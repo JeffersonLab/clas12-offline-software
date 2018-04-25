@@ -63,11 +63,11 @@ public abstract class MagneticField implements IField {
 	/** holds the field in a float buffer. */
 	protected FloatBuffer field;
 
-	/** reserved word */
-	protected int reserved1;
+	/** high word of unix creation time */
+	protected int highTime;
 
-	/** reserved word */
-	protected int reserved2;
+	/** low word of unix creation time */
+	protected int lowTime;
 
 	/** reserved word */
 	protected int reserved3;
@@ -291,6 +291,21 @@ public abstract class MagneticField implements IField {
     }
 
 
+	/**
+	 * Get the creation date
+	 * @return the creation date as a string
+	 */
+	public String getCreationDate() {
+		
+		long dlow = lowTime & 0x00000000ffffffffL;
+		long time = ((long)highTime << 32) | (dlow & 0xffffffffL);
+		
+		if (time < 1) {
+			return "unknown";
+		}
+
+        return MagneticFields.dateStringLong(time);
+	}
 
 
 	/**
@@ -528,72 +543,43 @@ public abstract class MagneticField implements IField {
 	@Override
 	public final String toString() {
 		StringBuffer sb = new StringBuffer(1024);
+		
+		//creation date
+		sb.append("  Created: " + getCreationDate() + "\n");
+		
+		
+		//if a torus, was it a full torus?
+		if (this instanceof FullTorus) {
+			sb.append("  Full torus with no assumed symmetry\n");
+		}
+		else if (this instanceof Torus) {
+			sb.append("  Reduced torus with assumed symmetry\n");
+		}
+		
+		sb.append("  " + q1Coordinate.toString());
 		sb.append("\n");
-		sb.append(q1Coordinate.toString());
+		sb.append("  " + q2Coordinate.toString());
 		sb.append("\n");
-		sb.append(q2Coordinate.toString());
+		sb.append("  " + q3Coordinate.toString());
 		sb.append("\n");
-		sb.append(q3Coordinate.toString());
-		sb.append("\n");
-		sb.append(String.format("Num Field Values: %d\n", numFieldPoints));
+		sb.append(String.format("  num field values: %d\n", numFieldPoints));
 
-		sb.append("Grid CS: " + gridCoordinateSystem + "\n");
-		sb.append("Field CS: " + fieldCoordinateSystem + "\n");
-		sb.append("length Unit: " + lengthUnit + "\n");
-		sb.append("angular Unit: " + angularUnit + "\n");
-		sb.append("field Unit: " + fieldUnit + "\n");
+		sb.append("  grid cs: " + gridCoordinateSystem + "\n");
+		sb.append("  field cs: " + fieldCoordinateSystem + "\n");
+		sb.append("  length unit: " + lengthUnit + "\n");
+		sb.append("  angular unit: " + angularUnit + "\n");
+		sb.append("  field unit: " + fieldUnit + "\n");
 
-		sb.append("max field at index: " + maxFieldIndex + "\n");
-		sb.append(String.format("Max Field Magnitude: %f %s\n", maxField, fieldUnit));
-		sb.append("Max Field Vector:" + vectorToString(maxVectorField) + "\n");
+		sb.append("  max field at index: " + maxFieldIndex + "\n");
+		sb.append(String.format("  max field magnitude: %f %s\n", maxField, fieldUnit));
+		sb.append("  max field vector:" + vectorToString(maxVectorField) + "\n");
 
-		sb.append(String.format("Max Field Location: (%s, %s, %s) = (%8.5f, %8.5f, %8.5f)\n", q1Coordinate.getName(),
+		sb.append(String.format("  max field location: (%s, %s, %s) = (%6.2f, %6.2f, %6.2f)\n", q1Coordinate.getName(),
 				q2Coordinate.getName(), q3Coordinate.getName(), maxFieldLocation[0], maxFieldLocation[1],
 				maxFieldLocation[2]));
 
-		sb.append(String.format("Avg Field Magnitude: %f %s\n", avgField, fieldUnit));
-
-		float xyz[] = new float[3];
-		// xyz[0] = 27.4412f;
-		// xyz[1] = 15.7716f;
-		// xyz[2] = 0.372474f;
-		// -31.7007, 31.1478, 28.158
-		// xyz[0] = -31.7007f;
-		// xyz[1] = 31.1478f;
-		// xyz[2] = 28.158f;
-		xyz[0] = 32.6f;
-		xyz[1] = 106.62f;
-		xyz[2] = 410.0f;
-
-		float vals[] = new float[3];
-		field(xyz[0], xyz[1], xyz[2], vals);
-
-		String vs = vectorToString(xyz);
-
-		sb.append("test location (XYZ): " + vectorToString(xyz) + "\n");
-		sb.append("test Field Vector (XYZ): " + vectorToString(vals) + "\n");
-
-		// convert to cylindrical
-		double phi = Math.atan2(xyz[1], xyz[0]);
-		double rho = Math.hypot(xyz[0], xyz[1]);
-
-		double cyl[] = { phi, rho, xyz[2] };
-		String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f", Math.toDegrees(cyl[0]), cyl[1], cyl[2],
-				Math.hypot(cyl[1], cyl[2]));
-		sb.append("test location (CYL): " + s + "\n");
-
-		double bx = vals[0];
-		double by = vals[1];
-		double bz = vals[2];
-
-		double sin = Math.sin(phi);
-		double cos = Math.cos(phi);
-
-		double bphi = -sin * bx + cos * by;
-		double brho = cos * bx + sin * by;
-		s = String.format("(%8.5f, %8.5f, %8.5f)", bphi, brho, bz);
-		sb.append("test Field Vector (CYL): " + s + "\n");
-
+		sb.append(String.format("  avg field magnitude: %f %s\n", avgField, fieldUnit));
+		
 		return sb.toString();
 	}
 
@@ -648,9 +634,7 @@ public abstract class MagneticField implements IField {
 		if (index > 1) {
 			_baseFileName = _baseFileName.substring(0, index);
 		}
-		
-		System.out.println("**** Found map with base file name: " + _baseFileName);
-		
+				
 		// N23 = -1;
 
 		try {
@@ -695,8 +679,8 @@ public abstract class MagneticField implements IField {
 			numFieldPoints = nQ1 * nQ2 * nQ3;
 
 			// last five reserved
-			reserved1 = dos.readInt();
-			reserved2 = dos.readInt();
+			highTime = dos.readInt();
+			lowTime = dos.readInt();
 			reserved3 = dos.readInt();
 			reserved4 = dos.readInt();
 			reserved5 = dos.readInt();

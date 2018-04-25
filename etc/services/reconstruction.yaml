@@ -42,5 +42,9 @@ configuration:
   io-services:
     writer:
       compression: 2
+  services:
+    DCHB:
+      torusMap: clas12-fieldmap-torus.dat
+
 mime-types:
   - binary/data-hipo

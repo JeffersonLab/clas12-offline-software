@@ -123,21 +123,13 @@ public class SectorLTCCItem extends PolygonItem {
 		
 	// accumulated drawer
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
-		int maxHit = AccumulationManager.getInstance().getMaxLTCCCount();
-		if (maxHit < 1) {
-			return;
-		}
+		int medianHit = AccumulationManager.getInstance().getMedianLTCCCount();
 
 		int hits[][][] = AccumulationManager.getInstance().getAccumulatedLTCCData();
 
-		int hit = hits[_sector - 1][_half - 1][_ring - 1];
+		int hitCount = hits[_sector - 1][_half - 1][_ring - 1];
 
-		double fract;
-		if (_view.isSimpleAccumulatedMode()) {
-			fract = ((double) hit) / maxHit;
-		} else {
-			fract = Math.log(hit + 1.) / Math.log(maxHit + 1.);
-		}
+		double fract = _view.getMedianSetting() * (((double) hitCount) / (1+medianHit));
 
 		Color color = AccumulationManager.getInstance().getColor(fract);
 

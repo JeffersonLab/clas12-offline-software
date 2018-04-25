@@ -28,6 +28,13 @@ public class Torus extends MagneticField {
 		_scaleFactor = -1; // default
 	}
 	
+	/**
+	 * Tests whether this is a full field or a phi symmetric field
+	 * @return <code>true</code> if this is a full field
+	 */
+	public static boolean isFieldmapFullField(String torusPath) throws FileNotFoundException {
+		return FullTorus.isFieldmapFullField(torusPath);
+	}
 
 	/**
 	 * Obtain a torus object from a binary file, probably

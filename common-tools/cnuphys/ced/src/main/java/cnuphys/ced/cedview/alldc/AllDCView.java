@@ -112,7 +112,7 @@ public class AllDCView extends CedView {
 		AllDCView view = null;
 
 		// set to a fraction of screen
-		Dimension d = GraphicsUtilities.screenFraction(0.5);
+		Dimension d = GraphicsUtilities.screenFraction(0.65);
 
 		// create the view
 		view = new AllDCView(

@@ -107,32 +107,33 @@ public class FTOFPanelItem extends PolygonItem {
 
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		int hits[][] = null;
-		int maxHit = AccumulationManager.getInstance().getMaxFTOFCount();
 
+		int medianHit = 0;
+		
 		int panelType = _ftofPanel.getPanelType();
 		switch (panelType) {
 		case FTOF.PANEL_1A:
+			medianHit = AccumulationManager.getInstance().getMedianFTOF1ACount();
 			hits = AccumulationManager.getInstance().getAccumulatedFTOF1AData();
 			break;
 		case FTOF.PANEL_1B:
+			medianHit = AccumulationManager.getInstance().getMedianFTOF1BCount();
 			hits = AccumulationManager.getInstance().getAccumulatedFTOF1BData();
 			break;
 		case FTOF.PANEL_2:
+			medianHit = AccumulationManager.getInstance().getMedianFTOF2Count();
 			hits = AccumulationManager.getInstance().getAccumulatedFTOF2Data();
 			break;
 		}
 
+		
 		if (hits != null) {
 			int sect0 = _sector - 1;
 			for (int paddle0 = 0; paddle0 < hits[sect0].length; paddle0++) {
 
-				int hit = hits[sect0][paddle0];
-				double fract;
-				if (_view.isSimpleAccumulatedMode()) {
-					fract = ((double) hit) / maxHit;
-				} else {
-					fract = Math.log(hit + 1.) / Math.log(maxHit + 1.);
-				}
+				int hitCount = hits[sect0][paddle0];
+				double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
+
 
 				Color fc = AccumulationManager.getInstance().getColor(fract);
 				Point2D.Double wp[] = getPaddle(_view, paddle0, _ftofPanel, _sector);
@@ -171,47 +172,7 @@ public class FTOFPanelItem extends PolygonItem {
 			}
 		}
 
-//		int panelType = _ftofPanel.getPanelType();
-//
-//		int hitCount = FTOF.getInstance().hitCount(panelType);
-//
-//		if (hitCount < 1) {
-//			return;
-//		}
-//		int pid[] = FTOF.getInstance().pid(panelType);
-//		int sector[] = FTOF.getInstance().sector(panelType);
-//		int paddles[] = FTOF.getInstance().paddle(panelType);
-//
-//		if (!_view.showMcTruth()) {
-//			pid = null;
-//		}
-//
-//		if ((sector == null) || (paddles == null)) {
-//			return;
-//		}
-//
-//		Color default_fc = Color.red;
-//
-//		for (int i = 0; i < hitCount; i++) {
-//			if (sector[i] == _sector) {
-//				Color fc = default_fc;
-//				if (pid != null) {
-//					LundId lid = LundSupport.getInstance().get(pid[i]);
-//					if (lid != null) {
-//						fc = lid.getStyle().getFillColor();
-//					}
-//				}
-//
-//				Point2D.Double wp[] = getPaddle(_view, (paddles[i] - 1), _ftofPanel, _sector);
-//
-//				if (wp != null) {
-//					Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
-//					WorldGraphicsUtilities.drawPath2D(g, container, path, fc, _style.getLineColor(), 0, LineStyle.SOLID,
-//							true);
-//				}
-//
-//			}
-//		}
+
 
 	}
 

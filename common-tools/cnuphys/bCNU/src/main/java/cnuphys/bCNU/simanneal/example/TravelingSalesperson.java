@@ -16,7 +16,6 @@ import javax.swing.SwingUtilities;
 
 import cnuphys.bCNU.simanneal.IUpdateListener;
 import cnuphys.bCNU.simanneal.Simulation;
-import cnuphys.bCNU.simanneal.SimulationPanel;
 import cnuphys.bCNU.simanneal.Solution;
 import cnuphys.splot.example.APlotDialog;
 import cnuphys.splot.fit.FitType;
@@ -29,7 +28,7 @@ import cnuphys.splot.plot.PlotParameters;
 import cnuphys.splot.plot.PlotTicks;
 import cnuphys.splot.style.SymbolType;
 
-public class TravelingSalesperson extends Solution {
+public class TravelingSalesperson extends Solution implements IUpdateListener {
 	
 	//singleton
 	private static TravelingSalesperson _instance;
@@ -53,14 +52,28 @@ public class TravelingSalesperson extends Solution {
 	//number of cities
 	private int _numCity;
 	
+	//record intermediate results for making a plot
+	private final Vector<Double> temps = new Vector<>(1000);
+	private Vector<Double> dists = new Vector<>(1000);
+
+	//Simulation panel for display
+	private TSDisplay tsd;
+
+	private Simulation _simulation;
+	
 	/**
 	 * A Solution with randomly located cities
 	 * @param numCity the number of cities
 	 */
 	private TravelingSalesperson(int numCity, River river) {
 		reset(numCity, river);
+		tsd = new TSDisplay(this);
 	}
 	
+	/**
+	 * Public access to the singleton
+	 * @return
+	 */
 	public static TravelingSalesperson getInstance() {
 		if (_instance == null) {
 			_instance = new TravelingSalesperson(200, River.NORIVER);
@@ -69,11 +82,27 @@ public class TravelingSalesperson extends Solution {
 	}
 	
 	/**
+	 * Convenience method to get the current solution
+	 * @return the current solution
+	 */
+	public TravelingSalesperson getCurrentSolution() {
+		if (_simulation == null) {
+			return this;
+		}
+		else {
+			return (TravelingSalesperson)(_simulation.currentSolution());
+		}
+	}
+	
+	/**
 	 * Reset the simulation
 	 * @param numCity the number of cities
 	 * @param the river "penalty"
 	 */
 	public void reset(int numCity, River river) {
+		
+		temps.clear();
+		dists.clear();
 		
 		_numCity = Math.max(MIN_CITY, Math.min(MAX_CITY, numCity));
 		
@@ -90,6 +119,10 @@ public class TravelingSalesperson extends Solution {
 		}
 	}
 	
+	/**
+	 * Get the number of cities
+	 * @return the number of cities
+	 */
 	public int getCityCount() {
 		return _numCity;
 	}
@@ -381,23 +414,54 @@ public class TravelingSalesperson extends Solution {
 		return pdialog;
 
 	}
-
 	
+
+	@Override
+	public void updateSolution(Simulation simulation, Solution newSolution, Solution oldSolution) {
+		TravelingSalesperson ts = (TravelingSalesperson)newSolution;
+		double temperature = simulation.getTemperature();
+		System.out.println(String.format("T: %-12.8f   D: %-10.5f", temperature, ts.getDistance()));
+		temps.add(temperature);
+		dists.add(ts.getDistance());
+	}
+	
+	
+	/**
+	 * Set the simulation
+	 * @param simulation the simulation
+	 */
+	public void setSimulation(Simulation simulation) {
+		_simulation = simulation;
+		_simulation.addUpdateListener(this);
+		_simulation.addUpdateListener(tsd);
+	}
+	
+	/**
+	 * Accessor for the simulation
+	 * @return the simulation
+	 */
+	public Simulation getSimulation() {
+		return _simulation;
+	}
+
+
+
+	//main program for testing
 	public static void main(String arg[]) {
 		//initial solution
 		
 		int numCity = 400;
 		River river = River.NORIVER;
 		
-		TravelingSalesperson initSol = getInstance();
-		initSol.reset(numCity, river);
+		TravelingSalesperson travPerson = getInstance();
+		travPerson.reset(numCity, river);
 		
-		System.out.println("City count: " + initSol.count());
-		System.out.println("Initial distance: " + initSol.getDistance());
-		System.out.println("Initial energy: " + initSol.getEnergy());
-		TravelingSalesperson neighbor = (TravelingSalesperson) initSol.getNeighbor();
-		System.out.println("Initial distance: " + initSol.getDistance());
-		System.out.println("Initial energy: " + initSol.getEnergy());
+		System.out.println("City count: " + travPerson.count());
+		System.out.println("Initial distance: " + travPerson.getDistance());
+		System.out.println("Initial energy: " + travPerson.getEnergy());
+		TravelingSalesperson neighbor = (TravelingSalesperson) travPerson.getNeighbor();
+		System.out.println("Initial distance: " + travPerson.getDistance());
+		System.out.println("Initial energy: " + travPerson.getEnergy());
 		System.out.println("Neighbor distance: " + neighbor.getDistance());
 		System.out.println("Neighbor energy: " + neighbor.getEnergy());
 		
@@ -405,8 +469,6 @@ public class TravelingSalesperson extends Solution {
 //			this(initialSolution, coolRate, thermalizationCount, -1L);
 //		}
 		
-		final Vector<Double> temps = new Vector<>(1000);
-		final Vector<Double> dists = new Vector<>(1000);
 		
 		
 		Properties props = new Properties();
@@ -415,28 +477,13 @@ public class TravelingSalesperson extends Solution {
 		props.setProperty(Simulation.THERMALCOUNT, "200");
 		props.setProperty(Simulation.MAXSTEPS, "1000");
 		
-		Simulation simulation = new Simulation(initSol, props);
+		Simulation simulation = new Simulation(travPerson, props);
 		
-		temps.add(simulation.getTemperature());
-		dists.add(initSol.getDistance());
-
+		travPerson.setSimulation(simulation);
 		
-		IUpdateListener updater = new IUpdateListener() {
-			
-
-			@Override
-			public void updateSolution(Simulation simulation, Solution newSolution, Solution oldSolution) {
-				TravelingSalesperson ts = (TravelingSalesperson)newSolution;
-				double temperature = simulation.getTemperature();
-				System.out.println(String.format("T: %-12.8f   D: %-10.5f", temperature, ts.getDistance()));
-				temps.add(temperature);
-				dists.add(ts.getDistance());
-
-			}
-			
-		};
-		
-		simulation.addUpdateListener(updater);
+		//add initial values
+		travPerson.temps.add(simulation.getTemperature());
+		travPerson.dists.add(travPerson.getDistance());
 		
 		final JFrame frame = new JFrame();
 
@@ -452,11 +499,10 @@ public class TravelingSalesperson extends Solution {
 
 		frame.setLayout(new BorderLayout());
 		
-		TSDisplay tsd = new TSDisplay(simulation);
-		tsd.setPreferredSize(new Dimension(600, 600));
 		
-		SimulationPanel simPanel = new SimulationPanel(simulation, null, tsd, null);
-		frame.add(simPanel, BorderLayout.CENTER);
+		travPerson.tsd.setPreferredSize(new Dimension(600, 600));
+		
+		frame.add(travPerson.tsd, BorderLayout.CENTER);
 
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override

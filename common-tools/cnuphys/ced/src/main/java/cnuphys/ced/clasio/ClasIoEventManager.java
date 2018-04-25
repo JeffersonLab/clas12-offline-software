@@ -69,14 +69,13 @@ public class ClasIoEventManager {
 
 	// reset everytime hipo or evio file is opened
 	private int _eventIndex;
-	
+
 	// all the filters
 	private ArrayList<IEventFilter> _eventFilters = new ArrayList<>();
 
-
 	// sources of events (the type, not the actual source)
 	public enum EventSourceType {
-//		HIPOFILE, HIPORING, ET, EVIOFILE
+		// HIPOFILE, HIPORING, ET, EVIOFILE
 		HIPOFILE, ET, EVIOFILE
 	}
 
@@ -121,7 +120,7 @@ public class ClasIoEventManager {
 	private File _currentEvioFile;
 
 	// current ip address of HIPO ring
-//	private String _currentHIPOAddress;
+	// private String _currentHIPOAddress;
 
 	// current ip address of ET ring
 	// private String _currentETAddress;
@@ -143,17 +142,17 @@ public class ClasIoEventManager {
 	// private constructor for singleton
 	private ClasIoEventManager() {
 		_dataSource = new HipoDataSource();
-		
-		//test trigger filter
-//		TriggerFilter testFilter = new TriggerFilter.Builder()
-//				.setType(TriggerFilter.TRIG_FILT_TYPE.EXACT)
-//				.setBits(17)
-//				.setActive(true)
-//				.setName("Test Trigger")
-//				.build();
-//		
-//		this.addEventFilter(testFilter);
-		
+
+		// test trigger filter
+		// TriggerFilter testFilter = new TriggerFilter.Builder()
+		// .setType(TriggerFilter.TRIG_FILT_TYPE.EXACT)
+		// .setBits(17)
+		// .setActive(true)
+		// .setName("Test Trigger")
+		// .build();
+		//
+		// this.addEventFilter(testFilter);
+
 	}
 
 	/**
@@ -180,8 +179,7 @@ public class ClasIoEventManager {
 			if (isAccumulating()) {
 				AccumulationManager.getInstance().newClasIoEvent(event);
 				notifyAllDefinedPlots(event);
-			}
-			else {
+			} else {
 				_runData.set(_currentEvent);
 				notifyEventListeners();
 				// notifyAllDefinedPlots(event);
@@ -211,17 +209,18 @@ public class ClasIoEventManager {
 			if (cbanks != null) {
 				for (String bankName : cbanks) {
 					if (bankName.contains("::true") || (bankName.equals("MC::Particle"))) {
-						
-//						boolean hasBank = _currentEvent.hasBank(bankName);
-//						
-//						
-//						boolean hasData = (DataManager.getInstance().hasData(_currentEvent, bankName) != null);
-//						System.out.println("****** BANK NAME [" + bankName + "]  + hasData: " + hasData + "   hasBank: " + hasBank);
-						
-						
+
+						// boolean hasBank = _currentEvent.hasBank(bankName);
+						//
+						//
+						// boolean hasData = (DataManager.getInstance().hasData(_currentEvent, bankName)
+						// != null);
+						// System.out.println("****** BANK NAME [" + bankName + "] + hasData: " +
+						// hasData + " hasBank: " + hasBank);
+
 						ColumnData cd = DataManager.getInstance().getColumnData(bankName, "pid");
-						
-	//					System.out.println("****** pid column null: " + (cd == null));
+
+						// System.out.println("****** pid column null: " + (cd == null));
 
 						if (cd != null) {
 							int pid[] = (int[]) (cd.getDataArray(_currentEvent));
@@ -324,14 +323,14 @@ public class ClasIoEventManager {
 	public String getCurrentSourceDescription() {
 
 		if ((_sourceType == EventSourceType.HIPOFILE) && (_currentHipoFile != null)) {
-			return "Hipo File " + _currentHipoFile.getName();
+			return "Hipo " + _currentHipoFile.getName();
+		} else if ((_sourceType == EventSourceType.EVIOFILE) && (_currentEvioFile != null)) {
+			return "Evio " + _currentEvioFile.getName();
 		}
-		else if ((_sourceType == EventSourceType.EVIOFILE) && (_currentEvioFile != null)) {
-			return "Evio File " + _currentEvioFile.getName();
-		}
-//		else if ((_sourceType == EventSourceType.HIPORING) && (_currentHIPOAddress != null)) {
-//			return "Hipo Ring " + _currentHIPOAddress;
-//		}
+		// else if ((_sourceType == EventSourceType.HIPORING) && (_currentHIPOAddress !=
+		// null)) {
+		// return "Hipo Ring " + _currentHIPOAddress;
+		// }
 		else if ((_sourceType == EventSourceType.ET) && (_currentMachine != null) && (_currentETFile != null)) {
 			return "ET " + _currentMachine + " " + _currentETFile;
 		}
@@ -372,8 +371,7 @@ public class ClasIoEventManager {
 
 		try {
 			getNextEvent();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -412,8 +410,7 @@ public class ClasIoEventManager {
 
 		try {
 			getNextEvent();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -475,8 +472,7 @@ public class ClasIoEventManager {
 				setEventSourceType(EventSourceType.ET);
 				Log.getInstance().info("Attempting to open EvioETSource.");
 				_dataSource.open(_currentETFile);
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
@@ -577,9 +573,9 @@ public class ClasIoEventManager {
 	 * 
 	 * @return <code>true</code> is source type is the hippo ring.
 	 */
-//	public boolean isSourceHipoRing() {
-//		return getEventSourceType() == EventSourceType.HIPORING;
-//	}
+	// public boolean isSourceHipoRing() {
+	// return getEventSourceType() == EventSourceType.HIPORING;
+	// }
 
 	/**
 	 * Check whether current event source type is the ET ring
@@ -600,13 +596,12 @@ public class ClasIoEventManager {
 		int evcount = 0;
 		if (isSourceHipoFile()) {
 			evcount = (_dataSource == null) ? 0 : _dataSource.getSize();
-		}
-		else if (isSourceEvioFile()) {
+		} else if (isSourceEvioFile()) {
 			evcount = (_dataSource == null) ? 0 : _dataSource.getSize();
 		}
-//		else if (isSourceHipoRing()) {
-//			return Integer.MAX_VALUE;
-//		}
+		// else if (isSourceHipoRing()) {
+		// return Integer.MAX_VALUE;
+		// }
 		else if (isSourceET()) {
 			return Integer.MAX_VALUE;
 		}
@@ -639,7 +634,7 @@ public class ClasIoEventManager {
 		case EVIOFILE:
 			isOK = (isSourceEvioFile() && (getEventCount() > 0) && (getEventNumber() < getEventCount()));
 			break;
-//		case HIPORING:
+		// case HIPORING:
 		case ET:
 			isOK = true;
 			break;
@@ -663,7 +658,7 @@ public class ClasIoEventManager {
 		case EVIOFILE:
 			numRemaining = getEventCount() - getEventNumber();
 			break;
-//		case HIPORING:
+		// case HIPORING:
 		case ET:
 			numRemaining = Integer.MAX_VALUE;
 		}
@@ -755,15 +750,15 @@ public class ClasIoEventManager {
 		// System.err.println("ET DEBUG: in getNextEvent estype: " + estype);
 
 		switch (estype) {
-//		case HIPORING:
-//			if (_dataSource.hasEvent()) {
-//				_currentEvent = _dataSource.getNextEvent();
-//
-//				// look for the run bank
-//				_eventIndex++;
-//				ifPassSetEvent(_currentEvent, 0);
-//			}
-//			break;
+		// case HIPORING:
+		// if (_dataSource.hasEvent()) {
+		// _currentEvent = _dataSource.getNextEvent();
+		//
+		// // look for the run bank
+		// _eventIndex++;
+		// ifPassSetEvent(_currentEvent, 0);
+		// }
+		// break;
 		case HIPOFILE:
 			if (_dataSource.hasEvent()) {
 				_currentEvent = _dataSource.getNextEvent();
@@ -778,8 +773,8 @@ public class ClasIoEventManager {
 
 				if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
 					_currentEvent = getDecoder().getDataEvent(_currentEvent);
-	                HipoDataBank   trigger = _decoder.createTriggerBank(_currentEvent);
-	                _currentEvent.appendBanks(trigger);
+					HipoDataBank trigger = _decoder.createTriggerBank(_currentEvent);
+					_currentEvent.appendBanks(trigger);
 
 					// System.err.println("Decoded to HIPO");
 					// _currentEvent.show();
@@ -790,7 +785,6 @@ public class ClasIoEventManager {
 
 			break; // end case eviofile
 
-
 		case ET:
 			int maxTries = 30;
 			int attempts = 0;
@@ -800,8 +794,7 @@ public class ClasIoEventManager {
 				try {
 					attempts++;
 					Thread.sleep(50);
-				}
-				catch (InterruptedException e) {
+				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 				_dataSource.waitForEvents();
@@ -818,21 +811,19 @@ public class ClasIoEventManager {
 
 					// decode the event from evio to hipo
 					_currentEvent = getDecoder().getDataEvent(_currentEvent);
-					
-					//manually create trigger bank
-	                HipoDataBank   trigger = _decoder.createTriggerBank(_currentEvent);
-	                _currentEvent.appendBanks(trigger);
+
+					// manually create trigger bank
+					HipoDataBank trigger = _decoder.createTriggerBank(_currentEvent);
+					_currentEvent.appendBanks(trigger);
 
 					_eventIndex++;
 					ifPassSetEvent(_currentEvent, 0);
 					break;
-				}
-				else {
+				} else {
 					_currentEvent = null;
 				}
 
 			}
-
 
 			break; // end case ET
 
@@ -840,28 +831,25 @@ public class ClasIoEventManager {
 
 		return _currentEvent;
 	}
-	
-	//set the event only if it passes filtering
+
+	// set the event only if it passes filtering
 	private void ifPassSetEvent(DataEvent event, int option) {
 		if (event != null) {
 			if (passFilters(event)) {
 				setNextEvent(event);
-			}
-			else {
+			} else {
 				if (option == 0) {
 					getNextEvent();
-				}
-				else if (option == 1) {
+				} else if (option == 1) {
 					if (_eventIndex == 0) {
 						setNextEvent(event);
-					}
-					else {
+					} else {
 						getPreviousEvent();
 					}
 				}
 			}
 		}
-		
+
 	}
 
 	/**
@@ -892,7 +880,7 @@ public class ClasIoEventManager {
 		EventSourceType estype = getEventSourceType();
 		switch (estype) {
 		case HIPOFILE:
-//		case HIPORING:
+			// case HIPORING:
 		case ET:
 		case EVIOFILE:
 			boolean hasETEvent = ((_dataSource != null) && _dataSource.hasEvent());
@@ -913,9 +901,9 @@ public class ClasIoEventManager {
 		EventSourceType estype = getEventSourceType();
 
 		switch (estype) {
-//		case HIPORING:
-//			_eventIndex--;
-//			break;
+		// case HIPORING:
+		// _eventIndex--;
+		// break;
 		case HIPOFILE:
 			_eventIndex--;
 			System.err.println("EVENT INDEX: " + _eventIndex);
@@ -931,9 +919,9 @@ public class ClasIoEventManager {
 				}
 				_eventIndex--;
 				_currentEvent = _decoder.getDataEvent(_currentEvent);
-				
-                HipoDataBank   trigger = _decoder.createTriggerBank(_currentEvent);
-                _currentEvent.appendBanks(trigger);
+
+				HipoDataBank trigger = _decoder.createTriggerBank(_currentEvent);
+				_currentEvent.appendBanks(trigger);
 			}
 			break; // end case eviofile
 
@@ -942,10 +930,8 @@ public class ClasIoEventManager {
 			break;
 		}
 
-//	setNextEvent(_currentEvent);
 		ifPassSetEvent(_currentEvent, 1);
 
-		// notifyEventListeners();
 		return _currentEvent;
 	}
 
@@ -971,7 +957,7 @@ public class ClasIoEventManager {
 
 			break;
 
-//		case HIPORING:
+		// case HIPORING:
 		case ET:
 			break;
 		}
@@ -997,8 +983,7 @@ public class ClasIoEventManager {
 				int numToSkip = (eventNumber - _eventIndex) - 1;
 				skipEvents(numToSkip);
 				getNextEvent();
-			}
-			else {
+			} else {
 				_dataSource.close();
 				_currentEvent = null;
 				_eventIndex = 0;
@@ -1050,7 +1035,6 @@ public class ClasIoEventManager {
 
 		setNextEvent(_currentEvent);
 
-		// notifyEventListeners();
 		return _currentEvent;
 	}
 
@@ -1102,6 +1086,7 @@ public class ClasIoEventManager {
 		Ced.getCed().fixTitle();
 	}
 
+	// new event file notification
 	private void notifyEventListeners(File file) {
 
 		Swimming.clearMCTrajectories();
@@ -1124,9 +1109,10 @@ public class ClasIoEventManager {
 		Ced.getCed().fixTitle();
 
 	}
-	
+
 	/**
 	 * Check if there are any active filters
+	 * 
 	 * @return <code>true</code> if there are any active filters
 	 */
 	public boolean isFilteringOn() {
@@ -1139,20 +1125,18 @@ public class ClasIoEventManager {
 		}
 		return false;
 	}
-	
 
 	/**
-	 * Notify listeners we have a new event ready for display. All they may want
-	 * is the notification that a new event has arrived. But the event itself is
-	 * passed along.
-	 * 
+	 * Notify listeners we have a new event ready for display. All they may want is
+	 * the notification that a new event has arrived. But the event itself is passed
+	 * along.
 	 */
 	protected void notifyEventListeners() {
 
 		Swimming.clearMCTrajectories();
 		Swimming.clearReconTrajectories();
 		_uniqueLundIds = null;
-		
+
 		Ced.getCed().setEventFilteringLabel(isFilteringOn());
 
 		_currentBanks = (_currentEvent == null) ? null : _currentEvent.getBankList();
@@ -1168,8 +1152,16 @@ public class ClasIoEventManager {
 				// This weird loop is the bullet proof way of notifying all
 				// listeners.
 				for (int i = listeners.length - 2; i >= 0; i -= 2) {
+					IClasIoEventListener listener = (IClasIoEventListener) listeners[i + 1];
 					if (listeners[i] == IClasIoEventListener.class) {
-						((IClasIoEventListener) listeners[i + 1]).newClasIoEvent(_currentEvent);
+						boolean notify = true;
+						if (this.isAccumulating()) {
+							notify = !listener.ignoreIfAccumulating();
+						}
+
+						if (notify) {
+							listener.newClasIoEvent(_currentEvent);
+						}
 					}
 				}
 			}
@@ -1228,8 +1220,8 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * Get the maximum energy deposited in the cal for the current event. Might
-	 * be NaN if there are no "true" (gemc) banks
+	 * Get the maximum energy deposited in the cal for the current event. Might be
+	 * NaN if there are no "true" (gemc) banks
 	 * 
 	 * @param plane
 	 *            (0, 1, 2) for (PCAL, EC_INNER, EC_OUTER)
@@ -1240,8 +1232,8 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * Remove a IClasIoEventListener. IClasIoEventListener listeners listen for
-	 * new events.
+	 * Remove a IClasIoEventListener. IClasIoEventListener listeners listen for new
+	 * events.
 	 * 
 	 * @param listener
 	 *            the IClasIoEventListener listener to remove.
@@ -1266,11 +1258,10 @@ public class ClasIoEventManager {
 	 * @param listener
 	 *            the IClasIoEventListener listener to add.
 	 * @param index
-	 *            Determines gross notification order. Those in index 0 are
-	 *            notified first. Then those in index 1. Finally those in index
-	 *            2. The Data containers should be in index 0. The trajectory
-	 *            and noise in index 1, and the regular views in index 2 (they
-	 *            are notified last)
+	 *            Determines gross notification order. Those in index 0 are notified
+	 *            first. Then those in index 1. Finally those in index 2. The Data
+	 *            containers should be in index 0. The trajectory and noise in index
+	 *            1, and the regular views in index 2 (they are notified last)
 	 */
 	public void addClasIoEventListener(IClasIoEventListener listener, int index) {
 
@@ -1295,8 +1286,8 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * Checks if a bank, identified by a string such as "FTOF1B::dgtz", is in
-	 * the current event.
+	 * Checks if a bank, identified by a string such as "FTOF1B::dgtz", is in the
+	 * current event.
 	 * 
 	 * @param bankName
 	 *            the bank name
@@ -1335,10 +1326,10 @@ public class ClasIoEventManager {
 		int index = Arrays.binarySearch(allBanks, bankName);
 		return index >= 0;
 	}
-	
-	//does the event pass all the active filters?
+
+	// does the event pass all the active filters?
 	private boolean passFilters(DataEvent event) {
-		
+
 		if ((event != null) && !_eventFilters.isEmpty()) {
 			for (IEventFilter filter : _eventFilters) {
 				if (filter.isActive()) {
@@ -1349,10 +1340,10 @@ public class ClasIoEventManager {
 				}
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Add an event filter
 	 * 
@@ -1366,7 +1357,7 @@ public class ClasIoEventManager {
 			}
 		}
 	}
-	
+
 	/**
 	 * Do this late in ced initialization
 	 */
