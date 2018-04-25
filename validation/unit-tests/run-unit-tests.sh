@@ -7,6 +7,7 @@ COAT="../../coatjava/"
 classPath="$COAT/lib/services/*:$COAT/lib/clas/*:$COAT/lib/utils/*:../lib/*:src/"
 
 export TORUSMAP=clas12-fieldmap-torus.dat
+export SOLENOIDMAP=clas12-fieldmap-solenoid.dat
 
 # compile codes
 javac -cp $classPath src/events/TestEvent.java
