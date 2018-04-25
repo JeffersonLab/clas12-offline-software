@@ -26,6 +26,7 @@ import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.magfield.IField;
+import cnuphys.magfield.MagneticFieldInitializationException;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.splot.example.APlotDialog;
@@ -368,6 +369,10 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 			MagneticFields.getInstance().initializeMagneticFieldsFromPath(torusPath, solenoidPath);
 			MagneticFields.getInstance().setActiveField(FieldType.TORUS);
 		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.err.println("Could not initialize Magnetic Fields");
+			System.exit(1);
+		} catch (MagneticFieldInitializationException e) {
 			e.printStackTrace();
 			System.err.println("Could not initialize Magnetic Fields");
 			System.exit(1);

@@ -791,6 +791,33 @@ public class MagneticFields {
 
 		initializeMagneticFieldsFromPath(_torusPath, _solenoidPath);
 	}
+	
+	/**
+	 * Initialize the magnetic field package
+	 * @param dataDir the common data directory containing the torus and solenoid
+	 * @param torusName the base name of the torus map
+	 * @param solenoidName the base name of the solenoid map
+	 * @throws FileNotFoundException if either full path is not null but the corresponding file cannot be found
+	 * @throws MagneticFieldInitializationException if both full paths are null. Will proceed as long as one path is not null.
+	 */
+	public void initializeMagneticFields(String dataDir, String torusName, String solenoidName) throws FileNotFoundException, MagneticFieldInitializationException {
+		initializeMagneticFields(dataDir, torusName, dataDir, solenoidName);
+	}
+	
+	/**
+	 * @param torusDataDir the data directory containing the torus
+	 * @param torusName the base name of the torus map
+	 * @param solenoidDataDir the data directory containing the solenoid
+	 * @param solenoidName the base name of the solenoid map
+	 * @throws FileNotFoundException if either path is not null but the corresponding file cannot be found
+	 * @throws MagneticFieldInitializationException if both paths are null. Will proceed as long as one path is not null.
+	 */
+	public void initializeMagneticFields(String torusDataDir, String torusName, String solenoidDataDir, String solenoidName) throws FileNotFoundException, MagneticFieldInitializationException {
+		String torusPath = (new File(torusDataDir, torusName)).getPath();
+		String solenoidPath = (new File(solenoidDataDir, solenoidName)).getPath();
+		initializeMagneticFieldsFromPath(torusPath, solenoidPath);
+	}
+
 
 	/**
 	 * Initialize the field from the two full paths. One of them can be null.
