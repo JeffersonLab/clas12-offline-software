@@ -454,9 +454,11 @@ public class Converter {
 						for (int iZ= 0; iZ < nZ; iZ++) {
 							double z = gdata[Z].min + iZ*gdata[Z].del();
 							FloatVect fv = bvals[iPhi][iRho][iZ];
-							writeln(writer, 0, false, String.format("%-5.1f  %-5.1f   %-5.1f   % 11.5E   % 11.5E   % 11.5E", phi, rho, z, fv.x, fv.y, fv.z));
+														
+							writeln(writer, 0, false, String.format("%-5.1f %-5.1f %-5.1f %s %s %s", 
+									phi, rho, z, bstr(fv.x), bstr(fv.y), bstr(fv.z)));
 							
-//							if (iZ == 10) {
+//							if (iZ == 200) {
 //								writer.flush();
 //								writer.close();
 //								return;
@@ -473,6 +475,15 @@ public class Converter {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	private static String bstr(float b) {
+		if (Math.abs(b) < 1.0e-3) {
+			return "0";
+		}
+		else {
+			return String.format("% 11.4E", b);
 		}
 	}
 

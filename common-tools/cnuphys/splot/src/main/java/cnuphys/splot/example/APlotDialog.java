@@ -67,6 +67,7 @@ public abstract class APlotDialog extends JDialog {
 		GraphicsUtilities.centerComponent(this);
 	}
 	
+	
 	/**
 	 * Add a north component
 	 */

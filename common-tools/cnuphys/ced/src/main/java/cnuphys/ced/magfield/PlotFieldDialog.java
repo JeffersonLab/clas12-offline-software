@@ -41,13 +41,9 @@ import cnuphys.splot.style.SymbolType;
 public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 	private static int _numPlotPoints = 50000;
-	
-	private static Color[] _curveColors = {Color.black,
-			X11Colors.getX11Color("dark red"),
-			X11Colors.getX11Color("dark blue"),
-			Color.red,
-			Color.green,
-			Color.blue};
+
+	private static Color[] _curveColors = { Color.black, X11Colors.getX11Color("dark red"),
+			X11Colors.getX11Color("dark blue"), Color.red, Color.green, Color.blue };
 
 	private static final int Z = 0;
 	private static final int RHO = 1;
@@ -57,7 +53,6 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 	private static int _whichVaries = Z;
 
 	// the default fixed values and ranges
-	
 
 	private static String sPHI = UnicodeSupport.SMALL_PHI;
 	private static String sRHO = UnicodeSupport.SMALL_RHO;
@@ -71,12 +66,11 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 	// generate a new plot
 	private JButton _plotButton;
-	
+
 	// clear all plots
 	private JButton _clearButton;
 
-
-	//hold the variable changing fields
+	// hold the variable changing fields
 	private VariablePanel _varPanels[];
 
 	// the variable toggle buttons
@@ -87,8 +81,11 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 	/**
 	 * Create the dialog for ploting the field
-	 * @param parent the parent  dialog
-	 * @param modal the usual meaning
+	 * 
+	 * @param parent
+	 *            the parent dialog
+	 * @param modal
+	 *            the usual meaning
 	 */
 	public PlotFieldDialog(JFrame parent, boolean modal) {
 		super(parent, "Magnetic Field Plotter", modal);
@@ -186,10 +183,9 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 	private JPanel makeButtonPanel() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 40, 0));
-		
+
 		_clearButton = new JButton(" Clear ");
 		_clearButton.addActionListener(this);
-
 
 		_plotButton = new JButton(" Plot ");
 		_plotButton.addActionListener(this);
@@ -228,11 +224,9 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 		if (source == _plotButton) {
 			doPlot();
-		} 
-		else if (source == _clearButton) {
+		} else if (source == _clearButton) {
 			doClear();
-		}
-		else {
+		} else {
 			for (int var = 0; var < 3; var++) {
 				if (source == _vButtons[var]) {
 
@@ -247,8 +241,8 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 					_parameters.setXLabel(_xLabels[var]);
 					fixExtraStrings();
-	//				System.err.println("CHANGED VARIABLE");
-	//				_canvas.getDataSet().clear();
+					// System.err.println("CHANGED VARIABLE");
+					// _canvas.getDataSet().clear();
 					break;
 				}
 
@@ -289,41 +283,40 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 	}
 
-	//clear all the plots
+	// clear all the plots
 	private void doClear() {
+
 		try {
 			_canvas.setDataSet(createDataSet());
+			_canvas.setWorldSystem();
 		} catch (DataSetException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		_canvas.repaint();
 	}
-	
+
 	// create the plot
 	private void doPlot() {
-//		_canvas.getDataSet().clear();
-		
-		//see if I have any curve slots avaiable
-	    int curveCount = _canvas.getDataSet().getCurveCount();
-	    System.err.println("NUM CURVE: " + curveCount);
-	    
-	    int hotIndex = -1;
-	    for (int i = 0; i < curveCount; i++) {
-	    	DataColumn curve = _canvas.getDataSet().getCurve(i);
-	    	if (curve.size() == 0) {
-	    		hotIndex = i;
-	    		break;
-	    	}
-	    }
-    	System.err.println("Hot INDEX: " + hotIndex);
-    	if (hotIndex < 0) {
-    		hotIndex = curveCount;
-    		DataColumn newCurve = _canvas.getDataSet().addCurve("Component", "|B| (" + (hotIndex + 1) + ")");
-    		newCurve.getFit().setFitType(FitType.CONNECT);
-    		newCurve.getStyle().setSymbolType(SymbolType.NOSYMBOL);
+		// _canvas.getDataSet().clear();
+
+		// see if I have any curve slots avaiable
+		int curveCount = _canvas.getDataSet().getCurveCount();
+
+		int hotIndex = -1;
+		for (int i = 0; i < curveCount; i++) {
+			DataColumn curve = _canvas.getDataSet().getCurve(i);
+			if (curve.size() == 0) {
+				hotIndex = i;
+				break;
+			}
+		}
+		if (hotIndex < 0) {
+			hotIndex = curveCount;
+			DataColumn newCurve = _canvas.getDataSet().addCurve("Component", "|B| (" + (hotIndex + 1) + ")");
+			newCurve.getFit().setFitType(FitType.CONNECT);
+			newCurve.getStyle().setSymbolType(SymbolType.NOSYMBOL);
 			newCurve.getStyle().setLineColor(_curveColors[hotIndex % _curveColors.length]);
-   	}
+		}
 
 		IField ifield = MagneticFields.getInstance().getActiveField();
 
@@ -336,8 +329,8 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 			double mag = 0;
 			switch (_whichVaries) {
 			case Z:
-				mag = ifield.fieldMagnitudeCylindrical(_varPanels[PHI].getFixedValue(), 
-						_varPanels[RHO].getFixedValue(), val);
+				mag = ifield.fieldMagnitudeCylindrical(_varPanels[PHI].getFixedValue(), _varPanels[RHO].getFixedValue(),
+						val);
 				break;
 
 			case RHO:
@@ -361,6 +354,7 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 		}
 
 		fixExtraStrings();
+		_canvas.setWorldSystem();
 		_canvas.repaint();
 	}
 
@@ -371,7 +365,7 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 		String torusPath = "/Users/heddle/magfield/clas12TorusFull_2.00.dat";
 		String solenoidPath = "/Users/heddle/magfield/clas12-fieldmap-solenoid.dat";
 		try {
-			MagneticFields.getInstance().initializeMagneticFields(torusPath, solenoidPath);
+			MagneticFields.getInstance().initializeMagneticFieldsFromPath(torusPath, solenoidPath);
 			MagneticFields.getInstance().setActiveField(FieldType.TORUS);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -402,11 +396,10 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 		private JTextField _fixedTF;
 		private JTextField _minTF;
 		private JTextField _maxTF;
-		
+
 		private double fixedValues[] = { 375, 50, 0 };
 		private double minValues[] = { 200, 0, -20 };
 		private double maxValues[] = { 500, 250, 20 };
-
 
 		private int _varIndex;
 

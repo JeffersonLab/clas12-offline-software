@@ -217,13 +217,7 @@ public class MagneticFields {
 			}
 		}
 
-
-		
-		if (_compositeField != null) {
-			
-		}
-
-		System.out.println(_torus);
+	//	System.out.println(_torus);
 		notifyListeners();
 
 	}
@@ -696,7 +690,7 @@ public class MagneticFields {
 
 		_solenoidPath = fullPath;
 
-		System.out.println("\nAttempted to read solenoid from [" + cp + "]  success: " + (solenoid != null));
+//		System.out.println("\nAttempted to read solenoid from [" + cp + "]  success: " + (solenoid != null));
 		return solenoid;
 	}
 
@@ -720,7 +714,7 @@ public class MagneticFields {
 		}
 
 		_torusPath = fullPath;
-		System.out.println("\nAttempted to read torus from [" + cp + "]  success: " + (torus != null));
+//		System.out.println("\nAttempted to read torus from [" + cp + "]  success: " + (torus != null));
 		return torus;
 	}
 
@@ -744,7 +738,7 @@ public class MagneticFields {
 		}
 
 		_torusPath = fullPath;
-		System.out.println("\nAttempted to read full torus from [" + cp + "]  success: " + (fullTorus != null));
+//		System.out.println("\nAttempted to read full torus from [" + cp + "]  success: " + (fullTorus != null));
 		return fullTorus;
 	}
 
@@ -776,69 +770,92 @@ public class MagneticFields {
 	 * variables TORUSMAP and SOLENOIDMAP as full paths to the torus and solenoid
 	 * 
 	 * @throws MagneticFieldInitializationException
-	 *             if either environment variable is not found
+	 *             if neither environment variable is not found. Will proceed if just one is found.
 	 * @throws FileNotFoundException
-	 *             if either file is not found
+	 *             if neither file is not found. Will proceed if just one is found.
 	 */
 	public void initializeMagneticFieldsFromEnv() throws MagneticFieldInitializationException, FileNotFoundException {
 		_torusPath = sysPropOrEnvVar("TORUSMAP");
 		if (_torusPath == null) {
 			System.err.println("No envrionment variable or property named TORUSMAP");
-			throw new MagneticFieldInitializationException();
 		}
 
 		_solenoidPath = sysPropOrEnvVar("SOLENOIDMAP");
-		if (_torusPath == null) {
+		if (_solenoidPath == null) {
 			System.err.println("No envrionment variable or property named SOLENOIDMAP");
+		}
+		
+		if ((_torusPath == null) && (_solenoidPath == null)) {
 			throw new MagneticFieldInitializationException();
 		}
 
-		initializeMagneticFields(_torusPath, _solenoidPath);
+		initializeMagneticFieldsFromPath(_torusPath, _solenoidPath);
 	}
 
 	/**
-	 * Initialize the field from the two full paths
+	 * Initialize the field from the two full paths. One of them can be null.
 	 * 
 	 * @param torusPath
-	 *            the full path to the torus map
+	 *            the full path to the torus map. Can be null.
 	 * @param solenoidPath
-	 *            the full path to the torus map
+	 *            the full path to the solenoid map. Can be null.
+	 * @throws MagneticFieldInitializationException
+	 *             if both paths are null. Will proceed as long as one path is not null.
 	 * @throws FileNotFoundException
-	 *             if either file is not found
+	 *             if either path is not null but the corresponding file cannot be found
 	 */
-	public void initializeMagneticFields(String torusPath, String solenoidPath) throws FileNotFoundException {
-		File torusFile = new File(torusPath);
-		if (!torusFile.exists()) {
-			throw new FileNotFoundException("TORUS map not found at [" + torusPath + "]");
+	public void initializeMagneticFieldsFromPath(String torusPath, String solenoidPath) throws MagneticFieldInitializationException, FileNotFoundException {
+		
+		
+		if ((torusPath == null) && (solenoidPath == null)) {
+			throw new MagneticFieldInitializationException();
 		}
 
-		File solenoidFile = new File(solenoidPath);
-		if (!solenoidFile.exists()) {
-			throw new FileNotFoundException("SOLENOID map not found at [" + solenoidPath + "]");
+		File torusFile = null;
+		File solenoidFile = null;
+
+		if (torusPath != null) {
+			torusFile = new File(torusPath);
+			if (!torusFile.exists()) {
+				torusFile = null;
+				throw new FileNotFoundException("TORUS map not found at [" + torusPath + "]");
+			}
 		}
 
-		boolean torusFull = FullTorus.isFieldmapFullField(torusPath);
-
+		if (solenoidPath != null) {
+			solenoidFile = new File(solenoidPath);
+			if (!solenoidFile.exists()) {
+				solenoidFile = null;
+				throw new FileNotFoundException("SOLENOID map not found at [" + solenoidPath + "]");
+			}
+		}
+		
 		System.out.println("===========================================");
-		System.out.println("======  Initializing Magnetic Fields  =====");
-		System.out.println("======  Version " + VERSION);
-		System.out.println("===========================================");
+		System.out.println("  Initializing Magnetic Fields");
+		System.out.println("  Version " + VERSION);
+		System.out.println("  Contact: david.heddle@cnu.edu");
+		System.out.println();
 
-		System.out.println("   TORUS: [" + torusPath + "] is full map: " + torusFull);
-		System.out.println("SOLENOID: [" + solenoidPath + "]");
-
-		// load the torus
-		if (torusFull) {
-			_torus = readFullTorus(torusPath);
-		} else {
-			_torus = readTorus(torusPath);
+		if (torusFile != null) {
+			boolean torusFull = FullTorus.isFieldmapFullField(torusPath);
+			System.out.println("  TORUS: [" + torusPath + "] is full map: " + torusFull);
+			// load the torus
+			if (torusFull) {
+				_torus = readFullTorus(torusPath);
+			} else {
+				_torus = readTorus(torusPath);
+			}
 		}
 
-		// load the solenoid
-		_solenoid = readSolenoid(solenoidPath);
+		if (solenoidFile != null) {
+			System.out.println("  SOLENOID: [" + solenoidPath + "]");
+			// load the solenoid
+			_solenoid = readSolenoid(solenoidPath);
+		}
 
-		System.out.println("Torus loaded: " + (_torus != null));
-		System.out.println("Solenoid loaded: " + (_solenoid != null));
+		System.out.println("  Torus loaded: " + (_torus != null));
+		System.out.println("  Solenoid loaded: " + (_solenoid != null));
+		System.out.println("===========================================");
 
 		// _uniform = new Uniform(0, 0, 2);
 		//
@@ -926,8 +943,8 @@ public class MagneticFields {
 		_initialized = true;
 
 		System.out.println("===========================================");
-		System.out.println("======  Initializing Magnetic Fields  =====");
-		System.out.println("======  Version " + VERSION);
+		System.out.println("=  Initializing Magnetic Fields");
+		System.out.println("=  Version " + VERSION);
 		System.out.println("===========================================");
 
 		initializeTorus(torusMap);
@@ -980,7 +997,7 @@ public class MagneticFields {
 					tmap.setFound(true);
 					tmap.setDirName(dataDir);
 
-					System.out.println("** FOUND Torus map [" + fName + "] in directory: [" + dataDir + "]");
+	//				System.out.println("** FOUND Torus map [" + fName + "] in directory: [" + dataDir + "]");
 				}
 
 			}
@@ -1034,11 +1051,6 @@ public class MagneticFields {
 	// final initialziation
 	private void finalInit() {
 		makeComposites();
-
-		System.out.println("\n***********************************");
-		System.out.println("* Magfield package version: " + VERSION);
-		System.out.println("* contact: david.heddle@cnu.edu");
-		System.out.println("***********************************\n");
 	}
 
 	/**
