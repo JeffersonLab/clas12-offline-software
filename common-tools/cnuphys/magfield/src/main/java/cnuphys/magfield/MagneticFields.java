@@ -813,8 +813,14 @@ public class MagneticFields {
 	 * @throws MagneticFieldInitializationException if both paths are null. Will proceed as long as one path is not null.
 	 */
 	public void initializeMagneticFields(String torusDataDir, String torusName, String solenoidDataDir, String solenoidName) throws FileNotFoundException, MagneticFieldInitializationException {
-		String torusPath = (new File(torusDataDir, torusName)).getPath();
-		String solenoidPath = (new File(solenoidDataDir, solenoidName)).getPath();
+		String torusPath = null;
+		String solenoidPath = null;
+        if (torusDataDir!=null && torusName!=null) {
+            torusPath = (new File(torusDataDir, torusName)).getPath();
+        }
+        if (solenoidDataDir!=null && solenoidName!=null) {
+            solenoidPath = (new File(solenoidDataDir, solenoidName)).getPath();
+        }
 		initializeMagneticFieldsFromPath(torusPath, solenoidPath);
 	}
 
