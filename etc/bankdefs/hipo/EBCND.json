@@ -1,0 +1,17 @@
+[
+  {
+  "bank": "EBCND::Neutron",
+  "group": 20322,
+  "info": "reconstructed neutron info from CND",
+  "items": [
+            {"name":"id",               "id":1, "type":"int16",  "info":"id of the neutron"},
+            {"name":"time",             "id":2, "type":"float", "info":"Detecting time (ns)"},
+            {"name":"x",                "id":3, "type":"float", "info":"Global X coor (cm) of the neutron"},
+            {"name":"y",                "id":4, "type":"float", "info":"Global Y coor (cm) of the neutron"},
+            {"name":"z",                "id":5, "type":"float", "info":"Global Z coor (cm) of the neutron"},
+            {"name":"px",                "id":6, "type":"float", "info":"px of the neutron"},
+            {"name":"py",                "id":7, "type":"float", "info":"py of the neutron"},
+            {"name":"pz",                "id":8, "type":"float", "info":"pz of the neutron"}
+        ]
+  } 
+]
