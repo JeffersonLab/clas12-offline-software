@@ -42,6 +42,7 @@ public abstract class ReconstructionEngine implements Engine {
     volatile ConcurrentMap<String,ConstantsManager> constManagerMap;
     volatile SchemaFactory                          engineDictionary;
 
+    volatile ConcurrentMap<String,String>           engineConfigMap;
     volatile String                                 engineConfiguration = null;
     
     String             engineName        = "UnknownEngine";
@@ -55,6 +56,7 @@ public abstract class ReconstructionEngine implements Engine {
         engineVersion = version;
         constManagerMap   = new ConcurrentHashMap<String,ConstantsManager>();
         engineDictionary  = new SchemaFactory();
+        engineConfigMap   = new ConcurrentHashMap<String,String>();
         engineDictionary.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
         //System.out.println("[Engine] >>>>> constants manager : " + getConstantsManager().toString());
     }
@@ -79,6 +81,14 @@ public abstract class ReconstructionEngine implements Engine {
         return constManagerMap.get(this.getClass().getName());
     }
 
+    public String getEngineConfigString(String key) {
+        String val=null;
+        if (this.engineConfigMap.containsKey(key)) {
+            val=this.engineConfigMap.get(key);
+        }
+        return val;
+    }
+
     /**
      *
      * @param ed
@@ -94,6 +104,18 @@ public abstract class ReconstructionEngine implements Engine {
             this.engineConfiguration = "";
             System.out.println("[CONFIGURE][" + this.getName() + "] *** WARNING *** ---> NO JSON Data provided");
         }
+       
+        // store yaml contents for easy access by engines:
+        engineConfigMap = new ConcurrentHashMap<String,String>();
+        try {
+            JSONObject base = new JSONObject(this.engineConfiguration);
+            for (String key : base.keySet()) {
+                engineConfigMap.put(key,base.getString(key));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         
       if(constManagerMap == null)
       constManagerMap   = new ConcurrentHashMap<String,ConstantsManager>();

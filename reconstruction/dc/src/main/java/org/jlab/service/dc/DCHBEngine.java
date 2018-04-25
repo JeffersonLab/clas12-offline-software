@@ -42,21 +42,50 @@ import org.jlab.rec.dc.trajectory.RoadFinder;
 import org.jlab.rec.dc.trajectory.Road;
 import org.jlab.utils.CLASResources;
 
+import org.jlab.clara.engine.EngineData;
+import org.jlab.clara.engine.EngineDataType;
 
 public class DCHBEngine extends ReconstructionEngine {
-    
+
     String FieldsConfig="";
     AtomicInteger Run = new AtomicInteger(0);
     DCGeant4Factory dcDetector;
+    String clasDictionaryPath ;
     
     public DCHBEngine() {
         super("DCHB","ziegler","4.0");
     }
-    String clasDictionaryPath ;
+    
+    /**
+     * 
+     * determine torus map name from yaml, else env, else crash
+     */
+    private void initializeMagneticFields() {
+        String torusMap=this.getEngineConfigString("torusMap");
+        if (torusMap!=null) {
+            System.out.println("["+this.getName()+"] Torus Map chosen based on yaml: "+torusMap);
+        }
+        else {
+            torusMap = System.getenv("TORUSMAP");
+            if (torusMap!=null) {
+                System.out.println("["+this.getName()+"] Torus Map chosen based on env: "+torusMap);
+            }
+        }
+        if (torusMap==null) {
+            throw new RuntimeException("["+this.getName()+"]  Failed to find torus map in yaml or env.");
+        }
+        String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";
+        // pending updates from Dave:
+        //MagneticFields.getInstance().initializeMagneticFields(mapDir,torusMap);
+    }
+
     @Override
     public boolean init() {
+
         Constants.Load();
-       
+     
+        this.initializeMagneticFields();
+
         clasDictionaryPath= CLASResources.getResourcePath("etc");
         String[]  dcTables = new String[]{
             "/calibration/dc/signal_generation/doca_resolution",
