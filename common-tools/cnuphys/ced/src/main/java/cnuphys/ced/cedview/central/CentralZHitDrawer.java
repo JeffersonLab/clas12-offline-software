@@ -107,10 +107,7 @@ public class CentralZHitDrawer implements IDrawable {
 
 	private void drawBSTHitsAccumulatedMode(Graphics g, IContainer container) {
 
-		int maxHit = AccumulationManager.getInstance().getMaxFullBSTCount();
-		if (maxHit < 1) {
-			return;
-		}
+		int medianHit = AccumulationManager.getInstance().getMedianFullBSTCount();
 
 		// first index is layer 0..7, second is sector 0..23
 		int bstFullData[][][] = AccumulationManager.getInstance().getAccumulatedBSTFullData();
@@ -122,12 +119,7 @@ public class CentralZHitDrawer implements IDrawable {
 
 					if (hitCount > 1) {
 
-						double fract;
-						if (_view.isSimpleAccumulatedMode()) {
-							fract = ((double) hitCount) / maxHit;
-						} else {
-							fract = Math.log(hitCount + 1.) / Math.log(maxHit + 1.);
-						}
+						double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 
 						Color color = AccumulationManager.getInstance().getColor(fract);
 						_view.drawBSTStrip((Graphics2D) g, container, color, sect0 + 1, lay0 + 1, strip0 + 1);

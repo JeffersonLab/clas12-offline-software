@@ -172,5 +172,13 @@ public abstract class CedView3D extends BaseView implements
 		}
 	}
 
+	/**
+	 * Tests whether this listener is interested in events while accumulating
+	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 */
+	@Override
+	public boolean ignoreIfAccumulating() {
+		return true;
+	}
 
 }
