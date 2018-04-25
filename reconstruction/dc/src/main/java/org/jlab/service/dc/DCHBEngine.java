@@ -42,21 +42,50 @@ import org.jlab.rec.dc.trajectory.RoadFinder;
 import org.jlab.rec.dc.trajectory.Road;
 import org.jlab.utils.CLASResources;
 
+import org.jlab.clara.engine.EngineData;
+import org.jlab.clara.engine.EngineDataType;
 
 public class DCHBEngine extends ReconstructionEngine {
-    
+
     String FieldsConfig="";
     AtomicInteger Run = new AtomicInteger(0);
     DCGeant4Factory dcDetector;
+    String clasDictionaryPath ;
     
     public DCHBEngine() {
         super("DCHB","ziegler","4.0");
     }
-    String clasDictionaryPath ;
+    
+    /**
+     * 
+     * determine torus map name from yaml, else env, else crash
+     */
+    private void initializeMagneticFields() {
+        String torusMap=this.getEngineConfigString("torusMap");
+        if (torusMap!=null) {
+            System.out.println("["+this.getName()+"] Torus Map chosen based on yaml: "+torusMap);
+        }
+        else {
+            torusMap = System.getenv("TORUSMAP");
+            if (torusMap!=null) {
+                System.out.println("["+this.getName()+"] Torus Map chosen based on env: "+torusMap);
+            }
+        }
+        if (torusMap==null) {
+            throw new RuntimeException("["+this.getName()+"]  Failed to find torus map in yaml or env.");
+        }
+        String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";
+        // pending updates from Dave:
+        //MagneticFields.getInstance().initializeMagneticFields(mapDir,torusMap);
+    }
+
     @Override
     public boolean init() {
+
         Constants.Load();
-       
+     
+        this.initializeMagneticFields();
+
         clasDictionaryPath= CLASResources.getResourcePath("etc");
         String[]  dcTables = new String[]{
             "/calibration/dc/signal_generation/doca_resolution",
@@ -74,7 +103,7 @@ public class DCHBEngine extends ReconstructionEngine {
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
         dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
         
-        
+        //MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
         //DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(800, "default");
         //dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
         //disconnect from database. Important to do this after loading tables.
@@ -108,10 +137,11 @@ public class DCHBEngine extends ReconstructionEngine {
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
-       
+        if(newRun==0)
+        	return true;
         if(Run.get()==0 || (Run.get()!=0 && Run.get()!=newRun)) { 
             if(newRun>1000) {
-                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
+                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
             } else {
                 MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
             }
