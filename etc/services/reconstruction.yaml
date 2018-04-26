@@ -45,6 +45,7 @@ configuration:
   services:
     DCHB:
       torusMap: clas12-fieldmap-torus.dat
+      solenoidMap: clas12-fieldmap-solenoid.dat
 
 mime-types:
   - binary/data-hipo
