@@ -51,19 +51,18 @@ public class Simulation {
 	/**
 	 * Create a Simulation
 	 * @param initialSolution the initial solution
-	 * @param props key-value properties of the simulation
+	 * @param props key-value properties of the simulation. Used for initialization.
 	 */
 	public Simulation(Solution initialSolution, Properties props) {
 		
 		_props = props;
 		
 		createRandomGenerator();
-		setParameters();
+		setParametersFromProperties();
 		
 		_currentSolution = initialSolution;
 		
 		setInitialTemperature();
-		
 	}
 	
 	/**
@@ -74,6 +73,7 @@ public class Simulation {
 		return _currentSolution;
 	}
 	
+	//make a guess for an initial temperature
 	private void setInitialTemperature() {
 		//find a average energy step
 		
@@ -108,7 +108,7 @@ public class Simulation {
 	}
 	
 	//set parameters from what is in properties
-	private void setParameters() {
+	private void setParametersFromProperties() {
 		//coolrate
 		if (_props.containsKey(COOLRATE)) {
 			_coolRate = Double.parseDouble(_props.getProperty(COOLRATE));
