@@ -4,6 +4,7 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -12,6 +13,9 @@ import javax.swing.KeyStroke;
 
 import cnuphys.splot.edit.CurveEditorDialog;
 import cnuphys.splot.edit.DialogUtilities;
+import cnuphys.splot.pdata.DataSet;
+import cnuphys.splot.pdata.DataSetException;
+import cnuphys.splot.pdata.DataSetType;
 
 public class SplotMenus implements ActionListener {
 
@@ -28,7 +32,9 @@ public class SplotMenus implements ActionListener {
 	protected JMenuItem _dataItem;
 	protected JMenuItem _clearItem;
 	protected JMenuItem _curveItem;
-
+	
+	protected JCheckBoxMenuItem _showExtraCB;
+	
 	/**
 	 * Create a set of menus and items for sPlot
 	 * 
@@ -38,7 +44,7 @@ public class SplotMenus implements ActionListener {
 	 */
 	public SplotMenus(PlotCanvas canvas, JMenuBar menuBar, boolean addQuit) {
 		_plotCanvas = canvas;
-		makeMenus(menuBar, addQuit);
+		makeMenus(canvas, menuBar, addQuit);
 	}
 
 	/**
@@ -50,13 +56,13 @@ public class SplotMenus implements ActionListener {
 	 */
 	public SplotMenus(PlotCanvas canvas, JPopupMenu popup, boolean addQuit) {
 		_plotCanvas = canvas;
-		makeMenus(popup, addQuit);
+		makeMenus(canvas, popup, addQuit);
 	}
 
 	// make the menus
-	private void makeMenus(Container container, boolean addQuit) {
+	private void makeMenus(PlotCanvas canvas, Container container, boolean addQuit) {
 //		makeFileMenu(container, addQuit);
-		makeEditMenu(container);
+		makeEditMenu(canvas, container);
 	}
 
 	// make the file menu
@@ -71,13 +77,15 @@ public class SplotMenus implements ActionListener {
 	}
 
 	// make the edit menu
-	protected void makeEditMenu(Container container) {
+	protected void makeEditMenu(PlotCanvas canvas, Container container) {
 		_editMenu = new JMenu("Edit");
 		_prefItem = addMenuItem("Preferences...", 'P', _editMenu);
 //		_dataItem = addMenuItem("Data...", 'D', _editMenu);
 		_curveItem = addMenuItem("Curves...", 'C', _editMenu);
-//		_editMenu.addSeparator();
-//		_clearItem = addMenuItem("Clear Data", '\0', _editMenu);
+		_editMenu.addSeparator();
+		_showExtraCB = addMenuCheckBox("Show any Extra Text", _editMenu, canvas.getParameters().extraDrawing());
+		_editMenu.addSeparator();
+		_clearItem = addMenuItem("Clear Data", '\0', _editMenu);
 		container.add(_editMenu);
 	}
 
@@ -109,6 +117,21 @@ public class SplotMenus implements ActionListener {
 
 		return mitem;
 	}
+	
+	protected JCheckBoxMenuItem addMenuCheckBox(String label, JMenu menu, boolean selected) {
+		JCheckBoxMenuItem cb = null;
+
+		if ((label != null) && (menu != null)) {
+			try {
+				cb = new JCheckBoxMenuItem(label, selected);
+				menu.add(cb);
+				cb.addActionListener(this);
+			} catch (Exception e) {
+			}
+		}
+
+		return cb;
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -130,7 +153,25 @@ public class SplotMenus implements ActionListener {
 			cd.setVisible(true);
 		}
 		else if (source == _clearItem) {
+			DataSet ds = _plotCanvas.getDataSet();
+			DataSetType dsType = null;
+			if (ds != null) {
+				dsType = ds.getType();
+			}
 			_plotCanvas.clearPlot();
+			
+			if (dsType != null) {
+				try {
+					ds = new DataSet(dsType);
+					_plotCanvas.setDataSet(ds);
+				} catch (DataSetException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		else if (source == _showExtraCB) {
+			_plotCanvas.getParameters().setExtraDrawing(_showExtraCB.isSelected());
+			_plotCanvas.repaint();
 		}
 	}
 

@@ -67,5 +67,11 @@
       <version>1.0</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.jlab.coda</groupId>
+      <artifactId>jclara</artifactId>
+      <version>4.3-SNAPSHOT</version>
+    </dependency>
+
   </dependencies>
  </project>

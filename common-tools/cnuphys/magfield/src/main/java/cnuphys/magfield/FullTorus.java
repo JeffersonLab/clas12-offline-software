@@ -1,7 +1,10 @@
 package cnuphys.magfield;
 
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class FullTorus extends Torus {
 		
@@ -20,7 +23,52 @@ public class FullTorus extends Torus {
 		return fullTorus;
 	}
 	
+	
+	/**
+	 * Tests whether this is a full field or a phi symmetric field
+	 * @return <code>true</code> if this is a full field
+	 */
+	public static boolean isFieldmapFullField(String torusPath) throws FileNotFoundException {
+		File file = new File(torusPath);
 
+		if (!file.exists()) {
+			throw new FileNotFoundException("TORUS Map not found at [" + torusPath + "]");
+		}
+
+		try {
+			DataInputStream dos = new DataInputStream(new FileInputStream(file));
+
+			boolean swap = false;
+			int magicnum = dos.readInt(); // magic number
+
+			// TODO handle swapping if necessary
+			swap = (magicnum != MAGICNUMBER);
+			if (swap) {
+				System.err.println("byte swapping required but not yet implemented.");
+				dos.close();
+				return false;
+			}
+			
+			//read five ints related to cs
+			dos.readInt();
+			dos.readInt();
+			dos.readInt();
+			dos.readInt();
+			dos.readInt();
+			
+			//now read phi min and phi max in degrees
+
+
+			float phiMin = dos.readFloat();
+			float phiMax = dos.readFloat();
+			
+			return (phiMax > 300);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return false;
+	}
 
 	/**
 	 * Get the field by trilinear interpolation.
@@ -62,6 +110,28 @@ public class FullTorus extends Torus {
 		result[Z] *= _scaleFactor;
 	}
 	
+	//for testing
+	public static void main(String arg[]) {
+		
+//		String fn[] = {"/Users/heddle/magfield/clas12-fieldmap-torus.dat", "/Users/heddle/magfield/Jan_clas12TorusFull_2.00.dat"};
+//		for (String name : fn) {
+//			try {
+//				boolean isFull = isFieldmapFullField(name);
+//				System.out.println("Path [" + name + "] full: " + isFull);
+//			} catch (FileNotFoundException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		
+		
+		try {
+			MagneticFields.getInstance().initializeMagneticFieldsFromEnv();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (MagneticFieldInitializationException e) {
+			e.printStackTrace();
+		}
+	}
 
 	
 }
