@@ -18,17 +18,17 @@ public class AttributeTableModel extends AbstractTableModel {
 	/**
 	 * Constant used to designate name column;
 	 */
-	public static final int PROP_NAME = 0;
+	public static final int NAME = 0;
 
 	/**
 	 * Constant used to designate value column;
 	 */
-	public static final int PROP_VALUE = 1;
+	public static final int VALUE = 1;
 
 	/**
 	 * array of column names
 	 */
-	private String cnames[] = { "Name", "Value" };
+	private String cnames[] = { "Key", "Value" };
 
 
 	//the model data
@@ -100,10 +100,10 @@ public class AttributeTableModel extends AbstractTableModel {
 
 		switch (columnIndex) {
 
-		case PROP_NAME:
+		case NAME:
 			return attribute.getKey();
 
-		case PROP_VALUE:
+		case VALUE:
 			return attribute.getValue();
 		}
 
@@ -171,6 +171,10 @@ public class AttributeTableModel extends AbstractTableModel {
 	@Override
 	public boolean isCellEditable(int row, int col) {
 		
+		if (col == NAME) {
+			return false;
+		}
+		
 		Attribute attribute = getAttribute(row);
 		return (attribute == null) ? false : attribute.isEditable();
 	}
@@ -208,7 +212,6 @@ public class AttributeTableModel extends AbstractTableModel {
 			Collections.sort(_data);
 		}
 	}
-
 
 
 }

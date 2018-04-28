@@ -29,7 +29,6 @@ public class AttributeBooleanEditor extends AttributeEditor<JCheckBox> implement
 
 		component.setSelected((Boolean)(attribute.getValue()));
 		component.setBackground(Color.white);
-		component.setEnabled(true);
 		component.addItemListener(this);
 	}
 

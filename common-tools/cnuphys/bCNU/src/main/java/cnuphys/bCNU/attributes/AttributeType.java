@@ -42,7 +42,7 @@ public enum AttributeType {
 	}
 	
 	/**
-	 * From an object, obtaine the type
+	 * From an object, obtain the type
 	 * @param value the object
 	 * @return the type
 	 */
@@ -69,6 +69,35 @@ public enum AttributeType {
 			return UNKNOWN;	
 		}		
 	}
+	
+	/**
+	 * Clone a value based on the type
+	 * @param value the object
+	 * @return the deep copy
+	 */
+	public static Object cloneValue(Object value) {
+		
+		if (value == null) {
+			return null;
+		}
+		
+		if (value instanceof Boolean) {
+			return new Boolean((Boolean)value);
+		}
+		else if (value instanceof String) {
+			return new String((String)value);
+		}
+		else if (value instanceof Integer) {
+			return new Integer((Integer)value);
+		}
+		else if (value instanceof Double) {
+			return new Double((Double)value);
+		}
+		else {
+			return null;	
+		}		
+	}
+
 	
 	/**
 	 * Get the class for creating an editor

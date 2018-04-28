@@ -15,7 +15,7 @@ import javax.swing.JFormattedTextField;
 public class AttributeDoubleEditor extends AttributeEditor<JFormattedTextField> implements FocusListener,
 KeyListener {
 
-	String oldText = null;
+	String oldText = "";
 
 	/**
 	 * The owner table.
@@ -25,7 +25,8 @@ KeyListener {
 	protected static NumberFormat numberFormat = NumberFormat
 			.getNumberInstance();
 	static {
-		numberFormat.setMinimumFractionDigits(8);
+		numberFormat.setMaximumFractionDigits(6);
+		numberFormat.setMinimumFractionDigits(0);
 	}
 
 	/**
@@ -63,8 +64,14 @@ KeyListener {
 				newText = "";
 			}
 
-			if ((oldText == null) || (oldText.compareTo(newText) != 0)) {
-				attribute.setValue(newText);
+			if (oldText.compareTo(newText) != 0) {
+				
+				try {
+					double dval = Double.parseDouble(newText);
+					attribute.setValue(dval);
+				}
+				catch (NumberFormatException e) {
+				}
 			}
 
 		}
@@ -103,7 +110,7 @@ KeyListener {
 	@Override
 	public void renderValue(Object value) {
 		Double val = (Double)value;
-		component.setText("" + val);
+		component.setText(String.format("%10.6G", value));
 	}
 
 }

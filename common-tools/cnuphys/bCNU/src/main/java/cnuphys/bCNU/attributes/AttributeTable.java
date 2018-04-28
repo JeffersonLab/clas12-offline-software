@@ -4,18 +4,22 @@
 package cnuphys.bCNU.attributes;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
 
 import javax.swing.JFrame;
-import javax.swing.JMenuBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
+
+import cnuphys.bCNU.util.Fonts;
 
 /**
  * A general table for displaying and editing attributes.
@@ -25,42 +29,81 @@ import javax.swing.table.TableColumn;
  */
 @SuppressWarnings("serial")
 public class AttributeTable extends JTable {
+	
+	//default and actual column widths
+	private static final int NAME_WIDTH = 70;
+	private static final int VAL_WIDTH = 140;
+	
+	private int _nameWidth;
+	private int _valueWidth;
+	
 
-
-	private DefaultTableCellRenderer def_renderer = new DefaultTableCellRenderer();
+	//to render keys (names)
+	private DefaultTableCellRenderer _nameRenderer;
 
 	//to render the values
-	private AttributeCellRenderer val_renderer;
+	private AttributeCellRenderer _valRenderer;
 
-	private AttributeCellEditor val_editor;
+	//to edit the values
+	private AttributeCellEditor _valEditor;
 	
 	//the scroll pane
 	private JScrollPane _scrollPane;
 
+	//default font
+	public static final Font defaultFont = Fonts.mediumFont;
 
+	//columns
 	private TableColumn c1, c2;
-
+	
+	/**
+	 * Create an attribute table with default column widths
+	 */
 	public AttributeTable() {
+		this(NAME_WIDTH, VAL_WIDTH);
+	}
 
-		val_editor = new AttributeCellEditor(this);
-		val_renderer = new AttributeCellRenderer(this);
+	/**
+	 * Create an attribute table
+	 * @param nw width of name column
+	 * @param vw width of value column
+	 */
+	public AttributeTable(int nw, int vw) {
+		_nameWidth = nw;
+		_valueWidth = vw;
+		
+		putClientProperty("terminateEditOnFocusLost", true);
+		
+		_nameRenderer = new DefaultTableCellRenderer() {
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+				Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+				c.setFont(defaultFont);
+				return c;
+			}
+		};
+
+		_valEditor = new AttributeCellEditor(this);
+		_valRenderer = new AttributeCellRenderer(this);
 
 		Dimension dim = getIntercellSpacing();
 		dim.width += 2;
 		setIntercellSpacing(dim);
 		setAutoCreateColumnsFromModel(false);
 		setModel(new AttributeTableModel());
-		def_renderer.setHorizontalAlignment(SwingConstants.LEFT);
+		_nameRenderer.setHorizontalAlignment(SwingConstants.LEFT);
 
-		c1 = new TableColumn(0, 65, def_renderer, null);
-		c2 = new TableColumn(1, 140, val_renderer, val_editor);
+		c1 = new TableColumn(0, _nameWidth, _nameRenderer, null);
+		c2 = new TableColumn(1, _valueWidth, _valRenderer, _valEditor);
 
 		addColumn(c1);
 		addColumn(c2);
 		getTableHeader().setReorderingAllowed(false);
+		
+		setGridColor(Color.lightGray);
 
 		setRowHeight(24);
 	}
+	
 	
 	/**
 	 * Get the attribute data model
@@ -127,6 +170,12 @@ public class AttributeTable extends JTable {
 		
 		return (model != null) ? model.getAttribute(row) : null;
 	}
+	
+
+    @Override
+	public void removeEditor() {
+		super.removeEditor();
+	}
 
 	
 	/**
@@ -135,7 +184,13 @@ public class AttributeTable extends JTable {
 	 */
 	public JScrollPane getScrollPane() {
 		if (_scrollPane == null) {
-			_scrollPane = new JScrollPane(this);
+			_scrollPane = new JScrollPane(this) {
+				public Dimension getPreferredSize() {
+					Dimension d = super.getPreferredSize();
+					d.width = _nameWidth + _valueWidth + 20;
+					return d;
+				}
+			};
 		}
 		
 		return _scrollPane;
@@ -149,24 +204,26 @@ public class AttributeTable extends JTable {
 		
 		Attributes attributes = new Attributes();
 		attributes.add(new Attribute("HEY", "Hey man", true, false));
+		attributes.add(new Attribute("DUDE", "Dude", false, false));
 		attributes.add(new Attribute("INT1", -9999, true, false));
-		attributes.add(new Attribute("INT2", 77, true, false));
-		attributes.add(new Attribute("INT2", 88, true, false));
+		attributes.add(new Attribute("INT2", 77, false, false));
+		attributes.add(new Attribute("INT3", 88, true, false));
 		attributes.add(new Attribute("BOOL1", true, true, false));
-		attributes.add(new Attribute("BOOL2", false, true, false));
+		attributes.add(new Attribute("BOOL2", false, false, false));
 		attributes.add(new Attribute("DOUBLE1", Double.MAX_VALUE, true, false));
-		attributes.add(new Attribute("DOUBLE2", Double.MIN_VALUE, true, false));
+		attributes.add(new Attribute("DOUBLE2", Double.MIN_VALUE, false, false));
 		
 		//make the table
 		
 		AttributeTable table = new AttributeTable();
-		table.setData(attributes);
+		table.setData(attributes.clone());
+		AttributePanel panel = new AttributePanel(table);
 		
 		//now make the frame to display
 		JFrame testFrame = new JFrame("Attributes");
 		
 		testFrame.setLayout(new BorderLayout(8, 8));
-		testFrame.add(table.getScrollPane(), BorderLayout.CENTER);
+		testFrame.add(panel, BorderLayout.CENTER);
 		
 		// set up what to do if the window is closed
 		WindowAdapter windowAdapter = new WindowAdapter() {

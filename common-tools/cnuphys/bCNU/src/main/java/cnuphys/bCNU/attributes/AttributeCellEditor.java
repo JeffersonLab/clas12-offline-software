@@ -56,41 +56,54 @@ public class AttributeCellEditor implements TableCellEditor {
 		
 		Attribute attribute = _attributeTable.getAttribute(row);
 		AttributeEditor editor = AttributeEditor.AttributeEditorFactory(_attributeTable, attribute, value);
-		return  (editor != null) ? editor.component : null;
+		
+		Component component = (editor != null) ? editor.component : null;
+
+		if (component != null) {
+			component.setFont(AttributeTable.defaultFont);
+		}
+		return component;
 	}
 
 	@Override
 	public Object getCellEditorValue() {
+		System.err.println("getCellEditorValue");
 		return null;
 	}
 
 	@Override
 	public boolean isCellEditable(EventObject anEvent) {
+		System.err.println("isCellEditable");
 		return true;
 	}
 
 	@Override
 	public boolean shouldSelectCell(EventObject anEvent) {
+		System.err.println("shouldSelectCell");
 		return true;
 	}
 
 	@Override
 	public boolean stopCellEditing() {
+		System.err.println("stopCellEditing");
 		_attributeTable.removeEditor();
 		return true;
 	}
 
 	@Override
 	public void cancelCellEditing() {
+		System.err.println("cancelCellEditing");
 		_attributeTable.removeEditor();
 	}
 
 	@Override
 	public void addCellEditorListener(CellEditorListener l) {
+		System.err.println("addCellEditorListener");
 	}
 
 	@Override
 	public void removeCellEditorListener(CellEditorListener l) {
+		System.err.println("removeCellEditorListener");
 	}
 	
 

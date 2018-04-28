@@ -14,19 +14,12 @@ public class Attribute implements Comparable<Attribute> {
 	//the key or name
 	private String _key;
 	
-
-	/**
-	 * Create an editable, visible Attibute
-	 * @param value the value
-	 */
-	public Attribute(String key, Object value) {
-		this(key, value, true, false);
-	}
 	
 	/**
 	 * Create an attribute
 	 * @param value the value
 	 * @param editable whether it is editable
+	 * @param hidden whether it is hidden (not on the table)
 	 */
 	public Attribute(String key, Object value, boolean editable, boolean hidden) {
 		_key = key;
@@ -106,5 +99,14 @@ public class Attribute implements Comparable<Attribute> {
 		return _key;
 	}
 
+	/**
+	 * Clone this attribute
+	 * @return the cloned value
+	 */
+	public Attribute clone() {
+		String newKey = new String(_key);
+		Object newVal = AttributeType.cloneValue(_value);
+		return new Attribute(newKey, newVal, _editable, _hidden);
+	}
 
 }
