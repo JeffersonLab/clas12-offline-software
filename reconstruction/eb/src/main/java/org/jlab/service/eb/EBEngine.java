@@ -237,7 +237,7 @@ public class EBEngine extends ReconstructionEngine {
 
     public void dropBanks(DataEvent de) {
         if (this.alreadyDroppedBanks==false) {
-            System.out.println("\nEBEngine:  dropping REC banks!\n");
+            System.out.println("["+this.getName()+"]  dropping REC banks!\n");
             this.alreadyDroppedBanks=true;
         }
         de.removeBank(eventBank);
@@ -248,10 +248,17 @@ public class EBEngine extends ReconstructionEngine {
         de.removeBank(trackBank);
         de.removeBank(crossBank);
         de.removeBank(ftBank);
+        de.removeBank(trajectoryBank);
+        de.removeBank(covMatrixBank);
     }
 
     @Override
     public boolean init() {
+
+        if (this.getEngineConfigString("dropBanks")=="true") {
+            dropBanks=true;
+        }
+
         requireConstants(EBCCDBConstants.getAllTableNames());
         this.getConstantsManager().setVariation("default");
         System.out.println("["+this.getName()+"] --> event builder is ready....");
