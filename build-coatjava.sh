@@ -17,13 +17,20 @@ do
 done
 
 if [ $downloadMaps == "yes" ]; then
-  wget http://github.com/JeffersonLab/clas12-offline-resources/archive/field-maps.zip
-  unzip field-maps.zip
-  mkdir etc/data/magfield common-tools/cnuphys/coatjava/etc/data/magfield common-tools/cnuphys/magfieldC/data
-  mv clas12-offline-resources-field-maps/etc/* etc/data/magfield/
-  mv clas12-offline-resources-field-maps/cnuphys/* common-tools/cnuphys/coatjava/etc/data/magfield/
-  mv clas12-offline-resources-field-maps/cnuphysC/* common-tools/cnuphys/magfieldC/data/
-  rm -rf field-maps.zip clas12-offline-resources-field-maps
+  webDir=http://clasweb.jlab.org/clas12offline/magfield
+  locDir=etc/data/magfield
+  mkdir -p $locDir
+  cd $locDir
+  for map in \
+    Full_torus_r251_phi181_z251_18Apr2018.dat \
+    Symm_torus_r251_phi121_z251_2008.dat \
+    Symm_torus_r2501_phi16_z251_24Apr2018.dat \
+    Symm_solenoid_r601_phi1_z1201_2008.dat
+  do
+    # -N only redownloads if timestamp/filesize is newer/different
+    wget -N --no-check-certificate $webDir/$map
+  done
+  cd -
 fi
 
 rm -rf coatjava
