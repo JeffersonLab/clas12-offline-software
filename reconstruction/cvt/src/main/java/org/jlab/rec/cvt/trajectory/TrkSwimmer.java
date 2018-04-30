@@ -219,7 +219,7 @@ public class TrkSwimmer {
         String clasDictionaryPath = CLASResources.getResourcePath("etc");
 
         //OK, see if we can create a Solenoid
-        String solenoidFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-solenoid.dat";
+        String solenoidFileName = clasDictionaryPath + "/data/magfield/Symm_solenoid_r601_phi1_z1201_2008.dat";
 
         File solenoidFile = new File(solenoidFileName);
         try {
