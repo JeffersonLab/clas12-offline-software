@@ -1485,9 +1485,13 @@ public class MagneticFields {
 		return formatterlong.format(longtime);
 	}
 
-	private static void timingTest() {
-		System.out.println("Timing tests");
+	
+	static String options[] = {"Standard, no probe", "Standard, with probe", "Rotated Composite"};
+	private static void timingTest(int option) {
+		System.out.println("Timing tests: [" + options[option] + "]");
 		long seed = 5347632765L;
+		
+		FieldProbe.cache((option != 0));
 		
 		int num = 10000000;
 		
@@ -1498,9 +1502,18 @@ public class MagneticFields {
 		float result[] = new float[3];
 		
 		IField ifield = MagneticFields.getInstance().getActiveField();
+		if (option == 2) {
+			ifield = MagneticFields.getInstance()._rotatedCompositeField;
+		}
 		
 		Random rand = new Random(seed);
 
+		double _angle = -25.0;
+		double _sin = Math.sin(Math.toRadians(_angle));
+		double _cos = Math.cos(Math.toRadians(_angle));
+
+		
+		
 		for (int i = 0; i < num; i++) {
 			z[i] = 600 * rand.nextFloat();
 			float rho = 600 * rand.nextFloat();
@@ -1508,6 +1521,14 @@ public class MagneticFields {
 
 			x[i] = (float) (rho * Math.cos(phi));
 			y[i] = (float) (rho * Math.sin(phi));
+			
+			if (option == 2) {
+				double xx = x[i] * _cos + z[i] * _sin;
+//				double yy = y[i];
+				double zz = z[i] * _cos - x[i] * _sin;
+				x[i] = (float)xx;
+				z[i] = (float)zz;
+			}
 		}
 		
 		//prime the pump
@@ -1586,21 +1607,33 @@ public class MagneticFields {
 		mb.add(mf.getMagneticFieldMenu(true, true));
 
 		JMenu testMenu = new JMenu("Tests");
-		final JMenuItem test1Item = new JMenuItem("Timing Test");
+		final JMenuItem test0Item = new JMenuItem("Timing Test (no probe)");
+		final JMenuItem test1Item = new JMenuItem("Timing Test (probe)");
+		final JMenuItem test2Item = new JMenuItem("Timing Test (Rotated Composite)");
 
 		ActionListener al = new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == test0Item) {
+					timingTest(0);
+				}
 				if (e.getSource() == test1Item) {
-					timingTest();
+					timingTest(1);
+				}
+				if (e.getSource() == test2Item) {
+					timingTest(2);
 				}
 			}
 
 		};
 
+		test0Item.addActionListener(al);
 		test1Item.addActionListener(al);
+		test2Item.addActionListener(al);
+		testMenu.add(test0Item);
 		testMenu.add(test1Item);
+		testMenu.add(test2Item);
 		mb.add(testMenu);
 		testFrame.add(magPanel1);
 		testFrame.add(magPanel2);

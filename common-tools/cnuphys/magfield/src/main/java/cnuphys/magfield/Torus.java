@@ -15,8 +15,8 @@ import java.util.StringTokenizer;
  *
  * @author David Heddle
  * @author Nicole Schumacher
- * @version 1.0
  */
+
 public class Torus extends MagneticField {
 	
 	/**
@@ -71,15 +71,6 @@ public class Torus extends MagneticField {
 		return relativePhi;
 	}
 	
-    /**
-     * Is the physical torus represented by the map misaligned?
-     * @return <code>true</code> if torus is misaligned
-     */
-    @Override
-	public boolean isMisaligned() {
-    	return false;
-    }
-    
 	/** 
 	 * A quick test to throw out points definitely outside the boundaries
 	 * @param x the x coordinate in the units of the map
@@ -91,10 +82,10 @@ public class Torus extends MagneticField {
 		if ((z < getZMin()) || (z > getZMax())) {
 			return false;
 		}
-		if ((Math.abs(x) < getRhoMin()) || (x > getRhoMax())) {
+		if ((Math.abs(x) < getRhoMin()) || (Math.abs(x) > getRhoMax())) {
 			return false;
 		}
-		if ((Math.abs(y) < getRhoMin()) || (y > getRhoMax())) {
+		if ((Math.abs(y) < getRhoMin()) || (Math.abs(y) > getRhoMax())) {
 			return false;
 		}
 		return true;
@@ -108,8 +99,15 @@ public class Torus extends MagneticField {
 	 * @return <code>true</code> if the point is in range (approximate)
 	 */
 	protected boolean crudeInRangeCylindrical(float phi, float rho, float z) {
+		if ((z < getZMin()) || (z > getZMax())) {
+			return false;
+		}
+		if ((rho < getRhoMin()) || (rho > getRhoMax())) {
+			return false;
+		}
 		return true;
 	}
+	
 
 	/**
 	 * Get the field by trilinear interpolation.

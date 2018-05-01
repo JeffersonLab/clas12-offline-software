@@ -68,10 +68,10 @@ public final class Solenoid extends MagneticField {
 		if ((z < getZMin()) || (z > getZMax())) {
 			return false;
 		}
-		if ((Math.abs(x) < getRhoMin()) || (x > getRhoMax())) {
+		if ((Math.abs(x) < getRhoMin()) || (Math.abs(x) > getRhoMax())) {
 			return false;
 		}
-		if ((Math.abs(y) < getRhoMin()) || (y > getRhoMax())) {
+		if ((Math.abs(y) < getRhoMin()) || (Math.abs(y) > getRhoMax())) {
 			return false;
 		}
 		return true;
@@ -85,6 +85,12 @@ public final class Solenoid extends MagneticField {
 	 * @return <code>true</code> if the point is in range (approximate)
 	 */
 	protected boolean crudeInRangeCylindrical(float phi, float rho, float z) {
+		if ((z < getZMin()) || (z > getZMax())) {
+			return false;
+		}
+		if ((rho < getRhoMin()) || (rho > getRhoMax())) {
+			return false;
+		}
 		return true;
 	}
 

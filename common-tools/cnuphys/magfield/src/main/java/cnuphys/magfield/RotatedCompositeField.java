@@ -6,7 +6,7 @@ public final class RotatedCompositeField extends CompositeField {
 	private double _angle = -25.0;
 	private double _sin = Math.sin(Math.toRadians(_angle));
 	private double _cos = Math.cos(Math.toRadians(_angle));
-
+	
 	/**
 	 * Set the rotation angle
 	 * 
@@ -56,10 +56,12 @@ public final class RotatedCompositeField extends CompositeField {
 	@Override
 	public void field(float xs, float ys, float zs, float[] result) {
 		
+		//first rotate the point
 		double x = xs * _cos - zs * _sin;
 		double y = ys;
 		double z = zs * _cos + xs * _sin;
 
+		//sum the fields
 		float bx = 0, by = 0, bz = 0;
 		for (IField field : this) {
 			field.field((float)x, (float)y, (float)z, result);
@@ -67,26 +69,24 @@ public final class RotatedCompositeField extends CompositeField {
 			by += result[1];
 			bz += result[2];
 		}
-
-//		System.out.println(" NEW: [ " + bx + ", " + by + ", " + bz + "] ");
-
+		
+		//now rotate the field
 		result[0] = (float)(bx * _cos + bz * _sin);
 		result[1] = (by);
 		result[2] = (float)(bz * _cos - bx * _sin);
-//		System.out.println(" NEW: [ " + result[0] + ", " + result[1] + ", " +
-//		result[2] + "] ");
 	}
 
-
+	
 	// the rotation only works for the Cartesian call
 	// TODO fix
 	@Override
 	public void fieldCylindrical(double phi, double rho, double z, float[] result) {
-		phi = Math.toRadians(phi);
-		double x = rho*Math.cos(phi);
-		double y = rho*Math.sin(phi);
-		System.err.println("Cannot use cylindrical call for rotated field");
-		field((float)x, (float)y, (float)z, result);
+		System.err.println("FATAL: Cannot use direct cylindrical call for rotated field.");
+		System.exit(1);
+//		phi = Math.toRadians(phi);
+//		double x = rho*Math.cos(phi);
+//		double y = rho*Math.sin(phi);
+//		field((float)x, (float)y, (float)z, result);
 	}
 
 	/**
