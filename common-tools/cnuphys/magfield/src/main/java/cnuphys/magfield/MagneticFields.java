@@ -1489,22 +1489,47 @@ public class MagneticFields {
 		System.out.println("Timing tests");
 		long seed = 5347632765L;
 		
-		int num = 10;
+		int num = 10000000;
 		
 		float x[] = new float[num];
 		float y[] = new float[num];
 		float z[] = new float[num];
 		
-		Random rand = new Random(seed);
+		float result[] = new float[3];
 		
+		IField ifield = MagneticFields.getInstance().getActiveField();
+		
+		Random rand = new Random(seed);
+
 		for (int i = 0; i < num; i++) {
-		    z[i] = 600*rand.nextFloat();
-			float rho = 600*rand.nextFloat();
-			double phi = Math.toRadians(30*rand.nextFloat());
-			
-			x[i] =(float)(rho*Math.cos(phi));
-			y[i] =(float)(rho*Math.sin(phi));
+			z[i] = 600 * rand.nextFloat();
+			float rho = 600 * rand.nextFloat();
+			double phi = Math.toRadians(30 * rand.nextFloat());
+
+			x[i] = (float) (rho * Math.cos(phi));
+			y[i] = (float) (rho * Math.sin(phi));
 		}
+		
+		//prime the pump
+		for (int i = 0; i < num; i++) {
+			ifield.field(x[i], y[i], z[i], result);
+		}
+
+		double sum = 0;
+		for (int outer = 0; outer < 5; outer++) {
+			long time = System.currentTimeMillis();
+			
+			for (int i = 0; i < num; i++) {
+				ifield.field(x[i], y[i], z[i], result);
+			}
+
+			double del = ((double)(System.currentTimeMillis() - time))/1000.;
+			sum += del;
+
+			System.out.println("loop " + (outer + 1) + " time  = " + del + " sec");
+			
+		}
+		System.out.println("avg "  + (sum/5.) + " sec");
 
 	}
 
@@ -1527,7 +1552,8 @@ public class MagneticFields {
 		System.out.println("mfdir exists: " + (mfdir.exists() && mfdir.isDirectory()));
 		// mf.initializeMagneticFields(mfdir.getPath(), TorusMap.FULL_200);
 		try {
-			mf.initializeMagneticFieldsFromEnv();
+			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat", "Symm_solenoid_r601_phi1_z1201_2008.dat");
+	//		mf.initializeMagneticFieldsFromEnv();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			System.exit(1);

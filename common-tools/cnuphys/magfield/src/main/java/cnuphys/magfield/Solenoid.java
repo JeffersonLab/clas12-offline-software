@@ -31,7 +31,6 @@ public final class Solenoid extends MagneticField {
 		
 //		_shiftZ = 450;
 	}
-	
 
 	/**
 	 * Obtain a solenoid object from a binary file, probably
@@ -57,6 +56,38 @@ public final class Solenoid extends MagneticField {
 	public boolean isMisaligned() {
     	return (Math.abs(_shiftZ) > MISALIGNTOL);
     }
+    
+	/** 
+	 * A quick test to throw out points definitely outside the boundaries
+	 * @param x the x coordinate in the units of the map
+	 * @param y the y coordinate in the units of the map
+	 * @param z the z coordinate in the units of the map
+	 * @return <code>true</code> if the point is in range (approximate)
+	 */
+	protected boolean crudeInRange(float x, float y, float z) {
+		if ((z < getZMin()) || (z > getZMax())) {
+			return false;
+		}
+		if ((Math.abs(x) < getRhoMin()) || (x > getRhoMax())) {
+			return false;
+		}
+		if ((Math.abs(y) < getRhoMin()) || (y > getRhoMax())) {
+			return false;
+		}
+		return true;
+	}
+	
+	/** 
+	 * A quick test to throw out points definitely outside the boundaries
+	 * @param phi the phi coordinate in the units of the map
+	 * @param rho the rho coordinate in the units of the map
+	 * @param z the z coordinate in the units of the map
+	 * @return <code>true</code> if the point is in range (approximate)
+	 */
+	protected boolean crudeInRangeCylindrical(float phi, float rho, float z) {
+		return true;
+	}
+
 	
 	/**
 	 * Get the field by trilinear interpolation.
@@ -74,6 +105,13 @@ public final class Solenoid extends MagneticField {
 	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
 	public void fieldCylindrical(SolenoidProbe probe, double phi, double rho, double z, float result[]) {
+		
+		if (!crudeInRangeCylindrical((float)phi, (float)rho, (float)z)) {
+			result[X] = 0f;
+			result[Y] = 0f;
+			result[Z] = 0f;
+			return;
+		}
 		
 		if (isZeroField()) {
 			result[X] = 0f;
@@ -420,6 +458,10 @@ public final class Solenoid extends MagneticField {
 
 	public double getRhoMax() {
 		return q2Coordinate.getMax();
+	}
+
+	public double getRhoMin() {
+		return q2Coordinate.getMin();
 	}
 
 	/**
