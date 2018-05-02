@@ -55,8 +55,8 @@ mvn install # also runs unit tests
 if [ $? != 0 ] ; then echo "mvn install failure" ; exit 1 ; fi
 
 if [ $runSpotBugs == "yes" ]; then
-	mvn com.github.spotbugs:spotbugs-maven-plugin:spotbugs # spotbugs goal produces a report target/spotbugsXml.xml for each module
-	# mvn com.github.spotbugs:spotbugs-maven-plugin:check # check goal produces a report and produces build failed if bugs
+	# mvn com.github.spotbugs:spotbugs-maven-plugin:spotbugs # spotbugs goal produces a report target/spotbugsXml.xml for each module
+	mvn com.github.spotbugs:spotbugs-maven-plugin:check # check goal produces a report and produces build failed if bugs
 	# the spotbugsXml.xml file is easiest read in a web browser
 	# see http://spotbugs.readthedocs.io/en/latest/maven.html and https://spotbugs.github.io/spotbugs-maven-plugin/index.html for more info
 	if [ $? != 0 ] ; then echo "spotbugs failure" ; exit 1 ; fi
