@@ -36,8 +36,7 @@ public class PluginManager {
 		@Override
 		public boolean accept(File dir, String name) {
 			File theFile = new File(dir, name);
-			return (theFile.isDirectory() || name.endsWith(".class") || name
-					.endsWith(".jar"));
+			return (theFile.isDirectory() || name.endsWith(".class") || name.endsWith(".jar"));
 		}
 
 	};
@@ -50,8 +49,7 @@ public class PluginManager {
 	 */
 	public PluginManager(String pluginFolder) {
 		try {
-			_bcnuPluginClaz = (Class<Plugin>) Class
-					.forName("cnuphys.bCNU.plugin.Plugin");
+			_bcnuPluginClaz = (Class<Plugin>) Class.forName("cnuphys.bCNU.plugin.Plugin");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -166,8 +164,7 @@ public class PluginManager {
 
 				String klass = file.getAbsolutePath();
 
-				klass = klass.substring(pdirLen + 1).replace(
-						File.separatorChar, '.');
+				klass = klass.substring(pdirLen + 1).replace(File.separatorChar, '.');
 				// remove .class
 				klass = klass.substring(0, klass.lastIndexOf('.'));
 
