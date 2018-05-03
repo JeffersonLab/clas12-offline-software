@@ -24,6 +24,8 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.event.EventListenerList;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import cnuphys.magfield.MagneticField.MathLib;
+
 /**
  * Static support for magnetic fields
  * 
@@ -63,8 +65,9 @@ public class MagneticFields {
 	// solenoidal field
 	private Solenoid _solenoid;
 
-	// torus field (with 12-fold symmetry)
+	// torus field (with 12-fold symmetry) and probe
 	private Torus _torus;
+	private TorusProbe _torusProbe;
 
 	// uniform field
 	// private Uniform _uniform;
@@ -84,8 +87,9 @@ public class MagneticFields {
 	// singleton
 	private static MagneticFields instance;
 
-	// which field is active
+	// which field and probe is active
 	private IField _activeField;
+	private FieldProbe _activeProbe;
 
 	// directories to look for maps
 	private String[] _dataDirs;
@@ -195,9 +199,11 @@ public class MagneticFields {
 		} else {
 			_torus = readTorus(path);
 		}
+		_torusProbe = new TorusProbe(_torus);
 
 		if (activeFieldWasTorus) {
 			_activeField = _torus;
+			_activeProbe = _torusProbe;
 		}
 
 		if (_torus != null) {
@@ -429,7 +435,10 @@ public class MagneticFields {
 	 * @return the active field
 	 */
 	public IField getActiveField() {
-		// init(); //harmless if already inited
+		if (_activeField == _torus) {
+			System.err.println("returning torus probe");
+			return _torusProbe;
+		}
 		return _activeField;
 	}
 
@@ -910,6 +919,7 @@ public class MagneticFields {
 			} else {
 				_torus = readTorus(torusPath);
 			}
+			_torusProbe = new TorusProbe(_torus);
 		}
 
 		if (solenoidFile != null) {
@@ -1078,6 +1088,8 @@ public class MagneticFields {
 			} else {
 				_torus = readTorus(new File(torusMap.getDirName(), torusMap.getFileName()).getPath());
 			}
+			_torusProbe = new TorusProbe(_torus);
+
 			// TorusMenu.getInstance().fixTitle(torusMap);
 			// System.out.println("** USING Torus map [" + torusMap.getName() +
 			// "]");
@@ -1198,7 +1210,8 @@ public class MagneticFields {
 		Object source = ae.getSource();
 
 		if (source == _torusItem) {
-			_activeField = _torus;
+//			_activeField = _torus;
+			_activeField = _torusProbe;
 		} else if (source == _solenoidItem) {
 			_activeField = _solenoid;
 		} else if (source == _bothItem) {
@@ -1236,7 +1249,7 @@ public class MagneticFields {
 		}
 	}
 
-	// mag field changed shift for alignment
+	// mag field changed shift for alignment (solenoid only)
 	protected void changedShift(MagneticField field) {
 		if (field != null) {
 			if (field == _torus) {
@@ -1486,7 +1499,7 @@ public class MagneticFields {
 	}
 
 	
-	static String options[] = {"Standard, no probe", "Standard, with probe", "Rotated Composite"};
+	static String options[] = {"Standard, no probe", "Standard, with probe", "Rotated Composite", "Default Math Lib", "FAST Math Lib", "SUPERFAST MathLab"};
 	private static void timingTest(int option) {
 		System.out.println("Timing tests: [" + options[option] + "]");
 		long seed = 5347632765L;
@@ -1512,7 +1525,14 @@ public class MagneticFields {
 		double _sin = Math.sin(Math.toRadians(_angle));
 		double _cos = Math.cos(Math.toRadians(_angle));
 
-		
+		//which math lib
+		MagneticField.setMathLib(MathLib.FAST);
+		if (option == 3) {
+			MagneticField.setMathLib(MathLib.DEFAULT);
+		}
+		else if (option == 5) {
+			MagneticField.setMathLib(MathLib.SUPERFAST);
+		}
 		
 		for (int i = 0; i < num; i++) {
 			z[i] = 600 * rand.nextFloat();
@@ -1610,6 +1630,9 @@ public class MagneticFields {
 		final JMenuItem test0Item = new JMenuItem("Timing Test (no probe)");
 		final JMenuItem test1Item = new JMenuItem("Timing Test (probe)");
 		final JMenuItem test2Item = new JMenuItem("Timing Test (Rotated Composite)");
+		final JMenuItem test3Item = new JMenuItem("Timing Test (Default Math Lib)");
+		final JMenuItem test4Item = new JMenuItem("Timing Test (Apache Math Lib)");
+		final JMenuItem test5Item = new JMenuItem("Timing Test (Icecore Math Lib)");
 
 		ActionListener al = new ActionListener() {
 
@@ -1618,11 +1641,20 @@ public class MagneticFields {
 				if (e.getSource() == test0Item) {
 					timingTest(0);
 				}
-				if (e.getSource() == test1Item) {
+				else if (e.getSource() == test1Item) {
 					timingTest(1);
 				}
-				if (e.getSource() == test2Item) {
+				else if (e.getSource() == test2Item) {
 					timingTest(2);
+				}
+				else if (e.getSource() == test3Item) {
+					timingTest(3);
+				}
+				else if (e.getSource() == test4Item) {
+					timingTest(4);
+				}
+				else if (e.getSource() == test5Item) {
+					timingTest(5);
 				}
 			}
 
@@ -1631,9 +1663,15 @@ public class MagneticFields {
 		test0Item.addActionListener(al);
 		test1Item.addActionListener(al);
 		test2Item.addActionListener(al);
+		test3Item.addActionListener(al);
+		test4Item.addActionListener(al);
+		test5Item.addActionListener(al);
 		testMenu.add(test0Item);
 		testMenu.add(test1Item);
 		testMenu.add(test2Item);
+		testMenu.add(test3Item);
+		testMenu.add(test4Item);
+		testMenu.add(test5Item);
 		mb.add(testMenu);
 		testFrame.add(magPanel1);
 		testFrame.add(magPanel2);

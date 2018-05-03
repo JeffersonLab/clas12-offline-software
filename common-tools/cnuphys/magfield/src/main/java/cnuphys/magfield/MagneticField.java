@@ -348,15 +348,42 @@ public abstract class MagneticField implements IField {
 	 */
 	public static double atan2Deg(double y, double x) {
 
+
 		switch (_mathLib) {
-		case FAST: case SUPERFAST:
+		case FAST:
 			double phirad = org.apache.commons.math3.util.FastMath.atan2(y, x);
+			return Math.toDegrees(phirad);
+		case SUPERFAST:
+			phirad = Icecore.atan2((float) y, (float) x);
 			return Math.toDegrees(phirad);
 		default:
 			return Math.toDegrees(Math.atan2(y, x));
 		}
 
 	}
+	
+	/**
+	 * Might use standard or fast atan2
+	 * 
+	 * @param y
+	 * @param x
+	 * @return atan2(y, x)
+	 */
+	public static double atan2Deg(float y, float x) {
+
+		switch (_mathLib) {
+		case FAST:
+			double phirad = org.apache.commons.math3.util.FastMath.atan2(y, x);
+			return Math.toDegrees(phirad);
+		case SUPERFAST:
+			phirad = Icecore.atan2(y, x);
+			return Math.toDegrees(phirad);
+		default:
+			return Math.toDegrees(Math.atan2(y, x));
+		}
+
+	}
+
 	
 	/**
 	 * 
@@ -825,9 +852,18 @@ public abstract class MagneticField implements IField {
 		double b101 = getB1(i101);
 		double b110 = getB1(i110);
 		double b111 = getB1(i111);
+		
+		double g0g1g2 = g0 * g1 * g2;
+		double g0g1f2 = g0 * g1 * f2;
+		double g0f1g2 = g0 * f1 * g2;
+		double g0f1f2 = g0 * f1 * f2;
+		double f0g1g2 = f0 * g1 * g2;
+		double f0g1f2 = f0 * g1 * f2;
+		double f0f1g2 = f0 * f1 * g2;
+		double f0f1f2 = f0 * f1 * f2;
 
-		double x = b000 * g0 * g1 * g2 + b001 * g0 * g1 * f2 + b010 * g0 * f1 * g2 + b011 * g0 * f1 * f2
-				+ b100 * f0 * g1 * g2 + b101 * f0 * g1 * f2 + b110 * f0 * f1 * g2 + b111 * f0 * f1 * f2;
+		double x = b000 * g0g1g2 + b001 * g0g1f2 + b010 * g0f1g2 + b011 * g0f1f2
+				+ b100 * f0g1g2 + b101 * f0g1f2 + b110 * f0f1g2 + b111 * f0f1f2;
 
 		// now y
 		b000 = getB2(i000);
@@ -839,8 +875,8 @@ public abstract class MagneticField implements IField {
 		b110 = getB2(i110);
 		b111 = getB2(i111);
 
-		double y = b000 * g0 * g1 * g2 + b001 * g0 * g1 * f2 + b010 * g0 * f1 * g2 + b011 * g0 * f1 * f2
-				+ b100 * f0 * g1 * g2 + b101 * f0 * g1 * f2 + b110 * f0 * f1 * g2 + b111 * f0 * f1 * f2;
+		double y = b000 * g0g1g2 + b001 * g0g1f2 + b010 * g0f1g2 + b011 * g0f1f2
+				+ b100 * f0g1g2 + b101 * f0g1f2 + b110 * f0f1g2 + b111 * f0f1f2;
 
 		// now z
 		b000 = getB3(i000);
@@ -857,8 +893,8 @@ public abstract class MagneticField implements IField {
 //		System.out.println("NEW  b110 = " + b110 + "  b111 = " + b111);
 
 
-		double z = b000 * g0 * g1 * g2 + b001 * g0 * g1 * f2 + b010 * g0 * f1 * g2 + b011 * g0 * f1 * f2
-				+ b100 * f0 * g1 * g2 + b101 * f0 * g1 * f2 + b110 * f0 * f1 * g2 + b111 * f0 * f1 * f2;
+		double z = b000 * g0g1g2 + b001 * g0g1f2 + b010 * g0f1g2 + b011 * g0f1f2
+				+ b100 * f0g1g2 + b101 * f0g1f2 + b110 * f0f1g2 + b111 * f0f1f2;
 
 		result[0] = (float) x;
 		result[1] = (float) y;
@@ -1137,6 +1173,10 @@ public abstract class MagneticField implements IField {
 
 			probe.q3_min = q3Coordinate.getMin(n2);
 			probe.q3_max = q3Coordinate.getMax(n2);
+			
+			probe.q1_norm = probe.q1_max- probe.q1_min;
+			probe.q2_norm = probe.q2_max- probe.q2_min;
+			probe.q3_norm = probe.q3_max- probe.q3_min;
 
 			int i000 = getCompositeIndex(n0, n1, n2);
 			int i001 = i000 + 1;

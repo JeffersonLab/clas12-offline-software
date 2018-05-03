@@ -357,6 +357,11 @@ public final class Solenoid extends MagneticField {
 
 		double g1 = 1 - f1;
 		double g2 = 1 - f2;
+		
+		double g1g2 = g1*g2;
+		double g1f2 = g1*f2;
+		double f1g2 = f1*g2;
+		double f1f2 = f1*f2;
 
 //		System.out.println("NEW q2 = " + q2 + "  q3 = " + q3);
 //		System.out.println("NEW n1 = " + n1 + "  n2 = " + n2);
@@ -377,8 +382,8 @@ public final class Solenoid extends MagneticField {
 		double b010 = getB1(i010);
 		double b011 = getB1(i011);
 
-		double bphi = b000 * g1 * g2 + b001 * g1 * f2 + b010 * f1 * g2
-				+ b011 * f1 * f2;
+		double bphi = b000 * g1g2 + b001 * g1f2 + b010 * f1g2
+				+ b011 * f1f2;
 
 		// now Brho
 		b000 = getB2(i000);
@@ -386,8 +391,8 @@ public final class Solenoid extends MagneticField {
 		b010 = getB2(i010);
 		b011 = getB2(i011);
 
-		double brho = b000 * g1 * g2 + b001 * g1 * f2 + b010 * f1 * g2
-				+ b011 * f1 * f2;
+		double brho = b000 * g1g2 + b001 * g1f2 + b010 * f1g2
+				+ b011 * f1f2;
 
 		// now Bz
 		b000 = getB3(i000);
@@ -395,7 +400,7 @@ public final class Solenoid extends MagneticField {
 		b010 = getB3(i010);
 		b011 = getB3(i011);
 
-		double bz = b000 * g1 * g2 + b001 * g1 * f2 + b010 * f1 * g2
+		double bz = b000 * g1g2 + b001 * g1f2 + b010 * f1 * g2
 				+ b011 * f1 * f2;
 
 		result[0] = (float) bphi;

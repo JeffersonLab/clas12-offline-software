@@ -13,6 +13,9 @@ public abstract class FieldProbe implements IField {
 	protected IField _field;
 	
 	public FieldProbe(IField field) {
+		if (field instanceof FieldProbe) {
+			System.err.println("WARNING: Making a Magnetic Field Probe from a Probe.");
+		}
 		_field = field;
 	}
 	
