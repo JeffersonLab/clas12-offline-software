@@ -278,24 +278,68 @@ public abstract class MagneticField implements IField {
      */
 	@Override
      public void gradient(float x, float y, float z, float result[]) {
- 		
- 		//TODO improve
- 		float[] fr1 = new float[3];
-		float[] fr2 = new float[3];
-		float del = 10f; //cm 
- 		
-		field(x-del, y, z, fr1);
-		field(x+del, y, z, fr2);
-		result[0] = (fr2[0]-fr1[0])/(2*del);
+		
+		//use three point derivative
+		float del = 1f; //cm
+		float del2 = 2*del;
+		
+		float baseVal = fieldMagnitude(x, y, z);
+		float bv3 = -3*baseVal;
+		
+		float bx0 = fieldMagnitude(x+del, y, z);
+		float bx1 = fieldMagnitude(x+del2, y, z);
+		
+//		System.err.println(" " + baseVal + "  " + bx0 + "  " + bx1);
+		float by0 = fieldMagnitude(x, y+del, z);
+		float by1 = fieldMagnitude(x, y+del2, z);
+		float bz0 = fieldMagnitude(x, y, z+del);
+		float bz1 = fieldMagnitude(x, y, z+del2);
+		
+		result[0] = (bv3 + 4*bx0 - bx1)/del2;
+		result[1] = (bv3 + 4*by0 - by1)/del2;
+		result[2] = (bv3 + 4*bz0 - bz1)/del2;
 
-		field(x, y-del, z, fr1);
-		field(x, y+del, z, fr2);
-		result[1] = (fr2[1]-fr1[1])/(2*del);
 		
-		field(x, y, z-del, fr1);
-		field(x, y, z+del, fr2);
+//		float bx0 = fieldMagnitude(x-del, y, z);
+//		float bx1 = fieldMagnitude(x+del, y, z);
+//		float by0 = fieldMagnitude(x, y-del, z);
+//		float by1 = fieldMagnitude(x, y+del, z);
+//		float bz0 = fieldMagnitude(x, y, z-del);
+//		float bz1 = fieldMagnitude(x, y, z+del);
+//		
+//		result[0] = (bx1-bx0)/del2;
+//		result[1] = (by1-by0)/del2;
+//		result[2] = (bz1-bz0)/del2;
+				
 		
-		result[2] = (fr2[2]-fr1[2])/(2*del);	
+ 		
+// 		//TODO improve
+// 		float[] fr1 = new float[3];
+//		float[] fr2 = new float[3];
+//		float del = 10f; //cm 
+// 		
+//		field(x-del, y, z, fr1);
+//		field(x+del, y, z, fr2);
+//		result[0] = (fr2[0]-fr1[0])/(2*del);
+// 		System.err.println("---------");
+// 		System.err.println("x = " + x + " y = " + y + " z = " + z);
+// 		System.err.println(" f1x = " + fr1[0]);
+//		System.err.println(" f2x = " + fr2[0]);
+//
+//
+//		field(x, y-del, z, fr1);
+//		field(x, y+del, z, fr2);
+//		result[1] = (fr2[1]-fr1[1])/(2*del);
+// 		System.err.println(" f1y = " + fr1[1]);
+//		System.err.println(" f2y = " + fr2[1]);
+//
+//		
+//		field(x, y, z-del, fr1);
+//		field(x, y, z+del, fr2);
+//		
+//		result[2] = (fr2[2]-fr1[2])/(2*del);	
+// 		System.err.println(" f1z = " + fr1[2]);
+//		System.err.println(" f2z = " + fr2[2]);
     }
 	
 	/**

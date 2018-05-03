@@ -65,9 +65,8 @@ public class MagneticFields {
 	// solenoidal field
 	private Solenoid _solenoid;
 
-	// torus field (with 12-fold symmetry) and probe
+	// torus field (with 12-fold symmetry)
 	private Torus _torus;
-	private TorusProbe _torusProbe;
 
 	// uniform field
 	// private Uniform _uniform;
@@ -87,9 +86,8 @@ public class MagneticFields {
 	// singleton
 	private static MagneticFields instance;
 
-	// which field and probe is active
+	// which field is active
 	private IField _activeField;
-	private FieldProbe _activeProbe;
 
 	// directories to look for maps
 	private String[] _dataDirs;
@@ -199,11 +197,9 @@ public class MagneticFields {
 		} else {
 			_torus = readTorus(path);
 		}
-		_torusProbe = new TorusProbe(_torus);
 
 		if (activeFieldWasTorus) {
 			_activeField = _torus;
-			_activeProbe = _torusProbe;
 		}
 
 		if (_torus != null) {
@@ -435,10 +431,6 @@ public class MagneticFields {
 	 * @return the active field
 	 */
 	public IField getActiveField() {
-		if (_activeField == _torus) {
-			System.err.println("returning torus probe");
-			return _torusProbe;
-		}
 		return _activeField;
 	}
 
@@ -919,7 +911,6 @@ public class MagneticFields {
 			} else {
 				_torus = readTorus(torusPath);
 			}
-			_torusProbe = new TorusProbe(_torus);
 		}
 
 		if (solenoidFile != null) {
@@ -1088,17 +1079,7 @@ public class MagneticFields {
 			} else {
 				_torus = readTorus(new File(torusMap.getDirName(), torusMap.getFileName()).getPath());
 			}
-			_torusProbe = new TorusProbe(_torus);
-
-			// TorusMenu.getInstance().fixTitle(torusMap);
-			// System.out.println("** USING Torus map [" + torusMap.getName() +
-			// "]");
-		} else {
-			// TorusMenu.getInstance().fixTitle(null);
-			// System.err.println("WARNING: Did not find a map for torus field:
-			// [" +
-			// torusMap.getName() + "]");
-		}
+		}  
 
 	}
 
@@ -1210,8 +1191,7 @@ public class MagneticFields {
 		Object source = ae.getSource();
 
 		if (source == _torusItem) {
-//			_activeField = _torus;
-			_activeField = _torusProbe;
+			_activeField = _torus;
 		} else if (source == _solenoidItem) {
 			_activeField = _solenoid;
 		} else if (source == _bothItem) {

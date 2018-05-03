@@ -19,6 +19,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.MagFieldDisplayArray;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.GridCoordinate;
+import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 
@@ -258,9 +259,11 @@ public class MagFieldItem extends AItem {
 			boolean hasSolenoid) {
 
 
-		// get a probe
-		FieldProbe probe = FieldProbe.factory();
-
+		IField activeField = MagneticFields.getInstance().getActiveField();
+		if (activeField == null) {
+			return;
+		}
+		
 		Rectangle bounds = container.getComponent().getBounds();
 		bounds.x = 0;
 		bounds.y = 0;
@@ -306,25 +309,28 @@ public class MagFieldItem extends AItem {
 				double phi = coords[4];
 
 				if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
-					double bmag = probe.fieldMagnitudeCylindrical(phi, rho, z) / 10.;
+					double bmag = activeField.fieldMagnitudeCylindrical(phi, rho, z) / 10.;
 
 					Color color = _colorScaleModelTorus.getColor(bmag);
 					g.setColor(color);
 					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
 				}
 				else if (displayOption == MagFieldDisplayArray.BGRADDISPLAY) {
-					probe.gradientCylindrical(phi, rho, z, result);
+					activeField.gradientCylindrical(phi, rho, z, result);
 					double gmag = Math.sqrt(result[0]*result[0] +
 							result[1]*result[1] + result[2]*result[2]);
 					
 					//convert to T/m
 					gmag *= 10;
-					Color color = _colorScaleModelGradient.getColor(gmag);
-					g.setColor(color);
-					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
+					
+					if (gmag > 0.02) {
+						Color color = _colorScaleModelGradient.getColor(gmag);
+						g.setColor(color);
+						g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
+					}
 				}
 				else { // one of the components
-					probe.fieldCylindrical(phi, rho, z, result);
+					activeField.fieldCylindrical(phi, rho, z, result);
 					double comp = 0.0;
 					switch (displayOption) {
 					case MagFieldDisplayArray.BXDISPLAY:

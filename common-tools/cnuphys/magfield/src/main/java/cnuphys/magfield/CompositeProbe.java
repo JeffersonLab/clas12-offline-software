@@ -50,18 +50,10 @@ public class CompositeProbe extends FieldProbe {
 	@Override
     public void gradientCylindrical(double phi, double rho, double z,
     	    float result[]) {
-		
-		float bx = 0, by = 0, bz = 0;
-		for (FieldProbe probe : probes) {
-			probe.gradientCylindrical(phi, rho, z, result);
-			bx += result[0];
-			by += result[1];
-			bz += result[2];
-		}
-		result[0] = bx;
-		result[1] = by;
-		result[2] = bz;
-   	
+		phi = Math.toRadians(phi);
+		double x = rho*Math.cos(phi);
+    	double y = rho*Math.sin(phi);
+    	gradient((float)x, (float)y, (float)z, result);   	
     }
 
 
@@ -81,16 +73,23 @@ public class CompositeProbe extends FieldProbe {
      */
      @Override
 	public void gradient(float x, float y, float z, float result[]) {
- 		float bx = 0, by = 0, bz = 0;
+ 		
+ 		float temp[] = new float[3];
+ 		float max = 0f;
+
+ 		
+ 		// use max of underlying gradients
  		for (FieldProbe probe : probes) {
- 			probe.gradient(x, y, z, result);
- 			bx += result[0];
- 			by += result[1];
- 			bz += result[2];
+ 			probe.gradient(x, y, z, temp);
+ 			float vlen = vectorLength(temp);
+ 			
+ 			if (vlen > max) {
+ 				result[0] = temp[0];
+ 				result[1] = temp[1];
+ 				result[2] = temp[2];
+ 				max = vlen;
+ 			}
  		}
- 		result[0] = bx;
- 		result[1] = by;
- 		result[2] = bz;
      }
     
 	

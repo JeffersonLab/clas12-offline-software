@@ -14,7 +14,6 @@ import java.util.ArrayList;
 @SuppressWarnings("serial")
 public class CompositeField extends ArrayList<IField> implements IField {
 
-
 	/**
 	 * Obtain the magnetic field at a given location expressed in Cartesian
 	 * coordinates. The field is returned as a Cartesian vector in kiloGauss.
@@ -44,7 +43,7 @@ public class CompositeField extends ArrayList<IField> implements IField {
 		result[1] = by;
 		result[2] = bz;
 	}
-	
+
 	/**
 	 * Checks whether the field has been set to always return zero.
 	 * 
@@ -62,26 +61,25 @@ public class CompositeField extends ArrayList<IField> implements IField {
 		return true;
 	}
 
-	
 	@Override
 	public boolean add(IField field) {
 		if (field instanceof CompositeField) {
 			System.err.println("Cannot add composite field to a composite field.");
 			return false;
 		}
-		
-	//	remove(field); //prevent duplicates
-		
-		//further check, only one solenoid or one torus
-		//(might have different instances for some reason)
-		
+
+		// remove(field); //prevent duplicates
+
+		// further check, only one solenoid or one torus
+		// (might have different instances for some reason)
+
 		for (IField ifield : this) {
 			if (ifield.getClass().equals(field.getClass())) {
 				remove(ifield);
 				break;
 			}
 		}
-		
+
 		return super.add(field);
 	}
 
@@ -93,8 +91,7 @@ public class CompositeField extends ArrayList<IField> implements IField {
 		for (IField field : this) {
 			if (count == 1) {
 				s += field.getName();
-			}
-			else {
+			} else {
 				s += " + " + field.getName();
 			}
 			count++;
@@ -102,20 +99,21 @@ public class CompositeField extends ArrayList<IField> implements IField {
 
 		return s;
 	}
-	
-    /**
-     * Is the physical magnet represented by any of the maps misaligned?
-     * @return <code>true</code> if any magnet is misaligned
-     */
-    @Override
+
+	/**
+	 * Is the physical magnet represented by any of the maps misaligned?
+	 * 
+	 * @return <code>true</code> if any magnet is misaligned
+	 */
+	@Override
 	public boolean isMisaligned() {
 		for (IField field : this) {
 			if (field.isMisaligned()) {
 				return true;
 			}
 		}
-    	return false;
-    }
+		return false;
+	}
 
 	/**
 	 * Read a magnetic field from a binary file. The file has the documented
@@ -147,70 +145,121 @@ public class CompositeField extends ArrayList<IField> implements IField {
 		result[1] = by;
 		result[2] = bz;
 	}
-	
 
-    /**
-     * Obtain an approximation for the magnetic field gradient at a given location expressed in cylindrical
-     * coordinates. The field is returned as a Cartesian vector in kiloGauss/cm.
-    *
-     * @param phi
-     *            azimuthal angle in degrees.
-     * @param rho
-     *            the cylindrical rho coordinate in cm.
-     * @param z
-     *            coordinate in cm
-     * @param result
-     *            the result
-     * @result a Cartesian vector holding the calculated field in kiloGauss.
-     */
+	/**
+	 * Obtain an approximation for the magnetic field gradient at a given
+	 * location expressed in cylindrical coordinates. The field is returned as a
+	 * Cartesian vector in kiloGauss/cm.
+	 *
+	 * @param phi
+	 *            azimuthal angle in degrees.
+	 * @param rho
+	 *            the cylindrical rho coordinate in cm.
+	 * @param z
+	 *            coordinate in cm
+	 * @param result
+	 *            the result
+	 * @result a Cartesian vector holding the calculated field in kiloGauss.
+	 */
 	@Override
-    public void gradientCylindrical(double phi, double rho, double z,
-    	    float result[]) {
-		
-		float bx = 0, by = 0, bz = 0;
-		for (IField field : this) {
-			field.gradientCylindrical(phi, rho, z, result);
-			bx += result[0];
-			by += result[1];
-			bz += result[2];
-		}
-		result[0] = bx;
-		result[1] = by;
-		result[2] = bz;
-   	
-    }
+	public void gradientCylindrical(double phi, double rho, double z, float result[]) {
+		phi = Math.toRadians(phi);
+		double x = rho * Math.cos(phi);
+		double y = rho * Math.sin(phi);
+		gradient((float) x, (float) y, (float) z, result);
+	}
 
-
-    /**
-     * Obtain an approximation for the magnetic field gradient at a given location expressed in Cartesian
-     * coordinates. The field is returned as a Cartesian vector in kiloGauss/cm.
-     *
-     * @param x
-     *            the x coordinate in cm
-     * @param y
-     *            the y coordinate in cm
-     * @param z
-     *            the z coordinate in cm
-     * @param result
-     *            a float array holding the retrieved field in kiloGauss. The
-     *            0,1 and 2 indices correspond to x, y, and z components.
-     */
-     @Override
+	/**
+	 * Obtain an approximation for the magnetic field gradient at a given
+	 * location expressed in Cartesian coordinates. The field is returned as a
+	 * Cartesian vector in kiloGauss/cm.
+	 *
+	 * @param x
+	 *            the x coordinate in cm
+	 * @param y
+	 *            the y coordinate in cm
+	 * @param z
+	 *            the z coordinate in cm
+	 * @param result
+	 *            a float array holding the retrieved field in kiloGauss. The
+	 *            0,1 and 2 indices correspond to x, y, and z components.
+	 */
+	@Override
 	public void gradient(float x, float y, float z, float result[]) {
- 		float bx = 0, by = 0, bz = 0;
- 		for (IField field : this) {
- 			field.gradient(x, y, z, result);
- 			bx += result[0];
- 			by += result[1];
- 			bz += result[2];
- 		}
- 		result[0] = bx;
- 		result[1] = by;
- 		result[2] = bz;
-     }
-    
-	
-	
+
+		float temp[] = new float[3];
+		float max = 0f;
+
+		
+		// use max of underlying gradients
+		for (IField field : this) {
+			field.gradient(x, y, z, temp);
+			float vlen = vectorLength(temp);
+			
+			if (vlen > max) {
+				result[0] = temp[0];
+				result[1] = temp[1];
+				result[2] = temp[2];
+				max = vlen;
+			}
+		}
+
+		// use three point derivative
+//		float del = 1f; // cm
+//		float del2 = 2 * del;
+
+		// float baseVal = fieldMagnitude(x, y, z);
+		// float bv3 = -3*baseVal;
+		//
+		// System.err.println("---------");
+		// System.err.println("baseVal " + baseVal);
+		//
+		// float bx0 = fieldMagnitude(x+del, y, z);
+		// float bx1 = fieldMagnitude(x+del2, y, z);
+		//
+		// float by0 = fieldMagnitude(x, y+del, z);
+		// float by1 = fieldMagnitude(x, y+del2, z);
+		// float bz0 = fieldMagnitude(x, y, z+del);
+		// float bz1 = fieldMagnitude(x, y, z+del2);
+		//
+		// System.err.println("bx0 " + bx0);
+		// System.err.println("bx1 " + bx1);
+		// System.err.println("by0 " + by0);
+		// System.err.println("by1 " + by1);
+		// System.err.println("bz0 " + bz0);
+		// System.err.println("bz1 " + bz1);
+		//
+		// result[0] = (bv3 + 4*bx0 - bx1)/del2;
+		// result[1] = (bv3 + 4*by0 - by1)/del2;
+		// result[2] = (bv3 + 4*bz0 - bz1)/del2;
+
+		// two point
+//		float bx0 = fieldMagnitude(x - del, y, z);
+//		float bx1 = fieldMagnitude(x + del, y, z);
+//		float by0 = fieldMagnitude(x, y - del, z);
+//		float by1 = fieldMagnitude(x, y + del, z);
+//		float bz0 = fieldMagnitude(x, y, z - del);
+//		float bz1 = fieldMagnitude(x, y, z + del);
+//
+//		result[0] = (bx1 - bx0) / del2;
+//		result[1] = (by1 - by0) / del2;
+//		result[2] = (bz1 - bz0) / del2;
+
+		// System.err.println("result: " + result[0] + ", " + result[1] + ", " +
+		// result[2]);
+
+		// float bx = 0, by = 0, bz = 0;
+		// for (IField field : this) {
+		// field.gradient(x, y, z, result);
+		// bx += result[0];
+		// by += result[1];
+		// bz += result[2];
+		// }
+		// result[0] = bx;
+		// result[1] = by;
+		// result[2] = bz;
+	}
+
 	/**
 	 * Get the field magnitude in kiloGauss at a given location expressed in
 	 * cylindrical coordinates.
@@ -247,7 +296,6 @@ public class CompositeField extends ArrayList<IField> implements IField {
 		float result[] = new float[3];
 		field(x, y, z, result);
 		return vectorLength(result);
-
 	}
 
 	/**
@@ -272,7 +320,6 @@ public class CompositeField extends ArrayList<IField> implements IField {
 		}
 		return maxField;
 	}
-	
 
 	/**
 	 * Check whether we have a torus field
@@ -303,6 +350,5 @@ public class CompositeField extends ArrayList<IField> implements IField {
 
 		return false;
 	}
-
 
 }
