@@ -88,6 +88,10 @@ public class CalorimeterResponse extends DetectorResponse {
                     v = momentsBank.getFloat("m2v",row);
                     w = momentsBank.getFloat("m2w",row);
                     response.setSecondMomentUVW(u,v,w);
+                    u = momentsBank.getFloat("m3u",row);
+                    v = momentsBank.getFloat("m3v",row);
+                    w = momentsBank.getFloat("m3w",row);
+                    response.setThirdMomentUVW(u,v,w);
                 }
                 response.setEnergy(bank.getFloat("energy", row));
                 response.setTime(bank.getFloat("time", row));

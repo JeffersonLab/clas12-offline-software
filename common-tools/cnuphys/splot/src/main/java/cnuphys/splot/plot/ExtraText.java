@@ -59,12 +59,12 @@ public class ExtraText extends DraggableRectangle {
 		}
 		
 
-		g.setColor(_params.getTextBackground());
-		g.setFont(_params.getTextFont());
+		g.setColor(_params.getExtraBackground());
+		g.setFont(_params.getExtraFont());
 		g.fillRect(x, y, width, height);
 
-		g.setColor(_params.getTextForeground());
-		FontMetrics fm = _canvas.getFontMetrics(_params.getTextFont());
+		g.setColor(_params.getExtraForeground());
+		FontMetrics fm = _canvas.getFontMetrics(_params.getExtraFont());
 
 		int xs = x + HGAP;
 		int ys = y + VGAP + fm.getHeight();
@@ -74,7 +74,7 @@ public class ExtraText extends DraggableRectangle {
 		}
 
 		if (_params.isExtraBorder()) {
-			g.setColor(_params.getTextBorderColor());
+			g.setColor(_params.getExtraBorderColor());
 			g.drawRect(x, y, width, height);
 		}
 
@@ -82,7 +82,7 @@ public class ExtraText extends DraggableRectangle {
 	
 	// get required width of the extra box
 	private int getExtraWidth() {
-		FontMetrics fm = _canvas.getFontMetrics(_params.getTextFont());
+		FontMetrics fm = _canvas.getFontMetrics(_params.getExtraFont());
 		String[] extraStrings = _params.getExtraStrings();
 		if ((extraStrings == null) || (extraStrings.length < 1)) {
 			return 0;
@@ -98,7 +98,7 @@ public class ExtraText extends DraggableRectangle {
 
 	// get required height of the extra text rectangle
 	private int getExtraHeight() {
-		FontMetrics fm = _canvas.getFontMetrics(_params.getTextFont());
+		FontMetrics fm = _canvas.getFontMetrics(_params.getExtraFont());
 		String[] extraStrings = _params.getExtraStrings();
 		if ((extraStrings == null) || (extraStrings.length < 1)) {
 			return 0;

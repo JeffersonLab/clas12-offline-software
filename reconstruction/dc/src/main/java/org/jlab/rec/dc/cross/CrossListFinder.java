@@ -134,7 +134,6 @@ public class CrossListFinder  {
                             bCand.CrossesOnTrack.add(c2);
                             bCand.CrossesOnTrack.add(c3);
                             bCand.Chisq = fitchsq;
-
                             if(bCand.Chisq<Constants.CROSSLISTSELECTQFMINCHSQ) {
                                 trkCnds.add(bCand);
                             }

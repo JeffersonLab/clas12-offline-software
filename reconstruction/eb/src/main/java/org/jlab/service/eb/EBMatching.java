@@ -49,13 +49,13 @@ public class EBMatching {
                                 + this.eventBuilder.getPindexMap().get(1);
 
             int index1A = part.getDetectorHit(respFTOF1A, DetectorType.FTOF, 1, 
-                    EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1A));
+                    eventBuilder.ccdb.getDouble(EBCCDBEnum.FTOF_MATCHING_1A));
             if (index1A >= 0) {
                 part.addResponse(respFTOF1A.get(index1A), true);
                 respFTOF1A.get(index1A).setAssociation(ii + pindex_offset);
             }
             int index1B = part.getDetectorHit(respFTOF1B, DetectorType.FTOF, 2,
-                    EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1B));
+                    eventBuilder.ccdb.getDouble(EBCCDBEnum.FTOF_MATCHING_1B));
             if (index1B >= 0) {
                 part.addResponse(respFTOF1B.get(index1B), true);
                 respFTOF1B.get(index1B).setAssociation(ii + pindex_offset);
@@ -63,7 +63,7 @@ public class EBMatching {
             // only try to match with FTOF2 if not matched with 1A/1B:
             if (index1A<0 && index1B<0) {
                 int index2 = part.getDetectorHit(respFTOF2, DetectorType.FTOF, 3,
-                        EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_2));
+                        eventBuilder.ccdb.getDouble(EBCCDBEnum.FTOF_MATCHING_2));
                 if (index2>=0) {
                     part.addResponse(respFTOF2.get(index2), true);
                     respFTOF2.get(index2).setAssociation(ii + pindex_offset);
@@ -91,13 +91,13 @@ public class EBMatching {
                 double matching;
                 switch (layer) {
                     case (1):
-                        matching=EBCCDBConstants.getDouble(EBCCDBEnum.PCAL_MATCHING);
+                        matching=eventBuilder.ccdb.getDouble(EBCCDBEnum.PCAL_MATCHING);
                         break;
                     case (4):
-                        matching=EBCCDBConstants.getDouble(EBCCDBEnum.ECIN_MATCHING);
+                        matching=eventBuilder.ccdb.getDouble(EBCCDBEnum.ECIN_MATCHING);
                         break;
                     case (7):
-                        matching=EBCCDBConstants.getDouble(EBCCDBEnum.ECOUT_MATCHING);
+                        matching=eventBuilder.ccdb.getDouble(EBCCDBEnum.ECOUT_MATCHING);
                         break;
                     default:
                         throw new RuntimeException("Invalid ECAL Layer:  "+layer);

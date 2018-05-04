@@ -67,6 +67,7 @@ import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.geometry.PCALGeometry;
+import cnuphys.ced.magfield.PlotFieldDialog;
 import cnuphys.ced.magfield.SwimAllMC;
 import cnuphys.ced.magfield.SwimAllRecon;
 import cnuphys.ced.noise.NoiseManager;
@@ -97,6 +98,7 @@ import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.view.HistoGridView;
 import cnuphys.bCNU.view.IHistogramMaker;
 import cnuphys.bCNU.view.LogView;
+import cnuphys.bCNU.view.PlotView;
 import cnuphys.bCNU.view.ViewManager;
 //import cnuphys.bCNU.view.XMLView;
 import cnuphys.bCNU.view.VirtualView;
@@ -108,7 +110,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 1.002";
+	private static final String _release = "build 1.003e";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -143,6 +145,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	//show which filters are active
 	private JMenu _eventFilterMenu;
 
+	//for plotting the field
+	private  PlotFieldDialog _plotFieldDialog;
 	
 	// some views
 	private AllDCView _allDCView;
@@ -175,6 +179,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	protected HistoGridView pcalHistoGrid;
 	protected HistoGridView ecHistoGrid;
 	
+	//plot view
+	private PlotView _plotView;
+
+	
 	// the about string
 	private static String _aboutString = "<html><span style=\"font-size:12px\">ced: the cLAS eVENT dISPLAY&nbsp;&nbsp;&nbsp;&nbsp;" + _release + 
 	"<br><br>Developed by Christopher Newport University" + 
@@ -186,6 +194,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	//use old BST geometry
 	private JCheckBoxMenuItem _oldBSTGeometry;
+	
+	
 
 	/**
 	 * Constructor (private--used to create singleton)
@@ -250,6 +260,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		_virtualView.moveToStart(_sectorView25, 0, VirtualView.UPPERLEFT);
 		_virtualView.moveToStart(_sectorView36, 0, VirtualView.UPPERLEFT);
 		
+		_virtualView.moveTo(_plotView, 0, VirtualView.CENTER);
 		
 		_virtualView.moveTo(dcHistoGrid, 13);
 		_virtualView.moveTo(ftofHistoGrid, 14);
@@ -272,8 +283,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		_virtualView.moveTo(_monteCarloView, 1, VirtualView.TOPCENTER);
 		_virtualView.moveTo(_reconEventView, 1, VirtualView.BOTTOMCENTER);
 
-		_virtualView.moveTo(_ftcalXyView, 18, VirtualView.CENTER);
 		_virtualView.moveTo(_tofView, 11, VirtualView.CENTER);
+
+		_virtualView.moveTo(_ftcalXyView, 12, VirtualView.CENTER);
 
 		if (_use3D) {
 			_virtualView.moveTo(_forward3DView, 9, VirtualView.CENTER);
@@ -317,6 +329,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// add monte carlo view
 		_monteCarloView = new ClasIoMonteCarloView();
+		
 
 		// add a reconstructed tracks view
 		_reconEventView = ClasIoReconEventView.getInstance();
@@ -359,6 +372,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// add logview
 		ViewManager.getInstance().getViewMenu().addSeparator();
+		//plot view
+		_plotView = new PlotView();
+
 		_logView = new LogView();
 
 		
@@ -550,7 +566,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// create the mag field menu
 		MagneticFields.getInstance().setActiveField(MagneticFields.FieldType.TORUS);
-		mmgr.addMenu(MagneticFields.getInstance().getMagneticFieldMenu());
+		addToMagneticFieldMenu();
+		
 
 		// the swimmer menu
 		mmgr.addMenu(SwimMenu.getInstance());
@@ -568,6 +585,40 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// add to the event menu
 		addToEventMenu();
 				
+	}
+	
+	// add items to the basic mag field menu
+	private void addToMagneticFieldMenu() {
+		JMenu magMenu = MagneticFields.getInstance().getMagneticFieldMenu();
+		final JMenuItem plotItem = new JMenuItem("Plot the Field...");
+		final JMenuItem loadItem = new JMenuItem("Load a Different Torus...");
+
+		magMenu.addSeparator();
+
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				if (e.getSource() == plotItem) {
+					if (_plotFieldDialog == null) {
+						_plotFieldDialog = new PlotFieldDialog(getCed(), false);
+					}
+
+					_plotFieldDialog.setVisible(true);
+
+				} else if (e.getSource() == loadItem) {
+					MagneticFields.getInstance().openNewTorus();
+				}
+			}
+		};
+
+		loadItem.addActionListener(al);
+		plotItem.addActionListener(al);
+		magMenu.add(loadItem);
+		magMenu.add(plotItem);
+
+		MenuManager.getInstance().addMenu(magMenu);
 	}
 
 	// add some fun stuff
@@ -604,34 +655,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	//add to the file menu
 	private void addToSwimMenu() {
-		
-		final JMenuItem stitem = new JMenuItem("Run some swim tests");
-		final JMenuItem mtitem = new JMenuItem("Run magfield edge tests");
-
-		
-		ActionListener al = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Object source = e.getSource();
-
-				if (source == stitem) {
-					CedTests.swimTest(false);
-				}
-				else if (source == mtitem) {
-					CedTests.edgeTest(true);
-				}
-
-			}
-		};
-		
-		SwimMenu.getInstance().addSeparator();
-		SwimMenu.getInstance().add(stitem);
-		stitem.addActionListener(al);
-		
-		SwimMenu.getInstance().add(mtitem);
-		mtitem.addActionListener(al);
-
 	}
 	
 	
@@ -991,6 +1014,14 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		getJMenuBar().add(_eventNumberLabel);
 		getJMenuBar().add(Box.createHorizontalStrut(5));
 	}
+	
+	/**
+	 * Get the plot view
+	 * @return the plot voew;
+	 */
+	public PlotView getPlotView() {
+		return _plotView;
+	}
 
 	/**
 	 * Fix the title of the main frame
@@ -1158,7 +1189,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		Cosmics.getInstance();
 		DataManager.getInstance();
 
-	    getInstance();  //creates ced frame
+//	    getInstance();  //creates ced frame
 
 
 		// now make the frame visible, in the AWT thread
@@ -1166,7 +1197,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 			@Override
 			public void run() {
-//			    getInstance();
+			    getInstance();
 				splashWindow.setVisible(false);
 				getCed().setVisible(true);
 				getCed().fixTitle();

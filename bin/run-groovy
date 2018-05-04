@@ -1,4 +1,7 @@
 #!/bin/bash
+
+source `dirname $0`/env.sh 
+
 CLARA_HOME=`dirname $0`/..
 DATAMINING=`dirname $0`/..
 CLAS12DIR=`dirname $0`/.. ; export CLAS12DIR
