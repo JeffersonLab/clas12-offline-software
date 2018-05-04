@@ -5,6 +5,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
@@ -45,6 +46,7 @@ import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
 import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
+import org.jlab.utils.CLASResources;
 
 public class DCTBLayerEffsEngine extends ReconstructionEngine {
 
@@ -71,12 +73,15 @@ public class DCTBLayerEffsEngine extends ReconstructionEngine {
         this.getConstantsManager().setVariation("default");
         
         // Load the geometry
-        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
+        String varname = CLASResources.getEnvironmentVariable("GEOMETRYDATABASEVARIATION");
+        String variationName = Optional.ofNullable(varname).orElse("default");
+
+        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, variationName);
         dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
-        ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, "default");
+        ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, variationName);
         ftofDetector = new FTOFGeant4Factory(providerFTOF);
         
-        ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, "default");
+        ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, variationName);
         ecDetector = new ECGeant4Factory(providerEC);
         pcalDetector = new PCALGeant4Factory(providerEC);
         System.out.println(" -- Det Geometry constants are Loaded " );
