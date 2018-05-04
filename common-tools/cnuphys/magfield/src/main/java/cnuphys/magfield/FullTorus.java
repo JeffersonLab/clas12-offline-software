@@ -80,7 +80,7 @@ public class FullTorus extends Torus {
 	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
 	@Override
-	public void fieldCylindrical(TorusProbe probe, double phi, double rho, double z,
+	public void fieldCylindrical(double phi, double rho, double z,
 			float result[]) {
 		if (isZeroField()) {
 			result[X] = 0f;
@@ -96,14 +96,7 @@ public class FullTorus extends Torus {
 			phi += 360.0;
 		}
 
-
-		if ((probe == null) || !FieldProbe.CACHE) {
-			interpolateField(phi, rho, z, result);
-		}
-		else {
-			calculate(phi, rho, z, probe, result);
-		}
-
+		_cell.calculate(phi, rho, z, result);
 
 		result[X] *= _scaleFactor;
 		result[Y] *= _scaleFactor;

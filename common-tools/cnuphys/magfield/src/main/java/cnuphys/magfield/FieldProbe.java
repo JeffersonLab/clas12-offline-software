@@ -172,8 +172,6 @@ public abstract class FieldProbe implements IField {
 
 		if (field != null) {
 
-			System.err.println("Creating Probe for [" + field.getClass().getName() + "]");
-
 			if (field instanceof Torus) {
 				return new TorusProbe((Torus) field);
 			} else if (field instanceof Solenoid) {

@@ -19,6 +19,8 @@ import java.util.StringTokenizer;
 
 public class Torus extends MagneticField {
 	
+	protected Cell3D _cell;
+	
 	/**
 	 * Instantiates a new torus.
 	 * Note q1 = phi, q2 = rho, q3 = z
@@ -26,6 +28,7 @@ public class Torus extends MagneticField {
 	public Torus() {
 		setCoordinateNames("phi", "rho", "z");
 		_scaleFactor = -1; // default
+		_cell = new Cell3D(this);
 	}
 	
 	/**
@@ -118,7 +121,8 @@ public class Torus extends MagneticField {
 	 * @param result the result
 	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
-	public void fieldCylindrical(TorusProbe probe, double phi, double rho, double z,
+	@Override
+	public void fieldCylindrical(double phi, double rho, double z,
 			float result[]) {
 		if (isZeroField()) {
 			result[X] = 0f;
@@ -139,12 +143,7 @@ public class Torus extends MagneticField {
 
 		boolean flip = (relativePhi < 0.0);
 
-		if ((probe == null) || !FieldProbe.CACHE) {
-			interpolateField(Math.abs(relativePhi), rho, z, result);
-		}
-		else {
-			calculate(Math.abs(relativePhi), rho, z, probe, result);
-		}
+		_cell.calculate(Math.abs(relativePhi), rho, z, result);
 
 		// negate change x and z components
 		if (flip) {
@@ -178,20 +177,6 @@ public class Torus extends MagneticField {
 		result[Z] *= _scaleFactor;
 	}
 	
-	/**
-	 * Get the field by trilinear interpolation.
-	 *
-	 * @param phi azimuthal angle in degrees.
-	 * @param rho the cylindrical rho coordinate in cm.
-	 * @param z coordinate in cm
-	 * @param result the result
-	 * @result a Cartesian vector holding the calculated field in kiloGauss.
-	 */
-	@Override
-	public void fieldCylindrical(double phi, double rho, double z,
-			float result[]) {
-		fieldCylindrical(null, phi, rho, z, result);
-	}
 
 	/**
 	 * @return the phiCoordinate
@@ -455,6 +440,12 @@ public class Torus extends MagneticField {
 	 */
 	@Override
 	public boolean containedCylindrical(float phi, float rho, float z) {
+		
+		double zmin = getZMin();
+		double zmax = getZMax();
+		double rmin = getRhoMin();
+		double rmax = getRhoMax();
+		
 		if ((z < getZMin()) || (z > getZMax())) {
 			return false;
 		}

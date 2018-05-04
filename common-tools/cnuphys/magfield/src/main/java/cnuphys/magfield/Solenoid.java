@@ -20,6 +20,8 @@ import java.util.StringTokenizer;
  */
 public final class Solenoid extends MagneticField {
 	
+	private Cell2D _cell;
+	
 	private static final double MISALIGNTOL = 1.0e-6; //cm
 	
 	// private constructor
@@ -28,7 +30,7 @@ public final class Solenoid extends MagneticField {
 	 */
 	private Solenoid() {
 		setCoordinateNames("phi", "rho", "z");
-		
+		_cell = new Cell2D(this);
 //		_shiftZ = 450;
 	}
 
@@ -110,7 +112,8 @@ public final class Solenoid extends MagneticField {
 	 *            the result
 	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
-	public void fieldCylindrical(SolenoidProbe probe, double phi, double rho, double z, float result[]) {
+	@Override
+	public void fieldCylindrical(double phi, double rho, double z, float result[]) {
 		
 		if (!crudeInRangeCylindrical((float)phi, (float)rho, (float)z)) {
 			result[X] = 0f;
@@ -136,13 +139,7 @@ public final class Solenoid extends MagneticField {
 			phi += 360.0;
 		}
 
-		if ((probe == null) || !FieldProbe.CACHE) {
-			interpolateField(rho, z, result);
-		}
-		else {
-			calculate(rho, z, probe, result);
-		}
-
+		_cell.calculate(rho, z, result);
 		// rotate onto to proper sector
 		
 		if (phi > 0.001) {
@@ -160,21 +157,6 @@ public final class Solenoid extends MagneticField {
 		result[Z] *= _scaleFactor;
 	}
 
-	/**
-	 * Get the field by trilinear interpolation.
-	 *
-	 * @param phi azimuthal angle in degrees.
-	 * @param rho the cylindrical rho coordinate in cm.
-	 * @param z coordinate in cm
-	 * @param result the result
-	 * @result a Cartesian vector holding the calculated field in kiloGauss.
-	 */
-	@Override
-	public void fieldCylindrical(double phi, double rho, double z,
-			float result[]) {
-		
-		fieldCylindrical(null, phi, rho, z, result);
-	}
 
 	/**
 	 * Convert a array used as a vector to a readable string.

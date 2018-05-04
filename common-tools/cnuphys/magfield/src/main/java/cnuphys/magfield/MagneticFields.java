@@ -1593,7 +1593,7 @@ public class MagneticFields {
 		System.out.println("mfdir exists: " + (mfdir.exists() && mfdir.isDirectory()));
 		// mf.initializeMagneticFields(mfdir.getPath(), TorusMap.FULL_200);
 		try {
-			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat",
+			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_18Apr2018.dat",
 					"Symm_solenoid_r601_phi1_z1201_2008.dat");
 			// mf.initializeMagneticFieldsFromEnv();
 		} catch (FileNotFoundException e) {

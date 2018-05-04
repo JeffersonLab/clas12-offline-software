@@ -23,7 +23,7 @@ public abstract class MagneticField implements IField {
 	}
 
 	// controls which algorithms to use
-	private static MathLib _mathLib = MathLib.FAST;
+	private static MathLib _mathLib = MathLib.SUPERFAST;
 
 	/** Magic number used to check if byteswapping is necessary. */
 	public static final int MAGICNUMBER = 0xced;
@@ -255,7 +255,7 @@ public abstract class MagneticField implements IField {
 			return;
 		}
 
-		double rho = Math.sqrt(x * x + y * y);
+		double rho = sqrt(x * x + y * y);
 		double phi = atan2Deg(y, x);
 		fieldCylindrical(phi, rho, z, result);
 	}
@@ -358,8 +358,8 @@ public abstract class MagneticField implements IField {
     public void gradientCylindrical(double phi, double rho, double z,
     	    float result[]) {
 		phi = Math.toRadians(phi);
-		double x = rho*Math.cos(phi);
-    	double y = rho*Math.sin(phi);
+		double x = rho*cos(phi);
+    	double y = rho*sin(phi);
     	gradient((float)x, (float)y, (float)z, result);
     }
 
@@ -434,7 +434,7 @@ public abstract class MagneticField implements IField {
 	 * @return
 	 */
 	public static double hypot(double x, double y) {
-		return Math.sqrt(x * x + y * y);
+		return sqrt(x * x + y * y);
 	}
 
 	/**
@@ -571,7 +571,7 @@ public abstract class MagneticField implements IField {
 		double sum = 0.0;
 
 		for (int i = 0; i < numFieldPoints; i++) {
-			double fm = Math.sqrt(squareMagnitude(i));
+			double fm = sqrt(squareMagnitude(i));
 			sum += fm;
 
 			if (fm > maxf) {
@@ -705,7 +705,7 @@ public abstract class MagneticField implements IField {
 		float vx = v[0];
 		float vy = v[1];
 		float vz = v[2];
-		return (float) Math.sqrt(vx * vx + vy * vy + vz * vz);
+		return (float) sqrt(vx * vx + vy * vy + vz * vz);
 	}
 	
 	/**
@@ -963,7 +963,7 @@ public abstract class MagneticField implements IField {
 
 		float result[] = new float[3];
 		interpolateField(q1, q2, q3, result);
-		return (float) Math.sqrt(result[0] * result[0] + result[1] * result[1] + result[2] * result[2]);
+		return (float) sqrt(result[0] * result[0] + result[1] * result[1] + result[2] * result[2]);
 	}
 
 	/**
@@ -978,7 +978,7 @@ public abstract class MagneticField implements IField {
 		float B1 = field.get(i);
 		float B2 = field.get(i + 1);
 		float B3 = field.get(i + 2);
-		return (float) Math.sqrt(B1 * B1 + B2 * B2 + B3 * B3);
+		return (float) sqrt(B1 * B1 + B2 * B2 + B3 * B3);
 	}
 
 	/**
@@ -1173,175 +1173,7 @@ public abstract class MagneticField implements IField {
 	}
 
 	/**
-	 * Calculate using a 3D probe
-	 * 
-	 * @param q1
-	 * @param q2
-	 * @param q3
-	 * @param probe
-	 */
-	public void calculate(double q1, double q2, double q3, TorusProbe probe, float[] result) {
-
-		result[0] = 0f;
-		result[1] = 0f;
-		result[2] = 0f;
-		
-		boolean inRange = q1Coordinate.inRange(q1) && q2Coordinate.inRange(q2) && q3Coordinate.inRange(q3);
-		
-		if (!inRange) {
-			return;
-		}
-
-
-		if (!probe.contains(q1, q2, q3)) {
-			int n0 = q1Coordinate.getIndex(q1);
-			if (n0 < 0) {
-				return;
-			}
-			int n1 = q2Coordinate.getIndex(q2);
-			if (n1 < 0) {
-				return;
-			}
-			int n2 = q3Coordinate.getIndex(q3);
-			if (n2 < 0) {
-				return;
-			}
-
-			probe.q1_min = q1Coordinate.getMin(n0);
-			probe.q1_max = q1Coordinate.getMax(n0);
-
-			probe.q2_min = q2Coordinate.getMin(n1);
-			probe.q2_max = q2Coordinate.getMax(n1);
-
-			probe.q3_min = q3Coordinate.getMin(n2);
-			probe.q3_max = q3Coordinate.getMax(n2);
-			
-			probe.q1_norm = probe.q1_max- probe.q1_min;
-			probe.q2_norm = probe.q2_max- probe.q2_min;
-			probe.q3_norm = probe.q3_max- probe.q3_min;
-
-			int i000 = getCompositeIndex(n0, n1, n2);
-			int i001 = i000 + 1;
-
-			int i010 = getCompositeIndex(n0, n1 + 1, n2);
-			int i011 = i010 + 1;
-
-			int i100 = getCompositeIndex(n0 + 1, n1, n2);
-			int i101 = i100 + 1;
-
-			int i110 = getCompositeIndex(n0 + 1, n1 + 1, n2);
-			int i111 = i110 + 1;
-
-			probe.b1_000 = getB1(i000);
-			probe.b1_001 = getB1(i001);
-			probe.b1_010 = getB1(i010);
-			probe.b1_011 = getB1(i011);
-			probe.b1_100 = getB1(i100);
-			probe.b1_101 = getB1(i101);
-			probe.b1_110 = getB1(i110);
-			probe.b1_111 = getB1(i111);
-
-			probe.b2_000 = getB2(i000);
-			probe.b2_001 = getB2(i001);
-			probe.b2_010 = getB2(i010);
-			probe.b2_011 = getB2(i011);
-			probe.b2_100 = getB2(i100);
-			probe.b2_101 = getB2(i101);
-			probe.b2_110 = getB2(i110);
-			probe.b2_111 = getB2(i111);
-
-			probe.b3_000 = getB3(i000);
-			probe.b3_001 = getB3(i001);
-			probe.b3_010 = getB3(i010);
-			probe.b3_011 = getB3(i011);
-			probe.b3_100 = getB3(i100);
-			probe.b3_101 = getB3(i101);
-			probe.b3_110 = getB3(i110);
-			probe.b3_111 = getB3(i111);
-		}
-
-		probe.evaluate(q1, q2, q3, result);
-		
-//		boolean stop = Double.isNaN(result[0]);
-//		System.err.print("PROBE: [" + result[0] + ", " + result[1] + ", " +
-//		result[2] + "]   ");
-//		
-//		MagneticFields.getInstance().getActiveField().fieldCylindrical(q1, q2, q3, result);
-//		System.err.println("TRAD: [" + result[0] + ", " + result[1] + ", " +
-//		result[2] + "]   ");
-//		
-//		if (stop) {
-//			System.exit(0);
-//		}
-
-	}
-
-	/**
-	 * Calculate using a 2D probe
-	 * 
-	 * @param q2
-	 * @param q3
-	 * @param probe
-	 */
-	public void calculate(double q2, double q3, SolenoidProbe probe, float[] result) {
-
-		result[0] = 0f;
-		result[1] = 0f;
-		result[2] = 0f;
-		
-		boolean inRange = q2Coordinate.inRange(q2) && q3Coordinate.inRange(q3);
-		
-		if (!inRange) {
-			return;
-		}
-		
-
-		if (!probe.contains(q2, q3)) {
-			int n1 = q2Coordinate.getIndex(q2);
-			if (n1 < 0) {
-				return;
-			}
-			int n2 = q3Coordinate.getIndex(q3);
-			if (n2 < 0) {
-				return;
-			}
-
-			probe.q2_min = q2Coordinate.getMin(n1);
-			probe.q2_max = q2Coordinate.getMax(n1);
-
-			probe.q3_min = q3Coordinate.getMin(n2);
-			probe.q3_max = q3Coordinate.getMax(n2);
-
-
-			// get the neighbor indices
-			int i000 = getCompositeIndex(0, n1, n2);
-			int i001 = i000 + 1;
-
-			int i010 = getCompositeIndex(0, n1 + 1, n2);
-			int i011 = i010 + 1;
-
-			probe.b1_b000 = 0;
-			probe.b1_b001 = 0;
-			probe.b1_b010 = 0;
-			probe.b1_b011 = 0;
-//			probe.b1_b000 = getB1(i000);
-//			probe.b1_b001 = getB1(i001);
-//			probe.b1_b010 = getB1(i010);
-//			probe.b1_b011 = getB1(i011);
-			probe.b2_b000 = getB2(i000);
-			probe.b2_b001 = getB2(i001);
-			probe.b2_b010 = getB2(i010);
-			probe.b2_b011 = getB2(i011);
-			probe.b3_b000 = getB3(i000);
-			probe.b3_b001 = getB3(i001);
-			probe.b3_b010 = getB3(i010);
-			probe.b3_b011 = getB3(i011);
-			
-		}
-
-		probe.evaluate(q2, q3, result);
-
-	}
+	 * Calculate using a 3D 
 	
 	 /**
      * Check whether the field boundaries include the point
@@ -1352,7 +1184,7 @@ public abstract class MagneticField implements IField {
      */
 	@Override
     public boolean contained(float x, float y, float z) {
-		double rho = Math.sqrt(x * x + y * y);
+		double rho = sqrt(x * x + y * y);
 		double phi = atan2Deg(y, x);
         return containedCylindrical((float)phi, (float)rho, z);
     }
@@ -1372,4 +1204,99 @@ public abstract class MagneticField implements IField {
 	 */
 	@Override
 	public abstract boolean containedCylindrical(float phi, float rho, float z);
+	
+	
+	public static double sqrt(double x) {
+		switch (_mathLib) {
+		case FAST: case SUPERFAST:
+			return org.apache.commons.math3.util.FastMath.sqrt(x);
+		default:
+			return Math.sqrt(x);
+		}
+
+	}
+	
+	/**
+	 * Might use standard or fast sin
+	 * 
+	 * @param x
+	 * @return atan2(y, x)
+	 */
+	public static double sin(double x) {
+
+		switch (_mathLib) {
+		case FAST:
+			return org.apache.commons.math3.util.FastMath.sin(x);
+		case SUPERFAST:
+			return Riven.sin((float) x);
+		default:
+			return Math.sin(x);
+		}
+
+	}
+
+	
+	/**
+	 * Might use standard or fast sin
+	 * 
+	 * @param x
+	 * @return atan2(y, x)
+	 */
+	public static double cos(double x) {
+
+		switch (_mathLib) {
+		case FAST:
+			return org.apache.commons.math3.util.FastMath.cos(x);
+		case SUPERFAST:
+			return Riven.cos((float) x);
+		default:
+			return Math.cos(x);
+		}
+
+	}
+
+	
+	
+	//faster sin and cos from gamers
+	 public static final class Riven {
+
+	        private static final int SIN_BITS, SIN_MASK, SIN_COUNT;
+	        private static final float radFull, radToIndex;
+	        private static final float degFull, degToIndex;
+	        private static final float[] sin, cos;
+
+	        static {
+	            SIN_BITS = 12;
+	            SIN_MASK = ~(-1 << SIN_BITS);
+	            SIN_COUNT = SIN_MASK + 1;
+
+	            radFull = (float) (Math.PI * 2.0);
+	            degFull = (float) (360.0);
+	            radToIndex = SIN_COUNT / radFull;
+	            degToIndex = SIN_COUNT / degFull;
+
+	            sin = new float[SIN_COUNT];
+	            cos = new float[SIN_COUNT];
+
+	            for (int i = 0; i < SIN_COUNT; i++) {
+	                sin[i] = (float) Math.sin((i + 0.5f) / SIN_COUNT * radFull);
+	                cos[i] = (float) Math.cos((i + 0.5f) / SIN_COUNT * radFull);
+	            }
+
+	            // Four cardinal directions (credits: Nate)                                                                                                                                                         
+	            for (int i = 0; i < 360; i += 90) {
+	                sin[(int) (i * degToIndex) & SIN_MASK] = (float) Math.sin(i * Math.PI / 180.0);
+	                cos[(int) (i * degToIndex) & SIN_MASK] = (float) Math.cos(i * Math.PI / 180.0);
+	            }
+	        }
+
+	        public static final float sin(float rad) {
+	            return sin[(int) (rad * radToIndex) & SIN_MASK];
+	        }
+
+	        public static final float cos(float rad) {
+	            return cos[(int) (rad * radToIndex) & SIN_MASK];
+	        }
+	    }
+
 }
