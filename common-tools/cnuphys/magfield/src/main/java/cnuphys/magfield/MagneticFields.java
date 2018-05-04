@@ -941,6 +941,26 @@ public class MagneticFields {
 		// these is a dir path, has nothing to do with the name of the field
 
 		String homeDir = getProperty("user.home");
+
+		File magdir = new File(homeDir, "magfield");
+		if (magdir.exists() && magdir.isDirectory()) {
+			File torusFile = new File(magdir, "Full_torus_r251_phi181_z251_18Apr2018.dat");
+			if (torusFile.exists() && torusFile.canRead()) {
+				File solenoidFile = new File(magdir, "Symm_solenoid_r601_phi1_z1201_2008.dat");
+				if (solenoidFile.exists() && solenoidFile.canRead()) {
+					try {
+						MagneticFields.getInstance().initializeMagneticFieldsFromPath(torusFile.getPath(),
+								solenoidFile.getPath());
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (MagneticFieldInitializationException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+
 		String cwd = getProperty("user.dir");
 
 		String olswDir = null;
@@ -1079,7 +1099,7 @@ public class MagneticFields {
 			} else {
 				_torus = readTorus(new File(torusMap.getDirName(), torusMap.getFileName()).getPath());
 			}
-		}  
+		}
 
 	}
 
@@ -1478,42 +1498,42 @@ public class MagneticFields {
 		return formatterlong.format(longtime);
 	}
 
-	
-	static String options[] = {"Standard, no probe", "Standard, with probe", "Rotated Composite", "Default Math Lib", "FAST Math Lib", "SUPERFAST MathLab"};
+	static String options[] = { "Standard, no probe", "Standard, with probe", "Rotated Composite", "Default Math Lib",
+			"FAST Math Lib", "SUPERFAST MathLab" };
+
 	private static void timingTest(int option) {
 		System.out.println("Timing tests: [" + options[option] + "]");
 		long seed = 5347632765L;
-		
+
 		FieldProbe.cache((option != 0));
-		
+
 		int num = 10000000;
-		
+
 		float x[] = new float[num];
 		float y[] = new float[num];
 		float z[] = new float[num];
-		
+
 		float result[] = new float[3];
-		
+
 		IField ifield = MagneticFields.getInstance().getActiveField();
 		if (option == 2) {
 			ifield = MagneticFields.getInstance()._rotatedCompositeField;
 		}
-		
+
 		Random rand = new Random(seed);
 
 		double _angle = -25.0;
 		double _sin = Math.sin(Math.toRadians(_angle));
 		double _cos = Math.cos(Math.toRadians(_angle));
 
-		//which math lib
+		// which math lib
 		MagneticField.setMathLib(MathLib.FAST);
 		if (option == 3) {
 			MagneticField.setMathLib(MathLib.DEFAULT);
-		}
-		else if (option == 5) {
+		} else if (option == 5) {
 			MagneticField.setMathLib(MathLib.SUPERFAST);
 		}
-		
+
 		for (int i = 0; i < num; i++) {
 			z[i] = 600 * rand.nextFloat();
 			float rho = 600 * rand.nextFloat();
@@ -1521,17 +1541,17 @@ public class MagneticFields {
 
 			x[i] = (float) (rho * Math.cos(phi));
 			y[i] = (float) (rho * Math.sin(phi));
-			
+
 			if (option == 2) {
 				double xx = x[i] * _cos + z[i] * _sin;
-//				double yy = y[i];
+				// double yy = y[i];
 				double zz = z[i] * _cos - x[i] * _sin;
-				x[i] = (float)xx;
-				z[i] = (float)zz;
+				x[i] = (float) xx;
+				z[i] = (float) zz;
 			}
 		}
-		
-		//prime the pump
+
+		// prime the pump
 		for (int i = 0; i < num; i++) {
 			ifield.field(x[i], y[i], z[i], result);
 		}
@@ -1539,18 +1559,18 @@ public class MagneticFields {
 		double sum = 0;
 		for (int outer = 0; outer < 5; outer++) {
 			long time = System.currentTimeMillis();
-			
+
 			for (int i = 0; i < num; i++) {
 				ifield.field(x[i], y[i], z[i], result);
 			}
 
-			double del = ((double)(System.currentTimeMillis() - time))/1000.;
+			double del = ((double) (System.currentTimeMillis() - time)) / 1000.;
 			sum += del;
 
 			System.out.println("loop " + (outer + 1) + " time  = " + del + " sec");
-			
+
 		}
-		System.out.println("avg "  + (sum/5.) + " sec");
+		System.out.println("avg " + (sum / 5.) + " sec");
 
 	}
 
@@ -1573,8 +1593,9 @@ public class MagneticFields {
 		System.out.println("mfdir exists: " + (mfdir.exists() && mfdir.isDirectory()));
 		// mf.initializeMagneticFields(mfdir.getPath(), TorusMap.FULL_200);
 		try {
-			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat", "Symm_solenoid_r601_phi1_z1201_2008.dat");
-	//		mf.initializeMagneticFieldsFromEnv();
+			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat",
+					"Symm_solenoid_r601_phi1_z1201_2008.dat");
+			// mf.initializeMagneticFieldsFromEnv();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -1620,20 +1641,15 @@ public class MagneticFields {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == test0Item) {
 					timingTest(0);
-				}
-				else if (e.getSource() == test1Item) {
+				} else if (e.getSource() == test1Item) {
 					timingTest(1);
-				}
-				else if (e.getSource() == test2Item) {
+				} else if (e.getSource() == test2Item) {
 					timingTest(2);
-				}
-				else if (e.getSource() == test3Item) {
+				} else if (e.getSource() == test3Item) {
 					timingTest(3);
-				}
-				else if (e.getSource() == test4Item) {
+				} else if (e.getSource() == test4Item) {
 					timingTest(4);
-				}
-				else if (e.getSource() == test5Item) {
+				} else if (e.getSource() == test5Item) {
 					timingTest(5);
 				}
 			}

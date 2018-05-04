@@ -255,9 +255,7 @@ public abstract class MagneticField implements IField {
 			return;
 		}
 
-		// float rho = (float) hypot(x, y);
 		double rho = Math.sqrt(x * x + y * y);
-
 		double phi = atan2Deg(y, x);
 		fieldCylindrical(phi, rho, z, result);
 	}
@@ -1345,5 +1343,33 @@ public abstract class MagneticField implements IField {
 
 	}
 	
-
+	 /**
+     * Check whether the field boundaries include the point
+     * @param x the x coordinate in the map units
+     * @param y the y coordinate in the map units
+     * @param z the z coordinate in the map units
+     * @return <code>true</code> if the point is included in the boundary of the field
+     */
+	@Override
+    public boolean contained(float x, float y, float z) {
+		double rho = Math.sqrt(x * x + y * y);
+		double phi = atan2Deg(y, x);
+        return containedCylindrical((float)phi, (float)rho, z);
+    }
+    
+	/**
+	 * Check whether the field boundaries include the point
+	 * 
+	 * @param phi
+	 *            azimuthal angle in degrees.
+	 * @param rho
+	 *            the cylindrical rho coordinate in cm.
+	 * @param z
+	 *            coordinate in cm
+	 * @return <code>true</code> if the point is included in the boundary of the
+	 *         field
+	 * 
+	 */
+	@Override
+	public abstract boolean containedCylindrical(float phi, float rho, float z);
 }

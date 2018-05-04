@@ -164,33 +164,25 @@ public abstract class FieldProbe implements IField {
 	public static FieldProbe factory(IField field) {
 		
 
-  //      (new Throwable()).printStackTrace();
+		// (new Throwable()).printStackTrace();
 
-		
-//		if (field == null) {
-//			System.err.println("null field in probe factory");
-//		}
-		
+		// if (field == null) {
+		// System.err.println("null field in probe factory");
+		// }
+
 		if (field != null) {
-			
+
 			System.err.println("Creating Probe for [" + field.getClass().getName() + "]");
-			
+
 			if (field instanceof Torus) {
-				return new TorusProbe((Torus)field);
-			}
-			else if (field instanceof Solenoid) {
-				return new SolenoidProbe((Solenoid)field);
-			}
-			else if (field instanceof Uniform) {
-				return new UniformProbe((Uniform)field);
-			}
-			else if (field instanceof RotatedCompositeField) {
-				return new RotatedCompositeProbe((RotatedCompositeField)field);
-			}
-			else if (field instanceof CompositeField) {
-				return new CompositeProbe((CompositeField)field);
-			}
-			else {
+				return new TorusProbe((Torus) field);
+			} else if (field instanceof Solenoid) {
+				return new SolenoidProbe((Solenoid) field);
+			} else if (field instanceof RotatedCompositeField) {
+				return new RotatedCompositeProbe((RotatedCompositeField) field);
+			} else if (field instanceof CompositeField) {
+				return new CompositeProbe((CompositeField) field);
+			} else {
 				System.err.println("WARNING: cannot create probe for " + field.getName());
 			}
 		}
@@ -222,4 +214,41 @@ public abstract class FieldProbe implements IField {
 	public boolean isMisaligned() {
     	return _field.isMisaligned();
     }
+    
+
+	 /**
+	 * Check whether the field boundaries include the point
+	 * 
+	 * @param x
+	 *            the x coordinate in the map units
+	 * @param y
+	 *            the y coordinate in the map units
+	 * @param z
+	 *            the z coordinate in the map units
+	 * @return <code>true</code> if the point is included in the boundary of the
+	 *         field
+	 */
+	@Override
+	public boolean contained(float x, float y, float z) {
+		double rho = Math.sqrt(x * x + y * y);
+		double phi = MagneticField.atan2Deg(y, x);
+		return containedCylindrical((float) phi, (float) rho, z);
+	}
+   
+	/**
+	 * Check whether the field boundaries include the point
+	 * 
+	 * @param phi
+	 *            azimuthal angle in degrees.
+	 * @param rho
+	 *            the cylindrical rho coordinate in cm.
+	 * @param z
+	 *            coordinate in cm
+	 * @return <code>true</code> if the point is included in the boundary of the
+	 *         field
+	 * 
+	 */
+	@Override
+	public abstract boolean containedCylindrical(float phi, float rho, float z);
+
 }

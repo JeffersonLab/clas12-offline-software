@@ -62,7 +62,6 @@ public class RotatedCompositeProbe extends FieldProbe {
 
 	}
 
-
 	@Override
 	public void fieldCylindrical(double phi, double rho, double z, float[] result) {
 		
@@ -81,4 +80,54 @@ public class RotatedCompositeProbe extends FieldProbe {
 		result[1] = brho;
 		result[2] = bz;
 	}
+	
+    /**
+	 * Check whether the field boundaries include the point
+	 * 
+	 * @param x
+	 *            the x coordinate in the map units
+	 * @param y
+	 *            the y coordinate in the map units
+	 * @param z
+	 *            the z coordinate in the map units
+	 * @return <code>true</code> if the point is included in the boundary of the
+	 *         field
+	 */
+	@Override
+	public boolean contained(float xs, float ys, float zs) {
+		
+		//first rotate the point
+		double x = xs * _cos - zs * _sin;
+		double y = ys;
+		double z = zs * _cos + xs * _sin;
+
+		
+		double rho = Math.sqrt(x * x + y * y);
+		double phi = MagneticField.atan2Deg(y, x);
+		return containedCylindrical((float) phi, (float) rho, (float)z);
+	}
+ 
+	/**
+	 * Check whether the field boundaries include the point
+	 * 
+	 * @param phi
+	 *            azimuthal angle in degrees.
+	 * @param rho
+	 *            the cylindrical rho coordinate in cm.
+	 * @param z
+	 *            coordinate in cm
+	 * @return <code>true</code> if the point is included in the boundary of the
+	 *         field
+	 * 
+	 */
+	@Override
+	public boolean containedCylindrical(float phi, float rho, float z) {
+		for (FieldProbe probe : probes) {
+			if (probe.containedCylindrical(phi, rho, z)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

@@ -505,5 +505,29 @@ public final class Solenoid extends MagneticField {
 	public String getName() {
 		return "Solenoid";
 	}
+	
+	/**
+	 * Check whether the field boundaries include the point
+	 * 
+	 * @param phi
+	 *            azimuthal angle in degrees.
+	 * @param rho
+	 *            the cylindrical rho coordinate in cm.
+	 * @param z
+	 *            coordinate in cm
+	 * @return <code>true</code> if the point is included in the boundary of the
+	 *         field
+	 * 
+	 */
+	@Override
+	public boolean containedCylindrical(float phi, float rho, float z) {
+		if ((z < getZMin()) || (z > getZMax())) {
+			return false;
+		}
+		if ((rho < getRhoMin()) || (rho > getRhoMax())) {
+			return false;
+		}
+		return true;
+	}
 
 }
