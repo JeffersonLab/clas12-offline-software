@@ -365,10 +365,10 @@ public class CompositeField extends ArrayList<IField> implements IField {
 	 *         field
 	 */
 	@Override
-	public boolean contained(float x, float y, float z) {
-		double rho = Math.sqrt(x * x + y * y);
-		double phi = MagneticField.atan2Deg(y, x);
-		return containedCylindrical((float) phi, (float) rho, z);
+	public boolean contains(float x, float y, float z) {
+		double rho = FastMath.sqrt(x * x + y * y);
+		double phi = FastMath.atan2Deg(y, x);
+		return containsCylindrical((float) phi, (float) rho, z);
 	}
    
 	/**
@@ -385,9 +385,9 @@ public class CompositeField extends ArrayList<IField> implements IField {
 	 * 
 	 */
 	@Override
-	public boolean containedCylindrical(float phi, float rho, float z) {
+	public boolean containsCylindrical(float phi, float rho, float z) {
 		for (IField field : this) {
-			if (field.containedCylindrical(phi, rho, z)) {
+			if (field.containsCylindrical(phi, rho, z)) {
 				return true;
 			}
 		}

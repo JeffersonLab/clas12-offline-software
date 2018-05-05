@@ -104,8 +104,8 @@ public final class RotatedCompositeField extends CompositeField {
 	@Override
 	public float fieldMagnitudeCylindrical(double phi, double rho, double z) {
 		phi = Math.toRadians(phi);
-		double x = rho*Math.cos(phi);
-		double y = rho*Math.sin(phi);
+		double x = rho*FastMath.cos(phi);
+		double y = rho*FastMath.sin(phi);
 		return fieldMagnitude((float)x, (float)y, (float)z);
 	}
 	
@@ -123,7 +123,7 @@ public final class RotatedCompositeField extends CompositeField {
 	 *         field
 	 */
 	@Override
-	public boolean contained(float xs, float ys, float zs) {
+	public boolean contains(float xs, float ys, float zs) {
 		
 		//first rotate the point
 		double x = xs * _cos - zs * _sin;
@@ -131,9 +131,9 @@ public final class RotatedCompositeField extends CompositeField {
 		double z = zs * _cos + xs * _sin;
 
 		
-		double rho = Math.sqrt(x * x + y * y);
-		double phi = MagneticField.atan2Deg(y, x);
-		return containedCylindrical((float) phi, (float) rho, (float)z);
+		double rho = FastMath.sqrt(x * x + y * y);
+		double phi = FastMath.atan2Deg(y, x);
+		return containsCylindrical((float) phi, (float) rho, (float)z);
 	}
   
 	/**
@@ -150,9 +150,9 @@ public final class RotatedCompositeField extends CompositeField {
 	 * 
 	 */
 	@Override
-	public boolean containedCylindrical(float phi, float rho, float z) {
+	public boolean containsCylindrical(float phi, float rho, float z) {
 		for (IField field : this) {
-			if (field.containedCylindrical(phi, rho, z)) {
+			if (field.containsCylindrical(phi, rho, z)) {
 				return true;
 			}
 		}

@@ -151,7 +151,7 @@ public interface IField {
      * @param z the z coordinate in the map units
      * @return <code>true</code> if the point is included in the boundary of the field
      */
-    public boolean contained(float x, float y, float z);
+    public boolean contains(float x, float y, float z);
     
 	/**
 	 * Check whether the field boundaries include the point
@@ -166,5 +166,5 @@ public interface IField {
 	 *         field
 	 * 
 	 */
-	public boolean containedCylindrical(float phi, float rho, float z);
+	public boolean containsCylindrical(float phi, float rho, float z);
 }

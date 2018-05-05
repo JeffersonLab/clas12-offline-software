@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cnuphys.lund.GeneratedParticleRecord;
-import cnuphys.magfield.MagneticField;
+import cnuphys.magfield.FastMath;
 import cnuphys.swim.SwimTrajectory;
 
 /**
@@ -235,8 +235,8 @@ public class SwimZResult {
 		if (sv != null) {
 			double p3[] = getThreeMomentum(sv);
 			if (Math.abs(_p) > 1.0e-20) {
-				thetaPhi[0] = MagneticField.acos2Deg(p3[2] / _p); // theta
-				thetaPhi[1] = MagneticField.atan2Deg(p3[1], p3[0]);
+				thetaPhi[0] = FastMath.acos2Deg(p3[2] / _p); // theta
+				thetaPhi[1] = FastMath.atan2Deg(p3[1], p3[0]);
 			}
 		}
 		return thetaPhi;

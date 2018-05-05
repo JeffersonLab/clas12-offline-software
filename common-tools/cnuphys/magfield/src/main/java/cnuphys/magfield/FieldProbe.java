@@ -3,7 +3,7 @@ package cnuphys.magfield;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-public abstract class FieldProbe implements IField {
+public class FieldProbe implements IField {
 
 	protected static boolean CACHE = true;
 	
@@ -12,6 +12,13 @@ public abstract class FieldProbe implements IField {
 	//the field
 	protected IField _field;
 	
+	/**
+	 * 
+	 * @param field
+	 * @deprecated this is nothing more than a wrapper for the underlying IField object. Just 
+	 * use the IField object directly. The probe technologie is now built into the IField object.
+	 */
+	@Deprecated
 	public FieldProbe(IField field) {
 		if (field instanceof FieldProbe) {
 			System.err.println("WARNING: Making a Magnetic Field Probe from a Probe.");
@@ -23,6 +30,7 @@ public abstract class FieldProbe implements IField {
 	 * Get the underlying field
 	 * @return the field that backs this probe
 	 */
+	@Deprecated
 	public IField getField() {
 		return _field;
 	}
@@ -33,6 +41,7 @@ public abstract class FieldProbe implements IField {
 	 * @param cacheOn
 	 *            the value of the flag
 	 */
+	@Deprecated
 	public static void cache(boolean cacheOn) {
 		CACHE = cacheOn;
 	}
@@ -52,24 +61,18 @@ public abstract class FieldProbe implements IField {
 
 	@Override
 	public void field(float x, float y, float z, float result[]) {
-		float rho = (float) Math.sqrt(x * x + y * y);
-		float phi = (float) MagneticField.atan2Deg(y, x);
-		fieldCylindrical(phi, rho, z, result);
+		_field.field(x, y, z, result);
 	}
 
 
 	@Override
 	public float fieldMagnitudeCylindrical(double phi, double r, double z) {
-		float result[] = new float[3];
-		fieldCylindrical(phi, r, z, result);
-		return vectorLength(result);
+		return _field.fieldMagnitudeCylindrical(phi, r, z);
 	}
 
 	@Override
 	public float fieldMagnitude(float x, float y, float z) {
-		float result[] = new float[3];
-		field(x, y, z, result);
-		return vectorLength(result);
+		return _field.fieldMagnitudeCylindrical(x, y, z);
 	}
 
 	@Override
@@ -113,10 +116,7 @@ public abstract class FieldProbe implements IField {
 	@Override
     public void gradientCylindrical(double phi, double rho, double z,
     	    float result[]) {
-		phi = Math.toRadians(phi);
-    	double x = rho*Math.cos(phi);
-    	double y = rho*Math.sin(phi);
-    	gradient((float)x, (float)y, (float)z, result);
+		_field.gradientCylindrical(phi, rho, z, result);
     }
 
 
@@ -136,24 +136,7 @@ public abstract class FieldProbe implements IField {
      */
      @Override
 	public void gradient(float x, float y, float z, float result[]) {
-  		//use three point derivative
-   		float del = 1f; //cm
-   		float del2 = 2*del;
-   		
-   		float baseVal = fieldMagnitude(x, y, z);
-   		float bv3 = -3*baseVal;
-   		
-   		float bx0 = fieldMagnitude(x+del, y, z);
-   		float bx1 = fieldMagnitude(x+del2, y, z);
-   		
-   		float by0 = fieldMagnitude(x, y+del, z);
-   		float by1 = fieldMagnitude(x, y+del2, z);
-   		float bz0 = fieldMagnitude(x, y, z+del);
-   		float bz1 = fieldMagnitude(x, y, z+del2);
-   		
-   		result[0] = (bv3 + 4*bx0 - bx1)/del2;
-   		result[1] = (bv3 + 4*by0 - by1)/del2;
-   		result[2] = (bv3 + 4*bz0 - bz1)/del2;
+ 		_field.gradientCylindrical(x, y, z, result);
      }
 
 	
@@ -163,12 +146,6 @@ public abstract class FieldProbe implements IField {
 	 */
 	public static FieldProbe factory(IField field) {
 		
-
-		// (new Throwable()).printStackTrace();
-
-		// if (field == null) {
-		// System.err.println("null field in probe factory");
-		// }
 
 		if (field != null) {
 
@@ -189,20 +166,6 @@ public abstract class FieldProbe implements IField {
 		return null;
 	}
 	
-	/**
-	 * Vector length.
-	 *
-	 * @param v
-	 *            the v
-	 * @return the float
-	 */
-	protected final float vectorLength(float v[]) {
-		float vx = v[0];
-		float vy = v[1];
-		float vz = v[2];
-		return (float) Math.sqrt(vx * vx + vy * vy + vz * vz);
-	}
-
 
     /**
      * Is the physical magnet represented by the map misaligned?
@@ -227,10 +190,8 @@ public abstract class FieldProbe implements IField {
 	 *         field
 	 */
 	@Override
-	public boolean contained(float x, float y, float z) {
-		double rho = Math.sqrt(x * x + y * y);
-		double phi = MagneticField.atan2Deg(y, x);
-		return containedCylindrical((float) phi, (float) rho, z);
+	public boolean contains(float x, float y, float z) {
+		return _field.contains(x, y, z);
 	}
    
 	/**
@@ -247,6 +208,13 @@ public abstract class FieldProbe implements IField {
 	 * 
 	 */
 	@Override
-	public abstract boolean containedCylindrical(float phi, float rho, float z);
+	public boolean containsCylindrical(float phi, float rho, float z) {
+		return _field.containsCylindrical(phi, rho, z);
+	}
+
+	@Override
+	public void fieldCylindrical(double phi, double rho, double z, float[] result) {
+		_field.fieldCylindrical(phi, rho, z, result);
+	}
 
 }

@@ -17,13 +17,6 @@ import java.nio.FloatBuffer;
  */
 public abstract class MagneticField implements IField {
 
-	/** Which atan2, etc. algorithms to use */
-	public enum MathLib {
-		DEFAULT, FAST, SUPERFAST;
-	}
-
-	// controls which algorithms to use
-	private static MathLib _mathLib = MathLib.SUPERFAST;
 
 	/** Magic number used to check if byteswapping is necessary. */
 	public static final int MAGICNUMBER = 0xced;
@@ -136,28 +129,6 @@ public abstract class MagneticField implements IField {
 	protected static final int Y = 1;
 	protected static final int Z = 2;
 	
-	/** 
-	 * A quick test to throw out points definitely outside the boundaries
-	 * @param x the x coordinate in the units of the map
-	 * @param y the y coordinate in the units of the map
-	 * @param z the z coordinate in the units of the map
-	 * @return <code>true</code> if the point is in range (approximate)
-	 */
-	protected boolean crudeInRange(float x, float y, float z) {
-		return true;
-	}
-	
-	/** 
-	 * A quick test to throw out points definitely outside the boundaries
-	 * @param phi the phi coordinate in the units of the map
-	 * @param rho the rho coordinate in the units of the map
-	 * @param z the z coordinate in the units of the map
-	 * @return <code>true</code> if the point is in range (approximate)
-	 */
-	protected boolean crudeInRangeCylindrical(float phi, float rho, float z) {
-		return true;
-	}
-
 
 	/**
 	 * Scale the field.
@@ -248,15 +219,15 @@ public abstract class MagneticField implements IField {
 	@Override
 	public final void field(float x, float y, float z, float result[]) {
 		
-		if (!crudeInRange(x, y, z)) {
+		if (!contains(x, y, z)) {
 			result[X] = 0f;
 			result[Y] = 0f;
 			result[Z] = 0f;
 			return;
 		}
 
-		double rho = sqrt(x * x + y * y);
-		double phi = atan2Deg(y, x);
+		double rho = FastMath.sqrt(x * x + y * y);
+		double phi = FastMath.atan2Deg(y, x);
 		fieldCylindrical(phi, rho, z, result);
 	}
 	
@@ -296,48 +267,6 @@ public abstract class MagneticField implements IField {
 		result[0] = (bv3 + 4*bx0 - bx1)/del2;
 		result[1] = (bv3 + 4*by0 - by1)/del2;
 		result[2] = (bv3 + 4*bz0 - bz1)/del2;
-
-		
-//		float bx0 = fieldMagnitude(x-del, y, z);
-//		float bx1 = fieldMagnitude(x+del, y, z);
-//		float by0 = fieldMagnitude(x, y-del, z);
-//		float by1 = fieldMagnitude(x, y+del, z);
-//		float bz0 = fieldMagnitude(x, y, z-del);
-//		float bz1 = fieldMagnitude(x, y, z+del);
-//		
-//		result[0] = (bx1-bx0)/del2;
-//		result[1] = (by1-by0)/del2;
-//		result[2] = (bz1-bz0)/del2;
-				
-		
- 		
-// 		//TODO improve
-// 		float[] fr1 = new float[3];
-//		float[] fr2 = new float[3];
-//		float del = 10f; //cm 
-// 		
-//		field(x-del, y, z, fr1);
-//		field(x+del, y, z, fr2);
-//		result[0] = (fr2[0]-fr1[0])/(2*del);
-// 		System.err.println("---------");
-// 		System.err.println("x = " + x + " y = " + y + " z = " + z);
-// 		System.err.println(" f1x = " + fr1[0]);
-//		System.err.println(" f2x = " + fr2[0]);
-//
-//
-//		field(x, y-del, z, fr1);
-//		field(x, y+del, z, fr2);
-//		result[1] = (fr2[1]-fr1[1])/(2*del);
-// 		System.err.println(" f1y = " + fr1[1]);
-//		System.err.println(" f2y = " + fr2[1]);
-//
-//		
-//		field(x, y, z-del, fr1);
-//		field(x, y, z+del, fr2);
-//		
-//		result[2] = (fr2[2]-fr1[2])/(2*del);	
-// 		System.err.println(" f1z = " + fr1[2]);
-//		System.err.println(" f2z = " + fr2[2]);
     }
 	
 	/**
@@ -358,8 +287,8 @@ public abstract class MagneticField implements IField {
     public void gradientCylindrical(double phi, double rho, double z,
     	    float result[]) {
 		phi = Math.toRadians(phi);
-		double x = rho*cos(phi);
-    	double y = rho*sin(phi);
+		double x = rho*FastMath.cos(phi);
+    	double y = rho*FastMath.sin(phi);
     	gradient((float)x, (float)y, (float)z, result);
     }
 
@@ -380,88 +309,6 @@ public abstract class MagneticField implements IField {
         return MagneticFields.dateStringLong(time);
 	}
 
-
-	/**
-	 * Might use standard or fast atan2
-	 * 
-	 * @param y
-	 * @param x
-	 * @return atan2(y, x)
-	 */
-	public static double atan2Deg(double y, double x) {
-
-
-		switch (_mathLib) {
-		case FAST:
-			double phirad = org.apache.commons.math3.util.FastMath.atan2(y, x);
-			return Math.toDegrees(phirad);
-		case SUPERFAST:
-			phirad = Icecore.atan2((float) y, (float) x);
-			return Math.toDegrees(phirad);
-		default:
-			return Math.toDegrees(Math.atan2(y, x));
-		}
-
-	}
-	
-	/**
-	 * Might use standard or fast atan2
-	 * 
-	 * @param y
-	 * @param x
-	 * @return atan2(y, x)
-	 */
-	public static double atan2Deg(float y, float x) {
-
-		switch (_mathLib) {
-		case FAST:
-			double phirad = org.apache.commons.math3.util.FastMath.atan2(y, x);
-			return Math.toDegrees(phirad);
-		case SUPERFAST:
-			phirad = Icecore.atan2(y, x);
-			return Math.toDegrees(phirad);
-		default:
-			return Math.toDegrees(Math.atan2(y, x));
-		}
-
-	}
-
-	
-	/**
-	 * 
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-	public static double hypot(double x, double y) {
-		return sqrt(x * x + y * y);
-	}
-
-	/**
-	 * 
-	 * @param x
-	 * @return
-	 */
-	public static double acos(double x) {
-
-		switch (_mathLib) {
-		case FAST: case SUPERFAST:
-			return org.apache.commons.math3.util.FastMath.acos(x);
-		default:
-			return Math.acos(x);
-		}
-
-	}
-
-	/**
-	 * Arc cosine returned in degrees
-	 * @param x the cosine value
-	 * @return acos in degrees
-	 */
-	public static double acos2Deg(double x) {
-		return Math.toDegrees(acos(x));
-	}
-
 	/**
 	 * Get the field magnitude in kiloGauss at a given location expressed in
 	 * cylindrical coordinates.
@@ -478,7 +325,7 @@ public abstract class MagneticField implements IField {
 	public final float fieldMagnitudeCylindrical(double phi, double r, double z) {
 		float result[] = new float[3];
 		fieldCylindrical(phi, r, z, result);
-		return vectorLength(result);
+		return FastMath.vectorLength(result);
 	}
 
 	/**
@@ -497,8 +344,7 @@ public abstract class MagneticField implements IField {
 	public final float fieldMagnitude(float x, float y, float z) {
 		float result[] = new float[3];
 		field(x, y, z, result);
-		return vectorLength(result);
-
+		return FastMath.vectorLength(result);
 	}
 
 	/**
@@ -513,12 +359,6 @@ public abstract class MagneticField implements IField {
 	 * @return the composite index (buffer offset)
 	 */
 	public final int getCompositeIndex(int n1, int n2, int n3) {
-		// if (N23 < 1) { // first time
-		// N3 = q3Coordinate.getNumPoints();
-		// N23 = q2Coordinate.getNumPoints() * q3Coordinate.getNumPoints();
-		// }
-		//
-		// return n1 * N23 + n2 * N3 + n3;
 		return n1 * (q2Coordinate.getNumPoints() * q3Coordinate.getNumPoints()) + n2 * q3Coordinate.getNumPoints() + n3;
 	}
 
@@ -571,7 +411,7 @@ public abstract class MagneticField implements IField {
 		double sum = 0.0;
 
 		for (int i = 0; i < numFieldPoints; i++) {
-			double fm = sqrt(squareMagnitude(i));
+			double fm = FastMath.sqrt(squareMagnitude(i));
 			sum += fm;
 
 			if (fm > maxf) {
@@ -601,22 +441,22 @@ public abstract class MagneticField implements IField {
 	}
 
 	/**
-	 * Get the math lib being used
+	 * Get the math lib being used.  Kept here for backwards compatibility.
 	 * 
 	 * @return the math lib being used
 	 */
-	public static MathLib getMathLib() {
-		return _mathLib;
+	public static FastMath.MathLib getMathLib() {
+		return FastMath.getMathLib();
 	}
 
 	/**
-	 * Set the math library to use
+	 * Set the math library to use. Kept here for backwards compatibility.
 	 * 
 	 * @param lib
 	 *            the math library enum
 	 */
-	public static void setMathLib(MathLib lib) {
-		_mathLib = lib;
+	public static void setMathLib(FastMath.MathLib lib) {
+		FastMath.setMathLib(lib);
 	}
 
 	/**
@@ -690,23 +530,10 @@ public abstract class MagneticField implements IField {
 	 * @return a string representation of the vector (array).
 	 */
 	protected String vectorToString(float v[]) {
-		String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f", v[0], v[1], v[2], vectorLength(v));
+		String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f", v[0], v[1], v[2], FastMath.vectorLength(v));
 		return s;
 	}
 
-	/**
-	 * Vector length.
-	 *
-	 * @param v
-	 *            the v
-	 * @return the float
-	 */
-	protected final float vectorLength(float v[]) {
-		float vx = v[0];
-		float vy = v[1];
-		float vz = v[2];
-		return (float) sqrt(vx * vx + vy * vy + vz * vz);
-	}
 	
 	/**
 	 * Get the base file name
@@ -823,148 +650,6 @@ public abstract class MagneticField implements IField {
 		return index;
 	}
 
-	/**
-	 * Interpolates a vector by trilinear interpolation.
-	 * 
-	 * @param q1
-	 *            the q1 coordinate
-	 * @param q2
-	 *            the q2 coordinate
-	 * @param q3
-	 *            the q3 coordinate
-	 * @param result
-	 *            will hold the result
-	 */
-	protected void interpolateField(double q1, double q2, double q3, float result[]) {
-
-		result[0] = 0f;
-		result[1] = 0f;
-		result[2] = 0f;
-
-		int n0 = q1Coordinate.getIndex(q1);
-		if (n0 < 0) {
-			return;
-		}
-		int n1 = q2Coordinate.getIndex(q2);
-		if (n1 < 0) {
-			return;
-		}
-		int n2 = q3Coordinate.getIndex(q3);
-		if (n2 < 0) {
-			return;
-		}
-
-	//	System.out.println("NEW q1 = " + q1);
-		double f0 = q1Coordinate.getFraction(q1, n0);
-		double f1 = q2Coordinate.getFraction(q2, n1);
-		double f2 = q3Coordinate.getFraction(q3, n2);
-
-		if (!_interpolate) { // nearest neighbor
-			f0 = (f0 < 0.5) ? 0 : 1;
-			f1 = (f1 < 0.5) ? 0 : 1;
-			f2 = (f2 < 0.5) ? 0 : 1;
-		}
-
-		double g0 = 1 - f0;
-		double g1 = 1 - f1;
-		double g2 = 1 - f2;
-		
-//		System.out.println("NEW n0 = " + n0 + " n1 = " + n1 + " n2 = " + n2);
-//		System.out.println("NEW  f0 = " + f0 + "  f1 = " + f1 + "  f2 = " + f2);
-//		System.out.println("NEW  g0 = " + g0 + "  g1 = " + g1 + "  g2 = " + g2);
-
-		// get the neighbor indices
-		int i000 = getCompositeIndex(n0, n1, n2);
-		int i001 = i000 + 1;
-
-		int i010 = getCompositeIndex(n0, n1 + 1, n2);
-		int i011 = i010 + 1;
-
-		int i100 = getCompositeIndex(n0 + 1, n1, n2);
-		int i101 = i100 + 1;
-
-		int i110 = getCompositeIndex(n0 + 1, n1 + 1, n2);
-		int i111 = i110 + 1;
-
-		double b000 = getB1(i000);
-		double b001 = getB1(i001);
-		double b010 = getB1(i010);
-		double b011 = getB1(i011);
-		double b100 = getB1(i100);
-		double b101 = getB1(i101);
-		double b110 = getB1(i110);
-		double b111 = getB1(i111);
-		
-		double g0g1g2 = g0 * g1 * g2;
-		double g0g1f2 = g0 * g1 * f2;
-		double g0f1g2 = g0 * f1 * g2;
-		double g0f1f2 = g0 * f1 * f2;
-		double f0g1g2 = f0 * g1 * g2;
-		double f0g1f2 = f0 * g1 * f2;
-		double f0f1g2 = f0 * f1 * g2;
-		double f0f1f2 = f0 * f1 * f2;
-
-		double x = b000 * g0g1g2 + b001 * g0g1f2 + b010 * g0f1g2 + b011 * g0f1f2
-				+ b100 * f0g1g2 + b101 * f0g1f2 + b110 * f0f1g2 + b111 * f0f1f2;
-
-		// now y
-		b000 = getB2(i000);
-		b001 = getB2(i001);
-		b010 = getB2(i010);
-		b011 = getB2(i011);
-		b100 = getB2(i100);
-		b101 = getB2(i101);
-		b110 = getB2(i110);
-		b111 = getB2(i111);
-
-		double y = b000 * g0g1g2 + b001 * g0g1f2 + b010 * g0f1g2 + b011 * g0f1f2
-				+ b100 * f0g1g2 + b101 * f0g1f2 + b110 * f0f1g2 + b111 * f0f1f2;
-
-		// now z
-		b000 = getB3(i000);
-		b001 = getB3(i001);
-		b010 = getB3(i010);
-		b011 = getB3(i011);
-		b100 = getB3(i100);
-		b101 = getB3(i101);
-		b110 = getB3(i110);
-		b111 = getB3(i111);
-		
-//		System.out.println("NEW  b000 = " + b000 + "  b001 = " + b001 + "  b010 = " + b010);
-//		System.out.println("NEW  b011 = " + b011 + "  b100 = " + b100 + "  b101 = " + b010);
-//		System.out.println("NEW  b110 = " + b110 + "  b111 = " + b111);
-
-
-		double z = b000 * g0g1g2 + b001 * g0g1f2 + b010 * g0f1g2 + b011 * g0f1f2
-				+ b100 * f0g1g2 + b101 * f0g1f2 + b110 * f0f1g2 + b111 * f0f1f2;
-
-		result[0] = (float) x;
-		result[1] = (float) y;
-		result[2] = (float) z;
-
-//		 System.out.println(" NEW: [ " + result[0] + ", " + result[1] + ", " +
-//		 result[2] + "] ");
-
-	}
-
-	/**
-	 * Interpolates the field magnitude by trilinear interpolation.
-	 *
-	 * @param q1
-	 *            the q1 coordinate
-	 * @param q2
-	 *            the q2 coordinate
-	 * @param q3
-	 *            the q3 coordinate return the interpolated value of the field
-	 *            magnitude
-	 * @return the float
-	 */
-	protected final float interpolateFieldMagnitude(double q1, double q2, double q3) {
-
-		float result[] = new float[3];
-		interpolateField(q1, q2, q3, result);
-		return (float) sqrt(result[0] * result[0] + result[1] * result[1] + result[2] * result[2]);
-	}
 
 	/**
 	 * Get the magnitude for a given index.
@@ -973,12 +658,12 @@ public abstract class MagneticField implements IField {
 	 *            the index.
 	 * @return the field magnitude at the given index.
 	 */
-	public final float fieldMagnitude(int index) {
+	public final double fieldMagnitude(int index) {
 		int i = 3 * index;
 		float B1 = field.get(i);
 		float B2 = field.get(i + 1);
 		float B3 = field.get(i + 2);
-		return (float) sqrt(B1 * B1 + B2 * B2 + B3 * B3);
+		return FastMath.sqrt(B1 * B1 + B2 * B2 + B3 * B3);
 	}
 
 	/**
@@ -1183,10 +868,10 @@ public abstract class MagneticField implements IField {
      * @return <code>true</code> if the point is included in the boundary of the field
      */
 	@Override
-    public boolean contained(float x, float y, float z) {
-		double rho = sqrt(x * x + y * y);
-		double phi = atan2Deg(y, x);
-        return containedCylindrical((float)phi, (float)rho, z);
+    public boolean contains(float x, float y, float z) {
+		double rho = FastMath.sqrt(x * x + y * y);
+		double phi = FastMath.atan2Deg(y, x);
+        return containsCylindrical((float)phi, (float)rho, z);
     }
     
 	/**
@@ -1203,100 +888,7 @@ public abstract class MagneticField implements IField {
 	 * 
 	 */
 	@Override
-	public abstract boolean containedCylindrical(float phi, float rho, float z);
+	public abstract boolean containsCylindrical(float phi, float rho, float z);
 	
-	
-	public static double sqrt(double x) {
-		switch (_mathLib) {
-		case FAST: case SUPERFAST:
-			return org.apache.commons.math3.util.FastMath.sqrt(x);
-		default:
-			return Math.sqrt(x);
-		}
-
-	}
-	
-	/**
-	 * Might use standard or fast sin
-	 * 
-	 * @param x
-	 * @return atan2(y, x)
-	 */
-	public static double sin(double x) {
-
-		switch (_mathLib) {
-		case FAST:
-			return org.apache.commons.math3.util.FastMath.sin(x);
-		case SUPERFAST:
-			return Riven.sin((float) x);
-		default:
-			return Math.sin(x);
-		}
-
-	}
-
-	
-	/**
-	 * Might use standard or fast sin
-	 * 
-	 * @param x
-	 * @return atan2(y, x)
-	 */
-	public static double cos(double x) {
-
-		switch (_mathLib) {
-		case FAST:
-			return org.apache.commons.math3.util.FastMath.cos(x);
-		case SUPERFAST:
-			return Riven.cos((float) x);
-		default:
-			return Math.cos(x);
-		}
-
-	}
-
-	
-	
-	//faster sin and cos from gamers
-	 public static final class Riven {
-
-	        private static final int SIN_BITS, SIN_MASK, SIN_COUNT;
-	        private static final float radFull, radToIndex;
-	        private static final float degFull, degToIndex;
-	        private static final float[] sin, cos;
-
-	        static {
-	            SIN_BITS = 12;
-	            SIN_MASK = ~(-1 << SIN_BITS);
-	            SIN_COUNT = SIN_MASK + 1;
-
-	            radFull = (float) (Math.PI * 2.0);
-	            degFull = (float) (360.0);
-	            radToIndex = SIN_COUNT / radFull;
-	            degToIndex = SIN_COUNT / degFull;
-
-	            sin = new float[SIN_COUNT];
-	            cos = new float[SIN_COUNT];
-
-	            for (int i = 0; i < SIN_COUNT; i++) {
-	                sin[i] = (float) Math.sin((i + 0.5f) / SIN_COUNT * radFull);
-	                cos[i] = (float) Math.cos((i + 0.5f) / SIN_COUNT * radFull);
-	            }
-
-	            // Four cardinal directions (credits: Nate)                                                                                                                                                         
-	            for (int i = 0; i < 360; i += 90) {
-	                sin[(int) (i * degToIndex) & SIN_MASK] = (float) Math.sin(i * Math.PI / 180.0);
-	                cos[(int) (i * degToIndex) & SIN_MASK] = (float) Math.cos(i * Math.PI / 180.0);
-	            }
-	        }
-
-	        public static final float sin(float rad) {
-	            return sin[(int) (rad * radToIndex) & SIN_MASK];
-	        }
-
-	        public static final float cos(float rad) {
-	            return cos[(int) (rad * radToIndex) & SIN_MASK];
-	        }
-	    }
 
 }

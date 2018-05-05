@@ -1,6 +1,6 @@
 package cnuphys.magfield;
 
-public class Cell3D {
+public class Cell3D implements MagneticFieldChangeListener {
 
 	public double q1Min = Float.POSITIVE_INFINITY;
 	public double q1Max = Float.NEGATIVE_INFINITY;
@@ -15,36 +15,17 @@ public class Cell3D {
 	private double q2Norm;
 	private double q3Norm;
 
-	private double b1_000 = 0.0;
-	private double b1_001 = 0.0;
-	private double b1_010 = 0.0;
-	private double b1_100 = 0.0;
-	private double b1_011 = 0.0;
-	private double b1_110 = 0.0;
-	private double b1_101 = 0.0;
-	private double b1_111 = 0.0;
-
-	private double b2_000 = 0.0;
-	private double b2_001 = 0.0;
-	private double b2_010 = 0.0;
-	private double b2_100 = 0.0;
-	private double b2_011 = 0.0;
-	private double b2_110 = 0.0;
-	private double b2_101 = 0.0;
-	private double b2_111 = 0.0;
-
-	private double b3_000 = 0.0;
-	private double b3_001 = 0.0;
-	private double b3_010 = 0.0;
-	private double b3_100 = 0.0;
-	private double b3_011 = 0.0;
-	private double b3_110 = 0.0;
-	private double b3_101 = 0.0;
-	private double b3_111 = 0.0;
 
 	private double f[] = new double[3];
 	private double g[] = new double[3];
-	private double aa[] = new double[8];
+	private double a[] = new double[8];
+
+	private int n1 = -1;
+	private int n2 = -1;
+	private int n3 = -1;
+	
+	//hold field at 8 corners of cell
+	FloatVect b[][][] = new FloatVect[2][2][2];
 
 	/**
 	 * Create a 3D cell (for Torus)
@@ -54,6 +35,16 @@ public class Cell3D {
 	 */
 	public Cell3D(MagneticField field) {
 		this.field = field;
+		MagneticFields.getInstance().addMagneticFieldChangeListener(this);
+		
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 2; j++) {
+				for (int k = 0; k < 2; k++) {
+					b[i][j][k] = new FloatVect();
+				}			
+			}		
+		}
+		
 	}
 
 	// reset the cached values
@@ -62,17 +53,17 @@ public class Cell3D {
 		GridCoordinate q2Coord = field.q2Coordinate;
 		GridCoordinate q3Coord = field.q3Coordinate;
 
-		int n1 = q1Coord.getIndex(phi);
+		n1 = q1Coord.getIndex(phi);
 		if (n1 < 0) {
 			System.err.println("WARNING Bad n1 in Cell3D.reset: " + n1);
 			return;
 		}
-		int n2 = q2Coord.getIndex(rho);
+		n2 = q2Coord.getIndex(rho);
 		if (n2 < 0) {
 			System.err.println("WARNING Bad n2 in Cell3D.reset: " + n2);
 			return;
 		}
-		int n3 = q3Coord.getIndex(z);
+		n3 = q3Coord.getIndex(z);
 		if (n3 < 0) {
 			System.err.println("WARNING Bad n3 in Cell3D.reset: " + n3);
 			return;
@@ -90,44 +81,46 @@ public class Cell3D {
 		q3Max = q3Coord.getMax(n3);
 		q3Norm = 1. / (q3Max - q3Min);
 
-		int i000 = field.getCompositeIndex(n1, n2, n3);
-		int i001 = i000 + 1;
+		int i000 = field.getCompositeIndex(n1, n2, n3); //n1 n2 n3
+		int i001 = i000 + 1; //n1 n2 n3+1
 
-		int i010 = field.getCompositeIndex(n1, n2 + 1, n3);
-		int i011 = i010 + 1;
+		int i010 = field.getCompositeIndex(n1, n2 + 1, n3); //n1 n2+1 n3
+		int i011 = i010 + 1;  //n1 n2+1 n3+1
 
-		int i100 = field.getCompositeIndex(n1 + 1, n2, n3);
-		int i101 = i100 + 1;
+		int i100 = field.getCompositeIndex(n1 + 1, n2, n3);  //n1+1 n2 n3
+		int i101 = i100 + 1;  //n1+1 n2 n3+1
 
-		int i110 = field.getCompositeIndex(n1 + 1, n2 + 1, n3);
-		int i111 = i110 + 1;
-
-		b1_000 = field.getB1(i000);
-		b1_001 = field.getB1(i001);
-		b1_010 = field.getB1(i010);
-		b1_011 = field.getB1(i011);
-		b1_100 = field.getB1(i100);
-		b1_101 = field.getB1(i101);
-		b1_110 = field.getB1(i110);
-		b1_111 = field.getB1(i111);
-
-		b2_000 = field.getB2(i000);
-		b2_001 = field.getB2(i001);
-		b2_010 = field.getB2(i010);
-		b2_011 = field.getB2(i011);
-		b2_100 = field.getB2(i100);
-		b2_101 = field.getB2(i101);
-		b2_110 = field.getB2(i110);
-		b2_111 = field.getB2(i111);
-
-		b3_000 = field.getB3(i000);
-		b3_001 = field.getB3(i001);
-		b3_010 = field.getB3(i010);
-		b3_011 = field.getB3(i011);
-		b3_100 = field.getB3(i100);
-		b3_101 = field.getB3(i101);
-		b3_110 = field.getB3(i110);
-		b3_111 = field.getB3(i111);
+		int i110 = field.getCompositeIndex(n1 + 1, n2 + 1, n3); //n1+1 n2+1 n3
+		int i111 = i110 + 1; //n1+1 n2+1 n3+1
+		
+		//field at 8 corners
+		
+		b[0][0][0].x = field.getB1(i000);
+		b[0][0][1].x = field.getB1(i001);
+		b[0][1][0].x = field.getB1(i010);
+		b[0][1][1].x = field.getB1(i011);
+		b[1][0][0].x = field.getB1(i100);
+		b[1][0][1].x = field.getB1(i101);
+		b[1][1][0].x = field.getB1(i110);
+		b[1][1][1].x = field.getB1(i111);
+		
+		b[0][0][0].y = field.getB2(i000);
+		b[0][0][1].y = field.getB2(i001);
+		b[0][1][0].y = field.getB2(i010);
+		b[0][1][1].y = field.getB2(i011);
+		b[1][0][0].y = field.getB2(i100);
+		b[1][0][1].y = field.getB2(i101);
+		b[1][1][0].y = field.getB2(i110);
+		b[1][1][1].y = field.getB2(i111);
+		
+		b[0][0][0].z = field.getB3(i000);
+		b[0][0][1].z = field.getB3(i001);
+		b[0][1][0].z = field.getB3(i010);
+		b[0][1][1].z = field.getB3(i011);
+		b[1][0][0].z = field.getB3(i100);
+		b[1][0][1].z = field.getB3(i101);
+		b[1][1][0].z = field.getB3(i110);
+		b[1][1][1].z = field.getB3(i111);
 
 	}
 
@@ -153,19 +146,24 @@ public class Cell3D {
 	 * Calculate the field in kG
 	 * 
 	 * @param phi
+	 *            the phi coordinate in degrees
 	 * @param rho
+	 *            the rho coordinate in cm
 	 * @param z
 	 * @param result
 	 */
 	public void calculate(double phi, double rho, double z, float[] result) {
-		if (field.containedCylindrical((float)phi, (float)rho, (float)z)) {
+		if (field.containsCylindrical((float) phi, (float) rho, (float) z)) {
 			// do we need to reset?
 			if (!containedCylindrical(phi, rho, z)) {
 				reset(phi, rho, z);
 			}
-//			else {
-//				System.err.println("Using cached 3d");
-//			}
+
+			if (!MagneticField.isInterpolate()) {
+				nearestNeighbor(phi, rho, z, result);
+				return;
+			}
+
 			f[0] = (phi - q1Min) * q1Norm;/// (q1_max - q1Min);
 			f[1] = (rho - q2Min) * q2Norm;// / (q2_max - q2Min);
 			f[2] = (z - q3Min) * q3Norm;// / (q3_max - q3Min);
@@ -178,21 +176,29 @@ public class Cell3D {
 			g[1] = 1 - f[1];
 			g[2] = 1 - f[2];
 
-			aa[0] = g[0] * g[1] * g[2];
-			aa[1] = g[0] * g[1] * f[2];
-			aa[2] = g[0] * f[1] * g[2];
-			aa[3] = g[0] * f[1] * f[2];
-			aa[4] = f[0] * g[1] * g[2];
-			aa[5] = f[0] * g[1] * f[2];
-			aa[6] = f[0] * f[1] * g[2];
-			aa[7] = f[0] * f[1] * f[2];
+			a[0] = g[0] * g[1] * g[2];
+			a[1] = g[0] * g[1] * f[2];
+			a[2] = g[0] * f[1] * g[2];
+			a[3] = g[0] * f[1] * f[2];
+			a[4] = f[0] * g[1] * g[2];
+			a[5] = f[0] * g[1] * f[2];
+			a[6] = f[0] * f[1] * g[2];
+			a[7] = f[0] * f[1] * f[2];
 
-			double bx = b1_000 * aa[0] + b1_001 * aa[1] + b1_010 * aa[2] + b1_011 * aa[3] + b1_100 * aa[4]
-					+ b1_101 * aa[5] + b1_110 * aa[6] + b1_111 * aa[7];
-			double by = b2_000 * aa[0] + b2_001 * aa[1] + b2_010 * aa[2] + b2_011 * aa[3] + b2_100 * aa[4]
-					+ b2_101 * aa[5] + b2_110 * aa[6] + b2_111 * aa[7];
-			double bz = b3_000 * aa[0] + b3_001 * aa[1] + b3_010 * aa[2] + b3_011 * aa[3] + b3_100 * aa[4]
-					+ b3_101 * aa[5] + b3_110 * aa[6] + b3_111 * aa[7];
+//			double bx = b1_000 * aa[0] + b1_001 * aa[1] + b1_010 * aa[2] + b1_011 * aa[3] + b1_100 * aa[4]
+//					+ b1_101 * aa[5] + b1_110 * aa[6] + b1_111 * aa[7];
+//			double by = b2_000 * aa[0] + b2_001 * aa[1] + b2_010 * aa[2] + b2_011 * aa[3] + b2_100 * aa[4]
+//					+ b2_101 * aa[5] + b2_110 * aa[6] + b2_111 * aa[7];
+//			double bz = b3_000 * aa[0] + b3_001 * aa[1] + b3_010 * aa[2] + b3_011 * aa[3] + b3_100 * aa[4]
+//					+ b3_101 * aa[5] + b3_110 * aa[6] + b3_111 * aa[7];
+			
+			double bx = b[0][0][0].x * a[0] + b[0][0][1].x * a[1] + b[0][1][0].x * a[2] + b[0][1][1].x * a[3] + b[1][0][0].x * a[4]
+					+ b[1][0][1].x * a[5] + b[1][1][0].x * a[6] + b[1][1][1].x * a[7];
+			double by = b[0][0][0].y * a[0] + b[0][0][1].y * a[1] + b[0][1][0].y * a[2] + b[0][1][1].y * a[3] + b[1][0][0].y * a[4]
+					+ b[1][0][1].y * a[5] + b[1][1][0].y * a[6] + b[1][1][1].y * a[7];
+			double bz = b[0][0][0].z * a[0] + b[0][0][1].z * a[1] + b[0][1][0].z * a[2] + b[0][1][1].z * a[3] + b[1][0][0].z * a[4]
+					+ b[1][0][1].z * a[5] + b[1][1][0].z * a[6] + b[1][1][1].z * a[7];
+
 
 			result[0] = (float) bx;
 			result[1] = (float) by;
@@ -202,6 +208,32 @@ public class Cell3D {
 				result[i] = 0f;
 			}
 		}
+	}
+
+	// nearest neighbor algorithm
+	private void nearestNeighbor(double phi, double rho, double z, float[] result) {
+		f[0] = (phi - q1Min) * q1Norm;
+		f[1] = (rho - q2Min) * q2Norm;
+		f[2] = (z - q3Min) * q3Norm;
+
+		int N1 = (f[0] < 0.5) ? 0 : 1;
+		int N2 = (f[1] < 0.5) ? 0 : 1;
+		int N3 = (f[2] < 0.5) ? 0 : 1;
+
+		result[0] = b[N1][N2][N3].x;
+		result[1] = b[N1][N2][N3].y;
+		result[2] = b[N1][N2][N3].z;
+	}
+
+	@Override
+	public void magneticFieldChanged() {
+		System.err.println("MAG FIELD CHANGED");
+		q1Min = Float.POSITIVE_INFINITY;
+		q1Max = Float.NEGATIVE_INFINITY;
+		q2Min = Float.POSITIVE_INFINITY;
+		q2Max = Float.NEGATIVE_INFINITY;
+		q3Min = Float.POSITIVE_INFINITY;
+		q3Max = Float.NEGATIVE_INFINITY;
 	}
 
 }

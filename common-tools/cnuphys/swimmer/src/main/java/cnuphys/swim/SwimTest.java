@@ -1,10 +1,8 @@
 package cnuphys.swim;
 
-import cnuphys.magfield.FieldProbe;
-import cnuphys.magfield.MagneticField;
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
-import cnuphys.swimZ.SwimZ;
 
 public class SwimTest {
 
@@ -43,9 +41,8 @@ public class SwimTest {
 
 		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
 
-		MagneticField.setMathLib(MagneticField.MathLib.FAST);
+		FastMath.setMathLib(FastMath.MathLib.FAST);
 		// MagneticField.setMathLib(MagneticField.MathLib.DEFAULT);
-		FieldProbe.cache(true);
 		int numTest = 10000;
 		// testParabolicApproximation(numTest);
 		// testOldUniform(numTest);
