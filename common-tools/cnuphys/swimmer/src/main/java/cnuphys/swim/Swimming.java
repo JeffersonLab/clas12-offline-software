@@ -5,11 +5,9 @@ import java.util.ArrayList;
 import javax.swing.event.EventListenerList;
 
 import cnuphys.lund.SwimTrajectoryListener;
-import cnuphys.magfield.FieldProbe;
-import cnuphys.magfield.MagneticField;
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
-import cnuphys.rk4.RungeKutta;
 import cnuphys.rk4.RungeKuttaException;
 
 public class Swimming {
@@ -329,9 +327,7 @@ public class Swimming {
 
 		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
 
-		MagneticField.setMathLib(MagneticField.MathLib.FAST);
-		// MagneticField.setMathLib(MagneticField.MathLib.DEFAULT);
-		FieldProbe.cache(true);
+		FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
 
 		testSwim(1);
 		testSwim2(1);

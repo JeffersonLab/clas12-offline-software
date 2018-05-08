@@ -11,10 +11,28 @@ public class CompositeProbe extends FieldProbe {
 		for (IField f : field) {
 			probes.add(FieldProbe.factory(f));
 		}
+
+	}
+	
+	@Override
+	public void field(float x, float y, float z, float result[]) {
+		
+		if (!contains(x, y, z)) {
+			result[0] = 0f;
+			result[1] = 0f;
+			result[2] = 0f;
+			return;
+		}
+
+		double rho = FastMath.sqrt(x * x + y * y);
+		double phi = FastMath.atan2Deg(y, x);
+		fieldCylindrical(phi, rho, z, result);
 	}
 
+	
 	@Override
 	public void fieldCylindrical(double phi, double rho, double z, float[] result) {
+		
 		float bx = 0;
 		float by = 0;
 		float bz = 0;
@@ -30,8 +48,7 @@ public class CompositeProbe extends FieldProbe {
 		result[1] = by;
 		result[2] = bz;
 	}
-	
-	
+
 
     /**
      * Obtain an approximation for the magnetic field gradient at a given location expressed in cylindrical
@@ -93,5 +110,7 @@ public class CompositeProbe extends FieldProbe {
  		result[2] = bz;
      }
     
+	
+
 	
 }

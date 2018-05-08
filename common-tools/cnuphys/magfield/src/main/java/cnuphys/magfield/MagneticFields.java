@@ -429,7 +429,6 @@ public class MagneticFields {
 	 * @return the active field
 	 */
 	public IField getActiveField() {
-		// init(); //harmless if already inited
 		return _activeField;
 	}
 
@@ -940,6 +939,28 @@ public class MagneticFields {
 		// these is a dir path, has nothing to do with the name of the field
 
 		String homeDir = getProperty("user.home");
+
+		File magdir = new File(homeDir, "magfield");
+		if (magdir.exists() && magdir.isDirectory()) {
+			//Symm_torus_LOWRES_2008.dat
+			//Full_torus_r251_phi181_z251_18Apr2018.dat
+			File torusFile = new File(magdir, "Symm_torus_LOWRES_2008.dat");
+			if (torusFile.exists() && torusFile.canRead()) {
+				File solenoidFile = new File(magdir, "Symm_solenoid_r601_phi1_z1201_2008.dat");
+				if (solenoidFile.exists() && solenoidFile.canRead()) {
+					try {
+						MagneticFields.getInstance().initializeMagneticFieldsFromPath(torusFile.getPath(),
+								solenoidFile.getPath());
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (MagneticFieldInitializationException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+
 		String cwd = getProperty("user.dir");
 
 		String olswDir = null;
@@ -1078,18 +1099,11 @@ public class MagneticFields {
 			} else {
 				_torus = readTorus(new File(torusMap.getDirName(), torusMap.getFileName()).getPath());
 			}
-			// TorusMenu.getInstance().fixTitle(torusMap);
-			// System.out.println("** USING Torus map [" + torusMap.getName() +
-			// "]");
-		} else {
-			// TorusMenu.getInstance().fixTitle(null);
-			// System.err.println("WARNING: Did not find a map for torus field:
-			// [" +
-			// torusMap.getName() + "]");
 		}
 
 	}
 
+	//make composite fields
 	private void makeComposites() {
 		_compositeField = new CompositeField();
 		_rotatedCompositeField = new RotatedCompositeField();
@@ -1236,7 +1250,7 @@ public class MagneticFields {
 		}
 	}
 
-	// mag field changed shift for alignment
+	// mag field changed shift for alignment (solenoid only)
 	protected void changedShift(MagneticField field) {
 		if (field != null) {
 			if (field == _torus) {
@@ -1485,53 +1499,95 @@ public class MagneticFields {
 		return formatterlong.format(longtime);
 	}
 
-	
-	static String options[] = {"Standard, no probe", "Standard, with probe", "Rotated Composite"};
-	private static void timingTest(int option) {
-		System.out.println("Timing tests: [" + options[option] + "]");
+	static String options[] = { "Random, with active field", " Along line, with active field", 
+			"Random, with active PROBE", " Along line, with active PROBE"};
+
+	//sameness tests (probes and not probes)
+	private static void samenessTest() {
+		System.out.println("Sameness test");
 		long seed = 5347632765L;
-		
-		FieldProbe.cache((option != 0));
-		
+
 		int num = 10000000;
-		
+
 		float x[] = new float[num];
 		float y[] = new float[num];
 		float z[] = new float[num];
-		
-		float result[] = new float[3];
-		
-		IField ifield = MagneticFields.getInstance().getActiveField();
-		if (option == 2) {
-			ifield = MagneticFields.getInstance()._rotatedCompositeField;
-		}
-		
+
+		float result1[] = new float[3];
+		float result2[] = new float[3];
+		float diff[] = new float[3];
+
+		IField ifield1 = MagneticFields.getInstance().getActiveField();
+		IField ifield2 = FieldProbe.factory(MagneticFields.getInstance().getActiveField());
 		Random rand = new Random(seed);
-
-		double _angle = -25.0;
-		double _sin = Math.sin(Math.toRadians(_angle));
-		double _cos = Math.cos(Math.toRadians(_angle));
-
 		
-		
+		double dT = 1./(num-1);
 		for (int i = 0; i < num; i++) {
-			z[i] = 600 * rand.nextFloat();
-			float rho = 600 * rand.nextFloat();
-			double phi = Math.toRadians(30 * rand.nextFloat());
+			double t = i*dT;
+			x[i] = (float) (85.*t);
+			y[i] = (float) (15.*t);
+			z[i] = (float) (372.*t);
+		}
 
-			x[i] = (float) (rho * Math.cos(phi));
-			y[i] = (float) (rho * Math.sin(phi));
+		double maxDiff = -1;
+		for (int i = 0; i < num; i++) {
+			ifield1.field(x[i], y[i], z[i], result1);
+			ifield2.field(x[i], y[i], z[i], result2);
 			
-			if (option == 2) {
-				double xx = x[i] * _cos + z[i] * _sin;
-//				double yy = y[i];
-				double zz = z[i] * _cos - x[i] * _sin;
-				x[i] = (float)xx;
-				z[i] = (float)zz;
+			for (int j = 0; j < 3; j++) {
+				diff[j] = result2[j] - result1[j];
+				double dlen = FastMath.vectorLength(diff);
+				maxDiff = Math.max(dlen,  maxDiff);
 			}
 		}
+
+		System.err.println("maxDiff = " + maxDiff);
+	}
+	
+	//timing tests
+	private static void timingTest(int option) {
+		System.out.println("Timing tests: [" + options[option] + "]");
+		long seed = 5347632765L;
+
+		int num = 10000000;
+
+		float x[] = new float[num];
+		float y[] = new float[num];
+		float z[] = new float[num];
+
+		float result[] = new float[3];
+
+		IField ifield;
 		
-		//prime the pump
+		if ((option == 2) || (option == 3)) {
+			ifield = FieldProbe.factory(MagneticFields.getInstance().getActiveField());
+		}
+		else {
+			ifield = MagneticFields.getInstance().getActiveField();
+		}
+
+		Random rand = new Random(seed);
+
+		if ((option == 0) || (option == 2)) {
+			for (int i = 0; i < num; i++) {
+				z[i] = 600 * rand.nextFloat();
+				float rho = 600 * rand.nextFloat();
+				double phi = Math.toRadians(30 * rand.nextFloat());
+
+				x[i] = (float) (rho * FastMath.cos(phi));
+				y[i] = (float) (rho * FastMath.sin(phi));
+			}
+		} else if ((option == 1) || (option == 3)) {
+			double dT = 1./(num-1);
+			for (int i = 0; i < num; i++) {
+				double t = i*dT;
+				x[i] = (float) (85.*t);
+				y[i] = (float) (15.*t);
+				z[i] = (float) (372.*t);
+			}
+		}
+
+		// prime the pump
 		for (int i = 0; i < num; i++) {
 			ifield.field(x[i], y[i], z[i], result);
 		}
@@ -1539,18 +1595,18 @@ public class MagneticFields {
 		double sum = 0;
 		for (int outer = 0; outer < 5; outer++) {
 			long time = System.currentTimeMillis();
-			
+
 			for (int i = 0; i < num; i++) {
 				ifield.field(x[i], y[i], z[i], result);
 			}
 
-			double del = ((double)(System.currentTimeMillis() - time))/1000.;
+			double del = ((double) (System.currentTimeMillis() - time)) / 1000.;
 			sum += del;
 
 			System.out.println("loop " + (outer + 1) + " time  = " + del + " sec");
-			
+
 		}
-		System.out.println("avg "  + (sum/5.) + " sec");
+		System.out.println("avg " + (sum / 5.) + " sec");
 
 	}
 
@@ -1565,16 +1621,14 @@ public class MagneticFields {
 
 		final MagneticFields mf = MagneticFields.getInstance();
 
-		// test explicit path load
-		// mf.initializeMagneticFields();
-
 		// test specific load
 		File mfdir = new File(System.getProperty("user.home"), "magfield");
 		System.out.println("mfdir exists: " + (mfdir.exists() && mfdir.isDirectory()));
-		// mf.initializeMagneticFields(mfdir.getPath(), TorusMap.FULL_200);
 		try {
-			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat", "Symm_solenoid_r601_phi1_z1201_2008.dat");
-	//		mf.initializeMagneticFieldsFromEnv();
+//			mf.initializeMagneticFields(mfdir.getPath(), "torus.dat",
+//					"Symm_solenoid_r601_phi1_z1201_2008.dat");
+			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_07May2018.dat",
+					"Symm_solenoid_r601_phi1_z1201_2008.dat");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -1607,9 +1661,12 @@ public class MagneticFields {
 		mb.add(mf.getMagneticFieldMenu(true, true));
 
 		JMenu testMenu = new JMenu("Tests");
-		final JMenuItem test0Item = new JMenuItem("Timing Test (no probe)");
-		final JMenuItem test1Item = new JMenuItem("Timing Test (probe)");
-		final JMenuItem test2Item = new JMenuItem("Timing Test (Rotated Composite)");
+		
+		final JMenuItem test0Item = new JMenuItem("Timing Test Random Points");
+		final JMenuItem test1Item = new JMenuItem("Timing Test Along a Line");
+		final JMenuItem test2Item = new JMenuItem("PROBE Timing Test Random Points");
+		final JMenuItem test3Item = new JMenuItem("PROBE Timing Test Along a Line");
+		final JMenuItem test4Item = new JMenuItem("Sameness test");
 
 		ActionListener al = new ActionListener() {
 
@@ -1618,11 +1675,17 @@ public class MagneticFields {
 				if (e.getSource() == test0Item) {
 					timingTest(0);
 				}
-				if (e.getSource() == test1Item) {
+				else if (e.getSource() == test1Item) {
 					timingTest(1);
 				}
-				if (e.getSource() == test2Item) {
+				else if (e.getSource() == test2Item) {
 					timingTest(2);
+				}
+				else if (e.getSource() == test3Item) {
+					timingTest(3);
+				}
+				else if (e.getSource() == test4Item) {
+					samenessTest();
 				}
 			}
 
@@ -1631,9 +1694,13 @@ public class MagneticFields {
 		test0Item.addActionListener(al);
 		test1Item.addActionListener(al);
 		test2Item.addActionListener(al);
+		test3Item.addActionListener(al);
+		test4Item.addActionListener(al);
 		testMenu.add(test0Item);
 		testMenu.add(test1Item);
 		testMenu.add(test2Item);
+		testMenu.add(test3Item);
+		testMenu.add(test4Item);
 		mb.add(testMenu);
 		testFrame.add(magPanel1);
 		testFrame.add(magPanel2);

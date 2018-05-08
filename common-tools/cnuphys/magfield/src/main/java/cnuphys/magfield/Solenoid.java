@@ -20,6 +20,8 @@ import java.util.StringTokenizer;
  */
 public final class Solenoid extends MagneticField {
 	
+	private Cell2D _cell;
+	
 	private static final double MISALIGNTOL = 1.0e-6; //cm
 	
 	// private constructor
@@ -28,7 +30,7 @@ public final class Solenoid extends MagneticField {
 	 */
 	private Solenoid() {
 		setCoordinateNames("phi", "rho", "z");
-		
+		_cell = new Cell2D(this);
 //		_shiftZ = 450;
 	}
 
@@ -57,42 +59,6 @@ public final class Solenoid extends MagneticField {
     	return (Math.abs(_shiftZ) > MISALIGNTOL);
     }
     
-	/** 
-	 * A quick test to throw out points definitely outside the boundaries
-	 * @param x the x coordinate in the units of the map
-	 * @param y the y coordinate in the units of the map
-	 * @param z the z coordinate in the units of the map
-	 * @return <code>true</code> if the point is in range (approximate)
-	 */
-	protected boolean crudeInRange(float x, float y, float z) {
-		if ((z < getZMin()) || (z > getZMax())) {
-			return false;
-		}
-		if ((Math.abs(x) < getRhoMin()) || (Math.abs(x) > getRhoMax())) {
-			return false;
-		}
-		if ((Math.abs(y) < getRhoMin()) || (Math.abs(y) > getRhoMax())) {
-			return false;
-		}
-		return true;
-	}
-	
-	/** 
-	 * A quick test to throw out points definitely outside the boundaries
-	 * @param phi the phi coordinate in the units of the map
-	 * @param rho the rho coordinate in the units of the map
-	 * @param z the z coordinate in the units of the map
-	 * @return <code>true</code> if the point is in range (approximate)
-	 */
-	protected boolean crudeInRangeCylindrical(float phi, float rho, float z) {
-		if ((z < getZMin()) || (z > getZMax())) {
-			return false;
-		}
-		if ((rho < getRhoMin()) || (rho > getRhoMax())) {
-			return false;
-		}
-		return true;
-	}
 
 	
 	/**
@@ -110,9 +76,9 @@ public final class Solenoid extends MagneticField {
 	 *            the result
 	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
-	public void fieldCylindrical(SolenoidProbe probe, double phi, double rho, double z, float result[]) {
+	public void fieldCylindrical(Cell2D cell, double phi, double rho, double z, float result[]) {
 		
-		if (!crudeInRangeCylindrical((float)phi, (float)rho, (float)z)) {
+		if (!containsCylindrical((float)phi, (float)rho, (float)z)) {
 			result[X] = 0f;
 			result[Y] = 0f;
 			result[Z] = 0f;
@@ -136,13 +102,7 @@ public final class Solenoid extends MagneticField {
 			phi += 360.0;
 		}
 
-		if ((probe == null) || !FieldProbe.CACHE) {
-			interpolateField(rho, z, result);
-		}
-		else {
-			calculate(rho, z, probe, result);
-		}
-
+		cell.calculate(rho, z, result);
 		// rotate onto to proper sector
 		
 		if (phi > 0.001) {
@@ -162,36 +122,24 @@ public final class Solenoid extends MagneticField {
 
 	/**
 	 * Get the field by trilinear interpolation.
-	 *
-	 * @param phi azimuthal angle in degrees.
-	 * @param rho the cylindrical rho coordinate in cm.
-	 * @param z coordinate in cm
-	 * @param result the result
+	 * 
+	 * @param probe
+	 *            for faster results
+	 * @param phi
+	 *            azimuthal angle in degrees.
+	 * @param rho
+	 *            the cylindrical rho coordinate in cm.
+	 * @param z
+	 *            coordinate in cm
+	 * @param result
+	 *            the result
 	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
 	@Override
-	public void fieldCylindrical(double phi, double rho, double z,
-			float result[]) {
-		
-		fieldCylindrical(null, phi, rho, z, result);
+	public void fieldCylindrical(double phi, double rho, double z, float result[]) {
+		fieldCylindrical(_cell, phi, rho, z, result);
 	}
-
-	/**
-	 * Convert a array used as a vector to a readable string.
-	 *
-	 * @param v the vector (float array) to represent.
-	 * @return a string representation of the vector (array).
-	 */
-	// @Override
-	// protected String vectorToString(float v[]) {
-	// float vx = v[X] / 10;
-	// float vy = v[Y] / 10;
-	// float vz = v[Z] / 10;
-	// float vLen = vectorLength(v) / 10;
-	// String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f T",
-	// vx, vy, vz, vLen);
-	// return s;
-	// }
+	
 
 	/**
 	 * main method used for testing.
@@ -357,6 +305,11 @@ public final class Solenoid extends MagneticField {
 
 		double g1 = 1 - f1;
 		double g2 = 1 - f2;
+		
+		double g1g2 = g1*g2;
+		double g1f2 = g1*f2;
+		double f1g2 = f1*g2;
+		double f1f2 = f1*f2;
 
 //		System.out.println("NEW q2 = " + q2 + "  q3 = " + q3);
 //		System.out.println("NEW n1 = " + n1 + "  n2 = " + n2);
@@ -377,8 +330,8 @@ public final class Solenoid extends MagneticField {
 		double b010 = getB1(i010);
 		double b011 = getB1(i011);
 
-		double bphi = b000 * g1 * g2 + b001 * g1 * f2 + b010 * f1 * g2
-				+ b011 * f1 * f2;
+		double bphi = b000 * g1g2 + b001 * g1f2 + b010 * f1g2
+				+ b011 * f1f2;
 
 		// now Brho
 		b000 = getB2(i000);
@@ -386,8 +339,8 @@ public final class Solenoid extends MagneticField {
 		b010 = getB2(i010);
 		b011 = getB2(i011);
 
-		double brho = b000 * g1 * g2 + b001 * g1 * f2 + b010 * f1 * g2
-				+ b011 * f1 * f2;
+		double brho = b000 * g1g2 + b001 * g1f2 + b010 * f1g2
+				+ b011 * f1f2;
 
 		// now Bz
 		b000 = getB3(i000);
@@ -395,7 +348,7 @@ public final class Solenoid extends MagneticField {
 		b010 = getB3(i010);
 		b011 = getB3(i011);
 
-		double bz = b000 * g1 * g2 + b001 * g1 * f2 + b010 * f1 * g2
+		double bz = b000 * g1g2 + b001 * g1f2 + b010 * f1 * g2
 				+ b011 * f1 * f2;
 
 		result[0] = (float) bphi;
@@ -499,6 +452,30 @@ public final class Solenoid extends MagneticField {
 	@Override
 	public String getName() {
 		return "Solenoid";
+	}
+	
+	/**
+	 * Check whether the field boundaries include the point
+	 * 
+	 * @param phi
+	 *            azimuthal angle in degrees.
+	 * @param rho
+	 *            the cylindrical rho coordinate in cm.
+	 * @param z
+	 *            coordinate in cm
+	 * @return <code>true</code> if the point is included in the boundary of the
+	 *         field
+	 * 
+	 */
+	@Override
+	public boolean containsCylindrical(float phi, float rho, float z) {
+		if ((z < getZMin()) || (z > getZMax())) {
+			return false;
+		}
+		if ((rho < getRhoMin()) || (rho > getRhoMax())) {
+			return false;
+		}
+		return true;
 	}
 
 }

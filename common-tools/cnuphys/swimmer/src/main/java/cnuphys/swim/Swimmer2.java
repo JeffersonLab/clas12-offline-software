@@ -3,9 +3,9 @@ package cnuphys.swim;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.IField;
-import cnuphys.magfield.MagneticField;
 import cnuphys.rk4.ButcherTableau;
 import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKutta;
@@ -140,8 +140,8 @@ public class Swimmer2 {
 	//		System.err.println("New start state = " + String.format("(%9.6f, %9.6f, %9.6f) (%9.6f, %9.6f, %9.6f)", xo, yo, zo, px, py, pz));
 
 			// momentum = traj.getFinalMomentum();
-			theta = MagneticField.acos2Deg(uf[5]);
-			phi = MagneticField.atan2Deg(uf[4], uf[3]);
+			theta = FastMath.acos2Deg(uf[5]);
+			phi = FastMath.atan2Deg(uf[4], uf[3]);
 
 
 			SwimTrajectory addTraj = swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, finalPathLength,
@@ -288,8 +288,8 @@ public class Swimmer2 {
 			
 			maxStepSize = Math.max(1.0e-4, (Math.abs(uf[2] - zTarget)/2));
 
-			theta = MagneticField.acos2Deg(uf[5]);  //pz
-			phi = MagneticField.atan2Deg(uf[4], uf[3]); //(py, px)
+			theta = FastMath.acos2Deg(uf[5]);  //pz
+			phi = FastMath.atan2Deg(uf[4], uf[3]); //(py, px)
 
 			int newNStep = swim(charge, uf[0], uf[1], uf[2], 
 					momentum, theta, phi, stopper, finalPathLength, sMax, 

@@ -62,10 +62,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	public enum Mode {
 		SINGLE_EVENT, ACCUMULATED
 	};
-	
-	//field probe for fast retrieval of mag field
-	protected FieldProbe probe;
-	
+		
 	//to add separator for first clone
 	private static boolean _firstClone = true;
 
@@ -163,8 +160,6 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 
 		// listen for trajectory changes
 		Swimming.addSwimTrajectoryListener(this);
-
-		probe = FieldProbe.factory();
 
 		MagneticFields.getInstance().addMagneticFieldChangeListener(this);
 
@@ -643,7 +638,6 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 */
 	@Override
 	public void magneticFieldChanged() {
-		probe = FieldProbe.factory();
 		getContainer().refresh();
 	}
 
