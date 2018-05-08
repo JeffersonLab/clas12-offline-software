@@ -1,5 +1,7 @@
 #!/bin/bash
 
+usage='build-coatjava.sh [--nospotbugs] [--nomaps]'
+
 runSpotBugs="yes"
 downloadMaps="yes"
 for xx in $@
@@ -13,6 +15,9 @@ do
     elif [ "$xx" == "--nomaps" ]
     then
         downloadMaps="no"
+    else
+        echo $usage
+        exit
     fi
 done
 
@@ -23,6 +28,7 @@ if [ $downloadMaps == "yes" ]; then
   cd $locDir
   for map in \
     Full_torus_r251_phi181_z251_18Apr2018.dat \
+    Full_torus_r251_phi181_z251_08May2018.dat \
     Symm_torus_r251_phi121_z251_2008.dat \
     Symm_torus_r2501_phi16_z251_24Apr2018.dat \
     Symm_solenoid_r601_phi1_z1201_2008.dat
