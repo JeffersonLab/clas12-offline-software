@@ -163,7 +163,7 @@ public class SwimEngine extends ReconstructionEngine {
         //this.initField();
         //this.initMagField();
         fastMC = new Clas12FastMC(-1.0,1.0);
-        MagneticField.setMathLib(MagneticField.MathLib.FAST);
+    //    MagneticField.setMathLib(MagneticField.MathLib.FAST);
         System.out.println("[swimmer] -------> FAST MONTE CARLO TEST. USING FAST MATH = " + MagneticField.MathLib.SUPERFAST);
         return true;
     }
@@ -182,6 +182,10 @@ public class SwimEngine extends ReconstructionEngine {
 
             public void fieldCylindrical(double d, double d1, double d2, float[] floats) {
                 
+            }
+            
+            public boolean containsCylindrical(float phi, float rho, float z) {
+                return true;
             }            
         };
         
