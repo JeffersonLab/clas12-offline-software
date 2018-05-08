@@ -25,6 +25,8 @@ public class Torus extends MagneticField {
 		_cell = new Cell3D(this);
 	}
 	
+	
+	
 	/**
 	 * Tests whether this is a full field or a phi symmetric field
 	 * @return <code>true</code> if this is a full field
@@ -67,7 +69,7 @@ public class Torus extends MagneticField {
 		}
 		return relativePhi;
 	}
-
+	
 	/**
 	 * Get the field by trilinear interpolation.
 	 *
@@ -77,8 +79,7 @@ public class Torus extends MagneticField {
 	 * @param result the result
 	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
-	@Override
-	public void fieldCylindrical(double phi, double rho, double z,
+	public void fieldCylindrical(Cell3D cell, double phi, double rho, double z,
 			float result[]) {
 		if (isZeroField()) {
 			result[X] = 0f;
@@ -99,7 +100,7 @@ public class Torus extends MagneticField {
 
 		boolean flip = (relativePhi < 0.0);
 
-		_cell.calculate(Math.abs(relativePhi), rho, z, result);
+		cell.calculate(Math.abs(relativePhi), rho, z, result);
 
 		// negate change x and z components
 		if (flip) {
@@ -122,7 +123,25 @@ public class Torus extends MagneticField {
 		
 		result[X] *= _scaleFactor;
 		result[Y] *= _scaleFactor;
-		result[Z] *= _scaleFactor;
+		result[Z] *= _scaleFactor;		
+	}
+
+
+	/**
+	 * Get the field by trilinear interpolation. Uses the
+	 * common cell which should not be done in a multithreaded environment.
+	 *
+	 * @param phi azimuthal angle in degrees.
+	 * @param rho the cylindrical rho coordinate in cm.
+	 * @param z coordinate in cm
+	 * @param result the result
+	 * @result a Cartesian vector holding the calculated field in kiloGauss.
+	 */
+	@Override
+	public void fieldCylindrical(double phi, double rho, double z,
+			float result[]) {
+
+		fieldCylindrical(_cell, phi, rho, z, result);
 	}
 	
 

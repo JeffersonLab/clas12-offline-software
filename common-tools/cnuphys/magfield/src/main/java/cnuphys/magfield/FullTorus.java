@@ -80,7 +80,7 @@ public class FullTorus extends Torus {
 	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
 	@Override
-	public void fieldCylindrical(double phi, double rho, double z,
+	public void fieldCylindrical(Cell3D cell, double phi, double rho, double z,
 			float result[]) {
 		if (isZeroField()) {
 			result[X] = 0f;
@@ -102,6 +102,24 @@ public class FullTorus extends Torus {
 		result[Y] *= _scaleFactor;
 		result[Z] *= _scaleFactor;
 	}
+	
+	/**
+	 * Get the field by trilinear interpolation. Uses the
+	 * common cell which should not be done in a multithreaded environment.
+	 *
+	 * @param phi azimuthal angle in degrees.
+	 * @param rho the cylindrical rho coordinate in cm.
+	 * @param z coordinate in cm
+	 * @param result the result
+	 * @result a Cartesian vector holding the calculated field in kiloGauss.
+	 */
+	@Override
+	public void fieldCylindrical(double phi, double rho, double z,
+			float result[]) {
+
+		fieldCylindrical(_cell, phi, rho, z, result);
+	}
+
 	
 	//for testing
 	public static void main(String arg[]) {

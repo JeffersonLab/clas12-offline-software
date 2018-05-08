@@ -3,9 +3,9 @@ package cnuphys.magfield;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-public class FieldProbe implements IField {
+public abstract class FieldProbe implements IField {
 
-	protected static boolean CACHE = true;
+//	protected static boolean CACHE = true;
 	
 	protected static final double TINY = 1.0e-8;
 	
@@ -15,10 +15,7 @@ public class FieldProbe implements IField {
 	/**
 	 * 
 	 * @param field
-	 * @deprecated this is nothing more than a wrapper for the underlying IField object. Just 
-	 * use the IField object directly. The probe technologie is now built into the IField object.
 	 */
-	@Deprecated
 	public FieldProbe(IField field) {
 		if (field instanceof FieldProbe) {
 			System.err.println("WARNING: Making a Magnetic Field Probe from a Probe.");
@@ -30,7 +27,6 @@ public class FieldProbe implements IField {
 	 * Get the underlying field
 	 * @return the field that backs this probe
 	 */
-	@Deprecated
 	public IField getField() {
 		return _field;
 	}
@@ -43,27 +39,26 @@ public class FieldProbe implements IField {
 	 */
 	@Deprecated
 	public static void cache(boolean cacheOn) {
-		CACHE = cacheOn;
+//		CACHE = cacheOn;
 	}
 	
 	/**
 	 * Check whether cache is on
 	 * @return <code>true</code> if cache is on
 	 */
+	@Deprecated
 	public static boolean isCache() {
-		return CACHE;
+//		return CACHE;
+		return true;
 	}
 	
+	/**
+	 * Get the name of the field
+	 */
 	@Override
 	public String getName() {
 		return _field.getName();
 	}
-
-	@Override
-	public void field(float x, float y, float z, float result[]) {
-		_field.field(x, y, z, result);
-	}
-
 
 	@Override
 	public float fieldMagnitudeCylindrical(double phi, double r, double z) {
@@ -100,6 +95,44 @@ public class FieldProbe implements IField {
 	
 
     /**
+     * Obtain an approximation for the magnetic field gradient at a given location expressed in Cartesian
+     * coordinates. The field is returned as a Cartesian vector in kiloGauss/cm.
+     *
+     * @param x
+     *            the x coordinate in cm
+     * @param y
+     *            the y coordinate in cm
+     * @param z
+     *            the z coordinate in cm
+     * @param result
+     *            a float array holding the retrieved field in kiloGauss. The
+     *            0,1 and 2 indices correspond to x, y, and z components.
+     */
+	@Override
+     public void gradient(float x, float y, float z, float result[]) {
+		
+		//use three point derivative
+		float del = 1f; //cm
+		float del2 = 2*del;
+		
+		float baseVal = fieldMagnitude(x, y, z);
+		float bv3 = -3*baseVal;
+		
+		float bx0 = fieldMagnitude(x+del, y, z);
+		float bx1 = fieldMagnitude(x+del2, y, z);
+		
+//		System.err.println(" " + baseVal + "  " + bx0 + "  " + bx1);
+		float by0 = fieldMagnitude(x, y+del, z);
+		float by1 = fieldMagnitude(x, y+del2, z);
+		float bz0 = fieldMagnitude(x, y, z+del);
+		float bz1 = fieldMagnitude(x, y, z+del2);
+		
+		result[0] = (bv3 + 4*bx0 - bx1)/del2;
+		result[1] = (bv3 + 4*by0 - by1)/del2;
+		result[2] = (bv3 + 4*bz0 - bz1)/del2;
+    }
+	
+	/**
      * Obtain an approximation for the magnetic field gradient at a given location expressed in cylindrical
      * coordinates. The field is returned as a Cartesian vector in kiloGauss/cm.
      *
@@ -116,29 +149,13 @@ public class FieldProbe implements IField {
 	@Override
     public void gradientCylindrical(double phi, double rho, double z,
     	    float result[]) {
-		_field.gradientCylindrical(phi, rho, z, result);
+		phi = Math.toRadians(phi);
+		double x = rho*FastMath.cos(phi);
+    	double y = rho*FastMath.sin(phi);
+    	gradient((float)x, (float)y, (float)z, result);
     }
 
-
-    /**
-     * Obtain an approximation for the magnetic field gradient at a given location expressed in Cartesian
-     * coordinates. The field is returned as a Cartesian vector in kiloGauss/cm.
-     *
-     * @param x
-     *            the x coordinate in cm
-     * @param y
-     *            the y coordinate in cm
-     * @param z
-     *            the z coordinate in cm
-     * @param result
-     *            a float array holding the retrieved field in kiloGauss. The
-     *            0,1 and 2 indices correspond to x, y, and z components.
-     */
-     @Override
-	public void gradient(float x, float y, float z, float result[]) {
- 		_field.gradientCylindrical(x, y, z, result);
-     }
-
+	
 	
 	/**
 	 * Get the appropriate probe for the given field

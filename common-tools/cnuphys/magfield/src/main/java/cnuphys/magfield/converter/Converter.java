@@ -26,6 +26,12 @@ public class Converter {
 	private static int RHO = 1;
 	private static int Z = 2;
 	
+	private static final double TINY = 1.0e-12;
+
+	static boolean firstLine = true;
+	static int lineCount;
+
+	
 	private static String gemcName[] = {"\"azimuthal\"", "\"transverse\"", "\"longitudinal\""};
 	private static String ordinal[] = {"first", "second", "third"};
 	private static String units[] = {"\"deg\"", "\"cm\"", "\"cm\""};
@@ -95,107 +101,91 @@ public class Converter {
 		return _homeDir + "/newMaps";
 	}
 
-	private static final double TINY = 1.0e-12;
-
-	// test that the grid sems to be right
-	static double oldZ = -99f;
-	static double oldRho = -99f;
-	static double oldPhi = -999f;
-
-	static boolean checkrho = true;
-	private static GridData[] preProcess(ArrayList<File> files) throws IOException {
+	
+	private static GridData[] preProcessor(ArrayList<File> files) throws IOException {
+		
 		
 		if (!files.isEmpty()) {
 			System.out.println("Found " + files.size() + " files.");
+			
 			GridData gdata[] = new GridData[3];
 			for (int i = 0; i < 3; i++) {
 				gdata[i] = (new Converter()).new GridData(i);
 			}
-
+			
+			gdata[Z].n = files.size();
+			
 			int zIndex = 0;
-			oldZ = -99f;
-			oldRho = -99f;
-			oldPhi = -999f;
-			float tiny = 0.1f;
-
 			for (File file : files) {
-				System.out.println(" PROCESSING FILE [" + file.getName() + "] zindex =  " + zIndex + "  ");
-
-				boolean first = (zIndex == 0);
 				
-//				boolean last = (zIndex == (files.size()-1));
-				
-				gdata[Z].n = files.size();
-				
-	//			if (zIndex == 1) break;
-				
+	 	    	System.out.println(" PRE-PROCESSING FILE [" + file.getName() + "] zindex =  " + zIndex + "  ");
+	 	    	firstLine = true;
+	 	    	lineCount = 0;
 				try {
 
 					AsciiReader ar = new AsciiReader(file, zIndex) {
-						int count = 0;
-
+						
 						@Override
 						protected void processLine(String line) {
 							String tokens[] = AsciiReadSupport.tokens(line);
+							
+							if (firstLine) {
+								int nRho = Integer.parseInt(tokens[0]);
+								int nPhi = Integer.parseInt(tokens[1]);
+								
+								if (gdata[PHI].n == 0) {
+									gdata[PHI].n = nPhi;
+									gdata[RHO].n = nRho;
+								}
+								else {
+									if ((gdata[PHI].n != nPhi) || (gdata[RHO].n  != nRho)) {
+										System.err.println("Grid Inconsistency");
+										System.exit(1);
+									}
+								}
+								
+								firstLine = false;
+							} //firstLine
+							
 							if ((tokens != null) && (tokens.length == 7)) {
-
+								int rhoIndex = lineCount % (gdata[RHO].n);
+								int phiIndex = lineCount % (gdata[RHO].n);
+								
 								double newX = Double.parseDouble(tokens[0])/10;
 								double newY = Double.parseDouble(tokens[1])/10;
 								double newZ = Float.parseFloat(tokens[2])/10;
 								double newRho = Math.hypot(newX, newY);
 								double newPhi = Math.toDegrees(Math.atan2(newY, newX));
-								if (newPhi < -.0001) newPhi += 360;
 							
-								gdata[PHI].min = Math.min(gdata[PHI].min, newPhi);
-								gdata[PHI].max = Math.max(gdata[PHI].max, newPhi);
+								if (phiIndex == 0) {
+									newPhi = 0.;
+								} else {
+									if (newPhi < -.0001) { 
+										newPhi += 360;
+									}
+								}
+									
+								if (phiIndex == (gdata[PHI].n - 1)) {
+									if (zeroAngle(newPhi)) {
+										newPhi = 360.;
+									}
+								}
+
+								gdata[PHI].min = Math.max(0, Math.min(gdata[PHI].min, newPhi));
+								gdata[PHI].max = Math.min(360, Math.max(gdata[PHI].max, newPhi));
 								gdata[RHO].min = Math.min(gdata[RHO].min, newRho);
 								gdata[RHO].max = Math.max(gdata[RHO].max, newRho);
 								gdata[Z].min = Math.min(gdata[Z].min, newZ);
 								gdata[Z].max = Math.max(gdata[Z].max, newZ);
 								
-							
-//								if (oldPhi > 1) {
-//									if (newPhi < 1) {
-//										System.out.println("phi = " + newPhi + "  x = " + newX/10 + "  y = " + newY/10);
-//									}
-//								}
-								
-
-								if (Math.abs(newPhi - oldPhi) > tiny) {
-									if (first && (newPhi > oldPhi)) {
-										System.out.println("    new Phi = " + newPhi);
-										gdata[PHI].n += 1;
-									}
-									oldPhi = newPhi;
-									
-								}
-								
-								if (Math.abs(newRho - oldRho) > tiny) {
-	//								System.out.println("  new Rho = " + newRho/10); //mm to cm
-									
-									if (checkrho && (newRho < oldRho)) {
-										checkrho = false;
-									}
-									if (checkrho &&  (newRho > oldRho)) {
-										gdata[RHO].n += 1;
-									}
-			     					oldRho = newRho;
-									
-
-								}
-
-								
-								if (Math.abs(newZ - oldZ) > tiny) {
-	//								System.out.println("new Z = " + newZ/10); //mm to cm
-									oldZ = newZ;
-								}
-								count++;
+								lineCount++;
 							}
-						}
+
+						} //processLine
 
 						@Override
 						public void done() {
-							System.out.println(" processed " + count + " lines");
+							System.out.println(" processed " + lineCount + " lines");
 						}
 
 					};
@@ -203,15 +193,27 @@ public class Converter {
 					e.printStackTrace();
 					System.exit(1);
 				}
-
-				zIndex++;
-			} // end file loop
-
+	 	    	
+	 	    	zIndex++;
+			}
+			
+			if ((gdata[PHI].max > 31)  && (gdata[PHI].max > 31)) {
+				System.err.println("Correcting PhiMax to 360 from " +  gdata[PHI].max);
+			}
+			
 			return gdata;
-		} else {
-			System.err.println("No files!");
-			return null;
 		}
+		
+		return null;
+	}
+	
+
+	private static boolean zeroAngle(double angDeg) {
+		if ((Math.abs(angDeg) < TINY) || (Math.abs(angDeg-360.) < TINY)) {
+			return true;
+		}
+		
+		return false;
 	}
 
 	// process all the files
@@ -290,7 +292,23 @@ public class Converter {
 								float By = Float.parseFloat(tokens[4]) * 10;
 								float Bz = Float.parseFloat(tokens[5]) * 10;
 
+								try {
 								bvals[phiIndex][rhoIndex][iVal] = new FloatVect(Bx, By, Bz);
+								}
+								catch (ArrayIndexOutOfBoundsException e ) {
+									e.printStackTrace();
+									System.err.println("PHIINDX: " + phiIndex + "  RHOINDX: " + rhoIndex + "  ZINDX:  " + iVal);
+
+									double x = Double.parseDouble(tokens[0])/10;
+									double y = Double.parseDouble(tokens[1]);
+									double z = Double.parseDouble(tokens[2]);
+									double phi = Math.toDegrees(Math.atan2(y, x));
+									double rho = Math.hypot(x, y);
+									System.err.println("PHI: " + phi + "   rho: " + rho + "   z: " + z);
+									
+									
+									System.exit(1);
+								}
 
 								count++;
 							}
@@ -511,7 +529,8 @@ public class Converter {
 		//preprocess to get the grid data
 		GridData gdata[] = null;
 		try {
-			gdata = preProcess(files);
+			gdata = preProcessor(files);
+			
 			System.out.println("PHI: " + gdata[PHI]);
 			System.out.println("RHO: " + gdata[RHO]);
 			System.out.println("Z: " + gdata[Z]);
@@ -520,8 +539,8 @@ public class Converter {
 			e.printStackTrace();
 		}
 		
-	//	convertToBinary(files, gdata);
-		convertToGemc(files, gdata);
+		convertToBinary(files, gdata);
+	//	convertToGemc(files, gdata);
 
 		System.out.println("done");
 	}

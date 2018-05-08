@@ -76,8 +76,7 @@ public final class Solenoid extends MagneticField {
 	 *            the result
 	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
-	@Override
-	public void fieldCylindrical(double phi, double rho, double z, float result[]) {
+	public void fieldCylindrical(Cell2D cell, double phi, double rho, double z, float result[]) {
 		
 		if (!containsCylindrical((float)phi, (float)rho, (float)z)) {
 			result[X] = 0f;
@@ -103,7 +102,7 @@ public final class Solenoid extends MagneticField {
 			phi += 360.0;
 		}
 
-		_cell.calculate(rho, z, result);
+		cell.calculate(rho, z, result);
 		// rotate onto to proper sector
 		
 		if (phi > 0.001) {
@@ -121,23 +120,26 @@ public final class Solenoid extends MagneticField {
 		result[Z] *= _scaleFactor;
 	}
 
-
 	/**
-	 * Convert a array used as a vector to a readable string.
-	 *
-	 * @param v the vector (float array) to represent.
-	 * @return a string representation of the vector (array).
+	 * Get the field by trilinear interpolation.
+	 * 
+	 * @param probe
+	 *            for faster results
+	 * @param phi
+	 *            azimuthal angle in degrees.
+	 * @param rho
+	 *            the cylindrical rho coordinate in cm.
+	 * @param z
+	 *            coordinate in cm
+	 * @param result
+	 *            the result
+	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
-	// @Override
-	// protected String vectorToString(float v[]) {
-	// float vx = v[X] / 10;
-	// float vy = v[Y] / 10;
-	// float vz = v[Z] / 10;
-	// float vLen = vectorLength(v) / 10;
-	// String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f T",
-	// vx, vy, vz, vLen);
-	// return s;
-	// }
+	@Override
+	public void fieldCylindrical(double phi, double rho, double z, float result[]) {
+		fieldCylindrical(_cell, phi, rho, z, result);
+	}
+	
 
 	/**
 	 * main method used for testing.

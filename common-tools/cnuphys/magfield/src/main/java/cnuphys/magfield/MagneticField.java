@@ -17,6 +17,11 @@ import java.nio.FloatBuffer;
  */
 public abstract class MagneticField implements IField {
 
+	/** Which atan2, etc. algorithms to use */
+	public enum MathLib {
+		DEFAULT, FAST, SUPERFAST;
+	}
+
 
 	/** Magic number used to check if byteswapping is necessary. */
 	public static final int MAGICNUMBER = 0xced;
@@ -129,6 +134,7 @@ public abstract class MagneticField implements IField {
 	protected static final int Y = 1;
 	protected static final int Z = 2;
 	
+
 
 	/**
 	 * Scale the field.
@@ -441,12 +447,19 @@ public abstract class MagneticField implements IField {
 	}
 
 	/**
-	 * Get the math lib being used.  Kept here for backwards compatibility.
+	 * Get the math lib being used. Kept here for backwards compatibility.
 	 * 
 	 * @return the math lib being used
 	 */
-	public static FastMath.MathLib getMathLib() {
-		return FastMath.getMathLib();
+	public static MathLib getMathLib() {
+		switch (FastMath.getMathLib()) {
+		case FAST:
+			return MathLib.FAST;
+		case SUPERFAST:
+			return MathLib.SUPERFAST;
+		default:
+			return MathLib.DEFAULT;
+		}
 	}
 
 	/**
@@ -455,8 +468,15 @@ public abstract class MagneticField implements IField {
 	 * @param lib
 	 *            the math library enum
 	 */
-	public static void setMathLib(FastMath.MathLib lib) {
-		FastMath.setMathLib(lib);
+	public static void setMathLib(MathLib lib) {
+		switch (lib) {
+		case FAST:
+			FastMath.setMathLib(FastMath.MathLib.FAST);
+		case SUPERFAST:
+			FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
+		default:
+			FastMath.setMathLib(FastMath.MathLib.DEFAULT);
+		}
 	}
 
 	/**
