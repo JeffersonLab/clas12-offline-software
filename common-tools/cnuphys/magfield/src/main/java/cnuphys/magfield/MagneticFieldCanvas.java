@@ -44,7 +44,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 
 	protected Font font = new Font("SandSerif", Font.PLAIN, 10);
 	protected Font font2 = new Font("SandSerif", Font.BOLD, 12);
-
+	
 	// coordinate system
 	public enum CSType {
 		XZ, YZ
@@ -309,6 +309,10 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 		float result[] = new float[3];
 		int w = 2;
 		int h = 2;
+		
+		//use probes
+		IField ifield = FieldProbe.factory(MagneticFields.getInstance().getActiveField());
+
 
 		for (int sx = bounds.x; sx < bounds.x + bounds.width; sx += w) {
 			pp.x = sx;
@@ -317,14 +321,15 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 				pp.y = sy;
 
 				localToWorld(pp, wp);
+				
 
 				switch (_cstype) {
 				case XZ:
-					MagneticFields.getInstance().field((float) (wp.y), 0f, (float) (wp.x),
+					ifield.field((float) (wp.y), 0f, (float) (wp.x),
 							result);
 					break;
 				case YZ:
-					MagneticFields.getInstance().field(0f, (float) (wp.y), (float) (wp.x),
+					ifield.field(0f, (float) (wp.y), (float) (wp.x),
 							result);
 					break;
 				}
@@ -492,9 +497,13 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 				localToWorld(me.getPoint(), _workPoint);
 
 				String s = null;
+				
+	//			IField ifield = MagneticFields.getInstance().getActiveField();
+				IField ifield = FieldProbe.factory(MagneticFields.getInstance().getActiveField());
+				
 				switch (_cstype) {
 				case XZ:
-					MagneticFields.getInstance().field((float) (_workPoint.y), 0f,
+					ifield.field((float) (_workPoint.y), 0f,
 							(float) (_workPoint.x), _workResult);
 					float Bx = _workResult[0];
 					float By = _workResult[1];
@@ -506,7 +515,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 									Bx / 10, By / 10, Bz / 10);
 					break;
 				case YZ:
-					MagneticFields.getInstance().field(0f, (float) (_workPoint.y),
+					ifield.field(0f, (float) (_workPoint.y),
 							(float) (_workPoint.x), _workResult);
 					Bx = _workResult[0];
 					By = _workResult[1];

@@ -43,6 +43,7 @@ import cnuphys.ced.item.SectorHTCCItem;
 import cnuphys.ced.item.SectorLTCCItem;
 import cnuphys.ced.item.SectorPCALItem;
 import cnuphys.ced.item.SectorSuperLayer;
+import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.splot.fit.FitType;
@@ -803,14 +804,14 @@ public class SectorView extends CedView implements ChangeListener {
 				+ " cm";
 		feedbackStrings.add(tiltsectxyz);
 
-//		IField activeField = MagneticFields.getInstance().getActiveField();
+		IField activeField = MagneticFields.getInstance().getActiveField();
 				
-		if (probe != null) {
+		if (activeField != null) {
 			float field[] = new float[3];
-			probe.fieldCylindrical(absphi, rho, z, field);
+			activeField.fieldCylindrical(absphi, rho, z, field);
 			
 			float grad[] = new float[3];
-			probe.gradientCylindrical(absphi, rho, z, grad);
+			activeField.gradientCylindrical(absphi, rho, z, grad);
 			
 			// convert to Tesla from kG
 			field[0] /= 10.0;

@@ -76,11 +76,11 @@ import cnuphys.ced.trigger.TriggerDialog;
 import cnuphys.ced.trigger.TriggerManager;
 import cnuphys.ced.trigger.TriggerMenuPanel;
 import cnuphys.lund.X11Colors;
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.MagneticField;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
-import cnuphys.magfield.MagneticField.MathLib;
 import cnuphys.splot.example.MemoryUsageDialog;
 import cnuphys.splot.plot.PlotPanel;
 import cnuphys.swim.SwimMenu;
@@ -1087,8 +1087,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 * @param arg the command line arguments.
 	 */
 	public static void main(String[] arg) {
-		FieldProbe.cache(true);
-		MagneticField.setMathLib(MathLib.FAST);
+		FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
 		
 		//read in userprefs
 		PropertiesManager.getInstance();

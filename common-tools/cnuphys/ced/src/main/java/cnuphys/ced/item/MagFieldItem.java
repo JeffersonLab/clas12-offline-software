@@ -19,6 +19,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.MagFieldDisplayArray;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.GridCoordinate;
+import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 
@@ -258,9 +259,11 @@ public class MagFieldItem extends AItem {
 			boolean hasSolenoid) {
 
 
-		// get a probe
-		FieldProbe probe = FieldProbe.factory();
-
+		IField activeField = MagneticFields.getInstance().getActiveField();
+		if (activeField == null) {
+			return;
+		}
+		
 		Rectangle bounds = container.getComponent().getBounds();
 		bounds.x = 0;
 		bounds.y = 0;
@@ -304,27 +307,37 @@ public class MagFieldItem extends AItem {
 				double z = coords[2];
 				double rho = coords[3];
 				double phi = coords[4];
+				
+				if (activeField.containsCylindrical((float)phi, (float)rho, (float)z)) {
 
 				if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
-					double bmag = probe.fieldMagnitudeCylindrical(phi, rho, z) / 10.;
+					double bmag = activeField.fieldMagnitudeCylindrical(phi, rho, z) / 10.;
 
 					Color color = _colorScaleModelTorus.getColor(bmag);
 					g.setColor(color);
 					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
 				}
 				else if (displayOption == MagFieldDisplayArray.BGRADDISPLAY) {
-					probe.gradientCylindrical(phi, rho, z, result);
+					activeField.gradientCylindrical(phi, rho, z, result);
 					double gmag = Math.sqrt(result[0]*result[0] +
 							result[1]*result[1] + result[2]*result[2]);
 					
 					//convert to T/m
 					gmag *= 10;
+					
 					Color color = _colorScaleModelGradient.getColor(gmag);
+					
+					if (color.getAlpha() < 255) {
+						color = new Color(color.getRed(), color.getGreen(), color.getBlue(), 255);
+					}
+					
+					
 					g.setColor(color);
 					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
+					
 				}
 				else { // one of the components
-					probe.fieldCylindrical(phi, rho, z, result);
+					activeField.fieldCylindrical(phi, rho, z, result);
 					double comp = 0.0;
 					switch (displayOption) {
 					case MagFieldDisplayArray.BXDISPLAY:
@@ -360,6 +373,7 @@ public class MagFieldItem extends AItem {
 					}
 
 				} //a component
+				}
 
 				pp.y += pixelStep;
 			}
@@ -393,7 +407,7 @@ public class MagFieldItem extends AItem {
 	private static double[] getGradientValues() {
 		int len = getGradientColors().length + 1;
 
-		double min = 0.05;
+		double min = 0.0;
 		double max = 15; //T/m
 		double del = (max-min) / (len - 1);
 		double values[] = new double[len];
@@ -503,14 +517,17 @@ public class MagFieldItem extends AItem {
 				int rr = r[i] + (int) (j * f * (r[i + 1] - r[i]));
 				int gg = g[i] + (int) (j * f * (g[i + 1] - g[i]));
 				int bb = b[i] + (int) (j * f * (b[i + 1] - b[i]));
+				
+				colors[k] = new Color(rr, gg, bb);
 
-				if (k < 2) {
-					// colors[k] = Color.cyan;
-					colors[k] = new Color(rr, gg, bb, 64);
-				}
-				else {
-					colors[k] = new Color(rr, gg, bb);
-				}
+//
+//				if (k < 2) {
+//					// colors[k] = Color.cyan;
+//					colors[k] = new Color(rr, gg, bb, 64);
+//				}
+//				else {
+//					colors[k] = new Color(rr, gg, bb);
+//				}
 				k++;
 			}
 		}
@@ -555,13 +572,15 @@ public class MagFieldItem extends AItem {
 				int gg = g[i] + (int) (j * f * (g[i + 1] - g[i]));
 				int bb = b[i] + (int) (j * f * (b[i + 1] - b[i]));
 
-				if (k < 2) {
-					// colors[k] = Color.cyan;
-					colors[k] = new Color(rr, gg, bb, 64);
-				}
-				else {
-					colors[k] = new Color(rr, gg, bb);
-				}
+				colors[k] = new Color(rr, gg, bb);
+
+//				if (k < 2) {
+//					// colors[k] = Color.cyan;
+//					colors[k] = new Color(rr, gg, bb, 64);
+//				}
+//				else {
+//					colors[k] = new Color(rr, gg, bb);
+//				}
 				k++;
 			}
 		}

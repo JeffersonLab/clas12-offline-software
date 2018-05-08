@@ -22,12 +22,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
-import cnuphys.magfield.MagneticField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.DefaultSwimStopper;
@@ -369,14 +368,14 @@ public class LundTrackDialog extends JDialog {
 	private static void printSummary(String message, int nstep,
 			double momentum, double Q[], double hdata[]) {
 		System.out.println(message);
-		double R = Math.sqrt(Q[0] * Q[0] + Q[1] * Q[1] + Q[2] * Q[2]);
-		double norm = Math.sqrt(Q[3] * Q[3] + Q[4] * Q[4] + Q[5] * Q[5]);
+		double R = FastMath.sqrt(Q[0] * Q[0] + Q[1] * Q[1] + Q[2] * Q[2]);
+		double norm = FastMath.sqrt(Q[3] * Q[3] + Q[4] * Q[4] + Q[5] * Q[5]);
 		double P = momentum * norm;
 		double px = P * Q[3];
 		double py = P * Q[4];
 		double pz = P * Q[5];
-		double theta = MagneticField.acos2Deg(pz / P);
-		double phi = MagneticField.atan2Deg(py, px);
+		double theta = FastMath.acos2Deg(pz / P);
+		double phi = FastMath.atan2Deg(py, px);
 
 		System.out.println("Number of steps: " + nstep);
 
@@ -398,8 +397,8 @@ public class LundTrackDialog extends JDialog {
 		px = -px;
 		py = -py;
 		pz = -pz;
-		theta = MagneticField.acos2Deg(pz / P);
-		phi = MagneticField.atan2Deg(py, px);
+		theta = FastMath.acos2Deg(pz / P);
+		phi = FastMath.atan2Deg(py, px);
 		System.out.println(String.format(
 				"Swim backwards use theta: %9.6f  phi: %9.6f", theta, phi));
 
