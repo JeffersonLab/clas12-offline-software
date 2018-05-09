@@ -8,6 +8,7 @@ import cnuphys.snr.clas12.Clas12NoiseResult;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
@@ -70,7 +71,10 @@ String FieldsConfig="";
         this.getConstantsManager().setVariation("calib");
 
         // Load the geometry
-        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
+        String varname = CLASResources.getEnvironmentVariable("GEOMETRYDATABASEVARIATION");
+        String variationName = Optional.ofNullable(varname).orElse("default");
+
+        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, variationName);
         dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
         
         
