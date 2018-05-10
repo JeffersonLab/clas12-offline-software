@@ -139,7 +139,7 @@ public class Cell3D implements MagneticFieldChangeListener {
 	 * 
 	 */
 	public boolean containedCylindrical(double phi, double rho, double z) {
-		return (phi >= q1Min && phi < q1Max) && (rho >= q2Min && rho < q2Max) && (z >= q3Min && z < q3Max);
+		return ((phi > q1Min) && (phi < q1Max) && (rho > q2Min) && (rho < q2Max) && (z > q3Min) && (z < q3Max));
 	}
 
 	/**
@@ -227,7 +227,6 @@ public class Cell3D implements MagneticFieldChangeListener {
 
 	@Override
 	public void magneticFieldChanged() {
-		System.err.println("MAG FIELD CHANGED");
 		q1Min = Float.POSITIVE_INFINITY;
 		q1Max = Float.NEGATIVE_INFINITY;
 		q2Min = Float.POSITIVE_INFINITY;

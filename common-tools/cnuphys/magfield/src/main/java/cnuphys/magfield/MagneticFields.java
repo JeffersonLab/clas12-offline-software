@@ -934,68 +934,63 @@ public class MagneticFields {
 	 * Tries to load the magnetic fields from fieldmaps
 	 */
 	public void initializeMagneticFields() {
+		
+		//three dirs to try (they should have a magfield directory)
+		String dirs[] = {getProperty("user.dir"),
+				getProperty("user.home"),
+				getProperty("user.dir") + "/../../../../../../etc/data"};
+		
+		boolean goodDir[] = new boolean[dirs.length];
+			
+		for (int i = 0; i < goodDir.length; i++) {
+			File magdir = new File(dirs[i], "magfield");
+			goodDir[i] = (magdir.exists() && magdir.isDirectory());
+			
+			try {
+				System.out.println("MagDir [" + magdir.getCanonicalPath() + "]  Good: " + goodDir[i]);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
-		// create a dir path to look for the fields
-		// these is a dir path, has nothing to do with the name of the field
+		for (int i = 0; i < goodDir.length; i++) {
+			if (goodDir[i]) {
+				File magdir = new File(dirs[i], "magfield");
+				if (initializeMagneticFields(magdir)) {
+					System.out.println("Used fields found in [" + magdir.getPath() + "]");
+					return;
+				}
+				else {
+					System.out.println("WARNING Unable to use fields found in [" + magdir.getPath() + "]");
+				}
+			}
+		}
+		
+		System.out.println("WARNING Magnetic Field Package did not initialize.");
+	}
 
-		String homeDir = getProperty("user.home");
+	private boolean initializeMagneticFields(File magdir) {
 
-		File magdir = new File(homeDir, "magfield");
-		if (magdir.exists() && magdir.isDirectory()) {
-			//Symm_torus_LOWRES_2008.dat
-			//Full_torus_r251_phi181_z251_18Apr2018.dat
-			File torusFile = new File(magdir, "Symm_torus_LOWRES_2008.dat");
-			if (torusFile.exists() && torusFile.canRead()) {
-				File solenoidFile = new File(magdir, "Symm_solenoid_r601_phi1_z1201_2008.dat");
-				if (solenoidFile.exists() && solenoidFile.canRead()) {
-					try {
-						MagneticFields.getInstance().initializeMagneticFieldsFromPath(torusFile.getPath(),
-								solenoidFile.getPath());
-					} catch (FileNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (MagneticFieldInitializationException e) {
-						e.printStackTrace();
-					}
+		// Symm_torus_LOWRES_2008.dat
+		// Full_torus_r251_phi181_z251_18Apr2018.dat
+		File torusFile = new File(magdir, "Symm_torus_LOWRES_2008.dat");
+		if (torusFile.exists() && torusFile.canRead()) {
+			File solenoidFile = new File(magdir, "Symm_solenoid_r601_phi1_z1201_2008.dat");
+			if (solenoidFile.exists() && solenoidFile.canRead()) {
+				try {
+					MagneticFields.getInstance().initializeMagneticFieldsFromPath(torusFile.getPath(),
+							solenoidFile.getPath());
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+					return false;
+				} catch (MagneticFieldInitializationException e) {
+					e.printStackTrace();
+					return false;
 				}
 			}
 		}
 
-		String cwd = getProperty("user.dir");
-
-		String olswDir = null;
-		try {
-			olswDir = (new File(cwd + "/../../../../../..")).getCanonicalPath();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		// build up dir path
-		StringBuffer sb = new StringBuffer(1024);
-		sb.append(".");
-
-		if (olswDir != null) {
-			File dfile = new File(olswDir, "/etc/data/magfield");
-			if (dfile.exists()) {
-				sb.append(":" + dfile.getPath());
-			}
-		}
-
-		sb.append(":" + homeDir + "/fieldMaps");
-		sb.append(":" + homeDir + "/magfield");
-		sb.append(":cedbuild/magfield");
-		sb.append(":../../../data");
-		sb.append(":../../data");
-		sb.append(":../data");
-		sb.append(":data");
-		sb.append(":../../../magfield");
-		sb.append(":../../magfield");
-		sb.append(":../magfield");
-		sb.append(":magfield");
-
-		String dirPath = sb.toString();
-
-		initializeMagneticFields(dirPath, TorusMap.SYMMETRIC);
+		return true;
 	}
 
 	/**
