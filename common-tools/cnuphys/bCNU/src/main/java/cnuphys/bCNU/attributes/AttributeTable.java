@@ -144,6 +144,16 @@ public class AttributeTable extends JTable {
 		removeEditor();
 		resizeAndRepaint();
 	}
+	
+	/**
+	 * Tries to find the attribute with the given key
+	 * 
+	 * @param attributeKey match to the key
+	 * @return the Attribute, or null.
+	 */
+	public Attribute getAttribute(String attributeKey) {
+		return this.getAttributeTableModel().getAttribute(attributeKey);
+	}
 
 
 	/**
@@ -216,6 +226,7 @@ public class AttributeTable extends JTable {
 		//make the table
 		
 		AttributeTable table = new AttributeTable();
+		
 		table.setData(attributes.clone());
 		AttributePanel panel = new AttributePanel(table);
 		
