@@ -29,8 +29,41 @@ import cnuphys.bCNU.graphics.style.SymbolType;
 	 * Create an empty Attributes object.
 	 */
 	public Attributes() {
-
+		super(100);
 	}
+	
+	/**
+	 * See if there is an attribute with the given key
+	 * @param attributeKey the key
+	 * @return <code>true</code> if this collection contains the key
+	 */
+	public boolean contains (String attributeKey) {
+		for (Attribute attribute : this) {
+			String key = attribute.getKey();
+			if (attributeKey.equals(key)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Tries to find the attribute with the given key
+	 * 
+	 * @param attributeKey match to the key
+	 * @return the Attribute, or null.
+	 */
+	public Attribute getAttribute(String attributeKey) {
+		
+		for (Attribute attribute : this) {
+			String key = attribute.getKey();
+			if (attributeKey.equals(key)) {
+				return attribute;
+			}
+		}
+		return null;
+	}
+
 
 	@Override
 	public boolean add(Attribute attribute) {
@@ -48,6 +81,30 @@ import cnuphys.bCNU.graphics.style.SymbolType;
 		add(index, attribute);
 		return true;
 	}
+	
+	/**
+	 * Add an attribute
+	 * @param key the key (name)
+	 * @param value the value
+	 * @param editable whether it is editable
+	 * @param hidden whether it is hidden (not on the table)
+	 * @return
+	 */
+	public boolean add(String key, Object value, boolean editable, boolean hidden) {
+		Attribute attribute = new Attribute(key, value, editable, hidden);
+		return add(attribute);
+	}
+	
+	/**
+	 * Add an attribute that is editable and not hidden
+	 * @param key the key (name)
+	 * @param value the value
+	 * @return
+	 */
+	public boolean add(String key, Object value) {
+		return add(key, value, true, false);
+	}
+
 
 
 	@Override

@@ -1,5 +1,7 @@
 package cnuphys.bCNU.attributes;
 
+import javax.management.modelmbean.InvalidTargetObjectTypeException;
+
 public class Attribute implements Comparable<Attribute> {
 	
 	//is the Attribute editable
@@ -17,6 +19,7 @@ public class Attribute implements Comparable<Attribute> {
 	
 	/**
 	 * Create an attribute
+	 * @param key the key (name)
 	 * @param value the value
 	 * @param editable whether it is editable
 	 * @param hidden whether it is hidden (not on the table)
@@ -107,6 +110,120 @@ public class Attribute implements Comparable<Attribute> {
 		String newKey = new String(_key);
 		Object newVal = AttributeType.cloneValue(_value);
 		return new Attribute(newKey, newVal, _editable, _hidden);
+	}
+	
+	/**
+	 * Retrieve a String value
+	 * @return the value as a String
+	 * @throws InvalidTargetObjectTypeException if the value is not a String
+	 */
+	public String getString() throws InvalidTargetObjectTypeException {
+		if (_value instanceof String) {
+			return (String)_value;
+		}
+		else {
+			throw new InvalidTargetObjectTypeException("Attribute Value is not a String");
+		}
+	}
+	
+	/**
+	 * Retrieve a boolean value
+	 * @return the value as a boolean
+	 * @throws InvalidTargetObjectTypeException if the value is not a Boolean
+	 */
+	public boolean getBoolean() throws InvalidTargetObjectTypeException {
+		if (_value instanceof Boolean) {
+			return (Boolean)_value;
+		}
+		else {
+			throw new InvalidTargetObjectTypeException("Attribute Value is not a Boolean");
+		}
+	}
+
+	/**
+	 * Retrieve a byte value
+	 * @return the value as a byte
+	 * @throws InvalidTargetObjectTypeException if the value is not a Byte
+	 */
+	public byte getByte() throws InvalidTargetObjectTypeException {
+		if (_value instanceof Byte) {
+			return (Byte)_value;
+		}
+		else {
+			throw new InvalidTargetObjectTypeException("Attribute Value is not a Byte");
+		}
+	}
+
+	/**
+	 * Retrieve a short value
+	 * @return the value as a short
+	 * @throws InvalidTargetObjectTypeException if the value is not a Short
+	 */
+	public short getShort() throws InvalidTargetObjectTypeException {
+		if (_value instanceof Short) {
+			return (Short)_value;
+		}
+		else {
+			throw new InvalidTargetObjectTypeException("Attribute Value is not a Short");
+		}
+	}
+
+	/**
+	 * Retrieve an int value
+	 * @return the value as an int
+	 * @throws InvalidTargetObjectTypeException if the value is not an Integer
+	 */
+	public int getInt() throws InvalidTargetObjectTypeException {
+		if (_value instanceof Integer) {
+			return (Integer)_value;
+		}
+		else {
+			throw new InvalidTargetObjectTypeException("Attribute Value is not a Integer");
+		}
+	}
+
+	
+	/**
+	 * Retrieve a long value
+	 * @return the value as a long
+	 * @throws InvalidTargetObjectTypeException if the value is not a Long
+	 */
+	public long getLong() throws InvalidTargetObjectTypeException {
+		if (_value instanceof Long) {
+			return (Long)_value;
+		}
+		else {
+			throw new InvalidTargetObjectTypeException("Attribute Value is not a Long");
+		}
+	}
+	
+	/**
+	 * Retrieve a float value
+	 * @return the value as a float
+	 * @throws InvalidTargetObjectTypeException if the value is not a Float
+	 */
+	public float getFloat() throws InvalidTargetObjectTypeException {
+		if (_value instanceof Float) {
+			return (Float)_value;
+		}
+		else {
+			throw new InvalidTargetObjectTypeException("Attribute Value is not a Float");
+		}
+	}
+
+	
+	/**
+	 * Retrieve a double value
+	 * @return the value as a double
+	 * @throws InvalidTargetObjectTypeException if the value is not a Double
+	 */
+	public double getDouble() throws InvalidTargetObjectTypeException {
+		if (_value instanceof Double) {
+			return (Double)_value;
+		}
+		else {
+			throw new InvalidTargetObjectTypeException("Attribute Value is not a Double");
+		}
 	}
 
 }

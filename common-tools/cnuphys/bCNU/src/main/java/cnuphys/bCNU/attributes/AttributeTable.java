@@ -127,10 +127,12 @@ public class AttributeTable extends JTable {
 	 * @param attributes the data
 	 */
 	public void setData(Attributes attributes) {
+		System.err.println("ATTRIBUTE COUNT: " + attributes.size());
 		AttributeTableModel model = getAttributeTableModel();
 		if (model != null) {
 			model.setData(attributes);
 		}
+		resizeAndRepaint();
 	}
 	
 	/**
@@ -153,21 +155,6 @@ public class AttributeTable extends JTable {
 	 */
 	public Attribute getAttribute(String attributeKey) {
 		return this.getAttributeTableModel().getAttribute(attributeKey);
-	}
-
-
-	/**
-	 * Set the attributes that will be displayed,
-	 * 
-	 * @param atributes the Attributes object to display and edit.
-	 */
-	public void setAttributes(Attributes attributes) {
-		AttributeTableModel model = getAttributeTableModel();
-		if (model != null) {
-			model.setData(attributes);
-		}
-
-		resizeAndRepaint();
 	}
 	
 	/**
@@ -222,6 +209,7 @@ public class AttributeTable extends JTable {
 		attributes.add(new Attribute("BOOL2", false, false, false));
 		attributes.add(new Attribute("DOUBLE1", Double.MAX_VALUE, true, false));
 		attributes.add(new Attribute("DOUBLE2", Double.MIN_VALUE, false, false));
+		attributes.add(new Attribute("CLONG", 88L, true, false));
 		
 		//make the table
 		

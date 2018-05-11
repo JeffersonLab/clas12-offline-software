@@ -48,7 +48,9 @@ public abstract class AttributeEditor<T extends JComponent> {
 		AttributeEditor editor = null;
 
 		if (attribute != null) {
-			Class claz = attribute.getType().getEditorClass();
+			System.err.println("DUDE " + attribute.getKey() + "  value " + attribute.getValue());
+			AttributeType type = attribute.getType();
+			Class claz = type.getEditorClass();
 			try {
 				Constructor cons = claz.getConstructor(AttributeTable.class, Attribute.class);
 				try {

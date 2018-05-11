@@ -32,14 +32,14 @@ public class AttributeTableModel extends AbstractTableModel {
 
 
 	//the model data
-	private Vector<Attribute> _data = new Vector<>();
+	private Attributes _data = new Attributes();
 	
 	
 	/**
 	 * Get the data
 	 * @return the table data
 	 */
-	public List<Attribute> getData() {
+	public Attributes getData() {
 		return _data;
 	}
 	
@@ -80,15 +80,8 @@ public class AttributeTableModel extends AbstractTableModel {
 	 * @return the Attribute, or null.
 	 */
 	public Attribute getAttribute(String attributeKey) {
-		
-		int numRow = getRowCount();
-		
-		for (int index = 0; index < numRow; index++) {
-			Attribute attribute = _data.elementAt(index);
-			String key = attribute.getKey();
-			if (attributeKey.equals(key)) {
-				return attribute;
-			}
+		if (_data != null) {
+			return _data.getAttribute(attributeKey);
 		}
 		return null;
 	}
