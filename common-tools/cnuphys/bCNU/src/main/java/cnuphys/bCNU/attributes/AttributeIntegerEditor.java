@@ -1,18 +1,9 @@
-/**
- * 
- */
 package cnuphys.bCNU.attributes;
 
-@SuppressWarnings("serial")
-public class AttributeIntegerEditor extends AttributeStringEditor {
+public class AttributeIntegerEditor extends AttributeIntegerValueEditor<Integer> {
 
 	/**
-	 * The staring value.
-	 */
-	private int startValue = Integer.MIN_VALUE;
-
-	/**
-	 * Create a integer editor.
+	 * Create an integer editor.
 	 * 
 	 * @param attributeTable the owner table.
 	 * @param attribute the attribute
@@ -21,47 +12,24 @@ public class AttributeIntegerEditor extends AttributeStringEditor {
 			Attribute attribute) {
 		super(attributeTable, attribute);
 	}
-
-	/**
-	 * See if a string has changed. If so, fire a notice.
-	 * 
-	 * @param eventComponent
-	 */
+	
 
 	@Override
-	protected void checkTextChange() {
-
-		try {
-			String newText = component.getText();
-
-			int newValue = startValue;
-			try {
-				newValue = Integer.parseInt(newText);
-			}
-			catch (NumberFormatException e) {
-				newValue = startValue;
-			}
-			if (newValue != startValue) {
-				attribute.setValue(newValue);
-				startValue = newValue;
-			}
-
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
+	protected void setStartValue() {
+		startValue = Integer.MIN_VALUE;
+		
 	}
-	
-	
-	/**
-	 * Render the value for display
-	 * @param value the
-	 */
+
 	@Override
-	public void renderValue(Object value) {
-		Integer val = (Integer)value;
-		component.setText("" + val);
+	protected Integer parse(String vText) {
+		Integer newValue = startValue;
+		try {
+			newValue = Integer.parseInt(vText);
+		}
+		catch (NumberFormatException e) {
+			newValue = startValue;
+		}
+		return newValue;
 	}
 
 

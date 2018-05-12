@@ -33,6 +33,27 @@ public class Attribute implements Comparable<Attribute> {
 	}
 	
 	/**
+	 * Create an attribute that is not hidden
+	 * @param key the key (name)
+	 * @param value the value
+	 * @param editable whether it is editable
+	 */
+	public Attribute(String key, Object value, boolean editable) {
+		this(key, value, editable, false);
+	}
+
+	
+	/**
+	 * Create an attribute that is editable and not hidden
+	 * @param key the key (name)
+	 * @param value the value
+	 */
+	public Attribute(String key, Object value) {
+		this(key, value, true, false);
+	}
+
+	
+	/**
 	 * Set whether this is editable
 	 * @param editable the editable flag
 	 */

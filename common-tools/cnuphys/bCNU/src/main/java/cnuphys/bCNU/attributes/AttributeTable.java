@@ -200,16 +200,21 @@ public class AttributeTable extends JTable {
 
 		
 		Attributes attributes = new Attributes();
-		attributes.add(new Attribute("HEY", "Hey man", true, false));
-		attributes.add(new Attribute("DUDE", "Dude", false, false));
-		attributes.add(new Attribute("INT1", -9999, true, false));
-		attributes.add(new Attribute("INT2", 77, false, false));
-		attributes.add(new Attribute("INT3", 88, true, false));
-		attributes.add(new Attribute("BOOL1", true, true, false));
-		attributes.add(new Attribute("BOOL2", false, false, false));
-		attributes.add(new Attribute("DOUBLE1", Double.MAX_VALUE, true, false));
-		attributes.add(new Attribute("DOUBLE2", Double.MIN_VALUE, false, false));
-		attributes.add(new Attribute("CLONG", 88L, true, false));
+		attributes.add(new Attribute("HEY", "Hey man"));
+		attributes.add(new Attribute("DUDE", "Dude", false));
+		attributes.add(new Attribute("INT1", -9999));
+		attributes.add(new Attribute("INT2", 77, false));
+		attributes.add(new Attribute("INT3", 88));
+		attributes.add(new Attribute("BOOL1", true));
+		attributes.add(new Attribute("BOOL2", false, false));
+		attributes.add(new Attribute("DOUBLE1", Double.MAX_VALUE));
+		attributes.add(new Attribute("DOUBLE2", Double.MIN_VALUE, false));
+		attributes.add(new Attribute("FLOAT", Double.MIN_VALUE));
+		attributes.add(new Attribute("LONG", 88L));
+		attributes.add(new Attribute("FLOAT", 123f));
+		attributes.add(new Attribute("BYTE", (byte)120));
+		attributes.add(new Attribute("SHORT", (short)-32000));
+		attributes.add(new Attribute("LONG", 88L));
 		
 		//make the table
 		

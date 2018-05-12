@@ -41,8 +41,11 @@ public enum AttributeType {
 	static {
 		editorClasses.put(BOOLEAN, AttributeBooleanEditor.class);
 		editorClasses.put(STRING, AttributeStringEditor.class);
+		editorClasses.put(BYTE, AttributeByteEditor.class);
+		editorClasses.put(SHORT, AttributeShortEditor.class);
 		editorClasses.put(INT, AttributeIntegerEditor.class);
 		editorClasses.put(LONG, AttributeLongEditor.class);
+		editorClasses.put(FLOAT, AttributeFloatEditor.class);
 		editorClasses.put(DOUBLE, AttributeDoubleEditor.class);
 	}
 	
