@@ -5,6 +5,8 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.util.Vector;
 
+import javax.swing.SwingUtilities;
+
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.rubberband.IRubberbanded;
 import cnuphys.bCNU.graphics.rubberband.Rubberband;
@@ -96,7 +98,7 @@ public class PointerButton extends ToolBarToggleButton
 	@Override
 	public void mousePressed(MouseEvent mouseEvent) {
 
-		if (mouseEvent.isPopupTrigger() || (mouseEvent.getButton() == MouseEvent.BUTTON3)) {
+		if (mouseEvent.isPopupTrigger() || SwingUtilities.isRightMouseButton(mouseEvent)) {
 			popupTrigger(mouseEvent);
 			return;
 		}
@@ -263,23 +265,7 @@ public class PointerButton extends ToolBarToggleButton
 	 */
 	@Override
 	public void mouseButton3Click(MouseEvent mouseEvent) {
-//		Vector<AItem> items = container.getItemsAtPoint(mouseEvent.getPoint());
-//
-//		boolean consumed = false;
-//
-//		if ((items != null) && (items.size() > 0)) {
-//			for (AItem item : items) {
-//				if (item.isRightClickable()) {
-//					consumed = true;
-//					ItemPopupManager.prepareForPopup(item, container, mouseEvent.getPoint());
-//					break;
-//				}
-//			}
-//		}
-//
-//		if (!consumed) {
-//			container.getView().rightClicked(mouseEvent);
-//		}
+		System.err.println("MB3 CLICK POINTERBUTTON");
 	}
 
 	/**
@@ -291,7 +277,7 @@ public class PointerButton extends ToolBarToggleButton
 	 */
 	private void selectItemsFromClick(AItem item, MouseEvent mouseEvent) {
 
-		if (mouseEvent.getButton() == 3) {
+		if (!SwingUtilities.isLeftMouseButton(mouseEvent)) {
 			return;
 		}
 

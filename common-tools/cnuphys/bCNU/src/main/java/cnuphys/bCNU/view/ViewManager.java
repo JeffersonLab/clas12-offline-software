@@ -306,18 +306,5 @@ public class ViewManager extends Vector<BaseView>
 
 		_listenerList.remove(IViewListener.class, listener);
 	}
-	
-	/**
-	 * Get the first plot view
-	 * @return the first plot view, or <code>null</code>
-	 */
-	public PlotView getPlotView() {
-		for (BaseView view : this) {
-			if (view instanceof PlotView) {
-				return (PlotView) view;
-			}
-		}
-		return null;
-	}
-	
+		
 }

@@ -276,25 +276,15 @@ public class SuperLayerDrawing {
 	private void drawAccumulatedHits(Graphics g, IContainer container, boolean reallyClose) {
 
 		int dcAccumulatedData[][][][] = AccumulationManager.getInstance().getAccumulatedDCData();
-		int maxHit = AccumulationManager.getInstance().getMaxDCCount();
-		if (maxHit < 1) {
-			return;
-		}
-
 		int sect0 = _iSupl.sector() - 1;
 		int supl0 = _iSupl.superlayer() - 1;
+		int medianHit = AccumulationManager.getInstance().getMedianDCCount(supl0);
 
 		for (int lay0 = 0; lay0 < 6; lay0++) {
 			for (int wire0 = 0; wire0 < 112; wire0++) {
 
 				int hit = dcAccumulatedData[sect0][supl0][lay0][wire0];
-				double fract;
-				if (_view.isSimpleAccumulatedMode()) {
-					fract = ((double) hit) / maxHit;
-				} else {
-					fract = Math.log(hit + 1.) / Math.log(maxHit + 1.);
-				}
-
+				double fract = _view.getMedianSetting()*(((double) hit) / (1 + medianHit));
 				Color color = AccumulationManager.getInstance().getColor(fract);
 
 				g.setColor(color);
@@ -1021,6 +1011,12 @@ public class SuperLayerDrawing {
 				if ((layer > 0) && (wire > 0)) {
 				double wireRate = AccumulationManager.getInstance().getAccumulatedWireHitPercentage(_iSupl.sector() - 1, _iSupl.superlayer() - 1, layer-1, wire-1);
 				double avgOccupancy = AccumulationManager.getInstance().getAverageDCOccupancy(_iSupl.sector() - 1, _iSupl.superlayer() - 1);
+				
+				int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
+						.getAccumulatedDCData();
+
+				int hitCount = dcAccumulatedData[_iSupl.sector() - 1][_iSupl.superlayer()-1][layer-1][wire-1];
+
 
 				feedbackStrings.add(AccumulationManager.accumulationFBColor + 
 						"accumulated event count: " + AccumulationManager.getInstance().getAccumulationEventCount());
@@ -1030,6 +1026,11 @@ public class SuperLayerDrawing {
 				feedbackStrings.add(AccumulationManager.accumulationFBColor + 
 						"hit rate layer: " + layer + ", wire: " + wire + " is "
 						+ DoubleFormat.doubleFormat(wireRate, 3) + "%");
+				
+				feedbackStrings.add(AccumulationManager.accumulationFBColor + 
+						"hit count layer: " + layer + ", wire: " + wire + " is "
+						+ hitCount);
+
 				}
 
 			}

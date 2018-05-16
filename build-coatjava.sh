@@ -1,6 +1,7 @@
 #!/bin/bash
 
 runSpotBugs="yes"
+downloadMaps="yes"
 for xx in $@
 do
     if [ "$xx" == "--nospotbugs" ]
@@ -9,30 +10,21 @@ do
     elif [ "$xx" == "-n" ]
     then
         runSpotBugs="no"
+    elif [ "$xx" == "--nomaps" ]
+    then
+        downloadMaps="no"
     fi
 done
 
-# this doesn't work on some systems:
-#OPTIONS=n
-#LONGOPTIONS=nospotbugs
-#PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
-#eval set -- "$PARSED"
-#while true; do
-#    case "$1" in
-#        -n|--nospotbugs)
-#            runSpotBugs="no"
-#            shift
-#            ;;
-#        --)
-#            shift
-#            break
-#            ;;
-#        *)
-#            echo "Programming error"
-#            exit 3
-#            ;;
-#    esac
-#done
+if [ $downloadMaps == "yes" ]; then
+  wget http://github.com/JeffersonLab/clas12-offline-resources/archive/field-maps.zip
+  unzip field-maps.zip
+  mkdir etc/data/magfield common-tools/cnuphys/coatjava/etc/data/magfield common-tools/cnuphys/magfieldC/data
+  mv clas12-offline-resources-field-maps/etc/* etc/data/magfield/
+  mv clas12-offline-resources-field-maps/cnuphys/* common-tools/cnuphys/coatjava/etc/data/magfield/
+  mv clas12-offline-resources-field-maps/cnuphysC/* common-tools/cnuphys/magfieldC/data/
+  rm -rf field-maps.zip clas12-offline-resources-field-maps
+fi
 
 rm -rf coatjava
 mkdir -p coatjava

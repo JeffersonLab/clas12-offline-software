@@ -24,6 +24,7 @@ public class EBEngine extends ReconstructionEngine {
     boolean dropBanks = false;
     boolean alreadyDroppedBanks = false;
 
+    // output banks:
     String eventBank        = null;
     String particleBank     = null;
     String calorimeterBank  = null;
@@ -31,10 +32,15 @@ public class EBEngine extends ReconstructionEngine {
     String cherenkovBank    = null;
     String trackBank        = null;
     String crossBank        = null;
-    String matrixBank       = null;
-    String trackType        = null;
     String ftBank           = null;
+    String trajectoryBank   = null;
+    String covMatrixBank    = null;
 
+    // inputs banks:
+    String trackType        = null;
+    String trajectoryType   = null;
+    String covMatrixType    = null;
+    
     public EBEngine(String name){
         super(name,"gavalian","1.0");
         initBankNames();
@@ -46,7 +52,7 @@ public class EBEngine extends ReconstructionEngine {
     
 
     public boolean processDataEvent(DataEvent de) {
-
+        
         if (this.dropBanks==true) this.dropBanks(de);
 
         // check run number, get constants from CCDB:
@@ -54,24 +60,23 @@ public class EBEngine extends ReconstructionEngine {
         if (de.hasBank("RUN::config")) {
             run=de.getBank("RUN::config").getInt("run",0);
         }
-        if (run>0 && run!=EBCCDBConstants.getRunNumber()) {
-            EBCCDBConstants.load(run,this.getConstantsManager());
-        }
-        if (!EBCCDBConstants.isLoaded()) {
+        if (run<=0) {
             System.out.println("EBEngine:  found no run number, CCDB constants not loaded, skipping event.");
             return false;
         }
 
+        EBCCDBConstants ccdb = new EBCCDBConstants(run,this.getConstantsManager());
+
         DetectorHeader head = EBio.readHeader(de);
 
-        EventBuilder eb = new EventBuilder();
+        EventBuilder eb = new EventBuilder(ccdb);
         eb.initEvent(head); // clear particles
 
         EBMatching ebm = new EBMatching(eb);
         
         // Process RF:
-        EBRadioFrequency rf = new EBRadioFrequency();
-        eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+EBCCDBConstants.getDouble(EBCCDBEnum.RF_OFFSET));
+        EBRadioFrequency rf = new EBRadioFrequency(ccdb);
+        eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+ccdb.getDouble(EBCCDBEnum.RF_OFFSET));
         
         List<DetectorResponse>  responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL,"ECAL::moments");
         List<DetectorResponse>  responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
@@ -89,7 +94,7 @@ public class EBEngine extends ReconstructionEngine {
         eb.addCherenkovResponses(responseLTCC);
 
         // Add tracks
-        List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType);
+        List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType, trajectoryType, covMatrixType);
         eb.addForwardTracks(tracks);      
         
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks");
@@ -114,7 +119,7 @@ public class EBEngine extends ReconstructionEngine {
                                     centralParticles, responseCTOF, responseCND);
         
         // Do PID etc:
-        EBAnalyzer analyzer = new EBAnalyzer();
+        EBAnalyzer analyzer = new EBAnalyzer(ccdb);
         analyzer.processEvent(eb.getEvent());
 
         // Add Forward Tagger particles:
@@ -167,11 +172,10 @@ public class EBEngine extends ReconstructionEngine {
                 final int ntracks = tracks.size() + ctracks.size();
                 DataBank bankTrack = DetectorData.getTracksBank(eb.getEvent().getParticles(), de, trackBank, ntracks);
                 de.appendBanks(bankTrack);
-            }
-
-            if(matrixBank!=null) {
-                DataBank bankMat = DetectorData.getTBCovMatBank(eb.getEvent().getParticles(), de, matrixBank);
-                de.appendBanks(bankMat);
+                DataBank bankTraj  = DetectorData.getTrajectoriesBank(eb.getEvent().getParticles(), de, trajectoryBank);
+                if (bankTraj != null) de.appendBanks(bankTraj);
+                DataBank bankCovMat = DetectorData.getCovMatrixBank(eb.getEvent().getParticles(), de, covMatrixBank);
+                if (bankCovMat != null) de.appendBanks(bankCovMat);
             }
         
         }
@@ -211,8 +215,24 @@ public class EBEngine extends ReconstructionEngine {
         this.crossBank = crossBank;
     }
 
+    public void setTrajectoryBank(String trajectoryBank) {
+        this.trajectoryBank = trajectoryBank;
+    }
+    
+    public void setCovMatrixBank(String covMatrixBank) {
+        this.covMatrixBank = covMatrixBank;
+    }
+    
     public void setTrackType(String trackType) {
         this.trackType = trackType;
+    }
+
+    public void setCovMatrixType(String covMatrixType) {
+        this.covMatrixType = covMatrixType;
+    }
+
+    public void setTrajectoryType(String trajectoryType) {
+        this.trajectoryType = trajectoryType;
     }
 
     public void dropBanks(DataEvent de) {
@@ -234,14 +254,16 @@ public class EBEngine extends ReconstructionEngine {
     public boolean init() {
         requireConstants(EBCCDBConstants.getAllTableNames());
         this.getConstantsManager().setVariation("default");
-        System.out.println("[EB::] --> event builder is ready....");
+        System.out.println("["+this.getName()+"] --> event builder is ready....");
         return true;
     }
-
+/*
     public boolean init(int run) {
+        System.out.println("["+this.getName()+"] --> manually initting with run "+run+" ...");
         this.init();
-        EBCCDBConstants.load(run,this.getConstantsManager());
+        ccdb.load(run,this.getConstantsManager());
         return true;
     }
+*/
     
 }

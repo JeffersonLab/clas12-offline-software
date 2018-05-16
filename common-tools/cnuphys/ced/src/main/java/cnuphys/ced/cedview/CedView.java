@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JSlider;
 import javax.swing.Timer;
 
 import cnuphys.bCNU.component.InfoWindow;
@@ -54,10 +55,12 @@ import org.jlab.io.base.DataEvent;
 public abstract class CedView extends BaseView implements IFeedbackProvider, SwimTrajectoryListener,
 		MagneticFieldChangeListener, IAccumulationListener, IClasIoEventListener {
 	
+	//for accumulation drawing
+	private double _medianRelSetting = 0.25;
 
 	// are we showing single events or are we showing accumulated data
 	public enum Mode {
-		SINGLE_EVENT, SIMPLEACCUMULATED, LOGACCUMULATED
+		SINGLE_EVENT, ACCUMULATED
 	};
 	
 	//field probe for fast retrieval of mag field
@@ -805,18 +808,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 * 
 	 * @return <code>true</code> if we are in accumulation mode
 	 */
-	public boolean isSimpleAccumulatedMode() {
-		return (_mode == Mode.SIMPLEACCUMULATED);
+	public boolean isAccumulatedMode() {
+		return (_mode == Mode.ACCUMULATED);
 	}
 
-	/**
-	 * See if we are in log accumulation event mode
-	 * 
-	 * @return <code>true</code> if we are in accumulation mode
-	 */
-	public boolean isLogAccumulatedMode() {
-		return (_mode == Mode.LOGACCUMULATED);
-	}
 
 	/**
 	 * Set the mode for this view.
@@ -827,6 +822,11 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 */
 	public void setMode(Mode mode) {
 		_mode = mode;
+		
+		JSlider slider = _controlPanel.getAccumulationSlider();
+		if (slider != null) {
+			slider.setEnabled(_mode == Mode.ACCUMULATED);
+		}
 	}
 
 	/**
@@ -1088,6 +1088,33 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		wp.y = Math.hypot(pisect.x(), pisect.y());
 		return pisect;
 	}
+	
+	/**
+	 * Tests whether this listener is interested in events while accumulating
+	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 */
+	@Override
+	public boolean ignoreIfAccumulating() {
+		return true;
+	}
+
+	/**
+	 * Get the median setting used in accumulation drawing
+	 * @return the median setting used in accumulation drawing
+	 */
+	public double getMedianSetting() {
+		return _medianRelSetting;
+	}
+	
+	/**
+	 * Set the median setting used in accumulation drawing
+	 * @param medianSetting the median setting used in accumulation drawing
+	 */
+	public void setMedianSetting(double medianSetting) {
+		_medianRelSetting = Math.max(0, Math.min(1, medianSetting));
+	}
+	
+
 	
 	/**
 	 * Clone the view. 

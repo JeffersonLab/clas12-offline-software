@@ -137,7 +137,7 @@ public class GridCoordinate {
 	 */
 	@Override
 	public String toString() {
-		return String.format("%-7s min: %7.2f   max: %7.2f   Np: %3d   delta: %8.3f", _name, _min, _max, _numPoints,
+		return String.format("%-7s min: %6.1f   max: %6.1f   Np: %4d   delta: %7.2f", _name, _min, _max, _numPoints,
 				_delta);
 	}
 

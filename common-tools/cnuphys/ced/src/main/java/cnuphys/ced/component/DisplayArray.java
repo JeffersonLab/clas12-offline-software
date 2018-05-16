@@ -32,10 +32,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	public static final String SINGLEEVENT_LABEL = "Single";
 
 	/** Label and access to the accumulated button */
-	public static final String ACCUMULATED_LABEL = "Accumulated";
-
-	/** Label and access to the accumulated button */
-	public static final String LOG_ACCUMULATED_LABEL = "Log Accum";
+	public static final String ACCUMULATED_LABEL = "Accum.";
 
 	/** Tag and access to the accumulated button group */
 	public static final String ACCUMULATED_BUTTONGROUP = "AccumulatedButtonGroup";
@@ -140,9 +137,6 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	// controls whether accumulated hits are displayed
 	private AbstractButton _accumulatedButton;
 
-	// controls whether log of accumulated hits are displayed
-	private AbstractButton _log_accumulatedButton;
-
 	// controls whether inner plane displayed for ec
 	private AbstractButton _innerButton;
 
@@ -201,12 +195,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 					X11Colors.getX11Color("teal")).getCheckBox();
 
 			_accumulatedButton = add(ACCUMULATED_LABEL,
-					view.isSimpleAccumulatedMode(), true,
-					ACCUMULATED_BUTTONGROUP, this,
-					X11Colors.getX11Color("teal")).getCheckBox();
-
-			_log_accumulatedButton = add(LOG_ACCUMULATED_LABEL,
-					view.isLogAccumulatedMode(), true,
+					view.isAccumulatedMode(), true,
 					ACCUMULATED_BUTTONGROUP, this,
 					X11Colors.getX11Color("teal")).getCheckBox();
 
@@ -302,10 +291,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 			_view.setMode(CedView.Mode.SINGLE_EVENT);
 		}
 		else if (button == _accumulatedButton) {
-			_view.setMode(CedView.Mode.SIMPLEACCUMULATED);
-		}
-		else if (button == _log_accumulatedButton) {
-			_view.setMode(CedView.Mode.LOGACCUMULATED);
+			_view.setMode(CedView.Mode.ACCUMULATED);
 		}
 		else if (button == _innerButton) {
 			_view.setBooleanProperty(SHOWINNER_PROPERTY, true);

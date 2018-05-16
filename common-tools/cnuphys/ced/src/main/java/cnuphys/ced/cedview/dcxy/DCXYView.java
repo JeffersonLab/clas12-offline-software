@@ -387,10 +387,6 @@ public class DCXYView extends HexView {
 		
 		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
 				.getAccumulatedDCData();
-		int maxHit = AccumulationManager.getInstance().getMaxDCCount();
-		if (maxHit < 1) {
-			return;
-		}
 
 		Point pp1 = new Point();
 		Point pp2 = new Point();
@@ -399,28 +395,24 @@ public class DCXYView extends HexView {
 
 		for (int sect0 = 0; sect0 < 6; sect0++) {
 			for (int supl0 = 0; supl0 < 6; supl0++) {
+
+				int medianHit = AccumulationManager.getInstance().getMedianDCCount(supl0);
+
 				for (int lay0 = 0; lay0 < 6; lay0++) {
 					for (int wire0 = 0; wire0 < 112; wire0++) {
 
-						double fract;
 						int hitCount = dcAccumulatedData[sect0][supl0][lay0][wire0];
 
 						if (hitCount > 0) {
-							if (isSimpleAccumulatedMode()) {
-								fract = ((double) hitCount) / maxHit;
-							}
-							else {
-								fract = Math.log(hitCount + 1.)
-										/ Math.log(maxHit + 1.);
-							}
+							double fract = getMedianSetting() * (((double) hitCount) / (1 + medianHit));
 
-							Color color = AccumulationManager.getInstance()
-									.getAlphaColor(fract, 128);
-							
-							projectWire(g, container, sect0 + 1,
-									supl0 + 1, lay0 + 1, wire0 + 1, wp1, wp2, pp1, pp2);
+							Color color = AccumulationManager.getInstance().getAlphaColor(fract, 128);
+
+							projectWire(g, container, sect0 + 1, supl0 + 1, lay0 + 1, wire0 + 1, wp1, wp2, pp1, pp2);
 
 							g.setColor(color);
+							g.drawLine(pp1.x, pp1.y, pp2.x, pp2.y);
+
 						} // hitcount > 0
 					}
 				}

@@ -96,7 +96,7 @@ public class Cluster extends ArrayList<Hit> {
      * @return region (1...3)
      */
     public int get_Region() {
-        return (this._Superlayer + 1) / 2;
+        return (int) (this._Superlayer + 1) / 2;
     }
 
     /**

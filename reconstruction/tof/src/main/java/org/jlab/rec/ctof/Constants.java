@@ -18,7 +18,7 @@ public class Constants {
 
     public static final double[] SCBARTHICKN = new double[1]; // 3 cm
     //public static final double LSBCONVFAC = 24. / 1000.; // ns/bin
-    public static final double[] ADC_MIP = new double[1]; // From DB 800
+//    public static final double[] ADC_MIP = new double[1]; // From DB 800
     public static final double DEDX_MIP = 1.956; // ~2 MeV/g/cm^2
     public static final double[] PEDU = new double[1]; // L pedestal
     public static final double[] PEDD = new double[1]; // R pedestal
@@ -50,14 +50,14 @@ public class Constants {
     // parameter for
     // coord z
 
-    public static final double DYHL = 0.8861; // Shift along beam line between
-    // high and the low pitch angles
-    // counters
-    // public static final double PCO = 19.4160; // Constant put the center of
-    // the CTOF barrel in its design position
-    public static final double PCO = 10.0; // Constant put the center of the
-    // CTOF barrel in its design
-    // position according to GEMC
+//    public static final double DYHL = 0.8861; // Shift along beam line between
+//    // high and the low pitch angles
+//    // counters
+//    // public static final double PCO = 19.4160; // Constant put the center of
+//    // the CTOF barrel in its design position
+//    public static final double PCO = 10.0; // Constant put the center of the
+//    // CTOF barrel in its design
+//    // position according to GEMC
 
     public static double CLSMATCHXPAR = 1; // x-matching parameter between
     // panels 1a and 1b
@@ -95,7 +95,7 @@ public class Constants {
 
         SCBARTHICKN[0] = 3.02;
 
-        ADC_MIP[0] = 800;
+//        ADC_MIP[0] = 800;
 
         TRKMATCHXPAR[0] = 1; // some reasonable value needs to be put there
         TRKMATCHYPAR[0] = 1; // some reasonable value needs to be put there

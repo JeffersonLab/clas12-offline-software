@@ -24,6 +24,7 @@ import org.jlab.clas.pdg.PhysicsConstants;
 /**
  *
  * @author gavalian
+ * @author baltzell
  */
 public class DetectorParticle implements Comparable {
     
@@ -42,17 +43,10 @@ public class DetectorParticle implements Comparable {
     
     private Line3D  driftChamberEnter = new Line3D();
     
-//    private Point3D ctofIntersection = new Point3D();
-    
-    private double[]  covMAT = new double[15];
-    
     private List<DetectorResponse>    responseStore = new ArrayList<DetectorResponse>();
     private List<CherenkovResponse>  cherenkovStore = new ArrayList<CherenkovResponse>();
     private List<TaggerResponse>     taggerStore = new ArrayList<TaggerResponse>();
 
-//    private List<ScintillatorResponse>    scintillatorStore = new ArrayList<ScintillatorResponse>();
-//    private List<CalorimeterResponse>  calorimeterStore = new ArrayList<CalorimeterResponse>();
-   
     private TreeMap<DetectorType,Vector3>  projectedHit = 
             new  TreeMap<DetectorType,Vector3>();
     
@@ -67,11 +61,6 @@ public class DetectorParticle implements Comparable {
         detectorTrack = track;
     }
    
-    public DetectorParticle(DetectorTrack track, double[] covMat) {
-        detectorTrack = track;
-        covMAT = covMat;
-    }
-    
     public DetectorParticle(int charge, double px, double py, double pz){
         detectorTrack = new DetectorTrack(charge,px,py,pz);
     }
@@ -164,7 +153,10 @@ public class DetectorParticle implements Comparable {
 
         return particle;
     }
-    
+   
+    public List<DetectorTrack.TrajectoryPoint> getTrackTrajectory() {
+        return detectorTrack.getTrajectory();
+    }
     
     public void clear(){
         this.responseStore.clear();
@@ -248,12 +240,15 @@ public class DetectorParticle implements Comparable {
     public int getTrackIndex() {
         return this.detectorTrack.getTrackIndex();
     }
-    
-    public double[] getTBCovariantMatrix() {
-        return this.covMAT;
+
+    public float[][] getCovMatrix() {
+        return this.detectorTrack.getCovMatrix();
     }
-    
-    
+
+    public float getCovMatrix(int ii, int jj) {
+        return this.detectorTrack.getCovMatrix(ii,jj);
+    }
+
     /**
      * Particle score combined number that represents which detectors were hit
      * HTCC - 1000, FTOF - 100, EC - 10
@@ -346,14 +341,6 @@ public class DetectorParticle implements Comparable {
         return this.taggerStore;
     }
  
-//    public List<CalorimeterResponse>  getCalorimeterResponses(){
-//        return this.calorimeterStore;
-//    }
-//    
-//    public List<ScintillatorResponse> getScintillatorResponses(){
-//        return this.scintillatorStore;
-//    }    
-    
     public DetectorResponse getHit(DetectorType type){
         for(DetectorResponse res : this.responseStore){
             if(res.getDescriptor().getType()==type) return res;
@@ -790,8 +777,12 @@ public class DetectorParticle implements Comparable {
 
         // choose cross based on detector type:
         Line3D cross;
-        if (type==DetectorType.HTCC) 
+        if (type==DetectorType.HTCC) {
             cross=this.detectorTrack.getFirstCross();
+            // 0 is detId for HTCC in TimeBasedTrkg::Trajectory bank!
+            //cross=this.detectorTrack.getTrajectoryPoint(0);
+            //if (cross==null) return -1;
+        }
         else if (type==DetectorType.LTCC)
             cross=this.detectorTrack.getLastCross();
         else throw new RuntimeException(
@@ -802,7 +793,10 @@ public class DetectorParticle implements Comparable {
         if(cherenkovs.size()>0){
             for(int loop = 0; loop < cherenkovs.size(); loop++) {
                 if(cherenkovs.get(loop).getCherenkovType()==type){
-                    boolean matchtruth = cherenkovs.get(loop).match(cross);
+                    //final boolean matchtruth = type==DetectorType.HTCC ?
+                    //    cherenkovs.get(loop).matchToPoint(cross) :
+                    //    cherenkovs.get(loop).match(cross);
+                    final boolean matchtruth = cherenkovs.get(loop).match(cross);
                     if(matchtruth==true){
                         bestIndex = loop;
                         // FIXME keep the first match!
