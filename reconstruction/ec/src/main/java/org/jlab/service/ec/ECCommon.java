@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jlab.detector.base.DetectorCollection;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.base.Layer;
 import org.jlab.geom.component.ScintillatorPaddle;
+import org.jlab.groot.data.H1F;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
@@ -36,7 +38,7 @@ public class ECCommon {
     private static double[] AtoE  = {15,10,10};   // SCALED ADC to Energy in MeV
     private static double[] AtoE5 = {15,5,5};     // For Sector 5 ECAL
     
-    //public static DetectorCollection<H1F> H1_ecEng = new DetectorCollection<H1F>();
+    public static DetectorCollection<H1F> H1_ecEng = new DetectorCollection<H1F>();
     
     static int ind[]  = {0,0,0,1,1,1,2,2,2}; 
     static float             tps =  (float) 0.02345;
@@ -44,24 +46,24 @@ public class ECCommon {
     public static float veff = 18.1f;
 //    public static float TOFFSET = 436; 
     
-    public static void initHistos() {
-        /*
+    public  static void initHistos() {
+       
         for (int is=1; is<7; is++){
             for (int il=1; il<4; il++) {             
                 H1_ecEng.add(is,il,0, new H1F("Cluster Errors",55,-10.,100.));
                 H1_ecEng.add(is,il,1, new H1F("Cluster Errors",55,-10.,100.));
             }
-        }*/
+        }
     }
     
     public static void resetHistos() {
-        /*
+        
         for (int is=1; is<7; is++){
             for (int il=1; il<4; il++) {             
                 H1_ecEng.get(is,il,0).reset();
                 H1_ecEng.get(is,il,1).reset();
             }
-        } */      
+        }       
     }
     
     public static List<ECStrip>  initEC(DataEvent event, Detector detector, ConstantsManager manager, int run){
@@ -272,9 +274,9 @@ public class ECCommon {
                             pV.get(bV).redoPeakLine();
                             pW.get(bW).redoPeakLine();
                             ECCluster cluster = new ECCluster(pU.get(bU),pV.get(bV),pW.get(bW));
-                            //H1_ecEng.get(sector,ind[startLayer-1]+1,0).fill(cluster.getHitPositionError());
+                            H1_ecEng.get(sector,ind[startLayer-1]+1,0).fill(cluster.getHitPositionError());
                             if(cluster.getHitPositionError()<ECCommon.clusterError[ind[startLayer-1]]) {
-                                //H1_ecEng.get(sector,ind[startLayer-1]+1,1).fill(cluster.getHitPositionError());
+                                 H1_ecEng.get(sector,ind[startLayer-1]+1,1).fill(cluster.getHitPositionError());
 //								double tU = cluster.getTime(0);
 //								double tV = cluster.getTime(1);
 //								double tW = cluster.getTime(2);
