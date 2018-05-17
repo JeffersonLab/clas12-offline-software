@@ -346,6 +346,8 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 		
 		//use probes
 		IField ifield = FieldProbe.factory(MagneticFields.getInstance().getActiveField());
+		System.err.println("PROBE: " + ifield.getClass().getName());
+	//	IField ifield = MagneticFields.getInstance().getActiveField();
 
 
 		for (int sx = bounds.x; sx < bounds.x + bounds.width; sx += w) {
