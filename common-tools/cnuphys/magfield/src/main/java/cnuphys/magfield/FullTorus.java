@@ -1,10 +1,7 @@
 package cnuphys.magfield;
 
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 
 public class FullTorus extends Torus {
 		
@@ -22,53 +19,7 @@ public class FullTorus extends Torus {
 		fullTorus.readBinaryMagneticField(file);
 		return fullTorus;
 	}
-	
-	
-	/**
-	 * Tests whether this is a full field or a phi symmetric field
-	 * @return <code>true</code> if this is a full field
-	 */
-	public static boolean isFieldmapFullField(String torusPath) throws FileNotFoundException {
-		File file = new File(torusPath);
 
-		if (!file.exists()) {
-			throw new FileNotFoundException("TORUS Map not found at [" + torusPath + "]");
-		}
-
-		try {
-			DataInputStream dos = new DataInputStream(new FileInputStream(file));
-
-			boolean swap = false;
-			int magicnum = dos.readInt(); // magic number
-
-			// TODO handle swapping if necessary
-			swap = (magicnum != MAGICNUMBER);
-			if (swap) {
-				System.err.println("byte swapping required but not yet implemented.");
-				dos.close();
-				return false;
-			}
-			
-			//read five ints related to cs
-			dos.readInt();
-			dos.readInt();
-			dos.readInt();
-			dos.readInt();
-			dos.readInt();
-			
-			//now read phi min and phi max in degrees
-
-
-			float phiMin = dos.readFloat();
-			float phiMax = dos.readFloat();
-			
-			return (phiMax > 300);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return false;
-	}
 
 	/**
 	 * Get the field by trilinear interpolation.
@@ -82,6 +33,21 @@ public class FullTorus extends Torus {
 	@Override
 	public void fieldCylindrical(Cell3D cell, double phi, double rho, double z,
 			float result[]) {
+		
+		if (isRectangularGrid()) {
+			System.err.println("Calling fieldCylindrical in FullTorus (with cell) for Rectangular Grid");
+			(new Throwable()).printStackTrace();
+			System.exit(1);
+		}
+
+		
+		if (!containsCylindrical((float)phi, (float)rho, (float)z)) {
+			result[X] = 0f;
+			result[Y] = 0f;
+			result[Z] = 0f;
+			return;
+		}
+
 		if (isZeroField()) {
 			result[X] = 0f;
 			result[Y] = 0f;
@@ -116,33 +82,16 @@ public class FullTorus extends Torus {
 	@Override
 	public void fieldCylindrical(double phi, double rho, double z,
 			float result[]) {
+		
+		if (isRectangularGrid()) {
+			System.err.println("Calling fieldCylindrical in FullTorus for Rectangular Grid");
+			System.exit(1);
+		}
+
 
 		fieldCylindrical(_cell, phi, rho, z, result);
 	}
 
-	
-	//for testing
-	public static void main(String arg[]) {
-		
-//		String fn[] = {"/Users/heddle/magfield/clas12-fieldmap-torus.dat", "/Users/heddle/magfield/Jan_clas12TorusFull_2.00.dat"};
-//		for (String name : fn) {
-//			try {
-//				boolean isFull = isFieldmapFullField(name);
-//				System.out.println("Path [" + name + "] full: " + isFull);
-//			} catch (FileNotFoundException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		
-		
-		try {
-			MagneticFields.getInstance().initializeMagneticFieldsFromEnv();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (MagneticFieldInitializationException e) {
-			e.printStackTrace();
-		}
-	}
 
 	
 }

@@ -48,22 +48,22 @@ public class Cell3D implements MagneticFieldChangeListener {
 	}
 
 	// reset the cached values
-	private void reset(double phi, double rho, double z) {
+	private void reset(double q1, double q2, double q3) {
 		GridCoordinate q1Coord = field.q1Coordinate;
 		GridCoordinate q2Coord = field.q2Coordinate;
 		GridCoordinate q3Coord = field.q3Coordinate;
 
-		n1 = q1Coord.getIndex(phi);
+		n1 = q1Coord.getIndex(q1);
 		if (n1 < 0) {
 			System.err.println("WARNING Bad n1 in Cell3D.reset: " + n1);
 			return;
 		}
-		n2 = q2Coord.getIndex(rho);
+		n2 = q2Coord.getIndex(q2);
 		if (n2 < 0) {
 			System.err.println("WARNING Bad n2 in Cell3D.reset: " + n2);
 			return;
 		}
-		n3 = q3Coord.getIndex(z);
+		n3 = q3Coord.getIndex(q3);
 		if (n3 < 0) {
 			System.err.println("WARNING Bad n3 in Cell3D.reset: " + n3);
 			return;
@@ -128,18 +128,15 @@ public class Cell3D implements MagneticFieldChangeListener {
 	 * Check whether the cell boundaries (not the map boundaries) include the
 	 * point
 	 * 
-	 * @param phi
-	 *            azimuthal angle in degrees.
-	 * @param rho
-	 *            the cylindrical rho coordinate in cm.
-	 * @param z
-	 *            coordinate in cm
+	 * @param q1  phi in deg for cylindrical, x (cm) for rectangular
+	 * @param q2  rho (cm) for cylindrical, y (cm) for rectangular
+	 * @param q3  z (cm) for cylindrical or rectangular
 	 * @return <code>true</code> if the point is included in the boundary of the
 	 *         field
 	 * 
 	 */
-	public boolean containedCylindrical(double phi, double rho, double z) {
-		return ((phi > q1Min) && (phi < q1Max) && (rho > q2Min) && (rho < q2Max) && (z > q3Min) && (z < q3Max));
+	public boolean contained(double q1, double q2, double q3) {
+		return ((q1 > q1Min) && (q1 < q1Max) && (q2 > q2Min) && (q2 < q2Max) && (q3 > q3Min) && (q3 < q3Max));
 	}
 
 	/**
@@ -152,21 +149,31 @@ public class Cell3D implements MagneticFieldChangeListener {
 	 * @param z
 	 * @param result
 	 */
-	public void calculate(double phi, double rho, double z, float[] result) {
-		if (field.containsCylindrical((float) phi, (float) rho, (float) z)) {
+	public void calculate(double q1, double q2, double q3, float[] result) {
+		
+		
+		boolean contains;
+		if (field.isRectangularGrid()) {
+			contains = field.contains((float) q1, (float) q2, (float)q3);
+		}
+		else {
+			contains = field.containsCylindrical((float) q1, (float) q2, (float)q3);
+		}
+		
+		if (contains) {
 			// do we need to reset?
-			if (!containedCylindrical(phi, rho, z)) {
-				reset(phi, rho, z);
+			if (!contained(q1, q2, q3)) {
+				reset(q1, q2, q3);
 			}
 
 			if (!MagneticField.isInterpolate()) {
-				nearestNeighbor(phi, rho, z, result);
+				nearestNeighbor(q1, q2, q3, result);
 				return;
 			}
 
-			f[0] = (phi - q1Min) * q1Norm;/// (q1_max - q1Min);
-			f[1] = (rho - q2Min) * q2Norm;// / (q2_max - q2Min);
-			f[2] = (z - q3Min) * q3Norm;// / (q3_max - q3Min);
+			f[0] = (q1 - q1Min) * q1Norm;/// (q1_max - q1Min);
+			f[1] = (q2 - q2Min) * q2Norm;// / (q2_max - q2Min);
+			f[2] = (q3 - q3Min) * q3Norm;// / (q3_max - q3Min);
 
 			f[0] = f[0] - Math.floor(f[0]);
 			f[1] = f[1] - Math.floor(f[1]);

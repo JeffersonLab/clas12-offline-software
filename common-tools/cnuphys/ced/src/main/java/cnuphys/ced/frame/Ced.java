@@ -591,7 +591,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private void addToMagneticFieldMenu() {
 		JMenu magMenu = MagneticFields.getInstance().getMagneticFieldMenu();
 		final JMenuItem plotItem = new JMenuItem("Plot the Field...");
-		final JMenuItem loadItem = new JMenuItem("Load a Different Torus...");
+//		final JMenuItem loadItem = new JMenuItem("Load a Different Torus...");
 
 		magMenu.addSeparator();
 
@@ -607,15 +607,16 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 					_plotFieldDialog.setVisible(true);
 
-				} else if (e.getSource() == loadItem) {
-					MagneticFields.getInstance().openNewTorus();
-				}
+				} 
+//				else if (e.getSource() == loadItem) {
+//					MagneticFields.getInstance().openNewTorus();
+//				}
 			}
 		};
 
-		loadItem.addActionListener(al);
+//		loadItem.addActionListener(al);
 		plotItem.addActionListener(al);
-		magMenu.add(loadItem);
+//		magMenu.add(loadItem);
 		magMenu.add(plotItem);
 
 		MenuManager.getInstance().addMenu(magMenu);
@@ -1044,8 +1045,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	@Override
 	public void magneticFieldChanged() {
-		Swimming.clearMCTrajectories();
-		Swimming.clearReconTrajectories();
+		Swimming.clearAllTrajectories();
 		fixTitle();
 		ClasIoEventManager.getInstance().reloadCurrentEvent();
 	}

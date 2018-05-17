@@ -104,8 +104,7 @@ public class LundTrackDialog extends JDialog {
 	private JTextField _accuracy;
 
 	// old (and default_ momentum in GeV/c
-	// private double _oldMomentum = 0.17988;
-	private double _oldMomentum = 1.0;
+	private double _oldMomentum = 2.0;
 
 	// unicode strings
 	public static final String SMALL_BETA = "\u03B2";
@@ -498,7 +497,7 @@ public class LundTrackDialog extends JDialog {
 		_theta = new JTextField(8);
 		_phi = new JTextField(8);
 
-		_theta.setText("30.0");
+		_theta.setText("15.0");
 		_phi.setText("0.0");
 
 		box.add(labeledTextField(SMALL_THETA, _theta, "deg", 20));
@@ -522,7 +521,7 @@ public class LundTrackDialog extends JDialog {
 		_accuracy = new JTextField(8);
 
 		_maxR.setText("7.0");
-		_fixedZ.setText("500.0");
+		_fixedZ.setText("575.0");
 		_accuracy.setText("10");
 
 		_fixedZ.setEnabled(false);
@@ -539,6 +538,13 @@ public class LundTrackDialog extends JDialog {
 		panel.add(box);
 		panel.setBorder(new CommonBorder("Integration Controls"));
 		return panel;
+	}
+	
+	public void setFixedZSelected(boolean selected) {
+		_standardCutoff.setSelected(!selected);
+		_fixedZCutoff.setSelected(selected);
+		_swimZ.setEnabled(_fixedZCutoff.isSelected());
+		_accuracy.setEnabled(_fixedZCutoff.isSelected());
 	}
 
 	private JPanel cutoffType() {

@@ -1059,8 +1059,7 @@ public class ClasIoEventManager {
 	 */
 	private void notifyEventListeners(EventSourceType source) {
 
-		Swimming.clearMCTrajectories();
-		Swimming.clearReconTrajectories();
+		Swimming.clearAllTrajectories();
 
 		if (_dataSource != null) {
 			_dataSource.close();
@@ -1089,8 +1088,7 @@ public class ClasIoEventManager {
 	// new event file notification
 	private void notifyEventListeners(File file) {
 
-		Swimming.clearMCTrajectories();
-		Swimming.clearReconTrajectories();
+		Swimming.clearAllTrajectories();
 
 		for (int index = 0; index < 3; index++) {
 			if (_viewListenerList[index] != null) {
@@ -1133,8 +1131,7 @@ public class ClasIoEventManager {
 	 */
 	protected void notifyEventListeners() {
 
-		Swimming.clearMCTrajectories();
-		Swimming.clearReconTrajectories();
+		Swimming.clearAllTrajectories();
 		_uniqueLundIds = null;
 
 		Ced.getCed().setEventFilteringLabel(isFilteringOn());

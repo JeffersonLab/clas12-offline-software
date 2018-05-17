@@ -25,15 +25,6 @@ public class Torus extends MagneticField {
 		_cell = new Cell3D(this);
 	}
 	
-	
-	
-	/**
-	 * Tests whether this is a full field or a phi symmetric field
-	 * @return <code>true</code> if this is a full field
-	 */
-	public static boolean isFieldmapFullField(String torusPath) throws FileNotFoundException {
-		return FullTorus.isFieldmapFullField(torusPath);
-	}
 
 	/**
 	 * Obtain a torus object from a binary file, probably
@@ -71,6 +62,43 @@ public class Torus extends MagneticField {
 	}
 	
 	/**
+	 * Obtain the magnetic field at a given location expressed in Cartesian
+	 * coordinates. The field is returned as a Cartesian vector in kiloGauss.
+	 * The coordinates are in the canonical CLAS system with the origin at the
+	 * nominal target, x through the middle of sector 1 and z along the beam.
+	 * 
+	 * @param x
+	 *            the x coordinate in cm
+	 * @param y
+	 *            the y coordinate in cm
+	 * @param z
+	 *            the z coordinate in cm
+	 * @param result
+	 *            a array holding the retrieved (interpolated) field in
+	 *            kiloGauss. The 0,1 and 2 indices correspond to x, y, and z
+	 *            components.
+	 */
+	@Override
+	public final void field(float x, float y, float z, float result[]) {
+
+		if (isRectangularGrid()) {
+			if (!contains(x, y, z)) {
+				result[X] = 0f;
+				result[Y] = 0f;
+				result[Z] = 0f;
+			} else {
+				_cell.calculate(x, y, z, result);
+			}
+			return;
+		}
+
+		double rho = FastMath.sqrt(x * x + y * y);
+		double phi = FastMath.atan2Deg(y, x);
+		fieldCylindrical(phi, rho, z, result);
+	}
+
+	
+	/**
 	 * Get the field by trilinear interpolation.
 	 *
 	 * @param phi azimuthal angle in degrees.
@@ -81,6 +109,19 @@ public class Torus extends MagneticField {
 	 */
 	public void fieldCylindrical(Cell3D cell, double phi, double rho, double z,
 			float result[]) {
+		
+		if (isRectangularGrid()) {
+			System.err.println("Calling fieldCylindrical in Torus for Rectangular Grid");
+			System.exit(1);
+		}
+		
+		if (!containsCylindrical((float)phi, (float)rho, (float)z)) {
+			result[X] = 0f;
+			result[Y] = 0f;
+			result[Z] = 0f;
+			return;
+		}
+
 		if (isZeroField()) {
 			result[X] = 0f;
 			result[Y] = 0f;
@@ -187,6 +228,10 @@ public class Torus extends MagneticField {
 	 * @return the maximum rho coordinate of the field boundary
 	 */
 	public double getRhoMax() {
+		if (isRectangularGrid()) {
+			System.err.println("Asking for Rho Max for Rectangular Grid");
+			System.exit(1);
+		}
 		return q2Coordinate.getMax();
 	}
 
@@ -195,8 +240,62 @@ public class Torus extends MagneticField {
 	 * @return the minimum rho coordinate of the field boundary
 	 */
 	public double getRhoMin() {
+		if (isRectangularGrid()) {
+			System.err.println("Asking for Rho Min for Rectangular Grid");
+			System.exit(1);
+		}
 		return q2Coordinate.getMin();
 	}
+	
+	/**
+	 * Get the maximum x coordinate of the field boundary
+	 * @return the maximum x coordinate of the field boundary
+	 */
+	public double getXMax() {
+		if (isCylindricalGrid()) {
+			System.err.println("Asking for X Max for Cylandrical Grid");
+			System.exit(1);
+		}
+		return q1Coordinate.getMax();
+	}
+	
+	/**
+	 * Get the maximum x coordinate of the field boundary
+	 * @return the maximum x coordinate of the field boundary
+	 */
+	public double getXMin() {
+		if (isCylindricalGrid()) {
+			System.err.println("Asking for X Min for Cylandrical Grid");
+			System.exit(1);
+		}
+		return q1Coordinate.getMin();
+	}
+
+	
+	/**
+	 * Get the maximum y coordinate of the field boundary
+	 * @return the maximum y coordinate of the field boundary
+	 */
+	public double getYMax() {
+		if (isCylindricalGrid()) {
+			System.err.println("Asking for Y Max for Cylandrical Grid");
+			System.exit(1);
+		}
+		return q2Coordinate.getMax();
+	}
+	
+	/**
+	 * Get the maximum y coordinate of the field boundary
+	 * @return the maximum y coordinate of the field boundary
+	 */
+	public double getYMin() {
+		if (isCylindricalGrid()) {
+			System.err.println("Asking for Y Min for Cylandrical Grid");
+			System.exit(1);
+		}
+		return q2Coordinate.getMin();
+	}
+
 
 	/**
 	 * Get the name of the field
@@ -207,6 +306,33 @@ public class Torus extends MagneticField {
 	public String getName() {
 		return "Torus";
 	}
+	
+	 /**
+     * Check whether the field boundaries include the point
+     * @param x the x coordinate in the map units
+     * @param y the y coordinate in the map units
+     * @param z the z coordinate in the map units
+     * @return <code>true</code> if the point is included in the boundary of the field
+     */
+	@Override
+    public boolean contains(float x, float y, float z) {
+		if (isRectangularGrid()) {
+			if ((x < getXMin()) || (x > getXMax())) {
+				return false;
+			}
+			if ((y < getYMin()) || (y > getYMax())) {
+				return false;
+			}
+			if ((z < getZMin()) || (z > getZMax())) {
+				return false;
+			}
+			return true;
+		}
+		
+		double rho = FastMath.sqrt(x * x + y * y);
+		double phi = FastMath.atan2Deg(y, x);
+        return containsCylindrical((float)phi, (float)rho, z);
+    }
 
 	/**
 	 * Check whether the field boundaries include the point
@@ -222,7 +348,14 @@ public class Torus extends MagneticField {
 	 * 
 	 */
 	@Override
-	public boolean containsCylindrical(float phi, float rho, float z) {		
+	public boolean containsCylindrical(float phi, float rho, float z) {	
+		
+		if (isRectangularGrid()) {
+			System.err.println("Calling containsCylindrical for a rectangular grid.");
+			(new Throwable()).printStackTrace();
+			System.exit(1);
+		}
+		
 		if ((z < getZMin()) || (z > getZMax())) {
 			return false;
 		}
