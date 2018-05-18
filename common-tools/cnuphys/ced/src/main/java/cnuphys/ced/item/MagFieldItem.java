@@ -21,7 +21,6 @@ import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.GridCoordinate;
 import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFields;
-import cnuphys.magfield.MagneticFields.FieldType;
 
 /**
  * This is a magnetic field item. It is restricted to live only on sector views.
@@ -146,7 +145,7 @@ public class MagFieldItem extends AItem {
 		Point pp = new Point();
 
 		int pstep2 = pixelStep / 2;
-		FieldProbe probe = FieldProbe.factory();
+		FieldProbe probe = FieldProbe.factory();  //uses active field
 
 		float result[] = new float[3];
 		double coords[] = new double[5];
@@ -259,8 +258,8 @@ public class MagFieldItem extends AItem {
 			boolean hasSolenoid) {
 
 
-		IField activeField = MagneticFields.getInstance().getActiveField();
-		if (activeField == null) {
+		IField probe = FieldProbe.factory();
+		if (probe == null) {
 			return;
 		}
 		
@@ -273,13 +272,7 @@ public class MagFieldItem extends AItem {
 		// get the boundary
 	    Rectangle fieldRect;
 		
-		boolean isUniform = MagneticFields.getInstance().getActiveFieldType() == FieldType.UNIFORM;
-		if (isUniform) {
-			fieldRect = new Rectangle(0, 0, bounds.width, bounds.height);
-		}
-		else {
-			fieldRect = getFieldRect(container, hasTorus, hasSolenoid);
-		}
+		fieldRect = getFieldRect(container, hasTorus, hasSolenoid);
 
 
 		Rectangle updateRect = bounds.intersection(fieldRect);
@@ -308,17 +301,17 @@ public class MagFieldItem extends AItem {
 				double rho = coords[3];
 				double phi = coords[4];
 				
-				if (activeField.containsCylindrical((float)phi, (float)rho, (float)z)) {
+				if (probe.containsCylindrical((float)phi, (float)rho, (float)z)) {
 
 				if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
-					double bmag = activeField.fieldMagnitudeCylindrical(phi, rho, z) / 10.;
+					double bmag = probe.fieldMagnitudeCylindrical(phi, rho, z) / 10.;
 
 					Color color = _colorScaleModelTorus.getColor(bmag);
 					g.setColor(color);
 					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
 				}
 				else if (displayOption == MagFieldDisplayArray.BGRADDISPLAY) {
-					activeField.gradientCylindrical(phi, rho, z, result);
+					probe.gradientCylindrical(phi, rho, z, result);
 					double gmag = Math.sqrt(result[0]*result[0] +
 							result[1]*result[1] + result[2]*result[2]);
 					
@@ -337,7 +330,7 @@ public class MagFieldItem extends AItem {
 					
 				}
 				else { // one of the components
-					activeField.fieldCylindrical(phi, rho, z, result);
+					probe.fieldCylindrical(phi, rho, z, result);
 					double comp = 0.0;
 					switch (displayOption) {
 					case MagFieldDisplayArray.BXDISPLAY:

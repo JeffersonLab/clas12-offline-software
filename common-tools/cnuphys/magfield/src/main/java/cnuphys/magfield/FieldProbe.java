@@ -85,14 +85,6 @@ public abstract class FieldProbe implements IField {
 		return _field.isZeroField();
 	}
 	
-	/**
-	 * Get the appropriate probe for the active field
-	 * @return the probe for the active field
-	 */
-	public static FieldProbe factory() {
-		return factory(MagneticFields.getInstance().getActiveField());
-	}
-	
 
     /**
      * Obtain an approximation for the magnetic field gradient at a given location expressed in Cartesian
@@ -137,6 +129,14 @@ public abstract class FieldProbe implements IField {
     }
 
 	
+	/**
+	 * Get the appropriate probe for the active field
+	 * @return the probe for the active field
+	 */
+	public static FieldProbe factory() {
+		return factory(MagneticFields.getInstance().getActiveField());
+	}
+	
 	
 	/**
 	 * Get the appropriate probe for the given field
@@ -160,8 +160,7 @@ public abstract class FieldProbe implements IField {
 			}
 		}
 
-//		System.err.println("WARNING: null probe");
-		return null;
+		return new ZeroProbe();
 	}
 	
 

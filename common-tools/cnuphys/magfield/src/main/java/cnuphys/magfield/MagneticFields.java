@@ -68,9 +68,6 @@ public class MagneticFields {
 	// torus field (with 12-fold symmetry)
 	private Torus _torus;
 
-	// uniform field
-	// private Uniform _uniform;
-
 	// composite field
 	private CompositeField _compositeField;
 
@@ -94,7 +91,7 @@ public class MagneticFields {
 
 	// types of fields
 	public enum FieldType {
-		TORUS, SOLENOID, COMPOSITE, COMPOSITEROTATED, ZEROFIELD, UNIFORM
+		TORUS, SOLENOID, COMPOSITE, COMPOSITEROTATED, ZEROFIELD
 	}
 
 	// List of magnetic field change listeners
@@ -109,7 +106,6 @@ public class MagneticFields {
 	private JRadioButtonMenuItem _bothItem;
 	private JRadioButtonMenuItem _bothRotatedItem;
 	private JRadioButtonMenuItem _zeroItem;
-	// private JRadioButtonMenuItem _uniformItem;
 
 	private JRadioButtonMenuItem _interpolateItem;
 	private JRadioButtonMenuItem _nearestNeighborItem;
@@ -304,7 +300,9 @@ public class MagneticFields {
 			_torusItem.setSelected(desiredFieldType == FieldType.TORUS);
 			_solenoidItem.setSelected(desiredFieldType == FieldType.SOLENOID);
 			_bothItem.setSelected(desiredFieldType == FieldType.COMPOSITE);
-			_bothRotatedItem.setSelected(desiredFieldType == FieldType.COMPOSITEROTATED);
+			if (_bothRotatedItem != null) {
+				_bothRotatedItem.setSelected(desiredFieldType == FieldType.COMPOSITEROTATED);
+			}
 			_zeroItem.setSelected(desiredFieldType == FieldType.ZEROFIELD);
 			// _uniformItem.setSelected(desiredFieldType == FieldType.UNIFORM);
 		}
@@ -404,9 +402,6 @@ public class MagneticFields {
 		case SOLENOID:
 			_activeField = _solenoid;
 			break;
-		// case UNIFORM:
-		// _activeField = _uniform;
-		// break;
 		case COMPOSITE:
 			_activeField = _compositeField;
 			break;
@@ -501,9 +496,6 @@ public class MagneticFields {
 			break;
 		case COMPOSITEROTATED:
 			break;
-		case UNIFORM:
-			scale = 1.;
-			break;
 		case ZEROFIELD:
 			scale = 0;
 			break;
@@ -541,7 +533,6 @@ public class MagneticFields {
 			break;
 		case COMPOSITEROTATED:
 			break;
-		case UNIFORM:
 		case ZEROFIELD:
 			shiftz = 0;
 			break;
@@ -1172,7 +1163,10 @@ public class MagneticFields {
 		_torusItem = createRadioMenuItem(_torus, "Torus", menu, bg, al);
 		_solenoidItem = createRadioMenuItem(_solenoid, "Solenoid", menu, bg, al);
 		_bothItem = createRadioMenuItem(_compositeField, "Composite", menu, bg, al);
-		_bothRotatedItem = createRadioMenuItem(_rotatedCompositeField, "Rotated Composite", menu, bg, al);
+
+		if (incRotatedField) {
+			_bothRotatedItem = createRadioMenuItem(_rotatedCompositeField, "Rotated Composite", menu, bg, al);
+		}
 
 		// _uniformItem = createRadioMenuItem(null, "Uniform", menu, bg, al);
 		_zeroItem = createRadioMenuItem(null, "No Field", menu, bg, al);
@@ -1200,7 +1194,10 @@ public class MagneticFields {
 		_torusItem.setEnabled(_torus != null);
 		_solenoidItem.setEnabled(_solenoid != null);
 		_bothItem.setEnabled((_torus != null) && (_solenoid != null));
-		_bothRotatedItem.setEnabled((_torus != null) && (_solenoid != null));
+
+		if (_bothRotatedItem != null) {
+			_bothRotatedItem.setEnabled((_torus != null) && (_solenoid != null));
+		}
 		// _uniformItem.setEnabled(_uniform != null);
 
 		menu.addSeparator();
@@ -1221,7 +1218,7 @@ public class MagneticFields {
 			_activeField = _solenoid;
 		} else if (source == _bothItem) {
 			_activeField = _compositeField;
-		} else if (source == _bothRotatedItem) {
+		} else if ((_bothRotatedItem != null) && (source == _bothRotatedItem)) {
 			_activeField = _rotatedCompositeField;
 		} else if (source == _zeroItem) {
 			_activeField = null;

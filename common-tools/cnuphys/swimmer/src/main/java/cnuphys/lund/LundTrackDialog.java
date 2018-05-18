@@ -106,6 +106,9 @@ public class LundTrackDialog extends JDialog {
 	// old (and default_ momentum in GeV/c
 	private double _oldMomentum = 2.0;
 
+	// only need one swimmer
+	private Swimmer _swimmer;
+
 	// unicode strings
 	public static final String SMALL_BETA = "\u03B2";
 	public static final String SMALL_GAMMA = "\u03B3";
@@ -148,6 +151,7 @@ public class LundTrackDialog extends JDialog {
 		};
 		addWindowListener(wa);
 
+		_swimmer = new Swimmer();
 		addComponents();
 		pack();
 		centerComponent(this);
@@ -178,7 +182,7 @@ public class LundTrackDialog extends JDialog {
 
 		Box box = Box.createVerticalBox();
 		box.add(Box.createVerticalStrut(6));
-		
+
 		ActionListener al = new ActionListener() {
 
 			@Override
@@ -233,111 +237,89 @@ public class LundTrackDialog extends JDialog {
 	 */
 	private void doCommonSwim() {
 
-		// get the current swimmer
-		Swimmer swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
+		try {
+			LundId lid = _lundComboBox.getSelectedId();
 
-		if (swimmer != null) {
+			// note xo, yo, zo converted to meters
+			double xo = Double.parseDouble(_vertexX.getText()) / 100.;
+			double yo = Double.parseDouble(_vertexY.getText()) / 100.;
+			double zo = Double.parseDouble(_vertexZ.getText()) / 100.;
+			double theta = Double.parseDouble(_theta.getText());
+			double phi = Double.parseDouble(_phi.getText());
+			double rMax = Double.parseDouble(_maxR.getText());
+			double momentum = Double.parseDouble(_momentumTextField.getText());
+
+			// create a stopper
+			DefaultSwimStopper stopper = new DefaultSwimStopper(rMax);
+
+			double stepSize = 5e-3; // m
+			double maxPathLen = 8.0; // m
+			double hdata[] = new double[3];
+
 			try {
-				LundId lid = _lundComboBox.getSelectedId();
+				if (_standardCutoff.isSelected()) {
+					SwimTrajectory traj = _swimmer.swim(lid.getCharge(), xo, yo, zo, momentum, theta, phi, stopper, 0,
+							maxPathLen, stepSize, Swimmer.CLAS_Tolerance, hdata);
+					traj.setLundId(lid);
 
-				// note xo, yo, zo converted to meters
-				double xo = Double.parseDouble(_vertexX.getText()) / 100.;
-				double yo = Double.parseDouble(_vertexY.getText()) / 100.;
-				double zo = Double.parseDouble(_vertexZ.getText()) / 100.;
-				double theta = Double.parseDouble(_theta.getText());
-				double phi = Double.parseDouble(_phi.getText());
-				double rMax = Double.parseDouble(_maxR.getText());
-				double momentum = Double.parseDouble(_momentumTextField
-						.getText());
+					double lastY[] = traj.lastElement();
+					printSummary("\nRESULT from adaptive stepsize method with storage and err vector", traj.size(),
+							momentum, lastY, hdata);
 
-				// create a stopper
-				DefaultSwimStopper stopper = new DefaultSwimStopper(rMax);
+					Swimming.addMCTrajectory(traj);
+				} else {
 
-				double stepSize = 5e-3; // m
-				double maxPathLen = 8.0; // m
-				double hdata[] = new double[3];
+					System.err.println("Fixed Z cutoff");
 
-				try {
-					if (_standardCutoff.isSelected()) {
-						SwimTrajectory traj = swimmer.swim(lid.getCharge(), xo,
-								yo, zo, momentum, theta, phi, stopper,
-								0, maxPathLen, stepSize, Swimmer.CLAS_Tolerance,
-								hdata);
-						traj.setLundId(lid);
+					// which algorithm
 
-						double lastY[] = traj.lastElement();
-						printSummary(
-								"\nRESULT from adaptive stepsize method with storage and err vector",
-								traj.size(), momentum, lastY, hdata);
+					double ztarget = Double.parseDouble(_fixedZ.getText()); // meters
 
-						Swimming.addMCTrajectory(traj);
+					SwimTrajectory traj = null;
+					if (_swimZ.isSelected()) {
+						System.err.println("SwimZ swimmer");
+						SwimZStateVector start = new SwimZStateVector(xo * 100, yo * 100, zo * 100, momentum, theta,
+								phi);
+						SwimZ sz = new SwimZ(MagneticFields.getInstance().getActiveField());
+
+						double adaptiveInitStepSize = 0.01;
+
+						double[] adaptiveAbsError = { 1.0e-5, 1.0e-5, 1.0e-5, 1.0e-5 };
+
+						SwimZResult result = sz.adaptiveRK(lid.getCharge(), momentum, start, ztarget,
+								adaptiveInitStepSize, adaptiveAbsError, hdata);
+						partialReport(result, "Z ADAPTIVE");
+						traj = result.toSwimTrajectory();
+
 					} else {
-
-
-						System.err.println("Fixed Z cutoff");
-
-						// which algorithm
-
-						double ztarget = Double.parseDouble(_fixedZ.getText()); // meters
-
-						SwimTrajectory traj = null;
-						if (_swimZ.isSelected()) {
-							System.err.println("SwimZ swimmer");
-							SwimZStateVector start = new SwimZStateVector(
-									xo * 100, yo * 100, zo * 100, momentum,
-									theta, phi);
-							SwimZ sz = new SwimZ(
-									MagneticFields.getInstance().getActiveField());
-
-							double adaptiveInitStepSize = 0.01;
-
-							double[] adaptiveAbsError = { 1.0e-5, 1.0e-5,
-									1.0e-5, 1.0e-5 };
-
-							SwimZResult result = sz.adaptiveRK(lid.getCharge(),
-									momentum, start, ztarget,
-									adaptiveInitStepSize, adaptiveAbsError,
-									hdata);
-							partialReport(result, "Z ADAPTIVE");
-							traj = result.toSwimTrajectory();
-
-						} else {
-							System.err.println("Traditional swimmer");
-							ztarget /= 100; // meters
-							// convert accuracy from microns to meters
-							double accuracy = Double.parseDouble(_accuracy
-									.getText()) / 1.0e6;
-							traj = swimmer.swim(lid.getCharge(), xo, yo, zo,
-									momentum, theta, phi, ztarget, accuracy,
-									rMax, maxPathLen, stepSize,
-									Swimmer.CLAS_Tolerance, hdata);
-							traj.setLundId(lid);
-							double lastY[] = traj.lastElement();
-							printSummary(
-									"\nresult from adaptive stepsize method with storage and Z cutoff at "
-											+ ztarget, traj.size(), momentum,
-									lastY, hdata);
-						}
-						if (traj != null) {
-							Swimming.addMCTrajectory(traj);
-						}
+						System.err.println("Traditional swimmer");
+						ztarget /= 100; // meters
+						// convert accuracy from microns to meters
+						double accuracy = Double.parseDouble(_accuracy.getText()) / 1.0e6;
+						traj = _swimmer.swim(lid.getCharge(), xo, yo, zo, momentum, theta, phi, ztarget, accuracy,
+								maxPathLen, stepSize, Swimmer.CLAS_Tolerance, hdata);
+						traj.setLundId(lid);
+						double lastY[] = traj.lastElement();
+						printSummary("\nresult from adaptive stepsize method with storage and Z cutoff at " + ztarget,
+								traj.size(), momentum, lastY, hdata);
 					}
-
-				} catch (RungeKuttaException e) {
-					e.printStackTrace();
+					if (traj != null) {
+						Swimming.addMCTrajectory(traj);
+					}
 				}
-			} catch (SwimZException e) {
-				System.err
-						.println("Swimming failed. See the log for more details.");
+
+			} catch (RungeKuttaException e) {
+				e.printStackTrace();
 			}
+		} catch (SwimZException e) {
+			System.err.println("Swimming failed. See the log for more details.");
 		}
 	}
 
 	private static void partialReport(SwimZResult result, String name) {
 		double p3v[] = result.getFinalThreeMomentum();
 		// check
-		double pf = Math.sqrt(p3v[0] * p3v[0] + p3v[1] * p3v[1] + p3v[2]
-				* p3v[2]);
+		double pf = Math.sqrt(p3v[0] * p3v[0] + p3v[1] * p3v[1] + p3v[2] * p3v[2]);
 
 		printVect(result.getInitialThreeMomentum(), "po");
 		printVect(result.getFinalThreeMomentum(), "pf");
@@ -346,26 +328,20 @@ public class LundTrackDialog extends JDialog {
 		System.out.println("Final state vector: " + result.last());
 
 		double thetaPhi[] = result.getInitialThetaAndPhi();
-		System.out.println(String.format(
-				"Initial theta = %-8.2f phi = %-8.2f deg", thetaPhi[0],
-				thetaPhi[1]));
+		System.out.println(String.format("Initial theta = %-8.2f phi = %-8.2f deg", thetaPhi[0], thetaPhi[1]));
 		thetaPhi = result.getFinalThetaAndPhi();
-		System.out.println(String.format(
-				"Final theta = %-8.2f phi = %-8.2f deg", thetaPhi[0],
-				thetaPhi[1]));
+		System.out.println(String.format("Final theta = %-8.2f phi = %-8.2f deg", thetaPhi[0], thetaPhi[1]));
 
 		System.out.println("p: " + pf + " GeV/c");
 	}
 
 	private static void printVect(double v[], String s) {
-		String out = String.format("%s [%-12.5f, %-12.5f, %-12.5f]", s, v[0],
-				v[1], v[2]);
+		String out = String.format("%s [%-12.5f, %-12.5f, %-12.5f]", s, v[0], v[1], v[2]);
 		System.out.println(out);
 	}
 
 	// print a summary
-	private static void printSummary(String message, int nstep,
-			double momentum, double Q[], double hdata[]) {
+	private static void printSummary(String message, int nstep, double momentum, double Q[], double hdata[]) {
 		System.out.println(message);
 		double R = FastMath.sqrt(Q[0] * Q[0] + Q[1] * Q[1] + Q[2] * Q[2]);
 		double norm = FastMath.sqrt(Q[3] * Q[3] + Q[4] * Q[4] + Q[5] * Q[5]);
@@ -383,14 +359,12 @@ public class LundTrackDialog extends JDialog {
 			System.out.println("avg stepsize: " + hdata[1]);
 			System.out.println("max stepsize: " + hdata[2]);
 		}
-		System.out
-				.println(String
-						.format("R = [%9.6f, %9.6f, %9.6f] |R| = %9.6f m\nP = [%9.6e, %9.6e, %9.6e] |P| =  %9.6e GeV/c",
-								Q[0], Q[1], Q[2], R, px, py, pz, P));
+		System.out.println(
+				String.format("R = [%9.6f, %9.6f, %9.6f] |R| = %9.6f m\nP = [%9.6e, %9.6e, %9.6e] |P| =  %9.6e GeV/c",
+						Q[0], Q[1], Q[2], R, px, py, pz, P));
 		System.out.println("norm (should be 1): " + norm);
 
-		System.out.println(String.format(
-				"Final angles theta: %9.6f  phi: %9.6f", theta, phi));
+		System.out.println(String.format("Final angles theta: %9.6f  phi: %9.6f", theta, phi));
 
 		// for swimming backwards
 		px = -px;
@@ -398,8 +372,7 @@ public class LundTrackDialog extends JDialog {
 		pz = -pz;
 		theta = FastMath.acos2Deg(pz / P);
 		phi = FastMath.atan2Deg(py, px);
-		System.out.println(String.format(
-				"Swim backwards use theta: %9.6f  phi: %9.6f", theta, phi));
+		System.out.println(String.format("Swim backwards use theta: %9.6f  phi: %9.6f", theta, phi));
 
 		System.out.println("--------------------------------------\n");
 	}
@@ -413,8 +386,7 @@ public class LundTrackDialog extends JDialog {
 	 * @param promptWidth
 	 * @return a Box holding a labeled text field
 	 */
-	private Box labeledTextField(String prompt, JTextField tf, String units,
-			final int promptWidth) {
+	private Box labeledTextField(String prompt, JTextField tf, String units, final int promptWidth) {
 		Box box = Box.createHorizontalBox();
 
 		JLabel plabel = new JLabel(prompt) {
@@ -539,7 +511,7 @@ public class LundTrackDialog extends JDialog {
 		panel.setBorder(new CommonBorder("Integration Controls"));
 		return panel;
 	}
-	
+
 	public void setFixedZSelected(boolean selected) {
 		_standardCutoff.setSelected(!selected);
 		_fixedZCutoff.setSelected(selected);
@@ -650,8 +622,7 @@ public class LundTrackDialog extends JDialog {
 			momentum = Double.parseDouble(_momentumTextField.getText());
 		} catch (Exception e) {
 			momentum = _oldMomentum;
-			_momentumTextField.setText(""
-					+ String.format("%-9.5f", _oldMomentum));
+			_momentumTextField.setText("" + String.format("%-9.5f", _oldMomentum));
 			return;
 		}
 

@@ -47,6 +47,8 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 	
 	private boolean _showGradient = false;
 	
+	private String _extraText = "";
+	
 	// coordinate system
 	public enum CSType {
 		XZ, YZ
@@ -101,6 +103,10 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 		};
 		MagneticFields.getInstance().addMagneticFieldChangeListener(mflistener);
 
+	}
+	
+	public void setExtraText(String s) {
+		_extraText = s;
 	}
 	
 	public void setShowGradient(boolean grad) {
@@ -244,7 +250,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 		
 		g.setFont(font2);
 		g.setColor(Color.cyan);
-		g.drawString("Sector " + _sector, bounds.x + 10, bounds.y + 20);
+		g.drawString("Sector " + _sector + "  " + _extraText, bounds.x + 10, bounds.y + 20);
 
 
 		Point pp = new Point();
@@ -345,8 +351,8 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 		
 		
 		//use probes
-		IField ifield = FieldProbe.factory(MagneticFields.getInstance().getActiveField());
-		System.err.println("PROBE: " + ifield.getClass().getName());
+		IField ifield = FieldProbe.factory();
+	//	System.err.println("PROBE: " + ifield.getClass().getName());
 	//	IField ifield = MagneticFields.getInstance().getActiveField();
 
 

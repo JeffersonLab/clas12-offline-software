@@ -24,12 +24,16 @@ import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFieldInitializationException;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
+import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimmer;
 import cnuphys.swim.Swimming;
 
 public class SwimTest {
+	
+	//we only need one swimmer it will adapt to changing fields.
+	private static Swimmer _swimmer;
 	
 	private static int _sector = 1;
 	final static MagneticFieldCanvas canvas1 = new MagneticFieldCanvas(_sector, -10, -10, 680, 460.,
@@ -38,20 +42,9 @@ public class SwimTest {
 			MagneticFieldCanvas.CSType.XZ);
 
 
-	static int Q = -1;
-	static double xo = 30.0; // cm
-	static double yo = 0.0;
-	static double zo = 300; // cm
-	static double zf = 500; // cm
-	static double p = 5.0; // GeV
-	static double theta = 30; // deg
-	static double phi = 10; // deg
-	static double uniformStepSize = .02; // cm
-	static double adaptiveInitStepSize = 0.01;
 
 	// these will be used to create a DefaultStopper
-	private static final double rmax = 6.0; // m
-	private static final double maxPathLength = 8.5; // m
+	private static final double maxPathLength = 8.0; // m
 
 	// get some fit results
 	private static final double hdata[] = new double[3];
@@ -62,8 +55,6 @@ public class SwimTest {
 	static double oldUniformStepSize = 0.1; // m
 	static double oldAdaptiveInitStepSize = 0.01; // m
 
-	// create a old style swimmer for comparison
-	private static Swimmer swimmer;
 	
 	private static void initMagField() {
 		// test specific load
@@ -109,6 +100,8 @@ public class SwimTest {
 		// drawing canvas
 		JPanel magPanel1 = canvas1.getPanelWithStatus(680, 460);
 		JPanel magPanel2 = canvas2.getPanelWithStatus(680, 460);
+		canvas1.setExtraText("Field Magnitude (T)");
+		canvas2.setExtraText("Gradient Magnitude (T/m)");
 		canvas2.setShowGradient(true);
 
 		// set up what to do if the window is closed
@@ -139,7 +132,7 @@ public class SwimTest {
 		// add the menu
 		JMenuBar mb = new JMenuBar();
 		testFrame.setJMenuBar(mb);
-		mb.add(mf.getMagneticFieldMenu(true, true));
+		mb.add(mf.getMagneticFieldMenu());
 		mb.add(SwimMenu.getInstance());
 		
 		JMenu testMenu = getTestMenu();
@@ -209,6 +202,8 @@ public class SwimTest {
 		
 		LundTrackDialog.getInstance().setFixedZSelected(true);
 		
+		_swimmer = new Swimmer();
+		
 		// testParabolicApproximation(numTest);
 		// testOldUniform(numTest);
 		// testOldAdaptive(numTest);
@@ -238,33 +233,61 @@ public class SwimTest {
 		System.out.println(" ]-------------\n");
 	}
 
-	// test the new SwimZ uniform integrator
-	private static void testUniform(int numTimes) {
 
-		header("Swim UNIFORM");
+	/**
+	 * Swims a charged particle. This swims to a fixed z value. This is for the
+	 * trajectory mode, where you want to cache steps along the path. Uses an
+	 * adaptive stepsize algorithm.
+	 * 
+	 * @param charge
+	 *            the charge: -1 for electron, 1 for proton, etc
+	 * @param xo
+	 *            the x vertex position in meters
+	 * @param yo
+	 *            the y vertex position in meters
+	 * @param zo
+	 *            the z vertex position in meters
+	 * @param momentum
+	 *            initial momentum in GeV/c
+	 * @param theta
+	 *            initial polar angle in degrees
+	 * @param phi
+	 *            initial azimuthal angle in degrees
+	 * @param fixedZ
+	 *            the fixed z value (meters) that terminates (or maxPathLength
+	 *            if reached first)
+	 * @param accuracy
+	 *            the accuracy of the fixed z termination, in meters
+	 * @param sMax
+	 *            Max path length in meters. This determines the max number of steps based on
+	 *            the step size. If a stopper is used, the integration might
+	 *            terminate before all the steps are taken. A reasonable value
+	 *            for CLAS is 8. meters
+	 * @param stepSize
+	 *            the initial step size in meters.
+	 * @param relTolerance
+	 *            the error tolerance as fractional diffs. Note it is a vector,
+	 *            the same dimension of the problem, e.g., 6 for
+	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 * @param hdata
+	 *            if not null, should be double[3]. Upon return, hdata[0] is the
+	 *            min stepsize used (m), hdata[1] is the average stepsize used
+	 *            (m), and hdata[2] is the max stepsize (m) used
+	 * @return the trajectory of the particle
+	 * @throws RungeKuttaException
+	 */
+	private SwimTrajectory traditionalSwimmer(int charge, double momentum, double theta, double phi, double ztarget,
+			double accuracy, double maxPathLen, double stepSize, double[] tolerance, double[] hdata)
+			throws RungeKuttaException {
+		SwimTrajectory traj;
+		traj = _swimmer.swim(charge, 0, 0, 0, momentum, theta, phi, ztarget, accuracy, maxPathLen, stepSize,
+				Swimmer.CLAS_Tolerance, hdata);
+		double lastY[] = traj.lastElement();
+		printSummary("\nresult from adaptive stepsize method with storage and Z cutoff at " + ztarget, traj.size(),
+				momentum, lastY, hdata);
 
-		double ztarget = 2.75; // where integration should stop
-		double accuracy = 10e-6; // 10 microns
-		double stepSize = 5e-3; // m
-
-		// save about every 20th step
-		double distanceBetweenSaves = 20 * stepSize;
-		SwimTrajectory traj = null;
-		Swimmer swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
-
-		long startTime = System.currentTimeMillis();
-		for (int i = 0; i < numTimes; i++) {
-
-			traj = swimmer.swim(-1, xo, yo, zo, p, theta, phi, ztarget, accuracy, rmax, maxPathLength, stepSize,
-					distanceBetweenSaves);
-		}
-		double timePerSwim = ((double) (System.currentTimeMillis() - startTime)) / numTimes;
-
-		printSummary("\nresult from uniform step stepsize method with storage", 20 * traj.size(), p, traj.lastElement(),
-				null);
-
-		System.out.println("time per swim: " + timePerSwim + "  ms");
-		footer("Swim UNIFORM");
+		return traj;
 	}
 
 	private static void testAdaptive(int numTimes) {
