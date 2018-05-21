@@ -66,6 +66,7 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
             "/calibration/dc/time_to_distance/time2dist",
          //   "/calibration/dc/time_corrections/T0_correction",
             "/calibration/dc/time_corrections/timingcuts",
+            "/calibration/dc/time_jitter",
         };
 
         requireConstants(Arrays.asList(dcTables));
