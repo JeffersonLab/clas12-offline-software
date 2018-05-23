@@ -44,12 +44,12 @@ public class Cell2D implements MagneticFieldChangeListener {
 
 		n2 = q2Coord.getIndex(rho);
 		if (n2 < 0) {
-			System.err.println("WARNING Bad n2 in Cell2D.reset: " + n2);
+			System.err.println("WARNING Bad n2 in Cell2D.reset: " + n2 + "  rho: " + rho);
 			return;
 		}
 		n3 = q3Coord.getIndex(z);
 		if (n3 < 0) {
-			System.err.println("WARNING Bad n3 in Cell2D.reset: " + n3);
+			System.err.println("WARNING Bad n3 in Cell2D.reset: " + n3 + "  z: " + z);
 			return;
 		}
 
@@ -93,7 +93,7 @@ public class Cell2D implements MagneticFieldChangeListener {
 	 * 
 	 */
 	public boolean containedCylindrical(double rho, double z) {
-		return (rho >= q2Min && rho < q2Max) && (z >= q3Min && z < q3Max);
+		return ((rho > q2Min) && (rho < q2Max) && (z > q3Min) && (z < q3Max));
 	}
 
 	/**

@@ -167,4 +167,6 @@ public interface IField {
 	 * 
 	 */
 	public boolean containsCylindrical(float phi, float rho, float z);
+	
+	
 }

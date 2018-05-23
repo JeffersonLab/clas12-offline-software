@@ -19,12 +19,10 @@ public class RotatedCompositeProbe extends FieldProbe {
 		}
 	}
 	
-
-
 	/**
 	 * Obtain the magnetic field at a given location expressed in Cartesian
 	 * coordinates. The field is returned as a Cartesian vector in kiloGauss.
-	 *
+	 * @param sector the sector [1..6]
 	 * @param xs
 	 *            the x coordinate in cm
 	 * @param ys
@@ -35,10 +33,36 @@ public class RotatedCompositeProbe extends FieldProbe {
 	 *            the result is a float array holding the retrieved field in
 	 *            kiloGauss. The 0,1 and 2 indices correspond to x, y, and z
 	 *            components.
+	 */	
+	public void field(int sector, float xs, float ys, float zs, float[] result) {
+		 //TODO Implement the sector effect to get the field from the right sector
+		 //For now using sector 1
+
+		 field(xs, ys, zs, result);
+	}
+
+
+
+	/**
+	 * Obtain the magnetic field at a given location expressed in Cartesian
+	 * coordinates. The field is returned as a Cartesian vector in kiloGauss.
+	 * THIS ASSUMES COORDINATES ARE IN A SECTOR 1 SECTOR SYSTEM 
+	 *
+	 * @param xs
+	 *            the x coordinate in cm in sector 1 sector system
+	 * @param ys
+	 *            the y coordinate in cm in sector 1 sector system
+	 * @param zs
+	 *            the z coordinate in cm in sector 1 sector system
+	 * @param result
+	 *            the result is a float array holding the retrieved field in
+	 *            kiloGauss. The 0,1 and 2 indices correspond to x, y, and z
+	 *            components.
 	 */
 	@Override
 	public void field(float xs, float ys, float zs, float[] result) {
 		
+		//first rotate location
 		double x = xs * _cos - zs * _sin;
 		double y = ys;
 		double z = zs * _cos + xs * _sin;
@@ -54,6 +78,7 @@ public class RotatedCompositeProbe extends FieldProbe {
 		}
 		
 
+		//now rotate the field in the opposite sense
 		result[0] = (float) (bx * _cos + bz * _sin);
 		result[1] = (by);
 		result[2] = (float) (bz * _cos - bx * _sin);

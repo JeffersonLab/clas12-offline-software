@@ -17,16 +17,20 @@ public class CompositeProbe extends FieldProbe {
 	@Override
 	public void field(float x, float y, float z, float result[]) {
 		
-		if (!contains(x, y, z)) {
-			result[0] = 0f;
-			result[1] = 0f;
-			result[2] = 0f;
-			return;
+		float bx = 0;
+		float by = 0;
+		float bz = 0;
+		
+		for (FieldProbe probe : probes) {
+			probe.field(x, y, z, result);
+			bx += result[0];
+			by += result[1];
+			bz += result[2];
 		}
-
-		double rho = FastMath.sqrt(x * x + y * y);
-		double phi = FastMath.atan2Deg(y, x);
-		fieldCylindrical(phi, rho, z, result);
+		
+		result[0] = bx;
+		result[1] = by;
+		result[2] = bz;
 	}
 
 	

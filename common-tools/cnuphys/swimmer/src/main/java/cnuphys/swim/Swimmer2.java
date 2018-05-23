@@ -43,8 +43,7 @@ public class Swimmer2 {
 	 *            interface into a magnetic field
 	 */
 	public Swimmer2(IField field) {
-		FieldProbe probe = FieldProbe.factory(field);
-		_field = (probe != null) ? probe : field;
+		_field = FieldProbe.factory(field);
 	}
 
 	/**
@@ -72,10 +71,7 @@ public class Swimmer2 {
 	 * @param accuracy
 	 *            the accuracy of the fixed z termination, in meters
 	 * @param sMax
-	 *            Max path length in meters. This determines the max number of steps based on
-	 *            the step size. If a stopper is used, the integration might
-	 *            terminate before all the steps are taken. A reasonable value
-	 *            for CLAS is 8. meters
+	 *            Max path length in meters.  A reasonable value for CLAS is 8. meters
 	 * @param stepSize
 	 *            the initial step size in meters.
 	 * @param relTolerance
@@ -195,8 +191,7 @@ public class Swimmer2 {
 	 * @param accuracy
 	 *            the accuracy of the fixed z termination, in meters
 	 * @param sMax
-	 *            Max path length in meters. This determines the max number of steps based on
-	 *            the step size. If a stopper is used, the integration might
+	 *            Max path length in meters. The integration might
 	 *            terminate before all the steps are taken. A reasonable value
 	 *            for CLAS is 8. meters
 	 * @param stepSize

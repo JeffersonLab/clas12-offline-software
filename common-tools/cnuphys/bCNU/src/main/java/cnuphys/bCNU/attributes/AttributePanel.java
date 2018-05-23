@@ -10,6 +10,15 @@ public class AttributePanel extends JPanel {
 
 	private AttributeTable _attributeTable;
 	
+	public AttributePanel(Attributes attributes) {
+		_attributeTable = new AttributeTable();
+		_attributeTable.setData(attributes.clone());
+		setLayout(new BorderLayout(4, 4));
+		
+		add(_attributeTable.getScrollPane(), BorderLayout.CENTER);
+		setBorder(BorderFactory.createEtchedBorder());
+	}
+	
 	public AttributePanel(AttributeTable attributeTable) {
 		_attributeTable = attributeTable;
 		

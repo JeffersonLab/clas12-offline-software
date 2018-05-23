@@ -1,4 +1,4 @@
-package cnuphys.bCNU.simanneal.example;
+package cnuphys.bCNU.simanneal.example.ts;
 
 import java.util.EnumMap;
 

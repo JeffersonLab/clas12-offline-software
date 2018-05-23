@@ -9,6 +9,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.BorderFactory;
@@ -77,8 +79,6 @@ import cnuphys.ced.trigger.TriggerManager;
 import cnuphys.ced.trigger.TriggerMenuPanel;
 import cnuphys.lund.X11Colors;
 import cnuphys.magfield.FastMath;
-import cnuphys.magfield.FieldProbe;
-import cnuphys.magfield.MagneticField;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.splot.example.MemoryUsageDialog;
@@ -110,7 +110,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 1.003e";
+	private static final String _release = "build 1.004a";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -591,7 +591,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private void addToMagneticFieldMenu() {
 		JMenu magMenu = MagneticFields.getInstance().getMagneticFieldMenu();
 		final JMenuItem plotItem = new JMenuItem("Plot the Field...");
-		final JMenuItem loadItem = new JMenuItem("Load a Different Torus...");
+//		final JMenuItem loadItem = new JMenuItem("Load a Different Torus...");
 
 		magMenu.addSeparator();
 
@@ -607,15 +607,16 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 					_plotFieldDialog.setVisible(true);
 
-				} else if (e.getSource() == loadItem) {
-					MagneticFields.getInstance().openNewTorus();
-				}
+				} 
+//				else if (e.getSource() == loadItem) {
+//					MagneticFields.getInstance().openNewTorus();
+//				}
 			}
 		};
 
-		loadItem.addActionListener(al);
+//		loadItem.addActionListener(al);
 		plotItem.addActionListener(al);
-		magMenu.add(loadItem);
+//		magMenu.add(loadItem);
 		magMenu.add(plotItem);
 
 		MenuManager.getInstance().addMenu(magMenu);
@@ -1044,8 +1045,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	@Override
 	public void magneticFieldChanged() {
-		Swimming.clearMCTrajectories();
-		Swimming.clearReconTrajectories();
+		Swimming.clearAllTrajectories();
 		fixTitle();
 		ClasIoEventManager.getInstance().reloadCurrentEvent();
 	}
@@ -1078,6 +1078,45 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		return _instance;
 	}
 	
+	//this is so we can find json files
+	private static void initClas12Dir() throws IOException {
+		
+		//for running from runnable jar (for coatjava)
+		String clas12dir = System.getProperty("CLAS12DIR");
+		
+		if (clas12dir == null) {
+			clas12dir = "coatjava";
+		}
+		
+		File clasDir = new File(clas12dir);
+		
+		if (clasDir.exists() && clasDir.isDirectory()) {
+			System.err.println("**** Found CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
+			System.setProperty("CLAS12DIR", clas12dir);
+			Log.getInstance().config("CLAS12DIR: " + clas12dir);
+			return;
+		}
+		else {
+			System.err.println("**** Did not find CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
+		}
+		
+		String cwd = Environment.getInstance().getCurrentWorkingDirectory();
+		clas12dir = cwd + "/../../../../../cnuphys/coatjava";
+		clasDir = new File(clas12dir);
+		
+		if (clasDir.exists() && clasDir.isDirectory()) {
+			System.err.println("**** Found CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
+			System.setProperty("CLAS12DIR", clas12dir);
+			Log.getInstance().config("CLAS12DIR: " + clas12dir);
+			return;
+		}
+		else {
+			System.err.println("**** Did not find CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
+		}
+
+		throw(new IOException("Could not locate the coatjava directory."));
+	}
+	
 	/**
 	 * Main program launches the ced gui.
 	 * <p>
@@ -1095,12 +1134,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		//initialize the trigger manager
 		TriggerManager.getInstance();
 		
-		//for running from runnable jar (for coatjava)
-		String clas12dir = System.getProperty("CLAS12DIR");
-		
-		if (clas12dir == null) {
-			clas12dir = "coatjava";
-			System.setProperty("CLAS12DIR", clas12dir);
+		//init the clas 12 dir wherev the json files are
+		try {
+			initClas12Dir();
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
 
 		FileUtilities.setDefaultDir("data");
@@ -1209,7 +1247,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		});
 		Log.getInstance().info(Environment.getInstance().toString());
-		Log.getInstance().config("CLAS12DIR: " + clas12dir);
 		
 		//try to update the log for fun
 //		try {
@@ -1223,43 +1260,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 
 	} // end main
-//	
-//	//update the log file for fun
-//	private static void updateCedLog() {
-//		
-//		File myHome = new File(Environment.getInstance().getHomeDirectory());
-//		String baseHome = myHome.getParent();
-//		
-//		File file = new File(baseHome, "heddle/ced.log");
-//		
-//		boolean fileExists = file.exists();
-//		
-//		if (!fileExists) {
-//			file = new File("/u/home/heddle/ced.log");
-//			fileExists = file.exists();
-//		}
-//		
-//		if (!fileExists) {
-//			file = new File("home/heddle/ced.log");
-//			fileExists = file.exists();
-//		}
-//
-//
-//		if (fileExists && file.canWrite()) {
-//			System.out.println("updating log");
-//			try {
-//				FileWriter fw = new FileWriter(file, true);
-//				String uname = Environment.getInstance().getUserName();
-//				String datestr = DateString.dateStringLong();
-//				String lstr = uname + " " + _release + " " + datestr;
-//				fw.write(lstr + "\n");
-//				fw.flush();
-//				fw.close();
-//			}
-//			catch (IOException e) {
-//			}
-//			
-//		}
-//	}
+
 
 }
