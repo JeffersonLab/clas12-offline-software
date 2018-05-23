@@ -88,6 +88,10 @@ public class FTCALGeometry {
 		Point2D.Double wp = new Point2D.Double();
 		
 		for (ScintillatorPaddle sp : padlist) {
+			
+			//rotate do to match  actualk geometry
+			sp.rotateZ(Math.PI);
+
 
 			int id = sp.getComponentId();
 			paddles[id] = sp;
@@ -95,6 +99,7 @@ public class FTCALGeometry {
 
 			Point p = new Point();
 			paddleXYCenter(id, wp);
+						
 			p.x = valToIndex(wp.x);
 			p.y = valToIndex(wp.y);
 				
@@ -138,9 +143,6 @@ public class FTCALGeometry {
 	 * @return the paddle, might be null
 	 */
 	public static ScintillatorPaddle getPaddle(int componentId) {
-		// if ((paddle < 1) || (paddle > 332)) {
-		// return null;
-		// }
 		return paddles[componentId];
 	}
 

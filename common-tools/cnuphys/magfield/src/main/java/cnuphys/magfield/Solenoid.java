@@ -59,6 +59,29 @@ public final class Solenoid extends MagneticField {
     	return (Math.abs(_shiftZ) > MISALIGNTOL);
     }
     
+	/**
+	 * Obtain the magnetic field at a given location expressed in Cartesian
+	 * coordinates. The field is returned as a Cartesian vector in kiloGauss.
+	 * The coordinates are in the canonical CLAS system with the origin at the
+	 * nominal target, x through the middle of sector 1 and z along the beam.
+	 * 
+	 * @param x
+	 *            the x coordinate in cm
+	 * @param y
+	 *            the y coordinate in cm
+	 * @param z
+	 *            the z coordinate in cm
+	 * @param result
+	 *            a array holding the retrieved (interpolated) field in
+	 *            kiloGauss. The 0,1 and 2 indices correspond to x, y, and z
+	 *            components.
+	 */
+	@Override
+	public final void field(float x, float y, float z, float result[]) {
+		double rho = FastMath.sqrt(x * x + y * y);
+		double phi = FastMath.atan2Deg(y, x);
+		fieldCylindrical(phi, rho, z, result);
+	}
 
 	
 	/**

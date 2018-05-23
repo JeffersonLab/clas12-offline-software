@@ -11,7 +11,7 @@ import cnuphys.bCNU.component.EnumComboBox;
  */
 public enum AttributeType {
 
-	BOOLEAN, STRING, INT, DOUBLE, UNKNOWN;
+	BOOLEAN, STRING, BYTE, SHORT, INT, LONG, FLOAT, DOUBLE, UNKNOWN;
 	
 
 	/**
@@ -23,7 +23,11 @@ public enum AttributeType {
 	static {
 		names.put(BOOLEAN, "boolean");
 		names.put(STRING, "float");
+		names.put(BYTE, "byte");
+		names.put(SHORT, "short");
 		names.put(INT, "int");
+		names.put(LONG, "long");
+		names.put(FLOAT, "float");
 		names.put(DOUBLE, "double");
 		names.put(UNKNOWN, "Unknown");
 	}
@@ -37,7 +41,11 @@ public enum AttributeType {
 	static {
 		editorClasses.put(BOOLEAN, AttributeBooleanEditor.class);
 		editorClasses.put(STRING, AttributeStringEditor.class);
+		editorClasses.put(BYTE, AttributeByteEditor.class);
+		editorClasses.put(SHORT, AttributeShortEditor.class);
 		editorClasses.put(INT, AttributeIntegerEditor.class);
+		editorClasses.put(LONG, AttributeLongEditor.class);
+		editorClasses.put(FLOAT, AttributeFloatEditor.class);
 		editorClasses.put(DOUBLE, AttributeDoubleEditor.class);
 	}
 	
@@ -59,8 +67,20 @@ public enum AttributeType {
 		else if (value instanceof String) {
 			return STRING;
 		}
+		else if (value instanceof Byte) {
+			return BYTE;
+		}
+		else if (value instanceof Short) {
+			return SHORT;
+		}
 		else if (value instanceof Integer) {
 			return INT;
+		}
+		else if (value instanceof Long) {
+			return LONG;
+		}
+		else if (value instanceof Float) {
+			return FLOAT;
 		}
 		else if (value instanceof Double) {
 			return DOUBLE;
@@ -87,8 +107,20 @@ public enum AttributeType {
 		else if (value instanceof String) {
 			return new String((String)value);
 		}
+		else if (value instanceof Byte) {
+			return new Byte((Byte)value);
+		}
+		else if (value instanceof Short) {
+			return new Short((Short)value);
+		}
 		else if (value instanceof Integer) {
 			return new Integer((Integer)value);
+		}
+		else if (value instanceof Long) {
+			return new Long((Long)value);
+		}
+		else if (value instanceof Float) {
+			return new Float((Float)value);
 		}
 		else if (value instanceof Double) {
 			return new Double((Double)value);

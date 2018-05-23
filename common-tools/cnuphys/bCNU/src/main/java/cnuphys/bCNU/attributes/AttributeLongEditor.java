@@ -1,14 +1,14 @@
 package cnuphys.bCNU.attributes;
 
-public class AttributeIntegerEditor extends AttributeIntegerValueEditor<Integer> {
+public class AttributeLongEditor extends AttributeIntegerValueEditor<Long> {
 
 	/**
-	 * Create an integer editor.
+	 * Create a long integer editor.
 	 * 
 	 * @param attributeTable the owner table.
 	 * @param attribute the attribute
 	 */
-	public AttributeIntegerEditor(AttributeTable attributeTable,
+	public AttributeLongEditor(AttributeTable attributeTable,
 			Attribute attribute) {
 		super(attributeTable, attribute);
 	}
@@ -16,15 +16,15 @@ public class AttributeIntegerEditor extends AttributeIntegerValueEditor<Integer>
 
 	@Override
 	protected void setStartValue() {
-		startValue = Integer.MIN_VALUE;
+		startValue = Long.MIN_VALUE;
 		
 	}
 
 	@Override
-	protected Integer parse(String vText) {
-		Integer newValue = startValue;
+	protected Long parse(String vText) {
+		Long newValue = startValue;
 		try {
-			newValue = Integer.parseInt(vText);
+			newValue = Long.parseLong(vText);
 		}
 		catch (NumberFormatException e) {
 			newValue = startValue;

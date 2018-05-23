@@ -1,13 +1,10 @@
-/**
- * 
- */
 package cnuphys.bCNU.attributes;
 
 @SuppressWarnings("serial")
-public class AttributeDoubleEditor extends AttributeRealValueEditor {
+public class AttributeFloatEditor extends AttributeRealValueEditor {
 
 
-	public AttributeDoubleEditor(AttributeTable attributeTable,
+	public AttributeFloatEditor(AttributeTable attributeTable,
 			Attribute attribute) {
 
 		super(attributeTable, attribute);
@@ -15,7 +12,7 @@ public class AttributeDoubleEditor extends AttributeRealValueEditor {
 
 	@Override
 	protected void parse(String vText) {
-		double dval = Double.parseDouble(vText);
+		float dval = Float.parseFloat(vText);
 		attribute.setValue(dval);
 	}
 
@@ -25,7 +22,7 @@ public class AttributeDoubleEditor extends AttributeRealValueEditor {
 	 */
 	@Override
 	public void renderValue(Object value) {
-		Double val = (Double)value;
+		Float val = (Float)value;
 		component.setText(String.format("%10.6G", val));
 	}
 	

@@ -85,14 +85,6 @@ public abstract class FieldProbe implements IField {
 		return _field.isZeroField();
 	}
 	
-	/**
-	 * Get the appropriate probe for the active field
-	 * @return the probe for the active field
-	 */
-	public static FieldProbe factory() {
-		return factory(MagneticFields.getInstance().getActiveField());
-	}
-	
 
     /**
      * Obtain an approximation for the magnetic field gradient at a given location expressed in Cartesian
@@ -110,27 +102,8 @@ public abstract class FieldProbe implements IField {
      */
 	@Override
      public void gradient(float x, float y, float z, float result[]) {
-		
-		//use three point derivative
-		float del = 1f; //cm
-		float del2 = 2*del;
-		
-		float baseVal = fieldMagnitude(x, y, z);
-		float bv3 = -3*baseVal;
-		
-		float bx0 = fieldMagnitude(x+del, y, z);
-		float bx1 = fieldMagnitude(x+del2, y, z);
-		
-//		System.err.println(" " + baseVal + "  " + bx0 + "  " + bx1);
-		float by0 = fieldMagnitude(x, y+del, z);
-		float by1 = fieldMagnitude(x, y+del2, z);
-		float bz0 = fieldMagnitude(x, y, z+del);
-		float bz1 = fieldMagnitude(x, y, z+del2);
-		
-		result[0] = (bv3 + 4*bx0 - bx1)/del2;
-		result[1] = (bv3 + 4*by0 - by1)/del2;
-		result[2] = (bv3 + 4*bz0 - bz1)/del2;
-    }
+		_field.gradient(x, y, z, result);
+     }
 	
 	/**
      * Obtain an approximation for the magnetic field gradient at a given location expressed in cylindrical
@@ -156,6 +129,14 @@ public abstract class FieldProbe implements IField {
     }
 
 	
+	/**
+	 * Get the appropriate probe for the active field
+	 * @return the probe for the active field
+	 */
+	public static FieldProbe factory() {
+		return factory(MagneticFields.getInstance().getActiveField());
+	}
+	
 	
 	/**
 	 * Get the appropriate probe for the given field
@@ -179,8 +160,7 @@ public abstract class FieldProbe implements IField {
 			}
 		}
 
-//		System.err.println("WARNING: null probe");
-		return null;
+		return new ZeroProbe();
 	}
 	
 

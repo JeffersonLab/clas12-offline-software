@@ -32,14 +32,14 @@ public class AttributeTableModel extends AbstractTableModel {
 
 
 	//the model data
-	private Vector<Attribute> _data = new Vector<>();
+	private Attributes _data = new Attributes();
 	
 	
 	/**
 	 * Get the data
 	 * @return the table data
 	 */
-	public List<Attribute> getData() {
+	public Attributes getData() {
 		return _data;
 	}
 	
@@ -56,21 +56,34 @@ public class AttributeTableModel extends AbstractTableModel {
 	/**
 	 * Tries to find the 0-based row that contains a given attribute.
 	 * 
-	 * @param attributeName match to the key
-	 * @return the Attribute, or null.
+	 * @param attributeKey match to the key
+	 * @return the row containing the attribute with the key, or -1.
 	 */
-	public int getRowFromName(String attributeName) {
+	public int getRowFromKey(String attributeKey) {
 		
 		int numRow = getRowCount();
 		
 		for (int index = 0; index < numRow; index++) {
 			Attribute attribute = _data.elementAt(index);
 			String key = attribute.getKey();
-			if (attributeName.equals(key)) {
+			if (attributeKey.equals(key)) {
 				return index;
 			}
 		}
 		return -1;
+	}
+	
+	/**
+	 * Tries to find the attribute with the given key
+	 * 
+	 * @param attributeKey match to the key
+	 * @return the Attribute, or null.
+	 */
+	public Attribute getAttribute(String attributeKey) {
+		if (_data != null) {
+			return _data.getAttribute(attributeKey);
+		}
+		return null;
 	}
 
 	/**

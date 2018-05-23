@@ -135,6 +135,22 @@ public abstract class MagneticField implements IField {
 	protected static final int Z = 2;
 	
 
+	/**
+	 * Does this field have a cylindrical grid
+	 * @return <code>true</code> if the field has a cylindrical grid
+	 */
+	public boolean isCylindricalGrid() {
+		return gridCoordinateSystem == CoordinateSystem.CYLINDRICAL;
+	}
+	
+	/**
+	 * Does this field have a rectangular (Cartesian)  grid
+	 * @return <code>true</code> if the field has a rectangular grid
+	 */
+	public boolean isRectangularGrid() {
+		return gridCoordinateSystem == CoordinateSystem.CARTESIAN;
+	}
+
 
 	/**
 	 * Scale the field.
@@ -205,37 +221,6 @@ public abstract class MagneticField implements IField {
 		setScaleFactor(0.0);
 	}
 
-	/**
-	 * Obtain the magnetic field at a given location expressed in Cartesian
-	 * coordinates. The field is returned as a Cartesian vector in kiloGauss.
-	 * The coordinates are in the canonical CLAS system with the origin at the
-	 * nominal target, x through the middle of sector 1 and z along the beam.
-	 * 
-	 * @param x
-	 *            the x coordinate in cm
-	 * @param y
-	 *            the y coordinate in cm
-	 * @param z
-	 *            the z coordinate in cm
-	 * @param result
-	 *            a array holding the retrieved (interpolated) field in
-	 *            kiloGauss. The 0,1 and 2 indices correspond to x, y, and z
-	 *            components.
-	 */
-	@Override
-	public final void field(float x, float y, float z, float result[]) {
-		
-		if (!contains(x, y, z)) {
-			result[X] = 0f;
-			result[Y] = 0f;
-			result[Z] = 0f;
-			return;
-		}
-
-		double rho = FastMath.sqrt(x * x + y * y);
-		double phi = FastMath.atan2Deg(y, x);
-		fieldCylindrical(phi, rho, z, result);
-	}
 	
     /**
      * Obtain an approximation for the magnetic field gradient at a given location expressed in Cartesian
@@ -599,6 +584,12 @@ public abstract class MagneticField implements IField {
 
 			// grid cs
 			gridCoordinateSystem = CoordinateSystem.fromInt(dos.readInt());
+			
+			if (isRectangularGrid()) {
+				_q1Name = "x";
+				_q2Name = "y";
+				_q3Name = "z";
+			}
 
 			// field cs
 			fieldCoordinateSystem = CoordinateSystem.fromInt(dos.readInt());
@@ -876,9 +867,6 @@ public abstract class MagneticField implements IField {
 		}
 		return 1;
 	}
-
-	/**
-	 * Calculate using a 3D 
 	
 	 /**
      * Check whether the field boundaries include the point
