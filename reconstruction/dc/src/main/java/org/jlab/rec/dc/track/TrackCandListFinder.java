@@ -321,8 +321,8 @@ public class TrackCandListFinder {
                         cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane); 	
                         // initialize the fitter with the candidate track
                         KFitter kFit = new KFitter(cand, DcDetector, false);
-                        if(this.trking.equalsIgnoreCase("TimeBased"))
-                            kFit.totNumIter=30;
+                        //if(this.trking.equalsIgnoreCase("TimeBased"))
+                        //    kFit.totNumIter=30;
                        
                         // initialize the state vector corresponding to the last measurement site
                         StateVec fn = new StateVec();

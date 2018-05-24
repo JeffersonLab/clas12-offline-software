@@ -45,6 +45,7 @@ import org.jlab.utils.CLASResources;
 
 import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
+import org.jlab.utils.groups.IndexedTable;
 
 public class DCHBEngine extends ReconstructionEngine {
 
@@ -111,6 +112,7 @@ public class DCHBEngine extends ReconstructionEngine {
             "/calibration/dc/time_to_distance/time2dist",
          //   "/calibration/dc/time_corrections/T0_correction",
             "/calibration/dc/time_corrections/timingcuts",
+            "/calibration/dc/time_jitter",
         };
 
         requireConstants(Arrays.asList(dcTables));
@@ -154,13 +156,24 @@ public class DCHBEngine extends ReconstructionEngine {
         }
 
         DataBank bank = event.getBank("RUN::config");
-
+        long   timeStamp = bank.getLong("timestamp", 0);
+        double triggerPhase =0;
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
         if(newRun==0)
         	return true;
+        
         if(Run.get()==0 || (Run.get()!=0 && Run.get()!=newRun)) { 
+            if(timeStamp==-1)
+                return true;
+            
+            IndexedTable tabJ=this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_jitter");
+            double period = tabJ.getDoubleValue("period", 0,0,0);
+            int    phase  = tabJ.getIntValue("phase", 0,0,0);
+            int    cycles = tabJ.getIntValue("cycles", 0,0,0);
+            
+            if(cycles>0) triggerPhase=period*((timeStamp+phase)%cycles); 
 //            if(newRun>1000) {
 //                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
 //            } else {
@@ -213,7 +226,7 @@ public class DCHBEngine extends ReconstructionEngine {
        HitReader hitRead = new HitReader();
        hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, Constants.getT0(), Constants.getT0Err(), 
                this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), 
-               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), dcDetector);
+               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), dcDetector, triggerPhase);
 
        List<Hit> hits = new ArrayList<Hit>();
        //I) get the hits
@@ -388,9 +401,9 @@ public class DCHBEngine extends ReconstructionEngine {
         
         //String inputFile = args[0];
         //String outputFile = args[1];
-        //String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
+        String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
         //String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.ev.hipo";
-        String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/gemc_out_mu-_hipo/mu-_30nA_bg_out.ev.hipo";
+        //String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/gemc_out_mu-_hipo/mu-_30nA_bg_out.ev.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
         
         DCHBEngine en = new DCHBEngine();
@@ -407,17 +420,19 @@ public class DCHBEngine extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         
-        //String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGD.hipo";
-        String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.recn2.hipo";
+        String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGD.hipo";
+        //String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.recn2.hipo";
+        //String outputFile="/Users/ziegler/Desktop/Work/Files/clas_002391.evio.50.test.hipo";
         writer.open(outputFile);
         TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
         long t1 = 0;
+        double stopcount = 211;
         while (reader.hasEvent()) {
             
             counter++;
-            System.out.println("************************************************************* ");
+            //System.out.println("************************************************************* ");
             DataEvent event = reader.getNextEvent();
-            if (counter > 0) {
+            if (counter ==10) {
                 t1 = System.currentTimeMillis();
             }
             //if(event.getBank("RUN::config").getInt("event", 0) <50)
@@ -427,16 +442,16 @@ public class DCHBEngine extends ReconstructionEngine {
             // Processing TB
             en2.processDataEvent(event);
             writer.writeEvent(event);
-            System.out.println("PROCESSED  EVENT "+event.getBank("RUN::config").getInt("event", 0));
+            //System.out.println("PROCESSED  EVENT "+event.getBank("RUN::config").getInt("event", 0));
            // event.show();
-            if (event.getBank("RUN::config").getInt("event", 0) > 11) {
-                break;
-            }
+            //if (event.getBank("RUN::config").getInt("event", 0) > 111) {
+            //    break;
+            //}
             
             
             // event.show();
-            //if(counter%100==0)
-            
+           if(counter==stopcount)
+             break;
             //if(event.hasBank("HitBasedTrkg::HBTracks")) {
             //    event.show();
             
@@ -444,7 +459,8 @@ public class DCHBEngine extends ReconstructionEngine {
         }
         writer.close();
         double t = System.currentTimeMillis() - t1;
-        System.out.println(t1 + " TOTAL  PROCESSING TIME = " + (t / (float) counter));
+        System.out.println("PROCESSING TIME (ms) = " + ((float)t / (float) (counter-10)));
     }
+
 
 }

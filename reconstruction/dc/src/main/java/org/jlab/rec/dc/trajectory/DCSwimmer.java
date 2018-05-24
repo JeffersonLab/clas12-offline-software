@@ -495,7 +495,7 @@ public class DCSwimmer {
         }
     }
 
-    
+
     public void Bfield(double x_cm, double y_cm, double z_cm, float[] result) {
 
         rprob.field((float) x_cm, (float) y_cm, (float) z_cm, result);

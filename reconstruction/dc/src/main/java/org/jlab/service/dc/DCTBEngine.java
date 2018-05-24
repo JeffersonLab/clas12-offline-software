@@ -251,7 +251,8 @@ public class DCTBEngine extends ReconstructionEngine {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());
             //}
             KFitter kFit = new KFitter(TrackArray[i], dcDetector, true);
-            //kFit.totNumIter=30;
+            kFit.totNumIter=10;
+            kFit.stepMax = 0.15;
             kFit.useFilter = true;
             StateVec fn = new StateVec();
             kFit.runFitter();

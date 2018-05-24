@@ -219,8 +219,8 @@ public class ClusterFinder {
             if (clus.get_fitProb() > Constants.HITBASEDTRKGMINFITHI2PROB || clus.size() < Constants.HITBASEDTRKGNONSPLITTABLECLSSIZE) {            
                 fittedClusList.add(clus); //if the chi2 prob is good enough, then just add the cluster, or if the cluster is not split-able because it has too few hits                
             } else {          
-                List<FittedCluster> splitClus = ct.ClusterSplitter(clus, selectedClusList.size(), cf);
-                fittedClusList.addAll(splitClus);              
+                //List<FittedCluster> splitClus = ct.ClusterSplitter(clus, selectedClusList.size(), cf);
+                //fittedClusList.addAll(splitClus);              
             }
         }
 

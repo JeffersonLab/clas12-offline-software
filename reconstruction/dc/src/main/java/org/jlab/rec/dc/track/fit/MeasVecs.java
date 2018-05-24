@@ -72,7 +72,7 @@ public class MeasVecs {
                     //    continue;
                     //}
                     
-                    HitOnTrack hot = new HitOnTrack(slayr, X, Z, trkcand.get(c).get(s).get(h).get_WireLength(), trkcand.get(c).get(s).get(h).get_WireMaxSag());
+                    HitOnTrack hot = new HitOnTrack(slayr, X, Z, trkcand.get(c).get(s).get(h).getB(), trkcand.get(c).get(s).get(h).get_WireLength(), trkcand.get(c).get(s).get(h).get_WireMaxSag());
                     double err_sl1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitSlopeErr();
 
                     double err_it1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitInterceptErr();
@@ -82,7 +82,7 @@ public class MeasVecs {
                     hot._hitError = err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1 + 2 * Z * err_cov1 + trkcand.get(c).get(s).get(h).get_DocaErr()*trkcand.get(c).get(s).get(h).get_DocaErr();
                     //if(trkcand.get(c).get(s).get(h).get_Time()/CCDBConstants.getTMAXSUPERLAYER()[trkcand.get(c).get(s).get(h).get_Sector()-1][trkcand.get(c).get(s).get(h).get_Superlayer()-1]<1.1)
                     //	hot._hitError = 100000; //exclude outoftimers from fit
-                    
+                   
                     if(Math.abs(trkcand.get(c).get(s).get(h).get_Residual())<1)
                         hOTS.add(hot);
 
@@ -108,7 +108,7 @@ public class MeasVecs {
             MeasVec meas = new MeasVec(i);
             meas.x = hOTS.get(i)._X;
             meas.z = hOTS.get(i)._Z;
-
+            meas.B = hOTS.get(i)._B;
             meas.error = hOTS.get(i)._hitError;
             meas.unc = hOTS.get(i)._Unc; //uncertainty used in KF fit
             meas.tilt = hOTS.get(i)._tilt;
@@ -139,7 +139,7 @@ public class MeasVecs {
                 //    continue;
                 //}
 
-                HitOnTrack hot = new HitOnTrack(slayr, X, Z, hitOnTrk.get_WireLength(), hitOnTrk.get_WireMaxSag());
+                HitOnTrack hot = new HitOnTrack(slayr, X, Z, hitOnTrk.getB(), hitOnTrk.get_WireLength(), hitOnTrk.get_WireMaxSag());
                 double err_sl1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitSlopeErr();
 
                 double err_it1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitInterceptErr();
@@ -173,7 +173,7 @@ public class MeasVecs {
             MeasVec meas = new MeasVec(i);
             meas.x = hOTS.get(i)._X;
             meas.z = hOTS.get(i)._Z;
-
+            meas.B = hOTS.get(i)._B;        
             meas.error = hOTS.get(i)._hitError;
             meas.unc = hOTS.get(i)._Unc; //uncertainty used in KF fit
             meas.tilt = hOTS.get(i)._tilt;
@@ -189,6 +189,7 @@ public class MeasVecs {
         final int k;
         public double z;
         public double x;
+        public double B;
         public double unc;
         public int tilt;
         public double error;
@@ -206,14 +207,16 @@ public class MeasVecs {
         public double _hitError;
         private double _X;
         private double _Z;
+        private double _B;
         private double _Unc;
         private int _tilt;
         private double _wireLen;
         private double _wireMaxSag;
 
-        HitOnTrack(int superlayer, double X, double Z, double wirelen, double wiremaxsag) {
+        HitOnTrack(int superlayer, double X, double Z, double B, double wirelen, double wiremaxsag) {
             _X = X;
             _Z = Z;
+            _B = B;
             _wireLen = wirelen;
             _wireMaxSag = wiremaxsag;
             
