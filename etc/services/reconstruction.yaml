@@ -46,8 +46,8 @@ configuration:
     DCHB:
       torusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
       solenoidMap: Symm_solenoid_r601_phi1_z1201_2008.dat
-      hBKFIterNum:  10
-      tBKFIterNum:  15
+      hBKFIterNum: 10
+      tBKFIterNum: 15
       hBKFSwimMaxStep: 0.3
       tBKFSwimMaxStep: 0.1
       
