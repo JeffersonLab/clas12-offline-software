@@ -1352,6 +1352,78 @@ public class MagneticFields {
 		menu.add(mi);
 		return mi;
 	}
+	
+	
+	/**
+	 * Removes the overlap between the solenoid and the torus. It does this by 
+	 * Adding the solenoid field to the torus field cutting of the solenoid
+	 * in the overlap region, then cutton off the solenoid at the min Z of the torus.
+	 * This is an experimental method and irreversible. In particular rescaling the torus
+	 * after doing this will cause the solenoid part of the overlap area to be scaled too. 
+	 * Which is nonsense.
+	 */
+	public  void removeMapOverlap() {
+		
+		if ((_torus == null) || (_solenoid == null)) {
+			return;
+		}
+		
+		if (_torus.isSolenoidAdded()) {
+			System.err.println("Cannot add solenoid into torus a second time.");
+			return;
+		}
+		
+		
+		float solLimitZ = (float)(_solenoid.getZMax());
+		float solLimitR = (float)(_solenoid.getRhoMax());
+		
+		int stopIndexR = _torus.getQ2Coordinate().getIndex(solLimitR);
+		int stopIndexZ = _torus.getQ3Coordinate().getIndex(solLimitZ);
+		
+//		float tRval = (float) _torus.getQ2Coordinate().getValue(stopIndexR);
+//		float tZval = (float) _torus.getQ3Coordinate().getValue(stopIndexZ);
+		
+//		System.err.println("tRVal = " + tRval);
+//		System.err.println("tZVal = " + tZval);
+		
+		float[] result = new float[3];
+		
+		for (int nPhi = 0; nPhi < _torus.getQ1Coordinate().getNumPoints(); nPhi++) {
+			float phi = (float) _torus.getQ1Coordinate().getValue(nPhi);
+//			System.err.println("PHI = "  + phi);
+			
+			for (int nRho = 0; nRho <= stopIndexR; nRho++) {
+				float rho = (float) _torus.getQ2Coordinate().getValue(nRho);
+//				System.err.println("Rho = "  + rho);
+				
+				
+				for (int nZ = 0; nZ <= stopIndexZ; nZ++) {
+					float z = (float) _torus.getQ3Coordinate().getValue(nZ);
+//					System.err.println("Z = "  + z);
+					
+					//get the solenoid field
+					_solenoid.fieldCylindrical(phi, rho, z, result);
+					
+					//composite index 
+			 		int index = _torus.getCompositeIndex(nPhi, nRho, nZ);
+	 		     	_torus.addToField(index, result);
+					
+				}
+
+			}
+		}
+		
+		
+
+		//now cutoff the solenoid
+		float zlim = (float)(_torus.getZMin());
+		System.err.println("FAKE Z LIM: " + zlim);
+		_solenoid.setFakeZLim(zlim);
+				
+		
+		notifyListeners();
+	}
+
 
 	/**
 	 * Check whether we have an active torus field

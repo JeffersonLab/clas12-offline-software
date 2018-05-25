@@ -51,7 +51,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 	
 	// coordinate system
 	public enum CSType {
-		XZ
+		XZ, YCOMP
 	}
 
 	private CSType _cstype;

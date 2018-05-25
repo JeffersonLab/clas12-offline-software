@@ -414,7 +414,7 @@ public class MagTests {
 					rectCylCompareTest();
 				}
 				else if (e.getSource() == reconfigItem) {
-					removeMapOverlap();
+					MagneticFields.getInstance().removeMapOverlap();
 				}
 			}
 		};
@@ -428,61 +428,6 @@ public class MagTests {
 
 
 		return testMenu;
-	}
-	
-	//remove the overlap of the solenoid
-	private static void removeMapOverlap() {
-		Solenoid solenoid = MagneticFields.getInstance().getSolenoid();
-		Torus torus = MagneticFields.getInstance().getTorus();
-		
-		float solLimitZ = (float)(solenoid.getZMax());
-		float solLimitR = (float)(solenoid.getRhoMax());
-		
-		int stopIndexR = torus.getQ2Coordinate().getIndex(solLimitR);
-		int stopIndexZ = torus.getQ3Coordinate().getIndex(solLimitZ);
-		
-		float tRval = (float) torus.getQ2Coordinate().getValue(stopIndexR);
-		float tZval = (float) torus.getQ3Coordinate().getValue(stopIndexZ);
-		
-		System.err.println("tRVal = " + tRval);
-		System.err.println("tZVal = " + tZval);
-		
-		float[] result = new float[3];
-		
-		for (int nPhi = 0; nPhi < torus.getQ1Coordinate().getNumPoints(); nPhi++) {
-			float phi = (float) torus.getQ1Coordinate().getValue(nPhi);
-//			System.err.println("PHI = "  + phi);
-			
-			for (int nRho = 0; nRho <= stopIndexR; nRho++) {
-				float rho = (float) torus.getQ2Coordinate().getValue(nRho);
-//				System.err.println("Rho = "  + rho);
-				
-				
-				for (int nZ = 0; nZ <= stopIndexZ; nZ++) {
-					float z = (float) torus.getQ3Coordinate().getValue(nZ);
-//					System.err.println("Z = "  + z);
-					
-					//get the solenoid field
-					solenoid.fieldCylindrical(phi, rho, z, result);
-					
-					//composite index 
-					int index = torus.getCompositeIndex(nPhi, nRho, nZ);
-					torus.addToField(index, result);
-					
-				}
-
-			}
-		}
-		
-		
-
-		//now cutoff the solenoid
-		float zlim = (float)(torus.getZMin());
-		System.err.println("FAKE Z LIM: " + zlim);
-		solenoid.setFakeZLim(zlim);
-				
-		
-		MagneticFields.getInstance().notifyListeners();
 	}
 	
 	private static void fixMenus() {
