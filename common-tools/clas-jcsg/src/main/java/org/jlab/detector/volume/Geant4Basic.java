@@ -29,8 +29,9 @@ public abstract class Geant4Basic {
     protected String volumeName;
     protected String volumeType;
     protected int[] rgb = {0x00, 0x00, 0xff};
-    protected boolean sensitivity = false;
-    protected boolean abstraction = false;
+    public boolean sensitivity = false;
+    public boolean abstraction = false;
+    
 
     protected CSG volumeCSG;
     protected final Primitive volumeSolid;
@@ -46,7 +47,14 @@ public abstract class Geant4Basic {
     private final List<Geant4Basic> children = new ArrayList<>();
 
     private Geant4Basic motherVolume;
-
+    
+    /*  This part of the code is used to assign optical properties to a material*/
+    public boolean Optical = false; 
+    public boolean Reflective = false; 
+    protected double indexrefraction =1 ; // index of refraction
+    protected double finishing = 0;  //rms of the surface 
+    /*----*/
+    
     protected Geant4Basic(Primitive volumeSolid) {
         this.volumeSolid = volumeSolid;
         updateCSGtransformation();
@@ -358,4 +366,41 @@ public abstract class Geant4Basic {
         return trans.transform(vec.clone());
         //return new Line3d(new Vector3d(0, 0, 0), new Vector3d(0, 0, 0));
     }
+
+    // Set the index or Reflection of a given G4 volume and activate it as a optical material
+    public void setIndexRefraction( double x)
+    {
+    this.Optical = true;
+    	this.indexrefraction = x;    	
+    }
+    // Set the material to be Optical 
+    public void SetOptical()
+    {
+    	this.Optical=true;
+    }
+    // Set the material to be a mirror
+    public void setReflective()
+    {
+    	SetOptical();
+    	this.Reflective = true; 
+    }
+    
+  //Getter
+    
+    public boolean isOptical() {
+        return Optical;
+    }
+    
+    public boolean isMirror()
+    {
+    	return Reflective;
+    }
+    
+    public double getIndex()
+    {
+    return this.indexrefraction;
+    }
+   
 }
+   
+
