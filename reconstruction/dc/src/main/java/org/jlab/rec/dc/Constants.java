@@ -259,5 +259,43 @@ public class Constants {
         return _T0ERR;
     }
    
+    
+    private static int HBKFINTERNUMBER = 10;
+    private static double HBKFSWIMMAXSTEPSIZE = 0.3;
+    private static int TBKFINTERNUMBER = 15;
+    private static double TBKFSWIMMAXSTEPSIZE = 0.1;
+
+    public static int getHBKFINTERNUMBER() {
+        return HBKFINTERNUMBER;
+    }
+
+    public static synchronized void setHBKFINTERNUMBER(int HBKFINTERNUMBER) {
+        HBKFINTERNUMBER = HBKFINTERNUMBER;
+    }
+
+    public static double getHBKFSWIMMAXSTEPSIZE() {
+        return HBKFSWIMMAXSTEPSIZE;
+    }
+
+    public static synchronized void setHBKFSWIMMAXSTEPSIZE(double HBKFSWIMMAXSTEPSIZE) {
+        HBKFSWIMMAXSTEPSIZE = HBKFSWIMMAXSTEPSIZE;
+    }
+
+    public static int getTBKFINTERNUMBER() {
+        return TBKFINTERNUMBER;
+    }
+
+    public static synchronized void setTBKFINTERNUMBER(int TBKFINTERNUMBER) {
+        TBKFINTERNUMBER = TBKFINTERNUMBER;
+    }
+
+    public static double getTBKFSWIMMAXSTEPSIZE() {
+        return TBKFSWIMMAXSTEPSIZE;
+    }
+
+    public static synchronized void setTBKFSWIMMAXSTEPSIZE(double TBKFSWIMMAXSTEPSIZE) {
+        TBKFSWIMMAXSTEPSIZE = TBKFSWIMMAXSTEPSIZE;
+    }
+    
 
 }

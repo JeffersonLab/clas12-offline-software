@@ -297,13 +297,13 @@ public class StateVecs {
     }
 
     private double getStepSize(float[] bf) {
-        double stepSize = stepMax;
+        double stepSize = 0.5;
         if (bf!=null) { // get the step size used in swimming as a function of the field intensity in the region traversed
             double B = Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2]); 
             if (B / Bmax < 0.01) {
                 stepSize = 1;
             } else {
-                stepSize = (1-B/Bmax)*(1-B/Bmax)*stepMax;
+                stepSize = (1-B/Bmax)*(1-B/Bmax)*0.2;
             }
             if(stepSize<0.01)
                 stepSize = 0.01;

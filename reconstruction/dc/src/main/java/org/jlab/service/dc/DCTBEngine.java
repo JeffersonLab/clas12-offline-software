@@ -47,6 +47,7 @@ public class DCTBEngine extends ReconstructionEngine {
     ECGeant4Factory ecDetector;
     PCALGeant4Factory pcalDetector; 
     TrajectorySurfaces tSurf;
+    int numIter =1;
     
     private TimeToDistanceEstimator tde;
     public DCTBEngine() {
@@ -100,6 +101,8 @@ public class DCTBEngine extends ReconstructionEngine {
         //}
         //TableLoader.Fill(this.getConstantsManager().getConstants(1000, "/calibration/dc/time_to_distance/time2dist")); 
         tde = new TimeToDistanceEstimator();
+        
+        numIter = Constants.getTBKFINTERNUMBER();
         return true;
     }
     
@@ -251,8 +254,7 @@ public class DCTBEngine extends ReconstructionEngine {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());
             //}
             KFitter kFit = new KFitter(TrackArray[i], dcDetector, true);
-            kFit.totNumIter=10;
-            kFit.stepMax = 0.15;
+            kFit.totNumIter=numIter;
             kFit.useFilter = true;
             StateVec fn = new StateVec();
             kFit.runFitter();

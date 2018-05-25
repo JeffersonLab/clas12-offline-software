@@ -1,7 +1,6 @@
 package org.jlab.service.dc;
 
 import cnuphys.magfield.MagneticFields;
-import cnuphys.magfield.TorusMap;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
@@ -97,6 +96,66 @@ public class DCHBEngine extends ReconstructionEngine {
             e.printStackTrace();
         }
     }
+    private void initializeRecoParams() {
+        String hBKFIterNum=this.getEngineConfigString("hBKFIterNum");
+        String hBKFSwimMaxStep=this.getEngineConfigString("hBKFSwimMaxStep");
+        String tBKFIterNum=this.getEngineConfigString("tBKFIterNum");
+        String tBKFSwimMaxStep=this.getEngineConfigString("tBKFSwimMaxStep");
+        
+        if (hBKFIterNum!=null) {
+            System.out.println("["+this.getName()+"] HB KF Number of Iterations chosen based on yaml: "+hBKFIterNum);
+        }
+        else {
+            hBKFIterNum = System.getenv("HBKFINTERNUM");
+            if (hBKFIterNum!=null) {
+                System.out.println("["+this.getName()+"] HB KF Number of Iterations chosen based on env: "+hBKFIterNum);
+            }
+        }
+        if (hBKFIterNum==null) {
+            throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for HBT in yaml or env.");
+        }
+        if (hBKFSwimMaxStep!=null) {
+            System.out.println("["+this.getName()+"] HB KF Max Swim Step chosen based on yaml: "+hBKFSwimMaxStep);
+        }
+        else {
+            hBKFSwimMaxStep = System.getenv("HBKFSWIMMAXSTEP");
+            if (hBKFSwimMaxStep!=null) {
+                System.out.println("["+this.getName()+"] HB KF Max Swim Step chosen based on env: "+hBKFSwimMaxStep);
+            }
+        }
+        if (hBKFSwimMaxStep==null) {
+            throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for HBT in yaml or env.");
+        }
+        if (tBKFIterNum!=null) {
+            System.out.println("["+this.getName()+"] TB KF Number of Iterations chosen based on yaml: "+tBKFIterNum);
+        }
+        else {
+            tBKFIterNum = System.getenv("TBKFINTERNUM");
+            if (tBKFIterNum!=null) {
+                System.out.println("["+this.getName()+"] TB KF Number of Iterations chosen based on env: "+tBKFIterNum);
+            }
+        }
+        if (tBKFIterNum==null) {
+            throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for TBT in yaml or env.");
+        }
+        if (tBKFSwimMaxStep!=null) {
+            System.out.println("["+this.getName()+"] TB KF Max Swim Step chosen based on yaml: "+tBKFSwimMaxStep);
+        }
+        else {
+            tBKFSwimMaxStep = System.getenv("TBKFSWIMMAXSTEP");
+            if (hBKFSwimMaxStep!=null) {
+                System.out.println("["+this.getName()+"] TB KF Max Swim Step chosen based on env: "+tBKFSwimMaxStep);
+            }
+        }
+        if (tBKFSwimMaxStep==null) {
+            throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for TBT in yaml or env.");
+        }
+        
+        Constants.setHBKFINTERNUMBER(Integer.parseInt(hBKFIterNum));
+        Constants.setTBKFINTERNUMBER(Integer.parseInt(tBKFIterNum));
+        Constants.setHBKFSWIMMAXSTEPSIZE(Double.parseDouble(hBKFSwimMaxStep));
+        Constants.setTBKFSWIMMAXSTEPSIZE(Double.parseDouble(tBKFSwimMaxStep));
+    }
 
     @Override
     public boolean init() {
@@ -104,7 +163,8 @@ public class DCHBEngine extends ReconstructionEngine {
         Constants.Load();
      
         this.initializeMagneticFields();
-
+        this.initializeRecoParams();
+        
         clasDictionaryPath= CLASResources.getResourcePath("etc");
         String[]  dcTables = new String[]{
             "/calibration/dc/signal_generation/doca_resolution",

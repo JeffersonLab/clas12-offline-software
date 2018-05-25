@@ -2,6 +2,7 @@ package org.jlab.rec.dc.track.fit;
 
 import Jama.Matrix;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.fit.StateVecs.CovMat;
 import org.jlab.rec.dc.track.fit.StateVecs.StateVec;
@@ -23,7 +24,6 @@ public class KFitter {
     public double chi2kf = 0;
     public int NDF = 0;
     public int ConvStatus = 1;
-    public double stepMax = 0.75;
     
     public KFitter(Track trk, DCGeant4Factory DcDetector, boolean TimeBasedUsingHBtrack) { 
         if(TimeBasedUsingHBtrack==true) {
@@ -35,10 +35,10 @@ public class KFitter {
     public void initFromHB(Track trk, DCGeant4Factory DcDetector) {
         mv.setMeasVecsFromHB(trk, DcDetector);
         sv.Z = new double[mv.measurements.size()];
-        sv.stepMax = this.stepMax;
         for (int i = 0; i < mv.measurements.size(); i++) {
             sv.Z[i] = mv.measurements.get(i).z; 
         } 
+        sv.stepMax=Constants.getTBKFSWIMMAXSTEPSIZE();
        // if(sv.Z.length<20) { // quit no enough measurements
         //    totNumIter=0;
         //    this.setFitFailed=true;
@@ -49,10 +49,10 @@ public class KFitter {
     public void init(Track trk, DCGeant4Factory DcDetector) {
         mv.setMeasVecs(trk, DcDetector);
         sv.Z = new double[mv.measurements.size()];
-        sv.stepMax = this.stepMax;
         for (int i = 0; i < mv.measurements.size(); i++) {
             sv.Z[i] = mv.measurements.get(i).z;
         }
+        sv.stepMax=Constants.getHBKFSWIMMAXSTEPSIZE();
         sv.init(trk, sv.Z[0], this);
     }
     
