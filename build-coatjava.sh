@@ -1,6 +1,9 @@
 #!/bin/bash
 
+usage='build-coatjava.sh [--nospotbugs] [--nomaps]'
+
 runSpotBugs="yes"
+downloadMaps="yes"
 for xx in $@
 do
     if [ "$xx" == "--nospotbugs" ]
@@ -9,30 +12,32 @@ do
     elif [ "$xx" == "-n" ]
     then
         runSpotBugs="no"
+    elif [ "$xx" == "--nomaps" ]
+    then
+        downloadMaps="no"
+    else
+        echo $usage
+        exit
     fi
 done
 
-# this doesn't work on some systems:
-#OPTIONS=n
-#LONGOPTIONS=nospotbugs
-#PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
-#eval set -- "$PARSED"
-#while true; do
-#    case "$1" in
-#        -n|--nospotbugs)
-#            runSpotBugs="no"
-#            shift
-#            ;;
-#        --)
-#            shift
-#            break
-#            ;;
-#        *)
-#            echo "Programming error"
-#            exit 3
-#            ;;
-#    esac
-#done
+if [ $downloadMaps == "yes" ]; then
+  webDir=http://clasweb.jlab.org/clas12offline/magfield
+  locDir=etc/data/magfield
+  mkdir -p $locDir
+  cd $locDir
+  for map in \
+    Full_torus_r251_phi181_z251_18Apr2018.dat \
+    Full_torus_r251_phi181_z251_08May2018.dat \
+    Symm_torus_r251_phi121_z251_2008.dat \
+    Symm_torus_r2501_phi16_z251_24Apr2018.dat \
+    Symm_solenoid_r601_phi1_z1201_2008.dat
+  do
+    # -N only redownloads if timestamp/filesize is newer/different
+    wget -N --no-check-certificate $webDir/$map
+  done
+  cd -
+fi
 
 rm -rf coatjava
 mkdir -p coatjava
@@ -56,8 +61,8 @@ mvn install # also runs unit tests
 if [ $? != 0 ] ; then echo "mvn install failure" ; exit 1 ; fi
 
 if [ $runSpotBugs == "yes" ]; then
-	mvn com.github.spotbugs:spotbugs-maven-plugin:spotbugs # spotbugs goal produces a report target/spotbugsXml.xml for each module
-	# mvn com.github.spotbugs:spotbugs-maven-plugin:check # check goal produces a report and produces build failed if bugs
+	# mvn com.github.spotbugs:spotbugs-maven-plugin:spotbugs # spotbugs goal produces a report target/spotbugsXml.xml for each module
+	mvn com.github.spotbugs:spotbugs-maven-plugin:check # check goal produces a report and produces build failed if bugs
 	# the spotbugsXml.xml file is easiest read in a web browser
 	# see http://spotbugs.readthedocs.io/en/latest/maven.html and https://spotbugs.github.io/spotbugs-maven-plugin/index.html for more info
 	if [ $? != 0 ] ; then echo "spotbugs failure" ; exit 1 ; fi

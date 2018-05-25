@@ -29,7 +29,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
     }
 
     private Line3D _paddleLine; // paddle line
-
+    
     private CTOFDetHit _matchedTrackHit; // matched hit information from
     // tracking; this contains the
     // information of the entrance and
@@ -67,7 +67,8 @@ public class Hit extends AHit implements IGetCalibrationParams {
             IndexedTable constants0, 
             IndexedTable constants1, 
             IndexedTable constants2, 
-            IndexedTable constants3) {
+            IndexedTable constants3, 
+            IndexedTable constants5) {
         /*
         0: "/calibration/ctof/attenuation"),
         1: "/calibration/ctof/effective_velocity"),
@@ -106,8 +107,8 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double ADCDErr = this.ADC2Unc();
         double TDCUErr = this.TDC1Unc();
         double TDCDErr = this.TDC2Unc();
-        double ADC_MIP = this.ADC_MIP(null);
-        double ADC_MIPErr = this.ADC_MIPUnc(null);
+        double ADC_MIP = this.ADC_MIP(constants5);
+        double ADC_MIPErr = this.ADC_MIPUnc(constants5);
         double DEDX_MIP = this.DEDX_MIP();
         double ScinBarThickn = this.ScinBarThickn();
 
@@ -148,23 +149,22 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
     private Point3D calc_hitPosition() {
         Point3D hitPosition = new Point3D();
-        Vector3D dir = new Vector3D(this.get_paddleLine().end().x()
-                - this.get_paddleLine().origin().x(), this.get_paddleLine()
-                .end().y()
-                - this.get_paddleLine().origin().y(), this.get_paddleLine()
-                .end().z()
-                - this.get_paddleLine().origin().z());
-        dir.unit();
+//        Vector3D dir = new Vector3D(this.get_paddleLine().end().x()
+//                - this.get_paddleLine().origin().x(), this.get_paddleLine()
+//                .end().y()
+//                - this.get_paddleLine().origin().y(), this.get_paddleLine()
+//                .end().z()
+//                - this.get_paddleLine().origin().z());
+//        dir.unit();
         Point3D startpoint = this.get_paddleLine().origin();
         // double L_2 = this.get_paddleLine().length()/2;
         // hitPosition.setX(startpoint.x() + (L_2+this.get_y())*dir.x());
         // hitPosition.setY(startpoint.y() + (L_2+this.get_y())*dir.y());
         // hitPosition.setZ(startpoint.z() + (L_2+this.get_y())*dir.z());
-        hitPosition.setX(startpoint.x() + Constants.SCBARTHICKN[0] / 2
-                * dir.x());
-        hitPosition.setY(startpoint.y() + Constants.SCBARTHICKN[0] / 2
-                * dir.y());
+        hitPosition.setX(startpoint.x());
+        hitPosition.setY(startpoint.y());
         hitPosition.setZ(this.get_y());
+//        System.out.println(hitPosition.x() + " " + hitPosition.y() + " " +hitPosition.z() + " " + Constants.SCBARTHICKN[0]);
 
         return hitPosition;
     }
@@ -273,13 +273,14 @@ public class Hit extends AHit implements IGetCalibrationParams {
     public double yOffset(IndexedTable tab) {
         //double ccdbOffset = CCDBConstants.getYOFF()[this.get_Sector() - 1][this
         //        .get_Panel() - 1][this.get_Paddle() - 1];
-        double ccdbOffset =  tab.getDoubleValue("y_offset", this.get_Sector(),this.get_Panel(),this.get_Paddle());
-        double shift = Constants.DYHL;
-        if (this.get_Paddle() % 2 == 1) {
-            shift = 0;
-        }
-        double paddleCenteringOffset = Constants.PCO;
-        return ccdbOffset - shift + paddleCenteringOffset;
+//        double ccdbOffset =  tab.getDoubleValue("y_offset", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+//        double shift = Constants.DYHL;
+//        if (this.get_Paddle() % 2 == 1) {
+//            shift = 0;
+//        }
+//        double paddleCenteringOffset = Constants.PCO;
+//        return ccdbOffset - shift + paddleCenteringOffset;
+        return -(this.get_paddleLine().origin().z()+this.get_paddleLine().end().z())/2;
     }
 
     @Override
@@ -386,12 +387,14 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
     @Override
     public double ADC_MIP(IndexedTable tab) {
-        return Constants.ADC_MIP[this.get_Panel() - 1];
+//        return Constants.ADC_MIP[this.get_Panel() - 1];
+        return tab.getDoubleValue("mipa_upstream", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override
     public double ADC_MIPUnc(IndexedTable tab) {
-        return Constants.ADC_MIP_UNC[this.get_Panel() - 1];
+//        return Constants.ADC_MIP_UNC[this.get_Panel() - 1];
+        return tab.getDoubleValue("mipa_upstream_err", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override

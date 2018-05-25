@@ -6,6 +6,11 @@ target
 *.class
 *lundfiles*.dat
 .DS_Store
+common-tools/cnuphys/coatjava/etc/data/magfield/clas12-fieldmap-solenoid.dat
+common-tools/cnuphys/coatjava/etc/data/magfield/clas12-fieldmap-torus.dat
+common-tools/cnuphys/magfieldC/data/clas12_torus_fieldmap_binary.dat
+common-tools/cnuphys/magfieldC/data/solenoid-srr.dat
+etc/data/magfield/*.dat
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

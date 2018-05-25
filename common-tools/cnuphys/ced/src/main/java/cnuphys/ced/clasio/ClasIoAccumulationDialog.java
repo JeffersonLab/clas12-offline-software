@@ -237,7 +237,7 @@ public class ClasIoAccumulationDialog extends JDialog {
 					_reason = DialogUtilities.CANCEL_RESPONSE;
 				} else {
 					count = Math.min(count, MAXACCUMULATIONCOUNT);
-					count = Math.min(count, _numRemaining);
+					count = Math.min(count, _numRemaining-1);
 				}
 				final int fcount = count;
 
@@ -245,7 +245,6 @@ public class ClasIoAccumulationDialog extends JDialog {
 
 					@Override
 					public void run() {
-						AccumulationManager.getInstance().notifyListeners(AccumulationManager.ACCUMULATION_STARTED);
 						_eventManager.setAccumulating(true);
 
 						int modCount = Math.max(2, fcount / 100);
@@ -257,6 +256,8 @@ public class ClasIoAccumulationDialog extends JDialog {
 								DataEvent event = _eventManager.getNextEvent();
 								if (event ==  null) {
 									try {
+										
+										System.err.println("SLEEP count = " + count + "/" + fcount);
 										Thread.sleep(30);
 									} catch (InterruptedException e) {
 										e.printStackTrace();
@@ -313,9 +314,6 @@ public class ClasIoAccumulationDialog extends JDialog {
 						AccumulationManager.getInstance().notifyListeners(
 								AccumulationManager.ACCUMULATION_FINISHED);
 												
-//						//reload last event
-//						_eventManager.reloadCurrentEvent();
-//						System.err.println("CCC");
 						
 						SwingUtilities.invokeLater(new Runnable() {
 							@Override
@@ -332,6 +330,8 @@ public class ClasIoAccumulationDialog extends JDialog {
 
 					}
 				};
+
+				AccumulationManager.getInstance().notifyListeners(AccumulationManager.ACCUMULATION_STARTED);
 
 				(new Thread(runnable)).start();
 

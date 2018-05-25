@@ -15,8 +15,8 @@ import org.jlab.geom.prim.Vector3D;
  */
 public class EBCCDBConstants {
 
-    private static int currentRun = -1;
-    private static boolean isLoaded = false;
+    private int currentRun = -1;
+    private boolean isLoaded = false;
     
     private static final String ebTablePrefix="/calibration/eb/";
 
@@ -48,61 +48,61 @@ public class EBCCDBConstants {
         return ret;
     }
 
-    private static Map <String,IndexedTable> tables = new HashMap<String,IndexedTable>();
-    private static Map <EBCCDBEnum,Double> dbDoubles = new HashMap<EBCCDBEnum,Double>();
-    private static Map <EBCCDBEnum,Integer> dbIntegers = new HashMap<EBCCDBEnum,Integer>();
-    private static Map <EBCCDBEnum,Vector3D> dbVector3Ds = new HashMap<EBCCDBEnum,Vector3D>();
-    private static Map <EBCCDBEnum,Double[]> dbArrays = new HashMap<EBCCDBEnum,Double[]>();
+    private Map <String,IndexedTable> tables = new HashMap<String,IndexedTable>();
+    private Map <EBCCDBEnum,Double> dbDoubles = new HashMap<EBCCDBEnum,Double>();
+    private Map <EBCCDBEnum,Integer> dbIntegers = new HashMap<EBCCDBEnum,Integer>();
+    private Map <EBCCDBEnum,Vector3D> dbVector3Ds = new HashMap<EBCCDBEnum,Vector3D>();
+    private Map <EBCCDBEnum,Double[]> dbArrays = new HashMap<EBCCDBEnum,Double[]>();
 
     // fill maps:
-    private static synchronized void setDouble(EBCCDBEnum key,Double value) {
+    private void setDouble(EBCCDBEnum key,Double value) {
         dbDoubles.put(key,value);
     }
-    private static synchronized void setVector3D(EBCCDBEnum key,Vector3D value) {
+    private void setVector3D(EBCCDBEnum key,Vector3D value) {
         dbVector3Ds.put(key,value);
     }
-    private static synchronized void setInteger(EBCCDBEnum key,int value) {
+    private void setInteger(EBCCDBEnum key,int value) {
         dbIntegers.put(key,value);
     }
-    private static synchronized void setArray(EBCCDBEnum key,Double[] value) {
+    private void setArray(EBCCDBEnum key,Double[] value) {
         dbArrays.put(key,value);
     }
     
     // read maps:
-    public static synchronized double getDouble(EBCCDBEnum key) {
+    public double getDouble(EBCCDBEnum key) {
         if (!dbDoubles.containsKey(key)) 
             throw new RuntimeException("Missing Double Key:  "+key);
         return dbDoubles.get(key);
     }
-    public static synchronized Vector3D getVector3D(EBCCDBEnum key) {
+    public Vector3D getVector3D(EBCCDBEnum key) {
         if (!dbVector3Ds.containsKey(key)) 
             throw new RuntimeException("Missing Vector3D Key:  "+key);
         return dbVector3Ds.get(key);
     }
-    public static synchronized int getInteger(EBCCDBEnum key) {
+    public int getInteger(EBCCDBEnum key) {
         if (!dbIntegers.containsKey(key)) 
             throw new RuntimeException("Missing Integer Key:  "+key);
         return dbIntegers.get(key);
     }
-    public static synchronized Double[] getArray(EBCCDBEnum key) {
+    public Double[] getArray(EBCCDBEnum key) {
         if (!dbArrays.containsKey(key)) 
             throw new RuntimeException("Missing Integer Key:  "+key);
         return dbArrays.get(key);
     }
 
-    public static synchronized IndexedTable getTable(String tableName) {
+    public IndexedTable getTable(String tableName) {
         if (tables.containsKey(tableName)) return tables.get(tableName);
         else return null;
     }
 
     // read ccdb tables:
-    private static synchronized void loadTable(
+    private void loadTable(
             int run,
             ConstantsManager manager, 
             String fullTableName) {
         tables.put(fullTableName,manager.getConstants(run,fullTableName));
     }
-    private static synchronized void loadEbTable(
+    private void loadEbTable(
             int run,
             ConstantsManager manager, 
             String shortTableName) {
@@ -110,7 +110,7 @@ public class EBCCDBConstants {
     }
 
     // read ccdb values, fill maps:
-    private static synchronized void loadDouble(
+    private void loadDouble(
             EBCCDBEnum key,
             String tableName,
             String columnName,
@@ -118,7 +118,7 @@ public class EBCCDBConstants {
         double value=tables.get(tableName).getDoubleValue(columnName,sector,layer,component);
         setDouble(key,value);
     }
-    private static synchronized void loadInteger(
+    private void loadInteger(
             EBCCDBEnum key,
             String tableName,
             String columnName,
@@ -126,7 +126,7 @@ public class EBCCDBConstants {
         int value=tables.get(tableName).getIntValue(columnName,sector,layer,component);
         setInteger(key,value);
     }
-    private static synchronized void loadVector3D(
+    private void loadVector3D(
             EBCCDBEnum key,
             String tableName,
             String colName1, String colName2, String colName3,
@@ -136,7 +136,7 @@ public class EBCCDBConstants {
         double val3=tables.get(tableName).getDoubleValue(colName3,sector,layer,component);
         setVector3D(key,new Vector3D(val1,val2,val3));
     }
-    private static synchronized void loadArray(
+    private void loadArray(
             EBCCDBEnum key,
             String tableName,
             String[] colNames,
@@ -147,7 +147,7 @@ public class EBCCDBConstants {
         setArray(key,vals);
     }
     
-    public static synchronized void show() {
+    public void show() {
         System.out.println("EBCCDBConstants:  show()");
         for (EBCCDBEnum ii : dbIntegers.keySet()) {
             System.out.println(String.format("%-30s: %d",ii,dbIntegers.get(ii)));
@@ -165,7 +165,7 @@ public class EBCCDBConstants {
         }
     }
 
-    public static final synchronized void load(int run,ConstantsManager manager) {
+    public final void load(int run,ConstantsManager manager) {
 
         // load /calibration/eb tables:
         for (String ss : ebTableNames) loadEbTable(run,manager,ss);
@@ -244,11 +244,14 @@ public class EBCCDBConstants {
 
         currentRun = run;
         isLoaded = true;
-        //setDB(DBP);
-
-        System.out.println("EBCCDBConstants:  loaded run "+run);
     }
     
-    public static synchronized boolean isLoaded() { return isLoaded; }
-    public static synchronized int getRunNumber() { return currentRun; }
+    public boolean isLoaded() { return isLoaded; }
+    public int getRunNumber() { return currentRun; }
+
+    public EBCCDBConstants() {}
+
+    public EBCCDBConstants(int run,ConstantsManager manager) {
+        load(run,manager);
+    }
 }

@@ -1,12 +1,14 @@
 package org.jlab.rec.dc.trajectory;
 
 import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.TorusMap;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.math3.util.FastMath;
 
 import org.jlab.detector.base.DetectorType;
@@ -21,6 +23,7 @@ import org.jlab.utils.CLASResources;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.geant4.v2.PCALGeant4Factory;
 import org.jlab.detector.hits.DetHit;
+import org.jlab.detector.hits.FTOFDetHit;
 import org.jlab.geometry.prim.Line3d;
 
 public class TrackDictionaryMaker {
@@ -161,7 +164,14 @@ public class TrackDictionaryMaker {
         public List<Integer> TDC = new ArrayList<Integer>();
         
     }
-    public static void ProcessTracks(PrintWriter pw, DCGeant4Factory dcDetector, FTOFGeant4Factory ftofDetector, PCALGeant4Factory pcalDetector, TrackDictionaryMaker tw, DCSwimmer sw) {
+    private List<Integer> Wl1 = new ArrayList<Integer>();
+    private List<Integer> Wl2 = new ArrayList<Integer>();
+    private List<Integer> Wl3 = new ArrayList<Integer>();
+    private List<Integer> Wl4 = new ArrayList<Integer>();
+    private List<Integer> Wl5 = new ArrayList<Integer>();
+    private List<Integer> Wl6 = new ArrayList<Integer>();
+    
+    public void ProcessTracks(PrintWriter pw, DCGeant4Factory dcDetector, FTOFGeant4Factory ftofDetector, PCALGeant4Factory pcalDetector, TrackDictionaryMaker tw, DCSwimmer sw) {
         double[] swimVal = new double[8];
         for(int i = 0; i < 2; i++) {
             int q = (int) Math.pow(-1, i);
@@ -204,15 +214,27 @@ public class TrackDictionaryMaker {
                         Point3D rotatedP = tw.rotateToTiltedCoordSys(new Point3D(swimVal[3], swimVal[4], swimVal[5]));
                         Point3D rotatedX = tw.rotateToTiltedCoordSys(new Point3D(swimVal[0], swimVal[1], swimVal[2]));
 
-                        
-                        List<Integer> Wi = new ArrayList<Integer>();
-                        List<Integer> Wf = new ArrayList<Integer>();
-
+                        //List<Integer> Wi = new ArrayList<Integer>();
+                        //List<Integer> Wf = new ArrayList<Integer>();
+                        this.Wl1.clear();
+                        this.Wl2.clear();
+                        this.Wl3.clear();
+                        this.Wl4.clear();
+                        this.Wl5.clear();
+                        this.Wl5.clear();
                         for (int sl = 0; sl < 6; sl++) {
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            swimtoLayer(0, sl, Wi, dcDetector, sw);             
+                            this.swimtoLayer(0, sl, Wl1, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            swimtoLayer(5, sl, Wf, dcDetector, sw);
+                            this.swimtoLayer(1, sl, Wl2, dcDetector, sw);        
+                            sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
+                            this.swimtoLayer(2, sl, Wl3, dcDetector, sw);        
+                            sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
+                            this.swimtoLayer(3, sl, Wl4, dcDetector, sw);        
+                            sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
+                            this.swimtoLayer(4, sl, Wl5, dcDetector, sw);        
+                            sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
+                            this.swimtoLayer(5, sl, Wl6, dcDetector, sw);
 
                             /*
                             double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(2).getComponent(0).getMidpoint().z());
@@ -252,8 +274,35 @@ public class TrackDictionaryMaker {
                             for(int ii =0; ii<3; ii++)
                                 trkPCAL[ii]=0;
                         }
-                        if (count(Wi) >4) {
-                            pw.printf("%d\t%.1f\t %.1f\t %.1f\t %d\t %d\t %d\t %d\t %d\t %d\t %d\t %d\t %d\t %d\t %d\t %d\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", q, p, theta, phi, Wi.get(0), Wf.get(0), Wi.get(1), Wf.get(1), Wi.get(2), Wf.get(2),Wi.get(3), Wf.get(3), Wi.get(4), Wf.get(4), Wi.get(5), Wf.get(5), trkTOF[0], trkTOF[1], trkTOF[2], trkPCAL[0], trkPCAL[1], trkPCAL[2]);
+                        
+                        int paddle = 0;
+                        if (hits != null && hits.size() > 0) {
+                            for (DetHit hit : hits) {
+                                FTOFDetHit fhit = new FTOFDetHit(hit);
+                                if(fhit.getLayer()==1 || fhit.getLayer()==3)
+                                    paddle = fhit.getPaddle();
+                            }
+                        }
+                        
+                        if (count(Wl3) >4) {
+                            pw.printf("%d\t%.1f\t %.1f\t %.1f\t "
+                                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
+                                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
+                                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
+                                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
+                                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
+                                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
+                                    +"%d\t\n",
+                                    //+ "%.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", 
+                                    q, p, theta, phi, 
+                                    Wl1.get(0), Wl2.get(0), Wl3.get(0), Wl4.get(0), Wl5.get(0), Wl6.get(0), 
+                                    Wl1.get(1), Wl2.get(1), Wl3.get(1), Wl4.get(1), Wl5.get(1), Wl6.get(1), 
+                                    Wl1.get(2), Wl2.get(2), Wl3.get(2), Wl4.get(2), Wl5.get(2), Wl6.get(2), 
+                                    Wl1.get(3), Wl2.get(3), Wl3.get(3), Wl4.get(3), Wl5.get(3), Wl6.get(3), 
+                                    Wl1.get(4), Wl2.get(4), Wl3.get(4), Wl4.get(4), Wl5.get(4), Wl6.get(4), 
+                                    Wl1.get(5), Wl2.get(5), Wl3.get(5), Wl4.get(5), Wl5.get(5), Wl6.get(5), 
+                                    //trkTOF[0], trkTOF[1], trkTOF[2], trkPCAL[0], trkPCAL[1], trkPCAL[2]);
+                                    paddle);
                             //System.out.printf("%d\t\t%.1f\t\t %.1f\t\t %.1f\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %.1f\t\t %.1f\t\t %.1f\t\t %.1f\t\t %.1f\t\t %.1f\t\t\n", q, p, theta, phi, Wi.get(0), Wf.get(0), Wi.get(1), Wf.get(1), Wi.get(2), Wf.get(2),Wi.get(3), Wf.get(3), Wi.get(4), Wf.get(4), Wi.get(5), Wf.get(5), trkTOF[0], trkTOF[1], trkTOF[2], trkPCAL[0], trkPCAL[1], trkPCAL[2]);
                             
                             //System.out.printf("%d\t\t %.1f\t\t %.1f\t\t %.1f\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t\n",q, p, theta, phi, Wi.get(0), Wi.get(1), Wi.get(2), Wi.get(3), Wi.get(4), Wi.get(5));
@@ -416,17 +465,20 @@ public class TrackDictionaryMaker {
         }
     }
     public static void main(String arg[]) throws FileNotFoundException {
-
-        PrintWriter pw = new PrintWriter(new File("/Users/ziegler/Workdir/Files/Dictionaries/DC/DCTracks.txt"));
+        TrackDictionaryMaker tm = new TrackDictionaryMaker();
+        PrintWriter pw = new PrintWriter(new File("/Users/ziegler/Desktop/Work/Files/Dictionary/DC/Sec1TorNeg1SolN1.txt"));
         // PrintWriter pw = new PrintWriter(new File("/Users/ziegler/DC/DCdictionaryCosmics.txt"));
 
         TrackDictionaryMaker tw = new TrackDictionaryMaker();
         
-        DCGeant4Factory dcDetector = new DCGeant4Factory(GeometryFactory.getConstants(DetectorType.DC, 11, "default"), DCGeant4Factory.MINISTAGGERON);
+        String varname = CLASResources.getEnvironmentVariable("GEOMETRYDATABASEVARIATION");
+        String variationName = Optional.ofNullable(varname).orElse("default");
+
+        DCGeant4Factory dcDetector = new DCGeant4Factory(GeometryFactory.getConstants(DetectorType.DC, 11, variationName), DCGeant4Factory.MINISTAGGERON);
        
-        FTOFGeant4Factory ftofDetector = new FTOFGeant4Factory(GeometryFactory.getConstants(DetectorType.FTOF, 11, "default"));
+        FTOFGeant4Factory ftofDetector = new FTOFGeant4Factory(GeometryFactory.getConstants(DetectorType.FTOF, 11, variationName));
         
-        PCALGeant4Factory pcalDetector = new PCALGeant4Factory(GeometryFactory.getConstants(DetectorType.ECAL, 11, "default"));
+        PCALGeant4Factory pcalDetector = new PCALGeant4Factory(GeometryFactory.getConstants(DetectorType.ECAL, 11, variationName));
 
        // 
 
@@ -438,21 +490,105 @@ public class TrackDictionaryMaker {
 
         String torusFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-torus.dat";
         String solenoidFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-solenoid.dat";
-        
-        MagneticFields.getInstance().initializeMagneticFields();
+        MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
+        //MagneticFields.getInstance().initializeMagneticFields();
         MagneticFields.getInstance().getTorus().setScaleFactor(-1.0);
-        MagneticFields.getInstance().getSolenoid().setScaleFactor(1.0);
+        MagneticFields.getInstance().getSolenoid().setScaleFactor(-1.0);
         System.out.println("Rotated Composite "+MagneticFields.getInstance().getRotatedCompositeField().getName());
        
         System.out.println(" version "+MagneticFields.getInstance().getVersion());
         
         DCSwimmer sw = new DCSwimmer();
         //ProcessCosmics(pw, dcDetector, tw, sw);
-        ProcessTracks( pw,  dcDetector, ftofDetector, pcalDetector, tw,  sw);
+        tm.ProcessTracks( pw,  dcDetector, ftofDetector, pcalDetector, tw,  sw);
 
         pw.close();
 
         System.out.println(" End ");
+    }
+
+    /**
+     * @return the Wl1
+     */
+    public List<Integer> getWl1() {
+        return Wl1;
+    }
+
+    /**
+     * @param Wl1 the Wl1 to set
+     */
+    public void setWl1(List<Integer> Wl1) {
+        this.Wl1 = Wl1;
+    }
+
+    /**
+     * @return the Wl2
+     */
+    public List<Integer> getWl2() {
+        return Wl2;
+    }
+
+    /**
+     * @param Wl2 the Wl2 to set
+     */
+    public void setWl2(List<Integer> Wl2) {
+        this.Wl2 = Wl2;
+    }
+
+    /**
+     * @return the Wl3
+     */
+    public List<Integer> getWl3() {
+        return Wl3;
+    }
+
+    /**
+     * @param Wl3 the Wl3 to set
+     */
+    public void setWl3(List<Integer> Wl3) {
+        this.Wl3 = Wl3;
+    }
+
+    /**
+     * @return the Wl4
+     */
+    public List<Integer> getWl4() {
+        return Wl4;
+    }
+
+    /**
+     * @param Wl4 the Wl4 to set
+     */
+    public void setWl4(List<Integer> Wl4) {
+        this.Wl4 = Wl4;
+    }
+
+    /**
+     * @return the Wl5
+     */
+    public List<Integer> getWl5() {
+        return Wl5;
+    }
+
+    /**
+     * @param Wl5 the Wl5 to set
+     */
+    public void setWl5(List<Integer> Wl5) {
+        this.Wl5 = Wl5;
+    }
+
+    /**
+     * @return the Wl6
+     */
+    public List<Integer> getWl6() {
+        return Wl6;
+    }
+
+    /**
+     * @param Wl6 the Wl6 to set
+     */
+    public void setWl6(List<Integer> Wl6) {
+        this.Wl6 = Wl6;
     }
 
     

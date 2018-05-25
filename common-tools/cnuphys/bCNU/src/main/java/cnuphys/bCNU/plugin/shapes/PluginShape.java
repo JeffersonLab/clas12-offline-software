@@ -38,8 +38,10 @@ public class PluginShape {
 	/**
 	 * Constructor
 	 * 
-	 * @param plugin the owner plugin where this shape is displayed.
-	 * @param shapeType the shape type
+	 * @param plugin
+	 *            the owner plugin where this shape is displayed.
+	 * @param shapeType
+	 *            the shape type
 	 * @see PluginShapeType
 	 */
 	protected PluginShape(Plugin plugin, PluginShapeType shapeType) {
@@ -78,7 +80,8 @@ public class PluginShape {
 	/**
 	 * Process the custom properties
 	 * 
-	 * @param props the properties
+	 * @param props
+	 *            the properties
 	 */
 	protected void processProperties(Properties props) {
 		_item.setLocked(true);
@@ -159,7 +162,8 @@ public class PluginShape {
 	/**
 	 * Set the shapes's info string
 	 * 
-	 * @param info the info string of the shape
+	 * @param info
+	 *            the info string of the shape
 	 */
 	public void setInfoString(String info) {
 		_item.setName((info == null) ? "???" : info);
@@ -168,7 +172,8 @@ public class PluginShape {
 	/**
 	 * Set the line color for the shape. This does not cause a redraw.
 	 * 
-	 * @param color the line color.
+	 * @param color
+	 *            the line color.
 	 */
 	public void setLineColor(Color color) {
 		_item.getStyle().setLineColor(color);
@@ -178,7 +183,8 @@ public class PluginShape {
 	 * Set the text color for the shape. Only relevant for PluginText shapes
 	 * This does not cause a redraw.
 	 * 
-	 * @param color the text colot
+	 * @param color
+	 *            the text colot
 	 */
 	public void setTextColor(Color color) {
 		if (_shapeType == PluginShapeType.TEXT) {
@@ -192,7 +198,8 @@ public class PluginShape {
 	 * Set the font for the shape. Only relevant for PluginText shapes This does
 	 * not cause a redraw.
 	 * 
-	 * @param font the Font
+	 * @param font
+	 *            the Font
 	 */
 	public void setFont(Font font) {
 		if (_shapeType == PluginShapeType.TEXT) {
@@ -205,17 +212,19 @@ public class PluginShape {
 	/**
 	 * Set the fill color for the shape. This does not cause a redraw.
 	 * 
-	 * @param color the fill color.
+	 * @param color
+	 *            the fill color.
 	 */
 	public void setFillColor(Color color) {
 		_item.getStyle().setFillColor(color);
 	}
+
 	/**
 	 * Returns the shapes fill color
 	 * 
 	 * @return FillColor
 	 */
-	public Color getFillColor(){
+	public Color getFillColor() {
 		return _item.getStyle().getFillColor();
 	}
 
@@ -231,7 +240,8 @@ public class PluginShape {
 	/**
 	 * Set the line width for the shape. This does not cause a redraw.
 	 * 
-	 * @param lineWidth the line width in pixels [0..10]
+	 * @param lineWidth
+	 *            the line width in pixels [0..10]
 	 */
 	public void setLineWidth(int lineWidth) {
 		// keep within reason
@@ -243,7 +253,8 @@ public class PluginShape {
 	 * Set the symbol type. Only relevant for PluginSymbol shapes. This does not
 	 * cause a redraw.
 	 * 
-	 * @param symbol the symbol.
+	 * @param symbol
+	 *            the symbol.
 	 */
 	public void setSymbol(SymbolType symbol) {
 		if (_shapeType == PluginShapeType.SYMBOL) {
@@ -255,7 +266,8 @@ public class PluginShape {
 	 * Set the symbol size. Only relevant for PluginSymbol shapes. This does not
 	 * cause a redraw.
 	 * 
-	 * @param size the symbol size (width and height) in pixels.
+	 * @param size
+	 *            the symbol size (width and height) in pixels.
 	 */
 	public void setSymbolSize(int size) {
 		if (_shapeType == PluginShapeType.SYMBOL) {
@@ -268,7 +280,8 @@ public class PluginShape {
 	/**
 	 * Set the line style
 	 * 
-	 * @param lineStyle the style to set
+	 * @param lineStyle
+	 *            the style to set
 	 * @see cnuphys.bCNU.graphics.style.LineStyle
 	 */
 	public void setLineStyle(LineStyle lineStyle) {
@@ -357,7 +370,8 @@ public class PluginShape {
 	 * Get the user data. This is any object that the user wants to attach to
 	 * the shape.
 	 * 
-	 * @param userData the new user data.
+	 * @param userData
+	 *            the new user data.
 	 */
 	public void setUserData(Object userData) {
 		_userData = userData;

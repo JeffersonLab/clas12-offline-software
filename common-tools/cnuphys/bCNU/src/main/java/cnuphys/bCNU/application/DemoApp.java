@@ -76,7 +76,7 @@ public class DemoApp extends BaseMDIApplication {
 		xmlView.setVisible(false);
 
 		// Sample plugin
-		//new DemoPlugin();
+		new DemoPlugin();
 		
 		//fx view
 		new DemoFxView("JavaFX View", 400, 70, 400, 400);

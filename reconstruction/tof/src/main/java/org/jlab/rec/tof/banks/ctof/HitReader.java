@@ -50,7 +50,8 @@ public class HitReader implements IMatchedHit {
             IndexedTable constants1, 
             IndexedTable constants2, 
             IndexedTable constants3, 
-            IndexedTable constants4) {
+            IndexedTable constants4, 
+            IndexedTable constants5) {
         /*
         0: "/calibration/ctof/attenuation"),
         1: "/calibration/ctof/effective_velocity"),
@@ -113,7 +114,7 @@ public class HitReader implements IMatchedHit {
             hit.set_StatusWord(this.set_StatusWord(hit.Status1(constants4), hit.Status2(constants4), ADCU[i], TDCU[i], ADCD[i], TDCD[i]));
             hit.setPaddleLine(geometry);
             // add this hit
-            hits.add(hit);
+            if(passHit(hit))hits.add(hit);
         }
         List<Hit> updated_hits = matchHitsToCVTTrk(hits, geometry, trks, paths, ids);
 
@@ -128,7 +129,8 @@ public class HitReader implements IMatchedHit {
             hit.set_HitParameters(1,  constants0, 
              constants1, 
              constants2, 
-             constants3);
+             constants3, 
+             constants5);
             // DetHits.get(hit.get_Panel()-1).add(hit);
         }
         // List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);
@@ -178,19 +180,33 @@ public class HitReader implements IMatchedHit {
 
     }
 
+    private boolean passHit(Hit hit) {
+        // drop hits that miss both ADCs or both TDCs
+        boolean pass = true;
+        String status = hit.get_StatusWord();
+        if (status.equals("0101") ||
+            status.equals("1010") ||
+            status.equals("1000") ||
+            status.equals("0100") ||
+            status.equals("0010") ||
+            status.equals("0001") ||
+            status.equals("0000")) {
+            pass = false;
+        }
+        return pass;
+    }
+
     private int passTDC(int tDC) {
         // selected ranges TDC in [0, ? 1000] // what is the upper limit?
         int pass = 0;
-        //if(tDC>100 &&  tDC<300)
-        pass = 1;
+        if (tDC > 0) pass = 1;
         return pass;
     }
 
     private int passADC(int aDC) {
         // selected ranges  ADC in [0, ? 8192]
         int pass = 0;
-        //if(aDC>700 && aDC<7000)
-        pass = 1;
+        if(aDC>0) pass = 1;
         return pass;
     }
 

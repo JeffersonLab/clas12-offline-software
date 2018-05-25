@@ -172,5 +172,14 @@ public class Histogram2D extends PlotDialog {
 	public void customXml(XmlPrintStreamWriter writer) {
 		writeHisto2DData(writer, _histoData);
 	}
+	
+	/**
+	 * Tests whether this listener is interested in events while accumulating
+	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 */
+	@Override
+	public boolean ignoreIfAccumulating() {
+		return false;
+	}
 
 }

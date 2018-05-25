@@ -15,8 +15,8 @@ import java.util.StringTokenizer;
  *
  * @author David Heddle
  * @author Nicole Schumacher
- * @version 1.0
  */
+
 public class Torus extends MagneticField {
 	
 	/**
@@ -28,6 +28,13 @@ public class Torus extends MagneticField {
 		_scaleFactor = -1; // default
 	}
 	
+	/**
+	 * Tests whether this is a full field or a phi symmetric field
+	 * @return <code>true</code> if this is a full field
+	 */
+	public static boolean isFieldmapFullField(String torusPath) throws FileNotFoundException {
+		return FullTorus.isFieldmapFullField(torusPath);
+	}
 
 	/**
 	 * Obtain a torus object from a binary file, probably
@@ -64,14 +71,43 @@ public class Torus extends MagneticField {
 		return relativePhi;
 	}
 	
-    /**
-     * Is the physical torus represented by the map misaligned?
-     * @return <code>true</code> if torus is misaligned
-     */
-    @Override
-	public boolean isMisaligned() {
-    	return false;
-    }
+	/** 
+	 * A quick test to throw out points definitely outside the boundaries
+	 * @param x the x coordinate in the units of the map
+	 * @param y the y coordinate in the units of the map
+	 * @param z the z coordinate in the units of the map
+	 * @return <code>true</code> if the point is in range (approximate)
+	 */
+	protected boolean crudeInRange(float x, float y, float z) {
+		if ((z < getZMin()) || (z > getZMax())) {
+			return false;
+		}
+		if ((Math.abs(x) < getRhoMin()) || (Math.abs(x) > getRhoMax())) {
+			return false;
+		}
+		if ((Math.abs(y) < getRhoMin()) || (Math.abs(y) > getRhoMax())) {
+			return false;
+		}
+		return true;
+	}
+	
+	/** 
+	 * A quick test to throw out points definitely outside the boundaries
+	 * @param phi the phi coordinate in the units of the map
+	 * @param rho the rho coordinate in the units of the map
+	 * @param z the z coordinate in the units of the map
+	 * @return <code>true</code> if the point is in range (approximate)
+	 */
+	protected boolean crudeInRangeCylindrical(float phi, float rho, float z) {
+		if ((z < getZMin()) || (z > getZMax())) {
+			return false;
+		}
+		if ((rho < getRhoMin()) || (rho > getRhoMax())) {
+			return false;
+		}
+		return true;
+	}
+	
 
 	/**
 	 * Get the field by trilinear interpolation.
@@ -375,6 +411,24 @@ public class Torus extends MagneticField {
 		System.out.println("Field: " + fieldStr);
 
 	}
+	
+	public double getZMax() {
+		return q3Coordinate.getMax();
+	}
+
+	public double getZMin() {
+		return q3Coordinate.getMin();
+	}
+
+	public double getRhoMax() {
+		return q2Coordinate.getMax();
+	}
+
+	public double getRhoMin() {
+		return q2Coordinate.getMin();
+	}
+
+
 
 	/**
 	 * Get the name of the field

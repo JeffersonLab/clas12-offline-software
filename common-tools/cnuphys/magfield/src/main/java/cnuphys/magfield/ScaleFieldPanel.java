@@ -21,7 +21,8 @@ public class ScaleFieldPanel extends JPanel {
 	public ScaleFieldPanel(final MagneticFields.FieldType type,
 			final String name, double defaultVal) {
 		setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
-//		setBackground(Color.white);
+		setOpaque(false);
+		setBackground(null);
 		_fieldType = type;
 
 		// label

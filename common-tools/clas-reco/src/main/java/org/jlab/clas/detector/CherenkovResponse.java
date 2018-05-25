@@ -14,22 +14,16 @@ import org.jlab.io.base.DataEvent;
 
 /**
  *
- * @author gavalian
+ * @author baltzell
  */
-public class CherenkovResponse {
+public class CherenkovResponse extends DetectorResponse {
 
-    private double  hitTime       = 0.0;
     private double  hitTheta      = 0.0;
     private double  hitPhi        = 0.0;
-    private double  hitNphe       = 0;
     private double  hitDeltaPhi   = 0.0;
     private double  hitDeltaTheta = 0.0;
-    private int     hitIndex      = -1;
-    private int     association   = -1;
 
-    private DetectorType  cherenkovType = DetectorType.HTCC;
-    private Point3D         hitPosition = new Point3D();
-    private DetectorDescriptor desc = new DetectorDescriptor();
+    private Point3D hitPosition = new Point3D();
 
     public CherenkovResponse(double theta, double phi, double dtheta, double dphi){
         hitTheta = theta;
@@ -38,19 +32,11 @@ public class CherenkovResponse {
         hitDeltaPhi    = dphi;
     }
 
-    public CherenkovResponse  setTime(double time) { hitTime = time; return this;}
-    public CherenkovResponse  setEnergy(double energy) { hitNphe = energy; return this;}
-    public void setAssociation(int assoc) {this.association = assoc;}
-    public void setHitIndex(int index){this.hitIndex = index;}
-
-    public double getTime(){ return hitTime;}
-    public int getHitIndex(){return hitIndex;}
-    public double getEnergy(){ return hitNphe;}
+    public double getNphe() {return this.getEnergy(); }
     public double getTheta() {return this.hitTheta;}
     public double getPhi() {return this.hitPhi;}
     public double getDeltaTheta(){ return this.hitDeltaTheta;}
     public double getDeltaPhi() {return this.hitDeltaPhi;}
-    public int getAssociation() {return this.association;}
 
     public Point3D getHitPosition(){
         return this.hitPosition;
@@ -58,6 +44,13 @@ public class CherenkovResponse {
 
     public void setHitPosition(double x, double y, double z){
         this.hitPosition.set(x, y, z);
+    }
+
+    /**
+     * Wrap delta-phi into -pi/pi:
+     */
+    public double getDeltaPhi(double phi1, double phi2) {
+        return Math.IEEEremainder(phi1-phi2,2.*Math.PI);
     }
 
     public Point3D getIntersection(Line3D line){
@@ -78,25 +71,25 @@ public class CherenkovResponse {
         // 2. either use both dphi and dtheta from detector bank (only
         //    exists for HTCC), or get both from CCDB
         return (Math.abs(vecHit.theta()-vecRec.theta())<10.0/57.2958
-        && Math.abs(vecHit.phi()-vecRec.phi())<this.hitDeltaPhi);
+        && Math.abs(getDeltaPhi(vecHit.phi(),vecRec.phi()))<this.hitDeltaPhi);
     }
-    
+   
+    public boolean matchToPoint(Line3D trackPoint) {
+        if (trackPoint==null) return false;
+        Vector3D vecTrk = trackPoint.origin().toVector3D();
+        Vector3D vecHit = this.hitPosition.toVector3D();
+        return (Math.abs(vecHit.theta()-vecTrk.theta())<10.0/57.2958
+        && Math.abs(getDeltaPhi(vecHit.phi(),vecTrk.phi()))<this.hitDeltaPhi);
+    }
+
     public double getDistance(Line3D line){
         
         return -1000.0;
     }
     
-    public DetectorType getCherenkovType(){
-        return this.cherenkovType;
-    }
-    
-    public void setCherenkovType(DetectorType htcc){
-        this.cherenkovType = htcc;
-    }
-
-    public static List<CherenkovResponse>  readHipoEvent(DataEvent event, 
+    public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type){        
-        List<CherenkovResponse> responseList = new ArrayList<CherenkovResponse>();
+        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
@@ -142,9 +135,9 @@ public class CherenkovResponse {
                 che.setHitIndex(row);
                 che.setEnergy(nphe);
                 che.setTime(time);
-                che.setCherenkovType(type);
+                che.getDescriptor().setType(type);
 
-                responseList.add(che);
+                responseList.add((DetectorResponse)che);
             }
         }
         return responseList;

@@ -743,7 +743,7 @@ public class BaseToolBar extends CommonToolBar
 	 */
 	@Override
 	public void mousePressed(MouseEvent me) {
-
+		
 		if (!_container.getComponent().isEnabled()) {
 			return;
 		}

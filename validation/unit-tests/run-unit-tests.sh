@@ -1,11 +1,13 @@
-#!/bin/sh -f
+#!/bin/bash
 
 # coatjava must already be built at ../../coatjava/
 
 # set environment
 COAT="../../coatjava/"
-classPath="$COAT/lib/services/*:$COAT/lib/clas/*:$COAT/lib/utils/*:../lib/*:src/"
 
+source $COAT/bin/env.sh
+
+classPath="$COAT/lib/services/*:$COAT/lib/clas/*:$COAT/lib/utils/*:../lib/*:src/"
 
 # compile codes
 javac -cp $classPath src/events/TestEvent.java

@@ -31,6 +31,9 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class ClusterFinder {
 
+    public ClusterFinder() {
+
+    }
 
     // cluster finding algorithm
     // the loop is done over sector and superlayers
@@ -43,9 +46,6 @@ public class ClusterFinder {
     int nwire = Constants.NWIRE;
 
     private Hit[][][] HitArray = new Hit[nsect * nslay][nwire][nlayr];
-    public ClusterFinder() {
-        
-    }
 
     /**
      *
@@ -140,7 +140,7 @@ public class ClusterFinder {
                     if (ct.count_nlayers_in_cluster(hits) >= Constants.DC_MIN_NLAYERS) {
 
                         // cluster constructor DCCluster(hit.sector,hit.superlayer, cid)
-                        Cluster this_cluster = new Cluster((ssl / nsect) + 1, (ssl % nsect) + 1, cid++);
+                        Cluster this_cluster = new Cluster((int) (ssl / nsect) + 1, (int) (ssl % nsect) + 1, cid++);
                         //System.out.println(" created cluster "+this_cluster.printInfo());
                         this_cluster.addAll(hits);
 
@@ -166,33 +166,40 @@ public class ClusterFinder {
 
         //fill array of hit
         this.fillHitArray(allhits, 0);
-
         //prune noise
-        ct.HitListPruner(allhits, HitArray);
-
-        //find clumps of hits
+        //ct.HitListPruner(allhits, HitArray);
+        //find clumps of hits init
         List<Cluster> clusters = this.findClumps(allhits, ct);
-        //System.out.println(" Clusters Step 1");
-        //for(Cluster c : clusters)
-        //	for(Hit h : c)
-        //		System.out.println(h.printInfo());
+       
+        allhits.clear();
+        
+        for (Cluster clus : clusters) {
+            Collections.sort(clus);
+            allhits.addAll(ct.HitListPruner(clus));
+        }
+        
+        this.fillHitArray(allhits, 0);
+        clusters.clear();
+        clusters = this.findClumps(allhits, ct);
+        
         // create cluster list to be fitted
         List<FittedCluster> selectedClusList = new ArrayList<FittedCluster>();
 
         for (Cluster clus : clusters) {
-
+            if(clus.size()<Constants.DC_MIN_NLAYERS)
+                continue;
             //System.out.println(" I passed this cluster "+clus.printInfo());
-            FittedCluster fclus = new FittedCluster(clus);
-            FittedCluster fClus = fclus;
-                    // rm isolated hit pruner
-                    //ct.IsolatedHitsPruner(fclus);
+            FittedCluster fClus = new FittedCluster(clus);
+            //FittedCluster fClus = ct.IsolatedHitsPruner(fclus);
             // Flag out-of-timers
             //if(Constants.isSimulation==true) {
-        //    ct.outOfTimersRemover(fClus, true); // remove outoftimers
+            ct.outOfTimersRemover(fClus, true); // remove outoftimers
             //} else {
-            	ct.outOfTimersRemover(fClus, false); // correct outoftimers
+            //	ct.outOfTimersRemover(fClus, false); // correct outoftimers
             //}
             // add cluster
+            if(fClus.size()<Constants.DC_MIN_NLAYERS)
+                continue;
             selectedClusList.add(fClus); 
         }
 
@@ -209,22 +216,16 @@ public class ClusterFinder {
             cf.SetFitArray(clus, "LC"); 
             cf.Fit(clus, true);
 
-            if (clus.get_fitProb() > Constants.HITBASEDTRKGMINFITHI2PROB || clus.size() < Constants.HITBASEDTRKGNONSPLITTABLECLSSIZE) {
-                fittedClusList.add(clus); //if the chi2 prob is good enough, then just add the cluster, or if the cluster is not split-able because it has too few hits
-                
-            } else {
-                //System.out.println(" I am trying to split this cluster  "+clus.printInfo());
+            if (clus.get_fitProb() > Constants.HITBASEDTRKGMINFITHI2PROB || clus.size() < Constants.HITBASEDTRKGNONSPLITTABLECLSSIZE) {            
+                fittedClusList.add(clus); //if the chi2 prob is good enough, then just add the cluster, or if the cluster is not split-able because it has too few hits                
+            } else {          
                 List<FittedCluster> splitClus = ct.ClusterSplitter(clus, selectedClusList.size(), cf);
-
-                fittedClusList.addAll(splitClus);
-                //System.out.println(" After trying to split the cluster I get  "+splitClus.size()+" clusters : ");
-                //for(FittedCluster cl : splitClus)
-                //	System.out.println(cl.printInfo());
+                fittedClusList.addAll(splitClus);              
             }
         }
 
         for (FittedCluster clus : fittedClusList) {
-            if (clus != null && clus.size() > 3) {
+            if (clus != null && clus.size() > 3 ) {
 
                 // update the hits
                 for (FittedHit fhit : clus) {
@@ -255,14 +256,7 @@ public class ClusterFinder {
         return refittedClusList;
 
     }
-    /**
-     * 
-     * @param fhits list of hits
-     * @param tab table of calibration constants
-     * @param DcDetector detector geometry
-     * @param tde time-to-distance class
-     * @return list of clusters recomposed from hits previously associated with a HB cluster
-     */
+
     private List<FittedCluster> RecomposeClusters(List<FittedHit> fhits, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
 
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
@@ -320,14 +314,7 @@ public class ClusterFinder {
 
         return clusters;
     }
-    /**
-     * 
-     * @param fhits list of hits
-     * @param tab table of calibration constants
-     * @param DcDetector detector geometry
-     * @param tde time-to-distance class
-     * @return list of clusters recomposed from hits previously associated with a TB cluster
-     */
+
     public List<FittedCluster> FindTimeBasedClusters(List<FittedHit> fhits, ClusterFitter cf, ClusterCleanerUtilities ct, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
 
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
@@ -471,15 +458,6 @@ public class ClusterFinder {
         return true;
     }
 
-    /**
-     * 
-     * @param fclusters list of clusters
-     * @param allhits list of hits
-     * @param ct cleaner utility
-     * @param cf fitter utility
-     * @param event hipo event
-     * @return hipo bank containing the result of the layer efficiency analysis
-     */
     public EvioDataBank getLayerEfficiencies(List<FittedCluster> fclusters, List<Hit> allhits, ClusterCleanerUtilities ct, ClusterFitter cf, EvioDataEvent event) {
 
         ArrayList<Hit> clusteredHits = new ArrayList<Hit>();

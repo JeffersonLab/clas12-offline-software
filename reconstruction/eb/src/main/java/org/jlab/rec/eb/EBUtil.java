@@ -13,8 +13,8 @@ public class EBUtil {
      /**
      * Get the mean expected ampling fraction.
      */
-    public static double getExpectedSamplingFraction(final double measuredEnergy) {
-        final Double[] t = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SF);
+    public static double getExpectedSamplingFraction(final double measuredEnergy,EBCCDBConstants ccdb) {
+        final Double[] t = ccdb.getArray(EBCCDBEnum.ELEC_SF);
         final double sfMean = t[0]*(t[1] + t[2]/measuredEnergy + t[3]*pow(measuredEnergy,-2));
         return sfMean;
     }
@@ -22,8 +22,8 @@ public class EBUtil {
      /**
      * Get the sigma of the expected sampling fraction.
      */
-    public static double getExpectedSamplingFractionSigma(final double measuredEnergy) {
-        final Double[] s = EBCCDBConstants.getArray(EBCCDBEnum.ELEC_SFS);
+    public static double getExpectedSamplingFractionSigma(final double measuredEnergy,EBCCDBConstants ccdb) {
+        final Double[] s = ccdb.getArray(EBCCDBEnum.ELEC_SFS);
         final double sfSigma = s[0];
         return sfSigma;
     }
@@ -31,22 +31,22 @@ public class EBUtil {
      /**
      * Calculate the signed number of sigma from the expected sampling fraction.
      */
-    public static double getSamplingFractionNSigma(DetectorParticle p) {
+    public static double getSamplingFractionNSigma(DetectorParticle p,EBCCDBConstants ccdb) {
         final double ener = p.getEnergy(DetectorType.ECAL);
         final double sf = p.getEnergyFraction(DetectorType.ECAL);
-        final double sfMean = getExpectedSamplingFraction(ener);
-        final double sfSigma = getExpectedSamplingFractionSigma(ener);
+        final double sfMean = getExpectedSamplingFraction(ener,ccdb);
+        final double sfSigma = getExpectedSamplingFractionSigma(ener,ccdb);
         return (sf-sfMean) / sfSigma;
     }
 
      /**
      * Perform a basic true/false identification for electrons.
      */
-    public static boolean isSimpleElectron(DetectorParticle p) {
+    public static boolean isSimpleElectron(DetectorParticle p,EBCCDBConstants ccdb) {
         
         final double pcalEnergy = p.getEnergy(DetectorType.ECAL,1);
         final double nphe = p.getNphe(DetectorType.HTCC);
-        final double sfNSigma = getSamplingFractionNSigma(p);
+        final double sfNSigma = getSamplingFractionNSigma(p,ccdb);
 
         boolean isElectron=true;
 
@@ -65,15 +65,15 @@ public class EBUtil {
     /**
      * Calculate timing resolution from EventBuilder constants:
      */
-    public static double getEBTimingResolution(DetectorParticle p, DetectorType type, int layer) {
+    public static double getEBTimingResolution(DetectorParticle p, DetectorType type, int layer,EBCCDBConstants ccdb) {
         Double[] pars;
         if (type==DetectorType.FTOF) {
-            if (layer==1) pars=EBCCDBConstants.getArray(EBCCDBEnum.FTOF1A_TimingRes);
-            if (layer==2) pars=EBCCDBConstants.getArray(EBCCDBEnum.FTOF1B_TimingRes);
-            else          pars=EBCCDBConstants.getArray(EBCCDBEnum.FTOF2_TimingRes);
+            if (layer==1) pars=ccdb.getArray(EBCCDBEnum.FTOF1A_TimingRes);
+            if (layer==2) pars=ccdb.getArray(EBCCDBEnum.FTOF1B_TimingRes);
+            else          pars=ccdb.getArray(EBCCDBEnum.FTOF2_TimingRes);
         }
         else if (type==DetectorType.CTOF) {
-            pars=EBCCDBConstants.getArray(EBCCDBEnum.CTOF_TimingRes);
+            pars=ccdb.getArray(EBCCDBEnum.CTOF_TimingRes);
         }
         else throw new RuntimeException("not ready for non-TOF");
         final double mom=p.vector().mag();
@@ -85,7 +85,7 @@ public class EBUtil {
     /**
      * Get timing resolution from detector calibration constants:
      */
-    public static double getDetTimingResolution(ScintillatorResponse resp,int run) {
+    public static double getDetTimingResolution(ScintillatorResponse resp,int run,EBCCDBConstants ccdb) {
         final int sector = resp.getDescriptor().getSector();
         final int layer = resp.getDescriptor().getLayer();
         final int component = resp.getDescriptor().getComponent();
@@ -96,7 +96,7 @@ public class EBUtil {
         else {
             throw new RuntimeException("not ready for non-FTOF");
         }
-        return EBCCDBConstants.getTable(tableName).
+        return ccdb.getTable(tableName).
             getDoubleValue("tres",sector,layer,component);
     }
 
