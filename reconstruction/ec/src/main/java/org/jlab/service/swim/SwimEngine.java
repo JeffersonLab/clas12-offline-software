@@ -163,83 +163,9 @@ public class SwimEngine extends ReconstructionEngine {
         //this.initField();
         //this.initMagField();
         fastMC = new Clas12FastMC(-1.0,1.0);
-        MagneticField.setMathLib(MagneticField.MathLib.FAST);
+    //    MagneticField.setMathLib(MagneticField.MathLib.FAST);
         System.out.println("[swimmer] -------> FAST MONTE CARLO TEST. USING FAST MATH = " + MagneticField.MathLib.SUPERFAST);
         return true;
     }
     
-    
-    private synchronized void initMagField(){
-        String clasDictionaryPath = CLASResources.getResourcePath("etc");		
-        String torusFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-torus.dat";		
-        File torusFile = new File(torusFileName);
-        MagneticField mf = new MagneticField(){
-
-            @Override
-            public String getName() {
-                return "TORUS";
-            }
-
-            public void fieldCylindrical(double d, double d1, double d2, float[] floats) {
-                
-            }            
-        };
-        
-        try {
-            mf.readBinaryMagneticField(torusFile);
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(SwimEngine.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        magfield.add(mf);
-        //System.out.println(" MAGNETIC FIELD CAPACITY = " + mf.getBuffer().capacity());
-    }
-    
-    private synchronized void initField(){
-        if(field.isEmpty()){
-            Torus torus = null;
-         Solenoid solenoid = null;
-         //will read mag field assuming 
-         String clasDictionaryPath = CLASResources.getResourcePath("etc");		
-         String torusFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-torus.dat";		
-         File torusFile = new File(torusFileName);
-         try {
-             torus = Torus.fromBinaryFile(torusFile);
-         } catch (FileNotFoundException e) {
-             e.printStackTrace();
-         }
-         
-         //OK, see if we can create a Solenoid
-         String solenoidFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-solenoid.dat";
-         //OK, see if we can create a Torus
-         if(clasDictionaryPath == "../clasJLib")
-             solenoidFileName = clasDictionaryPath + "/data/solenoid/v1.0/solenoid-srr.dat";
-         
-         File solenoidFile = new File(solenoidFileName);
-         try {
-             solenoid = Solenoid.fromBinaryFile(solenoidFile);
-         } catch (FileNotFoundException e) {
-             e.printStackTrace();
-         }
-         
-         MagneticField.setInterpolate(false);
-         CompositeField compositeField = new CompositeField();
-         
-         if (torus != null) {             
-             torus.setScaleFactor(-1.0);
-             
-             compositeField.add(torus);
-             ft.add(torus);
-         }
-         
-         if (solenoid != null) {
-             solenoid.setScaleFactor(1.0);             
-             compositeField.add(solenoid);             
-         }
-         field.add(compositeField);
-        } else {
-            System.out.println("[swimmer] ---> there is no reason to load the field");
-        }        
-        
-    }
 }

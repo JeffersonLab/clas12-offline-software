@@ -5,11 +5,9 @@ import java.util.ArrayList;
 import javax.swing.event.EventListenerList;
 
 import cnuphys.lund.SwimTrajectoryListener;
-import cnuphys.magfield.FieldProbe;
-import cnuphys.magfield.MagneticField;
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
-import cnuphys.rk4.RungeKutta;
 import cnuphys.rk4.RungeKuttaException;
 
 public class Swimming {
@@ -22,13 +20,21 @@ public class Swimming {
 
 	// the recon trajectories
 	private static ArrayList<SwimTrajectory> _reconTrajectories = new ArrayList<SwimTrajectory>();
+	
+	private static boolean _notifyOn = true;
+	
+	/**
+	 * Set whether we notify listeners. Might turn off temporarily to avoid multiple notifications. 
+	 * @param notifyOn the flag.
+	 */
+	public static void setNotifyOn(boolean notifyOn) {
+		_notifyOn = notifyOn;
+	}
 
 	/**
 	 * Clear all the mc trajectories.
 	 */
 	public static void clearMCTrajectories() {
-//		System.err.println("CLEAR MC TRAJ");
-//		(new Throwable()).printStackTrace();
 		_mcTrajectories.clear();
 		notifyListeners();
 	}
@@ -38,6 +44,17 @@ public class Swimming {
 	 */
 	public static void clearReconTrajectories() {
 		_reconTrajectories.clear();
+		notifyListeners();
+	}
+	
+	/**
+	 * Clear all trajectories
+	 */
+	public static void clearAllTrajectories() {
+		_notifyOn = false;
+		clearMCTrajectories();
+		clearReconTrajectories();
+		_notifyOn = true;
 		notifyListeners();
 	}
 
@@ -109,7 +126,7 @@ public class Swimming {
 	// notify listeners that the collection of trajectories has changed
 	protected static void notifyListeners() {
 
-		if (_listenerList == null) {
+		if (!_notifyOn || (_listenerList == null)) {
 			return;
 		}
 
@@ -329,9 +346,7 @@ public class Swimming {
 
 		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
 
-		MagneticField.setMathLib(MagneticField.MathLib.FAST);
-		// MagneticField.setMathLib(MagneticField.MathLib.DEFAULT);
-		FieldProbe.cache(true);
+		FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
 
 		testSwim(1);
 		testSwim2(1);

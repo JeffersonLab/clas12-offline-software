@@ -3,9 +3,11 @@ package cnuphys.swim;
 import java.util.ArrayList;
 
 import cnuphys.lund.GeneratedParticleRecord;
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.IField;
-import cnuphys.magfield.MagneticField;
+import cnuphys.magfield.MagneticFieldChangeListener;
+import cnuphys.magfield.MagneticFields;
 import cnuphys.rk4.ButcherTableau;
 import cnuphys.rk4.IRkListener;
 import cnuphys.rk4.IStopper;
@@ -63,6 +65,20 @@ public final class Swimmer {
 	// Tesla)
 	// so care has to be taken when using the field object
 	private IField _field;
+	
+	public Swimmer() {
+		_field = FieldProbe.factory(); 
+		MagneticFieldChangeListener mfl = new MagneticFieldChangeListener() {
+
+			@Override
+			public void magneticFieldChanged() {
+				_field = FieldProbe.factory(); 
+			}
+			
+		};
+		
+		MagneticFields.getInstance().addMagneticFieldChangeListener(mfl);
+	}
 	
 	/**
 	 * Swimmer constructor. Here we create a Swimmer that will use the given
@@ -404,8 +420,8 @@ public final class Swimmer {
 
 			stopper = new DefaultZStopper(finalPathLength, maxPathLength, fixedZ, accuracy, normalDirection);
 
-			theta = MagneticField.acos2Deg(pz);
-			phi = MagneticField.atan2Deg(py, px);
+			theta = FastMath.acos2Deg(pz);
+			phi = FastMath.atan2Deg(py, px);
 
 			SwimTrajectory addTraj = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, maxPathLength, stepSize,
 					distanceBetweenSaves);
@@ -450,7 +466,7 @@ public final class Swimmer {
 	 * @param accuracy
 	 *            the accuracy of the fixed z termination, in meters
 	 * @param maxRad
-	 *            the max radial coordinate
+	 *            the max radial coordinate NOTE: NO LONGER USED (here for backwards compatibility)
 	 * @param sMax
 	 *            Max path length in meters. This determines the max number of steps based on
 	 *            the step size. If a stopper is used, the integration might
@@ -473,7 +489,56 @@ public final class Swimmer {
 	public SwimTrajectory swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
 			final double fixedZ, double accuracy, double maxRad, double sMax, double stepSize,
 			double relTolerance[], double hdata[]) throws RungeKuttaException {
+		return swim(charge, xo, yo, zo, momentum, theta, phi, fixedZ, accuracy, sMax, stepSize, relTolerance, hdata);
+	}
 
+
+		/**
+		 * Swims a charged particle. This swims to a fixed z value. This is for the
+		 * trajectory mode, where you want to cache steps along the path. Uses an
+		 * adaptive stepsize algorithm.
+		 * 
+		 * @param charge
+		 *            the charge: -1 for electron, 1 for proton, etc
+		 * @param xo
+		 *            the x vertex position in meters
+		 * @param yo
+		 *            the y vertex position in meters
+		 * @param zo
+		 *            the z vertex position in meters
+		 * @param momentum
+		 *            initial momentum in GeV/c
+		 * @param theta
+		 *            initial polar angle in degrees
+		 * @param phi
+		 *            initial azimuthal angle in degrees
+		 * @param fixedZ
+		 *            the fixed z value (meters) that terminates (or maxPathLength
+		 *            if reached first)
+		 * @param accuracy
+		 *            the accuracy of the fixed z termination, in meters
+		 * @param sMax
+		 *            Max path length in meters. This determines the max number of steps based on
+		 *            the step size. If a stopper is used, the integration might
+		 *            terminate before all the steps are taken. A reasonable value
+		 *            for CLAS is 8. meters
+		 * @param stepSize
+		 *            the initial step size in meters.
+		 * @param relTolerance
+		 *            the error tolerance as fractional diffs. Note it is a vector,
+		 *            the same dimension of the problem, e.g., 6 for
+		 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+		 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+		 * @param hdata
+		 *            if not null, should be double[3]. Upon return, hdata[0] is the
+		 *            min stepsize used (m), hdata[1] is the average stepsize used
+		 *            (m), and hdata[2] is the max stepsize (m) used
+		 * @return the trajectory of the particle
+		 * @throws RungeKuttaException
+		 */
+		public SwimTrajectory swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+				final double fixedZ, double accuracy, double sMax, double stepSize,
+				double relTolerance[], double hdata[]) throws RungeKuttaException {		
 		if (momentum < MINMOMENTUM) {
 			System.err.println("Skipping low momentum swim (D)");
 			return new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi);
@@ -533,8 +598,8 @@ public final class Swimmer {
 			stopper = new DefaultZStopper(finalPathLength, sMax, fixedZ, accuracy, normalDirection);
 
 			// momentum = traj.getFinalMomentum();
-			theta = MagneticField.acos2Deg(pz);
-			phi = MagneticField.atan2Deg(py, px);
+			theta = FastMath.acos2Deg(pz);
+			phi = FastMath.atan2Deg(py, px);
 
 
 			SwimTrajectory addTraj = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, finalPathLength, sMax, stepSize,
@@ -1067,10 +1132,10 @@ public final class Swimmer {
 		q = -q;
 
 		// get the angles
-		double pt = MagneticField.hypot(px, py);
-		double p = MagneticField.hypot(pt, pz);
-		double theta = MagneticField.acos2Deg(pz);
-		double phi = MagneticField.atan2Deg(py, px);
+		double pt = FastMath.hypot(px, py);
+		double p = FastMath.hypot(pt, pz);
+		double theta = FastMath.acos2Deg(pz);
+		double phi = FastMath.atan2Deg(py, px);
 
 		// accuracy to z = 0 (m)
 		double ztarget = 0;

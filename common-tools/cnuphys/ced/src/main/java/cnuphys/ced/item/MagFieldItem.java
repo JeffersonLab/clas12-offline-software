@@ -19,8 +19,8 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.MagFieldDisplayArray;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.GridCoordinate;
+import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFields;
-import cnuphys.magfield.MagneticFields.FieldType;
 
 /**
  * This is a magnetic field item. It is restricted to live only on sector views.
@@ -145,7 +145,7 @@ public class MagFieldItem extends AItem {
 		Point pp = new Point();
 
 		int pstep2 = pixelStep / 2;
-		FieldProbe probe = FieldProbe.factory();
+		FieldProbe probe = FieldProbe.factory();  //uses active field
 
 		float result[] = new float[3];
 		double coords[] = new double[5];
@@ -258,9 +258,11 @@ public class MagFieldItem extends AItem {
 			boolean hasSolenoid) {
 
 
-		// get a probe
-		FieldProbe probe = FieldProbe.factory();
-
+		IField probe = FieldProbe.factory();
+		if (probe == null) {
+			return;
+		}
+		
 		Rectangle bounds = container.getComponent().getBounds();
 		bounds.x = 0;
 		bounds.y = 0;
@@ -270,13 +272,7 @@ public class MagFieldItem extends AItem {
 		// get the boundary
 	    Rectangle fieldRect;
 		
-		boolean isUniform = MagneticFields.getInstance().getActiveFieldType() == FieldType.UNIFORM;
-		if (isUniform) {
-			fieldRect = new Rectangle(0, 0, bounds.width, bounds.height);
-		}
-		else {
-			fieldRect = getFieldRect(container, hasTorus, hasSolenoid);
-		}
+		fieldRect = getFieldRect(container, hasTorus, hasSolenoid);
 
 
 		Rectangle updateRect = bounds.intersection(fieldRect);
@@ -304,6 +300,8 @@ public class MagFieldItem extends AItem {
 				double z = coords[2];
 				double rho = coords[3];
 				double phi = coords[4];
+				
+				if (probe.containsCylindrical((float)phi, (float)rho, (float)z)) {
 
 				if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
 					double bmag = probe.fieldMagnitudeCylindrical(phi, rho, z) / 10.;
@@ -319,9 +317,17 @@ public class MagFieldItem extends AItem {
 					
 					//convert to T/m
 					gmag *= 10;
+					
 					Color color = _colorScaleModelGradient.getColor(gmag);
+					
+					if (color.getAlpha() < 255) {
+						color = new Color(color.getRed(), color.getGreen(), color.getBlue(), 255);
+					}
+					
+					
 					g.setColor(color);
 					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
+					
 				}
 				else { // one of the components
 					probe.fieldCylindrical(phi, rho, z, result);
@@ -360,6 +366,7 @@ public class MagFieldItem extends AItem {
 					}
 
 				} //a component
+				}
 
 				pp.y += pixelStep;
 			}
@@ -393,7 +400,7 @@ public class MagFieldItem extends AItem {
 	private static double[] getGradientValues() {
 		int len = getGradientColors().length + 1;
 
-		double min = 0.05;
+		double min = 0.0;
 		double max = 15; //T/m
 		double del = (max-min) / (len - 1);
 		double values[] = new double[len];
@@ -503,14 +510,17 @@ public class MagFieldItem extends AItem {
 				int rr = r[i] + (int) (j * f * (r[i + 1] - r[i]));
 				int gg = g[i] + (int) (j * f * (g[i + 1] - g[i]));
 				int bb = b[i] + (int) (j * f * (b[i + 1] - b[i]));
+				
+				colors[k] = new Color(rr, gg, bb);
 
-				if (k < 2) {
-					// colors[k] = Color.cyan;
-					colors[k] = new Color(rr, gg, bb, 64);
-				}
-				else {
-					colors[k] = new Color(rr, gg, bb);
-				}
+//
+//				if (k < 2) {
+//					// colors[k] = Color.cyan;
+//					colors[k] = new Color(rr, gg, bb, 64);
+//				}
+//				else {
+//					colors[k] = new Color(rr, gg, bb);
+//				}
 				k++;
 			}
 		}
@@ -555,13 +565,15 @@ public class MagFieldItem extends AItem {
 				int gg = g[i] + (int) (j * f * (g[i + 1] - g[i]));
 				int bb = b[i] + (int) (j * f * (b[i + 1] - b[i]));
 
-				if (k < 2) {
-					// colors[k] = Color.cyan;
-					colors[k] = new Color(rr, gg, bb, 64);
-				}
-				else {
-					colors[k] = new Color(rr, gg, bb);
-				}
+				colors[k] = new Color(rr, gg, bb);
+
+//				if (k < 2) {
+//					// colors[k] = Color.cyan;
+//					colors[k] = new Color(rr, gg, bb, 64);
+//				}
+//				else {
+//					colors[k] = new Color(rr, gg, bb);
+//				}
 				k++;
 			}
 		}

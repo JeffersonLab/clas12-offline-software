@@ -12,8 +12,7 @@ import java.util.ArrayList;
  *
  */
 @SuppressWarnings("serial")
-public class CompositeField extends ArrayList<IField> implements IField {
-
+public class CompositeField extends ArrayList<MagneticField> implements IField {
 
 	/**
 	 * Obtain the magnetic field at a given location expressed in Cartesian
@@ -34,7 +33,7 @@ public class CompositeField extends ArrayList<IField> implements IField {
 	public void field(float x, float y, float z, float[] result) {
 
 		float bx = 0, by = 0, bz = 0;
-		for (IField field : this) {
+		for (MagneticField field : this) {
 			field.field(x, y, z, result);
 			bx += result[0];
 			by += result[1];
@@ -44,7 +43,7 @@ public class CompositeField extends ArrayList<IField> implements IField {
 		result[1] = by;
 		result[2] = bz;
 	}
-	
+
 	/**
 	 * Checks whether the field has been set to always return zero.
 	 * 
@@ -53,7 +52,7 @@ public class CompositeField extends ArrayList<IField> implements IField {
 	@Override
 	public final boolean isZeroField() {
 
-		for (IField ifield : this) {
+		for (MagneticField ifield : this) {
 			if (!(ifield.isZeroField())) {
 				return false;
 			}
@@ -62,26 +61,21 @@ public class CompositeField extends ArrayList<IField> implements IField {
 		return true;
 	}
 
-	
 	@Override
-	public boolean add(IField field) {
-		if (field instanceof CompositeField) {
-			System.err.println("Cannot add composite field to a composite field.");
-			return false;
-		}
-		
-	//	remove(field); //prevent duplicates
-		
-		//further check, only one solenoid or one torus
-		//(might have different instances for some reason)
-		
-		for (IField ifield : this) {
+	public boolean add(MagneticField field) {
+
+		// remove(field); //prevent duplicates
+
+		// further check, only one solenoid or one torus
+		// (might have different instances for some reason)
+
+		for (MagneticField ifield : this) {
 			if (ifield.getClass().equals(field.getClass())) {
 				remove(ifield);
 				break;
 			}
 		}
-		
+
 		return super.add(field);
 	}
 
@@ -90,11 +84,10 @@ public class CompositeField extends ArrayList<IField> implements IField {
 		String s = "Composite contains: ";
 
 		int count = 1;
-		for (IField field : this) {
+		for (MagneticField field : this) {
 			if (count == 1) {
 				s += field.getName();
-			}
-			else {
+			} else {
 				s += " + " + field.getName();
 			}
 			count++;
@@ -102,20 +95,21 @@ public class CompositeField extends ArrayList<IField> implements IField {
 
 		return s;
 	}
-	
-    /**
-     * Is the physical magnet represented by any of the maps misaligned?
-     * @return <code>true</code> if any magnet is misaligned
-     */
-    @Override
+
+	/**
+	 * Is the physical magnet represented by any of the maps misaligned?
+	 * 
+	 * @return <code>true</code> if any magnet is misaligned
+	 */
+	@Override
 	public boolean isMisaligned() {
 		for (IField field : this) {
 			if (field.isMisaligned()) {
 				return true;
 			}
 		}
-    	return false;
-    }
+		return false;
+	}
 
 	/**
 	 * Read a magnetic field from a binary file. The file has the documented
@@ -137,7 +131,7 @@ public class CompositeField extends ArrayList<IField> implements IField {
 	public void fieldCylindrical(double phi, double rho, double z, float[] result) {
 
 		float bx = 0, by = 0, bz = 0;
-		for (IField field : this) {
+		for (MagneticField field : this) {
 			field.fieldCylindrical(phi, rho, z, result);
 			bx += result[0];
 			by += result[1];
@@ -147,70 +141,67 @@ public class CompositeField extends ArrayList<IField> implements IField {
 		result[1] = by;
 		result[2] = bz;
 	}
-	
 
-    /**
-     * Obtain an approximation for the magnetic field gradient at a given location expressed in cylindrical
-     * coordinates. The field is returned as a Cartesian vector in kiloGauss/cm.
-    *
-     * @param phi
-     *            azimuthal angle in degrees.
-     * @param rho
-     *            the cylindrical rho coordinate in cm.
-     * @param z
-     *            coordinate in cm
-     * @param result
-     *            the result
-     * @result a Cartesian vector holding the calculated field in kiloGauss.
-     */
+	/**
+	 * Obtain an approximation for the magnetic field gradient at a given
+	 * location expressed in cylindrical coordinates. The field is returned as a
+	 * Cartesian vector in kiloGauss/cm.
+	 *
+	 * @param phi
+	 *            azimuthal angle in degrees.
+	 * @param rho
+	 *            the cylindrical rho coordinate in cm.
+	 * @param z
+	 *            coordinate in cm
+	 * @param result
+	 *            the result
+	 * @result a Cartesian vector holding the calculated field in kiloGauss.
+	 */
 	@Override
-    public void gradientCylindrical(double phi, double rho, double z,
-    	    float result[]) {
-		
-		float bx = 0, by = 0, bz = 0;
-		for (IField field : this) {
-			field.gradientCylindrical(phi, rho, z, result);
-			bx += result[0];
-			by += result[1];
-			bz += result[2];
-		}
-		result[0] = bx;
-		result[1] = by;
-		result[2] = bz;
-   	
-    }
+	public void gradientCylindrical(double phi, double rho, double z, float result[]) {
+		phi = Math.toRadians(phi);
+		double x = rho * Math.cos(phi);
+		double y = rho * Math.sin(phi);
+		gradient((float) x, (float) y, (float) z, result);
+	}
 
-
-    /**
-     * Obtain an approximation for the magnetic field gradient at a given location expressed in Cartesian
-     * coordinates. The field is returned as a Cartesian vector in kiloGauss/cm.
-     *
-     * @param x
-     *            the x coordinate in cm
-     * @param y
-     *            the y coordinate in cm
-     * @param z
-     *            the z coordinate in cm
-     * @param result
-     *            a float array holding the retrieved field in kiloGauss. The
-     *            0,1 and 2 indices correspond to x, y, and z components.
-     */
-     @Override
+	/**
+	 * Obtain an approximation for the magnetic field gradient at a given
+	 * location expressed in Cartesian coordinates. The field is returned as a
+	 * Cartesian vector in kiloGauss/cm.
+	 *
+	 * @param x
+	 *            the x coordinate in cm
+	 * @param y
+	 *            the y coordinate in cm
+	 * @param z
+	 *            the z coordinate in cm
+	 * @param result
+	 *            a float array holding the retrieved field in kiloGauss. The
+	 *            0,1 and 2 indices correspond to x, y, and z components.
+	 */
+	@Override
 	public void gradient(float x, float y, float z, float result[]) {
- 		float bx = 0, by = 0, bz = 0;
- 		for (IField field : this) {
- 			field.gradient(x, y, z, result);
- 			bx += result[0];
- 			by += result[1];
- 			bz += result[2];
- 		}
- 		result[0] = bx;
- 		result[1] = by;
- 		result[2] = bz;
-     }
-    
-	
-	
+
+		float temp[] = new float[3];
+		float max = 0f;
+
+		
+		// use max of underlying gradients
+		for (IField field : this) {
+			field.gradient(x, y, z, temp);
+			float vlen = vectorLength(temp);
+			
+			if (vlen > max) {
+				result[0] = temp[0];
+				result[1] = temp[1];
+				result[2] = temp[2];
+				max = vlen;
+			}
+		}
+
+	}
+
 	/**
 	 * Get the field magnitude in kiloGauss at a given location expressed in
 	 * cylindrical coordinates.
@@ -247,7 +238,6 @@ public class CompositeField extends ArrayList<IField> implements IField {
 		float result[] = new float[3];
 		field(x, y, z, result);
 		return vectorLength(result);
-
 	}
 
 	/**
@@ -267,12 +257,11 @@ public class CompositeField extends ArrayList<IField> implements IField {
 	@Override
 	public float getMaxFieldMagnitude() {
 		float maxField = 0f;
-		for (IField field : this) {
+		for (MagneticField field : this) {
 			maxField = Math.max(maxField, field.getMaxFieldMagnitude());
 		}
 		return maxField;
 	}
-	
 
 	/**
 	 * Check whether we have a torus field
@@ -280,7 +269,7 @@ public class CompositeField extends ArrayList<IField> implements IField {
 	 * @return <code>true</code> if we have a torus
 	 */
 	public boolean hasTorus() {
-		for (IField field : this) {
+		for (MagneticField field : this) {
 			if (field instanceof Torus) {
 				return true;
 			}
@@ -295,12 +284,74 @@ public class CompositeField extends ArrayList<IField> implements IField {
 	 * @return <code>true</code> if we have a solenoid
 	 */
 	public boolean hasSolenoid() {
-		for (IField field : this) {
+		for (MagneticField field : this) {
 			if (field instanceof Solenoid) {
 				return true;
 			}
 		}
 
+		return false;
+	}
+	
+
+	 /**
+	 * Check whether the field boundaries include the point
+	 * 
+	 * @param x
+	 *            the x coordinate in the map units
+	 * @param y
+	 *            the y coordinate in the map units
+	 * @param z
+	 *            the z coordinate in the map units
+	 * @return <code>true</code> if the point is included in the boundary of the
+	 *         field
+	 */
+	@Override
+	public boolean contains(float x, float y, float z) {
+		
+		double rho = Double.NaN;
+		double phi = Double.NaN;
+		
+		for (MagneticField field : this) {
+			if (field.isRectangularGrid()) {
+				if (field.contains(x, y, z)) {
+					return true;
+				}
+			}
+			else { // cylindrical
+				if (Double.isNaN(rho)) {
+					rho = FastMath.sqrt(x * x + y * y);
+					phi = FastMath.atan2Deg(y, x);
+				}
+				if (field.containsCylindrical((float) phi, (float) rho, z)) {
+					return true;
+				}
+			}
+		} //end loop over fields
+
+		return false;
+	}
+   
+	/**
+	 * Check whether the field boundaries include the point
+	 * 
+	 * @param phi
+	 *            azimuthal angle in degrees.
+	 * @param rho
+	 *            the cylindrical rho coordinate in cm.
+	 * @param z
+	 *            coordinate in cm
+	 * @return <code>true</code> if the point is included in the boundary of the
+	 *         field
+	 * 
+	 */
+	@Override
+	public boolean containsCylindrical(float phi, float rho, float z) {
+		for (MagneticField field : this) {
+			if (field.containsCylindrical(phi, rho, z)) {
+				return true;
+			}
+		}
 		return false;
 	}
 

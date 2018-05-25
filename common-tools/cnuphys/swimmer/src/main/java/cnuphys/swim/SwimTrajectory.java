@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.lund.LundId;
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.IField;
-import cnuphys.magfield.MagneticField;
 
 /**
  * Combines a generated particle record with a path (trajectory). A trajectory
@@ -97,7 +97,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		v[5] = pz;
 		add(0, v);
 	}
-
+	
 	/**
 	 * @param charge
 	 *            the charge of the particle (-1 for electron, +1 for proton,
@@ -224,7 +224,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 			double pos[] = get(i);
 			double x = pos[X_IDX];
 			double y = pos[Y_IDX];
-			double tp = MagneticField.atan2Deg(y, x);
+			double tp = FastMath.atan2Deg(y, x);
 			
 			phi += tp;
 			count++;
@@ -349,6 +349,57 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	public void setSource(String source) {
 		_source = new String((source == null) ? "???" : source);
 	}
+
+	/**
+	 * Get an array of elements of the state vector
+	 * @param index the desired element index
+	 * @return the array
+	 */
+	public double[] getArray(int index) {
+		int size = size();
+		if (size < 1) {
+			return null;
+		}
+		
+		double array[] = new double[size];
+		int i = 0;
+		for (double s[] : this) {
+			array[i] = s[index];
+			i++;
+		}
+		return array;
+	}
+	
+	public double[] getX() {
+		double x[] = getArray(X_IDX);
+		if (x != null) {
+			for (int i = 0; i < x.length; i++) {
+				x[i] *= 100.; //convert to cm
+			}
+		}
+		return x;
+	}
+	
+	public double[] getY() {
+		double y[] = getArray(Y_IDX);
+		if (y != null) {
+			for (int i = 0; i < y.length; i++) {
+				y[i] *= 100.; //convert to cm
+			}
+		}
+		return y;
+	}
+	
+	public double[] getZ() {
+		double z[] = getArray(Z_IDX);
+		if (z != null) {
+			for (int i = 0; i < z.length; i++) {
+				z[i] *= 100.; //convert to cm
+			}
+		}
+		return z;
+	}
+
 
 
 }
