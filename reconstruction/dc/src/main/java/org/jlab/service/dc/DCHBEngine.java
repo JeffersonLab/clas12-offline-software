@@ -112,7 +112,9 @@ public class DCHBEngine extends ReconstructionEngine {
             }
         }
         if (hBKFIterNum==null) {
-            throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for HBT in yaml or env.");
+            // fix to some default
+            hBKFIterNum="10";
+            //throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for HBT in yaml or env.");
         }
         if (hBKFSwimMaxStep!=null) {
             System.out.println("["+this.getName()+"] HB KF Max Swim Step chosen based on yaml: "+hBKFSwimMaxStep);
@@ -124,7 +126,9 @@ public class DCHBEngine extends ReconstructionEngine {
             }
         }
         if (hBKFSwimMaxStep==null) {
-            throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for HBT in yaml or env.");
+             // fix to some default
+             hBKFSwimMaxStep="0.3";
+            //throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for HBT in yaml or env.");
         }
         if (tBKFIterNum!=null) {
             System.out.println("["+this.getName()+"] TB KF Number of Iterations chosen based on yaml: "+tBKFIterNum);
@@ -136,7 +140,9 @@ public class DCHBEngine extends ReconstructionEngine {
             }
         }
         if (tBKFIterNum==null) {
-            throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for TBT in yaml or env.");
+            // fix to some default
+            tBKFIterNum="15";
+            //throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for TBT in yaml or env.");
         }
         if (tBKFSwimMaxStep!=null) {
             System.out.println("["+this.getName()+"] TB KF Max Swim Step chosen based on yaml: "+tBKFSwimMaxStep);
@@ -148,7 +154,9 @@ public class DCHBEngine extends ReconstructionEngine {
             }
         }
         if (tBKFSwimMaxStep==null) {
-            throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for TBT in yaml or env.");
+            // fix to some default
+            tBKFSwimMaxStep="0.1";
+            //throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for TBT in yaml or env.");
         }
         
         Constants.setHBKFINTERNUMBER(Integer.parseInt(hBKFIterNum));
