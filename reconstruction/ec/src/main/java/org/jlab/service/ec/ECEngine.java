@@ -31,10 +31,6 @@ public class ECEngine extends ReconstructionEngine {
     public Boolean        isMC = false;
     int                 calrun = 2;
     
-    List<ECStrip>     myStrips = new ArrayList<ECStrip>();
-    List<ECPeak>       myPeaks = new ArrayList<ECPeak>();
-    List<ECCluster> myClusters = new ArrayList<ECCluster>();
-
     public ECEngine(){
         super("EC","gavalian","1.0");
     }
@@ -76,23 +72,23 @@ public class ECEngine extends ReconstructionEngine {
 	    
         if(de instanceof HipoDataEvent) this.writeHipoBanks(de,ecStrips,ecPeaks,ecClusters);
         
-        myStrips.clear();   myStrips.addAll(ecStrips);
-        myPeaks.clear();    myPeaks.addAll(ecPeaks);
-        myClusters.clear(); myClusters.addAll(ecClusters);
+        ECCommon.myStrips.clear();   ECCommon.myStrips.addAll(ecStrips);
+        ECCommon.myPeaks.clear();    ECCommon.myPeaks.addAll(ecPeaks);
+        ECCommon.myClusters.clear(); ECCommon.myClusters.addAll(ecClusters);
         
         return true;
     }
     
     public List<ECStrip> getStrips() {
-	    return this.myStrips;
+	    return ECCommon.myStrips;
     }
     
     public List<ECPeak> getPeaks() {
-	    return this.myPeaks;    
+	    return ECCommon.myPeaks;    
     }
     
     public List<ECCluster> getClusters() {
-	    return this.myClusters;    
+	    return ECCommon.myClusters;    
     }    
         
     private void writeHipoBanks(DataEvent de, 
@@ -178,7 +174,7 @@ public class ECEngine extends ReconstructionEngine {
 //         de.appendBanks(bankS,bankP,bankC,bankD);
 
     }
-    
+   
     public void setCalRun(int runno) {
         System.out.println("ECEngine: Calibration Run Number = "+runno);
         this.calrun = runno;
@@ -187,7 +183,12 @@ public class ECEngine extends ReconstructionEngine {
     public void setVariation(String variation) {
         System.out.println("ECEngine: Variation = "+variation);
         ECCommon.variation = variation;
-    }  
+    } 
+    
+    public void setVeff(float veff) {
+        System.out.println("ECEngine: Veff = "+veff);
+    	    ECCommon.veff = veff;
+    }
     
     public void setStripThresholds(int thr0, int thr1, int thr2) {
         System.out.println("ECEngine: Strip ADC thresholds = "+thr0+" "+thr1+" "+thr2);

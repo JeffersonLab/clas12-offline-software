@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.math3.util.FastMath;
 
 import org.jlab.detector.base.DetectorType;
@@ -470,11 +471,14 @@ public class TrackDictionaryMaker {
 
         TrackDictionaryMaker tw = new TrackDictionaryMaker();
         
-        DCGeant4Factory dcDetector = new DCGeant4Factory(GeometryFactory.getConstants(DetectorType.DC, 11, "default"), DCGeant4Factory.MINISTAGGERON);
+        String varname = CLASResources.getEnvironmentVariable("GEOMETRYDATABASEVARIATION");
+        String variationName = Optional.ofNullable(varname).orElse("default");
+
+        DCGeant4Factory dcDetector = new DCGeant4Factory(GeometryFactory.getConstants(DetectorType.DC, 11, variationName), DCGeant4Factory.MINISTAGGERON);
        
-        FTOFGeant4Factory ftofDetector = new FTOFGeant4Factory(GeometryFactory.getConstants(DetectorType.FTOF, 11, "default"));
+        FTOFGeant4Factory ftofDetector = new FTOFGeant4Factory(GeometryFactory.getConstants(DetectorType.FTOF, 11, variationName));
         
-        PCALGeant4Factory pcalDetector = new PCALGeant4Factory(GeometryFactory.getConstants(DetectorType.ECAL, 11, "default"));
+        PCALGeant4Factory pcalDetector = new PCALGeant4Factory(GeometryFactory.getConstants(DetectorType.ECAL, 11, variationName));
 
        // 
 

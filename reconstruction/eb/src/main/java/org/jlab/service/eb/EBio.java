@@ -345,7 +345,7 @@ public class EBio {
                 che.setHitPosition(x, y, z);
                 che.setEnergy(nphe);
                 che.setTime(time);
-                che.setCherenkovType(DetectorType.HTCC);
+                che.getDescriptor().setType(DetectorType.HTCC);
                 htcc.add(che);
 
             }

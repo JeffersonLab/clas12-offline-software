@@ -78,20 +78,19 @@ public class EBEngine extends ReconstructionEngine {
         EBRadioFrequency rf = new EBRadioFrequency(ccdb);
         eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+ccdb.getDouble(EBCCDBEnum.RF_OFFSET));
         
-        List<DetectorResponse>  responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL,"ECAL::moments");
-        List<DetectorResponse>  responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
-        List<DetectorResponse>  responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
-        List<DetectorResponse>  responseCND  = ScintillatorResponse.readHipoEvent(de, "CND::hits", DetectorType.CND);
-        
-        List<CherenkovResponse> responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
-        List<CherenkovResponse> responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
+        List<DetectorResponse> responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL,"ECAL::moments");
+        List<DetectorResponse> responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
+        List<DetectorResponse> responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
+        List<DetectorResponse> responseCND  = ScintillatorResponse.readHipoEvent(de, "CND::hits", DetectorType.CND);
+        List<DetectorResponse> responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
+        List<DetectorResponse> responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
         
         eb.addDetectorResponses(responseFTOF);
         eb.addDetectorResponses(responseCTOF);
         eb.addDetectorResponses(responseCND);
         eb.addDetectorResponses(responseECAL);
-        eb.addCherenkovResponses(responseHTCC);
-        eb.addCherenkovResponses(responseLTCC);
+        eb.addDetectorResponses(responseHTCC);
+        eb.addDetectorResponses(responseLTCC);
 
         // Add tracks
         List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType, trajectoryType, covMatrixType);
@@ -156,7 +155,7 @@ public class EBEngine extends ReconstructionEngine {
                 DataBank bankSci = DetectorData.getScintillatorResponseBank(scintillators, de, scintillatorBank);
                 de.appendBanks(bankSci);               
             }
-            List<CherenkovResponse> cherenkovs = eb.getEvent().getCherenkovResponseList();
+            List<DetectorResponse> cherenkovs = eb.getEvent().getCherenkovResponseList();
             if(cherenkovBank!=null && cherenkovs.size()>0) {
                 DataBank bankChe = DetectorData.getCherenkovResponseBank(cherenkovs, de, cherenkovBank);
                 de.appendBanks(bankChe);
@@ -237,7 +236,7 @@ public class EBEngine extends ReconstructionEngine {
 
     public void dropBanks(DataEvent de) {
         if (this.alreadyDroppedBanks==false) {
-            System.out.println("\nEBEngine:  dropping REC banks!\n");
+            System.out.println("["+this.getName()+"]  dropping REC banks!\n");
             this.alreadyDroppedBanks=true;
         }
         de.removeBank(eventBank);
@@ -248,10 +247,17 @@ public class EBEngine extends ReconstructionEngine {
         de.removeBank(trackBank);
         de.removeBank(crossBank);
         de.removeBank(ftBank);
+        de.removeBank(trajectoryBank);
+        de.removeBank(covMatrixBank);
     }
 
     @Override
     public boolean init() {
+
+        if (this.getEngineConfigString("dropBanks")=="true") {
+            dropBanks=true;
+        }
+
         requireConstants(EBCCDBConstants.getAllTableNames());
         this.getConstantsManager().setVariation("default");
         System.out.println("["+this.getName()+"] --> event builder is ready....");

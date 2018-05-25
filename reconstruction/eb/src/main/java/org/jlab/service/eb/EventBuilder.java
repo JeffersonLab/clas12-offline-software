@@ -35,10 +35,9 @@ import org.jlab.rec.eb.EBUtil;
 public class EventBuilder {
 
     public EBCCDBConstants ccdb;
-    private DetectorEvent              detectorEvent = new DetectorEvent();
-    private List<DetectorResponse> detectorResponses = new ArrayList<DetectorResponse>();
-    private List<CherenkovResponse> cherenkovResponses = new ArrayList<CherenkovResponse>();
-    private List<TaggerResponse> taggerResponses = new ArrayList<TaggerResponse>();
+    private DetectorEvent               detectorEvent = new DetectorEvent();
+    private List<DetectorResponse>  detectorResponses = new ArrayList<DetectorResponse>();
+    private List<TaggerResponse>      taggerResponses = new ArrayList<TaggerResponse>();
     private List<Map<DetectorType,Integer>> ftIndices = new ArrayList<Map<DetectorType,Integer>>();
     private int[]  TriggerList = new int[]{11,-11,211,-211,0};
     private HashMap<Integer,Integer> pindex_map = new HashMap<Integer, Integer>();
@@ -57,10 +56,6 @@ public class EventBuilder {
     }
     public void addDetectorResponses(List<DetectorResponse> responses){
         detectorResponses.addAll(responses);
-    }
-
-    public void addCherenkovResponses(List<CherenkovResponse> responses){
-        cherenkovResponses.addAll(responses);
     }
 
     public void addTaggerResponses(List<TaggerResponse> responses){
@@ -203,19 +198,19 @@ public class EventBuilder {
             }
            
             // Matching tracks to HTCC:
-            index = p.getCherenkovSignal(this.cherenkovResponses,DetectorType.HTCC);
+            index = p.getCherenkovSignal(this.detectorResponses,DetectorType.HTCC);
             //double = p.getCherenkovSignalQuality()
             if(index>=0){
-                p.addCherenkovResponse(cherenkovResponses.get(index));
-                cherenkovResponses.get(index).setAssociation(n);
+                p.addResponse(detectorResponses.get(index));
+                detectorResponses.get(index).setAssociation(n);
             } 
 
             // Matching tracks to LTCC:
-            index = p.getCherenkovSignal(this.cherenkovResponses,DetectorType.LTCC);
+            index = p.getCherenkovSignal(this.detectorResponses,DetectorType.LTCC);
             //double = p.getCherenkovSignalQuality()
             if(index>=0){
-                p.addCherenkovResponse(cherenkovResponses.get(index));
-                cherenkovResponses.get(index).setAssociation(n);
+                p.addResponse(detectorResponses.get(index));
+                detectorResponses.get(index).setAssociation(n);
             }             
 
         }

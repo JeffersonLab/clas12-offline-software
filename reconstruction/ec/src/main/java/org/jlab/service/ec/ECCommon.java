@@ -21,6 +21,10 @@ import org.jlab.utils.groups.IndexedTable;
 
 public class ECCommon {
     
+    public static List<ECStrip>     myStrips = new ArrayList<ECStrip>();
+    public static List<ECPeak>       myPeaks = new ArrayList<ECPeak>();
+    public static List<ECCluster> myClusters = new ArrayList<ECCluster>();
+    
     public static int[]  stripThreshold = new int[3];
     public static int[]   peakThreshold = new int[3]; 
     public static float[]  clusterError = new float[3];
@@ -37,6 +41,7 @@ public class ECCommon {
     static int ind[]  = {0,0,0,1,1,1,2,2,2}; 
     static float             tps =  (float) 0.02345;
     public static float TOFFSET = 125; 
+    public static float veff = 18.1f;
 //    public static float TOFFSET = 436; 
     
     public static void initHistos() {
@@ -100,7 +105,7 @@ public class ECCommon {
                                   atten.getDoubleValue("B", sector,layer,component),
                                   atten.getDoubleValue("C", sector,layer,component));
             strip.setGain(gain.getDoubleValue("gain", sector,layer,component)); 
-            strip.setVeff(18.1);
+            strip.setVeff(veff);
             strip.setTiming(time.getDoubleValue("a0", sector, layer, component),
                             time.getDoubleValue("a1", sector, layer, component),
                             time.getDoubleValue("a2", sector, layer, component),
