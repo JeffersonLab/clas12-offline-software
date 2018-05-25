@@ -596,30 +596,36 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 			@Override
 			public void mouseMoved(MouseEvent me) {
 				localToWorld(me.getPoint(), _workPoint);
+				
 
 				String s = null;
-				
-	//			IField ifield = MagneticFields.getInstance().getActiveField();
-				IField ifield = FieldProbe.factory(MagneticFields.getInstance().getActiveField());
-				
+
+				// IField ifield =
+				// MagneticFields.getInstance().getActiveField();
+				IField ifield = FieldProbe.factory();
+				float xyz[] = new float[3];
+				MagneticFields.sectorToLab(_sector, xyz, (float) (_workPoint.y), 0f, (float) (_workPoint.x));
+
 				switch (_cstype) {
 				case XZ:
-					
+
 					if (ifield instanceof RotatedCompositeProbe) {
-						((RotatedCompositeProbe)ifield).field(_sector, (float) (_workPoint.y), 0f,
+						((RotatedCompositeProbe) ifield).field(_sector, (float) (_workPoint.y), 0f,
 								(float) (_workPoint.x), _workResult);
-					}
-					else {
-					ifield.field((float) (_workPoint.y), 0f,
-							(float) (_workPoint.x), _workResult);
+					} else {
+						ifield.field(xyz[0], xyz[1], xyz[2], _workResult);
 					}
 					float Bx = _workResult[0];
 					float By = _workResult[1];
 					float Bz = _workResult[2];
+					
+					double phi = FastMath.atan2Deg(xyz[1], xyz[0]);
+					double rho = FastMath.hypot(xyz[0], xyz[1]);
+
 					double bmag = Math.sqrt(Bx * Bx + By * By + Bz * Bz);
 					s = String
-							.format("  loc: ( %-4.2f,  0,  %-4.2f) Bmag %-4.2f T  B = (%-4.2f, %-4.2f,  %-4.2f)",
-									_workPoint.y, _workPoint.x, bmag / 10,
+							.format("  xyz: ( %-4.2f,  %-4.2f,  %-4.2f) cyl: ( %-4.2f,  %-4.2f,  %-4.2f) Bmag %-4.2f T  B = (%-4.2f, %-4.2f,  %-4.2f)",
+									xyz[0], xyz[1], xyz[2], phi, rho, xyz[2], bmag / 10,
 									Bx / 10, By / 10, Bz / 10);
 					
 					

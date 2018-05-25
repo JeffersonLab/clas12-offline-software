@@ -354,7 +354,7 @@ public class Torus extends MagneticField {
 		int index = 3*compositeIndex;
 		for (int i = 0; i < 3; i++) {
 			int j = index + i;
-			field.put(j, field.get(j) + result[i]);
+			field.put(j, field.get(j) + (float)(_scaleFactor*result[i]));
 		}
 		_addedSolenoid = true;
 	}
