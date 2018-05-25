@@ -2,12 +2,15 @@ package cnuphys.magfield;
 
 import java.util.ArrayList;
 
+
+
 public class RotatedCompositeProbe extends FieldProbe {
+	
 	
 	// the angle in degrees
 	private double _angle = -25.0;
-	private double _sin = Math.sin(Math.toRadians(_angle));
-	private double _cos = Math.cos(Math.toRadians(_angle));
+	private double _sin25 = Math.sin(Math.toRadians(_angle));
+	private double _cos25 = Math.cos(Math.toRadians(_angle));
 
 	private ArrayList<FieldProbe> probes = new ArrayList<FieldProbe>();
 
@@ -24,21 +27,65 @@ public class RotatedCompositeProbe extends FieldProbe {
 	 * coordinates. The field is returned as a Cartesian vector in kiloGauss.
 	 * @param sector the sector [1..6]
 	 * @param xs
-	 *            the x coordinate in cm
+	 *            the tilted x coordinate in cm
 	 * @param ys
-	 *            the y coordinate in cm
+	 *            the tilted y coordinate in cm
 	 * @param zs
-	 *            the z coordinate in cm
+	 *            the tilted z coordinate in cm
 	 * @param result
 	 *            the result is a float array holding the retrieved field in
 	 *            kiloGauss. The 0,1 and 2 indices correspond to x, y, and z
 	 *            components.
 	 */	
 	public void field(int sector, float xs, float ys, float zs, float[] result) {
-		 //TODO Implement the sector effect to get the field from the right sector
-		 //For now using sector 1
+		
+		//first rotate location to get to the sector coordinate system
+		float x = (float)(xs * _cos25 - zs * _sin25);
+		float y = (float)(ys);
+		float z = (float)(zs * _cos25 + xs * _sin25);
+		
+//		if (x < 0) {
+//			System.err.println("NEGATIVE X " + x);
+//			result[0] = 0;
+//			result[1] = 0;
+//			result[2] = 0;
+//			return;
+//		}
+		
+		
+		//now rotate to the correct sector to get the lab coordinates. We can use the result array!
+		MagneticFields.sectorToLab(sector, result, x, y, z);
+		
+		//test 
+//		int testSect = MagneticFields.getSector(result[0], result[1]);
+//		if (testSect!= sector) {
+//			testSect = MagneticFields.getSector(result[0], result[1]);
+//			System.err.println("Sectors don't match sector: " + sector + "  testSect:   " + testSect);
+//			System.err.println("xs = " + xs + "   ys = " + ys);
+//			System.err.println("PHI = " + Math.toDegrees(Math.atan2(result[1], result[0])));
+//			System.exit(1);
+//		}
+	//	System.err.println("Sectors match");
 
-		 field(xs, ys, zs, result);
+
+		float bx = 0, by = 0, bz = 0;
+		for (FieldProbe probe : probes) {
+			probe.field((float) x, (float) y, (float) z, result);
+			bx += result[0];
+			by += result[1];
+			bz += result[2];
+		}
+		
+		MagneticFields.labToSector(sector, result, bx, by, bz);
+		bx = result[0];
+		by = result[1];
+		bz = result[2];
+
+
+		//now rotate the field in the opposite sense
+		result[0] = (float) (bx * _cos25 + bz * _sin25);
+		result[1] = (by);
+		result[2] = (float) (bz * _cos25 - bx * _sin25);
 	}
 
 
@@ -61,28 +108,30 @@ public class RotatedCompositeProbe extends FieldProbe {
 	 */
 	@Override
 	public void field(float xs, float ys, float zs, float[] result) {
-		
-		//first rotate location
-		double x = xs * _cos - zs * _sin;
-		double y = ys;
-		double z = zs * _cos + xs * _sin;
+		field(1, xs, ys, zs, result);
 
-//		System.out.println("NEW R: [" + x + ", " + y + ", " + z + "]");
-
-		float bx = 0, by = 0, bz = 0;
-		for (FieldProbe probe : probes) {
-			probe.field((float) x, (float) y, (float) z, result);
-			bx += result[0];
-			by += result[1];
-			bz += result[2];
-		}
-		
-
-		//now rotate the field in the opposite sense
-		result[0] = (float) (bx * _cos + bz * _sin);
-		result[1] = (by);
-		result[2] = (float) (bz * _cos - bx * _sin);
-		
+//		
+//		//first rotate location
+//		double x = xs * _cos - zs * _sin;
+//		double y = ys;
+//		double z = zs * _cos + xs * _sin;
+//
+////		System.out.println("NEW R: [" + x + ", " + y + ", " + z + "]");
+//
+//		float bx = 0, by = 0, bz = 0;
+//		for (FieldProbe probe : probes) {
+//			probe.field((float) x, (float) y, (float) z, result);
+//			bx += result[0];
+//			by += result[1];
+//			bz += result[2];
+//		}
+//		
+//
+//		//now rotate the field in the opposite sense
+//		result[0] = (float) (bx * _cos + bz * _sin);
+//		result[1] = (by);
+//		result[2] = (float) (bz * _cos - bx * _sin);
+//		
 	}
 
 
@@ -154,9 +203,9 @@ public class RotatedCompositeProbe extends FieldProbe {
      */
      @Override
 	public void gradient(float xs, float ys, float zs, float result[]) {
- 		double x = xs * _cos - zs * _sin;
+ 		double x = xs * _cos25 - zs * _sin25;
  		double y = ys;
- 		double z = zs * _cos + xs * _sin;
+ 		double z = zs * _cos25 + xs * _sin25;
  		float bx = 0, by = 0, bz = 0;
  		for (FieldProbe probe : probes) {
  			probe.gradient((float)x, (float)y, (float)z, result);
@@ -164,9 +213,10 @@ public class RotatedCompositeProbe extends FieldProbe {
  			by += result[1];
  			bz += result[2];
  		}
-		result[0] = (float) (bx * _cos + bz * _sin);
+		result[0] = (float) (bx * _cos25 + bz * _sin25);
 		result[1] = (by);
-		result[2] = (float) (bz * _cos - bx * _sin);
+		result[2] = (float) (bz * _cos25 - bx * _sin25);
      }
+
 	
 }

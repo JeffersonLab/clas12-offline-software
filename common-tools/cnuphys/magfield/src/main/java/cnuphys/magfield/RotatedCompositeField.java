@@ -53,10 +53,33 @@ public final class RotatedCompositeField extends CompositeField {
 	 *            components.
 	 */	
 	public void field(int sector, float xs, float ys, float zs, float[] result) {
-		 //TODO Implement the sector effect to get the field from the right sector
-		 //For now using sector 1
+		//first rotate location
+		float x = (float)(xs * _cos - zs * _sin);
+		float y = (float)(ys);
+		float z = (float)(zs * _cos + xs * _sin);
+		
+		//now rotate to the correct sector. We can use the result array!
+		MagneticFields.sectorToLab(sector, result, x, y, z);
 
-		 field(xs, ys, zs, result);
+
+		float bx = 0, by = 0, bz = 0;
+		for (IField field : this) {
+			field.field((float) x, (float) y, (float) z, result);
+			bx += result[0];
+			by += result[1];
+			bz += result[2];
+		}
+		
+		MagneticFields.labToSector(sector, result, bx, by, bz);
+		bx = result[0];
+		by = result[1];
+		bz = result[2];
+
+
+		//now rotate the field in the opposite sense
+		result[0] = (float) (bx * _cos + bz * _sin);
+		result[1] = (by);
+		result[2] = (float) (bz * _cos - bx * _sin);
 	}
 
 
@@ -80,25 +103,28 @@ public final class RotatedCompositeField extends CompositeField {
 	 */
 	@Override
 	public void field(float xs, float ys, float zs, float[] result) {
-		
-		//first rotate the point
-		double x = xs * _cos - zs * _sin;
-		double y = ys;
-		double z = zs * _cos + xs * _sin;
-
-		//sum the fields
-		float bx = 0, by = 0, bz = 0;
-		for (IField field : this) {
-			field.field((float)x, (float)y, (float)z, result);
-			bx += result[0];
-			by += result[1];
-			bz += result[2];
-		}
-		
-		//now rotate the field
-		result[0] = (float)(bx * _cos + bz * _sin);
-		result[1] = (by);
-		result[2] = (float)(bz * _cos - bx * _sin);
+		System.err.println("SHOULD NOT HAPPEN");
+		System.exit(1);
+		field(1, xs, ys, zs, result);
+//		
+//		//first rotate the point
+//		double x = xs * _cos - zs * _sin;
+//		double y = ys;
+//		double z = zs * _cos + xs * _sin;
+//
+//		//sum the fields
+//		float bx = 0, by = 0, bz = 0;
+//		for (IField field : this) {
+//			field.field((float)x, (float)y, (float)z, result);
+//			bx += result[0];
+//			by += result[1];
+//			bz += result[2];
+//		}
+//		
+//		//now rotate the field
+//		result[0] = (float)(bx * _cos + bz * _sin);
+//		result[1] = (by);
+//		result[2] = (float)(bz * _cos - bx * _sin);
 	}
 
 	

@@ -1,27 +1,20 @@
 package cnuphys.magfield;
 
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.event.EventListenerList;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -33,6 +26,12 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * 
  */
 public class MagneticFields {
+	
+	//0.866...
+	private static final double ROOT3OVER2 = Math.sqrt(3)/2;
+	private static double cosPhi[] = {Double.NaN, 1, 0.5, -0.5, -1, -0.5, 0.5};
+	private static double sinPhi[] = {Double.NaN, 0, ROOT3OVER2, ROOT3OVER2, 0, -ROOT3OVER2, -ROOT3OVER2};
+
 
 	/**
 	 * A formatter to get the time in down to seconds (no day info).
@@ -47,7 +46,7 @@ public class MagneticFields {
 	}
 
 	// version of mag field package
-	private static String VERSION = "1.09";
+	private static String VERSION = "1.095";
 
 	// constants for different torus grids
 	public static final int SYMMETRIC_TORUS = 0;
@@ -1268,7 +1267,9 @@ public class MagneticFields {
 		}
 	}
 
-	// notify listeners of a change in the magnetic field
+	/**
+	 * Notify all listeners that a change has occurred in the magnetic fields
+	 */
 	protected void notifyListeners() {
 
 		if (_listenerList == null) {
@@ -1461,6 +1462,132 @@ public class MagneticFields {
 		}
 		return (new File(getTorusPath())).getName();
 	}
+	
+    
+	/**
+	 * Converts the sector 3D coordinates to clas (lab) 3D coordinates
+	 * 
+	 * @param sector the 1-based sector [1..6]
+	 * @param lab will hold the lab 3D Cartesian coordinates (modified)
+	 * @param x the sector x coordinate
+	 * @param y the sector y coordinate
+	 * @param z the sector z coordinate
+	 */
+	
+	public static void sectorToLab(int sector, float lab[],
+			float x, float y, float z) {
+
+		if ((sector < 1) || (sector > 6)) {
+			String wstr = "Bad sector: " + sector + " in RotatedCompositesectorToLab";
+			System.err.println(wstr);
+			return;
+		}
+
+		lab[2] = z; //z independent of sector
+		
+		if (sector == 1) {
+			lab[0] = x;
+			lab[1] = y;
+		}
+		else if (sector == 4) {
+			lab[0] = -x;
+			lab[1] = -y;
+		}
+		else { //sectors 2, 3, 5, 6
+			double cosP = cosPhi[sector];
+			double sinP = sinPhi[sector];
+			
+			lab[0] = (float)(cosP * x - sinP * y);
+			lab[1] = (float)(sinP * x + cosP * y);
+		}
+	}
+	
+	/**
+	 * Get the sector [1..6] from the lab x and y coordinates
+	 * 
+	 * @param labX the lab x
+	 * @param labY the lab y
+	 * @return the sector [1..6]
+	 */
+	public static int getSector(double labX, double labY) {
+		double phi = Math.atan2(labY, labX);
+		return getSector(Math.toDegrees(phi));
+	}
+	
+	/**
+	 * Get the sector [1..6] from the phi value
+	 * 
+	 * @param phi the value of phi in degrees
+	 * @return the sector [1..6]
+	 */
+	public static int getSector(double phi) {
+		// convert phi to [0..360]
+
+		while (phi < 0) {
+			phi += 360.0;
+		}
+		while (phi > 360.0) {
+			phi -= 360.0;
+		}
+
+		if ((phi > 330) || (phi <= 30)) {
+			return 1;
+		}
+		if (phi <= 90.0) {
+			return 2;
+		}
+		if (phi <= 150.0) {
+			return 3;
+		}
+		if (phi <= 210.0) {
+			return 4;
+		}
+		if (phi <= 270.0) {
+			return 5;
+		}
+		return 6;
+	}
+
+	
+	/**
+	 * Converts the clas (lab) 3D coordinates to sector 3D coordinates to
+	 * 
+	 * @param sector the 1-based sector [1..6]
+	 * @param lab will hold the lab 3D Cartesian coordinates (modified)
+	 * @param x the lab x coordinate
+	 * @param y the lab y coordinate
+	 * @param z the lab z coordinate
+	 */
+	
+	public static void labToSector(int sector, float sect[],
+			float x, float y, float z) {
+
+		if ((sector < 1) || (sector > 6)) {
+			String wstr = "Bad sector: " + sector + " in RotatedCompositesectorToLab";
+			System.err.println(wstr);
+			return;
+		}
+
+		sect[2] = z; //z independent of sector
+		
+		if (sector == 1) {
+			sect[0] = x;
+			sect[1] = y;
+		}
+		else if (sector == 4) {
+			sect[0] = -x;
+			sect[1] = -y;
+		}
+		else { //sectors 2, 3, 5, 6
+			double cosP = cosPhi[sector];
+			double sinP = sinPhi[sector];
+			
+			sect[0] = (float)(cosP * x + sinP * y);
+			sect[1] = (float)(-sinP * x + cosP * y);
+		}
+	}
+
+
 
 	/**
 	 * Get the solenoid file base name

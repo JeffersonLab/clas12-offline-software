@@ -3,6 +3,8 @@ package cnuphys.swimtest;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -13,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
 import cnuphys.lund.LundStyle;
@@ -55,7 +58,7 @@ public class SwimTest {
 	static double oldUniformStepSize = 0.1; // m
 	static double oldAdaptiveInitStepSize = 0.01; // m
 
-	
+	//initialize the magnetic field
 	private static void initMagField() {
 		// test specific load
 		final MagneticFields mf = MagneticFields.getInstance();
@@ -78,9 +81,32 @@ public class SwimTest {
 
 	}
 	
+	//create the test trajectories
+	private static void createTestTraj() {
+		
+	}
+	
+	//create the test menu
 	private static JMenu getTestMenu() {
 		JMenu menu = new JMenu("Tests");
 		
+		final JMenuItem createTrajItem = new JMenuItem("Create Test Trajectories...");
+		
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == createTrajItem) {
+					createTestTraj();
+				}
+				
+			}
+			
+		};
+		
+		createTrajItem.addActionListener(al);
+		
+		menu.add(createTrajItem);
 		return menu;
 	}
 	
@@ -154,7 +180,8 @@ public class SwimTest {
 
 	}
 	
-	private static void createMCanvasTrajectories() {
+	//takes all the created SwimTrajectories
+	private static void setMCanvasTrajectories() {
 		canvas1.clearTrajectories();
 		canvas2.clearTrajectories();
 		ArrayList<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
@@ -174,52 +201,6 @@ public class SwimTest {
 		}
 	}
 
-	public static void main(String arg[]) {
-
-		initMagField();
-
-		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
-
-		FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
-		// MagneticField.setMathLib(MagneticField.MathLib.DEFAULT);
-		int numTest = 10000;
-		
-		JFrame testFrame = createFrame();
-		
-		SwimTrajectoryListener trajListener = new SwimTrajectoryListener() {
-
-			@Override
-			public void trajectoriesChanged() {
-				ArrayList<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
-				System.out.println("Now have " + trajectories.size() +  " trajectories");
-				createMCanvasTrajectories();
-			}
-			
-		};
-		
-		
-		Swimming.addSwimTrajectoryListener(trajListener);
-		
-		LundTrackDialog.getInstance().setFixedZSelected(true);
-		
-		_swimmer = new Swimmer();
-		
-		// testParabolicApproximation(numTest);
-		// testOldUniform(numTest);
-		// testOldAdaptive(numTest);
-		// testAdaptiveEndpointOnly(numTest);
-		// testCovMatProp(numTest);
-		// testAdaptive(numTest);
-		//testUniform(numTest);
-		
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				testFrame.setVisible(true);
-			}
-		});		
-
-	}
 
 	private static void header(String s) {
 		System.out.println("-------------------------------------");
@@ -283,38 +264,11 @@ public class SwimTest {
 		SwimTrajectory traj;
 		traj = _swimmer.swim(charge, 0, 0, 0, momentum, theta, phi, ztarget, accuracy, maxPathLen, stepSize,
 				Swimmer.CLAS_Tolerance, hdata);
-		double lastY[] = traj.lastElement();
+		double finalStateVector[] = traj.lastElement();
 		printSummary("\nresult from adaptive stepsize method with storage and Z cutoff at " + ztarget, traj.size(),
-				momentum, lastY, hdata);
+				momentum, finalStateVector, hdata);
 
 		return traj;
-	}
-
-	private static void testAdaptive(int numTimes) {
-		// header("SwimZ ADAPTIVE");
-		//
-		// // the new swimmer
-		// SwimZStateVector start = new SwimZStateVector(xo, yo, zo, p, theta,
-		// phi);
-		//
-		// SwimZResult result = null;
-		// double hdata[] = new double[3];
-		//
-		// SwimZ sz = new SwimZ(MagneticFields.getInstance().getActiveField());
-		// long startTime = System.currentTimeMillis();
-		// for (int i = 0; i < numTimes; i++) {
-		// try {
-		// result = sz.adaptiveRK(Q, p, start, zf, adaptiveInitStepSize,
-		// adaptiveAbsError, hdata);
-		// } catch (SwimZException e) {
-		// e.printStackTrace();
-		// }
-		// }
-		// double timePerSwim = ((double) (System.currentTimeMillis() -
-		// startTime)) / numTimes;
-		// partialReport(result, timePerSwim, "Z ADAPTIVE");
-		// hdataReport(hdata, 1);
-		// footer("SwimZ ADAPTIVE");
 	}
 
 	private static void printVect(double v[], String s) {
@@ -349,5 +303,50 @@ public class SwimTest {
 		String s = String.format("Min step: %-12.5e   Avg Step: %-12.5f   Max Step: %-12.5f cm", toCM * hdata[0],
 				toCM * hdata[1], toCM * hdata[2]);
 		System.out.println(s);
+	}
+	
+
+	/**
+	 * main program
+	 * @param arg command line arguments (ignored)
+	 */
+	public static void main(String arg[]) {
+
+		initMagField();
+
+		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
+
+		FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
+		// MagneticField.setMathLib(MagneticField.MathLib.DEFAULT);
+		int numTest = 10000;
+		
+		JFrame testFrame = createFrame();
+		
+		SwimTrajectoryListener trajListener = new SwimTrajectoryListener() {
+
+			@Override
+			public void trajectoriesChanged() {
+				ArrayList<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
+				System.out.println("Now have " + trajectories.size() +  " trajectories");
+				setMCanvasTrajectories();
+			}
+			
+		};
+		
+		
+		Swimming.addSwimTrajectoryListener(trajListener);
+		
+		LundTrackDialog.getInstance().setFixedZSelected(true);
+		
+		_swimmer = new Swimmer();
+		
+		
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				testFrame.setVisible(true);
+			}
+		});		
+
 	}
 }

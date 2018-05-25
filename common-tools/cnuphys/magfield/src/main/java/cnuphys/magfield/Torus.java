@@ -333,6 +333,19 @@ public class Torus extends MagneticField {
 		double phi = FastMath.atan2Deg(y, x);
         return containsCylindrical((float)phi, (float)rho, z);
     }
+	
+	/**
+	 * Used to add the solenoid into the torus. Experimental!!
+	 * @param compositeIndex the composite index
+	 * @param result the solenoid field added in
+	 */
+	public void addToField(int compositeIndex, float[] result) {
+		int index = 3*compositeIndex;
+		for (int i = 0; i < 3; i++) {
+			int j = index + i;
+			field.put(j, field.get(j) + result[i]);
+		}
+	}
 
 	/**
 	 * Check whether the field boundaries include the point
