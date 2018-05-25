@@ -36,18 +36,43 @@ public final class RotatedCompositeField extends CompositeField {
 
 		return s;
 	}
-
-
+	
 	/**
 	 * Obtain the magnetic field at a given location expressed in Cartesian
 	 * coordinates. The field is returned as a Cartesian vector in kiloGauss.
-	 *
+	 * @param sector the sector [1..6]
 	 * @param xs
 	 *            the x coordinate in cm
 	 * @param ys
 	 *            the y coordinate in cm
 	 * @param zs
 	 *            the z coordinate in cm
+	 * @param result
+	 *            the result is a float array holding the retrieved field in
+	 *            kiloGauss. The 0,1 and 2 indices correspond to x, y, and z
+	 *            components.
+	 */	
+	public void field(int sector, float xs, float ys, float zs, float[] result) {
+		 //TODO Implement the sector effect to get the field from the right sector
+		 //For now using sector 1
+
+		 field(xs, ys, zs, result);
+	}
+
+
+
+
+	/**
+	 * Obtain the magnetic field at a given location expressed in Cartesian
+	 * coordinates. The field is returned as a Cartesian vector in kiloGauss.
+	 * THIS ASSUMES COORDINATES ARE IN A SECTOR 1 SECTOR SYSTEM 
+	 *
+	 * @param xs
+	 *            the x coordinate in cm in sector 1 sector system
+	 * @param ys
+	 *            the y coordinate in cm in sector 1 sector system
+	 * @param zs
+	 *            the z coordinate in cm in sector 1 sector system
 	 * @param result
 	 *            the result is a float array holding the retrieved field in
 	 *            kiloGauss. The 0,1 and 2 indices correspond to x, y, and z
@@ -104,10 +129,59 @@ public final class RotatedCompositeField extends CompositeField {
 	@Override
 	public float fieldMagnitudeCylindrical(double phi, double rho, double z) {
 		phi = Math.toRadians(phi);
-		double x = rho*Math.cos(phi);
-		double y = rho*Math.sin(phi);
+		double x = rho*FastMath.cos(phi);
+		double y = rho*FastMath.sin(phi);
 		return fieldMagnitude((float)x, (float)y, (float)z);
 	}
+	
 
+	 /**
+	 * Check whether the field boundaries include the point
+	 * 
+	 * @param x
+	 *            the x coordinate in the map units
+	 * @param y
+	 *            the y coordinate in the map units
+	 * @param z
+	 *            the z coordinate in the map units
+	 * @return <code>true</code> if the point is included in the boundary of the
+	 *         field
+	 */
+	@Override
+	public boolean contains(float xs, float ys, float zs) {
+		
+		//first rotate the point
+		double x = xs * _cos - zs * _sin;
+		double y = ys;
+		double z = zs * _cos + xs * _sin;
+
+		
+		double rho = FastMath.sqrt(x * x + y * y);
+		double phi = FastMath.atan2Deg(y, x);
+		return containsCylindrical((float) phi, (float) rho, (float)z);
+	}
+  
+	/**
+	 * Check whether the field boundaries include the point
+	 * 
+	 * @param phi
+	 *            azimuthal angle in degrees.
+	 * @param rho
+	 *            the cylindrical rho coordinate in cm.
+	 * @param z
+	 *            coordinate in cm
+	 * @return <code>true</code> if the point is included in the boundary of the
+	 *         field
+	 * 
+	 */
+	@Override
+	public boolean containsCylindrical(float phi, float rho, float z) {
+		for (IField field : this) {
+			if (field.containsCylindrical(phi, rho, z)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 }

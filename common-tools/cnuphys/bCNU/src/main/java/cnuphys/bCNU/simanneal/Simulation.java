@@ -3,11 +3,15 @@ package cnuphys.bCNU.simanneal;
 import java.util.Properties;
 import java.util.Random;
 
+import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.swing.event.EventListenerList;
+
+import cnuphys.bCNU.attributes.Attribute;
+import cnuphys.bCNU.attributes.Attributes;
 
 public class Simulation {
 	
-	//property keys
+	//common attribute keys
 	public static final String RANDSEED = "randseed";
 	public static final String COOLRATE = "coolrate";
 	public static final String MINTEMP  = "mintemp";
@@ -38,8 +42,8 @@ public class Simulation {
 	//random number generator
 	private Random _rand;
 	
-	//simulation properties
-	private Properties _props;
+	//simulation attributes
+	private Attributes _attributes;
 	
 	//the min or stopping temperature
 	private double _minTemp;
@@ -53,16 +57,24 @@ public class Simulation {
 	 * @param initialSolution the initial solution
 	 * @param props key-value properties of the simulation. Used for initialization.
 	 */
-	public Simulation(Solution initialSolution, Properties props) {
+	public Simulation(Solution initialSolution, Attributes attributes) {
 		
-		_props = props;
+		_attributes = attributes;
 		
 		createRandomGenerator();
-		setParametersFromProperties();
+		setParametersFromAttributes();
 		
 		_currentSolution = initialSolution;
 		
 		setInitialTemperature();
+	}
+	
+	/**
+	 * Accessor for the attributes
+	 * @return the attributes
+	 */
+	public Attributes getAttributes() {
+		return _attributes;
 	}
 	
 	/**
@@ -91,55 +103,60 @@ public class Simulation {
 		System.out.println("Initial temperature: " + _temperature);
 	}
 	
-	//create the random generator using a seed if provided
+	// create the random generator using a seed if provided
 	private void createRandomGenerator() {
-		if (_props.containsKey(RANDSEED)) {
-			long seed = Long.parseLong(_props.getProperty(RANDSEED));
-			if (seed > 0) {
-				_rand = new Random(seed);
+
+		if (_attributes.contains(RANDSEED)) {
+			try {
+				long seed = _attributes.getAttribute(RANDSEED).getLong();
+				if (seed > 0) {
+					_rand = new Random(seed);
+				} else {
+					_rand = new Random();
+				}
+			} catch (InvalidTargetObjectTypeException e) {
+				e.printStackTrace();
 			}
-			else {
-				_rand = new Random();
-			}
-		}
-		else {
+		} else {
 			_rand = new Random();
 		}
 	}
-	
-	//set parameters from what is in properties
-	private void setParametersFromProperties() {
-		//coolrate
-		if (_props.containsKey(COOLRATE)) {
-			_coolRate = Double.parseDouble(_props.getProperty(COOLRATE));
-		}
-		
-		//min temp
-		if (_props.containsKey(MINTEMP)) {
-			_minTemp = Double.parseDouble(_props.getProperty(MINTEMP));
-		}
-		else {
-			_minTemp = Math.min(1.0e-08, _coolRate);
+
+	// set parameters from what is in attributes
+	private void setParametersFromAttributes() {
+		// coolrate
+		try {
+			if (_attributes.contains(COOLRATE)) {
+				_coolRate = _attributes.getAttribute(COOLRATE).getDouble();
+			}
+
+			// min temp
+			if (_attributes.contains(MINTEMP)) {
+				_minTemp = _attributes.getAttribute(MINTEMP).getDouble();
+			} else {
+				_minTemp = Math.min(1.0e-08, _coolRate);
+			}
+
+			// thermalization count
+			if (_attributes.contains(THERMALCOUNT)) {
+				_thermalizationCount = _attributes.getAttribute(THERMALCOUNT).getInt();
+			}
+
+			// success count
+			if (_attributes.contains(SUCCESSCOUNT)) {
+				_successCount = _attributes.getAttribute(SUCCESSCOUNT).getInt();
+			} else {
+				_successCount = _thermalizationCount / 10;
+			}
+
+			// max steps
+			if (_attributes.contains(MAXSTEPS)) {
+				_maxSteps = _attributes.getAttribute(MAXSTEPS).getInt();
+			}
+		} catch (InvalidTargetObjectTypeException e) {
+			e.printStackTrace();
 		}
 
-		//thermalization count
-		if (_props.containsKey(THERMALCOUNT)) {
-			_thermalizationCount = Integer.parseInt(_props.getProperty(THERMALCOUNT));
-		}
-		
-		//success count
-		if (_props.containsKey(SUCCESSCOUNT)) {
-			_successCount = Integer.parseInt(_props.getProperty(SUCCESSCOUNT));
-		}
-		else {
-			_successCount = _thermalizationCount/10;
-		}
-		
-		//max steps
-		if (_props.containsKey(MAXSTEPS)) {
-			_maxSteps = Integer.parseInt(_props.getProperty(MAXSTEPS));
-		}
-		
 	}
 	
 	/**

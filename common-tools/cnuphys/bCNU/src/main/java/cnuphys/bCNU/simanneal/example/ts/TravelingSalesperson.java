@@ -1,4 +1,4 @@
-package cnuphys.bCNU.simanneal.example;
+package cnuphys.bCNU.simanneal.example.ts;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -14,8 +14,10 @@ import java.util.Vector;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import cnuphys.bCNU.attributes.Attributes;
 import cnuphys.bCNU.simanneal.IUpdateListener;
 import cnuphys.bCNU.simanneal.Simulation;
+import cnuphys.bCNU.simanneal.SimulationPanel;
 import cnuphys.bCNU.simanneal.Solution;
 import cnuphys.splot.example.APlotDialog;
 import cnuphys.splot.fit.FitType;
@@ -53,11 +55,9 @@ public class TravelingSalesperson extends Solution implements IUpdateListener {
 	private int _numCity;
 	
 	//record intermediate results for making a plot
-	private final Vector<Double> temps = new Vector<>(1000);
-	private Vector<Double> dists = new Vector<>(1000);
+	protected final Vector<Double> temps = new Vector<>(1000);
+	protected Vector<Double> dists = new Vector<>(1000);
 
-	//Simulation panel for display
-	private TSDisplay tsd;
 
 	private Simulation _simulation;
 	
@@ -67,7 +67,6 @@ public class TravelingSalesperson extends Solution implements IUpdateListener {
 	 */
 	private TravelingSalesperson(int numCity, River river) {
 		reset(numCity, river);
-		tsd = new TSDisplay(this);
 	}
 	
 	/**
@@ -433,7 +432,6 @@ public class TravelingSalesperson extends Solution implements IUpdateListener {
 	public void setSimulation(Simulation simulation) {
 		_simulation = simulation;
 		_simulation.addUpdateListener(this);
-		_simulation.addUpdateListener(tsd);
 	}
 	
 	/**
@@ -448,43 +446,7 @@ public class TravelingSalesperson extends Solution implements IUpdateListener {
 
 	//main program for testing
 	public static void main(String arg[]) {
-		//initial solution
-		
-		int numCity = 400;
-		River river = River.NORIVER;
-		
-		TravelingSalesperson travPerson = getInstance();
-		travPerson.reset(numCity, river);
-		
-		System.out.println("City count: " + travPerson.count());
-		System.out.println("Initial distance: " + travPerson.getDistance());
-		System.out.println("Initial energy: " + travPerson.getEnergy());
-		TravelingSalesperson neighbor = (TravelingSalesperson) travPerson.getNeighbor();
-		System.out.println("Initial distance: " + travPerson.getDistance());
-		System.out.println("Initial energy: " + travPerson.getEnergy());
-		System.out.println("Neighbor distance: " + neighbor.getDistance());
-		System.out.println("Neighbor energy: " + neighbor.getEnergy());
-		
-//		public Simulation(Solution initialSolution, double coolRate, int thermalizationCount) {
-//			this(initialSolution, coolRate, thermalizationCount, -1L);
-//		}
-		
-		
-		
-		Properties props = new Properties();
-		props.setProperty(Simulation.RANDSEED, "-1");
-		props.setProperty(Simulation.COOLRATE, "0.03");
-		props.setProperty(Simulation.THERMALCOUNT, "200");
-		props.setProperty(Simulation.MAXSTEPS, "1000");
-		
-		Simulation simulation = new Simulation(travPerson, props);
-		
-		travPerson.setSimulation(simulation);
-		
-		//add initial values
-		travPerson.temps.add(simulation.getTemperature());
-		travPerson.dists.add(travPerson.getDistance());
-		
+
 		final JFrame frame = new JFrame();
 
 		// set up what to do if the window is closed
@@ -499,10 +461,10 @@ public class TravelingSalesperson extends Solution implements IUpdateListener {
 
 		frame.setLayout(new BorderLayout());
 		
+
+		TSPanel tsPanel = new TSPanel();
 		
-		travPerson.tsd.setPreferredSize(new Dimension(600, 600));
-		
-		frame.add(travPerson.tsd, BorderLayout.CENTER);
+		frame.add(tsPanel, BorderLayout.CENTER);
 
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -515,7 +477,7 @@ public class TravelingSalesperson extends Solution implements IUpdateListener {
 
 		
 		
-		simulation.run();
+	//	tsPanel.getSimulation().run();
 		
 //		makePlot(temps, dists).setVisible(true);
 	}

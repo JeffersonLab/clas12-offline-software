@@ -5,7 +5,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -66,9 +68,6 @@ public class MagneticFields {
 	// torus field (with 12-fold symmetry)
 	private Torus _torus;
 
-	// uniform field
-	// private Uniform _uniform;
-
 	// composite field
 	private CompositeField _compositeField;
 
@@ -92,18 +91,21 @@ public class MagneticFields {
 
 	// types of fields
 	public enum FieldType {
-		TORUS, SOLENOID, COMPOSITE, COMPOSITEROTATED, ZEROFIELD, UNIFORM
+		TORUS, SOLENOID, COMPOSITE, COMPOSITEROTATED, ZEROFIELD
 	}
 
 	// List of magnetic field change listeners
 	private EventListenerList _listenerList;
 
 	// menu stuff
+
+	private JMenuItem _loadItem; // load different torus
+
 	private JRadioButtonMenuItem _torusItem;
 	private JRadioButtonMenuItem _solenoidItem;
 	private JRadioButtonMenuItem _bothItem;
+	private JRadioButtonMenuItem _bothRotatedItem;
 	private JRadioButtonMenuItem _zeroItem;
-	// private JRadioButtonMenuItem _uniformItem;
 
 	private JRadioButtonMenuItem _interpolateItem;
 	private JRadioButtonMenuItem _nearestNeighborItem;
@@ -184,7 +186,7 @@ public class MagneticFields {
 			throw new FileNotFoundException("No torus at [" + path + "]");
 		}
 
-		boolean torusFull = FullTorus.isFieldmapFullField(path);
+		boolean torusFull = isFieldmapFullField(path);
 
 		Torus oldTorus = _torus;
 		boolean activeFieldWasTorus = (_activeField == oldTorus);
@@ -298,6 +300,9 @@ public class MagneticFields {
 			_torusItem.setSelected(desiredFieldType == FieldType.TORUS);
 			_solenoidItem.setSelected(desiredFieldType == FieldType.SOLENOID);
 			_bothItem.setSelected(desiredFieldType == FieldType.COMPOSITE);
+			if (_bothRotatedItem != null) {
+				_bothRotatedItem.setSelected(desiredFieldType == FieldType.COMPOSITEROTATED);
+			}
 			_zeroItem.setSelected(desiredFieldType == FieldType.ZEROFIELD);
 			// _uniformItem.setSelected(desiredFieldType == FieldType.UNIFORM);
 		}
@@ -397,9 +402,6 @@ public class MagneticFields {
 		case SOLENOID:
 			_activeField = _solenoid;
 			break;
-		// case UNIFORM:
-		// _activeField = _uniform;
-		// break;
 		case COMPOSITE:
 			_activeField = _compositeField;
 			break;
@@ -429,7 +431,6 @@ public class MagneticFields {
 	 * @return the active field
 	 */
 	public IField getActiveField() {
-		// init(); //harmless if already inited
 		return _activeField;
 	}
 
@@ -495,9 +496,6 @@ public class MagneticFields {
 			break;
 		case COMPOSITEROTATED:
 			break;
-		case UNIFORM:
-			scale = 1.;
-			break;
 		case ZEROFIELD:
 			scale = 0;
 			break;
@@ -535,7 +533,6 @@ public class MagneticFields {
 			break;
 		case COMPOSITEROTATED:
 			break;
-		case UNIFORM:
 		case ZEROFIELD:
 			shiftz = 0;
 			break;
@@ -902,7 +899,7 @@ public class MagneticFields {
 		System.out.println();
 
 		if (torusFile != null) {
-			boolean torusFull = FullTorus.isFieldmapFullField(torusPath);
+			boolean torusFull = isFieldmapFullField(torusPath);
 			System.out.println("  TORUS: [" + torusPath + "] is full map: " + torusFull);
 			// load the torus
 			if (torusFull) {
@@ -936,45 +933,60 @@ public class MagneticFields {
 	 */
 	public void initializeMagneticFields() {
 
-		// create a dir path to look for the fields
-		// these is a dir path, has nothing to do with the name of the field
+		// three dirs to try (they should have a magfield directory)
+		String dirs[] = { getProperty("user.dir"), getProperty("user.home"),
+				getProperty("user.dir") + "/../../../../../../etc/data" };
 
-		String homeDir = getProperty("user.home");
-		String cwd = getProperty("user.dir");
+		boolean goodDir[] = new boolean[dirs.length];
 
-		String olswDir = null;
-		try {
-			olswDir = (new File(cwd + "/../../../../../..")).getCanonicalPath();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		for (int i = 0; i < goodDir.length; i++) {
+			File magdir = new File(dirs[i], "magfield");
+			goodDir[i] = (magdir.exists() && magdir.isDirectory());
 
-		// build up dir path
-		StringBuffer sb = new StringBuffer(1024);
-		sb.append(".");
-
-		if (olswDir != null) {
-			File dfile = new File(olswDir, "/etc/data/magfield");
-			if (dfile.exists()) {
-				sb.append(":" + dfile.getPath());
+			try {
+				System.out.println("MagDir [" + magdir.getCanonicalPath() + "]  Good: " + goodDir[i]);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 
-		sb.append(":" + homeDir + "/fieldMaps");
-		sb.append(":" + homeDir + "/magfield");
-		sb.append(":cedbuild/magfield");
-		sb.append(":../../../data");
-		sb.append(":../../data");
-		sb.append(":../data");
-		sb.append(":data");
-		sb.append(":../../../magfield");
-		sb.append(":../../magfield");
-		sb.append(":../magfield");
-		sb.append(":magfield");
+		for (int i = 0; i < goodDir.length; i++) {
+			if (goodDir[i]) {
+				File magdir = new File(dirs[i], "magfield");
+				if (initializeMagneticFields(magdir)) {
+					System.out.println("Used fields found in [" + magdir.getPath() + "]");
+					return;
+				} else {
+					System.out.println("WARNING Unable to use fields found in [" + magdir.getPath() + "]");
+				}
+			}
+		}
 
-		String dirPath = sb.toString();
+		System.out.println("WARNING Magnetic Field Package did not initialize.");
+	}
 
-		initializeMagneticFields(dirPath, TorusMap.SYMMETRIC);
+	private boolean initializeMagneticFields(File magdir) {
+
+		// Symm_torus_LOWRES_2008.dat
+		// Full_torus_r251_phi181_z251_18Apr2018.dat
+		File torusFile = new File(magdir, "Symm_torus_LOWRES_2008.dat");
+		if (torusFile.exists() && torusFile.canRead()) {
+			File solenoidFile = new File(magdir, "Symm_solenoid_r601_phi1_z1201_2008.dat");
+			if (solenoidFile.exists() && solenoidFile.canRead()) {
+				try {
+					MagneticFields.getInstance().initializeMagneticFieldsFromPath(torusFile.getPath(),
+							solenoidFile.getPath());
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+					return false;
+				} catch (MagneticFieldInitializationException e) {
+					e.printStackTrace();
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -1078,18 +1090,11 @@ public class MagneticFields {
 			} else {
 				_torus = readTorus(new File(torusMap.getDirName(), torusMap.getFileName()).getPath());
 			}
-			// TorusMenu.getInstance().fixTitle(torusMap);
-			// System.out.println("** USING Torus map [" + torusMap.getName() +
-			// "]");
-		} else {
-			// TorusMenu.getInstance().fixTitle(null);
-			// System.err.println("WARNING: Did not find a map for torus field:
-			// [" +
-			// torusMap.getName() + "]");
 		}
 
 	}
 
+	// make composite fields
 	private void makeComposites() {
 		_compositeField = new CompositeField();
 		_rotatedCompositeField = new RotatedCompositeField();
@@ -1158,9 +1163,10 @@ public class MagneticFields {
 		_torusItem = createRadioMenuItem(_torus, "Torus", menu, bg, al);
 		_solenoidItem = createRadioMenuItem(_solenoid, "Solenoid", menu, bg, al);
 		_bothItem = createRadioMenuItem(_compositeField, "Composite", menu, bg, al);
-		// _bothRotatedItem = createRadioMenuItem(_rotatedCompositeField,
-		// "Rotated
-		// Composite", menu, bg, al);
+
+		if (incRotatedField) {
+			_bothRotatedItem = createRadioMenuItem(_rotatedCompositeField, "Rotated Composite", menu, bg, al);
+		}
 
 		// _uniformItem = createRadioMenuItem(null, "Uniform", menu, bg, al);
 		_zeroItem = createRadioMenuItem(null, "No Field", menu, bg, al);
@@ -1188,7 +1194,16 @@ public class MagneticFields {
 		_torusItem.setEnabled(_torus != null);
 		_solenoidItem.setEnabled(_solenoid != null);
 		_bothItem.setEnabled((_torus != null) && (_solenoid != null));
+
+		if (_bothRotatedItem != null) {
+			_bothRotatedItem.setEnabled((_torus != null) && (_solenoid != null));
+		}
 		// _uniformItem.setEnabled(_uniform != null);
+
+		menu.addSeparator();
+		_loadItem = new JMenuItem("Load a Different Torus...");
+		_loadItem.addActionListener(al);
+		menu.add(_loadItem);
 
 		return menu;
 	}
@@ -1203,6 +1218,8 @@ public class MagneticFields {
 			_activeField = _solenoid;
 		} else if (source == _bothItem) {
 			_activeField = _compositeField;
+		} else if ((_bothRotatedItem != null) && (source == _bothRotatedItem)) {
+			_activeField = _rotatedCompositeField;
 		} else if (source == _zeroItem) {
 			_activeField = null;
 		}
@@ -1213,6 +1230,8 @@ public class MagneticFields {
 			MagneticField.setInterpolate(true);
 		} else if (source == _nearestNeighborItem) {
 			MagneticField.setInterpolate(false);
+		} else if (source == _loadItem) {
+			openNewTorus();
 		}
 
 		System.err.println("Active Field: " + getActiveFieldDescription());
@@ -1236,7 +1255,7 @@ public class MagneticFields {
 		}
 	}
 
-	// mag field changed shift for alignment
+	// mag field changed shift for alignment (solenoid only)
 	protected void changedShift(MagneticField field) {
 		if (field != null) {
 			if (field == _torus) {
@@ -1485,73 +1504,61 @@ public class MagneticFields {
 		return formatterlong.format(longtime);
 	}
 
-	
-	static String options[] = {"Standard, no probe", "Standard, with probe", "Rotated Composite"};
-	private static void timingTest(int option) {
-		System.out.println("Timing tests: [" + options[option] + "]");
-		long seed = 5347632765L;
-		
-		FieldProbe.cache((option != 0));
-		
-		int num = 10000000;
-		
-		float x[] = new float[num];
-		float y[] = new float[num];
-		float z[] = new float[num];
-		
-		float result[] = new float[3];
-		
-		IField ifield = MagneticFields.getInstance().getActiveField();
-		if (option == 2) {
-			ifield = MagneticFields.getInstance()._rotatedCompositeField;
-		}
-		
-		Random rand = new Random(seed);
+	/**
+	 * Tests whether this is a full field or a phi symmetric field
+	 * 
+	 * @return <code>true</code> if this is a full field
+	 */
+	public static boolean isFieldmapFullField(String torusPath) throws FileNotFoundException {
+		File file = new File(torusPath);
 
-		double _angle = -25.0;
-		double _sin = Math.sin(Math.toRadians(_angle));
-		double _cos = Math.cos(Math.toRadians(_angle));
-
-		
-		
-		for (int i = 0; i < num; i++) {
-			z[i] = 600 * rand.nextFloat();
-			float rho = 600 * rand.nextFloat();
-			double phi = Math.toRadians(30 * rand.nextFloat());
-
-			x[i] = (float) (rho * Math.cos(phi));
-			y[i] = (float) (rho * Math.sin(phi));
-			
-			if (option == 2) {
-				double xx = x[i] * _cos + z[i] * _sin;
-//				double yy = y[i];
-				double zz = z[i] * _cos - x[i] * _sin;
-				x[i] = (float)xx;
-				z[i] = (float)zz;
-			}
-		}
-		
-		//prime the pump
-		for (int i = 0; i < num; i++) {
-			ifield.field(x[i], y[i], z[i], result);
+		if (!file.exists()) {
+			throw new FileNotFoundException("TORUS Map not found at [" + torusPath + "]");
 		}
 
-		double sum = 0;
-		for (int outer = 0; outer < 5; outer++) {
-			long time = System.currentTimeMillis();
-			
-			for (int i = 0; i < num; i++) {
-				ifield.field(x[i], y[i], z[i], result);
+		try {
+			DataInputStream dos = new DataInputStream(new FileInputStream(file));
+
+			boolean swap = false;
+			int magicnum = dos.readInt(); // magic number
+
+			// TODO handle swapping if necessary
+			swap = (magicnum != MagneticField.MAGICNUMBER);
+			if (swap) {
+				System.err.println("byte swapping required but not yet implemented.");
+				dos.close();
+				return false;
 			}
 
-			double del = ((double)(System.currentTimeMillis() - time))/1000.;
-			sum += del;
+			// read five ints related to cs
+			int gridCS = dos.readInt();
 
-			System.out.println("loop " + (outer + 1) + " time  = " + del + " sec");
-			
+			if (gridCS == 0) {
+				System.out.println("Cylindrical Grid");
+			} else if (gridCS == 1) {
+				System.out.println("Rectangular Grid");
+				return true; // rect grids always "full"
+			} else {
+				System.err.println("Unknown Grid CS indicator: " + gridCS);
+				System.exit(1);
+			}
+
+			dos.readInt();
+			dos.readInt();
+			dos.readInt();
+			dos.readInt();
+
+			// now read phi min and phi max in degrees
+
+			float phiMin = dos.readFloat();
+			float phiMax = dos.readFloat();
+
+			return (phiMax > 300);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		System.out.println("avg "  + (sum/5.) + " sec");
 
+		return false;
 	}
 
 	/**
@@ -1561,93 +1568,7 @@ public class MagneticFields {
 	 *            command line arguments
 	 */
 	public static void main(String arg[]) {
-		final JFrame testFrame = new JFrame("Magnetic Field");
-
-		final MagneticFields mf = MagneticFields.getInstance();
-
-		// test explicit path load
-		// mf.initializeMagneticFields();
-
-		// test specific load
-		File mfdir = new File(System.getProperty("user.home"), "magfield");
-		System.out.println("mfdir exists: " + (mfdir.exists() && mfdir.isDirectory()));
-		// mf.initializeMagneticFields(mfdir.getPath(), TorusMap.FULL_200);
-		try {
-			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat", "Symm_solenoid_r601_phi1_z1201_2008.dat");
-	//		mf.initializeMagneticFieldsFromEnv();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			System.exit(1);
-		} catch (MagneticFieldInitializationException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-
-		testFrame.setLayout(new GridLayout(2, 1, 0, 10));
-		// drawing canvas
-		final MagneticFieldCanvas canvas1 = new MagneticFieldCanvas(-50, -350, 650, 700.,
-				MagneticFieldCanvas.CSType.XZ);
-		JPanel magPanel1 = canvas1.getPanelWithStatus(500, 465);
-		final MagneticFieldCanvas canvas2 = new MagneticFieldCanvas(-50, -350, 650, 700.,
-				MagneticFieldCanvas.CSType.YZ);
-		JPanel magPanel2 = canvas2.getPanelWithStatus(500, 465);
-
-		// set up what to do if the window is closed
-		WindowAdapter windowAdapter = new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent event) {
-				System.err.println("Done");
-				System.exit(1);
-			}
-		};
-
-		// add the menu
-		JMenuBar mb = new JMenuBar();
-		testFrame.setJMenuBar(mb);
-		mb.add(mf.getMagneticFieldMenu(true, true));
-
-		JMenu testMenu = new JMenu("Tests");
-		final JMenuItem test0Item = new JMenuItem("Timing Test (no probe)");
-		final JMenuItem test1Item = new JMenuItem("Timing Test (probe)");
-		final JMenuItem test2Item = new JMenuItem("Timing Test (Rotated Composite)");
-
-		ActionListener al = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (e.getSource() == test0Item) {
-					timingTest(0);
-				}
-				if (e.getSource() == test1Item) {
-					timingTest(1);
-				}
-				if (e.getSource() == test2Item) {
-					timingTest(2);
-				}
-			}
-
-		};
-
-		test0Item.addActionListener(al);
-		test1Item.addActionListener(al);
-		test2Item.addActionListener(al);
-		testMenu.add(test0Item);
-		testMenu.add(test1Item);
-		testMenu.add(test2Item);
-		mb.add(testMenu);
-		testFrame.add(magPanel1);
-		testFrame.add(magPanel2);
-
-		testFrame.addWindowListener(windowAdapter);
-		testFrame.pack();
-
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				testFrame.setVisible(true);
-			}
-		});
-
+		MagTests.runTests();
 	}
 
 }

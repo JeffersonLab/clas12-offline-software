@@ -1,10 +1,7 @@
 package cnuphys.swimZ;
 
-import java.io.File;
-
 import Jama.Matrix;
-import cnuphys.magfield.FieldProbe;
-import cnuphys.magfield.MagneticField;
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
@@ -50,9 +47,7 @@ public class SwimZTest {
 
 		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
 		
-		MagneticField.setMathLib(MagneticField.MathLib.FAST);
-//		MagneticField.setMathLib(MagneticField.MathLib.DEFAULT);
-		FieldProbe.cache(false);
+		FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
 		int numTest = 20000;
 //		testParabolicApproximation(numTest);
 //		testOldUniform(numTest);
