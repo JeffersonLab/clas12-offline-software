@@ -118,10 +118,7 @@ public abstract class MagneticField implements IField {
 	protected int numFieldPoints;
 
 	// used internally for index calculations
-	// private int N23 = -1;
-
-	// used internally for index calculations
-	// private int N3;
+	private int N23 = -1;
 
 	// scale factor always treated as positive
 	protected double _scaleFactor = 1.0;
@@ -350,7 +347,11 @@ public abstract class MagneticField implements IField {
 	 * @return the composite index (buffer offset)
 	 */
 	public final int getCompositeIndex(int n1, int n2, int n3) {
-		return n1 * (q2Coordinate.getNumPoints() * q3Coordinate.getNumPoints()) + n2 * q3Coordinate.getNumPoints() + n3;
+		if (N23 < 0) {
+			N23 = q2Coordinate.getNumPoints() * q3Coordinate.getNumPoints();
+			System.err.println("N23 = " + N23);
+		}
+		return n1 * N23 + n2 * q3Coordinate.getNumPoints() + n3;
 	}
 
 	/**
@@ -612,7 +613,9 @@ public abstract class MagneticField implements IField {
 			float q3Max = dos.readFloat();
 			int nQ3 = dos.readInt();
 			q3Coordinate = new GridCoordinate(_q3Name, q3Min, q3Max, nQ3);
-
+			
+			N23 = nQ2*nQ3;  //cache this value
+			
 			numFieldPoints = nQ1 * nQ2 * nQ3;
 
 			// last five reserved
@@ -629,8 +632,10 @@ public abstract class MagneticField implements IField {
 
 			// read the bytes as a block
 			dos.read(bytes);
-			ByteBuffer byteBuffer = ByteBuffer.wrap(bytes).asReadOnlyBuffer();
-			field = byteBuffer.asFloatBuffer().asReadOnlyBuffer();
+//			ByteBuffer byteBuffer = ByteBuffer.wrap(bytes).asReadOnlyBuffer();
+//			field = byteBuffer.asFloatBuffer().asReadOnlyBuffer();
+			ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+			field = byteBuffer.asFloatBuffer();
 
 			computeMaxField();
 

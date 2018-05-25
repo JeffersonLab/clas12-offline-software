@@ -31,6 +31,13 @@ import javax.swing.JRadioButtonMenuItem;
  *
  */
 public class MagTests {
+	private static final JMenuItem reconfigItem = new JMenuItem("Remove Solenoid and Torus Overlap");
+	private static int _sector = 1;
+	final static MagneticFieldCanvas canvas1 = new MagneticFieldCanvas(_sector, -50, 0, 650, 350.,
+			MagneticFieldCanvas.CSType.XZ);
+//	final static MagneticFieldCanvas canvas2 = new MagneticFieldCanvas(_sector, -50, 0, 650, 350.,
+//			MagneticFieldCanvas.CSType.YZ);
+
 
 	private static String options[] = { "Random, with active field", " Along line, with active field",
 			"Random, with active PROBE", " Along line, with active PROBE" };
@@ -406,21 +413,29 @@ public class MagTests {
 				else if (e.getSource() == rectCylItem) {
 					rectCylCompareTest();
 				}
+				else if (e.getSource() == reconfigItem) {
+					MagneticFields.getInstance().removeMapOverlap();
+				}
 			}
 		};
 		rectTorusItem.addActionListener(al2);
 		rectCylItem.addActionListener(al2);
+		reconfigItem.addActionListener(al2);
 		testMenu.add(rectTorusItem);
 		testMenu.add(rectCylItem);
+		testMenu.addSeparator();
+		testMenu.add(reconfigItem);
+
 
 		return testMenu;
 	}
+	
+	private static void fixMenus() {
+		boolean hasSolenoid = MagneticFields.getInstance().hasSolenoid();
+		boolean hasTorus = MagneticFields.getInstance().hasTorus();
+		reconfigItem.setEnabled(hasSolenoid && hasTorus);
+	}
 
-	private static int _sector = 1;
-	final static MagneticFieldCanvas canvas1 = new MagneticFieldCanvas(_sector, -50, -350, 650, 700.,
-			MagneticFieldCanvas.CSType.XZ);
-	final static MagneticFieldCanvas canvas2 = new MagneticFieldCanvas(_sector, -50, -350, 650, 700.,
-			MagneticFieldCanvas.CSType.YZ);
 
 
 	//set up the frame to run the tests
@@ -453,8 +468,8 @@ public class MagTests {
 
 
 		// drawing canvas
-		JPanel magPanel1 = canvas1.getPanelWithStatus(500, 465);
-		JPanel magPanel2 = canvas2.getPanelWithStatus(500, 465);
+		JPanel magPanel1 = canvas1.getPanelWithStatus(1000, 465);
+//		JPanel magPanel2 = canvas2.getPanelWithStatus(1000, 465);
 
 		// set up what to do if the window is closed
 		WindowAdapter windowAdapter = new WindowAdapter() {
@@ -471,6 +486,7 @@ public class MagTests {
 			public void magneticFieldChanged() {
 				label.setText(" Torus: " + MagneticFields.getInstance().getTorusPath());
 				System.err.println("Field changed. Torus path: " + MagneticFields.getInstance().getTorusPath());
+				fixMenus();
 			}
 			
 		};
@@ -489,10 +505,10 @@ public class MagTests {
 		mb.add(testMenu);
 		
 		JPanel cpanel = new JPanel();
-		cpanel.setLayout(new GridLayout(2, 1, 4, 4));
+		cpanel.setLayout(new GridLayout(1, 1, 4, 4));
 				
 		cpanel.add(magPanel1);
-		cpanel.add(magPanel2);
+//		cpanel.add(magPanel2);
 		
 		testFrame.add(cpanel, BorderLayout.CENTER);
 
@@ -526,10 +542,10 @@ public class MagTests {
 							System.out.println("Sector is now " + _sector);
 							
 							canvas1.setSector(_sector);
-							canvas2.setSector(_sector);
+//							canvas2.setSector(_sector);
 							
 							canvas1.repaint();
-							canvas2.repaint();
+//							canvas2.repaint();
 						}
 						break;
 					}

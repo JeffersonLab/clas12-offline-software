@@ -15,6 +15,9 @@ public class Torus extends MagneticField {
 	//the cell implements the probe trick
 	protected Cell3D _cell;
 	
+	//has part of the solenoid been added in to remove the overlap?
+	protected boolean _addedSolenoid;
+	
 	/**
 	 * Instantiates a new torus.
 	 * Note q1 = phi, q2 = rho, q3 = z
@@ -23,8 +26,16 @@ public class Torus extends MagneticField {
 		setCoordinateNames("phi", "rho", "z");
 		_scaleFactor = -1; // default
 		_cell = new Cell3D(this);
+		_addedSolenoid = false;
 	}
 	
+	/**
+	 * Has part of the solenoid been added in to remove the overlap?
+	 * @return<code>true</code> if the solenoid was added in.
+	 */
+	public boolean isSolenoidAdded() {
+		return _addedSolenoid;
+	}
 
 	/**
 	 * Obtain a torus object from a binary file, probably
@@ -333,6 +344,20 @@ public class Torus extends MagneticField {
 		double phi = FastMath.atan2Deg(y, x);
         return containsCylindrical((float)phi, (float)rho, z);
     }
+	
+	/**
+	 * Used to add the solenoid into the torus. Experimental!!
+	 * @param compositeIndex the composite index
+	 * @param result the solenoid field added in
+	 */
+	public void addToField(int compositeIndex, float[] result) {
+		int index = 3*compositeIndex;
+		for (int i = 0; i < 3; i++) {
+			int j = index + i;
+			field.put(j, field.get(j) + result[i]);
+		}
+		_addedSolenoid = true;
+	}
 
 	/**
 	 * Check whether the field boundaries include the point

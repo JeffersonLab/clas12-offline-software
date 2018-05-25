@@ -19,6 +19,6 @@ public class TrajectoryCompare {
 		double delX = finalPos2[0]-finalPos1[0];
 		double delY = finalPos2[1]-finalPos1[1];
 		double delZ = finalPos2[2]-finalPos1[2];
-		return Math.sqrt(delX*delX+delZ*delZ+delZ*delZ);
+		return Math.sqrt(delX*delX+delY*delY+delZ*delZ);
 	}
 }

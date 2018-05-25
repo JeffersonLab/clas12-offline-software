@@ -24,6 +24,9 @@ public final class Solenoid extends MagneticField {
 	
 	private static final double MISALIGNTOL = 1.0e-6; //cm
 	
+	//used to reconfigure fields so solenoid and torus do not overlap
+	private float _fakeZLim = Float.POSITIVE_INFINITY;
+	
 	// private constructor
 	/**
 	 * Instantiates a new solenoid.
@@ -78,6 +81,15 @@ public final class Solenoid extends MagneticField {
 	 */
 	@Override
 	public final void field(float x, float y, float z, float result[]) {
+		
+		if (z > _fakeZLim) {
+			result[X] = 0f;
+			result[Y] = 0f;
+			result[Z] = 0f;
+			return;
+		}
+		
+		
 		double rho = FastMath.sqrt(x * x + y * y);
 		double phi = FastMath.atan2Deg(y, x);
 		fieldCylindrical(phi, rho, z, result);
@@ -303,6 +315,11 @@ public final class Solenoid extends MagneticField {
 	 */
 	protected void interpolateField(double q2, double q3, float result[]) {
 		
+		if (q3 > _fakeZLim) {
+			System.err.println("FAKE Z VIOLATION SHOULD NOT HAVE HAPPENED");
+			System.exit(1);
+		}
+		
 
 		result[0] = 0f;
 		result[1] = 0f;
@@ -492,6 +509,11 @@ public final class Solenoid extends MagneticField {
 	 */
 	@Override
 	public boolean containsCylindrical(float phi, float rho, float z) {
+		
+		if (z > _fakeZLim) {
+			return false;
+		}
+		
 		if ((z < getZMin()) || (z > getZMax())) {
 			return false;
 		}
@@ -499,6 +521,22 @@ public final class Solenoid extends MagneticField {
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * Get the fake z lim used to remove overlap with torus
+	 * @return the fake z lim used to remove overlap with torus (cm)
+	 */
+	public float getFakeZLim() {
+		return _fakeZLim;
+	}
+	
+	/**
+	 * Set the fake z lim used to remove overlap with torus
+	 * @param zlim the new value in cm
+	 */
+	public void setFakeZLim(float zlim) {
+		_fakeZLim = zlim;
 	}
 
 }

@@ -36,6 +36,12 @@ public class GeometryManager {
 
 	// cal sector 0 in local coordinates
 	public static ECSector local_Cal_Sector0;
+	
+	//0.866...
+	private static final double ROOT3OVER2 = Math.sqrt(3)/2;
+	private static double cosPhi[] = {Double.NaN, 1, 0.5, -0.5, -1, -0.5, 0.5};
+	private static double sinPhi[] = {Double.NaN, 0, ROOT3OVER2, ROOT3OVER2, 0, -ROOT3OVER2, -ROOT3OVER2};
+
 
 	/**
 	 * Private constructor for the singleton.
@@ -298,6 +304,8 @@ public class GeometryManager {
 	 * @param clasP the lab 3D Cartesian coordinates (modified)
 	 * @param sectorP the sector 3D Cartesian coordinates (not modified)
 	 */
+	
+
 	public static void sectorToClas(int sector, Point3D clasP,
 			Point3D sectorP) {
 
@@ -307,18 +315,23 @@ public class GeometryManager {
 			return;
 		}
 
+		
 		if (sector == 1) {
 			clasP.setX(sectorP.x());
 			clasP.setY(sectorP.y());
 		}
-		else {
+		else if (sector == 4) {
+			clasP.setX(-sectorP.x());
+			clasP.setY(-sectorP.y());
+		}
+		else { //sectors 2, 3, 5, 6
 			double x = sectorP.x();
 			double y = sectorP.y();
-			double midPlanePhi = Math.toRadians(60 * (sector - 1));
-			double cosPhi = Math.cos(midPlanePhi);
-			double sinPhi = Math.sin(midPlanePhi);
-			clasP.setX(cosPhi * x - sinPhi * y);
-			clasP.setY(sinPhi * x + cosPhi * y);
+			double cosP = cosPhi[sector];
+			double sinP = sinPhi[sector];
+			
+			clasP.setX(cosP * x - sinP * y);
+			clasP.setY(sinP * x + cosP * y);
 		}
 
 		// z coordinates are the same

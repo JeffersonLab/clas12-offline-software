@@ -51,7 +51,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 	
 	// coordinate system
 	public enum CSType {
-		XZ, YZ
+		XZ, YCOMP
 	}
 
 	private CSType _cstype;
@@ -180,9 +180,9 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 			case XZ:
 				wp.setLocation(traj.zz[0], traj.xx[0]);
 				break;
-			case YZ:
-				wp.setLocation(traj.zz[0], traj.yy[0]);
-				break;
+//			case YZ:
+//				wp.setLocation(traj.zz[0], traj.yy[0]);
+//				break;
 			}
 			
 			worldToLocal(pp[0], wp);
@@ -196,9 +196,9 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 				case XZ:
 					wp.setLocation(traj.zz[i], traj.xx[i]);
 					break;
-				case YZ:
-					wp.setLocation(traj.zz[i], traj.yy[i]);
-					break;
+//				case YZ:
+//					wp.setLocation(traj.zz[i], traj.yy[i]);
+//					break;
 				}
 				worldToLocal(pp[i], wp);
 				poly.lineTo(pp[i].x, pp[i].y);
@@ -246,7 +246,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 	// draw the grid
 	protected void drawGrid(Graphics g, Rectangle bounds) {
 		double hvals[] = { -25, 75, 175, 275, 375, 475, 575 };
-		double vvals[] = { -300, -200, -100, 0, 100, 200, 300 };
+		double vvals[] = {0, 100, 200, 300 };
 		
 		g.setFont(font2);
 		g.setColor(Color.cyan);
@@ -322,9 +322,9 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 		case XZ:
 			s = "X";
 			break;
-		case YZ:
-			s = "Y";
-			break;
+//		case YZ:
+//			s = "Y";
+//			break;
 		}
 		g.setColor(Color.white);
 		g.drawString(s, xs - fm.stringWidth("s") / 2 + 1, ys - linlen - 4);
@@ -377,13 +377,14 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 					globalY = 0f;
 					globalZ = (float) (wp.x);
 					break;
-				case YZ:
-					globalX = 0f;
-					globalY = (float) (wp.y);
-					globalZ = (float) (wp.x);
-					break;
+//				case YZ:
+//					globalX = 0f;
+//					globalY = (float) (wp.y);
+//					globalZ = (float) (wp.x);
+//					break;
 				}
 				
+				if (!(ifield instanceof RotatedCompositeProbe)) {
 				if (_sector > 1) {
 					switch (_sector) {
 					case 2:
@@ -413,6 +414,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 					globalX = (float)tx;
 					globalY = (float)ty;
 				}
+				}
 				if (_showGradient) {
 					ifield.gradient(globalX, globalY, globalZ, result);
 					float gx = result[0];
@@ -425,6 +427,10 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 					g.setColor(_colorModel.getColor(gmag));
 					g.fillRect(pp.x, pp.y, w, h);
 				} else {
+					if (ifield instanceof RotatedCompositeProbe) {
+						((RotatedCompositeProbe)ifield).field(_sector, globalX, globalY, globalZ, result);
+					}
+
 					ifield.field(globalX, globalY, globalZ, result);
 					float vx = result[0];
 					float vy = result[1];
@@ -598,8 +604,15 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 				
 				switch (_cstype) {
 				case XZ:
+					
+					if (ifield instanceof RotatedCompositeProbe) {
+						((RotatedCompositeProbe)ifield).field(_sector, (float) (_workPoint.y), 0f,
+								(float) (_workPoint.x), _workResult);
+					}
+					else {
 					ifield.field((float) (_workPoint.y), 0f,
 							(float) (_workPoint.x), _workResult);
+					}
 					float Bx = _workResult[0];
 					float By = _workResult[1];
 					float Bz = _workResult[2];
@@ -620,19 +633,19 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 					s += String.format(" Grad %-4.2f T/m", gmag*10);
 					
 					break;
-				case YZ:
-					ifield.field(0f, (float) (_workPoint.y),
-							(float) (_workPoint.x), _workResult);
-					Bx = _workResult[0];
-					By = _workResult[1];
-					Bz = _workResult[2];
-					bmag = Math.sqrt(Bx * Bx + By * By + Bz * Bz);
-
-					s = String
-							.format("  loc: ( 0,  %-4.2f, %-4.2f) Bmag %-4.2f T  B = (%-4.2f, %-4.2f,  %-4.2f",
-									_workPoint.y, _workPoint.x, bmag / 10,
-									Bx / 10, By / 10, Bz / 10);
-					break;
+//				case YZ:
+//					ifield.field(0f, (float) (_workPoint.y),
+//							(float) (_workPoint.x), _workResult);
+//					Bx = _workResult[0];
+//					By = _workResult[1];
+//					Bz = _workResult[2];
+//					bmag = Math.sqrt(Bx * Bx + By * By + Bz * Bz);
+//
+//					s = String
+//							.format("  loc: ( 0,  %-4.2f, %-4.2f) Bmag %-4.2f T  B = (%-4.2f, %-4.2f,  %-4.2f",
+//									_workPoint.y, _workPoint.x, bmag / 10,
+//									Bx / 10, By / 10, Bz / 10);
+//					break;
 				}
 				label.setText(s);
 			}
