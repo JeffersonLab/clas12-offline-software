@@ -255,13 +255,13 @@ public class DetectorData {
        return bank;
    }
    
-   public static DataBank getCherenkovResponseBank(List<CherenkovResponse> responses, DataEvent event, String bank_name){
+   public static DataBank getCherenkovResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, responses.size());
        for(int row = 0; row < responses.size(); row++){
-           CherenkovResponse c = responses.get(row);
+           CherenkovResponse c = (CherenkovResponse)responses.get(row);
            bank.setShort("index", row, (short) c.getHitIndex());
            bank.setShort("pindex", row, (short) c.getAssociation());
-           bank.setByte("detector", row, (byte) c.getCherenkovType().getDetectorId());
+           bank.setByte("detector", row, (byte) c.getDescriptor().getType().getDetectorId());
            bank.setFloat("x", row, (float) c.getHitPosition().x());
            bank.setFloat("y", row, (float) c.getHitPosition().y());
            bank.setFloat("z", row, (float) c.getHitPosition().z());

@@ -318,7 +318,7 @@ public class CodaEventDecoder {
                         int   chipID = DataUtils.getInteger(halfWord, 0, 2);
                         int   halfID = DataUtils.getInteger(halfWord, 3, 3);
 
-                        Integer channelKey = (half<<8)|channel;
+                        Integer channelKey = ((half<<8) | (channel & 0xff));
 
                         //System.err.println( "CHIP = " + chipID + " HALF = " + halfID + "  CHANNEL = " + channel + " KEY = " + channelKey  );
                         //dataBank.addChannel(channelKey);

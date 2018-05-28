@@ -4,6 +4,7 @@ import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.TorusMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataBank;
@@ -85,7 +86,10 @@ public class TrackingEff extends ReconstructionEngine {
             this.getConstantsManager().setVariation("default");
             
             // Load the geometry
-            ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
+            String varname = CLASResources.getEnvironmentVariable("GEOMETRYDATABASEVARIATION");
+            String variationName = Optional.ofNullable(varname).orElse("default");
+
+            ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, variationName);
             dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
             
             //T0s

@@ -135,6 +135,29 @@ public abstract class MagneticField implements IField {
 	protected static final int X = 0;
 	protected static final int Y = 1;
 	protected static final int Z = 2;
+	
+	/** 
+	 * A quick test to throw out points definitely outside the boundaries
+	 * @param x the x coordinate in the units of the map
+	 * @param y the y coordinate in the units of the map
+	 * @param z the z coordinate in the units of the map
+	 * @return <code>true</code> if the point is in range (approximate)
+	 */
+	protected boolean crudeInRange(float x, float y, float z) {
+		return true;
+	}
+	
+	/** 
+	 * A quick test to throw out points definitely outside the boundaries
+	 * @param phi the phi coordinate in the units of the map
+	 * @param rho the rho coordinate in the units of the map
+	 * @param z the z coordinate in the units of the map
+	 * @return <code>true</code> if the point is in range (approximate)
+	 */
+	protected boolean crudeInRangeCylindrical(float phi, float rho, float z) {
+		return true;
+	}
+
 
 	/**
 	 * Scale the field.
@@ -224,6 +247,14 @@ public abstract class MagneticField implements IField {
 	 */
 	@Override
 	public final void field(float x, float y, float z, float result[]) {
+		
+		if (!crudeInRange(x, y, z)) {
+			result[X] = 0f;
+			result[Y] = 0f;
+			result[Z] = 0f;
+			return;
+		}
+
 		// float rho = (float) hypot(x, y);
 		double rho = Math.sqrt(x * x + y * y);
 
@@ -326,7 +357,6 @@ public abstract class MagneticField implements IField {
 		}
 
 	}
-
 	
 	/**
 	 * 
