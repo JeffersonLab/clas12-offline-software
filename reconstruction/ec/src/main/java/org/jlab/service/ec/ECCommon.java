@@ -41,9 +41,11 @@ public class ECCommon {
     public static DetectorCollection<H1F> H1_ecEng = new DetectorCollection<H1F>();
     
     static int ind[]  = {0,0,0,1,1,1,2,2,2}; 
-    static float             tps =  (float) 0.02345;
-    public static float TOFFSET = 125; 
-    public static float veff = 18.1f;
+    static float               tps = 0.02345f;
+	public static float    TOFFSET = 125f; 
+    public static float       veff = 18.1f;
+    public static int triggerPhase = 0;
+    
 //    public static float TOFFSET = 436; 
     
     public  static void initHistos() {
@@ -68,6 +70,25 @@ public class ECCommon {
     
     public static List<ECStrip>  initEC(DataEvent event, Detector detector, ConstantsManager manager, int run){
     	
+        manager.setVariation(variation);
+        
+        IndexedTable    atten = manager.getConstants(run, "/calibration/ec/attenuation");
+        IndexedTable     gain = manager.getConstants(run, "/calibration/ec/gain");
+		IndexedTable     time = manager.getConstants(run, "/calibration/ec/timing");
+		IndexedTable   jitter = manager.getConstants(run, "/calibration/ec/time_jitter");
+        
+        double PERIOD = jitter.getDoubleValue("period",0,0,0);
+        int    PHASE  = jitter.getIntValue("phase",0,0,0); 
+        int    CYCLES = jitter.getIntValue("cycles",0,0,0);
+        
+	    triggerPhase = 0;
+    	
+        if(event.hasBank("RUN::config")==true){
+            DataBank bank = event.getBank("RUN::config");
+            long timestamp = bank.getLong("timestamp", 0);
+            triggerPhase = (int) (PERIOD*((timestamp+PHASE)%CYCLES));
+        }
+    
         if (singleEvent) resetHistos();        
         
         List<ECStrip>  ecStrips = null;
@@ -79,12 +100,6 @@ public class ECCommon {
         if(ecStrips==null) return new ArrayList<ECStrip>();
         
         Collections.sort(ecStrips);
-        
-        manager.setVariation(variation);
-        
-        IndexedTable    atten = manager.getConstants(run, "/calibration/ec/attenuation");
-        IndexedTable     gain = manager.getConstants(run, "/calibration/ec/gain");
-		IndexedTable     time = manager.getConstants(run, "/calibration/ec/timing");
         
         for(ECStrip strip : ecStrips){
             int sector    = strip.getDescriptor().getSector();
@@ -103,9 +118,9 @@ public class ECCommon {
             strip.getLine().copy(paddle.getLine());
             double distance = paddle.getLine().origin().distance(firstPaddle.getLine().origin());
             strip.setDistanceEdge(distance);
-            strip.setAttenuation( atten.getDoubleValue("A", sector,layer,component),
-                                  atten.getDoubleValue("B", sector,layer,component),
-                                  atten.getDoubleValue("C", sector,layer,component));
+            strip.setAttenuation(atten.getDoubleValue("A", sector,layer,component),
+                                 atten.getDoubleValue("B", sector,layer,component),
+                                 atten.getDoubleValue("C", sector,layer,component));
             strip.setGain(gain.getDoubleValue("gain", sector,layer,component)); 
             strip.setVeff(veff);
             strip.setTiming(time.getDoubleValue("a0", sector, layer, component),
@@ -117,9 +132,9 @@ public class ECCommon {
         return ecStrips;
     }
         
-    public static List<ECStrip>  readStripsHipo(DataEvent event){   
+    public static List<ECStrip>  readStripsHipo(DataEvent event){ 
     	
-        List<ECStrip>  strips = new ArrayList<ECStrip>();
+    	    List<ECStrip>  strips = new ArrayList<ECStrip>();
         IndexedList<List<Integer>>  tdcs = new IndexedList<List<Integer>>(3);  
         
         if(event.hasBank("ECAL::tdc")==true){
@@ -128,7 +143,7 @@ public class ECCommon {
                 int  is = bank.getByte("sector",i);
                 int  il = bank.getByte("layer",i);
                 int  ip = bank.getShort("component",i);               
-                int tdc = bank.getInt("TDC",i);
+                int tdc = bank.getInt("TDC",i)-triggerPhase;
                 if(tdc>0) {                       
                     if(!tdcs.hasItem(is,il,ip)) tdcs.add(new ArrayList<Integer>(),is,il,ip);
                         tdcs.getItem(is,il,ip).add(tdc);       

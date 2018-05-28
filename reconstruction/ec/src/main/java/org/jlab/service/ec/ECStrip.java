@@ -18,24 +18,22 @@ public class ECStrip implements Comparable {
 	 * in the two bars. Hence, the time difference should be very small
 	 */
 	
-	private static final double coincTIME = 25.; //ns. 	
 	private DetectorDescriptor  desc = new DetectorDescriptor(DetectorType.ECAL);
     
-    private int                 iADC  = 0;
-    private int                 iTDC  = 0;
-    private double              iGain = 1.0;
-    private double              iADC_to_MEV  = 1.0/10000.0;
-    private double              iTDC_to_NSEC = 1.0;
-    private double              iAttenLengthA = 1.0;
-    private double              iAttenLengthB = 50000.0;
-    private double              iAttenLengthC = 0.0;
-	private double              iTimingA0 = 0; // Offset in ns (before applying a1)
-	private double              iTimingA1 = 1; // ns -> TDC conv. factor (TDC = ns/a1)
-	private double              iTimingA2 = 0; // time-walk factor (time_ns = time_ns + a2/sqrt(adc))
-	private double              iTimingA3 = 0; // 0
-	private double              iTimingA4 = 0; // 0
-	private double              veff      = 18.1; // Effective velocity of scintillator light (cm/ns)
-	private int                 peakID    = -1;
+    private int                iADC = 0;
+    private int                iTDC = 0;
+    private double            iGain = 1.0;
+    private double     iADC_to_MEV  = 1.0/10000.0;
+    private double    iAttenLengthA = 1.0;
+    private double    iAttenLengthB = 50000.0;
+    private double    iAttenLengthC = 0.0;
+	private double        iTimingA0 = 0; // Offset in ns (before applying a1)
+	private double        iTimingA1 = 1; // ns -> TDC conv. factor (TDC = ns/a1)
+	private double        iTimingA2 = 0; // time-walk factor (time_ns = time_ns + a2/sqrt(adc))
+	private double        iTimingA3 = 0; // 0
+	private double        iTimingA4 = 0; // 0
+	private double             veff = 18.1; // Effective velocity of scintillator light (cm/ns)
+	private int              peakID = -1;
 	
 	private double              tdist=0;
 	private double              edist=0;
@@ -43,6 +41,7 @@ public class ECStrip implements Comparable {
     private Line3D              stripLine = new Line3D();
     private double              stripDistanceEdge = 0.0;
     
+	private static final double coincTIME = 25.; //ns. 	
     private double              time = 0;
        
     public ECStrip(int sector, int layer, int component){
@@ -147,7 +146,7 @@ public class ECStrip implements Comparable {
     
 	public double getTime(Point3D point) {		
 		tdist = point.distance(this.stripLine.end());
-		time =  getTime() - tdist/veff;
+		time =  getTime() - tdist/veff + this.iTimingA3*tdist + this.iTimingA4*tdist*tdist;
 		return time;
 	} 
 	
