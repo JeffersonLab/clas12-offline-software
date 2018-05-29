@@ -21,12 +21,16 @@ import javax.swing.JPanel;
 import cnuphys.lund.LundStyle;
 import cnuphys.lund.LundTrackDialog;
 import cnuphys.lund.SwimTrajectoryListener;
+import cnuphys.magfield.CompositeProbe;
 import cnuphys.magfield.FastMath;
+import cnuphys.magfield.FieldProbe;
+import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFieldCanvas;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFieldInitializationException;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
+import cnuphys.magfield.RotatedCompositeProbe;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.SwimTrajectory;
@@ -69,6 +73,8 @@ public class SwimTest {
 			// "Symm_solenoid_r601_phi1_z1201_2008.dat");
 			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_08May2018.dat",
 					"Symm_solenoid_r601_phi1_z1201_2008.dat");
+//			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_18Apr2018.dat",
+//					"Symm_solenoid_r601_phi1_z1201_2008.dat");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -83,14 +89,59 @@ public class SwimTest {
 	
 	//create the test trajectories
 	private static void createTestTraj() {
-		
 	}
+	
+	//test the sector swimmer for rotated composite
+	private static void testSectorSwim() {
+
+		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITEROTATED);
+
+		IField field = FieldProbe.factory();
+	
+		Swimmer swimmer = new Swimmer(field);
+		
+		int charge = -1;
+		
+		double x0 = (-40. + 20*Math.random())/100.;
+		double y0 = (10. + 40.*Math.random())/100.;
+		double z0 = (180 + 40*Math.random())/100.;
+		double pTot = 1.0;
+		double theta = 0;
+		double phi = 0;
+		double z = 411.0/100.;
+		double accuracy = 10/1.0e6;
+		double stepSize = 0.01;
+		
+		System.out.println("=======");
+		for (int sector = 1; sector <= 6; sector ++) {
+			
+			 SwimTrajectory traj;
+			try {
+				traj = swimmer.sectorSwim(sector, charge, x0, y0, z0, pTot,
+				            theta, phi, z, accuracy, 10,
+				            10, stepSize, Swimmer.CLAS_Tolerance, hdata);
+	            traj.computeBDL(field);
+	            
+	            double lastY[] = traj.lastElement();
+				System.out.print("Sector: " + sector + "  ");
+				printVect(lastY, " last ");
+			} catch (RungeKuttaException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			
+			
+		}
+	}
+	
 	
 	//create the test menu
 	private static JMenu getTestMenu() {
 		JMenu menu = new JMenu("Tests");
 		
 		final JMenuItem createTrajItem = new JMenuItem("Create Test Trajectories...");
+		final JMenuItem testSectorItem = new JMenuItem("Test Sector Swim");
 		
 		ActionListener al = new ActionListener() {
 
@@ -99,14 +150,19 @@ public class SwimTest {
 				if (e.getSource() == createTrajItem) {
 					createTestTraj();
 				}
+				if (e.getSource() == testSectorItem) {
+					testSectorSwim();
+				}
 				
 			}
 			
 		};
 		
-		createTrajItem.addActionListener(al);
-		
+		createTrajItem.addActionListener(al);	
+		testSectorItem.addActionListener(al);	
 		menu.add(createTrajItem);
+		menu.add(testSectorItem);
+		
 		return menu;
 	}
 	
@@ -272,6 +328,14 @@ public class SwimTest {
 	}
 
 	private static void printVect(double v[], String s) {
+		
+		if (v.length == 8) {
+			String out = String.format("%s [%-12.5f, %-12.5f, %-12.5f, %-12.5f, %-12.5f, %-12.5f, %-12.5f, %-12.5f]", 
+					s, v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7]);
+			System.out.println(out);
+			return;
+		}
+		
 		String out = String.format("%s [%-12.5f, %-12.5f, %-12.5f]", s, v[0], v[1], v[2]);
 		System.out.println(out);
 	}

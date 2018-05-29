@@ -243,7 +243,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		}
 		return get(size()-1);
 	}
-
+	
 
 	/**
 	 * Get the final radial coordinate

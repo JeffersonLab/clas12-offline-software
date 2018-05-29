@@ -133,7 +133,7 @@ public abstract class FieldProbe implements IField {
 	 * Get the appropriate probe for the active field
 	 * @return the probe for the active field
 	 */
-	public static FieldProbe factory() {
+	public static IField factory() {
 		return factory(MagneticFields.getInstance().getActiveField());
 	}
 	
@@ -142,21 +142,28 @@ public abstract class FieldProbe implements IField {
 	 * Get the appropriate probe for the given field
 	 * @return the probe for the givev field
 	 */
-	public static FieldProbe factory(IField field) {
+	public static IField factory(IField field) {
+		
 		
 
 		if (field != null) {
+			
+			if (MagneticFields.getInstance().isProbeOrCompositeProbe(field)) {
+				return field;
+			}
 
 			if (field instanceof Torus) {
 				return new TorusProbe((Torus) field);
 			} else if (field instanceof Solenoid) {
 				return new SolenoidProbe((Solenoid) field);
 			} else if (field instanceof RotatedCompositeField) {
+				System.err.println("Creating rotated composite probe.");
 				return new RotatedCompositeProbe((RotatedCompositeField) field);
 			} else if (field instanceof CompositeField) {
 				return new CompositeProbe((CompositeField) field);
 			} else {
-				System.err.println("WARNING: cannot create probe for " + field.getName());
+				(new Throwable()).printStackTrace();
+				System.err.println("WARNING: cannot create probe for " + field.getName() + "  class: " + field.getClass().getName());
 			}
 		}
 

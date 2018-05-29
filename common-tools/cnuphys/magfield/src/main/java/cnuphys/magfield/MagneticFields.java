@@ -29,8 +29,8 @@ public class MagneticFields {
 	
 	//0.866...
 	private static final double ROOT3OVER2 = Math.sqrt(3)/2;
-	private static double cosPhi[] = {Double.NaN, 1, 0.5, -0.5, -1, -0.5, 0.5};
-	private static double sinPhi[] = {Double.NaN, 0, ROOT3OVER2, ROOT3OVER2, 0, -ROOT3OVER2, -ROOT3OVER2};
+	private static double _cosPhi[] = {Double.NaN, 1, 0.5, -0.5, -1, -0.5, 0.5};
+	private static double _sinPhi[] = {Double.NaN, 0, ROOT3OVER2, ROOT3OVER2, 0, -ROOT3OVER2, -ROOT3OVER2};
 
 
 	/**
@@ -1566,11 +1566,50 @@ public class MagneticFields {
 			lab[1] = -y;
 		}
 		else { //sectors 2, 3, 5, 6
-			double cosP = cosPhi[sector];
-			double sinP = sinPhi[sector];
+			double cosP = _cosPhi[sector];
+			double sinP = _sinPhi[sector];
 			
 			lab[0] = (float)(cosP * x - sinP * y);
 			lab[1] = (float)(sinP * x + cosP * y);
+		}
+	}
+	
+	
+	/**
+	 * Converts the clas (lab) 3D coordinates to sector 3D coordinates to
+	 * 
+	 * @param sector the 1-based sector [1..6]
+	 * @param lab will hold the lab 3D Cartesian coordinates (modified)
+	 * @param x the lab x coordinate
+	 * @param y the lab y coordinate
+	 * @param z the lab z coordinate
+	 */
+	
+	public static void labToSector(int sector, float sect[],
+			float x, float y, float z) {
+
+		if ((sector < 1) || (sector > 6)) {
+			String wstr = "Bad sector: " + sector + " in RotatedCompositesectorToLab";
+			System.err.println(wstr);
+			return;
+		}
+
+		sect[2] = z; //z independent of sector
+		
+		if (sector == 1) {
+			sect[0] = x;
+			sect[1] = y;
+		}
+		else if (sector == 4) {
+			sect[0] = -x;
+			sect[1] = -y;
+		}
+		else { //sectors 2, 3, 5, 6
+			double cosP = _cosPhi[sector];
+			double sinP = _sinPhi[sector];
+			
+			sect[0] = (float)(cosP * x + sinP * y);
+			sect[1] = (float)(-sinP * x + cosP * y);
 		}
 	}
 	
@@ -1586,6 +1625,8 @@ public class MagneticFields {
 		return getSector(Math.toDegrees(phi));
 	}
 	
+
+
 	/**
 	 * Get the sector [1..6] from the phi value
 	 * 
@@ -1618,45 +1659,6 @@ public class MagneticFields {
 			return 5;
 		}
 		return 6;
-	}
-
-	
-	/**
-	 * Converts the clas (lab) 3D coordinates to sector 3D coordinates to
-	 * 
-	 * @param sector the 1-based sector [1..6]
-	 * @param lab will hold the lab 3D Cartesian coordinates (modified)
-	 * @param x the lab x coordinate
-	 * @param y the lab y coordinate
-	 * @param z the lab z coordinate
-	 */
-	
-	public static void labToSector(int sector, float sect[],
-			float x, float y, float z) {
-
-		if ((sector < 1) || (sector > 6)) {
-			String wstr = "Bad sector: " + sector + " in RotatedCompositesectorToLab";
-			System.err.println(wstr);
-			return;
-		}
-
-		sect[2] = z; //z independent of sector
-		
-		if (sector == 1) {
-			sect[0] = x;
-			sect[1] = y;
-		}
-		else if (sector == 4) {
-			sect[0] = -x;
-			sect[1] = -y;
-		}
-		else { //sectors 2, 3, 5, 6
-			double cosP = cosPhi[sector];
-			double sinP = sinPhi[sector];
-			
-			sect[0] = (float)(cosP * x + sinP * y);
-			sect[1] = (float)(-sinP * x + cosP * y);
-		}
 	}
 
 
@@ -1736,6 +1738,7 @@ public class MagneticFields {
 				System.out.println("Cylindrical Grid");
 			} else if (gridCS == 1) {
 				System.out.println("Rectangular Grid");
+				dos.close();
 				return true; // rect grids always "full"
 			} else {
 				System.err.println("Unknown Grid CS indicator: " + gridCS);
@@ -1749,12 +1752,29 @@ public class MagneticFields {
 
 			// now read phi min and phi max in degrees
 
-			float phiMin = dos.readFloat();
+//			float phiMin = dos.readFloat();
 			float phiMax = dos.readFloat();
 
+			dos.close();
 			return (phiMax > 300);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+
+		return false;
+	}
+	
+	/**
+	 * Is this a probe or a composite probe?
+	 * @param field the object to test
+	 * @return <code>t
+	 */
+	public boolean isProbeOrCompositeProbe(IField field) {
+		//already a probe?
+		if ((field instanceof FieldProbe) || 
+				(field instanceof CompositeProbe) || 
+				(field instanceof RotatedCompositeProbe)) {
+			return true;
 		}
 
 		return false;

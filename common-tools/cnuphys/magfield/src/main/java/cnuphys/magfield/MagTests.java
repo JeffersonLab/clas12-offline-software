@@ -24,6 +24,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 
+import cnuphys.magfield.MagneticFields.FieldType;
+
 /**
  * Static testing of the magnetic field
  * 
@@ -84,6 +86,29 @@ public class MagTests {
 		System.err.println("maxDiff = " + maxDiff);
 	}
 
+	
+	private static void checkSectors() {
+		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITEROTATED);
+
+		RotatedCompositeProbe probe =  (RotatedCompositeProbe) FieldProbe.factory();
+
+		float result[] = new float[3];
+		
+//		double x = -60. + 20*Math.random();
+		double x = 100. + 20*Math.random();
+		double y = -40. + 20*Math.random();
+		double z = 290. + 30*Math.random();
+		
+		for (int sector = 1; sector <= 6; sector++) {
+			probe.field(sector, (float)x, (float)y, (float)z, result);
+			double Bx = result[0];
+			double By = result[1];
+			double Bz = result[2];
+			double bmag = Math.sqrt(Bx*Bx + By*By + Bz*Bz);
+			System.err.println(String.format("Sector %d (%9.5f, %9.5f, %9.5f) %9.5f", sector, result[0], result[1], result[2], bmag));
+		}
+		
+	}
 	
 	//compare the rectangular and cylindrical grids
 	private static void rectCylCompareTest() {
@@ -402,6 +427,7 @@ public class MagTests {
 		// now for rectangular grids
 		final JMenuItem rectTorusItem = new JMenuItem("Create Rectangular Torus");
 		final JMenuItem rectCylItem = new JMenuItem("Compare Rectangular and Cylindrical");
+		final JMenuItem rotatedSectorItem = new JMenuItem("Check Sectors for Rotated Composite");
 
 		ActionListener al2 = new ActionListener() {
 
@@ -416,15 +442,20 @@ public class MagTests {
 				else if (e.getSource() == reconfigItem) {
 					MagneticFields.getInstance().removeMapOverlap();
 				}
+				else if (e.getSource() == rotatedSectorItem) {
+					checkSectors();
+				}
 			}
 		};
 		rectTorusItem.addActionListener(al2);
 		rectCylItem.addActionListener(al2);
 		reconfigItem.addActionListener(al2);
+		rotatedSectorItem.addActionListener(al2);
 		testMenu.add(rectTorusItem);
 		testMenu.add(rectCylItem);
 		testMenu.addSeparator();
 		testMenu.add(reconfigItem);
+		testMenu.add(rotatedSectorItem);
 
 
 		return testMenu;
@@ -452,7 +483,9 @@ public class MagTests {
 		try {
 			// mf.initializeMagneticFields(mfdir.getPath(), "torus.dat",
 			// "Symm_solenoid_r601_phi1_z1201_2008.dat");
-			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_08May2018.dat",
+//			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_08May2018.dat",
+//					"Symm_solenoid_r601_phi1_z1201_2008.dat");
+			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_18Apr2018.dat",
 					"Symm_solenoid_r601_phi1_z1201_2008.dat");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

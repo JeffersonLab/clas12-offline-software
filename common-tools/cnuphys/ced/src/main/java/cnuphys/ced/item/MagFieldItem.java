@@ -145,7 +145,7 @@ public class MagFieldItem extends AItem {
 		Point pp = new Point();
 
 		int pstep2 = pixelStep / 2;
-		FieldProbe probe = FieldProbe.factory();  //uses active field
+		IField probe = FieldProbe.factory();  //uses active field
 
 		float result[] = new float[3];
 		double coords[] = new double[5];
