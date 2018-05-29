@@ -32,6 +32,7 @@ public class ECStrip implements Comparable {
 	private double        iTimingA2 = 0; // time-walk factor (time_ns = time_ns + a2/sqrt(adc))
 	private double        iTimingA3 = 0; // 0
 	private double        iTimingA4 = 0; // 0
+	private int        triggerPhase = 0;
 	private double             veff = 18.1; // Effective velocity of scintillator light (cm/ns)
 	private int              peakID = -1;
 	
@@ -74,12 +75,20 @@ public class ECStrip implements Comparable {
        	return this.iTDC * iTimingA1;
     }
     
+    public double getPhaseCorrectedTime() {
+    	    return this.iTDC * iTimingA1 - triggerPhase;
+    }
+    
+    public double getRawTime(boolean phaseCorrection) {
+ 	    return phaseCorrection ? getPhaseCorrectedTime():getRawTime();
+    }
+     
     public double getTWCTime() {
-      	return this.iTDC * iTimingA1 - iTimingA2 / Math.sqrt(this.iADC);
+      	return getRawTime(true) - iTimingA2 / Math.sqrt(this.iADC);
     }
     
 	public double getTime() {
-		return this.iTDC * iTimingA1 - iTimingA0 - iTimingA2 / Math.sqrt(this.iADC);
+		return getRawTime(true) - iTimingA0 - iTimingA2 / Math.sqrt(this.iADC);
 	}  
     
     public double getEnergy(){
@@ -106,6 +115,10 @@ public class ECStrip implements Comparable {
         this.iAttenLengthA = a;
         this.iAttenLengthB = b;
         this.iAttenLengthC = c;
+    }
+    
+    public void setTriggerPhase(int num) {
+    	    this.triggerPhase = num;
     }
     
     public void setVeff(double veff) {

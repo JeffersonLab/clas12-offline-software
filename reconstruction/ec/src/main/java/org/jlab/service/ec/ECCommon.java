@@ -122,6 +122,7 @@ public class ECCommon {
                                  atten.getDoubleValue("B", sector,layer,component),
                                  atten.getDoubleValue("C", sector,layer,component));
             strip.setGain(gain.getDoubleValue("gain", sector,layer,component)); 
+            strip.setTriggerPhase(triggerPhase);
             strip.setVeff(veff);
             strip.setTiming(time.getDoubleValue("a0", sector, layer, component),
                             time.getDoubleValue("a1", sector, layer, component),
@@ -142,7 +143,7 @@ public class ECCommon {
             for(int i = 0; i < bank.rows(); i++){
                 int  is = bank.getByte("sector",i);
                 int  il = bank.getByte("layer",i);
-                int  ip = bank.getShort("component",i);               
+                int  ip = bank.getShort("component",i);    
                 int tdc = bank.getInt("TDC",i)-triggerPhase;
                 if(tdc>0) {                       
                     if(!tdcs.hasItem(is,il,ip)) tdcs.add(new ArrayList<Integer>(),is,il,ip);
