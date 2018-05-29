@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class CompositeProbe extends FieldProbe {
 	
-	private ArrayList<FieldProbe> probes = new ArrayList<FieldProbe>();
+	private ArrayList<IField> probes = new ArrayList<IField>();
 
 	public CompositeProbe(CompositeField field) {
 		super(field);
@@ -21,7 +21,7 @@ public class CompositeProbe extends FieldProbe {
 		float by = 0;
 		float bz = 0;
 		
-		for (FieldProbe probe : probes) {
+		for (IField probe : probes) {
 			probe.field(x, y, z, result);
 			bx += result[0];
 			by += result[1];
@@ -41,7 +41,7 @@ public class CompositeProbe extends FieldProbe {
 		float by = 0;
 		float bz = 0;
 		
-		for (FieldProbe probe : probes) {
+		for (IField probe : probes) {
 			probe.fieldCylindrical(phi, rho, z, result);
 			bx += result[0];
 			by += result[1];
@@ -73,7 +73,7 @@ public class CompositeProbe extends FieldProbe {
     	    float result[]) {
 		
 		float bx = 0, by = 0, bz = 0;
-		for (FieldProbe probe : probes) {
+		for (IField probe : probes) {
 			probe.gradientCylindrical(phi, rho, z, result);
 			bx += result[0];
 			by += result[1];
@@ -103,7 +103,7 @@ public class CompositeProbe extends FieldProbe {
      @Override
 	public void gradient(float x, float y, float z, float result[]) {
  		float bx = 0, by = 0, bz = 0;
- 		for (FieldProbe probe : probes) {
+ 		for (IField probe : probes) {
  			probe.gradient(x, y, z, result);
  			bx += result[0];
  			by += result[1];
