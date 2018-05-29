@@ -49,6 +49,8 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 	
 	private String _extraText = "";
 	
+	private IField _field;
+	
 	// coordinate system
 	public enum CSType {
 		XZ, YCOMP
@@ -97,6 +99,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 			public void magneticFieldChanged() {
 				_colorModel = null;
 				System.err.println("Magnetic Field has changed. New torus is rectangular: " + MagneticFields.getInstance().getTorus().isRectangularGrid());
+				_field = FieldProbe.factory();
 				repaint();
 			}
 
@@ -351,7 +354,17 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 		
 		
 		//use probes
-		IField ifield = FieldProbe.factory();
+		
+		if (_field == null) {
+			_field = FieldProbe.factory();
+		}
+		
+		if (_field == null) {
+			_field = FieldProbe.factory();
+		}
+
+		
+	//	IField ifield = FieldProbe.factory();
 	//	System.err.println("PROBE: " + ifield.getClass().getName());
 	//	IField ifield = MagneticFields.getInstance().getActiveField();
 
@@ -384,7 +397,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 //					break;
 				}
 				
-				if (!(ifield instanceof RotatedCompositeProbe)) {
+				if (!(_field instanceof RotatedCompositeProbe)) {
 				if (_sector > 1) {
 					switch (_sector) {
 					case 2:
@@ -416,7 +429,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 				}
 				}
 				if (_showGradient) {
-					ifield.gradient(globalX, globalY, globalZ, result);
+					_field.gradient(globalX, globalY, globalZ, result);
 					float gx = result[0];
 					float gy = result[1];
 					float gz = result[2];
@@ -427,11 +440,11 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 					g.setColor(_colorModel.getColor(gmag));
 					g.fillRect(pp.x, pp.y, w, h);
 				} else {
-					if (ifield instanceof RotatedCompositeProbe) {
-						((RotatedCompositeProbe)ifield).field(_sector, globalX, globalY, globalZ, result);
+					if (_field instanceof RotatedCompositeProbe) {
+						((RotatedCompositeProbe)_field).field(_sector, globalX, globalY, globalZ, result);
 					}
 
-					ifield.field(globalX, globalY, globalZ, result);
+					_field.field(globalX, globalY, globalZ, result);
 					float vx = result[0];
 					float vy = result[1];
 					float vz = result[2];
@@ -602,18 +615,19 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 
 				// IField ifield =
 				// MagneticFields.getInstance().getActiveField();
-				IField ifield = FieldProbe.factory();
+				
+		//		IField ifield = FieldProbe.factory();
 				float xyz[] = new float[3];
 				MagneticFields.sectorToLab(_sector, xyz, (float) (_workPoint.y), 0f, (float) (_workPoint.x));
 
 				switch (_cstype) {
 				case XZ:
 
-					if (ifield instanceof RotatedCompositeProbe) {
-						((RotatedCompositeProbe) ifield).field(_sector, (float) (_workPoint.y), 0f,
+					if (_field instanceof RotatedCompositeProbe) {
+						((RotatedCompositeProbe) _field).field(_sector, (float) (_workPoint.y), 0f,
 								(float) (_workPoint.x), _workResult);
 					} else {
-						ifield.field(xyz[0], xyz[1], xyz[2], _workResult);
+						_field.field(xyz[0], xyz[1], xyz[2], _workResult);
 					}
 					float Bx = _workResult[0];
 					float By = _workResult[1];
@@ -629,7 +643,7 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 									Bx / 10, By / 10, Bz / 10);
 					
 					
-					ifield.gradient((float) (_workPoint.y), 0f,
+					_field.gradient((float) (_workPoint.y), 0f,
 							(float) (_workPoint.x), _workResult);
 					float gx = _workResult[0];
 					float gy = _workResult[1];
