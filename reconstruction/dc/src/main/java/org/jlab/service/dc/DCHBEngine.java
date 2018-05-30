@@ -152,7 +152,8 @@ public class DCHBEngine extends ReconstructionEngine {
         if(event.hasBank("RUN::config")==false ) {
                 return true;
         }
-
+        if(swimmer ==null)
+            swimmer = new DCSwimmer();
         DataBank bank = event.getBank("RUN::config");
 
         // Load the constants
@@ -178,7 +179,7 @@ public class DCHBEngine extends ReconstructionEngine {
                 shift = -1.9;
             }
             DCSwimmer.setMagneticFieldsScales(bank.getFloat("solenoid", 0), bank.getFloat("torus", 0), shift);
-            swimmer = new DCSwimmer();
+            
             Run.set(newRun);
             if(event.hasBank("MC::Particle")==true)
                 Constants.setMCDIST(0);
