@@ -61,7 +61,7 @@ public class SwimZ {
 	 *            interface into a magnetic field
 	 */
 	public SwimZ(IField field) {
-		FieldProbe probe = FieldProbe.factory(field);
+		IField probe = FieldProbe.factory(field);
 		_field = (probe != null) ? probe : field;
 	}
 	

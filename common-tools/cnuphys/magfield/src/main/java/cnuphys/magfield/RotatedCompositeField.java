@@ -58,13 +58,17 @@ public final class RotatedCompositeField extends CompositeField {
 		float y = (float)(ys);
 		float z = (float)(zs * _cos + xs * _sin);
 		
+		System.err.println("HEY MAN");
 		//now rotate to the correct sector. We can use the result array!
 		MagneticFields.sectorToLab(sector, result, x, y, z);
+		x = result[0];
+		y = result[1];
+		z = result[2];
 
 
 		float bx = 0, by = 0, bz = 0;
 		for (IField field : this) {
-			field.field((float) x, (float) y, (float) z, result);
+			field.field(x, y,  z, result);
 			bx += result[0];
 			by += result[1];
 			bz += result[2];
@@ -103,6 +107,7 @@ public final class RotatedCompositeField extends CompositeField {
 	 */
 	@Override
 	public void field(float xs, float ys, float zs, float[] result) {
+		(new Throwable()).printStackTrace();
 		System.err.println("SHOULD NOT HAPPEN");
 		System.exit(1);
 		field(1, xs, ys, zs, result);

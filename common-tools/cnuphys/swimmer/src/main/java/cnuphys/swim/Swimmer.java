@@ -8,6 +8,8 @@ import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.RotatedCompositeField;
+import cnuphys.magfield.RotatedCompositeProbe;
 import cnuphys.rk4.ButcherTableau;
 import cnuphys.rk4.IRkListener;
 import cnuphys.rk4.IStopper;
@@ -33,31 +35,13 @@ public final class Swimmer {
 
 	/**
 	 * In swimming routines that require a tolerance vector, this is a
-	 * reasonable one to use for CLAS. These represent absolute errors
-	 * in the adaptive stepsize algorithms
+	 * reasonable one to use for CLAS. These represent absolute errors in the
+	 * adaptive stepsize algorithms
 	 */
-//	private static double _eps = 1.0e-6;
+	// private static double _eps = 1.0e-6;
 	private static double _eps = 1.0e-5;
-//	private static double _eps = 1.0e-4;
+	// private static double _eps = 1.0e-4;
 	public static double CLAS_Tolerance[];
-	
-	public static final String VERSION = "1.07";
-
-	static {
-		setCLASTolerance(_eps);
-		System.out.println("\n***********************************");
-		System.out.println("* Swimmer package version: " + VERSION );
-		System.out.println("* contact: david.heddle@cnu.edu" );
-		System.out.println("***********************************\n");
-	}
-	
-	/**
-	 * Return the version string
-	 * @return the version string
-	 */
-	public static final String getVersion() {
-		return VERSION;
-	}
 
 	// Field getter.
 	// NOTE: the method of interest in IField takes a position in cm
@@ -65,21 +49,40 @@ public final class Swimmer {
 	// Tesla)
 	// so care has to be taken when using the field object
 	private IField _field;
-	
+
+	public static final String VERSION = "1.08";
+
+	static {
+		setCLASTolerance(_eps);
+		System.out.println("\n***********************************");
+		System.out.println("* Swimmer package version: " + VERSION);
+		System.out.println("* contact: david.heddle@cnu.edu");
+		System.out.println("***********************************\n");
+	}
+
+	/**
+	 * Return the version string
+	 * 
+	 * @return the version string
+	 */
+	public static final String getVersion() {
+		return VERSION;
+	}
+
 	public Swimmer() {
-		_field = FieldProbe.factory(); 
+		_field = FieldProbe.factory();
 		MagneticFieldChangeListener mfl = new MagneticFieldChangeListener() {
 
 			@Override
 			public void magneticFieldChanged() {
-				_field = FieldProbe.factory(); 
+				_field = FieldProbe.factory();
 			}
-			
+
 		};
-		
+
 		MagneticFields.getInstance().addMagneticFieldChangeListener(mfl);
 	}
-	
+
 	/**
 	 * Swimmer constructor. Here we create a Swimmer that will use the given
 	 * magnetic field.
@@ -88,11 +91,9 @@ public final class Swimmer {
 	 *            interface into a magnetic field
 	 */
 	public Swimmer(IField field) {
-		FieldProbe probe = FieldProbe.factory(field);
+		IField probe = FieldProbe.factory(field);
 		_field = (probe != null) ? probe : field;
 	}
-	
-
 
 	/**
 	 * Compute the radius of curvature in cm
@@ -370,7 +371,8 @@ public final class Swimmer {
 		// if no magnetic field or no charge, then simple straight line tracks.
 		// the path will consist of just two points
 		if ((_field == null) || (charge == 0)) {
-			System.out.println("Original Swimmer, straight line field is null: " + (_field == null) + "  charge: " + charge);
+			System.out.println(
+					"Original Swimmer, straight line field is null: " + (_field == null) + "  charge: " + charge);
 			GeneratedParticleRecord genPartRec = new GeneratedParticleRecord(charge, xo, yo, zo, momentum, theta, phi);
 			return straightLineTrajectoryFixedZ(genPartRec, fixedZ);
 
@@ -408,7 +410,7 @@ public final class Swimmer {
 		while ((count < maxtry) && (del > accuracy)) {
 			// last element had z beyond cutoff
 			int lastIndex = trajectory.size() - 1;
-			
+
 			trajectory.remove(lastIndex);
 			lastY = trajectory.lastElement();
 			xo = lastY[0];
@@ -438,14 +440,15 @@ public final class Swimmer {
 
 		return trajectory;
 	}
-	
-
 
 	/**
-	 * Swims a charged particle. This swims to a fixed z value. This is for the
-	 * trajectory mode, where you want to cache steps along the path. Uses an
-	 * adaptive stepsize algorithm.
+	 * Swims a charged particle in a sector coordinate system. This swims to a
+	 * fixed z value. This is for the trajectory mode, where you want to cache
+	 * steps along the path. Uses an adaptive stepsize algorithm. THIS IS ONLY
+	 * VALID IF THE FIELD IS A RotatedComnpositeField or RotatedCompositeProbe
 	 * 
+	 * @param sector
+	 *            the sector [1..6]
 	 * @param charge
 	 *            the charge: -1 for electron, 1 for proton, etc
 	 * @param xo
@@ -466,12 +469,13 @@ public final class Swimmer {
 	 * @param accuracy
 	 *            the accuracy of the fixed z termination, in meters
 	 * @param maxRad
-	 *            the max radial coordinate NOTE: NO LONGER USED (here for backwards compatibility)
+	 *            the max radial coordinate NOTE: NO LONGER USED (here for
+	 *            backwards compatibility)
 	 * @param sMax
-	 *            Max path length in meters. This determines the max number of steps based on
-	 *            the step size. If a stopper is used, the integration might
-	 *            terminate before all the steps are taken. A reasonable value
-	 *            for CLAS is 8. meters
+	 *            Max path length in meters. This determines the max number of
+	 *            steps based on the step size. If a stopper is used, the
+	 *            integration might terminate before all the steps are taken. A
+	 *            reasonable value for CLAS is 8. meters
 	 * @param stepSize
 	 *            the initial step size in meters.
 	 * @param relTolerance
@@ -486,61 +490,80 @@ public final class Swimmer {
 	 * @return the trajectory of the particle
 	 * @throws RungeKuttaException
 	 */
-	public SwimTrajectory swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
-			final double fixedZ, double accuracy, double maxRad, double sMax, double stepSize,
+	public SwimTrajectory sectorSwim(int sector, int charge, double xo, double yo, double zo, double momentum,
+			double theta, double phi, final double fixedZ, double accuracy, double maxRad, double sMax, double stepSize,
 			double relTolerance[], double hdata[]) throws RungeKuttaException {
-		return swim(charge, xo, yo, zo, momentum, theta, phi, fixedZ, accuracy, sMax, stepSize, relTolerance, hdata);
+
+		//can only work for rotated composite fields or probes
+		if ((_field instanceof RotatedCompositeField) || (_field instanceof RotatedCompositeProbe)) {
+			return sectorSwim(sector, charge, xo, yo, zo, momentum, theta, phi, fixedZ, accuracy, sMax, stepSize,
+					relTolerance, hdata);
+		}
+		System.err.println("Can only call sectorSwim with a RotatedComposite Field or Probe");
+		System.exit(1);
+		return null;
 	}
 
+	/**
+	 * Swims a charged particle in a sector coordinate system. This swims to a
+	 * fixed z value. This is for the trajectory mode, where you want to cache
+	 * steps along the path. Uses an adaptive stepsize algorithm. THIS IS ONLY
+	 * VALID IF THE FIELD IS A RotatedComnpositeField or RotatedCompositeProbe
+	 * 
+	 * @param sector
+	 *            the sector [1..6]
+	 * @param charge
+	 *            the charge: -1 for electron, 1 for proton, etc
+	 * @param xo
+	 *            the x vertex position in meters
+	 * @param yo
+	 *            the y vertex position in meters
+	 * @param zo
+	 *            the z vertex position in meters
+	 * @param momentum
+	 *            initial momentum in GeV/c
+	 * @param theta
+	 *            initial polar angle in degrees
+	 * @param phi
+	 *            initial azimuthal angle in degrees
+	 * @param fixedZ
+	 *            the fixed z value (meters) that terminates (or maxPathLength
+	 *            if reached first)
+	 * @param accuracy
+	 *            the accuracy of the fixed z termination, in meters
+	 * @param sMax
+	 *            Max path length in meters. This determines the max number of
+	 *            steps based on the step size. If a stopper is used, the
+	 *            integration might terminate before all the steps are taken. A
+	 *            reasonable value for CLAS is 8. meters
+	 * @param stepSize
+	 *            the initial step size in meters.
+	 * @param relTolerance
+	 *            the error tolerance as fractional diffs. Note it is a vector,
+	 *            the same dimension of the problem, e.g., 6 for
+	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 * @param hdata
+	 *            if not null, should be double[3]. Upon return, hdata[0] is the
+	 *            min stepsize used (m), hdata[1] is the average stepsize used
+	 *            (m), and hdata[2] is the max stepsize (m) used
+	 * @return the trajectory of the particle
+	 * @throws RungeKuttaException
+	 */
+	//can only work for rotated composite fields or probes
+	public SwimTrajectory sectorSwim(int sector, int charge, double xo, double yo, double zo, double momentum,
+			double theta, double phi, final double fixedZ, double accuracy, double sMax, double stepSize,
+			double relTolerance[], double hdata[]) throws RungeKuttaException {
+		
+		if (!(_field instanceof RotatedCompositeField) && !(_field instanceof RotatedCompositeProbe)) {
+			System.err.println("Can only call sectorSwim with a RotatedComposite Field or Probe");
+			System.exit(1);
+			return null;
+		}
 
-		/**
-		 * Swims a charged particle. This swims to a fixed z value. This is for the
-		 * trajectory mode, where you want to cache steps along the path. Uses an
-		 * adaptive stepsize algorithm.
-		 * 
-		 * @param charge
-		 *            the charge: -1 for electron, 1 for proton, etc
-		 * @param xo
-		 *            the x vertex position in meters
-		 * @param yo
-		 *            the y vertex position in meters
-		 * @param zo
-		 *            the z vertex position in meters
-		 * @param momentum
-		 *            initial momentum in GeV/c
-		 * @param theta
-		 *            initial polar angle in degrees
-		 * @param phi
-		 *            initial azimuthal angle in degrees
-		 * @param fixedZ
-		 *            the fixed z value (meters) that terminates (or maxPathLength
-		 *            if reached first)
-		 * @param accuracy
-		 *            the accuracy of the fixed z termination, in meters
-		 * @param sMax
-		 *            Max path length in meters. This determines the max number of steps based on
-		 *            the step size. If a stopper is used, the integration might
-		 *            terminate before all the steps are taken. A reasonable value
-		 *            for CLAS is 8. meters
-		 * @param stepSize
-		 *            the initial step size in meters.
-		 * @param relTolerance
-		 *            the error tolerance as fractional diffs. Note it is a vector,
-		 *            the same dimension of the problem, e.g., 6 for
-		 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
-		 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
-		 * @param hdata
-		 *            if not null, should be double[3]. Upon return, hdata[0] is the
-		 *            min stepsize used (m), hdata[1] is the average stepsize used
-		 *            (m), and hdata[2] is the max stepsize (m) used
-		 * @return the trajectory of the particle
-		 * @throws RungeKuttaException
-		 */
-		public SwimTrajectory swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
-				final double fixedZ, double accuracy, double sMax, double stepSize,
-				double relTolerance[], double hdata[]) throws RungeKuttaException {		
+
 		if (momentum < MINMOMENTUM) {
-			System.err.println("Skipping low momentum swim (D)");
+			System.err.println("Skipping low momentum swim (D5)");
 			return new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi);
 		}
 
@@ -552,13 +575,13 @@ public final class Swimmer {
 		SwimTrajectory traj = null;
 		// First try
 
-		traj = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, 0, sMax, stepSize, relTolerance, hdata);
+		traj = sectorSwim(sector, charge, xo, yo, zo, momentum, theta, phi, stopper, 0, sMax, stepSize, relTolerance, hdata);
 
 		// if we stopped because of max radius, we are done (never reached
 		// target z)
 		double finalPathLength = stopper.getFinalT();
-		
-	//	System.err.println("** STOP PLEN (A) = " + finalPathLength);
+
+		// System.err.println("** STOP PLEN (A) = " + finalPathLength);
 		if (finalPathLength > sMax) {
 			return traj;
 		}
@@ -591,9 +614,9 @@ public final class Swimmer {
 			double px = lastY[3];
 			double py = lastY[4];
 			double pz = lastY[5];
-			
-	//		System.err.println("New start state = " + String.format("(%9.6f, %9.6f, %9.6f) (%9.6f, %9.6f, %9.6f)", xo, yo, zo, px, py, pz));
 
+			// System.err.println("New start state = " + String.format("(%9.6f,
+			// %9.6f, %9.6f) (%9.6f, %9.6f, %9.6f)", xo, yo, zo, px, py, pz));
 
 			stopper = new DefaultZStopper(finalPathLength, sMax, fixedZ, accuracy, normalDirection);
 
@@ -601,12 +624,11 @@ public final class Swimmer {
 			theta = FastMath.acos2Deg(pz);
 			phi = FastMath.atan2Deg(py, px);
 
-
-			SwimTrajectory addTraj = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, finalPathLength, sMax, stepSize,
-					relTolerance, hdata);
+			SwimTrajectory addTraj = sectorSwim(sector, charge, xo, yo, zo, momentum, theta, phi, stopper, finalPathLength, sMax,
+					stepSize, relTolerance, hdata);
 
 			finalPathLength = stopper.getFinalT();
-	//	    System.err.println("** STOP PLEN (B) = " + finalPathLength);
+			// System.err.println("** STOP PLEN (B) = " + finalPathLength);
 
 			hdata[0] = Math.min(oldHdata[0], hdata[0]);
 			hdata[1] = hdata[1] * addTraj.size();
@@ -630,6 +652,276 @@ public final class Swimmer {
 		return traj;
 	}
 	
+
+	/**
+	 * Swims a charged particle in a sector coordinate system. This swims to a
+	 * fixed z value. This is for the trajectory mode, where you want to cache
+	 * steps along the path. Uses an adaptive stepsize algorithm. THIS IS ONLY
+	 * VALID IF THE FIELD IS A RotatedComnpositeField or RotatedCompositeProbe
+	 * 
+	 * @param sector
+	 *            the sector [1..6]
+	 * @param charge
+	 *            the charge: -1 for electron, 1 for proton, etc
+	 * @param xo
+	 *            the x vertex position in meters
+	 * @param yo
+	 *            the y vertex position in meters
+	 * @param zo
+	 *            the z vertex position in meters
+	 * @param momentum
+	 *            initial momentum in GeV/c
+	 * @param theta
+	 *            initial polar angle in degrees
+	 * @param phi
+	 *            initial azimuthal angle in degrees
+	 * @param stopper
+	 *            an optional object that can terminate the swimming based on
+	 *            some condition
+	 * @param s0
+	 *            Starting path length in meters
+	 * @param sMax
+	 *            Max path length in meters. This determines the max number of
+	 *            steps based on the step size. If a stopper is used, the
+	 *            integration might terminate before all the steps are taken. A
+	 *            reasonable value for CLAS is 8. meters
+	 * @param stepSize
+	 *            the initial step size in meters.
+	 * @param relTolerance
+	 *            the error tolerance as fractional diffs. Note it is a vector,
+	 *            the same dimension of the problem, e.g., 6 for
+	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 * @param hdata
+	 *            if not null, should be double[3]. Upon return, hdata[0] is the
+	 *            min stepsize used (m), hdata[1] is the average stepsize used
+	 *            (m), and hdata[2] is the max stepsize (m) used
+	 * @return the trajectory of the particle
+	 * @throws RungeKuttaException
+	 */
+	public SwimTrajectory sectorSwim(int sector, int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			IStopper stopper, double s0, double sMax, double stepSize, double relTolerance[], double hdata[])
+			throws RungeKuttaException {
+		
+		//can only work for rotated composite fields or probes
+		if (!(_field instanceof RotatedCompositeField) && !(_field instanceof RotatedCompositeProbe)) {
+			System.err.println("Can only call sectorSwim with a RotatedComposite Field or Probe");
+			System.exit(1);
+			return null;
+		}
+
+		// create the lists to hold the trajectory
+		ArrayList<Double> s = new ArrayList<Double>(100);
+		ArrayList<double[]> u = new ArrayList<double[]>(100);
+
+		// the the initial six vector
+		double uo[] = initialState(xo, yo, zo, theta, phi);
+
+		// create the trajectory container
+		SwimTrajectory trajectory = new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi, 100);
+
+		// the derivative
+		SectorDerivative deriv = new SectorDerivative(sector, charge, momentum, _field);
+
+		// integrate
+		(new RungeKutta()).adaptiveStep(uo, s0, sMax, stepSize, s, u, deriv, stopper, _defaultTableau, relTolerance,
+				hdata);
+		// now cycle through and get the save points
+		for (int i = 0; i < u.size(); i++) {
+			trajectory.add(u.get(i));
+		}
+
+		return trajectory;
+	}
+
+	/**
+	 * Swims a charged particle. This swims to a fixed z value. This is for the
+	 * trajectory mode, where you want to cache steps along the path. Uses an
+	 * adaptive stepsize algorithm.
+	 * 
+	 * @param charge
+	 *            the charge: -1 for electron, 1 for proton, etc
+	 * @param xo
+	 *            the x vertex position in meters
+	 * @param yo
+	 *            the y vertex position in meters
+	 * @param zo
+	 *            the z vertex position in meters
+	 * @param momentum
+	 *            initial momentum in GeV/c
+	 * @param theta
+	 *            initial polar angle in degrees
+	 * @param phi
+	 *            initial azimuthal angle in degrees
+	 * @param fixedZ
+	 *            the fixed z value (meters) that terminates (or maxPathLength
+	 *            if reached first)
+	 * @param accuracy
+	 *            the accuracy of the fixed z termination, in meters
+	 * @param maxRad
+	 *            the max radial coordinate NOTE: NO LONGER USED (here for
+	 *            backwards compatibility)
+	 * @param sMax
+	 *            Max path length in meters. This determines the max number of
+	 *            steps based on the step size. If a stopper is used, the
+	 *            integration might terminate before all the steps are taken. A
+	 *            reasonable value for CLAS is 8. meters
+	 * @param stepSize
+	 *            the initial step size in meters.
+	 * @param relTolerance
+	 *            the error tolerance as fractional diffs. Note it is a vector,
+	 *            the same dimension of the problem, e.g., 6 for
+	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 * @param hdata
+	 *            if not null, should be double[3]. Upon return, hdata[0] is the
+	 *            min stepsize used (m), hdata[1] is the average stepsize used
+	 *            (m), and hdata[2] is the max stepsize (m) used
+	 * @return the trajectory of the particle
+	 * @throws RungeKuttaException
+	 */
+	public SwimTrajectory swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			final double fixedZ, double accuracy, double maxRad, double sMax, double stepSize, double relTolerance[],
+			double hdata[]) throws RungeKuttaException {
+		return swim(charge, xo, yo, zo, momentum, theta, phi, fixedZ, accuracy, sMax, stepSize, relTolerance, hdata);
+	}
+
+	/**
+	 * Swims a charged particle. This swims to a fixed z value. This is for the
+	 * trajectory mode, where you want to cache steps along the path. Uses an
+	 * adaptive stepsize algorithm.
+	 * 
+	 * @param charge
+	 *            the charge: -1 for electron, 1 for proton, etc
+	 * @param xo
+	 *            the x vertex position in meters
+	 * @param yo
+	 *            the y vertex position in meters
+	 * @param zo
+	 *            the z vertex position in meters
+	 * @param momentum
+	 *            initial momentum in GeV/c
+	 * @param theta
+	 *            initial polar angle in degrees
+	 * @param phi
+	 *            initial azimuthal angle in degrees
+	 * @param fixedZ
+	 *            the fixed z value (meters) that terminates (or maxPathLength
+	 *            if reached first)
+	 * @param accuracy
+	 *            the accuracy of the fixed z termination, in meters
+	 * @param sMax
+	 *            Max path length in meters. This determines the max number of
+	 *            steps based on the step size. If a stopper is used, the
+	 *            integration might terminate before all the steps are taken. A
+	 *            reasonable value for CLAS is 8. meters
+	 * @param stepSize
+	 *            the initial step size in meters.
+	 * @param relTolerance
+	 *            the error tolerance as fractional diffs. Note it is a vector,
+	 *            the same dimension of the problem, e.g., 6 for
+	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 * @param hdata
+	 *            if not null, should be double[3]. Upon return, hdata[0] is the
+	 *            min stepsize used (m), hdata[1] is the average stepsize used
+	 *            (m), and hdata[2] is the max stepsize (m) used
+	 * @return the trajectory of the particle
+	 * @throws RungeKuttaException
+	 */
+	public SwimTrajectory swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			final double fixedZ, double accuracy, double sMax, double stepSize, double relTolerance[], double hdata[])
+			throws RungeKuttaException {
+		if (momentum < MINMOMENTUM) {
+			System.err.println("Skipping low momentum swim (D)");
+			return new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi);
+		}
+
+		// normally we swim from small z to a larger z cutoff.
+		// but we can handle either
+		final boolean normalDirection = (fixedZ > zo);
+		IStopper stopper = new DefaultZStopper(0, sMax, fixedZ, accuracy, normalDirection);
+
+		SwimTrajectory traj = null;
+		// First try
+
+		traj = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, 0, sMax, stepSize, relTolerance, hdata);
+
+		// if we stopped because of max radius, we are done (never reached
+		// target z)
+		double finalPathLength = stopper.getFinalT();
+
+		// System.err.println("** STOP PLEN (A) = " + finalPathLength);
+		if (finalPathLength > sMax) {
+			return traj;
+		}
+
+		// are we there yet?
+		double lastY[] = traj.lastElement();
+		double zlast = lastY[2];
+		double del = Math.abs(zlast - fixedZ);
+		int maxtry = 10;
+		int count = 0;
+
+		// set the step size to half the accuracy
+		stepSize = accuracy / 2;
+
+		// have to deal with the fact that the hdata array will reset so save
+		// current values
+		double oldHdata[] = new double[3];
+		oldHdata[0] = hdata[0];
+		oldHdata[1] = hdata[1] * traj.size(); // back to sum, not avg
+		oldHdata[2] = hdata[2];
+
+		while ((count < maxtry) && (del > accuracy)) {
+			// last element had z beyond cutoff
+			int lastIndex = traj.size() - 1;
+			traj.remove(lastIndex);
+			lastY = traj.lastElement();
+			xo = lastY[0];
+			yo = lastY[1];
+			zo = lastY[2];
+			double px = lastY[3];
+			double py = lastY[4];
+			double pz = lastY[5];
+
+			// System.err.println("New start state = " + String.format("(%9.6f,
+			// %9.6f, %9.6f) (%9.6f, %9.6f, %9.6f)", xo, yo, zo, px, py, pz));
+
+			stopper = new DefaultZStopper(finalPathLength, sMax, fixedZ, accuracy, normalDirection);
+
+			// momentum = traj.getFinalMomentum();
+			theta = FastMath.acos2Deg(pz);
+			phi = FastMath.atan2Deg(py, px);
+
+			SwimTrajectory addTraj = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, finalPathLength, sMax,
+					stepSize, relTolerance, hdata);
+
+			finalPathLength = stopper.getFinalT();
+			// System.err.println("** STOP PLEN (B) = " + finalPathLength);
+
+			hdata[0] = Math.min(oldHdata[0], hdata[0]);
+			hdata[1] = hdata[1] * addTraj.size();
+			hdata[1] = oldHdata[1] + hdata[1];
+			hdata[2] = Math.max(oldHdata[2], hdata[2]);
+			oldHdata[0] = hdata[0];
+			oldHdata[1] = hdata[1];
+			oldHdata[2] = hdata[2];
+
+			// merge the trajectories
+			traj.addAll(addTraj);
+			lastY = traj.lastElement();
+			zlast = lastY[2];
+			del = Math.abs(zlast - fixedZ);
+			count++;
+			stepSize /= 2;
+		} // while
+
+		// now can get overall avg stepsize
+		hdata[1] = hdata[1] / traj.size();
+		return traj;
+	}
+
 	/**
 	 * Swims a charged particle. This is for the trajectory mode, where you want
 	 * to cache steps along the path. Uses an adaptive stepsize algorithm.
@@ -652,10 +944,10 @@ public final class Swimmer {
 	 *            an optional object that can terminate the swimming based on
 	 *            some condition
 	 * @param sMax
-	 *            Max path length in meters. This determines the max number of steps based on
-	 *            the step size. If a stopper is used, the integration might
-	 *            terminate before all the steps are taken. A reasonable value
-	 *            for CLAS is 8. meters
+	 *            Max path length in meters. This determines the max number of
+	 *            steps based on the step size. If a stopper is used, the
+	 *            integration might terminate before all the steps are taken. A
+	 *            reasonable value for CLAS is 8. meters
 	 * @param stepSize
 	 *            the initial step size in meters.
 	 * @param relTolerance
@@ -673,8 +965,8 @@ public final class Swimmer {
 
 	public SwimTrajectory swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
 			IStopper stopper, double sMax, double stepSize, double relTolerance[], double hdata[])
-					throws RungeKuttaException {
-		return swim(charge, xo, yo, zo, momentum, theta, phi, stopper, 0.0, sMax, stepSize,relTolerance, hdata);
+			throws RungeKuttaException {
+		return swim(charge, xo, yo, zo, momentum, theta, phi, stopper, 0.0, sMax, stepSize, relTolerance, hdata);
 	}
 
 	/**
@@ -701,10 +993,10 @@ public final class Swimmer {
 	 * @param s0
 	 *            Starting path length in meters
 	 * @param sMax
-	 *            Max path length in meters. This determines the max number of steps based on
-	 *            the step size. If a stopper is used, the integration might
-	 *            terminate before all the steps are taken. A reasonable value
-	 *            for CLAS is 8. meters
+	 *            Max path length in meters. This determines the max number of
+	 *            steps based on the step size. If a stopper is used, the
+	 *            integration might terminate before all the steps are taken. A
+	 *            reasonable value for CLAS is 8. meters
 	 * @param stepSize
 	 *            the initial step size in meters.
 	 * @param relTolerance
@@ -721,7 +1013,7 @@ public final class Swimmer {
 	 */
 	public SwimTrajectory swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
 			IStopper stopper, double s0, double sMax, double stepSize, double relTolerance[], double hdata[])
-					throws RungeKuttaException {
+			throws RungeKuttaException {
 
 		// create the lists to hold the trajectory
 		ArrayList<Double> s = new ArrayList<Double>(100);
@@ -737,8 +1029,8 @@ public final class Swimmer {
 		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _field);
 
 		// integrate
-		(new RungeKutta()).adaptiveStep(uo, s0, sMax, stepSize, s, u, deriv, stopper, _defaultTableau,
-				relTolerance, hdata);
+		(new RungeKutta()).adaptiveStep(uo, s0, sMax, stepSize, s, u, deriv, stopper, _defaultTableau, relTolerance,
+				hdata);
 		// now cycle through and get the save points
 		for (int i = 0; i < u.size(); i++) {
 			trajectory.add(u.get(i));
@@ -852,7 +1144,7 @@ public final class Swimmer {
 	 */
 	public SwimTrajectory swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
 			IStopper stopper, double maxPathLength, double stepSize, double tolerance, double hdata[])
-					throws RungeKuttaException {
+			throws RungeKuttaException {
 
 		// construct an appropriate yscale array for CLAS12
 		double yscale[] = { 1., 1., 1., 1., 1., 1., };
@@ -949,9 +1241,9 @@ public final class Swimmer {
 
 	/**
 	 * Swims a Lund particle with a built it stopper for the maximum value of
-	 * the radial coordinate. This is for the listener method,
-	 * where a callback is called for each advance of the integration Uses a
-	 * fixed stepsize algorithm.
+	 * the radial coordinate. This is for the listener method, where a callback
+	 * is called for each advance of the integration Uses a fixed stepsize
+	 * algorithm.
 	 * 
 	 * @param charge
 	 *            the charge: -1 for electron, 1 for proton, etc
@@ -1062,7 +1354,6 @@ public final class Swimmer {
 
 		return traj;
 	}
-	
 
 	// create a straight line trajectory with just two points
 	// stopping at a fixed x
@@ -1091,7 +1382,7 @@ public final class Swimmer {
 		double uf[] = null;
 		// use parameterization, get t from x
 		if (Math.abs(delx) < 1.0e-20) {
-			uf = makeVector(xo, yo + dely, zo+delz, uo[3], uo[4], uo[5]);
+			uf = makeVector(xo, yo + dely, zo + delz, uo[3], uo[4], uo[5]);
 		} else {
 			double tt = (xf - xo) / delx;
 			double zf = zo + tt * delz;
@@ -1123,8 +1414,8 @@ public final class Swimmer {
 	 * @param pz
 	 *            the z start momentum in GeV/c
 	 */
-	public static SwimTrajectory swimBackwardsToVertex(IField field, int q, double xo, double yo, double zo, double px, double py,
-			double pz) {
+	public static SwimTrajectory swimBackwardsToVertex(IField field, int q, double xo, double yo, double zo, double px,
+			double py, double pz) {
 		// reverse the direction
 		px = -px;
 		py = -py;
