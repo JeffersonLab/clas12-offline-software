@@ -48,6 +48,9 @@ public class Cell3D implements MagneticFieldChangeListener {
 	}
 
 	// reset the cached values
+
+	boolean printedOnce = false;
+
 	private void reset(double q1, double q2, double q3) {
 		GridCoordinate q1Coord = field.q1Coordinate;
 		GridCoordinate q2Coord = field.q2Coordinate;
@@ -55,17 +58,26 @@ public class Cell3D implements MagneticFieldChangeListener {
 
 		n1 = q1Coord.getIndex(q1);
 		if (n1 < 0) {
-			System.err.println("WARNING Bad n1 in Cell3D.reset: " + n1);
+			if (!printedOnce) {
+				printedOnce = true;
+				System.err.println("WARNING Bad n1 in Cell3D.reset: " + n1 + "  phi: " + q1);
+			}
 			return;
 		}
 		n2 = q2Coord.getIndex(q2);
 		if (n2 < 0) {
-			System.err.println("WARNING Bad n2 in Cell3D.reset: " + n2);
+			if (!printedOnce) {
+				printedOnce = true;
+				System.err.println("WARNING Bad n2 in Cell3D.reset: " + n2 + "  rho: " + q2);
+			}
 			return;
 		}
 		n3 = q3Coord.getIndex(q3);
 		if (n3 < 0) {
-			System.err.println("WARNING Bad n3 in Cell3D.reset: " + n3);
+			if (!printedOnce) {
+				printedOnce = true;
+				System.err.println("WARNING Bad n3 in Cell3D.reset: " + n3 + "  z: " + q3);
+			}
 			return;
 		}
 
@@ -154,10 +166,10 @@ public class Cell3D implements MagneticFieldChangeListener {
 		
 		boolean contains;
 		if (field.isRectangularGrid()) {
-			contains = field.contains((float) q1, (float) q2, (float)q3);
+			contains = field.contains(q1, q2, q3);
 		}
 		else {
-			contains = field.containsCylindrical((float) q1, (float) q2, (float)q3);
+			contains = field.containsCylindrical(q1, q2, q3);
 		}
 		
 		if (contains) {

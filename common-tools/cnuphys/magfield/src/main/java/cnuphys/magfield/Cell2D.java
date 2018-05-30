@@ -36,6 +36,7 @@ public class Cell2D implements MagneticFieldChangeListener {
 
 	}
 
+	boolean printedOnce = false;
 	// reset the cached values
 	private void reset(double rho, double z) {
 
@@ -44,12 +45,18 @@ public class Cell2D implements MagneticFieldChangeListener {
 
 		n2 = q2Coord.getIndex(rho);
 		if (n2 < 0) {
-			System.err.println("WARNING Bad n2 in Cell2D.reset: " + n2 + "  rho: " + rho);
+			if (!printedOnce) {
+				printedOnce = true;
+				System.err.println("WARNING Bad n2 in Cell2D.reset: " + n2 + "  rho: " + rho);
+			}
 			return;
 		}
 		n3 = q3Coord.getIndex(z);
 		if (n3 < 0) {
-			System.err.println("WARNING Bad n3 in Cell2D.reset: " + n3 + "  z: " + z);
+			if (!printedOnce) {
+				printedOnce = true;
+				System.err.println("WARNING Bad n3 in Cell2D.reset: " + n3 + "  z: " + z);
+			}
 			return;
 		}
 
@@ -104,7 +111,7 @@ public class Cell2D implements MagneticFieldChangeListener {
 	 * @param result
 	 */
 	public void calculate(double rho, double z, float[] result) {
-		if (field.containsCylindrical(0f, (float) rho, (float) z)) {
+		if (field.containsCylindrical(0, rho, z)) {
 			// do we need to reset?
 			if (!containedCylindrical(rho, z)) {
 				reset(rho, z);

@@ -635,10 +635,13 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 					
 					double phi = FastMath.atan2Deg(xyz[1], xyz[0]);
 					double rho = FastMath.hypot(xyz[0], xyz[1]);
+					
+					boolean inSolenoid = MagneticFields.getInstance().getSolenoid().contains(xyz[0], xyz[1], xyz[2]);
+					boolean inTorus = MagneticFields.getInstance().getTorus().contains(xyz[0], xyz[1], xyz[2]);
 
 					double bmag = Math.sqrt(Bx * Bx + By * By + Bz * Bz);
 					s = String
-							.format("  xyz: ( %-4.2f,  %-4.2f,  %-4.2f) cyl: ( %-4.2f,  %-4.2f,  %-4.2f) Bmag %-4.2f T  B = (%-4.2f, %-4.2f,  %-4.2f)",
+							.format("  xyz ( %-4.2f,  %-4.2f,  %-4.2f) cyl ( %-4.2f,  %-4.2f,  %-4.2f) B %-4.2f (%-4.2f, %-4.2f,  %-4.2f)",
 									xyz[0], xyz[1], xyz[2], phi, rho, xyz[2], bmag / 10,
 									Bx / 10, By / 10, Bz / 10);
 					
@@ -651,6 +654,8 @@ public class MagneticFieldCanvas extends JComponent implements MouseListener,
 					double gmag = Math.sqrt(gx * gx + gy * gy + gz * gz);
 				
 					s += String.format(" Grad %-4.2f T/m", gmag*10);
+					
+					s += " inS " + inSolenoid + " inT " + inTorus;
 					
 					break;
 //				case YZ:

@@ -18,6 +18,10 @@ public class Torus extends MagneticField {
 	//has part of the solenoid been added in to remove the overlap?
 	protected boolean _addedSolenoid;
 	
+	//used to reconfigure fields so solenoid and torus do not overlap
+	private double _fakeZMin = Float.NEGATIVE_INFINITY;
+
+	
 	/**
 	 * Instantiates a new torus.
 	 * Note q1 = phi, q2 = rho, q3 = z
@@ -102,6 +106,14 @@ public class Torus extends MagneticField {
 			}
 			return;
 		}
+		
+		if (z < _fakeZMin) {
+			result[X] = 0f;
+			result[Y] = 0f;
+			result[Z] = 0f;
+			return;
+		}
+
 
 		double rho = FastMath.sqrt(x * x + y * y);
 		double phi = FastMath.atan2Deg(y, x);
@@ -126,7 +138,7 @@ public class Torus extends MagneticField {
 			System.exit(1);
 		}
 		
-		if (!containsCylindrical((float)phi, (float)rho, (float)z)) {
+		if (!containsCylindrical(phi, rho, z)) {
 			result[X] = 0f;
 			result[Y] = 0f;
 			result[Z] = 0f;
@@ -326,7 +338,7 @@ public class Torus extends MagneticField {
      * @return <code>true</code> if the point is included in the boundary of the field
      */
 	@Override
-    public boolean contains(float x, float y, float z) {
+    public boolean contains(double x, double y, double z) {
 		if (isRectangularGrid()) {
 			if ((x < getXMin()) || (x > getXMax())) {
 				return false;
@@ -342,7 +354,7 @@ public class Torus extends MagneticField {
 		
 		double rho = FastMath.sqrt(x * x + y * y);
 		double phi = FastMath.atan2Deg(y, x);
-        return containsCylindrical((float)phi, (float)rho, z);
+        return containsCylindrical(phi, rho, z);
     }
 	
 	/**
@@ -373,7 +385,7 @@ public class Torus extends MagneticField {
 	 * 
 	 */
 	@Override
-	public boolean containsCylindrical(float phi, float rho, float z) {	
+	public boolean containsCylindrical(double phi, double rho, double z) {	
 		
 		if (isRectangularGrid()) {
 			System.err.println("Calling containsCylindrical for a rectangular grid.");
@@ -381,6 +393,10 @@ public class Torus extends MagneticField {
 			System.exit(1);
 		}
 		
+		if (z < _fakeZMin) {
+			return false;
+		}
+
 		if ((z < getZMin()) || (z > getZMax())) {
 			return false;
 		}
@@ -388,5 +404,22 @@ public class Torus extends MagneticField {
 			return false;
 		}
 		return true;
+	}
+	
+	
+	/**
+	 * Get the fake z lim used to remove overlap with solenoid
+	 * @return the fake z lim used to remove overlap with solenoid (cm)
+	 */
+	public double getFakeZMin() {
+		return _fakeZMin;
+	}
+	
+	/**
+	 * Set the fake z lim used to remove overlap with solenoid
+	 * @param zlim the new value in cm
+	 */
+	public void setFakeZMin(double zlim) {
+		_fakeZMin = zlim;
 	}
 }

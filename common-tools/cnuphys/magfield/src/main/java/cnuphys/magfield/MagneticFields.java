@@ -1373,7 +1373,7 @@ public class MagneticFields {
 			return;
 		}
 		
-		
+		//the z and rho solenoid limits
 		float solLimitZ = (float)(_solenoid.getZMax());
 		float solLimitR = (float)(_solenoid.getRhoMax());
 		
@@ -1418,7 +1418,8 @@ public class MagneticFields {
 		//now cutoff the solenoid
 		float zlim = (float)(_torus.getZMin());
 		System.err.println("FAKE Z LIM: " + zlim);
-		_solenoid.setFakeZLim(zlim);
+		_solenoid.setFakeZMax(zlim);
+		_torus.setFakeZMin(zlim);
 				
 		
 		notifyListeners();
@@ -1451,7 +1452,14 @@ public class MagneticFields {
 		if (_activeField != null) {
 			if (_activeField instanceof Solenoid) {
 				return true;
-			} else if (_activeField instanceof CompositeField) {
+			} 
+			else if (_activeField instanceof SolenoidProbe) {
+				return true;
+			}
+			else if (_activeField instanceof CompositeProbe) {
+				return true;
+			}
+			else if (_activeField instanceof CompositeField) {
 				return ((CompositeField) _activeField).hasSolenoid();
 			}
 		}

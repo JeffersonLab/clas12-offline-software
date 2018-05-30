@@ -85,6 +85,40 @@ public abstract class FieldProbe implements IField {
 		return _field.isZeroField();
 	}
 	
+	
+	/**
+	 * Obtain the magnetic field at a given location expressed in Cartesian
+	 * coordinates in the sector (not lab or global) system. 
+	 * The field is returned as a Cartesian vector in kiloGauss.
+	 * @param sector the sector [1..6]
+	 * @param x
+	 *            the x sector coordinate in cm
+	 * @param y
+	 *            the y sector coordinate in cm
+	 * @param z
+	 *            the z sector coordinate in cm
+	 * @param result
+	 *            the result is a float array holding the retrieved field in
+	 *            kiloGauss. The 0,1 and 2 indices correspond to x, y, and z
+	 *            components.
+	 */
+	@Override
+	public void field(int sector, float x, float y, float z, float[] result) {
+				
+		//rotate to the correct sector to get the lab coordinates. We can use the result array!
+		MagneticFields.sectorToLab(sector, result, x, y, z);
+		x = result[0];
+		y = result[1];
+		z = result[2];
+		
+		//get the field using the global (lab) coordinates
+		field(x, y, z, result);
+		
+		//rotate the field back to the sector coordinates
+		MagneticFields.labToSector(sector, result, result[0],  result[1],  result[2]);
+
+	}
+
 
     /**
      * Obtain an approximation for the magnetic field gradient at a given location expressed in Cartesian
@@ -157,7 +191,6 @@ public abstract class FieldProbe implements IField {
 			} else if (field instanceof Solenoid) {
 				return new SolenoidProbe((Solenoid) field);
 			} else if (field instanceof RotatedCompositeField) {
-				System.err.println("Creating rotated composite probe.");
 				return new RotatedCompositeProbe((RotatedCompositeField) field);
 			} else if (field instanceof CompositeField) {
 				return new CompositeProbe((CompositeField) field);
@@ -194,7 +227,7 @@ public abstract class FieldProbe implements IField {
 	 *         field
 	 */
 	@Override
-	public boolean contains(float x, float y, float z) {
+	public boolean contains(double x, double y, double z) {
 		return _field.contains(x, y, z);
 	}
    
@@ -212,7 +245,7 @@ public abstract class FieldProbe implements IField {
 	 * 
 	 */
 	@Override
-	public boolean containsCylindrical(float phi, float rho, float z) {
+	public boolean containsCylindrical(double phi, double rho, double z) {
 		return _field.containsCylindrical(phi, rho, z);
 	}
 
