@@ -12,7 +12,7 @@ public class RotatedCompositeProbe extends FieldProbe {
 	private double _sin25 = Math.sin(Math.toRadians(_angle));
 	private double _cos25 = Math.cos(Math.toRadians(_angle));
 
-	private ArrayList<FieldProbe> probes = new ArrayList<FieldProbe>();
+	private ArrayList<IField> probes = new ArrayList<IField>();
 
 
 	public RotatedCompositeProbe(RotatedCompositeField field) {
@@ -44,17 +44,12 @@ public class RotatedCompositeProbe extends FieldProbe {
 		float y = (float)(ys);
 		float z = (float)(zs * _cos25 + xs * _sin25);
 		
-//		if (x < 0) {
-//			System.err.println("NEGATIVE X " + x);
-//			result[0] = 0;
-//			result[1] = 0;
-//			result[2] = 0;
-//			return;
-//		}
-		
 		
 		//now rotate to the correct sector to get the lab coordinates. We can use the result array!
 		MagneticFields.sectorToLab(sector, result, x, y, z);
+		x = result[0];
+		y = result[1];
+		z = result[2];
 		
 		//test 
 //		int testSect = MagneticFields.getSector(result[0], result[1]);
@@ -69,8 +64,8 @@ public class RotatedCompositeProbe extends FieldProbe {
 
 
 		float bx = 0, by = 0, bz = 0;
-		for (FieldProbe probe : probes) {
-			probe.field((float) x, (float) y, (float) z, result);
+		for (IField probe : probes) {
+			probe.field(x, y, z, result);
 			bx += result[0];
 			by += result[1];
 			bz += result[2];
@@ -142,7 +137,7 @@ public class RotatedCompositeProbe extends FieldProbe {
 		float brho = 0;
 		float bz = 0;
 		
-		for (FieldProbe probe : probes) {
+		for (IField probe : probes) {
 			probe.fieldCylindrical(phi, rho, z, result);
 			bphi += result[0];
 			brho += result[1];
@@ -174,7 +169,7 @@ public class RotatedCompositeProbe extends FieldProbe {
     	    float result[]) {
 		
 		float bx = 0, by = 0, bz = 0;
-		for (FieldProbe probe : probes) {
+		for (IField probe : probes) {
 			probe.gradientCylindrical(phi, rho, z, result);
 			bx += result[0];
 			by += result[1];
@@ -207,7 +202,7 @@ public class RotatedCompositeProbe extends FieldProbe {
  		double y = ys;
  		double z = zs * _cos25 + xs * _sin25;
  		float bx = 0, by = 0, bz = 0;
- 		for (FieldProbe probe : probes) {
+ 		for (IField probe : probes) {
  			probe.gradient((float)x, (float)y, (float)z, result);
  			bx += result[0];
  			by += result[1];
