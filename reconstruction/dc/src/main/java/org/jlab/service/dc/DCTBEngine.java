@@ -48,7 +48,6 @@ public class DCTBEngine extends ReconstructionEngine {
     PCALGeant4Factory pcalDetector; 
     TrajectorySurfaces tSurf;
     private TimeToDistanceEstimator tde;
-    DCSwimmer swimmer ;
     public DCTBEngine() {
         super("DCTB","ziegler","4.0");
     }
@@ -110,8 +109,7 @@ public class DCTBEngine extends ReconstructionEngine {
             System.err.println("RUN CONDITIONS NOT READ AT TIMEBASED LEVEL!");
             return true;
         }
-        if(swimmer ==null)
-            swimmer = new DCSwimmer();
+        DCSwimmer swimmer = new DCSwimmer();
         //if(event.getBank("RECHB::Event").getFloat("STTime", 0)<0)
         //    return true; // require the start time to reconstruct the tracks in the event
         

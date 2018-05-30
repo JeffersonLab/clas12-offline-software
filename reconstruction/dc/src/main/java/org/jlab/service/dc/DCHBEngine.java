@@ -52,7 +52,7 @@ public class DCHBEngine extends ReconstructionEngine {
     AtomicInteger Run = new AtomicInteger(0);
     DCGeant4Factory dcDetector;
     String clasDictionaryPath ;
-    DCSwimmer swimmer ;
+    
     public DCHBEngine() {
         super("DCHB","ziegler","4.0");
     }
@@ -152,8 +152,7 @@ public class DCHBEngine extends ReconstructionEngine {
         if(event.hasBank("RUN::config")==false ) {
                 return true;
         }
-        if(swimmer ==null)
-            swimmer = new DCSwimmer();
+        DCSwimmer swimmer = new DCSwimmer();
         DataBank bank = event.getBank("RUN::config");
 
         // Load the constants
