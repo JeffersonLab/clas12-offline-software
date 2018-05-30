@@ -52,7 +52,7 @@ public class DCHBEngine extends ReconstructionEngine {
     AtomicInteger Run = new AtomicInteger(0);
     DCGeant4Factory dcDetector;
     String clasDictionaryPath ;
-    
+    DCSwimmer swimmer ;
     public DCHBEngine() {
         super("DCHB","ziegler","4.0");
     }
@@ -178,6 +178,7 @@ public class DCHBEngine extends ReconstructionEngine {
                 shift = -1.9;
             }
             DCSwimmer.setMagneticFieldsScales(bank.getFloat("solenoid", 0), bank.getFloat("torus", 0), shift);
+            swimmer = new DCSwimmer();
             Run.set(newRun);
             if(event.hasBank("MC::Particle")==true)
                 Constants.setMCDIST(0);
@@ -270,11 +271,11 @@ public class DCHBEngine extends ReconstructionEngine {
 
 
         CrossListFinder crossLister = new CrossListFinder();
-        CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
+        CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null, swimmer);
 
         //6) find the list of  track candidates
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("HitBased");
-        trkcands = trkcandFinder.getTrackCands(crosslist, dcDetector, DCSwimmer.getTorScale() ) ;
+        trkcands = trkcandFinder.getTrackCands(crosslist, dcDetector, DCSwimmer.getTorScale() , swimmer) ;
 
 
         // track found	
@@ -350,9 +351,9 @@ public class DCHBEngine extends ReconstructionEngine {
         List<Cross> pcrosses = crossMake.find_Crosses(segments, dcDetector);
 
         //
-        CrossList pcrosslist = crossLister.candCrossLists(pcrosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
+        CrossList pcrosslist = crossLister.candCrossLists(pcrosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null, swimmer);
 
-        List<Track> mistrkcands =trkcandFinder.getTrackCands(pcrosslist, dcDetector, DCSwimmer.getTorScale());
+        List<Track> mistrkcands =trkcandFinder.getTrackCands(pcrosslist, dcDetector, DCSwimmer.getTorScale(), swimmer);
         if(mistrkcands.size()>0) {    
             trkcandFinder.removeOverlappingTracks(mistrkcands);		// remove overlaps
 

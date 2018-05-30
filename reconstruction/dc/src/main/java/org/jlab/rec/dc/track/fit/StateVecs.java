@@ -25,12 +25,13 @@ public class StateVecs {
     private final double[] A = new double[2];
     private final double[] dA = new double[4];
     private final float[] bf = new float[3];
-    DCSwimmer dcSwim = new DCSwimmer();
+    private DCSwimmer dcSwim;
     
     /**
      * State vector representing the track in the sector coordinate system at the measurement layer
      */
-    public StateVecs() {
+    public StateVecs(DCSwimmer dcSwimmer) {
+        dcSwim = dcSwimmer;
         //Max Field Location: (phi, rho, z) = (29.50000, 44.00000, 436.00000)
         // get the maximum value of the B field
         double phi = Math.toRadians(29.5);

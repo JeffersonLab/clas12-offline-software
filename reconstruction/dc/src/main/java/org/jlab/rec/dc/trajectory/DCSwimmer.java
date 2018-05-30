@@ -186,11 +186,10 @@ public class DCSwimmer {
             traj = swimmer.swim(_charge, _x0, _y0, _z0, _pTot,
                     _theta, _phi, z, accuracy, _rMax,
                     _maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
-
+            
             traj.computeBDL(rprob);
            // traj.computeBDL(rcompositeField);
             double lastY[] = traj.lastElement();
-
             value[0] = lastY[0] * 100; // convert back to cm
             value[1] = lastY[1] * 100; // convert back to cm
             value[2] = lastY[2] * 100; // convert back to cm

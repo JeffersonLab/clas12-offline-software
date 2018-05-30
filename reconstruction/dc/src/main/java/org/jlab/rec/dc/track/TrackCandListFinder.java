@@ -41,7 +41,7 @@ public class TrackCandListFinder {
     public TrackCandListFinder(String stat) {
             trking = stat;
     }
-    public DCSwimmer dcSwim = new DCSwimmer();
+    //public DCSwimmer dcSwim = new DCSwimmer();
     
     /**
      * 
@@ -72,7 +72,7 @@ public class TrackCandListFinder {
     }
     
     public double getHitBasedFitChi2ToCrosses(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, 
-        double p, int q, double x, double y, double z, double tanThX, double tanThY) {
+        double p, int q, double x, double y, double z, double tanThX, double tanThY, DCSwimmer dcSwim) {
         double pz = p / Math.sqrt(tanThX*tanThX + tanThY*tanThY + 1);
 
         dcSwim.SetSwimParameters(x,y,z,
@@ -101,7 +101,7 @@ public class TrackCandListFinder {
     private double[] getTrackInitFit(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3,
             double ux, double uy, double uz, double thX, double thY, 
             double theta1, double theta3, 
-            double iBdl, double TORSCALE) {
+            double iBdl, double TORSCALE, DCSwimmer dcSwim) {
         if(theta1<-998 || theta3<-998) {
             return new double[]{Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
         }
@@ -165,7 +165,8 @@ public class TrackCandListFinder {
      * @param crossList the input list of crosses
      * @return a list of track candidates in the DC
      */
-    public List<Track> getTrackCands(CrossList crossList, DCGeant4Factory DcDetector, double TORSCALE) {
+    public List<Track> getTrackCands(CrossList crossList, DCGeant4Factory DcDetector, double TORSCALE, DCSwimmer dcSwim) {
+        
         List<Track> cands = new ArrayList<Track>();
         if(crossList.size()==0) {
             //System.err.print("Error no tracks found");
@@ -257,7 +258,7 @@ public class TrackCandListFinder {
                         pars = getTrackInitFit(x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
                          ux,  uy,  uz,  thX,  thY, 
                          theta1s1,  theta3s1, 
-                         traj.get_IntegralBdl(),  TORSCALE);
+                         traj.get_IntegralBdl(),  TORSCALE, dcSwim);
                         chi2 = pars[0];
                         if(chi2<chisq) {
                             chisq = chi2;
@@ -269,7 +270,7 @@ public class TrackCandListFinder {
                         pars = getTrackInitFit(x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
                          ux,  uy,  uz,  thX,  thY, 
                          theta1s1,  theta3s2, 
-                         traj.get_IntegralBdl(),  TORSCALE);
+                         traj.get_IntegralBdl(),  TORSCALE, dcSwim);
                         chi2 = pars[0];
                         if(chi2<chisq) {
                             chisq = chi2;
@@ -281,7 +282,7 @@ public class TrackCandListFinder {
                         pars = getTrackInitFit(x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
                          ux,  uy,  uz,  thX,  thY, 
                          theta1s2,  theta3s1, 
-                         traj.get_IntegralBdl(),  TORSCALE);
+                         traj.get_IntegralBdl(),  TORSCALE, dcSwim);
                         chi2 = pars[0];
                         if(chi2<chisq) {
                             chisq = chi2;
@@ -293,7 +294,7 @@ public class TrackCandListFinder {
                         pars = getTrackInitFit(x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
                          ux,  uy,  uz,  thX,  thY, 
                          theta1s2,  theta3s2, 
-                         traj.get_IntegralBdl(),  TORSCALE);
+                         traj.get_IntegralBdl(),  TORSCALE, dcSwim);
                         chi2 = pars[0];
                         if(chi2<chisq) {
                             chisq = chi2;
@@ -301,7 +302,7 @@ public class TrackCandListFinder {
                             theta3 = theta3s2;
                             iBdl = pars[1];
                         }
-
+                        
                         if(chi2>2500)
                             continue;
 
@@ -315,7 +316,7 @@ public class TrackCandListFinder {
                             double p = calcInitTrkP(ux, uy, uz, thX, thY, 
                                                  theta1, theta3, 
                                                 iBdl, TORSCALE);
-                            int q = calcInitTrkQ(theta1, theta3, TORSCALE);
+                            int q = this.calcInitTrkQ(theta1, theta3, TORSCALE);
 
                             if(p>11)
                                 p=11;
@@ -330,7 +331,7 @@ public class TrackCandListFinder {
                                             cand.get(0).get_Dir().x()/cand.get(0).get_Dir().z(), cand.get(0).get_Dir().y()/cand.get(0).get_Dir().z());
                             cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane); 	
                             // initialize the fitter with the candidate track
-                            KFitter kFit = new KFitter(cand, DcDetector, false);
+                             KFitter kFit = new KFitter(cand, DcDetector, false, dcSwim);
                             if(this.trking.equalsIgnoreCase("TimeBased"))
                                 kFit.totNumIter=30;
 
@@ -354,7 +355,7 @@ public class TrackCandListFinder {
                                 System.out.println("z "+ kFit.finalStateVec.z); */
                                 double HBc2 = getHitBasedFitChi2ToCrosses( x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3, 
                                 1./Math.abs(kFit.finalStateVec.Q), (int)Math.signum(kFit.finalStateVec.Q),
-                                         kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.z, kFit.finalStateVec.tx, kFit.finalStateVec.ty);
+                                         kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.z, kFit.finalStateVec.tx, kFit.finalStateVec.ty, dcSwim);
                                 //System.out.println(cand.get(0).get_Sector()+" HB fit to crosses c2 "+HBc2);
                                 if(HBc2>1000) {
                                     kFit.setFitFailed=true;
@@ -367,7 +368,7 @@ public class TrackCandListFinder {
                                 //set the track parameters if the filter does not fail
                                 cand.set_P(1./Math.abs(kFit.finalStateVec.Q));
                                 cand.set_Q((int)Math.signum(kFit.finalStateVec.Q));
-                                this.setTrackPars(cand, traj, trjFind, fn, kFit.finalStateVec.z, DcDetector);
+                                this.setTrackPars(cand, traj, trjFind, fn, kFit.finalStateVec.z, DcDetector, dcSwim);
                                 // candidate parameters are set from the state vector
                                 cand.set_FitChi2(kFit.chi2);
                                 cand.set_FitNDF(kFit.NDF);
@@ -496,7 +497,7 @@ public class TrackCandListFinder {
      * @param z the z position in the tilted sector coordinate system at the last measurement site 
      * @param getDcDetector the detector geometry
      */
-    public void setTrackPars(Track cand, Trajectory traj, TrajectoryFinder trjFind, StateVec stateVec, double z, DCGeant4Factory getDcDetector) {
+    public void setTrackPars(Track cand, Trajectory traj, TrajectoryFinder trjFind, StateVec stateVec, double z, DCGeant4Factory getDcDetector, DCSwimmer dcSwim) {
         double pz = cand.get_P() / Math.sqrt(stateVec.tanThetaX()*stateVec.tanThetaX() + stateVec.tanThetaY()*stateVec.tanThetaY() + 1);
 
         //System.out.println("Setting track params for ");stateVec.printInfo();
