@@ -46,6 +46,8 @@ public class ECCommon {
     public static float       veff = 18.1f;
     public static int triggerPhase = 0;
     
+    static IndexedTable offset = null;
+    
 //    public static float TOFFSET = 436; 
     
     public  static void initHistos() {
@@ -76,6 +78,7 @@ public class ECCommon {
         IndexedTable     gain = manager.getConstants(run, "/calibration/ec/gain");
 		IndexedTable     time = manager.getConstants(run, "/calibration/ec/timing");
 		IndexedTable   jitter = manager.getConstants(run, "/calibration/ec/time_jitter");
+		               offset = manager.getConstants(run, "/calibration/ec/fadc_offset");
         
         double PERIOD = jitter.getDoubleValue("period",0,0,0);
         int    PHASE  = jitter.getIntValue("phase",0,0,0); 
@@ -93,9 +96,7 @@ public class ECCommon {
         
         List<ECStrip>  ecStrips = null;
         
-        if(event instanceof HipoDataEvent) {
-            ecStrips = ECCommon.readStripsHipo(event);
-        }
+        if(event instanceof HipoDataEvent) ecStrips = ECCommon.readStripsHipo(event);
         
         if(ecStrips==null) return new ArrayList<ECStrip>();
         
@@ -130,6 +131,7 @@ public class ECCommon {
                             time.getDoubleValue("a3", sector, layer, component),
                             time.getDoubleValue("a4", sector, layer, component));
         }
+            
         return ecStrips;
     }
         
@@ -144,7 +146,7 @@ public class ECCommon {
                 int  is = bank.getByte("sector",i);
                 int  il = bank.getByte("layer",i);
                 int  ip = bank.getShort("component",i);    
-                int tdc = bank.getInt("TDC",i)-triggerPhase;
+                int tdc = bank.getInt("TDC",i);
                 if(tdc>0) {                       
                     if(!tdcs.hasItem(is,il,ip)) tdcs.add(new ArrayList<Integer>(),is,il,ip);
                         tdcs.getItem(is,il,ip).add(tdc);       
@@ -159,7 +161,7 @@ public class ECCommon {
                 int  il = bank.getByte("layer", i);
                 int  ip = bank.getShort("component", i);
                 int adc = bank.getInt("ADC", i);
-                float t = bank.getFloat("time", i);
+                float t = bank.getFloat("time", i) + (float) offset.getDoubleValue("offset",is,il,0);
                 
                 ECStrip  strip = new ECStrip(is, il, ip); 
                 
@@ -175,8 +177,8 @@ public class ECCommon {
                     List<Integer> list = new ArrayList<Integer>();
                     list = tdcs.getItem(is,il,ip); tdcc=new Integer[list.size()]; list.toArray(tdcc);       
                     for (int ii=0; ii<tdcc.length; ii++) {
-                    	    float tdif = (tps*tdcc[ii]-TOFFSET)-t; 
-                    	    if (Math.abs(tdif)<30&&tdif<tmax) {tmax = tdif; tdc = tdcc[ii];}
+                    	    float tdif = (tps*tdcc[ii]-triggerPhase-TOFFSET)-t; 
+                    	    if (Math.abs(tdif)<10&&tdif<tmax) {tmax = tdif; tdc = tdcc[ii];}
                     }
                     strip.setTDC(tdc); 
                 }              

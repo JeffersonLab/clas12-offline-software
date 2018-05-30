@@ -119,7 +119,7 @@ public class ECStrip implements Comparable {
     
     public void setTriggerPhase(int num) {
     	    this.triggerPhase = num;
-    }
+    } 
     
     public void setVeff(double veff) {
     	   this.veff = veff;
