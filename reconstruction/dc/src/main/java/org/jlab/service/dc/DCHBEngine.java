@@ -1,5 +1,6 @@
 package org.jlab.service.dc;
 
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.TorusMap;
 import cnuphys.snr.NoiseReductionParameters;
@@ -91,6 +92,7 @@ public class DCHBEngine extends ReconstructionEngine {
         String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";
         try {
             MagneticFields.getInstance().initializeMagneticFields(mapDir,torusMap,solenoidMap);
+            FastMath.setMathLib(FastMath.MathLib.FAST);
         }
         catch (Exception e) {
             e.printStackTrace();
