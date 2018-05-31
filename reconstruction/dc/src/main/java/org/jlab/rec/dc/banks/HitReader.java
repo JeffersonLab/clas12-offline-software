@@ -14,6 +14,7 @@ import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -215,10 +216,10 @@ public class HitReader {
                     passTimingCut=true;
                 if(region ==2) {
                     if(wire[i]>=56) {
-                        if(T0Sub>timeCutMin && T0Sub<timeCutMax+timeCutLC*(float)(112-wire[i]/56))
+                        if(T0Sub>timeCutMin && T0Sub<timeCutMax       + timeCutLC*(float)(112-wire[i]/56) )
                             passTimingCut=true;
                     } else {
-                        if(T0Sub>timeCutMin && T0Sub<timeCutMax+timeCutLC*(float)(56-wire[i]/56))
+                        if(T0Sub>timeCutMin && T0Sub<timeCutMax + (200 + timeCutLC*(float)(56-wire[i]/56)) )
                             passTimingCut=true;
                     }
                 }

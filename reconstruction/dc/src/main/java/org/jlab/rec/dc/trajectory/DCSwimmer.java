@@ -169,7 +169,7 @@ public class DCSwimmer {
 
     }
 
-    public double[] SwimToPlane(double z_cm) {
+    public double[] SwimToPlane(int sector, double z_cm) {
         double z = z_cm / 100; // the magfield method uses meters
         double[] value = new double[8];
         double accuracy = 20e-6; //20 microns
@@ -183,7 +183,7 @@ public class DCSwimmer {
         double hdata[] = new double[3];
 
         try {
-            traj = swimmer.swim(_charge, _x0, _y0, _z0, _pTot,
+            traj = swimmer.sectorSwim(sector, _charge, _x0, _y0, _z0, _pTot,
                     _theta, _phi, z, accuracy, _rMax,
                     _maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
             
@@ -495,9 +495,9 @@ public class DCSwimmer {
     }
 
     
-    public void Bfield(double x_cm, double y_cm, double z_cm, float[] result) {
-
-        rprob.field((float) x_cm, (float) y_cm, (float) z_cm, result);
+    public void Bfield(int sector, double x_cm, double y_cm, double z_cm, float[] result) {
+        
+        rprob.field(sector, (float) x_cm, (float) y_cm, (float) z_cm, result);
         //rcompositeField.field((float) x_cm, (float) y_cm, (float) z_cm, result);
         result[0] =result[0]/10; 
         result[1] =result[1]/10;

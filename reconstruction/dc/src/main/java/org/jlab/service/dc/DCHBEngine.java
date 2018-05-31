@@ -275,7 +275,7 @@ public class DCHBEngine extends ReconstructionEngine {
 
         //6) find the list of  track candidates
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("HitBased");
-        trkcands = trkcandFinder.getTrackCands(crosslist, dcDetector, DCSwimmer.getTorScale() , swimmer) ;
+        trkcands = trkcandFinder.getTrackCands(crosslist, dcDetector, DCSwimmer.getTorScale(), swimmer) ;
 
 
         // track found	

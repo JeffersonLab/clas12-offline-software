@@ -257,8 +257,8 @@ public class TrackDictionaryMaker {
                             }
                             */
                         }
-                        double[] trkTOF = sw.SwimToPlane(668.1);
-                        double[] trkPCAL = sw.SwimToPlane(698.8);
+                        double[] trkTOF = sw.SwimToPlane(1, 668.1);
+                        double[] trkPCAL = sw.SwimToPlane(1, 698.8);
 
 
                         Line3d trkLine = new Line3d(rotateToSectorCoordSys(trkTOF[0],trkTOF[1],trkTOF[2]), rotateToSectorCoordSys(trkPCAL[0], trkPCAL[1], trkPCAL[2])) ;
@@ -370,7 +370,7 @@ public class TrackDictionaryMaker {
 
                         for (int sl = 0; sl < 6; sl++) {
 
-                            double[] trk = sw.SwimToPlane(dcDetector.getWireMidpoint(sl, 0, 0).z);
+                            double[] trk = sw.SwimToPlane(1, dcDetector.getWireMidpoint(sl, 0, 0).z);
                             double norm = Math.sqrt(trk[3] * trk[3] + trk[4] * trk[4] + trk[5] * trk[5]);
                             Line3D trkLine = new Line3D(new Point3D(trk[0], trk[1], trk[2]), new Vector3D(trk[3] / norm, trk[4] / norm, trk[5] / norm));
                             double wMax = Math.abs(dcDetector.getWireMidpoint(sl, 0, 0).x
@@ -405,7 +405,7 @@ public class TrackDictionaryMaker {
     
     public static void swimtoLayer(int l, int sl, List<Integer> Wi, List<Integer> Di, DCGeant4Factory dcDetector,  DCSwimmer sw) {
         //double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(l).getComponent(0).getMidpoint().z());
-        double[] trk = sw.SwimToPlane(dcDetector.getWireMidpoint(sl, l, 0).z); 
+        double[] trk = sw.SwimToPlane(1, dcDetector.getWireMidpoint(sl, l, 0).z); 
        
        // Line3D trkLine = new Line3D(new Point3D(trk[0], trk[1], trk[2]), new Vector3D(trk[3], trk[4], trk[5]).asUnit());
         double wMax = Math.abs(dcDetector.getWireMidpoint(sl, 0, 0).x
@@ -438,7 +438,7 @@ public class TrackDictionaryMaker {
     }
     public static void swimtoLayer(int l, int sl, List<Integer> Wi, DCGeant4Factory dcDetector,  DCSwimmer sw) {
         //double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(l).getComponent(0).getMidpoint().z());
-        double[] trk = sw.SwimToPlane(dcDetector.getWireMidpoint(sl, l, 0).z); 
+        double[] trk = sw.SwimToPlane(1, dcDetector.getWireMidpoint(sl, l, 0).z); 
        
        // Line3D trkLine = new Line3D(new Point3D(trk[0], trk[1], trk[2]), new Vector3D(trk[3], trk[4], trk[5]).asUnit());
         double wMax = Math.abs(dcDetector.getWireMidpoint(sl, 0, 0).x

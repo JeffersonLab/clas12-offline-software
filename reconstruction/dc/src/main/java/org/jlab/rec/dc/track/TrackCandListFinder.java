@@ -71,7 +71,7 @@ public class TrackCandListFinder {
         return pass;
     }
     
-    public double getHitBasedFitChi2ToCrosses(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, 
+    public double getHitBasedFitChi2ToCrosses(int sector, double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, 
         double p, int q, double x, double y, double z, double tanThX, double tanThY, DCSwimmer dcSwim) {
         double pz = p / Math.sqrt(tanThX*tanThX + tanThY*tanThY + 1);
 
@@ -79,12 +79,12 @@ public class TrackCandListFinder {
                         -pz*tanThX,-pz*tanThY,-pz,
                          -q);
         double chi2 = 0; // assume err =1 on points 
-        double[] R = dcSwim.SwimToPlane(z3);
+        double[] R = dcSwim.SwimToPlane(sector, z3);
         chi2+= (R[0] - x3)*(R[0] - x3) + (R[1] - y3)*(R[1] - y3);
         dcSwim.SetSwimParameters(R[0],R[1],R[2],
                         R[3],R[4],R[5],
                          -q);
-        R = dcSwim.SwimToPlane(z2);
+        R = dcSwim.SwimToPlane(sector, z2);
         dcSwim.SetSwimParameters(R[0],R[1],R[2],
                         R[3],R[4],R[5],
                          -q);
@@ -92,13 +92,13 @@ public class TrackCandListFinder {
         dcSwim.SetSwimParameters(R[0],R[1],R[2],
                         R[3],R[4],R[5],
                          -q);
-        R = dcSwim.SwimToPlane(z1);
+        R = dcSwim.SwimToPlane(sector, z1);
         chi2+= (R[0] - x1)*(R[0] - x1) + (R[1] - y1)*(R[1] - y1);
         
         return chi2;
     }
     
-    private double[] getTrackInitFit(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3,
+    private double[] getTrackInitFit(int sector, double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3,
             double ux, double uy, double uz, double thX, double thY, 
             double theta1, double theta3, 
             double iBdl, double TORSCALE, DCSwimmer dcSwim) {
@@ -120,13 +120,13 @@ public class TrackCandListFinder {
         int q= calcInitTrkQ(theta1, theta3,TORSCALE);
         
         dcSwim.SetSwimParameters(x1,y1,z1,p_x, p_y, p_z, q);
-        double[] R = dcSwim.SwimToPlane(z2);
+        double[] R = dcSwim.SwimToPlane(sector, z2);
         chi2+= (R[0] - x2)*(R[0] - x2) + (R[1] - y2)*(R[1] - y2);
         intBdl+=R[7];
         dcSwim.SetSwimParameters(R[0],R[1],R[2],
                         R[3],R[4],R[5],
                          q);
-        R = dcSwim.SwimToPlane(z3);
+        R = dcSwim.SwimToPlane(sector, z3);
         chi2+= (R[0] - x3)*(R[0] - x3) + (R[1] - y3)*(R[1] - y3);
         intBdl+=R[7];
         
@@ -255,7 +255,7 @@ public class TrackCandListFinder {
                         double iBdl = traj.get_IntegralBdl();
                         double[] pars;
 
-                        pars = getTrackInitFit(x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
+                        pars = getTrackInitFit(cand.get_Sector(), x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
                          ux,  uy,  uz,  thX,  thY, 
                          theta1s1,  theta3s1, 
                          traj.get_IntegralBdl(),  TORSCALE, dcSwim);
@@ -267,7 +267,7 @@ public class TrackCandListFinder {
                             iBdl = pars[1];
                         }
 
-                        pars = getTrackInitFit(x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
+                        pars = getTrackInitFit(cand.get_Sector(), x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
                          ux,  uy,  uz,  thX,  thY, 
                          theta1s1,  theta3s2, 
                          traj.get_IntegralBdl(),  TORSCALE, dcSwim);
@@ -279,7 +279,7 @@ public class TrackCandListFinder {
                             iBdl = pars[1];
                         }
 
-                        pars = getTrackInitFit(x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
+                        pars = getTrackInitFit(cand.get_Sector(), x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
                          ux,  uy,  uz,  thX,  thY, 
                          theta1s2,  theta3s1, 
                          traj.get_IntegralBdl(),  TORSCALE, dcSwim);
@@ -291,7 +291,7 @@ public class TrackCandListFinder {
                             iBdl = pars[1];
                         }
 
-                        pars = getTrackInitFit(x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
+                        pars = getTrackInitFit(cand.get_Sector(), x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3,
                          ux,  uy,  uz,  thX,  thY, 
                          theta1s2,  theta3s2, 
                          traj.get_IntegralBdl(),  TORSCALE, dcSwim);
@@ -353,7 +353,7 @@ public class TrackCandListFinder {
                                 System.out.println("x "+ kFit.finalStateVec.x);
                                 System.out.println("y "+ kFit.finalStateVec.y);
                                 System.out.println("z "+ kFit.finalStateVec.z); */
-                                double HBc2 = getHitBasedFitChi2ToCrosses( x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3, 
+                                double HBc2 = getHitBasedFitChi2ToCrosses(cand.get_Sector(), x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3, 
                                 1./Math.abs(kFit.finalStateVec.Q), (int)Math.signum(kFit.finalStateVec.Q),
                                          kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.z, kFit.finalStateVec.tx, kFit.finalStateVec.ty, dcSwim);
                                 //System.out.println(cand.get(0).get_Sector()+" HB fit to crosses c2 "+HBc2);
@@ -506,7 +506,7 @@ public class TrackCandListFinder {
                          cand.get_Q());
 
         // swimming to a ref points outside of the last DC region
-        double[] VecAtTarOut = dcSwim.SwimToPlane(592);
+        double[] VecAtTarOut = dcSwim.SwimToPlane(cand.get_Sector(), 592);
         double xOuter  = VecAtTarOut[0];
         double yOuter  = VecAtTarOut[1];
         double zOuter  = VecAtTarOut[2];
@@ -527,7 +527,7 @@ public class TrackCandListFinder {
                          -cand.get_Q());
 
         //swimming to a ref point upstream of the first DC region
-        double[] VecAtTarIn = dcSwim.SwimToPlane(180);
+        double[] VecAtTarIn = dcSwim.SwimToPlane(cand.get_Sector(), 180);
 
         if(VecAtTarIn==null) {
                 cand.fit_Successful=false;
@@ -547,7 +547,7 @@ public class TrackCandListFinder {
         double pzOr = -VecAtTarIn[5];
 
         if(traj!=null && trjFind!=null) {
-                traj.set_Trajectory(trjFind.getStateVecsAlongTrajectory(xOr, yOr, pxOr/pzOr, pyOr/pzOr, cand.get_P(),cand.get_Q(), getDcDetector));
+                traj.set_Trajectory(trjFind.getStateVecsAlongTrajectory(cand.get_Sector(), xOr, yOr, pxOr/pzOr, pyOr/pzOr, cand.get_P(),cand.get_Q(), getDcDetector));
                 cand.set_Trajectory(traj.get_Trajectory());
         }
         //cand.set_Vtx0_TiltedCS(trakOrigTiltSec);

@@ -238,14 +238,14 @@ public class CrossListFinder  {
         for(int i =0; i<c.get_Segment1().size(); i++) {
             Point3D ref =c.get_Segment1().get(i).getCrossDirIntersWire(); 
             float[] result = new float[3];
-            swimmer.Bfield(ref.x(), ref.y(), ref.z(), result);
+            swimmer.Bfield(c.get_Sector(), ref.x(), ref.y(), ref.z(), result);
             c.get_Segment1().get(i).setB(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );  
 
         }
         for(int i =0; i<c.get_Segment2().size(); i++) {
             Point3D ref =c.get_Segment2().get(i).getCrossDirIntersWire();
             float[] result = new float[3];
-            swimmer.Bfield(ref.x(), ref.y(), ref.z(), result);
+            swimmer.Bfield(c.get_Sector(), ref.x(), ref.y(), ref.z(), result);
             c.get_Segment2().get(i).setB(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );
         }
         if(tde!=null) {

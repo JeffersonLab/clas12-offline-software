@@ -43,7 +43,7 @@ public class CallB {
         DCSwimmer.setMagneticFieldsScales(0.0, -1.0, 0);
         DCSwimmer swim2 = new DCSwimmer();
         swim2.SetSwimParameters(0, 0, 0, 2*Math.sin(Math.toRadians(20.-25.)), 0, 2*Math.cos(Math.toRadians(20.-25)), -1);
-        double[]swimVal =swim2.SwimToPlane(500);
+        double[]swimVal =swim2.SwimToPlane(2,500);
         for(int i = 0; i<swimVal.length; i++)
             System.out.println("swimVal["+i+"]= "+swimVal[i]);
         //CallB en = new CallB();
