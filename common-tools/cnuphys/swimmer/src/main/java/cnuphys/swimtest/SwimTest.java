@@ -10,6 +10,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -43,11 +44,12 @@ public class SwimTest {
 	private static Swimmer _swimmer;
 	
 	private static int _sector = 1;
-	final static MagneticFieldCanvas canvas1 = new MagneticFieldCanvas(_sector, -10, -10, 680, 460.,
+	final static MagneticFieldCanvas canvas1 = new MagneticFieldCanvas(_sector, -50, 0, 650, 350.,
 			MagneticFieldCanvas.CSType.XZ);
-	final static MagneticFieldCanvas canvas2 = new MagneticFieldCanvas(_sector, -10, -10, 680, 460.,
-			MagneticFieldCanvas.CSType.XZ);
+//	final static MagneticFieldCanvas canvas2 = new MagneticFieldCanvas(_sector, -50, 0, 650, 350.,
+//			MagneticFieldCanvas.CSType.YZ);
 
+	private static final JMenuItem reconfigItem = new JMenuItem("Remove Solenoid and Torus Overlap");
 
 
 	// these will be used to create a DefaultStopper
@@ -89,6 +91,14 @@ public class SwimTest {
 	
 	//create the test trajectories
 	private static void createTestTraj() {
+		
+		long seed = 3344632211L;
+		Random rand = new Random(seed);
+		int num = 1000;
+
+		TestTrajectories test = new TestTrajectories();
+				
+
 	}
 	
 	//test the sector swimmer for rotated composite
@@ -150,8 +160,11 @@ public class SwimTest {
 				if (e.getSource() == createTrajItem) {
 					createTestTraj();
 				}
-				if (e.getSource() == testSectorItem) {
+				else if (e.getSource() == testSectorItem) {
 					testSectorSwim();
+				}
+				else if (e.getSource() == reconfigItem) {
+					MagneticFields.getInstance().removeMapOverlap();
 				}
 				
 			}
@@ -160,8 +173,10 @@ public class SwimTest {
 		
 		createTrajItem.addActionListener(al);	
 		testSectorItem.addActionListener(al);	
+		reconfigItem.addActionListener(al);	
 		menu.add(createTrajItem);
 		menu.add(testSectorItem);
+		menu.add(reconfigItem);
 		
 		return menu;
 	}
@@ -180,11 +195,11 @@ public class SwimTest {
 
 
 		// drawing canvas
-		JPanel magPanel1 = canvas1.getPanelWithStatus(680, 460);
-		JPanel magPanel2 = canvas2.getPanelWithStatus(680, 460);
+		JPanel magPanel1 = canvas1.getPanelWithStatus(1000, 465);
+//		JPanel magPanel2 = canvas2.getPanelWithStatus(680, 460);
 		canvas1.setExtraText("Field Magnitude (T)");
-		canvas2.setExtraText("Gradient Magnitude (T/m)");
-		canvas2.setShowGradient(true);
+//		canvas2.setExtraText("Gradient Magnitude (T/m)");
+//		canvas2.setShowGradient(true);
 
 		// set up what to do if the window is closed
 		WindowAdapter windowAdapter = new WindowAdapter() {
@@ -222,10 +237,10 @@ public class SwimTest {
 		mb.add(testMenu);
 		
 		JPanel cpanel = new JPanel();
-		cpanel.setLayout(new GridLayout(2, 1, 4, 4));
+		cpanel.setLayout(new GridLayout(1, 1, 4, 4));
 				
 		cpanel.add(magPanel1);
-		cpanel.add(magPanel2);
+//		cpanel.add(magPanel2);
 		
 		testFrame.add(cpanel, BorderLayout.CENTER);
 
@@ -239,7 +254,7 @@ public class SwimTest {
 	//takes all the created SwimTrajectories
 	private static void setMCanvasTrajectories() {
 		canvas1.clearTrajectories();
-		canvas2.clearTrajectories();
+//		canvas2.clearTrajectories();
 		ArrayList<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
 		
 		if ((trajectories == null) || (trajectories.size() < 1)) {
@@ -253,7 +268,7 @@ public class SwimTest {
 			
 			LundStyle ls = LundStyle.getStyle(traj.getLundId());
 			canvas1.addTrajectory(x, y, z, ls.getLineColor(), ls.getStroke());
-			canvas2.addTrajectory(x, y, z, ls.getLineColor(), ls.getStroke());
+//			canvas2.addTrajectory(x, y, z, ls.getLineColor(), ls.getStroke());
 		}
 	}
 

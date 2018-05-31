@@ -52,13 +52,13 @@ public final class RotatedCompositeField extends CompositeField {
 	 *            kiloGauss. The 0,1 and 2 indices correspond to x, y, and z
 	 *            components.
 	 */	
+	@Override
 	public void field(int sector, float xs, float ys, float zs, float[] result) {
 		//first rotate location
 		float x = (float)(xs * _cos - zs * _sin);
 		float y = (float)(ys);
 		float z = (float)(zs * _cos + xs * _sin);
 		
-		System.err.println("HEY MAN");
 		//now rotate to the correct sector. We can use the result array!
 		MagneticFields.sectorToLab(sector, result, x, y, z);
 		x = result[0];
@@ -179,7 +179,7 @@ public final class RotatedCompositeField extends CompositeField {
 	 *         field
 	 */
 	@Override
-	public boolean contains(float xs, float ys, float zs) {
+	public boolean contains(double xs, double ys, double zs) {
 		
 		//first rotate the point
 		double x = xs * _cos - zs * _sin;
@@ -189,7 +189,7 @@ public final class RotatedCompositeField extends CompositeField {
 		
 		double rho = FastMath.sqrt(x * x + y * y);
 		double phi = FastMath.atan2Deg(y, x);
-		return containsCylindrical((float) phi, (float) rho, (float)z);
+		return containsCylindrical(phi, rho, z);
 	}
   
 	/**
@@ -206,7 +206,7 @@ public final class RotatedCompositeField extends CompositeField {
 	 * 
 	 */
 	@Override
-	public boolean containsCylindrical(float phi, float rho, float z) {
+	public boolean containsCylindrical(double phi, double rho, double z) {
 		for (IField field : this) {
 			if (field.containsCylindrical(phi, rho, z)) {
 				return true;
@@ -214,5 +214,7 @@ public final class RotatedCompositeField extends CompositeField {
 		}
 		return false;
 	}
+	
+	
 
 }

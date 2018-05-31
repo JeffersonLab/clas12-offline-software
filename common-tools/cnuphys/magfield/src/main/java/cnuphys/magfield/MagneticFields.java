@@ -1373,9 +1373,9 @@ public class MagneticFields {
 			return;
 		}
 		
-		
-		float solLimitZ = (float)(_solenoid.getZMax());
-		float solLimitR = (float)(_solenoid.getRhoMax());
+		//the z and rho solenoid limits
+		double solLimitZ = _solenoid.getZMax();
+		double solLimitR = _solenoid.getRhoMax();
 		
 		int stopIndexR = _torus.getQ2Coordinate().getIndex(solLimitR);
 		int stopIndexZ = _torus.getQ3Coordinate().getIndex(solLimitZ);
@@ -1389,16 +1389,16 @@ public class MagneticFields {
 		float[] result = new float[3];
 		
 		for (int nPhi = 0; nPhi < _torus.getQ1Coordinate().getNumPoints(); nPhi++) {
-			float phi = (float) _torus.getQ1Coordinate().getValue(nPhi);
+			double phi = _torus.getQ1Coordinate().getValue(nPhi);
 //			System.err.println("PHI = "  + phi);
 			
 			for (int nRho = 0; nRho <= stopIndexR; nRho++) {
-				float rho = (float) _torus.getQ2Coordinate().getValue(nRho);
+				double rho = _torus.getQ2Coordinate().getValue(nRho);
 //				System.err.println("Rho = "  + rho);
 				
 				
 				for (int nZ = 0; nZ <= stopIndexZ; nZ++) {
-					float z = (float) _torus.getQ3Coordinate().getValue(nZ);
+					double z = _torus.getQ3Coordinate().getValue(nZ);
 //					System.err.println("Z = "  + z);
 					
 					//get the solenoid field
@@ -1416,10 +1416,10 @@ public class MagneticFields {
 		
 
 		//now cutoff the solenoid
-		float zlim = (float)(_torus.getZMin());
-		System.err.println("FAKE Z LIM: " + zlim);
-		_solenoid.setFakeZLim(zlim);
-				
+		double zlim = _torus.getZMin();
+//		System.err.println("FAKE Z LIM: " + zlim);
+		_solenoid.setFakeZMax(zlim);
+		_torus.setFakeZMin(zlim);	
 		
 		notifyListeners();
 	}
@@ -1451,7 +1451,14 @@ public class MagneticFields {
 		if (_activeField != null) {
 			if (_activeField instanceof Solenoid) {
 				return true;
-			} else if (_activeField instanceof CompositeField) {
+			} 
+			else if (_activeField instanceof SolenoidProbe) {
+				return true;
+			}
+			else if (_activeField instanceof CompositeProbe) {
+				return true;
+			}
+			else if (_activeField instanceof CompositeField) {
 				return ((CompositeField) _activeField).hasSolenoid();
 			}
 		}
