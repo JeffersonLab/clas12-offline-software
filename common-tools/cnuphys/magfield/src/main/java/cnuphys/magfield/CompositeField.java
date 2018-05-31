@@ -141,6 +141,44 @@ public class CompositeField extends ArrayList<MagneticField> implements IField {
 		result[1] = by;
 		result[2] = bz;
 	}
+	
+	/**
+	 * Obtain the magnetic field at a given location expressed in Cartesian
+	 * coordinates for the sector system. The field is returned as a Cartesian vector in kiloGauss.
+	 * @param sector the sector [1..6]
+	 * @param x
+	 *            the x sector coordinate in cm
+	 * @param y
+	 *            the y sector coordinate in cm
+	 * @param z
+	 *            the z sector coordinate in cm
+	 * @param result
+	 *            the result is a float array holding the retrieved field in
+	 *            kiloGauss. The 0,1 and 2 indices correspond to x, y, and z
+	 *            components.
+	 */	
+	@Override
+	public void field(int sector, float x, float y, float z, float[] result) {
+				
+		
+		//rotate to the correct sector to get the lab coordinates. We can use the result array!
+		MagneticFields.sectorToLab(sector, result, x, y, z);
+		x = result[0];
+		y = result[1];
+		z = result[2];
+
+
+		float bx = 0, by = 0, bz = 0;
+		for (IField probe : this) {
+			probe.field(x, y, z, result);
+			bx += result[0];
+			by += result[1];
+			bz += result[2];
+		}
+		
+		//rotate back
+		MagneticFields.labToSector(sector, result, bx, by, bz);
+	}
 
 	/**
 	 * Obtain an approximation for the magnetic field gradient at a given
@@ -263,19 +301,20 @@ public class CompositeField extends ArrayList<MagneticField> implements IField {
 		return maxField;
 	}
 
-	/**
-	 * Check whether we have a torus field
-	 * 
-	 * @return <code>true</code> if we have a torus
-	 */
-	public boolean hasTorus() {
-		for (MagneticField field : this) {
-			if (field instanceof Torus) {
-				return true;
-			}
-		}
+	
+ 	/**
+ 	 * Check whether we have a torus field
+ 	 * 
+ 	 * @return <code>true</code> if we have a torus
+ 	 */
+ 	public boolean hasTorus() {
+ 		for (IField field : this) {
+ 			if ((field instanceof TorusProbe) || ((field instanceof Torus))) {
+ 				return true;
+ 			}
+ 		}
 
-		return false;
+ 		return false;
 	}
 
 	/**
@@ -284,8 +323,8 @@ public class CompositeField extends ArrayList<MagneticField> implements IField {
 	 * @return <code>true</code> if we have a solenoid
 	 */
 	public boolean hasSolenoid() {
-		for (MagneticField field : this) {
-			if (field instanceof Solenoid) {
+		for (IField field : this) {
+			if ((field instanceof SolenoidProbe) || ((field instanceof Solenoid))) {
 				return true;
 			}
 		}
@@ -307,7 +346,7 @@ public class CompositeField extends ArrayList<MagneticField> implements IField {
 	 *         field
 	 */
 	@Override
-	public boolean contains(float x, float y, float z) {
+	public boolean contains(double x, double y, double z) {
 		
 		double rho = Double.NaN;
 		double phi = Double.NaN;
@@ -323,7 +362,7 @@ public class CompositeField extends ArrayList<MagneticField> implements IField {
 					rho = FastMath.sqrt(x * x + y * y);
 					phi = FastMath.atan2Deg(y, x);
 				}
-				if (field.containsCylindrical((float) phi, (float) rho, z)) {
+				if (field.containsCylindrical(phi, rho, z)) {
 					return true;
 				}
 			}
@@ -346,7 +385,7 @@ public class CompositeField extends ArrayList<MagneticField> implements IField {
 	 * 
 	 */
 	@Override
-	public boolean containsCylindrical(float phi, float rho, float z) {
+	public boolean containsCylindrical(double phi, double rho, double z) {
 		for (MagneticField field : this) {
 			if (field.containsCylindrical(phi, rho, z)) {
 				return true;

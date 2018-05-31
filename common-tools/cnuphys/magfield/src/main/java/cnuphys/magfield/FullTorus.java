@@ -41,7 +41,7 @@ public class FullTorus extends Torus {
 		}
 
 		
-		if (!containsCylindrical((float)phi, (float)rho, (float)z)) {
+		if (!containsCylindrical(phi, rho, z)) {
 			result[X] = 0f;
 			result[Y] = 0f;
 			result[Z] = 0f;

@@ -86,8 +86,111 @@ public class MagTests {
 		System.err.println("maxDiff = " + maxDiff);
 	}
 
-	
+	//check active field
 	private static void checkSectors() {
+		IField field = FieldProbe.factory();
+
+		long seed = 3344632211L;
+
+		int num = 1000000;
+	//	int num = 1;
+
+		float x[] = new float[num];
+		float y[] = new float[num];
+		float z[] = new float[num];
+
+		float result[][][] = new float[6][num][3];
+		float diff[] = new float[3];
+
+		Random rand = new Random(seed);
+		
+		for (int i = 0; i < num; i++) {
+			z[i] = 300 + (200 * rand.nextFloat());
+//			z[i] = 26f;
+			
+			double phi = -10f + 20.*rand.nextFloat();
+			
+//			phi = 0;
+	        phi = Math.toRadians(phi);
+			
+			
+			
+			float rho = 50 + 400*rand.nextFloat();
+			
+			
+//			rho = 50;
+			
+			x[i] = (float)(rho*Math.cos(phi));
+			y[i] = (float)(rho*Math.sin(phi));
+		}
+		
+		System.err.println("\nSector test created points");
+		
+		float delMax = 0;
+		int iMax = -1;
+		int sectMax = -1;
+		
+		for (int i = 0; i < num; i++) {
+
+			float locDelMax = 0;
+			int locSectMax = -1;
+			
+	//		System.err.println("--------");
+			for (int sect = 1; sect <= 6; sect++) {
+
+				field.field(sect, x[i], y[i], z[i], result[sect - 1][i]);
+				
+//				System.err.println(String.format("Sector %d (%9.5f, %9.5f, %9.5f) %9.5f", 
+//						sect, result[sect-1][i][0], result[sect-1][i][1], result[sect-1][i][2],
+//						FastMath.vectorLength(result[sect-1][i])));
+
+
+				if (sect > 0) {
+					for (int k = 0; k < 3; k++) {
+						diff[k] = result[sect - 1][i][k] - result[0][i][k];
+					}
+					double dlen = FastMath.vectorLength(diff);
+					if (dlen > locDelMax) {
+						locDelMax = (float) dlen;
+						locSectMax = sect;
+					}
+				}
+
+			} //end sector loop
+			
+			if (locDelMax > delMax) {
+				delMax = locDelMax;
+				iMax = i;
+				sectMax = locSectMax;
+			}
+			
+		}
+		System.err.println("\nSector test calculated field");
+		System.err.println(" Biggest diff: " + delMax + "  in sector " + sectMax);
+		System.err.println(String.format("xyz = (%8.3f, %8.3f, %8.3f)", x[iMax], y[iMax], z[iMax]));
+		
+		double phi = FastMath.atan2Deg(y[iMax], x[iMax]);
+		if (phi < 0) {
+			phi += 360;
+		}
+		double rho = FastMath.hypot(x[iMax], y[iMax]);
+		System.err.println(String.format("cyl = (%8.3f, %8.3f, %8.3f)", phi, rho, z[iMax]));
+		
+//		System.err.println(String.format("Sector 1 (%9.5f, %9.5f, %9.5f) %9.5f", 
+//				result[0][iMax][0], result[0][iMax][1], result[0][iMax][2], 
+//				FastMath.vectorLength(result[0][iMax])));
+		
+		for (int sect = 1; sect <= 6; sect++) {
+			int sm1 = sect - 1;
+			System.err.println(String.format("Sector %d (%9.5f, %9.5f, %9.5f) %9.5f", sect, result[sm1][iMax][0],
+					result[sm1][iMax][1], result[sm1][iMax][2], FastMath.vectorLength(result[sm1][iMax])));
+		}
+		
+		
+	}
+
+	//chectk sectors for rotated composite
+	private static void checkRotatedSectors() {
 		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITEROTATED);
 
 		RotatedCompositeProbe probe =  (RotatedCompositeProbe) FieldProbe.factory();
@@ -99,6 +202,7 @@ public class MagTests {
 		double y = -40. + 20*Math.random();
 		double z = 290. + 30*Math.random();
 		
+		System.err.println(String.format("\n xyz = (%8.3f, %8.3f, %8.3f)", x, y, z));
 		for (int sector = 1; sector <= 6; sector++) {
 			probe.field(sector, (float)x, (float)y, (float)z, result);
 			double Bx = result[0];
@@ -426,8 +530,10 @@ public class MagTests {
 
 		// now for rectangular grids
 		final JMenuItem rectTorusItem = new JMenuItem("Create Rectangular Torus");
+
 		final JMenuItem rectCylItem = new JMenuItem("Compare Rectangular and Cylindrical");
 		final JMenuItem rotatedSectorItem = new JMenuItem("Check Sectors for Rotated Composite");
+		final JMenuItem sectorItem = new JMenuItem("Check Sectors for (Normal) Composite");
 
 		ActionListener al2 = new ActionListener() {
 
@@ -443,6 +549,9 @@ public class MagTests {
 					MagneticFields.getInstance().removeMapOverlap();
 				}
 				else if (e.getSource() == rotatedSectorItem) {
+					checkRotatedSectors();
+				}
+				else if (e.getSource() == sectorItem) {
 					checkSectors();
 				}
 			}
@@ -451,11 +560,13 @@ public class MagTests {
 		rectCylItem.addActionListener(al2);
 		reconfigItem.addActionListener(al2);
 		rotatedSectorItem.addActionListener(al2);
+		sectorItem.addActionListener(al2);
 		testMenu.add(rectTorusItem);
 		testMenu.add(rectCylItem);
 		testMenu.addSeparator();
 		testMenu.add(reconfigItem);
 		testMenu.add(rotatedSectorItem);
+		testMenu.add(sectorItem);
 
 
 		return testMenu;
@@ -483,10 +594,10 @@ public class MagTests {
 		try {
 			// mf.initializeMagneticFields(mfdir.getPath(), "torus.dat",
 			// "Symm_solenoid_r601_phi1_z1201_2008.dat");
-//			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_08May2018.dat",
-//					"Symm_solenoid_r601_phi1_z1201_2008.dat");
-			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_18Apr2018.dat",
+			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_08May2018.dat",
 					"Symm_solenoid_r601_phi1_z1201_2008.dat");
+//			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_18Apr2018.dat",
+//					"Symm_solenoid_r601_phi1_z1201_2008.dat");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			System.exit(1);

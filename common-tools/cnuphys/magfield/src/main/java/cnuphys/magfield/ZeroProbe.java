@@ -66,7 +66,7 @@ public class ZeroProbe extends FieldProbe {
 
 	
 	@Override
-	public boolean contains(float x, float y, float z) {
+	public boolean contains(double x, double y, double z) {
 		return false;
 	}
 
