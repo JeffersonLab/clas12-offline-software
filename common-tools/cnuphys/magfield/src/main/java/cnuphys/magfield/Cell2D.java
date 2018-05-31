@@ -4,10 +4,10 @@ public class Cell2D implements MagneticFieldChangeListener {
 
 	private MagneticField field;
 
-	public double q2Min = Float.POSITIVE_INFINITY;
-	public double q2Max = Float.NEGATIVE_INFINITY;
-	public double q3Min = Float.POSITIVE_INFINITY;
-	public double q3Max = Float.NEGATIVE_INFINITY;
+	public double q2Min = Double.POSITIVE_INFINITY;
+	public double q2Max = Double.NEGATIVE_INFINITY;
+	public double q3Min = Double.POSITIVE_INFINITY;
+	public double q3Max = Double.NEGATIVE_INFINITY;
 
 	private double q2Norm;
 	private double q3Norm;
@@ -165,9 +165,9 @@ public class Cell2D implements MagneticFieldChangeListener {
 
 	@Override
 	public void magneticFieldChanged() {
-		q2Min = Float.POSITIVE_INFINITY;
-		q2Max = Float.NEGATIVE_INFINITY;
-		q3Min = Float.POSITIVE_INFINITY;
-		q3Max = Float.NEGATIVE_INFINITY;
+		q2Min = Double.POSITIVE_INFINITY;
+		q2Max = Double.NEGATIVE_INFINITY;
+		q3Min = Double.POSITIVE_INFINITY;
+		q3Max = Double.NEGATIVE_INFINITY;
 	}
 }

@@ -10,9 +10,6 @@ public class RotatedCompositeProbe extends CompositeProbe {
 
 	public RotatedCompositeProbe(RotatedCompositeField field) {
 		super(field);
-		for (IField f : field) {
-			probes.add(FieldProbe.factory(f));
-		}
 	}
 	
 	/**

@@ -2,12 +2,12 @@ package cnuphys.magfield;
 
 public class Cell3D implements MagneticFieldChangeListener {
 
-	public double q1Min = Float.POSITIVE_INFINITY;
-	public double q1Max = Float.NEGATIVE_INFINITY;
-	public double q2Min = Float.POSITIVE_INFINITY;
-	public double q2Max = Float.NEGATIVE_INFINITY;
-	public double q3Min = Float.POSITIVE_INFINITY;
-	public double q3Max = Float.NEGATIVE_INFINITY;
+	public double q1Min = Double.POSITIVE_INFINITY;
+	public double q1Max = Double.NEGATIVE_INFINITY;
+	public double q2Min = Double.POSITIVE_INFINITY;
+	public double q2Max = Double.NEGATIVE_INFINITY;
+	public double q3Min = Double.POSITIVE_INFINITY;
+	public double q3Max = Double.NEGATIVE_INFINITY;
 
 	private MagneticField field;
 
@@ -246,12 +246,12 @@ public class Cell3D implements MagneticFieldChangeListener {
 
 	@Override
 	public void magneticFieldChanged() {
-		q1Min = Float.POSITIVE_INFINITY;
-		q1Max = Float.NEGATIVE_INFINITY;
-		q2Min = Float.POSITIVE_INFINITY;
-		q2Max = Float.NEGATIVE_INFINITY;
-		q3Min = Float.POSITIVE_INFINITY;
-		q3Max = Float.NEGATIVE_INFINITY;
+		q1Min = Double.POSITIVE_INFINITY;
+		q1Max = Double.NEGATIVE_INFINITY;
+		q2Min = Double.POSITIVE_INFINITY;
+		q2Max = Double.NEGATIVE_INFINITY;
+		q3Min = Double.POSITIVE_INFINITY;
+		q3Max = Double.NEGATIVE_INFINITY;
 	}
 
 }
