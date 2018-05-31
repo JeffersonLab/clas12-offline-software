@@ -301,7 +301,7 @@ public class MagFieldItem extends AItem {
 				double rho = coords[3];
 				double phi = coords[4];
 				
-				if (probe.containsCylindrical((float)phi, (float)rho, (float)z)) {
+				if (probe.containsCylindrical(phi, rho, z)) {
 
 				if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
 					double bmag = probe.fieldMagnitudeCylindrical(phi, rho, z) / 10.;

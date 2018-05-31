@@ -25,7 +25,7 @@ public final class Solenoid extends MagneticField {
 	private static final double MISALIGNTOL = 1.0e-6; //cm
 	
 	//used to reconfigure fields so solenoid and torus do not overlap
-	private float _fakeZLim = Float.POSITIVE_INFINITY;
+	private double _fakeZMax = Float.POSITIVE_INFINITY;
 	
 	// private constructor
 	/**
@@ -82,7 +82,7 @@ public final class Solenoid extends MagneticField {
 	@Override
 	public final void field(float x, float y, float z, float result[]) {
 		
-		if (z > _fakeZLim) {
+		if (z >= _fakeZMax) {
 			result[X] = 0f;
 			result[Y] = 0f;
 			result[Z] = 0f;
@@ -113,7 +113,7 @@ public final class Solenoid extends MagneticField {
 	 */
 	public void fieldCylindrical(Cell2D cell, double phi, double rho, double z, float result[]) {
 		
-		if (!containsCylindrical((float)phi, (float)rho, (float)z)) {
+		if (!containsCylindrical(phi, rho, z)) {
 			result[X] = 0f;
 			result[Y] = 0f;
 			result[Z] = 0f;
@@ -137,10 +137,15 @@ public final class Solenoid extends MagneticField {
 			phi += 360.0;
 		}
 
+		//this will return
+		//result[0] = bphi = 0;
+		//result[1] = brho
+		//result[2] = bphi
+
 		cell.calculate(rho, z, result);
-		// rotate onto to proper sector
+		// rotate onto to proper phi
 		
-		if (phi > 0.001) {
+//		if (phi > 0.001) {
 			double rphi = Math.toRadians(phi);
 			double cos = Math.cos(rphi);
 			double sin = Math.sin(rphi);
@@ -148,7 +153,7 @@ public final class Solenoid extends MagneticField {
 			double brho = result[1];
 			result[X] = (float) (brho * cos - bphi * sin);
 			result[Y] = (float) (brho * sin + bphi * cos);
-		}
+//		}
 
 		result[X] *= _scaleFactor;
 		result[Y] *= _scaleFactor;
@@ -315,7 +320,7 @@ public final class Solenoid extends MagneticField {
 	 */
 	protected void interpolateField(double q2, double q3, float result[]) {
 		
-		if (q3 > _fakeZLim) {
+		if (q3 >= _fakeZMax) {
 			System.err.println("FAKE Z VIOLATION SHOULD NOT HAVE HAPPENED");
 			System.exit(1);
 		}
@@ -508,9 +513,9 @@ public final class Solenoid extends MagneticField {
 	 * 
 	 */
 	@Override
-	public boolean containsCylindrical(float phi, float rho, float z) {
+	public boolean containsCylindrical(double phi, double rho, double z) {
 		
-		if (z > _fakeZLim) {
+		if (z >= _fakeZMax) {
 			return false;
 		}
 		
@@ -527,16 +532,16 @@ public final class Solenoid extends MagneticField {
 	 * Get the fake z lim used to remove overlap with torus
 	 * @return the fake z lim used to remove overlap with torus (cm)
 	 */
-	public float getFakeZLim() {
-		return _fakeZLim;
+	public double getFakeZMax() {
+		return _fakeZMax;
 	}
 	
 	/**
 	 * Set the fake z lim used to remove overlap with torus
 	 * @param zlim the new value in cm
 	 */
-	public void setFakeZLim(float zlim) {
-		_fakeZLim = zlim;
+	public void setFakeZMax(double zlim) {
+		_fakeZMax = zlim;
 	}
 
 }
