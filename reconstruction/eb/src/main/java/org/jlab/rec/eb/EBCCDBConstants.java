@@ -32,7 +32,8 @@ public class EBCCDBConstants {
             "htcc_matching",
             "ltcc_matching",
             "rf/config",
-            "rf/offset"
+            "rf/offset",
+            "rf/jitter"
     };
     
     private static final String[] otherTableNames={
@@ -239,6 +240,9 @@ public class EBCCDBConstants {
         loadDouble(EBCCDBEnum.RF_OFFSET,"rf/offset","offset",1,1,rfId);
         loadDouble(EBCCDBEnum.RF_TDC2TIME,"rf/config","tdc2time",1,1,rfId);
         loadInteger(EBCCDBEnum.RF_CYCLES,"rf/config","cycles",1,1,rfId);
+        loadInteger(EBCCDBEnum.RF_JITTER_CYCLES,"rf/jitter","cycles",0,0,0);
+        loadInteger(EBCCDBEnum.RF_JITTER_PHASE ,"rf/jitter","phase",0,0,0);
+        loadDouble(EBCCDBEnum.RF_JITTER_PERIOD,"rf/jitter","period",0,0,0);
         
         //loadDouble(EBCCDBEnum.TRIGGER_ID,
 
