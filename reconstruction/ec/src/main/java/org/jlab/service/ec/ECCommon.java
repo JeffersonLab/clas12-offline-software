@@ -171,7 +171,7 @@ public class ECCommon {
                 if (variation=="clas6") sca = 1.0;               
                 if(strip.getADC()>sca*ECCommon.stripThreshold[ind[il-1]]) strips.add(strip); 
                 
-                Integer[] tdcc; float  tmax = 1000; int tdc = 1000;
+                Integer[] tdcc; float  tmax = 1000; int tdc = 0;
                 
                 if (tdcs.hasItem(is,il,ip)) {
                     List<Integer> list = new ArrayList<Integer>();
