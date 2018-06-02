@@ -48,6 +48,7 @@ public interface IField {
      *            0,1 and 2 indices correspond to x, y, and z components.
      */
     public void field(float x, float y, float z, float result[]);
+    public void field(int s, float x, float y, float z, float result[]);
 
     /**
      * Get the field magnitude in kiloGauss at a given location expressed in

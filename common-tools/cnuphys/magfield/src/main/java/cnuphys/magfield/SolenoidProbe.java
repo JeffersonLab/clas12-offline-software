@@ -85,4 +85,9 @@ public class SolenoidProbe extends FieldProbe {
 		((Solenoid)_field).fieldCylindrical(this, phi, rho, z, result);
 	}
 
+    @Override
+    public void field(int s, float x, float y, float z, float[] result) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

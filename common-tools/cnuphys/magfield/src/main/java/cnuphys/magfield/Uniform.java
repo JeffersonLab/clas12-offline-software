@@ -51,4 +51,9 @@ public class Uniform extends MagneticField {
 		_uniformField[2] = Bz;
 	}
 
+    @Override
+    public void field(int s, float x, float y, float z, float[] result) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

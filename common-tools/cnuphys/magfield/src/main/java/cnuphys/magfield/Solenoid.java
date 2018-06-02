@@ -501,4 +501,9 @@ public final class Solenoid extends MagneticField {
 		return "Solenoid";
 	}
 
+    @Override
+    public void field(int s, float x, float y, float z, float[] result) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

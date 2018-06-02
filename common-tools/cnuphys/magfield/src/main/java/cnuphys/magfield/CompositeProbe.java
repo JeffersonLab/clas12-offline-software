@@ -31,7 +31,44 @@ public class CompositeProbe extends FieldProbe {
 		result[2] = bz;
 	}
 	
-	
+/**
+	 * Obtain the magnetic field at a given location expressed in Cartesian
+	 * coordinates for the sector system. The field is returned as a Cartesian vector in kiloGauss.
+	 * @param sector the sector [1..6]
+	 * @param x
+	 *            the x sector coordinate in cm
+	 * @param y
+	 *            the y sector coordinate in cm
+	 * @param z
+	 *            the z sector coordinate in cm
+	 * @param result
+	 *            the result is a float array holding the retrieved field in
+	 *            kiloGauss. The 0,1 and 2 indices correspond to x, y, and z
+	 *            components.
+	 */	
+	@Override
+	public void field(int sector, float x, float y, float z, float[] result) {
+				
+		
+		//rotate to the correct sector to get the lab coordinates. We can use the result array!
+		MagneticFields.sectorToLab(sector, result, x, y, z);
+		x = result[0];
+		y = result[1];
+		z = result[2];
+
+
+		float bx = 0, by = 0, bz = 0;
+		for (IField probe : probes) {
+			probe.field(x, y, z, result);
+			bx += result[0];
+			by += result[1];
+			bz += result[2];
+		}
+		
+		//rotate back
+		MagneticFields.labToSector(sector, result, bx, by, bz);
+	}
+		
 
     /**
      * Obtain an approximation for the magnetic field gradient at a given location expressed in cylindrical

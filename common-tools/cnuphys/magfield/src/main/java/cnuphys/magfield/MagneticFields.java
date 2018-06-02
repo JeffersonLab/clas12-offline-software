@@ -1554,6 +1554,90 @@ public class MagneticFields {
 
 	}
 
+        /**
+	 * Converts the sector 3D coordinates to clas (lab) 3D coordinates
+	 * 
+	 * @param sector the 1-based sector [1..6]
+	 * @param lab will hold the lab 3D Cartesian coordinates (modified)
+	 * @param x the sector x coordinate
+	 * @param y the sector y coordinate
+	 * @param z the sector z coordinate
+	 */
+	
+	public static void sectorToLab(int sector, float lab[],
+			float x, float y, float z) {
+
+		if ((sector < 1) || (sector > 6)) {
+			String wstr = "Bad sector: " + sector + " in RotatedCompositesectorToLab";
+			System.err.println(wstr);
+			return;
+		}
+
+		lab[2] = z; //z independent of sector
+		
+		if (sector == 1) {
+			lab[0] = x;
+			lab[1] = y;
+		}
+		else if (sector == 4) {
+			lab[0] = -x;
+			lab[1] = -y;
+		}
+		else { //sectors 2, 3, 5, 6
+			double cosP = _cosPhi[sector];
+			double sinP = _sinPhi[sector];
+			
+			lab[0] = (float)(cosP * x - sinP * y);
+			lab[1] = (float)(sinP * x + cosP * y);
+		}
+	}
+	
+	
+	/**
+	 * Converts the clas (lab) 3D coordinates to sector 3D coordinates to
+	 * 
+	 * @param sector the 1-based sector [1..6]
+	 * @param lab will hold the lab 3D Cartesian coordinates (modified)
+	 * @param x the lab x coordinate
+	 * @param y the lab y coordinate
+	 * @param z the lab z coordinate
+	 */
+	
+	public static void labToSector(int sector, float sect[],
+			float x, float y, float z) {
+
+		if ((sector < 1) || (sector > 6)) {
+			String wstr = "Bad sector: " + sector + " in RotatedCompositesectorToLab";
+			System.err.println(wstr);
+			return;
+		}
+
+		sect[2] = z; //z independent of sector
+		
+		if (sector == 1) {
+			sect[0] = x;
+			sect[1] = y;
+		}
+		else if (sector == 4) {
+			sect[0] = -x;
+			sect[1] = -y;
+		}
+		else { //sectors 2, 3, 5, 6
+			double cosP = _cosPhi[sector];
+			double sinP = _sinPhi[sector];
+			
+			sect[0] = (float)(cosP * x + sinP * y);
+			sect[1] = (float)(-sinP * x + cosP * y);
+		}
+	}
+
+        private static final double ROOT3OVER2 = Math.sqrt(3)/2;
+	private static double _cosPhi[] = {Double.NaN, 1, 0.5, -0.5, -1, -0.5, 0.5};
+	private static double _sinPhi[] = {Double.NaN, 0, ROOT3OVER2, ROOT3OVER2, 0, -ROOT3OVER2, -ROOT3OVER2};
+
+        
+        
+        
 	/**
 	 * For testing and also as an example
 	 * 
