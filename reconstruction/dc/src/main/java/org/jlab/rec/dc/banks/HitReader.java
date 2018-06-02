@@ -91,7 +91,8 @@ public class HitReader {
      * @param event DataEvent
      */
     public void fetch_DCHits(DataEvent event, Clas12NoiseAnalysis noiseAnalysis, NoiseReductionParameters parameters,
-            Clas12NoiseResult results, double[][][][] T0, double[][][][] T0ERR, IndexedTable tab, IndexedTable tab2, DCGeant4Factory DcDetector) {
+            Clas12NoiseResult results, double[][][][] T0, double[][][][] T0ERR, IndexedTable tab, IndexedTable tab2, DCGeant4Factory DcDetector,
+            double triggerPhase) {
 
         if (event.hasBank("DC::tdc") == false) {
             //System.err.println("there is no dc bank ");
@@ -114,14 +115,6 @@ public class HitReader {
             layer[i] = bankDGTZ.getByte("layer", i);
             wire[i] = bankDGTZ.getShort("component", i);
             tdc[i] = bankDGTZ.getInt("TDC", i);
-            //_sector = sector[i];
-            //_layer = layer[i];
-            //_wire = wire[i];
-            
-            //this.swapWires(event, sector[i], layer[i], wire[i]);
-            //sector[i] = _sector;
-            //layer[i] = _layer;
-            //wire[i] = _wire;
             
         }
         
@@ -142,10 +135,9 @@ public class HitReader {
         List<Hit> hits = new ArrayList<Hit>();
 
         for (int i = 0; i < size; i++) {
-
             //if(Constants.isSimulation == false) {
             if (tdc != null && tdc.length > 0) {
-                smearedTime[i] = (double) tdc[i];
+                smearedTime[i] = (double) tdc[i] - triggerPhase;
                 if (smearedTime[i] < 0) {
                     smearedTime[i] = 1;
                 }

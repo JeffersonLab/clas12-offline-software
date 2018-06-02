@@ -105,7 +105,7 @@ public class EBUtil {
      */
     public static double getNeutralBeta(DetectorParticle p, DetectorType type, int layer,double startTime) {
         double beta=-1;
-        DetectorResponse resp = p.getResponse(type,layer);
+        DetectorResponse resp = p.getHit(type,layer);
         if (resp!=null) {
             beta = resp.getPosition().mag() / 
                 (resp.getTime()-startTime) / 

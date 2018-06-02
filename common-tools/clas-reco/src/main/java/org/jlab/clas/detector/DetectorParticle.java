@@ -284,16 +284,7 @@ public class DetectorParticle implements Comparable {
     public void addResponse(DetectorResponse res){
         this.responseStore.add(res);
     }
-    
-    public DetectorResponse  getResponse(DetectorType type, int layer){
-        for(DetectorResponse res : this.responseStore){
-            if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer){
-                return res;
-            }
-        }
-        return null;
-    }
-    
+
     public boolean hasHit(DetectorType type){
         int hits = 0;
         for( DetectorResponse res : this.responseStore){
@@ -329,17 +320,22 @@ public class DetectorParticle implements Comparable {
     }
  
     public DetectorResponse getHit(DetectorType type){
-        for(DetectorResponse res : this.responseStore){
-            if(res.getDescriptor().getType()==type) return res;
+        return getHit(type,-1);
+    }
+   
+    public DetectorResponse getHit(DetectorType type, int layer) {
+        for (DetectorResponse res : this.responseStore) {
+            if (res.getDescriptor().getType() != type) continue;
+            if (layer > 0 && res.getDescriptor().getLayer() != layer) continue;
+            return res;
         }
         return null;
     }
-    
-    public DetectorResponse getHit(DetectorType type, int layer){
-        for(DetectorResponse res : this.responseStore){
-            if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer) return res;
-        }
-        return null;
+    /**
+     * Just for backward compatibility for any external usage
+     */
+    public DetectorResponse  getResponse(DetectorType type, int layer){
+        return this.getHit(type,layer);
     }
     
 

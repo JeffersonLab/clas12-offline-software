@@ -40,6 +40,9 @@ public class CNDEngine extends ReconstructionEngine {
 
 	@Override
 	public boolean processDataEvent(DataEvent event) {
+		// update calibration constants based on run number if changed
+		setRunConditionsParameters(event);
+		
 		ArrayList<HalfHit> halfhits = new ArrayList<HalfHit>();   
 		ArrayList<CndHit> hits = new ArrayList<CndHit>();
 	    
@@ -53,9 +56,6 @@ public class CNDEngine extends ReconstructionEngine {
 		if(halfhits.size()==0 )
 			return true;
 
-		// update calibration constants based on run number if changed
-		setRunConditionsParameters(event);
-		
 		//2) find the CND hits from these half-hits
 		CndHitFinder hitFinder = new CndHitFinder();
 		hits = hitFinder.findHits(halfhits,1);

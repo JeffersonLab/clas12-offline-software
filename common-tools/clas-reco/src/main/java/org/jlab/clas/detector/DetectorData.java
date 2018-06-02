@@ -329,7 +329,7 @@ public class DetectorData {
                bank.setShort("pindex", row, (short) i);
                bank.setByte("detector", row, (byte) p.getTrackDetector());
                bank.setByte("q", row, (byte) p.getCharge());
-               bank.setFloat("chi2", row, (float) p.getChi2());
+               bank.setFloat("chi2", row, (float) p.getTrackChi2());
                bank.setShort("NDF", row, (short) p.getNDF());
                bank.setFloat("px_nomm", row, (float) p.vector().x());
                bank.setFloat("py_nomm", row, (float) p.vector().y());
@@ -541,8 +541,7 @@ public class DetectorData {
                track.setVertex(vx, vy, z0);
                track.setPath(bank.getFloat("pathlength", row));
                track.setNDF(bank.getInt("ndf",row));
-               // FIXME:  is this the correct chi2:
-               track.setchi2(bank.getFloat("circlefit_chi2_per_ndf",row));
+               track.setchi2(bank.getFloat("chi2",row));
 
                //track.addCTOFPoint(x,y,z);
                Vector3D hc_vec = DetectorData.readVector(bank, row, "c_x", "c_y", "c_z");

@@ -27,11 +27,14 @@ public class CalibrationConstantsLoader {
 	public static double[][][] ATNLEN               = new double[24][3][2];
 	public static double[][][] MIPDIRECT 		= new double[24][3][2];
 	public static double[][][] MIPINDIRECT		= new double[24][3][2];
-	public static int[][][] Status_LR 			= new int[24][3][2];
+	public static int[][][] Status_LR 		= new int[24][3][2];
+	public static double JITTER_PERIOD              = 0;
+	public static int JITTER_PHASE                  = 0;
+	public static int JITTER_CYCLES                 = 0;
 	public static double[] LENGTH                   = new double[3];
-	public static double[] ZOFFSET                   = new double[3];
+	public static double[] ZOFFSET                  = new double[3];
 	public static double[] THICKNESS                = new double[1];
-	public static double[] INNERRADIUS                = new double[1];
+	public static double[] INNERRADIUS              = new double[1];
 	//Calibration and geometry parameters from DB    
 
 	public static boolean arEnergyibConstantsLoaded = false;
@@ -53,6 +56,7 @@ public class CalibrationConstantsLoader {
 		dbprovider.loadTable("/calibration/cnd/Attenuation");
 		dbprovider.loadTable("/calibration/cnd/Status_LR");
 		dbprovider.loadTable("/calibration/cnd/Energy");
+		dbprovider.loadTable("/calibration/cnd/time_jitter");
 		dbprovider.loadTable("/geometry/cnd/layer");
 		dbprovider.loadTable("/geometry/cnd/cnd");
 
@@ -167,6 +171,11 @@ public class CalibrationConstantsLoader {
 			Status_LR[iSec-1][iLay-1][1] = iStatR;
 			//System.out.println("Status_LR "+iStat);
 		}
+		// TDC time jitter
+		JITTER_PERIOD = dbprovider.getDouble("/calibration/cnd/time_jitter/period", 0);
+		JITTER_PHASE  = dbprovider.getInteger("/calibration/cnd/time_jitter/phase", 0);
+		JITTER_CYCLES = dbprovider.getInteger("/calibration/cnd/time_jitter/cycles", 0);
+
 		// Geometry
 		for(int i =0; i< dbprovider.length("/geometry/cnd/layer/layer"); i++) {
 			int iLay = dbprovider.getInteger("/geometry/cnd/layer/layer", i);
