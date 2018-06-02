@@ -33,11 +33,11 @@ public class CrossListFinder  {
      * @return the list of crosses determined to be consistent with belonging to a track in the DC
      */
     private final List<BaseCand> trkCnds = new ArrayList<BaseCand>();
-    private final DCSwimmer swimmer = new DCSwimmer();
+    //private final DCSwimmer swimmer = new DCSwimmer();
     ClusterFitter cf = new ClusterFitter();
     SegmentFinder segFinder = new SegmentFinder();
 
-    public CrossList candCrossLists(List<Cross> dccrosslist, boolean TimeBased, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
+    public CrossList candCrossLists(List<Cross> dccrosslist, boolean TimeBased, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde, DCSwimmer swimmer) {
         //List<List<Cross>> trkCnds = new ArrayList<List<Cross>>();
         trkCnds.clear();
 
@@ -124,9 +124,9 @@ public class CrossListFinder  {
                                 continue; // fit failed
                             }
                             //if(TimeBased && tde!=null) {			
-                            this.updateBFittedHits(c1, tab, DcDetector, tde);
-                            this.updateBFittedHits(c2, tab, DcDetector, tde);
-                            this.updateBFittedHits(c3, tab, DcDetector, tde);
+                            this.updateBFittedHits(c1, tab, DcDetector, tde, swimmer);
+                            this.updateBFittedHits(c2, tab, DcDetector, tde, swimmer);
+                            this.updateBFittedHits(c3, tab, DcDetector, tde, swimmer);
                             //}
                             BaseCand bCand = new BaseCand();
                             bCand.CrossesOnTrack.clear();
@@ -234,18 +234,18 @@ public class CrossListFinder  {
      * @param tde  time-to-distance utility
      * Updates the B-field information of the hits in the cross segments
      */
-    private void updateBFittedHits(Cross c, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
+    private void updateBFittedHits(Cross c, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde, DCSwimmer swimmer) {
         for(int i =0; i<c.get_Segment1().size(); i++) {
             Point3D ref =c.get_Segment1().get(i).getCrossDirIntersWire(); 
             float[] result = new float[3];
-            swimmer.Bfield(ref.x(), ref.y(), ref.z(), result);
+            swimmer.Bfield(c.get_Sector(), ref.x(), ref.y(), ref.z(), result);
             c.get_Segment1().get(i).setB(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );  
 
         }
         for(int i =0; i<c.get_Segment2().size(); i++) {
             Point3D ref =c.get_Segment2().get(i).getCrossDirIntersWire();
             float[] result = new float[3];
-            swimmer.Bfield(ref.x(), ref.y(), ref.z(), result);
+            swimmer.Bfield(c.get_Sector(), ref.x(), ref.y(), ref.z(), result);
             c.get_Segment2().get(i).setB(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );
         }
         if(tde!=null) {

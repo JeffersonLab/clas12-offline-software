@@ -2,30 +2,32 @@ package org.jlab.rec.dc.track.fit;
 
 import Jama.Matrix;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
-import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.fit.StateVecs.CovMat;
 import org.jlab.rec.dc.track.fit.StateVecs.StateVec;
+import org.jlab.rec.dc.trajectory.DCSwimmer;
 
 public class KFitter {
 
     public boolean setFitFailed = false;
-
-    StateVecs sv = new StateVecs();
+    
+    StateVecs sv = null;
     MeasVecs mv = new MeasVecs();
 
     public StateVec finalStateVec;
     public CovMat finalCovMat;
 
-    public int totNumIter = 5;
+    public int totNumIter = 30;
     double newChisq = Double.POSITIVE_INFINITY;
 
     public double chi2 = 0;
     public double chi2kf = 0;
     public int NDF = 0;
     public int ConvStatus = 1;
-    
-    public KFitter(Track trk, DCGeant4Factory DcDetector, boolean TimeBasedUsingHBtrack) { 
+    public int sector; 
+    public KFitter(Track trk, DCGeant4Factory DcDetector, boolean TimeBasedUsingHBtrack, DCSwimmer dcSwim) { 
+        sv = new StateVecs(dcSwim);
+        sector = trk.get_Sector();
         if(TimeBasedUsingHBtrack==true) {
             this.initFromHB(trk, DcDetector); 
         } else {
@@ -35,10 +37,10 @@ public class KFitter {
     public void initFromHB(Track trk, DCGeant4Factory DcDetector) {
         mv.setMeasVecsFromHB(trk, DcDetector);
         sv.Z = new double[mv.measurements.size()];
+
         for (int i = 0; i < mv.measurements.size(); i++) {
             sv.Z[i] = mv.measurements.get(i).z; 
         } 
-        sv.stepMax=Constants.getTBKFSWIMMAXSTEPSIZE();
        // if(sv.Z.length<20) { // quit no enough measurements
         //    totNumIter=0;
         //    this.setFitFailed=true;
@@ -49,13 +51,12 @@ public class KFitter {
     public void init(Track trk, DCGeant4Factory DcDetector) {
         mv.setMeasVecs(trk, DcDetector);
         sv.Z = new double[mv.measurements.size()];
+
         for (int i = 0; i < mv.measurements.size(); i++) {
             sv.Z[i] = mv.measurements.get(i).z;
         }
-        sv.stepMax=Constants.getHBKFSWIMMAXSTEPSIZE();
         sv.init(trk, sv.Z[0], this);
     }
-    
     public boolean useFilter =true;
     public void runFitter() {
         this.chi2 = 0;
@@ -64,13 +65,10 @@ public class KFitter {
         for (int i = 1; i <= totNumIter; i++) {
             this.chi2kf = 0;
             if (i > 1) {
-                //for (int k = sv.Z.length - 1; k >0; k--) {
-                //    sv.transport(k, k-1, sv.trackTraj.get(k), sv.trackCov.get(k)); //get new state vec at 1st measurement after propagating back from the last filtered state
-                //}
-                sv.transport(sv.Z.length - 1, 0, sv.trackTraj.get(sv.Z.length - 1), sv.trackCov.get(sv.Z.length - 1));
+                sv.transport(sector, sv.Z.length - 1, 0, sv.trackTraj.get(sv.Z.length - 1), sv.trackCov.get(sv.Z.length - 1)); //get new state vec at 1st measurement after propagating back from the last filtered state
             }
             for (int k = 0; k < sv.Z.length - 1; k++) {
-                sv.transport(k, k + 1, sv.trackTraj.get(k), sv.trackCov.get(k));
+                sv.transport(sector, k, k + 1, sv.trackTraj.get(k), sv.trackCov.get(k));
                 //sv.trackTraj.add(k+1, sv.StateVec); 
                 //sv.trackCov.add(k+1, sv.CovMat);
                 // System.out.println((k)+"] trans "+sv.trackTraj.get(k).x+","+sv.trackTraj.get(k).y+","+
@@ -78,7 +76,6 @@ public class KFitter {
                 if(useFilter)
                     this.filter(k + 1);
             }
-            /*
             if(i>1) {
                 //this.calcFinalChisq();
                 //if(this.chi2>1000000) {
@@ -107,11 +104,8 @@ public class KFitter {
                     this.ConvStatus=1;
                 }
             }
-            */
         }
-        this.finalStateVec = sv.trackTraj.get(sv.Z.length - 1);
-        this.finalCovMat = sv.trackCov.get(sv.Z.length - 1);
-        this.calcFinalChisq();
+        this.calcFinalChisq(sector);
 
     }
 
@@ -193,24 +187,25 @@ public class KFitter {
     }
 
     @SuppressWarnings("unused")
-	private void smooth(int k) {
+	private void smooth(int sector, int k) {
         this.chi2 = 0;
         if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null) {
-            sv.transport(k, 0, sv.trackTraj.get(k), sv.trackCov.get(k));
+            sv.transport(sector, k, 0, sv.trackTraj.get(k), sv.trackCov.get(k));
             for (int k1 = 0; k1 < k; k1++) {
-                sv.transport(k1, k1 + 1, sv.trackTraj.get(k1), sv.trackCov.get(k1));
+                sv.transport(sector, k1, k1 + 1, sv.trackTraj.get(k1), sv.trackCov.get(k1));
                 this.filter(k1 + 1);
             }
         }
     }
 
-    private void calcFinalChisq() {
+    private void calcFinalChisq(int sector) {
         int k = sv.Z.length - 1;
         this.chi2 = 0;
         if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null) {
-            sv.rinit(sv.Z[0], k);
+            sv.transport(sector, sv.Z.length - 1, 0, sv.trackTraj.get(sv.Z.length - 1), sv.trackCov.get(sv.Z.length - 1)); //get new state vec at 1st measurement after propagating back from the last filtered state
+            
             for (int k1 = 0; k1 < k; k1++) {
-                sv.transport(k1, k1 + 1, sv.trackTraj.get(k1), sv.trackCov.get(k1));
+                sv.transport(sector, k1, k1 + 1, sv.trackTraj.get(k1), sv.trackCov.get(k1));
                 double V = mv.measurements.get(k1 + 1).error; 
                 double h = mv.h(new double[]{sv.trackTraj.get(k1 + 1).x, sv.trackTraj.get(k1 + 1).y}, 
                         (int) mv.measurements.get(k1 + 1).tilt,  mv.measurements.get(k1 + 1).wireMaxSag,  mv.measurements.get(k1 + 1).wireLen);
@@ -234,5 +229,5 @@ public class KFitter {
         double matDet = mat.det();
         return Math.abs(matDet) >= 1.e-30;
     }
-
+    
 }

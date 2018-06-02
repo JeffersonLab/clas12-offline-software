@@ -26,12 +26,13 @@ public class StateVecs {
     private final double[] A = new double[2];
     private final double[] dA = new double[4];
     private final float[] bf = new float[3];
-    DCSwimmer dcSwim = new DCSwimmer();
+    private DCSwimmer dcSwim;
     
     /**
      * State vector representing the track in the sector coordinate system at the measurement layer
      */
-    public StateVecs() {
+    public StateVecs(DCSwimmer dcSwimmer) {
+        dcSwim = dcSwimmer;
         //Max Field Location: (phi, rho, z) = (29.50000, 44.00000, 436.00000)
         // get the maximum value of the B field
         double phi = Math.toRadians(29.5);
@@ -90,7 +91,7 @@ public class StateVecs {
         return fVec;
 
     } */
-     public StateVec f(int i, int f, StateVec iVec) {
+     public StateVec f(int sector, int i, int f, StateVec iVec) {
 
         double x = iVec.x;
         double y = iVec.y;
@@ -105,7 +106,7 @@ public class StateVecs {
         double z = Z[i];
         
         while(Math.signum(Z[f] - Z[i]) *z<Math.signum(Z[f] - Z[i]) *Z[f]) {
-            dcSwim.Bfield(x, y, z, bf);
+            dcSwim.Bfield(sector, x, y, z, bf);
             s= Math.signum(Z[f] - Z[i]) * this.getStepSize(bf);
             if(Math.signum(Z[f] - Z[i]) *(z+s)>Math.signum(Z[f] - Z[i]) *Z[f])
                 s=Math.signum(Z[f] - Z[i]) *Math.abs(Z[f]-z);
@@ -141,7 +142,7 @@ public class StateVecs {
      * @param iVec state vector at the initial index
      * @param covMat state covariance matrix at the initial index
      */
-    public void transport(int i, int f, StateVec iVec, CovMat covMat) { // s = signed step-size
+    public void transport(int sector, int i, int f, StateVec iVec, CovMat covMat) { // s = signed step-size
         if(iVec==null)
             return;
         //StateVec iVec = trackTraj.get(i);
@@ -164,7 +165,7 @@ public class StateVecs {
 
         double z = Z[i];
         while(Math.signum(Z[f] - Z[i]) *z<Math.signum(Z[f] - Z[i]) *Z[f]) {
-            dcSwim.Bfield(x, y, z, bf);
+            dcSwim.Bfield(sector, x, y, z, bf);
             s= Math.signum(Z[f] - Z[i]) * this.getStepSize(bf);
            // System.out.println(" from "+(float)Z[i]+" to "+(float)Z[f]+" at "+(float)z+" By is "+bf[1]+" B is "+Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2])/Bmax+" stepSize is "+s);
             if(Math.signum(Z[f] - Z[i]) *(z+s)>Math.signum(Z[f] - Z[i]) *Z[f])
@@ -360,37 +361,6 @@ public class StateVecs {
         }
     }
     
-    /**
-     * 
-     * @param z0 the value at which the state vector needs to be reinitialized
-     * @param kf the final state measurement index
-     */
-    public void rinit(double z0, int kf) {
-        if (this.trackTraj.get(kf) != null) {
-            double x = this.trackTraj.get(kf).x;
-            double y = this.trackTraj.get(kf).y;
-            double z = this.trackTraj.get(kf).z;
-            double tx = this.trackTraj.get(kf).tx;
-            double ty = this.trackTraj.get(kf).ty;
-            double p = 1. / Math.abs(this.trackTraj.get(kf).Q);
-            int q = (int) Math.signum(this.trackTraj.get(kf).Q);
-
-            dcSwim.SetSwimParameters(-1, x, y, z, tx, ty, p, q);
-            double[] VecAtFirstMeasSite = dcSwim.SwimToPlane(z0);
-            StateVec initSV = new StateVec(0);
-            if(VecAtFirstMeasSite==null) {
-                return;
-            }
-            initSV.x = VecAtFirstMeasSite[0];
-            initSV.y = VecAtFirstMeasSite[1];
-            initSV.z = VecAtFirstMeasSite[2];
-            initSV.tx = VecAtFirstMeasSite[3] / VecAtFirstMeasSite[5];
-            initSV.ty = VecAtFirstMeasSite[4] / VecAtFirstMeasSite[5];
-            initSV.Q = this.trackTraj.get(kf).Q;
-            this.trackTraj.put(0, initSV);
-        } else {
-        }
-    }
     
     /**
      * 
@@ -405,7 +375,7 @@ public class StateVecs {
                     trkcand.get_StateVecAtReg1MiddlePlane().tanThetaX(), trkcand.get_StateVecAtReg1MiddlePlane().tanThetaY(), trkcand.get_P(),
                     trkcand.get_Q());
 
-            double[] VecAtFirstMeasSite = dcSwim.SwimToPlane(z0);
+            double[] VecAtFirstMeasSite = dcSwim.SwimToPlane(trkcand.get_Sector(), z0);
             StateVec initSV = new StateVec(0);
             initSV.x = VecAtFirstMeasSite[0];
             initSV.y = VecAtFirstMeasSite[1];
@@ -413,7 +383,6 @@ public class StateVecs {
             initSV.tx = VecAtFirstMeasSite[3] / VecAtFirstMeasSite[5];
             initSV.ty = VecAtFirstMeasSite[4] / VecAtFirstMeasSite[5];
             initSV.Q = trkcand.get_Q() / trkcand.get_P();
-            
             this.trackTraj.put(0, initSV);
         } else {
             kf.setFitFailed = true;
@@ -469,7 +438,7 @@ public class StateVecs {
             dcSwim.SetSwimParameters(trkR1X.x(), trkR1X.y(), trkR1X.z(), 
                     trkR1P.x(), trkR1P.y(), trkR1P.z(), trkcand.get_Q());
             
-            double[] VecAtFirstMeasSite = dcSwim.SwimToPlane(z0);
+            double[] VecAtFirstMeasSite = dcSwim.SwimToPlane(trkcand.get_Sector(), z0);
             StateVec initSV = new StateVec(0);
             initSV.x = VecAtFirstMeasSite[0];
             initSV.y = VecAtFirstMeasSite[1];

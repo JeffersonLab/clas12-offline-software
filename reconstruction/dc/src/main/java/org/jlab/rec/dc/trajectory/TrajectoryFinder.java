@@ -60,7 +60,7 @@ public class TrajectoryFinder {
             return null;
         }
         traj.set_Trajectory(getStateVecsAlongTrajectory(DcDetector));
-        traj.set_IntegralBdl(integralBdl(DcDetector));
+        traj.set_IntegralBdl(integralBdl(traj.get_Sector(), DcDetector));
         traj.set_PathLength(PathLength);
         
         return traj;
@@ -71,7 +71,7 @@ public class TrajectoryFinder {
      * @param DcDetector DC detector utility
      * @return integral Bdl
      */
-    public double integralBdl(DCGeant4Factory DcDetector) {
+    public double integralBdl(int sector, DCGeant4Factory DcDetector) {
 
         double z1 = DcDetector.getRegionMidpoint(0).z;
         double z3 = DcDetector.getRegionMidpoint(2).z;
@@ -91,7 +91,7 @@ public class TrajectoryFinder {
             double y = y_fitCoeff[0]*z*z+y_fitCoeff[1]*z+y_fitCoeff[2];
  
             float[] result = new float[3];
-            dcSwim.Bfield((x + x0) * 0.5, (y + y0) * 0.5, (z + z0) * 0.5, result);
+            dcSwim.Bfield(sector, (x + x0) * 0.5, (y + y0) * 0.5, (z + z0) * 0.5, result);
             //System.out.println("bf "+bf.toString());
             Vector3D dl = new Vector3D(x-x0,0,z-z0);
             Vector3D Bf = new Vector3D(result[0], result[1], result[2]);
@@ -119,7 +119,7 @@ public class TrajectoryFinder {
      * @param DcDetector DC detector utility
      * @return list of state vecs along track trajectory ... used for tFlight computation
      */
-    public List<StateVec> getStateVecsAlongTrajectory(double x0, double y0, double tanTheta_x, double tanTheta_y, double p, int q, DCGeant4Factory DcDetector) {              
+    public List<StateVec> getStateVecsAlongTrajectory(int sector, double x0, double y0, double tanTheta_x, double tanTheta_y, double p, int q, DCGeant4Factory DcDetector) {              
         //initialize at target
         dcSwim.SetSwimParameters(-1, -1,  x0,  y0,  tanTheta_x,  tanTheta_y,  p,  q, DcDetector);
 
@@ -132,7 +132,7 @@ public class TrajectoryFinder {
 
         //Z[0] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getPlane().point().z();
         Z[0] = DcDetector.getLayerMidpoint(0, 0).z; 
-        double[] swamPars = dcSwim.SwimToPlane(Z[0]) ;
+        double[] swamPars = dcSwim.SwimToPlane(sector, Z[0]) ;
         X[0] = swamPars[0];
         Y[0] = swamPars[1];
         thX[0] = swamPars[3]/swamPars[5];
@@ -157,7 +157,7 @@ public class TrajectoryFinder {
                     //Z[layerIdx] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
                     Z[planeIdx] = DcDetector.getLayerMidpoint(superlayerIdx, layerIdx).z; 
 
-                    swamPars = dcSwim.SwimToPlane(Z[planeIdx]) ;
+                    swamPars = dcSwim.SwimToPlane(sector, Z[planeIdx]) ;
                     X[planeIdx] = swamPars[0];
                     Y[planeIdx] = swamPars[1];
                     thX[planeIdx] = swamPars[3]/swamPars[5];

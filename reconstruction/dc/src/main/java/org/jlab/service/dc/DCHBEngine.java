@@ -1,6 +1,7 @@
 package org.jlab.service.dc;
 
 import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.TorusMap;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
@@ -96,74 +97,6 @@ public class DCHBEngine extends ReconstructionEngine {
             e.printStackTrace();
         }
     }
-    private void initializeRecoParams() {
-        String hBKFIterNum=this.getEngineConfigString("hBKFIterNum");
-        String hBKFSwimMaxStep=this.getEngineConfigString("hBKFSwimMaxStep");
-        String tBKFIterNum=this.getEngineConfigString("tBKFIterNum");
-        String tBKFSwimMaxStep=this.getEngineConfigString("tBKFSwimMaxStep");
-        
-        if (hBKFIterNum!=null) {
-            System.out.println("["+this.getName()+"] HB KF Number of Iterations chosen based on yaml: "+hBKFIterNum);
-        }
-        else {
-            hBKFIterNum = System.getenv("HBKFINTERNUM");
-            if (hBKFIterNum!=null) {
-                System.out.println("["+this.getName()+"] HB KF Number of Iterations chosen based on env: "+hBKFIterNum);
-            }
-        }
-        if (hBKFIterNum==null) {
-            // fix to some default
-            hBKFIterNum="10";
-            //throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for HBT in yaml or env.");
-        }
-        if (hBKFSwimMaxStep!=null) {
-            System.out.println("["+this.getName()+"] HB KF Max Swim Step chosen based on yaml: "+hBKFSwimMaxStep);
-        }
-        else {
-            hBKFSwimMaxStep = System.getenv("HBKFSWIMMAXSTEP");
-            if (hBKFSwimMaxStep!=null) {
-                System.out.println("["+this.getName()+"] HB KF Max Swim Step chosen based on env: "+hBKFSwimMaxStep);
-            }
-        }
-        if (hBKFSwimMaxStep==null) {
-             // fix to some default
-             hBKFSwimMaxStep="0.3";
-            //throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for HBT in yaml or env.");
-        }
-        if (tBKFIterNum!=null) {
-            System.out.println("["+this.getName()+"] TB KF Number of Iterations chosen based on yaml: "+tBKFIterNum);
-        }
-        else {
-            tBKFIterNum = System.getenv("TBKFINTERNUM");
-            if (tBKFIterNum!=null) {
-                System.out.println("["+this.getName()+"] TB KF Number of Iterations chosen based on env: "+tBKFIterNum);
-            }
-        }
-        if (tBKFIterNum==null) {
-            // fix to some default
-            tBKFIterNum="15";
-            //throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for TBT in yaml or env.");
-        }
-        if (tBKFSwimMaxStep!=null) {
-            System.out.println("["+this.getName()+"] TB KF Max Swim Step chosen based on yaml: "+tBKFSwimMaxStep);
-        }
-        else {
-            tBKFSwimMaxStep = System.getenv("TBKFSWIMMAXSTEP");
-            if (hBKFSwimMaxStep!=null) {
-                System.out.println("["+this.getName()+"] TB KF Max Swim Step chosen based on env: "+tBKFSwimMaxStep);
-            }
-        }
-        if (tBKFSwimMaxStep==null) {
-            // fix to some default
-            tBKFSwimMaxStep="0.1";
-            //throw new RuntimeException("["+this.getName()+"]  Failed to find KF settings for TBT in yaml or env.");
-        }
-        
-        Constants.setHBKFINTERNUMBER(Integer.parseInt(hBKFIterNum));
-        Constants.setTBKFINTERNUMBER(Integer.parseInt(tBKFIterNum));
-        Constants.setHBKFSWIMMAXSTEPSIZE(Double.parseDouble(hBKFSwimMaxStep));
-        Constants.setTBKFSWIMMAXSTEPSIZE(Double.parseDouble(tBKFSwimMaxStep));
-    }
 
     @Override
     public boolean init() {
@@ -171,8 +104,7 @@ public class DCHBEngine extends ReconstructionEngine {
         Constants.Load();
      
         this.initializeMagneticFields();
-        this.initializeRecoParams();
-        
+
         clasDictionaryPath= CLASResources.getResourcePath("etc");
         String[]  dcTables = new String[]{
             "/calibration/dc/signal_generation/doca_resolution",
@@ -222,7 +154,7 @@ public class DCHBEngine extends ReconstructionEngine {
         if(event.hasBank("RUN::config")==false ) {
                 return true;
         }
-
+        DCSwimmer swimmer = new DCSwimmer();
         DataBank bank = event.getBank("RUN::config");
         long   timeStamp = bank.getLong("timestamp", 0);
         double triggerPhase =0;
@@ -231,7 +163,6 @@ public class DCHBEngine extends ReconstructionEngine {
         int newRun = bank.getInt("run", 0);
         if(newRun==0)
         	return true;
-        
         if(Run.get()==0 || (Run.get()!=0 && Run.get()!=newRun)) { 
             if(timeStamp==-1)
                 return true;
@@ -241,13 +172,8 @@ public class DCHBEngine extends ReconstructionEngine {
             int    phase  = tabJ.getIntValue("phase", 0,0,0);
             int    cycles = tabJ.getIntValue("cycles", 0,0,0);
             
-            if(cycles>0) triggerPhase=period*((timeStamp+phase)%cycles); 
-//            if(newRun>1000) {
-//                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
-//            } else {
-//                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
-//            }
-            
+            if(cycles>0) triggerPhase=period*((timeStamp+phase)%cycles);
+
             TableLoader.FillT0Tables(newRun);
             TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist")); 
             //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"));
@@ -259,6 +185,7 @@ public class DCHBEngine extends ReconstructionEngine {
                 shift = -1.9;
             }
             DCSwimmer.setMagneticFieldsScales(bank.getFloat("solenoid", 0), bank.getFloat("torus", 0), shift);
+            
             Run.set(newRun);
             if(event.hasBank("MC::Particle")==true)
                 Constants.setMCDIST(0);
@@ -351,11 +278,11 @@ public class DCHBEngine extends ReconstructionEngine {
 
 
         CrossListFinder crossLister = new CrossListFinder();
-        CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
+        CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null, swimmer);
 
         //6) find the list of  track candidates
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("HitBased");
-        trkcands = trkcandFinder.getTrackCands(crosslist, dcDetector, DCSwimmer.getTorScale() ) ;
+        trkcands = trkcandFinder.getTrackCands(crosslist, dcDetector, DCSwimmer.getTorScale(), swimmer) ;
 
 
         // track found	
@@ -431,9 +358,9 @@ public class DCHBEngine extends ReconstructionEngine {
         List<Cross> pcrosses = crossMake.find_Crosses(segments, dcDetector);
 
         //
-        CrossList pcrosslist = crossLister.candCrossLists(pcrosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
+        CrossList pcrosslist = crossLister.candCrossLists(pcrosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null, swimmer);
 
-        List<Track> mistrkcands =trkcandFinder.getTrackCands(pcrosslist, dcDetector, DCSwimmer.getTorScale());
+        List<Track> mistrkcands =trkcandFinder.getTrackCands(pcrosslist, dcDetector, DCSwimmer.getTorScale(), swimmer);
         if(mistrkcands.size()>0) {    
             trkcandFinder.removeOverlappingTracks(mistrkcands);		// remove overlaps
 
@@ -469,9 +396,9 @@ public class DCHBEngine extends ReconstructionEngine {
         
         //String inputFile = args[0];
         //String outputFile = args[1];
-        String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
+        //String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
         //String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.ev.hipo";
-        //String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/gemc_out_mu-_hipo/mu-_30nA_bg_out.ev.hipo";
+        String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/gemc_out_mu-_hipo/mu-_30nA_bg_out.ev.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
         
         DCHBEngine en = new DCHBEngine();
@@ -488,19 +415,17 @@ public class DCHBEngine extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         
-        String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGD.hipo";
-        //String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.recn2.hipo";
-        //String outputFile="/Users/ziegler/Desktop/Work/Files/clas_002391.evio.50.test.hipo";
+        //String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGD.hipo";
+        String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.recn2.hipo";
         writer.open(outputFile);
         TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
         long t1 = 0;
-        double stopcount = 211;
         while (reader.hasEvent()) {
             
             counter++;
-            //System.out.println("************************************************************* ");
+            System.out.println("************************************************************* ");
             DataEvent event = reader.getNextEvent();
-            if (counter ==10) {
+            if (counter > 0) {
                 t1 = System.currentTimeMillis();
             }
             //if(event.getBank("RUN::config").getInt("event", 0) <50)
@@ -510,16 +435,16 @@ public class DCHBEngine extends ReconstructionEngine {
             // Processing TB
             en2.processDataEvent(event);
             writer.writeEvent(event);
-            //System.out.println("PROCESSED  EVENT "+event.getBank("RUN::config").getInt("event", 0));
+            System.out.println("PROCESSED  EVENT "+event.getBank("RUN::config").getInt("event", 0));
            // event.show();
-            //if (event.getBank("RUN::config").getInt("event", 0) > 111) {
-            //    break;
-            //}
+            if (event.getBank("RUN::config").getInt("event", 0) > 11) {
+             //   break;
+            }
             
             
             // event.show();
-           if(counter==stopcount)
-             break;
+            //if(counter%100==0)
+            
             //if(event.hasBank("HitBasedTrkg::HBTracks")) {
             //    event.show();
             
@@ -527,8 +452,7 @@ public class DCHBEngine extends ReconstructionEngine {
         }
         writer.close();
         double t = System.currentTimeMillis() - t1;
-        System.out.println("PROCESSING TIME (ms) = " + ((float)t / (float) (counter-10)));
+        System.out.println(t1 + " TOTAL  PROCESSING TIME = " + (t / (float) counter));
     }
-
 
 }
