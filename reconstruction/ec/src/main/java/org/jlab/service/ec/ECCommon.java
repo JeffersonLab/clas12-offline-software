@@ -44,11 +44,6 @@ public class ECCommon {
     static float               tps = 0.02345f;
 	public static float    TOFFSET = 125f; 
     public static float       veff = 18.1f;
-    public static int triggerPhase = 0;
-    
-    static IndexedTable offset = null;
-    
-//    public static float TOFFSET = 436; 
     
     public  static void initHistos() {
        
@@ -77,26 +72,12 @@ public class ECCommon {
         IndexedTable    atten = manager.getConstants(run, "/calibration/ec/attenuation");
         IndexedTable     gain = manager.getConstants(run, "/calibration/ec/gain");
 		IndexedTable     time = manager.getConstants(run, "/calibration/ec/timing");
-		IndexedTable   jitter = manager.getConstants(run, "/calibration/ec/time_jitter");
-		               offset = manager.getConstants(run, "/calibration/ec/fadc_offset");
-        
-        double PERIOD = jitter.getDoubleValue("period",0,0,0);
-        int    PHASE  = jitter.getIntValue("phase",0,0,0); 
-        int    CYCLES = jitter.getIntValue("cycles",0,0,0);
-        
-	    triggerPhase = 0;
-    	
-        if(event.hasBank("RUN::config")==true){
-            DataBank bank = event.getBank("RUN::config");
-            long timestamp = bank.getLong("timestamp", 0);
-            triggerPhase = (int) (PERIOD*((timestamp+PHASE)%CYCLES));
-        }
     
         if (singleEvent) resetHistos();        
         
         List<ECStrip>  ecStrips = null;
         
-        if(event instanceof HipoDataEvent) ecStrips = ECCommon.readStripsHipo(event);
+        if(event instanceof HipoDataEvent) ecStrips = ECCommon.readStripsHipo(event, run, manager);
         
         if(ecStrips==null) return new ArrayList<ECStrip>();
         
@@ -123,7 +104,6 @@ public class ECCommon {
                                  atten.getDoubleValue("B", sector,layer,component),
                                  atten.getDoubleValue("C", sector,layer,component));
             strip.setGain(gain.getDoubleValue("gain", sector,layer,component)); 
-            strip.setTriggerPhase(triggerPhase);
             strip.setVeff(veff);
             strip.setTiming(time.getDoubleValue("a0", sector, layer, component),
                             time.getDoubleValue("a1", sector, layer, component),
@@ -135,11 +115,26 @@ public class ECCommon {
         return ecStrips;
     }
         
-    public static List<ECStrip>  readStripsHipo(DataEvent event){ 
+    public static List<ECStrip>  readStripsHipo(DataEvent event, int run, ConstantsManager manager){ 
     	
-    	    List<ECStrip>  strips = new ArrayList<ECStrip>();
+    	List<ECStrip>  strips = new ArrayList<ECStrip>();
         IndexedList<List<Integer>>  tdcs = new IndexedList<List<Integer>>(3);  
         
+		IndexedTable   jitter = manager.getConstants(run, "/calibration/ec/time_jitter");
+		IndexedTable   offset = manager.getConstants(run, "/calibration/ec/fadc_offset");
+        
+        double PERIOD = jitter.getDoubleValue("period",0,0,0);
+        int    PHASE  = jitter.getIntValue("phase",0,0,0); 
+        int    CYCLES = jitter.getIntValue("cycles",0,0,0);
+        
+	    int triggerPhase = 0;
+    	
+        if(event.hasBank("RUN::config")==true){
+            DataBank bank = event.getBank("RUN::config");
+            long timestamp = bank.getLong("timestamp", 0);
+            triggerPhase = (int) (PERIOD*((timestamp+PHASE)%CYCLES));
+        }
+
         if(event.hasBank("ECAL::tdc")==true){
             DataBank  bank = event.getBank("ECAL::tdc");            
             for(int i = 0; i < bank.rows(); i++){
@@ -166,6 +161,7 @@ public class ECCommon {
                 ECStrip  strip = new ECStrip(is, il, ip); 
                 
                 strip.setADC(adc);
+                strip.setTriggerPhase(triggerPhase);
                 
                 double sca = (is==5)?AtoE5[ind[il-1]]:AtoE[ind[il-1]]; 
                 if (variation=="clas6") sca = 1.0;               

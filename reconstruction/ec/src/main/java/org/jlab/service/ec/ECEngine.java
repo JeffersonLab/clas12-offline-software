@@ -142,8 +142,7 @@ public class ECEngine extends ReconstructionEngine {
             bankC.setInt("coordW",   c,         clusters.get(c).getPeak(2).getCoord());
   
         }
-
-        
+      
         DataBank bankM = de.createBank("ECAL::moments", clusters.size());
         for(int c = 0; c < clusters.size(); c++){
             bankM.setFloat("distU", c, (float) clusters.get(c).clusterPeaks.get(0).getDistanceEdge());
@@ -159,8 +158,7 @@ public class ECEngine extends ReconstructionEngine {
             bankM.setFloat("m3v", c,   (float) clusters.get(c).clusterPeaks.get(1).getMoment3());
             bankM.setFloat("m3w", c,   (float) clusters.get(c).clusterPeaks.get(2).getMoment3());
         }
-        
-        
+                
         DataBank  bankD =  de.createBank("ECAL::calib", clusters.size());
          for(int c = 0; c < clusters.size(); c++){
             bankD.setByte("sector",  c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
