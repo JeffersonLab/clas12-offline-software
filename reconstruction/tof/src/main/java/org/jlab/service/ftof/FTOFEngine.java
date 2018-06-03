@@ -57,7 +57,8 @@ public class FTOFEngine extends ReconstructionEngine {
                     "/calibration/ftof/status",
                     "/calibration/ftof/gain_balance",
                     "/calibration/ftof/tdc_conv",
-                };
+                    "/calibration/ftof/time_jitter",
+                 };
         
         requireConstants(Arrays.asList(ftofTables));
        
@@ -108,9 +109,14 @@ public class FTOFEngine extends ReconstructionEngine {
 		
         // Load the constants
         //-------------------
-        int newRun = bank.getInt("run", 0);
+        int  newRun = bank.getInt("run", 0);
+        long timeStamp = bank.getLong("timestamp", 0);
         if (newRun<=0) {
             System.err.println("FTOFEngine:  got run <= 0 in RUN::config, skipping event.");
+            return false;
+        }
+        if (timeStamp==-1) {
+            System.err.println("FTOFEngine:  got 0 timestamp, skipping event");
             return false;
         }
         
@@ -129,14 +135,15 @@ public class FTOFEngine extends ReconstructionEngine {
         List<Cluster> clusters = new ArrayList<Cluster>(); // all clusters
         // read in the hits for FTOF
         HitReader hitRead = new HitReader();
-        hitRead.fetch_Hits(event, geometry, trkLines, paths, ids, 
+        hitRead.fetch_Hits(event, timeStamp, geometry, trkLines, paths, ids, 
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/attenuation"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/effective_velocity"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_offsets"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_walk"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/status"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/gain_balance"),
-                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/tdc_conv") );
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/tdc_conv"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_jitter") );
 
         // 1) get the hits
         List<Hit> FTOF1AHits = hitRead.get_FTOF1AHits();

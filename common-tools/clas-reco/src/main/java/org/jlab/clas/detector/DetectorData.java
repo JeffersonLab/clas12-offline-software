@@ -255,13 +255,13 @@ public class DetectorData {
        return bank;
    }
    
-   public static DataBank getCherenkovResponseBank(List<CherenkovResponse> responses, DataEvent event, String bank_name){
+   public static DataBank getCherenkovResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, responses.size());
        for(int row = 0; row < responses.size(); row++){
-           CherenkovResponse c = responses.get(row);
+           CherenkovResponse c = (CherenkovResponse)responses.get(row);
            bank.setShort("index", row, (short) c.getHitIndex());
            bank.setShort("pindex", row, (short) c.getAssociation());
-           bank.setByte("detector", row, (byte) c.getCherenkovType().getDetectorId());
+           bank.setByte("detector", row, (byte) c.getDescriptor().getType().getDetectorId());
            bank.setFloat("x", row, (float) c.getHitPosition().x());
            bank.setFloat("y", row, (float) c.getHitPosition().y());
            bank.setFloat("z", row, (float) c.getHitPosition().z());
@@ -329,7 +329,7 @@ public class DetectorData {
                bank.setShort("pindex", row, (short) i);
                bank.setByte("detector", row, (byte) p.getTrackDetector());
                bank.setByte("q", row, (byte) p.getCharge());
-               bank.setFloat("chi2", row, (float) p.getChi2());
+               bank.setFloat("chi2", row, (float) p.getTrackChi2());
                bank.setShort("NDF", row, (short) p.getNDF());
                bank.setFloat("px_nomm", row, (float) p.vector().x());
                bank.setFloat("py_nomm", row, (float) p.vector().y());
@@ -541,8 +541,7 @@ public class DetectorData {
                track.setVertex(vx, vy, z0);
                track.setPath(bank.getFloat("pathlength", row));
                track.setNDF(bank.getInt("ndf",row));
-               // FIXME:  is this the correct chi2:
-               track.setchi2(bank.getFloat("circlefit_chi2_per_ndf",row));
+               track.setchi2(bank.getFloat("chi2",row));
 
                //track.addCTOFPoint(x,y,z);
                Vector3D hc_vec = DetectorData.readVector(bank, row, "c_x", "c_y", "c_z");

@@ -44,20 +44,23 @@ public class HitReader implements IMatchedHit {
      * @param event the evio event
      * @param geometry the CTOF geometry from package
      */
-    public void fetch_Hits(DataEvent event, CTOFGeant4Factory geometry,
+    public void fetch_Hits(DataEvent event, long timeStamp, CTOFGeant4Factory geometry,
             List<Line3d> trks, double[] paths, int[] ids,
             IndexedTable constants0, 
             IndexedTable constants1, 
             IndexedTable constants2, 
             IndexedTable constants3, 
             IndexedTable constants4, 
-            IndexedTable constants5) {
+            IndexedTable constants5, 
+            IndexedTable constants6) {
         /*
         0: "/calibration/ctof/attenuation"),
         1: "/calibration/ctof/effective_velocity"),
         2: "/calibration/ctof/time_offsets"),
         3: "/calibration/ctof/tdc_conv"),
         4: "/calibration/ctof/status"));
+        5: "/calibration/ctof/gain_balance"),
+        6: "/calibration/ctof/time_jitter"));
         */
         _numTrks = trks.size();
 
@@ -126,11 +129,13 @@ public class HitReader implements IMatchedHit {
         for (Hit hit : updated_hits) {
             // set the layer to get the paddle position from the geometry
             // package
-            hit.set_HitParameters(1,  constants0, 
+            hit.set_HitParameters(1, timeStamp, 
+             constants0, 
              constants1, 
              constants2, 
              constants3, 
-             constants5);
+             constants5, 
+             constants6);
             // DetHits.get(hit.get_Panel()-1).add(hit);
         }
         // List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);

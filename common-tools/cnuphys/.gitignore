@@ -1,6 +1,9 @@
 *.class
 *.DS_Store
-*dvcs*.dat
+*dvcs
+*.dat
+*.classpath
+*.project
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

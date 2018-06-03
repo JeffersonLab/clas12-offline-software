@@ -44,8 +44,8 @@ configuration:
       compression: 2
   services:
     DCHB:
-      torusMap: clas12-fieldmap-torus.dat
-      solenoidMap: clas12-fieldmap-solenoid.dat
+      torusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
+      solenoidMap: Symm_solenoid_r601_phi1_z1201_2008.dat
 
 mime-types:
   - binary/data-hipo

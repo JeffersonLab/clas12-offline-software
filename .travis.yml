@@ -1,8 +1,17 @@
 ---
+
+sudo: required
+
 language: java
 
 jdk:
 - oraclejdk8
+
+# this affects which java version is used:
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
 
 before_install:
   - ls -lthra
@@ -10,6 +19,7 @@ before_install:
   - echo "starting build..."
 
 install:
+  - java -version
   - ./build-coatjava.sh
 
 script:

@@ -8,7 +8,10 @@ package org.jlab.utils.benchmark;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeMap;
 
 /**
@@ -16,9 +19,39 @@ import java.util.TreeMap;
  * @author gavalian
  */
 public class Benchmark {
-    private final TreeMap<String,BenchmarkTimer> timerStore = new TreeMap<String,BenchmarkTimer>();
+    
+    private static Benchmark  benchmarkInstance = new Benchmark();
+    
+    private final Map<String,BenchmarkTimer> timerStore = new HashMap<String,BenchmarkTimer>();
+    private Timer updateTimer = null;
+    
+    
     public Benchmark(){
         
+    }
+    
+    public void printTimer(int interval){
+        TimerTask timerTask = new TimerTask()
+            { 
+                public void run()
+                {
+                    //what to do at each excecution
+                    System.out.println(benchmarkStringValue());
+                }
+            };
+        updateTimer = new Timer("Benchmark");
+        updateTimer.scheduleAtFixedRate(timerTask, 0, interval);
+    }
+    
+    
+    public void reset(){
+        for(Map.Entry<String,BenchmarkTimer> entry : this.timerStore.entrySet()){
+            entry.getValue().reset();
+        }
+    }
+    
+    public static Benchmark getInstance(){
+        return benchmarkInstance;
     }
     
     public void addTimer(String name){
@@ -42,12 +75,15 @@ public class Benchmark {
     
     public void resume(String name){
         if(timerStore.containsKey(name)==false){
-            System.err.println("[Benchmark] -----> error. no timer defined with name ("
-            + name + ")");
+            //System.err.println("[Benchmark] -----> error. no timer defined with name ("
+            //+ name + ")");
+            addTimer(name);
+            timerStore.get(name).resume();
         } else {
             timerStore.get(name).resume();
         }
     }
+    
     public BenchmarkTimer  getTimer(String name){
         if(timerStore.containsKey(name)==true){
             return timerStore.get(name);
@@ -55,6 +91,37 @@ public class Benchmark {
         return null;
     }
     
+    
+    public String benchmarkStringValue(){
+         StringBuilder str = new StringBuilder();
+        ArrayList<String>  timerStrings = new ArrayList<String>();
+        for(Map.Entry<String,BenchmarkTimer> timer : timerStore.entrySet()){
+            timerStrings.add(timer.getValue().toString());
+            //str.append(timer.getValue().toString());
+            //str.append("\n");
+        }
+        
+        if(timerStrings.size()>0){
+            int len = timerStrings.get(0).length();
+            char[]  asterix = new char[len+8];
+            Arrays.fill(asterix,'*');
+            String margins = new String(asterix);
+            str.append(margins);
+            str.append("\n");
+            str.append("*     BENCHMARK  RESULTS \n");
+            str.append(margins);
+            str.append("\n");
+            for(String lines : timerStrings){
+                str.append("*   ");
+                str.append(lines);
+                str.append("   *\n");
+            }
+            str.append(margins);
+            str.append("\n");
+        }
+        
+        return str.toString();
+    }
     @Override
     public String toString(){
         StringBuilder str = new StringBuilder();

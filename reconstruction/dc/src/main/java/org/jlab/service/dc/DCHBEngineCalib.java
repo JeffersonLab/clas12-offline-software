@@ -8,6 +8,7 @@ import cnuphys.snr.clas12.Clas12NoiseResult;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
@@ -41,6 +42,7 @@ import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.Road;
 import org.jlab.rec.dc.trajectory.RoadFinder;
 import org.jlab.utils.CLASResources;
+import org.jlab.utils.groups.IndexedTable;
 
 
 public class DCHBEngineCalib extends ReconstructionEngine {
@@ -63,6 +65,7 @@ String FieldsConfig="";
             "/calibration/dc/time_to_distance/time2dist",
          //   "/calibration/dc/time_corrections/T0_correction",
             "/calibration/dc/time_corrections/timingcuts",
+            "/calibration/dc/time_jitter",
         };
 
         requireConstants(Arrays.asList(dcTables));
@@ -70,7 +73,10 @@ String FieldsConfig="";
         this.getConstantsManager().setVariation("calib");
 
         // Load the geometry
-        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
+        String varname = CLASResources.getEnvironmentVariable("GEOMETRYDATABASEVARIATION");
+        String variationName = Optional.ofNullable(varname).orElse("default");
+
+        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, variationName);
         dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
         
         
@@ -103,19 +109,24 @@ String FieldsConfig="";
         }
 
         DataBank bank = event.getBank("RUN::config");
-
+        long   timeStamp = bank.getLong("timestamp", 0);
+        double triggerPhase =0;
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
         if(newRun==0)
         	return true;
-
+        
         if(Run.get()==0 || (Run.get()!=0 && Run.get()!=newRun)) { 
-            if(newRun>1000) {
-                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
-            } else {
-                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
-            }
+            if(timeStamp==-1)
+                return true;
+            
+            IndexedTable tabJ=this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_jitter");
+            double period = tabJ.getDoubleValue("period", 0,0,0);
+            int    phase  = tabJ.getIntValue("phase", 0,0,0);
+            int    cycles = tabJ.getIntValue("cycles", 0,0,0);
+            
+            if(cycles>0) triggerPhase=period*((timeStamp+phase)%cycles);
             
             TableLoader.FillT0Tables(newRun);
             TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist")); 
@@ -163,7 +174,7 @@ String FieldsConfig="";
        HitReader hitRead = new HitReader();
        hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, Constants.getT0(), Constants.getT0Err(), 
                this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), 
-               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), dcDetector);
+               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), dcDetector, triggerPhase);
 
        List<Hit> hits = new ArrayList<Hit>();
        //I) get the hits

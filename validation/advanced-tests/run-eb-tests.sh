@@ -100,14 +100,11 @@ then
         fi
     fi
 
-    # download test files
-    if ! [ -e ${webFileStub}.evio ]
-    then
-        rm -f ${webFileStub}.evio.gz
-        wget --no-check-certificate $webDir/${webFileStub}.evio.gz
-        if [ $? != 0 ] ; then echo "wget validation files failure" ; exit 1 ; fi
-        gunzip -f ${webFileStub}.evio.gz
-    fi
+    # download test files, if necessary:
+    rm -f ${webFileStub}.evio
+    wget -N --no-check-certificate $webDir/${webFileStub}.evio.gz
+    if [ $? != 0 ] ; then echo "wget validation files failure" ; exit 1 ; fi
+    gunzip -f ${webFileStub}.evio.gz
 
     rm -f ${webFileStub}.hipo
     rm -f out_${webFileStub}.hipo

@@ -43,9 +43,8 @@ public class DetectorParticle implements Comparable {
     
     private Line3D  driftChamberEnter = new Line3D();
     
-    private List<DetectorResponse>    responseStore = new ArrayList<DetectorResponse>();
-    private List<CherenkovResponse>  cherenkovStore = new ArrayList<CherenkovResponse>();
-    private List<TaggerResponse>     taggerStore = new ArrayList<TaggerResponse>();
+    private List<DetectorResponse> responseStore = new ArrayList<DetectorResponse>();
+    private List<TaggerResponse>   taggerStore = new ArrayList<TaggerResponse>();
 
     private TreeMap<DetectorType,Vector3>  projectedHit = 
             new  TreeMap<DetectorType,Vector3>();
@@ -160,14 +159,6 @@ public class DetectorParticle implements Comparable {
     
     public void clear(){
         this.responseStore.clear();
-    }
-    
-    public List<CherenkovResponse> getCherenkovResponse(){
-        return this.cherenkovStore;
-    }
-    
-    public void addCherenkovResponse(CherenkovResponse res){
-        this.cherenkovStore.add(res);
     }
     
     public void addTaggerResponse(TaggerResponse res) {
@@ -293,16 +284,7 @@ public class DetectorParticle implements Comparable {
     public void addResponse(DetectorResponse res){
         this.responseStore.add(res);
     }
-    
-    public DetectorResponse  getResponse(DetectorType type, int layer){
-        for(DetectorResponse res : this.responseStore){
-            if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer){
-                return res;
-            }
-        }
-        return null;
-    }
-    
+
     public boolean hasHit(DetectorType type){
         int hits = 0;
         for( DetectorResponse res : this.responseStore){
@@ -333,26 +315,27 @@ public class DetectorParticle implements Comparable {
         return this.responseStore;
     }
     
-    public List<CherenkovResponse> getCherenkovResponses(){
-        return this.cherenkovStore;
-    }
-    
     public List<TaggerResponse> getTaggerResponses() {
         return this.taggerStore;
     }
  
     public DetectorResponse getHit(DetectorType type){
-        for(DetectorResponse res : this.responseStore){
-            if(res.getDescriptor().getType()==type) return res;
+        return getHit(type,-1);
+    }
+   
+    public DetectorResponse getHit(DetectorType type, int layer) {
+        for (DetectorResponse res : this.responseStore) {
+            if (res.getDescriptor().getType() != type) continue;
+            if (layer > 0 && res.getDescriptor().getLayer() != layer) continue;
+            return res;
         }
         return null;
     }
-    
-    public DetectorResponse getHit(DetectorType type, int layer){
-        for(DetectorResponse res : this.responseStore){
-            if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer) return res;
-        }
-        return null;
+    /**
+     * Just for backward compatibility for any external usage
+     */
+    public DetectorResponse  getResponse(DetectorType type, int layer){
+        return this.getHit(type,layer);
     }
     
 
@@ -610,15 +593,14 @@ public class DetectorParticle implements Comparable {
         status += scintillatorStat*this.countResponses(DetectorType.FTHODO);
 
         // calorimeters:
-        status +=  calorimeterStat*this.countResponses(DetectorType.CND);
-        status +=  calorimeterStat*this.countResponses(DetectorType.ECAL);
-        status +=  calorimeterStat*this.countResponses(DetectorType.FTCAL);
+        status += calorimeterStat*this.countResponses(DetectorType.CND);
+        status += calorimeterStat*this.countResponses(DetectorType.ECAL);
+        status += calorimeterStat*this.countResponses(DetectorType.FTCAL);
 
         // cherenkovs:
-        //status +=   cherenkovStat*this.countResponses(DetectorType.LTCC);
-        //status +=   cherenkovStat*this.countResponses(DetectorType.HTCC);
-        //status +=   cherenkovStat*this.countResponses(DetectorType.RICH);
-        status += cherenkovStat * cherenkovStore.size();
+        status += cherenkovStat*this.countResponses(DetectorType.LTCC);
+        status += cherenkovStat*this.countResponses(DetectorType.HTCC);
+        status += cherenkovStat*this.countResponses(DetectorType.RICH);
 
         this.particleStatus = status;
     }
@@ -737,8 +719,8 @@ public class DetectorParticle implements Comparable {
 
     public double getNphe(DetectorType type){
         double nphe = 0;
-        for(CherenkovResponse c : this.cherenkovStore){
-            if(c.getCherenkovType()==type){
+        for(DetectorResponse c : this.responseStore){
+            if(c.getDescriptor().getType() == type){
                 nphe = c.getEnergy();
                 // FIXME: this is choosing the last match 
                 // should instead either be a += or a break
@@ -773,7 +755,7 @@ public class DetectorParticle implements Comparable {
         return vertex_time;
     }
 
-    public int getCherenkovSignal(List<CherenkovResponse> cherenkovs, DetectorType type){
+    public int getCherenkovSignal(List<DetectorResponse> responses, DetectorType type){
 
         // choose cross based on detector type:
         Line3D cross;
@@ -790,13 +772,13 @@ public class DetectorParticle implements Comparable {
 
         // find the best match:
         int bestIndex = -1;
-        if(cherenkovs.size()>0){
-            for(int loop = 0; loop < cherenkovs.size(); loop++) {
-                if(cherenkovs.get(loop).getCherenkovType()==type){
+        if(responses.size()>0){
+            for(int loop = 0; loop < responses.size(); loop++) {
+                if(responses.get(loop).getDescriptor().getType() == type){
                     //final boolean matchtruth = type==DetectorType.HTCC ?
-                    //    cherenkovs.get(loop).matchToPoint(cross) :
-                    //    cherenkovs.get(loop).match(cross);
-                    final boolean matchtruth = cherenkovs.get(loop).match(cross);
+                    //    ((CherenkovResponse)cherenkovs.get(loop)).matchToPoint(cross) :
+                    //    ((CherenkovResponse)cherenkovs.get(loop)).match(cross);
+                    final boolean matchtruth = ((CherenkovResponse)responses.get(loop)).match(cross);
                     if(matchtruth==true){
                         bestIndex = loop;
                         // FIXME keep the first match!
