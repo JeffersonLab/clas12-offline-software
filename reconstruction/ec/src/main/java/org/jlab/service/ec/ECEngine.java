@@ -143,7 +143,7 @@ public class ECEngine extends ReconstructionEngine {
   
         }
 
-        /*
+        
         DataBank bankM = de.createBank("ECAL::moments", clusters.size());
         for(int c = 0; c < clusters.size(); c++){
             bankM.setFloat("distU", c, (float) clusters.get(c).clusterPeaks.get(0).getDistanceEdge());
@@ -159,7 +159,7 @@ public class ECEngine extends ReconstructionEngine {
             bankM.setFloat("m3v", c,   (float) clusters.get(c).clusterPeaks.get(1).getMoment3());
             bankM.setFloat("m3w", c,   (float) clusters.get(c).clusterPeaks.get(2).getMoment3());
         }
-        */
+        
         
         DataBank  bankD =  de.createBank("ECAL::calib", clusters.size());
          for(int c = 0; c < clusters.size(); c++){
@@ -174,8 +174,8 @@ public class ECEngine extends ReconstructionEngine {
             bankD.setFloat("recEW",  c, (float) clusters.get(c).getEnergy(2));            
         }
          
-//         de.appendBanks(bankS,bankP,bankC,bankD,bankM);
-         de.appendBanks(bankS,bankP,bankC,bankD);
+         de.appendBanks(bankS,bankP,bankC,bankD,bankM);
+//         de.appendBanks(bankS,bankP,bankC,bankD);
 
     }
    
@@ -225,7 +225,9 @@ public class ECEngine extends ReconstructionEngine {
         String[]  ecTables = new String[]{
             "/calibration/ec/attenuation", 
             "/calibration/ec/gain", 
-            "/calibration/ec/timing"     
+            "/calibration/ec/timing",
+            "/calibration/ec/time_jitter",
+            "/calibration/ec/fadc_offset"
         };
         
         requireConstants(Arrays.asList(ecTables));
