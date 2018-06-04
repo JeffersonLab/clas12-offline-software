@@ -17,18 +17,8 @@ public class TrackSeederCA {
 
     public TrackSeederCA() {
         
-        sortedCrosses = new ArrayList<ArrayList<ArrayList<Cross>>>();
-        
-        //for(int b =0; b<36; b++) {
-            //sortedCrosses.add(b, new ArrayList<ArrayList<Cross>>() );
-            //for(int l =0; l<6; l++) {
-                //sortedCrosses.get(b).add(l,new ArrayList<Cross>() );
-            //}
-        //}
     }
 
-    private List<ArrayList<Cross>> seedCrosses = new ArrayList<ArrayList<Cross>>();
-    private List<ArrayList<ArrayList<Cross>>> sortedCrosses;
 
 
     // Retrieve lists of crosses as track candidates
@@ -135,7 +125,7 @@ public class TrackSeederCA {
           camaker.set_aCvsR(45);         // max angle between the cell and the radius to the first cell
         }
         if( plane.equalsIgnoreCase("ZR") ){
-          camaker.set_cosBtwCells(0.1);
+          camaker.set_cosBtwCells(0.9); // it only applies to the BMTC cross only cells
           camaker.set_abCrs(30.);
           camaker.set_aCvsR(90.);
         }
@@ -146,12 +136,6 @@ public class TrackSeederCA {
         return camaker.getNodes();  
     }
     
-    private List<Double> Xs = new ArrayList<Double>();
-    private List<Double> Ys = new ArrayList<Double>();
-    private List<Double> Ws = new ArrayList<Double>();
-
-    private List<Seed> BMTmatches = new ArrayList<Seed>();
-
     public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses, 
     						   org.jlab.rec.cvt.svt.Geometry svt_geo, 
     						   org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
@@ -164,7 +148,7 @@ public class TrackSeederCA {
         
         crosses.addAll(svt_crosses);
 
-        Collections.sort(crosses);
+//        Collections.sort(crosses);
         
         for(Cross c : bmt_crosses) { 
             if(c.get_DetectorType().equalsIgnoreCase("Z"))
@@ -180,103 +164,20 @@ public class TrackSeederCA {
 
         List<Cell> xynodes = runCAMaker( "XY", 5, crosses, bmt_geo ); 
         List<ArrayList<Cross>> xytracks =  getCAcandidates( xynodes );
-       
-//        seedCrosses = xytracks;
-//        System.out.println(xytracks.size());
 
         
-        seedlist = CAonRZ( seedlist, xytracks, bmtC_crosses, svt_geo, bmt_geo);
+        //// TODO: TEST TEST TEST
+        // test if a first fit to move the SVT crosses helps
+//        for( ArrayList<Cross> acr : xytracks ) {
+//		    Track xycand = fitSeed(acr, svt_geo, 5, false);
+//		    // update
+//        }
+        
+        
+
+        List<ArrayList<Cross>> seedCrosses = CAonRZ( xytracks, bmtC_crosses, svt_geo, bmt_geo);
         
 //        System.out.println(seedlist.size());
-
-        return seedlist;
-    }
-    
-    public List<Seed> CAonRZ( List<Seed> seedlist, 
-    						   List<ArrayList<Cross>>xytracks , 
-    						   List<ArrayList<Cross>> bmtC_crosses,
-    						   org.jlab.rec.cvt.svt.Geometry svt_geo, 
-    						   org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
-
-      if( bmtC_crosses == null ) return null;
-      // loop over each xytrack to find ZR candidates
-      // ---------------------------------------------
-//      for( List<Cross> xycross : xytracks ){ // ALERT: this throw a concurrent modification exception 
-      for( int ixy=0; ixy< xytracks.size();ixy++ ){
-    	List<Cross> xycross = xytracks.get(ixy);
-        ArrayList<Cross> crsZR = new ArrayList<Cross>();
-        // get the SVT crosses
-        ArrayList<Cross> svtcrs = new ArrayList<Cross>();
-
-        // look for svt crosses and determine the sector from bmt z crosses
-        //------------------------------------------------------------------
-        int sector = -1;
-        for( Cross c : xycross ){
-          if( c.get_Detector().equalsIgnoreCase("SVT")){
-            svtcrs.add(c);
-//            System.out.print( " " + c.get_Id() + " " +c.get_Detector() + " " + c.get_DetectorType() + " ; " );
-          }
-          else {
-        	  sector = c.get_Sector()-1;
-          }
-        }
-        if( sector < 0 ) continue;
-        Collections.sort(svtcrs);
-//        Collections.sort(svtcrs,Collections.reverseOrder());
-//        for( Cross c : svtcrs ){
-//            System.out.print( " " + c.get_Id() + " " +c.get_Detector() + " " + c.get_DetectorType() + " ; " );
-//        }
-//        System.out.println();
-        crsZR.addAll(svtcrs);
-
-        // add all the BMT_C crosses
-        //--------------------------
-//        for( Cross c : bmtC_crosses.get(sector) ){
-//            System.out.print( " " + c.get_Id() + " " +c.get_Detector() + " " + c.get_DetectorType() + " ; " );
-//        }
-//        System.out.println();
-        if( bmtC_crosses.get(sector) == null  || bmtC_crosses.get(sector).size() == 0 ) continue;
-        crsZR.addAll( bmtC_crosses.get(sector) );
-
-        // sort 
-//        Collections.sort(crsZR,Collections.reverseOrder());
-//        Collections.sort(crsZR);
-        
-        // run the CAmaker
-        List<Cell> zrnodes = runCAMaker( "ZR", 5, crsZR, bmt_geo );
-
-        List<ArrayList<Cross>> zrtracks =  getCAcandidates( zrnodes );
-
-//        System.out.println("sector" + sector + " len " + zrtracks.size());  
-        
-        // collect crosses for candidates
-        //--------------------------------
-        for( List<Cross> zrcross : zrtracks ){
-          seedCrosses.add( new ArrayList<Cross>() );
-          int scsize = seedCrosses.size();
-          // add svt
-          for( Cross c : zrcross ){
-            if( c.get_Detector().equalsIgnoreCase("SVT")){
-              seedCrosses.get(scsize-1).add(c); 
-            }              
-          }
-
-          // add bmt z
-          for( Cross c : xycross ){
-            if( c.get_Detector().equalsIgnoreCase("BMT")){
-              seedCrosses.get(scsize-1).add(c); 
-            }              
-          }
-
-          // add bmt c
-          for( Cross c : zrcross ){
-            if( c.get_Detector().equalsIgnoreCase("BMT")){
-              seedCrosses.get(scsize-1).add(c); 
-            }              
-          }
-        }
-      }
-      
 	    for (int s = 0; s < seedCrosses.size(); s++) {
 	    	Collections.sort(seedCrosses.get(s));      // TODO: check why sorting matters
 		    Track cand = fitSeed(seedCrosses.get(s), svt_geo, 5, false);
@@ -298,7 +199,109 @@ public class TrackSeederCA {
 	    	}
 	    }
 
-      return seedlist;
+        return seedlist;
+    }
+    
+    public List<ArrayList<Cross>> CAonRZ( 
+    						   List<ArrayList<Cross>>xytracks , 
+    						   List<ArrayList<Cross>> bmtC_crosses,
+    						   org.jlab.rec.cvt.svt.Geometry svt_geo, 
+    						   org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
+      
+      List<ArrayList<Cross>> seedCrosses = new ArrayList<ArrayList<Cross>>();
+
+      if( bmtC_crosses == null ) return null;
+//      System.out.println("not null bmtc");
+      // loop over each xytrack to find ZR candidates
+      // ---------------------------------------------
+//      for( List<Cross> xycross : xytracks ){ // ALERT: this throw a concurrent modification exception 
+      for( int ixy=0; ixy< xytracks.size();ixy++ ){
+    	List<Cross> xycross = xytracks.get(ixy);
+        ArrayList<Cross> crsZR = new ArrayList<Cross>();
+        // get the SVT crosses
+        ArrayList<Cross> svtcrs = new ArrayList<Cross>();
+
+        // look for svt crosses and determine the sector from bmt z crosses
+        //------------------------------------------------------------------
+        int sector = -1;
+        for( Cross c : xycross ){
+          if( c.get_Detector().equalsIgnoreCase("SVT")){
+            svtcrs.add(c);
+//            System.out.print( " " + c.get_Id() + " " +c.get_Detector() + " " + c.get_DetectorType() + " ; " );
+          }
+          else {
+        	  sector = c.get_Sector()-1;
+          }
+        }
+//        System.out.println(sector);
+        if( sector < 0 ) continue;
+        Collections.sort(svtcrs);
+//        Collections.sort(svtcrs,Collections.reverseOrder());
+//        for( Cross c : svtcrs ){
+//            System.out.print( " " + c.get_Id() + " " +c.get_Detector() + " " + c.get_DetectorType() + " ; " );
+//        }
+//        System.out.println();
+        crsZR.addAll(svtcrs);
+
+        // add all the BMT_C crosses
+        //--------------------------
+//        for( Cross c : bmtC_crosses.get(sector) ){
+//            System.out.print( " " + c.get_Id() + " " +c.get_Detector() + " " + c.get_DetectorType() + " ; " );
+//        }
+//        System.out.println();
+        if( bmtC_crosses.get(sector) == null  || bmtC_crosses.get(sector).size() == 0 ) continue;
+        crsZR.addAll( bmtC_crosses.get(sector) );
+
+//        System.out.println("\n....\t"+crsZR);
+        // sort 
+//        Collections.sort(crsZR,Collections.reverseOrder());
+//        Collections.sort(crsZR);
+        
+        // run the CAmaker
+        List<Cell> zrnodes = runCAMaker( "ZR", 5, crsZR, bmt_geo );
+//System.out.println(zrnodes);
+        List<ArrayList<Cross>> zrtracks =  getCAcandidates( zrnodes );
+
+//        System.out.println("sector" + sector + " len " + zrtracks.size());  
+        
+        // collect crosses for candidates
+        //--------------------------------
+        for( List<Cross> zrcross : zrtracks ){
+          // count svt crosses. If none, skip the candidate // TODO
+          //int Nsvt = 0;
+          //for( Cross c : zrcross ){
+            //if( c.get_Detector().equalsIgnoreCase("SVT")){
+          	  //Nsvt++;
+            //}
+          //}
+          //if( Nsvt == 0 ) continue;
+          
+          seedCrosses.add( new ArrayList<Cross>() );
+          int scsize = seedCrosses.size();
+          // add svt
+          for( Cross c : zrcross ){
+            if( c.get_Detector().equalsIgnoreCase("SVT")){
+              seedCrosses.get(scsize-1).add(c); 
+            }
+          }
+
+          // add bmt z
+          for( Cross c : xycross ){
+            if( c.get_Detector().equalsIgnoreCase("BMT")){
+              seedCrosses.get(scsize-1).add(c); 
+            }              
+          }
+
+          // add bmt c
+          for( Cross c : zrcross ){
+            if( c.get_Detector().equalsIgnoreCase("BMT")){
+              seedCrosses.get(scsize-1).add(c); 
+            }              
+          }
+        }
+      }
+
+      return seedCrosses;
     }
 
     private List<Double> X = new ArrayList<Double>();
