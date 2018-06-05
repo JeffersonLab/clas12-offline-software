@@ -23,6 +23,10 @@ public class KFitter {
 
     public StateVec finalStateVec;
 
+    public KFitter(Seed trk, org.jlab.rec.cvt.svt.Geometry geo) {
+        this.init(trk, geo, null);
+    }
+    
     public KFitter(Seed trk, org.jlab.rec.cvt.svt.Geometry geo, DataEvent event) {
         this.init(trk, geo, event);
     }
