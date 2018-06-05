@@ -6,10 +6,12 @@ import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.clas.reco.io.EvioHipoEvent;
+import org.jlab.detector.base.DetectorCollection;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.decode.CLASDecoder;
 import org.jlab.geom.base.Detector;
+import org.jlab.groot.data.H1F;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
@@ -140,7 +142,7 @@ public class ECEngine extends ReconstructionEngine {
             bankC.setInt("coordW",   c,         clusters.get(c).getPeak(2).getCoord());
   
         }
-        
+      
         DataBank bankM = de.createBank("ECAL::moments", clusters.size());
         for(int c = 0; c < clusters.size(); c++){
             bankM.setFloat("distU", c, (float) clusters.get(c).clusterPeaks.get(0).getDistanceEdge());
@@ -156,7 +158,7 @@ public class ECEngine extends ReconstructionEngine {
             bankM.setFloat("m3v", c,   (float) clusters.get(c).clusterPeaks.get(1).getMoment3());
             bankM.setFloat("m3w", c,   (float) clusters.get(c).clusterPeaks.get(2).getMoment3());
         }
-        
+                
         DataBank  bankD =  de.createBank("ECAL::calib", clusters.size());
          for(int c = 0; c < clusters.size(); c++){
             bankD.setByte("sector",  c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
@@ -210,10 +212,10 @@ public class ECEngine extends ReconstructionEngine {
         ECCommon.clusterError[1] = err1;
         ECCommon.clusterError[2] = err2;
     }
-    /*
+    
     public DetectorCollection<H1F>  getHist() {
         return ECCommon.H1_ecEng;
-    }*/
+    }
     
     @Override
     public boolean init() {
@@ -221,7 +223,9 @@ public class ECEngine extends ReconstructionEngine {
         String[]  ecTables = new String[]{
             "/calibration/ec/attenuation", 
             "/calibration/ec/gain", 
-            "/calibration/ec/timing"     
+            "/calibration/ec/timing",
+            "/calibration/ec/time_jitter",
+            "/calibration/ec/fadc_offset"
         };
         
         requireConstants(Arrays.asList(ecTables));
@@ -233,7 +237,7 @@ public class ECEngine extends ReconstructionEngine {
         setPeakThresholds(18,20,15);
         setClusterCuts(7,15,20);
         
-        //ECCommon.initHistos();
+        ECCommon.initHistos();
         return true;
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
