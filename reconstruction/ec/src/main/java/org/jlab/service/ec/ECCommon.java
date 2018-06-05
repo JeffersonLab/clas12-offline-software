@@ -129,7 +129,7 @@ public class ECCommon {
         
 	    int triggerPhase = 0;
     	
-        if(event.hasBank("RUN::config")==true){
+        if(CYCLES>0&&event.hasBank("RUN::config")==true){
             DataBank bank = event.getBank("RUN::config");
             long timestamp = bank.getLong("timestamp", 0);
             triggerPhase = (int) (PERIOD*((timestamp+PHASE)%CYCLES));
