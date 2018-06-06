@@ -138,7 +138,7 @@ public class KFitter {
             double pz = invKappa * sv.trackTraj.get(k).tanL;
             TrjPoints.add(new HitOnTrack(layer, x, y, z, px, py, pz));
 
-            //System.out.println(" Traj layer "+layer+" x "+x+" y "+y+" z "+z);
+//            System.out.println(" Traj layer "+layer+" x "+x+" y "+y+" z "+z);
         }
     }
 
@@ -187,19 +187,19 @@ public class KFitter {
                         this.setFitFailed = true;
                     }
                     //System.err.println(c.get_Cluster1().get_Layer()+") error in traj "+this.TrjPoints.size());
-                    if (Double.isNaN(c.get_Point().x())) {
-                        c.set_Point(new Point3D(h.x, h.y, c.get_Point().z()));
-                    }
-                    if (Double.isNaN(c.get_Point().z())) {
-                        c.set_Point(new Point3D(c.get_Point().x(), c.get_Point().y(), h.z));
-                    }
+//                    if (Double.isNaN(c.get_Point().x())) {
+//                        c.set_Point(new Point3D(h.x, h.y, c.get_Point().z()));
+//                    }
+//                    if (Double.isNaN(c.get_Point().z())) {
+//                        c.set_Point(new Point3D(c.get_Point().x(), c.get_Point().y(), h.z));
+//                    }
 
                 }
             }
         }
         cand.addAll(trk.get_Crosses());
 
-        cand.finalUpdate_Crosses(geo);
+//        cand.finalUpdate_Crosses(geo);
 
         return cand;
     }
