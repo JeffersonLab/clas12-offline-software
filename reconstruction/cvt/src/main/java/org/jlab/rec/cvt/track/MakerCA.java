@@ -23,13 +23,19 @@ public class MakerCA {
 	private double _abCrs;  // max angle in degrees where to look for cross pairs 
 	private double _cosBtwCells; // minimal cosine between cells
 	private String _plane;  // plane, XY (default) or RZ 
+	private boolean _debug;
 
+	public MakerCA( boolean debug ) {
+		this();
+		this._debug = debug;
+	}
 	
 	public MakerCA(){
 		this._abCrs = 11.;
 		this._aCvsR = 15;
 		this._cosBtwCells = 0.995;
 		this._plane = "XY"; 
+		this._debug = false;
 	}
 	
 	
@@ -89,18 +95,21 @@ public class MakerCA {
 	public void createCells( List<Cross> crs, Geometry bgeom ){
 		// this function loops over the crosses and looks for pairs that pass the cuts
 		//
-//		Collections.sort(crs);
+		Collections.sort(crs);
 		nodes = new ArrayList<Cell>();
         for( int ic=0;ic<crs.size();ic++){
       	  Cross a = crs.get(ic);
       	  int aReg = a.get_Region();
-//          System.out.println( " cross a " + a.get_Id() + " " + a.get_Detector() + " " + a.get_Sector() + " " 
-//      	  + aReg + " phi " + a.get_Point().toVector3D().phi() + " in sector " + 
-//        		  bgeom.isInSector(1, a.get_Point().toVector3D().phi(), 0 ));
-          
       	  if( a.get_Detector().equalsIgnoreCase("BMT")) {
       		  aReg = 3 + bgeom.getLayer( aReg , a.get_DetectorType() );
       	  }
+      	  
+      	  if( this._debug ) {
+      		  System.out.println( "\n cross a " + a.get_Id() + " " + a.get_Detector() +a.get_DetectorType() + " sect:" + a.get_Sector() + " reg:" 
+      				  + aReg + " phi:" + a.get_Point().toVector3D().phi() + " in BMT sector:" + 
+      				  bgeom.isInSector(1, a.get_Point().toVector3D().phi(), 0 ));
+      	  }
+      	  
       	  
 //      	  for(int jc=0;jc<crs.size();jc++){
       	  for(int jc=ic+1;jc<crs.size();jc++){
@@ -110,26 +119,30 @@ public class MakerCA {
           	  int bReg = b.get_Region();
           	  if( b.get_Detector().equalsIgnoreCase("BMT")) {
           		  bReg = 3 + bgeom.getLayer( bReg , b.get_DetectorType() );
-//                	System.out.println( "   - cross b " + b.get_Id() + " " + b.get_Detector() +" " + 
-//          		  b.get_DetectorType() + " " + bReg + " " + b.get_Sector() );
           	  }
+          	  
+          	  if( this._debug ) {
+          		  System.out.println( " cross b " + b.get_Id() + " " + b.get_Detector() +b.get_DetectorType() + " sect:" + b.get_Sector() + " reg:" 
+          				  + bReg + " phi:" + b.get_Point().toVector3D().phi() + " in BMT sector:" + 
+          				  bgeom.isInSector(1, b.get_Point().toVector3D().phi(), 0 ));
+          	  }
+          	  
           	  if( bReg <= aReg  ) continue; // crosses should be ordered. skip in case they are not
           	  
           	  // we allow skipping one region maximum
           	  if( bReg <=4 ) {
           		  if( Math.abs( bReg-aReg) > 2) continue;
-//          		  System.out.println(" bReg <=4       passed Delta region 2 ");
+          		  if( this._debug) System.out.println(" bReg <=4       passed Delta region 2 ");
           	  }
           	  if( bReg > 4 && bReg < 7  ) {
           		  if( Math.abs( bReg-aReg) > 3) continue;
-//          		  System.out.println(" 4 < bReg < 7       passed Delta region 3 " ); 
+          		  if( this._debug) System.out.println(" 4 < bReg < 7       passed Delta region 3 " ); 
           	  }
           	  if( bReg >= 7 ) {
           		  if( Math.abs( bReg-aReg) > 4) continue;
-//          		  System.out.println(" 7 >= bReg        passed Delta region 4 " );
+          		  if( this._debug) System.out.println(" 7 >= bReg        passed Delta region 4 " );
           	  }
 
-//              System.out.println( "   - cross b " + b.get_Id() + " " + b.get_Detector() + " " + bReg + " " + b.get_Sector());
           	  // stay in the same BMT sector
           	  if( b.get_Detector().equalsIgnoreCase("BMT") ){
           		  if( a.get_Detector().equalsIgnoreCase("BMT")){
@@ -137,10 +150,9 @@ public class MakerCA {
           		  }
           		  else{
           			  double aphi = a.get_Point().toVector3D().phi() ;
-//          			  if( bgeom.isInSector(1, aphi, 30 ) != b.get_Sector() ) {
           			  if( ! bgeom.checkIsInSector( aphi, b.get_Sector(), 1, Math.toRadians(10) )  ) {
-//          				  System.out.println("arg"); 
-      				  continue; 
+          				  if( this._debug) System.out.println("cross b and a are not in the same sector"); 
+          				  continue;
       				  }
           			  
           		  }
@@ -148,10 +160,11 @@ public class MakerCA {
           	  
           	  // create the cell
       		  Cell scell = new Cell( a,b, this._plane);
-
+      		  if( this._debug) System.out.println( " ... create a cell: " + scell);
+      		  
       		  // check angular position of the crosses and the cell
       		  if( this.checkAngles(scell) == false ) {
-//          		  System.out.println("    +++ angle check not passed  +++ ");
+          		  if( this._debug) System.out.println("    +++ angle check not passed  +++ ");
       			  continue;
       		  }
       		  	
@@ -169,6 +182,7 @@ public class MakerCA {
       		  
       		  // here a good cell if found. Adding it to the list of cells
       		  nodes.add(scell);
+      		  if( this._debug) System.out.println( "adding the cell to the node list\n");
           	  
       	  }
         }

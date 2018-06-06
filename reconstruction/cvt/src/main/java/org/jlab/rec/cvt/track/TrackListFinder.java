@@ -6,6 +6,7 @@ import java.util.List;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 import org.jlab.rec.cvt.trajectory.TrkSwimmer;
@@ -31,8 +32,6 @@ public class TrackListFinder {
             return cands;
         }
 
-        // remove clones
-        //ArrayList<Track> passedcands = this.rmHelicalTrkClones(org.jlab.rec.cvt.svt.Constants.removeClones, cands);
         // loop over candidates and set the trajectories
         
         for (Track trk : cands) {
@@ -100,27 +99,43 @@ public class TrackListFinder {
     public void removeOverlappingTracks(List<Track> trkcands) {
             if(trkcands==null)
                 return;
+            
             List<Track> selectedTracks =new ArrayList<Track>();
             List<Track> list = new  ArrayList<Track>();
+            List<Track> rejected = new  ArrayList<Track>();
             for(int i =0; i<trkcands.size(); i++) { 
                 
                 list.clear();
-                if(trkcands.get(i)==null)
+                if(trkcands.get(i)==null) {
                     continue;
+                }
+                if( rejected.contains( trkcands.get(i) ) ) continue;
+                
                 this.getOverlapLists(trkcands.get(i), trkcands, list);
+                
                 Track selectedTrk = this.FindBestTrack(list);
                 if(selectedTrk==null)
                     continue;
-                if(this.ListContainsTrack(selectedTracks, selectedTrk)==false)
+                if(selectedTracks.contains(selectedTrk)==false)
                         selectedTracks.add(selectedTrk);
+                
+                list.remove(selectedTrk);
+
+                for( Track t : list ) {
+                	if( ! rejected.contains(t) ) rejected.add(t);
+                }
+
             }
+            if( rejected != null )
+            	selectedTracks.removeAll(rejected);
             if(trkcands!=null)
                 trkcands.removeAll(trkcands);
             if(selectedTracks!=null)
                 trkcands.addAll(selectedTracks);
     }
 
-    private boolean ListContainsTrack(List<Track> selectedTracks, Track selectedTrk) {
+    private boolean ListContainsTrack(List<Track> selectedTracks, Track selectedTrk) { 
+            // not used. Now Track extends Comparables
             boolean isInList = false;
             for(Track trk : selectedTracks) {
                     if(trk.get_Id()==selectedTrk.get_Id())
@@ -129,26 +144,45 @@ public class TrackListFinder {
             return isInList;
     }
 
+
     private void getOverlapLists(Track track, List<Track> trkcands, List<Track> list) {
-         
-        for(int i =0; i<trkcands.size(); i++) { 
-                if( (track.get(0).get_Id()!=-1 && track.get(0).get_Id()==trkcands.get(i).get(0).get_Id()) || 
-                                (track.get(1).get_Id()!=-1 && track.get(1).get_Id()==trkcands.get(i).get(1).get_Id()) || 
-                                (track.get(2).get_Id()!=-1 && track.get(2).get_Id()==trkcands.get(i).get(2).get_Id()) ) {
-                        list.add(trkcands.get(i));
-                }
-        }
+    // --------------------------------------------------------------------
+    //  two tracks are considered the same if they share at least 2 crosses
+    // --------------------------------------------------------------------
+			
+    	for( Track t : trkcands ) {
+    		int N = 0;
+    		for( Cross c : t ) {
+    			if( track.contains(c) ) { N++;  }
+    		}
+    		if( N >= 2 ) list.add( t );
+    	}
+    	
     }
 
     private Track FindBestTrack(List<Track> trkList) {
+    // --------------------------------------------------------------------
+    //  Select the candidate with the highest number of NDF
+    //    if two have the same ndf, get the one with the better chi2/ndf
+    // --------------------------------------------------------------------
             double bestChi2 = 9999999;
+            int ndf = 0;
             Track bestTrk = null;
 
             for(int i =0; i<trkList.size(); i++) {
-                    if(trkList.get(i).getChi2()/(double)trkList.get(i).getNDF()<bestChi2) {
-                            bestChi2 = trkList.get(i).getChi2()/(double)trkList.get(i).getNDF();
-                            bestTrk = trkList.get(i);
-                    }
+                    if(trkList.get(i).getNDF()>=ndf) {
+                        ndf = trkList.get(i).getNDF();
+                        if( trkList.get(i).getNDF()==ndf ) {
+                        	if(trkList.get(i).getChi2()/(double)trkList.get(i).getNDF()<bestChi2) {
+		                      bestChi2 = trkList.get(i).getChi2()/(double)trkList.get(i).getNDF();
+		                      bestTrk = trkList.get(i);
+                        	}
+                        }
+                        else {
+                        	bestChi2 = trkList.get(i).getChi2()/(double)trkList.get(i).getNDF();
+                        	bestTrk = trkList.get(i);
+                        }
+                }
             }
             return bestTrk;
     }
