@@ -96,7 +96,7 @@ public class EBEngine extends ReconstructionEngine {
         List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType, trajectoryType, covMatrixType);
         eb.addForwardTracks(tracks);      
         
-        List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks");
+        List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks", "CVTRec::Trajectory");
         eb.addCentralTracks(ctracks);
         
         eb.getPindexMap().put(0, tracks.size());

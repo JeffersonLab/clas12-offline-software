@@ -346,6 +346,7 @@ public class DetectorParticle implements Comparable {
     public double getTrackChi2() {return this.detectorTrack.getchi2();}
     public int    getStatus(){ return this.particleStatus;}
     public int    getTrackDetector() {return this.detectorTrack.getDetectorID();}
+    public int    getTrackSector() {return this.detectorTrack.getSector();}
     public double getMass(){ return this.particleMass;}
     public int    getPid(){ return this.particlePID;}
     public double getPidQuality() {return this.particleIDQuality;}
