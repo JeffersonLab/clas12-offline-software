@@ -12,8 +12,9 @@ public class TableLoader {
     public TableLoader() {
             // TODO Auto-generated constructor stub
     }
+    static final protected int nBinsT=2000;
     //public static double[][][][][] DISTFROMTIME = new double[6][6][6][6][850]; // sector slyr alpha Bfield time bins
-    public static double[][][][][] DISTFROMTIME = new double[6][6][8][6][1800]; // sector slyr alpha Bfield time bins
+    public static double[][][][][] DISTFROMTIME = new double[6][6][8][6][nBinsT]; // sector slyr alpha Bfield time bins
     static boolean T2DLOADED = false;
     static boolean T0LOADED = false;
     static int minBinIdxB = 0;
@@ -121,20 +122,21 @@ public class TableLoader {
                                             int tbin = Integer.parseInt(df.format(timebfield/2.) ) -1;
 
 
-                                             if(tbin<0)
-                                                 tbin=0;
-
-                                             if(tbin>maxBinIdxT[s][r][ibfield][icosalpha]) {
-                                                  maxBinIdxT[s][r][ibfield][icosalpha] = tbin; 
-                                             } //System.out.println("tbin "+tbin+" tmax "+tmax+ "s "+s+" sl "+r );
-                                              if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]==0) {
+                                            if(tbin<0)
+                                                tbin=0;
+                                            if(tbin>=nBinsT)
+                                                tbin = nBinsT-1;
+                                            if(tbin>maxBinIdxT[s][r][ibfield][icosalpha]) {
+                                                maxBinIdxT[s][r][ibfield][icosalpha] = tbin; 
+                                            } //System.out.println("tbin "+tbin+" tmax "+tmax+ "s "+s+" sl "+r );
+                                            if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]==0) {
                                                 // firstbin = bin;
                                                 // bincount = 0;				    	 
-                                                     DISTFROMTIME[s][r][ibfield][icosalpha][tbin]=x;
-                                             } else {
+                                                DISTFROMTIME[s][r][ibfield][icosalpha][tbin]=x;
+                                            } else {
                                                 // bincount++;
-                                                 DISTFROMTIME[s][r][ibfield][icosalpha][tbin]+=stepSize;
-                                             }
+                                                DISTFROMTIME[s][r][ibfield][icosalpha][tbin]+=stepSize;
+                                            }
 
                                            // System.out.println(r+"  "+ibfield+"  "+icosalpha+"  "+tbin +"  "+timebfield+ "  "+x+"  "+alpha); 
                                         }
