@@ -325,12 +325,13 @@ public class DetectorData {
            DetectorParticle p = particles.get(i);
            if(p.getTrackDetector()==DetectorType.DC.getDetectorId() ||
               p.getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
-               bank.setShort("index", row, (short) p.getTrackIndex());
-               bank.setShort("pindex", row, (short) i);
-               bank.setByte("detector", row, (byte) p.getTrackDetector());
-               bank.setByte("q", row, (byte) p.getCharge());
-               bank.setFloat("chi2", row, (float) p.getTrackChi2());
-               bank.setShort("NDF", row, (short) p.getNDF());
+               bank.setShort("index",   row, (short) p.getTrackIndex());
+               bank.setShort("pindex",  row, (short) i);
+               bank.setByte( "sector",  row, (byte)  p.getTrackSector());
+               bank.setByte( "detector",row, (byte)  p.getTrackDetector());
+               bank.setByte( "q",       row, (byte)  p.getCharge());
+               bank.setFloat("chi2",    row, (float) p.getTrackChi2());
+               bank.setShort("NDF",     row, (short) p.getNDF());
                bank.setFloat("px_nomm", row, (float) p.vector().x());
                bank.setFloat("py_nomm", row, (float) p.vector().y());
                bank.setFloat("pz_nomm", row, (float) p.vector().z());
@@ -460,6 +461,7 @@ public class DetectorData {
                track.setVector(pvec.x(), pvec.y(), pvec.z());
                track.setVertex(vertex.x(), vertex.y(), vertex.z());
                track.setPath(bank.getFloat("pathlength", row));
+               track.setSector(bank.getByte("sector", row));
 
                // t1 = HTCC, c1 = DCR1, c3 = DCR3
                Vector3D lc_vec = DetectorData.readVector(bank, row, "t1_x", "t1_y", "t1_z");
@@ -514,11 +516,16 @@ public class DetectorData {
    }
    
    
-   public static List<DetectorTrack>  readCentralDetectorTracks(DataEvent event, String bank_name){
+   public static List<DetectorTrack>  readCentralDetectorTracks(DataEvent event, String bank_name, String traj_bank_name){
        List<DetectorTrack>  tracks = new ArrayList<DetectorTrack>();
        if(event.hasBank(bank_name)==true){
            DataBank bank = event.getBank(bank_name);
            int nrows = bank.rows();
+
+           DataBank trajBank = null;
+           if (traj_bank_name!=null && event.hasBank(traj_bank_name)) {
+               trajBank=event.getBank(traj_bank_name);
+           }
 
            for(int row = 0; row < nrows; row++){
                int charge  = bank.getInt("q", row);               
@@ -549,6 +556,32 @@ public class DetectorData {
                track.addCross(hc_vec.x(), hc_vec.y(), hc_vec.z(), hc_dir.x(), hc_dir.y(), hc_dir.z());
 
                track.setDetectorID(DetectorType.CVT.getDetectorId());
+
+               final int trkId=bank.getInt("ID",row);
+
+               // this could be optimized:
+               if (trajBank!=null) {
+                   for (int ii=0; ii<trajBank.rows(); ii++) {
+                       if (trajBank.getInt("ID",ii) !=  trkId) continue;
+                       int detId=trajBank.getInt("LayerTrackIntersPlane",ii);
+                       float xx=trajBank.getFloat("XtrackIntersPlane",ii);
+                       float yy=trajBank.getFloat("YtrackIntersPlane",ii);
+                       float zz=trajBank.getFloat("ZtrackIntersPlane",ii);
+
+                       float theta=trajBank.getFloat("ThetaTrackIntersPlane",ii);
+                       float phi  =trajBank.getFloat("PhiTrackIntersPlane",ii);
+                       
+                       float cz = (float)(Math.cos(theta));
+                       float cx = (float)(Math.sin(theta)*Math.cos(phi));
+                       float cy = (float)(Math.sin(theta)*Math.sin(phi));
+                       
+                       Line3D traj=new Line3D(xx,yy,zz,
+                               xx+track.getMaxLineLength()*cx,
+                               yy+track.getMaxLineLength()*cy,
+                               zz+track.getMaxLineLength()*cz);
+                       track.addTrajectoryPoint(trkId,detId,traj);
+                   }
+               }
 
                tracks.add(track);
            }
