@@ -393,12 +393,12 @@ public class DCHBEngineCalib extends ReconstructionEngine {
         
         //String inputFile = args[0];
         //String outputFile = args[1];
-        //String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
+        String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
         //String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.ev.hipo";
-        String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/gemc_out_mu-_hipo/mu-_30nA_bg_out.ev.hipo";
+        //String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/gemc_out_mu-_hipo/mu-_30nA_bg_out.ev.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
         
-        DCHBEngine en = new DCHBEngine();
+        DCHBEngineCalib en = new DCHBEngineCalib();
         en.init();
         
         DCTBEngine en2 = new DCTBEngine();
@@ -412,8 +412,8 @@ public class DCHBEngineCalib extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         
-        //String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGD.hipo";
-        String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.recn2.hipo";
+        String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGD.hipo";
+        //String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.recn2.hipo";
         writer.open(outputFile);
         TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
         long t1 = 0;
@@ -434,14 +434,14 @@ public class DCHBEngineCalib extends ReconstructionEngine {
             writer.writeEvent(event);
             System.out.println("PROCESSED  EVENT "+event.getBank("RUN::config").getInt("event", 0));
            // event.show();
-            if (event.getBank("RUN::config").getInt("event", 0) > 11) {
-                break;
-            }
+            //if (event.getBank("RUN::config").getInt("event", 0) > 11) {
+            //    break;
+            //}
             
             
             // event.show();
-            //if(counter%100==0)
-            
+            if(counter%200==0)
+                break;
             //if(event.hasBank("HitBasedTrkg::HBTracks")) {
             //    event.show();
             
