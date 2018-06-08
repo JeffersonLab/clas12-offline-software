@@ -701,13 +701,17 @@ public void matchHits(List<StateVec> stateVecAtPlanesList, Track trk, DCGeant4Fa
     for(StateVec st : stateVecAtPlanesList) {
         if(st==null)
             return;
+        double Xtrk = st.x();
+        double Ytrk = st.y();
         planeIdNum++;
         float[] bf = new float[3];
         for(Cross c : trk) { 
                 for(FittedHit h1 : c.get_Segment1()) { 
                         if(planeIdNum== (h1.get_Superlayer()-1)*6+h1.get_Layer() ) {
                             bf[0]=(float) 0.;bf[1]=(float) 0.;bf[2]=(float) 0.;
-                            h1.setAssociatedStateVec(st);   
+                            h1.setAssociatedStateVec(st); 
+                            double Xhit = h1.XatY(DcDetector, Ytrk);
+                            h1.set_TrkResid(Xhit-Xtrk) ;  
                             dcSwim.Bfield(st.x(), st.y(), h1.get_Z(), bf);
                             h1.setB(Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2]));
                             h1.setSignalPropagTimeAlongWire(DcDetector);
@@ -718,6 +722,8 @@ public void matchHits(List<StateVec> stateVecAtPlanesList, Track trk, DCGeant4Fa
                         if(planeIdNum== (h2.get_Superlayer()-1)*6+h2.get_Layer() ) {
                             bf[0]=(float) 0.;bf[1]=(float) 0.;bf[2]=(float) 0.;
                             h2.setAssociatedStateVec(st);
+                            double Xhit = h2.XatY(DcDetector, Ytrk);
+                            h2.set_TrkResid(Xhit-Xtrk) ;
                             dcSwim.Bfield(st.x(), st.y(), h2.get_Z(), bf);
                             h2.setB(Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2]));
                             h2.setSignalPropagTimeAlongWire(DcDetector);

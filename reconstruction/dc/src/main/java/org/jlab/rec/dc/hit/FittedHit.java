@@ -522,6 +522,11 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 
     }
     
+    public double XatY(DCGeant4Factory DcDetector, double y) {
+        double x = this.calc_GeomCorr(DcDetector, y);
+        return x + this.get_LeftRightAmb() * (this.get_TimeToDistance()) ;
+    }
+        
     private double _WireLength;
 
     public double get_WireLength() {
@@ -542,6 +547,15 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         this._WireMaxSag = _WireMaxSag;
     }
     
+    private double _TrkResid;
+    
+    public double get_TrkResid() {
+        return _TrkResid;
+    }
+
+    public void set_TrkResid(double _TrkResid) {
+        this._TrkResid = _TrkResid;
+    }
     
     private double calc_GeomCorr(DCGeant4Factory DcDetector, double y) {
         

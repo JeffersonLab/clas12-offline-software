@@ -525,10 +525,10 @@ public class DCSwimmer {
     public static synchronized void setTorScale(double s) {
         TORSCALE = s;
     }
-    public static synchronized double getSolScale() {
+    public static double getSolScale() {
         return SOLSCALE;
     }
-    public static synchronized double getTorScale() {
+    public static double getTorScale() {
         return TORSCALE;
     }
     
