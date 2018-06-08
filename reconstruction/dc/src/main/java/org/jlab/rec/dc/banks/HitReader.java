@@ -153,9 +153,14 @@ public class HitReader {
         noiseAnalysis.clear();
 
         noiseAnalysis.findNoise(sector, superlayerNum, layerNum, wire, results);
-        
+         
         for (int i = 0; i < size; i++) {
-            if (tab3.getIntValue("status", sector[i], layer[i] ,wire[i])==0 && wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
+            boolean passHit = true;
+            if(tab3!=null) {
+                if(tab3.getIntValue("status", sector[i], layer[i] ,wire[i])!=0)
+                    passHit=false;
+            }
+            if (passHit && wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
                 
                 double tStart = 0;
                 double timeCutMin = 0;
