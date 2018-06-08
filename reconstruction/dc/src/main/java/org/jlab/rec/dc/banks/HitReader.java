@@ -92,7 +92,8 @@ public class HitReader {
      * @param event DataEvent
      */
     public void fetch_DCHits(DataEvent event, Clas12NoiseAnalysis noiseAnalysis, NoiseReductionParameters parameters,
-            Clas12NoiseResult results, double[][][][] T0, double[][][][] T0ERR, IndexedTable tab, IndexedTable tab2, DCGeant4Factory DcDetector,
+            Clas12NoiseResult results, double[][][][] T0, double[][][][] T0ERR, IndexedTable tab, IndexedTable tab2, 
+            IndexedTable tab3, DCGeant4Factory DcDetector,
             double triggerPhase) {
 
         if (event.hasBank("DC::tdc") == false) {
@@ -154,7 +155,7 @@ public class HitReader {
         noiseAnalysis.findNoise(sector, superlayerNum, layerNum, wire, results);
         
         for (int i = 0; i < size; i++) {
-            if (wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
+            if (tab3.getIntValue("status", sector[i], layer[i] ,wire[i])==0 && wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
                 
                 double tStart = 0;
                 double timeCutMin = 0;

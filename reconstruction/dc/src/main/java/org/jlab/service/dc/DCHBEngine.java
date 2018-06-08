@@ -109,6 +109,7 @@ public class DCHBEngine extends ReconstructionEngine {
          //   "/calibration/dc/time_corrections/T0_correction",
             "/calibration/dc/time_corrections/timingcuts",
             "/calibration/dc/time_jitter",
+            "/calibration/dc/status_tables/MK_V1",
         };
 
         requireConstants(Arrays.asList(dcTables));
@@ -222,7 +223,9 @@ public class DCHBEngine extends ReconstructionEngine {
        HitReader hitRead = new HitReader();
        hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, Constants.getT0(), Constants.getT0Err(), 
                this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), 
-               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), dcDetector, triggerPhase);
+               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), 
+               this.getConstantsManager().getConstants(newRun,"/calibration/dc/status_tables/MK_V1"), 
+               dcDetector, triggerPhase);
 
        List<Hit> hits = new ArrayList<Hit>();
        //I) get the hits
