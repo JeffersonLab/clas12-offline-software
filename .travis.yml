@@ -32,6 +32,9 @@ script:
   - echo "finished unit tests"
   - cd validation/advanced-tests/
   - ./run-advanced-tests.sh
+  - ./run-eb-tests.sh -100 electronproton
+  - ./run-eb-tests.sh -100 electrongamma
+  - ./run-eb-tests.sh -100 electronprotonC
   - cd -
   - echo "finished advanced tests"
   - mvn cobertura:cobertura &> /dev/null # for codecov
