@@ -174,7 +174,7 @@ public class ECCommon {
                     list = tdcs.getItem(is,il,ip); tdcc=new Integer[list.size()]; list.toArray(tdcc);       
                     for (int ii=0; ii<tdcc.length; ii++) {
                     	    float tdif = (tps*tdcc[ii]-triggerPhase-TOFFSET)-t; 
-                    	    if (Math.abs(tdif)<10&&tdif<tmax) {tmax = tdif; tdc = tdcc[ii];}
+                    	    if (Math.abs(tdif)<30&&tdif<tmax) {tmax = tdif; tdc = tdcc[ii];}
                     }
                     strip.setTDC(tdc); 
                 }              
