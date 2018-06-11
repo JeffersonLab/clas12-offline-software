@@ -243,17 +243,17 @@ public class FTOFEngine extends ReconstructionEngine {
         }
 
         rbc.appendFTOFBanks(event, hits, clusters, matchedClusters);
-            if (event.hasBank("FTOF::adc")) {
-                if (event.hasBank("FTOF::adc")) {
-                    event.getBank("FTOF::adc").show();
-                }
-                if (event.hasBank("FTOF::tdc")) {
-                    event.getBank("FTOF::tdc").show();
-                }
-                if (event.hasBank("FTOF::hits")) {
-                    event.getBank("FTOF::hits").show();
-                }
-            }
+//            if (event.hasBank("FTOF::adc")) {
+//                if (event.hasBank("FTOF::adc")) {
+//                    event.getBank("FTOF::adc").show();
+//                }
+//                if (event.hasBank("FTOF::tdc")) {
+//                    event.getBank("FTOF::tdc").show();
+//                }
+//                if (event.hasBank("FTOF::hits")) {
+//                    event.getBank("FTOF::hits").show();
+//                }
+//            }
 
 
         return true;
@@ -263,10 +263,10 @@ public class FTOFEngine extends ReconstructionEngine {
 
     public static void main(String arg[]) {
 
-        DCHBEngine en0 = new DCHBEngine();
-        en0.init();
-        DCTBEngine en1 = new DCTBEngine();
-        en1.init();
+//        DCHBEngine en0 = new DCHBEngine();
+//        en0.init();
+//        DCTBEngine en1 = new DCTBEngine();
+//        en1.init();
         FTOFEngine en = new FTOFEngine();
         en.init();
 

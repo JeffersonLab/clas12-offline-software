@@ -409,12 +409,12 @@ public class HitReader implements IMatchedHit {
 
         if (ADCandTDCLists != null) {
             Collections.sort(ADCandTDCLists);
-            System.out.println("Sorted");
-            for (BaseHit h : ADCandTDCLists) {
-                System.out.println(" : " + h.get_Sector() + " " + h.get_Layer() + " " + h.get_Component() + " "
-                        + h.ADC1 + " " + h.ADC2 + " " + h.TDC1 + " " + h.TDC2 + " i: " + h.ADCbankHitIdx1 + " " + h.ADCbankHitIdx2
-                        + " " + h.TDCbankHitIdx1 + " " + h.TDCbankHitIdx2);
-            }
+//            System.out.println("Sorted");
+//            for (BaseHit h : ADCandTDCLists) {
+//                System.out.println(" : " + h.get_Sector() + " " + h.get_Layer() + " " + h.get_Component() + " "
+//                        + h.ADC1 + " " + h.ADC2 + " " + h.TDC1 + " " + h.TDC2 + " i: " + h.ADCbankHitIdx1 + " " + h.ADCbankHitIdx2
+//                        + " " + h.TDCbankHitIdx1 + " " + h.TDCbankHitIdx2);
+//            }
             double t1 = -1;
             double t2 = -1; // t1, t2 not yet used in selection
             int adc1 = -1;
@@ -539,8 +539,8 @@ public class HitReader implements IMatchedHit {
                     hit.TDCbankHitIdx2 = tdc_idx2;
 
                     matchLists.add(hit);
-                    System.out.println(i+")  s "+hit.get_Sector()+" l "+hit.get_Layer()+" c "+hit.get_Component()+" adcL "+hit.get_ADC1()+" adcR "+hit.get_ADC2()+" tdcL "+
-                                                 hit.get_TDC1()+" tdcR "+hit.get_TDC2());
+//                    System.out.println(i+")  s "+hit.get_Sector()+" l "+hit.get_Layer()+" c "+hit.get_Component()+" adcL "+hit.get_ADC1()+" adcR "+hit.get_ADC2()+" tdcL "+
+//                                                 hit.get_TDC1()+" tdcR "+hit.get_TDC2());
 
                 }
             }
