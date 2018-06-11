@@ -82,9 +82,11 @@ public class HitReader implements IMatchedHit {
         */
         _numTrks = trks.size();
 
+        double triggerPhase = this.getTriggerPhase(timeStamp, constants6);
+        
         BaseHitReader hitReader = new BaseHitReader();
         IMatchedHit MH = this;
-        List<BaseHit> hitList = hitReader.get_MatchedHits(event, MH);
+        List<BaseHit> hitList = hitReader.get_MatchedHits(event, MH, triggerPhase, constants6, constants7);
 
         if (hitList.size() == 0) {
             // System.err.println("there is no FTOF bank ");
@@ -170,14 +172,13 @@ public class HitReader implements IMatchedHit {
             // set the layer to get the paddle position from the geometry
             // package
             hit.set_HitParameters(hit.get_Panel(), 
-                timeStamp,
+                triggerPhase,
                 constants0, 
                 constants1, 
                 constants2, 
                 constants3, 
                 constants5, 
-                constants6, 
-                constants7);
+                constants6);
             // DetHits.get(hit.get_Panel()-1).add(hit);
         }
         // List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);
@@ -403,16 +404,17 @@ public class HitReader implements IMatchedHit {
     }
 
     @Override
-    public List<BaseHit> MatchHits(ArrayList<BaseHit> ADCandTDCLists) {
+    public List<BaseHit> MatchHits(ArrayList<BaseHit> ADCandTDCLists, double timeJitter, IndexedTable tdcConv, IndexedTable ADCandTDCOffsets) {
         ArrayList<BaseHit> matchLists = new ArrayList<BaseHit>();
 
         if (ADCandTDCLists != null) {
             Collections.sort(ADCandTDCLists);
-            /*		System.out.println("Sorted");
-			for(BaseHit h : ADCandTDCLists)
-				System.out.println(" : "+h.get_Sector()+" "+h.get_Layer()+" "+h.get_Component()+" "
-			+h.ADC1+" "+h.ADC2+" "+h.TDC1+" "+h.TDC2+" i: "+h.ADCbankHitIdx1+" "+h.ADCbankHitIdx2
-			+" "+h.TDCbankHitIdx1+" "+h.TDCbankHitIdx2); */
+            System.out.println("Sorted");
+            for (BaseHit h : ADCandTDCLists) {
+                System.out.println(" : " + h.get_Sector() + " " + h.get_Layer() + " " + h.get_Component() + " "
+                        + h.ADC1 + " " + h.ADC2 + " " + h.TDC1 + " " + h.TDC2 + " i: " + h.ADCbankHitIdx1 + " " + h.ADCbankHitIdx2
+                        + " " + h.TDCbankHitIdx1 + " " + h.TDCbankHitIdx2);
+            }
             double t1 = -1;
             double t2 = -1; // t1, t2 not yet used in selection
             int adc1 = -1;
@@ -537,8 +539,8 @@ public class HitReader implements IMatchedHit {
                     hit.TDCbankHitIdx2 = tdc_idx2;
 
                     matchLists.add(hit);
-                   //  System.out.println(i+")  s "+hit.get_Sector()+" l "+hit.get_Layer()+" c "+hit.get_Component()+" adcL "+hit.get_ADC1()+" adcR "+hit.get_ADC2()+" tdcL "+
-                    // hit.get_TDC1()+" tdcR "+hit.get_TDC2());
+                    System.out.println(i+")  s "+hit.get_Sector()+" l "+hit.get_Layer()+" c "+hit.get_Component()+" adcL "+hit.get_ADC1()+" adcR "+hit.get_ADC2()+" tdcL "+
+                                                 hit.get_TDC1()+" tdcR "+hit.get_TDC2());
 
                 }
             }
@@ -546,6 +548,17 @@ public class HitReader implements IMatchedHit {
         }
 
         return matchLists;
+    }
+    
+    private double getTriggerPhase(long timestamp, IndexedTable table) {
+    // calculate the trigger time jitter correction
+        double period = table.getDoubleValue("period", 0,0,0);
+        int    phase  = table.getIntValue("phase", 0,0,0);
+        int    cycles = table.getIntValue("cycles", 0,0,0);
+        double triggerphase=0;
+        if(cycles > 0) triggerphase=period*((timestamp+phase)%cycles);
+//        System.out.println(period + " " + phase + " " + cycles + " " + timestamp + " " + triggerphase);
+        return triggerphase;
     }
     
     public static void main(String arg[]) {
@@ -568,7 +581,7 @@ public class HitReader implements IMatchedHit {
         hit4.ADC1=400;
         hit5.ADC2=460;
        
-       List<BaseHit> result = hr.MatchHits(ADCandTDCLists);
+//       List<BaseHit> result = hr.MatchHits(ADCandTDCLists);
     }
 
 }

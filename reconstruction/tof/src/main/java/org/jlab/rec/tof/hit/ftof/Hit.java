@@ -83,21 +83,19 @@ public class Hit extends AHit implements IGetCalibrationParams {
         this._matchedTrack = _matchedTrack;
     }
 
-    public void set_HitParameters(int superlayer, long timeStamp, IndexedTable constants0, 
+    public void set_HitParameters(int superlayer, double triggerPhase, IndexedTable constants0, 
             IndexedTable constants1, 
             IndexedTable constants2, 
             IndexedTable constants3, 
             IndexedTable constants5, 
-            IndexedTable constants6, 
-            IndexedTable constants7) {/*
+            IndexedTable constants6) {/*
         0: "/calibration/ftof/attenuation"),
         1: "/calibration/ftof/effective_velocity"),
         2: "/calibration/ftof/time_offsets"),
         3: "/calibration/ftof/time_walk"),
         4: "/calibration/ftof/status"),
         5: "/calibration/ftof/gain_balance"),
-        6: "/calibration/ftof/tdc_conv") );
-        7: "/calibration/ftof/time_jitter") );
+        6: "/calibration/ftof/tdc_conv"));
         */
         double pl = this.get_paddleLine().length();
 
@@ -134,7 +132,6 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double ADC_MIPErr = this.ADC_MIPUnc(constants5);
         double DEDX_MIP = this.DEDX_MIP();
         double ScinBarThickn = this.ScinBarThickn();
-        double triggerPhase  = this.calc_TriggerPhase(timeStamp, constants7);
 
         this.set_HitParams(superlayer, TW0L, TW0R, TW1L, TW1R, lambdaL,
                 lambdaR, yOffset, vL, vR, vLUnc, vRUnc, PEDL, PEDR, PEDLUnc,
@@ -284,9 +281,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
     @Override
     public double yOffset(IndexedTable tab) {
-        //return CCDBConstants.getYOFF()[this.get_Sector() - 1][this.get_Panel() - 1][this
-        //        .get_Paddle() - 1];
-        return tab.getDoubleValue("y_offset", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+        return 0.0;
     }
 
     @Override
