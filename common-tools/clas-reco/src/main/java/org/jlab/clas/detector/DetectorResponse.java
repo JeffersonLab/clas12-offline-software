@@ -15,12 +15,12 @@ import org.jlab.io.base.DataEvent;
 /**
  *
  * @author gavalian
+ * @author baltzell
  */
 public class DetectorResponse {
     
     private DetectorDescriptor  descriptor  = new DetectorDescriptor();
     private Vector3D            hitPosition = new Vector3D();
-    //private Point3D            hitPosition = new Vector3();
     private Vector3D     hitPositionMatched = new Vector3D();
     private Double             detectorTime = 0.0;
     private Double           detectorEnergy = 0.0;
@@ -45,7 +45,8 @@ public class DetectorResponse {
     public double getTime(){ return this.detectorTime;}
     public double getEnergy(){ return this.detectorEnergy; }
     public double getPath(){ return this.particlePath;}
-    
+    public int    getSector(){return this.descriptor.getSector();}
+
     public Vector3D getPosition(){ return this.hitPosition;}
     public Vector3D getMatchedPosition(){ return this.hitPositionMatched;}
     
