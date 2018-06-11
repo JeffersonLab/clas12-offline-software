@@ -42,7 +42,6 @@ public class ECCommon {
     
     static int ind[]  = {0,0,0,1,1,1,2,2,2}; 
     static float               tps = 0.02345f;
-	public static float    TOFFSET = 125f; 
     public static float       veff = 18.1f;
     
     public  static void initHistos() {
@@ -117,16 +116,18 @@ public class ECCommon {
         
     public static List<ECStrip>  readStripsHipo(DataEvent event, int run, ConstantsManager manager){ 
     	
-    	List<ECStrip>  strips = new ArrayList<ECStrip>();
+      	List<ECStrip>  strips = new ArrayList<ECStrip>();
         IndexedList<List<Integer>>  tdcs = new IndexedList<List<Integer>>(3);  
         
 		IndexedTable   jitter = manager.getConstants(run, "/calibration/ec/time_jitter");
 		IndexedTable   offset = manager.getConstants(run, "/calibration/ec/fadc_offset");
+		IndexedTable  goffset = manager.getConstants(run, "/calibration/ec/fadc_global_offset");
         
         double PERIOD = jitter.getDoubleValue("period",0,0,0);
         int    PHASE  = jitter.getIntValue("phase",0,0,0); 
         int    CYCLES = jitter.getIntValue("cycles",0,0,0);
         
+        float TOFFSET = (float) goffset.getDoubleValue("global_offset",0,0,0);
 	    int triggerPhase = 0;
     	
         if(CYCLES>0&&event.hasBank("RUN::config")==true){
