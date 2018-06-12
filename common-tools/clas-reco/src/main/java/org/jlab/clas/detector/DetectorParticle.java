@@ -264,12 +264,24 @@ public class DetectorParticle implements Comparable {
         return this.particleScore;
     }
     
-    public int getSector(){
-        if(this.hasHit(DetectorType.ECAL, 1)==true){
-            return getHit(DetectorType.ECAL, 1).getDescriptor().getSector();
-        }
-        return 0;
+    public int getSector(DetectorType type,int layer) {
+        DetectorResponse hit = this.getHit(type,layer);
+        return hit==null ? 0 : hit.getSector();
     }
+
+    public int getSector(DetectorType type) {
+        return this.getSector(type,-1);
+    }
+
+    /**
+     * @deprecated
+     * Just for backward compatibility for any external usage
+     */
+    public int getSector(){
+        return this.getSector(DetectorType.ECAL,1);
+    }
+
+
     /**
      * returns chi2 of score.
      * @return 
@@ -332,6 +344,7 @@ public class DetectorParticle implements Comparable {
         return null;
     }
     /**
+     * @deprecated
      * Just for backward compatibility for any external usage
      */
     public DetectorResponse  getResponse(DetectorType type, int layer){

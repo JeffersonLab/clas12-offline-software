@@ -517,6 +517,10 @@ public class DetectorData {
    
    
    public static List<DetectorTrack>  readCentralDetectorTracks(DataEvent event, String bank_name, String traj_bank_name){
+      
+       // these are ordered by index (1,2,3,4,5):
+       final String[] covVarNames={"d0","phi0","rho","z0","tandip"};
+       
        List<DetectorTrack>  tracks = new ArrayList<DetectorTrack>();
        if(event.hasBank(bank_name)==true){
            DataBank bank = event.getBank(bank_name);
@@ -554,6 +558,15 @@ public class DetectorData {
                Vector3D hc_vec = DetectorData.readVector(bank, row, "c_x", "c_y", "c_z");
                Vector3D hc_dir = DetectorData.readVector(bank, row, "c_ux", "c_uy", "c_uz");
                track.addCross(hc_vec.x(), hc_vec.y(), hc_vec.z(), hc_dir.x(), hc_dir.y(), hc_dir.z());
+
+               for (int ii=0; ii<5; ii++) {
+                   for (int jj=0; jj<5; jj++) {
+                       String varName = String.format("cov_%s%s",covVarNames[ii],ii==jj?"2":covVarNames[jj]);
+                       if (bank.getDescriptor().hasEntry(varName)==false) continue;
+                       track.setCovMatrix(ii,jj,bank.getFloat(varName,row));
+                   }
+               }
+
 
                track.setDetectorID(DetectorType.CVT.getDetectorId());
 
