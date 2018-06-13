@@ -94,18 +94,7 @@ public class EventBuilder {
     }
 
     /**
-     * set event statuses
-     */
-    //public void setEventStatuses() {
-    //    int status=0;
-    //    DetectorParticle pTrig = this.detectorEvent.getParticle(0);
-    //    DetectorTrack tTrig = pTrig.getTrack();
-    //}
-
-
-    /**
      * processes all particles and associating detector responses with given cuts to each particle.
-     * the thresholds are described in the EBConstatns class for each layer of the detector.
      */
     public void processHitMatching(){
         
@@ -119,93 +108,66 @@ public class EventBuilder {
             // responses to the particle if reasonable match
             // is found and set associations
 
-            // Matching tracks to FTOF layer 1A detector.
-            Double ftof1a_match_cut = ccdb.getDouble(EBCCDBEnum.FTOF_MATCHING_1A);
-            int index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 1, ftof1a_match_cut);
-            if(index>=0){
-                p.addResponse(detectorResponses.get(index), true);
-                detectorResponses.get(index).setAssociation(n);
+            // only match with FTOF/ECAL/HTCC/LTCC if it's a DC track:
+            if (p.getTrackDetectorID()==DetectorType.DC.getDetectorId()) {
+
+                // FTOF:
+                findMatchingHit(n,p,detectorResponses,DetectorType.FTOF, 1, ccdb.getDouble(EBCCDBEnum.FTOF_MATCHING_1A));
+                findMatchingHit(n,p,detectorResponses,DetectorType.FTOF, 2, ccdb.getDouble(EBCCDBEnum.FTOF_MATCHING_1B));
+                findMatchingHit(n,p,detectorResponses,DetectorType.FTOF, 3, ccdb.getDouble(EBCCDBEnum.FTOF_MATCHING_2));
+                
+                // ECAL:
+                findMatchingHit(n,p,detectorResponses,DetectorType.ECAL, 1, ccdb.getDouble(EBCCDBEnum.PCAL_MATCHING));
+                findMatchingHit(n,p,detectorResponses,DetectorType.ECAL, 4, ccdb.getDouble(EBCCDBEnum.ECIN_MATCHING));
+                findMatchingHit(n,p,detectorResponses,DetectorType.ECAL, 7, ccdb.getDouble(EBCCDBEnum.ECOUT_MATCHING));
+
+                // HTCC:
+                int index = p.getCherenkovSignal(this.detectorResponses,DetectorType.HTCC);
+                if(index>=0){
+                    p.addResponse(detectorResponses.get(index));
+                    detectorResponses.get(index).setAssociation(n);
+                } 
+
+                // LTCC:
+                index = p.getCherenkovSignal(this.detectorResponses,DetectorType.LTCC);
+                if(index>=0){
+                    p.addResponse(detectorResponses.get(index));
+                    detectorResponses.get(index).setAssociation(n);
+                }
             }
 
-            // Matching tracks to FTOF layer 1B detector.
-            Double ftof1b_match_cut = ccdb.getDouble(EBCCDBEnum.FTOF_MATCHING_1B);
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 2, ftof1b_match_cut);
-            if(index>=0){
-                p.addResponse(detectorResponses.get(index), true);
-                detectorResponses.get(index).setAssociation(n);
+            // only match with CTOF/CND if it's a central track:
+            else if (p.getTrackDetectorID()==DetectorType.CVT.getDetectorId()) {
+                findMatchingHit(n,p,detectorResponses,DetectorType.CTOF,0, ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
+                findMatchingHit(n,p,detectorResponses,DetectorType.CND, 1, ccdb.getDouble(EBCCDBEnum.CND_DZ));
             }
-
-            // Matching tracks to FTOF layer 2 detector.
-            Double ftof2_match_cut = ccdb.getDouble(EBCCDBEnum.FTOF_MATCHING_2);
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.FTOF, 3, ftof2_match_cut);
-            if(index>=0){
-                p.addResponse(detectorResponses.get(index), true);
-                detectorResponses.get(index).setAssociation(n);
-            }
-
-            // FIXME:  Remove this, CD matching should just be imported.
-            // Matching tracks to CTOF detector.
-//            index = p.getDetectorHit(this.detectorResponses, DetectorType.CTOF, 0, EBConstants.CTOF_Matching);
-//            if(index>=0){
-//                p.addResponse(detectorResponses.get(index), true);
-//                detectorResponses.get(index).setAssociation(n);
-//            }
-
-            // FIXME:  Remove this, CD matching should just be imported.
-            // Matching tracks to CND detector.
-            //index = p.getDetectorHit(this.detectorResponses, DetectorType.CND, 0, EBConstants.CND_Matching);
-            //if(index>=0){
-            //    p.addResponse(detectorResponses.get(index), true);
-            //    detectorResponses.get(index).setAssociation(n);
-            //}
-
-            // Matching tracks to PCAL:
-            Double pcal_match_cut = ccdb.getDouble(EBCCDBEnum.PCAL_MATCHING);
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 1, pcal_match_cut);
-            if(index>=0){
-                p.addResponse(detectorResponses.get(index), true);
-                detectorResponses.get(index).setAssociation(n);
-                //quality = p.getDetectorHitQuality(detectorResponses, index, EBConstants.PCAL_hitRes);
-                //detectorResponses.get(index).setHitQuality(quality);
-            }
-           
-            // Matching tracks to EC Inner:
-            Double ecin_match_cut = ccdb.getDouble(EBCCDBEnum.ECIN_MATCHING);
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 4, ecin_match_cut);
-            if(index>=0){
-                p.addResponse(detectorResponses.get(index), true);
-                detectorResponses.get(index).setAssociation(n);
-                //quality = p.getDetectorHitQuality(detectorResponses, index, EBConstants.ECOUT_hitRes);
-                //detectorResponses.get(index).setHitQuality(quality);
-            }
-            
-            // Matching tracks to EC Outer:
-            Double ecout_match_cut = ccdb.getDouble(EBCCDBEnum.ECOUT_MATCHING);
-            index = p.getDetectorHit(this.detectorResponses, DetectorType.ECAL, 7, ecout_match_cut);
-            if(index>=0){
-                p.addResponse(detectorResponses.get(index), true);
-                detectorResponses.get(index).setAssociation(n);
-                //quality = p.getDetectorHitQuality(detectorResponses, index, EBConstants.ECOUT_hitRes);
-                //detectorResponses.get(index).setHitQuality(quality);
-            }
-           
-            // Matching tracks to HTCC:
-            index = p.getCherenkovSignal(this.detectorResponses,DetectorType.HTCC);
-            //double = p.getCherenkovSignalQuality()
-            if(index>=0){
-                p.addResponse(detectorResponses.get(index));
-                detectorResponses.get(index).setAssociation(n);
-            } 
-
-            // Matching tracks to LTCC:
-            index = p.getCherenkovSignal(this.detectorResponses,DetectorType.LTCC);
-            //double = p.getCherenkovSignalQuality()
-            if(index>=0){
-                p.addResponse(detectorResponses.get(index));
-                detectorResponses.get(index).setAssociation(n);
-            }             
 
         }
+    }
+
+    /**
+     * Find closest matching response of given detector type and layer within given distance.
+     * If found, associate it with the particle.
+     *
+     * @param pindex the particle's index
+     * @param particle the particle
+     * @param responses all responses
+     * @param type detector type to find
+     * @param layer detector layer to find
+     * @param distance maximum distance between trajectory and hit
+     *
+     * @return whether match was found
+     */
+    public boolean findMatchingHit(
+            final int pindex, DetectorParticle particle, List<DetectorResponse> responses,
+            DetectorType type, final int layer, final double distance) {
+        final int index = particle.getDetectorHit(responses,type,layer,distance);
+        if (index>=0) {
+            particle.addResponse(responses.get(index),true);
+            responses.get(index).setAssociation(pindex);
+            return true;
+        }
+        return false;
     }
     
     public void forwardTaggerIDMatching() {

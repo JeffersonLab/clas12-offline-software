@@ -166,6 +166,8 @@ public class EBMatching {
      * Central Tracks and CTOF/CND were already matched before
      * event builder.  Copy in.
      *
+     * @deprecated switched to standard EB matching
+     *
      */
     
     public void processCentralParticles(DataEvent de,

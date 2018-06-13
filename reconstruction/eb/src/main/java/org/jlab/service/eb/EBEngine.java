@@ -111,11 +111,11 @@ public class EBEngine extends ReconstructionEngine {
         // Create neutrals:
         // (after assigning trigger particle, to get vertex/momentum right):
         eb.processNeutralTracks();
-        
-        List<DetectorParticle> centralParticles = eb.getEvent().getCentralParticles();
-        
-        ebm.processCentralParticles(de,"CVTRec::Tracks","CTOF::hits","CND::hits",
-                                    centralParticles, responseCTOF, responseCND);
+      
+        // old method imported matching from CTOF/CND reconstruction:
+        //List<DetectorParticle> centralParticles = eb.getEvent().getCentralParticles();
+        //ebm.processCentralParticles(de,"CVTRec::Tracks","CTOF::hits","CND::hits",
+        //                            centralParticles, responseCTOF, responseCND);
         
         // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer(ccdb);

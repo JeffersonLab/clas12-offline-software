@@ -122,7 +122,9 @@ public class DetectorEvent {
         List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
         for(DetectorParticle p : this.particleList){
             for(DetectorResponse r : p.getDetectorResponses()){
-                if(r.getDescriptor().getType()==DetectorType.FTOF || r.getDescriptor().getType()==DetectorType.CTOF)
+                if(r.getDescriptor().getType()==DetectorType.FTOF ||
+                   r.getDescriptor().getType()==DetectorType.CTOF ||
+                   r.getDescriptor().getType()==DetectorType.CND)
                 responses.add(r);
             }
         }
