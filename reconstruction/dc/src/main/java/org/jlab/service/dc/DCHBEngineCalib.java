@@ -1,7 +1,6 @@
 package org.jlab.service.dc;
 
 import cnuphys.magfield.MagneticFields;
-import cnuphys.magfield.TorusMap;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
@@ -39,24 +38,70 @@ import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.trajectory.DCSwimmer;
-import org.jlab.rec.dc.trajectory.Road;
 import org.jlab.rec.dc.trajectory.RoadFinder;
+import org.jlab.rec.dc.trajectory.Road;
 import org.jlab.utils.CLASResources;
 
+import org.jlab.utils.groups.IndexedTable;
 
 public class DCHBEngineCalib extends ReconstructionEngine {
-String FieldsConfig="";
+
+    String FieldsConfig="";
     AtomicInteger Run = new AtomicInteger(0);
     DCGeant4Factory dcDetector;
+    String clasDictionaryPath ;
     
     public DCHBEngineCalib() {
         super("DCHB","ziegler","4.0");
     }
-    String clasDictionaryPath ;
+    
+    /**
+     * 
+     * determine torus and solenoid map name from yaml, else env, else crash
+     */
+    private void initializeMagneticFields() {
+        String torusMap=this.getEngineConfigString("torusMap");
+        String solenoidMap=this.getEngineConfigString("solenoidMap");
+        if (torusMap!=null) {
+            System.out.println("["+this.getName()+"] Torus Map chosen based on yaml: "+torusMap);
+        }
+        else {
+            torusMap = System.getenv("TORUSMAP");
+            if (torusMap!=null) {
+                System.out.println("["+this.getName()+"] Torus Map chosen based on env: "+torusMap);
+            }
+        }
+        if (torusMap==null) {
+            throw new RuntimeException("["+this.getName()+"]  Failed to find torus map name in yaml or env.");
+        }
+        if (solenoidMap!=null) {
+            System.out.println("["+this.getName()+"] solenoid Map chosen based on yaml: "+solenoidMap);
+        }
+        else {
+            solenoidMap = System.getenv("SOLENOIDMAP");
+            if (solenoidMap!=null) {
+                System.out.println("["+this.getName()+"] solenoid Map chosen based on env: "+solenoidMap);
+            }
+        }
+        if (solenoidMap==null) {
+            throw new RuntimeException("["+this.getName()+"]  Failed to find solenoid map name in yaml or env.");
+        }
+        String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";
+        try {
+            MagneticFields.getInstance().initializeMagneticFields(mapDir,torusMap,solenoidMap);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public boolean init() {
+
         Constants.Load();
-       
+     
+        this.initializeMagneticFields();
+
         clasDictionaryPath= CLASResources.getResourcePath("etc");
         String[]  dcTables = new String[]{
             "/calibration/dc/signal_generation/doca_resolution",
@@ -64,6 +109,7 @@ String FieldsConfig="";
             "/calibration/dc/time_to_distance/time2dist",
          //   "/calibration/dc/time_corrections/T0_correction",
             "/calibration/dc/time_corrections/timingcuts",
+            "/calibration/dc/time_jitter",
         };
 
         requireConstants(Arrays.asList(dcTables));
@@ -77,7 +123,7 @@ String FieldsConfig="";
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, variationName);
         dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
         
-        
+        //MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
         //DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(800, "default");
         //dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
         //disconnect from database. Important to do this after loading tables.
@@ -107,20 +153,25 @@ String FieldsConfig="";
         }
 
         DataBank bank = event.getBank("RUN::config");
-
+        long   timeStamp = bank.getLong("timestamp", 0);
+        double triggerPhase =0;
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
         if(newRun==0)
         	return true;
-
+        
         if(Run.get()==0 || (Run.get()!=0 && Run.get()!=newRun)) { 
-            if(newRun>1000) {
-                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
-            } else {
-                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
-            }
+            if(timeStamp==-1)
+                return true;
             
+            IndexedTable tabJ=this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_jitter");
+            double period = tabJ.getDoubleValue("period", 0,0,0);
+            int    phase  = tabJ.getIntValue("phase", 0,0,0);
+            int    cycles = tabJ.getIntValue("cycles", 0,0,0);
+            
+            if(cycles>0) triggerPhase=period*((timeStamp+phase)%cycles); 
+
             TableLoader.FillT0Tables(newRun);
             TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist")); 
             //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"));
@@ -167,7 +218,7 @@ String FieldsConfig="";
        HitReader hitRead = new HitReader();
        hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, Constants.getT0(), Constants.getT0Err(), 
                this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), 
-               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), dcDetector);
+               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), dcDetector, triggerPhase);
 
        List<Hit> hits = new ArrayList<Hit>();
        //I) get the hits
@@ -342,12 +393,12 @@ String FieldsConfig="";
         
         //String inputFile = args[0];
         //String outputFile = args[1];
-        //String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
+        String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
         //String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.ev.hipo";
-        String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/gemc_out_mu-_hipo/mu-_30nA_bg_out.ev.hipo";
+        //String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/gemc_out_mu-_hipo/mu-_30nA_bg_out.ev.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
         
-        DCHBEngine en = new DCHBEngine();
+        DCHBEngineCalib en = new DCHBEngineCalib();
         en.init();
         
         DCTBEngine en2 = new DCTBEngine();
@@ -361,8 +412,8 @@ String FieldsConfig="";
         HipoDataSync writer = new HipoDataSync();
         //Writer
         
-        //String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGD.hipo";
-        String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.recn2.hipo";
+        String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGD.hipo";
+        //String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.recn2.hipo";
         writer.open(outputFile);
         TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
         long t1 = 0;
@@ -383,14 +434,14 @@ String FieldsConfig="";
             writer.writeEvent(event);
             System.out.println("PROCESSED  EVENT "+event.getBank("RUN::config").getInt("event", 0));
            // event.show();
-            if (event.getBank("RUN::config").getInt("event", 0) > 11) {
-                break;
-            }
+            //if (event.getBank("RUN::config").getInt("event", 0) > 11) {
+            //    break;
+            //}
             
             
             // event.show();
-            //if(counter%100==0)
-            
+            if(counter%200==0)
+                break;
             //if(event.hasBank("HitBasedTrkg::HBTracks")) {
             //    event.show();
             

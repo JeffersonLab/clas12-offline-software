@@ -27,13 +27,19 @@ public class DetectorTrack {
             this.bField=bField;
             this.pathLength=pathLength;
         }
+        public TrajectoryPoint(int trackId,int detId,Line3D traj) {
+            this.trackId=trackId;
+            this.detId=detId;
+            this.traj=traj;
+        }
         public int getTrackId() { return trackId; }
         public int getDetId() { return detId; }
         public Line3D getCross() { return traj; }
         public float getBField() { return bField; }
         public float getPathLength() { return pathLength; }
     }
-    
+   
+    private int     trackSector = 0;
     private int     trackAssociation = -1;
     private int     trackIndex = -1;
     private int     trackCharge = 0;
@@ -110,8 +116,10 @@ public class DetectorTrack {
     }
 
     public void addTrajectoryPoint(int trackId,int detId,Line3D traj,float bField,float pathLength) {
-        TrajectoryPoint tPoint = new TrajectoryPoint(trackId,detId,traj,bField,pathLength);
-        this.trajectory.add(tPoint);
+        this.trajectory.add(new TrajectoryPoint(trackId,detId,traj,bField,pathLength));
+    }
+    public void addTrajectoryPoint(int trackId,int detId,Line3D traj) {
+        this.trajectory.add(new TrajectoryPoint(trackId,detId,traj));
     }
 
     public Line3D getTrajectoryPoint(int detId) {
@@ -157,6 +165,11 @@ public class DetectorTrack {
         return this;
     }
 
+    public DetectorTrack setSector(int sector){
+        this.trackSector = sector;
+        return this;
+    }
+    
     public DetectorTrack setID(int id){
         this.taggerID = id;
         return this;
@@ -173,18 +186,19 @@ public class DetectorTrack {
     public void     setAssociation(int x) {this.trackAssociation = x;}
     public void     setDetectorID(int id) {this.trackDetectorID = id;}
     
-    public int      getCharge()   { return trackCharge;}
-    public int      getNDF()      {return ndf;}
-    public int      getStatus()   {return trackStatus;}
-    public double   getchi2()  {return trackchi2;}
-    public double   getP()        { return trackP.mag();} 
-    public int   getID()     {return this.taggerID;}
-    public double   getPath()     { return trackPath;}
-    public Vector3  getVector()   { return this.trackP;}
-    public Vector3  getVertex()   { return this.trackVertex;}
-    public Vector3D getTrackEnd() { return trackEnd;}
-    public int      getAssociation() {return trackAssociation;}
-    public int      getDetectorID() {return trackDetectorID;}
+    public int      getCharge()     {return this.trackCharge;}
+    public int      getNDF()        {return this.ndf;}
+    public int      getStatus()     {return this.trackStatus;}
+    public double   getchi2()       {return this.trackchi2;}
+    public double   getP()          {return this.trackP.mag();} 
+    public int      getID()         {return this.taggerID;}
+    public double   getPath()       {return this.trackPath;}
+    public int      getSector()     {return this.trackSector;}
+    public Vector3  getVector()     {return this.trackP;}
+    public Vector3  getVertex()     {return this.trackVertex;}
+    public Vector3D getTrackEnd()   {return this.trackEnd;}
+    public int      getAssociation(){return this.trackAssociation;}
+    public int      getDetectorID() {return this.trackDetectorID;}
     
     
     public void addCross(double x, double y, double z,

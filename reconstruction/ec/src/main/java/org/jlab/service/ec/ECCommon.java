@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jlab.detector.base.DetectorCollection;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.base.Layer;
 import org.jlab.geom.component.ScintillatorPaddle;
+import org.jlab.groot.data.H1F;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
@@ -36,53 +38,49 @@ public class ECCommon {
     private static double[] AtoE  = {15,10,10};   // SCALED ADC to Energy in MeV
     private static double[] AtoE5 = {15,5,5};     // For Sector 5 ECAL
     
-    //public static DetectorCollection<H1F> H1_ecEng = new DetectorCollection<H1F>();
+    public static DetectorCollection<H1F> H1_ecEng = new DetectorCollection<H1F>();
     
     static int ind[]  = {0,0,0,1,1,1,2,2,2}; 
-    static float             tps =  (float) 0.02345;
-    public static float TOFFSET = 125; 
-    public static float veff = 18.1f;
-//    public static float TOFFSET = 436; 
+    static float               tps = 0.02345f;
+    public static float       veff = 18.1f;
     
-    public static void initHistos() {
-        /*
+    public  static void initHistos() {
+       
         for (int is=1; is<7; is++){
             for (int il=1; il<4; il++) {             
                 H1_ecEng.add(is,il,0, new H1F("Cluster Errors",55,-10.,100.));
                 H1_ecEng.add(is,il,1, new H1F("Cluster Errors",55,-10.,100.));
             }
-        }*/
+        }
     }
     
     public static void resetHistos() {
-        /*
+        
         for (int is=1; is<7; is++){
             for (int il=1; il<4; il++) {             
                 H1_ecEng.get(is,il,0).reset();
                 H1_ecEng.get(is,il,1).reset();
             }
-        } */      
+        }       
     }
     
     public static List<ECStrip>  initEC(DataEvent event, Detector detector, ConstantsManager manager, int run){
     	
-        if (singleEvent) resetHistos();        
-        
-        List<ECStrip>  ecStrips = null;
-        
-        if(event instanceof HipoDataEvent) {
-            ecStrips = ECCommon.readStripsHipo(event);
-        }
-        
-        if(ecStrips==null) return new ArrayList<ECStrip>();
-        
-        Collections.sort(ecStrips);
-        
         manager.setVariation(variation);
         
         IndexedTable    atten = manager.getConstants(run, "/calibration/ec/attenuation");
         IndexedTable     gain = manager.getConstants(run, "/calibration/ec/gain");
 		IndexedTable     time = manager.getConstants(run, "/calibration/ec/timing");
+    
+        if (singleEvent) resetHistos();        
+        
+        List<ECStrip>  ecStrips = null;
+        
+        if(event instanceof HipoDataEvent) ecStrips = ECCommon.readStripsHipo(event, run, manager);
+        
+        if(ecStrips==null) return new ArrayList<ECStrip>();
+        
+        Collections.sort(ecStrips);
         
         for(ECStrip strip : ecStrips){
             int sector    = strip.getDescriptor().getSector();
@@ -101,9 +99,9 @@ public class ECCommon {
             strip.getLine().copy(paddle.getLine());
             double distance = paddle.getLine().origin().distance(firstPaddle.getLine().origin());
             strip.setDistanceEdge(distance);
-            strip.setAttenuation( atten.getDoubleValue("A", sector,layer,component),
-                                  atten.getDoubleValue("B", sector,layer,component),
-                                  atten.getDoubleValue("C", sector,layer,component));
+            strip.setAttenuation(atten.getDoubleValue("A", sector,layer,component),
+                                 atten.getDoubleValue("B", sector,layer,component),
+                                 atten.getDoubleValue("C", sector,layer,component));
             strip.setGain(gain.getDoubleValue("gain", sector,layer,component)); 
             strip.setVeff(veff);
             strip.setTiming(time.getDoubleValue("a0", sector, layer, component),
@@ -112,20 +110,38 @@ public class ECCommon {
                             time.getDoubleValue("a3", sector, layer, component),
                             time.getDoubleValue("a4", sector, layer, component));
         }
+            
         return ecStrips;
     }
         
-    public static List<ECStrip>  readStripsHipo(DataEvent event){   
+    public static List<ECStrip>  readStripsHipo(DataEvent event, int run, ConstantsManager manager){ 
     	
-        List<ECStrip>  strips = new ArrayList<ECStrip>();
+      	List<ECStrip>  strips = new ArrayList<ECStrip>();
         IndexedList<List<Integer>>  tdcs = new IndexedList<List<Integer>>(3);  
         
+		IndexedTable   jitter = manager.getConstants(run, "/calibration/ec/time_jitter");
+		IndexedTable   offset = manager.getConstants(run, "/calibration/ec/fadc_offset");
+		IndexedTable  goffset = manager.getConstants(run, "/calibration/ec/fadc_global_offset");
+        
+        double PERIOD = jitter.getDoubleValue("period",0,0,0);
+        int    PHASE  = jitter.getIntValue("phase",0,0,0); 
+        int    CYCLES = jitter.getIntValue("cycles",0,0,0);
+        
+        float TOFFSET = (float) goffset.getDoubleValue("global_offset",0,0,0);
+	    int triggerPhase = 0;
+    	
+        if(CYCLES>0&&event.hasBank("RUN::config")==true){
+            DataBank bank = event.getBank("RUN::config");
+            long timestamp = bank.getLong("timestamp", 0);
+            triggerPhase = (int) (PERIOD*((timestamp+PHASE)%CYCLES));
+        }
+
         if(event.hasBank("ECAL::tdc")==true){
             DataBank  bank = event.getBank("ECAL::tdc");            
             for(int i = 0; i < bank.rows(); i++){
                 int  is = bank.getByte("sector",i);
                 int  il = bank.getByte("layer",i);
-                int  ip = bank.getShort("component",i);               
+                int  ip = bank.getShort("component",i);    
                 int tdc = bank.getInt("TDC",i);
                 if(tdc>0) {                       
                     if(!tdcs.hasItem(is,il,ip)) tdcs.add(new ArrayList<Integer>(),is,il,ip);
@@ -141,23 +157,24 @@ public class ECCommon {
                 int  il = bank.getByte("layer", i);
                 int  ip = bank.getShort("component", i);
                 int adc = bank.getInt("ADC", i);
-                float t = bank.getFloat("time", i);
+                float t = bank.getFloat("time", i) + (float) offset.getDoubleValue("offset",is,il,0);
                 
                 ECStrip  strip = new ECStrip(is, il, ip); 
                 
                 strip.setADC(adc);
+                strip.setTriggerPhase(triggerPhase);
                 
                 double sca = (is==5)?AtoE5[ind[il-1]]:AtoE[ind[il-1]]; 
                 if (variation=="clas6") sca = 1.0;               
                 if(strip.getADC()>sca*ECCommon.stripThreshold[ind[il-1]]) strips.add(strip); 
                 
-                Integer[] tdcc; float  tmax = 1000; int tdc = 1000;
+                Integer[] tdcc; float  tmax = 1000; int tdc = 0;
                 
                 if (tdcs.hasItem(is,il,ip)) {
                     List<Integer> list = new ArrayList<Integer>();
                     list = tdcs.getItem(is,il,ip); tdcc=new Integer[list.size()]; list.toArray(tdcc);       
                     for (int ii=0; ii<tdcc.length; ii++) {
-                    	    float tdif = (tps*tdcc[ii]-TOFFSET)-t; 
+                    	    float tdif = (tps*tdcc[ii]-triggerPhase-TOFFSET)-t; 
                     	    if (Math.abs(tdif)<30&&tdif<tmax) {tmax = tdif; tdc = tdcc[ii];}
                     }
                     strip.setTDC(tdc); 
@@ -272,9 +289,9 @@ public class ECCommon {
                             pV.get(bV).redoPeakLine();
                             pW.get(bW).redoPeakLine();
                             ECCluster cluster = new ECCluster(pU.get(bU),pV.get(bV),pW.get(bW));
-                            //H1_ecEng.get(sector,ind[startLayer-1]+1,0).fill(cluster.getHitPositionError());
+                            H1_ecEng.get(sector,ind[startLayer-1]+1,0).fill(cluster.getHitPositionError());
                             if(cluster.getHitPositionError()<ECCommon.clusterError[ind[startLayer-1]]) {
-                                //H1_ecEng.get(sector,ind[startLayer-1]+1,1).fill(cluster.getHitPositionError());
+                                 H1_ecEng.get(sector,ind[startLayer-1]+1,1).fill(cluster.getHitPositionError());
 //								double tU = cluster.getTime(0);
 //								double tV = cluster.getTime(1);
 //								double tW = cluster.getTime(2);

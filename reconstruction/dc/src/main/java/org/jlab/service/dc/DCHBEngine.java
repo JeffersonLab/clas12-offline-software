@@ -1,7 +1,6 @@
 package org.jlab.service.dc;
 
 import cnuphys.magfield.MagneticFields;
-import cnuphys.magfield.TorusMap;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
@@ -42,9 +41,7 @@ import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.RoadFinder;
 import org.jlab.rec.dc.trajectory.Road;
 import org.jlab.utils.CLASResources;
-
-import org.jlab.clara.engine.EngineData;
-import org.jlab.clara.engine.EngineDataType;
+import org.jlab.utils.groups.IndexedTable;
 
 public class DCHBEngine extends ReconstructionEngine {
 
@@ -111,6 +108,7 @@ public class DCHBEngine extends ReconstructionEngine {
             "/calibration/dc/time_to_distance/time2dist",
          //   "/calibration/dc/time_corrections/T0_correction",
             "/calibration/dc/time_corrections/timingcuts",
+            "/calibration/dc/time_jitter",
         };
 
         requireConstants(Arrays.asList(dcTables));
@@ -154,13 +152,24 @@ public class DCHBEngine extends ReconstructionEngine {
         }
 
         DataBank bank = event.getBank("RUN::config");
-
+        long   timeStamp = bank.getLong("timestamp", 0);
+        double triggerPhase =0;
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
         if(newRun==0)
         	return true;
+        
         if(Run.get()==0 || (Run.get()!=0 && Run.get()!=newRun)) { 
+            if(timeStamp==-1)
+                return true;
+            
+            IndexedTable tabJ=this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_jitter");
+            double period = tabJ.getDoubleValue("period", 0,0,0);
+            int    phase  = tabJ.getIntValue("phase", 0,0,0);
+            int    cycles = tabJ.getIntValue("cycles", 0,0,0);
+            
+            if(cycles>0) triggerPhase=period*((timeStamp+phase)%cycles); 
 //            if(newRun>1000) {
 //                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
 //            } else {
@@ -213,7 +222,7 @@ public class DCHBEngine extends ReconstructionEngine {
        HitReader hitRead = new HitReader();
        hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, Constants.getT0(), Constants.getT0Err(), 
                this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), 
-               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), dcDetector);
+               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), dcDetector, triggerPhase);
 
        List<Hit> hits = new ArrayList<Hit>();
        //I) get the hits

@@ -11,24 +11,16 @@ import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter;
+import org.jlab.rec.cvt.fit.LineFitPars;
+import org.jlab.rec.cvt.fit.LineFitter;
 import org.jlab.rec.cvt.svt.Constants;
 
 public class TrackSeederCA {
 
     public TrackSeederCA() {
         
-        sortedCrosses = new ArrayList<ArrayList<ArrayList<Cross>>>();
-        
-        //for(int b =0; b<36; b++) {
-            //sortedCrosses.add(b, new ArrayList<ArrayList<Cross>>() );
-            //for(int l =0; l<6; l++) {
-                //sortedCrosses.get(b).add(l,new ArrayList<Cross>() );
-            //}
-        //}
     }
 
-    private List<ArrayList<Cross>> seedCrosses = new ArrayList<ArrayList<Cross>>();
-    private List<ArrayList<ArrayList<Cross>>> sortedCrosses;
 
 
     // Retrieve lists of crosses as track candidates
@@ -45,8 +37,16 @@ public class TrackSeederCA {
         for( Cell cell : nodes ){
       	  if( cell.get_state() >= mstate-1 ){
           
-            // if the cell has been already used for one track candidate, then skip it
-      		  if( cell.is_used()) continue;
+//             if the cell has been already used for one track candidate, then skip it
+      		  if( cell.is_used() ) continue;
+      		  if( cell.get_plane().equalsIgnoreCase("XY") ) {
+      			  if( cell.get_c1().is_usedInXYcand() || cell.get_c2().is_usedInXYcand() ) { continue;}
+      		  }
+
+      		  if( cell.get_plane().equalsIgnoreCase("ZR") ) {
+      			  if( cell.get_c1().is_usedInZRcand() || cell.get_c2().is_usedInZRcand() ) continue;
+      		  }
+      		 
       		  int candlen = 1;
       		  ArrayList<Cell> cand = new ArrayList<Cell>();
       		  cand.add( cell );
@@ -59,7 +59,14 @@ public class TrackSeederCA {
       			  int id = -1;
       			  for( int ic=0; ic < neighbour.get_neighbors().size();ic++ ){
       				  Cell cn = neighbour.get_neighbors().get(ic);
-      				  if(cn.is_used() ) continue;
+//      				  if(cn.is_used() ) continue;
+//      	      		  if( cn.get_plane().equalsIgnoreCase("XY") ) {
+//      	      			  if( cn.get_c1().is_usedInXYcand() || cn.get_c2().is_usedInXYcand() ) { continue;}
+//      	      		  }
+//
+//      	      		  if( cell.get_plane().equalsIgnoreCase("ZR") ) {
+//      	      			  if( cn.get_c1().is_usedInZRcand() || cn.get_c2().is_usedInZRcand() ) continue;
+//      	      		  }      				  
       				  if( cn.get_state() != neighbour.get_state()-1) continue;
       				  if( cn.get_state() >= ms ){
       					  ms = cn.get_state();
@@ -81,7 +88,18 @@ public class TrackSeederCA {
       			  }
       			  if( id < 0 ) break;
       			  Cell n = neighbour.get_neighbors().get(id);
-      			  n.set_used(true);
+      			
+      			  // avoid clones. Set the node and its upper cross to "already used"
+      			  // TODO: should we assign "used" only if a Good candidate is found?
+//      			  n.set_used(true); 
+//      			  if( n.get_plane().equalsIgnoreCase("XY") ) {
+////      				  n.get_c1().set_usedInXYcand( true );
+//      				  n.get_c2().set_usedInXYcand( true );
+//      			  }
+//      			  if( n.get_plane().equalsIgnoreCase("ZR") ) {
+////      				  n.get_c1().set_usedInZRcand( true );
+//      				  n.get_c2().set_usedInZRcand( true );
+//      			  }
 
 //              	  System.out.println(" - " + n);
       			  cand.add(n);
@@ -92,11 +110,25 @@ public class TrackSeederCA {
 //      		  System.out.println(" ");
       		  if( cand.get(0).get_plane().equalsIgnoreCase("XY")) {
 	  			  if( candlen > 2 ){
-	  				  cellCands.add(cand);
+	  				  if( fitSeed(getCrossFromCells(cand), 2, false) != null) {
+	  					  cellCands.add(cand);
+	  					  
+	  					  for( Cell n : cand ) {
+	  		      			  n.set_used(true); 
+	  		      			  if( n.get_plane().equalsIgnoreCase("XY") ) {
+//	  		      				  n.get_c1().set_usedInXYcand( true );
+	  		      				  n.get_c2().set_usedInXYcand( true );
+	  		      			  }
+	  		      			  if( n.get_plane().equalsIgnoreCase("ZR") ) {
+//	  		      				  n.get_c1().set_usedInZRcand( true );
+	  		      				  n.get_c2().set_usedInZRcand( true );
+	  		      			  }
+	  					  }
+	  				  }
 	  		  	  }
       		  }
       		  else {
-	  			  if( candlen > 1 ){
+	  			  if( candlen > 0 ){
 	  				  cellCands.add(cand);
 	  		  	  }
       		  }
@@ -109,25 +141,29 @@ public class TrackSeederCA {
 //        System.out.println(" cellCands " + cellCands.size() );
          
         for( List<Cell> candcell : cellCands ){
-//        	System.out.println(candcell);
           if(candcell.size() == 0 ) continue;
-//          System.out.print( " +++ ");
-      	  trCands.add( new ArrayList<Cross>());
-  		  trCands.get(trCands.size()-1).add( candcell.get(0).get_c2() );
-//          System.out.print( " " + trCands.get(trCands.size()-1).get(0).get_Id() + " " + trCands.get(trCands.size()-1).get(0).get_Detector() +trCands.get(trCands.size()-1).get(0).get_DetectorType());
-      	  for( Cell c : candcell ){
-//              System.out.print( " " + c.get_c1().get_Id() + " " + c.get_c1().get_Detector() +c.get_c1().get_DetectorType());
-      		  trCands.get(trCands.size()-1).add( c.get_c1() );
-      	  }
-//          System.out.println( " +++ " + trCands.get(trCands.size()-1).size() + ";   ");
+      	  trCands.add( getCrossFromCells(candcell));
+//      	  trCands.add( new ArrayList<Cross>());
+//  		  trCands.get(trCands.size()-1).add( candcell.get(0).get_c2() );
+//      	  for( Cell c : candcell ){
+//      		  trCands.get(trCands.size()-1).add( c.get_c1() );
+//      	  }
         }
         return trCands;      
     }
 
+    private ArrayList<Cross> getCrossFromCells( List<Cell> l ){
+    	if( l == null ) return null;
+    	ArrayList<Cross> crs = new ArrayList<Cross>();
+    	crs.add( l.get(0).get_c2());
+    	for( Cell c : l) crs.add(c.get_c1());
+    	
+    	return crs;
+    }
 
     // create and run the cellular automaton
     public List<Cell> runCAMaker( String plane, int nepochs, ArrayList<Cross> crs, org.jlab.rec.cvt.bmt.Geometry bgeom  ){
-        MakerCA camaker = new MakerCA();
+        MakerCA camaker = new MakerCA(false);
         camaker.set_plane( plane );
         if( plane.equalsIgnoreCase("XY") ){
           camaker.set_cosBtwCells(0.95);  // min dot product between neighbours 
@@ -135,7 +171,7 @@ public class TrackSeederCA {
           camaker.set_aCvsR(45);         // max angle between the cell and the radius to the first cell
         }
         if( plane.equalsIgnoreCase("ZR") ){
-          camaker.set_cosBtwCells(0.1);
+          camaker.set_cosBtwCells(0.9); // it only applies to the BMTC cross only cells
           camaker.set_abCrs(30.);
           camaker.set_aCvsR(90.);
         }
@@ -146,12 +182,6 @@ public class TrackSeederCA {
         return camaker.getNodes();  
     }
     
-    private List<Double> Xs = new ArrayList<Double>();
-    private List<Double> Ys = new ArrayList<Double>();
-    private List<Double> Ws = new ArrayList<Double>();
-
-    private List<Seed> BMTmatches = new ArrayList<Seed>();
-
     public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses, 
     						   org.jlab.rec.cvt.svt.Geometry svt_geo, 
     						   org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
@@ -164,7 +194,7 @@ public class TrackSeederCA {
         
         crosses.addAll(svt_crosses);
 
-        Collections.sort(crosses);
+//        Collections.sort(crosses);
         
         for(Cross c : bmt_crosses) { 
             if(c.get_DetectorType().equalsIgnoreCase("Z"))
@@ -180,25 +210,119 @@ public class TrackSeederCA {
 
         List<Cell> xynodes = runCAMaker( "XY", 5, crosses, bmt_geo ); 
         List<ArrayList<Cross>> xytracks =  getCAcandidates( xynodes );
-       
-//        seedCrosses = xytracks;
-//        System.out.println(xytracks.size());
 
+//        System.out.println( " XY tracks " + xytracks );
+        //// TODO: TEST TEST TEST
+        // test if a first fit to move the SVT crosses helps
+//        for( ArrayList<Cross> acr : xytracks ) {
+//		    Track xycand = fitSeed(acr, svt_geo, 5, false);
+//		    // update
+//        }
         
-        seedlist = CAonRZ( seedlist, xytracks, bmtC_crosses, svt_geo, bmt_geo);
         
+
+        List<ArrayList<Cross>> seedCrosses = CAonRZ( xytracks, bmtC_crosses, svt_geo, bmt_geo);
+        
+        List<Track> cands = new ArrayList<Track>();
 //        System.out.println(seedlist.size());
+	    for (int s = 0; s < seedCrosses.size(); s++) {
+	    	Collections.sort(seedCrosses.get(s));      // TODO: check why sorting matters
+		    Track cand = fitSeed(seedCrosses.get(s), svt_geo, 5, false);
+		    if (cand != null) {
+		    	cands.add(cand);
+		    }
+	    }
+//	    for( int i=0;i<cands.size();i++)cands.get(i).set_Id(i+1);
+//	    cands = rmDuplicate( cands ); // TODO
+	    
+	    for( Track cand : cands ) {
+	    	cand.finalUpdate_Crosses(svt_geo); // this should update the Z position, only for display purposes 
+	        Seed seed = new Seed();
+	        seed.set_Crosses(cand);
+	        seed.set_Helix(cand.get_helix());
+	        seedlist.add(seed);
+	        List<Cluster> clusters = new ArrayList<Cluster>();
+	        for(Cross c : seed.get_Crosses()) { 
+	            if(c.get_Detector().equalsIgnoreCase("SVT")) {
+	                clusters.add(c.get_Cluster1());
+	                clusters.add(c.get_Cluster2());
+            	} else {
+                	clusters.add(c.get_Cluster1());
+            	}
+        	}
+        	seed.set_Clusters(clusters);
+	    }
 
         return seedlist;
     }
     
-    public List<Seed> CAonRZ( List<Seed> seedlist, 
+    private List<Track> rmDuplicate( List<Track> tracks ) {
+    	List<Track> goodTrks = new ArrayList<Track>();
+    	List<Track> badTrks = new ArrayList<Track>();
+
+    	List<Track> sample = new ArrayList<Track>();
+    	List<Track> selected = new ArrayList<Track>();
+    	for( int i=0;i<tracks.size();i++) {
+    		Track tr = tracks.get(i);
+    		if( tr == null ) continue;
+    		// check if the track is a bad clone already discarded
+    		if( badTrks.contains(tr) ) continue;
+    		
+    		
+    		// look for all the clones. Tracks are considered clones if they share at least 2 crosses
+    		sample.clear();
+        	for( int j=0;j<tracks.size();j++) {
+        		Track tj = tracks.get(j);
+        		int nshared = 0;
+        		for( Cross c : tj ) {
+        			if( tr.contains(c) ) {
+        				nshared++;
+        				if( nshared >= 2 ) {
+                			sample.add(tj);
+                			break;
+                		}
+        			}
+        		}
+        		
+        	}
+        	
+        	// find the best clone
+        	int size = 0;
+        	int itr = 0;
+        	selected.clear();
+        	for( int j=0;j<sample.size();j++) {
+        		Track ts = sample.get(j);
+        		int tmpsize = ts.size();
+        		if( tmpsize >= size ) {
+        			size = tmpsize;
+        			selected.add(ts);
+        		}
+        		else {
+        			badTrks.add(ts);
+        		}
+        	}
+        	
+        	// add the best clone to the good tracks
+        	goodTrks.addAll( selected);
+        	
+        	// remove the bad one from tracks
+        	tracks.removeAll(badTrks);
+        	
+    	}
+    	goodTrks.removeAll(badTrks);
+    	return goodTrks;
+    }
+    
+    public List<ArrayList<Cross>> CAonRZ( 
     						   List<ArrayList<Cross>>xytracks , 
     						   List<ArrayList<Cross>> bmtC_crosses,
     						   org.jlab.rec.cvt.svt.Geometry svt_geo, 
     						   org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
+      
+      List<ArrayList<Cross>> seedCrosses = new ArrayList<ArrayList<Cross>>();
 
       if( bmtC_crosses == null ) return null;
+//      System.out.println("not null bmtc");
       // loop over each xytrack to find ZR candidates
       // ---------------------------------------------
 //      for( List<Cross> xycross : xytracks ){ // ALERT: this throw a concurrent modification exception 
@@ -220,6 +344,7 @@ public class TrackSeederCA {
         	  sector = c.get_Sector()-1;
           }
         }
+//        System.out.println(sector);
         if( sector < 0 ) continue;
         Collections.sort(svtcrs);
 //        Collections.sort(svtcrs,Collections.reverseOrder());
@@ -227,7 +352,7 @@ public class TrackSeederCA {
 //            System.out.print( " " + c.get_Id() + " " +c.get_Detector() + " " + c.get_DetectorType() + " ; " );
 //        }
 //        System.out.println();
-        crsZR.addAll(svtcrs);
+//        crsZR.addAll(svtcrs);
 
         // add all the BMT_C crosses
         //--------------------------
@@ -238,13 +363,14 @@ public class TrackSeederCA {
         if( bmtC_crosses.get(sector) == null  || bmtC_crosses.get(sector).size() == 0 ) continue;
         crsZR.addAll( bmtC_crosses.get(sector) );
 
+//        System.out.println("\n....\t"+crsZR);
         // sort 
 //        Collections.sort(crsZR,Collections.reverseOrder());
 //        Collections.sort(crsZR);
         
         // run the CAmaker
         List<Cell> zrnodes = runCAMaker( "ZR", 5, crsZR, bmt_geo );
-
+//System.out.println(zrnodes);
         List<ArrayList<Cross>> zrtracks =  getCAcandidates( zrnodes );
 
 //        System.out.println("sector" + sector + " len " + zrtracks.size());  
@@ -252,14 +378,62 @@ public class TrackSeederCA {
         // collect crosses for candidates
         //--------------------------------
         for( List<Cross> zrcross : zrtracks ){
+          // count svt crosses. If none, skip the candidate // TODO
+          //int Nsvt = 0;
+          //for( Cross c : zrcross ){
+            //if( c.get_Detector().equalsIgnoreCase("SVT")){
+          	  //Nsvt++;
+            //}
+          //}
+          //if( Nsvt == 0 ) continue;
+          
+        	
+          // FIT ZR BMT
+          // ---------------------------
+    		List<Double> R = new ArrayList<Double>();
+    		List<Double> Z = new ArrayList<Double>();
+    		List<Double> EZ= new ArrayList<Double>();
+    		
+    		for( Cross c : zrcross ) {
+    			R.add( org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[c.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det );
+    			Z.add( c.get_Point().z() );
+    			EZ.add( c.get_PointErr().z());
+    		}
+    		
+    		LineFitter ft = new LineFitter();
+    		boolean status = ft.fitStatus(Z, R, EZ, null, Z.size());
+    		if( status == false ) { System.err.println(" BMTC FIT FAILED");}
+    		LineFitPars fpars = ft.getFit();
+ 		   	if( fpars == null ) continue;
+ 		   	double b = fpars.intercept();
+ 		   	double m = fpars.slope();
+        	
+ 		   	
           seedCrosses.add( new ArrayList<Cross>() );
           int scsize = seedCrosses.size();
           // add svt
-          for( Cross c : zrcross ){
-            if( c.get_Detector().equalsIgnoreCase("SVT")){
-              seedCrosses.get(scsize-1).add(c); 
-            }              
+          for( Cross c : svtcrs ){
+			   int l1 = c.get_Cluster1().get_Layer();
+			   int s1 = c.get_Cluster1().get_Sector();
+			   double c1 = c.get_Cluster1().get_Centroid();
+			   double r1 = org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l1-1][s1-1];
+			   double nstr1 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r1 - b)/m, l1, s1);
+
+			   int l2 = c.get_Cluster2().get_Layer();
+			   int s2 = c.get_Cluster2().get_Sector();
+			   double c2 = c.get_Cluster2().get_Centroid();
+			   double r2 = org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l2-1][s2-1];
+			   double nstr2 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r2 - b)/m, l2, s2);
+			   
+			   if( Math.abs( c1 - nstr1 ) < 4 && Math.abs( c2 - nstr2 ) < 4 )			   
+				   seedCrosses.get(scsize-1).add(c);
           }
+
+//          for( Cross c : zrcross ){
+//            if( c.get_Detector().equalsIgnoreCase("SVT")){
+//              seedCrosses.get(scsize-1).add(c); 
+//            }
+//          }
 
           // add bmt z
           for( Cross c : xycross ){
@@ -276,29 +450,8 @@ public class TrackSeederCA {
           }
         }
       }
-      
-	    for (int s = 0; s < seedCrosses.size(); s++) {
-	    	Collections.sort(seedCrosses.get(s));      // TODO: check why sorting matters
-		    Track cand = fitSeed(seedCrosses.get(s), svt_geo, 5, false);
-		    if (cand != null) {
-		        Seed seed = new Seed();
-		        seed.set_Crosses(seedCrosses.get(s));
-		        seed.set_Helix(cand.get_helix());
-		        seedlist.add(seed);
-		        List<Cluster> clusters = new ArrayList<Cluster>();
-		        for(Cross c : seed.get_Crosses()) { 
-		            if(c.get_Detector().equalsIgnoreCase("SVT")) {
-		                clusters.add(c.get_Cluster1());
-		                clusters.add(c.get_Cluster2());
-	            	} else {
-	                	clusters.add(c.get_Cluster1());
-	            	}
-	        	}
-	        	seed.set_Clusters(clusters);
-	    	}
-	    }
 
-      return seedlist;
+      return seedCrosses;
     }
 
     private List<Double> X = new ArrayList<Double>();
@@ -312,6 +465,11 @@ public class TrackSeederCA {
     List<Cross> BMTCrossesZ = new ArrayList<Cross>();
     List<Cross> SVTCrosses = new ArrayList<Cross>();
 
+
+    public Track fitSeed(List<Cross> VTCrosses, int fitIter, boolean originConstraint) {
+    	return fitSeed( VTCrosses,null,fitIter,originConstraint);
+    }
+    
     public Track fitSeed(List<Cross> VTCrosses, org.jlab.rec.cvt.svt.Geometry svt_geo, int fitIter, boolean originConstraint) {
         double chisqMax = Double.POSITIVE_INFINITY;
         
@@ -425,19 +583,31 @@ public class TrackSeederCA {
             cand = new Track(fitTrk.get_helix());
             //cand.addAll(SVTCrosses);
             cand.addAll(SVTCrosses);
+            cand.addAll(BMTCrossesC);
+            cand.addAll(BMTCrossesZ);
             
             cand.set_HelicalTrack(fitTrk.get_helix());
+            if( X.size()>3 )
+            	cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]/(X.size()-3));
+            else 
+            	cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]*2); // penalize tracks with only 3 crosses 
+            
+            if( Z.size() > 2 )
+            	cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1]/Z.size());
+            else
+            	cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1]*2);// penalize tracks with only 2 crosses
+            	
             //if(shift==0)
-            if (fitTrk.get_chisq()[0] < chisqMax) {
-                chisqMax = fitTrk.get_chisq()[0];
-                if(chisqMax<Constants.CIRCLEFIT_MAXCHI2)
-                    cand.update_Crosses(svt_geo);
-                //i=fitIter;
-            }
+//            if (fitTrk.get_chisq()[0] < chisqMax) {
+//                chisqMax = fitTrk.get_chisq()[0];
+//                if(chisqMax<Constants.CIRCLEFIT_MAXCHI2)
+//                    cand.update_Crosses(svt_geo);
+//                //i=fitIter;
+//            }
         }
         //System.out.println(" Seed fitter "+fitTrk.get_chisq()[0]+" "+fitTrk.get_chisq()[1]); 
-        if(chisqMax>Constants.CIRCLEFIT_MAXCHI2)
-            cand=null;
+//        if(chisqMax>Constants.CIRCLEFIT_MAXCHI2)
+//            cand=null;
         return cand;
     }
 

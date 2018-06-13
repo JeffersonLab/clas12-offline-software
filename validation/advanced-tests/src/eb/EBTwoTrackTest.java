@@ -411,14 +411,14 @@ public class EBTwoTrackTest {
         System.out.println("\n#############################################################");
 
         // some global efficiency tests:
-        assertEquals(eEff>0.9,true);
+        assertEquals(eEff>0.88,true);
         if      (hadronPDG==2212) assertEquals(pEff>0.77,true);
         else if (hadronPDG==321)  {
             if (isCentral) assertEquals(kEff>0.55,true);
             else           assertEquals(kEff>0.60,true);
         }
         else if (hadronPDG==211)  assertEquals(piEff>0.75,true);
-        else if (hadronPDG==22)   assertEquals(gEff>0.85,true);
+        else if (hadronPDG==22)   assertEquals(gEff>0.84,true);
         else if (hadronPDG==2112) assertEquals(nEff>0.55,true);
     }
    

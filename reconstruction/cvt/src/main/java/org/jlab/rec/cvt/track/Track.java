@@ -16,7 +16,7 @@ import org.jlab.rec.cvt.trajectory.Trajectory;
  * @author ziegler
  *
  */
-public class Track extends Trajectory {
+public class Track extends Trajectory implements Comparable<Track> {
 
     private int _TrackingStatus;
 
@@ -208,6 +208,37 @@ public class Track extends Trajectory {
         return isInTrack;
     }
 
+    @Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Track other = (Track) obj;
+		if ( this.get_Id() != other.get_Id())
+			return false;
+
+		return true;
+	}
+
+
+
+    @Override
+    public int hashCode() {
+    	final int prime = 101;
+    	int result = super.hashCode();
+    	result += prime * result + this.get(0).hashCode() + this.get(this.size()-1).hashCode();
+    	return result;
+    }    
+    
+    @Override
+    public int compareTo( Track tr ) {
+//    	return ( tr.size() >= this.size() ) ? 1 : -1;
+    	return ( tr.get_P() > this.get_P() ) ? 1 : -1;
+    }
+    
     public Point3D get_TrackPointAtCTOFRadius() {
         return _TrackPointAtCTOFRadius;
     }

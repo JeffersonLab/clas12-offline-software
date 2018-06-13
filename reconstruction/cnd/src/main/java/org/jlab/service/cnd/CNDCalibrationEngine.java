@@ -44,7 +44,11 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	public boolean processDataEvent(DataEvent event) {
 		//event.show();
 		//System.out.println("in data process ");
-		ArrayList<HalfHit> halfhits = new ArrayList<HalfHit>();   
+            
+		// update calibration constants based on run number if changed
+		setRunConditionsParameters(event);
+
+                ArrayList<HalfHit> halfhits = new ArrayList<HalfHit>();   
 		ArrayList<CndHit> hits = new ArrayList<CndHit>();
 
 		//test
@@ -59,8 +63,6 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 			//			event.show();
 			return true;
 		}
-		// update calibration constants based on run number if changed
-		setRunConditionsParameters(event);
 
 		//2) find the CND hits from these half-hits
 		CndHitFinder hitFinder = new CndHitFinder();

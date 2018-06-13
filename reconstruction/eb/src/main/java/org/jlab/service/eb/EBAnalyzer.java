@@ -16,6 +16,7 @@ import org.jlab.rec.eb.EBConstants;
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
 import org.jlab.rec.eb.EBUtil;
+import org.jlab.rec.eb.SamplingFractions;
 
 /**
  * @author gavalian
@@ -309,7 +310,7 @@ public class EBAnalyzer {
 
             // electron/positron:
             if (abs(pid)==11) {
-                q = pow(EBUtil.getSamplingFractionNSigma(p,ccdb),2);
+                q = pow(SamplingFractions.getNSigma(pid,p,ccdb),2);
             }
 
             // based on timing:

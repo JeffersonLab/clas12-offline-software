@@ -409,9 +409,9 @@ public class RecoBankWriter {
         DataBank bank = event.createBank("CVTRec::Cosmics", cosmics.size());
         // an array representing the ids of the crosses that belong to the track: for a helical track with the current
         // 4 regions of SVT + 1 region of BMT there can be up to 4*2 (*2: for each hemisphere) crosses of type SVT and 2*2 of type PSEUDOBMT (1 for the C detector and 1 for the Z detector)
-        List<Integer> crossIdxArray = new ArrayList<Integer>();
 
         for (int i = 0; i < cosmics.size(); i++) {
+            List<Integer> crossIdxArray = new ArrayList<Integer>();
 
 
             bank.setShort("ID", i, (short) cosmics.get(i).get_Id());

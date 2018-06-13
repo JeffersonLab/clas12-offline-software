@@ -63,18 +63,22 @@ public class Hit extends AHit implements IGetCalibrationParams {
         this._matchedTrack = _matchedTrack;
     }
 
-    public void set_HitParameters(int superlayer, 
+    public void set_HitParameters(int superlayer,
+            long timeStamp,
             IndexedTable constants0, 
             IndexedTable constants1, 
             IndexedTable constants2, 
             IndexedTable constants3, 
-            IndexedTable constants5) {
+            IndexedTable constants5, 
+            IndexedTable constants6) {
         /*
         0: "/calibration/ctof/attenuation"),
         1: "/calibration/ctof/effective_velocity"),
         2: "/calibration/ctof/time_offsets"),
         3: "/calibration/ctof/tdc_conv"),
-        4: "/calibration/ctof/status"));
+        4: "/calibration/ctof/status"),
+        5: "/calibration/ctof/gain_balance"),
+        6: "/calibration/ctof/time_jitter"));
         */
         double pl = this.get_paddleLine().length();
 
@@ -111,10 +115,11 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double ADC_MIPErr = this.ADC_MIPUnc(constants5);
         double DEDX_MIP = this.DEDX_MIP();
         double ScinBarThickn = this.ScinBarThickn();
+        double triggerPhase  = this.calc_TriggerPhase(timeStamp, constants6);
 
         this.set_HitParams(superlayer, TW0U, TW0D, TW1U, TW1D, lambdaU,
                 lambdaD, yOffset, vU, vD, vUUnc, vDUnc, PEDU, PEDD, PEDUUnc,
-                PEDDUnc, paddle2paddle, RFPad, timeOffset, LSBConv, LSBConvErr,
+                PEDDUnc, paddle2paddle, RFPad, timeOffset, triggerPhase, LSBConv, LSBConvErr,
                 ADCUErr, ADCDErr, TDCUErr, TDCDErr, ADC_MIP, ADC_MIPErr,
                 DEDX_MIP, ScinBarThickn, pl);
         // Set the hit position in the local coordinate of the bar

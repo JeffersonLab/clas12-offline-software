@@ -25,7 +25,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.eb.EBConstants;
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
-import org.jlab.rec.eb.EBUtil;
+import org.jlab.rec.eb.SamplingFractions;
 
 /**
  *
@@ -290,7 +290,7 @@ public class EventBuilder {
         for(DetectorParticle p : particles) {
             
             final double visEnergy = p.getEnergy(DetectorType.ECAL);
-            final double sampFract = EBUtil.getExpectedSamplingFraction(visEnergy,ccdb);
+            final double sampFract = SamplingFractions.getMean(22,p,ccdb);
             final double corEnergy = visEnergy / sampFract;
 
             // direction cosines:
@@ -413,7 +413,7 @@ class TriggerOptions {
     public int getSoftwareTriggerScore(DetectorParticle p,EBCCDBConstants ccdb) {
 
         final double npheCut = ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT);
-        final double sfNSigma = EBUtil.getSamplingFractionNSigma(p,ccdb);
+        final double sfNSigma = SamplingFractions.getNSigma(11,p,ccdb);
 
         int score = 0;
         if(p.getNphe(DetectorType.HTCC) > npheCut){

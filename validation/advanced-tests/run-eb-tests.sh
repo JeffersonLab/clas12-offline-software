@@ -1,4 +1,4 @@
-#!/bin/sh -f
+#!/bin/bash
 
 webDir=http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/eb
 webVersion=4a.2.3-fid-r10
@@ -9,13 +9,21 @@ webDir=$webDir/$webVersion
 # whether to use CLARA (0=no)
 useClara=0
 
-# if first argument is -t, only run the test, 
-# don't redownload dependencies, don't run reconstruction.
+# if non-zero, don't redownload dependencies, don't run reconstruction:
 runTestOnly=0
-if [ "$1" = "-t" ]
-then
-    runTestOnly=1
-fi
+
+nEvents=-1
+
+for arg in $@
+do
+    if [ "$arg" == "-t" ]
+    then
+        runTestOnly=1
+    elif [[ $arg == "-100" ]]
+    then
+        webDir=${webDir}-100
+    fi
+done
 
 # last argument is input file stub:
 webFileStub="${@: -1}"
@@ -63,6 +71,7 @@ esac
 if [ $useClara -eq 0 ]
 then
     COAT=../../coatjava
+    source $COAT/bin/env.sh
 else
     CLARA_HOME=$PWD/clara_installation/
     COAT=$CLARA_HOME/plugins/clas12/

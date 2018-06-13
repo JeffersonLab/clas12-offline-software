@@ -75,10 +75,12 @@ public class TrackingEff extends ReconstructionEngine {
             // Load the Fields 
             clasDictionaryPath= CLASResources.getResourcePath("etc");
             String[]  dcTables = new String[]{
-                "/calibration/dc/signal_generation/doca_resolution",
-               // "/calibration/dc/time_to_distance/t2d",
-                "/calibration/dc/time_to_distance/time2dist",
-              //  "/calibration/dc/time_corrections/T0_correction",
+            "/calibration/dc/signal_generation/doca_resolution",
+          //  "/calibration/dc/time_to_distance/t2d",
+            "/calibration/dc/time_to_distance/time2dist",
+         //   "/calibration/dc/time_corrections/T0_correction",
+            "/calibration/dc/time_corrections/timingcuts",
+            "/calibration/dc/time_jitter",
             };
 
             requireConstants(Arrays.asList(dcTables));
@@ -226,7 +228,7 @@ public class TrackingEff extends ReconstructionEngine {
             //hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector);
             hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, 
                     this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), 
-                    this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), dcDetector);
+                    this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), dcDetector, 0.0);
 
             List<Hit> hits = new ArrayList<Hit>();
             List<Hit> sighits = new ArrayList<Hit>();
