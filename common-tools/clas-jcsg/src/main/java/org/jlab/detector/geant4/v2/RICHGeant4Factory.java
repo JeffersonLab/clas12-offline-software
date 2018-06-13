@@ -5,7 +5,9 @@
  */
 package org.jlab.detector.geant4.v2;
 
+import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Vector3d;
+import eu.mihosoft.vrl.v3d.Vertex;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,16 +17,17 @@ import org.jlab.detector.volume.G4Stl;
 import org.jlab.detector.volume.G4World;
 import org.jlab.geom.prim.Point3D;
 
+import com.sun.glass.ui.Window;
 
 import org.jlab.detector.volume.G4Box;
 
 /**
  * Building the RICH PMTs
  * @author Goodwill, kenjo
- * modfied by gangel
  */
 public final class RICHGeant4Factory extends Geant4Factory {
 
+	private int StlNr = 0; 
     //to be  stored in database, from hashmap of perl script for gemc, all dimensions in mm
     private final int PMT_rows = 23, sector = 4;
 
@@ -53,32 +56,53 @@ public final class RICHGeant4Factory extends Geant4Factory {
     // list containing the pmts
     private List<G4Box> pmts = new ArrayList<G4Box>();
     private List<G4Box> photocatodes = new ArrayList<G4Box>();
+    private List<G4Box> windows = new ArrayList<G4Box>();
     private List<G4Stl> stlvolumes = new ArrayList<G4Stl>();
     
+    // Optical properties as a test, they will be implemented for database
+    private double n_w=1.3;
+    private double n_aerogel=1.05;
 
     public RICHGeant4Factory() {
     	
         motherVolume = new G4World("fc");
         //import the 5 mesh files
-
+         int stlN=0;
         ClassLoader cloader = getClass().getClassLoader();
         G4Stl gasVolume = new G4Stl("OpticalGasVolume", cloader.getResourceAsStream("rich/cad/OpticalGasVolume.stl"), Length.mm / Length.cm);
         gasVolume.setMother(motherVolume);
         stlvolumes.add(gasVolume);
-
-        for (String name : new String[]{"AerogelTiles", "Aluminum", "CFRP", "Glass", "TedlarWrapping"}) {
+        for (String name : new String[]{"AerogelTiles", "Aluminum","BottomLeftMirror","BottomMirror","BottomRightMirror",  "CFRP", "Mirror1","Mirror2","Mirror3","Mirror4","Mirror5","Mirror6","Mirror7","Mirror8","Mirror9","Mirror10","MirrorBack1", "MirrorBack2", "MirrorSupport",   "TedlarWrapping", "TopLeftMirror", "TopRightMirror"}) {
             G4Stl component = new G4Stl(String.format("%s", name),
-                    cloader.getResourceAsStream(String.format("rich/cad/%s.stl", name)),
+               cloader.getResourceAsStream(String.format("rich/cad/%s.stl", name)),
                     Length.mm / Length.cm);
-
-            component.setMother(gasVolume);
+          //  if(name=="CFRP") component.setReflective();
+                      component.setMother(gasVolume);
+            if(name=="AerogelTiles") component.SetOptical();
+            if(name=="Mirror1") component.setReflective();
+            if(name=="Mirror2") component.setReflective();
+            if(name=="Mirror3") component.setReflective();
+            if(name=="Mirror4") component.setReflective();
+            if(name=="Mirror5") component.setReflective();
+            if(name=="Mirror6") component.setReflective();
+            if(name=="Mirror7") component.setReflective();
+            if(name=="Mirror8") component.setReflective();
+            if(name=="Mirror9") component.setReflective();
+            if(name=="Mirror10") component.setReflective();
+            if(name=="MirrorBack1") component.setReflective();
+            if(name=="MirrorBack2") component.setReflective();
+            if(name=="TopLeftMirror") component.setReflective();
+            if(name=="TopRightMirror") component.setReflective();
+            if(name=="BottomLeftMirror") component.setReflective();
+            if(name=="BottomRightMirror") component.setReflective();
+            if(name=="BottomMirror") component.setReflective();   
+         //   component.SetOptical();
             stlvolumes.add(component);
+            stlN++;
+      
         }
 
-     
-        
-   
-        
+        this.StlNr=stlN;
         //place the PMTs in the trapezoidal box
         for (int irow = 0; irow < PMT_rows; irow++) {
             //define number of PMTs in this row
@@ -137,14 +161,22 @@ public final class RICHGeant4Factory extends Geant4Factory {
         G4Box Window = new G4Box("Window_" + mapmtName, MAPMT_dx - MAPMTWall_thickness, MAPMT_dy - MAPMTWall_thickness, MAPMTWindow_thickness / 2);
         Window.translate(0, 0, -MAPMT_dz + MAPMTWindow_thickness / 2);
         Window.setMother(MAPMTVolume);
+        // Test optical
+        Window.SetOptical();
+        //Test index of refraction
+        Window.setIndexRefraction(n_w);
+        windows.add(Window);
 
         //photocathode
         G4Box Photocathode = new G4Box("Photocathode_" + mapmtName, MAPMTPhotocathode_side / 2, MAPMTPhotocathode_side / 2, MAPMTPhotocathode_thickness / 2);
         Photocathode.translate(0, 0, -MAPMT_dz + MAPMTWindow_thickness + MAPMTPhotocathode_thickness / 2);
         Photocathode.setMother(MAPMTVolume);
+        Photocathode.makeSensitive();
+        Photocathode.SetOptical();
       // add the photocatodes to the list
+        Photocathode.setIndexRefraction(n_w);//test to remove 
         photocatodes.add(Photocathode);
-       
+
         //socket
         G4Box Socket = new G4Box("Socket_" + mapmtName, MAPMT_dx - MAPMTWall_thickness, MAPMT_dy - MAPMTWall_thickness, MAPMTSocket_thickness / 2);
         Socket.translate(0, 0, MAPMT_dz - MAPMTSocket_thickness / 2);
@@ -169,16 +201,25 @@ public final class RICHGeant4Factory extends Geant4Factory {
     
     /**
      * @author: gangel
-     * @param i the nr of the PMT
+     * @param i the nr of the PMT (starting from 1)
      * @return: the Photocatodes volumes inside the PMT
      */
     public G4Box GetPhotocatode(int i)
-    {
-    	
+    {   	
     return	photocatodes.get(i-1);
-    
-   
     }
+    
+    
+    /**
+     * @author: gangel
+     * @param i the nr of the PMT (starting from 1 ) 
+     * @return: the Windows volumes inside the PMT
+     */
+    public G4Box GetWindow(int i)
+    {
+    	return windows.get(i-1);
+    }
+    
     /**
      * @author: gangel
      * @param i the STL volume
@@ -187,6 +228,38 @@ public final class RICHGeant4Factory extends Geant4Factory {
      */
     public G4Stl GetStl(int i)
     {
-        return  stlvolumes.get(i-1);
+        return  stlvolumes.get(i);
+    }
+    
+    public int GetStlNR()
+    {
+    	return this.StlNr;
+    }
+    
+    //i is the number of the stl
+    // 
+    public Vector3d GetNormal_Stl(int i, Vector3d hitV )
+    {
+    
+    	Vector3d[] Vector = new Vector3d[3];
+    	int k=0;
+    	//to modify
+    	for ( Polygon comp:	this.GetStl(i).toCSG().getPolygons() ) 
+		{
+			if(comp.contains(hitV))  // search between all the components of the mesh the one containing the vector 
+			{
+				
+				for (Vertex vert: comp.vertices ) //creating a list of vertices of components of the hitten track 
+				{
+					Vector[k] = vert.pos;
+					k++;
+				}	
+			}		        						
+		}
+    	// using k=0,1,2, I am sure I am going to take the entrance vertexes 
+    	Vector3d Surf1= new Vector3d( Vector[1].minus(Vector[0]));
+		Vector3d Surf2= new Vector3d( Vector[2].minus(Vector[0]));
+		Vector3d SurfN = new Vector3d(Surf1.cross(Surf2));
+    	return SurfN; 
     }
 }
