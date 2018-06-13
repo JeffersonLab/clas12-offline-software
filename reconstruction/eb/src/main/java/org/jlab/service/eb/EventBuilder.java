@@ -25,6 +25,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.eb.EBConstants;
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
+import org.jlab.rec.eb.EBUtil;
 import org.jlab.rec.eb.SamplingFractions;
 
 /**
@@ -88,8 +89,8 @@ public class EventBuilder {
      * set every particle's status
      */
     public void setParticleStatuses() {
-        for (DetectorParticle p : this.detectorEvent.getParticles()) {
-            p.setStatus();
+        for (int ii=0; ii<this.detectorEvent.getParticles().size(); ii++) {
+            EBUtil.setParticleStatus(this.detectorEvent.getParticles().get(ii),ccdb);
         }
     }
 
