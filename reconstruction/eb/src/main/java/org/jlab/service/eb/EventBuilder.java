@@ -71,22 +71,14 @@ public class EventBuilder {
      * and added to the detector event.
      * @param tracks 
      */
-    public void addForwardTracks(List<DetectorTrack> tracks) {
-        for(int i = 0 ; i < tracks.size(); i++){
-            DetectorParticle particle = new DetectorParticle(tracks.get(i));
-            //particle.setStatus(1);
-            detectorEvent.addParticle(particle);
-        }
-    }
-    
-    public void addCentralTracks(List<DetectorTrack> tracks) {
+    public void addTracks(List<DetectorTrack> tracks) {
         for(int i = 0 ; i < tracks.size(); i++){
             DetectorParticle particle = new DetectorParticle(tracks.get(i));
             detectorEvent.addParticle(particle);
         }
     }
     
-    public void addForwardTaggerParticles(List<DetectorParticle> particles) {
+    public void addParticles(List<DetectorParticle> particles) {
         for(int i = 0 ; i < particles.size(); i++){
             detectorEvent.addParticle(particles.get(i));
         }

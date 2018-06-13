@@ -94,10 +94,10 @@ public class EBEngine extends ReconstructionEngine {
 
         // Add tracks
         List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType, trajectoryType, covMatrixType);
-        eb.addForwardTracks(tracks);      
+        eb.addTracks(tracks);      
         
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks", "CVTRec::Trajectory");
-        eb.addCentralTracks(ctracks);
+        eb.addTracks(ctracks);
         
         eb.getPindexMap().put(0, tracks.size());
         eb.getPindexMap().put(1, ctracks.size());
@@ -126,7 +126,7 @@ public class EBEngine extends ReconstructionEngine {
         List<Map<DetectorType, Integer>> ftIndices = DetectorData.readForwardTaggerIndex(de,"FT::particles");
         List<TaggerResponse>        responseFTCAL = TaggerResponse.readHipoEvent(de,"FTCAL::clusters",DetectorType.FTCAL);
         List<TaggerResponse>        responseFTHODO = TaggerResponse.readHipoEvent(de,"FTHODO::clusters",DetectorType.FTHODO);
-        eb.addForwardTaggerParticles(ftparticles);
+        eb.addParticles(ftparticles);
         eb.addTaggerResponses(responseFTCAL);
         eb.addTaggerResponses(responseFTHODO);
         eb.addFTIndices(ftIndices);

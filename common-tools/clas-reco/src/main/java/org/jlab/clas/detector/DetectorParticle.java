@@ -360,6 +360,8 @@ public class DetectorParticle implements Comparable {
     public int    getStatus(){ return this.particleStatus;}
     public int    getTrackDetector() {return this.detectorTrack.getDetectorID();}
     public int    getTrackSector() {return this.detectorTrack.getSector();}
+    public int    getTrackDetectorID() {return this.detectorTrack.getDetectorID();}
+
     public double getMass(){ return this.particleMass;}
     public int    getPid(){ return this.particlePID;}
     public double getPidQuality() {return this.particleIDQuality;}
