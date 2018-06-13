@@ -29,8 +29,8 @@ public abstract class Geant4Basic {
     protected String volumeName;
     protected String volumeType;
     protected int[] rgb = {0x00, 0x00, 0xff};
-    public boolean sensitivity = false;
-    public boolean abstraction = false;
+    protected boolean sensitivity = false;
+    protected boolean abstraction = false;
     
 
     protected CSG volumeCSG;
@@ -49,8 +49,8 @@ public abstract class Geant4Basic {
     private Geant4Basic motherVolume;
     
     /*  This part of the code is used to assign optical properties to a material*/
-    public boolean Optical = false; 
-    public boolean Reflective = false; 
+    protected boolean Optical = false; 
+    protected boolean Reflective = false; 
     protected double indexrefraction =1 ; // index of refraction
     protected double finishing = 0;  //rms of the surface 
     /*----*/
@@ -371,7 +371,7 @@ public abstract class Geant4Basic {
     public void setIndexRefraction( double x)
     {
     this.Optical = true;
-    	this.indexrefraction = x;    	
+    this.indexrefraction = x;    	
     }
     // Set the material to be Optical 
     public void SetOptical()
