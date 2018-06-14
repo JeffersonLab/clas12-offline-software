@@ -111,26 +111,37 @@ public class EBAnalyzer {
 
     public void assignBetas(DetectorEvent event){
 
-        final double start_time  = event.getEventHeader().getStartTime();
+        final double startTime  = event.getEventHeader().getStartTime();
         int np = event.getParticles().size();
         for(int i = 1; i < np; i++) {
             DetectorParticle p = event.getParticle(i);
             double beta = 0.0;
             if (p.getCharge()==0) {
-                beta = EBUtil.getNeutralBetaECAL(p,start_time);
+                if (p.hasHit(DetectorType.ECAL)) {
+                    beta = EBUtil.getNeutralBetaECAL(p,startTime);
+                }
+                else if (p.hasHit(DetectorType.CND)) {
+                    beta = EBUtil.getNeutralBeta(p,DetectorType.CND,1,startTime);
+                }
+                else if (p.hasHit(DetectorType.FTCAL)) {
+                    beta = EBUtil.getNeutralBeta(p,DetectorType.FTCAL,0,startTime);
+                }
+                else {
+                    beta = -9999;
+                }
             }
             else {
                 if (p.hasHit(DetectorType.FTOF, 2)==true){
-                    beta = p.getBeta(DetectorType.FTOF,2, start_time);
+                    beta = p.getBeta(DetectorType.FTOF,2, startTime);
                 }
                 else if(p.hasHit(DetectorType.FTOF, 1)==true){
-                    beta = p.getBeta(DetectorType.FTOF, 1,start_time);
+                    beta = p.getBeta(DetectorType.FTOF, 1,startTime);
                 }
                 else if(p.hasHit(DetectorType.CTOF)==true){
-                    beta = p.getBeta(DetectorType.CTOF ,start_time);
+                    beta = p.getBeta(DetectorType.CTOF ,startTime);
                 }
                 else if(p.hasHit(DetectorType.FTOF, 3)==true){
-                    beta = p.getBeta(DetectorType.FTOF, 3,start_time);
+                    beta = p.getBeta(DetectorType.FTOF, 3,startTime);
                 }
             }
             p.setBeta(beta);

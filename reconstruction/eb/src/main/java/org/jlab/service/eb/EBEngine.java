@@ -116,7 +116,10 @@ public class EBEngine extends ReconstructionEngine {
         //List<DetectorParticle> centralParticles = eb.getEvent().getCentralParticles();
         //ebm.processCentralParticles(de,"CVTRec::Tracks","CTOF::hits","CND::hits",
         //                            centralParticles, responseCTOF, responseCND);
-        
+       
+
+        ebm.addCentralNeutrals(eb.getEvent());
+
         // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer(ccdb);
         analyzer.processEvent(eb.getEvent());

@@ -9,6 +9,7 @@ import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorTrack;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.eb.EBCCDBConstants;
@@ -159,6 +160,42 @@ public class EBMatching {
         this.addResponsesFTOF(parts);
 
         return parts;
+    }
+
+    /**
+     * find CD neutrals and append to particle list
+     */
+    public boolean addCentralNeutrals(DetectorEvent de) {
+        
+        List<DetectorResponse> respCND =
+            eventBuilder.getUnmatchedResponses(null, DetectorType.CND, 1);
+
+        if (respCND.size()>0) {
+
+            Vector3 vertex = new Vector3(0,0,0);
+            if (de.getParticles().size()>0) {
+                vertex.copy(eventBuilder.getEvent().getParticle(0).vertex());
+            }
+
+            for (DetectorResponse r : respCND) {
+
+                DetectorParticle neutral = DetectorParticle.createNeutral(r,vertex);
+
+                List<DetectorResponse> respCTOF =
+                    eventBuilder.getUnmatchedResponses(null, DetectorType.CTOF, 0);
+
+                final int indx=neutral.getDetectorHit(respCTOF,DetectorType.CTOF,0,
+                        eventBuilder.ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
+
+                if (indx >= 0) {
+                    neutral.addResponse(respCTOF.get(indx),true);
+                    respCTOF.get(indx).setAssociation(de.getParticles().size()-1);
+                }
+                de.addParticle(neutral);
+            }
+        }
+
+        return respCND.size()>0;
     }
 
     /**
