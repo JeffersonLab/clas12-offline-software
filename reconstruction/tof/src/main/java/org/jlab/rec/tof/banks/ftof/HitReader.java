@@ -13,6 +13,7 @@ import org.jlab.rec.tof.banks.BaseHit;
 import org.jlab.rec.tof.banks.BaseHitReader;
 import org.jlab.rec.tof.banks.IMatchedHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
+import org.jlab.utils.groups.IndexedList;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -82,7 +83,7 @@ public class HitReader implements IMatchedHit {
         */
         _numTrks = trks.size();
 
-        double triggerPhase = this.getTriggerPhase(timeStamp, constants6);
+        double triggerPhase = this.getTriggerPhase(timeStamp, constants7);
         
         BaseHitReader hitReader = new BaseHitReader();
         IMatchedHit MH = this;
