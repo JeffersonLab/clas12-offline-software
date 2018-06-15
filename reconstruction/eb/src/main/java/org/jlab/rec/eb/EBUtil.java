@@ -56,19 +56,26 @@ public class EBUtil {
     /**
      * Get timing resolution from detector calibration constants:
      */
-    public static double getDetTimingResolution(ScintillatorResponse resp,int run,EBCCDBConstants ccdb) {
+    public static double getDetTimingResolution(DetectorResponse resp,EBCCDBConstants ccdb) {
         final int sector = resp.getDescriptor().getSector();
         final int layer = resp.getDescriptor().getLayer();
         final int component = resp.getDescriptor().getComponent();
         String tableName=null;
+        double scale=1;
         if (resp.getDescriptor().getType()==DetectorType.FTOF) {
             tableName="/calibration/ftof/tres";
+            scale=0.001; // values in picoseconds :(
+        }
+        else if (resp.getDescriptor().getType()==DetectorType.CTOF) {
+            // CTOF doesn't currently have time resolution available in ccdb.
+            // This is the design value:
+            return 0.065;
         }
         else {
-            throw new RuntimeException("not ready for non-FTOF");
+            throw new RuntimeException("not ready for non-TOF");
         }
         return ccdb.getTable(tableName).
-            getDoubleValue("tres",sector,layer,component);
+            getDoubleValue("tres",sector,layer,component)*scale;
     }
 
     /**
