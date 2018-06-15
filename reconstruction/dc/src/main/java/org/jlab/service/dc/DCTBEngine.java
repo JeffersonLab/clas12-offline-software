@@ -118,8 +118,20 @@ public class DCTBEngine extends ReconstructionEngine {
         //-------------------
         int newRun = bank.getInt("run", 0);
         if(newRun==0)
-        	return true;
+            return true;
 
+        double T_Start = 0;
+        if(Constants.isUSETSTART() == true) {
+            if(event.hasBank("RECHB::Event")==true) {
+                T_Start = event.getBank("RECHB::Event").getFloat("STTime", 0);
+                if(T_Start<0) {
+                    return true; // quit if start time not found in data
+                }
+            } else {
+                return true; // no REC HB bank
+            }
+        }
+        
         //System.out.println(" RUNNING TIME BASED....................................");
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();

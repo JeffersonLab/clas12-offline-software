@@ -49,11 +49,14 @@ public class TableLoader {
                     }
             }
     }
-
-    public static synchronized void FillT0Tables(int run) {
+    
+    
+    
+    public static synchronized void FillT0Tables(int run, String variation) {
         if (T0LOADED) return;
         System.out.println(" T0 TABLE FILLED.....");
-        DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(run, "default");
+        DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(run, variation);
+        dbprovider = new DatabaseConstantProvider();
         dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
         //disconnect from database. Important to do this after loading tables.
         dbprovider.disconnect();
@@ -79,6 +82,7 @@ public class TableLoader {
         }
         T0LOADED = true;
     }
+    
     public static synchronized void Fill(IndexedTable tab) {
         //CCDBTables 0 =  "/calibration/dc/signal_generation/doca_resolution";
         //CCDBTables 1 =  "/calibration/dc/time_to_distance/t2d";
@@ -137,8 +141,6 @@ public class TableLoader {
                                                 // bincount++;
                                                 DISTFROMTIME[s][r][ibfield][icosalpha][tbin]+=stepSize;
                                             }
-
-                                           // System.out.println(r+"  "+ibfield+"  "+icosalpha+"  "+tbin +"  "+timebfield+ "  "+x+"  "+alpha); 
                                         }
                                 }
                         }

@@ -98,7 +98,23 @@ public class DCHBEngine extends ReconstructionEngine {
     public boolean init() {
 
         Constants.Load();
-     
+        String useSTTConf = this.getEngineConfigString("useStartTime");
+        
+        if (useSTTConf!=null) {
+            System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on yaml ="+useSTTConf);
+            Constants.setUSETSTART(Boolean.valueOf(useSTTConf));
+        }
+        else {
+            useSTTConf = System.getenv("USESTT");
+            if (useSTTConf!=null) {
+                System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on env ="+useSTTConf);
+                Constants.setUSETSTART(Boolean.valueOf(useSTTConf));
+            }
+        }
+        if (useSTTConf==null) {
+             System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on default ="+Constants.isUSETSTART());
+        }
+        
         this.initializeMagneticFields();
 
         clasDictionaryPath= CLASResources.getResourcePath("etc");
@@ -107,14 +123,16 @@ public class DCHBEngine extends ReconstructionEngine {
           //  "/calibration/dc/time_to_distance/t2d",
             "/calibration/dc/time_to_distance/time2dist",
          //   "/calibration/dc/time_corrections/T0_correction",
-            "/calibration/dc/time_corrections/timingcuts",
+            "/calibration/dc/time_corrections/tdctimingcuts",
             "/calibration/dc/time_jitter",
             "/calibration/dc/status_tables/MK_V1",
         };
 
         requireConstants(Arrays.asList(dcTables));
         // Get the constants for the correct variation
-        this.getConstantsManager().setVariation("default");
+        String dcvarname = CLASResources.getEnvironmentVariable("DCDATABASEVARIATION");
+        String dcvariationName = Optional.ofNullable(dcvarname).orElse("default");
+        this.getConstantsManager().setVariation(dcvariationName);
 
         // Load the geometry
         String varname = CLASResources.getEnvironmentVariable("GEOMETRYDATABASEVARIATION");
@@ -123,24 +141,6 @@ public class DCHBEngine extends ReconstructionEngine {
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, variationName);
         dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
         
-        //MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
-        //DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(800, "default");
-        //dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
-        //disconnect from database. Important to do this after loading tables.
-        //dbprovider.disconnect();
-        // T0-subtraction
-
-        //for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
-        //    int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
-        //    int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
-        //    int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
-        //    int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
-        //    double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
-        //    double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
-
-        //    T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
-        //    T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
-        //}
         return true;
     }
     
@@ -176,8 +176,9 @@ public class DCHBEngine extends ReconstructionEngine {
 //            } else {
 //                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
 //            }
-            
-            TableLoader.FillT0Tables(newRun);
+            String varname = CLASResources.getEnvironmentVariable("DCDATABASEVARIATION");
+            String variationName = Optional.ofNullable(varname).orElse("default");
+            TableLoader.FillT0Tables(newRun, variationName);
             TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist")); 
             //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"));
             //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
@@ -221,9 +222,9 @@ public class DCHBEngine extends ReconstructionEngine {
        //	event.appendBank(rbc.fillR3CrossfromMCTrack(event));
 
        HitReader hitRead = new HitReader();
-       hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, Constants.getT0(), Constants.getT0Err(), 
+       hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, 
                this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), 
-               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), 
+               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/tdctimingcuts"), 
                this.getConstantsManager().getConstants(newRun,"/calibration/dc/status_tables/MK_V1"), 
                dcDetector, triggerPhase);
 
@@ -400,9 +401,9 @@ public class DCHBEngine extends ReconstructionEngine {
         
         //String inputFile = args[0];
         //String outputFile = args[1];
-        //String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
+        String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
         //String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.ev.hipo";
-        String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/gemc_out_mu-_hipo/mu-_30nA_bg_out.ev.hipo";
+        //String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/gemc_out_mu-_hipo/mu-_30nA_bg_out.ev.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
         
         DCHBEngine en = new DCHBEngine();
@@ -419,8 +420,8 @@ public class DCHBEngine extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         
-        //String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGD.hipo";
-        String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.recn2.hipo";
+        String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGDSt.hipo";
+        //String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.recn2.hipo";
         writer.open(outputFile);
         TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
         long t1 = 0;

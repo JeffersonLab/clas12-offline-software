@@ -108,7 +108,7 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
           //  "/calibration/dc/time_to_distance/t2d",
             "/calibration/dc/time_to_distance/time2dist",
          //   "/calibration/dc/time_corrections/T0_correction",
-            "/calibration/dc/time_corrections/timingcuts",
+            "/calibration/dc/time_corrections/tdctimingcuts",
             "/calibration/dc/time_jitter",
             "/calibration/dc/status_tables/MK_V1",
         };
@@ -174,7 +174,9 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
             
             if(cycles>0) triggerPhase=period*((timeStamp+phase)%cycles); 
             
-            TableLoader.FillT0Tables(newRun);
+            String varname = CLASResources.getEnvironmentVariable("DCDATABASEVARIATION");
+            String variationName = Optional.ofNullable(varname).orElse("default");
+            TableLoader.FillT0Tables(newRun, variationName);
             TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist")); 
             //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"));
             //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
@@ -218,9 +220,9 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
        //	event.appendBank(rbc.fillR3CrossfromMCTrack(event));
 
        HitReader hitRead = new HitReader();
-       hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, Constants.getT0(), Constants.getT0Err(), 
+       hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results,
                this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), 
-               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), 
+               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/tdctimingcuts"), 
                this.getConstantsManager().getConstants(newRun,"/calibration/dc/status_tables/MK_V1"), 
                dcDetector, triggerPhase);
        

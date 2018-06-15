@@ -227,9 +227,9 @@ public class TrackingEff extends ReconstructionEngine {
 
             HitReader hitRead = new HitReader();
             //hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, T0, T0ERR, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"), dcDetector);
-                   hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, Constants.getT0(), Constants.getT0Err(), 
+                   hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, 
                this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), 
-               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), 
+               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/tdctimingcuts"), 
                this.getConstantsManager().getConstants(newRun,"/calibration/dc/status_tables/MK_V1"), 
                dcDetector, 0);
                    

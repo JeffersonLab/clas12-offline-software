@@ -1,16 +1,13 @@
 package org.jlab.service.dc;
 
 import Jama.Matrix;
-import com.google.common.util.concurrent.AtomicDouble;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.ECGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
@@ -28,20 +25,15 @@ import org.jlab.rec.dc.cluster.ClusterFinder;
 import org.jlab.rec.dc.cluster.ClusterFitter;
 import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.cross.Cross;
-import org.jlab.rec.dc.cross.CrossList;
-import org.jlab.rec.dc.cross.CrossListFinder;
 import org.jlab.rec.dc.cross.CrossMaker;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
-import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.track.fit.KFitter;
 import org.jlab.rec.dc.trajectory.DCSwimmer;
-import org.jlab.rec.dc.trajectory.Road;
-import org.jlab.rec.dc.trajectory.RoadFinder;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
@@ -126,8 +118,19 @@ public class DCTBLayerEffsEngine extends ReconstructionEngine {
         //-------------------
         int newRun = bank.getInt("run", 0);
         if(newRun==0)
-        	return true;
-
+            return true;
+        
+        double T_Start = 0;
+        if (event.hasBank("MC::Particle") == false && event.getBank("RUN::config").getInt("run", 0)>100) {
+            if(event.hasBank("RECHB::Event")==true)
+                T_Start = event.getBank("RECHB::Event").getFloat("STTime", 0);
+        }
+        // quit if start time not found in data
+        if(Constants.isUSETSTART() == true && T_Start<0) {
+            System.err.println(" no start time "+T_Start);
+            return true;
+        }
+        
         //System.out.println(" RUNNING TIME BASED....................................");
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
