@@ -54,6 +54,7 @@ public class EBCCDBConstants {
     private Map <EBCCDBEnum,Integer> dbIntegers = new HashMap<EBCCDBEnum,Integer>();
     private Map <EBCCDBEnum,Vector3D> dbVector3Ds = new HashMap<EBCCDBEnum,Vector3D>();
     private Map <EBCCDBEnum,Double[]> dbArrays = new HashMap<EBCCDBEnum,Double[]>();
+    private Map <EBCCDBEnum, Map <Integer,Double[]>> dbSectorArrays = new HashMap<EBCCDBEnum,Map<Integer,Double[]>>();
 
     // fill maps:
     private void setDouble(EBCCDBEnum key,Double value) {
@@ -67,6 +68,10 @@ public class EBCCDBConstants {
     }
     private void setArray(EBCCDBEnum key,Double[] value) {
         dbArrays.put(key,value);
+    }
+    private void setSectorArray(EBCCDBEnum key, Integer sector, Double[] value) {
+        if (!dbSectorArrays.containsKey(key)) dbSectorArrays.put(key,new HashMap<Integer,Double[]>());
+        dbSectorArrays.get(key).put(sector,value);
     }
     
     // read maps:
@@ -89,6 +94,13 @@ public class EBCCDBConstants {
         if (!dbArrays.containsKey(key)) 
             throw new RuntimeException("Missing Integer Key:  "+key);
         return dbArrays.get(key);
+    }
+    public Double[] getSectorArray(EBCCDBEnum key,int sector) {
+        if (!dbSectorArrays.containsKey(key))
+            throw new RuntimeException("Missing Integer Key:  "+key);
+        if (!dbSectorArrays.get(key).containsKey(sector))
+            throw new RuntimeException("Missing Integer Key:  "+sector);
+        return dbSectorArrays.get(key).get(sector);
     }
 
     public IndexedTable getTable(String tableName) {
@@ -147,6 +159,24 @@ public class EBCCDBConstants {
             vals[ii]=tables.get(tableName).getDoubleValue(colNames[ii],sector,layer,component);
         setArray(key,vals);
     }
+    private void loadSectorArray(
+            EBCCDBEnum key,
+            String tableName,
+            String[] colNames,
+            int sector) {
+        Double vals[]=new Double[colNames.length];
+        for (int ii=0; ii<colNames.length; ii++)
+            vals[ii]=tables.get(tableName).getDoubleValue(colNames[ii],sector,0,0);
+        setSectorArray(key,sector,vals);
+    }
+    private void loadSectorsArrays(
+            EBCCDBEnum key,
+            String tableName,
+            String[] colNames) {
+        for (int ii=0; ii<=6; ii++) {
+            this.loadSectorArray(key,tableName,colNames,ii);
+        }
+    }
     
     public void show() {
         System.out.println("EBCCDBConstants:  show()");
@@ -164,6 +194,15 @@ public class EBCCDBConstants {
         for (EBCCDBEnum ii : dbVector3Ds.keySet()) {
            System.out.println(String.format("%-30s",ii)+": "+dbVector3Ds.get(ii));
         }
+        for (EBCCDBEnum ii : dbSectorArrays.keySet()) {
+            for (int sector : dbSectorArrays.get(ii).keySet()) {
+                System.out.print(String.format("%-30s: %d ",ii,sector));
+                for (double xx : dbSectorArrays.get(ii).get(sector)) {
+                    System.out.print(xx+" , ");
+                }
+                System.out.println();
+            }
+        }
     }
 
     public final void load(int run,ConstantsManager manager) {
@@ -176,11 +215,10 @@ public class EBCCDBConstants {
 
         String[] sf ={"sf1", "sf2", "sf3", "sf4"};
         String[] sfs={"sfs1","sfs2","sfs3","sfs4"};
-        loadArray(EBCCDBEnum.ELEC_SF,"electron_sf",sf,0,0,0);
-
-        loadArray(EBCCDBEnum.PHOT_SF,"photon_sf",  sf,0,0,0);
-        loadArray(EBCCDBEnum.ELEC_SFS,"electron_sf",sfs,0,0,0);
-        loadArray(EBCCDBEnum.PHOT_SFS,"photon_sf",  sfs,0,0,0);
+        loadSectorsArrays(EBCCDBEnum.ELEC_SF,"electron_sf",sf);
+        loadSectorsArrays(EBCCDBEnum.PHOT_SF,"photon_sf",  sf);
+        loadSectorsArrays(EBCCDBEnum.ELEC_SFS,"electron_sf",sfs);
+        loadSectorsArrays(EBCCDBEnum.PHOT_SFS,"photon_sf",  sfs);
 
         loadDouble(EBCCDBEnum.PCAL_MATCHING,"ecal_matching","dr2",0,1,0);
         loadDouble(EBCCDBEnum.ECIN_MATCHING,"ecal_matching","dr2",0,4,0);
@@ -245,6 +283,8 @@ public class EBCCDBConstants {
         loadDouble(EBCCDBEnum.RF_JITTER_PERIOD,"rf/jitter","period",0,0,0);
         
         //loadDouble(EBCCDBEnum.TRIGGER_ID,
+
+        //this.show();
 
         currentRun = run;
         isLoaded = true;

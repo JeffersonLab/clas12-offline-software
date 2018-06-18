@@ -225,7 +225,8 @@ public class ECEngine extends ReconstructionEngine {
             "/calibration/ec/gain", 
             "/calibration/ec/timing",
             "/calibration/ec/time_jitter",
-            "/calibration/ec/fadc_offset"
+            "/calibration/ec/fadc_offset",
+            "/calibration/ec/fadc_global_offset"
         };
         
         requireConstants(Arrays.asList(ecTables));

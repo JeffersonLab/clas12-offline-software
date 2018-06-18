@@ -2,11 +2,14 @@ package org.jlab.rec.cvt.services;
 
 //import cnuphys.magfield.MagneticFields;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
@@ -346,8 +349,32 @@ public class CVTRecHandler {
         TrackListFinder trkFinder = new TrackListFinder();
         trks = new ArrayList<Track>();
         trks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom);
+        for( int i=0;i<trks.size();i++) { trks.get(i).set_Id(i+1);}
+        
 //        System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + trks.size());
-//        trkFinder.removeOverlappingTracks(trks); //turn off until debugged
+        trkFinder.removeOverlappingTracks(trks); //turn off until debugged
+
+        
+//      FIXME: workaround to properly assign the position and direction to the BMT crosses. to be understood where it comes from the not correct one  
+        for( Track t : trks ) {
+	    	for( Cross c : t ) {
+	        	if (Double.isNaN(c.get_Point0().x())) {
+	        		double r = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[c.get_Region()-1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
+	        		Point3D p = t.get_helix().getPointAtRadius(r);
+	                c.set_Point(new Point3D(p.x(), p.y(), c.get_Point().z()));
+	                Vector3D v = t.get_helix().getTrackDirectionAtRadius(r);
+	                c.set_Dir(v);
+	            }
+	            if (Double.isNaN(c.get_Point0().z())) {
+	        		double r = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[c.get_Region()-1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
+	        		Point3D p = t.get_helix().getPointAtRadius(r);
+	                c.set_Point(new Point3D(c.get_Point().x(), c.get_Point().y(), p.z()));
+	                Vector3D v = t.get_helix().getTrackDirectionAtRadius(r);
+	                c.set_Dir(v);
+	            }
+	    	}
+        }
+        
         
         for (int c = 0; c < trks.size(); c++) {
             trks.get(c).set_Id(c + 1);
@@ -399,10 +426,32 @@ public class CVTRecHandler {
             }
         }
         
+        /// remove direction information from crosses that were part of duplicates, now removed. TODO: Should I put it in the clone removal?  
+        for( Cross c : crosses.get(1) ) {
+        	if( c.get_AssociatedTrackID() < 0 ) {
+        		c.set_Dir( new Vector3D(0,0,0));
+        		c.set_DirErr( new Vector3D(0,0,0));
+        		if( c.get_DetectorType().equalsIgnoreCase("C")) {
+//        			System.out.println(c + " " + c.get_AssociatedTrackID());
+        			c.set_Point(new Point3D(Double.NaN,Double.NaN,c.get_Point().z()));
+//        			System.out.println(c.get_Point());
+        		}
+        		else {
+        			c.set_Point(new Point3D(c.get_Point().x(),c.get_Point().y(),Double.NaN));
+        		}
+        	}
+        }
+        for( Cross c : crosses.get(0) ) {
+        	if( c.get_AssociatedTrackID() < 0 ) {
+        		c.set_Dir( new Vector3D(0,0,0));
+        		c.set_DirErr( new Vector3D(0,0,0));
+        	}
+        }
+        
         //------------------------
         // set index associations
         if (trks.size() > 0) {
-            this.CleanupSpuriousCrosses(crosses, trks) ;
+            this.CleanupSpuriousCrosses(crosses, null) ;
         }
         return trks;
     }

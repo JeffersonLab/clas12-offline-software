@@ -37,6 +37,8 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         this._Sector = sector;
         this._Region = region;
         this._Id = crid;
+        this._usedInXYcand = false;
+        this._usedInZRcand = false;
     }
 
     private String _Detector;							//      the detector SVT or BMT
@@ -45,7 +47,26 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     private int _Region;    		 					//	    region [1,...]
     private int _Id;									//		cross Id
 
-    // point parameters:
+    private boolean _usedInXYcand;   // used in patter recognition
+    private boolean _usedInZRcand;
+    
+    public boolean is_usedInXYcand() {
+		return _usedInXYcand;
+	}
+
+	public void set_usedInXYcand(boolean _usedInXYcand) {
+		this._usedInXYcand = _usedInXYcand;
+	}
+
+	public boolean is_usedInZRcand() {
+		return _usedInZRcand;
+	}
+
+	public void set_usedInZRcand(boolean _usedInZRcand) {
+		this._usedInZRcand = _usedInZRcand;
+	}
+
+	// point parameters:
     private Point3D _Point;
     private Point3D _PointErr;
     private Point3D _Point0;
@@ -457,9 +478,17 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         	int argreg  = (arg.get_Detector().equalsIgnoreCase("BMT"))  ? 3 + bgeom.getLayer( arg.get_Region(), arg.get_DetectorType()) : arg.get_Region();
             int RegComp = thisreg < argreg ? -1 : thisreg == argreg ? 0 : 1;
 //            int RegComp = this.get_Region() < arg.get_Region() ? -1 : this.get_Region() == arg.get_Region() ? 0 : 1;
-            int PhiComp = this.get_Point0().toVector3D().phi() < arg.get_Point0().toVector3D().phi() ? -1 : this.get_Point0().toVector3D().phi() == arg.get_Point0().toVector3D().phi() ? 0 : 1;
-
-            return_val = ((RegComp == 0) ? PhiComp : RegComp);
+            
+            // check that is not BMTC for phi comparison
+            if( Double.isNaN(arg.get_Point().x())==false &&  Double.isNaN(this.get_Point().x())==false ) {
+            	int PhiComp = this.get_Point0().toVector3D().phi() < arg.get_Point0().toVector3D().phi() ? -1 : this.get_Point0().toVector3D().phi() == arg.get_Point0().toVector3D().phi() ? 0 : 1;
+            
+            	return_val = ((RegComp == 0) ? PhiComp : RegComp);
+            }
+            else {
+            	int ZComp = this.get_Point0().z() < arg.get_Point0().z() ? -1 : this.get_Point0().z() == arg.get_Point0().z() ? 0 : 1;
+            	return_val = ((RegComp == 0) ? ZComp : RegComp);
+            }
         }
 
         return return_val;

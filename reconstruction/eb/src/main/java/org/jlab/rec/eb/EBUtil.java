@@ -11,42 +11,13 @@ import org.jlab.clas.pdg.PhysicsConstants;
 public class EBUtil {
 
      /**
-     * Get the mean expected ampling fraction.
-     */
-    public static double getExpectedSamplingFraction(final double measuredEnergy,EBCCDBConstants ccdb) {
-        final Double[] t = ccdb.getArray(EBCCDBEnum.ELEC_SF);
-        final double sfMean = t[0]*(t[1] + t[2]/measuredEnergy + t[3]*pow(measuredEnergy,-2));
-        return sfMean;
-    }
-
-     /**
-     * Get the sigma of the expected sampling fraction.
-     */
-    public static double getExpectedSamplingFractionSigma(final double measuredEnergy,EBCCDBConstants ccdb) {
-        final Double[] s = ccdb.getArray(EBCCDBEnum.ELEC_SFS);
-        final double sfSigma = s[0];
-        return sfSigma;
-    }
-
-     /**
-     * Calculate the signed number of sigma from the expected sampling fraction.
-     */
-    public static double getSamplingFractionNSigma(DetectorParticle p,EBCCDBConstants ccdb) {
-        final double ener = p.getEnergy(DetectorType.ECAL);
-        final double sf = p.getEnergyFraction(DetectorType.ECAL);
-        final double sfMean = getExpectedSamplingFraction(ener,ccdb);
-        final double sfSigma = getExpectedSamplingFractionSigma(ener,ccdb);
-        return (sf-sfMean) / sfSigma;
-    }
-
-     /**
      * Perform a basic true/false identification for electrons.
      */
     public static boolean isSimpleElectron(DetectorParticle p,EBCCDBConstants ccdb) {
         
         final double pcalEnergy = p.getEnergy(DetectorType.ECAL,1);
         final double nphe = p.getNphe(DetectorType.HTCC);
-        final double sfNSigma = getSamplingFractionNSigma(p,ccdb);
+        final double sfNSigma = SamplingFractions.getNSigma(11,p,ccdb);
 
         boolean isElectron=true;
 
@@ -85,19 +56,26 @@ public class EBUtil {
     /**
      * Get timing resolution from detector calibration constants:
      */
-    public static double getDetTimingResolution(ScintillatorResponse resp,int run,EBCCDBConstants ccdb) {
+    public static double getDetTimingResolution(DetectorResponse resp,EBCCDBConstants ccdb) {
         final int sector = resp.getDescriptor().getSector();
         final int layer = resp.getDescriptor().getLayer();
         final int component = resp.getDescriptor().getComponent();
         String tableName=null;
+        double scale=1;
         if (resp.getDescriptor().getType()==DetectorType.FTOF) {
             tableName="/calibration/ftof/tres";
+            scale=0.001; // values in picoseconds :(
+        }
+        else if (resp.getDescriptor().getType()==DetectorType.CTOF) {
+            // CTOF doesn't currently have time resolution available in ccdb.
+            // This is the design value:
+            return 0.065;
         }
         else {
-            throw new RuntimeException("not ready for non-FTOF");
+            throw new RuntimeException("not ready for non-TOF");
         }
         return ccdb.getTable(tableName).
-            getDoubleValue("tres",sector,layer,component);
+            getDoubleValue("tres",sector,layer,component)*scale;
     }
 
     /**

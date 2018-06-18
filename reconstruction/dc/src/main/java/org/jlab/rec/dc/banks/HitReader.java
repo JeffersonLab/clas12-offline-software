@@ -210,7 +210,7 @@ public class HitReader {
                         if(T0Sub>timeCutMin && T0Sub<timeCutMax+timeCutLC*(float)(112-wire[i]/56))
                             passTimingCut=true;
                     } else {
-                        if(T0Sub>timeCutMin && T0Sub<timeCutMax+timeCutLC*(float)(56-wire[i]/56))
+                        if(T0Sub>timeCutMin && T0Sub<timeCutMax+200+timeCutLC*(float)(56-wire[i]/56))
                             passTimingCut=true;
                     }
                 }
