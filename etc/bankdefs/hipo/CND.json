@@ -30,5 +30,19 @@
             {"name":"indexLtdc",        "id":24, "type":"int16", "info":"index of the left tdc"},
             {"name":"indexRtdc",        "id":25, "type":"int16", "info":"index of the right tdc"}
         ]
-  } 
+  },
+  {
+  "bank": "CND::clusters",
+  "group": 20322,
+  "info": "reconstructed cluster info from CND and CTOF",
+  "items": [
+            {"name":"id",               "id":1,  "type":"int16",  "info":"id of the cluster"},
+            {"name":"nhits",            "id":2,  "type":"int16",  "info":"number of hits of the cluster"},
+            {"name":"energysum",        "id":3,  "type":"float",  "info":"Sum of E dep (MeV) of the hits"},
+            {"name":"x",                "id":4,  "type":"float",  "info":"center of X coor (cm) of the hits"},
+            {"name":"y",                "id":5,  "type":"float",  "info":"center of Y coor (cm) of the hits"},
+            {"name":"z",                "id":6,  "type":"float",  "info":"center of Z coor (cm) of the hits"},
+            {"name":"time",             "id":7,  "type":"float",  "info":"center of time (ns) of the hits"}
+        ]
+  }
 ]
