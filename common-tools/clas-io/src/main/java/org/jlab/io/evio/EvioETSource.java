@@ -43,8 +43,10 @@ import org.jlab.utils.options.OptionParser;
  *
  * @author gavalian
  */
+
 public class EvioETSource implements DataSource {
     
+
     private Boolean  connectionOK = false;
     private String   etRingHost   = "localhost";
     private Integer  etRingPort   = 11111;
@@ -57,7 +59,7 @@ public class EvioETSource implements DataSource {
     private int           currentEventPosition = 0;
     
     List<EvioDataEvent>   readerEvents     = new ArrayList<EvioDataEvent>();
-    
+
     public EvioETSource(){
         this.etRingPort = EtConstants.serverPort;
         this.setRemote(true);
@@ -66,6 +68,12 @@ public class EvioETSource implements DataSource {
     public EvioETSource(String host){
         this.etRingHost = host;
         this.etRingPort = EtConstants.serverPort;
+        this.setRemote(true);
+    }
+    
+    public EvioETSource(String host, int port){
+        this.etRingHost = host;
+        this.etRingPort = port;
         this.setRemote(true);
     }
     
