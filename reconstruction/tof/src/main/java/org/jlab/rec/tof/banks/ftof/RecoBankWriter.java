@@ -28,7 +28,7 @@ public class RecoBankWriter {
             HipoGroup group = dde.getGroup(bankName);
             ////event.show();
             //group.show();
-            dde.removeGroup(bankSize);
+            dde.removeGroup(bankName);
         }
         DataBank bank = event.createBank(bankName, bankSize);
         return bank;
