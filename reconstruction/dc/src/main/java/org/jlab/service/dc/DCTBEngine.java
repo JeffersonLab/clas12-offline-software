@@ -37,72 +37,25 @@ import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
-import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
-import org.jlab.utils.CLASResources;
 
-public class DCTBEngine extends ReconstructionEngine {
+public class DCTBEngine extends DCEngine {
 
-    DCGeant4Factory dcDetector;
-    FTOFGeant4Factory ftofDetector;
-    ECGeant4Factory ecDetector;
-    PCALGeant4Factory pcalDetector; 
-    TrajectorySurfaces tSurf;
+//    DCGeant4Factory dcDetector;
+//    FTOFGeant4Factory ftofDetector;
+//    ECGeant4Factory ecDetector;
+//    PCALGeant4Factory pcalDetector; 
+//    TrajectorySurfaces tSurf;
     
     private TimeToDistanceEstimator tde;
     public DCTBEngine() {
-        super("DCTB","ziegler","4.0");
+        super("DCTB");
+        tde = new TimeToDistanceEstimator();
     }
     @Override
     public boolean init() {
-        String[]  dcTables = new String[]{
-            "/calibration/dc/signal_generation/doca_resolution",
-            // "/calibration/dc/time_to_distance/t2d",
-            "/calibration/dc/time_to_distance/time2dist",
-            //    "/calibration/dc/time_corrections/T0_correction",
-        };
-        requireConstants(Arrays.asList(dcTables));
-        // Get the constants for the correct variation
-        this.getConstantsManager().setVariation("default");
-        
-        // Load the geometry
-        String varname = CLASResources.getEnvironmentVariable("GEOMETRYDATABASEVARIATION");
-        String variationName = Optional.ofNullable(varname).orElse("default");
-
-        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, variationName);
-        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
-        ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, variationName);
-        ftofDetector = new FTOFGeant4Factory(providerFTOF);
-        
-        ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, variationName);
-        ecDetector = new ECGeant4Factory(providerEC);
-        pcalDetector = new PCALGeant4Factory(providerEC);
-        System.out.println(" -- Det Geometry constants are Loaded " );
-        // create the surfaces
-        tSurf = new TrajectorySurfaces();
-        tSurf.LoadSurfaces(dcDetector, ftofDetector, ecDetector, pcalDetector);
-        
-        //DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(800, "default");
-        //dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
-        //disconnect from database. Important to do this after loading tables.
-        //dbprovider.disconnect();
-        // T0-subtraction
-
-        //for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
-        //    int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
-        //    int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
-        //    int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
-        //    int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
-        //    double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
-        //    double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
-
-        //    T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0;
-        //    T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
-        //}
-        //TableLoader.Fill(this.getConstantsManager().getConstants(1000, "/calibration/dc/time_to_distance/time2dist")); 
-        tde = new TimeToDistanceEstimator();
+        super.LoadTables();
         return true;
     }
-    
     @Override
     public boolean processDataEvent(DataEvent event) {
         //setRunConditionsParameters( event) ;
@@ -147,12 +100,12 @@ public class DCTBEngine extends ReconstructionEngine {
 
         HitReader hitRead = new HitReader();
         hitRead.read_HBHits(event, 
-            this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-            this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
+            super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
+            super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
             Constants.getT0(), Constants.getT0Err(), dcDetector, tde);
         hitRead.read_TBHits(event, 
-            this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-            this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde, Constants.getT0(), Constants.getT0Err());
+            super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
+            super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde, Constants.getT0(), Constants.getT0Err());
         List<FittedHit> hits = new ArrayList<FittedHit>();
         //I) get the hits
         if(hitRead.get_TBHits().isEmpty()) {
@@ -171,7 +124,7 @@ public class DCTBEngine extends ReconstructionEngine {
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
 
-        clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
+        clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct, super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
 
         if(clusters.isEmpty()) {
             rbc.fillAllTBBanks(event, rbc, hits, null, null, null, null);
