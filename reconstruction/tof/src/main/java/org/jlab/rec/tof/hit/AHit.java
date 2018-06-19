@@ -463,7 +463,6 @@ public abstract class AHit implements Comparable<AHit> {
             double LSBConvErr, double ADC1Err, double ADC2Err, double TDC1Err,
             double TDC2Err, double ADC_MIP, double ADC_MIPErr, double DEDX_MIP,
             double ScinBarThickn, double pl) {
-
         // the order of calculation matters depending on the status
         String status = this.get_StatusWord();
         // initializing the values:
