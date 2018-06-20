@@ -423,8 +423,11 @@ public class RecoBankWriter {
             
             // checks the existing schema to fill the time
             //System.out.println(" has entry "+bank.getDescriptor().hasEntry("time"));
+            /*
+            correctedTime = (this.get_Time() - this.get_DeltaTimeBeta());
+            */
             if(bank.getDescriptor().hasEntry("time")==true){
-               bank.setFloat("time", i, (float) hitlist.get(i).get_Time());      
+               bank.setFloat("time", i, (float) (hitlist.get(i).get_Time() - hitlist.get(i).get_DeltaTimeBeta()));      
             }
             if(bank.getDescriptor().hasEntry("fitResidual")==true){
                bank.setFloat("fitResidual", i, (float) hitlist.get(i).get_TrkResid());      
