@@ -355,7 +355,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 deltatime_beta = (Math.sqrt(x * x + (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta) * (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta)) - x) / tab.getDoubleValue("v0", this.get_Sector(), this.get_Superlayer(),0);
 
             }
-
+            this.set_DeltaTimeBeta(deltatime_beta);
             double correctedTime = (this.get_Time() - deltatime_beta);
             if(correctedTime<=0)
                 correctedTime=0.01;
@@ -912,5 +912,13 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      */
     public boolean get_OutOfTimeFlag() {
         return _OutOfTimeFlag;
+    }
+
+    private double _deltatime_beta;
+    public void set_DeltaTimeBeta(double deltatime_beta) {
+        _deltatime_beta = deltatime_beta;
+    }
+    public double get_DeltaTimeBeta() {
+        return _deltatime_beta ;
     }
 }

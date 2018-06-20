@@ -303,6 +303,7 @@ public class HitReader {
             hit.setTStart(T_Start);
             hit.setTProp(tProp[i]);
             hit.setTFlight(tFlight[i]);
+            hit.set_Beta(this.readBeta(event, trkID[i])); 
             
             double T0Sub = (double) (tdc[i] - tProp[i] - tFlight[i] - T_0);
             
