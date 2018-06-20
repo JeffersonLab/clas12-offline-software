@@ -351,8 +351,10 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             double deltatime_beta = 0;
             
             if (x != -1) {
+                //double V_0 = tab.getDoubleValue("v0", this.get_Sector(), this.get_Superlayer(),0); ==> floating cst must be fixed
+                double V_0 = Constants.V0AVERAGED;
                 //deltatime_beta = (Math.sqrt(x * x + (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta) * (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta)) - x) / CCDBConstants.getV0()[this.get_Sector() - 1][this.get_Superlayer() - 1];
-                deltatime_beta = (Math.sqrt(x * x + (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta) * (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta)) - x) / tab.getDoubleValue("v0", this.get_Sector(), this.get_Superlayer(),0);
+                deltatime_beta = (Math.sqrt(x * x + (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta) * (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta)) - x) / V_0;
 
             }
             this.set_DeltaTimeBeta(deltatime_beta);
