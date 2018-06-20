@@ -445,7 +445,7 @@ public class RecoBankWriter {
             bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
             bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
             bank.setFloat("T0", i, (float) hitlist.get(i).getT0());
-            bank.setFloat("TStart", i, (float) hitlist.get(i).getTStart());
+            bank.setFloat("TStart", i, (float) hitlist.get(i).getTStart()); 
             if(bank.getDescriptor().hasEntry("beta")==true){
                bank.setFloat("beta", i, (float) hitlist.get(i).get_Beta());      
             }
