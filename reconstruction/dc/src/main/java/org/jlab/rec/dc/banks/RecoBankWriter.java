@@ -446,7 +446,9 @@ public class RecoBankWriter {
             bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
             bank.setFloat("T0", i, (float) hitlist.get(i).getT0());
             bank.setFloat("TStart", i, (float) hitlist.get(i).getTStart());
-            
+            if(bank.getDescriptor().hasEntry("beta")==true){
+               bank.setFloat("beta", i, (float) hitlist.get(i).get_Beta());      
+            }
             if(hitlist.get(i).get_AssociatedTBTrackID()>-1 && event.hasBank("MC::Particle")==false) {
                 if(hitlist.get(i).getSignalPropagTimeAlongWire()==0 || hitlist.get(i).get_AssociatedTBTrackID()<1) {
                     bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp()); //old value if track fit failed
