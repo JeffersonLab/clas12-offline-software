@@ -39,7 +39,8 @@ public class Constants {
 
     public static final double LIGHTVEL = 0.00299792458;        // velocity of light (cm/ns) - conversion factor from radius in cm to momentum in GeV/c
 
-
+    // V0 averaged value in t(beta) term denominator
+    public static final double V0AVERAGED = 0.007;
     /// A region-segment contains two segments if they are in the same sector
     /// and region and satisfy the proximity condition:
     /// |Xwires2-Xwires1| = a*Xwires1 + b
@@ -129,6 +130,7 @@ public class Constants {
     public static int[][] STBLOC;
 
     private static boolean USETSTART = false;
+    
 
     public static final synchronized boolean isUSETSTART() {
         return USETSTART;
