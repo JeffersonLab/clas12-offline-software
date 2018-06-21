@@ -248,7 +248,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	                for(int i =0; i< size; i++) {
 	                        bank2.setInt("id",i, (i+1) );
 	                        bank2.setInt("nhits",i,  clusters_nhits.get(i) );
-	                        bank2.setFloat("energysum",i,   (float)(1.0*clusters_energysum.get(i)) );
+	                        bank2.setFloat("energy",i,   (float)(1.0*clusters_energysum.get(i)) );
 	                        bank2.setFloat("x",i,   (float)(1.0*clusters_x.get(i)) );
 	                        bank2.setFloat("y",i,   (float)(1.0*clusters_y.get(i)) );
 	                        bank2.setFloat("z",i,   (float)(1.0*clusters_z.get(i)) );
