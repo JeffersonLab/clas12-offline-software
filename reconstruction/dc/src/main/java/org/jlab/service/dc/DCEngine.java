@@ -121,8 +121,7 @@ public class DCEngine extends ReconstructionEngine {
         }
         
         // Load the geometry
-        variationName = Optional.ofNullable(geomDBVar).orElse("default");
-        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, variationName);
+        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, Optional.ofNullable(geomDBVar).orElse("default"));
         dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
         // Load other geometries
         ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, "default");
@@ -152,6 +151,7 @@ public class DCEngine extends ReconstructionEngine {
         }
         // Load the calibration constants
         String dcvariationName = Optional.ofNullable(ccDBVar).orElse("default");
+        variationName = dcvariationName;
         this.getConstantsManager().setVariation(dcvariationName);
     }
     

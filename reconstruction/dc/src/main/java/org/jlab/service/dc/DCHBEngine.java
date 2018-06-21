@@ -81,7 +81,7 @@ public class DCHBEngine extends DCEngine {
             
             if(cycles>0) triggerPhase=period*((timeStamp+phase)%cycles); 
 
-            TableLoader.FillT0Tables(newRun, variationName);
+            TableLoader.FillT0Tables(newRun, super.variationName);
             TableLoader.Fill(super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist")); 
             
             double shift =0;

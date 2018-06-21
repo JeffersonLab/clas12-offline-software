@@ -54,9 +54,8 @@ public class TableLoader {
     
     public static synchronized void FillT0Tables(int run, String variation) {
         if (T0LOADED) return;
-        System.out.println(" T0 TABLE FILLED.....");
+        System.out.println(" T0 TABLE FILLED..... for Run "+run+" with VARIATION "+variation);
         DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(run, variation);
-        dbprovider = new DatabaseConstantProvider();
         dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
         //disconnect from database. Important to do this after loading tables.
         dbprovider.disconnect();
@@ -78,7 +77,7 @@ public class TableLoader {
             T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
             Constants.setT0(T0);
             Constants.setT0Err(T0ERR);
-            
+            //System.out.println("T0 = "+t0);
         }
         T0LOADED = true;
     }
