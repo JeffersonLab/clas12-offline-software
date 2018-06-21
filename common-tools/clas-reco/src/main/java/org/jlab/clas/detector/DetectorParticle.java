@@ -303,9 +303,10 @@ public class DetectorParticle implements Comparable {
             if(res.getDescriptor().getType()==type) hits++;
         }
         if(hits==0) return false;
-        if(hits>1 && type!=DetectorType.CTOF){
+        if(hits>1 && type!=DetectorType.CTOF && type!=DetectorType.ECAL){
             // don't warn for CTOF, since it currently doesn't do clustering
-            System.out.println("[Warning] Too many hits for detector type = " + type);
+            // don't warn for ECAL, since it has multiple layers
+            System.out.println("[Warning] DetectorParticle.hasHit(type): Too many hits for detector type = " + type);
         }
         return true;
     }
@@ -318,7 +319,7 @@ public class DetectorParticle implements Comparable {
         if(hits==0) return false;
         if(hits>1 && type!=DetectorType.CTOF){
             // don't warn for CTOF, since it currently doesn't do clustering
-            System.out.println("[Warning] Too many hits for detector type = " + type);
+            System.out.println("[Warning] DetectorParticle.hasHit(type,layer): Too many hits for detector type = " + type);
         }
         return true;
     }
