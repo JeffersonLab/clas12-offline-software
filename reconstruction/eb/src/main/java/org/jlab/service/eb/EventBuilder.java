@@ -140,7 +140,7 @@ public class EventBuilder {
             // only match with CTOF/CND if it's a central track:
             else if (p.getTrackDetectorID()==DetectorType.CVT.getDetectorId()) {
                 findMatchingHit(n,p,detectorResponses,DetectorType.CTOF,0, ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
-                findMatchingHit(n,p,detectorResponses,DetectorType.CND, 1, ccdb.getDouble(EBCCDBEnum.CND_DZ));
+                findMatchingHit(n,p,detectorResponses,DetectorType.CND, 0, ccdb.getDouble(EBCCDBEnum.CND_DZ));
             }
 
         }
