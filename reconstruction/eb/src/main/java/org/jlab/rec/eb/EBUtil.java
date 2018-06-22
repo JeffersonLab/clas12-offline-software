@@ -79,27 +79,27 @@ public class EBUtil {
     }
 
     /**
-     * Calculate beta for given detector type:
+     * Calculate beta for given detector type/layer, prioritized by layer:
      */
-    public static double getNeutralBeta(DetectorParticle p, DetectorType type, int layer,double startTime) {
-        double beta=-1;
-        DetectorResponse resp = p.getHit(type,layer);
-        if (resp!=null) {
-            beta = resp.getPosition().mag() / 
-                (resp.getTime()-startTime) / 
-                PhysicsConstants.speedOfLight(); 
+    public static double getNeutralBeta(DetectorParticle p, DetectorType type, int[] layers,double startTime) {
+        double beta=-9999;
+        for (int layer : layers) {
+            DetectorResponse resp = p.getHit(type,layer);
+            if (resp!=null) {
+                beta = resp.getPosition().mag() /
+                    (resp.getTime()-startTime) /
+                    PhysicsConstants.speedOfLight();
+                break;
+            }
         }
         return beta;
     }
 
     /**
-     * Calculate beta for ECAL, prioritized by layer:
+     * Calculate beta for given detector type:
      */
-    public static double getNeutralBetaECAL(DetectorParticle p, double startTime) {
-        double      beta = getNeutralBeta(p,DetectorType.ECAL,1,startTime);
-        if (beta<0) beta = getNeutralBeta(p,DetectorType.ECAL,4,startTime);
-        if (beta<0) beta = getNeutralBeta(p,DetectorType.ECAL,7,startTime);
-        return beta;
+    public static double getNeutralBeta(DetectorParticle p, DetectorType type, int layer,double startTime) {
+        return getNeutralBeta(p,type,new int[]{layer},startTime);
     }
 
     /**

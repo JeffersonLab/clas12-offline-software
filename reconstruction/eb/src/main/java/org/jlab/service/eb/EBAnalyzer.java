@@ -112,22 +112,24 @@ public class EBAnalyzer {
     public void assignBetas(DetectorEvent event){
 
         final double startTime  = event.getEventHeader().getStartTime();
-        int np = event.getParticles().size();
+        final int np = event.getParticles().size();
+
+        // NOTE:  this loop skips 0 because it's the trigger particle
         for(int i = 1; i < np; i++) {
+
             DetectorParticle p = event.getParticle(i);
-            double beta = 0.0;
+            double beta = -9999;
             if (p.getCharge()==0) {
                 if (p.hasHit(DetectorType.ECAL)) {
-                    beta = EBUtil.getNeutralBetaECAL(p,startTime);
+                    // NOTE: prioritized by layer: PCAL, else Inner, else Outer
+                    beta = EBUtil.getNeutralBeta(p,DetectorType.ECAL,new int[]{1,4,7},startTime);
                 }
                 else if (p.hasHit(DetectorType.CND)) {
-                    beta = EBUtil.getNeutralBeta(p,DetectorType.CND,1,startTime);
+                    // NOTE: CND cluster layer is currently undefined (0)
+                    beta = EBUtil.getNeutralBeta(p,DetectorType.CND,0,startTime);
                 }
-                else if (p.hasHit(DetectorType.FTCAL)) {
+                else if (p.hasHit(DetectorType.FTCAL,0)) {
                     beta = EBUtil.getNeutralBeta(p,DetectorType.FTCAL,0,startTime);
-                }
-                else {
-                    beta = -9999;
                 }
             }
             else {
