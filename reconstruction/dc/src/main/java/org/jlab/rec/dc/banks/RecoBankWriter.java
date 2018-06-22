@@ -429,6 +429,9 @@ public class RecoBankWriter {
             if(bank.getDescriptor().hasEntry("time")==true){
                bank.setFloat("time", i, (float) (hitlist.get(i).get_Time() - hitlist.get(i).get_DeltaTimeBeta()));      
             }
+            if(bank.getDescriptor().hasEntry("tBeta")==true){
+               bank.setFloat("tBeta", i, (float) hitlist.get(i).get_DeltaTimeBeta());      
+            }
             if(bank.getDescriptor().hasEntry("fitResidual")==true){
                bank.setFloat("fitResidual", i, (float) hitlist.get(i).get_TrkResid());      
             }
