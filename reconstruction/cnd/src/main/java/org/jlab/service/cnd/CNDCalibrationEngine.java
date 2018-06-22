@@ -59,12 +59,17 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 
 		/// variables for clustering of hits
 	        int size = 0;
+		double hitenergy_temp = 0.0;
 	        ArrayList<Integer> clusters_nhits;
 	        ArrayList<Double>  clusters_energysum;
 	        ArrayList<Double>  clusters_x;
 	        ArrayList<Double>  clusters_y;
 	        ArrayList<Double>  clusters_z;
 	        ArrayList<Double>  clusters_time;
+	        ArrayList<Integer> clusters_sector;
+	        ArrayList<Integer> clusters_layer;
+	        ArrayList<Integer> clusters_component;
+	        ArrayList<Integer> clusters_status;
 	        double[] closest_distance = new double[1];
 	        int[] subA = new int[1];
 	        int[] subB = new int[1];
@@ -162,10 +167,14 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	        clusters_y = new ArrayList<Double>();
 	        clusters_z = new ArrayList<Double>();
 	        clusters_time = new ArrayList<Double>();
+		clusters_sector = new ArrayList<Integer>();
+                clusters_layer = new ArrayList<Integer>();
+                clusters_component = new ArrayList<Integer>();
+                clusters_status = new ArrayList<Integer>();
 
 		size = hits.size();
 		for (int i = 0; i < size; i++) {
-			if( hits.get(i).Edep()<3.0 )continue;
+			if( hits.get(i).Edep()<2.50 )continue;
 			clusters_nhits.add(1);
 			clusters_energysum.add(hits.get(i).Edep());
 			//// using the unit cm instead of mm, so divided by 10
@@ -173,6 +182,10 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 			clusters_y.add(hits.get(i).Y() /10.0);
 			clusters_z.add(hits.get(i).Z() /10.0);
 			clusters_time.add(hits.get(i).Time());
+			clusters_sector.add(hits.get(i).Sector());
+			clusters_layer.add(hits.get(i).Layer());
+			clusters_component.add(hits.get(i).Component());
+			clusters_status.add(0);
 		}
 
 		//// clustering of the CND hits
@@ -189,18 +202,28 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
                         +(clusters_time.get(0)-clusters_time.get(1))*(clusters_time.get(0)-clusters_time.get(1))/sigmaTime(clusters_time.get(0))/sigmaTime(clusters_time.get(1)) );
 
 			if(distance < cluster_size_){
+				if(clusters_energysum.get(0)<clusters_energysum.get(1)){
+					clusters_sector.set(0, clusters_sector.get(1) );
+					clusters_layer.set(0, clusters_layer.get(1) );
+					clusters_component.set(0, clusters_component.get(1) );
+				}
 				clusters_nhits.set(0, clusters_nhits.get(0) + 1);
 				clusters_energysum.set(0, clusters_energysum.get(0) + clusters_energysum.get(1));
 				clusters_x.set(0, (clusters_x.get(0) + clusters_x.get(1)) / 2.0 );
 				clusters_y.set(0, (clusters_y.get(0) + clusters_y.get(1)) / 2.0 );
 				clusters_z.set(0, (clusters_z.get(0) + clusters_z.get(1)) / 2.0 );
 				clusters_time.set(0, (clusters_time.get(0) + clusters_time.get(1)) / 2.0 );
+				if(clusters_status.get(1) !=0)clusters_status.set(0, clusters_status.get(1));
 				clusters_nhits.remove(1);
 				clusters_energysum.remove(1);
 				clusters_x.remove(1);
 				clusters_y.remove(1);
 				clusters_z.remove(1);
 				clusters_time.remove(1);
+				clusters_sector.remove(1);
+				clusters_layer.remove(1);
+				clusters_component.remove(1);
+				clusters_status.remove(1);
 		      	}
 		}
 	      	//// more than two cnd hits
@@ -215,6 +238,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 				if(subA[0]==-1 || subB[0]==-1)break;
 				else{
 					int clusters_number_now = clusters_x.size();
+					if(clusters_number_now == clusters_number) hitenergy_temp = clusters_energysum.get(subA[0]);
 					clusters_x.set(subA[0],
 					(clusters_x.get(subA[0])*(1+clusters_number-clusters_number_now)+clusters_x.get(subB[0]))/(2.0+clusters_number-clusters_number_now) );
 					clusters_y.set(subA[0],
@@ -224,6 +248,13 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 					clusters_time.set(subA[0],
 					(clusters_time.get(subA[0])*(1+clusters_number-clusters_number_now)+clusters_time.get(subB[0]))/(2.0+clusters_number-clusters_number_now) );
 
+					if(hitenergy_temp < clusters_energysum.get(subB[0])){
+                                        	clusters_sector.set(subA[0], clusters_sector.get(subB[0]) );
+                                        	clusters_layer.set(subA[0], clusters_layer.get(subB[0]) );
+                                        	clusters_component.set(subA[0], clusters_component.get(subB[0]) );
+						hitenergy_temp = clusters_energysum.get(subB[0]);
+					}
+					if(clusters_status.get(subB[0]) !=0) clusters_status.set(subA[0], clusters_status.get(subB[0]));
 					clusters_nhits.set(subA[0], clusters_nhits.get(subA[0]) + 1);
 					clusters_nhits.remove(subB[0]);
 					clusters_energysum.set(subA[0], clusters_energysum.get(subA[0])+clusters_energysum.get(subB[0]));
@@ -232,6 +263,10 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 					clusters_y.remove(subB[0]);
 					clusters_z.remove(subB[0]);
 					clusters_time.remove(subB[0]);
+					clusters_sector.remove(subB[0]);
+					clusters_layer.remove(subB[0]);
+					clusters_component.remove(subB[0]);
+					clusters_status.remove(subB[0]);
 				}
 	         	}
 		}
@@ -248,11 +283,15 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	                for(int i =0; i< size; i++) {
 	                        bank2.setInt("id",i, (i+1) );
 	                        bank2.setInt("nhits",i,  clusters_nhits.get(i) );
+				            bank2.setByte("sector",i,  (byte)(1*clusters_sector.get(i)) );
+				            bank2.setByte("layer",i,  (byte)(1*clusters_layer.get(i)) );
+				            bank2.setInt("component",i,  clusters_component.get(i) );
 	                        bank2.setFloat("energy",i,   (float)(1.0*clusters_energysum.get(i)) );
 	                        bank2.setFloat("x",i,   (float)(1.0*clusters_x.get(i)) );
 	                        bank2.setFloat("y",i,   (float)(1.0*clusters_y.get(i)) );
 	                        bank2.setFloat("z",i,   (float)(1.0*clusters_z.get(i)) );
 	                        bank2.setFloat("time",i,   (float)(1.0*clusters_time.get(i)) );
+				            bank2.setInt("status",i,  clusters_status.get(i) );
 	                }
 	                event.appendBanks(bank2);
 	        }
