@@ -290,7 +290,9 @@ public class EventBuilder {
         if (list==null) list=detectorResponses;
         List<DetectorResponse>  responses = new ArrayList<DetectorResponse>();
         for(DetectorResponse r : list){
-            if(r.getDescriptor().getType()==type&&r.getDescriptor().getLayer()==layer&&r.getAssociation()<0){
+            if(r.getDescriptor().getType()==type &&
+               (r.getDescriptor().getLayer()==layer || layer<=0) &&
+               r.getAssociation()<0){
                 responses.add(r);
             }
         }

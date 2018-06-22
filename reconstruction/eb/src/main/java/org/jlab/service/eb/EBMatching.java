@@ -168,7 +168,7 @@ public class EBMatching {
     public boolean addCentralNeutrals(DetectorEvent de) {
         
         List<DetectorResponse> respCND =
-            eventBuilder.getUnmatchedResponses(null, DetectorType.CND, 1);
+            eventBuilder.getUnmatchedResponses(null, DetectorType.CND, 0);
 
         if (respCND.size()>0) {
 
