@@ -167,35 +167,41 @@ public class EBMatching {
      */
     public boolean addCentralNeutrals(DetectorEvent de) {
         
-        List<DetectorResponse> respCND =
+        List<DetectorResponse> respsCND =
             eventBuilder.getUnmatchedResponses(null, DetectorType.CND, 0);
 
-        if (respCND.size()>0) {
+        if (respsCND.size()>0) {
 
             Vector3 vertex = new Vector3(0,0,0);
             if (de.getParticles().size()>0) {
                 vertex.copy(eventBuilder.getEvent().getParticle(0).vertex());
             }
 
-            for (DetectorResponse r : respCND) {
+            // make a new neutral particle for each unmatched CND cluster:
+            for (DetectorResponse respCND : respsCND) {
 
-                DetectorParticle neutral = DetectorParticle.createNeutral(r,vertex);
+                // haven't appended the particle yet, but this will be its index:
+                final int pindex = de.getParticles().size();
 
+                // make neutral particle from CND:
+                DetectorParticle neutral = DetectorParticle.createNeutral(respCND,vertex);
+                respCND.setAssociation(pindex);
+
+                // find and associate matching CTOF hits:
                 List<DetectorResponse> respCTOF =
                     eventBuilder.getUnmatchedResponses(null, DetectorType.CTOF, 0);
-
                 final int indx=neutral.getDetectorHit(respCTOF,DetectorType.CTOF,0,
                         eventBuilder.ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
-
                 if (indx >= 0) {
                     neutral.addResponse(respCTOF.get(indx),true);
-                    respCTOF.get(indx).setAssociation(de.getParticles().size()-1);
+                    respCTOF.get(indx).setAssociation(pindex);
                 }
+
                 de.addParticle(neutral);
             }
         }
 
-        return respCND.size()>0;
+        return respsCND.size()>0;
     }
 
     /**
