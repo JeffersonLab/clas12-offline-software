@@ -412,14 +412,30 @@ public class EBTwoTrackTest {
 
         // some global efficiency tests:
         assertEquals(eEff>0.88,true);
-        if      (hadronPDG==2212) assertEquals(pEff>0.77,true);
-        else if (hadronPDG==321)  {
-            if (isCentral) assertEquals(kEff>0.55,true);
-            else           assertEquals(kEff>0.60,true);
+        switch (hadronPDG) {
+            case 2212:
+                if (isCentral) assertEquals(pEff>0.77,true);
+                else           assertEquals(pEff>0.77,true);
+                break;
+            case 321:
+                if (isCentral) assertEquals(kEff>0.55,true);
+                else           assertEquals(kEff>0.60,true);
+                break;
+            case 211:
+                if (isCentral) assertEquals(piEff>0.75,true);
+                else           assertEquals(piEff>0.75,true);
+                break;
+            case 22:
+                if (isCentral) assertEquals(gEff>0.20,true);
+                else           assertEquals(gEff>0.84,true);
+                break;
+            case 2112:
+                if (isCentral) assertEquals(nEff>0.095,true);
+                else           assertEquals(nEff>0.55,true);
+                break;
+            default:
+                throw new RuntimeException("Not ready for pid="+hadronPDG);
         }
-        else if (hadronPDG==211)  assertEquals(piEff>0.75,true);
-        else if (hadronPDG==22)   assertEquals(gEff>0.84,true);
-        else if (hadronPDG==2112) assertEquals(nEff>0.55,true);
     }
    
     private void checkResultsFT() {

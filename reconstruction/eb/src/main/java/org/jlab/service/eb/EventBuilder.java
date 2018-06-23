@@ -139,6 +139,7 @@ public class EventBuilder {
 
             // only match with CTOF/CND if it's a central track:
             else if (p.getTrackDetectorID()==DetectorType.CVT.getDetectorId()) {
+                // NOTE:  Should we do 2-d matching in cylindrical coordinates for CD?
                 findMatchingHit(n,p,detectorResponses,DetectorType.CTOF,0, ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
                 findMatchingHit(n,p,detectorResponses,DetectorType.CND, 0, ccdb.getDouble(EBCCDBEnum.CND_DZ));
             }

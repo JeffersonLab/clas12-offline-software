@@ -128,7 +128,7 @@ public class EBAnalyzer {
                     // NOTE: CND cluster layer is currently undefined (0)
                     beta = EBUtil.getNeutralBeta(p,DetectorType.CND,0,startTime);
                 }
-                else if (p.hasHit(DetectorType.FTCAL,0)) {
+                else if (p.hasHit(DetectorType.FTCAL)) {
                     beta = EBUtil.getNeutralBeta(p,DetectorType.FTCAL,0,startTime);
                 }
             }
@@ -281,12 +281,17 @@ public class EBAnalyzer {
         public int bestPidFromTiming(DetectorParticle p) {
             int bestPid=0;
             if (p.getCharge() == 0) {
-                if (p.getBeta() < ccdb.getDouble(EBCCDBEnum.NEUTRON_maxBeta)) {
-                    bestPid=2112;
+                double betaCut = -1; 
+                if (p.hasHit(DetectorType.ECAL)) {
+                    betaCut = ccdb.getDouble(EBCCDBEnum.NEUTRON_maxBeta);
                 }
-                else {
-                    bestPid=22;
+                else if (p.hasHit(DetectorType.CND)) {
+                    betaCut = ccdb.getDouble(EBCCDBEnum.CND_NEUTRON_maxBeta);
                 }
+                else if (p.hasHit(DetectorType.FTCAL)) {
+                    betaCut = 0.8;
+                }
+                if (betaCut>0) bestPid = p.getBeta()<betaCut ? 2112 : 22;
             }
             else {
                 int[] hypotheses;
