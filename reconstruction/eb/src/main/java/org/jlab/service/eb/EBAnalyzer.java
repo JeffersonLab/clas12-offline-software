@@ -104,10 +104,41 @@ public class EBAnalyzer {
             event.getEventHeader().setStartTime(startTime);
             this.assignBetas(event);
             this.assignPids(event);
+            this.assignNeutralMomenta(event);
         }
 
     }
 
+    public void assignNeutralMomenta(DetectorEvent de) {
+        final int np = de.getParticles().size();
+        for (int ii=0; ii<np; ii++) {
+            
+            if (de.getParticle(ii).getCharge() != 0) continue;
+
+            DetectorParticle p = de.getParticle(ii);
+
+            // neutron momentum is based on measured beta:
+            if (p.getPid()==2112) {
+                final double beta = p.getBeta();
+                final double mass = PDGDatabase.getParticleById(p.getPid()).mass();
+                final double psquared = mass*mass / (1-beta*beta);
+                p.vector().setMag(Math.sqrt(psquared));
+            }
+
+            // photon momentum is based on calorimeter energy:
+            else if (p.getPid()==22) {
+                if (p.hasHit(DetectorType.ECAL)) {
+                    p.vector().setMag(p.getEnergy(DetectorType.ECAL) /
+                            SamplingFractions.getMean(22,p,ccdb));
+                }
+                else if (p.hasHit(DetectorType.CND)) {
+                    // CND has no handle on photon energy.
+                    // FIXME: Here we set it to the unit vector:
+                    p.vector().setMag(1.0);
+                }
+            }
+        }
+    }
 
     public void assignBetas(DetectorEvent event){
 
