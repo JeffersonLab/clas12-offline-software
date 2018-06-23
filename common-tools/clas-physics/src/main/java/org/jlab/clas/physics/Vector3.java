@@ -69,7 +69,7 @@ public class Vector3 {
         fX = c*xx - s*fY;
         fY = s*xx + c*fY;
     }
-    
+
     public void setMagThetaPhi(double mag, double theta , double phi)
     {
         double amag = Math.abs(mag);
@@ -78,6 +78,13 @@ public class Vector3 {
         fZ = amag * Math.cos(theta);
     }
     
+    public void setMag(double mag) {
+        final double scale = Math.abs(mag) / this.mag();
+        fX *= scale;
+        fY *= scale;
+        fZ *= scale;
+    }
+
     public double mag2()
     {
         return (fX*fX+fY*fY+fZ*fZ);
