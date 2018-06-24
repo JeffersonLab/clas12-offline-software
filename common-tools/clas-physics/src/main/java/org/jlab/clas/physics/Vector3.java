@@ -79,10 +79,12 @@ public class Vector3 {
     }
     
     public void setMag(double mag) {
-        final double scale = Math.abs(mag) / this.mag();
-        fX *= scale;
-        fY *= scale;
-        fZ *= scale;
+        if (this.mag()!=0) {
+            final double scale = Math.abs(mag) / this.mag();
+            fX *= scale;
+            fY *= scale;
+            fZ *= scale;
+        }
     }
 
     public double mag2()
