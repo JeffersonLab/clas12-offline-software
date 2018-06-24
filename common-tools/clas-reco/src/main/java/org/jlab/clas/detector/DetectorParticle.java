@@ -4,9 +4,8 @@ import static java.lang.Math.abs;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
-import java.util.TreeMap;
 
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.Vector3;
@@ -46,9 +45,6 @@ public class DetectorParticle implements Comparable {
     private List<DetectorResponse> responseStore = new ArrayList<DetectorResponse>();
     private List<TaggerResponse>   taggerStore = new ArrayList<TaggerResponse>();
 
-    private TreeMap<DetectorType,Vector3>  projectedHit = 
-            new  TreeMap<DetectorType,Vector3>();
-    
     private DetectorTrack detectorTrack = null;
     private TaggerResponse taggerTrack = null;
     
@@ -153,7 +149,7 @@ public class DetectorParticle implements Comparable {
         return particle;
     }
    
-    public List<DetectorTrack.TrajectoryPoint> getTrackTrajectory() {
+    public Map<Integer,DetectorTrack.TrajectoryPoint> getTrackTrajectory() {
         return detectorTrack.getTrajectory();
     }
     

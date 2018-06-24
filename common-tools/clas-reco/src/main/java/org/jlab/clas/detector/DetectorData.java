@@ -354,18 +354,18 @@ public class DetectorData {
                DetectorParticle p = particles.get(i);
                if(p.getTrackDetector()==DetectorType.DC.getDetectorId() ||
                   p.getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
-                   List <DetectorTrack.TrajectoryPoint> traj=p.getTrackTrajectory();
-                   for (int ii=0; ii<traj.size(); ii++) {
+                   for (int detId : p.getTrackTrajectory().keySet()) {
                        bank.setShort("index", row, (short) p.getTrackIndex());
                        bank.setShort("pindex", row, (short) i);
-                       bank.setShort("detId", row, (byte) traj.get(ii).getDetId());
-                       bank.setFloat("pathlength",row, traj.get(ii).getPathLength());
-                       bank.setFloat("x",row, (float)traj.get(ii).getCross().origin().x());
-                       bank.setFloat("y",row, (float)traj.get(ii).getCross().origin().y());
-                       bank.setFloat("z",row, (float)traj.get(ii).getCross().origin().z());
-                       bank.setFloat("cx",row, (float)traj.get(ii).getCross().direction().x());
-                       bank.setFloat("cy",row, (float)traj.get(ii).getCross().direction().x());
-                       bank.setFloat("cz",row, (float)traj.get(ii).getCross().direction().x());
+                       bank.setShort("detId", row, (byte) detId);
+                       DetectorTrack.TrajectoryPoint tp = p.getTrackTrajectory().get(detId);
+                       bank.setFloat("pathlength",row, tp.getPathLength());
+                       bank.setFloat("x",row, (float)tp.getCross().origin().x());
+                       bank.setFloat("y",row, (float)tp.getCross().origin().y());
+                       bank.setFloat("z",row, (float)tp.getCross().origin().z());
+                       bank.setFloat("cx",row, (float)tp.getCross().direction().x());
+                       bank.setFloat("cy",row, (float)tp.getCross().direction().x());
+                       bank.setFloat("cz",row, (float)tp.getCross().direction().x());
                        row = row + 1;
                    }
                }
@@ -486,7 +486,7 @@ public class DetectorData {
                                xx+track.getMaxLineLength()*trajBank.getFloat("tx",ii),
                                yy+track.getMaxLineLength()*trajBank.getFloat("ty",ii),
                                zz+track.getMaxLineLength()*trajBank.getFloat("tz",ii));
-                       track.addTrajectoryPoint(trkId,detId,traj,bField,pathLength);
+                       track.addTrajectoryPoint(detId,traj,bField,pathLength);
                    }
                }
                if (covBank!=null) {
@@ -585,7 +585,7 @@ public class DetectorData {
                                xx+track.getMaxLineLength()*cx,
                                yy+track.getMaxLineLength()*cy,
                                zz+track.getMaxLineLength()*cz);
-                       track.addTrajectoryPoint(trkId,detId,traj);
+                       track.addTrajectoryPoint(detId,traj);
                    }
                }
 
