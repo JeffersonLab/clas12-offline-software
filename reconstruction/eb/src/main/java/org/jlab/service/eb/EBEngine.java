@@ -81,7 +81,7 @@ public class EBEngine extends ReconstructionEngine {
         List<DetectorResponse> responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL,"ECAL::moments");
         List<DetectorResponse> responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
         List<DetectorResponse> responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
-        List<DetectorResponse> responseCND  = ScintillatorResponse.readHipoEvent(de, "CND::hits", DetectorType.CND);
+        List<DetectorResponse> responseCND  = ScintillatorResponse.readHipoEvent(de, "CND::clusters", DetectorType.CND);
         List<DetectorResponse> responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
         List<DetectorResponse> responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
         
@@ -94,10 +94,10 @@ public class EBEngine extends ReconstructionEngine {
 
         // Add tracks
         List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType, trajectoryType, covMatrixType);
-        eb.addForwardTracks(tracks);      
+        eb.addTracks(tracks);      
         
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks", "CVTRec::Trajectory");
-        eb.addCentralTracks(ctracks);
+        eb.addTracks(ctracks);
         
         eb.getPindexMap().put(0, tracks.size());
         eb.getPindexMap().put(1, ctracks.size());
@@ -111,12 +111,15 @@ public class EBEngine extends ReconstructionEngine {
         // Create neutrals:
         // (after assigning trigger particle, to get vertex/momentum right):
         eb.processNeutralTracks();
-        
-        List<DetectorParticle> centralParticles = eb.getEvent().getCentralParticles();
-        
-        ebm.processCentralParticles(de,"CVTRec::Tracks","CTOF::hits","CND::hits",
-                                    centralParticles, responseCTOF, responseCND);
-        
+      
+        // old method imported matching from CTOF/CND reconstruction:
+        //List<DetectorParticle> centralParticles = eb.getEvent().getCentralParticles();
+        //ebm.processCentralParticles(de,"CVTRec::Tracks","CTOF::hits","CND::hits",
+        //                            centralParticles, responseCTOF, responseCND);
+       
+
+        ebm.addCentralNeutrals(eb.getEvent());
+
         // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer(ccdb);
         analyzer.processEvent(eb.getEvent());
@@ -126,7 +129,7 @@ public class EBEngine extends ReconstructionEngine {
         List<Map<DetectorType, Integer>> ftIndices = DetectorData.readForwardTaggerIndex(de,"FT::particles");
         List<TaggerResponse>        responseFTCAL = TaggerResponse.readHipoEvent(de,"FTCAL::clusters",DetectorType.FTCAL);
         List<TaggerResponse>        responseFTHODO = TaggerResponse.readHipoEvent(de,"FTHODO::clusters",DetectorType.FTHODO);
-        eb.addForwardTaggerParticles(ftparticles);
+        eb.addParticles(ftparticles);
         eb.addTaggerResponses(responseFTCAL);
         eb.addTaggerResponses(responseFTHODO);
         eb.addFTIndices(ftIndices);

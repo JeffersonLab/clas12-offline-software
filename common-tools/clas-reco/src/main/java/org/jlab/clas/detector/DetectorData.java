@@ -106,7 +106,6 @@ public class DetectorData {
         }
         
         List<DetectorResponse> responses = DetectorData.readDetectorResponses(event, response_bank);
-        //System.out.println(" SIZE = " + responses.size());
         for(DetectorResponse r : responses){
             int association = r.getAssociation();
             if(association>=0&&association<detectorEvent.getParticles().size()){
@@ -171,22 +170,18 @@ public class DetectorData {
         DataBank bank = event.createBank(bank_name, particles.size());
         for(int row = 0; row < particles.size(); row++){
             bank.setInt("pid",row,particles.get(row).getPid());
-            //System.out.println("PID = " + particles.get(row).getPid());
             bank.setByte("charge",row, (byte) particles.get(row).getCharge());
             bank.setFloat("px", row, (float) particles.get(row).vector().x());
             bank.setFloat("py", row, (float) particles.get(row).vector().y());
             bank.setFloat("pz", row, (float) particles.get(row).vector().z());
-            
             bank.setFloat("vx", row, (float) particles.get(row).vertex().x());
             bank.setFloat("vy", row, (float) particles.get(row).vertex().y());
             bank.setFloat("vz", row, (float) particles.get(row).vertex().z());
-            
 //            bank.setFloat("mass", row, (float) particles.get(row).getMass());
             bank.setFloat("beta", row, (float) particles.get(row).getBeta());
             bank.setShort("status", row, (short) particles.get(row).getStatus());
             bank.setFloat("chi2pid", row, (float) particles.get(row).getPidQuality());
         }
-        //System.out.println("++++++++++++++++++++");
         return bank;
     }
     /**
@@ -280,11 +275,8 @@ public class DetectorData {
       public static DataBank getForwardTaggerBank(List<TaggerResponse> responses, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, responses.size());
        int row = 0;
-       //System.out.println("Forward Tagger Bank Printing");                                                                                    
        for(int i = 0; i < responses.size(); i++){
            TaggerResponse t  = responses.get(i);
-           //System.out.println(i + "  " + t.getAssociation());  
-           //System.out.println(t.getTime() + " " + t.getEnergy());
            bank.setShort("index", row, (short) t.getHitIndex());
            bank.setShort("pindex", row, (short) t.getAssociation());
            bank.setByte("detector", row, (byte) t.getDescriptor().getType().getDetectorId());
@@ -498,10 +490,11 @@ public class DetectorData {
                    }
                }
                if (covBank!=null) {
+                   final int dimCovMat=5;
                    for (int ii=0; ii<covBank.rows(); ii++) {
                        if (covBank.getInt("id",ii) !=  trkId) continue;
-                       for (int jj=1; jj<=5; jj++) {
-                           for (int kk=1; kk<5; kk++) {
+                       for (int jj=1; jj<=dimCovMat; jj++) {
+                           for (int kk=1; kk<=dimCovMat; kk++) {
                                float ele=covBank.getFloat(String.format("C%d%d",jj,kk),ii);
                                track.setCovMatrix(jj-1,kk-1,ele);
                            }
@@ -623,8 +616,6 @@ public class DetectorData {
                 if(charge==0) pid = 22;
                 if(charge<0) pid = 11;
                
-                //System.out.println("Particle ID " + pid);
-                
                 particle.setPid(pid);
                 particles.add(particle);
             }

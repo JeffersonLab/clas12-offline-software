@@ -104,33 +104,77 @@ public class EBAnalyzer {
             event.getEventHeader().setStartTime(startTime);
             this.assignBetas(event);
             this.assignPids(event);
+            this.assignNeutralMomenta(event);
         }
 
     }
 
+    public void assignNeutralMomenta(DetectorEvent de) {
+        final int np = de.getParticles().size();
+        for (int ii=0; ii<np; ii++) {
+            
+            if (de.getParticle(ii).getCharge() != 0) continue;
+
+            DetectorParticle p = de.getParticle(ii);
+
+            // neutron momentum is based on measured beta:
+            if (p.getPid()==2112) {
+                final double beta = p.getBeta();
+                final double mass = PDGDatabase.getParticleById(p.getPid()).mass();
+                final double psquared = mass*mass / (1-beta*beta);
+                p.vector().setMag(Math.sqrt(psquared));
+            }
+
+            // photon momentum is based on calorimeter energy:
+            else if (p.getPid()==22) {
+                if (p.hasHit(DetectorType.ECAL)) {
+                    p.vector().setMag(p.getEnergy(DetectorType.ECAL) /
+                            SamplingFractions.getMean(22,p,ccdb));
+                }
+                else if (p.hasHit(DetectorType.CND)) {
+                    // CND has no handle on photon energy.
+                    // FIXME: Here we set it to the unit vector:
+                    p.vector().setMag(1.0);
+                }
+            }
+        }
+    }
 
     public void assignBetas(DetectorEvent event){
 
-        final double start_time  = event.getEventHeader().getStartTime();
-        int np = event.getParticles().size();
+        final double startTime  = event.getEventHeader().getStartTime();
+        final int np = event.getParticles().size();
+
+        // NOTE:  this loop skips 0 because it's the trigger particle
         for(int i = 1; i < np; i++) {
+
             DetectorParticle p = event.getParticle(i);
-            double beta = 0.0;
+            double beta = -9999;
             if (p.getCharge()==0) {
-                beta = EBUtil.getNeutralBetaECAL(p,start_time);
+                if (p.hasHit(DetectorType.ECAL)) {
+                    // NOTE: prioritized by layer: PCAL, else Inner, else Outer
+                    beta = EBUtil.getNeutralBeta(p,DetectorType.ECAL,new int[]{1,4,7},startTime);
+                }
+                else if (p.hasHit(DetectorType.CND)) {
+                    // NOTE: CND cluster layer is currently undefined (0)
+                    beta = EBUtil.getNeutralBeta(p,DetectorType.CND,0,startTime);
+                }
+                else if (p.hasHit(DetectorType.FTCAL)) {
+                    beta = EBUtil.getNeutralBeta(p,DetectorType.FTCAL,0,startTime);
+                }
             }
             else {
                 if (p.hasHit(DetectorType.FTOF, 2)==true){
-                    beta = p.getBeta(DetectorType.FTOF,2, start_time);
+                    beta = p.getBeta(DetectorType.FTOF,2, startTime);
                 }
                 else if(p.hasHit(DetectorType.FTOF, 1)==true){
-                    beta = p.getBeta(DetectorType.FTOF, 1,start_time);
+                    beta = p.getBeta(DetectorType.FTOF, 1,startTime);
                 }
                 else if(p.hasHit(DetectorType.CTOF)==true){
-                    beta = p.getBeta(DetectorType.CTOF ,start_time);
+                    beta = p.getBeta(DetectorType.CTOF ,startTime);
                 }
                 else if(p.hasHit(DetectorType.FTOF, 3)==true){
-                    beta = p.getBeta(DetectorType.FTOF, 3,start_time);
+                    beta = p.getBeta(DetectorType.FTOF, 3,startTime);
                 }
             }
             p.setBeta(beta);
@@ -268,12 +312,17 @@ public class EBAnalyzer {
         public int bestPidFromTiming(DetectorParticle p) {
             int bestPid=0;
             if (p.getCharge() == 0) {
-                if (p.getBeta() < ccdb.getDouble(EBCCDBEnum.NEUTRON_maxBeta)) {
-                    bestPid=2112;
+                double betaCut = -1; 
+                if (p.hasHit(DetectorType.ECAL)) {
+                    betaCut = ccdb.getDouble(EBCCDBEnum.NEUTRON_maxBeta);
                 }
-                else {
-                    bestPid=22;
+                else if (p.hasHit(DetectorType.CND)) {
+                    betaCut = ccdb.getDouble(EBCCDBEnum.CND_NEUTRON_maxBeta);
                 }
+                else if (p.hasHit(DetectorType.FTCAL)) {
+                    betaCut = 0.8;
+                }
+                if (betaCut>0) bestPid = p.getBeta()<betaCut ? 2112 : 22;
             }
             else {
                 int[] hypotheses;
