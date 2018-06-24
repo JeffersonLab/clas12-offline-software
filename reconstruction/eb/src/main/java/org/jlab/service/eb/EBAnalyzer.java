@@ -132,9 +132,9 @@ public class EBAnalyzer {
                             SamplingFractions.getMean(22,p,ccdb));
                 }
                 else if (p.hasHit(DetectorType.CND)) {
-                    // CND has no handle on photon energy.
-                    // FIXME: Here we set it to the unit vector:
-                    p.vector().setMag(1.0);
+                    // CND has no handle on photon energy, so we set momentum to zero,
+                    // and let user get direction from REC::Scintillator.x/y/z.
+                    p.vector().setMag(0.0);
                 }
             }
         }
