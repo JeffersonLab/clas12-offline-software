@@ -32,7 +32,7 @@ public class DetectorParticle implements Comparable {
     private Integer particleTrackIndex = -1;
     private Double  particleBeta      = 0.0;
     private Double  particleMass      = 0.0;
-    private Double  particleIDQuality = 0.0;
+    private Double  particleIDQuality = 9999.0;
     private Double  particlePath      = 0.0; 
     private int     particleScore     = 0; // scores are assigned detector hits
     private double  particleScoreChi2 = 0.0; // chi2 for particle score 
@@ -100,6 +100,7 @@ public class DetectorParticle implements Comparable {
                 resp.getPosition().x(),
                 resp.getPosition().y(),
                 resp.getPosition().z());
+        resp.setPath(resp.getPosition().mag());
         particle.addResponse(resp);
         return particle;
     }
@@ -112,6 +113,11 @@ public class DetectorParticle implements Comparable {
                 vertex.x(),
                 vertex.y(),
                 vertex.z());
+        // FIXME:  stop mixing Vector3 and Vector3D
+        final double dx = resp.getPosition().x()-vertex.x();
+        final double dy = resp.getPosition().y()-vertex.y();
+        final double dz = resp.getPosition().z()-vertex.z();
+        resp.setPath(Math.sqrt(dx*dx+dy*dy+dz*dz));
         particle.addResponse(resp);
         return particle;
     }
