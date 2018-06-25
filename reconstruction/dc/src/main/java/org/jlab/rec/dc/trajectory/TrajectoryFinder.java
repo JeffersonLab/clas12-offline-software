@@ -119,63 +119,61 @@ public class TrajectoryFinder {
      * @param DcDetector DC detector utility
      * @return list of state vecs along track trajectory ... used for tFlight computation
      */
-    public List<StateVec> getStateVecsAlongTrajectory(double x0, double y0, double tanTheta_x, double tanTheta_y, double p, int q, DCGeant4Factory DcDetector) {              
-        //initialize at target
-        dcSwim.SetSwimParameters(-1, -1,  x0,  y0,  tanTheta_x,  tanTheta_y,  p,  q, DcDetector);
-
-        //position array 
-        double[] X = new double[36];
-        double[] Y = new double[36];
-        double[] Z = new double[36];
-        double[] thX = new double[36];
-        double[] thY = new double[36];
-
-        //Z[0] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getPlane().point().z();
-        Z[0] = DcDetector.getLayerMidpoint(0, 0).z; 
-        double[] swamPars = dcSwim.SwimToPlane(Z[0]) ;
-        X[0] = swamPars[0];
-        Y[0] = swamPars[1];
-        thX[0] = swamPars[3]/swamPars[5];
-        thY[0] = swamPars[4]/swamPars[5];
-        double pathLen = swamPars[6];
-
-        int planeIdx = 0;
-        int lastSupLyrIdx = 0;
-        int lastLyrIdx = 0;
-        List<StateVec> stateVecAtPlanesList = new ArrayList<StateVec>(36);
-
-        stateVecAtPlanesList.add(new StateVec(X[0],Y[0],thX[0], thY[0]));
-        stateVecAtPlanesList.get(stateVecAtPlanesList.size()-1).setPathLength(pathLen);
-        for(int superlayerIdx =0; superlayerIdx<6; superlayerIdx++) {
-            for(int layerIdx =0; layerIdx<6; layerIdx++) {
-                if(superlayerIdx ==0 && layerIdx==0) {    
-                    continue;
-                } else {
-                    // move to the next plane and determine the swam track parameters at that plane
-                    planeIdx++;
-                    dcSwim.SetSwimParameters(lastSupLyrIdx, lastLyrIdx,  X[planeIdx-1],  Y[planeIdx-1],  thX[planeIdx-1],  thY[planeIdx-1],  p,  q, DcDetector);
-                    //Z[layerIdx] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
-                    Z[planeIdx] = DcDetector.getLayerMidpoint(superlayerIdx, layerIdx).z; 
-
-                    swamPars = dcSwim.SwimToPlane(Z[planeIdx]) ;
-                    X[planeIdx] = swamPars[0];
-                    Y[planeIdx] = swamPars[1];
-                    thX[planeIdx] = swamPars[3]/swamPars[5];
-                    thY[planeIdx] = swamPars[4]/swamPars[5];
-                    pathLen+=swamPars[6];
-                    StateVec stVec = new StateVec(X[planeIdx],Y[planeIdx],thX[planeIdx], thY[planeIdx]);
-                    stVec.set_planeIdx(planeIdx);
-                    stVec.setPathLength(pathLen);
-                    stateVecAtPlanesList.add(stVec);
-                }
-                lastSupLyrIdx = superlayerIdx;
-                lastLyrIdx = layerIdx;
-            }
-        }
-        // return the list of state vectors at the list of measurement planes
-        return stateVecAtPlanesList;
-    }
-        
+//    public List<StateVec> getStateVecsAlongTrajectory(double x0, double y0, double z0, double tanTheta_x, double tanTheta_y, double p, int q, DCGeant4Factory DcDetector) {              
+//        //initialize at target
+//        dcSwim.SetSwimParameters(x0, y0, z0, tanTheta_x,  tanTheta_y,  p,  q);
+//        //position array 
+//        double[] X = new double[36];
+//        double[] Y = new double[36];
+//        double[] Z = new double[36];
+//        double[] thX = new double[36];
+//        double[] thY = new double[36];
+//
+//        //Z[0] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(0).getLayer(0).getPlane().point().z();
+//        Z[0] = DcDetector.getLayerMidpoint(0, 0).z; 
+//        double[] swamPars = dcSwim.SwimToPlane(Z[0]) ;
+//        X[0] = swamPars[0];
+//        Y[0] = swamPars[1];
+//        thX[0] = swamPars[3]/swamPars[5];
+//        thY[0] = swamPars[4]/swamPars[5];
+//        double pathLen = swamPars[6];
+//        int planeIdx = 0;
+//        int lastSupLyrIdx = 0;
+//        int lastLyrIdx = 0;
+//        List<StateVec> stateVecAtPlanesList = new ArrayList<StateVec>(36);
+//
+//        stateVecAtPlanesList.add(new StateVec(X[0],Y[0],thX[0], thY[0]));
+//        stateVecAtPlanesList.get(stateVecAtPlanesList.size()-1).setPathLength(pathLen);
+//        for(int superlayerIdx =0; superlayerIdx<6; superlayerIdx++) {
+//            for(int layerIdx =0; layerIdx<6; layerIdx++) {
+//                if(superlayerIdx ==0 && layerIdx==0) {    
+//                    continue;
+//                } else {
+//                    // move to the next plane and determine the swam track parameters at that plane
+//                    planeIdx++;
+//                    dcSwim.SetSwimParameters(X[planeIdx-1],  Y[planeIdx-1], Z[planeIdx-1], thX[planeIdx-1], thY[planeIdx-1],  p,  q);
+//                    //Z[layerIdx] = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayerIdx).getLayer(layerIdx).getPlane().point().z();
+//                    Z[planeIdx] = DcDetector.getLayerMidpoint(superlayerIdx, layerIdx).z; 
+//
+//                    swamPars = dcSwim.SwimToPlane(Z[planeIdx]) ;
+//                    X[planeIdx] = swamPars[0];
+//                    Y[planeIdx] = swamPars[1];
+//                    thX[planeIdx] = swamPars[3]/swamPars[5];
+//                    thY[planeIdx] = swamPars[4]/swamPars[5]; //System.out.println("traj swim to z "+Z[planeIdx]+" = "+swamPars[2]+" x "+ X[planeIdx]+" y "+ Y[planeIdx]);
+//                    pathLen+=swamPars[6];
+//                    StateVec stVec = new StateVec(X[planeIdx],Y[planeIdx],thX[planeIdx], thY[planeIdx]);
+//                    stVec.set_planeIdx(planeIdx);
+//                    stVec.setPathLength(pathLen);
+//                    stateVecAtPlanesList.add(stVec);
+//                }
+//                lastSupLyrIdx = superlayerIdx;
+//                lastLyrIdx = layerIdx;
+//            }
+//        }
+//        // return the list of state vectors at the list of measurement planes
+//        return stateVecAtPlanesList;
+//    }
+//        
     /**
      *
      * @return the list of state vectors along the trajectory

@@ -549,7 +549,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         this._WireMaxSag = _WireMaxSag;
     }
     
-    private double _TrkResid;
+    private double _TrkResid=999;
     
     public double get_TrkResid() {
         return _TrkResid;
@@ -775,6 +775,20 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         return Math.sqrt(r2);
     }
     
+    public double calc_SignalPropagAlongWire(double X, double Y, DCGeant4Factory DcDetector) {
+        
+        Vector3d WireEnd;
+        int end = Constants.STBLOC[this.get_Sector()-1][this.get_Superlayer()-1];
+        if(end>0) {
+            WireEnd = DcDetector.getWireRightend(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
+        } else {
+            WireEnd = DcDetector.getWireLeftend(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
+        }
+        
+        double r2 = (X-WireEnd.x)*(X-WireEnd.x) + (Y-WireEnd.y)*(Y-WireEnd.y);
+        
+        return Math.sqrt(r2);
+    }
     /**
      * 
      * @return signal propagation time along the wire in ns
@@ -817,9 +831,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     /**
      * sets signal time of flight to the track doca to the hit wire in ns
      */
-    public void setSignalTimeOfFlight() {
+    public void setSignalTimeOfFlight(double pathToFirstSite) {
         if(this.get_Beta()>0 && this.getAssociatedStateVec()!=null)
-            this._SignalTimeOfFlight = this.getAssociatedStateVec().getPathLength()/(Constants.SPEEDLIGHT*this.get_Beta());
+            this._SignalTimeOfFlight = (this.getAssociatedStateVec().getPathLength() + pathToFirstSite)/(Constants.SPEEDLIGHT*this.get_Beta());
             this._tFlight = this._SignalTimeOfFlight;
     }
     

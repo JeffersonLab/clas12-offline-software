@@ -293,7 +293,6 @@ public class DCHBEngine extends DCEngine {
                 return true;
         }
         rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, trkcands);
-
         return true;
     }
 

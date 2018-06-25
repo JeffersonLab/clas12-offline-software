@@ -231,6 +231,7 @@ public class DCTBEngine extends DCEngine {
                 // candidate parameters are set from the state vector
                 TrackArray[i].set_FitChi2(kFit.chi2); 
                 TrackArray[i].set_FitNDF(kFit.NDF);
+                TrackArray[i].set_Trajectory(kFit.kfStateVecsAlongTrajectory);
                 TrackArray[i].set_FitConvergenceStatus(kFit.ConvStatus);
                 TrackArray[i].set_Id(TrackArray[i].size()+1);
                 TrackArray[i].set_CovMat(kFit.finalCovMat.covMat);
