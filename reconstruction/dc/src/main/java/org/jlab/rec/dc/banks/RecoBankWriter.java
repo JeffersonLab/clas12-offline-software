@@ -410,6 +410,8 @@ public class RecoBankWriter {
             if (hitlist.get(i).get_Id() == -1) {
                 continue;
             }
+            if(hitlist.get(i).get_TrkResid()==999)
+                hitlist.get(i).set_AssociatedTBTrackID(-1);
             bank.setShort("id", i, (short) hitlist.get(i).get_Id());
             bank.setShort("status", i, (short) hitlist.get(i).get_QualityFac());
             bank.setByte("superlayer", i, (byte) hitlist.get(i).get_Superlayer());
