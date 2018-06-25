@@ -435,38 +435,23 @@ public class HitReader {
         this.set_TBHits(hits);
     }
 
-   
-    private double[] betaArray = new double[3];
     public double readBeta(DataEvent event, int trkId) {
         double _beta =1.0;
-        betaArray[0]=-1;
-        betaArray[1]=-1;
-        betaArray[2]=-1;
-        if (event.hasBank("RECHB::Event") == false) 
-            return 1.0;
-        DataBank bank = event.getBank("RECHB::Event");
-        double startTime = bank.getFloat("STTime", 0);
         
-        if (event.hasBank("FTOF::hits") == false) 
-            return 1.0;
+        if (event.hasBank("RECHB::Particle") == false || event.hasBank("RECHB::Track") == false ) 
+            return _beta;
+        DataBank bank = event.getBank("RECHB::Track");
         
-        DataBank bankftof = event.getBank("FTOF::hits");
         int rows = bank.rows();
         for (int i = 0; i < rows; i++) {
-            if(bankftof.getShort("trackid", i)==trkId) {
-                betaArray[bankftof.getByte("layer", i)-1]= bankftof.getFloat("pathLength", i)/(bankftof.getFloat("time", i)-startTime)/30.0 ;
+            if(bank.getByte("detector", i)==6 && bank.getShort("index", i)==trkId-1) {
+                _beta = event.getBank("RECHB::Particle").getFloat("beta", bank.getShort("pindex", i));
             }
         }
-        if(betaArray[0]==-1 && betaArray[1]==-1 && betaArray[2]!=-1)
-            _beta = betaArray[2];
-        if(betaArray[0]!=-1 && betaArray[1]==-1)
-            _beta = betaArray[0];
-        if(betaArray[1]!=-1)
-            _beta = betaArray[1];
-        if(_beta<0.)
-            _beta=0.01;
-        if(_beta>1.)
-            _beta=1;
+        if(_beta<0)
+            _beta=0.0;
+        if(_beta>1.0)
+            _beta=1.0;
         return _beta;
     }
     
