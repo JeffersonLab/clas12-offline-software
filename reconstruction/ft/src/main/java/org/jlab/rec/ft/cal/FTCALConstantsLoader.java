@@ -66,8 +66,8 @@ public class FTCALConstantsLoader {
 	public static double EN_THRES = 0.01;                                                   // energy threshold in GeV	
     // GEOMETRY PARAMETERS
 	public static double CRYS_DELTA  = 11.5;
-	public static double CRYS_WIDTH  = 15.3;													  // crystal width in mm
-	public static double CRYS_LENGTH = 200.;													  // crystal length in mm
+	public static double CRYS_WIDTH  = 15.3;					    // crystal width in mm
+	public static double CRYS_LENGTH = 200.;					    // crystal length in mm
 	public static double CRYS_ZPOS   = 1898.;                                           // position of the crystal front face
 	
 //	static DatabaseConstantProvider dbprovider = null;
