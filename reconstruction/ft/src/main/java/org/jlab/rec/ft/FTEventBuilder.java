@@ -141,7 +141,7 @@ public class FTEventBuilder {
                 track.setPosition(responses.get(i).getPosition());
                 track.setDirection();
                 track.setTime(responses.get(i).getTime() - responses.get(i).getPosition().mag() / 299.7);
-                track.setCalorimeterIndex(i);
+                track.setCalorimeterIndex(responses.get(i).getId());
                 track.setHodoscopeIndex(-1);
                 track.setTrackerIndex(-1);
                 particles.add(track);
