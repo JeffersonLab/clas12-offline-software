@@ -195,6 +195,11 @@ public class EBMatching {
                 if (indx >= 0) {
                     neutral.addResponse(respCTOF.get(indx),true);
                     respCTOF.get(indx).setAssociation(pindex);
+                    // FIXME:  stop mixing Vector3 and Vector3D
+                    final double dx = respCTOF.get(indx).getPosition().x()-vertex.x();
+                    final double dy = respCTOF.get(indx).getPosition().y()-vertex.y();
+                    final double dz = respCTOF.get(indx).getPosition().z()-vertex.z();
+                    respCTOF.get(indx).setPath(Math.sqrt(dx*dx+dy*dy+dz*dz));
                 }
 
                 de.addParticle(neutral);
