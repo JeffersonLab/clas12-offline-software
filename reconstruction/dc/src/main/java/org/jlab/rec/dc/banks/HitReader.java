@@ -448,8 +448,8 @@ public class HitReader {
                 _beta = event.getBank("RECHB::Particle").getFloat("beta", bank.getShort("pindex", i));
             }
         }
-        if(_beta<0)
-            _beta=0.0;
+        if(_beta<=0)
+            _beta=0.1;
         if(_beta>1.0)
             _beta=1.0;
         return _beta;
