@@ -449,7 +449,7 @@ public class EBTwoTrackTest {
         System.out.println(String.format("FD hEff = %.3f",hEff));
         System.out.println("#############################################################");
         if      (ftPDG==11) assertEquals(eEff>0.90,true);
-        else if (ftPDG==22) assertEquals(gEff>0.90,true);
+        else if (ftPDG==22) assertEquals(gEff>0.88,true);
         assertEquals(hEff>0.50,true);
     }
 
