@@ -121,8 +121,8 @@ public class EBAnalyzer {
             if (p.getPid()==2112) {
                 final double beta = p.getBeta();
                 final double mass = PDGDatabase.getParticleById(p.getPid()).mass();
-                final double psquared = mass*mass / (1-beta*beta);
-                p.vector().setMag(Math.sqrt(psquared));
+                final double psquared = Math.pow(mass*beta,2) / (1-beta*beta);
+                p.vector().setMag( Math.sqrt(psquared) );
             }
 
             // photon momentum is based on calorimeter energy:

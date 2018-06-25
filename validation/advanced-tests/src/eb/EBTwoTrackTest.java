@@ -558,11 +558,22 @@ public class EBTwoTrackTest {
         if (recPartBank!=null) {
 
             for (int ii = 0; ii < recPartBank.rows(); ii++) {
+               
+                final short status = recPartBank.getShort("status", ii);
+                final byte charge  = recPartBank.getByte("charge", ii);
+                final int pid      = recPartBank.getInt("pid", ii);
+                final boolean isFT = status/1000 == 1;
+                final boolean isFD = status/1000 == 2;
+                final boolean isCD = status/1000 == 4;
                 
-                final byte charge = recPartBank.getByte("charge", ii);
-                final int pid = recPartBank.getInt("pid", ii);
-                final double px=recPartBank.getFloat("px",ii);
-                final double py=recPartBank.getFloat("py",ii);
+                // determine sector 1-6:
+                double px = recPartBank.getFloat("px",ii);
+                double py = recPartBank.getFloat("py",ii);
+                // use hit position for photons from CD (with UDF momentum):
+                if (isCD && pid==22 && recSciMap.containsKey(ii)) {
+                    px = recSciBank.getFloat("x",recSciMap.get(ii).get(0));
+                    py = recSciBank.getFloat("y",recSciMap.get(ii).get(0));
+                }
                 final int sector = ClasMath.getSectorFromPhi(Math.atan2(py,px));
 
                 if (pid==11 && sector==electronSector) {
