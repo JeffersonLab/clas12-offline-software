@@ -28,7 +28,7 @@ public class Constants {
     public static final  int NWIRE  = 114; //1 guard + 112 sense + 1 guard
 
     public static final double z_extrap_to_LowFieldReg = 592.; // z in cm in the region outside of DC-R3 [used for extrapolation of the track to the outer detectors]
-    public static final double[] wpdist = {0.386160,0.404220,0.621906,0.658597,0.935140,0.977982};
+    public static final double[] wpdist = new double[6];//= {0.386160,0.404220,0.621906,0.658597,0.935140,0.977982};
 
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------
