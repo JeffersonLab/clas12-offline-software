@@ -257,7 +257,8 @@ public class EBEngine extends ReconstructionEngine {
     @Override
     public boolean init() {
 
-        if (this.getEngineConfigString("dropBanks")=="true") {
+        if (this.getEngineConfigString("dropBanks")!=null &&
+                this.getEngineConfigString("dropBanks").equals("true")) {
             dropBanks=true;
         }
 
