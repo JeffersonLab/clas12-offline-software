@@ -567,7 +567,7 @@ public class DetectorParticle implements Comparable {
             DetectorResponse response = hitList.get(loop);
             
             if(response.getDescriptor().getType()==type &&
-               response.getDescriptor().getLayer()==detectorLayer &&
+               (detectorLayer<=0 || response.getDescriptor().getLayer()==detectorLayer) &&
                response.getAssociation()<0) {
                 hitPoint.set(
                         response.getPosition().x(),
