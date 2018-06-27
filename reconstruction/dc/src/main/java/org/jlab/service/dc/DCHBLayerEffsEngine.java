@@ -1,7 +1,6 @@
 package org.jlab.service.dc;
 
 import cnuphys.magfield.MagneticFields;
-import cnuphys.magfield.TorusMap;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
@@ -39,26 +38,70 @@ import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.trajectory.DCSwimmer;
-import org.jlab.rec.dc.trajectory.Road;
 import org.jlab.rec.dc.trajectory.RoadFinder;
+import org.jlab.rec.dc.trajectory.Road;
 import org.jlab.utils.CLASResources;
+
 import org.jlab.utils.groups.IndexedTable;
 
-
 public class DCHBLayerEffsEngine extends ReconstructionEngine {
- 
+
     String FieldsConfig="";
     AtomicInteger Run = new AtomicInteger(0);
     DCGeant4Factory dcDetector;
+    String clasDictionaryPath ;
     
     public DCHBLayerEffsEngine() {
         super("DCHB","ziegler","4.0");
     }
-    String clasDictionaryPath ;
+    
+    /**
+     * 
+     * determine torus and solenoid map name from yaml, else env, else crash
+     */
+    private void initializeMagneticFields() {
+        String torusMap=this.getEngineConfigString("torusMap");
+        String solenoidMap=this.getEngineConfigString("solenoidMap");
+        if (torusMap!=null) {
+            System.out.println("["+this.getName()+"] Torus Map chosen based on yaml: "+torusMap);
+        }
+        else {
+            torusMap = System.getenv("TORUSMAP");
+            if (torusMap!=null) {
+                System.out.println("["+this.getName()+"] Torus Map chosen based on env: "+torusMap);
+            }
+        }
+        if (torusMap==null) {
+            throw new RuntimeException("["+this.getName()+"]  Failed to find torus map name in yaml or env.");
+        }
+        if (solenoidMap!=null) {
+            System.out.println("["+this.getName()+"] solenoid Map chosen based on yaml: "+solenoidMap);
+        }
+        else {
+            solenoidMap = System.getenv("SOLENOIDMAP");
+            if (solenoidMap!=null) {
+                System.out.println("["+this.getName()+"] solenoid Map chosen based on env: "+solenoidMap);
+            }
+        }
+        if (solenoidMap==null) {
+            throw new RuntimeException("["+this.getName()+"]  Failed to find solenoid map name in yaml or env.");
+        }
+        String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";
+        try {
+            MagneticFields.getInstance().initializeMagneticFields(mapDir,torusMap,solenoidMap);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public boolean init() {
+
         Constants.Load();
-       
+     
+        this.initializeMagneticFields();
+
         clasDictionaryPath= CLASResources.getResourcePath("etc");
         String[]  dcTables = new String[]{
             "/calibration/dc/signal_generation/doca_resolution",
@@ -66,6 +109,7 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
             "/calibration/dc/time_to_distance/time2dist",
          //   "/calibration/dc/time_corrections/T0_correction",
             "/calibration/dc/time_corrections/timingcuts",
+            "/calibration/dc/time_jitter",
         };
 
         requireConstants(Arrays.asList(dcTables));
@@ -79,7 +123,7 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, variationName);
         dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
         
-        
+        //MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
         //DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(800, "default");
         //dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
         //disconnect from database. Important to do this after loading tables.
@@ -127,7 +171,7 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
             int    phase  = tabJ.getIntValue("phase", 0,0,0);
             int    cycles = tabJ.getIntValue("cycles", 0,0,0);
             
-            if(cycles>0) triggerPhase=period*((timeStamp+phase)%cycles);
+            if(cycles>0) triggerPhase=period*((timeStamp+phase)%cycles); 
             
             TableLoader.FillT0Tables(newRun);
             TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist")); 
@@ -154,7 +198,7 @@ public class DCHBLayerEffsEngine extends ReconstructionEngine {
                        2,leftShifts,
                        rightShifts);
        
-       //System.out.println("RUNING HITBASED_________________________________________");
+       //System.out.println("RUNNING HITBASED_________________________________________");
 
        ClusterFitter cf = new ClusterFitter();
        ClusterCleanerUtilities ct = new ClusterCleanerUtilities();

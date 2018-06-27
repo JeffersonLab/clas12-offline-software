@@ -63,7 +63,8 @@ public class Seed implements Comparable<Seed>{
     @Override
     public int compareTo(Seed arg) {
 
-        return Double.parseDouble(this.get_IntIdentifier()) < Double.parseDouble(arg.get_IntIdentifier()) ? -1 : Double.parseDouble(this.get_IntIdentifier()) == Double.parseDouble(arg.get_IntIdentifier()) ? 0 : 1;
+    	return ( this._Crosses.size() > arg.get_Crosses().size() ) ? -1 : ( this._Crosses.size() == arg.get_Crosses().size() ) ? 0 : 1;
+//        return Double.parseDouble(this.get_IntIdentifier()) < Double.parseDouble(arg.get_IntIdentifier()) ? -1 : Double.parseDouble(this.get_IntIdentifier()) == Double.parseDouble(arg.get_IntIdentifier()) ? 0 : 1;
         
     }
 

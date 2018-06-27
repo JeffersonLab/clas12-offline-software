@@ -128,7 +128,6 @@ public class TrajectoryFinder {
         }
         //BMT
         for (int l = org.jlab.rec.cvt.svt.Constants.NLAYR; l < org.jlab.rec.cvt.svt.Constants.NLAYR + 2 * org.jlab.rec.cvt.bmt.Constants.NREGIONS; l++) {
-
             int BMTRegIdx = (l - org.jlab.rec.cvt.svt.Constants.NLAYR) / 2;
 
             if (org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTRegIdx] == 0) {
@@ -148,9 +147,13 @@ public class TrajectoryFinder {
             StateVec stVec = new StateVec(InterPoint.x(), InterPoint.y(), InterPoint.z(),
                     trkDir.x(), trkDir.y(), trkDir.z());
             
-            //stVec.set_planeIdx(l);            
+            stVec.set_planeIdx(l);  
+            double phiPos = Math.atan2(stVec.y(),stVec.x());
+            int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
+            stVec.set_SurfaceSector(sector);
+            stVec.set_SurfaceLayer(l+1); 
+            stVec.set_ID(id);
             //stateVecs.add(stVec);
-
             // calculate crosses on BMT layers using track information.  These are used in the event display
             for (Cross c : BMTCrossList) {
                 if (matchCrossToStateVec(c, stVec, l + 1, 0) == false) {
@@ -168,22 +171,16 @@ public class TrajectoryFinder {
                     this.setHitResolParams("BMT", c.get_Cluster1().get_Sector(), c.get_Cluster1().get_Layer(), c.get_Cluster1(),
                             stVec, svt_geo, bmt_geo, traj.isFinal);
                     
-                    StateVec stVecC = new StateVec(InterPoint.x(), InterPoint.y(), InterPoint.z(),
-                    trkDir.x(), trkDir.y(), trkDir.z());
+//                    StateVec stVecC = new StateVec(InterPoint.x(), InterPoint.y(), InterPoint.z(),
+//                    trkDir.x(), trkDir.y(), trkDir.z());
             
-                    stVecC.set_planeIdx(l);
+//                    stVecC.set_planeIdx(l);
                     //C-detector measuring z                                       
-                    stVecC.set_CalcCentroidStrip(bmt_geo.getCStrip(BMTRegIdx+1, stVec.z()));
-                    double phiPos = Math.atan2(stVec.y(),stVec.x());
-                    int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
-                    stVecC.set_SurfaceSector(sector);
-                    //Layer starting at 7
-                    stVecC.set_SurfaceLayer(l+1);
-                    this.fill_HelicalTrkAngleWRTBMTTangentPlane(trkDir, stVecC);
-                    stVecC.set_ID(id);
-                    stateVecs.add(stVecC);
+                    stVec.set_CalcCentroidStrip(bmt_geo.getCStrip(BMTRegIdx+1, stVec.z()));
+//                    this.fill_HelicalTrkAngleWRTBMTTangentPlane(trkDir, stVec);
                 }
-                if (c.get_DetectorType().equalsIgnoreCase("Z")) { //Z-detector measuring phi
+//                if (c.get_DetectorType().equalsIgnoreCase("Z")) { //Z-detector measuring phi
+                else { //Z-detector measuring phi
                     double z = InterPoint.z();
                     if (traj.isFinal) {
                         c.set_Point(new Point3D(c.get_Point().x(), c.get_Point().y(), z));
@@ -193,25 +190,25 @@ public class TrajectoryFinder {
                     // calculate the hit residuals
                     this.setHitResolParams("BMT", c.get_Cluster1().get_Sector(), c.get_Cluster1().get_Layer(), c.get_Cluster1(),
                             stVec, svt_geo, bmt_geo, traj.isFinal);
-                    StateVec stVecZ = new StateVec(InterPoint.x(), InterPoint.y(), InterPoint.z(),
-                    trkDir.x(), trkDir.y(), trkDir.z());
-                    stVecZ.set_planeIdx(l);
+//                    StateVec stVecZ = new StateVec(InterPoint.x(), InterPoint.y(), InterPoint.z(),
+//                    trkDir.x(), trkDir.y(), trkDir.z());
+//                    stVecZ.set_planeIdx(l);
                     //Z-detector measuring phi   
-                    double phiPos = Math.atan2(stVec.y(),stVec.x());
-                    stVecZ.set_CalcCentroidStrip(bmt_geo.getZStrip(BMTRegIdx+1,  phiPos));
-                    int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
-                    stVecZ.set_SurfaceSector(sector);
+//                    double phiPos = Math.atan2(stVec.y(),stVec.x());
+                    stVec.set_CalcCentroidStrip(bmt_geo.getZStrip(BMTRegIdx+1,  phiPos));
+//                    int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
+//                    stVecZ.set_SurfaceSector(sector);
                     //Layer starting at 7
-                    stVecZ.set_SurfaceLayer(l+1);
-                    this.fill_HelicalTrkAngleWRTBMTTangentPlane(trkDir, stVecZ);
-                    stVecZ.set_ID(id);
-                    stateVecs.add(stVecZ);
-                    
+//                    stVecZ.set_SurfaceLayer(l+1);
+//                    stVecZ.set_ID(id);
+//                    stateVecs.add(stVecZ);           
                 }
             }
+
+            this.fill_HelicalTrkAngleWRTBMTTangentPlane(trkDir, stVec);
+            stateVecs.add(stVec);
                 
         }
-
         traj.set_Trajectory(stateVecs);
 
         traj.addAll(BMTCrossList);
@@ -440,13 +437,20 @@ public class TrajectoryFinder {
                 value = false;	// reauire same region
             }
             if (c.get_DetectorType().equalsIgnoreCase("C")) { //C-detector measuring Z
+                if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 1) { //Z-detector measuring phi
+                    value = false;
+                }
+            	
                 if (Math.abs(stVec.z() - c.get_Point0().z()) > Constants.interTol) {
                     value = false;
                 }
             }
-            if (c.get_DetectorType().equalsIgnoreCase("Z")) { //Z-detector measuring phi		
+            if (c.get_DetectorType().equalsIgnoreCase("Z")) { //Z-detector measuring phi
+                if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 0) { //C-detector 
+                    value = false;
+                }
                 double deltaXt = Math.sqrt((stVec.x() - c.get_Point().x()) * (stVec.x() - c.get_Point().x()) + (stVec.y() - c.get_Point().y()) * (stVec.y() - c.get_Point().y()));
-                if (deltaXt > Constants.interTol) {
+                if (deltaXt > 2*Constants.interTol) {
                     value = false;
                 }
             }

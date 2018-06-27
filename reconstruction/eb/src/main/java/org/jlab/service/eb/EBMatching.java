@@ -214,7 +214,19 @@ public class EBMatching {
                     if (trkid>=0) {
                         if (!ctofMap.containsKey(trkid))
                             ctofMap.put(trkid,new ArrayList<Integer>());
-                        ctofMap.get(trkid).add(ictof);
+                        // insert it according to energy:
+                        boolean found=false;
+                        final float ee = ctofBank.getFloat("energy",ictof);
+                        for (int ilist=0; ilist<ctofMap.get(trkid).size(); ilist++) {
+                            final float ee2 = ctofBank.getFloat("energy",ctofMap.get(trkid).get(ilist));
+                            if (ee>ee2) {
+                                ctofMap.get(trkid).add(ilist,ictof);
+                                found=true;
+                                break;
+                            }
+                        }
+                        // no lower energies, put it at the end:
+                        if (found==false) ctofMap.get(trkid).add(ictof);
                     }
                 }
             }

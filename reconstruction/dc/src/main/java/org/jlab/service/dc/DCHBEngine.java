@@ -1,7 +1,6 @@
 package org.jlab.service.dc;
 
 import cnuphys.magfield.MagneticFields;
-import cnuphys.magfield.TorusMap;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
@@ -42,9 +41,6 @@ import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.RoadFinder;
 import org.jlab.rec.dc.trajectory.Road;
 import org.jlab.utils.CLASResources;
-
-import org.jlab.clara.engine.EngineData;
-import org.jlab.clara.engine.EngineDataType;
 import org.jlab.utils.groups.IndexedTable;
 
 public class DCHBEngine extends ReconstructionEngine {

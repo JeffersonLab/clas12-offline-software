@@ -264,12 +264,24 @@ public class DetectorParticle implements Comparable {
         return this.particleScore;
     }
     
-    public int getSector(){
-        if(this.hasHit(DetectorType.ECAL, 1)==true){
-            return getHit(DetectorType.ECAL, 1).getDescriptor().getSector();
-        }
-        return 0;
+    public int getSector(DetectorType type,int layer) {
+        DetectorResponse hit = this.getHit(type,layer);
+        return hit==null ? 0 : hit.getSector();
     }
+
+    public int getSector(DetectorType type) {
+        return this.getSector(type,-1);
+    }
+
+    /**
+     * @deprecated
+     * Just for backward compatibility for any external usage
+     */
+    public int getSector(){
+        return this.getSector(DetectorType.ECAL,1);
+    }
+
+
     /**
      * returns chi2 of score.
      * @return 
@@ -284,16 +296,7 @@ public class DetectorParticle implements Comparable {
     public void addResponse(DetectorResponse res){
         this.responseStore.add(res);
     }
-    
-    public DetectorResponse  getResponse(DetectorType type, int layer){
-        for(DetectorResponse res : this.responseStore){
-            if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer){
-                return res;
-            }
-        }
-        return null;
-    }
-    
+
     public boolean hasHit(DetectorType type){
         int hits = 0;
         for( DetectorResponse res : this.responseStore){
@@ -329,17 +332,23 @@ public class DetectorParticle implements Comparable {
     }
  
     public DetectorResponse getHit(DetectorType type){
-        for(DetectorResponse res : this.responseStore){
-            if(res.getDescriptor().getType()==type) return res;
+        return getHit(type,-1);
+    }
+   
+    public DetectorResponse getHit(DetectorType type, int layer) {
+        for (DetectorResponse res : this.responseStore) {
+            if (res.getDescriptor().getType() != type) continue;
+            if (layer > 0 && res.getDescriptor().getLayer() != layer) continue;
+            return res;
         }
         return null;
     }
-    
-    public DetectorResponse getHit(DetectorType type, int layer){
-        for(DetectorResponse res : this.responseStore){
-            if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer) return res;
-        }
-        return null;
+    /**
+     * @deprecated
+     * Just for backward compatibility for any external usage
+     */
+    public DetectorResponse  getResponse(DetectorType type, int layer){
+        return this.getHit(type,layer);
     }
     
 
@@ -350,6 +359,7 @@ public class DetectorParticle implements Comparable {
     public double getTrackChi2() {return this.detectorTrack.getchi2();}
     public int    getStatus(){ return this.particleStatus;}
     public int    getTrackDetector() {return this.detectorTrack.getDetectorID();}
+    public int    getTrackSector() {return this.detectorTrack.getSector();}
     public double getMass(){ return this.particleMass;}
     public int    getPid(){ return this.particlePID;}
     public double getPidQuality() {return this.particleIDQuality;}
