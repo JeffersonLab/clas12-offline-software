@@ -71,6 +71,7 @@ public class ECCommon {
         IndexedTable    atten = manager.getConstants(run, "/calibration/ec/attenuation");
         IndexedTable     gain = manager.getConstants(run, "/calibration/ec/gain");
 		IndexedTable     time = manager.getConstants(run, "/calibration/ec/timing");
+		IndexedTable    shift = manager.getConstants(run, "/calibration/ec/global_gain_shift");
     
         if (singleEvent) resetHistos();        
         
@@ -102,7 +103,7 @@ public class ECCommon {
             strip.setAttenuation(atten.getDoubleValue("A", sector,layer,component),
                                  atten.getDoubleValue("B", sector,layer,component),
                                  atten.getDoubleValue("C", sector,layer,component));
-            strip.setGain(gain.getDoubleValue("gain", sector,layer,component)); 
+            strip.setGain(gain.getDoubleValue("gain", sector,layer,component)*shift.getDoubleValue("gain_shift",sector,layer,0)); 
             strip.setVeff(veff);
             strip.setTiming(time.getDoubleValue("a0", sector, layer, component),
                             time.getDoubleValue("a1", sector, layer, component),

@@ -88,10 +88,10 @@ public class DatabaseConstantProvider implements ConstantProvider {
         
         String envAddress = this.getEnvironment();        
         if(envAddress!=null) address = envAddress;
-        this.initialize(address);
         if(timestamp.length()>8){
             this.setTimeStamp(timestamp);
         }
+        this.initialize(address);
     }
     
     public DatabaseConstantProvider(String address){
