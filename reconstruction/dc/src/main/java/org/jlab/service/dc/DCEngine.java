@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.ECGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
@@ -24,6 +25,7 @@ public class DCEngine extends ReconstructionEngine {
     FTOFGeant4Factory ftofDetector;
     ECGeant4Factory ecDetector;
     PCALGeant4Factory pcalDetector; 
+    double[] FVT_Interlayer = new double[6];
     TrajectorySurfaces tSurf;
     String clasDictionaryPath ;
     String variationName;
@@ -134,10 +136,20 @@ public class DCEngine extends ReconstructionEngine {
         ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, "default");
         ecDetector = new ECGeant4Factory(providerEC);
         pcalDetector = new PCALGeant4Factory(providerEC);
+        
+        DatabaseConstantProvider providerFMT = new DatabaseConstantProvider(11, "default");
+        providerFMT.loadTable("/geometry/fmt/fmt_layer");
+        providerFMT.disconnect();
+        for (int i = 0; i < providerFMT.length("/geometry/fmt/fmt_layer/Layer"); i++) {
+
+            int layer = providerFMT.getInteger("/geometry/fmt/fmt_layer/Layer", i);
+            double Zl = providerFMT.getDouble("/geometry/fmt/fmt_layer/Z", i);
+            FVT_Interlayer[layer-1] = Zl;
+        }
         System.out.println(" -- Det Geometry constants are Loaded " );
         // create the surfaces
         tSurf = new TrajectorySurfaces();
-        tSurf.LoadSurfaces(dcDetector, ftofDetector, ecDetector, pcalDetector);
+        tSurf.LoadSurfaces(dcDetector, ftofDetector, ecDetector, pcalDetector, FVT_Interlayer);
         
         // Get the constants for the correct variation
         String ccDBVar = this.getEngineConfigString("constantsDBVariation");

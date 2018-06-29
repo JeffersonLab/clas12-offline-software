@@ -2,17 +2,7 @@ package org.jlab.service.dc;
 
 import Jama.Matrix;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.base.GeometryFactory;
-import org.jlab.detector.geant4.v2.DCGeant4Factory;
-import org.jlab.detector.geant4.v2.ECGeant4Factory;
-import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
-import org.jlab.detector.geant4.v2.PCALGeant4Factory;
-import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -207,6 +197,8 @@ public class DCTBEngine extends DCEngine {
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         TrajectoryFinder trjFind = new TrajectoryFinder();
         for(int i = 0; i < TrackArray.length; i++) {
+            if(TrackArray[i].get_ListOfHBSegments()==null || TrackArray[i].get_ListOfHBSegments().size()<4)
+                continue;
             TrackArray[i].set_MissingSuperlayer(get_Status(TrackArray[i]));
             TrackArray[i].addAll(crossMake.find_Crosses(TrackArray[i].get_ListOfHBSegments(), dcDetector));
             if(TrackArray[i].size()<1)
@@ -217,7 +209,7 @@ public class DCTBEngine extends DCEngine {
             //}
             KFitter kFit = new KFitter(TrackArray[i], dcDetector, true);
             //kFit.totNumIter=30;
-            kFit.useFilter = true;
+            
             StateVec fn = new StateVec();
             kFit.runFitter();
             

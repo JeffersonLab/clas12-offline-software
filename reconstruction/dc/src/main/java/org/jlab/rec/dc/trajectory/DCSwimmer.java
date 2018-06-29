@@ -14,8 +14,6 @@ import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimmer;
 import cnuphys.magfield.TorusMap;
-import org.jlab.detector.geant4.v2.DCGeant4Factory;
-
 import org.jlab.rec.dc.Constants;
 import org.jlab.utils.CLASResources;
 

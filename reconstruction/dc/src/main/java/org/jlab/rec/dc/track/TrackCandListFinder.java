@@ -190,7 +190,38 @@ public class TrackCandListFinder {
                 this.getStraightTrack(cand);
                 if(cand.get_pAtOrig()!=null) {
                     cand.set_Id(cands.size()+1);
-                    this.matchHits(traj.get_Trajectory(), cand, DcDetector);
+                    // the state vector at the region 1 cross
+                    StateVec VecAtReg1MiddlePlane = new StateVec(cand.get(0).get_Point().x(),cand.get(0).get_Point().y(),
+                                    cand.get(0).get_Dir().x()/cand.get(0).get_Dir().z(), cand.get(0).get_Dir().y()/cand.get(0).get_Dir().z());
+                    cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane); 	
+                    // initialize the fitter with the candidate track
+                    KFitter kFit = new KFitter(cand, DcDetector, false);
+                    kFit.totNumIter=2;
+                    kFit.runFitter();
+                    if(kFit.finalStateVec==null)
+                        continue;
+                    // initialize the state vector corresponding to the last measurement site
+                    StateVec fn = new StateVec();
+                    
+                    //System.out.println(" fit failed due to chi2 "+kFit.setFitFailed+" p "+1./Math.abs(kFit.finalStateVec.Q));
+                    if(kFit.setFitFailed==false && kFit.finalStateVec!=null) {
+                        // set the state vector at the last measurement site
+                        fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
+                        //set the track parameters if the filter does not fail
+                        cand.set_P(1./Math.abs(kFit.finalStateVec.Q));
+                        cand.set_Q((int)Math.signum(kFit.finalStateVec.Q));
+                        this.setTrackPars(cand, traj, trjFind, fn, kFit.finalStateVec.z, DcDetector);
+                        // candidate parameters are set from the state vector
+                        cand.set_FitChi2(kFit.chi2);
+                        cand.set_FitNDF(kFit.NDF);
+                        cand.set_FitConvergenceStatus(kFit.ConvStatus);
+                        cand.set_Id(cands.size()+1);
+                        cand.set_CovMat(kFit.finalCovMat.covMat);
+                        cand.set_Trajectory(kFit.kfStateVecsAlongTrajectory);
+                        // add candidate to list of tracks
+                        cands.add(cand); 
+                    }
+                    //this.matchHits(traj.get_Trajectory(), cand, DcDetector);
                     cands.add(cand); 
                 }
             } else {
@@ -325,12 +356,13 @@ public class TrackCandListFinder {
                             cand.set_Q(q);
                             // momentum correction using the swam trajectory iBdl
                             cand.set_P(p); 
+                        
                             // the state vector at the region 1 cross
                             StateVec VecAtReg1MiddlePlane = new StateVec(cand.get(0).get_Point().x(),cand.get(0).get_Point().y(),
                                             cand.get(0).get_Dir().x()/cand.get(0).get_Dir().z(), cand.get(0).get_Dir().y()/cand.get(0).get_Dir().z());
                             cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane); 	
                             // initialize the fitter with the candidate track
-                             KFitter kFit = new KFitter(cand, DcDetector, false);
+                            KFitter kFit = new KFitter(cand, DcDetector, false);
                             if(this.trking.equalsIgnoreCase("TimeBased"))
                                 kFit.totNumIter=30;
 
@@ -340,18 +372,7 @@ public class TrackCandListFinder {
                             if(kFit.finalStateVec==null)
                                 continue;
                             if(this.trking.equalsIgnoreCase("HitBased")) { 
-                            /*    System.out.println("x1 "+x1);
-                                System.out.println("y1 "+y1);
-                                System.out.println("z1 "+z1);
-                                System.out.println("x2 "+x2);
-                                System.out.println("y2 "+y2);
-                                System.out.println("z2 "+z2);
-                                System.out.println("x3 "+x3);
-                                System.out.println("y3 "+y3);
-                                System.out.println("z3 "+z3);
-                                System.out.println("x "+ kFit.finalStateVec.x);
-                                System.out.println("y "+ kFit.finalStateVec.y);
-                                System.out.println("z "+ kFit.finalStateVec.z); */
+                            
                                 double HBc2 = getHitBasedFitChi2ToCrosses( x1,  y1,  z1,  x2,  y2,  z2,  x3,  y3,  z3, 
                                 1./Math.abs(kFit.finalStateVec.Q), (int)Math.signum(kFit.finalStateVec.Q),
                                          kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.z, kFit.finalStateVec.tx, kFit.finalStateVec.ty);
