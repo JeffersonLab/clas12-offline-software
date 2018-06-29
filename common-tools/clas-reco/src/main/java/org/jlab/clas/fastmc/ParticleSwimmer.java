@@ -49,9 +49,12 @@ public class ParticleSwimmer {
         Torus torus = null;
          Solenoid solenoid = null;
          //will read mag field assuming 
-         String clasDictionaryPath = CLASResources.getResourcePath("etc");		
-         String torusFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-torus.dat";		
-         File torusFile = new File(torusFileName);
+         String clasDictionaryPath = CLASResources.getResourcePath("etc");
+         String magfieldDir = clasDictionaryPath + "/data/magfield/";
+
+         String torusFileName = System.getenv("TORUSMAP");
+         if (torusFileName==null) torusFileName = "clas12-fieldmap-torus.dat";
+         File torusFile = new File(magfieldDir + torusFileName);
          try {
              torus = Torus.fromBinaryFile(torusFile);
          } catch (FileNotFoundException e) {
@@ -59,12 +62,13 @@ public class ParticleSwimmer {
          }
 		
          //OK, see if we can create a Solenoid
-         String solenoidFileName = clasDictionaryPath + "/data/magfield/clas12-fieldmap-solenoid.dat";
+         String solenoidFileName = System.getenv("SOLENOIDMAP");
+         if (solenoidFileName==null) solenoidFileName = "clas12-fieldmap-solenoid.dat";
          //OK, see if we can create a Torus
          if(clasDictionaryPath == "../clasJLib")
              solenoidFileName = clasDictionaryPath + "/data/solenoid/v1.0/solenoid-srr.dat";
          
-         File solenoidFile = new File(solenoidFileName);
+         File solenoidFile = new File(magfieldDir + solenoidFileName);
          try {
              solenoid = Solenoid.fromBinaryFile(solenoidFile);
          } catch (FileNotFoundException e) {

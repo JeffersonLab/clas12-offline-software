@@ -42,7 +42,6 @@ public class ECCommon {
     
     static int ind[]  = {0,0,0,1,1,1,2,2,2}; 
     static float               tps = 0.02345f;
-	public static float    TOFFSET = 125f; 
     public static float       veff = 18.1f;
     
     public  static void initHistos() {
@@ -72,6 +71,7 @@ public class ECCommon {
         IndexedTable    atten = manager.getConstants(run, "/calibration/ec/attenuation");
         IndexedTable     gain = manager.getConstants(run, "/calibration/ec/gain");
 		IndexedTable     time = manager.getConstants(run, "/calibration/ec/timing");
+		IndexedTable    shift = manager.getConstants(run, "/calibration/ec/global_gain_shift");
     
         if (singleEvent) resetHistos();        
         
@@ -103,7 +103,7 @@ public class ECCommon {
             strip.setAttenuation(atten.getDoubleValue("A", sector,layer,component),
                                  atten.getDoubleValue("B", sector,layer,component),
                                  atten.getDoubleValue("C", sector,layer,component));
-            strip.setGain(gain.getDoubleValue("gain", sector,layer,component)); 
+            strip.setGain(gain.getDoubleValue("gain", sector,layer,component)*shift.getDoubleValue("gain_shift",sector,layer,0)); 
             strip.setVeff(veff);
             strip.setTiming(time.getDoubleValue("a0", sector, layer, component),
                             time.getDoubleValue("a1", sector, layer, component),
@@ -117,16 +117,18 @@ public class ECCommon {
         
     public static List<ECStrip>  readStripsHipo(DataEvent event, int run, ConstantsManager manager){ 
     	
-    	List<ECStrip>  strips = new ArrayList<ECStrip>();
+      	List<ECStrip>  strips = new ArrayList<ECStrip>();
         IndexedList<List<Integer>>  tdcs = new IndexedList<List<Integer>>(3);  
         
 		IndexedTable   jitter = manager.getConstants(run, "/calibration/ec/time_jitter");
 		IndexedTable   offset = manager.getConstants(run, "/calibration/ec/fadc_offset");
+		IndexedTable  goffset = manager.getConstants(run, "/calibration/ec/fadc_global_offset");
         
         double PERIOD = jitter.getDoubleValue("period",0,0,0);
         int    PHASE  = jitter.getIntValue("phase",0,0,0); 
         int    CYCLES = jitter.getIntValue("cycles",0,0,0);
         
+        float TOFFSET = (float) goffset.getDoubleValue("global_offset",0,0,0);
 	    int triggerPhase = 0;
     	
         if(CYCLES>0&&event.hasBank("RUN::config")==true){
@@ -174,7 +176,7 @@ public class ECCommon {
                     list = tdcs.getItem(is,il,ip); tdcc=new Integer[list.size()]; list.toArray(tdcc);       
                     for (int ii=0; ii<tdcc.length; ii++) {
                     	    float tdif = (tps*tdcc[ii]-triggerPhase-TOFFSET)-t; 
-                    	    if (Math.abs(tdif)<10&&tdif<tmax) {tmax = tdif; tdc = tdcc[ii];}
+                    	    if (Math.abs(tdif)<30&&tdif<tmax) {tmax = tdif; tdc = tdcc[ii];}
                     }
                     strip.setTDC(tdc); 
                 }              

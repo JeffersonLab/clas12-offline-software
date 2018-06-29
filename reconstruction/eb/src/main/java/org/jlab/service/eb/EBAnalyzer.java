@@ -16,6 +16,7 @@ import org.jlab.rec.eb.EBConstants;
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
 import org.jlab.rec.eb.EBUtil;
+import org.jlab.rec.eb.SamplingFractions;
 
 /**
  * @author gavalian
@@ -305,11 +306,11 @@ public class EBAnalyzer {
          * Get a basic pid quality factor.
          */
         public double PIDQuality(DetectorParticle p, int pid, DetectorEvent event) {
-            double q=999;
+            double q=9999;
 
             // electron/positron:
             if (abs(pid)==11) {
-                q = pow(EBUtil.getSamplingFractionNSigma(p,ccdb),2);
+                q = SamplingFractions.getNSigma(pid,p,ccdb);
             }
 
             // based on timing:
@@ -318,22 +319,22 @@ public class EBAnalyzer {
                 double sigma = -1;
                 double delta_t = 99999;
                 if (p.hasHit(DetectorType.FTOF,2)==true) {
-                    sigma = 0.085; //EBUtil.getTimingResolution(p,DetectorType.FTOF,2);
-                    delta_t = abs(p.getVertexTime(DetectorType.FTOF, 2, pid)-startTime);
+                    sigma = EBUtil.getDetTimingResolution(p.getHit(DetectorType.FTOF,2),ccdb);
+                    delta_t = p.getVertexTime(DetectorType.FTOF, 2, pid)-startTime;
                 }
                 else if (p.hasHit(DetectorType.FTOF,1)==true) {
-                    sigma = 0.125; //EBUtil.getTimingResolution(p,DetectorType.FTOF,1);
-                    delta_t = abs(p.getVertexTime(DetectorType.FTOF, 1, pid)-startTime);
+                    sigma = EBUtil.getDetTimingResolution(p.getHit(DetectorType.FTOF,1),ccdb);
+                    delta_t = p.getVertexTime(DetectorType.FTOF, 1, pid)-startTime;
                 }
                 else if (p.hasHit(DetectorType.CTOF)==true) {
-                    sigma = 0.065; //EBUtil.getTimingResolution(p,DetectorType.CTOF,0);
-                    delta_t = abs(p.getVertexTime(DetectorType.CTOF, 0, pid)-startTime);
+                    sigma = EBUtil.getDetTimingResolution(p.getHit(DetectorType.CTOF,0),ccdb);
+                    delta_t = p.getVertexTime(DetectorType.CTOF, 0, pid)-startTime;
                 }
                 else if (p.hasHit(DetectorType.FTOF,3)==true) {
-                    sigma = 0.152; //EBUtil.getTimingResolution(p,DetectorType.FTOF,3);
-                    delta_t = abs(p.getVertexTime(DetectorType.FTOF, 3, pid)-startTime);
+                    sigma = EBUtil.getDetTimingResolution(p.getHit(DetectorType.FTOF,3),ccdb);
+                    delta_t = p.getVertexTime(DetectorType.FTOF, 3, pid)-startTime;
                 }
-                if (sigma>0) q = pow((delta_t/sigma),2);
+                q = delta_t / sigma;
             }
 
             // neutrals:

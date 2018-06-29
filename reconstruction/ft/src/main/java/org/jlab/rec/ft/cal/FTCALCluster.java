@@ -162,17 +162,23 @@ public class FTCALCluster extends ArrayList<FTCALHit> {
 	}
 
 	public double getWidthX() {
-            double sigmaX = Math.sqrt(this.getX2() - Math.pow(this.getX(),2.)); 
+            double sigmaX2 = (this.getX2() - Math.pow(this.getX(),2.)); 
+            if(sigmaX2<0) sigmaX2=0;
+            double sigmaX = Math.sqrt(sigmaX2);
             return sigmaX;
 	}
 
 	public double getWidthY() {
-            double sigmaY = Math.sqrt(this.getY2() - Math.pow(this.getY(),2.)); 
+            double sigmaY2 = (this.getY2() - Math.pow(this.getY(),2.)); 
+            if(sigmaY2<0) sigmaY2=0;
+            double sigmaY = Math.sqrt(sigmaY2); 
             return sigmaY;
 	}
 
 	public double getRadius() {
-            double radius = Math.sqrt(this.getX2() - Math.pow(this.getX(),2.) + this.getY2() - Math.pow(this.getY(),2.));
+            double radius2 = (this.getX2() - Math.pow(this.getX(),2.) + this.getY2() - Math.pow(this.getY(),2.));
+            if(radius2<0) radius2=0;
+            double radius = Math.sqrt(radius2);
             return radius;
 	}
 

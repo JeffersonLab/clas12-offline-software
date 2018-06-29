@@ -418,21 +418,24 @@ public class EvioHipoEvent {
         
         HipoDataBank hipoADC = (HipoDataBank) hipoEvent.createBank("ECAL::adc",nrows);
         HipoDataBank hipoTDC = (HipoDataBank) hipoEvent.createBank("ECAL::tdc",nrows);
-        
+       
+        final float tdc2ns = 0.02345f;
+
         int counter = 0;
         if(bankPCAL!=null){
             for(int i = 0; i < bankPCAL.rows(); i++){
                 hipoADC.setByte("sector",     counter, (byte)  bankPCAL.getInt("sector",i));
                 hipoADC.setByte("layer",      counter, (byte)  bankPCAL.getInt("view",i));
                 hipoADC.setShort("component", counter, (short) bankPCAL.getInt("strip",i));
-                hipoADC.setByte("order", counter, (byte) 0);
-                hipoADC.setInt("ADC", counter, bankPCAL.getInt("ADC", i));
+                hipoADC.setByte("order",      counter, (byte) 0);
+                hipoADC.setInt("ADC",         counter, bankPCAL.getInt("ADC", i));
+                hipoADC.setFloat("time",      counter, (float) bankPCAL.getInt("TDC",i)*tdc2ns);
                 
                 hipoTDC.setByte("sector",     counter, (byte)  bankPCAL.getInt("sector",i));
                 hipoTDC.setByte("layer",      counter, (byte)  bankPCAL.getInt("view",i));
                 hipoTDC.setShort("component", counter, (short) bankPCAL.getInt("strip",i));
-                hipoTDC.setByte("order", counter, (byte) 2);
-                hipoTDC.setInt("TDC", counter, bankPCAL.getInt("TDC", i));
+                hipoTDC.setByte("order",      counter, (byte) 2);
+                hipoTDC.setInt("TDC",         counter, bankPCAL.getInt("TDC", i));
                 counter++;
             }
         }
@@ -444,14 +447,15 @@ public class EvioHipoEvent {
                 hipoADC.setByte("sector",     counter, (byte)  bankECAL.getInt("sector",i));
                 hipoADC.setByte("layer",      counter, (byte)  (view+stack*3));
                 hipoADC.setShort("component", counter, (short) bankECAL.getInt("strip",i));
-                hipoADC.setByte("order", counter, (byte) 0);
-                hipoADC.setInt("ADC", counter, bankECAL.getInt("ADC", i));
+                hipoADC.setByte("order",      counter, (byte) 0);
+                hipoADC.setInt("ADC",         counter, bankECAL.getInt("ADC", i));
+                hipoADC.setFloat("time",      counter, (float) bankECAL.getInt("TDC",i)*tdc2ns);
                 
                 hipoTDC.setByte("sector",     counter, (byte)  bankECAL.getInt("sector",i));
                 hipoTDC.setByte("layer",      counter, (byte)  (view+stack*3));
                 hipoTDC.setShort("component", counter, (short) bankECAL.getInt("strip",i));
-                hipoTDC.setByte("order", counter, (byte) 1);
-                hipoTDC.setInt("TDC", counter, bankECAL.getInt("TDC", i));                
+                hipoTDC.setByte("order",      counter, (byte) 1);
+                hipoTDC.setInt("TDC",         counter, bankECAL.getInt("TDC", i));                
                 
                 counter++;
             }
