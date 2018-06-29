@@ -1,12 +1,12 @@
-package org.jlab.rec.fvt.fmt.cluster;
+package org.jlab.rec.fmt.cluster;
 
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jlab.rec.fvt.fmt.Constants;
-import org.jlab.rec.fvt.fmt.hit.FittedHit;
-import org.jlab.rec.fvt.fmt.hit.Hit;
+import org.jlab.rec.fmt.Constants;
+import org.jlab.rec.fmt.hit.FittedHit;
+import org.jlab.rec.fmt.hit.Hit;
 
 
 /**
