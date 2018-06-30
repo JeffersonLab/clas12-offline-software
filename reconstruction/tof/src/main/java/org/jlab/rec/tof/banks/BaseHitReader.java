@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.utils.groups.IndexedTable;
 
 public class BaseHitReader {
 
@@ -204,7 +205,7 @@ public class BaseHitReader {
 
     }
 
-    public List<BaseHit> get_MatchedHits(DataEvent event, IMatchedHit MH) {
+    public List<BaseHit> get_MatchedHits(DataEvent event, IMatchedHit MH, double jitter, IndexedTable tdcconv, IndexedTable offsets) {
         List<BaseHit> finalHitList = new ArrayList<BaseHit>();
 
         Map<DetectorLocation, ArrayList<BaseHit>> hitMap = this.get_Hits(event,
@@ -218,7 +219,7 @@ public class BaseHitReader {
                 Map.Entry me = (Map.Entry) it.next();
                 ArrayList<BaseHit> hitList = (ArrayList<BaseHit>) me.getValue();
 
-                finalHitList.addAll(MH.MatchHits(hitList));
+                finalHitList.addAll(MH.MatchHits(hitList,jitter,tdcconv,offsets));
             }
         }
 
