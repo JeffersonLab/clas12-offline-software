@@ -14,12 +14,11 @@ services:
     name: FTEB
   - class: org.jlab.service.dc.DCHBEngine
     name: DCHB
-  - class: org.jlab.service.dc.DCTBEngine
-    name: DCTB
-  - class: org.jlab.service.ftof.FTOFEngine
-    name: FTOF
+  - class: org.jlab.service.ftof.FTOFHBEngine
+    name: FTOFHB
+  - class: org.jlab.service.ec.ECEngine
+    name: EC
   - class: org.jlab.rec.cvt.services.CVTReconstruction
-#  - class: org.jlab.rec.cvt.services.CVTCosmicsReconstruction
     name: CVT
   - class: org.jlab.service.ctof.CTOFEngine
     name: CTOF
@@ -32,10 +31,12 @@ services:
     name: LTCC
   - class: org.jlab.rec.rich.RICHEBEngine
     name: RICH
-  - class: org.jlab.service.ec.ECEngine
-    name: EC
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
+  - class: org.jlab.service.dc.DCTBEngine
+    name: DCTB
+  - class: org.jlab.service.ftof.FTOFTBEngine
+    name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
     name: EBTB
 configuration:
@@ -46,6 +47,10 @@ configuration:
     DCHB:
       torusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
       solenoidMap: Symm_solenoid_r601_phi1_z1201_2008.dat
+      useStartTime: "true"
+      constantsDBVariation: calib
+    DCTB:
+      constantsDBVariation: calib
 
 mime-types:
   - binary/data-hipo

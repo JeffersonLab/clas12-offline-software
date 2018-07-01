@@ -1,4 +1,4 @@
-package org.jlab.rec.fvt.fmt;
+package org.jlab.rec.fmt;
 
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
@@ -10,45 +10,36 @@ import org.jlab.geom.prim.Point3D;
  *
  */
 public class Constants {
-
-
-	public Constants() {
-
-	}
+	
 	public static final int FVT_Nlayers = 6;
-	public static final int FVT_Nstrips = 1024;// Number of strips
-        public static final int FVT_Halfstrips = 320; // In the middle of the FMT, 320 strips are split in two. 
-        public static final int FVT_Sidestrips =  (FVT_Nstrips -2*FVT_Halfstrips)/2;
+	public static int FVT_Nstrips ;// Number of strips
+        public static int FVT_Halfstrips ; // In the middle of the FMT, 320 strips are split in two. 
+        public static int FVT_Sidestrips ;
         
 	// units = cm
 	public static int MAX_NB_CROSSES = 30;
 	
-	public static double FVT_Pitch = 0.525/10.; //strip width
-	//public static double FVT_interstrip = 0.125/10.; //inter strip
-        public static final double FVT_YCentral = (double)FVT_Halfstrips*FVT_Pitch/2.;
-	//public static double FVT_PitchS = FVT_Pitch+FVT_interstrip;
-	public static double FVT_Interlayer = 1.190;
-	public static double FVT_Interlayer_offset = 0.20; // 3to4
-	public static double FVT_Z1stlayer = 30.2967; // z-distance between target center and strips of the first layer.
-	public static double FVT_Angle1stlayer = 19.*Math.PI/180.;
-	public static double FVT_Rmax = FVT_Pitch*(FVT_Halfstrips + 2*FVT_Sidestrips)/2.;
+	public static double FVT_Pitch; //strip width
+	public static double FVT_Interstrip ; //inter strip
+        public static double FVT_YCentral;
+	public static double FVT_Rmax;
         
-	public static double FVT_Beamhole = 4.2575;//Radius of the hole in the center for the beam.
-        public static double FVT_SigmaS = FVT_Pitch/Math.sqrt(12);
+	public static double FVT_Beamhole;//Radius of the hole in the center for the beam.
+        public static double FVT_SigmaS;
 
-        public static double[] FVT_Zlayer = new double[FVT_Nlayers]; //Give z-coordinate of the layer
-        public static double[] FVT_Alpha = new double[FVT_Nlayers]; //Give the rotation angle to apply
+        public static double[] FVT_Zlayer; //Give z-coordinate of the layer
+        public static double[] FVT_Alpha; //Give the rotation angle to apply
 
-        public static double[][] FVT_stripsXloc = new double[FVT_Nstrips][2]; //Give the local end-points x-coordinates of the strip segment
-        public static double[][] FVT_stripsYloc = new double[FVT_Nstrips][2]; //Give the local end-points y-coordinates of the strip segment
-        public static double[] FVT_stripsXlocref = new double[FVT_Nstrips]; //Give the local ref-points x-coordinates of the strip segment
-        public static double[] FVT_stripsYlocref = new double[FVT_Nstrips]; //Give the local ref-points y-coordinates of the strip segment
-        public static double[][][] FVT_stripsX = new double[FVT_Nlayers][FVT_Nstrips][2]; //Give the  end-points x-coordinates of the strip segment rotated in the correct frame for the layer
-        public static double[][][] FVT_stripsY = new double[FVT_Nlayers][FVT_Nstrips][2]; //Give the  end-points y-coordinates of the strip segment
+        public static double[][] FVT_stripsXloc; //Give the local end-points x-coordinates of the strip segment
+        public static double[][] FVT_stripsYloc; //Give the local end-points y-coordinates of the strip segment
+        public static double[] FVT_stripsXlocref; //Give the local ref-points x-coordinates of the strip segment
+        public static double[] FVT_stripsYlocref; //Give the local ref-points y-coordinates of the strip segment
+        public static double[][][] FVT_stripsX; //Give the  end-points x-coordinates of the strip segment rotated in the correct frame for the layer
+        public static double[][][] FVT_stripsY; //Give the  end-points y-coordinates of the strip segment
 
-        public static double[] FVT_stripslength = new double[FVT_Nstrips]; //Give the strip length
+        public static double[] FVT_stripslength; //Give the strip length
 
-        public static double hDrift = 0.5;
+        public static double hDrift;
 	
         private static double[] EFF_Z_OVER_A ;      // for ELOSS
         private static double[] _X0 ;         // for M.Scat.
@@ -65,18 +56,21 @@ public class Constants {
     public static synchronized void Load() {
 		if (areConstantsLoaded ) return;
 
-		FVT_Zlayer[0] = 30.2967;
-                FVT_Zlayer[1] = 31.4897;
-                FVT_Zlayer[2] = 32.6797;
-                FVT_Zlayer[3] = 34.0697;
-                FVT_Zlayer[4] = 35.2597;
-                FVT_Zlayer[5] = 36.4497;
-		for(int i=0;i<FVT_Nlayers;i++) { 
-			//FVT_Zlayer[i] = FVT_Z1stlayer+i*FVT_Interlayer;
-			FVT_Alpha[i] = (double) i*Math.PI/3.+FVT_Angle1stlayer;
-			
-		}
+		//CCDBConstantsLoader FVT_CCDB= new CCDBConstantsLoader();
+		//FVT_CCDB.Load(runNb);
+		FVT_Sidestrips =  (FVT_Nstrips -2*FVT_Halfstrips)/2;
+		FVT_YCentral = (double)FVT_Halfstrips*FVT_Pitch/2.;
+		FVT_Rmax = FVT_Pitch*(FVT_Halfstrips + 2*FVT_Sidestrips)/2.;
+		FVT_SigmaS = FVT_Pitch/Math.sqrt(12);
+		FVT_stripsXloc = new double[FVT_Nstrips][2]; 
+                FVT_stripsYloc = new double[FVT_Nstrips][2];
+                FVT_stripsXlocref = new double[FVT_Nstrips]; 
+                FVT_stripsYlocref = new double[FVT_Nstrips]; 
+                FVT_stripsX = new double[FVT_Nlayers][FVT_Nstrips][2];
+                FVT_stripsY = new double[FVT_Nlayers][FVT_Nstrips][2]; 
+                FVT_stripslength = new double[FVT_Nstrips]; 
 		
+                
 		for(int i=0;i<FVT_Nstrips;i++) { 
 			//Give the Y of the middle of the strip
 			if (i<512){
@@ -175,23 +169,8 @@ public class Constants {
         public static synchronized void set_RELPOS(double[] REL_POS) {
            _REL_POS = REL_POS;
         }
-        
-	public static void main(String[] args) {
-		Constants.Load();
-		
-		System.out.println(FVT_stripsX[0][662][0]+" "+FVT_stripsY[0][662][0]);
-		System.out.println(FVT_stripsX[0][662][1]+" "+FVT_stripsY[0][662][1]);
-		System.out.println(FVT_stripsX[1][564][0]+" "+FVT_stripsY[1][564][0]);
-		System.out.println(FVT_stripsX[1][564][1]+" "+FVT_stripsY[1][564][1]);
-		
-		Line3D l1 = new Line3D();
-		l1.setOrigin(new Point3D(FVT_stripsX[0][662][0],FVT_stripsY[0][662][0],FVT_Zlayer[0]));
-		l1.setEnd(new Point3D(FVT_stripsX[0][662][1],FVT_stripsY[0][662][1],FVT_Zlayer[0]));
-		Line3D l2 = new Line3D();
-		l2.setOrigin(new Point3D(FVT_stripsX[1][564][0],FVT_stripsY[1][564][0],FVT_Zlayer[1]));
-		l2.setEnd(new Point3D(FVT_stripsX[1][564][1],FVT_stripsY[1][564][1],FVT_Zlayer[1]));
-		
-		System.out.println(l1.distance(l2).midpoint().toString());
-	}
+
+       
+	
 		
 }

@@ -27,14 +27,14 @@ public class CallB {
            // x = 10+100*aRandom.nextDouble();
             //y= 10*aRandom.nextDouble();
             //z=200+200*aRandom.nextDouble();
-            x=31; y=0; z=300;
+            //x=31; y=0; z=300;
            // swim.Bfield(x, y, z, result);
-            System.out.println(result[0]+", "+result[1]+" , "+result[2]+" = ? ");
-            MagneticFields.getInstance().initializeMagneticFields();
-            MagneticFields.getInstance().setActiveField(MagneticFields.FieldType.COMPOSITEROTATED);
-            MagneticFields.getInstance().getActiveField().field((float)x, (float)y, (float)z, result);
-            System.out.println(result[0]+", "+result[1]+" , "+result[2]+"  "+
-                    MagneticFields.getInstance().getActiveField().getName());
+            //System.out.println(result[0]+", "+result[1]+" , "+result[2]+" = ? ");
+            //MagneticFields.getInstance().initializeMagneticFields();
+            //MagneticFields.getInstance().setActiveField(MagneticFields.FieldType.COMPOSITEROTATED);
+            //MagneticFields.getInstance().getActiveField().field((float)x, (float)y, (float)z, result);
+            //System.out.println(result[0]+", "+result[1]+" , "+result[2]+"  "+
+            //        MagneticFields.getInstance().getActiveField().getName());
         //}
     }
     public static void main(String[] args)  {

@@ -142,7 +142,7 @@ public class ECEngine extends ReconstructionEngine {
             bankC.setInt("coordW",   c,         clusters.get(c).getPeak(2).getCoord());
   
         }
-      
+     
         DataBank bankM = de.createBank("ECAL::moments", clusters.size());
         for(int c = 0; c < clusters.size(); c++){
             bankM.setFloat("distU", c, (float) clusters.get(c).clusterPeaks.get(0).getDistanceEdge());
@@ -226,7 +226,8 @@ public class ECEngine extends ReconstructionEngine {
             "/calibration/ec/timing",
             "/calibration/ec/time_jitter",
             "/calibration/ec/fadc_offset",
-            "/calibration/ec/fadc_global_offset"
+            "/calibration/ec/fadc_global_offset",
+            "/calibration/ec/global_gain_shift"
         };
         
         requireConstants(Arrays.asList(ecTables));

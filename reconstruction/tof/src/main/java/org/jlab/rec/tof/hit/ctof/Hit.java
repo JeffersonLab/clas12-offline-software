@@ -64,21 +64,19 @@ public class Hit extends AHit implements IGetCalibrationParams {
     }
 
     public void set_HitParameters(int superlayer,
-            long timeStamp,
+            double triggerPhase,
             IndexedTable constants0, 
             IndexedTable constants1, 
             IndexedTable constants2, 
             IndexedTable constants3, 
-            IndexedTable constants5, 
-            IndexedTable constants6) {
+            IndexedTable constants5) {
         /*
         0: "/calibration/ctof/attenuation"),
         1: "/calibration/ctof/effective_velocity"),
         2: "/calibration/ctof/time_offsets"),
         3: "/calibration/ctof/tdc_conv"),
         4: "/calibration/ctof/status"),
-        5: "/calibration/ctof/gain_balance"),
-        6: "/calibration/ctof/time_jitter"));
+        5: "/calibration/ctof/gain_balance"));
         */
         double pl = this.get_paddleLine().length();
 
@@ -115,7 +113,6 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double ADC_MIPErr = this.ADC_MIPUnc(constants5);
         double DEDX_MIP = this.DEDX_MIP();
         double ScinBarThickn = this.ScinBarThickn();
-        double triggerPhase  = this.calc_TriggerPhase(timeStamp, constants6);
 
         this.set_HitParams(superlayer, TW0U, TW0D, TW1U, TW1D, lambdaU,
                 lambdaD, yOffset, vU, vD, vUUnc, vDUnc, PEDU, PEDD, PEDUUnc,
@@ -276,15 +273,6 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
     @Override
     public double yOffset(IndexedTable tab) {
-        //double ccdbOffset = CCDBConstants.getYOFF()[this.get_Sector() - 1][this
-        //        .get_Panel() - 1][this.get_Paddle() - 1];
-//        double ccdbOffset =  tab.getDoubleValue("y_offset", this.get_Sector(),this.get_Panel(),this.get_Paddle());
-//        double shift = Constants.DYHL;
-//        if (this.get_Paddle() % 2 == 1) {
-//            shift = 0;
-//        }
-//        double paddleCenteringOffset = Constants.PCO;
-//        return ccdbOffset - shift + paddleCenteringOffset;
         return -(this.get_paddleLine().origin().z()+this.get_paddleLine().end().z())/2;
     }
 

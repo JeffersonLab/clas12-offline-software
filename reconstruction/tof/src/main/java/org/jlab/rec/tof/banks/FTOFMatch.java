@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.utils.groups.IndexedTable;
 
 public class FTOFMatch implements IMatchedHit {
 
@@ -13,7 +14,7 @@ public class FTOFMatch implements IMatchedHit {
     }
 
     @Override
-    public List<BaseHit> MatchHits(ArrayList<BaseHit> ADCandTDCLists) {
+    public List<BaseHit> MatchHits(ArrayList<BaseHit> ADCandTDCLists, double timeJitter, IndexedTable tdcConv, IndexedTable ADCandTDCOffsets) {
         ArrayList<BaseHit> matchLists = new ArrayList<BaseHit>();
 
         if (ADCandTDCLists != null) {
