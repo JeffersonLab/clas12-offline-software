@@ -795,17 +795,6 @@ public abstract class AHit implements Comparable<AHit> {
         }
 
     }
-
-    public double calc_TriggerPhase(long timestamp, IndexedTable table) {
-    // calculate the trigger time jitter correction
-        double period = table.getDoubleValue("period", 0,0,0);
-        int    phase  = table.getIntValue("phase", 0,0,0);
-        int    cycles = table.getIntValue("cycles", 0,0,0);
-        double triggerphase=0;
-        if(cycles > 0) triggerphase=period*((timestamp+phase)%cycles);
-//        System.out.println(period + " " + phase + " " + cycles + " " + timestamp + " " + triggerphase);
-        return triggerphase;
-    }
  
     /**
      *

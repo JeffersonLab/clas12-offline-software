@@ -240,6 +240,18 @@ public class FTOFEngine extends ReconstructionEngine {
         }
 
         rbc.appendFTOFBanks(event, hits, clusters, matchedClusters);
+//            if (event.hasBank("FTOF::adc")) {
+//                if (event.hasBank("FTOF::adc")) {
+//                    event.getBank("FTOF::adc").show();
+//                }
+//                if (event.hasBank("FTOF::tdc")) {
+//                    event.getBank("FTOF::tdc").show();
+//                }
+//                if (event.hasBank("FTOF::hits")) {
+//                    event.getBank("FTOF::hits").show();
+//                }
+//            }
+
 
         return true;
     }
@@ -252,6 +264,7 @@ public class FTOFEngine extends ReconstructionEngine {
 
         int counter = 0;
         String inputFile = "/Users/ziegler/Desktop/Work/Files/GEMC/out_gemc_orig.hipo";
+
         // String inputFile = args[0];
         // String outputFile = args[1];
 
@@ -266,7 +279,7 @@ public class FTOFEngine extends ReconstructionEngine {
         writer.open(outputFile);
 
         long t1 = 0;
-        while (reader.hasEvent()) {
+        while (reader.hasEvent() && counter<10) {
 
             counter++;
 
