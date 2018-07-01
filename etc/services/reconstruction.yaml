@@ -48,10 +48,8 @@ configuration:
       torusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
       solenoidMap: Symm_solenoid_r601_phi1_z1201_2008.dat
       useStartTime: "true"
-      geomDBVariation: may_2018_engineers
       constantsDBVariation: calib
     DCTB:
-      geomDBVariation: may_2018_engineers  
       constantsDBVariation: calib
 
 mime-types:
