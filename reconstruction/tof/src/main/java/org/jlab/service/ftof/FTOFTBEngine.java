@@ -3,12 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.jlab.rec.fvt.track;
+package org.jlab.service.ftof;
 
 /**
  *
  * @author ziegler
  */
-public class TrackMatcher {
+public class FTOFTBEngine extends FTOFEngine {
+    
+    public FTOFTBEngine() {
+        super("FTOFTB");
+    }
     
 }

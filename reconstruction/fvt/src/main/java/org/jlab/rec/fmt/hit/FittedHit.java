@@ -1,4 +1,4 @@
-package org.jlab.rec.fvt.fmt.hit;
+package org.jlab.rec.fmt.hit;
 
 
 /**

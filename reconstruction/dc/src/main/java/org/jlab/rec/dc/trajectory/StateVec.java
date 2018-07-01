@@ -50,19 +50,50 @@ public class StateVec extends Matrix {
     /**
      * 
      * @return the wire plane index in the series of planes used in the trajectory
-     */
-    public int get_planeIdx() {
-            return _planeIdx;
+     */  
+    public int getPlaneIdx() {
+        return _planeIdx;
     }
 
+    
     /**
      * Sets the wire plane index in the series of planes used in the trajectory
      * @param _planeIdx wire plane index in the series of planes used in the trajectory
      */
-    public void set_planeIdx(int planeIdx) {
-            this._planeIdx = planeIdx;
+    public void setPlaneIdx(int _planeIdx) {
+        this._planeIdx = _planeIdx;
+    }
+    
+    private double z;
+
+    public double getZ() {
+        return z;
     }
 
+    public void setZ(double z) {
+        this.z = z;
+    }
+    
+    private double b;
+
+    public double getB() {
+        return b;
+    }
+
+    public void setB(double b) {
+        this.b = b;
+    }
+    // KF projector
+    private double h;
+
+    public double getProjector() {
+        return h;
+    }
+
+    public void setProjector(double h) {
+        this.h = h;
+    }
+    
     /**
      * Sets the stateVec 
      *

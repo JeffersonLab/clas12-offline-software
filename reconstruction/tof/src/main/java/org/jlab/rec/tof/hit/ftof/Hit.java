@@ -27,9 +27,8 @@ import org.jlab.rec.ftof.Constants;
 import org.jlab.rec.tof.banks.ftof.HitReader;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.IGetCalibrationParams;
-import org.jlab.service.ftof.FTOFEngine;
-
 import eu.mihosoft.vrl.v3d.Vector3d;
+import org.jlab.service.ftof.FTOFHBEngine;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -103,7 +102,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double TW0L = this.TW01(constants3);
         double TW0R = this.TW02(constants3);
         double TW1L = this.TW11(constants3);
-        double TW1R = this.TW12(constants3);
+        double TW1R = this.TW12(constants3); 
         double lambdaL = this.lambda1(constants0);
         this.set_lambda1(lambdaL);
         this.set_lambda1Unc(this.lambda1Unc(constants0));
@@ -429,7 +428,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
     
     public static void main(String arg[]) throws IOException {
 
-        FTOFEngine rec = new FTOFEngine();
+        FTOFHBEngine rec = new FTOFHBEngine();
         rec.init();
         HitReader hrd = new HitReader();
 

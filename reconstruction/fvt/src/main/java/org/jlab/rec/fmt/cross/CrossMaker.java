@@ -1,10 +1,10 @@
-package org.jlab.rec.fvt.fmt.cross;
+package org.jlab.rec.fmt.cross;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jlab.rec.fvt.fmt.Constants;
-import org.jlab.rec.fvt.fmt.cluster.Cluster;
+import org.jlab.rec.fmt.Constants;
+import org.jlab.rec.fmt.cluster.Cluster;
 
 /**
  * Driver class to make fmt crosses
@@ -52,7 +52,6 @@ public class CrossMaker {
 					this_cross.set_Cluster2(outlayerclus);
 					
 					this_cross.set_CrossParams();
-					
 					//make arraylist
 					crosses.add(this_cross);
 

@@ -1,6 +1,5 @@
 package org.jlab.service.ftof;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,9 +21,7 @@ import org.jlab.rec.tof.cluster.ClusterFinder;
 import org.jlab.rec.tof.cluster.ftof.ClusterMatcher;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
-import org.jlab.service.dc.DCHBEngine;
 import org.jlab.geometry.prim.Line3d;
-import org.jlab.service.dc.DCTBEngine;
 
 /**
  *
@@ -33,8 +30,8 @@ import org.jlab.service.dc.DCTBEngine;
  */
 public class FTOFEngine extends ReconstructionEngine {
 
-    public FTOFEngine() {
-        super("FTOFRec", "carman, ziegler", "0.5");
+    public FTOFEngine(String name) {
+        super(name, "carman, ziegler", "1.0");
     }
 
     FTOFGeant4Factory geometry;
@@ -262,16 +259,12 @@ public class FTOFEngine extends ReconstructionEngine {
     
 
     public static void main(String arg[]) {
-
-//        DCHBEngine en0 = new DCHBEngine();
-//        en0.init();
-//        DCTBEngine en1 = new DCTBEngine();
-//        en1.init();
-        FTOFEngine en = new FTOFEngine();
+        FTOFHBEngine en = new FTOFHBEngine();
         en.init();
 
         int counter = 0;
-        String inputFile = "/Users/devita/clas_003050.1.hipo";
+        String inputFile = "/Users/ziegler/Desktop/Work/Files/GEMC/out_gemc_orig.hipo";
+
         // String inputFile = args[0];
         // String outputFile = args[1];
 
@@ -282,7 +275,7 @@ public class FTOFEngine extends ReconstructionEngine {
 
         HipoDataSync writer = new HipoDataSync();
         // Writer
-        String outputFile = "/Users/devita/clas_003050.1.rec.hipo";
+        String outputFile = "/Users/ziegler/Desktop/Work/Files/GEMC/out_gemc_orig_rec.hipo";
         writer.open(outputFile);
 
         long t1 = 0;
@@ -300,7 +293,7 @@ public class FTOFEngine extends ReconstructionEngine {
             //en0.processDataEvent(event);
             //en1.processDataEvent(event);
             en.processDataEvent(event);
-            //System.out.println("  EVENT " + counter);
+            System.out.println("  EVENT " + counter);
             //if (counter > 3066)
             //	break;
             // event.show();

@@ -33,12 +33,12 @@ public class TrajectorySurfaces {
         _DetectorPlanes = aDetectorPlanes;
     }
 
-    double FVT_Z1stlayer = 30.2967; // z-distance between target center and strips of the first layer.
-    double FVT_Interlayer = 1.190;
+    //double FVT_Z1stlayer = 30.2967; // z-distance between target center and strips of the first layer.
+    //double FVT_Interlayer = 1.190;
     public void LoadSurfaces(DCGeant4Factory dcDetector,
             FTOFGeant4Factory ftofDetector,
             ECGeant4Factory ecDetector,
-            PCALGeant4Factory pcalDetector) {
+            PCALGeant4Factory pcalDetector, double[] FVT_Interlayer) {
        
         int iw =0;
         
@@ -51,7 +51,9 @@ public class TrajectorySurfaces {
             this._DetectorPlanes.add(new ArrayList<Surface>());
             //add FMT
             for(int i=0;i<6;i++) { 
-                d = FVT_Z1stlayer+i*FVT_Interlayer;
+                //d = FVT_Z1stlayer+i*FVT_Interlayer;
+                d = FVT_Interlayer[i]/10.;
+                
                 this._DetectorPlanes.get(is).add(new Surface("FMT"+(index+1), index++, i+1, d, 0., 0., 1.));
             } 
             index=7; // end of MM + HTCC

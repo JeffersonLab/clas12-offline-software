@@ -1,13 +1,13 @@
-package org.jlab.rec.fvt.fmt.cross;
+package org.jlab.rec.fmt.cross;
 
 import java.util.ArrayList;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.rec.fvt.fmt.Constants;
-import org.jlab.rec.fvt.fmt.Geometry;
-import org.jlab.rec.fvt.fmt.cluster.Cluster;
-import org.jlab.rec.fvt.fmt.hit.FittedHit;
+import org.jlab.rec.fmt.Constants;
+import org.jlab.rec.fmt.Geometry;
+import org.jlab.rec.fmt.cluster.Cluster;
+import org.jlab.rec.fmt.hit.FittedHit;
 
 /**
  * The crosses are objects used to find tracks and are characterized by a 3-D point and a direction unit vector.

@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.jlab.rec.fvt.fmt.banks;
+package org.jlab.rec.fmt.banks;
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.rec.fvt.fmt.hit.Hit;
+import org.jlab.rec.fmt.hit.Hit;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
