@@ -145,7 +145,7 @@ public class FTEventBuilder {
                 track.setHodoscopeIndex(-1);
                 track.setTrackerIndex(-1);
                 particles.add(track);
-                responses.get(i).setAssociation(i);
+                responses.get(i).setAssociation(particles.size()-1);
             }
         }
         if (debugMode >= 1) {
