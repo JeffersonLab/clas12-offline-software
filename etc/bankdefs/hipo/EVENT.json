@@ -88,8 +88,8 @@
             {"name":"x",            "id":9,  "type":"float", "info":"X coordinate of the hit (cm)"},
             {"name":"y",            "id":10, "type":"float", "info":"Y coordinate of the hit (cm)"},
             {"name":"z",            "id":11, "type":"float", "info":"Z coordinate of the hit (cm)"},
-            {"name":"theta",        "id":12, "type":"float", "info":"Theta of the matched hit (deg)"},
-            {"name":"phi",          "id":13, "type":"float", "info":"Phi of the mathced hit (deg)"},
+            {"name":"theta",        "id":12, "type":"float", "info":"DEPRECATED, TO BE REMOVED.  Theta of the matched hit (deg)"},
+            {"name":"phi",          "id":13, "type":"float", "info":"DEPRECATED, TO BE REMOVED.  Phi of the mathced hit (deg)"},
             {"name":"dtheta",       "id":14, "type":"float", "info":"Expected Theta Resolution (deg)"},
             {"name":"dphi",         "id":15, "type":"float", "info":"Expected Phi Resolution (deg)"},
             {"name":"status",       "id":16, "type":"int16", "info":"hit status"}
@@ -272,8 +272,8 @@
             {"name":"x",            "id":9,  "type":"float", "info":"X coordinate of the hit (cm)"},
             {"name":"y",            "id":10, "type":"float", "info":"Y coordinate of the hit (cm)"},
             {"name":"z",            "id":11, "type":"float", "info":"Z coordinate of the hit (cm)"},
-            {"name":"theta",        "id":12, "type":"float", "info":"Theta of the matched hit (deg)"},
-            {"name":"phi",          "id":13, "type":"float", "info":"Phi of the mathced hit (deg)"},
+            {"name":"theta",        "id":12, "type":"float", "info":"DEPRECATED, TO BE REMOVED.  Theta of the matched hit (deg)"},
+            {"name":"phi",          "id":13, "type":"float", "info":"DEPRECATED, TO BE REMOVED.  Phi of the mathced hit (deg)"},
             {"name":"dtheta",       "id":14, "type":"float", "info":"Expected Theta Resolution (deg)"},
             {"name":"dphi",         "id":15, "type":"float", "info":"Expected Phi Resolution (deg)"},
             {"name":"status",       "id":16, "type":"int16", "info":"hit status"}
