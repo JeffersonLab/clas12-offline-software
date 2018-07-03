@@ -1,8 +1,8 @@
-package org.jlab.rec.fvt.fmt.hit;
+package org.jlab.rec.fmt.hit;
 
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.rec.fvt.fmt.Constants;
+import org.jlab.rec.fmt.Constants;
 
 /**
  * A  hit characterized by layer, sector, wire number, and Edep.  The ADC to time conversion has been done.

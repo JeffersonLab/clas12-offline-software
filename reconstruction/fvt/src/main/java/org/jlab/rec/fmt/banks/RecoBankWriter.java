@@ -3,13 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.jlab.rec.fvt.fmt.banks;
+package org.jlab.rec.fmt.banks;
 import java.util.List;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.fvt.fmt.cluster.Cluster;
-import org.jlab.rec.fvt.fmt.cross.Cross;
-import org.jlab.rec.fvt.fmt.hit.FittedHit;
+import org.jlab.rec.fmt.cluster.Cluster;
+import org.jlab.rec.fmt.cross.Cross;
+import org.jlab.rec.fmt.hit.FittedHit;
 /**
  *
  * @author ziegler
@@ -17,13 +17,7 @@ import org.jlab.rec.fvt.fmt.hit.FittedHit;
 public class RecoBankWriter {
     
         public DataBank fillFMTHitsBank(DataEvent event, List<FittedHit> hitlist) {
-        if (hitlist == null) {
-            return null;
-        }
-        if (hitlist.size() == 0) {
-            return null;
-        }
-
+        
         DataBank bank
                 = event.createBank("FMTRec::Hits", hitlist.size());
 
@@ -53,12 +47,6 @@ public class RecoBankWriter {
      * @return clusters bank
      */
     public DataBank fillFMTClustersBank(DataEvent event, List<Cluster> cluslist) {
-        if (cluslist == null) {
-            return null;
-        }
-        if (cluslist.size() == 0) {
-            return null;
-        }
 
         DataBank bank = event.createBank("FMTRec::Clusters", cluslist.size());
         int[] hitIdxArray = new int[5];
@@ -104,13 +92,7 @@ public class RecoBankWriter {
      * @return crosses bank
      */
     public DataBank fillFMTCrossesBank(DataEvent event, List<Cross> crosses) {
-        if (crosses == null) {
-            return null;
-        }
-        if (crosses.get(0).size() == 0) {
-            return null;
-        }
-
+        
         DataBank bank = event.createBank("FMTRec::Crosses", crosses.size());
 
         int index = 0;

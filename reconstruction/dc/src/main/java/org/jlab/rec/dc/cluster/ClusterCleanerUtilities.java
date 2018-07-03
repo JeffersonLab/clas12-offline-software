@@ -370,6 +370,7 @@ public class ClusterCleanerUtilities {
             newhitPos.set_DocaErr(hit.get_DocaErr());
             newhitPos.setT0(hit.getT0()); 
             newhitPos.set_Beta(hit.get_Beta()); 
+            newhitPos.set_DeltaTimeBeta(hit.get_DeltaTimeBeta());
             newhitPos.setTStart(hit.getTStart());
             newhitPos.setTProp(hit.getTProp());
             newhitPos.setTFlight(hit.getTFlight());
@@ -388,7 +389,8 @@ public class ClusterCleanerUtilities {
             newhitNeg.set_Doca(hit.get_Doca());
             newhitNeg.set_DocaErr(hit.get_DocaErr());
             newhitNeg.setT0(hit.getT0()); 
-            newhitNeg.set_Beta(hit.get_Beta()); 
+            newhitNeg.set_Beta(hit.get_Beta());  
+            newhitNeg.set_DeltaTimeBeta(hit.get_DeltaTimeBeta());
             newhitNeg.setTStart(hit.getTStart());
             newhitNeg.setTProp(hit.getTProp());
             newhitNeg.setTFlight(hit.getTFlight());

@@ -56,7 +56,8 @@ public class CTOFEngine extends ReconstructionEngine {
                     "/calibration/ctof/tdc_conv",
                     "/calibration/ctof/status",
                     "/calibration/ctof/gain_balance",
-                    "/calibration/ctof/time_jitter"
+                    "/calibration/ctof/time_jitter",
+                    "/calibration/ctof/fadc_offset"
                 };
         
         requireConstants(Arrays.asList(ftofTables));
@@ -113,7 +114,8 @@ public class CTOFEngine extends ReconstructionEngine {
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/tdc_conv"),
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/status"),
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/gain_balance"),
-            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/time_jitter"));
+            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/time_jitter"),
+            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/fadc_offset"));
 
         // 1) get the hits
         List<Hit> CTOFHits = hitRead.get_CTOFHits();
@@ -173,6 +175,13 @@ public class CTOFEngine extends ReconstructionEngine {
         }
         //rbc.appendCTOFBanks( event, hits, clusters);
         rbc.appendCTOFBanks(event, hits, null); // json file needs clusters...
+//        if(event.hasBank("CTOF::adc")) {
+//            if(event.hasBank("CTOF::adc")) event.getBank("CTOF::adc").show();
+//            if(event.hasBank("CTOF::tdc")) event.getBank("CTOF::tdc").show();
+//            if(event.hasBank("CTOF::rawhits")) event.getBank("CTOF::rawhits").show();
+//            if(event.hasBank("CTOF::hits")) event.getBank("CTOF::hits").show();
+//            if(event.hasBank("CVTRec::Tracks")) event.getBank("CVTRec::Tracks").show();
+//        }
         return true;
 
     }

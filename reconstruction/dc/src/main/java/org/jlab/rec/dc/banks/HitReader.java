@@ -14,6 +14,7 @@ import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.Constants;
+import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -91,7 +92,8 @@ public class HitReader {
      * @param event DataEvent
      */
     public void fetch_DCHits(DataEvent event, Clas12NoiseAnalysis noiseAnalysis, NoiseReductionParameters parameters,
-            Clas12NoiseResult results, double[][][][] T0, double[][][][] T0ERR, IndexedTable tab, IndexedTable tab2, DCGeant4Factory DcDetector,
+            Clas12NoiseResult results, IndexedTable tab, IndexedTable tab2, 
+            IndexedTable tab3, DCGeant4Factory DcDetector,
             double triggerPhase) {
 
         if (event.hasBank("DC::tdc") == false) {
@@ -151,11 +153,15 @@ public class HitReader {
         noiseAnalysis.clear();
 
         noiseAnalysis.findNoise(sector, superlayerNum, layerNum, wire, results);
-        
+         
         for (int i = 0; i < size; i++) {
-            if (wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
+            boolean passHit = true;
+            if(tab3!=null) {
+                if(tab3.getIntValue("status", sector[i], layer[i] ,wire[i])!=0)
+                    passHit=false;
+            }
+            if (passHit && wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
                 
-                double tStart = 0;
                 double timeCutMin = 0;
                 double timeCutMax = 0;
                 double timeCutLC = 0;
@@ -164,57 +170,41 @@ public class HitReader {
                 
                 switch (region) {
                     case 1:
-                        tStart = tab2.getIntValue("TStart", 0, region ,0);
                         timeCutMin = tab2.getIntValue("MinEdge", 0, region ,0);
                         timeCutMax = tab2.getIntValue("MaxEdge", 0, region ,0);
                         break;
                     case 2:
                         if(wire[i]<=56) {
-                            tStart = tab2.getIntValue("TStart", 0, region ,1);  
                             timeCutLC = tab2.getIntValue("LinearCoeff", 0, region ,1); 
                             timeCutMin = tab2.getIntValue("MinEdge", 0, region ,1);
                             timeCutMax = tab2.getIntValue("MaxEdge", 0, region ,1);
                         }
                         if(wire[i]>56) {
-                            tStart = tab2.getIntValue("TStart", 0, region ,56); 
                             timeCutLC = tab2.getIntValue("LinearCoeff", 0, region ,56); 
                             timeCutMin = tab2.getIntValue("MinEdge", 0, region ,56);
                             timeCutMax = tab2.getIntValue("MaxEdge", 0, region ,56);
                         }
                         break;
                     case 3:
-                        tStart = tab2.getIntValue("TStart", 0, region ,0);
                         timeCutMin = tab2.getIntValue("MinEdge", 0, region ,0);
                         timeCutMax = tab2.getIntValue("MaxEdge", 0, region ,0);
                         break;
                 }
-                
-            //if (wire[i] != -1 && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
-                double T_0 = 0;
-                if (event.hasBank("MC::Particle") == false && event.getBank("RUN::config").getInt("run", 0)>100) {
-                    T_0 = this.get_T0(sector[i], superlayerNum[i], layerNum[i], wire[i], T0, T0ERR)[0];
-                }
-                double T0Sub = smearedTime[i] - T_0 ;//- Constants.TSTARTEST; 
-                if(Constants.isUSETSTART()==true && event.hasBank("MC::Particle") == false) { 
-                    T0Sub-= tStart; 
-                }
-                // temporary until new ccdb constants are in
-                //double TMax = CCDBConstants.getTMAXSUPERLAYER()[sector[i]-1][superlayerNum[i]-1];
- //               double TMax = tab.getDoubleValue("tmax", sector[i], superlayerNum[i] ,0);
                 boolean passTimingCut = false;
                 
-                if(region ==1 && T0Sub>timeCutMin && T0Sub<timeCutMax)
+                if(region ==1 && smearedTime[i]>timeCutMin && smearedTime[i]<timeCutMax)
                     passTimingCut=true;
                 if(region ==2) {
+                    double Bscale = DCSwimmer.getTorScale()*DCSwimmer.getTorScale();
                     if(wire[i]>=56) {
-                        if(T0Sub>timeCutMin && T0Sub<timeCutMax+timeCutLC*(float)(112-wire[i]/56))
+                        if(smearedTime[i]>timeCutMin && smearedTime[i]<timeCutMax+timeCutLC*(double)(112-wire[i]/56)*Bscale)
                             passTimingCut=true;
                     } else {
-                        if(T0Sub>timeCutMin && T0Sub<timeCutMax+200+timeCutLC*(float)(56-wire[i]/56))
+                        if(smearedTime[i]>timeCutMin && smearedTime[i]<timeCutMax+timeCutLC*(double)(56-wire[i]/56)*Bscale)
                             passTimingCut=true;
                     }
                 }
-                if(region ==3 && T0Sub>timeCutMin && T0Sub<timeCutMax)
+                if(region ==3 && smearedTime[i]>timeCutMin && smearedTime[i]<timeCutMax)
                     passTimingCut=true;
                 
                 if(passTimingCut) { // cut on spurious hits
@@ -232,7 +222,7 @@ public class HitReader {
         this.set_DCHits(hits);
 
     }
-
+    
     /**
      * Reads HB DC hits written to the DC bank
      *
@@ -313,6 +303,7 @@ public class HitReader {
             hit.setTStart(T_Start);
             hit.setTProp(tProp[i]);
             hit.setTFlight(tFlight[i]);
+            hit.set_Beta(this.readBeta(event, trkID[i])); 
             
             double T0Sub = (double) (tdc[i] - tProp[i] - tFlight[i] - T_0);
             
@@ -341,7 +332,8 @@ public class HitReader {
             hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));            
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
-            hits.add(hit);
+            if(hit.get_Beta()>0.1 && hit.get_Beta()<=1.00) 
+                hits.add(hit);
         }
         
         this.set_HBHits(hits);
@@ -436,7 +428,8 @@ public class HitReader {
             } 
             if(hit.get_Time()<0)
                 hit.set_QualityFac(1);
-            
+            if(hit.get_Beta()>0.1 && hit.get_Beta()<=1.00) 
+                hits.add(hit);
             hits.add(hit);
             
         }
@@ -444,38 +437,20 @@ public class HitReader {
         this.set_TBHits(hits);
     }
 
-   
-    private double[] betaArray = new double[3];
     public double readBeta(DataEvent event, int trkId) {
         double _beta =1.0;
-        betaArray[0]=-1;
-        betaArray[1]=-1;
-        betaArray[2]=-1;
-        if (event.hasBank("RECHB::Event") == false) 
-            return 1.0;
-        DataBank bank = event.getBank("RECHB::Event");
-        double startTime = bank.getFloat("STTime", 0);
         
-        if (event.hasBank("FTOF::hits") == false) 
-            return 1.0;
+        if (event.hasBank("RECHB::Particle") == false || event.hasBank("RECHB::Track") == false ) 
+            return _beta;
+        DataBank bank = event.getBank("RECHB::Track");
         
-        DataBank bankftof = event.getBank("FTOF::hits");
         int rows = bank.rows();
         for (int i = 0; i < rows; i++) {
-            if(bankftof.getShort("trackid", i)==trkId) {
-                betaArray[bankftof.getByte("layer", i)-1]= bankftof.getFloat("pathLength", i)/(bankftof.getFloat("time", i)-startTime)/30.0 ;
+            if(bank.getByte("detector", i)==6 && bank.getShort("index", i)==trkId-1) {
+                _beta = event.getBank("RECHB::Particle").getFloat("beta", bank.getShort("pindex", i));
             }
         }
-        if(betaArray[0]==-1 && betaArray[1]==-1 && betaArray[2]!=-1)
-            _beta = betaArray[2];
-        if(betaArray[0]!=-1 && betaArray[1]==-1)
-            _beta = betaArray[0];
-        if(betaArray[1]!=-1)
-            _beta = betaArray[1];
-        if(_beta<0.)
-            _beta=0.01;
-        if(_beta>1.)
-            _beta=1;
+        
         return _beta;
     }
     
