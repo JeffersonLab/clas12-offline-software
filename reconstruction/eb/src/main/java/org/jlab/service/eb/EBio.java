@@ -9,6 +9,8 @@ import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioFactory;
 import org.jlab.clas.detector.*;
 
+import org.jlab.rec.eb.EBScalers;
+import org.jlab.rec.eb.EBCCDBConstants;
 
 /**
  *
@@ -20,14 +22,17 @@ public class EBio {
     public static int  TRACKS_TB = 2;
     
     // read header bank information 
-    public static DetectorHeader readHeader(DataEvent event) {
+    public static DetectorHeader readHeader(DataEvent event, EBScalers ebs, EBCCDBConstants ccdb) {
+        
         DetectorHeader dHeader = new DetectorHeader();
+       
         if(event.hasBank("RUN::config")==true){
             DataBank bank = event.getBank("RUN::config");
             dHeader.setRun(bank.getInt("run", 0));
             dHeader.setEvent(bank.getInt("event", 0));
             dHeader.setTrigger(bank.getLong("trigger", 0));
         }
+
         // helicity:
         if(event.hasBank("HEL::adc")) {
             final int helComponent=1;
@@ -42,20 +47,11 @@ public class EBio {
                 }
             }
         }
-        /*
-        // fcup:
-        if(event.hasBank("RAW::scaler")){
-            DataBank bank = event.getBank("RAW::scaler");
-            for(int k=0;k<bank.rows(); k++){
-                if(bank.getInt("channel",k)==0 && bank.getInt("slot",k)==0){
-                    int FCscaler = bank.getInt("value",k);
-                    // 30 Hz minus 0.5 ms dead for Helicity
-                    float trueFreq = FCscaler / (0.03333f - 0.0005f);
-                    //float beamCurrent = (trueFreq-100f)/906.2f;
-                }   
-            }   
-        }
-        */
+        
+        // check for new scaler data, write most recent one:
+        ebs.readScalers(event,ccdb);
+        dHeader.setBeamChargeGated((float)ebs.getIntegratedBeamCharge());
+        dHeader.setLiveTime((float)ebs.getLiveTime());
         return dHeader;
     }
     
