@@ -22,7 +22,7 @@ import org.jlab.rec.eb.EBScalers;
  */
 public class EBEngine extends ReconstructionEngine {
 
-    boolean dropBanks = true;
+    boolean dropBanks = false;
     boolean alreadyDroppedBanks = false;
 
     // static to store across events:

@@ -15,11 +15,7 @@ import org.jlab.rec.eb.EBCCDBEnum;
  * The EPICS equation for converting fcup scaler S to beam current I:
  *   I [nA] = (S [Hz] - offset ) / slope * attenuation;
  *
- * FIXME:  Use CCDB for:
- * FCUP_OFFSET/SLOPE/ATTEN
- * GATEINVERTED
- * CLOCKFREQ
- * CRATE/SLOT/CHAN
+ * FIXME:  Use CCDB for GATEINVERTED, CLOCKFREQ, CRATE/SLOT/CHAN
  *
  * @author baltzell
  */
@@ -60,11 +56,6 @@ public class EBScalers {
     private static final int CHAN_FCUP=32;
     private static final int CHAN_CLOCK=34;
 
-    // calibration constants for fcup              // units (EPICS name)
-    private static final double FCUP_SLOPE=906.2;  // 1/nC  (fcup_slope)
-    private static final double FCUP_OFFSET=250.0; // Hz    (fcup_offset)
-    private static final double FCUP_ATTEN=9.8088; // None  (beam_stop_atten)
-
     // whether the gating signal was inverted:
     private static final boolean GATEINVERTED=true;
 
@@ -76,7 +67,7 @@ public class EBScalers {
        
         // load the previous reading in case we don't find a new one:
         Reading reading=new Reading(BEAMCHARGE,INST_BEAMCHARGE,INST_LIVETIME);
-        
+       
         if (!event.hasBank(BANKNAME)) return reading;
 
         //double tiTimeStamp=0;
@@ -141,18 +132,23 @@ public class EBScalers {
         final double clockTime = (double)clock / CLOCKFREQ; // seconds
         final double delClockTime = (double)delClock / CLOCKFREQ; // seconds
 
+        // retrieve fcup calibrations:
+        final double fcup_slope =ccdb.getDouble(EBCCDBEnum.FCUP_slope);
+        final double fcup_offset=ccdb.getDouble(EBCCDBEnum.FCUP_offset);
+        final double fcup_atten =ccdb.getDouble(EBCCDBEnum.FCUP_atten);
+
         // update the latest calculations:
         INST_LIVETIME = (double)delGatedClock / delClock;
-        INST_BEAMCHARGE = ((double)delGatedFcup/delClockTime-FCUP_OFFSET) / FCUP_SLOPE;
-        BEAMCHARGE = ((double)gatedFcup/clockTime-FCUP_OFFSET) / FCUP_SLOPE;
+        INST_BEAMCHARGE = ((double)delGatedFcup/delClockTime-fcup_offset) / fcup_slope;
+        BEAMCHARGE = ((double)gatedFcup/clockTime-fcup_offset) / fcup_slope;
        
         // convert from average-nA to integrated-nC:
         INST_BEAMCHARGE *= delClockTime;
         BEAMCHARGE *= clockTime;
 
         // correct for beam stopper attenuation:
-        INST_BEAMCHARGE *= FCUP_ATTEN;
-        BEAMCHARGE *= FCUP_ATTEN;
+        INST_BEAMCHARGE *= fcup_atten;
+        BEAMCHARGE *= fcup_atten;
 
         if (DEBUG) {
             System.err.println("--------------------------------------------------------------------");
