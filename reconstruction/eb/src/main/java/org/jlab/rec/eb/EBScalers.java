@@ -12,12 +12,10 @@ import org.jlab.rec.eb.EBCCDBEnum;
  *
  * See https://logbooks.jlab.org/comment/14616
  *
- * The EPICS fcup_slope/offset is:
- *   I [nA] = (R [Hz] - offset ) / slope
- * So, offset has units Hz, and slope has units 1/nC
+ * The EPICS equation for converting fcup scaler S to beam current I:
+ *   I [nA] = (S [Hz] - offset ) / slope * attenuation;
  *
- * FIXME:  Use CCDB for translation table and fcup slope/offset.
- * Things to go in CCDB:
+ * FIXME:  Use CCDB for:
  * FCUP_OFFSET/SLOPE/ATTEN
  * GATEINVERTED
  * CLOCKFREQ
@@ -27,6 +25,17 @@ import org.jlab.rec.eb.EBCCDBEnum;
  */
 public class EBScalers {
 
+    public class Reading {
+        public double beamCharge=0;
+        public double instantBeamCharge=0;
+        public double liveTime=0;
+        Reading(double q,double instq,double lt) {
+            beamCharge = q;
+            instantBeamCharge = instq;
+            liveTime = lt;
+        }
+    }
+
     // integrated beam charge:
     private static double BEAMCHARGE=0;      // nC
 
@@ -35,10 +44,12 @@ public class EBScalers {
     private static double INST_LIVETIME=0;
 
     // previous scaler readings:
-    private static int PREV_FCUP=-1;         // Counts
-    private static int PREV_CLOCK=-1;        // Counts
-    private static int PREV_GATEDFCUP=-1;    // Counts
-    private static int PREV_GATEDCLOCK=-1;   // Counts
+    private static int PREV_FCUP=-1;           // counts
+    private static int PREV_CLOCK=-1;          // counts
+    private static int PREV_GATEDFCUP=-1;      // counts
+    private static int PREV_GATEDCLOCK=-1;     // counts
+    //private static double PREV_UNIXTIME=-1;    // seconds
+    //private static double PREV_TITIMESTAMP=-1; // seconds
 
     // the relevant crate/slot/channel numbers for the integrating scalers:
     private static final String BANKNAME="RAW::scaler";
@@ -52,39 +63,29 @@ public class EBScalers {
     // calibration constants for fcup              // units (EPICS name)
     private static final double FCUP_SLOPE=906.2;  // 1/nC  (fcup_slope)
     private static final double FCUP_OFFSET=250.0; // Hz    (fcup_offset)
-    private static final double FCUP_ATTEN=1.0;    // None  (beam_stop_atten)
+    private static final double FCUP_ATTEN=9.8088; // None  (beam_stop_atten)
 
     // whether the gating signal was inverted:
     private static final boolean GATEINVERTED=true;
 
-    private static final double CLOCKFREQ=1e6;// 125e6; // Hz
+    private static final double CLOCKFREQ=1e6; // Hz
 
     private static final boolean DEBUG=false;
 
-    /**
-     * Get most recent integrated beam charge (units=nC)
-     */
-    public synchronized double getIntegratedBeamCharge() {
-        return BEAMCHARGE;
-    }
-   
-    /**
-     * Get most recent "instantaneous" clock livetime.
-     */
-    public synchronized double getLiveTime() {
-        return INST_LIVETIME;
-    }
-
-    /**
-     * Get most recent "instantaneous" beam charge (units=nC)
-     */
-    public synchronized double getBeamCharge() {
-        return INST_BEAMCHARGE;
-    }
-
-    public synchronized boolean readScalers(DataEvent event,EBCCDBConstants ccdb) {
+    public synchronized Reading readScalers(DataEvent event,EBCCDBConstants ccdb) {
+       
+        // load the previous reading in case we don't find a new one:
+        Reading reading=new Reading(BEAMCHARGE,INST_BEAMCHARGE,INST_LIVETIME);
         
-        if (!event.hasBank(BANKNAME)) return false;
+        if (!event.hasBank(BANKNAME)) return reading;
+
+        //double tiTimeStamp=0;
+        //double unixTime=0;
+        //if (event.hasBank("RUN::config")) {
+        //    tiTimeStamp = (double)event.getBank("RUN::config").getLong("timestamp",0);
+        //    unixTime  = (double)event.getBank("RUN::config").getInt("unixtime",0);
+        //    tiTimeStamp *= 4/1e9; // 4-ns cycles, convert to seconds
+        //}
 
         int fcup=-1;
         int clock=-1;
@@ -121,7 +122,7 @@ public class EBScalers {
         }
 
         // sanity check on all readings:
-        if (gatedFcup<0 || fcup<0 || gatedClock<0 || clock<=0) return false;
+        if (gatedFcup<0 || fcup<0 || gatedClock<0 || clock<=0) return reading;
 
         // invert the gating:
         if (GATEINVERTED) {
@@ -134,56 +135,55 @@ public class EBScalers {
         final int delClock = clock - PREV_CLOCK;
         final int delGatedFcup = gatedFcup - PREV_GATEDFCUP;
         final int delGatedClock = gatedClock - PREV_GATEDCLOCK;
+        //final double delTimeStamp = tiTimeStamp - PREV_TITIMESTAMP;
         
         // convert clock counts to seconds:
-        final double time = (double)clock / CLOCKFREQ; // seconds
-        final double delTime = (double)delClock / CLOCKFREQ; // seconds
+        final double clockTime = (double)clock / CLOCKFREQ; // seconds
+        final double delClockTime = (double)delClock / CLOCKFREQ; // seconds
 
         // update the latest calculations:
         INST_LIVETIME = (double)delGatedClock / delClock;
-        INST_BEAMCHARGE = ((double)delGatedFcup/delTime-FCUP_OFFSET) / FCUP_SLOPE;
-        BEAMCHARGE = ((double)gatedFcup/time-FCUP_OFFSET) / FCUP_SLOPE;
+        INST_BEAMCHARGE = ((double)delGatedFcup/delClockTime-FCUP_OFFSET) / FCUP_SLOPE;
+        BEAMCHARGE = ((double)gatedFcup/clockTime-FCUP_OFFSET) / FCUP_SLOPE;
        
         // convert from average-nA to integrated-nC:
-        INST_BEAMCHARGE *= delTime;
-        BEAMCHARGE *= time;
+        INST_BEAMCHARGE *= delClockTime;
+        BEAMCHARGE *= clockTime;
 
         // correct for beam stopper attenuation:
         INST_BEAMCHARGE *= FCUP_ATTEN;
         BEAMCHARGE *= FCUP_ATTEN;
 
+        if (DEBUG) {
+            System.err.println("--------------------------------------------------------------------");
+            System.err.println("FCUP = "+fcup+"/"+gatedFcup+"/"+delFcup+"/"+delGatedFcup);
+            System.err.println("CLOCK= "+clock+"/"+gatedClock+"/"+delClock+"/"+delGatedClock);
+            System.err.println("TIME = "+delClockTime+"/"+clockTime);
+            System.err.println(String.format("Q    = %.3f/%.3f ",INST_BEAMCHARGE,BEAMCHARGE));
+            System.err.println(String.format("LT   = %.3f ",INST_LIVETIME));
+            System.err.println("--------------------------------------------------------------------");
+            System.err.println(INST_BEAMCHARGE / delClockTime);
+        }
+        
+        if (clock<PREV_CLOCK) {
+            System.out.println("EBScalers:  *** WARNING ***  Misordered RAW::Scaler");
+        }
+        
         // update the previous scaler readings:
         PREV_FCUP = fcup;
         PREV_CLOCK = clock;
         PREV_GATEDFCUP = gatedFcup;
         PREV_GATEDCLOCK = gatedClock;
-       
-        if (DEBUG) {
-            System.err.println("--------------------------------------------------------------------");
-            System.err.println("FCUP = "+fcup+"/"+gatedFcup+"/"+delFcup+"/"+delGatedFcup);
-            System.err.println("CLOCK= "+clock+"/"+gatedClock+"/"+delClock+"/"+delGatedClock);
-            System.err.println("TIME = "+delTime+"/"+time);
-            System.err.println(String.format("Q    = %.3f/%.3f ",INST_BEAMCHARGE,BEAMCHARGE));
-            System.err.println(String.format("LT   = %.3f ",INST_LIVETIME));
-            System.err.println("--------------------------------------------------------------------");
-        }
-
-        return true;
+        //PREV_TITIMESTAMP = tiTimeStamp;
+        //PREV_UNIXTIME = unixTime;
+      
+        // return the new readings:
+        reading.beamCharge=BEAMCHARGE;
+        reading.instantBeamCharge=INST_BEAMCHARGE;
+        reading.liveTime=INST_LIVETIME;
+        return reading;
     }
 
-/*
-    public class EBScaler {
-        public double Q=0;
-        public double INSTQ=0;
-        public double LT=0;
-        public void EBScaler(double q,double instq,double lt) {
-            Q=q;
-            INSTQ=instq;
-            LT=lt;
-        }
-    }
-    //EBScaler ebs=new EBScaler(BEAMCHARGE,INST_BEAMCHARGE,INST_LIVETIME);
-*/
 
 /*
     public static final enum ScalerSignal {
