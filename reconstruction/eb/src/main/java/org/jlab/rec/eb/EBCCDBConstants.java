@@ -24,6 +24,7 @@ public class EBCCDBConstants {
             "electron_sf",
             "photon_sf",
             "neutron_beta",
+            "cnd_neutron_beta",
             "pid",
             "ecal_matching",
             "ftof_matching",
@@ -260,6 +261,8 @@ public class EBCCDBConstants {
         loadDouble(EBCCDBEnum.CND_DR,"cnd_matching","dr",0,0,0);
         loadDouble(EBCCDBEnum.CND_DPHI,"cnd_matching","dphi",0,0,0);
         loadDouble(EBCCDBEnum.CND_DZ,"cnd_matching","dz",0,0,0);
+
+        loadDouble(EBCCDBEnum.CND_NEUTRON_maxBeta,"cnd_neutron_beta","neutron_beta",0,0,0);
 
         loadDouble(EBCCDBEnum.NEUTRON_maxBeta,"neutron_beta","neutron_beta",0,0,0);
         

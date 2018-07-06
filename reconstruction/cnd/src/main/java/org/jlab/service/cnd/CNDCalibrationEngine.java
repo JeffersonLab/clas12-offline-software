@@ -283,15 +283,15 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	                for(int i =0; i< size; i++) {
 	                        bank2.setInt("id",i, (i+1) );
 	                        bank2.setInt("nhits",i,  clusters_nhits.get(i) );
-				bank2.setByte("sector",i,  (byte)(1*clusters_sector.get(i)) );
-				bank2.setByte("layer",i,  (byte)(1*clusters_layer.get(i)) );
-				bank2.setInt("component",i,  clusters_component.get(i) );
+				            bank2.setByte("sector",i,  (byte)(1*clusters_sector.get(i)) );
+				            bank2.setByte("layer",i,  (byte)(1*clusters_layer.get(i)) );
+				            bank2.setInt("component",i,  clusters_component.get(i) );
 	                        bank2.setFloat("energy",i,   (float)(1.0*clusters_energysum.get(i)) );
 	                        bank2.setFloat("x",i,   (float)(1.0*clusters_x.get(i)) );
 	                        bank2.setFloat("y",i,   (float)(1.0*clusters_y.get(i)) );
 	                        bank2.setFloat("z",i,   (float)(1.0*clusters_z.get(i)) );
 	                        bank2.setFloat("time",i,   (float)(1.0*clusters_time.get(i)) );
-				bank2.setInt("status",i,  clusters_status.get(i) );
+				            bank2.setInt("status",i,  clusters_status.get(i) );
 	                }
 	                event.appendBanks(bank2);
 	        }
