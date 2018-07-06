@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.ECGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
@@ -25,7 +24,7 @@ public class DCEngine extends ReconstructionEngine {
     FTOFGeant4Factory ftofDetector;
     ECGeant4Factory ecDetector;
     PCALGeant4Factory pcalDetector; 
-    double[] FVT_Interlayer = new double[6];
+    org.jlab.rec.fmt.Geometry fmtDetector;
     TrajectorySurfaces tSurf;
     String clasDictionaryPath ;
     String variationName;
@@ -137,19 +136,13 @@ public class DCEngine extends ReconstructionEngine {
         ecDetector = new ECGeant4Factory(providerEC);
         pcalDetector = new PCALGeant4Factory(providerEC);
         
-        DatabaseConstantProvider providerFMT = new DatabaseConstantProvider(11, "default");
-        providerFMT.loadTable("/geometry/fmt/fmt_layer");
-        providerFMT.disconnect();
-        for (int i = 0; i < providerFMT.length("/geometry/fmt/fmt_layer/Layer"); i++) {
-
-            int layer = providerFMT.getInteger("/geometry/fmt/fmt_layer/Layer", i);
-            double Zl = providerFMT.getDouble("/geometry/fmt/fmt_layer/Z", i);
-            FVT_Interlayer[layer-1] = Zl;
-        }
+        fmtDetector = new org.jlab.rec.fmt.Geometry();
+        if(org.jlab.rec.fmt.Constants.areConstantsLoaded==false) 
+            org.jlab.rec.fmt.CCDBConstantsLoader.Load(11);
         System.out.println(" -- Det Geometry constants are Loaded " );
         // create the surfaces
         tSurf = new TrajectorySurfaces();
-        tSurf.LoadSurfaces(dcDetector, ftofDetector, ecDetector, pcalDetector, FVT_Interlayer);
+        tSurf.LoadSurfaces(dcDetector, ftofDetector, ecDetector, pcalDetector, org.jlab.rec.fmt.Constants.FVT_Zlayer);
         
         // Get the constants for the correct variation
         String ccDBVar = this.getEngineConfigString("constantsDBVariation");

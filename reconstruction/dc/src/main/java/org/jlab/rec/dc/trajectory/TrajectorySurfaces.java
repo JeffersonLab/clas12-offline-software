@@ -52,7 +52,7 @@ public class TrajectorySurfaces {
             //add FMT
             for(int i=0;i<6;i++) { 
                 //d = FVT_Z1stlayer+i*FVT_Interlayer;
-                d = FVT_Interlayer[i]/10.;
+                d = FVT_Interlayer[i];
                 
                 this._DetectorPlanes.get(is).add(new Surface("FMT"+(index+1), index++, i+1, d, 0., 0., 1.));
             } 
