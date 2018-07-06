@@ -72,7 +72,7 @@ public class TaggerResponse {
     }
  
     public Point3D getPositionWidth(){
-        return this.hitPosition;
+        return this.hitWidth;
     }
     
     public void setPositionWidth(double x, double y, double z){
@@ -112,6 +112,7 @@ public class TaggerResponse {
                 ft.setTime(time);
                 ft.setHitIndex(row);
                 ft.setPosition(x, y, z);
+                ft.setPositionWidth(dx, dy, 0);
 
                 ft.getDescriptor().setType(type);
 

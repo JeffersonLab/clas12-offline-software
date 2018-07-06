@@ -12,6 +12,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.clas.detector.CherenkovResponse;
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
+import org.jlab.rec.eb.EBScalers;
 
 /**
  *
@@ -23,6 +24,9 @@ public class EBEngine extends ReconstructionEngine {
 
     boolean dropBanks = false;
     boolean alreadyDroppedBanks = false;
+
+    // static to store across events:
+    static EBScalers ebScalers = new EBScalers();
 
     // output banks:
     String eventBank        = null;
@@ -67,7 +71,7 @@ public class EBEngine extends ReconstructionEngine {
 
         EBCCDBConstants ccdb = new EBCCDBConstants(run,this.getConstantsManager());
 
-        DetectorHeader head = EBio.readHeader(de);
+        DetectorHeader head = EBio.readHeader(de,ebScalers,ccdb);
 
         EventBuilder eb = new EventBuilder(ccdb);
         eb.initEvent(head); // clear particles
