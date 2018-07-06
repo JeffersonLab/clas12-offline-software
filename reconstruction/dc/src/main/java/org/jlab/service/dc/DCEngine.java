@@ -137,8 +137,8 @@ public class DCEngine extends ReconstructionEngine {
         pcalDetector = new PCALGeant4Factory(providerEC);
         
         fmtDetector = new org.jlab.rec.fmt.Geometry();
-        if(org.jlab.rec.fmt.Constants.areConstantsLoaded==false)
-            org.jlab.rec.fmt.Constants.Load();
+        if(org.jlab.rec.fmt.Constants.areConstantsLoaded==false) 
+            org.jlab.rec.fmt.CCDBConstantsLoader.Load(11);
         System.out.println(" -- Det Geometry constants are Loaded " );
         // create the surfaces
         tSurf = new TrajectorySurfaces();
