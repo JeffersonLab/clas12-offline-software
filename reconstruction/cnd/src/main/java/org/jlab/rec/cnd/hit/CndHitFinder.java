@@ -99,21 +99,29 @@ public class CndHitFinder {
 					HalfHit hit_d;
 					HalfHit hit_n;
 
-					if (hit1.Tprop() < hit2.Tprop()) 
+					double delta = 	(CalibrationConstantsLoader.LENGTH[lay-1]/10.)*((1./CalibrationConstantsLoader.EFFVEL[block-1][lay-1][0])-(1./CalibrationConstantsLoader.EFFVEL[block-1][lay-1][1]));
+					double deltaR;
+
+					if(hit1.Component()==1) deltaR = hit1.Tprop()-hit2.Tprop();
+					else deltaR = hit2.Tprop()-hit1.Tprop();
+
+					//System.out.println("sector "+block+" layer "+lay+" v L "+CalibrationConstantsLoader.EFFVEL[block-1][lay-1][0]+ " v R "+CalibrationConstantsLoader.EFFVEL[block-1][lay-1][1]+ " delta "+delta + " deltaR "+deltaR );
+
+					if (deltaR<delta) 
 					{
 						hit_d = hit1;
 						hit_n = hit2;
 						pad_d = i;
 						pad_n = j;
 					}
-					else if (hit1.Tprop() > hit2.Tprop()) 
+					else if (deltaR>delta) 
 					{                                                                         
 						hit_d = hit2;
 						hit_n = hit1;
 						pad_d = j;
 						pad_n = i;
 					}
-					else continue;	   // loose events where it's really not clear which paddle they hit in.		
+					else continue; 		
 
 					// Now calculate the time and energy at the upstream and downstream ends of the paddle the hit happened in:	
 					// attlen is in cm. need to convert to mm -> *10
