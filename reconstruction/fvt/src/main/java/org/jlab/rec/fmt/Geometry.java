@@ -45,7 +45,7 @@ public class Geometry {
 	
 	
     public int getClosestStrip(double x, double y, int layer) {
-        int closestStrip = 0;
+        int closestStrip = 99999;
         if(Math.sqrt(x*x+y*y)<Constants.FVT_Rmax && Math.sqrt(x*x+y*y)>Constants.FVT_Beamhole) {
 	
             double x_loc =  x*Math.cos(Constants.FVT_Alpha[layer-1])+ y*Math.sin(Constants.FVT_Alpha[layer-1]);
