@@ -28,11 +28,11 @@ public class ECEngine extends ReconstructionEngine {
     CLASDecoder     decoder = new CLASDecoder();
     
     Detector        ecDetector = null;
-    public Boolean       debug = false;
-    public Boolean       local = false;
-    public Boolean singleEvent = false;
-    public Boolean        isMC = false;
-    int                 calrun = 2;
+    public Boolean             debug = false;
+    public Boolean  isSingleThreaded = false;
+    public Boolean       singleEvent = false;
+    public Boolean              isMC = false;
+    int                       calrun = 2;
     
     public ECEngine(){
         super("EC","gavalian","1.0");
@@ -42,7 +42,7 @@ public class ECEngine extends ReconstructionEngine {
     public boolean processDataEvent(DataEvent de) {
            
         ECCommon.setDebug(debug);
-        ECCommon.setLocal(local);
+        ECCommon.setisSingleThreaded(isSingleThreaded);
         ECCommon.setSingleEvent(singleEvent);
 
         int runNo = 10;
@@ -76,7 +76,7 @@ public class ECEngine extends ReconstructionEngine {
 	    
         if(de instanceof HipoDataEvent) this.writeHipoBanks(de,ecStrips,ecPeaks,ecClusters);
         
-        if (local) {
+        if (isSingleThreaded) {
         	ECCommon.clearMyStructures();
         	getStrips().addAll(ecStrips);
         	getPeaks().addAll(ecPeaks);
@@ -244,9 +244,8 @@ public class ECEngine extends ReconstructionEngine {
         setPeakThresholds(18,20,15);
         setClusterCuts(7,15,20);
         
-        if (local) ECCommon.initHistos();
+        if (isSingleThreaded) ECCommon.initHistos();
         return true;
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

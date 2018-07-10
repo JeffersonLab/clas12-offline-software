@@ -32,9 +32,9 @@ public class ECCommon {
     public static float[]  clusterError = new float[3];
 	public static float[] clusterDeltaT = new float[3];
     public static Boolean         debug = false;
-    public static Boolean         local = false;
-    public static Boolean   singleEvent = false;
-    public static String      variation = "default";
+    public static Boolean isSingleThreaded = false;
+    public static Boolean      singleEvent = false;
+    public static String         variation = "default";
     
     private static double[] AtoE  = {15,10,10};   // SCALED ADC to Energy in MeV
     private static double[] AtoE5 = {15,5,5};     // For Sector 5 ECAL
@@ -69,8 +69,8 @@ public class ECCommon {
     	debug = val;
     }
     
-    public static void setLocal(boolean val) {
-    	local = val;
+    public static void setisSingleThreaded(boolean val) {
+        isSingleThreaded = val;
     }
     
     public static void setSingleEvent(boolean val) {
@@ -321,9 +321,9 @@ public class ECCommon {
                             pV.get(bV).redoPeakLine();
                             pW.get(bW).redoPeakLine();
                             ECCluster cluster = new ECCluster(pU.get(bU),pV.get(bV),pW.get(bW));
-                            if(local)H1_ecEng.get(sector,ind[startLayer-1]+1,0).fill(cluster.getHitPositionError());
+                            if(isSingleThreaded)H1_ecEng.get(sector,ind[startLayer-1]+1,0).fill(cluster.getHitPositionError());
                             if(cluster.getHitPositionError()<ECCommon.clusterError[ind[startLayer-1]]) {
-                                if(local)H1_ecEng.get(sector,ind[startLayer-1]+1,1).fill(cluster.getHitPositionError());
+                                if(isSingleThreaded)H1_ecEng.get(sector,ind[startLayer-1]+1,1).fill(cluster.getHitPositionError());
 //								double tU = cluster.getTime(0);
 //								double tV = cluster.getTime(1);
 //								double tW = cluster.getTime(2);
