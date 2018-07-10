@@ -29,6 +29,7 @@ public class ECEngine extends ReconstructionEngine {
     
     Detector        ecDetector = null;
     public Boolean       debug = false;
+    public Boolean       local = false;
     public Boolean singleEvent = false;
     public Boolean        isMC = false;
     int                 calrun = 2;
@@ -40,8 +41,9 @@ public class ECEngine extends ReconstructionEngine {
     @Override
     public boolean processDataEvent(DataEvent de) {
            
-        ECCommon.debug       = this.debug;
-        ECCommon.singleEvent = this.singleEvent;
+        ECCommon.setDebug(debug);
+        ECCommon.setLocal(local);
+        ECCommon.setSingleEvent(singleEvent);
 
         int runNo = 10;
         
@@ -74,23 +76,26 @@ public class ECEngine extends ReconstructionEngine {
 	    
         if(de instanceof HipoDataEvent) this.writeHipoBanks(de,ecStrips,ecPeaks,ecClusters);
         
-        ECCommon.myStrips.clear();   ECCommon.myStrips.addAll(ecStrips);
-        ECCommon.myPeaks.clear();    ECCommon.myPeaks.addAll(ecPeaks);
-        ECCommon.myClusters.clear(); ECCommon.myClusters.addAll(ecClusters);
+        if (local) {
+        	ECCommon.clearMyStructures();
+        	getStrips().addAll(ecStrips);
+        	getPeaks().addAll(ecPeaks);
+        	getClusters().addAll(ecClusters);
+        }
         
         return true;
     }
     
     public List<ECStrip> getStrips() {
-	    return ECCommon.myStrips;
+	    return ECCommon.getMyStrips();    		
     }
     
     public List<ECPeak> getPeaks() {
-	    return ECCommon.myPeaks;    
+	    return ECCommon.getMyPeaks();    
     }
     
     public List<ECCluster> getClusters() {
-	    return ECCommon.myClusters;    
+	    return ECCommon.getMyClusters();    
     }    
         
     private void writeHipoBanks(DataEvent de, 
@@ -239,7 +244,7 @@ public class ECEngine extends ReconstructionEngine {
         setPeakThresholds(18,20,15);
         setClusterCuts(7,15,20);
         
-        ECCommon.initHistos();
+        if (local) ECCommon.initHistos();
         return true;
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

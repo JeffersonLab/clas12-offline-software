@@ -32,6 +32,7 @@ public class ECCommon {
     public static float[]  clusterError = new float[3];
 	public static float[] clusterDeltaT = new float[3];
     public static Boolean         debug = false;
+    public static Boolean         local = false;
     public static Boolean   singleEvent = false;
     public static String      variation = "default";
     
@@ -62,6 +63,36 @@ public class ECCommon {
                 H1_ecEng.get(is,il,1).reset();
             }
         }       
+    }
+    
+    public static void setDebug(boolean val) {
+    	debug = val;
+    }
+    
+    public static void setLocal(boolean val) {
+    	local = val;
+    }
+    
+    public static void setSingleEvent(boolean val) {
+    	singleEvent = val;
+    }
+    
+    public static void clearMyStructures() {
+    	getMyStrips().clear();
+    	getMyPeaks().clear();
+    	getMyClusters().clear();
+    }
+    
+    public static List<ECStrip> getMyStrips() {
+    	return myStrips;
+    }
+    
+    public static List<ECPeak> getMyPeaks() {
+    	return myPeaks;
+    }
+    
+    public static List<ECCluster> getMyClusters() {
+    	return myClusters;
     }
     
     public static List<ECStrip>  initEC(DataEvent event, Detector detector, ConstantsManager manager, int run){
@@ -290,9 +321,9 @@ public class ECCommon {
                             pV.get(bV).redoPeakLine();
                             pW.get(bW).redoPeakLine();
                             ECCluster cluster = new ECCluster(pU.get(bU),pV.get(bV),pW.get(bW));
-                            if(debug)H1_ecEng.get(sector,ind[startLayer-1]+1,0).fill(cluster.getHitPositionError());
+                            if(local)H1_ecEng.get(sector,ind[startLayer-1]+1,0).fill(cluster.getHitPositionError());
                             if(cluster.getHitPositionError()<ECCommon.clusterError[ind[startLayer-1]]) {
-                                if(debug)H1_ecEng.get(sector,ind[startLayer-1]+1,1).fill(cluster.getHitPositionError());
+                                if(local)H1_ecEng.get(sector,ind[startLayer-1]+1,1).fill(cluster.getHitPositionError());
 //								double tU = cluster.getTime(0);
 //								double tV = cluster.getTime(1);
 //								double tW = cluster.getTime(2);
