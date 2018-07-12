@@ -30,5 +30,23 @@
             {"name":"indexLtdc",        "id":24, "type":"int16", "info":"index of the left tdc"},
             {"name":"indexRtdc",        "id":25, "type":"int16", "info":"index of the right tdc"}
         ]
-  } 
+  },
+  {
+  "bank": "CND::clusters",
+  "group": 20322,
+  "info": "reconstructed cluster info from CND and CTOF",
+  "items": [
+            {"name":"id",               "id":1,  "type":"int16",  "info":"id of the cluster"},
+            {"name":"sector",           "id":2,  "type":"int8",   "info":"sector of the cluster's seed hit"},
+            {"name":"layer",            "id":3,  "type":"int8",   "info":"layer of the cluster's seed hit"},
+            {"name":"component",        "id":4,  "type":"int16",  "info":"component of the cluster's seed hit"},
+            {"name":"nhits",            "id":5,  "type":"int16",  "info":"number of hits of the cluster"},
+            {"name":"energy",           "id":6,  "type":"float",  "info":"Sum of E dep (MeV) of the hits"},
+            {"name":"x",                "id":7,  "type":"float",  "info":"center of X coor (cm) of the hits"},
+            {"name":"y",                "id":8,  "type":"float",  "info":"center of Y coor (cm) of the hits"},
+            {"name":"z",                "id":9,  "type":"float",  "info":"center of Z coor (cm) of the hits"},
+            {"name":"time",             "id":10, "type":"float",  "info":"center of time (ns) of the hits"},
+            {"name":"status",           "id":11, "type":"int16",  "info":"cluster status"}
+        ]
+  }
 ]

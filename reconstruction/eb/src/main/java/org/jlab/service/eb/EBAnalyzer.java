@@ -16,6 +16,7 @@ import org.jlab.rec.eb.EBConstants;
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
 import org.jlab.rec.eb.EBUtil;
+import org.jlab.rec.eb.SamplingFractions;
 
 /**
  * @author gavalian
@@ -103,33 +104,80 @@ public class EBAnalyzer {
             event.getEventHeader().setStartTime(startTime);
             this.assignBetas(event);
             this.assignPids(event);
+            this.assignNeutralMomenta(event);
         }
 
     }
 
+    public void assignNeutralMomenta(DetectorEvent de) {
+        final int np = de.getParticles().size();
+        for (int ii=0; ii<np; ii++) {
+            if (de.getParticle(ii).getCharge() != 0) continue;
+            DetectorParticle p = de.getParticle(ii);
+            switch (abs(p.getPid())) {
+                case 2112:
+                    // neutron momentum defined by measured beta:
+                    final double beta = p.getBeta();
+                    final double mass = PDGDatabase.getParticleById(p.getPid()).mass();
+                    final double psquared = Math.pow(mass*beta,2) / (1-beta*beta);
+                    p.vector().setMag( Math.sqrt(psquared) );
+                    break;
+                case 22:
+                    if (p.hasHit(DetectorType.ECAL)) {
+                        // ECAL photon momentum defined by measured energy:
+                        p.vector().setMag(p.getEnergy(DetectorType.ECAL) /
+                            SamplingFractions.getMean(22,p,ccdb));
+                    }
+                    else if (p.hasHit(DetectorType.CND)) {
+                        // CND has no handle on photon energy, so we set momentum to zero,
+                        // and let user get direction from REC::Scintillator.x/y/z.
+                        p.vector().setMag(0.0);
+                    }
+                    break;
+                case 0:
+                    // neutrals without a good pid get zero momentum:
+                    p.vector().setMag(0.0);
+                    break;
+                default:
+                    throw new RuntimeException("assignNeutralMomentum:  not ready for pid="+p.getPid());
+            }
+        }
+    }
 
     public void assignBetas(DetectorEvent event){
 
-        final double start_time  = event.getEventHeader().getStartTime();
-        int np = event.getParticles().size();
+        final double startTime  = event.getEventHeader().getStartTime();
+        final int np = event.getParticles().size();
+
+        // NOTE:  this loop skips 0 because it's the trigger particle
         for(int i = 1; i < np; i++) {
+
             DetectorParticle p = event.getParticle(i);
-            double beta = 0.0;
+            double beta = -9999;
             if (p.getCharge()==0) {
-                beta = EBUtil.getNeutralBetaECAL(p,start_time);
+                if (p.hasHit(DetectorType.ECAL)) {
+                    // NOTE: prioritized by layer: PCAL, else Inner, else Outer
+                    beta = EBUtil.getNeutralBeta(p,DetectorType.ECAL,new int[]{1,4,7},startTime);
+                }
+                else if (p.hasHit(DetectorType.CND)) {
+                    beta = EBUtil.getNeutralBeta(p,DetectorType.CND,0,startTime);
+                }
+                else if (p.hasHit(DetectorType.FTCAL)) {
+                    beta = EBUtil.getNeutralBeta(p,DetectorType.FTCAL,0,startTime);
+                }
             }
             else {
                 if (p.hasHit(DetectorType.FTOF, 2)==true){
-                    beta = p.getBeta(DetectorType.FTOF,2, start_time);
+                    beta = p.getBeta(DetectorType.FTOF,2, startTime);
                 }
                 else if(p.hasHit(DetectorType.FTOF, 1)==true){
-                    beta = p.getBeta(DetectorType.FTOF, 1,start_time);
+                    beta = p.getBeta(DetectorType.FTOF, 1,startTime);
                 }
                 else if(p.hasHit(DetectorType.CTOF)==true){
-                    beta = p.getBeta(DetectorType.CTOF ,start_time);
+                    beta = p.getBeta(DetectorType.CTOF ,startTime);
                 }
                 else if(p.hasHit(DetectorType.FTOF, 3)==true){
-                    beta = p.getBeta(DetectorType.FTOF, 3,start_time);
+                    beta = p.getBeta(DetectorType.FTOF, 3,startTime);
                 }
             }
             p.setBeta(beta);
@@ -267,11 +315,11 @@ public class EBAnalyzer {
         public int bestPidFromTiming(DetectorParticle p) {
             int bestPid=0;
             if (p.getCharge() == 0) {
-                if (p.getBeta() < ccdb.getDouble(EBCCDBEnum.NEUTRON_maxBeta)) {
-                    bestPid=2112;
+                if (p.hasHit(DetectorType.ECAL)) {
+                    bestPid = p.getBeta()<ccdb.getDouble(EBCCDBEnum.NEUTRON_maxBeta) ? 2112 : 22;
                 }
-                else {
-                    bestPid=22;
+                else if (p.hasHit(DetectorType.CND)) {
+                    bestPid = p.getBeta()<ccdb.getDouble(EBCCDBEnum.CND_NEUTRON_maxBeta) ? 2112 : 0;
                 }
             }
             else {
@@ -305,11 +353,11 @@ public class EBAnalyzer {
          * Get a basic pid quality factor.
          */
         public double PIDQuality(DetectorParticle p, int pid, DetectorEvent event) {
-            double q=999;
+            double q=9999;
 
             // electron/positron:
             if (abs(pid)==11) {
-                q = pow(EBUtil.getSamplingFractionNSigma(p,ccdb),2);
+                q = SamplingFractions.getNSigma(pid,p,ccdb);
             }
 
             // based on timing:
@@ -318,22 +366,22 @@ public class EBAnalyzer {
                 double sigma = -1;
                 double delta_t = 99999;
                 if (p.hasHit(DetectorType.FTOF,2)==true) {
-                    sigma = 0.085; //EBUtil.getTimingResolution(p,DetectorType.FTOF,2);
-                    delta_t = abs(p.getVertexTime(DetectorType.FTOF, 2, pid)-startTime);
+                    sigma = EBUtil.getDetTimingResolution(p.getHit(DetectorType.FTOF,2),ccdb);
+                    delta_t = p.getVertexTime(DetectorType.FTOF, 2, pid)-startTime;
                 }
                 else if (p.hasHit(DetectorType.FTOF,1)==true) {
-                    sigma = 0.125; //EBUtil.getTimingResolution(p,DetectorType.FTOF,1);
-                    delta_t = abs(p.getVertexTime(DetectorType.FTOF, 1, pid)-startTime);
+                    sigma = EBUtil.getDetTimingResolution(p.getHit(DetectorType.FTOF,1),ccdb);
+                    delta_t = p.getVertexTime(DetectorType.FTOF, 1, pid)-startTime;
                 }
                 else if (p.hasHit(DetectorType.CTOF)==true) {
-                    sigma = 0.065; //EBUtil.getTimingResolution(p,DetectorType.CTOF,0);
-                    delta_t = abs(p.getVertexTime(DetectorType.CTOF, 0, pid)-startTime);
+                    sigma = EBUtil.getDetTimingResolution(p.getHit(DetectorType.CTOF,0),ccdb);
+                    delta_t = p.getVertexTime(DetectorType.CTOF, 0, pid)-startTime;
                 }
                 else if (p.hasHit(DetectorType.FTOF,3)==true) {
-                    sigma = 0.152; //EBUtil.getTimingResolution(p,DetectorType.FTOF,3);
-                    delta_t = abs(p.getVertexTime(DetectorType.FTOF, 3, pid)-startTime);
+                    sigma = EBUtil.getDetTimingResolution(p.getHit(DetectorType.FTOF,3),ccdb);
+                    delta_t = p.getVertexTime(DetectorType.FTOF, 3, pid)-startTime;
                 }
-                if (sigma>0) q = pow((delta_t/sigma),2);
+                q = delta_t / sigma;
             }
 
             // neutrals:

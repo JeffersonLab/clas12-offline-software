@@ -21,17 +21,15 @@ do
     fi
 done
 
+# download the default field maps, as defined in bin/env.sh:
+# (and duplicated in etc/services/reconstruction.yaml):
+source `dirname $0`/bin/env.sh
 if [ $downloadMaps == "yes" ]; then
   webDir=http://clasweb.jlab.org/clas12offline/magfield
   locDir=etc/data/magfield
   mkdir -p $locDir
   cd $locDir
-  for map in \
-    Full_torus_r251_phi181_z251_18Apr2018.dat \
-    Full_torus_r251_phi181_z251_08May2018.dat \
-    Symm_torus_r251_phi121_z251_2008.dat \
-    Symm_torus_r2501_phi16_z251_24Apr2018.dat \
-    Symm_solenoid_r601_phi1_z1201_2008.dat
+  for map in $SOLENOIDMAP $TORUSMAP
   do
     # -N only redownloads if timestamp/filesize is newer/different
     wget -N --no-check-certificate $webDir/$map
@@ -83,7 +81,7 @@ cp reconstruction/ltcc/target/clasrec-ltcc-1.0-SNAPSHOT.jar coatjava/lib/service
 cp reconstruction/htcc/target/clasrec-htcc-1.0-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/cnd/target/clas12detector-cnd-1.0-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/rich/target/clas12detector-rich-1.0-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/fvt/target/clas12detector-fvt-1.0-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/fvt/target/clas12detector-fmt-1.0-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/eb/target/clas12detector-eb-1.0-SNAPSHOT.jar coatjava/lib/services/
 
 echo "COATJAVA SUCCESSFULLY BUILT !"

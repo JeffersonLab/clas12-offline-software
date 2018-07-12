@@ -41,17 +41,18 @@ public class EngineProcessor {
     public void initDefault(){
         
         String[] names = new String[]{
-            "DCHB","DCTB","FTOF","EC","HTCC",
-            "EBHB","EBTB"
+            "DCHB","FTOFHB","EC","HTCC","EBHB",
+            "DCTB","FTOFTB","EBTB"
         };
         
         String[] services = new String[]{
             "org.jlab.service.dc.DCHBEngine",
-            "org.jlab.service.dc.DCTBEngine",
-            "org.jlab.service.ftof.FTOFEngine",
+            "org.jlab.service.ftof.FTOFEHBngine",
             "org.jlab.service.ec.ECEngine",
             "org.jlab.service.htcc.HTCCReconstructionService",
             "org.jlab.service.eb.EBHBEngine",
+            "org.jlab.service.dc.DCTBEngine",
+            "org.jlab.service.ftof.FTOFTBEngine",
             "org.jlab.service.eb.EBTBEngine"
         };
         
@@ -67,10 +68,10 @@ public class EngineProcessor {
         
         String[] names = new String[]{
             "FTCAL", "FTHODO", "FTEB",
-            "DCHB","DCTB","CVT",
-            "FTOF", "CTOF","CND",
-            "EC","HTCC","LTCC",
-            "EBHB","EBTB"
+            "DCHB","FTOFHB","EC",
+            "CVT","CTOF","CND",
+            "HTCC","LTCC","RICHEB","EBHB",
+            "DCTB","FTOFTB","EBTB"
         };
         
         String[] services = new String[]{
@@ -78,16 +79,18 @@ public class EngineProcessor {
             "org.jlab.rec.ft.hodo.FTHODOEngine",
             "org.jlab.rec.ft.FTEBEngine",
             "org.jlab.service.dc.DCHBEngine",
-            "org.jlab.service.dc.DCTBEngine",
+            "org.jlab.service.ftof.FTOFHBEngine",
+            "org.jlab.service.ec.ECEngine",
             "org.jlab.rec.cvt.services.CVTReconstruction",
-            "org.jlab.service.ftof.FTOFEngine",
             "org.jlab.service.ctof.CTOFEngine",
             //"org.jlab.service.cnd.CNDEngine",
             "org.jlab.service.cnd.CNDCalibrationEngine",
-            "org.jlab.service.ec.ECEngine",
             "org.jlab.service.htcc.HTCCReconstructionService",
             "org.jlab.service.ltcc.LTCCEngine",
+            "org.jlab.rec.rich.RICHEBEngine",
             "org.jlab.service.eb.EBHBEngine",
+            "org.jlab.service.dc.DCTBEngine",
+            "org.jlab.service.ftof.FTOFTBEngine",
             "org.jlab.service.eb.EBTBEngine"
         };
         

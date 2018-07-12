@@ -10,7 +10,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.service.dc.DCHBEngine;
 import org.jlab.service.dc.DCTBEngine;
 import org.jlab.service.ec.ECEngine;
-import org.jlab.service.ftof.FTOFEngine;
+import org.jlab.service.ftof.FTOFTBEngine;
 import org.jlab.service.htcc.HTCCReconstructionService;
 import org.jlab.service.ltcc.LTCCEngine;
 import org.jlab.service.eb.EBHBEngine;
@@ -36,7 +36,7 @@ public class EBReconstructionTest {
         engineEC.init();
         engineEC.processDataEvent(ev);
 
-        FTOFEngine engineFTOF = new FTOFEngine();
+        FTOFTBEngine engineFTOF = new FTOFTBEngine();
         engineFTOF.init();
         engineFTOF.processDataEvent(ev);
 

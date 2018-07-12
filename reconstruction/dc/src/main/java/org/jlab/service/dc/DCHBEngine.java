@@ -1,19 +1,11 @@
 package org.jlab.service.dc;
 
-import cnuphys.magfield.MagneticFields;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.base.GeometryFactory;
-import org.jlab.detector.geant4.v2.DCGeant4Factory;
-import org.jlab.geom.base.ConstantProvider;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
@@ -40,110 +32,28 @@ import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.RoadFinder;
 import org.jlab.rec.dc.trajectory.Road;
-import org.jlab.utils.CLASResources;
 import org.jlab.utils.groups.IndexedTable;
 
-public class DCHBEngine extends ReconstructionEngine {
+public class DCHBEngine extends DCEngine {
 
     String FieldsConfig="";
     AtomicInteger Run = new AtomicInteger(0);
-    DCGeant4Factory dcDetector;
-    String clasDictionaryPath ;
-    
+    //DCGeant4Factory dcDetector;
+    //String clasDictionaryPath ;
+
     public DCHBEngine() {
-        super("DCHB","ziegler","4.0");
-    }
-    
-    /**
-     * 
-     * determine torus and solenoid map name from yaml, else env, else crash
-     */
-    private void initializeMagneticFields() {
-        String torusMap=this.getEngineConfigString("torusMap");
-        String solenoidMap=this.getEngineConfigString("solenoidMap");
-        if (torusMap!=null) {
-            System.out.println("["+this.getName()+"] Torus Map chosen based on yaml: "+torusMap);
-        }
-        else {
-            torusMap = System.getenv("TORUSMAP");
-            if (torusMap!=null) {
-                System.out.println("["+this.getName()+"] Torus Map chosen based on env: "+torusMap);
-            }
-        }
-        if (torusMap==null) {
-            throw new RuntimeException("["+this.getName()+"]  Failed to find torus map name in yaml or env.");
-        }
-        if (solenoidMap!=null) {
-            System.out.println("["+this.getName()+"] solenoid Map chosen based on yaml: "+solenoidMap);
-        }
-        else {
-            solenoidMap = System.getenv("SOLENOIDMAP");
-            if (solenoidMap!=null) {
-                System.out.println("["+this.getName()+"] solenoid Map chosen based on env: "+solenoidMap);
-            }
-        }
-        if (solenoidMap==null) {
-            throw new RuntimeException("["+this.getName()+"]  Failed to find solenoid map name in yaml or env.");
-        }
-        String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";
-        try {
-            MagneticFields.getInstance().initializeMagneticFields(mapDir,torusMap,solenoidMap);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        super("DCHB");
     }
 
     @Override
     public boolean init() {
-
+        // Load cuts
         Constants.Load();
-     
-        this.initializeMagneticFields();
-
-        clasDictionaryPath= CLASResources.getResourcePath("etc");
-        String[]  dcTables = new String[]{
-            "/calibration/dc/signal_generation/doca_resolution",
-          //  "/calibration/dc/time_to_distance/t2d",
-            "/calibration/dc/time_to_distance/time2dist",
-         //   "/calibration/dc/time_corrections/T0_correction",
-            "/calibration/dc/time_corrections/timingcuts",
-            "/calibration/dc/time_jitter",
-        };
-
-        requireConstants(Arrays.asList(dcTables));
-        // Get the constants for the correct variation
-        this.getConstantsManager().setVariation("default");
-
-        // Load the geometry
-        String varname = CLASResources.getEnvironmentVariable("GEOMETRYDATABASEVARIATION");
-        String variationName = Optional.ofNullable(varname).orElse("default");
-
-        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, variationName);
-        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
-        
-        //MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.FULL_200);
-        //DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(800, "default");
-        //dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
-        //disconnect from database. Important to do this after loading tables.
-        //dbprovider.disconnect();
-        // T0-subtraction
-
-        //for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
-        //    int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
-        //    int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
-        //    int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
-        //    int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
-        //    double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
-        //    double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
-
-        //    T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0; 
-        //    T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
-        //}
+        super.initializeMagneticFields();
+        super.setStartTimeOption();
+        super.LoadTables();
         return true;
     }
-    
-    
     @Override
     public boolean processDataEvent(DataEvent event) {
             //setRunConditionsParameters( event) ;
@@ -164,23 +74,15 @@ public class DCHBEngine extends ReconstructionEngine {
             if(timeStamp==-1)
                 return true;
             
-            IndexedTable tabJ=this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_jitter");
+            IndexedTable tabJ=super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_jitter");
             double period = tabJ.getDoubleValue("period", 0,0,0);
             int    phase  = tabJ.getIntValue("phase", 0,0,0);
             int    cycles = tabJ.getIntValue("cycles", 0,0,0);
             
             if(cycles>0) triggerPhase=period*((timeStamp+phase)%cycles); 
-//            if(newRun>1000) {
-//                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
-//            } else {
-//                MagneticFields.getInstance().initializeMagneticFields(clasDictionaryPath+"/data/magfield/", TorusMap.SYMMETRIC);
-//            }
-            
-            TableLoader.FillT0Tables(newRun);
-            TableLoader.Fill(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist")); 
-            //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"));
-            //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d"));
-            //CCDBTables.add(this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_corrections/T0_correction"));
+
+            TableLoader.FillT0Tables(newRun, super.variationName);
+            TableLoader.Fill(super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist")); 
             
             double shift =0;
             if(newRun>1890) {
@@ -220,9 +122,11 @@ public class DCHBEngine extends ReconstructionEngine {
        //	event.appendBank(rbc.fillR3CrossfromMCTrack(event));
 
        HitReader hitRead = new HitReader();
-       hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, Constants.getT0(), Constants.getT0Err(), 
-               this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), 
-               this.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/timingcuts"), dcDetector, triggerPhase);
+       hitRead.fetch_DCHits(event, noiseAnalysis, parameters, results, 
+               super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), 
+               super.getConstantsManager().getConstants(newRun,"/calibration/dc/time_corrections/tdctimingcuts"), 
+               super.getConstantsManager().getConstants(newRun,"/calibration/dc/tracking/wire_status"), 
+               dcDetector, triggerPhase);
 
        List<Hit> hits = new ArrayList<Hit>();
        //I) get the hits
@@ -279,7 +183,7 @@ public class DCHBEngine extends ReconstructionEngine {
 
 
         CrossListFinder crossLister = new CrossListFinder();
-        CrossList crosslist = crossLister.candCrossLists(crosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
+        CrossList crosslist = crossLister.candCrossLists(crosses, false, super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
 
         //6) find the list of  track candidates
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("HitBased");
@@ -359,7 +263,7 @@ public class DCHBEngine extends ReconstructionEngine {
         List<Cross> pcrosses = crossMake.find_Crosses(segments, dcDetector);
 
         //
-        CrossList pcrosslist = crossLister.candCrossLists(pcrosses, false, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
+        CrossList pcrosslist = crossLister.candCrossLists(pcrosses, false, super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
 
         List<Track> mistrkcands =trkcandFinder.getTrackCands(pcrosslist, dcDetector, DCSwimmer.getTorScale());
         if(mistrkcands.size()>0) {    
@@ -389,7 +293,6 @@ public class DCHBEngine extends ReconstructionEngine {
                 return true;
         }
         rbc.fillAllHBBanks(event, rbc, fhits, clusters, segments, crosses, trkcands);
-
         return true;
     }
 
@@ -398,8 +301,10 @@ public class DCHBEngine extends ReconstructionEngine {
         //String inputFile = args[0];
         //String outputFile = args[1];
         //String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
-        //String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.ev.hipo";
-        String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/gemc_out_mu-_hipo/mu-_30nA_bg_out.ev.hipo";
+        //String inputFile="/Users/ziegler/Desktop/Work/validation/infiles/out_clas_004013.evio.filt.hipo";
+        //String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/gemc_out_mu-_hipo/mu-_30nA_bg_out.ev.hipo";
+         String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/straight.hipo";
+        //String inputFile="/Users/ziegler/Desktop/Work/Files/FMTDevel/gemc/pion_rec.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
         
         DCHBEngine en = new DCHBEngine();
@@ -416,8 +321,11 @@ public class DCHBEngine extends ReconstructionEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
         
-        //String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGD.hipo";
-        String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/rec_out_mu-_testDCjar_hipo/mu_30nA_bg_out.recn2.hipo";
+        //String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGDSt.hipo";
+       // String outputFile="/Users/ziegler/Desktop/Work/validation/outfiles/out_clas_004013.evio.filtRecookSinThread.hipo";
+        String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/straight_rec.hipo";
+        //String outputFile="/Users/ziegler/Desktop/Work/Files/FMTDevel/gemc/pion_recFMTClusNoTrkRefit.hipo";
+        
         writer.open(outputFile);
         TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
         long t1 = 0;
@@ -438,9 +346,9 @@ public class DCHBEngine extends ReconstructionEngine {
             writer.writeEvent(event);
             System.out.println("PROCESSED  EVENT "+event.getBank("RUN::config").getInt("event", 0));
            // event.show();
-            if (event.getBank("RUN::config").getInt("event", 0) > 11) {
-                break;
-            }
+            //if (event.getBank("RUN::config").getInt("event", 0) > 350) {
+            //    break;
+            //}
             
             
             // event.show();

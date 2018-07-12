@@ -372,6 +372,7 @@ public class ClusterFinder {
                         newhit.set_DocaErr(hit.get_DocaErr());
                         newhit.setT0(hit.getT0()); 
                         newhit.set_Beta(hit.get_Beta()); 
+                        newhit.set_DeltaTimeBeta(hit.get_DeltaTimeBeta());
                         newhit.setTStart(hit.getTStart());
                         newhit.setTProp(hit.getTProp());
                         newhit.setTFlight(hit.getTFlight());

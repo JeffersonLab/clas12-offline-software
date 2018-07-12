@@ -72,9 +72,10 @@ public class RecoBankWriter {
             bank.setShort("id", i, (short) hitlist.get(i).get_Id());
             bank.setShort("component", i, (short) hitlist.get(i).get_Paddle());
             int status = 0;
-            if (Integer.parseInt(hitlist.get(i).get_StatusWord()) == 1111) {
-                status = 1;
-            }
+//            if (Integer.parseInt(hitlist.get(i).get_StatusWord()) == 1111) {
+//                status = 1;
+//            }
+            status = Integer.parseInt(hitlist.get(i).get_StatusWord());
             bank.setShort("status", i, (short) status);
             bank.setFloat("energy", i, (float) hitlist.get(i).get_Energy());
             bank.setFloat("energy_unc", i, (float) hitlist.get(i).get_EnergyUnc());
@@ -94,10 +95,10 @@ public class RecoBankWriter {
             bank.setFloat("x_unc", i, 5);
             bank.setFloat("y_unc", i, (float) hitlist.get(i).get_yUnc());
             bank.setFloat("z_unc", i, 10);
-            //bank.setShort("adc_idx1",i, (short) hitlist.get(i).get_ADCbankHitIdx1()); 		
-            //bank.setShort("adc_idx2",i, (short) hitlist.get(i).get_ADCbankHitIdx2()); 		
-            //bank.setShort("tdc_idx1",i, (short) hitlist.get(i).get_TDCbankHitIdx1()); 		
-            //bank.setShort("tdc_idx2",i, (short) hitlist.get(i).get_TDCbankHitIdx2()); 
+            bank.setShort("adc_idx1",i, (short) hitlist.get(i).get_ADCbankHitIdx1()); 		
+            bank.setShort("adc_idx2",i, (short) hitlist.get(i).get_ADCbankHitIdx2()); 		
+            bank.setShort("tdc_idx1",i, (short) hitlist.get(i).get_TDCbankHitIdx1()); 		
+            bank.setShort("tdc_idx2",i, (short) hitlist.get(i).get_TDCbankHitIdx2()); 
             bank.setFloat("pathLength", i, (float) hitlist.get(i)
                     .get_TrkPathLen());
             bank.setFloat("pathLengthThruBar", i, (float) hitlist.get(i)

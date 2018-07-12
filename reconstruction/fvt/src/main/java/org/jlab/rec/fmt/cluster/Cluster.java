@@ -1,12 +1,10 @@
-package org.jlab.rec.fvt.fmt.cluster;
+package org.jlab.rec.fmt.cluster;
 
 import java.util.ArrayList;
-import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Line3D;
-import org.jlab.rec.fvt.fmt.Constants;
-import static org.jlab.rec.fvt.fmt.Constants.FVT_stripsYloc;
-import org.jlab.rec.fvt.fmt.hit.FittedHit;
-import org.jlab.rec.fvt.fmt.hit.Hit;
+import org.jlab.rec.fmt.Constants;
+import org.jlab.rec.fmt.hit.FittedHit;
+import org.jlab.rec.fmt.hit.Hit;
 
 /**
  *  A cluster in the fmt consists of an array of hits that are grouped together according to the algorithm of the ClusterFinder class
@@ -18,23 +16,15 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 	private static final long serialVersionUID = 9153980362683755204L;
 
 
-	private int _Sector;      							//	    sector[1...24]
-	private int _Layer;    	 							//	    layer [1,...8]
-	private int _Id;									//		cluster Id
+	private int _Sector;      							
+	private int _Layer;    	 							
+	private int _Id;									
 	private Line3D _StripSegment ;
-	private Point3D _DCTraj;  // DC trajectory intersection with FMT plane
-
-        public Point3D getDCTraj() {
-            return _DCTraj;
-        }
-
-        public void setDCTraj(Point3D _DCTraj) {
-            this._DCTraj = _DCTraj;
-        }
+	
 	/**
 	 * 
-	 * @param sector the sector (1...24)
-	 * @param superlayer the layer (1...8)
+	 * @param sector the sector 
+	 * @param layer the layer 
 	 * @param cid the cluster ID, an incremental integer corresponding to the cluster formed in the series of clusters
 	 */
 	public Cluster(int sector, int layer, int cid) {

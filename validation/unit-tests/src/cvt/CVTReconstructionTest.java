@@ -36,10 +36,10 @@ public class CVTReconstructionTest {
 		assertEquals(testEvent.hasBank("REC::Particle"), true);
 		assertEquals(testEvent.getBank("REC::Particle").rows(), 1);
 		assertEquals(testEvent.getBank("REC::Particle").getByte("charge", 0), 1);
-		assertEquals(isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("px", 0), -0.375), true);
-		assertEquals(isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("py", 0), 0.483), true);
-		assertEquals(isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("pz", 0), 0.674), true);
-		assertEquals(isWithinXPercent(30.0, testEvent.getBank("REC::Particle").getFloat("vz", 0), -1.39), true);
+		assertEquals(isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("px", 0), 1.9504), true);
+		assertEquals(isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("py", 0), 0.2741), true);
+		assertEquals(isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("pz", 0), 0.3473), true);
+		assertEquals(isWithinXPercent(30.0, testEvent.getBank("REC::Particle").getFloat("vz", 0), -1.95444), true);
 	}
 	
 	
