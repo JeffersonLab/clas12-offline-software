@@ -36,6 +36,10 @@ public class DCLayer extends AbstractLayer<DriftChamberWire> {
         super(DetectorId.DC, sectorId, superlayerId, layerId, false);
     }
     
+    public DCLayer(DetectorId id, int sectorId, int superlayerId, int layerId) {
+        super(id, sectorId, superlayerId, layerId, false);
+    }
+    
     /**
      * Returns the plane that bisects the the region containing the layer.
      * In nominal alignments, for sectors 0 and 3 this plane is in the xz-plane.

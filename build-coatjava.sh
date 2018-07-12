@@ -2,8 +2,8 @@
 
 usage='build-coatjava.sh [--nospotbugs] [--nomaps]'
 
-runSpotBugs="yes"
-downloadMaps="yes"
+runSpotBugs="no"
+downloadMaps="no"
 for xx in $@
 do
     if [ "$xx" == "--nospotbugs" ]
