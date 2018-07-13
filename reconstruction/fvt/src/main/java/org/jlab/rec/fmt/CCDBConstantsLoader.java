@@ -16,24 +16,22 @@ public class CCDBConstantsLoader {
     static boolean CSTLOADED = false;
 
     // static FTOFGeant4Factory geometry ;
-    private static DatabaseConstantProvider DB;
-    static DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(
-            10, "default");
+    
 
     public static final synchronized void Load(int runNb) {
         double[] EFF_Z_OVER_A;
         double[] EFFX0  ;
         double[] REL_POS;
 
-	
+	double RelTrkCentralShift=0;
+        if(runNb>100)
+            RelTrkCentralShift=1.9;
         // Load the tables
         
-        
+        DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(
+            10, "default");
         //load material budget:
         dbprovider.loadTable("/test/mvt/fmt_mat");
-        
-       
-
     //material budget
     //===============
         EFF_Z_OVER_A = new double[dbprovider.length("/test/mvt/fmt_mat/thickness")];
@@ -78,23 +76,24 @@ public class CCDBConstantsLoader {
 	Constants.FVT_Zlayer = new double[dbprovider.length("/geometry/fmt/fmt_layer_noshim/Z")];
         Constants.FVT_Alpha = new double[dbprovider.length("/geometry/fmt/fmt_layer_noshim/Z")];
 	for (int i = 0; i < dbprovider.length("/geometry/fmt/fmt_layer_noshim/Z"); i++) {
-	    Constants.FVT_Zlayer[i]=dbprovider.getDouble("/geometry/fmt/fmt_layer_noshim/Z", i)/10.;
+	    Constants.FVT_Zlayer[i]=dbprovider.getDouble("/geometry/fmt/fmt_layer_noshim/Z", i)/10.-RelTrkCentralShift;
 	    Constants.FVT_Alpha[i]=Math.toRadians(dbprovider.getDouble("/geometry/fmt/fmt_layer_noshim/Angle", i));
 	}
-	
+//	dbprovider.loadTable("/geometry/fmt/fmt_layer");
+//	
+//	Constants.FVT_Zlayer = new double[dbprovider.length("/geometry/fmt/fmt_layer/Z")];
+//        Constants.FVT_Alpha = new double[dbprovider.length("/geometry/fmt/fmt_layer/Z")];
+//	for (int i = 0; i < dbprovider.length("/geometry/fmt/fmt_layer/Z"); i++) {
+//	    Constants.FVT_Zlayer[i]=dbprovider.getDouble("/geometry/fmt/fmt_layer/Z", i)/10.-RelTrkCentralShift;
+//	    Constants.FVT_Alpha[i]=Math.toRadians(dbprovider.getDouble("/geometry/fmt/fmt_layer/Angle", i));
+//	}
 	dbprovider.disconnect();
 	 
         CSTLOADED = true;
         System.out
                 .println("SUCCESSFULLY LOADED FMT material budget CONSTANTS....");
-        setDB(dbprovider);
+        
     }
 
-    public static final synchronized DatabaseConstantProvider getDB() {
-        return DB;
-    }
-
-    public static final synchronized void setDB(DatabaseConstantProvider dB) {
-        DB = dB;
-    }
+    
 }

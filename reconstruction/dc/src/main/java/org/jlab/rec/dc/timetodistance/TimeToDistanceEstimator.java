@@ -35,11 +35,12 @@ public class TimeToDistanceEstimator {
     * @param SlyrIdx slyr index (0...5)
     * @return the distance to the wire in cm
     */
-    public double interpolateOnGrid(double B, double alpha, double t,  int SecIdx, int SlyrIdx) {
+    public double interpolateOnGrid(double Bsigned, double alpha, double t,  int SecIdx, int SlyrIdx) {
         // for a given value of B find the bin edges in Tesla and the corresponding index:
         // if(alpha==30)
         //	 alpha-=0.0001;
         //reset range
+        double B = Math.abs(Bsigned);
         if(B>3.0) {
             B=3.0;
         }
