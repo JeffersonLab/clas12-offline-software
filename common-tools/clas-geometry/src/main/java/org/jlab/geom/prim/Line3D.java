@@ -16,6 +16,7 @@ import org.jlab.geom.Showable;
  * @author gavalian
  */
 public final class Line3D implements Transformable, Showable {
+    
     private final Point3D boundPoint0 = new Point3D(); // the origin point
     private final Point3D boundPoint1 = new Point3D(); // the end point
 
@@ -176,6 +177,14 @@ public final class Line3D implements Transformable, Showable {
         return boundPoint0;
     }
 
+    public Vector3D originDir(){
+        Vector3D vec = new Vector3D();
+        vec.setXYZ(boundPoint0.x()-boundPoint1.x(),
+                boundPoint0.y()-boundPoint1.y(),
+                boundPoint0.z()-boundPoint1.z());
+        vec.unit();
+        return vec;
+    }
     /**
      * Returns the end point.
      *
