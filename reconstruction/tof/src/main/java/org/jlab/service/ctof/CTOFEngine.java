@@ -22,6 +22,9 @@ import org.jlab.rec.tof.cluster.Cluster;
 import org.jlab.rec.tof.cluster.ClusterFinder;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ctof.Hit;
+import org.jlab.geom.base.ConstantProvider;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
 
 /**
  *
@@ -46,7 +49,7 @@ public class CTOFEngine extends ReconstructionEngine {
         Constants.Load();
         // }
         rbc = new RecoBankWriter();
-        geometry = new CTOFGeant4Factory();
+        //geometry = new CTOFGeant4Factory();
         // CalibrationConstantsLoader.Load();
         // }
         String[]  ftofTables = new String[]{ 
@@ -64,8 +67,9 @@ public class CTOFEngine extends ReconstructionEngine {
        
        // Get the constants for the correct variation
         this.getConstantsManager().setVariation("default");
-        
-        geometry = new CTOFGeant4Factory();
+ 
+        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.CTOF);
+        geometry = new CTOFGeant4Factory(cp);
         return true;
     }
 

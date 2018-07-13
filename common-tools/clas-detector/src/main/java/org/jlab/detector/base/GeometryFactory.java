@@ -80,6 +80,10 @@ public class GeometryFactory {
             provider.loadTable("/geometry/ft/ftcal");
         }
         
+        if(type==DetectorType.CTOF){
+            provider.loadTable("/geometry/ctof/ctof");
+        }
+        
         if(type==DetectorType.BST){
             provider.loadTable("/geometry/cvt/svt/svt");
             provider.loadTable("/geometry/cvt/svt/region");
