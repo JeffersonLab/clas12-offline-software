@@ -209,9 +209,11 @@ public class DCGeantFactory implements Factory<DCDetector, DCSector, DCSuperlaye
                 rPoint = new Point3D();
                 lPlane.intersection(line, lPoint);
                 rPlane.intersection(line, rPoint);
-                botHex.add(lPoint);
-                topHex.add(rPoint);                
+            
+                botHex.add(rPoint);
+                topHex.add(lPoint);                
             }
+            
             DriftChamberWire wire = new DriftChamberWire(wireId, wireMid, wireLine, 
                     false, botHex, topHex);
             layer.addComponent(wire);
