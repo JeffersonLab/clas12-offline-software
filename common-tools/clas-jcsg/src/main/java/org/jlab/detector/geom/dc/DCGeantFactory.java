@@ -8,9 +8,7 @@ package org.jlab.detector.geom.dc;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.base.GeometryFactory;
+
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.DetectorId;
 import org.jlab.geom.base.ConstantProvider;
@@ -22,8 +20,10 @@ import org.jlab.geom.detector.dc.DCLayer;
 import org.jlab.geom.detector.dc.DCSector;
 import org.jlab.geom.detector.dc.DCSuperlayer;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
+import org.jlab.geom.prim.Vector3D;
 
 /**
  *
@@ -142,6 +142,24 @@ public class DCGeantFactory implements Factory<DCDetector, DCSector, DCSuperlaye
         
         DCLayer layer = new DCLayer(DetectorId.DC,sectorId, superlayerId, layerId);
         
+        int regionId = superlayerId/2;
+        
+        // Load constants
+        double dist2tgt =                cp.getDouble("/geometry/dc/region/dist2tgt",   regionId);
+        double midgap   =                cp.getDouble("/geometry/dc/region/midgap",     regionId);
+        double thtilt   = Math.toRadians(cp.getDouble("/geometry/dc/region/thtilt",     regionId));
+        double thopen   = Math.toRadians(cp.getDouble("/geometry/dc/region/thopen",     regionId));
+        double xdist    =                cp.getDouble("/geometry/dc/region/xdist",      regionId);
+        double d_layer  =                cp.getDouble("/geometry/dc/superlayer/wpdist", superlayerId);
+        double thmin    = Math.toRadians(cp.getDouble("/geometry/dc/superlayer/thmin",  superlayerId));
+        // Quick Dirty fix for the stereo tilt first superlayer should be at -6 !
+        //
+        double thster   = -Math.toRadians(cp.getDouble("/geometry/dc/superlayer/thster", superlayerId));
+        int numWires    =                cp.getInteger("/geometry/dc/layer/nsensewires", 0);
+        
+        Plane3D lPlane = new Plane3D();
+        Plane3D rPlane = new Plane3D();
+        
         for(int wireId = 0; wireId < 112; wireId++){            
             Vector3d vOrigin = dcDetector.getWireLeftend(superlayerId, layerId, wireId);
             Vector3d vEnd    = dcDetector.getWireRightend(superlayerId, layerId, wireId);            
@@ -154,10 +172,48 @@ public class DCGeantFactory implements Factory<DCDetector, DCSector, DCSuperlaye
             Point3D wireMid = new Point3D(vMidpoint.x, vMidpoint.y,vMidpoint.z);
             List<Point3D> botHex = new ArrayList();
             List<Point3D> topHex = new ArrayList();
-            for (int h=0; h<6; h++) {
-                botHex.add(new Point3D(0.0,0.0,0.0));
-                topHex.add(new Point3D(0.0,0.0,0.0));
+            
+            Vector3D originDir = wireLine.originDir();
+            Vector3D    endDir = wireLine.originDir();
+            
+            lPlane.set(wireLine.origin(), originDir);
+            rPlane.set(wireLine.end(), originDir);
+            double w_layer = Math.sqrt(3)*d_layer/Math.cos(thster);
+            Point3D lPoint = new Point3D();
+            Point3D rPoint = new Point3D();
+            
+            double gz = dist2tgt;
+            if (superlayerId%2 == 1) {
+                gz += midgap + 21*cp.getDouble("/geometry/dc/superlayer/wpdist", superlayerId-1);
             }
+            double gx = -gz*Math.tan(thtilt-thmin);
+            gz = -(3*d_layer); // <-- Build DC Layers in local coordinates
+            
+            // Calculate the distance between the line of intersection of the two 
+            // end-plate planes and the z-axis
+            double xoff = dist2tgt*Math.tan(thtilt) - xdist/Math.sin(Math.PI/2-thtilt);
+            double mx = gx + midpointXOffset(layerId, w_layer);
+            double mz = gz + (layerId + 1)*(3*d_layer);
+            double wx = mx + wireId*2*w_layer;
+            double wz = mz;
+            
+            for (int h=0; h<6; h++) {
+                double hexRadiusX = w_layer*Math.sqrt(5)*0.5;
+                double hexRadiusZ = d_layer*2;
+                double hx = wireMid.x() + hexRadiusX*Math.sin(Math.toRadians(60*h));
+                double hz = wireMid.z() - hexRadiusZ*Math.cos(Math.toRadians(60*h));
+                Line3D line = new Line3D(0, 1000, 0, 0, -1000, 0);
+                line.rotateZ(thster);
+                line.translateXYZ(hx, 0, hz);
+                lPoint = new Point3D();
+                rPoint = new Point3D();
+                lPlane.intersection(line, lPoint);
+                rPlane.intersection(line, rPoint);
+            
+                botHex.add(rPoint);
+                topHex.add(lPoint);                
+            }
+            
             DriftChamberWire wire = new DriftChamberWire(wireId, wireMid, wireLine, 
                     false, botHex, topHex);
             layer.addComponent(wire);
@@ -165,6 +221,13 @@ public class DCGeantFactory implements Factory<DCDetector, DCSector, DCSuperlaye
         return layer;
     }
 
+    protected static double midpointXOffset(int layer, double w_layer) {        
+        // old, incorrect method:
+        return (1 + (layer%2))*w_layer;        
+        // new, correct method:
+        //return (3 - (layer%2))*w_layer;   // KEEP
+    }
+    
     @Override
     public String getType() {
         return "DC Factory";
