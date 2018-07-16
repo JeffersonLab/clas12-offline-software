@@ -55,6 +55,7 @@ mkdir -p coatjava/lib/services
 rm -rf ~/.m2/repository/org/hep/hipo
 rm -rf ~/.m2/repository/org/jlab
 
+unset CLAS12DIR
 mvn install # also runs unit tests
 if [ $? != 0 ] ; then echo "mvn install failure" ; exit 1 ; fi
 

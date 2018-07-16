@@ -58,4 +58,10 @@ public class ClasMath {
 		return newAngle;
 	}
 
+
+  public static boolean isWithinXPercent(double X, double val, double standard) {
+    if(val > (1.0 - (X/100.0))*standard && val < (1.0 + (X/100.0))*standard) return true;
+    return false;
+  }
+
 }

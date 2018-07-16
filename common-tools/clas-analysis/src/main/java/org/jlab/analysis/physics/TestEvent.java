@@ -1,4 +1,4 @@
-package events;
+package org.jlab.analysis.physics;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.hipo.HipoDataEvent;
