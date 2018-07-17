@@ -49,5 +49,41 @@
       <version>5.0-SNAPSHOT</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.jlab.clas</groupId>
+      <artifactId>clas-analysis</artifactId>
+      <version>5.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jlab.clas12.detector</groupId>
+      <artifactId>clas12detector-dc</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jlab.clas12.detector</groupId>
+      <artifactId>clas12detector-ec</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.jlab.clas12.detector</groupId>
+      <artifactId>tof</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.jlab.clas12.detector</groupId>
+      <artifactId>clasrec-htcc</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.jlab.clas12.detector</groupId>
+      <artifactId>clasrec-ltcc</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+
   </dependencies>
  </project>

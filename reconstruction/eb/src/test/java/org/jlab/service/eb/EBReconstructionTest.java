@@ -1,9 +1,10 @@
-package eb;
+package org.jlab.service.eb;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import events.TestEvent;
+import org.jlab.analysis.physics.TestEvent;
+import org.jlab.analysis.math.ClasMath;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -13,8 +14,6 @@ import org.jlab.service.ec.ECEngine;
 import org.jlab.service.ftof.FTOFTBEngine;
 import org.jlab.service.htcc.HTCCReconstructionService;
 import org.jlab.service.ltcc.LTCCEngine;
-import org.jlab.service.eb.EBHBEngine;
-import org.jlab.service.eb.EBTBEngine;
 
 /**
  *
@@ -56,7 +55,7 @@ public class EBReconstructionTest {
         engineEBTB.init();
         engineEBTB.processDataEvent(ev);
         
-        ev.show();
+        //ev.show();
     }
 
     /**
@@ -77,8 +76,8 @@ public class EBReconstructionTest {
         for (int ii=0; ii<bFrom.rows(); ii++) {
             int ref=bFrom.getInt(idxVarName,ii);
             if (ref>=bTo.rows() || ref<0) {
-                bFrom.show();
-                bTo.show();
+                //bFrom.show();
+                //bTo.show();
                 System.err.println(String.format(
                         "\bnhasValidRefs: failed on (%s0>%s) %d->%d\n",
                         bankNameFrom,bankNameTo,ii,ref));
@@ -90,6 +89,7 @@ public class EBReconstructionTest {
 
     @Test
     public void testEBReconstruction() {
+        System.setProperty("CLAS12DIR", "../../");
 
         DataEvent photonEvent = TestEvent.getECSector1PhotonEvent();
         processAllEngines(photonEvent);
@@ -100,6 +100,12 @@ public class EBReconstructionTest {
         assertEquals(photonEvent.hasBank("REC::Particle"), true);
         assertEquals(photonEvent.hasBank("REC::Calorimeter"), true);
         assertEquals(hasValidRefs(photonEvent,"REC::Calorimeter","REC::Particle","pindex"),true);
+        // additional EC reco. tests:
+        assertEquals(photonEvent.getBank("RECHB::Particle").rows(), 1);
+        assertEquals(ClasMath.isWithinXPercent(25.0, photonEvent.getBank("RECHB::Particle").getFloat("px", 0), 1.057), true);
+        assertEquals(photonEvent.getBank("RECHB::Particle").getFloat("py", 0) > -0.15, true);
+        assertEquals(photonEvent.getBank("RECHB::Particle").getFloat("py", 0) < 0.15, true);
+        assertEquals(ClasMath.isWithinXPercent(25.0, photonEvent.getBank("RECHB::Particle").getFloat("pz", 0), 2.266), true);
 
         DataEvent electronEvent = TestEvent.getDCSector1ElectronEvent();
         processAllEngines(electronEvent);
