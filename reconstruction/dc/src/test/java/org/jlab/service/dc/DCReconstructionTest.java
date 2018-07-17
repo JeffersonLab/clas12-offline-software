@@ -19,8 +19,6 @@ public class DCReconstructionTest {
   @Test
   public void testDCReconstruction() {
     System.setProperty("CLAS12DIR", "../../");
-    //System.setProperty("TORUSMAP", "Symm_torus_r2501_phi16_z251_24Apr2018.dat");
-    //System.setProperty("SOLENOIDMAP", "Symm_solenoid_r601_phi1_z1201_2008.dat");
 
     DataEvent testEvent = TestEvent.getDCSector1ElectronEvent();
 
@@ -47,7 +45,6 @@ public class DCReconstructionTest {
     assertEquals(testEvent.getBank("TimeBasedTrkg::TBTracks").getFloat("p0_y", 0) > -0.05, true);
     assertEquals(testEvent.getBank("TimeBasedTrkg::TBTracks").getFloat("p0_y", 0) < 0.05, true);
     assertEquals(ClasMath.isWithinXPercent(5.0, testEvent.getBank("TimeBasedTrkg::TBTracks").getFloat("p0_z", 0), 2.266), true);
-
   }
 
 }
