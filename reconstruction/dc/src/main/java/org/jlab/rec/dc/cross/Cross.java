@@ -352,7 +352,7 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
     
     public Point3D getCoordsInTiltedSector(double X, double Y, double Z) {
         double rx = X * Math.cos((this.get_Sector() - 1) * Math.toRadians(-60.)) - Y * Math.sin((this.get_Sector() - 1) * Math.toRadians(-60.));
-        double ry = Y * Math.sin((this.get_Sector() - 1) * Math.toRadians(-60.)) + Y * Math.cos((this.get_Sector() - 1) * Math.toRadians(-60.));
+        double ry = X * Math.sin((this.get_Sector() - 1) * Math.toRadians(-60.)) + Y * Math.cos((this.get_Sector() - 1) * Math.toRadians(-60.));
        
         double rtz = -rx * Math.sin(Math.toRadians(-25.)) + Z * Math.cos(Math.toRadians(-25.));
         double rtx = rx * Math.cos(Math.toRadians(-25.)) + Z * Math.sin(Math.toRadians(-25.));
