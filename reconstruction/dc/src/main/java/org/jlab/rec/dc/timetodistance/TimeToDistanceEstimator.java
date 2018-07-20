@@ -43,7 +43,7 @@ public class TimeToDistanceEstimator {
         if(B>3.0) {
             B=3.0;
         }
-
+        
         int binlowB  = this.getBIdx(B);
         int binhighB = binlowB + 1; 
 
