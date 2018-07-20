@@ -321,7 +321,7 @@ public class HitReader {
             hit.set_QualityFac(0);
             //hit.set_Doca(hit.get_TimeToDistance());
             //if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>CCDBConstants.getTMAXSUPERLAYER()[hit.get_Sector()-1][hit.get_Superlayer()-1] ) {
-            if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time() > constants1.getDoubleValue("tmax", hit.get_Sector(), hit.get_Superlayer(),0) ) {
+            if (hit.get_Doca() > hit.get_CellSize() ) {
                 //this.fix_TimeToDistance(this.get_CellSize());
                 hit.set_OutOfTimeFlag(true);
                 hit.set_QualityFac(2);
@@ -421,7 +421,7 @@ public class HitReader {
             hit.set_QualityFac(0);
             //hit.set_Doca(hit.get_TimeToDistance());
             //if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>CCDBConstants.getTMAXSUPERLAYER()[hit.get_Sector()-1][hit.get_Superlayer()-1]) {
-            if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>constants1.getDoubleValue("tmax", hit.get_Sector(), hit.get_Superlayer(),0) ) {   
+            if (hit.get_Doca() > hit.get_CellSize() ) {   
                 //this.fix_TimeToDistance(this.get_CellSize());
                 hit.set_OutOfTimeFlag(true);
                 hit.set_QualityFac(2);
