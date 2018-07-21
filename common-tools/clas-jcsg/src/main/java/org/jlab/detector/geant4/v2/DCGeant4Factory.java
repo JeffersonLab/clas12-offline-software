@@ -183,8 +183,8 @@ final class Wire {
     private final Vector3d midpoint;
     private final Vector3d center;
     private final Vector3d direction;
-    private Vector3d leftend;
     private Vector3d rightend;
+    private Vector3d leftend;
     private final Vector3d topend;
     private final Vector3d bottomend;
 
@@ -201,10 +201,10 @@ final class Wire {
         Vector3d rnorm = new Vector3d(-copen, sopen, 0);
 
         double wlenl = vnum.dot(lnorm) / direction.dot(lnorm);
-        leftend = direction.times(wlenl).add(midpoint);
+        rightend = direction.times(wlenl).add(midpoint);
 
         double wlenr = vnum.dot(rnorm) / direction.dot(rnorm);
-        rightend = direction.times(wlenr).add(midpoint);
+        leftend = direction.times(wlenr).add(midpoint);
     }
 
     public Wire(int isuper, int ilayer, int iwire) {
@@ -246,16 +246,16 @@ final class Wire {
 
         findEnds();
 
-        if (leftend.y < rightend.y) {
-            topend = rightend;
-            bottomend = leftend;
-        } else {
+        if (rightend.y < leftend.y) {
             topend = leftend;
             bottomend = rightend;
+        } else {
+            topend = rightend;
+            bottomend = leftend;
         }
 
-        length = leftend.minus(rightend).magnitude();
-        center = leftend.plus(rightend).dividedBy(2.0);
+        length = rightend.minus(leftend).magnitude();
+        center = rightend.plus(leftend).dividedBy(2.0);
     }
 
     private boolean isSensitiveWire(int isuper, int ilayer, int iwire) {
@@ -267,12 +267,12 @@ final class Wire {
         return new Vector3d(midpoint);
     }
 
-    public Vector3d left() {
-        return new Vector3d(leftend);
-    }
-
     public Vector3d right() {
         return new Vector3d(rightend);
+    }
+
+    public Vector3d left() {
+        return new Vector3d(leftend);
     }
 
     public Vector3d dir() {
@@ -373,15 +373,15 @@ public final class DCGeant4Factory extends Geant4Factory {
     }
 
     //this methods should be optimized if we decide to use them in reconstruction
-    public Vector3d getWireLeftend(int isuper, int ilayer, int iwire) {
-        Wire ww = new Wire(isuper, ilayer+1, iwire+1);
-        return ww.left().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
-    }
-
-    //this methods should be optimized if we decide to use them in reconstruction
     public Vector3d getWireRightend(int isuper, int ilayer, int iwire) {
         Wire ww = new Wire(isuper, ilayer+1, iwire+1);
         return ww.right().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
+    }
+
+    //this methods should be optimized if we decide to use them in reconstruction
+    public Vector3d getWireLeftend(int isuper, int ilayer, int iwire) {
+        Wire ww = new Wire(isuper, ilayer+1, iwire+1);
+        return ww.left().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
     }
 
     //this methods should be optimized if we decide to use them in reconstruction
@@ -480,7 +480,7 @@ public final class DCGeant4Factory extends Geant4Factory {
         for(int il=0;il<8;il+=7)
             for(int iwire=0;iwire<nsgwires+1;iwire+=nsgwires/30){
         Wire regw = new Wire(isup,il,iwire);
-        System.out.println("line("+regw.left()+", "+regw.right()+");");
+        System.out.println("line("+regw.right()+", "+regw.left()+");");
 
             }
     }
