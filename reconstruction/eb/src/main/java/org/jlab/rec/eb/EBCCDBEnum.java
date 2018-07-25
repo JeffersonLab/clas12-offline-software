@@ -47,11 +47,15 @@ public enum EBCCDBEnum {
     CND_DR,
     CND_DPHI,
     CND_DZ,
+    CND_NEUTRON_maxBeta,
     HTCC_DTHETA,
     HTCC_DPHI,
     HTCC_TimingRes,
     LTCC_DTHETA,
     LTCC_DPHI,
-    LTCC_TimingRes;
+    LTCC_TimingRes,
+    FCUP_slope,
+    FCUP_offset,
+    FCUP_atten;
 }
 

@@ -47,18 +47,9 @@ public class TrackReader {
         this._Paths = paths;
     }
 
-    public void fetch_Trks(DataEvent event) {
-
-        if (event.hasBank("TimeBasedTrkg::TBTracks") == false) {
-            // System.err.println("there is no DC bank ");
-            _TrkLines = new ArrayList<Line3d>();
-
+    public void setTracksFromBank(DataBank bankDC) {
+        if(bankDC==null)
             return;
-        }
-
-        DataBank bankDC = event.getBank("TimeBasedTrkg::TBTracks");
-
-        // double[] fitChisq = bankDC.getDouble("fitChisq"); // use this to
         // select good tracks
         int rows = bankDC.rows();
 
@@ -72,7 +63,7 @@ public class TrackReader {
         double[] p = new double[rows]; // pathlength of the track from origin to
         // DC R3
         int[] tid = new int[rows]; // track id in HB bank
-        if (event.hasBank("TimeBasedTrkg::TBTracks") == true) {
+        if (rows>0) {
             // instanciates the list
             // each arraylist corresponds to the tracks for a given sector
             List<Line3d> trkLines = new ArrayList<Line3d>();
@@ -104,6 +95,26 @@ public class TrackReader {
             this.set_TrkLines(trkLines);
             this.set_Paths(paths);
             this.setTrkId(tid);
+        }
+    }
+    public void fetch_Trks(DataEvent event) {
+
+        if (event.hasBank("TimeBasedTrkg::TBTracks") == false && event.hasBank("HitBasedTrkg::HBTracks") == false) {
+            // System.err.println("there is no DC bank ");
+            _TrkLines = new ArrayList<Line3d>();
+
+            return;
+        }
+        
+        
+        DataBank bankDC = null;
+        if(event.hasBank("TimeBasedTrkg::TBTracks") == true) {
+            bankDC = event.getBank("TimeBasedTrkg::TBTracks");
+            this.setTracksFromBank(bankDC);
+        }
+        if(event.hasBank("HitBasedTrkg::HBTracks")==true && event.hasBank("TimeBasedTrkg::TBTracks") == false) {
+            bankDC = event.getBank("HitBasedTrkg::HBTracks");
+            this.setTracksFromBank(bankDC);
         }
     }
 

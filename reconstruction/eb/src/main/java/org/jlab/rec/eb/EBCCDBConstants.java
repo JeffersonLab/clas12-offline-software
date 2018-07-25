@@ -24,6 +24,7 @@ public class EBCCDBConstants {
             "electron_sf",
             "photon_sf",
             "neutron_beta",
+            "cnd_neutron_beta",
             "pid",
             "ecal_matching",
             "ftof_matching",
@@ -37,6 +38,7 @@ public class EBCCDBConstants {
     };
     
     private static final String[] otherTableNames={
+        "/runcontrol/fcup",
         "/geometry/target",
         "/calibration/ftof/tres",
         //"/calibration/ctof/tres"
@@ -260,10 +262,16 @@ public class EBCCDBConstants {
         loadDouble(EBCCDBEnum.CND_DPHI,"cnd_matching","dphi",0,0,0);
         loadDouble(EBCCDBEnum.CND_DZ,"cnd_matching","dz",0,0,0);
 
+        loadDouble(EBCCDBEnum.CND_NEUTRON_maxBeta,"cnd_neutron_beta","neutron_beta",0,0,0);
+
         loadDouble(EBCCDBEnum.NEUTRON_maxBeta,"neutron_beta","neutron_beta",0,0,0);
         
         loadDouble(EBCCDBEnum.TARGET_POSITION,"/geometry/target","position",0,0,0);
-    
+   
+        loadDouble(EBCCDBEnum.FCUP_slope,"/runcontrol/fcup","slope",0,0,0);
+        loadDouble(EBCCDBEnum.FCUP_offset,"/runcontrol/fcup","offset",0,0,0);
+        loadDouble(EBCCDBEnum.FCUP_atten,"/runcontrol/fcup","atten",0,0,0);
+
         //loadDouble(EBCCDBEnum.HTCC_PION_THRESHOLD,
         //loadDouble(EBCCDBEnum.LTCC_PION_THRESHOLD,
         //loadDouble(EBCCDBEnum.LTCC_KAON_THRESHOLD,

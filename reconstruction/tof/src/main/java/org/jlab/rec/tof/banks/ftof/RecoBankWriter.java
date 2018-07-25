@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.hipo.HipoDataEvent;
+import org.jlab.jnp.hipo.data.HipoEvent;
+import org.jlab.jnp.hipo.data.HipoGroup;
 import org.jlab.rec.tof.cluster.Cluster;
 import org.jlab.rec.tof.hit.ftof.Hit;
 
@@ -18,7 +21,18 @@ public class RecoBankWriter {
     public RecoBankWriter() {
         // TODO Auto-generated constructor stub
     }
-
+    public DataBank CreateOutputBank(DataEvent event, String bankName, int bankSize) {
+        if(event.hasBank(bankName)) { // for second pass tracking
+            HipoDataEvent de = (HipoDataEvent) event;
+            HipoEvent dde = de.getHipoEvent();
+            HipoGroup group = dde.getGroup(bankName);
+            ////event.show();
+            //group.show();
+            dde.removeGroup(bankName);
+        }
+        DataBank bank = event.createBank(bankName, bankSize);
+        return bank;
+    }
     public DataBank fillRawHitsBank(DataEvent event, List<Hit> hitlist) {
         if (hitlist == null) {
             return null;
@@ -26,8 +40,8 @@ public class RecoBankWriter {
         if (hitlist.size() == 0) {
             return null;
         }
-
-        DataBank bank = event.createBank("FTOF::rawhits", hitlist.size());
+        
+        DataBank bank = this.CreateOutputBank(event, "FTOF::rawhits", hitlist.size());
         if (bank == null) {
             System.err
                     .println("COULD NOT CREATE A BANK!!!!!! for hitlist of size "
@@ -72,7 +86,7 @@ public class RecoBankWriter {
             return null;
         }
 
-        DataBank bank = event.createBank("FTOF::hits", hitlist.size());
+        DataBank bank = this.CreateOutputBank(event, "FTOF::hits", hitlist.size());
         if (bank == null) {
             System.err.println("COULD NOT CREATE A BANK!!!!!!");
             return null;
@@ -137,7 +151,7 @@ public class RecoBankWriter {
             return null;
         }
 
-        DataBank bank = event.createBank("FTOF::clusters", cluslist.size());
+        DataBank bank = this.CreateOutputBank(event, "FTOF::clusters", cluslist.size());
         if (bank == null) {
             System.err.println("COULD NOT CREATE A BANK!!!!!!");
             return null;
@@ -182,7 +196,7 @@ public class RecoBankWriter {
             return null;
         }
 
-        DataBank bank = event.createBank("FTOF::matchedclusters",
+        DataBank bank = this.CreateOutputBank(event, "FTOF::matchedclusters",
                 matchedClusters.size());
         if (bank == null) {
             System.err.println("COULD NOT CREATE A BANK!!!!!!");

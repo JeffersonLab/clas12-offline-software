@@ -28,10 +28,11 @@ public class ECEngine extends ReconstructionEngine {
     CLASDecoder     decoder = new CLASDecoder();
     
     Detector        ecDetector = null;
-    public Boolean       debug = false;
-    public Boolean singleEvent = false;
-    public Boolean        isMC = false;
-    int                 calrun = 2;
+    public Boolean             debug = false;
+    public Boolean  isSingleThreaded = false;
+    public Boolean       singleEvent = false;
+    public Boolean              isMC = false;
+    int                       calrun = 2;
     
     public ECEngine(){
         super("EC","gavalian","1.0");
@@ -40,8 +41,9 @@ public class ECEngine extends ReconstructionEngine {
     @Override
     public boolean processDataEvent(DataEvent de) {
            
-        ECCommon.debug       = this.debug;
-        ECCommon.singleEvent = this.singleEvent;
+        ECCommon.setDebug(debug);
+        ECCommon.setisSingleThreaded(isSingleThreaded);
+        ECCommon.setSingleEvent(singleEvent);
 
         int runNo = 10;
         
@@ -74,23 +76,26 @@ public class ECEngine extends ReconstructionEngine {
 	    
         if(de instanceof HipoDataEvent) this.writeHipoBanks(de,ecStrips,ecPeaks,ecClusters);
         
-        ECCommon.myStrips.clear();   ECCommon.myStrips.addAll(ecStrips);
-        ECCommon.myPeaks.clear();    ECCommon.myPeaks.addAll(ecPeaks);
-        ECCommon.myClusters.clear(); ECCommon.myClusters.addAll(ecClusters);
+        if (isSingleThreaded) {
+        	ECCommon.clearMyStructures();
+        	getStrips().addAll(ecStrips);
+        	getPeaks().addAll(ecPeaks);
+        	getClusters().addAll(ecClusters);
+        }
         
         return true;
     }
     
     public List<ECStrip> getStrips() {
-	    return ECCommon.myStrips;
+	    return ECCommon.getMyStrips();    		
     }
     
     public List<ECPeak> getPeaks() {
-	    return ECCommon.myPeaks;    
+	    return ECCommon.getMyPeaks();    
     }
     
     public List<ECCluster> getClusters() {
-	    return ECCommon.myClusters;    
+	    return ECCommon.getMyClusters();    
     }    
         
     private void writeHipoBanks(DataEvent de, 
@@ -142,7 +147,7 @@ public class ECEngine extends ReconstructionEngine {
             bankC.setInt("coordW",   c,         clusters.get(c).getPeak(2).getCoord());
   
         }
-      
+     
         DataBank bankM = de.createBank("ECAL::moments", clusters.size());
         for(int c = 0; c < clusters.size(); c++){
             bankM.setFloat("distU", c, (float) clusters.get(c).clusterPeaks.get(0).getDistanceEdge());
@@ -226,7 +231,8 @@ public class ECEngine extends ReconstructionEngine {
             "/calibration/ec/timing",
             "/calibration/ec/time_jitter",
             "/calibration/ec/fadc_offset",
-            "/calibration/ec/fadc_global_offset"
+            "/calibration/ec/fadc_global_offset",
+            "/calibration/ec/global_gain_shift"
         };
         
         requireConstants(Arrays.asList(ecTables));
@@ -238,9 +244,8 @@ public class ECEngine extends ReconstructionEngine {
         setPeakThresholds(18,20,15);
         setClusterCuts(7,15,20);
         
-        ECCommon.initHistos();
+        if (isSingleThreaded) ECCommon.initHistos();
         return true;
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

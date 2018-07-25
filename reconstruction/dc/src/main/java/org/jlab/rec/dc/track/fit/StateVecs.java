@@ -25,6 +25,7 @@ public class StateVecs {
     private final double[] A = new double[2];
     private final double[] dA = new double[4];
     private final float[] bf = new float[3];
+    
     DCSwimmer dcSwim = new DCSwimmer();
     
     /**
@@ -115,7 +116,7 @@ public class StateVecs {
         double tx = iVec.tx;
         double ty = iVec.ty;
         double Q = iVec.Q;
-
+        double Bf = iVec.B;
         // B-field components at state vector coordinates
         dcSwim.Bfield(x, y, Z[i], bf);
         
@@ -147,7 +148,7 @@ public class StateVecs {
 
         double s  = (Z[f] - Z[i]) / (double) nSteps;
         double z = Z[i];
-
+        double dPath=0;
        
         for (int j = 0; j < nSteps; j++) {
             // get the sign of the step
@@ -253,12 +254,15 @@ public class StateVecs {
            
             covMat.covMat = new Matrix(C);
             // transport stateVec
-            x += tx * s + 0.5 * Q * speedLight * A[0] * s * s;
-            y += ty * s + 0.5 * Q * speedLight * A[1] * s * s;
+            double dx = tx * s + 0.5 * Q * speedLight * A[0] * s * s;
+            x += dx;
+            double dy = ty * s + 0.5 * Q * speedLight * A[1] * s * s;
+            y +=dy;
             tx += Q * speedLight * A[0] * s;
             ty += Q * speedLight * A[1] * s;
 
             z += s;
+            dPath+= Math.sqrt(dx*dx+dy*dy+s*s);
         }
 
         StateVec fVec = new StateVec(f);
@@ -268,7 +272,8 @@ public class StateVecs {
         fVec.tx = tx;
         fVec.ty = ty;
         fVec.Q = Q;
-
+        fVec.B = Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2]);
+        fVec.deltaPath = dPath;
         //StateVec = fVec;
         this.trackTraj.put(f, fVec);
 
@@ -482,6 +487,8 @@ public class StateVecs {
             initSV.tx = VecAtFirstMeasSite[3] / VecAtFirstMeasSite[5];
             initSV.ty = VecAtFirstMeasSite[4] / VecAtFirstMeasSite[5];
             initSV.Q = trkcand.get_Q() / trkcand.get_pAtOrig().mag(); 
+            dcSwim.Bfield(initSV.x, initSV.y, initSV.z, bf);
+            initSV.B = Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2]);
             this.trackTraj.put(0, initSV); 
             
             CovMat initCM = new CovMat(0);
@@ -505,6 +512,8 @@ public class StateVecs {
         public double tx;   //track px/pz in the tilted sector coordinate system at z
         public double ty;   //track py/pz in the tilted sector coordinate system at z
         public double Q;    //track q/p
+        double B;
+        double deltaPath;
         
         StateVec(int k) {
             this.k = k;

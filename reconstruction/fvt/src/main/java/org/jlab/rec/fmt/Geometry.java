@@ -1,4 +1,4 @@
-package org.jlab.rec.fvt.fmt;
+package org.jlab.rec.fmt;
 
 import org.apache.commons.math3.special.Erf;
 import org.jlab.geom.prim.Point3D;
@@ -120,15 +120,4 @@ public class Geometry {
             }
         return cent;
     }
-	
-	public static void main (String arg[])  {
-		
-		Geometry fmt = new Geometry();
-		if(Constants.FVT_Zlayer[0]==0)
-			Constants.Load();
-		
-		
-		
-	}
-
 }

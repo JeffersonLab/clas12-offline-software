@@ -28,7 +28,7 @@ public class Constants {
     public static final  int NWIRE  = 114; //1 guard + 112 sense + 1 guard
 
     public static final double z_extrap_to_LowFieldReg = 592.; // z in cm in the region outside of DC-R3 [used for extrapolation of the track to the outer detectors]
-    public static final double[] wpdist = {0.386160,0.404220,0.621906,0.658597,0.935140,0.977982};
+    public static final double[] wpdist = new double[6];//= {0.386160,0.404220,0.621906,0.658597,0.935140,0.977982};
 
     // CONSTANTS USED IN RECONSTRUCTION
     //---------------------------------
@@ -39,7 +39,8 @@ public class Constants {
 
     public static final double LIGHTVEL = 0.00299792458;        // velocity of light (cm/ns) - conversion factor from radius in cm to momentum in GeV/c
 
-
+    // V0 averaged value in t(beta) term denominator
+    public static final double V0AVERAGED = 0.007;
     /// A region-segment contains two segments if they are in the same sector
     /// and region and satisfy the proximity condition:
     /// |Xwires2-Xwires1| = a*Xwires1 + b
@@ -129,6 +130,7 @@ public class Constants {
     public static int[][] STBLOC;
 
     private static boolean USETSTART = false;
+    
 
     public static final synchronized boolean isUSETSTART() {
         return USETSTART;
@@ -242,22 +244,21 @@ public class Constants {
     //	TORSCALE = tORSCALE;
     //}
 
-
-    private static double[][][][] _T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
-    private static double[][][][] _T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables
+ 
+    private static double[][][][] _T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables --- with TStart calibration 
+    private static double[][][][] _T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables --- with TStart calibration 
     public static synchronized void setT0(double[][][][] T0) {
         _T0 = T0;
     }
-
     public static synchronized void setT0Err(double[][][][] T0ERR) {
         _T0ERR = T0ERR;
     }
-    public static synchronized double[][][][] getT0() {
+    public static final double[][][][] getT0() {
         return _T0;
     }
-    public static synchronized double[][][][] getT0Err() {
+    public static final double[][][][] getT0Err() {
         return _T0ERR;
     }
-   
+     
 
 }

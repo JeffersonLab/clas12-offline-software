@@ -32,8 +32,9 @@ public class ECCommon {
     public static float[]  clusterError = new float[3];
 	public static float[] clusterDeltaT = new float[3];
     public static Boolean         debug = false;
-    public static Boolean   singleEvent = false;
-    public static String      variation = "default";
+    public static Boolean isSingleThreaded = false;
+    public static Boolean      singleEvent = false;
+    public static String         variation = "default";
     
     private static double[] AtoE  = {15,10,10};   // SCALED ADC to Energy in MeV
     private static double[] AtoE5 = {15,5,5};     // For Sector 5 ECAL
@@ -64,6 +65,36 @@ public class ECCommon {
         }       
     }
     
+    public static void setDebug(boolean val) {
+    	debug = val;
+    }
+    
+    public static void setisSingleThreaded(boolean val) {
+        isSingleThreaded = val;
+    }
+    
+    public static void setSingleEvent(boolean val) {
+    	singleEvent = val;
+    }
+    
+    public static void clearMyStructures() {
+    	getMyStrips().clear();
+    	getMyPeaks().clear();
+    	getMyClusters().clear();
+    }
+    
+    public static List<ECStrip> getMyStrips() {
+    	return myStrips;
+    }
+    
+    public static List<ECPeak> getMyPeaks() {
+    	return myPeaks;
+    }
+    
+    public static List<ECCluster> getMyClusters() {
+    	return myClusters;
+    }
+    
     public static List<ECStrip>  initEC(DataEvent event, Detector detector, ConstantsManager manager, int run){
     	
         manager.setVariation(variation);
@@ -71,6 +102,7 @@ public class ECCommon {
         IndexedTable    atten = manager.getConstants(run, "/calibration/ec/attenuation");
         IndexedTable     gain = manager.getConstants(run, "/calibration/ec/gain");
 		IndexedTable     time = manager.getConstants(run, "/calibration/ec/timing");
+		IndexedTable    shift = manager.getConstants(run, "/calibration/ec/global_gain_shift");
     
         if (singleEvent) resetHistos();        
         
@@ -102,7 +134,7 @@ public class ECCommon {
             strip.setAttenuation(atten.getDoubleValue("A", sector,layer,component),
                                  atten.getDoubleValue("B", sector,layer,component),
                                  atten.getDoubleValue("C", sector,layer,component));
-            strip.setGain(gain.getDoubleValue("gain", sector,layer,component)); 
+            strip.setGain(gain.getDoubleValue("gain", sector,layer,component)*shift.getDoubleValue("gain_shift",sector,layer,0)); 
             strip.setVeff(veff);
             strip.setTiming(time.getDoubleValue("a0", sector, layer, component),
                             time.getDoubleValue("a1", sector, layer, component),
@@ -289,9 +321,9 @@ public class ECCommon {
                             pV.get(bV).redoPeakLine();
                             pW.get(bW).redoPeakLine();
                             ECCluster cluster = new ECCluster(pU.get(bU),pV.get(bV),pW.get(bW));
-                            H1_ecEng.get(sector,ind[startLayer-1]+1,0).fill(cluster.getHitPositionError());
+                            if(isSingleThreaded)H1_ecEng.get(sector,ind[startLayer-1]+1,0).fill(cluster.getHitPositionError());
                             if(cluster.getHitPositionError()<ECCommon.clusterError[ind[startLayer-1]]) {
-                                 H1_ecEng.get(sector,ind[startLayer-1]+1,1).fill(cluster.getHitPositionError());
+                                if(isSingleThreaded)H1_ecEng.get(sector,ind[startLayer-1]+1,1).fill(cluster.getHitPositionError());
 //								double tU = cluster.getTime(0);
 //								double tV = cluster.getTime(1);
 //								double tW = cluster.getTime(2);

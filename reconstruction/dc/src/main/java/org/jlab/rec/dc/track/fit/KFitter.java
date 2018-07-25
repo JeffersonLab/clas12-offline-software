@@ -1,6 +1,8 @@
 package org.jlab.rec.dc.track.fit;
 
 import Jama.Matrix;
+import java.util.ArrayList;
+import java.util.List;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.fit.StateVecs.CovMat;
@@ -15,7 +17,7 @@ public class KFitter {
 
     public StateVec finalStateVec;
     public CovMat finalCovMat;
-
+    public List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory;
     public int totNumIter = 30;
     double newChisq = Double.POSITIVE_INFINITY;
 
@@ -198,14 +200,34 @@ public class KFitter {
     private void calcFinalChisq() {
         int k = sv.Z.length - 1;
         this.chi2 = 0;
+        double path =0;
+        kfStateVecsAlongTrajectory = new ArrayList<org.jlab.rec.dc.trajectory.StateVec>(); 
         if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null) {
             sv.rinit(sv.Z[0], k);
+            org.jlab.rec.dc.trajectory.StateVec svc = new org.jlab.rec.dc.trajectory.StateVec(sv.trackTraj.get(0).x, sv.trackTraj.get(0).y, sv.trackTraj.get(0).tx, sv.trackTraj.get(0).ty);
+            svc.setZ(sv.trackTraj.get(0).z);
+            svc.setB(sv.trackTraj.get(0).B);
+            path+=sv.trackTraj.get(0).deltaPath;
+            svc.setPathLength(path);
+            double h0 = mv.h(new double[]{sv.trackTraj.get(0).x, sv.trackTraj.get(0).y}, 
+                        (int) mv.measurements.get(0).tilt,  mv.measurements.get(0).wireMaxSag,  mv.measurements.get(0).wireLen);
+            svc.setProjector(h0);
+            kfStateVecsAlongTrajectory.add(svc);
+            chi2 += (mv.measurements.get(0).x - h0) * (mv.measurements.get(0).x - h0) / mv.measurements.get(0).error;
             for (int k1 = 0; k1 < k; k1++) {
                 sv.transport(k1, k1 + 1, sv.trackTraj.get(k1), sv.trackCov.get(k1));
+                
                 double V = mv.measurements.get(k1 + 1).error; 
                 double h = mv.h(new double[]{sv.trackTraj.get(k1 + 1).x, sv.trackTraj.get(k1 + 1).y}, 
                         (int) mv.measurements.get(k1 + 1).tilt,  mv.measurements.get(k1 + 1).wireMaxSag,  mv.measurements.get(k1 + 1).wireLen);
-
+//System.out.println("KF "+mv.measurements.get(k1 + 1).z+" meas --> "+mv.measurements.get(k1 + 1).x+" h "+h+" state x "+sv.trackTraj.get(k1 + 1).x+" y "+ sv.trackTraj.get(k1 + 1).y);
+                svc = new org.jlab.rec.dc.trajectory.StateVec(sv.trackTraj.get(k1 + 1).x, sv.trackTraj.get(k1 + 1).y, sv.trackTraj.get(k1 + 1).tx, sv.trackTraj.get(k1 + 1).ty);
+                svc.setZ(sv.trackTraj.get(k1 + 1).z);
+                svc.setB(sv.trackTraj.get(k1 + 1).B);
+                path+=sv.trackTraj.get(k1 + 1).deltaPath;
+                svc.setPathLength(path);
+                svc.setProjector(h);
+                kfStateVecsAlongTrajectory.add(svc);
                 chi2 += (mv.measurements.get(k1 + 1).x - h) * (mv.measurements.get(k1 + 1).x - h) / V;
             }
         }
