@@ -14,9 +14,9 @@ addons:
       - oracle-java8-installer
 
 before_install:
-  - ls -lthra
-  - java -version
-  - echo "starting build..."
+    - ls -lthra
+    - java -version
+    - echo "starting build..."
 
 install:
   - java -version
