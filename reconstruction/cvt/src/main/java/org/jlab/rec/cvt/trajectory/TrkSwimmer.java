@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import org.jlab.geom.prim.Point3D;
 
 import cnuphys.magfield.Solenoid;
+import cnuphys.magfield.FieldProbe;
 import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.SwimTrajectory;
@@ -21,8 +22,9 @@ import org.jlab.utils.CLASResources;
  */
 public class TrkSwimmer {
 
-    private static Solenoid sField;
-    private static Swimmer swimmer;
+    private  static Solenoid sField;
+    private FieldProbe sProbe;
+    private Swimmer swimmer;
     // get some fit results
 
     private double _x0;
@@ -139,7 +141,7 @@ public class TrkSwimmer {
                     _theta, _phi, z, accuracy, _maxPathLength,
                     _maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
 
-            traj.computeBDL(sField);
+            traj.computeBDL(sProbe);
             double[] lastY = traj.lastElement();
 
             value[0] = lastY[0] * 1000.; // convert back to mm
@@ -169,7 +171,7 @@ public class TrkSwimmer {
         double stepSize = 1e-4; // m
 
         SwimTrajectory st = swimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, 0.0005);
-        st.computeBDL(sField);
+        st.computeBDL(sProbe);
         double[] lastY = st.lastElement();
 
         value[0] = lastY[0] * 1000; // convert back to mm
@@ -197,7 +199,7 @@ public class TrkSwimmer {
 
         float result[] = new float[3];
 
-        sField.field((float) x_cm, (float) y_cm, (float) z_cm, result);
+        sProbe.field((float) x_cm, (float) y_cm, (float) z_cm, result);
 
         return new Point3D(result[0] / 10., result[1] / 10., result[2] / 10.);
 
@@ -244,21 +246,11 @@ public class TrkSwimmer {
 
     }
 
-    public static Solenoid getField() {
+    public  Solenoid getField() {
         return sField;
     }
 
-    public static void setField(Solenoid sField) {
-        TrkSwimmer.sField = sField;
-    }
-
-    public static Swimmer getSwimmer() {
-        return swimmer;
-    }
-
-    public static void setSwimmer(Swimmer swimmer) {
-        TrkSwimmer.swimmer = swimmer;
-    }
+   
 
     public double get_x0() {
         return _x0;
