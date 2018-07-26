@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.StringTokenizer;
 
 /**
@@ -22,14 +23,15 @@ public final class Solenoid extends MagneticField {
 	
 	private static final double MISALIGNTOL = 1.0e-6; //cm
 	
+	//used to reconfigure fields so solenoid and torus do not overlap
+	private double _fakeZMax = Float.POSITIVE_INFINITY;
+	
 	// private constructor
 	/**
 	 * Instantiates a new solenoid.
 	 */
 	private Solenoid() {
 		setCoordinateNames("phi", "rho", "z");
-		
-//		_shiftZ = 450;
 	}
 
 	/**
@@ -45,6 +47,7 @@ public final class Solenoid extends MagneticField {
 		Solenoid solenoid = new Solenoid();
 		solenoid.readBinaryMagneticField(file);
 		// is the field ready to use?
+		System.out.println(solenoid.toString());
 		return solenoid;
 	}
 
@@ -52,146 +55,74 @@ public final class Solenoid extends MagneticField {
      * Is the physical solenoid represented by the map misaligned?
      * @return <code>true</code> if solenoid is misaligned
      */
-    @Override
 	public boolean isMisaligned() {
     	return (Math.abs(_shiftZ) > MISALIGNTOL);
     }
     
-	/** 
-	 * A quick test to throw out points definitely outside the boundaries
-	 * @param x the x coordinate in the units of the map
-	 * @param y the y coordinate in the units of the map
-	 * @param z the z coordinate in the units of the map
-	 * @return <code>true</code> if the point is in range (approximate)
-	 */
-	protected boolean crudeInRange(float x, float y, float z) {
-		if ((z < getZMin()) || (z > getZMax())) {
-			return false;
-		}
-		if ((Math.abs(x) < getRhoMin()) || (Math.abs(x) > getRhoMax())) {
-			return false;
-		}
-		if ((Math.abs(y) < getRhoMin()) || (Math.abs(y) > getRhoMax())) {
-			return false;
-		}
-		return true;
-	}
-	
-	/** 
-	 * A quick test to throw out points definitely outside the boundaries
-	 * @param phi the phi coordinate in the units of the map
-	 * @param rho the rho coordinate in the units of the map
-	 * @param z the z coordinate in the units of the map
-	 * @return <code>true</code> if the point is in range (approximate)
-	 */
-	protected boolean crudeInRangeCylindrical(float phi, float rho, float z) {
-		if ((z < getZMin()) || (z > getZMax())) {
-			return false;
-		}
-		if ((rho < getRhoMin()) || (rho > getRhoMax())) {
-			return false;
-		}
-		return true;
+
+
+	public double getZMax() {
+		return q3Coordinate.getMax();
 	}
 
-	
+	public double getZMin() {
+		return q3Coordinate.getMin();
+	}
+
+	public double getRhoMax() {
+		return q2Coordinate.getMax();
+	}
+
+	public double getRhoMin() {
+		return q2Coordinate.getMin();
+	}
+
 	/**
-	 * Get the field by trilinear interpolation.
+	 * Get the name of the field
 	 * 
-	 * @param probe
-	 *            for faster results
-	 * @param phi
-	 *            azimuthal angle in degrees.
-	 * @param rho
-	 *            the cylindrical rho coordinate in cm.
-	 * @param z
-	 *            coordinate in cm
-	 * @param result
-	 *            the result
-	 * @result a Cartesian vector holding the calculated field in kiloGauss.
-	 */
-	public void fieldCylindrical(SolenoidProbe probe, double phi, double rho, double z, float result[]) {
-		
-		if (!crudeInRangeCylindrical((float)phi, (float)rho, (float)z)) {
-			result[X] = 0f;
-			result[Y] = 0f;
-			result[Z] = 0f;
-			return;
-		}
-		
-		if (isZeroField()) {
-			result[X] = 0f;
-			result[Y] = 0f;
-			result[Z] = 0f;
-			return;
-		}
-		
-		//misalignment??
-		if (isMisaligned()) {
-			z = z - _shiftZ;
-		}
-		
-
-		if (phi < 0.0) {
-			phi += 360.0;
-		}
-
-		if ((probe == null) || !FieldProbe.CACHE) {
-			interpolateField(rho, z, result);
-		}
-		else {
-			calculate(rho, z, probe, result);
-		}
-
-		// rotate onto to proper sector
-		
-		if (phi > 0.001) {
-			double rphi = Math.toRadians(phi);
-			double cos = Math.cos(rphi);
-			double sin = Math.sin(rphi);
-			double bphi = result[0];
-			double brho = result[1];
-			result[X] = (float) (brho * cos - bphi * sin);
-			result[Y] = (float) (brho * sin + bphi * cos);
-		}
-
-		result[X] *= _scaleFactor;
-		result[Y] *= _scaleFactor;
-		result[Z] *= _scaleFactor;
-	}
-
-	/**
-	 * Get the field by trilinear interpolation.
-	 *
-	 * @param phi azimuthal angle in degrees.
-	 * @param rho the cylindrical rho coordinate in cm.
-	 * @param z coordinate in cm
-	 * @param result the result
-	 * @result a Cartesian vector holding the calculated field in kiloGauss.
+	 * @return the name
 	 */
 	@Override
-	public void fieldCylindrical(double phi, double rho, double z,
-			float result[]) {
-		
-		fieldCylindrical(null, phi, rho, z, result);
+	public String getName() {
+		return "Solenoid";
 	}
-
+		
 	/**
-	 * Convert a array used as a vector to a readable string.
-	 *
-	 * @param v the vector (float array) to represent.
-	 * @return a string representation of the vector (array).
+	 * Get the fake z lim used to remove overlap with torus
+	 * @return the fake z lim used to remove overlap with torus (cm)
 	 */
-	// @Override
-	// protected String vectorToString(float v[]) {
-	// float vx = v[X] / 10;
-	// float vy = v[Y] / 10;
-	// float vz = v[Z] / 10;
-	// float vLen = vectorLength(v) / 10;
-	// String s = String.format("(%8.5f, %8.5f, %8.5f) magnitude: %8.5f T",
-	// vx, vy, vz, vLen);
-	// return s;
-	// }
+	public double getFakeZMax() {
+		return _fakeZMax;
+	}
+	
+	/**
+	 * Set the fake z lim used to remove overlap with torus
+	 * @param zlim the new value in cm
+	 */
+	public void setFakeZMax(double zlim) {
+		_fakeZMax = zlim;
+	}
+	
+	/**
+	 * Get some data as a string.
+	 * 
+	 * @return a string representation.
+	 */
+	@Override
+	public final String toString() {
+		String s = "Solenoid\n";
+		s += super.toString();
+		return s;
+	}
+	
+	/**
+	 * Print the current configuration
+	 * @param ps the print stream
+	 */
+	@Override
+	public void printConfiguration(PrintStream ps) {
+		ps.println(String.format("SOLENOID scale: %6.3f file: %s", _scaleFactor, MagneticFields.getInstance().getSolenoidBaseName()));
+	}
 
 	/**
 	 * main method used for testing.
@@ -322,183 +253,8 @@ public final class Solenoid extends MagneticField {
 		return s;
 	}
 
-	/**
-	 * Interpolates a vector by bilinear interpolation (instead of trilinear)
-	 * 
-	 * @param q1 the q1 coordinate
-	 * @param q2 the q2 coordinate
-	 * @param q3 the q3 coordinate
-	 * @param result will hold the result
-	 */
-	protected void interpolateField(double q2, double q3, float result[]) {
-		
-
-		result[0] = 0f;
-		result[1] = 0f;
-		result[2] = 0f;
-
-		int n1 = q2Coordinate.getIndex(q2);
-		if (n1 < 0) {
-			return;
-		}
-		int n2 = q3Coordinate.getIndex(q3);
-		if (n2 < 0) {
-			return;
-		}
-
-		double f1 = q2Coordinate.getFraction(q2, n1);
-		double f2 = q3Coordinate.getFraction(q3, n2);
-
-		if (!_interpolate) {
-			f1 = (f1 < 0.5) ? 0 : 1;
-			f2 = (f2 < 0.5) ? 0 : 1;
-		}
-		
-
-		double g1 = 1 - f1;
-		double g2 = 1 - f2;
-
-//		System.out.println("NEW q2 = " + q2 + "  q3 = " + q3);
-//		System.out.println("NEW n1 = " + n1 + "  n2 = " + n2);
-//		System.out.println("NEW    f1 = " + f1 + "  f2 = " + f2);
-//		System.out.println("NEW    g1 = " + g1 + "  g2 = " + g2);
 
 
-		// get the neighbor indices
-		int i000 = getCompositeIndex(0, n1, n2);
-		int i001 = i000 + 1;
 
-		int i010 = getCompositeIndex(0, n1 + 1, n2);
-		int i011 = i010 + 1;
-
-		// Bphi (zero for simple maps)
-		double b000 = getB1(i000);
-		double b001 = getB1(i001);
-		double b010 = getB1(i010);
-		double b011 = getB1(i011);
-
-		double bphi = b000 * g1 * g2 + b001 * g1 * f2 + b010 * f1 * g2
-				+ b011 * f1 * f2;
-
-		// now Brho
-		b000 = getB2(i000);
-		b001 = getB2(i001);
-		b010 = getB2(i010);
-		b011 = getB2(i011);
-
-		double brho = b000 * g1 * g2 + b001 * g1 * f2 + b010 * f1 * g2
-				+ b011 * f1 * f2;
-
-		// now Bz
-		b000 = getB3(i000);
-		b001 = getB3(i001);
-		b010 = getB3(i010);
-		b011 = getB3(i011);
-
-		double bz = b000 * g1 * g2 + b001 * g1 * f2 + b010 * f1 * g2
-				+ b011 * f1 * f2;
-
-		result[0] = (float) bphi;
-		result[1] = (float) brho;
-		result[2] = (float) bz;
-//		 System.out.println(" NEW: [ " + result[0] + ", " + result[1] + ", " +
-//		 result[2] + "] ");
-
-	}
-
-	/**
-	 * Interpolates the field magnitude by bilinear interpolation. (instead of
-	 * trilinear)
-	 *
-	 * @param q1 the q1 coordinate
-	 * @param q2 the q2 coordinate
-	 * @param q3 the q3 coordinate return the interpolated value of the field
-	 *            magnitude
-	 * @return the float
-	 */
-	protected float interpolateFieldMagnitude(double q2, double q3) {
-
-		float result[] = new float[3];
-		interpolateField(q2, q3, result);
-		return (float) Math.sqrt(result[0]*result[0] + result[1]*result[1] + result[2]*result[2]);
-
-//		int n1 = q2Coordinate.getIndex(q2);
-//		if (n1 < 0) {
-//			return 0f;
-//		}
-//		int n2 = q3Coordinate.getIndex(q3);
-//		if (n2 < 0) {
-//			return 0f;
-//		}
-//
-//		double f1 = q2Coordinate.getFraction(q2, n1);
-//		double f2 = q3Coordinate.getFraction(q3, n2);
-//
-//		double g1 = 1 - f1;
-//		double g2 = 1 - f2;
-//
-//		// get the neighbor indices
-//		int i000 = getCompositeIndex(0, n1, n2);
-//		int i001 = i000 + 1;
-//
-//		int i010 = getCompositeIndex(0, n1 + 1, n2);
-//		int i011 = i010 + 1;
-//
-//		double b000 = fieldMagnitude(i000);
-//		double b001 = fieldMagnitude(i001);
-//		double b010 = fieldMagnitude(i010);
-//		double b011 = fieldMagnitude(i011);
-//
-//		return (float) (b000 * g1 * g2 + b001 * g1 * f2 + b010 * f1 * g2
-//				+ b011 * f1 * f2);
-
-	}
-
-	public double getZMax() {
-		return q3Coordinate.getMax();
-	}
-
-	public double getZMin() {
-		return q3Coordinate.getMin();
-	}
-
-	public double getRhoMax() {
-		return q2Coordinate.getMax();
-	}
-
-	public double getRhoMin() {
-		return q2Coordinate.getMin();
-	}
-
-	/**
-	 * @return the phiCoordinate
-	 */
-	public GridCoordinate getPhiCoordinate() {
-		return q1Coordinate;
-	}
-
-	/**
-	 * @return the rCoordinate
-	 */
-	public GridCoordinate getRCoordinate() {
-		return q2Coordinate;
-	}
-
-	/**
-	 * @return the zCoordinate
-	 */
-	public GridCoordinate getZCoordinate() {
-		return q3Coordinate;
-	}
-
-	/**
-	 * Get the name of the field
-	 * 
-	 * @return the name
-	 */
-	@Override
-	public String getName() {
-		return "Solenoid";
-	}
 
 }
