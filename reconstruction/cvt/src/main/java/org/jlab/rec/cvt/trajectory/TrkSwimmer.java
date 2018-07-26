@@ -5,8 +5,9 @@ import java.io.FileNotFoundException;
 
 import org.jlab.geom.prim.Point3D;
 
+import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.Solenoid;
-import cnuphys.magfield.FieldProbe;
+import cnuphys.magfield.SolenoidProbe;
 import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.SwimTrajectory;
@@ -23,7 +24,7 @@ import org.jlab.utils.CLASResources;
 public class TrkSwimmer {
 
     private  static Solenoid sField;
-    private FieldProbe sProbe;
+    private SolenoidProbe sProbe;
     private Swimmer swimmer;
     // get some fit results
 
@@ -42,12 +43,10 @@ public class TrkSwimmer {
     public int nSteps;
 
     public TrkSwimmer() {
-        //create a swimmer for our magnetic field
-        //swimmer = new Swimmer(rcompositeField);
-        // create a swimmer for the torus field
-        //if(areFieldsLoaded==false)
-        //   getMagneticFields();
-        swimmer = new Swimmer(sField);
+        
+        swimmer = new Swimmer(MagneticFields.getInstance().getSolenoid());
+        sProbe = new SolenoidProbe(MagneticFields.getInstance().getSolenoid()) ;
+        
     }
 
     /**
