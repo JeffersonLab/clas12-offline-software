@@ -97,15 +97,7 @@ public class ViewManager extends Vector<BaseView>
 
 		};
 		mi.addActionListener(al);
-		if (view instanceof PluginView) {
-			if (_firstPlugin) {
-				_pluginMenu = new JMenu("Plugins");
-				MenuManager.getInstance().addMenu(_pluginMenu);
-				_firstPlugin = false;
-			}
-			_pluginMenu.add(mi);
-		}
-		else if (view instanceof HistoGridView) {
+		if (view instanceof HistoGridView) {
 			if (_firstHisto) {
 				_histoMenu = new JMenu("Histograms");
 				MenuManager.getInstance().addMenu(_histoMenu);
