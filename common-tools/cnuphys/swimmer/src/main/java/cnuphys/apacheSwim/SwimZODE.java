@@ -1,29 +1,56 @@
-package cnuphys.swimZ;
+package cnuphys.apacheSwim;
+
+import org.apache.commons.math3.exception.DimensionMismatchException;
+import org.apache.commons.math3.exception.MaxCountExceededException;
+import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 
 import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
-import cnuphys.rk4.IDerivative;
 
-public class SwimZDerivative implements IDerivative {
-
+/**
+ * This class holds the derivatives (ODE) for swimmin with z as the
+ * independent variable. The integration follows the method described for the
+ * HERA-B magnet here: http://arxiv.org/pdf/physics/0511177v1.pdf<br>
+ * <p>
+ * The "official" state vector has five elements: <br>
+ * (x, y, tx, ty, q) <br>
+ * Where x and y are the transverse coordinates (meters), tx = px/pz, ty = py/pz,
+ * and q = Q/|p| where Q is the integer charge (e.g. -1 for an electron)
+ * <p>
+ * However, since q is a constant, we only have four first order differential eqns.
+ * <p>
+ * UNITS
+ * <ul>
+ * <li>x, y, and z are in meters
+ * <li>p is in GeV/c
+ * <li>B (mag field) is in kGauss
+ * </ul>
+ * <p>
+ * 
+ * @author heddle
+ *
+ */
+final class SwimZODE implements FirstOrderDifferentialEquations {
+	
+	
 	// obtains the field in kG, coordinates should be in cm
-	protected FieldProbe _probe;
+	private FieldProbe _probe;
 
 	// the constant member of the state vector
-	protected double _q;
+	private double _q;
 	
 	//q times v
-	protected double _qv;
+	private double _qv;
 
 	//hold the mag field
-	protected float B[] = new float[3];
+	private float B[] = new float[3];
 
-	public SwimZDerivative() {
+	public SwimZODE() {
 		set(0, Double.NaN, null);
 	}
-	
+
 	/**
-	 * The derivative for swimming through a magnetic field
+	 * Create the derivative (i.e. the differential equations)
 	 * 
 	 * @param Q
 	 *            -1 for electron, +1 for proton, etc.
@@ -32,7 +59,7 @@ public class SwimZDerivative implements IDerivative {
 	 * @param probe
 	 *            the magnetic field getter
 	 */
-	public SwimZDerivative(int Q, double p, FieldProbe probe) {
+	public SwimZODE(int Q, double p, FieldProbe probe) {
 		set(Q, p, probe);
 	}
 	
@@ -49,8 +76,9 @@ public class SwimZDerivative implements IDerivative {
 	public void set(int Q, double p, FieldProbe probe) {
 		_q = Q / p;
 		_probe = probe;
-		_qv = _q * SwimZ.C;
+		_qv = _q * apacheSwimZ.C;
 	}
+
 
 	/**
 	 * Compute the derivatives given the value of the independent variable and
@@ -67,7 +95,9 @@ public class SwimZDerivative implements IDerivative {
 	 *            (output).
 	 */
 	@Override
-	public void derivative(double z, double[] x, double[] dxdz) {
+	public void computeDerivatives(double z, double[] x, double[] dxdz)
+			throws MaxCountExceededException, DimensionMismatchException {
+		
 
 		// get the field
 		_probe.field((float) x[0], (float) x[1], (float) z, B);
@@ -88,6 +118,12 @@ public class SwimZDerivative implements IDerivative {
 		dxdz[1] = ty;
 		dxdz[2] = _qv * Ax;
 		dxdz[3] = _qv * Ay;
+
 	}
 
+	@Override
+	public int getDimension() {
+		return 4;
+	}
+	
 }

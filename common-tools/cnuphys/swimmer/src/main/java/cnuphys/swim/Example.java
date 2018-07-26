@@ -2,8 +2,6 @@ package cnuphys.swim;
 
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
-import cnuphys.magfield.FieldProbe;
-import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
@@ -47,11 +45,7 @@ public class Example {
 		
 		MagneticFields.getInstance().initializeMagneticFields();
 		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
-		swimmer = new Swimmer(
-					MagneticFields.getInstance().getIField(MagneticFields.getInstance().getActiveFieldType()));
-
-		
-		FieldProbe.cache(true);
+		swimmer = new Swimmer();
 
 //		 example1();
 //		 example2();
@@ -169,8 +163,6 @@ public class Example {
 		double eps = 1.0e-08;
 		double stepSize = 5e-4; // m
 		
-		IField field = MagneticFields.getInstance().getActiveField();
-
 		try {
 			int nstep = swimmer.swim(electron.getCharge(), xo, yo, zo,
 					momentum, theta, phi, stopper, listener, maxPathLength,
@@ -208,9 +200,7 @@ public class Example {
 
 			// lets try getting integral |b x dl|
 			
-			IField field = MagneticFields.getInstance().getActiveField();
-			
-			traj.computeBDL(field);
+			traj.computeBDL(swimmer.getProbe());
 //			terminalPlot(
 //					traj,
 //					"Pathlength (horizontal, m) vs. Int|Bxdl| (vertical, kg-m) [ADAPTIVE] ",

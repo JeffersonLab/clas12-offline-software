@@ -2,38 +2,18 @@ package cnuphys.swimZ;
 
 import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
-import cnuphys.rk4.IDerivative;
+import cnuphys.magfield.RotatedCompositeProbe;
 
-public class SwimZDerivative implements IDerivative {
-
-	// obtains the field in kG, coordinates should be in cm
-	protected FieldProbe _probe;
-
-	// the constant member of the state vector
-	protected double _q;
+public class SectorSwimZDerivative extends SwimZDerivative {
 	
-	//q times v
-	protected double _qv;
-
-	//hold the mag field
-	protected float B[] = new float[3];
-
-	public SwimZDerivative() {
-		set(0, Double.NaN, null);
-	}
+	private int _sector = 0;
 	
 	/**
-	 * The derivative for swimming through a magnetic field
-	 * 
-	 * @param Q
-	 *            -1 for electron, +1 for proton, etc.
-	 * @param p
-	 *            the magnitude of the momentum in GeV/c.
-	 * @param probe
-	 *            the magnetic field getter
+	 * Set the sector [1..6]
+	 * @param sector the sector [1..6]
 	 */
-	public SwimZDerivative(int Q, double p, FieldProbe probe) {
-		set(Q, p, probe);
+	public void setSector(int sector) {
+		_sector = sector;
 	}
 	
 	/**
@@ -46,11 +26,12 @@ public class SwimZDerivative implements IDerivative {
 	 * @param probe
 	 *            the magnetic field getter
 	 */
-	public void set(int Q, double p, FieldProbe probe) {
-		_q = Q / p;
+	public void set(int sector, int Q, double p, FieldProbe probe) {
+		_sector = sector;
 		_probe = probe;
-		_qv = _q * SwimZ.C;
+		set(Q, p, probe);
 	}
+
 
 	/**
 	 * Compute the derivatives given the value of the independent variable and
@@ -70,7 +51,7 @@ public class SwimZDerivative implements IDerivative {
 	public void derivative(double z, double[] x, double[] dxdz) {
 
 		// get the field
-		_probe.field((float) x[0], (float) x[1], (float) z, B);
+		((RotatedCompositeProbe)_probe).field(_sector, (float) x[0], (float) x[1], (float) z, B);
 
 		// some needed factors
 		double tx = x[2];

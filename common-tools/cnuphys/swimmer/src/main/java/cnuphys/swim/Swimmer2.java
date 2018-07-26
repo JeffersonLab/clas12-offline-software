@@ -3,8 +3,9 @@ package cnuphys.swim;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
-import cnuphys.magfield.IField;
+import cnuphys.magfield.IMagField;
 import cnuphys.magfield.MagneticField;
 import cnuphys.rk4.ButcherTableau;
 import cnuphys.rk4.IStopper;
@@ -28,12 +29,11 @@ public class Swimmer2 {
 	//object cache
 	private ArrayDeque<DefaultDerivative> _derivCache = new ArrayDeque<>();
 
-	// Field getter.
-	// NOTE: the method of interest in IField takes a position in cm
-	// and returns a field in kG.This swim package works in SI (meters and
-	// Tesla)
+	// Field probe.
+	// NOTE: methods of interest in FieldProbe takes a position in cm and
+	// return a field in kG.This swim package works in SI (meters and Tesla)
 	// so care has to be taken when using the field object
-	private IField _field;
+	private FieldProbe _probe;
 	
 	/**
 	 * Swimmer2 constructor. Here we create a Swimmer that will use the given
@@ -42,10 +42,34 @@ public class Swimmer2 {
 	 * @param field
 	 *            interface into a magnetic field
 	 */
-	public Swimmer2(IField field) {
-		FieldProbe probe = FieldProbe.factory(field);
-		_field = (probe != null) ? probe : field;
+	public Swimmer2() {
+		_probe = FieldProbe.factory();
 	}
+	
+	/**
+	 * Create a swimmer specific to a magnetic field
+	 * @param magneticField the magnetic field
+	 */
+	public Swimmer2(MagneticField magneticField) {
+		_probe = FieldProbe.factory(magneticField);
+	}
+	
+	/**
+	 * Create a swimmer specific to a magnetic field
+	 * @param magneticField the magnetic field
+	 */
+	public Swimmer2(IMagField magneticField) {
+		_probe = FieldProbe.factory(magneticField);
+	}
+	
+	/**
+	 * Get the underlying field probe
+	 * @return the probe
+	 */
+	public FieldProbe getProbe() {
+		return _probe;
+	}
+
 
 	/**
 	 * Swims a charged particle. This swims to a fixed z value. This is for the
@@ -72,10 +96,7 @@ public class Swimmer2 {
 	 * @param accuracy
 	 *            the accuracy of the fixed z termination, in meters
 	 * @param sMax
-	 *            Max path length in meters. This determines the max number of steps based on
-	 *            the step size. If a stopper is used, the integration might
-	 *            terminate before all the steps are taken. A reasonable value
-	 *            for CLAS is 8. meters
+	 *            Max path length in meters.  A reasonable value for CLAS is 8. meters
 	 * @param stepSize
 	 *            the initial step size in meters.
 	 * @param relTolerance
@@ -140,8 +161,8 @@ public class Swimmer2 {
 	//		System.err.println("New start state = " + String.format("(%9.6f, %9.6f, %9.6f) (%9.6f, %9.6f, %9.6f)", xo, yo, zo, px, py, pz));
 
 			// momentum = traj.getFinalMomentum();
-			theta = MagneticField.acos2Deg(uf[5]);
-			phi = MagneticField.atan2Deg(uf[4], uf[3]);
+			theta = FastMath.acos2Deg(uf[5]);
+			phi = FastMath.atan2Deg(uf[4], uf[3]);
 
 
 			SwimTrajectory addTraj = swim(charge, uf[0], uf[1], uf[2], momentum, theta, phi, stopper, finalPathLength,
@@ -195,8 +216,7 @@ public class Swimmer2 {
 	 * @param accuracy
 	 *            the accuracy of the fixed z termination, in meters
 	 * @param sMax
-	 *            Max path length in meters. This determines the max number of steps based on
-	 *            the step size. If a stopper is used, the integration might
+	 *            Max path length in meters. The integration might
 	 *            terminate before all the steps are taken. A reasonable value
 	 *            for CLAS is 8. meters
 	 * @param stepSize
@@ -228,11 +248,11 @@ public class Swimmer2 {
 
 		DefaultDerivative deriv;
 		if (_derivCache.isEmpty()) {
-			deriv = new DefaultDerivative(charge, momentum, _field);
+			deriv = new DefaultDerivative(charge, momentum, _probe);
 		}
 		else {
 			deriv = _derivCache.pop();
-			deriv.set(charge, momentum, _field);
+			deriv.set(charge, momentum, _probe);
 		}
 
 		// normally we swim from small z to a larger z cutoff.
@@ -288,8 +308,8 @@ public class Swimmer2 {
 			
 			maxStepSize = Math.max(1.0e-4, (Math.abs(uf[2] - zTarget)/2));
 
-			theta = MagneticField.acos2Deg(uf[5]);  //pz
-			phi = MagneticField.atan2Deg(uf[4], uf[3]); //(py, px)
+			theta = FastMath.acos2Deg(uf[5]);  //pz
+			phi = FastMath.atan2Deg(uf[4], uf[3]); //(py, px)
 
 			int newNStep = swim(charge, uf[0], uf[1], uf[2], 
 					momentum, theta, phi, stopper, finalPathLength, sMax, 
@@ -379,7 +399,7 @@ public class Swimmer2 {
 		SwimTrajectory trajectory = new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi, 100);
 
 		// the derivative
-		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _field);
+		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _probe);
 
 		// integrate
 		_rungeKutta.adaptiveStep(uo, s0, sMax, stepSize, s, u, deriv, stopper, _defaultTableau,
@@ -446,11 +466,11 @@ public class Swimmer2 {
 		
 		DefaultDerivative deriv;
 		if (_derivCache.isEmpty()) {
-			deriv = new DefaultDerivative(charge, momentum, _field);
+			deriv = new DefaultDerivative(charge, momentum, _probe);
 		}
 		else {
 			deriv = _derivCache.pop();
-			deriv.set(charge, momentum, _field);
+			deriv.set(charge, momentum, _probe);
 		}
 
 		// integrate
