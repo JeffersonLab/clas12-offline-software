@@ -211,7 +211,7 @@ public class DCTBEngine extends DCEngine {
             //kFit.totNumIter=30;
             
             StateVec fn = new StateVec();
-            kFit.runFitter();
+            kFit.runFitter(TrackArray[i].get(0).get_Sector());
             
             if(kFit.setFitFailed==false && kFit.finalStateVec!=null) {
                 // set the state vector at the last measurement site
@@ -287,36 +287,7 @@ public class DCTBEngine extends DCEngine {
         return true;
     }
 
-    private void resetTrackParams(Track track, DCSwimmer dcSwim) {
-        if(track.get_ListOfHBSegments().size()<Constants.NSUPERLAYERTRACKING) {
-            //System.err.println(" not enough segments ");
-            return;
-        }
-        double theta3 = track.get_ListOfHBSegments().get(track.get_ListOfHBSegments().size()-1).get_fittedCluster().get_clusterLineFitSlope();
-        double theta1 = track.get_ListOfHBSegments().get(0).get_fittedCluster().get_clusterLineFitSlope();
-        double deltaTheta = theta3-theta1;
-       
-        double thX = (track.get(0).get_Dir().x()/track.get(0).get_Dir().z());
-        double thY = (track.get(0).get_Dir().y()/track.get(0).get_Dir().z());
-
-        //positive charges bend outward for nominal GEMC field configuration
-        int q = (int) Math.signum(deltaTheta); 
-        q*= (int)-1*Math.signum(DCSwimmer.getTorScale()); // flip the charge according to the field scale						
-
-        double p = track.get_pAtOrig().mag(); 
-        
-        double pz = p / Math.sqrt(thX*thX + thY*thY + 1);
-
-        //System.out.println("Setting track params for ");stateVec.printInfo();
-        dcSwim.SetSwimParameters(track.get(0).get_Point().x(), track.get(0).get_Point().y(), track.get(0).get_Point().z(),
-                    -pz*thX, -pz*thY, -pz,
-                     -q);
-        
-        double[] Vt = dcSwim.SwimToPlane(100);
-
-        track.set_pAtOrig(new Vector3D(-Vt[3], -Vt[4], -Vt[5]));
-        track.set_Vtx0(new Point3D(Vt[0], Vt[1], Vt[2]));
-    }
+    
 
     private int get_Status(Track track) {
         int miss = 0;    

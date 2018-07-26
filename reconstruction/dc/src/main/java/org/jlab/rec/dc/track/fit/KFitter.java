@@ -57,17 +57,17 @@ public class KFitter {
         sv.init(trk, sv.Z[0], this);
     }
     public boolean useFilter =true;
-    public void runFitter() {
+    public void runFitter(int sector) {
         this.chi2 = 0;
         this.NDF = mv.ndf;
 
         for (int i = 1; i <= totNumIter; i++) {
             this.chi2kf = 0;
             if (i > 1) {
-                sv.transport(sv.Z.length - 1, 0, sv.trackTraj.get(sv.Z.length - 1), sv.trackCov.get(sv.Z.length - 1)); //get new state vec at 1st measurement after propagating back from the last filtered state
+                sv.transport(sector, sv.Z.length - 1, 0, sv.trackTraj.get(sv.Z.length - 1), sv.trackCov.get(sv.Z.length - 1)); //get new state vec at 1st measurement after propagating back from the last filtered state
             }
             for (int k = 0; k < sv.Z.length - 1; k++) {
-                sv.transport(k, k + 1, sv.trackTraj.get(k), sv.trackCov.get(k));
+                sv.transport(sector, k, k + 1, sv.trackTraj.get(k), sv.trackCov.get(k));
                 //sv.trackTraj.add(k+1, sv.StateVec); 
                 //sv.trackCov.add(k+1, sv.CovMat);
                 // System.out.println((k)+"] trans "+sv.trackTraj.get(k).x+","+sv.trackTraj.get(k).y+","+
@@ -104,7 +104,7 @@ public class KFitter {
                 }
             }
         }
-        this.calcFinalChisq();
+        this.calcFinalChisq(sector);
 
     }
 
@@ -186,24 +186,24 @@ public class KFitter {
     }
 
     @SuppressWarnings("unused")
-	private void smooth(int k) {
+	private void smooth(int sector, int k) {
         this.chi2 = 0;
         if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null) {
-            sv.transport(k, 0, sv.trackTraj.get(k), sv.trackCov.get(k));
+            sv.transport(sector, k, 0, sv.trackTraj.get(k), sv.trackCov.get(k));
             for (int k1 = 0; k1 < k; k1++) {
-                sv.transport(k1, k1 + 1, sv.trackTraj.get(k1), sv.trackCov.get(k1));
+                sv.transport(sector, k1, k1 + 1, sv.trackTraj.get(k1), sv.trackCov.get(k1));
                 this.filter(k1 + 1);
             }
         }
     }
 
-    private void calcFinalChisq() {
+    private void calcFinalChisq(int sector) {
         int k = sv.Z.length - 1;
         this.chi2 = 0;
         double path =0;
         kfStateVecsAlongTrajectory = new ArrayList<org.jlab.rec.dc.trajectory.StateVec>(); 
         if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null) {
-            sv.rinit(sv.Z[0], k);
+            sv.transport(sector, sv.Z.length - 1, 0, sv.trackTraj.get(sv.Z.length - 1), sv.trackCov.get(sv.Z.length - 1)); 
             org.jlab.rec.dc.trajectory.StateVec svc = new org.jlab.rec.dc.trajectory.StateVec(sv.trackTraj.get(0).x, sv.trackTraj.get(0).y, sv.trackTraj.get(0).tx, sv.trackTraj.get(0).ty);
             svc.setZ(sv.trackTraj.get(0).z);
             svc.setB(sv.trackTraj.get(0).B);
@@ -215,7 +215,7 @@ public class KFitter {
             kfStateVecsAlongTrajectory.add(svc);
             chi2 += (mv.measurements.get(0).x - h0) * (mv.measurements.get(0).x - h0) / mv.measurements.get(0).error;
             for (int k1 = 0; k1 < k; k1++) {
-                sv.transport(k1, k1 + 1, sv.trackTraj.get(k1), sv.trackCov.get(k1));
+                sv.transport(sector, k1, k1 + 1, sv.trackTraj.get(k1), sv.trackCov.get(k1));
                 
                 double V = mv.measurements.get(k1 + 1).error; 
                 double h = mv.h(new double[]{sv.trackTraj.get(k1 + 1).x, sv.trackTraj.get(k1 + 1).y}, 

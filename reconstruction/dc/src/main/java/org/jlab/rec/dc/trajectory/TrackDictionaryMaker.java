@@ -130,7 +130,7 @@ public class TrackDictionaryMaker {
                 Wi.clear();
                 Di.clear();
                 sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                swimtoLayer(l, sl, Wi, Di, dcDetector, sw);             
+                swimtoLayer(sector, l, sl, Wi, Di, dcDetector, sw);             
                 for(int i=0; i<Wi.size(); i++) {
                     DCtdc.sector.add(index, (int) sector);
                     DCtdc.layer.add(index, (int) (l+1));
@@ -208,7 +208,7 @@ public class TrackDictionaryMaker {
                         double pz = p * Math.cos(Math.toRadians(theta));
                         sw.SetSwimParameters(0, 0, 0, px, py, pz, q);
                         swimVal = sw.SwimToPlaneLab(175.);
-                        
+                        int sector = this.getSector(swimVal[0], swimVal[1], swimVal[2]);
 
                         //Point3D rotatedP = tw.rotateToTiltedCoordSys(new Point3D(px, py, pz));
                         Point3D rotatedP = tw.rotateToTiltedCoordSys(new Point3D(swimVal[3], swimVal[4], swimVal[5]));
@@ -224,17 +224,17 @@ public class TrackDictionaryMaker {
                         this.Wl5.clear();
                         for (int sl = 0; sl < 6; sl++) {
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(0, sl, Wl1, dcDetector, sw);        
+                            this.swimtoLayer(sector, 0, sl, Wl1, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(1, sl, Wl2, dcDetector, sw);        
+                            this.swimtoLayer(sector, 1, sl, Wl2, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(2, sl, Wl3, dcDetector, sw);        
+                            this.swimtoLayer(sector, 2, sl, Wl3, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(3, sl, Wl4, dcDetector, sw);        
+                            this.swimtoLayer(sector, 3, sl, Wl4, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(4, sl, Wl5, dcDetector, sw);        
+                            this.swimtoLayer(sector, 4, sl, Wl5, dcDetector, sw);        
                             sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                            this.swimtoLayer(5, sl, Wl6, dcDetector, sw);
+                            this.swimtoLayer(sector, 5, sl, Wl6, dcDetector, sw);
 
                             /*
                             double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(2).getComponent(0).getMidpoint().z());
@@ -257,8 +257,8 @@ public class TrackDictionaryMaker {
                             }
                             */
                         }
-                        double[] trkTOF = sw.SwimToPlane(668.1);
-                        double[] trkPCAL = sw.SwimToPlane(698.8);
+                        double[] trkTOF = sw.SwimToPlane(sector, 668.1);
+                        double[] trkPCAL = sw.SwimToPlane(sector, 698.8);
 
 
                         Line3d trkLine = new Line3d(rotateToSectorCoordSys(trkTOF[0],trkTOF[1],trkTOF[2]), rotateToSectorCoordSys(trkPCAL[0], trkPCAL[1], trkPCAL[2])) ;
@@ -370,7 +370,7 @@ public class TrackDictionaryMaker {
 
                         for (int sl = 0; sl < 6; sl++) {
 
-                            double[] trk = sw.SwimToPlane(dcDetector.getWireMidpoint(sl, 0, 0).z);
+                            double[] trk = sw.SwimToPlane(1, dcDetector.getWireMidpoint(sl, 0, 0).z);
                             double norm = Math.sqrt(trk[3] * trk[3] + trk[4] * trk[4] + trk[5] * trk[5]);
                             Line3D trkLine = new Line3D(new Point3D(trk[0], trk[1], trk[2]), new Vector3D(trk[3] / norm, trk[4] / norm, trk[5] / norm));
                             double wMax = Math.abs(dcDetector.getWireMidpoint(sl, 0, 0).x
@@ -403,9 +403,9 @@ public class TrackDictionaryMaker {
         }
     }
     
-    public static void swimtoLayer(int l, int sl, List<Integer> Wi, List<Integer> Di, DCGeant4Factory dcDetector,  DCSwimmer sw) {
+    public static void swimtoLayer(int sector, int l, int sl, List<Integer> Wi, List<Integer> Di, DCGeant4Factory dcDetector,  DCSwimmer sw) {
         //double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(l).getComponent(0).getMidpoint().z());
-        double[] trk = sw.SwimToPlane(dcDetector.getWireMidpoint(sl, l, 0).z); 
+        double[] trk = sw.SwimToPlane(sector, dcDetector.getWireMidpoint(sl, l, 0).z); 
        
        // Line3D trkLine = new Line3D(new Point3D(trk[0], trk[1], trk[2]), new Vector3D(trk[3], trk[4], trk[5]).asUnit());
         double wMax = Math.abs(dcDetector.getWireMidpoint(sl, 0, 0).x
@@ -436,9 +436,9 @@ public class TrackDictionaryMaker {
             Di.add((int)10000);
         }
     }
-    public static void swimtoLayer(int l, int sl, List<Integer> Wi, DCGeant4Factory dcDetector,  DCSwimmer sw) {
+    public static void swimtoLayer(int sector, int l, int sl, List<Integer> Wi, DCGeant4Factory dcDetector,  DCSwimmer sw) {
         //double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(l).getComponent(0).getMidpoint().z());
-        double[] trk = sw.SwimToPlane(dcDetector.getWireMidpoint(sl, l, 0).z); 
+        double[] trk = sw.SwimToPlane(sector, dcDetector.getWireMidpoint(sl, l, 0).z); 
        
        // Line3D trkLine = new Line3D(new Point3D(trk[0], trk[1], trk[2]), new Vector3D(trk[3], trk[4], trk[5]).asUnit());
         double wMax = Math.abs(dcDetector.getWireMidpoint(sl, 0, 0).x

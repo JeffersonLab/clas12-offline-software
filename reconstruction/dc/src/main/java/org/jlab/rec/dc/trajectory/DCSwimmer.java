@@ -13,6 +13,10 @@ import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimmer;
+import cnuphys.swimZ.SwimZ;
+import cnuphys.swimZ.SwimZException;
+import cnuphys.swimZ.SwimZResult;
+import cnuphys.swimZ.SwimZStateVector;
 import cnuphys.magfield.TorusMap;
 import org.jlab.rec.dc.Constants;
 import org.jlab.utils.CLASResources;
@@ -24,13 +28,20 @@ import org.jlab.utils.CLASResources;
  *
  */
 public class DCSwimmer {
+	
+    //will use SwimZ above this momentum (dph)
+    private static double  SWIMZMINMOM = 0.75; //GeV/c
 
    // private static RotatedCompositeField rcompositeField;
    // private static CompositeField compositeField;
     private  RotatedCompositeProbe rprob;
     private  CompositeProbe prob;
     
+    // attempting to remove the old swimmer and replace with new z swimmer (dph)
     private Swimmer swimmer;
+    
+    //the Z swimmer for the tilted swimmer  (dph)
+    private SwimZ tiltedZSwimmer;
 
     public Swimmer getSwimmer() {
         return swimmer;
@@ -39,7 +50,11 @@ public class DCSwimmer {
     public void setSwimmer(Swimmer swimmer) {
         this.swimmer = swimmer;
     }
+    
     private Swimmer labswimmer;
+    
+    //the Z swimmer for the lab (dph)
+    private SwimZ labZSwimmer;
 
     public Swimmer getLabswimmer() {
         return labswimmer;
@@ -70,6 +85,10 @@ public class DCSwimmer {
         //if(areFieldsLoaded==false)
         //    getMagneticFields();
 
+    	//use the new z swimmers instead of the old one (dph)
+    	tiltedZSwimmer = new SwimZ(MagneticFields.getInstance().getRotatedCompositeField());
+    	labZSwimmer = new SwimZ(MagneticFields.getInstance().getCompositeField());
+    	
         swimmer = new Swimmer(MagneticFields.getInstance().getRotatedCompositeField());
         labswimmer = new Swimmer(MagneticFields.getInstance().getCompositeField());
         rprob = new RotatedCompositeProbe(MagneticFields.getInstance().getRotatedCompositeField());
@@ -162,9 +181,10 @@ public class DCSwimmer {
 
     }
 
-    public double[] SwimToPlane(double z_cm) {
+    public double[] SwimToPlane(int sector, double z_cm) {
         double z = z_cm / 100; // the magfield method uses meters
         double[] value = new double[8];
+        
         double accuracy = 20e-6; //20 microns
         double stepSize = Constants.SWIMSTEPSIZE; //  microns
 
@@ -172,34 +192,76 @@ public class DCSwimmer {
         {
             return null;
         }
+        
+        //use a SwimZResult instead of a trajectory (dph)
+        SwimZResult szr = null;
+        
         SwimTrajectory traj = null;
         double hdata[] = new double[3];
+        
+		try {
+			
+			if (_pTot > SWIMZMINMOM) {
+				
+				// use the new z swimmer (dph)
+				// NOTE THE DISTANCE, UNITS FOR swimZ are cm, NOT m like the old
+				// swimmer (dph)
 
-        try {
-            traj = swimmer.swim(_charge, _x0, _y0, _z0, _pTot,
-                    _theta, _phi, z, accuracy, _rMax,
-                    _maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
+				double stepSizeCM = stepSize * 100; // convert to cm
+				
+				//create the starting SwimZ state vector
+				SwimZStateVector start = new SwimZStateVector(_x0 * 100, _y0 * 100, _z0 * 100, _pTot, _theta, _phi);
 
-            traj.computeBDL(rprob);
-           // traj.computeBDL(rcompositeField);
-            double lastY[] = traj.lastElement();
+				try {
+					szr = tiltedZSwimmer.sectorAdaptiveRK(sector, _charge, _pTot, start, z_cm, stepSizeCM, hdata);
+				} catch (SwimZException e) {
+					szr = null;
+					System.err.println("[WARNING] Tilted SwimZ Failed for p = " + _pTot);
+				}
+			}
 
-            value[0] = lastY[0] * 100; // convert back to cm
-            value[1] = lastY[1] * 100; // convert back to cm
-            value[2] = lastY[2] * 100; // convert back to cm
-            value[3] = lastY[3] * _pTot;
-            value[4] = lastY[4] * _pTot;
-            value[5] = lastY[5] * _pTot;
-            value[6] = lastY[6] * 100;
-            value[7] = lastY[7] * 10;
+			if (szr != null) {
+				double bdl = szr.sectorGetBDL(sector, tiltedZSwimmer.getProbe());
+				double pathLength = szr.getPathLength(); // already in cm
 
-        } catch (RungeKuttaException e) {
-            e.printStackTrace();
+				SwimZStateVector last = szr.last();
+				double p3[] = szr.getThreeMomentum(last);
+
+				value[0] = last.x; // xf in cm
+				value[1] = last.y; // yz in cm
+				value[2] = last.z; // zf in cm
+				value[3] = p3[0];
+				value[4] = p3[1];
+				value[5] = p3[2];
+				value[6] = pathLength;
+				value[7] = bdl / 10; // convert from kg*cm to T*cm
+			} 
+			else { // use old swimmer. Either low momentum or SwimZ failed. (dph)
+
+				traj = swimmer.sectorSwim(sector, _charge, _x0, _y0, _z0, _pTot, _theta, _phi, z, accuracy, _rMax,
+						_maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
+
+				// traj.computeBDL(sector, rprob);
+				traj.sectorComputeBDL(sector, rprob);
+				// traj.computeBDL(rcompositeField);
+
+				double lastY[] = traj.lastElement();
+				value[0] = lastY[0] * 100; // convert back to cm
+				value[1] = lastY[1] * 100; // convert back to cm
+				value[2] = lastY[2] * 100; // convert back to cm
+				value[3] = lastY[3] * _pTot;
+				value[4] = lastY[4] * _pTot;
+				value[5] = lastY[5] * _pTot;
+				value[6] = lastY[6] * 100;
+				value[7] = lastY[7] * 10;
+			} // use old swimmer
+		} catch (Exception e) {
+			e.printStackTrace();
         }
         return value;
 
     }
-
+ 
     public double[] SwimToPlaneLab(double z_cm) {
         double z = z_cm / 100; // the magfield method uses meters
         double[] value = new double[8];
@@ -212,30 +274,71 @@ public class DCSwimmer {
         }
         SwimTrajectory traj = null;
         double hdata[] = new double[3];
+        
+        //use a SwimZResult instead of a trajectory (dph)
+        SwimZResult szr = null;
 
         try {
-            traj = labswimmer.swim(_charge, _x0, _y0, _z0, _pTot,
-                    _theta, _phi, z, accuracy, _rMax,
-                    _maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
+         	
+			if (_pTot > SWIMZMINMOM) {
+				
+				// use the new z swimmer (dph)
+				// NOTE THE DISTANCE, UNITS FOR swimZ are cm, NOT m like the old
+				// swimmer (dph)
 
-            traj.computeBDL(prob);
-            //traj.computeBDL(compositeField);
+				double stepSizeCM = stepSize * 100; // convert to cm
 
-            double lastY[] = traj.lastElement();
+				//create the starting SwimZ state vector
+				SwimZStateVector start = new SwimZStateVector(_x0 * 100, _y0 * 100, _z0 * 100, _pTot, _theta, _phi);
 
-            value[0] = lastY[0] * 100; // convert back to cm
-            value[1] = lastY[1] * 100; // convert back to cm
-            value[2] = lastY[2] * 100; // convert back to cm
-            value[3] = lastY[3] * _pTot;
-            value[4] = lastY[4] * _pTot;
-            value[5] = lastY[5] * _pTot;
-            value[6] = lastY[6] * 100;
-            value[7] = lastY[7] * 10;
+				try {
+					szr = labZSwimmer.adaptiveRK(_charge, _pTot, start, z_cm, stepSizeCM, hdata);
+				} catch (SwimZException e) {
+					szr = null;
+					System.err.println("[WARNING] SwimZ Failed for p = " + _pTot);
 
-        } catch (RungeKuttaException e) {
-            e.printStackTrace();
-        }
-        return value;
+				}
+			}
+
+			if (szr != null) {
+				double bdl = szr.getBDL(labZSwimmer.getProbe());
+				double pathLength = szr.getPathLength(); // already in cm
+
+				SwimZStateVector last = szr.last();
+				double p3[] = szr.getThreeMomentum(last);
+
+				value[0] = last.x; // xf in cm
+				value[1] = last.y; // yz in cm
+				value[2] = last.z; // zf in cm
+				value[3] = p3[0];
+				value[4] = p3[1];
+				value[5] = p3[2];
+				value[6] = pathLength;
+				value[7] = bdl / 10; // convert from kg*cm to T*cm
+			} 
+			else { // use old swimmer. Either low momentum or SwimZ failed. (dph)
+				traj = labswimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, z, accuracy, _rMax, _maxPathLength,
+						stepSize, Swimmer.CLAS_Tolerance, hdata);
+
+				traj.computeBDL(prob);
+				// traj.computeBDL(compositeField);
+
+				double lastY[] = traj.lastElement();
+
+				value[0] = lastY[0] * 100; // convert back to cm
+				value[1] = lastY[1] * 100; // convert back to cm
+				value[2] = lastY[2] * 100; // convert back to cm
+				value[3] = lastY[3] * _pTot;
+				value[4] = lastY[4] * _pTot;
+				value[5] = lastY[5] * _pTot;
+				value[6] = lastY[6] * 100;
+				value[7] = lastY[7] * 10;
+			} // old swimmer
+
+		} catch (RungeKuttaException e) {
+			e.printStackTrace();
+		}
+		return value;
 
     }
     //
@@ -297,6 +400,9 @@ public class DCSwimmer {
         // step size in m
         double stepSize = 1e-4; // m
 
+   //     System.out.println("SWIM TO SPHERE");
+        
+        
         SwimTrajectory st = labswimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, 0.0005);
         st.computeBDL(prob);
         //st.computeBDL(compositeField);
@@ -378,6 +484,9 @@ public class DCSwimmer {
         double stepSize = 1.e-6; // m
 
         SwimTrajectory st = null;
+        
+        System.out.println("SWIM TO CYLINDER");
+
         st = labswimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, 0.000001);
         st.computeBDL(prob);
         //st.computeBDL(compositeField);
@@ -455,6 +564,8 @@ public class DCSwimmer {
         double d= d_cm/100;
         PlaneBoundarySwimStopper stopper = new PlaneBoundarySwimStopper(d,n, dir);
 
+   //     System.out.println("SWIM TO PLANE BOUNDARY");
+
         SwimTrajectory st = labswimmer.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, Constants.SWIMSTEPSIZE, 0.0005);
         st.computeBDL(prob);
         //st.computeBDL(compositeField);
@@ -489,9 +600,9 @@ public class DCSwimmer {
     }
 
     
-    public void Bfield(double x_cm, double y_cm, double z_cm, float[] result) {
-
-        rprob.field((float) x_cm, (float) y_cm, (float) z_cm, result);
+    public void Bfield(int sector, double x_cm, double y_cm, double z_cm, float[] result) {
+        
+        rprob.field(sector, (float) x_cm, (float) y_cm, (float) z_cm, result);
         //rcompositeField.field((float) x_cm, (float) y_cm, (float) z_cm, result);
         result[0] =result[0]/10; 
         result[1] =result[1]/10;
