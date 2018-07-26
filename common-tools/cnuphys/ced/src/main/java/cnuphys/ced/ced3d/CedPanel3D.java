@@ -77,6 +77,7 @@ public class CedPanel3D extends Panel3D {
 	public static final String SHOW_HB_CROSS = "HB Cross";
 	public static final String SHOW_TB_TRACK = "TB Track";
 	public static final String SHOW_HB_TRACK = "HB Track";
+	public static final String SHOW_CVT_TRACK = "CVT Track";
 
 	public static final String SHOW_COSMIC = "Cosmics";
 
@@ -420,6 +421,13 @@ public class CedPanel3D extends Panel3D {
 		return show(CedPanel3D.SHOW_HB_TRACK);
 	}
 
+	/**
+	 * Show cvt based track?
+	 * @return <code>true</code> if we are to show cvt based track
+	 */
+	public boolean showCVTTrack() {
+		return show(CedPanel3D.SHOW_CVT_TRACK);
+	}
 
 	/**
 	 * Show time based cross?

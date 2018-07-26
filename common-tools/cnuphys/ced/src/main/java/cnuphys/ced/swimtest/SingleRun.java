@@ -39,7 +39,7 @@ public abstract class SingleRun {
 	 * @return the time of the test in seconds
 	 */
 	public String timeInSeconds() {
-		double timeSec = ((double)time)/1.0e9;
+		double timeSec = (time)/1.0e9;
 		return String.format("Approximate test time: %12.6f s", timeSec);
 	}
 	
@@ -48,7 +48,7 @@ public abstract class SingleRun {
 	 * @return the time of the test in milliseconds
 	 */
 	public String timeInMilliSeconds() {
-		double timeMilliSec = ((double)time)/1.0e6;
+		double timeMilliSec = (time)/1.0e6;
 		return String.format("Approximate test time: %12.6f ms", timeMilliSec);
 	}
 	

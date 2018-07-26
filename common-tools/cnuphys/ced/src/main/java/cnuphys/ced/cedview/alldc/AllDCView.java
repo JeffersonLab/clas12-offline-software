@@ -124,7 +124,7 @@ public class AllDCView extends CedView {
 				d.height, // container height, not total view width
 				PropertySupport.TOOLBAR, true, 
 				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
-				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
+				PropertySupport.VISIBLE, true,
 				PropertySupport.TITLE, _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")")),
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 

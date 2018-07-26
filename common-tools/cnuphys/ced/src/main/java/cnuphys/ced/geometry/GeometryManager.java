@@ -36,6 +36,12 @@ public class GeometryManager {
 
 	// cal sector 0 in local coordinates
 	public static ECSector local_Cal_Sector0;
+	
+	//0.866...
+	private static final double ROOT3OVER2 = Math.sqrt(3)/2;
+	private static double cosPhi[] = {Double.NaN, 1, 0.5, -0.5, -1, -0.5, 0.5};
+	private static double sinPhi[] = {Double.NaN, 0, ROOT3OVER2, ROOT3OVER2, 0, -ROOT3OVER2, -ROOT3OVER2};
+
 
 	/**
 	 * Private constructor for the singleton.
@@ -298,6 +304,8 @@ public class GeometryManager {
 	 * @param clasP the lab 3D Cartesian coordinates (modified)
 	 * @param sectorP the sector 3D Cartesian coordinates (not modified)
 	 */
+	
+
 	public static void sectorToClas(int sector, Point3D clasP,
 			Point3D sectorP) {
 
@@ -307,18 +315,23 @@ public class GeometryManager {
 			return;
 		}
 
+		
 		if (sector == 1) {
 			clasP.setX(sectorP.x());
 			clasP.setY(sectorP.y());
 		}
-		else {
+		else if (sector == 4) {
+			clasP.setX(-sectorP.x());
+			clasP.setY(-sectorP.y());
+		}
+		else { //sectors 2, 3, 5, 6
 			double x = sectorP.x();
 			double y = sectorP.y();
-			double midPlanePhi = Math.toRadians(60 * (sector - 1));
-			double cosPhi = Math.cos(midPlanePhi);
-			double sinPhi = Math.sin(midPlanePhi);
-			clasP.setX(cosPhi * x - sinPhi * y);
-			clasP.setY(sinPhi * x + cosPhi * y);
+			double cosP = cosPhi[sector];
+			double sinP = sinPhi[sector];
+			
+			clasP.setX(cosP * x - sinP * y);
+			clasP.setY(sinP * x + cosP * y);
 		}
 
 		// z coordinates are the same
@@ -464,8 +477,12 @@ public class GeometryManager {
 	}
 	
 	/**
-	 * 
-	 * @return if the projected polygon intersects the plane
+	 * See if the projected polygon intersects a plane
+	 * @param geoObj
+	 * @param projectionPlane
+	 * @param startIndex
+	 * @param count
+	 * @return <code>true</code> if the projected polygon intersects the plane
 	 */
 	public static boolean doesProjectedPolyIntersect(AbstractComponent geoObj, 
 			Plane3D projectionPlane, 
@@ -614,6 +631,43 @@ public class GeometryManager {
 			}
 		}
 		return path;
+	}
+	
+	/**
+	 * Get the rotation matrix from an axis specified by unit vector components
+	 * and an angle.
+	 * @param ux the x component of the unit vector giving the axis direction
+	 * @param uy the y component of the unit vector giving the axis direction
+	 * @param uz the z component of the unit vector giving the axis direction
+	 * @param theta the angle in degrees
+	 * @param rotMat space for the rotation matrix
+	 */
+	public void rotationMatrixFromAxisAndAngle(double ux, double uy, double uz, double theta, double[][] rotMat) {
+		double ang = Math.toRadians(theta);
+		double cos = Math.cos(ang);
+		double sin = Math.sin(ang);
+		double omc = 1. - cos;
+		double uxuy = ux*uy;
+		double uxuz = ux*uz;
+		double uyuz = uy*uz;
+		double uxsq = ux*ux;
+		double uysq = uy*uy;
+		double uzsq = uz*uz;
+		double uxsin = ux*sin;
+		double uysin = uy*sin;
+		double uzsin = uz*sin;
+		
+		rotMat[0][0] = cos + uxsq*omc;
+		rotMat[0][1] = uxuy*omc - uzsin;
+		rotMat[0][2] = uxuz*omc + uysin;
+		
+		rotMat[1][0] = uxuy*omc + uzsin;
+		rotMat[1][1] = cos + uysq*omc;
+		rotMat[1][2] = uyuz*omc - uxsin;
+
+		rotMat[2][0] = uxuz*omc - uysin;
+		rotMat[2][1] = uyuz*omc + uxsin;
+		rotMat[2][2] = cos + uzsq*omc;
 	}
 
 }

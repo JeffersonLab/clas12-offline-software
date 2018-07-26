@@ -49,7 +49,6 @@ import cnuphys.ced.geometry.BMTGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.BeamLineItem;
 import cnuphys.ced.item.MagFieldItem;
-import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.SwimTrajectory2D;
 
@@ -142,7 +141,7 @@ public class CentralZView extends CedView implements ChangeListener {
 				TMARGIN, PropertySupport.RIGHTMARGIN, RMARGIN,
 				PropertySupport.BOTTOMMARGIN, BMARGIN, PropertySupport.TOOLBAR,
 				true, PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
-				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
+				PropertySupport.VISIBLE, true,
 				PropertySupport.TITLE, title,
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
@@ -198,7 +197,6 @@ public class CentralZView extends CedView implements ChangeListener {
 					drawCosmicTracks(g, container);
 				}
 
-				_swimTrajectoryDrawer.draw(g, container);
 				drawGEMCHits(g, container);
 				drawBSTPanels(g, container);
 
@@ -206,6 +204,8 @@ public class CentralZView extends CedView implements ChangeListener {
 				denoteBMT(g, container);
 
 				_hitDrawer.draw(g, container);
+
+				_swimTrajectoryDrawer.draw(g, container);
 
 				if (showCrosses()) {
 					_crossDrawer.draw(g, container);
@@ -719,10 +719,9 @@ public class CentralZView extends CedView implements ChangeListener {
 		feedbackStrings.add(rtp);
 		feedbackStrings.add(rzp);
 
-		IField activeField = MagneticFields.getInstance().getActiveField();
-		if (activeField != null) {
+		if (_activeProbe != null) {
 			float field[] = new float[3];
-			activeField.fieldCylindrical(_phi, labRho / 10.0, labZ / 10.0,
+			_activeProbe.fieldCylindrical(_phi, labRho / 10.0, labZ / 10.0,
 					field);
 			// convert to Tesla from kG
 			field[0] /= 10.0;

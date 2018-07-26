@@ -34,7 +34,7 @@ public class BMTSectorItem extends DonutItem {
 		{LAYERTYPE.C, LAYERTYPE.Z, LAYERTYPE.Z, 
 				LAYERTYPE.C, LAYERTYPE.Z, LAYERTYPE.C};
 	
-	private static final String[] _sectorNames = {"3", "1", "2"};
+	private static final String[] _sectorNames = {"1", "3", "2"};
 	private static final double labelAngs[] = {225, 315, 90};
 //	private static final double labelRad = 238;
 	private static final double labelRad = 231;
@@ -182,7 +182,8 @@ public class BMTSectorItem extends DonutItem {
 			Point pp = new Point();
 			container.worldToLocal(pp, wp);
 			
-			FontMetrics fm = container.getComponent().getFontMetrics(Fonts.smallFont);
+			g.setColor(Color.blue);
+			FontMetrics fm = container.getComponent().getFontMetrics(Fonts.defaultFont);
 			int sw = fm.stringWidth(s);
 			g.drawString(s, pp.x-sw/2, pp.y+fm.getAscent()/2);
 		}
@@ -291,7 +292,7 @@ public class BMTSectorItem extends DonutItem {
 
 
 	/**
-	 * Add any appropriate feedback strings for the headsup display or feedback
+	 * Add any appropriate feedback strings
 	 * panel.
 	 * 
 	 * @param container the Base container.

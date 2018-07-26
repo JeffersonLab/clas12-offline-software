@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.central.CentralSupport;
 import cnuphys.ced.common.CrossDrawer;
 import cnuphys.ced.common.FMTCrossDrawer;
+import cnuphys.ced.common.SuperLayerDrawing;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.DC;
@@ -43,6 +45,7 @@ import cnuphys.ced.item.SectorHTCCItem;
 import cnuphys.ced.item.SectorLTCCItem;
 import cnuphys.ced.item.SectorPCALItem;
 import cnuphys.ced.item.SectorSuperLayer;
+import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.splot.fit.FitType;
@@ -56,6 +59,7 @@ import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
+import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.container.ScaleDrawer;
 import cnuphys.bCNU.graphics.style.LineStyle;
@@ -110,11 +114,13 @@ public class SectorView extends CedView implements ChangeListener {
 	
 	//for naming clones
 	private static int CLONE_COUNT[] = {0, 0, 0};
-
+	
+	//for special debug points
+	private static ArrayList<DebugPoint> _debugPoints = new ArrayList<DebugPoint>(10);
 	
 	// superlayer (graphical) items. The first index [0..1] is for upper and
 	// lower sectors.
-	// the second is for for super layer 0..5
+	// the second is for for super layer 0..5debug
 	private SectorSuperLayer _superLayers[][] = new SectorSuperLayer[2][6];
 
 	// determines if the wire intersections must be recalculated. This is caused
@@ -190,6 +196,11 @@ public class SectorView extends CedView implements ChangeListener {
 
 		// Recon drawer
 		_reconDrawer = new ReconDrawer(this);
+
+		// debug points
+//		if (_debugPoints.isEmpty()) {
+//			_debugPoints.add(new DebugPoint(0, 4.257, 300.4));
+//		}
 	}
 
 	/**
@@ -239,8 +250,6 @@ public class SectorView extends CedView implements ChangeListener {
 				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height,
 				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS,
 				CedView.TOOLBARBITS, PropertySupport.VISIBLE, true,
-				PropertySupport.HEADSUP, false,
-
 				PropertySupport.BACKGROUND,
 				X11Colors.getX11Color("Alice Blue").darker(),
 				// PropertySupport.BACKGROUND,
@@ -256,7 +265,7 @@ public class SectorView extends CedView implements ChangeListener {
 				+ ControlPanel.ACCUMULATIONLEGEND, DisplayBits.MAGFIELD
 				+ DisplayBits.CROSSES
 				+ DisplayBits.RECONHITS 
-				+ DisplayBits.CLUSTERS
+				+ DisplayBits.CLUSTERS + DisplayBits.FMTCROSSES
 				+ DisplayBits.DC_HITS + DisplayBits.SEGMENTS 
 				+ DisplayBits.GLOBAL_HB + DisplayBits.GLOBAL_TB
 				+ DisplayBits.ACCUMULATION //+ DisplayBits.SCALE
@@ -459,6 +468,17 @@ public class SectorView extends CedView implements ChangeListener {
 		} // end switch
 
 	}
+	
+	/**
+	 * Get the super layer drawer
+	 * @param upperLower 0 for upper sector, 1 for lower sector
+	 * @param superLayer super layer 1..6
+	 * @return the drawer
+	 */
+	public SuperLayerDrawing getSuperLayerDrawer(int upperLower, int superLayer) {
+		return _superLayers[upperLower][superLayer-1].getSuperLayerDrawer();
+	}
+
 
 	/**
 	 * Set the views before draw
@@ -577,6 +597,9 @@ public class SectorView extends CedView implements ChangeListener {
 				if ((_scaleDrawer != null) && showScale()) {
 					_scaleDrawer.draw(g, container);
 				}
+				
+				//secial debug points
+				drawDebugPoints(g, container);
 
 				// a clean rectangle
 				Rectangle bounds = container.getComponent().getBounds();
@@ -586,6 +609,35 @@ public class SectorView extends CedView implements ChangeListener {
 
 		};
 		getContainer().setAfterDraw(afterDraw);
+	}
+	
+	//points used for debugging
+	private void drawDebugPoints(Graphics g, IContainer container) {
+		for (DebugPoint dp : _debugPoints) {
+			int sector = dp.sector();
+			switch (_displaySectors) {
+			case SECTORS14:
+				if ((sector == 1) || (sector == 4)) {
+					Point pp = dp.toLocal(container);
+	//				System.err.println("DRAW DP AT " + pp);
+					SymbolDraw.drawCross(g, pp.x, pp.y, 8, Color.BLACK);
+				}
+				break;
+				
+			case SECTORS25:
+				if ((sector == 2) || (sector == 5)) {
+					
+				}
+				break;
+				
+			case SECTORS36:
+				if ((sector == 3) || (sector == 6)) {
+					
+				}
+				break;
+			}
+
+		}
 	}
 
 	/**
@@ -802,15 +854,13 @@ public class SectorView extends CedView implements ChangeListener {
 		String tiltsectxyz = "$yellow$Tilted sect xyz " + vecStr(result)
 				+ " cm";
 		feedbackStrings.add(tiltsectxyz);
-
-//		IField activeField = MagneticFields.getInstance().getActiveField();
 				
-		if (probe != null) {
+		if (_activeProbe != null) {
 			float field[] = new float[3];
-			probe.fieldCylindrical(absphi, rho, z, field);
+			_activeProbe.fieldCylindrical(absphi, rho, z, field);
 			
 			float grad[] = new float[3];
-			probe.gradientCylindrical(absphi, rho, z, grad);
+			_activeProbe.gradientCylindrical(absphi, rho, z, grad);
 			
 			// convert to Tesla from kG
 			field[0] /= 10.0;
@@ -1141,52 +1191,6 @@ public class SectorView extends CedView implements ChangeListener {
 
 		JPopupMenu popup = null;
 
-		final SectorView fview = this;
-		// are we on a time based recon item
-		// final FeedbackRect fbr = _reconDrawer.getFeedbackRect(getContainer(),
-		// mouseEvent.getPoint(), 1);
-		//
-		// if ((fbr != null) && (DataSupport.getTimeBasedTrackCount() > 0)) {
-		// popup = new JPopupMenu();
-		// final JMenuItem swimBackwardsItem = new JMenuItem(
-		// "Swim time-based track backwards");
-		// ActionListener al = new ActionListener() {
-		//
-		// @Override
-		// public void actionPerformed(ActionEvent e) {
-		// // for now just back swim the first
-		// double reconsP = dcData.timebasedtrkg_tbtracks_p[0];
-		//
-		// // have to swim traj backwards!
-		// // swimBackwardsToVertex(int q, double xo, double yo, double
-		// // zo, double px, double py, double pz) {
-		//
-		// int q = dcData.timebasedtrkg_tbtracks_q[0];
-		// double xo = dcData.timebasedtrkg_tbtracks_c3_x[0] / 100;
-		// double yo = dcData.timebasedtrkg_tbtracks_c3_y[0] / 100;
-		// double zo = dcData.timebasedtrkg_tbtracks_c3_z[0] / 100;
-		//
-		// double ux = dcData.timebasedtrkg_tbtracks_c3_ux[0];
-		// double uy = dcData.timebasedtrkg_tbtracks_c3_uy[0];
-		// double uz = dcData.timebasedtrkg_tbtracks_c3_uz[0];
-		//
-		// double pxo = reconsP * ux;
-		// double pyo = reconsP * uy;
-		// double pzo = reconsP * uz;
-		//
-		// SwimTrajectory traj = Swimmer.swimBackwardsToVertex(q, xo,
-		// yo, zo, pxo, pyo, pzo);
-		// traj.userObject = fview;
-		//
-		// Swimming.addReconTrajectory(traj);
-		// }
-		//
-		// };
-		//
-		// swimBackwardsItem.addActionListener(al);
-		// popup.add(swimBackwardsItem);
-		// }
-
 		// near a swum trajectory?
 		Point2D.Double wp = new Point2D.Double();
 		getContainer().localToWorld(mouseEvent.getPoint(), wp);
@@ -1234,7 +1238,7 @@ public class SectorView extends CedView implements ChangeListener {
 							PlotCanvas canvas = pview.getPlotCanvas();
 							try {
 								SwimTrajectory traj = traj2D.getTrajectory3D();
-								traj.computeBDL(MagneticFields.getInstance().getActiveField());
+								traj.computeBDL(FieldProbe.factory());
 
 								// do we already have data?
 								boolean havePlotData = (canvas.getDataSet() == null) ? false
@@ -1614,6 +1618,42 @@ public class SectorView extends CedView implements ChangeListener {
 		view.setBounds(vr);
 		return view;
 
+	}
+	
+	class DebugPoint {
+		
+		//LAB coordinates
+		private double phi;  //deg
+		private double rho;  //cm
+		private double z;   //cm
+		private double x;
+		private double y;
+		
+		public DebugPoint(double phi, double rho, double z) {
+			this.phi = phi;
+			this.rho = rho;
+			this.z = z;
+			double rphi = Math.toRadians(phi);
+			x = rho*Math.cos(rphi);
+			y = rho*Math.sin(rphi);
+		}
+		
+		/**
+		 * get the sector 1..6
+		 * @return the sector 1..6
+		 */
+		public int sector() {
+			return GeometryManager.getSector(phi);
+		}
+		
+		public Point toLocal(IContainer container) {
+			Point2D.Double wp = new Point2D.Double();
+			Point pp = new Point();
+			projectClasToWorld(x, y, z, projectionPlane, wp);
+			container.worldToLocal(pp, wp);
+			return pp;
+		}
+		
 	}
 	
 }

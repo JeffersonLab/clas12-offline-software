@@ -1,7 +1,5 @@
 package cnuphys.ced.trigger;
 
-import javax.swing.JLabel;
-
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.ced.alldata.ColumnData;

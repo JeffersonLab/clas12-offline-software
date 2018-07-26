@@ -38,7 +38,6 @@ import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.ECAL;
 import cnuphys.ced.event.data.PCAL;
 import cnuphys.ced.frame.Ced;
-import cnuphys.ced.trigger.TriggerFilter;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.swim.SwimMenu;
@@ -1059,8 +1058,7 @@ public class ClasIoEventManager {
 	 */
 	private void notifyEventListeners(EventSourceType source) {
 
-		Swimming.clearMCTrajectories();
-		Swimming.clearReconTrajectories();
+		Swimming.clearAllTrajectories();
 
 		if (_dataSource != null) {
 			_dataSource.close();
@@ -1089,8 +1087,7 @@ public class ClasIoEventManager {
 	// new event file notification
 	private void notifyEventListeners(File file) {
 
-		Swimming.clearMCTrajectories();
-		Swimming.clearReconTrajectories();
+		Swimming.clearAllTrajectories();
 
 		for (int index = 0; index < 3; index++) {
 			if (_viewListenerList[index] != null) {
@@ -1133,8 +1130,10 @@ public class ClasIoEventManager {
 	 */
 	protected void notifyEventListeners() {
 
-		Swimming.clearMCTrajectories();
-		Swimming.clearReconTrajectories();
+		Swimming.setNotifyOn(false); //prevent refreshes
+		Swimming.clearAllTrajectories();
+		Swimming.setNotifyOn(true); //prevent refreshes
+		
 		_uniqueLundIds = null;
 
 		Ced.getCed().setEventFilteringLabel(isFilteringOn());
