@@ -197,8 +197,8 @@ final class Wire {
         double copen = Math.cos(dbref.thopen(ireg) / 2.0);
         double sopen = Math.sin(dbref.thopen(ireg) / 2.0);
 
-        Vector3d lnorm = new Vector3d(copen, sopen, 0);
-        Vector3d rnorm = new Vector3d(-copen, sopen, 0);
+        Vector3d rnorm = new Vector3d(copen, sopen, 0);
+        Vector3d lnorm = new Vector3d(-copen, sopen, 0);
 
         double wlenl = vnum.dot(lnorm) / direction.dot(lnorm);
         leftend = direction.times(wlenl).add(midpoint);
