@@ -364,8 +364,8 @@ public class DetectorData {
                        bank.setFloat("y",row, (float)tp.getCross().origin().y());
                        bank.setFloat("z",row, (float)tp.getCross().origin().z());
                        bank.setFloat("cx",row, (float)tp.getCross().direction().x());
-                       bank.setFloat("cy",row, (float)tp.getCross().direction().x());
-                       bank.setFloat("cz",row, (float)tp.getCross().direction().x());
+                       bank.setFloat("cy",row, (float)tp.getCross().direction().y());
+                       bank.setFloat("cz",row, (float)tp.getCross().direction().z());
                        row = row + 1;
                    }
                }

@@ -116,11 +116,16 @@ public class EBAnalyzer {
             DetectorParticle p = de.getParticle(ii);
             switch (abs(p.getPid())) {
                 case 2112:
-                    // neutron momentum defined by measured beta:
+                    // neutron momentum defined by measured beta if valid:
                     final double beta = p.getBeta();
-                    final double mass = PDGDatabase.getParticleById(p.getPid()).mass();
-                    final double psquared = Math.pow(mass*beta,2) / (1-beta*beta);
-                    p.vector().setMag( Math.sqrt(psquared) );
+                    if (beta>0 && beta<1) {
+                        final double mass = PDGDatabase.getParticleById(p.getPid()).mass();
+                        final double psquared = Math.pow(mass*beta,2) / (1-beta*beta);
+                        p.vector().setMag( Math.sqrt(psquared) );
+                    }
+                    else {
+                        p.vector().setMag(0.0);
+                    }
                     break;
                 case 22:
                     if (p.hasHit(DetectorType.ECAL)) {
