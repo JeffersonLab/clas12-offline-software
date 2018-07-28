@@ -90,61 +90,32 @@ public class DetectorEvent {
         }
         return responses;
     }
-    
-    public List<DetectorResponse>  getCherenkovResponseList(){
-        this.setAssociation();
-        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
-        for (DetectorParticle p : this.particleList){
-            for (DetectorResponse r : p.getDetectorResponses()) {
-                if (r.getDescriptor().getType() == DetectorType.HTCC ||
-                    r.getDescriptor().getType() == DetectorType.LTCC ||
-                    r.getDescriptor().getType() == DetectorType.RICH)
-                responses.add(r);
-            }
-        }
-        return responses;
-    }
-    
-    public List<DetectorResponse>  getCalorimeterResponseList(){
-        this.setAssociation();
-        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
-        for(DetectorParticle p : this.particleList){
-            for(DetectorResponse r : p.getDetectorResponses()){
-                if(r.getDescriptor().getType()==DetectorType.ECAL)
-                responses.add(r);
-            }
-        }
-        return responses;
-    }
-    
-    public List<DetectorResponse>  getScintillatorResponseList(){
-        this.setAssociation();
-        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
-        for(DetectorParticle p : this.particleList){
-            for(DetectorResponse r : p.getDetectorResponses()){
-                if(r.getDescriptor().getType()==DetectorType.FTOF ||
-                   r.getDescriptor().getType()==DetectorType.CTOF ||
-                   r.getDescriptor().getType()==DetectorType.CND)
-                responses.add(r);
-            }
-        }
-        return responses;
-    }
-    
-   public List<DetectorResponse>  getTaggerResponseList(){
-        this.setAssociation();
-        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
-        for(DetectorParticle p : this.particleList){
-            for(DetectorResponse r : p.getDetectorResponses()){
-                if(r.getDescriptor().getType()==DetectorType.FTCAL ||
-                   r.getDescriptor().getType()==DetectorType.FTHODO)
-                responses.add(r);
-            }
-        }
-        return responses;
+
+   public List<DetectorResponse>  getCherenkovResponseList(){
+       return getResponseList(new DetectorType[]{
+           DetectorType.HTCC,DetectorType.LTCC,DetectorType.RICH
+       });
     }
 
-   public List<DetectorResponse> getResponseList(ArrayList<DetectorType> types) {
+    public List<DetectorResponse>  getCalorimeterResponseList(){
+       return getResponseList(new DetectorType[]{
+           DetectorType.ECAL
+       });
+    }
+
+    public List<DetectorResponse>  getScintillatorResponseList(){
+       return getResponseList(new DetectorType[]{
+           DetectorType.FTOF,DetectorType.CTOF,DetectorType.CND,DetectorType.BAND
+       });
+    }
+
+   public List<DetectorResponse>  getTaggerResponseList(){
+       return getResponseList(new DetectorType[]{
+           DetectorType.FTCAL,DetectorType.FTHODO
+       });
+    }
+
+   public List<DetectorResponse> getResponseList(DetectorType[] types) {
         this.setAssociation();
         List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
         for(DetectorParticle p : this.particleList){
