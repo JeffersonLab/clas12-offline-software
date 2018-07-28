@@ -131,19 +131,34 @@ public class DetectorEvent {
         return responses;
     }
     
-   public List<TaggerResponse>  getTaggerResponseList(){
+   public List<DetectorResponse>  getTaggerResponseList(){
         this.setAssociation();
-        List<TaggerResponse> responses = new ArrayList<TaggerResponse>();
+        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
         for(DetectorParticle p : this.particleList){
-            for(TaggerResponse r : p.getTaggerResponses()){
+            for(DetectorResponse r : p.getDetectorResponses()){
                 if(r.getDescriptor().getType()==DetectorType.FTCAL ||
-                        r.getDescriptor().getType()==DetectorType.FTHODO)
+                   r.getDescriptor().getType()==DetectorType.FTHODO)
                 responses.add(r);
             }
         }
         return responses;
     }
-   
+
+   public List<DetectorResponse> getResponseList(ArrayList<DetectorType> types) {
+        this.setAssociation();
+        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
+        for(DetectorParticle p : this.particleList){
+            for(DetectorResponse r : p.getDetectorResponses()) {
+                for(DetectorType t : types) {
+                    if (r.getDescriptor().getType() == t) {
+                        responses.add(r);
+                    }
+                }
+            }
+        }
+        return responses;
+   }
+
    public List<DetectorParticle> getCentralParticles() {
        List<DetectorParticle> central = new ArrayList<DetectorParticle>();
        for(DetectorParticle p : this.particleList) {

@@ -43,7 +43,6 @@ public class DetectorParticle implements Comparable {
     private Line3D  driftChamberEnter = new Line3D();
     
     private List<DetectorResponse> responseStore = new ArrayList<DetectorResponse>();
-    private List<TaggerResponse>   taggerStore = new ArrayList<TaggerResponse>();
 
     private DetectorTrack detectorTrack = null;
     private TaggerResponse taggerTrack = null;
@@ -131,7 +130,8 @@ public class DetectorParticle implements Comparable {
         //
         // TaggerResponse should be based on FT::particle, not just FT::cluster
        
-        Point3D xyz = tagger.getPosition();
+        Vector3D xyzV = tagger.getPosition();
+        Point3D xyz = new Point3D(xyzV.x(),xyzV.y(),xyzV.z());
         Vector3D mom = tagger.getMomentum();
         Vector3D dir=new Vector3D(mom);
         dir.unit();
@@ -161,10 +161,6 @@ public class DetectorParticle implements Comparable {
     
     public void clear(){
         this.responseStore.clear();
-    }
-    
-    public void addTaggerResponse(TaggerResponse res) {
-        this.taggerStore.add(res);
     }
     
     public void addResponse(DetectorResponse res, boolean match){
@@ -330,10 +326,6 @@ public class DetectorParticle implements Comparable {
         return this.responseStore;
     }
     
-    public List<TaggerResponse> getTaggerResponses() {
-        return this.taggerStore;
-    }
- 
     public DetectorResponse getHit(DetectorType type){
         return getHit(type,-1);
     }
@@ -354,9 +346,6 @@ public class DetectorParticle implements Comparable {
         return this.getHit(type,layer);
     }
     
-
-
-    
     public double getBeta(){ return this.particleBeta;}
     public double getNDF() {return this.detectorTrack.getNDF();}
     public double getTrackChi2() {return this.detectorTrack.getchi2();}
@@ -371,7 +360,7 @@ public class DetectorParticle implements Comparable {
     public void   setPidQuality(double q) {this.particleIDQuality = q;}
 
     public TaggerResponse getTaggerResponse(){ return this.taggerTrack; }
-    public Point3D getTaggerPosition() {return this.taggerTrack.getPosition();}
+    //public Point3D getTaggerPosition() {return this.taggerTrack.getPosition();}
     public Point3D getTaggerPositionWidth() {return this.taggerTrack.getPositionWidth();}
     public double  getTaggerRadius() {return this.taggerTrack.getRadius();}
     public double  getTaggerSize() {return this.taggerTrack.getSize();}

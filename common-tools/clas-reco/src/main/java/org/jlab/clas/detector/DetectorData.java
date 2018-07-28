@@ -272,11 +272,11 @@ public class DetectorData {
        return bank;
    }
       
-      public static DataBank getForwardTaggerBank(List<TaggerResponse> responses, DataEvent event, String bank_name){
+      public static DataBank getForwardTaggerBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, responses.size());
        int row = 0;
        for(int i = 0; i < responses.size(); i++){
-           TaggerResponse t  = responses.get(i);
+           TaggerResponse t  = (TaggerResponse)responses.get(i);
            bank.setShort("index", row, (short) t.getHitIndex());
            bank.setShort("pindex", row, (short) t.getAssociation());
            bank.setByte("detector", row, (byte) t.getDescriptor().getType().getDetectorId());

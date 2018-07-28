@@ -158,7 +158,7 @@ public class EBUtil {
             status += taggerStat;
         }
         */
-        if (p.getTaggerResponses().size()>0) status += taggerStat;
+        if (p.getHit(DetectorType.FTCAL)!=null) status += taggerStat;
 
 
         // scintillators:

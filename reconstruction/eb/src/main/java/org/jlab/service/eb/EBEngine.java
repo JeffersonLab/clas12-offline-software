@@ -127,11 +127,11 @@ public class EBEngine extends ReconstructionEngine {
         // Add Forward Tagger particles:
         List<DetectorParticle> ftparticles = DetectorData.readForwardTaggerParticles(de, "FT::particles");       
         List<Map<DetectorType, Integer>> ftIndices = DetectorData.readForwardTaggerIndex(de,"FT::particles");
-        List<TaggerResponse>        responseFTCAL = TaggerResponse.readHipoEvent(de,"FTCAL::clusters",DetectorType.FTCAL);
-        List<TaggerResponse>        responseFTHODO = TaggerResponse.readHipoEvent(de,"FTHODO::clusters",DetectorType.FTHODO);
+        List<DetectorResponse> responseFTCAL = TaggerResponse.readHipoEvent(de,"FTCAL::clusters",DetectorType.FTCAL);
+        List<DetectorResponse> responseFTHODO = TaggerResponse.readHipoEvent(de,"FTHODO::clusters",DetectorType.FTHODO);
         eb.addParticles(ftparticles);
-        eb.addTaggerResponses(responseFTCAL);
-        eb.addTaggerResponses(responseFTHODO);
+        eb.addDetectorResponses(responseFTCAL);
+        eb.addDetectorResponses(responseFTHODO);
         eb.addFTIndices(ftIndices);
         eb.forwardTaggerIDMatching();
 
@@ -164,7 +164,7 @@ public class EBEngine extends ReconstructionEngine {
                 de.appendBanks(bankChe);
             }
             
-            List<TaggerResponse> taggers = eb.getEvent().getTaggerResponseList();
+            List<DetectorResponse> taggers = eb.getEvent().getTaggerResponseList();
             if (ftBank!=null && taggers.size()>0) {
                 DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getTaggerResponseList(), de, ftBank);
                 de.appendBanks(bankForwardTagger);

@@ -38,7 +38,6 @@ public class EventBuilder {
     public EBCCDBConstants ccdb;
     private DetectorEvent               detectorEvent = new DetectorEvent();
     private List<DetectorResponse>  detectorResponses = new ArrayList<DetectorResponse>();
-    private List<TaggerResponse>      taggerResponses = new ArrayList<TaggerResponse>();
     private List<Map<DetectorType,Integer>> ftIndices = new ArrayList<Map<DetectorType,Integer>>();
     private int[]  TriggerList = new int[]{11,-11,211,-211,0};
     private HashMap<Integer,Integer> pindex_map = new HashMap<Integer, Integer>();
@@ -59,10 +58,6 @@ public class EventBuilder {
         detectorResponses.addAll(responses);
     }
 
-    public void addTaggerResponses(List<TaggerResponse> responses){
-        taggerResponses.addAll(responses);
-    }
-    
     public void addFTIndices(List<Map<DetectorType, Integer>> ftindex) {
         ftIndices.addAll(ftindex);
     }
@@ -179,18 +174,18 @@ public class EventBuilder {
                 int counter = 0;
                 DetectorParticle p = this.detectorEvent.getParticles().get(n);
                 if(p.getTrackDetector()==DetectorType.FTCAL.getDetectorId()) {
-                    int particle_calID = this.ftIndices.get(counter).get(DetectorType.FTCAL);
-                    int index = getForwardTaggerMatch(this.taggerResponses, p, DetectorType.FTCAL, particle_calID);
+                    final int particle_calID = this.ftIndices.get(counter).get(DetectorType.FTCAL);
+                    int index = getForwardTaggerMatch(this.detectorResponses, p, DetectorType.FTCAL, particle_calID);
                     if(index>=0){
-                        p.addTaggerResponse(this.taggerResponses.get(index));
-                        this.taggerResponses.get(index).setAssociation(n);
+                        p.addResponse(this.detectorResponses.get(index));
+                        this.detectorResponses.get(index).setAssociation(n);
                     }
       
-                    int particle_hodoID = this.ftIndices.get(counter).get(DetectorType.FTHODO);
-                    index = getForwardTaggerMatch(this.taggerResponses, p, DetectorType.FTHODO, particle_hodoID);
+                    final int particle_hodoID = this.ftIndices.get(counter).get(DetectorType.FTHODO);
+                    index = getForwardTaggerMatch(this.detectorResponses, p, DetectorType.FTHODO, particle_hodoID);
                     if(index>=0){
-                        p.addTaggerResponse(this.taggerResponses.get(index));
-                        this.taggerResponses.get(index).setAssociation(n);
+                        p.addResponse(this.detectorResponses.get(index));
+                        this.detectorResponses.get(index).setAssociation(n);
                     }
                     counter = counter + 1;
                 }
@@ -198,21 +193,17 @@ public class EventBuilder {
         }
     }
     
-    public int getForwardTaggerMatch(List<TaggerResponse> hitList, DetectorParticle part, 
+    public int getForwardTaggerMatch(List<DetectorResponse> hitList, DetectorParticle part, 
             DetectorType type, int ft_id) {
         int bestIndex = -1;
         for(int loop = 0; loop < hitList.size(); loop++) {
-            if(type==DetectorType.FTCAL){
-                if(hitList.get(loop).getDescriptor().getType()==type
-                    && hitList.get(loop).getID()==ft_id){
-                    bestIndex = loop;
-                }
+            if (type!=DetectorType.FTCAL && type!=DetectorType.FTHODO) {
+                continue;
             }
-            if(type==DetectorType.FTHODO){
-               if(hitList.get(loop).getDescriptor().getType()==type
-                     &&  hitList.get(loop).getID()==ft_id){
-                   bestIndex = loop;
-               }
+            if (hitList.get(loop).getDescriptor().getType()==type &&
+                ((TaggerResponse)hitList.get(loop)).getID()==ft_id){
+                bestIndex = loop;
+                break;
             }
         }
         return bestIndex;
