@@ -49,7 +49,7 @@ public class EngineProcessor {
         String[] services = new String[]{
             "org.jlab.clas.swimtools.MagFieldsEngine",
             "org.jlab.service.dc.DCHBEngine",
-            "org.jlab.service.ftof.FTOFEHBngine",
+            "org.jlab.service.ftof.FTOFHBEngine",
             "org.jlab.service.ec.ECEngine",
             "org.jlab.service.htcc.HTCCReconstructionService",
             "org.jlab.service.eb.EBHBEngine",
