@@ -4,6 +4,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import events.TestEvent;
+import org.jlab.clas.swimtools.MagFieldsEngine;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -23,7 +24,9 @@ import org.jlab.service.eb.EBTBEngine;
 public class EBReconstructionTest {
 
     public void processAllEngines(DataEvent ev) {
-
+        MagFieldsEngine enf = new MagFieldsEngine();
+        enf.init();
+        enf.processDataEvent(ev);
         DCHBEngine engineDCHB = new DCHBEngine();
         engineDCHB.init();
         engineDCHB.processDataEvent(ev);
