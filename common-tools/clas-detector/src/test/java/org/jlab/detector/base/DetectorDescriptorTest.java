@@ -22,5 +22,11 @@ public class DetectorDescriptorTest {
 		assertEquals(dd.getSector(), 4);
 		assertEquals(dd.getLayer(), 5);
 		assertEquals(dd.getComponent(), 6);
+
+		DetectorDescriptor dd2 = new DetectorDescriptor(DetectorType.DC);
+        dd2.setOrder(0);
+        dd2.setCrateSlotChannel(1, 2, 3);
+        dd2.setSectorLayerComponent(4, 5, 6);
+		assertEquals(dd.compare(dd2), true);
 	}
 }

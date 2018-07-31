@@ -1,6 +1,5 @@
 package org.jlab.service.ftof;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,9 +21,7 @@ import org.jlab.rec.tof.cluster.ClusterFinder;
 import org.jlab.rec.tof.cluster.ftof.ClusterMatcher;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
-import org.jlab.service.dc.DCHBEngine;
 import org.jlab.geometry.prim.Line3d;
-import org.jlab.service.dc.DCTBEngine;
 
 /**
  *
@@ -33,8 +30,8 @@ import org.jlab.service.dc.DCTBEngine;
  */
 public class FTOFEngine extends ReconstructionEngine {
 
-    public FTOFEngine() {
-        super("FTOFRec", "carman, ziegler", "0.5");
+    public FTOFEngine(String name) {
+        super(name, "carman, ziegler", "1.0");
     }
 
     FTOFGeant4Factory geometry;
@@ -57,7 +54,8 @@ public class FTOFEngine extends ReconstructionEngine {
                     "/calibration/ftof/status",
                     "/calibration/ftof/gain_balance",
                     "/calibration/ftof/tdc_conv",
-                };
+                    "/calibration/ftof/time_jitter",
+                 };
         
         requireConstants(Arrays.asList(ftofTables));
        
@@ -108,9 +106,14 @@ public class FTOFEngine extends ReconstructionEngine {
 		
         // Load the constants
         //-------------------
-        int newRun = bank.getInt("run", 0);
+        int  newRun = bank.getInt("run", 0);
+        long timeStamp = bank.getLong("timestamp", 0);
         if (newRun<=0) {
             System.err.println("FTOFEngine:  got run <= 0 in RUN::config, skipping event.");
+            return false;
+        }
+        if (timeStamp==-1) {
+            System.err.println("FTOFEngine:  got 0 timestamp, skipping event");
             return false;
         }
         
@@ -129,14 +132,15 @@ public class FTOFEngine extends ReconstructionEngine {
         List<Cluster> clusters = new ArrayList<Cluster>(); // all clusters
         // read in the hits for FTOF
         HitReader hitRead = new HitReader();
-        hitRead.fetch_Hits(event, geometry, trkLines, paths, ids, 
+        hitRead.fetch_Hits(event, timeStamp, geometry, trkLines, paths, ids, 
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/attenuation"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/effective_velocity"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_offsets"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_walk"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/status"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/gain_balance"),
-                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/tdc_conv") );
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/tdc_conv"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_jitter") );
 
         // 1) get the hits
         List<Hit> FTOF1AHits = hitRead.get_FTOF1AHits();
@@ -236,6 +240,18 @@ public class FTOFEngine extends ReconstructionEngine {
         }
 
         rbc.appendFTOFBanks(event, hits, clusters, matchedClusters);
+//            if (event.hasBank("FTOF::adc")) {
+//                if (event.hasBank("FTOF::adc")) {
+//                    event.getBank("FTOF::adc").show();
+//                }
+//                if (event.hasBank("FTOF::tdc")) {
+//                    event.getBank("FTOF::tdc").show();
+//                }
+//                if (event.hasBank("FTOF::hits")) {
+//                    event.getBank("FTOF::hits").show();
+//                }
+//            }
+
 
         return true;
     }
@@ -243,16 +259,12 @@ public class FTOFEngine extends ReconstructionEngine {
     
 
     public static void main(String arg[]) {
-
-        DCHBEngine en0 = new DCHBEngine();
-        en0.init();
-        DCTBEngine en1 = new DCTBEngine();
-        en1.init();
-        FTOFEngine en = new FTOFEngine();
+        FTOFHBEngine en = new FTOFHBEngine();
         en.init();
 
         int counter = 0;
-        String inputFile = "/Users/ziegler/Workdir/Distribution/CLARA/CLARA_INSTALL/data/output/out_pion_smearz_gen_1.hipo";
+        String inputFile = "/Users/ziegler/Desktop/Work/Files/GEMC/out_gemc_orig.hipo";
+
         // String inputFile = args[0];
         // String outputFile = args[1];
 
@@ -263,11 +275,11 @@ public class FTOFEngine extends ReconstructionEngine {
 
         HipoDataSync writer = new HipoDataSync();
         // Writer
-        String outputFile = "/Users/ziegler/Workdir/Files/GEMC/TestFTOFSchemaRec2.hipo";
+        String outputFile = "/Users/ziegler/Desktop/Work/Files/GEMC/out_gemc_orig_rec.hipo";
         writer.open(outputFile);
 
         long t1 = 0;
-        while (reader.hasEvent()) {
+        while (reader.hasEvent() && counter<10) {
 
             counter++;
 
@@ -281,7 +293,7 @@ public class FTOFEngine extends ReconstructionEngine {
             //en0.processDataEvent(event);
             //en1.processDataEvent(event);
             en.processDataEvent(event);
-            //System.out.println("  EVENT " + counter);
+            System.out.println("  EVENT " + counter);
             //if (counter > 3066)
             //	break;
             // event.show();

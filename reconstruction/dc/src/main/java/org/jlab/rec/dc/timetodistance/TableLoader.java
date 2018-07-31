@@ -12,8 +12,9 @@ public class TableLoader {
     public TableLoader() {
             // TODO Auto-generated constructor stub
     }
+    static final protected int nBinsT=2000;
     //public static double[][][][][] DISTFROMTIME = new double[6][6][6][6][850]; // sector slyr alpha Bfield time bins
-    public static double[][][][][] DISTFROMTIME = new double[6][6][8][6][1800]; // sector slyr alpha Bfield time bins
+    public static double[][][][][] DISTFROMTIME = new double[6][6][8][6][nBinsT]; // sector slyr alpha Bfield time bins
     static boolean T2DLOADED = false;
     static boolean T0LOADED = false;
     static int minBinIdxB = 0;
@@ -48,11 +49,13 @@ public class TableLoader {
                     }
             }
     }
-
-    public static synchronized void FillT0Tables(int run) {
+    
+    
+    
+    public static synchronized void FillT0Tables(int run, String variation) {
         if (T0LOADED) return;
-        System.out.println(" T0 TABLE FILLED.....");
-        DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(run, "default");
+        System.out.println(" T0 TABLE FILLED..... for Run "+run+" with VARIATION "+variation);
+        DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(run, variation);
         dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
         //disconnect from database. Important to do this after loading tables.
         dbprovider.disconnect();
@@ -74,10 +77,11 @@ public class TableLoader {
             T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
             Constants.setT0(T0);
             Constants.setT0Err(T0ERR);
-            
+            //System.out.println("T0 = "+t0);
         }
         T0LOADED = true;
     }
+    
     public static synchronized void Fill(IndexedTable tab) {
         //CCDBTables 0 =  "/calibration/dc/signal_generation/doca_resolution";
         //CCDBTables 1 =  "/calibration/dc/time_to_distance/t2d";
@@ -121,22 +125,21 @@ public class TableLoader {
                                             int tbin = Integer.parseInt(df.format(timebfield/2.) ) -1;
 
 
-                                             if(tbin<0)
-                                                 tbin=0;
-
-                                             if(tbin>maxBinIdxT[s][r][ibfield][icosalpha]) {
-                                                  maxBinIdxT[s][r][ibfield][icosalpha] = tbin; 
-                                             } //System.out.println("tbin "+tbin+" tmax "+tmax+ "s "+s+" sl "+r );
-                                              if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]==0) {
+                                            if(tbin<0)
+                                                tbin=0;
+                                            if(tbin>=nBinsT)
+                                                tbin = nBinsT-1;
+                                            if(tbin>maxBinIdxT[s][r][ibfield][icosalpha]) {
+                                                maxBinIdxT[s][r][ibfield][icosalpha] = tbin; 
+                                            } //System.out.println("tbin "+tbin+" tmax "+tmax+ "s "+s+" sl "+r );
+                                            if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]==0) {
                                                 // firstbin = bin;
                                                 // bincount = 0;				    	 
-                                                     DISTFROMTIME[s][r][ibfield][icosalpha][tbin]=x;
-                                             } else {
+                                                DISTFROMTIME[s][r][ibfield][icosalpha][tbin]=x;
+                                            } else {
                                                 // bincount++;
-                                                 DISTFROMTIME[s][r][ibfield][icosalpha][tbin]+=stepSize;
-                                             }
-
-                                           // System.out.println(r+"  "+ibfield+"  "+icosalpha+"  "+tbin +"  "+timebfield+ "  "+x+"  "+alpha); 
+                                                DISTFROMTIME[s][r][ibfield][icosalpha][tbin]+=stepSize;
+                                            }
                                         }
                                 }
                         }

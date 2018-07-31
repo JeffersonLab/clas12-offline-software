@@ -128,7 +128,7 @@ public class ECPeak {
             double     le = energy;
             
             this.peakDistanceEdge += 
-                    peakStrips.get(i).getDistanceEdge() + 
+                    //peakStrips.get(i).getDistanceEdge() + 
                     peakStrips.get(i).getDistanceEdge()*le;
             
             pointOrigin.setX(pointOrigin.x()+line.origin().x()*le);
@@ -153,18 +153,24 @@ public class ECPeak {
                 pointEnd.y()/logSumm,
                 pointEnd.z()/logSumm
         );
-        
+        // Calculating Moments of the shower peak
         for(int i = 0; i < this.peakStrips.size(); i++){            
-            Line3D line = this.peakStrips.get(i).getLine();
-            double dist   = line.origin().distance(this.peakLine.origin());
+            double stripDistance = this.peakStrips.get(i).getDistanceEdge();
+            double dist = this.peakDistanceEdge - stripDistance;
             double energy = this.peakStrips.get(i).getEnergy();
-            this.peakMoment  += energy*dist;
-            this.peakMoment2 += energy*dist*dist;
+            this.peakMoment  += Math.abs(dist)*energy;
+            this.peakMoment2 += dist*dist*energy;
             this.peakMoment3 += energy*dist*dist*dist;            
         }
+        
         this.peakMoment = this.peakMoment/logSumm;
-        this.peakMoment2 = this.peakMoment2/logSumm;
-        this.peakMoment3 = this.peakMoment3/logSumm;
+        if(this.peakMoment2<0.0000000001){
+            this.peakMoment2 = 4.5/12.0;
+        } else {
+            this.peakMoment2 = this.peakMoment2/logSumm;        
+        }
+        double sigma3    = Math.sqrt(this.peakMoment2);
+        this.peakMoment3 = this.peakMoment3/logSumm/(sigma3*sigma3*sigma3);
     }
     
     public double getDistanceEdge(){

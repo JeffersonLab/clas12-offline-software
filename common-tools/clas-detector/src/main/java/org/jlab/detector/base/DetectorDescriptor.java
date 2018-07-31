@@ -104,10 +104,10 @@ public class DetectorDescriptor implements Comparable<DetectorDescriptor> {
     }
     
     public boolean compare(DetectorDescriptor desc){
-        if(this.detectorType==desc.detectorType&&
-                this.dt_SECTOR==desc.dt_SECTOR&&
-                this.dt_LAYER==desc.dt_LAYER&&
-                this.dt_COMPONENT==desc.dt_COMPONENT) return true;
+        if(this.detectorType.equals(desc.detectorType)&&
+                this.dt_SECTOR.equals(desc.dt_SECTOR)&&
+                this.dt_LAYER.equals(desc.dt_LAYER)&&
+                this.dt_COMPONENT.equals(desc.dt_COMPONENT)) return true;
         return false;
     }
     

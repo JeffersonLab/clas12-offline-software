@@ -4,9 +4,8 @@ import static java.lang.Math.abs;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
-import java.util.TreeMap;
 
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.Vector3;
@@ -33,7 +32,7 @@ public class DetectorParticle implements Comparable {
     private Integer particleTrackIndex = -1;
     private Double  particleBeta      = 0.0;
     private Double  particleMass      = 0.0;
-    private Double  particleIDQuality = 0.0;
+    private Double  particleIDQuality = 9999.0;
     private Double  particlePath      = 0.0; 
     private int     particleScore     = 0; // scores are assigned detector hits
     private double  particleScoreChi2 = 0.0; // chi2 for particle score 
@@ -43,13 +42,9 @@ public class DetectorParticle implements Comparable {
     
     private Line3D  driftChamberEnter = new Line3D();
     
-    private List<DetectorResponse>    responseStore = new ArrayList<DetectorResponse>();
-    private List<CherenkovResponse>  cherenkovStore = new ArrayList<CherenkovResponse>();
-    private List<TaggerResponse>     taggerStore = new ArrayList<TaggerResponse>();
+    private List<DetectorResponse> responseStore = new ArrayList<DetectorResponse>();
+    private List<TaggerResponse>   taggerStore = new ArrayList<TaggerResponse>();
 
-    private TreeMap<DetectorType,Vector3>  projectedHit = 
-            new  TreeMap<DetectorType,Vector3>();
-    
     private DetectorTrack detectorTrack = null;
     private TaggerResponse taggerTrack = null;
     
@@ -105,6 +100,7 @@ public class DetectorParticle implements Comparable {
                 resp.getPosition().x(),
                 resp.getPosition().y(),
                 resp.getPosition().z());
+        resp.setPath(resp.getPosition().mag());
         particle.addResponse(resp);
         return particle;
     }
@@ -117,6 +113,11 @@ public class DetectorParticle implements Comparable {
                 vertex.x(),
                 vertex.y(),
                 vertex.z());
+        // FIXME:  stop mixing Vector3 and Vector3D
+        final double dx = resp.getPosition().x()-vertex.x();
+        final double dy = resp.getPosition().y()-vertex.y();
+        final double dz = resp.getPosition().z()-vertex.z();
+        resp.setPath(Math.sqrt(dx*dx+dy*dy+dz*dz));
         particle.addResponse(resp);
         return particle;
     }
@@ -154,20 +155,12 @@ public class DetectorParticle implements Comparable {
         return particle;
     }
    
-    public List<DetectorTrack.TrajectoryPoint> getTrackTrajectory() {
+    public Map<Integer,DetectorTrack.TrajectoryPoint> getTrackTrajectory() {
         return detectorTrack.getTrajectory();
     }
     
     public void clear(){
         this.responseStore.clear();
-    }
-    
-    public List<CherenkovResponse> getCherenkovResponse(){
-        return this.cherenkovStore;
-    }
-    
-    public void addCherenkovResponse(CherenkovResponse res){
-        this.cherenkovStore.add(res);
     }
     
     public void addTaggerResponse(TaggerResponse res) {
@@ -273,12 +266,24 @@ public class DetectorParticle implements Comparable {
         return this.particleScore;
     }
     
-    public int getSector(){
-        if(this.hasHit(DetectorType.ECAL, 1)==true){
-            return getHit(DetectorType.ECAL, 1).getDescriptor().getSector();
-        }
-        return 0;
+    public int getSector(DetectorType type,int layer) {
+        DetectorResponse hit = this.getHit(type,layer);
+        return hit==null ? 0 : hit.getSector();
     }
+
+    public int getSector(DetectorType type) {
+        return this.getSector(type,-1);
+    }
+
+    /**
+     * @deprecated
+     * Just for backward compatibility for any external usage
+     */
+    public int getSector(){
+        return this.getSector(DetectorType.ECAL,1);
+    }
+
+
     /**
      * returns chi2 of score.
      * @return 
@@ -293,25 +298,17 @@ public class DetectorParticle implements Comparable {
     public void addResponse(DetectorResponse res){
         this.responseStore.add(res);
     }
-    
-    public DetectorResponse  getResponse(DetectorType type, int layer){
-        for(DetectorResponse res : this.responseStore){
-            if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer){
-                return res;
-            }
-        }
-        return null;
-    }
-    
+
     public boolean hasHit(DetectorType type){
         int hits = 0;
         for( DetectorResponse res : this.responseStore){
             if(res.getDescriptor().getType()==type) hits++;
         }
         if(hits==0) return false;
-        if(hits>1 && type!=DetectorType.CTOF){
+        if(hits>1 && type!=DetectorType.CTOF && type!=DetectorType.ECAL){
             // don't warn for CTOF, since it currently doesn't do clustering
-            System.out.println("[Warning] Too many hits for detector type = " + type);
+            // don't warn for ECAL, since it has multiple layers
+            System.out.println("[Warning] DetectorParticle.hasHit(type): Too many hits for detector type = " + type);
         }
         return true;
     }
@@ -324,7 +321,7 @@ public class DetectorParticle implements Comparable {
         if(hits==0) return false;
         if(hits>1 && type!=DetectorType.CTOF){
             // don't warn for CTOF, since it currently doesn't do clustering
-            System.out.println("[Warning] Too many hits for detector type = " + type);
+            System.out.println("[Warning] DetectorParticle.hasHit(type,layer): Too many hits for detector type = " + type);
         }
         return true;
     }
@@ -333,26 +330,28 @@ public class DetectorParticle implements Comparable {
         return this.responseStore;
     }
     
-    public List<CherenkovResponse> getCherenkovResponses(){
-        return this.cherenkovStore;
-    }
-    
     public List<TaggerResponse> getTaggerResponses() {
         return this.taggerStore;
     }
  
     public DetectorResponse getHit(DetectorType type){
-        for(DetectorResponse res : this.responseStore){
-            if(res.getDescriptor().getType()==type) return res;
+        return getHit(type,-1);
+    }
+   
+    public DetectorResponse getHit(DetectorType type, int layer) {
+        for (DetectorResponse res : this.responseStore) {
+            if (res.getDescriptor().getType() != type) continue;
+            if (layer > 0 && res.getDescriptor().getLayer() != layer) continue;
+            return res;
         }
         return null;
     }
-    
-    public DetectorResponse getHit(DetectorType type, int layer){
-        for(DetectorResponse res : this.responseStore){
-            if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer) return res;
-        }
-        return null;
+    /**
+     * @deprecated
+     * Just for backward compatibility for any external usage
+     */
+    public DetectorResponse  getResponse(DetectorType type, int layer){
+        return this.getHit(type,layer);
     }
     
 
@@ -363,6 +362,9 @@ public class DetectorParticle implements Comparable {
     public double getTrackChi2() {return this.detectorTrack.getchi2();}
     public int    getStatus(){ return this.particleStatus;}
     public int    getTrackDetector() {return this.detectorTrack.getDetectorID();}
+    public int    getTrackSector() {return this.detectorTrack.getSector();}
+    public int    getTrackDetectorID() {return this.detectorTrack.getDetectorID();}
+
     public double getMass(){ return this.particleMass;}
     public int    getPid(){ return this.particlePID;}
     public double getPidQuality() {return this.particleIDQuality;}
@@ -545,84 +547,6 @@ public class DetectorParticle implements Comparable {
     public void setPid(int pid){this.particlePID = pid;}
     public void setCharge(int charge) { this.detectorTrack.setCharge(charge);}
     
-    public void setStatus() {
-        
-        final int centralStat=4000;
-        final int forwardStat=2000;
-        final int taggerStat=1000;
-        final int scintillatorStat=100;
-        final int calorimeterStat=10;
-        final int cherenkovStat=1;
-
-        int status = 0;
-        int trackType = -1;
-        if (this.detectorTrack!=null) trackType = this.detectorTrack.getDetectorID();
-
-        // central:
-        if (this.hasHit(DetectorType.BMT)  ||
-            this.hasHit(DetectorType.BST)  ||
-            this.hasHit(DetectorType.CVT)  ||
-            this.hasHit(DetectorType.CTOF) ||
-            this.hasHit(DetectorType.CND)  ||
-            this.hasHit(DetectorType.RTPC)) {
-                status += centralStat;
-        }
-        else if (this.detectorTrack!=null &&
-                DetectorType.getType(trackType)==DetectorType.CVT) {
-                status += centralStat;
-        }
-
-        // forward:
-        if (this.hasHit(DetectorType.DC)     ||
-            this.hasHit(DetectorType.FMT)    ||
-            this.hasHit(DetectorType.ECAL,1) ||
-            this.hasHit(DetectorType.ECAL,4) ||
-            this.hasHit(DetectorType.ECAL,7) ||
-            this.hasHit(DetectorType.FTOF,1) ||
-            this.hasHit(DetectorType.FTOF,2) ||
-            this.hasHit(DetectorType.FTOF,3) ||
-            this.hasHit(DetectorType.HTCC)   ||
-            this.hasHit(DetectorType.LTCC)   ||
-            this.hasHit(DetectorType.RICH)) {
-            status += forwardStat;
-        }
-        else if (this.detectorTrack!=null && 
-                DetectorType.getType(trackType)==DetectorType.DC) {
-            status += forwardStat;
-        }
-
-        // tagger:
-        // need to fix broken response classes inheritance
-        /*
-        if (this.hasHit(DetectorType.FT)   ||
-            this.hasHit(DetectorType.FTCAL)  ||
-            this.hasHit(DetectorType.FTHODO) ||
-            this.hasHit(DetectorType.FTTRK)) {
-            status += taggerStat;
-        }
-        */
-        if (this.taggerStore.size()>0) status += taggerStat;
-
-
-        // scintillators:
-        status += scintillatorStat*this.countResponses(DetectorType.FTOF);
-        status += scintillatorStat*this.countResponses(DetectorType.CTOF);
-        status += scintillatorStat*this.countResponses(DetectorType.FTHODO);
-
-        // calorimeters:
-        status +=  calorimeterStat*this.countResponses(DetectorType.CND);
-        status +=  calorimeterStat*this.countResponses(DetectorType.ECAL);
-        status +=  calorimeterStat*this.countResponses(DetectorType.FTCAL);
-
-        // cherenkovs:
-        //status +=   cherenkovStat*this.countResponses(DetectorType.LTCC);
-        //status +=   cherenkovStat*this.countResponses(DetectorType.HTCC);
-        //status +=   cherenkovStat*this.countResponses(DetectorType.RICH);
-        status += cherenkovStat * cherenkovStore.size();
-
-        this.particleStatus = status;
-    }
-    
     public void setCross(double x, double y, double z,
             double ux, double uy, double uz){
         this.particleCrossPosition.setXYZ(x, y, z);
@@ -643,7 +567,7 @@ public class DetectorParticle implements Comparable {
             DetectorResponse response = hitList.get(loop);
             
             if(response.getDescriptor().getType()==type &&
-               response.getDescriptor().getLayer()==detectorLayer &&
+               (detectorLayer<=0 || response.getDescriptor().getLayer()==detectorLayer) &&
                response.getAssociation()<0) {
                 hitPoint.set(
                         response.getPosition().x(),
@@ -737,8 +661,8 @@ public class DetectorParticle implements Comparable {
 
     public double getNphe(DetectorType type){
         double nphe = 0;
-        for(CherenkovResponse c : this.cherenkovStore){
-            if(c.getCherenkovType()==type){
+        for(DetectorResponse c : this.responseStore){
+            if(c.getDescriptor().getType() == type){
                 nphe = c.getEnergy();
                 // FIXME: this is choosing the last match 
                 // should instead either be a += or a break
@@ -773,7 +697,7 @@ public class DetectorParticle implements Comparable {
         return vertex_time;
     }
 
-    public int getCherenkovSignal(List<CherenkovResponse> cherenkovs, DetectorType type){
+    public int getCherenkovSignal(List<DetectorResponse> responses, DetectorType type){
 
         // choose cross based on detector type:
         Line3D cross;
@@ -790,13 +714,13 @@ public class DetectorParticle implements Comparable {
 
         // find the best match:
         int bestIndex = -1;
-        if(cherenkovs.size()>0){
-            for(int loop = 0; loop < cherenkovs.size(); loop++) {
-                if(cherenkovs.get(loop).getCherenkovType()==type){
+        if(responses.size()>0){
+            for(int loop = 0; loop < responses.size(); loop++) {
+                if(responses.get(loop).getDescriptor().getType() == type){
                     //final boolean matchtruth = type==DetectorType.HTCC ?
-                    //    cherenkovs.get(loop).matchToPoint(cross) :
-                    //    cherenkovs.get(loop).match(cross);
-                    final boolean matchtruth = cherenkovs.get(loop).match(cross);
+                    //    ((CherenkovResponse)cherenkovs.get(loop)).matchToPoint(cross) :
+                    //    ((CherenkovResponse)cherenkovs.get(loop)).match(cross);
+                    final boolean matchtruth = ((CherenkovResponse)responses.get(loop)).match(cross);
                     if(matchtruth==true){
                         bestIndex = loop;
                         // FIXME keep the first match!

@@ -18,6 +18,9 @@ public enum EBCCDBEnum {
     RF_CYCLES,
     RF_TDC2TIME,
     RF_ID,
+    RF_JITTER_CYCLES,
+    RF_JITTER_PERIOD,
+    RF_JITTER_PHASE,
     PCAL_TimingRes,
     ECIN_TimingRes,
     ECOUT_TimingRes,
@@ -44,11 +47,15 @@ public enum EBCCDBEnum {
     CND_DR,
     CND_DPHI,
     CND_DZ,
+    CND_NEUTRON_maxBeta,
     HTCC_DTHETA,
     HTCC_DPHI,
     HTCC_TimingRes,
     LTCC_DTHETA,
     LTCC_DPHI,
-    LTCC_TimingRes;
+    LTCC_TimingRes,
+    FCUP_slope,
+    FCUP_offset,
+    FCUP_atten;
 }
 

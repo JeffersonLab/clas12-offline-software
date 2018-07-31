@@ -75,8 +75,7 @@ public abstract class Plugin {
 		customizePlugin();
 
 		// create the underlying bCNU view
-		_view = new PluginView(title, world.x, world.y, world.x + world.width,
-				world.y + world.height, _props);
+		_view = new PluginView(title, world.x, world.y, world.x + world.width, world.y + world.height, _props);
 		_view.setPlugin(this);
 
 		// the mouse listener
@@ -183,8 +182,9 @@ public abstract class Plugin {
 	 * world.y = 0;
 	 * world.width = 600;
 	 * world.height = 400;
-	 * </code> </br> sets a world system from (-200, 0) at the lower left to
-	 * (400, 400) at the upper right.
+	 * </code> </br>
+	 * sets a world system from (-200, 0) at the lower left to (400, 400) at the
+	 * upper right.
 	 * 
 	 * @param world
 	 *            use this object to fill in the world default coordinate
@@ -320,8 +320,7 @@ public abstract class Plugin {
 	 * @param pixelPoint
 	 *            the pixel location of the click
 	 */
-	public abstract void shapeClick(PluginShape shape, int clickCount,
-			Point pixelPoint);
+	public abstract void shapeClick(PluginShape shape, int clickCount, Point pixelPoint);
 
 	/**
 	 * The popup trigger (usually a right-click) has occurred for a shape.
@@ -358,8 +357,7 @@ public abstract class Plugin {
 	 *            extra custom properties
 	 * @return the new shape
 	 */
-	public PluginShape addText(String info, double x, double y,
-			Object... properties) {
+	public PluginShape addText(String info, double x, double y, Object... properties) {
 		return new PluginText(this, info, x, y, properties);
 	}
 
@@ -378,8 +376,7 @@ public abstract class Plugin {
 	 *            extra custom properties
 	 * @return the new shape
 	 */
-	public PluginShape addSymbol(String info, double x, double y,
-			Object... properties) {
+	public PluginShape addSymbol(String info, double x, double y, Object... properties) {
 		return new PluginSymbol(this, info, x, y, properties);
 	}
 
@@ -402,12 +399,10 @@ public abstract class Plugin {
 	 *            extra custom properties
 	 * @return the new shape
 	 */
-	public PluginShape addSquare(String info, double xc, double yc,
-			double length, Object... properties) {
+	public PluginShape addSquare(String info, double xc, double yc, double length, Object... properties) {
 		return new PluginSquare(this, info, xc, yc, length, properties);
 	}
-	
-	
+
 	/**
 	 * Create an donut shape
 	 * 
@@ -420,21 +415,19 @@ public abstract class Plugin {
 	 *            the vertical center of the arc in world (not pixel)
 	 *            coordinates
 	 * @param radiusInner
-	 *            the inner radius of the donut in world coordinates. Note: the circle
-	 *            will only look circular if the plugin's world system has a 1:1
-	 *            aspect ratio.
+	 *            the inner radius of the donut in world coordinates. Note: the
+	 *            circle will only look circular if the plugin's world system
+	 *            has a 1:1 aspect ratio.
 	 * @param radiusOuter
 	 *            the outer radius of the donut in world coordinates.
 	 * @param properties
 	 *            extra custom properties
 	 * @return the new shape
 	 */
-	public PluginShape addDonut(String info, double xc, double yc, double radiusInner,
-			double radiusOuter, double startAngle, double openingAngle, Object... properties) {
-		return new PluginDonut(this, info, xc, yc, radiusInner, radiusOuter, startAngle,
-				openingAngle, properties);
+	public PluginShape addDonut(String info, double xc, double yc, double radiusInner, double radiusOuter,
+			double startAngle, double openingAngle, Object... properties) {
+		return new PluginDonut(this, info, xc, yc, radiusInner, radiusOuter, startAngle, openingAngle, properties);
 	}
-	
 
 	/**
 	 * Create an arc shape
@@ -455,10 +448,9 @@ public abstract class Plugin {
 	 *            extra custom properties
 	 * @return the new shape
 	 */
-	public PluginShape addArc(String info, double xc, double yc, double radius,
-			double startAngle, double openingAngle, Object... properties) {
-		return new PluginArc(this, info, xc, yc, radius, startAngle,
-				openingAngle, properties);
+	public PluginShape addArc(String info, double xc, double yc, double radius, double startAngle, double openingAngle,
+			Object... properties) {
+		return new PluginArc(this, info, xc, yc, radius, startAngle, openingAngle, properties);
 	}
 
 	/**
@@ -483,8 +475,7 @@ public abstract class Plugin {
 	 *            extra custom properties
 	 * @return the new shape
 	 */
-	public PluginShape addCircle(String info, double xc, double yc,
-			double radius, Object... properties) {
+	public PluginShape addCircle(String info, double xc, double yc, double radius, Object... properties) {
 		return new PluginCircle(this, info, xc, yc, radius, properties);
 	}
 
@@ -507,8 +498,7 @@ public abstract class Plugin {
 	 *            extra custom properties
 	 * @return the new shape
 	 */
-	public PluginShape addLine(String info, double x1, double y1, double x2,
-			double y2, Object... properties) {
+	public PluginShape addLine(String info, double x1, double y1, double x2, double y2, Object... properties) {
 		return new PluginLine(this, info, x1, y1, x2, y2, properties);
 	}
 
@@ -529,8 +519,7 @@ public abstract class Plugin {
 	 *            extra custom properties
 	 * @return the new shape
 	 */
-	public PluginShape addRectangle(String info, double x, double y, double w,
-			double h, Object... properties) {
+	public PluginShape addRectangle(String info, double x, double y, double w, double h, Object... properties) {
 		return new PluginRectangle(this, info, x, y, w, h, properties);
 	}
 
@@ -553,8 +542,7 @@ public abstract class Plugin {
 	 *            extra custom properties
 	 * @return the new shape
 	 */
-	public PluginShape addEllipse(String info, double x, double y, double w,
-			double h, Object... properties) {
+	public PluginShape addEllipse(String info, double x, double y, double w, double h, Object... properties) {
 		return new PluginEllipse(this, info, x, y, w, h, properties);
 	}
 
@@ -570,8 +558,7 @@ public abstract class Plugin {
 	 * @return the new shape
 	 * @see java.awt.geom.Point2D
 	 */
-	public PluginShape addPolygon(String info, Point2D.Double points[],
-			Object... properties) {
+	public PluginShape addPolygon(String info, Point2D.Double points[], Object... properties) {
 		return new PluginPolygon(this, info, points, properties);
 	}
 
@@ -592,10 +579,8 @@ public abstract class Plugin {
 	 * @return the new shape
 	 * @see java.awt.geom.Point2D
 	 */
-	public PluginShape addPolygon(String info, double x[], double y[],
-			Object... properties) {
-		return new PluginPolygon(this, info, PluginSupport.fromXYArrays(x, y),
-				properties);
+	public PluginShape addPolygon(String info, double x[], double y[], Object... properties) {
+		return new PluginPolygon(this, info, PluginSupport.fromXYArrays(x, y), properties);
 	}
 
 	/**
@@ -610,8 +595,7 @@ public abstract class Plugin {
 	 * @return the new shape
 	 * @see java.awt.geom.Point2D
 	 */
-	public PluginShape addPolyline(String info, Point2D.Double points[],
-			Object... properties) {
+	public PluginShape addPolyline(String info, Point2D.Double points[], Object... properties) {
 		return new PluginPolyline(this, info, points, properties);
 	}
 
@@ -632,10 +616,8 @@ public abstract class Plugin {
 	 * @return the new shape
 	 * @see java.awt.geom.Point2D
 	 */
-	public PluginShape addPolyline(String info, double x[], double y[],
-			Object... properties) {
-		return new PluginPolyline(this, info, PluginSupport.fromXYArrays(x, y),
-				properties);
+	public PluginShape addPolyline(String info, double x[], double y[], Object... properties) {
+		return new PluginPolyline(this, info, PluginSupport.fromXYArrays(x, y), properties);
 	}
 
 	/**

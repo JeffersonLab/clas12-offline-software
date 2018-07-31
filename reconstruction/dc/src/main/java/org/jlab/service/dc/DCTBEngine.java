@@ -2,16 +2,7 @@ package org.jlab.service.dc;
 
 import Jama.Matrix;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.base.GeometryFactory;
-import org.jlab.detector.geant4.v2.DCGeant4Factory;
-import org.jlab.detector.geant4.v2.ECGeant4Factory;
-import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
-import org.jlab.detector.geant4.v2.PCALGeant4Factory;
-import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -36,68 +27,25 @@ import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
-import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
 
-public class DCTBEngine extends ReconstructionEngine {
+public class DCTBEngine extends DCEngine {
 
-    DCGeant4Factory dcDetector;
-    FTOFGeant4Factory ftofDetector;
-    ECGeant4Factory ecDetector;
-    PCALGeant4Factory pcalDetector; 
-    TrajectorySurfaces tSurf;
+//    DCGeant4Factory dcDetector;
+//    FTOFGeant4Factory ftofDetector;
+//    ECGeant4Factory ecDetector;
+//    PCALGeant4Factory pcalDetector; 
+//    TrajectorySurfaces tSurf;
     
     private TimeToDistanceEstimator tde;
     public DCTBEngine() {
-        super("DCTB","ziegler","4.0");
+        super("DCTB");
+        tde = new TimeToDistanceEstimator();
     }
     @Override
     public boolean init() {
-        String[]  dcTables = new String[]{
-            "/calibration/dc/signal_generation/doca_resolution",
-            // "/calibration/dc/time_to_distance/t2d",
-            "/calibration/dc/time_to_distance/time2dist",
-            //    "/calibration/dc/time_corrections/T0_correction",
-        };
-        requireConstants(Arrays.asList(dcTables));
-        // Get the constants for the correct variation
-        this.getConstantsManager().setVariation("default");
-        
-        // Load the geometry
-        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, "default");
-        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
-        ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, "default");
-        ftofDetector = new FTOFGeant4Factory(providerFTOF);
-        
-        ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, "default");
-        ecDetector = new ECGeant4Factory(providerEC);
-        pcalDetector = new PCALGeant4Factory(providerEC);
-        System.out.println(" -- Det Geometry constants are Loaded " );
-        // create the surfaces
-        tSurf = new TrajectorySurfaces();
-        tSurf.LoadSurfaces(dcDetector, ftofDetector, ecDetector, pcalDetector);
-        
-        //DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(800, "default");
-        //dbprovider.loadTable("/calibration/dc/time_corrections/T0Corrections");
-        //disconnect from database. Important to do this after loading tables.
-        //dbprovider.disconnect();
-        // T0-subtraction
-
-        //for (int i = 0; i < dbprovider.length("/calibration/dc/time_corrections/T0Corrections/Sector"); i++) {
-        //    int iSec = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Sector", i);
-        //    int iSly = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Superlayer", i);
-        //    int iSlot = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Slot", i);
-        //    int iCab = dbprovider.getInteger("/calibration/dc/time_corrections/T0Corrections/Cable", i);
-        //    double t0 = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Correction", i);
-        //    double t0Error = dbprovider.getDouble("/calibration/dc/time_corrections/T0Corrections/T0Error", i);
-
-        //    T0[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0;
-        //    T0ERR[iSec - 1][iSly - 1][iSlot - 1][iCab - 1] = t0Error;
-        //}
-        //TableLoader.Fill(this.getConstantsManager().getConstants(1000, "/calibration/dc/time_to_distance/time2dist")); 
-        tde = new TimeToDistanceEstimator();
+        super.LoadTables();
         return true;
     }
-    
     @Override
     public boolean processDataEvent(DataEvent event) {
         //setRunConditionsParameters( event) ;
@@ -113,8 +61,20 @@ public class DCTBEngine extends ReconstructionEngine {
         //-------------------
         int newRun = bank.getInt("run", 0);
         if(newRun==0)
-        	return true;
+            return true;
 
+        double T_Start = 0;
+        if(Constants.isUSETSTART() == true) {
+            if(event.hasBank("RECHB::Event")==true) {
+                T_Start = event.getBank("RECHB::Event").getFloat("STTime", 0);
+                if(T_Start<0) {
+                    return true; // quit if start time not found in data
+                }
+            } else {
+                return true; // no REC HB bank
+            }
+        }
+        
         //System.out.println(" RUNNING TIME BASED....................................");
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
@@ -130,12 +90,12 @@ public class DCTBEngine extends ReconstructionEngine {
 
         HitReader hitRead = new HitReader();
         hitRead.read_HBHits(event, 
-            this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-            this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
+            super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
+            super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
             Constants.getT0(), Constants.getT0Err(), dcDetector, tde);
         hitRead.read_TBHits(event, 
-            this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-            this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde, Constants.getT0(), Constants.getT0Err());
+            super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
+            super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde, Constants.getT0(), Constants.getT0Err());
         List<FittedHit> hits = new ArrayList<FittedHit>();
         //I) get the hits
         if(hitRead.get_TBHits().isEmpty()) {
@@ -154,7 +114,7 @@ public class DCTBEngine extends ReconstructionEngine {
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
 
-        clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct, this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
+        clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct, super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
 
         if(clusters.isEmpty()) {
             rbc.fillAllTBBanks(event, rbc, hits, null, null, null, null);
@@ -237,6 +197,8 @@ public class DCTBEngine extends ReconstructionEngine {
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         TrajectoryFinder trjFind = new TrajectoryFinder();
         for(int i = 0; i < TrackArray.length; i++) {
+            if(TrackArray[i].get_ListOfHBSegments()==null || TrackArray[i].get_ListOfHBSegments().size()<4)
+                continue;
             TrackArray[i].set_MissingSuperlayer(get_Status(TrackArray[i]));
             TrackArray[i].addAll(crossMake.find_Crosses(TrackArray[i].get_ListOfHBSegments(), dcDetector));
             if(TrackArray[i].size()<1)
@@ -247,7 +209,7 @@ public class DCTBEngine extends ReconstructionEngine {
             //}
             KFitter kFit = new KFitter(TrackArray[i], dcDetector, true);
             //kFit.totNumIter=30;
-            kFit.useFilter = true;
+            
             StateVec fn = new StateVec();
             kFit.runFitter();
             
@@ -261,6 +223,7 @@ public class DCTBEngine extends ReconstructionEngine {
                 // candidate parameters are set from the state vector
                 TrackArray[i].set_FitChi2(kFit.chi2); 
                 TrackArray[i].set_FitNDF(kFit.NDF);
+                TrackArray[i].set_Trajectory(kFit.kfStateVecsAlongTrajectory);
                 TrackArray[i].set_FitConvergenceStatus(kFit.ConvStatus);
                 TrackArray[i].set_Id(TrackArray[i].size()+1);
                 TrackArray[i].set_CovMat(kFit.finalCovMat.covMat);

@@ -91,11 +91,14 @@ public class DetectorEvent {
         return responses;
     }
     
-    public List<CherenkovResponse>  getCherenkovResponseList(){
+    public List<DetectorResponse>  getCherenkovResponseList(){
         this.setAssociation();
-        List<CherenkovResponse> responses = new ArrayList<CherenkovResponse>();
-        for(DetectorParticle p : this.particleList){
-            for(CherenkovResponse r : p.getCherenkovResponses()){
+        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
+        for (DetectorParticle p : this.particleList){
+            for (DetectorResponse r : p.getDetectorResponses()) {
+                if (r.getDescriptor().getType() == DetectorType.HTCC ||
+                    r.getDescriptor().getType() == DetectorType.LTCC ||
+                    r.getDescriptor().getType() == DetectorType.RICH)
                 responses.add(r);
             }
         }
@@ -119,7 +122,9 @@ public class DetectorEvent {
         List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
         for(DetectorParticle p : this.particleList){
             for(DetectorResponse r : p.getDetectorResponses()){
-                if(r.getDescriptor().getType()==DetectorType.FTOF || r.getDescriptor().getType()==DetectorType.CTOF)
+                if(r.getDescriptor().getType()==DetectorType.FTOF ||
+                   r.getDescriptor().getType()==DetectorType.CTOF ||
+                   r.getDescriptor().getType()==DetectorType.CND)
                 responses.add(r);
             }
         }
@@ -162,10 +167,6 @@ public class DetectorEvent {
         for(int index = 0; index < this.particleList.size(); index++){
             List<DetectorResponse> responses = particleList.get(index).getDetectorResponses();
             for(DetectorResponse r : responses){
-                r.setAssociation(index);
-            }
-            List<CherenkovResponse> cresponses = particleList.get(index).getCherenkovResponses();
-            for(CherenkovResponse r : cresponses){
                 r.setAssociation(index);
             }
         }

@@ -103,21 +103,26 @@ public class CodaEventDecoder {
 
     public void setTimeStamp(EvioDataEvent event) {
         List<DetectorDataDgtz> tiEntries = this.getDataEntries_TI(event);
+        boolean tiSync=true;
         if(tiEntries.size()>0) {
             long ts = tiEntries.get(0).getTimeStamp();
             for(int i=1; i<tiEntries.size(); i++) {
-                if(tiEntries.get(i).getTimeStamp() != ts && this.timeStampErrors<100) {
-                    System.out.println("WARNING: mismatch in TI time stamps: crate " 
+                if(tiEntries.get(i).getTimeStamp() != ts) {
+                    tiSync=false;
+                    if(this.timeStampErrors<100) {
+                        System.out.println("WARNING: mismatch in TI time stamps: crate " 
                                         + tiEntries.get(i).getDescriptor().getCrate() + " reports " 
                                         + tiEntries.get(i).getTimeStamp() + " instead of " + ts);
-                    this.timeStampErrors++;
+                        this.timeStampErrors++;
+                    }
                 }
                 if(this.timeStampErrors==100) {
                     System.out.println("Reached the maximum number of timeStamp errors (100)");
                     this.timeStampErrors++;
                 }
             }
-            this.timeStamp = ts ;
+            if(tiSync) this.timeStamp = ts ;
+            else       this.timeStamp = -1 ;
         }
     }
 
@@ -318,7 +323,7 @@ public class CodaEventDecoder {
                         int   chipID = DataUtils.getInteger(halfWord, 0, 2);
                         int   halfID = DataUtils.getInteger(halfWord, 3, 3);
 
-                        Integer channelKey = (half<<8)|channel;
+                        Integer channelKey = ((half<<8) | (channel & 0xff));
 
                         //System.err.println( "CHIP = " + chipID + " HALF = " + halfID + "  CHANNEL = " + channel + " KEY = " + channelKey  );
                         //dataBank.addChannel(channelKey);

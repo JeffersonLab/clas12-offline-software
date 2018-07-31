@@ -1,5 +1,7 @@
 package org.jlab.clas.detector;
 
+import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.physics.Vector3;
@@ -15,25 +17,27 @@ import org.jlab.geom.prim.Vector3D;
 public class DetectorTrack {
 
     public class TrajectoryPoint {
-        private int trackId = -1;
         private int detId = -1;
         private Line3D traj=null;
         private float bField = 0;
         private float pathLength = -1;
-        public TrajectoryPoint(int trackId,int detId,Line3D traj,float bField,float pathLength) {
-            this.trackId=trackId;
+        public TrajectoryPoint(int detId,Line3D traj,float bField,float pathLength) {
             this.detId=detId;
             this.traj=traj;
             this.bField=bField;
             this.pathLength=pathLength;
         }
-        public int getTrackId() { return trackId; }
+        public TrajectoryPoint(int detId,Line3D traj) {
+            this.detId=detId;
+            this.traj=traj;
+        }
         public int getDetId() { return detId; }
         public Line3D getCross() { return traj; }
         public float getBField() { return bField; }
         public float getPathLength() { return pathLength; }
     }
-    
+   
+    private int     trackSector = 0;
     private int     trackAssociation = -1;
     private int     trackIndex = -1;
     private int     trackCharge = 0;
@@ -53,7 +57,7 @@ public class DetectorTrack {
     private float[][] covMatrix = new float[5][5];
     private List<Line3D> trackCrosses = new ArrayList<Line3D>();
    
-    private List<TrajectoryPoint> trajectory = new ArrayList<TrajectoryPoint>();
+    private Map<Integer,TrajectoryPoint> trajectory = new LinkedHashMap<Integer,TrajectoryPoint>();
     
     private double MAX_LINE_LENGTH = 1500.0;
 
@@ -109,21 +113,19 @@ public class DetectorTrack {
         this.trackVertex.setXYZ(vx, vy, vz);
     }
 
-    public void addTrajectoryPoint(int trackId,int detId,Line3D traj,float bField,float pathLength) {
-        TrajectoryPoint tPoint = new TrajectoryPoint(trackId,detId,traj,bField,pathLength);
-        this.trajectory.add(tPoint);
+    public void addTrajectoryPoint(int detId,Line3D traj,float bField,float pathLength) {
+        this.trajectory.put(detId,new TrajectoryPoint(detId,traj,bField,pathLength));
+    }
+    public void addTrajectoryPoint(int detId,Line3D traj) {
+        this.trajectory.put(detId,new TrajectoryPoint(detId,traj));
     }
 
     public Line3D getTrajectoryPoint(int detId) {
-        for (TrajectoryPoint tp : trajectory) {
-            if (tp.getDetId() == detId) {
-                return tp.getCross();
-            }
-        }
-        return null;
+        if (!this.trajectory.containsKey(detId)) return null;
+        return this.trajectory.get(detId).getCross();
     }
     
-    public List<TrajectoryPoint> getTrajectory() {
+    public Map<Integer,TrajectoryPoint> getTrajectory() {
         return this.trajectory;
     }
     
@@ -157,6 +159,11 @@ public class DetectorTrack {
         return this;
     }
 
+    public DetectorTrack setSector(int sector){
+        this.trackSector = sector;
+        return this;
+    }
+    
     public DetectorTrack setID(int id){
         this.taggerID = id;
         return this;
@@ -173,18 +180,19 @@ public class DetectorTrack {
     public void     setAssociation(int x) {this.trackAssociation = x;}
     public void     setDetectorID(int id) {this.trackDetectorID = id;}
     
-    public int      getCharge()   { return trackCharge;}
-    public int      getNDF()      {return ndf;}
-    public int      getStatus()   {return trackStatus;}
-    public double   getchi2()  {return trackchi2;}
-    public double   getP()        { return trackP.mag();} 
-    public int   getID()     {return this.taggerID;}
-    public double   getPath()     { return trackPath;}
-    public Vector3  getVector()   { return this.trackP;}
-    public Vector3  getVertex()   { return this.trackVertex;}
-    public Vector3D getTrackEnd() { return trackEnd;}
-    public int      getAssociation() {return trackAssociation;}
-    public int      getDetectorID() {return trackDetectorID;}
+    public int      getCharge()     {return this.trackCharge;}
+    public int      getNDF()        {return this.ndf;}
+    public int      getStatus()     {return this.trackStatus;}
+    public double   getchi2()       {return this.trackchi2;}
+    public double   getP()          {return this.trackP.mag();} 
+    public int      getID()         {return this.taggerID;}
+    public double   getPath()       {return this.trackPath;}
+    public int      getSector()     {return this.trackSector;}
+    public Vector3  getVector()     {return this.trackP;}
+    public Vector3  getVertex()     {return this.trackVertex;}
+    public Vector3D getTrackEnd()   {return this.trackEnd;}
+    public int      getAssociation(){return this.trackAssociation;}
+    public int      getDetectorID() {return this.trackDetectorID;}
     
     
     public void addCross(double x, double y, double z,

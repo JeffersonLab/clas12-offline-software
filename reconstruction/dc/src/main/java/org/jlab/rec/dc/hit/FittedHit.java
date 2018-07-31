@@ -351,11 +351,13 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             double deltatime_beta = 0;
             
             if (x != -1) {
+                //double V_0 = tab.getDoubleValue("v0", this.get_Sector(), this.get_Superlayer(),0); ==> floating cst must be fixed
+                double V_0 = Constants.V0AVERAGED;
                 //deltatime_beta = (Math.sqrt(x * x + (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta) * (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta)) - x) / CCDBConstants.getV0()[this.get_Sector() - 1][this.get_Superlayer() - 1];
-                deltatime_beta = (Math.sqrt(x * x + (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta) * (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta)) - x) / tab.getDoubleValue("v0", this.get_Sector(), this.get_Superlayer(),0);
+                deltatime_beta = (Math.sqrt(x * x + (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta) * (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta)) - x) / V_0;
 
             }
-
+            this.set_DeltaTimeBeta(deltatime_beta);
             double correctedTime = (this.get_Time() - deltatime_beta);
             if(correctedTime<=0)
                 correctedTime=0.01;
@@ -522,6 +524,11 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 
     }
     
+    public double XatY(DCGeant4Factory DcDetector, double y) {
+        double x = this.calc_GeomCorr(DcDetector, y);
+        return x + this.get_LeftRightAmb() * (this.get_TimeToDistance()) ;
+    }
+        
     private double _WireLength;
 
     public double get_WireLength() {
@@ -542,6 +549,15 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         this._WireMaxSag = _WireMaxSag;
     }
     
+    private double _TrkResid=999;
+    
+    public double get_TrkResid() {
+        return _TrkResid;
+    }
+
+    public void set_TrkResid(double _TrkResid) {
+        this._TrkResid = _TrkResid;
+    }
     
     private double calc_GeomCorr(DCGeant4Factory DcDetector, double y) {
         
@@ -759,6 +775,20 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         return Math.sqrt(r2);
     }
     
+    public double calc_SignalPropagAlongWire(double X, double Y, DCGeant4Factory DcDetector) {
+        
+        Vector3d WireEnd;
+        int end = Constants.STBLOC[this.get_Sector()-1][this.get_Superlayer()-1];
+        if(end>0) {
+            WireEnd = DcDetector.getWireRightend(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
+        } else {
+            WireEnd = DcDetector.getWireLeftend(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
+        }
+        
+        double r2 = (X-WireEnd.x)*(X-WireEnd.x) + (Y-WireEnd.y)*(Y-WireEnd.y);
+        
+        return Math.sqrt(r2);
+    }
     /**
      * 
      * @return signal propagation time along the wire in ns
@@ -801,9 +831,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     /**
      * sets signal time of flight to the track doca to the hit wire in ns
      */
-    public void setSignalTimeOfFlight() {
+    public void setSignalTimeOfFlight(double pathToFirstSite) {
         if(this.get_Beta()>0 && this.getAssociatedStateVec()!=null)
-            this._SignalTimeOfFlight = this.getAssociatedStateVec().getPathLength()/(Constants.SPEEDLIGHT*this.get_Beta());
+            this._SignalTimeOfFlight = (this.getAssociatedStateVec().getPathLength() + pathToFirstSite)/(Constants.SPEEDLIGHT*this.get_Beta());
             this._tFlight = this._SignalTimeOfFlight;
     }
     
@@ -898,5 +928,13 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      */
     public boolean get_OutOfTimeFlag() {
         return _OutOfTimeFlag;
+    }
+
+    private double _deltatime_beta;
+    public void set_DeltaTimeBeta(double deltatime_beta) {
+        _deltatime_beta = deltatime_beta;
+    }
+    public double get_DeltaTimeBeta() {
+        return _deltatime_beta ;
     }
 }

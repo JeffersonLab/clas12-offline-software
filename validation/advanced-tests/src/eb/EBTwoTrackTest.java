@@ -411,15 +411,31 @@ public class EBTwoTrackTest {
         System.out.println("\n#############################################################");
 
         // some global efficiency tests:
-        assertEquals(eEff>0.9,true);
-        if      (hadronPDG==2212) assertEquals(pEff>0.77,true);
-        else if (hadronPDG==321)  {
-            if (isCentral) assertEquals(kEff>0.55,true);
-            else           assertEquals(kEff>0.60,true);
+        assertEquals(eEff>0.88,true);
+        switch (hadronPDG) {
+            case 2212:
+                if (isCentral) assertEquals(pEff>0.77,true);
+                else           assertEquals(pEff>0.77,true);
+                break;
+            case 321:
+                if (isCentral) assertEquals(kEff>0.55,true);
+                else           assertEquals(kEff>0.60,true);
+                break;
+            case 211:
+                if (isCentral) assertEquals(piEff>0.75,true);
+                else           assertEquals(piEff>0.75,true);
+                break;
+            case 22:
+                if (isCentral) assertEquals(gEff>0.20,true);
+                else           assertEquals(gEff>0.84,true);
+                break;
+            case 2112:
+                if (isCentral) assertEquals(nEff>0.095,true);
+                else           assertEquals(nEff>0.55,true);
+                break;
+            default:
+                throw new RuntimeException("Not ready for pid="+hadronPDG);
         }
-        else if (hadronPDG==211)  assertEquals(piEff>0.75,true);
-        else if (hadronPDG==22)   assertEquals(gEff>0.85,true);
-        else if (hadronPDG==2112) assertEquals(nEff>0.55,true);
     }
    
     private void checkResultsFT() {
@@ -433,7 +449,7 @@ public class EBTwoTrackTest {
         System.out.println(String.format("FD hEff = %.3f",hEff));
         System.out.println("#############################################################");
         if      (ftPDG==11) assertEquals(eEff>0.90,true);
-        else if (ftPDG==22) assertEquals(gEff>0.90,true);
+        else if (ftPDG==22) assertEquals(gEff>0.88,true);
         assertEquals(hEff>0.50,true);
     }
 
@@ -542,11 +558,22 @@ public class EBTwoTrackTest {
         if (recPartBank!=null) {
 
             for (int ii = 0; ii < recPartBank.rows(); ii++) {
+               
+                final short status = recPartBank.getShort("status", ii);
+                final byte charge  = recPartBank.getByte("charge", ii);
+                final int pid      = recPartBank.getInt("pid", ii);
+                final boolean isFT = status/1000 == 1;
+                final boolean isFD = status/1000 == 2;
+                final boolean isCD = status/1000 == 4;
                 
-                final byte charge = recPartBank.getByte("charge", ii);
-                final int pid = recPartBank.getInt("pid", ii);
-                final double px=recPartBank.getFloat("px",ii);
-                final double py=recPartBank.getFloat("py",ii);
+                // determine sector 1-6:
+                double px = recPartBank.getFloat("px",ii);
+                double py = recPartBank.getFloat("py",ii);
+                // use hit position for photons from CD (with UDF momentum):
+                if (isCD && pid==22 && recSciMap.containsKey(ii)) {
+                    px = recSciBank.getFloat("x",recSciMap.get(ii).get(0));
+                    py = recSciBank.getFloat("y",recSciMap.get(ii).get(0));
+                }
                 final int sector = ClasMath.getSectorFromPhi(Math.atan2(py,px));
 
                 if (pid==11 && sector==electronSector) {

@@ -14,22 +14,16 @@ import org.jlab.io.base.DataEvent;
 
 /**
  *
- * @author gavalian
+ * @author baltzell
  */
-public class CherenkovResponse {
+public class CherenkovResponse extends DetectorResponse {
 
-    private double  hitTime       = 0.0;
     private double  hitTheta      = 0.0;
     private double  hitPhi        = 0.0;
-    private double  hitNphe       = 0;
     private double  hitDeltaPhi   = 0.0;
     private double  hitDeltaTheta = 0.0;
-    private int     hitIndex      = -1;
-    private int     association   = -1;
 
-    private DetectorType  cherenkovType = DetectorType.HTCC;
-    private Point3D         hitPosition = new Point3D();
-    private DetectorDescriptor desc = new DetectorDescriptor();
+    private Point3D hitPosition = new Point3D();
 
     public CherenkovResponse(double theta, double phi, double dtheta, double dphi){
         hitTheta = theta;
@@ -38,19 +32,11 @@ public class CherenkovResponse {
         hitDeltaPhi    = dphi;
     }
 
-    public CherenkovResponse  setTime(double time) { hitTime = time; return this;}
-    public CherenkovResponse  setEnergy(double energy) { hitNphe = energy; return this;}
-    public void setAssociation(int assoc) {this.association = assoc;}
-    public void setHitIndex(int index){this.hitIndex = index;}
-
-    public double getTime(){ return hitTime;}
-    public int getHitIndex(){return hitIndex;}
-    public double getEnergy(){ return hitNphe;}
+    public double getNphe() {return this.getEnergy(); }
     public double getTheta() {return this.hitTheta;}
     public double getPhi() {return this.hitPhi;}
     public double getDeltaTheta(){ return this.hitDeltaTheta;}
     public double getDeltaPhi() {return this.hitDeltaPhi;}
-    public int getAssociation() {return this.association;}
 
     public Point3D getHitPosition(){
         return this.hitPosition;
@@ -101,17 +87,9 @@ public class CherenkovResponse {
         return -1000.0;
     }
     
-    public DetectorType getCherenkovType(){
-        return this.cherenkovType;
-    }
-    
-    public void setCherenkovType(DetectorType htcc){
-        this.cherenkovType = htcc;
-    }
-
-    public static List<CherenkovResponse>  readHipoEvent(DataEvent event, 
+    public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type){        
-        List<CherenkovResponse> responseList = new ArrayList<CherenkovResponse>();
+        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
@@ -157,9 +135,9 @@ public class CherenkovResponse {
                 che.setHitIndex(row);
                 che.setEnergy(nphe);
                 che.setTime(time);
-                che.setCherenkovType(type);
+                che.getDescriptor().setType(type);
 
-                responseList.add(che);
+                responseList.add((DetectorResponse)che);
             }
         }
         return responseList;

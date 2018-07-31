@@ -410,6 +410,8 @@ public class RecoBankWriter {
             if (hitlist.get(i).get_Id() == -1) {
                 continue;
             }
+            if(hitlist.get(i).get_TrkResid()==999)
+                hitlist.get(i).set_AssociatedTBTrackID(-1);
             bank.setShort("id", i, (short) hitlist.get(i).get_Id());
             bank.setShort("status", i, (short) hitlist.get(i).get_QualityFac());
             bank.setByte("superlayer", i, (byte) hitlist.get(i).get_Superlayer());
@@ -423,8 +425,17 @@ public class RecoBankWriter {
             
             // checks the existing schema to fill the time
             //System.out.println(" has entry "+bank.getDescriptor().hasEntry("time"));
+            /*
+            correctedTime = (this.get_Time() - this.get_DeltaTimeBeta());
+            */
             if(bank.getDescriptor().hasEntry("time")==true){
-               bank.setFloat("time", i, (float) hitlist.get(i).get_Time());      
+               bank.setFloat("time", i, (float) (hitlist.get(i).get_Time() - hitlist.get(i).get_DeltaTimeBeta()));      
+            }
+            if(bank.getDescriptor().hasEntry("tBeta")==true){
+               bank.setFloat("tBeta", i, (float) hitlist.get(i).get_DeltaTimeBeta());      
+            }
+            if(bank.getDescriptor().hasEntry("fitResidual")==true){
+               bank.setFloat("fitResidual", i, (float) hitlist.get(i).get_TrkResid());      
             }
             bank.setFloat("doca", i, (float) hitlist.get(i).get_Doca());
             bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
@@ -439,8 +450,10 @@ public class RecoBankWriter {
             bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
             bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
             bank.setFloat("T0", i, (float) hitlist.get(i).getT0());
-            bank.setFloat("TStart", i, (float) hitlist.get(i).getTStart());
-            
+            bank.setFloat("TStart", i, (float) hitlist.get(i).getTStart()); 
+            if(bank.getDescriptor().hasEntry("beta")==true){
+               bank.setFloat("beta", i, (float) hitlist.get(i).get_Beta());      
+            }
             if(hitlist.get(i).get_AssociatedTBTrackID()>-1 && event.hasBank("MC::Particle")==false) {
                 if(hitlist.get(i).getSignalPropagTimeAlongWire()==0 || hitlist.get(i).get_AssociatedTBTrackID()<1) {
                     bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp()); //old value if track fit failed

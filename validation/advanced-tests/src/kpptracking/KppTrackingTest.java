@@ -42,7 +42,7 @@ public class KppTrackingTest {
 
 		System.out.println("Total count: " + totalCount + ". 2 track count: " + twoTrackCount);
 
-		assertEquals(twoTrackCount > 50, true); // this should be stricter!
+		assertEquals(twoTrackCount > 30, true); // this should be stricter!
 		
 	}
 

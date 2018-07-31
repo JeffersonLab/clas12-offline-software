@@ -44,26 +44,33 @@ public class HitReader implements IMatchedHit {
      * @param event the evio event
      * @param geometry the CTOF geometry from package
      */
-    public void fetch_Hits(DataEvent event, CTOFGeant4Factory geometry,
+    public void fetch_Hits(DataEvent event, long timeStamp, CTOFGeant4Factory geometry,
             List<Line3d> trks, double[] paths, int[] ids,
             IndexedTable constants0, 
             IndexedTable constants1, 
             IndexedTable constants2, 
             IndexedTable constants3, 
             IndexedTable constants4, 
-            IndexedTable constants5) {
+            IndexedTable constants5, 
+            IndexedTable constants6, 
+            IndexedTable constants7) {
         /*
         0: "/calibration/ctof/attenuation"),
         1: "/calibration/ctof/effective_velocity"),
         2: "/calibration/ctof/time_offsets"),
         3: "/calibration/ctof/tdc_conv"),
         4: "/calibration/ctof/status"));
+        5: "/calibration/ctof/gain_balance"),
+        6: "/calibration/ctof/time_jitter"),
+        7: "/calibration/ctof/fadc_offset"));
         */
         _numTrks = trks.size();
 
+        double triggerPhase = this.getTriggerPhase(timeStamp, constants6);
+        
         BaseHitReader hitReader = new BaseHitReader();
         IMatchedHit MH = this;
-        List<BaseHit> hitList = hitReader.get_MatchedHits(event, MH);
+        List<BaseHit> hitList = hitReader.get_MatchedHits(event, MH, triggerPhase, constants3, constants7);
 
         if (hitList.size() == 0) {
             // System.err.println("there is no FTOF bank ");
@@ -126,7 +133,8 @@ public class HitReader implements IMatchedHit {
         for (Hit hit : updated_hits) {
             // set the layer to get the paddle position from the geometry
             // package
-            hit.set_HitParameters(1,  constants0, 
+            hit.set_HitParameters(1, triggerPhase, 
+             constants0, 
              constants1, 
              constants2, 
              constants3, 
@@ -182,16 +190,10 @@ public class HitReader implements IMatchedHit {
 
     private boolean passHit(Hit hit) {
         // drop hits that miss both ADCs or both TDCs
-        boolean pass = true;
+        boolean pass = false;
         String status = hit.get_StatusWord();
-        if (status.equals("0101") ||
-            status.equals("1010") ||
-            status.equals("1000") ||
-            status.equals("0100") ||
-            status.equals("0010") ||
-            status.equals("0001") ||
-            status.equals("0000")) {
-            pass = false;
+        if (status.equals("1111") ) {
+            pass = true;
         }
         return pass;
     }
@@ -217,58 +219,59 @@ public class HitReader implements IMatchedHit {
         // Instantiates the list of hits
         List<Hit> hitList = new ArrayList<Hit>();
 
-        for (int i = 0; i < trks.size(); i++) { // looping over the tracks find the intersection of the track with that plane
-            Line3d trk = trks.get(i); //System.out.println(" trk line "+trk.toString());
+        
+        for (Hit fhit : CTOFhits) {
+            boolean match = false;
+            for (int i = 0; i < trks.size(); i++) { // looping over the tracks find the intersection of the track with that plane
+                Line3d trk = trks.get(i); //System.out.println(" trk line "+trk.toString());
 
-            CTOFDetHit[] HitArray = new CTOFDetHit[48];
-            List<DetHit> hits = ctofDetector.getIntersections(trk);
+//                CTOFDetHit[] HitArray = new CTOFDetHit[48];
+                List<DetHit> detHits = ctofDetector.getIntersections(trk);
 
-            if (hits != null && hits.size() > 0) {
-                for (DetHit hit : hits) {
-                    CTOFDetHit fhit = new CTOFDetHit(hit); //System.out.println(" matched hits "+fhit.toString());
-                    HitArray[fhit.getPaddle() - 1] = fhit;
+                if (detHits != null && detHits.size() > 0) {
+                    for (DetHit detHit : detHits) {
+                        CTOFDetHit matchedHit = new CTOFDetHit(detHit); //System.out.println(" matched hits "+fhit.toString());
+                        if(matchedHit.getPaddle() == fhit.get_Paddle()) {  // match is found
+                            match = true;
+                            // create a new FTOF hit for each intersecting track with this hit counter 
+                            // create the hit object
+                            Hit hit = new Hit(fhit.get_Id(), fhit.get_Panel(), fhit.get_Sector(), fhit.get_Paddle(), fhit.get_ADC1(), fhit.get_TDC1(), fhit.get_ADC2(), fhit.get_TDC2());
+                            hit.set_ADCbankHitIdx1(fhit.get_ADCbankHitIdx1());
+                            hit.set_ADCbankHitIdx2(fhit.get_ADCbankHitIdx2());
+                            hit.set_TDCbankHitIdx1(fhit.get_TDCbankHitIdx1());
+                            hit.set_TDCbankHitIdx2(fhit.get_TDCbankHitIdx2());
+                            hit.set_StatusWord(fhit.get_StatusWord());
+                            hit.set_paddleLine(fhit.get_paddleLine());
+                            hit.set_matchedTrackHit(matchedHit);
+                            hit.set_matchedTrack(trk);
+                            // get the pathlength of the track from its origin to the mid-point between the track entrance and exit from the bar
+                            //double deltaPath = matchedHit.origin().distance(matchedHit.mid());
+                            double deltaPath = hit.get_matchedTrack().origin().distance(matchedHit.mid());
+
+                            double pathLenTruBar = matchedHit.origin().distance(
+                                    matchedHit.end());
+                            hit.set_TrkPathLenThruBar(pathLenTruBar);
+                            hit.set_TrkPathLen(paths[i] + deltaPath);
+                            // get the coordinates for the track hit, which is defined as the mid-point between its entrance and its exit from the bar
+                            hit.set_TrkPosition(new Point3D(matchedHit.mid().x, matchedHit.mid().y, matchedHit.mid().z));
+
+                            // compute the local y at the middle of the bar :
+                            //----------------------------------------------
+                            Point3D origPaddleLine = hit.get_paddleLine().origin();
+                            Point3D trkPosinMidlBar = new Point3D(matchedHit.mid().x, matchedHit.mid().y, matchedHit.mid().z);
+                            double Lov2 = hit.get_paddleLine().length() / 2;
+                            double barOrigToTrkPos = origPaddleLine.distance(trkPosinMidlBar);
+                            // local y:
+                            hit.set_yTrk(barOrigToTrkPos - Lov2);
+                            hit._AssociatedTrkId = ids[i];
+                            //---------------------------------------
+                            hitList.add(hit);                    
+                        }
+                    }
                 }
             }
-            for (Hit fhit : CTOFhits) {
-                if (HitArray[fhit.get_Paddle() - 1] == null) { // there is no track matched to this hit
-                    hitList.add(fhit);	// add this hit to the output list anyway
-                }
-            }
-
-            for (Hit fhit : CTOFhits) {
-                if (HitArray[fhit.get_Paddle() - 1] != null) {
-                    CTOFDetHit matchedHit = HitArray[fhit.get_Paddle() - 1];
-
-                    // create a new FTOF hit for each intersecting track with this hit counter 
-                    // create the hit object
-                    Hit hit = new Hit(fhit.get_Id(), fhit.get_Panel(), fhit.get_Sector(), fhit.get_Paddle(), fhit.get_ADC1(), fhit.get_TDC1(), fhit.get_ADC2(), fhit.get_TDC2());
-                    hit.set_StatusWord(fhit.get_StatusWord());
-                    hit.set_paddleLine(fhit.get_paddleLine());
-                    hit.set_matchedTrackHit(matchedHit);
-                    hit.set_matchedTrack(trk);
-                    // get the pathlength of the track from its origin to the mid-point between the track entrance and exit from the bar
-                    //double deltaPath = matchedHit.origin().distance(matchedHit.mid());
-                    double deltaPath = hit.get_matchedTrack().origin().distance(matchedHit.mid());
-                    
-                    double pathLenTruBar = matchedHit.origin().distance(
-                            matchedHit.end());
-                    hit.set_TrkPathLenThruBar(pathLenTruBar);
-                    hit.set_TrkPathLen(paths[i] + deltaPath);
-                    // get the coordinates for the track hit, which is defined as the mid-point between its entrance and its exit from the bar
-                    hit.set_TrkPosition(new Point3D(matchedHit.mid().x, matchedHit.mid().y, matchedHit.mid().z));
-
-                    // compute the local y at the middle of the bar :
-                    //----------------------------------------------
-                    Point3D origPaddleLine = hit.get_paddleLine().origin();
-                    Point3D trkPosinMidlBar = new Point3D(matchedHit.mid().x, matchedHit.mid().y, matchedHit.mid().z);
-                    double Lov2 = hit.get_paddleLine().length() / 2;
-                    double barOrigToTrkPos = origPaddleLine.distance(trkPosinMidlBar);
-                    // local y:
-                    hit.set_yTrk(barOrigToTrkPos - Lov2);
-                    hit._AssociatedTrkId = ids[i];
-                    //---------------------------------------
-                    hitList.add(hit);
-                }
+            if(!match) { // there is no track matched to this hit
+                hitList.add(fhit);	// add this hit to the output list anyway
             }
         }
         return hitList;
@@ -280,13 +283,14 @@ public class HitReader implements IMatchedHit {
     }
 
     @Override
-    public List<BaseHit> MatchHits(ArrayList<BaseHit> ADCandTDCLists) {
+    public List<BaseHit> MatchHits(ArrayList<BaseHit> ADCandTDCLists, double timeJitter, IndexedTable tdcConv, IndexedTable ADCandTDCOffsets) {
         ArrayList<BaseHit> matchLists = new ArrayList<BaseHit>();
 
         if (ADCandTDCLists != null) {
             Collections.sort(ADCandTDCLists);
-            // for(BaseHit h : ADCandTDCLists)
-            // System.out.println(h.get_Sector()+":"+h.get_Layer()+":"+h.get_Component()+"   --   "+h.ADC1+"; "+h.ADC2+"; "+h.TDC1+"; "+h.TDC2+"; ");
+//             System.out.println("Trigger phase: " + timeJitter);
+//             for(BaseHit h : ADCandTDCLists)
+//             System.out.println(h.get_Sector()+":"+h.get_Layer()+":"+h.get_Component()+"   --   "+h.ADC1+"; "+h.ADC2+"; "+h.ADCTime1+"; "+h.ADCTime2+"; "+h.TDC1+"; "+h.TDC2+"; ");
             double t1 = -1;
             double t2 = -1; // t1, t2 not yet used in selection
             int adc1 = -1;
@@ -305,22 +309,31 @@ public class HitReader implements IMatchedHit {
 
             for (int i = 0; i < ADCandTDCLists.size(); i++) {
                 BaseHit h = ADCandTDCLists.get(i);
+                double tdconv1 = tdcConv.getDoubleValue("upstream",   h.get_Sector(), h.get_Layer(), h.get_Component());
+                double tdconv2 = tdcConv.getDoubleValue("downstream", h.get_Sector(), h.get_Layer(), h.get_Component());
+                double offset1 = ADCandTDCOffsets.getDoubleValue("upstream",   h.get_Sector(), h.get_Layer(), h.get_Component());
+                double offset2 = ADCandTDCOffsets.getDoubleValue("downstream", h.get_Sector(), h.get_Layer(), h.get_Component());
+                double width  = ADCandTDCOffsets.getDoubleValue("width", h.get_Sector(), h.get_Layer(), h.get_Component());
                 if (h.get_ADC1() > 0) {
                     adc1 = h.get_ADC1();
                     if (h.get_ADCTime1() > 0) {
                         t1 = h.get_ADCTime1();
+                    }                    
+                    if (adc2 > 0 && Math.abs(adc1 - adc2) < 16000) {
+                        hitlists.get(index1).add(h); // matched hit
+                        index1++;
                     }
-
-                    hitlists.get(index1).add(h);
-                    index1++;
+                    if (adc2 == -1) {
+                        hitlists.get(index1).add(h); // not matched hit
+                        index1++;
+                    }                    
                 }
                 if (h.get_ADC2() > 0) {
                     adc2 = h.get_ADC2();
                     if (h.get_ADCTime2() > 0) {
                         t2 = h.get_ADCTime2();
                     }
-
-                    if (adc1 > 0 && Math.abs(adc1 - adc2) < 8000) {
+                    if (adc1 > 0 && Math.abs(adc1 - adc2) < 16000) {
                         hitlists.get(index2).add(h); // matched hit
                         index2++;
                     }
@@ -331,16 +344,38 @@ public class HitReader implements IMatchedHit {
                 }
                 if (h.get_TDC1() > 0) {
                     tdc1 = h.get_TDC1();
-                    hitlists.get(index3).add(h);
-                    index3++;
+//                    if (tdc2 > 0 && Math.abs(tdc1 - tdc2) * 24. / 1000. < 50) {
+//                        hitlists.get(index3).add(h);
+//                        index3++;
+//                    }
+//                    if (tdc2 == -1) {
+//                        hitlists.get(index3).add(h); // not matched hit
+//                        index3++;
+//                    }
+                    if (adc1 > 0 && Math.abs(tdc1 * tdconv1 -timeJitter - (t1 + offset1)) < width) {
+                        hitlists.get(index3).add(h);
+                        index3++;
+                    }
+                    if (adc1 == -1) {
+                        hitlists.get(index3).add(h); // not matched hit
+                        index3++;
+                    }
                 }
                 if (h.get_TDC2() > 0) {
                     tdc2 = h.get_TDC2();
-                    if (tdc1 > 0 && Math.abs(tdc1 - tdc2) * 24. / 1000. < 35) {
+//                    if (tdc1 > 0 && Math.abs(tdc1 - tdc2) * 24. / 1000. < 50) {
+//                        hitlists.get(index4).add(h);
+//                        index4++;
+//                    }
+//                    if (tdc1 == -1) {
+//                        hitlists.get(index4).add(h); // not matched hit
+//                        index4++;
+//                    }
+                    if (adc2 > 0 && Math.abs(tdc2 * tdconv2 -timeJitter - (t2 + offset2)) < width) {
                         hitlists.get(index4).add(h);
                         index4++;
                     }
-                    if (tdc1 == -1) {
+                    if (adc2 == -1) {
                         hitlists.get(index4).add(h); // not matched hit
                         index4++;
                     }
@@ -411,8 +446,8 @@ public class HitReader implements IMatchedHit {
                     hit.TDCbankHitIdx2 = tdc_idx2;
 
                     matchLists.add(hit);
-                    // System.out.println(i+")  s "+hit.get_Sector()+" l "+hit.get_Layer()+" c "+hit.get_Component()+" adcL "+hit.get_ADC1()+" adcR "+hit.get_ADC2()+" tdcL "+
-                    // hit.get_TDC1()+" tdcR "+hit.get_TDC2());
+//                    System.out.println(i+")  s "+hit.get_Sector()+" l "+hit.get_Layer()+" c "+hit.get_Component()+" adcL "+hit.get_ADC1()+" adcR "+hit.get_ADC2()+" tdcL "+
+//                    hit.get_TDC1()+" tdcR "+hit.get_TDC2() +" tdcLx "+hit.TDCbankHitIdx1+" tdcRx "+hit.TDCbankHitIdx2);
 
                 }
             }
@@ -422,4 +457,14 @@ public class HitReader implements IMatchedHit {
         return matchLists;
     }
 
+    private double getTriggerPhase(long timestamp, IndexedTable table) {
+    // calculate the trigger time jitter correction
+        double period = table.getDoubleValue("period", 0,0,0);
+        int    phase  = table.getIntValue("phase", 0,0,0);
+        int    cycles = table.getIntValue("cycles", 0,0,0);
+        double triggerphase=0;
+        if(cycles > 0) triggerphase=period*((timestamp+phase)%cycles);
+//        System.out.println(period + " " + phase + " " + cycles + " " + timestamp + " " + triggerphase);
+        return triggerphase;
+    }
 }

@@ -9,6 +9,7 @@ import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorTrack;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.eb.EBCCDBConstants;
@@ -162,9 +163,58 @@ public class EBMatching {
     }
 
     /**
+     * find CD neutrals and append to particle list
+     */
+    public boolean addCentralNeutrals(DetectorEvent de) {
+        
+        List<DetectorResponse> respsCND =
+            eventBuilder.getUnmatchedResponses(null, DetectorType.CND, 0);
+
+        if (respsCND.size()>0) {
+
+            Vector3 vertex = new Vector3(0,0,0);
+            if (de.getParticles().size()>0) {
+                vertex.copy(eventBuilder.getEvent().getParticle(0).vertex());
+            }
+
+            // make a new neutral particle for each unmatched CND cluster:
+            for (DetectorResponse respCND : respsCND) {
+
+                // haven't appended the particle yet, but this will be its index:
+                final int pindex = de.getParticles().size();
+
+                // make neutral particle from CND:
+                DetectorParticle neutral = DetectorParticle.createNeutral(respCND,vertex);
+                respCND.setAssociation(pindex);
+
+                // find and associate matching CTOF hits:
+                List<DetectorResponse> respCTOF =
+                    eventBuilder.getUnmatchedResponses(null, DetectorType.CTOF, 0);
+                final int indx=neutral.getDetectorHit(respCTOF,DetectorType.CTOF,0,
+                        eventBuilder.ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
+                if (indx >= 0) {
+                    neutral.addResponse(respCTOF.get(indx),true);
+                    respCTOF.get(indx).setAssociation(pindex);
+                    // FIXME:  stop mixing Vector3 and Vector3D
+                    final double dx = respCTOF.get(indx).getPosition().x()-vertex.x();
+                    final double dy = respCTOF.get(indx).getPosition().y()-vertex.y();
+                    final double dz = respCTOF.get(indx).getPosition().z()-vertex.z();
+                    respCTOF.get(indx).setPath(Math.sqrt(dx*dx+dy*dy+dz*dz));
+                }
+
+                de.addParticle(neutral);
+            }
+        }
+
+        return respsCND.size()>0;
+    }
+
+    /**
      *
      * Central Tracks and CTOF/CND were already matched before
      * event builder.  Copy in.
+     *
+     * @deprecated switched to standard EB matching
      *
      */
     
@@ -214,7 +264,19 @@ public class EBMatching {
                     if (trkid>=0) {
                         if (!ctofMap.containsKey(trkid))
                             ctofMap.put(trkid,new ArrayList<Integer>());
-                        ctofMap.get(trkid).add(ictof);
+                        // insert it according to energy:
+                        boolean found=false;
+                        final float ee = ctofBank.getFloat("energy",ictof);
+                        for (int ilist=0; ilist<ctofMap.get(trkid).size(); ilist++) {
+                            final float ee2 = ctofBank.getFloat("energy",ctofMap.get(trkid).get(ilist));
+                            if (ee>ee2) {
+                                ctofMap.get(trkid).add(ilist,ictof);
+                                found=true;
+                                break;
+                            }
+                        }
+                        // no lower energies, put it at the end:
+                        if (found==false) ctofMap.get(trkid).add(ictof);
                     }
                 }
             }
