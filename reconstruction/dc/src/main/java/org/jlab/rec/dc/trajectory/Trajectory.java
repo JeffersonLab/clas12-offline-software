@@ -3,6 +3,7 @@ package org.jlab.rec.dc.trajectory;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
@@ -261,7 +262,7 @@ public class Trajectory extends ArrayList<Cross> {
     }
     
     public List<TrajectoryStateVec> trajectory;
-    public void calcTrajectory(int id, DCSwimmer dcSwim, double x, double y,  double z, double px, double py, double pz, int q, FTOFGeant4Factory ftofDetector, TrajectorySurfaces ts) {
+    public void calcTrajectory(int id, Swim dcSwim, double x, double y,  double z, double px, double py, double pz, int q, FTOFGeant4Factory ftofDetector, TrajectorySurfaces ts) {
         trajectory = new ArrayList<TrajectoryStateVec>();
         dcSwim.SetSwimParameters(x, y, z, px, py, pz, q);
        

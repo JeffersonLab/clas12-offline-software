@@ -12,9 +12,9 @@ import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
+import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -195,7 +195,7 @@ public class HitReader {
                 if(region ==1 && smearedTime[i]>timeCutMin && smearedTime[i]<timeCutMax)
                     passTimingCut=true;
                 if(region ==2) {
-                    double Bscale = DCSwimmer.getTorScale()*DCSwimmer.getTorScale();
+                    double Bscale = Swimmer.getTorScale()*Swimmer.getTorScale();
                     if(wire[i]>=56) {
                         if(smearedTime[i]>timeCutMin && smearedTime[i]<timeCutMax+timeCutLC*(double)(112-wire[i]/56)*Bscale)
                             passTimingCut=true;

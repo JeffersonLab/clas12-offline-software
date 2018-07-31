@@ -3,11 +3,11 @@ package org.jlab.rec.dc.track.fit;
 import Jama.Matrix;
 import java.util.HashMap;
 import java.util.Map;
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.cross.Cross;
 import org.jlab.rec.dc.track.Track;
-import org.jlab.rec.dc.trajectory.DCSwimmer;
 
 public class StateVecs {
     private double Bmax = 2.366498; // averaged
@@ -25,20 +25,21 @@ public class StateVecs {
     private final double[] A = new double[2];
     private final double[] dA = new double[4];
     private final float[] bf = new float[3];
-    
-    DCSwimmer dcSwim = new DCSwimmer();
-    
+    private final float[] lbf = new float[3];
+    private Swim dcSwim;
     /**
      * State vector representing the track in the sector coordinate system at the measurement layer
      */
-    public StateVecs() {
+    public StateVecs(Swim swimmer) {
         //Max Field Location: (phi, rho, z) = (29.50000, 44.00000, 436.00000)
         // get the maximum value of the B field
+        dcSwim = swimmer;
         double phi = Math.toRadians(29.5);
         double rho = 44.0;
         double z = 436.0;
-        Bmax = dcSwim.BfieldLab(rho*Math.cos(phi), rho*Math.sin(phi), z).toVector3D().mag() *(2.366498/4.322871999651699); // scales according to torus scale by reading the map and averaging the value
-    }
+        swimmer.BfieldLab(rho*Math.cos(phi), rho*Math.sin(phi), z, lbf);
+        Bmax = Math.sqrt(lbf[0]*lbf[0]+lbf[1]*lbf[1]+lbf[2]*lbf[2]) *(2.366498/4.322871999651699); // scales according to torus scale by reading the map and averaging the value
+     }
     
     /**
      * 
@@ -386,7 +387,7 @@ public class StateVecs {
                     trkcand.get_StateVecAtReg1MiddlePlane().tanThetaX(), trkcand.get_StateVecAtReg1MiddlePlane().tanThetaY(), trkcand.get_P(),
                     trkcand.get_Q());
 
-            double[] VecAtFirstMeasSite = dcSwim.SwimToPlane(trkcand.get(0).get_Sector(), z0);
+            double[] VecAtFirstMeasSite = dcSwim.SwimToPlaneTiltSecSys(trkcand.get(0).get_Sector(), z0);
             StateVec initSV = new StateVec(0);
             initSV.x = VecAtFirstMeasSite[0];
             initSV.y = VecAtFirstMeasSite[1];
@@ -449,7 +450,7 @@ public class StateVecs {
             dcSwim.SetSwimParameters(trkR1X.x(), trkR1X.y(), trkR1X.z(), 
                     trkR1P.x(), trkR1P.y(), trkR1P.z(), trkcand.get_Q());
             
-            double[] VecAtFirstMeasSite = dcSwim.SwimToPlane(trkcand.get(0).get_Sector(), z0);
+            double[] VecAtFirstMeasSite = dcSwim.SwimToPlaneTiltSecSys(trkcand.get(0).get_Sector(), z0);
             StateVec initSV = new StateVec(0);
             initSV.x = VecAtFirstMeasSite[0];
             initSV.y = VecAtFirstMeasSite[1];

@@ -2,6 +2,7 @@ package org.jlab.rec.dc.trajectory;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
@@ -26,7 +27,6 @@ public class TrajectoryFinder {
 	/**
 	 *  Field instantiated using the torus and the solenoid
 	*/
-	public DCSwimmer dcSwim = new DCSwimmer();
 	
 	/**
 	 * Step size used in integral Bdl Riemann integration
@@ -48,7 +48,7 @@ public class TrajectoryFinder {
      * @param candCrossList the input list of crosses used in determining a trajectory
      * @return a trajectory object
      */
-    public Trajectory findTrajectory(List<Cross> candCrossList, DCGeant4Factory DcDetector) {
+    public Trajectory findTrajectory(List<Cross> candCrossList, DCGeant4Factory DcDetector, Swim dcSwim) {
         Trajectory traj = new Trajectory();
         if (candCrossList.isEmpty()) {
             return traj;
@@ -60,7 +60,7 @@ public class TrajectoryFinder {
             return null;
         }
         traj.set_Trajectory(getStateVecsAlongTrajectory(DcDetector));
-        traj.set_IntegralBdl(integralBdl(candCrossList.get(0).get_Sector(), DcDetector));
+        traj.set_IntegralBdl(integralBdl(candCrossList.get(0).get_Sector(), DcDetector, dcSwim));
         traj.set_PathLength(PathLength);
         
         return traj;
@@ -71,7 +71,7 @@ public class TrajectoryFinder {
      * @param DcDetector DC detector utility
      * @return integral Bdl
      */
-    public double integralBdl(int sector, DCGeant4Factory DcDetector) {
+    public double integralBdl(int sector, DCGeant4Factory DcDetector, Swim dcSwim) {
 
         double z1 = DcDetector.getRegionMidpoint(0).z;
         double z3 = DcDetector.getRegionMidpoint(2).z;

@@ -109,7 +109,7 @@ public class TrackDictionaryMaker {
         }
         return sector;
     }
-    public DCTDC ProcessTrack(int q, double px, double py, double pz, double vx, double vy, double vz, DCGeant4Factory dcDetector, TrackDictionaryMaker tw, DCSwimmer sw) {
+    public DCTDC ProcessTrack(int q, double px, double py, double pz, double vx, double vy, double vz, DCGeant4Factory dcDetector, TrackDictionaryMaker tw, DCSwimmer2 sw) {
         
         double[] swimVal = new double[8];
        
@@ -171,7 +171,7 @@ public class TrackDictionaryMaker {
     private List<Integer> Wl5 = new ArrayList<Integer>();
     private List<Integer> Wl6 = new ArrayList<Integer>();
     
-    public void ProcessTracks(PrintWriter pw, DCGeant4Factory dcDetector, FTOFGeant4Factory ftofDetector, PCALGeant4Factory pcalDetector, TrackDictionaryMaker tw, DCSwimmer sw) {
+    public void ProcessTracks(PrintWriter pw, DCGeant4Factory dcDetector, FTOFGeant4Factory ftofDetector, PCALGeant4Factory pcalDetector, TrackDictionaryMaker tw, DCSwimmer2 sw) {
         double[] swimVal = new double[8];
         for(int i = 0; i < 2; i++) {
             int q = (int) Math.pow(-1, i);
@@ -315,7 +315,7 @@ public class TrackDictionaryMaker {
         }
     }
 
-    public static void ProcessCosmics(PrintWriter pw, DCGeant4Factory dcDetector, TrackDictionaryMaker tw, DCSwimmer sw) {
+    public static void ProcessCosmics(PrintWriter pw, DCGeant4Factory dcDetector, TrackDictionaryMaker tw, DCSwimmer2 sw) {
 
         double XMin = 35.;
         double XMax = 350;
@@ -403,7 +403,7 @@ public class TrackDictionaryMaker {
         }
     }
     
-    public static void swimtoLayer(int sector, int l, int sl, List<Integer> Wi, List<Integer> Di, DCGeant4Factory dcDetector,  DCSwimmer sw) {
+    public static void swimtoLayer(int sector, int l, int sl, List<Integer> Wi, List<Integer> Di, DCGeant4Factory dcDetector,  DCSwimmer2 sw) {
         //double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(l).getComponent(0).getMidpoint().z());
         double[] trk = sw.SwimToPlane(sector, dcDetector.getWireMidpoint(sl, l, 0).z); 
        
@@ -436,7 +436,7 @@ public class TrackDictionaryMaker {
             Di.add((int)10000);
         }
     }
-    public static void swimtoLayer(int sector, int l, int sl, List<Integer> Wi, DCGeant4Factory dcDetector,  DCSwimmer sw) {
+    public static void swimtoLayer(int sector, int l, int sl, List<Integer> Wi, DCGeant4Factory dcDetector,  DCSwimmer2 sw) {
         //double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(l).getComponent(0).getMidpoint().z());
         double[] trk = sw.SwimToPlane(sector, dcDetector.getWireMidpoint(sl, l, 0).z); 
        
@@ -498,7 +498,7 @@ public class TrackDictionaryMaker {
        
         System.out.println(" version "+MagneticFields.getInstance().getVersion());
         
-        DCSwimmer sw = new DCSwimmer();
+        DCSwimmer2 sw = new DCSwimmer2();
         //ProcessCosmics(pw, dcDetector, tw, sw);
         tm.ProcessTracks( pw,  dcDetector, ftofDetector, pcalDetector, tw,  sw);
 

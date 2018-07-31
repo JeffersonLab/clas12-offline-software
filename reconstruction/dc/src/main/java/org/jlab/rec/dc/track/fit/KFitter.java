@@ -3,6 +3,7 @@ package org.jlab.rec.dc.track.fit;
 import Jama.Matrix;
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.fit.StateVecs.CovMat;
@@ -12,7 +13,7 @@ public class KFitter {
 
     public boolean setFitFailed = false;
 
-    StateVecs sv = new StateVecs();
+    StateVecs sv ;
     MeasVecs mv = new MeasVecs();
 
     public StateVec finalStateVec;
@@ -26,7 +27,8 @@ public class KFitter {
     public int NDF = 0;
     public int ConvStatus = 1;
     
-    public KFitter(Track trk, DCGeant4Factory DcDetector, boolean TimeBasedUsingHBtrack) { 
+    public KFitter(Track trk, DCGeant4Factory DcDetector, boolean TimeBasedUsingHBtrack, Swim swimmer) { 
+        sv = new StateVecs(swimmer);
         if(TimeBasedUsingHBtrack==true) {
             this.initFromHB(trk, DcDetector); 
         } else {

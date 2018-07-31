@@ -3,6 +3,7 @@ package org.jlab.service.dc;
 import Jama.Matrix;
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -23,7 +24,6 @@ import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.track.fit.KFitter;
-import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
@@ -37,6 +37,7 @@ public class DCTBEngine extends DCEngine {
 //    TrajectorySurfaces tSurf;
     
     private TimeToDistanceEstimator tde;
+    
     public DCTBEngine() {
         super("DCTB");
         tde = new TimeToDistanceEstimator();
@@ -74,7 +75,8 @@ public class DCTBEngine extends DCEngine {
                 return true; // no REC HB bank
             }
         }
-        
+        // get Field
+        Swim dcSwim = new Swim();        
         //System.out.println(" RUNNING TIME BASED....................................");
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
@@ -207,7 +209,7 @@ public class DCTBEngine extends DCEngine {
             //if(TrackArray[i].get_FitChi2()>200) {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());
             //}
-            KFitter kFit = new KFitter(TrackArray[i], dcDetector, true);
+            KFitter kFit = new KFitter(TrackArray[i], dcDetector, true, dcSwim);
             //kFit.totNumIter=30;
             
             StateVec fn = new StateVec();
@@ -219,7 +221,8 @@ public class DCTBEngine extends DCEngine {
                 //set the track parameters if the filter does not fail
                 TrackArray[i].set_P(1./Math.abs(kFit.finalStateVec.Q));
                 TrackArray[i].set_Q((int)Math.signum(kFit.finalStateVec.Q));
-                trkcandFinder.setTrackPars(TrackArray[i], new Trajectory(), trjFind, fn, kFit.finalStateVec.z, dcDetector);
+                trkcandFinder.setTrackPars(TrackArray[i], new Trajectory(), trjFind, fn, 
+                        kFit.finalStateVec.z, dcDetector, dcSwim);
                 // candidate parameters are set from the state vector
                 TrackArray[i].set_FitChi2(kFit.chi2); 
                 TrackArray[i].set_FitNDF(kFit.NDF);
@@ -246,8 +249,8 @@ public class DCTBEngine extends DCEngine {
             for(Track trk: trkcands) {
                 // reset the id
                 trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
-                trk.calcTrajectory(trkId, trkcandFinder.dcSwim, trk.get_Vtx0().x(), trk.get_Vtx0().y(), trk.get_Vtx0().z(), trk.get_pAtOrig().x(), trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q(), ftofDetector, tSurf);
+                trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector, dcSwim);
+                trk.calcTrajectory(trkId, dcSwim, trk.get_Vtx0().x(), trk.get_Vtx0().y(), trk.get_Vtx0().z(), trk.get_pAtOrig().x(), trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q(), ftofDetector, tSurf);
 //                for(int j = 0; j< trk.trajectory.size(); j++) {
 //                System.out.println(trk.get_Id()+" "+trk.trajectory.size()+" ("+trk.trajectory.get(j).getDetId()+") ["+
 //                            trk.trajectory.get(j).getDetName()+"] "+

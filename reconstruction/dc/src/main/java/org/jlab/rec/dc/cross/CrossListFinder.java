@@ -3,6 +3,7 @@ package org.jlab.rec.dc.cross;
 import Jama.Matrix;
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -12,7 +13,6 @@ import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
-import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.utils.groups.IndexedTable;
 import trackfitter.fitter.LineFitter;
 
@@ -33,11 +33,10 @@ public class CrossListFinder  {
      * @return the list of crosses determined to be consistent with belonging to a track in the DC
      */
     private final List<BaseCand> trkCnds = new ArrayList<BaseCand>();
-    private final DCSwimmer swimmer = new DCSwimmer();
     ClusterFitter cf = new ClusterFitter();
     SegmentFinder segFinder = new SegmentFinder();
 
-    public CrossList candCrossLists(List<Cross> dccrosslist, boolean TimeBased, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
+    public CrossList candCrossLists(List<Cross> dccrosslist, boolean TimeBased, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde, Swim swimmer) {
         //List<List<Cross>> trkCnds = new ArrayList<List<Cross>>();
         trkCnds.clear();
 
@@ -124,9 +123,9 @@ public class CrossListFinder  {
                                 continue; // fit failed
                             }
                             //if(TimeBased && tde!=null) {			
-                            this.updateBFittedHits(c1, tab, DcDetector, tde);
-                            this.updateBFittedHits(c2, tab, DcDetector, tde);
-                            this.updateBFittedHits(c3, tab, DcDetector, tde);
+                            this.updateBFittedHits(c1, tab, DcDetector, tde, swimmer);
+                            this.updateBFittedHits(c2, tab, DcDetector, tde, swimmer);
+                            this.updateBFittedHits(c3, tab, DcDetector, tde, swimmer);
                             //}
                             BaseCand bCand = new BaseCand();
                             bCand.CrossesOnTrack.clear();
@@ -234,7 +233,7 @@ public class CrossListFinder  {
      * @param tde  time-to-distance utility
      * Updates the B-field information of the hits in the cross segments
      */
-    private void updateBFittedHits(Cross c, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
+    private void updateBFittedHits(Cross c, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde, Swim swimmer) {
         for(int i =0; i<c.get_Segment1().size(); i++) {
             Point3D ref =c.get_Segment1().get(i).getCrossDirIntersWire(); 
             float[] result = new float[3];

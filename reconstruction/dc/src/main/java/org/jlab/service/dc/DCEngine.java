@@ -36,7 +36,7 @@ public class DCEngine extends ReconstructionEngine {
      * 
      * determine torus and solenoid map name from yaml, else env, else crash
      */
-    public void initializeMagneticFields() {
+    /*public void initializeMagneticFields() {
         String torusMap=this.getEngineConfigString("torusMap");
         String solenoidMap=this.getEngineConfigString("solenoidMap");
         if (torusMap!=null) {
@@ -70,7 +70,7 @@ public class DCEngine extends ReconstructionEngine {
         catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     public void setStartTimeOption() {
         // Load config

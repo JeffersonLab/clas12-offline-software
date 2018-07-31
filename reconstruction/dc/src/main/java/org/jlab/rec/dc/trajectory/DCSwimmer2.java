@@ -27,7 +27,7 @@ import org.jlab.utils.CLASResources;
  * @author ziegler
  *
  */
-public class DCSwimmer {
+public class DCSwimmer2 {
 	
     //will use SwimZ above this momentum (dph)
     private static double  SWIMZMINMOM = 0.75; //GeV/c
@@ -78,7 +78,7 @@ public class DCSwimmer {
     //public boolean isRotatedCoordinateSystem = true;
     public int nSteps;
 
-    public DCSwimmer() {
+    public DCSwimmer2() {
         //create a swimmer for our magnetic field
         //swimmer = new Swimmer(rcompositeField);
         // create a swimmer for the magnetic fields

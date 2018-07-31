@@ -6,6 +6,9 @@ import cnuphys.snr.clas12.Clas12NoiseResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.jlab.clas.swimtools.MagFieldsEngine;
+import org.jlab.clas.swimtools.Swim;
+import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
@@ -29,7 +32,6 @@ import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
-import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.RoadFinder;
 import org.jlab.rec.dc.trajectory.Road;
 import org.jlab.utils.groups.IndexedTable;
@@ -38,6 +40,7 @@ public class DCHBEngine extends DCEngine {
 
     String FieldsConfig="";
     AtomicInteger Run = new AtomicInteger(0);
+    
     //DCGeant4Factory dcDetector;
     //String clasDictionaryPath ;
 
@@ -49,7 +52,7 @@ public class DCHBEngine extends DCEngine {
     public boolean init() {
         // Load cuts
         Constants.Load();
-        super.initializeMagneticFields();
+        //super.initializeMagneticFields();
         super.setStartTimeOption();
         super.LoadTables();
         return true;
@@ -84,15 +87,19 @@ public class DCHBEngine extends DCEngine {
             TableLoader.FillT0Tables(newRun, super.variationName);
             TableLoader.Fill(super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist")); 
             
-            double shift =0;
-            if(newRun>1890) {
-                shift = -1.9;
-            }
-            DCSwimmer.setMagneticFieldsScales(bank.getFloat("solenoid", 0), bank.getFloat("torus", 0), shift);
+            //double shift =0;
+            //if(newRun>1890) {
+            //    shift = -1.9;
+            //}
+            //DCSwimmer.setMagneticFieldsScales(bank.getFloat("solenoid", 0), bank.getFloat("torus", 0), shift);
+            
             Run.set(newRun);
             if(event.hasBank("MC::Particle")==true)
                 Constants.setMCDIST(0);
         }
+        // get Field
+        Swim dcSwim = new Swim();
+        
         // init SNR
        Clas12NoiseResult results = new Clas12NoiseResult();
        Clas12NoiseAnalysis noiseAnalysis = new Clas12NoiseAnalysis();
@@ -183,11 +190,13 @@ public class DCHBEngine extends DCEngine {
 
 
         CrossListFinder crossLister = new CrossListFinder();
-        CrossList crosslist = crossLister.candCrossLists(crosses, false, super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
+        CrossList crosslist = crossLister.candCrossLists(crosses, false, 
+                super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), 
+                dcDetector, null, dcSwim);
 
         //6) find the list of  track candidates
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("HitBased");
-        trkcands = trkcandFinder.getTrackCands(crosslist, dcDetector, DCSwimmer.getTorScale() ) ;
+        trkcands = trkcandFinder.getTrackCands(crosslist, dcDetector, Swimmer.getTorScale(), dcSwim ) ;
 
 
         // track found	
@@ -199,7 +208,7 @@ public class DCHBEngine extends DCEngine {
             for(Track trk: trkcands) {
                 // reset the id
                 trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
+                trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector, dcSwim);
                 for(Cross c : trk) { 
                     c.get_Segment1().isOnTrack=true;
                     c.get_Segment2().isOnTrack=true;
@@ -263,9 +272,11 @@ public class DCHBEngine extends DCEngine {
         List<Cross> pcrosses = crossMake.find_Crosses(segments, dcDetector);
 
         //
-        CrossList pcrosslist = crossLister.candCrossLists(pcrosses, false, super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, null);
+        CrossList pcrosslist = crossLister.candCrossLists(pcrosses, false, 
+                super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), 
+                dcDetector, null, dcSwim);
 
-        List<Track> mistrkcands =trkcandFinder.getTrackCands(pcrosslist, dcDetector, DCSwimmer.getTorScale());
+        List<Track> mistrkcands =trkcandFinder.getTrackCands(pcrosslist, dcDetector, Swimmer.getTorScale(), dcSwim);
         if(mistrkcands.size()>0) {    
             trkcandFinder.removeOverlappingTracks(mistrkcands);		// remove overlaps
 
@@ -273,7 +284,7 @@ public class DCHBEngine extends DCEngine {
 
                 // reset the id
                 trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
+                trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector, dcSwim);
                 for(Cross c : trk) { 
                     for(FittedHit h1 : c.get_Segment1()) { 
                             h1.set_AssociatedHBTrackID(trk.get_Id());
@@ -302,10 +313,12 @@ public class DCHBEngine extends DCEngine {
         //String outputFile = args[1];
         //String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
         //String inputFile="/Users/ziegler/Desktop/Work/validation/infiles/out_clas_004013.evio.filt.hipo";
-        //String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/gemc_out_mu-_hipo/mu-_30nA_bg_out.ev.hipo";
-         String inputFile="/Users/ziegler/Desktop/Work/Files/Data/out_clas_002391_extractRawBanksFromCooked.hipo";
+        //String inputFile="/Users/ziegler/Desktop/Work/Files/FMTDevel/gemc/SimuTag_4a.2.4/lumiclas12_pi.hipo";
+        String inputFile="/Users/ziegler/Desktop/Work/Release/devel/swim-devel-merge/clas12-offline-software/validation/advanced-tests/out_twoTrackEvents_809.hipo";
         //String inputFile="/Users/ziegler/Desktop/Work/Files/FMTDevel/gemc/pion_rec.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
+        MagFieldsEngine enf = new MagFieldsEngine();
+        enf.init();
         
         DCHBEngine en = new DCHBEngine();
         en.init();
@@ -322,8 +335,8 @@ public class DCHBEngine extends DCEngine {
         //Writer
         
         //String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGDSt.hipo";
-       // String outputFile="/Users/ziegler/Desktop/Work/validation/outfiles/out_clas_004013.evio.filtRecookSinThread.hipo";
-        String outputFile="/Users/ziegler/Desktop/Work/Files/Data/out_clas_002391_extractRawBanksFromCookedReCook.hipo";
+        String outputFile="/Users/ziegler/Desktop/Work/Files/FMTDevel/gemc/SimuTag_4a.2.4/lumiclas12_pi_cook.hipo";
+        //String outputFile="/Users/ziegler/Desktop/Work/Files/Data/out_clas_002391_extractRawBanksFromCookedReCook2.hipo";
         //String outputFile="/Users/ziegler/Desktop/Work/Files/FMTDevel/gemc/pion_recFMTClusNoTrkRefit.hipo";
         
         writer.open(outputFile);
@@ -339,6 +352,7 @@ public class DCHBEngine extends DCEngine {
             }
             //if(event.getBank("RUN::config").getInt("event", 0) <50)
              //   continue;
+            enf.processDataEvent(event); 
             en.processDataEvent(event);
             //event.show();
             // Processing TB
@@ -346,7 +360,7 @@ public class DCHBEngine extends DCEngine {
             writer.writeEvent(event);
             System.out.println("PROCESSED  EVENT "+event.getBank("RUN::config").getInt("event", 0));
            // event.show();
-            //if (event.getBank("RUN::config").getInt("event", 0) > 350) {
+            //if (event.getBank("RUN::config").getInt("event", 0) > 101) {
             //    break;
             //}
             
