@@ -1,4 +1,4 @@
-package cnuphys.swimtest;
+package cnuphys.swim.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

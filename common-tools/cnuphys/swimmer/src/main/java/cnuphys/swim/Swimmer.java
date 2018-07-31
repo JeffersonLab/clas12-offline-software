@@ -16,6 +16,7 @@ import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKutta;
 import cnuphys.rk4.RungeKuttaException;
 
+import cnuphys.swim.util.Plane;
 /**
  * Handles the swimming of a particle through a magnetic field.
  * 
@@ -705,7 +706,13 @@ public final class Swimmer {
 		int count = 0;
 
 		// set the step size to half the accuracy
-		stepSize = accuracy / 2;
+	    stepSize = accuracy / 2;
+		
+		//set the reverse stepsize to about 1/10 of distance to cover
+//		int size = traj.size();
+//		double zn = traj.get(size-2)[2];
+//		double znp1 = traj.get(size-1)[2];
+//		stepSize = Math.max(accuracy, Math.abs((znp1-zn)/10));
 
 		// have to deal with the fact that the hdata array will reset so save
 		// current values
@@ -722,6 +729,7 @@ public final class Swimmer {
 			xo = lastY[0];
 			yo = lastY[1];
 			zo = lastY[2];
+	//		stepSize = Math.max(accuracy, Math.abs((fixedZ-zo)/10));
 			double px = lastY[3];
 			double py = lastY[4];
 			double pz = lastY[5];
@@ -856,6 +864,284 @@ public final class Swimmer {
 	}
 
 	/**
+	 * Swims a charged particle. This swims to a fixed plane. This is for the
+	 * trajectory mode, where you want to cache steps along the path. Uses an
+	 * adaptive stepsize algorithm.
+	 * 
+	 * @param charge
+	 *            the charge: -1 for electron, 1 for proton, etc
+	 * @param xo
+	 *            the x vertex position in meters
+	 * @param yo
+	 *            the y vertex position in meters
+	 * @param zo
+	 *            the z vertex position in meters
+	 * @param momentum
+	 *            initial momentum in GeV/c
+	 * @param theta
+	 *            initial polar angle in degrees
+	 * @param phi
+	 *            initial azimuthal angle in degrees
+	 * @param normX
+	 *            the x component of the normal vector
+	 * @param normY
+	 *            the y component of the normal vector
+	 * @param normZ
+	 *            the z component of the normal vector
+	 * @param d the distance from the origin to the plane        
+	 * @param accuracy
+	 *            the accuracy of the distance from plane termination, in meters
+	 * @param maxRad
+	 *            the max radial coordinate NOTE: NO LONGER USED (here for
+	 *            backwards compatibility)
+	 * @param sMax
+	 *            Max path length in meters. This determines the max number of
+	 *            steps based on the step size. If a stopper is used, the
+	 *            integration might terminate before all the steps are taken. A
+	 *            reasonable value for CLAS is 8. meters
+	 * @param stepSize
+	 *            the initial step size in meters.
+	 * @param relTolerance
+	 *            the error tolerance as fractional diffs. Note it is a vector,
+	 *            the same dimension of the problem, e.g., 6 for
+	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 * @param hdata
+	 *            if not null, should be double[3]. Upon return, hdata[0] is the
+	 *            min stepsize used (m), hdata[1] is the average stepsize used
+	 *            (m), and hdata[2] is the max stepsize (m) used
+	 * @return the trajectory of the particle
+	 * @throws RungeKuttaException
+	 */
+	public SwimTrajectory swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			final double normX, final double normY, final double normZ, final double d, double accuracy, double maxRad, double sMax, double stepSize, double relTolerance[],
+			double hdata[]) throws RungeKuttaException {
+		return swim(charge, xo, yo, zo, momentum, theta, phi, normX, normY, normZ, d, accuracy, sMax, stepSize, relTolerance, hdata);
+	}
+	
+	/**
+	 * Swims a charged particle. This swims to a fixed plane. This is for the
+	 * trajectory mode, where you want to cache steps along the path. Uses an
+	 * adaptive stepsize algorithm.
+	 * 
+	 * @param charge
+	 *            the charge: -1 for electron, 1 for proton, etc
+	 * @param xo
+	 *            the x vertex position in meters
+	 * @param yo
+	 *            the y vertex position in meters
+	 * @param zo
+	 *            the z vertex position in meters
+	 * @param momentum
+	 *            initial momentum in GeV/c
+	 * @param theta
+	 *            initial polar angle in degrees
+	 * @param phi
+	 *            initial azimuthal angle in degrees
+	 * @param normX
+	 *            the x component of the normal vector
+	 * @param normY
+	 *            the y component of the normal vector
+	 * @param normZ
+	 *            the z component of the normal vector
+	 * @param d the distance from the origin to the plane        
+	 * @param accuracy
+	 *            the accuracy of the fixed z termination, in meters
+	 * @param sMax
+	 *            Max path length in meters. This determines the max number of
+	 *            steps based on the step size. If a stopper is used, the
+	 *            integration might terminate before all the steps are taken. A
+	 *            reasonable value for CLAS is 8. meters
+	 * @param stepSize
+	 *            the initial step size in meters.
+	 * @param relTolerance
+	 *            the error tolerance as fractional diffs. Note it is a vector,
+	 *            the same dimension of the problem, e.g., 6 for
+	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 * @param hdata
+	 *            if not null, should be double[3]. Upon return, hdata[0] is the
+	 *            min stepsize used (m), hdata[1] is the average stepsize used
+	 *            (m), and hdata[2] is the max stepsize (m) used
+	 * @return the trajectory of the particle
+	 * @throws RungeKuttaException
+	 */
+	public SwimTrajectory swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			final double normX, final double normY, final double normZ, final double d, double accuracy, double sMax, double stepSize, double relTolerance[], double hdata[])
+			throws RungeKuttaException {
+		
+		Plane plane = Plane.createPlane(normX,  normY, normZ, d);
+		return swim(charge, xo, yo, zo, momentum, theta, phi, plane, accuracy, sMax, stepSize, relTolerance, hdata);
+
+	}
+	
+	/**
+	 * Swims a charged particle. This swims to a fixed plane. This is for the
+	 * trajectory mode, where you want to cache steps along the path. Uses an
+	 * adaptive stepsize algorithm.
+	 * 
+	 * @param charge
+	 *            the charge: -1 for electron, 1 for proton, etc
+	 * @param xo
+	 *            the x vertex position in meters
+	 * @param yo
+	 *            the y vertex position in meters
+	 * @param zo
+	 *            the z vertex position in meters
+	 * @param momentum
+	 *            initial momentum in GeV/c
+	 * @param theta
+	 *            initial polar angle in degrees
+	 * @param phi
+	 *            initial azimuthal angle in degrees
+	 * @param plane
+	 *            the plane to swim to
+	 * @param accuracy
+	 *            the accuracy of the fixed z termination, in meters
+	 * @param sMax
+	 *            Max path length in meters. This determines the max number of
+	 *            steps based on the step size. If a stopper is used, the
+	 *            integration might terminate before all the steps are taken. A
+	 *            reasonable value for CLAS is 8. meters
+	 * @param stepSize
+	 *            the initial step size in meters.
+	 * @param relTolerance
+	 *            the error tolerance as fractional diffs. Note it is a vector,
+	 *            the same dimension of the problem, e.g., 6 for
+	 *            [x,y,z,vx,vy,vz]. It might be something like {1.0e-10,
+	 *            1.0e-10, 1.0e-10, 1.0e-8, 1.0e-8, 1.0e-8}
+	 * @param hdata
+	 *            if not null, should be double[3]. Upon return, hdata[0] is the
+	 *            min stepsize used (m), hdata[1] is the average stepsize used
+	 *            (m), and hdata[2] is the max stepsize (m) used
+	 * @return the trajectory of the particle
+	 * @throws RungeKuttaException
+	 */
+	public SwimTrajectory swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			Plane plane, double accuracy, double sMax, double stepSize, double relTolerance[], double hdata[])
+			throws RungeKuttaException {
+		if (momentum < MINMOMENTUM) {
+			return new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi);
+		}
+				
+		//no field?
+		if ((charge == 0) || (getProbe().isZeroField())) {
+	//		System.err.println("Skipping neutral or no field swim (D)");
+			// just has to be proportional to velocity
+			SwimTrajectory traj = new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi);
+			double vz = momentum * FastMath.cos(Math.toRadians(theta));
+			double vp = momentum * FastMath.sin(Math.toRadians(theta));
+			double vx = vp * Math.cos(Math.toRadians(phi));
+			double vy = vp * Math.sin(Math.toRadians(phi));
+			double time = plane.timeToPlane(xo, yo, zo, vx, vy, vz);
+			
+			double xf = xo + vx*time;
+			double yf = yo + vy*time;
+			double zf = zo + vz*time;
+			
+			traj.add(xf, yf, zf, momentum, theta, phi);
+
+			return traj;
+		}
+		
+
+		DefaultPlaneStopper stopper = new DefaultPlaneStopper(0, sMax, plane, accuracy, 999);
+
+		SwimTrajectory traj = null;
+		// First try
+
+		traj = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, 0, sMax, stepSize, relTolerance, hdata);
+
+		// if stopped because of max radius, we are done (never reached plane)
+		double finalPathLength = stopper.getFinalT();
+
+		// if stopped because of max s, we are done (never reached plane)
+		if (finalPathLength > sMax) {
+			return traj;
+		}
+
+		// are we there yet?
+		double lastY[] = traj.lastElement();
+		
+		double del = plane.distanceToPlane(lastY[0], lastY[1], lastY[2]);
+		int maxtry = 20;
+		int count = 0;
+//
+//		// set the step size to half the accuracy
+//		stepSize = accuracy / 2;
+		
+		//set the reverse stepsize to about 1/10 of distance to cover
+		//stepSize = Math.max(accuracy, Math.abs(del/10));
+
+
+		// have to deal with the fact that the hdata array will reset so save
+		// current values
+		double oldHdata[] = new double[3];
+		oldHdata[0] = hdata[0];
+		oldHdata[1] = hdata[1] * traj.size(); // back to sum, not avg
+		oldHdata[2] = hdata[2];
+
+		while ((count < maxtry) && (del > accuracy)) {
+			
+			
+			
+			// last element had beyond plane cutoff
+			int lastIndex = traj.size() - 1;
+			traj.remove(lastIndex);
+			lastY = traj.lastElement();
+			xo = lastY[0];
+			yo = lastY[1];
+			zo = lastY[2];
+			double px = lastY[3];
+			double py = lastY[4];
+			double pz = lastY[5];
+			
+			del = plane.distanceToPlane(lastY[0], lastY[1], lastY[2]);
+			stepSize = Math.max(accuracy, Math.abs(del/10));
+	//		System.out.print("COUNT: " + count + " StepSize: " + stepSize);
+
+			// System.err.println("New start state = " + String.format("(%9.6f,
+			// %9.6f, %9.6f) (%9.6f, %9.6f, %9.6f)", xo, yo, zo, px, py, pz));
+
+			stopper = new DefaultPlaneStopper(finalPathLength, sMax, plane, accuracy, -stopper.getSide());
+
+			// momentum = traj.getFinalMomentum();
+			theta = FastMath.acos2Deg(pz);
+			phi = FastMath.atan2Deg(py, px);
+
+			SwimTrajectory addTraj = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, finalPathLength, sMax,
+					stepSize, relTolerance, hdata);
+
+			finalPathLength = stopper.getFinalT();
+			// System.err.println("** STOP PLEN (B) = " + finalPathLength);
+
+			hdata[0] = Math.min(oldHdata[0], hdata[0]);
+			hdata[1] = hdata[1] * addTraj.size();
+			hdata[1] = oldHdata[1] + hdata[1];
+			hdata[2] = Math.max(oldHdata[2], hdata[2]);
+			oldHdata[0] = hdata[0];
+			oldHdata[1] = hdata[1];
+			oldHdata[2] = hdata[2];
+
+			// merge the trajectories
+			traj.addAll(addTraj);
+			lastY = traj.lastElement();
+			
+			del = plane.distanceToPlane(lastY[0], lastY[1], lastY[2]);
+			
+	//		System.out.println("   del: " + del);
+			count++;
+	//		stepSize /= 2;
+	//		stepSize = Math.max(accuracy, Math.abs(del/10));
+		} // while
+
+		// now can get overall avg stepsize
+		hdata[1] = hdata[1] / traj.size();
+		return traj;
+	}
+
+
+	/**
 	 * Swims a charged particle. This swims to a fixed z value. This is for the
 	 * trajectory mode, where you want to cache steps along the path. Uses an
 	 * adaptive stepsize algorithm.
@@ -976,9 +1262,6 @@ public final class Swimmer {
 				
 				traj.add(xf, yf, fixedZ, momentum, theta, phi);
 				
-//				System.out.println("xf = " + xf);
-//				System.out.println("yf = " + yf);
-//				System.out.println("zf = " + fixedZ);
 				
 			}
 			return traj;
@@ -1013,6 +1296,13 @@ public final class Swimmer {
 
 		// set the step size to half the accuracy
 		stepSize = accuracy / 2;
+		
+		//set the reverse stepsize to about 1/10 of distance to cover
+//		int size = traj.size();
+//		double zn = traj.get(size-2)[2];
+//		double znp1 = traj.get(size-1)[2];
+//		stepSize = Math.max(accuracy, Math.abs((znp1-zn)/10));
+
 
 		// have to deal with the fact that the hdata array will reset so save
 		// current values
@@ -1033,9 +1323,10 @@ public final class Swimmer {
 			double py = lastY[4];
 			double pz = lastY[5];
 
+	//		stepSize = Math.max(accuracy, Math.abs((fixedZ-zo)/10));
+
 			// System.err.println("New start state = " + String.format("(%9.6f,
 			// %9.6f, %9.6f) (%9.6f, %9.6f, %9.6f)", xo, yo, zo, px, py, pz));
-
 			stopper = new DefaultZStopper(finalPathLength, sMax, fixedZ, accuracy, normalDirection);
 
 			// momentum = traj.getFinalMomentum();

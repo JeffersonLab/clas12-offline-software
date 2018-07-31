@@ -1,4 +1,4 @@
-package cnuphys.swim;
+package cnuphys.swim.util;
 
 import cnuphys.lund.DoubleFormat;
 

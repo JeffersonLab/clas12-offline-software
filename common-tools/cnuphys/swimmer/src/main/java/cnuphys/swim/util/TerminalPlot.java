@@ -1,4 +1,4 @@
-package cnuphys.swim;
+package cnuphys.swim.util;
 
 /**
  * Just what it sounds like, crude 2D (one data set) terminal scatter plot for

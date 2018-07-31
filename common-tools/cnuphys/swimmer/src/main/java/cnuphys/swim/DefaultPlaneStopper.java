@@ -1,6 +1,7 @@
 package cnuphys.swim;
 
 import cnuphys.rk4.IStopper;
+import cnuphys.swim.util.Plane;
 
 public class DefaultPlaneStopper implements IStopper {
 	
@@ -12,19 +13,22 @@ public class DefaultPlaneStopper implements IStopper {
 	private Plane _plane;
 
 	
+	//which side of the plane
+	private int _side;
 	/**
 	 * Plane stopper that doesn't check max R (does check max path length)
 	 * @param s0 starting path length in meters
 	 * @param sMax maximal path length in meters
-	 * @param norm the normal vector where the components (0, 1, 2) map to (x, y, z)
-	 * @param p a point in the plane where the components (0, 1, 2) map to (x, y, z)
+	 * @param plane the plane
 	 * @param accuracy the accuracy in meters
+	 * @param side the starting side. Set to any number > 100 if not known.
 	 */
-	public DefaultPlaneStopper(double s0, double sMax, double norm[], double p[], double accuracy) {
+	public DefaultPlaneStopper(double s0, double sMax, Plane plane, double accuracy, int side) {
 		_totalPathLength = s0;
 		_maxS = sMax;
 		_accuracy = accuracy;
-		_plane = Plane.createPlane(norm, p);
+		_plane = plane;
+		_side = side;
 	}
 	
 	/**
@@ -32,20 +36,52 @@ public class DefaultPlaneStopper implements IStopper {
 	 * @param s0 starting path length in meters
 	 * @param rMax maximal radius in meters
 	 * @param sMax maximal path length in meters
-	 * @param norm the normal vector where the components (0, 1, 2) map to (x, y, z)
-	 * @param p a point in the plane where the components (0, 1, 2) map to (x, y, z)
+	 * @param plane the plane
 	 * @param accuracy the accuracy in meters
+	 * @param side the starting side. Set to any number > 100 if not known.
 	 */
-	public DefaultPlaneStopper(double s0, double rMax, double sMax, double norm[], double p[], double accuracy) {
-		this(s0, sMax, norm, p, accuracy);
+	public DefaultPlaneStopper(double s0, double rMax, double sMax, Plane plane, double accuracy, int side) {
+		this(s0, sMax, plane, accuracy, side);
 		_maxRsSq = rMax*rMax;
 	}
 
 
+	/**
+	 * Get the current side
+	 * @return the current side
+	 */
+	public int getSide() {
+		return _side;
+	}
 	@Override
-	public boolean stopIntegration(double t, double[] y) {
+	public boolean stopIntegration(double s, double[] y) {
+		//within accuracy?
+		if (_plane.distanceToPlane(y[0], y[1], y[2]) < _accuracy) {
+			return true;
+		}
+		
+		//check limit of radial coordinate if finite max
+		if (Double.isFinite(_maxRsSq)) {
+			double rsq = y[0]*y[0] + y[1]*y[1] + y[2]*y[2];
+			if (rsq > _maxRsSq) {
+				return true;
+			}
+		}
 		// TODO Auto-generated method stub
-		return false;
+		if (s > _maxS) {
+			return true;
+		}
+
+		int newSide = _plane.directionSign(y[0], y[1], y[2]);
+
+		boolean shouldStop;
+		if (_side > 99) {
+			shouldStop = false;
+		} else {
+			shouldStop = (_side != newSide);
+		}
+		_side = newSide;
+		return shouldStop;
 	}
 
 	@Override
@@ -58,4 +94,22 @@ public class DefaultPlaneStopper implements IStopper {
 		// Do nothing
 	}
 
+	/**
+	 * Generally this is the same as stop integration. So most
+	 * will just return stopIntegration(). But sometimes
+	 * stop just means we reset and integrate more. For example, with a 
+	 * fixed Z integrator we "stop" when we cross the z boundary however
+	 * we are not done unless we are within tolerance. If we are within
+	 * tolerance (on either side) we are really done! 
+	 * @param t
+	 *            the current value of the independent variable (typically
+	 *            pathlength)
+	 * @param y
+	 *            the current state vector (typically [x, y, z, vx, vy, vz])
+	 * @return <code>true</code> if we should stop now.
+	 */
+	@Override
+	public boolean terminateIntegration(double t, double y[]) {
+		return _plane.contained(y[0], y[1], y[2], _accuracy);
+	}
 }

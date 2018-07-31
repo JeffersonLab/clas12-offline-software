@@ -5,6 +5,7 @@ import cnuphys.lund.LundSupport;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
+import cnuphys.swim.util.TerminalPlot;
 
 /**
  * This class gives an example of swimming a Lund particle

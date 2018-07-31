@@ -18,7 +18,7 @@ public class SectorSwimZDerivative extends SwimZDerivative {
 	
 	/**
 	 * Set the parameters
-	 * 
+	 * @param sect the sector [1..6]
 	 * @param Q
 	 *            -1 for electron, +1 for proton, etc.
 	 * @param p

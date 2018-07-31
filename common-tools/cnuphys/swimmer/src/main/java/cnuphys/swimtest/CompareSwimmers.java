@@ -108,11 +108,23 @@ public class CompareSwimmers {
 		double[] v = new double[2];
 		v[0] = tiltedX * _cos25 + tiltedZ * _sin25;
 		v[1] = tiltedZ * _cos25 - tiltedX * _sin25;
-//		v[0] = tiltedX * _cos25 - tiltedZ * _sin25;
-//		v[1] = tiltedZ * _cos25 + tiltedX * _sin25;
-
 		return v;
 	}
+	
+	/**
+	 * Convert sector x and z to tilted x and z
+	 * @param sectorX the sector x coordinate
+	 * @param sectorZ the sector z coordinate
+	 * @return the tilted coordinates, with v[0] = x and v[1] = z
+	 */
+	public static double[] sectorToTilted(double sectorX, double sectorZ) {
+		double[] v = new double[2];
+		v[0] = sectorX * _cos25 - sectorZ * _sin25;
+		v[1] = sectorZ * _cos25 + sectorX * _sin25;
+		return v;
+	}
+
+
 
 
 	/**
@@ -120,6 +132,7 @@ public class CompareSwimmers {
 	 */
 	public static void swimmerVswimmer2Test(long seed, int num) {
 		
+		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
 		double zTarg = 5.0; //m
 		double zTargCM = zTarg*100; //cm
 		double accuracy = 1.0e-5; //m

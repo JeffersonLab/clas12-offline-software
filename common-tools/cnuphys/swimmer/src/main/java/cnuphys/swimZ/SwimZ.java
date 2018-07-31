@@ -233,7 +233,7 @@ public class SwimZ {
 	/**
 	 * Swim to a fixed z over short distances using RK adaptive stepsize
 	 * 
-	 * @param sector 
+	 * @param sector the sector [1..6]
 	 * @param Q
 	 *            the integer charge of the particle (-1 for electron)
 	 * @param p

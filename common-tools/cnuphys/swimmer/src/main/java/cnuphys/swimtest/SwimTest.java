@@ -114,6 +114,7 @@ public class SwimTest {
 		final JMenuItem polyItem = new JMenuItem("SwimZ vs. Poly Approx Test");
 		final JMenuItem specialItem = new JMenuItem("Special Trouble Cases");
 
+		final JMenuItem planeItem = new JMenuItem("Swim To Plane Test");
 		ActionListener al = new ActionListener() {
 
 			@Override
@@ -126,6 +127,9 @@ public class SwimTest {
 				}
 				else if (e.getSource() == threadItem) {
 					ThreadTest.threadTest(100, 8);
+				}
+				else if (e.getSource() == planeItem) {
+					PlaneTest.planeTest();
 				}
 				else if (e.getSource() == oneVtwoItem) {
 					CompareSwimmers.swimmerVswimmer2Test(3344632211L, 10000);
@@ -151,6 +155,7 @@ public class SwimTest {
 		testSectorItem.addActionListener(al);	
 		reconfigItem.addActionListener(al);	
 		specialItem.addActionListener(al);	
+		planeItem.addActionListener(al);	
 		menu.add(createTrajItem);
 		menu.add(oneVtwoItem);
 		menu.add(polyItem);
@@ -159,6 +164,7 @@ public class SwimTest {
 		menu.add(threadItem);
 		menu.add(specialItem);
 		
+		menu.add(planeItem);
 		return menu;
 	}
 	

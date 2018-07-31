@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Vector;
 
 import cnuphys.swim.Swimmer;
+import cnuphys.swim.util.TrajectorySummary;
 
 public class TestTrajectories implements Serializable {
 	

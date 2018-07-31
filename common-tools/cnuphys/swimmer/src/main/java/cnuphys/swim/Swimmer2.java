@@ -139,11 +139,18 @@ public class Swimmer2 {
 			return traj;
 		}
 
+		//got here, then went beyond target z
 		int maxtry = 10;
 		int count = 0;
 
 		// set the step size to half the accuracy
-		stepSize = accuracy / 2;
+		//stepSize = accuracy / 2;
+		
+		//set the reverse stepsize to about 1/10 of distance to cover
+		int size = traj.size();
+		double zn = traj.get(size-2)[2];
+		double znp1 = traj.get(size-1)[2];
+		stepSize = Math.max(accuracy, Math.abs((znp1-zn)/10));
 
 		// have to deal with the fact that the hdata array will reset so save
 		// current values
@@ -287,7 +294,11 @@ public class Swimmer2 {
 		int count = 0;
 
 		// set the step size to half the accuracy
-		stepSize = accuracy / 2;
+		//stepSize = accuracy / 2;
+		
+		//set the reverse stepsize to about 1/10 of distance to cover
+		double zn = uf[2];
+		stepSize = Math.max(accuracy, Math.abs((zn - zTarget)/10));
 
 		// have to deal with the fact that the hdata array will reset so save
 		// current values
