@@ -4,6 +4,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import events.TestEvent;
+import org.jlab.clas.swimtools.MagFieldsEngine;
 
 import org.jlab.io.base.DataEvent;
 import org.jlab.service.ec.ECEngine;
@@ -19,7 +20,9 @@ public class ECReconstructionTest {
 	public void testECReconstruction() {
 		
 		DataEvent testEvent = TestEvent.getECSector1PhotonEvent();
-
+                MagFieldsEngine enf = new MagFieldsEngine();
+                enf.init();
+                enf.processDataEvent(testEvent);
 		ECEngine engineEC = new ECEngine();
 		engineEC.init();
 		engineEC.processDataEvent(testEvent);
