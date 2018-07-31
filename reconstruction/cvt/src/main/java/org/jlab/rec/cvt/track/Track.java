@@ -115,7 +115,7 @@ public class Track extends Trajectory implements Comparable<Track> {
     public void set_HelicalTrack(Helix Helix, Swim swimmer, float b[]) {
         if (Helix != null) {
             set_Q(((int) Math.signum(Constants.getSolenoidscale()) * Helix.get_charge()));
-            swimmer.Bfield(0, 0, 0, 0, b);
+            swimmer.BfieldLab(0, 0, 0, b);
             double Bz = b[2];
             double calcPt = Constants.LIGHTVEL * Helix.radius() * Bz;
             double calcPz = 0;
