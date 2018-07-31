@@ -5,9 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 
-import org.jlab.geom.prim.Point3D;
-import org.jlab.rec.cvt.cross.Cross;
-import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.fit.StateVecs.StateVec;
 
