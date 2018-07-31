@@ -170,8 +170,6 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 
 		for (Trajectory traj : _trajectories) {
 
-			System.err.println("TRAJ HAS " + traj.size() + " points");
-
 			Point pp[] = new Point[traj.size()];
 			for (int i = 0; i < pp.length; i++) {
 				pp[i] = new Point();

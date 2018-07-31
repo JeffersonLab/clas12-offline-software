@@ -141,7 +141,7 @@ public class MagneticFields {
 	/**
 	 * Open a new torus map from the file selector
 	 */
-	public void openNewTorus() {
+	protected void openNewTorus() {
 
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Torus Maps", "dat", "torus", "map");
 
@@ -169,7 +169,7 @@ public class MagneticFields {
 	 *            the path to the torus map
 	 * @throws FileNotFoundException
 	 */
-	public void openNewTorus(String path) throws FileNotFoundException {
+	protected void openNewTorus(String path) throws FileNotFoundException {
 		File file = new File(path);
 		if (!file.exists()) {
 			throw new FileNotFoundException("No torus at [" + path + "]");
@@ -216,7 +216,7 @@ public class MagneticFields {
 	/**
 	 * Open a new solenoid map from the file selector
 	 */
-	public void openNewSolenoid() {
+	protected void openNewSolenoid() {
 
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Solenoid Maps", "dat", "solenoid", "map");
 
@@ -245,7 +245,7 @@ public class MagneticFields {
 	 *            the path to the solenoid map
 	 * @throws FileNotFoundException
 	 */
-	public void openNewSolenoid(String path) throws FileNotFoundException {
+	protected void openNewSolenoid(String path) throws FileNotFoundException {
 		File file = new File(path);
 		if (!file.exists()) {
 			throw new FileNotFoundException("No solenoid at [" + path + "]");
@@ -1354,51 +1354,58 @@ public class MagneticFields {
 			return;
 		}
 		
-		//the z and rho solenoid limits
-		double solLimitZ = _solenoid.getZMax();
-		double solLimitR = _solenoid.getRhoMax();
-		
-		int stopIndexR = _torus.getQ2Coordinate().getIndex(solLimitR);
-		int stopIndexZ = _torus.getQ3Coordinate().getIndex(solLimitZ);
-		
-//		float tRval = (float) _torus.getQ2Coordinate().getValue(stopIndexR);
-//		float tZval = (float) _torus.getQ3Coordinate().getValue(stopIndexZ);
-		
-//		System.err.println("tRVal = " + tRval);
-//		System.err.println("tZVal = " + tZval);
-		
-		float[] result = new float[3];
-		
-		FieldProbe probe = FieldProbe.factory(_solenoid);
-		
-		for (int nPhi = 0; nPhi < _torus.getQ1Coordinate().getNumPoints(); nPhi++) {
-			double phi = _torus.getQ1Coordinate().getValue(nPhi);
-//			System.err.println("PHI = "  + phi);
-			
-			for (int nRho = 0; nRho <= stopIndexR; nRho++) {
-				double rho = _torus.getQ2Coordinate().getValue(nRho);
-//				System.err.println("Rho = "  + rho);
-				
-				
-				for (int nZ = 0; nZ <= stopIndexZ; nZ++) {
-					double z = _torus.getQ3Coordinate().getValue(nZ);
-//					System.err.println("Z = "  + z);
+		synchronized (_torus) {
+			synchronized (_solenoid) {
+				// the z and rho solenoid limits
+				double solLimitZ = _solenoid.getZMax();
+				double solLimitR = _solenoid.getRhoMax();
+
+				int stopIndexR = _torus.getQ2Coordinate().getIndex(solLimitR);
+				int stopIndexZ = _torus.getQ3Coordinate().getIndex(solLimitZ);
+
+				// float tRval = (float)
+				// _torus.getQ2Coordinate().getValue(stopIndexR);
+				// float tZval = (float)
+				// _torus.getQ3Coordinate().getValue(stopIndexZ);
+
+				// System.err.println("tRVal = " + tRval);
+				// System.err.println("tZVal = " + tZval);
+
+				float[] result = new float[3];
+
+				FieldProbe probe = FieldProbe.factory(_solenoid);
+
+				for (int nPhi = 0; nPhi < _torus.getQ1Coordinate().getNumPoints(); nPhi++) {
+					double phi = _torus.getQ1Coordinate().getValue(nPhi);
 					
 					//get the solenoid field
-					probe.fieldCylindrical(phi, rho, z, result);
-					
-					//composite index 
-			 		int index = _torus.getCompositeIndex(nPhi, nRho, nZ);
-	 		     	_torus.addToField(index, result);
+					for (int nRho = 0; nRho <= stopIndexR; nRho++) {
+						double rho = _torus.getQ2Coordinate().getValue(nRho);
+						// System.err.println("Rho = " + rho);
+
+						for (int nZ = 0; nZ <= stopIndexZ; nZ++) {
+							double z = _torus.getQ3Coordinate().getValue(nZ);
+							// System.err.println("Z = " + z);
+
+							// get the solenoid field
+							probe.fieldCylindrical(phi, rho, z, result);
+
+							// composite index
+							int index = _torus.getCompositeIndex(nPhi, nRho, nZ);
+							_torus.addToField(index, result);
+
+						}
+
+					}
 					
 				}
 
+				// now cutoff the solenoid
+				double zlim = _torus.getZMin();
+				_solenoid.setFakeZMax(zlim);
 			}
 		}
 		
-		//now cutoff the solenoid
-		double zlim = _torus.getZMin();
-		_solenoid.setFakeZMax(zlim);
 		notifyListeners();
 	}
 
