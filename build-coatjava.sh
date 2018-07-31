@@ -73,8 +73,8 @@ cd -
 
 cp common-tools/coat-lib/target/coat-libs-5.1-SNAPSHOT.jar coatjava/lib/clas/
 cp reconstruction/dc/target/clas12detector-dc-1.0-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/tof/target/tof-1.0-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/cvt/target/cvt-1.0-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/tof/target/clas12detector-tof-1.0-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/cvt/target/clas12detector-cvt-1.0-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/ft/target/clas12detector-ft-1.0-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/ec/target/clas12detector-ec-1.0-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/ltcc/target/clasrec-ltcc-1.0-SNAPSHOT.jar coatjava/lib/services/
