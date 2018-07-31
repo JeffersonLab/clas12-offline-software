@@ -4,6 +4,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import events.TestEvent;
+import org.jlab.clas.swimtools.MagFieldsEngine;
 
 import org.jlab.io.base.DataEvent;
 import org.jlab.service.dc.DCHBEngine;
@@ -19,7 +20,9 @@ public class DCReconstructionTest {
 	public void testDCReconstruction() {
 		
 		DataEvent testEvent = TestEvent.getDCSector1ElectronEvent();
-
+                MagFieldsEngine enf = new MagFieldsEngine();
+                enf.init();
+                enf.processDataEvent(testEvent);    
 		DCHBEngine engineHB = new DCHBEngine();
 		engineHB.init();
 		engineHB.processDataEvent(testEvent);
