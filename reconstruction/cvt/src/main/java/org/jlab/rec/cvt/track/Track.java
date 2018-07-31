@@ -1,5 +1,6 @@
 package org.jlab.rec.cvt.track;
 
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cross.Cross;
@@ -27,15 +28,16 @@ public class Track extends Trajectory implements Comparable<Track> {
     public int get_TrackingStatus() {
         return _TrackingStatus;
     }
+    float b[] = new float[3];
 
     /**
      *
      * @param helix helix track parameterization
      */
-    public Track(Helix helix) {
+    public Track(Helix helix, Swim swimmer) {
         super(helix);
         if (helix != null) {
-            set_HelicalTrack(helix);
+            set_HelicalTrack(helix, swimmer, b);
         }
     }
 
@@ -110,10 +112,11 @@ public class Track extends Trajectory implements Comparable<Track> {
      *
      * @param Helix the track helix
      */
-    public void set_HelicalTrack(Helix Helix) {
+    public void set_HelicalTrack(Helix Helix, Swim swimmer, float b[]) {
         if (Helix != null) {
             set_Q(((int) Math.signum(Constants.getSolenoidscale()) * Helix.get_charge()));
-            double Bz = Math.abs(this.calc_Field(0, 0, 0));
+            swimmer.Bfield(0, 0, 0, 0, b);
+            double Bz = b[2];
             double calcPt = Constants.LIGHTVEL * Helix.radius() * Bz;
             double calcPz = 0;
             calcPz = calcPt * Helix.get_tandip();
@@ -209,36 +212,38 @@ public class Track extends Trajectory implements Comparable<Track> {
     }
 
     @Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Track other = (Track) obj;
-		if ( this.get_Id() != other.get_Id())
-			return false;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Track other = (Track) obj;
+        if (this.get_Id() != other.get_Id()) {
+            return false;
+        }
 
-		return true;
-	}
-
-
+        return true;
+    }
 
     @Override
     public int hashCode() {
-    	final int prime = 101;
-    	int result = super.hashCode();
-    	result += prime * result + this.get(0).hashCode() + this.get(this.size()-1).hashCode();
-    	return result;
-    }    
-    
-    @Override
-    public int compareTo( Track tr ) {
-//    	return ( tr.size() >= this.size() ) ? 1 : -1;
-    	return ( tr.get_P() > this.get_P() ) ? 1 : -1;
+        final int prime = 101;
+        int result = super.hashCode();
+        result += prime * result + this.get(0).hashCode() + this.get(this.size() - 1).hashCode();
+        return result;
     }
-    
+
+    @Override
+    public int compareTo(Track tr) {
+//    	return ( tr.size() >= this.size() ) ? 1 : -1;
+        return (tr.get_P() > this.get_P()) ? 1 : -1;
+    }
+
     public Point3D get_TrackPointAtCTOFRadius() {
         return _TrackPointAtCTOFRadius;
     }
@@ -286,10 +291,10 @@ public class Track extends Trajectory implements Comparable<Track> {
     public void set_lineFitChi2PerNDF(double _lineFitChi2PerNDF) {
         this._lineFitChi2PerNDF = _lineFitChi2PerNDF;
     }
-    
+
     private int _NDF;
     private double _Chi2;
-    
+
     public int getNDF() {
         return _NDF;
     }
@@ -305,6 +310,5 @@ public class Track extends Trajectory implements Comparable<Track> {
     public void setChi2(double _Chi2) {
         this._Chi2 = _Chi2;
     }
-    
 
 }

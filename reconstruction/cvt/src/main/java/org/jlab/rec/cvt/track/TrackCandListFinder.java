@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.track;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -211,7 +212,9 @@ public class TrackCandListFinder {
      * @param crossList the input list of crosses
      * @return an array list of track candidates in the SVT
      */
-    public ArrayList<Track> getHelicalTracks(CrossList crossList, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
+    public ArrayList<Track> getHelicalTracks(CrossList crossList, 
+            org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo,
+            Swim swimmer) {
 
         X.clear();
         Y.clear();
@@ -284,7 +287,7 @@ public class TrackCandListFinder {
 
                 // if the fit is successful
                 if (fitTrk.get_helix() != null && fitTrk.getFit() != null) {
-                    Track cand = new Track(fitTrk.get_helix());
+                    Track cand = new Track(fitTrk.get_helix(), swimmer);
                     cand.addAll(crossList.get(i));
                     //cand.set_HelicalTrack(fitTrk.get_helix());			done in Track constructor			
                     //cand.update_Crosses(svt_geo);

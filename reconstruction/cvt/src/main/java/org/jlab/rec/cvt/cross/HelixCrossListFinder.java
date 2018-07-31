@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.cross;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cluster.Cluster;
@@ -51,7 +52,8 @@ public class HelixCrossListFinder {
      * @return the list of crosses determined to be consistent with belonging to
      * a track in the cvt
      */
-    public List<org.jlab.rec.cvt.track.Seed> findCandidateCrossLists(List<ArrayList<Cross>> cvt_crosses, org.jlab.rec.cvt.svt.Geometry svt_geo) {  
+    public List<org.jlab.rec.cvt.track.Seed> findCandidateCrossLists(List<ArrayList<Cross>> cvt_crosses, 
+            org.jlab.rec.cvt.svt.Geometry svt_geo, Swim swimmer) {  
         // instantiate the crosslist
         //List<Seed> seedList = new ArrayList<Seed>();
         
@@ -167,11 +169,11 @@ public class HelixCrossListFinder {
             //this.MatchBMTC(s, theListsByRegionBMTC.get(1), svt_geo); // match the seed to each BMT region
             //this.MatchBMTC(s, theListsByRegionBMTC.get(2), svt_geo); // match the seed to each BMT region
            
-            Track trk = s.seedFit.fitSeed(s, svt_geo, 3, true);
+            Track trk = s.seedFit.fitSeed(s, svt_geo, 3, true, swimmer);
             if(trk==null)
                 continue;
             //match to r1
-            MatchToRegion1( s, theListsByRegion.get(0), svt_geo); 
+            MatchToRegion1( s, theListsByRegion.get(0), svt_geo, swimmer); 
             org.jlab.rec.cvt.track.Seed trkSeed = new org.jlab.rec.cvt.track.Seed();
             
             trkSeed.set_Crosses(s);
@@ -446,11 +448,11 @@ public class HelixCrossListFinder {
 
     }
 
-    private void MatchToRegion1(Seed s, ArrayList<Cross> R1Crosses, org.jlab.rec.cvt.svt.Geometry svt_geo) {
+    private void MatchToRegion1(Seed s, ArrayList<Cross> R1Crosses, org.jlab.rec.cvt.svt.Geometry svt_geo, Swim swimmer) {
         
         if(s==null)
             return;
-        Track cand = s.seedFit.fitSeed(s, svt_geo, 3, true);
+        Track cand = s.seedFit.fitSeed(s, svt_geo, 3, true, swimmer);
         if(cand==null)
             return;
          
@@ -482,9 +484,9 @@ public class HelixCrossListFinder {
   
     }
 
-    private void MatchBMTC(Seed s, ArrayList<Cross> BMTCrosses, org.jlab.rec.cvt.svt.Geometry svt_geo) {
+    private void MatchBMTC(Seed s, ArrayList<Cross> BMTCrosses, org.jlab.rec.cvt.svt.Geometry svt_geo, Swim swimmer) {
         
-        Track cand = s.seedFit.fitSeed(s, svt_geo, 3, true);
+        Track cand = s.seedFit.fitSeed(s, svt_geo, 3, true, swimmer);
         if(s==null)
             return;
         double maxChi2 = Double.POSITIVE_INFINITY;
@@ -494,7 +496,7 @@ public class HelixCrossListFinder {
             continue; 
         } else {
             s.add(BMTCrosses.get(i));
-            cand = s.seedFit.fitSeed(s, svt_geo, 3, true);
+            cand = s.seedFit.fitSeed(s, svt_geo, 3, true, swimmer);
             if(cand==null)
                 continue;
             double linechi2perndf = cand.get_lineFitChi2PerNDF();

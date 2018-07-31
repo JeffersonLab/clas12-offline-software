@@ -2,8 +2,8 @@ package org.jlab.rec.cvt.services;
 
 //import cnuphys.magfield.MagneticFields;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
@@ -12,9 +12,6 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.hipo.HipoDataEvent;
-import org.jlab.io.hipo.HipoDataSource;
-import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.HitReader;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
@@ -24,7 +21,6 @@ import org.jlab.rec.cvt.cluster.ClusterFinder;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossList;
 import org.jlab.rec.cvt.cross.CrossMaker;
-import org.jlab.rec.cvt.cross.HelixCrossListFinder;
 import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
 import org.jlab.rec.cvt.hit.ADCConvertor;
 import org.jlab.rec.cvt.hit.FittedHit;
@@ -37,7 +33,6 @@ import org.jlab.rec.cvt.track.TrackListFinder;
 import org.jlab.rec.cvt.track.TrackSeederCA;
 import org.jlab.rec.cvt.track.fit.KFitter;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
-import org.jlab.rec.cvt.trajectory.TrkSwimmer;
 
 /**
  *
@@ -93,8 +88,8 @@ public class CVTRecHandler {
             System.out.println("  CHECK CONFIGS..............................." + FieldsConfig + " = ? " + newConfig);
             Constants.Load(isCosmics, isSVTonly, (double) bank.getFloat("solenoid", 0));
             // Load the Fields
-            System.out.println("************************************************************SETTING FIELD SCALE *****************************************************");
-            TrkSwimmer.setMagneticFieldScale(bank.getFloat("solenoid", 0)); // something changed in the configuration
+            //System.out.println("************************************************************SETTING FIELD SCALE *****************************************************");
+            //TrkSwimmer.setMagneticFieldScale(bank.getFloat("solenoid", 0)); // something changed in the configuration
             //double shift =0;
             //if(bank.getInt("run", 0)>1840)
             //    shift = -1.9;
@@ -317,7 +312,7 @@ public class CVTRecHandler {
         return cosmics;
 	}
 	
-	public List<Track> beamTracking(){
+	public List<Track> beamTracking(Swim swimmer){
 		if( this.crosses == null ) return null;
 		TrackSeederCA trseed = new TrackSeederCA();
         
@@ -325,14 +320,14 @@ public class CVTRecHandler {
         List<Track> trkcands = new ArrayList<Track>();
         
         //List<Seed> seeds = trseed.findSeed(SVTclusters, SVTGeom, crosses.get(1), BMTGeom);
-        List<Seed> seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom);
+        List<Seed> seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
         
         for (Seed seed : seeds) { 
             
-            kf = new KFitter(seed, SVTGeom );
-            kf.runFitter(SVTGeom, BMTGeom);
+            kf = new KFitter(seed, SVTGeom, swimmer );
+            kf.runFitter(SVTGeom, BMTGeom, swimmer);
             //System.out.println(" OUTPUT SEED......................");
-            trkcands.add(kf.OutputTrack(seed, SVTGeom));
+            trkcands.add(kf.OutputTrack(seed, SVTGeom, swimmer));
             if (kf.setFitFailed == false) {
                 trkcands.get(trkcands.size() - 1).set_TrackingStatus(2);
            } else {
@@ -348,7 +343,7 @@ public class CVTRecHandler {
         //This last part does ELoss C
         TrackListFinder trkFinder = new TrackListFinder();
         trks = new ArrayList<Track>();
-        trks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom);
+        trks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom, swimmer);
         for( int i=0;i<trks.size();i++) { trks.get(i).set_Id(i+1);}
         
 //        System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + trks.size());
@@ -504,7 +499,7 @@ public class CVTRecHandler {
         cp.disconnect();    
         this.setSVTDB(cp);
         
-        TrkSwimmer.getMagneticFields();
+//        TrkSwimmer.getMagneticFields();
         return true;
     }
     private DatabaseConstantProvider _SVTDB;

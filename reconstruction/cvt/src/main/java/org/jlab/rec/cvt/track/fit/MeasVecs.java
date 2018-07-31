@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.track.fit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.cross.Cross;
@@ -115,7 +116,8 @@ public class MeasVecs {
         return stateVec.z;
     }
 
-    public double[] H(StateVec stateVec, StateVecs sv, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, int type) {
+    public double[] H(StateVec stateVec, StateVecs sv, org.jlab.rec.cvt.svt.Geometry sgeo, 
+            org.jlab.rec.cvt.bmt.Geometry bgeo, int type, Swim swimmer) {
         StateVec SVplus = null;// = new StateVec(stateVec.k);
         StateVec SVminus = null;// = new StateVec(stateVec.k);
 
@@ -126,8 +128,8 @@ public class MeasVecs {
         SVplus.d_rho = stateVec.d_rho + delta_d_rho / 2.;
         SVminus.d_rho = stateVec.d_rho - delta_d_rho / 2.;
 
-        SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type);
-        SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type);
+        SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type, swimmer);
+        SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type, swimmer);
 
         double delta_m_drho = 0;
         if (type == 0) {
@@ -147,8 +149,8 @@ public class MeasVecs {
         SVplus.phi0 = stateVec.phi0 + delta_d_phi0 / 2.;
         SVminus.phi0 = stateVec.phi0 - delta_d_phi0 / 2.;
 
-        SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type);
-        SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type);
+        SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type, swimmer);
+        SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type, swimmer);
 
         double delta_m_dphi0 = 0;
         if (type == 0) {
@@ -168,8 +170,8 @@ public class MeasVecs {
         SVplus.kappa = stateVec.kappa + delta_d_kappa / 2.;
         SVminus.kappa = stateVec.kappa - delta_d_kappa / 2.;
 
-        SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type);
-        SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type);
+        SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type, swimmer);
+        SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type, swimmer);
 
         double delta_m_dkappa = 0;
         if (type == 0) {
@@ -189,8 +191,8 @@ public class MeasVecs {
         SVplus.dz = stateVec.dz + delta_d_dz / 2.;
         SVminus.dz = stateVec.dz - delta_d_dz / 2.;
 
-        SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type);
-        SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type);
+        SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type, swimmer);
+        SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type, swimmer);
 
         double delta_m_dz = 0;
         if (type == 0) {
@@ -210,8 +212,8 @@ public class MeasVecs {
         SVplus.tanL = stateVec.tanL + delta_d_tanL / 2.;
         SVminus.tanL = stateVec.tanL - delta_d_tanL / 2.;
 
-        SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type);
-        SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type);
+        SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type, swimmer);
+        SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type, swimmer);
 
         double delta_m_dtanL = 0;
         if (type == 0) {

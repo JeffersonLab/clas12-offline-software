@@ -21,7 +21,7 @@ import org.jlab.utils.CLASResources;
  * @author ziegler
  *
  */
-public class TrkSwimmer {
+public class TrkSwimmer2 {
 
     private  static Solenoid sField;
     private SolenoidProbe sProbe;
@@ -42,7 +42,7 @@ public class TrkSwimmer {
 
     public int nSteps;
 
-    public TrkSwimmer() {
+    public TrkSwimmer2() {
         
         swimmer = new Swimmer(MagneticFields.getInstance().getSolenoid());
         sProbe = new SolenoidProbe(MagneticFields.getInstance().getSolenoid()) ;
