@@ -9,7 +9,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.services.CVTReconstruction;
 import org.jlab.service.eb.EBHBEngine;
 import org.jlab.service.eb.EBTBEngine;
-
+import org.jlab.clas.swimtools.MagFieldsEngine;
 /**
  *
  * @author naharrison
@@ -20,7 +20,9 @@ public class CVTReconstructionTest {
 	public void testCVTReconstruction() {
 		
 		DataEvent testEvent = TestEvent.getCVTTestEvent();
-
+                MagFieldsEngine enf = new MagFieldsEngine();
+                enf.init();
+                enf.processDataEvent(testEvent);
 		CVTReconstruction CVTengine = new CVTReconstruction();
 		CVTengine.init();
 		CVTengine.processDataEvent(testEvent);
