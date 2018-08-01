@@ -16,14 +16,16 @@ import cnuphys.swimZ.SwimZ;
  */
 public class ProbeCollection {
     
-    public final cnuphys.swimZ.SwimZ RCF_z;  //  rotated composite field 
-    public final cnuphys.swimZ.SwimZ CF_z;   //  composite field 
+    public final cnuphys.swimZ.SwimZ RCF_z;  //  rotated composite field - for swimming to fixed z 
+    public final cnuphys.swimZ.SwimZ CF_z;   //  composite field - for swimming to fixed z 
     public final cnuphys.swim.Swimmer RCF;   //  rotated composite field 
     public final cnuphys.swim.Swimmer CF;    //  composite field 
     //Probes:
     public final RotatedCompositeProbe RCP;
     public final CompositeProbe CP; 
-    
+    /**
+     * Gets rotated composite and composite fields, get corresponding probes
+     */
     public ProbeCollection() {
         RCP =   new RotatedCompositeProbe(MagneticFields.getInstance().getRotatedCompositeField());
         CP  =   new CompositeProbe(MagneticFields.getInstance().getCompositeField());

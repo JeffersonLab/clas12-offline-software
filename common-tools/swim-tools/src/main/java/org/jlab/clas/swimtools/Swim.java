@@ -39,14 +39,15 @@ public class Swim {
 	final double stepSize = 5.00 * 1.e-4; // 500 microns
 
 	private ProbeCollection PC;
-
+        /**
+         * Class for swimming to various surfaces.  The input and output units are cm and GeV/c
+         */
 	public Swim() {
-		PC = Swimmer.getProbeCollection(Thread.currentThread());
-		if (PC == null) {
-			PC = new ProbeCollection();
-			Swimmer.put(Thread.currentThread(), PC);
-		}
-
+            PC = Swimmer.getProbeCollection(Thread.currentThread());
+            if (PC == null) {
+                PC = new ProbeCollection();
+                Swimmer.put(Thread.currentThread(), PC);
+            }
 	}
 
 	/**
@@ -236,7 +237,11 @@ public class Swim {
 		return value;
 
 	}
-
+        /**
+         * 
+         * @param z_cm
+         * @return state  x,y,z,px,py,pz, pathlength, iBdl at the plane surface
+         */
 	public double[] SwimToPlaneLab(double z_cm) {
 		double z = z_cm / 100; // the magfield method uses meters
 		double[] value = new double[8];
@@ -314,7 +319,9 @@ public class Swim {
 		return value;
 
 	}
-
+        /**
+         * Cylindrical stopper
+         */
 	private class CylindricalcalBoundarySwimStopper implements IStopper {
 
 		private double _finalPathLength = Double.NaN;
@@ -363,7 +370,11 @@ public class Swim {
 			_finalPathLength = finalPathLength;
 		}
 	}
-
+        /**
+         * 
+         * @param Rad
+         * @return state  x,y,z,px,py,pz, pathlength, iBdl at the surface 
+         */
 	public double[] SwimToCylinder(double Rad) {
 
 		double[] value = new double[8];
@@ -439,7 +450,11 @@ public class Swim {
 			_finalPathLength = finalPathLength;
 		}
 	}
-
+        /**
+         * 
+         * @param Rad
+         * @return state  x,y,z,px,py,pz, pathlength, iBdl at the surface 
+         */
 	public double[] SwimToSphere(double Rad) {
 
 		double[] value = new double[8];
@@ -522,7 +537,13 @@ public class Swim {
 			_finalPathLength = finalPathLength;
 		}
 	}
-
+        /**
+         * 
+         * @param d_cm
+         * @param n
+         * @param dir
+         * @return return state  x,y,z,px,py,pz, pathlength, iBdl at the plane surface in the lab frame
+         */
 	public double[] SwimToPlaneBoundary(double d_cm, Vector3D n, int dir) {
 
 		double[] value = new double[8];
@@ -644,7 +665,15 @@ public class Swim {
 		double r = Math.sqrt(x * x + y * y + z * z);
 		System.out.println(String.format("%s: (%-8.5f, %-8.5f, %-8.5f) R: %-8.5f", pfx, z, y, z, r));
 	}
-
+        
+        /**
+         * 
+         * @param sector
+         * @param x_cm
+         * @param y_cm
+         * @param z_cm
+         * @param result B field components in T in the tilted sector system
+         */
 	public void Bfield(int sector, double x_cm, double y_cm, double z_cm, float[] result) {
 
 		PC.RCP.field(sector, (float) x_cm, (float) y_cm, (float) z_cm, result);
@@ -655,7 +684,13 @@ public class Swim {
 		result[2] = result[2] / 10;
 
 	}
-
+        /**
+         * 
+         * @param x_cm
+         * @param y_cm
+         * @param z_cm
+         * @param result B field components in T in the lab frame
+         */
 	public void BfieldLab(double x_cm, double y_cm, double z_cm, float[] result) {
 
 		PC.CP.field((float) x_cm, (float) y_cm, (float) z_cm, result);
