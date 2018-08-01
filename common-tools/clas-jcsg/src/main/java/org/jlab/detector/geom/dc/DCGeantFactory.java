@@ -23,6 +23,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Transformation3D;
+import org.jlab.geom.prim.Triangle3D;
 import org.jlab.geom.prim.Vector3D;
 
 /**
@@ -93,7 +94,7 @@ public class DCGeantFactory implements Factory<DCDetector, DCSector, DCSuperlaye
                     gz += midgap + 21*cp.getDouble("/geometry/dc/superlayer/wpdist", superlayerId-1);
                 }
                 Transformation3D trans = new Transformation3D();
-                trans.translateXYZ(0, 0, gz);
+                //trans.translateXYZ(0, 0, gz);
                 superlayer.setTransformation(trans);
             }
         }
@@ -156,7 +157,20 @@ public class DCGeantFactory implements Factory<DCDetector, DCSector, DCSuperlaye
         //
         double thster   = -Math.toRadians(cp.getDouble("/geometry/dc/superlayer/thster", superlayerId));
         int numWires    =                cp.getInteger("/geometry/dc/layer/nsensewires", 0);
-        
+        double gz = dist2tgt;
+            if (superlayerId%2 == 1) {
+                gz += midgap + 21*cp.getDouble("/geometry/dc/superlayer/wpdist", superlayerId-1);
+            }
+            double gx = -gz*Math.tan(thtilt-thmin);
+            gz = -(3*d_layer); // <-- Build DC Layers in local coordinates
+            double w_layer = Math.sqrt(3)*d_layer/Math.cos(thster);
+            // Calculate the distance between the line of intersection of the two 
+            // end-plate planes and the z-axis
+            double xoff = dist2tgt*Math.tan(thtilt) - xdist/Math.sin(Math.PI/2-thtilt);
+            double mx = gx + midpointXOffset(layerId, w_layer);
+            double mz = gz + (layerId + 1)*(3*d_layer);
+            //double wx = mx + wireId*2*w_layer;
+            //double wz = mz;
         Plane3D lPlane = new Plane3D();
         Plane3D rPlane = new Plane3D();
         
@@ -178,22 +192,11 @@ public class DCGeantFactory implements Factory<DCDetector, DCSector, DCSuperlaye
             
             lPlane.set(wireLine.origin(), originDir);
             rPlane.set(wireLine.end(), originDir);
-            double w_layer = Math.sqrt(3)*d_layer/Math.cos(thster);
+            
             Point3D lPoint = new Point3D();
             Point3D rPoint = new Point3D();
             
-            double gz = dist2tgt;
-            if (superlayerId%2 == 1) {
-                gz += midgap + 21*cp.getDouble("/geometry/dc/superlayer/wpdist", superlayerId-1);
-            }
-            double gx = -gz*Math.tan(thtilt-thmin);
-            gz = -(3*d_layer); // <-- Build DC Layers in local coordinates
-            
-            // Calculate the distance between the line of intersection of the two 
-            // end-plate planes and the z-axis
-            double xoff = dist2tgt*Math.tan(thtilt) - xdist/Math.sin(Math.PI/2-thtilt);
-            double mx = gx + midpointXOffset(layerId, w_layer);
-            double mz = gz + (layerId + 1)*(3*d_layer);
+          
             double wx = mx + wireId*2*w_layer;
             double wz = mz;
             
@@ -218,6 +221,31 @@ public class DCGeantFactory implements Factory<DCDetector, DCSector, DCSuperlaye
                     false, botHex, topHex);
             layer.addComponent(wire);
         }
+        
+        
+        List<DriftChamberWire> wires = layer.getAllComponents();
+        
+        Point3D pLL = new Point3D(
+                wires.get(0).getLine().origin().x(),
+                wires.get(0).getLine().origin().y(),
+                wires.get(0).getMidpoint().z());
+        Point3D pLR = new Point3D(
+                wires.get(0).getLine().end().x(),
+                wires.get(0).getLine().end().y(),
+                wires.get(0).getMidpoint().z());
+        Point3D pUL = new Point3D(
+                wires.get(numWires-1).getLine().origin().x(),
+                wires.get(numWires-1).getLine().origin().y(),
+                wires.get(0).getMidpoint().z());
+        Point3D pUR = new Point3D(
+                wires.get(numWires-1).getLine().end().x(),
+                wires.get(numWires-1).getLine().end().y(),
+                wires.get(0).getMidpoint().z());
+        layer.getBoundary().addFace(new Triangle3D(pLL, pLR, pUL));
+        layer.getBoundary().addFace(new Triangle3D(pUR, pUL, pLR));
+        
+        layer.getMidplane().set(0, 0, mz, 0, 1, 0);
+        layer.getPlane().set(0, 0, mz, 0, 0, 1);
         return layer;
     }
 
