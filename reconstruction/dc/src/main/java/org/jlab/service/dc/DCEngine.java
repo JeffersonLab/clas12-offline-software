@@ -1,6 +1,5 @@
 package org.jlab.service.dc;
 
-import cnuphys.magfield.MagneticFields;
 import java.util.Arrays;
 import java.util.Optional;
 import org.jlab.clas.reco.ReconstructionEngine;

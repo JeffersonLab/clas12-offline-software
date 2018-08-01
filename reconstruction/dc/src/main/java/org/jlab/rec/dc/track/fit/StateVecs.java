@@ -289,39 +289,6 @@ public class StateVecs {
         }
     }
 
-
-    /*
-    public class B {
-
-        final int k;
-        final double z;
-        double x;
-        double y;
-        double tx;
-        double ty;
-        double s;
-
-        public double Bx;
-        public double By;
-        public double Bz;
-
-        B(int k, double z, double x, double y, double tx, double ty, double s) {
-            this.k = k;
-            this.z = z;
-            this.x = x;
-            this.y = y;
-            this.tx = tx;
-            this.ty = ty;
-            this.s = s;
-
-            float[] bf = new float[3];
-            dcSwim.Bfield(x, y, z, bf);
-            this.Bx = bf[0];
-            this.By = bf[1];
-            this.Bz = bf[2];
-        }
-    }
-*/
     
     private void A(double tx, double ty, double Bx, double By, double Bz, double[] a) {
 
