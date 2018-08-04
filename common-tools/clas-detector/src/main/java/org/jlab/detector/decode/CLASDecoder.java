@@ -461,7 +461,6 @@ public class CLASDecoder {
         parser.addOption("-c", "2", "compression type (0-NONE, 1-LZ4 Fast, 2-LZ4 Best, 3-GZIP)");
         parser.addOption("-d", "0","debug mode, set >0 for more verbose output");
         parser.addOption("-m", "run","translation tables source (use -m devel for development tables)");
-        parser.addOption("-b", "16","record buffer size in MB");
         parser.addRequired("-o","output.hipo");
         
         
@@ -497,7 +496,6 @@ public class CLASDecoder {
             
             String outputFile = parser.getOption("-o").stringValue();
             int compression = parser.getOption("-c").intValue();
-            int  recordsize = parser.getOption("-b").intValue();
             int debug = parser.getOption("-d").intValue();            
             
             CLASDecoder decoder = new CLASDecoder(developmentMode);
@@ -506,7 +504,7 @@ public class CLASDecoder {
             
             //HipoDataSync writer = new HipoDataSync();
             System.out.println(" OUTPUT WRITER CHANGED TO JNP HIPO");
-            HipoWriter writer = new HipoWriter(recordsize*1024*1024);
+            HipoWriter writer = new HipoWriter();
             writer.setCompressionType(compression);
             writer.appendSchemaFactoryFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
             int nrun = parser.getOption("-r").intValue();
