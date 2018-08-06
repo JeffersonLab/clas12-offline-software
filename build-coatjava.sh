@@ -1,9 +1,10 @@
 #!/bin/bash
 
-usage='build-coatjava.sh [--nospotbugs] [--nomaps]'
+usage='build-coatjava.sh [--nospotbugs] [--nomaps] [--nounittests]'
 
 runSpotBugs="yes"
 downloadMaps="yes"
+runUnitTests="yes"
 for xx in $@
 do
     if [ "$xx" == "--nospotbugs" ]
@@ -15,6 +16,9 @@ do
     elif [ "$xx" == "--nomaps" ]
     then
         downloadMaps="no"
+    elif [ "$xx" == "--nounittests" ]
+    then
+        runUnitTests="no"
     else
         echo $usage
         exit
@@ -55,8 +59,14 @@ mkdir -p coatjava/lib/services
 rm -rf ~/.m2/repository/org/hep/hipo
 rm -rf ~/.m2/repository/org/jlab
 
-mvn install # also runs unit tests
-if [ $? != 0 ] ; then echo "mvn install failure" ; exit 1 ; fi
+unset CLAS12DIR
+if [ $runUnitTests == "yes" ]; then
+	mvn install # also runs unit tests
+	if [ $? != 0 ] ; then echo "mvn install failure" ; exit 1 ; fi
+else
+	mvn -Dmaven.test.skip=true install
+	if [ $? != 0 ] ; then echo "mvn install failure" ; exit 1 ; fi
+fi
 
 if [ $runSpotBugs == "yes" ]; then
 	# mvn com.github.spotbugs:spotbugs-maven-plugin:spotbugs # spotbugs goal produces a report target/spotbugsXml.xml for each module
