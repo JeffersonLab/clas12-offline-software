@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jlab.detector.base.DetectorType;
+import org.jlab.io.base.DataEvent;
+import org.jlab.clas.detector.DetectorData;
 
 import org.jlab.clas.detector.CalorimeterResponse;
 import org.jlab.clas.detector.DetectorHeader;
@@ -207,6 +209,18 @@ public class EventBuilder {
             }
         }
         return bestIndex;
+    }
+
+    public void processForwardTagger(DataEvent de) {
+        List<DetectorParticle> ftparticles = DetectorData.readForwardTaggerParticles(de, "FT::particles");       
+        List<Map<DetectorType, Integer>> ftIndices = DetectorData.readForwardTaggerIndex(de,"FT::particles");
+        List<DetectorResponse> responseFTCAL = TaggerResponse.readHipoEvent(de,"FTCAL::clusters",DetectorType.FTCAL);
+        List<DetectorResponse> responseFTHODO = TaggerResponse.readHipoEvent(de,"FTHODO::clusters",DetectorType.FTHODO);
+        addParticles(ftparticles);
+        addDetectorResponses(responseFTCAL);
+        addDetectorResponses(responseFTHODO);
+        addFTIndices(ftIndices);
+        forwardTaggerIDMatching();
     }
 
 

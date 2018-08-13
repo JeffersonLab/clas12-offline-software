@@ -102,7 +102,8 @@ public class EBEngine extends ReconstructionEngine {
         
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks", "CVTRec::Trajectory");
         eb.addTracks(ctracks);
-        
+       
+        // FIXME:  remove need for these indexing bookkeepers:
         eb.getPindexMap().put(0, tracks.size());
         eb.getPindexMap().put(1, ctracks.size());
         
@@ -125,16 +126,7 @@ public class EBEngine extends ReconstructionEngine {
         analyzer.processEvent(eb.getEvent());
 
         // Add Forward Tagger particles:
-        List<DetectorParticle> ftparticles = DetectorData.readForwardTaggerParticles(de, "FT::particles");       
-        List<Map<DetectorType, Integer>> ftIndices = DetectorData.readForwardTaggerIndex(de,"FT::particles");
-        List<DetectorResponse> responseFTCAL = TaggerResponse.readHipoEvent(de,"FTCAL::clusters",DetectorType.FTCAL);
-        List<DetectorResponse> responseFTHODO = TaggerResponse.readHipoEvent(de,"FTHODO::clusters",DetectorType.FTHODO);
-        eb.addParticles(ftparticles);
-        eb.addDetectorResponses(responseFTCAL);
-        eb.addDetectorResponses(responseFTHODO);
-        eb.addFTIndices(ftIndices);
-        eb.forwardTaggerIDMatching();
-
+        eb.processForwardTagger(de);
 
         // create REC:detector banks:
         if(eb.getEvent().getParticles().size()>0){
@@ -166,7 +158,7 @@ public class EBEngine extends ReconstructionEngine {
             
             List<DetectorResponse> taggers = eb.getEvent().getTaggerResponseList();
             if (ftBank!=null && taggers.size()>0) {
-                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getTaggerResponseList(), de, ftBank);
+                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(taggers, de, ftBank);
                 de.appendBanks(bankForwardTagger);
             }
 

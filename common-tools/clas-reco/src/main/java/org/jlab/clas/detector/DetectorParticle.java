@@ -45,7 +45,6 @@ public class DetectorParticle implements Comparable {
     private List<DetectorResponse> responseStore = new ArrayList<DetectorResponse>();
 
     private DetectorTrack detectorTrack = null;
-    private TaggerResponse taggerTrack = null;
     
     public DetectorParticle(){
         detectorTrack = new DetectorTrack(-1);
@@ -118,40 +117,6 @@ public class DetectorParticle implements Comparable {
         final double dz = resp.getPosition().z()-vertex.z();
         resp.setPath(Math.sqrt(dx*dx+dy*dy+dz*dz));
         particle.addResponse(resp);
-        return particle;
-    }
-    
-    public static DetectorParticle createFTparticle(TaggerResponse tagger) {
-
-        // FIXME:
-        //
-        // This "taggerTrack" naming is not good:
-        // Any "track" should be a DetectorTrack (or at least inherit from it).
-        //
-        // TaggerResponse should be based on FT::particle, not just FT::cluster
-       
-        Vector3D xyzV = tagger.getPosition();
-        Point3D xyz = new Point3D(xyzV.x(),xyzV.y(),xyzV.z());
-        Vector3D mom = tagger.getMomentum();
-        Vector3D dir=new Vector3D(mom);
-        dir.unit();
-
-        // copied from createNeutral / processNeutralTracks:
-        DetectorTrack track = new DetectorTrack(0,1.0);
-        track.addCross(xyz.x(), xyz.y(), xyz.z(), dir.x(),dir.y(),dir.z());
-        track.setVector(dir.x(),dir.y(),dir.z());
-        track.setVertex(0.0, 0.0, 0.0);
-        track.setPath(xyz.distance(new Point3D(0,0,0)));
-        track.setTrackEnd(xyz.x(),xyz.y(),xyz.z());
-        track.setVector(mom.x(),mom.y(),mom.z());
-        track.setP(mom.r());
-        
-        DetectorParticle particle = new DetectorParticle(track);
-        particle.taggerTrack=tagger;
-
-        // FIXME: Use FT::particle instead of FT::cluster, then stop assuming charge=0, pid=22
-        particle.setPid(22);
-
         return particle;
     }
    
@@ -358,16 +323,6 @@ public class DetectorParticle implements Comparable {
     public int    getPid(){ return this.particlePID;}
     public double getPidQuality() {return this.particleIDQuality;}
     public void   setPidQuality(double q) {this.particleIDQuality = q;}
-
-    public TaggerResponse getTaggerResponse(){ return this.taggerTrack; }
-    //public Point3D getTaggerPosition() {return this.taggerTrack.getPosition();}
-    public Point3D getTaggerPositionWidth() {return this.taggerTrack.getPositionWidth();}
-    public double  getTaggerRadius() {return this.taggerTrack.getRadius();}
-    public double  getTaggerSize() {return this.taggerTrack.getSize();}
-    public double  getTaggerIndex() {return this.taggerTrack.getHitIndex();}
-    public double  getTaggerTime() {return this.taggerTrack.getTime();}
-    public double  getTaggerEnergy() {return this.taggerTrack.getEnergy();}
-
     
     public Path3D getTrajectory(){
         Path3D  path = new Path3D();
