@@ -5,6 +5,8 @@
  */
 package org.jlab.clas.swimtools;
 import cnuphys.magfield.MagneticFields;
+
+import java.util.HashMap;
 import java.util.Hashtable;
 /**
  *
@@ -14,7 +16,7 @@ import java.util.Hashtable;
 
 public class Swimmer {
     
-    private static Hashtable<Thread, ProbeCollection> swimmers = new Hashtable<>();
+    private static HashMap<Thread, ProbeCollection> swimmers = new HashMap<>();
     
     public static ProbeCollection getProbeCollection(Thread thr){
         return swimmers.get(thr);

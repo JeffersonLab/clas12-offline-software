@@ -183,7 +183,7 @@ public class ClusterFinder {
         clusters = this.findClumps(allhits, ct);
         
         // create cluster list to be fitted
-        List<FittedCluster> selectedClusList = new ArrayList<FittedCluster>();
+        List<FittedCluster> selectedClusList = new ArrayList<>();
 
         for (Cluster clus : clusters) {
             if(clus.size()<Constants.DC_MIN_NLAYERS)

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 usage='build-coatjava.sh [--nospotbugs] [--nomaps]'
+OS=$(uname)
 
 runSpotBugs="yes"
 downloadMaps="yes"
@@ -32,7 +33,17 @@ if [ $downloadMaps == "yes" ]; then
   for map in $SOLENOIDMAP $TORUSMAP
   do
     # -N only redownloads if timestamp/filesize is newer/different
-    wget -N --no-check-certificate $webDir/$map
+
+case $OS in
+    'Linux')
+        wget -N --no-check-certificate $webDir/$map
+     ;;
+     'Darwin')
+       curl "$webDir/$map" -o $map
+     ;;
+     *) ;;
+esac
+
   done
   cd -
 fi
