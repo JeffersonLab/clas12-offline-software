@@ -191,15 +191,18 @@ final class Wire {
     private double w2tgt;
 
     private void findEnds() {
+        // define vector from wire midpoint to chamber tip (z is wrong!!)
         Vector3d vnum = new Vector3d(0, dbref.xdist(ireg), 0);
         vnum.sub(midpoint);
 
         double copen = Math.cos(dbref.thopen(ireg) / 2.0);
         double sopen = Math.sin(dbref.thopen(ireg) / 2.0);
 
+        // define unit vector normal to the sides of the chamber and pointing inside
         Vector3d rnorm = new Vector3d(copen, sopen, 0);
         Vector3d lnorm = new Vector3d(-copen, sopen, 0);
 
+        System.out.println(vnum + " " + lnorm + " " + direction);
         double wlenl = vnum.dot(lnorm) / direction.dot(lnorm);
         leftend = direction.times(wlenl).add(midpoint);
 
@@ -213,12 +216,14 @@ final class Wire {
         this.iwire = iwire;
         this.ireg = isuper / 2;
 
+        // calculate first-wire distance from target
         w2tgt = dbref.dist2tgt(ireg);
         if (isuper % 2 > 0) {
             w2tgt += dbref.superwidth(isuper - 1) + dbref.midgap(ireg);
         }
         w2tgt /= Math.cos(dbref.thtilt(ireg) - dbref.thmin(isuper));
 
+        // y0 and z0 in the lab for the first wire of the layer
         y0mid = w2tgt * Math.sin(dbref.thmin(isuper));
         z0mid = w2tgt * Math.cos(dbref.thmin(isuper));
 
@@ -229,21 +234,25 @@ final class Wire {
         double dw = 4 * Math.cos(Math.toRadians(30)) * dbref.wpdist(isuper);
         double dw2 = dw / cster;
 
+        // hh: wire distance in the wire plane
         double hh = (iwire + ((double)(ilayer % 2)) / 2.0) * dw2;
         if(ireg==2 && isSensitiveWire(isuper, ilayer, iwire) && dbref.getMinistaggerStatus())
                 hh += ((ilayer%2)*2-1)*0.03;
-                
+        
+        // ll: layer distance
         double tt = dbref.cellthickness(isuper) * dbref.wpdist(isuper);
         double ll = ilayer * tt;
 
+        // wire x=0 coordinates in the lab
         double ym = y0mid + ll * stilt + hh * ctilt;
         double zm = z0mid + ll * ctilt - hh * stilt;
 
+        // wire midpoint in the lab
         midpoint = new Vector3d(0, ym, zm);
         direction = new Vector3d(1, 0, 0);
         direction.rotateZ(dbref.thster(isuper));
         direction.rotateX(-dbref.thtilt(ireg));
-
+        System.out.println(direction);
         findEnds();
 
         if (leftend.y < rightend.y) {
@@ -365,7 +374,7 @@ public final class DCGeant4Factory extends Geant4Factory {
                     wireMids[isuper][ilayer][iwire] = ww.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
                     wireLefts[isuper][ilayer][iwire] = ww.left().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
                     wireRights[isuper][ilayer][iwire] = ww.right().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
-            //        System.out.println(isuper + " " + ilayer + " " + iwire + " " + wireLefts[isuper][ilayer][iwire] + " " + wireMids[isuper][ilayer][iwire] + " " + wireRights[isuper][ilayer][iwire]);
+//                    System.out.println((isuper+1) + " " + (ilayer+1) + " " + (iwire+1) + " " + wireLefts[isuper][ilayer][iwire] + " " + wireMids[isuper][ilayer][iwire] + " " + wireRights[isuper][ilayer][iwire]);
                }
             }
         }
