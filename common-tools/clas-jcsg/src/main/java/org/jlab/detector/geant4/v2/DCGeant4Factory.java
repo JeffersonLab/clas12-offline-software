@@ -202,7 +202,6 @@ final class Wire {
         Vector3d rnorm = new Vector3d(copen, sopen, 0);
         Vector3d lnorm = new Vector3d(-copen, sopen, 0);
 
-        System.out.println(vnum + " " + lnorm + " " + direction);
         double wlenl = vnum.dot(lnorm) / direction.dot(lnorm);
         leftend = direction.times(wlenl).add(midpoint);
 
@@ -252,7 +251,6 @@ final class Wire {
         direction = new Vector3d(1, 0, 0);
         direction.rotateZ(dbref.thster(isuper));
         direction.rotateX(-dbref.thtilt(ireg));
-        System.out.println(direction);
         findEnds();
 
         if (leftend.y < rightend.y) {
