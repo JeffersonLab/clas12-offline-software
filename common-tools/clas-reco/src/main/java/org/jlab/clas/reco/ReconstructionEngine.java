@@ -66,7 +66,7 @@ public abstract class ReconstructionEngine implements Engine {
     
     public void requireConstants(List<String> tables){
         if(constManagerMap.containsKey(this.getClass().getName())==false){
-            System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
+            if(debugMode>=1) System.out.println("[ConstantsManager] ---> create a new one for module : " + this.getClass().getName());
             ConstantsManager manager = new ConstantsManager();
             manager.init(tables);
             constManagerMap.put(this.getClass().getName(), manager);
@@ -99,10 +99,10 @@ public abstract class ReconstructionEngine implements Engine {
         
         if (ed.getMimeType().equals(EngineDataType.JSON.toString())) {
             this.engineConfiguration = (String) ed.getData();
-            System.out.println("[CONFIGURE][" + this.getName() + "] ---> JSON Data : " + this.engineConfiguration);
+            if(debugMode>=1) System.out.println("[CONFIGURE][" + this.getName() + "] ---> JSON Data : " + this.engineConfiguration);
         } else {
             this.engineConfiguration = "";
-            System.out.println("[CONFIGURE][" + this.getName() + "] *** WARNING *** ---> NO JSON Data provided");
+            System.err.println("[CONFIGURE][" + this.getName() + "] *** WARNING *** ---> NO JSON Data provided");
         }
        
         // store yaml contents for easy access by engines:
@@ -122,30 +122,31 @@ public abstract class ReconstructionEngine implements Engine {
       if(engineDictionary == null)
       engineDictionary  = new SchemaFactory();
         //EngineData data = new EngineData();
-        System.out.println("--- engine configuration is called " + this.getDescription());
+        if(debugMode>=1) System.out.println("--- engine configuration is called " + this.getDescription());
         try {
             this.init();
         } catch (Exception e){
-            System.out.println("[Wooops] ---> something went wrong with " + this.getDescription());
+            System.err.println("[Wooops] ---> something went wrong with " + this.getDescription());
             e.printStackTrace();
         }
-        System.out.println("----> I am doing nothing");
         
         try {
             if(engineConfiguration.length()>2){
 //                String variation = this.getStringConfigParameter(engineConfiguration, "services", "variation");
                 String variation = this.getStringConfigParameter(engineConfiguration, "variation");
-                System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting variation : " + variation);
                 if(variation.length()>2) this.setVariation(variation);
                 String timestamp = this.getStringConfigParameter(engineConfiguration, "timestamp");
-                System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting timestamp : " + timestamp);
                 if(timestamp.length()>2) this.setTimeStamp(timestamp);
+                if(debugMode>=1){
+                    System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting variation : " + variation);
+                    System.out.println("[CONFIGURE]["+ this.getName() +"] ---->  Setting timestamp : " + timestamp);
+                }
             } else {
-                System.out.println("[CONFIGURE][" + this.getName() +"] *** WARNING *** ---> configuration string is too short ("
+                System.err.println("[CONFIGURE][" + this.getName() +"] *** WARNING *** ---> configuration string is too short ("
                  + this.engineConfiguration + ")");
             }
         } catch (Exception e){
-            System.out.println("[Engine] " + getName() + " failet to set variation");
+            System.err.println("[Engine] " + getName() + " failet to set variation");
         }
         return ed;
     }
@@ -161,7 +162,7 @@ public abstract class ReconstructionEngine implements Engine {
             if(base.has(key)==true){
                 variation = base.getString(key);
             } else {
-                System.out.println("[JSON]" + this.getName() + " **** warning **** does not contain key = " + key);
+                System.err.println("[JSON]" + this.getName() + " **** warning **** does not contain key = " + key);
             }
             /*
             js = base.get(key);
