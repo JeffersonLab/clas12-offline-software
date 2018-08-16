@@ -49,6 +49,8 @@ public abstract class ReconstructionEngine implements Engine {
     String             engineAuthor      = "N.T.";
     String             engineVersion     = "0.0";
     String             engineDescription = "CLARA Engine";
+    
+    public int debugMode = 0;
 
     public ReconstructionEngine(String name, String author, String version){
         engineName    = name;
