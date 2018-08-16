@@ -25,6 +25,8 @@ public class ConstantsManager {
     private String   databaseVariation = "default";
     private String   timeStamp         = "";
     
+    public int debugMode = 0;
+    
     public ConstantsManager(){
         
     }
@@ -62,7 +64,7 @@ public class ConstantsManager {
         }
         DatabaseConstantsDescriptor  descriptor = this.runConstants.get(run);
         if(descriptor.getMap().containsKey(table)==false){
-            System.out.println("[getConstants] error ( run = " + run + " ) "
+            System.err.println("[getConstants] error ( run = " + run + " ) "
                     + " table not found with name : " + table);
         }
         return descriptor.getMap().get(table);
@@ -72,7 +74,7 @@ public class ConstantsManager {
 
         if(this.runConstants.containsKey(run)==true) return;
         
-        System.out.println("[ConstantsManager] --->  loading table for run = " + run);
+        if(debugMode>=1) System.out.println("[ConstantsManager] --->  loading table for run = " + run);
         DatabaseConstantsDescriptor desc = defaultDescriptor.getCopy(run);
         DatabaseConstantProvider provider = new DatabaseConstantProvider(run,
                 this.databaseVariation, this.timeStamp);
@@ -88,11 +90,10 @@ public class ConstantsManager {
             try {
                 IndexedTable  table = provider.readTable(tableName);
                 desc.getMap().put(tk.get(i), table);
-                System.out.println(String.format("***** >>> adding : %14s / table = %s", tk.get(i),tableName));
-                //System.out.println("***** >>> adding : table " + tableName 
-                //        + "  key = " + tk.get(i));
+                if(debugMode>=1) System.out.println(String.format("***** >>> adding : %14s / table = %s", tk.get(i),tableName));
+
             } catch (Exception e) {
-                System.out.println("[ConstantsManager] ---> error reading table : "
+                System.err.println("[ConstantsManager] ---> error reading table : "
                         + tableName);
             }
         }
@@ -148,7 +149,7 @@ public class ConstantsManager {
         
         public void addTables(Set<String> keys, Set<String> tables){
             if(keys.size()!=tables.size()){
-                System.out.println("[DatabaseConstantsDescriptor] error --> "
+                System.err.println("[DatabaseConstantsDescriptor] error --> "
                 + " size of keys ("+keys.size()+") does not match size of"
                         + " tables ("+tables.size()+")");
             } else {
