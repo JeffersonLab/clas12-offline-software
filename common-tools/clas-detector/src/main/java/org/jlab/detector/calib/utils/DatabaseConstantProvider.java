@@ -51,7 +51,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
     
     private org.jlab.ccdb.JDBCProvider provider;
     
-    private int          debugMode = 1;
+    private int          debugMode = 0;
     
     public DatabaseConstantProvider(){
         this.loadTimeErrors = 0;
