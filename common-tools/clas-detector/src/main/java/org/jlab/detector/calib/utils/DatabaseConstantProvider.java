@@ -157,7 +157,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
     
     private void initialize(String address){
         provider = CcdbPackage.createProvider(address);
-        if(debugMode>0){
+        if(debugMode>=1){
             System.out.println("[DB] --->  open connection with : " + address);
             System.out.println("[DB] --->  database variation   : " + this.variation);
             System.out.println("[DB] --->  database run number  : " + this.runNumber);
@@ -167,9 +167,9 @@ public class DatabaseConstantProvider implements ConstantProvider {
         provider.connect();
         
         if(provider.isConnected()==true){
-            if(debugMode>0) System.out.println("[DB] --->  database connection  : success");
+            if(debugMode>=1) System.out.println("[DB] --->  database connection  : success");
         } else {
-            System.out.println("[DB] --->  database connection  : failed");
+            System.err.println("[DB] --->  database connection  : failed");
         }
         
         provider.setDefaultVariation(variation);
@@ -187,9 +187,9 @@ public class DatabaseConstantProvider implements ConstantProvider {
         try {
             databaseDate = format.parse(timestamp);
         } catch (ParseException ex) {
-            System.out.println("\n\n ***** TIMESTAMP ERROR ***** error parsing timestamp : " + timestamp);
+            System.err.println("\n\n ***** TIMESTAMP ERROR ***** error parsing timestamp : " + timestamp);
             databaseDate = new Date();
-            System.out.println(" ***** TIMESTAMP WARNING ***** setting date to : " + databaseDate);
+            System.err.println(" ***** TIMESTAMP WARNING ***** setting date to : " + databaseDate);
 
         }
         
@@ -331,9 +331,11 @@ public class DatabaseConstantProvider implements ConstantProvider {
             int ncolumns = asgmt.getColumnCount();
             TypeTable  table = asgmt.getTypeTable();
             Vector<TypeTableColumn> typecolumn = asgmt.getTypeTable().getColumns();
-            System.out.println("[DB LOAD] ---> loading data table : " + table_name);
-            System.out.println("[DB LOAD] ---> number of columns  : " + typecolumn.size());
-            System.out.println();
+	    if(debugMode>=1){
+            	System.out.println("[DB LOAD] ---> loading data table : " + table_name);
+            	System.out.println("[DB LOAD] ---> number of columns  : " + typecolumn.size());
+            	System.out.println();
+	    }
             for(int loop = 0; loop < ncolumns; loop++){
                 //System.out.println("Reading column number " + loop 
                 //+ "  " + typecolumn.elementAt(loop).getCellType()
@@ -355,7 +357,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
             }
             //provider.close();
         } catch (Exception e){
-            System.out.println("[DB LOAD] --->  error loading table : " + table_name);
+            System.err.println("[DB LOAD] --->  error loading table : " + table_name);
             this.loadTimeErrors++;
         }
     }
@@ -398,7 +400,7 @@ public class DatabaseConstantProvider implements ConstantProvider {
     }
     
     public void disconnect(){
-        System.out.println("[DB] --->  database disconnect  : success");
+	if(debugMode>=1) System.out.println("[DB] --->  database disconnect  : success");
         this.provider.close();
     }
     /**
