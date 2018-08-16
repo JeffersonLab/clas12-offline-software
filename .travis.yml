@@ -25,11 +25,7 @@ install:
 script:
   - ls -lthra
   - which groovy
-  - echo "starting unit tests..."
-  - cd validation/unit-tests/
-  - ./run-unit-tests.sh
-  - cd -
-  - echo "finished unit tests"
+  - echo "starting advanced tests..."
   - cd validation/advanced-tests/
   - ./run-advanced-tests.sh
   - ./run-eb-tests.sh -100 electronproton
