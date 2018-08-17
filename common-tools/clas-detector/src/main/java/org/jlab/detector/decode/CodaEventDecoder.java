@@ -293,6 +293,7 @@ public class CodaEventDecoder {
 
         if(node.getTag()==57617){
             try {
+//                System.out.println("Found SVT bank");
                 ByteBuffer     compBuffer = node.getByteData(true);
                 CompositeData  compData = new CompositeData(compBuffer.array(),event.getByteOrder());
                 List<DataType> cdatatypes = compData.getTypes();
@@ -317,15 +318,29 @@ public class CodaEventDecoder {
                         Short  tdc     = DataUtils.getShortFromByte(tdcbyte);
                         //Byte   tdc     = (Byte) cdataitems.get(position+2);
                         //Short   adc     = (Short)  cdataitems.get(position+3);
-                        Byte   adc     = (Byte)  cdataitems.get(position+3);
+                        Byte   adcbyte = (Byte)  cdataitems.get(position+3);
 
+                        // regular FSSR data entry
                         int halfWord = DataUtils.getIntFromByte(half);
                         int   chipID = DataUtils.getInteger(halfWord, 0, 2);
                         int   halfID = DataUtils.getInteger(halfWord, 3, 3);
-
+                        int   adc    = adcbyte;
                         Integer channelKey = ((half<<8) | (channel & 0xff));
+                        
+//                        System.err.println( "Half/chip = " + half + " CHIP = " + chipID + " HALF = " + halfID + "  CHANNEL = " + channel + " KEY = " + channelKey  );
 
-                        //System.err.println( "CHIP = " + chipID + " HALF = " + halfID + "  CHANNEL = " + channel + " KEY = " + channelKey  );
+                        // TDC data entry
+                        if(half == -128) {
+                            halfWord   = DataUtils.getIntFromByte(channel);
+                            halfID     = DataUtils.getInteger(halfWord, 2, 2);
+                            chipID     = DataUtils.getInteger(halfWord, 0, 1) + 1;
+                            channel    = 0;
+                            channelKey = 0;
+                            tdc = (short) ((adcbyte<<8) | (tdcbyte & 0xff));                            
+//                            System.err.println( "Half/chip = " + half + " CHIP = " + chipID + " HALF = " + halfID + " TDC = " + tdcbyte + "  ADC = " + adc + " Time = " + tdc  );
+                            adc = -1;
+                        }
+
                         //dataBank.addChannel(channelKey);
                         //dataBank.addData(channelKey, new RawData(channelKey,tdc,adc));
                         //int channelID = chipID*10000 + halfID*1000 + channel;
@@ -882,11 +897,11 @@ public class CodaEventDecoder {
 
     public static void main(String[] args){
         EvioSource reader = new EvioSource();
-        reader.open("/Users/devita/clas_003050.evio.1");
+        reader.open("/Users/devita/svt123_000190.evio.0");
         CodaEventDecoder decoder = new CodaEventDecoder();
         DetectorEventDecoder detectorDecoder = new DetectorEventDecoder();
 
-        int maxEvents = 30000;
+        int maxEvents = 30;
         int icounter  = 0;
 
         while(reader.hasEvent()==true&&icounter<maxEvents){
