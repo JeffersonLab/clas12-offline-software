@@ -13,6 +13,7 @@ import org.jlab.clas.detector.CherenkovResponse;
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
 import org.jlab.rec.eb.EBScalers;
+import org.jlab.rec.eb.EBRadioFrequency;
 
 /**
  *
