@@ -1,60 +1,66 @@
 #!/bin/bash
+#!/bin/bash
 
-source `dirname $0`/env.sh 
+NC='\033[0m'              # No Color
+RED='\033[0;31m'          # Red
+GREEN='\033[0;32m'        # Green
+YELLOW='\033[0;33m'       # Yellow
+BLUE='\033[0;34m'         # Blue
+PURPLE='\033[0;35m'       # Purple
 
-CLARA_HOME=`dirname $0`/..
-DATAMINING=`dirname $0`/..
-CLAS12DIR=`dirname $0`/.. ; export CLAS12DIR
- 
-CLARA_SERVICES=$CLAS12DIR/lib/services ; export CLARA_SERVICES
+export MALLOC_ARENA_MAX=1
+export TORUSMAP=Symm_torus_r2501_phi16_z251_24Apr2018.dat
+export SOLENOIDMAP=Symm_solenoid_r601_phi1_z1201_13June2018.dat
 
-#JYTHONPATH=${DATAMINING}/lib/jython
-#echo ${JYTHONPATH}
+if [ -z ${CLAS12DIR+x} ];
+  then
+    if [ -z ${CLARA_HOME+x} ];
+      then
+        echo -en "${RED}";
+        echo "Error: CLAS12DIR and CLARA_HOME not set.";
+        echo "Set one of these to continue";
+        echo "Exiting";
+        echo -en "${NC}";
+        exit 1;
+      else
+        export CLARA_SERVICES=$CLARA_HOME/lib;
+        export CLAS12DIR=$CLARA_HOME/plugins/clas12;
+        echo -en "${GREEN}";
+        echo +-------------------------------------------------------------------------
+        echo "| Using CLARA_SERVICES to set CLAS12DIR: $CLAS12DIR";
+        echo +-------------------------------------------------------------------------
+        echo -en "${NC}";
+    fi
+  else
+    echo -en "${GREEN}";
+    echo +-------------------------------------------------------------------------
+    echo "| Using CLAS12DIR, manually set to: $CLAS12DIR";
+    echo +-------------------------------------------------------------------------
+    echo -en "${NC}";
+fi
 
 #--------------------------------------------------------------
 # Adding supporting COAT jar files
-for i in `ls -a $DATAMINING/lib/clas/*.jar`
-do  
-#echo "$i"
-if [ -z "${JYPATH}" ] ; then
-JYPATH="$i"
-else
-JYPATH=${JYPATH}:"$i"
-fi
-done 
-#--------------------------------------------------------------
-# Adding supporting plugins directory
-for i in `ls -a $DATAMINING/lib/services/*.jar`
-do
-if [ -z "${JYPATH}" ] ; then
-JYPATH="$i"
-else
-JYPATH=${JYPATH}:"$i"
-fi
+for i in $(ls -a $CLAS12DIR/lib/*/*.jar)
+  do
+    if [[ $i = *"coat-libs"* ]]; then
+      VER=$(echo $i | cut -d'-' -f3)
+      DATE=$(stat --format="%z" $i | cut -d' ' -f1)
+    fi
+
+    if [ -z "${JYPATH+x}" ] ; then
+      JYPATH="$i"
+    else
+      JYPATH=${JYPATH}:"$i"
+    fi
 done
-#--------------------------------------------------------------
-# Adding supporting plugins directory
-#--------------------------------------------------------------
-# Done loading plugins
-#--------------------------------------------------------------
-# Adding supporting plugins directory 
-for i in `ls -a $DATAMINING/lib/utils/*.jar`
-do
-if [ -z "${JYPATH}" ] ; then
-JYPATH="$i"
-else
-JYPATH=${JYPATH}:"$i"
-fi
-done
-#-------------------------------------------------------------
-JYPATH=${JYPATH}:${DATAMINING}/lib/packages
-echo " "
-echo " "
-echo "*****************************************"
-echo "*    Running COAT-JAVA Groovy Scripts   *"
-echo "*    Version : 3a  Release : 2016       *" 
-echo "*****************************************"
-echo " "
-echo " "
-JAVA_OPTS="-Dsun.java2d.pmoffscreen=false -Xms1024m -Xmx2048m"; export JAVA_OPTS
+
+echo -en "${BLUE}";
+echo "*************************************************"
+echo -e "*\tRunning COAT-JAVA Groovy Scripts\t*"
+echo -e "*\tVersion : ${VER}  Release : ${DATE} \t*"
+echo "*************************************************"
+echo -en "${NC}";
+
+export JAVA_OPTS="-Dsun.java2d.pmoffscreen=false -Xms1024m -Xmx2048m";
 groovy -cp "$JYPATH" $*
