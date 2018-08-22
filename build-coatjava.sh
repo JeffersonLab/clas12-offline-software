@@ -1,10 +1,20 @@
 #!/bin/bash
 
-usage='build-coatjava.sh [--nospotbugs] [--nomaps] [--nounittests]'
+NC='\033[0m'              # No Color
+RED='\033[0;31m'          # Red
+GREEN='\033[0;32m'        # Green
+YELLOW='\033[0;33m'       # Yellow
+BLUE='\033[0;34m'         # Blue
+PURPLE='\033[0;35m'       # Purple
+
+BUILD_DIR=$PWD
+
+usage='build-coatjava.sh [--nospotbugs] [--nomaps] [--nounittests] [--clean]'
 
 runSpotBugs="yes"
 downloadMaps="yes"
 runUnitTests="yes"
+clean="no"
 for xx in $@
 do
     if [ "$xx" == "--nospotbugs" ]
@@ -19,47 +29,68 @@ do
     elif [ "$xx" == "--nounittests" ]
     then
         runUnitTests="no"
+    elif [ "$xx" == "--clean" ]
+    then
+        clean="yes"
     else
         echo $usage
         exit
     fi
 done
 
-# download the default field maps, as defined in bin/env.sh:
-# (and duplicated in etc/services/reconstruction.yaml):
-source `dirname $0`/bin/env.sh
-if [ $downloadMaps == "yes" ]; then
-  webDir=http://clasweb.jlab.org/clas12offline/magfield
-  locDir=etc/data/magfield
-  mkdir -p $locDir
-  cd $locDir
-  for map in $SOLENOIDMAP $TORUSMAP
-  do
-    # -N only redownloads if timestamp/filesize is newer/different
-    wget -N --no-check-certificate $webDir/$map
-  done
-  cd -
+if [ -z ${CLAS12DIR+x} ];
+  then
+    export CLAS12DIR=$BUILD_DIR/coatjava
+  else
+    echo -en "${GREEN}";
+    echo +-------------------------------------------------------------------------
+    echo "| Using CLAS12DIR, manually set to: $CLAS12DIR";
+    echo +-------------------------------------------------------------------------
+    echo -en "${NC}";
 fi
 
-rm -rf coatjava
-mkdir -p coatjava
-cp -r bin coatjava/
-cp -r etc coatjava/
-mkdir -p coatjava/lib/clas
-cp external-dependencies/JEventViewer-1.1.jar coatjava/lib/clas/
-cp external-dependencies/vecmath-1.3.1-2.jar coatjava/lib/clas/
-mkdir -p coatjava/lib/utils
-cp external-dependencies/jclara-4.3-SNAPSHOT.jar coatjava/lib/utils
-cp external-dependencies/clas12mon-2.0.jar coatjava/lib/utils
-cp external-dependencies/KPP-Plots-2.0.jar coatjava/lib/utils
-#cp external-dependencies/jaw-1.0.jar coatjava/lib/utils
-mkdir -p coatjava/lib/services
-
 ### clean up any cache copies ###
-rm -rf ~/.m2/repository/org/hep/hipo
-rm -rf ~/.m2/repository/org/jlab
+if [ $clean == "yes" ]; then
+  echo -e "${RED} Warning deleting $CLAS12DIR and maven cache! \n\n\t(You have 5 seconds to top this) \n\n${NC}"
+  sleep 5
+  rm -rf ~/.m2/repository/org/hep/hipo
+  rm -rf ~/.m2/repository/org/jlab
+  rm -rf $CLAS12DIR
+fi
 
-unset CLAS12DIR
+
+mkdir -p $CLAS12DIR
+
+export TORUSMAP=Symm_torus_r2501_phi16_z251_24Apr2018.dat
+export SOLENOIDMAP=Symm_solenoid_r601_phi1_z1201_13June2018.dat
+if [ $downloadMaps == "yes" ]; then
+  webDir=http://clasweb.jlab.org/clas12offline/magfield
+  MAPS=$CLAS12DIR/etc/data/magfield
+  mkdir -p $MAPS
+  cd $MAPS
+  if [ ! -f $SOLENOIDMAP ] || [ ! -f $TORUSMAP ]; then
+    for map in $SOLENOIDMAP $TORUSMAP
+      do
+        # -N only redownloads if timestamp/filesize is newer/different
+        wget -N --no-check-certificate $webDir/$map
+      done
+  fi
+  cd $BUILD_DIR
+fi
+
+#Remove and recreate directory structure
+mkdir -p $CLAS12DIR/lib/clas
+mkdir -p $CLAS12DIR/lib/services
+mkdir -p $CLAS12DIR/lib/utils
+
+#Copy in files from
+cp -r bin $CLAS12DIR/
+cp -r etc $CLAS12DIR/
+cp external-dependencies/JEventViewer-1.1.jar $CLAS12DIR/lib/clas/
+cp external-dependencies/vecmath-1.3.1-2.jar $CLAS12DIR/lib/clas/
+cp external-dependencies/jclara-4.3-SNAPSHOT.jar $CLAS12DIR/lib/utils/
+cp external-dependencies/KPP-Plots-2.0.jar $CLAS12DIR/lib/utils/
+
 if [ $runUnitTests == "yes" ]; then
 	mvn install # also runs unit tests
 	if [ $? != 0 ] ; then echo "mvn install failure" ; exit 1 ; fi
@@ -76,22 +107,25 @@ if [ $runSpotBugs == "yes" ]; then
 	if [ $? != 0 ] ; then echo "spotbugs failure" ; exit 1 ; fi
 fi
 
-cd common-tools/coat-lib
+cd $BUILD_DIR/common-tools/coat-lib
 mvn package
 if [ $? != 0 ] ; then echo "mvn package failure" ; exit 1 ; fi
-cd -
+cd $BUILD_DIR
 
-cp common-tools/coat-lib/target/coat-libs-5.1-SNAPSHOT.jar coatjava/lib/clas/
-cp reconstruction/dc/target/clas12detector-dc-1.0-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/tof/target/tof-1.0-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/cvt/target/cvt-1.0-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/ft/target/clas12detector-ft-1.0-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/ec/target/clas12detector-ec-1.0-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/ltcc/target/clasrec-ltcc-1.0-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/htcc/target/clasrec-htcc-1.0-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/cnd/target/clas12detector-cnd-1.0-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/rich/target/clas12detector-rich-1.0-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/fvt/target/clas12detector-fmt-1.0-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/eb/target/clas12detector-eb-1.0-SNAPSHOT.jar coatjava/lib/services/
+cp common-tools/coat-lib/target/coat-libs-5.1-SNAPSHOT.jar $CLAS12DIR/lib/clas/
+cp reconstruction/dc/target/clas12detector-dc-1.0-SNAPSHOT.jar $CLAS12DIR/lib/services/
+cp reconstruction/tof/target/tof-1.0-SNAPSHOT.jar $CLAS12DIR/lib/services/
+cp reconstruction/cvt/target/cvt-1.0-SNAPSHOT.jar $CLAS12DIR/lib/services/
+cp reconstruction/ft/target/clas12detector-ft-1.0-SNAPSHOT.jar $CLAS12DIR/lib/services/
+cp reconstruction/ec/target/clas12detector-ec-1.0-SNAPSHOT.jar $CLAS12DIR/lib/services/
+cp reconstruction/ltcc/target/clasrec-ltcc-1.0-SNAPSHOT.jar $CLAS12DIR/lib/services/
+cp reconstruction/htcc/target/clasrec-htcc-1.0-SNAPSHOT.jar $CLAS12DIR/lib/services/
+cp reconstruction/cnd/target/clas12detector-cnd-1.0-SNAPSHOT.jar $CLAS12DIR/lib/services/
+cp reconstruction/rich/target/clas12detector-rich-1.0-SNAPSHOT.jar $CLAS12DIR/lib/services/
+cp reconstruction/fvt/target/clas12detector-fmt-1.0-SNAPSHOT.jar $CLAS12DIR/lib/services/
+cp reconstruction/eb/target/clas12detector-eb-1.0-SNAPSHOT.jar $CLAS12DIR/lib/services/
 
 echo "COATJAVA SUCCESSFULLY BUILT !"
+echo "Exporting CLAS12DIR=$CLAS12DIR"
+
+export CLAS12DIR=$CLAS12DIR
