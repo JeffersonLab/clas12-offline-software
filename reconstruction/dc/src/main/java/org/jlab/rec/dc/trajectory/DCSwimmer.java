@@ -168,10 +168,10 @@ public class DCSwimmer {
         double accuracy = 20e-6; //20 microns
         double stepSize = Constants.SWIMSTEPSIZE; //  microns
 
-        if (_pTot < Constants.MINTRKMOM) // fiducial cut 
-        {
-            return null;
-        }
+        //if (_pTot < Constants.MINTRKMOM) // fiducial cut 
+        //{
+        //    return null;
+        //}
         SwimTrajectory traj = null;
         double hdata[] = new double[3];
 
@@ -206,10 +206,10 @@ public class DCSwimmer {
         double accuracy = 20e-6; //20 microns
         double stepSize = Constants.SWIMSTEPSIZE; //  microns
 
-        if (_pTot < Constants.MINTRKMOM) // fiducial cut 
-        {
-            return null;
-        }
+        //if (_pTot < Constants.MINTRKMOM) // fiducial cut 
+        //{
+        //    return null;
+        //}
         SwimTrajectory traj = null;
         double hdata[] = new double[3];
 
