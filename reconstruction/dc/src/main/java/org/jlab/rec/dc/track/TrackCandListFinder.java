@@ -80,11 +80,18 @@ public class TrackCandListFinder {
                          -q);
         double chi2 = 0; // assume err =1 on points 
         double[] R = dcSwim.SwimToPlane(z3);
+        if(R==null)
+            return Double.POSITIVE_INFINITY;
+        
         chi2+= (R[0] - x3)*(R[0] - x3) + (R[1] - y3)*(R[1] - y3);
         dcSwim.SetSwimParameters(R[0],R[1],R[2],
                         R[3],R[4],R[5],
                          -q);
+        
         R = dcSwim.SwimToPlane(z2);
+        if(R==null)
+            return Double.POSITIVE_INFINITY;
+        
         dcSwim.SetSwimParameters(R[0],R[1],R[2],
                         R[3],R[4],R[5],
                          -q);
@@ -93,6 +100,9 @@ public class TrackCandListFinder {
                         R[3],R[4],R[5],
                          -q);
         R = dcSwim.SwimToPlane(z1);
+        if(R==null)
+            return Double.POSITIVE_INFINITY;
+        
         chi2+= (R[0] - x1)*(R[0] - x1) + (R[1] - y1)*(R[1] - y1);
         
         return chi2;
@@ -121,12 +131,18 @@ public class TrackCandListFinder {
         
         dcSwim.SetSwimParameters(x1,y1,z1,p_x, p_y, p_z, q);
         double[] R = dcSwim.SwimToPlane(z2);
+        if(R==null) {
+           return new double[]{Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
+        }
         chi2+= (R[0] - x2)*(R[0] - x2) + (R[1] - y2)*(R[1] - y2);
         intBdl+=R[7];
         dcSwim.SetSwimParameters(R[0],R[1],R[2],
                         R[3],R[4],R[5],
                          q);
         R = dcSwim.SwimToPlane(z3);
+        if(R==null) {
+           return new double[]{Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
+        }
         chi2+= (R[0] - x3)*(R[0] - x3) + (R[1] - y3)*(R[1] - y3);
         intBdl+=R[7];
         
@@ -528,6 +544,10 @@ public class TrackCandListFinder {
 
         // swimming to a ref points outside of the last DC region
         double[] VecAtTarOut = dcSwim.SwimToPlane(592);
+        if(VecAtTarOut==null) {
+            cand.fit_Successful=false;
+            return;
+        }
         double xOuter  = VecAtTarOut[0];
         double yOuter  = VecAtTarOut[1];
         double zOuter  = VecAtTarOut[2];
@@ -551,8 +571,8 @@ public class TrackCandListFinder {
         double[] VecAtTarIn = dcSwim.SwimToPlane(180);
 
         if(VecAtTarIn==null) {
-                cand.fit_Successful=false;
-                return;
+            cand.fit_Successful=false;
+            return;
         }
 
         if(VecAtTarIn[6]+VecAtTarOut[6]<200) {
@@ -721,7 +741,10 @@ public void matchHits(List<StateVec> stateVecAtPlanesList, Track trk, DCGeant4Fa
     if(stateVecAtPlanesList==null)
         return;
     dcSwim.SetSwimParameters(trk.get_Vtx0().x(), trk.get_Vtx0().y(), trk.get_Vtx0().z(), trk.get_pAtOrig().x(), trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q());
+    if(dcSwim.SwimToPlane(stateVecAtPlanesList.get(0).getZ())==null)
+        return;
     double PathToFirstMeas = dcSwim.SwimToPlane(stateVecAtPlanesList.get(0).getZ())[6];
+    
     for(StateVec st : stateVecAtPlanesList) {
         if(st==null)
             return;
