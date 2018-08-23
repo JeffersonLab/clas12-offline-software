@@ -80,7 +80,6 @@ public class TrackCandListFinder {
                          -q);
         double chi2 = 0; // assume err =1 on points 
         double[] R = dcSwim.SwimToPlane(z3);
-        
         chi2+= (R[0] - x3)*(R[0] - x3) + (R[1] - y3)*(R[1] - y3);
         dcSwim.SetSwimParameters(R[0],R[1],R[2],
                         R[3],R[4],R[5],
@@ -349,10 +348,10 @@ public class TrackCandListFinder {
                                                 iBdl, TORSCALE);
                             int q = this.calcInitTrkQ(theta1, theta3, TORSCALE);
 
-                            //if(p>11)
-                            //    p=11;
-                            if(p>Constants.MAXTRKMOM || p< Constants.MINTRKMOM)
-                              continue;
+                            if(p>11)
+                                p=11;
+                            //if(p>Constants.MAXTRKMOM || p< Constants.MINTRKMOM)
+                              //  continue;
 
                             cand.set_Q(q);
                             // momentum correction using the swam trajectory iBdl
