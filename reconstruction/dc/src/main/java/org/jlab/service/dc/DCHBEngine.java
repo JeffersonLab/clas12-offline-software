@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.swimtools.MagFieldsEngine;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.swimtools.Swimmer;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
@@ -56,47 +57,9 @@ public class DCHBEngine extends DCEngine {
         Constants.Load();
         super.setStartTimeOption();
         super.LoadTables();
-        newRun = 809;
-        long timeStamp = 371468548086L;
-        if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
-            IndexedTable tabJ = super.getConstantsManager().getConstants(newRun, Constants.TIMEJITTER);
-            double period = tabJ.getDoubleValue("period", 0, 0, 0);
-            int phase = tabJ.getIntValue("phase", 0, 0, 0);
-            int cycles = tabJ.getIntValue("cycles", 0, 0, 0);
-
-            if (cycles > 0) triggerPhase = period * ((timeStamp + phase) % cycles);
-
-            TableLoader.FillT0Tables(newRun, super.variationName);
-            TableLoader.Fill(super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST));
-
-            Run.set(newRun);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean processDataEvent(DataEvent event) {
-        long startTime = 0;
-        //setRunConditionsParameters( event) ;
-        if (!event.hasBank("RUN::config")) {
-            return true;
-        }
-
-//        DataBank bank = event.getBank("RUN::config");
-//        long timeStamp = bank.getLong("timestamp", 0);
-//        double triggerPhase = 0;
-
-        // Load the constants
-        //-------------------
-//        int newRun = bank.getInt("run", 0);
-//        if (newRun == 0)
-//            return true;
-//
-
+//        newRun = 809;
+//        long timeStamp = 371468548086L;
 //        if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
-//            if (timeStamp == -1)
-//                return true;
-//            if (debug.get()) startTime = System.currentTimeMillis();
 //            IndexedTable tabJ = super.getConstantsManager().getConstants(newRun, Constants.TIMEJITTER);
 //            double period = tabJ.getDoubleValue("period", 0, 0, 0);
 //            int phase = tabJ.getIntValue("phase", 0, 0, 0);
@@ -108,12 +71,49 @@ public class DCHBEngine extends DCEngine {
 //            TableLoader.Fill(super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST));
 //
 //            Run.set(newRun);
-//            if (event.hasBank("MC::Particle")) {
-//                Constants.setMCDIST(0);
-//            }
-//
-//            if (debug.get()) System.out.println("NEW RUN INIT = " + (System.currentTimeMillis() - startTime));
 //        }
+        return true;
+    }
+
+    @Override
+    public boolean processDataEvent(DataEvent event) {
+//        long startTime = 0;
+        //setRunConditionsParameters( event) ;
+        if (!event.hasBank("RUN::config")) {
+            return true;
+        }
+
+       DataBank bank = event.getBank("RUN::config");
+       long timeStamp = bank.getLong("timestamp", 0);
+       double triggerPhase = 0;
+
+        // Load the constants
+        //-------------------
+        int newRun = bank.getInt("run", 0);
+       if (newRun == 0)
+           return true;
+
+       if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
+           if (timeStamp == -1)
+               return true;
+ //          if (debug.get()) startTime = System.currentTimeMillis();
+           IndexedTable tabJ = super.getConstantsManager().getConstants(newRun, Constants.TIMEJITTER);
+           double period = tabJ.getDoubleValue("period", 0, 0, 0);
+           int phase = tabJ.getIntValue("phase", 0, 0, 0);
+           int cycles = tabJ.getIntValue("cycles", 0, 0, 0);
+
+           if (cycles > 0) triggerPhase = period * ((timeStamp + phase) % cycles);
+
+           TableLoader.FillT0Tables(newRun, super.variationName);
+           TableLoader.Fill(super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST));
+
+           Run.set(newRun);
+           if (event.hasBank("MC::Particle")) {
+               Constants.setMCDIST(0);
+           }
+
+ //          if (debug.get()) System.out.println("NEW RUN INIT = " + (System.currentTimeMillis() - startTime));
+       }
 
         /* 1 */
         // get Field

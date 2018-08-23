@@ -460,24 +460,6 @@ public class FittedHit extends Hit implements Comparable<Hit> {
 
         //double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
         double z = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;
-/*
-        //double z1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(this.get_Wire()-1).getMidpoint().z();
-        //double z0 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(this.get_Wire()-1).getMidpoint().z();
-        double z1 = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 1, this.get_Wire() - 1).z;
-        double z0 = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 0, this.get_Wire() - 1).z;
-        double deltaz = Math.abs(z1 - z0);
-        //double xMin = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(0).getMidpoint().x();
-        double xMin = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 1, 0).x;
-
-        double x = xMin + (this.get_Wire() - 1) * 2 * deltaz * Math.tan(Math.PI / 6);
-        if (this.get_Layer() % 2 == 1) {
-            x += deltaz * Math.tan(Math.PI / 6);
-        }
-        //
-        //double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
-        //x = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().x();
- */
-        //double x = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).x;       
         double x= this.calc_GeomCorr(DcDetector, 0); 
         //
         this.set_X(x);
@@ -492,24 +474,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         if (this.get_Time() > 0) {
             this.set_TimeToDistance(cosTrkAngle, B, tab, tde);
         }
-    /*
-        //double z1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(this.get_Wire()-1).getMidpoint().z();
-        //double z0 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(this.get_Wire()-1).getMidpoint().z();
-        double z1 = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 1, this.get_Wire() - 1).z;
-        double z0 = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 0, this.get_Wire() - 1).z;
-        double deltaz = Math.abs(z1 - z0);
-        //double xMin = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(1).getComponent(0).getMidpoint().x();
-        double xMin = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 1, 0).x;
-
-        double x = xMin + (this.get_Wire() - 1) * 2 * deltaz * Math.tan(Math.PI / 6);
-
-        if (this.get_Layer() % 2 == 1) {
-            x += deltaz * Math.tan(Math.PI / 6);
-        }
-
-        //double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
-        //x = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().x();
-    */
+   
         double z = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;        
         //double x = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).x;
         double x = this.calc_GeomCorr(DcDetector, 0);
@@ -572,8 +537,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         double wire = this.get_Wire();
         double normW = (double) wire/112.;
         
-        xL-=Constants.MCDIST*DL*(normW-3*normW*normW*normW+2*normW*normW*normW*normW);
-        xR-=Constants.MCDIST*DR*(normW-3*normW*normW*normW+2*normW*normW*normW*normW);
+        xL-=Constants.getMCDIST()*DL*(normW-3*normW*normW*normW+2*normW*normW*normW*normW);
+        xR-=Constants.getMCDIST()*DR*(normW-3*normW*normW*normW+2*normW*normW*normW*normW);
         
         double x = xR -(yR-y)*((xR-xL)/(yR-yL));
         
@@ -624,7 +589,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 throw new RuntimeException("invalid region");
         }    
         
-        double MaxSag = Constants.MCDIST*A*C*wire*wire*Math.cos(25.)*Math.cos(30.);
+        double MaxSag = Constants.getMCDIST()*A*C*wire*wire*Math.cos(25.)*Math.cos(30.);
         
         double delta_x = MaxSag*(1.-y/(0.5*wireLen))*(1.-y/(0.5*wireLen));
         

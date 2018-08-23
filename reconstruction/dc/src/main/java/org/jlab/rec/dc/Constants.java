@@ -169,7 +169,6 @@ public class Constants {
     public static int[][] STBLOC;
 
     private static boolean USETSTART = false;
-    
 
     public static boolean isUSETSTART() {
         return USETSTART;
@@ -179,8 +178,22 @@ public class Constants {
         Constants.USETSTART = USETSTART;
     }
     
-    public static final double MCDIST = 1.0;
+    private static double MCDIST = 1.0;
 
+    /**
+     * @return the MCDIST
+     */
+    public static double getMCDIST() {
+        return MCDIST;
+    }
+
+    /**
+     * @param aMCDIST the MCDIST to set
+     */
+    public static void setMCDIST(double aMCDIST) {
+        MCDIST = aMCDIST;
+    }
+    
     public static final double[][][] MAXENDPLTDEFLEC = new double[3][6][2];
     
     public static synchronized void Load() {
@@ -265,17 +278,6 @@ public class Constants {
             runLAYEREFFS = le;
     }
 
-
-    //public static final double getTORSCALE() {
-    //	return TORSCALE;
-    //}
-
-
-    //public static final void setTORSCALE(double tORSCALE) {
-    //	TORSCALE = tORSCALE;
-    //}
-
- 
     private static double[][][][] _T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables --- with TStart calibration 
     private static double[][][][] _T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables --- with TStart calibration 
     public static synchronized void setT0(double[][][][] T0) {
@@ -297,4 +299,5 @@ public class Constants {
     public static final String TIMEJITTER = "/calibration/dc/time_jitter";
     public static final String HITBASE = "HitBased";
 
+   
 }

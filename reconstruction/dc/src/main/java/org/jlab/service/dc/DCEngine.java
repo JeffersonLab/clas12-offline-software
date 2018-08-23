@@ -30,46 +30,7 @@ public class DCEngine extends ReconstructionEngine {
     public DCEngine(String name) {
         super(name,"ziegler","5.0");
     }
-    
-    /**
-     * 
-     * determine torus and solenoid map name from yaml, else env, else crash
-     */
-    /*public void initializeMagneticFields() {
-        String torusMap=this.getEngineConfigString("torusMap");
-        String solenoidMap=this.getEngineConfigString("solenoidMap");
-        if (torusMap!=null) {
-            System.out.println("["+this.getName()+"] Torus Map chosen based on yaml: "+torusMap);
-        }
-        else {
-            torusMap = System.getenv("TORUSMAP");
-            if (torusMap!=null) {
-                System.out.println("["+this.getName()+"] Torus Map chosen based on env: "+torusMap);
-            }
-        }
-        if (torusMap==null) {
-            throw new RuntimeException("["+this.getName()+"]  Failed to find torus map name in yaml or env.");
-        }
-        if (solenoidMap!=null) {
-            System.out.println("["+this.getName()+"] solenoid Map chosen based on yaml: "+solenoidMap);
-        }
-        else {
-            solenoidMap = System.getenv("SOLENOIDMAP");
-            if (solenoidMap!=null) {
-                System.out.println("["+this.getName()+"] solenoid Map chosen based on env: "+solenoidMap);
-            }
-        }
-        if (solenoidMap==null) {
-            throw new RuntimeException("["+this.getName()+"]  Failed to find solenoid map name in yaml or env.");
-        }
-        String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";
-        try {
-            MagneticFields.getInstance().initializeMagneticFields(mapDir,torusMap,solenoidMap);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
+   
 
     public void setStartTimeOption() {
         // Load config

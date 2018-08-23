@@ -6,7 +6,7 @@
 package org.jlab.rec.dc.track.fit;
 
 import Jama.Matrix;
-import java.util.Vector;
+import java.util.ArrayList;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.rec.dc.Constants;
 
@@ -18,24 +18,24 @@ public class RungeKutta {
     
     private final float[] _b = new float[3];
     final double v = 0.0029979245;
-    private final Vector<Double> k1;
-    private final Vector<Double> k2;
-    private final Vector<Double> k3;
-    private final Vector<Double> k4;
-    private final Vector<Double> jk1;
-    private final Vector<Double> jk2;
-    private final Vector<Double> jk3;
-    private final Vector<Double> jk4;
+    private final ArrayList<Double> k1;
+    private final ArrayList<Double> k2;
+    private final ArrayList<Double> k3;
+    private final ArrayList<Double> k4;
+    private final ArrayList<Double> jk1;
+    private final ArrayList<Double> jk2;
+    private final ArrayList<Double> jk3;
+    private final ArrayList<Double> jk4;
     
     public RungeKutta() {
-        this.k1 = new Vector<Double>(4);
-        this.k2 = new Vector<Double>(4);
-        this.k3 = new Vector<Double>(4);
-        this.k4 = new Vector<Double>(4);
-        this.jk1 = new Vector<Double>(12);
-        this.jk2 = new Vector<Double>(12);
-        this.jk3 = new Vector<Double>(12);
-        this.jk4 = new Vector<Double>(12);
+        this.k1 = new ArrayList<Double>(4);
+        this.k2 = new ArrayList<Double>(4);
+        this.k3 = new ArrayList<Double>(4);
+        this.k4 = new ArrayList<Double>(4);
+        this.jk1 = new ArrayList<Double>(12);
+        this.jk2 = new ArrayList<Double>(12);
+        this.jk3 = new ArrayList<Double>(12);
+        this.jk4 = new ArrayList<Double>(12);
         
     }
     void RK4transport(int sector, double q, double x0, double y0, double z0, double tx0, double ty0, double h, Swim swimmer, 
@@ -300,9 +300,8 @@ public class RungeKutta {
                     + delAy_delty(tx1, ty1,b0,b1,b2)*(delty_delq0_1));
     }
 
-    private void getRKn(int sector, Vector<Double> k1, Vector<Double> k2, double d, double x0, double y0, double z0, double tx0, double ty0, double q, float[] b) {
-        double x1   = k1.get(0);
-        double y1   = k1.get(1);
+    private void getRKn(int sector, ArrayList<Double> k1, ArrayList<Double> k2, double d, double x0, double y0, double z0, double tx0, double ty0, double q, float[] b) {
+       
         double tx1  = k1.get(2);
         double ty1  = k1.get(3);
         
@@ -317,11 +316,9 @@ public class RungeKutta {
         k2.add(3, ty2);
     }
 
-    private void getjRKn(int sector, Vector<Double> k1, Vector<Double> jk1, Vector<Double> jk2, double d, double x0, double y0, double z0, double tx0, double ty0, double q, float[] _b, 
+    private void getjRKn(int sector, ArrayList<Double> k1, ArrayList<Double> jk1, ArrayList<Double> jk2, double d, double x0, double y0, double z0, double tx0, double ty0, double q, float[] _b, 
             double deltx_deltx0_0, double delty_deltx0_0, double deltx_delty0_0, double delty_delty0_0, double deltx_delq0_0, double delty_delq0_0) {
         
-        //double x1   = k1.get(0);
-        //double y1   = k1.get(1);
         double tx1  = k1.get(2);
         double ty1  = k1.get(3);
         

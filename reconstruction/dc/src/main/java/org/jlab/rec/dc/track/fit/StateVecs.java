@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.cross.Cross;
 import org.jlab.rec.dc.track.Track;
 
