@@ -248,7 +248,7 @@ public class HitReader {
             _HBHits = new ArrayList<>();
             return;
         }
-
+        
         DataBank bank = event.getBank("HitBasedTrkg::HBHits");
         int rows = bank.rows();
 
@@ -337,9 +337,10 @@ public class HitReader {
 
             hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));
             hit.set_AssociatedClusterID(clusterID[i]);
-            hit.set_AssociatedHBTrackID(trkID[i]);
-            if (hit.get_Beta() > 0.1 && hit.get_Beta() <= 1.00)
-                hits.add(hit);
+            hit.set_AssociatedHBTrackID(trkID[i]); 
+            if (hit.get_Beta() > 0.0 ) {
+                hits.add(hit); 
+            }
         }
 
         this.set_HBHits(hits);
@@ -458,7 +459,8 @@ public class HitReader {
                         bank.getShort("pindex", i));
             }
         }
-
+        if(_beta>1.0)
+            _beta=1.0;
         return _beta;
     }
 
