@@ -85,7 +85,9 @@ public class CLASDecoder {
         
         if(event instanceof EvioDataEvent){
             try {
+                
                 dataList = codaDecoder.getDataEntries( (EvioDataEvent) event);
+                
                 if(this.decoderDebugMode>0){
                     System.out.println("\n>>>>>>>>> RAW decoded data");
                     for(DetectorDataDgtz data : dataList){
