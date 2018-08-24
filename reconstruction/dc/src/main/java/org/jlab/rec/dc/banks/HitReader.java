@@ -304,7 +304,8 @@ public class HitReader {
             hit.setTProp(tProp[i]);
             hit.setTFlight(tFlight[i]);
             hit.set_Beta(this.readBeta(event, trkID[i])); 
-            
+            if(hit.get_Beta()>1.0)
+                hit.set_Beta(1.0); // HB resolution too poor to set cut on beta.
             double T0Sub = (double) (tdc[i] - tProp[i] - tFlight[i] - T_0);
             
             if(Constants.isUSETSTART()==true) { 
