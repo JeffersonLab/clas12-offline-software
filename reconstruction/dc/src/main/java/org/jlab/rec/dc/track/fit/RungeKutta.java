@@ -40,6 +40,213 @@ public class RungeKutta {
     }
     void RK4transport(int sector, double q, double x0, double y0, double z0, double tx0, double ty0, double h, Swim swimmer, 
             StateVecs.CovMat covMat, StateVecs.StateVec fVec, StateVecs.CovMat fCov, double mass) {
+        // Jacobian:
+        double[][] u = new double[5][5];       
+        double[][] C = new double[5][5];
+        double deltx_deltx0_0 =1;
+        double delty_deltx0_0 =0;
+        double deltx_delty0_0 =0;
+        double delty_delty0_0 =1;
+        double deltx_delq0_0 =0;
+        double delty_delq0_0 =0;
+        //System.out.println("RK0 "+x0+","+y0+","+z0+";"+tx0+","+ty0+","+" z0 "+z0+" h "+h);
+        //State
+        swimmer.Bfield(sector, x0, y0, z0, _b);
+        double x1 = tx0;
+        double y1 = ty0;
+        double tx1=q*v*Ax(tx0, ty0, _b[0], _b[1], _b[2]);
+        double ty1=q*v*Ay(tx0, ty0, _b[0], _b[1], _b[2]);
+        
+        // Jacobian:
+        double delx_deltx0_1 = deltx_deltx0_0;
+        double dely_deltx0_1 = delty_deltx0_0;
+        double delx_delty0_1 = deltx_delty0_0;
+        double dely_delty0_1 = delty_delty0_0;
+        
+        double deltx_deltx0_1 = q*v*(delAx_deltx(tx0,ty0,_b[0],_b[1],_b[2])*deltx_deltx0_0  
+                + delAx_delty(tx0,ty0,_b[0],_b[1],_b[2])*delty_deltx0_0);
+        double delty_deltx0_1 = q*v*(delAy_deltx(tx0,ty0,_b[0],_b[1],_b[2])*deltx_deltx0_0  
+                + delAy_delty(tx0,ty0,_b[0],_b[1],_b[2])*delty_deltx0_0);
+        double deltx_delty0_1 = q*v*(delAx_delty(tx0,ty0,_b[0],_b[1],_b[2])*deltx_delty0_0  
+                + delAx_delty(tx0,ty0,_b[0],_b[1],_b[2])*delty_delty0_0);
+        double delty_delty0_1 = q*v*(delAy_delty(tx0,ty0,_b[0],_b[1],_b[2])*deltx_delty0_0  
+                + delAy_delty(tx0,ty0,_b[0],_b[1],_b[2])*delty_delty0_0);
+        
+        double delx_delq0_1 = deltx_delq0_0;
+        double dely_delq0_1 = delty_delq0_0;
+        
+        double deltx_delq0_1 = v*Ax(tx0, ty0, _b[0], _b[1], _b[2])
+                + q*v*(delAx_deltx(tx0,ty0,_b[0],_b[1],_b[2])*deltx_delq0_0  
+                    + delAx_delty(tx0,ty0,_b[0],_b[1],_b[2])*delty_delq0_0);
+        double delty_delq0_1 = v*Ay(tx0, ty0, _b[0], _b[1], _b[2])
+                + q*v*(delAy_deltx(tx0,ty0,_b[0],_b[1],_b[2])*deltx_delq0_0  
+                    + delAy_delty(tx0,ty0,_b[0],_b[1],_b[2])*delty_delq0_0);
+        
+ 
+        swimmer.Bfield(sector, x0+0.5*h*x1, y0+0.5*h*y1, z0+0.5*h, _b);
+        double x2 = tx0+0.5*h*tx1;
+        double y2 = ty0+0.5*h*ty1;
+        double tx2=q*v*Ax((tx0+0.5*h*tx1), (ty0+0.5*h*ty1), _b[0], _b[1], _b[2]);
+        double ty2=q*v*Ay((tx0+0.5*h*tx1), (ty0+0.5*h*ty1), _b[0], _b[1], _b[2]);
+        
+        // Jacobian:
+        double delx_deltx0_2 = deltx_deltx0_0+0.5*h*deltx_deltx0_1;
+        double dely_deltx0_2 = delty_deltx0_0+0.5*h*delty_deltx0_1;
+        double delx_delty0_2 = deltx_delty0_0+0.5*h*deltx_delty0_1;
+        double dely_delty0_2 = delty_delty0_0+0.5*h*delty_delty0_1;
+        
+        double deltx_deltx0_2 = this.deltx_deltx0_next(q,v,tx0+0.5*h*tx1,ty0+0.5*h*ty1,_b[0],_b[1],_b[2],
+                deltx_deltx0_0+0.5*h*deltx_deltx0_1,delty_deltx0_0+0.5*h*delty_deltx0_1);
+        double delty_deltx0_2 = this.delty_deltx0_next(q,v,tx0+0.5*h*tx1,ty0+0.5*h*ty1,_b[0],_b[1],_b[2],
+                deltx_deltx0_0+0.5*h*deltx_deltx0_1,delty_deltx0_0+0.5*h*delty_deltx0_1);
+        double deltx_delty0_2 = this.deltx_delty0_next(q,v,tx0+0.5*h*tx1,ty0+0.5*h*ty1,_b[0],_b[1],_b[2],
+                deltx_delty0_0+0.5*h*deltx_delty0_1,delty_delty0_0+0.5*h*delty_delty0_1);
+        double delty_delty0_2 = this.delty_delty0_next(q,v,tx0+0.5*h*tx1,ty0+0.5*h*ty1,_b[0],_b[1],_b[2],
+                deltx_delty0_0+0.5*h*deltx_delty0_1,delty_delty0_0+0.5*h*delty_delty0_1);
+        
+        double delx_delq0_2 = deltx_delq0_0+0.5*h*deltx_delq0_1;
+        double dely_delq0_2 = delty_delq0_0+0.5*h*delty_delq0_1;
+        
+        double deltx_delq0_2 = this.deltx_delq0_next(q,v,tx0+0.5*h*tx1,ty0+0.5*h*ty1,_b[0],_b[1],_b[2],
+                deltx_delq0_0+0.5*h*deltx_delq0_1,delty_delq0_0+0.5*h*delty_delq0_1);
+        double delty_delq0_2 = this.delty_delq0_next(q,v,tx0+0.5*h*tx1,ty0+0.5*h*ty1,_b[0],_b[1],_b[2],
+                deltx_delq0_0+0.5*h*deltx_delq0_1,delty_delq0_0+0.5*h*delty_delq0_1);
+        
+        swimmer.Bfield(sector, x0+0.5*h*x2, y0+0.5*h*y2, z0+0.5*h, _b);
+        double x3 = tx0+0.5*h*tx2;
+        double y3 = ty0+0.5*h*ty2;
+        double tx3=q*v*Ax((tx0+0.5*h*tx2), (ty0+0.5*h*ty2), _b[0], _b[1], _b[2]);
+        double ty3=q*v*Ay((tx0+0.5*h*tx2), (ty0+0.5*h*ty2), _b[0], _b[1], _b[2]);
+        
+        // Jacobian:
+        double delx_deltx0_3 = deltx_deltx0_0+0.5*h*deltx_deltx0_2;
+        double dely_deltx0_3 = delty_deltx0_0+0.5*h*delty_deltx0_2;
+        double delx_delty0_3 = deltx_delty0_0+0.5*h*deltx_delty0_2;
+        double dely_delty0_3 = delty_delty0_0+0.5*h*delty_delty0_2;
+        
+        double deltx_deltx0_3 = this.deltx_deltx0_next(q,v,tx0+0.5*h*tx2,ty0+0.5*h*ty2,_b[0],_b[1],_b[2],
+                deltx_deltx0_0+0.5*h*deltx_deltx0_2,delty_deltx0_0+0.5*h*delty_deltx0_2);
+        double delty_deltx0_3 = this.delty_deltx0_next(q,v,tx0+0.5*h*tx2,ty0+0.5*h*ty2,_b[0],_b[1],_b[2],
+                deltx_deltx0_0+0.5*h*deltx_deltx0_2,delty_deltx0_0+0.5*h*delty_deltx0_2);
+        double deltx_delty0_3 = this.deltx_delty0_next(q,v,tx0+0.5*h*tx2,ty0+0.5*h*ty2,_b[0],_b[1],_b[2],
+                deltx_delty0_0+0.5*h*deltx_delty0_2,delty_delty0_0+0.5*h*delty_delty0_2);
+        double delty_delty0_3 = this.delty_delty0_next(q,v,tx0+0.5*h*tx2,ty0+0.5*h*ty2,_b[0],_b[1],_b[2],
+                deltx_delty0_0+0.5*h*deltx_delty0_2,delty_delty0_0+0.5*h*delty_delty0_2);
+        
+        double delx_delq0_3 = deltx_delq0_0+0.5*h*deltx_delq0_2;
+        double dely_delq0_3 = delty_delq0_0+0.5*h*delty_delq0_2;
+        
+        double deltx_delq0_3 = this.deltx_delq0_next(q,v,tx0+0.5*h*tx2,ty0+0.5*ty2,_b[0],_b[1],_b[2],
+                deltx_delq0_0+0.5*h*deltx_delq0_2,delty_delq0_0+0.5*h*delty_delq0_2);
+        double delty_delq0_3 = this.delty_delq0_next(q,v,tx0+0.5*h*tx2,ty0+0.5*ty2,_b[0],_b[1],_b[2],
+                deltx_delq0_0+0.5*h*deltx_delq0_2,delty_delq0_0+0.5*h*delty_delq0_2);
+        
+        swimmer.Bfield(sector, x0+h*x3, y0+h*y3, z0+h, _b);
+        double x4 = tx0+h*tx3;
+        double y4 = ty0+h*ty3;
+        double tx4=q*v*Ax((tx0+h*tx3), (ty0+h*ty3), _b[0], _b[1], _b[2]);
+        double ty4=q*v*Ay((tx0+h*tx3), (ty0+h*ty3), _b[0], _b[1], _b[2]);
+       
+         // Jacobian:
+        double delx_deltx0_4 = deltx_deltx0_0+h*deltx_deltx0_3;
+        double dely_deltx0_4 = delty_deltx0_0+h*delty_deltx0_3;
+        double delx_delty0_4 = deltx_delty0_0+h*deltx_delty0_3;
+        double dely_delty0_4 = delty_delty0_0+h*delty_delty0_3;
+        
+        double deltx_deltx0_4 = this.deltx_deltx0_next(q,v,tx0+h*tx3,ty0+h*ty3,_b[0],_b[1],_b[2],
+                deltx_deltx0_0+h*deltx_deltx0_3,delty_deltx0_0+h*delty_deltx0_3);
+        double delty_deltx0_4 = this.delty_deltx0_next(q,v,tx0+h*tx3,ty0+h*ty3,_b[0],_b[1],_b[2],
+                deltx_deltx0_0+h*deltx_deltx0_3,delty_deltx0_0+h*delty_deltx0_3);
+        double deltx_delty0_4 = this.deltx_delty0_next(q,v,tx0+h*tx3,ty0+h*ty3,_b[0],_b[1],_b[2],
+                deltx_delty0_0+h*deltx_delty0_3,delty_delty0_0+h*delty_delty0_3);
+        double delty_delty0_4 = this.delty_delty0_next(q,v,tx0+h*tx3,ty0+h*ty3,_b[0],_b[1],_b[2],
+                deltx_delty0_0+h*deltx_delty0_3,delty_delty0_0+h*delty_delty0_3);
+        
+        double delx_delq0_4 = deltx_delq0_0+h*deltx_delq0_3;
+        double dely_delq0_4 = delty_delq0_0+h*delty_delq0_3;
+        
+        double deltx_delq0_4 = this.deltx_delq0_next(q,v,tx0+h*tx3,ty0+h*ty3,_b[0],_b[1],_b[2],
+                deltx_delq0_0+h*deltx_delq0_3,delty_delq0_0+h*delty_delq0_3);
+        double delty_delq0_4 = this.delty_delq0_next(q,v,tx0+h*tx3,ty0+h*ty3,_b[0],_b[1],_b[2],
+                deltx_delq0_0+h*deltx_delq0_3,delty_delq0_0+h*delty_delq0_3);
+        
+        double x = x0 + this.RK4(x1, x2, x3, x4, h);
+        double y = y0 + this.RK4(y1, y2, y3, y4, h);
+        double tx = tx0 + this.RK4(tx1, tx2, tx3, tx4, h);
+        double ty = ty0 + this.RK4(ty1, ty2, ty3, ty4, h);
+        double z = z0+h;
+        //System.out.println("RK "+x+","+y+","+z+";"+tx+","+ty+","+" z0 "+z0);
+        // Jacobian:
+        double delx_deltx0  = this.RK4(delx_deltx0_1, delx_deltx0_2, delx_deltx0_3, delx_deltx0_4, h);
+        double deltx_deltx0 = 1 + this.RK4(deltx_deltx0_1, deltx_deltx0_2, deltx_deltx0_3, deltx_deltx0_4, h);
+        double dely_deltx0  = this.RK4(dely_deltx0_1, dely_deltx0_2, dely_deltx0_3, dely_deltx0_4, h);
+        double delty_deltx0 = this.RK4(delty_deltx0_1, delty_deltx0_2, delty_deltx0_3, delty_deltx0_4, h);
+        
+        double delx_delty0  = this.RK4(delx_delty0_1, delx_delty0_2, delx_delty0_3, delx_delty0_4, h);
+        double deltx_delty0 = this.RK4(deltx_delty0_1, deltx_delty0_2, deltx_delty0_3, deltx_delty0_4, h);
+        double dely_delty0  = this.RK4(dely_delty0_1, dely_delty0_2, dely_delty0_3, dely_delty0_4, h);
+        double delty_delty0 = 1 + this.RK4(delty_delty0_1, delty_delty0_2, delty_delty0_3, delty_delty0_4, h);
+        
+        double delx_delq0  = this.RK4(delx_delq0_1, delx_delq0_2, delx_delq0_3, delx_delq0_4, h);
+        double deltx_delq0 = this.RK4(deltx_delq0_1, deltx_delq0_2, deltx_delq0_3, deltx_delq0_4, h);
+        double dely_delq0  = this.RK4(dely_delq0_1, dely_delq0_2, dely_delq0_3, dely_delq0_4, h);
+        double delty_delq0 = this.RK4(delty_delq0_1, delty_delq0_2, delty_delq0_3, delty_delq0_4, h);
+
+        //covMat = FCF^T; u = FC;
+        for (int j1 = 0; j1 < 5; j1++) {
+            u[0][j1] = covMat.covMat.get(0,j1) + covMat.covMat.get(2,j1) * delx_deltx0 + covMat.covMat.get(3,j1)* delx_delty0 + covMat.covMat.get(4,j1) * delx_delq0;
+            u[1][j1] = covMat.covMat.get(1,j1) + covMat.covMat.get(2,j1) * dely_deltx0 + covMat.covMat.get(3,j1) * dely_delty0 + covMat.covMat.get(4,j1) * dely_delq0;
+            u[2][j1] = covMat.covMat.get(2,j1) + covMat.covMat.get(3,j1) * deltx_delty0 + covMat.covMat.get(4,j1) * deltx_delq0;
+            u[3][j1] = covMat.covMat.get(2,j1) * delty_deltx0 + covMat.covMat.get(3,j1) + covMat.covMat.get(4,j1) * delty_delq0;
+            u[4][j1] = covMat.covMat.get(4,j1);
+        }
+
+        for (int i1 = 0; i1 < 5; i1++) {
+            C[i1][0] = u[i1][0] + u[i1][2] * delx_deltx0 + u[i1][3] * delx_delty0 + u[i1][4] * delx_delq0;
+            C[i1][1] = u[i1][1] + u[i1][2] * dely_deltx0 + u[i1][3] * dely_delty0 + u[i1][4] * dely_delq0;
+            C[i1][2] = u[i1][2] + u[i1][3] * deltx_delty0 + u[i1][4] * deltx_delq0;
+            C[i1][3] = u[i1][2] * delty_deltx0 + u[i1][3] + u[i1][4] * delty_delq0;
+            C[i1][4] = u[i1][4];
+        }
+
+        // Q  process noise matrix estimate
+        double p = Math.abs(1. / q);
+        double pz = p / Math.sqrt(1 + tx * tx + ty * ty);
+        double px = tx * pz;
+        double py = ty * pz;
+
+        double t_ov_X0 = Math.signum(h) * h / Constants.ARGONRADLEN; //path length in radiation length units = t/X0 [true path length/ X0] ; Ar radiation length = 14 cm
+
+
+        double beta = p / Math.sqrt(p * p + mass * mass); // use particle momentum
+        double cosEntranceAngle = Math.abs((x * px + y * py + z * pz) / (Math.sqrt(x * x + y * y + z * z) * p));
+        double pathLength = t_ov_X0 / cosEntranceAngle;
+
+        double sctRMS = (0.0136 / (beta * p)) * Math.sqrt(pathLength) * (1 + 0.038 * Math.log(pathLength)); // Highland-Lynch-Dahl formula
+
+        double cov_txtx = (1 + tx * tx) * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
+        double cov_tyty = (1 + ty * ty) * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
+        double cov_txty = tx * ty * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
+
+        if (h > 0) {
+            C[2][2] += cov_txtx;
+            C[2][3] += cov_txty;
+            C[3][2] += cov_txty;
+            C[3][3] += cov_tyty;
+        }
+        
+        fVec.x = x;
+        fVec.y  = y ;
+        fVec.z = z0+h;
+        fVec.tx = tx;
+        fVec.ty = ty;
+        fVec.Q = q;
+        fVec.B = Math.sqrt(_b[0]*_b[0]+_b[1]*_b[1]+_b[2]*_b[2]);
+        fCov.covMat=new Matrix(C);
+            // transport stateVec
+    }
+    void RK4transport_2(int sector, double q, double x0, double y0, double z0, double tx0, double ty0, double h, Swim swimmer, 
+            StateVecs.CovMat covMat, StateVecs.StateVec fVec, StateVecs.CovMat fCov, double mass) {
         k1.clear();
         k2.clear();
         k3.clear();

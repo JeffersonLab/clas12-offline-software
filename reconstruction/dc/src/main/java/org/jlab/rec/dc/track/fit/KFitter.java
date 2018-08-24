@@ -4,7 +4,6 @@ import Jama.Matrix;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
@@ -100,13 +99,15 @@ public class KFitter {
 
 //                double deltaChi2 = Math.abs(this.chi2kf - newChisq);
                 if (this.chi2kf < newChisq) {
-                    if(this.finalStateVec!=null)
+                    if(this.finalStateVec!=null) {
                         if( Math.abs(sv.trackTraj.get(svzLength - 1).Q-this.finalStateVec.Q)<5.e-4 &&
-                                    Math.abs(sv.trackTraj.get(svzLength - 1).x-this.finalStateVec.x)<1.e-4 &&
-                                    Math.abs(sv.trackTraj.get(svzLength - 1).y-this.finalStateVec.y)<1.e-4 &&
-                                    Math.abs(sv.trackTraj.get(svzLength - 1).tx-this.finalStateVec.tx)<1.e-6 &&
-                                            Math.abs(sv.trackTraj.get(svzLength - 1).ty-this.finalStateVec.ty)<1.e-6)
+                                Math.abs(sv.trackTraj.get(svzLength - 1).x-this.finalStateVec.x)<1.e-4 &&
+                                Math.abs(sv.trackTraj.get(svzLength - 1).y-this.finalStateVec.y)<1.e-4 &&
+                                Math.abs(sv.trackTraj.get(svzLength - 1).tx-this.finalStateVec.tx)<1.e-6 &&
+                                Math.abs(sv.trackTraj.get(svzLength - 1).ty-this.finalStateVec.ty)<1.e-6) {
                             i = totNumIter;
+                        }
+                    }
                     this.finalStateVec = sv.trackTraj.get(svzLength - 1);
                     this.finalCovMat = sv.trackCov.get(svzLength - 1);
 
