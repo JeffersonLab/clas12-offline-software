@@ -338,8 +338,10 @@ public class HitReader {
             hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
-            if (hit.get_Beta() > 0.0 ) {
-                hits.add(hit); 
+            if(hit.get_Beta()>0.15 && hit.get_Beta()<=1.40) {
+                if(hit.get_Beta()>1.0)
+                    hit.set_Beta(1.0);
+                hits.add(hit);
             }
         }
 
@@ -435,10 +437,11 @@ public class HitReader {
             }
             if (hit.get_Time() < 0)
                 hit.set_QualityFac(1);
-            if (hit.get_Beta() > 0.1 && hit.get_Beta() <= 1.00)
+            if(hit.get_Beta()>0.2 && hit.get_Beta()<=1.30) {
+                if(hit.get_Beta()>1.0)
+                    hit.set_Beta(1.0);
                 hits.add(hit);
-            hits.add(hit);
-
+            }
         }
 
         this.set_TBHits(hits);
