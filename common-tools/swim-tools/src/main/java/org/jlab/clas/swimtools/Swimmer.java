@@ -7,7 +7,6 @@ package org.jlab.clas.swimtools;
 import cnuphys.magfield.MagneticFields;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 /**
  *
  * @author ziegler, heddle
@@ -34,9 +33,11 @@ public class Swimmer {
         MagneticFields.getInstance().setSolenoidShift(shift);
         setSolScale(SolenoidScale);
         setTorScale(TorusScale);
+        //remove overlap for composite field
+        MagneticFields.getInstance().removeMapOverlap();
         FieldsLoaded = true;
         System.out.println(" TRACKING ***** ****** ****** THE TORUS IS BEING SCALED BY " + (TorusScale * 100) + "  %   *******  ****** **** ");
-        System.out.println(" TRACKING ***** ****** ****** THE SOLENOID IS BEING SCALED BY " + (SolenoidScale * 100) + "  %   *******  ****** **** ");
+        System.out.println(" TRACKING ***** ****** ****** THE SOLENOID IS BEING SCALED BY " + (SolenoidScale * 100) + "  %   *******  ****** **** ");   
     }
 
     private static double SOLSCALE = -1;
