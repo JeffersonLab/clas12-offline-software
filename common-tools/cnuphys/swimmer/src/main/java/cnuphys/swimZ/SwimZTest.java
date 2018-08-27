@@ -144,35 +144,7 @@ public class SwimZTest {
 		hdataReport(hdata, 1);
 		footer("SwimZ ADAPTIVE");
 	}
-	private static void testCovMatProp(int numTimes) {
-		header("SwimZ COV MAT PROP");
-
-		// the new swimmer
-		SwimZStateVector start = new SwimZStateVector(xo, yo, zo, p, theta, phi);
-		SwimZStateVector stop = new SwimZStateVector(xo, yo, zo, p, theta, phi);
-
-		double hdata[] = new double[3];
-		int numStep = 0;
-
-		SwimZ sz = new SwimZ();
-		long startTime = System.currentTimeMillis();
-		
-		
-		Matrix covMat = new Matrix(5, 5);
-		
-		for (int i = 0; i < numTimes; i++) {
-			try {
-				numStep = sz.transport(Q, p, start, stop, covMat, zf, adaptiveInitStepSize, hdata);
-			} catch (SwimZException e) {
-				e.printStackTrace();
-			}
-		}
-		double timePerSwim = ((double) (System.currentTimeMillis() - startTime)) / numTimes;
-		System.out.println("Number of steps: " + numStep);
-		partialReport(start, stop, timePerSwim, "Z ADAPTIVE");
-		hdataReport(hdata, 1);
-		footer("SwimZ COV MAT PROP");
-	}
+	
 	private static void testAdaptiveEndpointOnly(int numTimes) {
 		header("SwimZ ADAPTIVE ENDPOINT ONLY");
 
