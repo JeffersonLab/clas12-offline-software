@@ -9,7 +9,7 @@ if ( -e "$1.evio" ) then
     exit
 endif
 
-source /group/clas12/gemc/environment.csh 4a.2.3
+source /group/clas12/gemc/environment.csh 4a.2.4
 set run = 10
 set nEvents = 1000
 set gcard = ${GEMC}/../clas12.gcard
