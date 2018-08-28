@@ -34,7 +34,7 @@ public class Swimmer {
         setSolScale(SolenoidScale);
         setTorScale(TorusScale);
         //remove overlap for composite field
-        MagneticFields.getInstance().removeMapOverlap();
+        //MagneticFields.getInstance().removeMapOverlap();
         FieldsLoaded = true;
         System.out.println(" TRACKING ***** ****** ****** THE TORUS IS BEING SCALED BY " + (TorusScale * 100) + "  %   *******  ****** **** ");
         System.out.println(" TRACKING ***** ****** ****** THE SOLENOID IS BEING SCALED BY " + (SolenoidScale * 100) + "  %   *******  ****** **** ");   
