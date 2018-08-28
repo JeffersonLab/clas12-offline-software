@@ -174,7 +174,7 @@ public class DCHBEngine extends DCEngine {
         SegmentFinder segFinder = new SegmentFinder();
         List<Segment> segments = segFinder.get_Segments(clusters,
                 event,
-                dcDetector);
+                dcDetector, false);
         /* 15 */
         // need 6 segments to make a trajectory
         if (segments.isEmpty()) {

@@ -104,14 +104,6 @@ public class Constants {
 
     public static double SEGSUMRESIDCUT = 0.9;
 
-    //public static final boolean OUTOFTIMEFLAG = true;
-
-    //private static boolean T2DGRID ;
-    //private static boolean CALIB;
-    //private static double TORSCALE;
-
-    private static boolean runLAYEREFFS = false;
-
     // SNR parameters -- can be optimized
     public static final  int[] SNR_RIGHTSHIFTS = {0,1,2,2,4,4};
     public static final  int[] SNR_LEFTSHIFTS  = {0,1,2,2,4,4};	
@@ -266,16 +258,6 @@ public class Constants {
             
             System.out.println("CONSTANTS LOADED!!!");
 
-    }
-
-
-    public static boolean LAYEREFFS() {
-            return runLAYEREFFS;
-    }
-
-
-    public static void setLAYEREFFS(final boolean le) {
-            runLAYEREFFS = le;
     }
 
     private static double[][][][] _T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables --- with TStart calibration 

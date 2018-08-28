@@ -27,7 +27,7 @@ public class SegmentFinder {
      * @param DcDetector DC detector utility
      */
     public void get_LayerEfficiencies(Segment seg, DataEvent event, DCGeant4Factory DcDetector) {
-        if (Constants.LAYEREFFS() == true) {
+        if (seg!=null) {
             // get all the hits to obtain layer efficiency
             if (event.hasBank("DC::tdc") != false) {
 
@@ -119,7 +119,7 @@ public class SegmentFinder {
      * @param missingHits the list of hits that are not in the cluster (should be null for time-based tracking)
      * @return the list of segments obtained from the clusters
      */
-    public List<Segment> get_Segments(List<FittedCluster> allClusters, DataEvent event, DCGeant4Factory DcDetector) {
+    public List<Segment> get_Segments(List<FittedCluster> allClusters, DataEvent event, DCGeant4Factory DcDetector, boolean runLayersEffs) {
         List<Segment> segList = new ArrayList<Segment>();
         for (FittedCluster fClus : allClusters) {
 
@@ -133,7 +133,7 @@ public class SegmentFinder {
             Segment seg = new Segment(fClus);
             seg.set_fitPlane(DcDetector);
             
-            if (Constants.LAYEREFFS() == true)
+            if (runLayersEffs == true)
                 this.get_LayerEfficiencies(seg, event, DcDetector);
             
             double sumRes=0;

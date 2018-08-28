@@ -128,7 +128,7 @@ public class DCTBEngine extends DCEngine {
 
         List<FittedCluster> pclusters = segFinder.selectTimeBasedSegments(clusters);
 
-        segments =  segFinder.get_Segments(pclusters, event, dcDetector);
+        segments =  segFinder.get_Segments(pclusters, event, dcDetector, false);
 
         if(segments.isEmpty()) { // need 6 segments to make a trajectory
             for(FittedCluster c : clusters) {					
