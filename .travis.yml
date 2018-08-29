@@ -4,6 +4,9 @@ sudo: required
 
 language: java
 
+env:
+    - CLAS12DIR /home/travis/build/JeffersonLab/clas12-offline-software/coatjava
+
 jdk:
 - oraclejdk8
 

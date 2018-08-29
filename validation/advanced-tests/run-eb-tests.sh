@@ -70,11 +70,10 @@ esac
 # set up environment
 if [ $useClara -eq 0 ]
 then
-    COAT=../../coatjava
-    source $COAT/bin/env.sh
+    COAT=$CLAS12DIR
 else
     CLARA_HOME=$PWD/clara_installation/
-    COAT=$CLARA_HOME/plugins/clas12/
+    COAT=$CLAS12DIR
     export CLARA_HOME
 fi
 
@@ -124,7 +123,7 @@ then
     # run reconstruction:
     if [ $useClara -eq 0 ]
     then
-        ../../coatjava/bin/notsouseful-util -i ${webFileStub}.hipo -o out_${webFileStub}.hipo -c 2
+        $COAT/bin/notsouseful-util -i ${webFileStub}.hipo -o out_${webFileStub}.hipo -c 2
     else
         echo "set inputDir $PWD/" > cook.clara
         echo "set outputDir $PWD/" >> cook.clara
