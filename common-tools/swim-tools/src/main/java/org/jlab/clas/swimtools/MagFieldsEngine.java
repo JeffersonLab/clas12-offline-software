@@ -13,6 +13,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
         super("MagFields","ziegler","1.0");
     }
     AtomicInteger Run = new AtomicInteger(0);
+    public static final double tilt = 25.;
     /**
      * 
      * determine torus and solenoid map name from yaml, else env, else crash
@@ -68,6 +69,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
         }
         Swimmer.setMagneticFieldsScales(bank.getFloat("solenoid", 0), bank.getFloat("torus", 0), shift);
         
+        //FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
         return true;
     }
 
