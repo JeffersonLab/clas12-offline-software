@@ -140,7 +140,7 @@ then
 fi
 
 # run Event Builder tests:
-java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath2 -DINPUTFILE=out_${webFileStub}.hipo org.junit.runner.JUnitCore eb.EBTwoTrackTest
+java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath -DINPUTFILE=out_${webFileStub}.hipo org.junit.runner.JUnitCore eb.EBTwoTrackTest
 if [ $? != 0 ] ; then echo "EBTwoTrackTest unit test failure" ; exit 1 ; else echo "EBTwoTrackTest passed unit tests" ; fi
 
 exit 0
