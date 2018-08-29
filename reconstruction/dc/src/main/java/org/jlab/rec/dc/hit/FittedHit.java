@@ -6,6 +6,7 @@ import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.dc.trajectory.StateVec;
+import org.jlab.service.dc.DCEngine;
 import org.jlab.utils.groups.IndexedTable;
 /**
  * A hit that was used in a fitted cluster. It extends the Hit class and
@@ -589,7 +590,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 throw new RuntimeException("invalid region");
         }    
         
-        double MaxSag = Constants.getMCDIST()*A*C*wire*wire*Math.cos(25.)*Math.cos(30.);
+        double MaxSag = Constants.getMCDIST()*A*C*wire*wire*Math.cos(Math.toRadians(DCEngine.tilt))*Math.cos(Math.toRadians(30.));
         
         double delta_x = MaxSag*(1.-y/(0.5*wireLen))*(1.-y/(0.5*wireLen));
         

@@ -31,7 +31,7 @@ public class DCEngine extends ReconstructionEngine {
         super(name,"ziegler","5.0");
     }
    
-
+    public static final double tilt = 25.;
     public void setStartTimeOption() {
         // Load config
         String useSTTConf = this.getEngineConfigString("useStartTime");

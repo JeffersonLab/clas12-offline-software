@@ -7,6 +7,7 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
+import org.jlab.service.dc.DCEngine;
 
 /**
  * The crosses are objects used to find tracks and are characterized by a 3-D
@@ -328,8 +329,8 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
      * coordinate system
      */
     public Point3D getCoordsInSector(double X, double Y, double Z) {
-        double rz = -X * Math.sin(Math.toRadians(25.)) + Z * Math.cos(Math.toRadians(25.));
-        double rx = X * Math.cos(Math.toRadians(25.)) + Z * Math.sin(Math.toRadians(25.));
+        double rz = -X * Math.sin(Math.toRadians(DCEngine.tilt)) + Z * Math.cos(Math.toRadians(DCEngine.tilt));
+        double rx = X * Math.cos(Math.toRadians(DCEngine.tilt)) + Z * Math.sin(Math.toRadians(DCEngine.tilt));
 
         return new Point3D(rx, Y, rz);
     }
@@ -354,8 +355,8 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
         double rx = X * Math.cos((this.get_Sector() - 1) * Math.toRadians(-60.)) - Y * Math.sin((this.get_Sector() - 1) * Math.toRadians(-60.));
         double ry = X * Math.sin((this.get_Sector() - 1) * Math.toRadians(-60.)) + Y * Math.cos((this.get_Sector() - 1) * Math.toRadians(-60.));
        
-        double rtz = -rx * Math.sin(Math.toRadians(-25.)) + Z * Math.cos(Math.toRadians(-25.));
-        double rtx = rx * Math.cos(Math.toRadians(-25.)) + Z * Math.sin(Math.toRadians(-25.));
+        double rtz = -rx * Math.sin(Math.toRadians(-DCEngine.tilt)) + Z * Math.cos(Math.toRadians(-DCEngine.tilt));
+        double rtx = rx * Math.cos(Math.toRadians(-DCEngine.tilt)) + Z * Math.sin(Math.toRadians(-DCEngine.tilt));
          
         return new Point3D(rtx, ry, rtz);
     }
