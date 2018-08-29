@@ -7,10 +7,6 @@ YELLOW='\033[0;33m'       # Yellow
 BLUE='\033[0;34m'         # Blue
 PURPLE='\033[0;35m'       # Purple
 
-export MALLOC_ARENA_MAX=1
-export TORUSMAP=Symm_torus_r2501_phi16_z251_24Apr2018.dat
-export SOLENOIDMAP=Symm_solenoid_r601_phi1_z1201_13June2018.dat
-
 if [ -z ${CLAS12DIR+x} ];
   then
     if [ -z ${CLARA_HOME+x} ];
@@ -37,5 +33,6 @@ if [ -z ${CLAS12DIR+x} ];
     echo +-------------------------------------------------------------------------
     echo -en "${NC}";
 fi
+source $CLAS12DIR/bin/env.sh
 
 java -Xmx1024m -Xms256m -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/services/*" org.jlab.display.ec.ECPion $*

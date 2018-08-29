@@ -1,5 +1,4 @@
 #!/bin/bash
-#!/bin/bash
 
 NC='\033[0m'              # No Color
 RED='\033[0;31m'          # Red
@@ -7,10 +6,6 @@ GREEN='\033[0;32m'        # Green
 YELLOW='\033[0;33m'       # Yellow
 BLUE='\033[0;34m'         # Blue
 PURPLE='\033[0;35m'       # Purple
-
-export MALLOC_ARENA_MAX=1
-export TORUSMAP=Symm_torus_r2501_phi16_z251_24Apr2018.dat
-export SOLENOIDMAP=Symm_solenoid_r601_phi1_z1201_13June2018.dat
 
 if [ -z ${CLAS12DIR+x} ];
   then
@@ -38,6 +33,7 @@ if [ -z ${CLAS12DIR+x} ];
     echo +-------------------------------------------------------------------------
     echo -en "${NC}";
 fi
+source $CLAS12DIR/bin/env.sh
 
 #--------------------------------------------------------------
 # Adding supporting COAT jar files
