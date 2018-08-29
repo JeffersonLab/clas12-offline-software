@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export CLAS12DIR=/home/travis/build/JeffersonLab/clas12-offline-software/coatjava
+
 webDir=http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/eb
 webVersion=4a.2.3-fid-r10
 webDir=$webDir/$webVersion
@@ -77,12 +79,10 @@ else
     export CLARA_HOME
 fi
 
-classPath="$COAT/lib/services/*:$COAT/lib/clas/*:$COAT/lib/utils/*:../lib/*:src/"
-
-classPath2="../../coatjava/lib/services/*:../../coatjava/lib/clas/*:../../coatjava/lib/utils/*:../lib/*:src/"
+classPath="$COAT/lib/services/*:$COAT/lib/clas/*:$COAT/lib/utils/*:$COAT/../validation/lib/*:../lib/*:src/"
 
 # make sure test code compiles before anything else:
-javac -cp $classPath2 src/eb/EBTwoTrackTest.java
+javac -cp $classPath src/eb/EBTwoTrackTest.java
 if [ $? != 0 ] ; then echo "EBTwoTrackTest compilation failure" ; exit 1 ; fi
 
 # download and setup dependencies, run reconstruction:
