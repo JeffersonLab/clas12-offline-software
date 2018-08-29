@@ -4,12 +4,14 @@ public class RotatedCompositeProbe extends CompositeProbe {
 	
 	
 	// the angle in degrees for rotating between tilted ans sector CS
-	private final double _angle = -25.0;
-	private final double _sin25 = Math.sin(Math.toRadians(_angle));
-	private final double _cos25 = Math.cos(Math.toRadians(_angle));
+	public double _angle = 25.0;
+	private final double _sin25 ;
+	private final double _cos25 ;
 
 	public RotatedCompositeProbe(RotatedCompositeField field) {
-		super(field);
+            super(field);
+            _sin25 = Math.sin(Math.toRadians(-_angle));
+            _cos25 = Math.cos(Math.toRadians(-_angle));
 	}
 	
 	/**
