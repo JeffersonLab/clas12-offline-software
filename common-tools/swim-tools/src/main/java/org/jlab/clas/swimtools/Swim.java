@@ -46,8 +46,6 @@ public class Swim {
         PC = Swimmer.getProbeCollection(Thread.currentThread());
         if (PC == null) {
             PC = new ProbeCollection();
-            PC.RCP._angle = MagFieldsEngine.tilt;
-            Plane._angle = MagFieldsEngine.tilt;
             Swimmer.put(Thread.currentThread(), PC);
         }
     }
