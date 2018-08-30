@@ -8,7 +8,7 @@ package cnuphys.swim.util;
 public class Plane {
 	
 	// the angle in degrees for rotating between tilted and sector CS
-	public static double _angle = 25.0;
+	private static double _angle = 25.0;
 	private static double _sin25 = Math.sin(Math.toRadians(_angle));
 	private static double _cos25 = Math.cos(Math.toRadians(_angle));
 
