@@ -21,6 +21,7 @@ import org.jlab.rec.dc.Constants;
 import org.jlab.utils.options.OptionParser;
 
 import org.jlab.groot.data.H1F;
+import org.jlab.groot.data.TDirectory;
 import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -603,6 +604,32 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         can12.update();
 	}
     
+    public void saveHistosToFile(String fileName) {
+        // TXT table summary FILE //
+        TDirectory dir = new TDirectory();
+        String folder = "/LayerEffs";
+        dir.mkdir(folder);
+        dir.cd(folder);
+                
+        for (int i = 0; i < 6; i++) {
+            dir.addDataSet(LayerEffs1.get(new Coordinate(i)));
+            dir.addDataSet(LayerEffs2.get(new Coordinate(i)));
+            dir.addDataSet(LayerEffs3.get(new Coordinate(i)));
+            dir.addDataSet(LayerEffs4.get(new Coordinate(i)));
+            dir.addDataSet(LayerEffs5.get(new Coordinate(i)));
+            dir.addDataSet(LayerEffs6.get(new Coordinate(i)));
+            dir.addDataSet(LayerEffsTrkD1.get(new Coordinate(i)));
+            dir.addDataSet(LayerEffsTrkD2.get(new Coordinate(i)));
+            dir.addDataSet(LayerEffsTrkD3.get(new Coordinate(i)));
+            dir.addDataSet(LayerEffsTrkD4.get(new Coordinate(i)));
+            dir.addDataSet(LayerEffsTrkD5.get(new Coordinate(i)));
+            dir.addDataSet(LayerEffsTrkD6.get(new Coordinate(i)));
+        }
+        System.out.println("Saving histograms to file " + fileName);
+        dir.writeFile(fileName);
+    }
+   
+   
     public static void main(String[] args) {
         JFrame frame = new JFrame("DC ANALYSIS");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -641,6 +668,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
                     tm.drawPlots();
             }
             tm.drawPlots();
+            tm.saveHistosToFile("dclayereffs.hipo");
         }
     }
    
