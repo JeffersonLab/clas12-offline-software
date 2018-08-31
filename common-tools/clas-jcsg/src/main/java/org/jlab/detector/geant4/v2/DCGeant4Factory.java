@@ -70,6 +70,7 @@ final class DCdatabase {
             backgap[ireg] = cp.getDouble(dcdbpath + "region/backgap", ireg)*Length.cm;
             thopen[ireg] = Math.toRadians(cp.getDouble(dcdbpath + "region/thopen", ireg));
             thtilt[ireg] = Math.toRadians(cp.getDouble(dcdbpath + "region/thtilt", ireg));
+            
         }
         for (int isuper = 0; isuper < nSupers; isuper++) {
             thmin[isuper] = Math.toRadians(cp.getDouble(dcdbpath + "superlayer/thmin", isuper));
@@ -82,6 +83,9 @@ final class DCdatabase {
 
             superwidth[isuper] = wpdist[isuper] * (nsenselayers[isuper] + nguardlayers[isuper] - 1) * cellthickness[isuper];
         }
+        //thtilt[0]-= Math.toRadians(0.2);
+        //thtilt[1]-= Math.toRadians(0.2);
+        //thtilt[2]-= Math.toRadians(0.5);
     }
 
     public double dist2tgt(int ireg) {
@@ -191,14 +195,16 @@ final class Wire {
     private double w2tgt;
 
     private void findEnds() {
+        // define vector from wire midpoint to chamber tip (z is wrong!!)
         Vector3d vnum = new Vector3d(0, dbref.xdist(ireg), 0);
         vnum.sub(midpoint);
 
         double copen = Math.cos(dbref.thopen(ireg) / 2.0);
         double sopen = Math.sin(dbref.thopen(ireg) / 2.0);
 
-        Vector3d lnorm = new Vector3d(copen, sopen, 0);
-        Vector3d rnorm = new Vector3d(-copen, sopen, 0);
+        // define unit vector normal to the sides of the chamber and pointing inside
+        Vector3d rnorm = new Vector3d(copen, sopen, 0);
+        Vector3d lnorm = new Vector3d(-copen, sopen, 0);
 
         double wlenl = vnum.dot(lnorm) / direction.dot(lnorm);
         leftend = direction.times(wlenl).add(midpoint);
@@ -213,12 +219,14 @@ final class Wire {
         this.iwire = iwire;
         this.ireg = isuper / 2;
 
+        // calculate first-wire distance from target
         w2tgt = dbref.dist2tgt(ireg);
         if (isuper % 2 > 0) {
             w2tgt += dbref.superwidth(isuper - 1) + dbref.midgap(ireg);
         }
         w2tgt /= Math.cos(dbref.thtilt(ireg) - dbref.thmin(isuper));
 
+        // y0 and z0 in the lab for the first wire of the layer
         y0mid = w2tgt * Math.sin(dbref.thmin(isuper));
         z0mid = w2tgt * Math.cos(dbref.thmin(isuper));
 
@@ -229,21 +237,24 @@ final class Wire {
         double dw = 4 * Math.cos(Math.toRadians(30)) * dbref.wpdist(isuper);
         double dw2 = dw / cster;
 
+        // hh: wire distance in the wire plane
         double hh = (iwire + ((double)(ilayer % 2)) / 2.0) * dw2;
         if(ireg==2 && isSensitiveWire(isuper, ilayer, iwire) && dbref.getMinistaggerStatus())
                 hh += ((ilayer%2)*2-1)*0.03;
-                
+        
+        // ll: layer distance
         double tt = dbref.cellthickness(isuper) * dbref.wpdist(isuper);
         double ll = ilayer * tt;
 
+        // wire x=0 coordinates in the lab
         double ym = y0mid + ll * stilt + hh * ctilt;
         double zm = z0mid + ll * ctilt - hh * stilt;
 
+        // wire midpoint in the lab
         midpoint = new Vector3d(0, ym, zm);
         direction = new Vector3d(1, 0, 0);
         direction.rotateZ(dbref.thster(isuper));
         direction.rotateX(-dbref.thtilt(ireg));
-
         findEnds();
 
         if (leftend.y < rightend.y) {
@@ -307,8 +318,14 @@ public final class DCGeant4Factory extends Geant4Factory {
     private final double y_enlargement = 3.65;
     private final double z_enlargement = -2.96;
     private final double microgap = 0.01;
+    private final double tiltTSC25 = Math.toRadians(25.);
     
     private final Vector3d[][][] wireMids;
+    private final Vector3d[][][] wireLefts;
+    private final Vector3d[][][] wireRights;
+    private final Vector3d[][][] wireMidsTSC25;
+    private final Vector3d[][][] wireLeftsTSC25;
+    private final Vector3d[][][] wireRightsTSC25;
     private final Vector3d[][] layerMids;
     private final Vector3d[] regionMids;
 
@@ -340,11 +357,22 @@ public final class DCGeant4Factory extends Geant4Factory {
         properties.put("author", "mestayer");
         properties.put("date", "05/08/16");
 
-        wireMids = new Vector3d[dbref.nsuperlayers()][][];
+        // define wire and layer points in tilted coordinate frame (z axis is perpendicular to the chamber, y is along the wire)
+        wireMids  = new Vector3d[dbref.nsuperlayers()][][];
+        wireLefts  = new Vector3d[dbref.nsuperlayers()][][];
+        wireRights = new Vector3d[dbref.nsuperlayers()][][];
+        wireMidsTSC25  = new Vector3d[dbref.nsuperlayers()][][];
+        wireLeftsTSC25  = new Vector3d[dbref.nsuperlayers()][][];
+        wireRightsTSC25 = new Vector3d[dbref.nsuperlayers()][][];
         layerMids = new Vector3d[dbref.nsuperlayers()][];
         for(int isuper=0; isuper<dbref.nsuperlayers(); isuper++) {
-            wireMids[isuper] = new Vector3d[dbref.nsenselayers(isuper)][dbref.nsensewires()];
-            layerMids[isuper] = new Vector3d[dbref.nsenselayers(isuper)];
+            wireMids[isuper]   = new Vector3d[dbref.nsenselayers(isuper)][dbref.nsensewires()];
+            wireLefts[isuper]  = new Vector3d[dbref.nsenselayers(isuper)][dbref.nsensewires()];
+            wireRights[isuper] = new Vector3d[dbref.nsenselayers(isuper)][dbref.nsensewires()];
+            wireMidsTSC25[isuper]   = new Vector3d[dbref.nsenselayers(isuper)][dbref.nsensewires()];
+            wireLeftsTSC25[isuper]  = new Vector3d[dbref.nsenselayers(isuper)][dbref.nsensewires()];
+            wireRightsTSC25[isuper] = new Vector3d[dbref.nsenselayers(isuper)][dbref.nsensewires()];
+            layerMids[isuper]  = new Vector3d[dbref.nsenselayers(isuper)];
 
             for(int ilayer=0; ilayer<dbref.nsenselayers(isuper); ilayer++) {
                 Wire firstWire = new Wire(isuper, ilayer+1, 1);
@@ -356,7 +384,13 @@ public final class DCGeant4Factory extends Geant4Factory {
                 for(int iwire=0; iwire<dbref.nsensewires(); iwire++) {
                     Wire ww = new Wire(isuper, ilayer+1, iwire+1);
                     wireMids[isuper][ilayer][iwire] = ww.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
-                }
+                    wireLefts[isuper][ilayer][iwire] = ww.left().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
+                    wireRights[isuper][ilayer][iwire] = ww.right().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
+                    wireMidsTSC25[isuper][ilayer][iwire] = ww.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-tiltTSC25);
+                    wireLeftsTSC25[isuper][ilayer][iwire] = ww.left().rotateZ(Math.toRadians(-90.0)).rotateY(-tiltTSC25);
+                    wireRightsTSC25[isuper][ilayer][iwire] = ww.right().rotateZ(Math.toRadians(-90.0)).rotateY(-tiltTSC25);
+//                    System.out.println((isuper+1) + " " + (ilayer+1) + " " + (iwire+1) + " " + wireLefts[isuper][ilayer][iwire] + " " + wireMids[isuper][ilayer][iwire] + " " + wireRights[isuper][ilayer][iwire]);
+               }
             }
         }
 
@@ -369,19 +403,15 @@ public final class DCGeant4Factory extends Geant4Factory {
     }
 
     public Vector3d getWireMidpoint(int isuper, int ilayer, int iwire) {
-        return wireMids[isuper][ilayer][iwire];
+        return wireMidsTSC25[isuper][ilayer][iwire];
     }
 
-    //this methods should be optimized if we decide to use them in reconstruction
     public Vector3d getWireLeftend(int isuper, int ilayer, int iwire) {
-        Wire ww = new Wire(isuper, ilayer+1, iwire+1);
-        return ww.left().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
+        return wireLeftsTSC25[isuper][ilayer][iwire];
     }
 
-    //this methods should be optimized if we decide to use them in reconstruction
     public Vector3d getWireRightend(int isuper, int ilayer, int iwire) {
-        Wire ww = new Wire(isuper, ilayer+1, iwire+1);
-        return ww.right().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
+        return wireRightsTSC25[isuper][ilayer][iwire];
     }
 
     //this methods should be optimized if we decide to use them in reconstruction
@@ -481,26 +511,7 @@ public final class DCGeant4Factory extends Geant4Factory {
             for(int iwire=0;iwire<nsgwires+1;iwire+=nsgwires/30){
         Wire regw = new Wire(isup,il,iwire);
         System.out.println("line("+regw.left()+", "+regw.right()+");");
-
             }
     }
     */
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
