@@ -13,7 +13,6 @@ public class MagFieldsEngine extends ReconstructionEngine {
         super("MagFields","ziegler","1.0");
     }
     AtomicInteger Run = new AtomicInteger(0);
-    public static final double tilt = 25.;
     /**
      * 
      * determine torus and solenoid map name from yaml, else env, else crash
