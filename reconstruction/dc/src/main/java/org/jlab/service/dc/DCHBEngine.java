@@ -361,7 +361,7 @@ public class DCHBEngine extends DCEngine {
 
     public static void main(String[] args) {
 
-        String inputFile = "/Users/ziegler/Desktop/Work/Release/devel/swim-devel-merge/clas12-offline-software/validation/advanced-tests/out_twoTrackEvents_809.hipo";
+        String inputFile = "/Users/ziegler/Desktop/Work/validation/infiles/straight.hipo";
         MagFieldsEngine enf = new MagFieldsEngine();
         enf.init();
 
@@ -379,7 +379,7 @@ public class DCHBEngine extends DCEngine {
         HipoDataSync writer = new HipoDataSync();
         //Writer
 
-        String outputFile = "/Users/ziegler/Desktop/Work/Files/FMTDevel/gemc/SimuTag_4a.2.4/lumiclas12_pi_cook.hipo";
+        String outputFile = "/Users/ziegler/Desktop/Work/Files/test.hipo";
 
         writer.open(outputFile);
         long t1 = 0;
@@ -398,7 +398,9 @@ public class DCHBEngine extends DCEngine {
             en2.processDataEvent(event);
             writer.writeEvent(event);
             System.out.println("PROCESSED  EVENT " + event.getBank("RUN::config").getInt("event", 0));
-
+            
+            if(counter>40)
+                break;
         }
         writer.close();
         double t = System.currentTimeMillis() - t1;

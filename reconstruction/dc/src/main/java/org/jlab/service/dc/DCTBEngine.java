@@ -188,7 +188,9 @@ public class DCTBEngine extends DCEngine {
             TrackArray[HBtrk.get_Id()-1] = HBtrk; 
             TrackArray[HBtrk.get_Id()-1].set_Status(0);
         }
-        
+        if(TrackArray==null) {
+            return true; // HB tracks not saved correctly
+        }
         for(Segment seg : segments) {
             TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].get_ListOfHBSegments().add(seg); 
             if(seg.get_Status()==1)
@@ -199,7 +201,7 @@ public class DCTBEngine extends DCEngine {
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         TrajectoryFinder trjFind = new TrajectoryFinder();
         for(int i = 0; i < TrackArray.length; i++) {
-            if(TrackArray[i].get_ListOfHBSegments()==null || TrackArray[i].get_ListOfHBSegments().size()<4)
+            if(TrackArray[i]==null || TrackArray[i].get_ListOfHBSegments()==null || TrackArray[i].get_ListOfHBSegments().size()<4)
                 continue;
             TrackArray[i].set_MissingSuperlayer(get_Status(TrackArray[i]));
             TrackArray[i].addAll(crossMake.find_Crosses(TrackArray[i].get_ListOfHBSegments(), dcDetector));
@@ -210,12 +212,11 @@ public class DCTBEngine extends DCEngine {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());
             //}
             KFitter kFit = new KFitter(TrackArray[i], dcDetector, true, dcSwim);
-            //kFit.totNumIter=30;
-            
+           
             StateVec fn = new StateVec();
             kFit.runFitter(TrackArray[i].get(0).get_Sector());
             
-            if(kFit.setFitFailed==false && kFit.finalStateVec!=null) {
+            if(kFit.setFitFailed==false && kFit.finalStateVec!=null) { 
                 // set the state vector at the last measurement site
                 fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
                 //set the track parameters if the filter does not fail
@@ -229,7 +230,7 @@ public class DCTBEngine extends DCEngine {
                 TrackArray[i].set_Trajectory(kFit.kfStateVecsAlongTrajectory);
                 TrackArray[i].set_FitConvergenceStatus(kFit.ConvStatus);
                 TrackArray[i].set_Id(TrackArray[i].size()+1);
-                TrackArray[i].set_CovMat(kFit.finalCovMat.covMat);
+                TrackArray[i].set_CovMat(kFit.finalCovMat.covMat); 
                 if(TrackArray[i].get_Vtx0().toVector3D().mag()>500)
                     continue;
                 trkcands.add(TrackArray[i]);

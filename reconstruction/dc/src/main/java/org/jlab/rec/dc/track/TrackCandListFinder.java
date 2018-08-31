@@ -224,7 +224,7 @@ public class TrackCandListFinder {
                     cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane);
                     // initialize the fitter with the candidate track
                     KFitter kFit = new KFitter(cand, DcDetector, false, dcSwim);
-                    kFit.totNumIter = 2;
+                    kFit.totNumIter = 1;
 
                     if (debug) startTime = System.currentTimeMillis();
                     kFit.runFitter(cand.get(0).get_Sector());
@@ -535,7 +535,6 @@ public class TrackCandListFinder {
 
                 X0 = FitPars1.intercept();
                 Y0 = FitPars2.intercept();
-
                 Point3D trkR1X = new Point3D(FitPars1.slope() * x[0] + FitPars1.intercept(),
                         FitPars2.slope() * x[0] + FitPars2.intercept(), x[0]);
                 Point3D trkR3X = new Point3D(FitPars1.slope() * x[2] + FitPars1.intercept(),
@@ -637,7 +636,6 @@ public class TrackCandListFinder {
 
         //swimming to a ref point upstream of the first DC region
         double[] VecAtTarIn = dcSwim.SwimToPlaneTiltSecSys(cand.get(0).get_Sector(), 180);
-
         if (VecAtTarIn == null) {
             cand.fit_Successful = false;
             return;
@@ -679,7 +677,6 @@ public class TrackCandListFinder {
                 -R3TrkMomentum.y(),
                 -R3TrkMomentum.z(),
                 -cand.get_Q());
-
         // recalc new vertex using plane stopper
         //int sector = cand.get(2).get_Sector();
         int sector = cand.get(cand.size() - 1).get_Sector();

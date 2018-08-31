@@ -5,12 +5,15 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.math3.util.FastMath;
 import org.jlab.clas.swimtools.MagFieldsEngine;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.swimtools.Swimmer;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
 
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.prim.Line3D;
@@ -20,7 +23,9 @@ import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.geant4.v2.PCALGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
+import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geometry.prim.Line3d;
+import org.jlab.rec.dc.Constants;
 
 import org.jlab.utils.options.OptionParser;
 
@@ -45,18 +50,21 @@ public class TrackDictionaryMaker extends DCEngine{
         super.LoadTables();
         return true;
     }
-    public void processFile(float torScale, float solScale) {
+    public void processFile(float torScale, float solScale, int charge, float pBinSize, float phiMin, float phiMax, float vz) {
         Swimmer.setMagneticFieldsScales(torScale, solScale, -1.9);
         Swim sw = new Swim();
-        PrintWriter pwi = null;
-        PrintWriter pwo = null;
+        PrintWriter pw = null;
         try {
-            
-            pwi = new PrintWriter("PosTracksDicTorus"+String.valueOf(torScale)+"Solenoid"+String.valueOf(solScale)+".txt");
-            pwo = new PrintWriter("NegTracksDicTorus"+String.valueOf(torScale)+"Solenoid"+String.valueOf(solScale)+".txt");
-            this.ProcessTracks(pwi, pwo, dcDetector, ftofDetector, pcalDetector, sw);
-            pwi.close();
-            pwo.close();
+            System.out.println(" MAKING ROADS for "+"TracksDicTorus"+String.valueOf(torScale)+"Solenoid"+String.valueOf(solScale)
+                    +"Charge"+String.valueOf(charge)+"InvPBinSizeiGeV"+String.valueOf(pBinSize)
+                    +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax)
+                    +"VzCm" +String.valueOf(vz));
+            pw = new PrintWriter("TracksDicTorus"+String.valueOf(torScale)+"Solenoid"+String.valueOf(solScale)
+                    +"Charge"+String.valueOf(charge)+"InvPBinSizeiGeV"+String.valueOf(pBinSize)
+                    +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax)
+                    +"VzCm" +String.valueOf(vz)+".txt");
+            this.ProcessTracks(pw, dcDetector, ftofDetector, pcalDetector, sw, charge, pBinSize, phiMin, phiMax, vz);
+            pw.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(TrackDictionaryMaker.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -185,194 +193,177 @@ public class TrackDictionaryMaker extends DCEngine{
     private List<Integer> Wl6 = new ArrayList<Integer>();
     private String entry;
     
-    public void ProcessTracks(PrintWriter pwi, PrintWriter pwo,DCGeant4Factory dcDetector, FTOFGeant4Factory ftofDetector, PCALGeant4Factory pcalDetector, Swim sw) {
+    public void ProcessTracks(PrintWriter pw,DCGeant4Factory dcDetector, FTOFGeant4Factory ftofDetector, PCALGeant4Factory pcalDetector, Swim sw, int q, float pBinSize, float PhiMin, float PhiMax, float Vz) {
         double[] swimVal = new double[8];
-        for(int i = 0; i < 2; i++) {
-            int q = (int) Math.pow(-1, i);
+        //for(int i = 0; i < 2; i++) {
+            //int q = (int) Math.pow(-1, i);
+            if(Math.abs(q)==1) {
             double invPMin = 1. / 10.;
             double invPMax = 1./0.500;
             double invPRange = invPMax - invPMin;
-            double invPBinSize = 0.05;
+            double invPBinSize = (double) pBinSize;
             int nBinsinvP = (int) (invPRange / invPBinSize) + 1;
 
-            double phiMin = 0;
-            double phiMax = 360;
+            double phiMin = (double) PhiMin;
+            double phiMax = (double) PhiMax;
             double phiRange = phiMax - phiMin;
-            double phiBinSize = 1.;
+            double phiBinSize = 2.;
             int nBinsPhi = (int) (phiRange / phiBinSize) + 1;
             double thetaMin = 5;
             double thetaMax = 41;
             double thetaRange = thetaMax - thetaMin;
             double thetaBinSize = 0.5;
             int nBinsTheta = (int) (thetaRange / thetaBinSize) + 1;
-            double vzMin = -2.5;
-            double vzMax = 2.5;
-            double vzRange = vzMin - vzMax;
-            double vzBinSize = 0.1;
-            int nBinsVz = (int) (vzRange / vzBinSize) + 1;
+            //double vzMin = -2.5;
+            //double vzMax = 2.5;
+            //double vzRange = vzMax - vzMin;
+            //double vzBinSize = 0.1;
+            //int nBinsVz = (int) (vzRange / vzBinSize) + 1;
+            double vz = (double) Vz;    
+            //for (int nvz = 0; nvz < nBinsVz; nvz++) {
+            //    double vz = vzMin + (double) nvz * vzBinSize; 
             
-            for (int nvz = 0; nvz < nBinsVz; nvz++) {
-                double vz = vzMin + (double) nvz * vzBinSize; 
                 
-                for (int nip = 0; nip < nBinsinvP; nip++) {
-                    double invP = invPMin + (double) nip * invPBinSize;
-                    double p = 1. / invP;
+            for (int nip = 0; nip < nBinsinvP; nip++) {
+                double invP = invPMin + (double) nip * invPBinSize;
+                double p = 1. / invP;
 
-                    for (int nth = 0; nth < nBinsTheta; nth++) {
+                for (int nth = 0; nth < nBinsTheta; nth++) {
 
-                        double theta = thetaMin + (double) nth * thetaBinSize;
+                    double theta = thetaMin + (double) nth * thetaBinSize;
 
-                        for (int nph = 0; nph < nBinsPhi; nph++) {
+                    for (int nph = 0; nph < nBinsPhi; nph++) {
 
-                            double phi = phiMin + (double) nph * phiBinSize; 
-                        
-                            double px = p * Math.cos(Math.toRadians(phi)) * Math.sin(Math.toRadians(theta));
-                            double py = p * Math.sin(Math.toRadians(phi)) * Math.sin(Math.toRadians(theta));
-                            double pz = p * Math.cos(Math.toRadians(theta));
-                            sw.SetSwimParameters(0, 0, vz, px, py, pz, q);
-                            swimVal = sw.SwimToPlaneLab(175.);
-                            int sector = this.getSector(swimVal[0], swimVal[1], swimVal[2]);
+                        double phi = phiMin + (double) nph * phiBinSize; 
 
-                            //Point3D rotatedP = tw.rotateToTiltedCoordSys(new Point3D(px, py, pz));
-                            Point3D rotatedP = this.rotateToTiltedCoordSys(new Point3D(swimVal[3], swimVal[4], swimVal[5]));
-                            Point3D rotatedX = this.rotateToTiltedCoordSys(new Point3D(swimVal[0], swimVal[1], swimVal[2]));
+                        double px = p * Math.cos(Math.toRadians(phi)) * Math.sin(Math.toRadians(theta));
+                        double py = p * Math.sin(Math.toRadians(phi)) * Math.sin(Math.toRadians(theta));
+                        double pz = p * Math.cos(Math.toRadians(theta));
+                        sw.SetSwimParameters(0, 0, vz, px, py, pz, q);
+                        swimVal = sw.SwimToPlaneLab(175.);
+                        int sector = this.getSector(swimVal[0], swimVal[1], swimVal[2]);
 
-                            //List<Integer> Wi = new ArrayList<Integer>();
-                            //List<Integer> Wf = new ArrayList<Integer>();
-                            this.Wl1.clear();
-                            this.Wl2.clear();
-                            this.Wl3.clear();
-                            this.Wl4.clear();
-                            this.Wl5.clear();
-                            this.Wl5.clear();
-                            this.entry = "";
-                            for (int sl = 0; sl < 6; sl++) {
-                                sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                                this.swimtoLayer(sector, 0, sl, Wl1, dcDetector, sw);        
-                                sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                                this.swimtoLayer(sector, 1, sl, Wl2, dcDetector, sw);        
-                                sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                                this.swimtoLayer(sector, 2, sl, Wl3, dcDetector, sw);        
-                                sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                                this.swimtoLayer(sector, 3, sl, Wl4, dcDetector, sw);        
-                                sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                                this.swimtoLayer(sector, 4, sl, Wl5, dcDetector, sw);        
-                                sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
-                                this.swimtoLayer(sector, 5, sl, Wl6, dcDetector, sw);
+                        //Point3D rotatedP = tw.rotateToTiltedCoordSys(new Point3D(px, py, pz));
+                        Point3D rotatedP = this.rotateToTiltedCoordSys(new Point3D(swimVal[3], swimVal[4], swimVal[5]));
+                        Point3D rotatedX = this.rotateToTiltedCoordSys(new Point3D(swimVal[0], swimVal[1], swimVal[2]));
 
-                                /*
-                                double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(2).getComponent(0).getMidpoint().z());
-                                Line3D trkLine = new Line3D(new Point3D(trk[0], trk[1], trk[2]), new Vector3D(trk[3], trk[4], trk[5]));
-                                double wMax = Math.abs(dcDetector.getSector(0).getSuperlayer(sl).getLayer(0).getComponent(0).getMidpoint().x()
-                                        - dcDetector.getSector(0).getSuperlayer(sl).getLayer(0).getComponent(1).getMidpoint().x()) / 2.;
+                        //List<Integer> Wi = new ArrayList<Integer>();
+                        //List<Integer> Wf = new ArrayList<Integer>();
+                        this.Wl1.clear();
+                        this.Wl2.clear();
+                        this.Wl3.clear();
+                        this.Wl4.clear();
+                        this.Wl5.clear();
+                        this.Wl6.clear();
+                        this.entry = "";
+                        for (int sl = 0; sl < 6; sl++) {
+                            sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
+                            this.swimtoLayer(sector, 0, sl, Wl1, dcDetector, sw);        
+                            sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
+                            this.swimtoLayer(sector, 1, sl, Wl2, dcDetector, sw);        
+                            sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
+                            this.swimtoLayer(sector, 2, sl, Wl3, dcDetector, sw);        
+                            sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
+                            this.swimtoLayer(sector, 3, sl, Wl4, dcDetector, sw);        
+                            sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
+                            this.swimtoLayer(sector, 4, sl, Wl5, dcDetector, sw);        
+                            sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), q);
+                            this.swimtoLayer(sector, 5, sl, Wl6, dcDetector, sw);
 
-                                double min = 1000;
-                                int w = -1;
-                                for (int i = 0; i < 112; i++) {
-                                    Line3D wl = dcDetector.getSector(0).getSuperlayer(sl).getLayer(2).getComponent(i).getLine();
-                                    if (trkLine.distance(wl).length() < min) {
-                                        min = trkLine.distance(wl).length();
-                                        w = i;
-                                    }
-                                }
+                            /*
+                            double[] trk = sw.SwimToPlane(dcDetector.getSector(0).getSuperlayer(sl).getLayer(2).getComponent(0).getMidpoint().z());
+                            Line3D trkLine = new Line3D(new Point3D(trk[0], trk[1], trk[2]), new Vector3D(trk[3], trk[4], trk[5]));
+                            double wMax = Math.abs(dcDetector.getSector(0).getSuperlayer(sl).getLayer(0).getComponent(0).getMidpoint().x()
+                                    - dcDetector.getSector(0).getSuperlayer(sl).getLayer(0).getComponent(1).getMidpoint().x()) / 2.;
 
-                                if (min < wMax) {
-                                    Wi.add(w + 1);
-                                }
-                                */
-                            }
-                            double[] trkTOF = sw.SwimToPlaneTiltSecSys(sector, 668.1);
-                            double[] trkPCAL = sw.SwimToPlaneTiltSecSys(sector, 698.8);
-
-
-                            Line3d trkLine = new Line3d(rotateToSectorCoordSys(trkTOF[0],trkTOF[1],trkTOF[2]), rotateToSectorCoordSys(trkPCAL[0], trkPCAL[1], trkPCAL[2])) ;
-
-                            List<DetHit> hits = ftofDetector.getIntersections(trkLine);
-                            List<DetHit> hits2 = pcalDetector.getIntersections(trkLine);
-
-                            if(hits.size()==0) {
-                                for(int ii =0; ii<3; ii++)
-                                    trkTOF[ii]=0;
-                            }
-                            if(hits2.size()==0) {
-                                for(int ii =0; ii<3; ii++)
-                                    trkPCAL[ii]=0;
-                            }
-
-                            int paddle = 0;
-                            if (hits != null && hits.size() > 0) {
-                                for (DetHit hit : hits) {
-                                    FTOFDetHit fhit = new FTOFDetHit(hit);
-                                    if(fhit.getLayer()==1 || fhit.getLayer()==3)
-                                        paddle = fhit.getPaddle();
+                            double min = 1000;
+                            int w = -1;
+                            for (int i = 0; i < 112; i++) {
+                                Line3D wl = dcDetector.getSector(0).getSuperlayer(sl).getLayer(2).getComponent(i).getLine();
+                                if (trkLine.distance(wl).length() < min) {
+                                    min = trkLine.distance(wl).length();
+                                    w = i;
                                 }
                             }
 
-                            if (count(Wl3) >4) {
-                                if(String.valueOf(q)+
-                                        String.valueOf(Wl1.get(0))+ String.valueOf(Wl2.get(0))+ String.valueOf(Wl3.get(0))+ String.valueOf(Wl4.get(0))+ String.valueOf(Wl5.get(0))+ String.valueOf(Wl6.get(0))+ 
-                                        String.valueOf(Wl1.get(1))+ String.valueOf(Wl2.get(1))+ String.valueOf(Wl3.get(1))+ String.valueOf(Wl4.get(1))+ String.valueOf(Wl5.get(1))+ String.valueOf(Wl6.get(1))+ 
-                                        String.valueOf(Wl1.get(2))+ String.valueOf(Wl2.get(2))+ String.valueOf(Wl3.get(2))+ String.valueOf(Wl4.get(2))+ String.valueOf(Wl5.get(2))+ String.valueOf(Wl6.get(2))+ 
-                                        String.valueOf(Wl1.get(3))+ String.valueOf(Wl2.get(3))+ String.valueOf(Wl3.get(3))+ String.valueOf(Wl4.get(3))+ String.valueOf(Wl5.get(3))+ String.valueOf(Wl6.get(3))+ 
-                                        String.valueOf(Wl1.get(4))+ String.valueOf(Wl2.get(4))+ String.valueOf(Wl3.get(4))+ String.valueOf(Wl4.get(4))+ String.valueOf(Wl5.get(4))+ String.valueOf(Wl6.get(4))+ 
-                                        String.valueOf(Wl1.get(5))+ String.valueOf(Wl2.get(5))+ String.valueOf(Wl3.get(5))+ String.valueOf(Wl4.get(5))+ String.valueOf(Wl5.get(5))+ String.valueOf(Wl6.get(5))+
-                                        String.valueOf(paddle)==entry)
-                                    continue;
-                                entry = String.valueOf(q)+
-                                        String.valueOf(Wl1.get(0))+ String.valueOf(Wl2.get(0))+ String.valueOf(Wl3.get(0))+ String.valueOf(Wl4.get(0))+ String.valueOf(Wl5.get(0))+ String.valueOf(Wl6.get(0))+ 
-                                        String.valueOf(Wl1.get(1))+ String.valueOf(Wl2.get(1))+ String.valueOf(Wl3.get(1))+ String.valueOf(Wl4.get(1))+ String.valueOf(Wl5.get(1))+ String.valueOf(Wl6.get(1))+ 
-                                        String.valueOf(Wl1.get(2))+ String.valueOf(Wl2.get(2))+ String.valueOf(Wl3.get(2))+ String.valueOf(Wl4.get(2))+ String.valueOf(Wl5.get(2))+ String.valueOf(Wl6.get(2))+ 
-                                        String.valueOf(Wl1.get(3))+ String.valueOf(Wl2.get(3))+ String.valueOf(Wl3.get(3))+ String.valueOf(Wl4.get(3))+ String.valueOf(Wl5.get(3))+ String.valueOf(Wl6.get(3))+ 
-                                        String.valueOf(Wl1.get(4))+ String.valueOf(Wl2.get(4))+ String.valueOf(Wl3.get(4))+ String.valueOf(Wl4.get(4))+ String.valueOf(Wl5.get(4))+ String.valueOf(Wl6.get(4))+ 
-                                        String.valueOf(Wl1.get(5))+ String.valueOf(Wl2.get(5))+ String.valueOf(Wl3.get(5))+ String.valueOf(Wl4.get(5))+ String.valueOf(Wl5.get(5))+ String.valueOf(Wl6.get(5))+
-                                        String.valueOf(paddle);
-                                if(i==0)
-                                    pwi.printf("%d\t%.1f\t %.1f\t %.1f\t %.1f\t"
-                                        + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                                        + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                                        + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                                        + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                                        + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                                        + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                                        +"%d\t\n",
-                                        //+ "%.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", 
-                                        q, p, theta, phi, vz,
-                                        Wl1.get(0), Wl2.get(0), Wl3.get(0), Wl4.get(0), Wl5.get(0), Wl6.get(0), 
-                                        Wl1.get(1), Wl2.get(1), Wl3.get(1), Wl4.get(1), Wl5.get(1), Wl6.get(1), 
-                                        Wl1.get(2), Wl2.get(2), Wl3.get(2), Wl4.get(2), Wl5.get(2), Wl6.get(2), 
-                                        Wl1.get(3), Wl2.get(3), Wl3.get(3), Wl4.get(3), Wl5.get(3), Wl6.get(3), 
-                                        Wl1.get(4), Wl2.get(4), Wl3.get(4), Wl4.get(4), Wl5.get(4), Wl6.get(4), 
-                                        Wl1.get(5), Wl2.get(5), Wl3.get(5), Wl4.get(5), Wl5.get(5), Wl6.get(5), 
-                                        //trkTOF[0], trkTOF[1], trkTOF[2], trkPCAL[0], trkPCAL[1], trkPCAL[2]);
-                                        paddle);
-                                if(i==1)
-                                    pwo.printf("%d\t%.1f\t %.1f\t %.1f\t %.1f\t"
-                                        + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                                        + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                                        + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                                        + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                                        + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                                        + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                                        +"%d\t\n",
-                                        //+ "%.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", 
-                                        q, p, theta, phi, vz,
-                                        Wl1.get(0), Wl2.get(0), Wl3.get(0), Wl4.get(0), Wl5.get(0), Wl6.get(0), 
-                                        Wl1.get(1), Wl2.get(1), Wl3.get(1), Wl4.get(1), Wl5.get(1), Wl6.get(1), 
-                                        Wl1.get(2), Wl2.get(2), Wl3.get(2), Wl4.get(2), Wl5.get(2), Wl6.get(2), 
-                                        Wl1.get(3), Wl2.get(3), Wl3.get(3), Wl4.get(3), Wl5.get(3), Wl6.get(3), 
-                                        Wl1.get(4), Wl2.get(4), Wl3.get(4), Wl4.get(4), Wl5.get(4), Wl6.get(4), 
-                                        Wl1.get(5), Wl2.get(5), Wl3.get(5), Wl4.get(5), Wl5.get(5), Wl6.get(5), 
-                                        //trkTOF[0], trkTOF[1], trkTOF[2], trkPCAL[0], trkPCAL[1], trkPCAL[2]);
-                                        paddle);
-                                //System.out.printf("%d\t\t%.1f\t\t %.1f\t\t %.1f\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %.1f\t\t %.1f\t\t %.1f\t\t %.1f\t\t %.1f\t\t %.1f\t\t\n", q, p, theta, phi, Wi.get(0), Wf.get(0), Wi.get(1), Wf.get(1), Wi.get(2), Wf.get(2),Wi.get(3), Wf.get(3), Wi.get(4), Wf.get(4), Wi.get(5), Wf.get(5), trkTOF[0], trkTOF[1], trkTOF[2], trkPCAL[0], trkPCAL[1], trkPCAL[2]);
-
-                                //System.out.printf("%d\t\t %.1f\t\t %.1f\t\t %.1f\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t\n",q, p, theta, phi, Wi.get(0), Wi.get(1), Wi.get(2), Wi.get(3), Wi.get(4), Wi.get(5));
-
+                            if (min < wMax) {
+                                Wi.add(w + 1);
                             }
+                            */
+                        }
+                        double[] trkTOF = sw.SwimToPlaneTiltSecSys(sector, 668.1);
+                        double[] trkPCAL = sw.SwimToPlaneTiltSecSys(sector, 698.8);
+
+
+                        Line3d trkLine = new Line3d(rotateToSectorCoordSys(trkTOF[0],trkTOF[1],trkTOF[2]), rotateToSectorCoordSys(trkPCAL[0], trkPCAL[1], trkPCAL[2])) ;
+
+                        List<DetHit> hits = ftofDetector.getIntersections(trkLine);
+                        List<DetHit> hits2 = pcalDetector.getIntersections(trkLine);
+
+                        if(hits.size()==0) {
+                            for(int ii =0; ii<3; ii++)
+                                trkTOF[ii]=0;
+                        }
+                        if(hits2.size()==0) {
+                            for(int ii =0; ii<3; ii++)
+                                trkPCAL[ii]=0;
+                        }
+
+                        int paddle = 0;
+                        if (hits != null && hits.size() > 0) {
+                            for (DetHit hit : hits) {
+                                FTOFDetHit fhit = new FTOFDetHit(hit);
+                                if(fhit.getLayer()==1 || fhit.getLayer()==3)
+                                    paddle = fhit.getPaddle();
+                            }
+                        }
+
+                        if (count(Wl3) >4) {
+                            if(String.valueOf(q)+
+                                    String.valueOf(Wl1.get(0))+ String.valueOf(Wl2.get(0))+ String.valueOf(Wl3.get(0))+ String.valueOf(Wl4.get(0))+ String.valueOf(Wl5.get(0))+ String.valueOf(Wl6.get(0))+ 
+                                    String.valueOf(Wl1.get(1))+ String.valueOf(Wl2.get(1))+ String.valueOf(Wl3.get(1))+ String.valueOf(Wl4.get(1))+ String.valueOf(Wl5.get(1))+ String.valueOf(Wl6.get(1))+ 
+                                    String.valueOf(Wl1.get(2))+ String.valueOf(Wl2.get(2))+ String.valueOf(Wl3.get(2))+ String.valueOf(Wl4.get(2))+ String.valueOf(Wl5.get(2))+ String.valueOf(Wl6.get(2))+ 
+                                    String.valueOf(Wl1.get(3))+ String.valueOf(Wl2.get(3))+ String.valueOf(Wl3.get(3))+ String.valueOf(Wl4.get(3))+ String.valueOf(Wl5.get(3))+ String.valueOf(Wl6.get(3))+ 
+                                    String.valueOf(Wl1.get(4))+ String.valueOf(Wl2.get(4))+ String.valueOf(Wl3.get(4))+ String.valueOf(Wl4.get(4))+ String.valueOf(Wl5.get(4))+ String.valueOf(Wl6.get(4))+ 
+                                    String.valueOf(Wl1.get(5))+ String.valueOf(Wl2.get(5))+ String.valueOf(Wl3.get(5))+ String.valueOf(Wl4.get(5))+ String.valueOf(Wl5.get(5))+ String.valueOf(Wl6.get(5))+
+                                    String.valueOf(paddle)==entry)
+                                continue;
+                            entry = String.valueOf(q)+
+                                    String.valueOf(Wl1.get(0))+ String.valueOf(Wl2.get(0))+ String.valueOf(Wl3.get(0))+ String.valueOf(Wl4.get(0))+ String.valueOf(Wl5.get(0))+ String.valueOf(Wl6.get(0))+ 
+                                    String.valueOf(Wl1.get(1))+ String.valueOf(Wl2.get(1))+ String.valueOf(Wl3.get(1))+ String.valueOf(Wl4.get(1))+ String.valueOf(Wl5.get(1))+ String.valueOf(Wl6.get(1))+ 
+                                    String.valueOf(Wl1.get(2))+ String.valueOf(Wl2.get(2))+ String.valueOf(Wl3.get(2))+ String.valueOf(Wl4.get(2))+ String.valueOf(Wl5.get(2))+ String.valueOf(Wl6.get(2))+ 
+                                    String.valueOf(Wl1.get(3))+ String.valueOf(Wl2.get(3))+ String.valueOf(Wl3.get(3))+ String.valueOf(Wl4.get(3))+ String.valueOf(Wl5.get(3))+ String.valueOf(Wl6.get(3))+ 
+                                    String.valueOf(Wl1.get(4))+ String.valueOf(Wl2.get(4))+ String.valueOf(Wl3.get(4))+ String.valueOf(Wl4.get(4))+ String.valueOf(Wl5.get(4))+ String.valueOf(Wl6.get(4))+ 
+                                    String.valueOf(Wl1.get(5))+ String.valueOf(Wl2.get(5))+ String.valueOf(Wl3.get(5))+ String.valueOf(Wl4.get(5))+ String.valueOf(Wl5.get(5))+ String.valueOf(Wl6.get(5))+
+                                    String.valueOf(paddle);
+                            
+                            pw.printf("%d\t%.1f\t %.1f\t %.1f\t "
+                                + "%d\t %d\t %d\t %d\t %d\t %d\t "
+                                + "%d\t %d\t %d\t %d\t %d\t %d\t "
+                                + "%d\t %d\t %d\t %d\t %d\t %d\t "
+                                + "%d\t %d\t %d\t %d\t %d\t %d\t "
+                                + "%d\t %d\t %d\t %d\t %d\t %d\t "
+                                + "%d\t %d\t %d\t %d\t %d\t %d\t "
+                                +"%d\t %.1f\t\n",
+                                //+ "%.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", 
+                                q, p, theta, phi,
+                                Wl1.get(0), Wl2.get(0), Wl3.get(0), Wl4.get(0), Wl5.get(0), Wl6.get(0), 
+                                Wl1.get(1), Wl2.get(1), Wl3.get(1), Wl4.get(1), Wl5.get(1), Wl6.get(1), 
+                                Wl1.get(2), Wl2.get(2), Wl3.get(2), Wl4.get(2), Wl5.get(2), Wl6.get(2), 
+                                Wl1.get(3), Wl2.get(3), Wl3.get(3), Wl4.get(3), Wl5.get(3), Wl6.get(3), 
+                                Wl1.get(4), Wl2.get(4), Wl3.get(4), Wl4.get(4), Wl5.get(4), Wl6.get(4), 
+                                Wl1.get(5), Wl2.get(5), Wl3.get(5), Wl4.get(5), Wl5.get(5), Wl6.get(5), 
+                                //trkTOF[0], trkTOF[1], trkTOF[2], trkPCAL[0], trkPCAL[1], trkPCAL[2]);
+                                paddle, vz);
+                            
+                            //System.out.printf("%d\t\t%.1f\t\t %.1f\t\t %.1f\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %.1f\t\t %.1f\t\t %.1f\t\t %.1f\t\t %.1f\t\t %.1f\t\t\n", q, p, theta, phi, Wi.get(0), Wf.get(0), Wi.get(1), Wf.get(1), Wi.get(2), Wf.get(2),Wi.get(3), Wf.get(3), Wi.get(4), Wf.get(4), Wi.get(5), Wf.get(5), trkTOF[0], trkTOF[1], trkTOF[2], trkPCAL[0], trkPCAL[1], trkPCAL[2]);
+
+                            //System.out.printf("%d\t\t %.1f\t\t %.1f\t\t %.1f\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t\n",q, p, theta, phi, Wi.get(0), Wi.get(1), Wi.get(2), Wi.get(3), Wi.get(4), Wi.get(5));
+
                         }
                     }
                 }
-            }
+            }          
         }
     }
 
@@ -611,19 +602,45 @@ public class TrackDictionaryMaker extends DCEngine{
         this.Wl6 = Wl6;
     }
 
+    private void resetGeom(String geomDBVar) {
+        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, Optional.ofNullable(geomDBVar).orElse("default"));
+        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
+        
+        for(int l=0; l<6; l++) {
+            Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
+            System.out.println("****************** WPDIST READ *********FROM RELOADED "+geomDBVar+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
+        }
+        
+    }
     public static void main(String[] args) {
-        TrackDictionaryMaker tm = new TrackDictionaryMaker();
+        TrackDictionaryMaker tm = new TrackDictionaryMaker();        
         tm.init();
+        
         OptionParser parser = new OptionParser("dict-maker");
 
         parser.addOption("-t","-1.0");
         parser.addOption("-s","-1.0");
+        parser.addOption("-q","-1");
+        parser.addOption("-p","0.05");
+        parser.addOption("-phimin","-30.0");
+        parser.addOption("-phimax","30.0");
+        parser.addOption("-vz","0.0");
+        parser.addOption("-var","default");
         parser.parse(args);
         
         if(parser.hasOption("-t")==true && parser.hasOption("-s")==true){
             float torus    = (float) parser.getOption("-t").doubleValue();
             float solenoid = (float) parser.getOption("-s").doubleValue();
-            tm.processFile(torus, solenoid);
+            int charge = parser.getOption("-q").intValue();
+            float pBinSize = (float) parser.getOption("-p").doubleValue();
+            float phiMin = (float) parser.getOption("-phimin").doubleValue();
+            float phiMax = (float) parser.getOption("-phimax").doubleValue();
+            float vz = (float) parser.getOption("-vz").doubleValue();
+            String dcVar = parser.getOption("-var").stringValue();
+            tm.resetGeom(dcVar);
+            tm.processFile(torus, solenoid, charge, pBinSize, phiMin, phiMax, vz);
+        } else {
+            System.out.println(" FIELDS NOT SET");
         }
     }
     

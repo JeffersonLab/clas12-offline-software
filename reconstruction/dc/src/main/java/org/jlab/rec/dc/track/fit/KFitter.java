@@ -88,7 +88,7 @@ public class KFitter {
                 sv.transport(sector, k, k + 1,
                         sv.trackTraj.get(k),
                         sv.trackCov.get(k));
-                this.filter(k + 1);
+                    this.filter(k + 1);
             }
             if (i > 1) {
                 //this.calcFinalChisq();
@@ -123,7 +123,10 @@ public class KFitter {
             }
         }
 //        });
-
+        if(totNumIter==1) {
+            this.finalStateVec = sv.trackTraj.get(svzLength - 1);
+            this.finalCovMat = sv.trackCov.get(svzLength - 1);
+        }
         this.calcFinalChisq(sector);
 
     }
