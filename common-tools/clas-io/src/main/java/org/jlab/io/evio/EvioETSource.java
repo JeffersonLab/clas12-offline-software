@@ -77,6 +77,13 @@ public class EvioETSource implements DataSource {
         this.setRemote(true);
     }
     
+    public EvioETSource(String host, int port, String station){
+        this.etRingHost = host;
+        this.etRingPort = port;
+        this.etStation  = station;
+        this.setRemote(true);
+    }
+    
     public EvioETSource(String host, String station){
         this.etRingHost = host;
         this.etRingPort = EtConstants.serverPort;
