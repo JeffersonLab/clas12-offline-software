@@ -110,6 +110,8 @@ public class FADCData {
 
             position+=2;
             if(compressedWord==5){
+                
+                System.out.println( " position = " + position +  " NWORD = 5  LENGTH = " + adcBuffer.length);
                 short value;
                 //result.clear();
                 for(int i = 0; i < 4; i++){
@@ -198,6 +200,8 @@ public class FADCData {
 
             position+=2;
             if(compressedWord==5){
+                
+                //System.out.println(" NWORD = 5 " );
                 short value;
                 result.clear();
                 for(int i = 0; i < 4; i++){

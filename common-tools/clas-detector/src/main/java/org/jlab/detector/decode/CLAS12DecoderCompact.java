@@ -17,18 +17,50 @@ import org.jlab.io.evio.EvioSource;
  */
 public class CLAS12DecoderCompact {
     
+    
+    public static void readFile(String inputFile){
+        CodaEventDecoder decoder = new CodaEventDecoder();
+        EvioSource reader = new EvioSource();
+        System.out.println("openning file : " + inputFile);
+        reader.open(inputFile);
+        int counter = 0;
+
+        while(reader.hasEvent()==true&&counter<20){
+            EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
+            //List<FADCData>  adc = decoder.getADCEntries(event, 73,57638);
+            System.out.println("========================= EVENT # " + counter);
+            List<FADCData>  adc = decoder.getADCEntries(event);//, 73,57601);
+            
+            for(FADCData data : adc){
+                //System.out.println(data);
+                data.show();
+            }
+            
+            List<DetectorDataDgtz> dgtz = FADCData.convert(adc);
+            
+            for(DetectorDataDgtz data : dgtz){
+                System.out.println("ADC size = " + data.getADCSize() + "  " + data.getADCData(0).getPulseArray().length);
+                System.out.println(data);
+            }
+            //List<DetectorDataDgtz> data = decoder.getDataEntries(event);
+            counter++;
+        }
+    }
+    
     public static void main(String[] args){
         //String inputFile = "/Users/gavalian/Work/Software/project-4a.0.0/data/compressed/cnd_000096.evio.0";
-        String inputFile = "/Users/gavalian/Work/Software/project-4a.0.0/data/compressed/cnd_000106.evio.0";
+        //String inputFile = "/Users/gavalian/Work/Software/project-4a.0.0/data/compressed/cnd_000106.evio.0";
         //String inputFile = "/Users/gavalian/Work/Software/project-4a.0.0/data/compressed/cnd_004459.evio.0";
-        CodaEventDecoder decoder = new CodaEventDecoder();
+        String inputFile = "/Users/gavalian/Work/Software/project-5a.0.0/clas_004604.evio.00000";
+       CLAS12DecoderCompact.readFile(inputFile);
+        /*CodaEventDecoder decoder = new CodaEventDecoder();
         EvioSource reader = new EvioSource();
         System.out.println("openning file : " + inputFile);
         reader.open(inputFile);
         int counter = 0;
         int uncompressed = 0;
         int compressed   = 0;
-        while(reader.hasEvent()==true&&counter<5){
+        while(reader.hasEvent()==true&&counter<50){
             EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
             //List<FADCData>  adc = decoder.getADCEntries(event, 73,57638);
             List<FADCData>  adc = decoder.getADCEntries(event, 73,57601);
@@ -71,7 +103,7 @@ public class CLAS12DecoderCompact {
                     System.out.println(str.toString());
                     System.out.println("--- end");
                 }
-            }
+            }*/
             /*
             if(adc!=null){
                 System.out.println("------------------------------ EVENT " + counter);
@@ -89,9 +121,9 @@ public class CLAS12DecoderCompact {
                 }
             }*/
             
-            counter++;
+            /*counter++;
         }
         double ratio = ((double) compressed)/uncompressed;
-        System.out.println("events processed = " + counter + "  ratio = " + ratio);
+        System.out.println("events processed = " + counter + "  ratio = " + ratio);*/
     }
 }
