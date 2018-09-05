@@ -6,7 +6,6 @@ import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.dc.trajectory.StateVec;
-import org.jlab.service.dc.DCEngine;
 import org.jlab.utils.groups.IndexedTable;
 /**
  * A hit that was used in a fitted cluster. It extends the Hit class and
@@ -538,8 +537,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         double wire = this.get_Wire();
         double normW = (double) wire/112.;
         
-        xL-=Constants.getMCDIST()*DL*(normW-3*normW*normW*normW+2*normW*normW*normW*normW);
-        xR-=Constants.getMCDIST()*DR*(normW-3*normW*normW*normW+2*normW*normW*normW*normW);
+        xL-=Constants.getWIREDIST()*DL*(normW-3*normW*normW*normW+2*normW*normW*normW*normW);
+        xR-=Constants.getWIREDIST()*DR*(normW-3*normW*normW*normW+2*normW*normW*normW*normW);
         
         double x = xR -(yR-y)*((xR-xL)/(yR-yL));
         
@@ -590,7 +589,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 throw new RuntimeException("invalid region");
         }    
         
-        double MaxSag = Constants.getMCDIST()*A*C*wire*wire*Math.cos(Math.toRadians(25.))*Math.cos(Math.toRadians(30.));
+        double MaxSag = Constants.getWIREDIST()*A*C*wire*wire*Math.cos(Math.toRadians(25.))*Math.cos(Math.toRadians(30.));
         
         double delta_x = MaxSag*(1.-y/(0.5*wireLen))*(1.-y/(0.5*wireLen));
         

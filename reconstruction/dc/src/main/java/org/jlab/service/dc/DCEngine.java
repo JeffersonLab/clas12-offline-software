@@ -49,6 +49,32 @@ public class DCEngine extends ReconstructionEngine {
         if (useSTTConf==null) {
              System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on default ="+Constants.isUSETSTART());
         }
+        
+        // Wire distortions
+        String wireDistortionsFlag = this.getEngineConfigString("wireDistort");
+        
+        if (wireDistortionsFlag!=null) {
+            System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on yaml ="+wireDistortionsFlag);
+            if(Boolean.valueOf(wireDistortionsFlag)==true) {
+                Constants.setWIREDIST(1.0);
+            } else {
+                Constants.setWIREDIST(0);
+            }
+        }
+        else {
+            wireDistortionsFlag = System.getenv("USEWIREDIST");
+            if (wireDistortionsFlag!=null) {
+                System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on env ="+wireDistortionsFlag);
+                if(Boolean.valueOf(wireDistortionsFlag)==true) {
+                    Constants.setWIREDIST(1.0);
+                } else {
+                    Constants.setWIREDIST(0);
+                }
+            }
+        }
+        if (wireDistortionsFlag==null) {
+             System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (off in MC, on in data)");
+        }
     }
     public void LoadTables() {
         

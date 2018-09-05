@@ -170,20 +170,20 @@ public class Constants {
         Constants.USETSTART = USETSTART;
     }
     
-    private static double MCDIST = 1.0;
+    private static double WIREDIST = 1.0;
 
     /**
-     * @return the MCDIST
+     * @return the WIREDIST
      */
-    public static double getMCDIST() {
-        return MCDIST;
+    public static double getWIREDIST() {
+        return WIREDIST;
     }
 
     /**
-     * @param aMCDIST the MCDIST to set
+     * @param aMCDIST the WIREDIST to set
      */
-    public static void setMCDIST(double aMCDIST) {
-        MCDIST = aMCDIST;
+    public static void setWIREDIST(double aDIST) {
+        WIREDIST = aDIST;
     }
     
     public static final double[][][] MAXENDPLTDEFLEC = new double[3][6][2];

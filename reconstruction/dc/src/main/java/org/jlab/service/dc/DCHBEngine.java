@@ -108,8 +108,8 @@ public class DCHBEngine extends DCEngine {
            TableLoader.Fill(super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST));
 
            Run.set(newRun);
-           if (event.hasBank("MC::Particle")) {
-               Constants.setMCDIST(0);
+           if (event.hasBank("MC::Particle") && this.getEngineConfigString("wireDistort")==null) {
+               Constants.setWIREDIST(0);
            }
 
  //          if (debug.get()) System.out.println("NEW RUN INIT = " + (System.currentTimeMillis() - startTime));
