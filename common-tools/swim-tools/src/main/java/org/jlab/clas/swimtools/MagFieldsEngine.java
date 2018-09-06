@@ -51,8 +51,28 @@ public class MagFieldsEngine extends ReconstructionEngine {
         catch (Exception e) {
             e.printStackTrace();
         }
+        
+         // Wire distortions
+        String solShift = this.getEngineConfigString("solShift");
+        
+        if (solShift!=null) {
+            System.out.println("["+this.getName()+"] run with solenoid z shift in tracking config chosen based on yaml ="+solShift);
+            Swimmer.set_zShift(Float.valueOf(solShift));
+        }
+        else {
+            solShift = System.getenv("SOLSHIFT");
+            if (solShift!=null) {
+                System.out.println("["+this.getName()+"] run with solenoid z shift in tracking config chosen based on env ="+solShift);
+                Swimmer.set_zShift(Float.valueOf(solShift));
+            }
+        }
+        if (solShift==null) {
+            System.out.println("["+this.getName()+"] run with solenoid z shift in tracking set to 0 cm");
+            // this.solenoidShift = (float) 0;
+        }
+        
     }
-
+    
     @Override
     public boolean processDataEvent(DataEvent event) {
         DataBank bank = event.getBank("RUN::config");
@@ -62,11 +82,12 @@ public class MagFieldsEngine extends ReconstructionEngine {
         if(newRun==0)
             return true;
         
-        double shift =0;
-        if(newRun>1890) {
-            shift = -1.9;
-        }
-        Swimmer.setMagneticFieldsScales(bank.getFloat("solenoid", 0), bank.getFloat("torus", 0), shift);
+        //double shift =0;
+        //if(newRun>1890) {
+        //    shift = -1.9;
+        //}
+        Swimmer.setMagneticFieldsScales(bank.getFloat("solenoid", 0), bank.getFloat("torus", 0), 
+                (double)Swimmer.get_zShift());
         
         //FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
         return true;

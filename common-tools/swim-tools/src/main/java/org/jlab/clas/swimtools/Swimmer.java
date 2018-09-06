@@ -23,7 +23,13 @@ public class Swimmer {
     public static void put(Thread thr, ProbeCollection PC) {
         swimmers.put(thr, PC);
     }
-    
+    private static float zShift = 0;
+    public static synchronized void set_zShift(float shift){
+        zShift = shift;
+    }
+    public static synchronized float get_zShift(){
+        return zShift ;
+    }
     public static synchronized void setMagneticFieldsScales(double SolenoidScale, double TorusScale, double shift) {
         if (FieldsLoaded) {
             return;
