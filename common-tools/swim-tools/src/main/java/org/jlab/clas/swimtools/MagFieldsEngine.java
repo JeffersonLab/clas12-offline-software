@@ -53,7 +53,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
         }
         
          // Wire distortions
-        String solShift = this.getEngineConfigString("solShift");
+        String solShift = this.getEngineConfigString("solenoidShift");
         
         if (solShift!=null) {
             System.out.println("["+this.getName()+"] run with solenoid z shift in tracking config chosen based on yaml ="+solShift);
