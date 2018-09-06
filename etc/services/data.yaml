@@ -45,11 +45,11 @@ configuration:
   io-services:
     writer:
       compression: 2
-      schema_dir: "absolute-path-to-schema-folder"
+#      schema_dir: "/u/home/clas12-1/chef/myClara/plugins/clas12/etc/bankdefs/dst"
   services:
     MAGFIELDS:
-      torusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
       solenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
+      torusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
       solenoidShift: "-1.9"
     DCHB:  
       useStartTime: "true"
@@ -57,6 +57,6 @@ configuration:
       geomDBVariation: may_2018_engineers
     DCTB:
       geomDBVariation: may_2018_engineers
-
+      
 mime-types:
   - binary/data-hipo
