@@ -357,16 +357,16 @@ public class CodaEventDecoder {
             try {
 //                System.out.println("Found SVT bank");
                 ByteBuffer     compBuffer = node.getByteData(true);
-                System.out.println(" COMPOSITE TYPE   = " + node.getTypeObj().name() + " "
-                + node.getDataTypeObj().name());
-                System.out.println(" COMPOSITE BUFFER = " + compBuffer.array().length);
-                
+                //System.out.println(" COMPOSITE TYPE   = " + node.getTypeObj().name() + " "
+                //+ node.getDataTypeObj().name());
+                //System.out.println(" COMPOSITE BUFFER = " + compBuffer.array().length);
+                /*
                 for(int i = 0; i < compBuffer.array().length; i++){
                     short value = (short) (0x00FF&(compBuffer.array()[i]));
                     System.out.println(String.format("%4d ",value));
                 }
                 System.out.println();
-                
+                */
                 CompositeData  compData = new CompositeData(compBuffer.array(),event.getByteOrder());
                 List<DataType> cdatatypes = compData.getTypes();
                 List<Object>   cdataitems = compData.getItems();
@@ -527,33 +527,36 @@ public class CodaEventDecoder {
     public void decodeComposite(ByteBuffer buffer, int offset, List<DataType> ctypes, List<Object> citems){
         int position = offset;
         int length   = buffer.capacity();
-        
-        while(position<length){
-            Short slot = (short) (0x00FF&(buffer.get(position)));
-            position++;
-            citems.add(slot);
-            ctypes.add(DataType.SHORT16);
-            Short counter =  (short) (0x00FF&(buffer.get(position)));
-            citems.add(counter);
-            ctypes.add(DataType.NVALUE);
-            position++;
-            
-            for(int i = 0; i < counter; i++){
-                Short channel = (short) (0x00FF&(buffer.get(position)));
+        try {
+            while(position<length){
+                Short slot = (short) (0x00FF&(buffer.get(position)));
                 position++;
-                citems.add(channel);
+                citems.add(slot);
                 ctypes.add(DataType.SHORT16);
-                Short ndata = (short) (0x00FF&(buffer.get(position)));
-                position++;
-                citems.add(ndata);
+                Short counter =  (short) (0x00FF&(buffer.get(position)));
+                citems.add(counter);
                 ctypes.add(DataType.NVALUE);
-                for(int b = 0; b < ndata; b++){
-                    Short data = buffer.getShort(position);
-                    position+=2;
-                    citems.add(data);
+                position++;
+                
+                for(int i = 0; i < counter; i++){
+                    Short channel = (short) (0x00FF&(buffer.get(position)));
+                    position++;
+                    citems.add(channel);
                     ctypes.add(DataType.SHORT16);
+                    Short ndata = (short) (0x00FF&(buffer.get(position)));
+                    position++;
+                    citems.add(ndata);
+                    ctypes.add(DataType.NVALUE);
+                    for(int b = 0; b < ndata; b++){
+                        Short data = buffer.getShort(position);
+                        position+=2;
+                        citems.add(data);
+                        ctypes.add(DataType.SHORT16);
+                    }
                 }
             }
+        } catch (Exception e){
+            System.out.println("Exception : Length = " + length + "  position = " + position);
         }
     }
     
@@ -569,7 +572,7 @@ public class CodaEventDecoder {
                     short value = (short) (0x00FF&(compBuffer.array()[i]));
                     System.out.println(String.format("%4d %4d ",i,value));
                 }*/
-                System.out.println();
+                //System.out.println();
                 List<DataType> cdatatypes = new ArrayList<DataType>();
                 List<Object>   cdataitems = new ArrayList<Object>();
                 this.decodeComposite(compBuffer, 24, cdatatypes, cdataitems);
