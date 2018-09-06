@@ -313,7 +313,8 @@ public class DCTBEngine extends DCEngine {
                      -q);
         
         double[] Vt = dcSwim.SwimToPlane(100);
-
+        if(Vt==null)
+            return;
         track.set_pAtOrig(new Vector3D(-Vt[3], -Vt[4], -Vt[5]));
         track.set_Vtx0(new Point3D(Vt[0], Vt[1], Vt[2]));
     }
