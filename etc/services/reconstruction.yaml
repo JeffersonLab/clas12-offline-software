@@ -45,12 +45,65 @@ configuration:
   io-services:
     writer:
       compression: 2
+#      schema_dir: "/u/home/clas12-1/chef/myClara/plugins/clas12/etc/bankdefs/dst"
   services:
     MAGFIELDS:
-      torusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
       solenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
-    DCHB:  
+      torusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
+      solenoidShift: "0.0"
+    FTCAL:
+      variation: default
+      timestamp: 08/22/2018
+    FTHODO:
+      variation: default
+      timestamp: 08/22/2018
+    FTEB:
+      variation: default
+      timestamp: 08/22/2018
+    DCHB:
+      variation: default
+      timestamp: 08/22/2018
       useStartTime: "true"
-
+      wireDistortionsFlag: "false"
+#      geomDBVariation: may_2018_engineers
+      constantsDBVariation: default
+    DCTB:
+      variation: default
+      timestamp: 08/22/2018
+#      geomDBVariation: may_2018_engineers
+      constantsDBVariation: default
+    FTOFHB:
+      variation: default
+      timestamp: 08/22/2018
+    FTOFTB:
+      variation: default
+      timestamp: 08/22/2018
+    CVT:
+      variation: default
+      timestamp: 08/22/2018
+    CTOF:
+      variation: default
+      timestamp: 08/22/2018
+    CND:
+      variation: default
+      timestamp: 08/22/2018
+    HTCC:
+      variation: default
+      timestamp: 08/22/2018
+    LTCC:
+      variation: default
+      timestamp: 08/22/2018
+    RICH:
+      variation: default
+      timestamp: 08/22/2018
+    EC:
+      variation: default
+      timestamp: 08/22/2018
+    EBHB:
+      variation: default
+      timestamp: 08/22/2018
+    EBTB:
+      variation: default
+      timestamp: 08/22/2018
 mime-types:
   - binary/data-hipo
