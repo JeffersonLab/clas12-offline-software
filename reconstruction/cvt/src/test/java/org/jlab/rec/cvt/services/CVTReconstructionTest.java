@@ -1,5 +1,6 @@
 package org.jlab.rec.cvt.services;
 
+import cnuphys.magfield.MagneticFields;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -10,6 +11,8 @@ import org.jlab.service.eb.EBTBEngine;
 
 import org.jlab.analysis.physics.TestEvent;
 import org.jlab.analysis.math.ClasMath;
+import org.jlab.clas.swimtools.MagFieldsEngine;
+import org.jlab.utils.CLASResources;
 
 /**
  *
@@ -17,33 +20,42 @@ import org.jlab.analysis.math.ClasMath;
  */
 public class CVTReconstructionTest {
 	
-	@Test
-	public void testCVTReconstruction() {
-    System.setProperty("CLAS12DIR", "../../");
-		
-		DataEvent testEvent = TestEvent.getCVTTestEvent();
-                MagFieldsEngine enf = new MagFieldsEngine();
-                enf.init();
-                enf.processDataEvent(testEvent);
-		CVTReconstruction CVTengine = new CVTReconstruction();
-		CVTengine.init();
-		CVTengine.processDataEvent(testEvent);
+    @Test
+    public void testCVTReconstruction() {
+        System.setProperty("CLAS12DIR", "../../");
+        DataEvent testEvent = TestEvent.getCVTTestEvent();
+        String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";
+        try {
+            MagneticFields.getInstance().initializeMagneticFields(mapDir,
+                    "Symm_torus_r2501_phi16_z251_24Apr2018.dat","Symm_solenoid_r601_phi1_z1201_13June2018.dat");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        MagFieldsEngine enf = new MagFieldsEngine();
+        //enf.init();
+        enf.processDataEvent(testEvent);
+        
+        CVTReconstruction CVTengine = new CVTReconstruction();
+        CVTengine.init();
+        CVTengine.processDataEvent(testEvent);
 
-		EBHBEngine EBHBengine = new EBHBEngine();
-		EBHBengine.init();
-		EBHBengine.processDataEvent(testEvent);
+        EBHBEngine EBHBengine = new EBHBEngine();
+        EBHBengine.init();
+        EBHBengine.processDataEvent(testEvent);
 
-		EBTBEngine EBTBengine = new EBTBEngine();
-		EBTBengine.init();
-		EBTBengine.processDataEvent(testEvent);
+        EBTBEngine EBTBengine = new EBTBEngine();
+        EBTBengine.init();
+        EBTBengine.processDataEvent(testEvent);
 
-		assertEquals(testEvent.hasBank("REC::Particle"), true);
-		assertEquals(testEvent.getBank("REC::Particle").rows(), 1);
-		assertEquals(testEvent.getBank("REC::Particle").getByte("charge", 0), 1);
-		assertEquals(ClasMath.isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("px", 0), 1.9504), true);
-		assertEquals(ClasMath.isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("py", 0), 0.2741), true);
-		assertEquals(ClasMath.isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("pz", 0), 0.3473), true);
-		assertEquals(ClasMath.isWithinXPercent(30.0, testEvent.getBank("REC::Particle").getFloat("vz", 0), -1.95444), true);
-	}
+        assertEquals(testEvent.hasBank("REC::Particle"), true);
+        assertEquals(testEvent.getBank("REC::Particle").rows(), 1);
+        assertEquals(testEvent.getBank("REC::Particle").getByte("charge", 0), 1);
+        assertEquals(ClasMath.isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("px", 0), 1.9504), true);
+        assertEquals(ClasMath.isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("py", 0), 0.2741), true);
+        assertEquals(ClasMath.isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("pz", 0), 0.3473), true);
+        assertEquals(ClasMath.isWithinXPercent(30.0, testEvent.getBank("REC::Particle").getFloat("vz", 0), -1.95444), true);
+    }
 
 }
