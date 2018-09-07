@@ -485,9 +485,9 @@ public class EvioHipoEvent {
                 hipoBank.setFloat("px", i, (float) (evioBank.getDouble("px", i)/1000.0) );
                 hipoBank.setFloat("py", i, (float) (evioBank.getDouble("py", i)/1000.0) );
                 hipoBank.setFloat("pz", i, (float) (evioBank.getDouble("pz", i)/1000.0) );
-                hipoBank.setFloat("vx", i, (float) (evioBank.getDouble("vx", i)) );
-                hipoBank.setFloat("vy", i, (float) (evioBank.getDouble("vy", i)) );
-                hipoBank.setFloat("vz", i, (float) (evioBank.getDouble("vz", i)) );
+                hipoBank.setFloat("vx", i, (float) (evioBank.getDouble("vx", i)/10.0) );
+                hipoBank.setFloat("vy", i, (float) (evioBank.getDouble("vy", i)/10.0) );
+                hipoBank.setFloat("vz", i, (float) (evioBank.getDouble("vz", i)/10.0) );
                 hipoBank.setFloat("vt", i, (float) (evioBank.getDouble("vt", i)) );
             }
             if(evioBank.rows()>0) hipoEvent.appendBanks(hipoBank);

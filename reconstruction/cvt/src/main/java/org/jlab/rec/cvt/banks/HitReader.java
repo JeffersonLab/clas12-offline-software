@@ -154,6 +154,10 @@ public class HitReader {
             //bankDGTZ.show();
             for (int i = 0; i < rows; i++) {
 
+                if (bankDGTZ.getInt("ADC", i) < 0) {
+                    continue; // ignore hits TDC hits with ADC==-1 
+                }
+
                 id[i] = i + 1;
                 sector[i] = bankDGTZ.getInt("sector", i);
                 layer[i] = bankDGTZ.getInt("layer", i);

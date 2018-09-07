@@ -610,16 +610,6 @@ public class TrackCandListFinder {
                 cand.get_Q());
 
         // swimming to a ref points outside of the last DC region
-        double[] VecAtTarOut = dcSwim.SwimToPlaneTiltSecSys(cand.get(0).get_Sector(), 592);
-        if(VecAtTarOut==null)
-            return;
-        
-        double xOuter = VecAtTarOut[0];
-        double yOuter = VecAtTarOut[1];
-        double zOuter = VecAtTarOut[2];
-        double uxOuter = VecAtTarOut[3] / cand.get_P();
-        double uyOuter = VecAtTarOut[4] / cand.get_P();
-        double uzOuter = VecAtTarOut[5] / cand.get_P();
         //Cross crossR = new Cross(cand.get(2).get_Sector(), cand.get(2).get_Region(), -1);
         Cross crossR = new Cross(cand.get(cand.size() - 1).get_Sector(),
                 cand.get(cand.size() - 1).get_Region(), -1);
@@ -635,9 +625,16 @@ public class TrackCandListFinder {
                 -cand.get_Q());
 
         //swimming to a ref point upstream of the first DC region
-        double[] VecAtTarIn = dcSwim.SwimToPlaneTiltSecSys(cand.get(0).get_Sector(), 180);
-        if (VecAtTarIn == null) {
-            cand.fit_Successful = false;
+        double[] VecAtTarOut = dcSwim.SwimToPlaneTiltSecSys(cand.get(0).get_Sector(), 592);
+        if(VecAtTarOut==null)
+            return;
+        
+        double xOuter = VecAtTarOut[0];
+        double yOuter = VecAtTarOut[1];
+        double zOuter = VecAtTarOut[2];
+        double uxOuter = VecAtTarOut[3] / cand.get_P();
+        double uyOuter = VecAtTarOut[4] / cand.get_P();
+        double uzOuter = VecAtTarOut[5] / cand.get_P();
             return;
         }
 
@@ -810,14 +807,9 @@ public class TrackCandListFinder {
 
     public void matchHits(List<StateVec> stateVecAtPlanesList, Track trk, DCGeant4Factory DcDetector, Swim dcSwim) {
 
-        if (stateVecAtPlanesList == null)
-            return;
-        dcSwim.SetSwimParameters(trk.get_Vtx0().x(),
-                trk.get_Vtx0().y(), trk.get_Vtx0().z(), trk.get_pAtOrig().x(),
-                trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q());
-        double[] ToFirstMeas = dcSwim.SwimToPlaneTiltSecSys(trk.get(0).get_Sector(),
-                stateVecAtPlanesList.get(0).getZ());
-        if (ToFirstMeas == null)
+        double[] VecAtTarIn = dcSwim.SwimToPlaneTiltSecSys(cand.get(0).get_Sector(), 180);
+        if (VecAtTarIn == null) {
+            cand.fit_Successful = false;
             return;
         
         double PathToFirstMeas =ToFirstMeas[6];
@@ -878,3 +870,11 @@ public class TrackCandListFinder {
     }
 
 }
+        if (stateVecAtPlanesList == null)
+            return;
+        dcSwim.SetSwimParameters(trk.get_Vtx0().x(),
+                trk.get_Vtx0().y(), trk.get_Vtx0().z(), trk.get_pAtOrig().x(),
+                trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q());
+        double[] ToFirstMeas = dcSwim.SwimToPlaneTiltSecSys(trk.get(0).get_Sector(),
+                stateVecAtPlanesList.get(0).getZ());
+        if (ToFirstMeas == null)
