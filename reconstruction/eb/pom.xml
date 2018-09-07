@@ -69,7 +69,7 @@
     
     <dependency>
       <groupId>org.jlab.clas12.detector</groupId>
-      <artifactId>tof</artifactId>
+      <artifactId>clas12detector-tof</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     
