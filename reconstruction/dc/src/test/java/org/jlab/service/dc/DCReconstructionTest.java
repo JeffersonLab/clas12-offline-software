@@ -9,6 +9,7 @@ import org.jlab.service.dc.DCTBEngine;
 
 import org.jlab.analysis.physics.TestEvent;
 import org.jlab.analysis.math.ClasMath;
+import org.jlab.clas.swimtools.MagFieldsEngine;
 
 /**
  *
@@ -21,7 +22,9 @@ public class DCReconstructionTest {
     System.setProperty("CLAS12DIR", "../../");
 
     DataEvent testEvent = TestEvent.getDCSector1ElectronEvent();
-
+    MagFieldsEngine enf = new MagFieldsEngine();
+    enf.init();
+    enf.processDataEvent(event);
     DCHBEngine engineHB = new DCHBEngine();
     engineHB.init();
     engineHB.processDataEvent(testEvent);
