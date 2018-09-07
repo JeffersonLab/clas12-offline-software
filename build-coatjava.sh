@@ -36,17 +36,7 @@ if [ $downloadMaps == "yes" ]; then
   for map in $SOLENOIDMAP $TORUSMAP
   do
     # -N only redownloads if timestamp/filesize is newer/different
-
-case $OS in
-    'Linux')
-        wget -N --no-check-certificate $webDir/$map
-     ;;
-     'Darwin')
-       curl "$webDir/$map" -o $map
-     ;;
-     *) ;;
-esac
-
+    wget -N --no-check-certificate $webDir/$map
   done
   cd -
 fi
