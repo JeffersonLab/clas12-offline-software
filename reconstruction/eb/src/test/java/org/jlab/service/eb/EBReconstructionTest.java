@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import org.jlab.analysis.physics.TestEvent;
 import org.jlab.analysis.math.ClasMath;
+import org.jlab.clas.swimtools.MagFieldsEngine;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
