@@ -303,7 +303,7 @@ public class DCHBEngine extends DCEngine {
         //String inputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305.hipo";
         //String inputFile="/Users/ziegler/Desktop/Work/validation/infiles/out_clas_004013.evio.filt.hipo";
         //String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/BGMERG/gemc_out_mu-_hipo/mu-_30nA_bg_out.ev.hipo";
-         String inputFile="/Users/ziegler/Desktop/Work/Files/GEMC/straight.hipo";
+         String inputFile="/Users/ziegler/Desktop/Work/Files/Data/out_clas_002391_extractRawBanksFromCooked.hipo";
         //String inputFile="/Users/ziegler/Desktop/Work/Files/FMTDevel/gemc/pion_rec.hipo";
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
         
@@ -323,7 +323,7 @@ public class DCHBEngine extends DCEngine {
         
         //String outputFile="/Users/ziegler/Desktop/Work/Files/Data/DecodedData/clas_003305_recGDSt.hipo";
        // String outputFile="/Users/ziegler/Desktop/Work/validation/outfiles/out_clas_004013.evio.filtRecookSinThread.hipo";
-        String outputFile="/Users/ziegler/Desktop/Work/Files/GEMC/straight_rec.hipo";
+        String outputFile="/Users/ziegler/Desktop/Work/Files/Data/out_clas_002391_extractRawBanksFromCookedReCook.hipo";
         //String outputFile="/Users/ziegler/Desktop/Work/Files/FMTDevel/gemc/pion_recFMTClusNoTrkRefit.hipo";
         
         writer.open(outputFile);

@@ -321,7 +321,7 @@ public class HitReader {
             hit.set_QualityFac(0);
             //hit.set_Doca(hit.get_TimeToDistance());
             //if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>CCDBConstants.getTMAXSUPERLAYER()[hit.get_Sector()-1][hit.get_Superlayer()-1] ) {
-            if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time() > constants1.getDoubleValue("tmax", hit.get_Sector(), hit.get_Superlayer(),0) ) {
+            if (hit.get_Doca() > hit.get_CellSize() ) {
                 //this.fix_TimeToDistance(this.get_CellSize());
                 hit.set_OutOfTimeFlag(true);
                 hit.set_QualityFac(2);
@@ -332,8 +332,11 @@ public class HitReader {
             hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));            
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
-            if(hit.get_Beta()>0.1 && hit.get_Beta()<=1.00) 
+            if(hit.get_Beta()>0.15 && hit.get_Beta()<=1.40) {
+                if(hit.get_Beta()>1.0)
+                    hit.set_Beta(1.0);
                 hits.add(hit);
+            }
         }
         
         this.set_HBHits(hits);
@@ -421,14 +424,16 @@ public class HitReader {
             hit.set_QualityFac(0);
             //hit.set_Doca(hit.get_TimeToDistance());
             //if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>CCDBConstants.getTMAXSUPERLAYER()[hit.get_Sector()-1][hit.get_Superlayer()-1]) {
-            if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>constants1.getDoubleValue("tmax", hit.get_Sector(), hit.get_Superlayer(),0) ) {   
+            if (hit.get_Doca() > hit.get_CellSize() ) {   
                 //this.fix_TimeToDistance(this.get_CellSize());
                 hit.set_OutOfTimeFlag(true);
                 hit.set_QualityFac(2);
             } 
             if(hit.get_Time()<0)
                 hit.set_QualityFac(1);
-            if(hit.get_Beta()>0.1 && hit.get_Beta()<=1.00) 
+            if(hit.get_Beta()>0.2 && hit.get_Beta()<=1.30)
+                if(hit.get_Beta()>1.0)
+                    hit.set_Beta(1.0);
                 hits.add(hit);
             hits.add(hit);
             

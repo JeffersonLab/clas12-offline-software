@@ -59,7 +59,11 @@ public class EBScalers {
     // whether the gating signal was inverted:
     private static final boolean GATEINVERTED=true;
 
+    // clock frequency for conversion from clock counts to time:
     private static final double CLOCKFREQ=1e6; // Hz
+
+    // readout period, only used for ignoring invalid readouts:
+    private static final double READOUTPERIOD=1./30; // seconds
 
     private static final boolean DEBUG=false;
 
@@ -127,10 +131,19 @@ public class EBScalers {
         final int delGatedFcup = gatedFcup - PREV_GATEDFCUP;
         final int delGatedClock = gatedClock - PREV_GATEDCLOCK;
         //final double delTimeStamp = tiTimeStamp - PREV_TITIMESTAMP;
-        
+       
         // convert clock counts to seconds:
         final double clockTime = (double)clock / CLOCKFREQ; // seconds
         final double delClockTime = (double)delClock / CLOCKFREQ; // seconds
+
+        if (clock < PREV_CLOCK) {
+            System.out.println("EBScalers:  *** WARNING ***  Misordered RAW::Scaler");
+        }
+        
+        // ignore this reading if time elapsed is too small:
+        // - this can be due to misordered events or duplicates via EBHB+EBTB
+        // - FIXME:  should have a better solution for EBHB+EBTB
+        if (delClockTime < READOUTPERIOD/10.) return reading;
 
         // retrieve fcup calibrations:
         final double fcup_slope =ccdb.getDouble(EBCCDBEnum.FCUP_slope);
@@ -157,12 +170,8 @@ public class EBScalers {
             System.err.println("TIME = "+delClockTime+"/"+clockTime);
             System.err.println(String.format("Q    = %.3f/%.3f ",INST_BEAMCHARGE,BEAMCHARGE));
             System.err.println(String.format("LT   = %.3f ",INST_LIVETIME));
-            System.err.println("--------------------------------------------------------------------");
             System.err.println(INST_BEAMCHARGE / delClockTime);
-        }
-        
-        if (clock<PREV_CLOCK) {
-            System.out.println("EBScalers:  *** WARNING ***  Misordered RAW::Scaler");
+            System.err.println("--------------------------------------------------------------------");
         }
         
         // update the previous scaler readings:
