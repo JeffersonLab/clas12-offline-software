@@ -56,77 +56,7 @@ public class CVTRecHandler {
         BMTGeom = bmtg;
     }
     
-    String FieldsConfig = "";
-    int Run = -1;
-  
-    public void setRunConditionsParameters(DataEvent event, String Fields, int iRun, boolean addMisAlignmts, String misAlgnFile) {
-        if (event.hasBank("RUN::config") == false) {
-            System.err.println("RUN CONDITIONS NOT READ!");
-            return;
-        }
-
-        int Run = iRun;
-
-        boolean isCosmics = false;
-        DataBank bank = event.getBank("RUN::config");
-        //System.out.println(bank.getInt("Event")[0]);
-        if (bank.getByte("type", 0) == 0) {
-        }
-        if (bank.getByte("mode", 0) == 1) {
-            isCosmics = true;
-        }
-
-        boolean isSVTonly = false;
-
-        // Load the fields
-        //-----------------
-        String newConfig = "SOLENOID" + bank.getFloat("solenoid", 0);
-
-        if (Fields.equals(newConfig) == false) {
-            // Load the Constants
-            
-            System.out.println("  CHECK CONFIGS..............................." + FieldsConfig + " = ? " + newConfig);
-            Constants.Load(isCosmics, isSVTonly, (double) bank.getFloat("solenoid", 0));
-            // Load the Fields
-            //System.out.println("************************************************************SETTING FIELD SCALE *****************************************************");
-            //TrkSwimmer.setMagneticFieldScale(bank.getFloat("solenoid", 0)); // something changed in the configuration
-            //double shift =0;
-            //if(bank.getInt("run", 0)>1840)
-            //    shift = -1.9;
-            //MagneticFields.getInstance().setSolenoidShift(shift);
-//            this.setFieldsConfig(newConfig);
-            
-            CCDBConstantsLoader.Load(new DatabaseConstantProvider(bank.getInt("run", 0), "default"));
-        }
-        this.setFieldsConfig(newConfig);
-
-        // Load the constants
-        //-------------------
-        int newRun = bank.getInt("run", 0);
-
-        if (Run != newRun) {
-            this.setRun(newRun);
-        }
-      
-        Run = newRun;
-        this.setRun(Run);
-    }
-
-    public int getRun() {
-        return Run;
-    }
-
-    public void setRun(int run) {
-        Run = run;
-    }
-
-    public String getFieldsConfig() {
-        return FieldsConfig;
-    }
-
-    public void setFieldsConfig(String fieldsConfig) {
-        FieldsConfig = fieldsConfig;
-    }
+    
     
     List<FittedHit> SVThits   = null;
     List<FittedHit> BMThits   = null;
@@ -312,7 +242,7 @@ public class CVTRecHandler {
         return cosmics;
 	}
 	
-	public List<Track> beamTracking(Swim swimmer){
+	public List<Track> beamTracking(Swim swimmer){ System.out.println(" BEAM TRACK...........");
 		if( this.crosses == null ) return null;
 		TrackSeederCA trseed = new TrackSeederCA();
         
@@ -323,7 +253,6 @@ public class CVTRecHandler {
         List<Seed> seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
         
         for (Seed seed : seeds) { 
-            
             kf = new KFitter(seed, SVTGeom, swimmer );
             kf.runFitter(SVTGeom, BMTGeom, swimmer);
             //System.out.println(" OUTPUT SEED......................");

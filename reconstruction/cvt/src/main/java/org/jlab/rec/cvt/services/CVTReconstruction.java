@@ -1,9 +1,11 @@
 package org.jlab.rec.cvt.services;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
@@ -33,6 +35,10 @@ public class CVTReconstruction extends ReconstructionEngine {
     org.jlab.rec.cvt.bmt.Geometry BMTGeom;
     SVTStripFactory svtIdealStripFactory;
     
+    private AtomicInteger Run = new AtomicInteger(0);
+    private double triggerPhase;
+    private int newRun = 0;
+    
     public CVTReconstruction() {
         super("CVTTracks", "ziegler", "4.0");
         org.jlab.rec.cvt.svt.Constants.Load();
@@ -41,86 +47,35 @@ public class CVTReconstruction extends ReconstructionEngine {
 
     }
 
-    String FieldsConfig = "";
-    int Run = -1;
-  
-    public void setRunConditionsParameters(DataEvent event, String Fields, int iRun, boolean addMisAlignmts, String misAlgnFile) {
-        if (event.hasBank("RUN::config") == false) {
-            System.err.println("RUN CONDITIONS NOT READ!");
-            return;
+    
+    
+    
+    @Override
+    public boolean processDataEvent(DataEvent event) {
+	if (!event.hasBank("RUN::config")) {
+            return true;
         }
 
-        int Run = iRun;
-
-        boolean isMC = false;
-        boolean isCosmics = false;
-        DataBank bank = event.getBank("RUN::config");
-        //System.out.println(bank.getInt("Event")[0]);
-        if (bank.getByte("type", 0) == 0) {
-            isMC = true;
-        }
-        if (bank.getByte("mode", 0) == 1) {
-            isCosmics = true;
-        }
-
-        boolean isSVTonly = false;
-
-        // Load the fields
-        //-----------------
-        String newConfig = "SOLENOID" + bank.getFloat("solenoid", 0);
-
-        if (Fields.equals(newConfig) == false) {
-            // Load the Constants
-            
-            System.out.println("  CHECK CONFIGS..............................." + FieldsConfig + " = ? " + newConfig);
-            Constants.Load(isCosmics, isSVTonly, (double) bank.getFloat("solenoid", 0));
-            // Load the Fields
-            //System.out.println("************************************************************SETTING FIELD SCALE *****************************************************");
-            //TrkSwimmer.setMagneticFieldScale(bank.getFloat("solenoid", 0)); // something changed in the configuration
-            //double shift =0;
-            //if(bank.getInt("run", 0)>1840)
-            //    shift = -1.9;
-            //MagneticFields.getInstance().setSolenoidShift(shift);
-//            this.setFieldsConfig(newConfig);
-            
-            CCDBConstantsLoader.Load(new DatabaseConstantProvider(bank.getInt("run", 0), "default"));
-        }
-        this.setFieldsConfig(newConfig);
-
+       DataBank bank = event.getBank("RUN::config");
+       
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
+       if (newRun == 0)
+           return true;
+        if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
+           CCDBConstantsLoader.Load(new DatabaseConstantProvider(bank.getInt("run", 0), "default"));
+ //          if (debug.get()) startTime = System.currentTimeMillis();
+           
+           Run.set(newRun);
+           
+ //          if (debug.get()) System.out.println("NEW RUN INIT = " + (System.currentTimeMillis() - startTime));
+       }
 
-        if (Run != newRun) {
-            this.setRun(newRun);
-        }
-      
-        Run = newRun;
-        this.setRun(Run);
-    }
-
-    public int getRun() {
-        return Run;
-    }
-
-    public void setRun(int run) {
-        Run = run;
-    }
-
-    public String getFieldsConfig() {
-        return FieldsConfig;
-    }
-
-    public void setFieldsConfig(String fieldsConfig) {
-        FieldsConfig = fieldsConfig;
-    }
-    
-	@Override
-    public boolean processDataEvent(DataEvent event) {
-		
+        /* 1 */
+        // get Field
+        Swim dcSwim = new Swim();
         CVTRecHandler recHandler = new CVTRecHandler(SVTGeom,BMTGeom);
-        setRunConditionsParameters(event, this.getFieldsConfig(), this.getRun(), false, "");
-
         Swim swimmer = new Swim();
         
         RecoBankWriter rbc = new RecoBankWriter();
@@ -130,7 +85,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         recHandler.loadCrosses();
 
         //System.out.println(" Number of crosses "+crosses.get(0).size()+" + "+crosses.get(1).size());
-        if(Constants.isCosmicsData()==true) { 
+        if(Math.abs(Swimmer.getSolScale())<0.0001) { 
             List<StraightTrack> cosmics = recHandler.cosmicsTracking();   
         	rbc.appendCVTCosmicsBanks(event, recHandler.getSVThits(), recHandler.getBMThits(), 
         									 recHandler.getSVTclusters(), recHandler.getBMTclusters(), 
@@ -148,7 +103,7 @@ public class CVTReconstruction extends ReconstructionEngine {
     public boolean init() {
         System.out.println(" ........................................ trying to connect to db ");
 //        CCDBConstantsLoader.Load(new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default"));
-        CCDBConstantsLoader.Load(new DatabaseConstantProvider(10, "default"));
+        CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, "default"));
                
         DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
 //        DatabaseConstantProvider cp = new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default");
