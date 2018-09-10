@@ -242,7 +242,7 @@ public class CVTRecHandler {
         return cosmics;
 	}
 	
-	public List<Track> beamTracking(Swim swimmer){ System.out.println(" BEAM TRACK...........");
+	public List<Track> beamTracking(Swim swimmer){ 
 		if( this.crosses == null ) return null;
 		TrackSeederCA trseed = new TrackSeederCA();
         
