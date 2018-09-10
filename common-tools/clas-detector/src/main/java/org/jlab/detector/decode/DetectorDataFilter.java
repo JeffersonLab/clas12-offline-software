@@ -15,8 +15,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import org.jlab.detector.base.DetectorType;
-import javax.swing.JTextField;
-import org.jlab.jnp.hipo4.data.DataType;
 
 /**
  *
@@ -72,9 +70,33 @@ public class DetectorDataFilter {
         this.detectorCRATES.clear();
     }
     
+    
+    @Override
+    public String toString(){
+       StringBuilder str = new StringBuilder();
+       int counter = 0;
+       str.append("[");
+       for(DetectorType type : this.detectorTypes){
+           if(counter!=0) str.append(",");
+           str.append(type.getName());
+           counter++;
+       }
+       str.append("]");
+       counter = 0;
+       str.append("[");
+       for(Integer crate : this.detectorCRATES){
+           if(counter!=0) str.append(",");
+           str.append(crate);
+           counter++;
+       }
+       str.append("]");
+       return str.toString();
+    }
+    
     public static class DetectorDataFilterPane extends JPanel implements ActionListener {
         
         DetectorDataFilter filter = new DetectorDataFilter();
+        JLabel             filterText = null;
         
         public DetectorDataFilterPane(){
             super();
@@ -97,6 +119,11 @@ public class DetectorDataFilter {
             JButton buttonAddReset = new JButton("Reset");
             buttonAddReset.addActionListener(this);
             this.add(buttonAddReset);
+            
+            filterText = new JLabel();
+            filterText.setText(filter.toString());
+            
+            this.add(filterText);
         }
         
         public DetectorDataFilter getFilter(){return this.filter;}
@@ -120,13 +147,31 @@ public class DetectorDataFilter {
                 }
             }
             if(e.getActionCommand().compareTo("add_crate")==0){
-               
-                
+               Object[] possibilities = new Object[99];
+               for(int i = 0; i < 99; i++){
+                   Integer crate = i+1;
+                   possibilities[i] = crate.toString();
+               }
+               String s = (String) JOptionPane.showInputDialog(
+                    this,
+                    "Add Crate to the filter:\n"
+                    ,
+                    "Detector Filter",
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    possibilities,
+                    "FTOF");
+                if ((s != null) && (s.length() > 0)) {
+                    Integer crate = Integer.parseInt(s);
+                    this.filter.addCrate(crate);
+                }
             }
             
             if(e.getActionCommand().compareTo("Reset")==0){
                 this.filter.reset();
             }
+            
+            this.filterText.setText(filter.toString());
         }
         
         
