@@ -86,9 +86,9 @@ public class CLASDecoder {
         if(event instanceof EvioDataEvent){
             try {
                 
-                // dataList = codaDecoder.getDataEntries( (EvioDataEvent) event);
+                dataList = codaDecoder.getDataEntries( (EvioDataEvent) event);
                 
-                dataList = new ArrayList<DetectorDataDgtz>();
+                //dataList = new ArrayList<DetectorDataDgtz>();
                 //-----------------------------------------------------------------------------
                 // This part reads the BITPACKED FADC data from tag=57638 Format (cmcms)
                 // Then unpacks into Detector Digigitized data, and appends to existing buffer
