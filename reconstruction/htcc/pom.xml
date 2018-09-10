@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.jlab.clas12.detector</groupId>
-  <artifactId>clasrec-htcc</artifactId>
+  <artifactId>clas12detector-htcc</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 

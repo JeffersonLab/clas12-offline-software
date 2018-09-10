@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.jlab.clas12.detector</groupId>
-  <artifactId>clasrec-ltcc</artifactId>
+  <artifactId>clas12detector-ltcc</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
@@ -46,12 +46,6 @@
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-io</artifactId>
       <version>5.0-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jlab.plugins</groupId>
-      <artifactId>jMath</artifactId>
-      <version>1.0</version>
     </dependency>
   </dependencies>
 

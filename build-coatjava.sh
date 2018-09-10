@@ -87,8 +87,8 @@ cp reconstruction/tof/target/clas12detector-tof-1.0-SNAPSHOT.jar coatjava/lib/se
 cp reconstruction/cvt/target/clas12detector-cvt-1.0-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/ft/target/clas12detector-ft-1.0-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/ec/target/clas12detector-ec-1.0-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/ltcc/target/clasrec-ltcc-1.0-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/htcc/target/clasrec-htcc-1.0-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/ltcc/target/clas12detector-ltcc-1.0-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/htcc/target/clas12detector-htcc-1.0-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/cnd/target/clas12detector-cnd-1.0-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/rich/target/clas12detector-rich-1.0-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/fvt/target/clas12detector-fmt-1.0-SNAPSHOT.jar coatjava/lib/services/
