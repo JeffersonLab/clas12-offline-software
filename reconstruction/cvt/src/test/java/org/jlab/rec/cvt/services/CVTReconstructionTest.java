@@ -21,7 +21,7 @@ public class CVTReconstructionTest {
 	
     @Test
     public void testCVTReconstruction() {
-        /*
+        
         System.setProperty("CLAS12DIR", "../../");
        
         String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";
@@ -42,7 +42,6 @@ public class CVTReconstructionTest {
         CVTReconstruction CVTengine = new CVTReconstruction();
         CVTengine.init();
         
-        System.out.println("*****************************");
         testEvent.show();
         CVTengine.processDataEvent(testEvent);
         testEvent.show();
@@ -61,7 +60,7 @@ public class CVTReconstructionTest {
         assertEquals(ClasMath.isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("py", 0), 0.2741), true);
         assertEquals(ClasMath.isWithinXPercent(10.0, testEvent.getBank("REC::Particle").getFloat("pz", 0), 0.3473), true);
         assertEquals(ClasMath.isWithinXPercent(30.0, testEvent.getBank("REC::Particle").getFloat("vz", 0), -1.95444), true); 
-*/
+
     }
     
 }
