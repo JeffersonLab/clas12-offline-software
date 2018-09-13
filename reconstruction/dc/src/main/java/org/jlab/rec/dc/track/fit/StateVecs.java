@@ -265,6 +265,10 @@ public class StateVecs {
             dcSwim.SetSwimParameters(trkcand.get_Vtx0().x(), trkcand.get_Vtx0().y(), trkcand.get_Vtx0().z(), 
                     trkcand.get_pAtOrig().x(), trkcand.get_pAtOrig().y(), trkcand.get_pAtOrig().z(), trkcand.get_Q());
             double[] VecInDCVolume = dcSwim.SwimToPlaneLab(175.);
+            if(VecInDCVolume==null){
+                kf.setFitFailed = true;
+                return;
+            }
             // rotate to TCS
             Cross C = new Cross(trkcand.get(0).get_Sector(), trkcand.get(0).get_Region(), -1);
         

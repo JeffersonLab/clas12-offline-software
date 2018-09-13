@@ -267,8 +267,12 @@ public class Trajectory extends ArrayList<Cross> {
         dcSwim.SetSwimParameters(x, y, z, px, py, pz, q);
        
         double[] trkPars = new double[8];
+        if(trkPars==null)
+            return;
         //HTCC
         double[] trkParsCheren = dcSwim.SwimToSphere(175.);
+        if(trkParsCheren==null)
+            return;
         this.FillTrajectory(id, trajectory, trkParsCheren, trkParsCheren[6], 0, ts); 
         //reinit Cheren
         for(int k =0; k<8; k++)
