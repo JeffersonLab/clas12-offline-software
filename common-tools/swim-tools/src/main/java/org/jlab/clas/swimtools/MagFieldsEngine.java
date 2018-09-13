@@ -1,5 +1,6 @@
 package org.jlab.clas.swimtools;
 
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.MagneticFields;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.reco.ReconstructionEngine;
@@ -52,7 +53,9 @@ public class MagFieldsEngine extends ReconstructionEngine {
             e.printStackTrace();
         }
         
-         // Wire distortions
+        //Math libs
+        //FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
+        // Shift
         String solShift = this.getEngineConfigString("solenoidShift");
         
         if (solShift!=null) {

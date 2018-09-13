@@ -29,8 +29,9 @@ public class Swim {
     private double _theta;
     private double _pTot;
     private final double _rMax = 5 + 3; // increase to allow swimming to outer
-                                                                    // detectors
+    // detectors
     private double _maxPathLength = 9;
+    private boolean SwimUnPhys = false; //Flag to indicate if track is swimmable
     private int _charge;
 
     final double SWIMZMINMOM = 0.75; // GeV/c
@@ -39,6 +40,7 @@ public class Swim {
     final double stepSize = 5.00 * 1.e-4; // 500 microns
 
     private ProbeCollection PC;
+    
     /**
      * Class for swimming to various surfaces.  The input and output units are cm and GeV/c
      */
@@ -64,12 +66,12 @@ public class Swim {
      */
     public void SetSwimParameters(int direction, double x0, double y0, double z0, double thx, double thy, double p,
                     int charge) {
-
+        
         // x,y,z in m = swimmer units
         _x0 = x0 / 100;
         _y0 = y0 / 100;
         _z0 = z0 / 100;
-
+        this.checkR(_x0, _y0, _z0);
         double pz = direction * p / Math.sqrt(thx * thx + thy * thy + 1);
         double px = thx * pz;
         double py = thy * pz;
@@ -100,7 +102,7 @@ public class Swim {
         _x0 = x0 / 100;
         _y0 = y0 / 100;
         _z0 = z0 / 100;
-
+        this.checkR(_x0, _y0, _z0);
         double pz = p / Math.sqrt(thx * thx + thy * thy + 1);
         double px = thx * pz;
         double py = thy * pz;
@@ -127,6 +129,7 @@ public class Swim {
         _x0 = x0 / 100;
         _y0 = y0 / 100;
         _z0 = z0 / 100;
+         this.checkR(_x0, _y0, _z0);
         _phi = Math.toDegrees(FastMath.atan2(py, px));
         _pTot = Math.sqrt(px * px + py * py + pz * pz);
         _theta = Math.toDegrees(Math.acos(pz / _pTot));
@@ -164,9 +167,9 @@ public class Swim {
         double z = z_cm / 100; // the magfield method uses meters
         double[] value = new double[8];
 
-        if (_pTot < MINTRKMOM) // fiducial cut
+        if (_pTot < MINTRKMOM || this.SwimUnPhys==true) // fiducial cut
         {
-            return value;
+            return null;
         }
 
         // use a SwimZResult instead of a trajectory (dph)
@@ -192,7 +195,7 @@ public class Swim {
                         szr = PC.RCF_z.sectorAdaptiveRK(sector, _charge, _pTot, start, z_cm, stepSizeCM, hdata);
                 } catch (SwimZException e) {
                         szr = null;
-                        System.err.println("[WARNING] Tilted SwimZ Failed for p = " + _pTot);
+                        //System.err.println("[WARNING] Tilted SwimZ Failed for p = " + _pTot);
                 }
             }
 
@@ -246,7 +249,7 @@ public class Swim {
         double z = z_cm / 100; // the magfield method uses meters
         double[] value = new double[8];
 
-        if (_pTot < MINTRKMOM) // fiducial cut
+        if (_pTot < MINTRKMOM || this.SwimUnPhys==true) // fiducial cut
         {
                 return null;
         }
@@ -273,7 +276,7 @@ public class Swim {
                         szr = PC.CF_z.adaptiveRK(_charge, _pTot, start, z_cm, stepSizeCM, hdata);
                 } catch (SwimZException e) {
                         szr = null;
-                        System.err.println("[WARNING] SwimZ Failed for p = " + _pTot);
+                        //System.err.println("[WARNING] SwimZ Failed for p = " + _pTot);
 
                 }
             }
@@ -318,6 +321,12 @@ public class Swim {
         }
         return value;
 
+    }
+
+    private void checkR(double _x0, double _y0, double _z0) {
+        if(Math.sqrt(_x0*_x0 + _y0*_y0)>this._rMax || 
+                Math.sqrt(_x0*_x0 + _y0*_y0 + _z0*_z0)>this._maxPathLength)
+            this.SwimUnPhys=true;
     }
     /**
      * Cylindrical stopper
@@ -379,7 +388,9 @@ public class Swim {
 
         double[] value = new double[8];
         // using adaptive stepsize
-
+        if(this.SwimUnPhys)
+            return null;
+        
         SphericalBoundarySwimStopper stopper = new SphericalBoundarySwimStopper(Rad);
 
         SwimTrajectory st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize,
@@ -459,7 +470,8 @@ public class Swim {
 
         double[] value = new double[8];
         // using adaptive stepsize
-
+        if(this.SwimUnPhys==true)
+            return null;
         SphericalBoundarySwimStopper stopper = new SphericalBoundarySwimStopper(Rad);
 
         SwimTrajectory st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize,
@@ -547,6 +559,8 @@ public class Swim {
     public double[] SwimToPlaneBoundary(double d_cm, Vector3D n, int dir) {
 
         double[] value = new double[8];
+        if(this.SwimUnPhys)
+            return null;
         double d = d_cm / 100;
 
         double hdata[] = new double[3];
