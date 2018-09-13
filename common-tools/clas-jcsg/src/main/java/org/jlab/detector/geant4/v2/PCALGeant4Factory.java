@@ -8,6 +8,7 @@ package org.jlab.detector.geant4.v2;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
+import static org.jlab.detector.hits.DetId.PCALID;
 import org.jlab.detector.units.SystemOfUnits.Length;
 import org.jlab.detector.volume.G4Trap;
 import org.jlab.detector.volume.G4World;
@@ -146,14 +147,13 @@ public final class PCALGeant4Factory extends Geant4Factory {
                         dstrip / 2.0, 0, 0,
                         uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0,
                         uwidth / 2.0 - dwrap, lhalfbtm, lhalftop, 0);
-
                 if (istrip > 0 && istrip <= (nustrips - ndoubles * 2)) {
                     stripVol.makeSensitive();
                     scipaddles.add(stripVol);
                 }
                 stripVol.setMother(layerVol);
                 stripVol.translate(0, (-uheight + hshort + hlong) / 2.0, 0);
-
+                stripVol.setId(PCALID, isector+1, ilayer+1, scipaddles.size());
                 hshort += uwidth;
             }
 
@@ -167,13 +167,12 @@ public final class PCALGeant4Factory extends Geant4Factory {
                         dstrip / 2.0, 0, 0,
                         wstrip - dwrap, lhalfbtm, lhalftop, 0,
                         wstrip - dwrap, lhalfbtm, lhalftop, 0);
-
                 stripVol.makeAbstract();
                 stripVol.makeSensitive();
                 scipaddles.add(stripVol);
                 stripVol.setMother(layerVol);
                 stripVol.translate(0, (-uheight + hshort + hlong) / 2.0, 0);
-
+                stripVol.setId(PCALID, isector+1, ilayer+1, scipaddles.size());
                 hshort += 2.0 * wstrip;
             }
 
@@ -193,7 +192,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
                         dstrip / 2.0, 0, 0,
                         wstrip - dwrap, lbtm / 2.0, ltop / 2.0, -walpha,
                         wstrip - dwrap, lbtm / 2.0, ltop / 2.0, -walpha);
-
+                
                 stripVol.makeAbstract();
                 stripVol.makeSensitive();
                 scipaddles.add(stripVol);
@@ -201,7 +200,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 double xstrip = ystrip * Math.tan(-walpha);
                 stripVol.translate(xstrip, ystrip, 0);
                 stripVol.setMother(layerVol);
-
+                stripVol.setId(PCALID, isector+1, ilayer+1, scipaddles.size());
                 hshort += wstrip;
             }
 
@@ -216,7 +215,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
                         dstrip / 2.0, 0, 0,
                         wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha,
                         wwidth / 2.0 - dwrap, lbtm / 2.0, ltop / 2.0, -walpha);
-
+                
                 if (istrip > ndoubles * 2) {
                     stripVol.makeSensitive();
                     scipaddles.add(stripVol);
@@ -225,7 +224,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 double xstrip = ystrip * Math.tan(-walpha);
                 stripVol.translate(xstrip, ystrip, 0);
                 stripVol.setMother(layerVol);
-
+                stripVol.setId(PCALID, isector+1, ilayer+1, scipaddles.size());
                 hshort += wwidth;
             }
 
