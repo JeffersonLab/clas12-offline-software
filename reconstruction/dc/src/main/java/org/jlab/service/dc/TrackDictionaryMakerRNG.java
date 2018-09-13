@@ -25,7 +25,6 @@ import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.geant4.v2.PCALGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
-import org.jlab.detector.hits.PCALDetHit;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.rec.dc.Constants;
@@ -46,6 +45,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         return count;
     }
     Random r = null;
+    long seed= 10;
     private Map<ArrayList<Integer>, Integer> dictionary = null;
     
     public TrackDictionaryMakerRNG(){
@@ -60,19 +60,38 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         super.LoadTables();
         return true;
     }
-    public void processFile(float torScale, float solScale, int charge, int n, float phiMin, float phiMax) {
+    public void processFile(float torScale, float solScale, int charge, int n, long seed,
+            float pMin, float pMax, float thMin, float thMax, float phiMin, float phiMax, float vzMin, float vzMax) {
         
         Swimmer.setMagneticFieldsScales(torScale, solScale, -1.9);
         Swim sw = new Swim();
         PrintWriter pw = null;
         try {
-            System.out.println(" MAKING ROADS for "+"TracksDicTorus"+String.valueOf(torScale)+"Solenoid"+String.valueOf(solScale)
-                    +"Charge"+String.valueOf(charge)+"n"+String.valueOf(n)
-                    +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax));
-            pw = new PrintWriter("TracksDicTorus"+String.valueOf(torScale)+"Solenoid"+String.valueOf(solScale)
-                    +"Charge"+String.valueOf(charge)+"n"+String.valueOf(n)
-                    +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax)+".txt");
-            this.ProcessTracks(pw, dcDetector, ftofDetector, pcalDetector, sw, charge, n, phiMin, phiMax);
+            System.out.println(" MAKING ROADS for: "
+                    +"\n Torus:\t\t"   +String.valueOf(torScale)
+                    +"\n Solenoid:\t"  +String.valueOf(solScale)
+                    +"\n Charge:\t"    +String.valueOf(charge)
+                    +"\n PMinGev:\t"   +String.valueOf(pMin)
+                    +"\n PMaxGeV:\t"   +String.valueOf(pMax)
+                    +"\n ThMinDeg:\t"  +String.valueOf(thMin)
+                    +"\n ThMaxDeg:\t"  +String.valueOf(thMax)
+                    +"\n PhiMinDeg:\t" +String.valueOf(phiMin)
+                    +"\n PhiMaxDeg:\t" +String.valueOf(phiMax)
+                    +"\n VzMinDeg:\t"  +String.valueOf(vzMin)
+                    +"\n VzMaxDeg:\t"  +String.valueOf(vzMax)
+                    +"\n Seed:\t\t"    +String.valueOf(seed)
+                    +"\n NTracks:\t"   +String.valueOf(n));
+            String fileName = "TracksDicTorus"+String.valueOf(torScale)+"Solenoid"+String.valueOf(solScale)
+                    +"Charge"+String.valueOf(charge)+"n"+String.valueOf(n)+"Seed"+String.valueOf(seed)
+                    +"PMinGev" +String.valueOf(pMin)+"PMaxGeV" +String.valueOf(pMax)
+                    +"ThMinDeg" +String.valueOf(thMin)+"ThMaxDeg" +String.valueOf(thMax)
+                    +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax)
+                    +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax)+".txt";
+            pw = new PrintWriter(fileName);
+            this.r.setSeed(seed);
+            System.out.println("\n Random generator seed set to: " + seed);
+            System.out.println("\n Dictionary file name: " + fileName + "\n");
+            this.ProcessTracks(pw, dcDetector, ftofDetector, pcalDetector, sw, charge, n, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax);
             pw.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(TrackDictionaryMakerRNG.class.getName()).log(Level.SEVERE, null, ex);
@@ -218,7 +237,10 @@ public class TrackDictionaryMakerRNG extends DCEngine{
     public void ProcessTracks(PrintWriter pw,DCGeant4Factory dcDetector, 
             FTOFGeant4Factory ftofDetector, PCALGeant4Factory pcalDetector, 
             Swim sw, int q, int numRandoms, 
-            float PhiMin, float PhiMax) {
+            float PMin, float PMax, 
+            float ThMin, float ThMax, 
+            float PhiMin, float PhiMax, 
+            float VzMin, float VzMax) {
         double[] swimVal = new double[8];
         Map<ArrayList<Integer>, Integer> newDictionary = new HashMap<>();
         int[] wireArray = new int[36];
@@ -230,11 +252,12 @@ public class TrackDictionaryMakerRNG extends DCEngine{
 
             
         for (int i = 0; i < numRandoms; i++) {
+            if(i%10000 == 0) System.out.println("\t" + i + " tracks generated, " + newDictionary.size() + " roads found");
             Clear(wireArray);
-            invP     =this.randomDouble((double)(1./11.0), (double) (1./0.3));
+            invP     =this.randomDouble((double)(1./PMax), (double) (1./PMin));
             phiDeg   =this.randomDouble((double) PhiMin, (double) PhiMax);
-            thetaDeg =this.randomDouble(5, 41);
-            vzCm     =this.randomDouble(-5.0, 5.0);
+            thetaDeg =this.randomDouble(ThMin, ThMax);
+            vzCm     =this.randomDouble(VzMin, VzMax);
             double p = 1. / invP;
             
             double px = p * Math.cos(Math.toRadians(phiDeg)) * Math.sin(Math.toRadians(thetaDeg));
@@ -367,14 +390,14 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     Wl1.get(5), Wl2.get(5), Wl3.get(5), Wl4.get(5), Wl5.get(5), Wl6.get(5), 
                     //trkTOF[0], trkTOF[1], trkTOF[2], trkPCAL[0], trkPCAL[1], trkPCAL[2]);
                     paddle, vzCm);  */
-                    pw.printf("%d\t%.1f\t %.1f\t %.1f\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    +"%d\t %d\t %d\t %.1f\t\n",
+                    pw.printf("%d\t%.2f\t%.2f\t%.2f\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%.2f\t\n",
                     //+ "%.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", 
                     q, p, thetaDeg, phiDeg,
                     Wl1.get(0), Wl2.get(0), Wl3.get(0), Wl4.get(0), Wl5.get(0), Wl6.get(0), 
@@ -388,6 +411,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                 }   
             }
         }
+        System.out.println("\t" + numRandoms + " tracks generated, " + newDictionary.size() + " roads found");
     }
 
     public static void ProcessCosmics(PrintWriter pw, DCGeant4Factory dcDetector, TrackDictionaryMakerRNG tw, Swim sw) {
@@ -636,8 +660,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         
     }
     public static void main(String[] args) {
-        TrackDictionaryMakerRNG tm = new TrackDictionaryMakerRNG();        
-        tm.init();
+    
         
         OptionParser parser = new OptionParser("dict-maker");
 
@@ -645,25 +668,39 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         parser.addOption("-s","-1.0");
         parser.addOption("-q","-1");
         parser.addOption("-n","10000");
+        parser.addOption("-pmin","0.3");
+        parser.addOption("-pmax","11.0");
+        parser.addOption("-thmin","5.0");
+        parser.addOption("-thmax","40.0");
         parser.addOption("-phimin","-30.0");
         parser.addOption("-phimax","30.0");
         parser.addOption("-seed","10");
         parser.addOption("-var","default");
+        parser.addOption("-vzmin","-5.0");
+        parser.addOption("-vzmax","5.0");
         parser.parse(args);
         
 
         if(parser.hasOption("-t")==true && parser.hasOption("-s")==true){
+            TrackDictionaryMakerRNG tm = new TrackDictionaryMakerRNG();        
+            tm.init();
             float torus    = (float) parser.getOption("-t").doubleValue();
             float solenoid = (float) parser.getOption("-s").doubleValue();
             int charge = parser.getOption("-q").intValue();
             int n = parser.getOption("-n").intValue();
+            float pMin = (float) parser.getOption("-pmin").doubleValue();
+            float pMax = (float) parser.getOption("-pmax").doubleValue();
+            float thMin = (float) parser.getOption("-thmin").doubleValue();
+            float thMax = (float) parser.getOption("-thmax").doubleValue();
             float phiMin = (float) parser.getOption("-phimin").doubleValue();
             float phiMax = (float) parser.getOption("-phimax").doubleValue();
+            float vzMin = (float) parser.getOption("-vzmin").doubleValue();
+            float vzMax = (float) parser.getOption("-vzmax").doubleValue();
             long seed = (long)parser.getOption("-seed").intValue();
-            tm.r.setSeed(seed);
+//            tm.r.setSeed(seed);
             String dcVar = parser.getOption("-var").stringValue();
             tm.resetGeom(dcVar);
-            tm.processFile(torus, solenoid, charge, n, phiMin, phiMax);
+            tm.processFile(torus, solenoid, charge, n, seed, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax);
         } else {
             System.out.println(" FIELDS NOT SET");
         }
