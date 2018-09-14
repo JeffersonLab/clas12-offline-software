@@ -76,10 +76,10 @@ public final class FTOFGeant4Factory extends Geant4Factory {
                 panel_mother_dz + motherGap);
         panelVolume.setId(FTOFID, sector, layer, 0);
 
-        double panel_pos_xy = dist2edge * Math.sin(thmin) + (panel_width + 0.0 * motherGap) / 2 * Math.cos(thtilt);
+        double panel_pos_xy = dist2edge * Math.sin(thmin) + panel_width / 2 * Math.cos(thtilt) + panel_mother_dy * Math.sin(thtilt);
         double panel_pos_x = panel_pos_xy * Math.cos(Math.toRadians(sector * 60 - 60));
         double panel_pos_y = panel_pos_xy * Math.sin(Math.toRadians(sector * 60 - 60));
-        double panel_pos_z = dist2edge * Math.cos(thmin) - (panel_width + 0.0 * motherGap) / 2 * Math.sin(thtilt) + panel_mother_dy * Math.cos(thtilt);
+        double panel_pos_z = dist2edge * Math.cos(thmin) - panel_width / 2 * Math.sin(thtilt) + panel_mother_dy * Math.cos(thtilt);
 
         panelVolume.rotate("xyz", Math.toRadians(-90) - thtilt, 0.0, Math.toRadians(-30.0 - sector * 60.0));
         panelVolume.translate(panel_pos_x, panel_pos_y, panel_pos_z);
@@ -109,8 +109,9 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         double wrapperthickness = cp.getDouble(stringLayers[layer - 1] + "/panel/wrapperthickness", 0);
         double thtilt = Math.toRadians(cp.getDouble(stringLayers[layer - 1] + "/panel/thtilt", 0));
         double thmin = Math.toRadians(cp.getDouble(stringLayers[layer - 1] + "/panel/thmin", 0));
-        if(layer==2) gap = cp.getDouble(stringLayers[layer - 1] + "/panel/pairgap", 0);
-        
+        double pairgap = 0;
+        if(layer==2) pairgap = cp.getDouble(stringLayers[layer - 1] + "/panel/pairgap", 0);
+            
         String paddleLengthStr = stringLayers[layer - 1] + "/paddles/Length";
 
         List<G4Box> paddleVolumes = new ArrayList<>();
@@ -121,7 +122,10 @@ public final class FTOFGeant4Factory extends Geant4Factory {
             G4Box volume = new G4Box(vname, paddlelength / 2. * Length.cm, paddlethickness / 2. * Length.cm, paddlewidth / 2.0 * Length.cm);
             volume.makeSensitive();
 
-            double zoffset = (ipaddle - numPaddles / 2. + 0.5) * (paddlewidth + gap + 2 * wrapperthickness);
+            int ipair = (int) ipaddle/2;
+            double zoffset = (ipaddle - numPaddles / 2. + 0.5) * (paddlewidth + gap);
+            if(layer==2) zoffset = (ipair - numPaddles/4-0.5) * (2*paddlewidth + gap + pairgap) + ((ipaddle%2)+0.5) * (paddlewidth + gap);
+
             volume.translate(0.0, 0.0, zoffset * Length.cm);
 
             paddleVolumes.add(volume);
