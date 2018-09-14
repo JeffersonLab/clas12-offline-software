@@ -597,10 +597,14 @@ public class TrackCandListFinder {
         if (shift == 1) {
             //X.add(0, (double) 0);
             //Y.add(0, (double) 0);
+            double xb = org.jlab.rec.cvt.Constants.getXb();
+            double yb = org.jlab.rec.cvt.Constants.getYb();
+            double rb = Math.sqrt(xb*xb+yb*yb);
             X.add(0, (double) org.jlab.rec.cvt.Constants.getXb());
             Y.add(0, (double) org.jlab.rec.cvt.Constants.getYb());
             //Z.add(0, (double) 0);
-            Rho.add(0, (double) 0);
+            //Rho.add(0, (double) 0);
+            Rho.add(0, (double) rb);
             //ErrRt.add(0, org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);
             ErrRt.add(0, org.jlab.rec.cvt.Constants.getRbErr());
             //ErrZ.add(0, org.jlab.rec.cvt.svt.Constants.ZVTXCONSTRAINT);
