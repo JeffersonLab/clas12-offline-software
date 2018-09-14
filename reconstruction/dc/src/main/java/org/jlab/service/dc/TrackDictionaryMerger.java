@@ -478,9 +478,6 @@ public class TrackDictionaryValidation {
                     }
                     // keep only roads with 6 superlayers
                     if(wires.size()!=6) continue;
-                    int paddle1b = Integer.parseInt(lineValues[40]);
-                    int paddle2  = Integer.parseInt(lineValues[42]);
-                    int pcalu    = Integer.parseInt(lineValues[43]);
                     nFull++;
                     if(this.dictionary.containsKey(wires)) {
                         nDupli++;
