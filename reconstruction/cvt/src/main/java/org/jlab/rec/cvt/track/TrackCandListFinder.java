@@ -588,34 +588,38 @@ public class TrackCandListFinder {
 
         ((ArrayList<Double>) X).ensureCapacity(SVTcrossesInTrk.size() + BMTZdetcrossesInTrk.size() + shift);
         ((ArrayList<Double>) Y).ensureCapacity(SVTcrossesInTrk.size() + BMTZdetcrossesInTrk.size() + shift);
-        ((ArrayList<Double>) Z).ensureCapacity(SVTcrossesInTrk.size() + BMTCdetcrossesInTrk.size() + shift);
+        ((ArrayList<Double>) Z).ensureCapacity(SVTcrossesInTrk.size() + BMTCdetcrossesInTrk.size() );
         ((ArrayList<Double>) Rho).ensureCapacity(SVTcrossesInTrk.size() + BMTCdetcrossesInTrk.size() + shift);
-        ((ArrayList<Double>) ErrZ).ensureCapacity(SVTcrossesInTrk.size() + BMTCdetcrossesInTrk.size() + shift);
+        ((ArrayList<Double>) ErrZ).ensureCapacity(SVTcrossesInTrk.size() + BMTCdetcrossesInTrk.size() );
         ((ArrayList<Double>) ErrRho).ensureCapacity(SVTcrossesInTrk.size() + BMTCdetcrossesInTrk.size() + shift);
         ((ArrayList<Double>) ErrRt).ensureCapacity(SVTcrossesInTrk.size() + BMTZdetcrossesInTrk.size() + shift);
 
         if (shift == 1) {
-            X.add(0, (double) 0);
-            Y.add(0, (double) 0);
-            Z.add(0, (double) 0);
+            //X.add(0, (double) 0);
+            //Y.add(0, (double) 0);
+            X.add(0, (double) org.jlab.rec.cvt.Constants.getXb());
+            Y.add(0, (double) org.jlab.rec.cvt.Constants.getYb());
+            //Z.add(0, (double) 0);
             Rho.add(0, (double) 0);
-            ErrRt.add(0, org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);
-            ErrZ.add(0, org.jlab.rec.cvt.svt.Constants.ZVTXCONSTRAINT);
-            ErrRho.add(0, org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);
+            //ErrRt.add(0, org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);
+            ErrRt.add(0, org.jlab.rec.cvt.Constants.getRbErr());
+            //ErrZ.add(0, org.jlab.rec.cvt.svt.Constants.ZVTXCONSTRAINT);
+            //ErrRho.add(0, org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);
+            ErrRho.add(0, org.jlab.rec.cvt.Constants.getRbErr());
         }
 
         for (int j = shift; j < shift + SVTcrossesInTrk.size(); j++) {
 
             X.add(j, SVTcrossesInTrk.get(j - shift).get_Point().x());
             Y.add(j, SVTcrossesInTrk.get(j - shift).get_Point().y());
-            Z.add(j, SVTcrossesInTrk.get(j - shift).get_Point().z());
+            Z.add(j, SVTcrossesInTrk.get(j - shift-1).get_Point().z());
             Rho.add(j, Math.sqrt(SVTcrossesInTrk.get(j - shift).get_Point().x() * SVTcrossesInTrk.get(j - shift).get_Point().x()
                     + SVTcrossesInTrk.get(j - shift).get_Point().y() * SVTcrossesInTrk.get(j - shift).get_Point().y()));
             ErrRho.add(j, Math.sqrt(SVTcrossesInTrk.get(j - shift).get_PointErr().x() * SVTcrossesInTrk.get(j - shift).get_PointErr().x()
                     + SVTcrossesInTrk.get(j - shift).get_PointErr().y() * SVTcrossesInTrk.get(j - shift).get_PointErr().y()));
             ErrRt.add(j, Math.sqrt(SVTcrossesInTrk.get(j - shift).get_PointErr().x() * SVTcrossesInTrk.get(j - shift).get_PointErr().x()
                     + SVTcrossesInTrk.get(j - shift).get_PointErr().y() * SVTcrossesInTrk.get(j - shift).get_PointErr().y()));
-            ErrZ.add(j, SVTcrossesInTrk.get(j - shift).get_PointErr().z());
+            ErrZ.add(j, SVTcrossesInTrk.get(j - shift-1).get_PointErr().z());
 
         }
 
@@ -654,10 +658,10 @@ public class TrackCandListFinder {
             for (int j = shift; j < shift + j0; j++) {
                 X.add(j, SVTcrossesInTrk.get(j - shift).get_Point0().x());
                 Y.add(j, SVTcrossesInTrk.get(j - shift).get_Point0().y());
-                Z.add(j, SVTcrossesInTrk.get(j - shift).get_Point0().z());
+                Z.add(j, SVTcrossesInTrk.get(j - shift-1).get_Point0().z());
                 ErrRho.add(j, Math.sqrt(SVTcrossesInTrk.get(j - shift).get_PointErr().x() * SVTcrossesInTrk.get(j - shift).get_PointErr().x()
                         + SVTcrossesInTrk.get(j - shift).get_PointErr().y() * SVTcrossesInTrk.get(j - shift).get_PointErr().y()));
-                ErrZ.add(j, SVTcrossesInTrk.get(j - shift).get_PointErr0().z());
+                ErrZ.add(j, SVTcrossesInTrk.get(j - shift-1).get_PointErr0().z());
             }
         }
         //	if(Constants.DEBUGMODE) {
