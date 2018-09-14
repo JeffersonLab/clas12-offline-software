@@ -123,14 +123,6 @@ public class Torus extends MagneticField {
 	}
 	
 	/**
-	 * Get the minimum z coordinate of the field boundary
-	 * @return the minimum z coordinate of the field boundary
-	 */
-	public double getZMin() {
-		return q3Coordinate.getMin();
-	}
-
-	/**
 	 * Print the current configuration
 	 * @param ps the print stream
 	 */

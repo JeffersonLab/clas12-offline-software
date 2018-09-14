@@ -271,6 +271,7 @@ public abstract class FieldProbe implements IField {
 	}
 	
 	
+	private static int ZEROPROBEWARNINGCOUNT = 0;
 	/**
 	 * Get the appropriate probe for the given field
 	 * @return the probe for the given field
@@ -293,7 +294,11 @@ public abstract class FieldProbe implements IField {
 			}
 		}
 
-		System.err.println("WARNING: creating a Zero probe");
+		//give limited number of warnings
+		if (ZEROPROBEWARNINGCOUNT < 3) {
+			System.err.println("WARNING: creating a Zero probe");
+			ZEROPROBEWARNINGCOUNT++;
+		}
 		
 		return new ZeroProbe();
 	}
@@ -309,9 +314,7 @@ public abstract class FieldProbe implements IField {
      */
     @Override
 	public boolean contains(double x, double y, double z) {
-		double rho = FastMath.sqrt(x * x + y * y);
-		double phi = FastMath.atan2Deg(y, x);
-        return containsCylindrical(phi, rho, z);
+    	return _field.contains(x, y, z);
     }
    
 	/**
@@ -328,7 +331,10 @@ public abstract class FieldProbe implements IField {
 	 * 
 	 */
 	@Override
-	public abstract boolean containsCylindrical(double phi, double rho, double z);
+	public boolean containsCylindrical(double phi, double rho, double z) {
+		//assumes shifting was done
+		return _field.contains(rho, z);
+	}
 
 	@Override
 	public abstract void fieldCylindrical(double phi, double rho, double z, float[] result);

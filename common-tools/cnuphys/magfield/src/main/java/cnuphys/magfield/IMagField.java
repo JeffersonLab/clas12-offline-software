@@ -63,4 +63,9 @@ public interface IMagField {
 	 * @param ps the print stream
 	 */
 	public void printConfiguration(PrintStream ps);
+	
+	public boolean contains(double x, double y, double z);
+
+	public boolean contains(double rho, double z);
+
 }

@@ -42,5 +42,9 @@ public class PointSet3D extends Item3D {
 	public void draw(GLAutoDrawable drawable) {
 		Support3D.drawPoints(drawable, _coords, _color, _pointSize, _circular);
 	}
+	
+	public void setCoords(float[] coords) {
+		_coords = coords;
+	}
 
 }

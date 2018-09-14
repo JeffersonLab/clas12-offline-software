@@ -80,12 +80,6 @@ public class SolenoidProbe extends FieldProbe {
 	 */
 	private void fieldCylindrical(Cell2D cell, double phi, double rho, double z, float result[]) {
 
-		if (!containsCylindrical(phi, rho, z)) {
-			result[X] = 0f;
-			result[Y] = 0f;
-			result[Z] = 0f;
-			return;
-		}
 
 		if (isZeroField()) {
 			result[X] = 0f;
@@ -95,9 +89,28 @@ public class SolenoidProbe extends FieldProbe {
 		}
 
 		// misalignment??
-		if (_solenoid.isMisaligned()) {
+		if (_solenoid.isMisalignedZ()) {
 			z = z - _solenoid.getShiftZ();
 		}
+		
+		//x and y uglier
+		if (_solenoid.isMisalignedX() || _solenoid.isMisalignedY()) {
+			double phiRad  = Math.toRadians(phi);
+			double x = rho*FastMath.cos(phiRad);
+			double y = rho*FastMath.sin(phiRad);
+			x = x - _solenoid.getShiftY();
+			y = y - _solenoid.getShiftY();
+			rho = FastMath.hypot(x, y);
+			phi = FastMath.atan2Deg(y, x);
+		}
+		
+		if (!containsCylindrical(phi, rho, z)) {
+			result[X] = 0f;
+			result[Y] = 0f;
+			result[Z] = 0f;
+			return;
+		}
+
 
 		if (phi < 0.0) {
 			phi += 360.0;
@@ -141,19 +154,8 @@ public class SolenoidProbe extends FieldProbe {
 	 * 
 	 */
 	@Override
-	public boolean containsCylindrical(double phi, double rho, double z) {
-
-		if (z >= _solenoid.getFakeZMax()) {
-			return false;
-		}
-
-		if ((z < getZMin()) || (z > getZMax())) {
-			return false;
-		}
-		if ((rho < getRhoMin()) || (rho > getRhoMax())) {
-			return false;
-		}
-		return true;
+	public boolean containsCylindrical(double phi, double rho, double z) {	
+		return _solenoid.contains(rho, z);
 	}
 
 }

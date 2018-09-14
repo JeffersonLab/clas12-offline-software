@@ -73,6 +73,29 @@ public class TorusProbe extends FieldProbe {
 			float result[]) {
 		
 				
+		if (isZeroField()) {
+			result[X] = 0f;
+			result[Y] = 0f;
+			result[Z] = 0f;
+			return;
+		}
+		
+		// misalignment??
+		if (_torus.isMisalignedZ()) {
+			z = z - _torus.getShiftZ();
+		}
+		
+		//x and y uglier
+		if (_torus.isMisalignedX() || _torus.isMisalignedY()) {
+			double phiRad  = Math.toRadians(phi);
+			double x = rho*FastMath.cos(phiRad);
+			double y = rho*FastMath.sin(phiRad);
+			x = x - _torus.getShiftX();
+			y = y - _torus.getShiftY();
+			rho = FastMath.hypot(x, y);
+			phi = FastMath.atan2Deg(y, x);
+		}
+
 		if (!containsCylindrical(phi, rho, z)) {
 			result[X] = 0f;
 			result[Y] = 0f;
@@ -80,12 +103,6 @@ public class TorusProbe extends FieldProbe {
 			return;
 		}
 
-		if (isZeroField()) {
-			result[X] = 0f;
-			result[Y] = 0f;
-			result[Z] = 0f;
-			return;
-		}
 
 		while (phi >= 360.0) {
 			phi -= 360.0;
@@ -170,14 +187,7 @@ public class TorusProbe extends FieldProbe {
 	 */
 	@Override
 	public boolean containsCylindrical(double phi, double rho, double z) {	
-		
-		if ((z < getZMin()) || (z > getZMax())) {
-			return false;
-		}
-		if ((rho < getRhoMin()) || (rho > getRhoMax())) {
-			return false;
-		}
-		return true;
+		return _torus.contains(rho, z);
 	}
 
 

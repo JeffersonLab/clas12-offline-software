@@ -15,20 +15,51 @@ public class FastMath {
 	 * 
 	 * @param y
 	 * @param x
-	 * @return atan2(y, x)
+	 * @return arctan(y/x) over 2Pi radians
 	 */
-	public static double atan2Deg(float y, float x) {
+	public static double atan2(float y, float x) {
 
 		switch (_mathLib) {
 		case FAST:
-			double phirad = org.apache.commons.math3.util.FastMath.atan2(y, x);
-			return Math.toDegrees(phirad);
+			return org.apache.commons.math3.util.FastMath.atan2(y, x);
 		case SUPERFAST:
-			phirad = Icecore.atan2(y, x);
-			return Math.toDegrees(phirad);
+			return Icecore.atan2(y, x);
 		default:
-			return Math.toDegrees(Math.atan2(y, x));
+			return Math.atan2(y, x);
 		}
+	}
+
+	/**
+	 * Might use standard or fast atan2
+	 * 
+	 * @param y
+	 * @param x
+	 * @return arctan(y/x) over 2Pi radians
+	 */
+	public static double atan2(double y, double x) {
+
+
+		switch (_mathLib) {
+		case FAST:
+			return org.apache.commons.math3.util.FastMath.atan2(y, x);
+		case SUPERFAST:
+			return Icecore.atan2((float)y, (float)x);
+		default:
+			return Math.atan2(y, x);
+		}
+
+	}
+	
+	
+	/**
+	 * Might use standard or fast atan2
+	 * 
+	 * @param y
+	 * @param x
+	 * @return arctan(y/x) over 360 degrees
+	 */
+	public static double atan2Deg(float y, float x) {
+		return Math.toDegrees(atan2(y, x));
 	}
 
 	/**
@@ -39,19 +70,7 @@ public class FastMath {
 	 * @return atan2(y, x)
 	 */
 	public static double atan2Deg(double y, double x) {
-
-
-		switch (_mathLib) {
-		case FAST:
-			double phirad = org.apache.commons.math3.util.FastMath.atan2(y, x);
-			return Math.toDegrees(phirad);
-		case SUPERFAST:
-			phirad = Icecore.atan2((float) y, (float) x);
-			return Math.toDegrees(phirad);
-		default:
-			return Math.toDegrees(Math.atan2(y, x));
-		}
-
+		return Math.toDegrees(atan2(y, x));
 	}
 	
 	
@@ -91,6 +110,11 @@ public class FastMath {
 	}
 	
 	
+	/**
+	 * Fast version of usual square root
+	 * @param x the value
+	 * @return the square root of x
+	 */
 	public static double sqrt(double x) {
 		switch (_mathLib) {
 		case FAST: case SUPERFAST:
@@ -104,8 +128,8 @@ public class FastMath {
 	/**
 	 * Might use standard or fast sin
 	 * 
-	 * @param x
-	 * @return atan2(y, x)
+	 * @param x the angle in radians
+	 * @return the sine
 	 */
 	public static double sin(double x) {
 
@@ -122,10 +146,10 @@ public class FastMath {
 
 	
 	/**
-	 * Might use standard or fast sin
+	 * Might use standard or fast cos
 	 * 
-	 * @param x
-	 * @return atan2(y, x)
+	 * @param x the angle in radians
+	 * @return the cosine
 	 */
 	public static double cos(double x) {
 

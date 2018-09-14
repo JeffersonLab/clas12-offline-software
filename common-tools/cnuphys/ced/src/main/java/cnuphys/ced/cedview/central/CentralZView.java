@@ -337,13 +337,20 @@ public class CentralZView extends CedView implements ChangeListener {
 		Point p1 = new Point();
 		Point p2 = new Point();
 		for (Cosmic cosmic : cosmics) {
-			double y1 = 1000;
-			double y2 = -1000;
+			double y1 = 100;
+			double y2 = -100;
 			double x1 = cosmic.trkline_yx_slope * y1 + cosmic.trkline_yx_interc;
 			double x2 = cosmic.trkline_yx_slope * y2 + cosmic.trkline_yx_interc;
 			double z1 = cosmic.trkline_yz_slope * y1 + cosmic.trkline_yz_interc;
 			double z2 = cosmic.trkline_yz_slope * y2 + cosmic.trkline_yz_interc;
 			
+			//convert to mm
+			x1 *= 10;
+			x2 *= 10;
+			y1 *= 10;
+			y2 *= 10;
+			z1 *= 10;
+			z2 *= 10;
 			labToLocal(x1, y1, z1, p1);
 			labToLocal(x2, y2, z2, p2);
 			

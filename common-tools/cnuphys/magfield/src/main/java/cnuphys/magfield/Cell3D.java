@@ -70,7 +70,7 @@ public class Cell3D {
 		if (_n1 < 0) {
 			if (!printedOnce) {
 				printedOnce = true;
-				System.err.println("WARNING Bad n1 in Cell3D.reset: " + _n1 + "  phi: " + q1);
+		//		System.err.println("WARNING Bad n1 in Cell3D.reset: " + _n1 + "  phi: " + q1);
 			}
 			return;
 		}
@@ -78,7 +78,7 @@ public class Cell3D {
 		if (_n2 < 0) {
 			if (!printedOnce) {
 				printedOnce = true;
-				System.err.println("WARNING Bad n2 in Cell3D.reset: " + _n2 + "  rho: " + q2);
+		//		System.err.println("WARNING Bad n2 in Cell3D.reset: " + _n2 + "  rho: " + q2);
 			}
 			return;
 		}
@@ -86,7 +86,7 @@ public class Cell3D {
 		if (_n3 < 0) {
 			if (!printedOnce) {
 				printedOnce = true;
-				System.err.println("WARNING Bad n3 in Cell3D.reset: " + _n3 + "  z: " + q3);
+		//		System.err.println("WARNING Bad n3 in Cell3D.reset: " + _n3 + "  z: " + q3);
 			}
 			return;
 		}
@@ -174,7 +174,7 @@ public class Cell3D {
 	 */
 	public void calculate(double q1, double q2, double q3, float[] result) {
 				
-		if (_probe.containsCylindrical(q1, q2, q3)) {
+	//	if (_probe.containsCylindrical(q1, q2, q3)) {
 			// do we need to reset?
 			if (!contained(q1, q2, q3)) {
 				reset(q1, q2, q3);
@@ -230,11 +230,12 @@ public class Cell3D {
 			result[0] = (float) bx;
 			result[1] = (float) by;
 			result[2] = (float) bz;
-		} else {
-			for (int i = 0; i < 3; i++) {
-				result[i] = 0f;
-			}
-		}
+//		} 
+//	else {
+//			for (int i = 0; i < 3; i++) {
+//				result[i] = 0f;
+//			}
+//		}
 	}
 
 	// nearest neighbor algorithm
