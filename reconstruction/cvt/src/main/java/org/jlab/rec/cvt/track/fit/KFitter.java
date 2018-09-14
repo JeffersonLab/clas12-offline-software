@@ -14,6 +14,7 @@ import org.jlab.rec.cvt.trajectory.Helix;
 
 import Jama.Matrix;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.rec.cvt.Constants;
 
 public class KFitter {
 
@@ -63,15 +64,15 @@ public class KFitter {
         //take first plane along beam line with n = y-dir;
         sv.Layer.add(0);
         sv.Sector.add(0);
-        sv.X0.add((double) 0.0);
-        sv.Y0.add((double) 0.0);
+        sv.X0.add((double) Constants.getXb());
+        sv.Y0.add((double) Constants.getYb());
         sv.Z0.add((double) 0.0);
         for (int i = 1; i < mv.measurements.size(); i++) {
             sv.Layer.add(mv.measurements.get(i).layer);
             sv.Sector.add(mv.measurements.get(i).sector);
             //Point3D ref = geo.intersectionOfHelixWithPlane(mv.measurements.get(i).layer, mv.measurements.get(i).sector,  helix) ;
             //ref = new Point3D(0,Constants.MODULERADIUS[mv.measurements.get(i).layer-1][0], 0);
-            Point3D ref = new Point3D(0, 0, 0);
+            Point3D ref = new Point3D(Constants.getXb(), Constants.getYb(), 0);
             sv.X0.add(ref.x());
             sv.Y0.add(ref.y());
             sv.Z0.add(ref.z());
