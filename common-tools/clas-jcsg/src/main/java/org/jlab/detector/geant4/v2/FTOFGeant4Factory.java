@@ -11,11 +11,14 @@ import org.jlab.detector.volume.G4Trd;
 import org.jlab.detector.volume.G4Box;
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
 import static org.jlab.detector.hits.DetId.FTOFID;
 import static org.jlab.detector.units.SystemOfUnits.Length;
 import org.jlab.detector.volume.G4World;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.prim.Plane3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
 
 /**
@@ -73,10 +76,10 @@ public final class FTOFGeant4Factory extends Geant4Factory {
                 panel_mother_dz + motherGap);
         panelVolume.setId(FTOFID, sector, layer, 0);
 
-        double panel_pos_xy = dist2edge * Math.sin(thmin) + (panel_width + 2.0 * motherGap) / 2 * Math.cos(thtilt);
+        double panel_pos_xy = dist2edge * Math.sin(thmin) + (panel_width + 0.0 * motherGap) / 2 * Math.cos(thtilt);
         double panel_pos_x = panel_pos_xy * Math.cos(Math.toRadians(sector * 60 - 60));
         double panel_pos_y = panel_pos_xy * Math.sin(Math.toRadians(sector * 60 - 60));
-        double panel_pos_z = dist2edge * Math.cos(thmin) - (panel_width + 2.0 * motherGap) / 2 * Math.sin(thtilt);
+        double panel_pos_z = dist2edge * Math.cos(thmin) - (panel_width + 0.0 * motherGap) / 2 * Math.sin(thtilt) + panel_mother_dy * Math.cos(thtilt);
 
         panelVolume.rotate("xyz", Math.toRadians(-90) - thtilt, 0.0, Math.toRadians(-30.0 - sector * 60.0));
         panelVolume.translate(panel_pos_x, panel_pos_y, panel_pos_z);
@@ -106,7 +109,8 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         double wrapperthickness = cp.getDouble(stringLayers[layer - 1] + "/panel/wrapperthickness", 0);
         double thtilt = Math.toRadians(cp.getDouble(stringLayers[layer - 1] + "/panel/thtilt", 0));
         double thmin = Math.toRadians(cp.getDouble(stringLayers[layer - 1] + "/panel/thmin", 0));
-
+        if(layer==2) gap = cp.getDouble(stringLayers[layer - 1] + "/panel/pairgap", 0);
+        
         String paddleLengthStr = stringLayers[layer - 1] + "/paddles/Length";
 
         List<G4Box> paddleVolumes = new ArrayList<>();
@@ -165,4 +169,30 @@ public final class FTOFGeant4Factory extends Geant4Factory {
     public G4World getMother() {
         return motherVolume;
     }
+    
+    
+    public static void main(String[] args) {
+        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.FTOF);
+        FTOFGeant4Factory factory = new FTOFGeant4Factory(cp);
+            
+        for (int sector = 1; sector <= 1; sector++) {
+            for (int layer = 1; layer <= 3; layer++) {
+                int npaddles = cp.length(factory.stringLayers[layer - 1] + "/paddles/paddle");
+                for (int comp = 1; comp <= npaddles; comp++) {
+                    G4Box pad = factory.getComponent(sector, layer, comp);
+                    double x=(pad.getLineY().origin().x+pad.getLineY().end().x)/2;
+                    double y=(pad.getLineY().origin().y+pad.getLineY().end().y)/2;
+                    double z=(pad.getLineY().origin().z+pad.getLineY().end().z)/2;
+//                    System.out.println(pad.getLineY().origin().toString());
+//                    System.out.println(pad.getLineY().end().toString());
+                    double dx=pad.getLineY().end().x-pad.getLineY().origin().x;
+                    double dz=pad.getLineY().end().z-pad.getLineY().origin().z;
+                    double tilt=Math.toDegrees(Math.atan(dx/dz));
+//                    System.out.println(tilt);
+                    System.out.println(comp + "\t" + pad.getLineY().origin().x + "\t" + pad.getLineY().origin().y +  "\t" + pad.getLineY().origin().z + "\t" + pad.getXHalfLength() + "\t" + pad.getYHalfLength() + "\t" + pad.getZHalfLength());
+                }
+            }
+        }
+    }
+
 }
