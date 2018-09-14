@@ -17,4 +17,4 @@ echo "LIBRARY DIRECTORY      = " $DATAMINING/lib/clas/
 
 #java -cp "$DATAMINING/lib/clas/core/*" org.jlab.coda.eventViewer.EventTreeFrame $*
 #java -Xms1024m -cp "$DATAMINING/lib/clas/*:$DATAMINING/lib/plugins/*" org.jlab.io.hipo.HipoDataSync $*
-java -Xmx1536m -Xms1024m -cp "$DATAMINING/lib/clas/*:$DATAMINING/lib/services/*:$DATAMINING/lib/utils/*" org.jlab.service.dc.TrackDictionaryMakerRNG $*
+java -Xmx1536m -Xms1024m -cp "$DATAMINING/lib/clas/*:$DATAMINING/lib/services/*:$DATAMINING/lib/utils/*" org.jlab.service.dc.TrackDictionaryValidation $*
