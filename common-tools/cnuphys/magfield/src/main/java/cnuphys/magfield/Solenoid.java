@@ -31,6 +31,29 @@ public final class Solenoid extends MagneticField {
 	}
 
 	/**
+	 * Checks whether the field has been set to always return zero.
+	 * 
+	 * @return <code>true</code> if the field is set to return zero.
+	 */
+	@Override
+	public final boolean isZeroField() {
+		if (isActive()) {
+			return super.isZeroField();
+		} else {
+			return true;
+		}
+	}
+	
+	/**
+	 * Checks this field active. 
+	 * @return <code>true</code> if this field is active;
+	 */
+	public boolean isActive() {
+		return MagneticFields.getInstance().hasActiveSolenoid();
+	}
+
+
+	/**
 	 * Obtain a solenoid object from a binary file, probably
 	 * "clas12_solenoid_fieldmap_binary.dat"
 	 *

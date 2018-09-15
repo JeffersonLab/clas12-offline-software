@@ -202,7 +202,7 @@ public abstract class MagneticField implements IMagField {
 	 * @return <code>true</code> if the field is set to return zero.
 	 */
 	@Override
-	public final boolean isZeroField() {
+	public boolean isZeroField() {
 		return (Math.abs(_scaleFactor) < 1.0e-6);
 	}
 
@@ -740,9 +740,26 @@ public abstract class MagneticField implements IMagField {
 		return q2Coordinate.getMin();
 	}
 
+	/**
+	 * Checks this field active. 
+	 * @return <code>true</code> if this field is active;
+	 */
+	public abstract boolean isActive();
 
+	/**
+	 * Checks whether the field boundary contain the given point.
+	 * @param x the x coordinate in cm
+	 * @param y the y coordinate in cm
+	 * @param z the z coordinate in cm
+	 * @return <code>true</code> if the field contains the given point
+	 */
 	@Override
 	public boolean contains(double x, double y, double z) {
+		
+		if (!isActive()) {
+			return false;
+		}
+		
 		//apply the shifts
 		x -= _shiftX;
 		y -= _shiftY;
@@ -752,8 +769,14 @@ public abstract class MagneticField implements IMagField {
 		return contains(rho, z);
 	}
 	
-	@Override
-	public boolean contains(double rho, double z) {
+	/**
+	 * Checks whether the field boundary contain the given point. Note the azimuthal coordinate
+	 * is not provided because it is assumed that all fields are valid for all phi.
+	 * @param rho the cylindrical radius in cm 
+	 * @param z the z coordinate in cm
+	 * @return <code>true</code> if the field contains the given point
+	 */
+	private boolean contains(double rho, double z) {
 		
 		//assumes z has already been shifted backwards
 		if (z >= _fakeZMax) {
@@ -771,5 +794,5 @@ public abstract class MagneticField implements IMagField {
 		}
 		return true;
 	}
-
+	
 }

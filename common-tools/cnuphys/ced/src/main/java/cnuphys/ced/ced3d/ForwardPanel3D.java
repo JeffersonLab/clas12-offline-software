@@ -87,11 +87,11 @@ public class ForwardPanel3D extends CedPanel3D {
 		}
 		
 		//mag field boundaries
-		if (MagneticFields.getInstance().hasSolenoid()) {
+		if (MagneticFields.getInstance().hasActiveSolenoid()) {
 			System.out.println("Adding 3D Solenoid Boundary");
 			addItem(new FieldBoundary(this, MagneticFields.getInstance().getSolenoid(), _solenoidColor));
 		}
-		if (MagneticFields.getInstance().hasTorus()) {
+		if (MagneticFields.getInstance().hasActiveTorus()) {
 			System.out.println("Adding 3D Torus Boundary");
 			addItem(new FieldBoundary(this, MagneticFields.getInstance().getTorus(), _torusColor));
 		}

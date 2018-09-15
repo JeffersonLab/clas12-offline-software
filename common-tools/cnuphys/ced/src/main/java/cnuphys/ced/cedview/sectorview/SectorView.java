@@ -808,9 +808,9 @@ public class SectorView extends CedView implements ChangeListener {
 
 		double result[] = new double[3];
 		worldToLabXYZ(wp, result);
-		double x = result[0];
-		double y = result[1];
-		double z = result[2];
+		float x = (float)result[0];
+		float y = (float)result[1];
+		float z = (float)result[2];
 
 		String xyz = "xyz " + vecStr(result) + " cm";
 
@@ -857,10 +857,10 @@ public class SectorView extends CedView implements ChangeListener {
 				
 		if (_activeProbe != null) {
 			float field[] = new float[3];
-			_activeProbe.fieldCylindrical(absphi, rho, z, field);
+			_activeProbe.field(x, y, z, field);
 			
 			float grad[] = new float[3];
-			_activeProbe.gradientCylindrical(absphi, rho, z, grad);
+			_activeProbe.gradient(x, y, z, grad);
 			
 			// convert to Tesla from kG
 			field[0] /= 10.0;
@@ -877,8 +877,8 @@ public class SectorView extends CedView implements ChangeListener {
 			feedbackStrings.add("$Lawn Green$"
 					+ MagneticFields.getInstance().getActiveFieldDescription());
 			
-			boolean hasTorus = MagneticFields.getInstance().hasTorus();
-			boolean hasSolenoid = MagneticFields.getInstance().hasSolenoid();
+			boolean hasTorus = MagneticFields.getInstance().hasActiveTorus();
+			boolean hasSolenoid = MagneticFields.getInstance().hasActiveSolenoid();
 			
 			//scale factors
 			if (hasTorus || hasSolenoid) {

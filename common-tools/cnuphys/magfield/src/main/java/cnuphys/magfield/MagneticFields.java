@@ -694,18 +694,10 @@ public class MagneticFields {
 		
 		if (_solenoid != null) {
 			System.err.println("Reading a solenoid but already have one. Nothing changes");
-//			System.exit(1);
 		}
 		
 		
 		File file = new File(fullPath);
-		String cp;
-		try {
-			cp = file.getCanonicalPath();
-		} catch (IOException e1) {
-			cp = "???";
-			e1.printStackTrace();
-		}
 
 		Solenoid solenoid = null;
 		if (file.exists()) {
@@ -731,13 +723,6 @@ public class MagneticFields {
 		}
 
 		File file = new File(fullPath);
-		String cp;
-		try {
-			cp = file.getCanonicalPath();
-		} catch (IOException e1) {
-			cp = "???";
-			e1.printStackTrace();
-		}
 
 		Torus torus = null;
 		if (file.exists()) {
@@ -1416,18 +1401,26 @@ public class MagneticFields {
 
 				for (int nPhi = 0; nPhi < _torus.getQ1Coordinate().getNumPoints(); nPhi++) {
 					double phi = _torus.getQ1Coordinate().getValue(nPhi);
+					double phiRad = Math.toRadians(phi);
+					
+					double cosPhi = Math.cos(phiRad);
+					double sinPhi = Math.sin(phiRad);
 					
 					//get the solenoid field
 					for (int nRho = 0; nRho <= stopIndexR; nRho++) {
 						double rho = _torus.getQ2Coordinate().getValue(nRho);
 						// System.err.println("Rho = " + rho);
+						
+						float x = (float)(rho * cosPhi);
+						float y = (float)(rho * sinPhi);
+
 
 						for (int nZ = 0; nZ <= stopIndexZ; nZ++) {
 							double z = _torus.getQ3Coordinate().getValue(nZ);
 							// System.err.println("Z = " + z);
 
 							// get the solenoid field
-							probe.fieldCylindrical(phi, rho, z, result);
+							probe.field(x, y, (float)z, result);
 
 							// composite index
 							int index = _torus.getCompositeIndex(nPhi, nRho, nZ);
@@ -1454,7 +1447,8 @@ public class MagneticFields {
 	 * 
 	 * @return <code>true</code> if we have a torus
 	 */
-	public boolean hasTorus() {
+	public boolean hasActiveTorus() {
+		
 		if (_activeField != null) {
 			if (_activeField instanceof Torus) {
 				return true;
@@ -1478,7 +1472,7 @@ public class MagneticFields {
 	 * 
 	 * @return <code>true</code> if we have a solenoid
 	 */
-	public boolean hasSolenoid() {
+	public boolean hasActiveSolenoid() {
 		if (_activeField != null) {
 			if (_activeField instanceof Solenoid) {
 				return true;

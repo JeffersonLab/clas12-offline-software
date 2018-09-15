@@ -116,8 +116,8 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 			return;
 		}
 
-		boolean hasTorus = MagneticFields.getInstance().hasTorus();
-		boolean hasSolenoid = MagneticFields.getInstance().hasSolenoid();
+		boolean hasTorus = MagneticFields.getInstance().hasActiveTorus();
+		boolean hasSolenoid = MagneticFields.getInstance().hasActiveSolenoid();
 
 		if (_view instanceof SectorView) {
 			drawItemSectorView(g, container, displayOption, hasTorus, hasSolenoid);
@@ -163,19 +163,21 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 				// get the true Cartesian coordinates
 				((CentralZView) (_view)).getCLASCordinates(container, pp, wp, coords);
 
-				double z = coords[2];
+				float x = (float)coords[0];
+				float y = (float)coords[1];
+				float z = (float)coords[2];
 				double rho = coords[3];
 				double phi = coords[4];
 
 				if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
 					// note conversion to cm from mm
-					double bmag = _activeProbe.fieldMagnitudeCylindrical(phi, rho / 10, z / 10, result) / 10.;
+					double bmag = _activeProbe.fieldMagnitude(x/10, y/10, z/10) / 10.;
 
 					Color color = _colorScaleModelSolenoid.getColor(bmag);
 					g.setColor(color);
 					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
 				} else if (displayOption == MagFieldDisplayArray.BGRADDISPLAY) {
-					_activeProbe.gradientCylindrical(phi, rho, z, result);
+					_activeProbe.gradient(x, y, z, result);
 					double gmag = Math.sqrt(result[0] * result[0] + result[1] * result[1] + result[2] * result[2]);
 
 					// convert to T/m
@@ -185,7 +187,7 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
 				} else { // one of the components
 							// note conversion to cm from mm
-					_activeProbe.fieldCylindrical(phi, rho / 10, z / 10, result);
+					_activeProbe.field(x/10, y/10, z/10, result);
 					double comp = 0.0;
 					switch (displayOption) {
 					case MagFieldDisplayArray.BXDISPLAY:
@@ -295,20 +297,22 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 				// get the true Cartesian coordinates
 				((SectorView) (_view)).getCLASCordinates(container, pp, wp, coords);
 
-				double z = coords[2];
+				float x = (float)coords[0];
+				float y = (float)coords[1];
+				float z = (float)coords[2];
 				double rho = coords[3];
 				double phi = coords[4];
 
 		//		if (_activeProbe.containsCylindrical(phi, rho, z)) {
 
 					if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
-						double bmag = _activeProbe.fieldMagnitudeCylindrical(phi, rho, z) / 10.;
+						double bmag = _activeProbe.fieldMagnitude(x, y, z) / 10.;
 
 						Color color = _colorScaleModelTorus.getColor(bmag);
 						g.setColor(color);
 						g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
 					} else if (displayOption == MagFieldDisplayArray.BGRADDISPLAY) {
-						_activeProbe.gradientCylindrical(phi, rho, z, result);
+						_activeProbe.gradient(x, y, z, result);
 						double gmag = Math.sqrt(result[0] * result[0] + result[1] * result[1] + result[2] * result[2]);
 
 						// convert to T/m
@@ -324,7 +328,7 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 						g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
 
 					} else { // one of the components
-						_activeProbe.fieldCylindrical(phi, rho, z, result);
+						_activeProbe.field(x, y, z, result);
 						double comp = 0.0;
 						switch (displayOption) {
 						case MagFieldDisplayArray.BXDISPLAY:

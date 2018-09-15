@@ -79,9 +79,6 @@ public class CentralZView extends CedView implements ChangeListener {
 	private static final Color HITFILL = new Color(255, 128, 0, 64);
 	private static final Color TRANS = new Color(192, 192, 192, 128);
 
-	// default fill color half-alpha blue
-	private static final Color TRANS2 = new Color(0, 0, 255, 128);
-
 	// line stroke
 	private static Stroke stroke = GraphicsUtilities.getStroke(1.5f,
 			LineStyle.SOLID);
@@ -706,9 +703,9 @@ public class CentralZView extends CedView implements ChangeListener {
 
 		// the world coordinates
 		double labRho = Math.abs(worldPoint.y);
-		double labZ = worldPoint.x;
-		double labX = labRho * _cosphi;
-		double labY = labRho * _sinphi;
+		float labZ = (float)worldPoint.x;
+		float labX = (float)(labRho * _cosphi);
+		float labY = (float)(labRho * _sinphi);
 		double r = Math.sqrt(labX * labX + labY * labY + labZ * labZ);
 		double theta = Math.toDegrees(Math.atan2(labRho, labZ));
 
@@ -728,8 +725,7 @@ public class CentralZView extends CedView implements ChangeListener {
 
 		if (_activeProbe != null) {
 			float field[] = new float[3];
-			_activeProbe.fieldCylindrical(_phi, labRho / 10.0, labZ / 10.0,
-					field);
+			_activeProbe.field(labX/10, labY/10, labZ/10, field);
 			// convert to Tesla from kG
 			field[0] /= 10.0;
 			field[1] /= 10.0;
@@ -790,11 +786,6 @@ public class CentralZView extends CedView implements ChangeListener {
 		return "(" + DoubleFormat.doubleFormat(vx, 2) + ", "
 				+ DoubleFormat.doubleFormat(vy, 2) + ", "
 				+ DoubleFormat.doubleFormat(vz, 2) + ")";
-	}
-
-	// convenience method to create a feedback string
-	private void fbString(String color, String str, List<String> fbstrs) {
-		fbstrs.add("$" + color + "$" + str);
 	}
 
 	/**

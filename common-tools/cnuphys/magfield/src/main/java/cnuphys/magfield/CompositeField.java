@@ -158,14 +158,4 @@ public class CompositeField extends ArrayList<IMagField> implements IMagField {
 	}
 
 
-	@Override
-	public boolean contains(double rho, double z) {
-		for (IMagField field : this) {
-			if (field.contains(rho, z)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 }
