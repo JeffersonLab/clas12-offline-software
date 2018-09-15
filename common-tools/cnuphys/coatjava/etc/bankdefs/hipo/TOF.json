@@ -133,8 +133,12 @@
        {"name":"tx",          "id":17, "type":"float", "info":"Global X coor (cm) of hit from CVT info -trkID index"},
        {"name":"ty",          "id":18, "type":"float", "info":"Global Y coor (cm) of hit from CVT info - trkID index"},
        {"name":"tz",          "id":19, "type":"float", "info":"Global Z coor (cm) of hit from CVT info - trkID index"},
-       {"name":"pathLength",        "id":20, "type":"float", "info":"pathlength of the track from the vertex (doca point to the beamline to the midpoint between the entrance and exit of the hit bar"},
-       {"name":"pathLengthThruBar", "id":21, "type":"float", "info":"pathlength of the track from the entrance point to the exit point through the hit bar"}
+       {"name":"adc_idx1",    "id":20, "type":"int16", "info":"index of hit with ADCU in adc bank, starts at zero"},
+       {"name":"adc_idx2",    "id":21, "type":"int16", "info":"index of hit with ADCD in adc bank, starts at zero"},
+       {"name":"tdc_idx1",    "id":22, "type":"int16", "info":"index of hit with TDCU in tdc bank, starts at zero"},
+       {"name":"tdc_idx2",    "id":23, "type":"int16", "info":"index of hit with TDCD in tdc bank, starts at zero"},
+       {"name":"pathLength",        "id":24, "type":"float", "info":"pathlength of the track from the vertex (doca point to the beamline to the midpoint between the entrance and exit of the hit bar"},
+       {"name":"pathLengthThruBar", "id":25, "type":"float", "info":"pathlength of the track from the entrance point to the exit point through the hit bar"}
               
     ]
   }
