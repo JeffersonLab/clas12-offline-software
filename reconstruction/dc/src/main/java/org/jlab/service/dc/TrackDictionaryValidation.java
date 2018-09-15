@@ -557,7 +557,7 @@ public class TrackDictionaryValidation {
         TrackDictionaryValidation tm = new TrackDictionaryValidation();
         tm.init();
         if(parser.containsOptions(arguments, "-c") || parser.containsOptions(arguments, "-d")) {
-            if(parser.hasOption("-c")==true) {
+            if(parser.containsOptions(arguments, "-c")) {
                 tm.createDictionary(inputFileName);
             }
             else if(parser.hasOption("-d")==true) {
