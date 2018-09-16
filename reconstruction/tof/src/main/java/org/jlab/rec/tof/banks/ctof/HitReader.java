@@ -119,7 +119,7 @@ public class HitReader implements IMatchedHit {
             hit.set_TDCbankHitIdx2(TDCDIdx[i]);
             //hit.set_StatusWord(statusWord);
             hit.set_StatusWord(this.set_StatusWord(hit.Status1(constants4), hit.Status2(constants4), ADCU[i], TDCU[i], ADCD[i], TDCD[i]));
-            hit.setPaddleLine(geometry);
+            hit.setPaddleGeo(geometry);
             // add this hit
             if(passHit(hit))hits.add(hit);
         }
@@ -242,6 +242,7 @@ public class HitReader implements IMatchedHit {
                             hit.set_TDCbankHitIdx2(fhit.get_TDCbankHitIdx2());
                             hit.set_StatusWord(fhit.get_StatusWord());
                             hit.set_paddleLine(fhit.get_paddleLine());
+                            hit.set_barthickness(fhit.get_barthickness());
                             hit.set_matchedTrackHit(matchedHit);
                             hit.set_matchedTrack(trk);
                             // get the pathlength of the track from its origin to the mid-point between the track entrance and exit from the bar

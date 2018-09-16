@@ -48,7 +48,6 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
     }
 
-    private Line3D _paddleLine; // paddle line
     private FTOFDetHit _matchedTrackHit; // matched hit information from
     // tracking; this contains the
     // information of the entrance and
@@ -57,14 +56,6 @@ public class Hit extends AHit implements IGetCalibrationParams {
     private Line3d _matchedTrack;
     public int _AssociatedTrkId = -1;
     public int trkAssociated_Paddle;
-
-    public Line3D get_paddleLine() {
-        return _paddleLine;
-    }
-
-    public void set_paddleLine(Line3D paddleLine) {
-        this._paddleLine = paddleLine;
-    }
 
     public FTOFDetHit get_matchedTrackHit() {
         return _matchedTrackHit;
@@ -130,7 +121,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double ADC_MIP = this.ADC_MIP(constants5);
         double ADC_MIPErr = this.ADC_MIPUnc(constants5);
         double DEDX_MIP = this.DEDX_MIP();
-        double ScinBarThickn = this.ScinBarThickn();
+        double ScinBarThickn = this.get_barthickness();
 
         this.set_HitParams(superlayer, TW0L, TW0R, TW1L, TW1R, lambdaL,
                 lambdaR, yOffset, vL, vR, vLUnc, vRUnc, PEDL, PEDR, PEDLUnc,
@@ -142,7 +133,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
     }
 
-    public void setPaddleLine(FTOFGeant4Factory geometry) {
+    public void set_PaddleGeo(FTOFGeant4Factory geometry) {
         // get the line in the middle of the paddle
         G4Box comp = (G4Box) geometry.getComponent(this.get_Sector(),
                 this.get_Panel(), this.get_Paddle());
@@ -155,6 +146,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
                 comp.getLineX().origin().z, comp.getLineX().end().x, comp
                 .getLineX().end().y, comp.getLineX().end().z);
         this.set_paddleLine(paddleLine);
+        this.set_barthickness(geometry.getThickness(this.get_Sector(),this.get_Panel(), this.get_Paddle()));
     }
 
     public Point3D calc_hitPosition() {
@@ -405,11 +397,6 @@ public class Hit extends AHit implements IGetCalibrationParams {
     @Override
     public double DEDX_MIP() {
         return Constants.DEDX_MIP;
-    }
-
-    @Override
-    public double ScinBarThickn() {
-        return Constants.SCBARTHICKN[this.get_Panel() - 1];
     }
 
     @Override

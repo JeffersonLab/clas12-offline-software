@@ -152,6 +152,14 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         throw new IndexOutOfBoundsException();
     }
 
+    public double getThickness(int sector, int layer, int paddle) {
+        int ivolume = (sector - 1) * 3 + layer - 1;
+
+        Geant4Basic panel = motherVolume.getChildren().get(ivolume);
+        G4Box pad = (G4Box) panel.getChildren().get(paddle-1);
+        return pad.getYHalfLength()*2.;      
+    }
+    
     public Plane3D getFrontalFace(int sector, int layer) {
         if (sector < 1 || sector > 6
                 || layer < 1 || layer > 3) {
@@ -164,10 +172,30 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
         Geant4Basic panel = motherVolume.getChildren().get(ivolume);
         G4Box padl = (G4Box) panel.getChildren().get(1);
-        Vector3d point = new Vector3d(padl.getVertex(0));
+        Vector3d point = new Vector3d(padl.getVertex(0)); //first corner of the paddle on the upstream face
         Vector3d normal = new Vector3d(panel.getLineY().diff().normalized());
 
         return new Plane3D(point.x, point.y, point.z, normal.x, normal.y, normal.z);
+    }
+
+    public Plane3D getMidPlane(int sector, int layer) {
+        if (sector < 1 || sector > 6
+                || layer < 1 || layer > 3) {
+            System.err.println("ERROR!!!");
+            System.err.println("Component: sector: " + sector + ", layer: " + layer + " doesn't exist");
+            throw new IndexOutOfBoundsException();
+        }
+
+        int ivolume = (sector - 1) * 3 + layer - 1;
+
+        Geant4Basic panel = motherVolume.getChildren().get(ivolume);
+        G4Box padl = (G4Box) panel.getChildren().get(1);
+        double x=(padl.getLineY().origin().x+padl.getLineY().end().x)/2;
+        double y=(padl.getLineY().origin().y+padl.getLineY().end().y)/2;
+        double z=(padl.getLineY().origin().z+padl.getLineY().end().z)/2;
+        Vector3d normal = new Vector3d(panel.getLineY().diff().normalized());
+
+        return new Plane3D(x, y, z, normal.x, normal.y, normal.z);
     }
 
     public G4World getMother() {

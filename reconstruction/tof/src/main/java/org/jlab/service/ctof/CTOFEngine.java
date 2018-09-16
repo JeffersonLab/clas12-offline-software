@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
@@ -68,7 +69,21 @@ public class CTOFEngine extends ReconstructionEngine {
        // Get the constants for the correct variation
         this.getConstantsManager().setVariation("default");
  
-        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.CTOF);
+        // get the geometry
+        String geomDBVar = this.getEngineConfigString("geomDBVariation");
+        if (geomDBVar!=null) {
+            System.out.println("["+this.getName()+"] run with geometry variation based on yaml ="+geomDBVar);
+        }
+        else {
+            geomDBVar = System.getenv("GEOMDBVAR");
+            if (geomDBVar!=null) {
+                System.out.println("["+this.getName()+"] run with geometry variation chosen based on env ="+geomDBVar);
+            }
+        } 
+        if (geomDBVar==null) {
+            System.out.println("["+this.getName()+"] run with default geometry");
+        }
+        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.CTOF, 11, Optional.ofNullable(geomDBVar).orElse("default"));
         geometry = new CTOFGeant4Factory(cp);
         return true;
     }

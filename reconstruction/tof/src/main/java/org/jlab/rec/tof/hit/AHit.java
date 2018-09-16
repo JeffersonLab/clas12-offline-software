@@ -4,6 +4,7 @@
 package org.jlab.rec.tof.hit;
 
 import java.text.DecimalFormat;
+import org.jlab.geom.prim.Line3D;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.utils.groups.IndexedTable;
@@ -30,6 +31,9 @@ public abstract class AHit implements Comparable<AHit> {
     private int _ADCbankHitIdx2 = -1;
     private int _TDCbankHitIdx1 = -1;
     private int _TDCbankHitIdx2 = -1;
+
+    private Line3D _paddleLine; // paddle line
+    private double _barThickness;
 
     public AHit(int id, int panel, int sector, int paddle, int aDC1, int tDC1,
             int aDC2, int tDC2) {
@@ -297,6 +301,22 @@ public abstract class AHit implements Comparable<AHit> {
 
     public void set_yUnc(double _yUnc) {
         this._yUnc = _yUnc;
+    }
+
+    public Line3D get_paddleLine() {
+        return _paddleLine;
+    }
+
+    public void set_paddleLine(Line3D paddleLine) {
+        this._paddleLine = paddleLine;
+    }
+
+    public void set_barthickness(double thickness) {
+        this._barThickness = thickness;
+    }
+
+    public double get_barthickness() {
+        return this._barThickness;
     }
 
     public Point3D get_TrkPosition() {

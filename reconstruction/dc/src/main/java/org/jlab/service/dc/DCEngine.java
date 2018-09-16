@@ -129,10 +129,10 @@ public class DCEngine extends ReconstructionEngine {
             System.out.println("****************** WPDIST READ *********FROM "+geomDBVar+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
         }
         // Load other geometries
-        ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, "default");
+        ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, Optional.ofNullable(geomDBVar).orElse("default"));
         ftofDetector = new FTOFGeant4Factory(providerFTOF);
         
-        ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, "default");
+        ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, Optional.ofNullable(geomDBVar).orElse("default"));
         ecDetector = new ECGeant4Factory(providerEC);
         pcalDetector = new PCALGeant4Factory(providerEC);
         

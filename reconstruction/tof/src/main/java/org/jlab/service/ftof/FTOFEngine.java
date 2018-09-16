@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
+import org.jlab.geom.base.ConstantProvider;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
@@ -63,22 +67,36 @@ public class FTOFEngine extends ReconstructionEngine {
         this.getConstantsManager().setVariation("default");
         
         // Get the geometry
-        DatabaseConstantProvider db = new DatabaseConstantProvider( 11, "default");
-        // using
-        // the
-        // new
-        // run
-        // load the geometry tables
-        db.loadTable("/geometry/ftof/panel1a/paddles");
-        db.loadTable("/geometry/ftof/panel1a/panel");
-        db.loadTable("/geometry/ftof/panel1b/paddles");
-        db.loadTable("/geometry/ftof/panel1b/panel");
-        db.loadTable("/geometry/ftof/panel2/paddles");
-        db.loadTable("/geometry/ftof/panel2/panel");
-
-        // disconncect from database. Important to do this after loading tables.
-        db.disconnect();
-        geometry = new FTOFGeant4Factory(db);
+        String geomDBVar = this.getEngineConfigString("geomDBVariation");
+        if (geomDBVar!=null) {
+            System.out.println("["+this.getName()+"] run with geometry variation based on yaml ="+geomDBVar);
+        }
+        else {
+            geomDBVar = System.getenv("GEOMDBVAR");
+            if (geomDBVar!=null) {
+                System.out.println("["+this.getName()+"] run with geometry variation chosen based on env ="+geomDBVar);
+            }
+        } 
+        if (geomDBVar==null) {
+            System.out.println("["+this.getName()+"] run with default geometry");
+        }
+        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.FTOF, 11, Optional.ofNullable(geomDBVar).orElse("default"));
+//        DatabaseConstantProvider db = new DatabaseConstantProvider( 11, Optional.ofNullable(geomDBVar).orElse("default"));
+//        // using
+//        // the
+//        // new
+//        // run
+//        // load the geometry tables
+//        db.loadTable("/geometry/ftof/panel1a/paddles");
+//        db.loadTable("/geometry/ftof/panel1a/panel");
+//        db.loadTable("/geometry/ftof/panel1b/paddles");
+//        db.loadTable("/geometry/ftof/panel1b/panel");
+//        db.loadTable("/geometry/ftof/panel2/paddles");
+//        db.loadTable("/geometry/ftof/panel2/panel");
+//
+//        // disconncect from database. Important to do this after loading tables.
+//        db.disconnect();
+        geometry = new FTOFGeant4Factory(cp);
         // Load the Calibration Constants
         // if (CCDBConstantsLoader.CSTLOADED == false) {
         // DatabaseConstantProvider db = CCDBConstantsLoader.Load();

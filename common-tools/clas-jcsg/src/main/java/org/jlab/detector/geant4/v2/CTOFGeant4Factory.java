@@ -57,9 +57,14 @@ public final class CTOFGeant4Factory extends Geant4Factory {
         return motherVolume.getChildren().get(ipaddle - 1);
     }
 
+    public double getThickness(int ipaddle){
+        CTOFpaddle pad = (CTOFpaddle) motherVolume.getChildren().get(ipaddle - 1);
+        return pad.getThickness();
+    }
+    
     private class CTOFpaddle extends G4Stl {
 
-	   private final String ctofdbpath = "/geometry/ctof/ctof/";
+        private final String ctofdbpath = "/geometry/ctof/ctof/";
         private final Line3d centerline;
         private final double angle;
         private final double radius;
