@@ -204,7 +204,6 @@ final class Wire {
     private final int iwire;
     private final DCdatabase dbref = DCdatabase.getInstance();
 
-    private final double y0mid, z0mid;
     private final double length;
 
     private final Vector3d midpoint;
@@ -214,8 +213,6 @@ final class Wire {
     private Vector3d rightend;
     private final Vector3d topend;
     private final Vector3d bottomend;
-
-    private double w2tgt;
 
     private void findEnds() {
         // define vector from wire midpoint to chamber tip (z is wrong!!)
@@ -243,15 +240,15 @@ final class Wire {
         this.ireg = isuper / 2;
 
         // calculate first-wire distance from target
-        w2tgt = dbref.dist2tgt(ireg);
+        double w2tgt = dbref.dist2tgt(ireg);
         if (isuper % 2 > 0) {
             w2tgt += dbref.superwidth(isuper - 1) + dbref.midgap(ireg);
         }
         w2tgt /= Math.cos(dbref.thtilt(ireg) - dbref.thmin(isuper));
 
         // y0 and z0 in the lab for the first wire of the layer
-        y0mid = w2tgt * Math.sin(dbref.thmin(isuper));
-        z0mid = w2tgt * Math.cos(dbref.thmin(isuper));
+        double y0mid = w2tgt * Math.sin(dbref.thmin(isuper));
+        double z0mid = w2tgt * Math.cos(dbref.thmin(isuper));
 
         double cster = Math.cos(dbref.thster(isuper));
         double ctilt = Math.cos(dbref.thtilt(ireg));
