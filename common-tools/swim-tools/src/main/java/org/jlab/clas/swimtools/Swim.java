@@ -221,6 +221,9 @@ public class Swim {
                                 _maxPathLength, stepSize, cnuphys.swim.Swimmer.CLAS_Tolerance, hdata);
 
                 // traj.computeBDL(sector, rprob);
+                if(traj==null)
+                    return null;
+                
                 traj.sectorComputeBDL(sector, PC.RCP);
                 // traj.computeBDL(rcompositeField);
 
@@ -300,7 +303,8 @@ public class Swim {
                                     // (dph)
                 traj = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, z, accuracy, _rMax, _maxPathLength,
                                 stepSize, cnuphys.swim.Swimmer.CLAS_Tolerance, hdata);
-
+                if(traj==null)
+                    return null;
                 traj.computeBDL(PC.CP);
                 // traj.computeBDL(compositeField);
 
@@ -395,6 +399,8 @@ public class Swim {
 
         SwimTrajectory st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize,
                         0.0005);
+        if(st==null)
+                    return null;
         st.computeBDL(PC.CP);
         // st.computeBDL(compositeField);
 
@@ -476,6 +482,8 @@ public class Swim {
 
         SwimTrajectory st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize,
                         0.0005);
+        if(st==null)
+            return null;
         st.computeBDL(PC.CP);
         // st.computeBDL(compositeField);
 

@@ -1,6 +1,5 @@
 package org.jlab.clas.swimtools;
 
-import cnuphys.magfield.FastMath;
 import cnuphys.magfield.MagneticFields;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.reco.ReconstructionEngine;
@@ -53,9 +52,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
             e.printStackTrace();
         }
         
-        //Math libs
-        //FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
-        // Shift
+         // Field Shifts
         String solShift = this.getEngineConfigString("solenoidShift");
         
         if (solShift!=null) {
@@ -73,7 +70,60 @@ public class MagFieldsEngine extends ReconstructionEngine {
             System.out.println("["+this.getName()+"] run with solenoid z shift in tracking set to 0 cm");
             // this.solenoidShift = (float) 0;
         }
+        //torus:
+        String TorX = this.getEngineConfigString("torusXShift");
         
+        if (TorX!=null) {
+            System.out.println("["+this.getName()+"] run with torus x shift in tracking config chosen based on yaml ="+TorX);
+            Swimmer.setTorXShift(Float.valueOf(TorX));
+        }
+        else {
+            TorX = System.getenv("TORXSHIFT");
+            if (TorX!=null) {
+                System.out.println("["+this.getName()+"] run with torus x shift in tracking config chosen based on env ="+TorX);
+                Swimmer.setTorXShift(Float.valueOf(TorX));
+            }
+        }
+        if (TorX==null) {
+            System.out.println("["+this.getName()+"] run with torus x shift in tracking set to 0 cm");
+            // this.solenoidShift = (float) 0;
+        }
+        
+        String TorY = this.getEngineConfigString("torusYShift");
+        
+        if (TorY!=null) {
+            System.out.println("["+this.getName()+"] run with torus y shift in tracking config chosen based on yaml ="+TorY);
+            Swimmer.setTorYShift(Float.valueOf(TorY));
+        }
+        else {
+            TorY = System.getenv("TORYSHIFT");
+            if (TorY!=null) {
+                System.out.println("["+this.getName()+"] run with torus y shift in tracking config chosen based on env ="+TorY);
+                Swimmer.setTorYShift(Float.valueOf(TorY));
+            }
+        }
+        if (TorY==null) {
+            System.out.println("["+this.getName()+"] run with torus y shift in tracking set to 0 cm");
+            // this.solenoidShift = (float) 0;
+        }
+        
+        String TorZ = this.getEngineConfigString("torusZShift");
+        
+        if (TorZ!=null) {
+            System.out.println("["+this.getName()+"] run with torus z shift in tracking config chosen based on yaml ="+TorZ);
+            Swimmer.setTorZShift(Float.valueOf(TorZ));
+        }
+        else {
+            TorZ = System.getenv("TORZSHIFT");
+            if (TorZ!=null) {
+                System.out.println("["+this.getName()+"] run with torus z shift in tracking config chosen based on env ="+TorZ);
+                Swimmer.setTorZShift(Float.valueOf(TorZ));
+            }
+        }
+        if (TorZ==null) {
+            System.out.println("["+this.getName()+"] run with torus z shift in tracking set to 0 cm");
+            // this.solenoidShift = (float) 0;
+        }
     }
     
     @Override
@@ -90,7 +140,8 @@ public class MagFieldsEngine extends ReconstructionEngine {
         //    shift = -1.9;
         //}
         Swimmer.setMagneticFieldsScales(bank.getFloat("solenoid", 0), bank.getFloat("torus", 0), 
-                (double)Swimmer.get_zShift());
+                (double) 0.0, (double) 0.0, (double)Swimmer.get_zShift(),
+                (double)Swimmer.getTorXShift(), (double)Swimmer.getTorYShift(), (double)Swimmer.getTorZShift());
         
         //FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
         return true;
