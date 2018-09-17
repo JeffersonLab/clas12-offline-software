@@ -30,6 +30,29 @@ public class Torus extends MagneticField {
 	}
 	
 	/**
+	 * Checks whether the field has been set to always return zero.
+	 * 
+	 * @return <code>true</code> if the field is set to return zero.
+	 */
+	@Override
+	public final boolean isZeroField() {
+		if (isActive()) {
+			return super.isZeroField();
+		} else {
+			return true;
+		}
+	}
+	
+	/**
+	 * Checks this field active. 
+	 * @return <code>true</code> if this field is active;
+	 */
+	public boolean isActive() {
+		return MagneticFields.getInstance().hasActiveTorus();
+	}
+
+	
+	/**
 	 * Has part of the solenoid been added in to remove the overlap?
 	 * @return<code>true</code> if the solenoid was added in.
 	 */
@@ -122,14 +145,6 @@ public class Torus extends MagneticField {
 		_addedSolenoid = true;
 	}
 	
-	/**
-	 * Get the minimum z coordinate of the field boundary
-	 * @return the minimum z coordinate of the field boundary
-	 */
-	public double getZMin() {
-		return q3Coordinate.getMin();
-	}
-
 	/**
 	 * Print the current configuration
 	 * @param ps the print stream

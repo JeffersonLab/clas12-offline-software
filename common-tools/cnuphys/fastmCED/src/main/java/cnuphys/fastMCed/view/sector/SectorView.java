@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -37,7 +36,6 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.container.ScaleDrawer;
-import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.item.YouAreHereItem;
 import cnuphys.bCNU.layer.LogicalLayer;
@@ -84,10 +82,6 @@ public class SectorView extends AView implements ChangeListener {
 	private static final Color TRANSCOLOR = new Color(0, 0, 0, 64);
 	private static final Color TRANSCOLOR2 = new Color(255, 255, 255, 64);
 	
-	// line stroke
-	private static Stroke stroke = GraphicsUtilities.getStroke(1.5f,
-			LineStyle.SOLID);
-
 	//for bdl plot
 	private static Color plotColors[] = { X11Colors.getX11Color("Dark Red"),
 			X11Colors.getX11Color("Dark Blue"),
@@ -577,9 +571,9 @@ public class SectorView extends AView implements ChangeListener {
 
 		double result[] = new double[3];
 		worldToLabXYZ(wp, result);
-		double x = result[0];
-		double y = result[1];
-		double z = result[2];
+		float x = (float)result[0];
+		float y = (float)result[1];
+		float z = (float)result[2];
 
 		String xyz = "xyz " + vecStr(result) + " cm";
 
@@ -620,10 +614,10 @@ public class SectorView extends AView implements ChangeListener {
 				
 		if (_activeProbe != null) {
 			float field[] = new float[3];
-			_activeProbe.fieldCylindrical(absphi, rho, z, field);
+			_activeProbe.field(x, y, z, field);
 			
 			float grad[] = new float[3];
-			_activeProbe.gradientCylindrical(absphi, rho, z, grad);
+			_activeProbe.gradient(x, y, z, grad);
 			
 			// convert to Tesla from kG
 			field[0] /= 10.0;
@@ -640,8 +634,8 @@ public class SectorView extends AView implements ChangeListener {
 			feedbackStrings.add("$Lawn Green$"
 					+ MagneticFields.getInstance().getActiveFieldDescription());
 			
-			boolean hasTorus = MagneticFields.getInstance().hasTorus();
-			boolean hasSolenoid = MagneticFields.getInstance().hasSolenoid();
+			boolean hasTorus = MagneticFields.getInstance().hasActiveTorus();
+			boolean hasSolenoid = MagneticFields.getInstance().hasActiveSolenoid();
 			
 			//scale factors
 			if (hasTorus || hasSolenoid) {

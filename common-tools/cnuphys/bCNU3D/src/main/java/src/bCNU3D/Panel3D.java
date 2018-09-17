@@ -1,6 +1,7 @@
 package bCNU3D;
 
 import item3D.Axes3D;
+import item3D.Cylinder;
 import item3D.Item3D;
 import item3D.PointSet3D;
 import item3D.Triangle3D;
@@ -611,6 +612,8 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 				addItem(new Triangle3D(this, 0f, 0f, 500f, 0f, -400f, -500f,
 						500f, -100f, 500f, new Color(0, 255, 0, 64), 2f, true));
+				
+				addItem(new Cylinder(this, 0f, 0f, 0f, 300f, 300f, 300f, 50f, new Color(0, 255, 255, 128)));
 
 				// Cube cube = new Cube(this, 0.25f, 0.25f, 0.25f, 0.5f,
 				// Color.yellow);

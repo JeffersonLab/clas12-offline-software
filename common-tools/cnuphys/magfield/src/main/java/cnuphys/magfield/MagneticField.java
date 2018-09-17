@@ -19,6 +19,12 @@ public abstract class MagneticField implements IMagField {
 
 	/** Magic number used to check if byteswapping is necessary. */
 	public static final int MAGICNUMBER = 0xced;
+	
+	//used to reconfigure fields so solenoid and torus do not overlap
+	private double _fakeZMax = Float.POSITIVE_INFINITY;
+
+	/** misalignment tolerance */
+	public static final double MISALIGNTOL = 1.0e-6; //cm
 
 	/**
 	 * Index where max field magnitude resides
@@ -82,8 +88,15 @@ public abstract class MagneticField implements IMagField {
 	/** the full path to the file */
 	private String _baseFileName;
 	
+	/** shift in x direction in cm (misalignment) */
+	protected double _shiftX; //cm
+	
+	/** shift in y direction in cm (misalignment) */
+	protected double _shiftY; //cm
+
 	/** shift in z direction in cm (misalignment) */
 	protected double _shiftZ; //cm
+
 		
 	/**
 	 * Holds the grid info for the slowest changing coordinate (as stored in the
@@ -112,6 +125,7 @@ public abstract class MagneticField implements IMagField {
 	// determine whether we use interpolation or nearest neighbor
 	protected static boolean _interpolate = true;		
 	
+	private static final double TINY = 1.0e-5;
 	/**
 	 * Scale the field.
 	 * 
@@ -119,8 +133,14 @@ public abstract class MagneticField implements IMagField {
 	 *            the scale factor
 	 */
 	public final void setScaleFactor(double scale) {
-		_scaleFactor = scale;
-		MagneticFields.getInstance().changedScale(this);
+		System.out.println("CHANGING SCALE from " + _scaleFactor + " to " + scale + "  for " + getBaseFileName());
+		if (Math.abs(scale - _scaleFactor) > TINY) {
+			_scaleFactor = scale;
+			MagneticFields.getInstance().changedScale(this);
+		}
+		else {
+			System.out.println("Ignored inconsequential scale change for " + getBaseFileName());
+		}
 	}
 	
 	@Override
@@ -129,14 +149,44 @@ public abstract class MagneticField implements IMagField {
 	}
 	
 	/**
+	 * Change the shift in the x direction
+	 * @param shiftX the shift in cm
+	 */
+	public final void setShiftX(double shiftX) {
+		_shiftX = shiftX;
+	}
+
+	/**
+	 * Change the shift in the y direction
+	 * @param shiftY the shift in cm
+	 */
+	public final void setShiftY(double shiftY) {
+		_shiftY = shiftY;
+	}
+
+	/**
 	 * Change the shift in the z direction
 	 * @param shiftZ the shift in cm
 	 */
 	public final void setShiftZ(double shiftZ) {
 		_shiftZ = shiftZ;
-		MagneticFields.getInstance().changedShift(this);
 	}
 
+	/**
+	 * Get the shift in x. 
+	 * @return the x shift in cm.
+	 */
+	public final double getShiftX() {
+		return _shiftX;
+	}
+	
+	/**
+	 * Get the shift in y. 
+	 * @return the y shift in cm.
+	 */
+	public final double getShiftY() {
+		return _shiftY;
+	}
 	
 	/**
 	 * Get the shift in z. 
@@ -152,7 +202,7 @@ public abstract class MagneticField implements IMagField {
 	 * @return <code>true</code> if the field is set to return zero.
 	 */
 	@Override
-	public final boolean isZeroField() {
+	public boolean isZeroField() {
 		return (Math.abs(_scaleFactor) < 1.0e-6);
 	}
 
@@ -625,5 +675,124 @@ public abstract class MagneticField implements IMagField {
 	public GridCoordinate getZCoordinate() {
 		return q3Coordinate;
 	}
+	
+    /**
+     * Is the map misaligned in the X direction?
+     * @return <code>true</code> if map is misaligned
+     */
+	public boolean isMisalignedX() {
+    	return (Math.abs(_shiftX) > MISALIGNTOL);
+    }
 
+    /**
+     * Is the map misaligned in the Y direction?
+     * @return <code>true</code> if map is misaligned
+     */
+	public boolean isMisalignedY() {
+    	return (Math.abs(_shiftY) > MISALIGNTOL);
+    }
+
+    /**
+     * Is the map misaligned in the Z direction?
+     * @return <code>true</code> if map is misaligned
+     */
+	public boolean isMisalignedZ() {
+    	return (Math.abs(_shiftZ) > MISALIGNTOL);
+    }
+
+    /**
+     * Is the map misaligned in any direction?
+     * @return <code>true</code> if solenoid is misaligned
+     */
+	public boolean isMisaligned() {
+    	return (isMisalignedX() || isMisalignedY() || isMisalignedZ());
+    }
+	
+	/**
+	 * Get the fake z lim used to remove overlap with torus
+	 * @return the fake z lim used to remove overlap with torus (cm)
+	 */
+	public double getFakeZMax() {
+		return _fakeZMax;
+	}
+	
+	/**
+	 * Set the fake z lim used to remove overlap with torus
+	 * @param zlim the new value in cm
+	 */
+	public void setFakeZMax(double zlim) {
+		_fakeZMax = zlim;
+	}
+
+	public double getZMax() {
+		return q3Coordinate.getMax();
+	}
+
+	public double getZMin() {
+		return q3Coordinate.getMin();
+	}
+
+	public double getRhoMax() {
+		return q2Coordinate.getMax();
+	}
+
+	public double getRhoMin() {
+		return q2Coordinate.getMin();
+	}
+
+	/**
+	 * Checks this field active. 
+	 * @return <code>true</code> if this field is active;
+	 */
+	public abstract boolean isActive();
+
+	/**
+	 * Checks whether the field boundary contain the given point.
+	 * @param x the x coordinate in cm
+	 * @param y the y coordinate in cm
+	 * @param z the z coordinate in cm
+	 * @return <code>true</code> if the field contains the given point
+	 */
+	@Override
+	public boolean contains(double x, double y, double z) {
+		
+		if (!isActive()) {
+			return false;
+		}
+		
+		//apply the shifts
+		x -= _shiftX;
+		y -= _shiftY;
+		z -= _shiftZ;
+		
+		double rho = FastMath.hypot(x, y);
+		return contains(rho, z);
+	}
+	
+	/**
+	 * Checks whether the field boundary contain the given point. Note the azimuthal coordinate
+	 * is not provided because it is assumed that all fields are valid for all phi.
+	 * @param rho the cylindrical radius in cm 
+	 * @param z the z coordinate in cm
+	 * @return <code>true</code> if the field contains the given point
+	 */
+	private boolean contains(double rho, double z) {
+		
+		//assumes z has already been shifted backwards
+		if (z >= _fakeZMax) {
+			return false;
+		}
+
+		if (z < getZMin()) {
+			return false;
+		}
+		if (z > getZMax()) {
+			return false;
+		}
+		if ((rho < getRhoMin()) || (rho > getRhoMax())) {
+			return false;
+		}
+		return true;
+	}
+	
 }

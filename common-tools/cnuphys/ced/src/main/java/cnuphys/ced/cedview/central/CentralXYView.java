@@ -273,10 +273,15 @@ public class CentralXYView extends CedXYView {
 		Point p1 = new Point();
 		Point p2 = new Point();
 		for (Cosmic cosmic : cosmics) {
-			double y1 = 1000;
-			double y2 = -1000;
+			double y1 = 100;
+			double y2 = -100;
 			double x1 = cosmic.trkline_yx_slope * y1 + cosmic.trkline_yx_interc;
 			double x2 = cosmic.trkline_yx_slope * y2 + cosmic.trkline_yx_interc;
+			//convert to mm
+			x1 *= 10;
+			x2 *= 10;
+			y1 *= 10;
+			y2 *= 10;
 			container.worldToLocal(p1, x1, y1);
 			container.worldToLocal(p2, x2, y2);
 			

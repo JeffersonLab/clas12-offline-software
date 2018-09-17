@@ -6,12 +6,6 @@ public class ZeroProbe extends FieldProbe {
 		super(null);
 	}
 	
-
-	@Override
-	public float fieldMagnitudeCylindrical(double phi, double r, double z) {
-		return 0;
-	}
-
 	@Override
 	public float fieldMagnitude(float x, float y, float z) {
 		return 0;
@@ -34,15 +28,7 @@ public class ZeroProbe extends FieldProbe {
 		result[2] = 0;
     }
 
-	@Override
-    public void gradientCylindrical(double phi, double rho, double z,
-    	    float result[]) {
-		result[0] = 0;
-		result[1] = 0;
-		result[2] = 0;
-    }
-
-
+ 
 	@Override
 	public void field(float x, float y, float z, float[] result) {
 		result[0] = 0;
@@ -50,21 +36,9 @@ public class ZeroProbe extends FieldProbe {
 		result[2] = 0;
 	}
 	
-	@Override
-	public void fieldCylindrical(double phi, double rho, double z, float[] result) {
-		result[0] = 0;
-		result[1] = 0;
-		result[2] = 0;
-	}
-
 	
 	@Override
 	public boolean contains(double x, double y, double z) {
-		return false;
-	}
-
-	@Override
-	public boolean containsCylindrical(double phi, double rho, double z) {
 		return false;
 	}
 

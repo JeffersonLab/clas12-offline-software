@@ -427,5 +427,9 @@ public class ColorScaleModel {
 		colors[(len - 1) * n] = new Color(r[len - 1], g[len - 1], b[len - 1]);
 		return colors;
 	}
+	
+	public boolean isTooSmall(Color color) {
+		return (_tooSmallColor.equals(color));
+	}
 
 }

@@ -13,7 +13,6 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.item.AItem;
 import cnuphys.bCNU.layer.LogicalLayer;
-import cnuphys.fastMCed.frame.FastMCed;
 import cnuphys.fastMCed.streaming.StreamManager;
 import cnuphys.fastMCed.view.AView;
 import cnuphys.fastMCed.view.MagFieldDisplayArray;
@@ -113,8 +112,8 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 			return;
 		}
 
-		boolean hasTorus = MagneticFields.getInstance().hasTorus();
-		boolean hasSolenoid = MagneticFields.getInstance().hasSolenoid();
+		boolean hasTorus = MagneticFields.getInstance().hasActiveTorus();
+		boolean hasSolenoid = MagneticFields.getInstance().hasActiveSolenoid();
 
 		drawItemSectorView(g, container, displayOption, hasTorus, hasSolenoid);
 	}
@@ -193,22 +192,25 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 				// get the true Cartesian coordinates
 				((SectorView) (_view)).getCLASCordinates(container, pp, wp, coords);
 
-				double z = coords[2];
+				float x = (float)coords[0];
+				float y = (float)coords[1];
+		    	float z = (float)coords[2];
 				double rho = coords[3];
 				double phi = coords[4];
 				
-				if (_activeProbe.containsCylindrical(phi, rho, z)) {
+				if (_activeProbe.contains(x, y, z)) {
 
 				if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
 					
-					double bmag = _activeProbe.fieldMagnitudeCylindrical(phi, rho, z) / 10.;
+					//note conversion to Tesla
+					float bmag = _activeProbe.fieldMagnitude((float)x, (float)y, (float)z) /10;
 
 					Color color = _colorScaleModelTorus.getColor(bmag);
 					g.setColor(color);
 					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
 				}
 				else if (displayOption == MagFieldDisplayArray.BGRADDISPLAY) {
-					_activeProbe.gradientCylindrical(phi, rho, z, result);
+					_activeProbe.gradient(x, y, z, result);
 					double gmag = Math.sqrt(result[0]*result[0] +
 							result[1]*result[1] + result[2]*result[2]);
 					
@@ -227,7 +229,7 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 					
 				}
 				else { // one of the components
-					_activeProbe.fieldCylindrical(phi, rho, z, result);
+					_activeProbe.field(x, y, z, result);
 					double comp = 0.0;
 					switch (displayOption) {
 					case MagFieldDisplayArray.BXDISPLAY:
@@ -313,9 +315,6 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 			// double speedup = 5.0;
 			double speedup = 6.0;
 			values[i] = min + (max - min) * Math.exp(-i * del * speedup / max);
-
-			// double x = (Math.PI * i) / (2.0 * (values.length - 1));
-			// values[i] = min + (max - min) * (1.0 - Math.cos(x));
 		}
 		return values;
 	}
@@ -363,17 +362,9 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 		values[len - 1] = max;
 
 		for (int i = 1; i < len - 1; i++) {
-			// values[i] = i*del;
-			// use nonlinear cosine scale
-			// double x = (Math.PI * i) / (2.0 * (values.length - 1));
-			// values[i] = min + (max - min) * (1.0 - Math.cos(x));
-
 			double del = (max - min) / (len - 1);
 			double speedup = 6.0;
 			values[i] = min + (max - min) * Math.exp(-i * del * speedup / max);
-
-			// double x = (Math.PI * i) / (2.0 * (values.length - 1));
-			// values[i] = min + (max - min) * (1.0 - Math.cos(x));
 		}
 		return values;
 	}

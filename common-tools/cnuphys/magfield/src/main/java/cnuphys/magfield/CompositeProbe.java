@@ -76,26 +76,6 @@ public class CompositeProbe extends FieldProbe {
 		result[2] = bz;
 	}
 
-	
-	@Override
-	public void fieldCylindrical(double phi, double rho, double z, float[] result) {
-		
-		float bx = 0;
-		float by = 0;
-		float bz = 0;
-		
-		for (IField probe : probes) {
-			probe.fieldCylindrical(phi, rho, z, result);
-			bx += result[0];
-			by += result[1];
-			bz += result[2];
-		}
-		
-		result[0] = bx;
-		result[1] = by;
-		result[2] = bz;
-	}
-
 	/**
 	 * Checks whether the field has been set to always return zero.
 	 * 
@@ -111,37 +91,6 @@ public class CompositeProbe extends FieldProbe {
 		
 		return true;
 	}
-
-    /**
-     * Obtain an approximation for the magnetic field gradient at a given location expressed in cylindrical
-     * coordinates. The field is returned as a Cartesian vector in kiloGauss/cm.
-     *
-     * @param phi
-     *            azimuthal angle in degrees.
-     * @param rho
-     *            the cylindrical rho coordinate in cm.
-     * @param z
-     *            coordinate in cm
-     * @param result
-     *            the result
-     * @result a Cartesian vector holding the calculated field in kiloGauss.
-     */
-	@Override
-    public void gradientCylindrical(double phi, double rho, double z,
-    	    float result[]) {
-		
-		float bx = 0, by = 0, bz = 0;
-		for (IField probe : probes) {
-			probe.gradientCylindrical(phi, rho, z, result);
-			bx += result[0];
-			by += result[1];
-			bz += result[2];
-		}
-		result[0] = bx;
-		result[1] = by;
-		result[2] = bz;
-   	
-    }
 
 
     /**
@@ -204,14 +153,14 @@ public class CompositeProbe extends FieldProbe {
 	}
 
 
-	@Override
-	public boolean containsCylindrical(double phi, double rho, double z) {
-		for (IField probe : probes) {
-			if (probe.containsCylindrical(phi, rho, z)) {
-				return true;
-			}
-		}
-		return false;
-	}
+//	@Override
+//	public boolean containsCylindrical(double phi, double rho, double z) {
+//		for (IField probe : probes) {
+//			if (probe.containsCylindrical(phi, rho, z)) {
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
 	
 }
