@@ -528,7 +528,7 @@ public class CodaEventDecoder {
         int position = offset;
         int length   = buffer.capacity();
         try {
-            while(position<length){
+            while(position<(length-3)){
                 Short slot = (short) (0x00FF&(buffer.get(position)));
                 position++;
                 citems.add(slot);
