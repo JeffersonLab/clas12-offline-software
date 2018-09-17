@@ -22,7 +22,7 @@ public class BSTPanel3D extends DetectorItem3D {
 
 	protected static final float CROSS_LEN = 3f; // in cm
 	protected static final Color crossColor = X11Colors
-			.getX11Color("dark orange");
+			.getX11Color("dark green");
 
 	// the 1=based sect
 	private int _sector;

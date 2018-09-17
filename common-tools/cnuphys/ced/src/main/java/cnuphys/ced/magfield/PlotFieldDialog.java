@@ -39,6 +39,7 @@ import cnuphys.splot.plot.PlotParameters;
 import cnuphys.splot.plot.X11Colors;
 import cnuphys.splot.style.SymbolType;
 
+@SuppressWarnings("serial")
 public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 	private static int _numPlotPoints = 50000;
@@ -328,27 +329,41 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 		double min = _varPanels[_whichVaries].getMinValue();
 		double max = _varPanels[_whichVaries].getMaxValue();
 		double del = (max - min) / (_numPlotPoints - 1);
+		
+		float x;
+		float y;
+		float z;
+		double phiRad;
 
 		for (int i = 0; i < _numPlotPoints; i++) {
 			double val = min + i * del;
 			double mag = 0;
 			switch (_whichVaries) {
 			case Z:
-				mag = probe.fieldMagnitudeCylindrical(_varPanels[PHI].getFixedValue(), _varPanels[RHO].getFixedValue(),
-						val);
+				phiRad = Math.toRadians(_varPanels[PHI].getFixedValue());
+				x = (float)(_varPanels[RHO].getFixedValue() * Math.cos(phiRad));
+				y = (float)(_varPanels[RHO].getFixedValue() * Math.sin(phiRad));
+				z = (float)val;
+				mag = probe.fieldMagnitude(x, y, z);
 				break;
 
 			case RHO:
-				mag = probe.fieldMagnitudeCylindrical(_varPanels[PHI].getFixedValue(), val,
-						_varPanels[Z].getFixedValue());
+				phiRad = Math.toRadians(_varPanels[PHI].getFixedValue());
+				x = (float)(val * Math.cos(phiRad));
+				y = (float)(val * Math.sin(phiRad));
+				z = (float)_varPanels[Z].getFixedValue();
+				mag = probe.fieldMagnitude(x, y, z);
 				break;
 
 			case PHI:
-				mag = probe.fieldMagnitudeCylindrical(val, _varPanels[RHO].getFixedValue(),
-						_varPanels[Z].getFixedValue());
+				phiRad = Math.toRadians(val);
+				x = (float)(_varPanels[RHO].getFixedValue() * Math.cos(phiRad));
+				y = (float)(_varPanels[RHO].getFixedValue() * Math.sin(phiRad));
+				z = (float)_varPanels[Z].getFixedValue();
+				mag = probe.fieldMagnitude(x, y, z);
 				break;
 			}
-
+			
 			mag = mag / 10; // to tesla
 			try {
 				_canvas.getDataSet().addToCurve(hotIndex, val, mag);

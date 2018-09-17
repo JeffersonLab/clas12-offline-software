@@ -111,7 +111,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 1.004e";
+	private static final String _release = "build 1.005a";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -1066,7 +1066,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		MagneticFields.getInstance().getVersion() + ") "
 				+ MagneticFields.getInstance().getActiveFieldDescription();
 		
-		if (MagneticFields.getInstance().hasTorus()) {
+		if (MagneticFields.getInstance().hasActiveTorus()) {
 			String path = MagneticFields.getInstance().getTorusBaseName();
 			title  += " (" + path + ")";
 		}

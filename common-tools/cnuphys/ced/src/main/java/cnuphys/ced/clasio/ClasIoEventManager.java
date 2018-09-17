@@ -111,6 +111,9 @@ public class ClasIoEventManager {
 
 	// someone who can swim all recon particles
 	private ISwimAll _allReconSwimmer;
+	
+	//the current port
+	private int _currentPort;
 
 	// the current hipo event file
 	private File _currentHipoFile;
@@ -433,6 +436,9 @@ public class ClasIoEventManager {
 			_currentMachine = _etDialog.getMachine();
 			_currentETFile = _etDialog.getFile();
 			_currentStation = _etDialog.getStation();
+			_currentPort = _etDialog.getPort();
+			
+	//		System.err.println("CURRENT PORT: " + _currentPort);
 
 			// does the file exist?
 
@@ -440,25 +446,12 @@ public class ClasIoEventManager {
 			Log.getInstance().info("ET Filename: [" + _currentETFile + "]");
 			Log.getInstance().info("ET Station Name: [" + _currentStation + "]");
 			System.err.println("ET File Name:_currentETFile [" + _currentETFile + "]");
-			File file = new File(_currentETFile);
 
-			// do not check if file exists! That prevents connecting across
-			// machines
-			// if (!file.exists()) {
-			// Log.getInstance().error("ET Filename: ["+ _currentETFile + "]
-			// does NOT exist. Cannot connect to ET.");
-			// JOptionPane.showMessageDialog
-			// (null, "The file: " + file.getAbsolutePath() + " does not
-			// exist.",
-			// "ET File not Found",
-			// JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
-			// return;
-			// }
 
 			try {
 				Log.getInstance().info("Attempting to create EvioETSource.");
 
-				_dataSource = new EvioETSource(_currentMachine, _currentStation);
+				_dataSource = new EvioETSource(_currentMachine, _currentPort, _currentStation);
 
 				if (_dataSource == null) {
 					Log.getInstance().error("null EvioETSource.  Cannot connect to ET.");
@@ -472,7 +465,8 @@ public class ClasIoEventManager {
 				Log.getInstance().info("Attempting to open EvioETSource.");
 				_dataSource.open(_currentETFile);
 			} catch (Exception e) {
-				e.printStackTrace();
+				String message = "Could not connect to ET Ring [" + e.getMessage() + "]";
+				Log.getInstance().error(message);
 			}
 
 		} // end ok

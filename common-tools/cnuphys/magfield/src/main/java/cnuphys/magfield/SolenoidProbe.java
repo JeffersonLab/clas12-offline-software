@@ -32,20 +32,23 @@ public class SolenoidProbe extends FieldProbe {
 	}
 
 	/**
-	 * Get the field magnitude in kiloGauss at a given location expressed in
-	 * Cartesian coordinates.
-	 * 
-	 * @param x
-	 *            the x coordinate in cm
-	 * @param y
-	 *            the y coordinate in cm
-	 * @param z
-	 *            the z coordinate in cm
-	 * @return the magnitude of the field in kiloGauss.
+	 * Get the field in kG
+	 * @param x the x coordinate in cm
+	 * @param y the y coordinate in cm
+	 * @param z the z coordinate in cm
+	 * @param result holds the resuts, the Cartesian coordinates of B in kG
 	 */
 	@Override
 	public void field(float x, float y, float z, float result[]) {
-
+		
+		if (isZeroField()) {
+			result[X] = 0f;
+			result[Y] = 0f;
+			result[Z] = 0f;
+			return;
+		}
+				
+		//note that the contains functions handles the shifts
 		if (!contains(x, y, z)) {
 			result[0] = 0f;
 			result[1] = 0f;
@@ -53,13 +56,13 @@ public class SolenoidProbe extends FieldProbe {
 			return;
 		}
 
+		//apply the shifts
+		x -= _solenoid.getShiftX();
+		y -= _solenoid.getShiftY();
+		z -= _solenoid.getShiftZ();
+
 		double rho = FastMath.sqrt(x * x + y * y);
 		double phi = FastMath.atan2Deg(y, x);
-		fieldCylindrical(phi, rho, z, result);
-	}
-
-	@Override
-	public void fieldCylindrical(double phi, double rho, double z, float[] result) {
 		fieldCylindrical(_cell, phi, rho, z, result);
 	}
 
@@ -80,28 +83,6 @@ public class SolenoidProbe extends FieldProbe {
 	 */
 	private void fieldCylindrical(Cell2D cell, double phi, double rho, double z, float result[]) {
 
-		if (!containsCylindrical(phi, rho, z)) {
-			result[X] = 0f;
-			result[Y] = 0f;
-			result[Z] = 0f;
-			return;
-		}
-
-		if (isZeroField()) {
-			result[X] = 0f;
-			result[Y] = 0f;
-			result[Z] = 0f;
-			return;
-		}
-
-		// misalignment??
-		if (_solenoid.isMisaligned()) {
-			z = z - _solenoid.getShiftZ();
-		}
-
-		if (phi < 0.0) {
-			phi += 360.0;
-		}
 
 		// this will return
 		// result[0] = bphi = 0;
@@ -127,33 +108,5 @@ public class SolenoidProbe extends FieldProbe {
 		result[Z] *= sf;
 	}
 
-	/**
-	 * Check whether the field boundaries include the point
-	 * 
-	 * @param phi
-	 *            azimuthal angle in degrees.
-	 * @param rho
-	 *            the cylindrical rho coordinate in cm.
-	 * @param z
-	 *            coordinate in cm
-	 * @return <code>true</code> if the point is included in the boundary of the
-	 *         field
-	 * 
-	 */
-	@Override
-	public boolean containsCylindrical(double phi, double rho, double z) {
-
-		if (z >= _solenoid.getFakeZMax()) {
-			return false;
-		}
-
-		if ((z < getZMin()) || (z > getZMax())) {
-			return false;
-		}
-		if ((rho < getRhoMin()) || (rho > getRhoMax())) {
-			return false;
-		}
-		return true;
-	}
 
 }

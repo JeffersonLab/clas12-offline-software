@@ -27,8 +27,8 @@ public interface IField {
      *            the result
      * @result a Cartesian vector holding the calculated field in kiloGauss.
      */
-    public void fieldCylindrical(double phi, double rho, double z,
-	    float result[]);
+//    public void fieldCylindrical(double phi, double rho, double z,
+//	    float result[]);
 
     /**
      * Obtain the magnetic field at a given location expressed in Cartesian
@@ -76,7 +76,7 @@ public interface IField {
      *            in cm
      * @return the magnitude of the field in kiloGauss.
      */
-    public float fieldMagnitudeCylindrical(double phi, double r, double z);
+//    public float fieldMagnitudeCylindrical(double phi, double r, double z);
     
 	/**
 	 * Get the field magnitude in kiloGauss at a given location expressed in
@@ -92,7 +92,7 @@ public interface IField {
 	 * actually hold the vector field
 	 * @return the magnitude of the field in kiloGauss.
 	 */
-	public float fieldMagnitudeCylindrical(double phi, double r, double z, float[] workSpace);
+//	public float fieldMagnitudeCylindrical(double phi, double r, double z, float[] workSpace);
 
     /**
      * Get the field magnitude in kiloGauss at a given location expressed in
@@ -122,8 +122,8 @@ public interface IField {
      *            the result
      * @result a Cartesian vector holding the calculated field in kiloGauss.
      */
-    public void gradientCylindrical(double phi, double rho, double z,
-    	    float result[]);
+//    public void gradientCylindrical(double phi, double rho, double z,
+//    	    float result[]);
 
 
     /**
@@ -170,8 +170,6 @@ public interface IField {
 	/**
 	 * Check whether the field boundaries include the point
 	 * 
-	 * @param phi
-	 *            azimuthal angle in degrees.
 	 * @param rho
 	 *            the cylindrical rho coordinate in cm.
 	 * @param z
@@ -180,7 +178,7 @@ public interface IField {
 	 *         field
 	 * 
 	 */
-	public boolean containsCylindrical(double phi, double rho, double z);
+//	public boolean contains(double rho, double z);
 	
 	
 }

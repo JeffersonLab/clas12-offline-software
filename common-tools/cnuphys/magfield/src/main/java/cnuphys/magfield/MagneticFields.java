@@ -31,7 +31,6 @@ public class MagneticFields {
 	private static double _cosPhi[] = {Double.NaN, 1, 0.5, -0.5, -1, -0.5, 0.5};
 	private static double _sinPhi[] = {Double.NaN, 0, ROOT3OVER2, ROOT3OVER2, 0, -ROOT3OVER2, -ROOT3OVER2};
 
-
 	/**
 	 * A formatter to get the time in down to seconds (no day info).
 	 */
@@ -105,6 +104,9 @@ public class MagneticFields {
 
 	// for shifting
 	private MisplacedPanel _shiftSolenoidPanel;
+	private MisplacedPanel _shiftTorusPanelX;
+	private MisplacedPanel _shiftTorusPanelY;
+	private MisplacedPanel _shiftTorusPanelZ;
 
 	// private constructor for singleton
 	private MagneticFields() {
@@ -290,14 +292,43 @@ public class MagneticFields {
 	/**
 	 * Shift the solenoid along Z for misplacement. A negative shift moved the
 	 * solenoid upstream.
-	 * 
-	 * @param shiftZ
-	 *            the shift in cm
+	 * Kept for backwards compatibility
+	 * @param shiftZ the shift in cm
 	 */
 	public void setSolenoidShift(double shiftZ) {
-		if (_solenoid != null) {
-			_solenoid.setShiftZ(shiftZ);
+		shiftMagneticField(_solenoid, 0, 0, shiftZ);
+	}
+	
+	/**
+	 * Shift the magnetic field (i.e., a misalignment)
+	 * @param field the field, either _solenoid or torus
+	 * @param shiftX the X shift in cm
+	 * @param shiftY the Y shift in cm
+	 * @param shiftZ the Z shift in cm A negative shift moved the
+	 * field upstream.
+	 */
+	public void shiftMagneticField(MagneticField field, double shiftX, double shiftY, double shiftZ) {
+		
+		if (field == null) {
+			return;
 		}
+		
+		if (!(field instanceof Torus) && !(field instanceof Solenoid)) {
+			return;
+		}
+		
+		
+		boolean shift = (Math.abs(_solenoid._shiftX - shiftX) > MagneticField.MISALIGNTOL);
+		shift = shift || (Math.abs(_solenoid._shiftY - shiftY) > MagneticField.MISALIGNTOL);
+		shift = shift || (Math.abs(_solenoid._shiftZ - shiftZ) > MagneticField.MISALIGNTOL);
+		
+		if (shift) {
+			field.setShiftX(shiftX);
+			field.setShiftY(shiftY);
+			field.setShiftZ(shiftZ);
+			MagneticFields.getInstance().changedShift(field);
+		}
+		
 	}
 
 	/**
@@ -450,7 +481,9 @@ public class MagneticFields {
 	 *            one of the enum values
 	 */
 	public void setActiveField(FieldType ftype) {
-		// init();
+		if (ftype == getActiveFieldType()) {
+			return;
+		}
 		switch (ftype) {
 		case TORUS:
 			_activeField = _torus;
@@ -661,18 +694,10 @@ public class MagneticFields {
 		
 		if (_solenoid != null) {
 			System.err.println("Reading a solenoid but already have one. Nothing changes");
-//			System.exit(1);
 		}
 		
 		
 		File file = new File(fullPath);
-		String cp;
-		try {
-			cp = file.getCanonicalPath();
-		} catch (IOException e1) {
-			cp = "???";
-			e1.printStackTrace();
-		}
 
 		Solenoid solenoid = null;
 		if (file.exists()) {
@@ -698,13 +723,6 @@ public class MagneticFields {
 		}
 
 		File file = new File(fullPath);
-		String cp;
-		try {
-			cp = file.getCanonicalPath();
-		} catch (IOException e1) {
-			cp = "???";
-			e1.printStackTrace();
-		}
 
 		Torus torus = null;
 		if (file.exists()) {
@@ -1151,13 +1169,19 @@ public class MagneticFields {
 		if (_torus != null) {
 			menu.addSeparator();
 			_scaleTorusPanel = new ScaleFieldPanel(FieldType.TORUS, "Torus", _torus.getScaleFactor());
+			_shiftTorusPanelX = new MisplacedPanel(FieldType.TORUS, "Torus", _torus.getShiftZ(), MisplacedPanel.SHIFTX);
+			_shiftTorusPanelY = new MisplacedPanel(FieldType.TORUS, "Torus", _torus.getShiftZ(), MisplacedPanel.SHIFTY);
+			_shiftTorusPanelZ = new MisplacedPanel(FieldType.TORUS, "Torus", _torus.getShiftZ(), MisplacedPanel.SHIFTZ);
 			menu.add(_scaleTorusPanel);
+			menu.add(_shiftTorusPanelX);
+			menu.add(_shiftTorusPanelY);
+			menu.add(_shiftTorusPanelZ);
 		}
 
 		if (_solenoid != null) {
 			menu.addSeparator();
 			_scaleSolenoidPanel = new ScaleFieldPanel(FieldType.SOLENOID, "Solenoid", _solenoid.getScaleFactor());
-			_shiftSolenoidPanel = new MisplacedPanel(FieldType.SOLENOID, "Solenoid", _solenoid.getShiftZ());
+			_shiftSolenoidPanel = new MisplacedPanel(FieldType.SOLENOID, "Solenoid", _solenoid.getShiftZ(), MisplacedPanel.SHIFTZ);
 			menu.add(_scaleSolenoidPanel);
 			menu.add(_shiftSolenoidPanel);
 		}
@@ -1357,7 +1381,7 @@ public class MagneticFields {
 		synchronized (_torus) {
 			synchronized (_solenoid) {
 				// the z and rho solenoid limits
-				double solLimitZ = _solenoid.getZMax();
+				double solLimitZ = _solenoid.getZMax() + _solenoid._shiftZ;
 				double solLimitR = _solenoid.getRhoMax();
 
 				int stopIndexR = _torus.getQ2Coordinate().getIndex(solLimitR);
@@ -1377,18 +1401,26 @@ public class MagneticFields {
 
 				for (int nPhi = 0; nPhi < _torus.getQ1Coordinate().getNumPoints(); nPhi++) {
 					double phi = _torus.getQ1Coordinate().getValue(nPhi);
+					double phiRad = Math.toRadians(phi);
+					
+					double cosPhi = Math.cos(phiRad);
+					double sinPhi = Math.sin(phiRad);
 					
 					//get the solenoid field
 					for (int nRho = 0; nRho <= stopIndexR; nRho++) {
 						double rho = _torus.getQ2Coordinate().getValue(nRho);
 						// System.err.println("Rho = " + rho);
+						
+						float x = (float)(rho * cosPhi);
+						float y = (float)(rho * sinPhi);
+
 
 						for (int nZ = 0; nZ <= stopIndexZ; nZ++) {
 							double z = _torus.getQ3Coordinate().getValue(nZ);
 							// System.err.println("Z = " + z);
 
 							// get the solenoid field
-							probe.fieldCylindrical(phi, rho, z, result);
+							probe.field(x, y, (float)z, result);
 
 							// composite index
 							int index = _torus.getCompositeIndex(nPhi, nRho, nZ);
@@ -1415,7 +1447,8 @@ public class MagneticFields {
 	 * 
 	 * @return <code>true</code> if we have a torus
 	 */
-	public boolean hasTorus() {
+	public boolean hasActiveTorus() {
+		
 		if (_activeField != null) {
 			if (_activeField instanceof Torus) {
 				return true;
@@ -1439,7 +1472,7 @@ public class MagneticFields {
 	 * 
 	 * @return <code>true</code> if we have a solenoid
 	 */
-	public boolean hasSolenoid() {
+	public boolean hasActiveSolenoid() {
 		if (_activeField != null) {
 			if (_activeField instanceof Solenoid) {
 				return true;
@@ -1783,6 +1816,34 @@ public class MagneticFields {
 	}
 
 	
+	public String getCurrentConfigurationMultiLine() {
+		String s = getActiveFieldType().name() + "\n";
+				
+		//TORUS, SOLENOID, COMPOSITE, COMPOSITEROTATED, ZEROFIELD
+		switch (getActiveFieldType()) {
+		case TORUS:
+			s += String.format("Torus [%s] scale: %-7.3f\n", _torus.getBaseFileName(), _torus.getScaleFactor());
+			break;
+		case SOLENOID:
+			s += String.format("Solenoid [%s] scale: %-7.3f\n", _solenoid.getBaseFileName(), _solenoid.getScaleFactor());
+			break;
+		case COMPOSITE: case COMPOSITEROTATED:
+			s += String.format("Solenoid [%s] scale: %-7.3f\n", _solenoid.getBaseFileName(), _solenoid.getScaleFactor());
+			s += String.format("Torus [%s] scale: %-7.3f\n", _torus.getBaseFileName(), _torus.getScaleFactor());
+			break;
+		case ZEROFIELD:
+			s += " zero field";
+			break;
+		}
+		
+		return s;
+	}
+
+
+	/**
+	 * Print a one line version of the magnetic field configuration
+	 * @param ps the print stream
+	 */
 	public void printCurrentConfiguration(PrintStream ps) {
 		ps.println("Current magfied configuration: ");
 		getActiveField().printConfiguration(ps);
