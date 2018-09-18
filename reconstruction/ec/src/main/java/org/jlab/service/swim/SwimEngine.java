@@ -177,6 +177,11 @@ public class SwimEngine extends ReconstructionEngine {
         MagneticField mf = new MagneticField(){
 
             @Override
+	    public boolean isActive() {
+                return true;            
+	    }
+    
+            @Override
             public String getName() {
                 return "TORUS";
             }

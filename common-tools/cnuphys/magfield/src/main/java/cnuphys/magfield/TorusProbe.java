@@ -38,11 +38,22 @@ public class TorusProbe extends FieldProbe {
 	
 	/**
 	 * Get the field in kG
-	 * @param x the x coor
+	 * @param x the x coordinate in cm
+	 * @param y the y coordinate in cm
+	 * @param z the z coordinate in cm
+	 * @param result holds the resuts, the Cartesian coordinates of B in kG
 	 */
 	@Override
 	public void field(float x, float y, float z, float result[]) {
+		
+		if (isZeroField()) {
+			result[X] = 0f;
+			result[Y] = 0f;
+			result[Z] = 0f;
+			return;
+		}
 				
+		//note that the contains functions handles the shifts
 		if (!contains(x, y, z)) {
 			result[0] = 0f;
 			result[1] = 0f;
@@ -50,19 +61,19 @@ public class TorusProbe extends FieldProbe {
 			return;
 		}
 
+		//apply the shifts
+		x -= _torus.getShiftX();
+		y -= _torus.getShiftY();
+		z -= _torus.getShiftZ();
+
 		double rho = FastMath.sqrt(x * x + y * y);
 		double phi = FastMath.atan2Deg(y, x);
-		fieldCylindrical(_cell, phi, rho, z, result);
-	}
-
-	@Override
-	public void fieldCylindrical(double phi, double rho, double z, float[] result) {
 		fieldCylindrical(_cell, phi, rho, z, result);
 	}
 		
 	/**
 	 * Get the field by trilinear interpolation.
-	 *
+	 * Assumes all shifting from misalignment is done.
 	 * @param phi azimuthal angle in degrees.
 	 * @param rho the cylindrical rho coordinate in cm.
 	 * @param z coordinate in cm
@@ -71,29 +82,6 @@ public class TorusProbe extends FieldProbe {
 	 */
 	private void fieldCylindrical(Cell3D cell, double phi, double rho, double z,
 			float result[]) {
-		
-				
-		if (!containsCylindrical(phi, rho, z)) {
-			result[X] = 0f;
-			result[Y] = 0f;
-			result[Z] = 0f;
-			return;
-		}
-
-		if (isZeroField()) {
-			result[X] = 0f;
-			result[Y] = 0f;
-			result[Z] = 0f;
-			return;
-		}
-
-		while (phi >= 360.0) {
-			phi -= 360.0;
-		}
-		while (phi < 0.0) {
-			phi += 360.0;
-		}
-		
 
 		//must deal with 12-fold symmetry possibility
 		if (_fullMap) {
@@ -168,17 +156,10 @@ public class TorusProbe extends FieldProbe {
 	 *         field
 	 * 
 	 */
-	@Override
-	public boolean containsCylindrical(double phi, double rho, double z) {	
-		
-		if ((z < getZMin()) || (z > getZMax())) {
-			return false;
-		}
-		if ((rho < getRhoMin()) || (rho > getRhoMax())) {
-			return false;
-		}
-		return true;
-	}
+//	@Override
+//	public boolean containsCylindrical(double phi, double rho, double z) {	
+//		return _torus.contains(rho, z);
+//	}
 
 
 

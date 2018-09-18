@@ -572,8 +572,8 @@ public class MagTests {
 	}
 	
 	private static void fixMenus() {
-		boolean hasSolenoid = MagneticFields.getInstance().hasSolenoid();
-		boolean hasTorus = MagneticFields.getInstance().hasTorus();
+		boolean hasSolenoid = MagneticFields.getInstance().hasActiveSolenoid();
+		boolean hasTorus = MagneticFields.getInstance().hasActiveTorus();
 		reconfigItem.setEnabled(hasSolenoid && hasTorus);
 	}
 

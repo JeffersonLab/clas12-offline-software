@@ -7,8 +7,6 @@ import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.IMagField;
 import cnuphys.magfield.MagneticField;
-import cnuphys.magfield.MagneticFieldChangeListener;
-import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.RotatedCompositeProbe;
 import cnuphys.rk4.ButcherTableau;
 import cnuphys.rk4.IRkListener;
@@ -393,6 +391,13 @@ public final class Swimmer {
 			return new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi);
 
 		}
+		
+		//have we already stopped because of maxRad?
+		if (FastMath.sqrt(xo*xo + yo*yo + zo*zo) > maxRad) {
+			System.err.println("Starting point of trajectory is outside maxRad of stopper (C)");
+			return null;
+		}
+		
 
 		// our first attempt
 		SwimTrajectory trajectory = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, maxPathLength, stepSize,
@@ -654,7 +659,14 @@ public final class Swimmer {
 			System.err.println("Skipping low momentum swim (D5)");
 			return new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi);
 		}
+		
+		//have we already stopped because of maxRad?
+		if (FastMath.sqrt(xo*xo + yo*yo + zo*zo) > maxRad) {
+			System.err.println("Starting point of trajectory is outside maxRad of stopper (C)");
+			return null;
+		}
 
+		
 		// normally we swim from small z to a larger z cutoff.
 		// but we can handle either
 		final boolean normalDirection = (fixedZ > zo);

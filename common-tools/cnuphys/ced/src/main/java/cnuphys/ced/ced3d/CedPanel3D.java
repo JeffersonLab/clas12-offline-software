@@ -78,11 +78,11 @@ public class CedPanel3D extends Panel3D {
 	public static final String SHOW_TB_TRACK = "TB Track";
 	public static final String SHOW_HB_TRACK = "HB Track";
 	public static final String SHOW_CVT_TRACK = "CVT Track";
+	
+	public static final String SHOW_MAP_EXTENTS = "Map Extents";
+
 
 	public static final String SHOW_COSMIC = "Cosmics";
-
-	// alpha value for volumes
-	protected int volumeAlpha = 28;
 
 	// Check box array
 	protected CheckBoxArray _checkBoxArray;
@@ -420,6 +420,15 @@ public class CedPanel3D extends Panel3D {
 	public boolean showHBTrack() {
 		return show(CedPanel3D.SHOW_HB_TRACK);
 	}
+	
+	/**
+	 * Show field map extents
+	 * @return <code>true</code> if we are to show torus and solenoid extent
+	 */
+	public boolean showMapExtents() {
+		return show(CedPanel3D.SHOW_MAP_EXTENTS);
+	}
+
 
 	/**
 	 * Show cvt based track?

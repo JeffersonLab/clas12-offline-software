@@ -63,4 +63,14 @@ public interface IMagField {
 	 * @param ps the print stream
 	 */
 	public void printConfiguration(PrintStream ps);
+	
+	/**
+	 * Checks whether the field boundary contain the given point.
+	 * @param x the x coordinate in cm
+	 * @param y the y coordinate in cm
+	 * @param z the z coordinate in cm
+	 * @return <code>true</code> if the field contains the given point
+	 */
+	public boolean contains(double x, double y, double z);
+
 }

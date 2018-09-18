@@ -11,7 +11,7 @@ public class CosmicList extends Vector<Cosmic> {
 
 	public CosmicList(String bankName) {
 
-		int id[] = ColumnData.getIntArray(bankName + ".ID");
+		short id[] = ColumnData.getShortArray(bankName + ".ID");
 		if ((id == null) || (id.length < 1)) {
 	//		System.err.println("NO ID ARRAY in [" + bankName + "]");
 			return;
@@ -48,7 +48,7 @@ public class CosmicList extends Vector<Cosmic> {
 	}
 	
 	//check arrays are not null and have same length
-	private int checkArrays(int[] id,
+	private int checkArrays(short[] id,
 			float[] chi2, float[] phi, float[] theta, 
 			float[] trkline_yx_interc, float[] trkline_yx_slope, 
 			float[] trkline_yz_interc, float[] trkline_yz_slope) {
@@ -103,7 +103,7 @@ public class CosmicList extends Vector<Cosmic> {
 	}
 	
 	//check for length mismatch
-	private boolean lengthMismatch(int[] id, float[] array, String name) {
+	private boolean lengthMismatch(short[] id, float[] array, String name) {
 		if (array == null) {
 			_error = "null " + name + " array when creating CosmicList";
 			return true;

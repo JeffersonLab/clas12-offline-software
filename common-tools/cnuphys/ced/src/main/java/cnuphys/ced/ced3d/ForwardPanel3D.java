@@ -7,17 +7,22 @@ import java.awt.Font;
 
 import cnuphys.ced.ced3d.view.CedView3D;
 import cnuphys.lund.X11Colors;
+import cnuphys.magfield.MagneticFields;
 
 public class ForwardPanel3D extends CedPanel3D {
 
+	//cm
 	private final float xymax = 600f;
 	private final float zmax = 600f;
 	private final float zmin = -100f;
+	
+	private static final Color _torusColor = new Color(0, 255, 255, 16);
+	private static final Color _solenoidColor = new Color(255, 128, 255, 16);
 
 	private static final String _cbaLabels[] = { SHOW_VOLUMES, SHOW_TRUTH,
 			SHOW_SECTOR_1, SHOW_SECTOR_2, SHOW_SECTOR_3, SHOW_SECTOR_4,
 			SHOW_SECTOR_5, SHOW_SECTOR_6, SHOW_DC, SHOW_ECAL, SHOW_PCAL,
-			SHOW_FTOF, SHOW_HB_CROSS, SHOW_TB_CROSS , SHOW_HB_TRACK, SHOW_TB_TRACK, SHOW_CVT_TRACK };
+			SHOW_FTOF, SHOW_HB_CROSS, SHOW_TB_CROSS , SHOW_HB_TRACK, SHOW_TB_TRACK, SHOW_CVT_TRACK, SHOW_MAP_EXTENTS};
 	
 
 	public ForwardPanel3D(CedView3D view, float angleX, float angleY, float angleZ,
@@ -80,6 +85,17 @@ public class ForwardPanel3D extends CedPanel3D {
 				}
 			}
 		}
+		
+		//mag field boundaries
+		if (MagneticFields.getInstance().hasActiveSolenoid()) {
+			System.out.println("Adding 3D Solenoid Boundary");
+			addItem(new FieldBoundary(this, MagneticFields.getInstance().getSolenoid(), _solenoidColor));
+		}
+		if (MagneticFields.getInstance().hasActiveTorus()) {
+			System.out.println("Adding 3D Torus Boundary");
+			addItem(new FieldBoundary(this, MagneticFields.getInstance().getTorus(), _torusColor));
+		}
+
 
 	} // create initial items
 

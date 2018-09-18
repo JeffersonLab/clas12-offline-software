@@ -89,45 +89,7 @@ public abstract class FieldProbe implements IField {
 		return FastMath.vectorLength(result);
 	}
 	
-	/**
-	 * Get the field magnitude in kiloGauss at a given location expressed in
-	 * cylindrical coordinates.
-	 * 
-	 * @param phi
-	 *            azimuthal angle in degrees.
-	 * @param r
-	 *            in cm.
-	 * @param z
-	 *            in cm
-	 * @return the magnitude of the field in kiloGauss.
-	 */
-	@Override
-	public float fieldMagnitudeCylindrical(double phi, double r, double z) {
-		float result[] = new float[3];
-		fieldCylindrical(phi, r, z, result);
-		return FastMath.vectorLength(result);
-	}
 	
-	/**
-	 * Get the field magnitude in kiloGauss at a given location expressed in
-	 * cylindrical coordinates.
-	 * 
-	 * @param phi
-	 *            azimuthal angle in degrees.
-	 * @param r
-	 *            in cm.
-	 * @param z
-	 *            in cm
-	 * @param workSpace a float[3] that can be reused. It will
-	 * actually hold the vector field
-	 * @return the magnitude of the field in kiloGauss.
-	 */
-	@Override
-	public float fieldMagnitudeCylindrical(double phi, double r, double z, float[] workSpace) {
-		fieldCylindrical(phi, r, z, workSpace);
-		return FastMath.vectorLength(workSpace);
-	}
-
 	
 	/**
 	 * Obtain the maximum field magnitude of any point in the map.
@@ -199,6 +161,8 @@ public abstract class FieldProbe implements IField {
 		MagneticFields.labToSector(sector, result, result[0],  result[1],  result[2]);
 
 	}
+	
+	
 
 	
     /**
@@ -253,14 +217,14 @@ public abstract class FieldProbe implements IField {
      *            the result
      * @result a Cartesian vector holding the calculated field in kiloGauss.
      */
-	@Override
-    public void gradientCylindrical(double phi, double rho, double z,
-    	    float result[]) {
-		phi = Math.toRadians(phi);
-		double x = rho*FastMath.cos(phi);
-    	double y = rho*FastMath.sin(phi);
-    	gradient((float)x, (float)y, (float)z, result);
-    }
+//	@Override
+//    public void gradientCylindrical(double phi, double rho, double z,
+//    	    float result[]) {
+//		phi = Math.toRadians(phi);
+//		double x = rho*FastMath.cos(phi);
+//    	double y = rho*FastMath.sin(phi);
+//    	gradient((float)x, (float)y, (float)z, result);
+//    }
 	
 	/**
 	 * Get the appropriate probe for the active field
@@ -271,6 +235,7 @@ public abstract class FieldProbe implements IField {
 	}
 	
 	
+	private static int ZEROPROBEWARNINGCOUNT = 0;
 	/**
 	 * Get the appropriate probe for the given field
 	 * @return the probe for the given field
@@ -293,13 +258,15 @@ public abstract class FieldProbe implements IField {
 			}
 		}
 
-		System.err.println("WARNING: creating a Zero probe");
+		//give limited number of warnings
+		if (ZEROPROBEWARNINGCOUNT < 3) {
+			System.err.println("WARNING: creating a Zero probe");
+			ZEROPROBEWARNINGCOUNT++;
+		}
 		
 		return new ZeroProbe();
 	}
 	
-    
-
 	 /**
      * Check whether the field boundaries include the point
      * @param x the x coordinate in the map units
@@ -309,9 +276,7 @@ public abstract class FieldProbe implements IField {
      */
     @Override
 	public boolean contains(double x, double y, double z) {
-		double rho = FastMath.sqrt(x * x + y * y);
-		double phi = FastMath.atan2Deg(y, x);
-        return containsCylindrical(phi, rho, z);
+    	return _field.contains(x, y, z);
     }
    
 	/**
@@ -327,11 +292,6 @@ public abstract class FieldProbe implements IField {
 	 *         field
 	 * 
 	 */
-	@Override
-	public abstract boolean containsCylindrical(double phi, double rho, double z);
-
-	@Override
-	public abstract void fieldCylindrical(double phi, double rho, double z, float[] result);
 	
 	/**
 	 * Get the sector [1..6] from the phi value

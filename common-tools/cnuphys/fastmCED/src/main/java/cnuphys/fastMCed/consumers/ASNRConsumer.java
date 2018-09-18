@@ -36,8 +36,8 @@ public abstract class ASNRConsumer extends PhysicsEventConsumer {
 	protected void loadOrCreateDictionary(int bendDirection) {
 		double torusScale = 0;
 		double solenoidScale = 0;
-		boolean useTorus = MagneticFields.getInstance().hasTorus();
-		boolean useSolenoid = MagneticFields.getInstance().hasSolenoid();
+		boolean useTorus = MagneticFields.getInstance().hasActiveTorus();
+		boolean useSolenoid = MagneticFields.getInstance().hasActiveSolenoid();
 		if (useTorus) {
 			Torus torus = MagneticFields.getInstance().getTorus();
 			torusScale = (torus == null) ? 0 : torus.getScaleFactor();

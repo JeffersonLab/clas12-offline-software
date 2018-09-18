@@ -21,6 +21,8 @@ import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.GridCoordinate;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.Solenoid;
+import cnuphys.magfield.Torus;
 
 /**
  * This is a magnetic field item. It is restricted to live only on sector views.
@@ -34,7 +36,7 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 
 	// sector view parent
 	private CedView _view;
-	
+
 	private FieldProbe _activeProbe;
 
 	// if mag field failed to , give up
@@ -94,7 +96,7 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 		if (_failedToLoad) {
 			return;
 		}
-		
+
 		if (_activeProbe == null) {
 			_activeProbe = FieldProbe.factory();
 		}
@@ -114,23 +116,19 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 			return;
 		}
 
-		boolean hasTorus = MagneticFields.getInstance().hasTorus();
-		boolean hasSolenoid = MagneticFields.getInstance().hasSolenoid();
+		boolean hasTorus = MagneticFields.getInstance().hasActiveTorus();
+		boolean hasSolenoid = MagneticFields.getInstance().hasActiveSolenoid();
 
 		if (_view instanceof SectorView) {
 			drawItemSectorView(g, container, displayOption, hasTorus, hasSolenoid);
-		}
-		else if (_view instanceof CentralZView) {
+		} else if (_view instanceof CentralZView) {
 			drawItemCentralZView(g, container, displayOption, hasTorus, hasSolenoid);
 		}
 
 	}
 
 	// drawer for Central Z views
-	private void drawItemCentralZView(Graphics g,
-			IContainer container,
-			int displayOption,
-			boolean hasTorus,
+	private void drawItemCentralZView(Graphics g, IContainer container, int displayOption, boolean hasTorus,
 			boolean hasSolenoid) {
 
 		if (!hasSolenoid) {
@@ -165,32 +163,31 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 				// get the true Cartesian coordinates
 				((CentralZView) (_view)).getCLASCordinates(container, pp, wp, coords);
 
-				double z = coords[2];
+				float x = (float)coords[0];
+				float y = (float)coords[1];
+				float z = (float)coords[2];
 				double rho = coords[3];
 				double phi = coords[4];
 
 				if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
 					// note conversion to cm from mm
-					double bmag = _activeProbe.fieldMagnitudeCylindrical(phi, rho / 10, z / 10, result) / 10.;
+					double bmag = _activeProbe.fieldMagnitude(x/10, y/10, z/10) / 10.;
 
 					Color color = _colorScaleModelSolenoid.getColor(bmag);
 					g.setColor(color);
 					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
-				}
-				else if (displayOption == MagFieldDisplayArray.BGRADDISPLAY) {
-					_activeProbe.gradientCylindrical(phi, rho, z, result);
-					double gmag = Math.sqrt(result[0]*result[0] +
-							result[1]*result[1] + result[2]*result[2]);
-					
-					//convert to T/m
+				} else if (displayOption == MagFieldDisplayArray.BGRADDISPLAY) {
+					_activeProbe.gradient(x, y, z, result);
+					double gmag = Math.sqrt(result[0] * result[0] + result[1] * result[1] + result[2] * result[2]);
+
+					// convert to T/m
 					gmag *= 10;
 					Color color = _colorScaleModelGradient.getColor(gmag);
 					g.setColor(color);
 					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
-				}
-				else { // one of the components
-					// note conversion to cm from mm
-					_activeProbe.fieldCylindrical(phi, rho / 10, z / 10, result);
+				} else { // one of the components
+							// note conversion to cm from mm
+					_activeProbe.field(x/10, y/10, z/10, result);
 					double comp = 0.0;
 					switch (displayOption) {
 					case MagFieldDisplayArray.BXDISPLAY:
@@ -215,8 +212,7 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 
 					if (comp > 0) {
 						g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
-					}
-					else {
+					} else {
 						g.drawRect(pp.x - pstep2, pp.y - pstep2, pixelStep - 1, pixelStep - 1);
 					}
 
@@ -230,23 +226,29 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 
 	private Rectangle getFieldRect(IContainer container, boolean hasTorus, boolean hasSolenoid) {
 
+		Solenoid solenoid = MagneticFields.getInstance().getSolenoid();
+		Torus torus = MagneticFields.getInstance().getTorus();
+
+		double solZmin = hasSolenoid ? (solenoid.getZMin() + solenoid.getShiftZ()) : Double.POSITIVE_INFINITY;
+		double solZmax = hasSolenoid ? (solenoid.getZMax() + solenoid.getShiftZ()) : Double.NEGATIVE_INFINITY;
+		double torZmin = hasTorus ? (torus.getZMin() + torus.getShiftZ()) : Double.POSITIVE_INFINITY;
+		double torZmax = hasTorus ? (torus.getZMax() + torus.getShiftZ()) : Double.NEGATIVE_INFINITY;
+
+		double zmin = Math.min(solZmin, torZmin);
+		double zmax = Math.max(solZmax, torZmax);
+
 		fieldBoundary = new Rectangle2D.Double();
 		GridCoordinate rCoordinate = null;
-		GridCoordinate zCoordinate = null;
 		if (hasTorus) {
 			rCoordinate = MagneticFields.getInstance().getTorus().getRCoordinate();
-			zCoordinate = MagneticFields.getInstance().getTorus().getZCoordinate();
-		}
-		else {
+		} else {
 			rCoordinate = MagneticFields.getInstance().getSolenoid().getRCoordinate();
-			zCoordinate = MagneticFields.getInstance().getSolenoid().getZCoordinate();
 		}
 
-		fieldBoundary.x = zCoordinate.getMin();
-		if (hasSolenoid) {
-			fieldBoundary.x = MagneticFields.getInstance().getSolenoid().getZCoordinate().getMin();
-		}
-		fieldBoundary.width = (zCoordinate.getMax() - fieldBoundary.x);
+		fieldBoundary.x = zmin;
+		fieldBoundary.width = (zmax - zmin);
+
+		System.out.println(fieldBoundary);
 
 		fieldBoundary.y = -rCoordinate.getMax();
 		fieldBoundary.height = 2 * rCoordinate.getMax();
@@ -257,28 +259,21 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 	}
 
 	// drawer for sector views
-	private void drawItemSectorView(Graphics g,
-			IContainer container,
-			int displayOption,
-			boolean hasTorus,
+	private void drawItemSectorView(Graphics g, IContainer container, int displayOption, boolean hasTorus,
 			boolean hasSolenoid) {
-
 
 		if (_activeProbe == null) {
 			return;
 		}
-		
+
 		Rectangle bounds = container.getComponent().getBounds();
 		bounds.x = 0;
 		bounds.y = 0;
-	
-		
-		
-		// get the boundary
-	    Rectangle fieldRect;
-		
-		fieldRect = getFieldRect(container, hasTorus, hasSolenoid);
 
+		// get the boundary
+		Rectangle fieldRect;
+
+		fieldRect = getFieldRect(container, hasTorus, hasSolenoid);
 
 		Rectangle updateRect = bounds.intersection(fieldRect);
 
@@ -302,76 +297,74 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 				// get the true Cartesian coordinates
 				((SectorView) (_view)).getCLASCordinates(container, pp, wp, coords);
 
-				double z = coords[2];
+				float x = (float)coords[0];
+				float y = (float)coords[1];
+				float z = (float)coords[2];
 				double rho = coords[3];
 				double phi = coords[4];
-				
-				if (_activeProbe.containsCylindrical(phi, rho, z)) {
 
-				if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
-					double bmag = _activeProbe.fieldMagnitudeCylindrical(phi, rho, z) / 10.;
+		//		if (_activeProbe.containsCylindrical(phi, rho, z)) {
 
-					Color color = _colorScaleModelTorus.getColor(bmag);
-					g.setColor(color);
-					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
-				}
-				else if (displayOption == MagFieldDisplayArray.BGRADDISPLAY) {
-					_activeProbe.gradientCylindrical(phi, rho, z, result);
-					double gmag = Math.sqrt(result[0]*result[0] +
-							result[1]*result[1] + result[2]*result[2]);
-					
-					//convert to T/m
-					gmag *= 10;
-					
-					Color color = _colorScaleModelGradient.getColor(gmag);
-					
-					if (color.getAlpha() < 255) {
-						color = new Color(color.getRed(), color.getGreen(), color.getBlue(), 255);
-					}
-					
-					
-					g.setColor(color);
-					g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
-					
-				}
-				else { // one of the components
-					_activeProbe.fieldCylindrical(phi, rho, z, result);
-					double comp = 0.0;
-					switch (displayOption) {
-					case MagFieldDisplayArray.BXDISPLAY:
-						comp = result[0] / 10.;
-						break;
-					case MagFieldDisplayArray.BYDISPLAY:
-						comp = result[1] / 10.;
-						break;
-					case MagFieldDisplayArray.BZDISPLAY:
-						comp = result[2] / 10.;
-						break;
-					case MagFieldDisplayArray.BPERPDISPLAY:
-						// normal vect to sect view is
-						// -sin(phi)*i + cos(phi)*j
-						double sinp = Math.sin(Math.toRadians(phi));
-						double cosp = Math.cos(Math.toRadians(phi));
-						comp = (-result[0] * sinp + result[1] * cosp) / 10.;
-						break;
+					if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
+						double bmag = _activeProbe.fieldMagnitude(x, y, z) / 10.;
 
-					}
-					Color color = _colorScaleModelTorus.getColor(Math.abs(comp));
-					g.setColor(color);
-
-					// distinguish positive and negative
-					if (comp > 0) {
+						Color color = _colorScaleModelTorus.getColor(bmag);
+						g.setColor(color);
 						g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
-					}
-					else {
-						// g.drawRect(pp.x - pstep2, pp.y - pstep2, pixelStep -
-						// 1,
-						// pixelStep - 1);
-						g.fillOval(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
-					}
+					} else if (displayOption == MagFieldDisplayArray.BGRADDISPLAY) {
+						_activeProbe.gradient(x, y, z, result);
+						double gmag = Math.sqrt(result[0] * result[0] + result[1] * result[1] + result[2] * result[2]);
 
-				} //a component
-				}
+						// convert to T/m
+						gmag *= 10;
+
+						Color color = _colorScaleModelGradient.getColor(gmag);
+
+						if (color.getAlpha() < 255) {
+							color = new Color(color.getRed(), color.getGreen(), color.getBlue(), 255);
+						}
+
+						g.setColor(color);
+						g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
+
+					} else { // one of the components
+						_activeProbe.field(x, y, z, result);
+						double comp = 0.0;
+						switch (displayOption) {
+						case MagFieldDisplayArray.BXDISPLAY:
+							comp = result[0] / 10.;
+							break;
+						case MagFieldDisplayArray.BYDISPLAY:
+							comp = result[1] / 10.;
+							break;
+						case MagFieldDisplayArray.BZDISPLAY:
+							comp = result[2] / 10.;
+							break;
+						case MagFieldDisplayArray.BPERPDISPLAY:
+							// normal vect to sect view is
+							// -sin(phi)*i + cos(phi)*j
+							double sinp = Math.sin(Math.toRadians(phi));
+							double cosp = Math.cos(Math.toRadians(phi));
+							comp = (-result[0] * sinp + result[1] * cosp) / 10.;
+							break;
+
+						}
+						Color color = _colorScaleModelTorus.getColor(Math.abs(comp));
+						g.setColor(color);
+
+						// distinguish positive and negative
+						if (comp > 0) {
+							g.fillRect(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
+						} else {
+							// g.drawRect(pp.x - pstep2, pp.y - pstep2,
+							// pixelStep -
+							// 1,
+							// pixelStep - 1);
+							g.fillOval(pp.x - pstep2, pp.y - pstep2, pixelStep, pixelStep);
+						}
+
+					} // a component
+		//		} //active probe contains
 
 				pp.y += pixelStep;
 			}
@@ -406,8 +399,8 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 		int len = getGradientColors().length + 1;
 
 		double min = 0.0;
-		double max = 15; //T/m
-		double del = (max-min) / (len - 1);
+		double max = 15; // T/m
+		double del = (max - min) / (len - 1);
 		double values[] = new double[len];
 		values[0] = min;
 		values[len - 1] = max;
@@ -515,17 +508,17 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 				int rr = r[i] + (int) (j * f * (r[i + 1] - r[i]));
 				int gg = g[i] + (int) (j * f * (g[i + 1] - g[i]));
 				int bb = b[i] + (int) (j * f * (b[i + 1] - b[i]));
-				
+
 				colors[k] = new Color(rr, gg, bb);
 
-//
-//				if (k < 2) {
-//					// colors[k] = Color.cyan;
-//					colors[k] = new Color(rr, gg, bb, 64);
-//				}
-//				else {
-//					colors[k] = new Color(rr, gg, bb);
-//				}
+				//
+				// if (k < 2) {
+				// // colors[k] = Color.cyan;
+				// colors[k] = new Color(rr, gg, bb, 64);
+				// }
+				// else {
+				// colors[k] = new Color(rr, gg, bb);
+				// }
 				k++;
 			}
 		}
@@ -572,13 +565,13 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 
 				colors[k] = new Color(rr, gg, bb);
 
-//				if (k < 2) {
-//					// colors[k] = Color.cyan;
-//					colors[k] = new Color(rr, gg, bb, 64);
-//				}
-//				else {
-//					colors[k] = new Color(rr, gg, bb);
-//				}
+				// if (k < 2) {
+				// // colors[k] = Color.cyan;
+				// colors[k] = new Color(rr, gg, bb, 64);
+				// }
+				// else {
+				// colors[k] = new Color(rr, gg, bb);
+				// }
 				k++;
 			}
 		}

@@ -21,10 +21,6 @@ import java.util.StringTokenizer;
  */
 public final class Solenoid extends MagneticField {
 	
-	private static final double MISALIGNTOL = 1.0e-6; //cm
-	
-	//used to reconfigure fields so solenoid and torus do not overlap
-	private double _fakeZMax = Float.POSITIVE_INFINITY;
 	
 	// private constructor
 	/**
@@ -33,6 +29,29 @@ public final class Solenoid extends MagneticField {
 	private Solenoid() {
 		setCoordinateNames("phi", "rho", "z");
 	}
+
+	/**
+	 * Checks whether the field has been set to always return zero.
+	 * 
+	 * @return <code>true</code> if the field is set to return zero.
+	 */
+	@Override
+	public final boolean isZeroField() {
+		if (isActive()) {
+			return super.isZeroField();
+		} else {
+			return true;
+		}
+	}
+	
+	/**
+	 * Checks this field active. 
+	 * @return <code>true</code> if this field is active;
+	 */
+	public boolean isActive() {
+		return MagneticFields.getInstance().hasActiveSolenoid();
+	}
+
 
 	/**
 	 * Obtain a solenoid object from a binary file, probably
@@ -50,32 +69,7 @@ public final class Solenoid extends MagneticField {
 		System.out.println(solenoid.toString());
 		return solenoid;
 	}
-
-    /**
-     * Is the physical solenoid represented by the map misaligned?
-     * @return <code>true</code> if solenoid is misaligned
-     */
-	public boolean isMisaligned() {
-    	return (Math.abs(_shiftZ) > MISALIGNTOL);
-    }
     
-
-
-	public double getZMax() {
-		return q3Coordinate.getMax();
-	}
-
-	public double getZMin() {
-		return q3Coordinate.getMin();
-	}
-
-	public double getRhoMax() {
-		return q2Coordinate.getMax();
-	}
-
-	public double getRhoMin() {
-		return q2Coordinate.getMin();
-	}
 
 	/**
 	 * Get the name of the field
@@ -87,21 +81,6 @@ public final class Solenoid extends MagneticField {
 		return "Solenoid";
 	}
 		
-	/**
-	 * Get the fake z lim used to remove overlap with torus
-	 * @return the fake z lim used to remove overlap with torus (cm)
-	 */
-	public double getFakeZMax() {
-		return _fakeZMax;
-	}
-	
-	/**
-	 * Set the fake z lim used to remove overlap with torus
-	 * @param zlim the new value in cm
-	 */
-	public void setFakeZMax(double zlim) {
-		_fakeZMax = zlim;
-	}
 	
 	/**
 	 * Get some data as a string.

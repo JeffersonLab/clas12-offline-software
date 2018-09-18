@@ -56,7 +56,7 @@ public class Cell2D {
 		if (_n2 < 0) {
 			if (!printedOnce) {
 				printedOnce = true;
-				System.err.println("WARNING Bad n2 in Cell2D.reset: " + _n2 + "  rho: " + rho);
+			//	System.err.println("WARNING Bad n2 in Cell2D.reset: " + _n2 + "  rho: " + rho);
 			}
 			return;
 		}
@@ -64,7 +64,7 @@ public class Cell2D {
 		if (_n3 < 0) {
 			if (!printedOnce) {
 				printedOnce = true;
-				System.err.println("WARNING Bad n3 in Cell2D.reset: " + _n3 + "  z: " + z);
+	//			System.err.println("WARNING Bad n3 in Cell2D.reset: " + _n3 + "  z: " + z);
 			}
 			return;
 		}
@@ -119,7 +119,7 @@ public class Cell2D {
 	 * @param result
 	 */
 	public void calculate(double rho, double z, float[] result) {
-		if (_probe.containsCylindrical(0, rho, z)) {
+	//	if (_probe.containsCylindrical(0, rho, z)) {
 			// do we need to reset?
 			if (!containedCylindrical(rho, z)) {
 				reset(rho, z);
@@ -156,11 +156,12 @@ public class Cell2D {
 			result[1] = (float) brho;
 			result[2] = (float) bz;
 
-		} else {
-			for (int i = 0; i < 3; i++) {
-				result[i] = 0f;
-			}
-		}
+//		} 
+//	else {
+//			for (int i = 0; i < 3; i++) {
+//				result[i] = 0f;
+//			}
+//		}
 	}
 
 	// nearest neighbor algorithm
