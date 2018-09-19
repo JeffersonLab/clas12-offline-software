@@ -103,7 +103,7 @@ final class DCdatabase {
 
 		  align_dthetax[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_x",irow);
   		  align_dthetay[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_y",irow);
-  		  align_dthetaz[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_z",irow);		
+  		  align_dthetaz[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_z",irow);
 	   }
     }
 
@@ -287,7 +287,7 @@ final class Wire {
         double hh = (iwire + ((double)(ilayer % 2)) / 2.0) * dw2;
         if(ireg==2 && isSensitiveWire(isuper, ilayer, iwire) && dbref.getMinistaggerStatus())
                 hh += ((ilayer%2)*2-1)*0.03;
-        
+
         // ll: layer distance
         double tt = dbref.cellthickness(isuper) * dbref.wpdist(isuper);
         double ll = ilayer * tt;
@@ -399,30 +399,37 @@ public final class DCGeant4Factory extends Geant4Factory {
         regionMids = new Vector3d[dbref.nsectors()][dbref.nregions()];
 
         for(int isec = 0; isec < dbref.nsectors(); isec++) {
+            for(int iregion=0; iregion<dbref.nregions(); iregion++) {
+                regionMids[isec][iregion] = getRegion(isec, iregion).getGlobalPosition().rotateZ(Math.toRadians(-isec * 60)).rotateY(-dbref.thtilt(iregion));
+/*
+                //define layerMid using wires (produce slight shift compared to GEMC volumes)
+                regionMids[isec][iregion] = new Vector3d(layerMids[isec][iregion*2][dbref.nsenselayers(iregion*2)-1]);
+                regionMids[isec][iregion] = regionMids[isec][iregion].plus(layerMids[isec][iregion*2+1][0]).dividedBy(2.0);
+*/
+            }
+
             for(int isuper=0; isuper<dbref.nsuperlayers(); isuper++) {
                 layerMids[isec][isuper]  = new Vector3d[dbref.nsenselayers(isuper)];
-    
+
                 for(int ilayer=0; ilayer<dbref.nsenselayers(isuper); ilayer++) {
+/*
+                    //define layerMid using wires (produce slight shift compared to GEMC volumes)
                     Wire firstWire = new Wire(isuper, ilayer+1, 1);
                     Wire lastWire = new Wire(isuper, ilayer+1, dbref.nsensewires());
                     Vector3d firstMid = firstWire.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
                     Vector3d lastMid = lastWire.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
-    
                     layerMids[isec][isuper][ilayer] = firstMid.plus(lastMid).dividedBy(2.0);
+*/
+                    layerMids[isec][isuper][ilayer] = getLayer(isec, isuper, ilayer).getGlobalPosition().rotateZ(Math.toRadians(- isec * 60)).rotateY(-dbref.thtilt(isuper/2));
                 }
             }
-    
-            for(int iregion=0; iregion<dbref.nregions(); iregion++) {
-                regionMids[isec][iregion] = new Vector3d(layerMids[isec][iregion*2][dbref.nsenselayers(iregion*2)-1]);
-                regionMids[isec][iregion] = regionMids[isec][iregion].plus(layerMids[isec][iregion*2+1][0]).dividedBy(2.0);
-            }
-    
+
             for(int isuper=0; isuper<dbref.nsuperlayers(); isuper++) {
                 wires[isec][isuper]   = new Wire[dbref.nsenselayers(isuper)][dbref.nsensewires()];
                 for(int ilayer=0; ilayer<dbref.nsenselayers(isuper); ilayer++) {
                     for(int iwire=0; iwire<dbref.nsensewires(); iwire++) {
                         wires[isec][isuper][ilayer][iwire] = new Wire(isuper, ilayer+1, iwire+1);
-    
+
                         wires[isec][isuper][ilayer][iwire].rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
     //                    System.out.println((isuper+1) + " " + (ilayer+1) + " " + (iwire+1) + " " + wireLefts[isuper][ilayer][iwire] + " " + wireMids[isuper][ilayer][iwire] + " " + wireRights[isuper][ilayer][iwire]);
                    }
@@ -475,8 +482,12 @@ public final class DCGeant4Factory extends Geant4Factory {
         return wires[0][isuper][ilayer][iwire].dir();
     }
 
-    private Geant4Basic getRegion(int ireg) {
-        return motherVolume.getChildren().get(ireg*6);
+    private Geant4Basic getRegion(int isec, int ireg) {
+        return motherVolume.getChildren().get(ireg*6+isec);
+    }
+
+    private Geant4Basic getLayer(int isec, int isuper, int ilayer) {
+        return getRegion(isec, isuper/2).getChildren().get((isuper%2)*6 + ilayer);
     }
     ///////////////////////////////////////////////////
     public Geant4Basic createRegion(int isector, int iregion) {
