@@ -194,6 +194,34 @@ final class DCdatabase {
     public boolean getMinistaggerStatus(){
         return ministaggerStatus;
     }
+
+    public double getAlignmentX(int isec, int ireg) {
+        return align_dx[isec][ireg];
+    }
+
+    public double getAlignmentY(int isec, int ireg) {
+        return align_dy[isec][ireg];
+    }
+
+    public double getAlignmentZ(int isec, int ireg) {
+        return align_dz[isec][ireg];
+    }
+
+    public double getAlignmentThetaX(int isec, int ireg) {
+        return align_dthetax[isec][ireg];
+    }
+
+    public double getAlignmentThetaY(int isec, int ireg) {
+        return align_dthetay[isec][ireg];
+    }
+
+    public double getAlignmentThetaZ(int isec, int ireg) {
+        return align_dthetaz[isec][ireg];
+    }
+
+    public Vector3d getAlignmentShift(int isec, int ireg) {
+        return new Vector3d(align_dx[isec][ireg], align_dy[isec][ireg], align_dz[isec][ireg]);
+    }
 }
 
 final class Wire {
@@ -209,6 +237,15 @@ final class Wire {
     private final Vector3d direction;
     private Vector3d leftend;
     private Vector3d rightend;
+
+    public Wire translate(Vector3d vshift) {
+        midpoint.add(vshift);
+        center.add(vshift);
+        leftend.add(vshift);
+        rightend.add(vshift);
+
+        return this;
+    }
 
     public Wire rotateX(double rotX) {
         midpoint.rotateX(rotX);
@@ -427,13 +464,30 @@ public final class DCGeant4Factory extends Geant4Factory {
             for(int isuper=0; isuper<dbref.nsuperlayers(); isuper++) {
                 wires[isec][isuper]   = new Wire[dbref.nsenselayers(isuper)][dbref.nsensewires()];
                 for(int ilayer=0; ilayer<dbref.nsenselayers(isuper); ilayer++) {
+                    layerMids[isec][isuper][ilayer].add(regionMids[isec][isuper/2].times(-1.0));
+                    layerMids[isec][isuper][ilayer].rotateZ(dbref.getAlignmentThetaZ(isec, isuper/2));
+                    layerMids[isec][isuper][ilayer].rotateY(dbref.getAlignmentThetaY(isec, isuper/2));
+                    layerMids[isec][isuper][ilayer].rotateX(dbref.getAlignmentThetaX(isec, isuper/2));
+                    layerMids[isec][isuper][ilayer].add(regionMids[isec][isuper/2]);
+                    layerMids[isec][isuper][ilayer].add(dbref.getAlignmentShift(isec, isuper/2));
+
                     for(int iwire=0; iwire<dbref.nsensewires(); iwire++) {
                         wires[isec][isuper][ilayer][iwire] = new Wire(isuper, ilayer+1, iwire+1);
 
                         wires[isec][isuper][ilayer][iwire].rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
+
+                        //dc alignment implementation
+                        wires[isec][isuper][ilayer][iwire].translate(regionMids[isec][isuper/2].times(-1.0));
+                        wires[isec][isuper][ilayer][iwire].rotateZ(dbref.getAlignmentThetaZ(isec, isuper/2));
+                        wires[isec][isuper][ilayer][iwire].rotateY(dbref.getAlignmentThetaY(isec, isuper/2));
+                        wires[isec][isuper][ilayer][iwire].rotateX(dbref.getAlignmentThetaX(isec, isuper/2));
+                        wires[isec][isuper][ilayer][iwire].translate(regionMids[isec][isuper/2]);
+                        wires[isec][isuper][ilayer][iwire].translate(dbref.getAlignmentShift(isec, isuper/2));
     //                    System.out.println((isuper+1) + " " + (ilayer+1) + " " + (iwire+1) + " " + wireLefts[isuper][ilayer][iwire] + " " + wireMids[isuper][ilayer][iwire] + " " + wireRights[isuper][ilayer][iwire]);
                    }
                 }
+
+                regionMids[isec][isuper/2].add(dbref.getAlignmentShift(isec, isuper/2));
             }
         }
     }
