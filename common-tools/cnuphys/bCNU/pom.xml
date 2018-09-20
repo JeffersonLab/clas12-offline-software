@@ -50,7 +50,7 @@
     <dependency>
       <groupId>org.jlab.coda</groupId>
       <artifactId>jevio</artifactId>
-      <version>6.1-SNAPSHOT</version>
+      <version>4.4</version>
     </dependency>
 
 <dependency>
