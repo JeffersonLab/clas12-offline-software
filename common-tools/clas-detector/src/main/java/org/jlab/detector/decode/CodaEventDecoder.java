@@ -26,6 +26,8 @@ import org.jlab.io.evio.EvioSource;
 import org.jlab.io.evio.EvioTreeBranch;
 import org.jlab.utils.data.DataUtils;
 
+import sun.awt.image.IntegerComponentRaster;
+
 /**
  *
  * @author gavalian
@@ -794,67 +796,70 @@ public class CodaEventDecoder {
         return entries;
     }
     
+    /**
+     * Decoding MicroMegas Packed Data
+     * @param crate
+     * @param node
+     * @param event
+     * @return
+     */
     public List<DetectorDataDgtz>  getDataEntries_57640(Integer crate, EvioNode node, EvioDataEvent event){
-
-//        System.out.println("Found bit packed MM bank");
+        // Micromegas packed data
+        // ----------------------
+        
         ArrayList<DetectorDataDgtz>  entries = new ArrayList<DetectorDataDgtz>();
-
         if(node.getTag()==57640){
             try {
-
                 ByteBuffer     compBuffer = node.getByteData(true);
                 CompositeData  compData = new CompositeData(compBuffer.array(),event.getByteOrder());
-//                System.out.println(compData.toString());
-                
+
                 List<DataType> cdatatypes = compData.getTypes();
                 List<Object>   cdataitems = compData.getItems();
-                
-//                for(DataType dType : cdatatypes) System.out.println(dType.toString());
-                if(cdatatypes.get(3) != DataType.NVALUE){
-                    System.err.println("[EvioRawDataSource] ** error ** corrupted "
-                    + " bank. tag = " + node.getTag() + " num = " + node.getNum());
-                    return null;
-                }
 
-                int position = 0;
+                int jdata = 0;  // item counter 
+                for( int i = 0 ; i < cdatatypes.size();  ) { // loop over data types
+                	Byte CRATE     =  (Byte)cdataitems.get( jdata++ ); i++;
+                	
+                	Integer EV_ID  = (Integer)cdataitems.get( jdata++ ); i++;
+                	
+                	Long TIMESTAMP =  (Long)cdataitems.get( jdata++ ); i++;
+                	
+                	Short nChannels =  (Short)cdataitems.get( jdata++ ); i++; 
 
-                while(position<cdatatypes.size()-4){
-                    Byte    slot = (Byte)     cdataitems.get(position+0);
-                    Integer trig = (Integer)  cdataitems.get(position+1);
-                    Long    time = (Long)     cdataitems.get(position+2);
-                    //EvioRawDataBank  dataBank = new EvioRawDataBank(crate, slot.intValue(),trig,time);
+                	for( int ch=0; ch<nChannels; ch++ ) {
+                    	Short CHANNEL = (Short)cdataitems.get( jdata++ ); i++;
+                    	
+                    	int nBytes = (Byte)cdataitems.get( jdata++ ); i++;
+                    	
+                    	DetectorDataDgtz bank = new DetectorDataDgtz(crate,CRATE.intValue(),CHANNEL.intValue());
 
-                    Integer nchannels = (Integer) cdataitems.get(position+3);
-                    //System.out.println("Retrieving the data size = " + cdataitems.size()
-                    //+ "  " + cdatatypes.get(3) + " number of channels = " + nchannels);
-                    position += 4;
-                    int counter  = 0;
-                    while(counter<nchannels){
-
-                        Short channel   = (Short) cdataitems.get(position);
-                        Integer length = (Integer) cdataitems.get(position+1);
-                        DetectorDataDgtz bank = new DetectorDataDgtz(crate,slot.intValue(),channel.intValue());
-
-                        short[] shortbuffer = new short[length];
-                        for(int loop = 0; loop < length; loop++){
-                            Short sample    = (Short) cdataitems.get(position+2+loop);
-                            shortbuffer[loop] = sample;
-                        }
-                        //Added pulse fitting for MMs
-                        ADCData adcData = new ADCData();
-			//adcData.setTimeStamp(timeStamp); // bug fixed
-                        adcData.setTimeStamp(time);
-			adcData.setPulse(shortbuffer);  
-                        bank.addADC(adcData);
-                        //bank.addPulse(shortbuffer);
-                        //bank.setTimeStamp(time);
-                        //dataBank.addData(channel.intValue(),
-                        //            new RawData(shortbuffer));
-                        entries.add(bank);
-                        position += 2+length;
-                        counter++;
-                    }
-                }
+                    	int nSamples = nBytes*8/12;
+                    	short[] samples = new short[ nSamples ];
+                    	for( short t : samples ) { t = 0x00; }
+                    	
+                    	int s = 0;
+                    	for( int b=0;b<nBytes;b++ ) {
+                    		short data = (short)((byte)cdataitems.get( jdata++ )&0xFF);
+                    		
+                    		s = (int)Math.floor( b * 8./12. );
+                    		if( b%3 != 1) {
+                    			samples[s] += (short)data;
+                    		}
+                    		else {
+                    			samples[s] += (data&0x000F)<<8;
+                    			if( s+1 < nSamples ) samples[s+1] += ((data&0x00F0)>>4)<<8;
+                    		}
+                    	
+                    	}
+                    	i++;
+                    	
+                      ADCData adcData = new ADCData();
+                      adcData.setTimeStamp(TIMESTAMP);
+                      adcData.setPulse(samples);  
+                      bank.addADC(adcData);
+                      entries.add(bank);
+                	} // end loop on channels
+                } // end loop on data types
                 return entries;
 
             } catch (EvioException ex) {
@@ -1246,11 +1251,11 @@ public class CodaEventDecoder {
 
     public static void main(String[] args){
         EvioSource reader = new EvioSource();
-        reader.open("/Users/devita/mvt_packed_004698.evio.00000");
+        reader.open("/home/fbossu/Data/mvt_packed_004698.evio.00000");
         CodaEventDecoder decoder = new CodaEventDecoder();
         DetectorEventDecoder detectorDecoder = new DetectorEventDecoder();
 
-        int maxEvents = 30;
+        int maxEvents = 5;
         int icounter  = 0;
 
         while(reader.hasEvent()==true&&icounter<maxEvents){
