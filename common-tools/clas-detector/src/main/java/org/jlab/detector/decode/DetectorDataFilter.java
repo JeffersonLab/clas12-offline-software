@@ -131,7 +131,7 @@ public class DetectorDataFilter {
         @Override
         public void actionPerformed(ActionEvent e) {
             if(e.getActionCommand().compareTo("add_detector")==0){
-                Object[] possibilities = {"ECAL","FTOF","DC","BST","FTCAL","FTTRK"};
+                Object[] possibilities = {"ECAL","FTOF","DC","BST","FTCAL","FTTRK", "RF"};
                 String s = (String) JOptionPane.showInputDialog(
                     this,
                     "Add Detector to the filter:\n"
