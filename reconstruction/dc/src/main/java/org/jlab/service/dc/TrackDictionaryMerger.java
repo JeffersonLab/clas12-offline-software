@@ -101,7 +101,7 @@ public class TrackDictionaryMerger {
                         this.dictionary.put(wires, line);
                     }
                 }
-                if(nLines % 1000000 == 0) System.out.println("Read " + nLines + " roads");
+                if(nLines % 1000000 == 0) System.out.println("Read " + nLines + " roads with " + nFull + " full ones, " + nDupli + " duplicates and " + this.dictionary.keySet().size() + " good ones");
             }
             System.out.println("Found " + nLines + " roads with " + nFull + " full ones, " + nDupli + " duplicates and " + this.dictionary.keySet().size() + " good ones");
         } 

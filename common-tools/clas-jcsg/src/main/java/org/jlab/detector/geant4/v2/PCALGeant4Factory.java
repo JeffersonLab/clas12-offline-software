@@ -75,6 +75,10 @@ public final class PCALGeant4Factory extends Geant4Factory {
     private Layer getULayer(int ilayer, int isector) {
         Layer uLayer = new Layer("U-view-scintillator_" + (ilayer * 3 + 1) + "_s" + isector, dstrip + 2.0 * dwrap);
         uLayer.populateUstrips(ilayer, isector);
+        for(int istrip=0; istrip<uLayer.scipaddles.size(); istrip++) {
+            G4Trap strip = (G4Trap) uLayer.scipaddles.get(istrip);
+            strip.setId(PCALID, isector, (ilayer * 3 + 1), istrip+1);
+        }
         return uLayer;
     }
 
@@ -88,6 +92,10 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 new Vector3d(-wmax * (Math.pow(Math.cos(thview), 2.0) + 0.25), -wheight / 2.0, 0)));
         vLayer.layerVol.translate(shiftVec);
         vLayer.populateWstrips(ilayer, isector);
+        for(int istrip=0; istrip<vLayer.scipaddles.size(); istrip++) {
+            G4Trap strip = (G4Trap) vLayer.scipaddles.get(istrip);
+            strip.setId(PCALID, isector, (ilayer * 3 + 2), istrip+1);
+        }
         return vLayer;
     }
 
@@ -101,6 +109,10 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 new Vector3d(-wmax * (Math.pow(Math.cos(thview), 2.0) + 0.25), -wheight / 2.0, 0)));
         wLayer.layerVol.translate(shiftVec);
         wLayer.populateWstrips(ilayer, isector);
+        for(int istrip=0; istrip<wLayer.scipaddles.size(); istrip++) {
+            G4Trap strip = (G4Trap) wLayer.scipaddles.get(istrip);
+            strip.setId(PCALID, isector, (ilayer * 3 + 3), istrip+1);
+        }
         return wLayer;
     }
 
@@ -153,7 +165,6 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 }
                 stripVol.setMother(layerVol);
                 stripVol.translate(0, (-uheight + hshort + hlong) / 2.0, 0);
-                stripVol.setId(PCALID, isector+1, ilayer+1, scipaddles.size());
                 hshort += uwidth;
             }
 
@@ -172,7 +183,6 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 scipaddles.add(stripVol);
                 stripVol.setMother(layerVol);
                 stripVol.translate(0, (-uheight + hshort + hlong) / 2.0, 0);
-                stripVol.setId(PCALID, isector+1, ilayer+1, scipaddles.size());
                 hshort += 2.0 * wstrip;
             }
 
@@ -200,7 +210,6 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 double xstrip = ystrip * Math.tan(-walpha);
                 stripVol.translate(xstrip, ystrip, 0);
                 stripVol.setMother(layerVol);
-                stripVol.setId(PCALID, isector+1, ilayer+1, scipaddles.size());
                 hshort += wstrip;
             }
 
@@ -224,7 +233,6 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 double xstrip = ystrip * Math.tan(-walpha);
                 stripVol.translate(xstrip, ystrip, 0);
                 stripVol.setMother(layerVol);
-                stripVol.setId(PCALID, isector+1, ilayer+1, scipaddles.size());
                 hshort += wwidth;
             }
 

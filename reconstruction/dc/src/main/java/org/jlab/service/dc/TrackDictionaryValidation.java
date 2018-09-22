@@ -122,6 +122,9 @@ public class TrackDictionaryValidation {
         H2F hi_vztheta_neg_road = new H2F("hi_vztheta_neg_road", "hi_vztheta_neg_road", 100, -15, 15, 100, 0.0, 65.0);     
         hi_vztheta_neg_road.setTitleX("vz (cm)");
         hi_vztheta_neg_road.setTitleY("#theta (deg)");
+        H2F hi_pcalftof_neg_road = new H2F("hi_pcalftof_neg_road", "hi_pcalftof_neg_road", 65, 0.0, 65.0, 70, 0.0, 70.0);      
+        hi_pcalftof_neg_road.setTitleX("FTOF paddle");
+        hi_pcalftof_neg_road.setTitleY("PCAL strip");
         H2F hi_ptheta_pos_road = new H2F("hi_ptheta_pos_road", "hi_ptheta_pos_road", 100, 0.0, 10.0, 100, 0.0, 65.0);     
         hi_ptheta_pos_road.setTitleX("p (GeV)");
         hi_ptheta_pos_road.setTitleY("#theta (deg)");
@@ -131,13 +134,18 @@ public class TrackDictionaryValidation {
         H2F hi_vztheta_pos_road = new H2F("hi_vztheta_pos_road", "hi_vztheta_pos_road", 100, -15, 15, 100, 0.0, 65.0);     
         hi_vztheta_pos_road.setTitleX("vz (cm)");
         hi_vztheta_pos_road.setTitleY("#theta (deg)");
-        DataGroup dRoads  = new DataGroup(3,2);
+        H2F hi_pcalftof_pos_road = new H2F("hi_pcalftof_pos_road", "hi_pcalftof_pos_road", 65, 0.0, 65.0, 70, 0.0, 70.0);       
+        hi_pcalftof_pos_road.setTitleX("FTOF paddle");
+        hi_pcalftof_pos_road.setTitleY("PCAL strip");
+        DataGroup dRoads  = new DataGroup(4,2);
         dRoads.addDataSet(hi_ptheta_neg_road,   0);
         dRoads.addDataSet(hi_phitheta_neg_road, 1);
         dRoads.addDataSet(hi_vztheta_neg_road,  2);
-        dRoads.addDataSet(hi_ptheta_pos_road,   3);
-        dRoads.addDataSet(hi_phitheta_pos_road, 4);
-        dRoads.addDataSet(hi_vztheta_pos_road,  5);
+        dRoads.addDataSet(hi_pcalftof_neg_road, 3);
+        dRoads.addDataSet(hi_ptheta_pos_road,   4);
+        dRoads.addDataSet(hi_phitheta_pos_road, 5);
+        dRoads.addDataSet(hi_vztheta_pos_road,  6);
+        dRoads.addDataSet(hi_pcalftof_pos_road, 7);
         this.dataGroups.add(dRoads, 0);
         // matched roads
         H2F hi_ptheta_neg_matchedroad = new H2F("hi_ptheta_neg_matchedroad", "hi_ptheta_neg_matchedroad", 100, 0.0, 10.0, 100, 0.0, 65.0);     
@@ -279,12 +287,12 @@ public class TrackDictionaryValidation {
     
     public void plotHistos() {
         this.analyzeHistos();
-        this.canvas.getCanvas("Dictionary").divide(3, 2);
+        this.canvas.getCanvas("Dictionary").divide(4, 2);
         this.canvas.getCanvas("Dictionary").setGridX(false);
         this.canvas.getCanvas("Dictionary").setGridY(false);
         this.canvas.getCanvas("Dictionary").draw(dataGroups.getItem(0));
         this.canvas.getCanvas("Dictionary").getPad(0).getAxisZ().setLog(true);
-        this.canvas.getCanvas("Dictionary").getPad(3).getAxisZ().setLog(true);
+        this.canvas.getCanvas("Dictionary").getPad(4).getAxisZ().setLog(true);
         this.canvas.getCanvas("Matched Roads").divide(3, 2);
         this.canvas.getCanvas("Matched Roads").setGridX(false);
         this.canvas.getCanvas("Matched Roads").setGridY(false);
@@ -328,11 +336,15 @@ public class TrackDictionaryValidation {
             if(nevent%10000 == 0) System.out.println("Analyzed " + nevent + " events");
             DataBank recTrack = null;
             DataBank recHits = null;
+            DataBank recFtof = null;
             DataBank mcPart  = null;
             if (event.hasBank("TimeBasedTrkg::TBTracks")) {
                 recTrack = event.getBank("TimeBasedTrkg::TBTracks");
             }
             if (event.hasBank("TimeBasedTrkg::TBHits")) {
+                recHits = event.getBank("TimeBasedTrkg::TBHits");
+            }
+            if (event.hasBank("FTOF::hits")) {
                 recHits = event.getBank("TimeBasedTrkg::TBHits");
             }
             if (event.hasBank("MC::Particle")) {
@@ -454,6 +466,7 @@ public class TrackDictionaryValidation {
             String line = null;
             while ((line = txtreader.readLine()) != null) {
                 nLines++;
+                if(nLines % 1000000 == 0) System.out.println("Read " + nLines + " roads");
                 String[] lineValues;
                 lineValues  = line.split("\t");
                 ArrayList<Integer> wires = new ArrayList<Integer>();
@@ -476,11 +489,13 @@ public class TrackDictionaryValidation {
                         int wire = Integer.parseInt(lineValues[4+i*6]);
                         if(wire>0) wires.add(wire);
                     }
-                    // keep only roads with 6 superlayers
-                    if(wires.size()!=6) continue;
                     int paddle1b = Integer.parseInt(lineValues[40]);
                     int paddle2  = Integer.parseInt(lineValues[42]);
-                    int pcalu    = Integer.parseInt(lineValues[43]);
+                    int pcalu    = Integer.parseInt(lineValues[43]);                    
+                    // keep only roads with 6 superlayers
+                    if(wires.size()!=6) continue;
+//                    // keep only roads with ftof
+//                    if(paddle1b==0) continue;
                     nFull++;
                     if(this.dictionary.containsKey(wires)) {
                         nDupli++;
@@ -494,15 +509,16 @@ public class TrackDictionaryValidation {
                             this.dataGroups.getItem(0).getH2F("hi_ptheta_neg_road").fill(road.p(), Math.toDegrees(road.theta()));
                             this.dataGroups.getItem(0).getH2F("hi_phitheta_neg_road").fill(phiSec, Math.toDegrees(road.theta()));
                             this.dataGroups.getItem(0).getH2F("hi_vztheta_neg_road").fill(road.vz(), Math.toDegrees(road.theta()));
+                            if(paddle1b>0) this.dataGroups.getItem(0).getH2F("hi_pcalftof_neg_road").fill(paddle1b, pcalu);
                         }
                         else {
                             this.dataGroups.getItem(0).getH2F("hi_ptheta_pos_road").fill(road.p(), Math.toDegrees(road.theta()));
                             this.dataGroups.getItem(0).getH2F("hi_phitheta_pos_road").fill(phiSec, Math.toDegrees(road.theta()));                            
                             this.dataGroups.getItem(0).getH2F("hi_vztheta_pos_road").fill(road.vz(), Math.toDegrees(road.theta()));
+                            if(paddle1b>0) this.dataGroups.getItem(0).getH2F("hi_pcalftof_pos_road").fill(paddle1b, pcalu);
                         }
                     }
                 }
-                if(nLines % 1000000 == 0) System.out.println("Read " + nLines + " roads");
             }
             System.out.println("Found " + nLines + " roads with " + nFull + " full ones, " + nDupli + " duplicates and " + this.dictionary.keySet().size() + " good ones");
         } 
@@ -524,14 +540,14 @@ public class TrackDictionaryValidation {
         OptionParser parser = new OptionParser("dict-validation");
         parser.addOption("-d","dictionary.txt", "read dictionary from file");
         parser.addOption("-c","input.hipo", "create dictionary from event file");
-        parser.addRequired("-i","set event file for dictionary validation");
+        parser.addOption("-i","set event file for dictionary validation");
         parser.addOption("-w", "0", "wire smearing in road finding");
         parser.addOption("-n", "-1", "maximum number of events to process");
         parser.parse(args);
         
         List<String> arguments = new ArrayList<String>();
         for(String item : args){ arguments.add(item); }
-
+        
         String dictionaryFileName = null;
         if(parser.hasOption("-d")==true){
             dictionaryFileName = parser.getOption("-d").stringValue();
@@ -547,20 +563,21 @@ public class TrackDictionaryValidation {
         int wireSmear = parser.getOption("-w").intValue();
         int maxEvents = parser.getOption("-n").intValue();
             
-//        dictionaryFileName="/Users/devita/TracksDic_n20000000_newformat.txt";
+//        dictionaryFileName="/Users/devita/TracksDic_test.txt";
 //        inputFileName = "/Users/devita/out_clas_004013.0.9.hipo";
 //        testFileName  = "/Users/devita/out_clas_004013.0.9.hipo";
 //        testFileName  = "/Users/devita/clas12_pi.hipo";
 //        wireSmear=0;
 //        maxEvents = 100000;  
+        boolean debug=false;
         
         TrackDictionaryValidation tm = new TrackDictionaryValidation();
         tm.init();
-        if(parser.containsOptions(arguments, "-c") || parser.containsOptions(arguments, "-d")) {
+        if(parser.containsOptions(arguments, "-c") || parser.containsOptions(arguments, "-d") || debug) {
             if(parser.containsOptions(arguments, "-c")) {
                 tm.createDictionary(inputFileName);
             }
-            else if(parser.hasOption("-d")==true) {
+            else if(parser.hasOption("-d")==true || debug) {
                 tm.readDictionary(dictionaryFileName);                
             }
     //        tm.printDictionary();

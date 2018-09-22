@@ -86,11 +86,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jlab.coda</groupId>
-      <artifactId>jclara</artifactId>
-      <version>4.3-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>clas12detector-fmt</artifactId>
       <version>${project.version}</version>
