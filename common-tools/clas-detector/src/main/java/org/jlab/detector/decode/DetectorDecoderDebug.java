@@ -20,7 +20,11 @@ import org.jlab.io.evio.EvioSource;
 public class DetectorDecoderDebug {
     
     private CodaEventDecoder          codaDecoder = null; 
-    
+    private int      totalRawSize = 0;
+    private int totalComparedSize = 0;
+    private int       totalErrors = 0;
+    private int        totalEvent = 0;
+
     public DetectorDecoderDebug(){
         codaDecoder = new CodaEventDecoder();
     }
@@ -45,6 +49,9 @@ public class DetectorDecoderDebug {
         int size = raw.size();
         int comparedSize = 0;
         
+        this.totalEvent++;
+        this.totalRawSize += size;
+        
         for(Map.Entry<Integer,DetectorDataDgtz> entry : raw.entrySet()){
             if(packed.containsKey(entry.getKey())==false){
                 System.out.println(
@@ -54,6 +61,7 @@ public class DetectorDecoderDebug {
                                 entry.getValue().getDescriptor().getSlot(),
                                 entry.getValue().getDescriptor().getChannel()
                         ));
+                this.totalErrors++;
             } else {
                 DetectorDataDgtz data = packed.get(entry.getKey());
                 int diff = this.getDifference(entry.getValue(), data);
@@ -61,10 +69,12 @@ public class DetectorDecoderDebug {
                     comparedSize++;
                 } else {
                     System.out.println("*** ERROR : something went wrong with DATA : " + data.getDescriptor().toString());
+                    this.totalErrors++;
                 }
             }
         }
         
+        this.totalComparedSize+=comparedSize;
         System.out.println(String.format(">>> COMPARISION FOR event #%8d ->  processed %8d / passed %8d",
                 eventNumber,size,comparedSize));
     }
@@ -111,6 +121,14 @@ public class DetectorDecoderDebug {
         return dataMap;
     }
     
+    public void printComparisonStats()  {
+        System.out.println("\n Comparison statistics:");
+        System.out.println("\t Number of events:         " + this.totalEvent);
+        System.out.println("\t Number of pulses:         " + this.totalRawSize);
+        System.out.println("\t Number of matched pulses: " + this.totalComparedSize);        
+        System.out.println("\t Number of errors:         " + this.totalErrors);        
+    }
+    
     public static void main(String[] args){
         String inputFile = "/Users/gavalian/Work/Software/project-5a.0.0/data/raw/test_004714.evio.00000";
         
@@ -128,6 +146,7 @@ public class DetectorDecoderDebug {
             debugger.compareMaps(mapRow, mapPkt, eventNumber);
             eventNumber++;
         }
+        debugger.printComparisonStats();
                 
     }
 }
