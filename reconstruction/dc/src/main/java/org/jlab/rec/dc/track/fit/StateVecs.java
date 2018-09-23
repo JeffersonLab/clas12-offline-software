@@ -417,6 +417,8 @@ public class StateVecs {
                     trkcand.get_Q());
 
             double[] VecAtFirstMeasSite = dcSwim.SwimToPlane(z0);
+            if(VecAtFirstMeasSite==null)
+                return;
             StateVec initSV = new StateVec(0);
             initSV.x = VecAtFirstMeasSite[0];
             initSV.y = VecAtFirstMeasSite[1];
@@ -480,6 +482,9 @@ public class StateVecs {
                     trkR1P.x(), trkR1P.y(), trkR1P.z(), trkcand.get_Q());
             
             double[] VecAtFirstMeasSite = dcSwim.SwimToPlane(z0);
+            if(VecAtFirstMeasSite==null)
+                return;
+            
             StateVec initSV = new StateVec(0);
             initSV.x = VecAtFirstMeasSite[0];
             initSV.y = VecAtFirstMeasSite[1];

@@ -84,7 +84,7 @@ public class EBAnalyzer {
                 final double vzCorr = 0;//(tgpos - trigger.vertex().z()) / PhysicsConstants.speedOfLight();
 
                 final double deltatr = - vertexTime + event.getEventHeader().getRfTime() - vzCorr +
-                    + (EBConstants.RF_LARGE_INTEGER+0.5)*rfBucketLength + rfOffset;
+                    + (EBConstants.RF_LARGE_INTEGER+0.5)*rfBucketLength;
                 final double rfCorr = deltatr % rfBucketLength - rfBucketLength/2;
                 
                 startTime = vertexTime + rfCorr;
@@ -116,11 +116,16 @@ public class EBAnalyzer {
             DetectorParticle p = de.getParticle(ii);
             switch (abs(p.getPid())) {
                 case 2112:
-                    // neutron momentum defined by measured beta:
+                    // neutron momentum defined by measured beta if valid:
                     final double beta = p.getBeta();
-                    final double mass = PDGDatabase.getParticleById(p.getPid()).mass();
-                    final double psquared = Math.pow(mass*beta,2) / (1-beta*beta);
-                    p.vector().setMag( Math.sqrt(psquared) );
+                    if (beta>0 && beta<1) {
+                        final double mass = PDGDatabase.getParticleById(p.getPid()).mass();
+                        final double psquared = Math.pow(mass*beta,2) / (1-beta*beta);
+                        p.vector().setMag( Math.sqrt(psquared) );
+                    }
+                    else {
+                        p.vector().setMag(0.0);
+                    }
                     break;
                 case 22:
                     if (p.hasHit(DetectorType.ECAL)) {

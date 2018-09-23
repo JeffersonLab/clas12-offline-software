@@ -235,8 +235,9 @@ public class ECEngine extends ReconstructionEngine {
             "/calibration/ec/global_gain_shift"
         };
         
-        requireConstants(Arrays.asList(ecTables));
         
+        requireConstants(Arrays.asList(ecTables));
+        getConstantsManager().setVariation(ECCommon.variation);
         ecDetector =  GeometryFactory.getDetector(DetectorType.ECAL);
 
         setCalRun(2);
