@@ -459,7 +459,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public void updateHitPosition(DCGeant4Factory DcDetector) {
 
         //double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(this.get_Layer()-1).getComponent(this.get_Wire()-1).getMidpoint().z();
-        double z = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;
+        double z = DcDetector.getWireMidpoint(this.get_Sector() - 1, this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;
         double x= this.calc_GeomCorr(DcDetector, 0); 
         //
         this.set_X(x);
@@ -475,7 +475,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             this.set_TimeToDistance(cosTrkAngle, B, tab, tde);
         }
    
-        double z = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;        
+        double z = DcDetector.getWireMidpoint(this.get_Sector() - 1, this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;        
         //double x = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).x;
         double x = this.calc_GeomCorr(DcDetector, 0);
         //this.set_X(x+this.get_LeftRightAmb()*this.get_TimeToDistance());
@@ -526,10 +526,10 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     
     private double calc_GeomCorr(DCGeant4Factory DcDetector, double y) {
         
-        double xL = DcDetector.getWireLeftend(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x;
-        double xR = DcDetector.getWireRightend(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x;
-        double yL = DcDetector.getWireLeftend(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).y;
-        double yR = DcDetector.getWireRightend(this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).y;
+        double xL = DcDetector.getWireLeftend(this.get_Sector()-1, this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x;
+        double xR = DcDetector.getWireRightend(this.get_Sector()-1, this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x;
+        double yL = DcDetector.getWireLeftend(this.get_Sector()-1, this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).y;
+        double yR = DcDetector.getWireRightend(this.get_Sector()-1, this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).y;
         
         double DL = Constants.MAXENDPLTDEFLEC[this.get_Region()-1][this.get_Sector()-1][0];
         double DR = Constants.MAXENDPLTDEFLEC[this.get_Region()-1][this.get_Sector()-1][1];
@@ -727,9 +727,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         Vector3d WireEnd;
         int end = Constants.STBLOC[this.get_Sector()-1][this.get_Superlayer()-1];
         if(end>0) {
-            WireEnd = DcDetector.getWireRightend(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
+            WireEnd = DcDetector.getWireRightend(this.get_Sector()-1, this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
         } else {
-            WireEnd = DcDetector.getWireLeftend(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
+            WireEnd = DcDetector.getWireLeftend(this.get_Sector()-1, this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
         }
         
         double X = this.getCrossDirIntersWire().x();
@@ -745,9 +745,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         Vector3d WireEnd;
         int end = Constants.STBLOC[this.get_Sector()-1][this.get_Superlayer()-1];
         if(end>0) {
-            WireEnd = DcDetector.getWireRightend(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
+            WireEnd = DcDetector.getWireRightend(this.get_Sector()-1, this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
         } else {
-            WireEnd = DcDetector.getWireLeftend(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
+            WireEnd = DcDetector.getWireLeftend(this.get_Sector()-1, this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1);
         }
         
         double r2 = (X-WireEnd.x)*(X-WireEnd.x) + (Y-WireEnd.y)*(Y-WireEnd.y);

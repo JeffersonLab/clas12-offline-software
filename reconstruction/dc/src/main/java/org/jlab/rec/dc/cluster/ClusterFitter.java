@@ -170,8 +170,8 @@ public class ClusterFitter {
             //clus.get(i).set_ClusFitDoca(FitPars.slope()*FitArray[0][i]+FitPars.intercept());
             //double xWire = GeometryLoader.dcDetector.getSector(0).getSuperlayer(clus.get(i).get_Superlayer()-1).getLayer(clus.get(i).get_Layer()-1).getComponent(clus.get(i).get_Wire()-1).getMidpoint().x();
             //double zWire = GeometryLoader.dcDetector.getSector(0).getSuperlayer(clus.get(i).get_Superlayer()-1).getLayer(clus.get(i).get_Layer()-1).getComponent(clus.get(i).get_Wire()-1).getMidpoint().z();
-            double xWire = DcDetector.getWireMidpoint(clus.get(i).get_Superlayer() - 1, clus.get(i).get_Layer() - 1, clus.get(i).get_Wire() - 1).x;
-            double zWire = DcDetector.getWireMidpoint(clus.get(i).get_Superlayer() - 1, clus.get(i).get_Layer() - 1, clus.get(i).get_Wire() - 1).z;
+            double xWire = DcDetector.getWireMidpoint(clus.get(i).get_Sector() - 1, clus.get(i).get_Superlayer() - 1, clus.get(i).get_Layer() - 1, clus.get(i).get_Wire() - 1).x;
+            double zWire = DcDetector.getWireMidpoint(clus.get(i).get_Sector() - 1, clus.get(i).get_Superlayer() - 1, clus.get(i).get_Layer() - 1, clus.get(i).get_Wire() - 1).z;
 
             Line3D FitLine = new Line3D();
             Point3D pointOnTrk = new Point3D(FitArray.get(0).get(0), FitPars.slope() * FitArray.get(0).get(0) + FitPars.intercept(), 0);

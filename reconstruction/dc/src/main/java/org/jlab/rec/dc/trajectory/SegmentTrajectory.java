@@ -56,23 +56,23 @@ public class SegmentTrajectory {
     }
 
     /**
-     * 
+     * @param sector
      * @param superlayer
      * @param layer
      * @param trkX trk x in local tilted coordinate system
      * @return the wire that should fire for a trajectory with x value trkX at the given superlayer and layer
      */
-    public int getWireOnTrajectory(int superlayer, int layer, double trkX, DCGeant4Factory DcDetector) {
+    public int getWireOnTrajectory(int sector, int superlayer, int layer, double trkX, DCGeant4Factory DcDetector) {
 
             //double x1 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayer-1).getLayer(layer-1).getComponent(1).getMidpoint().x();
             //double x0 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayer-1).getLayer(layer-1).getComponent(0).getMidpoint().x();
-            double x1 = DcDetector.getWireMidpoint(superlayer-1, layer-1, 1).x;
-            double x0 = DcDetector.getWireMidpoint(superlayer-1, layer-1, 0).x;
+            double x1 = DcDetector.getWireMidpoint(sector-1, superlayer-1, layer-1, 1).x;
+            double x0 = DcDetector.getWireMidpoint(sector-1, superlayer-1, layer-1, 0).x;
 
             double deltax = Math.abs(x1-x0);
 
             //double xFirstCell = GeometryLoader.dcDetector.getSector(0).getSuperlayer(superlayer-1).getLayer(layer-1).getComponent(0).getMidpoint().x();
-            double xFirstCell = DcDetector.getWireMidpoint(superlayer-1, layer-1, 0).x;
+            double xFirstCell = DcDetector.getWireMidpoint(sector-1, superlayer-1, layer-1, 0).x;
 
             int nearestWire = (int)Math.ceil((trkX-xFirstCell+deltax/2.)/deltax) ;
 

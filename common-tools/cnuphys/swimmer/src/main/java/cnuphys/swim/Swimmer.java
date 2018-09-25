@@ -198,7 +198,7 @@ public final class Swimmer {
 		}
 
 		if (momentum < MINMOMENTUM) {
-			System.err.println("Skipping low momentum swim (A)");
+			//System.err.println("Skipping low momentum swim (A)");
 			return new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi);
 		}
 
@@ -313,7 +313,7 @@ public final class Swimmer {
 			IStopper stopper, IRkListener listener, double maxPathLength, double stepSize) {
 
 		if (momentum < MINMOMENTUM) {
-			System.err.println("Skipping low momentum swim (B)");
+			//System.err.println("Skipping low momentum swim (B)");
 			return 0;
 		}
 
@@ -377,8 +377,8 @@ public final class Swimmer {
 		// if no magnetic field or no charge, then simple straight line tracks.
 		// the path will consist of just two points
 		if ((_probe == null) || (charge == 0)) {
-			System.out.println(
-					"Original Swimmer, straight line field is null: " + (_probe == null) + "  charge: " + charge);
+			//System.out.println(
+			//		"Original Swimmer, straight line field is null: " + (_probe == null) + "  charge: " + charge);
 			GeneratedParticleRecord genPartRec = new GeneratedParticleRecord(charge, xo, yo, zo, momentum, theta, phi);
 			return straightLineTrajectoryFixedZ(genPartRec, fixedZ);
 
@@ -387,14 +387,14 @@ public final class Swimmer {
 		}
 
 		if (momentum < MINMOMENTUM) {
-			System.err.println("Skipping low momentum swim (C)");
+			//System.err.println("Skipping low momentum swim (C)");
 			return new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi);
 
 		}
 		
 		//have we already stopped because of maxRad?
 		if (FastMath.sqrt(xo*xo + yo*yo + zo*zo) > maxRad) {
-			System.err.println("Starting point of trajectory is outside maxRad of stopper (C)");
+			//System.err.println("Starting point of trajectory is outside maxRad of stopper (C)");
 			return null;
 		}
 		
@@ -570,25 +570,25 @@ public final class Swimmer {
 						relTolerance, hdata);
 
 			} catch (Exception e) {
-				System.err.println("SECTOR SWIM A Exception");
+				//System.err.println("SECTOR SWIM A Exception");
 				e.printStackTrace();
 			}
 
 			if (traj == null) {
-				System.err.println("ERROR null trajectory in SECTOR SWIM A. Method arguments:");
-				System.err.println("sector = " + sector);
-				System.err.println("charge = " + charge);
-				System.err.println("target Z: " + fixedZ + "   setpSize = " + stepSize);
-				System.err.println("(xo, yo, zo) = (" + xo + ", " + yo + ", " + zo + ")");
-				System.err.println("(p, theta, phi) = (" + momentum + ", " + theta + ", " + phi + ")");
-				System.err.println("(accuracy, maxRad, sMax) = (" + accuracy + ", " + maxRad + ", " + sMax + ")");
-				System.err.print("Rel tolerance: ");
-				for (double v : relTolerance) {
-					System.err.print(" " + v);
-				}
-				System.err.println("");
+				//System.err.println("ERROR null trajectory in SECTOR SWIM A. Method arguments:");
+				//System.err.println("sector = " + sector);
+				//System.err.println("charge = " + charge);
+				//System.err.println("target Z: " + fixedZ + "   setpSize = " + stepSize);
+				//System.err.println("(xo, yo, zo) = (" + xo + ", " + yo + ", " + zo + ")");
+				//System.err.println("(p, theta, phi) = (" + momentum + ", " + theta + ", " + phi + ")");
+				//System.err.println("(accuracy, maxRad, sMax) = (" + accuracy + ", " + maxRad + ", " + sMax + ")");
+				//System.err.print("Rel tolerance: ");
+				//for (double v : relTolerance) {
+                                //  System.err.print(" " + v);
+				//}
+				//System.err.println("");
 						
-				_probe.getField().printConfiguration(System.err);			
+				//_probe.getField().printConfiguration(System.err);			
 			}
 			return traj;		}
 		System.err.println("Can only call sectorSwim with a RotatedComposite Probe");
@@ -656,13 +656,13 @@ public final class Swimmer {
 
 
 		if (momentum < MINMOMENTUM) {
-			System.err.println("Skipping low momentum swim (D5)");
+			//System.err.println("Skipping low momentum swim (D5)");
 			return new SwimTrajectory(charge, xo, yo, zo, momentum, theta, phi);
 		}
 		
 		//have we already stopped because of maxRad?
 		if (FastMath.sqrt(xo*xo + yo*yo + zo*zo) > maxRad) {
-			System.err.println("Starting point of trajectory is outside maxRad of stopper (C)");
+			//System.err.println("Starting point of trajectory is outside maxRad of stopper (C)");
 			return null;
 		}
 
@@ -681,24 +681,24 @@ public final class Swimmer {
 					relTolerance, hdata);
 			
 			if (traj == null) {
-				System.err.println("ERROR null trajectory in SECTOR SWIM A. Method arguments:");
-				System.err.println("sector = " + sector);
-				System.err.println("charge = " + charge);
-				System.err.println("target Z: " + fixedZ + "   setpSize = " + stepSize);
-				System.err.println("(xo, yo, zo) = (" + xo + ", " + yo + ", " + zo + ")");
-				System.err.println("(p, theta, phi) = (" + momentum + ", " + theta + ", " + phi + ")");
-				System.err.println("(accuracy, sMax) = (" + accuracy + ", " + ", " + sMax + ")");
-				System.err.print("Rel tolerance: ");
-				for (double v : relTolerance) {
-					System.err.print(" " + v);
-				}
-				System.err.println("");
+				//System.err.println("ERROR null trajectory in SECTOR SWIM A. Method arguments:");
+				//System.err.println("sector = " + sector);
+				//System.err.println("charge = " + charge);
+				//System.err.println("target Z: " + fixedZ + "   setpSize = " + stepSize);
+				//System.err.println("(xo, yo, zo) = (" + xo + ", " + yo + ", " + zo + ")");
+				//System.err.println("(p, theta, phi) = (" + momentum + ", " + theta + ", " + phi + ")");
+				//System.err.println("(accuracy, sMax) = (" + accuracy + ", " + ", " + sMax + ")");
+				//System.err.print("Rel tolerance: ");
+				//for (double v : relTolerance) {
+				//	System.err.print(" " + v);
+				//}
+				//System.err.println("");
 						
-				_probe.getField().printConfiguration(System.err);			
+				//_probe.getField().printConfiguration(System.err);			
 			}
 
 		} catch (Exception e) {
-			System.err.println("SECTOR SWIM B Exception");
+			//System.err.println("SECTOR SWIM B Exception");
 			e.printStackTrace();
 		}
 		// if we stopped because of max radius, we are done (never reached
@@ -860,8 +860,8 @@ public final class Swimmer {
 			(new RungeKutta()).adaptiveStep(uo, s0, sMax, stepSize, s, u, deriv, stopper, _defaultTableau, relTolerance,
 					hdata);
 		} catch (RungeKuttaException e) {
-			System.err.println("SECTOR SWIM C RungeKutta Exception");
-			System.err.println("Tableau: " + _defaultTableau.getClass().getName());
+		//	System.err.println("SECTOR SWIM C RungeKutta Exception");
+		//	System.err.println("Tableau: " + _defaultTableau.getClass().getName());
 			e.printStackTrace();
 			trajectory = null;
 			throw(e);
@@ -1669,7 +1669,7 @@ public final class Swimmer {
 			double hdata[]) throws RungeKuttaException {
 
 		if (momentum < MINMOMENTUM) {
-			System.err.println("Skipping low momentum swim (F)");
+		//	System.err.println("Skipping low momentum swim (F)");
 			return 0;
 		}
 

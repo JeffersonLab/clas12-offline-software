@@ -43,6 +43,7 @@ public class GeometryFactory {
             provider.loadTable("/geometry/dc/region");
             provider.loadTable("/geometry/dc/superlayer");
             provider.loadTable("/geometry/dc/layer");
+            provider.loadTable("/geometry/dc/alignment");
         }
         
         if(type==DetectorType.ECAL){

@@ -126,9 +126,9 @@ public class RoadFinder  {
                 FittedCluster fpseudoCluster = new FittedCluster(pseudoCluster);
             for(int l = 0; l<6; l++) {
                 int layer = l+1;
-                double z = DcDetector.getWireMidpoint(slyr-1,layer-1,0).z;
+                double z = DcDetector.getWireMidpoint(segList.get(0).get_Sector() - 1, slyr-1,layer-1,0).z;
                 double trkX = a[0]*z*z+a[1]*z+a[2]; 
-                int calcWire = segTrj.getWireOnTrajectory(slyr, layer, trkX, DcDetector) ;
+                int calcWire = segTrj.getWireOnTrajectory(segList.get(0).get_Sector(), slyr, layer, trkX, DcDetector) ;
                 FittedHit pseudoHit = new FittedHit(segList.get(0).get_Sector(),slyr, layer, calcWire,
                                 0, -1); 
                 //estimate the error on the hit as the cellSize/sqrt(12)
@@ -164,10 +164,10 @@ public class RoadFinder  {
 
             for(int l = 0; l<6; l++) {
             int layer = l+1;
-            double z = DcDetector.getWireMidpoint(pseudoSeg.get_Superlayer()-1,layer-1,0).z;
+            double z = DcDetector.getWireMidpoint(pseudoSeg.get_Sector()-1, pseudoSeg.get_Superlayer()-1,layer-1,0).z;
             double trkX = qf.a[0]*z*z+qf.a[1]*z+qf.a[2]; 
             double delta = (trkX-pseudoSeg.get(l).get_X())/pseudoSeg.get(l).get_CellSize()/Math.cos(Math.toRadians(6.)) ;
-            int calcWire = segTrj.getWireOnTrajectory(pseudoSeg.get_Superlayer(), layer, trkX, DcDetector);
+            int calcWire = segTrj.getWireOnTrajectory(pseudoSeg.get_Sector(), pseudoSeg.get_Superlayer(), layer, trkX, DcDetector);
 
             FittedHit pseudoHit = new FittedHit(segList.get(0).get_Sector(),pseudoSeg.get_Superlayer(), layer, calcWire,
                             0, -1); 
@@ -218,7 +218,7 @@ public class RoadFinder  {
         for(Segment s : segList) {
             for(FittedHit h : s) {
                 double trkX = qf.a[0]*h.get_Z()*h.get_Z()+qf.a[1]*h.get_Z()+qf.a[2]; 
-                int calcWire = segTrj.getWireOnTrajectory(h.get_Superlayer(), h.get_Layer(), trkX, DcDetector) ;
+                int calcWire = segTrj.getWireOnTrajectory(h.get_Sector(), h.get_Superlayer(), h.get_Layer(), trkX, DcDetector) ;
                 WChi2+=(h.get_Wire()-calcWire)*(h.get_Wire()-calcWire);
             } 
         }
