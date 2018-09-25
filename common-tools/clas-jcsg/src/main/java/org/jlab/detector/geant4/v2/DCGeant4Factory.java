@@ -425,7 +425,10 @@ public final class DCGeant4Factory extends Geant4Factory {
 
         for(int isec = 0; isec < dbref.nsectors(); isec++) {
             for(int iregion=0; iregion<dbref.nregions(); iregion++) {
-                regionMids[isec][iregion] = getRegion(isec, iregion).getGlobalPosition().rotateZ(Math.toRadians(-isec * 60)).rotateY(-dbref.thtilt(iregion));
+                regionMids[isec][iregion] = getRegion(isec, iregion).getGlobalPosition()
+				.add(dbref.getAlignmentShift(isec, iregion))
+				.rotateZ(Math.toRadians(-isec * 60))
+				.rotateY(-dbref.thtilt(iregion));
 /*
                 //define layerMid using wires (produce slight shift compared to GEMC volumes)
                 regionMids[isec][iregion] = new Vector3d(layerMids[isec][iregion*2][dbref.nsenselayers(iregion*2)-1]);
@@ -445,7 +448,10 @@ public final class DCGeant4Factory extends Geant4Factory {
                     Vector3d lastMid = lastWire.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
                     layerMids[isec][isuper][ilayer] = firstMid.plus(lastMid).dividedBy(2.0);
 */
-                    layerMids[isec][isuper][ilayer] = getLayer(isec, isuper, ilayer).getGlobalPosition().rotateZ(Math.toRadians(- isec * 60)).rotateY(-dbref.thtilt(isuper/2));
+                    layerMids[isec][isuper][ilayer] = getLayer(isec, isuper, ilayer).getGlobalPosition()
+					.add(dbref.getAlignmentShift(isec, isuper/2))
+					.rotateZ(Math.toRadians(- isec * 60))
+					.rotateY(-dbref.thtilt(isuper/2));
                 }
             }
 
@@ -457,12 +463,14 @@ public final class DCGeant4Factory extends Geant4Factory {
                     layerMids[isec][isuper][ilayer].rotateY(dbref.getAlignmentThetaY(isec, isuper/2));
                     layerMids[isec][isuper][ilayer].rotateX(dbref.getAlignmentThetaX(isec, isuper/2));
                     layerMids[isec][isuper][ilayer].add(regionMids[isec][isuper/2]);
-                    layerMids[isec][isuper][ilayer].add(dbref.getAlignmentShift(isec, isuper/2));
 
                     for(int iwire=0; iwire<dbref.nsensewires(); iwire++) {
                         wires[isec][isuper][ilayer][iwire] = new Wire(isuper, ilayer+1, iwire+1);
 
-                        wires[isec][isuper][ilayer][iwire].rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
+                        wires[isec][isuper][ilayer][iwire].rotateZ(Math.toRadians(-90.0 + isec * 60))
+						.translate(dbref.getAlignmentShift(isec, isuper/2))
+						.rotateZ(Math.toRadians(-isec * 60))
+						.rotateY(-dbref.thtilt(isuper/2));
 
                         //dc alignment implementation
                         wires[isec][isuper][ilayer][iwire].translate(regionMids[isec][isuper/2].times(-1.0));
@@ -470,12 +478,10 @@ public final class DCGeant4Factory extends Geant4Factory {
                         wires[isec][isuper][ilayer][iwire].rotateY(dbref.getAlignmentThetaY(isec, isuper/2));
                         wires[isec][isuper][ilayer][iwire].rotateX(dbref.getAlignmentThetaX(isec, isuper/2));
                         wires[isec][isuper][ilayer][iwire].translate(regionMids[isec][isuper/2]);
-                        wires[isec][isuper][ilayer][iwire].translate(dbref.getAlignmentShift(isec, isuper/2));
     //                    System.out.println((isuper+1) + " " + (ilayer+1) + " " + (iwire+1) + " " + wireLefts[isuper][ilayer][iwire] + " " + wireMids[isuper][ilayer][iwire] + " " + wireRights[isuper][ilayer][iwire]);
                    }
                 }
 
-                regionMids[isec][isuper/2].add(dbref.getAlignmentShift(isec, isuper/2));
             }
         }
     }
