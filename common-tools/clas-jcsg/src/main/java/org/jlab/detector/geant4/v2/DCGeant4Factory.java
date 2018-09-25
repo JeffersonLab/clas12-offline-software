@@ -195,18 +195,6 @@ final class DCdatabase {
         return ministaggerStatus;
     }
 
-    public double getAlignmentX(int isec, int ireg) {
-        return align_dx[isec][ireg];
-    }
-
-    public double getAlignmentY(int isec, int ireg) {
-        return align_dy[isec][ireg];
-    }
-
-    public double getAlignmentZ(int isec, int ireg) {
-        return align_dz[isec][ireg];
-    }
-
     public double getAlignmentThetaX(int isec, int ireg) {
         return align_dthetax[isec][ireg];
     }
