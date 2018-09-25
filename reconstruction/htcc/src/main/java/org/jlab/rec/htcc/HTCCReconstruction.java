@@ -267,7 +267,7 @@ public class HTCCReconstruction {
                 double time = timeArray[testHit] - parameters.t0[ithetaTest];
                 double timeDiff = Math.abs(time - clusterTime);
 
-                double npheTest = npheArray[testHit];
+                double npheTest = npheArray[testHit]; 
                 // If the test hit is close enough in space and time
                 if ((ithetaDiff == 1 || iphiDiff == 1)
                         && (ithetaDiff + iphiDiff <= 2)
@@ -351,7 +351,7 @@ public class HTCCReconstruction {
         double phi0;
         double dphi0;
         double npeminclst;
-        int npheminmax;
+        double npheminmax;
         double npheminhit;
         int nhitmaxclst;
         int nthetamaxclst;
@@ -372,7 +372,7 @@ public class HTCCReconstruction {
             phi0 = Math.toRadians(15.0);
             dphi0 = Math.toRadians(15.0);
             npeminclst = 0.1;
-            npheminmax = 1;
+            npheminmax = 0.1;
             npheminhit = 0.1;
             nhitmaxclst = 4;
             nthetamaxclst = 2;
