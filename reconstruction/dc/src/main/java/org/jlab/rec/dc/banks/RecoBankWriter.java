@@ -769,7 +769,7 @@ public class RecoBankWriter {
     }
 
     private DataBank fillTrajectoryBank(DataEvent event, List<Track> tracks) {
-        DataBank bank = event.createBank("TimeBasedTrkg::Trajectory", tracks.size()*19);
+        DataBank bank = event.createBank("TimeBasedTrkg::Trajectory", tracks.size()*21);
         int i1=0;
         for (Track track : tracks) {
             if (track == null)

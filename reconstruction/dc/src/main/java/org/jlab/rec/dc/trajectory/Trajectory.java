@@ -261,11 +261,14 @@ public class Trajectory extends ArrayList<Cross> {
        return panel;
     }
     
+    
+    
     public List<TrajectoryStateVec> trajectory;
-    public void calcTrajectory(int id, Swim dcSwim, double x, double y,  double z, double px, double py, double pz, int q, FTOFGeant4Factory ftofDetector, TrajectorySurfaces ts) {
+    public void calcTrajectory(int id, Swim dcSwim, double x, double y,  double z, double px, double py, double pz, int q, FTOFGeant4Factory ftofDetector, TrajectorySurfaces ts,double tarCenter) {
         trajectory = new ArrayList<TrajectoryStateVec>();
         dcSwim.SetSwimParameters(x, y, z, px, py, pz, q);
-       
+        
+        double tarWall = tarCenter+5./2.;
         double[] trkPars = new double[8];
         if(trkPars==null)
             return;
@@ -274,9 +277,32 @@ public class Trajectory extends ArrayList<Cross> {
         if(trkParsCheren==null)
             return;
         this.FillTrajectory(id, trajectory, trkParsCheren, trkParsCheren[6], 0, ts); 
+        // Swim to target
+        dcSwim.SetSwimParameters(trkParsCheren[0], trkParsCheren[1], trkParsCheren[2], -trkParsCheren[3], -trkParsCheren[4], -trkParsCheren[5], -q);
+        double[] trkTar3 = dcSwim.SwimToPlaneLab(tarWall);
+        if(trkTar3==null)
+            return;
+        for (int b = 3; b<6; b++) {
+            trkTar3[b]*=-1;
+        } 
+        this.FillTrajectory(id, trajectory, trkTar3, tarWall-z, 102, ts);
+        
+        double[] trkTar1 = dcSwim.SwimToPlaneLab(tarCenter);
+        if(trkTar1==null)
+            return;
+        for (int b = 3; b<6; b++) {
+            trkTar1[b]*=-1;
+        } 
+        this.FillTrajectory(id, trajectory, trkTar1, tarCenter-z, 101, ts);
+        
+        //reset track to swim forward
+        dcSwim.SetSwimParameters(x, y, z, px, py, pz, q);
         //reinit Cheren
-        for(int k =0; k<8; k++)
+        for(int k =0; k<8; k++) {
             trkParsCheren[k] = 0;
+            trkTar3[k] = 0;
+            trkTar1[k] = 0;
+        }
         
         int is = this._Sector-1;
         double pathLen =0;
@@ -328,8 +354,10 @@ public class Trajectory extends ArrayList<Cross> {
         sv.setDetId(i);
         if(i==0)
             sv.setDetName("HTCC");
-        if(i>0)
+        if(i>0 && i<100)
             sv.setDetName(ts.getDetectorPlanes().get(0).get(i-1).getDetectorName());
+        if(i>100)
+            sv.setDetName("TAR");
         sv.setTrkId(id);
         sv.setX(trkPars[0]);
         sv.setY(trkPars[1]);

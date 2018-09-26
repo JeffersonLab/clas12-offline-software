@@ -25,7 +25,7 @@ public class TrajectorySurfaces {
 
     private List<ArrayList<Surface>> _DetectorPlanes = new ArrayList<ArrayList<Surface>>();
     
-    public synchronized List<ArrayList<Surface>> getDetectorPlanes() {
+    public List<ArrayList<Surface>> getDetectorPlanes() {
         return _DetectorPlanes;
     }
 
