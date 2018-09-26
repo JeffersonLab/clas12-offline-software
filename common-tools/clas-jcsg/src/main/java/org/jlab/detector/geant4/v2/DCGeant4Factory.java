@@ -459,9 +459,9 @@ public final class DCGeant4Factory extends Geant4Factory {
                 wires[isec][isuper]   = new Wire[dbref.nsenselayers(isuper)][dbref.nsensewires()];
                 for(int ilayer=0; ilayer<dbref.nsenselayers(isuper); ilayer++) {
                     layerMids[isec][isuper][ilayer].add(regionMids[isec][isuper/2].times(-1.0));
-                    layerMids[isec][isuper][ilayer].rotateZ(dbref.getAlignmentThetaZ(isec, isuper/2));
-                    layerMids[isec][isuper][ilayer].rotateY(dbref.getAlignmentThetaY(isec, isuper/2));
-                    layerMids[isec][isuper][ilayer].rotateX(dbref.getAlignmentThetaX(isec, isuper/2));
+                    layerMids[isec][isuper][ilayer].rotateZ(Math.toRadians(dbref.getAlignmentThetaZ(isec, isuper/2)));
+                    layerMids[isec][isuper][ilayer].rotateX(Math.toRadians(dbref.getAlignmentThetaX(isec, isuper/2)));
+                    layerMids[isec][isuper][ilayer].rotateY(Math.toRadians(dbref.getAlignmentThetaY(isec, isuper/2)));
                     layerMids[isec][isuper][ilayer].add(regionMids[isec][isuper/2]);
 
                     for(int iwire=0; iwire<dbref.nsensewires(); iwire++) {
@@ -474,9 +474,9 @@ public final class DCGeant4Factory extends Geant4Factory {
 
                         //dc alignment implementation
                         wires[isec][isuper][ilayer][iwire].translate(regionMids[isec][isuper/2].times(-1.0));
-                        wires[isec][isuper][ilayer][iwire].rotateZ(dbref.getAlignmentThetaZ(isec, isuper/2));
-                        wires[isec][isuper][ilayer][iwire].rotateY(dbref.getAlignmentThetaY(isec, isuper/2));
-                        wires[isec][isuper][ilayer][iwire].rotateX(dbref.getAlignmentThetaX(isec, isuper/2));
+                        wires[isec][isuper][ilayer][iwire].rotateZ(Math.toRadians(dbref.getAlignmentThetaZ(isec, isuper/2)));
+                        wires[isec][isuper][ilayer][iwire].rotateX(Math.toRadians(dbref.getAlignmentThetaX(isec, isuper/2)));
+                        wires[isec][isuper][ilayer][iwire].rotateY(Math.toRadians(dbref.getAlignmentThetaY(isec, isuper/2)));
                         wires[isec][isuper][ilayer][iwire].translate(regionMids[isec][isuper/2]);
     //                    System.out.println((isuper+1) + " " + (ilayer+1) + " " + (iwire+1) + " " + wireLefts[isuper][ilayer][iwire] + " " + wireMids[isuper][ilayer][iwire] + " " + wireRights[isuper][ilayer][iwire]);
                    }
