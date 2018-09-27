@@ -309,7 +309,7 @@ final class Wire {
         double dw2 = dw / cster;
 
         // hh: wire distance in the wire plane
-        double hh = (iwire + ((double)(ilayer % 2)) / 2.0) * dw2;
+        double hh = (iwire-1 + ((double)(ilayer % 2)) / 2.0) * dw2;
         if(ireg==2 && isSensitiveWire(isuper, ilayer, iwire) && dbref.getMinistaggerStatus())
                 hh += ((ilayer%2)*2-1)*0.03;
 
