@@ -383,7 +383,8 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
 	
 	float trkDBinning = (float) ((float) 4.0/40.0);
 	private void ProcessLayerEffs(DataEvent event) {
-		
+		if(event.hasBank("TimeBasedTrkg::TBSegmentTrajectory")==false)
+                    return;
 		DataBank Bank = event.getBank("TimeBasedTrkg::TBSegmentTrajectory") ;
 		int nrows =  Bank.rows();
 		//Bank.show(); System.out.println(" NUMBER OF ENTRIES IN BANK = "+nrows);
