@@ -789,6 +789,7 @@ public class RecoBankWriter {
                 bank.setFloat("tx", i1, (float) ((float) track.trajectory.get(j).getpX() / track.get_P()));
                 bank.setFloat("ty", i1, (float) ((float) track.trajectory.get(j).getpY() / track.get_P()));
                 bank.setFloat("tz", i1, (float) ((float) track.trajectory.get(j).getpZ() / track.get_P()));
+                bank.setFloat("B", i1, (float) track.trajectory.get(j).getiBdl());
                 bank.setFloat("L", i1, (float) track.trajectory.get(j).getPathLen());
                 i1++;
             }
@@ -892,94 +893,4 @@ public class RecoBankWriter {
             event.appendBanks(rbc.fillTBHitsBank(event, fhits));
         }
     }
-/*
-    public void fillAllHBBanksCalib(DataEvent event, RecoBankWriter rbc, List<FittedHit> fhits, List<FittedCluster> clusters,
-            List<Segment> segments, List<Cross> crosses,
-            List<Track> trkcands) {
-
-        if (event == null) {
-            return;
-        }
-
-        if (trkcands != null) {
-            event.appendBanks(rbc.fillHBHitsBank(event, fhits),
-                    rbc.fillHBClustersBank(event, clusters),
-                    rbc.fillHBSegmentsBank(event, segments),
-                    rbc.fillHBSegmentsTrajectoryBank(event, segments),
-                    rbc.fillHBCrossesBank(event, crosses),
-                    rbc.fillHBTracksBank(event, trkcands),
-                    rbc.fillTrackCovMatBank(event, trkcands)
-            );
-
-        }
-        if (crosses != null && trkcands == null) {
-            event.appendBanks(rbc.fillHBHitsBank(event, fhits),
-                    rbc.fillHBClustersBank(event, clusters),
-                    rbc.fillHBSegmentsBank(event, segments),
-                    rbc.fillHBSegmentsTrajectoryBank(event, segments),
-                    rbc.fillHBCrossesBank(event, crosses)
-            );
-        }
-        if (segments != null && crosses == null) {
-            event.appendBanks(rbc.fillHBHitsBank(event, fhits),
-                    rbc.fillHBClustersBank(event, clusters),
-                    rbc.fillHBSegmentsBank(event, segments),
-                    rbc.fillHBSegmentsTrajectoryBank(event, segments)
-            );
-        }
-        if (clusters != null && segments == null) {
-            event.appendBanks(rbc.fillHBHitsBank(event, fhits),
-                    rbc.fillHBClustersBank(event, clusters)
-            );
-        }
-        if (fhits != null && clusters == null) {
-            event.appendBanks(rbc.fillHBHitsBank(event, fhits)
-            );
-        }
-    }
-
-    public void fillAllTBBanksCalib(DataEvent event, RecoBankWriter rbc, List<FittedHit> fhits, List<FittedCluster> clusters,
-            List<Segment> segments, List<Cross> crosses,
-            List<Track> trkcands) {
-
-        if (event == null) {
-            return;
-        }
-
-        if (trkcands != null) {
-            event.appendBanks(rbc.fillTBHitsBank(event, fhits),
-                    rbc.fillTBClustersBank(event, clusters),
-                    rbc.fillTBSegmentsBank(event, segments),
-                    rbc.fillTBSegmentsTrajectoryBank(event, segments),
-                    rbc.fillTBCrossesBank(event, crosses),
-                    rbc.fillTBTracksBank(event, trkcands));
-        }
-        if (crosses != null && trkcands == null) {
-            event.appendBanks(rbc.fillTBHitsBank(event, fhits),
-                    rbc.fillTBClustersBank(event, clusters),
-                    rbc.fillTBSegmentsBank(event, segments),
-                    rbc.fillTBSegmentsTrajectoryBank(event, segments),
-                    rbc.fillTBCrossesBank(event, crosses));
-        }
-        if (segments != null && crosses == null) {
-            event.appendBanks(rbc.fillTBHitsBank(event, fhits),
-                    rbc.fillTBClustersBank(event, clusters),
-                    rbc.fillTBSegmentsBank(event, segments),
-                    rbc.fillTBSegmentsTrajectoryBank(event, segments));
-        }
-        if (segments != null && crosses == null) {
-            event.appendBanks(rbc.fillTBHitsBank(event, fhits),
-                    rbc.fillTBClustersBank(event, clusters),
-                    rbc.fillTBSegmentsBank(event, segments));
-        }
-        if (clusters != null && segments == null) {
-            event.appendBanks(rbc.fillTBHitsBank(event, fhits),
-                    rbc.fillTBClustersBank(event, clusters));
-        }
-
-        if (fhits != null && clusters == null) {
-            event.appendBanks(rbc.fillTBHitsBank(event, fhits));
-        }
-    }
-*/
 }
