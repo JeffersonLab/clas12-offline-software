@@ -3,7 +3,7 @@
 export CLAS12DIR=/home/travis/build/JeffersonLab/clas12-offline-software/coatjava
 
 webDir=http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/eb
-webVersion=4a.2.3-fid-r10
+webVersion=4a.2.4-fid-r10
 webDir=$webDir/$webVersion
 
 # coatjava must already be built at ../../coatjava/
@@ -13,6 +13,13 @@ useClara=0
 
 # if non-zero, don't redownload dependencies, don't run reconstruction:
 runTestOnly=0
+
+# gemc default solenoid (changed in 4a.2.4):
+gemcSolenoidDefault=-1.0
+if [[ $webVersion = *"4a.2.2"* ]] || [[ $webVersion = *"4a.2.3"* ]]
+then
+    gemcSolenoidDefault=1.0
+fi
 
 nEvents=-1
 
@@ -118,7 +125,7 @@ then
     rm -f out_${webFileStub}.hipo
 
     # convert to hipo:
-    $COAT/bin/evio2hipo -o ${webFileStub}.hipo ${webFileStub}.evio
+    $COAT/bin/evio2hipo -s $gemcSolenoidDefault -o ${webFileStub}.hipo ${webFileStub}.evio
 
     # run reconstruction:
     if [ $useClara -eq 0 ]
