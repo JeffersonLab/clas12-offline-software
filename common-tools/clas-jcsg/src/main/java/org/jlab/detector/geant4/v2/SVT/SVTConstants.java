@@ -683,11 +683,12 @@ public class SVTConstants
 	 * @return int[] an array containing RM indices
 	 * @throws IllegalArgumentException index out of bounds
 	 */
-	public static int[] convertLayer2RegionModule( int aLayer ) throws IllegalArgumentException // l=[0:7], NMODULES = 2
-	{
-		if( aLayer < 0 || aLayer > NLAYERS-1 ){ throw new IllegalArgumentException("layer out of bounds"); }
-		return new int[]{ aLayer/NMODULES, aLayer%NMODULES }; // r=[0:3], m=[0:1]
-	}
+        // Creating an array for this is an unnecessary usage of memory
+	//public static int[] convertLayer2RegionModule( int aLayer ) throws IllegalArgumentException // l=[0:7], NMODULES = 2
+	//{
+        //		if( aLayer < 0 || aLayer > NLAYERS-1 ){ throw new IllegalArgumentException("layer out of bounds"); }
+        //		return new int[]{ aLayer/NMODULES, aLayer%NMODULES }; // r=[0:3], m=[0:1]
+	//}
 	
 	
 	/**

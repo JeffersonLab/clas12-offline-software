@@ -963,14 +963,14 @@ public class SVTVolumeFactory
 		if( aLayerMin != 0 )
 		{
 			layerMin = aLayerMin;
-			regionMin = SVTConstants.convertLayer2RegionModule( aLayerMin )[0]+1;
-			moduleMin = SVTConstants.convertLayer2RegionModule( aLayerMin )[1]+1;
+			regionMin = aLayerMin/2+1;
+			moduleMin = aLayerMin%2+1;
 		}
 		if( aLayerMax != 0 )
 		{
 			layerMax = aLayerMax;
-			regionMax = SVTConstants.convertLayer2RegionModule( aLayerMax )[0]+1;
-			moduleMax = SVTConstants.convertLayer2RegionModule( aLayerMax )[1]+1-1;
+			regionMax = aLayerMax/2+1;
+			moduleMax = aLayerMax%2+1-1;
 		}
 		for( int i = 0; i < SVTConstants.NREGIONS; i++ )
 		{

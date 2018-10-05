@@ -122,10 +122,10 @@ public class SVTStripFactory
 	public Line3d getIdealStrip( int aLayer, int aSector, int aStrip ) throws IllegalArgumentException
 	{
 		if( aLayer < 0 || aLayer > SVTConstants.NLAYERS-1 ){ throw new IllegalArgumentException("layer out of bounds"); }
-		int[] rm = SVTConstants.convertLayer2RegionModule( aLayer );
-		if( aSector < 0 || aSector > SVTConstants.NSECTORS[rm[0]]-1 ){ throw new IllegalArgumentException("sector out of bounds"); }
+                //int[] rm = SVTConstants.convertLayer2RegionModule( aLayer );
+		if( aSector < 0 || aSector > SVTConstants.NSECTORS[aLayer/2]-1 ){ throw new IllegalArgumentException("sector out of bounds"); }
 		if( aStrip < 0 || aStrip > SVTConstants.NSTRIPS-1 ){ throw new IllegalArgumentException("strip out of bounds"); }
-		return getIdealStrip( rm[0], aSector, rm[1], aStrip );
+		return getIdealStrip( aLayer/2, aSector, aLayer%2, aStrip );
 	}
 
 
@@ -272,10 +272,10 @@ public class SVTStripFactory
 	public Line3d getShiftedStrip( int aLayer, int aSector, int aStrip ) throws IllegalArgumentException
 	{
 		if( aLayer < 0 || aLayer > SVTConstants.NLAYERS-1 ){ throw new IllegalArgumentException("layer out of bounds"); }
-		int[] rm = SVTConstants.convertLayer2RegionModule( aLayer );
-		if( aSector < 0 || aSector > SVTConstants.NSECTORS[rm[0]]-1 ){ throw new IllegalArgumentException("sector out of bounds"); }
+		//int[] rm = SVTConstants.convertLayer2RegionModule( aLayer );
+		if( aSector < 0 || aSector > SVTConstants.NSECTORS[aLayer/2]-1 ){ throw new IllegalArgumentException("sector out of bounds"); }
 		if( aStrip < 0 || aStrip > SVTConstants.NSTRIPS-1 ){ throw new IllegalArgumentException("strip out of bounds"); }
-		return getShiftedStrip( rm[0], aSector, rm[1], aStrip );
+		return getShiftedStrip( aLayer/2, aSector, aLayer%2, aStrip );
 	}
 	
 	
@@ -367,9 +367,9 @@ public class SVTStripFactory
 	public Vector3d[] getIdealLayerCorners( int aLayer, int aSector ) throws IllegalArgumentException
 	{
 		if( aLayer < 0 || aLayer > SVTConstants.NLAYERS-1 ){ throw new IllegalArgumentException("layer out of bounds"); }
-		int[] rm = SVTConstants.convertLayer2RegionModule( aLayer );
-		if( aSector < 0 || aSector > SVTConstants.NSECTORS[rm[0]]-1 ){ throw new IllegalArgumentException("sector out of bounds"); }
-		return getIdealLayerCorners( rm[0], aSector, rm[1] );
+		//int[] rm = SVTConstants.convertLayer2RegionModule( aLayer );
+		if( aSector < 0 || aSector > SVTConstants.NSECTORS[aLayer/2]-1 ){ throw new IllegalArgumentException("sector out of bounds"); }
+		return getIdealLayerCorners( aLayer/2, aSector, aLayer%2 );
 	}
 	
 	
@@ -429,9 +429,9 @@ public class SVTStripFactory
 	public Vector3d[] getShiftedLayerCorners( int aLayer, int aSector ) throws IllegalArgumentException
 	{
 		if( aLayer < 0 || aLayer > SVTConstants.NLAYERS-1 ){ throw new IllegalArgumentException("layer out of bounds"); }
-		int[] rm = SVTConstants.convertLayer2RegionModule( aLayer );
-		if( aSector < 0 || aSector > SVTConstants.NSECTORS[rm[0]]-1 ){ throw new IllegalArgumentException("sector out of bounds"); }
-		return getShiftedLayerCorners( rm[0], aSector, rm[1] );
+		//int[] rm = SVTConstants.convertLayer2RegionModule( aLayer );
+		if( aSector < 0 || aSector > SVTConstants.NSECTORS[aLayer/2]-1 ){ throw new IllegalArgumentException("sector out of bounds"); }
+		return getShiftedLayerCorners( aLayer/2, aSector, aLayer%2 );
 	}
 	
 	
