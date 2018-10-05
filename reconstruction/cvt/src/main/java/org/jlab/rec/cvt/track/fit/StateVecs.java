@@ -12,6 +12,7 @@ import org.jlab.rec.cvt.trajectory.Helix;
 
 import Jama.Matrix;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.rec.cvt.svt.Constants;
 
 public class StateVecs {
@@ -34,7 +35,7 @@ public class StateVecs {
     public List<Integer> Sector;
 
     public double[] getStateVecPosAtModule(int k, StateVec kVec, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, int type) {
-      
+
         double xc = X0.get(k) + (kVec.d_rho + kVec.alpha / kVec.kappa) * Math.cos(kVec.phi0);
         double yc = Y0.get(k) + (kVec.d_rho + kVec.alpha / kVec.kappa) * Math.sin(kVec.phi0);
         double r = Math.abs(kVec.alpha / kVec.kappa);
@@ -52,7 +53,7 @@ public class StateVecs {
             if (type == 2) {
                 rm = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(Layer.get(k) - 5) / 2 - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
             }
-            
+
             double a = 0.5 * (rm * rm - r * r + xc * xc + yc * yc) / yc;
             double b = -xc / yc;
 
@@ -86,10 +87,10 @@ public class StateVecs {
                 double y1 = yc + Math.sqrt(r * r - (X - xc) * (X - xc));
                 double y2 = yc - Math.sqrt(r * r - (X - xc) * (X - xc));
 
-                if (Math.abs(y1 - Or.y()) < Math.abs(En.y() - Or.y())+10) {
+                if (Math.abs(y1 - Or.y()) < Math.abs(En.y() - Or.y()) + 10) {
                     Y = y1;
                 } else {
-                    if (Math.abs(y2 - Or.y()) < Math.abs(En.y() - Or.y())+10) {
+                    if (Math.abs(y2 - Or.y()) < Math.abs(En.y() - Or.y()) + 10) {
                         Y = y2;
                     }
                 }
@@ -99,10 +100,10 @@ public class StateVecs {
                 double x1 = xc + Math.sqrt(r * r - (Y - yc) * (Y - yc));
                 double x2 = xc - Math.sqrt(r * r - (Y - yc) * (Y - yc));
 
-                if (Math.abs(x1 - Or.x()) < Math.abs(En.x() - Or.x())+10) {
+                if (Math.abs(x1 - Or.x()) < Math.abs(En.x() - Or.x()) + 10) {
                     X = x1;
                 } else {
-                    if (Math.abs(x2 - Or.x()) < Math.abs(En.x() - Or.x())+10) {
+                    if (Math.abs(x2 - Or.x()) < Math.abs(En.x() - Or.x()) + 10) {
                         X = x2;
                     }
                 }
@@ -120,20 +121,20 @@ public class StateVecs {
                 double x1 = (xc + (-d + yc) * m + Math.sqrt(del)) / (1 + m * m);
                 double x2 = (xc + (-d + yc) * m - Math.sqrt(del)) / (1 + m * m);
 
-                if (Math.abs(x1 - Or.x()) < Math.abs(En.x() - Or.x())+10) {
+                if (Math.abs(x1 - Or.x()) < Math.abs(En.x() - Or.x()) + 10) {
                     X = x1;
                 } else {
-                    if (Math.abs(x2 - Or.x()) < Math.abs(En.x() - Or.x())+10) {
+                    if (Math.abs(x2 - Or.x()) < Math.abs(En.x() - Or.x()) + 10) {
                         X = x2;
                     }
                 }
                 double y1 = yc + Math.sqrt(r * r - (X - xc) * (X - xc));
                 double y2 = yc - Math.sqrt(r * r - (X - xc) * (X - xc));
 
-                if (Math.abs(y1 - Or.y()) < Math.abs(En.y() - Or.y())+10) {
+                if (Math.abs(y1 - Or.y()) < Math.abs(En.y() - Or.y()) + 10) {
                     Y = y1;
                 } else {
-                    if (Math.abs(y2 - Or.y()) < Math.abs(En.y() - Or.y())+10) {
+                    if (Math.abs(y2 - Or.y()) < Math.abs(En.y() - Or.y()) + 10) {
                         Y = y2;
                     }
                 }
@@ -155,7 +156,7 @@ public class StateVecs {
         return value;
     }
 
-    public void getStateVecAtModule(int k, StateVec kVec, org.jlab.rec.cvt.svt.Geometry sgeo, 
+    public void getStateVecAtModule(int k, StateVec kVec, org.jlab.rec.cvt.svt.Geometry sgeo,
             org.jlab.rec.cvt.bmt.Geometry bgeo, int type, Swim swimmer) {
 
         StateVec newVec = kVec;
@@ -175,7 +176,7 @@ public class StateVecs {
         kVec = newVec;
     }
 
-    public StateVec newStateVecAtModule(int k, StateVec kVec, org.jlab.rec.cvt.svt.Geometry sgeo, 
+    public StateVec newStateVecAtModule(int k, StateVec kVec, org.jlab.rec.cvt.svt.Geometry sgeo,
             org.jlab.rec.cvt.bmt.Geometry bgeo, int type, Swim swimmer) {
 
         StateVec newVec = kVec;
@@ -195,8 +196,8 @@ public class StateVecs {
         return newVec;
     }
 
-    public void transport(int i, int f, StateVec iVec, CovMat icovMat, 
-            org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, int type, 
+    public void transport(int i, int f, StateVec iVec, CovMat icovMat,
+            org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, int type,
             Swim swimmer) { // s = signed step-size
         if (iVec.phi0 < 0) {
             iVec.phi0 += 2. * Math.PI;
@@ -296,47 +297,58 @@ public class StateVecs {
 
     private double get_t_ov_X0(double radius) {
         double value = Constants.SILICONTHICK / Constants.SILICONRADLEN;
-        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0]) 
-            value = org.jlab.rec.cvt.bmt.Constants.get_T_OVER_X0()[this.getBMTLayer(radius)-1];
+        if (radius >= org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0]) {
+            value = org.jlab.rec.cvt.bmt.Constants.get_T_OVER_X0()[this.getBMTLayer(radius) - 1];
+        }
         return value;
     }
-    
-    private double detMat_Z_ov_A_timesThickn(double radius) {    
+
+    private double detMat_Z_ov_A_timesThickn(double radius) {
         double value = 0;
-        if(radius>=Constants.MODULERADIUS[0][0]&& radius<org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0])
+        if (radius >= SVTConstants.LAYERRADIUS[0][0] && radius < org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0]) {
             value = org.jlab.rec.cvt.svt.Constants.detMatZ_ov_A_timesThickn;
-        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0] && this.getBMTLayer(radius)>0)
-            value = org.jlab.rec.cvt.bmt.Constants.getEFF_Z_OVER_A()[this.getBMTLayer(radius)-1];
+        }
+        if (radius >= org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0] && this.getBMTLayer(radius) > 0) {
+            value = org.jlab.rec.cvt.bmt.Constants.getEFF_Z_OVER_A()[this.getBMTLayer(radius) - 1];
+        }
         return value;
     }
+
     private int getBMTLayer(double radius) {
         int layer = 0;
-        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0] && radius<org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[0])
-            layer=1;
-        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[0] && radius<org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[1])
-            layer=2;
-        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[1] && radius<org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[1])
-            layer=3;
-        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[1] && radius<org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[2])
-            layer=4;
-        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[2] && radius<org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[2])
-           layer=5;
-        if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[2])
-           layer=6;
-       
+        if (radius >= org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0] && radius < org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[0]) {
+            layer = 1;
+        }
+        if (radius >= org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[0] && radius < org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[1]) {
+            layer = 2;
+        }
+        if (radius >= org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[1] && radius < org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[1]) {
+            layer = 3;
+        }
+        if (radius >= org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[1] && radius < org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[2]) {
+            layer = 4;
+        }
+        if (radius >= org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[2] && radius < org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[2]) {
+            layer = 5;
+        }
+        if (radius >= org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[2]) {
+            layer = 6;
+        }
+
         return layer;
     }
+
     private double[] ELoss_hypo(StateVec iVec, int dir) {
         double[] Eloss = new double[3]; //Eloss for pion, kaon, proton hypotheses
 
-        if (dir < 0  || Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)<Constants.MODULERADIUS[0][0]) {
+        if (dir < 0 || Math.sqrt(iVec.x * iVec.x + iVec.y * iVec.y) < SVTConstants.LAYERRADIUS[0][0]) {
             return Eloss;
         }
 
         Vector3D trkDir = this.P(iVec.k);
         trkDir.unit();
         double cosEntranceAngle = trkDir.z();
-       // System.out.println(" cosTrk "+Math.toDegrees(Math.acos(trkDir.z()))+" at state "+iVec.k+" dir "+dir);
+        // System.out.println(" cosTrk "+Math.toDegrees(Math.acos(trkDir.z()))+" at state "+iVec.k+" dir "+dir);
         double pt = Math.abs(1. / iVec.kappa);
         double pz = pt * iVec.tanL;
         double p = Math.sqrt(pt * pt + pz * pz);
@@ -355,7 +367,7 @@ public class StateVecs {
             double logterm = 2. * mass * beta * beta * gamma * gamma * Wmax / (I * I);
 
             double delta = 0.;
-            double dEdx = 0.00001535 * this.detMat_Z_ov_A_timesThickn(Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)) * (Math.log(logterm) - 2 * beta * beta - delta) / (beta * beta); //in GeV/mm
+            double dEdx = 0.00001535 * this.detMat_Z_ov_A_timesThickn(Math.sqrt(iVec.x * iVec.x + iVec.y * iVec.y)) * (Math.log(logterm) - 2 * beta * beta - delta) / (beta * beta); //in GeV/mm
             //System.out.println(" mass hy "+hyp+" Mat at "+Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)+"Z/A*t "+this.detMat_Z_ov_A_timesThickn(Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y))+" dEdx "+dEdx);
             Eloss[hyp - 2] = dir * Math.abs(dEdx / cosEntranceAngle);
         }
@@ -373,7 +385,7 @@ public class StateVecs {
         });
 
         // if (iVec.k % 2 == 1 && dir > 0) {
-        if (dir >0 && Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)>=Constants.MODULERADIUS[0][0]) {
+        if (dir > 0 && Math.sqrt(iVec.x * iVec.x + iVec.y * iVec.y) >= SVTConstants.LAYERRADIUS[0][0]) {
             Vector3D trkDir = this.P(iVec.k);
             trkDir.unit();
             double cosEntranceAngle = Math.abs(this.P(iVec.k).z());
@@ -383,20 +395,20 @@ public class StateVecs {
             double p = Math.sqrt(pt * pt + pz * pz);
 
             //double t_ov_X0 = 2. * 0.32 / Constants.SILICONRADLEN; //path length in radiation length units = t/X0 [true path length/ X0] ; Si radiation length = 9.36 cm
-            double t_ov_X0 = this.get_t_ov_X0(Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)); //System.out.println(Math.log(t_ov_X0)/9.+" rad "+Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)+" t/x0 "+t_ov_X0);
+            double t_ov_X0 = this.get_t_ov_X0(Math.sqrt(iVec.x * iVec.x + iVec.y * iVec.y)); //System.out.println(Math.log(t_ov_X0)/9.+" rad "+Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)+" t/x0 "+t_ov_X0);
             double mass = MassHypothesis(2);   // assume given mass hypothesis (2=pion)
             double beta = p / Math.sqrt(p * p + mass * mass); // use particle momentum
             double pathLength = t_ov_X0 / cosEntranceAngle;
 //0.0136?
 
-            double sctRMS = (0.00141 / (beta * p)) * Math.sqrt(pathLength) * (1 + Math.log10(pathLength)/9.); // Highland-Lynch-Dahl formula
-            
+            double sctRMS = (0.00141 / (beta * p)) * Math.sqrt(pathLength) * (1 + Math.log10(pathLength) / 9.); // Highland-Lynch-Dahl formula
+
             Q = new Matrix(new double[][]{
                 {0, 0, 0, 0, 0},
-                {0, sctRMS*sctRMS * (1 + iVec.tanL * iVec.tanL), 0, 0, 0},
-                {0, 0, sctRMS*sctRMS * (iVec.kappa * iVec.kappa * iVec.tanL * iVec.tanL), 0, sctRMS*sctRMS * (iVec.kappa * iVec.tanL * (1 + iVec.tanL * iVec.tanL))},
+                {0, sctRMS * sctRMS * (1 + iVec.tanL * iVec.tanL), 0, 0, 0},
+                {0, 0, sctRMS * sctRMS * (iVec.kappa * iVec.kappa * iVec.tanL * iVec.tanL), 0, sctRMS * sctRMS * (iVec.kappa * iVec.tanL * (1 + iVec.tanL * iVec.tanL))},
                 {0, 0, 0, 0, 0},
-                {0, 0, sctRMS*sctRMS * (iVec.kappa * iVec.tanL * (1 + iVec.tanL * iVec.tanL)), 0, sctRMS*sctRMS * (1 + iVec.tanL * iVec.tanL) * (1 + iVec.tanL * iVec.tanL)}
+                {0, 0, sctRMS * sctRMS * (iVec.kappa * iVec.tanL * (1 + iVec.tanL * iVec.tanL)), 0, sctRMS * sctRMS * (1 + iVec.tanL * iVec.tanL) * (1 + iVec.tanL * iVec.tanL)}
             });
         }
 
@@ -445,7 +457,6 @@ public class StateVecs {
 
     }
 
-
     public class B {
 
         final int k;
@@ -453,7 +464,7 @@ public class StateVecs {
         double y;
         double z;
         Swim swimmer;
-        
+
         public double Bx;
         public double By;
         public double Bz;
@@ -461,6 +472,7 @@ public class StateVecs {
         public double alpha;
 
         float b[] = new float[3];
+
         B(int k, double x, double y, double z, Swim swimmer) {
             this.k = k;
             this.x = x;
@@ -472,7 +484,7 @@ public class StateVecs {
             this.By = b[1];
             this.Bz = b[2];
 
-            this.alpha = 1. / (StateVecs.speedLight * Math.sqrt(b[0]*b[0]+b[1]*b[1]+b[2]*b[2]));
+            this.alpha = 1. / (StateVecs.speedLight * Math.sqrt(b[0] * b[0] + b[1] * b[1] + b[2] * b[2]));
             //this.alpha = 1. / (5.);
         }
     }
@@ -537,12 +549,13 @@ public class StateVecs {
         double h_dca = Math.sqrt(x * x + y * y);
         double h_phi0 = Math.atan2(py, px);
         double kappa = Math.signum(this.trackTraj.get(kf).kappa) / Math.sqrt(px * px + py * py);
-        double h_omega = kappa / this.trackTraj.get(kf).alpha; h_omega = kappa/this.trackTraj.get(0).alpha;
+        double h_omega = kappa / this.trackTraj.get(kf).alpha;
+        h_omega = kappa / this.trackTraj.get(0).alpha;
         double h_dz = z;
         double h_tandip = pz / Math.sqrt(px * px + py * py);
-        
+
         Helix trkHelix = new Helix(h_dca, h_phi0, h_omega, h_dz, h_tandip, this.trackCov.get(kf).covMat);
-       // System.out.println("x "+x+" y "+y+" z "+z+" p "+p_unc+" pt "+Math.sqrt(px*px+py*py) +" theta "+Math.toDegrees(Math.acos(pz/Math.sqrt(px*px+py*py+pz*pz)))+" phi "+Math.toDegrees(Math.atan2(py, px))+" q "+q);
+        // System.out.println("x "+x+" y "+y+" z "+z+" p "+p_unc+" pt "+Math.sqrt(px*px+py*py) +" theta "+Math.toDegrees(Math.acos(pz/Math.sqrt(px*px+py*py+pz*pz)))+" phi "+Math.toDegrees(Math.atan2(py, px))+" q "+q);
 
         return trkHelix;
     }

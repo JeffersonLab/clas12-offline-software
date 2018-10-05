@@ -29,19 +29,19 @@ public class Geometry {
     }
 
     // Return the layer number 1..6, given the region 1..3 and the detector type "C" or "Z" 
-    public int getLayer( int region, String detType ) {
-    	int layer = -1;
-    	int[] lZ = { 2, 3, 5};
-    	int[] lC = { 1, 4, 6}; 
-    	if( detType.equalsIgnoreCase("Z") ) {
-    		layer = lZ[ region - 1 ];
-    	}
-    	if( detType.equalsIgnoreCase("C")) {
-    		layer = lC[ region - 1 ];
-    	}
-    	return layer;
+    public int getLayer(int region, String detType) {
+        int layer = -1;
+        int[] lZ = {2, 3, 5};
+        int[] lC = {1, 4, 6};
+        if (detType.equalsIgnoreCase("Z")) {
+            layer = lZ[region - 1];
+        }
+        if (detType.equalsIgnoreCase("C")) {
+            layer = lC[region - 1];
+        }
+        return layer;
     }
-    
+
     /**
      *
      * @param sector the sector in CLAS12 1...3
@@ -62,11 +62,10 @@ public class Geometry {
         //double angle=Constants.getCRZEDGE1()[num_region][num_detector]+(Constants.getCRZXPOS()[num_region]+(Constants.getCRZWIDTH()[num_region]/2.+num_strip*(Constants.getCRZWIDTH()[num_region]+Constants.getCRZSPACING()[num_region])))/Constants.getCRZRADIUS()[num_region];
         //double angle=Constants.getCRZEDGE1()[num_region][num_detector]+(0.5+num_strip)*Constants.getCRZWIDTH()[num_region]/Constants.getCRZRADIUS()[num_region];
         //double angle = Constants.getCRZEDGE1()[num_region][num_detector] + ((double) num_strip) * Constants.getCRZWIDTH()[num_region] / Constants.getCRZRADIUS()[num_region];
-        double angle = Constants.getCRZEDGE1()[num_region][num_detector] + ((double) num_strip+0.5) * Constants.getCRZWIDTH()[num_region] / Constants.getCRZRADIUS()[num_region];
+        double angle = Constants.getCRZEDGE1()[num_region][num_detector] + ((double) num_strip + 0.5) * Constants.getCRZWIDTH()[num_region] / Constants.getCRZRADIUS()[num_region];
         return angle; //in rad 
     }
 
-    
     /**
      *
      * @param layer the layer 1...6
@@ -92,7 +91,7 @@ public class Geometry {
         }
         //double strip_calc = ( (angle-Constants.getCRZEDGE1()[num_region][num_detector])*Constants.getCRZRADIUS()[num_region]-Constants.getCRZXPOS()[num_region]-Constants.getCRZWIDTH()[num_region]/2.)/(Constants.getCRZWIDTH()[num_region]+Constants.getCRZSPACING()[num_region]);
         //double strip_calc = ((angle - Constants.getCRZEDGE1()[num_region][num_detector]) * Constants.getCRZRADIUS()[num_region]) / (Constants.getCRZWIDTH()[num_region]);
-        double strip_calc = ((angle - Constants.getCRZEDGE1()[num_region][num_detector]) * Constants.getCRZRADIUS()[num_region]) / (Constants.getCRZWIDTH()[num_region])-0.5;
+        double strip_calc = ((angle - Constants.getCRZEDGE1()[num_region][num_detector]) * Constants.getCRZRADIUS()[num_region]) / (Constants.getCRZWIDTH()[num_region]) - 0.5;
         strip_calc = (int) (Math.round(strip_calc * 1d) / 1d);
         int strip_num = (int) Math.floor(strip_calc);
 
@@ -183,9 +182,9 @@ public class Geometry {
                     group++;
                     limit += Constants.getCRCGROUP()[num_region][group];
                 }
-              }
+            }
         }
-        zc += Constants.getCRCWIDTH()[num_region][group]/2.;
+        zc += Constants.getCRCWIDTH()[num_region][group] / 2.;
         return zc; //in mm
     }
 
@@ -264,7 +263,7 @@ public class Geometry {
         int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
         //double sigma = Constants.SigmaDrift * Math.sqrt((Math.sqrt(x * x + y * y) - Constants.getCRCRADIUS()[num_region] + Constants.hStrip2Det) / Constants.hDrift);
         double sigma = Constants.SigmaDrift * ((Math.sqrt(x * x + y * y) - Constants.getCRZRADIUS()[num_region] + Constants.hStrip2Det) / Constants.hDrift / Math.cos(Constants.getThetaL()));
-  
+
         return sigma;
 
     }
@@ -339,70 +338,70 @@ public class Geometry {
 
         return randomNumber;
     }
-   
-     public double[] LabToDetFrame(int layer, int sector, double x, double y, double z) {	
-     	double[] newPos = new double[3];
-     
-     	newPos[0] = x-org.jlab.rec.cvt.bmt.Constants.Cx[layer-1][sector-1];
-     	newPos[1] = y-org.jlab.rec.cvt.bmt.Constants.Cy[layer-1][sector-1];
-     	newPos[2] = z-org.jlab.rec.cvt.bmt.Constants.Cz[layer-1][sector-1];
- 	
-     	double ThetaZ=org.jlab.rec.cvt.bmt.Constants.Rz[layer-1][sector-1];	
-     	double ThetaY=org.jlab.rec.cvt.bmt.Constants.Ry[layer-1][sector-1];
-     	double ThetaX=org.jlab.rec.cvt.bmt.Constants.Rx[layer-1][sector-1];
- 	
-     	//Rotate around z
-     	double xx=newPos[0];
-     	newPos[0]=Math.cos(ThetaZ)*xx+Math.sin(ThetaZ)*newPos[1];
-     	newPos[1]=-Math.sin(ThetaZ)*xx+Math.cos(ThetaZ)*newPos[1];
- 	
-     	//Rotate around x
-     	double yy=newPos[1];
-     	newPos[1]=Math.cos(ThetaX)*yy+Math.sin(ThetaX)*newPos[2];
-     	newPos[2]=-Math.sin(ThetaX)*yy+Math.cos(ThetaX)*newPos[2];
- 	
-     	//Rotate around Y
-     	double zz=newPos[2];
-     	newPos[2]=Math.cos(ThetaY)*zz+Math.sin(ThetaY)*newPos[0];
-     	newPos[0]=-Math.sin(ThetaY)*zz+Math.cos(ThetaY)*newPos[0];
- 	
- 	return newPos;
-     }
- 
-    public double[] DetToLabFrame(int layer, int sector, double x, double y, double z) {
- 	
- 	double[] newPos = new double[3];
-     
- 	newPos[0] = x;
- 	newPos[1] = y;
- 	newPos[2] = z;
- 	
- 	double ThetaZ=-org.jlab.rec.cvt.bmt.Constants.Rz[layer-1][sector-1];
- 	double ThetaY=-org.jlab.rec.cvt.bmt.Constants.Ry[layer-1][sector-1];
- 	double ThetaX=-org.jlab.rec.cvt.bmt.Constants.Rx[layer-1][sector-1];
- 	
- 	//Rotate around z
- 	double xx=newPos[0];
- 	newPos[0]=Math.cos(ThetaZ)*xx+Math.sin(ThetaZ)*newPos[1];
- 	newPos[1]=-Math.sin(ThetaZ)*xx+Math.cos(ThetaZ)*newPos[1];
- 	
- 	//Rotate around x
- 	double yy=newPos[1];
- 	newPos[1]=Math.cos(ThetaX)*yy+Math.sin(ThetaX)*newPos[2];
- 	newPos[2]=-Math.sin(ThetaX)*yy+Math.cos(ThetaX)*newPos[2];
- 	
- 	//Rotate around Y
- 	double zz=newPos[2];
- 	newPos[2]=Math.cos(ThetaY)*zz+Math.sin(ThetaY)*newPos[0];
- 	newPos[0]=-Math.sin(ThetaY)*zz+Math.cos(ThetaY)*newPos[0];
- 	
- 	newPos[0] = x+org.jlab.rec.cvt.bmt.Constants.Cx[layer-1][sector-1];
- 	newPos[1] = y+org.jlab.rec.cvt.bmt.Constants.Cy[layer-1][sector-1];
- 	newPos[2] = z+org.jlab.rec.cvt.bmt.Constants.Cz[layer-1][sector-1];
- 	
- 	return newPos;
+
+    public double[] LabToDetFrame(int layer, int sector, double x, double y, double z) {
+        double[] newPos = new double[3];
+
+        newPos[0] = x - org.jlab.rec.cvt.bmt.Constants.Cx[layer - 1][sector - 1];
+        newPos[1] = y - org.jlab.rec.cvt.bmt.Constants.Cy[layer - 1][sector - 1];
+        newPos[2] = z - org.jlab.rec.cvt.bmt.Constants.Cz[layer - 1][sector - 1];
+
+        double ThetaZ = org.jlab.rec.cvt.bmt.Constants.Rz[layer - 1][sector - 1];
+        double ThetaY = org.jlab.rec.cvt.bmt.Constants.Ry[layer - 1][sector - 1];
+        double ThetaX = org.jlab.rec.cvt.bmt.Constants.Rx[layer - 1][sector - 1];
+
+        //Rotate around z
+        double xx = newPos[0];
+        newPos[0] = Math.cos(ThetaZ) * xx + Math.sin(ThetaZ) * newPos[1];
+        newPos[1] = -Math.sin(ThetaZ) * xx + Math.cos(ThetaZ) * newPos[1];
+
+        //Rotate around x
+        double yy = newPos[1];
+        newPos[1] = Math.cos(ThetaX) * yy + Math.sin(ThetaX) * newPos[2];
+        newPos[2] = -Math.sin(ThetaX) * yy + Math.cos(ThetaX) * newPos[2];
+
+        //Rotate around Y
+        double zz = newPos[2];
+        newPos[2] = Math.cos(ThetaY) * zz + Math.sin(ThetaY) * newPos[0];
+        newPos[0] = -Math.sin(ThetaY) * zz + Math.cos(ThetaY) * newPos[0];
+
+        return newPos;
     }
- 
+
+    public double[] DetToLabFrame(int layer, int sector, double x, double y, double z) {
+
+        double[] newPos = new double[3];
+
+        newPos[0] = x;
+        newPos[1] = y;
+        newPos[2] = z;
+
+        double ThetaZ = -org.jlab.rec.cvt.bmt.Constants.Rz[layer - 1][sector - 1];
+        double ThetaY = -org.jlab.rec.cvt.bmt.Constants.Ry[layer - 1][sector - 1];
+        double ThetaX = -org.jlab.rec.cvt.bmt.Constants.Rx[layer - 1][sector - 1];
+
+        //Rotate around z
+        double xx = newPos[0];
+        newPos[0] = Math.cos(ThetaZ) * xx + Math.sin(ThetaZ) * newPos[1];
+        newPos[1] = -Math.sin(ThetaZ) * xx + Math.cos(ThetaZ) * newPos[1];
+
+        //Rotate around x
+        double yy = newPos[1];
+        newPos[1] = Math.cos(ThetaX) * yy + Math.sin(ThetaX) * newPos[2];
+        newPos[2] = -Math.sin(ThetaX) * yy + Math.cos(ThetaX) * newPos[2];
+
+        //Rotate around Y
+        double zz = newPos[2];
+        newPos[2] = Math.cos(ThetaY) * zz + Math.sin(ThetaY) * newPos[0];
+        newPos[0] = -Math.sin(ThetaY) * zz + Math.cos(ThetaY) * newPos[0];
+
+        newPos[0] = x + org.jlab.rec.cvt.bmt.Constants.Cx[layer - 1][sector - 1];
+        newPos[1] = y + org.jlab.rec.cvt.bmt.Constants.Cy[layer - 1][sector - 1];
+        newPos[2] = z + org.jlab.rec.cvt.bmt.Constants.Cz[layer - 1][sector - 1];
+
+        return newPos;
+    }
+
     /**
      *
      * @param sector
@@ -474,7 +473,7 @@ public class Geometry {
                 num_detector = i;
             }
         }
-       
+
         return num_detector;
     }
 
@@ -494,54 +493,57 @@ public class Geometry {
     }
 
     /**
-    *
-    * @param angle
-    * @param sector
-    * @param layer
-    * @param x
-    * @return a boolean indicating if the given angle is the sector 
-    */
-    public boolean checkIsInSector( double angle, int sector, int layer, double jitter ) {
-    	if( layer < 1 || layer > 6 ) {
-    		System.err.println(" BMT layer has to be 1 <= layer <= 6");
-    		return false;
-    	}
-    	if( sector < 1 || sector > 3 ) {
-    		System.err.println(" BMT sector has to be 1 <= layer <= 3");
-    		return false;
-    	}
-    	
-    	int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+     *
+     * @param angle
+     * @param sector
+     * @param layer
+     * @param x
+     * @return a boolean indicating if the given angle is the sector
+     */
+    public boolean checkIsInSector(double angle, int sector, int layer, double jitter) {
+        if (layer < 1 || layer > 6) {
+            System.err.println(" BMT layer has to be 1 <= layer <= 6");
+            return false;
+        }
+        if (sector < 1 || sector > 3) {
+            System.err.println(" BMT sector has to be 1 <= layer <= 3");
+            return false;
+        }
+
+        int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
         double angle_i = 0; // first angular boundary init
         double angle_f = 0; // second angular boundary for detector A, B, or C init
-        angle_i = Constants.getCRCEDGE1()[num_region][sector-1];
-        angle_f = Constants.getCRCEDGE2()[num_region][sector-1];
-        
+        angle_i = Constants.getCRCEDGE1()[num_region][sector - 1];
+        angle_f = Constants.getCRCEDGE2()[num_region][sector - 1];
 
         if (angle < 0) {
             angle += 2 * Math.PI; // from 0 to 2Pi
         }
-        
-        if( sector == 3 ) {
-        	if( angle < Math.PI ) {
-        		if( angle < angle_f + jitter ) return true;
-        		else return false;
-        	}
-        	else {
-        		if( angle > angle_i - jitter ) return true;
-        		else return false;
-        	}
-        }
-        else {
-            if ( (angle >= angle_i - jitter && angle <= angle_f + jitter))
-            	return true;
-            else
-            	return false;
-            
+
+        if (sector == 3) {
+            if (angle < Math.PI) {
+                if (angle < angle_f + jitter) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                if (angle > angle_i - jitter) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        } else {
+            if ((angle >= angle_i - jitter && angle <= angle_f + jitter)) {
+                return true;
+            } else {
+                return false;
+            }
+
         }
     }
-    
-    
+
     public double LorentzAngleCorr(double phi, int layer) {
 
         int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
@@ -549,9 +551,11 @@ public class Geometry {
         //return phi + (Constants.hDrift * Math.tan(Constants.getThetaL())) / (Constants.getCRZRADIUS()[num_region]);
         return phi + (Constants.hStrip2Det * Math.tan(Constants.getThetaL())) / (Constants.getCRZRADIUS()[num_region]);
     }
+
     public void SetLorentzAngle(int layer, int sector) {
-     	org.jlab.rec.cvt.bmt.Constants.setThetaL(layer, sector); 
+        org.jlab.rec.cvt.bmt.Constants.setThetaL(layer, sector);
     }
+
     // Correct strip position before clustering
     public int getLorentzCorrectedZStrip(int sector, int layer, int theMeasuredZStrip) {
 

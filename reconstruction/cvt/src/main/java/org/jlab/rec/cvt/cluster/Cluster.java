@@ -169,22 +169,22 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 FittedHit thehit = this.get(i);
                 // gets the energy value of the strip
                 double strpEn = thehit.get_Strip().get_Edep();
-                
+
                 int strpNb = -1;
                 int strpNb0 = -1; //before LC
-                if (this.get_Detector()==0) {
+                if (this.get_Detector() == 0) {
                     // for the SVT the analysis only uses the centroid
                     strpNb = thehit.get_Strip().get_Strip();
                 }
-                if (this.get_Detector()==1) { 
+                if (this.get_Detector() == 1) {
                     // for the BMT the analysis distinguishes between C and Z type detectors
-                    if (this.get_DetectorType()==0) { // C-detectors
+                    if (this.get_DetectorType() == 0) { // C-detectors
                         strpNb = thehit.get_Strip().get_Strip();
                         // for C detector the Z of the centroid is calculated
                         weightedZ += strpEn * thehit.get_Strip().get_Z();
                         weightedZErrSq += (thehit.get_Strip().get_ZErr()) * (thehit.get_Strip().get_ZErr());
                     }
-                    if (this.get_DetectorType()==1) { // Z-detectors
+                    if (this.get_DetectorType() == 1) { // Z-detectors
                         // for Z detectors Larentz-correction is applied to the strip
                         strpNb = thehit.get_Strip().get_LCStrip();
                         strpNb0 = thehit.get_Strip().get_Strip();
@@ -211,15 +211,15 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 if (strpEn >= Emax) {
                     Emax = strpEn;
                     seed = strpNb;
-                    if (this.get_DetectorType()==1) {
+                    if (this.get_DetectorType() == 1) {
                         seed = strpNb0;
                     }
                 }
 
             }
             if (totEn == 0) {
-                System.err.println(" Cluster energy is null .... exit "+this._Detector+" "+this._DetectorType);
-                
+                System.err.println(" Cluster energy is null .... exit " + this._Detector + " " + this._DetectorType);
+
                 return;
             }
 
@@ -267,7 +267,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     public void set_Centroid(double _Centroid) {
         this._Centroid = _Centroid;
     }
-    
+
     public double get_CentroidError() {
         return _CentroidError;
     }
@@ -275,6 +275,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     public void set_CentroidError(double _CentroidE) {
         this._CentroidError = _CentroidE;
     }
+
     public double get_Centroid0() {
         return _Centroid0;
     }
@@ -400,7 +401,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
      * @return cluster info. about location and number of hits contained in it
      */
     public void printInfo() {
-        String s = " cluster: Detector " + this.get_Detector() +"  Detector Type " + this.get_DetectorType() + " ID " + this.get_Id() + " Sector " + this.get_Sector() + " Layer " + this.get_Layer() + " Size " + this.size() +" centroid "+this.get_Centroid();
+        String s = " cluster: Detector " + this.get_Detector() + "  Detector Type " + this.get_DetectorType() + " ID " + this.get_Id() + " Sector " + this.get_Sector() + " Layer " + this.get_Layer() + " Size " + this.size() + " centroid " + this.get_Centroid();
         System.out.println(s);
     }
 
@@ -444,7 +445,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
     @Override
     public int compareTo(Cluster arg) {
-            
+
         //sort by phi of strip implant of first strip in the cluster, then by layer, then by seed strip number
         double this_phi = PhiInRange(this.get(0).get_Strip().get_ImplantPoint().toVector3D().phi());
         double arg_phi = PhiInRange(arg.get(0).get_Strip().get_ImplantPoint().toVector3D().phi());
@@ -457,8 +458,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         int return_val = ((CompPhi == 0) ? return_val1 : CompPhi);
 
         return return_val;
-        
-        
+
     }
 
     private double PhiInRange(double phi) {
@@ -468,5 +468,4 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         return phi;
     }
 
-    
 }

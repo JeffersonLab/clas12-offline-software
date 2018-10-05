@@ -35,26 +35,27 @@ public class MeasVecs {
 
     }
 
-        public void setMeasVecs(Seed trkcand, org.jlab.rec.cvt.svt.Geometry sgeo) {
-       // for(Cross c : trkcand.get_Crosses() ) { System.out.println(" crosses in seed passed to KF: "+c.printInfo());}System.out.println(" =========");
+    public void setMeasVecs(Seed trkcand, org.jlab.rec.cvt.svt.Geometry sgeo) {
+        // for(Cross c : trkcand.get_Crosses() ) { System.out.println(" crosses in seed passed to KF: "+c.printInfo());}System.out.println(" =========");
         measurements = new ArrayList<MeasVec>();
         MeasVec meas0 = new MeasVec();
         meas0.centroid = 0;
         meas0.error = 1;
         meas0.sector = 0;
         meas0.layer = 0;
-        measurements.add(meas0); 
+        measurements.add(meas0);
         for (int i = 0; i < trkcand.get_Clusters().size(); i++) {
-            if(trkcand.get_Clusters().get(i).get_Detector()==0) {
+            if (trkcand.get_Clusters().get(i).get_Detector() == 0) {
                 MeasVec meas = new MeasVec();
                 meas.centroid = trkcand.get_Clusters().get(i).get_Centroid();
                 meas.type = 0;
-                meas.error = trkcand.get_Clusters().get(i).get_CentroidError()*trkcand.get_Clusters().get(i).get_CentroidError()*trkcand.get_Clusters().get(i).size();
+                meas.error = trkcand.get_Clusters().get(i).get_CentroidError() * trkcand.get_Clusters().get(i).get_CentroidError() * trkcand.get_Clusters().get(i).size();
 
                 meas.sector = trkcand.get_Clusters().get(i).get_Sector();
                 meas.layer = trkcand.get_Clusters().get(i).get_Layer();
-                if(i>0 && measurements.get(measurements.size()-1).layer==meas.layer)
+                if (i > 0 && measurements.get(measurements.size() - 1).layer == meas.layer) {
                     continue;
+                }
                 measurements.add(meas);
             }
         }
@@ -65,10 +66,11 @@ public class MeasVecs {
 
                 MeasVec meas = new MeasVec();
                 meas.sector = trkcand.get_Crosses().get(c).get_Sector();
-                meas.layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6;
+                meas.layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 6;
                 meas.centroid = trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();
-                if(measurements.size()>0 && measurements.get(measurements.size()-1).layer==meas.layer)
+                if (measurements.size() > 0 && measurements.get(measurements.size() - 1).layer == meas.layer) {
                     continue;
+                }
                 if (trkcand.get_Crosses().get(c).get_DetectorType().equalsIgnoreCase("Z")) {
                     meas.x = trkcand.get_Crosses().get(c).get_Point().x();
                     meas.y = trkcand.get_Crosses().get(c).get_Point().y();
@@ -87,10 +89,8 @@ public class MeasVecs {
             }
         }
         Collections.sort(measurements);
-        
-    }
 
-    
+    }
 
     public double h(StateVec stateVec, org.jlab.rec.cvt.svt.Geometry sgeo) {
         if (stateVec == null) {
@@ -113,7 +113,7 @@ public class MeasVecs {
         return stateVec.z;
     }
 
-    public double[] H(StateVec stateVec, StateVecs sv, org.jlab.rec.cvt.svt.Geometry sgeo, 
+    public double[] H(StateVec stateVec, StateVecs sv, org.jlab.rec.cvt.svt.Geometry sgeo,
             org.jlab.rec.cvt.bmt.Geometry bgeo, int type, Swim swimmer) {
         StateVec SVplus = null;// = new StateVec(stateVec.k);
         StateVec SVminus = null;// = new StateVec(stateVec.k);
@@ -304,7 +304,7 @@ public class MeasVecs {
                 del_m_del_x * delx_deltanL + del_m_del_y * dely_deltanL + del_m_del_z * delz_deltanL
 
             };
-            
+
         }
 
         return H;

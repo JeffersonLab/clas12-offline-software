@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.cross;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.bmt.Geometry;
@@ -67,12 +68,14 @@ public class CrossMaker {
         //loop over the clusters
         // inner clusters
         for (Cluster inlayerclus : svt_innerlayrclus) {
-            if(inlayerclus.get_TotalEnergy()<org.jlab.rec.cvt.svt.Constants.ETOTCUT)
+            if (inlayerclus.get_TotalEnergy() < org.jlab.rec.cvt.svt.Constants.ETOTCUT) {
                 continue;
+            }
             // outer clusters
             for (Cluster outlayerclus : svt_outerlayrclus) {
-                if(outlayerclus.get_TotalEnergy()<org.jlab.rec.cvt.svt.Constants.ETOTCUT)
+                if (outlayerclus.get_TotalEnergy() < org.jlab.rec.cvt.svt.Constants.ETOTCUT) {
                     continue;
+                }
                 // the diffence in layers between outer and inner is 1 for a double layer
                 if (outlayerclus.get_Layer() - inlayerclus.get_Layer() != 1) {
                     continue;
@@ -81,8 +84,8 @@ public class CrossMaker {
                 if (outlayerclus.get_Sector() != inlayerclus.get_Sector()) {
                     continue;
                 }
-                
-                    // define new cross ))
+
+                // define new cross ))
                 // a cut to avoid looping over all strips - from geometry there is a minimum (maximum) strip sum of inner and outer layers that can give a strip intersection
                 if ((inlayerclus.get_MinStrip() + outlayerclus.get_MinStrip() > Constants.sumStpNumMin)
                         && (inlayerclus.get_MaxStrip() + outlayerclus.get_MaxStrip() < Constants.sumStpNumMax)) { // the intersection is valid
@@ -95,7 +98,7 @@ public class CrossMaker {
                     this_cross.set_Cluster2(outlayerclus);
                     this_cross.set_Id(rid);
                     // sets the cross parameters (point3D and associated error) from the SVT geometry
-                    this_cross.set_CrossParamsSVT(null, svt_geo); 
+                    this_cross.set_CrossParamsSVT(null, svt_geo);
                     // the uncorrected point obtained from default estimate that the track is at 90 deg wrt the module should not be null
                     if (this_cross.get_Point0() != null) {
                         //pass the cross to the arraylist of crosses
@@ -114,12 +117,15 @@ public class CrossMaker {
 
     private void calcCentErr(Cross c, Cluster Cluster1, org.jlab.rec.cvt.svt.Geometry svt_geo) {
         double Z = svt_geo.transformToFrame(Cluster1.get_Sector(), Cluster1.get_Layer(), c.get_Point().x(), c.get_Point().y(), c.get_Point().z(), "local", "").z();
-        if(Z<0)
-            Z=0;
-        if(Z>Constants.ACTIVESENLEN)
-            Z=Constants.ACTIVESENLEN;
-        Cluster1.set_CentroidError(Cluster1.get_ResolutionAlongZ(Z, svt_geo) / (Constants.PITCH / Math.sqrt(12.)));
+        if (Z < 0) {
+            Z = 0;
+        }
+        if (Z > SVTConstants.ACTIVESENLEN) {
+            Z = SVTConstants.ACTIVESENLEN;
+        }
+        Cluster1.set_CentroidError(Cluster1.get_ResolutionAlongZ(Z, svt_geo) / (SVTConstants.READOUTPITCH / Math.sqrt(12.)));
     }
+
     /**
      *
      * @param Clayrclus C layer BMT clusters

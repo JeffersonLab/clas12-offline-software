@@ -154,7 +154,7 @@ public class Hit implements Comparable<Hit> {
     public boolean isSameAs(FittedHit otherHit) {
         FittedHit thisHit = (FittedHit) this;
         boolean cmp = false;
-        if ((thisHit.get_Detector()==otherHit.get_Detector())
+        if ((thisHit.get_Detector() == otherHit.get_Detector())
                 && thisHit.get_Sector() == otherHit.get_Sector()
                 && thisHit.get_Layer() == otherHit.get_Layer()
                 && thisHit.get_Strip().get_Strip() == otherHit.get_Strip().get_Strip()

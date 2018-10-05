@@ -28,7 +28,7 @@ public class KFitter {
     public KFitter(Seed trk, org.jlab.rec.cvt.svt.Geometry geo, Swim swimmer) {
         this.init(trk, geo, null, swimmer);
     }
-    
+
     public KFitter(Seed trk, org.jlab.rec.cvt.svt.Geometry geo, DataEvent event, Swim swimmer) {
         this.init(trk, geo, event, swimmer);
     }
@@ -85,7 +85,7 @@ public class KFitter {
 
     public void runFitter(org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
         double newchisq = Double.POSITIVE_INFINITY;
-        this.NDF = sv.X0.size()-5; 
+        this.NDF = sv.X0.size() - 5;
         for (int it = 0; it < totNumIter; it++) {
             this.chi2 = 0;
             TrjPoints.clear();
@@ -105,23 +105,22 @@ public class KFitter {
                 //		sv.trackTraj.get(k+1).z+" p "+1./sv.trackTraj.get(k).kappa); 
                 //System.out.println(" Energy loss \n pion "+ (float) sv.trackTraj.get(k+1).get_ELoss()[0]+"\n kaon "+ (float) sv.trackTraj.get(k+1).get_ELoss()[1]+"\n proton "+ (float) sv.trackTraj.get(k+1).get_ELoss()[2]);
             }
-            
+
             if (it < totNumIter - 1) {
-                this.Rinit(swimmer); 
+                this.Rinit(swimmer);
             }
-            this.chi2=this.calc_chi2(sgeo);
-            if(this.chi2<newchisq) {
-                newchisq=this.chi2;
+            this.chi2 = this.calc_chi2(sgeo);
+            if (this.chi2 < newchisq) {
+                newchisq = this.chi2;
                 KFHelix = sv.setTrackPars(sv.X0.size() - 1);
                 this.setTrajectory();
             } else {
                 break;
             }
         }
-       
+
         //KFHelix = sv.setTrackPars(sv.X0.size() - 1);
         //this.setTrajectory();
-        
     }
     public List<HitOnTrack> TrjPoints = new ArrayList<HitOnTrack>();
 
@@ -167,21 +166,22 @@ public class KFitter {
         sv.trackCov.get(0).covMat = sv.trackCov.get(sv.X0.size() - 1).covMat;
     }
     public Helix KFHelix;
-    
+
     public Track OutputTrack(Seed trk, org.jlab.rec.cvt.svt.Geometry geo, Swim swimmer) {
-   
+
         Track cand = new Track(KFHelix, swimmer);
-        
-        if(cand.get_P()<0.05)
+
+        if (cand.get_P() < 0.05) {
             this.setFitFailed = true;
+        }
         cand.setNDF(NDF);
         cand.setChi2(chi2);
-        
+
         for (Cross c : trk.get_Crosses()) {
             if (c.get_Detector().equalsIgnoreCase("SVT")) {
                 continue;
             }
-           // System.out.println("output  track trajectory   "+this.TrjPoints.size());
+            // System.out.println("output  track trajectory   "+this.TrjPoints.size());
             for (HitOnTrack h : this.TrjPoints) {
                 //System.out.println(" hot : layer "+h.layer+" x "+h.x+" y "+h.y+" z "+h.z);
                 if (c.get_Cluster1().get_Layer() == h.layer - 6) {
@@ -202,7 +202,6 @@ public class KFitter {
         cand.addAll(trk.get_Crosses());
 
 //        cand.finalUpdate_Crosses(geo);
-
         return cand;
     }
 
@@ -214,11 +213,11 @@ public class KFitter {
         double m = 0;
         //get the projector state
         double h = 0;
-        double chi2 =0;
-        m=0;
-        h=0;
-        for(int k = 1; k< sv.X0.size(); k++) {
-            
+        double chi2 = 0;
+        m = 0;
+        h = 0;
+        for (int k = 1; k < sv.X0.size(); k++) {
+
             if (mv.measurements.get(k).type == 0) {
                 m = mv.measurements.get(k).centroid;
                 h = mv.h(sv.trackTraj.get(k), sgeo);
@@ -234,10 +233,11 @@ public class KFitter {
             }
 
             chi2 += (m - h) * (m - h) / mv.measurements.get(k).error;
-        }  
-       return chi2;
+        }
+        return chi2;
 
     }
+
     private void filter(int k, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
 
         if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null) {
@@ -366,8 +366,9 @@ public class KFitter {
                 f_h = mv.hZ(fVec);
             }
 
-            if(Math.signum(sv.trackTraj.get(k).d_rho)!=Math.signum(drho_filt))
+            if (Math.signum(sv.trackTraj.get(k).d_rho) != Math.signum(drho_filt)) {
                 return;
+            }
             if ((m - f_h) * (m - f_h) / V < (m - h) * (m - h) / V) {
                 sv.trackTraj.get(k).d_rho = drho_filt;
                 sv.trackTraj.get(k).phi0 = phi0_filt;
@@ -379,7 +380,7 @@ public class KFitter {
 
                 //	sv.trackTraj.put(k, fVec);
             } else {
-               // chi2 += (m - h) * (m - h) / V;
+                // chi2 += (m - h) * (m - h) / V;
             }
             //chi2+=(mv.measurements.get(k).centroid - f_h)*(mv.measurements.get(k).centroid - f_h)/V;
 

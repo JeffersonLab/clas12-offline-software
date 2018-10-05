@@ -7,6 +7,7 @@ import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.trajectory.Helix;
 
 import Jama.Matrix;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
 /**
  * A fitter which does sequential fit (for r, phi coordinates) to a circle using
@@ -73,7 +74,7 @@ public class HelicalTrackFitter {
         ((ArrayList<Double>) W).ensureCapacity(X.size());
 
         for (int j = 0; j < X.size(); j++) {
-            
+
             if (errRt.get(j) == 0) {
                 System.err.println("Point errors ill-defined -- helical fit exiting");
                 return FitStatus.CircleFitFailed;
@@ -87,7 +88,7 @@ public class HelicalTrackFitter {
         _circlefit = new CircleFitter();
         boolean circlefitstatusOK = _circlefit.fitStatus(X, Y, W, X.size());
 
-        if (!circlefitstatusOK) { 
+        if (!circlefitstatusOK) {
             return FitStatus.CircleFitFailed;
         }
 
@@ -145,7 +146,7 @@ public class HelicalTrackFitter {
         boolean linefitstatusOK = _linefit.fitStatus(Rho, Z, errRho, ErrZ, Z.size());
 
         if (!linefitstatusOK) {
-            return FitStatus.LineFitFailed; 
+            return FitStatus.LineFitFailed;
         }
         //  Get the results of the fits
         _linefitpars = _linefit.getFit();
@@ -163,7 +164,7 @@ public class HelicalTrackFitter {
         //fit_Z0 = (Math.abs(fit_dca)-_linefitpars.intercept())/ _linefitpars.slope() ; //reset for displaced vertex
         //System.out.println("fit z0 "+_linefitpars.intercept());
         //require vertex position inside of the inner barrel
-        if (Math.abs(fit_dca) > Constants.MODULERADIUS[0][0]) {
+        if (Math.abs(fit_dca) > SVTConstants.LAYERRADIUS[0][0]) {
 //            if (Math.abs(fit_dca) > Constants.MODULERADIUS[0][0] || Math.abs(fit_Z0) > 100) {
             return null;
         }

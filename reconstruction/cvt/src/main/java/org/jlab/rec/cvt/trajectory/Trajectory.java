@@ -96,6 +96,4 @@ public class Trajectory extends ArrayList<Cross> {
 
     public boolean isFinal = false;
 
-   
-
 }

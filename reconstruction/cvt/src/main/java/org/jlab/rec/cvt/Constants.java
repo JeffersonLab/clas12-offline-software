@@ -28,10 +28,10 @@ public class Constants {
 
     public static final double CTOFINNERRADIUS = 250;     // 250 mm
     public static final double CTOFOUTRRADIUS = 250 + 33;  // 283  mm
-    
-    private static double _Xb =0;
-    private static double _Yb =0;
-    private static double _RbErr = 1./Math.sqrt(12.);
+
+    private static double _Xb = 0;
+    private static double _Yb = 0;
+    private static double _RbErr = 1. / Math.sqrt(12.);
 
     public static double getXb() {
         return _Xb;
@@ -229,7 +229,6 @@ public class Constants {
         51.005773, 53.437996, 56.123356, 59.103894};
 
     //public static final int CVTCONFIGSTARTREG = 2; // for 3SVT+3BMT
-
     public static synchronized void Load(boolean isCosmics, boolean isSVTonly, double SolenoidScale) {
         if (areConstantsLoaded) {
             return;
@@ -245,8 +244,9 @@ public class Constants {
         areConstantsLoaded = true;
         System.out.println("CVT constants loaded ? " + areConstantsLoaded);
 
-        if(Math.abs(SolenoidScale)<0.001)
+        if (Math.abs(SolenoidScale) < 0.001) {
             Constants.setCosmicsData(true);
+        }
     }
 
     public static final boolean isCosmicsData() {

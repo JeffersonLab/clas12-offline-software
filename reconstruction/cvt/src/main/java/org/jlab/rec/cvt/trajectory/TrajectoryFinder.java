@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.trajectory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -33,8 +34,9 @@ public class TrajectoryFinder {
      * @return a trajectory object
      */
     public Trajectory findTrajectory(int id, Helix helix, ArrayList<Cross> candCrossList, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, String isFinal) {
-        if(helix ==null)
+        if (helix == null) {
             return null;
+        }
         Trajectory traj = new Trajectory(helix);
         if (isFinal == "final") {
             traj.isFinal = true;
@@ -70,7 +72,7 @@ public class TrajectoryFinder {
         for (int a = 0; a < Sectors.length; a++) {
             if (Sectors[a] == 0) {
 
-                Point3D I = helix.getPointAtRadius(org.jlab.rec.cvt.svt.Constants.MODULERADIUS[a][0]);
+                Point3D I = helix.getPointAtRadius(SVTConstants.LAYERRADIUS[a/2][a%2]);
 
                 int sec = svt_geo.findSectorFromAngle(a + 1, I);
                 Sectors[a] = sec;
@@ -135,23 +137,23 @@ public class TrajectoryFinder {
             }
             double R = 0;
 
-            if (org.jlab.rec.cvt.bmt.Geometry.getZorC(l + 1-6) == 1) {
+            if (org.jlab.rec.cvt.bmt.Geometry.getZorC(l + 1 - 6) == 1) {
                 R = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
             }
-            if (org.jlab.rec.cvt.bmt.Geometry.getZorC(l + 1-6) == 0) {
+            if (org.jlab.rec.cvt.bmt.Geometry.getZorC(l + 1 - 6) == 0) {
                 R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
             }
             Point3D InterPoint = helix.getPointAtRadius(R);
             Vector3D trkDir = helix.getTrackDirectionAtRadius(R);
-            
+
             StateVec stVec = new StateVec(InterPoint.x(), InterPoint.y(), InterPoint.z(),
                     trkDir.x(), trkDir.y(), trkDir.z());
-            
-            stVec.set_planeIdx(l);  
-            double phiPos = Math.atan2(stVec.y(),stVec.x());
-            int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
+
+            stVec.set_planeIdx(l);
+            double phiPos = Math.atan2(stVec.y(), stVec.x());
+            int sector = bmt_geo.isInSector(BMTRegIdx + 1, phiPos, 0);
             stVec.set_SurfaceSector(sector);
-            stVec.set_SurfaceLayer(l+1); 
+            stVec.set_SurfaceLayer(l + 1);
             stVec.set_ID(id);
             //stateVecs.add(stVec);
             // calculate crosses on BMT layers using track information.  These are used in the event display
@@ -170,21 +172,19 @@ public class TrajectoryFinder {
                     // calculate the hit residuals
                     this.setHitResolParams("BMT", c.get_Cluster1().get_Sector(), c.get_Cluster1().get_Layer(), c.get_Cluster1(),
                             stVec, svt_geo, bmt_geo, traj.isFinal);
-                    
+
 //                    StateVec stVecC = new StateVec(InterPoint.x(), InterPoint.y(), InterPoint.z(),
 //                    trkDir.x(), trkDir.y(), trkDir.z());
-            
 //                    stVecC.set_planeIdx(l);
                     //C-detector measuring z                                       
-                    stVec.set_CalcCentroidStrip(bmt_geo.getCStrip(BMTRegIdx+1, stVec.z()));
+                    stVec.set_CalcCentroidStrip(bmt_geo.getCStrip(BMTRegIdx + 1, stVec.z()));
 //                    this.fill_HelicalTrkAngleWRTBMTTangentPlane(trkDir, stVec);
-                }
-//                if (c.get_DetectorType().equalsIgnoreCase("Z")) { //Z-detector measuring phi
+                } //                if (c.get_DetectorType().equalsIgnoreCase("Z")) { //Z-detector measuring phi
                 else { //Z-detector measuring phi
                     double z = InterPoint.z();
                     if (traj.isFinal) {
                         c.set_Point(new Point3D(c.get_Point().x(), c.get_Point().y(), z));
-                        c.set_Dir(trkDir); 
+                        c.set_Dir(trkDir);
                     }
 
                     // calculate the hit residuals
@@ -195,7 +195,7 @@ public class TrajectoryFinder {
 //                    stVecZ.set_planeIdx(l);
                     //Z-detector measuring phi   
 //                    double phiPos = Math.atan2(stVec.y(),stVec.x());
-                    stVec.set_CalcCentroidStrip(bmt_geo.getZStrip(BMTRegIdx+1,  phiPos));
+                    stVec.set_CalcCentroidStrip(bmt_geo.getZStrip(BMTRegIdx + 1, phiPos));
 //                    int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
 //                    stVecZ.set_SurfaceSector(sector);
                     //Layer starting at 7
@@ -207,7 +207,7 @@ public class TrajectoryFinder {
 
             this.fill_HelicalTrkAngleWRTBMTTangentPlane(trkDir, stVec);
             stateVecs.add(stVec);
-                
+
         }
         traj.set_Trajectory(stateVecs);
 
@@ -215,24 +215,25 @@ public class TrajectoryFinder {
 
         return traj;
     }
-    private void fill_HelicalTrkAngleWRTBMTTangentPlane(Vector3D trkDir, StateVec stVec){
-        double phiPos = Math.atan2(stVec.y(),stVec.x());
+
+    private void fill_HelicalTrkAngleWRTBMTTangentPlane(Vector3D trkDir, StateVec stVec) {
+        double phiPos = Math.atan2(stVec.y(), stVec.x());
         Vector3D trkDirRot = trkDir.clone();
-        trkDirRot.rotateZ(Math.PI/2-phiPos); // Bring the track direction vector in phi=0
-        double thetaC = Math.abs( Math.toRadians(90) - Math.abs(Math.atan(trkDirRot.y()/trkDirRot.z())) );
-        double thetaZ = Math.abs( Math.toRadians(90) - Math.abs(Math.atan(trkDirRot.y()/trkDirRot.x())) );
-        if ( (trkDirRot.y()>0 && trkDirRot.x()>0)||(trkDirRot.y()<0 && trkDirRot.x()<0) ){
-            thetaZ=-thetaZ;  //Negative thetaZ if track is going to negative phi
+        trkDirRot.rotateZ(Math.PI / 2 - phiPos); // Bring the track direction vector in phi=0
+        double thetaC = Math.abs(Math.toRadians(90) - Math.abs(Math.atan(trkDirRot.y() / trkDirRot.z())));
+        double thetaZ = Math.abs(Math.toRadians(90) - Math.abs(Math.atan(trkDirRot.y() / trkDirRot.x())));
+        if ((trkDirRot.y() > 0 && trkDirRot.x() > 0) || (trkDirRot.y() < 0 && trkDirRot.x() < 0)) {
+            thetaZ = -thetaZ;  //Negative thetaZ if track is going to negative phi
         }
-        if (stVec.z()<0){
-            thetaC=-thetaC;  //Negative thetaC if track is going to negative z
+        if (stVec.z() < 0) {
+            thetaC = -thetaC;  //Negative thetaC if track is going to negative z
         }
-        
+
         //Fill State Vector
         stVec.set_TrkPhiAtSurface(thetaZ); //Call "phi" the normal angle for Z detectors
         stVec.set_TrkThetaAtSurface(thetaC); //Call "theta" the normal angle for C detectors
     }
-    
+
     private void fill_HelicalTrkAngleWRTSVTPlane(int sector, int layer,
         Vector3D trkDir, org.jlab.rec.cvt.svt.Geometry svt_geo, StateVec stVec) {
         Vector3D n = svt_geo.findBSTPlaneNormal(sector, layer);
@@ -268,7 +269,7 @@ public class TrajectoryFinder {
 
         for (Cross c : candCrossList) {
             if (c.get_Detector().equalsIgnoreCase("SVT")) {
-                SVTCrossList.add(c); 
+                SVTCrossList.add(c);
             } else {
                 BMTCrossList.add(c);
             }
@@ -312,13 +313,13 @@ public class TrajectoryFinder {
                         if (matchCrossToStateVec(c, stVec, l + 1, s + 1) == false) {
                             continue;
                         }
-                        
+
                         Cluster clsOnTrk = null;
                         if (l % 2 == 0) {
-                            clsOnTrk = c.get_Cluster1(); 
+                            clsOnTrk = c.get_Cluster1();
                         }
                         if (l % 2 == 1) {
-                            clsOnTrk = c.get_Cluster2(); 
+                            clsOnTrk = c.get_Cluster2();
                         }
 
                         if (clsOnTrk != null && clsOnTrk.get_Layer() == l + 1) {
@@ -421,12 +422,12 @@ public class TrajectoryFinder {
             }
             if (c.get_Sector() != sector) {
                 value = false;		// same sector 
-            } 
+            }
             double deltaXt = Math.sqrt((stVec.x() - c.get_Point().x()) * (stVec.x() - c.get_Point().x()) + (stVec.y() - c.get_Point().y()) * (stVec.y() - c.get_Point().y()));
-            if (deltaXt > org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH / 2) {
+            if (deltaXt > SVTConstants.ACTIVESENWID/ 2) {
                 value = false; // within 1/2 module width
             }
-            
+
         }
 
         if (c.get_Detector().equalsIgnoreCase("BMT")) { // BMT
@@ -440,7 +441,7 @@ public class TrajectoryFinder {
                 if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 1) { //Z-detector measuring phi
                     value = false;
                 }
-            	
+
                 if (Math.abs(stVec.z() - c.get_Point0().z()) > Constants.interTol) {
                     value = false;
                 }
@@ -450,7 +451,7 @@ public class TrajectoryFinder {
                     value = false;
                 }
                 double deltaXt = Math.sqrt((stVec.x() - c.get_Point().x()) * (stVec.x() - c.get_Point().x()) + (stVec.y() - c.get_Point().y()) * (stVec.y() - c.get_Point().y()));
-                if (deltaXt > 2*Constants.interTol) {
+                if (deltaXt > 2 * Constants.interTol) {
                     value = false;
                 }
             }
@@ -469,12 +470,12 @@ public class TrajectoryFinder {
     public void setHitResolParams(String detector, int sector, int layer, Cluster cluster,
             StateVec stVec, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, boolean trajFinal) {
 
-        if (detector.equalsIgnoreCase("SVT") ) {
+        if (detector.equalsIgnoreCase("SVT")) {
             double doca2Cls = svt_geo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
             double doca2Seed = svt_geo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
-            cluster.set_SeedResidual(doca2Seed); 
+            cluster.set_SeedResidual(doca2Seed);
             cluster.set_CentroidResidual(doca2Cls);
-            
+
             for (FittedHit hit : cluster) {
                 double doca1 = svt_geo.getDOCAToStrip(sector, layer, (double) hit.get_Strip().get_Strip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
                 double sigma1 = svt_geo.getSingleStripResolution(layer, hit.get_Strip().get_Strip(), stVec.z());
@@ -601,7 +602,7 @@ public class TrajectoryFinder {
                     continue;
                 }
 
-                if ((Math.sqrt(p.x() * p.x() + p.y() * p.y()) <= Math.sqrt(0.25 * Constants.ACTIVESENLEN * Constants.ACTIVESENWIDTH + Constants.MODULERADIUS[l][0] * Constants.MODULERADIUS[l][0]))) {
+                if ((Math.sqrt(p.x() * p.x() + p.y() * p.y()) <= Math.sqrt(0.25 * SVTConstants.ACTIVESENLEN * SVTConstants.ACTIVESENWID + SVTConstants.LAYERRADIUS[l/2][l%2] * SVTConstants.LAYERRADIUS[l/2][l%2]))) {
 
                     Vector3D n = svt_geo.findBSTPlaneNormal(s + 1, l + 1);
                     Vector3D ui = new Vector3D(n.y(), -n.x(), 0); //longitudinal vector along the local x direction of the module
@@ -656,12 +657,12 @@ public class TrajectoryFinder {
 
         if (Math.abs(dot) > epsilon) {
             //threeVec w = new threeVec(_yxinterc2+Constants.MODULERADIUS[l][0]*Math.sin(angle), -Constants.MODULERADIUS[l][0]*Math.cos(angle), _yzinterc2);
-            Vector3D w = new Vector3D(_yxinterc2 - Constants.MODULERADIUS[l][0] * n.x(), -Constants.MODULERADIUS[l][0] * n.y(), _yzinterc2);
+            Vector3D w = new Vector3D(_yxinterc2 - SVTConstants.LAYERRADIUS[l/2][l%2] * n.x(), -SVTConstants.LAYERRADIUS[l/2][l%2] * n.y(), _yzinterc2);
             double y = -(n.x() * w.x() + n.y() * w.y() + n.z() * w.z()) / dot;
             //threeVec Delt = new threeVec(y*_yxslope2+_yxinterc2+Constants.MODULERADIUS[l][0]*Math.sin(angle),y-Constants.MODULERADIUS[l][0]*Math.cos(angle),0);
-            Vector3D Delt = new Vector3D(y * _yxslope2 + _yxinterc2 - Constants.MODULERADIUS[l][0] * n.x(), y - Constants.MODULERADIUS[l][0] * n.y(), 0);
+            Vector3D Delt = new Vector3D(y * _yxslope2 + _yxinterc2 - SVTConstants.LAYERRADIUS[l/2][l%2] * n.x(), y - SVTConstants.LAYERRADIUS[l/2][l%2] * n.y(), 0);
 
-            if (Delt.mag() < Constants.ACTIVESENWIDTH / 2 + Constants.TOLTOMODULEEDGE) {
+            if (Delt.mag() < SVTConstants.ACTIVESENWID / 2 + Constants.TOLTOMODULEEDGE) {
                 inters[0] = y * _yxslope2 + _yxinterc2;
                 inters[1] = y;
                 inters[2] = y * _yzslope2 + _yzinterc2;

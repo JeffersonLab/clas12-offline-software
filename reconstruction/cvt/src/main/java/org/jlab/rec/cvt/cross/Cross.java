@@ -2,11 +2,12 @@ package org.jlab.rec.cvt.cross;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cluster.Cluster;
-import org.jlab.rec.cvt.svt.Constants;
+//import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.svt.Geometry;
 
 /**
@@ -49,24 +50,24 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 
     private boolean _usedInXYcand;   // used in patter recognition
     private boolean _usedInZRcand;
-    
+
     public boolean is_usedInXYcand() {
-		return _usedInXYcand;
-	}
+        return _usedInXYcand;
+    }
 
-	public void set_usedInXYcand(boolean _usedInXYcand) {
-		this._usedInXYcand = _usedInXYcand;
-	}
+    public void set_usedInXYcand(boolean _usedInXYcand) {
+        this._usedInXYcand = _usedInXYcand;
+    }
 
-	public boolean is_usedInZRcand() {
-		return _usedInZRcand;
-	}
+    public boolean is_usedInZRcand() {
+        return _usedInZRcand;
+    }
 
-	public void set_usedInZRcand(boolean _usedInZRcand) {
-		this._usedInZRcand = _usedInZRcand;
-	}
+    public void set_usedInZRcand(boolean _usedInZRcand) {
+        this._usedInZRcand = _usedInZRcand;
+    }
 
-	// point parameters:
+    // point parameters:
     private Point3D _Point;
     private Point3D _PointErr;
     private Point3D _Point0;
@@ -75,19 +76,23 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     private Vector3D _DirErr;
 
     @Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Cross other = (Cross) obj;
-		if (_Id != other._Id)
-			return false;
-		return true;
-	}
-    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Cross other = (Cross) obj;
+        if (_Id != other._Id) {
+            return false;
+        }
+        return true;
+    }
+
     public String get_Detector() {
         return _Detector;
     }
@@ -371,18 +376,18 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     }
 
     @Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + _Id;
-		return result;
-	}
-    
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + _Id;
+        return result;
+    }
+
     @Override
     public String toString() {
-    	return this.printInfo();
+        return this.printInfo();
     }
-    
+
     public String printInfo() {
         String s = " cross:  " + this.get_Detector() + " ID " + this.get_Id() + " Sector " + this.get_Sector() + " Region " + this.get_Region()
                 + " Point " + this.get_Point().toString();
@@ -428,18 +433,18 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
                     theRegion = 4;
                 }
             }
-            */
-             
+             */
 
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[4][0] + Constants.MODULERADIUS[5][0]) * 0.5 < 15) {
-                if (this.get_Point0().y() > 0) {
+             
+            if (this.get_Point0().toVector3D().rho() - (SVTConstants.LAYERRADIUS[4/2][4%2] + SVTConstants.LAYERRADIUS[5/2][5%2]) * 0.5 < 15) {
+                if (this.get_Point0().y() > 0) { 
                     theRegion = 6;
                 } else {
                     theRegion = 1;
                 }
             }
 
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[2][0] + Constants.MODULERADIUS[3][0]) * 0.5 < 15) {
+            if (this.get_Point0().toVector3D().rho() - (SVTConstants.LAYERRADIUS[2/2][2%2] + SVTConstants.LAYERRADIUS[3/2][3%2]) * 0.5 < 15) {
                 if (this.get_Point0().y() > 0) {
                     theRegion = 5;
                 } else {
@@ -447,7 +452,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
                 }
             }
 
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[0][0] + Constants.MODULERADIUS[1][0]) * 0.5 < 15) {
+            if (this.get_Point0().toVector3D().rho() - (SVTConstants.LAYERRADIUS[0/2][0%2] + SVTConstants.LAYERRADIUS[1/2][1%2]) * 0.5 < 15) {
                 if (this.get_Point0().y() > 0) {
                     theRegion = 4;
                 } else {
@@ -473,21 +478,20 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
             return_val = ((RegComp == 0) ? IDComp : RegComp);
         }
         if (org.jlab.rec.cvt.Constants.isCosmicsData() == false) {
-        	org.jlab.rec.cvt.bmt.Geometry bgeom = new org.jlab.rec.cvt.bmt.Geometry();
-        	int thisreg = (this.get_Detector().equalsIgnoreCase("BMT")) ? 3 + bgeom.getLayer( this.get_Region(), this.get_DetectorType()) : this.get_Region();
-        	int argreg  = (arg.get_Detector().equalsIgnoreCase("BMT"))  ? 3 + bgeom.getLayer( arg.get_Region(), arg.get_DetectorType()) : arg.get_Region();
+            org.jlab.rec.cvt.bmt.Geometry bgeom = new org.jlab.rec.cvt.bmt.Geometry();
+            int thisreg = (this.get_Detector().equalsIgnoreCase("BMT")) ? 3 + bgeom.getLayer(this.get_Region(), this.get_DetectorType()) : this.get_Region();
+            int argreg = (arg.get_Detector().equalsIgnoreCase("BMT")) ? 3 + bgeom.getLayer(arg.get_Region(), arg.get_DetectorType()) : arg.get_Region();
             int RegComp = thisreg < argreg ? -1 : thisreg == argreg ? 0 : 1;
 //            int RegComp = this.get_Region() < arg.get_Region() ? -1 : this.get_Region() == arg.get_Region() ? 0 : 1;
-            
+
             // check that is not BMTC for phi comparison
-            if( Double.isNaN(arg.get_Point().x())==false &&  Double.isNaN(this.get_Point().x())==false ) {
-            	int PhiComp = this.get_Point0().toVector3D().phi() < arg.get_Point0().toVector3D().phi() ? -1 : this.get_Point0().toVector3D().phi() == arg.get_Point0().toVector3D().phi() ? 0 : 1;
-            
-            	return_val = ((RegComp == 0) ? PhiComp : RegComp);
-            }
-            else {
-            	int ZComp = this.get_Point0().z() < arg.get_Point0().z() ? -1 : this.get_Point0().z() == arg.get_Point0().z() ? 0 : 1;
-            	return_val = ((RegComp == 0) ? ZComp : RegComp);
+            if (Double.isNaN(arg.get_Point().x()) == false && Double.isNaN(this.get_Point().x()) == false) {
+                int PhiComp = this.get_Point0().toVector3D().phi() < arg.get_Point0().toVector3D().phi() ? -1 : this.get_Point0().toVector3D().phi() == arg.get_Point0().toVector3D().phi() ? 0 : 1;
+
+                return_val = ((RegComp == 0) ? PhiComp : RegComp);
+            } else {
+                int ZComp = this.get_Point0().z() < arg.get_Point0().z() ? -1 : this.get_Point0().z() == arg.get_Point0().z() ? 0 : 1;
+                return_val = ((RegComp == 0) ? ZComp : RegComp);
             }
         }
 
@@ -504,64 +508,64 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         AssociatedTrackID = associatedTrackID;
     }
 
-    public static void main(String arg[]) {
-
-        Constants.Load();
-        // Geometry geo = new Geometry();
-
-        ArrayList<Cross> testList = new ArrayList<Cross>();
-
-        for (int i = 0; i < 5; i++) {
-            Cross c1 = new Cross("SVT", "", 1, 1, 1 + i);
-            c1.set_Point0(new Point3D(-1.2 - i, 66.87, 0));
-            testList.add(c1);
-        }
-        for (int i = 0; i < 5; i++) {
-            Cross c1 = new Cross("SVT", "", 1, 3, 1 + i);
-            c1.set_Point0(new Point3D(-1.2 + i, 123, 0));
-            testList.add(c1);
-        }
-
-        for (int i = 0; i < 5; i++) {
-            Cross c1 = new Cross("SVT", "", 1, 2, 1 + i);
-            c1.set_Point0(new Point3D(-1.2 - i, 95, 0));
-            testList.add(c1);
-        }
-
-        Collections.sort(testList);
-
-        ArrayList<ArrayList<Cross>> theListsByRegion = new ArrayList<ArrayList<Cross>>();
-
-        ArrayList<Cross> theRegionList = new ArrayList<Cross>();
-        if (testList.size() > 0) {
-            theRegionList.add(testList.get(0)); // init
-        }
-        for (int i = 1; i < testList.size(); i++) {
-            Cross c = testList.get(i);
-            if (testList.get(i - 1).get_Region() != c.get_Region()) {
-                theListsByRegion.add(theRegionList);    // end previous list by region
-                theRegionList = new ArrayList<Cross>(); // new region list
-            }
-            theRegionList.add(c);
-        }
-        theListsByRegion.add(theRegionList);
-
-        // check that the correct lists are created
-        for (int i = 0; i < theListsByRegion.size(); i++) {
-            System.out.println(" i " + i);
-            for (int j = 0; j < theListsByRegion.get(i).size(); j++) {
-                Cross c = theListsByRegion.get(i).get(j);
-                System.out.println(c.get_Detector() + " " + c.get_Region() + " " + c.get_Point0().toVector3D().phi());
-            }
-        }
-
-    }
+//    public static void main(String arg[]) {
+//
+//        Constants.Load();
+//        // Geometry geo = new Geometry();
+//
+//        ArrayList<Cross> testList = new ArrayList<Cross>();
+//
+//        for (int i = 0; i < 5; i++) {
+//            Cross c1 = new Cross("SVT", "", 1, 1, 1 + i);
+//            c1.set_Point0(new Point3D(-1.2 - i, 66.87, 0));
+//            testList.add(c1);
+//        }
+//        for (int i = 0; i < 5; i++) {
+//            Cross c1 = new Cross("SVT", "", 1, 3, 1 + i);
+//            c1.set_Point0(new Point3D(-1.2 + i, 123, 0));
+//            testList.add(c1);
+//        }
+//
+//        for (int i = 0; i < 5; i++) {
+//            Cross c1 = new Cross("SVT", "", 1, 2, 1 + i);
+//            c1.set_Point0(new Point3D(-1.2 - i, 95, 0));
+//            testList.add(c1);
+//        }
+//
+//        Collections.sort(testList);
+//
+//        ArrayList<ArrayList<Cross>> theListsByRegion = new ArrayList<ArrayList<Cross>>();
+//
+//        ArrayList<Cross> theRegionList = new ArrayList<Cross>();
+//        if (testList.size() > 0) {
+//            theRegionList.add(testList.get(0)); // init
+//        }
+//        for (int i = 1; i < testList.size(); i++) {
+//            Cross c = testList.get(i);
+//            if (testList.get(i - 1).get_Region() != c.get_Region()) {
+//                theListsByRegion.add(theRegionList);    // end previous list by region
+//                theRegionList = new ArrayList<Cross>(); // new region list
+//            }
+//            theRegionList.add(c);
+//        }
+//        theListsByRegion.add(theRegionList);
+//
+//        // check that the correct lists are created
+//        for (int i = 0; i < theListsByRegion.size(); i++) {
+//            System.out.println(" i " + i);
+//            for (int j = 0; j < theListsByRegion.get(i).size(); j++) {
+//                Cross c = theListsByRegion.get(i).get(j);
+//                System.out.println(c.get_Detector() + " " + c.get_Region() + " " + c.get_Point0().toVector3D().phi());
+//            }
+//        }
+//
+//    }
 
     public boolean isInFiducial(Geometry svt_geo) {
         boolean pass = true;
         Point3D LC = svt_geo.transformToFrame(this.get_Sector(), this.get_Cluster1().get_Layer(), this.get_Point().x(), this.get_Point().y(), this.get_Point().z(), "local", "");
-        if (((LC.x() < -0.10 || LC.x() > Constants.ACTIVESENWIDTH + 0.10))
-                || ((LC.z() < -1 || LC.z() > Constants.MODULELENGTH + 1))) {
+        if (((LC.x() < -0.10 || LC.x() > SVTConstants.ACTIVESENWID + 0.10))
+                || ((LC.z() < -1 || LC.z() > SVTConstants.MODULELEN+ 1))) {
             pass = false;
         }
         return pass;

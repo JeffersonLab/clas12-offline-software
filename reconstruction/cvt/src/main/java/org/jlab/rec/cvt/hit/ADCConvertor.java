@@ -64,7 +64,7 @@ public class ADCConvertor {
         	value = ((double)(adc+0.5)*etoV*maxV/8); // center of bin to avoid zero value
                 
         }  */
-      
+
         return value;
     }
 

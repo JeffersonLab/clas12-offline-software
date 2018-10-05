@@ -15,10 +15,7 @@ public class CCDBConstantsLoader {
 
     static boolean CSTLOADED = false;
 
-   
     //private static DatabaseConstantProvider DB;
-    
-
     public static final synchronized void Load(DatabaseConstantProvider dbprovider) {
         // initialize the constants
         //Z detector characteristics
@@ -49,19 +46,18 @@ public class CCDBConstantsLoader {
         double[][] CRCEDGE2 = new double[NREGIONS][3];          // the angle of the second edge of each PCB detector A, B, C
         double[] CRCXPOS = new double[NREGIONS]; 		// Distance on the PCB between the PCB first edge and the edge of the first strip in mm
 
-        double[] EFF_Z_OVER_A = new double[NREGIONS*2];
-        double[] T_OVER_X0    = new double[NREGIONS*2];
-        
-         int GRID_SIZE=405;
-         double[] THETA_L_grid = new double [GRID_SIZE];
-         double[] ELEC_grid = new double [GRID_SIZE];
-         double[] MAG_grid = new double [GRID_SIZE];
-         
-         // HV settings for Lorentz Angle
-         double [][] HV_DRIFT= new double [NREGIONS*2][3];
-         
+        double[] EFF_Z_OVER_A = new double[NREGIONS * 2];
+        double[] T_OVER_X0 = new double[NREGIONS * 2];
+
+        int GRID_SIZE = 405;
+        double[] THETA_L_grid = new double[GRID_SIZE];
+        double[] ELEC_grid = new double[GRID_SIZE];
+        double[] MAG_grid = new double[GRID_SIZE];
+
+        // HV settings for Lorentz Angle
+        double[][] HV_DRIFT = new double[NREGIONS * 2][3];
+
         // Load the tables
-        
         // using
         // the
         // new
@@ -74,7 +70,7 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/geometry/cvt/mvt/bmt_strip_L4");
         dbprovider.loadTable("/geometry/cvt/mvt/bmt_strip_L5");
         dbprovider.loadTable("/geometry/cvt/mvt/bmt_strip_L6");
-        
+
         //load material budget:
         dbprovider.loadTable("/test/mvt/bmt_mat_l1");
         dbprovider.loadTable("/test/mvt/bmt_mat_l2");
@@ -82,16 +78,16 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/test/mvt/bmt_mat_l4");
         dbprovider.loadTable("/test/mvt/bmt_mat_l5");
         dbprovider.loadTable("/test/mvt/bmt_mat_l6");
-        
-         //load Lorentz angle table
+
+        //load Lorentz angle table
         dbprovider.loadTable("/calibration/mvt/lorentz");
         dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_fullfield");
         dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_midfield");
         dbprovider.disconnect();
-        
+
         //beam offset table
         dbprovider.loadTable("/test/beam_pos");
-       //  dbprovider.show();
+        //  dbprovider.show();
         // Getting the Constants
         // 1) pitch info 
         for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_strip_L1/Group_size"); i++) {
@@ -169,88 +165,89 @@ public class CCDBConstantsLoader {
             }
 
         }
-        
+
         //material budget
         //===============
         for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l1/thickness"); i++) {
-            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l1/thickness", i)/10000.;
-            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l1/average_z", i);
-            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l1/average_a", i);
-            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l1/x0", i);
-            EFF_Z_OVER_A[0] += thickness*Zeff/Aeff;      
-            T_OVER_X0[0]+=thickness/X0;
+            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l1/thickness", i) / 10000.;
+            double Zeff = dbprovider.getDouble("/test/mvt/bmt_mat_l1/average_z", i);
+            double Aeff = dbprovider.getDouble("/test/mvt/bmt_mat_l1/average_a", i);
+            double X0 = dbprovider.getDouble("/test/mvt/bmt_mat_l1/x0", i);
+            EFF_Z_OVER_A[0] += thickness * Zeff / Aeff;
+            T_OVER_X0[0] += thickness / X0;
         }
         for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l2/thickness"); i++) {
-            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l2/thickness", i)/10000.;
-            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l2/average_z", i);
-            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l2/average_a", i);
-            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l2/x0", i);
-            EFF_Z_OVER_A[1] += thickness*Zeff/Aeff;      
-            T_OVER_X0[1]+=thickness/X0;     
-        }  
+            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l2/thickness", i) / 10000.;
+            double Zeff = dbprovider.getDouble("/test/mvt/bmt_mat_l2/average_z", i);
+            double Aeff = dbprovider.getDouble("/test/mvt/bmt_mat_l2/average_a", i);
+            double X0 = dbprovider.getDouble("/test/mvt/bmt_mat_l2/x0", i);
+            EFF_Z_OVER_A[1] += thickness * Zeff / Aeff;
+            T_OVER_X0[1] += thickness / X0;
+        }
         for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l3/thickness"); i++) {
-            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l3/thickness", i)/10000.;
-            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l3/average_z", i);
-            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l3/average_a", i);
-            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l3/x0", i);
-            EFF_Z_OVER_A[2] += thickness*Zeff/Aeff;      
-            T_OVER_X0[2]+=thickness/X0;      
+            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l3/thickness", i) / 10000.;
+            double Zeff = dbprovider.getDouble("/test/mvt/bmt_mat_l3/average_z", i);
+            double Aeff = dbprovider.getDouble("/test/mvt/bmt_mat_l3/average_a", i);
+            double X0 = dbprovider.getDouble("/test/mvt/bmt_mat_l3/x0", i);
+            EFF_Z_OVER_A[2] += thickness * Zeff / Aeff;
+            T_OVER_X0[2] += thickness / X0;
         }
         for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l4/thickness"); i++) {
-            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l4/thickness", i)/10000.;
-            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l4/average_z", i);
-            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l4/average_a", i);
-            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l4/x0", i);
-            EFF_Z_OVER_A[3] += thickness*Zeff/Aeff;      
-            T_OVER_X0[3]+=thickness/X0;   
+            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l4/thickness", i) / 10000.;
+            double Zeff = dbprovider.getDouble("/test/mvt/bmt_mat_l4/average_z", i);
+            double Aeff = dbprovider.getDouble("/test/mvt/bmt_mat_l4/average_a", i);
+            double X0 = dbprovider.getDouble("/test/mvt/bmt_mat_l4/x0", i);
+            EFF_Z_OVER_A[3] += thickness * Zeff / Aeff;
+            T_OVER_X0[3] += thickness / X0;
         }
         for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l5/thickness"); i++) {
-            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l5/thickness", i)/10000.;
-            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l5/average_z", i);
-            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l5/average_a", i);
-            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l5/x0", i);
-            EFF_Z_OVER_A[4] += thickness*Zeff/Aeff;      
-            T_OVER_X0[4]+=thickness/X0;  
+            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l5/thickness", i) / 10000.;
+            double Zeff = dbprovider.getDouble("/test/mvt/bmt_mat_l5/average_z", i);
+            double Aeff = dbprovider.getDouble("/test/mvt/bmt_mat_l5/average_a", i);
+            double X0 = dbprovider.getDouble("/test/mvt/bmt_mat_l5/x0", i);
+            EFF_Z_OVER_A[4] += thickness * Zeff / Aeff;
+            T_OVER_X0[4] += thickness / X0;
         }
         for (int i = 0; i < dbprovider.length("/test/mvt/bmt_mat_l6/thickness"); i++) {
-            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l6/thickness", i)/10000.;
-            double Zeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l6/average_z", i);
-            double Aeff =  dbprovider.getDouble("/test/mvt/bmt_mat_l6/average_a", i);
-            double X0 =  dbprovider.getDouble("/test/mvt/bmt_mat_l6/x0", i);
-            EFF_Z_OVER_A[5] += thickness*Zeff/Aeff;      
-            T_OVER_X0[5]+=thickness/X0;      
+            double thickness = dbprovider.getDouble("/test/mvt/bmt_mat_l6/thickness", i) / 10000.;
+            double Zeff = dbprovider.getDouble("/test/mvt/bmt_mat_l6/average_z", i);
+            double Aeff = dbprovider.getDouble("/test/mvt/bmt_mat_l6/average_a", i);
+            double X0 = dbprovider.getDouble("/test/mvt/bmt_mat_l6/x0", i);
+            EFF_Z_OVER_A[5] += thickness * Zeff / Aeff;
+            T_OVER_X0[5] += thickness / X0;
         }
-        
-        if (GRID_SIZE!=dbprovider.length("/calibration/mvt/lorentz/angle")) {
-         System.out.println("WARNING... Lorentz angle grid is not the same size as the table in CCDBConstant");}
-         for (int i = 0; i < dbprovider.length("/calibration/mvt/lorentz/angle"); i++) {
-         	THETA_L_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/angle",i);
-         	ELEC_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/Edrift",i);
-         	MAG_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/Bfield",i);
+
+        if (GRID_SIZE != dbprovider.length("/calibration/mvt/lorentz/angle")) {
+            System.out.println("WARNING... Lorentz angle grid is not the same size as the table in CCDBConstant");
         }
-         
-         for (int i = 0; i<2*NREGIONS; i++) {
-        	 HV_DRIFT[i][0]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_1", i);
-    		 HV_DRIFT[i][1]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_2", i);
-    		 HV_DRIFT[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_3", i);
-        	 if (Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.8) {
-        		 HV_DRIFT[i][0]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_1", i);
-        		 HV_DRIFT[i][1]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_2", i);
-        		 HV_DRIFT[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_3", i);
-        	 }
-        	 
+        for (int i = 0; i < dbprovider.length("/calibration/mvt/lorentz/angle"); i++) {
+            THETA_L_grid[i] = dbprovider.getDouble("/calibration/mvt/lorentz/angle", i);
+            ELEC_grid[i] = dbprovider.getDouble("/calibration/mvt/lorentz/Edrift", i);
+            MAG_grid[i] = dbprovider.getDouble("/calibration/mvt/lorentz/Bfield", i);
         }
-         // beam offset
-        double r = dbprovider.getDouble("/test/beam_pos/r", 0);     
-        double r_err = dbprovider.getDouble("/test/beam_pos/err_r", 0); 
-        double phi_deg = dbprovider.getDouble("/test/beam_pos/phi0", 0); 
+
+        for (int i = 0; i < 2 * NREGIONS; i++) {
+            HV_DRIFT[i][0] = dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_1", i);
+            HV_DRIFT[i][1] = dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_2", i);
+            HV_DRIFT[i][2] = dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_3", i);
+            if (Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()) < 0.8) {
+                HV_DRIFT[i][0] = dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_1", i);
+                HV_DRIFT[i][1] = dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_2", i);
+                HV_DRIFT[i][2] = dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_3", i);
+            }
+
+        }
+        // beam offset
+        double r = dbprovider.getDouble("/test/beam_pos/r", 0);
+        double r_err = dbprovider.getDouble("/test/beam_pos/err_r", 0);
+        double phi_deg = dbprovider.getDouble("/test/beam_pos/phi0", 0);
         double phi = Math.toRadians(phi_deg);
-        double xb = r*Math.cos(phi);
-        double yb = r*Math.sin(phi);
+        double xb = r * Math.cos(phi);
+        double yb = r * Math.sin(phi);
         org.jlab.rec.cvt.Constants.setXb(xb);
         org.jlab.rec.cvt.Constants.setYb(yb);
         org.jlab.rec.cvt.Constants.setRbErr(r_err);
-        
+
         Constants.setCRCRADIUS(CRCRADIUS);
         Constants.setCRZRADIUS(CRZRADIUS);
         Constants.setCRZNSTRIPS(CRZNSTRIPS);
@@ -282,13 +279,12 @@ public class CCDBConstantsLoader {
         CSTLOADED = true;
         System.out
                 .println("SUCCESSFULLY LOADED BMT CONSTANTS....");
-     //   setDB(dbprovider);
+        //   setDB(dbprovider);
     }
 
     //public static final synchronized DatabaseConstantProvider getDB() {
     //    return DB;
     //}
-
     //public static final synchronized void setDB(DatabaseConstantProvider dB) {
     //    DB = dB;
     //}

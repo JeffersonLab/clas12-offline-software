@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.cross;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -425,7 +426,7 @@ public class StraightTrackCrossListFinder {
                 if (Math.abs(dot) < epsilon) {
                     continue;
                 }
-                double R = (org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l][0] + org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l + 1][0]) / 2.;
+                double R = (SVTConstants.LAYERRADIUS[l/2][l%2] + SVTConstants.LAYERRADIUS[(l+1)/2][(l+1)%2]) / 2.;
 
                 Vector3D w = new Vector3D(yxinterc - R * n.x(), -R * n.y(), 0);
 
@@ -433,7 +434,7 @@ public class StraightTrackCrossListFinder {
 
                 Vector3D Delt = new Vector3D(fac * yxslope + yxinterc - R * n.x(), fac - R * n.y(), 0);
 
-                if (Delt.mag() < org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH / 2) {
+                if (Delt.mag() < SVTConstants.ACTIVESENWID / 2) {
                     double tX = fac * yxslope + yxinterc;
                     double tY = fac;
                     Cross cross2D = new Cross("SVT", "", s + 1, (int) (l + 2) / 2, -1); // 2-dimentional cross object corresponding to a point on the trajectory line in the xy plane

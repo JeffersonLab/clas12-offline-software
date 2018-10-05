@@ -19,7 +19,7 @@ public class EnergyLossCorr {
     /**
      * Field instantiated using the torus and the solenoid
      */
-    
+
     double cosEntAnglesPlanes[];
 
     private double[][] Points;
@@ -54,10 +54,10 @@ public class EnergyLossCorr {
 
         init(trkcand, bstSwim);
     }
-    
+
     public void doCorrection(Track trkcand, Geometry geo, Swim bstSwim, float b[]) {
         bstSwim.BfieldLab(Points[0][0] / 10, Points[0][0] / 10, Points[0][0] / 10, b);
-        double B = (double)b[2];
+        double B = (double) b[2];
         double ELossMax = 600; //600Mev 
         double stepSize = 0.001; //1 MeV
         int nbins = (int) ELossMax;

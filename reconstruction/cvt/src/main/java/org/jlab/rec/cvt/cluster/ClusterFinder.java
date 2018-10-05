@@ -23,7 +23,8 @@ public class ClusterFinder {
     int nstrip = 1200; // max number of strips
     int nlayr = 6;
     int nsec = 18;
-    public ArrayList<Cluster> findClusters(List<Hit> hits2,org.jlab.rec.cvt.bmt.Geometry geo_bmt) // the number of strips depends on the layer 
+
+    public ArrayList<Cluster> findClusters(List<Hit> hits2, org.jlab.rec.cvt.bmt.Geometry geo_bmt) // the number of strips depends on the layer 
     {
         ArrayList<Cluster> clusters = new ArrayList<Cluster>();
 
@@ -41,9 +42,9 @@ public class ClusterFinder {
             int w = hit.get_Strip().get_Strip();
             int l = hit.get_Layer();
             int s = hit.get_Sector();
-            
+
             if (w > 0 && w < nstrip) {
-                HitArray[w - 1][l - 1][s - 1] = hit; 
+                HitArray[w - 1][l - 1][s - 1] = hit;
             }
 
         }
@@ -59,7 +60,7 @@ public class ClusterFinder {
                 // looping over all strips
                 while (si < nstrip) {
                     // if there's a hit, it's a cluster candidate
-                    if (HitArray[si][l][s] != null || (si < nstrip - 1 && HitArray[si + 1][l][s] != null)) { 
+                    if (HitArray[si][l][s] != null || (si < nstrip - 1 && HitArray[si + 1][l][s] != null)) {
                         // vector of hits in the cluster candidate
                         ArrayList<FittedHit> hits = new ArrayList<FittedHit>();
 
@@ -79,8 +80,8 @@ public class ClusterFinder {
                         Cluster this_cluster = new Cluster(hits.get(0).get_Detector(), hits.get(0).get_DetectorType(), hits.get(0).get_Sector(), l + 1, cid++);
                         this_cluster.set_Id(clusters.size() + 1);
                         // add hits to the cluster
-                        this_cluster.addAll(hits); 
-                        for (FittedHit h : hits) { 
+                        this_cluster.addAll(hits);
+                        for (FittedHit h : hits) {
                             h.set_AssociatedClusterID(this_cluster.get_Id());
                         }
 
