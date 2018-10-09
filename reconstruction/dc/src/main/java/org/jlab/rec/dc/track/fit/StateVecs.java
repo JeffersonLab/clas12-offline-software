@@ -78,6 +78,7 @@ public class StateVecs {
             double tx = fVec.tx;
             double ty = fVec.ty;
             double Q =  fVec.Q;
+            double dPath = fVec.deltaPath;
             covMat.covMat = fCov.covMat; 
             
             s= Math.signum(Z[f] - Z[i]) * stepSize;
@@ -86,7 +87,7 @@ public class StateVecs {
                 s=Math.signum(Z[f] - Z[i]) *Math.abs(Z[f]-z);
             
             rk.RK4transport( sector, Q, x, y, z, tx, ty, s, dcSwim,
-                        covMat, fVec, fCov, mass);
+                        covMat, fVec, fCov, mass, dPath);
             
             if( Math.abs(fVec.B - BatMeas)<0.0001)
                 stepSize*=2;
@@ -136,10 +137,11 @@ public class StateVecs {
             double tx = fVec.tx;
             double ty = fVec.ty;
             double Q =  fVec.Q;
+            double dPath = fVec.deltaPath;
             covMat.covMat = fCov.covMat; 
             
             rk.RK4transport( sector, Q, x, y, z, tx, ty, s, dcSwim,
-                        covMat, fVec, fCov, mass);
+                        covMat, fVec, fCov, mass, dPath);
             
         }
         

@@ -39,7 +39,7 @@ public class RungeKutta {
         
     }
     void RK4transport(int sector, double q, double x0, double y0, double z0, double tx0, double ty0, double h, Swim swimmer, 
-            StateVecs.CovMat covMat, StateVecs.StateVec fVec, StateVecs.CovMat fCov, double mass) {
+            StateVecs.CovMat covMat, StateVecs.StateVec fVec, StateVecs.CovMat fCov, double mass, double dPath) {
         // Jacobian:
         double[][] u = new double[5][5];       
         double[][] C = new double[5][5];
@@ -242,8 +242,10 @@ public class RungeKutta {
         fVec.ty = ty;
         fVec.Q = q;
         fVec.B = Math.sqrt(_b[0]*_b[0]+_b[1]*_b[1]+_b[2]*_b[2]);
+        fVec.deltaPath = Math.sqrt((x0-x)*(x0-x)+(y0-y)*(y0-y)+h*h)+dPath;
         fCov.covMat=new Matrix(C);
-            // transport stateVec
+        
+        
     }
     void RK4transport_2(int sector, double q, double x0, double y0, double z0, double tx0, double ty0, double h, Swim swimmer, 
             StateVecs.CovMat covMat, StateVecs.StateVec fVec, StateVecs.CovMat fCov, double mass) {
