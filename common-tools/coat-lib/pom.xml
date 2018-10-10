@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jlab.clas</groupId>
   <artifactId>coat-libs</artifactId>
-  <version>5.1-SNAPSHOT</version>
+  <version>5.7.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <!--
@@ -32,7 +32,7 @@
     <dependency>
       <groupId>org.jlab.coda</groupId>
       <artifactId>jevio</artifactId>
-      <version>6.0-SNAPSHOT</version>
+      <version>6.1-SNAPSHOT</version>
     </dependency>
 
 <!--
@@ -83,55 +83,49 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-io</artifactId>
-      <version>5.0-SNAPSHOT</version>
+      <version>5.7.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-reco</artifactId>
-      <version>5.0-SNAPSHOT</version>
+      <version>5.7.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-utils</artifactId>
-      <version>5.0-SNAPSHOT</version>
+      <version>5.7.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-jcsg</artifactId>
-      <version>0.3.2</version>
+      <version>5.7.0</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-detector</artifactId>
-      <version>5.0-SNAPSHOT</version>
+      <version>5.7.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-analysis</artifactId>
-      <version>5.0-SNAPSHOT</version>
+      <version>5.7.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-geometry</artifactId>
-      <version>5.0-SNAPSHOT</version>
+      <version>5.7.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-physics</artifactId>
-      <version>5.0-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jlab.clas</groupId>
-      <artifactId>swim-tools</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>5.7.0-SNAPSHOT</version>
     </dependency>
 
     <!--
