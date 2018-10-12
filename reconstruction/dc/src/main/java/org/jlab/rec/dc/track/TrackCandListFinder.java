@@ -820,7 +820,7 @@ public class TrackCandListFinder {
         if (ToFirstMeas == null)
             return;
         
-        double PathToFirstMeas =ToFirstMeas[6];
+        //double PathToFirstMeas =ToFirstMeas[6];
         
         for (StateVec st : stateVecAtPlanesList) {
             if (st == null)
@@ -834,7 +834,7 @@ public class TrackCandListFinder {
                         h1.setB(st.getB());
                         h1.calc_SignalPropagAlongWire(st.x(), st.y(), DcDetector);
                         h1.setSignalPropagTimeAlongWire(DcDetector);
-                        h1.setSignalTimeOfFlight(PathToFirstMeas);
+                        h1.setSignalTimeOfFlight();
                     }
                 }
                 for (FittedHit h1 : c.get_Segment2()) {
@@ -844,7 +844,7 @@ public class TrackCandListFinder {
                         h1.setB(st.getB());
                         h1.calc_SignalPropagAlongWire(st.x(), st.y(), DcDetector);
                         h1.setSignalPropagTimeAlongWire(DcDetector);
-                        h1.setSignalTimeOfFlight(PathToFirstMeas);
+                        h1.setSignalTimeOfFlight();
                     }
                 }
             }

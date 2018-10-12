@@ -88,6 +88,26 @@ public class CLASDecoder {
                 
                 dataList = codaDecoder.getDataEntries( (EvioDataEvent) event);
                 
+                //dataList = new ArrayList<DetectorDataDgtz>();
+                //-----------------------------------------------------------------------------
+                // This part reads the BITPACKED FADC data from tag=57638 Format (cmcms)
+                // Then unpacks into Detector Digigitized data, and appends to existing buffer
+                // Modified on 9/5/2018
+                //-----------------------------------------------------------------------------
+                
+                List<FADCData>  fadcPacked = codaDecoder.getADCEntries((EvioDataEvent) event);
+                
+                /*for(FADCData data : fadcPacked){
+                    data.show();
+                }*/
+                
+                if(fadcPacked!=null){
+                    List<DetectorDataDgtz> fadcUnpacked = FADCData.convert(fadcPacked);
+                    dataList.addAll(fadcUnpacked);
+                }
+                //  END of Bitpacked section                
+                //-----------------------------------------------------------------------------
+                //this.decoderDebugMode = 4;
                 if(this.decoderDebugMode>0){
                     System.out.println("\n>>>>>>>>> RAW decoded data");
                     for(DetectorDataDgtz data : dataList){

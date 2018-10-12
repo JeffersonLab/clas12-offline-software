@@ -796,9 +796,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     /**
      * sets signal time of flight to the track doca to the hit wire in ns
      */
-    public void setSignalTimeOfFlight(double pathToFirstSite) {
+    public void setSignalTimeOfFlight() {
         if(this.get_Beta()>0 && this.getAssociatedStateVec()!=null)
-            this._SignalTimeOfFlight = (this.getAssociatedStateVec().getPathLength() + pathToFirstSite)/(Constants.SPEEDLIGHT*this.get_Beta());
+            this._SignalTimeOfFlight = (this.getAssociatedStateVec().getPathLength())/(Constants.SPEEDLIGHT*this.get_Beta());
             this._tFlight = this._SignalTimeOfFlight;
     }
     
