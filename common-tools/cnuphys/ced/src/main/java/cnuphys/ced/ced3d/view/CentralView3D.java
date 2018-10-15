@@ -21,7 +21,14 @@ public class CentralView3D extends CedView3D {
 	@Override
 	protected CedPanel3D make3DPanel(float angleX, float angleY, float angleZ,
 			float xDist, float yDist, float zDist) {
-		return new CentralPanel3D(this, angleX, angleY, angleZ, xDist, yDist, zDist);
+		
+		CentralPanel3D panel = new CentralPanel3D(this, angleX, angleY, angleZ, xDist, yDist, zDist);
+		panel.setRotationX(0f);
+		panel.setRotationY(180f);
+		panel.setRotationZ(0f);
+	//	panel.refresh();
+
+		return panel;
 	}
 	
 

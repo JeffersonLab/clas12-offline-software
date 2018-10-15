@@ -14,6 +14,12 @@ public class ExtendedWord {
 
 	// Word with all bits on
 	private static final long ALLBITSON = 0xFFFFFFFFFFFFFFFFL;
+	
+	//for base62 encoding
+	private static final char[] digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+	private static final int RADIX62 = 62;
+    private static final long MAX62 = Long.MAX_VALUE / RADIX62;
+
 
 	/**
 	 * Holds the composite words. words[0] is least significant.
@@ -452,9 +458,32 @@ public class ExtendedWord {
 	}
 	
 	/**
+	 * Hash this ExtendedWord into a String in base 62
+	 * @return a String suitable as a hash or map key
+	 */
+	public String hashKey62() {
+		StringBuilder sb = new StringBuilder(128);
+
+		for (long word : getWords()) {
+			if (sb.length() > 0) {
+				sb.append(HASH_DELIM);
+			}
+			if (word != 0) {
+				String s62 = encode62(word);
+				sb.append(s62);
+			} else {
+				sb.append('0');
+			}
+		}
+
+		return sb.toString();
+	}
+
+	
+	/**
 	 * Convert back to an ExtendedWord from a hash key
 	 * @param hash the key
-	 * @return the equivaleny ExtendedWord
+	 * @return the equivalent ExtendedWord
 	 */
 	public static ExtendedWord fromHash(String hash) {
 		StringTokenizer t = new StringTokenizer(hash, HASH_DELIM);
@@ -468,6 +497,129 @@ public class ExtendedWord {
 		return new ExtendedWord(words);
 	}
 	
+	/**
+	 * Convert back to an ExtendedWord from a hash key
+	 * @param hash the key
+	 * @return the equivalent ExtendedWord
+	 */
+	public static ExtendedWord fromHash62(String hash) {
+		StringTokenizer t = new StringTokenizer(hash, HASH_DELIM);
+		int num = t.countTokens();
+		
+		long[] words = new long[num];
+		for (int i = 0; i < num; i++) {
+			words[i] = parseLong62(t.nextToken());
+		}
+		
+		return new ExtendedWord(words);
+	}
+
+	
+	
+	  /**
+	     * Helper for parsing longs.
+	     *
+	     * @param str the string to parse
+	     * @return the parsed long value
+	     * @throws NumberFormatException if there is an error
+	     * @throws NullPointerException if decode is true and str is null
+	     * @see #parseLong(String, int)
+	     * @see #decode(String)
+	     */
+	    private static long parseLong62(String str)
+	    {
+	      if (str == null) {
+	        throw new NumberFormatException();
+	      }
+	      
+	      int index = 0;
+	      int len = str.length();
+	      boolean isNeg = false;
+	      
+	      if (len == 0) {
+	        throw new NumberFormatException();
+	      }
+	      
+	      int ch = str.charAt(index);
+	      if (ch == '-')
+	        {
+	          if (len == 1)
+	            throw new NumberFormatException();
+	          
+	          isNeg = true;
+	          ch = str.charAt(++index);
+	        }
+
+	      if (index == len) {
+	        throw new NumberFormatException();
+	      }
+	  	      	  
+	      long val = 0;
+	      while (index < len)
+	        {
+	      if (val < 0 || val > MAX62)
+	        throw new NumberFormatException();
+	  
+	          ch = digit62(str.charAt(index++));
+	          val = val * RADIX62 + ch;
+	          if (ch < 0 || (val < 0 && (! isNeg || val != Long.MIN_VALUE)))
+	            throw new NumberFormatException();
+	        }
+	      return isNeg ? -val : val;
+	    }
+	    
+	    //get the value of a digit for base 62
+	    private static int digit62(char ch) {
+	    	if (Character.isDigit(ch)) {
+	    		return ch - '0';
+	    	}
+	    	
+	    	else if (Character.isLowerCase(ch)) {
+	    		return 10 + ch - 'a';
+	    	}
+	    	
+	    	return 36 + ch - 'A';
+	    }	
+	/**
+	 * Encode a long into a base 62 String. Based on the 
+	 * toString implementation in the Java Long class.
+	 * @param number the number to encode
+	 * @return a base 62 number
+	 */
+	public static String encode62(long num) {
+				
+		   // For negative numbers, print out the absolute value w/ a leading '-'.
+		      // Use an array large enough for a binary number.
+		      char[] buffer = new char[65];
+		      int i = 65;
+		      boolean isNeg = false;
+		      if (num < 0)
+		        {
+		          isNeg = true;
+		          num = -num;
+		  
+		          // When the value is MIN_VALUE, it overflows when made positive
+		          if (num < 0)
+		        {
+		          buffer[--i] = digits[(int) (-(num + RADIX62) % RADIX62)];
+		          num = -(num / RADIX62);
+		        }
+		        }
+		  
+		     do
+		        {
+		          buffer[--i] = digits[(int) (num % RADIX62)];
+		          num /= RADIX62;
+		        }
+		      while (num > 0);
+		  
+		      if (isNeg)
+		        buffer[--i] = '-';
+		  
+		      // Package constructor avoids an array copy.
+		      return new String(buffer, i, 65 - i);		
+		
+    }
 
 	public static void main(String arg[]) {
 		ExtendedWord a = new ExtendedWord(112);
@@ -494,8 +646,22 @@ public class ExtendedWord {
 		System.err.println(" b = " + b);
 		System.err.println("bp = " + bp);
 		
+		System.err.println("\nNow try base 62");
+//		System.err.println("digitsChar62[0] = " + digitsChar62[61]);
 		
-		
-	}
+		String ahash62 = a.hashKey62();
+		String bhash62 = b.hashKey62();
+		System.err.println("ahash62 [" + ahash62 + "]");
+		System.err.println("bhash62 [" + bhash62 + "]");
 
+		ExtendedWord a62 = fromHash62(ahash62);
+		ExtendedWord b62 = fromHash62(bhash62);
+
+		System.err.println("  a = " + a);
+		System.err.println("a62 = " + a62);
+		System.err.println("  b = " + b);
+		System.err.println("b62 = " + b62);
+
+	}
+	
 }

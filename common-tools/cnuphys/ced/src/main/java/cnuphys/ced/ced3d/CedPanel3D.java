@@ -198,7 +198,7 @@ public class CedPanel3D extends Panel3D {
 		JPanel ep = new JPanel();
 		ep.setLayout(new VerticalFlowLayout());
 
-		ep.add(new KeyboardLegend());
+		ep.add(new KeyboardLegend(this));
 		_checkBoxArray = new CheckBoxArray(2, 4, 4, _cbaLabels);
 		_checkBoxArray.setBorder(new CommonBorder());
 		ep.add(_checkBoxArray);
