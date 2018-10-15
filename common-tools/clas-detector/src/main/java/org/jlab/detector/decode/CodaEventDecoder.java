@@ -1112,7 +1112,7 @@ public class CodaEventDecoder {
                             int quartet  = DataUtils.getInteger(dataEntry, 30, 30);
                             int interval = DataUtils.getInteger(dataEntry, 29, 29);
                             int id       = DataUtils.getInteger(dataEntry, 24, 28);
-                            int value    = DataUtils.getInteger(dataEntry,  0, 23);
+                            long value   = DataUtils.getLongFromInt(DataUtils.getInteger(dataEntry,  0, 23));
                             if(id < 3) {
                                 DetectorDataDgtz entry = new DetectorDataDgtz(crate,num,id+32*interval);
                                 SCALERData scaler = new SCALERData();
@@ -1130,7 +1130,7 @@ public class CodaEventDecoder {
                             if(id<3 && slot<4) {
                                 DetectorDataDgtz entry = new DetectorDataDgtz(crate,num,loop-5);
                                 SCALERData scaler = new SCALERData();
-                                scaler.setValue(dataEntry);                            
+                                scaler.setValue(DataUtils.getLongFromInt(dataEntry));                            
                                 entry.addSCALER(scaler);
                                 scalerEntries.add(entry);
 //                                long long_data = 0;
@@ -1226,7 +1226,7 @@ public class CodaEventDecoder {
                     long[] longData = ByteDataTransformer.toLongArray(node.getStructureBuffer(true));
                     int[]  intData  = ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
                     DetectorDataDgtz entry = new DetectorDataDgtz(crate,0,0);
-                    long tStamp = longData[2]&0x00000000ffffffff;
+                    long tStamp = longData[2]&0x00000000ffffffffL;
                     entry.setTimeStamp(tStamp);
                     if(node.getDataLength()==4) tiEntries.add(entry);
                     else if(node.getDataLength()==5) { // trigger supervisor crate
