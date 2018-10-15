@@ -1133,7 +1133,9 @@ public class CodaEventDecoder {
                                 scaler.setValue(dataEntry);                            
                                 entry.addSCALER(scaler);
                                 scalerEntries.add(entry);
-//                                System.out.println(loop + " " + crate + " " + slot + " " + id + " " + dataEntry);
+//                                long long_data = 0;
+//                                long  value = (long) ((long_data|dataEntry)&0x00000000FFFFFFFFL);
+//                                System.out.println(loop + " " + crate + " " + slot + " " + id + " " + dataEntry + " " + value + " " + DataUtils.getLongFromInt(dataEntry) + " " + String.format("0x%08X", dataEntry) + " " + String.format("0x%16X", value));           
                             }
                         }
                     }
@@ -1251,11 +1253,11 @@ public class CodaEventDecoder {
 
     public static void main(String[] args){
         EvioSource reader = new EvioSource();
-        reader.open("/home/fbossu/Data/mvt_packed_004698.evio.00000");
+        reader.open("/Users/devita/clas_004013.evio.1000");
         CodaEventDecoder decoder = new CodaEventDecoder();
         DetectorEventDecoder detectorDecoder = new DetectorEventDecoder();
 
-        int maxEvents = 5;
+        int maxEvents = 5000;
         int icounter  = 0;
 
         while(reader.hasEvent()==true&&icounter<maxEvents){

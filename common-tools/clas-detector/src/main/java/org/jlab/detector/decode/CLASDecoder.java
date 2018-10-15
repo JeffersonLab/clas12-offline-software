@@ -317,8 +317,8 @@ public class CLASDecoder {
         
         for(int i = 0; i < vtpDGTZ.size(); i++){
             vtpBANK.setByte("crate", i, (byte) vtpDGTZ.get(i).getDescriptor().getCrate());
-            vtpBANK.setByte("slot", i, (byte) vtpDGTZ.get(i).getDescriptor().getSlot());
-            vtpBANK.setShort("channel", i, (short) vtpDGTZ.get(i).getDescriptor().getChannel());
+//            vtpBANK.setByte("slot", i, (byte) vtpDGTZ.get(i).getDescriptor().getSlot());
+//            vtpBANK.setShort("channel", i, (short) vtpDGTZ.get(i).getDescriptor().getChannel());
             vtpBANK.setInt("word", i, vtpDGTZ.get(i).getVTPData(0).getWord());
         }
         return vtpBANK;

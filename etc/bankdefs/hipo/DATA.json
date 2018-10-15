@@ -407,9 +407,7 @@
     "info": "digitized VTP bank for untranslated entries",
     "items": [
        {"name":"crate",    "id":1, "type":"int8",  "info":"crate of VTP"},
-       {"name":"slot",     "id":2, "type":"int8",  "info":"slot for VTP"},
-       {"name":"channel",  "id":3, "type":"int16", "info":"channel for VTP"},
-       {"name":"word",     "id":4, "type":"int32", "info":"vtp value"}
+       {"name":"word",     "id":2, "type":"int32", "info":"vtp value"}
     ]
   }
 ]
