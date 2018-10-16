@@ -7,7 +7,6 @@ import java.util.StringTokenizer;
 import org.jlab.geom.DetectorHit;
 import org.jlab.geom.DetectorId;
 
-import cnuphys.bCNU.util.Bits;
 import cnuphys.fastMCed.fastmc.AugmentedDetectorHit;
 import cnuphys.fastMCed.fastmc.ParticleHits;
 import cnuphys.snr.ExtendedWord;

@@ -11,6 +11,8 @@ import cnuphys.fastMCed.geometry.DCGeometry;
 import cnuphys.fastMCed.geometry.FTOFGeometry;
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.lund.LundId;
+import cnuphys.lund.LundStyle;
+import cnuphys.lund.LundSupport;
 import cnuphys.splot.plot.DoubleFormat;
 
 /**
@@ -35,13 +37,28 @@ public class ParticleHits {
 	 * A mapping of the detector type to a list of augmented detector hits
 	 */
 	private EnumMap<DetectorId, HitHolder> hits;
+	
+	/**
+	 * Null constructor used for random noise generation
+	 */
+	public ParticleHits() {
+		_lundId = LundSupport.unknownMinus;
+		_lundId.getStyle().setFillColor(Color.cyan);
+				
+		hits = new EnumMap<>(DetectorId.class);
+		HitHolder dcHH = new HitHolder(6, 6);
+		HitHolder ftofHH = new HitHolder(6, 0);
+		
+		hits.put(DetectorId.DC, dcHH);
+		hits.put(DetectorId.FTOF, ftofHH);
+	}
 
 	/**
 	 * The particle hits for a single trajectory as determined by fastMC
 	 * 
 	 * @param lundId
 	 *            the Lund Id
-	 * @ parm particleRec
+	 * @param particleRec
 	 *            contains the vertex and momentum information
 	 * @param path
 	 *            the path
@@ -145,6 +162,20 @@ public class ParticleHits {
 	 */
 	public HitHolder getHitHolder(DetectorId id) {
 		return hits.get(id);
+	}
+	
+	/**
+	 * Check if we have a hit at the provided component
+	 * @param id the detector id 
+	 * @param sect0 the zero based sector
+	 * @param supl0 the zero based superlayer
+	 * @param layer0 the zero based layer
+	 * @param comp0 the zero based component id
+	 * @return <code>true</code> if we have a hit at that component
+	 */
+	public boolean hasHit(DetectorId id, int sect0, int supl0, int layer0, int comp0) {
+		HitHolder holder = hits.get(id);
+		return holder.hasHit(sect0, supl0, layer0, comp0);
 	}
 
 	/**

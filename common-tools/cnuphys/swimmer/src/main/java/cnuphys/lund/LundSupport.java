@@ -34,6 +34,16 @@ public class LundSupport {
 	private static Color orangeRed = X11Colors.getX11Color("Orange Red");
 	private static Color olive = X11Colors.getX11Color("Olive");
 	private static Color powder = X11Colors.getX11Color("Powder Blue");
+	
+	/** Unknown negative lepton */
+	public static LundId unknownPlus = new LundId("Lepton", "G" + SUPERPLUS,   0, 0,  3, 0);
+	
+	/** Unknown negative lepton */
+	public static LundId unknownMinus = new LundId("Lepton", "G" + SUPERMINUS, -1, 0, -3, 0);
+	
+	/** Unknown neutral "lepton" */
+	public static LundId unknownNeutral = new LundId("Lepton", "G" + SUPERZERO,   -2, 0, 0, 0);
+
 
 	/**
 	 * private constructor for the singleton.
@@ -204,9 +214,9 @@ public class LundSupport {
 		_lundIds = new ArrayList<LundId>(400);
 		
 		//Geantinos or generic 
-		_lundIds.add(new LundId("Lepton", "G" + SUPERPLUS,   0, 0,  3, 0));
-		_lundIds.add(new LundId("Lepton", "G" + SUPERMINUS, -1, 0, -3, 0));
-		_lundIds.add(new LundId("Lepton", "G" + SUPERZERO,   -2, 0, 0, 0));
+		_lundIds.add(unknownPlus);
+		_lundIds.add(unknownMinus);
+		_lundIds.add(unknownNeutral);
 		
 		//unknowns (orange--track based)
 		_lundIds.add(new LundId("Lepton", "?TB" + SUPERPLUS,   -99,  0,  3, 0));

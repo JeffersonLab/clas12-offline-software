@@ -77,6 +77,22 @@ public class LundStyle {
 	public Color getFillColor() {
 		return _fillColor;
 	}
+	
+	/**
+	 * Set the line color
+	 * @param color the new line color
+	 */
+	public void setLineColor(Color color) {
+		_lineColor = color;
+	}
+
+	/**
+	 * Set the fill color
+	 * @param color the new fill color
+	 */
+	public void setFillColor(Color color) {
+		_fillColor = color;
+	}
 
 	/**
 	 * Get the stroke

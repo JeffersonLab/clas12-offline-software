@@ -113,6 +113,7 @@ public class RandomEvGenDialog extends JDialog implements ActionListener, IEvent
 		return reason;
 	}
 	
+	//create the north component of the dialog
 	protected void createNorthComponent() {
 		JPanel panel = new JPanel();
 		

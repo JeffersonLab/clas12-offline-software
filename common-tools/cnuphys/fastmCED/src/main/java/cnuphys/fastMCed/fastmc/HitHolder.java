@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.geom.DetectorHit;
+import org.jlab.geom.DetectorId;
 
 import cnuphys.bCNU.util.Bits;
 
@@ -63,6 +64,16 @@ public class HitHolder {
 				hits[sect0][supl0].add(new AugmentedDetectorHit(dhit));
 			}
 		}
+	}
+	
+	/**
+	 * Add a single hit
+	 * @param dhit the hit, which will be augmented
+	 */
+	public void add(DetectorHit dhit) {
+		int sect0 = dhit.getSectorId();
+		int supl0 = dhit.getSuperlayerId();
+		hits[sect0][supl0].add(new AugmentedDetectorHit(dhit));
 	}
 	
 	/**
@@ -178,4 +189,27 @@ public class HitHolder {
 		}
 		return Bits.countBits(word);
 	}
+	
+	/**
+	 * Check if we have a hit at the provided component
+	 * @param sect0 the zero based sector
+	 * @param supl0 the zero based superlayer
+	 * @param layer0 the zero based layer
+	 * @param comp0 the zero based component id
+	 * @return <code>true</code> if we have a hit at that component
+	 */
+	public boolean hasHit(int sect0, int supl0, int layer0, int comp0) {
+		
+		ArrayList<AugmentedDetectorHit> list = getHits(sect0, supl0);
+		if (list != null) {
+			for (AugmentedDetectorHit ahit : list) {
+				if ((ahit.getLayerId() == layer0) && (ahit.getComponentId() == comp0)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+
 }

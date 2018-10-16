@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import java.util.List;
 
 import org.jlab.detector.base.GeometryFactory;
+import org.jlab.detector.geom.dc.DCGeantFactory;
 import org.jlab.geom.DetectorHit;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.DriftChamberWire;
@@ -66,8 +67,8 @@ public class DCGeometry {
 			_dcDataProvider = GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.DC);
 		}
 
-		// arghh ugly hack until GEMC is modified
-
+//		DCGeantFactory dcFactory = new DCGeantFactory();
+		
 		DCFactoryUpdated dcFactory = new DCFactoryUpdated();
 		_dcDetector = dcFactory.createDetectorCLAS(_dcDataProvider);
 

@@ -40,6 +40,7 @@ import cnuphys.bCNU.view.PlotView;
 import cnuphys.bCNU.view.ViewManager;
 import cnuphys.bCNU.view.VirtualView;
 import cnuphys.fastMCed.eventio.PhysicsEventManager;
+import cnuphys.fastMCed.eventio.RandomNoiseGenerator;
 import cnuphys.fastMCed.consumers.ConsumerManager;
 import cnuphys.fastMCed.eventgen.AEventGenerator;
 import cnuphys.fastMCed.eventgen.GeneratorManager;
@@ -470,6 +471,10 @@ public class FastMCed extends BaseMDIApplication
 	
 	// create the options menu
 	private void addToOptionMenu(JMenu omenu) {
+
+		RandomNoiseGenerator.getInstance().addToMenu(omenu);
+		omenu.addSeparator();
+		
 		omenu.add(MagnifyWindow.magificationMenu());
 		omenu.addSeparator();
 		

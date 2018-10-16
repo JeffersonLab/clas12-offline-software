@@ -28,7 +28,7 @@ public class FTOFGeometry {
 	//the overall detector
 	private static FTOFDetector _ftofDetector;
 	
-	//first index -s sector 0..5
+	//first index is sector 0..5
 	//2nd index = panel type (superlayer) 0..2 for 1A, 1B, 2
 	private static FTOFLayer[][] _ftofLayers = new FTOFLayer[6][3];
 
@@ -38,6 +38,7 @@ public class FTOFGeometry {
 	private static FTOFPanel _ftofPanel[] = new FTOFPanel[3];
 	private static String ftofNames[] = { "Panel 1A", "Panel 1B", "Panel 2" };
 
+	//TOF data provider
 	private static ConstantProvider tofDataProvider = 
 			GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.FTOF);
 

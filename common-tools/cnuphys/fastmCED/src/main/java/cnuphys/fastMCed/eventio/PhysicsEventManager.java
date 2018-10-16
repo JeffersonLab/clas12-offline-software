@@ -211,6 +211,13 @@ public class PhysicsEventManager {
 			}
 		}
 		
+		//Add random noise if requested
+		if (RandomNoiseGenerator.getInstance().isGenerateNoise()) {
+			System.err.println("Generating noise");
+			
+			RandomNoiseGenerator.getInstance().generateNoise(_currentParticleHits);
+		}
+		
 		//do the SNR analysis
 		SNRManager.getInstance().analyzeSNR(_currentParticleHits);
 

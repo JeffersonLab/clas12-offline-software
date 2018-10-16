@@ -89,6 +89,10 @@ public class ConsumerManager extends Vector<PhysicsEventConsumer> implements IPh
 		shiftConsumer.setActive(false);
 		add(shiftConsumer);
 		
+		SNRThreeLevelTestConsumer snr3Consumer = new SNRThreeLevelTestConsumer();
+		snr3Consumer.setActive(true);
+		add(snr3Consumer);
+	
 		
 //		SNRSector1TestConsumerV2 testConsumer2 = new SNRSector1TestConsumerV2();
 //		testConsumer2.setActive(false);
