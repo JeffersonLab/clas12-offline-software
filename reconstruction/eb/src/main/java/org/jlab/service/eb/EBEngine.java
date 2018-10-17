@@ -42,6 +42,7 @@ public class EBEngine extends ReconstructionEngine {
 
     // inputs banks:
     String trackType        = null;
+    String ftofHitsType     = null;
     String trajectoryType   = null;
     String covMatrixType    = null;
     
@@ -83,7 +84,7 @@ public class EBEngine extends ReconstructionEngine {
         eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+ccdb.getDouble(EBCCDBEnum.RF_OFFSET));
         
         List<DetectorResponse> responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL,"ECAL::moments");
-        List<DetectorResponse> responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
+        List<DetectorResponse> responseFTOF = ScintillatorResponse.readHipoEvent(de, ftofHitsType, DetectorType.FTOF);
         List<DetectorResponse> responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
         List<DetectorResponse> responseCND  = ScintillatorResponse.readHipoEvent(de, "CND::clusters", DetectorType.CND);
         List<DetectorResponse> responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
@@ -231,6 +232,10 @@ public class EBEngine extends ReconstructionEngine {
     
     public void setTrackType(String trackType) {
         this.trackType = trackType;
+    }
+    
+    public void setFTOFHitsType(String hitsType) {
+        this.ftofHitsType = hitsType;
     }
 
     public void setCovMatrixType(String covMatrixType) {
