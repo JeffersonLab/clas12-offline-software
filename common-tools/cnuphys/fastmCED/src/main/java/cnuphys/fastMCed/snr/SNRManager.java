@@ -13,6 +13,7 @@ import cnuphys.snr.ExtendedWord;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
+import cnuphys.snr.clas12.Clas12ThreeLevelAnalysis;
 
 
 public class SNRManager  {
@@ -42,7 +43,7 @@ public class SNRManager  {
 	private static SNRManager instance;
 
 	// The analysis package
-	private Clas12NoiseAnalysis _noisePackage = new Clas12NoiseAnalysis();
+	private Clas12ThreeLevelAnalysis _noisePackage = new Clas12ThreeLevelAnalysis();
 
 	// result container
 	private Clas12NoiseResult _noiseResults = new Clas12NoiseResult();
@@ -386,11 +387,7 @@ public class SNRManager  {
 	public NoiseReductionParameters getParameters(int sect0, int supl0) {
 		return _noisePackage.getParameters(sect0, supl0);
 	}
-	
-	public NoiseReductionParameters getCompositeParameters(int sect0) {
-		return _noisePackage.getCompositeParameters(sect0, 1);
-	}
-	
+		
 	//add feedback string with common color
 	private void addFBStr(String s, List<String>feedbackStrings) {
 		feedbackStrings.add(_fbColor+s);

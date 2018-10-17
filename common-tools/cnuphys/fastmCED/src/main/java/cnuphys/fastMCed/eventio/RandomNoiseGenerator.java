@@ -115,7 +115,7 @@ public class RandomNoiseGenerator implements ActionListener {
 
 						if (hasHit(hits, DetectorId.DC, sect, supl, lay, wire)) {
 
-							System.err.println("Skip adding random hit on real hit");
+	//						System.err.println("Skip adding random hit on real hit");
 						} else {
 							DetectorHit dHit = new DetectorHit(DetectorId.DC, sect, supl, lay, wire, zeroPoint);
 							dcHits.add(dHit);

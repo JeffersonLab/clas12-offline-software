@@ -410,6 +410,7 @@ public class NoiseReductionParameters {
 		_analyzed = true;
 	}
 
+	//this creates the masks and .ANDS. them with the data
 	private void cleanFromSegments() {
 		// now remove the noise first. Set packedData[0] to contain overlap
 		// (union) of both
