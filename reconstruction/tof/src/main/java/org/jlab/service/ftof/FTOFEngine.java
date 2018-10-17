@@ -32,12 +32,14 @@ public class FTOFEngine extends ReconstructionEngine {
 
     public FTOFEngine(String name) {
         super(name, "carman, ziegler", "1.0");
+        TrkType = name;
     }
-
+    private final String TrkType;
+    
     FTOFGeant4Factory geometry;
     int Run = 0;
     RecoBankWriter rbc;
-   
+    
     @Override
     public boolean init() {
 
@@ -206,7 +208,7 @@ public class FTOFEngine extends ReconstructionEngine {
         }
         // 2.1) exit if cluster list is empty but save the hits
         if (clusters.size() == 0) {
-            rbc.appendFTOFBanks(event, hits, null, null);
+            rbc.appendFTOFBanks(event, hits, null, null, TrkType);
             return true;
         }
         // continuing ... there are clusters
@@ -235,11 +237,11 @@ public class FTOFEngine extends ReconstructionEngine {
         ArrayList<ArrayList<Cluster>> matchedClusters = clsMatch
                 .MatchedClusters(clusters);
         if (matchedClusters.size() == 0) {
-            rbc.appendFTOFBanks(event, hits, clusters, null);
+            rbc.appendFTOFBanks(event, hits, clusters, null, TrkType);
             return true;
         }
 
-        rbc.appendFTOFBanks(event, hits, clusters, matchedClusters);
+        rbc.appendFTOFBanks(event, hits, clusters, matchedClusters, TrkType);
 //            if (event.hasBank("FTOF::adc")) {
 //                if (event.hasBank("FTOF::adc")) {
 //                    event.getBank("FTOF::adc").show();

@@ -29,6 +29,7 @@ public class RecoBankWriter {
             ////event.show();
             //group.show();
             dde.removeGroup(bankName);
+            return null;
         }
         DataBank bank = event.createBank(bankName, bankSize);
         return bank;
@@ -40,8 +41,11 @@ public class RecoBankWriter {
         if (hitlist.size() == 0) {
             return null;
         }
+        if(event.hasBank("FTOF::rawhits"))
+            return null; // don't save again for TB
         
-        DataBank bank = this.CreateOutputBank(event, "FTOF::rawhits", hitlist.size());
+        DataBank bank = event.createBank("FTOF::rawhits", hitlist.size());
+        //DataBank bank = this.CreateOutputBank(event, "FTOF::rawhits", hitlist.size());
         if (bank == null) {
             System.err
                     .println("COULD NOT CREATE A BANK!!!!!! for hitlist of size "
@@ -78,15 +82,17 @@ public class RecoBankWriter {
 
     }
 
-    public DataBank fillRecHitsBank(DataEvent event, List<Hit> hitlist) {
+    public DataBank fillRecHitsBank(DataEvent event, List<Hit> hitlist, String hitsType) {
         if (hitlist == null) {
             return null;
         }
         if (hitlist.size() == 0) {
             return null;
         }
-
-        DataBank bank = this.CreateOutputBank(event, "FTOF::hits", hitlist.size());
+        String bankName = "FTOF::hits";
+        if(hitsType.equalsIgnoreCase("FTOFHB"))
+            bankName = "FTOF::hbhits";
+        DataBank bank = this.CreateOutputBank(event, bankName, hitlist.size());
         if (bank == null) {
             System.err.println("COULD NOT CREATE A BANK!!!!!!");
             return null;
@@ -267,7 +273,7 @@ public class RecoBankWriter {
 
     public void appendFTOFBanks(DataEvent event, List<Hit> hits,
             List<Cluster> clusters,
-            ArrayList<ArrayList<Cluster>> matchedClusters) {
+            ArrayList<ArrayList<Cluster>> matchedClusters, String hitsType) {
         List<DataBank> fTOFBanks = new ArrayList<DataBank>();
 
         DataBank bank1 = this.fillRawHitsBank((DataEvent) event, hits);
@@ -275,7 +281,7 @@ public class RecoBankWriter {
             fTOFBanks.add(bank1);
         }
 
-        DataBank bank2 = this.fillRecHitsBank((DataEvent) event, hits);
+        DataBank bank2 = this.fillRecHitsBank((DataEvent) event, hits, hitsType);
         if (bank2 != null) {
             fTOFBanks.add(bank2);
         }
