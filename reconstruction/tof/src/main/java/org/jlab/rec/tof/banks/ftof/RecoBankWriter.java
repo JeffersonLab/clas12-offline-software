@@ -92,9 +92,9 @@ public class RecoBankWriter {
         String bankName = "FTOF::hits";
         if(hitsType.equalsIgnoreCase("FTOFHB"))
             bankName = "FTOF::hbhits";
-        DataBank bank = this.CreateOutputBank(event, bankName, hitlist.size());
+        DataBank bank = event.createBank(bankName, hitlist.size());
         if (bank == null) {
-            System.err.println("COULD NOT CREATE A BANK!!!!!!");
+            System.err.println("COULD NOT CREATE A BANK!!!!!!"+bankName);
             return null;
         }
         for (int i = 0; i < hitlist.size(); i++) {
@@ -149,48 +149,53 @@ public class RecoBankWriter {
 
     }
 
-    public DataBank fillClustersBank(DataEvent event, List<Cluster> cluslist) {
+    public DataBank fillClustersBank(DataEvent event, List<Cluster> cluslist, String hitsType) {
         if (cluslist == null) {
             return null;
         }
         if (cluslist.size() == 0) {
             return null;
         }
-
-        DataBank bank = this.CreateOutputBank(event, "FTOF::clusters", cluslist.size());
-        if (bank == null) {
-            System.err.println("COULD NOT CREATE A BANK!!!!!!");
+        if(hitsType.equalsIgnoreCase("FTOFHB")) {
             return null;
-        }
-        for (int i = 0; i < cluslist.size(); i++) {
-            bank.setShort("id", i, (short) cluslist.get(i).get_Id());
-            bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
-            bank.setByte("layer", i, (byte) cluslist.get(i).get_Panel());
-            bank.setShort("component", i, (short) cluslist.get(i).get(0)
-                    .get_Paddle()); // paddle id of hit with lowest paddle id in
-            // cluster [Check the sorting!!!]
-            int status = 0;
-            if (Integer.parseInt(cluslist.get(i).get_StatusWord()) == 1111) {
-                status = 1;
+        } else {
+            // save clusters only for TB
+            DataBank bank = event.createBank("FTOF::clusters", cluslist.size());
+
+            //DataBank bank = this.CreateOutputBank(event, "FTOF::clusters", cluslist.size());
+            if (bank == null) {
+                System.err.println("COULD NOT CREATE A BANK!!!!!!");
+                return null;
             }
-            bank.setShort("status", i, (short) status);
-            bank.setFloat("energy", i, (float) cluslist.get(i).get_Energy());
-            bank.setFloat("energy_unc", i, (float) cluslist.get(i)
-                    .get_EnergyUnc());
-            bank.setFloat("time", i, (float) cluslist.get(i).get_t());
-            bank.setFloat("time_unc", i, (float) cluslist.get(i).get_tUnc());
-            bank.setFloat("x", i, (float) cluslist.get(i).get_x());
-            bank.setFloat("y", i, (float) cluslist.get(i).get_y());
-            bank.setFloat("z", i, (float) cluslist.get(i).get_z());
-            bank.setFloat("x_unc", i, 5); // At this stage the uncertainty is
-            // not calculated
-            bank.setFloat("y_unc", i, (float) cluslist.get(i).get_y_locUnc());
-            bank.setFloat("z_unc", i, 10); // At this stage the uncertainty is
-            // not calculated
-        }
+            for (int i = 0; i < cluslist.size(); i++) {
+                bank.setShort("id", i, (short) cluslist.get(i).get_Id());
+                bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
+                bank.setByte("layer", i, (byte) cluslist.get(i).get_Panel());
+                bank.setShort("component", i, (short) cluslist.get(i).get(0)
+                        .get_Paddle()); // paddle id of hit with lowest paddle id in
+                // cluster [Check the sorting!!!]
+                int status = 0;
+                if (Integer.parseInt(cluslist.get(i).get_StatusWord()) == 1111) {
+                    status = 1;
+                }
+                bank.setShort("status", i, (short) status);
+                bank.setFloat("energy", i, (float) cluslist.get(i).get_Energy());
+                bank.setFloat("energy_unc", i, (float) cluslist.get(i)
+                        .get_EnergyUnc());
+                bank.setFloat("time", i, (float) cluslist.get(i).get_t());
+                bank.setFloat("time_unc", i, (float) cluslist.get(i).get_tUnc());
+                bank.setFloat("x", i, (float) cluslist.get(i).get_x());
+                bank.setFloat("y", i, (float) cluslist.get(i).get_y());
+                bank.setFloat("z", i, (float) cluslist.get(i).get_z());
+                bank.setFloat("x_unc", i, 5); // At this stage the uncertainty is
+                // not calculated
+                bank.setFloat("y_unc", i, (float) cluslist.get(i).get_y_locUnc());
+                bank.setFloat("z_unc", i, 10); // At this stage the uncertainty is
+                // not calculated
+            }
 
-        return bank;
-
+            return bank;
+            }
     }
 
     private DataBank fillClustersBank(DataEvent event,
@@ -286,7 +291,7 @@ public class RecoBankWriter {
             fTOFBanks.add(bank2);
         }
 
-        DataBank bank3 = this.fillClustersBank((DataEvent) event, clusters);
+        DataBank bank3 = this.fillClustersBank((DataEvent) event, clusters, hitsType);
         if (bank3 != null) {
             fTOFBanks.add(bank3);
         }
