@@ -40,7 +40,6 @@
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-jcsg</artifactId>
       <version>5.7.0</version>
-      <type>jar</type>
     </dependency>  
 
     <dependency>
