@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import javax.swing.event.EventListenerList;
 
 import cnuphys.lund.SwimTrajectoryListener;
-import cnuphys.magfield.FastMath;
+import org.jlab.clas.clas.math.FastMath;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;

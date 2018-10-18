@@ -25,7 +25,7 @@ import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
-import cnuphys.magfield.FastMath;
+import org.jlab.clas.clas.math.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.DefaultSwimStopper;

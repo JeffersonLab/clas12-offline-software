@@ -3,7 +3,7 @@ package cnuphys.swim;
 import java.util.ArrayList;
 
 import cnuphys.lund.GeneratedParticleRecord;
-import cnuphys.magfield.FastMath;
+import org.jlab.clas.clas.math.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.IMagField;
 import cnuphys.magfield.MagneticField;

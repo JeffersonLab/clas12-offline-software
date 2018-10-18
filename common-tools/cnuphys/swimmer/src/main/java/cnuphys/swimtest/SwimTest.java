@@ -22,7 +22,7 @@ import javax.swing.JPanel;
 import cnuphys.lund.LundStyle;
 import cnuphys.lund.LundTrackDialog;
 import cnuphys.lund.SwimTrajectoryListener;
-import cnuphys.magfield.FastMath;
+import org.jlab.clas.clas.math.FastMath;
 import cnuphys.magfield.MagneticFieldCanvas;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFieldInitializationException;

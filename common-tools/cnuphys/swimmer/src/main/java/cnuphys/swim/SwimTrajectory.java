@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.lund.LundId;
-import cnuphys.magfield.FastMath;
+import org.jlab.clas.clas.math.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.RotatedCompositeProbe;
 

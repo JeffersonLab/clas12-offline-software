@@ -1,5 +1,7 @@
 package cnuphys.magfield;
 
+import org.jlab.clas.clas.math.FastMath;
+
 public class SolenoidProbe extends FieldProbe {
 
 	private Cell2D _cell;

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cnuphys.lund.GeneratedParticleRecord;
-import cnuphys.magfield.FastMath;
+import org.jlab.clas.clas.math.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.swim.SwimTrajectory;
 

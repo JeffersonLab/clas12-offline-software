@@ -1,5 +1,7 @@
 package cnuphys.magfield;
 
+import org.jlab.clas.clas.math.FastMath;
+
 public abstract class FieldProbe implements IField {
 
 	// indices of components

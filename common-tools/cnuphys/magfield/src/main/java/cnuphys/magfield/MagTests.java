@@ -1,5 +1,6 @@
 package cnuphys.magfield;
 
+import org.jlab.clas.clas.math.FastMath;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridLayout;

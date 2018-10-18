@@ -22,6 +22,7 @@
     <module>cnuphys</module>
     <module>clas-reco</module> 
     <module>clas-analysis</module> 
-    <module>swim-tools</module> 
+    <module>swim-tools</module>
+    <module>clas-math</module>
   </modules>
 </project>

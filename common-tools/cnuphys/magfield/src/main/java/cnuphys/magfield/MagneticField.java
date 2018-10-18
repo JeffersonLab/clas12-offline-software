@@ -1,5 +1,6 @@
 package cnuphys.magfield;
 
+import org.jlab.clas.clas.math.FastMath;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
