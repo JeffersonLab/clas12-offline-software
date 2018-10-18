@@ -107,7 +107,7 @@ public class Geometry {
     //*** 
     public int findSectorFromAngle(int layer, Point3D trkPoint) {
         int Sect = SVTConstants.NSECTORS[(layer-1)/2];
-        for (int s = 0; s < SVTConstants.NSECTORS[(layer-1)/2] - 1; s++) {
+        for (int s = 0; s < SVTConstants.NSECTORS[(layer-1)/2]; s++) {
             int sector = s + 1;
             Vector3D orig = new Vector3D(getPlaneModuleOrigin(sector, layer).x(),
                                          getPlaneModuleOrigin(sector, layer).y(), 0);
@@ -170,7 +170,7 @@ public class Geometry {
         double x = m1 * z + b1;
         X[0] = x;
         X[1] = z;
-
+        
         return X;
     }
 
@@ -212,7 +212,7 @@ public class Geometry {
         if (frame.equals("lab")) {
             Line3d localLine = new Line3d(new Vector3d(x-SVTConstants.ACTIVESENWID/2, y, z),
                                           new Vector3d(x-SVTConstants.ACTIVESENWID/2, y, z)) ;
-            Line3d labFrameLine = localLine.transformed(SVTConstants.getLabFrame( (int)((layer+1)/2) -1,
+            Line3d labFrameLine = localLine.transformed(SVTConstants.getLabFrame( (layer-1)/2,
                                                                                   sector-1,
                                                                                   //= SVTConstants.LAYERRADIUS[rm[0]][rm[1]]
                                                                                   SVTConstants.LAYERRADIUS[(layer-1)/2][(layer-1)%2]+gap/2,
@@ -244,6 +244,7 @@ public class Geometry {
                                 localLine.origin().y,
                                 localLine.origin().z);
         }
+        //System.out.println(transf.toString()+" frame = "+frame+" sector "+sector+" layer "+layer+" x "+x +" y "+y +" z "+z);
         return transf;
     }
     //*** point and its error
@@ -566,9 +567,9 @@ public class Geometry {
             pitchcorr = Math.abs(getXAtZ(layer, (double) s2 - 1, z) - getXAtZ(layer, (double) s2, z));
         }
 
-        double layerGap = SVTConstants.LAYERRADIUS[0][1]  // MODULERADIUS[1][0] = 65.447 + LAYRGAP + MODULEPOSFAC * SILICONTHICK = SVTConstants.LAYERRADIUS[0][1]
-                        - SVTConstants.LAYERRADIUS[0][0]; // MODULERADIUS[0][0] = 65.447 - MODULEPOSFAC * SILICONTHICK           = SVTConstants.LAYERRADIUS[0][0]
-
+        double layerGap = SVTConstants.LAYERRADIUS[layer/2][1]
+                    - SVTConstants.LAYERRADIUS[layer/2][0]; 
+      
         double shift = sign * layerGap * Math.tan(TrkToPlnNormRelatAngl) / pitchcorr;
 
         return -shift;

@@ -129,7 +129,7 @@ public class Constants {
             for (int layer = 1; layer <= 8; layer++) {
                 ArrayList<Shape3D> layerModules = new ArrayList<Shape3D>();
 
-                for (int sector = 1; sector <= Constants.NSECT[layer - 1]; sector++) {
+                for (int sector = 1; sector <= SVTConstants.NSECTORS[(layer - 1) / 2]; sector++) {
 
                     Shape3D module = new Shape3D();
 

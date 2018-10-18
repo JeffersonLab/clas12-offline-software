@@ -7,14 +7,10 @@ import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
-import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.HitReader;
-import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cluster.ClusterFinder;
@@ -39,115 +35,13 @@ import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
  */
 public class CVTRecHandler {
 
-    RecoBankWriter rbc = new RecoBankWriter();
-    org.jlab.rec.cvt.svt.Geometry SVTGeom;
-    org.jlab.rec.cvt.bmt.Geometry BMTGeom;
-    SVTStripFactory svtIdealStripFactory;
-
-    public CVTRecHandler() {
-        org.jlab.rec.cvt.svt.Constants.Load();
-        SVTGeom = new org.jlab.rec.cvt.svt.Geometry();
-        BMTGeom = new org.jlab.rec.cvt.bmt.Geometry();
-    }
-
-    public CVTRecHandler(org.jlab.rec.cvt.svt.Geometry svtg, org.jlab.rec.cvt.bmt.Geometry bmtg) {
-        SVTGeom = svtg;
-        BMTGeom = bmtg;
-    }
-
-    String FieldsConfig = "";
-    int Run = -1;
-
-    public void setRunConditionsParameters(DataEvent event, String Fields, int iRun, boolean addMisAlignmts, String misAlgnFile) {
-        if (event.hasBank("RUN::config") == false) {
-            System.err.println("RUN CONDITIONS NOT READ!");
-            return;
-        }
-
-        int Run = iRun;
-
-        boolean isCosmics = false;
-        DataBank bank = event.getBank("RUN::config");
-        //System.out.println(bank.getInt("Event")[0]);
-        if (bank.getByte("type", 0) == 0) {
-        }
-        if (bank.getByte("mode", 0) == 1) {
-            isCosmics = true;
-        }
-
-        boolean isSVTonly = false;
-
-        // Load the fields
-        //-----------------
-        String newConfig = "SOLENOID" + bank.getFloat("solenoid", 0);
-
-        if (Fields.equals(newConfig) == false) {
-            // Load the Constants
-
-            System.out.println("  CHECK CONFIGS..............................." + FieldsConfig + " = ? " + newConfig);
-            Constants.Load(isCosmics, isSVTonly, (double) bank.getFloat("solenoid", 0));
-            // Load the Fields
-            //System.out.println("************************************************************SETTING FIELD SCALE *****************************************************");
-            //TrkSwimmer.setMagneticFieldScale(bank.getFloat("solenoid", 0)); // something changed in the configuration
-            //double shift =0;
-            //if(bank.getInt("run", 0)>1840)
-            //    shift = -1.9;
-            //MagneticFields.getInstance().setSolenoidShift(shift);
-//            this.setFieldsConfig(newConfig);
-
-            CCDBConstantsLoader.Load(new DatabaseConstantProvider(bank.getInt("run", 0), "default"));
-        }
-        this.setFieldsConfig(newConfig);
-
-        // Load the constants
-        //-------------------
-        int newRun = bank.getInt("run", 0);
-
-        if (Run != newRun) {
-            this.setRun(newRun);
-        }
-
-        Run = newRun;
-        this.setRun(Run);
-    }
-
-    public int getRun() {
-        return Run;
-    }
-
-    public void setRun(int run) {
-        Run = run;
-    }
-
-    public String getFieldsConfig() {
-        return FieldsConfig;
-    }
-
-    public void setFieldsConfig(String fieldsConfig) {
-        FieldsConfig = fieldsConfig;
-    }
+    
 
     List<FittedHit> SVThits = null;
     List<FittedHit> BMThits = null;
     List<Cluster> clusters = null;
     List<Cluster> SVTclusters = null;
     List<Cluster> BMTclusters = null;
-
-    public org.jlab.rec.cvt.bmt.Geometry getBMTGeom() {
-        return BMTGeom;
-    }
-
-    public void setBMTGeom(org.jlab.rec.cvt.bmt.Geometry bMTGeom) {
-        BMTGeom = bMTGeom;
-    }
-
-    public org.jlab.rec.cvt.svt.Geometry getSVTGeom() {
-        return SVTGeom;
-    }
-
-    public void setSVTGeom(org.jlab.rec.cvt.svt.Geometry sVTGeom) {
-        SVTGeom = sVTGeom;
-    }
 
     public List<FittedHit> getSVThits() {
         return SVThits;
@@ -181,7 +75,9 @@ public class CVTRecHandler {
         BMTclusters = bMTclusters;
     }
 
-    public boolean loadClusters(DataEvent event) {
+    public boolean loadClusters(DataEvent event, 
+            org.jlab.rec.cvt.svt.Geometry SVTGeom,
+            org.jlab.rec.cvt.bmt.Geometry BMTGeom) {
         SVThits = new ArrayList<FittedHit>();
         BMThits = new ArrayList<FittedHit>();
         clusters = new ArrayList<Cluster>();
@@ -239,7 +135,7 @@ public class CVTRecHandler {
 
     List<ArrayList<Cross>> crosses = null;
 
-    public void loadCrosses() {
+    public void loadCrosses(org.jlab.rec.cvt.svt.Geometry SVTGeom) {
         crosses = new ArrayList<ArrayList<Cross>>();
         CrossMaker crossMake = new CrossMaker();
         crosses = crossMake.findCrosses(clusters, SVTGeom);
@@ -263,7 +159,8 @@ public class CVTRecHandler {
         this.trks = trks;
     }
 
-    public List<StraightTrack> cosmicsTracking() {
+    public List<StraightTrack> cosmicsTracking(org.jlab.rec.cvt.svt.Geometry SVTGeom,
+            org.jlab.rec.cvt.bmt.Geometry BMTGeom) {
         if (this.crosses == null) {
             return null;
         }
@@ -282,7 +179,7 @@ public class CVTRecHandler {
 
         //------------------------
         if (cosmics.size() == 0) {
-            this.CleanupSpuriousCrosses(crosses, null);
+            this.CleanupSpuriousCrosses(crosses, null, SVTGeom);
             return null;
         }
 
@@ -310,13 +207,14 @@ public class CVTRecHandler {
             trkcandFinder.matchClusters(SVTclusters, new TrajectoryFinder(), SVTGeom, BMTGeom, true,
                     cosmics.get(k1).get_Trajectory(), k1 + 1);
         }
-        this.CleanupSpuriousCrosses(crosses, null);
+        this.CleanupSpuriousCrosses(crosses, null, SVTGeom);
         //4)  ---  write out the banks			
 
         return cosmics;
     }
 
-    public List<Track> beamTracking(Swim swimmer) {
+    public List<Track> beamTracking(Swim swimmer, org.jlab.rec.cvt.svt.Geometry SVTGeom,
+            org.jlab.rec.cvt.bmt.Geometry BMTGeom) {
         if (this.crosses == null) {
             return null;
         }
@@ -342,7 +240,7 @@ public class CVTRecHandler {
         }
 
         if (trkcands.size() == 0) {
-            this.CleanupSpuriousCrosses(crosses, null);
+            this.CleanupSpuriousCrosses(crosses, null, SVTGeom);
             return null;
         }
 
@@ -451,12 +349,12 @@ public class CVTRecHandler {
         //------------------------
         // set index associations
         if (trks.size() > 0) {
-            this.CleanupSpuriousCrosses(crosses, null);
+            this.CleanupSpuriousCrosses(crosses, null, SVTGeom);
         }
         return trks;
     }
 
-    private void CleanupSpuriousCrosses(List<ArrayList<Cross>> crosses, List<Track> trks) {
+    private void CleanupSpuriousCrosses(List<ArrayList<Cross>> crosses, List<Track> trks,org.jlab.rec.cvt.svt.Geometry SVTGeom) {
         List<Cross> rmCrosses = new ArrayList<Cross>();
 
         if (crosses.get(0) != null) {
