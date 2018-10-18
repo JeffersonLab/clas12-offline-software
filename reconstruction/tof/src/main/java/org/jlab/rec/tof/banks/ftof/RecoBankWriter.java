@@ -199,81 +199,85 @@ public class RecoBankWriter {
     }
 
     private DataBank fillClustersBank(DataEvent event,
-            ArrayList<ArrayList<Cluster>> matchedClusters) {
+            ArrayList<ArrayList<Cluster>> matchedClusters, String hitsType) {
         if (matchedClusters == null) {
             return null;
         }
         if (matchedClusters.size() == 0) {
             return null;
         }
-
-        DataBank bank = this.CreateOutputBank(event, "FTOF::matchedclusters",
-                matchedClusters.size());
-        if (bank == null) {
-            System.err.println("COULD NOT CREATE A BANK!!!!!!");
+        if(hitsType.equalsIgnoreCase("FTOFHB")) {
             return null;
-        }
-        for (int i = 0; i < matchedClusters.size(); i++) {
-            if (matchedClusters.get(i) == null) {
-                continue;
+        } else {
+            // save clusters only for TB
+            DataBank bank = event.createBank("FTOF::matchedclusters",
+                matchedClusters.size());
+            if (bank == null) {
+                System.err.println("COULD NOT CREATE A BANK!!!!!!");
+                return null;
             }
-            bank.setByte("sector", i, (byte) matchedClusters.get(i).get(0)
-                    .get_Sector());
-            bank.setShort("paddle_id1A", i,
-                    (short) matchedClusters.get(i).get(0).get(0).get_Paddle()); // paddle
-            // id
-            // of
-            // hit
-            // with
-            // lowest
-            // paddle
-            // id
-            // in
-            // cluster
-            // [Check
-            // the
-            // sorting!!!]
-            bank.setShort("paddle_id1B", i,
-                    (short) matchedClusters.get(i).get(1).get(0).get_Paddle()); // paddle
-            // id
-            // of
-            // hit
-            // with
-            // lowest
-            // paddle
-            // id
-            // in
-            // cluster
-            // [Check
-            // the
-            // sorting!!!]
-            bank.setShort("clusSize_1A", i,
-                    (short) matchedClusters.get(i).get(0).size()); // size of
-            // cluster
-            // in 1a
-            bank.setShort("clusSize_1B", i,
-                    (short) matchedClusters.get(i).get(1).size()); // size of
-            // cluster
-            // in 1b
-            bank.setShort("clus_1A", i, (short) matchedClusters.get(i).get(0)
-                    .get_Id()); // id of cluster in 1a
-            bank.setShort("clus_1B", i, (short) matchedClusters.get(i).get(1)
-                    .get_Id()); // id of cluster in 1b
-            bank.setFloat("tminAlgo_1B_tCorr", i, (float) matchedClusters
-                    .get(i).get(1).get_tCorr()[0]); // uses tmin algorithm to
-            // compute the path length
-            // between counters
-            bank.setFloat("midbarAlgo_1B_tCorr", i, (float) matchedClusters
-                    .get(i).get(1).get_tCorr()[1]); // uses middle of bar
-            // algorithm to compute the
-            // path length between
-            // counters
-            bank.setFloat("EmaxAlgo_1B_tCorr", i, (float) matchedClusters
-                    .get(i).get(1).get_tCorr()[2]); // uses Emax algorithm to
-            // compute the path length
-            // between counters
+            for (int i = 0; i < matchedClusters.size(); i++) {
+                if (matchedClusters.get(i) == null) {
+                    continue;
+                }
+                bank.setByte("sector", i, (byte) matchedClusters.get(i).get(0)
+                        .get_Sector());
+                bank.setShort("paddle_id1A", i,
+                        (short) matchedClusters.get(i).get(0).get(0).get_Paddle()); // paddle
+                // id
+                // of
+                // hit
+                // with
+                // lowest
+                // paddle
+                // id
+                // in
+                // cluster
+                // [Check
+                // the
+                // sorting!!!]
+                bank.setShort("paddle_id1B", i,
+                        (short) matchedClusters.get(i).get(1).get(0).get_Paddle()); // paddle
+                // id
+                // of
+                // hit
+                // with
+                // lowest
+                // paddle
+                // id
+                // in
+                // cluster
+                // [Check
+                // the
+                // sorting!!!]
+                bank.setShort("clusSize_1A", i,
+                        (short) matchedClusters.get(i).get(0).size()); // size of
+                // cluster
+                // in 1a
+                bank.setShort("clusSize_1B", i,
+                        (short) matchedClusters.get(i).get(1).size()); // size of
+                // cluster
+                // in 1b
+                bank.setShort("clus_1A", i, (short) matchedClusters.get(i).get(0)
+                        .get_Id()); // id of cluster in 1a
+                bank.setShort("clus_1B", i, (short) matchedClusters.get(i).get(1)
+                        .get_Id()); // id of cluster in 1b
+                bank.setFloat("tminAlgo_1B_tCorr", i, (float) matchedClusters
+                        .get(i).get(1).get_tCorr()[0]); // uses tmin algorithm to
+                // compute the path length
+                // between counters
+                bank.setFloat("midbarAlgo_1B_tCorr", i, (float) matchedClusters
+                        .get(i).get(1).get_tCorr()[1]); // uses middle of bar
+                // algorithm to compute the
+                // path length between
+                // counters
+                bank.setFloat("EmaxAlgo_1B_tCorr", i, (float) matchedClusters
+                        .get(i).get(1).get_tCorr()[2]); // uses Emax algorithm to
+                // compute the path length
+                // between counters
+            }
+            return bank;
         }
-        return bank;
     }
 
     public void appendFTOFBanks(DataEvent event, List<Hit> hits,
@@ -297,7 +301,7 @@ public class RecoBankWriter {
         }
 
         DataBank bank4 = this.fillClustersBank((DataEvent) event,
-                matchedClusters);
+                matchedClusters, hitsType);
         if (bank4 != null) {
             fTOFBanks.add(bank4);
         }
