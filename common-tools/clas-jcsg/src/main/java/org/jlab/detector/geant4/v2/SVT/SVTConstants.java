@@ -42,7 +42,7 @@ public class SVTConstants
 	//private static double[][] LAYERSHIFTDATA = null;
 	//private static String filenameLayerShiftData = null;
 	
-	public static boolean VERBOSE = false;
+	public static boolean VERBOSE = true;
 	//public static String[] VARIATION = new String[]{ "ideal", "shifted" };
 	
 	// SVT GEOMETRY PARAMETERS
