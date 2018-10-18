@@ -1,6 +1,8 @@
 package org.jlab.rec.dc.trajectory;
 
 import java.util.Random;
+//import org.apache.commons.math3.util.FastMath;
+import org.jlab.clas.clas.math.FastMath;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
@@ -124,7 +126,7 @@ public class Vertex {
             double R = Q* pt / (LIGHTVEL * Bfield);
             double tanL = pz / pt;
 
-            double phi = Math.atan2(py, px);
+            double phi = FastMath.atan2(py, px);
 
             double xc   = x + R * Math.sin(phi);
             double yc   = y - R * Math.cos(phi);

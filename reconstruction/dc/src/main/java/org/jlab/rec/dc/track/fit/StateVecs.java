@@ -3,6 +3,7 @@ package org.jlab.rec.dc.track.fit;
 import Jama.Matrix;
 import java.util.HashMap;
 import java.util.Map;
+import org.jlab.clas.clas.math.FastMath;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.dc.cross.Cross;
@@ -39,7 +40,7 @@ public class StateVecs {
         //double phi = Math.toRadians(29.5);
         //double rho = 44.0;
         //double z = 436.0;
-        //swimmer.BfieldLab(rho*Math.cos(phi), rho*Math.sin(phi), z, lbf);
+        //swimmer.BfieldLab(rho*FastMath.cos(phi), rho*FastMath.sin(phi), z, lbf);
         //Bmax = Math.sqrt(lbf[0]*lbf[0]+lbf[1]*lbf[1]+lbf[2]*lbf[2]) *(2.366498/4.322871999651699); // scales according to torus scale by reading the map and averaging the value
      }
     
@@ -232,7 +233,7 @@ public class StateVecs {
         double err_sl2 = trkcand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitSlopeErr();
         double err_it1 = trkcand.get(0).get_Segment1().get_fittedCluster().get_clusterLineFitInterceptErr();
         double err_it2 = trkcand.get(0).get_Segment2().get_fittedCluster().get_clusterLineFitInterceptErr();
-        double wy_over_wx = (Math.cos(Math.toRadians(6.)) / Math.sin(Math.toRadians(6.)));
+        double wy_over_wx = (FastMath.cos(Math.toRadians(6.)) / FastMath.sin(Math.toRadians(6.)));
 
         double eux = 0.5 * Math.sqrt(err_sl1 * err_sl1 + err_sl2 * err_sl2);
         double euy = 0.5 * wy_over_wx * Math.sqrt(err_sl1 * err_sl1 + err_sl2 * err_sl2);

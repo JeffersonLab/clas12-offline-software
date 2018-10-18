@@ -2,8 +2,9 @@ package org.jlab.rec.dc.track;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.clas.math.FastMath;
 
-import org.apache.commons.math3.util.FastMath;
+//import org.apache.commons.math3.util.FastMath;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.prim.Point3D;

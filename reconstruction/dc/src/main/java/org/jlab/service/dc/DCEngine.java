@@ -23,7 +23,6 @@ public class DCEngine extends ReconstructionEngine {
     FTOFGeant4Factory ftofDetector;
     ECGeant4Factory ecDetector;
     PCALGeant4Factory pcalDetector; 
-    org.jlab.rec.fmt.Geometry fmtDetector;
     TrajectorySurfaces tSurf;
     String clasDictionaryPath ;
     String variationName;
@@ -121,13 +120,11 @@ public class DCEngine extends ReconstructionEngine {
         ecDetector = new ECGeant4Factory(providerEC);
         pcalDetector = new PCALGeant4Factory(providerEC);
         
-        fmtDetector = new org.jlab.rec.fmt.Geometry();
-        if(org.jlab.rec.fmt.Constants.areConstantsLoaded==false) 
-            org.jlab.rec.fmt.CCDBConstantsLoader.Load(11);
+        
         System.out.println(" -- Det Geometry constants are Loaded " );
         // create the surfaces
         tSurf = new TrajectorySurfaces();
-        tSurf.LoadSurfaces(dcDetector, ftofDetector, ecDetector, pcalDetector, org.jlab.rec.fmt.Constants.FVT_Zlayer);
+        tSurf.LoadSurfaces(dcDetector, ftofDetector, ecDetector, pcalDetector);
         
         // Get the constants for the correct variation
         String ccDBVar = this.getEngineConfigString("constantsDBVariation");

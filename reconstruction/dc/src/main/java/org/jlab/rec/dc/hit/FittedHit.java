@@ -1,6 +1,7 @@
 package org.jlab.rec.dc.hit;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
+import org.jlab.clas.clas.math.FastMath;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
@@ -484,7 +485,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             MPCorr = cosTrkAngle;
         }
 
-        this.set_X(x + this.get_LeftRightAmb() * (this.get_TimeToDistance() / MPCorr) / Math.cos(Math.toRadians(6.)));
+        this.set_X(x + this.get_LeftRightAmb() * (this.get_TimeToDistance() / MPCorr) / FastMath.cos(Math.toRadians(6.)));
         this.set_Z(z);
 
     }
@@ -589,7 +590,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 throw new RuntimeException("invalid region");
         }    
         
-        double MaxSag = Constants.getWIREDIST()*A*C*wire*wire*Math.cos(Math.toRadians(25.))*Math.cos(Math.toRadians(30.));
+        double MaxSag = Constants.getWIREDIST()*A*C*wire*wire*FastMath.cos(Math.toRadians(25.))*FastMath.cos(Math.toRadians(30.));
         
         double delta_x = MaxSag*(1.-y/(0.5*wireLen))*(1.-y/(0.5*wireLen));
         
@@ -641,8 +642,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @return string with hit output 
      */
     public String printInfo() {
-        //double xr = this._X*Math.cos(Math.toRadians(25.))+this._Z*Math.sin(Math.toRadians(25.));		
-        //double zr = this._Z*Math.cos(Math.toRadians(25.))-this._X*Math.sin(Math.toRadians(25.));
+        //double xr = this._X*FastMath.cos(Math.toRadians(25.))+this._Z*FastMath.sin(Math.toRadians(25.));		
+        //double zr = this._Z*FastMath.cos(Math.toRadians(25.))-this._X*FastMath.sin(Math.toRadians(25.));
         String s = "DC Fitted Hit: ID " + this.get_Id() + " Sector " + this.get_Sector() + " Superlayer " + this.get_Superlayer() + " Layer " + this.get_Layer() + " Wire " + this.get_Wire() + " TDC " + this.get_TDC()+ " Time " + this.get_Time()
                 + "  LR " + this.get_LeftRightAmb() + " doca " + this.get_TimeToDistance()+ " +/- " +this.get_DocaErr() + " updated pos  " + this._X + " clus "
                 + this._AssociatedClusterID;

@@ -3,6 +3,7 @@ package org.jlab.rec.dc.cluster;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.clas.clas.math.FastMath;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 
 import org.jlab.geom.prim.Line3D;
@@ -28,6 +29,7 @@ public class ClusterFitter {
     private List<Double> y = new ArrayList<Double>();
     private List<Double> ex = new ArrayList<Double>();
     private List<Double> ey = new ArrayList<Double>();
+    private double stereo = FastMath.cos(Math.toRadians(6.));
     
     private String CoordinateSystem; // LC= local, TSC = tilted Sector
     public ClusterFitter() {
@@ -61,7 +63,7 @@ public class ClusterFitter {
                 ex.add(i, (double) 0);
                 y.add(i, clus.get(i).get_X());
                 //ey[i]= clus.get(i).get_DocaErr(); //CODEFIX1
-                ey.add(i, clus.get(i).get_DocaErr() / Math.cos(Math.toRadians(6.))); 
+                ey.add(i, clus.get(i).get_DocaErr() / stereo); 
             }
 
         }
@@ -182,7 +184,7 @@ public class ClusterFitter {
 
             //double trkDocaMP = -xWire + (FitPars.slope()*FitArray[0][i]+FitPars.intercept());
             double trkDocaMP = FitLine.distance(Wire).length();
-            double trkDoca = trkDocaMP * Math.cos(Math.toRadians(6.));
+            double trkDoca = trkDocaMP * stereo;
 
             clus.get(i).set_ClusFitDoca(trkDoca);
 

@@ -6,6 +6,7 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.clas.clas.math.FastMath;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.hit.FittedHit;
@@ -269,15 +270,15 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
         double Z_1 = DcDetector.getWireMidpoint(this.get_Sector() - 1, this.get_Superlayer() - 1, 0, 0).z;
         double X_1 = this.get_fittedCluster().get_clusterLineFitSlope() * Z_1 + this.get_fittedCluster().get_clusterLineFitIntercept();
 
-        double x1 = Math.cos(Math.toRadians(25.)) * X_1 + Math.sin(Math.toRadians(25.)) * Z_1;
-        double z1 = -Math.sin(Math.toRadians(25.)) * X_1 + Math.cos(Math.toRadians(25.)) * Z_1;
+        double x1 = FastMath.cos(Math.toRadians(25.)) * X_1 + FastMath.sin(Math.toRadians(25.)) * Z_1;
+        double z1 = -FastMath.sin(Math.toRadians(25.)) * X_1 + FastMath.cos(Math.toRadians(25.)) * Z_1;
 
         //double Z_2 = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(5).getComponent(0).getMidpoint().z();
         double Z_2 = DcDetector.getWireMidpoint(this.get_Sector() - 1, this.get_Superlayer() - 1, 5, 0).z;
         double X_2 = this.get_fittedCluster().get_clusterLineFitSlope() * Z_2 + this.get_fittedCluster().get_clusterLineFitIntercept();
 
-        double x2 = Math.cos(Math.toRadians(25.)) * X_2 + Math.sin(Math.toRadians(25.)) * Z_2;
-        double z2 = -Math.sin(Math.toRadians(25.)) * X_2 + Math.cos(Math.toRadians(25.)) * Z_2;
+        double x2 = FastMath.cos(Math.toRadians(25.)) * X_2 + FastMath.sin(Math.toRadians(25.)) * Z_2;
+        double z2 = -FastMath.sin(Math.toRadians(25.)) * X_2 + FastMath.cos(Math.toRadians(25.)) * Z_2;
 
         double[] EndPointsArray = new double[4];
         EndPointsArray[0] = x1;
@@ -330,8 +331,8 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
      */
     private Plane3D calc_fitPlane(Point3D refPoint, Vector3D refDir) {
 
-        double X = Math.pow(-1, (this.get_Superlayer() - 1)) * Math.sin(Math.toRadians(6));
-        double Y = Math.cos(Math.toRadians(6.));
+        double X = Math.pow(-1, (this.get_Superlayer() - 1)) * FastMath.sin(Math.toRadians(6));
+        double Y = FastMath.cos(Math.toRadians(6.));
 
         Vector3D plDir = new Vector3D(X, Y, 0);
 
