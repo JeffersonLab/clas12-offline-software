@@ -22,7 +22,7 @@ case $OS in
      ;;
      'Darwin')
        echo "Getting Clara..."
-       curl "https://claraweb.jlab.org/clara/_downloads/install-claracre-clas.sh" -o install-claracre-clas.sh
+       curl -OL "https://claraweb.jlab.org/clara/_downloads/install-claracre-clas.sh" -o install-claracre-clas.sh
      ;;
      *) ;;
 esac
@@ -40,7 +40,7 @@ case $OS in
        wget --no-check-certificate http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/twoTrackEvents_809_raw.evio.tar.gz
      ;;
      'Darwin')
-       curl "http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/twoTrackEvents_809_raw.evio.tar.gz" -o twoTrackEvents_809_raw.evio.tar.gz
+       curl -OL "http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/twoTrackEvents_809_raw.evio.tar.gz" -o twoTrackEvents_809_raw.evio.tar.gz
      ;;
      *) ;;
 esac
