@@ -799,13 +799,41 @@ public class CentralZView extends CedView implements ChangeListener {
 	public void labToWorld(double x, double y, double z, Point2D.Double wp) {
 		wp.x = z;
 		wp.y = x * _cosphi + y * _sinphi;
-
 	}
+	
+	//work arrays and viewer constants
+	private float[] _sCoords = new float[6];
+	private Point _sP1 = new Point();
+	private Point _sP2 = new Point();
+	private Point2D.Double _sWp = new Point2D.Double();
+	private static final double _viewerD = 200; //mm
+	private static final double _minViewerDist = 77.2;
+	private static final double _maxViewerDist = 379.;
 
-	public void labToLocal(double x, double y, double z, Point pp) {
-		Point2D.Double wp = new Point2D.Double();
-		labToWorld(x, y, z, wp);
-		getContainer().worldToLocal(pp, wp);
+	/**
+	 * Convert lab coordinates xyz to local screen coordinates
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @param z the z coordinate
+	 * @param pp the coordinate will hold the screen coordinates
+	 * @return the alpha value that can be used to simulate depth
+	 */
+	public double labToLocal(double x, double y, double z, Point pp) {
+		labToWorld(x, y, z, _sWp);
+		getContainer().worldToLocal(pp, _sWp);
+		
+		//viewer location
+		double vX = _viewerD*_sinphi;
+		double vY = _viewerD*_cosphi;
+		
+		//viewer distance
+		double dX = vX- x;
+		double dY = vY - y;
+		double distance = Math.sqrt(dX*dX +dY*dY + z*z);
+		
+		double alpha = 1. - ((distance - _minViewerDist)/(_maxViewerDist - _minViewerDist));
+		return alpha;
+//		System.err.println("distance  = " + distance + "  aplha = " + alpha);
 	}
 
 	/**
@@ -818,26 +846,72 @@ public class CentralZView extends CedView implements ChangeListener {
 	 * @param layer 1-based layer 1..8
 	 * @param strip 1-based strip 1..255
 	 */
+		
 	public void drawBSTStrip(Graphics2D g2, IContainer container, Color color,
 			int sector, int layer, int strip) {
 
-		float coords[] = new float[6];
-
-		BSTGeometry.getStrip(sector, layer, strip, coords);
+		BSTGeometry.getStrip(sector, layer, strip, _sCoords);
 
 		Stroke oldStroke = g2.getStroke();
 		g2.setColor(color);
 		g2.setStroke(stroke);
-		Point p1 = new Point();
-		Point p2 = new Point();
+		
+		
+		int nStep = 10;
+		double dT = 1./nStep;
+		double t1;
+		double t2;
+		
+		double dX = _sCoords[3] - _sCoords[0];
+		double dY = _sCoords[4] - _sCoords[1];
+		double dZ = _sCoords[5] - _sCoords[2];
+		
+		for (int i = 0; i < nStep; i++ ) {
+			t1 = i * dT;
+			t2 = t1 + dT;
+			
+			double x1 = _sCoords[0] +t1*dX;
+			double y1 = _sCoords[1] +t1*dY;
+			double z1 = _sCoords[2] +t1*dZ;
+			
+			double x2 = _sCoords[0] +t2*dX;
+			double y2 = _sCoords[1] +t2*dY;
+			double z2 = _sCoords[2] +t2*dZ;
+
+			// cm to mm
+			double alpha1 = labToLocal(10 * x1, 10 * y1, 10 * z1, _sP1);
+			double alpha2 = labToLocal(10 * x2, 10 * y2, 10 * z2, _sP2);
+			
+
+			drawAlphaLine(g2, _sP1.x, _sP1.y, _sP2.x, _sP2.y, alpha1, alpha2);
+
+		}
+		
 		// Just draw a line from (x1,y1,z1) to (x2,y2,z2)
 
-		// cm to mm
-		labToLocal(10 * coords[0], 10 * coords[1], 10 * coords[2], p1);
-		labToLocal(10 * coords[3], 10 * coords[4], 10 * coords[5], p2);
-
-		g2.drawLine(p1.x, p1.y, p2.x, p2.y);
+//		// cm to mm
+//		double alpha1 = labToLocal(10 * _sCoords[0], 10 * _sCoords[1], 10 * _sCoords[2], _sP1);
+//		double alpha2 = labToLocal(10 * _sCoords[3], 10 * _sCoords[4], 10 * _sCoords[5], _sP2);
+//		
+//
+//		drawAlphaLine(g2, _sP1.x, _sP1.y, _sP2.x, _sP2.y, alpha1, alpha2);
 		g2.setStroke(oldStroke);
+
+	}
+	
+	private void drawAlphaLine(Graphics2D g2, int x1, int y1, int x2, int y2, double alpha1, double alpha2) {
+		Color baseColor = g2.getColor();
+		
+		double alpha = 0.5*(alpha1 + alpha2);
+		
+		int alp = (int) Math.max(0, Math.min(255, 255*alpha));
+
+		Color ca = new Color(baseColor.getRed(), baseColor.getGreen(), baseColor.getBlue(), alp);
+		g2.setColor(ca);
+		
+		g2.drawLine(_sP1.x, _sP1.y, _sP2.x, _sP2.y);
+		
+		g2.setColor(baseColor);
 
 	}
 
