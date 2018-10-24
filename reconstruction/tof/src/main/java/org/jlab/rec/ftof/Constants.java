@@ -65,13 +65,13 @@ public class Constants {
     public static final double ADCMIN = 100; // adc value minimum value
     public static final double ADCMAX = 10000; // adc value maximum value
 
-    public static double CLSMATCHXPAR = 10; // x-matching parameter between
+    public static double CLSMATCHXPAR = 100; // x-matching parameter between
     // panels 1a and 1b
-    public static double CLSMATCHYPAR = 10; // y-matching parameter between
+    public static double CLSMATCHYPAR = 100; // y-matching parameter between
     // panels 1a and 1b
-    public static double CLSMATCHZPAR = 10; // z-matching parameter between
+    public static double CLSMATCHZPAR = 100; // z-matching parameter between
     // panels 1a and 1b
-    public static double CLSMATCHTPAR = 10; // t-matching parameter between
+    public static double CLSMATCHTPAR = 100; // t-matching parameter between
     // panels 1a and 1b
     public static double CLS1ATRKMATCHXPAR = 15; // x-matching parameter between
     // panel 1a cluster and

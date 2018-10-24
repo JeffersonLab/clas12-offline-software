@@ -31,6 +31,8 @@ public abstract class AHit implements Comparable<AHit> {
     private int _TDCbankHitIdx1 = -1;
     private int _TDCbankHitIdx2 = -1;
 
+    public int _AssociatedTrkId = -1;
+    
     public AHit(int id, int panel, int sector, int paddle, int aDC1, int tDC1,
             int aDC2, int tDC2) {
         _Id = id;

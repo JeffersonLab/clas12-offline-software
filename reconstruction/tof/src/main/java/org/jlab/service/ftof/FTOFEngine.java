@@ -205,7 +205,7 @@ public class FTOFEngine extends ReconstructionEngine {
         }
         if (FTOF2Clusters != null) {
             clusters.addAll(FTOF2Clusters);
-        }
+        } 
         // 2.1) exit if cluster list is empty but save the hits
         if (clusters.size() == 0) {
             rbc.appendFTOFBanks(event, hits, null, null, TrkType);
@@ -235,7 +235,7 @@ public class FTOFEngine extends ReconstructionEngine {
         // matching ... not used at this stage...
         ClusterMatcher clsMatch = new ClusterMatcher();
         ArrayList<ArrayList<Cluster>> matchedClusters = clsMatch
-                .MatchedClusters(clusters);
+                .MatchedClusters(clusters, event);
         if (matchedClusters.size() == 0) {
             rbc.appendFTOFBanks(event, hits, clusters, null, TrkType);
             return true;

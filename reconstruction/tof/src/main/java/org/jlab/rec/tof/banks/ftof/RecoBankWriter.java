@@ -169,6 +169,7 @@ public class RecoBankWriter {
             }
             for (int i = 0; i < cluslist.size(); i++) {
                 bank.setShort("id", i, (short) cluslist.get(i).get_Id());
+                bank.setShort("trackid", i, (short) cluslist.get(i).get(0)._AssociatedTrkId);
                 bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
                 bank.setByte("layer", i, (byte) cluslist.get(i).get_Panel());
                 bank.setShort("component", i, (short) cluslist.get(i).get(0)
@@ -258,9 +259,9 @@ public class RecoBankWriter {
                         (short) matchedClusters.get(i).get(1).size()); // size of
                 // cluster
                 // in 1b
-                bank.setShort("clus_1A", i, (short) matchedClusters.get(i).get(0)
+                bank.setShort("clus_1Aid", i, (short) matchedClusters.get(i).get(0)
                         .get_Id()); // id of cluster in 1a
-                bank.setShort("clus_1B", i, (short) matchedClusters.get(i).get(1)
+                bank.setShort("clus_1Bid", i, (short) matchedClusters.get(i).get(1)
                         .get_Id()); // id of cluster in 1b
                 bank.setFloat("tminAlgo_1B_tCorr", i, (float) matchedClusters
                         .get(i).get(1).get_tCorr()[0]); // uses tmin algorithm to
