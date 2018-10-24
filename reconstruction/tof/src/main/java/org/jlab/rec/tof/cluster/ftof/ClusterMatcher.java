@@ -247,6 +247,8 @@ public class ClusterMatcher {
                     }
 
                     ArrayList<Cluster> ClsDoub = ClusterDoublet(C1, C2, event);
+                    if(ClsDoub==null)
+                        continue;
                     C2.set_tCorr(this.get_CorrectedHitTime(C1, C2)); // set the
                     // corrected
                     // Time for
