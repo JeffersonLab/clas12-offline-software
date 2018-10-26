@@ -33,19 +33,19 @@ public class EBScalers {
     }
 
     // integrated beam charge:
-    private static double BEAMCHARGE=0;      // nC
+    private double BEAMCHARGE=0;      // nC
 
     // these are "instantaneous":
-    private static double INST_BEAMCHARGE=0; // nC
-    private static double INST_LIVETIME=0;
+    private double INST_BEAMCHARGE=0; // nC
+    private double INST_LIVETIME=0;
 
     // previous scaler readings:
-    private static int PREV_FCUP=-1;           // counts
-    private static int PREV_CLOCK=-1;          // counts
-    private static int PREV_GATEDFCUP=-1;      // counts
-    private static int PREV_GATEDCLOCK=-1;     // counts
-    //private static double PREV_UNIXTIME=-1;    // seconds
-    //private static double PREV_TITIMESTAMP=-1; // seconds
+    private int PREV_FCUP=-1;           // counts
+    private int PREV_CLOCK=-1;          // counts
+    private int PREV_GATEDFCUP=-1;      // counts
+    private int PREV_GATEDCLOCK=-1;     // counts
+    //private double PREV_UNIXTIME=-1;    // seconds
+    //private double PREV_TITIMESTAMP=-1; // seconds
 
     // the relevant crate/slot/channel numbers for the integrating scalers:
     private static final String BANKNAME="RAW::scaler";
@@ -141,8 +141,6 @@ public class EBScalers {
         }
         
         // ignore this reading if time elapsed is too small:
-        // - this can be due to misordered events or duplicates via EBHB+EBTB
-        // - FIXME:  should have a better solution for EBHB+EBTB
         if (delClockTime < READOUTPERIOD/10.) return reading;
 
         // retrieve fcup calibrations:

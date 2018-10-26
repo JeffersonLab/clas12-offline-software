@@ -26,9 +26,6 @@ public class EBEngine extends ReconstructionEngine {
     boolean dropBanks = false;
     boolean alreadyDroppedBanks = false;
 
-    // static to store across events:
-    static EBScalers ebScalers = new EBScalers();
-
     // output banks:
     String eventBank        = null;
     String particleBank     = null;
@@ -54,10 +51,13 @@ public class EBEngine extends ReconstructionEngine {
     public void initBankNames() {
         //Initialize bank names
     }
-    
 
     public boolean processDataEvent(DataEvent de) {
-        
+        throw new RuntimeException("EBEngine cannot be used directly.  Use EBTBEngine/EBHBEngine instead.");
+    }
+
+    public boolean processDataEvent(DataEvent de,EBScalers ebs) {
+
         if (this.dropBanks==true) this.dropBanks(de);
 
         // check run number, get constants from CCDB:
@@ -72,7 +72,7 @@ public class EBEngine extends ReconstructionEngine {
 
         EBCCDBConstants ccdb = new EBCCDBConstants(run,this.getConstantsManager());
 
-        DetectorHeader head = EBio.readHeader(de,ebScalers,ccdb);
+        DetectorHeader head = EBio.readHeader(de,ebs,ccdb);
 
         EventBuilder eb = new EventBuilder(ccdb);
         eb.initEvent(head); // clear particles
