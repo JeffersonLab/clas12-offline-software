@@ -61,10 +61,8 @@ public class EBUtil {
         final int layer = resp.getDescriptor().getLayer();
         final int component = resp.getDescriptor().getComponent();
         String tableName=null;
-        double scale=1;
         if (resp.getDescriptor().getType()==DetectorType.FTOF) {
             tableName="/calibration/ftof/tres";
-            scale=0.001; // values in picoseconds :(
         }
         else if (resp.getDescriptor().getType()==DetectorType.CTOF) {
             // CTOF doesn't currently have time resolution available in ccdb.
@@ -75,7 +73,7 @@ public class EBUtil {
             throw new RuntimeException("not ready for non-TOF");
         }
         return ccdb.getTable(tableName).
-            getDoubleValue("tres",sector,layer,component)*scale;
+            getDoubleValue("tres",sector,layer,component);
     }
 
     /**
