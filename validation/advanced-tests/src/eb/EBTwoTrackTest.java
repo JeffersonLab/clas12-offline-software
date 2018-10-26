@@ -374,6 +374,37 @@ public class EBTwoTrackTest {
         }
     }
 
+    /*
+     *
+     * Check that REC::Particle.status agrees with REC::Detector banks.
+     *
+     */
+    public void checkParticleStatus() {
+        if (recPartBank==null) return;
+        for (int ipart=0; ipart<recPartBank.rows(); ipart++) {
+            final int status = recPartBank.getShort("status",ipart);
+            final boolean isFD = ((int)status/1000)==2;
+            final int ncher = status%10;
+            final int ncalo = status%100  - ncher;
+            final int nscin = status%1000 - ncher - ncalo;
+            int mcher=0;
+            int mcalo=0;
+            int mscin=0;
+            if (!isFD) continue;
+            if (recCalMap.containsKey(ipart)) mcalo = recCalMap.get(ipart).size();
+            if (recSciMap.containsKey(ipart)) mscin = recSciMap.get(ipart).size();
+            // cherenkov is special case, requires 2 photoelectrons to be in status:
+            if (recCheMap.containsKey(ipart)) {
+                for (int iche : recCheMap.get(ipart)) {
+                    if (recCheBank.getInt("nphe",iche)>=2) mcher++;
+                }
+            }
+            assertEquals("Cherenkov Count, Event "+recBank.getInt("NEVENT",0),mcher,ncher);
+            assertEquals("Calorimeter Count, Event "+recBank.getInt("NEVENT",0),mcalo,ncalo);
+            assertEquals("Scintillator Count, Event "+recBank.getInt("NEVENT",0),mscin,nscin);
+        }
+    }
+
     private void checkResults() {
 
         final double twoTrackFrac = (double)nTwoTrackEvents / nEvents;
