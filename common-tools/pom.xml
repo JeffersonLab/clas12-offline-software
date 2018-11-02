@@ -24,5 +24,6 @@
     <module>clas-analysis</module> 
     <module>swim-tools</module>
     <module>clas-math</module>
+    <module>clas-eventmerger</module>
   </modules>
 </project>
