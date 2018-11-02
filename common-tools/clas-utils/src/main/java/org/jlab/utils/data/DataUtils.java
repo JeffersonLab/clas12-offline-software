@@ -75,4 +75,10 @@ public class DataUtils {
         byte byte_data = 0;
         return (byte) ((byte_data|data)&0xFF);
     }
+
+    public static long  getLongFromInt(int data){
+        long long_data = 0;
+        return (long) ( (long_data|data)&0x00000000FFFFFFFFL);
+    }
+    
 }
