@@ -11,13 +11,9 @@ import java.util.Random;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
-//import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
 import org.jlab.detector.volume.G4Box;
-//import org.jlab.geom.component.ScintillatorMesh;
-//import org.jlab.geom.detector.ftof.FTOFDetectorMesh;
-//import org.jlab.geom.detector.ftof.FTOFFactory;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
@@ -155,6 +151,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
                 comp.getLineX().origin().z, comp.getLineX().end().x, comp
                 .getLineX().end().y, comp.getLineX().end().z);
         this.set_paddleLine(paddleLine);
+        _barThkn = geometry.getThickness(this.get_Sector(),this.get_Panel(), this.get_Paddle());
     }
 
     public Point3D calc_hitPosition() {
@@ -407,9 +404,11 @@ public class Hit extends AHit implements IGetCalibrationParams {
         return Constants.DEDX_MIP;
     }
 
+    private double _barThkn;
+    
     @Override
     public double ScinBarThickn() {
-        return Constants.SCBARTHICKN[this.get_Panel() - 1];
+        return _barThkn;
     }
 
     @Override

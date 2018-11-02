@@ -10,7 +10,6 @@ import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.detector.hits.CTOFDetHit;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.rec.ctof.Constants;
 import org.jlab.rec.tof.hit.AHit;
@@ -147,6 +146,8 @@ public class Hit extends AHit implements IGetCalibrationParams {
                 l.end().y, l.end().z);
        // this.printInfo();System.out.println(" ");
         this.set_paddleLine(paddleLine);
+        
+         _barThkn = geometry.getThickness(get_Paddle());
     }
 
     private Point3D calc_hitPosition() {
@@ -395,9 +396,11 @@ public class Hit extends AHit implements IGetCalibrationParams {
         return Constants.DEDX_MIP;
     }
 
+    private double _barThkn;
+    
     @Override
     public double ScinBarThickn() {
-        return Constants.SCBARTHICKN[this.get_Panel() - 1];
+        return _barThkn;
     }
 
     @Override

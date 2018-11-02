@@ -16,8 +16,6 @@ public class Constants {
     public static final int[] NPAD = new int[3]; // the number of paddles per
     // sector for panel 1A, 1B,
     // and 2
-    public static final double[] SCBARTHICKN = new double[3]; // 5 cm for 1A and
-   
     // public static final double[] ADC_MIP = new double[3]; // From DB 800 A1 &
     // 2 2000 for 1B
     public static final double DEDX_MIP = 1.956; // units = MeV/g/cm^2
@@ -65,13 +63,13 @@ public class Constants {
     public static final double ADCMIN = 100; // adc value minimum value
     public static final double ADCMAX = 10000; // adc value maximum value
 
-    public static double CLSMATCHXPAR = 100; // x-matching parameter between
+    public static double CLSMATCHXPAR = 10; // x-matching parameter between
     // panels 1a and 1b
-    public static double CLSMATCHYPAR = 100; // y-matching parameter between
+    public static double CLSMATCHYPAR = 10; // y-matching parameter between
     // panels 1a and 1b
-    public static double CLSMATCHZPAR = 100; // z-matching parameter between
+    public static double CLSMATCHZPAR = 10; // z-matching parameter between
     // panels 1a and 1b
-    public static double CLSMATCHTPAR = 100; // t-matching parameter between
+    public static double CLSMATCHTPAR = 10; // t-matching parameter between
     // panels 1a and 1b
     public static double CLS1ATRKMATCHXPAR = 15; // x-matching parameter between
     // panel 1a cluster and
@@ -106,10 +104,6 @@ public class Constants {
         NPAD[0] = 23;
         NPAD[1] = 62;
         NPAD[2] = 5;
-
-        SCBARTHICKN[0] = 5;
-        SCBARTHICKN[1] = 6;
-        SCBARTHICKN[2] = 5;
 
         // ADC_MIP[0] = 800;
         // ADC_MIP[1] = 2000;
