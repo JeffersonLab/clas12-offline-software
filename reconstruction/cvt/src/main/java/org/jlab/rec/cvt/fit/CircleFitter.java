@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.fit;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jlab.clas.clas.math.FastMath;
 import org.jlab.rec.cvt.Constants;
 
 import Jama.Matrix;
@@ -158,31 +159,31 @@ public class CircleFitter {
         q1 = Cr2r2 * Cxy - Cxr2 * Cyr2;
         q2 = Cr2r2 * (Cxx - Cyy) - Cxr2 * Cxr2 + Cyr2 * Cyr2;
 
-        phiFit = 0.5 * Math.atan2(2. * q1, q2);
+        phiFit = 0.5 * FastMath.atan2(2. * q1, q2);
 
-        kappa = (Math.sin(phiFit) * Cxr2 - Math.cos(phiFit) * Cyr2) / Cr2r2;
+        kappa = (FastMath.sin(phiFit) * Cxr2 - FastMath.cos(phiFit) * Cyr2) / Cr2r2;
 
-        delta = -kappa * Sr2 + Math.sin(phiFit) * Sx - Math.cos(phiFit) * Sy;
+        delta = -kappa * Sr2 + FastMath.sin(phiFit) * Sx - FastMath.cos(phiFit) * Sy;
 
         // the curvature rho= 1/R ; 
         rhoFit = 2. * kappa / Math.sqrt(1. - 4. * delta * kappa);
         // the distance of closest approach to the origin
         docaFit = 2. * delta / (1. + Math.sqrt(1. - 4. * delta * kappa));
         // The chi2	
-        _chi2 = Sw * ((1. + rhoFit * docaFit) * (1. + rhoFit * docaFit)) * ((Math.sin(phiFit) * Math.sin(phiFit)) * Cxx + (Math.cos(phiFit) * Math.cos(phiFit)) * Cyy - 2. * Math.sin(phiFit) * Math.cos(phiFit) * Cxy - kappa * kappa * Cr2r2);
+        _chi2 = Sw * ((1. + rhoFit * docaFit) * (1. + rhoFit * docaFit)) * ((FastMath.sin(phiFit) * FastMath.sin(phiFit)) * Cxx + (FastMath.cos(phiFit) * FastMath.cos(phiFit)) * Cyy - 2. * FastMath.sin(phiFit) * FastMath.cos(phiFit) * Cxy - kappa * kappa * Cr2r2);
 
         // The explicit formulae for the inverse covariance matrix elements give
         // The covariance matrix
         double u = 1 + rhoFit * docaFit;
-        double S_alpha = Math.sin(phiFit) * Sx - Math.cos(phiFit) * Sy;
-        double S_beta = Math.cos(phiFit) * Sx + Math.sin(phiFit) * Sy;
-        double S_gamma = ((Math.sin(phiFit) * Math.sin(phiFit)) - (Math.cos(phiFit) * Math.cos(phiFit))) * Sxy + Math.cos(phiFit) * Math.sin(phiFit) * (Sxx - Syy);
-        double S_delta = Math.sin(phiFit) * Sxr2 - Math.cos(phiFit) * Syr2;
-        double S_alphalpha = (Math.sin(phiFit) * Math.sin(phiFit)) * Sxx - 2. * Math.cos(phiFit) * Math.sin(phiFit) * Sxy + (Math.cos(phiFit) * Math.cos(phiFit)) * Syy;
+        double S_alpha = FastMath.sin(phiFit) * Sx - FastMath.cos(phiFit) * Sy;
+        double S_beta = FastMath.cos(phiFit) * Sx + FastMath.sin(phiFit) * Sy;
+        double S_gamma = ((FastMath.sin(phiFit) * FastMath.sin(phiFit)) - (FastMath.cos(phiFit) * FastMath.cos(phiFit))) * Sxy + FastMath.cos(phiFit) * FastMath.sin(phiFit) * (Sxx - Syy);
+        double S_delta = FastMath.sin(phiFit) * Sxr2 - FastMath.cos(phiFit) * Syr2;
+        double S_alphalpha = (FastMath.sin(phiFit) * FastMath.sin(phiFit)) * Sxx - 2. * FastMath.cos(phiFit) * FastMath.sin(phiFit) * Sxy + (FastMath.cos(phiFit) * FastMath.cos(phiFit)) * Syy;
 
         double invV_rhorho = 0.25 * (Sr2r2) - docaFit * (S_delta - docaFit * (S_alphalpha + 0.5 * Sr2 - docaFit * (S_alpha - 0.25 * docaFit * Sw)));
-        double invV_rhophi = -u * (0.5 * (Math.cos(phiFit) * Sxr2 + Math.sin(phiFit) * Syr2) - docaFit * (Sy - 0.5 * docaFit * S_beta));
-        double invV_phiphi = u * u * ((Math.cos(phiFit) * Math.cos(phiFit)) * Sxx + (Math.sin(phiFit) * Math.sin(phiFit)) * Syy + Math.sin(2. * phiFit) * Sxy);
+        double invV_rhophi = -u * (0.5 * (FastMath.cos(phiFit) * Sxr2 + FastMath.sin(phiFit) * Syr2) - docaFit * (Sy - 0.5 * docaFit * S_beta));
+        double invV_phiphi = u * u * ((FastMath.cos(phiFit) * FastMath.cos(phiFit)) * Sxx + (FastMath.sin(phiFit) * FastMath.sin(phiFit)) * Syy + FastMath.sin(2. * phiFit) * Sxy);
         double invV_rhod = rhoFit * (-0.5 * S_delta + docaFit * S_alphalpha) + 0.5 * u * Sr2 - 0.5 * docaFit * ((2. * u + rhoFit * docaFit) * S_alpha - u * docaFit * Sw);
         double invV_phid = u * (rhoFit * S_gamma - u * S_beta);
         double invV_dd = rhoFit * (rhoFit * S_alphalpha - 2. * u * S_alpha) + u * u * Sw;
@@ -221,14 +222,14 @@ public class CircleFitter {
         _rho = rhoFit + Delta_rho;
         _phi = phiFit + Delta_phi;
         _dca = docaFit + Delta_doca;
-        _xpca = _xx0 + _dca * Math.sin(phiFit);
-        _ypca = _yy0 - _dca * Math.cos(phiFit);
+        _xpca = _xx0 + _dca * FastMath.sin(phiFit);
+        _ypca = _yy0 - _dca * FastMath.cos(phiFit);
 
         // corrected chi2
         _chi2 = (1. + _rho * _dca) * (1. + _rho * _dca) * (1. - kappa * delta) * _chi2;
 
         // transformation to a new reference point
-        propagatePars(_xref, _yref, x, y, Math.cos(_phi), Math.sin(_phi));
+        propagatePars(_xref, _yref, x, y, FastMath.cos(_phi), FastMath.sin(_phi));
 
         return true;
     }
@@ -287,10 +288,10 @@ public class CircleFitter {
         _covr[5] =  Vp_dd; 
          */
         //  new params
-        _phi = Math.atan2(B, C);
+        _phi = FastMath.atan2(B, C);
         _dca = A / (1. + U);
         // get the correct signed curvature
-        double s = Math.cos(_phi) * x + Math.sin(_phi) * y;
+        double s = FastMath.cos(_phi) * x + FastMath.sin(_phi) * y;
         if (s < 0) {
             _phi += Math.PI;
             _dca = -_dca;
@@ -305,8 +306,8 @@ public class CircleFitter {
             _phi += 2. * Math.PI;
         }
         // update parameters
-        _xpca = _xref + _dca * Math.sin(_phi);
-        _ypca = _yref - _dca * Math.cos(_phi);
+        _xpca = _xref + _dca * FastMath.sin(_phi);
+        _ypca = _yref - _dca * FastMath.cos(_phi);
     }
 
     public CircleFitPars getFit() {
@@ -314,10 +315,10 @@ public class CircleFitter {
     }
 
     public CircleFitPars propagatefit(double xp, double yp) {
-        double x = Math.cos(_phi);
-        double y = Math.sin(_phi);
-        double cosphi = Math.cos(_phi);
-        double sinphi = Math.sin(_phi);
+        double x = FastMath.cos(_phi);
+        double y = FastMath.sin(_phi);
+        double cosphi = FastMath.cos(_phi);
+        double sinphi = FastMath.sin(_phi);
         propagatePars(xp, yp, x, y, cosphi, sinphi);
 
         return new CircleFitPars(_xref, _yref, _rho, _phi, _dca, _chi2, _covr);

@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.trajectory;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
+import org.jlab.clas.clas.math.FastMath;
 import Jama.Matrix;
 
 /**
@@ -124,20 +125,20 @@ public class Helix {
 
     //  (x,y) coordinates of the circle center
     public double xcen() {
-        return (radius() - this.get_dca()) * Math.sin(this.get_phi_at_dca());
+        return (radius() - this.get_dca()) * FastMath.sin(this.get_phi_at_dca());
     }
 
     public double ycen() {
-        return (-radius() + this.get_dca()) * Math.cos(this.get_phi_at_dca());
+        return (-radius() + this.get_dca()) * FastMath.cos(this.get_phi_at_dca());
     }
 
     //  (x,y) coordinates of the dca
     public double xdca() {
-        return this.get_dca() * Math.cos(this.get_phi_at_dca());
+        return this.get_dca() * FastMath.cos(this.get_phi_at_dca());
     }
 
     public double ydca() {
-        return this.get_dca() * Math.sin(this.get_phi_at_dca());
+        return this.get_dca() * FastMath.sin(this.get_phi_at_dca());
     }
 
     public double getArcLength_dca(Point3D refpoint) {
@@ -145,8 +146,8 @@ public class Helix {
         if (refpoint == null) {
             return 0;
         }
-        double refX = radius() * Math.cos(refpoint.toVector3D().phi());
-        double refY = radius() * Math.sin(refpoint.toVector3D().phi());
+        double refX = radius() * FastMath.cos(refpoint.toVector3D().phi());
+        double refY = radius() * FastMath.sin(refpoint.toVector3D().phi());
         double arclen = ArcLength(xcen(), ycen(), radius(), xcen(), ycen(), refX, refY);
         return arclen;
     }
@@ -159,8 +160,8 @@ public class Helix {
         double y1toyc = y1 - ycenter;
         double x2toxc = x2 - xcenter;
         double y2toyc = y2 - ycenter;
-        double phi1 = Math.atan2(y1toyc, x1toxc);
-        double phi2 = Math.atan2(y2toyc, x2toxc);
+        double phi1 = FastMath.atan2(y1toyc, x1toxc);
+        double phi2 = FastMath.atan2(y2toyc, x2toxc);
         double dphi = phi2 - phi1;
         //  put dphi in (-pi, pi)
         if (dphi > Math.PI) {
@@ -199,8 +200,8 @@ public class Helix {
 
         double alpha = -newPathLength * omega;
 
-        double x = d0 * charge * Math.sin(phi0) + (charge / Math.abs(omega)) * (Math.sin(phi0) - Math.cos(alpha) * Math.sin(phi0) - Math.sin(alpha) * Math.cos(phi0));
-        double y = -d0 * charge * Math.cos(phi0) - (charge / Math.abs(omega)) * (Math.cos(phi0) + Math.sin(alpha) * Math.sin(phi0) - Math.cos(alpha) * Math.cos(phi0));
+        double x = d0 * charge * FastMath.sin(phi0) + (charge / Math.abs(omega)) * (FastMath.sin(phi0) - FastMath.cos(alpha) * FastMath.sin(phi0) - FastMath.sin(alpha) * FastMath.cos(phi0));
+        double y = -d0 * charge * FastMath.cos(phi0) - (charge / Math.abs(omega)) * (FastMath.cos(phi0) + FastMath.sin(alpha) * FastMath.sin(phi0) - FastMath.cos(alpha) * FastMath.cos(phi0));
         double z = z0 + newPathLength * tandip;
 
         return new Point3D(x, y, z);
@@ -223,8 +224,8 @@ public class Helix {
 
         double sintheta = Math.abs(sintheta());
 
-        double ux = Math.cos(-alpha + phi0) * sintheta;
-        double uy = Math.sin(-alpha + phi0) * sintheta;
+        double ux = FastMath.cos(-alpha + phi0) * sintheta;
+        double uy = FastMath.sin(-alpha + phi0) * sintheta;
         double uz = costheta();
 
         Vector3D trkDir = new Vector3D(ux, uy, uz);

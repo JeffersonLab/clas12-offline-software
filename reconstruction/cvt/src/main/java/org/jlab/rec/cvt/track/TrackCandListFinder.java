@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 
+import org.jlab.clas.clas.math.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.bmt.Constants;
@@ -861,7 +862,7 @@ public class TrackCandListFinder {
         }
         for (int j = 0; j < y.length; j++) {
             double x = sx * y[j] + ix;
-            double phi = Math.atan2(y[j], x);
+            double phi = FastMath.atan2(y[j], x);
             // calculate the z position of the trajectory at the radius of the C detector
             double z = sz * y[j] + iz;
 

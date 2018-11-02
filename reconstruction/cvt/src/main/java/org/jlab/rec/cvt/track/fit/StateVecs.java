@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jlab.clas.clas.math.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.track.Seed;
@@ -35,8 +36,8 @@ public class StateVecs {
 
     public double[] getStateVecPosAtModule(int k, StateVec kVec, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, int type) {
       
-        double xc = X0.get(k) + (kVec.d_rho + kVec.alpha / kVec.kappa) * Math.cos(kVec.phi0);
-        double yc = Y0.get(k) + (kVec.d_rho + kVec.alpha / kVec.kappa) * Math.sin(kVec.phi0);
+        double xc = X0.get(k) + (kVec.d_rho + kVec.alpha / kVec.kappa) * FastMath.cos(kVec.phi0);
+        double yc = Y0.get(k) + (kVec.d_rho + kVec.alpha / kVec.kappa) * FastMath.sin(kVec.phi0);
         double r = Math.abs(kVec.alpha / kVec.kappa);
         Vector3D ToPoint = new Vector3D();
         Vector3D ToRef = new Vector3D(X0.get(k) - xc, Y0.get(k) - yc, 0);
@@ -64,16 +65,16 @@ public class StateVecs {
             double yp = a + b * xp;
             double ym = a + b * xm;
 
-            if (bmt_geo.isInSector(Layer.get(k) - 6, Math.atan2(ym, xm), Math.toRadians(10)) == Sector.get(k)) {
+            if (bmt_geo.isInSector(Layer.get(k) - 6, FastMath.atan2(ym, xm), Math.toRadians(10)) == Sector.get(k)) {
                 X = xm;
                 Y = ym;
             }
-            if (bmt_geo.isInSector(Layer.get(k) - 6, Math.atan2(yp, xp), Math.toRadians(10)) == Sector.get(k)) {
+            if (bmt_geo.isInSector(Layer.get(k) - 6, FastMath.atan2(yp, xp), Math.toRadians(10)) == Sector.get(k)) {
                 X = xp;
                 Y = yp;
             }
             //System.out.println("R="+rm+" sector "+Sector.get(k)+" [xm, ym]= ["+xm+","+ym+"]; [xp,yp]= ["+xp+","+yp+"]; [x,y]= ["+X+","+Y+"]"+
-            //"+sec "+bmt_geo.isInSector(Layer.get(k)-6, Math.atan2(yp, xp), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter))+"-sec "+bmt_geo.isInSector(Layer.get(k)-6, Math.atan2(ym, xm), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter)));
+            //"+sec "+bmt_geo.isInSector(Layer.get(k)-6, FastMath.atan2(yp, xp), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter))+"-sec "+bmt_geo.isInSector(Layer.get(k)-6, FastMath.atan2(ym, xm), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter)));
         } else {
 
             // Find the intersection of the helix circle with the module plane projection in XY which is a line
@@ -143,8 +144,8 @@ public class StateVecs {
         ToPoint = new Vector3D(X - xc, Y - yc, 0);
         double phi = ToRef.angle(ToPoint);
         phi *= -Math.signum(kVec.kappa);
-        double x = X0.get(k) + kVec.d_rho * Math.cos(kVec.phi0) + kVec.alpha / kVec.kappa * (Math.cos(kVec.phi0) - Math.cos(kVec.phi0 + phi));
-        double y = Y0.get(k) + kVec.d_rho * Math.sin(kVec.phi0) + kVec.alpha / kVec.kappa * (Math.sin(kVec.phi0) - Math.sin(kVec.phi0 + phi));
+        double x = X0.get(k) + kVec.d_rho * FastMath.cos(kVec.phi0) + kVec.alpha / kVec.kappa * (FastMath.cos(kVec.phi0) - FastMath.cos(kVec.phi0 + phi));
+        double y = Y0.get(k) + kVec.d_rho * FastMath.sin(kVec.phi0) + kVec.alpha / kVec.kappa * (FastMath.sin(kVec.phi0) - FastMath.sin(kVec.phi0 + phi));
         double z = Z0.get(k) + kVec.dz - kVec.alpha / kVec.kappa * kVec.tanL * phi;
 
         value[0] = x;
@@ -204,15 +205,15 @@ public class StateVecs {
 
         B Bf = new B(i, iVec.x, iVec.y, iVec.z, swimmer);
 
-        double Xc = X0.get(i) + (iVec.d_rho + iVec.alpha / iVec.kappa) * Math.cos(iVec.phi0);
-        double Yc = Y0.get(i) + (iVec.d_rho + iVec.alpha / iVec.kappa) * Math.sin(iVec.phi0);
+        double Xc = X0.get(i) + (iVec.d_rho + iVec.alpha / iVec.kappa) * FastMath.cos(iVec.phi0);
+        double Yc = Y0.get(i) + (iVec.d_rho + iVec.alpha / iVec.kappa) * FastMath.sin(iVec.phi0);
 
         // transport stateVec...
         StateVec fVec = new StateVec(f);
 
-        double phi_f = Math.atan2(Yc - Y0.get(f), Xc - X0.get(f));
+        double phi_f = FastMath.atan2(Yc - Y0.get(f), Xc - X0.get(f));
         if (iVec.kappa < 0) {
-            phi_f = Math.atan2(-Yc + Y0.get(f), -Xc + X0.get(f));
+            phi_f = FastMath.atan2(-Yc + Y0.get(f), -Xc + X0.get(f));
         }
 
         if (phi_f < 0) {
@@ -220,7 +221,7 @@ public class StateVecs {
         }
         fVec.phi0 = phi_f;
 
-        fVec.d_rho = (Xc - X0.get(f)) * Math.cos(phi_f) + (Yc - Y0.get(f)) * Math.sin(phi_f) - Bf.alpha / iVec.kappa;
+        fVec.d_rho = (Xc - X0.get(f)) * FastMath.cos(phi_f) + (Yc - Y0.get(f)) * FastMath.sin(phi_f) - Bf.alpha / iVec.kappa;
 
         fVec.kappa = iVec.kappa;
 
@@ -241,15 +242,15 @@ public class StateVecs {
         this.getStateVecAtModule(f, fVec, sgeo, bgeo, type, swimmer);
 
         // now transport covMat...
-        double dphi0_prm_del_drho = -1. / (fVec.d_rho + iVec.alpha / iVec.kappa) * Math.sin(fVec.phi0 - iVec.phi0);
-        double dphi0_prm_del_phi0 = (iVec.d_rho + iVec.alpha / iVec.kappa) / (fVec.d_rho + iVec.alpha / iVec.kappa) * Math.cos(fVec.phi0 - iVec.phi0);
-        double dphi0_prm_del_kappa = (iVec.alpha / (iVec.kappa * iVec.kappa)) / (fVec.d_rho + iVec.alpha / iVec.kappa) * Math.sin(fVec.phi0 - iVec.phi0);
+        double dphi0_prm_del_drho = -1. / (fVec.d_rho + iVec.alpha / iVec.kappa) * FastMath.sin(fVec.phi0 - iVec.phi0);
+        double dphi0_prm_del_phi0 = (iVec.d_rho + iVec.alpha / iVec.kappa) / (fVec.d_rho + iVec.alpha / iVec.kappa) * FastMath.cos(fVec.phi0 - iVec.phi0);
+        double dphi0_prm_del_kappa = (iVec.alpha / (iVec.kappa * iVec.kappa)) / (fVec.d_rho + iVec.alpha / iVec.kappa) * FastMath.sin(fVec.phi0 - iVec.phi0);
         double dphi0_prm_del_dz = 0;
         double dphi0_prm_del_tanL = 0;
 
-        double drho_prm_del_drho = Math.cos(fVec.phi0 - iVec.phi0);
-        double drho_prm_del_phi0 = (iVec.d_rho + iVec.alpha / iVec.kappa) * Math.sin(fVec.phi0 - iVec.phi0);
-        double drho_prm_del_kappa = (iVec.alpha / (iVec.kappa * iVec.kappa)) * (1 - Math.cos(fVec.phi0 - iVec.phi0));
+        double drho_prm_del_drho = FastMath.cos(fVec.phi0 - iVec.phi0);
+        double drho_prm_del_phi0 = (iVec.d_rho + iVec.alpha / iVec.kappa) * FastMath.sin(fVec.phi0 - iVec.phi0);
+        double drho_prm_del_kappa = (iVec.alpha / (iVec.kappa * iVec.kappa)) * (1 - FastMath.cos(fVec.phi0 - iVec.phi0));
         double drho_prm_del_dz = 0;
         double drho_prm_del_tanL = 0;
 
@@ -259,9 +260,9 @@ public class StateVecs {
         double dkappa_prm_del_dz = 0;
         double dkappa_prm_del_tanL = 0;
 
-        double dz_prm_del_drho = ((iVec.alpha / iVec.kappa) / (fVec.dz + iVec.alpha / iVec.kappa)) * iVec.tanL * Math.sin(fVec.phi0 - iVec.phi0);
-        double dz_prm_del_phi0 = (iVec.alpha / iVec.kappa) * iVec.tanL * (1 - Math.cos(fVec.phi0 - iVec.phi0) * (iVec.dz + iVec.alpha / iVec.kappa) / (fVec.dz + iVec.alpha / iVec.kappa));
-        double dz_prm_del_kappa = (iVec.alpha / (iVec.kappa * iVec.kappa)) * iVec.tanL * (fVec.phi0 - iVec.phi0 - Math.sin(fVec.phi0 - iVec.phi0) * (iVec.alpha / iVec.kappa) / (fVec.dz + iVec.alpha / iVec.kappa));
+        double dz_prm_del_drho = ((iVec.alpha / iVec.kappa) / (fVec.dz + iVec.alpha / iVec.kappa)) * iVec.tanL * FastMath.sin(fVec.phi0 - iVec.phi0);
+        double dz_prm_del_phi0 = (iVec.alpha / iVec.kappa) * iVec.tanL * (1 - FastMath.cos(fVec.phi0 - iVec.phi0) * (iVec.dz + iVec.alpha / iVec.kappa) / (fVec.dz + iVec.alpha / iVec.kappa));
+        double dz_prm_del_kappa = (iVec.alpha / (iVec.kappa * iVec.kappa)) * iVec.tanL * (fVec.phi0 - iVec.phi0 - FastMath.sin(fVec.phi0 - iVec.phi0) * (iVec.alpha / iVec.kappa) / (fVec.dz + iVec.alpha / iVec.kappa));
         double dz_prm_del_dz = 1;
         double dz_prm_del_tanL = -iVec.alpha * (fVec.phi0 - iVec.phi0) / iVec.kappa;
 
@@ -509,8 +510,8 @@ public class StateVecs {
             //double y = this.trackTraj.get(kf).y;
             //double z = this.trackTraj.get(kf).z; 
             //B Bf = new B(kf, x, y, z);
-            double px = -Math.signum(1 / this.trackTraj.get(kf).kappa) * Math.sin(this.trackTraj.get(kf).phi0 + this.trackTraj.get(kf).phi);
-            double py = Math.signum(1 / this.trackTraj.get(kf).kappa) * Math.cos(this.trackTraj.get(kf).phi0 + this.trackTraj.get(kf).phi);
+            double px = -Math.signum(1 / this.trackTraj.get(kf).kappa) * FastMath.sin(this.trackTraj.get(kf).phi0 + this.trackTraj.get(kf).phi);
+            double py = Math.signum(1 / this.trackTraj.get(kf).kappa) * FastMath.cos(this.trackTraj.get(kf).phi0 + this.trackTraj.get(kf).phi);
             double pz = Math.signum(1 / this.trackTraj.get(kf).kappa) * this.trackTraj.get(kf).tanL;
             //int q = (int) Math.signum(this.trackTraj.get(kf).kappa);
 
@@ -523,11 +524,11 @@ public class StateVecs {
 
     public Helix setTrackPars(int kf) {
 
-        double x = this.trackTraj.get(kf).d_rho * Math.cos(this.trackTraj.get(kf).phi0);
-        double y = this.trackTraj.get(kf).d_rho * Math.sin(this.trackTraj.get(kf).phi0);
+        double x = this.trackTraj.get(kf).d_rho * FastMath.cos(this.trackTraj.get(kf).phi0);
+        double y = this.trackTraj.get(kf).d_rho * FastMath.sin(this.trackTraj.get(kf).phi0);
         double z = this.trackTraj.get(kf).dz;
-        double px = -Math.abs(1. / this.trackTraj.get(kf).kappa) * Math.sin(this.trackTraj.get(kf).phi0);
-        double py = Math.abs(1. / this.trackTraj.get(kf).kappa) * Math.cos(this.trackTraj.get(kf).phi0);
+        double px = -Math.abs(1. / this.trackTraj.get(kf).kappa) * FastMath.sin(this.trackTraj.get(kf).phi0);
+        double py = Math.abs(1. / this.trackTraj.get(kf).kappa) * FastMath.cos(this.trackTraj.get(kf).phi0);
         double pz = Math.abs(1. / this.trackTraj.get(kf).kappa) * this.trackTraj.get(kf).tanL;
         int q = (int) Math.signum(this.trackTraj.get(kf).kappa);
         double p_unc = Math.sqrt(px * px + py * py + pz * pz);
@@ -535,14 +536,14 @@ public class StateVecs {
         double E_loss = this.trackTraj.get(kf).get_ELoss()[2];
 
         double h_dca = Math.sqrt(x * x + y * y);
-        double h_phi0 = Math.atan2(py, px);
+        double h_phi0 = FastMath.atan2(py, px);
         double kappa = Math.signum(this.trackTraj.get(kf).kappa) / Math.sqrt(px * px + py * py);
         double h_omega = kappa / this.trackTraj.get(kf).alpha; h_omega = kappa/this.trackTraj.get(0).alpha;
         double h_dz = z;
         double h_tandip = pz / Math.sqrt(px * px + py * py);
         
         Helix trkHelix = new Helix(h_dca, h_phi0, h_omega, h_dz, h_tandip, this.trackCov.get(kf).covMat);
-       // System.out.println("x "+x+" y "+y+" z "+z+" p "+p_unc+" pt "+Math.sqrt(px*px+py*py) +" theta "+Math.toDegrees(Math.acos(pz/Math.sqrt(px*px+py*py+pz*pz)))+" phi "+Math.toDegrees(Math.atan2(py, px))+" q "+q);
+       // System.out.println("x "+x+" y "+y+" z "+z+" p "+p_unc+" pt "+Math.sqrt(px*px+py*py) +" theta "+Math.toDegrees(Math.acos(pz/Math.sqrt(px*px+py*py+pz*pz)))+" phi "+Math.toDegrees(FastMath.atan2(py, px))+" q "+q);
 
         return trkHelix;
     }
@@ -551,17 +552,17 @@ public class StateVecs {
         //init stateVec
 
         StateVec initSV = new StateVec(0);
-        initSV.x = -trk.get_Helix().get_dca() * Math.sin(trk.get_Helix().get_phi_at_dca());
-        initSV.y = trk.get_Helix().get_dca() * Math.cos(trk.get_Helix().get_phi_at_dca());
+        initSV.x = -trk.get_Helix().get_dca() * FastMath.sin(trk.get_Helix().get_phi_at_dca());
+        initSV.y = trk.get_Helix().get_dca() * FastMath.cos(trk.get_Helix().get_phi_at_dca());
         initSV.z = trk.get_Helix().get_Z0();
-        double xcen = (1. / trk.get_Helix().get_curvature() - trk.get_Helix().get_dca()) * Math.sin(trk.get_Helix().get_phi_at_dca());
-        double ycen = (-1. / trk.get_Helix().get_curvature() + trk.get_Helix().get_dca()) * Math.cos(trk.get_Helix().get_phi_at_dca());
+        double xcen = (1. / trk.get_Helix().get_curvature() - trk.get_Helix().get_dca()) * FastMath.sin(trk.get_Helix().get_phi_at_dca());
+        double ycen = (-1. / trk.get_Helix().get_curvature() + trk.get_Helix().get_dca()) * FastMath.cos(trk.get_Helix().get_phi_at_dca());
         B Bf = new B(0, 0, 0, 0, swimmer);
         initSV.alpha = Bf.alpha;
         initSV.kappa = Bf.alpha * trk.get_Helix().get_curvature();
-        initSV.phi0 = Math.atan2(ycen, xcen);
+        initSV.phi0 = FastMath.atan2(ycen, xcen);
         if (initSV.kappa < 0) {
-            initSV.phi0 = Math.atan2(-ycen, -xcen);
+            initSV.phi0 = FastMath.atan2(-ycen, -xcen);
         }
         initSV.dz = trk.get_Helix().get_Z0();
         initSV.tanL = trk.get_Helix().get_tandip();

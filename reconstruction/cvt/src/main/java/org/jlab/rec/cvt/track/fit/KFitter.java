@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.track.fit;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jlab.clas.clas.math.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.cross.Cross;
@@ -135,8 +136,8 @@ public class KFitter {
             double azi = sv.trackTraj.get(k).phi0 + sv.trackTraj.get(k).phi;
             //System.out.println("Trj "+x+","+y+","+z);
             double invKappa = 1. / Math.abs(sv.trackTraj.get(k).kappa);
-            double px = -invKappa * Math.sin(azi);
-            double py = invKappa * Math.cos(azi);
+            double px = -invKappa * FastMath.sin(azi);
+            double py = invKappa * FastMath.cos(azi);
             double pz = invKappa * sv.trackTraj.get(k).tanL;
             TrjPoints.add(new HitOnTrack(layer, x, y, z, px, py, pz));
 
@@ -147,17 +148,17 @@ public class KFitter {
     public void Rinit(Swim swimmer) {
         Helix helix = sv.setTrackPars(sv.X0.size() - 1);
 
-        sv.trackTraj.get(0).x = -helix.get_dca() * Math.sin(helix.get_phi_at_dca());
-        sv.trackTraj.get(0).y = helix.get_dca() * Math.cos(helix.get_phi_at_dca());
+        sv.trackTraj.get(0).x = -helix.get_dca() * FastMath.sin(helix.get_phi_at_dca());
+        sv.trackTraj.get(0).y = helix.get_dca() * FastMath.cos(helix.get_phi_at_dca());
         sv.trackTraj.get(0).z = helix.get_Z0();
-        double xcen = (1. / helix.get_curvature() - helix.get_dca()) * Math.sin(helix.get_phi_at_dca());
-        double ycen = (-1. / helix.get_curvature() + helix.get_dca()) * Math.cos(helix.get_phi_at_dca());
+        double xcen = (1. / helix.get_curvature() - helix.get_dca()) * FastMath.sin(helix.get_phi_at_dca());
+        double ycen = (-1. / helix.get_curvature() + helix.get_dca()) * FastMath.cos(helix.get_phi_at_dca());
         B Bf = sv.new B(0, 0, 0, 0, swimmer);
         sv.trackTraj.get(0).alpha = Bf.alpha;
         sv.trackTraj.get(0).kappa = Bf.alpha * helix.get_curvature();
-        sv.trackTraj.get(0).phi0 = Math.atan2(ycen, xcen);
+        sv.trackTraj.get(0).phi0 = FastMath.atan2(ycen, xcen);
         if (sv.trackTraj.get(0).kappa < 0) {
-            sv.trackTraj.get(0).phi0 = Math.atan2(-ycen, -xcen);
+            sv.trackTraj.get(0).phi0 = FastMath.atan2(-ycen, -xcen);
         }
         sv.trackTraj.get(0).dz = helix.get_Z0();
         sv.trackTraj.get(0).tanL = helix.get_tandip();
@@ -225,7 +226,7 @@ public class KFitter {
 
             }
             if (mv.measurements.get(k).type == 1) {
-                m = Math.atan2(mv.measurements.get(k).y, mv.measurements.get(k).x);
+                m = FastMath.atan2(mv.measurements.get(k).y, mv.measurements.get(k).x);
                 h = mv.hPhi(sv.trackTraj.get(k));
             }
             if (mv.measurements.get(k).type == 2) {
@@ -255,7 +256,7 @@ public class KFitter {
 
             }
             if (mv.measurements.get(k).type == 1) {
-                m = Math.atan2(mv.measurements.get(k).y, mv.measurements.get(k).x);
+                m = FastMath.atan2(mv.measurements.get(k).y, mv.measurements.get(k).x);
                 h = mv.hPhi(sv.trackTraj.get(k));
             }
             if (mv.measurements.get(k).type == 2) {
@@ -330,7 +331,7 @@ public class KFitter {
                 tanL_filt += K[4] * (mv.measurements.get(k).centroid - h);
             }
             if (mv.measurements.get(k).type == 1) {
-                double phiM = Math.atan2(mv.measurements.get(k).y, mv.measurements.get(k).x);
+                double phiM = FastMath.atan2(mv.measurements.get(k).y, mv.measurements.get(k).x);
                 drho_filt += K[0] * (phiM - h);
                 phi0_filt += K[1] * (phiM - h);
                 kappa_filt += K[2] * (phiM - h);

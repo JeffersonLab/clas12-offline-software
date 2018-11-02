@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.cross;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jlab.clas.clas.math.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.bmt.Geometry;
 import org.jlab.rec.cvt.cluster.Cluster;
@@ -146,18 +147,18 @@ public class CrossMaker {
             this_cross.set_Cluster1(Zlayerclus); // this is the inner shell
             //the uncorrected x,y position of the Z detector cluster centroid.  This is calculated from the measured strips 
             // in the cluster prior to taking Lorentz angle correction into account
-            double x0 = (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det) * Math.cos(Zlayerclus.get_Phi0());
-            double y0 = (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det) * Math.sin(Zlayerclus.get_Phi0());
-            double x0Er = -org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] * Math.sin(Zlayerclus.get_Phi0()) * Zlayerclus.get_PhiErr0();
-            double y0Er = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] * Math.cos(Zlayerclus.get_Phi0()) * Zlayerclus.get_PhiErr0();
+            double x0 = (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det) * FastMath.cos(Zlayerclus.get_Phi0());
+            double y0 = (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det) * FastMath.sin(Zlayerclus.get_Phi0());
+            double x0Er = -org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] * FastMath.sin(Zlayerclus.get_Phi0()) * Zlayerclus.get_PhiErr0();
+            double y0Er = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] * FastMath.cos(Zlayerclus.get_Phi0()) * Zlayerclus.get_PhiErr0();
             // set only the coordinates for which there is a measurement
             this_cross.set_Point0(new Point3D(x0, y0, Double.NaN));
             this_cross.set_PointErr0(new Point3D(x0Er, y0Er, Double.NaN));
             //the x,y position of the Z detector cluster centroid.  This is calculated from the Lorentz angle corrected strips 
-            double x = (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det) * Math.cos(Zlayerclus.get_Phi());
-            double y = (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det) * Math.sin(Zlayerclus.get_Phi());
-            double xEr = -org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] * Math.sin(Zlayerclus.get_Phi()) * Zlayerclus.get_PhiErr();
-            double yEr = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] * Math.cos(Zlayerclus.get_Phi()) * Zlayerclus.get_PhiErr();
+            double x = (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det) * FastMath.cos(Zlayerclus.get_Phi());
+            double y = (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det) * FastMath.sin(Zlayerclus.get_Phi());
+            double xEr = -org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] * FastMath.sin(Zlayerclus.get_Phi()) * Zlayerclus.get_PhiErr();
+            double yEr = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[Zlayerclus.get_Region() - 1] * FastMath.cos(Zlayerclus.get_Phi()) * Zlayerclus.get_PhiErr();
 
             // set only the coordinates for which there is a measurement (x,y)
             this_cross.set_Point(new Point3D(x, y, Double.NaN));
