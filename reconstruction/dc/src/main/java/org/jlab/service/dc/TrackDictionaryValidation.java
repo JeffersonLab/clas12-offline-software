@@ -345,7 +345,7 @@ public class TrackDictionaryValidation {
                 recHits = event.getBank("TimeBasedTrkg::TBHits");
             }
             if (event.hasBank("FTOF::hits")) {
-                recHits = event.getBank("TimeBasedTrkg::TBHits");
+                recHits = event.getBank("FTOF::hits");
             }
             if (event.hasBank("MC::Particle")) {
                 mcPart = event.getBank("MC::Particle");

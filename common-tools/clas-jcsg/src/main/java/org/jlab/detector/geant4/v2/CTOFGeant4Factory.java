@@ -24,8 +24,15 @@ import org.jlab.detector.base.GeometryFactory;
 public final class CTOFGeant4Factory extends Geant4Factory {
 
     private final int npaddles = 48;
+    private final String ctofdbpath = "/geometry/ctof/ctof/";
+    private final String caddbpath  = "/geometry/ctof/cad/";
 
     public CTOFGeant4Factory(ConstantProvider cp) {
+        
+        double cadRadius = cp.getDouble(caddbpath+"radius", 0); 
+        double cadThick  = cp.getDouble(caddbpath+"thickness", 0); 
+        double cadAngle  = cp.getDouble(caddbpath+"angle", 0);
+        double cadOffset = cp.getDouble(caddbpath+"offset", 0);
         motherVolume = new G4World("fc");
 
         ClassLoader cloader = getClass().getClassLoader();
@@ -36,8 +43,12 @@ public final class CTOFGeant4Factory extends Geant4Factory {
                         cloader.getResourceAsStream(String.format("ctof/cad/%s%02d.stl", name, iscint)), iscint);
                 component.scale(Length.mm / Length.cm);
 
-                component.rotate("zyx", Math.toRadians(97.5), Math.toRadians(180), 0);
-                component.translate(0, 0, 127.327);
+                component.rotate("zyx", Math.toRadians(90+cadAngle), Math.toRadians(180), 0);
+                
+                Vector3d idealCenter   = getCenter(cadRadius, cadThick, cadAngle*(iscint-0.5));
+                Vector3d currentCenter = component.center;
+                Vector3d shift = currentCenter.clone().sub(idealCenter);
+                component.translate(shift.x, shift.y, shift.z+cadOffset);
                 component.setMother(motherVolume);
 
                 if (name.equals("sc")) {
@@ -48,6 +59,12 @@ public final class CTOFGeant4Factory extends Geant4Factory {
         }
     }
 
+    public Vector3d getCenter(double radius, double thickness, double angle){
+        Vector3d cent = new Vector3d(radius+thickness/2.,0, 0);
+        cent.rotateZ(Math.toRadians(angle));
+        return cent;    
+    }
+    
     public Geant4Basic getPaddle(int ipaddle) {
         if (ipaddle < 1 || ipaddle > npaddles) {
             System.err.println("ERROR!!!");
@@ -64,8 +81,8 @@ public final class CTOFGeant4Factory extends Geant4Factory {
     
     private class CTOFpaddle extends G4Stl {
 
-        private final String ctofdbpath = "/geometry/ctof/ctof/";
         private final Line3d centerline;
+        private final Vector3d center;
         private final double angle;
         private final double radius;
         private final double thickness;
@@ -82,9 +99,8 @@ public final class CTOFGeant4Factory extends Geant4Factory {
             length = cp.getDouble(ctofdbpath+"length", padnum-1);
             offset = cp.getDouble(ctofdbpath+"offset", padnum-1);
             
-            Vector3d cent = new Vector3d(radius+thickness/2.,0, 0);
-            cent.rotateZ(Math.toRadians(angle));
-            centerline = new Line3d(new Vector3d(cent.x, cent.y, -length/2+offset), new Vector3d(cent.x, cent.y, length/2+offset));
+            center = getCenter(radius, thickness, angle);
+            centerline = new Line3d(new Vector3d(center.x, center.y, -length/2+offset), new Vector3d(center.x, center.y, length/2+offset));
         }
 
         @Override

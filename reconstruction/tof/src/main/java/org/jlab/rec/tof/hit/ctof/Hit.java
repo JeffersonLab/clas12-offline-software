@@ -27,8 +27,6 @@ public class Hit extends AHit implements IGetCalibrationParams {
         super(id, panel, sector, paddle, aDCU, tDCU, aDCD, tDCD);
     }
 
-    private Line3D _paddleLine; // paddle line
-    
     private CTOFDetHit _matchedTrackHit; // matched hit information from
     // tracking; this contains the
     // information of the entrance and
@@ -37,14 +35,6 @@ public class Hit extends AHit implements IGetCalibrationParams {
     private Line3d _matchedTrack;
 
     public int _AssociatedTrkId = -1;
-
-    public Line3D get_paddleLine() {
-        return _paddleLine;
-    }
-
-    public void set_paddleLine(Line3D paddleLine) {
-        this._paddleLine = paddleLine;
-    }
 
     public CTOFDetHit get_matchedTrackHit() {
         return _matchedTrackHit;
@@ -111,7 +101,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double ADC_MIP = this.ADC_MIP(constants5);
         double ADC_MIPErr = this.ADC_MIPUnc(constants5);
         double DEDX_MIP = this.DEDX_MIP();
-        double ScinBarThickn = this.ScinBarThickn();
+        double ScinBarThickn = this.get_barthickness();
 
         this.set_HitParams(superlayer, TW0U, TW0D, TW1U, TW1D, lambdaU,
                 lambdaD, yOffset, vU, vD, vUUnc, vDUnc, PEDU, PEDD, PEDUUnc,
@@ -147,7 +137,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
        // this.printInfo();System.out.println(" ");
         this.set_paddleLine(paddleLine);
         
-         _barThkn = geometry.getThickness(get_Paddle());
+        this.set_barthickness(geometry.getThickness(get_Paddle()));
     }
 
     private Point3D calc_hitPosition() {
@@ -394,13 +384,6 @@ public class Hit extends AHit implements IGetCalibrationParams {
     @Override
     public double DEDX_MIP() {
         return Constants.DEDX_MIP;
-    }
-
-    private double _barThkn;
-    
-    @Override
-    public double ScinBarThickn() {
-        return _barThkn;
     }
 
     @Override

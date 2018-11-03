@@ -77,6 +77,11 @@ public class GeometryFactory {
             provider.loadTable("/geometry/cnd/layer");
         }
         
+        if(type==DetectorType.CTOF){
+            provider.loadTable("/geometry/ctof/ctof");
+            provider.loadTable("/geometry/ctof/cad");
+        }
+        
         if(type==DetectorType.FTCAL){
             provider.loadTable("/geometry/ft/ftcal");
         }
