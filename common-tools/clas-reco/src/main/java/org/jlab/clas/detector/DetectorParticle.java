@@ -26,7 +26,8 @@ import org.jlab.clas.pdg.PhysicsConstants;
  * @author baltzell
  */
 public class DetectorParticle implements Comparable {
-    
+   
+    private boolean isTriggerParticle = false;
     private Integer particlePID       = 0;
     private Integer particleStatus    = 1;
     private Integer particleTrackIndex = -1;
@@ -226,6 +227,23 @@ public class DetectorParticle implements Comparable {
     public int getScore(){
         return this.particleScore;
     }
+    
+    /**
+     * returns whether this is the trigger particle.
+     */
+    public boolean isTriggerParticle() {
+        return isTriggerParticle;
+    }
+
+    /**
+     *
+     * set this as the trigger particle.
+     *
+     */
+    public void setTriggerParticle(boolean val) {
+        isTriggerParticle=val;
+    }
+
     
     public int getSector(DetectorType type,int layer) {
         DetectorResponse hit = this.getHit(type,layer);
@@ -689,7 +707,27 @@ public class DetectorParticle implements Comparable {
     }  
     
     public int compareTo(Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        DetectorParticle other = (DetectorParticle) o;
+
+        // trigger particle takes highest priority:
+        if (this.isTriggerParticle() && other.isTriggerParticle()) {
+            throw new RuntimeException("Cannot have 2 trigger particles.");
+        }
+        else if (this.isTriggerParticle())  return -1;
+        else if (other.isTriggerParticle()) return  1;
+
+        // then charge ordering (-,+,0):
+        else if (this.getCharge() != other.getCharge()) {
+            if      (this.getCharge()  < 0) return -1;
+            else if (other.getCharge() < 0) return  1;
+            else if (this.getCharge()  > 0) return -1;
+            else if (other.getCharge() > 0) return  1;
+            else throw new RuntimeException("Impossible.");
+        }
+
+        // and then momentum ordering (largest to smallest):
+        else if (this.vector().mag() == other.vector().mag()) return 0;
+        else return this.vector().mag() > other.vector().mag() ? -1 : 1;
     }
 
     @Override

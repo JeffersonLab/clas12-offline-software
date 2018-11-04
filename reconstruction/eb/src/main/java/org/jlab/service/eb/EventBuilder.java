@@ -423,11 +423,14 @@ class TriggerOptions {
                        event.getParticle(i).vector().mag() > maxMom){
                         maxMom = event.getParticle(i).vector().mag();
                         index = i;
-                            }
+                    }
                 }
             }
-            // move the trigger particle to the first row:
-            if (index>=0) event.moveUp(index);
+            // assign and move the trigger particle to the first row:
+            if (index>=0) {
+                event.getParticle(index).setTriggerParticle(true);
+                event.moveUp(index);
+            }
         }
 
         return foundTriggerParticle;
