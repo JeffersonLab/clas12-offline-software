@@ -35,7 +35,7 @@ public class CNDXYPolygon extends Polygon {
 	
 	//"REAL" numbering
 	int sector; //1..24
-	int component; //1..2
+	int _leftRight; //1..2
 
 
 	private ScintillatorPaddle paddle;
@@ -58,7 +58,7 @@ public class CNDXYPolygon extends Polygon {
 		CNDGeometry.geoTripletToRealTriplet(geo, real);
 		
 		sector = real[0];
-		component = real[2];
+		_leftRight = real[2];
 	}
 
 	/**
@@ -103,7 +103,7 @@ public class CNDXYPolygon extends Polygon {
 		g.setColor(lineColor);
 		g.drawPolygon(this);
 		
-		if ((component == 1) && (layer == 2)) {
+		if ((_leftRight == 1) && (layer == 2)) {
 			Point2D.Double centroid = WorldGraphicsUtilities.getCentroid(wp);
 			container.worldToLocal(pp, centroid);
 			g.setColor(Color.gray);
@@ -124,7 +124,6 @@ public class CNDXYPolygon extends Polygon {
 		
 		fbString("red", "cnd sector " + sector, feedbackStrings);
 		fbString("red", "cnd layer " + layer, feedbackStrings);
-		fbString("red", "cnd component " + component, feedbackStrings);
 
 		
 		//hit?
@@ -133,26 +132,25 @@ public class CNDXYPolygon extends Polygon {
 		TdcAdcHitList hits = CND.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			// all hits have component 1
+			
 			hit = hits.get(sector, layer, 1);
 
-			if (hit != null) {
-				fbString("cyan", "cnd hit order " + hit.order, feedbackStrings);
-				if ((hit.order == 0) && (component == 1)) {
-					int adc = hit.adcL;
-					fbString("cyan", "adcL " + hit.adcL, feedbackStrings);
+			if (hit != null) {				
+			
+				//will be 1 for left, 2 for right
+				int leftRight = 1 + (hit.order % 2);
+				
+				if (_leftRight == leftRight) {
+				boolean hasADC = (hit.adcL > -1) || (hit.adcL > -1);
+				boolean hasTDC = (hit.tdcL > -1) || (hit.tdcL > -1);
+
+				fbString("cyan", "cnd order " + hit.order + " " + ((leftRight == 1) ? "left" : "right"), feedbackStrings);
+				fbString("cyan", "adcL " + hit.adcL, feedbackStrings);
+				fbString("cyan", "adcR " + hit.adcR, feedbackStrings);
+				fbString("cyan", "tdcL " + hit.tdcL, feedbackStrings);
+				fbString("cyan", "tdcR " + hit.tdcR, feedbackStrings);
 				}
-				else if ((hit.order == 1) && (component == 2)) {
-					int adc = hit.adcL;
-					fbString("cyan", "adcR " + hit.adcR, feedbackStrings);
-			}
-				else if ((hit.order == 2) && (component == 1)) {
-					int tdc = hit.tdcL;
-					fbString("cyan", "tdcL " + hit.tdcL, feedbackStrings);
-				}
-				else if ((hit.order == 3) && (component == 2)) {
-					int tdc = hit.tdcR;
-					fbString("cyan", "tdcR " + hit.tdcR, feedbackStrings);
-				}
+							
 
 			}
 		}
