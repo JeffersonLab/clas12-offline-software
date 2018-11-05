@@ -49,6 +49,8 @@ public class ConnectionDialog extends BasicDialog {
     
     private JTextField _ipField;
     private JTextField _fileName;
+    private JTextField _portNumber;
+    
     private JComboBox  _comboHosts;
     private JComboBox  _comboEtFiles;
     private JComboBox  _files;
@@ -146,6 +148,15 @@ public class ConnectionDialog extends BasicDialog {
         
         panel.add(subpanel2);
         
+        
+        JPanel subpanel3 = new JPanel();
+        JLabel labelport = new JLabel(" Port : ");
+        _portNumber = new JTextField(8);
+        _portNumber.setText("11111");
+        subpanel3.add(labelport);
+        subpanel3.add(_portNumber);
+        
+        panel.add(subpanel3);
         Border emptyBorder = BorderFactory
                 .createEtchedBorder();//4, 4, 4, 4);
         
@@ -173,6 +184,16 @@ public class ConnectionDialog extends BasicDialog {
         return _fileName.getText();
     }
     
+    public Integer getPort(){
+        String port_number = _portNumber.getText();
+        Integer port = 11111;
+        try {
+            port = Integer.parseInt(port_number);
+        } catch (Exception e) {
+            System.out.println("ERROR : the string provided is not a number : " + port_number);
+        }
+        return port;
+    }
     
     public String getIpAddress() {
         return _ipField.getText();

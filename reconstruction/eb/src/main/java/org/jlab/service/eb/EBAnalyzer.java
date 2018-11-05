@@ -84,7 +84,7 @@ public class EBAnalyzer {
                 final double vzCorr = 0;//(tgpos - trigger.vertex().z()) / PhysicsConstants.speedOfLight();
 
                 final double deltatr = - vertexTime + event.getEventHeader().getRfTime() - vzCorr +
-                    + (EBConstants.RF_LARGE_INTEGER+0.5)*rfBucketLength + rfOffset;
+                    + (EBConstants.RF_LARGE_INTEGER+0.5)*rfBucketLength;
                 final double rfCorr = deltatr % rfBucketLength - rfBucketLength/2;
                 
                 startTime = vertexTime + rfCorr;

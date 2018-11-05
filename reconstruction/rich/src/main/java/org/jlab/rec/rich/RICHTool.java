@@ -256,7 +256,7 @@ public class RICHTool{
 		   nxp[ipmt-1]=15+(28-(plast[irow]-pfirst[irow]+1)+(ipmt-pfirst[irow])*2)*4+8; 
 		}
 
-		if(debugMode>=0) System.out.println("PMT "+ipmt+" Nx "+nxp[ipmt-1]+" Ny "+nyp[ipmt-1]);
+		if(debugMode>=1) System.out.println("PMT "+ipmt+" Nx "+nxp[ipmt-1]+" Ny "+nyp[ipmt-1]);
 
 	    }
 	}
@@ -294,7 +294,7 @@ public class RICHTool{
 
                 yp[ipmt-1]= yrow[ccrow];
                 xp[ipmt-1]= xcol[ccol];
-		if(debugMode>=0) System.out.println("PMT "+ipmt+" COL "+ccol+" "+xcol[ccol]+" ROW "+(ccrow+1)+" "+yrow[ccrow]);
+		if(debugMode>=1) System.out.println("PMT "+ipmt+" COL "+ccol+" "+xcol[ccol]+" ROW "+(ccrow+1)+" "+yrow[ccrow]);
 
 	    }
 	}
