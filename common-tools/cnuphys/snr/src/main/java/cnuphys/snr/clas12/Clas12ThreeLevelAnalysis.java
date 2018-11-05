@@ -8,7 +8,7 @@ public class Clas12ThreeLevelAnalysis {
 	public int rawHitCount;
 	
 	/** level of analysis */
-	private SNR_Level _snrLevel = SNR_Level.LEVEL_ONE;
+	private SnrLevel _snrLevel = SnrLevel.LEVEL_ONE;
 
 	
 	// there is superlayer dependence on the parameters but not sector dependence
@@ -38,7 +38,7 @@ public class Clas12ThreeLevelAnalysis {
 	 * Set the SNR analysis level
 	 * @param level the new level
 	 */
-	public void setLevel(SNR_Level level) {
+	public void setLevel(SnrLevel level) {
 		_snrLevel = level;
 	}
 	
@@ -46,7 +46,7 @@ public class Clas12ThreeLevelAnalysis {
 	 * Get the SNR analysis level
 	 * @return the SNR analysis level
 	 */
-	public SNR_Level getLevel() {
+	public SnrLevel getLevel() {
 		return _snrLevel;
 	}
 	
