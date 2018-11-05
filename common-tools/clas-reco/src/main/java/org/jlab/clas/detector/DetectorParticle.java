@@ -676,17 +676,30 @@ public class DetectorParticle implements Comparable {
 
         // find the best match:
         int bestIndex = -1;
+        double bestConeAngle = Double.POSITIVE_INFINITY;
         if(responses.size()>0){
             for(int loop = 0; loop < responses.size(); loop++) {
-                if(responses.get(loop).getDescriptor().getType() == type){
-                    //final boolean matchtruth = type==DetectorType.HTCC ?
-                    //    ((CherenkovResponse)cherenkovs.get(loop)).matchToPoint(cross) :
-                    //    ((CherenkovResponse)cherenkovs.get(loop)).match(cross);
-                    final boolean matchtruth = ((CherenkovResponse)responses.get(loop)).match(cross);
-                    if(matchtruth==true){
+//                if(responses.get(loop).getDescriptor().getType() == type){
+//                    //final boolean matchtruth = type==DetectorType.HTCC ?
+//                    //    ((CherenkovResponse)cherenkovs.get(loop)).matchToPoint(cross) :
+//                    //    ((CherenkovResponse)cherenkovs.get(loop)).match(cross);
+//                    final boolean matchtruth = ((CherenkovResponse)responses.get(loop)).match(cross);
+//                    if(matchtruth==true){
+
+                if (responses.get(loop).getDescriptor().getType() != type) continue;
+                if (responses.get(loop).getAssociation()>=0) continue;
+                CherenkovResponse cher = (CherenkovResponse)responses.get(loop);
+                // FIXME:  use normalized distance/angle instead of box cut?,
+                // unify HTCC/LTCC inputs (and remove hardcoded constant), unify with non-Cherenkov?
+                CherenkovResponse.TrackResidual tres = cher.getTrackResidual(cross);
+                if (Math.abs(tres.getDeltaTheta()) < cher.getDeltaTheta() && //10.0/57.2958 &&
+                    Math.abs(tres.getDeltaPhi())   < cher.getDeltaPhi()) {
+                    if (tres.getConeAngle() < bestConeAngle) {
+
+
                         bestIndex = loop;
-                        // FIXME keep the first match!
-                        break;
+//                        // FIXME keep the first match!
+//                        break;
                     }
                 }
             }

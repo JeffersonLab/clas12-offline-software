@@ -104,7 +104,7 @@ public class EBMatching {
                 int index = part.getDetectorHit(respECAL, DetectorType.ECAL, layer, matching);
                 if (index>=0) {
                     int pindex_offset = this.eventBuilder.getPindexMap().get(0)
-                                        + this.eventBuilder.getPindexMap().get(1); //After FD/CD Charged Particles
+                                      + this.eventBuilder.getPindexMap().get(1); //After FD/CD Charged Particles
                     part.addResponse(respECAL.get(index), true); 
                     respECAL.get(index).setAssociation(ii + pindex_offset);
                 }
@@ -147,8 +147,12 @@ public class EBMatching {
             vertex.copy(eventBuilder.getEvent().getParticle(0).vertex());
         }
 
-        for (DetectorResponse r : responsesECAL)
+        for (DetectorResponse r : responsesECAL) {
+            int pindex_offset = this.eventBuilder.getPindexMap().get(0)
+                              + this.eventBuilder.getPindexMap().get(1); //After FD/CD Charged Particles
+            r.setAssociation(parts.size()+pindex_offset);
             parts.add(DetectorParticle.createNeutral(r,vertex));
+        }
         
         // add other responses:
         this.addResponsesECAL(parts,otherEcalLayers);

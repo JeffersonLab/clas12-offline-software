@@ -2,7 +2,6 @@ package org.jlab.clas.detector;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
@@ -18,11 +17,32 @@ import org.jlab.io.base.DataEvent;
  */
 public class CherenkovResponse extends DetectorResponse {
 
-    private double  hitTheta      = 0.0;
-    private double  hitPhi        = 0.0;
+    public static class TrackResidual {
+        private double coneAngle;
+        private double dTheta;
+        private double dPhi;
+        public double getDeltaTheta() { return this.dTheta; }
+        public double getDeltaPhi()   { return this.dPhi; }
+        public double getConeAngle()  { return this.coneAngle; }
+        public TrackResidual(CherenkovResponse cher, Line3D track) {
+            Point3D intersection = cher.getIntersection(track);
+            Vector3D vecTrk = intersection.toVector3D();
+            Vector3D vecHit = cher.hitPosition.toVector3D();
+            this.dTheta = vecHit.theta()-vecTrk.theta();
+            this.dPhi = cher.getDeltaPhi(vecHit.phi(),vecTrk.phi());
+            this.coneAngle = vecHit.angle(vecTrk);
+        }
+    }
+
+    // theta/phi resolution for this response:
     private double  hitDeltaPhi   = 0.0;
     private double  hitDeltaTheta = 0.0;
+    
+    // FIXME:  remove this, use hitPosition instead:
+    private double  hitTheta      = 0.0;
+    private double  hitPhi        = 0.0;
 
+    // FIXME:  remove this, use DetectorResponse's hitPosition instead:
     private Point3D hitPosition = new Point3D();
 
     public CherenkovResponse(double theta, double phi, double dtheta, double dphi){
@@ -82,11 +102,10 @@ public class CherenkovResponse extends DetectorResponse {
         && Math.abs(getDeltaPhi(vecHit.phi(),vecTrk.phi()))<this.hitDeltaPhi);
     }
 
-    public double getDistance(Line3D line){
-        
-        return -1000.0;
+    public TrackResidual getTrackResidual(Line3D particleTrack) {
+        return new TrackResidual(this,particleTrack);
     }
-    
+
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type){        
         List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
@@ -111,15 +130,15 @@ public class CherenkovResponse extends DetectorResponse {
                 double theta=0,phi=0,dtheta=0,dphi=0;
 
                 if (type==DetectorType.HTCC) {
-                    dtheta = bank.getFloat("dtheta",row);
-                    dphi = bank.getFloat("dphi",row);
+                    dtheta = 10*3.14159/180;// based on MC //bank.getFloat("dtheta",row);
+                    dphi   = 18*3.14159/180;// based on MC //bank.getFloat("dphi",row);
                     theta = bank.getFloat("theta", row);
                     phi = bank.getFloat("phi",row);
                 }
 
                 else if (type==DetectorType.LTCC) {
                     // Hardcode some dtheta/dphi values for now (for matching):
-                    dtheta = 10*3.14159/180;
+                    dtheta = (35-5)/18*2 * 3.14159/180; // +/- 2 mirrors
                     dphi   = 10*3.14159/180;
                     // Fill theta/phi:
                     // Not yet.

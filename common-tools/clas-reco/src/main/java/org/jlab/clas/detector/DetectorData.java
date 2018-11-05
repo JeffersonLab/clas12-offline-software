@@ -264,7 +264,7 @@ public class DetectorData {
            bank.setFloat("phi", row, (float) c.getPhi());
            bank.setFloat("dtheta", row, (float) c.getDeltaTheta());
            bank.setFloat("dphi", row, (float) c.getDeltaPhi());
-           bank.setFloat("path", row, (float) 0.0);
+           bank.setFloat("path", row, (float) c.getPath());
            bank.setFloat("time", row, (float) c.getTime());
            bank.setFloat("nphe", row, (float) c.getEnergy());
            bank.setFloat("chi2", row, (float) 0.0);
