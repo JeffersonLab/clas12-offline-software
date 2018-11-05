@@ -2,7 +2,6 @@ package org.jlab.rec.eb;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.pow;
-import org.jlab.clas.detector.ScintillatorResponse;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.detector.base.DetectorType;

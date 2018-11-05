@@ -1,8 +1,6 @@
 package org.jlab.rec.eb;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.eb.EBCCDBConstants;
-import org.jlab.rec.eb.EBCCDBEnum;
 /**
  *
  * Read the occaisonal scaler bank and store across events.

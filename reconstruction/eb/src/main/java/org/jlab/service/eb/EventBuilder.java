@@ -1,7 +1,6 @@
 package org.jlab.service.eb;
 
 import static java.lang.Math.abs;
-import static java.lang.Math.pow;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,18 +10,12 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataEvent;
 import org.jlab.clas.detector.DetectorData;
 
-import org.jlab.clas.detector.CalorimeterResponse;
 import org.jlab.clas.detector.DetectorHeader;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorTrack;
-import org.jlab.clas.detector.CherenkovResponse;
-import org.jlab.clas.detector.ScintillatorResponse;
 import org.jlab.clas.detector.TaggerResponse;
-
-import org.jlab.clas.physics.Vector3;
-import org.jlab.geom.prim.Vector3D;
 
 import org.jlab.rec.eb.EBConstants;
 import org.jlab.rec.eb.EBCCDBConstants;
