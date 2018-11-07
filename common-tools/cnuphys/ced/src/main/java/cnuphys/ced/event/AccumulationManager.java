@@ -30,6 +30,7 @@ import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HTCC2;
 import cnuphys.ced.event.data.LTCC;
 import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.CND;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 
@@ -67,6 +68,9 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 
 	private static final Color HOTCOLOR = X11Colors.getX11Color("red");
 
+	// CND accumulated accumulated data indices are sector, layer, order (0 or 1, adc only)
+	private int _CNDAccumulatedData[][][];
+	
 	// HTCC accumulated accumulated data indices are sector, ring, half
 	private int _HTCCAccumulatedData[][][];
 
@@ -79,7 +83,6 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 
 	// dc accumulated data indices are sector, superlayer, layer, wire
 	private int _DCAccumulatedData[][][][];
-	// private int _maxDCCount;
 
 	// BST accumulated data (layer[0..7], sector[0..23])
 	private int _BSTAccumulatedData[][];
@@ -126,6 +129,9 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		// FTCAL data
 		_FTCALAccumulatedData = new int[476];
 
+		//cnd data (24 sectors, 3 layers, left and right)
+		_CNDAccumulatedData = new int[24][3][2];
+		
 		// htcc data
 		_HTCCAccumulatedData = new int[GeoConstants.NUM_SECTOR][4][2];
 
@@ -183,6 +189,16 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		for (int i = 0; i < _FTCALAccumulatedData.length; i++) {
 			_FTCALAccumulatedData[i] = 0;
 		}
+		
+		// clear accumulated CND
+		for (int sector = 0; sector < 24; sector++) {
+			for (int layer = 0; layer < 3; layer++) {
+				for (int leftright = 0; leftright < 2; leftright++) {
+					_CNDAccumulatedData[sector][layer][leftright] = 0;
+				}
+			}
+		}
+
 
 		// clear accumulated HTCC
 		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
@@ -214,7 +230,6 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 				}
 			}
 		}
-		// _maxDCCount = 0;
 
 		// clear ecal data
 		for (int sector = 0; sector < 6; sector++) {
@@ -299,6 +314,16 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	public int[] getAccumulatedFTCALData() {
 		return _FTCALAccumulatedData;
 	}
+	
+	/**
+	 * Get the accumulated CND data
+	 * 
+	 * @return the accumulated CND data
+	 */
+	public int[][][] getAccumulatedCNDData() {
+		return _CNDAccumulatedData;
+	}
+	
 
 	/**
 	 * Get the accumulated HTCC data
@@ -443,6 +468,15 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	public int getMedianFTCALCount() {
 		return getMedian(_FTCALAccumulatedData);
 	}
+	
+	/**
+	 * Get the median counts for CND
+	 * 
+	 * @return the median counts for CND
+	 */
+	public int getMedianCNDCount() {
+		return getMedian(_CNDAccumulatedData);
+	}
 
 	/**
 	 * Get the median counts for HTCC
@@ -492,7 +526,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	/**
 	 * Get the median counts on any ftof1a panel
 	 * 
-	 * @return the max counts for any ftof1a panel.
+	 * @return the median counts for any ftof1a panel.
 	 */
 	public int getMedianFTOF1ACount() {
 		return getMedian(_FTOF1AAccumulatedData);
@@ -501,7 +535,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	/**
 	 * Get the median counts on any ftof1b panel
 	 * 
-	 * @return the max counts for any ftof1b panel.
+	 * @return the median counts for any ftof1b panel.
 	 */
 	public int getMedianFTOF1BCount() {
 		return getMedian(_FTOF1BAccumulatedData);
@@ -510,19 +544,12 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	/**
 	 * Get the median counts on any ftof2 panel
 	 * 
-	 * @return the max counts for any ftof2 panel.
+	 * @return the median counts for any ftof2 panel.
 	 */
 	public int getMedianFTOF2Count() {
 		return getMedian(_FTOF2AccumulatedData);
 	}
 
-	//
-	// /**
-	// * @return the colorScaleModel
-	// */
-	// public static ColorScaleModel getColorScaleModel() {
-	// return colorScaleModel;
-	// }
 
 	/**
 	 * Get the color to use
@@ -593,6 +620,10 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		// FTCal Data
 		AdcHitList ftcalList = FTCAL.getInstance().updateAdcList();
 		accumFTCAL(ftcalList);
+		
+		//CND a special case
+		CND.getInstance().updateData();
+		accumCND();
 
 		// htcc data
 		AdcHitList htccList = HTCC2.getInstance().updateAdcList();
@@ -664,6 +695,28 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		}
 	}
 
+	
+	// accumulate CND which is a special case
+	private void accumCND() {
+		CND cnd = CND.getInstance();
+		int adcCount = cnd.getCountAdc();
+		if (adcCount > 0) {
+			byte[] sect = cnd.adc_sect;
+			byte[] layer = cnd.adc_layer;
+			byte[] order = cnd.adc_order;
+			
+			for (int i = 0; i < adcCount; i++) {
+				
+				int sect0 = sect[i]-1;
+				int lay0  = layer[i]-1;
+				//note order is already a zero based quantity
+				int ord0 = order[i];
+				
+				_CNDAccumulatedData[sect0][lay0][ord0] += 1;
+			}
+		}
+	}
+	
 	// accumulate htcc
 	private void accumHTCC(AdcHitList list) {
 		if ((list == null) || list.isEmpty()) {

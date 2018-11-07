@@ -417,16 +417,16 @@ public class SuperLayerDrawing {
 
 		// get the hexagon
 		Polygon hexagon = getHexagon(container, layer, wire);
+		
+		if (hexagon == null) {
+			return;
+		}
 
 		if (location != null) {
 			Rectangle r = hexagon.getBounds();
 			if (r != null) {
 				location.setLocation(r.x + r.width / 2, r.y + r.height / 2);
 			}
-		}
-
-		if (hexagon == null) {
-			return;
 		}
 
 		g.setColor(hitFill);

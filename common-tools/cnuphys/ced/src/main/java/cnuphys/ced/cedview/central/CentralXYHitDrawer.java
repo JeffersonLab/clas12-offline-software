@@ -133,7 +133,28 @@ public class CentralXYHitDrawer implements IDrawable {
 
 	// draw accumulated BST hits (panels)
 	private void drawCNDAccumulatedHits(Graphics g, IContainer container) {
+		int medianHit = AccumulationManager.getInstance().getMedianCNDCount();
 		
+		int cndData[][][] = AccumulationManager.getInstance()
+				.getAccumulatedCNDData();
+
+		for (int sect0 = 0; sect0 < 24; sect0++) {
+			for (int lay0 = 0; lay0 < 3; lay0++) {
+				for (int order = 0; order < 2; order++) {
+					
+					int hitCount = cndData[sect0][lay0][order];
+
+					
+					CNDXYPolygon poly = _view.getCNDPolygon(sect0+1, lay0+1, order+1);
+					double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
+					Color color = AccumulationManager.getInstance()
+							.getColor(fract);
+
+					poly.draw(g, container, color, Color.black);
+
+				}
+			}
+		}
 	}
 
 	
@@ -211,12 +232,6 @@ public class CentralXYHitDrawer implements IDrawable {
 		int adcCount = cnd.getCountAdc();
 		int tdcCount = cnd.getCountTdc();
 		
-//		System.err.println("adcCount = " + adcCount);
-//		System.err.println("tdcCount = " + tdcCount);
-		
-	//	TdcAdcHitList hits = cnd.getHits();
-		
-		
 		//tdc?
 		if (tdcCount > 0) {
 			for (int i = 0; i < tdcCount; i++) {
@@ -246,7 +261,7 @@ public class CentralXYHitDrawer implements IDrawable {
 			}
 		}
 		
-		//tdc?
+		//tdc again?
 		if (tdcCount > 0) {
 			for (int i = 0; i < tdcCount; i++) {
 				int hsect = cnd.tdc_sect[i];
@@ -259,70 +274,11 @@ public class CentralXYHitDrawer implements IDrawable {
 				g.setColor(Color.black);
 				g.drawLine(poly.xpoints[0], poly.ypoints[0], poly.xpoints[2], poly.ypoints[2]);
 				g.drawLine(poly.xpoints[1], poly.ypoints[1], poly.xpoints[3], poly.ypoints[3]);
-		//		poly.draw(g, container, null, Color.black);
-
 			}
 		}
 
 
-		
-//		TdcAdcHitList hits = CND.getInstance().getHits();
-//
-//		if ((hits != null) && !hits.isEmpty()) {
-//			for (TdcAdcHit hit : hits) {
-//				
-//				//adcs have order = 0, 1
-//				if (hit != null){
-//					
-//				//	System.err.println("ORDER: " + hit.order);
-//					
-//					//int comp = 1 + (hit.order % 2);
-//					
-//					//the scheme
-//					//cnd sectors 1-24
-//					//cnd layers 1-3
-//					//cnd component always 1
-//					//cnd adc order = 0, 1 for left, right
-//					//cnd tdc order = 2, 3 for left, right
-//					
-////					System.err.println("CND sect: " + hit.sector + " lay:" + hit.layer + " comp: " + hit.component + 
-////					" ord: " + hit.order + " adcL: " + hit.adcL + " adcR: " +  hit.adcR + 
-////					" tdcL: " + hit.tdcL + " tdcR: " +  hit.tdcR);
-//					
-//					boolean hasADC = (hit.adcL > -1) || (hit.adcL > -1);
-//					boolean hasTDC = (hit.tdcL > -1) || (hit.tdcL > -1);
-//					
-//					//will be 1 for left, 2 for right
-//					int leftRight = 1 + (hit.order % 2);
-//					
-//					
-//					CNDXYPolygon poly = _view.getCNDPolygon(hit.sector, hit.layer, leftRight);
-//					if (poly != null) {
-//						
-//						if (hasADC) {
-//							Color color = hits.adcColor(hit);
-//							poly.draw(g, container, color, Color.black);
-//						}
-//						
-//						if (hasTDC) {
-//							g.setColor(Color.red);
-//							g.drawLine(poly.xpoints[0], poly.ypoints[0], poly.xpoints[2], poly.ypoints[2]);
-//							g.drawLine(poly.xpoints[1], poly.ypoints[1], poly.xpoints[3], poly.ypoints[3]);
-//							poly.draw(g, container, null, Color.red);
-//						}
-//						
-////						if (hit.order < 2) {  //adc
-////							Color color = hits.adcColor(hit);
-////							poly.draw(g, container, color, Color.black);
-////						}
-////						else {
-////							poly.draw(g, container, null, Color.red);
-////						} //tdc
-//						
-//					}
-//				}
-//			}
-//		}
+
 	}
 	
 	

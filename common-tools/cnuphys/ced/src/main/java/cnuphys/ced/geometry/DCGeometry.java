@@ -53,11 +53,8 @@ public class DCGeometry {
 			_dcDataProvider = GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.DC);
 		}
 
-		// arghh ugly hack until GEMC is modified
 
 		DCFactoryUpdated dcFactory = new DCFactoryUpdated();
-		
-//		DCGeantFactory dcFactory = new DCGeantFactory();
 
 		_dcDetector = dcFactory.createDetectorCLAS(_dcDataProvider);
 
@@ -601,28 +598,31 @@ public class DCGeometry {
 		ext.y = p0.y + (p0.y - p1.y);
 	}
 	
+	/**
+	 * print the wire location
+	 * @param superlayer the 0-based superlayer
+	 * @param layer the zero based layer
+	 * @param wire the zero based wire
+	 */
 	public static void printWire(int superlayer, int layer, int wire) {
-				
-				DriftChamberWire dcw = wires[superlayer][layer][wire];
-				double x1 = dcw.getLine().origin().x();
-				double y1 = dcw.getLine().origin().y();
-				double z1 = dcw.getLine().origin().z();
-				
-				double x2 = dcw.getLine().end().x();
-				double y2 = dcw.getLine().end().y();
-				double z2 = dcw.getLine().end().z();
-				
-				double xm = dcw.getMidpoint().x();
-				double ym = dcw.getMidpoint().y();
-				double zm = dcw.getMidpoint().z();
 
+		DriftChamberWire dcw = wires[superlayer][layer][wire];
+		double x1 = dcw.getLine().origin().x();
+		double y1 = dcw.getLine().origin().y();
+		double z1 = dcw.getLine().origin().z();
 
-				
-				System.out.println(String.format(
-				"OLD  end (%-4.1f, %-4.1f, %-4.1f) end (%-4.1f, %-4.1f, %-4.1f) mid (%-4.1f, %-4.1f, %-4.1f)",
-				x1, y1, z1, x2, y2, z2,
-				xm, ym, zm));
-				
+		double x2 = dcw.getLine().end().x();
+		double y2 = dcw.getLine().end().y();
+		double z2 = dcw.getLine().end().z();
+
+		double xm = dcw.getMidpoint().x();
+		double ym = dcw.getMidpoint().y();
+		double zm = dcw.getMidpoint().z();
+
+		System.out.println(
+				String.format("supl %d lay %d wire %d end (%-4.1f, %-4.1f, %-4.1f) end (%-4.1f, %-4.1f, %-4.1f) mid (%-4.1f, %-4.1f, %-4.1f)",
+						superlayer+1, layer+1, wire+1, x1, y1, z1, x2, y2, z2, xm, ym, zm));
+
 	}
 
 	
@@ -630,6 +630,7 @@ public class DCGeometry {
 		initialize();
 
 		printWire(0, 0, 65);
+		printWire(4, 3, 75);
 
 		
 //		DriftChamberWire dcw = wires[0][0][0];

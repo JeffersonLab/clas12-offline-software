@@ -12,7 +12,10 @@ import org.jlab.geom.component.ScintillatorPaddle;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.util.Fonts;
+import cnuphys.bCNU.util.X11Colors;
+import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.CedXYView;
+import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.CND;
 import cnuphys.ced.geometry.CNDGeometry;
 
@@ -28,6 +31,9 @@ public class CNDXYPolygon extends Polygon {
 	 * The paddleId 1..48
 	 */
 	public int paddleId;
+	
+	private static final Color _navy = X11Colors.getX11Color("navy");
+	private static final Color _powder = X11Colors.getX11Color("powder blue");
 	
 	private static Font _font = Fonts.hugeFont;
 	
@@ -104,14 +110,24 @@ public class CNDXYPolygon extends Polygon {
 		if ((_leftRight == 1) && (layer == 2)) {
 			Point2D.Double centroid = WorldGraphicsUtilities.getCentroid(wp);
 			container.worldToLocal(pp, centroid);
-			g.setColor(Color.gray);
+			g.setColor(_powder);
 			g.setFont(_font);
 			g.drawString("" + sector, pp.x-6, pp.y+6);
+			g.setColor(_navy);
+			g.drawString("" + sector, pp.x-5, pp.y+7);
 
 		}
 
 	}
 
+	/**
+	 * Get the feedback strings
+	 * @param container the cdrawing container
+	 * @param screenPoint the mouse location
+	 * @param worldPoint the corresponding world point
+	 * @param feedbackStrings where to add the strings
+	 * @return true 
+	 */
 	public boolean getFeedbackStrings(IContainer container, Point screenPoint,
 			Point2D.Double worldPoint, List<String> feedbackStrings) {
 
@@ -122,43 +138,52 @@ public class CNDXYPolygon extends Polygon {
 			return false;
 		}
 
-		
-		fbString("cyan", "cnd sect " + sector + " layer " + layer + (_leftRight == 1 ? " [left]" : " [right]"), feedbackStrings);
+		fbString("cyan", "cnd sect " + sector + " layer " + layer + (_leftRight == 1 ? " [left]" : " [right]"),
+				feedbackStrings);
 
-		int adcCount = cnd.getCountAdc();
-		int tdcCount = cnd.getCountTdc();
-		
-		//adc?
-		if (adcCount > 0) {
-			for (int i = 0; i < adcCount; i++) {
-				int hsect = cnd.adc_sect[i];
-				int hlayer = cnd.adc_layer[i];
-				int hleftright = 1 + (cnd.adc_order[i] % 2);
-				
-				if ((sector == hsect) && (layer == hlayer) && (_leftRight == hleftright)) {
-					fbString("cyan", "cnd adc " + cnd.adc_ADC[i], feedbackStrings);
-					fbString("cyan", "cnd ped " + cnd.adc_ped[i], feedbackStrings);
-					
-					String timeStr = String.format("cnd time %-6.1f", cnd.adc_time[i]);
-					fbString("cyan", timeStr, feedbackStrings);
+		CedView view = (CedView) (container.getView());
+
+		if (view.isSingleEventMode()) {
+
+			int adcCount = cnd.getCountAdc();
+			int tdcCount = cnd.getCountTdc();
+
+			// adc?
+			if (adcCount > 0) {
+				for (int i = 0; i < adcCount; i++) {
+					int hsect = cnd.adc_sect[i];
+					int hlayer = cnd.adc_layer[i];
+					int hleftright = 1 + (cnd.adc_order[i] % 2);
+
+					if ((sector == hsect) && (layer == hlayer) && (_leftRight == hleftright)) {
+						fbString("cyan", "cnd adc " + cnd.adc_ADC[i], feedbackStrings);
+						fbString("cyan", "cnd ped " + cnd.adc_ped[i], feedbackStrings);
+
+						String timeStr = String.format("cnd time %-6.1f", cnd.adc_time[i]);
+						fbString("cyan", timeStr, feedbackStrings);
+					}
 				}
 			}
-		}
-		
-		//tdc?
-		if (tdcCount > 0) {
-			for (int i = 0; i < tdcCount; i++) {
-				int hsect = cnd.tdc_sect[i];
-				int hlayer = cnd.tdc_layer[i];
-				int hleftright = 1 + (cnd.tdc_order[i] % 2);
 
-				
-				if ((sector == hsect) && (layer == hlayer) && (_leftRight == hleftright)) {
-					fbString("cyan", "cnd tdc " + cnd.tdc_TDC[i], feedbackStrings);
+			// tdc?
+			if (tdcCount > 0) {
+				for (int i = 0; i < tdcCount; i++) {
+					int hsect = cnd.tdc_sect[i];
+					int hlayer = cnd.tdc_layer[i];
+					int hleftright = 1 + (cnd.tdc_order[i] % 2);
+
+					if ((sector == hsect) && (layer == hlayer) && (_leftRight == hleftright)) {
+						fbString("cyan", "cnd tdc " + cnd.tdc_TDC[i], feedbackStrings);
+					}
 				}
 			}
+		} else { //accumulated
+
+			int[][][] cndAccumData = AccumulationManager.getInstance().getAccumulatedCNDData();
+			int count = cndAccumData[sector-1][layer-1][_leftRight-1];
+			fbString("cyan", "accumulated count " + count, feedbackStrings);			//TODO FINISH
 		}
-		
+
 		return true;
 	}
 

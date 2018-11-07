@@ -107,6 +107,23 @@ public class CND extends DetectorData {
 	}
 
 
+	/**
+	 * Update data used only during accumulation
+	 */
+	public void updateData() {
+		adc_sect = ColumnData.getByteArray("CND::adc.sector");
+		adc_layer = ColumnData.getByteArray("CND::adc.layer");
+		adc_order = ColumnData.getByteArray("CND::adc.order");
+		adc_ADC = ColumnData.getIntArray("CND::adc.ADC");
+		adc_time = ColumnData.getFloatArray("CND::adc.time");
+		adc_ped = ColumnData.getShortArray("CND::adc.ped");
+		
+		tdc_sect = ColumnData.getByteArray("CND::tdc.sector");
+		tdc_layer = ColumnData.getByteArray("CND::tdc.layer");
+		tdc_order = ColumnData.getByteArray("CND::tdc.order");
+		tdc_TDC = ColumnData.getIntArray("CND::tdc.TDC");
+
+	}
 	
 	/**
 	 * Update the list. This is probably needed only during accumulation
