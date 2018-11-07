@@ -392,15 +392,16 @@ public class DetectorData {
                DetectorParticle p = particles.get(i);
                if (p.getTrackDetector()!=DetectorType.DC.getDetectorId() &&
                    p.getTrackDetector()!=DetectorType.CVT.getDetectorId() ) continue;
-               bank.setShort("index",i,(short)p.getTrackIndex());
-               bank.setShort("pindex",i,(short)i);
+               bank.setShort("index",row,(short)p.getTrackIndex());
+               bank.setShort("pindex",row,(short)i);
                for (int ii=0; ii<5; ii++) {
                    for (int jj=0; jj<5; jj++) {
                        String varName = String.format("C%d%d",ii+1,jj+1);
                        if (bank.getDescriptor().hasEntry(varName)!=true) continue;
-                       bank.setFloat(varName,i,p.getCovMatrix(ii,jj));
+                       bank.setFloat(varName,row,p.getCovMatrix(ii,jj));
                    }
                }
+               row++;
            }
        }
        return bank;
