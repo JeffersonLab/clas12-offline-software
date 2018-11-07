@@ -2,6 +2,7 @@ package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
 import org.jlab.detector.base.GeometryFactory;
+import org.jlab.detector.geom.dc.DCGeantFactory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.DriftChamberWire;
 import org.jlab.geom.detector.dc.DCDetector;
@@ -41,6 +42,12 @@ public class DCGeometry {
 	 * Initialize the DC Geometry by loading all the wires
 	 */
 	public static void initialize() {
+				
+//		ConstantProvider cp = GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.DC, 4013, "default");
+//		
+//        DCGeantFactory factory = new DCGeantFactory();
+//        
+//        _dcDetector = factory.createDetectorCLAS(cp);
 
 		if (_dcDataProvider == null) {
 			_dcDataProvider = GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.DC);
@@ -49,6 +56,9 @@ public class DCGeometry {
 		// arghh ugly hack until GEMC is modified
 
 		DCFactoryUpdated dcFactory = new DCFactoryUpdated();
+		
+//		DCGeantFactory dcFactory = new DCGeantFactory();
+
 		_dcDetector = dcFactory.createDetectorCLAS(_dcDataProvider);
 
 		sector0 = _dcDetector.getSector(0);

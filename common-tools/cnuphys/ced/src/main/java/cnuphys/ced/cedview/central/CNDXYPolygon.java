@@ -14,8 +14,6 @@ import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.event.data.CND;
-import cnuphys.ced.event.data.TdcAdcHit;
-import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.CNDGeometry;
 
 @SuppressWarnings("serial")
@@ -117,44 +115,50 @@ public class CNDXYPolygon extends Polygon {
 	public boolean getFeedbackStrings(IContainer container, Point screenPoint,
 			Point2D.Double worldPoint, List<String> feedbackStrings) {
 
+		
+		CND cnd = CND.getInstance();
+		
 		if (!contains(screenPoint)) {
 			return false;
 		}
 
 		
-		fbString("red", "cnd sector " + sector, feedbackStrings);
-		fbString("red", "cnd layer " + layer, feedbackStrings);
+		fbString("cyan", "cnd sect " + sector + " layer " + layer + (_leftRight == 1 ? " [left]" : " [right]"), feedbackStrings);
 
+		int adcCount = cnd.getCountAdc();
+		int tdcCount = cnd.getCountTdc();
 		
-		//hit?
-		
-		TdcAdcHit hit = null;
-		TdcAdcHitList hits = CND.getInstance().getHits();
-		if ((hits != null) && !hits.isEmpty()) {
-			// all hits have component 1
-			
-			hit = hits.get(sector, layer, 1);
-
-			if (hit != null) {				
-			
-				//will be 1 for left, 2 for right
-				int leftRight = 1 + (hit.order % 2);
+		//adc?
+		if (adcCount > 0) {
+			for (int i = 0; i < adcCount; i++) {
+				int hsect = cnd.adc_sect[i];
+				int hlayer = cnd.adc_layer[i];
+				int hleftright = 1 + (cnd.adc_order[i] % 2);
 				
-				if (_leftRight == leftRight) {
-				boolean hasADC = (hit.adcL > -1) || (hit.adcL > -1);
-				boolean hasTDC = (hit.tdcL > -1) || (hit.tdcL > -1);
-
-				fbString("cyan", "cnd order " + hit.order + " " + ((leftRight == 1) ? "left" : "right"), feedbackStrings);
-				fbString("cyan", "adcL " + hit.adcL, feedbackStrings);
-				fbString("cyan", "adcR " + hit.adcR, feedbackStrings);
-				fbString("cyan", "tdcL " + hit.tdcL, feedbackStrings);
-				fbString("cyan", "tdcR " + hit.tdcR, feedbackStrings);
+				if ((sector == hsect) && (layer == hlayer) && (_leftRight == hleftright)) {
+					fbString("cyan", "cnd adc " + cnd.adc_ADC[i], feedbackStrings);
+					fbString("cyan", "cnd ped " + cnd.adc_ped[i], feedbackStrings);
+					
+					String timeStr = String.format("cnd time %-6.1f", cnd.adc_time[i]);
+					fbString("cyan", timeStr, feedbackStrings);
 				}
-							
-
 			}
 		}
+		
+		//tdc?
+		if (tdcCount > 0) {
+			for (int i = 0; i < tdcCount; i++) {
+				int hsect = cnd.tdc_sect[i];
+				int hlayer = cnd.tdc_layer[i];
+				int hleftright = 1 + (cnd.tdc_order[i] % 2);
 
+				
+				if ((sector == hsect) && (layer == hlayer) && (_leftRight == hleftright)) {
+					fbString("cyan", "cnd tdc " + cnd.tdc_TDC[i], feedbackStrings);
+				}
+			}
+		}
+		
 		return true;
 	}
 

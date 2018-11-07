@@ -62,6 +62,7 @@ import cnuphys.ced.event.data.HBSegments;
 import cnuphys.ced.event.data.HTCC2;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.BSTCrosses;
+import cnuphys.ced.event.data.CND;
 import cnuphys.ced.event.data.TBCrosses;
 import cnuphys.ced.event.data.TBSegments;
 import cnuphys.ced.geometry.BSTGeometry;
@@ -111,7 +112,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 1.005d";
+	private static final String _release = "build 1.006";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -120,7 +121,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private JMenuItem _eventCountLabel;
 
 	// using 3D?
-	private static boolean _use3D = true;
+	private static boolean _use3D = false;
 	
 	// event menu
 	private ClasIoEventMenu _eventMenu;
@@ -1225,9 +1226,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 //					Log.getInstance().config("Solenoid Path: " + arg[i]);
 //					System.out.println("Solenoid Path: " + arg[i]);
 //				}
-				else if (arg[i].contains("NO3D")) {
-					_use3D = false;
-					System.err.println("Not using 3D");
+				else if (arg[i].contains("USE3D") || (arg[i].contains("TAKETHATGAGIKANDVERONIQUE"))) {
+					_use3D = true;
+					System.err.println("Using 3D");
 				}
 
 				i++;
@@ -1257,6 +1258,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		CTOF.getInstance();
 		BST.getInstance();
 		BMT.getInstance();
+		CND.getInstance();
 		Cosmics.getInstance();
 		DataManager.getInstance();
 
