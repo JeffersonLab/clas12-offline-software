@@ -257,13 +257,5 @@ public class EBEngine extends ReconstructionEngine {
         System.out.println("["+this.getName()+"] --> event builder is ready....");
         return true;
     }
-/*
-    public boolean init(int run) {
-        System.out.println("["+this.getName()+"] --> manually initting with run "+run+" ...");
-        this.init();
-        ccdb.load(run,this.getConstantsManager());
-        return true;
-    }
-*/
     
 }
