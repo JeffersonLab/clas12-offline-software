@@ -26,14 +26,16 @@ import org.jlab.clas.pdg.PhysicsConstants;
  * @author baltzell
  */
 public class DetectorParticle implements Comparable {
-   
+  
+    public static final Double DEFAULTQUALITY=99.0;
+
     private boolean isTriggerParticle = false;
     private Integer particlePID       = 0;
     private Integer particleStatus    = 1;
     private Integer particleTrackIndex = -1;
     private Double  particleBeta      = 0.0;
     private Double  particleMass      = 0.0;
-    private Double  particleIDQuality = 9999.0;
+    private Double  particleIDQuality = DEFAULTQUALITY;
     private Double  particlePath      = 0.0; 
     private int     particleScore     = 0; // scores are assigned detector hits
     private double  particleScoreChi2 = 0.0; // chi2 for particle score 

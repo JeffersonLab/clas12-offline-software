@@ -355,7 +355,7 @@ public class EBAnalyzer {
          * Get a basic pid quality factor.
          */
         public double PIDQuality(DetectorParticle p, int pid, DetectorEvent event) {
-            double q=9999;
+            double q=DetectorParticle.DEFAULTQUALITY;
 
             // electron/positron:
             if (abs(pid)==11) {
