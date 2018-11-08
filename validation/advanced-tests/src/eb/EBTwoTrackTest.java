@@ -165,6 +165,7 @@ public class EBTwoTrackTest {
             DataEvent event = reader.getNextEvent();
             getBanks(event);
             checkAllRefs(event);
+            checkParticleStatus(event);
             if (!udfFileType) {
                 if (isForwardTagger) processEventFT(event);
                 else processEvent(event);
@@ -379,14 +380,14 @@ public class EBTwoTrackTest {
      * Check that REC::Particle.status agrees with REC::Detector banks.
      *
      */
-    public void checkParticleStatus() {
+    public void checkParticleStatus(DataEvent event) {
         if (recPartBank==null) return;
         for (int ipart=0; ipart<recPartBank.rows(); ipart++) {
             final int status = recPartBank.getShort("status",ipart);
             final boolean isFD = ((int)status/1000)==2;
             final int ncher = status%10;
-            final int ncalo = status%100  - ncher;
-            final int nscin = status%1000 - ncher - ncalo;
+            final int ncalo = (status%100  - ncher)/10;
+            final int nscin = (status%1000 - ncalo*10 - ncher)/100;
             int mcher=0;
             int mcalo=0;
             int mscin=0;
@@ -396,12 +397,13 @@ public class EBTwoTrackTest {
             // cherenkov is special case, requires 2 photoelectrons to be in status:
             if (recCheMap.containsKey(ipart)) {
                 for (int iche : recCheMap.get(ipart)) {
-                    if (recCheBank.getInt("nphe",iche)>=2) mcher++;
+                    if (recCheBank.getFloat("nphe",iche)>2) mcher++;
                 }
             }
-            assertEquals("Cherenkov Count, Event "+recBank.getInt("NEVENT",0),mcher,ncher);
-            assertEquals("Calorimeter Count, Event "+recBank.getInt("NEVENT",0),mcalo,ncalo);
-            assertEquals("Scintillator Count, Event "+recBank.getInt("NEVENT",0),mscin,nscin);
+            if (mcalo!=ncalo || mscin!=nscin || mcher!=ncher) { recPartBank.show(); recCalBank.show(); recSciBank.show(); recCheBank.show(); }
+            assertEquals(String.format("Cherenkov Count, Event >%d<",recBank.getInt("NEVENT",0)),ncher,mcher);
+            assertEquals(String.format("Calorimeter Count, Event >%d<",recBank.getInt("NEVENT",0)),ncalo,mcalo);
+            assertEquals(String.format("Scintillator Count, Event >%d<",recBank.getInt("NEVENT",0)),nscin,mscin);
         }
     }
 
