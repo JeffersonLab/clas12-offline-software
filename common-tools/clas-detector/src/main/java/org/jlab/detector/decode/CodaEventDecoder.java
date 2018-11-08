@@ -1251,9 +1251,7 @@ public class CodaEventDecoder {
                 }
             }
         }
-	 if(tiEntries.size()>0) {
-            long ts = tiEntries.get(0).getTimeStamp();
-	 }
+
         return tiEntries;
     }
 
