@@ -16,6 +16,7 @@ import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorTrack;
 import org.jlab.clas.detector.TaggerResponse;
+import org.jlab.clas.detector.CherenkovResponse;
 
 import org.jlab.rec.eb.EBConstants;
 import org.jlab.rec.eb.EBCCDBConstants;
@@ -112,15 +113,17 @@ public class EventBuilder {
                 findMatchingHit(n,p,detectorResponses,DetectorType.ECAL, 4, ccdb.getDouble(EBCCDBEnum.ECIN_MATCHING));
                 findMatchingHit(n,p,detectorResponses,DetectorType.ECAL, 7, ccdb.getDouble(EBCCDBEnum.ECOUT_MATCHING));
 
-                // HTCC:
-                int index = p.getCherenkovSignal(this.detectorResponses,DetectorType.HTCC);
-                if(index>=0){
-                    p.addResponse(detectorResponses.get(index));
-                    detectorResponses.get(index).setAssociation(n);
-                } 
+// Treat HTCC specially below, leave this here for now.
+//                // HTCC:
+//                // Find matching cluster for each particle.
+//                int index = p.getCherenkovSignal(this.detectorResponses,DetectorType.HTCC);
+//                if(index>=0){
+//                    p.addResponse(detectorResponses.get(index));
+//                    detectorResponses.get(index).setAssociation(n);
+//                } 
 
                 // LTCC:
-                index = p.getCherenkovSignal(this.detectorResponses,DetectorType.LTCC);
+                int index = p.getCherenkovSignal(this.detectorResponses,DetectorType.LTCC);
                 if(index>=0){
                     p.addResponse(detectorResponses.get(index));
                     detectorResponses.get(index).setAssociation(n);
@@ -135,7 +138,47 @@ public class EventBuilder {
             }
 
         }
+
+        // Special treatment for HTCC, with coarse resolution.
+        // Try all combos of HTCC clusters and particle to find best matches.
+        while (true) {
+            int bestPart=-1;
+            int bestRes=-1;
+            CherenkovResponse.TrackResidual bestTR=null;
+            for (int ires=0; ires<this.detectorResponses.size(); ires++) {
+                if (this.detectorResponses.get(ires).getDescriptor().getType() != DetectorType.HTCC) continue;
+                if (this.detectorResponses.get(ires).getAssociation()>=0) continue;
+                CherenkovResponse che=(CherenkovResponse)this.detectorResponses.get(ires);
+                int ipart = che.findClosestTrack(this.detectorEvent.getParticles());
+                if (ipart < 0) continue;
+                CherenkovResponse.TrackResidual tr = che.getTrackResidual(this.detectorEvent.getParticle(ipart));
+                if (bestTR==null || tr.compareTo(bestTR)<0) {
+                    bestPart = ipart;
+                    bestRes = ires;
+                    bestTR = tr;
+                }
+            }
+            if (bestTR==null) break;
+            this.detectorEvent.getParticle(bestPart).addResponse(this.detectorResponses.get(bestRes),true);
+            this.detectorResponses.get(bestRes).setAssociation(bestPart);
+        }
+       /* 
+        // Special treatment for HTCC, with coarse resolution.
+        // Find matching particle for each cluster.
+        for (int ii=0; ii<this.detectorResponses.size();ii++) {
+            if (this.detectorResponses.get(ii).getAssociation()>=0) continue;
+            if (this.detectorResponses.get(ii) instanceof CherenkovResponse) {
+                CherenkovResponse che = (CherenkovResponse)this.detectorResponses.get(ii);
+                int index = che.findClosestTrack(this.detectorEvent.getParticles());
+                if (index>=0) {
+                    this.detectorEvent.getParticle(index).addResponse(che);
+                    che.setAssociation(index);
+                }
+            }
+        }
+        */
     }
+
 
     /**
      * Find closest matching response of given detector type and layer within given distance.

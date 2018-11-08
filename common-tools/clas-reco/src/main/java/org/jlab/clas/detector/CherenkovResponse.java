@@ -17,7 +17,7 @@ import org.jlab.io.base.DataEvent;
  */
 public class CherenkovResponse extends DetectorResponse {
 
-    public static class TrackResidual {
+    public static class TrackResidual implements Comparable {
         private double coneAngle;
         private double dTheta;
         private double dPhi;
@@ -31,6 +31,12 @@ public class CherenkovResponse extends DetectorResponse {
             this.dTheta = vecHit.theta()-vecTrk.theta();
             this.dPhi = cher.getDeltaPhi(vecHit.phi(),vecTrk.phi());
             this.coneAngle = vecHit.angle(vecTrk);
+        }
+        public int compareTo(Object o) {
+            TrackResidual other = (TrackResidual)o;
+            if (this.coneAngle < other.getConeAngle()) return -1;
+            if (this.coneAngle > other.getConeAngle()) return  1;
+            return 0;
         }
     }
 
@@ -81,29 +87,41 @@ public class CherenkovResponse extends DetectorResponse {
         plane.intersection(line, intersect);
         return intersect;
     }
-
-    public boolean match(Line3D particletrack){
-        Point3D intersection = this.getIntersection(particletrack);
-        Vector3D vecRec = intersection.toVector3D();
-        Vector3D vecHit = this.hitPosition.toVector3D();
-        // FIXME:
-        // 1. remove hardcoded constant (10 degrees)
-        // 2. either use both dphi and dtheta from detector bank (only
-        //    exists for HTCC), or get both from CCDB
-        return (Math.abs(vecHit.theta()-vecRec.theta())<10.0/57.2958
-        && Math.abs(getDeltaPhi(vecHit.phi(),vecRec.phi()))<this.hitDeltaPhi);
-    }
-   
-    public boolean matchToPoint(Line3D trackPoint) {
-        if (trackPoint==null) return false;
-        Vector3D vecTrk = trackPoint.origin().toVector3D();
-        Vector3D vecHit = this.hitPosition.toVector3D();
-        return (Math.abs(vecHit.theta()-vecTrk.theta())<10.0/57.2958
-        && Math.abs(getDeltaPhi(vecHit.phi(),vecTrk.phi()))<this.hitDeltaPhi);
-    }
-
+    
     public TrackResidual getTrackResidual(Line3D particleTrack) {
         return new TrackResidual(this,particleTrack);
+    }
+
+    public TrackResidual getTrackResidual(DetectorParticle particle) {
+        return new TrackResidual(this,this.getCross(particle));
+    }
+
+    public Line3D getCross(DetectorParticle part) {
+        if (this.getDescriptor().getType() == DetectorType.HTCC)
+            return part.getFirstCross();
+        else if (this.getDescriptor().getType() == DetectorType.LTCC)
+            return part.getLastCross();
+        else
+            throw new RuntimeException("DetectorParticle:getCheckr5noSignal:  invalid type:  "+this.getDescriptor().getType());
+    }
+
+    public int findClosestTrack(List<DetectorParticle> parts) {
+        int best=-1;
+        TrackResidual trBest=null;
+        for (int ipart=0; ipart<parts.size(); ipart++) {
+            if (parts.get(ipart).getCharge()==0) continue;
+            if (parts.get(ipart).getTrackDetectorID()!=DetectorType.DC.getDetectorId()) continue;
+            if (parts.get(ipart).countResponses(this.getDescriptor().getType()) > 0) continue;
+            TrackResidual tr=getTrackResidual(parts.get(ipart));
+            if (trBest == null || tr.compareTo(trBest)<0) {//getConeAngle() < trBest.getConeAngle()) {
+                if (tr.getDeltaTheta() < this.getDeltaTheta() &&
+                    tr.getDeltaPhi() < this.getDeltaPhi()) {
+                    trBest=tr;
+                    best=ipart;
+                }
+            }
+        }
+        return best;
     }
 
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
@@ -122,26 +140,25 @@ public class CherenkovResponse extends DetectorResponse {
 
                 // FIXME: unify LTCC/HTCC detector banks
                 // Here we have to treat them differently:
-                // 2.  either add dtheta/dphi to LTCC, or ignore HTCC's and use CCDB for both
                 // 3.  HTCC provides both x/y/z and theta/phi, while LTCC provides only x/y/z.
                 //     The current convention in EB is to use only x/y/z, while theta/phi is
                 //     just propogated.
 
                 double theta=0,phi=0,dtheta=0,dphi=0;
 
+                // FIXME:  move these constants to CCDB
                 if (type==DetectorType.HTCC) {
-                    dtheta = 10*3.14159/180;// based on MC //bank.getFloat("dtheta",row);
-                    dphi   = 18*3.14159/180;// based on MC //bank.getFloat("dphi",row);
+                    dtheta = 10*3.14159/180; // based on MC
+                    dphi   = 18*3.14159/180; // based on MC
                     theta = bank.getFloat("theta", row);
-                    phi = bank.getFloat("phi",row);
+                    phi   = bank.getFloat("phi",row);
                 }
 
                 else if (type==DetectorType.LTCC) {
-                    // Hardcode some dtheta/dphi values for now (for matching):
                     dtheta = (35-5)/18*2 * 3.14159/180; // +/- 2 mirrors
                     dphi   = 10*3.14159/180;
-                    // Fill theta/phi:
-                    // Not yet.
+                    theta = Math.atan2(Math.sqrt(x*x+y*y),z);
+                    phi   = Math.atan2(y,x);
                 }
 
                 else {
