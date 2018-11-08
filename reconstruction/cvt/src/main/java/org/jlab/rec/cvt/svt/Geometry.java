@@ -6,7 +6,6 @@ import eu.mihosoft.vrl.v3d.Vector3d;
 import java.io.FileNotFoundException;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
-import org.jlab.clas.clas.math.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Triangle3d;
@@ -79,7 +78,7 @@ public class Geometry {
         //double angle = 2.*Math.PI*((double)(sector-1)/(double)Constants.NSECT[layer-1]) + Math.PI/2.;
         double angle = 2. * Math.PI * ((double) -(sector - 1) / (double) Constants.NSECT[layer - 1]) + Constants.PHI0[layer - 1];
 
-        return new Vector3D(FastMath.cos(angle), FastMath.sin(angle), 0);
+        return new Vector3D(Math.cos(angle), Math.sin(angle), 0);
     }
     //***
 
@@ -149,13 +148,13 @@ public class Geometry {
                 gap = Constants.MODULERADIUS[layer][sector - 1] - Constants.MODULERADIUS[layer - 1][sector - 1];
             }
         }
-        double lTx = (Constants.MODULERADIUS[layer - 1][sector - 1] + 0.5 * gap) * FastMath.cos(Glob_rangl);
-        double lTy = (Constants.MODULERADIUS[layer - 1][sector - 1] + 0.5 * gap) * FastMath.sin(Glob_rangl);
+        double lTx = (Constants.MODULERADIUS[layer - 1][sector - 1] + 0.5 * gap) * Math.cos(Glob_rangl);
+        double lTy = (Constants.MODULERADIUS[layer - 1][sector - 1] + 0.5 * gap) * Math.sin(Glob_rangl);
         double lTz = Constants.Z0[layer - 1];
 
         //rotate and translate
-        double cosRotation = FastMath.cos(Loc_to_Glob_rangl);
-        double sinRotation = FastMath.sin(Loc_to_Glob_rangl);
+        double cosRotation = Math.cos(Loc_to_Glob_rangl);
+        double sinRotation = Math.sin(Loc_to_Glob_rangl);
 
         double xt = 0;
         double yt = 0;
@@ -220,8 +219,8 @@ public class Geometry {
         // angle to rotate to global frame
         double Loc_to_Glob_rangl = Glob_rangl - Constants.LOCZAXISROTATION;
 
-        double cosRotation = FastMath.cos(Loc_to_Glob_rangl);
-        double sinRotation = FastMath.sin(Loc_to_Glob_rangl);
+        double cosRotation = Math.cos(Loc_to_Glob_rangl);
+        double sinRotation = Math.sin(Loc_to_Glob_rangl);
 
         double yerr = Math.abs(cosRotation * LCErr_x);
         double xerr = Math.abs(sinRotation * LCErr_x);
@@ -533,9 +532,9 @@ public class Geometry {
         int nstep = 1;
         double stepSize = 0.001;
 
-        double Theta = FastMath.atan2((Constants.ACTIVESENWIDTH / 2), Constants.MODULERADIUS[layer - 1][sector - 1]);
+        double Theta = Math.atan2((Constants.ACTIVESENWIDTH / 2), Constants.MODULERADIUS[layer - 1][sector - 1]);
         double RMin = Constants.MODULERADIUS[layer - 1][sector - 1];
-        double RMax = RMin / FastMath.cos(Theta);
+        double RMax = RMin / Math.cos(Theta);
         double R = RMin;
 
         Point3D InterPoint = helix.getPointAtRadius(R);

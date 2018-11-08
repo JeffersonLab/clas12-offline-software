@@ -1,6 +1,5 @@
 package org.jlab.rec.cvt.hit;
 
-import org.jlab.clas.clas.math.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
@@ -149,7 +148,7 @@ public class Strip {
             // get the strip number after correcting for Lorentz angle
             this.set_LCStrip(theLorentzCorrectedStrip);
 
-            double sigma = org.jlab.rec.cvt.bmt.Constants.SigmaDrift / FastMath.cos(org.jlab.rec.cvt.bmt.Constants.getThetaL()); // max sigma for drift distance  (hDrift) = total gap from top to mesh
+            double sigma = org.jlab.rec.cvt.bmt.Constants.SigmaDrift / Math.cos(org.jlab.rec.cvt.bmt.Constants.getThetaL()); // max sigma for drift distance  (hDrift) = total gap from top to mesh
 
             int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6double Z0=0;
             //max phi err

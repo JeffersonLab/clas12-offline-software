@@ -2,8 +2,6 @@ package org.jlab.rec.cvt.bmt;
 
 import java.util.Random;
 
-import org.jlab.clas.clas.math.FastMath;
-
 public class Geometry {
 
     public Geometry() {
@@ -265,7 +263,7 @@ public class Geometry {
 
         int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
         //double sigma = Constants.SigmaDrift * Math.sqrt((Math.sqrt(x * x + y * y) - Constants.getCRCRADIUS()[num_region] + Constants.hStrip2Det) / Constants.hDrift);
-        double sigma = Constants.SigmaDrift * ((Math.sqrt(x * x + y * y) - Constants.getCRZRADIUS()[num_region] + Constants.hStrip2Det) / Constants.hDrift / FastMath.cos(Constants.getThetaL()));
+        double sigma = Constants.SigmaDrift * ((Math.sqrt(x * x + y * y) - Constants.getCRZRADIUS()[num_region] + Constants.hStrip2Det) / Constants.hDrift / Math.cos(Constants.getThetaL()));
   
         return sigma;
 
@@ -282,7 +280,7 @@ public class Geometry {
     public double getSigmaAzimuth(int layer, double x, double y) { // sigma for Z-detectors
 
         int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6double Z0=0;
-        double sigma = Constants.SigmaDrift * Math.sqrt((Math.sqrt(x * x + y * y) - Constants.getCRZRADIUS()[num_region] + Constants.hStrip2Det) / Constants.hDrift / FastMath.cos(Constants.getThetaL()));
+        double sigma = Constants.SigmaDrift * Math.sqrt((Math.sqrt(x * x + y * y) - Constants.getCRZRADIUS()[num_region] + Constants.hStrip2Det) / Constants.hDrift / Math.cos(Constants.getThetaL()));
 
         return sigma;
 
@@ -315,14 +313,14 @@ public class Geometry {
 		if(layer%2==1)  {// Z layer
 			sigma = getSigmaAzimuth(layer, x, y); //  azimuth shower profile taking into account the Lorentz angle
 			// changes phi
-			double phicorr = (this.randomGaus(0, sigma, rand)/FastMath.cos(Constants.getThetaL())
+			double phicorr = (this.randomGaus(0, sigma, rand)/Math.cos(Constants.getThetaL())
 					-(Math.sqrt(x*x+y*y)-Constants.getCRZRADIUS()[num_region]+
 							Constants.hStrip2Det)*Math.tan(Constants.getThetaL()))/Constants.getCRZRADIUS()[num_region];
-			double phi = FastMath.atan2(y, x); 
+			double phi = Math.atan2(y, x); 
 			phi+=phicorr;
 			
-			x = Math.sqrt(x*x+y*y)*FastMath.cos(phi);
-			y = Math.sqrt(x*x+y*y)*FastMath.sin(phi);
+			x = Math.sqrt(x*x+y*y)*Math.cos(phi);
+			y = Math.sqrt(x*x+y*y)*Math.sin(phi);
 		}
 		newPos[0] = x;
 		newPos[1] = y;
@@ -355,18 +353,18 @@ public class Geometry {
  	
      	//Rotate around z
      	double xx=newPos[0];
-     	newPos[0]=FastMath.cos(ThetaZ)*xx+FastMath.sin(ThetaZ)*newPos[1];
-     	newPos[1]=-FastMath.sin(ThetaZ)*xx+FastMath.cos(ThetaZ)*newPos[1];
+     	newPos[0]=Math.cos(ThetaZ)*xx+Math.sin(ThetaZ)*newPos[1];
+     	newPos[1]=-Math.sin(ThetaZ)*xx+Math.cos(ThetaZ)*newPos[1];
  	
      	//Rotate around x
      	double yy=newPos[1];
-     	newPos[1]=FastMath.cos(ThetaX)*yy+FastMath.sin(ThetaX)*newPos[2];
-     	newPos[2]=-FastMath.sin(ThetaX)*yy+FastMath.cos(ThetaX)*newPos[2];
+     	newPos[1]=Math.cos(ThetaX)*yy+Math.sin(ThetaX)*newPos[2];
+     	newPos[2]=-Math.sin(ThetaX)*yy+Math.cos(ThetaX)*newPos[2];
  	
      	//Rotate around Y
      	double zz=newPos[2];
-     	newPos[2]=FastMath.cos(ThetaY)*zz+FastMath.sin(ThetaY)*newPos[0];
-     	newPos[0]=-FastMath.sin(ThetaY)*zz+FastMath.cos(ThetaY)*newPos[0];
+     	newPos[2]=Math.cos(ThetaY)*zz+Math.sin(ThetaY)*newPos[0];
+     	newPos[0]=-Math.sin(ThetaY)*zz+Math.cos(ThetaY)*newPos[0];
  	
  	return newPos;
      }
@@ -385,18 +383,18 @@ public class Geometry {
  	
  	//Rotate around z
  	double xx=newPos[0];
- 	newPos[0]=FastMath.cos(ThetaZ)*xx+FastMath.sin(ThetaZ)*newPos[1];
- 	newPos[1]=-FastMath.sin(ThetaZ)*xx+FastMath.cos(ThetaZ)*newPos[1];
+ 	newPos[0]=Math.cos(ThetaZ)*xx+Math.sin(ThetaZ)*newPos[1];
+ 	newPos[1]=-Math.sin(ThetaZ)*xx+Math.cos(ThetaZ)*newPos[1];
  	
  	//Rotate around x
  	double yy=newPos[1];
- 	newPos[1]=FastMath.cos(ThetaX)*yy+FastMath.sin(ThetaX)*newPos[2];
- 	newPos[2]=-FastMath.sin(ThetaX)*yy+FastMath.cos(ThetaX)*newPos[2];
+ 	newPos[1]=Math.cos(ThetaX)*yy+Math.sin(ThetaX)*newPos[2];
+ 	newPos[2]=-Math.sin(ThetaX)*yy+Math.cos(ThetaX)*newPos[2];
  	
  	//Rotate around Y
  	double zz=newPos[2];
- 	newPos[2]=FastMath.cos(ThetaY)*zz+FastMath.sin(ThetaY)*newPos[0];
- 	newPos[0]=-FastMath.sin(ThetaY)*zz+FastMath.cos(ThetaY)*newPos[0];
+ 	newPos[2]=Math.cos(ThetaY)*zz+Math.sin(ThetaY)*newPos[0];
+ 	newPos[0]=-Math.sin(ThetaY)*zz+Math.cos(ThetaY)*newPos[0];
  	
  	newPos[0] = x+org.jlab.rec.cvt.bmt.Constants.Cx[layer-1][sector-1];
  	newPos[1] = y+org.jlab.rec.cvt.bmt.Constants.Cy[layer-1][sector-1];
@@ -442,7 +440,7 @@ public class Geometry {
             angle_i = A_f;
         }
         // the hit parameters
-        double angle = FastMath.atan2(x[1], x[0]);
+        double angle = Math.atan2(x[1], x[0]);
         if (angle > 2 * Math.PI) {
             angle -= 2 * Math.PI;
         }
@@ -606,10 +604,10 @@ public class Geometry {
 		}
 		 double[] X = geo.smearedPosition(5, 0 , Constants.CRZRADIUS[2] , 0);
 		 System.out.println(0+", "+(0.3+Constants.CRZRADIUS[2])+" , "+0+"  smeared "+X[0]+", "+X[1]+" , "+X[2]);
-		 System.out.println(geo.getZStrip(5, FastMath.atan2(Constants.CRZRADIUS[2],0 )));
-		 System.out.println(geo.getZStrip(5, FastMath.atan2(X[1],X[0])));
-		 System.out.println(Math.toDegrees( geo.CRZStrip_GetPhi(1,6, geo.getZStrip(5, FastMath.atan2(X[1],X[0]))) ));	
-		 int theMeasuredZStrip = geo.getZStrip(5, FastMath.atan2(X[1],X[0])); // start reco
+		 System.out.println(geo.getZStrip(5, Math.atan2(Constants.CRZRADIUS[2],0 )));
+		 System.out.println(geo.getZStrip(5, Math.atan2(X[1],X[0])));
+		 System.out.println(Math.toDegrees( geo.CRZStrip_GetPhi(1,6, geo.getZStrip(5, Math.atan2(X[1],X[0]))) ));	
+		 int theMeasuredZStrip = geo.getZStrip(5, Math.atan2(X[1],X[0])); // start reco
 		 double theMeasuredPhi = geo.CRZStrip_GetPhi(1,6,theMeasuredZStrip);
 		 double theLorentzCorrectedAngle = geo.LorentzAngleCorr( theMeasuredPhi, 6);
 		 System.out.println(" corrected phi = "+Math.toDegrees(theLorentzCorrectedAngle));
@@ -617,8 +615,8 @@ public class Geometry {
 		 System.out.println(theMeasuredZStrip+" "+theLorentzCorrectedStrip); */
  /*
 		 double phiC = geo.CRZStrip_GetPhi(3,6,216);
-		 double x = Constants.CRCRADIUS[2]*FastMath.cos(phiC);
-		 double y = Constants.CRCRADIUS[2]*FastMath.sin(phiC);
+		 double x = Constants.CRCRADIUS[2]*Math.cos(phiC);
+		 double y = Constants.CRCRADIUS[2]*Math.sin(phiC);
 		 int theMeasuredCStrip = geo.getCStrip(6,X[2]);
 		 double z = geo.CRCStrip_GetZ(6,309);
 		 System.out.println(x+", "+y+", "+z);*/

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 
-import org.jlab.clas.clas.math.FastMath;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.fit.StateVecs.StateVec;
 
@@ -107,7 +106,7 @@ public class MeasVecs {
     }
 
     public double hPhi(StateVec stateVec) {
-        return FastMath.atan2(stateVec.y, stateVec.x);
+        return Math.atan2(stateVec.y, stateVec.x);
     }
 
     public double hZ(StateVec stateVec) {
@@ -283,14 +282,14 @@ public class MeasVecs {
             //double dz = stateVec.dz;
             double tanL = stateVec.tanL;
 
-            double delx_deldrho = FastMath.cos(phi0);
-            double dely_deldrho = FastMath.sin(phi0);
+            double delx_deldrho = Math.cos(phi0);
+            double dely_deldrho = Math.sin(phi0);
             double delz_deldrho = 0;
-            double delx_delphi0 = -drho * FastMath.sin(phi0) - alpha / kappa * (FastMath.sin(phi0) - FastMath.sin(phi0 + phi));
-            double dely_delphi0 = drho * FastMath.cos(phi0) + alpha / kappa * (FastMath.cos(phi0) - FastMath.cos(phi0 + phi));
+            double delx_delphi0 = -drho * Math.sin(phi0) - alpha / kappa * (Math.sin(phi0) - Math.sin(phi0 + phi));
+            double dely_delphi0 = drho * Math.cos(phi0) + alpha / kappa * (Math.cos(phi0) - Math.cos(phi0 + phi));
             double delz_delphi0 = 0;
-            double delx_delkappa = -alpha / (kappa * kappa) * (FastMath.cos(phi0) - FastMath.cos(phi0 + phi));
-            double dely_delkappa = -alpha / (kappa * kappa) * (FastMath.sin(phi0) - FastMath.sin(phi0 + phi));
+            double delx_delkappa = -alpha / (kappa * kappa) * (Math.cos(phi0) - Math.cos(phi0 + phi));
+            double dely_delkappa = -alpha / (kappa * kappa) * (Math.sin(phi0) - Math.sin(phi0 + phi));
             double delz_delkappa = alpha / (kappa * kappa) * tanL * phi;
             double delx_deldz = 0;
             double dely_deldz = 0;

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jlab.clas.clas.math.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cluster.Cluster;
@@ -149,7 +148,7 @@ public class TrajectoryFinder {
                     trkDir.x(), trkDir.y(), trkDir.z());
             
             stVec.set_planeIdx(l);  
-            double phiPos = FastMath.atan2(stVec.y(),stVec.x());
+            double phiPos = Math.atan2(stVec.y(),stVec.x());
             int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
             stVec.set_SurfaceSector(sector);
             stVec.set_SurfaceLayer(l+1); 
@@ -195,7 +194,7 @@ public class TrajectoryFinder {
 //                    trkDir.x(), trkDir.y(), trkDir.z());
 //                    stVecZ.set_planeIdx(l);
                     //Z-detector measuring phi   
-//                    double phiPos = FastMath.atan2(stVec.y(),stVec.x());
+//                    double phiPos = Math.atan2(stVec.y(),stVec.x());
                     stVec.set_CalcCentroidStrip(bmt_geo.getZStrip(BMTRegIdx+1,  phiPos));
 //                    int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
 //                    stVecZ.set_SurfaceSector(sector);
@@ -217,7 +216,7 @@ public class TrajectoryFinder {
         return traj;
     }
     private void fill_HelicalTrkAngleWRTBMTTangentPlane(Vector3D trkDir, StateVec stVec){
-        double phiPos = FastMath.atan2(stVec.y(),stVec.x());
+        double phiPos = Math.atan2(stVec.y(),stVec.x());
         Vector3D trkDirRot = trkDir.clone();
         trkDirRot.rotateZ(Math.PI/2-phiPos); // Bring the track direction vector in phi=0
         double thetaC = Math.abs( Math.toRadians(90) - Math.abs(Math.atan(trkDirRot.y()/trkDirRot.z())) );
@@ -247,7 +246,7 @@ public class TrajectoryFinder {
         double xl = u.dot(ui);
         double yl = u.dot(uj);
 
-        double PhiTrackIntersPlane = FastMath.atan2(yl, xl);
+        double PhiTrackIntersPlane = Math.atan2(yl, xl);
         double ThetaTrackIntersPlane = Math.acos(zl);
 
         stVec.set_TrkPhiAtSurface(PhiTrackIntersPlane);
@@ -345,7 +344,7 @@ public class TrajectoryFinder {
                     double XtrackIntersSurf = BMTIntersections[l][h][0];
                     double YtrackIntersSurf = BMTIntersections[l][h][1];
                     double ZtrackIntersSurf = BMTIntersections[l][h][2];
-                    int SectorTrackIntersSurf = bmt_geo.isInSector(LayerTrackIntersSurf, FastMath.atan2(YtrackIntersSurf, XtrackIntersSurf), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter));
+                    int SectorTrackIntersSurf = bmt_geo.isInSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter));
                     double PhiTrackIntersSurf = BMTIntersections[l][h][3];
                     double ThetaTrackIntersSurf = BMTIntersections[l][h][4];
                     double trkToMPlnAngl = BMTIntersections[l][h][5];
@@ -502,10 +501,10 @@ public class TrajectoryFinder {
             if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 1) { //Z-detector measuring phi
                 // calculate the hit residuals
                 for (FittedHit h1 : cluster) {
-                    double StripX = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] * FastMath.cos(h1.get_Strip().get_Phi());
-                    double StripY = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] * FastMath.sin(h1.get_Strip().get_Phi());
+                    double StripX = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] * Math.cos(h1.get_Strip().get_Phi());
+                    double StripY = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] * Math.sin(h1.get_Strip().get_Phi());
 
-                    double Sign = Math.signum(FastMath.atan2(StripY - stVec.y(), StripX - stVec.x()));
+                    double Sign = Math.signum(Math.atan2(StripY - stVec.y(), StripX - stVec.x()));
                     double docaToTrk = Sign * Math.sqrt((StripX - stVec.x()) * (StripX - stVec.x()) + (StripY - stVec.y()) * (StripY - stVec.y()));
                     double stripResol = h1.get_Strip().get_PhiErr();
                     h1.set_docaToTrk(docaToTrk);
@@ -544,7 +543,7 @@ public class TrajectoryFinder {
                     continue;
                 }
 
-                Vector3D n = new Vector3D(FastMath.cos(FastMath.atan2(p.y(), p.x())), FastMath.sin(FastMath.atan2(p.y(), p.x())), 0);
+                Vector3D n = new Vector3D(Math.cos(Math.atan2(p.y(), p.x())), Math.sin(Math.atan2(p.y(), p.x())), 0);
                 Vector3D ui = new Vector3D(n.y(), -n.x(), 0); //longitudinal vector along the local x direction of the module
 
                 Vector3D uj = ui.cross(n); //longitudinal vector along the local z direction of the module
@@ -563,7 +562,7 @@ public class TrajectoryFinder {
                 double xl = u.dot(ui);
                 double yl = u.dot(uj);
 
-                double phi = FastMath.atan2(yl, xl);
+                double phi = Math.atan2(yl, xl);
                 double theta = Math.acos(zl);
 
                 result[l][h][0] = p.x();
@@ -623,7 +622,7 @@ public class TrajectoryFinder {
                     double xl = u.dot(ui);
                     double yl = u.dot(uj);
 
-                    double phi = FastMath.atan2(yl, xl);
+                    double phi = Math.atan2(yl, xl);
                     double theta = Math.acos(zl);
 
                     result[l][s][0] = p.x();
@@ -656,10 +655,10 @@ public class TrajectoryFinder {
         double dot = (n.x() * _yxslope2 + n.y());
 
         if (Math.abs(dot) > epsilon) {
-            //threeVec w = new threeVec(_yxinterc2+Constants.MODULERADIUS[l][0]*FastMath.sin(angle), -Constants.MODULERADIUS[l][0]*FastMath.cos(angle), _yzinterc2);
+            //threeVec w = new threeVec(_yxinterc2+Constants.MODULERADIUS[l][0]*Math.sin(angle), -Constants.MODULERADIUS[l][0]*Math.cos(angle), _yzinterc2);
             Vector3D w = new Vector3D(_yxinterc2 - Constants.MODULERADIUS[l][0] * n.x(), -Constants.MODULERADIUS[l][0] * n.y(), _yzinterc2);
             double y = -(n.x() * w.x() + n.y() * w.y() + n.z() * w.z()) / dot;
-            //threeVec Delt = new threeVec(y*_yxslope2+_yxinterc2+Constants.MODULERADIUS[l][0]*FastMath.sin(angle),y-Constants.MODULERADIUS[l][0]*FastMath.cos(angle),0);
+            //threeVec Delt = new threeVec(y*_yxslope2+_yxinterc2+Constants.MODULERADIUS[l][0]*Math.sin(angle),y-Constants.MODULERADIUS[l][0]*Math.cos(angle),0);
             Vector3D Delt = new Vector3D(y * _yxslope2 + _yxinterc2 - Constants.MODULERADIUS[l][0] * n.x(), y - Constants.MODULERADIUS[l][0] * n.y(), 0);
 
             if (Delt.mag() < Constants.ACTIVESENWIDTH / 2 + Constants.TOLTOMODULEEDGE) {
@@ -718,7 +717,7 @@ public class TrajectoryFinder {
                 inters_top[3] = geo.getCStrip(l + 1, z_plus);
             }
             if (l % 2 == 0) {
-                inters_top[3] = geo.getZStrip(l + 1, FastMath.atan2(y_plus, x_plus));
+                inters_top[3] = geo.getZStrip(l + 1, Math.atan2(y_plus, x_plus));
             }
         }
         if (geo.isInFiducial(x_minus, y_minus, z_minus, l + 1)) {
@@ -729,7 +728,7 @@ public class TrajectoryFinder {
                 inters_bottom[3] = geo.getCStrip(l + 1, z_minus);
             }
             if (l % 2 == 0) {
-                inters_bottom[3] = geo.getZStrip(l + 1, FastMath.atan2(y_minus, x_minus));
+                inters_bottom[3] = geo.getZStrip(l + 1, Math.atan2(y_minus, x_minus));
             }
         }
 

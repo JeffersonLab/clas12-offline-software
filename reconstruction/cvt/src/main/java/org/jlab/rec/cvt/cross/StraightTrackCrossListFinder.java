@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jlab.clas.clas.math.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.bmt.Constants;
@@ -103,9 +102,9 @@ public class StraightTrackCrossListFinder {
             // theta_j in the middle of the bin :
             //System.out.println(" bin "+j_t);
             double theta_j = ThetaMin + (0.5 + j_t) * SizeThetaBin;
-            cosTheta_Rz_array[j_t] = FastMath.cos(Math.toRadians(theta_j));
-            sinTheta_Rz_array[j_t] = FastMath.sin(Math.toRadians(theta_j));
-            //System.out.println("             theta "+theta_j+"  cos "+FastMath.cos(Math.toRadians(theta_j))+" sin "+FastMath.cos(Math.toRadians(theta_j)));
+            cosTheta_Rz_array[j_t] = Math.cos(Math.toRadians(theta_j));
+            sinTheta_Rz_array[j_t] = Math.sin(Math.toRadians(theta_j));
+            //System.out.println("             theta "+theta_j+"  cos "+Math.cos(Math.toRadians(theta_j))+" sin "+Math.cos(Math.toRadians(theta_j)));
         }
 
         // loop over points to fill the accumulator arrays
@@ -451,24 +450,24 @@ public class StraightTrackCrossListFinder {
             this.calcBMT2DPoint(yxslope,
                     yxinterc, org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[r] + org.jlab.rec.cvt.bmt.Constants.hDrift, t);
 
-            Cross cross2D1 = new Cross("BMT", "C", bmt_geo.isInSector((r + 1) * 2, FastMath.atan2(t[1], t[0]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
+            Cross cross2D1 = new Cross("BMT", "C", bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[1], t[0]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
             cross2D1.set_Point0(new Point3D(t[0], t[1], 0));
             projectedCrosses.add(cross2D1);
             if (t[3] != t[1] && t[2] != t[0]) {
 
-                Cross cross2D2 = new Cross("BMT", "C", bmt_geo.isInSector((r + 1) * 2, FastMath.atan2(t[3], t[2]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
+                Cross cross2D2 = new Cross("BMT", "C", bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[3], t[2]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
                 cross2D2.set_Point0(new Point3D(t[2], t[3], 0));
                 projectedCrosses.add(cross2D2);
             }
             this.calcBMT2DPoint(yxslope,
                     yxinterc, org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[r] + org.jlab.rec.cvt.bmt.Constants.hDrift, t);
 
-            Cross cross2D3 = new Cross("BMT", "Z", bmt_geo.isInSector((r + 1) * 2, FastMath.atan2(t[1], t[0]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
+            Cross cross2D3 = new Cross("BMT", "Z", bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[1], t[0]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
             cross2D3.set_Point0(new Point3D(t[0], t[1], 0));
             projectedCrosses.add(cross2D3);
             if (t[3] != t[1] && t[2] != t[0]) {
 
-                Cross cross2D4 = new Cross("BMT", "Z", bmt_geo.isInSector((r + 1) * 2, FastMath.atan2(t[3], t[2]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
+                Cross cross2D4 = new Cross("BMT", "Z", bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[3], t[2]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
                 cross2D4.set_Point0(new Point3D(t[2], t[3], 0));
                 projectedCrosses.add(cross2D4);
             }

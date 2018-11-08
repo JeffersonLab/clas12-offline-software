@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 
-import org.jlab.clas.clas.math.FastMath;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
@@ -215,8 +214,8 @@ public class TrackSeeder {
                   double yi = c.get_Point().y();
                   double unci = Math.sqrt(c.get_PointErr().x()*c.get_PointErr().x()+c.get_PointErr().y()*c.get_PointErr().y());
                   double ri = Math.sqrt(xi*xi+yi*yi);
-                  double fi = FastMath.atan2(yi,xi) ;
-                  double res = 0.5*r*ri*ri - (1+r*d)*ri*FastMath.sin(f-fi)+0.5*r*d*d+d;
+                  double fi = Math.atan2(yi,xi) ;
+                  double res = 0.5*r*ri*ri - (1+r*d)*ri*Math.sin(f-fi)+0.5*r*d*d+d;
                   res = res*res;
                   if( res > maxresiduals ) maxresiduals = res;
               }
@@ -228,8 +227,8 @@ public class TrackSeeder {
                   double yi = c.get_Point().y();
                   double unci = Math.sqrt(c.get_PointErr().x()*c.get_PointErr().x()+c.get_PointErr().y()*c.get_PointErr().y());
                   double ri = Math.sqrt(xi*xi+yi*yi);
-                  double fi = FastMath.atan2(yi,xi) ;
-                  double res = 0.5*r*ri*ri - (1+r*d)*ri*FastMath.sin(f-fi)+0.5*r*d*d+d;
+                  double fi = Math.atan2(yi,xi) ;
+                  double res = 0.5*r*ri*ri - (1+r*d)*ri*Math.sin(f-fi)+0.5*r*d*d+d;
                   res = res*res;
                   if( Math.abs(res - maxresiduals) < 1.e-3 ) {
                     //System.out.println(" remove detector " + c .get_Detector() + " region " + c.get_Region() + " sector " + c.get_Sector()  );
@@ -320,7 +319,7 @@ public class TrackSeeder {
         for (int i = 0; i < bmt_crosses.size(); i++) { 
             Point3D pAtBMTSurf =seed.get_Helix().getPointAtRadius(org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[bmt_crosses.get(i).get_Region()-1]);
             // the hit parameters
-            double angle = FastMath.atan2(pAtBMTSurf.y(), pAtBMTSurf.x());
+            double angle = Math.atan2(pAtBMTSurf.y(), pAtBMTSurf.x());
             if (angle < 0) {
                 angle += 2 * Math.PI;
             }
@@ -565,7 +564,7 @@ public class TrackSeeder {
         double z_bmt = bmt_Ccross.get_Point().z();
         double r_bmt = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[bmt_Ccross.get_Region() - 1];
         Point3D phiHelixAtSurf = trkCand.get_Helix().getPointAtRadius(r_bmt); 
-        if (bmt_geo.isInSector(bmt_Ccross.get_Cluster1().get_Layer(), FastMath.atan2(phiHelixAtSurf.y(), phiHelixAtSurf.x()), Math.toRadians(10)) != bmt_Ccross.get_Sector()) {
+        if (bmt_geo.isInSector(bmt_Ccross.get_Cluster1().get_Layer(), Math.atan2(phiHelixAtSurf.y(), phiHelixAtSurf.x()), Math.toRadians(10)) != bmt_Ccross.get_Sector()) {
             return false;
         }
         double dzdr_bmt = z_bmt / r_bmt;

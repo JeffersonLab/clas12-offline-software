@@ -2,7 +2,6 @@ package org.jlab.rec.cvt.bmt;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 
-import org.jlab.clas.clas.math.FastMath;
 /**
  *
  * @author ziegler
@@ -246,8 +245,8 @@ public class CCDBConstantsLoader {
         double r_err = dbprovider.getDouble("/test/beam_pos/err_r", 0); 
         double phi_deg = dbprovider.getDouble("/test/beam_pos/phi0", 0); 
         double phi = Math.toRadians(phi_deg);
-        double xb = r*FastMath.cos(phi);
-        double yb = r*FastMath.sin(phi);
+        double xb = r*Math.cos(phi);
+        double yb = r*Math.sin(phi);
         org.jlab.rec.cvt.Constants.setXb(xb);
         org.jlab.rec.cvt.Constants.setYb(yb);
         org.jlab.rec.cvt.Constants.setRbErr(r_err);
