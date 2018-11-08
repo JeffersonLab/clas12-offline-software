@@ -98,7 +98,7 @@ public class ECCommon {
     public static List<ECStrip>  initEC(DataEvent event, Detector detector, ConstantsManager manager, int run){
     	
         manager.setVariation(variation);
-        
+
         IndexedTable    atten = manager.getConstants(run, "/calibration/ec/attenuation");
         IndexedTable     gain = manager.getConstants(run, "/calibration/ec/gain");
 		IndexedTable     time = manager.getConstants(run, "/calibration/ec/timing");
