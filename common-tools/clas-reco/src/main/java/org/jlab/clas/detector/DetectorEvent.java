@@ -1,6 +1,7 @@
 package org.jlab.clas.detector;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
@@ -22,7 +23,13 @@ public class DetectorEvent {
     public DetectorEvent(){
         
     }
-    
+   
+    public void sort() {
+        System.err.println("DetectorEvent:  Not ready for sorting!!!!!!!!!");
+        Collections.sort(particleList);
+        setAssociation();
+    }
+
     public static DetectorEvent readDetectorEvent(DataEvent event){
         return DetectorData.readDetectorEvent(event);
     }
@@ -115,6 +122,10 @@ public class DetectorEvent {
        });
     }
 
+   public List<DetectorResponse>  getResponseList(DetectorType type) {
+       return getResponseList(new DetectorType[]{type});
+   }
+
    public List<DetectorResponse> getResponseList(DetectorType[] types) {
         this.setAssociation();
         List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
@@ -123,6 +134,7 @@ public class DetectorEvent {
                 for(DetectorType t : types) {
                     if (r.getDescriptor().getType() == t) {
                         responses.add(r);
+                        break;
                     }
                 }
             }

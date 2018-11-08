@@ -336,6 +336,8 @@ public class DetectorParticle implements Comparable {
     public int    getTrackDetector() {return this.detectorTrack.getDetectorID();}
     public int    getTrackSector() {return this.detectorTrack.getSector();}
     public int    getTrackDetectorID() {return this.detectorTrack.getDetectorID();}
+    public Line3D getFirstCross() {return this.detectorTrack.getFirstCross();}
+    public Line3D getLastCross() {return this.detectorTrack.getLastCross();}
 
     public double getMass(){ return this.particleMass;}
     public int    getPid(){ return this.particlePID;}
@@ -720,6 +722,9 @@ public class DetectorParticle implements Comparable {
     }  
     
     public int compareTo(Object o) {
+
+        System.err.println("DetectorParticle:  Not ready for sorting!!!!!!!!!!!!!!!");
+
         DetectorParticle other = (DetectorParticle) o;
 
         // trigger particle takes highest priority:
@@ -731,10 +736,10 @@ public class DetectorParticle implements Comparable {
 
         // then charge ordering (-,+,0):
         else if (this.getCharge() != other.getCharge()) {
-            if      (this.getCharge()  < 0) return -1;
-            else if (other.getCharge() < 0) return  1;
-            else if (this.getCharge()  > 0) return -1;
+            if      (this.getCharge()  > 0) return -1;
             else if (other.getCharge() > 0) return  1;
+            else if (this.getCharge()  < 0) return -1;
+            else if (other.getCharge() < 0) return  1;
             else throw new RuntimeException("Impossible.");
         }
 
