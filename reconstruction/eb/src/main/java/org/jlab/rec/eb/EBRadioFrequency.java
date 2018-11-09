@@ -1,11 +1,8 @@
-package org.jlab.service.eb;
+package org.jlab.rec.eb;
 
 import java.util.ArrayList;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-
-import org.jlab.rec.eb.EBCCDBConstants;
-import org.jlab.rec.eb.EBCCDBEnum;
 
 /**
  *

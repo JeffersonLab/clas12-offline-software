@@ -47,12 +47,12 @@ public class EBio {
                 }
             }
         }
-        
+
         // scaler data for beam charge and livetime:
-        EBScalers.Reading ebsr = ebs.readScalers(event,ccdb);
-        dHeader.setBeamChargeGated((float)ebsr.beamCharge);
-        dHeader.setLiveTime((float)ebsr.liveTime);
-        
+        //EBScalers.Reading ebsr = ebs.readScalers(event,ccdb);
+        //dHeader.setBeamChargeGated((float)ebsr.getBeamCharge());
+        //dHeader.setLiveTime((float)ebsr.getLiveTime());
+
         return dHeader;
     }
     

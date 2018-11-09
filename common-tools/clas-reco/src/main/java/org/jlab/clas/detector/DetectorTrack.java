@@ -14,7 +14,7 @@ import org.jlab.geom.prim.Vector3D;
  * @author gavalian
  * @author baltzell
  */
-public class DetectorTrack {
+public class DetectorTrack implements Comparable {
 
     public class TrajectoryPoint {
         private int detId = -1;
@@ -223,6 +223,11 @@ public class DetectorTrack {
         return this.trackCrosses.get(this.trackCrosses.size()-1);
     }
     
+    public int compareTo(Object o) {
+        DetectorTrack other = (DetectorTrack) o;
+        if (this.getVector().mag() == other.getVector().mag()) return 0;
+        else return this.getVector().mag() > other.getVector().mag() ? -1 : 1;
+    }
     
     
     @Override

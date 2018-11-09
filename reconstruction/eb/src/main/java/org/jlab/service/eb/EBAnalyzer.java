@@ -1,13 +1,10 @@
 package org.jlab.service.eb;
 
 import static java.lang.Math.abs;
-import static java.lang.Math.pow;
-import java.util.HashMap;
 
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.clas.detector.DetectorResponse;
 
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.pdg.PDGDatabase;
@@ -358,7 +355,7 @@ public class EBAnalyzer {
          * Get a basic pid quality factor.
          */
         public double PIDQuality(DetectorParticle p, int pid, DetectorEvent event) {
-            double q=9999;
+            double q=DetectorParticle.DEFAULTQUALITY;
 
             // electron/positron:
             if (abs(pid)==11) {
