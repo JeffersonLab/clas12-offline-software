@@ -56,8 +56,8 @@ cp external-dependencies/KPP-Plots-2.0.jar coatjava/lib/utils
 mkdir -p coatjava/lib/services
 
 ### clean up any cache copies ###
-#rm -rf ~/.m2/repository/org/hep/hipo
-#rm -rf ~/.m2/repository/org/jlab
+rm -rf ~/.m2/repository/org/hep/hipo
+rm -rf ~/.m2/repository/org/jlab
 
 unset CLAS12DIR
 if [ $runUnitTests == "yes" ]; then
