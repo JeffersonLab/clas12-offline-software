@@ -41,6 +41,7 @@ public class ReconDrawer extends ProjectedViewDrawer {
 		
 		// DC TB Hits
 		if (_view.showDCTBHits()) {
+			drawDCTBHits(g, container);
 		}
 
 
@@ -51,6 +52,11 @@ public class ReconDrawer extends ProjectedViewDrawer {
 		drawDCHitList(g, container, DC.HB_COLOR, DC.getInstance().getHBHits());
 	}
 	
+	// draw reconstructed DC hit based hits
+	private void drawDCTBHits(Graphics g, IContainer container) {
+		drawDCHitList(g, container, DC.TB_COLOR, DC.getInstance().getTBHits());
+	}
+
 	
 	//draw a reconstructed hit list
 	private void drawDCHitList(Graphics g, IContainer container, Color fillColor, DCHitList hits) {

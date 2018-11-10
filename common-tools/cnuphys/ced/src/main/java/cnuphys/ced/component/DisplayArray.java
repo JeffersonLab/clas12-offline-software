@@ -81,6 +81,9 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	/** Label for reconstructed clusters button */
 	public static final String CLUSTER_LABEL = "Clusters";
 		
+	/** Label for reconstructed fmt crosses button */
+	public static final String FMTCROSS_LABEL = "FMT Crosses";
+
 	/** Global show HB */
 	private static final String GLOBAL_HB_LABEL = "HB Data";
 
@@ -121,6 +124,9 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	
 	// controls whether reconstructed clusters are displayed
 	private AbstractButton _clusterButton;
+	
+	// controls whether reconstructed fmt crosses are displayed
+	private AbstractButton _fmtCrossButton;
 
 	// controls mc truth is displayed (when available)
 	private AbstractButton _mcTruthButton;
@@ -275,6 +281,13 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 			_clusterButton = add(CLUSTER_LABEL,
 					true, true, this, _buttonColor).getCheckBox();
 		}
+		
+		// reconstructed clusters
+		if (Bits.checkBit(bits, DisplayBits.FMTCROSSES)) {
+			_fmtCrossButton = add(FMTCROSS_LABEL,
+					true, true, this, _buttonColor).getCheckBox();
+		}
+
 
 	}
 
@@ -372,6 +385,17 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		return (_clusterButton != null)
 				&& _clusterButton.isSelected();
 	}
+	
+	/**
+	 * Convenience method to see if we show the reconstructed FMT Crosses.
+	 * 
+	 * @return <code>true</code> if we are to show reconstructed FMT Crosses
+	 */
+	public boolean showFMTCrosses() {
+		return (_fmtCrossButton != null)
+				&& _fmtCrossButton.isSelected();
+	}
+
 	
 	/**
 	 * Convenience method to see if we show the reconstructed hits.

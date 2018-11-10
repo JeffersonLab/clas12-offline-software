@@ -1,7 +1,5 @@
 package cnuphys.ced.trigger;
 
-import java.awt.Dimension;
-import java.awt.FontMetrics;
 import java.util.EnumMap;
 
 import cnuphys.bCNU.component.EnumComboBox;

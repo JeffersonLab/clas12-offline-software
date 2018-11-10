@@ -618,15 +618,23 @@ public final class Environment {
 	}
 
 	/**
-	 * Split the class path into directories and jar files
+	 * Split the application's class path into directories and jar files
 	 * 
 	 * @return an array of the class path segments
 	 */
-	public String[] splitClassPath() {
-		String cp = new String(_classPath);
+	private String[] splitClassPath() {
+		return splitPath(_classPath);
+	}
+	
+	/**
+	 * Split the path into directories and jar files
+	 * 
+	 * @return an array of the path segments
+	 */
+	public String[] splitPath(String classPath) {
+		String cp = new String(classPath);
 		cp = cp.replace(".", File.separator);
-		// cp = FileUtilities.fixPathSeparator(cp);
-		return FileUtilities.tokens(cp, File.pathSeparator);
+ 		return FileUtilities.tokens(cp, File.pathSeparator);
 	}
 	
 	public GraphicsDevice[] getGraphicsDevices() {

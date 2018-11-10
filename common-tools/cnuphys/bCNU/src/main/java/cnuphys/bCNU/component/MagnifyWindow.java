@@ -59,7 +59,7 @@ public class MagnifyWindow extends JWindow {
 		setLayout(new BorderLayout(0, 0));
 		setSize(_WIDTH, _HEIGHT);
 
-		_container = new BaseContainer(new Rectangle.Double(0, 0, 1, 1), false) {
+		_container = new BaseContainer(new Rectangle.Double(0, 0, 1, 1)) {
 			@Override
 			public void paintComponent(Graphics g) {
 				if (_customDraw == null) {

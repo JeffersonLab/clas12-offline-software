@@ -7,6 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.JComponent;
+import javax.swing.JSlider;
 
 public abstract class AttributeEditor<T extends JComponent> {
 
@@ -45,10 +46,17 @@ public abstract class AttributeEditor<T extends JComponent> {
 	 */
 	public static AttributeEditor AttributeEditorFactory(AttributeTable attributeTable, Attribute attribute, Object value) {
 
+		
 		AttributeEditor editor = null;
 
 		if (attribute != null) {
-			Class claz = attribute.getType().getEditorClass();
+			
+			Object valueObj = attribute.getValue();
+			if (valueObj instanceof JSlider) {
+				valueObj = "" + ((JSlider)valueObj).getValue();
+			}
+			AttributeType type = attribute.getType();
+			Class claz = type.getEditorClass();
 			try {
 				Constructor cons = claz.getConstructor(AttributeTable.class, Attribute.class);
 				try {

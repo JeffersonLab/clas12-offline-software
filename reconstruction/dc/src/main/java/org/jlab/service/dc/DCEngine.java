@@ -1,6 +1,5 @@
 package org.jlab.service.dc;
 
-import cnuphys.magfield.MagneticFields;
 import java.util.Arrays;
 import java.util.Optional;
 import org.jlab.clas.reco.ReconstructionEngine;
@@ -24,52 +23,11 @@ public class DCEngine extends ReconstructionEngine {
     FTOFGeant4Factory ftofDetector;
     ECGeant4Factory ecDetector;
     PCALGeant4Factory pcalDetector; 
-    org.jlab.rec.fmt.Geometry fmtDetector;
     TrajectorySurfaces tSurf;
     String clasDictionaryPath ;
     String variationName;
     public DCEngine(String name) {
         super(name,"ziegler","5.0");
-    }
-    
-    /**
-     * 
-     * determine torus and solenoid map name from yaml, else env, else crash
-     */
-    public void initializeMagneticFields() {
-        String torusMap=this.getEngineConfigString("torusMap");
-        String solenoidMap=this.getEngineConfigString("solenoidMap");
-        if (torusMap!=null) {
-            System.out.println("["+this.getName()+"] Torus Map chosen based on yaml: "+torusMap);
-        }
-        else {
-            torusMap = System.getenv("TORUSMAP");
-            if (torusMap!=null) {
-                System.out.println("["+this.getName()+"] Torus Map chosen based on env: "+torusMap);
-            }
-        }
-        if (torusMap==null) {
-            throw new RuntimeException("["+this.getName()+"]  Failed to find torus map name in yaml or env.");
-        }
-        if (solenoidMap!=null) {
-            System.out.println("["+this.getName()+"] solenoid Map chosen based on yaml: "+solenoidMap);
-        }
-        else {
-            solenoidMap = System.getenv("SOLENOIDMAP");
-            if (solenoidMap!=null) {
-                System.out.println("["+this.getName()+"] solenoid Map chosen based on env: "+solenoidMap);
-            }
-        }
-        if (solenoidMap==null) {
-            throw new RuntimeException("["+this.getName()+"]  Failed to find solenoid map name in yaml or env.");
-        }
-        String mapDir = CLASResources.getResourcePath("etc")+"/data/magfield";
-        try {
-            MagneticFields.getInstance().initializeMagneticFields(mapDir,torusMap,solenoidMap);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public void setStartTimeOption() {
@@ -89,6 +47,32 @@ public class DCEngine extends ReconstructionEngine {
         }
         if (useSTTConf==null) {
              System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on default ="+Constants.isUSETSTART());
+        }
+        
+        // Wire distortions
+        String wireDistortionsFlag = this.getEngineConfigString("wireDistort");
+        
+        if (wireDistortionsFlag!=null) {
+            System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on yaml ="+wireDistortionsFlag);
+            if(Boolean.valueOf(wireDistortionsFlag)==true) {
+                Constants.setWIREDIST(1.0);
+            } else {
+                Constants.setWIREDIST(0);
+            }
+        }
+        else {
+            wireDistortionsFlag = System.getenv("USEWIREDIST");
+            if (wireDistortionsFlag!=null) {
+                System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on env ="+wireDistortionsFlag);
+                if(Boolean.valueOf(wireDistortionsFlag)==true) {
+                    Constants.setWIREDIST(1.0);
+                } else {
+                    Constants.setWIREDIST(0);
+                }
+            }
+        }
+        if (wireDistortionsFlag==null) {
+             System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (off in MC, on in data)");
         }
     }
     public void LoadTables() {
@@ -136,13 +120,11 @@ public class DCEngine extends ReconstructionEngine {
         ecDetector = new ECGeant4Factory(providerEC);
         pcalDetector = new PCALGeant4Factory(providerEC);
         
-        fmtDetector = new org.jlab.rec.fmt.Geometry();
-        if(org.jlab.rec.fmt.Constants.areConstantsLoaded==false) 
-            org.jlab.rec.fmt.CCDBConstantsLoader.Load(11);
+        
         System.out.println(" -- Det Geometry constants are Loaded " );
         // create the surfaces
         tSurf = new TrajectorySurfaces();
-        tSurf.LoadSurfaces(dcDetector, ftofDetector, ecDetector, pcalDetector, org.jlab.rec.fmt.Constants.FVT_Zlayer);
+        tSurf.LoadSurfaces(dcDetector, ftofDetector, ecDetector, pcalDetector);
         
         // Get the constants for the correct variation
         String ccDBVar = this.getEngineConfigString("constantsDBVariation");

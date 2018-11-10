@@ -7,13 +7,25 @@
   <groupId>org.jlab.clas12.detector</groupId>
   <artifactId>clas12detector-dc</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+     <build>
+         <plugins>
+             <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-compiler-plugin</artifactId>
+                 <configuration>
+                     <source>1.8</source>
+                     <target>1.8</target>
+                 </configuration>
+             </plugin>
+         </plugins>
+     </build>
+     <packaging>jar</packaging>
 
   <parent>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>5.7.0-SNAPSHOT</version>
+    <version>5.7.1-SNAPSHOT</version>
   </parent>
 
    <repositories>
@@ -27,8 +39,7 @@
      <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-jcsg</artifactId>
-      <version>5.7.0</version>
-      <type>jar</type>
+      <version>5.7.1-SNAPSHOT</version>
     </dependency>  
 
     <dependency>
@@ -40,13 +51,13 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-reco</artifactId>
-      <version>5.7.0-SNAPSHOT</version>
+      <version>5.7.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-analysis</artifactId>
-      <version>5.7.0-SNAPSHOT</version>
+      <version>5.7.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -72,16 +83,22 @@
       <artifactId>trackfitter</artifactId>
       <version>1.0</version>
     </dependency>
-
     <dependency>
-      <groupId>org.jlab.coda</groupId>
-      <artifactId>jclara</artifactId>
-      <version>4.3-SNAPSHOT</version>
+      <groupId>org.jlab.clas</groupId>
+      <artifactId>swim-tools</artifactId>
+      <version>5.7.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>clas12detector-fmt</artifactId>
-      <version>${project.version}</version>
-    </dependency>       
+      <groupId>org.jlab</groupId>
+      <artifactId>groot</artifactId>
+      <version>2.2.0-SNAPSHOT</version>
+      <type>jar</type>
+    </dependency>
+   
+    <dependency>
+      <groupId>org.jlab.clas</groupId>
+      <artifactId>clas-math</artifactId>
+      <version>5.7.1-SNAPSHOT</version>
+    </dependency>
   </dependencies>
  </project>

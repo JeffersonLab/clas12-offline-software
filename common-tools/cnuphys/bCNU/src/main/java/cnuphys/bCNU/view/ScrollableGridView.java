@@ -130,7 +130,6 @@ public class ScrollableGridView extends BaseView {
 				PropertySupport.HEIGHT, height,
 				PropertySupport.TOOLBAR, false, 
 				PropertySupport.VISIBLE, true, 
-				PropertySupport.HEADSUP, false,
 				PropertySupport.TITLE, title,
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 		

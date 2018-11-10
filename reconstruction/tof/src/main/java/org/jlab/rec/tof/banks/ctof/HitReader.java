@@ -2,7 +2,9 @@ package org.jlab.rec.tof.banks.ctof;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;
@@ -211,7 +213,76 @@ public class HitReader implements IMatchedHit {
         if(aDC>0) pass = 1;
         return pass;
     }
+    
+    private List<Hit> matchHitsToCVTTrk(List<Hit> CTOFhits, CTOFGeant4Factory ctofDetector, List<Line3d> trks, double[] paths, int[] ids) {
+        if (trks == null || trks.size() == 0) {
+            return CTOFhits; // no hits were matched with DC tracks
+        }
+        Map<String, org.jlab.rec.tof.hit.ctof.Hit> ctofHits = new LinkedHashMap<String, org.jlab.rec.tof.hit.ctof.Hit>();
+        
+        // Instantiates the list of hits
+        List<org.jlab.rec.tof.hit.ctof.Hit> hitList = new ArrayList<org.jlab.rec.tof.hit.ctof.Hit>();
+        
+        String det ;
+        for (org.jlab.rec.tof.hit.ctof.Hit fhit : CTOFhits) {
+            det = new String("C");
+            det+=fhit.get_Paddle();
+            ctofHits.put(det, fhit);
+        }
+        for (int i = 0; i < trks.size(); i++) { // looping over the tracks find
+            // the intersection of the track
+            // with that plane
+            Line3d trk = trks.get(i);
+            List<DetHit> hits = ctofDetector.getIntersections(trk);
+            String mdet ; 
+            if (hits != null && hits.size() > 0) {
+                for (DetHit hit : hits) {
+                    CTOFDetHit fhit = new CTOFDetHit(hit);
+                    
+                    // add buffer for matched hits
+                    //----------------------------
+                    for (int j = -1; j<=1; j++) {
+                        mdet = new String("C");
+                        mdet+=fhit.getPaddle() + j;
 
+                        if(ctofHits.containsKey(mdet)) {
+                            ctofHits.get(mdet)._AssociatedTrkId = ids[i];
+                            ctofHits.get(mdet).set_matchedTrackHit(fhit);
+                            ctofHits.get(mdet).set_matchedTrack(trks.get(i));
+                            double deltaPath = trks.get(i).origin().distance(
+                                        fhit.mid());
+                            double pathLenTruBar = fhit.origin().distance(
+                                    fhit.end());
+                            ctofHits.get(mdet).set_TrkPathLenThruBar(pathLenTruBar);
+                            ctofHits.get(mdet).set_TrkPathLen(paths[i] + deltaPath);
+                            // get the coordinates for the track hit, which is defined
+                            // as the mid-point between its entrance and its exit from
+                            // the bar
+                            ctofHits.get(mdet).set_TrkPosition(new Point3D(fhit.mid().x,
+                                    fhit.mid().y, fhit.mid().z));
+                            // compute the local y at the middle of the bar :
+                            // ----------------------------------------------
+                            Point3D origPaddleLine = ctofHits.get(mdet).get_paddleLine().origin();
+                            Point3D trkPosinMidlBar = new Point3D(fhit.mid().x,
+                                    fhit.mid().y, fhit.mid().z);
+                            double Lov2 = ctofHits.get(mdet).get_paddleLine().length() / 2;
+                            double barOrigToTrkPos = origPaddleLine
+                                    .distance(trkPosinMidlBar);
+                            // local y:
+                            ctofHits.get(mdet).set_yTrk(barOrigToTrkPos - Lov2);
+                           // hitList.add(ftofHits.get(mdet));
+                        }
+                    }
+                }
+            }
+        }
+        for (Map.Entry<String, org.jlab.rec.tof.hit.ctof.Hit> hits : ctofHits.entrySet()) {
+            hitList.add(hits.getValue());
+        }
+        
+        return hitList;
+    }
+    /*
     private List<Hit> matchHitsToCVTTrk(List<Hit> CTOFhits, CTOFGeant4Factory ctofDetector, List<Line3d> trks, double[] paths, int[] ids) {
         if (trks == null || trks.size() == 0) {
             return CTOFhits; // no hits were matched with DC tracks
@@ -236,6 +307,7 @@ public class HitReader implements IMatchedHit {
                             // create a new FTOF hit for each intersecting track with this hit counter 
                             // create the hit object
                             Hit hit = new Hit(fhit.get_Id(), fhit.get_Panel(), fhit.get_Sector(), fhit.get_Paddle(), fhit.get_ADC1(), fhit.get_TDC1(), fhit.get_ADC2(), fhit.get_TDC2());
+                            
                             hit.set_ADCbankHitIdx1(fhit.get_ADCbankHitIdx1());
                             hit.set_ADCbankHitIdx2(fhit.get_ADCbankHitIdx2());
                             hit.set_TDCbankHitIdx1(fhit.get_TDCbankHitIdx1());
@@ -276,7 +348,7 @@ public class HitReader implements IMatchedHit {
         }
         return hitList;
     }
-
+    */
     @Override
     public String DetectorName() {
         return "CTOF";

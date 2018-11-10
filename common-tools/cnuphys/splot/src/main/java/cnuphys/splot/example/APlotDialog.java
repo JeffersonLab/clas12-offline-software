@@ -2,6 +2,7 @@ package cnuphys.splot.example;
 
 import java.awt.BorderLayout;
 import java.awt.Insets;
+import java.util.Properties;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -21,10 +22,12 @@ public abstract class APlotDialog extends JDialog {
 
 	// the menus and items
 	protected SplotMenus _menus;
+	
+	protected Properties _properties;
 
-	public APlotDialog(JFrame owner, String title, boolean modal) {
+	public APlotDialog(JFrame owner, String title, boolean modal, Properties properties) {
 		super(owner, title, modal);
-		
+		_properties = properties;
 		setLayout(new BorderLayout(4, 4));
 
 		// Initialize look and feel

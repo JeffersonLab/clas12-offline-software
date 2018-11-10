@@ -7,9 +7,10 @@ package org.jlab.service.ltcc;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jMath.Vector.threeVec;
+//import org.jMath.Vector.threeVec;
 import java.util.List;
 import java.util.ArrayList;
+import org.jlab.geom.prim.Vector3D;
 
 /**
  *
@@ -74,13 +75,13 @@ public final class LTCCCluster {
     // cluster averages/totals
     private double nphe = 0;        // total number of photo-electrons
     private int nHits = 0;          // total number of hits
-    private final threeVec position;  // average cluster position * nphe
+    private final Vector3D position;  // average cluster position * nphe
     private double time = 0;        // average cluster time * nphe
     private double segment = 0;     // average segment * nphe
     private Status status = Status.GOOD; // cluster status
     
     LTCCCluster() {
-        position = new threeVec();
+        position = new Vector3D();
     }
     
     LTCCCluster(LTCCHit center) {
@@ -97,10 +98,11 @@ public final class LTCCCluster {
         // multiply segment/position/time with nphe because the 
         // respective getter will re-average the value
         this.segment = bank.getShort("segment", index) * this.nphe;
-        this.position = new threeVec(
+        this.position = new Vector3D(
                 bank.getFloat("x", index), 
                 bank.getFloat("y", index), 
-                bank.getFloat("z", index)).mult(this.nphe);
+                bank.getFloat("z", index));
+        this.position.multiply(this.nphe);
         this.time = bank.getFloat("time", index) * this.nphe;
         this.nHits = bank.getShort("nHits", index);
         this.thetaMin = bank.getFloat("minTheta", index);
@@ -150,8 +152,8 @@ public final class LTCCCluster {
     public double getNphe() {
         return this.nphe;
     }
-    public threeVec getPosition() {
-        return this.position.mult(1/this.nphe);
+    public Vector3D getPosition() {
+        return this.position.multiply(1/this.nphe);
     }
     public double getTime() {
         return this.time / this.nphe;
@@ -180,7 +182,7 @@ public final class LTCCCluster {
     
     public void save(DataBank bank, int index) {
         // calculate average position
-        threeVec xyz = this.getPosition();
+        Vector3D xyz = this.getPosition();
                 // set the bank entries
         bank.setShort("id", index, (short) index);
         bank.setByte("status", index, (byte) this.status.code);
@@ -228,7 +230,7 @@ public final class LTCCCluster {
     }
     private void updateTotals(LTCCHit hit) {
         this.nphe += hit.getNphe();
-        this.position.addi(hit.getPosition().mult(hit.getNphe()));
+        this.position.add(hit.getPosition().multiply(hit.getNphe()));
         this.time += hit.getTime() * hit.getNphe();   
         this.segment += hit.getSegment() * hit.getNphe();
     }

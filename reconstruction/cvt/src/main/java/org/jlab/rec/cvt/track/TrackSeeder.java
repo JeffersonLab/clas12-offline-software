@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.track;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.cluster.Cluster;
@@ -150,7 +151,9 @@ public class TrackSeeder {
 
     private List<Seed> BMTmatches = new ArrayList<Seed>();
 
-    public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
+    public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses, 
+            org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo,
+            Swim swimmer) {
        
         List<Seed> seedlist = new ArrayList<Seed>();
 
@@ -262,7 +265,7 @@ public class TrackSeeder {
             //	if(seeds.get(s).size()<4)
             //	continue;
             
-            Track cand = fitSeed(seedCrosses.get(s), svt_geo, 5, false);
+            Track cand = fitSeed(seedCrosses.get(s), svt_geo, 5, false, swimmer);
             if (cand != null) {
                 Seed seed = new Seed();
                 seed.set_Crosses(seedCrosses.get(s));
@@ -287,7 +290,7 @@ public class TrackSeeder {
                     
                     for (Seed bseed : BMTmatches) {
                         //refit using the BMT
-                        Track bcand = fitSeed(bseed.get_Crosses(), svt_geo, 5, false);
+                        Track bcand = fitSeed(bseed.get_Crosses(), svt_geo, 5, false, swimmer);
                         if (bcand != null) {
                             seed = new Seed();
                             seed.set_Crosses(bseed.get_Crosses());
@@ -339,8 +342,10 @@ public class TrackSeeder {
     List<Cross> BMTCrossesC = new ArrayList<Cross>();
     List<Cross> BMTCrossesZ = new ArrayList<Cross>();
     List<Cross> SVTCrosses = new ArrayList<Cross>();
-
-    public Track fitSeed(List<Cross> VTCrosses, org.jlab.rec.cvt.svt.Geometry svt_geo, int fitIter, boolean originConstraint) {
+    float b[] = new float[3];
+    
+    public Track fitSeed(List<Cross> VTCrosses, org.jlab.rec.cvt.svt.Geometry svt_geo, int fitIter, 
+            boolean originConstraint, Swim swimmer) {
         double chisqMax = Double.POSITIVE_INFINITY;
         
         Track cand = null;
@@ -404,7 +409,7 @@ public class TrackSeeder {
             ((ArrayList<Double>) ErrRho).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz); // Try: don't use svt in dipdangle fit determination
             ((ArrayList<Double>) ErrRt).ensureCapacity(svtSz + bmtZSz);
 
-            cand = new Track(null);
+            cand = new Track(null, swimmer);
             cand.addAll(SVTCrosses);
             for (int j = 0; j < SVTCrosses.size(); j++) {
                 X.add(j, SVTCrosses.get(j).get_Point().x());
@@ -450,11 +455,11 @@ public class TrackSeeder {
                 return null;
             }
 
-            cand = new Track(fitTrk.get_helix());
+            cand = new Track(fitTrk.get_helix(), swimmer);
             //cand.addAll(SVTCrosses);
             cand.addAll(SVTCrosses);
             
-            cand.set_HelicalTrack(fitTrk.get_helix());
+            cand.set_HelicalTrack(fitTrk.get_helix(), swimmer, b);
             //if(shift==0)
             if (fitTrk.get_chisq()[0] < chisqMax) {
                 chisqMax = fitTrk.get_chisq()[0];

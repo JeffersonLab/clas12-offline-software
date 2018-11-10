@@ -9,10 +9,11 @@ import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.utils.groups.IndexedTable;
-import org.jMath.Vector.threeVec;
+//import org.jMath.Vector.threeVec;
 
 import java.util.LinkedList;
 import java.util.List;
+import org.jlab.geom.prim.Vector3D;
 
 
 /**
@@ -127,14 +128,20 @@ public final class LTCCHit {
     // NOTE: due to the angle of the track in the magnetic field, this is
     //       typically NOT the mirror that was actually hit. See
     //       LTCCClusterCorrection.calcPosition() for more info.
-    public threeVec getPosition() {
+    public Vector3D getPosition() {
         double phi = Math.toRadians(PHI0[this.segment - 1] 
                 * (this.side == 1 ? -1 : 1))
                 + 2. * Math.PI * (this.sector - 1) / 6.;
-        threeVec v = new threeVec();
-        v.setPolar(RHO0[this.segment - 1], 
-                Math.toRadians(THETA0[this.segment - 1]),
-                phi);
+        Vector3D v = new Vector3D(RHO0[this.segment - 1]*
+                Math.sin(Math.toRadians(THETA0[this.segment - 1]))*Math.cos(phi),
+                RHO0[this.segment - 1]*
+                Math.sin(Math.toRadians(THETA0[this.segment - 1]))*Math.sin(phi),
+                RHO0[this.segment - 1]*
+                Math.cos(Math.toRadians(THETA0[this.segment - 1]))
+        );
+        //v.setPolar(RHO0[this.segment - 1], 
+        //        Math.toRadians(THETA0[this.segment - 1]),
+        //        phi);
 
         return v;
     }

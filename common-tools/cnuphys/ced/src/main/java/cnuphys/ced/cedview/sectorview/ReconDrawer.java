@@ -2,13 +2,21 @@ package cnuphys.ced.cedview.sectorview;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Stroke;
 import java.awt.geom.Point2D;
 import java.util.List;
 
+import org.jlab.geom.prim.Point3D;
+
 import cnuphys.bCNU.format.DoubleFormat;
+import cnuphys.bCNU.graphics.GraphicsUtilities;
+import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
+import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.util.UnicodeSupport;
+import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.Cluster;
@@ -18,11 +26,17 @@ import cnuphys.ced.event.data.DCHit;
 import cnuphys.ced.event.data.DCHitList;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.FTOF;
+import cnuphys.ced.event.data.HBSegments;
 import cnuphys.ced.event.data.Hit1;
 import cnuphys.ced.event.data.Hit1List;
+import cnuphys.ced.event.data.Segment;
+import cnuphys.ced.event.data.SegmentList;
+import cnuphys.ced.event.data.TBSegments;
+import cnuphys.ced.frame.CedColors;
+import cnuphys.ced.item.SectorSuperLayer;
 
 public class ReconDrawer extends SectorViewDrawer  {
-
+	
 	/**
 	 * Reconstructed hits drawer
 	 * @param view
@@ -49,6 +63,7 @@ public class ReconDrawer extends SectorViewDrawer  {
 		
 		// DC TB Hits
 		if (_view.showDCTBHits()) {
+			drawDCTBHits(g, container);
 		}
 
 
@@ -61,6 +76,20 @@ public class ReconDrawer extends SectorViewDrawer  {
 		if (_view.showClusters()) {
 			drawClusters(g, container);
 		}
+		
+		if (_view.showDCHBSegments()) {
+			for (int supl = 1; supl <= 6; supl++) {
+				_view.getSuperLayerDrawer(0, supl).drawHitBasedSegments(g, container);
+			}
+		}
+		
+		if (_view.showDCTBSegments()) {
+			for (int supl = 1; supl <= 6; supl++) {
+				_view.getSuperLayerDrawer(0, supl).drawTimeBasedSegments(g, container);
+			}			
+		}
+
+		
 	}
 	
 	// draw reconstructed clusters
@@ -73,12 +102,21 @@ public class ReconDrawer extends SectorViewDrawer  {
 	private void drawReconHits(Graphics g, IContainer container) {
 		drawReconHitList(g, container, FTOF.getInstance().getHits());
 	}
-	
 
 	// draw reconstructed DC hit based hits
 	private void drawDCHBHits(Graphics g, IContainer container) {
-		drawDCHitList(g, container, DC.HB_COLOR, DC.getInstance().getHBHits());
+		if (_view.showHB()) {
+			drawDCHitList(g, container, DC.HB_COLOR, DC.getInstance().getHBHits());
+		}
 	}
+
+	// draw reconstructed DC hit based hits
+	private void drawDCTBHits(Graphics g, IContainer container) {
+		if (_view.showTB()) {
+			drawDCHitList(g, container, DC.TB_COLOR, DC.getInstance().getTBHits());
+		}
+	}
+
 
 
 	/**
@@ -220,6 +258,6 @@ public class ReconDrawer extends SectorViewDrawer  {
 
 
 	}
-		
+
 
 }

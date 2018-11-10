@@ -10,6 +10,7 @@ public class DefaultZStopper implements IStopper {
 	private double _maxS;
 	private double _accuracy;
 	private double _currentZ = Double.NaN;
+	private double _maxRsSq = Double.POSITIVE_INFINITY;
 	
 	
 	public DefaultZStopper() {
@@ -17,10 +18,11 @@ public class DefaultZStopper implements IStopper {
 	
 	
 	/**
-	 * Z stopper that doesn't check pathlength (does check max R)
+	 * Z stopper that doesn't check max R (does check max path length)
 	 * @param s0 starting path length in meters
 	 * @param sMax maximal path length in meters
 	 * @param targetZ stopping Z in meters
+	 * @param accuracy the accuracy in meters
 	 * @param normalDirection <code></code> if going smaller to larger z
 	 */
 	public DefaultZStopper(double s0, double sMax, double targetZ, double accuracy, boolean normalDirection) {
@@ -30,6 +32,21 @@ public class DefaultZStopper implements IStopper {
 		_normalDirection = normalDirection;
 		_accuracy = accuracy;
 	}
+	
+	/**
+	 * Z stopper that checks Rmax (and sMax)
+	 * @param s0 starting path length in meters
+	 * @param rMax maximal radius in meters
+	 * @param sMax maximal path length in meters
+	 * @param targetZ stopping Z in meters
+	 * @param accuracy the accuracy in meters
+	 * @param normalDirection <code></code> if going smaller to larger z
+	 */
+	public DefaultZStopper(double s0, double rMax, double sMax, double targetZ, double accuracy, boolean normalDirection) {
+		this(s0, sMax, targetZ, accuracy, normalDirection);
+		_maxRsSq = rMax*rMax;
+	}
+
 	
 	
 	public void setS0(double s0) {
@@ -62,13 +79,19 @@ public class DefaultZStopper implements IStopper {
 		if (Math.abs(_currentZ - _targetZ) < _accuracy) {
 			return true;
 		}
+		
+		//check limit of radial coordinate if finite max
+		if (Double.isFinite(_maxRsSq)) {
+			double rsq = y[0]*y[0] + y[1]*y[1] + y[2]*y[2];
+			if (rsq > _maxRsSq) {
+				return true;
+			}
+		}
 				
 		//independent variable s is the path length
 		if (s > _maxS) {
 			return true;
 		}
-		
-//		System.err.println("TOTAL PATH LEN = " + _totalPathLength);
 		
 		if (_normalDirection) {
 			return (_currentZ > _targetZ);

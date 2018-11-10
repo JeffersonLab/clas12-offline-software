@@ -5,7 +5,10 @@
  */
 package org.jlab.service.ltcc;
 
-import org.jMath.Vector.threeVec;
+//import org.jMath.Vector.threeVec;
+
+import org.jlab.geom.prim.Vector3D;
+
 
 /**
  *
@@ -32,9 +35,9 @@ public class LTCCClusterCorrection {
             - double solenoid: solenoid field setting
         * returns (threeVec): a vector with a more accurate cluster position
     */
-    public static threeVec calcPosition(threeVec clusterPos, double p, 
+    public static Vector3D calcPosition(Vector3D clusterPos, double p, 
             int charge, double torus, double solenoid) {
         // currently a no-op
-        return new threeVec(clusterPos);
+        return new Vector3D(clusterPos);
     }
 }

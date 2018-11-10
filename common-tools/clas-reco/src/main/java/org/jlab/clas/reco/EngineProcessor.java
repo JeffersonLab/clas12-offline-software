@@ -41,13 +41,15 @@ public class EngineProcessor {
     public void initDefault(){
         
         String[] names = new String[]{
+            "MAGFIELDS",
             "DCHB","FTOFHB","EC","HTCC","EBHB",
             "DCTB","FTOFTB","EBTB"
         };
         
         String[] services = new String[]{
+            "org.jlab.clas.swimtools.MagFieldsEngine",
             "org.jlab.service.dc.DCHBEngine",
-            "org.jlab.service.ftof.FTOFEHBngine",
+            "org.jlab.service.ftof.FTOFHBEngine",
             "org.jlab.service.ec.ECEngine",
             "org.jlab.service.htcc.HTCCReconstructionService",
             "org.jlab.service.eb.EBHBEngine",
@@ -67,6 +69,7 @@ public class EngineProcessor {
     public void initAll(){
         
         String[] names = new String[]{
+            "MAGFIELDS",
             "FTCAL", "FTHODO", "FTEB",
             "DCHB","FTOFHB","EC",
             "CVT","CTOF","CND",
@@ -75,6 +78,7 @@ public class EngineProcessor {
         };
         
         String[] services = new String[]{
+            "org.jlab.clas.swimtools.MagFieldsEngine",
             "org.jlab.rec.ft.cal.FTCALEngine",
             "org.jlab.rec.ft.hodo.FTHODOEngine",
             "org.jlab.rec.ft.FTEBEngine",
