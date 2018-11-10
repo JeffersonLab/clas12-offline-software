@@ -53,7 +53,7 @@
   },
    {
     "bank": "FTOF::hits",
-    "group": 21222,
+    "group": 21231,
     "info": "reconstructed hit info from FTOF",
     "items": [
        {"name":"id",          "id":1, "type":"int16",  "info":"id of the hit"},
@@ -85,7 +85,7 @@
   },
  {
     "bank": "FTOF::clusters",
-    "group": 21223,
+    "group": 21232,
     "info": "reconstructed clusters from FTOF",
     "items": [
         {"name":"id",          "id":1, "type":"int16",  "info":"id of the hit"},
@@ -108,7 +108,7 @@
  },
  {
     "bank": "FTOF::matchedclusters",
-    "group": 21224,
+    "group": 21233,
     "info": "matched clusters from FTOF",
     "items": [
         {"name":"sector",               "id":1, "type":"int8",   "info":"sector of FTOF"},

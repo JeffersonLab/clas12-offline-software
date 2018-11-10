@@ -62,6 +62,7 @@ echo "set session s_cook" >> cook.clara
 echo "set description d_cook" >> cook.clara
 ls twoTrackEvents_809.hipo > files.list
 echo "set fileList $PWD/files.list" >> cook.clara
+echo "set servicesFile $CLARA_HOME/plugins/clas12/config/data.yaml" >> cook.clara
 echo "run local" >> cook.clara
 echo "run local" >> cook.clara
 echo "exit" >> cook.clara
