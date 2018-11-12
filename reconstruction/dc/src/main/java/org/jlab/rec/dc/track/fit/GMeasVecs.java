@@ -89,6 +89,85 @@ public class GMeasVecs {
 		}
 	}
 	
+	
+	
+	void setMeasVecsFromHB(Track trk, DCGeant4Factory DcDetector) { 
+        List<GHitOnTrack> hOTS = new ArrayList<GHitOnTrack>(); // the list of hits on track		
+        FittedHit hitOnTrk;
+        for(int s = 0; s < trk.get_ListOfHBSegments().size(); s++) {
+            for(int h = 0; h < trk.get_ListOfHBSegments().get(s).size(); h++) { 
+                trk.get_ListOfHBSegments().get(s).get(h).calc_CellSize(DcDetector);
+                hitOnTrk = trk.get_ListOfHBSegments().get(s).get(h); 
+                
+		
+		int slayr = trk.get_ListOfHBSegments().get(s).get(h).get_Superlayer();
+		int ilayer = trk.get_ListOfHBSegments().get(s).get(h).get_Layer();
+		int iwire = trk.get_ListOfHBSegments().get(s).get(h).get_Wire();
+					
+		double d = trk.get_ListOfHBSegments().get(s).get(h).get_TimeToDistance();
+		
+		
+		
+		/*int slayr = trk.get_ListOfHBSegments().get(s).get(h).get_Superlayer();
+
+                double sl1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitSlope();
+                double it1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitIntercept();
+
+                double Z = hitOnTrk.get_Z();
+                double X = sl1 * Z + it1;*/
+
+                
+                //HitOnTrack hot = new HitOnTrack(slayr, X, Z, hitOnTrk.get_WireLength(), hitOnTrk.get_WireMaxSag());
+                
+		GHitOnTrack hot = new GHitOnTrack(slayr, ilayer, iwire, d);
+		
+		/*double err_sl1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitSlopeErr();
+
+                double err_it1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitInterceptErr();
+                double err_cov1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitSlIntCov();
+
+                hot._Unc = Math.sqrt(err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1);
+                hot._hitError = err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1 + 2 * Z * err_cov1 + trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr()*trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr();
+
+                if(Math.abs(trk.get_ListOfHBSegments().get(s).get(h).get_Residual())<1) */
+                    hOTS.add(hot);
+                
+            }
+        }
+        /*Collections.sort(hOTS); // sort the collection in order of increasing Z value (i.e. going downstream from the target)
+        ndf = hOTS.size()-5;
+        // identify double hits and take the average position		
+        for (int i = 0; i < hOTS.size(); i++) {
+            if (i > 0) {
+                if (Math.abs(hOTS.get(i - 1)._Z - hOTS.get(i)._Z)<0.01) {
+                    hOTS.get(i - 1)._X = (hOTS.get(i - 1)._X / (hOTS.get(i - 1)._Unc * hOTS.get(i - 1)._Unc) + hOTS.get(i)._X / (hOTS.get(i)._Unc * hOTS.get(i)._Unc)) / (1. / (hOTS.get(i - 1)._Unc * hOTS.get(i - 1)._Unc) + 1. / (hOTS.get(i)._Unc * hOTS.get(i)._Unc));
+                    //hOTS.get(i-1)._hitError  = 1./Math.sqrt(1./(hOTS.get(i-1)._hitError*hOTS.get(i-1)._hitError) + 1./(hOTS.get(i)._hitError*hOTS.get(i)._hitError) );
+                    hOTS.remove(i);
+                }
+            }
+        }*/
+
+	measurements = new ArrayList<GMeasVec>(hOTS.size());
+
+        for (int i = 0; i < hOTS.size(); i++) {
+	  GMeasVec meas = new GMeasVec(i);
+	  meas.isl = hOTS.get(i)._sl;
+	  meas.ilayer = hOTS.get(i)._lay;
+	  meas.iwire = hOTS.get(i)._wir;
+	  meas.drift_dist = hOTS.get(i)._dist;
+	  meas.error 	= hOTS.get(i)._hitError;
+	  this.measurements.add(i, meas);
+		
+            //System.out.println(" measurement "+i+" = "+meas.x+" at "+meas.z);
+        }
+    }
+	
+	
+	
+	
+	
+	
+	
 	private class GHitOnTrack implements Comparable<GHitOnTrack> {
 	   public double _hitError;
 	   private double _dist;

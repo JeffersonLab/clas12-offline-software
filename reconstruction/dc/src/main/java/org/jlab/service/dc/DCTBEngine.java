@@ -28,6 +28,15 @@ import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
 
+
+// MO: need this for copying gFit results
+import org.jlab.rec.dc.track.fit.StateVecs;
+// MO: add GFitter methods
+import org.jlab.rec.dc.track.fit.GStateVecs;
+import org.jlab.rec.dc.track.fit.GStateVecs.GStateVec;
+import org.jlab.rec.dc.track.fit.GMeasVecs;
+import org.jlab.rec.dc.track.fit.GFitter;
+
 public class DCTBEngine extends DCEngine {
 
 //    DCGeant4Factory dcDetector;
@@ -63,8 +72,14 @@ public class DCTBEngine extends DCEngine {
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
+	double TORSCALE=bank.getFloat("torus", 0); // MO: can we obtain it from Swim?
+	double SOLSCALE=bank.getFloat("solenoid", 0); // MO: can we obtain it from Swim?
         if(newRun==0)
             return true;
+
+	   if (this.getEngineConfigString("trkGFitter")!=null) {
+               Constants.setGFT(true);
+           }
 
         double T_Start = 0;
         if(Constants.isUSETSTART() == true) {
@@ -214,11 +229,37 @@ public class DCTBEngine extends DCEngine {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());
             //}
             KFitter kFit = new KFitter(TrackArray[i], dcDetector, true, dcSwim);
-           
-            StateVec fn = new StateVec();
+	    if(Constants.getGFT()) { // MO: run LSQ-fit
+	     GFitter gFit = new GFitter(TrackArray[i], dcDetector, true, dcSwim, TORSCALE);
+             gFit.runFitter(TrackArray[i].get(0).get_Sector());
+	     // MO: copy into kFit object
+		    StateVecs ksv = new StateVecs(dcSwim); // object was not created in memory
+		    ksv.init(TrackArray[i], 175., kFit); // must call this to create instance
+		    kFit.finalStateVec = ksv.trackTraj.get(0);
+		    kFit.finalCovMat = ksv.trackCov.get(0);
+		    
+		    kFit.finalStateVec.x = gFit.finalStateVec.x;
+                    kFit.finalStateVec.y = gFit.finalStateVec.y;
+                    kFit.finalStateVec.tx = gFit.finalStateVec.tx;
+                    kFit.finalStateVec.ty = gFit.finalStateVec.ty;
+                    kFit.finalStateVec.Q = gFit.finalStateVec.Q;
+                    kFit.finalStateVec.z = gFit.finalStateVec.z;
+		    kFit.chi2 = gFit.chi2;
+		    kFit.NDF = gFit.NDF;
+		    kFit.ConvStatus = gFit.ConvStatus;
+		    kFit.setFitFailed = gFit.setFitFailed;
+		    
+		    kFit.finalCovMat.covMat = gFit.finalCovMat.covMat;
+		    kFit.kfStateVecsAlongTrajectory = gFit.kfStateVecsAlongTrajectory;
+
+            } else{ // MO: standard Kalman filter
             kFit.runFitter(TrackArray[i].get(0).get_Sector());
+	    }
+	    
             
-            if(kFit.setFitFailed==false && kFit.finalStateVec!=null) { 
+            if(kFit.setFitFailed==false && kFit.finalStateVec!=null) {
+	        StateVec fn = new StateVec();
+	    
                 // set the state vector at the last measurement site
                 fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
                 //set the track parameters if the filter does not fail

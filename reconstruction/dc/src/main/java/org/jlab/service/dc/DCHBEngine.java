@@ -111,9 +111,13 @@ public class DCHBEngine extends DCEngine {
            if (event.hasBank("MC::Particle") && this.getEngineConfigString("wireDistort")==null) {
                Constants.setWIREDIST(0);
            }
-
+	   
  //          if (debug.get()) System.out.println("NEW RUN INIT = " + (System.currentTimeMillis() - startTime));
        }
+
+	   if (this.getEngineConfigString("trkGFitter")!=null) {
+               Constants.setGFT(true);
+           }
 
         /* 1 */
         // get Field

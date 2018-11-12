@@ -22,6 +22,14 @@ import org.jlab.rec.dc.trajectory.TrajectoryFinder;
 import trackfitter.fitter.LineFitPars;
 import trackfitter.fitter.LineFitter;
 
+// MO: need this for copying gFit results
+import org.jlab.rec.dc.track.fit.StateVecs;
+// MO: add GFitter methods
+import org.jlab.rec.dc.track.fit.GStateVecs;
+import org.jlab.rec.dc.track.fit.GStateVecs.GStateVec;
+import org.jlab.rec.dc.track.fit.GMeasVecs;
+import org.jlab.rec.dc.track.fit.GFitter;
+
 /**
  * A class with a method implementing an algorithm that finds lists of track candidates in the DC
  *
@@ -225,12 +233,39 @@ public class TrackCandListFinder {
                     cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane);
                     // initialize the fitter with the candidate track
                     KFitter kFit = new KFitter(cand, DcDetector, false, dcSwim);
+		    if(Constants.getGFT()) { // MO: run LSQ-fit
+		     GFitter gFit = new GFitter(cand, DcDetector, false, dcSwim, TORSCALE);
+                     if (debug) startTime = System.currentTimeMillis();
+		     gFit.runFitter(cand.get(0).get_Sector());
+		     if (debug) System.out.println("Gaussian LSF = " + (System.currentTimeMillis() - startTime));
+		     // MO: copy into kFit object
+		    StateVecs ksv = new StateVecs(dcSwim); // object was not created in memory
+		    ksv.init(cand, 175., kFit); // must call this to create instance
+		    kFit.finalStateVec = ksv.trackTraj.get(0);
+		    kFit.finalCovMat = ksv.trackCov.get(0);
+		    
+		    kFit.finalStateVec.x = gFit.finalStateVec.x;
+                    kFit.finalStateVec.y = gFit.finalStateVec.y;
+                    kFit.finalStateVec.tx = gFit.finalStateVec.tx;
+                    kFit.finalStateVec.ty = gFit.finalStateVec.ty;
+                    kFit.finalStateVec.Q = gFit.finalStateVec.Q;
+                    kFit.finalStateVec.z = gFit.finalStateVec.z;
+		    kFit.chi2 = gFit.chi2;
+		    kFit.NDF = gFit.NDF;
+		    kFit.ConvStatus = gFit.ConvStatus;
+		    kFit.setFitFailed = gFit.setFitFailed;
+		    
+		    kFit.finalCovMat.covMat = gFit.finalCovMat.covMat;
+		    kFit.kfStateVecsAlongTrajectory = gFit.kfStateVecsAlongTrajectory;
+
+		     
+		    } else{ // MO: standard Kalman filter
                     kFit.totNumIter = 1;
 
                     if (debug) startTime = System.currentTimeMillis();
                     kFit.runFitter(cand.get(0).get_Sector());
                     if (debug) System.out.println("Kalman fitter = " + (System.currentTimeMillis() - startTime));
-
+                    }
 
                     if (kFit.finalStateVec == null)
                         continue;
@@ -409,21 +444,49 @@ public class TrackCandListFinder {
                                     cand.get(0).get_Dir().y() / cand.get(0).get_Dir().z());
                             cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane);
                             // initialize the fitter with the candidate track
-
                             KFitter kFit = new KFitter(cand, DcDetector, false, dcSwim);
+			    if(Constants.getGFT()) { // MO: run LSQ-fit
+		             GFitter gFit = new GFitter(cand, DcDetector, false, dcSwim, TORSCALE);
+                             if (debug) startTime = System.currentTimeMillis();
+			     gFit.runFitter(cand.get(0).get_Sector());
+			     if (debug) System.out.println("Gaussian LSF - 2 = " + (System.currentTimeMillis() - startTime));
+
+			     // MO: copy into kFit object
+		    StateVecs ksv = new StateVecs(dcSwim); // object was not created in memory
+		    ksv.init(cand, 175., kFit); // must call this to create instance
+		    kFit.finalStateVec = ksv.trackTraj.get(0);
+		    kFit.finalCovMat = ksv.trackCov.get(0);
+		    
+		    kFit.finalStateVec.x = gFit.finalStateVec.x;
+                    kFit.finalStateVec.y = gFit.finalStateVec.y;
+                    kFit.finalStateVec.tx = gFit.finalStateVec.tx;
+                    kFit.finalStateVec.ty = gFit.finalStateVec.ty;
+                    kFit.finalStateVec.Q = gFit.finalStateVec.Q;
+                    kFit.finalStateVec.z = gFit.finalStateVec.z;
+		    kFit.chi2 = gFit.chi2;
+		    kFit.NDF = gFit.NDF;
+		    kFit.ConvStatus = gFit.ConvStatus;
+		    kFit.setFitFailed = gFit.setFitFailed;
+		    
+		    kFit.finalCovMat.covMat = gFit.finalCovMat.covMat;
+		    kFit.kfStateVecsAlongTrajectory = gFit.kfStateVecsAlongTrajectory;
+
+			     
+		            } else { // MO: standard Kalman filter*/
 //                            if(this.trking.equalsIgnoreCase("TimeBased"))
 //                                kFit.totNumIter=30;
-
-                            // initialize the state vector corresponding to the last measurement site
-                            StateVec fn = new StateVec();
 
                             if (debug) startTime = System.currentTimeMillis();
                             kFit.runFitter(cand.get(0).get_Sector());
                             if (debug)
                                 System.out.println("Kalman fitter - 2 = " + (System.currentTimeMillis() - startTime));
+                            }
 
                             if (kFit.finalStateVec == null)
                                 continue;
+
+                            // initialize the state vector corresponding to the last measurement site
+                            StateVec fn = new StateVec();
 
                             if (this.trking.equalsIgnoreCase("HitBased")) {
 

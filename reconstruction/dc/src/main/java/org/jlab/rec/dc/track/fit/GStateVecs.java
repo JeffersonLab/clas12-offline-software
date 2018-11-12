@@ -12,6 +12,8 @@ import org.jlab.rec.dc.track.Track;
 //import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.clas.swimtools.Swim;
 
+import org.jlab.rec.dc.cross.Cross;
+
 import Jama.Matrix;
 
 public class GStateVecs {
@@ -133,6 +135,8 @@ public class GStateVecs {
 		
 		Matrix Cpropagated = null;
 		double[][] transpStateJacobian = null;
+		
+		double dPath=0;
 		
 		for(int j =0; j< nSteps; j++) {
 			
@@ -263,6 +267,11 @@ public class GStateVecs {
  			ty += Q*speedLight*A[1]*s;
  			
 			z+= s;
+			
+			dPath += Math.sqrt(
+			 (tx*s+Q*speedLight*A[0]*s*s/2)*(tx*s+Q*speedLight*A[0]*s*s/2)
+			+(ty*s+Q*speedLight*A[1]*s*s/2)*(ty*s+Q*speedLight*A[1]*s*s/2)
+			+s*s);
 		}
 		
 		GStateVec fVec = new GStateVec(f);
@@ -272,6 +281,7 @@ public class GStateVecs {
 		fVec.tx = tx;
 		fVec.ty = ty;
 		fVec.Q = Q;
+		fVec.deltaPath = dPath;
 		
 		//StateVec = fVec;
 		this.trackTraj.put(f, fVec);
@@ -297,6 +307,8 @@ public class GStateVecs {
 		public double tx;
 		public double ty;
 		public double Q;
+		double B;
+                double deltaPath;
 		
 		GStateVec(int k){
 			this.k = k;
@@ -423,6 +435,8 @@ public class GStateVecs {
 			double ty = this.trackTraj.get(gf).ty;
 			double p = 1./Math.abs(this.trackTraj.get(gf).Q);
 			int q = (int) Math.signum(this.trackTraj.get(gf).Q);
+
+//System.out.println("GVinit.sect: " + this.trackTraj.get(0).get_Sector() +" , "+ sector );
 			
 			dcSwim.SetSwimParameters(-1, x, y, z, tx, ty, p, q);
 			//double[] VecAtFirstMeasSite = dcSwim.SwimToPlane(z0);
@@ -449,9 +463,10 @@ public class GStateVecs {
 		}
 	}
 	
-	public void init(int sector, Track trkcand, double z0, GFitter gf) {
+	public void init(Track trkcand, double z0, GFitter gf) {
 
 //System.out.println("GVinit: " + trkcand.get_StateVecAtReg1MiddlePlane() +" , "+ dcSwim );
+//System.out.println("GVinit.sect: " + trkcand.get(0).get_Sector() +" , "+ sector );
 
 		if(trkcand.get_StateVecAtReg1MiddlePlane()!=null ) {
 			dcSwim.SetSwimParameters(-1, trkcand.get_StateVecAtReg1MiddlePlane().x(),trkcand.get_StateVecAtReg1MiddlePlane().y(),trkcand.get(0).get_Point().z(),
@@ -462,7 +477,7 @@ public class GStateVecs {
 
 			//double[] VecAtFirstMeasSite = dcSwim.SwimToPlane(z0);
 			//double[] VecAtFirstMeasSite = dcSwim.SwimToPlaneLab(z0);
-			double[] VecAtFirstMeasSite = dcSwim.SwimToPlaneTiltSecSys(sector, z0);
+			double[] VecAtFirstMeasSite = dcSwim.SwimToPlaneTiltSecSys(trkcand.get(0).get_Sector(), z0);
 			GStateVec initSV = new GStateVec(0);
 			if(VecAtFirstMeasSite!=null) {
 			 initSV.x = VecAtFirstMeasSite[0];
@@ -499,7 +514,126 @@ public class GStateVecs {
 		initCM.covMat = initCMatrix;
 		this.trackCov.put(0, initCM);
 	}
-	
+
+
+	public void initFromHB(Track trkcand, double z0, GFitter gf) {
+
+//System.out.println("GVinit: " + trkcand.get_StateVecAtReg1MiddlePlane() +" , "+ dcSwim );
+
+		//if(trkcand.get_StateVecAtReg1MiddlePlane()!=null ) {
+		//	dcSwim.SetSwimParameters(-1, trkcand.get_StateVecAtReg1MiddlePlane().x(),trkcand.get_StateVecAtReg1MiddlePlane().y(),trkcand.get(0).get_Point().z(),
+		//			trkcand.get_StateVecAtReg1MiddlePlane().tanThetaX(),trkcand.get_StateVecAtReg1MiddlePlane().tanThetaY(),trkcand.get_P(),
+		//			 trkcand.get_Q());
+
+        if (trkcand != null && trkcand.get_CovMat()!=null) {
+            dcSwim.SetSwimParameters(trkcand.get_Vtx0().x(), trkcand.get_Vtx0().y(), trkcand.get_Vtx0().z(), 
+                    trkcand.get_pAtOrig().x(), trkcand.get_pAtOrig().y(), trkcand.get_pAtOrig().z(), trkcand.get_Q());
+            double[] VecInDCVolume = dcSwim.SwimToPlaneLab(175.);
+
+
+/*System.out.println("GSV.init: " + trkcand.get_Vtx0().x() +" , "+ trkcand.get_Vtx0().y() +" , "+ trkcand.get_Vtx0().z()
++" , "+ trkcand.get_pAtOrig().x()
++" , "+ trkcand.get_pAtOrig().y()
++" , "+ trkcand.get_pAtOrig().z()
++" , "+ trkcand.get_Q()
++" , z0= "+ z0
+);*/
+
+            if(VecInDCVolume==null){
+                gf.setFitFailed = true;
+                return;
+            }
+            // rotate to TCS
+            Cross C = new Cross(trkcand.get(0).get_Sector(), trkcand.get(0).get_Region(), -1);
+        
+            Point3D trkR1X = C.getCoordsInTiltedSector(VecInDCVolume[0],VecInDCVolume[1],VecInDCVolume[2]);
+            Point3D trkR1P = C.getCoordsInTiltedSector(VecInDCVolume[3],VecInDCVolume[4],VecInDCVolume[5]);
+            
+            dcSwim.SetSwimParameters(trkR1X.x(), trkR1X.y(), trkR1X.z(), 
+                    trkR1P.x(), trkR1P.y(), trkR1P.z(), trkcand.get_Q());
+
+/*System.out.println("GSV.SetSwimParameters: " + trkR1X.x() +" , "+ trkR1X.y() +" , "+ trkR1X.z()
++" , "+ trkR1P.x()
++" , "+ trkR1P.y()
++" , "+ trkR1P.z()
+);*/
+
+            double[] VecAtFirstMeasSite = dcSwim.SwimToPlaneTiltSecSys(trkcand.get(0).get_Sector(), z0);
+            if(VecAtFirstMeasSite==null){
+                gf.setFitFailed = true;
+                return;
+            }
+
+/*System.out.println("GSV.VecAtFirstMeasSite: " + VecAtFirstMeasSite[0] +" , "+ VecAtFirstMeasSite[1] +" , "+ VecAtFirstMeasSite[2] +" , "+ z0
++" , "+ VecAtFirstMeasSite[3]
++" , "+ VecAtFirstMeasSite[4]
++" , "+ VecAtFirstMeasSite[5]
+);*/
+
+//System.out.println("GVinit: " + trkcand.get_StateVecAtReg1MiddlePlane().x() +" , "+ trkcand.get_Q());
+
+			//double[] VecAtFirstMeasSite = dcSwim.SwimToPlane(z0);
+			//double[] VecAtFirstMeasSite = dcSwim.SwimToPlaneLab(z0);
+			//double[] VecAtFirstMeasSite = dcSwim.SwimToPlaneTiltSecSys(sector, z0);
+			GStateVec initSV = new GStateVec(0);
+
+// MO: this does not exist anymore (not saved into HB bank)			
+/*System.out.println("GSV.get_Trajectory: " + trkcand.get_Trajectory() );
+
+System.out.println("GSV.get_Trajectory.get(0): " + trkcand.get_Trajectory() +" , "+ trkcand.get_Trajectory().get(0));
+
+org.jlab.rec.dc.trajectory.StateVec firstSV = trkcand.get_Trajectory().get(0);
+
+initSV.x = firstSV.x();
+initSV.y = firstSV.y();
+initSV.z = firstSV.getZ();
+initSV.tx = firstSV.tanThetaX();
+initSV.ty = firstSV.tanThetaY();*/
+
+			//if(false) {
+			if(VecAtFirstMeasSite!=null) {
+			 initSV.x = VecAtFirstMeasSite[0];
+			 initSV.y = VecAtFirstMeasSite[1];
+			 initSV.z = VecAtFirstMeasSite[2];
+			 initSV.tx = VecAtFirstMeasSite[3]/VecAtFirstMeasSite[5];
+			 initSV.ty = VecAtFirstMeasSite[4]/VecAtFirstMeasSite[5];
+			} else { // dcSwim.SwimToPlaneTiltSecSys returns null is no B-field is present
+			 initSV.x  = trkcand.get_StateVecAtReg1MiddlePlane().x() + trkcand.get_StateVecAtReg1MiddlePlane().tanThetaX()*(z0-trkcand.get(0).get_Point().z());
+			 initSV.y  = trkcand.get_StateVecAtReg1MiddlePlane().y() + trkcand.get_StateVecAtReg1MiddlePlane().tanThetaY()*(z0-trkcand.get(0).get_Point().z());
+			 initSV.z  = z0;
+			 initSV.tx = trkcand.get_StateVecAtReg1MiddlePlane().tanThetaX();
+			 initSV.ty = trkcand.get_StateVecAtReg1MiddlePlane().tanThetaY();
+			}
+			//}
+			//initSV.Q = trkcand.get_Q()/trkcand.get_P(); // MO:
+			double P_r1l1_tilt=Math.sqrt(VecAtFirstMeasSite[3]*VecAtFirstMeasSite[3]
+		                                    +VecAtFirstMeasSite[4]*VecAtFirstMeasSite[4]
+						    +VecAtFirstMeasSite[5]*VecAtFirstMeasSite[5]);
+			if(P_r1l1_tilt>0) initSV.Q = trkcand.get_Q()/P_r1l1_tilt;
+			else initSV.Q = -0.001; // MO: momentum not defined
+			this.trackTraj.put(0, initSV);
+		} else {
+			gf.setFitFailed = true;
+			return;
+		}
+		//System.out.println((0)+"] init "+this.trackTraj.get(0).x+","+this.trackTraj.get(0).y+","+
+		//		this.trackTraj.get(0).z+","+this.trackTraj.get(0).tx+","+this.trackTraj.get(0).ty+" "+1/this.trackTraj.get(0).Q); 
+		
+		
+		Matrix initCMatrix = new Matrix( new double[][]{
+				{    1,       0,       0,       0,  0},
+				{    0,       1,       0,       0,  0},
+				{    0,       0,       1,       0,  0},
+				{    0,       0,       0,       1,  0},
+				{    0,       0,       0,       0,  1}
+		});
+		
+		CovMat initCM = new CovMat(0);
+		initCM.covMat = initCMatrix;
+		this.trackCov.put(0, initCM);
+	}
+
+
 	public void printMatrix(Matrix C) {
 		for(int k = 0; k< 5; k++) {
 			System.out.println(C.get(k, 0)+"	"+C.get(k, 1)+"	"+C.get(k, 2)+"	"+C.get(k, 3)+"	"+C.get(k, 4));

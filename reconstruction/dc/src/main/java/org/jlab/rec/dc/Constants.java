@@ -186,6 +186,22 @@ public class Constants {
         WIREDIST = aDIST;
     }
     
+    private static boolean USE_GFITTER = false;
+
+    /**
+     * @return the USE_GFITTER
+     */
+    public static boolean getGFT() {
+        return USE_GFITTER;
+    }
+
+    /**
+     * @param aMCDIST the USE_GFITTER to set
+     */
+    public static void setGFT(boolean aDIST) {
+        USE_GFITTER = aDIST;
+    }
+    
     public static final double[][][] MAXENDPLTDEFLEC = new double[3][6][2];
     
     public static synchronized void Load() {

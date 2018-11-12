@@ -1,14 +1,19 @@
 package org.jlab.rec.dc.track.fit;
 
+import java.util.ArrayList;
+import java.util.List;
+
 //import org.jlab.rec.dc.GeometryLoader;
 import org.jlab.geom.prim.Vector3D;
 
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.track.Track;
 
 import org.jlab.rec.dc.track.fit.GStateVecs;
 import org.jlab.rec.dc.track.fit.GStateVecs.GStateVec;
+import org.jlab.rec.dc.track.fit.GStateVecs.CovMat;
 import org.jlab.rec.dc.track.fit.GMeasVecs;
 import org.jlab.rec.dc.track.fit.GMeasVecs.GMeasVec;
 
@@ -25,29 +30,32 @@ public class GFitter {
 	private DCGeant4Factory DcDetector;
 	
 	public GStateVec finalStateVec;
+	public CovMat finalCovMat;
 	
 	private Swim dcSwim;
 	private double TORSCALE;
 	private boolean debug_gfit=false;
 	//private boolean debug_gfit=true;
+	public int ConvStatus = 1;
 	
 	// save track crossing layers
-	//public List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory;
+	public List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory;
 	
-	public GFitter(int sector, Track trk, DCGeant4Factory DcDetector_init,
+	public GFitter(Track trk, DCGeant4Factory DcDetector_init,
                    boolean TimeBasedUsingHBtrack,
                    Swim swimmer, double torus_bfiled_scale) {
 		 sv = new GStateVecs(swimmer);
 		 dcSwim=swimmer;
-		 TORSCALE = torus_bfiled_scale;
-		this.init(sector, trk, DcDetector_init);
+		 TORSCALE = Swimmer.getTorScale();
+		this.init(trk, DcDetector_init, TimeBasedUsingHBtrack);
 	}
 
-	public void init(int sector, Track trk, DCGeant4Factory DcDetector_init) {
+	public void init(Track trk, DCGeant4Factory DcDetector_init, boolean TimeBasedUsingHBtrack) {
 		DcDetector = DcDetector_init;
-		mv.setGMeasVecs(trk,DcDetector);
+		if(TimeBasedUsingHBtrack) mv.setMeasVecsFromHB(trk, DcDetector);
+		else mv.setGMeasVecs(trk,DcDetector);
 		sv.Z = new double[mv.measurements.size()];
-		
+		int sector=trk.get(0).get_Sector();
 		for(int i =0; i< mv.measurements.size(); i++) {
 			//sv.Z[i] = mv.measurements.get(i).z;
 			int superlayer=mv.measurements.get(i).isl;
@@ -57,11 +65,19 @@ public class GFitter {
 			
 			// MO: we don't have error yet here at HTB, use cell size
 			//mv.measurements.get(i).error=0.8;
-			if(i>0) mv.measurements.get(i).error=(sv.Z[i]-sv.Z[i-1])/Math.cos(Math.toRadians(30))/2;
+			if(i>0) {
+			 if(TimeBasedUsingHBtrack) mv.measurements.get(i).error=0.03; // TBT 300 um
+			 else mv.measurements.get(i).error=(sv.Z[i]-sv.Z[i-1])/Math.cos(Math.toRadians(30))/2;
+			}
+		 
 		}
-		mv.measurements.get(0).error=(sv.Z[1]-sv.Z[0])/Math.cos(Math.toRadians(30))/2;
-		
-		sv.init(sector, trk, sv.Z[0], this);
+		if(TimeBasedUsingHBtrack) mv.measurements.get(0).error=0.03; // TBT 300 um
+		else mv.measurements.get(0).error=(sv.Z[1]-sv.Z[0])/Math.cos(Math.toRadians(30))/2;
+
+		if(TimeBasedUsingHBtrack) {
+		 sv.initFromHB(trk, sv.Z[0], this);
+		 for(int k=0; k<sv.Z.length-1; k++) sv.transport(sector, k, k+1, sv.trackTraj.get(k), sv.trackCov.get(k));
+		} else sv.init(trk, sv.Z[0], this);
 	}
 	
 	//public int totNumIter = 10;
@@ -164,7 +180,8 @@ if(debug_gfit) System.out.println(" GFit.initial: " +sector
 				sv.trackTraj.get(k).ty/cnorm,
 				1./cnorm)
 				);
-				chi2_before+= (mv.measurements.get(k).drift_dist - doca)*(mv.measurements.get(k).drift_dist - doca)/mv.measurements.get(k).error/mv.measurements.get(k).error;
+				//chi2_before+= (mv.measurements.get(k).drift_dist - doca)*(mv.measurements.get(k).drift_dist - doca)/mv.measurements.get(k).error/mv.measurements.get(k).error;
+				chi2_before+= (Math.signum(doca)*mv.measurements.get(k).drift_dist - doca)*(Math.signum(doca)*mv.measurements.get(k).drift_dist - doca)/mv.measurements.get(k).error/mv.measurements.get(k).error;
 
 if(debug_gfit) System.out.println(" GFit.Before(Sec,SL,layer,wire): " +sector
 +" , "+ mv.measurements.get(k).isl
@@ -269,7 +286,8 @@ System.out.println(" covMat: " +k
 
 
 
-				vx[k] = mv.measurements.get(k).drift_dist - doca; // TDC(k)*V_drift - DOCA_fit_k
+				//vx[k] = mv.measurements.get(k).drift_dist - doca; // TDC(k)*V_drift - DOCA_fit_k
+				vx[k] = Math.signum(doca)*mv.measurements.get(k).drift_dist - doca; // TDC(k)*V_drift - DOCA_fit_k
 				//vx[k] = Math.abs(mv.measurements.get(k).drift_dist) - Math.abs(doca); // TDC(k)*V_drift - DOCA_fit_k
 				//vx[k] = Math.abs(doca) - Math.abs(mv.measurements.get(k).drift_dist); // TDC(k)*V_drift - DOCA_fit_k
 				weight[k] = 1./(mv.measurements.get(k).error*mv.measurements.get(k).error); // V=trk(5,il,ilnk)**2 + dc_Sigma_doca(is)**2
@@ -420,6 +438,7 @@ System.out.println(" transp: " + k
 			this.calcFinalChisq(sector);
 			if(this.chi2<newChisq) {
 				this.finalStateVec = sv.trackTraj.get(sv.Z.length-1); // last measured layer
+				this.finalCovMat = sv.trackCov.get(sv.Z.length - 1);
 				newChisq = this.chi2;
 			}  else {
 				i=totNumIter;
@@ -444,7 +463,7 @@ System.out.println(" transp: " + k
 
 	private void calcFinalChisq(int sector) {
 	
-	   //kfStateVecsAlongTrajectory = new ArrayList<>();
+	   kfStateVecsAlongTrajectory = new ArrayList<>();
 	   
 	   
 	    
@@ -452,27 +471,28 @@ System.out.println(" transp: " + k
 		int k = sv.Z.length-1;
 		//int k = 0;
 		this.chi2 =0;
+		double path = 0;
 		if(sv.trackTraj.get(k)!=null && sv.trackCov.get(k).covMat!=null) {
 			//sv.rinit(sv.Z[0], k);
 			sv.rinit(sector, sv.Z[0], k); // do we need this?
 			//sv.rinit(sv.Z[0], 0);
 			
 			
-			/*org.jlab.rec.dc.trajectory.StateVec svc =
+			org.jlab.rec.dc.trajectory.StateVec svc =
                     new org.jlab.rec.dc.trajectory.StateVec(sv.trackTraj.get(0).x,
                             sv.trackTraj.get(0).y,
                             sv.trackTraj.get(0).tx,
                             sv.trackTraj.get(0).ty);
             svc.setZ(sv.trackTraj.get(0).z);
-            svc.setB(sv.trackTraj.get(0).B);
-            path += sv.trackTraj.get(0).deltaPath;
+            //svc.setB(sv.trackTraj.get(0).B); // MO: not implemented
+            path += sv.trackTraj.get(0).deltaPath; // MO: not implemented
             svc.setPathLength(path);
-            double h0 = mv.h(new double[]{sv.trackTraj.get(0).x, sv.trackTraj.get(0).y},
-                    mv.measurements.get(0).tilt,
-                    mv.measurements.get(0).wireMaxSag,
-                    mv.measurements.get(0).wireLen);
-            svc.setProjector(h0);
-            kfStateVecsAlongTrajectory.add(svc);*/
+            //double h0 = mv.h(new double[]{sv.trackTraj.get(0).x, sv.trackTraj.get(0).y}, // MO: not implemented
+            //        mv.measurements.get(0).tilt,
+            //        mv.measurements.get(0).wireMaxSag,
+            //        mv.measurements.get(0).wireLen);
+            //svc.setProjector(h0);
+            kfStateVecsAlongTrajectory.add(svc);
 	    
 			
 			for(int k1=0; k1<sv.Z.length; k1++) {
@@ -504,7 +524,8 @@ System.out.println(" transp: " + k
 				sv.trackTraj.get(k1).ty/cnorm,
 				1./cnorm)
 				);
-				this.chi2+= (mv.measurements.get(k1).drift_dist - doca)*(mv.measurements.get(k1).drift_dist - doca)/V/V;
+				//this.chi2+= (mv.measurements.get(k1).drift_dist - doca)*(mv.measurements.get(k1).drift_dist - doca)/V/V;
+				this.chi2+= (Math.signum(doca)*mv.measurements.get(k1).drift_dist - doca)*(Math.signum(doca)*mv.measurements.get(k1).drift_dist - doca)/V/V;
 
 if(debug_gfit) System.out.println(" GFit.Chi2(SL,layer,wire): " +mv.measurements.get(k1).isl
 +" , "+ mv.measurements.get(k1).ilayer
@@ -512,6 +533,21 @@ if(debug_gfit) System.out.println(" GFit.Chi2(SL,layer,wire): " +mv.measurements
 + " doca = " +doca+ " drift_dist = " + mv.measurements.get(k1).drift_dist
 + " sv.x = " +sv.trackTraj.get(k1).x+ " sv.y = " +sv.trackTraj.get(k1).y);
 
+
+                    svc = new org.jlab.rec.dc.trajectory.StateVec(sv.trackTraj.get(k1).x,
+                            sv.trackTraj.get(k1).y,
+                            sv.trackTraj.get(k1).tx,
+                            sv.trackTraj.get(k1).ty);
+            svc.setZ(sv.trackTraj.get(k1).z);
+            //svc.setB(sv.trackTraj.get(k1).B); // MO: not implemented
+            path += sv.trackTraj.get(k1).deltaPath; // MO: not implemented
+            svc.setPathLength(path);
+            //double h0 = mv.h(new double[]{sv.trackTraj.get(k1).x, sv.trackTraj.get(k1).y}, // MO: not implemented
+            //        mv.measurements.get(k1).tilt,
+            //        mv.measurements.get(k1).wireMaxSag,
+            //        mv.measurements.get(k1).wireLen);
+            //svc.setProjector(h0);
+            kfStateVecsAlongTrajectory.add(svc);
 
 			}
 
