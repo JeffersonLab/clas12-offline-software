@@ -16,6 +16,8 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Shape3D;
 import org.jlab.geom.prim.Triangle3D;
 
+import cnuphys.ced.frame.Ced;
+
 public class DCGeometry {
 
 	private static ConstantProvider _dcDataProvider;
@@ -462,6 +464,7 @@ public class DCGeometry {
 
 		extPoint(first, second, wp[0]);
 		extPoint(last, nexttolast, wp[1]);
+		
 	}
 
 	/**
@@ -481,39 +484,96 @@ public class DCGeometry {
 	public static void getLayerPolygon(int superLayer, int layer, Plane3D plane, Point2D.Double wp[]) {
 
 		Point2D.Double hex[] = GeometryManager.allocate(6);
+		
+		boolean useOldGeo = Ced.useOldDCGeo();
 
 		int firstWire = 1;
 		while ((firstWire < 112) && !getHexagon(superLayer, layer, firstWire, plane, hex, null)) {
 			firstWire++;
 		}
 //		System.err.println("FIRST WIRE: " + firstWire);
+		
+		getHexagon(superLayer, layer, 1, plane, hex, null);
 
-//		getHexagon(superLayer, layer, 1, plane, hex, null);
-		assignFromHex(wp, 0, hex, 0);
-		assignFromHex(wp, 11, hex, 3);
-		assignFromHex(wp, 12, hex, 4);
-		assignFromHex(wp, 13, hex, 5);
+		/*
+		 * The mappings of the old geo hex indices to the new is
+		 * 0 --> 5
+		 * 1 --> 4
+		 * 2 --> 3
+		 * 3 --> 2
+		 * 4 --> 1
+		 * 5 --> 0
+		 */
 
+		if (useOldGeo) {
+			assignFromHex(wp, 0, hex, 0);
+			assignFromHex(wp, 11, hex, 3);
+			assignFromHex(wp, 12, hex, 4);
+			assignFromHex(wp, 13, hex, 5);
+		} else {
+			assignFromHex(wp, 0, hex, 5);
+			assignFromHex(wp, 11, hex, 2);
+			assignFromHex(wp, 12, hex, 1);
+			assignFromHex(wp, 13, hex, 0);
+		}
+
+//		if ((superLayer == 1) && (layer == 1)) {
+//		for (int i = 0; i < 6; i++)
+//		System.err.println(String.format("hex[%d] = [%-6.1f, %-6.1f]", i, hex[i].x, hex[i].y));
+//	}
+		
+		
+		
 		int sindex = Math.max(13, firstWire+8);
 		getHexagon(superLayer, layer, sindex, plane, hex, null);
-		assignFromHex(wp, 1, hex, 0);
-		assignFromHex(wp, 10, hex, 3);
-
+		
+		if (useOldGeo) {
+			assignFromHex(wp, 1, hex, 0);
+			assignFromHex(wp, 10, hex, 3);
+		}
+		else {
+			assignFromHex(wp, 1, hex, 5);
+			assignFromHex(wp, 10, hex, 2);
+		}
+		
 		sindex = Math.max(57, sindex+12);
 		getHexagon(superLayer, layer, 57, plane, hex, null);
-		assignFromHex(wp, 2, hex, 0);
-		assignFromHex(wp, 9, hex, 3);
+		
+		if (useOldGeo) {
+			assignFromHex(wp, 2, hex, 0);
+			assignFromHex(wp, 9, hex, 3);
+		}
+		else {
+			assignFromHex(wp, 2, hex, 5);
+			assignFromHex(wp, 9, hex, 2);
+		}
 
 		sindex = Math.max(99, sindex+29);
 		getHexagon(superLayer, layer, 99, plane, hex, null);
-		assignFromHex(wp, 3, hex, 0);
-		assignFromHex(wp, 8, hex, 3);
+		
+		if (useOldGeo) {
+			assignFromHex(wp, 3, hex, 0);
+			assignFromHex(wp, 8, hex, 3);
+		}
+		else {
+			assignFromHex(wp, 3, hex, 5);
+			assignFromHex(wp, 8, hex, 2);
+		}
 
 		getHexagon(superLayer, layer, 112, plane, hex, null);
-		assignFromHex(wp, 4, hex, 0);
-		assignFromHex(wp, 5, hex, 1);
-		assignFromHex(wp, 6, hex, 2);
-		assignFromHex(wp, 7, hex, 3);
+		
+		if (useOldGeo) {
+			assignFromHex(wp, 4, hex, 0);
+			assignFromHex(wp, 5, hex, 1);
+			assignFromHex(wp, 6, hex, 2);
+			assignFromHex(wp, 7, hex, 3);
+		}
+		else {
+			assignFromHex(wp, 4, hex, 5);
+			assignFromHex(wp, 5, hex, 4);
+			assignFromHex(wp, 6, hex, 3);
+			assignFromHex(wp, 7, hex, 2);
+		}
 	}
 
 	/**
@@ -530,56 +590,58 @@ public class DCGeometry {
 	 */
 	public static void getSuperLayerPolygon(int superLayer, Plane3D projectionPlane, Point2D.Double wp[]) {
 
-		Point2D.Double lb[] = GeometryManager.allocate(14);
-		getLayerPolygon(superLayer, 1, projectionPlane, lb);
-		wp[0].setLocation(lb[12]);
-		wp[1].setLocation(lb[13]);
-		wp[2].setLocation(lb[0]);
-		wp[3].setLocation(lb[1]);
-		wp[4].setLocation(lb[2]);
-		wp[5].setLocation(lb[3]);
-		wp[6].setLocation(lb[4]);
-		wp[7].setLocation(lb[5]);
-		wp[8].setLocation(lb[6]);
+		Point2D.Double layBoundry[] = GeometryManager.allocate(14);
+		getLayerPolygon(superLayer, 1, projectionPlane, layBoundry);
+		wp[0].setLocation(layBoundry[12]);
+		wp[1].setLocation(layBoundry[13]);
+		wp[2].setLocation(layBoundry[0]);
+		wp[3].setLocation(layBoundry[1]);
+		wp[4].setLocation(layBoundry[2]);
+		wp[5].setLocation(layBoundry[3]);
+		wp[6].setLocation(layBoundry[4]);
+		wp[7].setLocation(layBoundry[5]);
+		wp[8].setLocation(layBoundry[6]);
 
-		getLayerPolygon(superLayer, 2, projectionPlane, lb);
-		wp[9].setLocation(lb[5]);
-		wp[10].setLocation(lb[6]);
-		wp[32].setLocation(lb[12]);
-		wp[33].setLocation(lb[13]);
+		getLayerPolygon(superLayer, 2, projectionPlane, layBoundry);
+		wp[9].setLocation(layBoundry[5]);
+		wp[10].setLocation(layBoundry[6]);
+		wp[32].setLocation(layBoundry[12]);
+		wp[33].setLocation(layBoundry[13]);
 
-		getLayerPolygon(superLayer, 3, projectionPlane, lb);
-		wp[11].setLocation(lb[5]);
-		wp[12].setLocation(lb[6]);
-		wp[30].setLocation(lb[12]);
-		wp[31].setLocation(lb[13]);
+		getLayerPolygon(superLayer, 3, projectionPlane, layBoundry);
+		wp[11].setLocation(layBoundry[5]);
+		wp[12].setLocation(layBoundry[6]);
+		wp[30].setLocation(layBoundry[12]);
+		wp[31].setLocation(layBoundry[13]);
 
-		getLayerPolygon(superLayer, 4, projectionPlane, lb);
-		wp[13].setLocation(lb[5]);
-		wp[14].setLocation(lb[6]);
-		wp[28].setLocation(lb[12]);
-		wp[29].setLocation(lb[13]);
+		getLayerPolygon(superLayer, 4, projectionPlane, layBoundry);
+		wp[13].setLocation(layBoundry[5]);
+		wp[14].setLocation(layBoundry[6]);
+		wp[28].setLocation(layBoundry[12]);
+		wp[29].setLocation(layBoundry[13]);
 
-		getLayerPolygon(superLayer, 5, projectionPlane, lb);
-		wp[15].setLocation(lb[5]);
-		wp[16].setLocation(lb[6]);
-		wp[26].setLocation(lb[12]);
-		wp[27].setLocation(lb[13]);
+		getLayerPolygon(superLayer, 5, projectionPlane, layBoundry);
+		wp[15].setLocation(layBoundry[5]);
+		wp[16].setLocation(layBoundry[6]);
+		wp[26].setLocation(layBoundry[12]);
+		wp[27].setLocation(layBoundry[13]);
 
-		getLayerPolygon(superLayer, 6, projectionPlane, lb);
-		wp[17].setLocation(lb[5]);
-		wp[18].setLocation(lb[6]);
-		wp[19].setLocation(lb[7]);
-		wp[20].setLocation(lb[8]);
-		wp[21].setLocation(lb[9]);
-		wp[22].setLocation(lb[10]);
-		wp[23].setLocation(lb[11]);
-		wp[24].setLocation(lb[12]);
-		wp[25].setLocation(lb[13]);
+		getLayerPolygon(superLayer, 6, projectionPlane, layBoundry);
+		wp[17].setLocation(layBoundry[5]);
+		wp[18].setLocation(layBoundry[6]);
+		wp[19].setLocation(layBoundry[7]);
+		wp[20].setLocation(layBoundry[8]);
+		wp[21].setLocation(layBoundry[9]);
+		wp[22].setLocation(layBoundry[10]);
+		wp[23].setLocation(layBoundry[11]);
+		wp[24].setLocation(layBoundry[12]);
+		wp[25].setLocation(layBoundry[13]);
 
 	}
 
 	private static void assignFromHex(Point2D.Double wp[], int wpIndex, Point2D.Double hex[], int hexIndex) {
+		
+		hexIndex = hexIndex % 6;
 		Point2D.Double p = new Point2D.Double(hex[hexIndex].x, hex[hexIndex].y);
 		wp[wpIndex] = p;
 	}

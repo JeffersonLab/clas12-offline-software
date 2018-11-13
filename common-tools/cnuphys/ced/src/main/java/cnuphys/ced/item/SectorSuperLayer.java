@@ -66,6 +66,10 @@ public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 		_superlayerDrawer = new SuperLayerDrawing(_view, this);
 	}
 	
+	/**
+	 * Get the superlayer drawer for this item
+	 * @return the superlayer drawer
+	 */
 	public SuperLayerDrawing getSuperLayerDrawer() {
 		return _superlayerDrawer;
 	}

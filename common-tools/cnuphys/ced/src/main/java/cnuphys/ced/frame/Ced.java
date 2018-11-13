@@ -120,6 +120,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	//for the event count
 	private JMenuItem _eventCountLabel;
 
+	//use old DC Geo
+	private static boolean _useOldDCGeo = false;
+	
 	// using 3D?
 	private static boolean _use3D = false;
 	
@@ -1103,6 +1106,14 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		return _use3D;
 	}
 	
+	/**
+	 * Check whether we old DC Geometry
+	 * 
+	 * @return <code>true</code> if we use OldDCGeo
+	 */
+	public static boolean useOldDCGeo() {
+		return _useOldDCGeo;
+	}
 
 	/**
 	 * Get the parent frame
@@ -1226,9 +1237,13 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 //					Log.getInstance().config("Solenoid Path: " + arg[i]);
 //					System.out.println("Solenoid Path: " + arg[i]);
 //				}
-				else if (arg[i].contains("USE3D") || (arg[i].contains("TAKETHATGAGIKANDVERONIQUE"))) {
+				else if (arg[i].contains("USE3D") || arg[i].contains("TAKETHATGAGIKANDVERONIQUE")) {
 					_use3D = true;
 					System.err.println("Using 3D");
+				}
+				else if (arg[i].contains("OLDDCGEO")) {
+					_useOldDCGeo = true;
+					System.err.println("Using Old DC Geometry");
 				}
 
 				i++;
