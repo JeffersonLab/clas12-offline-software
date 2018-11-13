@@ -1,6 +1,7 @@
 package cnuphys.swim;
 
-import cnuphys.magfield.IField;
+import cnuphys.magfield.FieldProbe;
+import cnuphys.magfield.RotatedCompositeProbe;
 
 public class Bxdl {
 
@@ -21,10 +22,18 @@ public class Bxdl {
 	 *            the starting [x,y,z] position
 	 * @param p1
 	 *            the ending [x,y,z] position
-	 * @param field
+	 * @param probe
 	 *            the object that can return the magnetic field
 	 */
-	public static void accumulate(Bxdl previous, Bxdl current, double[] p0, double[] p1, IField field) {
+	public static void accumulate(Bxdl previous, Bxdl current, double[] p0, double[] p1, FieldProbe probe) {
+
+		if (probe instanceof RotatedCompositeProbe) {
+			System.err.println("SHOULD NOT HAPPEN. In rotated composite field probe, should not call Bxdl accumlate without the sector argument.");
+
+			(new Throwable()).printStackTrace();
+			System.exit(1);
+			
+		}
 
 		double dr[] = new double[3];
 
@@ -39,7 +48,52 @@ public class Bxdl {
 		float yavgcm = (float) (100. * (p0[1] + p1[1]) / 2);
 		float zavgcm = (float) (100. * (p0[2] + p1[2]) / 2);
 		float b[] = new float[3];
-		field.field(xavgcm, yavgcm, zavgcm, b);
+		probe.field(xavgcm, yavgcm, zavgcm, b);
+
+		double bxdl[] = cross(b, dr);
+		double magbxdl = vecmag(bxdl);
+
+		// make it cumulative if we have a previous
+		if (previous != null) {
+			pathlength += previous._pathlength;
+			magbxdl += previous._bxdl;
+		}
+
+		// set the current
+		current._pathlength = pathlength;
+		current._bxdl = magbxdl;
+	}
+	
+	/**
+	 * Accumulate the integral of b cross dl
+	 * 
+	 * @param previous
+	 *            the previous accumulation
+	 * @param current
+	 *            the (after returning) current accumulation
+	 * @param p0
+	 *            the starting [x,y,z] position
+	 * @param p1
+	 *            the ending [x,y,z] position
+	 * @param probe
+	 *            the object that can return the magnetic field
+	 */
+	public static void sectorAccumulate(int sector, Bxdl previous, Bxdl current, double[] p0, double[] p1, RotatedCompositeProbe probe) {
+
+		double dr[] = new double[3];
+
+		for (int i = 0; i < 3; i++) {
+			dr[i] = p1[i] - p0[i];
+		}
+
+		double pathlength = vecmag(dr);
+
+		// use the average position (in cm) to compute B for b cross dl
+		float xavgcm = (float) (100. * (p0[0] + p1[0]) / 2);
+		float yavgcm = (float) (100. * (p0[1] + p1[1]) / 2);
+		float zavgcm = (float) (100. * (p0[2] + p1[2]) / 2);
+		float b[] = new float[3];
+		probe.field(sector, xavgcm, yavgcm, zavgcm, b);
 
 		double bxdl[] = cross(b, dr);
 		double magbxdl = vecmag(bxdl);

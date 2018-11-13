@@ -75,7 +75,7 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 
 		if (SwimMenu.getInstance().showMonteCarloTracks()) {
 			List<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
-
+			
 			if (trajectories != null) {
 
 				for (SwimTrajectory trajectory : trajectories) {

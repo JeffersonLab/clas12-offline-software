@@ -25,20 +25,20 @@ public class TrajectorySurfaces {
 
     private List<ArrayList<Surface>> _DetectorPlanes = new ArrayList<ArrayList<Surface>>();
     
-    public synchronized List<ArrayList<Surface>> getDetectorPlanes() {
+    public List<ArrayList<Surface>> getDetectorPlanes() {
         return _DetectorPlanes;
     }
 
     public synchronized void setDetectorPlanes(List<ArrayList<Surface>> aDetectorPlanes) {
         _DetectorPlanes = aDetectorPlanes;
     }
-
-    //double FVT_Z1stlayer = 30.2967; // z-distance between target center and strips of the first layer.
-    //double FVT_Interlayer = 1.190;
+    
+    double FVT_Z1stlayer = 30.2967; // z-distance between target center and strips of the first layer.
+    double FVT_Interlayer = 1.190;  // Keep this for now until the Geometry service is ready... or remove FMT from traj.
     public void LoadSurfaces(DCGeant4Factory dcDetector,
             FTOFGeant4Factory ftofDetector,
             ECGeant4Factory ecDetector,
-            PCALGeant4Factory pcalDetector, double[] FVT_Interlayer) {
+            PCALGeant4Factory pcalDetector) {
        
         int iw =0;
         
@@ -51,8 +51,7 @@ public class TrajectorySurfaces {
             this._DetectorPlanes.add(new ArrayList<Surface>());
             //add FMT
             for(int i=0;i<6;i++) { 
-                //d = FVT_Z1stlayer+i*FVT_Interlayer;
-                d = FVT_Interlayer[i];
+                d = FVT_Z1stlayer+i*FVT_Interlayer;
                 
                 this._DetectorPlanes.get(is).add(new Surface("FMT"+(index+1), index++, i+1, d, 0., 0., 1.));
             } 
@@ -61,7 +60,7 @@ public class TrajectorySurfaces {
             n = this.RotateFromTSCtoLabC(0,0,1, is+1).toVector3D();
             for(int isup =0; isup<6; isup++) {
                 for(int il =0; il<6; il++) {
-                    d = dcDetector.getWireMidpoint(isup, il, iw).z; 
+                    d = dcDetector.getWireMidpoint(is, isup, il, iw).z; 
                     this._DetectorPlanes.get(is).add(new Surface("DC"+(index-6), index++, is*6+il+1,d, n.x(), n.y(), n.z()));                    
                 }
             } 

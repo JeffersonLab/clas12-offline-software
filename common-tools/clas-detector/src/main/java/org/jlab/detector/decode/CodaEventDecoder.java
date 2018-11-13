@@ -1217,16 +1217,20 @@ public class CodaEventDecoder {
 
         List<DetectorDataDgtz> tiEntries = new ArrayList<>();
         List<EvioTreeBranch> branches = this.getEventBranches(event);
-
         for(EvioTreeBranch branch : branches){
             int  crate = branch.getTag();
             EvioTreeBranch cbranch = this.getEventBranch(branches, branch.getTag());
             for(EvioNode node : cbranch.getNodes()){
                 if(node.getTag()==57610){
                     long[] longData = ByteDataTransformer.toLongArray(node.getStructureBuffer(true));
-                    int[]  intData  = ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
+                    int[]  intData  = ByteDataTransformer.toIntArray(node.getStructureBuffer(true));		    
+                    long     tStamp = longData[2]&0x0000ffffffffffffL;
+
+		    // Below is endian swap if needed
+		    //long    ntStamp = (((long)(intData[5]&0x0000ffffL))<<32) | (intData[4]&0xffffffffL);
+		    //System.out.println(longData[2]+" "+tStamp+" "+crate+" "+node.getDataLength());
+		    
                     DetectorDataDgtz entry = new DetectorDataDgtz(crate,0,0);
-                    long tStamp = longData[2]&0x00000000ffffffffL;
                     entry.setTimeStamp(tStamp);
                     if(node.getDataLength()==4) tiEntries.add(entry);
                     else if(node.getDataLength()==5) { // trigger supervisor crate
@@ -1247,6 +1251,7 @@ public class CodaEventDecoder {
                 }
             }
         }
+
         return tiEntries;
     }
 

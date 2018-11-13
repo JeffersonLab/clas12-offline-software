@@ -34,6 +34,10 @@ public class DC extends DetectorData {
 	//HB reconstructed hits
 	private DCHitList _hbHits;
 	
+	//TB reconstructed hits
+	private DCHitList _tbHits;
+
+	
 	//singleton
 	private static DC _instance;
 	
@@ -54,10 +58,19 @@ public class DC extends DetectorData {
 		_tdcHits =  new DCTdcHitList();
 		try {
 			_hbHits = new DCHitList("HitBasedTrkg::HBHits");
+//			System.err.println("HB HIT COUNT = " + ((_hbHits == null) ? 0 : _hbHits.size()));
 		} catch (EventDataException e) {
 			_hbHits = null;
 			e.printStackTrace();
 		}
+		try {
+			_tbHits = new DCHitList("TimeBasedTrkg::TBHits");
+//			System.err.println("TB HIT COUNT = " + ((_tbHits == null) ? 0 : _tbHits.size()));
+		} catch (EventDataException e) {
+			_tbHits = null;
+			e.printStackTrace();
+		}
+
 		if (Ced.getCed().playDCOccupancy()) {
 			playOccupancyTone(75);
 		}
@@ -87,6 +100,15 @@ public class DC extends DetectorData {
 	public DCHitList getHBHits() {
 		return _hbHits;
 	}
+	
+	/**
+	 * Get the time based hit list
+	 * @return the time based hit list
+	 */
+	public DCHitList getTBHits() {
+		return _tbHits;
+	}
+
 	
 	/**
 	 * total DC occupancy all sectors all layers

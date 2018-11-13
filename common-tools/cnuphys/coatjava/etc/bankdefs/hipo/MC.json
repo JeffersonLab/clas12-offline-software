@@ -76,7 +76,7 @@
             {"name":"trackE",   "id":7,  "type":"float", "info":"Energy of the track"},
             {"name":"totEdep",  "id":8,  "type":"float", "info":"Total Energy Deposited"},
             {"name":"avgX",     "id":9,  "type":"float", "info":"Average X position in global reference system"},
-            {"name":"avgY",     "id":10,  "type":"float", "info":"Average Y position in global reference system"},
+            {"name":"avgY",     "id":10, "type":"float", "info":"Average Y position in global reference system"},
             {"name":"avgZ",     "id":11, "type":"float", "info":"Average Z position in global reference system"},
             {"name":"avgLx",    "id":12, "type":"float", "info":"Average X position in local reference system"},
             {"name":"avgLy",    "id":13, "type":"float", "info":"Average Y position in local reference system"},
@@ -91,7 +91,9 @@
             {"name":"mvy",      "id":22, "type":"float", "info":"y component of primary vertex of the mother of the particle entering the sensitive volume"},
             {"name":"mvz",      "id":23, "type":"float", "info":"z component of primary vertex of the mother of the particle entering the sensitive volume"},
             {"name":"avgT",     "id":24, "type":"float", "info":"Average time"},
-            {"name":"hitn",     "id":25,  "type":"int32", "info":"Hit number"}
+            {"name":"nsteps",   "id":25, "type":"int32", "info":"Number of geant4 steps"},
+            {"name":"procID",   "id":26, "type":"int32", "info":"Process that created the FP. see gemc.jlab.org"},
+            {"name":"hitn",     "id":27, "type":"int32", "info":"Hit number"}
         ]
     }
 ]

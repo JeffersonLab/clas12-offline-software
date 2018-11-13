@@ -1,10 +1,7 @@
 package cnuphys.swimZ;
 
-import java.io.File;
-
 import Jama.Matrix;
-import cnuphys.magfield.FieldProbe;
-import cnuphys.magfield.MagneticField;
+import org.jlab.clas.clas.math.FastMath;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
@@ -50,9 +47,7 @@ public class SwimZTest {
 
 		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
 		
-		MagneticField.setMathLib(MagneticField.MathLib.FAST);
-//		MagneticField.setMathLib(MagneticField.MathLib.DEFAULT);
-		FieldProbe.cache(false);
+		FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
 		int numTest = 20000;
 //		testParabolicApproximation(numTest);
 //		testOldUniform(numTest);
@@ -86,7 +81,7 @@ public class SwimZTest {
 		SwimZResult result = null;
 		SwimZStateVector last = null;
 
-		SwimZ sz = new SwimZ(MagneticFields.getInstance().getActiveField());
+		SwimZ sz = new SwimZ();
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < numTimes; i++) {
 			try {
@@ -103,27 +98,27 @@ public class SwimZTest {
 
 	// test the new SwimZ uniform integrator
 	private static void testUniform(int numTimes) {
-
-		header("SwimZ UNIFORM");
-
-		// the new swimmer
-		SwimZStateVector start = new SwimZStateVector(xo, yo, zo, p, theta, phi);
-
-		SwimZResult result = null;
-		SwimZStateVector last = null;
-
-		SwimZ sz = new SwimZ(MagneticFields.getInstance().getActiveField());
-		long startTime = System.currentTimeMillis();
-		for (int i = 0; i < numTimes; i++) {
-			try {
-				result = sz.uniformRK4(Q, p, start, zf, uniformStepSize);
-			} catch (SwimZException e) {
-				e.printStackTrace();
-			}
-		}
-		double timePerSwim = ((double) (System.currentTimeMillis() - startTime)) / numTimes;
-		partialReport(result, timePerSwim, "Z UNIFORM");
-		footer("SwimZ UNIFORM");
+//
+//		header("SwimZ UNIFORM");
+//
+//		// the new swimmer
+//		SwimZStateVector start = new SwimZStateVector(xo, yo, zo, p, theta, phi);
+//
+//		SwimZResult result = null;
+//		SwimZStateVector last = null;
+//
+//		SwimZ sz = new SwimZ();
+//		long startTime = System.currentTimeMillis();
+//		for (int i = 0; i < numTimes; i++) {
+//			try {
+//				result = sz.uniformRK4(Q, p, start, zf, uniformStepSize);
+//			} catch (SwimZException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		double timePerSwim = ((double) (System.currentTimeMillis() - startTime)) / numTimes;
+//		partialReport(result, timePerSwim, "Z UNIFORM");
+//		footer("SwimZ UNIFORM");
 	}
 
 	private static void testAdaptive(int numTimes) {
@@ -135,11 +130,11 @@ public class SwimZTest {
 		SwimZResult result = null;
 		double hdata[] = new double[3];
 
-		SwimZ sz = new SwimZ(MagneticFields.getInstance().getActiveField());
+		SwimZ sz = new SwimZ();
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < numTimes; i++) {
 			try {
-				result = sz.adaptiveRK(Q, p, start, zf, adaptiveInitStepSize, adaptiveAbsError, hdata);
+				result = sz.adaptiveRK(Q, p, start, zf, adaptiveInitStepSize, hdata);
 			} catch (SwimZException e) {
 				e.printStackTrace();
 			}
@@ -149,35 +144,7 @@ public class SwimZTest {
 		hdataReport(hdata, 1);
 		footer("SwimZ ADAPTIVE");
 	}
-	private static void testCovMatProp(int numTimes) {
-		header("SwimZ COV MAT PROP");
-
-		// the new swimmer
-		SwimZStateVector start = new SwimZStateVector(xo, yo, zo, p, theta, phi);
-		SwimZStateVector stop = new SwimZStateVector(xo, yo, zo, p, theta, phi);
-
-		double hdata[] = new double[3];
-		int numStep = 0;
-
-		SwimZ sz = new SwimZ(MagneticFields.getInstance().getActiveField());
-		long startTime = System.currentTimeMillis();
-		
-		
-		Matrix covMat = new Matrix(5, 5);
-		
-		for (int i = 0; i < numTimes; i++) {
-			try {
-				numStep = sz.transport(Q, p, start, stop, covMat, zf, adaptiveInitStepSize, adaptiveAbsError, hdata);
-			} catch (SwimZException e) {
-				e.printStackTrace();
-			}
-		}
-		double timePerSwim = ((double) (System.currentTimeMillis() - startTime)) / numTimes;
-		System.out.println("Number of steps: " + numStep);
-		partialReport(start, stop, timePerSwim, "Z ADAPTIVE");
-		hdataReport(hdata, 1);
-		footer("SwimZ COV MAT PROP");
-	}
+	
 	private static void testAdaptiveEndpointOnly(int numTimes) {
 		header("SwimZ ADAPTIVE ENDPOINT ONLY");
 
@@ -188,11 +155,11 @@ public class SwimZTest {
 		double hdata[] = new double[3];
 		int numStep = 0;
 
-		SwimZ sz = new SwimZ(MagneticFields.getInstance().getActiveField());
+		SwimZ sz = new SwimZ();
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < numTimes; i++) {
 			try {
-				numStep = sz.adaptiveRK(Q, p, start, stop, zf, adaptiveInitStepSize, adaptiveAbsError, hdata);
+				numStep = sz.adaptiveRK(Q, p, start, stop, zf, adaptiveInitStepSize, hdata);
 			} catch (SwimZException e) {
 				e.printStackTrace();
 			}

@@ -43,6 +43,7 @@ public class GeometryFactory {
             provider.loadTable("/geometry/dc/region");
             provider.loadTable("/geometry/dc/superlayer");
             provider.loadTable("/geometry/dc/layer");
+            provider.loadTable("/geometry/dc/alignment");
         }
         
         if(type==DetectorType.ECAL){
@@ -74,6 +75,11 @@ public class GeometryFactory {
         if(type==DetectorType.CND){
             provider.loadTable("/geometry/cnd/cnd");
             provider.loadTable("/geometry/cnd/layer");
+        }
+        
+        if(type==DetectorType.CTOF){
+            provider.loadTable("/geometry/ctof/ctof");
+            provider.loadTable("/geometry/ctof/cad");
         }
         
         if(type==DetectorType.FTCAL){

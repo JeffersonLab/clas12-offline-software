@@ -93,7 +93,7 @@ public class FTCalXYView extends CedXYView {
 				PropertySupport.RIGHTMARGIN, RMARGIN, PropertySupport.BOTTOMMARGIN,
 				BMARGIN, PropertySupport.TOOLBAR, true,
 				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
-				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
+				PropertySupport.VISIBLE, true,
 				PropertySupport.TITLE, title,
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
@@ -142,6 +142,7 @@ public class FTCalXYView extends CedXYView {
 
 			}
 			
+			//draw the ftcal grid
 			private void drawGrid(Graphics g, IContainer container) {
 				
 				g.setColor(Color.lightGray);
@@ -204,8 +205,6 @@ public class FTCalXYView extends CedXYView {
 				}
 				Rectangle screenRect = getActiveScreenRectangle(container);
 				drawAxes(g, container, screenRect, false);
-				// }
-
 			}
 
 		};

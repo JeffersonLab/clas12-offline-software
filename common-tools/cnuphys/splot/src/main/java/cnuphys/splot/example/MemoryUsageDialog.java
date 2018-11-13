@@ -21,7 +21,7 @@ public class MemoryUsageDialog extends APlotDialog implements IValueGetter {
 	private static Font _legendFont = Environment.getInstance().getCommonFont(10);
 
 	public MemoryUsageDialog(JFrame owner) {
-		super(owner, "Memory Usage", false);
+		super(owner, "Memory Usage", false, null);
 		setSize(500, 400);
 	}
 

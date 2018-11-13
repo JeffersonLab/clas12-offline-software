@@ -3,6 +3,7 @@ package org.jlab.service.dc;
 import Jama.Matrix;
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -23,7 +24,6 @@ import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
 import org.jlab.rec.dc.track.fit.KFitter;
-import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
@@ -37,6 +37,7 @@ public class DCTBEngine extends DCEngine {
 //    TrajectorySurfaces tSurf;
     
     private TimeToDistanceEstimator tde;
+    private double tarCent=-1.942;
     public DCTBEngine() {
         super("DCTB");
         tde = new TimeToDistanceEstimator();
@@ -53,6 +54,8 @@ public class DCTBEngine extends DCEngine {
             System.err.println("RUN CONDITIONS NOT READ AT TIMEBASED LEVEL!");
             return true;
         }
+        if(event.hasBank("MC::Event")==true)
+            tarCent=0;
         //if(event.getBank("RECHB::Event").getFloat("STTime", 0)<0)
         //    return true; // require the start time to reconstruct the tracks in the event
         
@@ -74,7 +77,8 @@ public class DCTBEngine extends DCEngine {
                 return true; // no REC HB bank
             }
         }
-        
+        // get Field
+        Swim dcSwim = new Swim();        
         //System.out.println(" RUNNING TIME BASED....................................");
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
@@ -126,7 +130,7 @@ public class DCTBEngine extends DCEngine {
 
         List<FittedCluster> pclusters = segFinder.selectTimeBasedSegments(clusters);
 
-        segments =  segFinder.get_Segments(pclusters, event, dcDetector);
+        segments =  segFinder.get_Segments(pclusters, event, dcDetector, false);
 
         if(segments.isEmpty()) { // need 6 segments to make a trajectory
             for(FittedCluster c : clusters) {					
@@ -186,7 +190,9 @@ public class DCTBEngine extends DCEngine {
             TrackArray[HBtrk.get_Id()-1] = HBtrk; 
             TrackArray[HBtrk.get_Id()-1].set_Status(0);
         }
-        
+        if(TrackArray==null) {
+            return true; // HB tracks not saved correctly
+        }
         for(Segment seg : segments) {
             TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].get_ListOfHBSegments().add(seg); 
             if(seg.get_Status()==1)
@@ -197,7 +203,7 @@ public class DCTBEngine extends DCEngine {
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         TrajectoryFinder trjFind = new TrajectoryFinder();
         for(int i = 0; i < TrackArray.length; i++) {
-            if(TrackArray[i].get_ListOfHBSegments()==null || TrackArray[i].get_ListOfHBSegments().size()<4)
+            if(TrackArray[i]==null || TrackArray[i].get_ListOfHBSegments()==null || TrackArray[i].get_ListOfHBSegments().size()<4)
                 continue;
             TrackArray[i].set_MissingSuperlayer(get_Status(TrackArray[i]));
             TrackArray[i].addAll(crossMake.find_Crosses(TrackArray[i].get_ListOfHBSegments(), dcDetector));
@@ -207,26 +213,26 @@ public class DCTBEngine extends DCEngine {
             //if(TrackArray[i].get_FitChi2()>200) {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());
             //}
-            KFitter kFit = new KFitter(TrackArray[i], dcDetector, true);
-            //kFit.totNumIter=30;
-            
+            KFitter kFit = new KFitter(TrackArray[i], dcDetector, true, dcSwim);
+           
             StateVec fn = new StateVec();
-            kFit.runFitter();
+            kFit.runFitter(TrackArray[i].get(0).get_Sector());
             
-            if(kFit.setFitFailed==false && kFit.finalStateVec!=null) {
+            if(kFit.setFitFailed==false && kFit.finalStateVec!=null) { 
                 // set the state vector at the last measurement site
                 fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
                 //set the track parameters if the filter does not fail
                 TrackArray[i].set_P(1./Math.abs(kFit.finalStateVec.Q));
                 TrackArray[i].set_Q((int)Math.signum(kFit.finalStateVec.Q));
-                trkcandFinder.setTrackPars(TrackArray[i], new Trajectory(), trjFind, fn, kFit.finalStateVec.z, dcDetector);
+                trkcandFinder.setTrackPars(TrackArray[i], new Trajectory(), trjFind, fn, 
+                        kFit.finalStateVec.z, dcDetector, dcSwim);
                 // candidate parameters are set from the state vector
                 TrackArray[i].set_FitChi2(kFit.chi2); 
                 TrackArray[i].set_FitNDF(kFit.NDF);
                 TrackArray[i].set_Trajectory(kFit.kfStateVecsAlongTrajectory);
                 TrackArray[i].set_FitConvergenceStatus(kFit.ConvStatus);
                 TrackArray[i].set_Id(TrackArray[i].size()+1);
-                TrackArray[i].set_CovMat(kFit.finalCovMat.covMat);
+                TrackArray[i].set_CovMat(kFit.finalCovMat.covMat); 
                 if(TrackArray[i].get_Vtx0().toVector3D().mag()>500)
                     continue;
                 trkcands.add(TrackArray[i]);
@@ -246,8 +252,10 @@ public class DCTBEngine extends DCEngine {
             for(Track trk: trkcands) {
                 // reset the id
                 trk.set_Id(trkId);
-                trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector);
-                trk.calcTrajectory(trkId, trkcandFinder.dcSwim, trk.get_Vtx0().x(), trk.get_Vtx0().y(), trk.get_Vtx0().z(), trk.get_pAtOrig().x(), trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q(), ftofDetector, tSurf);
+                trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector, dcSwim);
+                trk.calcTrajectory(trkId, dcSwim, trk.get_Vtx0().x(), trk.get_Vtx0().y(), 
+                        trk.get_Vtx0().z(), trk.get_pAtOrig().x(), trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q(), 
+                        ftofDetector, tSurf, tarCent);
 //                for(int j = 0; j< trk.trajectory.size(); j++) {
 //                System.out.println(trk.get_Id()+" "+trk.trajectory.size()+" ("+trk.trajectory.get(j).getDetId()+") ["+
 //                            trk.trajectory.get(j).getDetName()+"] "+
@@ -287,37 +295,7 @@ public class DCTBEngine extends DCEngine {
         return true;
     }
 
-    private void resetTrackParams(Track track, DCSwimmer dcSwim) {
-        if(track.get_ListOfHBSegments().size()<Constants.NSUPERLAYERTRACKING) {
-            //System.err.println(" not enough segments ");
-            return;
-        }
-        double theta3 = track.get_ListOfHBSegments().get(track.get_ListOfHBSegments().size()-1).get_fittedCluster().get_clusterLineFitSlope();
-        double theta1 = track.get_ListOfHBSegments().get(0).get_fittedCluster().get_clusterLineFitSlope();
-        double deltaTheta = theta3-theta1;
-       
-        double thX = (track.get(0).get_Dir().x()/track.get(0).get_Dir().z());
-        double thY = (track.get(0).get_Dir().y()/track.get(0).get_Dir().z());
-
-        //positive charges bend outward for nominal GEMC field configuration
-        int q = (int) Math.signum(deltaTheta); 
-        q*= (int)-1*Math.signum(DCSwimmer.getTorScale()); // flip the charge according to the field scale						
-
-        double p = track.get_pAtOrig().mag(); 
-        
-        double pz = p / Math.sqrt(thX*thX + thY*thY + 1);
-
-        //System.out.println("Setting track params for ");stateVec.printInfo();
-        dcSwim.SetSwimParameters(track.get(0).get_Point().x(), track.get(0).get_Point().y(), track.get(0).get_Point().z(),
-                    -pz*thX, -pz*thY, -pz,
-                     -q);
-        
-        double[] Vt = dcSwim.SwimToPlane(100);
-        if(Vt==null)
-            return;
-        track.set_pAtOrig(new Vector3D(-Vt[3], -Vt[4], -Vt[5]));
-        track.set_Vtx0(new Point3D(Vt[0], Vt[1], Vt[2]));
-    }
+    
 
     private int get_Status(Track track) {
         int miss = 0;    

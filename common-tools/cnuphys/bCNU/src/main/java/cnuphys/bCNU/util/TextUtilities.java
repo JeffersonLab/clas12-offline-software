@@ -150,8 +150,8 @@ public class TextUtilities {
 	}
 
 	/**
-	 * Check to see if two vectors of strings are equal. Used by FeedbackPane
-	 * and HeadsUp to avoid redrawing identical strings.
+	 * Check to see if two vectors of strings are equal. Used by feedback 
+	 * to avoid redrawing identical strings.
 	 * 
 	 * @param list1
 	 *            the first String vector.

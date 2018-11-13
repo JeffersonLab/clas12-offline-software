@@ -1,11 +1,11 @@
 package cnuphys.swim;
 
-import cnuphys.magfield.IField;
+import cnuphys.magfield.FieldProbe;
 import cnuphys.rk4.IDerivative;
 
 public class DefaultDerivative implements IDerivative {
 
-	private IField _field;
+	private FieldProbe _probe;
 
 	private double _momentum;  //GeV/c
 
@@ -27,15 +27,15 @@ public class DefaultDerivative implements IDerivative {
 	 * @param field
 	 *            the magnetic field
 	 */
-	public DefaultDerivative(int charge, double momentum, IField field) {
-		_field = field;
+	public DefaultDerivative(int charge, double momentum, FieldProbe field) {
+		_probe = field;
 		_momentum = momentum;
 //units of this  alpha are 1/(T*m)
 		_alpha = 1.0e-9 * charge * Swimmer.C / _momentum;
 	}
 	
-	public void set(int charge, double momentum, IField field) {
-		_field = field;
+	public void set(int charge, double momentum, FieldProbe field) {
+		_probe = field;
 		_momentum = momentum;
 //units of this  alpha are 1/(T*m)
 		_alpha = 1.0e-9 * charge * Swimmer.C / _momentum;		
@@ -60,7 +60,7 @@ public class DefaultDerivative implements IDerivative {
 		double By = 0.0;
 		double Bz = 0.0;
 
-		if (_field != null) {
+		if (_probe != null) {
 
 			float b[] = new float[3];
 
@@ -69,7 +69,7 @@ public class DefaultDerivative implements IDerivative {
 			double yy = Q[1] * 100;
 			double zz = Q[2] * 100;
 
-			_field.field((float) xx, (float) yy, (float) zz, b);
+			_probe.field((float) xx, (float) yy, (float) zz, b);
 			// convert to tesla
 			Bx = b[0] / 10.0;
 			By = b[1] / 10.0;

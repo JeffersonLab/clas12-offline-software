@@ -6,7 +6,6 @@ import java.awt.geom.Point2D;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.magneticfield.swim.ASwimTrajectoryDrawer;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.lund.LundId;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.SwimTrajectory2D;
 
@@ -87,19 +86,20 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 
 	@Override
 	public boolean acceptSimpleTrack(SwimTrajectory2D trajectory) {
-		
-		String source  = trajectory.getSource().toLowerCase();
+
+		String source = trajectory.getSource().toLowerCase();
 
 		if (source.contains("hbtracks")) {
+			System.err.println("DCXY HB TRACK ACCEPT: " + _view.showHB());
 			return _view.showHB();
-		}
-		else if (source.contains("tbtracks")) {
+		} else if (source.contains("tbtracks")) {
+			System.err.println("DCXY TB TRACK ACCEPT: " + _view.showTB());
 			return _view.showTB();
-			}
-		else if (source.contains("cvtrec")) {
+		} else if (source.contains("cvtrec")) {
+			System.err.println("DCXY CVT TRACK ACCEPT: " +  _view.showCVTTracks());
 			return _view.showCVTTracks();
 		}
-		
+
 		return true;
 	}
 

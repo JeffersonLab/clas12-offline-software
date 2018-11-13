@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Collections;
 
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.io.base.DataBank;
+import org.jlab.io.base.DataEvent;
 import org.jlab.rec.ftof.Constants;
 import org.jlab.rec.tof.cluster.Cluster;
 import org.jlab.rec.tof.hit.AHit;
@@ -23,7 +25,7 @@ public class ClusterMatcher {
 
     }
 
-    private double[] _pathLen = new double[3]; // pathlength of track between
+    private double[] _deltaPathLen = new double[3]; // pathlength of track between
     // counters for 3 cases(taking
     // earlier hit time, max energy
     // or average hit times)
@@ -85,13 +87,17 @@ public class ClusterMatcher {
      * @return a 2-cluster system corresponding to a match between panel 1a and
      * panel 1b
      */
-    public ArrayList<Cluster> ClusterDoublet(Cluster C1a, Cluster C1b) { // CHECK
-        // this...
+    public ArrayList<Cluster> ClusterDoublet(Cluster C1a, Cluster C1b, DataEvent event) { 
+        if (event.hasBank("RECHB::Particle")==false ||  event.hasBank("RECHB::Track")==false) 
+            return null; // do only if there's TB tracking
+        
         if (C1b.get_xTrk() == null || C1a.get_xTrk() == null) {
             return null; // no tracking info
         }
+        if (C1a.get(0)._AssociatedTrkId != C1b.get(0)._AssociatedTrkId) {
+            return null; // not from the stame track
+        }
         ArrayList<Cluster> ClsDoublet = new ArrayList<Cluster>(2);
-
         // computes an array of pathlengths for (cluster size=1) 1 or (cluster
         // size=2) 3 reference points along
         // the trajectory of the track with the counters in the cluster
@@ -99,10 +105,19 @@ public class ClusterMatcher {
         double[][] X1 = this.get_ClusterHitCoordinates(C1a);
         double[][] X2 = this.get_ClusterHitCoordinates(C1b);
         double[] deltaR = this.calc_deltaR(X1, X2);
-        this._pathLen = deltaR;
-
-        double beta = C1b.get(0).get_TrkPathLen() / C1b.get_t();
-        this.Beta = beta;
+        this._deltaPathLen = deltaR;
+        //Read Beta:   
+        DataBank bank = event.getBank("RECHB::Track");
+        int rows = bank.rows();
+        for (int i = 0; i < rows; i++) {
+            if (bank.getByte("detector", i) == 6 &&
+                    bank.getShort("index", i) == C1a.get(0)._AssociatedTrkId - 1) {
+                this.Beta = event.getBank("RECHB::Particle").getFloat("beta",
+                        bank.getShort("pindex", i));
+            }
+        }
+        //double beta = C1b.get(0).get_TrkPathLen() / C1b.get_t();
+        //this.Beta = beta;
         // extrapolate the point in panel 1a to panel 1b using tracking vector
         double ux_mid = X2[1][0] - X1[1][0];
         double uy_mid = X2[1][1] - X1[1][1];
@@ -122,6 +137,7 @@ public class ClusterMatcher {
                 || Math.abs(C1b.get_z() - C1b.get_zTrk()[0]) > Constants.CLS1BTRKMATCHZPAR) {
             return null; // not matched
         }
+        
         // Matching between 1A and 1B
         if (Math.abs(C1a_x_etrapPan1b - C1b.get_x()) < Constants.CLSMATCHXPAR) {
             this._xMatch = C1a_x_etrapPan1b;
@@ -142,7 +158,6 @@ public class ClusterMatcher {
         }
         ClsDoublet.add(C1a);
         ClsDoublet.add(C1b);
-
         return ClsDoublet;
 
     }
@@ -212,30 +227,34 @@ public class ClusterMatcher {
      * @param clusters
      * @return list of matched cluster doublets
      */
-    public ArrayList<ArrayList<Cluster>> MatchedClusters(List<Cluster> clusters) {
-
-        Collections.sort(clusters);
-
+    public ArrayList<ArrayList<Cluster>> MatchedClusters(List<Cluster> clusters, DataEvent event) { 
         ArrayList<ArrayList<Cluster>> ClsDoublets = new ArrayList<ArrayList<Cluster>>();
+        
+        if (event.hasBank("RECHB::Particle")==true ||  event.hasBank("RECHB::Track")==true) { 
+         // do only if there's TB tracking
+            Collections.sort(clusters);
 
-        for (Cluster C1 : clusters) {
-            if (C1.get_Panel() != 1) {
-                continue;
-            }
-            for (Cluster C2 : clusters) {
-                if (C2.get_Panel() != 2) {
+            for (Cluster C1 : clusters) {
+                if (C1.get_Panel() != 1) {
                     continue;
                 }
-                if (C1.get_Sector() != C2.get_Sector()) {
-                    continue;
-                }
+                for (Cluster C2 : clusters) {
+                    if (C2.get_Panel() != 2) {
+                        continue;
+                    }
+                    if (C1.get_Sector() != C2.get_Sector()) {
+                        continue;
+                    }
 
-                ArrayList<Cluster> ClsDoub = ClusterDoublet(C1, C2);
-                C2.set_tCorr(this.get_CorrectedHitTime(C1, C2)); // set the
-                // corrected
-                // Time for
-                // 1b
-                ClsDoublets.add(ClsDoub);
+                    ArrayList<Cluster> ClsDoub = ClusterDoublet(C1, C2, event);
+                    if(ClsDoub==null)
+                        continue;
+                    C2.set_tCorr(this.get_CorrectedHitTime(C1, C2)); // set the
+                    // corrected
+                    // Time for
+                    // 1b
+                    ClsDoublets.add(ClsDoub);
+                }
             }
         }
         return ClsDoublets;
@@ -281,9 +300,8 @@ public class ClusterMatcher {
             double term1 = clus1B.get_t() / delta_t1b;
             double term3 = 1. / delta_t1a + 1. / delta_t1b;
             for (int i = 0; i < 3; i++) {
-                if (this._pathLen[i] > 0) {
-                    term2[i] = (clus1A.get_t() - this._pathLen[i] / Beta)
-                            / delta_t1a;
+                if (this._deltaPathLen[i] > 0) {
+                    term2[i] = (clus1A.get_t() - this._deltaPathLen[i] / Beta) / delta_t1a;
                     tCorr[i] = (term1 + term2[i]) / term3;
                 }
             }

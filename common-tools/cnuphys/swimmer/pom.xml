@@ -25,6 +25,11 @@
         <artifactId>jama</artifactId>
         <version>1.0.3</version>
       </dependency>
+      <dependency>
+        <groupId>org.jlab.clas</groupId>
+        <artifactId>clas-math</artifactId>
+        <version>5.7.1-SNAPSHOT</version>
+      </dependency>
     </dependencies>
 
     <properties>

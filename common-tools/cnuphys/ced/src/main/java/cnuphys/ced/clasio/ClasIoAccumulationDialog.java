@@ -340,7 +340,6 @@ public class ClasIoAccumulationDialog extends JDialog {
 				_reason = DialogUtilities.CANCEL_RESPONSE;
 			}
 
-			ViewManager.getInstance().refreshAllViews();
 		} //ok
 		else {
 			setVisible(false);

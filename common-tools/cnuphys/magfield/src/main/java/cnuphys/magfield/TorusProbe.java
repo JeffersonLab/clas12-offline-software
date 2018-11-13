@@ -1,122 +1,168 @@
 package cnuphys.magfield;
 
+import org.jlab.clas.clas.math.FastMath;
+
 /**
  *
  * @author gavalian
  */
 public class TorusProbe extends FieldProbe {
 
-	double q1_min = Double.POSITIVE_INFINITY;
-	double q1_max = Double.NEGATIVE_INFINITY;
-	double q2_min = Double.POSITIVE_INFINITY;
-	double q2_max = Double.NEGATIVE_INFINITY;
-	double q3_min = Double.POSITIVE_INFINITY;
-	double q3_max = Double.NEGATIVE_INFINITY;
-
-	double b1_000 = 0.0;
-	double b1_001 = 0.0;
-	double b1_010 = 0.0;
-	double b1_100 = 0.0;
-	double b1_011 = 0.0;
-	double b1_110 = 0.0;
-	double b1_101 = 0.0;
-	double b1_111 = 0.0;
-
-	double b2_000 = 0.0;
-	double b2_001 = 0.0;
-	double b2_010 = 0.0;
-	double b2_100 = 0.0;
-	double b2_011 = 0.0;
-	double b2_110 = 0.0;
-	double b2_101 = 0.0;
-	double b2_111 = 0.0;
-
-	double b3_000 = 0.0;
-	double b3_001 = 0.0;
-	double b3_010 = 0.0;
-	double b3_100 = 0.0;
-	double b3_011 = 0.0;
-	double b3_110 = 0.0;
-	double b3_101 = 0.0;
-	double b3_111 = 0.0;
+	//cell used to cache corner information
+	private Cell3D _cell;
 	
+	//the torus field
+	private Torus _torus;
+	
+	//12 -fold symmetry or full map?
+	private boolean _fullMap;
+		
+	/**
+	 * Create a probe for use with the torus
+	 * @param field the torus field
+	 */
 	public TorusProbe(Torus field) {
 		super(field);
-	}
-	
-	@Override
-	public String toString() {
-		StringBuffer sb = new StringBuffer(1024);
-		sb.append("q1: [" + q1_min + " - " + q1_max + "]\n");
-		sb.append("q2: [" + q2_min + " - " + q2_max + "]\n");
-		sb.append("q3: [" + q3_min + " - " + q3_max + "]\n");
-		sb.append(String.format("%-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f \n", 
-				b1_000, b1_001, b1_010, b1_100, b1_011, b1_110, b1_101, b1_111));
-		sb.append(String.format("%-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f \n", 
-				b2_000, b2_001, b2_010, b2_100, b2_011, b2_110, b2_101, b2_111));
-		sb.append(String.format("%-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f %-10.3f \n", 
-				b3_000, b3_001, b3_010, b3_100, b3_011, b3_110, b3_101, b3_111));
-		return sb.toString();
-	}
-	
-	/**
-	 * Check whether the point is contained in this
-	 * probe. A probe corresponds to a grid cell.
-	 * @param q1 the value of the first coordinate
-	 * @param q2 the value of the second coordinate
-	 * @param q3 the value of the third coordinate
-	 * @return <code>true</code> of caching is on and the coordinate is in
-	 * the cell corresponding to this probe.
-	 */
-	public boolean contains(double q1, double q2, double q3) {
-		if (!CACHE) {
-			return false; //will prevent caching
+		if (MagneticFields.getInstance().getTorus() != field) {
+			MagneticFields.getInstance().setTorus(field);
 		}
-		return (q1 >= q1_min && q1 < q1_max) && (q2 >= q2_min && q2 < q2_max) && (q3 >= q3_min && q3 < q3_max);
-	}
 
+		_torus = MagneticFields.getInstance().getTorus();
+
+		_cell = new Cell3D(this);
+		_fullMap = _torus.isFullMap();
+		
+		q1Coordinate = _torus.q1Coordinate.clone();
+		q2Coordinate = _torus.q2Coordinate.clone();
+		q3Coordinate = _torus.q3Coordinate.clone();
+		
+	}
+	
 	/**
-	 * Interpolate the field
-	 * @param q1
-	 * @param q2
-	 * @param q3
-	 * @return the field
+	 * Get the field in kG
+	 * @param x the x coordinate in cm
+	 * @param y the y coordinate in cm
+	 * @param z the z coordinate in cm
+	 * @param result holds the resuts, the Cartesian coordinates of B in kG
 	 */
-	public void evaluate(double q1, double q2, double q3, float[] result) {
-				
-		double f0 = (q1 - q1_min) / (q1_max - q1_min);
-		double f1 = (q2 - q2_min) / (q2_max - q2_min);
-		double f2 = (q3 - q3_min) / (q3_max - q3_min);
-		
-		f0 = f0 - Math.floor(f0);
-		f1 = f1 - Math.floor(f1);
-		f2 = f2 - Math.floor(f2);
-		
-		
-		double g0 = 1 - f0;
-		double g1 = 1 - f1;
-		double g2 = 1 - f2;
-		
-//		System.out.println("NEW PROBE  f0 = " + f0 + "  f1 = " + f1 + "  f2 = " + f2);
-//		System.out.println("NEW PROBE  g0 = " + g0 + "  g1 = " + g1 + "  g2 = " + g2);
-
-		
-		double x = b1_000 * g0 * g1 * g2 + b1_001 * g0 * g1 * f2 + b1_010 * g0 * f1 * g2 + b1_011 * g0 * f1 * f2
-				+ b1_100 * f0 * g1 * g2 + b1_101 * f0 * g1 * f2 + b1_110 * f0 * f1 * g2 + b1_111 * f0 * f1 * f2;
-		double y = b2_000 * g0 * g1 * g2 + b2_001 * g0 * g1 * f2 + b2_010 * g0 * f1 * g2 + b2_011 * g0 * f1 * f2
-				+ b2_100 * f0 * g1 * g2 + b2_101 * f0 * g1 * f2 + b2_110 * f0 * f1 * g2 + b2_111 * f0 * f1 * f2;
-		double z = b3_000 * g0 * g1 * g2 + b3_001 * g0 * g1 * f2 + b3_010 * g0 * f1 * g2 + b3_011 * g0 * f1 * f2
-				+ b3_100 * f0 * g1 * g2 + b3_101 * f0 * g1 * f2 + b3_110 * f0 * f1 * g2 + b3_111 * f0 * f1 * f2;
-		result[0] = (float) x;
-		result[1] = (float) y;
-		result[2] = (float) z;
-	}
-
-
 	@Override
-	public void fieldCylindrical(double phi, double rho, double z, float[] result) {
-		((Torus)_field).fieldCylindrical(this, phi, rho, z, result);
+	public void field(float x, float y, float z, float result[]) {
+		
+		if (isZeroField()) {
+			result[X] = 0f;
+			result[Y] = 0f;
+			result[Z] = 0f;
+			return;
+		}
+				
+		//note that the contains functions handles the shifts
+		if (!contains(x, y, z)) {
+			result[0] = 0f;
+			result[1] = 0f;
+			result[2] = 0f;
+			return;
+		}
+
+		//apply the shifts
+		x -= _torus.getShiftX();
+		y -= _torus.getShiftY();
+		z -= _torus.getShiftZ();
+
+		double rho = FastMath.sqrt(x * x + y * y);
+		double phi = FastMath.atan2Deg(y, x);
+		fieldCylindrical(_cell, phi, rho, z, result);
 	}
+		
+	/**
+	 * Get the field by trilinear interpolation.
+	 * Assumes all shifting from misalignment is done.
+	 * @param phi azimuthal angle in degrees.
+	 * @param rho the cylindrical rho coordinate in cm.
+	 * @param z coordinate in cm
+	 * @param result the result
+	 * @result a Cartesian vector holding the calculated field in kiloGauss.
+	 */
+	private void fieldCylindrical(Cell3D cell, double phi, double rho, double z,
+			float result[]) {
+
+		//must deal with 12-fold symmetry possibility
+		if (_fullMap) {
+			cell.calculate(phi, rho, z, result);	
+		}
+		else {  //12-fold symmmetric
+			// relativePhi (-30, 30) phi relative to middle of sector
+			double relativePhi = relativePhi(phi);
+
+			boolean flip = (relativePhi < 0.0);
+
+			cell.calculate(Math.abs(relativePhi), rho, z, result);
+			
+			// negate change x and z components
+			if (flip) {
+				result[X] = -result[X];
+				result[Z] = -result[Z];
+			}
+
+			// rotate onto to proper sector
+			
+			int sector = getSector(phi);
+
+			if (sector > 1) {
+				double cos = cosSect[sector];
+				double sin = sinSect[sector];
+				double bx = result[X];
+				double by = result[Y];
+				result[X] = (float) (bx * cos - by * sin);
+				result[Y] = (float) (bx * sin + by * cos);
+			}
+
+		}
+		
+		double sf = _torus._scaleFactor;
+		result[X] *= sf;
+		result[Y] *= sf;
+		result[Z] *= sf;		
+	}
+	
+	/**
+	 * Must deal with the fact that we only have the field between 0 and 30
+	 * degrees.
+	 *
+	 * @param absolutePhi the absolute phi
+	 * @return the relative phi (-30, 30) from the nearest middle of a sector in
+	 *         degrees.
+	 */
+	private double relativePhi(double absolutePhi) {
+		if (absolutePhi < 0.0) {
+			absolutePhi += 360.0;
+		}
+
+		// make relative phi between 0 -30 and 30
+		double relativePhi = absolutePhi;
+		while (Math.abs(relativePhi) > 30.0) {
+			relativePhi -= 60.0;
+		}
+		return relativePhi;
+	}
+	
+	/**
+	 * Check whether the field boundaries include the point
+	 * 
+	 * @param phi
+	 *            azimuthal angle in degrees.
+	 * @param rho
+	 *            the cylindrical rho coordinate in cm.
+	 * @param z
+	 *            coordinate in cm
+	 * @return <code>true</code> if the point is included in the boundary of the
+	 *         field
+	 * 
+	 */
+//	@Override
+//	public boolean containsCylindrical(double phi, double rho, double z) {	
+//		return _torus.contains(rho, z);
+//	}
+
 
 
 }

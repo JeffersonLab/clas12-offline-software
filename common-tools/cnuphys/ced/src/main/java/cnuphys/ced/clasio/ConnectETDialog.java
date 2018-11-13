@@ -16,26 +16,30 @@ import cnuphys.bCNU.dialog.SimpleDialog;
 import cnuphys.bCNU.dialog.VerticalFlowLayout;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
+import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Environment;
 
+@SuppressWarnings("serial")
 public class ConnectETDialog extends SimpleDialog {
 	
 	public static ImageIcon _etIcon;
 
-
+	//default port
+	public static final int DEFAULT_PORT = 11111;
+	
 	// button names for closeout
 	private static String[] closeoutButtons = {"Connect", "Cancel"};
-	
 	
 	// reason the dialog was closed
 	private int _reason = DialogUtilities.CANCEL_RESPONSE;
 	
 	//text fields
 	private JTextField _stationTF;
+	private JTextField _portTF;
 	private JTextField _fileTF;
 	
 	//machine combobox
-	private JComboBox _machineCombo;
+	private JComboBox<String> _machineCombo;
 
 	/**
 	 * Create the panel for selected 
@@ -69,13 +73,38 @@ public class ConnectETDialog extends SimpleDialog {
 		return label;
 	}
 	
+	/**
+	 * Get the selected file
+	 * @return the selected file
+	 */
 	public String getFile() {
 		return _fileTF.getText();
 	}
 	
+	/**
+	 * Get the selected station
+	 * @return the selected station
+	 */
 	public String getStation() {
 		return _stationTF.getText();
 	}
+	
+	/**
+	 * Get the selected port
+	 * @return the selected port
+	 */
+	public int getPort() {
+		String pstr = _portTF.getText();
+		try {
+			return Integer.parseInt(pstr);
+		}
+		catch (Exception e) {
+			String msg = "Bad text in ET Connect Dialog port field: \"" + pstr + "\" using default port " + DEFAULT_PORT;
+			Log.getInstance().warning(msg);
+			return DEFAULT_PORT;
+		}
+	}
+
 	
 	/**
 	 * Get the machine to connect to
@@ -125,6 +154,14 @@ public class ConnectETDialog extends SimpleDialog {
 		_stationTF.setText("ced_station");
 		cpanel.add(_stationTF);
 		
+		JPanel ppanel = new JPanel();
+		ppanel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 4));
+		ppanel.add(new JLabel("Port: "));
+		_portTF = new JTextField(9);
+		_portTF.setText("" + DEFAULT_PORT);
+		ppanel.add(_portTF);
+
+		
 		JPanel spanel = new JPanel();
 		spanel.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 4));		
 		spanel.add(new JLabel("File: "));
@@ -134,6 +171,7 @@ public class ConnectETDialog extends SimpleDialog {
 		
 		panel.add(npanel);
 		panel.add(cpanel);
+		panel.add(ppanel);
 		panel.add(spanel);
 		
 		panel.setBorder(CommonBorder.withEmptyBorder("Connection Parameters", 4));

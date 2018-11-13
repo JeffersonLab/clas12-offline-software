@@ -18,8 +18,9 @@ public class DataDrawSupport {
 	private static final Color TRANSYELLOW = new Color(255, 255, 0, 240);
 	private static final Color TRANSGREEN = X11Colors.getX11Color("lawn green", 250);
 	private static final Color TRANSBLUE = X11Colors.getX11Color("sky blue", 250);
+	private static final Color TRANSRED = X11Colors.getX11Color("red", 128);
 
-	public static Color transColors[] = { DC.HB_TRANS, DC.TB_TRANS, TRANSYELLOW, TRANSGREEN, TRANSBLUE };
+	public static Color transColors[] = { DC.HB_TRANS, DC.TB_TRANS, TRANSYELLOW, TRANSGREEN, TRANSRED };
 	public static String prefix[] = { "HB ", "TB ", "BST ", "BMT ", "FMT "};
 	
 
