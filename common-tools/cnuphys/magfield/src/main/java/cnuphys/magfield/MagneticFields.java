@@ -939,7 +939,7 @@ public class MagneticFields {
 			if (goodDir[i]) {
 				File magdir = new File(dirs[i], "magfield");
 				if (initializeMagneticFields(magdir)) {
-					System.out.println("Used fields found in [" + magdir.getPath() + "]");
+	 				System.out.println("Used fields found in [" + magdir.getPath() + "]");
 					return;
 				} else {
 					System.out.println("WARNING Unable to use fields found in [" + magdir.getPath() + "]");

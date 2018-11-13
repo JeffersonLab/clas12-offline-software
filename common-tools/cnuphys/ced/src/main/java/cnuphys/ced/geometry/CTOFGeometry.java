@@ -96,22 +96,22 @@ public class CTOFGeometry {
 	
 	public static void main(String arg[]) {
 		initialize();
-		realGeoTest();
+//		realGeoTest();
 	}
 	
-	private static void realGeoTest() {
-		CTOFGeant4Factory factory = new CTOFGeant4Factory();
-		for(int ipad=11;ipad<=48;ipad++){
-			Geant4Basic pad = factory.getPaddle(ipad);
-			
-			System.err.println();
-//			Line3d lineX = pad.getLineX();
-//			System.err.println("X: " + lineX.toString());
-//			Line3d lineY = pad.getLineY();
-//			System.err.println("Y: " + lineY.toString());
-			Line3d lineZ = pad.getLineZ();
-			System.err.println("Z: " + lineZ.toString());
-		}
-
-	}
+//	private static void realGeoTest() {
+//		CTOFGeant4Factory factory = new CTOFGeant4Factory();
+//		for(int ipad=11;ipad<=48;ipad++){
+//			Geant4Basic pad = factory.getPaddle(ipad);
+//			
+//			System.err.println();
+////			Line3d lineX = pad.getLineX();
+////			System.err.println("X: " + lineX.toString());
+////			Line3d lineY = pad.getLineY();
+////			System.err.println("Y: " + lineY.toString());
+//			Line3d lineZ = pad.getLineZ();
+//			System.err.println("Z: " + lineZ.toString());
+//		}
+//
+//	}
 }

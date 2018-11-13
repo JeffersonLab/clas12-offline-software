@@ -43,20 +43,19 @@ public class DCGeometry {
 	 */
 	public static void initialize() {
 				
-//		ConstantProvider cp = GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.DC, 4013, "default");
-//		
-//        DCGeantFactory factory = new DCGeantFactory();
-//        
-//        _dcDetector = factory.createDetectorCLAS(cp);
+		ConstantProvider cp = GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.DC, 4013, "default");
+		
+        DCGeantFactory factory = new DCGeantFactory();
+        
+        _dcDetector = factory.createDetectorCLAS(cp);
 
-		if (_dcDataProvider == null) {
-			_dcDataProvider = GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.DC);
-		}
-
-
-		DCFactoryUpdated dcFactory = new DCFactoryUpdated();
-
-		_dcDetector = dcFactory.createDetectorCLAS(_dcDataProvider);
+//		if (_dcDataProvider == null) {
+//			_dcDataProvider = GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.DC);
+//		}
+//
+//
+//		DCFactoryUpdated dcFactory = new DCFactoryUpdated();
+//		_dcDetector = dcFactory.createDetectorCLAS(_dcDataProvider);
 
 		sector0 = _dcDetector.getSector(0);
 
