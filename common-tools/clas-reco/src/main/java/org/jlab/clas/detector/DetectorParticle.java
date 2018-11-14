@@ -338,6 +338,7 @@ public class DetectorParticle implements Comparable {
     public int    getTrackDetector() {return this.detectorTrack.getDetectorID();}
     public int    getTrackSector() {return this.detectorTrack.getSector();}
     public int    getTrackDetectorID() {return this.detectorTrack.getDetectorID();}
+    public int    getTrackStatus() {return this.detectorTrack.getStatus();}
     public Line3D getFirstCross() {return this.detectorTrack.getFirstCross();}
     public Line3D getLastCross() {return this.detectorTrack.getLastCross();}
 

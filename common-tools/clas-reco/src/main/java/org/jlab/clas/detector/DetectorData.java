@@ -222,6 +222,7 @@ public class DetectorData {
            bank.setFloat("time", row, (float) r.getTime());
            bank.setFloat("energy", row, (float) r.getEnergy());
            bank.setFloat("chi2", row, (float) 0.0);
+           bank.setShort("status",row,(short) r.getStatus());
        }
        return bank;
    }
@@ -246,6 +247,7 @@ public class DetectorData {
            bank.setFloat("time", row, (float) r.getTime());
            bank.setFloat("energy", row, (float) r.getEnergy());
            bank.setFloat("chi2", row, (float) 0.0);
+           bank.setShort("status",row,(short) r.getStatus());
        }
        return bank;
    }
@@ -268,6 +270,7 @@ public class DetectorData {
            bank.setFloat("time", row, (float) c.getTime());
            bank.setFloat("nphe", row, (float) c.getEnergy());
            bank.setFloat("chi2", row, (float) 0.0);
+           bank.setShort("status",row,(short) c.getStatus());
        }
        return bank;
    }
@@ -330,6 +333,7 @@ public class DetectorData {
                bank.setFloat("vx_nomm", row, (float) p.vertex().x());
                bank.setFloat("vy_nomm", row, (float) p.vertex().y());
                bank.setFloat("vz_nomm", row, (float) p.vertex().z());
+               bank.setInt(  "status",  row, (int)   p.getTrackStatus());
                row = row + 1;
            }
        }
