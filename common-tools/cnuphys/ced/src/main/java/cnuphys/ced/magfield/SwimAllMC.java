@@ -70,6 +70,10 @@ public class SwimAllMC implements ISwimAll {
 		float vy[] = dm.getFloatArray(event, "MC::Particle.vy");
 		float vz[] = dm.getFloatArray(event, "MC::Particle.vz");
 				
+		
+		//According to email from Raffella of 11/14/18 the units in MC::Particle
+		//are now cm and GeV.
+		
 		Vector<TrajectoryRowData> v = new Vector<TrajectoryRowData>(len);
 
 		try {
@@ -78,18 +82,17 @@ public class SwimAllMC implements ISwimAll {
 				LundId lid = LundSupport.getInstance().get(pid[index]);
 
 				if (lid != null) {
-					double pxo = 1000*px[index]; // Convert to MeV
+					double pxo = 1000*px[index]; // Convert GeV to MeV
 					double pyo = 1000*py[index];
 					double pzo = 1000*pz[index];
 					double p = Math.sqrt(pxo * pxo + pyo * pyo + pzo * pzo);
 					double theta = Math.toDegrees(Math.acos(pzo / p));
 					// filter out 0 theta
-					if (theta > 1.) {
+					if (theta > 0.01) {
 
-						// note conversions from mm to cm
-						double x = vx[index] / 10.0;
-						double y = vy[index] / 10.0;
-						double z = vz[index] / 10.0;
+						double x = vx[index]; //keep in cm
+						double y = vy[index];
+						double z = vz[index];
 
 						double phi = Math.toDegrees(Math.atan2(pyo, pxo));
 
@@ -157,9 +160,13 @@ public class SwimAllMC implements ISwimAll {
 		if (px == null) {
 			return;
 		}
-		float py[] = dm.getFloatArray(event, "MC::Particle.py");
+		
+		//According to email from Raffella of 11/14/18 the units in MC::Particle
+		//are now cm and GeV.
+
+		float py[] = dm.getFloatArray(event, "MC::Particle.py"); //GeV
 		float pz[] = dm.getFloatArray(event, "MC::Particle.pz");
-		float vx[] = dm.getFloatArray(event, "MC::Particle.vx");
+		float vx[] = dm.getFloatArray(event, "MC::Particle.vx"); //cm
 		float vy[] = dm.getFloatArray(event, "MC::Particle.vy");
 		float vz[] = dm.getFloatArray(event, "MC::Particle.vz");
 
@@ -173,22 +180,19 @@ public class SwimAllMC implements ISwimAll {
 					System.err.println("null LundId object for id: " + pdgid);
 				} else {
 					if (lid != null) {
-						double pxo = px[index]; // in Gev??
+						double pxo = px[index]; // in Gev/c
 						double pyo = py[index];
 						double pzo = pz[index];
 						double p = Math.sqrt(pxo * pxo + pyo * pyo + pzo * pzo);
 						double theta = Math.toDegrees(Math.acos(pzo / p));
 						// filter out 0 theta
-						if (theta > 1.) {
+						if (theta > 0.01) {
 
 							// covert momenta to GeV/c from MeV/c
-//							pxo /= 1000.0;
-//							pyo /= 1000.0;
-//							pzo /= 1000.0;
-							// note vertices are in mm must convert to meters
-							double x = vx[index] / 1000.0;
-							double y = vy[index] / 1000.0;
-							double z = vz[index] / 1000.0;
+							// note vertices are in cm must convert to meters
+							double x = vx[index] / 100.0;
+							double y = vy[index] / 100.0;
+							double z = vz[index] / 100.0;
 
 							swim(lid, pxo, pyo, pzo, x, y, z);
 						}
@@ -205,7 +209,16 @@ public class SwimAllMC implements ISwimAll {
 
 	}
 	
-	//units GeV/c and meters
+	/**
+	 * 
+	 * @param lid the lund id
+	 * @param px x component of momentum in GeV/c
+	 * @param py y component of momentum in GeV/c
+	 * @param pz z component of momentum in GeV/c
+	 * @param x x vertex coordinate in meters
+	 * @param y y vertex coordinate in meters
+	 * @param z z vertex coordinate in meters
+	 */
 	private void swim(LundId lid, double px, double py, double pz, double x, double y, double z) {
 		double p = Math.sqrt(px * px + py * py + pz * pz);
 		double theta = Math.toDegrees(Math.acos(pz / p));
