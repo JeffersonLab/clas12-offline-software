@@ -28,8 +28,9 @@
 							dir="${cnudir}" />
 		</copy>
 		
-		<!-- copy shell script -->
+		<!-- copy shell scripts -->
 		<copy file="${cnudir}/ced/ced.sh" todir="${destdir}"/>
+		<copy file="${cnudir}/ced/ced3d.sh" todir="${destdir}"/>
 		
 		<!-- copy data (field maps)-->
 		<copy todir="${destdir}">
