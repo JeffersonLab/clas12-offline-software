@@ -118,7 +118,7 @@ public class HistoGridView extends ScrollableGridView implements MouseListener, 
 				& ~BaseToolBar.UNDOZOOMBUTTON
 				& ~BaseToolBar.TEXTBUTTON & ~BaseToolBar.DELETEBUTTON;
 
-		BaseContainer container = new BaseContainer(new Rectangle2D.Double(0,0,1,1), false) {
+		BaseContainer container = new BaseContainer(new Rectangle2D.Double(0,0,1,1)) {
 			@Override
 			public void scale(double scaleFactor) {
 				PlotCanvas canvas = ((HistoGridView) (getView()))._hotCanvas;
@@ -181,7 +181,7 @@ public class HistoGridView extends ScrollableGridView implements MouseListener, 
 				PropertySupport.CONTAINER, container,
 				PropertySupport.HEIGHT, height, PropertySupport.TOOLBAR, true,
 				PropertySupport.TOOLBARBITS, tbarbits,
-				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
+				PropertySupport.VISIBLE, true,
 				PropertySupport.TITLE, title, PropertySupport.SCROLLABLE, true,
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 

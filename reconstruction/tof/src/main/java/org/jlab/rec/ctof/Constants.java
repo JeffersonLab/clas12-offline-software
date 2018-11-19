@@ -16,7 +16,7 @@ public class Constants {
     public static final int[] NPAD = new int[1]; // the number of paddles per
     // sector
 
-    public static final double[] SCBARTHICKN = new double[1]; // 3 cm
+    //public static final double[] SCBARTHICKN = new double[1]; // 3 cm
     //public static final double LSBCONVFAC = 24. / 1000.; // ns/bin
 //    public static final double[] ADC_MIP = new double[1]; // From DB 800
     public static final double DEDX_MIP = 1.956; // ~2 MeV/g/cm^2
@@ -93,7 +93,7 @@ public class Constants {
 
         NPAD[0] = 48;
 
-        SCBARTHICKN[0] = 3.02;
+//        SCBARTHICKN[0] = 3.02;
 
 //        ADC_MIP[0] = 800;
 

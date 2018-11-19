@@ -4,8 +4,9 @@ import java.util.ArrayList;
 
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.lund.LundId;
-import cnuphys.magfield.IField;
-import cnuphys.magfield.MagneticField;
+import org.jlab.clas.clas.math.FastMath;
+import cnuphys.magfield.FieldProbe;
+import cnuphys.magfield.RotatedCompositeProbe;
 
 /**
  * Combines a generated particle record with a path (trajectory). A trajectory
@@ -97,7 +98,8 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		v[5] = pz;
 		add(0, v);
 	}
-
+	
+	
 	/**
 	 * @param charge
 	 *            the charge of the particle (-1 for electron, +1 for proton,
@@ -203,6 +205,38 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		//convert to cm
 		return Math.sqrt(x*x + y*y + z*z)*100.;
 	}
+	
+	/**
+	 * @param xo
+	 *            the x vertex position in m
+	 * @param yo
+	 *            the y vertex position in m
+	 * @param zo
+	 *            the z vertex position in m
+	 * @param momentum
+	 *            initial momentum in GeV/c
+	 * @param theta
+	 *            initial polar angle in degrees
+	 * @param phi
+	 *            initial azimuthal angle in degrees
+	 */
+	public void add(double xo, double yo, double zo, double momentum, double theta, double phi) {
+		double thetRad = Math.toRadians(theta);
+		double phiRad = Math.toRadians(phi);
+
+		double pz = Math.cos(thetRad);
+		double rho = Math.sin(thetRad);
+		double px = rho * Math.cos(phiRad);
+		double py = rho * Math.sin(phiRad);
+		double v[] = new double[6];
+		v[0] = xo;
+		v[1] = yo;
+		v[2] = zo;
+		v[3] = px;
+		v[4] = py;
+		v[5] = pz;
+		add(v);
+	}
 
 	/**
 	 * Get the average phi for this trajectory based on positions, not
@@ -224,7 +258,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 			double pos[] = get(i);
 			double x = pos[X_IDX];
 			double y = pos[Y_IDX];
-			double tp = MagneticField.atan2Deg(y, x);
+			double tp = FastMath.atan2Deg(y, x);
 			
 			phi += tp;
 			count++;
@@ -243,7 +277,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		}
 		return get(size()-1);
 	}
-
+	
 
 	/**
 	 * Get the final radial coordinate
@@ -280,6 +314,22 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		}
 		return pos;
 	}
+	
+	/**
+	 * Get the total BDL integral if computed
+	 * @return the total BDL integral in kG-m
+	 */
+	public double getComputedBDL() {
+		if (!_computedBDL) {
+			return Double.NaN;
+		}
+		
+		if (this.size() < 1) {
+			return 0;
+		}
+		
+		return this.lastElement()[BXDL_IDX];
+	}
 
 	/**
 	 * Compute the integral B cross dl. This will cause the state vector arrays to
@@ -287,12 +337,20 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	 * entry l is cumulative pathlength in m and the eighth entry bdl is the
 	 * cumulative integral bdl in kG-m.
 	 * 
-	 * @param field
+	 * @param probe
 	 *            the field getter
 	 */
-	public void computeBDL(IField field) {
+	public void computeBDL(FieldProbe probe) {
 		if (_computedBDL) {
 			return;
+		}
+		
+		if (probe instanceof RotatedCompositeProbe) {
+			System.err.println("SHOULD NOT HAPPEN. In rotated composite field probe, should not call computeBDL without the sector argument.");
+
+			(new Throwable()).printStackTrace();
+			System.exit(1);
+			
 		}
 
 		Bxdl previous = new Bxdl();
@@ -302,7 +360,8 @@ public class SwimTrajectory extends ArrayList<double[]> {
 
 		for (int i = 1; i < size(); i++) {
 			double[] p1 = get(i);
-			Bxdl.accumulate(previous, current, p0, p1, field);
+			Bxdl.accumulate(previous, current, p0, p1, probe);
+			
 			augment(p1, current.getPathlength(), current.getIntegralBxdl(), i);
 			previous.set(current);
 			p0 = p1;
@@ -310,8 +369,41 @@ public class SwimTrajectory extends ArrayList<double[]> {
 
 		_computedBDL = true;
 	}
+	
+	/**
+	 * Compute the integral B cross dl. This will cause the state vector arrays to
+	 * expand by two, becoming [x, y, z, px/p, py/p, pz/p, l, bdl] where the 7th
+	 * entry l is cumulative pathlength in m and the eighth entry bdl is the
+	 * cumulative integral bdl in kG-m.
+	 * 
+	 * @param sector sector 1..6
+	 * @param probe
+	 *            the field getter
+	 */
+	public void sectorComputeBDL(int sector, RotatedCompositeProbe probe) {
+		if (_computedBDL) {
+			return;
+		}
+		
+		Bxdl previous = new Bxdl();
+		Bxdl current = new Bxdl();
+		double[] p0 = get(0);
+		augment(p0, 0, 0, 0);
 
-	// replace the 6D state vector at the given index with
+		for (int i = 1; i < size(); i++) {
+			double[] p1 = get(i);
+			Bxdl.sectorAccumulate(sector, previous, current, p0, p1, probe);
+			
+			augment(p1, current.getPathlength(), current.getIntegralBxdl(), i);
+
+			previous.set(current);
+			p0 = p1;
+		}
+		_computedBDL = true;
+	}
+
+
+	// replace the 6D state vector <at the given index with
 	// and 8D vector that appends pathelength (m) and integral
 	// b dot dl (kg-m)
 	private void augment(double p[], double pl, double bdl, int index) {
@@ -349,6 +441,57 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	public void setSource(String source) {
 		_source = new String((source == null) ? "???" : source);
 	}
+
+	/**
+	 * Get an array of elements of the state vector
+	 * @param index the desired element index
+	 * @return the array
+	 */
+	public double[] getArray(int index) {
+		int size = size();
+		if (size < 1) {
+			return null;
+		}
+		
+		double array[] = new double[size];
+		int i = 0;
+		for (double s[] : this) {
+			array[i] = s[index];
+			i++;
+		}
+		return array;
+	}
+	
+	public double[] getX() {
+		double x[] = getArray(X_IDX);
+		if (x != null) {
+			for (int i = 0; i < x.length; i++) {
+				x[i] *= 100.; //convert to cm
+			}
+		}
+		return x;
+	}
+	
+	public double[] getY() {
+		double y[] = getArray(Y_IDX);
+		if (y != null) {
+			for (int i = 0; i < y.length; i++) {
+				y[i] *= 100.; //convert to cm
+			}
+		}
+		return y;
+	}
+	
+	public double[] getZ() {
+		double z[] = getArray(Z_IDX);
+		if (z != null) {
+			for (int i = 0; i < z.length; i++) {
+				z[i] *= 100.; //convert to cm
+			}
+		}
+		return z;
+	}
+
 
 
 }

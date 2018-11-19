@@ -5,11 +5,9 @@ import java.util.ArrayList;
 import javax.swing.event.EventListenerList;
 
 import cnuphys.lund.SwimTrajectoryListener;
-import cnuphys.magfield.FieldProbe;
-import cnuphys.magfield.MagneticField;
+import org.jlab.clas.clas.math.FastMath;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
-import cnuphys.rk4.RungeKutta;
 import cnuphys.rk4.RungeKuttaException;
 
 public class Swimming {
@@ -22,13 +20,21 @@ public class Swimming {
 
 	// the recon trajectories
 	private static ArrayList<SwimTrajectory> _reconTrajectories = new ArrayList<SwimTrajectory>();
+	
+	private static boolean _notifyOn = true;
+	
+	/**
+	 * Set whether we notify listeners. Might turn off temporarily to avoid multiple notifications. 
+	 * @param notifyOn the flag.
+	 */
+	public static void setNotifyOn(boolean notifyOn) {
+		_notifyOn = notifyOn;
+	}
 
 	/**
 	 * Clear all the mc trajectories.
 	 */
 	public static void clearMCTrajectories() {
-//		System.err.println("CLEAR MC TRAJ");
-//		(new Throwable()).printStackTrace();
 		_mcTrajectories.clear();
 		notifyListeners();
 	}
@@ -38,6 +44,17 @@ public class Swimming {
 	 */
 	public static void clearReconTrajectories() {
 		_reconTrajectories.clear();
+		notifyListeners();
+	}
+	
+	/**
+	 * Clear all trajectories
+	 */
+	public static void clearAllTrajectories() {
+		_notifyOn = false;
+		clearMCTrajectories();
+		clearReconTrajectories();
+		_notifyOn = true;
 		notifyListeners();
 	}
 
@@ -107,9 +124,9 @@ public class Swimming {
 
 
 	// notify listeners that the collection of trajectories has changed
-	protected static void notifyListeners() {
+	public static void notifyListeners() {
 
-		if (_listenerList == null) {
+		if (!_notifyOn || (_listenerList == null)) {
 			return;
 		}
 
@@ -167,10 +184,10 @@ public class Swimming {
 
 
 	public static void printSummary(String message, int nstep, double momentum,
-			double Q[], double hdata[]) {
+			double y[], double hdata[]) {
 		System.out.println(message);
-		double R = Math.sqrt(Q[0] * Q[0] + Q[1] * Q[1] + Q[2] * Q[2]);
-		double norm = Math.sqrt(Q[3] * Q[3] + Q[4] * Q[4] + Q[5] * Q[5]);
+		double R = Math.sqrt(y[0] * y[0] + y[1] * y[1] + y[2] * y[2]);
+		double norm = Math.sqrt(y[3] * y[3] + y[4] * y[4] + y[5] * y[5]);
 		double P = momentum * norm;
 
 		System.out.println("Number of steps: " + nstep);
@@ -183,8 +200,8 @@ public class Swimming {
 		System.out
 				.println(String
 						.format("R = [%9.6f, %9.6f, %9.6f] |R| = %9.6f m\nP = [%9.6e, %9.6e, %9.6e] |P| =  %9.6e GeV/c",
-								Q[0], Q[1], Q[2], R, P * Q[3], P * Q[4], P
-										* Q[5], P));
+								y[0], y[1], y[2], R, P * y[3], P * y[4], P
+										* y[5], P));
 		System.out.println("norm (should be 1): " + norm);
 		System.out.println("--------------------------------------\n");
 	}
@@ -212,7 +229,7 @@ public class Swimming {
 		if (opt == 1) {
 			System.out.println("\nSWIMMER 1");
 		}
-		Swimmer swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
+		Swimmer swimmer = new Swimmer();
 
 		SwimTrajectory traj = null;
 		try {
@@ -254,7 +271,7 @@ public class Swimming {
 		if (opt == 1) {
 			System.out.println("\nSWIMMER 2");
 		}
-		Swimmer2 swimmer = new Swimmer2(MagneticFields.getInstance().getActiveField());
+		Swimmer2 swimmer = new Swimmer2();
 
 		SwimTrajectory traj = null;
 		try {
@@ -300,7 +317,7 @@ public class Swimming {
 		if (opt == 1) {
 			System.out.println("\nSWIMMER 3");
 		}
-		Swimmer2 swimmer = new Swimmer2(MagneticFields.getInstance().getActiveField());
+		Swimmer2 swimmer = new Swimmer2();
 
 		int nStep= 0;
 		
@@ -329,9 +346,7 @@ public class Swimming {
 
 		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
 
-		MagneticField.setMathLib(MagneticField.MathLib.FAST);
-		// MagneticField.setMathLib(MagneticField.MathLib.DEFAULT);
-		FieldProbe.cache(true);
+		FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
 
 		testSwim(1);
 		testSwim2(1);

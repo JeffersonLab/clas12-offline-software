@@ -88,7 +88,9 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_fullfield");
         dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_midfield");
         dbprovider.disconnect();
-
+        
+        //beam offset table
+        dbprovider.loadTable("/test/beam_pos");
        //  dbprovider.show();
         // Getting the Constants
         // 1) pitch info 
@@ -238,7 +240,17 @@ public class CCDBConstantsLoader {
         	 }
         	 
         }
-                
+         // beam offset
+        double r = dbprovider.getDouble("/test/beam_pos/r", 0);     
+        double r_err = dbprovider.getDouble("/test/beam_pos/err_r", 0); 
+        double phi_deg = dbprovider.getDouble("/test/beam_pos/phi0", 0); 
+        double phi = Math.toRadians(phi_deg);
+        double xb = r*Math.cos(phi);
+        double yb = r*Math.sin(phi);
+        org.jlab.rec.cvt.Constants.setXb(xb);
+        org.jlab.rec.cvt.Constants.setYb(yb);
+        org.jlab.rec.cvt.Constants.setRbErr(r_err);
+        
         Constants.setCRCRADIUS(CRCRADIUS);
         Constants.setCRZRADIUS(CRZRADIUS);
         Constants.setCRZNSTRIPS(CRZNSTRIPS);

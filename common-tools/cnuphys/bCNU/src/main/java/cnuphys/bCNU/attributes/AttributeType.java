@@ -2,6 +2,8 @@ package cnuphys.bCNU.attributes;
 
 import java.util.EnumMap;
 
+import javax.swing.JSlider;
+
 import cnuphys.bCNU.component.EnumComboBox;
 
 /**
@@ -11,7 +13,7 @@ import cnuphys.bCNU.component.EnumComboBox;
  */
 public enum AttributeType {
 
-	BOOLEAN, STRING, INT, DOUBLE, UNKNOWN;
+	BOOLEAN, STRING, BYTE, SHORT, INT, LONG, FLOAT, DOUBLE, SLIDER, UNKNOWN;
 	
 
 	/**
@@ -23,8 +25,13 @@ public enum AttributeType {
 	static {
 		names.put(BOOLEAN, "boolean");
 		names.put(STRING, "float");
+		names.put(BYTE, "byte");
+		names.put(SHORT, "short");
 		names.put(INT, "int");
+		names.put(LONG, "long");
+		names.put(FLOAT, "float");
 		names.put(DOUBLE, "double");
+		names.put(SLIDER, "slider");
 		names.put(UNKNOWN, "Unknown");
 	}
 	
@@ -37,8 +44,13 @@ public enum AttributeType {
 	static {
 		editorClasses.put(BOOLEAN, AttributeBooleanEditor.class);
 		editorClasses.put(STRING, AttributeStringEditor.class);
+		editorClasses.put(BYTE, AttributeByteEditor.class);
+		editorClasses.put(SHORT, AttributeShortEditor.class);
 		editorClasses.put(INT, AttributeIntegerEditor.class);
+		editorClasses.put(LONG, AttributeLongEditor.class);
+		editorClasses.put(FLOAT, AttributeFloatEditor.class);
 		editorClasses.put(DOUBLE, AttributeDoubleEditor.class);
+		editorClasses.put(SLIDER, AttributeSliderEditor.class);
 	}
 	
 	/**
@@ -59,42 +71,29 @@ public enum AttributeType {
 		else if (value instanceof String) {
 			return STRING;
 		}
+		else if (value instanceof Byte) {
+			return BYTE;
+		}
+		else if (value instanceof Short) {
+			return SHORT;
+		}
 		else if (value instanceof Integer) {
 			return INT;
+		}
+		else if (value instanceof Long) {
+			return LONG;
+		}
+		else if (value instanceof Float) {
+			return FLOAT;
 		}
 		else if (value instanceof Double) {
 			return DOUBLE;
 		}
+		else if (value instanceof JSlider) {
+			return SLIDER;
+		}
 		else {
 			return UNKNOWN;	
-		}		
-	}
-	
-	/**
-	 * Clone a value based on the type
-	 * @param value the object
-	 * @return the deep copy
-	 */
-	public static Object cloneValue(Object value) {
-		
-		if (value == null) {
-			return null;
-		}
-		
-		if (value instanceof Boolean) {
-			return new Boolean((Boolean)value);
-		}
-		else if (value instanceof String) {
-			return new String((String)value);
-		}
-		else if (value instanceof Integer) {
-			return new Integer((Integer)value);
-		}
-		else if (value instanceof Double) {
-			return new Double((Double)value);
-		}
-		else {
-			return null;	
 		}		
 	}
 

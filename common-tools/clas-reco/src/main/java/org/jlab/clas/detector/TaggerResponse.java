@@ -14,46 +14,24 @@ import org.jlab.io.base.DataEvent;
 
 /**
  *
- * @author gavalian
+ * @author baltzell
  */
-public class TaggerResponse {
+public class TaggerResponse extends DetectorResponse {
     
-
-    
-    
-    private double    hitTime = 0.0;
-    private int         hitID = -1;
+    private int     hitID = -1;
     private int     hitSize = -1;
     private double  hitRadius = 0.0;
-    private double  hitEnergy = 0.0;
-    private int   association = -1;
-    private int   hitIndex = -1;
-    private double hitPath = 0.0;
     
-    private DetectorDescriptor  descriptor  = new DetectorDescriptor();
-
-    private Vector3D         hitMomentum = new Vector3D();
-    private Point3D         hitPosition = new Point3D();
-    private Point3D         hitWidth = new Point3D();
+    private Vector3D hitMomentum = new Vector3D();
+    private Point3D  hitWidth = new Point3D();
     
     public void setID(int id){ hitID = id;}
-    public void setTime(double time) {hitTime = time;}
     public void setSize(int q){hitSize = q;}
-    public void  setEnergy(double energy) { hitEnergy = energy;}
-    public void setAssociation(int assoc) {this.association = assoc;}
-    public void setHitIndex(int index) {this.hitIndex = index;}
     public void setRadius(double r) {hitRadius = r;}
-    public void setPath(double path) {hitPath = path;}
     
-    public DetectorDescriptor getDescriptor(){ return this.descriptor;}
     public int getSize(){return hitSize;}
     public int getID(){return hitID;}
-    public double getTime(){ return hitTime;}
-    public double getEnergy(){ return hitEnergy;}
-    public int getAssociation() {return this.association;}
-    public int getHitIndex() {return this.hitIndex;}
     public double getRadius() {return this.hitRadius;}
-    public double getPath() {return this.hitPath;}
     
     public Vector3D getMomentum(){
         return this.hitMomentum;
@@ -63,14 +41,6 @@ public class TaggerResponse {
         this.hitMomentum.setXYZ(px, py, pz);
     }
     
-    public Point3D getPosition(){
-        return this.hitPosition;
-    }
-    
-    public void setPosition(double x, double y, double z){
-        this.hitPosition.set(x, y, z);
-    }
- 
     public Point3D getPositionWidth(){
         return this.hitWidth;
     }
@@ -79,9 +49,9 @@ public class TaggerResponse {
         this.hitWidth.set(x, y, z);
     }
 
-    public static List<TaggerResponse>  readHipoEvent(DataEvent event, 
+    public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
         String bankName, DetectorType type){        
-        List<TaggerResponse> responseList = new ArrayList<TaggerResponse>();
+        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
@@ -116,7 +86,7 @@ public class TaggerResponse {
 
                 ft.getDescriptor().setType(type);
 
-                responseList.add(ft);
+                responseList.add((DetectorResponse)ft);
             }
         }
         return responseList;

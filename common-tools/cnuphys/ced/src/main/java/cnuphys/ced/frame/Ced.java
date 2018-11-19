@@ -9,6 +9,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.BorderFactory;
@@ -76,22 +78,21 @@ import cnuphys.ced.trigger.TriggerDialog;
 import cnuphys.ced.trigger.TriggerManager;
 import cnuphys.ced.trigger.TriggerMenuPanel;
 import cnuphys.lund.X11Colors;
-import cnuphys.magfield.FieldProbe;
-import cnuphys.magfield.MagneticField;
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
-import cnuphys.magfield.MagneticField.MathLib;
 import cnuphys.splot.example.MemoryUsageDialog;
 import cnuphys.splot.plot.PlotPanel;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.Swimmer;
-import cnuphys.swim.Swimming;
 import cnuphys.bCNU.eliza.ElizaDialog;
 import cnuphys.bCNU.fortune.FortuneManager;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.bCNU.menu.MenuManager;
+import cnuphys.bCNU.simanneal.example.ising2D.Ising2DDialog;
+import cnuphys.bCNU.simanneal.example.ts.TSDialog;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.PropertySupport;
@@ -110,7 +111,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 1.003e";
+	private static final String _release = "build 1.005a";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -195,7 +196,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	//use old BST geometry
 	private JCheckBoxMenuItem _oldBSTGeometry;
 	
-	
+	//for the traveling salesperson dialog
+	private TSDialog _tsDialog;
+
+	//for the ising model 2D dialog
+	private Ising2DDialog _i2dDialog;
 
 	/**
 	 * Constructor (private--used to create singleton)
@@ -591,8 +596,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private void addToMagneticFieldMenu() {
 		JMenu magMenu = MagneticFields.getInstance().getMagneticFieldMenu();
 		final JMenuItem plotItem = new JMenuItem("Plot the Field...");
-		final JMenuItem loadItem = new JMenuItem("Load a Different Torus...");
-
+//		final JMenuItem reconfigItem = new JMenuItem("Remove Solenoid and Torus Overlap");
+//		final JMenuItem samenessItem = new JMenuItem("Sameness Test with/without Overlap Removal");
 		magMenu.addSeparator();
 
 		ActionListener al = new ActionListener() {
@@ -607,21 +612,28 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 					_plotFieldDialog.setVisible(true);
 
-				} else if (e.getSource() == loadItem) {
-					MagneticFields.getInstance().openNewTorus();
-				}
+				} 
+//				else if (e.getSource() == reconfigItem) {
+//					MagneticFields.getInstance().removeMapOverlap();
+//				}
+//				else if (e.getSource() == samenessItem) {
+//					MagTests.samenessTest();
+//				}
 			}
 		};
 
-		loadItem.addActionListener(al);
+//		reconfigItem.addActionListener(al);
+//		samenessItem.addActionListener(al);
 		plotItem.addActionListener(al);
-		magMenu.add(loadItem);
+//		magMenu.add(reconfigItem);
+//		magMenu.add(samenessItem);
 		magMenu.add(plotItem);
 
 		MenuManager.getInstance().addMenu(magMenu);
 	}
 
 	// add some fun stuff
+	
 	private void addWeirdMenu(JMenu menu) {
 		String weirdTitle = "w" + "\u018e" + "i" + "\u1d19" + "d";
 		_weirdMenu = new JMenu(weirdTitle);
@@ -629,6 +641,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		// eliza!
 		final JMenuItem elizaItem = new JMenuItem("Eliza...");
 		final JMenuItem fortuneItem = new JMenuItem("Fortune...");
+		final JMenuItem tsItem = new JMenuItem("Traveling Salesperson ...");
+		final JMenuItem i2dItem = new JMenuItem("2D Ising Model ...");
 
 		ActionListener al1 = new ActionListener() {
 			@Override
@@ -641,13 +655,29 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				else if (source == fortuneItem) {
 					FortuneManager.getInstance().showDialog();
 				}
+				else if (source == tsItem) {
+					if (_tsDialog == null) {
+						_tsDialog = new TSDialog();
+					}
+					_tsDialog.setVisible(true);
+				}
+				else if (source == i2dItem) {
+					if (_i2dDialog == null) {
+						_i2dDialog = new Ising2DDialog();
+					}
+					_i2dDialog.setVisible(true);
+				}
 			}
 		};
 
 		elizaItem.addActionListener(al1);
 		fortuneItem.addActionListener(al1);
+		tsItem.addActionListener(al1);
+		i2dItem.addActionListener(al1);
 		_weirdMenu.add(elizaItem);
 		_weirdMenu.add(fortuneItem);
+		_weirdMenu.add(tsItem);
+		_weirdMenu.add(i2dItem);
 		
 		menu.add(_weirdMenu, 0);
 
@@ -677,7 +707,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 				if (source == defConItem) {
 					restoreDefaultViewLocations();
-//					System.err.println("HEY MAN");
 					refresh();
 				}
 			}
@@ -729,7 +758,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				
 				Object source = e.getSource();
 
-				if (source == _memoryUsage) {
+				if (source == memPlot) {
 					if (_memoryUsage == null) {
 						_memoryUsage = new MemoryUsageDialog(Ced.getFrame());
 					}
@@ -1036,6 +1065,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		title += "   [Magnetic Field (" +
 		MagneticFields.getInstance().getVersion() + ") "
 				+ MagneticFields.getInstance().getActiveFieldDescription();
+		
+		if (MagneticFields.getInstance().hasActiveTorus()) {
+			String path = MagneticFields.getInstance().getTorusBaseName();
+			title  += " (" + path + ")";
+		}
+		
 		title += "] [Swimmer (" + Swimmer.getVersion() + ")]";
 		
 		title += ("  " + ClasIoEventManager.getInstance().getCurrentSourceDescription());
@@ -1044,8 +1079,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 	@Override
 	public void magneticFieldChanged() {
-		Swimming.clearMCTrajectories();
-		Swimming.clearReconTrajectories();
+//		Swimming.clearAllTrajectories();
 		fixTitle();
 		ClasIoEventManager.getInstance().reloadCurrentEvent();
 	}
@@ -1078,6 +1112,45 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		return _instance;
 	}
 	
+	//this is so we can find json files
+	private static void initClas12Dir() throws IOException {
+		
+		//for running from runnable jar (for coatjava)
+		String clas12dir = System.getProperty("CLAS12DIR");
+		
+		if (clas12dir == null) {
+			clas12dir = "coatjava";
+		}
+		
+		File clasDir = new File(clas12dir);
+		
+		if (clasDir.exists() && clasDir.isDirectory()) {
+			System.err.println("**** Found CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
+			System.setProperty("CLAS12DIR", clas12dir);
+			Log.getInstance().config("CLAS12DIR: " + clas12dir);
+			return;
+		}
+		else {
+			System.err.println("**** Did not find CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
+		}
+		
+		String cwd = Environment.getInstance().getCurrentWorkingDirectory();
+		clas12dir = cwd + "/../../../../../cnuphys/coatjava";
+		clasDir = new File(clas12dir);
+		
+		if (clasDir.exists() && clasDir.isDirectory()) {
+			System.err.println("**** Found CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
+			System.setProperty("CLAS12DIR", clas12dir);
+			Log.getInstance().config("CLAS12DIR: " + clas12dir);
+			return;
+		}
+		else {
+			System.err.println("**** Did not find CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
+		}
+
+		throw(new IOException("Could not locate the coatjava directory."));
+	}
+	
 	/**
 	 * Main program launches the ced gui.
 	 * <p>
@@ -1087,8 +1160,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	 * @param arg the command line arguments.
 	 */
 	public static void main(String[] arg) {
-		FieldProbe.cache(true);
-		MagneticField.setMathLib(MathLib.FAST);
+		FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
 		
 		//read in userprefs
 		PropertiesManager.getInstance();
@@ -1096,12 +1168,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		//initialize the trigger manager
 		TriggerManager.getInstance();
 		
-		//for running from runnable jar (for coatjava)
-		String clas12dir = System.getProperty("CLAS12DIR");
-		
-		if (clas12dir == null) {
-			clas12dir = "coatjava";
-			System.setProperty("CLAS12DIR", clas12dir);
+		//init the clas 12 dir wherev the json files are
+		try {
+			initClas12Dir();
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
 
 		FileUtilities.setDefaultDir("data");
@@ -1210,7 +1281,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		});
 		Log.getInstance().info(Environment.getInstance().toString());
-		Log.getInstance().config("CLAS12DIR: " + clas12dir);
 		
 		//try to update the log for fun
 //		try {
@@ -1224,43 +1294,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 
 	} // end main
-//	
-//	//update the log file for fun
-//	private static void updateCedLog() {
-//		
-//		File myHome = new File(Environment.getInstance().getHomeDirectory());
-//		String baseHome = myHome.getParent();
-//		
-//		File file = new File(baseHome, "heddle/ced.log");
-//		
-//		boolean fileExists = file.exists();
-//		
-//		if (!fileExists) {
-//			file = new File("/u/home/heddle/ced.log");
-//			fileExists = file.exists();
-//		}
-//		
-//		if (!fileExists) {
-//			file = new File("home/heddle/ced.log");
-//			fileExists = file.exists();
-//		}
-//
-//
-//		if (fileExists && file.canWrite()) {
-//			System.out.println("updating log");
-//			try {
-//				FileWriter fw = new FileWriter(file, true);
-//				String uname = Environment.getInstance().getUserName();
-//				String datestr = DateString.dateStringLong();
-//				String lstr = uname + " " + _release + " " + datestr;
-//				fw.write(lstr + "\n");
-//				fw.flush();
-//				fw.close();
-//			}
-//			catch (IOException e) {
-//			}
-//			
-//		}
-//	}
+
 
 }

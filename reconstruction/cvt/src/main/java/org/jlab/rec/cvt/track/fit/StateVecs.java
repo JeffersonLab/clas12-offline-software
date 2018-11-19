@@ -9,9 +9,9 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.trajectory.Helix;
-import org.jlab.rec.cvt.trajectory.TrkSwimmer;
 
 import Jama.Matrix;
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.rec.cvt.svt.Constants;
 
 public class StateVecs {
@@ -155,7 +155,8 @@ public class StateVecs {
         return value;
     }
 
-    public void getStateVecAtModule(int k, StateVec kVec, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, int type) {
+    public void getStateVecAtModule(int k, StateVec kVec, org.jlab.rec.cvt.svt.Geometry sgeo, 
+            org.jlab.rec.cvt.bmt.Geometry bgeo, int type, Swim swimmer) {
 
         StateVec newVec = kVec;
         double[] pars = this.getStateVecPosAtModule(k, kVec, sgeo, bgeo, type);
@@ -167,14 +168,15 @@ public class StateVecs {
         newVec.y = pars[1];
         newVec.z = pars[2];
 
-        newVec.alpha = new B(k, newVec.x, newVec.y, newVec.z).alpha;
+        newVec.alpha = new B(k, newVec.x, newVec.y, newVec.z, swimmer).alpha;
         newVec.phi = pars[3];
 
         // new state: 
         kVec = newVec;
     }
 
-    public StateVec newStateVecAtModule(int k, StateVec kVec, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, int type) {
+    public StateVec newStateVecAtModule(int k, StateVec kVec, org.jlab.rec.cvt.svt.Geometry sgeo, 
+            org.jlab.rec.cvt.bmt.Geometry bgeo, int type, Swim swimmer) {
 
         StateVec newVec = kVec;
         double[] pars = this.getStateVecPosAtModule(k, kVec, sgeo, bgeo, type);
@@ -186,19 +188,21 @@ public class StateVecs {
         newVec.y = pars[1];
         newVec.z = pars[2];
 
-        newVec.alpha = new B(k, newVec.x, newVec.y, newVec.z).alpha;
+        newVec.alpha = new B(k, newVec.x, newVec.y, newVec.z, swimmer).alpha;
         newVec.phi = pars[3];
 
         // new state: 
         return newVec;
     }
 
-    public void transport(int i, int f, StateVec iVec, CovMat icovMat, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, int type) { // s = signed step-size
+    public void transport(int i, int f, StateVec iVec, CovMat icovMat, 
+            org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, int type, 
+            Swim swimmer) { // s = signed step-size
         if (iVec.phi0 < 0) {
             iVec.phi0 += 2. * Math.PI;
         }
 
-        B Bf = new B(i, iVec.x, iVec.y, iVec.z);
+        B Bf = new B(i, iVec.x, iVec.y, iVec.z, swimmer);
 
         double Xc = X0.get(i) + (iVec.d_rho + iVec.alpha / iVec.kappa) * Math.cos(iVec.phi0);
         double Yc = Y0.get(i) + (iVec.d_rho + iVec.alpha / iVec.kappa) * Math.sin(iVec.phi0);
@@ -234,7 +238,7 @@ public class StateVecs {
         fVec.alpha = Bf.alpha;
 
         ////System.out.println("... B "+Bf.Bz+"Z0.get(i)"+ Z0.get(i) +" Z0.get(f) "+Z0.get(f));
-        this.getStateVecAtModule(f, fVec, sgeo, bgeo, type);
+        this.getStateVecAtModule(f, fVec, sgeo, bgeo, type, swimmer);
 
         // now transport covMat...
         double dphi0_prm_del_drho = -1. / (fVec.d_rho + iVec.alpha / iVec.kappa) * Math.sin(fVec.phi0 - iVec.phi0);
@@ -441,7 +445,6 @@ public class StateVecs {
 
     }
 
-    TrkSwimmer tSwim = new TrkSwimmer();
 
     public class B {
 
@@ -449,25 +452,27 @@ public class StateVecs {
         double x;
         double y;
         double z;
-
+        Swim swimmer;
+        
         public double Bx;
         public double By;
         public double Bz;
 
         public double alpha;
 
-        B(int k, double x, double y, double z) {
+        float b[] = new float[3];
+        B(int k, double x, double y, double z, Swim swimmer) {
             this.k = k;
             this.x = x;
             this.y = y;
             this.z = z;
 
-            Point3D bf = tSwim.Bfield(x / 10, y / 10, z / 10);
-            this.Bx = bf.x();
-            this.By = bf.y();
-            this.Bz = bf.z();
+            swimmer.BfieldLab(x / 10, y / 10, z / 10, b);
+            this.Bx = b[0];
+            this.By = b[1];
+            this.Bz = b[2];
 
-            this.alpha = 1. / (StateVecs.speedLight * bf.toVector3D().mag());
+            this.alpha = 1. / (StateVecs.speedLight * Math.sqrt(b[0]*b[0]+b[1]*b[1]+b[2]*b[2]));
             //this.alpha = 1. / (5.);
         }
     }
@@ -542,7 +547,7 @@ public class StateVecs {
         return trkHelix;
     }
 
-    public void init(Seed trk, KFitter kf) {
+    public void init(Seed trk, KFitter kf, Swim swimmer) {
         //init stateVec
 
         StateVec initSV = new StateVec(0);
@@ -551,7 +556,7 @@ public class StateVecs {
         initSV.z = trk.get_Helix().get_Z0();
         double xcen = (1. / trk.get_Helix().get_curvature() - trk.get_Helix().get_dca()) * Math.sin(trk.get_Helix().get_phi_at_dca());
         double ycen = (-1. / trk.get_Helix().get_curvature() + trk.get_Helix().get_dca()) * Math.cos(trk.get_Helix().get_phi_at_dca());
-        B Bf = new B(0, 0, 0, 0);
+        B Bf = new B(0, 0, 0, 0, swimmer);
         initSV.alpha = Bf.alpha;
         initSV.kappa = Bf.alpha * trk.get_Helix().get_curvature();
         initSV.phi0 = Math.atan2(ycen, xcen);

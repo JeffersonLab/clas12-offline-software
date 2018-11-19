@@ -12,9 +12,9 @@ import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
+import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.trajectory.DCSwimmer;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -24,7 +24,6 @@ import org.jlab.utils.groups.IndexedTable;
  * truth-information (i.e. Left-Right ambiguity)
  *
  * @author ziegler
- *
  */
 public class HitReader {
 
@@ -34,7 +33,6 @@ public class HitReader {
     private List<FittedHit> _TBHits; //time-based tracking hit information
 
     /**
-     *
      * @return a list of DC hits
      */
     public List<Hit> get_DCHits() {
@@ -46,12 +44,11 @@ public class HitReader {
      *
      * @param _DCHits list of DC hits
      */
-    public void set_DCHits(List<Hit> _DCHits) {
+    private void set_DCHits(List<Hit> _DCHits) {
         this._DCHits = _DCHits;
     }
 
     /**
-     *
      * @return list of DCHB hits
      */
     public List<FittedHit> get_HBHits() {
@@ -63,12 +60,11 @@ public class HitReader {
      *
      * @param _HBHits list of DC hits
      */
-    public void set_HBHits(List<FittedHit> _HBHits) {
+    private void set_HBHits(List<FittedHit> _HBHits) {
         this._HBHits = _HBHits;
     }
-    
-     /**
-     *
+
+    /**
      * @return list of DCTB hits
      */
     public List<FittedHit> get_TBHits() {
@@ -80,7 +76,7 @@ public class HitReader {
      *
      * @param _TBHits list of DC hits
      */
-    public void set_TBHits(List<FittedHit> _TBHits) {
+    private void set_TBHits(List<FittedHit> _TBHits) {
         this._TBHits = _TBHits;
     }
 
@@ -91,18 +87,21 @@ public class HitReader {
      *
      * @param event DataEvent
      */
-    public void fetch_DCHits(DataEvent event, Clas12NoiseAnalysis noiseAnalysis, NoiseReductionParameters parameters,
-            Clas12NoiseResult results, IndexedTable tab, IndexedTable tab2, 
-            IndexedTable tab3, DCGeant4Factory DcDetector,
-            double triggerPhase) {
+    public void fetch_DCHits(DataEvent event, Clas12NoiseAnalysis noiseAnalysis,
+                             NoiseReductionParameters parameters,
+                             Clas12NoiseResult results, IndexedTable tab,
+                             IndexedTable tab2, IndexedTable tab3,
+                             DCGeant4Factory DcDetector,
+                             double triggerPhase) {
 
-        if (event.hasBank("DC::tdc") == false) {
-            //System.err.println("there is no dc bank ");
-            _DCHits = new ArrayList<Hit>();
+        if (!event.hasBank("DC::tdc")) {
+            _DCHits = new ArrayList<>();
 
             return;
         }
-        
+
+//        if(true)return;// DDD BREAK BREAK BREAK
+
         DataBank bankDGTZ = event.getBank("DC::tdc");
 
         int rows = bankDGTZ.rows();
@@ -117,13 +116,14 @@ public class HitReader {
             layer[i] = bankDGTZ.getByte("layer", i);
             wire[i] = bankDGTZ.getShort("component", i);
             tdc[i] = bankDGTZ.getInt("TDC", i);
-            
-        }
-        
 
-        if (event.hasBank("DC::doca") == true) {
+        }
+
+
+        if (event.hasBank("DC::doca")) {
             DataBank bankD = event.getBank("DC::doca");
-            for (int i = 0; i < bankD.rows(); i++) {
+            int bd_rows = bankD.rows();
+            for (int i = 0; i < bd_rows; i++) {
                 if (bankD.getFloat("stime", i) < 0) {
                     useMChit[i] = -1;
                 }
@@ -134,11 +134,10 @@ public class HitReader {
         int[] superlayerNum = new int[size];
         double[] smearedTime = new double[size];
 
-        List<Hit> hits = new ArrayList<Hit>();
+        List<Hit> hits = new ArrayList<>();
 
         for (int i = 0; i < size; i++) {
-            //if(Constants.isSimulation == false) {
-            if (tdc != null && tdc.length > 0) {
+            if (tdc.length > 0) {
                 smearedTime[i] = (double) tdc[i] - triggerPhase;
                 if (smearedTime[i] < 0) {
                     smearedTime[i] = 1;
@@ -152,69 +151,72 @@ public class HitReader {
         results.clear();
         noiseAnalysis.clear();
 
-        noiseAnalysis.findNoise(sector, superlayerNum, layerNum, wire, results);
-         
+
+         noiseAnalysis.findNoise(sector, superlayerNum, layerNum, wire, results);
+
         for (int i = 0; i < size; i++) {
             boolean passHit = true;
-            if(tab3!=null) {
-                if(tab3.getIntValue("status", sector[i], layer[i] ,wire[i])!=0)
-                    passHit=false;
+            if (tab3 != null) {
+                if (tab3.getIntValue("status", sector[i], layer[i], wire[i]) != 0)
+                    passHit = false;
             }
-            if (passHit && wire[i] != -1 && results.noise[i] == false && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
-                
+            if (passHit && wire[i] != -1 && !results.noise[i] && useMChit[i] != -1 && !(superlayerNum[i] == 0)) {
+
                 double timeCutMin = 0;
                 double timeCutMax = 0;
                 double timeCutLC = 0;
-                
-                int region = (int) ( (superlayerNum[i]+1)/2 );
-                
+
+                int region = ((superlayerNum[i] + 1) / 2);
+
                 switch (region) {
                     case 1:
-                        timeCutMin = tab2.getIntValue("MinEdge", 0, region ,0);
-                        timeCutMax = tab2.getIntValue("MaxEdge", 0, region ,0);
+                        timeCutMin = tab2.getIntValue("MinEdge", 0, region, 0);
+                        timeCutMax = tab2.getIntValue("MaxEdge", 0, region, 0);
                         break;
                     case 2:
-                        if(wire[i]<=56) {
-                            timeCutLC = tab2.getIntValue("LinearCoeff", 0, region ,1); 
-                            timeCutMin = tab2.getIntValue("MinEdge", 0, region ,1);
-                            timeCutMax = tab2.getIntValue("MaxEdge", 0, region ,1);
+                        if (wire[i] <= 56) {
+                            timeCutLC = tab2.getIntValue("LinearCoeff", 0, region, 1);
+                            timeCutMin = tab2.getIntValue("MinEdge", 0, region, 1);
+                            timeCutMax = tab2.getIntValue("MaxEdge", 0, region, 1);
                         }
-                        if(wire[i]>56) {
-                            timeCutLC = tab2.getIntValue("LinearCoeff", 0, region ,56); 
-                            timeCutMin = tab2.getIntValue("MinEdge", 0, region ,56);
-                            timeCutMax = tab2.getIntValue("MaxEdge", 0, region ,56);
+                        if (wire[i] > 56) {
+                            timeCutLC = tab2.getIntValue("LinearCoeff", 0, region, 56);
+                            timeCutMin = tab2.getIntValue("MinEdge", 0, region, 56);
+                            timeCutMax = tab2.getIntValue("MaxEdge", 0, region, 56);
                         }
                         break;
                     case 3:
-                        timeCutMin = tab2.getIntValue("MinEdge", 0, region ,0);
-                        timeCutMax = tab2.getIntValue("MaxEdge", 0, region ,0);
+                        timeCutMin = tab2.getIntValue("MinEdge", 0, region, 0);
+                        timeCutMax = tab2.getIntValue("MaxEdge", 0, region, 0);
                         break;
                 }
                 boolean passTimingCut = false;
-                
-                if(region ==1 && smearedTime[i]>timeCutMin && smearedTime[i]<timeCutMax)
-                    passTimingCut=true;
-                if(region ==2) {
-                    double Bscale = DCSwimmer.getTorScale()*DCSwimmer.getTorScale();
-                    if(wire[i]>=56) {
-                        if(smearedTime[i]>timeCutMin && smearedTime[i]<timeCutMax+timeCutLC*(double)(112-wire[i]/56)*Bscale)
-                            passTimingCut=true;
+
+                if (region == 1 && smearedTime[i] > timeCutMin && smearedTime[i] < timeCutMax)
+                    passTimingCut = true;
+                if (region == 2) {
+                    double Bscale = Swimmer.getTorScale() * Swimmer.getTorScale();
+                    if (wire[i] >= 56) {
+                        if (smearedTime[i] > timeCutMin &&
+                                smearedTime[i] < timeCutMax + timeCutLC * (double) (112 - wire[i] / 56) * Bscale)
+                            passTimingCut = true;
                     } else {
-                        if(smearedTime[i]>timeCutMin && smearedTime[i]<timeCutMax+timeCutLC*(double)(56-wire[i]/56)*Bscale)
-                            passTimingCut=true;
+                        if (smearedTime[i] > timeCutMin &&
+                                smearedTime[i] < timeCutMax + timeCutLC * (double) (56 - wire[i] / 56) * Bscale)
+                            passTimingCut = true;
                     }
                 }
-                if(region ==3 && smearedTime[i]>timeCutMin && smearedTime[i]<timeCutMax)
-                    passTimingCut=true;
-                
-                if(passTimingCut) { // cut on spurious hits
+                if (region == 3 && smearedTime[i] > timeCutMin && smearedTime[i] < timeCutMax)
+                    passTimingCut = true;
+
+                if (passTimingCut) { // cut on spurious hits
                     //Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], smearedTime[i], 0, 0, hitno[i]);			
                     Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], tdc[i], (i + 1));
                     hit.set_Id(i + 1);
                     hit.calc_CellSize(DcDetector);
                     double posError = hit.get_CellSize() / Math.sqrt(12.);
-                    hit.set_DocaErr(posError); 
-                    hits.add(hit); 
+                    hit.set_DocaErr(posError);
+                    hits.add(hit);
                 }
             }
         }
@@ -222,20 +224,28 @@ public class HitReader {
         this.set_DCHits(hits);
 
     }
-    
+
+
     /**
      * Reads HB DC hits written to the DC bank
      *
-     * @param event
+     * @param event      .
+     * @param constants0 .
+     * @param constants1 .
+     * @param T0         .
+     * @param T0ERR      .
+     * @param DcDetector .
+     * @param tde        .
      */
-    public void read_HBHits(DataEvent event, IndexedTable constants0, IndexedTable constants1, double[][][][] T0, double[][][][] T0ERR, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde ) {
+    public void read_HBHits(DataEvent event, IndexedTable constants0, IndexedTable constants1, double[][][][] T0,
+                            double[][][][] T0ERR, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         /*
         0: this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
         1: this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d")
         */
-        if (event.hasBank("HitBasedTrkg::HBHits") == false) {
+        if (!event.hasBank("HitBasedTrkg::HBHits")) {
             //System.err.println("there is no HB dc bank ");
-            _HBHits = new ArrayList<FittedHit>();
+            _HBHits = new ArrayList<>();
             return;
         }
         
@@ -255,7 +265,7 @@ public class HitReader {
         double[] tProp = new double[rows];
         double[] tFlight = new double[rows];
         double[] trkDoca = new double[rows];
-        
+
         for (int i = 0; i < rows; i++) {
             id[i] = bank.getShort("id", i);
             sector[i] = bank.getByte("sector", i);
@@ -270,66 +280,62 @@ public class HitReader {
             clusterID[i] = bank.getShort("clusterID", i);
             trkID[i] = bank.getByte("trkID", i);
             tProp[i] = bank.getFloat("TProp", i);
-            tFlight[i] = bank.getFloat("TFlight", i); 
-            if (event.hasBank("MC::Particle") == true || event.getBank("RUN::config").getInt("run", 0)<100) {
+            tFlight[i] = bank.getFloat("TFlight", i);
+            if (event.hasBank("MC::Particle") ||
+                    event.getBank("RUN::config").getInt("run", 0) < 100) {
                 tProp[i] = 0;
-                tFlight[i] = 0; 
+                tFlight[i] = 0;
             }
         }
 
         int size = layer.length;
 
-        List<FittedHit> hits = new ArrayList<FittedHit>();
+        List<FittedHit> hits = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             //use only hits that have been fit to a track
             if (trkID[i] == -1) {
                 continue;
             }
-            
+
             double T_0 = 0;
             double T_Start = 0;
-            if (event.hasBank("MC::Particle") == false && event.getBank("RUN::config").getInt("run", 0)>100) {
+            if (!event.hasBank("MC::Particle") &&
+                    event.getBank("RUN::config").getInt("run", 0) > 100) {
                 T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
-                if(event.hasBank("RECHB::Event")==true)
+                if (event.hasBank("RECHB::Event"))
                     T_Start = event.getBank("RECHB::Event").getFloat("STTime", 0);
             }
 
-            //FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], time[i]-tProp[i]-tFlight[i] - this.get_T0(sector[i], slayer[i], layer[i], wire[i], Constants.getT0())[0], 0, B[i], id[i]);
-            FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], tdc[i], id[i]);   
+            FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], tdc[i], id[i]);
             hit.set_Id(id[i]);
             hit.setB(B[i]);
-            //hit.setT0SubTime(time[i]- T_0+tProp[i]+tFlight[i]);
-            hit.setT0(T_0); 
+            hit.setT0(T_0);
             hit.setTStart(T_Start);
             hit.setTProp(tProp[i]);
             hit.setTFlight(tFlight[i]);
-            hit.set_Beta(this.readBeta(event, trkID[i])); 
-            
-            double T0Sub = (double) (tdc[i] - tProp[i] - tFlight[i] - T_0);
-            
-            if(Constants.isUSETSTART()==true) { 
-                T0Sub-= T_Start; 
+            hit.set_Beta(this.readBeta(event, trkID[i]));
+
+            double T0Sub = (tdc[i] - tProp[i] - tFlight[i] - T_0);
+
+            if (Constants.isUSETSTART()) {
+                T0Sub -= T_Start;
             }
             hit.set_Time(T0Sub);
-           // hit.set_Time((double)tdc[i] - tProp[i] - tFlight[i] - T_0 - T_Start); // this is the correct formula after the T_0s are recalibrated
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
-            hit.calc_CellSize( DcDetector) ;
+            hit.calc_CellSize(DcDetector);
             hit.set_ClusFitDoca(trkDoca[i]);
             hit.set_TimeToDistance(1.0, B[i], constants1, tde);
-            
+
             hit.set_QualityFac(0);
-            //hit.set_Doca(hit.get_TimeToDistance());
-            //if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>CCDBConstants.getTMAXSUPERLAYER()[hit.get_Sector()-1][hit.get_Superlayer()-1] ) {
-            if (hit.get_Doca() > hit.get_CellSize() ) {
-                //this.fix_TimeToDistance(this.get_CellSize());
+            if (hit.get_Doca() > hit.get_CellSize()) {
                 hit.set_OutOfTimeFlag(true);
                 hit.set_QualityFac(2);
-            } 
-            if(hit.get_Time()<0)
+            }
+            if (hit.get_Time() < 0)
                 hit.set_QualityFac(1);
-            
-            hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));            
+
+            hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
             if(hit.get_Beta()>0.15 && hit.get_Beta()<=1.40) {
@@ -338,17 +344,19 @@ public class HitReader {
                 hits.add(hit);
             }
         }
-        
+
         this.set_HBHits(hits);
     }
-    public void read_TBHits(DataEvent event, IndexedTable constants0, IndexedTable constants1, TimeToDistanceEstimator tde, double[][][][] T0, double[][][][] T0ERR) {
+
+    public void read_TBHits(DataEvent event, IndexedTable constants0, IndexedTable constants1,
+                            TimeToDistanceEstimator tde, double[][][][] T0, double[][][][] T0ERR) {
         /*
         0: this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
         1: this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d")
         */
-        if (event.hasBank("TimeBasedTrkg::TBHits") == false || event.hasBank("RECHB::Event") == false) {
+        if (!event.hasBank("TimeBasedTrkg::TBHits") || !event.hasBank("RECHB::Event")) {
             //System.err.println("there is no HB dc bank ");
-            _TBHits = new ArrayList<FittedHit>();
+            _TBHits = new ArrayList<>();
             return;
         }
 
@@ -367,11 +375,11 @@ public class HitReader {
         int[] trkID = new int[rows];
         double[] tProp = new double[rows];
         double[] tFlight = new double[rows];
-        double startTime = (double)event.getBank("REC::Event").getFloat("STTime", 0);
-        
-        if(startTime<0)
-            return ;
-        
+        double startTime = (double) event.getBank("REC::Event").getFloat("STTime", 0);
+
+        if (startTime < 0)
+            return;
+
         for (int i = 0; i < rows; i++) {
             sector[i] = bank.getByte("sector", i);
             slayer[i] = bank.getByte("superlayer", i);
@@ -385,118 +393,122 @@ public class HitReader {
             trkID[i] = bank.getByte("trkID", i);
             tProp[i] = bank.getFloat("TProp", i);
             tFlight[i] = bank.getFloat("TFlight", i);
-        
-            if (event.hasBank("MC::Particle") == true || event.getBank("RUN::config").getInt("run", 0)<100) {
-                    tProp[i] = 0;
-                    tFlight[i] = 0; 
+
+            if (event.hasBank("MC::Particle") ||
+                    event.getBank("RUN::config").getInt("run", 0) < 100) {
+                tProp[i] = 0;
+                tFlight[i] = 0;
             }
         }
         int size = layer.length;
 
-        List<FittedHit> hits = new ArrayList<FittedHit>();
+        List<FittedHit> hits = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             //use only hits that have been fit to a track
             if (trkID[i] == -1) {
                 continue;
             }
             //
-            FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], tdc[i], id[i]);          
+            FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], tdc[i], id[i]);
             hit.setB(B[i]);
             //hit.setT0SubTime(time[i]- T_0+tProp[i]+tFlight[i]);
             double T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
-            hit.setT0(T_0); 
-            hit.set_Beta(this.readBeta(event, trkID[i])); 
+            hit.setT0(T_0);
+            hit.set_Beta(this.readBeta(event, trkID[i]));
             hit.setTStart(startTime);
             hit.setTProp(tProp[i]);
             //reset the time based on new beta
-            double newtFlight = tFlight[i]/hit.get_Beta();
+            double newtFlight = tFlight[i] / hit.get_Beta();
             hit.setTFlight(newtFlight);
-            hit.set_Time((double)tdc[i] - tProp[i] - newtFlight - T_0 - startTime);
+            hit.set_Time((double) tdc[i] - tProp[i] - newtFlight - T_0 - startTime);
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
-            
-            hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));            
+
+            hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));
             hit.set_AssociatedClusterID(clusterID[i]);
-            hit.set_AssociatedTBTrackID(trkID[i]); 
-            
+            hit.set_AssociatedTBTrackID(trkID[i]);
+
             hit.set_TimeToDistance(1.0, B[i], constants1, tde);
-            
+
             hit.set_QualityFac(0);
-            //hit.set_Doca(hit.get_TimeToDistance());
-            //if (hit.get_Doca() > hit.get_CellSize() || hit.get_Time()>CCDBConstants.getTMAXSUPERLAYER()[hit.get_Sector()-1][hit.get_Superlayer()-1]) {
-            if (hit.get_Doca() > hit.get_CellSize() ) {   
-                //this.fix_TimeToDistance(this.get_CellSize());
+            if (hit.get_Doca() > hit.get_CellSize()) {
                 hit.set_OutOfTimeFlag(true);
                 hit.set_QualityFac(2);
-            } 
-            if(hit.get_Time()<0)
+            }
+            if (hit.get_Time() < 0)
                 hit.set_QualityFac(1);
-            if(hit.get_Beta()>0.2 && hit.get_Beta()<=1.30)
+            if(hit.get_Beta()>0.2 && hit.get_Beta()<=1.30) {
                 if(hit.get_Beta()>1.0)
                     hit.set_Beta(1.0);
                 hits.add(hit);
-            hits.add(hit);
-            
+            }
         }
 
         this.set_TBHits(hits);
     }
 
-    public double readBeta(DataEvent event, int trkId) {
-        double _beta =1.0;
-        
-        if (event.hasBank("RECHB::Particle") == false || event.hasBank("RECHB::Track") == false ) 
+    private double readBeta(DataEvent event, int trkId) {
+        double _beta = 1.0;
+
+        if (!event.hasBank("RECHB::Particle") || !event.hasBank("RECHB::Track"))
             return _beta;
         DataBank bank = event.getBank("RECHB::Track");
-        
+
         int rows = bank.rows();
         for (int i = 0; i < rows; i++) {
-            if(bank.getByte("detector", i)==6 && bank.getShort("index", i)==trkId-1) {
-                _beta = event.getBank("RECHB::Particle").getFloat("beta", bank.getShort("pindex", i));
+            if (bank.getByte("detector", i) == 6 &&
+                    bank.getShort("index", i) == trkId - 1) {
+                _beta = event.getBank("RECHB::Particle").getFloat("beta",
+                        bank.getShort("pindex", i));
             }
         }
-        
+        if(_beta>1.0)
+            _beta=1.0;
         return _beta;
     }
-    
 
-    private double[] get_T0(int sector, int superlayer, int layer, int wire, double[][][][] T0, double[][][][] T0ERR) {
+
+    private double[] get_T0(int sector, int superlayer,
+                            int layer, int wire, double[][][][] T0, double[][][][] T0ERR) {
         double[] T0Corr = new double[2];
 
         int cable = this.getCableID1to6(layer, wire);
         int slot = this.getSlotID1to7(wire);
-        
+
         double t0 = T0[sector - 1][superlayer - 1][slot - 1][cable - 1];      //nSec*nSL*nSlots*nCables
         double t0E = T0ERR[sector - 1][superlayer - 1][slot - 1][cable - 1];
-        
+
         T0Corr[0] = t0;
         T0Corr[1] = t0E;
-        
+
         return T0Corr;
     }
 
     private int getSlotID1to7(int wire1to112) {
-        int iSlot = (int) ((wire1to112 - 1) / 16) + 1;
-        return iSlot;
+        return ((wire1to112 - 1) / 16) + 1;
     }
 
     private int getCableID1to6(int layer1to6, int wire1to112) {
         /*96 channels are grouped into 6 groups of 16 channels and each group 
             joins with a connector & a corresponding cable (with IDs 1,2,3,4,& 6)*/
-        int wire1to16 = (int) ((wire1to112 - 1) % 16 + 1);
-        int cable_id = this.CableID[layer1to6 - 1][wire1to16 - 1];
-        return cable_id;
+        int wire1to16 = ((wire1to112 - 1) % 16 + 1);
+        return this.CableID[layer1to6 - 1][wire1to16 - 1];
     }
+
     //Map of Cable ID (1, .., 6) in terms of Layer number (1, ..., 6) and localWire# (1, ..., 16)
-    private final int[][] CableID = { //[nLayer][nLocWire] => nLocWire=16, 7 groups of 16 wires in each layer
-        {1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6}, //Layer 1
-        {1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6}, //Layer 2
-        {1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 5, 6, 6, 6}, //Layer 3
-        {1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6}, //Layer 4
-        {1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 5, 6, 6, 6}, //Layer 5
-        {1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6}, //Layer 6  
-    //===> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 (Local wire ID: 0 for 1st, 16th, 32th, 48th, 64th, 80th, 96th wires)
+    private final int[][] CableID = {
+            //[nLayer][nLocWire] => nLocWire=16, 7 groups of 16 wires in each layer
+            {1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6}, //Layer 1
+            {1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6}, //Layer 2
+            {1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 5, 6, 6, 6}, //Layer 3
+            {1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6}, //Layer 4
+            {1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5, 5, 5, 6, 6, 6}, //Layer 5
+            {1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6}, //Layer 6
+            //===> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+            // (Local wire ID: 0 for 1st, 16th, 32th, 48th, 64th, 80th, 96th wires)
     };
+
+    /*
     private final int[][] CableSwaps ={
      //[nswaps][swap]
         //CableSwaps[0]:from sector CableSwaps[1]: from layer(1...36) CableSwaps[2]: from wire
@@ -537,7 +549,8 @@ public class HitReader {
     private int _sector;
     private int _layer;
     private int _wire;
-    
+
+
     private void swapWires(DataEvent event, int sector, int layer, int wire) {
         // don't swap in MC
         if (event.hasBank("MC::Particle") == true || event.getBank("RUN::config").getInt("run", 0)<100) {
@@ -573,6 +586,7 @@ public class HitReader {
            }
           if (trigger_bits[31])System.out.println("Trigger bit set from random pulser");
         }
-}   */
+}
     }
+*/
 }

@@ -1,10 +1,7 @@
 package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
-import java.util.List;
-
 import org.jlab.detector.base.GeometryFactory;
-import org.jlab.geom.DetectorHit;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.DriftChamberWire;
 import org.jlab.geom.detector.dc.DCDetector;
@@ -13,7 +10,6 @@ import org.jlab.geom.detector.dc.DCLayer;
 import org.jlab.geom.detector.dc.DCSector;
 import org.jlab.geom.detector.dc.DCSuperlayer;
 import org.jlab.geom.prim.Line3D;
-import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Shape3D;
@@ -25,8 +21,6 @@ public class DCGeometry {
 	private static DCDetector _dcDetector;
 	private static DCSector sector0;
 
-	private static double shortestWire;
-	private static double longestWire;
 	private static double minWireX;
 	private static double maxWireX;
 	private static double minWireY;
@@ -38,6 +32,8 @@ public class DCGeometry {
 	/**
 	 * These are the drift chamber wires from the geometry service. The indices
 	 * are 0-based: [superlayer 0:5][layer 0:5][wire 0:111]
+	 * NOTE: a DriftChamberWire is actually the full hexagonal volume. Its getLine
+	 * method returns the line of the sense wire.
 	 */
 	private static DriftChamberWire wires[][][];
 
@@ -57,8 +53,6 @@ public class DCGeometry {
 
 		sector0 = _dcDetector.getSector(0);
 
-		shortestWire = Double.POSITIVE_INFINITY;
-		longestWire = Double.NEGATIVE_INFINITY;
 		minWireX = Double.POSITIVE_INFINITY;
 		maxWireX = Double.NEGATIVE_INFINITY;
 		minWireY = Double.POSITIVE_INFINITY;
@@ -76,6 +70,7 @@ public class DCGeometry {
 
 				for (int w = 0; w < 112; w++) {
 					DriftChamberWire dcw = dcLayer.getComponent(w);
+					
 					wires[suplay][lay][w] = dcw;
 
 					Line3D line = dcw.getLine();
@@ -89,8 +84,6 @@ public class DCGeometry {
 					double wireLen = dcw.getLength();
 					// double wireLen = line.length();
 
-					shortestWire = Math.min(shortestWire, wireLen);
-					longestWire = Math.max(longestWire, wireLen);
 					minWireX = Math.min(minWireX, xx0);
 					minWireX = Math.min(minWireX, xx1);
 					maxWireX = Math.max(maxWireX, xx0);
@@ -107,19 +100,6 @@ public class DCGeometry {
 				}
 			}
 		}
-
-		// Log.getInstance().info("Shortest Wire: " + shortestWire);
-		// Log.getInstance().info("Longest Wire: " + longestWire);
-		// System.err.println("shortest wire: " + shortestWire);
-		// System.err.println("longest wire: " + longestWire);
-		// System.err.println("minX: " + minWireX);
-		// System.err.println("maxX: " + maxWireX);
-		// System.err.println("minY: " + minWireY);
-		// System.err.println("maxY: " + maxWireY);
-		// System.err.println("minZ: " + minWireZ);
-		// System.err.println("maxZ: " + maxWireZ);
-		//
-		// System.err.println("Done initing DC Geometry");
 
 	}
 
@@ -165,24 +145,6 @@ public class DCGeometry {
 			coords[k + 2] = (float) v6.z();
 		}
 
-	}
-
-	/**
-	 * Get the length of the shortest wire in cm
-	 * 
-	 * @return the length of the shortest wire in cm
-	 */
-	public static double getShortestWire() {
-		return shortestWire;
-	}
-
-	/**
-	 * Get the length of the longest wire in cm
-	 * 
-	 * @return the length of the longest wire in cm
-	 */
-	public static double getLongestWire() {
-		return longestWire;
 	}
 
 	/**
@@ -270,7 +232,7 @@ public class DCGeometry {
 	 * @return the mid point of the wire in sector 1
 	 */
 	public static Point3D getMidPoint(int superlayer, int layer, int wire) {
-		return wires[superlayer - 1][layer - 1][wire - 1].getLine().midpoint();
+		return wires[superlayer - 1][layer - 1][wire - 1].getMidpoint();
 	}
 
 	/**
@@ -616,19 +578,6 @@ public class DCGeometry {
 		wp[wpIndex] = p;
 	}
 
-	// private static void expand(Point2D.Double wp0, Point2D.Double wp1, double
-	// factor) {
-	// double delx = factor * (wp1.x - wp0.x);
-	// double dely = factor * (wp1.y - wp0.y);
-	//
-	// double x0 = wp0.x;
-	// double y0 = wp0.y;
-	//
-	// wp0.x = wp1.x - delx;
-	// wp0.y = wp1.y - dely;
-	// wp1.x = x0 + delx;
-	// wp1.y = y0 + dely;
-	// }
 
 	// extend a point
 	private static void extPoint(Point2D.Double p0, Point2D.Double p1, Point2D.Double ext) {
@@ -642,10 +591,42 @@ public class DCGeometry {
 		ext.y = p0.y + (p0.y - p1.y);
 	}
 	
+	public static void printWire(int superlayer, int layer, int wire) {
+				
+				DriftChamberWire dcw = wires[superlayer][layer][wire];
+				double x1 = dcw.getLine().origin().x();
+				double y1 = dcw.getLine().origin().y();
+				double z1 = dcw.getLine().origin().z();
+				
+				double x2 = dcw.getLine().end().x();
+				double y2 = dcw.getLine().end().y();
+				double z2 = dcw.getLine().end().z();
+				
+				double xm = dcw.getMidpoint().x();
+				double ym = dcw.getMidpoint().y();
+				double zm = dcw.getMidpoint().z();
+
+
+				
+				System.out.println(String.format(
+				"OLD  end (%-4.1f, %-4.1f, %-4.1f) end (%-4.1f, %-4.1f, %-4.1f) mid (%-4.1f, %-4.1f, %-4.1f)",
+				x1, y1, z1, x2, y2, z2,
+				xm, ym, zm));
+				
+	}
+
 	
 	public static void main(String arg[]) {
 		initialize();
-		System.out.println(wires[0][0][0].getLine().origin() + "   " + wires[0][0][0].getLine().end() + "  MID: " + wires[0][0][0].getMidpoint());
+
+		printWire(0, 0, 65);
+
+		
+//		DriftChamberWire dcw = wires[0][0][0];
+//		System.out.println("num vol edges: " + dcw.getNumVolumeEdges());
+//		for (int i = 0; i < dcw.getNumVolumeEdges(); i++) {
+//			System.out.println(dcw.getVolumeEdge(i));
+//		}
 	}
 
 }

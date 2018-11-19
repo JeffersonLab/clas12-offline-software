@@ -1,6 +1,7 @@
 package org.jlab.clas.detector;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
@@ -22,7 +23,13 @@ public class DetectorEvent {
     public DetectorEvent(){
         
     }
-    
+   
+    public void sort() {
+        System.err.println("DetectorEvent:  Not ready for sorting!!!!!!!!!");
+        Collections.sort(particleList);
+        setAssociation();
+    }
+
     public static DetectorEvent readDetectorEvent(DataEvent event){
         return DetectorData.readDetectorEvent(event);
     }
@@ -90,60 +97,51 @@ public class DetectorEvent {
         }
         return responses;
     }
-    
-    public List<DetectorResponse>  getCherenkovResponseList(){
-        this.setAssociation();
-        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
-        for (DetectorParticle p : this.particleList){
-            for (DetectorResponse r : p.getDetectorResponses()) {
-                if (r.getDescriptor().getType() == DetectorType.HTCC ||
-                    r.getDescriptor().getType() == DetectorType.LTCC ||
-                    r.getDescriptor().getType() == DetectorType.RICH)
-                responses.add(r);
-            }
-        }
-        return responses;
+
+   public List<DetectorResponse>  getCherenkovResponseList(){
+       return getResponseList(new DetectorType[]{
+           DetectorType.HTCC,DetectorType.LTCC,DetectorType.RICH
+       });
     }
-    
+
     public List<DetectorResponse>  getCalorimeterResponseList(){
-        this.setAssociation();
-        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
-        for(DetectorParticle p : this.particleList){
-            for(DetectorResponse r : p.getDetectorResponses()){
-                if(r.getDescriptor().getType()==DetectorType.ECAL)
-                responses.add(r);
-            }
-        }
-        return responses;
+       return getResponseList(new DetectorType[]{
+           DetectorType.ECAL
+       });
     }
-    
+
     public List<DetectorResponse>  getScintillatorResponseList(){
+       return getResponseList(new DetectorType[]{
+           DetectorType.FTOF,DetectorType.CTOF,DetectorType.CND,DetectorType.BAND
+       });
+    }
+
+   public List<DetectorResponse>  getTaggerResponseList(){
+       return getResponseList(new DetectorType[]{
+           DetectorType.FTCAL,DetectorType.FTHODO
+       });
+    }
+
+   public List<DetectorResponse>  getResponseList(DetectorType type) {
+       return getResponseList(new DetectorType[]{type});
+   }
+
+   public List<DetectorResponse> getResponseList(DetectorType[] types) {
         this.setAssociation();
         List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
         for(DetectorParticle p : this.particleList){
-            for(DetectorResponse r : p.getDetectorResponses()){
-                if(r.getDescriptor().getType()==DetectorType.FTOF ||
-                   r.getDescriptor().getType()==DetectorType.CTOF ||
-                   r.getDescriptor().getType()==DetectorType.CND)
-                responses.add(r);
+            for(DetectorResponse r : p.getDetectorResponses()) {
+                for(DetectorType t : types) {
+                    if (r.getDescriptor().getType() == t) {
+                        responses.add(r);
+                        break;
+                    }
+                }
             }
         }
         return responses;
-    }
-    
-   public List<TaggerResponse>  getTaggerResponseList(){
-        this.setAssociation();
-        List<TaggerResponse> responses = new ArrayList<TaggerResponse>();
-        for(DetectorParticle p : this.particleList){
-            for(TaggerResponse r : p.getTaggerResponses()){
-                if(r.getDescriptor().getType()==DetectorType.FTCAL ||
-                        r.getDescriptor().getType()==DetectorType.FTHODO)
-                responses.add(r);
-            }
-        }
-        return responses;
-    }
-   
+   }
+
    public List<DetectorParticle> getCentralParticles() {
        List<DetectorParticle> central = new ArrayList<DetectorParticle>();
        for(DetectorParticle p : this.particleList) {

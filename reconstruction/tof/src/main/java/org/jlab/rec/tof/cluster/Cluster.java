@@ -314,23 +314,26 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
         double xTrk = 0;
         double yTrk = 0;
         double zTrk = 0;
+        int id =0;
         int[] iClusHitsMatchedToTrk = new int[this.size()];
         int totNbMatches = 0;
-
+        if(this.size()<1 || this.get(0)._AssociatedTrkId<1)
+            return;
+        id = this.get(0)._AssociatedTrkId;
         for (int i = 0; i < this.size(); i++) {
             iClusHitsMatchedToTrk[i] = -1;
 
             AHit h = this.get(i);
-
+            
             if (h.get_TrkPosition() == null
-                    || Double.isNaN(h.get_TrkPosition().x())) {
+                    || Double.isNaN(h.get_TrkPosition().x()) || this.get(i)._AssociatedTrkId!=id) {
                 continue;
             }
-
+            id = h._AssociatedTrkId;
             xTrk = h.get_TrkPosition().x();
             yTrk = h.get_TrkPosition().y();
             zTrk = h.get_TrkPosition().z();
-
+            
             if (Math.abs(xTrk - this.get_x()) < Constants.TRKMATCHXPAR[this
                     .get_Panel() - 1]
                     && Math.abs(yTrk - this.get_y()) < Constants.TRKMATCHYPAR[this
@@ -359,11 +362,12 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
                         .get_TrkPosition().y();
                 z_Trk[nbMatches] = this.get(iClusHitsMatchedToTrk[j])
                         .get_TrkPosition().z();
-
+                
                 nbMatches++;
             }
 
         }
+        
         this.set_xTrk(x_Trk);
         this.set_yTrk(y_Trk);
         this.set_zTrk(z_Trk);

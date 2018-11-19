@@ -59,6 +59,7 @@ public class SameTrackDifferentMaxStep extends ASwimTest {
 	}
 	
 	//everything is initialized, about to launch, final prep
+	@Override
 	protected void aboutToLaunch() {
 		System.err.println("PREPARE TO LAUNCH");
 		System.err.println("NUMBER OF ITERATIONS = " + getIterationCount());

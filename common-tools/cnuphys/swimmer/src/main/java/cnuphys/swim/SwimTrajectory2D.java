@@ -6,7 +6,7 @@ import java.util.List;
 
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.lund.LundId;
-import cnuphys.magfield.MagneticField;
+import org.jlab.clas.clas.math.FastMath;
 
 /**
  * A 2D version of the 3D SwimTrajectory where all points have been projected
@@ -180,7 +180,7 @@ public class SwimTrajectory2D {
 	 */
 	private static byte getSector(double x, double y) {
 		
-		double phi = MagneticField.atan2Deg(y, x);
+		double phi = FastMath.atan2Deg(y, x);
 		// convert phi to [0..360]
 
 		while (phi < 0) {

@@ -24,7 +24,6 @@ import javax.swing.event.ListSelectionListener;
 
 import cnuphys.bCNU.dialog.VerticalFlowLayout;
 import cnuphys.bCNU.graphics.component.TextFieldPanel;
-import cnuphys.magfield.MagneticField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 
@@ -300,12 +299,7 @@ public class SwimTester extends JFrame implements ListSelectionListener, ActionL
 	private void initMagFields() {
 		MagneticFields.getInstance().initializeMagneticFields();
 		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
-		// swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
-
 		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
-
-		MagneticField.setMathLib(MagneticField.MathLib.FAST);
-
 	}
 	
 	@Override

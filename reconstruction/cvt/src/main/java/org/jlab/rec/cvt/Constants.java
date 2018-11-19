@@ -28,6 +28,34 @@ public class Constants {
 
     public static final double CTOFINNERRADIUS = 250;     // 250 mm
     public static final double CTOFOUTRRADIUS = 250 + 33;  // 283  mm
+    
+    private static double _Xb =0;
+    private static double _Yb =0;
+    private static double _RbErr = 1./Math.sqrt(12.);
+
+    public static double getXb() {
+        return _Xb;
+    }
+
+    public static synchronized void setXb(double Xb) {
+        _Xb = Xb;
+    }
+
+    public static double getYb() {
+        return _Yb;
+    }
+
+    public static synchronized void setYb(double Yb) {
+        _Yb = Yb;
+    }
+
+    public static double getRbErr() {
+        return _RbErr;
+    }
+
+    public static synchronized void setRbErr(double RbErr) {
+        _RbErr = RbErr;
+    }
 
     //public static final boolean DEBUGMODE =false;
     // for landau inverse calculation

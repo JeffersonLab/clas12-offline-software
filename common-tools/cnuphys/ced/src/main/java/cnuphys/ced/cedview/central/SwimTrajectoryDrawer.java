@@ -9,7 +9,6 @@ import java.util.List;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.magneticfield.swim.ASwimTrajectoryDrawer;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.lund.LundId;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.SwimTrajectory2D;

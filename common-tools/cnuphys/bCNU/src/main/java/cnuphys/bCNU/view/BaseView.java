@@ -15,6 +15,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyVetoException;
 import java.util.Properties;
@@ -28,6 +29,7 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.component.MagnifyWindow;
 import cnuphys.bCNU.format.DoubleFormat;
@@ -46,7 +48,7 @@ import cnuphys.bCNU.util.PropertySupport;
  * 
  */
 @SuppressWarnings("serial")
-public class BaseView extends JInternalFrame implements FocusListener {
+public class BaseView extends JInternalFrame implements FocusListener, MouseListener {
 
 	// use to stack views as added
 	private static int LASTLEFT = 0;
@@ -91,6 +93,11 @@ public class BaseView extends JInternalFrame implements FocusListener {
 	 */
 	public BaseView(Object... keyVals) {
 
+		if ((keyVals != null) && ((keyVals.length % 2) == 1)) {
+			System.err.println("Odd number of keyVals in BaseView constructor");
+			(new Throwable()).printStackTrace();
+		}
+
 		// create a quick zoom menu
 		_viewPopupMenu = new ViewPopupMenu(this);
 
@@ -98,7 +105,8 @@ public class BaseView extends JInternalFrame implements FocusListener {
 
 		// setLayout(new BorderLayout());
 
-		_properties = PropertySupport.fromKeyValues(keyVals);
+		_properties = PropertySupport.fromKeyValues(keyVals);		
+		
 		// get the recognized attributes
 		String title = PropertySupport.getTitle(_properties);
 
@@ -137,6 +145,7 @@ public class BaseView extends JInternalFrame implements FocusListener {
 			LASTTOP += DEL_V;
 		}
 
+		addMouseListener(this);
 		addFocusListener(this);
 		setFrameIcon(null);
 		ViewManager.getInstance().add(this);
@@ -150,8 +159,7 @@ public class BaseView extends JInternalFrame implements FocusListener {
 			// container in attributes? if not, use a BaseContainer
 			_container = PropertySupport.getContainer(_properties);
 			if (_container == null) {
-				_container = new BaseContainer(this, worldSystem,
-						PropertySupport.getHeadsUp(_properties));
+				_container = new BaseContainer(this, worldSystem);
 			}
 			else {
 				_container.setView(this);
@@ -309,8 +317,7 @@ public class BaseView extends JInternalFrame implements FocusListener {
 	}
 
 	/**
-	 * Checks whether this view is on top. This is needed for the HeadsUp
-	 * display, so that it only provides headsup on the active view.
+	 * Checks whether this view is on top. 
 	 * 
 	 * @return <code>true</code> if this view (internal frame) is on top.
 	 */
@@ -778,6 +785,29 @@ public class BaseView extends JInternalFrame implements FocusListener {
 	public void refresh() {
 		if (_container != null) {
 			_container.refresh();
+		}
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		if (BaseMDIApplication.getHeadsUpDisplay() != null) {
+			BaseMDIApplication.getHeadsUpDisplay().clear();
 		}
 	}
 

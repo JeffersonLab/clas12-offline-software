@@ -92,36 +92,6 @@ public class VirtualView extends BaseView
 		getContainer().getComponent().setBackground(_bg);
 		
 		
-//		MouseListener ml = new MouseListener() {
-//
-//			@Override
-//			public void mouseClicked(MouseEvent e) {
-//				System.err.println("ML Mouse CLICKED");
-//			}
-//
-//			@Override
-//			public void mousePressed(MouseEvent e) {
-//				System.err.println("\nML Mouse PRESSED");
-//			}
-//
-//			@Override
-//			public void mouseReleased(MouseEvent e) {
-//				System.err.println("ML Mouse RELEASED");
-//			}
-//
-//			@Override
-//			public void mouseEntered(MouseEvent e) {
-//				System.err.println("ML Mouse ENTERED");
-//			}
-//
-//			@Override
-//			public void mouseExited(MouseEvent e) {
-//				System.err.println("ML Mouse EXITED");
-//			}
-//			
-//		};
-//		getContainer().getComponent().addMouseListener(ml);
-
 		getContainer().getComponent().addMouseMotionListener(this);
 		getContainer().getComponent().addMouseListener(this);
 
@@ -276,7 +246,7 @@ public class VirtualView extends BaseView
 		// create the view
 		view = new VirtualView(PropertySupport.WORLDSYSTEM, world, PropertySupport.LEFT, 0, PropertySupport.TOP, 0,
 				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height, PropertySupport.TOOLBAR, false,
-				PropertySupport.VISIBLE, true, PropertySupport.BACKGROUND, Color.white, PropertySupport.HEADSUP, false,
+				PropertySupport.VISIBLE, true, PropertySupport.BACKGROUND, Color.white,
 				PropertySupport.TITLE, VVTITLE, PropertySupport.STANDARDVIEWDECORATIONS, false,
 				PropertySupport.ICONIFIABLE, false, PropertySupport.RESIZABLE, true, 
 				PropertySupport.MAXIMIZABLE, false, PropertySupport.CLOSABLE, false);
@@ -289,7 +259,7 @@ public class VirtualView extends BaseView
 		view.setSize(width, height + insets.top);
 		return view;
 	}
-	
+		
 
 	/**
 	 * Get the number of columns

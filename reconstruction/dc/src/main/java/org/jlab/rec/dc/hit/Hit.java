@@ -228,8 +228,8 @@ public class Hit implements Comparable<Hit> {
         // fix cell size = w_{i+1} -w_{i}
         //double layerDiffAtMPln  = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(0).getMidpoint().x()
         //             - GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(1).getMidpoint().x();
-        double layerDiffAtMPln = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 0, 0).x
-                - DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 0, 1).x;
+        double layerDiffAtMPln = DcDetector.getWireMidpoint(this.get_Sector() - 1, this.get_Superlayer() - 1, 0, 0).x
+                - DcDetector.getWireMidpoint(this.get_Sector() - 1, this.get_Superlayer() - 1, 0, 1).x;
 
         //double cellSize = 0.5*Math.cos(Math.toRadians(6.)*Math.abs(layerDiffAtMPln*Math.cos(Math.toRadians(6.)));
         _cellSize = 0.5 * Math.abs(layerDiffAtMPln);

@@ -1,6 +1,7 @@
 package bCNU3D;
 
 import item3D.Axes3D;
+import item3D.Cylinder;
 import item3D.Item3D;
 import item3D.PointSet3D;
 import item3D.Triangle3D;
@@ -49,6 +50,11 @@ public class Panel3D extends JPanel implements GLEventListener {
 	};
 
 	protected final DrawMode _drawMode = DrawMode.MANUAL;
+	
+	
+	protected float _xscale = 1.0f; 
+	protected float _yscale = 1.0f; 
+	protected float _zscale = 1.0f; 
 
 	protected GLProfile glprofile;
 	protected GLCapabilities glcapabilities;
@@ -211,6 +217,12 @@ public class Panel3D extends JPanel implements GLEventListener {
 		return gljpanel;
 	}
 
+	
+	public void setScale(float xscale, float yscale, float zscale) {
+		_xscale = xscale;
+		_yscale = yscale;
+		_zscale = zscale;
+	}
 
 	@Override
 	public void display(GLAutoDrawable drawable) {
@@ -238,6 +250,8 @@ public class Panel3D extends JPanel implements GLEventListener {
 		gl.glLoadIdentity(); // reset the model-view matrix
 
 		gl.glTranslatef(_xdist, _ydist, _zdist); // translate into the screen
+		
+		gl.glScalef(_xscale, _yscale, _zscale);
 
 		gl.glPushMatrix();
 		gl.glRotatef(_view_rotx, 1.0f, 0.0f, 0.0f);
@@ -479,6 +493,19 @@ public class Panel3D extends JPanel implements GLEventListener {
 			_itemList.add(item);
 		}
 	}
+	
+	/**
+	 * Add an item to the list. Note that this does not initiate a redraw.
+	 * 
+	 * @param item the item to add.
+	 */
+	public void addItem(int index, Item3D item) {
+		if (item != null) {
+			_itemList.remove(item);
+			_itemList.add(index, item);
+		}
+	}
+
 
 	/**
 	 * Remove an item from the list. Note that this does not initiate a redraw.
@@ -567,7 +594,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 				// coordinate axes
 
 				Axes3D axes = new Axes3D(this, -xymax, xymax, -xymax, xymax,
-						zmin, zmax, Color.darkGray, 1f, 7, 7, 8, Color.black,
+						zmin, zmax, null, Color.darkGray, 1f, 7, 7, 8, Color.black,
 						Color.blue, new Font("SansSerif", Font.PLAIN, 11), 0);
 				addItem(axes);
 
@@ -585,6 +612,8 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 				addItem(new Triangle3D(this, 0f, 0f, 500f, 0f, -400f, -500f,
 						500f, -100f, 500f, new Color(0, 255, 0, 64), 2f, true));
+				
+				addItem(new Cylinder(this, 0f, 0f, 0f, 300f, 300f, 300f, 50f, new Color(0, 255, 255, 128)));
 
 				// Cube cube = new Cube(this, 0.25f, 0.25f, 0.25f, 0.5f,
 				// Color.yellow);

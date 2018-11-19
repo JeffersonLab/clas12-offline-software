@@ -67,7 +67,7 @@ public class MeasVecs {
                     double X = sl1 * Z + it1;
 
                     //exclude hits that have poor segment
-                    //if ((trkcand.get(c).get(s).get(h).get_X() - X) / (trkcand.get(c).get(s).get(h).get_CellSize() / Math.cos(Math.toRadians(6.))) > 1.5) {
+                    //if ((trkcand.get(c).get(s).get(h).get_X() - X) / (trkcand.get(c).get(s).get(h).get_CellSize() / FastMath.cos(Math.toRadians(6.))) > 1.5) {
                     //if(Math.abs(trkcand.get(c).get(s).get(h).get_Residual())>1) {   
                     //    continue;
                     //}
@@ -134,7 +134,7 @@ public class MeasVecs {
                 double X = sl1 * Z + it1;
 
                 //exclude hits that have poor segment
-                //if ((trkcand.get(c).get(s).get(h).get_X() - X) / (trkcand.get(c).get(s).get(h).get_CellSize() / Math.cos(Math.toRadians(6.))) > 1.5) {
+                //if ((trkcand.get(c).get(s).get(h).get_X() - X) / (trkcand.get(c).get(s).get(h).get_CellSize() / FastMath.cos(Math.toRadians(6.))) > 1.5) {
                 //if(Math.abs(trk.get_ListOfHBSegments().get(s).get(h).get_Residual())>1) {   
                 //    continue;
                 //}

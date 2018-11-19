@@ -20,6 +20,11 @@
 	<artifactId>commons-math3</artifactId>
 	<version>3.6.1</version>
       </dependency>
+        <dependency>
+            <groupId>org.jlab.clas</groupId>
+            <artifactId>clas-math</artifactId>
+            <version>5.7.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <properties>
