@@ -232,7 +232,8 @@ public class ECEngine extends ReconstructionEngine {
             "/calibration/ec/time_jitter",
             "/calibration/ec/fadc_offset",
             "/calibration/ec/fadc_global_offset",
-            "/calibration/ec/global_gain_shift"
+            "/calibration/ec/global_gain_shift",
+            "/calibration/ec/effective_velocity"
         };
         
         
