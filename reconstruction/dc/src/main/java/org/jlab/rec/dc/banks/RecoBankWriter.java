@@ -349,9 +349,9 @@ public class RecoBankWriter {
      * @param candlist tracks
      * @return covariance matrix from HB fits to be used for starting TB tracking
      */
-    private DataBank fillTrackCovMatBank(DataEvent event, List<Track> candlist) {
+    private DataBank fillTrackCovMatBank(DataEvent event, List<Track> candlist, String name) {
 
-        DataBank bank = event.createBank("TimeBasedTrkg::TBCovMat", candlist.size());
+        DataBank bank = event.createBank(name, candlist.size());
 
         for (int i = 0; i < candlist.size(); i++) {
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
@@ -609,42 +609,6 @@ public class RecoBankWriter {
 
     }
 
-//    /**
-//     *
-//     * @param event the EvioEvent
-//     * @return segments bank
-//     */
-//    private DataBank fillTBSegmentsTrajectoryBank(DataEvent event, List<Segment> seglist) {
-//        if(event.hasBank("TimeBasedTrkg::TBSegmentTrajectory")) { // for second pass tracking
-//                HipoDataEvent de = (HipoDataEvent) event;
-//                HipoEvent dde = de.getHipoEvent();
-////                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBSegmentTrajectory");
-//                ////event.show();
-//                //group.show();
-//                dde.removeGroup("TimeBasedTrkg::TBSegmentTrajectory");
-//        }
-//        DataBank bank = event.createBank("TimeBasedTrkg::TBSegmentTrajectory", seglist.size() * 6);
-//
-//        int index = 0;
-//        for (Segment aSeglist : seglist) {
-//            if (aSeglist.get_Id() == -1) {
-//                continue;
-//            }
-//            SegmentTrajectory trj = aSeglist.get_Trajectory();
-//            for (int l = 0; l < 6; l++) {
-//                bank.setShort("segmentID", index, (short) trj.get_SegmentId());
-//                bank.setByte("sector", index, (byte) trj.get_Sector());
-//                bank.setByte("superlayer", index, (byte) trj.get_Superlayer());
-//                bank.setByte("layer", index, (byte) (l + 1));
-//                bank.setShort("matchedHitID", index, (short) trj.getMatchedHitId()[l]);
-//                bank.setFloat("trkDoca", index, (float) trj.getTrkDoca()[l]);
-//                index++;
-//            }
-//        }
-//        //bank.show();
-//        return bank;
-//    }
-
     /**
      *
      * @param event the EvioEvent
@@ -826,7 +790,7 @@ public class RecoBankWriter {
                     rbc.fillHBSegmentsBank(event, segments),
                     rbc.fillHBCrossesBank(event, crosses),
                     rbc.fillHBTracksBank(event, trkcands),
-                    rbc.fillTrackCovMatBank(event, trkcands)
+                    rbc.fillTrackCovMatBank(event, trkcands, "HitBasedTrkg::HBCovMat")
             );
 
         }
@@ -869,6 +833,7 @@ public class RecoBankWriter {
                     rbc.fillTBSegmentsBank(event, segments),
                     rbc.fillTBCrossesBank(event, crosses),
                     rbc.fillTBTracksBank(event, trkcands),
+                    rbc.fillTrackCovMatBank(event, trkcands, "TimeBasedTrkg::TBCovMat"),
                     rbc.fillTrajectoryBank(event, trkcands));
 
         }

@@ -6,6 +6,7 @@ import java.util.List;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.segment.Segment;
+import org.jlab.rec.dc.track.fit.StateVecs;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 
@@ -25,6 +26,8 @@ public class Track extends Trajectory implements Comparable<Track>{
     private int _Q;
     private double _P;
     private Matrix _CovMat;
+    private StateVecs.CovMat _StateCovMat;
+    private StateVecs.StateVec _StateVec;
 
     private Point3D _Region3CrossPoint;
     private Point3D _Region3CrossDir;
@@ -290,6 +293,21 @@ public class Track extends Trajectory implements Comparable<Track>{
      * 
      * @return Kalman fit covariance matrix
      */
+    public StateVecs.CovMat get_StateCovMat() {
+        return _StateCovMat;
+    }
+    /**
+     * 
+     * @param _CovMat Kalman fit covariance matrix
+     */
+    public void set_StateCovMat(StateVecs.CovMat _SCovMat) {
+        this._StateCovMat = _SCovMat;
+    }
+    
+    /**
+     * 
+     * @return Kalman fit covariance matrix
+     */
     public Matrix get_CovMat() {
         return _CovMat;
     }
@@ -299,6 +317,21 @@ public class Track extends Trajectory implements Comparable<Track>{
      */
     public void set_CovMat(Matrix _CovMat) {
         this._CovMat = _CovMat;
+    }
+    
+    /**
+     * 
+     * @return finalStateVec at last KF outer measurement site
+     */
+    public StateVecs.StateVec get_StateVec() {
+        return this._StateVec ;
+    }
+    /**
+     * 
+     * @param finalStateVec at last KF outer measurement site
+     */
+    public void set_StateVec(StateVecs.StateVec finalStateVec) {
+        this._StateVec = finalStateVec;
     }
     
     /**
@@ -407,6 +440,8 @@ public class Track extends Trajectory implements Comparable<Track>{
 
             return ((returnSec ==0) ? return_val_a6 : returnSec);
     }
+
+    
 
    
 
