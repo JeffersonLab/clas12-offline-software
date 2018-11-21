@@ -100,6 +100,9 @@ public class StateVecs {
         this.trackCov.put(f, fCov);
     }
     
+    private double cos25 = FastMath.cos(Math.toRadians(25.));
+    private double sin25 = FastMath.sin(Math.toRadians(25.));
+    
     /**
      * 
      * @param zfinal target z in TSC
@@ -113,6 +116,7 @@ public class StateVecs {
         StateVecs.StateVec fVec = new StateVec(0);
         CovMat fCov = new CovMat(0);
         
+        Matrix labCovMat = null ;
         fVec.x = iVec.x;
         fVec.y = iVec.y;
         fVec.z = iVec.z;
@@ -140,13 +144,37 @@ public class StateVecs {
             double dPath = fVec.deltaPath;
             covMat.covMat = fCov.covMat; 
             
+            Matrix RotateToLab = this.LabJacobian(sector, tx,ty);
+            Matrix RotateToLabT = RotateToLab.copy();
+            RotateToLabT.transpose();
+            
+            try {
+                labCovMat = RotateToLabT.times(fCov.covMat).times(RotateToLab);
+            } catch (Exception e) {
+                return null;
+            }
+            
             rk.RK4transport( sector, Q, x, y, z, tx, ty, s, dcSwim,
                         covMat, fVec, fCov, mass, dPath);
             
         }
-        return fCov.covMat;
+        return labCovMat;
     }
-    
+        private Matrix LabJacobian(int sector, double tx, double ty) {
+        double cos_sec = FastMath.cos((double)(sector - 1)*Math.toRadians(60.));
+        double sin_sec = FastMath.sin((double)(sector - 1)*Math.toRadians(60.));
+        double t_deriv_N1 = -tx*sin25 + cos25;
+        double t_deriv_N2 = t_deriv_N1*t_deriv_N1;
+        
+        double[][] M = new double[][]{
+                    {cos25*cos_sec, -sin_sec, 0, 0, 0},
+                    {cos25*sin_sec,  cos_sec, 0, 0, 0},
+                    {(cos_sec - ty*sin25*sin_sec)/t_deriv_N2, -sin_sec/t_deriv_N1, 0, 0, 0},
+                    {(sin_sec - ty*sin25*cos_sec)/t_deriv_N2, cos_sec/t_deriv_N1, 0, 0, 0},
+                    {0, 0, 0, 0, 1}
+            };
+        return new Matrix(M);
+    }
     
     /**
      * 
@@ -354,6 +382,8 @@ public class StateVecs {
         }
         
     }
+
+
     /**
      * The state vector representing the track at a given measurement site
      */
