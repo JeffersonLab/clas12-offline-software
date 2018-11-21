@@ -2,12 +2,13 @@ package org.jlab.rec.cvt.cross;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import org.jlab.rec.cvt.Constants;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cluster.Cluster;
-import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.svt.Geometry;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
 /**
  * The crosses are objects used to find tracks and are characterized by a 3-D
@@ -431,7 +432,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
             */
              
 
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[4][0] + Constants.MODULERADIUS[5][0]) * 0.5 < 15) {
+            if (this.get_Point0().toVector3D().rho() - (org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[1][1] + org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[2][0]) * 0.5 < 15) {
                 if (this.get_Point0().y() > 0) {
                     theRegion = 6;
                 } else {
@@ -439,7 +440,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
                 }
             }
 
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[2][0] + Constants.MODULERADIUS[3][0]) * 0.5 < 15) {
+            if (this.get_Point0().toVector3D().rho() - (org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[0][1] + org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[1][0]) * 0.5 < 15) {
                 if (this.get_Point0().y() > 0) {
                     theRegion = 5;
                 } else {
@@ -447,7 +448,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
                 }
             }
 
-            if (this.get_Point0().toVector3D().rho() - (Constants.MODULERADIUS[0][0] + Constants.MODULERADIUS[1][0]) * 0.5 < 15) {
+            if (this.get_Point0().toVector3D().rho() - (org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[0][0] + org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[0][1]) * 0.5 < 15) {
                 if (this.get_Point0().y() > 0) {
                     theRegion = 4;
                 } else {
@@ -506,7 +507,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 
     public static void main(String arg[]) {
 
-        Constants.Load();
+    	org.jlab.rec.cvt.Constants.Load(false, false, -1.0);
         // Geometry geo = new Geometry();
 
         ArrayList<Cross> testList = new ArrayList<Cross>();
@@ -560,8 +561,8 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     public boolean isInFiducial(Geometry svt_geo) {
         boolean pass = true;
         Point3D LC = svt_geo.transformToFrame(this.get_Sector(), this.get_Cluster1().get_Layer(), this.get_Point().x(), this.get_Point().y(), this.get_Point().z(), "local", "");
-        if (((LC.x() < -0.10 || LC.x() > Constants.ACTIVESENWIDTH + 0.10))
-                || ((LC.z() < -1 || LC.z() > Constants.MODULELENGTH + 1))) {
+        if (((LC.x() < -0.10 || LC.x() > org.jlab.detector.geant4.v2.SVT.SVTConstants.ACTIVESENWID + 0.10))
+                || ((LC.z() < -1 || LC.z() > org.jlab.detector.geant4.v2.SVT.SVTConstants.MODULELEN + 1))) {
             pass = false;
         }
         return pass;

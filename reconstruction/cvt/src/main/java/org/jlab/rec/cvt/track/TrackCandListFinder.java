@@ -151,12 +151,12 @@ public class TrackCandListFinder {
         //		shift =1;
 
         // interate the fit a number of times set in the constants file
-        int Max_Number_Of_Iterations = org.jlab.rec.cvt.svt.Constants.BSTTRKINGNUMBERITERATIONS;
+        int Max_Number_Of_Iterations = org.jlab.rec.cvt.Constants.BSTTRKINGNUMBERITERATIONS;
 
         // loop over the cross list and do the fits to the crosses
         if (list.size() >= 3) {
             // for debugging purposes only sets all errors to 1
-            boolean ignoreErr = org.jlab.rec.cvt.svt.Constants.ignoreErr;
+            boolean ignoreErr = org.jlab.rec.cvt.Constants.ignoreErr;
 
             int Number_Of_Iterations = 0;
             // do till the number of iterations is reached			
@@ -239,12 +239,12 @@ public class TrackCandListFinder {
         }
 
         // interate the fit a number of times set in the constants file
-        int Max_Number_Of_Iterations = org.jlab.rec.cvt.svt.Constants.BSTTRKINGNUMBERITERATIONS;
+        int Max_Number_Of_Iterations = org.jlab.rec.cvt.Constants.BSTTRKINGNUMBERITERATIONS;
 
         // loop over the cross list and do the fits to the crosses
         for (int i = 0; i < crossList.size(); i++) {
             // for debugging purposes only sets all errors to 1
-            boolean ignoreErr = org.jlab.rec.cvt.svt.Constants.ignoreErr;
+            boolean ignoreErr = org.jlab.rec.cvt.Constants.ignoreErr;
 
             int Number_Of_Iterations = 0;
             // do till the number of iterations is reached			
@@ -302,7 +302,7 @@ public class TrackCandListFinder {
             }
         }
         // remove clones
-        ArrayList<Track> passedcands = this.rmHelicalTrkClones(org.jlab.rec.cvt.svt.Constants.removeClones, cands);
+        ArrayList<Track> passedcands = this.rmHelicalTrkClones(org.jlab.rec.cvt.Constants.removeClones, cands);
         // loop over candidates and set the trajectories
         
         for (int ic = 0; ic < passedcands.size(); ic++) {
@@ -344,7 +344,7 @@ public class TrackCandListFinder {
             ArrayList<Cross> crossesToFit = new ArrayList<Cross>();
             // remove SVT regions
             for (Cross crossInTrackToFit : SVTCrosses.get(i)) { 
-                if (crossInTrackToFit.get_Region() != org.jlab.rec.cvt.svt.Constants.BSTEXCLUDEDFITREGION) {// remove the crosses from the exluded region to fit the track
+                if (crossInTrackToFit.get_Region() != org.jlab.rec.cvt.Constants.BSTEXCLUDEDFITREGION) {// remove the crosses from the exluded region to fit the track
                     crossesToFit.add(crossInTrackToFit);
                 }
             }
@@ -486,7 +486,7 @@ public class TrackCandListFinder {
 			} */
         }
 
-        ArrayList<StraightTrack> passedcands = this.rmStraightTrkClones(org.jlab.rec.cvt.svt.Constants.removeClones, cands);
+        ArrayList<StraightTrack> passedcands = this.rmStraightTrkClones(org.jlab.rec.cvt.Constants.removeClones, cands);
         //ArrayList<StraightTrack> passedcands = this.rmStraightTrkClones(false, cands);
 
         for (int ic = 0; ic < passedcands.size(); ic++) {
@@ -797,7 +797,7 @@ public class TrackCandListFinder {
      */
     public ArrayList<Cross> matchTrackToMM(List<Cross> MMCrosses, StraightTrack thecand, org.jlab.rec.cvt.bmt.Geometry geo) {
 
-        double matchCutOff = org.jlab.rec.cvt.svt.Constants.COSMICSMINRESIDUAL; // ?  guess
+        double matchCutOff = org.jlab.rec.cvt.Constants.COSMICSMINRESIDUAL; // ?  guess
 
         ArrayList<Cross> BMTCrossList = new ArrayList<Cross>();
         StraightTrack thecand2 = thecand;
@@ -1058,8 +1058,8 @@ public class TrackCandListFinder {
     private void EliminateStraightTrackOutliers(ArrayList<Cross> crossesToFit,
             StraightTrackFitter fitTrk, org.jlab.rec.cvt.svt.Geometry svt_geo) {
         for (int j = 0; j < crossesToFit.size(); j++) {
-            if (Math.abs(fitTrk.get_ray().get_yxslope() * crossesToFit.get(j).get_Point().y() + fitTrk.get_ray().get_yxinterc() - crossesToFit.get(j).get_Point().x()) > org.jlab.rec.cvt.svt.Constants.COSMICSMINRESIDUAL
-                    || Math.abs(fitTrk.get_ray().get_yzslope() * crossesToFit.get(j).get_Point().y() + fitTrk.get_ray().get_yzinterc() - crossesToFit.get(j).get_Point().z()) > org.jlab.rec.cvt.svt.Constants.COSMICSMINRESIDUALZ) {
+            if (Math.abs(fitTrk.get_ray().get_yxslope() * crossesToFit.get(j).get_Point().y() + fitTrk.get_ray().get_yxinterc() - crossesToFit.get(j).get_Point().x()) > org.jlab.rec.cvt.Constants.COSMICSMINRESIDUAL
+                    || Math.abs(fitTrk.get_ray().get_yzslope() * crossesToFit.get(j).get_Point().y() + fitTrk.get_ray().get_yzinterc() - crossesToFit.get(j).get_Point().z()) > org.jlab.rec.cvt.Constants.COSMICSMINRESIDUALZ) {
                 resetUnusedCross(crossesToFit.get(j), svt_geo);
                 crossesToFit.remove(j);
             }

@@ -34,8 +34,8 @@ public class ADCConvertor {
         int START[] = new int[8];
         int END[] = new int[8];
         for (int i = 0; i < 8; i++) {
-            START[i] = org.jlab.rec.cvt.svt.Constants.initThresholds + org.jlab.rec.cvt.svt.Constants.deltaThresholds * i;
-            END[i] = org.jlab.rec.cvt.svt.Constants.initThresholds + org.jlab.rec.cvt.svt.Constants.deltaThresholds * (i + 1);
+            START[i] = org.jlab.rec.cvt.Constants.initThresholds + org.jlab.rec.cvt.Constants.deltaThresholds * i;
+            END[i] = org.jlab.rec.cvt.Constants.initThresholds + org.jlab.rec.cvt.Constants.deltaThresholds * (i + 1);
         }
         END[7] = 1000; //overflow
 

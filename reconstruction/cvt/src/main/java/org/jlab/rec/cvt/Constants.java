@@ -32,6 +32,52 @@ public class Constants {
     private static double _Xb =0;
     private static double _Yb =0;
     private static double _RbErr = 1./Math.sqrt(12.);
+    
+    //A bunch of constants needed and previously in Constants.java in org.jlab.rec.cvt.svt
+    //Threshold for svt
+    public static int initThresholds = 30;
+    public static int deltaThresholds = 15;
+    
+    //Reconstruction constant
+    public static double ETOTCUT = 10.0;
+    
+    //sum of SVT strip numbers for valid reconstruction
+    public static int sumStpNumMin = 70;
+    public static int sumStpNumMax = 350;
+    public static double interTol = 10.0; //mm
+    public static double ToModuleEdge=1.0; //mm // Tolerance for track trajectory point at layer to module fiducial edge (mm
+    
+    static double CaThick = 0.5;// <= Should be read from SVT COnstants... But what is it?
+    static double RohacellThick = 2.5;// <= Should be read from SVT COnstants
+    static double Z_eff_roha = Math.pow((7.84 / 100.) * Math.pow(1, 2.94) + (64.5 / 100.) * Math.pow(6, 2.94) + (8.38 / 100.) * Math.pow(7, 2.94) + (19.12 / 100.) * Math.pow(8, 2.94), (1. / 2.94));
+
+    // empirical scaling factor from MC
+    public static double detMatZ_ov_A_timesThickn = (14. * 2 * 0.32 / 28.0855 + (Z_eff_roha * RohacellThick / 12.0588) + 6 * CaThick / 12.0107);/// <= Should be read from SVT COnstants
+    
+    // ----- cut based cand select
+    public static double phi12cut = 35.;
+    public static double phi13cut = 35.;
+    public static double phi14cut = 35.;
+    public static double radcut = 100.;
+    public static double dzdrcut = 200.;// used to be 150
+    
+    public static final int BSTTRKINGNUMBERITERATIONS = 3;
+    //public static final int MAXNUMCROSSES = 50;
+    public static final int MAXNUMCROSSESINMODULE = 4;
+    
+    // for cosmics
+    public static final double COSMICSMINRESIDUAL = 2;
+    public static final double COSMICSMINRESIDUALZ = 20;
+    
+    // track list cut-off
+    public static final double CIRCLEFIT_MAXCHI2 = 100;
+    public static boolean ignoreErr = false;
+    public static boolean removeClones = true;
+    public static final double PIDCUTOFF = 2.6;
+    public static final double TOLTOMODULEEDGE = 1.0; // Tolerance for track trajectory point at layer to module fiducial edge (mm)
+    public static final double SILICONRADLEN = 9.36 * 10; //check this - converted to mm
+    public static int BSTEXCLUDEDFITREGION = 0;
+    public static double MAXDISTTOTRAJXY = 5; //max xy dist to cross in cm
 
     public static double getXb() {
         return _Xb;
@@ -238,8 +284,6 @@ public class Constants {
         setSolenoidscale(SolenoidScale);
         Constants.setCosmicsData(false);
         setSVTOnly(isSVTonly);
-
-        org.jlab.rec.cvt.svt.Constants.Load();
         org.jlab.rec.cvt.bmt.Constants.Load();
 
         areConstantsLoaded = true;
@@ -247,6 +291,7 @@ public class Constants {
 
         if(Math.abs(SolenoidScale)<0.001)
             Constants.setCosmicsData(true);
+          
     }
 
     public static final boolean isCosmicsData() {

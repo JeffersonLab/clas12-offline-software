@@ -35,7 +35,6 @@ public class CVTReconstruction extends ReconstructionEngine {
     
     public CVTReconstruction() {
         super("CVTTracks", "ziegler", "4.0");
-        org.jlab.rec.cvt.svt.Constants.Load();
         SVTGeom = new org.jlab.rec.cvt.svt.Geometry();
         BMTGeom = new org.jlab.rec.cvt.bmt.Geometry();
 

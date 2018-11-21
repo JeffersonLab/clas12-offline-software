@@ -90,10 +90,10 @@ public class TrackListFinder {
         }
         TotE /= (double) NbHits;
 
-        if (TotE <= org.jlab.rec.cvt.svt.Constants.PIDCUTOFF) {
+        if (TotE <= org.jlab.rec.cvt.Constants.PIDCUTOFF) {
             trk.set_PID("pion");
         }
-        if (TotE > org.jlab.rec.cvt.svt.Constants.PIDCUTOFF) {
+        if (TotE > org.jlab.rec.cvt.Constants.PIDCUTOFF) {
             trk.set_PID("proton");
         }
     }

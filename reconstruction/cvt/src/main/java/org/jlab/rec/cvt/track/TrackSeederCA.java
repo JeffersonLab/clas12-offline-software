@@ -14,7 +14,6 @@ import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter;
 import org.jlab.rec.cvt.fit.LineFitPars;
 import org.jlab.rec.cvt.fit.LineFitter;
-import org.jlab.rec.cvt.svt.Constants;
 
 public class TrackSeederCA {
 
@@ -421,13 +420,13 @@ public class TrackSeederCA {
 			   int l1 = c.get_Cluster1().get_Layer();
 			   int s1 = c.get_Cluster1().get_Sector();
 			   double c1 = c.get_Cluster1().get_Centroid();
-			   double r1 = org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l1-1][s1-1];
+			   double r1 = org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(l1-1)/2][(l1-1)%2];
 			   double nstr1 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r1 - b)/m, l1, s1);
 
 			   int l2 = c.get_Cluster2().get_Layer();
 			   int s2 = c.get_Cluster2().get_Sector();
 			   double c2 = c.get_Cluster2().get_Centroid();
-			   double r2 = org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l2-1][s2-1];
+			   double r2 = org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(l2-1)/2][(l2-1)%2];
 			   double nstr2 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r2 - b)/m, l2, s2);
 			   
 			   if( Math.abs( c1 - nstr1 ) < 4 && Math.abs( c2 - nstr2 ) < 4 )			   
