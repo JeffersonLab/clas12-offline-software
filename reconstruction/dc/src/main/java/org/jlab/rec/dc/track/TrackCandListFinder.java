@@ -1,6 +1,5 @@
 package org.jlab.rec.dc.track;
 
-import Jama.Matrix;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.clas.math.FastMath;
@@ -16,7 +15,6 @@ import org.jlab.rec.dc.cross.CrossList;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.track.fit.KFitter;
-import org.jlab.rec.dc.track.fit.StateVecs;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
@@ -485,23 +483,6 @@ public class TrackCandListFinder {
         return cands;
     }
 
-        
-    private double cos_tilt = FastMath.cos(Math.toRadians(25.));
-    private double sin_tilt = FastMath.sin(Math.toRadians(25.));
-    private StateVecs sv;
-    public Matrix get_TrackCovMatAtVertex(Track cand, Swim dcSwim) {
-        sv = new StateVecs(dcSwim);   
-        double labx = cand.get_Vtx0().x(); 
-        double laby = cand.get_Vtx0().y();
-        double labz = cand.get_Vtx0().z();
-            
-        int sector = this.getSector(labx, laby);
-        double tsz = (labx * FastMath.cos((double)(sector - 1) * Math.toRadians(-60.)) 
-        - laby * FastMath.sin((double)(sector - 1) * Math.toRadians(-60.))) * sin_tilt + labz * cos_tilt;
-        
-        return sv.getCovMatAtFixedZ(cand.get_Sector(), tsz, cand.get_StateVec(), cand.get_StateCovMat());
-    }
-    
     /**
      * @param cand straight track candidate
      */
