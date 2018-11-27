@@ -169,8 +169,8 @@ public class StateVecs {
         double[][] M = new double[][]{
                     {cos25*cos_sec, -sin_sec, 0, 0, 0},
                     {cos25*sin_sec,  cos_sec, 0, 0, 0},
-                    {0, 0, (cos_sec - ty*sin25*sin_sec)/t_deriv_N2, -sin_sec/t_deriv_N1, 0},
-                    {0, 0, (sin_sec - ty*sin25*cos_sec)/t_deriv_N2,  cos_sec/t_deriv_N1, 0},
+                    {(cos_sec - ty*sin25*sin_sec)/t_deriv_N2, -sin_sec/t_deriv_N1, 0, 0, 0},
+                    {(sin_sec - ty*sin25*cos_sec)/t_deriv_N2, cos_sec/t_deriv_N1, 0, 0, 0},
                     {0, 0, 0, 0, 1}
             };
         return new Matrix(M);
