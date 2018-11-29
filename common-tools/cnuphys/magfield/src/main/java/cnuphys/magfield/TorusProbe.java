@@ -85,11 +85,14 @@ public class TorusProbe extends FieldProbe {
 	private void fieldCylindrical(Cell3D cell, double phi, double rho, double z,
 			float result[]) {
 
-		//must deal with 12-fold symmetry possibility
+		// must deal with 12-fold symmetry possibility
 		if (_fullMap) {
-			cell.calculate(phi, rho, z, result);	
-		}
-		else {  //12-fold symmmetric
+			if (phi < 0) {
+				phi += 360;
+			}
+
+			cell.calculate(phi, rho, z, result);
+		} else { // 12-fold symmmetric
 			// relativePhi (-30, 30) phi relative to middle of sector
 			double relativePhi = relativePhi(phi);
 
