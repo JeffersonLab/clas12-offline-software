@@ -45,7 +45,7 @@ configuration:
   io-services:
     writer:
       compression: 2
-# settings below are for GEMC, compatible with 4a.2.4      
+# settings below are for GEMC, compatible with 4a.2.5      
   services:
     MAGFIELDS:
       solenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
