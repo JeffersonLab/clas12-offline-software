@@ -1,0 +1,61 @@
+[
+  {
+    "name"  : "data::event",
+    "group" : 2000,
+    "item"  : 1,
+    "entries":[
+      {"name":"pid"     , "type":"I", "info":"particle LUND id"},
+      {"name":"charge"  , "type":"B", "info":"particle charge"},
+      {"name":"px"      , "type":"F", "info":"x-component of momenta"},
+      {"name":"py"      , "type":"F", "info":"y-component of momenta"},
+      {"name":"pz"      , "type":"F", "info":"z-component of momenta"},
+      {"name":"vx"      , "type":"F", "info":"x-component of vertex"},
+      {"name":"vy"      , "type":"F", "info":"y-component of vertex"},
+      {"name":"vz"      , "type":"F", "info":"z-component of vertex"},
+      {"name":"beta"    , "type":"F", "info":"x-component of vertex"},
+      {"name":"chi2"    , "type":"F", "info":"pid assignment quality"},
+      {"name":"status"  , "type":"I", "info":"status flag of the particle"}
+    ]
+  },
+  {
+    "name"  : "data::detector",
+    "group" : 2000,
+    "item"  : 2,
+    "entries":[
+      { "name":"id"        , "type":"S", "info":"detector ID"},
+      { "name":"component" , "type":"I", "info":"detector component id's"},
+      { "name":"x"         , "type":"F", "info":"detector hit X position"},
+      { "name":"y"         , "type":"F", "info":"detector hit Y position"},
+      { "name":"z"         , "type":"F", "info":"detector hit Z position"},
+      { "name":"time"      , "type":"F", "info":"hit time"},
+      { "name":"energy"    , "type":"F", "info":"hit energy"},
+      { "name":"chi2"      , "type":"F", "info":"hit matching quality factor"}
+    ]
+  },
+  {
+    "name" : "ecal::adc",
+    "group": 20411,
+    "item" : 3,
+    "entries":[
+      { "name":"sector"    , "type":"I", "info":"detector sector"},
+      { "name":"layer"     , "type":"I", "info":"detector layer"},
+      { "name":"component" , "type":"I", "info":"detector component id's"},
+      { "name":"order"     , "type":"I", "info":"order of (0 - ADCU , 1 - ADCD)"},       
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from fit"},
+      { "name":"time"      , "type":"F", "info":"time from fitting the pulse"},
+      { "name":"ped"       , "type":"I", "info":"pedestal from pulse"}
+    ]
+  },
+  {
+    "name" : "ecal::tdc",
+    "group": 20412,
+    "item" : 4,
+    "entries":[
+      { "name":"sector"    , "type":"I", "info":"detector sector"},
+      { "name":"layer"     , "type":"I", "info":"detector layer"},
+      { "name":"component" , "type":"I", "info":"detector component id's"},
+      { "name":"order"     , "type":"I", "info":"order of (2 - TDCU , 3 - TDCD)"},       
+      { "name":"TDC"       , "type":"I", "info":"TDC value"}
+    ]
+  }
+]
