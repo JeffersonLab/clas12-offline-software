@@ -38,23 +38,14 @@ import cnuphys.bCNU.view.BaseView;
  * 
  */
 @SuppressWarnings("serial")
-public class AllDCView extends CedView {
+public class AllDCView extends CedView implements IAllDC {
 	
-	/** 
-	 * Normal mode (standard all dc view) or the 
-	 * accumuate only mode (the much newer view)
-	 */
-	public enum AllDCMode {NORMAL, ACCUMULATEONLY};
-	
-	//the mode (normal == standard all dc view)
-	protected AllDCMode _mode = AllDCMode.NORMAL;
 	
 	//for naming clones
 	private static int CLONE_COUNT = 0;
 	
 	//base title
-	protected static final String _baseTitle[] = {"All Drift Chambers",
-			"Accumulation View"};
+	protected static final String _baseTitle = "All Drift Chambers";
 
 	/**
 	 * A sector rectangle for each sector
@@ -98,9 +89,8 @@ public class AllDCView extends CedView {
 	 * @param keyVals
 	 *            variable set of arguments.
 	 */
-	protected AllDCView(AllDCMode mode, Object... keyVals) {
+	protected AllDCView(Object... keyVals) {
 		super(keyVals);
-		_mode = mode;
 
 		setSectorWorldRects();
 		setBeforeDraw();
@@ -113,7 +103,7 @@ public class AllDCView extends CedView {
 	 * 
 	 * @return a new AllDCView.
 	 */
-	public static AllDCView createAllDCView(AllDCMode mode) {
+	public static AllDCView createAllDCView() {
 		AllDCView view = null;
 
 		// set to a fraction of screen
@@ -121,7 +111,6 @@ public class AllDCView extends CedView {
 
 		// create the view
 		view = new AllDCView(
-				mode,
 				PropertySupport.WORLDSYSTEM,
 				_defaultWorldRectangle,
 				PropertySupport.WIDTH,
@@ -131,7 +120,7 @@ public class AllDCView extends CedView {
 				PropertySupport.TOOLBAR, true, 
 				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
 				PropertySupport.VISIBLE, true,
-				PropertySupport.TITLE, _baseTitle[mode.ordinal()] + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")")),
+				PropertySupport.TITLE, _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")")),
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL + ControlPanel.DISPLAYARRAY
@@ -149,14 +138,8 @@ public class AllDCView extends CedView {
 	private void setBeforeDraw() {
 		// style for sector rects
 		
-		if (isAllDCModeNormal()) {
-			_sectorStyle = new Styled(X11Colors.getX11Color("dark slate gray"));
-			_sectorStyle.setLineColor(Color.lightGray);
-		}
-		else {
-			_sectorStyle = new Styled(X11Colors.getX11Color("black"));
-			_sectorStyle.setLineColor(Color.yellow);
-		}
+		_sectorStyle = new Styled(X11Colors.getX11Color("dark slate gray"));
+		_sectorStyle.setLineColor(Color.lightGray);
 
 		// use a before-drawer to sector dividers and labels
 		_beforeDraw = new DrawableAdapter() {
@@ -394,31 +377,28 @@ public class AllDCView extends CedView {
 		vr.x += 40;
 		vr.y += 40;
 		
-		AllDCView view = createAllDCView(_mode);
+		AllDCView view = createAllDCView();
 		view.setBounds(vr);
 		return view;
 
 	}
-	
-	/**
-	 * See if this is the normal, standard all dc view
-	 * or the one that is accumulation only
-	 * @return the mode for this all dc view
-	 */
-	public AllDCMode getAllDCMode() {
-		return _mode;
-	}
-	
-	/**
-	 * See if this is the normal, standard all dc view
-	 * or the one that is accumulation only
-	 * @return <code>true</code> if this is the normal standards all dc view
-	 */
-	public boolean isAllDCModeNormal() {
-		return (_mode == AllDCMode.NORMAL);
-	}
-	
-	
 
+	/**
+	 * Get the underlying view
+	 * @return the underlying view
+	 */
+	@Override
+	public CedView getView() {
+		return this;
+	}
+	
+	/**
+	 * Is this the standard alldc view?
+	 * @return <code>true/code> if this is the standard alldc view.
+	 */
+	@Override
+	public boolean isStandardAllDCView() {
+		return true;
+	}
 
 }

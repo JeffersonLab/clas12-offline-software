@@ -30,14 +30,9 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 	// the event manager
 	private static ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
-	// visibility hashtable
-	//private static Hashtable<String, JCheckBox[]> _visHash = new Hashtable<String, JCheckBox[]>();
-
 	// bank name
 	private String _bankName;
 
-	// the panel from Gagik
-//	private DataBankPanel _dataBankPanel;
 	
 	//table to hold the data
 	private BankDataTable _table;
@@ -51,6 +46,7 @@ public class ClasIoBankDialog extends JDialog implements ItemListener {
 
 	public ClasIoBankDialog(String bankName) {
 		super(Ced.getFrame(), bankName, false);
+		
 		_bankName = bankName;
 		setLayout(new BorderLayout(4, 4));
 		setup();

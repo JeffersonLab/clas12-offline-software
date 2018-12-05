@@ -38,9 +38,9 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 	// the node table
 	private NodeTable _nodeTable;
 
-	private Hashtable<String, ClasIoBankDialog> _dataBanks = new Hashtable<String, ClasIoBankDialog>(
+	private Hashtable<String, ClasIoBankDialog> _dataBanks = new Hashtable<>(
 			193);
-
+	
 	/**
 	 * This panel holds all the known banks in a grid of buttons. Banks present
 	 * will be clickable, and will cause the table to scroll to that name
@@ -85,12 +85,12 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 				boolean inCurrent = _eventManager.isBankInCurrentEvent(s);
 				alabel.setEnabled(inCurrent);
 
-				ClasIoBankDialog bd = _dataBanks.get(s);
-				if (bd != null) {
+				ClasIoBankDialog bdlog = _dataBanks.get(s);
+				if (bdlog != null) {
 					if (inCurrent) {
-						bd.update();
+						bdlog.update();
 					} else {
-						bd.clear();
+						bdlog.clear();
 					}
 				}
 			}
@@ -112,14 +112,17 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 					if (clickCount == 1) {
 						_nodeTable.makeNameVisible(label);
 					} else if (clickCount == 2) {
-						ClasIoBankDialog bd = _dataBanks.get(label);
+						ClasIoBankDialog bdlog = _dataBanks.get(label);
 
-						if (bd == null) {
-							bd = new ClasIoBankDialog(label);
-							_dataBanks.put(label, bd);
+						if (bdlog == null) {
+							bdlog = new ClasIoBankDialog(label);
+							_dataBanks.put(label, bdlog);
 						}
-						bd.update();
-						bd.setVisible(true);
+						bdlog.update();
+
+						if (!bdlog.isVisible()) {
+							bdlog.setVisible(true);
+						}
 					}
 				}
 			}

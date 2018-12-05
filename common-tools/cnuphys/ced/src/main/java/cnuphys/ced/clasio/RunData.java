@@ -45,7 +45,7 @@ public class RunData {
 		int oldRun = run;
 		
 		try {
-			System.out.println("-- GETTING Run:Config...");
+	//		System.out.println("-- GETTING Run:Config...");
 			
 			run = safeInt(dataEvent, "run");
 			if (run < 0) {

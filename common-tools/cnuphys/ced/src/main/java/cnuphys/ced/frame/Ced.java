@@ -354,7 +354,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		ViewManager.getInstance().getViewMenu().addSeparator();
 
 		// add an alldc view and poosibly alldcaccumview
-		_allDCView = AllDCView.createAllDCView(AllDCView.AllDCMode.NORMAL);
+		_allDCView = AllDCView.createAllDCView();
 
 		if (_experimental) {
 			_allDCAccumView = AllDCAccumView.createAllDCAccumView();

@@ -44,7 +44,7 @@ public class VirtualView extends BaseView
 	private static int _numcol = 8;
 	
 	//minimum height hack
-	private static final int MINHEIGHT = 100;
+	private static final int MINHEIGHT = 60;
 
 	private int _currentCol = 0;
 	private Point _offsets[] = new Point[_numcol];

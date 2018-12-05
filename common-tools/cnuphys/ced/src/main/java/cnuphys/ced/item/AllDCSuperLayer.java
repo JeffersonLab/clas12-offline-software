@@ -11,6 +11,7 @@ import org.jlab.geom.prim.Point3D;
 
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.alldc.AllDCView;
+import cnuphys.ced.cedview.alldc.IAllDC;
 import cnuphys.ced.clasio.ClasIoEventManager;
 //import cnuphys.ced.dcnoise.NoiseEventListener;
 //import cnuphys.ced.dcnoise.NoiseReductionParameters;
@@ -62,7 +63,7 @@ public class AllDCSuperLayer extends RectangleItem {
 	private int _numWires;
 
 	// the AllDC view this item lives on
-	private AllDCView _view;
+	private IAllDC _allDC;
 
 	// for hits cells
 	private static final Color _defaultHitCellFill = Color.red;
@@ -96,12 +97,12 @@ public class AllDCSuperLayer extends RectangleItem {
 	 * @param numWires
 	 *            the number of wires per layer
 	 */
-	public AllDCSuperLayer(LogicalLayer layer, AllDCView view,
+	public AllDCSuperLayer(LogicalLayer layer, IAllDC allDC,
 			Rectangle2D.Double worldRectangle, int sector, int superLayer,
 			int numWires) {
 		super(layer, worldRectangle);
 		_worldRectangle = worldRectangle;
-		_view = view;
+		_allDC = allDC;
 		_numWires = numWires;
 
 		_style.setFillColor(Color.white);
@@ -174,7 +175,7 @@ public class AllDCSuperLayer extends RectangleItem {
 				+ _superLayer, -9, -5);
 
 		// now the data
-		if (_view.isSingleEventMode()) {
+		if (_allDC.getView().isSingleEventMode()) {
 			singleEventDrawItem(g, container);
 			// shade the layers
 			for (int i = 0; i < GeoConstants.NUM_LAYER; i += 2) {
@@ -218,7 +219,7 @@ public class AllDCSuperLayer extends RectangleItem {
 				_sector - 1, _superLayer - 1);
 
 		// show the noise segment masks?
-		if (_view.showMasks()) {
+		if (_allDC.getView().showMasks()) {
 			drawMasks(g, container, parameters);
 		}
 
@@ -329,14 +330,14 @@ public class AllDCSuperLayer extends RectangleItem {
 		}
 
 		// abort if hiding noise and this is noise
-		if (_view.hideNoise() && noise) {
+		if (_allDC.getView().hideNoise() && noise) {
 			return;
 		}
 
 		getCell(layer, wire, wr);
 
 		// are we to show mc (MonteCarlo simulation) truth?
-		boolean showTruth = _view.showMcTruth();
+		boolean showTruth = _allDC.getView().showMcTruth();
 
 		Color hitFill = _defaultHitCellFill;
 		Color hitLine = _defaultHitCellLine;
@@ -353,7 +354,7 @@ public class AllDCSuperLayer extends RectangleItem {
 			}
 		} // end gemcData != null
 
-		if ((_view.showNoiseAnalysis()) && noise) {
+		if ((_allDC.getView().showNoiseAnalysis()) && noise) {
 			highlightNoiseHit(g, container, !showTruth, wr);
 		} else {
 			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr,
@@ -460,7 +461,7 @@ public class AllDCSuperLayer extends RectangleItem {
 				int hitCount = dcAccumulatedData[_sector - 1][_superLayer - 1][layer][wire];
 				getCell(layer + 1, wire + 1, wr);
 				
-				double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
+				double fract = _allDC.getView().getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 				
 				AccumulationManager.getInstance();
 				Color color = AccumulationManager.getInstance().getColor(fract);
@@ -522,7 +523,7 @@ public class AllDCSuperLayer extends RectangleItem {
 
 			}
 
-			if (_view.isSingleEventMode()) {
+			if (_allDC.getView().isSingleEventMode()) {
 				singleEventFeedbackStrings(wire, layer, feedbackStrings);
 			} else {
 				accumulatedFeedbackStrings(wire, layer, feedbackStrings);
@@ -570,7 +571,7 @@ public class AllDCSuperLayer extends RectangleItem {
 					+ layer + "  wire " + wire);
 		}
 		else {
-			hit.tdcAdcFeedback(_view.showNoiseAnalysis(), _view.showMcTruth(), feedbackStrings);
+			hit.tdcAdcFeedback(_allDC.getView().showNoiseAnalysis(), _allDC.getView().showMcTruth(), feedbackStrings);
 		}
 	}
 		
@@ -592,7 +593,7 @@ public class AllDCSuperLayer extends RectangleItem {
 		double wireRate = AccumulationManager.getInstance().getAccumulatedWireHitPercentage(_sector-1, _superLayer-1, layer-1, wire-1);
 		double avgOccupancy = AccumulationManager.getInstance().getAverageDCOccupancy(_sector-1, _superLayer-1);
 
-		int hitCount = hitCount = dcAccumulatedData[_sector-1][_superLayer-1][layer-1][wire-1];
+		int hitCount = dcAccumulatedData[_sector-1][_superLayer-1][layer-1][wire-1];
 		
 		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
 				"accumulated event count: " + AccumulationManager.getInstance().getAccumulationEventCount());
