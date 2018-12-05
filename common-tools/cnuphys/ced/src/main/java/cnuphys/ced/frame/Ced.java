@@ -30,6 +30,7 @@ import cnuphys.ced.alldata.graphics.DefinitionManager;
 import cnuphys.ced.ced3d.view.CentralView3D;
 import cnuphys.ced.ced3d.view.FTCalView3D;
 import cnuphys.ced.ced3d.view.ForwardView3D;
+import cnuphys.ced.cedview.alldc.AllDCAccumView;
 import cnuphys.ced.cedview.alldc.AllDCView;
 import cnuphys.ced.cedview.allec.ECView;
 import cnuphys.ced.cedview.allpcal.PCALView;
@@ -112,7 +113,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 1.006b";
+	private static final String _release = "build 1.006d";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -125,6 +126,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	// using 3D?
 	private static boolean _use3D = false;
+	
+	//experimental mode
+	private static boolean _experimental = false;
 	
 	// event menu
 	private ClasIoEventMenu _eventMenu;
@@ -155,6 +159,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	
 	// some views
 	private AllDCView _allDCView;
+	private AllDCAccumView _allDCAccumView;
 	private VirtualView _virtualView;
 	private ClasIoMonteCarloView _monteCarloView;
 	private ClasIoReconEventView _reconEventView;
@@ -278,6 +283,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 		_virtualView.moveTo(ecHistoGrid, 17);
 		
     	_virtualView.moveTo(_allDCView, 3);
+    	if (_experimental) {
+        	_virtualView.moveTo(_allDCAccumView, 18);
+    	}
 		_virtualView.moveTo(_eventView, 6, VirtualView.CENTER);
 		_virtualView.moveTo(_centralXYView, 2, VirtualView.BOTTOMLEFT);
 		_virtualView.moveTo(_centralZView, 2, VirtualView.UPPERRIGHT);
@@ -345,8 +353,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		ViewManager.getInstance().getViewMenu().addSeparator();
 
-		// add an alldc view
-		_allDCView = AllDCView.createAllDCView();
+		// add an alldc view and poosibly alldcaccumview
+		_allDCView = AllDCView.createAllDCView(AllDCView.AllDCMode.NORMAL);
+
+		if (_experimental) {
+			_allDCAccumView = AllDCAccumView.createAllDCAccumView();
+		}
 
 		_tofView = TOFView.createTOFView();
 
@@ -1244,6 +1256,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 				else if (arg[i].contains("OLDDCGEO")) {
 					_useOldDCGeo = true;
 					System.err.println("Using Old DC Geometry");
+				}
+				else if (arg[i].contains("EXP")) {
+					_experimental = true;
+					System.err.println("Experimental");
 				}
 
 				i++;

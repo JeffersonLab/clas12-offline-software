@@ -12,6 +12,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
@@ -48,7 +49,7 @@ import cnuphys.bCNU.util.PropertySupport;
  * 
  */
 @SuppressWarnings("serial")
-public class BaseView extends JInternalFrame implements FocusListener, MouseListener {
+public class BaseView extends JInternalFrame implements FocusListener, MouseListener, ComponentListener {
 
 	// use to stack views as added
 	private static int LASTLEFT = 0;
@@ -261,31 +262,7 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 			});
 		}
 
-		// look for view resizes. It seems to be a hack, but at least for the
-		// open maps
-		// implementation I had to add this desktop repaint or when the view was
-		// made
-		// smaller it would leave garbage behind
-		ComponentAdapter ca = new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent ce) {
-				// hard to believe is necessary but funny things happen without
-				// it
-				if (_desktop != null) {
-					_desktop.repaint();
-				}
-			}
-
-			@Override
-			public void componentMoved(ComponentEvent ce) {
-				Point p = getLocation();
-				if (p.y < -9) {
-					p.y = -9;
-					setLocation(p);
-				}
-			}
-		};
-		addComponentListener(ca);
+		addComponentListener(this);
 	}
 	
 	/**
@@ -809,6 +786,31 @@ public class BaseView extends JInternalFrame implements FocusListener, MouseList
 		if (BaseMDIApplication.getHeadsUpDisplay() != null) {
 			BaseMDIApplication.getHeadsUpDisplay().clear();
 		}
+	}
+
+	@Override
+	public void componentHidden(ComponentEvent arg0) {
+	}
+
+	@Override
+	public void componentMoved(ComponentEvent arg0) {
+		Point p = getLocation();
+		if (p.y < -9) {
+			p.y = -9;
+			setLocation(p);
+		}
+	}
+
+	@Override
+	public void componentResized(ComponentEvent arg0) {
+		// hard to believe necessary but funny things happen without it
+		if (_desktop != null) {
+			_desktop.repaint();
+		}
+	}
+
+	@Override
+	public void componentShown(ComponentEvent arg0) {
 	}
 
 }

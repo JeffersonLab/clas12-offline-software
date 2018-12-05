@@ -39,50 +39,36 @@ public class ControlPanel extends JPanel implements ChangeListener {
 	// widths of some optional widgets
 	private static final int FULLWIDTH = 220;
 
-	/**
-	 * Bit used to create a display array
-	 */
+	/** Bit used to create a display array */
 	public static final int DISPLAYARRAY = 01;
 
-	/**
-	 * Bit used to create a phi slider
-	 */
+	/**  Bit used to create a phi slider */
 	public static final int PHISLIDER = 02;
 
-	/**
-	 * Bit used to create a torus legend
-	 */
+	/** Bit used to create a torus legend */
 	public static final int FIELDLEGEND = 04;
 
-	/**
-	 * Bit used to create a Lund particle legend
-	 */
+	/** Bit used to create a Lund particle legend */
 	public static final int DRAWLEGEND = 010;
 
-	/**
-	 * Bit used to create a target slider
-	 */
+	/** Bit used to create a target slider */
 	public static final int TARGETSLIDER = 020;
 
-	/**
-	 * Bit used to create a feedback pane
-	 */
+	/** Bit used to create a feedback pane */
 	public static final int FEEDBACK = 040;
 
-	/**
-	 * Bit used to create an accumulation legend
-	 */
+	/** Bit used to create an accumulation legend */
 	public static final int ACCUMULATIONLEGEND = 0100;
 
-	/**
-	 * Bit used to create an accumulation legend
-	 */
+	/** Bit used to create an accumulation legend */
 	public static final int NOISECONTROL = 0200;
 
-	/**
-	 * Bit used to make phi slider have full 360 degree range
-	 */
+	/** Bit used to make phi slider have full 360 degree range */
 	public static final int PHI_SLIDER_BIG = 0400;
+	
+	/** Bit used for accumulation only all dc panel */
+	public static final int ALLDC_ACCUM_ONLY = 01000;
+
 
 	// the view parent
 	private CedView _view;
@@ -140,15 +126,14 @@ public class ControlPanel extends JPanel implements ChangeListener {
 		if (Bits.checkBit(controlPanelBits, FEEDBACK)) {
 			_feedbackPane = new FeedbackPane(FEEDBACKWIDTH);
 			view.getContainer().setFeedbackPane(_feedbackPane);
-//			box.add(_feedbackPane);
-//			box.add(Box.createVerticalGlue());
 		}
 
 		add(box, BorderLayout.NORTH);
 
 		add(_feedbackPane, BorderLayout.CENTER);
+		validate();
 	}
-	
+		
 	/**
 	 * Add a component to the south, below the feedback.
 	 * @param component the added component
@@ -430,6 +415,9 @@ public class ControlPanel extends JPanel implements ChangeListener {
 	 * @return <code>true</code> if we are to show results of the noise analysis
 	 */
 	public boolean showNoiseAnalysis() {
+		if (_noisePanel == null) {
+			return false;
+		}
 		return _noisePanel.showNoiseAnalysis();
 	}
 
@@ -439,6 +427,9 @@ public class ControlPanel extends JPanel implements ChangeListener {
 	 * @return <code>true</code> if we are to show the masks.
 	 */
 	public boolean showMasks() {
+		if (_noisePanel == null) {
+			return false;
+		}
 		return _noisePanel.showMasks();
 	}
 
@@ -448,6 +439,9 @@ public class ControlPanel extends JPanel implements ChangeListener {
 	 * @return <code>true</code> if we are to show the scale.
 	 */
 	public boolean showScale() {
+		if (_displayArray == null) {
+			return false;
+		}
 		return _displayArray.showScale();
 	}
 
@@ -457,6 +451,10 @@ public class ControlPanel extends JPanel implements ChangeListener {
 	 * @return <code>true</code> if we are to hide the noise hits
 	 */
 	public boolean hideNoise() {
+		if (_noisePanel == null) {
+			return true;
+		}
+
 		return _noisePanel.hideNoise();
 	}
 

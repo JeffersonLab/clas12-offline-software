@@ -31,6 +31,7 @@ import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
 
+@SuppressWarnings("serial")
 public class VirtualView extends BaseView
 		implements InternalFrameListener, IViewListener, MouseMotionListener, MouseListener {
 
@@ -41,11 +42,13 @@ public class VirtualView extends BaseView
 	private Vector<BaseView> _views = new Vector<BaseView>();
 
 	private static int _numcol = 8;
+	
+	//minimum height hack
+	private static final int MINHEIGHT = 100;
 
 	private int _currentCol = 0;
 	private Point _offsets[] = new Point[_numcol];
 
-	// private static final Color _bg = X11Colors.getX11Color("dark blue");
 	private static final Color _bg = Color.gray;
 	private static final Color _fill = X11Colors.getX11Color("alice blue");
 	private static final Color _vwfillInactive = new Color(255, 200, 120, 128);
@@ -98,11 +101,11 @@ public class VirtualView extends BaseView
 		// set the offsets
 		setOffsets();
 
-		// System.err.println("[VV] world: " + getContainer().getWorldSystem());
 		setBeforeDraw();
 		setAfterDraw();
 
 		_instance = this;
+		
 	}
 
 	/**
@@ -145,6 +148,8 @@ public class VirtualView extends BaseView
 			_offsets[col] = new Point((int) (col * dx), (int) (dy));
 		}
 	}
+	
+	
 
 	/**
 	 * Create the view's before drawer.
@@ -154,7 +159,7 @@ public class VirtualView extends BaseView
 		IDrawable beforeDraw = new DrawableAdapter() {
 
 			@Override
-			public void draw(Graphics g, IContainer container) {
+			public void draw(Graphics g, IContainer container) {	
 				Rectangle cr = getColRect(_currentCol);
 				g.setColor(_fill);
 				g.fillRect(cr.x + 1, cr.y + 1, cr.width - 1, cr.height - 1);
@@ -190,7 +195,6 @@ public class VirtualView extends BaseView
 					g.drawLine(pp.x, 0, pp.x, b.height);
 				}
 
-				double dy = world.height;
 				wp.x = world.x + world.width / 2;
 
 				Rectangle cr = getColRect(_currentCol);
@@ -200,7 +204,7 @@ public class VirtualView extends BaseView
 
 				g.setColor(Color.green);
 				g.drawRect(cr.x, cr.y, cr.width - 1, cr.height - 1);
-
+				
 			}
 
 		};
@@ -272,7 +276,6 @@ public class VirtualView extends BaseView
 
 	// get the world system
 	private static Rectangle2D.Double getWorld() {
-		// System.err.println("VV getting world");
 		GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		GraphicsDevice[] devices = g.getScreenDevices();
 
@@ -294,7 +297,7 @@ public class VirtualView extends BaseView
 		Object source = e.getSource();
 		if (source instanceof BaseView) {
 			BaseView view = (BaseView) source;
-			// System.err.println("[VV] " + view.getTitle() + " opened");
+
 			if (view.getVirtualItem() != null) {
 				view.getVirtualItem().setLocation();
 				view.getVirtualItem().setVisible(true);
@@ -325,7 +328,6 @@ public class VirtualView extends BaseView
 			BaseView view = (BaseView) source;
 			view.getVirtualItem().setVisible(false);
 			getContainer().refresh();
-			// System.err.println("[VV] " + view.getTitle() + " iconified");
 		}
 	}
 
@@ -336,8 +338,6 @@ public class VirtualView extends BaseView
 			BaseView view = (BaseView) source;
 			view.getVirtualItem().setVisible(true);
 			getContainer().refresh();
-
-			// System.err.println("[VV] " + view.getTitle() + " deiconified");
 		}
 	}
 
@@ -469,7 +469,6 @@ public class VirtualView extends BaseView
 
 	@Override
 	public void mouseClicked(MouseEvent mouseEvent) {
-//		System.err.println("HEY MAN");
 		switch (mouseEvent.getButton()) {
 		case MouseEvent.BUTTON1:
 			if (mouseEvent.getClickCount() == 1) { // single click
@@ -486,8 +485,6 @@ public class VirtualView extends BaseView
 	// handle a double click
 	private void handleDoubleClick(MouseEvent mouseEvent) {
 		Point rc = getRowCol(mouseEvent.getPoint());
-//		 System.err.println("Double clicked on: " + rc.y + ", " + rc.x);
-
 		int clickCol = rc.x;
 		if ((clickCol == _currentCol)) {
 			return;
@@ -804,12 +801,10 @@ public class VirtualView extends BaseView
 		else if (constraint == CENTERLEFT) {
 			int xf = (int) (left + slop);
 			dh = xf - x0;
-			System.err.println("CENTERLEFT DV, DELV = " + dv + "," + delv);
 		}
 		else if (constraint == CENTERRIGHT) {
 			int xf = (int) (right - bounds.width - 2 * slop);
 			dh = xf - x0;
-			System.err.println("CENTERRIGHT DV, DELV = " + dv + "," + delv);
 		}
 
 		view.offset(dh + delh, dv + delv);
@@ -873,11 +868,14 @@ public class VirtualView extends BaseView
 		return b.intersects(c);
 	}
 
-//	public void reportVisibility() {
-//		System.err.println("-------------");
-//		for (BaseView view : _views) {
-//			System.err.println("View " + view.getTitle() + " VIS: " + isViewVisible(view));
-//		}
-//	}
+	@Override
+	public void componentResized(ComponentEvent arg0) {
+		Dimension size  = getSize();
+		if (size.height < MINHEIGHT) {
+			size.height = MINHEIGHT;
+			setSize(size);
+		}
+		super.componentResized(arg0);
+	}
 
 }

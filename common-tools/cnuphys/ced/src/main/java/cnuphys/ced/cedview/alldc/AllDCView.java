@@ -40,52 +40,56 @@ import cnuphys.bCNU.view.BaseView;
 @SuppressWarnings("serial")
 public class AllDCView extends CedView {
 	
+	/** 
+	 * Normal mode (standard all dc view) or the 
+	 * accumuate only mode (the much newer view)
+	 */
+	public enum AllDCMode {NORMAL, ACCUMULATEONLY};
+	
+	//the mode (normal == standard all dc view)
+	protected AllDCMode _mode = AllDCMode.NORMAL;
 	
 	//for naming clones
 	private static int CLONE_COUNT = 0;
 	
 	//base title
-	private static final String _baseTitle = "All Drift Chambers";
-
-
+	protected static final String _baseTitle[] = {"All Drift Chambers",
+			"Accumulation View"};
 
 	/**
 	 * A sector rectangle for each sector
 	 */
-	private Rectangle2D.Double _sectorWorldRects[];
+	protected Rectangle2D.Double _sectorWorldRects[];
 
 	// font for label text
-	private static final Font labelFont = Fonts.commonFont(Font.PLAIN, 11);
+	protected static final Font labelFont = Fonts.commonFont(Font.PLAIN, 11);
 
 	/**
 	 * Used for drawing the sector rects.
 	 */
-	private Styled _sectorStyle;
+	protected Styled _sectorStyle;
 
 	// The optional "before" drawer for this view
-	private IDrawable _beforeDraw;
-
-	// transparent color
-	private static final Color TRANS = new Color(255, 255, 0, 80);
+	protected IDrawable _beforeDraw;
 
 	/**
 	 * The all dc view is rendered on 2x3 grid. Each grid is 1x1 in world
 	 * coordinates. Thus the whole view has width = 3 and height = 2. These
 	 * offesets move the sector to the right spot on the grid.
 	 */
-	private static double _xoffset[] = { 0.0, 1.0, 2.0, 0.0, 1.0, 2.0 };
+	protected static double _xoffset[] = { 0.0, 1.0, 2.0, 0.0, 1.0, 2.0 };
 
 	/**
 	 * The all dc view is rendered on 2x3 grid. Each grid is 1x1 in world
 	 * coordinates. Thus the whole view has width = 3 and height = 2. These
 	 * offesets move the sector to the right spot on the grid.
 	 */
-	private static double _yoffset[] = { 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 };
+	protected static double _yoffset[] = { 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 };
 
 	// all the superlayer items indexed by sector (0..5) and superlayer (0..5)
-	private AllDCSuperLayer _superLayerItems[][];
+	protected AllDCSuperLayer _superLayerItems[][];
 
-	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
+	protected static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
 			0.0, 0.0, 3.0, 2.0);
 
 	/**
@@ -94,8 +98,9 @@ public class AllDCView extends CedView {
 	 * @param keyVals
 	 *            variable set of arguments.
 	 */
-	private AllDCView(Object... keyVals) {
+	protected AllDCView(AllDCMode mode, Object... keyVals) {
 		super(keyVals);
+		_mode = mode;
 
 		setSectorWorldRects();
 		setBeforeDraw();
@@ -108,7 +113,7 @@ public class AllDCView extends CedView {
 	 * 
 	 * @return a new AllDCView.
 	 */
-	public static AllDCView createAllDCView() {
+	public static AllDCView createAllDCView(AllDCMode mode) {
 		AllDCView view = null;
 
 		// set to a fraction of screen
@@ -116,6 +121,7 @@ public class AllDCView extends CedView {
 
 		// create the view
 		view = new AllDCView(
+				mode,
 				PropertySupport.WORLDSYSTEM,
 				_defaultWorldRectangle,
 				PropertySupport.WIDTH,
@@ -125,17 +131,14 @@ public class AllDCView extends CedView {
 				PropertySupport.TOOLBAR, true, 
 				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
 				PropertySupport.VISIBLE, true,
-				PropertySupport.TITLE, _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")")),
+				PropertySupport.TITLE, _baseTitle[mode.ordinal()] + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")")),
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
-		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL
-				+ ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK
-				+ ControlPanel.ACCUMULATIONLEGEND,
-				DisplayBits.ACCUMULATION 
-						 + DisplayBits.MCTRUTH,
-				3, 5);
-
+		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL + ControlPanel.DISPLAYARRAY
+				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND,
+				DisplayBits.ACCUMULATION + DisplayBits.MCTRUTH, 3, 5);
 		view.add(view._controlPanel, BorderLayout.EAST);
+
 		view.pack();
 		return view;
 	}
@@ -145,8 +148,15 @@ public class AllDCView extends CedView {
 	 */
 	private void setBeforeDraw() {
 		// style for sector rects
-		_sectorStyle = new Styled(X11Colors.getX11Color("dark slate gray"));
-		_sectorStyle.setLineColor(Color.lightGray);
+		
+		if (isAllDCModeNormal()) {
+			_sectorStyle = new Styled(X11Colors.getX11Color("dark slate gray"));
+			_sectorStyle.setLineColor(Color.lightGray);
+		}
+		else {
+			_sectorStyle = new Styled(X11Colors.getX11Color("black"));
+			_sectorStyle.setLineColor(Color.yellow);
+		}
 
 		// use a before-drawer to sector dividers and labels
 		_beforeDraw = new DrawableAdapter() {
@@ -384,10 +394,31 @@ public class AllDCView extends CedView {
 		vr.x += 40;
 		vr.y += 40;
 		
-		AllDCView view = createAllDCView();
+		AllDCView view = createAllDCView(_mode);
 		view.setBounds(vr);
 		return view;
 
 	}
+	
+	/**
+	 * See if this is the normal, standard all dc view
+	 * or the one that is accumulation only
+	 * @return the mode for this all dc view
+	 */
+	public AllDCMode getAllDCMode() {
+		return _mode;
+	}
+	
+	/**
+	 * See if this is the normal, standard all dc view
+	 * or the one that is accumulation only
+	 * @return <code>true</code> if this is the normal standards all dc view
+	 */
+	public boolean isAllDCModeNormal() {
+		return (_mode == AllDCMode.NORMAL);
+	}
+	
+	
+
 
 }
