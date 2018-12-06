@@ -382,6 +382,20 @@
            {"name":"C55",    "id":26, "type":"float",  "info":"C55 covariance matrix element at last superlayer used in the fit"}
            ]
  },
+  {
+ "bank": "TimeBasedTrkg::Pars",
+ "group": 20638,
+ "info": "reconstructed track covariance matrix",
+ "items": [
+           {"name":"id",     "id":1, "type":"int16", "info":"id of the track"},
+           {"name":"mid",    "id":2, "type":"int8",  "info":"measurerement site index"},
+           {"name":"x",      "id":3, "type":"float",  "info":"track x at layer used in the fit"},
+           {"name":"y",      "id":4, "type":"float",  "info":"track y at layer used in the fit"},
+           {"name":"z",      "id":5, "type":"float",  "info":"track z at layer used in the fit"},
+           {"name":"XX",     "id":6, "type":"float",  "info":"x2 covariance matrix element at layer used in the fit"},
+           {"name":"YY",     "id":7, "type":"float",  "info":"y2 covariance matrix element at layer used in the fit"}
+           ]
+ },
  {
     "bank": "TimeBasedTrkg::Trajectory",
     "group": 20653,
