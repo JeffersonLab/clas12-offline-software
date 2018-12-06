@@ -25,6 +25,7 @@ public class Track extends Trajectory implements Comparable<Track>{
     private int _Q;
     private double _P;
     private Matrix _CovMat;
+    private List<Matrix> _CovMats;
 
     private Point3D _Region3CrossPoint;
     private Point3D _Region3CrossDir;
@@ -299,6 +300,21 @@ public class Track extends Trajectory implements Comparable<Track>{
      */
     public void set_CovMat(Matrix _CovMat) {
         this._CovMat = _CovMat;
+    }
+    
+    /**
+     * 
+     * @return Kalman fit covariance matrix at each measurement site
+     */
+    public List<Matrix> get_CovMats() {
+        return _CovMats;
+    }
+    /**
+     * 
+     * @param _CovMats Kalman fit covariance matrix at each measurement sire
+     */
+    public void set_CovMats(List<Matrix> _CovMats) {
+        this._CovMats = _CovMats;
     }
     
     /**

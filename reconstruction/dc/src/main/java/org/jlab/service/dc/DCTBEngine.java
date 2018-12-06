@@ -233,6 +233,7 @@ public class DCTBEngine extends DCEngine {
                 TrackArray[i].set_FitConvergenceStatus(kFit.ConvStatus);
                 TrackArray[i].set_Id(TrackArray[i].size()+1);
                 TrackArray[i].set_CovMat(kFit.finalCovMat.covMat); 
+                TrackArray[i].set_CovMats(kFit.kfCovMatAlongTrajectory); 
                 if(TrackArray[i].get_Vtx0().toVector3D().mag()>500)
                     continue;
                 trkcands.add(TrackArray[i]);

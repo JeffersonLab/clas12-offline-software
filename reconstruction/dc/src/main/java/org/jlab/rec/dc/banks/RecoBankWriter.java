@@ -386,6 +386,29 @@ public class RecoBankWriter {
         //bank.show();
         return bank;
     }
+    //Filling Track x y component uncertainties at each measurement site
+    private DataBank fillTrackCovMatElsBank(DataEvent event, List<Track> candlist) {
+
+        DataBank bank = event.createBank("TimeBasedTrkg::Pars", candlist.size()*36);
+        
+        for (int i = 0; i < candlist.size(); i++) {
+            bank.setShort("id", i, (short) candlist.get(i).get_Id()); 
+            int index = 0;
+            if(candlist.get(i).get_CovMats()!=null && candlist.get(i).get_Trajectory().size() == candlist.get(i).get_CovMats().size()) {
+                for(int j = 0; j < candlist.get(i).get_CovMats().size(); j++) { 
+                    bank.setByte("mid", index, (byte)index);
+                    bank.setFloat("x", index, (float) candlist.get(i).get_Trajectory().get(j).x());
+                    bank.setFloat("y", index, (float) candlist.get(i).get_Trajectory().get(j).y());
+                    bank.setFloat("z", index, (float) candlist.get(i).get_Trajectory().get(j).getZ());
+                    bank.setFloat("XX", index, (float) candlist.get(i).get_CovMats().get(j).get(0, 0));
+                    bank.setFloat("YY", index, (float) candlist.get(i).get_CovMats().get(j).get(1, 1));
+                    index++;
+                }
+            }
+        }
+        //bank.show();
+        return bank;
+    }
      /**
      *
      * @param event the EvioEvent
@@ -869,7 +892,8 @@ public class RecoBankWriter {
                     rbc.fillTBSegmentsBank(event, segments),
                     rbc.fillTBCrossesBank(event, crosses),
                     rbc.fillTBTracksBank(event, trkcands),
-                    rbc.fillTrajectoryBank(event, trkcands));
+                    rbc.fillTrajectoryBank(event, trkcands),
+                    rbc.fillTrackCovMatElsBank(event, trkcands));
 
         }
         if (crosses != null && trkcands == null) {

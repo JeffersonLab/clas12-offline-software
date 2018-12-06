@@ -26,6 +26,8 @@ public class KFitter {
     public StateVec finalStateVec;
     public CovMat finalCovMat;
     public List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory;
+    public List<Matrix> kfCovMatAlongTrajectory;
+    
     public int totNumIter = 30;
     private double newChisq = Double.POSITIVE_INFINITY;
 
@@ -226,6 +228,7 @@ public class KFitter {
         this.chi2 = 0;
         double path = 0;
         kfStateVecsAlongTrajectory = new ArrayList<>();
+        kfCovMatAlongTrajectory = new ArrayList<>();
         if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null) {
             sv.transport(sector, sv.Z.length - 1, 0,
                     sv.trackTraj.get(sv.Z.length - 1),
@@ -245,10 +248,11 @@ public class KFitter {
                     mv.measurements.get(0).wireLen);
             svc.setProjector(h0);
             kfStateVecsAlongTrajectory.add(svc);
+            kfCovMatAlongTrajectory.add(sv.trackCov.get(0).covMat);
             chi2 += (mv.measurements.get(0).x - h0) * (mv.measurements.get(0).x - h0) / mv.measurements.get(0).error;
             for (int k1 = 0; k1 < k; k1++) {
                 sv.transport(sector, k1, k1 + 1, sv.trackTraj.get(k1), sv.trackCov.get(k1));
-
+                
                 double V = mv.measurements.get(k1 + 1).error;
                 double h = mv.h(new double[]{sv.trackTraj.get(k1 + 1).x, sv.trackTraj.get(k1 + 1).y},
                         mv.measurements.get(k1 + 1).tilt,
@@ -264,6 +268,7 @@ public class KFitter {
                 svc.setPathLength(path);
                 svc.setProjector(h);
                 kfStateVecsAlongTrajectory.add(svc);
+                kfCovMatAlongTrajectory.add(sv.trackCov.get(k1+1).covMat); 
                 chi2 += (mv.measurements.get(k1 + 1).x - h) * (mv.measurements.get(k1 + 1).x - h) / V;
             }
         }
