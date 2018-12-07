@@ -25,7 +25,7 @@ import bCNU3D.DoubleFormat;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.UnicodeSupport;
-import cnuphys.magfield.IField;
+import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.MagneticFieldInitializationException;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
@@ -39,6 +39,7 @@ import cnuphys.splot.plot.PlotParameters;
 import cnuphys.splot.plot.X11Colors;
 import cnuphys.splot.style.SymbolType;
 
+@SuppressWarnings("serial")
 public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 	private static int _numPlotPoints = 50000;
@@ -89,7 +90,7 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 	 *            the usual meaning
 	 */
 	public PlotFieldDialog(JFrame parent, boolean modal) {
-		super(parent, "Magnetic Field Plotter", modal);
+		super(parent, "Magnetic Field Plotter", modal, null);
 		setIconImage(ImageManager.cnuIcon.getImage());
 		_canvas.setPreferredSize(new Dimension(600, 600));
 		pack();
@@ -105,6 +106,7 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 			curve.getFit().setFitType(FitType.CONNECT);
 			curve.getStyle().setSymbolType(SymbolType.NOSYMBOL);
 			curve.getStyle().setLineColor(_curveColors[0]);
+			curve.getStyle().setLineWidth(2f);
 		}
 
 		return ds;
@@ -112,7 +114,8 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 	@Override
 	protected String[] getColumnNames() {
-		String labels[] = { "Component", "|B| (1)" };
+		String labels[] = { "Component", "|B| (1) " + 
+				MagneticFields.getInstance().getCurrentConfiguration() };
 		return labels;
 	}
 
@@ -313,38 +316,54 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 		}
 		if (hotIndex < 0) {
 			hotIndex = curveCount;
-			DataColumn newCurve = _canvas.getDataSet().addCurve("Component", "|B| (" + (hotIndex + 1) + ")");
+			DataColumn newCurve = _canvas.getDataSet().addCurve("Component", "|B| (" + (hotIndex + 1) + ") " + 
+					MagneticFields.getInstance().getCurrentConfiguration());
 			newCurve.getFit().setFitType(FitType.CONNECT);
 			newCurve.getStyle().setSymbolType(SymbolType.NOSYMBOL);
 			newCurve.getStyle().setLineColor(_curveColors[hotIndex % _curveColors.length]);
+			newCurve.getStyle().setLineWidth(2f);
 		}
 
-		IField ifield = MagneticFields.getInstance().getActiveField();
+		FieldProbe probe = FieldProbe.factory();
 
 		double min = _varPanels[_whichVaries].getMinValue();
 		double max = _varPanels[_whichVaries].getMaxValue();
 		double del = (max - min) / (_numPlotPoints - 1);
+		
+		float x;
+		float y;
+		float z;
+		double phiRad;
 
 		for (int i = 0; i < _numPlotPoints; i++) {
 			double val = min + i * del;
 			double mag = 0;
 			switch (_whichVaries) {
 			case Z:
-				mag = ifield.fieldMagnitudeCylindrical(_varPanels[PHI].getFixedValue(), _varPanels[RHO].getFixedValue(),
-						val);
+				phiRad = Math.toRadians(_varPanels[PHI].getFixedValue());
+				x = (float)(_varPanels[RHO].getFixedValue() * Math.cos(phiRad));
+				y = (float)(_varPanels[RHO].getFixedValue() * Math.sin(phiRad));
+				z = (float)val;
+				mag = probe.fieldMagnitude(x, y, z);
 				break;
 
 			case RHO:
-				mag = ifield.fieldMagnitudeCylindrical(_varPanels[PHI].getFixedValue(), val,
-						_varPanels[Z].getFixedValue());
+				phiRad = Math.toRadians(_varPanels[PHI].getFixedValue());
+				x = (float)(val * Math.cos(phiRad));
+				y = (float)(val * Math.sin(phiRad));
+				z = (float)_varPanels[Z].getFixedValue();
+				mag = probe.fieldMagnitude(x, y, z);
 				break;
 
 			case PHI:
-				mag = ifield.fieldMagnitudeCylindrical(val, _varPanels[RHO].getFixedValue(),
-						_varPanels[Z].getFixedValue());
+				phiRad = Math.toRadians(val);
+				x = (float)(_varPanels[RHO].getFixedValue() * Math.cos(phiRad));
+				y = (float)(_varPanels[RHO].getFixedValue() * Math.sin(phiRad));
+				z = (float)_varPanels[Z].getFixedValue();
+				mag = probe.fieldMagnitude(x, y, z);
 				break;
 			}
-
+			
 			mag = mag / 10; // to tesla
 			try {
 				_canvas.getDataSet().addToCurve(hotIndex, val, mag);

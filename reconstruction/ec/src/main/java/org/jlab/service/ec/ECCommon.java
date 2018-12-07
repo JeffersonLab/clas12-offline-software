@@ -98,11 +98,12 @@ public class ECCommon {
     public static List<ECStrip>  initEC(DataEvent event, Detector detector, ConstantsManager manager, int run){
     	
         manager.setVariation(variation);
-        
+
         IndexedTable    atten = manager.getConstants(run, "/calibration/ec/attenuation");
         IndexedTable     gain = manager.getConstants(run, "/calibration/ec/gain");
 		IndexedTable     time = manager.getConstants(run, "/calibration/ec/timing");
 		IndexedTable    shift = manager.getConstants(run, "/calibration/ec/global_gain_shift");
+		IndexedTable       ev = manager.getConstants(run, "/calibration/ec/effective_velocity");
     
         if (singleEvent) resetHistos();        
         
@@ -135,7 +136,7 @@ public class ECCommon {
                                  atten.getDoubleValue("B", sector,layer,component),
                                  atten.getDoubleValue("C", sector,layer,component));
             strip.setGain(gain.getDoubleValue("gain", sector,layer,component)*shift.getDoubleValue("gain_shift",sector,layer,0)); 
-            strip.setVeff(veff);
+            strip.setVeff(ev.getDoubleValue("veff",sector,layer,component));
             strip.setTiming(time.getDoubleValue("a0", sector, layer, component),
                             time.getDoubleValue("a1", sector, layer, component),
                             time.getDoubleValue("a2", sector, layer, component),

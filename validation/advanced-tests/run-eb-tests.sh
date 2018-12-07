@@ -1,7 +1,7 @@
 #!/bin/bash
 
 webDir=http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/eb
-webVersion=4a.2.4-fid-r10
+webVersion=4a.2.5-fid-r11
 webDir=$webDir/$webVersion
 
 # coatjava must already be built at ../../coatjava/
@@ -17,6 +17,13 @@ gemcSolenoidDefault=-1.0
 if [[ $webVersion = *"4a.2.2"* ]] || [[ $webVersion = *"4a.2.3"* ]]
 then
     gemcSolenoidDefault=1.0
+fi
+
+# geometry variation for DC
+geoDbVariation="may_2018_engineers"
+if [[ $webVersion = *"4a.2.2"* ]] || [[ $webVersion = *"4a.2.3"* ]] || [[ $webVersion = *"4a.2.4"* ]]
+then
+    geoDbVariation="default"
 fi
 
 nEvents=-1
@@ -131,6 +138,8 @@ then
     # run reconstruction:
     if [ $useClara -eq 0 ]
     then
+        GEOMDBVAR=$geoDbVariation
+        export GEOMDBVAR
         ../../coatjava/bin/notsouseful-util -i ${webFileStub}.hipo -o out_${webFileStub}.hipo -c 2
     else
         echo "set inputDir $PWD/" > cook.clara

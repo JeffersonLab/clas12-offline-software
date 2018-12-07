@@ -16,8 +16,6 @@ public class Constants {
     public static final int[] NPAD = new int[3]; // the number of paddles per
     // sector for panel 1A, 1B,
     // and 2
-    public static final double[] SCBARTHICKN = new double[3]; // 5 cm for 1A and
-   
     // public static final double[] ADC_MIP = new double[3]; // From DB 800 A1 &
     // 2 2000 for 1B
     public static final double DEDX_MIP = 1.956; // units = MeV/g/cm^2
@@ -106,10 +104,6 @@ public class Constants {
         NPAD[0] = 23;
         NPAD[1] = 62;
         NPAD[2] = 5;
-
-        SCBARTHICKN[0] = 5;
-        SCBARTHICKN[1] = 6;
-        SCBARTHICKN[2] = 5;
 
         // ADC_MIP[0] = 800;
         // ADC_MIP[1] = 2000;

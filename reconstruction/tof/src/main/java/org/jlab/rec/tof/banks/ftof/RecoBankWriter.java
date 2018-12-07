@@ -29,6 +29,7 @@ public class RecoBankWriter {
             ////event.show();
             //group.show();
             dde.removeGroup(bankName);
+            return null;
         }
         DataBank bank = event.createBank(bankName, bankSize);
         return bank;
@@ -40,8 +41,11 @@ public class RecoBankWriter {
         if (hitlist.size() == 0) {
             return null;
         }
+        if(event.hasBank("FTOF::rawhits"))
+            return null; // don't save again for TB
         
-        DataBank bank = this.CreateOutputBank(event, "FTOF::rawhits", hitlist.size());
+        DataBank bank = event.createBank("FTOF::rawhits", hitlist.size());
+        //DataBank bank = this.CreateOutputBank(event, "FTOF::rawhits", hitlist.size());
         if (bank == null) {
             System.err
                     .println("COULD NOT CREATE A BANK!!!!!! for hitlist of size "
@@ -78,17 +82,19 @@ public class RecoBankWriter {
 
     }
 
-    public DataBank fillRecHitsBank(DataEvent event, List<Hit> hitlist) {
+    public DataBank fillRecHitsBank(DataEvent event, List<Hit> hitlist, String hitsType) {
         if (hitlist == null) {
             return null;
         }
         if (hitlist.size() == 0) {
             return null;
         }
-
-        DataBank bank = this.CreateOutputBank(event, "FTOF::hits", hitlist.size());
+        String bankName = "FTOF::hits";
+        if(hitsType.equalsIgnoreCase("FTOFHB"))
+            bankName = "FTOF::hbhits";
+        DataBank bank = event.createBank(bankName, hitlist.size());
         if (bank == null) {
-            System.err.println("COULD NOT CREATE A BANK!!!!!!");
+            System.err.println("COULD NOT CREATE A BANK!!!!!!"+bankName);
             return null;
         }
         for (int i = 0; i < hitlist.size(); i++) {
@@ -143,131 +149,141 @@ public class RecoBankWriter {
 
     }
 
-    public DataBank fillClustersBank(DataEvent event, List<Cluster> cluslist) {
+    public DataBank fillClustersBank(DataEvent event, List<Cluster> cluslist, String hitsType) {
         if (cluslist == null) {
             return null;
         }
         if (cluslist.size() == 0) {
             return null;
         }
-
-        DataBank bank = this.CreateOutputBank(event, "FTOF::clusters", cluslist.size());
-        if (bank == null) {
-            System.err.println("COULD NOT CREATE A BANK!!!!!!");
+        if(hitsType.equalsIgnoreCase("FTOFHB")) {
             return null;
-        }
-        for (int i = 0; i < cluslist.size(); i++) {
-            bank.setShort("id", i, (short) cluslist.get(i).get_Id());
-            bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
-            bank.setByte("layer", i, (byte) cluslist.get(i).get_Panel());
-            bank.setShort("component", i, (short) cluslist.get(i).get(0)
-                    .get_Paddle()); // paddle id of hit with lowest paddle id in
-            // cluster [Check the sorting!!!]
-            int status = 0;
-            if (Integer.parseInt(cluslist.get(i).get_StatusWord()) == 1111) {
-                status = 1;
+        } else {
+            // save clusters only for TB
+            DataBank bank = event.createBank("FTOF::clusters", cluslist.size());
+
+            //DataBank bank = this.CreateOutputBank(event, "FTOF::clusters", cluslist.size());
+            if (bank == null) {
+                System.err.println("COULD NOT CREATE A BANK!!!!!!");
+                return null;
             }
-            bank.setShort("status", i, (short) status);
-            bank.setFloat("energy", i, (float) cluslist.get(i).get_Energy());
-            bank.setFloat("energy_unc", i, (float) cluslist.get(i)
-                    .get_EnergyUnc());
-            bank.setFloat("time", i, (float) cluslist.get(i).get_t());
-            bank.setFloat("time_unc", i, (float) cluslist.get(i).get_tUnc());
-            bank.setFloat("x", i, (float) cluslist.get(i).get_x());
-            bank.setFloat("y", i, (float) cluslist.get(i).get_y());
-            bank.setFloat("z", i, (float) cluslist.get(i).get_z());
-            bank.setFloat("x_unc", i, 5); // At this stage the uncertainty is
-            // not calculated
-            bank.setFloat("y_unc", i, (float) cluslist.get(i).get_y_locUnc());
-            bank.setFloat("z_unc", i, 10); // At this stage the uncertainty is
-            // not calculated
-        }
+            for (int i = 0; i < cluslist.size(); i++) {
+                bank.setShort("id", i, (short) cluslist.get(i).get_Id());
+                bank.setShort("trackid", i, (short) cluslist.get(i).get(0)._AssociatedTrkId);
+                bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
+                bank.setByte("layer", i, (byte) cluslist.get(i).get_Panel());
+                bank.setShort("component", i, (short) cluslist.get(i).get(0)
+                        .get_Paddle()); // paddle id of hit with lowest paddle id in
+                // cluster [Check the sorting!!!]
+                int status = 0;
+                if (Integer.parseInt(cluslist.get(i).get_StatusWord()) == 1111) {
+                    status = 1;
+                }
+                bank.setShort("status", i, (short) status);
+                bank.setFloat("energy", i, (float) cluslist.get(i).get_Energy());
+                bank.setFloat("energy_unc", i, (float) cluslist.get(i)
+                        .get_EnergyUnc());
+                bank.setFloat("time", i, (float) cluslist.get(i).get_t());
+                bank.setFloat("time_unc", i, (float) cluslist.get(i).get_tUnc());
+                bank.setFloat("x", i, (float) cluslist.get(i).get_x());
+                bank.setFloat("y", i, (float) cluslist.get(i).get_y());
+                bank.setFloat("z", i, (float) cluslist.get(i).get_z());
+                bank.setFloat("x_unc", i, 5); // At this stage the uncertainty is
+                // not calculated
+                bank.setFloat("y_unc", i, (float) cluslist.get(i).get_y_locUnc());
+                bank.setFloat("z_unc", i, 10); // At this stage the uncertainty is
+                // not calculated
+            }
 
-        return bank;
-
+            return bank;
+            }
     }
 
     private DataBank fillClustersBank(DataEvent event,
-            ArrayList<ArrayList<Cluster>> matchedClusters) {
+            ArrayList<ArrayList<Cluster>> matchedClusters, String hitsType) {
         if (matchedClusters == null) {
             return null;
         }
         if (matchedClusters.size() == 0) {
             return null;
         }
-
-        DataBank bank = this.CreateOutputBank(event, "FTOF::matchedclusters",
-                matchedClusters.size());
-        if (bank == null) {
-            System.err.println("COULD NOT CREATE A BANK!!!!!!");
+        if(hitsType.equalsIgnoreCase("FTOFHB")) {
             return null;
-        }
-        for (int i = 0; i < matchedClusters.size(); i++) {
-            if (matchedClusters.get(i) == null) {
-                continue;
+        } else {
+            // save clusters only for TB
+            DataBank bank = event.createBank("FTOF::matchedclusters",
+                matchedClusters.size());
+            if (bank == null) {
+                System.err.println("COULD NOT CREATE A BANK!!!!!!");
+                return null;
             }
-            bank.setByte("sector", i, (byte) matchedClusters.get(i).get(0)
-                    .get_Sector());
-            bank.setShort("paddle_id1A", i,
-                    (short) matchedClusters.get(i).get(0).get(0).get_Paddle()); // paddle
-            // id
-            // of
-            // hit
-            // with
-            // lowest
-            // paddle
-            // id
-            // in
-            // cluster
-            // [Check
-            // the
-            // sorting!!!]
-            bank.setShort("paddle_id1B", i,
-                    (short) matchedClusters.get(i).get(1).get(0).get_Paddle()); // paddle
-            // id
-            // of
-            // hit
-            // with
-            // lowest
-            // paddle
-            // id
-            // in
-            // cluster
-            // [Check
-            // the
-            // sorting!!!]
-            bank.setShort("clusSize_1A", i,
-                    (short) matchedClusters.get(i).get(0).size()); // size of
-            // cluster
-            // in 1a
-            bank.setShort("clusSize_1B", i,
-                    (short) matchedClusters.get(i).get(1).size()); // size of
-            // cluster
-            // in 1b
-            bank.setShort("clus_1A", i, (short) matchedClusters.get(i).get(0)
-                    .get_Id()); // id of cluster in 1a
-            bank.setShort("clus_1B", i, (short) matchedClusters.get(i).get(1)
-                    .get_Id()); // id of cluster in 1b
-            bank.setFloat("tminAlgo_1B_tCorr", i, (float) matchedClusters
-                    .get(i).get(1).get_tCorr()[0]); // uses tmin algorithm to
-            // compute the path length
-            // between counters
-            bank.setFloat("midbarAlgo_1B_tCorr", i, (float) matchedClusters
-                    .get(i).get(1).get_tCorr()[1]); // uses middle of bar
-            // algorithm to compute the
-            // path length between
-            // counters
-            bank.setFloat("EmaxAlgo_1B_tCorr", i, (float) matchedClusters
-                    .get(i).get(1).get_tCorr()[2]); // uses Emax algorithm to
-            // compute the path length
-            // between counters
+            for (int i = 0; i < matchedClusters.size(); i++) {
+                if (matchedClusters.get(i) == null) {
+                    continue;
+                }
+                bank.setByte("sector", i, (byte) matchedClusters.get(i).get(0)
+                        .get_Sector());
+                bank.setShort("paddle_id1A", i,
+                        (short) matchedClusters.get(i).get(0).get(0).get_Paddle()); // paddle
+                // id
+                // of
+                // hit
+                // with
+                // lowest
+                // paddle
+                // id
+                // in
+                // cluster
+                // [Check
+                // the
+                // sorting!!!]
+                bank.setShort("paddle_id1B", i,
+                        (short) matchedClusters.get(i).get(1).get(0).get_Paddle()); // paddle
+                // id
+                // of
+                // hit
+                // with
+                // lowest
+                // paddle
+                // id
+                // in
+                // cluster
+                // [Check
+                // the
+                // sorting!!!]
+                bank.setShort("clusSize_1A", i,
+                        (short) matchedClusters.get(i).get(0).size()); // size of
+                // cluster
+                // in 1a
+                bank.setShort("clusSize_1B", i,
+                        (short) matchedClusters.get(i).get(1).size()); // size of
+                // cluster
+                // in 1b
+                bank.setShort("clus_1Aid", i, (short) matchedClusters.get(i).get(0)
+                        .get_Id()); // id of cluster in 1a
+                bank.setShort("clus_1Bid", i, (short) matchedClusters.get(i).get(1)
+                        .get_Id()); // id of cluster in 1b
+                bank.setFloat("tminAlgo_1B_tCorr", i, (float) matchedClusters
+                        .get(i).get(1).get_tCorr()[0]); // uses tmin algorithm to
+                // compute the path length
+                // between counters
+                bank.setFloat("midbarAlgo_1B_tCorr", i, (float) matchedClusters
+                        .get(i).get(1).get_tCorr()[1]); // uses middle of bar
+                // algorithm to compute the
+                // path length between
+                // counters
+                bank.setFloat("EmaxAlgo_1B_tCorr", i, (float) matchedClusters
+                        .get(i).get(1).get_tCorr()[2]); // uses Emax algorithm to
+                // compute the path length
+                // between counters
+            }
+            return bank;
         }
-        return bank;
     }
 
     public void appendFTOFBanks(DataEvent event, List<Hit> hits,
             List<Cluster> clusters,
-            ArrayList<ArrayList<Cluster>> matchedClusters) {
+            ArrayList<ArrayList<Cluster>> matchedClusters, String hitsType) {
         List<DataBank> fTOFBanks = new ArrayList<DataBank>();
 
         DataBank bank1 = this.fillRawHitsBank((DataEvent) event, hits);
@@ -275,18 +291,18 @@ public class RecoBankWriter {
             fTOFBanks.add(bank1);
         }
 
-        DataBank bank2 = this.fillRecHitsBank((DataEvent) event, hits);
+        DataBank bank2 = this.fillRecHitsBank((DataEvent) event, hits, hitsType);
         if (bank2 != null) {
             fTOFBanks.add(bank2);
         }
 
-        DataBank bank3 = this.fillClustersBank((DataEvent) event, clusters);
+        DataBank bank3 = this.fillClustersBank((DataEvent) event, clusters, hitsType);
         if (bank3 != null) {
             fTOFBanks.add(bank3);
         }
 
         DataBank bank4 = this.fillClustersBank((DataEvent) event,
-                matchedClusters);
+                matchedClusters, hitsType);
         if (bank4 != null) {
             fTOFBanks.add(bank4);
         }

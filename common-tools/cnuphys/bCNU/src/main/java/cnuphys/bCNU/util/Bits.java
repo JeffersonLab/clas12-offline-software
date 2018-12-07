@@ -158,8 +158,8 @@ public class Bits {
 	 *            the word to count.
 	 * @return the number of "on" bits in the word.
 	 */
-	public static long countBits(long x) {
-		long b;
+	public static int countBits(long x) {
+		int b;
 
 		for (b = 0; x != 0; x = x >> 1) {
 			if ((x & 01) == 01) {

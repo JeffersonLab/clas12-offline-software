@@ -12,7 +12,6 @@ import javax.swing.JComponent;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.graphics.style.SymbolType;
-import cnuphys.bCNU.plugin.Plugin;
 
 public class PropertySupport {
 
@@ -30,7 +29,6 @@ public class PropertySupport {
 	public static final String FILLCOLOR = "FILLCOLOR";
 	public static final String FONT = "FONT";
 	public static final String FRACTION = "FRACTION";
-	public static final String HEADSUP = "HEADSUP";
 	public static final String HEIGHT = "HEIGHT";
 	public static final String ICONIFIABLE = "ICONIFIABLE";
 	public static final String LAYER = "LAYER";
@@ -296,17 +294,6 @@ public class PropertySupport {
 	 */
 	public static boolean getDraggable(Properties props) {
 		return getBoolean(props, DRAGGABLE, false);
-	}
-
-	/**
-	 * Get the headsup boolean flag, indicating whether the headsup display
-	 * should be active
-	 * 
-	 * @param props the properties
-	 * @return the headsup flag. On error, return false.
-	 */
-	public static boolean getHeadsUp(Properties props) {
-		return getBoolean(props, HEADSUP, false);
 	}
 
 	/**
@@ -658,17 +645,6 @@ public class PropertySupport {
 	 */
 	public static int getVVPanel(Properties props) {
 		return getInt(props, VVPANEL, Integer.MIN_VALUE);
-	}
-
-	/**
-	 * Get a virtual view placement location from the properties. Only
-	 * meaningful values are the constants defined in VirtualView.
-	 * 
-	 * @param props the properties
-	 * @return the virtual view location. On error return VirtualView.CENTER
-	 */
-	public static int getVVLocation(Properties props) {
-		return getInt(props, VVLOCATION, Plugin.CENTER);
 	}
 
 	/**

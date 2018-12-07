@@ -1,7 +1,9 @@
 package org.jlab.rec.dc.trajectory;
 
 import java.util.Random;
-
+//import org.apache.commons.math3.util.FastMath;
+import org.jlab.clas.clas.math.FastMath;
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -13,8 +15,8 @@ public class Vertex {
 
     Random rn = new Random();
     public static double SMEARING_FAC = 0;
-    DCSwimmer swim2 = new DCSwimmer();
-
+    Swim swim2 = new Swim();
+    
     public Vertex() {
 
     }
@@ -77,7 +79,7 @@ public class Vertex {
         thecand.set_Vtx0(new Point3D(rx,ry,rz));
         thecand.set_pAtOrig(new Vector3D(rpx,rpy,rpz));
 
-    }
+    } 
 
     /**
      * 
@@ -124,7 +126,7 @@ public class Vertex {
             double R = Q* pt / (LIGHTVEL * Bfield);
             double tanL = pz / pt;
 
-            double phi = Math.atan2(py, px);
+            double phi = FastMath.atan2(py, px);
 
             double xc   = x + R * Math.sin(phi);
             double yc   = y - R * Math.cos(phi);

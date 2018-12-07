@@ -34,6 +34,7 @@ import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.HexView;
+import cnuphys.ced.common.FMTCrossDrawer;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.AccumulationManager;
@@ -67,6 +68,10 @@ public class DCXYView extends HexView {
 
 	// draws mc hits
 	private McHitDrawer _mcHitDrawer;
+	
+	//for fmt
+	private FMTCrossDrawer _fmtCrossDrawer;
+
 		
 	//exach superlayer in a different color
 	private static Color _wireColors[] = {Color.red, X11Colors.getX11Color("dark red"), 
@@ -113,6 +118,10 @@ public class DCXYView extends HexView {
 		_swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
 		_crossDrawer = new CrossDrawer(this);
 		_mcHitDrawer = new McHitDrawer(this);
+		
+		// fmt cross drawer
+		_fmtCrossDrawer = new FMTCrossDrawer(this);
+
 		setBeforeDraw();
 		setAfterDraw();
 		getContainer().getComponent().setBackground(Color.gray);
@@ -153,6 +162,11 @@ public class DCXYView extends HexView {
 		panel.add(wireLegend, BorderLayout.CENTER);
 		panel.setBorder(BorderFactory.createEtchedBorder());
 		add(panel, BorderLayout.SOUTH);
+		
+		//add a quick zoom
+		double qzlim = 25;
+		addQuickZoom("Central Region", -qzlim, -qzlim, qzlim, qzlim);
+
 	}
 
 	// add the control panel
@@ -163,8 +177,8 @@ public class DCXYView extends HexView {
 				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
 				+ ControlPanel.DRAWLEGEND, 
 				DisplayBits.ACCUMULATION
-				+ DisplayBits.CROSSES
-				+ DisplayBits.GLOBAL_HB + DisplayBits.GLOBAL_TB
+				+ DisplayBits.CROSSES + DisplayBits.FMTCROSSES
+				+ DisplayBits.GLOBAL_HB + DisplayBits.GLOBAL_TB + DisplayBits.CVTTRACKS
                 + DisplayBits.MCTRUTH, 3, 5);
 
 		add(_controlPanel, BorderLayout.EAST);
@@ -238,6 +252,12 @@ public class DCXYView extends HexView {
 						_crossDrawer.setMode(CrossDrawer.TB);
 						_crossDrawer.draw(g, container);
 					}
+					
+					//Other (not DC) Crosses
+					if (showCrosses()) {
+						_fmtCrossDrawer.draw(g, container);
+					}
+
 					drawCoordinateSystem(g, container);
 					drawSectorNumbers(g, container);
 				} // not acumulating
@@ -438,7 +458,6 @@ public class DCXYView extends HexView {
 		props.put(PropertySupport.TOOLBAR, true);
 		props.put(PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS);
 		props.put(PropertySupport.VISIBLE, true);
-		props.put(PropertySupport.HEADSUP, false);
 
 		props.put(PropertySupport.BACKGROUND,
 				X11Colors.getX11Color("Alice Blue"));
@@ -463,6 +482,11 @@ public class DCXYView extends HexView {
 		if (showDCTBCrosses()) {
 			_crossDrawer.setMode(CrossDrawer.TB);
 			_crossDrawer.feedback(container, pp, wp, feedbackStrings);
+		}
+		
+		//Other (not DC) Crosses
+		if (showCrosses()) {
+			_fmtCrossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
 
 		if (showMcTruth()) {

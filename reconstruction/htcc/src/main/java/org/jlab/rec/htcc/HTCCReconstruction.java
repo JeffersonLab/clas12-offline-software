@@ -19,9 +19,11 @@ import org.jlab.utils.groups.IndexedTable;
 public class HTCCReconstruction {
 
     // HTCC geometry parameters
-    private final ReconstructionParameters parameters;
     public IndexedTable gain;
     public IndexedTable time;
+    public IndexedTable ring_time;
+    public IndexedTable cluster_par;
+    public IndexedTable geometry;
 
     // Raw HTCC data from the bank
     private int[] hitnArray;
@@ -44,7 +46,6 @@ public class HTCCReconstruction {
      * Initializes the HTCCReconstruction.
      */
     public HTCCReconstruction() {
-        parameters = new ReconstructionParameters();
     }
 
     /**
@@ -132,7 +133,7 @@ public class HTCCReconstruction {
 
         // Find all hits above the photoelectron threshold
         for (int hit = 0; hit < numHits; ++hit) {
-            if (npheArray[hit] > parameters.npheminhit && sectorArray[hit] > 0) {
+            if (npheArray[hit] > cluster_par.getDoubleValue("npheminhit", 0,0,0) && sectorArray[hit] > 0) {
                 remainingHits.add(hit);
             }
         }
@@ -154,7 +155,7 @@ public class HTCCReconstruction {
 
         // Find the hit from the list of remaining hits with the largest number 
         // of photoelectrons that also meets the threshold for the minimum 
-        // number of photoelectrons specified by parameters.npheminmax
+        // number of photoelectrons specified by cluster_par.npheminmax
         findMaximumHit(remainingHits);
 
         // If a maximum hit was found:
@@ -170,14 +171,14 @@ public class HTCCReconstruction {
             // Numver of Photoelectrons
             double nphe = maxHitNumPhotoelectrons;
             // Hit Time
-            double time = timeArray[maxHitRawDataIndex] - parameters.t0[itheta];
+            double time = timeArray[maxHitRawDataIndex] - ring_time.getDoubleValue("offset", 0,0,itheta+1);
             // Detector Coordinates (polar)
-            double theta = parameters.theta0[itheta];
-            double phi = parameters.phi0 + 2.0 * parameters.dphi0 * iphi;
+            double theta = Math.toRadians(geometry.getDoubleValue("theta0", 0,0,0)+2*geometry.getDoubleValue("dtheta", 0,0,0)*itheta);
+            double phi   = Math.toRadians(geometry.getDoubleValue("phi0", 0,0,0)  +2*geometry.getDoubleValue("dphi", 0,0,0)*iphi);
             // Detector Alignment Errors
-            double dtheta = parameters.dtheta0[itheta];
-            double dphi = parameters.dphi0;
-
+            double dtheta = Math.toRadians(geometry.getDoubleValue("dtheta", 0,0,0));
+            double dphi   = Math.toRadians(geometry.getDoubleValue("dphi", 0,0,0));
+ 
             // Create a new cluster and add the maximum hit
             HTCCCluster cluster = new HTCCCluster();
             cluster.addHit(itheta, iphi, nphe, time, theta, phi, dtheta, dphi);
@@ -185,10 +186,10 @@ public class HTCCReconstruction {
             growCluster(cluster, remainingHits);
 
             //Check whether this cluster has nphe above threshold, size along theta and phi and total number of hits less than maximum:
-            if (cluster.getNPheTot() >= parameters.npeminclst
-                    && cluster.getNThetaClust() <= parameters.nthetamaxclst
-                    && cluster.getNPhiClust() <= parameters.nphimaxclst
-                    && cluster.getNHitClust() <= parameters.nhitmaxclst) {
+            if (cluster.getNPheTot() >= cluster_par.getDoubleValue("npheminclst", 0,0,0)
+                    && cluster.getNThetaClust() <= cluster_par.getDoubleValue("nthetamaxclst", 0,0,0)
+                    && cluster.getNPhiClust() <= cluster_par.getDoubleValue("nphimaxclst", 0,0,0)
+                    && cluster.getNHitClust() <= cluster_par.getDoubleValue("nhitmaxclst", 0,0,0)) {
 
                 // Return the cluster
                 return cluster;
@@ -205,14 +206,14 @@ public class HTCCReconstruction {
      * photoelectrons specified in <code>parameters</code>.
      * <p>
      * Side effects: If a maximum hit was found with a number of photo electrons
-     * greater than or equal to <code>parameters.npheminmax</code>, then:
+     * greater than or equal to <code>cluster_par.npheminmax</code>, then:
      * maxHitNumPhotoelectrons = the number of photoelectrons for the max hit
      * maxHitRawDataIndex = the index of the max hit in the bank data
      * maxHitRemainingIndex = the index of the max hit in the remaining hits
      * list
      * <p>
      * If no remaining hit has a number of photoelectrons greater than or equal
-     * to <code>parameters.npheminmax</code>, then: maxHitNumPhotoelectrons = -1
+     * to <code>cluster_par.npheminmax</code>, then: maxHitNumPhotoelectrons = -1
      * maxHitRawDataIndex = -1 maxHitRemainingIndex = -1
      *
      * @param remainingHits the list of remaining hits
@@ -224,7 +225,7 @@ public class HTCCReconstruction {
         for (int hit = 0; hit < remainingHits.size(); ++hit) {
             int hitIndex = remainingHits.get(hit);
             double numPhotoElectrons = npheArray[hitIndex];
-            if (numPhotoElectrons >= parameters.npheminmax
+            if (numPhotoElectrons >= cluster_par.getDoubleValue("npheminmax", 0,0,0)
                     && numPhotoElectrons > maxHitNumPhotoelectrons) {
                 maxHitNumPhotoelectrons = numPhotoElectrons;
                 maxHitRemainingIndex = hit;
@@ -264,24 +265,24 @@ public class HTCCReconstruction {
                 int iphiDiff = Math.min((12 + iphiTest - iphiCurr) % 12, (12 + iphiCurr - iphiTest) % 12);
 
                 // Find the difference in time
-                double time = timeArray[testHit] - parameters.t0[ithetaTest];
+                double time = timeArray[testHit] - ring_time.getDoubleValue("offset", 0,0,ithetaTest+1);
                 double timeDiff = Math.abs(time - clusterTime);
 
                 double npheTest = npheArray[testHit];
                 // If the test hit is close enough in space and time
                 if ((ithetaDiff == 1 || iphiDiff == 1)
                         && (ithetaDiff + iphiDiff <= 2)
-                        && (timeDiff <= parameters.maxtimediff)) {
+                        && (timeDiff <= cluster_par.getDoubleValue("maxtimediff", 0,0,0))) {
                     // Remove the hit from the remaining hits list
                     remainingHits.remove(hit);
                     // Get the Numeber of Photoelectrons
                     npheTest = npheArray[testHit];
                     // Get the Detector Coordinates (polar)
-                    double thetaTest = parameters.theta0[ithetaTest];
-                    double phiTest = parameters.phi0 + 2.0 * parameters.dphi0 * iphiTest;
-                    // Get the Detector Alignment Errors
-                    double dthetaTest = parameters.dtheta0[ithetaTest];
-                    double dphiTest = parameters.dphi0;
+                    double thetaTest = Math.toRadians(geometry.getDoubleValue("theta0", 0,0,0)+2*geometry.getDoubleValue("dtheta", 0,0,0)*ithetaTest);
+                    double phiTest   = Math.toRadians(geometry.getDoubleValue("phi0", 0,0,0)  +2*geometry.getDoubleValue("dphi", 0,0,0)*iphiTest);
+                    // Detector Alignment Errors
+                    double dthetaTest = Math.toRadians(geometry.getDoubleValue("dtheta", 0,0,0));
+                    double dphiTest   = Math.toRadians(geometry.getDoubleValue("dphi", 0,0,0));
                     // Add the hit to the cluster
                     cluster.addHit(ithetaTest, iphiTest, npheTest, time, thetaTest, phiTest, dthetaTest, dphiTest);
                     // Get the new average time of the cluster
@@ -341,60 +342,60 @@ public class HTCCReconstruction {
 //        bankClusters.show();
     }
 
-    /**
-     * Contains the HTCC reconstruction parameters.
-     */
-    class ReconstructionParameters {
-
-        double theta0[];
-        double dtheta0[];
-        double phi0;
-        double dphi0;
-        int npeminclst;
-        int npheminmax;
-        int npheminhit;
-        int nhitmaxclst;
-        int nthetamaxclst;
-        int nphimaxclst;
-        double maxtimediff;
-        double t0[];
-
-        /**
-         * Initialize reconstruction parameters with sensible defaults.
-         */
-        ReconstructionParameters() {
-            theta0 = new double[]{8.75, 16.25, 23.75, 31.25};
-            dtheta0 = new double[]{3.75, 3.75, 3.75, 3.75};
-            for (int i = 0; i < 4; ++i) {
-                theta0[i] = Math.toRadians(theta0[i]);
-                dtheta0[i] = Math.toRadians(dtheta0[i]);
-            }
-            phi0 = Math.toRadians(15.0);
-            dphi0 = Math.toRadians(15.0);
-            npeminclst = 1;
-            npheminmax = 1;
-            npheminhit = 1;
-            nhitmaxclst = 4;
-            nthetamaxclst = 2;
-            nphimaxclst = 2;
-            //defaul value
-            //maxtimediff = 2;
-            maxtimediff = 8;
-
-            t0 = new double[]{11.54, 11.93, 12.33, 12.75};
-        }
-
-        /**
-         * Initialize reconstruction parameters from a packed string.
-         *
-         * @param packed_string the packed string
-         * @throws UnsupportedOperationException
-         */
-        ReconstructionParameters(String packed_string) {
-            // TODO if necessary
-            throw new UnsupportedOperationException();
-        }
-    }
+//    /**
+//     * Contains the HTCC reconstruction parameters.
+//     */
+//    class ReconstructionParameters {
+//
+//        double theta0[];
+//        double dtheta0[];
+//        double phi0;
+//        double dphi0;
+//        int npeminclst;
+//        int npheminmax;
+//        int npheminhit;
+//        int nhitmaxclst;
+//        int nthetamaxclst;
+//        int nphimaxclst;
+//        double maxtimediff;
+//        double t0[];
+//
+//        /**
+//         * Initialize reconstruction parameters with sensible defaults.
+//         */
+//        ReconstructionParameters() {
+//            theta0 = new double[]{8.75, 16.25, 23.75, 31.25};
+//            dtheta0 = new double[]{3.75, 3.75, 3.75, 3.75};
+//            for (int i = 0; i < 4; ++i) {
+//                theta0[i] = Math.toRadians(theta0[i]);
+//                dtheta0[i] = Math.toRadians(dtheta0[i]);
+//            }
+//            phi0 = Math.toRadians(15.0);
+//            dphi0 = Math.toRadians(15.0);
+//            npeminclst = 1;
+//            npheminmax = 1;
+//            npheminhit = 1;
+//            nhitmaxclst = 4;
+//            nthetamaxclst = 2;
+//            nphimaxclst = 2;
+//            //defaul value
+//            //maxtimediff = 2;
+//            maxtimediff = 8;
+//
+//            t0 = new double[]{11.54, 11.93, 12.33, 12.75};
+//        }
+//
+//        /**
+//         * Initialize reconstruction parameters from a packed string.
+//         *
+//         * @param packed_string the packed string
+//         * @throws UnsupportedOperationException
+//         */
+//        ReconstructionParameters(String packed_string) {
+//            // TODO if necessary
+//            throw new UnsupportedOperationException();
+//        }
+//    }
 
     /**
      * Main routine for testing.

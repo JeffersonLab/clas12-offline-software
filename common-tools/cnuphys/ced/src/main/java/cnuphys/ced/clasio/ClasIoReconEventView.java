@@ -52,6 +52,8 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 
 			addTracks(event, _trajData, "HitBasedTrkg::HBTracks");
 			addTracks(event, _trajData, "TimeBasedTrkg::TBTracks");
+			
+			//only look for cvt tracks if we have no other recon tracks?
 			addTracks(event, _trajData, "CVTRec::Tracks");
 
 			model.setData(_trajData);
@@ -129,11 +131,41 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 			byte q[] = dm.getByteArray(event, bankName + "." + "q");
 			int count = (q == null) ? 0 : q.length;
 			
-			System.err.println("Number of cvt tracks found: " + count);
+		//	System.err.println("Number of cvt tracks found: " + count);
 			if (count > 0) {
-				float p[] = dm.getFloatArray(event, bankName + "." + "p");
+				float pt[] = dm.getFloatArray(event, bankName + "." + "pt");
+				float phi0[] = dm.getFloatArray(event, bankName + "." + "phi0");
+				float d0[] = dm.getFloatArray(event, bankName + "." + "d0");
+				float z0[] = dm.getFloatArray(event, bankName + "." + "z0");
+				float tandip[] = dm.getFloatArray(event, bankName + "." + "tandip");
+				short id[] = dm.getShortArray(event, bankName + "." + "ID");
+				
+				for (int i = 0; i < count; i++) {
+					
+					LundId lid = LundSupport.getCVTbased(q[i]);
+					
+					double xo = -d0[i]*Math.sin(phi0[i]);
+					double yo = d0[i]*Math.cos(phi0[i]);
+					double zo = z0[i];
+					double pxo = pt[i]*Math.cos(phi0[i]);
+					double pyo = pt[i]*Math.sin(phi0[i]);
+					double pzo = pt[i]*tandip[i];
+					
+					double p = Math.sqrt(pxo*pxo + pyo*pyo + pzo*pzo);
+					double theta = Math.acos(pzo/p);
+					TrajectoryRowData row = new TrajectoryRowData(id[i], lid, xo, yo, zo, 1000 *p, Math.toDegrees(theta),
+							Math.toDegrees(phi0[i]), 0, bankName);
+					data.add(row);
+				}
 			}
 
+//			X_vtx = -d0*sin(phi0)
+//			Y_vtx = d0*cos(phi0)
+//			Z_vtx = z0
+//			Px_vtx = pt*cos(phi0)
+//			Py_vtx = pt*sin(phi0)
+//			Pz_vtx = pt*tandip			
+			
 		}
 		catch (Exception e) {
 			String warning = "[ClasIoReconEventView.addCVTTracks] " + e.getMessage();

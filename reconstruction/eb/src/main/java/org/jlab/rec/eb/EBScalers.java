@@ -1,11 +1,6 @@
 package org.jlab.rec.eb;
-
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-
-import org.jlab.rec.eb.EBCCDBConstants;
-import org.jlab.rec.eb.EBCCDBEnum;
-
 /**
  *
  * Read the occaisonal scaler bank and store across events.
@@ -15,200 +10,165 @@ import org.jlab.rec.eb.EBCCDBEnum;
  * The EPICS equation for converting fcup scaler S to beam current I:
  *   I [nA] = (S [Hz] - offset ) / slope * attenuation;
  *
+ * The (32 bit) 1 MHz DSC2 clock rolls over every ~35 minutes.  We
+ * instead try to use the (48 bit) TI 4-ns timestamp, by storing the
+ * first timestamp in the run.
+ *
+ * Probably this will have to be done post-processing, e.g. in trains,
+ * where we can process the full run in one shot.
+ *
  * FIXME:  Use CCDB for GATEINVERTED, CLOCKFREQ, CRATE/SLOT/CHAN
  *
  * @author baltzell
  */
 public class EBScalers {
 
-    public class Reading {
-        public double beamCharge=0;
-        public double instantBeamCharge=0;
-        public double liveTime=0;
-        Reading(double q,double instq,double lt) {
-            beamCharge = q;
-            instantBeamCharge = instq;
-            liveTime = lt;
+    private RawReading firstRawReading=null;
+    private RawReading prevRawReading=new RawReading();
+    private Reading prevReading=new Reading();
+
+    public static class Reading {
+        private double beamCharge=0;
+        private double liveTime=0;
+        public void setBeamCharge(double x) { beamCharge=x; }
+        public void setLiveTime(double x)   { liveTime=x; }
+        public double getBeamCharge()       { return beamCharge; }
+        public double getLiveTime()         { return liveTime; }
+        public void show() { System.out.println("BCG=%.3f   LT=%.3f"); }
+    }
+
+    private static class RawReading {
+        
+        private static final String SCALERBANKNAME="RAW::scaler";
+        private static final int CRATE=64;
+        private static final int SLOT=64;
+        private static final int CHAN_GATEDFCUP=0;
+        private static final int CHAN_GATEDCLOCK=2;
+        private static final int CHAN_FCUP=32;
+        private static final int CHAN_CLOCK=34;
+
+        // whether the gating signal was inverted:
+        private static final boolean GATEINVERTED=true;
+
+        // clock frequency for conversion from clock counts to time:
+        private static final double CLOCKFREQ=1e6; // Hz
+
+        private long fcup=0;         // counts
+        private long gatedFcup=0;    // counts
+        private long clock=0;        // counts
+        private long gatedClock=0;   // counts
+        private long tiTimeStamp=0;  // 4-nanoseconds
+        private int unixTime=0;      // seconds
+       
+        public long   getClock()       { return this.clock; }
+        public long   getFcup()        { return this.fcup; }
+        public long   getGatedClock()  { return this.gatedClock; }
+        public long   getGatedFcup()   { return this.gatedFcup; }
+        public long   getTiTimeStamp() { return this.tiTimeStamp; }
+        public int    getUnixTime()    { return this.unixTime; }
+        public double getClockTime()   { return this.clock / CLOCKFREQ; }
+
+        public void subtract(RawReading r) {
+            this.fcup -= r.fcup;
+            this.clock -= r.clock;
+            this.gatedFcup -= r.gatedFcup;
+            this.gatedClock -= r.gatedClock;
+            this.unixTime -= r.unixTime;
+            this.tiTimeStamp -= r.tiTimeStamp;
+        }
+
+        public void show() {
+            System.out.println("FCUP = "+this.fcup+"/"+this.gatedFcup);
+            System.out.println("CLOK = "+this.clock+"/"+this.gatedClock);
+            System.out.println("TIME = "+this.unixTime+"/"+this.tiTimeStamp);
+        }
+        
+        public RawReading() {}
+        
+        public RawReading(RawReading r) {
+            this.fcup = r.fcup;
+            this.clock = r.clock;
+            this.gatedFcup = r.gatedFcup;
+            this.gatedClock = r.gatedClock;
+            this.unixTime = r.unixTime;
+            this.tiTimeStamp = r.tiTimeStamp;
+        }
+        
+        public RawReading(DataEvent event) {
+            
+            if (!event.hasBank(SCALERBANKNAME)) return;
+            if (!event.hasBank("RUN::config")) return;
+            
+            tiTimeStamp=event.getBank("RUN::config").getLong("timestamp",0);
+            unixTime   =event.getBank("RUN::config").getInt("unixtime",0);
+            
+            DataBank bank = event.getBank(SCALERBANKNAME);
+            for(int k=0;k<bank.rows(); k++){
+                if (bank.getInt("crate",k)==CRATE &&
+                    bank.getInt("slot",k)==SLOT) {
+                    switch (bank.getInt("channel",k)) {
+                        case CHAN_GATEDFCUP:
+                            gatedFcup = bank.getLong("value",k);
+                            break;
+                        case CHAN_GATEDCLOCK:
+                            gatedClock = bank.getLong("value",k);
+                            break;
+                        case CHAN_CLOCK:
+                            clock = bank.getLong("value",k);
+                            break;
+                        case CHAN_FCUP:
+                            fcup = bank.getLong("value",k);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            if (GATEINVERTED) {
+                gatedFcup = fcup - gatedFcup;
+                gatedClock = clock - gatedClock;
+            }
         }
     }
 
-    // integrated beam charge:
-    private static double BEAMCHARGE=0;      // nC
-
-    // these are "instantaneous":
-    private static double INST_BEAMCHARGE=0; // nC
-    private static double INST_LIVETIME=0;
-
-    // previous scaler readings:
-    private static int PREV_FCUP=-1;           // counts
-    private static int PREV_CLOCK=-1;          // counts
-    private static int PREV_GATEDFCUP=-1;      // counts
-    private static int PREV_GATEDCLOCK=-1;     // counts
-    //private static double PREV_UNIXTIME=-1;    // seconds
-    //private static double PREV_TITIMESTAMP=-1; // seconds
-
-    // the relevant crate/slot/channel numbers for the integrating scalers:
-    private static final String BANKNAME="RAW::scaler";
-    private static final int CRATE=64;
-    private static final int SLOT=64;
-    private static final int CHAN_GATEDFCUP=0;
-    private static final int CHAN_GATEDCLOCK=2;
-    private static final int CHAN_FCUP=32;
-    private static final int CHAN_CLOCK=34;
-
-    // whether the gating signal was inverted:
-    private static final boolean GATEINVERTED=true;
-
-    // clock frequency for conversion from clock counts to time:
-    private static final double CLOCKFREQ=1e6; // Hz
-
-    // readout period, only used for ignoring invalid readouts:
-    private static final double READOUTPERIOD=1./30; // seconds
-
-    private static final boolean DEBUG=false;
-
+    /**
+     * This returns the most recent available scaler info.  If events are
+     * misordered, this is the scaler info with the most recent TI timestamp.
+     */
     public synchronized Reading readScalers(DataEvent event,EBCCDBConstants ccdb) {
        
-        // load the previous reading in case we don't find a new one:
-        Reading reading=new Reading(BEAMCHARGE,INST_BEAMCHARGE,INST_LIVETIME);
+        RawReading raw=new RawReading(event);
        
-        if (!event.hasBank(BANKNAME)) return reading;
+        if (raw.getGatedFcup()<=0 || raw.getTiTimeStamp()<=0) return prevReading;
 
-        //double tiTimeStamp=0;
-        //double unixTime=0;
-        //if (event.hasBank("RUN::config")) {
-        //    tiTimeStamp = (double)event.getBank("RUN::config").getLong("timestamp",0);
-        //    unixTime  = (double)event.getBank("RUN::config").getInt("unixtime",0);
-        //    tiTimeStamp *= 4/1e9; // 4-ns cycles, convert to seconds
-        //}
-
-        int fcup=-1;
-        int clock=-1;
-        int gatedFcup=-1;
-        int gatedClock=-1;
-
-        DataBank bank = event.getBank(BANKNAME);
-
-        for(int k=0;k<bank.rows(); k++){
-
-            final int crate = bank.getInt("crate",k);
-            final int slot  = bank.getInt("slot",k);
-            final int chan  = bank.getInt("channel",k);
-
-            // Integrating scalers:
-            if (crate==CRATE && slot==SLOT) {
-                switch (chan) {
-                    case CHAN_GATEDFCUP:
-                        gatedFcup = bank.getInt("value",k);
-                        break;
-                    case CHAN_GATEDCLOCK:
-                        gatedClock = bank.getInt("value",k);
-                        break;
-                    case CHAN_CLOCK:
-                        clock = bank.getInt("value",k);
-                        break;
-                    case CHAN_FCUP:
-                        fcup = bank.getInt("value",k);
-                        break;
-                    default:
-                        break;
-                }
-            }
+        if (firstRawReading==null ||
+            firstRawReading.getTiTimeStamp() > raw.getTiTimeStamp()) {
+            firstRawReading = raw;
         }
-
-        // sanity check on all readings:
-        if (gatedFcup<0 || fcup<0 || gatedClock<0 || clock<=0) return reading;
-
-        // invert the gating:
-        if (GATEINVERTED) {
-            gatedFcup = fcup - gatedFcup;
-            gatedClock = clock - gatedClock;
-        }
-        
-        // calculate deltas relative to previous reading:
-        final int delFcup = fcup - PREV_FCUP;
-        final int delClock = clock - PREV_CLOCK;
-        final int delGatedFcup = gatedFcup - PREV_GATEDFCUP;
-        final int delGatedClock = gatedClock - PREV_GATEDCLOCK;
-        //final double delTimeStamp = tiTimeStamp - PREV_TITIMESTAMP;
-       
-        // convert clock counts to seconds:
-        final double clockTime = (double)clock / CLOCKFREQ; // seconds
-        final double delClockTime = (double)delClock / CLOCKFREQ; // seconds
-
-        if (clock < PREV_CLOCK) {
-            System.out.println("EBScalers:  *** WARNING ***  Misordered RAW::Scaler");
-        }
-        
-        // ignore this reading if time elapsed is too small:
-        // - this can be due to misordered events or duplicates via EBHB+EBTB
-        // - FIXME:  should have a better solution for EBHB+EBTB
-        if (delClockTime < READOUTPERIOD/10.) return reading;
+         
+        RawReading rawRelDiff = new RawReading(raw);
+        rawRelDiff.subtract(prevRawReading);
+     
+        // ignore earlier readouts:
+        if (raw.getFcup() < prevRawReading.getFcup()) return prevReading;
+        if (raw.getTiTimeStamp() < prevRawReading.getTiTimeStamp()) return prevReading;
 
         // retrieve fcup calibrations:
         final double fcup_slope =ccdb.getDouble(EBCCDBEnum.FCUP_slope);
         final double fcup_offset=ccdb.getDouble(EBCCDBEnum.FCUP_offset);
         final double fcup_atten =ccdb.getDouble(EBCCDBEnum.FCUP_atten);
 
-        // update the latest calculations:
-        INST_LIVETIME = (double)delGatedClock / delClock;
-        INST_BEAMCHARGE = ((double)delGatedFcup/delClockTime-fcup_offset) / fcup_slope;
-        BEAMCHARGE = ((double)gatedFcup/clockTime-fcup_offset) / fcup_slope;
-       
-        // convert from average-nA to integrated-nC:
-        INST_BEAMCHARGE *= delClockTime;
-        BEAMCHARGE *= clockTime;
+        final double livetime = (double)rawRelDiff.getGatedClock() / rawRelDiff.getClock();
+        final double seconds = (raw.getTiTimeStamp() - firstRawReading.getTiTimeStamp()) * 4/1e9;
+        final double beamCharge = (raw.getGatedFcup() - fcup_offset * seconds) / fcup_slope * fcup_atten;
 
-        // correct for beam stopper attenuation:
-        INST_BEAMCHARGE *= fcup_atten;
-        BEAMCHARGE *= fcup_atten;
-
-        if (DEBUG) {
-            System.err.println("--------------------------------------------------------------------");
-            System.err.println("FCUP = "+fcup+"/"+gatedFcup+"/"+delFcup+"/"+delGatedFcup);
-            System.err.println("CLOCK= "+clock+"/"+gatedClock+"/"+delClock+"/"+delGatedClock);
-            System.err.println("TIME = "+delClockTime+"/"+clockTime);
-            System.err.println(String.format("Q    = %.3f/%.3f ",INST_BEAMCHARGE,BEAMCHARGE));
-            System.err.println(String.format("LT   = %.3f ",INST_LIVETIME));
-            System.err.println(INST_BEAMCHARGE / delClockTime);
-            System.err.println("--------------------------------------------------------------------");
-        }
-        
-        // update the previous scaler readings:
-        PREV_FCUP = fcup;
-        PREV_CLOCK = clock;
-        PREV_GATEDFCUP = gatedFcup;
-        PREV_GATEDCLOCK = gatedClock;
-        //PREV_TITIMESTAMP = tiTimeStamp;
-        //PREV_UNIXTIME = unixTime;
-      
-        // return the new readings:
-        reading.beamCharge=BEAMCHARGE;
-        reading.instantBeamCharge=INST_BEAMCHARGE;
-        reading.liveTime=INST_LIVETIME;
-        return reading;
+        prevRawReading = raw;
+        prevReading.setLiveTime(livetime);
+        prevReading.setBeamCharge(beamCharge);
+        //System.out.println("<<<<<<<<<<<<<<    >>>>>>>>>>>>>");
+        //raw.show();
+        //prevReading.show();
+        return prevReading;
     }
-
-
-/*
-    public static final enum ScalerSignal {
-        FCUP  (0, "FCUP"),
-        SLM   (1, "SLM"),
-        CLOCK (2, "CLOCK")
-    }
-
-    public static final enum ScalerVersion {
-        GATEDTRG  (0, "GATEDTRG"),
-        GATEDTDC  (1, "GATEDTDC"),
-        TRG       (2, "TRG"),
-        TDC       (3, "TDC")
-    }
-    
-    public static final int NCHAN=16;
-    public static final int getChannel(ScalerSignal sig, ScalerVersion ver) {
-        return sig + NCHAN * ver;
-    }
-*/
-
 }
 

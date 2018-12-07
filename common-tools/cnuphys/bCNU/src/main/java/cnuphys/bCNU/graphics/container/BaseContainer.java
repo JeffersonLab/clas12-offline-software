@@ -33,7 +33,6 @@ import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.drawable.IDrawableListener;
 import cnuphys.bCNU.feedback.FeedbackControl;
 import cnuphys.bCNU.feedback.FeedbackPane;
-import cnuphys.bCNU.feedback.HeadsUpDisplay;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.graphics.toolbar.ToolBarToggleButton;
@@ -81,10 +80,6 @@ public class BaseContainer extends JComponent
 	 */
 	protected BaseToolBar _toolBar;
 
-	/**
-	 * The optional heads up display.
-	 */
-	protected HeadsUpDisplay _headsUp;
 
 	/**
 	 * The logical layer visibility control. It is created when requested.
@@ -92,8 +87,7 @@ public class BaseContainer extends JComponent
 	protected VisibilityTableScrollPane _visTable;
 
 	/**
-	 * The optional feedback pane, an alternative to Headsup when headsup is to
-	 * intrusive.
+	 * The optional feedback pane.
 	 */
 	protected FeedbackPane _feedbackPane;
 
@@ -189,10 +183,9 @@ public class BaseContainer extends JComponent
 	 * on a panel, for example
 	 * 
 	 * @param worldSystem the default world system.
-	 * @param addHeadsUp if <code>true</code>, add a headsup display.
 	 */
-	public BaseContainer(Rectangle2D.Double worldSystem, boolean addHeadsUp) {
-		this(null, worldSystem, addHeadsUp);
+	public BaseContainer(Rectangle2D.Double worldSystem) {
+		this(null, worldSystem);
 	}
 
 	/**
@@ -201,10 +194,8 @@ public class BaseContainer extends JComponent
 	 * @param view Every container lives on one view. This is the view, which is
 	 *            an internal frame, that owns this container.
 	 * @param worldSystem the default world system.
-	 * @param addHeadsUp if <code>true</code>, add a headsup display.
 	 */
-	public BaseContainer(BaseView view, Rectangle2D.Double worldSystem,
-			boolean addHeadsUp) {
+	public BaseContainer(BaseView view, Rectangle2D.Double worldSystem) {
 		_view = view;
 		_worldSystem = worldSystem;
 		_feedbackControl = new FeedbackControl(this);
@@ -212,10 +203,6 @@ public class BaseContainer extends JComponent
 		_defaultWorldSystem = copy(worldSystem);
 		_previousWorldSystem = copy(worldSystem);
 
-		// create a headsup display?
-		if (addHeadsUp) {
-			_headsUp = new HeadsUpDisplay(this);
-		}
 
 		// create the annotation layer. (not added to userlayer hash)
 		_annotationLayer = new LogicalLayer(this, "Annotations");
@@ -923,9 +910,6 @@ public class BaseContainer extends JComponent
 	@Override
 	public void mouseExited(MouseEvent mouseEvent) {
 		_currentMousePoint = null;
-		if (_headsUp != null) {
-			_headsUp.updateHeadsUp(null, null);
-		}
 	}
 
 	/**
@@ -1167,16 +1151,6 @@ public class BaseContainer extends JComponent
 	@Override
 	public void setFeedbackPane(FeedbackPane feedbackPane) {
 		_feedbackPane = feedbackPane;
-	}
-
-	/**
-	 * Get the optional headsup display.
-	 * 
-	 * @return the headsUp display.
-	 */
-	@Override
-	public HeadsUpDisplay getHeadsUp() {
-		return _headsUp;
 	}
 
 	/**

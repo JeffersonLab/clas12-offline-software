@@ -101,15 +101,12 @@ public class TOFView extends CedView implements ISector {
 				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height,
 				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS,
 				CedView.NORANGETOOLBARBITS, PropertySupport.VISIBLE, true,
-				PropertySupport.HEADSUP, false,
-
 				PropertySupport.BACKGROUND,
 				X11Colors.getX11Color("Antique White"),
 				PropertySupport.TITLE, title,
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
-		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL
-				+ ControlPanel.DISPLAYARRAY 
+		view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY 
 				+ ControlPanel.DRAWLEGEND + ControlPanel.FEEDBACK
 				+ ControlPanel.ACCUMULATIONLEGEND, DisplayBits.ACCUMULATION
 				+ DisplayBits.MCTRUTH, 3, 5);

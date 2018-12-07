@@ -1,6 +1,5 @@
 package cnuphys.ced.cedview.sectorview;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.geom.Point2D;
 
@@ -8,9 +7,7 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.magneticfield.swim.ASwimTrajectoryDrawer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.geometry.GeometryManager;
-import cnuphys.lund.LundId;
-import cnuphys.magfield.MagneticField;
-import cnuphys.splot.plot.X11Colors;
+import cnuphys.magfield.FastMath;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.SwimTrajectory2D;
 
@@ -81,7 +78,7 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 			double pos[] = traj.get(i);
 			double x = pos[SwimTrajectory.X_IDX];
 			double y = pos[SwimTrajectory.Y_IDX];
-			double tp = MagneticField.atan2Deg(y, x);
+			double tp = FastMath.atan2Deg(y, x);
 			
 	//		System.err.println("  >>  SECTOR: " + GeometryManager.getSector(tp));
 			sector[GeometryManager.getSector(tp)] += 1;

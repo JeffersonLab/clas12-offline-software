@@ -50,7 +50,7 @@ cp external-dependencies/JEventViewer-1.1.jar coatjava/lib/clas/
 cp external-dependencies/vecmath-1.3.1-2.jar coatjava/lib/clas/
 mkdir -p coatjava/lib/utils
 cp external-dependencies/jclara-4.3-SNAPSHOT.jar coatjava/lib/utils
-cp external-dependencies/clas12mon-2.0.jar coatjava/lib/utils
+cp external-dependencies/clas12mon-3.0.jar coatjava/lib/utils
 cp external-dependencies/KPP-Plots-2.0.jar coatjava/lib/utils
 #cp external-dependencies/jaw-1.0.jar coatjava/lib/utils
 mkdir -p coatjava/lib/services
@@ -81,7 +81,7 @@ mvn package
 if [ $? != 0 ] ; then echo "mvn package failure" ; exit 1 ; fi
 cd -
 
-cp common-tools/coat-lib/target/coat-libs-5.7.0-SNAPSHOT.jar coatjava/lib/clas/
+cp common-tools/coat-lib/target/coat-libs-5.7.4-SNAPSHOT.jar coatjava/lib/clas/
 cp reconstruction/dc/target/clas12detector-dc-1.0-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/tof/target/clas12detector-tof-1.0-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/cvt/target/clas12detector-cvt-1.0-SNAPSHOT.jar coatjava/lib/services/

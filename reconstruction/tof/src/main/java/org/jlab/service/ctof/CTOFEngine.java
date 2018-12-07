@@ -8,7 +8,10 @@ import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -46,10 +49,9 @@ public class CTOFEngine extends ReconstructionEngine {
         Constants.Load();
         // }
         rbc = new RecoBankWriter();
-        geometry = new CTOFGeant4Factory();
         // CalibrationConstantsLoader.Load();
         // }
-        String[]  ftofTables = new String[]{ 
+        String[]  ctofTables = new String[]{ 
                     "/calibration/ctof/attenuation",
                     "/calibration/ctof/effective_velocity",
                     "/calibration/ctof/time_offsets",
@@ -60,12 +62,13 @@ public class CTOFEngine extends ReconstructionEngine {
                     "/calibration/ctof/fadc_offset"
                 };
         
-        requireConstants(Arrays.asList(ftofTables));
+        requireConstants(Arrays.asList(ctofTables));
        
        // Get the constants for the correct variation
         this.getConstantsManager().setVariation("default");
+        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.CTOF, 11, "default");
+        geometry = new CTOFGeant4Factory(cp);
         
-        geometry = new CTOFGeant4Factory();
         return true;
     }
 

@@ -15,7 +15,6 @@ import cnuphys.bCNU.drawable.DrawableList;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.feedback.FeedbackControl;
 import cnuphys.bCNU.feedback.FeedbackPane;
-import cnuphys.bCNU.feedback.HeadsUpDisplay;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.graphics.toolbar.ToolBarToggleButton;
 import cnuphys.bCNU.graphics.world.WorldPolygon;
@@ -365,13 +364,6 @@ public interface IContainer {
 	 *            the feedback pane.
 	 */
 	public void setFeedbackPane(FeedbackPane feedbackPane);
-
-	/**
-	 * Get the optional headsup display.
-	 * 
-	 * @return the headsUp display.
-	 */
-	public HeadsUpDisplay getHeadsUp();
 
 	/**
 	 * Get the optional feedback pane.

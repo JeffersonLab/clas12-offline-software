@@ -256,7 +256,7 @@ public class SectorECItem extends PolygonItem {
 	}
 
 	/**
-	 * Add any appropriate feedback strings for the headsup display or feedback
+	 * Add any appropriate feedback strings
 	 * panel. Default implementation returns the item's name.
 	 * 
 	 * @param container

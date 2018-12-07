@@ -47,6 +47,10 @@ public class DisplayBits {
 	/** cvt recon tracks */
 	public static final int CVTTRACKS = 040000;
 	
+	/** reconstructed clusters */
+	public static final int FMTCROSSES = 0100000;
+
+	
 	
 	/** Distance scale */
 	//public static final int SCALE = 04;

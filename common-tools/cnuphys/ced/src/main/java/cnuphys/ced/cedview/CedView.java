@@ -63,9 +63,8 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		SINGLE_EVENT, ACCUMULATED
 	};
 	
-	//field probe for fast retrieval of mag field
-	protected FieldProbe probe;
-	
+	static protected FieldProbe _activeProbe;
+		
 	//to add separator for first clone
 	private static boolean _firstClone = true;
 
@@ -164,8 +163,6 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		// listen for trajectory changes
 		Swimming.addSwimTrajectoryListener(this);
 
-		probe = FieldProbe.factory();
-
 		MagneticFields.getInstance().addMagneticFieldChangeListener(this);
 
 		_userComponentDrawer = new UserComponentLundDrawer(this);
@@ -201,6 +198,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		GraphicsUtilities.setSizeMini(nextEvent);
 		getToolBar().add(Box.createHorizontalStrut(5), 0);
 		getToolBar().add(nextEvent, 0);
+		
+		if (_activeProbe == null) {
+			_activeProbe = FieldProbe.factory();
+		}
 	}
 
 	// called when heartbeat goes off.
@@ -425,7 +426,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	}
 
 	/**
-	 * Convenience method to see it we show the the reconstructed clusters.
+	 * Convenience method to see it we show the reconstructed clusters.
 	 * 
 	 * @return <code>true</code> if we are to show the the reconstructed
 	 *         clusters.
@@ -436,6 +437,20 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showClusters();
 	}
+	
+	/**
+	 * Convenience method to see it we show the reconstructed FMT Crosses.
+	 * 
+	 * @return <code>true</code> if we are to show the the reconstructed
+	 *         FMT Crosses.
+	 */
+	public boolean showFMTCrosses() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showFMTCrosses();
+	}
+
 
 	
 	/**
@@ -643,7 +658,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 */
 	@Override
 	public void magneticFieldChanged() {
-		probe = FieldProbe.factory();
+		_activeProbe = FieldProbe.factory();
 		getContainer().refresh();
 	}
 

@@ -232,11 +232,13 @@ public class ECEngine extends ReconstructionEngine {
             "/calibration/ec/time_jitter",
             "/calibration/ec/fadc_offset",
             "/calibration/ec/fadc_global_offset",
-            "/calibration/ec/global_gain_shift"
+            "/calibration/ec/global_gain_shift",
+            "/calibration/ec/effective_velocity"
         };
         
-        requireConstants(Arrays.asList(ecTables));
         
+        requireConstants(Arrays.asList(ecTables));
+        getConstantsManager().setVariation(ECCommon.variation);
         ecDetector =  GeometryFactory.getDetector(DetectorType.ECAL);
 
         setCalRun(2);

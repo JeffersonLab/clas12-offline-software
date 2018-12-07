@@ -17,6 +17,7 @@ import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.cedview.CedView;
+import cnuphys.ced.cedview.dcxy.DCXYView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.Cross2;
 import cnuphys.ced.event.data.CrossList2;
@@ -43,6 +44,12 @@ public class FMTCrossDrawer extends CedViewDrawer  {
 
 	@Override
 	public void draw(Graphics g, IContainer container) {
+		
+		if (!_view.showFMTCrosses()) {
+			return;
+		}
+		
+		
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
@@ -73,6 +80,12 @@ public class FMTCrossDrawer extends CedViewDrawer  {
 	 * @param container the drawing container
 	 */
 	public void drawFMTCrosses(Graphics g, IContainer container) {
+		
+		//treat DCXY view separately
+		if (_view instanceof DCXYView) {
+			drawFMTCrossesXY(g, container);
+			return;
+		}
 		
 		CrossList2 crosses = FMTCrosses.getInstance().getCrosses();
 		
@@ -135,6 +148,66 @@ public class FMTCrossDrawer extends CedViewDrawer  {
 					_fmtFBRects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y - DataDrawSupport.CROSSHALF,
 							2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
 				}
+			} // loop over crosses
+		} // len > 0
+
+	}
+	
+	/**
+	 * Draw FMT crosses
+	 * @param g the graphics context
+	 * @param container the drawing container
+	 */
+	public void drawFMTCrossesXY(Graphics g, IContainer container) {
+		
+		CrossList2 crosses = FMTCrosses.getInstance().getCrosses();
+		
+		int len = (crosses == null) ? 0 : crosses.size();
+		
+		if (len == 0) {
+			_fmtFBRects = null;
+		} else {
+			_fmtFBRects = new Rectangle[len];
+		}
+
+		if (len > 0) {
+			Point2D.Double wp = new Point2D.Double();
+			Point pp = new Point();
+			Point2D.Double wp2 = new Point2D.Double();
+			Point pp2 = new Point();
+
+			for (int i = 0; i < len; i++) {
+				Cross2 cross = crosses.elementAt(i);
+
+				//lab coordinates
+				wp.setLocation(cross.x, cross.y);
+				
+
+
+					container.worldToLocal(pp, wp);
+					cross.setLocation(pp);
+
+					// arrows
+
+					int pixlen = ARROWLEN;
+					double r = pixlen / WorldGraphicsUtilities.getMeanPixelDensity(container);
+					
+					//lab coordinates of end of arrow
+					wp2.setLocation(cross.x + r * cross.ux, cross.y + r * cross.uy);
+					container.worldToLocal(pp2, wp2);
+
+					g.setColor(Color.orange);
+					g.drawLine(pp.x + 1, pp.y, pp2.x + 1, pp2.y);
+					g.drawLine(pp.x, pp.y + 1, pp2.x, pp2.y + 1);
+					g.setColor(Color.darkGray);
+					g.drawLine(pp.x, pp.y, pp2.x, pp2.y);
+
+					// the circles and crosses
+					DataDrawSupport.drawCross(g, pp.x, pp.y, DataDrawSupport.FMT_CROSS);
+
+					// fbrects for quick feedback
+					_fmtFBRects[i] = new Rectangle(pp.x - DataDrawSupport.CROSSHALF, pp.y - DataDrawSupport.CROSSHALF,
+							2 * DataDrawSupport.CROSSHALF, 2 * DataDrawSupport.CROSSHALF);
 			} // loop over crosses
 		} // len > 0
 
