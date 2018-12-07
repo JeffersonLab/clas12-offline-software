@@ -24,10 +24,15 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.sin;
 import static java.lang.Math.cos;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.physics.LorentzVector;
 
 import org.jlab.rec.cnd.cluster.CNDCluster;
 import org.jlab.rec.cnd.cluster.CNDClusterFinder;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  * Service to return reconstructed CND Hits - the output is in Hipo format
@@ -44,7 +49,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	
 	}
 
-	int Run = -1;
+	//int Run = -1;
 	RecoBankWriter rbc;
 	//test
 	static int enb =0;
@@ -54,16 +59,39 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	static int posmatch=0;
 	static int ctof=0;
 	static int ctoftot=0;
+        
+        private AtomicInteger Run = new AtomicInteger(0);
+        private int newRun = 0;
 
 	@Override
 	public boolean processDataEvent(DataEvent event) {
 
+            
+            if (!event.hasBank("RUN::config")) {
+            return true;
+            }
+
+           DataBank bank = event.getBank("RUN::config");
+
+            // Load the constants
+            //-------------------
+            int newRun = bank.getInt("run", 0);
+            if (newRun == 0)
+               return true;
+
+            if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
+                List<IndexedTable> tabJs = new ArrayList<IndexedTable>();
+                for(String tbStg : cndTables)
+                    tabJs.add(this.getConstantsManager().getConstants(newRun, tbStg));
+               
+                CalibrationConstantsLoader.Load(tabJs);    
+
+                Run.set(newRun);
+           }
+            
 		//event.show();
 		//System.out.println("in data process ");
             
-		// update calibration constants based on run number if changed
-		setRunConditionsParameters(event);
-
                 ArrayList<HalfHit> halfhits = new ArrayList<HalfHit>();   
 		ArrayList<CndHit> hits = new ArrayList<CndHit>();
 
@@ -178,36 +206,51 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 		
 	}
 
+        String[]  cndTables = new String[]{
+                "/calibration/cnd/UturnEloss",
+                "/calibration/cnd/UturnTloss",
+                "/calibration/cnd/TimeOffsets_LR",
+                "/calibration/cnd/TDC_conv",
+                "/calibration/cnd/TimeOffsets_layer",
+                "/calibration/cnd/EffV",
+                "/calibration/cnd/Attenuation",
+                "/calibration/cnd/Status_LR",
+                "/calibration/cnd/Energy",
+                "/calibration/cnd/time_jitter",
+                "/geometry/cnd/layer",
+                "/geometry/cnd/cnd"
+            };
 	@Override
 	public boolean init() {
-		// TODO Auto-generated method stub
-		rbc = new RecoBankWriter();
-		System.out.println("in init ");
+            // TODO Auto-generated method stub
+            rbc = new RecoBankWriter();
+            System.out.println("in init ");
+            
+
+        requireConstants(Arrays.asList(cndTables));
+        
+        // Get the constants for the correct variation
+        String ccDBVar = this.getEngineConfigString("constantsDBVariation");
+        if (ccDBVar!=null) {
+            System.out.println("["+this.getName()+"] run with constants variation based on yaml ="+ccDBVar);
+        }
+        else {
+            ccDBVar = System.getenv("CCDBVAR");
+            if (ccDBVar!=null) {
+                System.out.println("["+this.getName()+"] run with constants variation chosen based on env ="+ccDBVar);
+            }
+        } 
+        if (ccDBVar==null) {
+            System.out.println("["+this.getName()+"] run with default constants");
+        }
+        // Load the calibration constants
+        String dcvariationName = Optional.ofNullable(ccDBVar).orElse("default");
+        this.getConstantsManager().setVariation(dcvariationName);
 		return true;
 	}
 
 
-	public void setRunConditionsParameters(DataEvent event) {
-		if(event.hasBank("RUN::config")==false) {
-			System.err.println("RUN CONDITIONS NOT READ!");
-		}
-		else {
-			int newRun = Run;        
-
-			DataBank bank = event.getBank("RUN::config");
-			newRun = bank.getInt("run", 0);  
-			// Load the constants
-			//-------------------
-			if(Run!=newRun) {
-				CalibrationConstantsLoader.Load(newRun,"default"); 
-				Run = newRun;
-			}
-		}
-
-	}
-
-
-
+	
 	public static void main (String arg[]) {
 		CNDCalibrationEngine en = new CNDCalibrationEngine();
 
