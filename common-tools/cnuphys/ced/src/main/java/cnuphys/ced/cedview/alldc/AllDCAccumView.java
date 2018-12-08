@@ -60,6 +60,13 @@ public class AllDCAccumView extends CedView implements IAllDC {
 	//counts for all data indices sector, superlayer, layer. wire
 	private int _counts[][][][] = new int[6][6][6][112];
 
+	//superlayer counts
+	private int _superlayerCounts[][] = new int[6][6];
+	
+	//sector counts
+	private int _sectorCounts[] = new int[6];
+
+	
 	/**
 	 * A sector rectangle for each sector
 	 */
@@ -421,7 +428,9 @@ public class AllDCAccumView extends CedView implements IAllDC {
 		System.err.println("reset");
 		
 		for (int sect = 0; sect < 6; sect++) {
+			_sectorCounts[sect] = 0;
 			for (int supl = 0; supl < 6; supl++) {
+				_superlayerCounts[sect][supl] = 0;
 				for (int lay = 0; lay < 6; lay++) {
 					for (int wire = 0; wire < 112; wire++) {
 						_counts[sect][supl][lay][wire] = 0;
@@ -482,13 +491,13 @@ public class AllDCAccumView extends CedView implements IAllDC {
 	 * @param feedbackStrings
 	 */
 	public void augmentedFeedback(int sector, int superlayer, int layer, int wire, List<String> feedbackStrings) {
-		augFB("sector " + sector, feedbackStrings);
-		augFB("superlayer " + superlayer, feedbackStrings);
-		augFB("layer " + layer, feedbackStrings);
-		augFB("wire " + wire, feedbackStrings);
+		augFB(0, "sector " + sector, feedbackStrings);
+		augFB(0, "superlayer " + superlayer, feedbackStrings);
+		augFB(0, "layer " + layer, feedbackStrings);
+		augFB(0, "wire " + wire, feedbackStrings);
 		
 		int counts = getCounts(sector, superlayer, layer, wire);
-		augFB("counts " + counts, feedbackStrings);
+		augFB(1, "counts " + counts, feedbackStrings);
 	}
 	
 	//1-based indices
@@ -496,10 +505,26 @@ public class AllDCAccumView extends CedView implements IAllDC {
 		return _counts[sector-1][superlayer-1][layer-1][wire-1];
 	}
 	
+	//counts in a given superlayer
+	private int getSuperlayerCounts(int sector, int superlayer) {
+		int counts = 0;
+		
+		for (int layer = 1; layer <= 6; layer++) {
+			for (int  wire = 1; wire <= 112; wire++) {
+				counts += getCounts(sector, superlayer, );
+			}
+		}
+		
+		return counts;
+	}
+	
 	//add a colored string
-	private void augFB(String msg, List<String> feedbackStrings) {
-		feedbackStrings.add("$yellow$" + msg);
+	
+	private static final String colors[] = {"$yellow$", "$white$", "$orange$"};
+	private void augFB(int col, String msg, List<String> feedbackStrings) {
+		feedbackStrings.add(colors[col] + msg);
 	}
 
+	
 
 }
