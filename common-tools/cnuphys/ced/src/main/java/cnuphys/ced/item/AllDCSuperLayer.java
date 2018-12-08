@@ -10,6 +10,7 @@ import java.util.List;
 import org.jlab.geom.prim.Point3D;
 
 import cnuphys.ced.cedview.CedView;
+import cnuphys.ced.cedview.alldc.AllDCAccumView;
 import cnuphys.ced.cedview.alldc.AllDCView;
 import cnuphys.ced.cedview.alldc.IAllDC;
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -64,6 +65,9 @@ public class AllDCSuperLayer extends RectangleItem {
 
 	// the AllDC view this item lives on
 	private IAllDC _allDC;
+	
+	//the parent view
+	private CedView _view;
 
 	// for hits cells
 	private static final Color _defaultHitCellFill = Color.red;
@@ -86,7 +90,7 @@ public class AllDCSuperLayer extends RectangleItem {
 	 * 
 	 * @param layer
 	 *            the Layer this item is on.
-	 * @param view
+	 * @param alldc
 	 *            the AllDCView parent
 	 * @param worldRectangle
 	 *            the boundaries which are not the real boundaries.
@@ -103,6 +107,7 @@ public class AllDCSuperLayer extends RectangleItem {
 		super(layer, worldRectangle);
 		_worldRectangle = worldRectangle;
 		_allDC = allDC;
+		_view = _allDC.getView();
 		_numWires = numWires;
 
 		_style.setFillColor(Color.white);
@@ -175,7 +180,7 @@ public class AllDCSuperLayer extends RectangleItem {
 				+ _superLayer, -9, -5);
 
 		// now the data
-		if (_allDC.getView().isSingleEventMode()) {
+		if (_view.isSingleEventMode()) {
 			singleEventDrawItem(g, container);
 			// shade the layers
 			for (int i = 0; i < GeoConstants.NUM_LAYER; i += 2) {
@@ -219,7 +224,7 @@ public class AllDCSuperLayer extends RectangleItem {
 				_sector - 1, _superLayer - 1);
 
 		// show the noise segment masks?
-		if (_allDC.getView().showMasks()) {
+		if (_view.showMasks()) {
 			drawMasks(g, container, parameters);
 		}
 
@@ -330,14 +335,14 @@ public class AllDCSuperLayer extends RectangleItem {
 		}
 
 		// abort if hiding noise and this is noise
-		if (_allDC.getView().hideNoise() && noise) {
+		if (_view.hideNoise() && noise) {
 			return;
 		}
 
 		getCell(layer, wire, wr);
 
 		// are we to show mc (MonteCarlo simulation) truth?
-		boolean showTruth = _allDC.getView().showMcTruth();
+		boolean showTruth = _view.showMcTruth();
 
 		Color hitFill = _defaultHitCellFill;
 		Color hitLine = _defaultHitCellLine;
@@ -354,7 +359,7 @@ public class AllDCSuperLayer extends RectangleItem {
 			}
 		} // end gemcData != null
 
-		if ((_allDC.getView().showNoiseAnalysis()) && noise) {
+		if ((_view.showNoiseAnalysis()) && noise) {
 			highlightNoiseHit(g, container, !showTruth, wr);
 		} else {
 			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr,
@@ -461,7 +466,7 @@ public class AllDCSuperLayer extends RectangleItem {
 				int hitCount = dcAccumulatedData[_sector - 1][_superLayer - 1][layer][wire];
 				getCell(layer + 1, wire + 1, wr);
 				
-				double fract = _allDC.getView().getMedianSetting()*(((double) hitCount) / (1 + medianHit));
+				double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 				
 				AccumulationManager.getInstance();
 				Color color = AccumulationManager.getInstance().getColor(fract);
@@ -522,11 +527,19 @@ public class AllDCSuperLayer extends RectangleItem {
 				feedbackStrings.add(rtp);
 
 			}
+			
+			if (_allDC.isStandardAllDCView()) {
 
-			if (_allDC.getView().isSingleEventMode()) {
-				singleEventFeedbackStrings(wire, layer, feedbackStrings);
-			} else {
-				accumulatedFeedbackStrings(wire, layer, feedbackStrings);
+				if (_view.isSingleEventMode()) {
+					singleEventFeedbackStrings(wire, layer, feedbackStrings);
+				} else {
+					accumulatedFeedbackStrings(wire, layer, feedbackStrings);
+				}
+			}
+			else {
+				if (_view instanceof AllDCAccumView) {
+					((AllDCAccumView)_view).augmentedFeedback(_sector, _superLayer, layer, wire, feedbackStrings);
+				}
 			}
 
 		} // end contains
@@ -571,7 +584,7 @@ public class AllDCSuperLayer extends RectangleItem {
 					+ layer + "  wire " + wire);
 		}
 		else {
-			hit.tdcAdcFeedback(_allDC.getView().showNoiseAnalysis(), _allDC.getView().showMcTruth(), feedbackStrings);
+			hit.tdcAdcFeedback(_view.showNoiseAnalysis(), _view.showMcTruth(), feedbackStrings);
 		}
 	}
 		

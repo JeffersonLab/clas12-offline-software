@@ -11,10 +11,14 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
+import org.jlab.io.base.DataEvent;
+
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.DC;
+import cnuphys.ced.event.data.DCTdcHit;
+import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.item.AllDCSuperLayer;
 import cnuphys.bCNU.drawable.DrawableAdapter;
@@ -52,6 +56,9 @@ public class AllDCAccumView extends CedView implements IAllDC {
 	
 	//base title
 	protected static final String _baseTitle = "Accumulation Only";
+	
+	//counts for all data indices sector, superlayer, layer. wire
+	private int _counts[][][][] = new int[6][6][6][112];
 
 	/**
 	 * A sector rectangle for each sector
@@ -102,6 +109,8 @@ public class AllDCAccumView extends CedView implements IAllDC {
 		setBeforeDraw();
 		setAfterDraw();
 		addItems();
+		
+		_eventManager.addSpecialEventListener(this);
 	}
 
 	/**
@@ -411,6 +420,15 @@ public class AllDCAccumView extends CedView implements IAllDC {
 	public void reset() {
 		System.err.println("reset");
 		
+		for (int sect = 0; sect < 6; sect++) {
+			for (int supl = 0; supl < 6; supl++) {
+				for (int lay = 0; lay < 6; lay++) {
+					for (int wire = 0; wire < 112; wire++) {
+						_counts[sect][supl][lay][wire] = 0;
+					}
+				}
+			}
+		}
 		
 		refresh();
 	}
@@ -421,8 +439,66 @@ public class AllDCAccumView extends CedView implements IAllDC {
 	 */
 	public void setMode(int mode) {
 		_mode = mode;
-		System.err.println("MODE = " + _mode);
+	//	System.err.println("MODE = " + _mode);
 		refresh();
+	}
+	
+	/**
+	 * A new event has arrived.
+	 * 
+	 * @param event
+	 *            the new event.
+	 */
+	@Override
+	public void newClasIoEvent(final DataEvent event) {
+		super.newClasIoEvent(event);
+//		System.err.println("HEY MAN");
+		
+		DCTdcHitList hits = DC.getInstance().getTDCHits();
+		if ((hits != null) && !hits.isEmpty()) {
+			for (DCTdcHit hit : hits) {
+				logHit(hit);
+			}
+		}
+	}
+
+
+	private void logHit(DCTdcHit hit) {
+		int sect0 = hit.sector - 1;
+		int supl0 = hit.superlayer - 1;
+		int lay0 = hit.layer6 - 1;
+		int wire0 = hit.wire - 1;
+		
+		System.err.println("LOGGED HIT");
+		_counts[sect0][supl0][lay0][wire0] += 1;
+	}
+	
+	/**
+	 * Augmented feedback called by the superlayer item
+	 * @param sector the sector [1..6]
+	 * @param superlayer the superlayer [1..6]
+	 * @param layer the layer [1..6]
+	 * @param wire the wire [1..112]
+	 * @param feedbackStrings
+	 */
+	public void augmentedFeedback(int sector, int superlayer, int layer, int wire, List<String> feedbackStrings) {
+		augFB("sector " + sector, feedbackStrings);
+		augFB("superlayer " + superlayer, feedbackStrings);
+		augFB("layer " + layer, feedbackStrings);
+		augFB("wire " + wire, feedbackStrings);
+		
+		int counts = getCounts(sector, superlayer, layer, wire);
+		augFB("counts " + counts, feedbackStrings);
+	}
+	
+	//1-based indices
+	private int getCounts(int sector, int superlayer, int layer, int wire) {
+		return _counts[sector-1][superlayer-1][layer-1][wire-1];
+	}
+	
+	//add a colored string
+	private void augFB(String msg, List<String> feedbackStrings) {
+		feedbackStrings.add("$yellow$" + msg);
 	}
 
 

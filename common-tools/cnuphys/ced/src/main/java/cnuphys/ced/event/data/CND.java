@@ -8,7 +8,7 @@ import cnuphys.ced.alldata.ColumnData;
 
 public class CND extends DetectorData {
 
-	
+	/** all the data arrays */
 	public byte adc_sect[];
 	public byte adc_layer[];
 	public byte adc_order[];

@@ -46,8 +46,11 @@ import cnuphys.swim.Swimming;
 public class ClasIoEventManager {
 
 	// Unique lund ids in the event (if any)
-	private Vector<LundId> _uniqueLundIds = new Vector<LundId>();
-
+	private Vector<LundId> _uniqueLundIds = new Vector<>();
+	
+	//listen for events even in accumulation mode
+	private Vector<IClasIoEventListener> _specialListeners = new Vector<>();
+	
 	// A sorted list of banks present in the current event
 	private String _currentBanks[];
 
@@ -181,6 +184,15 @@ public class ClasIoEventManager {
 			if (isAccumulating()) {
 				AccumulationManager.getInstance().newClasIoEvent(event);
 				notifyAllDefinedPlots(event);
+				
+				//notify special listeners
+				//the get events even if we are accumulating
+				//e.g., AddDCAccumView
+				for (IClasIoEventListener listener : _specialListeners) {
+					listener.newClasIoEvent(event);
+				}
+				
+				
 			} else {
 				_runData.set(_currentEvent);
 				notifyEventListeners();
@@ -826,6 +838,7 @@ public class ClasIoEventManager {
 	}
 
 	// set the event only if it passes filtering
+	//option = 1 used by previous event
 	private void ifPassSetEvent(DataEvent event, int option) {
 		if (event != null) {
 			if (passFilters(event)) {
@@ -1362,4 +1375,14 @@ public class ClasIoEventManager {
 		}
 	}
 
+	
+	/**
+	 * Add a special listener that gets events even if we are accumulating.
+	 * Example: AllDCAccumView
+	 * @param listener the event listener
+	 */
+	public void addSpecialEventListener(IClasIoEventListener listener) {
+		_specialListeners.remove(listener);
+		_specialListeners.add(listener);
+	}
 }
