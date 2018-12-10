@@ -60,25 +60,24 @@ public class CalibrationConstantsLoader {
 
             for (int iSec = 1; iSec <=24; iSec++) {
                 for(int iLay = 1; iLay <=3; iLay++) {
-                    UTURNELOSS[iSec-1][iLay-1] = tabJs.get(0).getDoubleValue("uturn_eloss", iSec, iLay, 0);
-                    UTURNTLOSS[iSec-1][iLay-1] = tabJs.get(1).getDoubleValue("uturn_tloss", iSec, iLay, 0);
-                    TIMEOFFSETSLR[iSec-1][iLay-1] = tabJs.get(2).getDoubleValue("time_offset_LR", iSec, iLay, 0);
-                    TDCTOTIMESLOPE[iSec-1][iLay-1][0]  = tabJs.get(3).getDoubleValue("slope_L", iSec, iLay, 0);
-                    TDCTOTIMEOFFSET[iSec-1][iLay-1][0] = tabJs.get(3).getDoubleValue("offset_L", iSec, iLay, 0);
-                    TDCTOTIMESLOPE[iSec-1][iLay-1][1]  = tabJs.get(3).getDoubleValue("slope_R", iSec, iLay, 0);
-                    TDCTOTIMEOFFSET[iSec-1][iLay-1][1] = tabJs.get(3).getDoubleValue("offset_R", iSec, iLay, 0);
-                    TIMEOFFSETSECT[iSec-1][iLay-1] = tabJs.get(4).getDoubleValue("time_offset_layer", iSec, iLay, 0);
-                    EFFVEL[iSec-1][iLay-1][0] = tabJs.get(5).getDoubleValue("veff_L", iSec, iLay, 0);
-                    EFFVEL[iSec-1][iLay-1][1] = tabJs.get(5).getDoubleValue("veff_R", iSec, iLay, 0);
-                    ATNLEN[iSec-1][iLay-1][0] = tabJs.get(6).getDoubleValue("attlen_L", iSec, iLay, 0);
-                    ATNLEN[iSec-1][iLay-1][1] = tabJs.get(6).getDoubleValue("attlen_R", iSec, iLay, 0);
-                    Status_LR[iSec-1][iLay-1][0] = tabJs.get(7).getIntValue("/calibration/cnd/Status_LR/status_L", iSec, iLay, 0);
-                    Status_LR[iSec-1][iLay-1][1] = tabJs.get(7).getIntValue("/calibration/cnd/Status_LR/status_R", iSec, iLay, 0);
-                    MIPDIRECT[iSec-1][iLay-1][0]    = tabJs.get(8).getDoubleValue("/calibration/cnd/Energy/mip_dir_L", iSec, iLay, 0);
-                    MIPINDIRECT[iSec-1][iLay-1][0]  = tabJs.get(8).getDoubleValue("/calibration/cnd/Energy/mip_indir_L", iSec, iLay, 0);
-                    MIPDIRECT[iSec-1][iLay-1][1]    = tabJs.get(8).getDoubleValue("/calibration/cnd/Energy/mip_dir_R", iSec, iLay, 0);
-                    MIPINDIRECT[iSec-1][iLay-1][1]  = tabJs.get(8).getDoubleValue("/calibration/cnd/Energy/mip_indir_R", iSec, iLay, 0);
-
+                    UTURNELOSS[iSec-1][iLay-1] = tabJs.get(0).getDoubleValue("uturn_eloss", iSec, iLay, 1); // component is 1
+                    UTURNTLOSS[iSec-1][iLay-1] = tabJs.get(1).getDoubleValue("uturn_tloss", iSec, iLay, 1);
+                    TIMEOFFSETSLR[iSec-1][iLay-1] = tabJs.get(2).getDoubleValue("time_offset_LR", iSec, iLay, 1);
+                    TDCTOTIMESLOPE[iSec-1][iLay-1][0]  = tabJs.get(3).getDoubleValue("slope_L", iSec, iLay, 1);
+                    TDCTOTIMEOFFSET[iSec-1][iLay-1][0] = tabJs.get(3).getDoubleValue("offset_L", iSec, iLay, 1);
+                    TDCTOTIMESLOPE[iSec-1][iLay-1][1]  = tabJs.get(3).getDoubleValue("slope_R", iSec, iLay, 1);
+                    TDCTOTIMEOFFSET[iSec-1][iLay-1][1] = tabJs.get(3).getDoubleValue("offset_R", iSec, iLay, 1);
+                    TIMEOFFSETSECT[iSec-1][iLay-1] = tabJs.get(4).getDoubleValue("time_offset_layer", iSec, iLay, 1);
+                    EFFVEL[iSec-1][iLay-1][0] = tabJs.get(5).getDoubleValue("veff_L", iSec, iLay, 1);
+                    EFFVEL[iSec-1][iLay-1][1] = tabJs.get(5).getDoubleValue("veff_R", iSec, iLay, 1);
+                    ATNLEN[iSec-1][iLay-1][0] = tabJs.get(6).getDoubleValue("attlen_L", iSec, iLay, 1);
+                    ATNLEN[iSec-1][iLay-1][1] = tabJs.get(6).getDoubleValue("attlen_R", iSec, iLay, 1);
+                    Status_LR[iSec-1][iLay-1][0] = tabJs.get(7).getIntValue("/calibration/cnd/Status_LR/status_L", iSec, iLay, 1);
+                    Status_LR[iSec-1][iLay-1][1] = tabJs.get(7).getIntValue("/calibration/cnd/Status_LR/status_R", iSec, iLay, 1);
+                    MIPDIRECT[iSec-1][iLay-1][0]    = tabJs.get(8).getDoubleValue("/calibration/cnd/Energy/mip_dir_L", iSec, iLay, 1);
+                    MIPINDIRECT[iSec-1][iLay-1][0]  = tabJs.get(8).getDoubleValue("/calibration/cnd/Energy/mip_indir_L", iSec, iLay, 1);
+                    MIPDIRECT[iSec-1][iLay-1][1]    = tabJs.get(8).getDoubleValue("/calibration/cnd/Energy/mip_dir_R", iSec, iLay, 1);
+                    MIPINDIRECT[iSec-1][iLay-1][1]  = tabJs.get(8).getDoubleValue("/calibration/cnd/Energy/mip_indir_R", iSec, iLay, 1);
                 }
             }
             JITTER_PERIOD = tabJs.get(9).getDoubleValue("period", 0, 0, 0);

@@ -17,13 +17,6 @@ import org.jlab.rec.cnd.hit.HalfHit;
 import org.jlab.rec.cnd.hit.CndHitFinder;
 
 import java.lang.String;
-import java.lang.Double;
-import java.lang.Integer;
-import static java.lang.Math.abs;
-import static java.lang.Math.pow;
-import static java.lang.Math.sqrt;
-import static java.lang.Math.sin;
-import static java.lang.Math.cos;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -81,8 +74,9 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 
             if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
                 List<IndexedTable> tabJs = new ArrayList<IndexedTable>();
-                for(String tbStg : cndTables)
+                for(String tbStg : cndTables) {
                     tabJs.add(this.getConstantsManager().getConstants(newRun, tbStg));
+                }
                
                 CalibrationConstantsLoader.Load(tabJs);    
 
@@ -216,9 +210,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
                 "/calibration/cnd/Attenuation",
                 "/calibration/cnd/Status_LR",
                 "/calibration/cnd/Energy",
-                "/calibration/cnd/time_jitter",
-                "/geometry/cnd/layer",
-                "/geometry/cnd/cnd"
+                "/calibration/cnd/time_jitter"
             };
 	@Override
 	public boolean init() {
