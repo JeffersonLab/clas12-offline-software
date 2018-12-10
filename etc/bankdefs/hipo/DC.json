@@ -393,7 +393,9 @@
            {"name":"y",      "id":4, "type":"float",  "info":"track y at layer used in the fit"},
            {"name":"z",      "id":5, "type":"float",  "info":"track z at layer used in the fit"},
            {"name":"XX",     "id":6, "type":"float",  "info":"x2 covariance matrix element at layer used in the fit"},
-           {"name":"YY",     "id":7, "type":"float",  "info":"y2 covariance matrix element at layer used in the fit"}
+           {"name":"XY",     "id":7, "type":"float",  "info":"xy covariance matrix element at layer used in the fit"},
+           {"name":"YX",     "id":8, "type":"float",  "info":"yx covariance matrix element at layer used in the fit"},
+           {"name":"YY",     "id":9, "type":"float",  "info":"y2 covariance matrix element at layer used in the fit"}
            ]
  },
  {

@@ -401,6 +401,8 @@ public class RecoBankWriter {
                     bank.setFloat("y", index, (float) candlist.get(i).get_Trajectory().get(j).y());
                     bank.setFloat("z", index, (float) candlist.get(i).get_Trajectory().get(j).getZ());
                     bank.setFloat("XX", index, (float) candlist.get(i).get_CovMats().get(j).get(0, 0));
+                    bank.setFloat("XY", index, (float) candlist.get(i).get_CovMats().get(j).get(0, 1));
+                    bank.setFloat("YX", index, (float) candlist.get(i).get_CovMats().get(j).get(1, 0));
                     bank.setFloat("YY", index, (float) candlist.get(i).get_CovMats().get(j).get(1, 1));
                     index++;
                 }
