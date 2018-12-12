@@ -5,32 +5,33 @@
  */
 package org.jlab.detector.geant4.v2.DC;
 
-import java.util.List;
 import org.jlab.geom.component.DriftChamberWire;
+import org.jlab.geom.prim.Shape3D;
 
 /**
  *
  * @author kenjo
  */
 public interface DCstructure {
-    interface DCwire {
-        void print();
+
+    interface DCLayer {
+        Shape3D getBoundary();
+        DriftChamberWire getComponent(int icomp);
     }
 
-    interface DClayer {
-        DCwire getComponent(int iwire);
+    interface DCSuperlayer {
+
+        DCLayer getLayer(int ilayer);
     }
 
-    interface DCsuperlayer {
-        DClayer getLayer(int ilayer);
+    interface DCSector {
+
+        DCSuperlayer getSuperlayer(int isuperlayer);
     }
 
-    interface DCsector {
-        DCsuperlayer getSuperlayer(int isuperlayer);
+    interface DCDetector {
+
+        DCSector getSector(int isector);
     }
-    
-    interface DCdetector {
-        DCsector getSector(int isector);
-    }
-    
+
 }
