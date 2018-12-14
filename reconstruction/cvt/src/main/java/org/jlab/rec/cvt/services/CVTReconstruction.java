@@ -1,12 +1,9 @@
 package org.jlab.rec.cvt.services;
 
-//import cnuphys.magfield.MagneticFields;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.coda.jevio.EvioException;
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
@@ -20,7 +17,6 @@ import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
 import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.Track;
-import org.jlab.rec.cvt.trajectory.TrkSwimmer;
 //import org.jlab.service.eb.EBHBEngine;
 //import org.jlab.service.eb.EBTBEngine;
 
@@ -79,8 +75,8 @@ public class CVTReconstruction extends ReconstructionEngine {
             System.out.println("  CHECK CONFIGS..............................." + FieldsConfig + " = ? " + newConfig);
             Constants.Load(isCosmics, isSVTonly, (double) bank.getFloat("solenoid", 0));
             // Load the Fields
-            System.out.println("************************************************************SETTING FIELD SCALE *****************************************************");
-            TrkSwimmer.setMagneticFieldScale(bank.getFloat("solenoid", 0)); // something changed in the configuration
+            //System.out.println("************************************************************SETTING FIELD SCALE *****************************************************");
+            //TrkSwimmer.setMagneticFieldScale(bank.getFloat("solenoid", 0)); // something changed in the configuration
             //double shift =0;
             //if(bank.getInt("run", 0)>1840)
             //    shift = -1.9;
@@ -120,12 +116,12 @@ public class CVTReconstruction extends ReconstructionEngine {
     }
     
 	@Override
- public boolean processDataEvent(DataEvent event) {
+    public boolean processDataEvent(DataEvent event) {
 		
-		CVTRecHandler recHandler = new CVTRecHandler(SVTGeom,BMTGeom);
-		setRunConditionsParameters(event, this.getFieldsConfig(), this.getRun(), false, "");
+        CVTRecHandler recHandler = new CVTRecHandler(SVTGeom,BMTGeom);
+        setRunConditionsParameters(event, this.getFieldsConfig(), this.getRun(), false, "");
 
-        
+        Swim swimmer = new Swim();
         
         RecoBankWriter rbc = new RecoBankWriter();
 
@@ -141,7 +137,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         									 recHandler.getCrosses(), cosmics);
         } 
         else {
-            List<Track> trks = recHandler.beamTracking();   
+            List<Track> trks = recHandler.beamTracking(swimmer);   
         	rbc.appendCVTBanks(event, recHandler.getSVThits(), recHandler.getBMThits(), 
         									 recHandler.getSVTclusters(), recHandler.getBMTclusters(), 
         									 recHandler.getCrosses(), trks);
@@ -162,7 +158,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         this.setSVTDB(cp);
         
         
-        TrkSwimmer.getMagneticFields();
+        //TrkSwimmer.getMagneticFields();
         return true;
     }
     private DatabaseConstantProvider _SVTDB;

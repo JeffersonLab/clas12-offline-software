@@ -49,7 +49,6 @@ import cnuphys.ced.geometry.BMTGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.BeamLineItem;
 import cnuphys.ced.item.MagFieldItem;
-import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.SwimTrajectory2D;
 
@@ -79,9 +78,6 @@ public class CentralZView extends CedView implements ChangeListener {
 	// fill color
 	private static final Color HITFILL = new Color(255, 128, 0, 64);
 	private static final Color TRANS = new Color(192, 192, 192, 128);
-
-	// default fill color half-alpha blue
-	private static final Color TRANS2 = new Color(0, 0, 255, 128);
 
 	// line stroke
 	private static Stroke stroke = GraphicsUtilities.getStroke(1.5f,
@@ -142,7 +138,7 @@ public class CentralZView extends CedView implements ChangeListener {
 				TMARGIN, PropertySupport.RIGHTMARGIN, RMARGIN,
 				PropertySupport.BOTTOMMARGIN, BMARGIN, PropertySupport.TOOLBAR,
 				true, PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
-				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
+				PropertySupport.VISIBLE, true,
 				PropertySupport.TITLE, title,
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
@@ -198,7 +194,6 @@ public class CentralZView extends CedView implements ChangeListener {
 					drawCosmicTracks(g, container);
 				}
 
-				_swimTrajectoryDrawer.draw(g, container);
 				drawGEMCHits(g, container);
 				drawBSTPanels(g, container);
 
@@ -206,6 +201,8 @@ public class CentralZView extends CedView implements ChangeListener {
 				denoteBMT(g, container);
 
 				_hitDrawer.draw(g, container);
+
+				_swimTrajectoryDrawer.draw(g, container);
 
 				if (showCrosses()) {
 					_crossDrawer.draw(g, container);
@@ -337,13 +334,20 @@ public class CentralZView extends CedView implements ChangeListener {
 		Point p1 = new Point();
 		Point p2 = new Point();
 		for (Cosmic cosmic : cosmics) {
-			double y1 = 1000;
-			double y2 = -1000;
+			double y1 = 100;
+			double y2 = -100;
 			double x1 = cosmic.trkline_yx_slope * y1 + cosmic.trkline_yx_interc;
 			double x2 = cosmic.trkline_yx_slope * y2 + cosmic.trkline_yx_interc;
 			double z1 = cosmic.trkline_yz_slope * y1 + cosmic.trkline_yz_interc;
 			double z2 = cosmic.trkline_yz_slope * y2 + cosmic.trkline_yz_interc;
 			
+			//convert to mm
+			x1 *= 10;
+			x2 *= 10;
+			y1 *= 10;
+			y2 *= 10;
+			z1 *= 10;
+			z2 *= 10;
 			labToLocal(x1, y1, z1, p1);
 			labToLocal(x2, y2, z2, p2);
 			
@@ -699,9 +703,9 @@ public class CentralZView extends CedView implements ChangeListener {
 
 		// the world coordinates
 		double labRho = Math.abs(worldPoint.y);
-		double labZ = worldPoint.x;
-		double labX = labRho * _cosphi;
-		double labY = labRho * _sinphi;
+		float labZ = (float)worldPoint.x;
+		float labX = (float)(labRho * _cosphi);
+		float labY = (float)(labRho * _sinphi);
 		double r = Math.sqrt(labX * labX + labY * labY + labZ * labZ);
 		double theta = Math.toDegrees(Math.atan2(labRho, labZ));
 
@@ -719,11 +723,9 @@ public class CentralZView extends CedView implements ChangeListener {
 		feedbackStrings.add(rtp);
 		feedbackStrings.add(rzp);
 
-		IField activeField = MagneticFields.getInstance().getActiveField();
-		if (activeField != null) {
+		if (_activeProbe != null) {
 			float field[] = new float[3];
-			activeField.fieldCylindrical(_phi, labRho / 10.0, labZ / 10.0,
-					field);
+			_activeProbe.field(labX/10, labY/10, labZ/10, field);
 			// convert to Tesla from kG
 			field[0] /= 10.0;
 			field[1] /= 10.0;
@@ -784,11 +786,6 @@ public class CentralZView extends CedView implements ChangeListener {
 		return "(" + DoubleFormat.doubleFormat(vx, 2) + ", "
 				+ DoubleFormat.doubleFormat(vy, 2) + ", "
 				+ DoubleFormat.doubleFormat(vz, 2) + ")";
-	}
-
-	// convenience method to create a feedback string
-	private void fbString(String color, String str, List<String> fbstrs) {
-		fbstrs.add("$" + color + "$" + str);
 	}
 
 	/**

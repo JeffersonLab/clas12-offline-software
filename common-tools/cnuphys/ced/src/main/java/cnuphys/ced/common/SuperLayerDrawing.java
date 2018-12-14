@@ -56,10 +56,10 @@ public class SuperLayerDrawing {
 
 	// owner view
 	private CedView _view;
-	
-	//superlayer interface for geometric objects
+
+	// superlayer interface for geometric objects
 	private ISuperLayer _iSupl;
-		
+
 	// convenient access to the noise manager
 	private NoiseManager _noiseManager = NoiseManager.getInstance();
 
@@ -67,7 +67,7 @@ public class SuperLayerDrawing {
 	// dirction,
 	// as a unit vector, of any of the wires
 	private double[] _direction;
-	
+
 	/**
 	 * Constructor
 	 * 
@@ -79,17 +79,17 @@ public class SuperLayerDrawing {
 	public SuperLayerDrawing(CedView view, ISuperLayer isupl) {
 		_view = view;
 		_iSupl = isupl;
-		
-		//set the wire direction
-		//use any wire to set the wire direction
-		Line3D l3d = DCGeometry.getWire(_iSupl.sector(), _iSupl.superlayer(), 3, 56);	
+
+		// set the wire direction
+		// use any wire to set the wire direction
+		Line3D l3d = DCGeometry.getWire(_iSupl.sector(), _iSupl.superlayer(), 3, 56);
 		_direction = new double[3];
 		_direction[0] = l3d.end().x() - l3d.origin().x();
 		_direction[1] = l3d.end().y() - l3d.origin().y();
 		_direction[2] = l3d.end().z() - l3d.origin().z();
 		_direction = VectorSupport.unitVector(_direction);
 	}
-	
+
 	public void drawItem(Graphics g, IContainer container, Polygon lastDrawnPolygon) {
 
 		Graphics2D g2 = (Graphics2D) g;
@@ -106,7 +106,7 @@ public class SuperLayerDrawing {
 		g2.setClip(lastDrawnPolygon);
 		for (int layer = 1; layer <= 6; layer++) {
 			Polygon poly = getLayerPolygon(container, layer);
-			
+
 			if ((layer % 2) == 1) {
 				g.setColor(CedColors.layerFillColors[1]);
 				g.fillPolygon(poly);
@@ -122,7 +122,6 @@ public class SuperLayerDrawing {
 		if (_view.showMasks()) {
 			drawMasks(g, container, parameters);
 		}
-
 
 		// draw wires?
 		if (reallyClose || (WorldGraphicsUtilities
@@ -155,11 +154,11 @@ public class SuperLayerDrawing {
 		for (int layer = 1; layer <= 6; layer++) {
 			for (int wire = 1; wire <= 112; wire++) {
 				drawOneWire(g, container, layer, wire, reallyClose, pp);
-			}  //wire loop
+			} // wire loop
 		}
 	}
-	
-	//draw a single wire
+
+	// draw a single wire
 	private void drawOneWire(Graphics g, IContainer container, int layer, int wire, boolean reallyClose, Point pp) {
 		g.setColor(CedColors.senseWireColor);
 		Point2D.Double wp = wire(_iSupl.superlayer(), layer, wire, _iSupl.isLowerSector());
@@ -180,7 +179,6 @@ public class SuperLayerDrawing {
 			}
 		}
 	}
-
 
 	/**
 	 * Draw the masks showing the effect of the noise finding algorithm
@@ -204,7 +202,6 @@ public class SuperLayerDrawing {
 			}
 		}
 	}
-
 
 	/**
 	 * Draws the masking that shows where the noise algorithm thinks there are
@@ -255,6 +252,7 @@ public class SuperLayerDrawing {
 		}
 
 	}
+
 	/**
 	 * Draw hits and related data
 	 * 
@@ -271,8 +269,8 @@ public class SuperLayerDrawing {
 			drawAccumulatedHits(g, container, reallyClose);
 		}
 	}
-	
-	//draw hits in accumulated mode
+
+	// draw hits in accumulated mode
 	private void drawAccumulatedHits(Graphics g, IContainer container, boolean reallyClose) {
 
 		int dcAccumulatedData[][][][] = AccumulationManager.getInstance().getAccumulatedDCData();
@@ -284,7 +282,7 @@ public class SuperLayerDrawing {
 			for (int wire0 = 0; wire0 < 112; wire0++) {
 
 				int hit = dcAccumulatedData[sect0][supl0][lay0][wire0];
-				double fract = _view.getMedianSetting()*(((double) hit) / (1 + medianHit));
+				double fract = _view.getMedianSetting() * (((double) hit) / (1 + medianHit));
 				Color color = AccumulationManager.getInstance().getColor(fract);
 
 				g.setColor(color);
@@ -294,8 +292,8 @@ public class SuperLayerDrawing {
 					g.drawPolygon(hexagon);
 
 				}
-			} //wire loop
-		} //layer loop
+			} // wire loop
+		} // layer loop
 
 	}
 
@@ -308,16 +306,18 @@ public class SuperLayerDrawing {
 	 *            the drawing container
 	 */
 	private void drawSingleModeHits(Graphics g, IContainer container, boolean reallyClose) {
-		
+
 		DCTdcHitList hits = DC.getInstance().getTDCHits();
 		if ((hits != null) && !hits.isEmpty()) {
-			
+
 			Point pp = new Point();
 			for (DCTdcHit hit : hits) {
 				if ((hit.sector == _iSupl.sector()) && (hit.superlayer == _iSupl.superlayer())) {
 					drawBasicDCHit(g, container, hit.layer6, hit.wire, hit.noise, -1, hit.doca, hit.sdoca);
-					
-					//just draw the wire again
+
+					// System.err.println("DOCA " + hit.doca);
+
+					// just draw the wire again
 					drawOneWire(g, container, hit.layer6, hit.wire, reallyClose, pp);
 
 				}
@@ -326,12 +326,10 @@ public class SuperLayerDrawing {
 
 		// draw track based hits (docas) and segments
 		drawHitBasedSegments(g, container);
-//		drawTimeBasedHits(g, container);
+		// drawTimeBasedHits(g, container);
 		drawTimeBasedSegments(g, container);
-		
 
 	}
-	
 
 	/**
 	 * Draw a single dc hit
@@ -393,7 +391,7 @@ public class SuperLayerDrawing {
 			g.drawPolygon(hexagon);
 		}
 	}
-	
+
 	/**
 	 * Draw a single dc hit
 	 * 
@@ -437,7 +435,6 @@ public class SuperLayerDrawing {
 		g.drawPolygon(hexagon);
 	}
 
-	
 	/**
 	 * Draw a single dc hit
 	 * 
@@ -458,14 +455,14 @@ public class SuperLayerDrawing {
 	 * @param sdoca
 	 *            the smeared distance of closest approach array in mm
 	 */
-	private void drawBasicDCHit(Graphics g, IContainer container, int layer, int wire, boolean noise, int pid, 
+	private void drawBasicDCHit(Graphics g, IContainer container, int layer, int wire, boolean noise, int pid,
 			float doca, float sdoca) {
 
 		// abort if hiding noise and this is noise
 		if (_view.hideNoise() && noise) {
 			return;
 		}
-		
+
 		drawDCHit(g, container, layer, wire, noise, pid);
 
 		// are we to show mc (MonteCarlo simulation) truth?
@@ -474,25 +471,25 @@ public class SuperLayerDrawing {
 			return;
 		}
 
-		if (Float.isNaN(doca) || Float.isNaN(sdoca)) {
-			return;
-		}
-		if ((doca < 1.0e-6) || (sdoca < 1.0e-6)) {
-			return;
-		}
+		if (_view.showMcTruth()) {
+			if (Float.isNaN(doca) || Float.isNaN(sdoca)) {
+				return;
+			}
+			if ((doca < 1.0e-6) || (sdoca < 1.0e-6)) {
+				return;
+			}
 
-
-		// draw SIM docas?
-		if (WorldGraphicsUtilities
-				.getMeanPixelDensity(_view.getContainer()) > SuperLayerDrawing.wireThreshold[_iSupl.superlayer()]) {
-//			drawDOCA(g, container, layer, wire, doca, CedColors.docaFill,
-//					CedColors.docaLine);
-			drawDOCA(g, container, layer, wire, sdoca, CedColors.docaFill,
-					CedColors.docaLine);
+			// draw SIM docas?
+			if (WorldGraphicsUtilities
+					.getMeanPixelDensity(_view.getContainer()) > SuperLayerDrawing.wireThreshold[_iSupl.superlayer()]) {
+				// drawDOCA(g, container, layer, wire, doca, CedColors.docaFill,
+				// CedColors.docaLine);
+				drawDOCA(g, container, layer, wire, sdoca, CedColors.docaTruthFill, CedColors.docaTruthLine);
+			}
 		}
 
 	}
-	
+
 	/**
 	 * Draw a single dc hit
 	 * 
@@ -511,12 +508,10 @@ public class SuperLayerDrawing {
 	 * @param doca
 	 *            the distance of closest approach array in mm
 	 */
-	public void drawReconDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, int layer, int wire, 
+	public void drawReconDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, int layer, int wire,
 			float doca, Point location) {
 
-		
 		drawReconDCHit(g, container, fillColor, frameColor, layer, wire, location);
-
 
 		if (Float.isNaN(doca)) {
 			return;
@@ -525,17 +520,15 @@ public class SuperLayerDrawing {
 			return;
 		}
 
+		// draw docas?
 
-		// draw  docas?
-		
 		if (WorldGraphicsUtilities
 				.getMeanPixelDensity(_view.getContainer()) > SuperLayerDrawing.wireThreshold[_iSupl.superlayer()]) {
-			drawDOCA(g, container, layer, wire, doca, CedColors.docaFill,
-					CedColors.docaLine);
+
+			drawDOCA(g, container, layer, wire, doca, CedColors.docaTruthFill, fillColor.darker());
 		}
 
 	}
-
 
 	/**
 	 * Obtain a crude outline of a sense wire layer
@@ -552,8 +545,7 @@ public class SuperLayerDrawing {
 			Point2D.Double verticies[] = GeometryManager.allocate(14);
 
 			// all indices in DCGeometry calls are 1-based
-			DCGeometry.getLayerPolygon(_iSupl.superlayer(), layer, 
-					_iSupl.projectionPlane(), verticies);
+			DCGeometry.getLayerPolygon(_iSupl.superlayer(), layer, _iSupl.projectionPlane(), verticies);
 
 			if (_iSupl.isLowerSector()) {
 				SuperLayerDrawing.flipPolyToLowerSector(verticies);
@@ -602,33 +594,37 @@ public class SuperLayerDrawing {
 
 	/**
 	 * Get the layer and the wire we are in
-	 * @param container holds 1-based layer and wire
-	 * @param pp the mouse point
-	 * @param data holds results [later, wire]
+	 * 
+	 * @param container
+	 *            holds 1-based layer and wire
+	 * @param pp
+	 *            the mouse point
+	 * @param data
+	 *            holds results [later, wire]
 	 */
 	public void getLayerAndWire(IContainer container, Point pp, int[] data) {
 		data[0] = -1;
 		data[1] = -1;
 		data[0] = getLayer(container, pp);
-		
-		//could be off by one
+
+		// could be off by one
 		if (data[0] > 0) {
-			
-			//get wire guess
+
+			// get wire guess
 			Polygon poly = getLayerPolygon(data[0]);
 			int ymin = poly.ypoints[4];
 			int ymax = poly.ypoints[13];
-			double fract = (pp.y - ymin)/(ymax-ymin+1.);
-			int wguess = 1 + (int)((1.-fract)*112);
-			//System.err.println("WIRE GUESS: " + wguess);
-			
+			double fract = (pp.y - ymin) / (ymax - ymin + 1.);
+			int wguess = 1 + (int) ((1. - fract) * 112);
+			// System.err.println("WIRE GUESS: " + wguess);
+
 			int minLay = Math.max(data[0] - 1, 1);
 			int maxLay = Math.min(data[0] + 1, 6);
 			for (int lay = minLay; lay <= maxLay; lay++) {
-				
-				int minWire = Math.max(1, wguess-6);
-				int maxWire = Math.min(112, wguess+6);
-				
+
+				int minWire = Math.max(1, wguess - 6);
+				int maxWire = Math.min(112, wguess + 6);
+
 				for (int wire = minWire; wire <= maxWire; wire++) {
 					Polygon hexagon = getHexagon(container, lay, wire);
 					if ((hexagon != null) && hexagon.contains(pp)) {
@@ -705,15 +701,14 @@ public class SuperLayerDrawing {
 	 *            the one based wire 1..112
 	 * @return the cell hexagon
 	 */
-	public Polygon getHexagon(IContainer container, int layer,
-			int wire) {
+	public Polygon getHexagon(IContainer container, int layer, int wire) {
 
 		Point2D.Double wpoly[] = GeometryManager.allocate(6);
 		// note all indices in calls to DCGeometry are 1-based
-		if (!DCGeometry.getHexagon(_iSupl.superlayer(), layer, wire, 
-				_iSupl.projectionPlane(), wpoly, null)) {
+		if (!DCGeometry.getHexagon(_iSupl.superlayer(), layer, wire, _iSupl.projectionPlane(), wpoly, null)) {
 			return null;
-		};
+		}
+		;
 
 		if (_iSupl.isLowerSector()) {
 			flipPolyToLowerSector(wpoly);
@@ -788,8 +783,8 @@ public class SuperLayerDrawing {
 	 * @param doca2d
 	 *            the doca in mm
 	 */
-	public void drawDOCA(Graphics g, IContainer container, int layer, int wire,
-			double doca2d, Color fillColor, Color lineColor) {
+	public void drawDOCA(Graphics g, IContainer container, int layer, int wire, double doca2d, Color fillColor,
+			Color lineColor) {
 
 		if (Double.isNaN(doca2d) || (doca2d < 1.0e-6)) {
 			return;
@@ -800,8 +795,8 @@ public class SuperLayerDrawing {
 		double radius = doca2d / 10.0; // converted mm to cm
 
 		if (radius > 5) {
-			String wmsg = "Very large doca radius: " + radius + " cm. Sect: " + _iSupl.sector() + " supl: " + _iSupl.superlayer()
-					+ "lay: " + layer + " wire: " + wire;
+			String wmsg = "Very large doca radius: " + radius + " cm. Sect: " + _iSupl.sector() + " supl: "
+					+ _iSupl.superlayer() + "lay: " + layer + " wire: " + wire;
 
 			Log.getInstance().warning(wmsg);
 			System.err.println(wmsg);
@@ -832,16 +827,21 @@ public class SuperLayerDrawing {
 	}
 
 	/**
-	 * projected space point. Projected by finding the closest point on the plane.
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 * @param z the z coordinate
+	 * projected space point. Projected by finding the closest point on the
+	 * plane.
+	 * 
+	 * @param x
+	 *            the x coordinate
+	 * @param y
+	 *            the y coordinate
+	 * @param z
+	 *            the z coordinate
 	 * @return the projected space point
 	 */
 	public Point3D projectedPoint(double x, double y, double z, Point2D.Double wp) {
 		return _view.projectedPoint(x, y, z, _iSupl.projectionPlane(), wp);
 	}
-	
+
 	/**
 	 * 
 	 * @param g
@@ -856,6 +856,7 @@ public class SuperLayerDrawing {
 		}
 
 		SegmentList segments = HBSegments.getInstance().getSegments();
+		
 		if ((segments != null) && !segments.isEmpty()) {
 			Point2D.Double wp1 = new Point2D.Double();
 			Point2D.Double wp2 = new Point2D.Double();
@@ -869,9 +870,8 @@ public class SuperLayerDrawing {
 				}
 			}
 		}
-		
-	} // drawHiteBasedSegments
 
+	} // drawHiteBasedSegments
 
 	/**
 	 * 
@@ -892,7 +892,7 @@ public class SuperLayerDrawing {
 			Point2D.Double wp2 = new Point2D.Double();
 			for (Segment segment : segments) {
 				if ((segment.sector == _iSupl.sector()) && (segment.superlayer == _iSupl.superlayer())) {
-					
+
 					projectedPoint(segment.x1, 0, segment.z1, wp1);
 					projectedPoint(segment.x2, 0, segment.z2, wp2);
 					drawSegment(g, container, _view, wp1, wp2, CedColors.tbSegmentLine, DC.TB_COLOR);
@@ -900,11 +900,10 @@ public class SuperLayerDrawing {
 				}
 			}
 		}
-		
-	} // drawTimeBasedSegments
-	
 
-	//draw a HB or TB segement
+	} // drawTimeBasedSegments
+
+	// draw a HB or TB segement
 	private void drawSegment(Graphics g, IContainer container, CedView view, Point2D.Double sectPnt1,
 			Point2D.Double sectPnt2, Color lineColor, Color endColor) {
 
@@ -917,19 +916,19 @@ public class SuperLayerDrawing {
 		container.worldToLocal(p1, sectPnt1);
 		container.worldToLocal(p2, sectPnt2);
 
-		g.setColor(CedColors.docaFill);
+		g.setColor(CedColors.docaTruthFill);
 		g2.setStroke(GraphicsUtilities.getStroke(6f, LineStyle.SOLID));
 		g.drawLine(p1.x, p1.y, p2.x, p2.y);
 		g.setColor(lineColor);
 		g2.setStroke(GraphicsUtilities.getStroke(1.5f, LineStyle.SOLID));
 		g.drawLine(p1.x, p1.y, p2.x, p2.y);
-		
-		SymbolDraw.drawOval(g2, p1.x, p1.y, 2, 2, endColor, endColor);
-		SymbolDraw.drawOval(g2, p2.x, p2.y, 2, 2, endColor, endColor);
+
+		SymbolDraw.drawOval(g2, p1.x, p1.y, 3, 3, Color.black, endColor);
+		SymbolDraw.drawOval(g2, p2.x, p2.y, 3, 3, Color.black, endColor);
 
 		g2.setStroke(oldStroke);
 	}
-	
+
 	/**
 	 * Gets the wire from the world point. This only gives sensible results if
 	 * the world point has already passed the "inside" test and we used getLayer
@@ -954,18 +953,17 @@ public class SuperLayerDrawing {
 		return Math.max(1, Math.min(112, wire));
 	}
 
-	
 	/**
 	 * Get the direction in the lab system of a wire in this superlayer
+	 * 
 	 * @return a unit vector in the wire direction
 	 */
-	public double [] getWireDirection() {
+	public double[] getWireDirection() {
 		return _direction;
 	}
-	
 
 	/**
-	 * Add any appropriate feedback strings for the headsup display or feedback
+	 * Add any appropriate feedback strings
 	 * panel.
 	 * 
 	 * @param container
@@ -979,18 +977,16 @@ public class SuperLayerDrawing {
 	 */
 	public void getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
 			List<String> feedbackStrings) {
-		
-		
-		
-		
+
 		if (_iSupl.item().contains(container, screenPoint)) {
 
-			NoiseReductionParameters parameters = _noiseManager.getParameters(_iSupl.sector() - 1, _iSupl.superlayer() - 1);
-			
-			//wire direction
+			NoiseReductionParameters parameters = _noiseManager.getParameters(_iSupl.sector() - 1,
+					_iSupl.superlayer() - 1);
+
+			// wire direction
 			String wds = "wire dir: " + VectorSupport.toString(getWireDirection(), 3);
 			feedbackStrings.add(wds);
-			
+
 			// getLayer returns a 1 based index (-1 on failure)
 			// int layer = getLayer(container, screenPoint);
 
@@ -999,37 +995,32 @@ public class SuperLayerDrawing {
 			int layer = data[0];
 			int wire = data[1];
 
-
 			if (_view.isSingleEventMode()) {
 				feedbackStrings.add(DataSupport.prelimColor + "Raw Superlayer Occ "
 						+ DoubleFormat.doubleFormat(100.0 * parameters.getRawOccupancy(), 2) + "%");
 				feedbackStrings.add(DataSupport.prelimColor + "Reduced Superlayer Occ "
 						+ DoubleFormat.doubleFormat(100.0 * parameters.getNoiseReducedOccupancy(), 2) + "%");
 
-			} 
-			else {
+			} else {
 				if ((layer > 0) && (wire > 0)) {
-				double wireRate = AccumulationManager.getInstance().getAccumulatedWireHitPercentage(_iSupl.sector() - 1, _iSupl.superlayer() - 1, layer-1, wire-1);
-				double avgOccupancy = AccumulationManager.getInstance().getAverageDCOccupancy(_iSupl.sector() - 1, _iSupl.superlayer() - 1);
-				
-				int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
-						.getAccumulatedDCData();
+					double wireRate = AccumulationManager.getInstance().getAccumulatedWireHitPercentage(
+							_iSupl.sector() - 1, _iSupl.superlayer() - 1, layer - 1, wire - 1);
+					double avgOccupancy = AccumulationManager.getInstance().getAverageDCOccupancy(_iSupl.sector() - 1,
+							_iSupl.superlayer() - 1);
 
-				int hitCount = dcAccumulatedData[_iSupl.sector() - 1][_iSupl.superlayer()-1][layer-1][wire-1];
+					int dcAccumulatedData[][][][] = AccumulationManager.getInstance().getAccumulatedDCData();
 
+					int hitCount = dcAccumulatedData[_iSupl.sector() - 1][_iSupl.superlayer() - 1][layer - 1][wire - 1];
 
-				feedbackStrings.add(AccumulationManager.accumulationFBColor + 
-						"accumulated event count: " + AccumulationManager.getInstance().getAccumulationEventCount());
-				feedbackStrings.add(AccumulationManager.accumulationFBColor + 
-						"avg occupancy superlayer: " + _iSupl.superlayer() + " is "
-						+ DoubleFormat.doubleFormat(100*avgOccupancy, 3) + "%");
-				feedbackStrings.add(AccumulationManager.accumulationFBColor + 
-						"hit rate layer: " + layer + ", wire: " + wire + " is "
-						+ DoubleFormat.doubleFormat(wireRate, 3) + "%");
-				
-				feedbackStrings.add(AccumulationManager.accumulationFBColor + 
-						"hit count layer: " + layer + ", wire: " + wire + " is "
-						+ hitCount);
+					feedbackStrings.add(AccumulationManager.accumulationFBColor + "accumulated event count: "
+							+ AccumulationManager.getInstance().getAccumulationEventCount());
+					feedbackStrings.add(AccumulationManager.accumulationFBColor + "avg occupancy superlayer: "
+							+ _iSupl.superlayer() + " is " + DoubleFormat.doubleFormat(100 * avgOccupancy, 3) + "%");
+					feedbackStrings.add(AccumulationManager.accumulationFBColor + "hit rate layer: " + layer
+							+ ", wire: " + wire + " is " + DoubleFormat.doubleFormat(wireRate, 3) + "%");
+
+					feedbackStrings.add(AccumulationManager.accumulationFBColor + "hit count layer: " + layer
+							+ ", wire: " + wire + " is " + hitCount);
 
 				}
 
@@ -1038,14 +1029,12 @@ public class SuperLayerDrawing {
 			DCTdcHitList hits = DC.getInstance().getTDCHits();
 
 			if ((layer > 0) && (wire > 0)) {
-				
+
 				DCTdcHit hit = null;
 				if ((hits != null) && !hits.isEmpty()) {
 					hit = hits.getHit(_iSupl.sector(), _iSupl.superlayer(), layer, wire);
 				}
-				
-				
-				
+
 				// int wire = getWire(layer, worldPoint);
 				// if ((wire > 0) && (wire <= GeoConstants.NUM_WIRE)) {
 
@@ -1064,19 +1053,21 @@ public class SuperLayerDrawing {
 
 	// add time based recons fb
 	private void addReconstructedFeedback(List<String> feedbackStrings) {
-//
-//		double p[] = DC.timeBasedTrackP();
-//		if (p != null) {
-//			int reconTrackCount = p.length;
-//			if (reconTrackCount > 0) {
-//				feedbackStrings.add(DataSupport.reconColor + "TB #reconstructed tracks " + reconTrackCount);
-//				for (int i = 0; i < reconTrackCount; i++) {
-//
-//					feedbackStrings.add(DataSupport.reconColor + "TB trk# " + (i + 1) + " recon p "
-//							+ DoubleFormat.doubleFormat(p[i], 5) + " Gev/c");
-//				}
-//			}
-//		} // p != null
+		//
+		// double p[] = DC.timeBasedTrackP();
+		// if (p != null) {
+		// int reconTrackCount = p.length;
+		// if (reconTrackCount > 0) {
+		// feedbackStrings.add(DataSupport.reconColor + "TB #reconstructed
+		// tracks " + reconTrackCount);
+		// for (int i = 0; i < reconTrackCount; i++) {
+		//
+		// feedbackStrings.add(DataSupport.reconColor + "TB trk# " + (i + 1) + "
+		// recon p "
+		// + DoubleFormat.doubleFormat(p[i], 5) + " Gev/c");
+		// }
+		// }
+		// } // p != null
 	}
 
 }

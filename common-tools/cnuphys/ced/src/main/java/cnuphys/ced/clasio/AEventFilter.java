@@ -4,13 +4,9 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JCheckBox;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 
-import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.frame.Ced;
 
@@ -75,6 +71,7 @@ public abstract class AEventFilter implements IEventFilter {
 	 * Get the menu component
 	 * @return the menu component
 	 */
+	@Override
 	public JComponent getMenuComponent() {
 		return _menuComponent;
 	}

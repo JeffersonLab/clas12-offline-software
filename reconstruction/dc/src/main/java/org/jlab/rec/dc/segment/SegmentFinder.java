@@ -2,13 +2,13 @@ package org.jlab.rec.dc.segment;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.clas.math.FastMath;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.hit.FittedHit;
-import org.jlab.rec.dc.hit.Hit;
 import org.jlab.rec.dc.trajectory.SegmentTrajectory;
 
 /**
@@ -27,7 +27,7 @@ public class SegmentFinder {
      * @param DcDetector DC detector utility
      */
     public void get_LayerEfficiencies(Segment seg, DataEvent event, DCGeant4Factory DcDetector) {
-        if (Constants.LAYEREFFS() == true) {
+        if (seg!=null) {
             // get all the hits to obtain layer efficiency
             if (event.hasBank("DC::tdc") != false) {
 
@@ -74,17 +74,17 @@ public class SegmentFinder {
 
                 for (int l = 0; l < 6; l++) {
                     //double z = GeometryLoader.dcDetector.getSector(0).getSuperlayer(seg.get_Superlayer()-1).getLayer(l).getComponent(0).getMidpoint().z();
-                    double z = DcDetector.getWireMidpoint(seg.get_Superlayer() - 1, l, 0).z;
+                    double z = DcDetector.getWireMidpoint(seg.get_Sector() - 1, seg.get_Superlayer() - 1, l, 0).z;
                     double trkXMP = seg.get_fittedCluster().get_clusterLineFitSlopeMP() * z + seg.get_fittedCluster().get_clusterLineFitInterceptMP();
                     double trkX = seg.get_fittedCluster().get_clusterLineFitSlope() * z + seg.get_fittedCluster().get_clusterLineFitIntercept();
 
                     if (trkX == 0) {
                         continue; // should always get a cluster fit
                     }
-                    int trjWire = trj.getWireOnTrajectory(seg.get_Superlayer(), l + 1, trkXMP, DcDetector);
+                    int trjWire = trj.getWireOnTrajectory(seg.get_Sector(), seg.get_Superlayer(), l + 1, trkXMP, DcDetector);
                     //double x = GeometryLoader.dcDetector.getSector(0).getSuperlayer(seg.get_Superlayer()-1).getLayer(l).getComponent(trjWire-1).getMidpoint().x();
-                    double x = DcDetector.getWireMidpoint(seg.get_Superlayer() - 1, l, trjWire - 1).x;
-                    double cosTrkAngle = Math.cos(Math.toRadians(6.)) * Math.sqrt(1. + seg.get_fittedCluster().get_clusterLineFitSlope() * seg.get_fittedCluster().get_clusterLineFitSlope());
+                    double x = DcDetector.getWireMidpoint(seg.get_Sector() - 1, seg.get_Superlayer() - 1, l, trjWire - 1).x;
+                    double cosTrkAngle = FastMath.cos(Math.toRadians(6.)) * Math.sqrt(1. + seg.get_fittedCluster().get_clusterLineFitSlope() * seg.get_fittedCluster().get_clusterLineFitSlope());
                     double calc_doca = (x - trkX) * cosTrkAngle;
                     trkDocas[l] = calc_doca;
 
@@ -119,7 +119,7 @@ public class SegmentFinder {
      * @param missingHits the list of hits that are not in the cluster (should be null for time-based tracking)
      * @return the list of segments obtained from the clusters
      */
-    public List<Segment> get_Segments(List<FittedCluster> allClusters, DataEvent event, DCGeant4Factory DcDetector) {
+    public List<Segment> get_Segments(List<FittedCluster> allClusters, DataEvent event, DCGeant4Factory DcDetector, boolean runLayersEffs) {
         List<Segment> segList = new ArrayList<Segment>();
         for (FittedCluster fClus : allClusters) {
 
@@ -133,7 +133,7 @@ public class SegmentFinder {
             Segment seg = new Segment(fClus);
             seg.set_fitPlane(DcDetector);
             
-            if (Constants.LAYEREFFS() == true)
+            if (runLayersEffs == true)
                 this.get_LayerEfficiencies(seg, event, DcDetector);
             
             double sumRes=0;

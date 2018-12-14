@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.track;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -9,12 +10,9 @@ import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
-import org.jlab.rec.cvt.trajectory.TrkSwimmer;
 
 public class TrackListFinder {
-
-    private TrkSwimmer bstSwim = new TrkSwimmer();
-
+    
     public TrackListFinder() {
         // TODO Auto-generated constructor stub
     }
@@ -25,7 +23,9 @@ public class TrackListFinder {
      * @param svt_geo the svt geometry
      * @return the list of selected tracks
      */
-    public List<Track> getTracks(List<Track> cands, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
+    public List<Track> getTracks(List<Track> cands, 
+            org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo,
+            Swim bstSwim) {
         List<Track> tracks = new ArrayList<Track>();
         if (cands.size() == 0) {
             System.err.print("Error no tracks found");
@@ -46,13 +46,16 @@ public class TrackListFinder {
 
                 int charge = trk.get_Q();
                 double maxPathLength = 5.0;//very loose cut 
-                bstSwim.SetSwimParameters(trk.get_helix(), maxPathLength, charge, trk.get_P());
+                bstSwim.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
+                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
+                        trk.get_P(), charge, 
+                        maxPathLength) ;
 
-                double[] pointAtCylRad = bstSwim.SwimToCylinder(Constants.CTOFINNERRADIUS);
-                trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0], pointAtCylRad[1], pointAtCylRad[2]));
-                trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3], pointAtCylRad[4], pointAtCylRad[5]));
+                double[] pointAtCylRad = bstSwim.SwimToCylinder(Constants.CTOFINNERRADIUS/10);
+                trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
+                trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
 
-                trk.set_pathLength(bstSwim.swamPathLength);
+                trk.set_pathLength(pointAtCylRad[6]*10);
 
                 TrajectoryFinder trjFind = new TrajectoryFinder();
 

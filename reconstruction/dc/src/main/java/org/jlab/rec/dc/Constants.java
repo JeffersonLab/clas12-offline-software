@@ -9,7 +9,7 @@ import cnuphys.snr.NoiseReductionParameters;
  */
 public class Constants {
 
-    static boolean ConstantsLoaded = false;
+    private static boolean ConstantsLoaded = false;
     // RECONSTRUCTION PARAMETERS
     public static final int DC_MIN_NLAYERS = 4;
     public static final double SPEEDLIGHT = 29.97924580;
@@ -104,56 +104,92 @@ public class Constants {
 
     public static double SEGSUMRESIDCUT = 0.9;
 
-    //public static final boolean OUTOFTIMEFLAG = true;
-
-    //private static boolean T2DGRID ;
-    //private static boolean CALIB;
-    //private static double TORSCALE;
-
-    private static boolean runLAYEREFFS = false;
-
     // SNR parameters -- can be optimized
     public static final  int[] SNR_RIGHTSHIFTS = {0,1,2,2,4,4};
     public static final  int[] SNR_LEFTSHIFTS  = {0,1,2,2,4,4};	
 
 
     // Arrays for combinatorial cluster compositions
-    static final int[][] CombArray1Layer = new int[][]{{0},{1}};
-    static final int[][] CombArray2Layers = new int[][]{{0,0},{1,0},{0,1},{1,1}};
-    static final int[][] CombArray3Layers = new int[][]{{0,0,0},{1,0,0},{0,1,0},{1,1,0},{0,0,1},{1,0,1},{0,1,1},{1,1,1}};
-    static final int[][] CombArray4Layers = new int[][]{{0,0,0,0},{1,0,0,0},{0,1,0,0},{1,1,0,0},{0,0,1,0},{1,0,1,0},{0,1,1,0},{1,1,1,0},{0,0,0,1},{1,0,0,1},{0,1,0,1},{1,1,0,1},{0,0,1,1},{1,0,1,1},{0,1,1,1},{1,1,1,1}};
-    static final int[][] CombArray5Layers = new int[][]{{0,0,0,0,0},{1,0,0,0,0},{0,1,0,0,0},{1,1,0,0,0},{0,0,1,0,0},{1,0,1,0,0},{0,1,1,0,0},{1,1,1,0,0},{0,0,0,1,0},{1,0,0,1,0},{0,1,0,1,0},{1,1,0,1,0},{0,0,1,1,0},{1,0,1,1,0},{0,1,1,1,0},{1,1,1,1,0},{0,0,0,0,1},{1,0,0,0,1},{0,1,0,0,1},{1,1,0,0,1},{0,0,1,0,1},{1,0,1,0,1},{0,1,1,0,1},{1,1,1,0,1},{0,0,0,1,1},{1,0,0,1,1},{0,1,0,1,1},{1,1,0,1,1},{0,0,1,1,1},{1,0,1,1,1},{0,1,1,1,1},{1,1,1,1,1}};
-    static final int[][] CombArray6Layers = new int[][]{{0,0,0,0,0,0},{1,0,0,0,0,0},{0,1,0,0,0,0},{1,1,0,0,0,0},{0,0,1,0,0,0},{1,0,1,0,0,0},{0,1,1,0,0,0},{1,1,1,0,0,0},{0,0,0,1,0,0},{1,0,0,1,0,0},{0,1,0,1,0,0},{1,1,0,1,0,0},{0,0,1,1,0,0},{1,0,1,1,0,0},{0,1,1,1,0,0},{1,1,1,1,0,0},{0,0,0,0,1,0},{1,0,0,0,1,0},{0,1,0,0,1,0},{1,1,0,0,1,0},{0,0,1,0,1,0},{1,0,1,0,1,0},{0,1,1,0,1,0},{1,1,1,0,1,0},{0,0,0,1,1,0},{1,0,0,1,1,0},{0,1,0,1,1,0},{1,1,0,1,1,0},{0,0,1,1,1,0},{1,0,1,1,1,0},{0,1,1,1,1,0},{1,1,1,1,1,0},{0,0,0,0,0,1},{1,0,0,0,0,1},{0,1,0,0,0,1},{1,1,0,0,0,1},{0,0,1,0,0,1},{1,0,1,0,0,1},{0,1,1,0,0,1},{1,1,1,0,0,1},{0,0,0,1,0,1},{1,0,0,1,0,1},{0,1,0,1,0,1},{1,1,0,1,0,1},{0,0,1,1,0,1},{1,0,1,1,0,1},{0,1,1,1,0,1},{1,1,1,1,0,1},{0,0,0,0,1,1},{1,0,0,0,1,1},{0,1,0,0,1,1},{1,1,0,0,1,1},{0,0,1,0,1,1},{1,0,1,0,1,1},{0,1,1,0,1,1},{1,1,1,0,1,1},{0,0,0,1,1,1},{1,0,0,1,1,1},{0,1,0,1,1,1},{1,1,0,1,1,1},{0,0,1,1,1,1},{1,0,1,1,1,1},{0,1,1,1,1,1},{1,1,1,1,1,1}};
+    private static final int[][] CombArray1Layer = new int[][]{
+            {0},
+            {1}};
 
-    public static final ArrayList<int[][]> CombArray = new ArrayList<int[][]>(6);
+    private static final int[][] CombArray2Layers = new int[][]{
+            {0,0}, {1,0},
+            {0,1}, {1,1}};
+
+    private static final int[][] CombArray3Layers = new int[][]{
+            {0,0,0}, {1,0,0}, {0,1,0}, {1,1,0},
+            {0,0,1}, {1,0,1}, {0,1,1}, {1,1,1}};
+
+    private static final int[][] CombArray4Layers = new int[][]{
+            {0,0,0,0}, {1,0,0,0}, {0,1,0,0}, {1,1,0,0},
+            {0,0,1,0}, {1,0,1,0}, {0,1,1,0}, {1,1,1,0},
+            {0,0,0,1}, {1,0,0,1}, {0,1,0,1}, {1,1,0,1},
+            {0,0,1,1}, {1,0,1,1}, {0,1,1,1}, {1,1,1,1}};
+
+    private static final int[][] CombArray5Layers = new int[][]{
+            {0,0,0,0,0}, {1,0,0,0,0}, {0,1,0,0,0}, {1,1,0,0,0},
+            {0,0,1,0,0}, {1,0,1,0,0}, {0,1,1,0,0}, {1,1,1,0,0},
+            {0,0,0,1,0}, {1,0,0,1,0}, {0,1,0,1,0}, {1,1,0,1,0},
+            {0,0,1,1,0}, {1,0,1,1,0}, {0,1,1,1,0}, {1,1,1,1,0},
+            {0,0,0,0,1}, {1,0,0,0,1}, {0,1,0,0,1}, {1,1,0,0,1},
+            {0,0,1,0,1}, {1,0,1,0,1}, {0,1,1,0,1}, {1,1,1,0,1},
+            {0,0,0,1,1}, {1,0,0,1,1}, {0,1,0,1,1}, {1,1,0,1,1},
+            {0,0,1,1,1}, {1,0,1,1,1}, {0,1,1,1,1}, {1,1,1,1,1}};
+
+    private static final int[][] CombArray6Layers = new int[][]{
+            {0,0,0,0,0,0}, {1,0,0,0,0,0}, {0,1,0,0,0,0}, {1,1,0,0,0,0},
+            {0,0,1,0,0,0}, {1,0,1,0,0,0}, {0,1,1,0,0,0}, {1,1,1,0,0,0},
+            {0,0,0,1,0,0}, {1,0,0,1,0,0}, {0,1,0,1,0,0}, {1,1,0,1,0,0},
+            {0,0,1,1,0,0}, {1,0,1,1,0,0}, {0,1,1,1,0,0}, {1,1,1,1,0,0},
+            {0,0,0,0,1,0}, {1,0,0,0,1,0}, {0,1,0,0,1,0}, {1,1,0,0,1,0},
+            {0,0,1,0,1,0}, {1,0,1,0,1,0}, {0,1,1,0,1,0}, {1,1,1,0,1,0},
+            {0,0,0,1,1,0}, {1,0,0,1,1,0}, {0,1,0,1,1,0}, {1,1,0,1,1,0},
+            {0,0,1,1,1,0}, {1,0,1,1,1,0}, {0,1,1,1,1,0}, {1,1,1,1,1,0},
+            {0,0,0,0,0,1}, {1,0,0,0,0,1}, {0,1,0,0,0,1}, {1,1,0,0,0,1},
+            {0,0,1,0,0,1}, {1,0,1,0,0,1}, {0,1,1,0,0,1}, {1,1,1,0,0,1},
+            {0,0,0,1,0,1}, {1,0,0,1,0,1}, {0,1,0,1,0,1}, {1,1,0,1,0,1},
+            {0,0,1,1,0,1}, {1,0,1,1,0,1}, {0,1,1,1,0,1}, {1,1,1,1,0,1},
+            {0,0,0,0,1,1}, {1,0,0,0,1,1}, {0,1,0,0,1,1}, {1,1,0,0,1,1},
+            {0,0,1,0,1,1}, {1,0,1,0,1,1}, {0,1,1,0,1,1}, {1,1,1,0,1,1},
+            {0,0,0,1,1,1}, {1,0,0,1,1,1}, {0,1,0,1,1,1}, {1,1,0,1,1,1},
+            {0,0,1,1,1,1}, {1,0,1,1,1,1}, {0,1,1,1,1,1}, {1,1,1,1,1,1}};
+
+    public static final ArrayList<int[][]> CombArray = new ArrayList<>(6);
 
     public static int[][] STBLOC;
 
     private static boolean USETSTART = false;
-    
 
-    public static final synchronized boolean isUSETSTART() {
+    public static boolean isUSETSTART() {
         return USETSTART;
     }
 
-    public static final synchronized void setUSETSTART(boolean USETSTART) {
+    public static void setUSETSTART(boolean USETSTART) {
         Constants.USETSTART = USETSTART;
     }
     
-    private static double MCDIST = 1.0;
+    private static double WIREDIST = 1.0;
 
-    public static final synchronized double getMCDIST() {
-        return MCDIST;
+    /**
+     * @return the WIREDIST
+     */
+    public static double getWIREDIST() {
+        return WIREDIST;
     }
 
-    public static final synchronized void setMCDIST(double d) {
-        Constants.MCDIST = d;
+    /**
+     * @param aMCDIST the WIREDIST to set
+     */
+    public static void setWIREDIST(double aDIST) {
+        WIREDIST = aDIST;
     }
     
-    public static double[][][] MAXENDPLTDEFLEC = new double[3][6][2];
+    public static final double[][][] MAXENDPLTDEFLEC = new double[3][6][2];
     
-    public static final synchronized void Load() {
-        if (ConstantsLoaded==true)
+    public static synchronized void Load() {
+        if (ConstantsLoaded)
                 return;
         CombArray.add(CombArray1Layer);
         CombArray.add(CombArray2Layers);
@@ -224,27 +260,6 @@ public class Constants {
 
     }
 
-
-    public static final boolean LAYEREFFS() {
-            return runLAYEREFFS;
-    }
-
-
-    public static final void setLAYEREFFS(final boolean le) {
-            runLAYEREFFS = le;
-    }
-
-
-    //public static final double getTORSCALE() {
-    //	return TORSCALE;
-    //}
-
-
-    //public static final void setTORSCALE(double tORSCALE) {
-    //	TORSCALE = tORSCALE;
-    //}
-
- 
     private static double[][][][] _T0 = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables --- with TStart calibration 
     private static double[][][][] _T0ERR = new double[6][6][7][6]; //nSec*nSL*nSlots*nCables --- with TStart calibration 
     public static synchronized void setT0(double[][][][] T0) {
@@ -253,12 +268,18 @@ public class Constants {
     public static synchronized void setT0Err(double[][][][] T0ERR) {
         _T0ERR = T0ERR;
     }
-    public static final double[][][][] getT0() {
+    public static double[][][][] getT0() {
         return _T0;
     }
-    public static final double[][][][] getT0Err() {
+    public static double[][][][] getT0Err() {
         return _T0ERR;
     }
-     
 
+    public static final String TIME2DIST = "/calibration/dc/time_to_distance/time2dist";
+    public static final String TDCTCUTS = "/calibration/dc/time_corrections/tdctimingcuts";
+    public static final String WIRESTAT = "/calibration/dc/tracking/wire_status";
+    public static final String TIMEJITTER = "/calibration/dc/time_jitter";
+    public static final String HITBASE = "HitBased";
+
+   
 }

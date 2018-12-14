@@ -51,10 +51,11 @@ public class TrajectoryDrawer3D extends Item3D {
 
 				boolean showHB = _cedPanel3D.showHBTrack();
 				boolean showTB = _cedPanel3D.showTBTrack();
+				boolean showCVT = _cedPanel3D.showCVTTrack();
 
 				for (SwimTrajectory trajectory : trajectories) {
 					LundId lid = trajectory.getLundId();
-					if ((showHB && LundSupport.isHB(lid)) || (showTB && LundSupport.isTB(lid))) {
+					if ((showCVT && LundSupport.isCVT(lid)) ||(showHB && LundSupport.isHB(lid)) || (showTB && LundSupport.isTB(lid))) {
 						drawSwimTrajectory(drawable, trajectory);
 					}
 				}

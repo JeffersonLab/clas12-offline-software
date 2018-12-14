@@ -11,7 +11,6 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.lund.TrajectoryRowData;
-import cnuphys.magfield.MagneticFields;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.DefaultSwimStopper;
 import cnuphys.swim.SwimTrajectory;
@@ -212,7 +211,7 @@ public class SwimAllMC implements ISwimAll {
 		double theta = Math.toDegrees(Math.acos(pz / p));
 		double phi = Math.toDegrees(Math.atan2(py, px));
 
-		Swimmer swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
+		Swimmer swimmer = new Swimmer();
 		double stepSize = 5e-4; // m
 		DefaultSwimStopper stopper = new DefaultSwimStopper(RMAX);
 

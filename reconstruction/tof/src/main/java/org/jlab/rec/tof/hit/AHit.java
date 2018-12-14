@@ -4,6 +4,7 @@
 package org.jlab.rec.tof.hit;
 
 import java.text.DecimalFormat;
+import org.jlab.geom.prim.Line3D;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.utils.groups.IndexedTable;
@@ -31,6 +32,8 @@ public abstract class AHit implements Comparable<AHit> {
     private int _TDCbankHitIdx1 = -1;
     private int _TDCbankHitIdx2 = -1;
 
+    public int _AssociatedTrkId = -1;
+    
     public AHit(int id, int panel, int sector, int paddle, int aDC1, int tDC1,
             int aDC2, int tDC2) {
         _Id = id;
@@ -299,6 +302,19 @@ public abstract class AHit implements Comparable<AHit> {
         this._yUnc = _yUnc;
     }
 
+    public Line3D get_paddleLine() {
+        return _paddleLine;
+    }
+    public void set_paddleLine(Line3D paddleLine) {
+        this._paddleLine = paddleLine;
+    }
+    public void set_barthickness(double thickness) {
+        this._barThickness = thickness;
+    }
+    public double get_barthickness() {
+        return this._barThickness;
+    }
+
     public Point3D get_TrkPosition() {
         return _TrkPosition;
     }
@@ -339,7 +355,9 @@ public abstract class AHit implements Comparable<AHit> {
         this._PathLenThruBar = _PathLen;
     }
 
+    private double _barThickness;   // bar thickness
     private Point3D _Position; // Hit position
+    private Line3D _paddleLine; // paddle line
     private double _Energy; // Deposited energy in the bar
     private double _EnergyUnc; // Uncertainty in the deposited energy in the bar
     private double _Energy1; // (FTOF) L (CTOF) U deposited energy

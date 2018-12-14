@@ -2,7 +2,6 @@ package org.jlab.rec.eb;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.pow;
-import org.jlab.clas.detector.ScintillatorResponse;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.detector.base.DetectorType;
@@ -61,10 +60,8 @@ public class EBUtil {
         final int layer = resp.getDescriptor().getLayer();
         final int component = resp.getDescriptor().getComponent();
         String tableName=null;
-        double scale=1;
         if (resp.getDescriptor().getType()==DetectorType.FTOF) {
             tableName="/calibration/ftof/tres";
-            scale=0.001; // values in picoseconds :(
         }
         else if (resp.getDescriptor().getType()==DetectorType.CTOF) {
             // CTOF doesn't currently have time resolution available in ccdb.
@@ -75,7 +72,7 @@ public class EBUtil {
             throw new RuntimeException("not ready for non-TOF");
         }
         return ccdb.getTable(tableName).
-            getDoubleValue("tres",sector,layer,component)*scale;
+            getDoubleValue("tres",sector,layer,component);
     }
 
     /**
@@ -158,7 +155,7 @@ public class EBUtil {
             status += taggerStat;
         }
         */
-        if (p.getTaggerResponses().size()>0) status += taggerStat;
+        if (p.getHit(DetectorType.FTCAL)!=null) status += taggerStat;
 
 
         // scintillators:

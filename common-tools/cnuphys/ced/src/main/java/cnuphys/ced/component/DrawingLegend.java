@@ -31,6 +31,8 @@ public class DrawingLegend extends JComponent {
 	
 
 	private static final Font labelFont = new Font("SansSerif", Font.PLAIN, 9);
+	
+	private static final Color bgColor = new Color(120, 120, 120);
 
 	// parent view
 	private BaseView _view;
@@ -57,7 +59,7 @@ public class DrawingLegend extends JComponent {
 	@Override
 	public void paintComponent(Graphics g) {
 		Rectangle b = getBounds();
-		g.setColor(Color.darkGray);
+		g.setColor(bgColor);
 		g.fillRect(0, 0, b.width, b.height);
 
 		Point pp = new Point();
@@ -83,7 +85,7 @@ public class DrawingLegend extends JComponent {
 		if (_view != null) {
 			if ((_view instanceof SectorView) ||
 					(_view instanceof DCXYView) || (_view instanceof ProjectedDCView)) {
-				paintSectorViewLegend(g, x, yc);
+				paintForwardViewLegend(g, x, yc);
 			}
 			
 			else if ((_view instanceof CentralXYView) || (_view instanceof CentralZView)) {
@@ -96,6 +98,7 @@ public class DrawingLegend extends JComponent {
 	//paint the legent for the central 2D views
 	private void paintCentralViewLegend(Graphics g, int x, int yc) {
 		int xo = x;
+		Graphics2D g2 = (Graphics2D) g;
 		x = drawCross(g, x, yc, DataDrawSupport.BST_CROSS);
 		x = drawCross(g, x, yc, DataDrawSupport.BMT_CROSS);
 		
@@ -104,17 +107,26 @@ public class DrawingLegend extends JComponent {
 				X11Colors.getX11Color("Dark Green"), X11Colors.getX11Color("Aquamarine"));
 
 		quickString(g, xo+16, yc, "hit strip midpoint");
+		
+		//tracks
+		yc += 18;
+		x = xo;
+		x = quickString(g, xo, yc, "Tracks   ");
+		x = drawLine(g2, x, yc, DC.HB_COLOR, "HB ");
+		x = drawLine(g2, x, yc, DC.TB_COLOR, "TB ");
+		x = drawLine(g2, x, yc, CedColors.cvtTrackColor, "CVT ");
+
 	}
 
 	//paint the legend for sector views
-	private void paintSectorViewLegend(Graphics g, int x, int yc) {
+	private void paintForwardViewLegend(Graphics g, int x, int yc) {
 		
 		int xo = x;
 		Graphics2D g2 = (Graphics2D) g;
 		x = drawCross(g, x, yc, DataDrawSupport.HB_CROSS);
 		x = drawCross(g, x, yc, DataDrawSupport.TB_CROSS);
 		x = drawCross(g, x, yc, DataDrawSupport.FMT_CROSS);
-		x = drawCircle(g, x, yc, CedColors.docaLine, "TB Doca");
+		x = drawCircle(g, x, yc, CedColors.docaTruthLine, "TB Doca");
 		yc += 18;
 		
 		
@@ -122,15 +134,36 @@ public class DrawingLegend extends JComponent {
 		x = xo;
 		x = drawSegLine(g2, x, yc, CedColors.hbSegmentLine, DC.HB_COLOR, "HB Segment");
 		x = drawSegLine(g2, x, yc, CedColors.tbSegmentLine, DC.TB_COLOR, "TB Segment");
+		
+		//tracks
+		yc += 18;
+		x = xo;
+		x = quickString(g, xo, yc, "Tracks   ");
+		x = drawLine(g2, x, yc, DC.HB_COLOR, "HB ");
+		x = drawLine(g2, x, yc, DC.TB_COLOR, "TB ");
+		x = drawLine(g2, x, yc, CedColors.cvtTrackColor, "CVT ");
 
 	}
 	
+	private int drawLine(Graphics2D g2, int x, int yc, Color lineColor, String str) {
+		g2.setColor(CedColors.docaTruthFill);
+		g2.setStroke(GraphicsUtilities.getStroke(6f, LineStyle.SOLID));
+		g2.drawLine(x, yc, x+26, yc);
+		g2.setColor(lineColor);
+		g2.setStroke(GraphicsUtilities.getStroke(2f, LineStyle.SOLID));
+		g2.drawLine(x, yc, x+26, yc);
+		
+		x += 36;
+		return quickString(g2, x, yc-2, str) + 18;
+	}
+
+	
 	private int drawSegLine(Graphics2D g2, int x, int yc, Color lineColor, Color endColor, String str) {
-		g2.setColor(CedColors.docaFill);
+		g2.setColor(CedColors.docaTruthFill);
 		g2.setStroke(GraphicsUtilities.getStroke(6f, LineStyle.SOLID));
 		g2.drawLine(x, yc, x+30, yc);
 		g2.setColor(lineColor);
-		g2.setStroke(GraphicsUtilities.getStroke(1.5f, LineStyle.SOLID));
+		g2.setStroke(GraphicsUtilities.getStroke(2f, LineStyle.SOLID));
 		g2.drawLine(x, yc, x+30, yc);
 		
 		SymbolDraw.drawOval(g2, x, yc, 2, 2, endColor, endColor);

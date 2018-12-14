@@ -62,8 +62,6 @@ public interface IGetCalibrationParams {
 
     public double DEDX_MIP();
 
-    public double ScinBarThickn();
-    
     public int Status1(IndexedTable tab);
     
     public int Status2(IndexedTable tab);

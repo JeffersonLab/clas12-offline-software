@@ -11,21 +11,32 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.MenuSelectionManager;
 
+@SuppressWarnings("serial")
 public class MisplacedPanel extends JPanel {
+	
+	
+	public static final int SHIFTX = 0;
+	public static final int SHIFTY = 1;
+	public static final int SHIFTZ = 2;
+	
+	private static final String shiftStr[] = {"X", "Y", "Z"};
 
 	private JLabel _label;
 	private final MagneticFields.FieldType _fieldType;
 	protected JTextField _textField;
+	
+	private int _shiftDir;
 
 	public MisplacedPanel(final MagneticFields.FieldType type,
-			final String name, double defaultVal) {
+			final String name, double defaultVal, int shiftDir) {
 		setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
 		setOpaque(false);
 		setBackground(null);
 		_fieldType = type;
+		_shiftDir = shiftDir;
 
 		// label
-		_label = new JLabel("Shift " + name + " Z (cm)");
+		_label = new JLabel("Shift " + name + " " + shiftStr[_shiftDir] +  " (cm)");
 
 		// textField
 		_textField = new JTextField(String.format("%7.3f", defaultVal), 5);
@@ -56,7 +67,7 @@ public class MisplacedPanel extends JPanel {
 		add(_textField);
 	}
 	
-	//maybe change the Z shift
+	//maybe change the shift
 	private void maybeChangeShift() {
 		try {
 			double newShift= Double.parseDouble(_textField.getText());
@@ -66,15 +77,33 @@ public class MisplacedPanel extends JPanel {
 				return;
 			}
 			
-			double currentShift = getField()._shiftZ;
-			if (Math.abs(newShift - currentShift) > 1.0e-6) {
-				getField()._shiftZ = newShift;
-				MagneticFields.getInstance().notifyListeners();
+			double currentShift = getShift();
+			
+			if (Math.abs(newShift - currentShift) > MagneticField.MISALIGNTOL) {
+				
+				switch(_shiftDir) {
+				case SHIFTX:
+					getField()._shiftX = newShift;
+					MagneticFields.getInstance().notifyListeners();
+					break;
+					
+				case SHIFTY:
+					getField()._shiftY = newShift;
+					MagneticFields.getInstance().notifyListeners();
+					break;
+					
+				case SHIFTZ:
+					getField()._shiftZ = newShift;
+					MagneticFields.getInstance().notifyListeners();
+					break;
+				}
+				
+				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		_textField.setText(String.format("%7.3f", getField().getShiftZ()));
+		_textField.setText(String.format("%7.3f", getShift()));
 	}
 
 	private MagneticField getField() {
@@ -82,7 +111,21 @@ public class MisplacedPanel extends JPanel {
 	}
 	
 	public void fixText() {
-		_textField.setText(String.format("%7.3f", getField().getShiftZ()));
+		_textField.setText(String.format("%7.3f", getField()));
+	}
+	
+	private double getShift() {
+		switch(_shiftDir) {
+		case SHIFTX:
+			return getField()._shiftX;
+			
+		case SHIFTY:
+			return getField()._shiftY;
+			
+		case SHIFTZ:
+			return getField()._shiftZ;
+		}
+		return 0;
 	}
 
 	@Override

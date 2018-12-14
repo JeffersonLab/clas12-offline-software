@@ -56,6 +56,7 @@ public enum EBCCDBEnum {
     LTCC_TimingRes,
     FCUP_slope,
     FCUP_offset,
-    FCUP_atten;
+    FCUP_atten,
+    HWP_position;
 }
 

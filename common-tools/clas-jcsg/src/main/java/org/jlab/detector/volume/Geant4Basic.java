@@ -107,6 +107,10 @@ public abstract class Geant4Basic {
         return this.children;
     }
 
+    public Vector3d getGlobalPosition() {
+        return getGlobalTransform().transform(new Vector3d(0, 0, 0));
+    }
+
     public Vector3d getLocalPosition() {
         return volumeTransformation.transform(new Vector3d(0, 0, 0));
     }

@@ -164,9 +164,9 @@
         {"name":"Cross2_ID",     "id":29, "type":"int16",  "info":"id of second cross on track"},
         {"name":"Cross3_ID",     "id":30, "type":"int16",  "info":"id of third cross on track"},
         {"name":"q",        	 "id":31, "type":"int8",   "info":"charge of the track"},
-        {"name":"pathlength",    "id":32, "type":"float",   "info":"pathlength of the track"},
-        {"name":"chi2",          "id":33, "type":"float",   "info":"fit chi2 of the track"},
-        {"name":"ndf",           "id":34, "type":"int16",   "info":"fit ndf of the track"}
+        {"name":"pathlength",    "id":32, "type":"float",  "info":"pathlength of the track"},
+        {"name":"chi2",          "id":33, "type":"float",  "info":"fit chi2 of the track"},
+        {"name":"ndf",           "id":34, "type":"int16",  "info":"fit ndf of the track"}
     ]
  },
  
@@ -186,16 +186,20 @@
         {"name":"docaError",    "id":9,  "type":"float", "info":"uncertainty on doca of the hit calculated from TDC (in cm)"},
         {"name":"trkDoca",      "id":10,  "type":"float", "info":"track doca of the hit (in cm)"},
         {"name":"timeResidual", "id":11,  "type":"float", "info":"time residual of the hit (in cm)"},
-        {"name":"LR",           "id":12, "type":"int8", "info":"Left/Right ambiguity of the hit"},
-        {"name":"X",            "id":13,  "type":"float", "info":"wire x-coordinate  in tilted-sector"},
-        {"name":"Z",            "id":14,  "type":"float", "info":"wire z-coordinate  in tilted-sector"},
-        {"name":"B",            "id":15,  "type":"float", "info":"B-field intensity at hit position in tilted-sector system"},
-        {"name":"TProp",        "id":16,  "type":"float", "info":"t propagation along the wire (ns)"},
-        {"name":"TFlight",      "id":17,  "type":"float", "info":"time of flight correction (ns)"},      
-        {"name":"T0",           "id":18,  "type":"float", "info":"T0 (ns)"},
-        {"name":"TStart",       "id":19,  "type":"float", "info":"event start time used (ns)"},
-        {"name":"clusterID",    "id":20, "type":"int16", "info":"ID of associated cluster"},
-        {"name":"trkID",        "id":21, "type":"int8", "info":"ID of associated track"}
+        {"name":"fitResidual",  "id":12,  "type":"float", "info":"fit residual of the hit (in cm, from KF)"},
+        {"name":"LR",           "id":13, "type":"int8", "info":"Left/Right ambiguity of the hit"},
+        {"name":"X",            "id":14,  "type":"float", "info":"wire x-coordinate  in tilted-sector"},
+        {"name":"Z",            "id":15,  "type":"float", "info":"wire z-coordinate  in tilted-sector"},
+        {"name":"B",            "id":16,  "type":"float", "info":"B-field intensity at hit position in tilted-sector system"},
+        {"name":"TProp",        "id":17,  "type":"float", "info":"t propagation along the wire (ns)"},
+        {"name":"TFlight",      "id":18,  "type":"float", "info":"time of flight correction (ns)"},      
+        {"name":"T0",           "id":19,  "type":"float", "info":"T0 (ns)"},
+        {"name":"TStart",       "id":20,  "type":"float", "info":"event start time used (ns)"},
+        {"name":"clusterID",    "id":21, "type":"int16", "info":"ID of associated cluster"},
+        {"name":"trkID",        "id":22, "type":"int8", "info":"ID of associated track"},
+        {"name":"time",         "id":23, "type":"float", "info":"time used in tracking (ns)"},
+        {"name":"beta",         "id":24, "type":"float", "info":"beta used in tracking"},
+        {"name":"tBeta",        "id":25, "type":"float", "info":"beta-dependent time correction used in tracking"}
     ]
  },
  {
