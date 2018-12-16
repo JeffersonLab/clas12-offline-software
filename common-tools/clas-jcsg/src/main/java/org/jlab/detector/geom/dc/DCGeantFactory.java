@@ -7,6 +7,7 @@ package org.jlab.detector.geom.dc;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
@@ -93,7 +94,7 @@ public class DCGeantFactory implements Factory<DCDetector, DCSector, DCSuperlaye
                     gz += midgap + 21*cp.getDouble("/geometry/dc/superlayer/wpdist", superlayerId-1);
                 }
                 Transformation3D trans = new Transformation3D();
-                trans.translateXYZ(0, 0, gz);
+                //trans.translateXYZ(0, 0, gz);
                 superlayer.setTransformation(trans);
             }
         }
@@ -170,6 +171,10 @@ public class DCGeantFactory implements Factory<DCDetector, DCSector, DCSuperlaye
             );
             
             Point3D wireMid = new Point3D(vMidpoint.x, vMidpoint.y,vMidpoint.z);
+            
+            /*System.out.println(" sector " + sectorId + " sl = " +  superlayerId 
+                    + " layer " + layerId + "  wire " + wireId + "  midpoint "
+                    + wireMid.toString());*/
             List<Point3D> botHex = new ArrayList();
             List<Point3D> topHex = new ArrayList();
             
@@ -205,18 +210,28 @@ public class DCGeantFactory implements Factory<DCDetector, DCSector, DCSuperlaye
                 Line3D line = new Line3D(0, 1000, 0, 0, -1000, 0);
                 line.rotateZ(thster);
                 line.translateXYZ(hx, 0, hz);
+                //line.translateXYZ(hx, 0.0, 0.0);
                 lPoint = new Point3D();
                 rPoint = new Point3D();
+                
+                lPoint.translateXYZ(0.0, 0.0, -hz);
+                rPoint.translateXYZ(0.0, 0.0, -hz);
+                
                 lPlane.intersection(line, lPoint);
                 rPlane.intersection(line, rPoint);
             
                 botHex.add(rPoint);
-                topHex.add(lPoint);                
+                topHex.add(lPoint);     
+
             }
-            
+            Collections.reverse(botHex);
+            Collections.reverse(topHex);
             DriftChamberWire wire = new DriftChamberWire(wireId, wireMid, wireLine, 
                     false, botHex, topHex);
+
             layer.addComponent(wire);
+            
+            
         }
         return layer;
     }

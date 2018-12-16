@@ -47,7 +47,7 @@ public class DetectorTrack implements Comparable {
     private int     taggerID    = 0;
     private double  trackchi2   = 0.0;
     private int     ndf         = 0;
-    private int     trackStatus = 0;
+    private int     trackStatus = -1;
     private int     trackDetectorID = -1;
     
     private Vector3D   trackEnd = new Vector3D();

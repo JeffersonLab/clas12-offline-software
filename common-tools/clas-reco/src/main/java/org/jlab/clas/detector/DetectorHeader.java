@@ -11,7 +11,7 @@ public class DetectorHeader {
     private long      trigger = 0;
     private double     rfTime = 0.0;
     private double  startTime = -1000.0;
-    private byte     helicity = -99;
+    private byte     helicity = 0;
     private float beamChargeGated = 0;
     private float    livetime = -1;
     private short eventCategory = 0;

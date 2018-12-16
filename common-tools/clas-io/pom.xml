@@ -3,14 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jlab.clas</groupId>
   <artifactId>clas-io</artifactId>
-  <version>5.7.1-SNAPSHOT</version>
+  <version>5.7.4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <parent>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>5.7.1-SNAPSHOT</version>
+    <version>5.7.4-SNAPSHOT</version>
   </parent>
 
   <dependencies>
@@ -50,7 +50,7 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-utils</artifactId>
-      <version>5.7.1-SNAPSHOT</version>
+      <version>5.7.4-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
