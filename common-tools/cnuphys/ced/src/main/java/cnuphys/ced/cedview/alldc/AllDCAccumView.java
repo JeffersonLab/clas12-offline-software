@@ -511,12 +511,28 @@ public class AllDCAccumView extends CedView implements IAllDC {
 		
 		for (int layer = 1; layer <= 6; layer++) {
 			for (int  wire = 1; wire <= 112; wire++) {
-				counts += getCounts(sector, superlayer, );
+				counts += getCounts(sector, superlayer, layer, wire);
 			}
 		}
 		
 		return counts;
 	}
+
+	// counts in a given sector
+	private int getSectorCounts(int sector) {
+		int counts = 0;
+
+		for (int superlayer = 1; superlayer <= 6; superlayer++) {
+			for (int layer = 1; layer <= 6; layer++) {
+				for (int wire = 1; wire <= 112; wire++) {
+					counts += getCounts(sector, superlayer, layer, wire);
+				}
+			}
+		}
+
+		return counts;
+	}
+
 	
 	//add a colored string
 	
