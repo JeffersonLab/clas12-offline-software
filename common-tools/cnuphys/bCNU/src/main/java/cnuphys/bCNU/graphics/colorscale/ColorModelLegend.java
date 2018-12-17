@@ -23,8 +23,6 @@ public class ColorModelLegend extends JComponent {
 	private Dimension size;
 
 	private int _gap = 2;
-	private int left;
-	private int right;
 	private int top;
 	private int bottom;
 

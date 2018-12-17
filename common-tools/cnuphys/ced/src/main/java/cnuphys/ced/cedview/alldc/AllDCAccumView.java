@@ -478,7 +478,7 @@ public class AllDCAccumView extends CedView implements IAllDC {
 		int lay0 = hit.layer6 - 1;
 		int wire0 = hit.wire - 1;
 		
-		System.err.println("LOGGED HIT");
+	//	System.err.println("LOGGED HIT");
 		_counts[sect0][supl0][lay0][wire0] += 1;
 	}
 	

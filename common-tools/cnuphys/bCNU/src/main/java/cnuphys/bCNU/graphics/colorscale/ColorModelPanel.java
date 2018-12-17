@@ -1,11 +1,20 @@
 package cnuphys.bCNU.graphics.colorscale;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Insets;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
+import javax.swing.ButtonGroup;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import cnuphys.bCNU.graphics.component.CommonBorder;
 
@@ -17,19 +26,31 @@ public class ColorModelPanel extends JPanel {
 	//a slider
 	private JSlider _slider;
 	
+	//the model
+	private ColorScaleModel _model;
+	
+	//max value of the slider
 	private static final int MAXVAL = 1000;
+	
+	//radio buttons
+	private JRadioButton colorRB;
+	private JRadioButton monoRB;
 	
 	/**
 	 * Create a panel with a slider and a color legend
-	 * @param model
-	 * @param desiredWidth
-	 * @param name
-	 * @param gap
+	 * @param model the color model
+	 * @param desiredWidth pixel width
+	 * @param name a name
+	 * @param gap a spacing
+	 * @param initRelValue normalized value 0..1
 	 */
 	public ColorModelPanel(ColorScaleModel model, int desiredWidth, String name, int gap, double initRelVal) {
+		
+		_model= model;
+		
 		setLayout(new BorderLayout(4, 4));
 		
-		_legend = new ColorModelLegend(model, desiredWidth, null, gap);
+		_legend = new ColorModelLegend(_model, desiredWidth, null, gap);
 		_legend.setBorder(null);
 		
 		_slider = new JSlider(JSlider.HORIZONTAL, 0, MAXVAL, MAXVAL/2) {
@@ -44,9 +65,18 @@ public class ColorModelPanel extends JPanel {
 		
 		setValue(initRelVal);
 		
+		addNorth();
 		add(_legend, BorderLayout.CENTER);
 		add(_slider, BorderLayout.SOUTH);
 		setBorder(new CommonBorder(name));
+	}
+	
+	private void addNorth() {
+//		JPanel panel = new JPanel();
+//		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 2));
+//		
+//		ButtonGroup bg = new ButtonGroup();
+//		add(panel, BorderLayout.NORTH);
 	}
 	
 	/**
@@ -76,6 +106,23 @@ public class ColorModelPanel extends JPanel {
 		return ((double)ival)/((double)MAXVAL);
 	}
 	
+	/**
+	 * Gets the absolute value
+	 * This assumes a uniform values array
+	 * @return the absolute value
+	 */
+	public double getAbsoluteValue() {
+		double relVal = getValue();
+		double vals[] = _model.values;
+		
+		int len = vals.length;
+		
+		double min = vals[0];
+		double max = vals[len-1];
+		
+		return min + relVal*(max - min);
+	}
+	
 	@Override
 	public Insets getInsets() {
 		Insets def = super.getInsets();
@@ -83,5 +130,68 @@ public class ColorModelPanel extends JPanel {
 				def.right + 2);
 	}
 
+	/**
+	 * Main program for testing
+	 * @param arg command arguments ignored
+	 */
+	public static void main(String arg[]) {
+		//now make the frame to display
+		JFrame testFrame = new JFrame("Color Scale");
+		
+		
+		Color colors[] = ColorScaleModel.getWeatherMapColors(100);
+		double values[] = ColorScaleModel.uniformValueArray(colors, 100,  500);
+		ColorScaleModel model = new ColorScaleModel("Test", values, colors);
+		
+		/**
+		 * Create a panel with a slider and a color legend
+		 * @param model the color model
+		 * @param desiredWidth pixel width
+		 * @param name a name
+		 * @param gap a spacing
+		 * @param initRelValue normalized value 0..1
+		 */
+		
+		
+		
+		ColorModelPanel panel = new ColorModelPanel(model, 280, "Panel", 20, 0.5);
+		
+		testFrame.setLayout(new BorderLayout(8, 8));
+		testFrame.add(panel, BorderLayout.CENTER);
+		
+		// set up what to do if the window is closed
+		WindowAdapter windowAdapter = new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent event) {
+				System.err.println("Done");
+				System.exit(1);
+			}
+		};
+		
+		ChangeListener changeListener = new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				double val = panel.getAbsoluteValue();
+				System.out.println("value: " + val);
+			}
+			
+		};
+		
+		panel.getSlider().addChangeListener(changeListener);
+
+		testFrame.addWindowListener(windowAdapter);
+		testFrame.pack();
+
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				testFrame.setVisible(true);
+			}
+		});
+		
+		
+
+	}
 
 }

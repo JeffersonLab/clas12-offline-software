@@ -31,7 +31,7 @@ public class ColorScaleModel {
 	//null color
 	private static final Color NULLCOLOR = new Color(0, 0, 0, 16);
 
-	// Color returned for a too-small value (default: null)
+	// Color returned for a too-small value
 	private Color _tooSmallColor = new Color(96, 96, 96, 16);
 
 	// Color returned for a too-big value (default: null)
@@ -426,6 +426,28 @@ public class ColorScaleModel {
 
 		colors[(len - 1) * n] = new Color(r[len - 1], g[len - 1], b[len - 1]);
 		return colors;
+	}
+	
+	/**
+	 * Create a uniform array of values with one more entry than are in a colors array.
+	 * @param colors a colors array
+	 * @param min the min value
+	 * @param max the max value
+	 * @return the values array
+	 */
+	public static double[] uniformValueArray(Color colors[], double min, double max) {
+		int len = colors.length;
+		double vals[] = new double[len+1];
+		double del  = (max-min)/len;
+		
+		vals[0] = min;
+		vals[len] = max;
+		
+		for (int i = 1; i < len; i++) {
+			vals[i] = min + i*del;
+		}
+		
+		return vals;
 	}
 	
 	public boolean isTooSmall(Color color) {
