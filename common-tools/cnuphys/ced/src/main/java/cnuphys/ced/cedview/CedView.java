@@ -22,6 +22,7 @@ import cnuphys.bCNU.component.InfoWindow;
 import cnuphys.bCNU.component.TranslucentWindow;
 import cnuphys.bCNU.feedback.IFeedbackProvider;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
+import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.graphics.toolbar.ToolBarToggleButton;
@@ -136,7 +137,8 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 
 	// the clasIO event manager
 	protected ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
-
+	
+	
 	/**
 	 * Constructor
 	 * 
@@ -400,6 +402,17 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		return _controlPanel.getDisplayArray().showDCHBCrosses();
 	}
 	
+	/**
+	 * Get the color scale model if there is one.
+	 * @return the color scale model for accumulation, etc.
+	 */
+	public ColorScaleModel getColorScaleModel() {
+		if (_controlPanel != null) {
+			return _controlPanel.getColorScaleModel();
+		}
+		
+		return null;
+	}
 	
 	/**
 	 * Convenience method global hit based display
@@ -838,10 +851,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	public void setMode(Mode mode) {
 		_mode = mode;
 		
-		JSlider slider = _controlPanel.getAccumulationSlider();
-		if (slider != null) {
-			slider.setEnabled(_mode == Mode.ACCUMULATED);
-		}
+//		JSlider slider = _controlPanel.getAccumulationSlider();
+//		if (slider != null) {
+//			slider.setEnabled(_mode == Mode.ACCUMULATED);
+//		}
 	}
 
 	/**

@@ -131,7 +131,7 @@ public class SectorLTCCItem extends PolygonItem {
 
 		double fract = _view.getMedianSetting() * (((double) hitCount) / (1+medianHit));
 
-		Color color = AccumulationManager.getInstance().getColor(fract);
+		Color color = AccumulationManager.getInstance().getColor(_view.getColorScaleModel(), fract);
 
 		g.setColor(color);
 		g.fillPolygon(_lastDrawnPolygon);

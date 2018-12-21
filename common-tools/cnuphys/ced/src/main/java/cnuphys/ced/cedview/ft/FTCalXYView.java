@@ -253,7 +253,7 @@ public class FTCalXYView extends CedXYView {
 					FTCalXYPolygon poly = ftCalPoly[index];
 					double fract = getMedianSetting()*(((double) acchits[i]) / (1 + medianHit));
 
-					Color color = AccumulationManager.getInstance().getColor(fract);
+					Color color = AccumulationManager.getInstance().getColor(getColorScaleModel(), fract);
 					g.setColor(color);
 					g.fillPolygon(poly);
 					g.setColor(Color.black);

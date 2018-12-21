@@ -426,7 +426,7 @@ public class DCXYView extends HexView {
 						if (hitCount > 0) {
 							double fract = getMedianSetting() * (((double) hitCount) / (1 + medianHit));
 
-							Color color = AccumulationManager.getInstance().getAlphaColor(fract, 128);
+							Color color = AccumulationManager.getInstance().getAlphaColor(getColorScaleModel(), fract, 128);
 
 							projectWire(g, container, sect0 + 1, supl0 + 1, lay0 + 1, wire0 + 1, wp1, wp2, pp1, pp2);
 

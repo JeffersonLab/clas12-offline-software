@@ -283,8 +283,8 @@ public class SuperLayerDrawing {
 
 				int hit = dcAccumulatedData[sect0][supl0][lay0][wire0];
 				double fract = _view.getMedianSetting() * (((double) hit) / (1 + medianHit));
-				Color color = AccumulationManager.getInstance().getColor(fract);
-
+				Color color = AccumulationManager.getInstance().getColor(_view.getColorScaleModel(), fract);
+				
 				g.setColor(color);
 				Polygon hexagon = getHexagon(container, lay0 + 1, wire0 + 1);
 				if (hexagon != null) {

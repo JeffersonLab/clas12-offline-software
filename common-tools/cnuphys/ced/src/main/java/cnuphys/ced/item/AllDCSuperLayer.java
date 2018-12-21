@@ -469,7 +469,12 @@ public class AllDCSuperLayer extends RectangleItem {
 				double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 				
 				AccumulationManager.getInstance();
-				Color color = AccumulationManager.getInstance().getColor(fract);
+				Color color = AccumulationManager.getInstance().getColor(_view.getColorScaleModel(), fract);
+				
+				if (color.getRed() > color.getBlue()) {
+					System.out.println("Dude!");
+				}
+
 				WorldGraphicsUtilities.drawWorldRectangle(g, container, wr,
 						color, color, 1, LineStyle.SOLID);
 

@@ -121,7 +121,7 @@ public class CentralZHitDrawer implements IDrawable {
 
 						double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 
-						Color color = AccumulationManager.getInstance().getColor(fract);
+						Color color = AccumulationManager.getInstance().getColor(_view.getColorScaleModel(), fract);
 						_view.drawBSTStrip((Graphics2D) g, container, color, sect0 + 1, lay0 + 1, strip0 + 1);
 					}
 

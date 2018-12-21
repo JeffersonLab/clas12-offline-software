@@ -269,7 +269,7 @@ public class TOFView extends CedView implements ISector {
 			double fract = getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 
 			Color color = AccumulationManager.getInstance()
-					.getColor(fract);
+					.getColor(getColorScaleModel(), fract);
 			g.setColor(color);
 			g.fillRect(rr.x, rr.y, rr.width, rr.height);
 			g.setColor(Color.black);
@@ -308,7 +308,7 @@ public class TOFView extends CedView implements ISector {
 				int hit = hits[sect0][paddle0];
 				double fract = this.getMedianSetting() *(((double) hit) / (1 + medianHit));
 
-				Color color = AccumulationManager.getInstance().getColor(fract);
+				Color color = AccumulationManager.getInstance().getColor(getColorScaleModel(), fract);
 				
 				shells[panelType].getStripRectangle(container, paddle0, rr);
 				g.setColor(color);

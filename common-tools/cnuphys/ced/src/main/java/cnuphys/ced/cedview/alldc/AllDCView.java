@@ -5,8 +5,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
@@ -53,7 +55,7 @@ public class AllDCView extends CedView implements IAllDC {
 	protected Rectangle2D.Double _sectorWorldRects[];
 
 	// font for label text
-	protected static final Font labelFont = Fonts.commonFont(Font.PLAIN, 11);
+	protected static final Font labelFont = Fonts.commonFont(Font.PLAIN, 12);
 
 	/**
 	 * Used for drawing the sector rects.
@@ -147,15 +149,21 @@ public class AllDCView extends CedView implements IAllDC {
 			@Override
 			public void draw(Graphics g, IContainer container) {
 				g.setFont(labelFont);
+				
+				Graphics2D g2 = (Graphics2D)g;
+				g2.setRenderingHint(
+				        RenderingHints.KEY_TEXT_ANTIALIASING,
+				        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+				
 				for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
 					WorldGraphicsUtilities.drawWorldRectangle(g, container,
 							_sectorWorldRects[sector], _sectorStyle);
 					double left = _sectorWorldRects[sector].x;
 					double top = _sectorWorldRects[sector].y
 							+ _sectorWorldRects[sector].height;
-					g.setColor(Color.cyan);
+					g.setColor(Color.red);
 					WorldGraphicsUtilities.drawWorldText(g, container, left,
-							top, "Sector " + (sector + 1), 8, 12);
+							top, "Sector " + (sector + 1), 8, 14);
 				}
 			}
 

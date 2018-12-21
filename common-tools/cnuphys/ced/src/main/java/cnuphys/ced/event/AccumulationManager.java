@@ -64,9 +64,9 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	private static AccumulationManager instance;
 
 	// private static final Color NULLCOLOR = new Color(128, 128, 128);
-	private static final Color NULLCOLOR = Color.gray;
+	//private static final Color NULLCOLOR = Color.gray;
 
-	private static final Color HOTCOLOR = X11Colors.getX11Color("red");
+//	private static final Color HOTCOLOR = X11Colors.getX11Color("red");
 
 	// CND accumulated accumulated data indices are sector, layer, order (0 or 1, adc only)
 	private int _CNDAccumulatedData[][][];
@@ -558,13 +558,14 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	 *            the fraction (compared to max hits)
 	 * @return the color to use
 	 */
-	public Color getColor(double fract) {
-		if (fract < 1.0e-6) {
-			return NULLCOLOR;
-		} else if (fract > 1.0) {
-			return HOTCOLOR;
-		}
-		return colorScaleModel.getColor(fract);
+	public Color getColor(ColorScaleModel model, double fract) {
+		fract = Math.max(0.0001f, Math.min(fract, 0.9999f));
+//		if (fract < 1.0e-6) {
+//			return NULLCOLOR;
+//		} else if (fract > 1.0) {
+//			return model.getHotColor();
+//		}
+		return model.getColor(fract);
 	}
 
 	/**
@@ -576,8 +577,8 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	 *            the alpha value [0..255]
 	 * @return the color corresponding to the value.
 	 */
-	public Color getAlphaColor(double value, int alpha) {
-		Color c = getColor(value);
+	public Color getAlphaColor(ColorScaleModel model, double value, int alpha) {
+		Color c = getColor(model, value);
 		Color color = new Color(c.getRed(), c.getGreen(), c.getBlue(), alpha);
 		return color;
 	}

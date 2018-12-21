@@ -197,7 +197,7 @@ public class ECHexSectorItem extends HexSectorItem {
 					if (hitCount > 0) {
 						double fract = _ecView.getMedianSetting() * (((double) hitCount) / (1 + medianHit));
 
-						Color color = AccumulationManager.colorScaleModel
+						Color color = _ecView.getColorScaleModel()
 								.getAlphaColor(fract, 128);
 
 						g.setColor(color);

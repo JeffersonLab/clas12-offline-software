@@ -16,6 +16,7 @@ import javax.swing.event.ChangeListener;
 import cnuphys.bCNU.feedback.FeedbackPane;
 import cnuphys.bCNU.graphics.colorscale.ColorModelLegend;
 import cnuphys.bCNU.graphics.colorscale.ColorModelPanel;
+import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Bits;
 import cnuphys.bCNU.util.Fonts;
@@ -161,14 +162,27 @@ public class ControlPanel extends JPanel implements ChangeListener {
 		_colorPanel = new ColorModelPanel(AccumulationManager.colorScaleModel, 160,
 				"Relative Accumulation", 10, _view.getMedianSetting());
 
-		_colorPanel.getSlider().setEnabled(false);
-		_colorPanel.getSlider().addChangeListener(this);
+//		_colorPanel.getSlider().setEnabled(false);
+//		_colorPanel.getSlider().addChangeListener(this);
 
 		panel.add(_colorPanel, BorderLayout.SOUTH);
 
 		tabbedPane.add(panel, "display");
 
 	}
+	
+	/**
+	 * Get the color scale model if there is one.
+	 * @return the color scale model for accumulation, etc.
+	 */
+	public ColorScaleModel getColorScaleModel() {
+		if (_colorPanel != null) {
+			return _colorPanel.getColorScaleModel();
+		}
+		
+		return null;
+	}
+
 
 	// use a tabbed pane to save space
 	private JTabbedPane addTabbedPane(CedView view, int controlPanelBits, int displayArrayBits) {
@@ -260,11 +274,11 @@ public class ControlPanel extends JPanel implements ChangeListener {
 			sp.add(_displayArray, BorderLayout.NORTH);
 			// accumulation
 			if (Bits.checkBit(controlPanelBits, ACCUMULATIONLEGEND)) {
-				_colorPanel = new ColorModelPanel(AccumulationManager.colorScaleModel, 160,
-						"Relative Accumulation or ADC Value", 10, _view.getMedianSetting());
+				_colorPanel = new ColorModelPanel(_view, AccumulationManager.colorScaleModel, 160,
+						"Relative Accumulation or ADC Value", 10, _view.getMedianSetting(), true, true);
 
-				_colorPanel.getSlider().setEnabled(false);
-				_colorPanel.getSlider().addChangeListener(this);
+//				_colorPanel.getSlider().setEnabled(false);
+//				_colorPanel.getSlider().addChangeListener(this);
 
 				sp.add(_colorPanel, BorderLayout.SOUTH);
 			}
@@ -287,14 +301,14 @@ public class ControlPanel extends JPanel implements ChangeListener {
 		return tabbedPane;
 	}
 
-	/**
-	 * Get the slider for the accumulation legend
-	 * 
-	 * @return the slider
-	 */
-	public JSlider getAccumulationSlider() {
-		return (_colorPanel == null) ? null : _colorPanel.getSlider();
-	}
+//	/**
+//	 * Get the slider for the accumulation legend
+//	 * 
+//	 * @return the slider
+//	 */
+//	public JSlider getAccumulationSlider() {
+//		return (_colorPanel == null) ? null : _colorPanel.getSlider();
+//	}
 
 //	/**
 //	 * Create the slider used to control the target z
@@ -463,13 +477,13 @@ public class ControlPanel extends JPanel implements ChangeListener {
 	public void stateChanged(ChangeEvent e) {
 		Object source = e.getSource();
 		if (_colorPanel != null) {
-			JSlider slider = _colorPanel.getSlider();
-
-			if (source == slider) {
-				double val = _colorPanel.getValue();
-				_view.setMedianSetting(val);
-				_view.refresh();
-			}
+//			JSlider slider = _colorPanel.getSlider();
+//
+//			if (source == slider) {
+//				double val = _colorPanel.getValue();
+//				_view.setMedianSetting(val);
+//				_view.refresh();
+//			}
 		}
 
 	}

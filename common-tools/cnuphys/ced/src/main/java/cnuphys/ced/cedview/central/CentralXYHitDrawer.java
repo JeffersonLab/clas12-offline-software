@@ -148,7 +148,7 @@ public class CentralXYHitDrawer implements IDrawable {
 					CNDXYPolygon poly = _view.getCNDPolygon(sect0+1, lay0+1, order+1);
 					double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 					Color color = AccumulationManager.getInstance()
-							.getColor(fract);
+							.getColor(_view.getColorScaleModel(), fract);
 
 					poly.draw(g, container, color, Color.black);
 
@@ -180,7 +180,7 @@ public class CentralXYHitDrawer implements IDrawable {
 
 					double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 					Color color = AccumulationManager.getInstance()
-							.getColor(fract);
+							.getColor(_view.getColorScaleModel(), fract);
 					_view.drawBSTPanel((Graphics2D) g, container, panel, color);
 
 				}
@@ -206,7 +206,7 @@ public class CentralXYHitDrawer implements IDrawable {
 				double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 
 				Color color = AccumulationManager.getInstance()
-						.getColor(fract);
+						.getColor(_view.getColorScaleModel(), fract);
 				
 				poly.draw(g, container, index+1, color);
 			}

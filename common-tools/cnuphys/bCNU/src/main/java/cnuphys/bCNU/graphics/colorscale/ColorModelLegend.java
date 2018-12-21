@@ -143,10 +143,19 @@ public class ColorModelLegend extends JComponent {
 	 * Set the color model
 	 * @param model the new color model
 	 */
-	public void setModel(ColorScaleModel model) {
+	public void setColorScaleModel(ColorScaleModel model) {
 		_model = model;
 		repaint();
 	}
+	
+	/**
+	 * Get the color scale model if there is one.
+	 * @return the color scale model for accumulation, etc.
+	 */
+	public ColorScaleModel getColorScaleModel() {
+		return _model;
+	}
+
 
 	@Override
 	public Dimension getPreferredSize() {

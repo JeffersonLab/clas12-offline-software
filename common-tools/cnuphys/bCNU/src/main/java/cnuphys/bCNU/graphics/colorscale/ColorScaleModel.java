@@ -45,7 +45,9 @@ public class ColorScaleModel {
 
 	// Number of rows of display.
 	private int _numberOfRows = 1;
-
+	
+	private Color HOTCOLOR = Color.red;
+	
 	/**
 	 * This creates a ColorScaleModel for converting a value into a color. The
 	 * values array should be sorted in ascending order. In any rate, it will
@@ -429,6 +431,14 @@ public class ColorScaleModel {
 	}
 	
 	/**
+	 * Get the off scale color
+	 * @return the hot color
+	 */
+	public Color getHotColor() {
+		return HOTCOLOR;
+	}
+	
+	/**
 	 * Get a monochrome model companion to a color model.
 	 * @param model the color model.
 	 * @return a monochrome model companion
@@ -450,7 +460,25 @@ public class ColorScaleModel {
 			mono[i] = new Color(c, c, c);
 		}
 		
-		return new ColorScaleModel(values, mono);
+//		System.out.print("vals [" + values.length + "] ");
+//		for (double v : values) {
+//			String s = String.format("%-4.2f ", v);
+//			System.out.print(s);
+//		}
+//		System.out.println();
+//		
+//		System.out.print("colors [" + mono.length + "] ");
+//		for (Color col : mono) {
+//			float[] comp = col.getColorComponents(null);
+//			String s = String.format("[%-4.2f, %-4.2f, %-4.2f] ", comp[0], comp[1], comp[2]);
+//			System.out.print(s);
+//		}
+//		System.out.println();
+
+		ColorScaleModel mcm = new ColorScaleModel(values, mono);
+		
+		mcm.HOTCOLOR = Color.cyan;
+		return mcm;
 	}
 	
 	/**

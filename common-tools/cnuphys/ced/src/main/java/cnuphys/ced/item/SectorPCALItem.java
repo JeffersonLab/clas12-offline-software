@@ -198,7 +198,7 @@ public class SectorPCALItem extends PolygonItem {
 
 			if (wp != null) {
 				Color color = AccumulationManager.getInstance()
-						.getColor(fract);
+						.getColor(_view.getColorScaleModel(), fract);
 				Path2D.Double path = WorldGraphicsUtilities
 						.worldPolygonToPath(wp);
 				WorldGraphicsUtilities.drawPath2D(g, container, path, color,

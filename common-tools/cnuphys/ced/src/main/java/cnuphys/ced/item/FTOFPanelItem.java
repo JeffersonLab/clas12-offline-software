@@ -135,7 +135,7 @@ public class FTOFPanelItem extends PolygonItem {
 				double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 
 
-				Color fc = AccumulationManager.getInstance().getColor(fract);
+				Color fc = AccumulationManager.getInstance().getColor(_view.getColorScaleModel(), fract);
 				Point2D.Double wp[] = getPaddle(_view, paddle0, _ftofPanel, _sector);
 
 				if (wp != null) {

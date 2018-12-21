@@ -172,7 +172,7 @@ public class PCALHexSectorItem extends HexSectorItem {
 					if (hitCount > 0) {
 						double fract = _pcalView.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 
-						Color color = AccumulationManager.colorScaleModel
+						Color color = _pcalView.getColorScaleModel()
 								.getAlphaColor(fract, 128);
 
 						g.setColor(color);
