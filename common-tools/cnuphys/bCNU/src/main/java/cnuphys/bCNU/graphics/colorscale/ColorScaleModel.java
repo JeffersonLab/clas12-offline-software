@@ -429,6 +429,31 @@ public class ColorScaleModel {
 	}
 	
 	/**
+	 * Get a monochrome model companion to a color model.
+	 * @param model the color model.
+	 * @return a monochrome model companion
+	 */
+	public static ColorScaleModel getMonochromeModel(ColorScaleModel model) {
+		double values[] = model.values;
+		
+		Color[] colors = model.colors;
+		
+		int len = colors.length;
+		Color mono[] = new Color[len];
+		
+		mono[0] = new Color(0f, 0f, 0f);
+		mono[len-1] = new Color(1f, 1f, 1f);
+		float del = 1.0f/(len-1);
+		
+		for (int i = 1; i < len-1; i++) {
+			float c = i*del;
+			mono[i] = new Color(c, c, c);
+		}
+		
+		return new ColorScaleModel(values, mono);
+	}
+	
+	/**
 	 * Create a uniform array of values with one more entry than are in a colors array.
 	 * @param colors a colors array
 	 * @param min the min value

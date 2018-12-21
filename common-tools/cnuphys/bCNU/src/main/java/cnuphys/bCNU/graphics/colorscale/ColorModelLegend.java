@@ -138,6 +138,15 @@ public class ColorModelLegend extends JComponent {
 		GraphicsUtilities.drawSimple3DRect(g, (int)left, top-1, (int)(right - left), bottom - top + 1, false);
 
 	}
+	
+	/**
+	 * Set the color model
+	 * @param model the new color model
+	 */
+	public void setModel(ColorScaleModel model) {
+		_model = model;
+		repaint();
+	}
 
 	@Override
 	public Dimension getPreferredSize() {
