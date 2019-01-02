@@ -497,6 +497,17 @@ public class CLASDecoder4 {
         return bank;
     }
     
+    public Bank createEpicsBank(){
+        if(schemaFactory.hasSchema("RAW::epics")==false) return null;
+        if (this.codaDecoder.getEpicsData().isEmpty()==true) return null;
+        String json = this.codaDecoder.getEpicsData().toString();
+        Bank bank = new Bank(schemaFactory.getSchema("RAW::epics"), json.length());
+        for (int ii=0; ii<json.length(); ii++) {
+            bank.putByte("json",ii,(byte)json.charAt(ii));
+        }
+        return bank;
+    }
+
     public static void main(String[] args){
         
         OptionParser parser = new OptionParser("decoder");
@@ -567,7 +578,7 @@ public class CLASDecoder4 {
             if(nrun>0){
                 decoder.setRunNumber(nrun,true);
             }
-            
+
             for(String inputFile : inputList){
                 EvioSource reader = new EvioSource();
                 reader.open(inputFile);
@@ -582,6 +593,9 @@ public class CLASDecoder4 {
                     if(trigger!=null) decodedEvent.write(trigger);
                     //decodedEvent.appendBanks(header);
                     //decodedEvent.appendBanks(trigger);
+
+                    Bank epics = decoder.createEpicsBank();
+                    if (epics!=null) decodedEvent.write(epics);
 
                     //HipoDataEvent dhe = (HipoDataEvent) decodedEvent;
                     //writer.writeEvent(dhe.getHipoEvent());
