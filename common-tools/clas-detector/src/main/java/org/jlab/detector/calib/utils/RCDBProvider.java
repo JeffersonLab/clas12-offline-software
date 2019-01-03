@@ -13,20 +13,20 @@ import org.rcdb.ConditionType;
 public class RCDBProvider {
 
     public static final String DEFAULTADDRESS = "mysql://rcdb@clasdb.jlab.org/rcdb";
-    
+
     private org.rcdb.JDBCProvider provider;
-    
+
     public RCDBProvider(){
         String address = DEFAULTADDRESS;
-        String envAddress = this.getEnvironment();        
+        String envAddress = this.getEnvironment();
         if (envAddress!=null) address = envAddress;
         this.initialize(address);
     }
-    
+
     public RCDBProvider(String address){
         this.initialize(address);
     }
-    
+
     private String getEnvironment(){
         String envRCDB   = System.getenv("RCDB_DATABASE");
         String envCLAS12 = System.getenv("CLAS12DIR");
@@ -55,7 +55,7 @@ public class RCDBProvider {
         str.append(rcdb);
         return str.toString();
     }
-    
+
     private void initialize(String address){
         provider = RCDB.createProvider(address);
         try {
@@ -69,14 +69,14 @@ public class RCDBProvider {
             System.out.println("[DB] --->  database connection  : failed");
         }
     }
-    
+
     public void disconnect(){
         if (provider.isConnected()) {
             System.out.println("[DB] --->  database disconnect  : success");
             provider.close();
         }
     }
-    
+
     public RCDBConstants getConstants(int run) {
         RCDBConstants data = new RCDBConstants();
         if (provider.isConnected()) {
@@ -95,11 +95,13 @@ public class RCDBProvider {
                         data.add(name,cnd.toDouble());
                         break;
                     case "Time":
-                        System.out.print(cnd.toTime().getHours()+" ");
-                        System.out.print(cnd.toTime().getMinutes()+" ");
-                        System.out.print(cnd.toTime().getTime()+" ");
-                        System.out.print(cnd.toTime().toLocaleString()+" ");
-                        System.out.println(cnd.toTime().toString());
+                        data.add(name,cnd.toTime());
+                        //System.out.print(cnd.toTime().getHours()+" ");
+                        //System.out.print(cnd.toTime().getMinutes()+" ");
+                        //System.out.print(cnd.toTime().getSeconds()+" ");
+                        //System.out.print(cnd.toTime().getTime()+" ");
+                        //System.out.print(cnd.toTime().toLocaleString()+" ");
+                        //System.out.println(cnd.toTime().toString());
                         break;
                     default:
                         break;
@@ -111,7 +113,7 @@ public class RCDBProvider {
 
     public static void main(String[] args){
         RCDBProvider a=new RCDBProvider();
-        RCDBConstants data=a.getConstants(4013);
+        RCDBConstants data=a.getConstants(4014);
         data.show();
         a.disconnect();
     }
