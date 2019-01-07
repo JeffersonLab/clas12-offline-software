@@ -7,12 +7,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import org.jlab.clas.physics.Particle;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.groot.data.H2F;
 import org.jlab.groot.graphics.EmbeddedCanvasTabbed;
 import org.jlab.groot.group.DataGroup;
@@ -49,66 +53,134 @@ public class TrackDictionaryValidation {
                       this.dataGroups.getItem(3).getH2F("hi_phitheta_neg_eff"));
     }
     
-    public void createDictionary(String inputFileName) {
+    public void createDictionary(String inputFileName, int pidSelect, int chargeSelect) {
         // create dictionary from event file
         System.out.println("\nCreating dictionary from file: " + inputFileName);
         Map<ArrayList<Integer>, Particle> newDictionary = new HashMap<>();
         HipoDataSource reader = new HipoDataSource();
         reader.open(inputFileName);
+        String[] tokens = inputFileName.split("/");
+        String dictName = tokens[tokens.length-1] + "_roads.txt";
+        System.out.println("\nDictionary will be saved to: " + dictName); 
         int nevent = -1;
         while(reader.hasEvent() == true) {
             DataEvent event = reader.getNextEvent();
             nevent++;
             if(nevent%10000 == 0) System.out.println("Analyzed " + nevent + " events");
-            DataBank recTrack = null;
-            DataBank recHits = null;
+            DataBank recParticle     = null;
+            DataBank recCalorimeter  = null;
+            DataBank recScintillator = null;
+            DataBank recCerenkov     = null;
+            DataBank recTrack        = null;
+            DataBank tbtTrack        = null;
+            DataBank ecalCluster     = null;
+            DataBank tbtHits = null;
+            if (event.hasBank("Rec::Particle")) {
+                recParticle = event.getBank("Rec::Particle");
+            }
+            if (event.hasBank("Rec::Track")) {
+                recTrack = event.getBank("Rec::Track");
+            }
             if (event.hasBank("TimeBasedTrkg::TBTracks")) {
-                recTrack = event.getBank("TimeBasedTrkg::TBTracks");
+                tbtTrack = event.getBank("TimeBasedTrkg::TBTracks");
             }
             if (event.hasBank("TimeBasedTrkg::TBHits")) {
-                recHits = event.getBank("TimeBasedTrkg::TBHits");
+                tbtHits = event.getBank("TimeBasedTrkg::TBHits");
             }
-            if (recTrack != null && recHits != null) {
+            if (event.hasBank("ECAL::cluster")) {
+                ecalCluster = event.getBank("ECAL::cluster");
+            }
+            // add other banks
+            if(recParticle!=null && recTrack != null && tbtTrack != null && tbtHits != null) {
                 for (int i = 0; i < recTrack.rows(); i++) {
-                    int charge = recTrack.getByte("q",i);
-                     Particle part = new Particle(
-                                        charge*211,
-                                        recTrack.getFloat("p0_x", i),
-                                        recTrack.getFloat("p0_y", i),
-                                        recTrack.getFloat("p0_z", i),
-                                        recTrack.getFloat("Vtx0_x", i),
-                                        recTrack.getFloat("Vtx0_y", i),
-                                        recTrack.getFloat("Vtx0_z", i));
-                    int[] wireArray = new int[36];
-                    for (int j = 0; j < recHits.rows(); j++) {
-                        if (recHits.getByte("trkID", j) == recTrack.getShort("id", i)) {
-                            int sector = recHits.getByte("sector", j);
-                            int superlayer = recHits.getByte("superlayer", j);
-                            int layer = recHits.getByte("layer", j);
-                            int wire = recHits.getShort("wire", j);
-                            wireArray[(superlayer - 1) * 6 + layer - 1] = wire;
-                        }
-                    }
-                    ArrayList<Integer> wires = new ArrayList<Integer>();
-                    for (int k = 0; k < 6; k++) {
-                        for (int l=0; l<6; l++) {
-                            // use first non zero wire in superlayer
-                            if(wireArray[k*6 +l] != 0) {
-                               wires.add(wireArray[k*6+l]);
-                               break;
+                    // start from tracks
+                    int index    = recTrack.getShort("index", i);
+                    int pindex   = recTrack.getShort("pindex", i);
+                    int detector = recTrack.getByte("detector", i);
+                    // use only forward tracks
+                    if(detector == DetectorType.DC.getDetectorId()) {
+                        int charge   = recParticle.getByte("charge", pindex);
+                        int pid      = recParticle.getInt("pid", pindex);
+                        // if charge or pid selectrion are set, then compare to the current track values
+                        if(chargeSelect != 0 && chargeSelect!=charge) continue;
+                        if(pidSelect != 0    && pidSelect!=pid)       continue;   
+                        // save particle information
+                        Particle part = new Particle(
+                                        -11*charge,
+                                        recTrack.getFloat("px", i),
+                                        recTrack.getFloat("py", i),
+                                        recTrack.getFloat("pz", i),
+                                        recTrack.getFloat("Vx", i),
+                                        recTrack.getFloat("Vy", i),
+                                        recTrack.getFloat("Vz", i));                   
+                        // get the DC wires' IDs
+                        int[] wireArray = new int[36];
+                        for (int j = 0; j < tbtHits.rows(); j++) {
+                            if (tbtHits.getByte("trkID", j) == tbtTrack.getShort("id", index)) {
+                                int sector = tbtHits.getByte("sector", j);
+                                int superlayer = tbtHits.getByte("superlayer", j);
+                                int layer = tbtHits.getByte("layer", j);
+                                int wire = tbtHits.getShort("wire", j);
+                                wireArray[(superlayer - 1) * 6 + layer - 1] = wire;
                             }
                         }
-                    }
-                    // keep only roads with 6 superlayers
-                    if(wires.size()==6) {
-                        if(!newDictionary.containsKey(wires))  {
-                            newDictionary.put(wires, part);
-                        }   
+                        ArrayList<Integer> wires = new ArrayList<Integer>();
+                        for (int k = 0; k < 6; k++) {
+                            for (int l=0; l<6; l++) {
+                                // use first non zero wire in superlayer
+                                if(wireArray[k*6 +l] != 0) {
+                                   wires.add(wireArray[k*6+l]);
+                                   break;
+                                }
+                            }
+                        }
+                        // keep only roads with 6 superlayers
+                        if(wires.size()==6) {
+                            // now check other detectors
+                            int paddle1b = 0;
+                            int paddle2  = 0;
+                            int pcalU    = 0;
+                            int htcc     = 0;
+                            // check FTOF
+                            if(recScintillator!=null) {
+                                for(int j=0; j<recScintillator.rows(); j++) {
+                                    if(recScintillator.getShort("pindex",j) == pindex) {
+                                        int detectorScint  = recScintillator.getByte("detector", i);
+                                        int layerScint     = recScintillator.getByte("layer",j);
+                                        int componentScint = recScintillator.getShort("component",j);
+                                        if(detectorScint==DetectorType.FTOF.getDetectorId() && layerScint==2) paddle1b = componentScint;
+                                        if(detectorScint==DetectorType.FTOF.getDetectorId() && layerScint==3) paddle2  = componentScint;
+                                    }
+                                }
+                            }
+                            // check ECAL
+                            if(recCalorimeter!=null && ecalCluster!=null) {
+                                for(int j=0; j<recCalorimeter.rows(); j++) {
+                                    if(recCalorimeter.getShort("pindex",j) == pindex) {
+                                        int detectorClus = recCalorimeter.getByte("detector", i);
+                                        int indexClus    = recCalorimeter.getShort("index",j);
+                                        int layerClus    = recCalorimeter.getByte("layer",j);
+                                        // use pcal only
+                                        if(detectorClus==DetectorType.ECAL.getDetectorId() && layerClus==1) {
+                                            pcalU = ecalCluster.getByte("idU",j);
+                                        }
+                                    }
+                                }
+                            }
+                            wires.add(paddle1b);
+                            wires.add(paddle2);
+                            wires.add(pcalU);
+                            wires.add(htcc);
+                            if(!newDictionary.containsKey(wires))  {
+                                newDictionary.put(wires, part);
+                            }   
+                        }
                     }
                 }
             }
         }
         this.setDictionary(newDictionary);
+        this.writeDictionary(newDictionary, dictName);
     }
     
     public void createHistos() {
@@ -534,12 +606,68 @@ public class TrackDictionaryValidation {
         this.dictionary = newDictionary;
     }
     
+    private void writeDictionary(Map<ArrayList<Integer>, Particle> dictionary, String dictName) {
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(dictName);
+            for(Map.Entry<ArrayList<Integer>, Particle> entry : dictionary.entrySet()) {
+                ArrayList<Integer> road = entry.getKey();
+                Particle           part = entry.getValue();
+                if(road.size()<6) {
+                    continue;
+                }
+                else {
+                    int wl1 = road.get(0);
+                    int wl2 = road.get(1);
+                    int wl3 = road.get(2);
+                    int wl4 = road.get(3);
+                    int wl5 = road.get(4);
+                    int wl6 = road.get(5);
+                    int paddle1b = 0;
+                    int paddle2  = 0;
+                    int pcalU    = 0;
+                    int htcc     = 0;
+                    if(road.size()==10) {
+                        paddle1b = road.get(6);
+                        paddle2  = road.get(7);
+                        pcalU    = road.get(8);
+                        htcc     = road.get(9);
+                    }
+                    pw.printf("%d\t%.2f\t%.2f\t%.2f\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%.2f\t%d\t%d\t%d\n",
+                    //+ "%.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", 
+                    part.charge(), part.p(), Math.toDegrees(part.theta()), Math.toDegrees(part.phi()),
+                    road.get(0), 0, 0, 0, 0, 0, 
+                    road.get(1), 0, 0, 0, 0, 0, 
+                    road.get(2), 0, 0, 0, 0, 0, 
+                    road.get(3), 0, 0, 0, 0, 0, 
+                    road.get(4), 0, 0, 0, 0, 0, 
+                    road.get(5), 0, 0, 0, 0, 0,  
+                    paddle1b, part.vz(), paddle2, pcalU, htcc);
+                }
+            }
+            pw.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(TrackDictionaryMakerRNG.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+        }
+       
+    }
+    
 
     public static void main(String[] args) {
         
         OptionParser parser = new OptionParser("dict-validation");
         parser.addOption("-d","dictionary.txt", "read dictionary from file");
         parser.addOption("-c","input.hipo", "create dictionary from event file");
+        parser.addOption("-pid","0", "select particle PID for dictonary creation (0: no selection)");
+        parser.addOption("-q","0", "select particle charge for dictonary creation (0: no selection)");
         parser.addOption("-i","set event file for dictionary validation");
         parser.addOption("-w", "0", "wire smearing in road finding");
         parser.addOption("-n", "-1", "maximum number of events to process");
@@ -553,8 +681,12 @@ public class TrackDictionaryValidation {
             dictionaryFileName = parser.getOption("-d").stringValue();
         }
         String inputFileName = null;
+        int pid = 0;
+        int charge = 0;
         if(parser.hasOption("-c")==true){
             inputFileName = parser.getOption("-c").stringValue();
+            if(parser.hasOption("-pid")==true) pid    = parser.getOption("-pid").intValue();
+            if(parser.hasOption("-q")  ==true) charge = parser.getOption("-q").intValue();
         }
         String testFileName = null;
         if(parser.hasOption("-i")==true){
@@ -575,7 +707,7 @@ public class TrackDictionaryValidation {
         tm.init();
         if(parser.containsOptions(arguments, "-c") || parser.containsOptions(arguments, "-d") || debug) {
             if(parser.containsOptions(arguments, "-c")) {
-                tm.createDictionary(inputFileName);
+                tm.createDictionary(inputFileName, pid, charge);
             }
             else if(parser.hasOption("-d")==true || debug) {
                 tm.readDictionary(dictionaryFileName);                
