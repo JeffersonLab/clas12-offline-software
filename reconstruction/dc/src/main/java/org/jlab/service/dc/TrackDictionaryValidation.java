@@ -66,7 +66,7 @@ public class TrackDictionaryValidation {
         while(reader.hasEvent() == true) {
             DataEvent event = reader.getNextEvent();
             nevent++;
-            if(nevent%10000 == 0) System.out.println("Analyzed " + nevent + " events");
+            if(nevent%10000 == 0) System.out.println("Analyzed " + nevent + " events, found " + newDictionary.size() + " roads");
             DataBank recParticle     = null;
             DataBank recCalorimeter  = null;
             DataBank recScintillator = null;
@@ -75,11 +75,17 @@ public class TrackDictionaryValidation {
             DataBank tbtTrack        = null;
             DataBank ecalCluster     = null;
             DataBank tbtHits = null;
-            if (event.hasBank("Rec::Particle")) {
-                recParticle = event.getBank("Rec::Particle");
+            if (event.hasBank("REC::Particle")) {
+                recParticle = event.getBank("REC::Particle");
             }
-            if (event.hasBank("Rec::Track")) {
-                recTrack = event.getBank("Rec::Track");
+            if (event.hasBank("REC::Scintillator")) {
+                recScintillator = event.getBank("REC::Scintillator");
+            }
+            if (event.hasBank("REC::Calorimeter")) {
+                recCalorimeter = event.getBank("REC::Calorimeter");
+            }
+            if (event.hasBank("REC::Track")) {
+                recTrack = event.getBank("REC::Track");
             }
             if (event.hasBank("TimeBasedTrkg::TBTracks")) {
                 tbtTrack = event.getBank("TimeBasedTrkg::TBTracks");
@@ -107,12 +113,12 @@ public class TrackDictionaryValidation {
                         // save particle information
                         Particle part = new Particle(
                                         -11*charge,
-                                        recTrack.getFloat("px", i),
-                                        recTrack.getFloat("py", i),
-                                        recTrack.getFloat("pz", i),
-                                        recTrack.getFloat("Vx", i),
-                                        recTrack.getFloat("Vy", i),
-                                        recTrack.getFloat("Vz", i));                   
+                                        recParticle.getFloat("px", i),
+                                        recParticle.getFloat("py", i),
+                                        recParticle.getFloat("pz", i),
+                                        recParticle.getFloat("vx", i),
+                                        recParticle.getFloat("vy", i),
+                                        recParticle.getFloat("vz", i));                   
                         // get the DC wires' IDs
                         int[] wireArray = new int[36];
                         for (int j = 0; j < tbtHits.rows(); j++) {
@@ -171,6 +177,7 @@ public class TrackDictionaryValidation {
                             wires.add(paddle2);
                             wires.add(pcalU);
                             wires.add(htcc);
+                            // save roads to map
                             if(!newDictionary.containsKey(wires))  {
                                 newDictionary.put(wires, part);
                             }   
@@ -406,113 +413,147 @@ public class TrackDictionaryValidation {
             DataEvent event = reader.getNextEvent();
             nevent++;
             if(nevent%10000 == 0) System.out.println("Analyzed " + nevent + " events");
-            DataBank recTrack = null;
-            DataBank recHits = null;
-            DataBank recFtof = null;
-            DataBank mcPart  = null;
+            DataBank recParticle     = null;
+            DataBank recCalorimeter  = null;
+            DataBank recScintillator = null;
+            DataBank recCerenkov     = null;
+            DataBank recTrack        = null;
+            DataBank tbtTrack        = null;
+            DataBank ecalCluster     = null;
+            DataBank tbtHits         = null;
+            DataBank mcPart          = null;          
+            if (event.hasBank("REC::Particle")) {
+                recParticle = event.getBank("REC::Particle");
+            }
+            if (event.hasBank("REC::Scintillator")) {
+                recScintillator = event.getBank("REC::Scintillator");
+            }
+            if (event.hasBank("REC::Calorimeter")) {
+                recCalorimeter = event.getBank("REC::Calorimeter");
+            }
+            if (event.hasBank("REC::Track")) {
+                recTrack = event.getBank("REC::Track");
+            }
             if (event.hasBank("TimeBasedTrkg::TBTracks")) {
-                recTrack = event.getBank("TimeBasedTrkg::TBTracks");
+                tbtTrack = event.getBank("TimeBasedTrkg::TBTracks");
             }
             if (event.hasBank("TimeBasedTrkg::TBHits")) {
-                recHits = event.getBank("TimeBasedTrkg::TBHits");
+                tbtHits = event.getBank("TimeBasedTrkg::TBHits");
             }
-            if (event.hasBank("FTOF::hits")) {
-                recHits = event.getBank("FTOF::hits");
+            if (event.hasBank("ECAL::cluster")) {
+                ecalCluster = event.getBank("ECAL::cluster");
             }
             if (event.hasBank("MC::Particle")) {
                 mcPart = event.getBank("MC::Particle");
             }
-            if (recTrack != null && recHits != null) {
+            // add other banks
+            if(recParticle!=null && recTrack != null && tbtTrack != null && tbtHits != null) {
                 for (int i = 0; i < recTrack.rows(); i++) {
-                    int charge = recTrack.getByte("q",i);
-                    Particle part = new Particle(
-                                        charge*211,
-                                        recTrack.getFloat("p0_x", i),
-                                        recTrack.getFloat("p0_y", i),
-                                        recTrack.getFloat("p0_z", i),
-                                        recTrack.getFloat("Vtx0_x", i),
-                                        recTrack.getFloat("Vtx0_y", i),
-                                        recTrack.getFloat("Vtx0_z", i));
-                    boolean goodTrack=true;
-                    // neglect tracks with bad vertex
-                    if(Math.abs(part.vz())>10) goodTrack=false;
-                    // for mc events, use only well reconstructed tracks
-                    if (mcPart != null) {
-                        for(int loop = 0; loop < mcPart.rows(); loop++) { 
-                            Particle genPart = new Particle(
-                                        mcPart.getInt("pid",  loop),
-                                        mcPart.getFloat("px", loop),
-                                        mcPart.getFloat("py", loop),
-                                        mcPart.getFloat("pz", loop),
-                                        mcPart.getFloat("vx", loop),
-                                        mcPart.getFloat("vy", loop),
-                                        mcPart.getFloat("vz", loop));
-                            if(part.charge()!=genPart.charge() ||
-                               Math.abs(part.p()-genPart.p())>0.1 ||
-                               Math.abs(Math.toDegrees(part.phi()-genPart.phi()))>5 ||    
-                               Math.abs(Math.toDegrees(part.theta()-genPart.theta()))>5) {
-                                goodTrack=false;
-                            }
-                        }   
-                    }
-                    if(!goodTrack) continue;
-                    int[] wireArray = new int[36];
-                    int nSL3=0;
-                    for (int j = 0; j < recHits.rows(); j++) {
-                        if (recHits.getByte("trkID", j) == recTrack.getShort("id", i)) {
-                            int sector = recHits.getByte("sector", j);
-                            int superlayer = recHits.getByte("superlayer", j);
-                            int layer = recHits.getByte("layer", j);
-                            int wire = recHits.getShort("wire", j);
-                            wireArray[(superlayer - 1) * 6 + layer - 1] = wire;
-                            if(superlayer==3) nSL3++;
+                    // start from tracks
+                    int index    = recTrack.getShort("index", i);
+                    int pindex   = recTrack.getShort("pindex", i);
+                    int detector = recTrack.getByte("detector", i);
+                    // use only forward tracks
+                    if(detector == DetectorType.DC.getDetectorId()) {
+                        int charge   = recParticle.getByte("charge", pindex);
+                        int pid      = recParticle.getInt("pid", pindex);
+                        // save particle information
+                        Particle part = new Particle(
+                                        -11*charge,
+                                        recParticle.getFloat("px", i),
+                                        recParticle.getFloat("py", i),
+                                        recParticle.getFloat("pz", i),
+                                        recParticle.getFloat("vx", i),
+                                        recParticle.getFloat("vy", i),
+                                        recParticle.getFloat("vz", i));                   
+                        boolean goodTrack=true;
+                        // neglect tracks with bad vertex
+                        if(Math.abs(part.vz())>10) goodTrack=false;
+                        if (mcPart != null) {
+                            for(int loop = 0; loop < mcPart.rows(); loop++) { 
+                                Particle genPart = new Particle(
+                                            mcPart.getInt("pid",  loop),
+                                            mcPart.getFloat("px", loop),
+                                            mcPart.getFloat("py", loop),
+                                            mcPart.getFloat("pz", loop),
+                                            mcPart.getFloat("vx", loop),
+                                            mcPart.getFloat("vy", loop),
+                                            mcPart.getFloat("vz", loop));
+                                if(part.charge()!=genPart.charge() ||
+                                   Math.abs(part.p()-genPart.p())>0.1 ||
+                                   Math.abs(Math.toDegrees(part.phi()-genPart.phi()))>5 ||    
+                                   Math.abs(Math.toDegrees(part.theta()-genPart.theta()))>5) {
+                                   goodTrack=false;
+                                }
+                            }   
                         }
-                    }
-                    if(nSL3<3) continue; //ignore tracks with less than 3 hits in SL3 as in dictionary maker
-                    ArrayList<Integer> wires = new ArrayList<Integer>();
-                    for (int k = 0; k < 6; k++) {
-                        for (int l=0; l<1; l++) {
-                            // use first non zero wire in superlayer
-                            if(wireArray[k*6 +l] != 0) {
-                               wires.add(wireArray[k*6+l]);
-                               break;
+                        if(!goodTrack) continue;
+                        
+                        // get the DC wires' IDs
+                        int[] wireArray = new int[36];
+                        int nSL3=0;
+                        for (int j = 0; j < tbtHits.rows(); j++) {
+                            if (tbtHits.getByte("trkID", j) == tbtTrack.getShort("id", index)) {
+                                int sector     = tbtHits.getByte("sector", j);
+                                int superlayer = tbtHits.getByte("superlayer", j);
+                                int layer      = tbtHits.getByte("layer", j);
+                                int wire       = tbtHits.getShort("wire", j);
+                                wireArray[(superlayer - 1) * 6 + layer - 1] = wire;
+                                if(superlayer==3) nSL3++;
                             }
-                        }
-                    }
-                    // use only tracks with 6 superlayers
-                    if(wires.size()==6) {
-                        double phi     = (Math.toDegrees(part.phi())+180+30)%60-30;                        
-                        Particle road = this.findRoad(wires,wireSmear);
-                        if(road != null) {
-                            double phiRoad = (Math.toDegrees(road.phi())+180+30)%60-30;
-                            if(road.charge()<0) {
-                                this.dataGroups.getItem(1).getH2F("hi_ptheta_neg_matchedroad").fill(road.p(), Math.toDegrees(road.theta()));
-                                this.dataGroups.getItem(1).getH2F("hi_phitheta_neg_matchedroad").fill(phiRoad, Math.toDegrees(road.theta()));
-                                this.dataGroups.getItem(1).getH2F("hi_vztheta_neg_matchedroad").fill(road.vz(), Math.toDegrees(road.theta()));
+
+                            if(nSL3<3) continue; //ignore tracks with less than 3 hits in SL3 as in dictionary maker
+                            ArrayList<Integer> wires = new ArrayList<Integer>();
+                            for (int k = 0; k < 6; k++) {
+                                for (int l=0; l<1; l++) {
+                                    // use first non zero wire in superlayer
+                                    if(wireArray[k*6 +l] != 0) {
+                                       wires.add(wireArray[k*6+l]);
+                                       break;
+                                    }
+                                }
                             }
-                            else {
-                                this.dataGroups.getItem(1).getH2F("hi_ptheta_pos_matchedroad").fill(road.p(), Math.toDegrees(road.theta()));
-                                this.dataGroups.getItem(1).getH2F("hi_phitheta_pos_matchedroad").fill(phiRoad, Math.toDegrees(road.theta()));                            
-                                this.dataGroups.getItem(1).getH2F("hi_vztheta_pos_matchedroad").fill(road.vz(), Math.toDegrees(road.theta()));
+                            // use only tracks with 6 superlayers
+                            if(wires.size()==6) {
+                                // add 4 0s to wires array to mimic ftof, pcal and htcc
+                                wires.add(0);
+                                wires.add(0);
+                                wires.add(0);
+                                wires.add(0);
+                                double phi     = (Math.toDegrees(part.phi())+180+30)%60-30;                        
+                                Particle road = this.findRoad(wires,wireSmear);
+                                if(road != null) {
+                                    double phiRoad = (Math.toDegrees(road.phi())+180+30)%60-30;
+                                    if(road.charge()<0) {
+                                        this.dataGroups.getItem(1).getH2F("hi_ptheta_neg_matchedroad").fill(road.p(), Math.toDegrees(road.theta()));
+                                        this.dataGroups.getItem(1).getH2F("hi_phitheta_neg_matchedroad").fill(phiRoad, Math.toDegrees(road.theta()));
+                                        this.dataGroups.getItem(1).getH2F("hi_vztheta_neg_matchedroad").fill(road.vz(), Math.toDegrees(road.theta()));
+                                    }
+                                    else {
+                                        this.dataGroups.getItem(1).getH2F("hi_ptheta_pos_matchedroad").fill(road.p(), Math.toDegrees(road.theta()));
+                                        this.dataGroups.getItem(1).getH2F("hi_phitheta_pos_matchedroad").fill(phiRoad, Math.toDegrees(road.theta()));                            
+                                        this.dataGroups.getItem(1).getH2F("hi_vztheta_pos_matchedroad").fill(road.vz(), Math.toDegrees(road.theta()));
+                                    }
+                                    if(charge==-1) {
+                                        this.dataGroups.getItem(2).getH2F("hi_ptheta_neg_found").fill(part.p(), Math.toDegrees(part.theta()));
+                                        this.dataGroups.getItem(2).getH2F("hi_phitheta_neg_found").fill(phi, Math.toDegrees(part.theta()));
+                                    }
+                                    else {
+                                        this.dataGroups.getItem(2).getH2F("hi_ptheta_pos_found").fill(part.p(), Math.toDegrees(part.theta()));
+                                        this.dataGroups.getItem(2).getH2F("hi_phitheta_pos_found").fill(phi, Math.toDegrees(part.theta()));
+                                    }
+                                }
+                                else {
+                                    if(charge==-1) {
+                                        this.dataGroups.getItem(2).getH2F("hi_ptheta_neg_missing").fill(part.p(), Math.toDegrees(part.theta()));
+                                        this.dataGroups.getItem(2).getH2F("hi_phitheta_neg_missing").fill(phi, Math.toDegrees(part.theta()));
+                                    }
+                                    else {
+                                        this.dataGroups.getItem(2).getH2F("hi_ptheta_pos_missing").fill(part.p(), Math.toDegrees(part.theta()));
+                                        this.dataGroups.getItem(2).getH2F("hi_phitheta_pos_missing").fill(phi, Math.toDegrees(part.theta()));
+                                    }                    
+                                }
                             }
-                            if(charge==-1) {
-                                this.dataGroups.getItem(2).getH2F("hi_ptheta_neg_found").fill(part.p(), Math.toDegrees(part.theta()));
-                                this.dataGroups.getItem(2).getH2F("hi_phitheta_neg_found").fill(phi, Math.toDegrees(part.theta()));
-                            }
-                            else {
-                                this.dataGroups.getItem(2).getH2F("hi_ptheta_pos_found").fill(part.p(), Math.toDegrees(part.theta()));
-                                this.dataGroups.getItem(2).getH2F("hi_phitheta_pos_found").fill(phi, Math.toDegrees(part.theta()));
-                            }
-                        }
-                        else {
-                            if(charge==-1) {
-                                this.dataGroups.getItem(2).getH2F("hi_ptheta_neg_missing").fill(part.p(), Math.toDegrees(part.theta()));
-                                this.dataGroups.getItem(2).getH2F("hi_phitheta_neg_missing").fill(phi, Math.toDegrees(part.theta()));
-                            }
-                            else {
-                                this.dataGroups.getItem(2).getH2F("hi_ptheta_pos_missing").fill(part.p(), Math.toDegrees(part.theta()));
-                                this.dataGroups.getItem(2).getH2F("hi_phitheta_pos_missing").fill(phi, Math.toDegrees(part.theta()));
-                            }                    
                         }
                     }
                 }
@@ -566,8 +607,11 @@ public class TrackDictionaryValidation {
                     int pcalu    = Integer.parseInt(lineValues[43]);                    
                     // keep only roads with 6 superlayers
                     if(wires.size()!=6) continue;
-//                    // keep only roads with ftof
-//                    if(paddle1b==0) continue;
+                    // add 4 0s to wires array to mimic ftof, pcal and htcc
+                    wires.add(0);
+                    wires.add(0);
+                    wires.add(0);
+                    wires.add(0);
                     nFull++;
                     if(this.dictionary.containsKey(wires)) {
                         nDupli++;
@@ -696,8 +740,8 @@ public class TrackDictionaryValidation {
         int maxEvents = parser.getOption("-n").intValue();
             
 //        dictionaryFileName="/Users/devita/TracksDic_test.txt";
-//        inputFileName = "/Users/devita/out_clas_004013.0.9.hipo";
-//        testFileName  = "/Users/devita/out_clas_004013.0.9.hipo";
+//        inputFileName = "/Users/devita/out_clas_003355.evio.440.hipo";
+//        testFileName  = "/Users/devita/out_clas_003355.evio.440.hipo";
 //        testFileName  = "/Users/devita/clas12_pi.hipo";
 //        wireSmear=0;
 //        maxEvents = 100000;  
@@ -706,23 +750,23 @@ public class TrackDictionaryValidation {
         TrackDictionaryValidation tm = new TrackDictionaryValidation();
         tm.init();
         if(parser.containsOptions(arguments, "-c") || parser.containsOptions(arguments, "-d") || debug) {
-            if(parser.containsOptions(arguments, "-c")) {
+            if(parser.containsOptions(arguments, "-c") || debug) {
                 tm.createDictionary(inputFileName, pid, charge);
             }
             else if(parser.hasOption("-d")==true || debug) {
                 tm.readDictionary(dictionaryFileName);                
-            }
     //        tm.printDictionary();
-            tm.processFile(testFileName,wireSmear,maxEvents);
+                tm.processFile(testFileName,wireSmear,maxEvents);
 
-            JFrame frame = new JFrame("Tracking");
-            Dimension screensize = null;
-            screensize = Toolkit.getDefaultToolkit().getScreenSize();
-            frame.setSize((int) (screensize.getWidth() * 0.8), (int) (screensize.getHeight() * 0.8));
-            frame.add(tm.getCanvas());
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
-            tm.plotHistos();
+                JFrame frame = new JFrame("Tracking");
+                Dimension screensize = null;
+                screensize = Toolkit.getDefaultToolkit().getScreenSize();
+                frame.setSize((int) (screensize.getWidth() * 0.8), (int) (screensize.getHeight() * 0.8));
+                frame.add(tm.getCanvas());
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
+                tm.plotHistos();
+            }
         }
         else {
             parser.printUsage();
