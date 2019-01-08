@@ -26,8 +26,8 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.hipo.HipoDataEvent;
-import org.jlab.jnp.hipo.data.HipoEvent;
-import org.jlab.jnp.hipo.schema.SchemaFactory;
+import org.jlab.jnp.hipo4.data.Event;
+import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import static org.json.JSONObject.quote;
@@ -57,7 +57,8 @@ public abstract class ReconstructionEngine implements Engine {
         constManagerMap   = new ConcurrentHashMap<String,ConstantsManager>();
         engineDictionary  = new SchemaFactory();
         engineConfigMap   = new ConcurrentHashMap<String,String>();
-        engineDictionary.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
+        String env = System.getenv("CLAS12DIR");
+        engineDictionary.initFromDirectory( env +  "/etc/bankdefs/hipo4");
         //System.out.println("[Engine] >>>>> constants manager : " + getConstantsManager().toString());
     }
 
@@ -230,9 +231,9 @@ public abstract class ReconstructionEngine implements Engine {
         if(mt.compareTo("binary/data-hipo")==0){
             try {
                 //ByteBuffer bb = (ByteBuffer) input.getData();
-                HipoEvent hipoEvent = (HipoEvent) input.getData();
-                hipoEvent.setSchemaFactory(engineDictionary, false);
-                dataEventHipo = new HipoDataEvent(hipoEvent);
+                Event hipoEvent = (Event) input.getData();
+                //hipoEvent.setSchemaFactory(engineDictionary, false);
+                dataEventHipo = new HipoDataEvent(hipoEvent,engineDictionary);
                 
                 //dataEventHipo.initDictionary(engineDictionary);
                 //dataEventHipo = new HipoDataEvent(bb.array(),this.engineDictionary);
