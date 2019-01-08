@@ -712,7 +712,7 @@ public class TrackDictionaryValidation {
         parser.addOption("-c","input.hipo", "create dictionary from event file");
         parser.addOption("-pid","0", "select particle PID for dictonary creation (0: no selection)");
         parser.addOption("-q","0", "select particle charge for dictonary creation (0: no selection)");
-        parser.addOption("-i","set event file for dictionary validation");
+        parser.addOption("-i","", "set event file for dictionary validation");
         parser.addOption("-w", "0", "wire smearing in road finding");
         parser.addOption("-n", "-1", "maximum number of events to process");
         parser.parse(args);
