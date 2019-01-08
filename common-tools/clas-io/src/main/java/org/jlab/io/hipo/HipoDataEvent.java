@@ -274,7 +274,7 @@ public class HipoDataEvent implements DataEvent {
     @Override
     public DataBank createBank(String bank_name, int rows) {
         
-        System.out.println(" CREATING BANK = " + bank_name);
+        //System.out.println(" CREATING BANK = " + bank_name);
         
         Schema schema = schemaFactory.getSchema(bank_name);
         if(schema ==null) {
@@ -286,7 +286,7 @@ public class HipoDataEvent implements DataEvent {
                 System.out.println("\t ----> " + sc);
             }
         }
-        System.out.println("SCHEMA = " + schema.getName());
+        //System.out.println("SCHEMA = " + schema.getName());
         
         Bank   bank   = new Bank(schema,rows);
         
