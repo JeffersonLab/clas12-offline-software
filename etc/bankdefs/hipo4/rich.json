@@ -1,10 +1,10 @@
 [ 
  {
-    "bank": "RICH::hits",
+    "name": "RICH::hits",
     "group": 22000,
     "item" : 21,   
     "info": "Reconstructed Hits in RICH",
-    "items": [
+    "entries": [
               {"name":"id",          "type":"S", "info":"Hit id"},
               {"name":"sector",      "type":"S", "info":"Hit sector"},
               {"name":"tile",        "type":"S", "info":"Hit tile"},
@@ -21,11 +21,11 @@
     ]
   },
    {
-    "bank": "RICH::clusters",
+    "name": "RICH::clusters",
     "group": 22000,
     "item" : 22,   
     "info": "Reconstructed Clusters in RICH",
-    "items": [
+    "entries": [
             {"name":"id",         "type":"S", "info":"Clu id"},
             {"name":"size",       "type":"S", "info":"Clu size"},
             {"name":"sector",     "type":"S", "info":"Clu sector"},

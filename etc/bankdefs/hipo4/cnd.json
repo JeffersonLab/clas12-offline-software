@@ -1,6 +1,6 @@
 [
   {
-  "bank": "CND::hits",
+  "name": "CND::hits",
     "group": 20300,
     "item" : 21,
     "info": "reconstructed hit info from CND",
@@ -33,7 +33,7 @@
         ]
   },
   {
-  "bank": "CND::clusters",
+  "name": "CND::clusters",
     "group": 20300,
     "item" : 22,
     "info": "reconstructed cluster info from CND and CTOF",

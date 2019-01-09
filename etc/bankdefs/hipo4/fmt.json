@@ -1,10 +1,10 @@
  [
   {
-  "bank": "FMTRec::Hits",
+  "name": "FMTRec::Hits",
   "group": 20800,
   "item" : 21,   
   "info": "reconstructed FMT hits",
-  "items": [
+  "entries": [
         {"name":"ID",             "type":"S", "info":"hit ID"},
         {"name":"sector",         "type":"B", "info":"hit sector"},
         {"name":"layer",          "type":"B", "info":"hit layer"},
@@ -16,11 +16,11 @@
         ]
   },
   {
-  "bank": "FMTRec::Clusters",
+  "name": "FMTRec::Clusters",
   "group": 20800,
   "item" : 22,   
   "info": "reconstructed FMT clusters",
-  "items": [
+  "entries": [
             {"name":"ID",              "type":"S", "info":"ID"},
             {"name":"sector",          "type":"B", "info":"sector"},
             {"name":"layer",           "type":"B", "info":"layer"},
@@ -40,11 +40,11 @@
             ]
   },
   {
-  "bank": "FMTRec::Crosses",
+  "name": "FMTRec::Crosses",
   "group": 20800,
   "item" : 25,   
   "info": "reconstructed FMT crosses",
-  "items": [
+  "entries": [
             {"name":"ID",          "type":"S", "info":"ID"},
             {"name":"sector",      "type":"B", "info":"sector"},
             {"name":"region",      "type":"B", "info":"region"},

@@ -1,6 +1,6 @@
 [ 
  {
-    "bank": "HitBasedTrkg::HBHits",
+    "name": "HitBasedTrkg::HBHits",
     "group": 20600,
     "item" : 21,
     "info": "reconstructed hits using DC wire positions",
@@ -27,7 +27,7 @@
     ]
   },
  {
-    "bank": "HitBasedTrkg::HBClusters",
+    "name": "HitBasedTrkg::HBClusters",
     "group": 20600,
     "item" : 22,
     "info": "reconstructed clusters using DC wire positions",
@@ -58,7 +58,7 @@
        ]
   },
   {
-    "bank": "HitBasedTrkg::HBSegments",
+    "name": "HitBasedTrkg::HBSegments",
     "group": 20600,
     "item" : 23,
     "info": "reconstructed segments using DC wire positions",
@@ -94,7 +94,7 @@
     ]
   },
   {
-    "bank": "HitBasedTrkg::HBSegmentTrajectory",
+    "name": "HitBasedTrkg::HBSegmentTrajectory",
     "group": 20600,
     "item" : 24,
     "info": "reconstructed segment trajectory from hit-based tracking",
@@ -108,7 +108,7 @@
     ]
   },
   {
-    "bank": "HitBasedTrkg::HBCrosses",
+    "name": "HitBasedTrkg::HBCrosses",
     "group": 20600,
     "item" : 25,
     "info": "reconstructed segments using DC wire positions",
@@ -134,7 +134,7 @@
     ]
   },
   {
-    "bank": "HitBasedTrkg::HBTracks",
+    "name": "HitBasedTrkg::HBTracks",
     "group": 20600,
     "item" : 26,
     "info": "reconstructed tracks using DC wire positions",
@@ -176,7 +176,7 @@
     ]
   }, 
   {
-    "bank": "TimeBasedTrkg::TBHits",
+    "name": "TimeBasedTrkg::TBHits",
     "group": 20600,
     "item" : 31,
     "info": "reconstructed hits using DC timing information",
@@ -209,7 +209,7 @@
     ]
   },
   {
-    "bank": "TimeBasedTrkg::TBClusters",
+    "name": "TimeBasedTrkg::TBClusters",
     "group": 20600,
     "item" : 32,
     "info": "reconstructed clusters using DC timing information",
@@ -240,7 +240,7 @@
     ]
   },
   {
-    "bank": "TimeBasedTrkg::TBSegments",
+    "name": "TimeBasedTrkg::TBSegments",
     "group": 20600,
     "item" : 33,
     "info": "reconstructed segments using DC timing information",
@@ -278,7 +278,7 @@
     ]
   },
   {
-    "bank": "TimeBasedTrkg::TBSegmentTrajectory",
+    "name": "TimeBasedTrkg::TBSegmentTrajectory",
     "group": 20600,
     "item" : 34,
     "info": "reconstructed segment trajectory from hit-based tracking",
@@ -292,7 +292,7 @@
     ]
   },
   {
-    "bank": "TimeBasedTrkg::TBCrosses",
+    "name": "TimeBasedTrkg::TBCrosses",
     "group": 20600,
     "item" : 35,
     "info": "reconstructed segments using DC timing information",
@@ -318,7 +318,7 @@
     ]
   },
   {
-    "bank": "TimeBasedTrkg::TBTracks",
+    "name": "TimeBasedTrkg::TBTracks",
     "group": 20600,
     "item" : 36,
     "info": "reconstructed tracks using DC timing information",
@@ -360,7 +360,7 @@
     ]
   },
   {
-    "bank": "TimeBasedTrkg::TBCovMat",
+    "name": "TimeBasedTrkg::TBCovMat",
     "group": 20600,
     "item" : 37,
     "info": "reconstructed track covariance matrix",
@@ -394,7 +394,7 @@
     ]
   },
   {
-    "bank": "TimeBasedTrkg::Trajectory",
+    "name": "TimeBasedTrkg::Trajectory",
     "group": 20600,
     "item" : 53,
     "info": "Trajectory bank",

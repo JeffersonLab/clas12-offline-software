@@ -1,10 +1,10 @@
  [
   {
-    "bank": "CVTRec::Tracks",
+    "name": "CVTRec::Tracks",
     "group": 20500,
     "item" : 26,   
     "info": "reconstructed SVT tracks",
-    "items": [
+    "entries": [
         {"name":"ID",             "type":"S", "info":"ID"},
         {"name":"fittingMethod",  "type":"B", "info":"fitting method (1 for global fit, 2 for Kalman Filter)"},
         {"name":"c_x",            "type":"F", "info":"x-coordinate of a helical trk point extrapolated to a cylinder at 25 cm radius from the lab origin (cm unit)"},
@@ -45,11 +45,11 @@
     ]
   },
   {
-    "bank": "CVTRec::Cosmics",
+    "name": "CVTRec::Cosmics",
     "group": 20500,
     "item" : 28,   
     "info": "reconstructed SVT straight tracks",
-    "items": [
+    "entries": [
         {"name":"ID",                  "type":"S", "info":"ID"},
         {"name":"trkline_yx_slope",    "type":"F", "info":"trkline_yx_slope"},
         {"name":"trkline_yx_interc",   "type":"F", "info":"trkline_yx_interc"},
@@ -80,11 +80,11 @@
     ]
   },
   {
-    "bank": "CVTRec::Trajectory",
+    "name": "CVTRec::Trajectory",
     "group": 20500,
     "item" : 29,   
     "info": "reconstructed SVT straight tracks trajectory",
-    "items": [
+    "entries": [
         {"name":"ID",                      "type":"S", "info":"ID"},
         {"name":"LayerTrackIntersPlane",   "type":"B", "info":"Layer of intersection of Track "},
         {"name":"SectorTrackIntersPlane",  "type":"B", "info":"Sector of intersection of Track "},

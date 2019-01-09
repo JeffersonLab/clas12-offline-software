@@ -1,10 +1,10 @@
  [
   {
-  "bank": "BSTRec::Hits",
+  "name": "BSTRec::Hits",
   "group": 20200,
   "item" : 21,   
   "info": "reconstructed BST hits on track",
-  "items": [
+  "entries": [
         {"name":"ID",             "type":"S", "info":"hit ID"},
         {"name":"sector",         "type":"B", "info":"hit sector"},
         {"name":"layer",          "type":"B", "info":"hit layer"},
@@ -16,11 +16,11 @@
         ]
   },
   {
-  "bank": "BSTRec::Clusters",
+  "name": "BSTRec::Clusters",
   "group": 20200,
   "item" : 22,   
   "info": "reconstructed BST clusters",
-  "items": [
+  "entries": [
             {"name":"ID",              "type":"S", "info":"ID"},
             {"name":"sector",          "type":"B", "info":"sector"},
             {"name":"layer",           "type":"B", "info":"layer"},
@@ -40,11 +40,11 @@
             ]
   },
   {
-  "bank": "BSTRec::Crosses",
+  "name": "BSTRec::Crosses",
   "group": 20200,
   "item" : 25,   
   "info": "reconstructed BST crosses",
-  "items": [
+  "entries": [
             {"name":"ID",          "type":"S", "info":"ID"},
             {"name":"sector",      "type":"B", "info":"sector"},
             {"name":"region",      "type":"B", "info":"region"},
@@ -63,11 +63,11 @@
             ]
   },
   {
-  "bank": "BSTRec::LayerEffs",
+  "name": "BSTRec::LayerEffs",
   "group": 20200,
   "item" : 26,   
   "info": "layer efficiencies",
-  "items": [
+  "entries": [
             {"name":"sector",      "type":"B", "info":"sector"},
             {"name":"layer",       "type":"B", "info":"layer"},
             {"name":"residual",    "type":"F", "info":"excluded layer residual of the matched cluster centroid"},
