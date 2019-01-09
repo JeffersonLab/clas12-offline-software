@@ -54,9 +54,8 @@ public class HipoDataDescriptor implements DataDescriptor {
 
     @Override
     public boolean hasEntry(String entry) {
-        
+        return hipoSchema.hasEntry(entry);
         //return (this.hipoSchema.getEntry(entry)!=null);
-        return true;
     }
 
     @Override

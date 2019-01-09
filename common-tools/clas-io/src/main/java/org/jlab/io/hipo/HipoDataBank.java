@@ -23,6 +23,7 @@ public class HipoDataBank implements DataBank  {
     
     public HipoDataBank(Bank bank){
         hipoGroup = bank;
+        descriptor = new HipoDataDescriptor(bank.getSchema());
     }
     
     public HipoDataBank(HipoDataDescriptor desc, int size){        
