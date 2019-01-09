@@ -1,4 +1,4 @@
-package org.jlab.rec.cnd.hit;
+package org.jlab.rec.band.hit;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,28 +10,27 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geom.prim.Plane3D;
-import org.jlab.rec.cnd.constants.CalibrationConstantsLoader;
-import org.jlab.rec.cnd.constants.Parameters;
-import org.jlab.rec.cnd.hit.CvtGetHTrack.CVTTrack;
+import org.jlab.rec.band.constants.CalibrationConstantsLoader;
+import org.jlab.rec.band.constants.Parameters;
+import org.jlab.rec.band.hit.CvtGetHTrack.CVTTrack;
 
-public class CndHitFinder {
+public class BandHitFinder {
 
-	public CndHitFinder(){
+	public BandHitFinder(){
 		// empty constructor
 	}
 
-	// This class contains the core of the code. The findhits method reconstruct good cnd hits from raw halfhits using various cuts and matching.
+	// This class contains the core of the code. The findhits method reconstruct good band hits from raw halfhits using various cuts and matching.
 	// The following method are used to calculate the length the particle is travelling in the paddle while depositing energy.
 
 	// flag to distinguish between calibration mode 0 (loose cuts) and reconstruction mode 1 (tighter cuts)
 	
-	public ArrayList<CndHit> findHits(ArrayList<HalfHit> halfhits,int flag) 
+	public ArrayList<BandHit> findHits(ArrayList<HalfHit> halfhits,int flag) 
 	{
 
 		Parameters.SetParameters();
 
-		ArrayList<CndHit> HitArray = new ArrayList<CndHit>();      // array list of all "good" reconstructed hits in CND
-		ArrayList<CndHit> goodCndHits = new ArrayList<CndHit>();   // array list of unambiguous reconstructed hits in CND
+		ArrayList<BandHit> HitArray = new ArrayList<BandHit>();      // array list of all "good" reconstructed hits in BAND
 
 		if(halfhits.size() > 0) {
 
@@ -192,9 +191,9 @@ public class CndHitFinder {
 
 					totrec++;  // count number of "good" reconstructions
 
-					// Create a new CndHit and fill it with the relevant info:
+					// Create a new BandHit and fill it with the relevant info:
 
-					CndHit GoodHit = new CndHit(pad_d,pad_n);  // Takes as index the halfhits array indices of the two half-hits involved.
+					BandHit GoodHit = new BandHit(pad_d,pad_n);  // Takes as index the halfhits array indices of the two half-hits involved.
 
 					GoodHit.set_Time(T_hit);
 					GoodHit.set_X(x_hit);
@@ -231,7 +230,7 @@ public class CndHitFinder {
 				}  // close loop over j
 			} // close loop over i  		
 
-			// At this stage an array of possible reconstructed hits, type CndHit and called HitArray, has been created. 
+			// At this stage an array of possible reconstructed hits, type BandHit and called HitArray, has been created. 
 			// There may be cases of ambiguous reconstruction: where two signals from one paddle can be matched up with a single one from the neighbour.
 			// Remove those reconstructions:
 
@@ -244,14 +243,14 @@ public class CndHitFinder {
 
 			for(int i = 0; i < (HitArray.size()); i++)
 			{		
-				CndHit cndhit1 = HitArray.get(i);
+				BandHit bandhit1 = HitArray.get(i);
 
 				for(int j = i+1; j < HitArray.size(); j++) 
 				{
-					CndHit cndhit2 = HitArray.get(j);   
+					BandHit bandhit2 = HitArray.get(j);   
 
 					if (i!=j){
-						if ((cndhit1.index_d() == cndhit2.index_d() || cndhit1.index_d() == cndhit2.index_n() || cndhit1.index_n() == cndhit2.index_d() || cndhit1.index_n() == cndhit2.index_n()))	
+						if ((bandhit1.index_d() == bandhit2.index_d() || bandhit1.index_d() == bandhit2.index_n() || bandhit1.index_n() == bandhit2.index_d() || bandhit1.index_n() == bandhit2.index_n()))	
 						{
 							ambig_rec[i] = 1;  // set the flags for ambiguous reconstructions
 							ambig_rec[j] = 1;
@@ -263,33 +262,33 @@ public class CndHitFinder {
 			// Now loop through and create a new array in which there are no ambiguous reconstructions:
 			for(int i = 0; i < HitArray.size(); i++)
 			{	
-				CndHit goodhit = HitArray.get(i);
+				BandHit goodhit = HitArray.get(i);
 				if (ambig_rec[i] == 0)
 				{
-					goodCndHits.add(goodhit);
+					goodBandHits.add(goodhit);
 				}
 			}
 
 			// Sort the hits in order of ascending time, so the first one has the shortest time:
-			Collections.sort(goodCndHits);  
+			Collections.sort(goodBandHits);  
 
 		}  // closes if halfhit array has non-zero entries...
 
-		return goodCndHits;
+		return goodBandHits;
 
 	} // findHits function		
 
 
-	public double findLength(CndHit hit, List<CVTTrack> helices, int flag) 
+	public double findLength(BandHit hit, List<CVTTrack> helices, int flag) 
 	{
-		// this method is used to find the length of the path followed by the detected charged particle in the cnd
+		// this method is used to find the length of the path followed by the detected charged particle in the band
 		// first we need to know if the particle is charged by matching the hit to the cvt helical tracks
 		// then we can calculate the length of the track
 
 		// flag is used to distinguish calibration mode 0 and reconstruction mode 1
 
 		double length = 0;
-		double xi=hit.X(); // retrieve cnd hit coordinates
+		double xi=hit.X(); // retrieve band hit coordinates
 		double yi=hit.Y();
 		double zi=hit.Z();
 		int lay=hit.Layer();
@@ -314,13 +313,13 @@ public class CndHitFinder {
 
 		for(int i =0 ; i<helices.size() ; i++){//loop through helical tracks extracted from the cvt
 
-			// the following line give the point at which the cnd hit would occur according to the cvt track
-			//Point3D hitCndfromCvt = helices.get(i).get_Helix().getPointAtRadius(radius); 
-			Point3D hitCndfromCvt = helices.get(i).get_TrkInters().get(lay-1).get(1); // middle of the counter
+			// the following line give the point at which the band hit would occur according to the cvt track
+			//Point3D hitBandfromCvt = helices.get(i).get_Helix().getPointAtRadius(radius); 
+			Point3D hitBandfromCvt = helices.get(i).get_TrkInters().get(lay-1).get(1); // middle of the counter
 
-			double xj=hitCndfromCvt.x(); // retrieve CndFromCvt hit coordinates
-			double yj=hitCndfromCvt.y();
-			double zj=hitCndfromCvt.z();
+			double xj=hitBandfromCvt.x(); // retrieve CndFromCvt hit coordinates
+			double yj=hitBandfromCvt.y();
+			double zj=hitBandfromCvt.z();
 
 			double rj=(Math.sqrt(xj*xj+yj*yj+zj*zj));
 			double phij = Math.signum(yj)*Math.acos(xj/rj)*(180./Math.PI);
@@ -337,7 +336,7 @@ public class CndHitFinder {
 				hit.set_tY(yj);
 				hit.set_tZ(zj);
 
-				// get the length travelled by the particule in the paddle. If the entry point is outside the cnd skip the event, if the escape point is outside the paddle, the escape point is the intersection of the particule path and the plane defined at the edge of the paddle, otherwise get the distance between entrypoint and escape point.
+				// get the length travelled by the particule in the paddle. If the entry point is outside the band skip the event, if the escape point is outside the paddle, the escape point is the intersection of the particule path and the plane defined at the edge of the paddle, otherwise get the distance between entrypoint and escape point.
 
 				if(helices.get(i).get_TrkInters().get(lay-1).get(0).z()>((-1.*CalibrationConstantsLoader.ZOFFSET[lay-1]) + (CalibrationConstantsLoader.LENGTH[lay-1]))) continue;
 				if(helices.get(i).get_TrkInters().get(lay-1).get(0).z()<(-1.*CalibrationConstantsLoader.ZOFFSET[lay-1])) continue;
@@ -371,7 +370,7 @@ public class CndHitFinder {
 
 
 
-	public double findLengthNeutral(Point3D vertex, CndHit hit){
+	public double findLengthNeutral(Point3D vertex, BandHit hit){
 
 		// not finished	
 
@@ -400,7 +399,7 @@ public class CndHitFinder {
 			Arc3D arc2 = new Arc3D(origin2,center,normal,Math.PI*2.);
 			Cylindrical3D cyl1 = new Cylindrical3D(arc1,2.*CalibrationConstantsLoader.LENGTH[lay-1]);
 			Cylindrical3D cyl2 = new Cylindrical3D(arc2,2.*CalibrationConstantsLoader.LENGTH[lay-1]);
-			// the cylinders are biggers than the actual cnd but it is just for convenience, as the hit point is in the cnd anyway
+			// the cylinders are biggers than the actual band but it is just for convenience, as the hit point is in the cnd anyway
 
 			//set the line between the vertex and the hit point
 			Line3D line = new Line3D(vertex,hitpoint);
@@ -426,4 +425,4 @@ public class CndHitFinder {
 
 
 
-} // CndHitFinder
+} // BandHitFinder

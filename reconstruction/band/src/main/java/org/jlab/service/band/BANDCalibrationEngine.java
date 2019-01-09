@@ -1,4 +1,4 @@
-package org.jlab.service.cnd;
+package org.jlab.service.band;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,13 +8,13 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
-import org.jlab.rec.cnd.constants.CalibrationConstantsLoader;
-import org.jlab.rec.cnd.banks.HitReader;
-import org.jlab.rec.cnd.banks.RecoBankWriter;
-import org.jlab.rec.cnd.hit.CndHit;
-import org.jlab.rec.cnd.hit.CvtGetHTrack;
-import org.jlab.rec.cnd.hit.HalfHit;
-import org.jlab.rec.cnd.hit.CndHitFinder;
+import org.jlab.rec.band.constants.CalibrationConstantsLoader;
+import org.jlab.rec.band.banks.HitReader;
+import org.jlab.rec.band.banks.RecoBankWriter;
+import org.jlab.rec.band.hit.BandHit;
+import org.jlab.rec.band.hit.CvtGetHTrack;
+import org.jlab.rec.band.hit.HalfHit;
+import org.jlab.rec.band.hit.bandHitFinder;
 
 import java.lang.String;
 import java.lang.Double;
@@ -26,21 +26,21 @@ import static java.lang.Math.sin;
 import static java.lang.Math.cos;
 import org.jlab.clas.physics.LorentzVector;
 
-import org.jlab.rec.cnd.cluster.CNDCluster;
-import org.jlab.rec.cnd.cluster.CNDClusterFinder;
+import org.jlab.rec.band.cluster.BANDCluster;
+import org.jlab.rec.band.cluster.BANDClusterFinder;
 
 /**
- * Service to return reconstructed CND Hits - the output is in Hipo format
+ * Service to return reconstructed BAND Hits - the output is in Hipo format
  * doing clustering job at the end, provide the cluster infos for PID ("rwangcn8@gmail.com")
  *
  *
  */
 
-public class CNDCalibrationEngine extends ReconstructionEngine {
+public class BANDCalibrationEngine extends ReconstructionEngine {
 
 
-	public CNDCalibrationEngine() {
-		super("CND", "chatagnon & WANG", "1.0");
+	public BANDCalibrationEngine() {
+		super("BAND", "hauenstein & segarra", "1.0");
 	
 	}
 
@@ -48,7 +48,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	RecoBankWriter rbc;
 	//test
 	static int enb =0;
-	static int ecnd=0;
+	static int eband=0;
 	static int hcvt=0;
 	static int match=0;
 	static int posmatch=0;
@@ -65,14 +65,14 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 		setRunConditionsParameters(event);
 
                 ArrayList<HalfHit> halfhits = new ArrayList<HalfHit>();   
-		ArrayList<CndHit> hits = new ArrayList<CndHit>();
+		ArrayList<bandHit> hits = new ArrayList<bandHit>();
 
 		//test
 //		if(event.hasBank("CVTRec::Tracks")){
 //			hcvt++;
 //		}
 
-		halfhits = HitReader.getCndHalfHits(event);		
+		halfhits = HitReader.getBandHalfHits(event);		
 		//1) exit if halfhit list is empty
 		if(halfhits.size()==0 ){
 			//			System.out.println("fin de process (0) : ");
@@ -80,15 +80,15 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 			return true;
 		}
 
-		//2) find the CND hits from these half-hits
-		CndHitFinder hitFinder = new CndHitFinder();
+		//2) find the BAND hits from these half-hits
+		BandHitFinder hitFinder = new BandHitFinder();
 		hits = hitFinder.findHits(halfhits,0);
 
 		CvtGetHTrack cvttry = new CvtGetHTrack();
 		cvttry.getCvtHTrack(event); // get the list of helix associated with the event
 
 		//int flag=0;
-		for (CndHit hit : hits){ // findlength for charged particles
+		for (BandHit hit : hits){ // findlength for charged particles
 			double length =hitFinder.findLength(hit, cvttry.getHelices(),0);
 			if (length!=0){
 				hit.set_tLength(length); // the path length is non zero only when there is a match with cvt track
@@ -100,20 +100,20 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 
 		//	   			GetVertex getVertex = new GetVertex();
 		//	   			Point3D vertex = getVertex.getVertex(event);
-		//	   			for (CndHit hit : hits){ // check findlengthneutral
+		//	   			for (bandHit hit : hits){ // check findlengthneutral
 		//	   				hitFinder.findLengthNeutral( vertex, hit);
 		//		   			}
 		//	   			
 
 		//		if(hits.size()!=0){
 		//
-		//			DataBank outbank = RecoBankWriter.fillCndHitBanks(event, hits);
+		//			DataBank outbank = RecoBankWriter.fillbandHitBanks(event, hits);
 		////			System.out.println("event before process : ");
 		////			event.show();
 		//			event.appendBanks(outbank);
 		//			//System.out.println("event after process : ");
 		//			//event.show();
-		//			ecnd++;
+		//			eband++;
 		//			if(event.hasBank("CVTRec::Tracks")){
 		//				posmatch++;
 		//				//event.getBank("MC::Particle").show();
@@ -127,12 +127,12 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 		//	}
 		if(hits.size()!=0){
 
-			//          DataBank outbank = RecoBankWriter.fillCndHitBanks(event, hits);
+			//          DataBank outbank = RecoBankWriter.fillbandHitBanks(event, hits);
 			//          event.appendBanks(outbank);
 			// event.show();
 		//	System.out.println("in process event ");
-			rbc.appendCNDBanks(event,hits);
-			//      ecnd++;
+			rbc.appendbandBanks(event,hits);
+			//      eband++;
 			//      if(event.hasBank("CVTRec::Tracks")){
 			//              posmatch++;
 			//event.getBank("MC::Particle").show();
@@ -144,31 +144,31 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 
 
 
-		//// clustering of the CND hits
-		CNDClusterFinder cndclusterFinder = new CNDClusterFinder();
-		ArrayList<CNDCluster> cndclusters = cndclusterFinder.findClusters(hits);
+		//// clustering of the BAND hits
+		BANDClusterFinder bandclusterFinder = new BANDClusterFinder();
+		ArrayList<BANDCluster> bandclusters = bandclusterFinder.findClusters(hits);
 	        
 
-	        /// Filling the banks of CND clusters
-	        int size = cndclusters.size();
+	        /// Filling the banks of band clusters
+	        int size = bandclusters.size();
 	        if(size>0){
-	                DataBank bank2 =  event.createBank("CND::clusters", size);
+	                DataBank bank2 =  event.createBank("BAND::clusters", size);
 	                if (bank2 == null) {
-	                        System.err.println("COULD NOT CREATE A CND::clusters BANK!!!!!!");
+	                        System.err.println("COULD NOT CREATE A BAND::clusters BANK!!!!!!");
 	                        return false;
 	                }
 	                for(int i =0; i< size; i++) {
-	                        bank2.setInt("id",i, cndclusters.get(i).get_id() );
-	                        bank2.setInt("nhits",i, cndclusters.get(i).get_nhits() );
-				bank2.setByte("sector",i,  (byte)(1* cndclusters.get(i).get_sector()) );
-				bank2.setByte("layer",i,  (byte)(1*  cndclusters.get(i).get_layer()) );
-				bank2.setInt("component",i,  cndclusters.get(i).get_component() );
-	                        bank2.setFloat("energy",i,   (float)(1.0* cndclusters.get(i).get_energysum()) );
-	                        bank2.setFloat("x",i,   (float)(1.0* cndclusters.get(i).get_x()) );
-	                        bank2.setFloat("y",i,   (float)(1.0* cndclusters.get(i).get_y()) );
-	                        bank2.setFloat("z",i,   (float)(1.0* cndclusters.get(i).get_z()) );
-	                        bank2.setFloat("time",i,   (float)(1.0*  cndclusters.get(i).get_time()) );
-				bank2.setInt("status",i,   cndclusters.get(i).get_status());
+	                        bank2.setInt("id",i, bandclusters.get(i).get_id() );
+	                        bank2.setInt("nhits",i, bandclusters.get(i).get_nhits() );
+				bank2.setByte("sector",i,  (byte)(1* bandclusters.get(i).get_sector()) );
+				bank2.setByte("layer",i,  (byte)(1*  bandclusters.get(i).get_layer()) );
+				bank2.setInt("component",i,  bandclusters.get(i).get_component() );
+	                        bank2.setFloat("energy",i,   (float)(1.0* bandclusters.get(i).get_energysum()) );
+	                        bank2.setFloat("x",i,   (float)(1.0* bandclusters.get(i).get_x()) );
+	                        bank2.setFloat("y",i,   (float)(1.0* bandclusters.get(i).get_y()) );
+	                        bank2.setFloat("z",i,   (float)(1.0* bandclusters.get(i).get_z()) );
+	                        bank2.setFloat("time",i,   (float)(1.0*  bandclusters.get(i).get_time()) );
+				bank2.setInt("status",i,   bandclusters.get(i).get_status());
 	                }
 	                event.appendBanks(bank2);
 	        }
@@ -209,24 +209,16 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 
 
 	public static void main (String arg[]) {
-		CNDCalibrationEngine en = new CNDCalibrationEngine();
+		bandCalibrationEngine en = new bandCalibrationEngine();
 
 		en.init();
-		//String input = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/pi-.r100.evio";
-		//String input = "/projet/nucleon/silvia/test.hipo";
-		//String input = "/projet/nucleon/silvia/ctof_pion.rec.hipo";
-		//String input = "/projet/nucleon/silvia/out_ep.hipo";
-		//String input = "/projet/nucleon/silvia/out_out_bis.hipo";
-		//String input = "/projet/nucleon/silvia/out_bis.hipo";
-		//String input = "/projet/nucleon/silvia/test.rec.hipo";
-		//String input = "/projet/nucleon/pierre/test_out3.hipo";
-		//String input = "/projet/nucleon/silvia/test.hipo";
-		String input = "/projet/nucleon/pierre/RecCND/clas_002227.evio.18.hipo";
-		//String input = "/projet/nucleon/pierre/RecCND/test.hipo";
+		
+		String input = "/projet/nucleon/hauenst/Recband/clas_002227.evio.18.hipo";
+		//String input = "/projet/nucleon/pierre/Recband/test.hipo";
 		//String input = "/projet/nucleon/silvia/CLARA/out_clasdispr_small.00849.hipo";
 		HipoDataSource  reader = new HipoDataSource();
 		reader.open(input);
-		String outputFile="/projet/nucleon/pierre/RecCND/test1.hipo";
+		String outputFile="/projet/nucleon/hauenst/Recband/test1.hipo";
 		HipoDataSync  writer = new HipoDataSync();
 		writer.open(outputFile);
 
@@ -251,12 +243,12 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 			writer.writeEvent(event);
 			//System.out.println("après write ");
 
-//				if(event.hasBank("CND::hits")){
+//				if(event.hasBank("band::hits")){
 //							//event.show();
 //				System.out.println("event nb "+enb);
-//				event.getBank("CND::hits").show();	
-//			event.getBank("CND::adc").show();	
-//			event.getBank("CND::tdc").show();	
+//				event.getBank("band::hits").show();	
+//			event.getBank("band::adc").show();	
+//			event.getBank("band::tdc").show();	
 //				}
 
 
@@ -266,20 +258,20 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 		}		
 		writer.close();
 
-		//some statitics on cvt/cnd matching
+		//some statitics on cvt/band matching
 		System.out.println("enb "+enb);
-		System.out.println("ecnd "+ecnd);
+		System.out.println("eband "+eband);
 		System.out.println("hcvt "+hcvt);
 		System.out.println("posmatch "+posmatch);
 		System.out.println("match "+match);
-		System.out.println("%match cnd "+100.*match/posmatch);
+		System.out.println("%match band "+100.*match/posmatch);
 		System.out.println("Done");
 
 
 		HipoDataSource  sortie = new HipoDataSource();
 		sortie.open(outputFile);
 
-		System.out.println("Fichier de sortie : ");
+		
 		while(sortie.hasEvent()) {
 
 			DataEvent event = (DataEvent) sortie.getNextEvent();

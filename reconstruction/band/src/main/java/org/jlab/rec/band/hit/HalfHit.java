@@ -1,10 +1,9 @@
-package org.jlab.rec.cnd.hit;
+package org.jlab.rec.band.hit;
 
-import org.jlab.rec.cnd.constants.CalibrationConstantsLoader;
+import org.jlab.rec.band.constants.CalibrationConstantsLoader;
 
 public class HalfHit {
 
-	// In the constructor below, bank_index refers to index in the raw CND bank, 
 	// flag is 0 if it's real data or the "direct" signal in the simulation, 1 if it is the "indirect" signal in the simulation.
 
 	public HalfHit(int sector, int layer, int component, double triggerphase, int adc, int tdc, int _indexadc,int _indextdc) 
@@ -36,12 +35,12 @@ public class HalfHit {
 	private double _Eatt;      // Attenuated energy (MeV) at the upstream end of the paddle 
 	private double _Tprop;     // Time (ns) at the upstream end of the paddle
 
-	private int _sector;       // sector (block) of the CND 				
+	private int _sector;       // sector (block) of the BAND 				
 	private int _layer;        // layer in which the signal is registered
 	private int _component;    // component (paddle) with which the signal is associated
 
-	private int _indexadc;    // Index of the adc signal in the raw CND bank
-	private int _indextdc;    // Index of the tdc signal in the raw CND bank
+	private int _indexadc;    // Index of the adc signal in the raw BAND bank
+	private int _indextdc;    // Index of the tdc signal in the raw BAND bank
 	
 	public int Sector() {
 		return _sector;

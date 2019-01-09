@@ -1,4 +1,4 @@
-package org.jlab.rec.cnd.banks;
+package org.jlab.rec.band.banks;
 
 import java.util.ArrayList;
 import org.jlab.io.base.DataBank;
@@ -10,12 +10,12 @@ public class RecoBankWriter {
 
 
 	// write useful information in the bank
-	public static DataBank fillCndHitBanks(DataEvent event, ArrayList<CndHit> hitlist) {
+	public static DataBank fillBandHitBanks(DataEvent event, ArrayList<BandHit> hitlist) {
 
-		DataBank bank =  event.createBank("CND::hits", hitlist.size());
+		DataBank bank =  event.createBank("BAND::hits", hitlist.size());
 		
 		if (bank == null) {
-			System.err.println("COULD NOT CREATE A CND::Hits BANK!!!!!!");
+			System.err.println("COULD NOT CREATE A BAND::Hits BANK!!!!!!");
 			return null;
 		}
 
@@ -49,9 +49,9 @@ public class RecoBankWriter {
 
 	}
 
-	 public void appendCNDBanks(DataEvent event,ArrayList<CndHit> hitlist) {
+	 public void appendBANDBanks(DataEvent event,ArrayList<BandHit> hitlist) {
 		if(hitlist.size()!=0){
-			DataBank bank = this.fillCndHitBanks((DataEvent) event, hitlist);
+			DataBank bank = this.fillBandHitBanks((DataEvent) event, hitlist);
 			//bank.show();
 			event.appendBanks(bank);
 			//event.show();

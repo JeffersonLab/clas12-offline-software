@@ -1,4 +1,4 @@
-package org.jlab.rec.cnd.banks;
+package org.jlab.rec.band.banks;
 
 import java.util.ArrayList;
 
@@ -11,7 +11,7 @@ import org.jlab.rec.cnd.hit.HalfHit;
 public class HitReader {
 
 	// this method retrieves the half hits ie the adc/tdc signal from all the pmt for a given event
-	public static  ArrayList<HalfHit> getCndHalfHits(DataEvent event) {
+	public static  ArrayList<HalfHit> getBandHalfHits(DataEvent event) {
 
 		if(event==null)
 			return new ArrayList<HalfHit>();
@@ -26,14 +26,14 @@ public class HitReader {
                 }
 
             // Check that the file has the dgtz bank for CND.	 
-		if(event.hasBank("CND::adc")==false || event.hasBank("CND::tdc")==false) {
-			//System.err.println("there is no CND bank :-(");
+		if(event.hasBank("BAND::adc")==false || event.hasBank("BAND::tdc")==false) {
+			//System.err.println("there is no BAND bank :-(");
 			return new ArrayList<HalfHit>();
 		} 
 
 
-		DataBank bankADC = event.getBank("CND::adc");
-		DataBank bankTDC = event.getBank("CND::tdc");
+		DataBank bankADC = event.getBank("BAND::adc");
+		DataBank bankTDC = event.getBank("BAND::tdc");
 
 		//if(bankADC.rows() != bankTDC.rows()) return new ArrayList<HalfHit>();
 

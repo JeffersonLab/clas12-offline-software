@@ -1,4 +1,4 @@
-package org.jlab.rec.cnd.hit;
+package org.jlab.rec.band.hit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,7 +123,7 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
     }
 
     /**
-     * A class to hold the CVT track information relevant for CND analysis
+     * A class to hold the CVT track information relevant for BAND analysis
      *
      * @author ziegler
      *

@@ -1,12 +1,12 @@
-package org.jlab.rec.cnd.cluster;
+package org.jlab.rec.band.cluster;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.cnd.hit.CndHit;
+import org.jlab.rec.band.hit.BandHit;
 
-import org.jlab.rec.cnd.cluster.CNDCluster;
+import org.jlab.rec.band.cluster.BANDCluster;
 
 import java.lang.String;
 import java.lang.Double;
@@ -19,16 +19,16 @@ import static java.lang.Math.cos;
 import org.jlab.clas.physics.LorentzVector;
 
 
-public class CNDClusterFinder {
+public class BANDClusterFinder {
 
 	private double cluster_size_ = 5;
 
-	public CNDClusterFinder() {
+	public BANDClusterFinder() {
 	// TODO Auto-generated constructor stub
 	}
 
-	public ArrayList<CNDCluster> findClusters(ArrayList<CndHit> hits) {
-		ArrayList<CNDCluster> clusters = new ArrayList<CNDCluster>();
+	public ArrayList<BANDCluster> findClusters(ArrayList<BandHit> hits) {
+		ArrayList<BANDCluster> clusters = new ArrayList<BANDCluster>();
 
 		/// variables for clustering of hits
 	        int size = 0;
@@ -91,12 +91,12 @@ public class CNDClusterFinder {
 			clusters_status.add(0);
 		}
 
-		//// clustering of the CND hits
+		//// clustering of the BAND hits
 		/// only one hit, no need to do clustering
 	     	if(clusters_nhits.size()==1){
 			//// do nothing.
 	      	}
-      		///the case for two good cnd hits
+      		///the case for two good band hits
 	      	else if(clusters_nhits.size()==2){
 			/// combine the two hits or not...
                         double distance = sqrt( (clusters_x.get(0)-clusters_x.get(1))*(clusters_x.get(0)-clusters_x.get(1))/sigmaX(clusters_x.get(0))/sigmaX(clusters_x.get(1))
@@ -134,7 +134,7 @@ public class CNDClusterFinder {
 				clusters_status.remove(1);
 		      	}
 		}
-	      	//// more than two cnd hits
+	      	//// more than two band hits
 	      	//// hierarchiral clustering
 	      	else if(clusters_nhits.size()>2){
 			int clusters_number = clusters_x.size();
@@ -197,7 +197,7 @@ public class CNDClusterFinder {
 		}
 
 		for(int i = 0; i < clusters_x.size(); i++){
-			CNDCluster acluster = new CNDCluster(i+1, clusters_sector.get(i), clusters_layer.get(i) );
+			BANDCluster acluster = new BANDCluster(i+1, clusters_sector.get(i), clusters_layer.get(i) );
 			acluster.set_component(clusters_component.get(i));
 			acluster.set_x(clusters_x.get(i));
 			acluster.set_y(clusters_y.get(i));
@@ -212,7 +212,7 @@ public class CNDClusterFinder {
 		return clusters;
 	}
 
-	/// resolutions of CND hits
+	/// resolutions of BAND hits
 	/// unit : cm
 	private double sigmaX(double x){ return 1.6; }
 	/// unit : cm

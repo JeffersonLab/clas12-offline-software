@@ -1,14 +1,14 @@
-package org.jlab.rec.cnd.hit;
+package org.jlab.rec.band.hit;
 
 import java.util.ArrayList;
 
 
 
-public class CndHit extends ArrayList<HalfHit> implements Comparable<CndHit>{
+public class BandHit extends ArrayList<HalfHit> implements Comparable<BandHit>{
 
 	/**
-	 * A CndHit consists of an array of particle hits in the CND reconstructed according to 
-	 * the algorithm of the CndHitFinder class
+	 * A BandHit consists of an array of particle hits in the BAND reconstructed according to 
+	 * the algorithm of the BandHitFinder class
 	 */
 
 	private static final long serialVersionUID = 1L;    // What is this??
@@ -38,7 +38,7 @@ public class CndHit extends ArrayList<HalfHit> implements Comparable<CndHit>{
 
 
 	// constructor
-	public CndHit(int padd, int padn) {
+	public BandHit(int padd, int padn) {
 		this._pad_d = padd;
 		this._pad_n = padn;
 	}
@@ -227,7 +227,7 @@ public class CndHit extends ArrayList<HalfHit> implements Comparable<CndHit>{
 		this._uZ = _uZ;
 	}
 
-	public int compareTo(CndHit arg0) {  // Sorts into ascending time order
+	public int compareTo(BandHit arg0) {  // Sorts into ascending time order
 		if(this.Time()<arg0.Time()) {
 			return 1;
 		} else {

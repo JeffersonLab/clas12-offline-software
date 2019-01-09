@@ -1,12 +1,12 @@
-package org.jlab.rec.cnd.cluster;
+package org.jlab.rec.band.cluster;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.cnd.hit.CndHit;
+import org.jlab.rec.band.hit.BandHit;
 
-public class CNDCluster extends ArrayList<CndHit> implements Comparable<CNDCluster> {
+public class BANDCluster extends ArrayList<BandHit> implements Comparable<BANDCluster> {
 
 	private int _id;
 	private int _sector;
@@ -20,13 +20,13 @@ public class CNDCluster extends ArrayList<CndHit> implements Comparable<CNDClust
 	private double _energysum;
 	private int _status; 
 
-	private ArrayList<CndHit> _cndhits;
+	private ArrayList<BandHit> _bandhits;
 
-	public CNDCluster(int id, int sector, int layer){
+	public BANDCluster(int id, int sector, int layer){
 		_id = id;
 		_sector = sector;
 		_layer = layer;
-		_cndhits = new ArrayList<CndHit>();
+		_bandhits = new ArrayList<BandHit>();
 	}
 
 	public int get_id(){
@@ -96,12 +96,12 @@ public class CNDCluster extends ArrayList<CndHit> implements Comparable<CNDClust
 		_status = status;
 	}
 
-	public void add_cndhit(CndHit ahit){
-		_cndhits.add(ahit);
+	public void add_bandhit(BandHit ahit){
+		_bandhits.add(ahit);
 	}
 
 	@Override
-	public int compareTo(CNDCluster arg) {
+	public int compareTo(BANDCluster arg) {
 	/// sorted by sector, layer
 		if(this.get_sector() < arg.get_sector())return 1;
 		else if(this.get_sector() == arg.get_sector()){
