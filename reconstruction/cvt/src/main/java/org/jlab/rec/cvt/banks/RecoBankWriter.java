@@ -269,7 +269,7 @@ public class RecoBankWriter {
             bank.setFloat("err_x", index, (float) (crosses.get(i).get(j).get_PointErr().x()/10.));
             bank.setFloat("err_y", index, (float) (crosses.get(i).get(j).get_PointErr().y()/10.));
             bank.setFloat("err_z", index, (float) (crosses.get(i).get(j).get_PointErr().z()/10.));
-            bank.setInt("trkID", index, crosses.get(i).get(j).get_AssociatedTrackID());
+            bank.setShort("trkID", index, (short) crosses.get(i).get(j).get_AssociatedTrackID());
            
             if (crosses.get(i).get(j).get_Dir() != null && 
                     !Double.isNaN(crosses.get(i).get(j).get_Dir().x()) &&
