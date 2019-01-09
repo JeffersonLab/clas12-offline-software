@@ -72,11 +72,11 @@ public class FTHODOEngine extends ReconstructionEngine {
     
         if(event instanceof EvioDataEvent) {
             EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
-            run = bank.getInt("Run")[0];
+            run = bank.getInt("Run",0);
         }
         else {
             DataBank bank = event.getBank("RUN::config");
-            run = bank.getInt("run")[0];
+            run = bank.getInt("run",0);
         }
 	return run;	
     }
