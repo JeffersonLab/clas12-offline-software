@@ -27,7 +27,7 @@ script:
   - which groovy
   - echo "starting advanced tests..."
   - cd validation/advanced-tests/
-  - ./run-advanced-tests.sh
+#  - ./run-advanced-tests.sh
   - ./run-eb-tests.sh -100 electronproton
   - ./run-eb-tests.sh -100 electrongamma
   - ./run-eb-tests.sh -100 electronprotonC
