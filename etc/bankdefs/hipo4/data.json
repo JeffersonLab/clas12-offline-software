@@ -427,5 +427,14 @@
       { "name":"crate"     , "type":"B", "info":"crate number"},
       { "name":"value"     , "type":"I", "info":"vtp value"}
     ]
+  },
+  {
+    "name" : "RAW::epics",
+    "group": 20000,
+    "item" : 15,
+    "info" : "EPICS bank",
+    "entries":[
+        { "name":"json"    , "type":"B", "info":"json character" }
+    ]
   }
 ]
