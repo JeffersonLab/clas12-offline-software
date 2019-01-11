@@ -158,11 +158,11 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	                        return false;
 	                }
 	                for(int i =0; i< size; i++) {
-	                        bank2.setInt("id",i, cndclusters.get(i).get_id() );
-	                        bank2.setInt("nhits",i, cndclusters.get(i).get_nhits() );
+	                        bank2.setShort("id",i, (short) cndclusters.get(i).get_id() );
+	                        bank2.setShort("nhits",i, (short) cndclusters.get(i).get_nhits() );
 				bank2.setByte("sector",i,  (byte)(1* cndclusters.get(i).get_sector()) );
 				bank2.setByte("layer",i,  (byte)(1*  cndclusters.get(i).get_layer()) );
-				bank2.setInt("component",i,  cndclusters.get(i).get_component() );
+				bank2.setShort("component",i, (short) cndclusters.get(i).get_component() );
 	                        bank2.setFloat("energy",i,   (float)(1.0* cndclusters.get(i).get_energysum()) );
 	                        bank2.setFloat("x",i,   (float)(1.0* cndclusters.get(i).get_x()) );
 	                        bank2.setFloat("y",i,   (float)(1.0* cndclusters.get(i).get_y()) );

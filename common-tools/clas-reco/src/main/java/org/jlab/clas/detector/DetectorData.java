@@ -333,7 +333,7 @@ public class DetectorData {
                bank.setFloat("vx_nomm", row, (float) p.vertex().x());
                bank.setFloat("vy_nomm", row, (float) p.vertex().y());
                bank.setFloat("vz_nomm", row, (float) p.vertex().z());
-               bank.setInt(  "status",  row, (int)   p.getTrackStatus());
+               bank.setShort("status",  row, (short) p.getTrackStatus());
                row = row + 1;
            }
        }

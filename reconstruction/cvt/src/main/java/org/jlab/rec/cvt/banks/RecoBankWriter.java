@@ -525,9 +525,9 @@ public class RecoBankWriter {
             }
             for (StateVec stVec : trks.get(i).get_Trajectory()) {
 
-                bank.setInt("ID", k, trks.get(i).get_Id());
-                bank.setInt("LayerTrackIntersPlane", k, stVec.get_SurfaceLayer());
-                bank.setInt("SectorTrackIntersPlane", k, stVec.get_SurfaceSector());
+                bank.setShort("ID", k, (short) trks.get(i).get_Id());
+                bank.setByte("LayerTrackIntersPlane", k, (byte) stVec.get_SurfaceLayer());
+                bank.setByte("SectorTrackIntersPlane", k, (byte) stVec.get_SurfaceSector());
                 bank.setFloat("XtrackIntersPlane", k, (float) (stVec.x()/10.));
                 bank.setFloat("YtrackIntersPlane", k, (float) (stVec.y()/10.));
                 bank.setFloat("ZtrackIntersPlane", k, (float) (stVec.z()/10.));
