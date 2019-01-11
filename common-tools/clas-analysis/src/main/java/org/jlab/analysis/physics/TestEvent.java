@@ -1,13 +1,9 @@
 package org.jlab.analysis.physics;
 
-import org.jlab.io.base.DataBank;
 import org.jlab.io.hipo.HipoDataEvent;
-import org.jlab.io.hipo.HipoDataSync;
-import org.jlab.jnp.hipo.io.HipoWriter;
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
-import org.jlab.utils.system.ClasUtilsFile;
 
 /**
  *
@@ -15,11 +11,8 @@ import org.jlab.utils.system.ClasUtilsFile;
  */
 public class TestEvent {
 
-	public static HipoDataEvent getDCSector1ElectronEvent() {
-                String dir = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4");
-                SchemaFactory schemaFactory = new SchemaFactory();
-                schemaFactory.initFromDirectory(dir);
-		Event testEvent = new Event();
+	public static HipoDataEvent getDCSector1ElectronEvent(SchemaFactory schemaFactory) {
+                Event testEvent = new Event();
                 Bank config = new Bank(schemaFactory.getSchema("RUN::config"), 1);
                 Bank DCtdc  = new Bank(schemaFactory.getSchema("DC::tdc"), 37);
 		
@@ -125,15 +118,14 @@ public class TestEvent {
 		
 		testEvent.write(config);
 		testEvent.write(DCtdc);
-                HipoDataEvent hipoEvent = new HipoDataEvent(testEvent);
+                testEvent.show();
+                HipoDataEvent hipoEvent = new HipoDataEvent(testEvent,schemaFactory);
+                hipoEvent.show();
 		return hipoEvent;
 	}
 
 
-	public static HipoDataEvent getCVTTestEvent() {
-                String dir = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4");
-                SchemaFactory schemaFactory = new SchemaFactory();
-                schemaFactory.initFromDirectory(dir);
+	public static HipoDataEvent getCVTTestEvent(SchemaFactory schemaFactory) {
 		Event testEvent = new Event();
                 Bank config = new Bank(schemaFactory.getSchema("RUN::config"), 1);
 		Bank BSTadc = new Bank(schemaFactory.getSchema("BST::adc"), 8);
@@ -332,15 +324,12 @@ public class TestEvent {
 		testEvent.write(config);
 		testEvent.write(BSTadc);
 		testEvent.write(BMTadc);
-                HipoDataEvent hipoEvent = new HipoDataEvent(testEvent);
+                HipoDataEvent hipoEvent = new HipoDataEvent(testEvent,schemaFactory);
 		return hipoEvent;
 	}
 
 
-	public static HipoDataEvent getECSector1PhotonEvent() {
-                String dir = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4");
-                SchemaFactory schemaFactory = new SchemaFactory();
-                schemaFactory.initFromDirectory(dir);
+	public static HipoDataEvent getECSector1PhotonEvent(SchemaFactory schemaFactory) {
 		Event testEvent = new Event();
                 Bank config  = new Bank(schemaFactory.getSchema("RUN::config"), 1);
 		Bank ECALadc = new Bank(schemaFactory.getSchema("ECAL::adc"), 48);
@@ -715,7 +704,7 @@ public class TestEvent {
 		testEvent.write(config);
 		testEvent.write(ECALadc);
 		testEvent.write(ECALtdc);
-                HipoDataEvent hipoEvent = new HipoDataEvent(testEvent);
+                HipoDataEvent hipoEvent = new HipoDataEvent(testEvent,schemaFactory);
 		return hipoEvent;
 	}
 
