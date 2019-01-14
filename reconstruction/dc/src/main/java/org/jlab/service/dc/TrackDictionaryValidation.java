@@ -93,8 +93,8 @@ public class TrackDictionaryValidation {
             if (event.hasBank("TimeBasedTrkg::TBHits")) {
                 tbtHits = event.getBank("TimeBasedTrkg::TBHits");
             }
-            if (event.hasBank("ECAL::cluster")) {
-                ecalCluster = event.getBank("ECAL::cluster");
+            if (event.hasBank("ECAL::clusters")) {
+                ecalCluster = event.getBank("ECAL::clusters");
             }
             // add other banks
             if(recParticle!=null && recTrack != null && tbtTrack != null && tbtHits != null) {
@@ -146,12 +146,14 @@ public class TrackDictionaryValidation {
                             int paddle1b = 0;
                             int paddle2  = 0;
                             int pcalU    = 0;
+                            int pcalV    = 0;
+                            int pcalW    = 0;
                             int htcc     = 0;
                             // check FTOF
                             if(recScintillator!=null) {
                                 for(int j=0; j<recScintillator.rows(); j++) {
                                     if(recScintillator.getShort("pindex",j) == pindex) {
-                                        int detectorScint  = recScintillator.getByte("detector", i);
+                                        int detectorScint  = recScintillator.getByte("detector", j);
                                         int layerScint     = recScintillator.getByte("layer",j);
                                         int componentScint = recScintillator.getShort("component",j);
                                         if(detectorScint==DetectorType.FTOF.getDetectorId() && layerScint==2) paddle1b = componentScint;
@@ -163,12 +165,15 @@ public class TrackDictionaryValidation {
                             if(recCalorimeter!=null && ecalCluster!=null) {
                                 for(int j=0; j<recCalorimeter.rows(); j++) {
                                     if(recCalorimeter.getShort("pindex",j) == pindex) {
-                                        int detectorClus = recCalorimeter.getByte("detector", i);
+                                        int detectorClus = recCalorimeter.getByte("detector", j);
                                         int indexClus    = recCalorimeter.getShort("index",j);
                                         int layerClus    = recCalorimeter.getByte("layer",j);
                                         // use pcal only
                                         if(detectorClus==DetectorType.ECAL.getDetectorId() && layerClus==1) {
-                                            pcalU = ecalCluster.getByte("idU",j);
+                                            pcalU = (ecalCluster.getInt("coordU",indexClus)-4)/8+1;
+                                            pcalV = (ecalCluster.getInt("coordV",indexClus)-4)/8+1;
+                                            pcalW = (ecalCluster.getInt("coordW",indexClus)-4)/8+1;
+//                                            System.out.println(pcalU + " " + pcalV + " " + pcalW);
                                         }
                                     }
                                 }
@@ -176,6 +181,8 @@ public class TrackDictionaryValidation {
                             wires.add(paddle1b);
                             wires.add(paddle2);
                             wires.add(pcalU);
+                            wires.add(pcalV);
+                            wires.add(pcalW);
                             wires.add(htcc);
                             // save roads to map
                             if(!newDictionary.containsKey(wires))  {
@@ -398,7 +405,7 @@ public class TrackDictionaryValidation {
             }
         }
     }
-    public void processFile(String fileName, int wireSmear, int maxEvents) {
+    public void processFile(String fileName, int wireSmear, int mode, int maxEvents) {
         // testing dictionary on event file
         
         System.out.println("\nTesting dictionary on file " + fileName);
@@ -440,8 +447,8 @@ public class TrackDictionaryValidation {
             if (event.hasBank("TimeBasedTrkg::TBHits")) {
                 tbtHits = event.getBank("TimeBasedTrkg::TBHits");
             }
-            if (event.hasBank("ECAL::cluster")) {
-                ecalCluster = event.getBank("ECAL::cluster");
+            if (event.hasBank("ECAL::clusters")) {
+                ecalCluster = event.getBank("ECAL::clusters");
             }
             if (event.hasBank("MC::Particle")) {
                 mcPart = event.getBank("MC::Particle");
@@ -501,58 +508,97 @@ public class TrackDictionaryValidation {
                                 wireArray[(superlayer - 1) * 6 + layer - 1] = wire;
                                 if(superlayer==3) nSL3++;
                             }
+                        }
 
-                            if(nSL3<3) continue; //ignore tracks with less than 3 hits in SL3 as in dictionary maker
-                            ArrayList<Integer> wires = new ArrayList<Integer>();
-                            for (int k = 0; k < 6; k++) {
-                                for (int l=0; l<1; l++) {
-                                    // use first non zero wire in superlayer
-                                    if(wireArray[k*6 +l] != 0) {
-                                       wires.add(wireArray[k*6+l]);
-                                       break;
+                        if(nSL3<3) continue; //ignore tracks with less than 3 hits in SL3 as in dictionary maker
+                        ArrayList<Integer> wires = new ArrayList<Integer>();
+                        for (int k = 0; k < 6; k++) {
+                            for (int l=0; l<1; l++) {
+                                // use first non zero wire in superlayer
+                                if(wireArray[k*6 +l] != 0) {
+                                   wires.add(wireArray[k*6+l]);
+                                   break;
+                                }
+                            }
+                        }
+                            
+                        // use only tracks with 6 superlayers
+                        if(wires.size()==6) {
+                            // now check other detectors
+                            int paddle1b = 0;
+                            int paddle2  = 0;
+                            int pcalU    = 0;
+                            int pcalV    = 0;
+                            int pcalW    = 0;
+                            int htcc     = 0;
+                            // check FTOF
+                            if(recScintillator!=null && mode>0) {
+                                for(int j=0; j<recScintillator.rows(); j++) {
+                                    if(recScintillator.getShort("pindex",j) == pindex) {
+                                        int detectorScint  = recScintillator.getByte("detector", j);
+                                        int layerScint     = recScintillator.getByte("layer",j);
+                                        int componentScint = recScintillator.getShort("component",j);
+                                        if(detectorScint==DetectorType.FTOF.getDetectorId() && layerScint==2) paddle1b = componentScint;
+                                        if(detectorScint==DetectorType.FTOF.getDetectorId() && layerScint==3) paddle2  = componentScint;
                                     }
                                 }
                             }
-                            // use only tracks with 6 superlayers
-                            if(wires.size()==6) {
-                                // add 4 0s to wires array to mimic ftof, pcal and htcc
-                                wires.add(0);
-                                wires.add(0);
-                                wires.add(0);
-                                wires.add(0);
-                                double phi     = (Math.toDegrees(part.phi())+180+30)%60-30;                        
-                                Particle road = this.findRoad(wires,wireSmear);
-                                if(road != null) {
-                                    double phiRoad = (Math.toDegrees(road.phi())+180+30)%60-30;
-                                    if(road.charge()<0) {
-                                        this.dataGroups.getItem(1).getH2F("hi_ptheta_neg_matchedroad").fill(road.p(), Math.toDegrees(road.theta()));
-                                        this.dataGroups.getItem(1).getH2F("hi_phitheta_neg_matchedroad").fill(phiRoad, Math.toDegrees(road.theta()));
-                                        this.dataGroups.getItem(1).getH2F("hi_vztheta_neg_matchedroad").fill(road.vz(), Math.toDegrees(road.theta()));
+                            // check ECAL
+                            if(recCalorimeter!=null && ecalCluster!=null && mode>0) {
+                                for(int j=0; j<recCalorimeter.rows(); j++) {
+                                    if(recCalorimeter.getShort("pindex",j) == pindex) {
+                                        int detectorClus = recCalorimeter.getByte("detector", j);
+                                        int indexClus    = recCalorimeter.getShort("index",j);
+                                        int layerClus    = recCalorimeter.getByte("layer",j);
+                                        // use pcal only
+                                        if(detectorClus==DetectorType.ECAL.getDetectorId() && layerClus==1) {
+                                            pcalU = (ecalCluster.getInt("coordU",indexClus)-4)/8+1;
+                                            if(mode>1) {
+                                                pcalV = (ecalCluster.getInt("coordV",indexClus)-4)/8+1;
+                                                pcalW = (ecalCluster.getInt("coordW",indexClus)-4)/8+1;
+                                            }
+                                        }
                                     }
-                                    else {
-                                        this.dataGroups.getItem(1).getH2F("hi_ptheta_pos_matchedroad").fill(road.p(), Math.toDegrees(road.theta()));
-                                        this.dataGroups.getItem(1).getH2F("hi_phitheta_pos_matchedroad").fill(phiRoad, Math.toDegrees(road.theta()));                            
-                                        this.dataGroups.getItem(1).getH2F("hi_vztheta_pos_matchedroad").fill(road.vz(), Math.toDegrees(road.theta()));
-                                    }
-                                    if(charge==-1) {
-                                        this.dataGroups.getItem(2).getH2F("hi_ptheta_neg_found").fill(part.p(), Math.toDegrees(part.theta()));
-                                        this.dataGroups.getItem(2).getH2F("hi_phitheta_neg_found").fill(phi, Math.toDegrees(part.theta()));
-                                    }
-                                    else {
-                                        this.dataGroups.getItem(2).getH2F("hi_ptheta_pos_found").fill(part.p(), Math.toDegrees(part.theta()));
-                                        this.dataGroups.getItem(2).getH2F("hi_phitheta_pos_found").fill(phi, Math.toDegrees(part.theta()));
-                                    }
+                                }
+                            }
+                            wires.add(paddle1b);
+                            wires.add(paddle2);
+                            wires.add(pcalU);
+                            wires.add(pcalV);
+                            wires.add(pcalW);
+                            wires.add(htcc);
+                            double phi     = (Math.toDegrees(part.phi())+180+30)%60-30;                        
+                            Particle road = this.findRoad(wires,wireSmear);
+                            if(road != null) {
+                                double phiRoad = (Math.toDegrees(road.phi())+180+30)%60-30;
+                                if(road.charge()<0) {
+                                    this.dataGroups.getItem(1).getH2F("hi_ptheta_neg_matchedroad").fill(road.p(), Math.toDegrees(road.theta()));
+                                    this.dataGroups.getItem(1).getH2F("hi_phitheta_neg_matchedroad").fill(phiRoad, Math.toDegrees(road.theta()));
+                                    this.dataGroups.getItem(1).getH2F("hi_vztheta_neg_matchedroad").fill(road.vz(), Math.toDegrees(road.theta()));
                                 }
                                 else {
-                                    if(charge==-1) {
-                                        this.dataGroups.getItem(2).getH2F("hi_ptheta_neg_missing").fill(part.p(), Math.toDegrees(part.theta()));
-                                        this.dataGroups.getItem(2).getH2F("hi_phitheta_neg_missing").fill(phi, Math.toDegrees(part.theta()));
-                                    }
-                                    else {
-                                        this.dataGroups.getItem(2).getH2F("hi_ptheta_pos_missing").fill(part.p(), Math.toDegrees(part.theta()));
-                                        this.dataGroups.getItem(2).getH2F("hi_phitheta_pos_missing").fill(phi, Math.toDegrees(part.theta()));
-                                    }                    
+                                    this.dataGroups.getItem(1).getH2F("hi_ptheta_pos_matchedroad").fill(road.p(), Math.toDegrees(road.theta()));
+                                    this.dataGroups.getItem(1).getH2F("hi_phitheta_pos_matchedroad").fill(phiRoad, Math.toDegrees(road.theta()));                            
+                                    this.dataGroups.getItem(1).getH2F("hi_vztheta_pos_matchedroad").fill(road.vz(), Math.toDegrees(road.theta()));
                                 }
+                                if(charge==-1) {
+                                    this.dataGroups.getItem(2).getH2F("hi_ptheta_neg_found").fill(part.p(), Math.toDegrees(part.theta()));
+                                    this.dataGroups.getItem(2).getH2F("hi_phitheta_neg_found").fill(phi, Math.toDegrees(part.theta()));
+                                }
+                                else {
+                                    this.dataGroups.getItem(2).getH2F("hi_ptheta_pos_found").fill(part.p(), Math.toDegrees(part.theta()));
+                                    this.dataGroups.getItem(2).getH2F("hi_phitheta_pos_found").fill(phi, Math.toDegrees(part.theta()));
+                                }
+                            }
+                            else {
+                                if(charge==-1) {
+                                    this.dataGroups.getItem(2).getH2F("hi_ptheta_neg_missing").fill(part.p(), Math.toDegrees(part.theta()));
+                                    this.dataGroups.getItem(2).getH2F("hi_phitheta_neg_missing").fill(phi, Math.toDegrees(part.theta()));
+                                }
+                                else {
+                                    this.dataGroups.getItem(2).getH2F("hi_ptheta_pos_missing").fill(part.p(), Math.toDegrees(part.theta()));
+                                    this.dataGroups.getItem(2).getH2F("hi_phitheta_pos_missing").fill(phi, Math.toDegrees(part.theta()));
+                                }                    
                             }
                         }
                     }
@@ -563,7 +609,7 @@ public class TrackDictionaryValidation {
     }
     
     
-    public void readDictionary(String fileName) {
+    public void readDictionary(String fileName, int mode) {
         
         this.dictionary = new HashMap<>();
         
@@ -571,6 +617,7 @@ public class TrackDictionaryValidation {
         int nLines = 0;
         int nFull  = 0;
         int nDupli = 0;
+        int nfirst = 0;
         
         File fileDict = new File(fileName);
         BufferedReader txtreader = null;
@@ -583,7 +630,7 @@ public class TrackDictionaryValidation {
                 String[] lineValues;
                 lineValues  = line.split("\t");
                 ArrayList<Integer> wires = new ArrayList<Integer>();
-                if(lineValues.length < 42) {
+                if(lineValues.length < 47) {
                     System.out.println("WARNING: dictionary line " + nLines + " incomplete: skipping");
                 }
                 else {
@@ -602,16 +649,33 @@ public class TrackDictionaryValidation {
                         int wire = Integer.parseInt(lineValues[4+i*6]);
                         if(wire>0) wires.add(wire);
                     }
-                    int paddle1b = Integer.parseInt(lineValues[40]);
-                    int paddle2  = Integer.parseInt(lineValues[42]);
-                    int pcalu    = Integer.parseInt(lineValues[43]);                    
+                    int paddle1b = 0;
+                    int paddle2  = 0;
+                    int pcalu    = 0; 
+                    int pcalv    = 0;                    
+                    int pcalw    = 0;
+                    int htcc     = 0;
+                    if(lineValues.length >=44 & mode>0) {
+                        paddle1b = Integer.parseInt(lineValues[40]);                    
+                        paddle2  = Integer.parseInt(lineValues[42]);
+                        pcalu    = Integer.parseInt(lineValues[43]);
+                    }                    
+                    if(lineValues.length >=46 & mode>1) {
+                        pcalv    = Integer.parseInt(lineValues[44]);                    
+                        pcalw    = Integer.parseInt(lineValues[45]);
+                    }                    
+                     if(lineValues.length >=47 & mode>2) {
+                        htcc     = Integer.parseInt(lineValues[46]);
+                    }                    
                     // keep only roads with 6 superlayers
                     if(wires.size()!=6) continue;
-                    // add 4 0s to wires array to mimic ftof, pcal and htcc
-                    wires.add(0);
-                    wires.add(0);
-                    wires.add(0);
-                    wires.add(0);
+                    // add other detectors
+                    wires.add(paddle1b);
+                    wires.add(paddle2);
+                    wires.add(pcalu);
+                    wires.add(pcalv);
+                    wires.add(pcalw);
+                    wires.add(htcc);
                     nFull++;
                     if(this.dictionary.containsKey(wires)) {
                         nDupli++;
@@ -657,7 +721,7 @@ public class TrackDictionaryValidation {
             for(Map.Entry<ArrayList<Integer>, Particle> entry : dictionary.entrySet()) {
                 ArrayList<Integer> road = entry.getKey();
                 Particle           part = entry.getValue();
-                if(road.size()<6) {
+                if(road.size()<12) {
                     continue;
                 }
                 else {
@@ -667,16 +731,12 @@ public class TrackDictionaryValidation {
                     int wl4 = road.get(3);
                     int wl5 = road.get(4);
                     int wl6 = road.get(5);
-                    int paddle1b = 0;
-                    int paddle2  = 0;
-                    int pcalU    = 0;
-                    int htcc     = 0;
-                    if(road.size()==10) {
-                        paddle1b = road.get(6);
-                        paddle2  = road.get(7);
-                        pcalU    = road.get(8);
-                        htcc     = road.get(9);
-                    }
+                    int paddle1b = road.get(6);
+                    int paddle2  = road.get(7);
+                    int pcalU    = road.get(8);
+                    int pcalV    = road.get(9);
+                    int pcalW    = road.get(10);
+                    int htcc     = road.get(11);
                     pw.printf("%d\t%.2f\t%.2f\t%.2f\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
@@ -684,7 +744,8 @@ public class TrackDictionaryValidation {
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
-                    + "%d\t%.2f\t%d\t%d\t%d\n",
+                    + "%d\t%.2f\t%d\t%d\t%d\t%d\t"
+                    + "%d\n",
                     //+ "%.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", 
                     part.charge(), part.p(), Math.toDegrees(part.theta()), Math.toDegrees(part.phi()),
                     road.get(0), 0, 0, 0, 0, 0, 
@@ -693,7 +754,7 @@ public class TrackDictionaryValidation {
                     road.get(3), 0, 0, 0, 0, 0, 
                     road.get(4), 0, 0, 0, 0, 0, 
                     road.get(5), 0, 0, 0, 0, 0,  
-                    paddle1b, part.vz(), paddle2, pcalU, htcc);
+                    paddle1b, part.vz(), paddle2, pcalU, pcalV, pcalW, htcc);
                 }
             }
             pw.close();
@@ -714,6 +775,7 @@ public class TrackDictionaryValidation {
         parser.addOption("-q","0", "select particle charge for dictonary creation (0: no selection)");
         parser.addOption("-i","", "set event file for dictionary validation");
         parser.addOption("-w", "0", "wire smearing in road finding");
+        parser.addOption("-m", "0", "select test node: 0-DC only, 1-DC-FTOF-pcalU, 2-DC-FTOF-pcalUVW, 3-DC-FTOF-pcalUVW-HTCC");
         parser.addOption("-n", "-1", "maximum number of events to process");
         parser.parse(args);
         
@@ -737,6 +799,7 @@ public class TrackDictionaryValidation {
             testFileName = parser.getOption("-i").stringValue();
         }
         int wireSmear = parser.getOption("-w").intValue();
+        int mode      = parser.getOption("-m").intValue();
         int maxEvents = parser.getOption("-n").intValue();
             
 //        dictionaryFileName="/Users/devita/TracksDic_test.txt";
@@ -754,9 +817,9 @@ public class TrackDictionaryValidation {
                 tm.createDictionary(inputFileName, pid, charge);
             }
             else if(parser.hasOption("-d")==true || debug) {
-                tm.readDictionary(dictionaryFileName);                
+                tm.readDictionary(dictionaryFileName,mode);                
     //        tm.printDictionary();
-                tm.processFile(testFileName,wireSmear,maxEvents);
+                tm.processFile(testFileName,wireSmear,mode,maxEvents);
 
                 JFrame frame = new JFrame("Tracking");
                 Dimension screensize = null;

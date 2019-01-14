@@ -333,7 +333,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     trkPCAL[ii]=0;
             }
 
-            int paddle1b = 0; int paddle2 = 0; int pcalU =0;
+            int paddle1b = 0; int paddle2 = 0; int pcalU =0; int pcalV=0; int pcalW=0; int htcc=0;
             if (hits != null && hits.size() > 0) {
                 for (DetHit hit : hits) {
                     FTOFDetHit fhit = new FTOFDetHit(hit);
@@ -348,6 +348,10 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     PCALDetHit phit = new PCALDetHit(hit2);
                     if(phit.getLayer()==1)
                         pcalU = phit.getPaddle();
+                    if(phit.getLayer()==2)
+                        pcalV = phit.getPaddle();
+                    if(phit.getLayer()==3)
+                        pcalW = phit.getPaddle();
                 }
             }
             //Wl1.get(0)= wire in SL1, L1;  Wl2.get(0)= wire in SL1, L2; Wl1.get(5)= wire in SL6, L1;  Wl2.get(5)= wire in SL6, L2; 
@@ -372,15 +376,14 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                 }
                 else {
                     newDictionary.put(wires, 1);
-                /*    System.out.printf("%d\t%.1f\t %.1f\t %.1f\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    +"%d\t %.1f\t\n",
-                    //+ "%.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", 
+                /*    System.out.printf("%d\t%.2f\t%.2f\t%.2f\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%.2f\t%d\t%d\t%d\t%d\n",
                     q, p, thetaDeg, phiDeg,
                     Wl1.get(0), Wl2.get(0), Wl3.get(0), Wl4.get(0), Wl5.get(0), Wl6.get(0), 
                     Wl1.get(1), Wl2.get(1), Wl3.get(1), Wl4.get(1), Wl5.get(1), Wl6.get(1), 
@@ -388,8 +391,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     Wl1.get(3), Wl2.get(3), Wl3.get(3), Wl4.get(3), Wl5.get(3), Wl6.get(3), 
                     Wl1.get(4), Wl2.get(4), Wl3.get(4), Wl4.get(4), Wl5.get(4), Wl6.get(4), 
                     Wl1.get(5), Wl2.get(5), Wl3.get(5), Wl4.get(5), Wl5.get(5), Wl6.get(5), 
-                    //trkTOF[0], trkTOF[1], trkTOF[2], trkPCAL[0], trkPCAL[1], trkPCAL[2]);
-                    paddle, vzCm);  */
+                    paddle, vzCm, paddle2, pcalU, pcalV, pcalW);  */
                     pw.printf("%d\t%.2f\t%.2f\t%.2f\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
@@ -397,8 +399,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
-                    + "%d\t%.2f\t%d\t%d\n",
-                    //+ "%.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", 
+                    + "%d\t%.2f\t%d\t%d\t%d\t%d\t%d\n",
                     q, p, thetaDeg, phiDeg,
                     Wl1.get(0), Wl2.get(0), Wl3.get(0), Wl4.get(0), Wl5.get(0), Wl6.get(0), 
                     Wl1.get(1), Wl2.get(1), Wl3.get(1), Wl4.get(1), Wl5.get(1), Wl6.get(1), 
@@ -406,8 +407,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     Wl1.get(3), Wl2.get(3), Wl3.get(3), Wl4.get(3), Wl5.get(3), Wl6.get(3), 
                     Wl1.get(4), Wl2.get(4), Wl3.get(4), Wl4.get(4), Wl5.get(4), Wl6.get(4), 
                     Wl1.get(5), Wl2.get(5), Wl3.get(5), Wl4.get(5), Wl5.get(5), Wl6.get(5), 
-                    //trkTOF[0], trkTOF[1], trkTOF[2], trkPCAL[0], trkPCAL[1], trkPCAL[2]);
-                    paddle1b, vzCm, paddle2, pcalU);
+                    paddle1b, vzCm, paddle2, pcalU, pcalV, pcalW, htcc);
                 }   
             }
         }
