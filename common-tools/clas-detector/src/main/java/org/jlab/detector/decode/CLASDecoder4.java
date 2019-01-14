@@ -20,6 +20,7 @@ import org.jlab.jnp.hipo4.io.HipoWriter;
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
+import org.jlab.jnp.hipo4.io.HipoWriterSorted;
 
 import org.jlab.utils.benchmark.ProgressPrintout;
 import org.jlab.utils.options.OptionParser;
@@ -331,7 +332,7 @@ public class CLASDecoder4 {
             vtpBANK.putByte("crate", i, (byte) vtpDGTZ.get(i).getDescriptor().getCrate());
 //            vtpBANK.setByte("slot", i, (byte) vtpDGTZ.get(i).getDescriptor().getSlot());
 //            vtpBANK.setShort("channel", i, (short) vtpDGTZ.get(i).getDescriptor().getChannel());
-            vtpBANK.putInt("value", i, vtpDGTZ.get(i).getVTPData(0).getWord());
+            vtpBANK.putInt("word", i, vtpDGTZ.get(i).getVTPData(0).getWord());
         }
         return vtpBANK;
     }
@@ -560,9 +561,18 @@ public class CLASDecoder4 {
             
             //HipoDataSync writer = new HipoDataSync();
             System.out.println(" OUTPUT WRITER CHANGED TO JNP HIPO");
-            HipoWriter writer = new HipoWriter();
+            /*HipoWriter writer = new HipoWriter();
             writer.setCompressionType(compression);
             writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4"));
+            */
+            
+            HipoWriterSorted writer = new HipoWriterSorted();
+            writer.setCompressionType(compression);
+            writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4"));
+            
+            Bank rawScaler = new Bank(writer.getSchemaFactory().getSchema("RAW::scaler"));
+            Event scalerEvent = new Event();
+            
             
             int nrun = parser.getOption("-r").intValue();
             double torus = parser.getOption("-t").doubleValue();
@@ -599,7 +609,17 @@ public class CLASDecoder4 {
 
                     //HipoDataEvent dhe = (HipoDataEvent) decodedEvent;
                     //writer.writeEvent(dhe.getHipoEvent());
-                    writer.addEvent(decodedEvent);
+                    
+                    int eventTag;
+                    decodedEvent.read(rawScaler);
+                    
+                    if(rawScaler.getRows()>0){                        
+                        scalerEvent.reset();
+                        scalerEvent.write(rawScaler);
+                        writer.addEvent(scalerEvent, 1);
+                    }
+                    
+                    writer.addEvent(decodedEvent,0);
                     
                     counter++;
                     progress.updateStatus();
