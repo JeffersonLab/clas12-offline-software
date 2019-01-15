@@ -53,14 +53,13 @@ public class TrackDictionaryValidation {
                       this.dataGroups.getItem(3).getH2F("hi_phitheta_neg_eff"));
     }
     
-    public void createDictionary(String inputFileName, int pidSelect, int chargeSelect) {
+    public void createDictionary(String inputFileName, String dictName , int pidSelect, int chargeSelect) {
         // create dictionary from event file
         System.out.println("\nCreating dictionary from file: " + inputFileName);
         Map<ArrayList<Integer>, Particle> newDictionary = new HashMap<>();
         HipoDataSource reader = new HipoDataSource();
         reader.open(inputFileName);
         String[] tokens = inputFileName.split("/");
-        String dictName = tokens[tokens.length-1] + "_roads.txt";
         System.out.println("\nDictionary will be saved to: " + dictName); 
         int nevent = -1;
         while(reader.hasEvent() == true) {
@@ -405,7 +404,7 @@ public class TrackDictionaryValidation {
             }
         }
     }
-    public void processFile(String fileName, int wireSmear, int mode, int maxEvents) {
+    public void processFile(String fileName, int wireSmear, int mode, int maxEvents, int pidSelect, int chargeSelect) {
         // testing dictionary on event file
         
         System.out.println("\nTesting dictionary on file " + fileName);
@@ -464,6 +463,9 @@ public class TrackDictionaryValidation {
                     if(detector == DetectorType.DC.getDetectorId()) {
                         int charge   = recParticle.getByte("charge", pindex);
                         int pid      = recParticle.getInt("pid", pindex);
+                        // if pid or charge are selected keep only matching particles
+                        if(chargeSelect != 0 && chargeSelect!=charge) continue;
+                        if(pidSelect != 0    && pidSelect!=pid)       continue;   
                         // save particle information
                         Particle part = new Particle(
                                         -11*charge,
@@ -770,38 +772,43 @@ public class TrackDictionaryValidation {
         
         OptionParser parser = new OptionParser("dict-validation");
         parser.addOption("-d","dictionary.txt", "read dictionary from file");
-        parser.addOption("-c","input.hipo", "create dictionary from event file");
-        parser.addOption("-pid","0", "select particle PID for dictonary creation (0: no selection)");
-        parser.addOption("-q","0", "select particle charge for dictonary creation (0: no selection)");
-        parser.addOption("-i","", "set event file for dictionary validation");
-        parser.addOption("-w", "0", "wire smearing in road finding");
-        parser.addOption("-m", "0", "select test node: 0-DC only, 1-DC-FTOF-pcalU, 2-DC-FTOF-pcalUVW, 3-DC-FTOF-pcalUVW-HTCC");
-        parser.addOption("-n", "-1", "maximum number of events to process");
+        parser.addOption("-c"  ,  "", "create dictionary from event file");
+        parser.addOption("-i"  ,  "", "set event file for dictionary validation");
+        parser.addOption("-pid", "0", "select particle PID for dictonary creation (0: no selection)");
+        parser.addOption("-q"  , "0", "select particle charge for dictonary creation (0: no selection)");
+        parser.addOption("-w"  , "0", "wire smearing in road finding");
+        parser.addOption("-m"  , "0", "select test mode: 0-DC only, 1-DC-FTOF-pcalU, 2-DC-FTOF-pcalUVW, 3-DC-FTOF-pcalUVW-HTCC");
+        parser.addOption("-n"  ,"-1", "maximum number of events to process");
         parser.parse(args);
         
         List<String> arguments = new ArrayList<String>();
         for(String item : args){ arguments.add(item); }
         
         String dictionaryFileName = null;
-        if(parser.hasOption("-d")==true){
-            dictionaryFileName = parser.getOption("-d").stringValue();
-        }
+        if(parser.hasOption("-d")==true) dictionaryFileName = parser.getOption("-d").stringValue();
+        
         String inputFileName = null;
-        int pid = 0;
-        int charge = 0;
-        if(parser.hasOption("-c")==true){
-            inputFileName = parser.getOption("-c").stringValue();
-            if(parser.hasOption("-pid")==true) pid    = parser.getOption("-pid").intValue();
-            if(parser.hasOption("-q")  ==true) charge = parser.getOption("-q").intValue();
-        }
+        if(parser.hasOption("-c")==true) inputFileName = parser.getOption("-c").stringValue();
+            
         String testFileName = null;
-        if(parser.hasOption("-i")==true){
-            testFileName = parser.getOption("-i").stringValue();
-        }
+        if(parser.hasOption("-i")==true) testFileName = parser.getOption("-i").stringValue();
+            
+        
+        int pid       = parser.getOption("-pid").intValue();
+        int charge    = parser.getOption("-q").intValue();
         int wireSmear = parser.getOption("-w").intValue();
         int mode      = parser.getOption("-m").intValue();
         int maxEvents = parser.getOption("-n").intValue();
-            
+        
+        
+        System.out.println("Dictionary file name set to: " + dictionaryFileName);
+        if(parser.containsOptions(arguments, "-c"))   System.out.println("Event file for dictionary creation set to:    " + inputFileName);
+        if(parser.containsOptions(arguments, "-i"))   System.out.println("Event file for dictionary validation set to:  " + testFileName);
+        System.out.println("PID selection for dictionary creation/validation set to:    " + pid);
+        System.out.println("Charge selection for dictionary creation/validation set to: " + charge);
+        System.out.println("Wire smearing for dictionary validation set to:             " + wireSmear);
+        System.out.println("Test mode set to:                                           " + mode);
+        System.out.println("Maximum number of events to process set to:                 " + maxEvents);
 //        dictionaryFileName="/Users/devita/TracksDic_test.txt";
 //        inputFileName = "/Users/devita/out_clas_003355.evio.440.hipo";
 //        testFileName  = "/Users/devita/out_clas_003355.evio.440.hipo";
@@ -812,14 +819,14 @@ public class TrackDictionaryValidation {
         
         TrackDictionaryValidation tm = new TrackDictionaryValidation();
         tm.init();
-        if(parser.containsOptions(arguments, "-c") || parser.containsOptions(arguments, "-d") || debug) {
+        if(parser.containsOptions(arguments, "-c") || parser.containsOptions(arguments, "-i") || debug) {
             if(parser.containsOptions(arguments, "-c") || debug) {
-                tm.createDictionary(inputFileName, pid, charge);
+                tm.createDictionary(inputFileName, dictionaryFileName, pid, charge);
             }
-            else if(parser.hasOption("-d")==true || debug) {
+            else if(parser.containsOptions(arguments, "-i") || debug) {
                 tm.readDictionary(dictionaryFileName,mode);                
     //        tm.printDictionary();
-                tm.processFile(testFileName,wireSmear,mode,maxEvents);
+                tm.processFile(testFileName,wireSmear,mode,maxEvents, pid, charge);
 
                 JFrame frame = new JFrame("Tracking");
                 Dimension screensize = null;
