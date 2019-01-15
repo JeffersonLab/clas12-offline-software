@@ -197,7 +197,7 @@ public class CrossListFinder  {
          cf.SetFitArray(_Segment1.get_fittedCluster(), "TSC");
          cf.Fit(_Segment1.get_fittedCluster(), true);
          cosTrkAngle = 1. / Math.sqrt(1. + _Segment1.get_fittedCluster().get_clusterLineFitSlope() * _Segment1.get_fittedCluster().get_clusterLineFitSlope());
-
+         
          for (FittedHit fhit : _Segment1.get_fittedCluster()) {
             fhit.updateHitPositionWithTime(cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
         }

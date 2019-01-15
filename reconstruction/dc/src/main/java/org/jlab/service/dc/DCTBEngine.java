@@ -275,10 +275,19 @@ public class DCTBEngine extends DCEngine {
                     
                     for(FittedHit h1 : c.get_Segment1()) { 
                         h1.set_AssociatedTBTrackID(trk.get_Id());
+                        double cosTrkAngle = 1. / Math.sqrt(1. + c.get_Segment1().get_fittedCluster().get_clusterLineFitSlope() * c.get_Segment1().get_fittedCluster().get_clusterLineFitSlope());
+                        
+                        h1.updateHitPositionWithTime(cosTrkAngle, h1.getB(), 
+                                super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
 
                     }
                     for(FittedHit h2 : c.get_Segment2()) {
-                        h2.set_AssociatedTBTrackID(trk.get_Id());                              
+                        h2.set_AssociatedTBTrackID(trk.get_Id());  
+                        double cosTrkAngle = 1. / Math.sqrt(1. + c.get_Segment2().get_fittedCluster().get_clusterLineFitSlope() * c.get_Segment2().get_fittedCluster().get_clusterLineFitSlope());
+                        
+                        h2.updateHitPositionWithTime(cosTrkAngle, h2.getB(), 
+                                super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
+
                     }
                 }
                 trkId++;

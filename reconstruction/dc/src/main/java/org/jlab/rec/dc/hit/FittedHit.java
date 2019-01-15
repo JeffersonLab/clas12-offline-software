@@ -361,7 +361,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             this.set_DeltaTimeBeta(deltatime_beta);
             double correctedTime = (this.get_Time() - deltatime_beta);
             if(correctedTime<=0)
-                correctedTime=0.01;
+                correctedTime=0.0;
 
             distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), correctedTime, secIdx, slIdx) ;
             
@@ -480,12 +480,12 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         //double x = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).x;
         double x = this.calc_GeomCorr(DcDetector, 0);
         //this.set_X(x+this.get_LeftRightAmb()*this.get_TimeToDistance());
-        double MPCorr = 1;
-        if (cosTrkAngle > 0.8 & cosTrkAngle <= 1) {
-            MPCorr = cosTrkAngle;
-        }
+        //double MPCorr = 1;
+        //if (cosTrkAngle > 0.8 & cosTrkAngle <= 1) {
+        //    MPCorr = cosTrkAngle;
+        //}
 
-        this.set_X(x + this.get_LeftRightAmb() * (this.get_TimeToDistance() / MPCorr) / FastMath.cos(Math.toRadians(6.)));
+        this.set_X(x + this.get_LeftRightAmb() * (this.get_TimeToDistance() / cosTrkAngle) / FastMath.cos(Math.toRadians(6.)));
         this.set_Z(z);
 
     }
