@@ -361,14 +361,20 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             }
             if (count(Wl3) >=3) {
                 ArrayList<Integer> wires = new ArrayList<Integer>();
-                    for (int k = 0; k < 6; k++) {
-                        for (int l=0; l<6; l++) {
-                            if(wireArray[k*6 +l] != -1) {
-                               wires.add(wireArray[k*6+l]);
-                               break;
-                            }
+                for (int k = 0; k < 6; k++) {
+                    for (int l=0; l<6; l++) {
+                        if(wireArray[k*6 +l] != -1) {
+                           wires.add(wireArray[k*6+l]);
+                           break;
                         }
                     }
+                }
+                wires.add(paddle1b);
+                wires.add(paddle2);
+                wires.add(pcalU);
+                wires.add(pcalV);
+                wires.add(pcalW);
+                wires.add(htcc);
                 if(newDictionary.containsKey(wires))  {
                         int nRoad = newDictionary.get(wires) + 1;
                         newDictionary.replace(wires, nRoad);

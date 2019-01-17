@@ -404,6 +404,7 @@ public class TrackDictionaryValidation {
             }
         }
     }
+    
     public void processFile(String fileName, int wireSmear, int mode, int maxEvents, int pidSelect, int chargeSelect) {
         // testing dictionary on event file
         
