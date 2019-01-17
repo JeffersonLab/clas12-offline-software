@@ -570,7 +570,8 @@ public class CLASDecoder4 {
             writer.setCompressionType(compression);
             writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4"));
             
-            Bank rawScaler = new Bank(writer.getSchemaFactory().getSchema("RAW::scaler"));
+            Bank   rawScaler = new Bank(writer.getSchemaFactory().getSchema("RAW::scaler"));
+            Bank  rawRunConf = new Bank(writer.getSchemaFactory().getSchema("RUN::config"));
             Event scalerEvent = new Event();
             
             
@@ -612,10 +613,13 @@ public class CLASDecoder4 {
                     
                     int eventTag;
                     decodedEvent.read(rawScaler);
+                    decodedEvent.read(rawRunConf);
                     
                     if(rawScaler.getRows()>0){                        
                         scalerEvent.reset();
                         scalerEvent.write(rawScaler);
+                        if(rawRunConf.getRows()>0) scalerEvent.write(rawRunConf);
+                        
                         writer.addEvent(scalerEvent, 1);
                     }
                     

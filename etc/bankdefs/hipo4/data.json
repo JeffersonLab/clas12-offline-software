@@ -425,7 +425,7 @@
     "info": "VTP bank",
     "entries":[
       { "name":"crate"     , "type":"B", "info":"crate number"},
-      { "name":"value"     , "type":"I", "info":"vtp value"}
+      { "name":"word"     , "type":"I", "info":"vtp value"}
     ]
   },
   {
