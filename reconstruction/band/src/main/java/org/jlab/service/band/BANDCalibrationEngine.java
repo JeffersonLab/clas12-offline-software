@@ -64,7 +64,7 @@ public class BANDCalibrationEngine extends ReconstructionEngine {
 		// update calibration constants based on run number if changed
 		setRunConditionsParameters(event);
 
-                ArrayList<HalfHit> halfhits = new ArrayList<HalfHit>();   
+        ArrayList<HalfHit> halfhits = new ArrayList<HalfHit>();   
 		ArrayList<bandHit> hits = new ArrayList<bandHit>();
 
 		//test
