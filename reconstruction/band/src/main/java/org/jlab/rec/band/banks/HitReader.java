@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.cnd.constants.CalibrationConstantsLoader;
-import org.jlab.rec.cnd.constants.Parameters;
-import org.jlab.rec.cnd.hit.HalfHit;
+import org.jlab.rec.band.constants.CalibrationConstantsLoader;
+import org.jlab.rec.band.constants.Parameters;
+import org.jlab.rec.band.hit.HalfHit;
 
 public class HitReader {
 
