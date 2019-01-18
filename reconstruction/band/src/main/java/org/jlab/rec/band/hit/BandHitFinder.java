@@ -31,6 +31,7 @@ public class BandHitFinder {
 		Parameters.SetParameters();
 
 		ArrayList<BandHit> HitArray = new ArrayList<BandHit>();      // array list of all "good" reconstructed hits in BAND
+		ArrayList<BandHit> goodBandHits = new ArrayList<BandHit>();   // array list of unambiguous reconstructed hits in CND
 
 		if(halfhits.size() > 0) {
 
