@@ -91,7 +91,7 @@ public class BANDEngine extends ReconstructionEngine {
 			//          event.appendBanks(outbank);
 			// event.show();
 			System.out.println("in process event ");
-			rbc.appendbandBanks(event,hits);
+			rbc.appendBANDBanks(event,hits);
 			//      eband++;
 			//      if(event.hasBank("CVTRec::Tracks")){
 			//              posmatch++;
@@ -158,7 +158,7 @@ public class BANDEngine extends ReconstructionEngine {
 	}
 
 	public static void main (String arg[]) {
-		bandEngine en = new bandEngine();
+		BANDEngine en = new BANDEngine();
 		en.init();
 		//String input = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/pi-.r100.evio";
 		

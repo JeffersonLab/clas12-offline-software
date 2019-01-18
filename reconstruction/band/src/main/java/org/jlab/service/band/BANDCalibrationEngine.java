@@ -14,7 +14,7 @@ import org.jlab.rec.band.banks.RecoBankWriter;
 import org.jlab.rec.band.hit.BandHit;
 import org.jlab.rec.band.hit.CvtGetHTrack;
 import org.jlab.rec.band.hit.HalfHit;
-import org.jlab.rec.band.hit.bandHitFinder;
+import org.jlab.rec.band.hit.BandHitFinder;
 
 import java.lang.String;
 import java.lang.Double;
@@ -65,7 +65,7 @@ public class BANDCalibrationEngine extends ReconstructionEngine {
 		setRunConditionsParameters(event);
 
                 ArrayList<HalfHit> halfhits = new ArrayList<HalfHit>();   
-		ArrayList<bandHit> hits = new ArrayList<bandHit>();
+		ArrayList<BandHit> hits = new ArrayList<BandHit>();
 
 		//test
 //		if(event.hasBank("CVTRec::Tracks")){
@@ -131,7 +131,7 @@ public class BANDCalibrationEngine extends ReconstructionEngine {
 			//          event.appendBanks(outbank);
 			// event.show();
 		//	System.out.println("in process event ");
-			rbc.appendbandBanks(event,hits);
+			rbc.appendBANDBanks(event,hits);
 			//      eband++;
 			//      if(event.hasBank("CVTRec::Tracks")){
 			//              posmatch++;
@@ -209,7 +209,7 @@ public class BANDCalibrationEngine extends ReconstructionEngine {
 
 
 	public static void main (String arg[]) {
-		bandCalibrationEngine en = new bandCalibrationEngine();
+		BANDCalibrationEngine en = new BANDCalibrationEngine();
 
 		en.init();
 		
