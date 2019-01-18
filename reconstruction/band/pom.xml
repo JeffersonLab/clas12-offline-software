@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.jlab.clas12.detector</groupId>
-    <artifactId>clas12detector-cnd</artifactId>
+    <artifactId>clas12detector-band</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
@@ -13,7 +13,7 @@
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>5.7.0-SNAPSHOT</version>
+    <version>5.7.4-SNAPSHOT</version>
   </parent>
 
     <repositories>
