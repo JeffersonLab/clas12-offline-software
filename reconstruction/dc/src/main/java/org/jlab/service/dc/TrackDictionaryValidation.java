@@ -69,11 +69,13 @@ public class TrackDictionaryValidation {
             DataBank recParticle     = null;
             DataBank recCalorimeter  = null;
             DataBank recScintillator = null;
-            DataBank recCerenkov     = null;
+            DataBank recCherenkov    = null;
             DataBank recTrack        = null;
             DataBank tbtTrack        = null;
             DataBank ecalCluster     = null;
             DataBank tbtHits = null;
+            DataBank htccRec         = null;
+            DataBank htccADC         = null;
             if (event.hasBank("REC::Particle")) {
                 recParticle = event.getBank("REC::Particle");
             }
@@ -82,6 +84,9 @@ public class TrackDictionaryValidation {
             }
             if (event.hasBank("REC::Calorimeter")) {
                 recCalorimeter = event.getBank("REC::Calorimeter");
+            }
+            if (event.hasBank("REC::Cherenkov")) {
+                recCherenkov = event.getBank("REC::Cherenkov");
             }
             if (event.hasBank("REC::Track")) {
                 recTrack = event.getBank("REC::Track");
@@ -94,6 +99,12 @@ public class TrackDictionaryValidation {
             }
             if (event.hasBank("ECAL::clusters")) {
                 ecalCluster = event.getBank("ECAL::clusters");
+            }
+            if (event.hasBank("HTCC::rec")) {
+                htccRec = event.getBank("HTCC::rec");
+            }
+            if (event.hasBank("HTCC::adc")) {
+                htccADC = event.getBank("HTCC::adc");
             }
             // add other banks
             if(recParticle!=null && recTrack != null && tbtTrack != null && tbtHits != null) {
@@ -173,6 +184,58 @@ public class TrackDictionaryValidation {
                                             pcalV = (ecalCluster.getInt("coordV",indexClus)-4)/8+1;
                                             pcalW = (ecalCluster.getInt("coordW",indexClus)-4)/8+1;
 //                                            System.out.println(pcalU + " " + pcalV + " " + pcalW);
+                                        }
+                                    }
+                                }
+                            }
+                           // check HTCC
+                            if (recCherenkov != null && htccRec != null && htccADC != null) {
+                                int htcc_event;
+//                                recCherenkov.show(); htccADC.show();
+                                for (int j = 0; j < recCherenkov.rows(); j++) {
+                                    if (recCherenkov.getShort("pindex", j) == pindex) {
+                                        int detectorCheren = recCherenkov.getByte("detector", j);
+                                        if (detectorCheren == DetectorType.HTCC.getDetectorId()) {
+                                            int nhits = htccRec.getShort("nhits",recCherenkov.getShort("index", j));
+                                            double thetaCheren = recCherenkov.getFloat("theta", j);
+                                            double phiCheren   = recCherenkov.getFloat("phi", j);
+                                            thetaCheren = Math.toDegrees(thetaCheren);
+                                            phiCheren   = Math.toDegrees(phiCheren );
+                                            double phiCC   = Math.round(phiCheren); 
+                                            if(phiCC<0) phiCC +=360;
+                                            double thetaCC = ((double) Math.round(thetaCheren*100))/100.;
+                                            ArrayList<int[]> htccPMTs        = htccPMT(thetaCC, phiCC);
+                                            ArrayList<int[]> htccPMTsMatched = new ArrayList<int[]>();
+//                                            System.out.println(thetaCheren + " " + thetaCC + " " + phiCheren + " " + phiCC + " " + htccPMTs.size());
+                                            //The special case of 4 hits, where we need to check if the hits were not in fact only 3
+                                            for(int iPMT = 0; iPMT < htccPMTs.size(); iPMT++) {
+                                                int htccSector    = htccPMTs.get(iPMT)[0];
+                                                int htccLayer     = htccPMTs.get(iPMT)[1];
+                                                int htccComponent = htccPMTs.get(iPMT)[2];
+                                                boolean found = false;
+//                                                System.out.println(iPMT + " " + htccSector + " " + htccLayer + " " + htccComponent);
+                                                for (int k = 0; k < htccADC.rows(); k++) {
+                                                    int sector    = htccADC.getByte("sector", k);
+                                                    int layer     = htccADC.getByte("layer", k);
+                                                    int component = htccADC.getShort("component", k);
+//                                                    System.out.println(k + " " + sector + " " + layer + " " + component);
+                                                    if( htccSector    == sector && 
+                                                        htccLayer     == layer && 
+                                                        htccComponent == component) {
+                                                        found = true;
+//                                                        System.out.println("Found match in adc bank");
+                                                    }                                                  
+                                                }
+                                                if(found) {
+                                                    htccPMTsMatched.add(htccPMTs.get(iPMT));
+                                                }
+//                                                else {
+//                                                    System.out.println("Removing hit " + iPMT + " among " + htccPMTs.size() + " " + thetaCC + " " +  phiCC + " " + htccSector + "/" + htccLayer+ "/"+htccComponent);
+//                                                    runConfig.show();recCherenkov.show(); htccRec.show();htccADC.show();
+//                                                }
+                                            }
+                                            if(htccPMTsMatched.size() != nhits) System.out.println("Mismatch in HTCC cluster size " + nhits +"/"+htccPMTsMatched.size()+"/"+htccPMTs.size() + " " + thetaCC + " " +  phiCC);
+                                            htcc = this.htccMask(htccPMTsMatched);
                                         }
                                     }
                                 }
@@ -364,8 +427,203 @@ public class TrackDictionaryValidation {
     public Map<ArrayList<Integer>, Particle> getDictionary() {
         return dictionary;
     }
+
+    public int htccMask(ArrayList<int[]> htccPMTS) {
+        int[] htccMaskArray = new int[8];
+        for(int iPMT = 0; iPMT < htccPMTS.size(); iPMT++) {
+            int htccSector    = htccPMTS.get(iPMT)[0];
+            int htccLayer     = htccPMTS.get(iPMT)[1];
+            int htccComponent = htccPMTS.get(iPMT)[2];
+            int ibit = (htccComponent-1) +(htccLayer-1)*4;
+            htccMaskArray[ibit]=1;
+        }
+        int htccMask=0;
+//        System.out.println("Mask " + htccPMTS.size());
+        for(int ibit=0; ibit<8; ibit++) {
+            if(htccMaskArray[ibit]>0) {
+                int imask = 1 << ibit;
+                htccMask += imask;
+//                System.out.println(ibit + " " + imask + " " + htccMask);
+            }
+        }
+        return htccMask;
+    }
     
-    public boolean init() {
+    public ArrayList<int[]> htccPMT(double th, double ph) {
+        double TableTheta1[] = {8.75, 16.25, 23.75, 31.25};
+        double TableTheta2[] = {12.5, 20.00, 27.50};
+
+        ArrayList<int[]> htccPMTS = new ArrayList<int[]>();
+
+        double p1, p2, ph_new;
+//   int sector[];
+//   HTCC_Hits cherenkov_road = null;
+        //First, find the number of hits, which table to use, and sector/layer/component
+        for (int i = 0; i < 4; i++) {
+            if (th == TableTheta1[i]) {
+                for (int k = 0; k < 12; k++) {
+                    p1 = 15.0 + k * 30.0;
+                    p2 = k * 30.0;
+                    if (ph == p1) {
+                        int htccPMT[] = new int[3];
+
+                        if (ph > 30.0 && ph < 90.0) {
+                            htccPMT[0] = 2;
+                        } else if (ph > 90.0 && ph < 150.0) {
+                            htccPMT[0] = 3;
+                        } else if (ph > 150.0 && ph < 210.0) {
+                            htccPMT[0] = 4;
+                        } else if (ph > 210.0 && ph < 270.0) {
+                            htccPMT[0] = 5;
+                        } else if (ph > 270.0 && ph < 330.0) {
+                            htccPMT[0] = 6;
+                        } else if (ph < 30.0 || ph > 330.0) {
+                            htccPMT[0] = 1;
+                        }
+
+                        if (ph != 345.0) {
+                            ph_new = ph - (htccPMT[0] - 1) * 60.0;
+                        } else {
+                            ph_new = -15.0;
+                        }
+
+                        if (ph_new == -15.0) {
+                            htccPMT[1] = 1;
+                        } else if (ph_new == 15.0) {
+                            htccPMT[1] = 2;
+                        }
+
+                        htccPMT[2] = i + 1;
+                        htccPMTS.add(htccPMT);
+
+                        //System.out.println(th + " " + ph + " " + HTCC_Sector[0] + " " + HTCC_Layer[0] + " " + HTCC_Component[0]);
+                    } else if (ph == p2) {
+                        int htccPMT1[] = new int[3];
+                        int htccPMT2[] = new int[3];
+                        double testr = ph % 60.;
+                        int test = (int) Math.round(ph / 60.0);
+                        if (testr == 0) {
+                            htccPMT1[0] = test + 1;
+                            htccPMT2[0] = test + 1;
+                            htccPMT1[1] = 1;
+                            htccPMT2[1] = 2;
+                        } else if (testr != 0) {
+                            htccPMT1[0] = test;
+                            htccPMT2[0] = test + 1;
+                            if (test == 6) {
+                                htccPMT2[0] = 1;
+                            }
+                            htccPMT1[1] = 2;
+                            htccPMT2[1] = 1;
+                        }
+
+                        htccPMT1[2] = i + 1;
+                        htccPMT2[2] = i + 1;
+                        htccPMTS.add(htccPMT1);
+                        htccPMTS.add(htccPMT2);
+//            if (ph == 300.0) {System.out.println(th + " " + ph + " " + sector[0] + " " + layer[0] + " " + component[0] + " " + sector[1] + " " + layer[1] + " " + component[1]);}
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < 3; i++) {
+            if (th == TableTheta2[i]) {
+                for (int k = 0; k < 12; k++) {
+                    p1 = 15.0 + k * 30.0;
+                    p2 = k * 30.0;
+                    if (ph == p1) {
+                        int htccPMT1[] = new int[3];
+                        int htccPMT2[] = new int[3];
+                        if (ph > 30.0 && ph < 90.0) {
+                            htccPMT1[0] = 2;
+                            htccPMT2[0] = 2;
+                        } else if (ph > 90.0 && ph < 150.0) {
+                            htccPMT1[0] = 3;
+                            htccPMT2[0] = 3;
+                        } else if (ph > 150.0 && ph < 210.0) {
+                            htccPMT1[0] = 4;
+                            htccPMT2[0] = 4;
+                        } else if (ph > 210.0 && ph < 270.0) {
+                            htccPMT1[0] = 5;
+                            htccPMT2[0] = 5;
+                        } else if (ph > 270.0 && ph < 330.0) {
+                            htccPMT1[0] = 6;
+                            htccPMT2[0] = 6;
+                        } else if (ph < 30.0 || ph > 330.0) {
+                            htccPMT1[0] = 1;
+                            htccPMT2[0] = 1;
+                        }
+
+                        if (ph != 345.0) {
+                            ph_new = ph - (htccPMT1[0] - 1) * 60.0;
+                        } else {
+                            ph_new = -15.0;
+                        }
+
+                        if (ph_new == -15.0) {
+                            htccPMT1[1] = 1;
+                            htccPMT2[1] = 1;
+                        } else if (ph_new == 15.0) {
+                            htccPMT1[1] = 2;
+                            htccPMT2[1] = 2;
+                        }
+
+                        htccPMT1[2] = i + 1;
+                        htccPMT2[2] = i + 2;
+                        htccPMTS.add(htccPMT1);
+                        htccPMTS.add(htccPMT2);
+                        //System.out.println(th + " " + ph + " " + sector[0] + " " + layer[0] + " " + component[0] + " " + sector[1] + " " + layer[1] + " " + component[1]);
+                    } else if (ph == p2) {
+                        int htccPMT1[] = new int[3];
+                        int htccPMT2[] = new int[3];
+                        int htccPMT3[] = new int[3];
+                        int htccPMT4[] = new int[3];
+                        double testr = ph % 60.0;
+                        int test = (int) Math.round(ph / 60.0);
+                        if (testr == 0) {
+                            htccPMT1[0] = test + 1;
+                            htccPMT2[0] = test + 1;
+                            htccPMT3[0] = test + 1;
+                            htccPMT4[0] = test + 1;
+                            htccPMT1[1] = 1;
+                            htccPMT2[1] = 1;
+                            htccPMT3[1] = 2;
+                            htccPMT4[1] = 2;
+
+                        } else if (testr != 0) {
+                            htccPMT1[0] = test;
+                            htccPMT2[0] = test;
+                            htccPMT3[0] = test + 1;
+                            htccPMT4[0] = test + 1;
+                            if (test == 6) {
+                                htccPMT3[0] = 1;
+                                htccPMT4[0] = 1;
+                            }
+                            htccPMT1[1] = 2;
+                            htccPMT2[1] = 2;
+                            htccPMT3[1] = 1;
+                            htccPMT4[1] = 1;
+                        }
+
+                        htccPMT1[2] = i + 1;
+                        htccPMT2[2] = i + 2;
+                        htccPMT3[2] = i + 1;
+                        htccPMT4[2] = i + 2;
+                        //System.out.println(th + " " + ph + " " + sector[0] + " " + layer[0] + " " + component[0] + " " + sector[1] + " " + layer[1] + " " + component[1]+ " " + sector[2] + " " + layer[2] + " " + component[2] + " " + sector[3] + " " + layer[3] + " " + component[3]);
+                        htccPMTS.add(htccPMT1);
+                        htccPMTS.add(htccPMT2);
+                        htccPMTS.add(htccPMT3);
+                        htccPMTS.add(htccPMT4);
+    
+                    }
+                }
+            }
+        }
+        return htccPMTS;
+    }
+
+
+   public boolean init() {
         this.createHistos();
         return true;
     }
@@ -420,15 +678,21 @@ public class TrackDictionaryValidation {
             DataEvent event = reader.getNextEvent();
             nevent++;
             if(nevent%10000 == 0) System.out.println("Analyzed " + nevent + " events");
+            DataBank runConfig       = null;
             DataBank recParticle     = null;
             DataBank recCalorimeter  = null;
             DataBank recScintillator = null;
-            DataBank recCerenkov     = null;
+            DataBank recCherenkov    = null;
             DataBank recTrack        = null;
             DataBank tbtTrack        = null;
             DataBank ecalCluster     = null;
             DataBank tbtHits         = null;
+            DataBank htccRec         = null;
+            DataBank htccADC         = null;
             DataBank mcPart          = null;          
+            if (event.hasBank("RUN::config")) {
+                runConfig = event.getBank("RUN::config");
+            }            
             if (event.hasBank("REC::Particle")) {
                 recParticle = event.getBank("REC::Particle");
             }
@@ -437,6 +701,9 @@ public class TrackDictionaryValidation {
             }
             if (event.hasBank("REC::Calorimeter")) {
                 recCalorimeter = event.getBank("REC::Calorimeter");
+            }
+            if (event.hasBank("REC::Cherenkov")) {
+                recCherenkov = event.getBank("REC::Cherenkov");
             }
             if (event.hasBank("REC::Track")) {
                 recTrack = event.getBank("REC::Track");
@@ -449,6 +716,12 @@ public class TrackDictionaryValidation {
             }
             if (event.hasBank("ECAL::clusters")) {
                 ecalCluster = event.getBank("ECAL::clusters");
+            }
+            if (event.hasBank("HTCC::rec")) {
+                htccRec = event.getBank("HTCC::rec");
+            }
+            if (event.hasBank("HTCC::adc")) {
+                htccADC = event.getBank("HTCC::adc");
             }
             if (event.hasBank("MC::Particle")) {
                 mcPart = event.getBank("MC::Particle");
@@ -564,6 +837,59 @@ public class TrackDictionaryValidation {
                                     }
                                 }
                             }
+                           // check HTCC
+                            if (recCherenkov != null && htccRec != null && htccADC != null && mode > 2) {
+                                int htcc_event;
+//                                recCherenkov.show(); htccADC.show();
+                                for (int j = 0; j < recCherenkov.rows(); j++) {
+                                    if (recCherenkov.getShort("pindex", j) == pindex) {
+                                        int detectorCheren = recCherenkov.getByte("detector", j);
+                                        if (detectorCheren == DetectorType.HTCC.getDetectorId()) {
+                                            int nhits = htccRec.getShort("nhits",recCherenkov.getShort("index", j));
+                                            double thetaCheren = recCherenkov.getFloat("theta", j);
+                                            double phiCheren   = recCherenkov.getFloat("phi", j);
+                                            thetaCheren = Math.toDegrees(thetaCheren);
+                                            phiCheren   = Math.toDegrees(phiCheren );
+                                            double phiCC   = Math.round(phiCheren); 
+                                            if(phiCC<0) phiCC +=360;
+                                            double thetaCC = ((double) Math.round(thetaCheren*100))/100.;
+                                            ArrayList<int[]> htccPMTs        = htccPMT(thetaCC, phiCC);
+                                            ArrayList<int[]> htccPMTsMatched = new ArrayList<int[]>();
+//                                            System.out.println(thetaCheren + " " + thetaCC + " " + phiCheren + " " + phiCC + " " + htccPMTs.size());
+                                            //The special case of 4 hits, where we need to check if the hits were not in fact only 3
+                                            for(int iPMT = 0; iPMT < htccPMTs.size(); iPMT++) {
+                                                int htccSector    = htccPMTs.get(iPMT)[0];
+                                                int htccLayer     = htccPMTs.get(iPMT)[1];
+                                                int htccComponent = htccPMTs.get(iPMT)[2];
+                                                boolean found = false;
+//                                                System.out.println(iPMT + " " + htccSector + " " + htccLayer + " " + htccComponent);
+                                                for (int k = 0; k < htccADC.rows(); k++) {
+                                                    int sector    = htccADC.getByte("sector", k);
+                                                    int layer     = htccADC.getByte("layer", k);
+                                                    int component = htccADC.getShort("component", k);
+//                                                    System.out.println(k + " " + sector + " " + layer + " " + component);
+                                                    if( htccSector    == sector && 
+                                                        htccLayer     == layer && 
+                                                        htccComponent == component) {
+                                                        found = true;
+//                                                        System.out.println("Found match in adc bank");
+                                                    }                                                  
+                                                }
+                                                if(found) {
+                                                    htccPMTsMatched.add(htccPMTs.get(iPMT));
+                                                }
+//                                                else {
+//                                                    System.out.println("Removing hit " + iPMT + " among " + htccPMTs.size() + " " + thetaCC + " " +  phiCC + " " + htccSector + "/" + htccLayer+ "/"+htccComponent);
+//                                                    runConfig.show();recCherenkov.show(); htccRec.show();htccADC.show();
+//                                                }
+                                            }
+                                            if(htccPMTsMatched.size() != nhits) System.out.println("Mismatch in HTCC cluster size " + nhits +"/"+htccPMTsMatched.size()+"/"+htccPMTs.size() + " " + thetaCC + " " +  phiCC);
+                                            htcc = this.htccMask(htccPMTsMatched);
+                                        }
+                                    }
+                                }
+                            }
+                            
                             wires.add(paddle1b);
                             wires.add(paddle2);
                             wires.add(pcalU);
@@ -772,7 +1098,7 @@ public class TrackDictionaryValidation {
     public static void main(String[] args) {
         
         OptionParser parser = new OptionParser("dict-validation");
-        parser.addOption("-d","dictionary.txt", "read dictionary from file");
+        parser.addOption("-d","dictionary.txt", "dictionary file name");
         parser.addOption("-c"  ,  "", "create dictionary from event file");
         parser.addOption("-i"  ,  "", "set event file for dictionary validation");
         parser.addOption("-pid", "0", "select particle PID for dictonary creation (0: no selection)");
@@ -810,10 +1136,10 @@ public class TrackDictionaryValidation {
         System.out.println("Wire smearing for dictionary validation set to:             " + wireSmear);
         System.out.println("Test mode set to:                                           " + mode);
         System.out.println("Maximum number of events to process set to:                 " + maxEvents);
-//        dictionaryFileName="/Users/devita/TracksDic_test.txt";
+//        dictionaryFileName="/Users/devita/tracks_silvia.txt";
 //        inputFileName = "/Users/devita/out_clas_003355.evio.440.hipo";
 //        testFileName  = "/Users/devita/out_clas_003355.evio.440.hipo";
-//        testFileName  = "/Users/devita/clas12_pi.hipo";
+//        mode =2;
 //        wireSmear=0;
 //        maxEvents = 100000;  
         boolean debug=false;
