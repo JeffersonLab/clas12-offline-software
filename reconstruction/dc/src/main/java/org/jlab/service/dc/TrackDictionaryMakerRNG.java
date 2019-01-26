@@ -63,7 +63,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
     public void processFile(float torScale, float solScale, int charge, int n, long seed,
             float pMin, float pMax, float thMin, float thMax, float phiMin, float phiMax, float vzMin, float vzMax) {
         
-        Swimmer.setMagneticFieldsScales(torScale, solScale, -1.9);
+        Swimmer.setMagneticFieldsScales(solScale, torScale, -1.9);
         Swim sw = new Swim();
         PrintWriter pw = null;
         try {
@@ -77,8 +77,8 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     +"\n ThMaxDeg:\t"  +String.valueOf(thMax)
                     +"\n PhiMinDeg:\t" +String.valueOf(phiMin)
                     +"\n PhiMaxDeg:\t" +String.valueOf(phiMax)
-                    +"\n VzMinDeg:\t"  +String.valueOf(vzMin)
-                    +"\n VzMaxDeg:\t"  +String.valueOf(vzMax)
+                    +"\n VzMinCm:\t"   +String.valueOf(vzMin)
+                    +"\n VzMaxCm:\t"   +String.valueOf(vzMax)
                     +"\n Seed:\t\t"    +String.valueOf(seed)
                     +"\n NTracks:\t"   +String.valueOf(n));
             String fileName = "TracksDicTorus"+String.valueOf(torScale)+"Solenoid"+String.valueOf(solScale)
@@ -86,7 +86,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     +"PMinGev" +String.valueOf(pMin)+"PMaxGeV" +String.valueOf(pMax)
                     +"ThMinDeg" +String.valueOf(thMin)+"ThMaxDeg" +String.valueOf(thMax)
                     +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax)
-                    +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax)+".txt";
+                    +"VzMinCm" +String.valueOf(vzMin)+"VzMaxCm" +String.valueOf(vzMax)+".txt";
             pw = new PrintWriter(fileName);
             this.r.setSeed(seed);
             System.out.println("\n Random generator seed set to: " + seed);
@@ -321,7 +321,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
 
             Line3d trkLine = new Line3d(rotateToSectorCoordSys(trkTOF[0],trkTOF[1],trkTOF[2]), rotateToSectorCoordSys(trkPCAL[0], trkPCAL[1], trkPCAL[2])) ;
 
-            List<DetHit> hits = ftofDetector.getIntersections(trkLine);
+            List<DetHit> hits  = ftofDetector.getIntersections(trkLine);
             List<DetHit> hits2 = pcalDetector.getIntersections(trkLine);
 
             if(hits.size()==0) {
@@ -547,10 +547,12 @@ public class TrackDictionaryMakerRNG extends DCEngine{
        
        // Line3D trkLine = new Line3D(new Point3D(trk[0], trk[1], trk[2]), new Vector3D(trk[3], trk[4], trk[5]).asUnit());
         double wMax = Math.abs(dcDetector.getWireMidpoint(sector-1, sl, 0, 0).x
-                - dcDetector.getWireMidpoint(sector-1, sl, 0, 1).x) / 2.;
+                             - dcDetector.getWireMidpoint(sector-1, sl, 0, 1).x) / 2.;
 
         double min = 1000;
         int w = -1;
+        double wLeft  = 0;
+        double wRight = 0;
         for (int i = 0; i < 112; i++) {
             eu.mihosoft.vrl.v3d.Vector3d p3dl = dcDetector.getWireLeftend(sector-1, sl, l, i);
             eu.mihosoft.vrl.v3d.Vector3d p3dr = dcDetector.getWireRightend(sector-1, sl, l, i);
@@ -559,12 +561,15 @@ public class TrackDictionaryMakerRNG extends DCEngine{
            
             if (wl.distance(new Point3D(trk[0], trk[1], trk[2])).length() < min) { 
                 min = wl.distance(new Point3D(trk[0], trk[1], trk[2])).length();
+                wLeft = p3dl.y;
+                wRight= p3dr.y;
                 w = i; //System.out.println(" min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
             } 
         }
 
-        if (min < wMax*1.01) {
+        if (min < wMax*1.01 && trk[1]>(wLeft-wMax) && trk[1]<(wRight+wMax)) {
             Wi.add(w + 1); //System.out.println("min "+min);
+ //           System.out.println(w + " " + sl + " " + l + " " + wLeft + " " + wRight);
         } else {
             Wi.add(0);
         }
