@@ -1002,6 +1002,7 @@ public class TrackDictionaryValidation {
                     double px    = p*Math.sin(Math.toRadians(theta))*Math.cos(Math.toRadians(phi));
                     double py    = p*Math.sin(Math.toRadians(theta))*Math.sin(Math.toRadians(phi));
                     double pz    = p*Math.cos(Math.toRadians(theta));
+                    double phiSec = (phi+360+30)%60-30;
                     Particle road = new Particle(211*charge, px, py, pz, 0, 0, vz);
                     // take wire id of first layer in each superlayer, id>0
                     for(int i=0; i<6; i++) {
@@ -1043,7 +1044,6 @@ public class TrackDictionaryValidation {
                     }
                     else {
                         this.dictionary.put(wires, road);
-                        double phiSec = (Math.toDegrees(road.phi())+180+30)%60-30;
                         if(road.charge()<0) {
                             this.dataGroups.getItem(0).getH2F("hi_ptheta_neg_road").fill(road.p(), Math.toDegrees(road.theta()));
                             this.dataGroups.getItem(0).getH2F("hi_phitheta_neg_road").fill(phiSec, Math.toDegrees(road.theta()));
@@ -1168,6 +1168,7 @@ public class TrackDictionaryValidation {
         if(parser.containsOptions(arguments, "-i"))   System.out.println("Event file for dictionary validation set to:  " + testFileName);
         System.out.println("PID selection for dictionary creation/validation set to:    " + pid);
         System.out.println("Charge selection for dictionary creation/validation set to: " + charge);
+        System.out.println("Momentum threshold set to:                                  " + thrs);
         System.out.println("Wire smearing for dictionary validation set to:             " + wireSmear);
         System.out.println("Pcal smearing for dictionary validation set to:             " + pcalSmear);
         System.out.println("Test mode set to:                                           " + mode);

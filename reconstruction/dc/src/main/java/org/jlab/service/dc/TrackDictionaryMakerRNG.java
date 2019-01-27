@@ -106,11 +106,11 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         double rx = x * Math.cos(Math.toRadians(25.)) + z * Math.sin(Math.toRadians(25.));
         return new Vector3d(rx, y, rz);
     }
-    public Point3D rotateToTiltedCoordSys(Point3D labFramePars){
+    public Point3D rotateToTiltedCoordSys(int sector, Point3D labFramePars){
         double[] XinSec = new double[3];
         double[] XinTiltSec = new double[3];
 
-        int sector = this.getSector(labFramePars.x(), labFramePars.y(), labFramePars.z());
+//        int sector = this.getSector(labFramePars.x(), labFramePars.y(), labFramePars.z());
 
         if ((sector < 1) || (sector > 6)) {
             return new Point3D(0,0,0);
@@ -164,9 +164,10 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         swimVal = sw.SwimToPlaneLab(175.);
 
         //Point3D rotatedP = tw.rotateToTiltedCoordSys(new Point3D(px, py, pz));
-        Point3D rotatedP = this.rotateToTiltedCoordSys(new Point3D(swimVal[3], swimVal[4], swimVal[5]));
-        Point3D rotatedX = this.rotateToTiltedCoordSys(new Point3D(swimVal[0], swimVal[1], swimVal[2]));
         int sector = this.getSector(swimVal[0], swimVal[1], swimVal[2]);
+        
+        Point3D rotatedP = this.rotateToTiltedCoordSys(sector, new Point3D(swimVal[3], swimVal[4], swimVal[5]));
+        Point3D rotatedX = this.rotateToTiltedCoordSys(sector, new Point3D(swimVal[0], swimVal[1], swimVal[2]));
 //System.out.println(" sector in TrackDictionary "+sector);
         List<Integer> Wi = new ArrayList<Integer>();
         List<Integer> Di = new ArrayList<Integer>();
@@ -268,8 +269,8 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             int sector = this.getSector(swimVal[0], swimVal[1], swimVal[2]);
 
             //Point3D rotatedP = tw.rotateToTiltedCoordSys(new Point3D(px, py, pz));
-            Point3D rotatedP = this.rotateToTiltedCoordSys(new Point3D(swimVal[3], swimVal[4], swimVal[5]));
-            Point3D rotatedX = this.rotateToTiltedCoordSys(new Point3D(swimVal[0], swimVal[1], swimVal[2]));
+            Point3D rotatedP = this.rotateToTiltedCoordSys(sector, new Point3D(swimVal[3], swimVal[4], swimVal[5]));
+            Point3D rotatedX = this.rotateToTiltedCoordSys(sector, new Point3D(swimVal[0], swimVal[1], swimVal[2]));
 
             //List<Integer> Wi = new ArrayList<Integer>();
             //List<Integer> Wf = new ArrayList<Integer>();
@@ -362,13 +363,14 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             if (count(Wl3) >=3) {
                 ArrayList<Integer> wires = new ArrayList<Integer>();
                 for (int k = 0; k < 6; k++) {
-                    for (int l=0; l<6; l++) {
-                        if(wireArray[k*6 +l] != -1) {
+                    for (int l=0; l<1; l++) {
+                        if(wireArray[k*6 +l] > 0) {
                            wires.add(wireArray[k*6+l]);
                            break;
                         }
                     }
                 }
+                if(wires.size()!=6)continue;
                 wires.add(paddle1b);
                 wires.add(paddle2);
                 wires.add(pcalU);
@@ -420,7 +422,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         System.out.println("\t" + numRandoms + " tracks generated, " + newDictionary.size() + " roads found");
     }
 
-    public static void ProcessCosmics(PrintWriter pw, DCGeant4Factory dcDetector, TrackDictionaryMakerRNG tw, Swim sw) {
+    public void ProcessCosmics(PrintWriter pw, DCGeant4Factory dcDetector, TrackDictionaryMakerRNG tw, Swim sw) {
 
         double XMin = 35.;
         double XMax = 350;
@@ -465,9 +467,11 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                         double py = p * Math.sin(Math.toRadians(phi)) * Math.sin(Math.toRadians(theta));
                         double pz = p * Math.cos(Math.toRadians(theta));
 
-                        Point3D rotatedP = tw.rotateToTiltedCoordSys(new Point3D(px, py, pz));
+                        int sector = this.getSector(x,y,z);
+                        
+                        Point3D rotatedP = tw.rotateToTiltedCoordSys(sector, new Point3D(px, py, pz));
 
-                        Point3D rotatedX = tw.rotateToTiltedCoordSys(new Point3D(x, y, z));
+                        Point3D rotatedX = tw.rotateToTiltedCoordSys(sector, new Point3D(x, y, z));
 
                         sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), 1);
 
@@ -564,7 +568,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                 wLeft = p3dl.y;
                 wRight= p3dr.y;
                 w = i; //System.out.println(" min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
-            } 
+            }  
         }
 
         if (min < wMax*1.01 && trk[1]>(wLeft-wMax) && trk[1]<(wRight+wMax)) {

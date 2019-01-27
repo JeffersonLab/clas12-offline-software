@@ -19,7 +19,7 @@ import org.jlab.utils.options.OptionParser;
 
 public class TrackDictionaryMerger {
 
-    private Map<ArrayList<Integer>, Particle> dictionary = null;
+    private Map<ArrayList<Byte>, Particle> dictionary = null;
     private int nlines;
     private int nfull;
     private int ndupli;            
@@ -28,7 +28,7 @@ public class TrackDictionaryMerger {
 
     }
 
-    public Map<ArrayList<Integer>, Particle> getDictionary() {
+    public Map<ArrayList<Byte>, Particle> getDictionary() {
         return dictionary;
     }
     
@@ -58,7 +58,7 @@ public class TrackDictionaryMerger {
                 this.nlines++;
                 String[] lineValues;
                 lineValues  = line.split("\t");
-                ArrayList<Integer> wires = new ArrayList<Integer>();
+                ArrayList<Byte> wires = new ArrayList<Byte>();
                 if(lineValues.length < 47) {
                     System.out.println("WARNING: dictionary line " + nLines + " incomplete: skipping");
                 }
@@ -76,7 +76,7 @@ public class TrackDictionaryMerger {
                     // take wire id of first layer in each superlayer, id>0
                     for(int i=0; i<6; i++) {
                         int wire = Integer.parseInt(lineValues[4+i*6]);
-                        if(wire>0) wires.add(wire);
+                        if(wire>0) wires.add((byte) wire);
                     }
                     // keep only roads with 6 superlayers
                     if(wires.size()!=6) continue;
@@ -86,12 +86,12 @@ public class TrackDictionaryMerger {
                     int pcalv    = Integer.parseInt(lineValues[44]);
                     int pcalw    = Integer.parseInt(lineValues[45]);
                     int htcc     = Integer.parseInt(lineValues[46]);
-                    wires.add(paddle1b);
-                    wires.add(paddle2);
-                    wires.add(pcalu);
-                    wires.add(pcalv);
-                    wires.add(pcalw);
-                    wires.add(htcc);
+                    wires.add((byte) paddle1b);
+                    wires.add((byte) paddle2);
+                    wires.add((byte) pcalu);
+                    wires.add((byte) pcalv);
+                    wires.add((byte) pcalw);
+                    wires.add((byte) htcc);
                     nFull++;
                     this.nfull++;
                     if(this.dictionary.containsKey(wires)) {
@@ -118,7 +118,7 @@ public class TrackDictionaryMerger {
         } 
    }
     
-    private void setDictionary(Map<ArrayList<Integer>, Particle> newDictionary) {
+    private void setDictionary(Map<ArrayList<Byte>, Particle> newDictionary) {
         this.dictionary = newDictionary;
     }
     
@@ -126,9 +126,9 @@ public class TrackDictionaryMerger {
         PrintWriter pw = null;
         try {
             pw = new PrintWriter(dictName);
-            for(Map.Entry<ArrayList<Integer>, Particle> entry : this.dictionary.entrySet()) {
-                ArrayList<Integer> road = entry.getKey();
-                Particle           part = entry.getValue();
+            for(Map.Entry<ArrayList<Byte>, Particle> entry : this.dictionary.entrySet()) {
+                ArrayList<Byte> road = entry.getKey();
+                Particle        part = entry.getValue();
                 if(road.size()<12) {
                     continue;
                 }
