@@ -69,6 +69,23 @@
     ]
   },
  {
+    "bank": "FTTRK::hits",
+    "group": 21321,
+    "info": "Reconstructed Hits in FT hodoscope",
+    "items": [
+              {"name":"sector",    "id":2,  "type":"int8",  "info":"sector number"},
+              {"name":"layer",	   "id":3,  "type":"int8",  "info":"layer number"},
+              {"name":"component", "id":4,  "type":"int16", "info":"component number"},
+              {"name":"x",         "id":5,  "type":"float", "info":"Hit X position (cm)" },
+              {"name":"y",         "id":6,  "type":"float", "info":"Hit Y position (cm)" },
+              {"name":"z",         "id":7,  "type":"float", "info":"Hit Z position (cm)" },
+              {"name":"energy",    "id":8,  "type":"float", "info":"Hit Energy" },
+              {"name":"time",      "id":9,  "type":"float", "info":"Hit Time" },
+              {"name":"hitID", 	   "id":10, "type":"int16", "info":"Hit Pointer to ADC bank"},
+              {"name":"clusterID", "id":11, "type":"int16", "info":"Hit Pointer to Cluster Bank"}
+    ]
+  },
+ {
     "bank": "FT::particles",
     "group": 20924,
     "info": "Reconstructed Particles in FT",
