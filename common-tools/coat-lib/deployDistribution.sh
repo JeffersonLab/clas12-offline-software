@@ -3,9 +3,9 @@
 #-------------------------------------------------------------------------------------------------
 #  JEVIO
 REPO="/Users/devita/NetBeansProjects/clas12-offline-software/myLocalMvnRepo"
-VERSION="5.7.4-SNAPSHOT"
+VERSION="5.7.5-SNAPSHOT"
 
-mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file  -Dfile=target/coat-libs-5.7.4-SNAPSHOT.jar \
+mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file  -Dfile=target/coat-libs-5.7.5-SNAPSHOT.jar \
     -DgroupId=org.jlab.coat \
     -DartifactId=coat-libs \
     -Dversion=$VERSION \
