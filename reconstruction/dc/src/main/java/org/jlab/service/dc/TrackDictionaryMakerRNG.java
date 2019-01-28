@@ -60,7 +60,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         super.LoadTables();
         return true;
     }
-    public void processFile(float torScale, float solScale, int charge, int n, long seed,
+    public void processFile(int duplicates, float torScale, float solScale, int charge, int n, long seed,
             float pMin, float pMax, float thMin, float thMax, float phiMin, float phiMax, float vzMin, float vzMax) {
         
         Swimmer.setMagneticFieldsScales(solScale, torScale, -1.9);
@@ -80,18 +80,20 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     +"\n VzMinCm:\t"   +String.valueOf(vzMin)
                     +"\n VzMaxCm:\t"   +String.valueOf(vzMax)
                     +"\n Seed:\t\t"    +String.valueOf(seed)
-                    +"\n NTracks:\t"   +String.valueOf(n));
+                    +"\n NTracks:\t"   +String.valueOf(n)
+                    +"\n Duplicates:\t"+String.valueOf(duplicates));
             String fileName = "TracksDicTorus"+String.valueOf(torScale)+"Solenoid"+String.valueOf(solScale)
                     +"Charge"+String.valueOf(charge)+"n"+String.valueOf(n)+"Seed"+String.valueOf(seed)
                     +"PMinGev" +String.valueOf(pMin)+"PMaxGeV" +String.valueOf(pMax)
                     +"ThMinDeg" +String.valueOf(thMin)+"ThMaxDeg" +String.valueOf(thMax)
                     +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax)
-                    +"VzMinCm" +String.valueOf(vzMin)+"VzMaxCm" +String.valueOf(vzMax)+".txt";
+                    +"VzMinCm" +String.valueOf(vzMin)+"VzMaxCm" +String.valueOf(vzMax)
+                    +"Duplicates" +String.valueOf(duplicates)+".txt";
             pw = new PrintWriter(fileName);
             this.r.setSeed(seed);
             System.out.println("\n Random generator seed set to: " + seed);
             System.out.println("\n Dictionary file name: " + fileName + "\n");
-            this.ProcessTracks(pw, dcDetector, ftofDetector, pcalDetector, sw, charge, n, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax);
+            this.ProcessTracks(pw, dcDetector, ftofDetector, pcalDetector, sw, charge, n, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax,duplicates);
             pw.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(TrackDictionaryMakerRNG.class.getName()).log(Level.SEVERE, null, ex);
@@ -241,7 +243,8 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             float PMin, float PMax, 
             float ThMin, float ThMax, 
             float PhiMin, float PhiMax, 
-            float VzMin, float VzMax) {
+            float VzMin, float VzMax,
+            int duplicates) {
         double[] swimVal = new double[8];
         Map<ArrayList<Integer>, Integer> newDictionary = new HashMap<>();
         int[] wireArray = new int[36];
@@ -377,7 +380,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                 wires.add(pcalV);
                 wires.add(pcalW);
                 wires.add(htcc);
-                if(newDictionary.containsKey(wires))  {
+                if(newDictionary.containsKey(wires) && duplicates!=0)  {
                         int nRoad = newDictionary.get(wires) + 1;
                         newDictionary.replace(wires, nRoad);
                        // System.out.println(" Number of duplicate roads "+nRoad+" p "+p+" theta "+thetaDeg+" phi "+phiDeg+" vz "+vzCm);
@@ -679,6 +682,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         
         OptionParser parser = new OptionParser("dict-maker");
 
+        parser.addOption("-dupli","0","remove duplicates");
         parser.addOption("-t","-1.0");
         parser.addOption("-s","-1.0");
         parser.addOption("-q","-1");
@@ -703,6 +707,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             float solenoid = (float) parser.getOption("-s").doubleValue();
             int charge = parser.getOption("-q").intValue();
             int n = parser.getOption("-n").intValue();
+            int duplicates = parser.getOption("-dupli").intValue();
             float pMin = (float) parser.getOption("-pmin").doubleValue();
             float pMax = (float) parser.getOption("-pmax").doubleValue();
             float thMin = (float) parser.getOption("-thmin").doubleValue();
@@ -715,7 +720,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
 //            tm.r.setSeed(seed);
             String dcVar = parser.getOption("-var").stringValue();
             tm.resetGeom(dcVar);
-            tm.processFile(torus, solenoid, charge, n, seed, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax);
+            tm.processFile(duplicates,torus, solenoid, charge, n, seed, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax);
         } else {
             System.out.println(" FIELDS NOT SET");
         }

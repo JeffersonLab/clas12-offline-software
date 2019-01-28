@@ -57,10 +57,10 @@ public class TrackDictionaryValidation {
                                                                + this.dataGroups.getItem(2).getH2F("hi_ptheta_neg_missing").integral());
     }
     
-    public void createDictionary(String inputFileName, String dictName , int pidSelect, int chargeSelect, double thrs) {
+    public void createDictionary(String inputFileName, String dictName , int pidSelect, int chargeSelect, double thrs, int duplicates) {
         // create dictionary from event file
         System.out.println("\nCreating dictionary from file: " + inputFileName);
-        Map<ArrayList<Byte>, Particle> newDictionary = new HashMap<>();
+        Map<ArrayList<Integer>, Particle> newDictionary = new HashMap<>();
         HipoDataSource reader = new HipoDataSource();
         reader.open(inputFileName);
         String[] tokens = inputFileName.split("/");
@@ -145,12 +145,12 @@ public class TrackDictionaryValidation {
                                 wireArray[(superlayer - 1) * 6 + layer - 1] = wire;
                             }
                         }
-                        ArrayList<Byte> wires = new ArrayList<Byte>();
+                        ArrayList<Integer> wires = new ArrayList<Integer>();
                         for (int k = 0; k < 6; k++) {
                             for (int l=0; l<6; l++) {
                                 // use first non zero wire in superlayer
                                 if(wireArray[k*6 +l] != 0) {
-                                   wires.add((byte) wireArray[k*6+l]);
+                                   wires.add(wireArray[k*6+l]);
                                    break;
                                 }
                             }
@@ -239,18 +239,19 @@ public class TrackDictionaryValidation {
 //                                                    runConfig.show();recCherenkov.show(); htccRec.show();htccADC.show();
 //                                                }
                                             }
-                                            if(htccPMTsMatched.size() != nhits) System.out.println("Mismatch in HTCC cluster size " + nhits +"/"+htccPMTsMatched.size()+"/"+htccPMTs.size() + " " + thetaCC + " " +  phiCC);
+//                                            if(htccPMTsMatched.size() != nhits) System.out.println("Mismatch in HTCC cluster size " + nhits +"/"+htccPMTsMatched.size()+"/"+htccPMTs.size() + " " + thetaCC + " " +  phiCC);
                                             htcc = this.htccMask(htccPMTsMatched);
                                         }
                                     }
                                 }
                             }
-                            wires.add((byte) paddle1b);
-                            wires.add((byte) paddle2);
-                            wires.add((byte) pcalU);
-                            wires.add((byte) pcalV);
-                            wires.add((byte) pcalW);
-                            wires.add((byte) htcc);
+                            wires.add(paddle1b);
+                            wires.add(paddle2);
+                            wires.add(pcalU);
+                            wires.add(pcalV);
+                            wires.add(pcalW);
+                            wires.add(htcc);
+                            if(duplicates==0) wires.add(nevent);
                             // save roads to map
                             if(!newDictionary.containsKey(wires))  {
                                 newDictionary.put(wires, part);
@@ -260,7 +261,7 @@ public class TrackDictionaryValidation {
                 }
             }
         }
-        this.setDictionary(newDictionary);
+        System.out.println("Analyzed " + nevent + " events, found " + newDictionary.size() + " roads");
         this.writeDictionary(newDictionary, dictName);
     }
     
@@ -1075,13 +1076,13 @@ public class TrackDictionaryValidation {
         this.dictionary = newDictionary;
     }
     
-    private void writeDictionary(Map<ArrayList<Byte>, Particle> dictionary, String dictName) {
+    private void writeDictionary(Map<ArrayList<Integer>, Particle> dictionary, String dictName) {
         PrintWriter pw = null;
         try {
             pw = new PrintWriter(dictName);
-            for(Map.Entry<ArrayList<Byte>, Particle> entry : dictionary.entrySet()) {
-                ArrayList<Byte> road = entry.getKey();
-                Particle        part = entry.getValue();
+            for(Map.Entry<ArrayList<Integer>, Particle> entry : dictionary.entrySet()) {
+                ArrayList<Integer> road = entry.getKey();
+                Particle           part = entry.getValue();
                 if(road.size()<12) {
                     continue;
                 }
@@ -1130,16 +1131,17 @@ public class TrackDictionaryValidation {
     public static void main(String[] args) {
         
         OptionParser parser = new OptionParser("dict-validation");
-        parser.addOption("-d","dictionary.txt", "dictionary file name");
-        parser.addOption("-c"  ,  "", "create dictionary from event file");
-        parser.addOption("-i"  ,  "", "set event file for dictionary validation");
-        parser.addOption("-pid", "0", "select particle PID for dictonary creation (0: no selection)");
-        parser.addOption("-q"  , "0", "select particle charge for dictonary creation (0: no selection)");
-        parser.addOption("-w"  , "0", "wire smearing in road finding");
-        parser.addOption("-s"  , "0", "pcal strip smearing in road finding");
-        parser.addOption("-m"  , "0", "select test mode: 0-DC only, 1-DC-FTOF-pcalU, 2-DC-FTOF-pcalUVW, 3-DC-FTOF-pcalUVW-HTCC");
-        parser.addOption("-t"  , "1", "select roads momentum threshold in GeV");
-        parser.addOption("-n"  ,"-1", "maximum number of events to process");
+        parser.addOption("-d"    ,"dictionary.txt", "dictionary file name");
+        parser.addOption("-c"    ,  "", "create dictionary from event file");
+        parser.addOption("-i"    ,  "", "set event file for dictionary validation");
+        parser.addOption("-pid"  , "0", "select particle PID for dictonary creation (0: no selection)");
+        parser.addOption("-q"    , "0", "select particle charge for dictonary creation (0: no selection)");
+        parser.addOption("-w"    , "0", "wire smearing in road finding");
+        parser.addOption("-s"    , "0", "pcal strip smearing in road finding");
+        parser.addOption("-m"    , "0", "select test mode: 0-DC only, 1-DC-FTOF-pcalU, 2-DC-FTOF-pcalUVW, 3-DC-FTOF-pcalUVW-HTCC");
+        parser.addOption("-t"    , "1", "select roads momentum threshold in GeV");
+        parser.addOption("-n"    ,"-1", "maximum number of events to process");
+        parser.addOption("-dupli", "0", "remove duplicates in dictionary creation");
         parser.parse(args);
         
         List<String> arguments = new ArrayList<String>();
@@ -1155,13 +1157,14 @@ public class TrackDictionaryValidation {
         if(parser.hasOption("-i")==true) testFileName = parser.getOption("-i").stringValue();
             
         
-        int pid       = parser.getOption("-pid").intValue();
-        int charge    = parser.getOption("-q").intValue();
-        int wireSmear = parser.getOption("-w").intValue();
-        int pcalSmear = parser.getOption("-s").intValue();
-        int mode      = parser.getOption("-m").intValue();
-        int maxEvents = parser.getOption("-n").intValue();
-        double thrs   = parser.getOption("-t").doubleValue();
+        int pid        = parser.getOption("-pid").intValue();
+        int charge     = parser.getOption("-q").intValue();
+        int wireSmear  = parser.getOption("-w").intValue();
+        int pcalSmear  = parser.getOption("-s").intValue();
+        int mode       = parser.getOption("-m").intValue();
+        int maxEvents  = parser.getOption("-n").intValue();
+        int duplicates = parser.getOption("-dupli").intValue();
+        double thrs    = parser.getOption("-t").doubleValue();
         
         System.out.println("Dictionary file name set to: " + dictionaryFileName);
         if(parser.containsOptions(arguments, "-c"))   System.out.println("Event file for dictionary creation set to:    " + inputFileName);
@@ -1173,6 +1176,7 @@ public class TrackDictionaryValidation {
         System.out.println("Pcal smearing for dictionary validation set to:             " + pcalSmear);
         System.out.println("Test mode set to:                                           " + mode);
         System.out.println("Maximum number of events to process set to:                 " + maxEvents);
+        System.out.println("Duplicates remove flag set to:                              " + duplicates);
 //        dictionaryFileName="/Users/devita/tracks_silvia.txt";
 //        inputFileName = "/Users/devita/out_clas_003355.evio.440.hipo";
 //        testFileName  = "/Users/devita/out_clas_003355.evio.440.hipo";
@@ -1185,7 +1189,7 @@ public class TrackDictionaryValidation {
         tm.init();
         if(parser.containsOptions(arguments, "-c") || parser.containsOptions(arguments, "-i") || debug) {
             if(parser.containsOptions(arguments, "-c") || debug) {
-                tm.createDictionary(inputFileName, dictionaryFileName, pid, charge, thrs);
+                tm.createDictionary(inputFileName, dictionaryFileName, pid, charge, thrs, duplicates);
             }
             else if(parser.containsOptions(arguments, "-i") || debug) {
                 tm.readDictionary(dictionaryFileName,mode,thrs);                
