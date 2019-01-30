@@ -50,7 +50,7 @@ public class ECCluster {
     }
     
     public double getRawEnergy(){
-        return getRawEnergy(0)+getRawEnergy(1)+getRawEnergy(2);
+        return getRawEnergy(0)+getRawEnergy(1)+getRawEnergy(2); 
     }
     
     public double getRawEnergy(int view){

@@ -44,7 +44,8 @@ public class ECStrip implements Comparable {
     
 	private static final double coincTIME = 25.; //ns. 	
     private double              time = 0;
-       
+    float[]                       tw = {300,300,300,100,100,100,100,100,100};
+    
     public ECStrip(int sector, int layer, int component){
         this.desc.setSectorLayerComponent(sector, layer, component);
     }
@@ -75,20 +76,38 @@ public class ECStrip implements Comparable {
        	return this.iTDC * iTimingA1;
     }
     
-    public double getPhaseCorrectedTime() {
-    	    return this.iTDC * iTimingA1 - triggerPhase;
+    public double getPhaseCorrectedTime() { 
+        return this.iTDC * iTimingA1 - triggerPhase;
     }
     
     public double getRawTime(boolean phaseCorrection) {
  	    return phaseCorrection ? getPhaseCorrectedTime():getRawTime();
     }
-     
+    
     public double getTWCTime() {
+    	return (ECCommon.useNewTimeCal)?getNewTWCTime():getOldTWCTime();    	
+    }
+
+    public double getOldTWCTime() {
       	return getRawTime(true) - iTimingA2 / Math.sqrt(this.iADC);
     }
     
-	public double getTime() {
+    public double getNewTWCTime() {
+    	double radc = Math.sqrt(this.iADC);
+      	return getRawTime(true)-tw[this.desc.getLayer()-1]/radc-iTimingA2-iTimingA3/radc-iTimingA4/Math.sqrt(radc);
+    } 
+    
+    public double getTime() {
+    	return (ECCommon.useNewTimeCal)?getNewTime():getOldTime();
+    }
+	
+	public double getOldTime() {
 		return getRawTime(true) - iTimingA0 - iTimingA2 / Math.sqrt(this.iADC);
+	}  
+	
+	public double getNewTime() {
+    	double radc = Math.sqrt(this.iADC);
+		return getRawTime(true) - iTimingA0 - tw[this.desc.getLayer()-1]/radc-iTimingA2-iTimingA3/radc-iTimingA4/Math.sqrt(radc);
 	}  
     
     public double getEnergy(){
@@ -159,7 +178,7 @@ public class ECStrip implements Comparable {
     
 	public double getTime(Point3D point) {		
 		tdist = point.distance(this.stripLine.end());
-		time =  getTime() - tdist/veff + this.iTimingA3*tdist + this.iTimingA4*tdist*tdist;
+		time =  getTime() - tdist/veff;
 		return time;
 	} 
 	

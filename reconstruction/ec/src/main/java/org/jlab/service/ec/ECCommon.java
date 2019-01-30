@@ -34,6 +34,7 @@ public class ECCommon {
     public static Boolean         debug = false;
     public static Boolean isSingleThreaded = false;
     public static Boolean      singleEvent = false;
+    public static Boolean    useNewTimeCal = false;
     public static String         variation = "default";
     
     private static double[] AtoE  = {15,10,10};   // SCALED ADC to Energy in MeV
@@ -187,7 +188,7 @@ public class ECCommon {
             DataBank bank = event.getBank("ECAL::adc");
             for(int i = 0; i < bank.rows(); i++){
                 int  is = bank.getByte("sector", i);
-                int  il = bank.getByte("layer", i);
+                int  il = bank.getByte("layer", i); 
                 int  ip = bank.getShort("component", i);
                 int adc = bank.getInt("ADC", i);
                 float t = bank.getFloat("time", i) + (float) offset.getDoubleValue("offset",is,il,0);
@@ -201,14 +202,12 @@ public class ECCommon {
                 if (variation=="clas6") sca = 1.0;               
                 if(strip.getADC()>sca*ECCommon.stripThreshold[ind[il-1]]) strips.add(strip); 
                 
-                Integer[] tdcc; float  tmax = 1000; int tdc = 0;
+                float  tmax = 1000; int tdc = 0;
                 
                 if (tdcs.hasItem(is,il,ip)) {
-                    List<Integer> list = new ArrayList<Integer>();
-                    list = tdcs.getItem(is,il,ip); tdcc=new Integer[list.size()]; list.toArray(tdcc);       
-                    for (int ii=0; ii<tdcc.length; ii++) {
-                    	    float tdif = (tps*tdcc[ii]-triggerPhase-TOFFSET)-t; 
-                    	    if (Math.abs(tdif)<30&&tdif<tmax) {tmax = tdif; tdc = tdcc[ii];}
+                    for (float tdcc : tdcs.getItem(is,il,ip)) {
+                        float tdif = (tps*tdcc-triggerPhase-TOFFSET)-t; 
+                        if (Math.abs(tdif)<30&&tdif<tmax) {tmax = tdif; tdc = (int)tdcc;}
                     }
                     strip.setTDC(tdc); 
                 }              
@@ -220,18 +219,18 @@ public class ECCommon {
     
     public static List<ECPeak>  createPeaks(List<ECStrip> stripList){
         List<ECPeak>  peakList = new ArrayList<ECPeak>();
-        if(stripList.size()>1){
-            ECPeak  firstPeak = new ECPeak(stripList.get(0));
-            peakList.add(firstPeak);
-            for(int loop = 1; loop < stripList.size(); loop++){
+        if(stripList.size()>1){ //Require minimum of 2 strips/event to reject uncorrelated hot channels
+            ECPeak  firstPeak = new ECPeak(stripList.get(0)); //Seed the first peak with the first strip
+            peakList.add(firstPeak); 
+            for(int loop = 1; loop < stripList.size(); loop++){ //Loop over all strips 
                 boolean stripAdded = false;                
                 for(ECPeak  peak : peakList){
-                    if(peak.addStrip(stripList.get(loop))==true){
+                    if(peak.addStrip(stripList.get(loop))==true){ //Add adjacent strip to newly seeded peak
                         stripAdded = true;
                     }
                 }
                 if(stripAdded==false){
-                    ECPeak  newPeak = new ECPeak(stripList.get(loop));
+                    ECPeak  newPeak = new ECPeak(stripList.get(loop)); //Non-adjacent strip seeds new peak
                     peakList.add(newPeak);
                 }
             }

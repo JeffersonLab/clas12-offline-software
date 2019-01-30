@@ -60,7 +60,7 @@ public class ECEngine extends ReconstructionEngine {
         List<ECPeak>      ecPeaks  = ECCommon.processPeaks(ECCommon.createPeaks(ecStrips)); // thresholds, split peaks -> update peak-lines          
         List<ECCluster> ecClusters = new ArrayList<ECCluster>();
         ecClusters.addAll(ECCommon.createClusters(ecPeaks,1)); //PCAL
-        ecClusters.addAll(ECCommon.createClusters(ecPeaks,4)); //ECinner
+        ecClusters.addAll(ECCommon.createClusters(ecPeaks,4)); //ECinner 
         ecClusters.addAll(ECCommon.createClusters(ecPeaks,7)); //ECouter
         
         ECCommon.shareClustersEnergy(ecClusters);  // Repair 2 clusters which share the same peaks
@@ -195,6 +195,11 @@ public class ECEngine extends ReconstructionEngine {
     public void setVeff(float veff) {
         System.out.println("ECEngine: Veff = "+veff);
     	    ECCommon.veff = veff;
+    }
+    
+    public void setNewTimeCal(boolean val) {
+        System.out.println("ECEngine: useNewTimeCal = "+val);
+    	ECCommon.useNewTimeCal = val;
     }
     
     public void setStripThresholds(int thr0, int thr1, int thr2) {

@@ -18,7 +18,7 @@ public class ECPeak {
     private DetectorDescriptor  desc       = new DetectorDescriptor(DetectorType.ECAL);
     private List<ECStrip>       peakStrips = new ArrayList<ECStrip>();
     private Line3D              peakLine   = new Line3D();
-    private int                 indexMaxStrip = -1;
+    public int                  indexMaxStrip = -1;
     private int                 peakOrder     = -1;
     private double              peakDistanceEdge = 0.0;
     private double              peakMoment       = 0.0;
@@ -63,7 +63,7 @@ public class ECPeak {
     }
         
     public double getTime(){
-        if(this.indexMaxStrip>0 && this.indexMaxStrip < this.peakStrips.size()-1){
+        if(this.indexMaxStrip >= 0 && this.indexMaxStrip < this.peakStrips.size()){
             return this.peakStrips.get(indexMaxStrip).getTime();
         }
             return 0.0;
