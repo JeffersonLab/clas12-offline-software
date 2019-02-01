@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.jlab.eventmerger.bgmerger;
+package org.jlab.clas.eventmerger;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;

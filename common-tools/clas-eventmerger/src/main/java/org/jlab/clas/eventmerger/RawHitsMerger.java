@@ -3,28 +3,49 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.jlab.eventmerger.bgmerger;
+package org.jlab.clas.eventmerger;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
+import org.jlab.utils.options.OptionParser;
 
 public class RawHitsMerger extends ReconstructionEngine {
 
    
     public RawHitsMerger() {
-        super("RawHitMerger","ziegler","1.0");
+        super("RawHitsMerger","ziegler","1.0");
     }
 
     
 
     public static void main(String[] args)  {
         
-        //String inputFile = args[0];
-        //String outputFile = args[1];
-        //String inputFile2="/Users/ziegler/Desktop/Work/Files/Data/random_4013.hipo";
-        String inputFile2="/Users/ziegler/Desktop/Work/Files/Data/skimrandomnotracks.700_899.hipo";
-        String inputFile="/Users/ziegler/Desktop/Work/Files/Data/out_clas_004150.evio.10_19_filt.hipo";
+        String inputFile2= null;//="/Users/ziegler/Desktop/Work/Files/Data/skimrandomnotracks.700_899.hipo";
+        String inputFile = null;//="/Users/ziegler/Desktop/Work/Files/Data/out_clas_004150.evio.10_19_filt.hipo";
+        String outputFile= null;//"/Users/ziegler/Desktop/Work/Files/TestMergedFile.hipo";
+        String outputFile0= null; //"/Users/ziegler/Desktop/Work/Files/TestDataUnMergedFile.hipo";
+         
+        OptionParser parser = new OptionParser("event-merger");
+        parser.addOption("-isignal","");
+        parser.addOption("-ibkg","");
+        parser.addOption("-osignal","");
+        parser.addOption("-omerged","");
+        parser.parse(args);
+        
+        if(parser.hasOption("-isignal")==true && 
+                parser.hasOption("-ibkg")==true && 
+                parser.hasOption("-osignal")==true && 
+                parser.hasOption("-omerged")==true){
+            
+            inputFile   = parser.getOption("-isignal").stringValue();
+            inputFile2  = parser.getOption("-ibkg").stringValue();
+            outputFile0 = parser.getOption("-osignal").stringValue();
+            outputFile  = parser.getOption("-omerged").stringValue();
+        } else {
+            System.err.println("Error parsing file names...correct syntax is:");
+            System.err.println("./bin/event-merger -isignal myNoBackgoundDataFile -ibkg myBackgroundFile -osignal myOutputNoBackgroundAnalysisSample -omerged myMergedDataSample");
+        }
         
         //System.err.println(" \n[PROCESSING FILE] : " + inputFile);
         
@@ -42,9 +63,7 @@ public class RawHitsMerger extends ReconstructionEngine {
         //Writer
         HipoDataSync writer0 = new HipoDataSync();
         HipoDataSync writer = new HipoDataSync();
-        String outputFile="/Users/ziegler/Desktop/Work/Files/TestMergedFile.hipo";
-        String outputFile0="/Users/ziegler/Desktop/Work/Files/TestDataUnMergedFile.hipo";
-        //String outputFile="/Users/ziegler/Desktop/Work/Files/FMTDevel/gemc/pion_recFMTClusNoTrkRefit.hipo";
+        
         
         writer0.open(outputFile0);
         writer.open(outputFile);
