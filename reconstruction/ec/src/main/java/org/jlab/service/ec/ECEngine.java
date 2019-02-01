@@ -132,7 +132,7 @@ public class ECEngine extends ReconstructionEngine {
             bankC.setByte("sector",  c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
             bankC.setByte("layer",   c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
             bankC.setFloat("energy", c, (float) clusters.get(c).getEnergy());
-            bankC.setFloat("time",   c, (float) clusters.get(c).getTime());
+            bankC.setFloat("time",   c, (float) clusters.get(c).getRawADCTime());
             bankC.setByte("idU",     c,  (byte) clusters.get(c).UVIEW_ID);
             bankC.setByte("idV",     c,  (byte) clusters.get(c).VVIEW_ID);
             bankC.setByte("idW",     c,  (byte) clusters.get(c).WVIEW_ID);
