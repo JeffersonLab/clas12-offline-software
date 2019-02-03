@@ -6,18 +6,15 @@ import os
 
 # print usage
 if len(sys.argv)<2:
-   print "usage: bankSplit.py coatjavabankfolder (e.g. coatjava/etc/bankdefs)"
+   print "usage: bankSplit.py coatjavahipobankfolder (e.g. coatjava/etc/bankdefs/hipo/)"
    sys.exit()
 
 # hipo schema directory
-bankdirectory = sys.argv[1] +  "/"
-os.chdir(bankdirectory)
-
-#input hipo directory
-hipodirectory = "hipo/"
+hipodirectory = sys.argv[1] +  "/"
+os.chdir(hipodirectory)
 
 # single jsons directory
-workdirectory   = "hipos/"
+workdirectory   = "singles/"
 singledirectory = "full/"
 os.mkdir(workdirectory)	    
 os.mkdir(workdirectory + singledirectory)	    
@@ -33,11 +30,11 @@ def createdirandlinks(dirname, banklist):
 
     
 # for each json file in hipo schema folder
-for filename in os.listdir(hipodirectory):
+for filename in os.listdir("./"):
     if filename.endswith(".json"):
 		
         #Read JSON data into the datastore variable
-        f = open(hipodirectory + filename)
+        f = open(filename)
         datastore = json.load(f)
     
         # loop over banks in the json file
@@ -51,7 +48,7 @@ print("Single json files saved in " + workdirectory + singledirectory)
 # create dst, calibration and monitoring directories
 dst = ["RUN::config","RAW::scaler","REC::Event","REC::Particle","REC::Calorimeter","REC::Cherenkov","REC::CovMat","REC::ForwardTagger","REC::Scintillator","REC::Track","REC::Traj","RICH::tdc","MC::Event","MC::Header","MC::Lund","MC::Particle","MC::True"]
 calibration = ["CND::adc","CND::hits","CND::tdc","CTOF::adc","CTOF::hits","CTOF::tdc","CVTRec::Tracks","ECAL::calib","ECAL::clusters","ECAL::peaks","FT::particles","FTCAL::adc","FTCAL::clusters","FTCAL::hits","FTHODO::adc","FTHODO::clusters","FTHODO::hits","FTOF::adc","FTOF::hits","FTOF::tdc","HTCC::adc","HTCC::rec","LTCC::adc","LTCC::clusters","MC::Event","MC::Header","MC::Lund","MC::Particle","MC::True","RAW::scaler","REC::Calorimeter","REC::Cherenkov","REC::CovMat","REC::Event","REC::ForwardTagger","REC::Particle","REC::Scintillator","REC::Track","REC::Traj","RF::adc","RF::tdc","RICH::tdc","RUN::config","RUN::rf","RUN::trigger","TimeBasedTrkg::TBCrosses","TimeBasedTrkg::TBHits","TimeBasedTrkg::TBSegments","TimeBasedTrkg::TBSegmentTrajectory","TimeBasedTrkg::TBTracks","TimeBasedTrkg::Trajectory"]
-monitoring = ["BMTRec::Crosses","BMTRec::Hits","BSTRec::Crosses","BSTRec::Hits","CND::adc","CND::clusters","CND::hits","CND::tdc","CTOF::adc","CTOF::hits","CTOF::tdc","CVTRec::Tracks","CVTRec::Trajectory","ECAL::calib","ECAL::clusters","ECAL::hits","ECAL::peaks","FT::particles","FTCAL::adc","FTCAL::clusters","FTCAL::hits","FTHODO::adc","FTHODO::clusters","FTHODO::hits","FTOF::adc","FTOF::hits","FTOF::tdc","HitBasedTrkg::HBTracks","HTCC::adc","HTCC::rec","LTCC::adc","LTCC::clusters","MC::Event","MC::Header","MC::Lund","MC::Particle","MC::True","RAW::scaler","REC::Calorimeter","REC::Cherenkov","REC::CovMat","REC::Event","REC::ForwardTagger","REC::Particle","REC::Scintillator","REC::Track","REC::Traj","RECHB::Calorimeter","RECHB::Cherenkov","RECHB::Event","RECHB::ForwardTagger","RECHB::Particle","RECHB::Scintillator","RECHB::Track","RF::adc","RF::tdc","RICH::tdc","RUN::config","RUN::rf","RUN::trigger","TimeBasedTrkg::TBCrosses","TimeBasedTrkg::TBHits","TimeBasedTrkg::TBSegments","TimeBasedTrkg::TBSegmentTrajectory","TimeBasedTrkg::TBTracks","TimeBasedTrkg::Trajectory"]
+monitoring = ["BMTRec::Crosses","BMTRec::Hits","BMTRec::LayerEffs","BSTRec::Crosses","BSTRec::Hits","BSTRec::LayerEffs","CND::adc","CND::clusters","CND::hits","CND::tdc","CTOF::adc","CTOF::hits","CTOF::tdc","CVTRec::Tracks","CVTRec::Trajectory","ECAL::calib","ECAL::clusters","ECAL::hits","ECAL::peaks","FT::particles","FTCAL::adc","FTCAL::clusters","FTCAL::hits","FTHODO::adc","FTHODO::clusters","FTHODO::hits","FTOF::adc","FTOF::hits","FTOF::tdc","HitBasedTrkg::HBTracks","HTCC::adc","HTCC::rec","LTCC::adc","LTCC::clusters","MC::Event","MC::Header","MC::Lund","MC::Particle","MC::True","RAW::scaler","REC::Calorimeter","REC::Cherenkov","REC::CovMat","REC::Event","REC::ForwardTagger","REC::Particle","REC::Scintillator","REC::Track","REC::Traj","RECHB::Calorimeter","RECHB::Cherenkov","RECHB::Event","RECHB::ForwardTagger","RECHB::Particle","RECHB::Scintillator","RECHB::Track","RF::adc","RF::tdc","RICH::tdc","RUN::config","RUN::rf","RUN::trigger","TimeBasedTrkg::TBCrosses","TimeBasedTrkg::TBHits","TimeBasedTrkg::TBSegments","TimeBasedTrkg::TBSegmentTrajectory","TimeBasedTrkg::TBTracks","TimeBasedTrkg::Trajectory"]
 createdirandlinks("dst/", dst)
 createdirandlinks("calibration/", calibration)
 createdirandlinks("monitoring/",  monitoring)
