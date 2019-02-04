@@ -98,10 +98,10 @@ public class DetectorEventDecoder {
         
         translationManager.init(keysTrans,tablesTrans);
         
-        keysFitter   = Arrays.asList(new String[]{"FTCAL","FTHODO","FTTRK","FTOF","LTCC","ECAL","HTCC","CTOF","CND","BMT","FMT","HEL","RF"});
+        keysFitter   = Arrays.asList(new String[]{"FTCAL","FTHODO","FTTRK","FTOF","LTCC","ECAL","HTCC","CTOF","CND","BMT","FMT","HEL","RF","BAND"});
         tablesFitter = Arrays.asList(new String[]{
             "/daq/fadc/ftcal","/daq/fadc/fthodo","/daq/config/fttrk","/daq/fadc/ftof","/daq/fadc/ltcc","/daq/fadc/ec",
-            "/daq/fadc/htcc","/daq/fadc/ctof","/daq/fadc/cnd","/daq/config/bmt","/daq/config/fmt","/daq/fadc/hel","/daq/fadc/rf"
+            "/daq/fadc/htcc","/daq/fadc/ctof","/daq/fadc/cnd","/daq/config/bmt","/daq/config/fmt","/daq/fadc/hel","/daq/fadc/rf","/daq/fadc/band"
         });
         fitterManager.init(keysFitter, tablesFitter);
     }
