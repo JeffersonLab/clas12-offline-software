@@ -19,30 +19,29 @@ public class RecoBankWriter {
 			return null;
 		}
 
-		// the bank use cm as distance units -> need to convert from mm
-		for(int i =0; i< hitlist.size(); i++) {
+		if (hitlist.size() !=1) {
+			System.err.println("Hitlist for BAND::hits BANK writer has wrong length. It is "+hitlist.size());
+			return null;
+		}
+		//i should only go to 1 but keep for loop for future extensions if more hits are required
+		for(int i =0;  i<hitlist.size(); i++) {
 			bank.setShort("id",i, (short)(i+1));
-			bank.setByte("sector",i, (byte) hitlist.get(i).Sector());
-			bank.setByte("layer",i, (byte) hitlist.get(i).Layer());
-			bank.setShort("component",i, (short) hitlist.get(i).Component());
-			bank.setShort("trkID",i, (short) hitlist.get(i).get_AssociatedTrkId());
-			bank.setFloat("time",i, (float) hitlist.get(i).Time());
-			bank.setFloat("x",i, (float) (hitlist.get(i).X()/10.));
-			bank.setFloat("y",i, (float) (hitlist.get(i).Y()/10.));
-			bank.setFloat("z",i, (float) (hitlist.get(i).Z()/10.));
-			bank.setFloat("x_unc",i, (float) (hitlist.get(i).get_uX()/10.));
-			bank.setFloat("y_unc",i, (float) (hitlist.get(i).get_uY()/10.));
-			bank.setFloat("z_unc",i, (float) (hitlist.get(i).get_uZ()/10.));
-			bank.setFloat("tx",i, (float) (hitlist.get(i).get_tX()/10.));
-			bank.setFloat("ty",i, (float) (hitlist.get(i).get_tY()/10.));
-			bank.setFloat("tz",i, (float) (hitlist.get(i).get_tZ()/10.));
-			bank.setFloat("energy",i, (float) hitlist.get(i).Edep());
-			bank.setFloat("tlength",i, (float) (hitlist.get(i).tLength()/10.)); // units is cm
-			bank.setFloat("pathlength",i, (float) (hitlist.get(i).pathLength()/10.)); // units is cm
-			bank.setShort("indexLadc",i, (short) hitlist.get(i).indexLadc());
-			bank.setShort("indexRadc",i, (short) hitlist.get(i).indexRadc());
-			bank.setShort("indexLtdc",i, (short) hitlist.get(i).indexLtdc());
-			bank.setShort("indexRtdc",i, (short) hitlist.get(i).indexRtdc());
+			bank.setInt("sector",i, (int) hitlist.get(i).GetSector());
+			bank.setInt("layer",i, (int) hitlist.get(i).GetLayer());
+			bank.setInt("component",i, (int) hitlist.get(i).GetComponent());
+			bank.setDouble("meantime",i, (double) hitlist.get(i).GetMeanTime());
+			bank.setDouble("difftime",i, (double) hitlist.get(i).GetDiffTime());
+			bank.setDouble("adcleftcorr",  i, (double) hitlist.get(i).GetAdcLeft());
+			bank.setDouble("tdcleftcorr",  i, (double) hitlist.get(i).GetTdcLeft());
+			bank.setDouble("adcrightcorr",  i, (double) hitlist.get(i).GetAdcRight());
+			bank.setDouble("tdcrightcorr",  i, (double) hitlist.get(i).GetTdcRight());
+			bank.setDouble("x",i, (double) (hitlist.get(i).GetX()));
+			bank.setDouble("y",i, (double) (hitlist.get(i).GetY()));
+			bank.setDouble("z",i, (double) (hitlist.get(i).GetZ()));
+			bank.setDouble("ux",i, (double) (hitlist.get(i).GetUx()));
+			bank.setDouble("uy",i, (double) (hitlist.get(i).GetUy()));
+			bank.setDouble("uz",i, (double) (hitlist.get(i).GetUz()));
+
 
 		}
 		return bank;
