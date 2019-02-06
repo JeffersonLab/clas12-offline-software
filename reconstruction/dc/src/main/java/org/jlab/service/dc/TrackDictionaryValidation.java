@@ -238,8 +238,22 @@ public class TrackDictionaryValidation {
 //                                                    System.out.println("Removing hit " + iPMT + " among " + htccPMTs.size() + " " + thetaCC + " " +  phiCC + " " + htccSector + "/" + htccLayer+ "/"+htccComponent);
 //                                                    runConfig.show();recCherenkov.show(); htccRec.show();htccADC.show();
 //                                                }
+                                                }
+                                            if(htccPMTsMatched.size() != nhits) {
+                                                System.out.println("Mismatch in HTCC cluster size " + nhits +"/"+htccPMTsMatched.size()+"/"+htccPMTs.size() + " " + thetaCC + " " +  phiCC + " " +((phiCC+30)%60-30));
+//                                                for(int iPMT = 0; iPMT < htccPMTs.size(); iPMT++) {
+//                                                    int htccSector    = htccPMTs.get(iPMT)[0];
+//                                                    int htccLayer     = htccPMTs.get(iPMT)[1];
+//                                                    int htccComponent = htccPMTs.get(iPMT)[2];
+//                                                    System.out.println(iPMT + " " + htccSector + " " + htccLayer + " " + htccComponent);
+//                                                }
+//                                                for (int k = 0; k < htccADC.rows(); k++) {
+//                                                    int sector    = htccADC.getByte("sector", k);
+//                                                    int layer     = htccADC.getByte("layer", k);
+//                                                    int component = htccADC.getShort("component", k);
+//                                                    System.out.println(k + " " + sector + " " + layer + " " + component);
+//                                                }
                                             }
-//                                            if(htccPMTsMatched.size() != nhits) System.out.println("Mismatch in HTCC cluster size " + nhits +"/"+htccPMTsMatched.size()+"/"+htccPMTs.size() + " " + thetaCC + " " +  phiCC);
                                             htcc = this.htccMask(htccPMTsMatched);
                                         }
                                     }
@@ -472,175 +486,202 @@ public class TrackDictionaryValidation {
     }
     
     public ArrayList<int[]> htccPMT(double th, double ph) {
-        double TableTheta1[] = {8.75, 16.25, 23.75, 31.25};
-        double TableTheta2[] = {12.5, 20.00, 27.50};
+        // phi is defined between 0 and 360
+        double TableTheta1[] = { 8.75, 16.25, 23.75, 31.25};
+        double TableTheta2[] = {12.50, 20.00, 27.50};
+        double TableTheta3[] = {11.25, 18.75, 26.25};
+        double TableTheta4[] = {13.75, 21.25, 28.75};
 
         ArrayList<int[]> htccPMTS = new ArrayList<int[]>();
 
         double p1, p2, ph_new;
+
+        int sector=0;
+        if (ph > 30.0 && ph <= 90.0) {
+            sector = 2;
+        } else if (ph > 90.0 && ph <= 150.0) {
+            sector = 3;
+        } else if (ph > 150.0 && ph <= 210.0) {
+            sector = 4;
+        } else if (ph > 210.0 && ph <= 270.0) {
+            sector = 5;
+        } else if (ph > 270.0 && ph <= 330.0) {
+            sector = 6;
+        } else if (ph <= 30.0 || ph > 330.0) {
+            sector = 1;
+        }
+        double phSec = ((ph+30.0)%60)-30;
+
 //   int sector[];
 //   HTCC_Hits cherenkov_road = null;
         //First, find the number of hits, which table to use, and sector/layer/component
         for (int i = 0; i < 4; i++) {
-            if (th == TableTheta1[i]) {
-                for (int k = 0; k < 12; k++) {
-                    p1 = 15.0 + k * 30.0;
-                    p2 = k * 30.0;
-                    if (ph == p1) {
-                        int htccPMT[] = new int[3];
-
-                        if (ph > 30.0 && ph < 90.0) {
-                            htccPMT[0] = 2;
-                        } else if (ph > 90.0 && ph < 150.0) {
-                            htccPMT[0] = 3;
-                        } else if (ph > 150.0 && ph < 210.0) {
-                            htccPMT[0] = 4;
-                        } else if (ph > 210.0 && ph < 270.0) {
-                            htccPMT[0] = 5;
-                        } else if (ph > 270.0 && ph < 330.0) {
-                            htccPMT[0] = 6;
-                        } else if (ph < 30.0 || ph > 330.0) {
-                            htccPMT[0] = 1;
-                        }
-
-                        if (ph != 345.0) {
-                            ph_new = ph - (htccPMT[0] - 1) * 60.0;
-                        } else {
-                            ph_new = -15.0;
-                        }
-
-                        if (ph_new == -15.0) {
-                            htccPMT[1] = 1;
-                        } else if (ph_new == 15.0) {
-                            htccPMT[1] = 2;
-                        }
-
-                        htccPMT[2] = i + 1;
-                        htccPMTS.add(htccPMT);
-
-                        //System.out.println(th + " " + ph + " " + HTCC_Sector[0] + " " + HTCC_Layer[0] + " " + HTCC_Component[0]);
-                    } else if (ph == p2) {
-                        int htccPMT1[] = new int[3];
-                        int htccPMT2[] = new int[3];
-                        double testr = ph % 60.;
-                        int test = (int) Math.round(ph / 60.0);
-                        if (testr == 0) {
-                            htccPMT1[0] = test + 1;
-                            htccPMT2[0] = test + 1;
-                            htccPMT1[1] = 1;
-                            htccPMT2[1] = 2;
-                        } else if (testr != 0) {
-                            htccPMT1[0] = test;
-                            htccPMT2[0] = test + 1;
-                            if (test == 6) {
-                                htccPMT2[0] = 1;
-                            }
-                            htccPMT1[1] = 2;
-                            htccPMT2[1] = 1;
-                        }
-
-                        htccPMT1[2] = i + 1;
-                        htccPMT2[2] = i + 1;
-                        htccPMTS.add(htccPMT1);
-                        htccPMTS.add(htccPMT2);
-//            if (ph == 300.0) {System.out.println(th + " " + ph + " " + sector[0] + " " + layer[0] + " " + component[0] + " " + sector[1] + " " + layer[1] + " " + component[1]);}
-                    }
+            // 1 hit case
+            if (th == TableTheta1[i] && (phSec==-15 || phSec==15)) {
+                int htccPMT[] = new int[3];
+                htccPMT[0] = sector;
+                if (phSec == -15.0) {
+                    htccPMT[1] = 1;
+                } else if (phSec == 15.0) {
+                    htccPMT[1] = 2;
+                }              
+                htccPMT[2] = i + 1;
+                htccPMTS.add(htccPMT);  
+            }
+            // 2 hits over phi
+            else if (th == TableTheta1[i] && phSec==0) {
+                for(int k = 0; k < 2; k++) {
+                    int htccPMT[] = new int[3];
+                    htccPMT[0] = sector;
+                    htccPMT[1] = k + 1;
+                    htccPMT[2] = i + 1;
+                    htccPMTS.add(htccPMT);  
+                }                    
+            }
+            // 2 hits over sectors
+            else if (th == TableTheta1[i] && phSec==-30) {
+                for(int k = 0; k < 2; k++) {
+                    int htccPMT[] = new int[3];
+                    htccPMT[0] = sector + k; if(htccPMT[0]==7) htccPMT[0]=1;
+                    htccPMT[1] = 2 - k;
+                    htccPMT[2] = i + 1;
+                    htccPMTS.add(htccPMT);  
+                }                    
+            }
+        }
+        for (int i = 0; i < 3; i++) {
+            // 2 hits over theta
+            if (th == TableTheta2[i] && (phSec==-15 || phSec==15)) {
+                for(int k = 0; k < 2; k++) {
+                    int htccPMT[] = new int[3];
+                    htccPMT[0] = sector;
+                    if (phSec == -15.0) {
+                        htccPMT[1] = 1;
+                    } else if (phSec == 15.0) {
+                        htccPMT[1] = 2;
+                    }              
+                    htccPMT[2] = i + 1 + k;
+                    htccPMTS.add(htccPMT);  
+                }                    
+            }
+            // 4 hits
+            if (th == TableTheta2[i] && phSec==0) {
+                for(int k = 0; k < 2; k++) {
+                for(int j = 0; j < 2; j++) {
+                    int htccPMT[] = new int[3];
+                    htccPMT[0] = sector;
+                    htccPMT[1] = j + 1;
+                    htccPMT[2] = i + 1 + k;
+                    htccPMTS.add(htccPMT);  
+                }
+                }
+            }
+            // 4 hits in between sectors
+            if (th == TableTheta2[i] && phSec==-30) {
+                for(int k = 0; k < 2; k++) {
+                for(int j = 0; j < 2; j++) {
+                    int htccPMT[] = new int[3];
+                    htccPMT[0] = sector + j; if(htccPMT[0]==7) htccPMT[0]=1;
+                    htccPMT[1] = 2 - j;
+                    htccPMT[2] = i + 1 + k;
+                    htccPMTS.add(htccPMT);  
+                }
                 }
             }
         }
         for (int i = 0; i < 3; i++) {
-            if (th == TableTheta2[i]) {
-                for (int k = 0; k < 12; k++) {
-                    p1 = 15.0 + k * 30.0;
-                    p2 = k * 30.0;
-                    if (ph == p1) {
-                        int htccPMT1[] = new int[3];
-                        int htccPMT2[] = new int[3];
-                        if (ph > 30.0 && ph < 90.0) {
-                            htccPMT1[0] = 2;
-                            htccPMT2[0] = 2;
-                        } else if (ph > 90.0 && ph < 150.0) {
-                            htccPMT1[0] = 3;
-                            htccPMT2[0] = 3;
-                        } else if (ph > 150.0 && ph < 210.0) {
-                            htccPMT1[0] = 4;
-                            htccPMT2[0] = 4;
-                        } else if (ph > 210.0 && ph < 270.0) {
-                            htccPMT1[0] = 5;
-                            htccPMT2[0] = 5;
-                        } else if (ph > 270.0 && ph < 330.0) {
-                            htccPMT1[0] = 6;
-                            htccPMT2[0] = 6;
-                        } else if (ph < 30.0 || ph > 330.0) {
-                            htccPMT1[0] = 1;
-                            htccPMT2[0] = 1;
-                        }
-
-                        if (ph != 345.0) {
-                            ph_new = ph - (htccPMT1[0] - 1) * 60.0;
-                        } else {
-                            ph_new = -15.0;
-                        }
-
-                        if (ph_new == -15.0) {
-                            htccPMT1[1] = 1;
-                            htccPMT2[1] = 1;
-                        } else if (ph_new == 15.0) {
-                            htccPMT1[1] = 2;
-                            htccPMT2[1] = 2;
-                        }
-
-                        htccPMT1[2] = i + 1;
-                        htccPMT2[2] = i + 2;
-                        htccPMTS.add(htccPMT1);
-                        htccPMTS.add(htccPMT2);
-                        //System.out.println(th + " " + ph + " " + sector[0] + " " + layer[0] + " " + component[0] + " " + sector[1] + " " + layer[1] + " " + component[1]);
-                    } else if (ph == p2) {
-                        int htccPMT1[] = new int[3];
-                        int htccPMT2[] = new int[3];
-                        int htccPMT3[] = new int[3];
-                        int htccPMT4[] = new int[3];
-                        double testr = ph % 60.0;
-                        int test = (int) Math.round(ph / 60.0);
-                        if (testr == 0) {
-                            htccPMT1[0] = test + 1;
-                            htccPMT2[0] = test + 1;
-                            htccPMT3[0] = test + 1;
-                            htccPMT4[0] = test + 1;
-                            htccPMT1[1] = 1;
-                            htccPMT2[1] = 1;
-                            htccPMT3[1] = 2;
-                            htccPMT4[1] = 2;
-
-                        } else if (testr != 0) {
-                            htccPMT1[0] = test;
-                            htccPMT2[0] = test;
-                            htccPMT3[0] = test + 1;
-                            htccPMT4[0] = test + 1;
-                            if (test == 6) {
-                                htccPMT3[0] = 1;
-                                htccPMT4[0] = 1;
-                            }
-                            htccPMT1[1] = 2;
-                            htccPMT2[1] = 2;
-                            htccPMT3[1] = 1;
-                            htccPMT4[1] = 1;
-                        }
-
-                        htccPMT1[2] = i + 1;
-                        htccPMT2[2] = i + 2;
-                        htccPMT3[2] = i + 1;
-                        htccPMT4[2] = i + 2;
-                        //System.out.println(th + " " + ph + " " + sector[0] + " " + layer[0] + " " + component[0] + " " + sector[1] + " " + layer[1] + " " + component[1]+ " " + sector[2] + " " + layer[2] + " " + component[2] + " " + sector[3] + " " + layer[3] + " " + component[3]);
-                        htccPMTS.add(htccPMT1);
-                        htccPMTS.add(htccPMT2);
-                        htccPMTS.add(htccPMT3);
-                        htccPMTS.add(htccPMT4);
-    
-                    }
+            // 3 hit combinations
+            if (th == TableTheta3[i] && phSec==-5) {
+                for(int k = 0; k < 2; k++) {
+                for(int j = 0; j < 2; j++) {
+                    int htccPMT[] = new int[3];
+                    htccPMT[0] = sector;
+                    htccPMT[1] = j + 1;
+                    htccPMT[2] = i + 1 + k;
+                    if(!(k==1 && j==1)) htccPMTS.add(htccPMT);  
+                }
+                }
+            }
+            if (th == TableTheta3[i] && phSec==5) {
+                for(int k = 0; k < 2; k++) {
+                for(int j = 0; j < 2; j++) {
+                    int htccPMT[] = new int[3];
+                    htccPMT[0] = sector;
+                    htccPMT[1] = j + 1;
+                    htccPMT[2] = i + 1 + k;
+                    if(!(k==1 && j==0)) htccPMTS.add(htccPMT);  
+                }
+                }
+            }
+            if (th == TableTheta3[i] && phSec==-25) {
+                for(int k = 0; k < 2; k++) {
+                for(int j = 0; j < 2; j++) {
+                    int htccPMT[] = new int[3];
+                    htccPMT[0] = sector - j; if(htccPMT[0]==0) htccPMT[0]=6;
+                    htccPMT[1] = j + 1;
+                    htccPMT[2] = i + 1 + k;
+                    if(!(k==1 && j==1)) htccPMTS.add(htccPMT);  
+                }
+                }
+            }
+            if (th == TableTheta3[i] && phSec==25) {
+                for(int k = 0; k < 2; k++) {
+                for(int j = 0; j < 2; j++) {
+                    int htccPMT[] = new int[3];
+                    htccPMT[0] = sector + j; if(htccPMT[0]==7) htccPMT[0]=1;
+                    htccPMT[1] = 2 - j;
+                    htccPMT[2] = i + 1 + k;
+                    if(!(k==1 && j==1)) htccPMTS.add(htccPMT);  
+                }
                 }
             }
         }
+        for (int i = 0; i < 3; i++) {
+            // 3 hit combinations
+            if (th == TableTheta4[i] && phSec==-5) {
+                for(int k = 0; k < 2; k++) {
+                for(int j = 0; j < 2; j++) {
+                    int htccPMT[] = new int[3];
+                    htccPMT[0] = sector;
+                    htccPMT[1] = j + 1;
+                    htccPMT[2] = i + 1 + k;
+                    if(!(k==0 && j==1)) htccPMTS.add(htccPMT);  
+                }
+                }
+            }
+            if (th == TableTheta4[i] && phSec==5) {
+                for(int k = 0; k < 2; k++) {
+                for(int j = 0; j < 2; j++) {
+                    int htccPMT[] = new int[3];
+                    htccPMT[0] = sector;
+                    htccPMT[1] = j + 1;
+                    htccPMT[2] = i + 1 + k;
+                    if(!(k==0 && j==0)) htccPMTS.add(htccPMT);  
+                }
+                }
+            }
+            if (th == TableTheta4[i] && phSec==-25) {
+                for(int k = 0; k < 2; k++) {
+                for(int j = 0; j < 2; j++) {
+                    int htccPMT[] = new int[3];
+                    htccPMT[0] = sector - j; if(htccPMT[0]==0) htccPMT[0]=6;
+                    htccPMT[1] = j + 1;
+                    htccPMT[2] = i + 1 + k;
+                    if(!(k==0 && j==1)) htccPMTS.add(htccPMT);  
+                }
+                }
+            }
+            if (th == TableTheta4[i] && phSec==25) {
+                for(int k = 0; k < 2; k++) {
+                for(int j = 0; j < 2; j++) {
+                    int htccPMT[] = new int[3];
+                    htccPMT[0] = sector + j; if(htccPMT[0]==7) htccPMT[0]=1;
+                    htccPMT[1] = 2 - j;
+                    htccPMT[2] = i + 1 + k;
+                    if(!(k==0 && j==1)) htccPMTS.add(htccPMT);  
+                }
+                }
+            }        }
         return htccPMTS;
     }
 
