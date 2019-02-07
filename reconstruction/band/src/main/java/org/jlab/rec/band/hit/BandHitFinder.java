@@ -16,7 +16,7 @@ public class BandHitFinder {
 	/** author:  F.Hauenstein
 	 * This class contains the core of the code. The find hits method reconstruct good band hits from raw hits
 	 *  using various cuts and matching.
-     For the start good hits are defined with only one coincidence hit in the active area of a BAND area and no 
+     For the start good hits are defined with only up to 5 coincidence hit in the active area of a BAND area and no 
      hit in the veto counters.
      TODO: Implement geometry calculations
 	 */
@@ -140,11 +140,11 @@ public class BandHitFinder {
 			} // close loop over i  		
 
 			// At this stage an array of coincidence hits from type BandHit exists
-			//We are only interested if we have exactly one hit surviving all cuts, thus "good" events should 
-			//have a coincidences array of lenght one
+			//We are only interested if we have five or less hits surviving all cuts, thus "good" events should 
+			//have a coincidences array of length 5 or less
 
 		
-			if (coincidences.size() == 1) return coincidences;
+			if (coincidences.size() <=5) return coincidences;
 			else {
 				return new ArrayList<BandHit>();
 			}
