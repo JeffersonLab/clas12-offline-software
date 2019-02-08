@@ -32,7 +32,7 @@ public class BandHitFinder {
 		if(candidates.size() > 0) {
 
 			// Loop through the candidates array to find possible combinations of left and right.
-			//in parallel store hits from veto in another array to speed up check later
+			// check directly if veto counter has a hit and return empty array to speed up loop.
 			
 			double xposHit = -1; 		//Position along the bar, determined from time difference
 			double yposHit = -1;        //Position in vertical direction, determined from component and middle of the bar
@@ -143,17 +143,36 @@ public class BandHitFinder {
 			//We are only interested if we have five or less hits surviving all cuts, thus "good" events should 
 			//have a coincidences array of length 5 or less
 
+			//Next line is for the future when the advancedHitFinder is correctly implemented
+		//	return advancedHitFinder(coincidences);
 		
 			if (coincidences.size() <=5) return coincidences;
 			else {
 				return new ArrayList<BandHit>();
 			}
-		
+		 
 
 		}  // closes if candidates array has non-zero entries...
 
 		return coincidences; //this array is empty since the if condition for a non-zero of candidates was not true.
 
 	} // findHits function		
+	
+	public ArrayList<BandHit> advancedHitFinder(ArrayList<BandHit> coincidences) 
+	{
+		
+		/** author:  F.Hauenstein
+		 * This function implements better reconstruction methods for BandHits. It is called from BandHitFinder::findGoodHits function
+		 * so that all hits given to this function are already calibrated and coincidences on a bar
+	 	 */
+		
+		ArrayList<BandHit> betterHits = new ArrayList<BandHit>();      // array list of all coincidence hits in BAND with no veto fired
+
+		//
+		
+		return betterHits;
+	}
+	
+	
 
 } // BandHitFinder
