@@ -19,7 +19,7 @@
             {"name":"z",                "id":13, "type":"float", "info":"Z coor (cm) of coincidence hit"},
             {"name":"ux",               "id":14, "type":"float", "info":"X coor uncertainty (cm) of coincidence hit"},
             {"name":"uy",               "id":15, "type":"float", "info":"Y coor uncertainty (cm) of coincidence hit"},
-            {"name":"uz",               "id":16, "type":"float", "info":"Z coor uncertainty (cm) of coincidence hit"},
+            {"name":"uz",               "id":16, "type":"float", "info":"Z coor uncertainty (cm) of coincidence hit"}
           ]
   }
 ]
