@@ -2,244 +2,176 @@ package org.jlab.rec.band.hit;
 
 import java.util.ArrayList;
 
-
-
-public class BandHit extends ArrayList<HalfHit> implements Comparable<BandHit>{
+public class BandHit extends ArrayList<BandHitCandidate> {
 
 	/**
-	 * A BandHit consists of an array of particle hits in the BAND reconstructed according to 
-	 * the algorithm of the BandHitFinder class
+	 * author: Florian Hauenstein
+	 * A BandHit consists of a coincidence hit on a bar with no veto hits or other bars fired. Corresponding
+	 * hits are found by the BandHitFinder
+	Add raw information about adcs and tdcs L and R, add time diff and sum of time
+	 *
 	 */
-
+	
 	private static final long serialVersionUID = 1L;    // What is this??
 
-	private int _pad_d;   				  // index, to the half-hit array list, of the "direct" half-hit 
-	private int _pad_n;			          // index, to the half-hit array list, of the "indirect", neighbour half-hit 
-	private double _T;       	          // reconstructed time of hit
-	private double _Z;       	          // z co-ordinate of hit (wrt target center)
-	private double _X;       	          // x co-ordinate of hit (wrt target center)
-	private double _Y;       	          // y co-ordinate of hit (wrt target center)
-	private double _tX;       	          // x co-ordinate of track wrt to middle of the counter	
-	private double _tY;       	          // y co-ordinate of track wrt to middle of the counter
-	private double _tZ;       	          // z co-ordinate of track wrt to middle of the counter
-	private double _uX;					  // uncertainty in hit x coordinate
-	private double _uY;					  // uncertainty in hit y coordinate
-	private double _uZ;					  // uncertainty in hit z coordinate
-	private double _pathlength;       	      // reconstructed path length from the vertex
-	private double _tLength;       	      // reconstructed path length in the hit paddle
-	private double _E;       	          // reconstructed energy of hit
-	private double _phi;       	          // azimuthal angle of hit (assuming hit in center of paddle width)
-	private double _theta;       	      // polar angle of hit (assuming hit in center of paddle thickness)
+	private double _diffTime;       	   // tL - tR
+	private double _meanTime;       	   // reconstructed time of hit (corresponds to (tL+tR)/2
+	private double _x;       	          // x co-ordinate of hit (wrt target center)
+	private double _y;       	          // y co-ordinate of hit (wrt target center)
+	private double _z;       	          // z co-ordinate of hit (wrt target center)
+	private double _ux;					  // uncertainty in hit x coordinate
+	private double _uy;					  // uncertainty in hit y coordinate
+	private double _uz;					  // uncertainty in hit z coordinate
+	private double _tdcLeft;		 	//Corrected TDC left PMT in ns
+	private double _tdcRight;			//Corrected TDC left PMT in ns
+	private double _adcLeft;			//Corrected ADC left PMT in MeVee
+	private double _adcRight;			//Corrected ADC left PMT in MeVee
+	
 	private int _sector, _layer, _component; 
-	private int _indexLadc;				  // index to match row adc and tdc to reconstructed hit (index L (resp.R) should be the same for adc and tdc)
-	private int _indexRadc;
-	private int _indexLtdc;				  // index to match row adc and tdc to reconstructed hit (index L (resp.R) should be the same for adc and tdc)
-	private int _indexRtdc;
+	
 
 
 	// constructor
-	public BandHit(int padd, int padn) {
-		this._pad_d = padd;
-		this._pad_n = padn;
+	public BandHit() {
+		_sector = -1;
+		_layer = -1;
+		_component = -1;
+		_x = -1;
+		_y = -1;
+		_z = -1;
+		_ux = -1;
+		_uy = -1;
+		_uz = -1;
+		_meanTime = -2000;
+		_diffTime = -2000;
+		_tdcLeft = -2000;
+		_tdcRight = -2000;
+		_adcLeft = -2000;
+		_adcRight = -2000;
 	}
 
-	public int index_d() {
-		return _pad_d;
+	public double GetDiffTime() {
+		return _diffTime;
+	}
+	
+	public void SetDiffTime(double time) {
+		this._diffTime = time;
+	}
+	
+	public double GetMeanTime() {
+		return _meanTime;
+	}
+	
+	public void SetMeanTime(double time) {
+		this._meanTime = time;
 	}
 
-	public int index_n() {
-		return _pad_n;
+	public double GetX() {
+		return _x;
 	}
 
-	public double Time() {
-		return _T;
+	public double GetY() {
+		return _y;
 	}
 
-	public void set_Time(double time) {
-		this._T = time;
+	public double GetZ() {
+		return _z;
 	}
 
-	public double Z() {
-		return _Z;
+	public void SetX(double xpos) {
+		this._x = xpos;
 	}
 
-	public double X() {
-		return _X;
+	public void SetY(double ypos) {
+		this._y = ypos;
 	}
 
-	public double Y() {
-		return _Y;
+	public void SetZ(double zpos) {
+		this._z = zpos;
 	}
 
-	public double pathLength() {
-		return _pathlength;
+	public double GetUx() {
+		return _ux;
 	}
 
-	public double tLength() {
-		return _tLength;
+	public double GetUy() {
+		return _uy;
 	}
 
-	public void set_Z(double zpos) {
-		this._Z = zpos;
+	public double GetUz() {
+		return _uz;
 	}
 
-	public void set_X(double xpos) {
-		this._X = xpos;
+	public void SetUx(double xunc) {
+		this._ux = xunc;
 	}
 
-	public void set_Y(double ypos) {
-		this._Y = ypos;
+	public void SetUy(double yunc) {
+		this._uy = yunc;
 	}
 
-	public void set_pathlength(double path) {
-		this._pathlength=path;
+	public void SetUz(double zunc) {
+		this._uz = zunc;
 	}
 
-	public void set_tLength(double dL) {
-		this._tLength=dL;
+	public double GetTdcLeft() {
+		return _tdcLeft;
+	}
+	
+	public double GetTdcRight() {
+		return _tdcRight;
+	}
+	
+	public void SetTdcLeft(double tdc) {
+		this._tdcLeft = tdc;
+	}
+	
+	public void SetTdcRight(double tdc) {
+		this._tdcRight = tdc;
+	}
+	
+	public double GetAdcLeft() {
+		return _adcLeft;
+	}
+	
+	public double GetAdcRight() {
+		return _adcRight;
+	}
+	
+	public void SetAdcLeft(double adc) {
+		this._adcLeft = adc;
+	}
+	
+	public void SetAdcRight(double adc) {
+		this._adcRight = adc;
 	}
 
-	public double Edep() {
-		return _E;
-	}
-
-	public void set_Edep(double energy) {
-		this._E = energy;
-	}	
-
-	public double Phi() {
-		return _phi;
-	}
-
-	public void set_Phi(double phi) {
-		this._phi = phi;
-	}
-
-	public double Theta() {
-		return _theta;
-	}
-
-	public void set_Theta(double theta) {
-		this._theta = theta;
-	}
-
-	public int Sector() {
+	
+	public int GetSector() {
 		return _sector;
 	}
 
-	public void set_Sector(int sector) {
+	public void SetSector(int sector) {
 		this._sector = sector;
 	}
 
-	public int Layer() {
+	public int GetLayer() {
 		return _layer;
 	}
 
-	public void set_Layer(int layer) {
+	public void SetLayer(int layer) {
 		this._layer = layer;
 	}
 
-	public int Component() {
+	public int GetComponent() {
 		return _component;
 	}
 
-	public void set_Component(int component) {
+	public void SetComponent(int component) {
 		this._component = component;
 	}		
 
-	public double indexLadc() {
-		return _indexLadc;
-	}
-
-	public void set_indexLadc(int indexLadc) {
-		this._indexLadc = indexLadc;
-	}
-
-	public double indexRadc() {
-		return _indexRadc;
-	}
-
-	public void set_indexRadc(int indexRadc) {
-		this._indexRadc = indexRadc;
-	}
 	
-	public double indexLtdc() {
-		return _indexLtdc;
-	}
 
-	public void set_indexLtdc(int indexLtdc) {
-		this._indexLtdc = indexLtdc;
-	}
-
-	public double indexRtdc() {
-		return _indexRtdc;
-	}
-
-	public void set_indexRtdc(int indexRtdc) {
-		this._indexRtdc = indexRtdc;
-	}
-
-	public double get_tX() {
-		return _tX;
-	}
-
-	public void set_tX(double _tX) {
-		this._tX = _tX;
-	}
-
-	public double get_tY() {
-		return _tY;
-	}
-
-	public void set_tY(double _tY) {
-		this._tY = _tY;
-	}
-
-	public double get_tZ() {
-		return _tZ;
-	}
-
-	public void set_tZ(double _tZ) {
-		this._tZ = _tZ;
-	}
-
-	public double get_uX() {
-		return _uX;
-	}
-
-	public void set_uX(double _uX) {
-		this._uX = _uX;
-	}
-
-	public double get_uY() {
-		return _uY;
-	}
-
-	public void set_uY(double _uY) {
-		this._uY = _uY;
-	}
-
-	public double get_uZ() {
-		return _uZ;
-	}
-
-	public void set_uZ(double _uZ) {
-		this._uZ = _uZ;
-	}
-
-	public int compareTo(BandHit arg0) {  // Sorts into ascending time order
-		if(this.Time()<arg0.Time()) {
-			return 1;
-		} else {
-			return 0;
-		}
-	}
-
-	private int _Id = -1;
-	public void set_AssociatedTrkId(int id) {
-		_Id = id;
-	}	
-	public int get_AssociatedTrkId() {
-		return _Id ;
-	}
+	
 }
