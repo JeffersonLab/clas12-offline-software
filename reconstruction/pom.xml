@@ -25,5 +25,6 @@
     <module>rich</module>
     <module>fvt</module>
     <module>eb</module>
+    <module>band</module>
   </modules>
 </project>
