@@ -47,16 +47,17 @@ public class HitReader {
 		int adc=0;
 		double ftdc=0;
 		
+	
 		// starts looking at the adc bank
 		for(int i = 0; i<nadc; i++)
 		{ 
 			int sector    = bankADC.getByte("sector",i);  // one of the 5 sectors
 			int layer     = bankADC.getByte("layer",i);  // one of the 6 layers
-			int component = bankADC.getInt("component", i);
+			int component = bankADC.getShort("component", i);
 			int order     = bankADC.getByte("order",i);
 		
 			//int side = -1;
-			
+			//Do we have to change adc to long from int?
 			adc = bankADC.getInt("ADC",i); 
 			
 			
@@ -67,20 +68,22 @@ public class HitReader {
 			for(int j=0; j<ntdc; j++){
 				int s = bankTDC.getByte("sector", j);
                 int l = bankTDC.getByte("layer", j);
+                int c = bankTDC.getShort("component", j);
                 int o = bankTDC.getByte("order", j);
 
-				if(s==sector && l == layer  && o == order+2 ){
-			//System.out.println("s "+ s+" sector "+sector+" l "+l+" layer "+layer+" o "+o+" order "+order);
+				if(s==sector && l == layer && c==component && o == order+2 ){
+		//	System.out.println("Hit Reader: s "+ s+" sector "+sector+" l "+l+" layer "+layer+" c "+c+" component "+component+" o "+o+" order "+order);
 				 tdc = bankTDC.getInt("TDC",j);
 				 break;
 				}
 			}
+		//	System.out.println("Hit Reader: adc "+ adc +" tdc "+tdc+" ftdc "+ftdc);
 			
 			BandHitCandidate newhit = null;
 
 			// First, carry out checks on the quality of the signals:	    	  
-			if (adc == 0 || tdc == 0) continue; // require good ADC and TDC values
-
+			if (adc == 0 || tdc == 0 ||  ftdc == 0) continue; // require good ADC and TDC values
+		//	System.out.println("Hit Reader after check: adc "+ adc +" tdc "+tdc+" ftdc "+ftdc);
 			newhit = new BandHitCandidate(sector, layer, component, order, triggerPhase, adc, tdc, ftdc); 
 
 			candidates.add(newhit);

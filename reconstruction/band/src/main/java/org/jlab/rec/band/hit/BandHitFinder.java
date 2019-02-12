@@ -160,8 +160,11 @@ public class BandHitFinder {
 		//	return advancedHitFinder(coincidences);
 		
 			
-			if (coincidences.size() <=10) {
+			if (coincidences.size() <=10 && coincidences.size()>0) {
 				System.out.println("In BandHitFinder found " + coincidences.size() + " coincidence hits");
+				for (int i = 0; i < (coincidences.size()); i++) {
+					System.out.println("Hit "+i+" : sector "+ coincidences.get(i).GetSector()+ " layer "+ coincidences.get(i).GetLayer()+" component " + coincidences.get(i).GetComponent());
+				}
 				return coincidences;
 			}
 			else {

@@ -46,23 +46,20 @@ public class BANDEngine extends ReconstructionEngine {
 		if(candidates.size()==0 )
 			return true;
 
-		//2) find the BAND hits from thes candidates
+		//2) find the BAND hits from the candidates
 		BandHitFinder hitFinder = new BandHitFinder();
 		hits = hitFinder.findGoodHits(candidates);
 
 		
-		   			
+    	if(hits.size()>0){
 
-		if(hits.size()!=0){
-
-				//          DataBank outbank = RecoBankWriter.fillbandHitBanks(event, hits);
-			//          event.appendBanks(outbank);
-			// event.show();
+			for (int i = 0; i < (hits.size()); i++) {
+				System.out.println("Hit "+i+" : sector "+ hits.get(i).GetSector()+ " layer "+ hits.get(i).GetLayer()+" component " + hits.get(i).GetComponent());
+			}
+			//event.show();
 			System.out.println("in process event ");
 			rbc.appendBANDBanks(event,hits);
-			
-			
-		
+				
 		}
 
 
@@ -97,21 +94,21 @@ public class BANDEngine extends ReconstructionEngine {
 	public static void main (String arg[]) {
 		BANDEngine en = new BANDEngine();
 		en.init();
-		//String input = "/Users/ziegler/Workdir/Files/GEMC/ForwardTracks/pi-.r100.evio";
 		
-		String input = "/band_2052_2053.hipo";
+		
+		String input = "bandtest.hipo";
 		
 		HipoDataSource  reader = new HipoDataSource();
 		reader.open(input);
-		String outputFile="/projet/nucleon/hauenst/band_run2052_2053/test.hipo";
+		String outputFile="test.hipo";
 		HipoDataSync  writer = new HipoDataSync();
 		writer.open(outputFile);
-
+        int nofevents=0;
 		
-		while(reader.hasEvent()) {
+		while(reader.hasEvent() && nofevents<1000) {
 			
 			DataEvent event = (DataEvent) reader.getNextEvent();
-			
+			//System.out.println("***********  NEXT EVENT ************");
 			//event.show();
 			if (event.hasBank("band::adc") && event.hasBank("band::tdc")){
 			event.getBank("band::adc").show();
@@ -119,6 +116,7 @@ public class BANDEngine extends ReconstructionEngine {
 			}
 			en.processDataEvent(event);
 			writer.writeEvent(event);
+			nofevents++;
 			//event.getBank("band::hits").show();
 			
 		}		

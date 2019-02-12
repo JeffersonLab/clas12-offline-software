@@ -50,13 +50,14 @@ public class RecoBankWriter {
 
 	}
 
-	 public void appendBANDBanks(DataEvent event,ArrayList<BandHit> hitlist) {
-		if(hitlist.size()!=0){
-			DataBank bank = this.fillBandHitBanks((DataEvent) event, hitlist);
-			//bank.show();
-			event.appendBanks(bank);
+	 public static void appendBANDBanks(DataEvent event,ArrayList<BandHit> hitlist) {
+		if(hitlist.size()>0){
+			System.out.println("Before fillBandHitBanks");
+			DataBank bank = fillBandHitBanks(event, hitlist);
+			bank.show();
+			event.appendBank(bank);
 			//event.show();
-		}
+	     }
 	}
 
 }

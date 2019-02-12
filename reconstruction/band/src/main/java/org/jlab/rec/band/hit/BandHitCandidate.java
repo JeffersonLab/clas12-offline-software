@@ -6,10 +6,12 @@ public class BandHitCandidate {
 
 	public BandHitCandidate(int sector, int layer, int component, int order, double triggerphase, int adc, int tdc, double ftdc) 
 	{
+		Parameters.SetParameters();
+		
 		this._sector = sector;
 		this._layer = layer;
 		this._component = component;	
-		this._side = order;
+		this._side = order+1;  //Left side is 1 and right side is 2
 		
 		this._AttCorr = (double) adc * Parameters.adcConv[sector-1][layer-1][component-1]; //conversion of ADC to MeVee
 										
@@ -22,7 +24,7 @@ public class BandHitCandidate {
 		this._tdc = tdc;
 		this._ftdc = ftdc;
                 
-		
+		//System.out.println("BandHitCandidate const: adc "+ adc +" tdc "+tdc+" ftdc "+ftdc+ " AttCorr " + this._AttCorr + " tcorr "+ this._tCorr);
 
 	}
 
