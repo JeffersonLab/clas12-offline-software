@@ -45,19 +45,22 @@ public class HitReader {
 		int ntdc = bankTDC.rows();   // number of tdc values
 		int tdc=0;
 		int adc=0;
+		double ftdc=0;
 		
 		// starts looking at the adc bank
 		for(int i = 0; i<nadc; i++)
 		{ 
 			int sector    = bankADC.getByte("sector",i);  // one of the 5 sectors
 			int layer     = bankADC.getByte("layer",i);  // one of the 6 layers
-			int component = bankADC.getByte("component", i);
+			int component = bankADC.getInt("component", i);
 			int order     = bankADC.getByte("order",i);
 		
-			int side = -1;
+			//int side = -1;
 			
 			adc = bankADC.getInt("ADC",i); 
 			
+			
+			ftdc = bankADC.getFloat("time",i);
 			
 			//know look for a tdc that is matching the adc. 
 			//Starts from the beginning of the tdc list so only the first tdc is taken.
@@ -78,7 +81,7 @@ public class HitReader {
 			// First, carry out checks on the quality of the signals:	    	  
 			if (adc == 0 || tdc == 0) continue; // require good ADC and TDC values
 
-			newhit = new BandHitCandidate(sector, layer, component, order, triggerPhase, adc, tdc); 
+			newhit = new BandHitCandidate(sector, layer, component, order, triggerPhase, adc, tdc, ftdc); 
 
 			candidates.add(newhit);
 		}

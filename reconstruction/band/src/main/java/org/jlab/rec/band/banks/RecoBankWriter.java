@@ -33,8 +33,10 @@ public class RecoBankWriter {
 			bank.setFloat("difftime",i, (float) hitlist.get(i).GetDiffTime());
 			bank.setFloat("adcleftcorr",  i, (float) hitlist.get(i).GetAdcLeft());
 			bank.setFloat("tdcleftcorr",  i, (float) hitlist.get(i).GetTdcLeft());
+			bank.setFloat("ftdcleftcorr",  i, (float) hitlist.get(i).GetFtdcLeft());	
 			bank.setFloat("adcrightcorr",  i, (float) hitlist.get(i).GetAdcRight());
 			bank.setFloat("tdcrightcorr",  i, (float) hitlist.get(i).GetTdcRight());
+			bank.setFloat("ftdcrightcorr",  i, (float) hitlist.get(i).GetFtdcRight());
 			bank.setFloat("x",i, (float) (hitlist.get(i).GetX()));
 			bank.setFloat("y",i, (float) (hitlist.get(i).GetY()));
 			bank.setFloat("z",i, (float) (hitlist.get(i).GetZ()));

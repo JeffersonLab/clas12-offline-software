@@ -8,7 +8,6 @@ public class BandHit extends ArrayList<BandHitCandidate> {
 	 * author: Florian Hauenstein
 	 * A BandHit consists of a coincidence hit on a bar with no veto hits or other bars fired. Corresponding
 	 * hits are found by the BandHitFinder
-	Add raw information about adcs and tdcs L and R, add time diff and sum of time
 	 *
 	 */
 	
@@ -23,9 +22,11 @@ public class BandHit extends ArrayList<BandHitCandidate> {
 	private double _uy;					  // uncertainty in hit y coordinate
 	private double _uz;					  // uncertainty in hit z coordinate
 	private double _tdcLeft;		 	//Corrected TDC left PMT in ns
-	private double _tdcRight;			//Corrected TDC left PMT in ns
-	private double _adcLeft;			//Corrected ADC left PMT in MeVee
-	private double _adcRight;			//Corrected ADC left PMT in MeVee
+	private double _tdcRight;			//Corrected TDC right PMT in ns
+	private double _ftdcLeft;		 	//Corrected FADC time left PMT in ns
+	private double _ftdcRight;			//Corrected FADC time right PMT in ns	
+	private double _adcLeft;			//Corrected ADC left PMT 
+	private double _adcRight;			//Corrected ADC left PMT 
 	
 	private int _sector, _layer, _component; 
 	
@@ -46,6 +47,8 @@ public class BandHit extends ArrayList<BandHitCandidate> {
 		_diffTime = -2000;
 		_tdcLeft = -2000;
 		_tdcRight = -2000;
+		_ftdcLeft = -2000;
+		_ftdcRight = -2000;
 		_adcLeft = -2000;
 		_adcRight = -2000;
 	}
@@ -128,6 +131,22 @@ public class BandHit extends ArrayList<BandHitCandidate> {
 	
 	public void SetTdcRight(double tdc) {
 		this._tdcRight = tdc;
+	}
+	
+	public double GetFtdcLeft() {
+		return _ftdcLeft;
+	}
+	
+	public double GetFtdcRight() {
+		return _ftdcRight;
+	}
+	
+	public void SetFtdcLeft(double tdc) {
+		this._ftdcLeft = tdc;
+	}
+	
+	public void SetFtdcRight(double tdc) {
+		this._ftdcRight = tdc;
 	}
 	
 	public double GetAdcLeft() {

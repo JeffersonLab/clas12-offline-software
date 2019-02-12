@@ -66,7 +66,7 @@ public class Parameters {
 
 					pedestal[s][l][c] = 0;
 					adcConv[s][l][c] = 1./2000.; //assuming 1MeVee at channel 2000
-					tdcConv[s][l][c] = 25./1000; 
+					tdcConv[s][l][c] = 0.02345; 
 					tdcOffsetLR[s][l][c] = 0.;
 					attL[s][l][c] = 0.;
 					

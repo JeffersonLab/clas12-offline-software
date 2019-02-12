@@ -76,17 +76,28 @@ public class BandHitFinder {
 					double tdcright = -1;
 					double adcleft = -1;
 					double adcright = -1;
+					double ftdcleft = -1;
+					double ftdcright = -1;
 					if (hit1.GetSide() == 1) { //Hit1 is from left side PMT
+						
+						//adcleft = hit1.GetAttCorr();
+						//adcright = hit2.GetAttCorr();
 						tdcleft = hit1.GetTimeCorr();
 						tdcright = hit2.GetTimeCorr();
-						adcleft = hit1.GetAttCorr();
-						adcright = hit2.GetAttCorr();
+						ftdcleft = hit1.GetFtdc();
+						ftdcright = hit2.GetFtdc();
+						adcleft = hit1.GetAdc();
+						adcright = hit2.GetAdc();
 					}
 					else if (hit1.GetSide() == 2) { //Hit1 is from right side PMT
-						tdcleft = hit1.GetTimeCorr();
-						tdcright = hit2.GetTimeCorr();
-						adcleft = hit1.GetAttCorr();
-						adcright = hit2.GetAttCorr();
+						tdcleft = hit2.GetTimeCorr();
+						tdcright = hit1.GetTimeCorr();
+						ftdcleft = hit2.GetFtdc();
+						ftdcright = hit1.GetFtdc();
+						adcleft = hit2.GetAdc();
+						adcright = hit1.GetAdc();
+						//adcleft = hit2.GetAttCorr();
+						//adcright = hit1.GetAttCorr();
 					}
 					else { 
 						System.err.println("BAND HIT FINDER. Found two hits with left and right side but can not assign which hide belongs to which side");
@@ -99,16 +110,16 @@ public class BandHitFinder {
 					
 					//First cut : the time of hit has to be in a physical time window 
 					// window set to 0-250ns for now	
-					if (tMean < Parameters.minTime[layer-1] || tMean > Parameters.maxTime[layer-1]) {
-						continue;
-					}
+				   // if (tMean < Parameters.minTime[layer-1] || tMean > Parameters.maxTime[layer-1]) {
+				//		continue;
+				//	}
 					
 					//Second Cut: Check if time difference is within time window of a bar 
-					double maxDiffTime = Parameters.barLengthSector[sector-1]/Parameters.lightspeed;
-					if (deltaT > maxDiffTime) continue;
+				//	double maxDiffTime = Parameters.barLengthSector[sector-1]/Parameters.lightspeed;
+				//	if (Math.abs(deltaT) > maxDiffTime) continue;
 					
 					//Third Cut: Check if Energy deposit for both sides is over 2MeVee
-				    if (hit1.GetAttCorr() < 2 || hit2.GetAttCorr() < 2)  continue;
+				//    if (hit1.GetAttCorr() < 2 || hit2.GetAttCorr() < 2)  continue;
 
 					
 					//Add here calculations of x,y, and z pos of hit and uncertainties	
@@ -116,8 +127,8 @@ public class BandHitFinder {
 	
 					// Create a new BandHit and fill it with the relevant info:
 
-					BandHit Hit = new BandHit();  // Takes as index the halfhits array indices of the two half-hits involved.
-
+					BandHit Hit = new BandHit();  
+					
 					Hit.SetSector(sector);
 					Hit.SetLayer(layer);
 					Hit.SetComponent(component);
@@ -125,6 +136,8 @@ public class BandHitFinder {
 					Hit.SetAdcRight(adcright);
 					Hit.SetTdcLeft(tdcleft);
 					Hit.SetTdcRight(tdcright);
+					Hit.SetFtdcLeft(ftdcleft);
+					Hit.SetFtdcRight(ftdcright);
 					Hit.SetDiffTime(deltaT);
 					Hit.SetMeanTime(tMean);
 					Hit.SetX(xposHit);
@@ -146,7 +159,11 @@ public class BandHitFinder {
 			//Next line is for the future when the advancedHitFinder is correctly implemented
 		//	return advancedHitFinder(coincidences);
 		
-			if (coincidences.size() <=5) return coincidences;
+			
+			if (coincidences.size() <=10) {
+				System.out.println("In BandHitFinder found " + coincidences.size() + " coincidence hits");
+				return coincidences;
+			}
 			else {
 				return new ArrayList<BandHit>();
 			}

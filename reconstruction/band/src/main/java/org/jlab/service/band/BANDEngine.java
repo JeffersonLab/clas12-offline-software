@@ -31,12 +31,7 @@ public class BANDEngine extends ReconstructionEngine {
 
 	int Run = -1;
 	RecoBankWriter rbc;
-	//test
-	static int enb =0;
-	static int eband=0;
-	static int hcvt=0;
-	static int match=0;
-	static int posmatch=0;
+	
 
 	@Override
 	public boolean processDataEvent(DataEvent event) {
@@ -114,7 +109,7 @@ public class BANDEngine extends ReconstructionEngine {
 
 		
 		while(reader.hasEvent()) {
-			enb++;		
+			
 			DataEvent event = (DataEvent) reader.getNextEvent();
 			
 			//event.show();
@@ -125,21 +120,11 @@ public class BANDEngine extends ReconstructionEngine {
 			en.processDataEvent(event);
 			writer.writeEvent(event);
 			//event.getBank("band::hits").show();
-			System.out.println("event nb "+enb);
-			//event.getBank("band::hits").show();
-			//System.out.println();
-			if(enb>1000)
-				break;
+			
 		}		
 		writer.close();
 		
-		System.out.println("enb "+enb);
-		System.out.println("eband "+eband);
-		System.out.println("hcvt "+hcvt);
-		System.out.println("posmatch "+posmatch);
-		System.out.println("match "+match);
-		System.out.println("%match "+100.*match/posmatch);
-		System.out.println("Done");
+		
 	}
 
 }
