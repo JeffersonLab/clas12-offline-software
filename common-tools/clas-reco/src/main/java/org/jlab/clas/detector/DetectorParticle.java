@@ -4,6 +4,7 @@ import static java.lang.Math.abs;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.List;
 
@@ -42,6 +43,9 @@ public class DetectorParticle implements Comparable {
     
     private Vector3 particleCrossPosition  = new Vector3();
     private Vector3 particleCrossDirection = new Vector3();
+  
+    // let multiple particles share the same hit for these detectors:
+    private final DetectorType[] sharedDetectors = {DetectorType.FTOF};
     
     private Line3D  driftChamberEnter = new Line3D();
     
@@ -529,13 +533,22 @@ public class DetectorParticle implements Comparable {
         double   minimumDistance = 500.0;
         int      bestIndex       = -1;
 
+        boolean hitSharing=false;
+        for (int ii=0; ii<sharedDetectors.length && this.getCharge()!=0; ii++) {
+        //for (int ii=0; ii<sharedDetectors.length; ii++) {
+            if (type == sharedDetectors[ii]) {
+                hitSharing=true;
+                break;
+            }
+        }
+
         for(int loop = 0; loop < hitList.size(); loop++){
            
             DetectorResponse response = hitList.get(loop);
-            
+
             if(response.getDescriptor().getType()==type &&
                (detectorLayer<=0 || response.getDescriptor().getLayer()==detectorLayer) &&
-               response.getAssociation()<0) {
+               (hitSharing || response.getAssociation()<0)) {
                 hitPoint.set(
                         response.getPosition().x(),
                         response.getPosition().y(),
