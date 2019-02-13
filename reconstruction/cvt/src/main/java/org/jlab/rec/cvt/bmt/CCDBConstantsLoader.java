@@ -52,22 +52,6 @@ public class CCDBConstantsLoader {
         double[] EFF_Z_OVER_A = new double[NREGIONS*2];
         double[] T_OVER_X0    = new double[NREGIONS*2];
         
-        //Rotations and Translations to apply to all tiles in order to pre-align the entire MVT with SVT 
-        double RxAll=0.0;
-        double RyAll=0.0;
-        double RzAll=0.0;
-        double TxAll=0.0;
-        double TyAll=0.0;
-        double TzAll=0.0;
-        
-        //Rotations and Translations to apply on individual tiles after performing the transformations AllvsSVT
-        double[][] Rx= new double[NREGIONS*2][3]; //[layer] [sector]
-        double[][] Ry= new double[NREGIONS*2][3]; //[layer] [sector]
-        double[][] Rz= new double[NREGIONS*2][3]; //[layer] [sector]
-        double[][] Tx= new double[NREGIONS*2][3]; //[layer] [sector]
-        double[][] Ty= new double[NREGIONS*2][3]; //[layer] [sector]
-        double[][] Tz= new double[NREGIONS*2][3]; //[layer] [sector]
-        
          int GRID_SIZE=405;
          double[] THETA_L_grid = new double [GRID_SIZE];
          double[] ELEC_grid = new double [GRID_SIZE];
@@ -107,10 +91,10 @@ public class CCDBConstantsLoader {
         //Load Misalignment constant
         dbprovider.loadTable("/test/mvt/MVTAlignment");
         dbprovider.loadTable("/test/mvt/AllvsSVT");
-        dbprovider.disconnect();
-        
+              
         //beam offset table
         dbprovider.loadTable("/test/beam_pos");
+        dbprovider.disconnect();
        //  dbprovider.show();
         // Getting the Constants
         // 1) pitch info 
