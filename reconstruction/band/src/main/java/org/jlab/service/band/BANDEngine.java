@@ -8,7 +8,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
-//import org.jlab.rec.band.constants.CalibrationConstantsLoader;
+import org.jlab.rec.band.constants.CalibrationConstantsLoader;
 import org.jlab.rec.band.banks.HitReader;
 import org.jlab.rec.band.banks.RecoBankWriter;
 import org.jlab.rec.band.hit.BandHit;
@@ -16,10 +16,8 @@ import org.jlab.rec.band.hit.BandHitCandidate;
 import org.jlab.rec.band.hit.BandHitFinder;
 
 
-/**
+/** @author Florian Hauenstein, Efrain Segarra
  * Service to return reconstructed BAND Hits - the output is in Hipo format
- * 
- *
  */
 
 public class BANDEngine extends ReconstructionEngine {
@@ -83,10 +81,10 @@ public class BANDEngine extends ReconstructionEngine {
 			newRun = bank.getInt("run", 0);  
 			// Load the constants
 			//-------------------
-			/*if(Run!=newRun) {
+			if(Run!=newRun) {
 				CalibrationConstantsLoader.Load(newRun,"default"); 
 				Run = newRun;
-			}*/
+			}
 		}
 
 	}
