@@ -25,7 +25,7 @@ public class CalibrationConstantsLoader {
 	//public static double[][][] VEFF_TDC			= new double[24][3][2];	
 	//public static double[][] VEFF_FADC 			= new double[6][5];
 
-	public Map<Integer, Double> TDC_T_OFFSET = new HashMap<Integer, Double>();
+	public static Map<Integer, Double> TDC_T_OFFSET = new HashMap<Integer, Double>();
 
 
 	public static boolean arEnergyibConstantsLoaded = false;
@@ -64,9 +64,9 @@ public class CalibrationConstantsLoader {
 			//System.out.println("time_offset_LR "+iTO);
 		}
 
-		for (String keys : objectSet.keySet())  
+		for (Integer keys : TDC_T_OFFSET.keySet())  
 		{
-			System.out.println(keys + ":"+ objectSet.get(keys));
+			System.out.println(keys + ":"+ TDC_T_OFFSET.get(keys));
 		}
 
 		// TDC time jitter
