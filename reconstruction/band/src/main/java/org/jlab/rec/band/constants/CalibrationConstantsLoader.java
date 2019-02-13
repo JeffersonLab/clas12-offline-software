@@ -20,15 +20,11 @@ public class CalibrationConstantsLoader {
 	}
 	public static boolean CSTLOADED = false;
 
-	// Instantiating the constants arrays
-	//public static double[][][] FADC_T_OFFSET	= new double[24][3][2];
-	//public static double[][][] VEFF_TDC			= new double[24][3][2];	
-	//public static double[][] VEFF_FADC 			= new double[6][5];
-
+		// Maps for constants from database
 	public static Map<Integer, Double> TDC_T_OFFSET = new HashMap<Integer, Double>();
-
-
-	public static boolean arEnergyibConstantsLoaded = false;
+	public static Map<Integer, Double> FADC_T_OFFSET = new HashMap<Integer, Double>();
+	public static Map<Integer, Double> TDC_VEFF = new HashMap<Integer,Double>();
+	public static Map<Integer, Double> FADC_VEFF = new HashMap<Integer, Double>();
 
 	static DatabaseConstantProvider dbprovider = null;
 
@@ -50,25 +46,40 @@ public class CalibrationConstantsLoader {
 
 		// Time offsets
 		for(int i =0; i< dbprovider.length("/calibration/band/lr_offsets/sector"); i++) {
-			// Get sector, layer, component
-			int sector = dbprovider.getInteger("/calibration/band/lr_offsets/sector", i);	    
-			int layer = dbprovider.getInteger("/calibration/band/lr_offsets/layer", i);
-			int component = dbprovider.getInteger("/calibration/band/lr_offsets/component", i);
-			// Get the actual offsets
-			double tdc_off = dbprovider.getDouble("/calibration/band/lr_offsets/tdc_off", i);
-			double fadc_off = dbprovider.getDouble("/calibration/band/lr_offsets/fadc_off", i);
-
+				// Get sector, layer, component
+			int sector 		= dbprovider.getInteger("/calibration/band/lr_offsets/sector", 		i);	    
+			int layer 		= dbprovider.getInteger("/calibration/band/lr_offsets/layer", 		i);
+			int component 	= dbprovider.getInteger("/calibration/band/lr_offsets/component", 	i);
+				// Get the actual offsets
+			double tdc_off 	= dbprovider.getDouble("/calibration/band/lr_offsets/tdc_off", 		i);
+			double fadc_off = dbprovider.getDouble("/calibration/band/lr_offsets/fadc_off", 	i);
+				// Put in the maps
 			int key = sector*100+layer*10+component;
-			TDC_T_OFFSET.put( Integer.valueOf(key) , Double.valueOf(tdc_off) );
+			TDC_T_OFFSET.put( 	Integer.valueOf(key), 	Double.valueOf(tdc_off) );
+			FADC_T_OFFSET.put( 	Integer.valueOf(key), 	Double.valueOf(fadc_off) );
+		}
 
-			//System.out.println("time_offset_LR "+iTO);
+		// Speed of lights
+		for(int i =0; i< dbprovider.length("/calibration/band/effective_velocity/sector"); i++) {
+				// Get sector, layer, component
+			int sector 		= dbprovider.getInteger("/calibration/band/effective_velocity/sector",		i);	    
+			int layer 		= dbprovider.getInteger("/calibration/band/effective_velocity/layer",		i);
+			int component 	= dbprovider.getInteger("/calibration/band/effective_velocity/component",	i);
+				// Get the velocities
+			double veff_tdc		= dbprovider.getDouble("/calibration/band/effective_velocity/veff_tdc", 	i);
+			double veff_fadc	= dbprovider.getDouble("/calibration/band/effective_velocity/veff_fadc",	i);
+				// Put in the maps
+			int key = sector*100+layer*10+component;
+			TDC_VEFF.put(	Integer.valueOf(key),		Double.valueOf(veff_tdc) );
+			FADC_VEFF.put(	Integer.valueOf(key), 		Double.valueOf(veff_fadc) );
 		}
 
 		for (Integer keys : TDC_T_OFFSET.keySet())  
 		{
-			System.out.println(keys + ":"+ TDC_T_OFFSET.get(keys));
+		   System.out.println(keys + " : "+ TDC_T_OFFSET.get(keys) + " " + FADC_T_OFFSET.get(keys)
+				   					+ " " + TDC_VEFF.get(keys) + " " + FADC_VEFF.get(keys) );
 		}
-
+		
 		// TDC time jitter
 		//JITTER_PERIOD = dbprovider.getDouble("/calibration/band/time_jitter/period", 0);
 		//JITTER_PHASE  = dbprovider.getInteger("/calibration/band/time_jitter/phase", 0);
