@@ -2,6 +2,8 @@ package org.jlab.rec.cvt.bmt;
 
 import java.util.Random;
 
+import org.jlab.geom.prim.Vector3D;
+
 public class Geometry {
 
     public Geometry() {
@@ -340,67 +342,104 @@ public class Geometry {
         return randomNumber;
     }
    
-     public double[] LabToDetFrame(int layer, int sector, double x, double y, double z) {	
-     	double[] newPos = new double[3];
+    public Vector3D Slope_CVTToDetFrame(int layer, int sector, Vector3D slope) {	
+     	Vector3D new_slope = new Vector3D();
+     	new_slope.setX(slope.x()); new_slope.setY(slope.y()); new_slope.setZ(slope.z());
+     	new_slope.rotateX(org.jlab.rec.cvt.bmt.Constants.getRx(layer,sector));
+		new_slope.rotateY(org.jlab.rec.cvt.bmt.Constants.getRy(layer,sector));
+		new_slope.rotateZ(org.jlab.rec.cvt.bmt.Constants.getRz(layer,sector));
+ 	
+     	return new_slope;
+     }
      
-     	newPos[0] = x-org.jlab.rec.cvt.bmt.Constants.Cx[layer-1][sector-1];
-     	newPos[1] = y-org.jlab.rec.cvt.bmt.Constants.Cy[layer-1][sector-1];
-     	newPos[2] = z-org.jlab.rec.cvt.bmt.Constants.Cz[layer-1][sector-1];
- 	
-     	double ThetaZ=org.jlab.rec.cvt.bmt.Constants.Rz[layer-1][sector-1];	
-     	double ThetaY=org.jlab.rec.cvt.bmt.Constants.Ry[layer-1][sector-1];
-     	double ThetaX=org.jlab.rec.cvt.bmt.Constants.Rx[layer-1][sector-1];
- 	
-     	//Rotate around z
-     	double xx=newPos[0];
-     	newPos[0]=Math.cos(ThetaZ)*xx+Math.sin(ThetaZ)*newPos[1];
-     	newPos[1]=-Math.sin(ThetaZ)*xx+Math.cos(ThetaZ)*newPos[1];
- 	
-     	//Rotate around x
-     	double yy=newPos[1];
-     	newPos[1]=Math.cos(ThetaX)*yy+Math.sin(ThetaX)*newPos[2];
-     	newPos[2]=-Math.sin(ThetaX)*yy+Math.cos(ThetaX)*newPos[2];
- 	
-     	//Rotate around Y
-     	double zz=newPos[2];
-     	newPos[2]=Math.cos(ThetaY)*zz+Math.sin(ThetaY)*newPos[0];
-     	newPos[0]=-Math.sin(ThetaY)*zz+Math.cos(ThetaY)*newPos[0];
- 	
- 	return newPos;
+     public Vector3D Point_CVTToDetFrame(int layer, int sector, Vector3D point) {	
+      	Vector3D new_point = new Vector3D();
+      	new_point.setX(point.x()); new_point.setY(point.y()); new_point.setZ(point.z());
+      	new_point.rotateX(org.jlab.rec.cvt.bmt.Constants.getRx(layer,sector));
+ 		new_point.rotateY(org.jlab.rec.cvt.bmt.Constants.getRy(layer,sector));
+ 		new_point.rotateZ(org.jlab.rec.cvt.bmt.Constants.getRz(layer,sector));
+ 		new_point.setX(new_point.x()+org.jlab.rec.cvt.bmt.Constants.getCx(layer,sector));
+		new_point.setY(new_point.y()+org.jlab.rec.cvt.bmt.Constants.getCy(layer,sector));
+		new_point.setZ(new_point.z()+org.jlab.rec.cvt.bmt.Constants.getCz(layer,sector));
+  	
+      	return new_point;
+      }
+     
+     public Vector3D Slope_DetToCVTFrame(int layer, int sector, Vector3D slope) {	
+      	Vector3D new_slope = new Vector3D();
+      	new_slope.setX(slope.x()); new_slope.setY(slope.y()); new_slope.setZ(slope.z());
+      	new_slope.rotateZ(-org.jlab.rec.cvt.bmt.Constants.getRz(layer,sector));
+ 		new_slope.rotateY(-org.jlab.rec.cvt.bmt.Constants.getRy(layer,sector));
+ 		new_slope.rotateX(-org.jlab.rec.cvt.bmt.Constants.getRx(layer,sector));
+  	
+      	return new_slope;
+      }
+      
+      public Vector3D Point_DetToCVTFrame(int layer, int sector, Vector3D point) {	
+       	Vector3D new_point = new Vector3D();
+       	new_point.setX(point.x()); new_point.setY(point.y()); new_point.setZ(point.z());
+       	new_point.setX(new_point.x()-org.jlab.rec.cvt.bmt.Constants.getCx(layer,sector));
+ 		new_point.setY(new_point.y()-org.jlab.rec.cvt.bmt.Constants.getCy(layer,sector));
+ 		new_point.setZ(new_point.z()-org.jlab.rec.cvt.bmt.Constants.getCz(layer,sector));
+ 		new_point.rotateZ(-org.jlab.rec.cvt.bmt.Constants.getRz(layer,sector));
+ 		new_point.rotateY(-org.jlab.rec.cvt.bmt.Constants.getRy(layer,sector));
+ 		new_point.rotateX(-org.jlab.rec.cvt.bmt.Constants.getRx(layer,sector));
+   	
+       	return new_point;
+       }
+      
+      public Vector3D Slope_LabToCVTFrame(Vector3D slope) {	
+       	Vector3D new_slope = new Vector3D();
+       	new_slope.setX(slope.x()); new_slope.setY(slope.y()); new_slope.setZ(slope.z());
+       	new_slope.rotateX(org.jlab.rec.cvt.bmt.Constants.getRxAll());
+  		new_slope.rotateY(org.jlab.rec.cvt.bmt.Constants.getRyAll());
+  		new_slope.rotateZ(org.jlab.rec.cvt.bmt.Constants.getRzAll());
+   	
+       	return new_slope;
+       }
+       
+       public Vector3D Point_LabToCVTFrame(Vector3D point) {	
+        	Vector3D new_point = new Vector3D();
+        	new_point.setX(point.x()); new_point.setY(point.y()); new_point.setZ(point.z());
+        	new_point.rotateX(org.jlab.rec.cvt.bmt.Constants.getRxAll());
+        	new_point.rotateY(org.jlab.rec.cvt.bmt.Constants.getRyAll());
+        	new_point.rotateZ(org.jlab.rec.cvt.bmt.Constants.getRzAll());
+        	new_point.setX(new_point.x()+org.jlab.rec.cvt.bmt.Constants.getCxAll());
+        	new_point.setY(new_point.y()+org.jlab.rec.cvt.bmt.Constants.getCyAll());
+        	new_point.setZ(new_point.z()+org.jlab.rec.cvt.bmt.Constants.getCzAll());
+    	
+        	return new_point;
+        }
+       
+       public Vector3D Slope_CVTToLabFrame(Vector3D slope) {	
+        	Vector3D new_slope = new Vector3D();
+        	new_slope.setX(slope.x()); new_slope.setY(slope.y()); new_slope.setZ(slope.z());
+        	new_slope.rotateZ(-org.jlab.rec.cvt.bmt.Constants.getRzAll());
+        	new_slope.rotateY(-org.jlab.rec.cvt.bmt.Constants.getRyAll());
+        	new_slope.rotateX(-org.jlab.rec.cvt.bmt.Constants.getRxAll());
+    	
+        	return new_slope;
+        }
+        
+        public Vector3D Point_CVTToLabFrame(Vector3D point) {	
+         	Vector3D new_point = new Vector3D();
+         	new_point.setX(point.x()); new_point.setY(point.y()); new_point.setZ(point.z());
+         	new_point.setX(new_point.x()-org.jlab.rec.cvt.bmt.Constants.getCxAll());
+         	new_point.setY(new_point.y()-org.jlab.rec.cvt.bmt.Constants.getCyAll());
+         	new_point.setZ(new_point.z()-org.jlab.rec.cvt.bmt.Constants.getCzAll());
+         	new_point.rotateZ(-org.jlab.rec.cvt.bmt.Constants.getRzAll());
+         	new_point.rotateY(-org.jlab.rec.cvt.bmt.Constants.getRyAll());
+         	new_point.rotateX(-org.jlab.rec.cvt.bmt.Constants.getRxAll());
+     	
+         	return new_point;
+         }
+    
+     public Vector3D LabToDetFrame(int layer, int sector, Vector3D PosLab) {	
+     	 return this.Point_CVTToDetFrame(layer, sector, this.Point_LabToCVTFrame(PosLab));
      }
  
-    public double[] DetToLabFrame(int layer, int sector, double x, double y, double z) {
- 	
- 	double[] newPos = new double[3];
-     
- 	newPos[0] = x;
- 	newPos[1] = y;
- 	newPos[2] = z;
- 	
- 	double ThetaZ=-org.jlab.rec.cvt.bmt.Constants.Rz[layer-1][sector-1];
- 	double ThetaY=-org.jlab.rec.cvt.bmt.Constants.Ry[layer-1][sector-1];
- 	double ThetaX=-org.jlab.rec.cvt.bmt.Constants.Rx[layer-1][sector-1];
- 	
- 	//Rotate around z
- 	double xx=newPos[0];
- 	newPos[0]=Math.cos(ThetaZ)*xx+Math.sin(ThetaZ)*newPos[1];
- 	newPos[1]=-Math.sin(ThetaZ)*xx+Math.cos(ThetaZ)*newPos[1];
- 	
- 	//Rotate around x
- 	double yy=newPos[1];
- 	newPos[1]=Math.cos(ThetaX)*yy+Math.sin(ThetaX)*newPos[2];
- 	newPos[2]=-Math.sin(ThetaX)*yy+Math.cos(ThetaX)*newPos[2];
- 	
- 	//Rotate around Y
- 	double zz=newPos[2];
- 	newPos[2]=Math.cos(ThetaY)*zz+Math.sin(ThetaY)*newPos[0];
- 	newPos[0]=-Math.sin(ThetaY)*zz+Math.cos(ThetaY)*newPos[0];
- 	
- 	newPos[0] = x+org.jlab.rec.cvt.bmt.Constants.Cx[layer-1][sector-1];
- 	newPos[1] = y+org.jlab.rec.cvt.bmt.Constants.Cy[layer-1][sector-1];
- 	newPos[2] = z+org.jlab.rec.cvt.bmt.Constants.Cz[layer-1][sector-1];
- 	
- 	return newPos;
+    public Vector3D DetToLabFrame(int layer, int sector, Vector3D PosDet) {
+ 	   	return this.Point_CVTToLabFrame(this.Point_DetToCVTFrame(layer, sector, PosDet));
     }
  
     /**

@@ -389,6 +389,27 @@ public class Constants {
  	   	Cz[layer-1][sector-1]  = cCz;
  }
  
+ 
+ public static synchronized double getRx(int layer, int sector) {
+	    return Rx[layer-1][sector-1];
+}
+public static synchronized double getRy(int layer, int sector) {
+		return Ry[layer-1][sector-1];
+}
+public static synchronized double getRz(int layer, int sector) {
+	   	return Rz[layer-1][sector-1];
+}
+public static synchronized double getCx(int layer, int sector) {
+		return Cx[layer-1][sector-1];
+}
+public static synchronized double getCy(int layer, int sector) {
+		return Cy[layer-1][sector-1];
+}
+public static synchronized double getCz(int layer, int sector) {
+	   	return Cz[layer-1][sector-1];
+}
+ 
+ 
  public static synchronized void setRxAll(double cRxAll) {
 	    RxAll  = cRxAll;
  }
@@ -407,4 +428,23 @@ public class Constants {
  public static synchronized void setCzAll(double cCzAll) {
 	   	CzAll  = cCzAll;
  }
+ 
+ public static synchronized double getRxAll() {
+	    return RxAll;
+}
+public static synchronized double getRyAll() {
+		return RyAll;
+}
+public static synchronized double getRzAll() {
+	   	return RzAll;
+}
+public static synchronized double getCxAll() {
+		return CxAll;
+}
+public static synchronized double getCyAll() {
+		return CyAll;
+}
+public static synchronized double getCzAll() {
+	   	return CzAll;
+}
 }
