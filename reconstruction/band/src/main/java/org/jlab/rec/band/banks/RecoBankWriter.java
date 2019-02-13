@@ -1,9 +1,11 @@
 package org.jlab.rec.band.banks;
 
 import java.util.ArrayList;
+
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.band.hit.BandHit;
+
 
 
 public class RecoBankWriter {
@@ -12,6 +14,9 @@ public class RecoBankWriter {
 	// write useful information in the bank
 	public static DataBank fillBandHitBanks(DataEvent event, ArrayList<BandHit> hitlist) {
 
+		if (hitlist == null) {
+	        return null;
+	    }
 		DataBank bank =  event.createBank("BAND::hits", hitlist.size());
 		
 		if (bank == null) {
@@ -19,10 +24,7 @@ public class RecoBankWriter {
 			return null;
 		}
 
-		if (hitlist.size() !=1) {
-			System.err.println("Hitlist for BAND::hits BANK writer has wrong length. It is "+hitlist.size());
-			return null;
-		}
+		
 		//i should only go to 1 but keep for loop for future extensions if more hits are required
 		for(int i =0;  i<hitlist.size(); i++) {
 			bank.setShort("id",i, (short)(i+1));
@@ -51,13 +53,13 @@ public class RecoBankWriter {
 	}
 
 	 public static void appendBANDBanks(DataEvent event,ArrayList<BandHit> hitlist) {
-		if(hitlist.size()>0){
-			System.out.println("Before fillBandHitBanks");
-			DataBank bank = fillBandHitBanks(event, hitlist);
-			bank.show();
-			event.appendBank(bank);
-			//event.show();
-	     }
+		 
+		 DataBank bank = fillBandHitBanks((DataEvent) event, hitlist);
+		 if (bank != null) {
+			 bank.show();
+			 event.appendBank(bank);
+         }
+	     	 		
 	}
 
 }

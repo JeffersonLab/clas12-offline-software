@@ -30,7 +30,7 @@ public class BANDEngine extends ReconstructionEngine {
 	}
 
 	int Run = -1;
-	RecoBankWriter rbc;
+	
 	
 
 	@Override
@@ -58,7 +58,7 @@ public class BANDEngine extends ReconstructionEngine {
 			}
 			//event.show();
 			System.out.println("in process event ");
-			rbc.appendBANDBanks(event,hits);
+			RecoBankWriter.appendBANDBanks(event,hits);
 				
 		}
 
@@ -92,6 +92,7 @@ public class BANDEngine extends ReconstructionEngine {
 	}
 
 	public static void main (String arg[]) {
+		
 		BANDEngine en = new BANDEngine();
 		en.init();
 		
