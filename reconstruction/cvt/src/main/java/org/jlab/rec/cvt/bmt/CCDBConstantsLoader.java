@@ -52,6 +52,22 @@ public class CCDBConstantsLoader {
         double[] EFF_Z_OVER_A = new double[NREGIONS*2];
         double[] T_OVER_X0    = new double[NREGIONS*2];
         
+        //Rotations and Translations to apply to all tiles in order to pre-align the entire MVT with SVT 
+        double RxAll=0.0;
+        double RyAll=0.0;
+        double RzAll=0.0;
+        double TxAll=0.0;
+        double TyAll=0.0;
+        double TzAll=0.0;
+        
+        //Rotations and Translations to apply on individual tiles after performing the transformations AllvsSVT
+        double[][] Rx= new double[NREGIONS*2][3]; //[layer] [sector]
+        double[][] Ry= new double[NREGIONS*2][3]; //[layer] [sector]
+        double[][] Rz= new double[NREGIONS*2][3]; //[layer] [sector]
+        double[][] Tx= new double[NREGIONS*2][3]; //[layer] [sector]
+        double[][] Ty= new double[NREGIONS*2][3]; //[layer] [sector]
+        double[][] Tz= new double[NREGIONS*2][3]; //[layer] [sector]
+        
          int GRID_SIZE=405;
          double[] THETA_L_grid = new double [GRID_SIZE];
          double[] ELEC_grid = new double [GRID_SIZE];
@@ -87,6 +103,10 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/calibration/mvt/lorentz");
         dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_fullfield");
         dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_midfield");
+        
+        //Load Misalignment constant
+        dbprovider.loadTable("/test/mvt/MVTAlignment");
+        dbprovider.loadTable("/test/mvt/AllvsSVT");
         dbprovider.disconnect();
         
         //beam offset table
@@ -240,6 +260,24 @@ public class CCDBConstantsLoader {
         	 }
         	 
         }
+         
+        //Loading alignment constant in tables
+         Constants.setRxAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Rx", 0));
+         Constants.setRyAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Ry", 0));
+         Constants.setRzAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Rz", 0));
+         Constants.setCxAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Tx", 0));
+         Constants.setCyAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Ty", 0));
+         Constants.setCzAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Tz", 0));
+         
+         for (int i=0;i<dbprovider.length("/test/mvt/MVTAlignment/Rx");i++) {
+        	Constants.setRx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i),dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Rx",i));
+        	Constants.setRy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i),dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Ry",i));
+        	Constants.setRz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i),dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Rz",i));
+        	Constants.setCx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i),dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Tx",i));
+        	Constants.setCy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i),dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Ty",i));
+        	Constants.setCz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i),dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Tz",i));
+         }
+         
          // beam offset
         double r = dbprovider.getDouble("/test/beam_pos/r", 0);     
         double r_err = dbprovider.getDouble("/test/beam_pos/err_r", 0); 
