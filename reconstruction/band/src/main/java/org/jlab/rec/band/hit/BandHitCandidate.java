@@ -19,7 +19,7 @@ public class BandHitCandidate {
 		this._ftdc 		= ftdc;
 		this._tdc 		= tdc;
                 
-		System.out.println("Created BandHitCandidate: adc "+ this._adc +" tdc "+this._tdc+" ftdc "+this._ftdc+ " AttCorr " + this._AttCorr + " tcorr "+ this._tCorr);
+	//	System.out.println("Created BandHitCandidate: adc "+ this._adc +" tdc "+this._tdc+" ftdc "+this._ftdc+ " AttCorr " + this._AttCorr + " tcorr "+ this._tCorr);
 
 	}
 	

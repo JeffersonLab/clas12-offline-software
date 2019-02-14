@@ -63,7 +63,7 @@ public class RecoBankWriter {
 		 
 		 DataBank bank = fillBandHitBanks((DataEvent) event, hitlist);
 		 if (bank != null) {
-			 bank.show();
+	//		 bank.show();
 			 event.appendBank(bank);
          }
 	     	 		

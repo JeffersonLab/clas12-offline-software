@@ -46,7 +46,7 @@ public class BandHitFinder {
 				
 				//check if hit is in the veto counter (layer 6). 
 				if (hit1.GetLayer() == 6) {
-					System.err.println("veto fired, event can not be good :-(");
+				//	System.err.println("BAND veto fired, event can not be good :-(");
 					return new ArrayList<BandHit>();
 				}
 
@@ -101,7 +101,7 @@ public class BandHitFinder {
 					double tdiff_tdc  = (tdcleft - tdcright) - CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) );
 					double tdiff_fadc = (ftdcleft - ftdcright) - CalibrationConstantsLoader.FADC_T_OFFSET.get( Integer.valueOf(barKey) );
 					
-					System.out.println("*Found a candidate BAR with tdiff: "+tdiff_tdc+" "+tdiff_fadc);
+				//	System.out.println("*Found a candidate BAR with tdiff: "+tdiff_tdc+" "+tdiff_fadc);
 					
 					// Check if the time difference is within the length of the bar:
 					double maxDiff_tdc = Parameters.barLengthSector[sector-1]/
@@ -109,7 +109,7 @@ public class BandHitFinder {
 					double maxDiff_fadc = Parameters.barLengthSector[sector-1]/
 							CalibrationConstantsLoader.FADC_VEFF.get( Integer.valueOf(barKey) );
 					
-					System.out.println("\tmax time diff allowed: "+maxDiff_tdc+"  " +maxDiff_fadc);
+				//	System.out.println("\tmax time diff allowed: "+maxDiff_tdc+"  " +maxDiff_fadc);
 
 					if( Math.abs(tdiff_tdc)  > maxDiff_tdc )continue;
 					if( Math.abs(tdiff_fadc) > maxDiff_fadc )continue;
@@ -163,9 +163,9 @@ public class BandHitFinder {
 		
 			
 			if ( coincidences.size()>0 ) {
-				System.out.println("In BandHitFinder found " + coincidences.size() + " coincidence hits");
+				//System.out.println("In BandHitFinder found " + coincidences.size() + " coincidence hits");
 				for (int i = 0; i < (coincidences.size()); i++) {
-					System.out.println("Hit "+i+" : sector "+ coincidences.get(i).GetSector()+ " layer "+ coincidences.get(i).GetLayer()+" component " + coincidences.get(i).GetComponent());
+				//	System.out.println("Hit "+i+" : sector "+ coincidences.get(i).GetSector()+ " layer "+ coincidences.get(i).GetLayer()+" component " + coincidences.get(i).GetComponent());
 				}
 				return coincidences;
 			}

@@ -63,7 +63,7 @@ public class HitReader {
 			if( adc <= 0 || ftdc <= 0 ) continue;
 			
 			int key = s*1000 + l*100 + c*10 + o;
-			System.out.println("s,l,c,o: "+key+" adc,ftdc: "+adc+" "+ftdc);
+		//	System.out.println("s,l,c,o: "+key+" adc,ftdc: "+adc+" "+ftdc);
 			
 			// Check if this PMT has been stored before, and if it has, then
 			// replace it only if it has a larger ADC value. Otherwise, add to map
@@ -91,12 +91,12 @@ public class HitReader {
             if( tdc <= 0 ) continue;
             
             int key = s*1000 + l*100 + c*10 + (o-2);
-			System.out.println("s,l,c,o: "+key+" tdc: "+tdc);
+//			System.out.println("s,l,c,o: "+key+" tdc: "+tdc);
 
             
             // Make sure that we have FADC information for this PMT -- if not, skip it
             if( !fadcInt.containsKey(key) || !fadcTimes.containsKey(key) ) continue;
-            System.out.println("\t*Found match for this PMT!*");
+  //          System.out.println("\t*Found match for this PMT!*");
             
             // If we have already stored a TDC for this PMT, need to compare with
             // FADC time and take the smallest tdiff one.
@@ -128,7 +128,7 @@ public class HitReader {
 			int adc = fadcInt.get(keys);
 			float ftdc = fadcTimes.get(keys);
 			double tdc = tdcTimes.get(keys);
-			System.out.println("Found a candidate PMT hit! slco: "+sector+" "+layer+" "+component+" "+order+" "+adc+" "+ftdc+" "+tdc);
+	//		System.out.println("Found a candidate PMT hit! slco: "+sector+" "+layer+" "+component+" "+order+" "+adc+" "+ftdc+" "+tdc);
 
 			
 			BandHitCandidate newHit = new BandHitCandidate( sector,layer,component,order,
