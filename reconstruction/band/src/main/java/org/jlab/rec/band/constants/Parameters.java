@@ -31,47 +31,9 @@ public class Parameters {
     public static final double[] barLengthSector = {164, 202, 51, 51, 202} ;           // Bar length in each layer (cm)
 
 	
-	//RECONSTRUCTION PARAMETERS
-	public static final double[][][] pedestal = new double[sectNum][layNum][compNum];         // ADC pedestals, per ADC 
-	public static final double[][][] adcConv = new double[sectNum][layNum][compNum]; 	      // conversion factors from ADC channels to MeVee
-   
-	public static final double[][][] tdcConv = new double[sectNum][layNum][compNum];         // conversion factors from TDC channels to time (ns).
-	public static final double tdcOffset = 0;       										 // Global TDC offset
-	public static final double[] tdcOffsetLayer = new double[layNum];                    // TDC offset per layer
-	public static final double[][][] tdcOffsetLR = new double[sectNum][layNum][compNum];        // Time offset between the two components in each sector/layer	
-
-	
-	public static final double[][][] attL = new double[sectNum][layNum][compNum];              // Attenuation length 
-	
-	public static final double tRes = 0.2;	                                                  // Average time resolution for hit (ns)
-
+	//RECONSTRUCTION PARAMETERS   
 	public static double eThresh = 0.1 ;                                                     // Min reconstructed deposited energy threshold for a good event in MeVee
 
-
-	public static void SetParameters() {
-
-		for (int l=0; l<layNum; l++) {
-
-		
-			maxTime[l] = 250.;
-			minTime[l] = 0.;
-			tdcOffsetLayer[l] = 0.;
-
-			for (int s=0; s<sectNum; s++) {
-
-				for (int c=0; c<compNum; c++) {
-
-					pedestal[s][l][c] = 0;
-					adcConv[s][l][c] = 1./2000.; //assuming 1MeVee at channel 2000
-					tdcConv[s][l][c] = 0.02345; 
-					tdcOffsetLR[s][l][c] = 0.;
-					attL[s][l][c] = 0.;
-					
-
-				}
-			}
-		}
-	}
 }
 
 

@@ -6,7 +6,6 @@ public class BandHitCandidate {
 
 	public BandHitCandidate(int sector, int layer, int component, int order, double triggerphase, int adc, double tdc, float ftdc) 
 	{
-		Parameters.SetParameters();
 		
 		this._sector 	= sector;
 		this._layer 	= layer;

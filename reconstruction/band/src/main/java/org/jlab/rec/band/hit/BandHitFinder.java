@@ -23,10 +23,7 @@ public class BandHitFinder {
      TODO: Implement geometry calculations
 	 */
 	
-	public ArrayList<BandHit> findGoodHits(ArrayList<BandHitCandidate> candidates) 
-	{
-
-		Parameters.SetParameters();
+	public ArrayList<BandHit> findGoodHits(ArrayList<BandHitCandidate> candidates) {
 
 		// array list of all coincidence hits in BAND with no veto fired
 		ArrayList<BandHit> coincidences = new ArrayList<BandHit>();  
