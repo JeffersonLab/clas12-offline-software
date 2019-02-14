@@ -21,14 +21,16 @@ import org.jlab.utils.groups.IndexedTable;
 
 public class HitReader {
 
-	private static Map<Integer,Integer>	fadcInt 	= new HashMap<Integer,Integer>();
-	private static Map<Integer,Float>	fadcTimes	= new HashMap<Integer,Float>();
-	private static Map<Integer,Double>	tdcTimes	= new HashMap<Integer,Double>();
-
 	
 	// this method retrieves the candidate hits ie the adc/tdc signal from all the pmt for a given event
 	public static  ArrayList<BandHitCandidate> getBandCandidates(DataEvent event) {
 
+		Map<Integer,Integer>	fadcInt 	= new HashMap<Integer,Integer>();
+		Map<Integer,Float>	fadcTimes	= new HashMap<Integer,Float>();
+		Map<Integer,Double>	tdcTimes	= new HashMap<Integer,Double>();
+
+		
+		
 		if(event==null) return new ArrayList<BandHitCandidate>();
 
 		// Grab trigger phase for TDC vs FADC matching

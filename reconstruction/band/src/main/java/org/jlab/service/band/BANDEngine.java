@@ -107,7 +107,7 @@ public class BANDEngine extends ReconstructionEngine {
 		while(reader.hasEvent() && nofevents<1000) {
 			
 			DataEvent event = (DataEvent) reader.getNextEvent();
-			//System.out.println("***********  NEXT EVENT ************");
+			System.out.println("***********  NEXT EVENT ************");
 			//event.show();
 			if (event.hasBank("band::adc") && event.hasBank("band::tdc")){
 				event.getBank("band::adc").show();
