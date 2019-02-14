@@ -395,8 +395,8 @@ public class Swim {
         if(this.SwimUnPhys)
             return null;
         
-        SphericalBoundarySwimStopper stopper = new SphericalBoundarySwimStopper(Rad);
-
+        CylindricalcalBoundarySwimStopper stopper = new CylindricalcalBoundarySwimStopper(Rad);
+        
         SwimTrajectory st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize,
                         0.0005);
         if(st==null)
