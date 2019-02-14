@@ -34,7 +34,7 @@ public class ECCommon {
     public static Boolean         debug = false;
     public static Boolean isSingleThreaded = false;
     public static Boolean      singleEvent = false;
-    public static Boolean    useNewTimeCal = false;
+    public static Boolean    useNewTimeCal = true;
     public static String         variation = "default";
     
     private static double[] AtoE  = {15,10,10};   // SCALED ADC to Energy in MeV
