@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class BandHit extends ArrayList<BandHitCandidate> {
 
 	/**
-	 * author: Florian Hauenstein
+	 * author: Efrain Segarra, Florian Hauenstein
 	 * A BandHit consists of a coincidence hit on a bar with no veto hits or other bars fired. Corresponding
 	 * hits are found by the BandHitFinder
 	 *
@@ -13,183 +13,86 @@ public class BandHit extends ArrayList<BandHitCandidate> {
 	
 	private static final long serialVersionUID = 1L;    // What is this??
 
-	private double _diffTime;       	   // tL - tR
-	private double _meanTime;       	   // reconstructed time of hit (corresponds to (tL+tR)/2
-	private double _x;       	          // x co-ordinate of hit (wrt target center)
-	private double _y;       	          // y co-ordinate of hit (wrt target center)
-	private double _z;       	          // z co-ordinate of hit (wrt target center)
-	private double _ux;					  // uncertainty in hit x coordinate
-	private double _uy;					  // uncertainty in hit y coordinate
-	private double _uz;					  // uncertainty in hit z coordinate
-	private double _tdcLeft;		 	//Corrected TDC left PMT in ns
-	private double _tdcRight;			//Corrected TDC right PMT in ns
-	private double _ftdcLeft;		 	//Corrected FADC time left PMT in ns
-	private double _ftdcRight;			//Corrected FADC time right PMT in ns	
-	private double _adcLeft;			//Corrected ADC left PMT 
-	private double _adcRight;			//Corrected ADC left PMT 
-	
 	private int _sector, _layer, _component; 
 	
-
+	private double _meantimeTdc, _meantimeFadc;
+	private double _difftimeTdc, _difftimeFadc;
+	
+	private double _adcLcorr, _adcRcorr;
+	private double _tFadcLcorr, _tFadcRcorr;
+	private double _tTdcLcorr, _tTdcRcorr;
+	
+	private double _x, _y, _z;
+	private double _ux, _uy, _uz;
 
 	// constructor
 	public BandHit() {
-		_sector = -1;
-		_layer = -1;
-		_component = -1;
-		_x = -1;
-		_y = -1;
-		_z = -1;
-		_ux = -1;
-		_uy = -1;
-		_uz = -1;
-		_meanTime = -2000;
-		_diffTime = -2000;
-		_tdcLeft = -2000;
-		_tdcRight = -2000;
-		_ftdcLeft = -2000;
-		_ftdcRight = -2000;
-		_adcLeft = -2000;
-		_adcRight = -2000;
-	}
-
-	public double GetDiffTime() {
-		return _diffTime;
+		_sector = -1; _layer = -1; _component = -1;
+		
+		_meantimeTdc = -2000.; _meantimeFadc = -2000.;
+		_difftimeTdc = -2000.; _difftimeFadc = -2000.;
+		
+		_adcLcorr = -2000.; _adcRcorr  = -2000.;
+		_tFadcLcorr = -2000.; _tFadcRcorr = -2000.;
+		_tTdcLcorr = -2000.; _tTdcRcorr = -2000.;
+		
+		_x = -2000.; _y = -2000.; _z = -2000.;
+		_ux = -2000.; _uy = -2000.; _uz = -2000.;
+		
 	}
 	
-	public void SetDiffTime(double time) {
-		this._diffTime = time;
-	}
+	// Grab functions
+	public int GetSector() 		{return _sector;}
+	public int GetLayer()		{return _layer;}
+	public int GetComponent()	{return _component;}
 	
-	public double GetMeanTime() {
-		return _meanTime;
-	}
+	public double GetMeanTime_TDC() 	{return _meantimeTdc;}
+	public double GetMeanTime_FADC() 	{return _meantimeFadc;}
+	public double GetDiffTime_TDC()		{return _difftimeTdc;}
+	public double GetDiffTime_FADC()	{return _difftimeFadc;}
 	
-	public void SetMeanTime(double time) {
-		this._meanTime = time;
-	}
-
-	public double GetX() {
-		return _x;
-	}
-
-	public double GetY() {
-		return _y;
-	}
-
-	public double GetZ() {
-		return _z;
-	}
-
-	public void SetX(double xpos) {
-		this._x = xpos;
-	}
-
-	public void SetY(double ypos) {
-		this._y = ypos;
-	}
-
-	public void SetZ(double zpos) {
-		this._z = zpos;
-	}
-
-	public double GetUx() {
-		return _ux;
-	}
-
-	public double GetUy() {
-		return _uy;
-	}
-
-	public double GetUz() {
-		return _uz;
-	}
-
-	public void SetUx(double xunc) {
-		this._ux = xunc;
-	}
-
-	public void SetUy(double yunc) {
-		this._uy = yunc;
-	}
-
-	public void SetUz(double zunc) {
-		this._uz = zunc;
-	}
-
-	public double GetTdcLeft() {
-		return _tdcLeft;
-	}
+	public double GetAdcLeft()		{return _adcLcorr;}
+	public double GetAdcRight()		{return  _adcRcorr;}
+	public double GetTLeft_FADC()	{return _tFadcLcorr;}
+	public double GetTRight_FADC()	{return _tFadcRcorr;}
+	public double GetTLeft_TDC()	{return _tTdcLcorr;}
+	public double GetTRight_TDC()	{return _tTdcRcorr;}
 	
-	public double GetTdcRight() {
-		return _tdcRight;
-	}
+	public double GetX()	{return _x;}
+	public double GetY()	{return _y;}
+	public double GetZ()	{return _z;}
+	public double GetUx()	{return _ux;}
+	public double GetUy()	{return _uy;}
+	public double GetUz()	{return _uz;}
 	
-	public void SetTdcLeft(double tdc) {
-		this._tdcLeft = tdc;
-	}
+	// Set functions
+	public void SetSector(int sector) 			{this._sector = sector; }
+	public void SetLayer(int layer)	 			{this._layer = layer; }
+	public void SetComponent(int component)		{this._component = component;}
 	
-	public void SetTdcRight(double tdc) {
-		this._tdcRight = tdc;
-	}
+	public void SetMeanTime_TDC(double meanTimeTDC)		{this._meantimeTdc = meanTimeTDC;}
+	public void SetMeanTime_FADC(double meanTimeFADC)	{this._meantimeFadc = meanTimeFADC;}
+	public void SetDiffTime_TDC(double diffTimeTDC)		{this._difftimeTdc = diffTimeTDC;}
+	public void SetDiffTime_FADC(double diffTimeFADC)	{this._difftimeFadc = diffTimeFADC;}
 	
-	public double GetFtdcLeft() {
-		return _ftdcLeft;
-	}
+	public void SetAdcLeft(double adcL)			{this._adcLcorr = adcL;}
+	public void SetAdcRight(double adcR)		{this._adcRcorr = adcR;}
+	public void SetTLeft_FADC(double ftdcL)		{this._tFadcLcorr = ftdcL;}
+	public void SetTRight_FADC(double ftdcR)	{this._tFadcRcorr = ftdcR;}
+	public void SetTLeft_TDC(double tdcL)		{this._tTdcLcorr = tdcL;}
+	public void SetTRight_TDC(double tdcR)		{this._tTdcRcorr = tdcR;}
 	
-	public double GetFtdcRight() {
-		return _ftdcRight;
-	}
-	
-	public void SetFtdcLeft(double tdc) {
-		this._ftdcLeft = tdc;
-	}
-	
-	public void SetFtdcRight(double tdc) {
-		this._ftdcRight = tdc;
-	}
-	
-	public double GetAdcLeft() {
-		return _adcLeft;
-	}
-	
-	public double GetAdcRight() {
-		return _adcRight;
-	}
-	
-	public void SetAdcLeft(double adc) {
-		this._adcLeft = adc;
-	}
-	
-	public void SetAdcRight(double adc) {
-		this._adcRight = adc;
-	}
+	public void SetX(double x)		{this._x = x;}
+	public void SetY(double y)		{this._y = y;}
+	public void SetZ(double z)		{this._z = z;}
+	public void SetUx(double ux)	{this._ux = ux;}
+	public void SetUy(double uy)	{this._uy = uy;}
+	public void SetUz(double uz)	{this._uz = uz;}
+
 
 	
-	public int GetSector() {
-		return _sector;
-	}
-
-	public void SetSector(int sector) {
-		this._sector = sector;
-	}
-
-	public int GetLayer() {
-		return _layer;
-	}
-
-	public void SetLayer(int layer) {
-		this._layer = layer;
-	}
-
-	public int GetComponent() {
-		return _component;
-	}
-
-	public void SetComponent(int component) {
-		this._component = component;
-	}		
-
+	
+	
 	
 
 	

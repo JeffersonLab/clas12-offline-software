@@ -25,6 +25,10 @@ public class CalibrationConstantsLoader {
 	public static Map<Integer, Double> FADC_T_OFFSET = new HashMap<Integer, Double>();
 	public static Map<Integer, Double> TDC_VEFF = new HashMap<Integer,Double>();
 	public static Map<Integer, Double> FADC_VEFF = new HashMap<Integer, Double>();
+	public static double JITTER_PERIOD = 0;
+	public static int JITTER_PHASE = 0;
+	public static int JITTER_CYCLES = 0;
+
 
 	static DatabaseConstantProvider dbprovider = null;
 
@@ -73,19 +77,11 @@ public class CalibrationConstantsLoader {
 			TDC_VEFF.put(	Integer.valueOf(key),		Double.valueOf(veff_tdc) );
 			FADC_VEFF.put(	Integer.valueOf(key), 		Double.valueOf(veff_fadc) );
 		}
-
-		for (Integer keys : TDC_T_OFFSET.keySet())  
-		{
-		   System.out.println(keys + " : "+ TDC_T_OFFSET.get(keys) + " " + FADC_T_OFFSET.get(keys)
-				   					+ " " + TDC_VEFF.get(keys) + " " + FADC_VEFF.get(keys) );
-		}
 		
 		// TDC time jitter
-		//JITTER_PERIOD = dbprovider.getDouble("/calibration/band/time_jitter/period", 0);
-		//JITTER_PHASE  = dbprovider.getInteger("/calibration/band/time_jitter/phase", 0);
-		//JITTER_CYCLES = dbprovider.getInteger("/calibration/band/time_jitter/cycles", 0);
-
-
+		JITTER_PERIOD = dbprovider.getDouble("/calibration/band/time_jitter/period", 0);
+		JITTER_PHASE  = dbprovider.getInteger("/calibration/band/time_jitter/phase", 0);
+		JITTER_CYCLES = dbprovider.getInteger("/calibration/band/time_jitter/cycles", 0);
 
 
 		CSTLOADED = true;

@@ -24,11 +24,10 @@ public class BANDEngine extends ReconstructionEngine {
 
 
 	public BANDEngine() {
-		super("BAND", "hauenstein", "1.0");
+		super("BAND", "hauensteinsegarra", "1.0");
 	}
 
 	int Run = -1;
-	
 	
 
 	@Override
@@ -39,12 +38,13 @@ public class BANDEngine extends ReconstructionEngine {
 		ArrayList<BandHitCandidate> candidates = new ArrayList<BandHitCandidate>();   
 		ArrayList<BandHit> hits = new ArrayList<BandHit>();
 	    
+		//1) Search for valid PMT hits based on FADC/TDC for each PMT
 		candidates = HitReader.getBandCandidates(event)	;	
-		//1) exit if candidates list is empty
+		// exit if candidates list is empty
 		if(candidates.size()==0 )
 			return true;
 
-		//2) find the BAND hits from the candidates
+		//2) Find the BAND bar hits from the candidates
 		BandHitFinder hitFinder = new BandHitFinder();
 		hits = hitFinder.findGoodHits(candidates);
 
@@ -110,8 +110,8 @@ public class BANDEngine extends ReconstructionEngine {
 			//System.out.println("***********  NEXT EVENT ************");
 			//event.show();
 			if (event.hasBank("band::adc") && event.hasBank("band::tdc")){
-			event.getBank("band::adc").show();
-			event.getBank("band::tdc").show();
+				event.getBank("band::adc").show();
+				event.getBank("band::tdc").show();
 			}
 			en.processDataEvent(event);
 			writer.writeEvent(event);
