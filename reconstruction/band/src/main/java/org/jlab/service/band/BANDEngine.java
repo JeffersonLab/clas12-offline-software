@@ -104,7 +104,7 @@ public class BANDEngine extends ReconstructionEngine {
 		writer.open(outputFile);
         int nofevents=0;
 		
-		while(reader.hasEvent() && nofevents<1000) {
+		while(reader.hasEvent() && nofevents<5) {
 			
 			DataEvent event = (DataEvent) reader.getNextEvent();
 			System.out.println("***********  NEXT EVENT ************");
