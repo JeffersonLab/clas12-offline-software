@@ -32,7 +32,6 @@ public class Parameters {
 
 	
 	//RECONSTRUCTION PARAMETERS
-
 	public static final double[][][] pedestal = new double[sectNum][layNum][compNum];         // ADC pedestals, per ADC 
 	public static final double[][][] adcConv = new double[sectNum][layNum][compNum]; 	      // conversion factors from ADC channels to MeVee
    
@@ -45,8 +44,6 @@ public class Parameters {
 	public static final double[][][] attL = new double[sectNum][layNum][compNum];              // Attenuation length 
 	
 	public static final double tRes = 0.2;	                                                  // Average time resolution for hit (ns)
-	public static final double[] maxTime = new double[layNum];							      // Max time of particle hit in a bar for a good event	
-	public static final double[] minTime = new double[layNum];							      // Min time of particle hit in a bar for a good event	
 
 	public static double eThresh = 0.1 ;                                                     // Min reconstructed deposited energy threshold for a good event in MeVee
 
