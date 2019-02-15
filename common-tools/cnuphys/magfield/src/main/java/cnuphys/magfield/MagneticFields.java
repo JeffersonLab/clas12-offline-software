@@ -681,6 +681,7 @@ public class MagneticFields {
 	public void setTorus(Torus torus) {
 		if (torus != null) {
 			if (torus != _torus) {
+				(new Throwable()).printStackTrace();
 				System.err.println("Manually setting torus");
 				_torus = torus;
 				notifyListeners();

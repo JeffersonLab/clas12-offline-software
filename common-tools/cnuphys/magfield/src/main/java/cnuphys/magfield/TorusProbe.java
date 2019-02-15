@@ -14,6 +14,9 @@ public class TorusProbe extends FieldProbe {
 	
 	//12 -fold symmetry or full map?
 	private boolean _fullMap;
+	
+	//hack used only by double torus
+	protected boolean _notDoubleTorus = true;
 		
 	/**
 	 * Create a probe for use with the torus
@@ -37,6 +40,33 @@ public class TorusProbe extends FieldProbe {
 	}
 	
 	/**
+	 * Create a probe for use with the torus
+	 * Used only for the weird DoubleTorus
+	 * @param field
+	 *            the torus field
+	 */
+	public TorusProbe(Torus field, boolean set) {
+		super(field);
+
+		if (set) {
+			if (MagneticFields.getInstance().getTorus() != field) {
+				MagneticFields.getInstance().setTorus(field);
+			}
+		}
+
+		_torus = field;
+
+		_cell = new Cell3D(this);
+		_fullMap = _torus.isFullMap();
+
+		q1Coordinate = _torus.q1Coordinate.clone();
+		q2Coordinate = _torus.q2Coordinate.clone();
+		q3Coordinate = _torus.q3Coordinate.clone();
+
+	}
+
+	
+	/**
 	 * Get the field in kG
 	 * @param x the x coordinate in cm
 	 * @param y the y coordinate in cm
@@ -46,11 +76,14 @@ public class TorusProbe extends FieldProbe {
 	@Override
 	public void field(float x, float y, float z, float result[]) {
 		
-		if (isZeroField()) {
-			result[X] = 0f;
-			result[Y] = 0f;
-			result[Z] = 0f;
-			return;
+		//hack for double torus
+		if (_notDoubleTorus) {
+			if (isZeroField()) {
+				result[X] = 0f;
+				result[Y] = 0f;
+				result[Z] = 0f;
+				return;
+			}
 		}
 				
 		//note that the contains functions handles the shifts
