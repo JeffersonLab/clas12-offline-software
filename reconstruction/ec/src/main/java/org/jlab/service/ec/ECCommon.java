@@ -34,7 +34,7 @@ public class ECCommon {
     public static Boolean         debug = false;
     public static Boolean isSingleThreaded = false;
     public static Boolean      singleEvent = false;
-    public static Boolean    useNewTimeCal = true;
+    public static Boolean    useNewTimeCal =  true;
     public static String         variation = "default";
     
     private static double[] AtoE  = {15,10,10};   // SCALED ADC to Energy in MeV
@@ -103,7 +103,8 @@ public class ECCommon {
         IndexedTable    atten = manager.getConstants(run, "/calibration/ec/attenuation");
         IndexedTable     gain = manager.getConstants(run, "/calibration/ec/gain");
 		IndexedTable     time = manager.getConstants(run, "/calibration/ec/timing");
-		IndexedTable    shift = manager.getConstants(run, "/calibration/ec/global_gain_shift");
+		IndexedTable      ggs = manager.getConstants(run, "/calibration/ec/global_gain_shift");
+		IndexedTable      gtw = manager.getConstants(run, "/calibration/ec/global_time_walk");
 		IndexedTable       ev = manager.getConstants(run, "/calibration/ec/effective_velocity");
     
         if (singleEvent) resetHistos();        
@@ -136,7 +137,8 @@ public class ECCommon {
             strip.setAttenuation(atten.getDoubleValue("A", sector,layer,component),
                                  atten.getDoubleValue("B", sector,layer,component),
                                  atten.getDoubleValue("C", sector,layer,component));
-            strip.setGain(gain.getDoubleValue("gain", sector,layer,component)*shift.getDoubleValue("gain_shift",sector,layer,0)); 
+            strip.setGain(gain.getDoubleValue("gain", sector,layer,component)*ggs.getDoubleValue("gain_shift",sector,layer,0)); 
+            strip.setGlobalTimeWalk(gtw.getDoubleValue("time_walk",sector,layer,0)); 
             strip.setVeff(ev.getDoubleValue("veff",sector,layer,component));
             strip.setTiming(time.getDoubleValue("a0", sector, layer, component),
                             time.getDoubleValue("a1", sector, layer, component),

@@ -44,10 +44,13 @@ public class ECStrip implements Comparable {
     
 	private static final double coincTIME = 25.; //ns. 	
     private double              time = 0;
-    float[]                       tw = {300,300,300,100,100,100,100,100,100};
+    private double               gtw = 0;
+    private TimeCorrection       twc = null; 
     
     public ECStrip(int sector, int layer, int component){
         this.desc.setSectorLayerComponent(sector, layer, component);
+        if( ECCommon.useNewTimeCal) twc = new ExtendedTWCTime();
+        if(!ECCommon.useNewTimeCal) twc = new SimpleTWCTime();
     }
 	
     public DetectorDescriptor  getDescriptor(){
@@ -84,31 +87,34 @@ public class ECStrip implements Comparable {
  	    return phaseCorrection ? getPhaseCorrectedTime():getRawTime();
     }
     
-    public double getTWCTime() {
-    	return (ECCommon.useNewTimeCal)?getNewTWCTime():getOldTWCTime();    	
-    }
-
-    public double getOldTWCTime() {
-      	return getRawTime(true) - iTimingA2 / Math.sqrt(this.iADC);
+    public void setGlobalTimeWalk(double gtw) {
+    	this.gtw = gtw;
     }
     
-    public double getNewTWCTime() {
-    	double radc = Math.sqrt(this.iADC);
-      	return getRawTime(true)-tw[this.desc.getLayer()-1]/radc-iTimingA2-iTimingA3/radc-iTimingA4/Math.sqrt(radc);
-    } 
+    public double getTWCTime() {
+    	return twc.getTime();    	
+    }
     
     public double getTime() {
-    	return (ECCommon.useNewTimeCal)?getNewTime():getOldTime();
+    	return twc.getTime()-iTimingA0;
     }
-	
-	public double getOldTime() {
-		return getRawTime(true) - iTimingA0 - iTimingA2 / Math.sqrt(this.iADC);
-	}  
-	
-	public double getNewTime() {
-    	double radc = Math.sqrt(this.iADC);
-		return getRawTime(true) - iTimingA0 - tw[this.desc.getLayer()-1]/radc-iTimingA2-iTimingA3/radc-iTimingA4/Math.sqrt(radc);
-	}  
+    
+    abstract class TimeCorrection {
+    	public abstract double getTime();
+    }
+    
+    public class SimpleTWCTime extends TimeCorrection {
+        public double getTime() {
+          	return getRawTime(true) - iTimingA2 / Math.sqrt(iADC);
+        }    	
+    }
+    
+    public class ExtendedTWCTime extends TimeCorrection {
+        public double getTime() {
+        	double radc = Math.sqrt(iADC);
+          	return getRawTime(true)-gtw/radc-iTimingA2-iTimingA3/radc-iTimingA4/Math.sqrt(radc);          	
+        }    	
+    } 
     
     public double getEnergy(){
         return this.iADC*this.iGain*this.iADC_to_MEV;
