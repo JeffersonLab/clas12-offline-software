@@ -44,7 +44,7 @@ public class ECStrip implements Comparable {
     
 	private static final double coincTIME = 25.; //ns. 	
     private double              time = 0;
-    private double               gtw = 0;
+    private double               gtw = 0; //global time walk correction
     private TimeCorrection       twc = null; 
     
     public ECStrip(int sector, int layer, int component){
