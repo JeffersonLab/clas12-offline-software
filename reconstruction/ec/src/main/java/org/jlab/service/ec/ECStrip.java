@@ -45,17 +45,17 @@ public class ECStrip implements Comparable {
 	private static final double coincTIME = 25.; //ns. 	
     private double              time = 0;
     private double               gtw = 0; //global time walk correction
-    private TimeCorrection       twc = null; 
+    private TimeCorrection        tc = null; 
     
     public ECStrip(int sector, int layer, int component){
         this.desc.setSectorLayerComponent(sector, layer, component);
-        if( ECCommon.useNewTimeCal) twc = new ExtendedTWCTime();
-        if(!ECCommon.useNewTimeCal) twc = new SimpleTWCTime();
+        if( ECCommon.useNewTimeCal) tc = new ExtendedTWCTime();
+        if(!ECCommon.useNewTimeCal) tc = new SimpleTWCTime();
     }
 	
-    public DetectorDescriptor  getDescriptor(){
-    	    return this.desc;
-    	}
+    public DetectorDescriptor getDescriptor(){
+    	return this.desc;
+    }
     
     public ECStrip setADC(int adc){
         this.iADC = adc;
@@ -76,15 +76,15 @@ public class ECStrip implements Comparable {
     }
     
     public double getRawTime(){
-       	return this.iTDC * iTimingA1;
+       	return tc.getRawTime();
     }
     
     public double getPhaseCorrectedTime() { 
-        return this.iTDC * iTimingA1 - triggerPhase;
+        return tc.getPhaseCorrectedTime();
     }
     
     public double getRawTime(boolean phaseCorrection) {
- 	    return phaseCorrection ? getPhaseCorrectedTime():getRawTime();
+ 	    return phaseCorrection ? tc.getPhaseCorrectedTime():tc.getRawTime();
     }
     
     public void setGlobalTimeWalk(double gtw) {
@@ -92,28 +92,56 @@ public class ECStrip implements Comparable {
     }
     
     public double getTWCTime() {
-    	return twc.getTime();    	
+    	return tc.getTWCTime();    	
     }
     
     public double getTime() {
-    	return twc.getTime()-iTimingA0;
+    	return tc.getTime();
     }
     
     abstract class TimeCorrection {
+    	public abstract double getRawTime();
+    	public abstract double getPhaseCorrectedTime();
+    	public abstract double getTWCTime();    	
     	public abstract double getTime();
     }
     
-    public class SimpleTWCTime extends TimeCorrection {
-        public double getTime() {
-          	return getRawTime(true) - iTimingA2 / Math.sqrt(iADC);
-        }    	
+    public class SimpleTWCTime extends TimeCorrection {    	
+        public double getRawTime(){
+           	return iTDC * iTimingA1;
+        }
+        
+        public double getPhaseCorrectedTime() { 
+            return iTDC * iTimingA1 - triggerPhase;
+        } 
+         	
+        public double getTWCTime() {
+          	return  getPhaseCorrectedTime() - iTimingA2 / Math.sqrt(iADC);
+        }  
+        
+    	public double getTime() {
+    		return getPhaseCorrectedTime() - iTimingA2 / Math.sqrt(iADC) - iTimingA0;
+    	}
     }
     
-    public class ExtendedTWCTime extends TimeCorrection {
-        public double getTime() {
+    public class ExtendedTWCTime extends TimeCorrection {    	
+        public double getRawTime(){
+           	return iTDC * iTimingA1;
+        }
+        
+        public double getPhaseCorrectedTime() { 
+            return iTDC * iTimingA1 - triggerPhase;
+        } 
+        
+        public double getTWCTime() {
         	double radc = Math.sqrt(iADC);
-          	return getRawTime(true)-gtw/radc-iTimingA2-iTimingA3/radc-iTimingA4/Math.sqrt(radc);          	
-        }    	
+          	return getPhaseCorrectedTime() - gtw/radc - iTimingA2 - iTimingA3/radc - iTimingA4/Math.sqrt(radc);          	
+        } 
+        
+    	public double getTime() {
+        	double radc = Math.sqrt(iADC);
+          	return getPhaseCorrectedTime() - gtw/radc - iTimingA2 - iTimingA3/radc - iTimingA4/Math.sqrt(radc) - iTimingA0;          	
+        }         
     } 
     
     public double getEnergy(){
