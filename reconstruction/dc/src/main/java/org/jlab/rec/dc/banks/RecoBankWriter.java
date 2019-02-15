@@ -339,6 +339,12 @@ public class RecoBankWriter {
             bank.setShort("Cross3_ID", i, (short) candlist.get(i).get(2).get_Id());
             bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
             bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
+            bank.setFloat("x", i, (float) candlist.get(i).getFinalStateVec().x());
+            bank.setFloat("y", i, (float) candlist.get(i).getFinalStateVec().y());
+            bank.setFloat("z", i, (float) candlist.get(i).getFinalStateVec().getZ());
+            bank.setFloat("tx", i, (float) candlist.get(i).getFinalStateVec().tanThetaX());
+            bank.setFloat("ty", i, (float) candlist.get(i).getFinalStateVec().tanThetaY());
+            
         }
         //bank.show();
         return bank;

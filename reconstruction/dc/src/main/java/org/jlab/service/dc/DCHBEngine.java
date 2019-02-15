@@ -57,21 +57,7 @@ public class DCHBEngine extends DCEngine {
         Constants.Load();
         super.setStartTimeOption();
         super.LoadTables();
-//        newRun = 809;
-//        long timeStamp = 371468548086L;
-//        if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
-//            IndexedTable tabJ = super.getConstantsManager().getConstants(newRun, Constants.TIMEJITTER);
-//            double period = tabJ.getDoubleValue("period", 0, 0, 0);
-//            int phase = tabJ.getIntValue("phase", 0, 0, 0);
-//            int cycles = tabJ.getIntValue("cycles", 0, 0, 0);
-//
-//            if (cycles > 0) triggerPhase = period * ((timeStamp + phase) % cycles);
-//
-//            TableLoader.FillT0Tables(newRun, super.variationName);
-//            TableLoader.Fill(super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST));
-//
-//            Run.set(newRun);
-//        }
+
         return true;
     }
 
@@ -92,7 +78,8 @@ public class DCHBEngine extends DCEngine {
         int newRun = bank.getInt("run", 0);
        if (newRun == 0)
            return true;
-
+        
+        //System.out.println("******************************************************** EVENT "+bank.getInt("event", 0));
        if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
            if (timeStamp == -1)
                return true;
@@ -169,6 +156,7 @@ public class DCHBEngine extends DCEngine {
         List<FittedHit> fhits = rbc.createRawHitList(hits);
         /* 13 */
         rbc.updateListsListWithClusterInfo(fhits, clusters);
+        
         /* 14 */
         //3) find the segments from the fitted clusters
         SegmentFinder segFinder = new SegmentFinder();
@@ -230,30 +218,27 @@ public class DCHBEngine extends DCEngine {
                 Swimmer.getTorScale(),
                 dcSwim);
         /* 19 */
-
+        List<Track> selectedTracks = new ArrayList<Track>();
         // track found
         int trkId = 1;
-        if (trkcands.size() > 0) {
+        if (trkcands.size() > 0) { 
             // remove overlaps
-            trkcandFinder.removeOverlappingTracks(trkcands);
+            //trkcandFinder.removeOverlappingTracks(trkcands);
             for (Track trk : trkcands) {
+                if(trk.get_FitChi2()>Constants.MAXCHI2)
+                    continue;
                 // reset the id
                 trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(),
                         trk,
                         dcDetector,
                         dcSwim);
-                for (Cross c : trk) {
-                    c.get_Segment1().isOnTrack = true;
-                    c.get_Segment2().isOnTrack = true;
-
-                    for (FittedHit h1 : c.get_Segment1()) {
-                        h1.set_AssociatedHBTrackID(trk.get_Id());
+                
+                    for (Cross c : trk) {
+                        c.get_Segment1().isOnTrack = true;
+                        c.get_Segment2().isOnTrack = true;
                     }
-                    for (FittedHit h2 : c.get_Segment2()) {
-                        h2.set_AssociatedHBTrackID(trk.get_Id());
-                    }
-                }
+                selectedTracks.add(trk);
                 trkId++;
             }
         }
@@ -315,28 +300,23 @@ public class DCHBEngine extends DCEngine {
 
         // remove overlaps
         if (mistrkcands.size() > 0) {
-            trkcandFinder.removeOverlappingTracks(mistrkcands);
+            //trkcandFinder.removeOverlappingTracks(mistrkcands);
             for (Track trk : mistrkcands) {
-
+                //if(trk.get_FitChi2()>Constants.MAXCHI2)
+                //    continue;
                 // reset the id
                 trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(),
                         trk,
                         dcDetector,
                         dcSwim);
-                for (Cross c : trk) {
-                    for (FittedHit h1 : c.get_Segment1()) {
-                        h1.set_AssociatedHBTrackID(trk.get_Id());
-                    }
-                    for (FittedHit h2 : c.get_Segment2()) {
-                        h2.set_AssociatedHBTrackID(trk.get_Id());
-                    }
-                }
+                selectedTracks.add(trk);
                 trkId++;
             }
         }
-        trkcands.addAll(mistrkcands);
-
+        //trkcands.addAll(mistrkcands);
+        trkcands.clear();
+        trkcands.addAll(selectedTracks);
         // no candidate found, stop here and save the hits,
         // the clusters, the segments, the crosses
         if (trkcands.isEmpty()) {
@@ -349,6 +329,15 @@ public class DCHBEngine extends DCEngine {
                     null);
             return true;
         }
+        for(Track trk: trkcands) {
+            if(trk.getHitsOnTrack()!=null) {
+                fhits.addAll(trk.getHitsOnTrack());
+            
+                for(FittedHit fh : trk.getHitsOnTrack()) {
+                    fh.set_AssociatedHBTrackID(trk.get_Id());
+                }
+            }
+        }
         rbc.fillAllHBBanks(event,
                 rbc,
                 fhits,
@@ -356,6 +345,7 @@ public class DCHBEngine extends DCEngine {
                 segments,
                 crosses,
                 trkcands);
+        
         return true;
     }
 

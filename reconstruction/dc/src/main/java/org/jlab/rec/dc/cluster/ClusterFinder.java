@@ -2,7 +2,9 @@ package org.jlab.rec.dc.cluster;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 
 import org.jlab.io.evio.EvioDataBank;
@@ -260,58 +262,32 @@ public class ClusterFinder {
     private List<FittedCluster> RecomposeClusters(List<FittedHit> fhits, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
 
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
-        int NbClus = -1;
+        Map<Integer, List<FittedHit>> clsMap = new HashMap<Integer, List<FittedHit>>();
+        
         for (FittedHit hit : fhits) {
+            Integer key =hit.get_AssociatedHBTrackID()*10000+hit.get_AssociatedClusterID();
+            if(clsMap.get(key)==null)
+                clsMap.put( key, new ArrayList<FittedHit>());
+            clsMap.get(key).add(hit);
+        }
+        
+        int clsId = 1;
+        for (Map.Entry<Integer, List<FittedHit>> entry : clsMap.entrySet()) {
             
-            if (hit.get_AssociatedClusterID() == -1) {
-                continue;
-            }
-            if (hit.get_AssociatedClusterID() > NbClus) {
-                NbClus = hit.get_AssociatedClusterID();
-            }
-        }
-
-        FittedHit[][] HitArray = new FittedHit[fhits.size()][NbClus + 1];
-
-        int index = 0;
-        for (FittedHit hit : fhits) {
-            if (hit.get_AssociatedClusterID() == -1) {
-                continue;
-            }
-            HitArray[index][hit.get_AssociatedClusterID()] = hit;
-            hit.updateHitPosition(DcDetector);
-
-            index++;
-        }
-
-        for (int c = 0; c < NbClus + 1; c++) {
-            List<FittedHit> hitlist = new ArrayList<FittedHit>();
-            for (int i = 0; i < index; i++) {
-                if (HitArray[i][c] != null) {
-                    hitlist.add(HitArray[i][c]);
-                }
-            }
-            if (hitlist.size() > 0) {
-
-                Cluster cluster = new Cluster(hitlist.get(0).get_Sector(), hitlist.get(0).get_Superlayer(), c);
-                FittedCluster fcluster = new FittedCluster(cluster);
-                fcluster.addAll(hitlist);
-                clusters.add(fcluster);
-            }
-        }
-
-        for (FittedCluster clus : clusters) {
-            if (clus != null) {
+            if (entry.getValue() != null) {
                 // update the hits
-                for (FittedHit fhit : clus) {
+                for (FittedHit fhit : entry.getValue()) {
                     fhit.set_TrkgStatus(0);
                     fhit.updateHitPositionWithTime(1, fhit.getB(), tab, DcDetector, tde);
-                    fhit.set_AssociatedClusterID(clus.get_Id());
-                    fhit.set_AssociatedHBTrackID(clus.get(0).get_AssociatedHBTrackID());
+                    fhit.set_AssociatedClusterID(clsId); 
                 }
+                Cluster cluster = new Cluster(entry.getValue().get(0).get_Sector(), entry.getValue().get(0).get_Superlayer(), clsId);
+                FittedCluster fcluster = new FittedCluster(cluster);
+                fcluster.addAll(entry.getValue());
+                clusters.add(fcluster);
+                clsId++;
             }
         }
-
         return clusters;
     }
 

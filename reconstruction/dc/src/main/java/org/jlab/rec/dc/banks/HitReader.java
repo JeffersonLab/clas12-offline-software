@@ -338,6 +338,7 @@ public class HitReader {
             hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
+            
             if(hit.get_Beta()>0.15 && hit.get_Beta()<=1.40) {
                 if(hit.get_Beta()>1.0)
                     hit.set_Beta(1.0);
@@ -460,10 +461,19 @@ public class HitReader {
                     bank.getShort("index", i) == trkId - 1) {
                 _beta = event.getBank("RECHB::Particle").getFloat("beta",
                         bank.getShort("pindex", i));
+                if(_beta<0) { // beta not found --> assign pion hypo
+                    double px = event.getBank("RECHB::Particle").getFloat("px",
+                            bank.getShort("pindex", i));
+                    double py = event.getBank("RECHB::Particle").getFloat("py",
+                            bank.getShort("pindex", i));
+                    double pz = event.getBank("RECHB::Particle").getFloat("pz",
+                            bank.getShort("pindex", i));
+                    double mass = 0.13957018;
+                    _beta = Math.sqrt(px*px+py*py+pz*pz)/Math.sqrt(px*px+py*py+pz*pz+mass*mass);
+                }
             }
         }
-        if(_beta>1.0)
-            _beta=1.0;
+        
         return _beta;
     }
 

@@ -161,6 +161,7 @@ public class Constants {
     public static int[][] STBLOC;
 
     private static boolean USETSTART = false;
+    public static double SEEDCUT = 2500;
 
     public static boolean isUSETSTART() {
         return USETSTART;

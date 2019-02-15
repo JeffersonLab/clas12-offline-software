@@ -10,7 +10,7 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
  * @author ziegler
  *
  */
-public class Hit implements Comparable<Hit> {
+public class Hit implements Comparable<Hit>, Cloneable {
 
     private int _Sector;      							//	   sector[1...6]
     private int _Superlayer;    	 					//	   superlayer [1,...6]
@@ -261,6 +261,11 @@ public class Hit implements Comparable<Hit> {
     public String printInfo() {
         String s = "DC Hit: ID " + this.get_Id() + " Sector " + this.get_Sector() + " Superlayer " + this.get_Superlayer() + " Layer " + this.get_Layer() + " Wire " + this.get_Wire() + " TDC " + this.get_TDC();
         return s;
+    }
+    
+    public Object clone() throws CloneNotSupportedException {
+        Hit hitClone = (Hit)super.clone();
+        return hitClone;
     }
 
 }
