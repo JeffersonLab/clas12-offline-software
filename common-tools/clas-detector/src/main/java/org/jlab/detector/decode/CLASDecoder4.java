@@ -686,7 +686,6 @@ public class CLASDecoder4 {
                     //decodedEvent.appendBanks(trigger);
 
                     Bank epics = decoder.createEpicsBank();
-                    if (epics!=null) decodedEvent.write(epics);
 
                     //HipoDataEvent dhe = (HipoDataEvent) decodedEvent;
                     //writer.writeEvent(dhe.getHipoEvent());
@@ -694,10 +693,11 @@ public class CLASDecoder4 {
                     int eventTag;
                     decodedEvent.read(rawScaler);
                     decodedEvent.read(rawRunConf);
-
-                    if(rawScaler.getRows()>0){
+                        
+                    if(rawScaler.getRows()>0 || epics!=null) {
                         scalerEvent.reset();
-                        scalerEvent.write(rawScaler);
+
+                        if(rawScaler.getRows()>0) scalerEvent.write(rawScaler);
                         if(rawRunConf.getRows()>0) scalerEvent.write(rawRunConf);
 
                         Bank recScaler = decoder.createReconScalerBank(decodedEvent);
@@ -705,6 +705,12 @@ public class CLASDecoder4 {
                             decodedEvent.write(recScaler);
                             scalerEvent.write(recScaler);
                         }
+
+                        if (epics!=null) {
+                            decodedEvent.write(epics);
+                            scalerEvent.write(epics);
+                        }
+                        
                         writer.addEvent(scalerEvent, 1);
                     }
 
