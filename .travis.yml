@@ -20,7 +20,7 @@ before_install:
 
 install:
   - java -version
-  - ./build-coatjava.sh
+  - ./build-coatjava.sh --quiet
 
 script:
   - ls -lthra
