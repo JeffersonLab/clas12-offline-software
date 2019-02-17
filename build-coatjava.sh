@@ -34,8 +34,7 @@ mvn='mvn'
 if [ "$quiet" == "yes" ]
 then
     wget='wget --progress=dot:mega'
-    mvn='mvn -B'
-    #mvn='mvn -q -B'
+    mvn='mvn -q -B'
 fi
 
 # download the default field maps, as defined in bin/env.sh:
