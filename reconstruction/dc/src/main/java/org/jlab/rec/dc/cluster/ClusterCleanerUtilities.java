@@ -381,7 +381,6 @@ public class ClusterCleanerUtilities {
             newhitPos.calc_CellSize(DcDetector);
             newhitPos.set_LeftRightAmb(1);
             newhitPos.updateHitPositionWithTime(1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer, so that cosTrkAng =1
-
             newhitPos.set_AssociatedClusterID(hit.get_AssociatedClusterID());
             newhitPos.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());
 
@@ -402,7 +401,6 @@ public class ClusterCleanerUtilities {
             newhitNeg.calc_CellSize(DcDetector);
             newhitNeg.set_LeftRightAmb(-1);
             newhitNeg.updateHitPositionWithTime(1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer
-
             newhitNeg.set_AssociatedClusterID(hit.get_AssociatedClusterID());
             newhitNeg.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());
 

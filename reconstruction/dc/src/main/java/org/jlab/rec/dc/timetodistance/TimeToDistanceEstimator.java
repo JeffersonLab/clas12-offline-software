@@ -2,7 +2,6 @@ package org.jlab.rec.dc.timetodistance;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import org.jlab.rec.dc.Constants;
 
 
 public class TimeToDistanceEstimator {
@@ -144,9 +143,16 @@ public class TimeToDistanceEstimator {
      * @return time bin
      */
     public int getTimeIdx(double t1, int is, int ir, int ibfield, int icosalpha) {
+        
         DecimalFormat df = new DecimalFormat("#");
         df.setRoundingMode(RoundingMode.CEILING);
-        int binIdx = Integer.parseInt(df.format(t1/2.) ) -1; 
+       
+        int binIdx =0;
+        try{
+            binIdx = Integer.parseInt(df.format(t1/2.) ) -1; 
+        } catch (NumberFormatException e) {
+            System.out.println(" time bin error "+t1+" ");
+        }
         if(binIdx<0) {
             binIdx = TableLoader.minBinIdxT;
         }

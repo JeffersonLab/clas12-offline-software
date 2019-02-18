@@ -204,7 +204,7 @@ public class DCTBEngine extends DCEngine {
         if(TrackArray==null) {
             return true; // HB tracks not saved correctly
         }
-        for(Segment seg : segments) {
+        for(Segment seg : segments) { 
             TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].get_ListOfHBSegments().add(seg); 
             if(seg.get_Status()==1)
                 TrackArray[seg.get(0).get_AssociatedHBTrackID()-1].set_Status(1);
@@ -305,7 +305,7 @@ public class DCTBEngine extends DCEngine {
                         
                         h1.updateHitPositionWithTime(cosTrkAngle, h1.getB(), 
                                 super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
-
+                        
                     }
                     for(FittedHit h2 : c.get_Segment2()) {
                         h2.set_AssociatedTBTrackID(trk.get_Id());  
@@ -313,7 +313,7 @@ public class DCTBEngine extends DCEngine {
                         
                         h2.updateHitPositionWithTime(cosTrkAngle, h2.getB(), 
                                 super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
-
+                        
                     }
                 }
                 trkId++;

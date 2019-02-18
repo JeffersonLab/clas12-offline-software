@@ -185,7 +185,8 @@ public class ClusterFitter {
             //double trkDocaMP = -xWire + (FitPars.slope()*FitArray[0][i]+FitPars.intercept());
             double trkDocaMP = FitLine.distance(Wire).length();
             double trkDoca = trkDocaMP * stereo;
-
+            if(Double.isNaN(trkDoca)) 
+                return;
             clus.get(i).set_ClusFitDoca(trkDoca);
 
             //

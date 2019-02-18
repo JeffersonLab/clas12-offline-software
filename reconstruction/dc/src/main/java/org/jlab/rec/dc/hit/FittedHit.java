@@ -362,7 +362,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             double correctedTime = (this.get_Time() - deltatime_beta);
             if(correctedTime<=0)
                 correctedTime=0.0;
-
+            
             distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), correctedTime, secIdx, slIdx) ;
             
         }
