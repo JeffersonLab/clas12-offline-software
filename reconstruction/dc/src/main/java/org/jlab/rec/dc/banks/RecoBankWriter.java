@@ -78,7 +78,7 @@ public class RecoBankWriter {
             bank.setFloat("Z", i, (float) hitlist.get(i).get_Z());
             bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
             bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
-            bank.setByte("trkID", i, (byte) hitlist.get(i).get_AssociatedHBTrackID());
+            bank.setShort("trkID", i, (short) hitlist.get(i).get_AssociatedHBTrackID());
 
             bank.setInt("TDC",i,hitlist.get(i).get_TDC());
             bank.setFloat("B", i, (float) hitlist.get(i).getB());
