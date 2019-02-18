@@ -278,7 +278,7 @@ public class HitReader {
             B[i] = bank.getFloat("B", i);
             trkDoca[i] = bank.getFloat("trkDoca", i);
             clusterID[i] = bank.getShort("clusterID", i);
-            trkID[i] = bank.getByte("trkID", i);
+            trkID[i] = bank.getShort("trkID", i);
             tProp[i] = bank.getFloat("TProp", i);
             tFlight[i] = bank.getFloat("TFlight", i);
             if (event.hasBank("MC::Particle") ||
@@ -320,11 +320,18 @@ public class HitReader {
             if (Constants.isUSETSTART()) {
                 T0Sub -= T_Start;
             }
+            
+            if(T0Sub<-25) {
+                continue;
+            } else {
+                if(T0Sub<0)
+                    T0Sub=0;
+            }
             hit.set_Time(T0Sub);
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
             hit.calc_CellSize(DcDetector);
-            hit.set_ClusFitDoca(trkDoca[i]);
+            hit.set_ClusFitDoca(trkDoca[i]); 
             hit.set_TimeToDistance(1.0, B[i], constants1, tde);
 
             hit.set_QualityFac(0);
@@ -338,8 +345,7 @@ public class HitReader {
             hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
-            
-            if(hit.get_Beta()>0.15 && hit.get_Beta()<=1.40) {
+            if(hit.get_Beta()>0.3 && hit.get_Beta()<=1.2) {
                 if(hit.get_Beta()>1.0)
                     hit.set_Beta(1.0);
                 hits.add(hit);
@@ -428,7 +434,6 @@ public class HitReader {
             hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedTBTrackID(trkID[i]);
-
             hit.set_TimeToDistance(1.0, B[i], constants1, tde);
 
             hit.set_QualityFac(0);
@@ -438,7 +443,7 @@ public class HitReader {
             }
             if (hit.get_Time() < 0)
                 hit.set_QualityFac(1);
-            if(hit.get_Beta()>0.2 && hit.get_Beta()<=1.30) {
+            if(hit.get_Beta()>0.25 && hit.get_Beta()<=1.15) {
                 if(hit.get_Beta()>1.0)
                     hit.set_Beta(1.0);
                 hits.add(hit);
