@@ -20,18 +20,18 @@ before_install:
 
 install:
   - java -version
-  - ./build-coatjava.sh
+  - ./build-coatjava.sh --quiet
 
 script:
   - ls -lthra
   - which groovy
   - echo "starting advanced tests..."
   - cd validation/advanced-tests/
-  - ./run-advanced-tests.sh
-  - ./run-eb-tests.sh -100 electronproton
-  - ./run-eb-tests.sh -100 electrongamma
-  - ./run-eb-tests.sh -100 electronprotonC
-  - ./run-eb-tests.sh -100 electronneutronC
+  - ./run-advanced-tests.sh                 || travis_terminate 1;
+  - ./run-eb-tests.sh -100 electronproton   || travis_terminate 1;
+  - ./run-eb-tests.sh -100 electrongamma    || travis_terminate 1;
+  - ./run-eb-tests.sh -100 electronprotonC  || travis_terminate 1;
+  - ./run-eb-tests.sh -100 electronneutronC || travis_terminate 1;
   - cd -
   - echo "finished advanced tests"
   - mvn cobertura:cobertura &> /dev/null # for codecov

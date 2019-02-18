@@ -1112,7 +1112,7 @@ public class CodaEventDecoder {
                             int quartet  = DataUtils.getInteger(dataEntry, 30, 30);
                             int interval = DataUtils.getInteger(dataEntry, 29, 29);
                             int id       = DataUtils.getInteger(dataEntry, 24, 28);
-                            int value    = DataUtils.getInteger(dataEntry,  0, 23);
+                            long value   = DataUtils.getLongFromInt(DataUtils.getInteger(dataEntry,  0, 23));
                             if(id < 3) {
                                 DetectorDataDgtz entry = new DetectorDataDgtz(crate,num,id+32*interval);
                                 SCALERData scaler = new SCALERData();
@@ -1130,10 +1130,12 @@ public class CodaEventDecoder {
                             if(id<3 && slot<4) {
                                 DetectorDataDgtz entry = new DetectorDataDgtz(crate,num,loop-5);
                                 SCALERData scaler = new SCALERData();
-                                scaler.setValue(dataEntry);                            
+                                scaler.setValue(DataUtils.getLongFromInt(dataEntry));                            
                                 entry.addSCALER(scaler);
                                 scalerEntries.add(entry);
-//                                System.out.println(loop + " " + crate + " " + slot + " " + id + " " + dataEntry);
+//                                long long_data = 0;
+//                                long  value = (long) ((long_data|dataEntry)&0x00000000FFFFFFFFL);
+//                                System.out.println(loop + " " + crate + " " + slot + " " + id + " " + dataEntry + " " + value + " " + DataUtils.getLongFromInt(dataEntry) + " " + String.format("0x%08X", dataEntry) + " " + String.format("0x%16X", value));           
                             }
                         }
                     }
@@ -1215,16 +1217,20 @@ public class CodaEventDecoder {
 
         List<DetectorDataDgtz> tiEntries = new ArrayList<>();
         List<EvioTreeBranch> branches = this.getEventBranches(event);
-
         for(EvioTreeBranch branch : branches){
             int  crate = branch.getTag();
             EvioTreeBranch cbranch = this.getEventBranch(branches, branch.getTag());
             for(EvioNode node : cbranch.getNodes()){
                 if(node.getTag()==57610){
                     long[] longData = ByteDataTransformer.toLongArray(node.getStructureBuffer(true));
-                    int[]  intData  = ByteDataTransformer.toIntArray(node.getStructureBuffer(true));
+                    int[]  intData  = ByteDataTransformer.toIntArray(node.getStructureBuffer(true));		    
+                    long     tStamp = longData[2]&0x0000ffffffffffffL;
+
+		    // Below is endian swap if needed
+		    //long    ntStamp = (((long)(intData[5]&0x0000ffffL))<<32) | (intData[4]&0xffffffffL);
+		    //System.out.println(longData[2]+" "+tStamp+" "+crate+" "+node.getDataLength());
+		    
                     DetectorDataDgtz entry = new DetectorDataDgtz(crate,0,0);
-                    long tStamp = longData[2]&0x00000000ffffffff;
                     entry.setTimeStamp(tStamp);
                     if(node.getDataLength()==4) tiEntries.add(entry);
                     else if(node.getDataLength()==5) { // trigger supervisor crate
@@ -1245,17 +1251,18 @@ public class CodaEventDecoder {
                 }
             }
         }
+
         return tiEntries;
     }
 
 
     public static void main(String[] args){
         EvioSource reader = new EvioSource();
-        reader.open("/home/fbossu/Data/mvt_packed_004698.evio.00000");
+        reader.open("/Users/devita/clas_004013.evio.1000");
         CodaEventDecoder decoder = new CodaEventDecoder();
         DetectorEventDecoder detectorDecoder = new DetectorEventDecoder();
 
-        int maxEvents = 5;
+        int maxEvents = 5000;
         int icounter  = 0;
 
         while(reader.hasEvent()==true&&icounter<maxEvents){

@@ -335,7 +335,7 @@ public class Swim {
     /**
      * Cylindrical stopper
      */
-    private class CylindricalcalBoundarySwimStopper implements IStopper {
+    private class CylindricalBoundarySwimStopper implements IStopper {
 
         private double _finalPathLength = Double.NaN;
 
@@ -347,7 +347,7 @@ public class Swim {
          * @param maxR
          *            the max radial coordinate in meters.
          */
-        private CylindricalcalBoundarySwimStopper(double Rad) {
+        private CylindricalBoundarySwimStopper(double Rad) {
                 // DC reconstruction units are cm. Swim units are m. Hence scale by
                 // 100
                 _Rad = Rad;
@@ -395,8 +395,8 @@ public class Swim {
         if(this.SwimUnPhys)
             return null;
         
-        CylindricalcalBoundarySwimStopper stopper = new CylindricalcalBoundarySwimStopper(Rad);
-
+        CylindricalBoundarySwimStopper stopper = new CylindricalBoundarySwimStopper(Rad);
+        
         SwimTrajectory st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize,
                         0.0005);
         if(st==null)

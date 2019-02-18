@@ -40,6 +40,8 @@ public class ScintillatorResponse extends DetectorResponse {
                 response.setPosition(x, y, z);
                 response.setEnergy(bank.getFloat("energy", row));
                 response.setTime(bank.getFloat("time", row));
+                response.setStatus(bank.getInt("status",row));
+
                 responseList.add(response);
             }
         }

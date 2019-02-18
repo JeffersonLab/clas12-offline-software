@@ -222,6 +222,7 @@ public class DetectorData {
            bank.setFloat("time", row, (float) r.getTime());
            bank.setFloat("energy", row, (float) r.getEnergy());
            bank.setFloat("chi2", row, (float) 0.0);
+           bank.setShort("status",row,(short) r.getStatus());
        }
        return bank;
    }
@@ -246,6 +247,7 @@ public class DetectorData {
            bank.setFloat("time", row, (float) r.getTime());
            bank.setFloat("energy", row, (float) r.getEnergy());
            bank.setFloat("chi2", row, (float) 0.0);
+           bank.setShort("status",row,(short) r.getStatus());
        }
        return bank;
    }
@@ -264,19 +266,20 @@ public class DetectorData {
            bank.setFloat("phi", row, (float) c.getPhi());
            bank.setFloat("dtheta", row, (float) c.getDeltaTheta());
            bank.setFloat("dphi", row, (float) c.getDeltaPhi());
-           bank.setFloat("path", row, (float) 0.0);
+           bank.setFloat("path", row, (float) c.getPath());
            bank.setFloat("time", row, (float) c.getTime());
            bank.setFloat("nphe", row, (float) c.getEnergy());
            bank.setFloat("chi2", row, (float) 0.0);
+           bank.setShort("status",row,(short) c.getStatus());
        }
        return bank;
    }
       
-      public static DataBank getForwardTaggerBank(List<TaggerResponse> responses, DataEvent event, String bank_name){
+      public static DataBank getForwardTaggerBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, responses.size());
        int row = 0;
        for(int i = 0; i < responses.size(); i++){
-           TaggerResponse t  = responses.get(i);
+           TaggerResponse t  = (TaggerResponse)responses.get(i);
            bank.setShort("index", row, (short) t.getHitIndex());
            bank.setShort("pindex", row, (short) t.getAssociation());
            bank.setByte("detector", row, (byte) t.getDescriptor().getType().getDetectorId());
@@ -330,6 +333,7 @@ public class DetectorData {
                bank.setFloat("vx_nomm", row, (float) p.vertex().x());
                bank.setFloat("vy_nomm", row, (float) p.vertex().y());
                bank.setFloat("vz_nomm", row, (float) p.vertex().z());
+               bank.setInt(  "status",  row, (int)   p.getTrackStatus());
                row = row + 1;
            }
        }
@@ -392,15 +396,16 @@ public class DetectorData {
                DetectorParticle p = particles.get(i);
                if (p.getTrackDetector()!=DetectorType.DC.getDetectorId() &&
                    p.getTrackDetector()!=DetectorType.CVT.getDetectorId() ) continue;
-               bank.setShort("index",i,(short)p.getTrackIndex());
-               bank.setShort("pindex",i,(short)i);
+               bank.setShort("index",row,(short)p.getTrackIndex());
+               bank.setShort("pindex",row,(short)i);
                for (int ii=0; ii<5; ii++) {
                    for (int jj=0; jj<5; jj++) {
                        String varName = String.format("C%d%d",ii+1,jj+1);
                        if (bank.getDescriptor().hasEntry(varName)!=true) continue;
-                       bank.setFloat(varName,i,p.getCovMatrix(ii,jj));
+                       bank.setFloat(varName,row,p.getCovMatrix(ii,jj));
                    }
                }
+               row++;
            }
        }
        return bank;
