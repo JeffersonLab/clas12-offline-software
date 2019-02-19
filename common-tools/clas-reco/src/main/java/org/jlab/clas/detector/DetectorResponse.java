@@ -64,11 +64,12 @@ public class DetectorResponse {
     public void setHitIndex(int hitIndex) {this.hitIndex = hitIndex;}
        
     // new, many-to-one relationship between tracks and hits:
-    public Integer[] getAssociations(){ return (Integer[])this.associations.toArray();}
     public void addAssociation(int asc){ this.associations.add(asc); }
     public int getNAssociations() { return this.associations.size(); }
     public int getAssociation(int index) { return this.associations.get(index); }
-    
+    public boolean hasAssociation(int asc) { return this.associations.contains(asc); }
+    public void clearAssociations() { this.associations.clear(); }
+
     // if we wanted pindex to store pointers to multiple particles:
     // (but with pindex being a short, this would be limited to 15 particles)
     public int getPindexMask() {

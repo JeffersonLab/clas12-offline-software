@@ -45,7 +45,7 @@ public class DetectorParticle implements Comparable {
     private Vector3 particleCrossDirection = new Vector3();
   
     // let multiple particles share the same hit for these detectors:
-    private final DetectorType[] sharedDetectors = {DetectorType.FTOF};
+    private final DetectorType[] sharedDetectors = {DetectorType.FTOF,DetectorType.CTOF};
     
     private Line3D  driftChamberEnter = new Line3D();
     
