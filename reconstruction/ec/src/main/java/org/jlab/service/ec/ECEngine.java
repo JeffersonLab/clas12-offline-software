@@ -60,7 +60,7 @@ public class ECEngine extends ReconstructionEngine {
         List<ECPeak>      ecPeaks  = ECCommon.processPeaks(ECCommon.createPeaks(ecStrips)); // thresholds, split peaks -> update peak-lines          
         List<ECCluster> ecClusters = new ArrayList<ECCluster>();
         ecClusters.addAll(ECCommon.createClusters(ecPeaks,1)); //PCAL
-        ecClusters.addAll(ECCommon.createClusters(ecPeaks,4)); //ECinner
+        ecClusters.addAll(ECCommon.createClusters(ecPeaks,4)); //ECinner 
         ecClusters.addAll(ECCommon.createClusters(ecPeaks,7)); //ECouter
         
         ECCommon.shareClustersEnergy(ecClusters);  // Repair 2 clusters which share the same peaks
@@ -132,7 +132,7 @@ public class ECEngine extends ReconstructionEngine {
             bankC.setByte("sector",  c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
             bankC.setByte("layer",   c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
             bankC.setFloat("energy", c, (float) clusters.get(c).getEnergy());
-            bankC.setFloat("time",   c, (float) clusters.get(c).getTime());
+            bankC.setFloat("time",   c, (float) clusters.get(c).getRawADCTime());
             bankC.setByte("idU",     c,  (byte) clusters.get(c).UVIEW_ID);
             bankC.setByte("idV",     c,  (byte) clusters.get(c).VVIEW_ID);
             bankC.setByte("idW",     c,  (byte) clusters.get(c).WVIEW_ID);
@@ -197,6 +197,11 @@ public class ECEngine extends ReconstructionEngine {
     	    ECCommon.veff = veff;
     }
     
+    public void setNewTimeCal(boolean val) {
+        System.out.println("ECEngine: useNewTimeCal = "+val);
+    	ECCommon.useNewTimeCal = val;
+    }
+    
     public void setStripThresholds(int thr0, int thr1, int thr2) {
         System.out.println("ECEngine: Strip ADC thresholds = "+thr0+" "+thr1+" "+thr2);
         ECCommon.stripThreshold[0] = thr0;
@@ -233,6 +238,7 @@ public class ECEngine extends ReconstructionEngine {
             "/calibration/ec/fadc_offset",
             "/calibration/ec/fadc_global_offset",
             "/calibration/ec/global_gain_shift",
+            "/calibration/ec/global_time_walk",
             "/calibration/ec/effective_velocity"
         };
         
