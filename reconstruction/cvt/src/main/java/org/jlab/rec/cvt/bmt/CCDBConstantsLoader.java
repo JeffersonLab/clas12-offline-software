@@ -246,23 +246,24 @@ public class CCDBConstantsLoader {
         }
          
         //Loading alignment constant in tables
-         Constants.setRxAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Rx", 0));
-         Constants.setRyAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Ry", 0));
-         Constants.setRzAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Rz", 0));
-         Constants.setCxAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Tx", 0));
-         Constants.setCyAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Ty", 0));
-         Constants.setCzAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Tz", 0));
-         
-         for (int i=0;i<dbprovider.length("/test/mvt/MVTAlignment/Rx");i++) {
-        	Constants.setRx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i),dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Rx",i));
-        	Constants.setRy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i),dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Ry",i));
-        	Constants.setRz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i),dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Rz",i));
-        	Constants.setCx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i),dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Tx",i));
-        	Constants.setCy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i),dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Ty",i));
-        	Constants.setCz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i),dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Tz",i));
-         }
-         
-         // beam offset
+        Constants.setRxAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Rx", 0));
+        Constants.setRyAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Ry", 0));
+        Constants.setRzAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Rz", 0));
+        Constants.setCxAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Tx", 0));
+        Constants.setCyAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Ty", 0));
+        Constants.setCzAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Tz", 0));
+
+        for (int i=0;i<dbprovider.length("/test/mvt/MVTAlignment/Rx");i++) {
+          // for the alignment table, layer numbering goes from 7 to 12. Adding "-6" to bring it back to [1,6] range
+          Constants.setRx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Rx",i));
+          Constants.setRy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Ry",i));
+          Constants.setRz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Rz",i));
+          Constants.setCx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Tx",i));
+          Constants.setCy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Ty",i));
+          Constants.setCz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Tz",i));
+        }
+
+        // beam offset
         double r = dbprovider.getDouble("/test/beam_pos/r", 0);     
         double r_err = dbprovider.getDouble("/test/beam_pos/err_r", 0); 
         double phi_deg = dbprovider.getDouble("/test/beam_pos/phi0", 0); 
