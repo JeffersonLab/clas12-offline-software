@@ -9,6 +9,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.band.constants.CalibrationConstantsLoader;
+import org.jlab.rec.band.constants.Parameters;
 import org.jlab.rec.band.banks.HitReader;
 import org.jlab.rec.band.banks.RecoBankWriter;
 import org.jlab.rec.band.hit.BandHit;
@@ -80,6 +81,7 @@ public class BANDEngine extends ReconstructionEngine {
 			if(Run!=newRun) {
 				CalibrationConstantsLoader.Load(newRun,"default"); 
 				Run = newRun;
+				Parameters.CreateGeometry(); // loading BAND params
 			}
 		}
 
