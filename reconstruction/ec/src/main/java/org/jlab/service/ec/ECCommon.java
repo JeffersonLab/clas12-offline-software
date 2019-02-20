@@ -12,7 +12,6 @@ import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.groot.data.H1F;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.utils.groups.IndexedList;
 import org.jlab.utils.groups.IndexedTable;
 
@@ -111,7 +110,7 @@ public class ECCommon {
         
         List<ECStrip>  ecStrips = null;
         
-        if(event instanceof HipoDataEvent) ecStrips = ECCommon.readStripsHipo(event, run, manager);
+        ecStrips = ECCommon.readStripsHipo(event, run, manager); //lcs
         
         if(ecStrips==null) return new ArrayList<ECStrip>();
         

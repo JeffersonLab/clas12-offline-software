@@ -14,9 +14,7 @@ import org.jlab.geom.base.Detector;
 import org.jlab.groot.data.H1F;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.hipo.HipoDataEvent;
-import org.jlab.io.hipo.HipoDataSync;
+
 /**
  *
  * @author gavalian
@@ -24,10 +22,9 @@ import org.jlab.io.hipo.HipoDataSync;
 public class ECEngine extends ReconstructionEngine {
 
     EvioHipoEvent convertor = new EvioHipoEvent();            
-    HipoDataSync     writer = new HipoDataSync();
     CLASDecoder     decoder = new CLASDecoder();
     
-    Detector        ecDetector = null;
+    Detector              ecDetector = null;
     public Boolean             debug = false;
     public Boolean  isSingleThreaded = false;
     public Boolean       singleEvent = false;
@@ -74,7 +71,7 @@ public class ECEngine extends ReconstructionEngine {
             if(ecClusters.size()==2) {for(ECCluster c : ecClusters) System.out.println(c);}
         }
 	    
-        if(de instanceof HipoDataEvent) this.writeHipoBanks(de,ecStrips,ecPeaks,ecClusters);
+        this.writeHipoBanks(de,ecStrips,ecPeaks,ecClusters); //lcs
         
         if (isSingleThreaded) {
         	ECCommon.clearMyStructures();
