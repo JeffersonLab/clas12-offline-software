@@ -33,6 +33,7 @@ import eu.mihosoft.vrl.v3d.Transform;
 public class SVTConstants
 {
 	private static String ccdbPath = "/geometry/cvt/svt/";
+	private static String ccdbPathAlignment = "/test/svt/";
 	private static boolean bLoadedConstants = false; // only load constants once
 	
 	// data for alignment shifts
@@ -102,7 +103,15 @@ public class SVTConstants
 	public static double STRIPLENMAX;  //      ||  AZ  | DZ |MG| DZ |  AZ  | DZ |MG| DZ |  AZ  ||
 	public static double MODULEWID; // || DZ | AZ | DZ ||
 	public static double SECTORLEN;
-	
+	//
+	//Loading Maxime's alignment constant
+	public static double[][] Rx;
+	public static double[][] Ry;
+	public static double[][] Rz;
+	public static double[][] Tx;
+	public static double[][] Ty;
+	public static double[][] Tz;
+	public static double[][] LocTx;
 	/**
 	 * Loads the the necessary tables for the SVT geometry for a given DatabaseConstantProvider.
 	 * 
@@ -117,6 +126,7 @@ public class SVTConstants
 		cp.loadTable( ccdbPath +"material/box");
 		cp.loadTable( ccdbPath +"material/tube");
 		cp.loadTable( ccdbPath +"alignment");
+		cp.loadTable( ccdbPathAlignment +"SVTAlignment");
 		//if( loadAlignmentTables ) cp.loadTable( ccdbPath +"alignment/sector"); // possible future tables
 		//if( loadAlignmentTables ) cp.loadTable( ccdbPath +"alignment/layer");
 		
@@ -294,7 +304,7 @@ public class SVTConstants
 			REFRADIUS = new double[NREGIONS]; // used to derive LAYERRADIUS
 			SUPPORTRADIUS = new double[NREGIONS]; // used to build volumes
 			LAYERRADIUS = new double[NREGIONS][NMODULES]; // used to build strips
-			
+						
 			// Consider Region 1 Sector 6 (not to scale)
 			//
 			// y (vertical)                                    .------------------^-------------
@@ -363,6 +373,24 @@ public class SVTConstants
 			NTOTALSECTORS = convertRegionSector2Index( NREGIONS-1, NSECTORS[NREGIONS-1]-1 )+1;
 			NTOTALFIDUCIALS = convertRegionSectorFiducial2Index(NREGIONS-1, NSECTORS[NREGIONS-1]-1, NFIDUCIALS-1  )+1;
 			
+			Rx=new double[NREGIONS*2][18];
+			Ry=new double[NREGIONS*2][18];
+			Rz=new double[NREGIONS*2][18];
+			Tx=new double[NREGIONS*2][18];
+			Ty=new double[NREGIONS*2][18];
+			Tz=new double[NREGIONS*2][18];
+			LocTx=new double[NREGIONS*2][18];
+			
+			for (int i=0; i<cp.length(ccdbPathAlignment+"SVTAlignment/Rx");i++) {
+				Rx[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Rx", i );
+				Ry[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Ry", i );
+				Rz[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Rz", i );
+				Tx[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Tx", i );
+				Ty[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Ty", i );
+				Tz[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Tz", i );
+				LocTx[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/LocTx", i );
+			}
+						
 			// check one constant from each table
 			//if( NREGIONS == 0 || NSECTORS[0] == 0 || FIDCUX == 0 || MATERIALS[0][0] == 0 || SUPPORTRADIUS[0] == 0 )
 				//throw new NullPointerException("please load the following tables from CCDB in "+ccdbPath+"\n svt\n region\n support\n fiducial\n material\n");
@@ -372,6 +400,7 @@ public class SVTConstants
 			if( VERBOSE )
 			{
 				System.out.println();
+				System.out.printf("Rx   %8.3f\n", Rx[0][0]);
 				System.out.printf("NTOTALSECTORS   %4d\n", NTOTALSECTORS );
 				System.out.printf("NTOTALFIDUCIALS %4d\n", NTOTALFIDUCIALS );
 				System.out.printf("PHI0            %8.3f\n", Math.toDegrees(PHI0) );
