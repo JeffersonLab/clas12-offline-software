@@ -110,7 +110,7 @@ public class ECCommon {
         
         List<ECStrip>  ecStrips = null;
         
-        ecStrips = ECCommon.readStripsHipo(event, run, manager); //lcs
+        ecStrips = ECCommon.readStripsHipo(event, run, manager);  
         
         if(ecStrips==null) return new ArrayList<ECStrip>();
         

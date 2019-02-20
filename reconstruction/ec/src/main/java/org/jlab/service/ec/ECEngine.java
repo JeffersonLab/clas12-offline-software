@@ -5,11 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.clas.reco.io.EvioHipoEvent;
 import org.jlab.detector.base.DetectorCollection;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
-import org.jlab.detector.decode.CLASDecoder;
 import org.jlab.geom.base.Detector;
 import org.jlab.groot.data.H1F;
 import org.jlab.io.base.DataBank;
@@ -20,9 +18,6 @@ import org.jlab.io.base.DataEvent;
  * @author gavalian
  */
 public class ECEngine extends ReconstructionEngine {
-
-    EvioHipoEvent convertor = new EvioHipoEvent();            
-    CLASDecoder     decoder = new CLASDecoder();
     
     Detector              ecDetector = null;
     public Boolean             debug = false;
@@ -71,7 +66,7 @@ public class ECEngine extends ReconstructionEngine {
             if(ecClusters.size()==2) {for(ECCluster c : ecClusters) System.out.println(c);}
         }
 	    
-        this.writeHipoBanks(de,ecStrips,ecPeaks,ecClusters); //lcs
+        this.writeHipoBanks(de,ecStrips,ecPeaks,ecClusters);  
         
         if (isSingleThreaded) {
         	ECCommon.clearMyStructures();
