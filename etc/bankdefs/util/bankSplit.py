@@ -35,8 +35,11 @@ for filename in os.listdir("./"):
 		
         #Read JSON data into the datastore variable
         f = open(filename)
-        datastore = json.load(f)
-    
+        try:
+            datastore = json.load(f)
+        except:
+            print 'Invalid JSON:  '+filename
+            sys.exit(1)
         # loop over banks in the json file
 	for bank in datastore:
 	    bankname = bank['bank']
