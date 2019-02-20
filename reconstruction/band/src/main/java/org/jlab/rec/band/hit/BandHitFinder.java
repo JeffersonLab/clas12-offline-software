@@ -64,7 +64,7 @@ public class BandHitFinder {
 					BandHitCandidate hit2 = candidates.get(j);   
 
 					if (hit2.GetSector() != sector ) continue;       // both must be in the same sector
-					if (hit2.GetLayer() != layer) continue;          // both must be in the same layer					
+					if (hit2.GetLayer() != layer) continue;          // both must be in the same layer
 					if (hit2.GetComponent() != component) continue;  // both must have the same component
 					
 					// Sanity check if side differs by one (there should be no multi hits stored)

@@ -28,47 +28,43 @@ public class BANDEngine extends ReconstructionEngine {
 	}
 
 	int Run = -1;
-	
+
 
 	@Override
-	public boolean processDataEvent(DataEvent event) {
-		// update calibration constants based on run number if changed
-		setRunConditionsParameters(event);
-		
-		ArrayList<BandHitCandidate> candidates = new ArrayList<BandHitCandidate>();   
-		ArrayList<BandHit> hits = new ArrayList<BandHit>();
-	    
-		//1) Search for valid PMT hits based on FADC/TDC for each PMT
-		candidates = HitReader.getBandCandidates(event)	;	
-		// exit if candidates list is empty
-		if(candidates.size()==0 )
-			return true;
+		public boolean processDataEvent(DataEvent event) {
+			// update calibration constants based on run number if changed
+			setRunConditionsParameters(event);
 
-		//2) Find the BAND bar hits from the candidates
-		BandHitFinder hitFinder = new BandHitFinder();
-		hits = hitFinder.findGoodHits(candidates);
+			ArrayList<BandHitCandidate> candidates = new ArrayList<BandHitCandidate>();   
+			ArrayList<BandHit> hits = new ArrayList<BandHit>();
 
-		
-    	if(hits.size()>0){
+			//1) Search for valid PMT hits based on FADC/TDC for each PMT
+			candidates = HitReader.getBandCandidates(event)	;	
+			// exit if candidates list is empty
+			if(candidates.size()==0 )
+				return true;
 
-			for (int i = 0; i < (hits.size()); i++) {
-				System.out.println("Hit "+i+" : sector "+ hits.get(i).GetSector()+ " layer "+ hits.get(i).GetLayer()+" component " + hits.get(i).GetComponent());
+			//2) Find the BAND bar hits from the candidates
+			BandHitFinder hitFinder = new BandHitFinder();
+			hits = hitFinder.findGoodHits(candidates);
+
+
+			if(hits.size()>0){
+				//event.show();
+				System.out.println("in process event ");
+				RecoBankWriter.appendBANDBanks(event,hits);
+
 			}
-			//event.show();
-			System.out.println("in process event ");
-			RecoBankWriter.appendBANDBanks(event,hits);
-				
+
+
+			return true;
 		}
 
-
-		return true;
-	}
-
 	@Override
-	public boolean init() {
-		// TODO Auto-generated method stub
-		return true;
-	}
+		public boolean init() {
+			// TODO Auto-generated method stub
+			return true;
+		}
 
 	public void setRunConditionsParameters(DataEvent event) {
 		if(event.hasBank("RUN::config")==false) {
@@ -90,22 +86,22 @@ public class BANDEngine extends ReconstructionEngine {
 	}
 
 	public static void main (String arg[]) {
-		
+
 		BANDEngine en = new BANDEngine();
 		en.init();
-		
-		
+
+
 		String input = "bandtest.hipo";
-		
+
 		HipoDataSource  reader = new HipoDataSource();
 		reader.open(input);
 		String outputFile="test.hipo";
 		HipoDataSync  writer = new HipoDataSync();
 		writer.open(outputFile);
-        int nofevents=0;
-		
+		int nofevents=0;
+
 		while(reader.hasEvent() && nofevents<5) {
-			
+
 			DataEvent event = (DataEvent) reader.getNextEvent();
 			System.out.println("***********  NEXT EVENT ************");
 			//event.show();
@@ -117,11 +113,11 @@ public class BANDEngine extends ReconstructionEngine {
 			writer.writeEvent(event);
 			nofevents++;
 			//event.getBank("band::hits").show();
-			
+
 		}		
 		writer.close();
-		
-		
+
+
 	}
 
 }
