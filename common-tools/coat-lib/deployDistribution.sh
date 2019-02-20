@@ -1,11 +1,16 @@
+#!/bin/bash
+
+REPO="$( cd "$(dirname "$0")"/../.. ; pwd -P )"/myLocalMvnRepo
+
+cd `dirname $0`
+
 #-------------------------------------------------------------------------------------------------
 # Script is exporting existing Jar files to repository
 #-------------------------------------------------------------------------------------------------
-#  JEVIO
-REPO="/Users/devita/NetBeansProjects/clas12-offline-software/myLocalMvnRepo"
-VERSION="5.7.7-SNAPSHOT"
 
-mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file  -Dfile=target/coat-libs-5.7.7-SNAPSHOT.jar \
+VERSION="5.7.8-SNAPSHOT"
+
+mvn org.apache.maven.plugins:maven-install-plugin:2.5.2:install-file  -Dfile=target/coat-libs-$VERSION.jar \
     -DgroupId=org.jlab.coat \
     -DartifactId=coat-libs \
     -Dversion=$VERSION \
