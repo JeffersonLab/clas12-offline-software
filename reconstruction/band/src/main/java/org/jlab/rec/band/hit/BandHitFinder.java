@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jlab.rec.band.constants.CalibrationConstantsLoader;
-//import org.jlab.rec.band.constants.CalibrationConstantsLoader;
 import org.jlab.rec.band.constants.Parameters;
 
 
@@ -48,7 +47,7 @@ public class BandHitFinder {
 
 				//check if hit is in the veto counter (layer 6). 
 				if (hit1.GetLayer() == 6) {
-					System.err.println("veto fired, event can not be good :-(");
+					//System.err.println("veto fired, event can not be good :-(");
 					return new ArrayList<BandHit>();
 				}
 
@@ -103,7 +102,7 @@ public class BandHitFinder {
 					double tdiff_tdc  = (tdcleft - tdcright) - CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) );
 					double tdiff_fadc = (ftdcleft - ftdcright) - CalibrationConstantsLoader.FADC_T_OFFSET.get( Integer.valueOf(barKey) );
 
-					System.out.println("*Found a candidate BAR with tdiff: "+tdiff_tdc+" "+tdiff_fadc);
+					//System.out.println("*Found a candidate BAR with tdiff: "+tdiff_tdc+" "+tdiff_fadc);
 
 					// Check if the time difference is within the length of the bar:
 					double maxDiff_tdc = Parameters.barLengthSector[sector-1]/
@@ -111,8 +110,7 @@ public class BandHitFinder {
 					double maxDiff_fadc = Parameters.barLengthSector[sector-1]/
 						CalibrationConstantsLoader.FADC_VEFF.get( Integer.valueOf(barKey) );
 
-					System.out.println("\tmax time diff allowed: "+maxDiff_tdc+"  " +maxDiff_fadc);
-
+					//System.out.println("\tmax time diff allowed: "+maxDiff_tdc+"  " +maxDiff_fadc);
 					if( Math.abs(tdiff_tdc)  > maxDiff_tdc )continue;
 					if( Math.abs(tdiff_fadc) > maxDiff_fadc )continue;
 
@@ -122,9 +120,21 @@ public class BandHitFinder {
 					double mtime_fadc = ( ( ftdcleft+ftdcright) - 
 							Math.abs(CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) ) ) )/2.;
 
-					double xpos_tdc = tdiff_tdc / CalibrationConstantsLoader.TDC_VEFF.get( Integer.valueOf(barKey) );
-					double xpos_fadc = tdiff_fadc / CalibrationConstantsLoader.FADC_VEFF.get( Integer.valueOf(barKey) );
+					// Get position from mean time, but multiply by -1 because we define left to be position x, so if
+					// L-R < 0, that means position is closer to left side, which is positive x.
+					double xpos_tdc =  (-1./2.)* tdiff_tdc * CalibrationConstantsLoader.TDC_VEFF.get( Integer.valueOf(barKey) );
+					double xpos_fadc = (-1./2.)* tdiff_fadc * CalibrationConstantsLoader.FADC_VEFF.get( Integer.valueOf(barKey) );
 					xposHit = (xpos_tdc+xpos_fadc)/2.;
+
+					// Grab global position from parameters class
+					Double[] globPos = Parameters.barGeo.get( Integer.valueOf(barKey) );
+					xposHit += globPos[0];
+					yposHit = globPos[1];
+					zposHit = globPos[2];
+					//System.out.println("bar " + barKey+" with pos: ("+xposHit+" , "+yposHit+" , "+zposHit+")");
+					xposHitUnc = Parameters.barRes * CalibrationConstantsLoader.FADC_VEFF.get( Integer.valueOf(barKey) );
+					yposHitUnc = Parameters.thickness / 2.;
+					zposHitUnc = Parameters.thickness / 2.;
 
 					// Create a new BandHit and fill it with the relevant info:
 					BandHit Hit = new BandHit();  
@@ -165,10 +175,10 @@ public class BandHitFinder {
 
 
 			if ( coincidences.size()>0 ) {
-				System.out.println("In BandHitFinder found " + coincidences.size() + " coincidence hits");
-				for (int i = 0; i < (coincidences.size()); i++) {
-					System.out.println("Hit "+i+" : sector "+ coincidences.get(i).GetSector()+ " layer "+ coincidences.get(i).GetLayer()+" component " + coincidences.get(i).GetComponent());
-				}
+				//System.out.println("In BandHitFinder found " + coincidences.size() + " coincidence hits");
+				//for (int i = 0; i < (coincidences.size()); i++) {
+				//	System.out.println("Hit "+i+" : sector "+ coincidences.get(i).GetSector()+ " layer "+ coincidences.get(i).GetLayer()+" component " + coincidences.get(i).GetComponent());
+				//}
 				return coincidences;
 			}
 			else {

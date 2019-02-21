@@ -53,6 +53,7 @@ public class Parameters {
 
 	public static final double[] globPt = {avgX,avgY,avgZ}; // single global position
 
+	public static final double barRes = 0.3; // needs to be read in actually from CCDB but temp holder at the moment
 	
 	//Maybe add here more geometry constants for x and y or read from ccdb
 	public static final double[] barLengthSector = {164, 202, 51, 51, 202} ;           // Bar length in each layer (cm)

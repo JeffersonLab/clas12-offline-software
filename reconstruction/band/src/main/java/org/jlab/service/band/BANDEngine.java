@@ -52,7 +52,7 @@ public class BANDEngine extends ReconstructionEngine {
 
 			if(hits.size()>0){
 				//event.show();
-				System.out.println("in process event ");
+				//System.out.println("in process event ");
 				RecoBankWriter.appendBANDBanks(event,hits);
 
 			}
@@ -105,12 +105,12 @@ public class BANDEngine extends ReconstructionEngine {
 		while(reader.hasEvent() && nofevents<5) {
 
 			DataEvent event = (DataEvent) reader.getNextEvent();
-			System.out.println("***********  NEXT EVENT ************");
+			//System.out.println("***********  NEXT EVENT ************");
 			//event.show();
-			if (event.hasBank("band::adc") && event.hasBank("band::tdc")){
-				event.getBank("band::adc").show();
-				event.getBank("band::tdc").show();
-			}
+			//if (event.hasBank("band::adc") && event.hasBank("band::tdc")){
+			//	event.getBank("band::adc").show();
+			//	event.getBank("band::tdc").show();
+			//}
 			en.processDataEvent(event);
 			writer.writeEvent(event);
 			nofevents++;
