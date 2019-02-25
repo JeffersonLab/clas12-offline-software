@@ -118,7 +118,7 @@ public class BandHitFinder {
 					double mtime_tdc = ( (tdcleft+tdcright) - 
 							Math.abs(CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) )) )/2.;
 					double mtime_fadc = ( ( ftdcleft+ftdcright) - 
-							Math.abs(CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) ) ) )/2.;
+							Math.abs(CalibrationConstantsLoader.FADC_T_OFFSET.get( Integer.valueOf(barKey) ) ) )/2.;
 
 					// Get position from mean time, but multiply by -1 because we define left to be position x, so if
 					// L-R < 0, that means position is closer to left side, which is positive x.
