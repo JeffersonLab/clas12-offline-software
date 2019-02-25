@@ -86,7 +86,7 @@ public class HitReader {
 			int c = bankTDC.getShort("component", j);
 			int o = bankTDC.getByte("order", j);
 
-			double tdc = (double)bankTDC.getInt("TDC",j) * 0.02345;
+			double tdc = ((double)bankTDC.getInt("TDC",j) * 0.02345) - triggerPhase;
 
 			if( tdc <= 0 ) continue;
 
