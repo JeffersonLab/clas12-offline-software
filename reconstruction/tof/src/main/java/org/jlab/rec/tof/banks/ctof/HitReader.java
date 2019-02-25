@@ -241,37 +241,35 @@ public class HitReader implements IMatchedHit {
                     
                     // add buffer for matched hits
                     //----------------------------
-                    for (int j = -1; j<=1; j++) {
-                        mdet = new String("C");
-                        mdet+=fhit.getPaddle() + j;
+                    mdet = new String("C");                       
+                    mdet+=fhit.getPaddle();
 
-                        if(ctofHits.containsKey(mdet)) {
-                            ctofHits.get(mdet)._AssociatedTrkId = ids[i];
-                            ctofHits.get(mdet).set_matchedTrackHit(fhit);
-                            ctofHits.get(mdet).set_matchedTrack(trks.get(i));
-                            double deltaPath = trks.get(i).origin().distance(
-                                        fhit.mid());
-                            double pathLenTruBar = fhit.origin().distance(
-                                    fhit.end());
-                            ctofHits.get(mdet).set_TrkPathLenThruBar(pathLenTruBar);
-                            ctofHits.get(mdet).set_TrkPathLen(paths[i] + deltaPath);
-                            // get the coordinates for the track hit, which is defined
-                            // as the mid-point between its entrance and its exit from
-                            // the bar
-                            ctofHits.get(mdet).set_TrkPosition(new Point3D(fhit.mid().x,
-                                    fhit.mid().y, fhit.mid().z));
-                            // compute the local y at the middle of the bar :
-                            // ----------------------------------------------
-                            Point3D origPaddleLine = ctofHits.get(mdet).get_paddleLine().origin();
-                            Point3D trkPosinMidlBar = new Point3D(fhit.mid().x,
-                                    fhit.mid().y, fhit.mid().z);
-                            double Lov2 = ctofHits.get(mdet).get_paddleLine().length() / 2;
-                            double barOrigToTrkPos = origPaddleLine
-                                    .distance(trkPosinMidlBar);
-                            // local y:
-                            ctofHits.get(mdet).set_yTrk(barOrigToTrkPos - Lov2);
-                           // hitList.add(ftofHits.get(mdet));
-                        }
+                    if(ctofHits.containsKey(mdet)) {
+                        ctofHits.get(mdet)._AssociatedTrkId = ids[i];
+                        ctofHits.get(mdet).set_matchedTrackHit(fhit);
+                        ctofHits.get(mdet).set_matchedTrack(trks.get(i));
+                        double deltaPath = trks.get(i).origin().distance(
+                                    fhit.mid());
+                        double pathLenTruBar = fhit.origin().distance(
+                                fhit.end());
+                        ctofHits.get(mdet).set_TrkPathLenThruBar(pathLenTruBar);
+                        ctofHits.get(mdet).set_TrkPathLen(paths[i] + deltaPath);
+                        // get the coordinates for the track hit, which is defined
+                        // as the mid-point between its entrance and its exit from
+                        // the bar
+                        ctofHits.get(mdet).set_TrkPosition(new Point3D(fhit.mid().x,
+                                fhit.mid().y, fhit.mid().z));
+                        // compute the local y at the middle of the bar :
+                        // ----------------------------------------------
+                        Point3D origPaddleLine = ctofHits.get(mdet).get_paddleLine().origin();
+                        Point3D trkPosinMidlBar = new Point3D(fhit.mid().x,
+                                fhit.mid().y, fhit.mid().z);
+                        double Lov2 = ctofHits.get(mdet).get_paddleLine().length() / 2;
+                        double barOrigToTrkPos = origPaddleLine
+                                .distance(trkPosinMidlBar);
+                        // local y:
+                        ctofHits.get(mdet).set_yTrk(barOrigToTrkPos - Lov2);
+                       // hitList.add(ftofHits.get(mdet));
                     }
                 }
             }
