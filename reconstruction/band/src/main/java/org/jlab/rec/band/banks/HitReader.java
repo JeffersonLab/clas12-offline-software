@@ -63,13 +63,10 @@ public class HitReader {
 			if( adc <= 0 || ftdc <= 0 ) continue;
 
 			int key = s*1000 + l*100 + c*10 + o;
-<<<<<<< HEAD
-		//	System.out.println("s,l,c,o: "+key+" adc,ftdc: "+adc+" "+ftdc);
-			
-=======
+
 			//System.out.println("s,l,c,o: "+key+" adc,ftdc: "+adc+" "+ftdc);
 
->>>>>>> 7d0d2baf38448b733c77a37d9ce481874635efac
+
 			// Check if this PMT has been stored before, and if it has, then
 			// replace it only if it has a larger ADC value. Otherwise, add to map
 			if (fadcInt.containsKey( Integer.valueOf(key) ) ) { 
