@@ -90,7 +90,7 @@ public class CalibrationConstantsLoader {
 		JITTER_CYCLES = dbprovider.getInteger("/calibration/band/time_jitter/cycles", 0);
 
 		// Paddle-to-paddle offsets
-		for(int i =0; i< dbprovider.length("/calibration/band/paddle_offsets"); i++) {
+		for(int i =0; i< dbprovider.length("/calibration/band/paddle_offsets/sector"); i++) {
 			int sector 		= dbprovider.getInteger("/calibration/band/paddle_offsets/sector",		i);	    
 			int layer 		= dbprovider.getInteger("/calibration/band/paddle_offsets/layer",		i);
 			int component 	= dbprovider.getInteger("/calibration/band/paddle_offsets/component",	i);
@@ -103,9 +103,10 @@ public class CalibrationConstantsLoader {
 			int key = sector*100+layer*10+component;
 			FADC_MT_P2P_OFFSET.put(	Integer.valueOf(key),		Double.valueOf(p2p_off_fadc) );
 			FADC_MT_P2P_RES.put(	Integer.valueOf(key),		Double.valueOf(p2p_res_fadc) );
+
 		}
 		// Layer-to-layer offsets
-		for(int i =0; i< dbprovider.length("/calibration/band/layer_offsets"); i++) {
+		for(int i =0; i< dbprovider.length("/calibration/band/layer_offsets/sector"); i++) {
 			int sector 		= dbprovider.getInteger("/calibration/band/layer_offsets/sector",		i);	    
 			int layer 		= dbprovider.getInteger("/calibration/band/layer_offsets/layer",		i);
 			int component 	= dbprovider.getInteger("/calibration/band/layer_offsets/component",	i);
