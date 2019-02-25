@@ -138,7 +138,7 @@ public class BandHitFinder {
 					yposHit = globPos[1];
 					zposHit = globPos[2];
 					//System.out.println("bar " + barKey+" with pos: ("+xposHit+" , "+yposHit+" , "+zposHit+")");
-					xposHitUnc = CalibrationConstantsLoader.FADC_P2P_RES.get( Integer.valueOf(barKey) )
+					xposHitUnc = CalibrationConstantsLoader.FADC_MT_P2P_RES.get( Integer.valueOf(barKey) )
 									* CalibrationConstantsLoader.FADC_VEFF.get( Integer.valueOf(barKey) );
 					yposHitUnc = Parameters.thickness / 2.;
 					zposHitUnc = Parameters.thickness / 2.;
