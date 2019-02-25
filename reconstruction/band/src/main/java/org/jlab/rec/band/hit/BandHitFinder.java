@@ -112,10 +112,16 @@ public class BandHitFinder {
 					if( Math.abs(tdiff_fadc) > maxDiff_fadc )continue;
 
 					// Form mean time
-					double mtime_tdc = ( (tdcleft+tdcright) - 
-							Math.abs(CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) )) )/2.;
-					double mtime_fadc = ( ( ftdcleft+ftdcright) - 
-							Math.abs(CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) ) ) )/2.;
+					double mtime_tdc =
+							( tdcleft + tdcright )/2. 
+							  - Math.abs(CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) ))/2. ;
+							  //- CalibrationConstantsLoader.TDC_MT_P2P_OFFSET.get(Integer.valueOf(barKey) ) 
+							  //- CalibrationConstantsLoader.TDC_MT_L2L_OFFSET.get(Integer.valueOf(barKey) ) ;
+					double mtime_fadc = 
+							( ftdcleft + ftdcright )/2.
+							 - Math.abs(CalibrationConstantsLoader.FADC_T_OFFSET.get( Integer.valueOf(barKey) ))/2.
+							 - CalibrationConstantsLoader.FADC_MT_P2P_OFFSET.get(Integer.valueOf(barKey) )
+							 - CalibrationConstantsLoader.FADC_MT_L2L_OFFSET.get(Integer.valueOf(barKey) ) ;
 
 					// Get position from mean time, but multiply by -1 because we define left to be position x, so if
 					// L-R < 0, that means position is closer to left side, which is positive x.
@@ -129,7 +135,8 @@ public class BandHitFinder {
 					yposHit = globPos[1];
 					zposHit = globPos[2];
 					//System.out.println("bar " + barKey+" with pos: ("+xposHit+" , "+yposHit+" , "+zposHit+")");
-					xposHitUnc = Parameters.barRes * CalibrationConstantsLoader.FADC_VEFF.get( Integer.valueOf(barKey) );
+					xposHitUnc = CalibrationConstantsLoader.FADC_MT_P2P_RES.get( Integer.valueOf(barKey) )
+									* CalibrationConstantsLoader.FADC_VEFF.get( Integer.valueOf(barKey) );
 					yposHitUnc = Parameters.thickness / 2.;
 					zposHitUnc = Parameters.thickness / 2.;
 
