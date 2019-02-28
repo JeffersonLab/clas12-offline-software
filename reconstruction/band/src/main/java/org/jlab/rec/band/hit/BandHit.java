@@ -41,6 +41,13 @@ public class BandHit extends ArrayList<BandHitCandidate> {
 
 	}
 
+	// Show class for debugging
+	public void Print(){
+		System.out.println(_sector+" "+_layer+" "+_component);
+		System.out.println("\t"+_x+" "+_y+" "+_z);
+		System.out.println("\t"+_difftimeFadc+" "+_adcLcorr+" "+_adcRcorr);
+	}
+
 	// Grab functions
 	public int GetSector() 		{return _sector;}
 	public int GetLayer()		{return _layer;}

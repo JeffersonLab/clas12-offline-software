@@ -21,14 +21,15 @@ public class CalibrationConstantsLoader {
 	public static boolean CSTLOADED = false;
 
 		// Maps for constants from database
-	public static Map<Integer, Double> TDC_T_OFFSET = new HashMap<Integer, Double>();
-	public static Map<Integer, Double> FADC_T_OFFSET = new HashMap<Integer, Double>();
-	public static Map<Integer, Double> TDC_VEFF = new HashMap<Integer,Double>();
-	public static Map<Integer, Double> FADC_VEFF = new HashMap<Integer, Double>();
-	public static Map<Integer, Double> FADC_MT_P2P_OFFSET = new HashMap<Integer,Double>();
-	public static Map<Integer, Double> FADC_MT_P2P_RES = new HashMap<Integer,Double>();
-	public static Map<Integer, Double> FADC_MT_L2L_OFFSET = new HashMap<Integer,Double>();
-	public static Map<Integer, Double> FADC_MT_L2L_RES = new HashMap<Integer,Double>();
+	public static Map<Integer, Double> TDC_T_OFFSET = new HashMap<Integer, Double>();		// TDC L-R offset [ns]
+	public static Map<Integer, Double> FADC_T_OFFSET = new HashMap<Integer, Double>();		// FADC L-R offset [ns]
+	public static Map<Integer, Double> TDC_VEFF = new HashMap<Integer,Double>();			// TDC effective velocity [cm/ns]
+	public static Map<Integer, Double> FADC_VEFF = new HashMap<Integer, Double>();			// FADC effective velocity [cm/ns]
+	public static Map<Integer, Double> FADC_MT_P2P_OFFSET = new HashMap<Integer,Double>();		// FADC mean time paddle-to-paddle offset [ns]
+	public static Map<Integer, Double> FADC_MT_P2P_RES = new HashMap<Integer,Double>();		// FADC mean time paddle resolution [ns]
+	public static Map<Integer, Double> FADC_MT_L2L_OFFSET = new HashMap<Integer,Double>();		// FADC mean time layer-by-layer offset [ns]
+	public static Map<Integer, Double> FADC_MT_L2L_RES = new HashMap<Integer,Double>();		// FADC mean time layer resolution [ns]
+	public static Map<Integer, Double> FADC_ATTEN_LENGTH = new HashMap<Integer,Double>();		// FADC attenuation length [cm]
 	public static double JITTER_PERIOD = 0;
 	public static int JITTER_PHASE = 0;
 	public static int JITTER_CYCLES = 0;
@@ -38,7 +39,7 @@ public class CalibrationConstantsLoader {
 
 	public static synchronized void Load(int runno, String var) {
 
-		System.out.println("*Loading calibration constants*");
+		//System.out.println("*Loading calibration constants*");
 
 		dbprovider = new DatabaseConstantProvider(runno, var); // reset using the new variation
 
@@ -47,13 +48,13 @@ public class CalibrationConstantsLoader {
 		dbprovider.loadTable("/calibration/band/effective_velocity");
 		dbprovider.loadTable("/calibration/band/paddle_offsets");
 		dbprovider.loadTable("/calibration/band/layer_offsets");
+		dbprovider.loadTable("/calibration/band/attenuation_lengths");
 
 		//disconncect from database. Important to do this after loading tables.
 		dbprovider.disconnect(); 
-
 		dbprovider.show();
 
-
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Time offsets
 		for(int i =0; i< dbprovider.length("/calibration/band/lr_offsets/sector"); i++) {
 				// Get sector, layer, component
@@ -69,6 +70,7 @@ public class CalibrationConstantsLoader {
 			FADC_T_OFFSET.put( 	Integer.valueOf(key), 	Double.valueOf(fadc_off) );
 		}
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Speed of lights
 		for(int i =0; i< dbprovider.length("/calibration/band/effective_velocity/sector"); i++) {
 				// Get sector, layer, component
@@ -84,11 +86,13 @@ public class CalibrationConstantsLoader {
 			FADC_VEFF.put(	Integer.valueOf(key), 		Double.valueOf(veff_fadc) );
 		}
 		
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// TDC time jitter
 		JITTER_PERIOD = dbprovider.getDouble("/calibration/band/time_jitter/period", 0);
 		JITTER_PHASE  = dbprovider.getInteger("/calibration/band/time_jitter/phase", 0);
 		JITTER_CYCLES = dbprovider.getInteger("/calibration/band/time_jitter/cycles", 0);
 
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Paddle-to-paddle offsets
 		for(int i =0; i< dbprovider.length("/calibration/band/paddle_offsets/sector"); i++) {
 			int sector 		= dbprovider.getInteger("/calibration/band/paddle_offsets/sector",		i);	    
@@ -105,6 +109,8 @@ public class CalibrationConstantsLoader {
 			FADC_MT_P2P_RES.put(	Integer.valueOf(key),		Double.valueOf(p2p_res_fadc) );
 
 		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Layer-to-layer offsets
 		for(int i =0; i< dbprovider.length("/calibration/band/layer_offsets/sector"); i++) {
 			int sector 		= dbprovider.getInteger("/calibration/band/layer_offsets/sector",		i);	    
@@ -121,9 +127,24 @@ public class CalibrationConstantsLoader {
 			FADC_MT_L2L_RES.put(	Integer.valueOf(key),		Double.valueOf(l2l_res_fadc) );
 		}
 		
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// Attenuation constants
+		for( int i=0; i < dbprovider.length("/calibration/band/attenuation_lengths/sector"); i++){
+			int sector 	 	= dbprovider.getInteger("/calibration/band/attenuation_lengths/sector", 	i);
+			int layer		= dbprovider.getInteger("/calibration/band/attenuation_lengths/layer",		i);
+			int component		= dbprovider.getInteger("/calibration/band/attenuation_lengths/component",	i);
+			
+			// Grab attenuation length
+			double atten		= dbprovider.getDouble("/calibration/band/attenuation_lengths/atten_len",	i);
+			double atten_err	= dbprovider.getDouble("/calibration/band/attenuation_lengths/atten_len_err",	i);
+
+			// Put in map
+			int key = sector*100+layer*10+component;
+			FADC_ATTEN_LENGTH.put(	Integer.valueOf(key),		Double.valueOf(atten) 	);
+		}
 		
 		CSTLOADED = true;
-		System.out.println("SUCCESSFULLY LOADED band CALIBRATION CONSTANTS....");
+		//System.out.println("SUCCESSFULLY LOADED band CALIBRATION CONSTANTS....");
 
 		setDB(dbprovider);
 
