@@ -145,11 +145,9 @@ public class BandHitFinder {
 
 					// Correct FADC ADC for attenuation length
 					double sectorLen = Parameters.barLengthSector[sector-1];
-					double mu_cm = CalibrationConstantsLoader.FADC_ATTEN_LENGTH.get( Integer.valueOf(barKey) ) * 100.; // in [cm]
+					double mu_cm = CalibrationConstantsLoader.FADC_ATTEN_LENGTH.get( Integer.valueOf(barKey) ); // in [cm]
 					double adcL_corr = adcleft * Math.exp( (sectorLen/2.-xpos_fadc) / mu_cm );
 					double adcR_corr = adcright* Math.exp( (sectorLen/2.+xpos_fadc) / mu_cm );
-					//System.out.println("Before/after mu correction: " + adcleft + " / " + adcL_corr + " , " + adcright + " / " + adcR_corr);
-					//System.out.println("\tmu,position: " + mu_cm + " " + xpos_fadc);
 
 
 					// Create a new BandHit and fill it with the relevant info:
