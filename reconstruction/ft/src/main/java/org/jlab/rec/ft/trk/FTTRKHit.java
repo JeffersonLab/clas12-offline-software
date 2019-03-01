@@ -47,11 +47,12 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
 	private int _Strip;    	 				                //	   strip [1...256]
 
 	private double _Edep;      					        //	   Reconstructed time, for now it is the gemc time
-	private Line3D _StripSegment;						//     The geometry segment representing the strip position
-	private int _Id;                                        		//	   Hit Id
-	private double _Time;                                                   //	   	Reconstructed time, for now it is the gemc time
-	private int    _DGTZIndex;                                              //		Pointer to cluster
-	private int    _ClusterIndex;                                           //		Pointer to cluster
+	private Line3D _StripSegment;						//         The geometry segment representing the strip position
+	private int    _Id;                                        		//	   Hit Id
+	private double _Time;                                                   //	   Reconstructed time, for now it is the gemc time
+	private int    _DGTZIndex;                                              //	   Pointer to raw hit
+	private int    _ClusterIndex;                                           //	   Pointer to cluster
+	private int    _CrossIndex;                                             //	   Pointer to cross
 	
 	
 	/**
@@ -183,6 +184,14 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
 
         public void set_ClusterIndex(int _ClusterIndex) {
             this._ClusterIndex = _ClusterIndex;
+        }
+
+        public int get_CrossIndex() {
+            return _CrossIndex;
+        }
+
+        public void set_CrossIndex(int _CrossIndex) {
+            this._CrossIndex = _CrossIndex;
         }
 
 	/**

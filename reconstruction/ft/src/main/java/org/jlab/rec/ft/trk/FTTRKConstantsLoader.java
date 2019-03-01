@@ -34,7 +34,7 @@ public class FTTRKConstantsLoader {
         public static double[][][] stripsY; //Give the  end-points y-coordinates of the strip segment
         public static double[] stripslength; //Give the strip length
 
-    public static synchronized void Load() {
+        public static synchronized void Load() {
 
 		Sidestrips =  (Nstrips -2*Halfstrips)/2;
 		YCentral = (double)Halfstrips*Pitch/2.;
@@ -104,6 +104,7 @@ public class FTTRKConstantsLoader {
 		}
 		System.out.println("*****   FMT constants loaded!");
 	}
+        
 	private static int getLocalRegion(int i) {
 		// To represent the geometry we divide the barrel micromega disk into 3 regions according to the strip numbering system.
 		// Here i = strip_number -1;

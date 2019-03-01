@@ -10,10 +10,6 @@ import java.util.List;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.hipo.HipoDataEvent;
-import org.jlab.rec.ft.hodo.FTHODOCluster;
-import org.jlab.rec.ft.hodo.FTHODOHit;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -48,9 +44,151 @@ public class FTTRKReconstruction {
     }
 
 
+    public ArrayList<FTTRKCluster> findClusters(List<FTTRKHit> hits)
+    {
+    	// cluster finding algorithm
+	// the loop is done over sectors 
 
+	int nlayer = FTTRKConstantsLoader.Nlayers;
+	int nstrip = FTTRKConstantsLoader.Nstrips;
+	boolean[][] checked;
+	FTTRKHit[][] HitArray;        
+        ArrayList<FTTRKCluster> clusters = new ArrayList<FTTRKCluster>();
+
+        // a boolean array to avoid double counting at the numbering discontinuities
+        checked = new boolean[nstrip][nlayer] ;
+        for(int l=0; l<nlayer; l++){
+            for(int s=0; s<nstrip; s++) {
+                    checked[s][l]=false;
+            }
+        }
+
+        // a Hit Array is used to identify clusters
+        HitArray = new FTTRKHit[nstrip][nlayer] ;
+
+
+        // initializing non-zero Hit Array entries
+        // with valid hits
+        for(FTTRKHit hit : hits) {
+
+            if(hit.get_Strip()==-1) continue;
+
+            int w = hit.get_Strip();
+            int l = hit.get_Layer();
+
+            if(w>0 && w<nstrip)	{						
+                    HitArray[w-1][l-1] = hit;
+            }
+
+        }
+        int cid = 1;  // cluster id, will increment with each new good cluster
+
+        // for each layer and sector, a loop over the strips
+        // is done to define clusters in that module's layer
+        // clusters are delimited by strips with no hits 
+        for(int l=0; l<nlayer; l++) {		
+            int si  = 0;  // strip index in the loop
+
+            // looping over all strips
+            while(si<nstrip) {
+                // if there's a hit, it's a cluster candidate
+                if(HitArray[si][l] != null&&!checked[si][l])
+                {
+                    // vector of hits in the cluster candidate
+                    ArrayList<FTTRKHit> clusterHits = new ArrayList<FTTRKHit>();
+
+                    // adding all hits in this and all the subsequent
+                    // strip until there's a strip with no hit
+                    // Strip 1 and 513 needs a particular loop
+                    if (si==0){
+                        int sj=832;
+                        while(HitArray[sj][l] != null  && sj<nstrip) {
+                            checked[sj][l]=true;
+                            clusterHits.add(new FTTRKHit(HitArray[sj][l].get_Sector(),HitArray[sj][l].get_Layer(),HitArray[sj][l].get_Strip(),HitArray[sj][l].get_Edep()));
+                            sj++;
+                        }
+                    }
+
+                    if (si==512){
+                        int sj=320;
+                        while(HitArray[sj][l] != null  && sj<512) {
+                            checked[sj][l]=true;
+                            clusterHits.add(new FTTRKHit(HitArray[sj][l].get_Sector(),HitArray[sj][l].get_Layer(),HitArray[sj][l].get_Strip(),HitArray[sj][l].get_Edep()));
+                            sj++;
+                        }
+                    }
+
+                    //For all strips
+                    while(HitArray[si][l] != null  && si<nstrip) {
+                        checked[si][l]=true;
+                        clusterHits.add(new FTTRKHit(HitArray[si][l].get_Sector(),HitArray[si][l].get_Layer(),HitArray[si][l].get_Strip(),HitArray[si][l].get_Edep()));
+                        if (si!=511) si++; //Since strip 512 is on a edge
+                        else break;
+                    }
+
+                    // define new cluster 
+                    FTTRKCluster this_cluster = new FTTRKCluster(1, l+1, cid++); 
+
+
+                    // add hits to the cluster
+                    this_cluster.addAll(hits);
+                    this_cluster.calc_CentroidParams();
+
+                    //make arraylist
+                    clusters.add(this_cluster);
+                }
+                // if no hits, check for next wire coordinate
+                si++;
+            }
+        }
+        return clusters;
+
+    }
     
-    public List<FTTRKHit> readRawHits(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable geometry) {
+    public ArrayList<FTTRKCross> findCrosses(List<FTTRKCluster> clusters) {
+
+        // first separate the segments according to layers
+        ArrayList<FTTRKCluster> allinnerlayrclus = new ArrayList<FTTRKCluster>();
+        ArrayList<FTTRKCluster> allouterlayrclus = new ArrayList<FTTRKCluster>();
+
+        // Sorting by layer first:
+        for (FTTRKCluster theclus : clusters){
+            if(theclus.get_Layer()%2==0) { 
+                    allouterlayrclus.add(theclus); 
+            } 
+            if(theclus.get_Layer()%2==1) { 
+                    allinnerlayrclus.add(theclus);
+            }
+        }
+
+        ArrayList<FTTRKCross> crosses = new ArrayList<FTTRKCross>();
+
+        int rid =0;
+        for(FTTRKCluster inlayerclus : allinnerlayrclus){
+            for(FTTRKCluster outlayerclus : allouterlayrclus){
+                if(outlayerclus.get_Layer()-inlayerclus.get_Layer()!=1)
+                        continue;
+                if(outlayerclus.get_Sector()!=inlayerclus.get_Sector())
+                        continue;
+                if( (inlayerclus.get_MinStrip()+outlayerclus.get_MinStrip() > 1) 
+                            && (inlayerclus.get_MaxStrip()+outlayerclus.get_MaxStrip() < FTTRKConstantsLoader.Nstrips*2) ) { // put correct numbers to make sure the intersection is valid
+
+                    // define new cross 
+                    FTTRKCross this_cross = new FTTRKCross(inlayerclus.get_Sector(), inlayerclus.get_Region(),rid++);
+                    this_cross.set_Cluster1(inlayerclus);
+                    this_cross.set_Cluster2(outlayerclus);
+
+                    this_cross.set_CrossParams();
+                    //make arraylist
+                    crosses.add(this_cross);
+
+                }
+            }
+        }
+        return crosses;
+    }
+
+        public List<FTTRKHit> readRawHits(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable geometry) {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTTRK:adc bank");
 
@@ -75,7 +213,7 @@ public class FTTRKReconstruction {
     }    
     
     
-    public void writeBanks(DataEvent event, List<FTTRKHit> hits, List<FTTRKCluster> clusters){
+    public void writeBanks(DataEvent event, List<FTTRKHit> hits, List<FTTRKCluster> clusters, List<FTTRKCross> crosses){
         
         // hits banks
         if(hits.size()!=0) {
@@ -98,28 +236,44 @@ public class FTTRKReconstruction {
             }
             event.appendBanks(bankHits);
         }
-//        // cluster bank
-//        if(clusters.size()!=0){
-//            DataBank bankCluster = event.createBank("FTHODO::clusters", clusters.size());    
-//            if(bankCluster==null){
-//                System.out.println("ERROR CREATING BANK : FTHODO::clusters");
-//                return;
-//            }
-//            for(int i = 0; i < clusters.size(); i++){
-//                            bankCluster.setShort("id", i,(short) clusters.get(i).getID());
-//                            bankCluster.setShort("size", i,(short) clusters.get(i).getSize());
-//                            bankCluster.setFloat("x",i,(float) (clusters.get(i).getX()/10.0));
-//                            bankCluster.setFloat("y",i,(float) (clusters.get(i).getY()/10.0));
-//                            bankCluster.setFloat("z",i,(float) (clusters.get(i).getZ()/10.0));
-//                            bankCluster.setFloat("widthX",i,(float) (clusters.get(i).getWidthX()/10.0));
-//                            bankCluster.setFloat("widthY",i,(float) (clusters.get(i).getWidthY()/10.0));
-//                            bankCluster.setFloat("radius",i,(float) (clusters.get(i).getRadius()/10.0));
-//                            bankCluster.setFloat("time",i,(float) clusters.get(i).getTime());
-//                            bankCluster.setFloat("energy",i,(float) clusters.get(i).getEnergy());
-//            }
-//            event.appendBanks(bankCluster);
-//        }
+        // cluster bank
+        if(clusters.size()!=0){
+            DataBank bankCluster = event.createBank("FTTRK::clusters", clusters.size());    
+            if(bankCluster==null){
+                System.out.println("ERROR CREATING BANK : FTTRK::clusters");
+                return;
+            }
+            for(int i = 0; i < clusters.size(); i++){
+                bankCluster.setShort("size",      i,(short) clusters.get(i).size());
+                bankCluster.setShort("id",        i,(short) clusters.get(i).get_Id());
+                bankCluster.setByte("sector",     i,(byte)  clusters.get(i).get_Sector());
+                bankCluster.setByte("layer",      i,(byte)  clusters.get(i).get_Layer());
+                bankCluster.setFloat("energy",    i,(float) clusters.get(i).get_TotalEnergy());
+                bankCluster.setFloat("maxEnergy", i,(float) clusters.get(i).get_SeedEnergy());
+                bankCluster.setShort("seed",      i,(short) clusters.get(i).get_SeedStrip());
+                bankCluster.setFloat("centroid",  i,(float) clusters.get(i).get_Centroid());
+            }
+            event.appendBanks(bankCluster);
+        }
+        // cross bank
+        if(crosses.size()!=0){        
+            DataBank bankCross = event.createBank("FTTRK::crosses", crosses.size());
+            if(bankCross==null){
+                System.out.println("ERROR CREATING BANK : FTTRK::crosses");
+                return;
+            }        
+            for (int j = 0; j < crosses.size(); j++) {
+                bankCross.setShort("id",         j, (short) crosses.get(j).get_Id());
+                bankCross.setByte("sector",      j, (byte)  crosses.get(j).get_Sector());
+                bankCross.setByte("detector",    j, (byte)  crosses.get(j).get_Region());
+                bankCross.setFloat("x",          j, (float) crosses.get(j).get_Point().x());
+                bankCross.setFloat("y",          j, (float) crosses.get(j).get_Point().y());
+                bankCross.setFloat("z",          j, (float) crosses.get(j).get_Point().z());
+                bankCross.setShort("Cluster1ID", j, (short) crosses.get(j).get_Cluster1().get_Id());
+                bankCross.setShort("Cluster2ID", j, (short) crosses.get(j).get_Cluster2().get_Id());
+            }
+        }
     }
-    
+  
 
 }

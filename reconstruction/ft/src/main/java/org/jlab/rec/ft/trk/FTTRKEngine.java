@@ -54,6 +54,7 @@ public class FTTRKEngine extends ReconstructionEngine {
             List<FTTRKHit> allHits      = new ArrayList();
             List<FTTRKHit> selectedHits = new ArrayList();
             List<FTTRKCluster> clusters = new ArrayList();
+            List<FTTRKCross>   crosses  = new ArrayList();
             
             // update calibration constants based on run number if changed
             int run = setRunConditionsParameters(event);
@@ -63,10 +64,12 @@ public class FTTRKEngine extends ReconstructionEngine {
                 allHits = reco.initFTTRK(event,this.getConstantsManager(), run);
 //                // select good hits and order them by energy
 //                selectedHits = reco.selectHits(allHits); 
-//                // create clusters
-//                clusters = reco.findClusters(selectedHits);
+                // create clusters
+                clusters = reco.findClusters(allHits);
+                // create crosses
+                crosses = reco.findCrosses(clusters);
                 // write output banks
-                reco.writeBanks(event, selectedHits, clusters);
+                reco.writeBanks(event, allHits, clusters, crosses);
             }
             return true;
 	}
