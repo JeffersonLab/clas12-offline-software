@@ -76,8 +76,9 @@ public class FTTRKReconstruction {
             int w = hit.get_Strip();
             int l = hit.get_Layer();
 
-            if(w>0 && w<nstrip)	{						
+            if(w>0 && w<=nstrip)	{						
                     HitArray[w-1][l-1] = hit;
+                    if(debugMode>=1) System.out.println(w + " " + l + " " + HitArray[w-1][l-1].printInfo());
             }
 
         }
@@ -86,13 +87,13 @@ public class FTTRKReconstruction {
         // for each layer and sector, a loop over the strips
         // is done to define clusters in that module's layer
         // clusters are delimited by strips with no hits 
-        for(int l=0; l<nlayer; l++) {		
-            int si  = 0;  // strip index in the loop
+        for(int il=0; il<nlayer; il++) {		
+            int is  = 0;  // strip index in the loop
 
             // looping over all strips
-            while(si<nstrip) {
+            while(is<nstrip) {
                 // if there's a hit, it's a cluster candidate
-                if(HitArray[si][l] != null&&!checked[si][l])
+                if(HitArray[is][il] != null&&!checked[is][il])
                 {
                     // vector of hits in the cluster candidate
                     ArrayList<FTTRKHit> clusterHits = new ArrayList<FTTRKHit>();
@@ -100,45 +101,45 @@ public class FTTRKReconstruction {
                     // adding all hits in this and all the subsequent
                     // strip until there's a strip with no hit
                     // Strip 1 and 513 needs a particular loop
-                    if (si==0){
-                        int sj=832;
-                        while(HitArray[sj][l] != null  && sj<nstrip) {
-                            checked[sj][l]=true;
-                            clusterHits.add(new FTTRKHit(HitArray[sj][l].get_Sector(),HitArray[sj][l].get_Layer(),HitArray[sj][l].get_Strip(),HitArray[sj][l].get_Edep()));
-                            sj++;
+                    if (is==0){
+                        int js=832;
+                        while(HitArray[js][il] != null  && js<nstrip) {
+                            checked[js][il]=true;
+                            clusterHits.add(new FTTRKHit(HitArray[js][il].get_Sector(),HitArray[js][il].get_Layer(),HitArray[js][il].get_Strip(),HitArray[js][il].get_Edep()));
+                            js++;
                         }
                     }
 
-                    if (si==512){
+                    if (is==512){
                         int sj=320;
-                        while(HitArray[sj][l] != null  && sj<512) {
-                            checked[sj][l]=true;
-                            clusterHits.add(new FTTRKHit(HitArray[sj][l].get_Sector(),HitArray[sj][l].get_Layer(),HitArray[sj][l].get_Strip(),HitArray[sj][l].get_Edep()));
+                        while(HitArray[sj][il] != null  && sj<512) {
+                            checked[sj][il]=true;
+                            clusterHits.add(new FTTRKHit(HitArray[sj][il].get_Sector(),HitArray[sj][il].get_Layer(),HitArray[sj][il].get_Strip(),HitArray[sj][il].get_Edep()));
                             sj++;
                         }
                     }
 
                     //For all strips
-                    while(HitArray[si][l] != null  && si<nstrip) {
-                        checked[si][l]=true;
-                        clusterHits.add(new FTTRKHit(HitArray[si][l].get_Sector(),HitArray[si][l].get_Layer(),HitArray[si][l].get_Strip(),HitArray[si][l].get_Edep()));
-                        if (si!=511) si++; //Since strip 512 is on a edge
+                    while(HitArray[is][il] != null  && is<nstrip) {
+                        checked[is][il]=true;
+                        clusterHits.add(new FTTRKHit(HitArray[is][il].get_Sector(),HitArray[is][il].get_Layer(),HitArray[is][il].get_Strip(),HitArray[is][il].get_Edep()));
+                        if (is!=511) is++; //Since strip 512 is on a edge
                         else break;
                     }
 
                     // define new cluster 
-                    FTTRKCluster this_cluster = new FTTRKCluster(1, l+1, cid++); 
+                    FTTRKCluster this_cluster = new FTTRKCluster(1, il+1, cid++); 
 
 
                     // add hits to the cluster
-                    this_cluster.addAll(hits);
+                    this_cluster.addAll(clusterHits);
                     this_cluster.calc_CentroidParams();
 
                     //make arraylist
                     clusters.add(this_cluster);
                 }
                 // if no hits, check for next wire coordinate
-                si++;
+                is++;
             }
         }
         return clusters;
@@ -170,6 +171,7 @@ public class FTTRKReconstruction {
                         continue;
                 if(outlayerclus.get_Sector()!=inlayerclus.get_Sector())
                         continue;
+                if(debugMode>=1) System.out.println(inlayerclus.printInfo() +  " " + outlayerclus.printInfo());
                 if( (inlayerclus.get_MinStrip()+outlayerclus.get_MinStrip() > 1) 
                             && (inlayerclus.get_MaxStrip()+outlayerclus.get_MaxStrip() < FTTRKConstantsLoader.Nstrips*2) ) { // put correct numbers to make sure the intersection is valid
 
@@ -181,7 +183,7 @@ public class FTTRKReconstruction {
                     this_cross.set_CrossParams();
                     //make arraylist
                     crosses.add(this_cross);
-
+                    if(debugMode>=1) System.out.println(this_cross.printInfo() + " " + crosses.size());
                 }
             }
         }
@@ -203,7 +205,7 @@ public class FTTRKReconstruction {
                 int iorder      = bankDGTZ.getInt("order",row);
                 int adc         = bankDGTZ.getInt("ADC",row);
                 float time      = bankDGTZ.getFloat("time",row);
-                if(adc!=-1 && time!=-1){
+                if(adc>0 && time!=-1 && icomponent!=-1){
                     FTTRKHit hit = new FTTRKHit(isector,ilayer,icomponent, (double) adc);
 	            hits.add(hit); 
 	        }	          
@@ -272,6 +274,7 @@ public class FTTRKReconstruction {
                 bankCross.setShort("Cluster1ID", j, (short) crosses.get(j).get_Cluster1().get_Id());
                 bankCross.setShort("Cluster2ID", j, (short) crosses.get(j).get_Cluster2().get_Id());
             }
+            event.appendBanks(bankCross);
         }
     }
   

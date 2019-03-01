@@ -9,16 +9,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.JFrame;
+import org.jlab.clas.detector.DetectorData;
+import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.physics.GenericKinematicFitter;
 import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.groot.data.H1F;
+import org.jlab.groot.data.H2F;
 import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataBank;
-import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.evio.EvioSource;
+import org.jlab.io.hipo.HipoDataSource;
 
 /**
  *
@@ -34,19 +35,22 @@ public class FTTRKEngine extends ReconstructionEngine {
 	
 	@Override
 	public boolean init() {
+            
+            FTTRKConstantsLoader.Load();
+            
 		reco = new FTTRKReconstruction();
 		reco.debugMode=0;
 
-                String[]  tables = new String[]{ 
-                    "/calibration/ft/fthodo/charge_to_energy",
-                    "/calibration/ft/fthodo/time_offsets",
-                    "/calibration/ft/fthodo/status",
-                    "/geometry/ft/fthodo"
-                };
-                requireConstants(Arrays.asList(tables));
-                this.getConstantsManager().setVariation("default");
+            String[]  tables = new String[]{ 
+                "/calibration/ft/fthodo/charge_to_energy",
+                "/calibration/ft/fthodo/time_offsets",
+                "/calibration/ft/fthodo/status",
+                "/geometry/ft/fthodo"
+            };
+            requireConstants(Arrays.asList(tables));
+            this.getConstantsManager().setVariation("default");
 
-                return true;
+            return true;
 	}
 
 	@Override
@@ -80,68 +84,57 @@ public class FTTRKEngine extends ReconstructionEngine {
                 System.out.println("RUN CONDITIONS NOT READ!");
         }       
     
-        if(event instanceof EvioDataEvent) {
-            EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
-            run = bank.getInt("Run")[0];
-        }
-        else {
-            DataBank bank = event.getBank("RUN::config");
+        DataBank bank = event.getBank("RUN::config");
             run = bank.getInt("run")[0];
-        }
+        
 	return run;	
     }
 
     
     public static void main (String arg[]) {
-		FTTRKEngine cal = new FTTRKEngine();
-		cal.init();
-//		String input = "/Users/devita/data/out_clasdispr.00.e11.000.emn0.75tmn.09.xs65.61nb.dis.1.V5.hipo";
-//		HipoDataSource  reader = new HipoDataSource();
-		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/out_header.ev";
-		EvioSource  reader = new EvioSource();
+		FTTRKEngine trk = new FTTRKEngine();
+		trk.init();
+		String input = "/Users/devita/work/clas12/simulations/clas12Tags/4.3.1/out.hipo";
+		HipoDataSource  reader = new HipoDataSource();
 		reader.open(input);
 		
 		// initialize histos
-        H1F h1 = new H1F("Cluster Energy",100, 0.,5.);         
-        h1.setOptStat(Integer.parseInt("1111")); h1.setTitleX("Cluster Energy (GeV)");
-        H1F h2 = new H1F("Energy Resolution",100, -1, 1);         
-        h2.setOptStat(Integer.parseInt("1111")); h2.setTitleX("Energy Resolution(GeV)");
-        H1F h3 = new H1F("Theta Resolution",100, -2, 2);         
-        h3.setOptStat(Integer.parseInt("1111")); h3.setTitleX("Theta Resolution(deg)");
-        H1F h4 = new H1F("Phi Resolution",100, -10, 10);         
-        h4.setOptStat(Integer.parseInt("1111")); h4.setTitleX("Phi Resolution(deg)");
-        H1F h5 = new H1F("Time Resolution",100, -10, 10);         
-        h5.setOptStat(Integer.parseInt("1111")); h5.setTitleX("Time Resolution(ns)");
+        H2F h1 = new H2F("h1", "Layer vs. Component",100, 0.,1000,5, 0.,5.);         
+        h1.setTitleX("Component");
+        h1.setTitleX("Layer");
+        H1F h2 = new H1F("Energy",100, 0, 100);         
+        h2.setOptStat(Integer.parseInt("1111")); h2.setTitleX("Energy"); h2.setTitleY("Counts");
+        H1F h3 = new H1F("Time",100, -2, 2);         
+        h3.setOptStat(Integer.parseInt("1111")); h3.setTitleX("Time"); h3.setTitleY("Counts");
 
         while(reader.hasEvent()){
             DataEvent event = (DataEvent) reader.getNextEvent();
-            cal.processDataEvent(event);
+            trk.processDataEvent(event);
 
-            GenericKinematicFitter      fitter = new GenericKinematicFitter(11);
-            PhysicsEvent                   gen = fitter.getGeneratedEvent((EvioDataEvent)event);
-//            DetectorEvent detectorEvent = DetectorData.readDetectorEvent(event);
-//            PhysicsEvent            gen = detectorEvent.getGeneratedEvent();
-            if(event.hasBank("FTHODORec::clusters")) {
-                DataBank bank = event.getBank("FTHODORec::clusters");
+            DetectorEvent detectorEvent = DetectorData.readDetectorEvent(event);
+            PhysicsEvent            gen = detectorEvent.getGeneratedEvent();
+            if(event.hasBank("FTTRK::hits")) {
+                DataBank bank = event.getBank("FTTRK::hits");
                 int nrows = bank.rows();
                 for(int i=0; i<nrows;i++) {
-                    h1.fill(bank.getDouble("clusterEnergy",i));
-                    h2.fill(bank.getDouble("clusterEnergy",i)-gen.getParticle("[11]").vector().p());
-                    h3.fill(bank.getDouble("clusterTheta",i)-gen.getParticle("[11]").theta()*180/Math.PI);
-                    h4.fill(bank.getDouble("clusterPhi",i)-gen.getParticle("[11]").phi()*180/Math.PI);
-                    h5.fill(bank.getDouble("clusterTime",i));
+                    int layer  = bank.getByte("layer",i);
+                    int comp   = bank.getShort("component",i);
+                    float energy = bank.getFloat("energy",i);
+                    float time   = bank.getFloat("time",i);
+                    
+                    h1.fill(comp,layer);
+                    h2.fill(energy);
+                    h3.fill(time);
             	}
             }
         }
         JFrame frame = new JFrame("FT Reconstruction");
         frame.setSize(800,800);
         EmbeddedCanvas canvas = new EmbeddedCanvas();
-        canvas.divide(2,3);
+        canvas.divide(1,3);
         canvas.cd(0); canvas.draw(h1);
         canvas.cd(1); canvas.draw(h2);
         canvas.cd(2); canvas.draw(h3);
-        canvas.cd(3); canvas.draw(h4);
-        canvas.cd(5); canvas.draw(h5);
         frame.add(canvas);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);     
