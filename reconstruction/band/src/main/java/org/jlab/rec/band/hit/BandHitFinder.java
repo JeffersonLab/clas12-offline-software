@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.jlab.rec.band.constants.CalibrationConstantsLoader;
 import org.jlab.rec.band.constants.Parameters;
+import org.netlib.util.doubleW;
 
 
 public class BandHitFinder {
@@ -97,7 +98,19 @@ public class BandHitFinder {
 						System.err.println("BAND HIT FINDER. Found two hits with left and right side but can not assign which hide belongs to which side");
 						continue;
 					}
-
+					
+					// -----------------------------------------------------------------------------------------------
+					// Time-walk correction
+					double time_walk_params[] = CalibrationConstantsLoader.TIMEWALK.get( Integer.valueOf(barKey) );
+					double parA = time_walk_params[0];
+					double parB = time_walk_params[1];
+					double errA = time_walk_params[2];
+					double errB = time_walk_params[3];
+					
+					tdcleft  = tdcleft  - (ftdcleft  + parA/Math.sqrt(adcleft ) + parB);
+					tdcright = tdcright - (ftdcright + parA/Math.sqrt(adcright) + parB);
+					// -----------------------------------------------------------------------------------------------
+					
 					// Form the L-R time
 					double tdiff_tdc  = (tdcleft - tdcright) - CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) );
 					double tdiff_fadc = (ftdcleft - ftdcright) - CalibrationConstantsLoader.FADC_T_OFFSET.get( Integer.valueOf(barKey) );
