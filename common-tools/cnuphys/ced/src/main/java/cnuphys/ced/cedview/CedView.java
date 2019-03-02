@@ -503,6 +503,81 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showCVTTracks();
 	}
+	
+	/**
+	 * Convenience method to see if we show the trkDoca column.
+	 * 
+	 * @return <code>true</code> if we are to show the trkDoca column.
+	 */
+	public boolean showTrkDoca() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showDoca();
+	}
+
+	
+	/**
+	 * Convenience method to see if we show the doca column.
+	 * 
+	 * @return <code>true</code> if we are to show the doca column.
+	 */
+	public boolean showDoca() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showDoca();
+	}
+
+	/**
+	 * Convenience method to see if we show the HB trkDoca column.
+	 * 
+	 * @return <code>true</code> if we are to show HB trkDoca column.
+	 */
+	public boolean showHBTrkDoca() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showHBTrkDoca();
+	}
+	
+	/**
+	 * Convenience method to see if we show the TB trkDoca column.
+	 * 
+	 * @return <code>true</code> if we are to show TB trkDoca column.
+	 */
+	public boolean showTBTrkDoca() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showTBTrkDoca();
+	}
+
+
+	/**
+	 * Convenience method to see if we show the HB doca column.
+	 * 
+	 * @return <code>true</code> if we are to show HB doca column.
+	 */
+	public boolean showHBDoca() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showDoca();
+	}
+	
+	/**
+	 * Convenience method to see if we show the TB doca column.
+	 * 
+	 * @return <code>true</code> if we are to show TB doca column.
+	 */
+	public boolean showTBDoca() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showTBDoca();
+	}
+
 
 	/**
 	 * Convenience method to see it we show the dc time-based reconstructed

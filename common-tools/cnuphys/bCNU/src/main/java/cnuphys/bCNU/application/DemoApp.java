@@ -2,8 +2,6 @@ package cnuphys.bCNU.application;
 
 import java.awt.EventQueue;
 
-import cnuphys.bCNU.fx.DemoFx2View;
-import cnuphys.bCNU.fx.DemoFxView;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
@@ -75,10 +73,6 @@ public class DemoApp extends BaseMDIApplication {
 		XMLView xmlView = new XMLView();
 		xmlView.setVisible(false);
 		
-		//fx view
-		new DemoFxView("JavaFX View", 400, 70, 400, 400);
-		new DemoFx2View("JavaFX2 View", 500, 270, 400, 400);
-
 	}
 
 	/**

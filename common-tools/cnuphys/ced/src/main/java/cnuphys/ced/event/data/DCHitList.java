@@ -33,23 +33,26 @@ public class DCHitList extends Vector<DCHit> {
 		byte lr[] = ColumnData.getByteArray(bankName + ".LR");
 		int TDC[] = ColumnData.getIntArray(bankName + ".TDC");
 				
-		float doca[] = ColumnData.getFloatArray(bankName + ".trkDoca");
+		float trkDoca[] = ColumnData.getFloatArray(bankName + ".trkDoca");
+		float doca[] = ColumnData.getFloatArray(bankName + ".doca");
 		
 		//for backwards compatibility do not include TDC in array check
-		
-		length = checkArrays(sector, superlayer, layer, wire, id, status, lr, doca);
+		//doca array null for HB
+		length = checkArrays(sector, superlayer, layer, wire, id, status, lr, trkDoca);
 		if (length < 0) {
 			Log.getInstance().warning("[" + bankName + "] " + _error);
 			throw new EventDataException("[" + bankName + "] " + _error);
 		}
-		
-		for (int i = 0; i < length; i++) {
-			
-			int tdc = DataSupport.safeValue(TDC, i, -1);
-			
-			add(new DCHit(sector[i], superlayer[i], layer[i], wire[i], id[i], status[i], lr[i], tdc, doca[i]));
-		}
 
+		for (int i = 0; i < length; i++) {
+
+			int tdc = DataSupport.safeValue(TDC, i, -1);
+
+			float docaval = (doca == null) ? -1f : doca[i];
+			
+			add(new DCHit(sector[i], superlayer[i], layer[i], wire[i], id[i], status[i], lr[i], tdc, trkDoca[i],
+					docaval));
+		}
 
 	}
 	

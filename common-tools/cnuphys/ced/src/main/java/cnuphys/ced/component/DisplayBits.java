@@ -50,7 +50,9 @@ public class DisplayBits {
 	/** reconstructed clusters */
 	public static final int FMTCROSSES = 0100000;
 
-	
+	/** A flag for trkDoca v. doca */
+	public static final int DOCA = 0200000;
+
 	
 	/** Distance scale */
 	//public static final int SCALE = 04;

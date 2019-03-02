@@ -36,13 +36,15 @@ public class DCHit {
 	/** Track DOCA in cm */
 	public float trkDoca;
 
+	/** DOCA in cm */
+	public float doca;
 	
 	/**
 	 * @param sector the 1-based sector
 	 * @param layer the 1-based layer 1..6
 	 * @param wire the 1-based wire
 	 */
-	public DCHit(byte sector, byte superlayer, byte layer, short wire, short id, short status, byte lr, int tdc, float doca) {
+	public DCHit(byte sector, byte superlayer, byte layer, short wire, short id, short status, byte lr, int tdc, float trkDoca, float doca) {
 		this.sector = sector;
 		this.superlayer = superlayer;
 		this.layer = layer;
@@ -51,7 +53,8 @@ public class DCHit {
 		this.status = status;
 		this.lr = lr;
 		this.tdc = tdc;
-		this.trkDoca = doca;
+		this.trkDoca = trkDoca;
+		this.doca = doca;
 	}
 	
 	/**

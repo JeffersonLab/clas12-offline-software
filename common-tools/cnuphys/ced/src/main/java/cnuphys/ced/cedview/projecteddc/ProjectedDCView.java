@@ -143,7 +143,7 @@ public class ProjectedDCView extends CedView implements ISector {
 				+ ControlPanel.ACCUMULATIONLEGEND, DisplayBits.CROSSES
 				+ DisplayBits.DC_HITS + DisplayBits.SEGMENTS 
 				+ DisplayBits.GLOBAL_HB + DisplayBits.GLOBAL_TB
-				+ DisplayBits.ACCUMULATION
+				+ DisplayBits.ACCUMULATION + DisplayBits.DOCA
 				+ DisplayBits.MCTRUTH, 3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);

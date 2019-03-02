@@ -33,9 +33,18 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 	/** Label and access to the accumulated button */
 	public static final String ACCUMULATED_LABEL = "Accum.";
+	
+	/** Label and access for trkDoca label */
+	public static final String TRKDOCA_LABEL = "TrkDoca";
 
+	/** Label and access for doca label */
+	public static final String DOCA_LABEL = "Doca";
+ 
 	/** Tag and access to the accumulated button group */
 	public static final String ACCUMULATED_BUTTONGROUP = "AccumulatedButtonGroup";
+	
+	/** Tag and access to the doca button group */
+	public static final String DOCA_BUTTONGROUP = "DocaButtonGroup";
 
 	/** Tag and access to the inner/outer button group */
 	public static final String INNEROUTER_BUTTONGROUP = "InnerOuterButtonGroup";
@@ -142,6 +151,12 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 	// controls whether accumulated hits are displayed
 	private AbstractButton _accumulatedButton;
+	
+	// controls whether track docas are displayed
+	private AbstractButton _trkDocaButton;
+
+	// controls whether doca columns are displayed
+	private AbstractButton _docaButton;
 
 	// controls whether inner plane displayed for ec
 	private AbstractButton _innerButton;
@@ -204,6 +219,20 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 					view.isAccumulatedMode(), true,
 					ACCUMULATED_BUTTONGROUP, this,
 					X11Colors.getX11Color("teal")).getCheckBox();
+
+		}
+		
+		//DOCA Option?
+		if (Bits.checkBit(bits, DisplayBits.DOCA)) {
+			_trkDocaButton = add(TRKDOCA_LABEL,
+					true, true,
+					DOCA_BUTTONGROUP, this,
+					X11Colors.getX11Color("coral")).getCheckBox();
+
+			_docaButton = add(DOCA_LABEL,
+					false, true,
+					DOCA_BUTTONGROUP, this,
+					X11Colors.getX11Color("coral")).getCheckBox();
 
 		}
 
@@ -518,6 +547,62 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	 */
 	public boolean showDCTBCrosses() {
 		return showTB() && showCrosses();
+	}
+	
+	/**
+	 * Convenience method to see if we show the track doca column.
+	 * 
+	 * @return <code>true</code> if we are to show track doca column.
+	 */
+	public boolean showTrkDoca() {
+		return (_trkDocaButton != null)
+				&& _trkDocaButton.isSelected();
+	}
+	
+	/**
+	 * Convenience method to see if we show the  reconstructed crosses.
+	 * 
+	 * @return <code>true</code> if we are to show  reconstructed crosses.
+	 */
+	public boolean showDoca() {
+		return !showTrkDoca();
+	}
+
+	/**
+	 * Convenience method to see if we show the HB trkDoca column.
+	 * 
+	 * @return <code>true</code> if we are to show HB trkDoca column.
+	 */
+	public boolean showHBTrkDoca() {
+		return showHB() && showTrkDoca();
+	}
+	
+	/**
+	 * Convenience method to see if we show the TB trkDoca column.
+	 * 
+	 * @return <code>true</code> if we are to show TB trkDoca column.
+	 */
+	public boolean showTBTrkDoca() {
+		return showTB() && showTrkDoca();
+	}
+
+
+	/**
+	 * Convenience method to see if we show the HB doca column.
+	 * 
+	 * @return <code>true</code> if we are to show HB doca column.
+	 */
+	public boolean showHBDoca() {
+		return showHB() && showDoca();
+	}
+	
+	/**
+	 * Convenience method to see if we show the TB doca column.
+	 * 
+	 * @return <code>true</code> if we are to show TB doca column.
+	 */
+	public boolean showTBDoca() {
+		return showTB() && showDoca();
 	}
 
 

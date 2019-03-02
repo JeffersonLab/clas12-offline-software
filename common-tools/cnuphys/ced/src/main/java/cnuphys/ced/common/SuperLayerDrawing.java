@@ -315,8 +315,6 @@ public class SuperLayerDrawing {
 				if ((hit.sector == _iSupl.sector()) && (hit.superlayer == _iSupl.superlayer())) {
 					drawBasicDCHit(g, container, hit.layer6, hit.wire, hit.noise, -1, hit.doca, hit.sdoca);
 
-					// System.err.println("DOCA " + hit.doca);
-
 					// just draw the wire again
 					drawOneWire(g, container, hit.layer6, hit.wire, reallyClose, pp);
 
@@ -346,10 +344,6 @@ public class SuperLayerDrawing {
 	 *            is noise hit
 	 * @param pid
 	 *            gemc particle id
-	 * @param doca
-	 *            the distance of closest approach array in mm
-	 * @param sdoca
-	 *            the smeared distance of closest approach array in mm
 	 */
 	private void drawDCHit(Graphics g, IContainer container, int layer, int wire, boolean noise, int pid) {
 
@@ -403,14 +397,8 @@ public class SuperLayerDrawing {
 	 *            1-based layer 1..6
 	 * @param wire
 	 *            1-based wire 1..112
-	 * @param noise
-	 *            is noise hit
-	 * @param pid
-	 *            gemc particle id
-	 * @param doca
-	 *            the distance of closest approach array in mm
-	 * @param sdoca
-	 *            the smeared distance of closest approach array in mm
+	 * @param location
+	 *            location
 	 */
 	private void drawReconDCHit(Graphics g, IContainer container, Color hitFill, Color hitLine, int layer, int wire,
 			Point location) {
@@ -482,8 +470,6 @@ public class SuperLayerDrawing {
 			// draw SIM docas?
 			if (WorldGraphicsUtilities
 					.getMeanPixelDensity(_view.getContainer()) > SuperLayerDrawing.wireThreshold[_iSupl.superlayer()]) {
-				// drawDOCA(g, container, layer, wire, doca, CedColors.docaFill,
-				// CedColors.docaLine);
 				drawDOCA(g, container, layer, wire, sdoca, CedColors.docaTruthFill, CedColors.docaTruthLine);
 			}
 		}
@@ -795,6 +781,9 @@ public class SuperLayerDrawing {
 		double radius = doca2d / 10.0; // converted mm to cm
 
 		if (radius > 5) {
+			
+	//		(new Throwable()).printStackTrace();
+			
 			String wmsg = "Very large doca radius: " + radius + " cm. Sect: " + _iSupl.sector() + " supl: "
 					+ _iSupl.superlayer() + "lay: " + layer + " wire: " + wire;
 

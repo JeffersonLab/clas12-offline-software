@@ -67,6 +67,8 @@ public class ReconDrawer extends ProjectedViewDrawer {
 		
 		for (DCHit hit : hits) {
 			if (_view.getSector() == hit.sector) {
+				
+				
 				_view.drawDCHit(g, container, fillColor, Color.black, hit.sector, hit.superlayer, hit.layer,
 						hit.wire, hit.trkDoca, hit.getLocation());
 			}

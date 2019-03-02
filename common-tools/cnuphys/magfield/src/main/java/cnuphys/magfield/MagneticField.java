@@ -17,10 +17,6 @@ import java.nio.FloatBuffer;
  */
 public abstract class MagneticField implements IMagField {
 	
-	//hack used only by double torus
-	protected boolean _notDoubleTorus = true;
-
-
 	/** Magic number used to check if byteswapping is necessary. */
 	public static final int MAGICNUMBER = 0xced;
 	
@@ -770,12 +766,10 @@ public abstract class MagneticField implements IMagField {
 	@Override
 	public boolean contains(double x, double y, double z) {
 		
-		if (_notDoubleTorus) {
-			if (!isActive()) {
-				return false;
-			}
+		if (!isActive()) {
+			return false;
 		}
-		
+
 		//apply the shifts
 		x -= _shiftX;
 		y -= _shiftY;
