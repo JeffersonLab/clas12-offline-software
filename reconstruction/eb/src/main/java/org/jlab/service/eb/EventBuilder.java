@@ -81,7 +81,10 @@ public class EventBuilder {
      */
     public void setParticleStatuses() {
         for (int ii=0; ii<this.detectorEvent.getParticles().size(); ii++) {
-            EBUtil.setParticleStatus(this.detectorEvent.getParticles().get(ii),ccdb);
+            this.detectorEvent.getParticle(ii).setStatus(
+                    ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT),
+                    ccdb.getDouble(EBCCDBEnum.LTCC_NPHE_CUT)
+                    );
         }
     }
 

@@ -177,9 +177,8 @@ public class DetectorData {
             bank.setFloat("vx", row, (float) particles.get(row).vertex().x());
             bank.setFloat("vy", row, (float) particles.get(row).vertex().y());
             bank.setFloat("vz", row, (float) particles.get(row).vertex().z());
-//            bank.setFloat("mass", row, (float) particles.get(row).getMass());
             bank.setFloat("beta", row, (float) particles.get(row).getBeta());
-            bank.setShort("status", row, (short) particles.get(row).getStatus());
+            bank.setShort("status", row, (short) particles.get(row).getStatus().getValue());
             bank.setFloat("chi2pid", row, (float) particles.get(row).getPidQuality());
         }
         return bank;
