@@ -1,9 +1,12 @@
 package org.jlab.service.eb;
 
 import static java.lang.Math.abs;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
+import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.detector.base.DetectorType;
 
 import org.jlab.clas.pdg.PhysicsConstants;
@@ -25,14 +28,137 @@ public class EBAnalyzer {
 
     private EBCCDBConstants ccdb;
 
-    private int[]  pidPositive = new int[]{-11,  211, 321, 2212, 45};
-    private int[]  pidNegative = new int[]{ 11, -211,-321,-2212};
-    private int[]  pidNeutral = new int[]{22,2112};
+    static final int[]  PID_POSITIVE = new int[]{-11,  211, 321, 2212, 45};
+    static final int[]  PID_NEGATIVE = new int[]{ 11, -211,-321,-2212};
+    static final int[]  PID_NEUTRAL = new int[]{22,2112};
 
     public EBAnalyzer(EBCCDBConstants ccdb) {
         this.ccdb=ccdb;
     }
 
+    
+    /**
+     *
+     * Determine event start time from FT electron and reassign timing-based
+     * particle identification accordingly.
+     * 
+     * Choice of which FT electron to use is that with the smallest vertex
+     * time difference between FT and any combination of FD charged particle
+     * and pid (mass) hypothesis.
+     *
+     * WARNING:  Here we hijack the event's particles, overwriting their pids,
+     * rather than making copies, since particle ordering is critical for
+     * shadow banks to work as intended, so they should have been written to
+     * REC::Particle bank already.
+     *
+     */
+    public void processEventFT(DetectorEvent event) {
+
+        if (event.getParticles().size() <= 0) return;
+
+        // An FD electron was already used to get start time, abort:
+        if (event.getEventHeader().getStartTime()>0 &&
+            event.getParticle(0).getPid()==11 &&
+            event.getParticle(0).getStatus().isForward()) return;
+
+        // Match FT against these hypotheses in FD:
+        final int[] hypotheses = new int[]{-11,11,-211,211,2212};
+    
+        // particle candidates for FT-FD time-matching:
+        List<DetectorParticle> electronFT = new ArrayList<DetectorParticle>();
+        List<DetectorParticle> chargedFD = new ArrayList<DetectorParticle>();
+
+        // corresponding response candidates, to avoid excessive searches during combinatorics:
+        List<DetectorResponse> electronFTC = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> chargedFTOF = new ArrayList<DetectorResponse>();
+
+        // load the candidates:
+        for (DetectorParticle p : event.getParticles()) {
+            if (p.getStatus().isTagger() && p.getPid()==11) {
+                DetectorResponse ftc = p.getHit(DetectorType.FTCAL);
+                if (ftc==null) throw new RuntimeException("FT electron without FTC!");
+                electronFT.add(p);
+                electronFTC.add(ftc);
+            }
+            else if (p.getStatus().isForward() && p.getCharge()!=0) {
+                DetectorResponse ftof1a = p.getHit(DetectorType.FTOF,2);
+                if (ftof1a==null) continue;
+                chargedFD.add(p);
+                chargedFTOF.add(ftof1a);
+            }
+        }
+
+        // no good candidates, abort:
+        if (electronFT.size()<1 || chargedFD.size()<1) return;
+        
+        // the index of the FT particle with the best FT-FD timing-match:
+        int iMinTimeDiffFT = -1;
+
+        // anything relevant must be better than 2 ns match:
+        double minTimeDiff = 2.0;
+
+        // loop over FT electron candidates:
+        for (int itag=0; itag<electronFT.size(); itag++) {
+
+            // the FT calorimeter hit for this FT electron:
+            final DetectorResponse ftc = electronFTC.get(itag);
+
+            // this would be a straight line from (0,0,0): 
+            final double pathFT = ftc.getPosition().mag();
+
+            // assume beta=1 and calculate vertex time:
+            final double vtxTimeFT = ftc.getTime() -
+                pathFT/PhysicsConstants.speedOfLight();
+
+            // calculate RF-corrected FT start time:
+            // should we really compare against RF-corrected time?
+            // or would comparing vertex times make more sense, and
+            // then correcting for RF after choosing the best match?
+            //double deltatr = - vtxTimeFT + rfTime + (1000+0.5)*rfPeriod;
+            //double rfCorr     = deltatr % rfPeriod - rfPeriod/2;             
+            
+            // loop over FD charged particles:
+            for (int ifd=0; ifd<chargedFD.size(); ifd++) {
+
+                final DetectorResponse ftof1a = chargedFTOF.get(ifd);
+                final double pFD = chargedFD.get(ifd).vector().mag();
+                final double pathFD = chargedFD.get(ifd).getPathLength(ftof1a.getPosition());
+                    
+                for (int pid : hypotheses) {
+
+                    // ignore if measured charge doesn't match hypothesis charge:
+                    if (PDGDatabase.getParticleById(pid).charge() !=
+                            chargedFD.get(ifd).getCharge()) {
+                        continue;
+                    }
+                    
+                    // calculate beta and vertex time based on measured
+                    // momentum and this pid hypothesis:
+                    final double beta = pFD /
+                            Math.sqrt(pFD*pFD + Math.pow(PDGDatabase.getParticleMass(pid),2));
+                    final double vtxTimeFD = ftof1a.getTime() -
+                        pathFD/PhysicsConstants.speedOfLight()/beta;
+
+                    // check for a new best FT-FD timing match:
+                    if (Math.abs(vtxTimeFD-vtxTimeFT) < Math.abs(minTimeDiff)) {
+                        minTimeDiff = vtxTimeFD-vtxTimeFT;
+                        iMinTimeDiffFT = itag;
+                    }
+                }
+            }
+        }
+        
+        // no good FT, abort:
+        if (iMinTimeDiffFT<0) return;
+/*
+        // recalculate betas, pids, etc:
+        event.getEventHeader().setStartTimeFT(startTime);
+        this.assignBetas(event,true);
+        this.assignPids(event,true);
+        this.assignNeutralMomenta(event,true);
+*/
+    }
+    
     public void processEvent(DetectorEvent event) {
 
         // abort, rely on default init of DetectorEvent:
@@ -202,20 +328,20 @@ public class EBAnalyzer {
             DetectorParticle p = event.getParticle(i);
             
             if (p.getCharge()>0){
-                for(int b = 0; b < this.pidPositive.length; b++) {
-                    pidHyp.PIDMatch(p, this.pidPositive[b]); 
+                for(int b = 0; b < this.PID_POSITIVE.length; b++) {
+                    pidHyp.PIDMatch(p, this.PID_POSITIVE[b]); 
                 }
             } 
             
             else if (p.getCharge()<0) {
-                for(int b = 0; b < this.pidNegative.length; b++) {
-                    pidHyp.PIDMatch(p, this.pidNegative[b]);
+                for(int b = 0; b < this.PID_NEGATIVE.length; b++) {
+                    pidHyp.PIDMatch(p, this.PID_NEGATIVE[b]);
                 }
                 //Collections.sort(pidHyp); 
             }
             else {
-                for(int b = 0; b < this.pidNeutral.length; b++) {
-                    pidHyp.PIDMatch(p, this.pidNeutral[b]);
+                for(int b = 0; b < this.PID_NEUTRAL.length; b++) {
+                    pidHyp.PIDMatch(p, this.PID_NEUTRAL[b]);
                 }
             }
 
@@ -326,8 +452,8 @@ public class EBAnalyzer {
             }
             else {
                 int[] hypotheses;
-                if      (p.getCharge()>0) hypotheses=pidPositive;
-                else                      hypotheses=pidNegative;
+                if      (p.getCharge()>0) hypotheses=PID_POSITIVE;
+                else                      hypotheses=PID_NEGATIVE;
                 final double startTime = event.getEventHeader().getStartTime();
                 double minTimeDiff=Double.MAX_VALUE;
                 for (int ii=0; ii<hypotheses.length; ii++) {
