@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.jlab.rec.band.constants.CalibrationConstantsLoader;
 import org.jlab.rec.band.constants.Parameters;
+import org.netlib.util.doubleW;
 
 
 public class BandHitFinder {
@@ -48,6 +49,7 @@ public class BandHitFinder {
 				//check if hit is in the veto counter (layer 6). 
 				if (hit1.GetLayer() == 6) {
 					//System.err.println("veto fired, event can not be good :-(");
+
 					return new ArrayList<BandHit>();
 				}
 
@@ -97,10 +99,24 @@ public class BandHitFinder {
 						System.err.println("BAND HIT FINDER. Found two hits with left and right side but can not assign which hide belongs to which side");
 						continue;
 					}
-
+					
+					// -----------------------------------------------------------------------------------------------
+					// Time-walk correction
+					double time_walk_params[] = CalibrationConstantsLoader.TIMEWALK.get( Integer.valueOf(barKey) );
+					double parA = time_walk_params[0];
+					double parB = time_walk_params[1];
+					double errA = time_walk_params[2];
+					double errB = time_walk_params[3];
+					
+					tdcleft  = tdcleft  - (ftdcleft  + parA/Math.sqrt(adcleft ) + parB);
+					tdcright = tdcright - (ftdcright + parA/Math.sqrt(adcright) + parB);
+					// -----------------------------------------------------------------------------------------------
+					
 					// Form the L-R time
 					double tdiff_tdc  = (tdcleft - tdcright) - CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) );
 					double tdiff_fadc = (ftdcleft - ftdcright) - CalibrationConstantsLoader.FADC_T_OFFSET.get( Integer.valueOf(barKey) );
+
+					//System.out.println("*Found a candidate BAR with tdiff: "+tdiff_tdc+" "+tdiff_fadc);
 					// Check if the time difference is within the length of the bar:
 					double maxDiff_tdc = Parameters.barLengthSector[sector-1]/
 						CalibrationConstantsLoader.TDC_VEFF.get( Integer.valueOf(barKey) );
@@ -134,11 +150,20 @@ public class BandHitFinder {
 					xposHit += globPos[0];
 					yposHit = globPos[1];
 					zposHit = globPos[2];
-					//System.out.println("bar " + barKey+" with pos: ("+xposHit+" , "+yposHit+" , "+zposHit+")");
 					xposHitUnc = CalibrationConstantsLoader.FADC_MT_P2P_RES.get( Integer.valueOf(barKey) )
 									* CalibrationConstantsLoader.FADC_VEFF.get( Integer.valueOf(barKey) );
 					yposHitUnc = Parameters.thickness / 2.;
 					zposHitUnc = Parameters.thickness / 2.;
+
+
+					// Correct FADC ADC for attenuation length
+					double sectorLen = Parameters.barLengthSector[sector-1];
+					double mu_cm = CalibrationConstantsLoader.FADC_ATTEN_LENGTH.get( Integer.valueOf(barKey) ); // in [cm]
+					double adcL_corr = adcleft * Math.exp( (sectorLen/2.-xpos_fadc) / mu_cm );
+					double adcR_corr = adcright* Math.exp( (sectorLen/2.+xpos_fadc) / mu_cm );
+					//System.out.println("Before/after mu correction: " + adcleft + " / " + adcL_corr + " , " + adcright + " / " + adcR_corr);
+					//System.out.println("\tmu,position: " + mu_cm + " " + xpos_fadc);
+
 
 					// Create a new BandHit and fill it with the relevant info:
 					BandHit Hit = new BandHit();  
@@ -150,8 +175,8 @@ public class BandHitFinder {
 					Hit.SetMeanTime_FADC(mtime_fadc);
 					Hit.SetDiffTime_TDC(tdiff_tdc);
 					Hit.SetDiffTime_FADC(tdiff_fadc);
-					Hit.SetAdcLeft(adcleft);
-					Hit.SetAdcRight(adcright);
+					Hit.SetAdcLeft(adcL_corr);
+					Hit.SetAdcRight(adcR_corr);
 					Hit.SetTLeft_FADC(ftdcleft);
 					Hit.SetTRight_FADC(ftdcright);
 					Hit.SetTLeft_TDC(tdcleft);
@@ -162,6 +187,9 @@ public class BandHitFinder {
 					Hit.SetUx(xposHitUnc);
 					Hit.SetUy(yposHitUnc);
 					Hit.SetUz(zposHitUnc);
+					
+					// Print for debugging:
+					//Hit.Print();
 
 					coincidences.add(Hit);
 

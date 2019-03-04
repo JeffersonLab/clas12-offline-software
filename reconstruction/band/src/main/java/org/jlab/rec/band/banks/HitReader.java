@@ -63,8 +63,9 @@ public class HitReader {
 			if( adc <= 0 || ftdc <= 0 ) continue;
 
 			int key = s*1000 + l*100 + c*10 + o;
-			
+
 			//System.out.println("s,l,c,o: "+key+" adc,ftdc: "+adc+" "+ftdc);
+
 
 			// Check if this PMT has been stored before, and if it has, then
 			// replace it only if it has a larger ADC value. Otherwise, add to map
@@ -130,6 +131,7 @@ public class HitReader {
 			float ftdc = fadcTimes.get(keys);
 			double tdc = tdcTimes.get(keys);
 			//System.out.println("Found a candidate PMT hit! slco: "+sector+" "+layer+" "+component+" "+order+" "+adc+" "+ftdc+" "+tdc);
+
 			BandHitCandidate newHit = new BandHitCandidate( sector,layer,component,order,
 					triggerPhase, adc, tdc, ftdc );
 			candidates.add(newHit);

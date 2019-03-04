@@ -22,6 +22,8 @@ public class BandHitCandidate {
 
 		//System.out.println("Created BandHitCandidate: adc "+ this._adc +" tdc "+this._tdc+" ftdc "+this._ftdc+ " AttCorr " + this._AttCorr + " tcorr "+ this._tCorr);
 
+                
+
 	}
 
 	private int _sector;       		// sector of BAND  in which signal is registered 				

@@ -66,7 +66,6 @@ public class RecoBankWriter {
 			//bank.show();
 			event.appendBank(bank);
 		}
-
 	}
 
 }
