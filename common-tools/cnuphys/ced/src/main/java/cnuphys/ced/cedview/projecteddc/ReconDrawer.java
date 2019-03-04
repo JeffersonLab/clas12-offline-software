@@ -11,6 +11,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCHit;
 import cnuphys.ced.event.data.DCHitList;
+import cnuphys.ced.frame.CedColors;
 
 public class ReconDrawer extends ProjectedViewDrawer {
 
@@ -34,32 +35,24 @@ public class ReconDrawer extends ProjectedViewDrawer {
 			return;
 		}
 		
-		// DC HB Hits
-		if (_view.showDCHBHits()) {
-			drawDCHBHits(g, container);
-		}
-		
-		// DC TB Hits
-		if (_view.showDCTBHits()) {
-			drawDCTBHits(g, container);
-		}
+		// DC HB and TB Hits
+		drawDCDOCA(g, container);
 
 
 	}
-	
 	// draw reconstructed DC hit based hits
-	private void drawDCHBHits(Graphics g, IContainer container) {
-		drawDCHitList(g, container, DC.HB_COLOR, DC.getInstance().getHBHits());
-	}
-	
-	// draw reconstructed DC hit based hits
-	private void drawDCTBHits(Graphics g, IContainer container) {
-		drawDCHitList(g, container, DC.TB_COLOR, DC.getInstance().getTBHits());
+	private void drawDCDOCA(Graphics g, IContainer container) {
+		if (_view.showHB()) {
+			drawDCHitList(g, container, CedColors.HB_COLOR, DC.getInstance().getHBHits(), false);
+		}
+		if (_view.showTB()) {
+			drawDCHitList(g, container, CedColors.TB_COLOR, DC.getInstance().getTBHits(), true);
+		}
 	}
 
 	
 	//draw a reconstructed hit list
-	private void drawDCHitList(Graphics g, IContainer container, Color fillColor, DCHitList hits) {
+	private void drawDCHitList(Graphics g, IContainer container, Color fillColor, DCHitList hits, boolean isTimeBased) {
 		if ((hits == null) || hits.isEmpty()) {
 			return;
 		}
@@ -67,10 +60,7 @@ public class ReconDrawer extends ProjectedViewDrawer {
 		
 		for (DCHit hit : hits) {
 			if (_view.getSector() == hit.sector) {
-				
-				
-				_view.drawDCHit(g, container, fillColor, Color.black, hit.sector, hit.superlayer, hit.layer,
-						hit.wire, hit.trkDoca, hit.getLocation());
+				_view.drawDCHit(g, container, fillColor, Color.black, hit, isTimeBased);
 			}
 		}
 

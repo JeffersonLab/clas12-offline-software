@@ -6,27 +6,12 @@ import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.util.SoundUtils;
 import cnuphys.ced.frame.Ced;
-import cnuphys.splot.plot.X11Colors;
 
 public class DC extends DetectorData {
 
 	private static final int TOTALNUMWIRE = 24192;
 	private static final int TOTALNUMWIRESECTOR = 4032;
 	
-	
-	//colors for hb based and time based distinction
-	/** hit based color */
-	public static final Color HB_COLOR = Color.yellow;
-	
-	/** slightly transparent HB color */
-	public static final Color HB_TRANS = new Color(255, 255, 0, 240);
-	
-	/** time based color */
-	public static final Color TB_COLOR = X11Colors.getX11Color("dark orange");
-	
-	/** slightly transparent TB color */
-	public static final Color TB_TRANS = X11Colors.getX11Color("dark orange", 240);
-
 	
 	//tdc adc hit list
 	private DCTdcHitList _tdcHits = new DCTdcHitList();

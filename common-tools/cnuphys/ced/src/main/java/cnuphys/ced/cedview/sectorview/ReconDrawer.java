@@ -56,16 +56,8 @@ public class ReconDrawer extends SectorViewDrawer  {
 			return;
 		}
 		
-		// DC HB Hits
-		if (_view.showDCHBHits()) {
-			drawDCHBHits(g, container);
-		}
-		
-		// DC TB Hits
-		if (_view.showDCTBHits()) {
-			drawDCTBHits(g, container);
-		}
-
+		// DC HB and TB Hits
+		drawDCDOCA(g, container);
 
 		// Reconstructed hits
 		if (_view.showReconHits()) {
@@ -104,19 +96,14 @@ public class ReconDrawer extends SectorViewDrawer  {
 	}
 
 	// draw reconstructed DC hit based hits
-	private void drawDCHBHits(Graphics g, IContainer container) {
+	private void drawDCDOCA(Graphics g, IContainer container) {
 		if (_view.showHB()) {
-			drawDCHitList(g, container, DC.HB_COLOR, DC.getInstance().getHBHits());
+			drawDCHitList(g, container, CedColors.HB_COLOR, DC.getInstance().getHBHits(), false);
 		}
-	}
-
-	// draw reconstructed DC hit based hits
-	private void drawDCTBHits(Graphics g, IContainer container) {
 		if (_view.showTB()) {
-			drawDCHitList(g, container, DC.TB_COLOR, DC.getInstance().getTBHits());
+			drawDCHitList(g, container, CedColors.TB_COLOR, DC.getInstance().getTBHits(), true);
 		}
 	}
-
 
 
 	/**
@@ -244,15 +231,14 @@ public class ReconDrawer extends SectorViewDrawer  {
 	}
 	
 	//draw a reconstructed hit list
-	private void drawDCHitList(Graphics g, IContainer container, Color fillColor, DCHitList hits) {
+	private void drawDCHitList(Graphics g, IContainer container, Color fillColor, DCHitList hits, boolean isTimeBased) {
 		if ((hits == null) || hits.isEmpty()) {
 			return;
 		}
 						
 		for (DCHit hit : hits) {
 			if (_view.containsSector(hit.sector)) {
-				_view.drawDCHit(g, container, fillColor, Color.black, hit.sector, hit.superlayer, hit.layer,
-						hit.wire, hit.trkDoca, hit.getLocation());
+				_view.drawDCHit(g, container, fillColor, Color.black, hit, isTimeBased);
 			}
 		}
 

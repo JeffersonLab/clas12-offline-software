@@ -14,6 +14,7 @@ import cnuphys.bCNU.item.PolygonItem;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.common.SuperLayerDrawing;
+import cnuphys.ced.event.data.DCHit;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 
@@ -69,11 +70,8 @@ public class ProjectedSuperLayer extends PolygonItem implements ISuperLayer {
 	 * @param wire 1-based wire 1..112
 	 * @param trkDoca doca in cm
 	 */
-	public void drawDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, byte layer, short wire,
-			float trkDoca, Point location) {
-		
-		float docaMM = 10*trkDoca; //convert to mm
-		_superlayerDrawer.drawReconDCHit(g, container, fillColor, frameColor, layer, wire, docaMM, location);
+	public void drawDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, DCHit hit, boolean isTimeBased) {
+		_superlayerDrawer.drawReconDCHitAndDOCA(g, container, fillColor, frameColor, hit, isTimeBased);
 	}
 		
 	/**
@@ -94,7 +92,7 @@ public class ProjectedSuperLayer extends PolygonItem implements ISuperLayer {
 		getStyle().setFillColor(Color.white);
 		super.drawItem(g, container); // draws shell
 
-		_superlayerDrawer.drawItem(g, container, _lastDrawnPolygon);
+		_superlayerDrawer.drawItem(g, container, _lastDrawnPolygon, false);
 	}
 
 	public Polygon getLastDrawnPolygon() {

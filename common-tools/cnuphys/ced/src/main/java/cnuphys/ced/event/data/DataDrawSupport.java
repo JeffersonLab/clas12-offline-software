@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.Point;
 
 import cnuphys.bCNU.graphics.SymbolDraw;
+import cnuphys.ced.frame.CedColors;
 import cnuphys.splot.plot.X11Colors;
 
 public class DataDrawSupport {
@@ -20,7 +21,7 @@ public class DataDrawSupport {
 	private static final Color TRANSBLUE = X11Colors.getX11Color("sky blue", 250);
 	private static final Color TRANSRED = X11Colors.getX11Color("red", 128);
 
-	public static Color transColors[] = { DC.HB_TRANS, DC.TB_TRANS, TRANSYELLOW, TRANSGREEN, TRANSRED };
+	public static Color transColors[] = { CedColors.HB_TRANS, CedColors.TB_TRANS, TRANSYELLOW, TRANSGREEN, TRANSRED };
 	public static String prefix[] = { "HB ", "TB ", "BST ", "BMT ", "FMT "};
 	
 

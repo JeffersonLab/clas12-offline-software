@@ -35,6 +35,12 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	public static final String ACCUMULATED_LABEL = "Accum.";
 	
 	/** Label and access for trkDoca label */
+	public static final String NODOCA_LABEL = "No Doca";
+	
+	/** Label and access for trkDoca label */
+	public static final String ALLDOCA_LABEL = "All Doca";
+	
+	/** Label and access for trkDoca label */
 	public static final String TRKDOCA_LABEL = "TrkDoca";
 
 	/** Label and access for doca label */
@@ -152,6 +158,12 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	// controls whether accumulated hits are displayed
 	private AbstractButton _accumulatedButton;
 	
+	// controls whether all docas are displayed
+	private AbstractButton _noDocaButton;
+	
+	// controls whether all docas are displayed
+	private AbstractButton _allDocaButton;
+	
 	// controls whether track docas are displayed
 	private AbstractButton _trkDocaButton;
 
@@ -224,15 +236,25 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		
 		//DOCA Option?
 		if (Bits.checkBit(bits, DisplayBits.DOCA)) {
-			_trkDocaButton = add(TRKDOCA_LABEL,
+			_trkDocaButton = add(NODOCA_LABEL,
+					false, true,
+					DOCA_BUTTONGROUP, this,
+					X11Colors.getX11Color("dark green")).getCheckBox();
+
+			_allDocaButton = add(ALLDOCA_LABEL,
 					true, true,
 					DOCA_BUTTONGROUP, this,
-					X11Colors.getX11Color("coral")).getCheckBox();
+					X11Colors.getX11Color("dark green")).getCheckBox();
+
+			_trkDocaButton = add(TRKDOCA_LABEL,
+					false, true,
+					DOCA_BUTTONGROUP, this,
+					X11Colors.getX11Color("dark green")).getCheckBox();
 
 			_docaButton = add(DOCA_LABEL,
 					false, true,
 					DOCA_BUTTONGROUP, this,
-					X11Colors.getX11Color("coral")).getCheckBox();
+					X11Colors.getX11Color("dark green")).getCheckBox();
 
 		}
 
@@ -550,22 +572,43 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	}
 	
 	/**
+	 * Convenience method to see if we show no doca at all.
+	 * 
+	 * @return <code>true</code> if we are to show no doca.
+	 */
+	public boolean showNoDoca() {
+		return (_noDocaButton != null)
+				&& _noDocaButton.isSelected();
+	}
+	
+	/**
+	 * Convenience method to see if we show all doca at all.
+	 * 
+	 * @return <code>true</code> if we are to show all doca.
+	 */
+	public boolean showAllDoca() {
+		return (_allDocaButton != null)
+				&& _allDocaButton.isSelected();
+	}
+
+	/**
 	 * Convenience method to see if we show the track doca column.
 	 * 
 	 * @return <code>true</code> if we are to show track doca column.
 	 */
 	public boolean showTrkDoca() {
-		return (_trkDocaButton != null)
-				&& _trkDocaButton.isSelected();
+		return showAllDoca() || ((_trkDocaButton != null)
+				&& _trkDocaButton.isSelected());
 	}
 	
 	/**
-	 * Convenience method to see if we show the  reconstructed crosses.
+	 * Convenience method to see if we show the doca column.
 	 * 
-	 * @return <code>true</code> if we are to show  reconstructed crosses.
+	 * @return <code>true</code> if we are to show the doca column.
 	 */
 	public boolean showDoca() {
-		return !showTrkDoca();
+		return showAllDoca() || ((_docaButton != null)
+				&& _docaButton.isSelected());
 	}
 
 	/**

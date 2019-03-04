@@ -32,6 +32,7 @@ import cnuphys.ced.common.SuperLayerDrawing;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.DC;
+import cnuphys.ced.event.data.DCHit;
 import cnuphys.ced.frame.Ced;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.FTOFGeometry;
@@ -555,16 +556,30 @@ public class SectorView extends CedView implements ChangeListener {
 			p0.y = p1.y;
 		}
 	}
+	
+	//redraw the segments on top
+	private void redrawSegments(Graphics g, IContainer container) {
+//		private SectorSuperLayer _superLayers[][] = new SectorSuperLayer[2][6];
+		
+		//secty loop is just upper and lower (0-1, not 0-5)
+		for (int sect = 0; sect < 2; sect++) {
+			for (int supl = 0; supl < 6; supl++) {
+				_superLayers[sect][supl].drawSegments(g, container);
+			}
+		}
+	}
 
 	/**
 	 * Set the views before draw
 	 */
+	
+	private boolean segmentsOnTop = true;
 	private void setAfterDraw() {
 		IDrawable afterDraw = new DrawableAdapter() {
 
 			@Override
 			public void draw(Graphics g, IContainer container) {
-
+				
 				// draw trajectories
 				_swimTrajectoryDrawer.draw(g, container);
 
@@ -600,6 +615,12 @@ public class SectorView extends CedView implements ChangeListener {
 				
 				//secial debug points
 				drawDebugPoints(g, container);
+				
+				//redraw segments
+				if (segmentsOnTop) {
+//					System.err.println("REDRAW SEGMENTS");
+					redrawSegments(g, container);
+				}
 
 				// a clean rectangle
 				Rectangle bounds = container.getComponent().getBounds();
@@ -1581,18 +1602,12 @@ public class SectorView extends CedView implements ChangeListener {
 	 * @param container
 	 * @param fillColor
 	 * @param frameColor
-	 * @param sector
-	 * @param superlayer
-	 * @param layer
-	 * @param wire
-	 * @param trkDoca
 	 */
-	public void drawDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, byte sector,
-			byte superlayer, byte layer, short wire, float trkDoca, Point location) {
+	public void drawDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, DCHit hit, boolean isTimeBased) {
 
-		SectorSuperLayer sectSL = _superLayers[(sector < 4) ? 0 : 1][superlayer-1];
+		SectorSuperLayer sectSL = _superLayers[(hit.sector < 4) ? 0 : 1][hit.superlayer-1];
 		sectSL.drawDCHit(g, container, fillColor, frameColor, 
-				layer, wire, trkDoca, location);
+				hit, isTimeBased);
 		
 	}
 	

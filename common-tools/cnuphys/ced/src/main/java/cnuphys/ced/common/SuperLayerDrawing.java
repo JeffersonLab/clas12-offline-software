@@ -27,6 +27,7 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.projecteddc.ISuperLayer;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC;
+import cnuphys.ced.event.data.DCHit;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.DataSupport;
@@ -90,7 +91,7 @@ public class SuperLayerDrawing {
 		_direction = VectorSupport.unitVector(_direction);
 	}
 
-	public void drawItem(Graphics g, IContainer container, Polygon lastDrawnPolygon) {
+	public void drawItem(Graphics g, IContainer container, Polygon lastDrawnPolygon, boolean segmentsOnly) {
 
 		Graphics2D g2 = (Graphics2D) g;
 
@@ -103,38 +104,49 @@ public class SuperLayerDrawing {
 		Shape clip = g2.getClip();
 		// Stroke oldStroke = g2.getStroke();
 
-		g2.setClip(lastDrawnPolygon);
-		for (int layer = 1; layer <= 6; layer++) {
-			Polygon poly = getLayerPolygon(container, layer);
+		if (lastDrawnPolygon != null) {
+			g2.setClip(lastDrawnPolygon);
+		} else {
+			System.err.println("NULL LAST POLY");
+		}
 
-			if ((layer % 2) == 1) {
-				g.setColor(CedColors.layerFillColors[1]);
-				g.fillPolygon(poly);
-				g.drawPolygon(poly);
+		if (!segmentsOnly) {
+			// differentiate the layers
+			for (int layer = 1; layer <= 6; layer++) {
+				Polygon poly = getLayerPolygon(container, layer);
+
+				if ((layer % 2) == 1) {
+					g.setColor(CedColors.layerFillColors[1]);
+					g.fillPolygon(poly);
+					g.drawPolygon(poly);
+				}
+			}
+
+			// draw results of noise reduction? If so will need the parameters
+			// (which also have the results)
+			NoiseReductionParameters parameters = _noiseManager.getParameters(_iSupl.sector() - 1,
+					_iSupl.superlayer() - 1);
+
+			// show the noise segment masks?
+			if (_view.showMasks()) {
+				drawMasks(g, container, parameters);
+			}
+
+			// draw wires?
+			if (reallyClose || (WorldGraphicsUtilities.getMeanPixelDensity(
+					_view.getContainer()) > SuperLayerDrawing.wireThreshold[_iSupl.superlayer()])) {
+				drawWires(g, container, reallyClose);
 			}
 		}
 
-		// draw results of noise reduction? If so will need the parameters
-		// (which also have the results)
-		NoiseReductionParameters parameters = _noiseManager.getParameters(_iSupl.sector() - 1, _iSupl.superlayer() - 1);
-
-		// show the noise segment masks?
-		if (_view.showMasks()) {
-			drawMasks(g, container, parameters);
-		}
-
-		// draw wires?
-		if (reallyClose || (WorldGraphicsUtilities
-				.getMeanPixelDensity(_view.getContainer()) > SuperLayerDrawing.wireThreshold[_iSupl.superlayer()])) {
-			drawWires(g, container, reallyClose);
-		}
-
 		// draw the hits
-		drawHits(g, container, reallyClose);
+		drawHits(g, container, reallyClose, segmentsOnly);
 
 		// draw outer boundary again.
 		g.setColor(_iSupl.item().getStyle().getLineColor());
-		g.drawPolygon(lastDrawnPolygon);
+		if (lastDrawnPolygon != null) {
+			g.drawPolygon(lastDrawnPolygon);
+		}
 
 		g2.setClip(clip);
 	}
@@ -261,17 +273,21 @@ public class SuperLayerDrawing {
 	 * @param container
 	 *            the drawing container
 	 */
-	private void drawHits(Graphics g, IContainer container, boolean reallyClose) {
+	private void drawHits(Graphics g, IContainer container, boolean reallyClose, boolean segmentsOnly) {
 
 		if (_view.isSingleEventMode()) {
-			drawSingleModeHits(g, container, reallyClose);
+			drawSingleModeHits(g, container, reallyClose, segmentsOnly);
 		} else {
-			drawAccumulatedHits(g, container, reallyClose);
+			drawAccumulatedHits(g, container, reallyClose, segmentsOnly);
 		}
 	}
 
 	// draw hits in accumulated mode
-	private void drawAccumulatedHits(Graphics g, IContainer container, boolean reallyClose) {
+	private void drawAccumulatedHits(Graphics g, IContainer container, boolean reallyClose, boolean segmentsOnly) {
+		
+		if (segmentsOnly) {
+			return;
+		}
 
 		int dcAccumulatedData[][][][] = AccumulationManager.getInstance().getAccumulatedDCData();
 		int sect0 = _iSupl.sector() - 1;
@@ -300,24 +316,24 @@ public class SuperLayerDrawing {
 	/**
 	 * Draw hits (and other data) when we are in single hit mode
 	 * 
-	 * @param g
-	 *            The graphics object
-	 * @param container
-	 *            the drawing container
+	 * @param g         The graphics object
+	 * @param container the drawing container
 	 */
-	private void drawSingleModeHits(Graphics g, IContainer container, boolean reallyClose) {
+	private void drawSingleModeHits(Graphics g, IContainer container, boolean reallyClose, boolean segmentsOnly) {
 
-		DCTdcHitList hits = DC.getInstance().getTDCHits();
-		if ((hits != null) && !hits.isEmpty()) {
+		if (!segmentsOnly) {
+			DCTdcHitList hits = DC.getInstance().getTDCHits();
+			if ((hits != null) && !hits.isEmpty()) {
 
-			Point pp = new Point();
-			for (DCTdcHit hit : hits) {
-				if ((hit.sector == _iSupl.sector()) && (hit.superlayer == _iSupl.superlayer())) {
-					drawBasicDCHit(g, container, hit.layer6, hit.wire, hit.noise, -1, hit.doca, hit.sdoca);
+				Point pp = new Point();
+				for (DCTdcHit hit : hits) {
+					if ((hit.sector == _iSupl.sector()) && (hit.superlayer == _iSupl.superlayer())) {
+						drawBasicDCHit(g, container, hit.layer6, hit.wire, hit.noise, -1);
 
-					// just draw the wire again
-					drawOneWire(g, container, hit.layer6, hit.wire, reallyClose, pp);
+						// just draw the wire again
+						drawOneWire(g, container, hit.layer6, hit.wire, reallyClose, pp);
 
+					}
 				}
 			}
 		}
@@ -438,13 +454,8 @@ public class SuperLayerDrawing {
 	 *            is noise hit
 	 * @param pid
 	 *            gemc particle id
-	 * @param doca
-	 *            the distance of closest approach array in mm
-	 * @param sdoca
-	 *            the smeared distance of closest approach array in mm
 	 */
-	private void drawBasicDCHit(Graphics g, IContainer container, int layer, int wire, boolean noise, int pid,
-			float doca, float sdoca) {
+	private void drawBasicDCHit(Graphics g, IContainer container, int layer, int wire, boolean noise, int pid) {
 
 		// abort if hiding noise and this is noise
 		if (_view.hideNoise() && noise) {
@@ -452,28 +463,6 @@ public class SuperLayerDrawing {
 		}
 
 		drawDCHit(g, container, layer, wire, noise, pid);
-
-		// are we to show mc (MonteCarlo simulation) truth?
-		boolean showTruth = _view.showMcTruth();
-		if (!showTruth) {
-			return;
-		}
-
-		if (_view.showMcTruth()) {
-			if (Float.isNaN(doca) || Float.isNaN(sdoca)) {
-				return;
-			}
-			if ((doca < 1.0e-6) || (sdoca < 1.0e-6)) {
-				return;
-			}
-
-			// draw SIM docas?
-			if (WorldGraphicsUtilities
-					.getMeanPixelDensity(_view.getContainer()) > SuperLayerDrawing.wireThreshold[_iSupl.superlayer()]) {
-				drawDOCA(g, container, layer, wire, sdoca, CedColors.docaTruthFill, CedColors.docaTruthLine);
-			}
-		}
-
 	}
 
 	/**
@@ -489,29 +478,16 @@ public class SuperLayerDrawing {
 	 *            1-based wire 1..112
 	 * @param noise
 	 *            is noise hit
-	 * @param pid
-	 *            gemc particle id
-	 * @param doca
-	 *            the distance of closest approach array in mm
 	 */
-	public void drawReconDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, int layer, int wire,
-			float doca, Point location) {
+	public void drawReconDCHitAndDOCA(Graphics g, IContainer container, Color fillColor, Color frameColor, DCHit hit, boolean isTimeBased) {
 
-		drawReconDCHit(g, container, fillColor, frameColor, layer, wire, location);
-
-		if (Float.isNaN(doca)) {
-			return;
-		}
-		if (doca < 1.0e-6) {
-			return;
-		}
-
-		// draw docas?
-
+		drawReconDCHit(g, container, fillColor, frameColor, hit.layer, hit.wire, hit.getLocation());
+		
+		
 		if (WorldGraphicsUtilities
 				.getMeanPixelDensity(_view.getContainer()) > SuperLayerDrawing.wireThreshold[_iSupl.superlayer()]) {
 
-			drawDOCA(g, container, layer, wire, doca, CedColors.docaTruthFill, fillColor.darker());
+			drawDOCA(g, container, hit, isTimeBased);
 		}
 
 	}
@@ -769,50 +745,62 @@ public class SuperLayerDrawing {
 	 * @param doca2d
 	 *            the doca in mm
 	 */
-	public void drawDOCA(Graphics g, IContainer container, int layer, int wire, double doca2d, Color fillColor,
-			Color lineColor) {
+	public void drawDOCA(Graphics g, IContainer container, DCHit hit, boolean isTimeBased) {
 
-		if (Double.isNaN(doca2d) || (doca2d < 1.0e-6)) {
-			return;
+		
+		float docas[] = {-1, -1};
+		Color frameColor;
+		Color fillColors[] = {CedColors.DOCA_COLOR, CedColors.TRKDOCA_COLOR};
+	
+		if (isTimeBased) {
+			docas[0] = _view.showTBDoca() ? hit.doca : 0f;
+			docas[1] = _view.showTBTrkDoca() ? hit.trkDoca : 0f;
+			frameColor = CedColors.TB_DOCAFRAME;
+		} else { // hit based
+			docas[0] = _view.showHBDoca() ? hit.doca : 0f;
+			docas[1] = _view.showHBTrkDoca() ? hit.trkDoca : 0f;
+			frameColor = CedColors.HB_DOCAFRAME;			
 		}
 
-		// draw gemc doca
-		// convert micron to cm
-		double radius = doca2d / 10.0; // converted mm to cm
-
-		if (radius > 5) {
+		for (int j = 0; j < docas.length; j++) {
 			
-	//		(new Throwable()).printStackTrace();
+			float radius = docas[j];
+			if (radius < 1.0e-5) {
+				continue;
+			}
 			
-			String wmsg = "Very large doca radius: " + radius + " cm. Sect: " + _iSupl.sector() + " supl: "
-					+ _iSupl.superlayer() + "lay: " + layer + " wire: " + wire;
+			
+			if (radius > 5) {
 
-			Log.getInstance().warning(wmsg);
-			System.err.println(wmsg);
-			return;
+				String wmsg = "Very large doca radius: " + radius + " cm. Sect: " + _iSupl.sector() + " supl: "
+						+ _iSupl.superlayer() + "lay: " + hit.layer + " wire: " + hit.wire;
+
+				Log.getInstance().warning(wmsg);
+				System.err.println(wmsg);
+				return;
+			}
+
+			// center is the given wire projected locations
+
+			Point2D.Double center = wire(_iSupl.superlayer(), hit.layer, hit.wire, _iSupl.isLowerSector());
+			Point2D.Double doca[] = _view.getCenteredWorldCircle(center, radius);
+
+			if (doca != null) {
+
+				// Point2D.Double doca[] = _view.getCenteredWorldCircle(_sector - 1,
+				// _superLayer - 1, layer, wire, radius);
+				Polygon docaPoly = new Polygon();
+				Point dp = new Point();
+				for (int i = 0; i < doca.length; i++) {
+					container.worldToLocal(dp, doca[i]);
+					docaPoly.addPoint(dp.x, dp.y);
+				}
+				g.setColor(fillColors[j]);
+				g.fillPolygon(docaPoly);
+				g.setColor(frameColor);
+				g.drawPolygon(docaPoly);
+			}
 		}
-
-		// center is the given wire projected locations
-
-		Point2D.Double center = wire(_iSupl.superlayer(), layer, wire, _iSupl.isLowerSector());
-		Point2D.Double doca[] = _view.getCenteredWorldCircle(center, radius);
-
-		if (doca == null) {
-			return;
-		}
-
-		// Point2D.Double doca[] = _view.getCenteredWorldCircle(_sector - 1,
-		// _superLayer - 1, layer, wire, radius);
-		Polygon docaPoly = new Polygon();
-		Point dp = new Point();
-		for (int i = 0; i < doca.length; i++) {
-			container.worldToLocal(dp, doca[i]);
-			docaPoly.addPoint(dp.x, dp.y);
-		}
-		g.setColor(fillColor);
-		g.fillPolygon(docaPoly);
-		g.setColor(lineColor);
-		g.drawPolygon(docaPoly);
 	}
 
 	/**
@@ -854,7 +842,7 @@ public class SuperLayerDrawing {
 					
 					projectedPoint(segment.x1, 0, segment.z1, wp1);
 					projectedPoint(segment.x2, 0, segment.z2, wp2);
-					drawSegment(g, container, _view, wp1, wp2, CedColors.hbSegmentLine, DC.HB_COLOR);
+					drawSegment(g, container, _view, wp1, wp2, CedColors.hbSegmentLine, CedColors.HB_COLOR);
 
 				}
 			}
@@ -882,9 +870,28 @@ public class SuperLayerDrawing {
 			for (Segment segment : segments) {
 				if ((segment.sector == _iSupl.sector()) && (segment.superlayer == _iSupl.superlayer())) {
 
+//					if (segment.sector == 4 && segment.superlayer == 3) {
+//						System.err.println("seg sect 4 and superlayer " + segment.superlayer);
+//						System.err.println(String.format("    (%-9.4f, %-9.4f), (%-9.4f, %-9.4f)", segment.z1, segment.x1, segment.z2, segment.x2));
+//					}
+					
+					
 					projectedPoint(segment.x1, 0, segment.z1, wp1);
 					projectedPoint(segment.x2, 0, segment.z2, wp2);
-					drawSegment(g, container, _view, wp1, wp2, CedColors.tbSegmentLine, DC.TB_COLOR);
+					
+					//have top flip if lower sector
+					if (_iSupl.isLowerSector()) {
+						wp1.y = -wp1.y;
+						wp2.y = -wp2.y;
+					}
+
+//					
+//					if (segment.sector == 4 && segment.superlayer == 3) {
+//						System.err.println("    pp1: " + wp1);
+//						System.err.println("    pp2: " + wp2);
+//					}
+					
+					drawSegment(g, container, _view, wp1, wp2, CedColors.tbSegmentLine, CedColors.TB_COLOR);
 
 				}
 			}

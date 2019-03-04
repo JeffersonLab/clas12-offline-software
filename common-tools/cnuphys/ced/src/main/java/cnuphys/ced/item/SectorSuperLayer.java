@@ -12,6 +12,7 @@ import cnuphys.ced.cedview.projecteddc.ISuperLayer;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.common.SuperLayerDrawing;
+import cnuphys.ced.event.data.DCHit;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.bCNU.graphics.container.IContainer;
@@ -84,11 +85,9 @@ public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 	 * @param wire 1-based wire 1..112
 	 * @param trkDoca doca in cm
 	 */
-	public void drawDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, byte layer, short wire,
-			float trkDoca, Point location) {
+	public void drawDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, DCHit hit, boolean isTimeBased) {
 		
-		float docaMM = 10*trkDoca; //convert to mm
-		_superlayerDrawer.drawReconDCHit(g, container, fillColor, frameColor, layer, wire, docaMM, location);
+		_superlayerDrawer.drawReconDCHitAndDOCA(g, container, fillColor, frameColor, hit, isTimeBased);
 	}
 
 	/**
@@ -109,8 +108,30 @@ public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 		getStyle().setFillColor(Color.white);
 		super.drawItem(g, container); // draws shell
 
-		_superlayerDrawer.drawItem(g, container, _lastDrawnPolygon);
+		_superlayerDrawer.drawItem(g, container, _lastDrawnPolygon, false);
 	}
+	
+	/**
+	 * Custom drawer for the item.
+	 * 
+	 * @param g
+	 *            the graphics context.
+	 * @param container
+	 *            the graphical container being rendered.
+	 */
+	public void drawSegments(Graphics g, IContainer container) {
+
+		if (_eventManager.isAccumulating()) {
+			return;
+		}
+
+		getStyle().setFillColor(null);
+		super.drawItem(g, container); // draws shell
+
+		_superlayerDrawer.drawItem(g, container, _lastDrawnPolygon, true);
+	}
+
+	
 
 
 	/**

@@ -16,7 +16,7 @@ import javax.swing.JComponent;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.event.data.DC;
+import cnuphys.ced.frame.CedColors;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
 import cnuphys.splot.plot.GraphicsUtilities;
@@ -108,8 +108,8 @@ public class PIDLegend extends JComponent {
 
 		int x = 4;
 		int xoff = -15;
-		x += drawLineForLegend(g, x, _yeven, "HB", DC.HB_COLOR);
-		x += drawLineForLegend(g, x, _yodd, "TB", DC.TB_COLOR);
+		x += drawLineForLegend(g, x, _yeven, "HB", CedColors.HB_COLOR);
+		x += drawLineForLegend(g, x, _yodd, "TB", CedColors.TB_COLOR);
 		
 		if (numMC != 0) {
 

@@ -28,6 +28,7 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.common.CrossDrawer;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
+import cnuphys.ced.event.data.DCHit;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.swim.SwimTrajectory2D;
 
@@ -413,19 +414,6 @@ public class ProjectedDCView extends CedView implements ISector {
 	}
 
 	/**
-	 * Returns a string representation of the form: "(x,y,z)".
-	 * 
-	 * @param numDec
-	 *            the number of decimal places for each coordinate.
-	 * @return a String representation of the vector
-	 */
-	private String vecStr(float v[]) {
-		return "(" + DoubleFormat.doubleFormat(v[0], 3) + ", "
-				+ DoubleFormat.doubleFormat(v[1], 3) + ", "
-				+ DoubleFormat.doubleFormat(v[2], 3) + ")";
-	}
-
-	/**
 	 * Are the given global x and y in this view? That is, does the sector they
 	 * correspond to in this view based on the calculated phi?
 	 * 
@@ -471,21 +459,15 @@ public class ProjectedDCView extends CedView implements ISector {
 	 * @param container
 	 * @param fillColor
 	 * @param frameColor
-	 * @param sector 1-based sector
-	 * @param superlayer
-	 * @param layer
-	 * @param wire
-	 * @param trkDoca
 	 */
-	public void drawDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, byte sector,
-			byte superlayer, byte layer, short wire, float trkDoca, Point location) {
+	public void drawDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, DCHit hit, boolean isTimeBased) {
 
-		if (_sector != sector) {
+		if (_sector != hit.sector) {
 			return;
 		}
-		ProjectedSuperLayer sectSL = _superLayers[superlayer-1];
+		ProjectedSuperLayer sectSL = _superLayers[hit.superlayer-1];
 		sectSL.drawDCHit(g, container, fillColor, frameColor, 
-				layer, wire, trkDoca, location);
+				hit, isTimeBased);
 		
 	}
 

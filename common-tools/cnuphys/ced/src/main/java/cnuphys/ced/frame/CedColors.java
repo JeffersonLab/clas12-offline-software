@@ -36,5 +36,19 @@ public class CedColors {
 	
 	//cvt tracks
 	public static final Color cvtTrackColor = X11Colors.getX11Color("Dark Green");
-
+	
+	//hit based
+	public static final Color HB_COLOR = Color.yellow;
+	public static final Color HB_TRANS = new Color(255, 255, 0, 240);
+	public static final Color HB_DOCAFRAME = HB_COLOR.darker();
+	
+	//time based
+	public static final Color TB_COLOR = X11Colors.getX11Color("dark orange");
+	public static final Color TB_TRANS = X11Colors.getX11Color("dark orange", 240);
+	public static final Color TB_DOCAFRAME = TB_COLOR.darker();
+	
+	//doca fills
+	public static final Color DOCA_COLOR = new Color(0, 255, 0, 60);
+	public static final Color TRKDOCA_COLOR = new Color(0, 0, 255, 60);
+	
 }

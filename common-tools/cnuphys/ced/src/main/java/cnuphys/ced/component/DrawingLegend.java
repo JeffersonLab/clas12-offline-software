@@ -112,8 +112,8 @@ public class DrawingLegend extends JComponent {
 		yc += 18;
 		x = xo;
 		x = quickString(g, xo, yc, "Tracks   ");
-		x = drawLine(g2, x, yc, DC.HB_COLOR, "HB ");
-		x = drawLine(g2, x, yc, DC.TB_COLOR, "TB ");
+		x = drawLine(g2, x, yc, CedColors.HB_COLOR, "HB ");
+		x = drawLine(g2, x, yc, CedColors.TB_COLOR, "TB ");
 		x = drawLine(g2, x, yc, CedColors.cvtTrackColor, "CVT ");
 
 	}
@@ -132,15 +132,15 @@ public class DrawingLegend extends JComponent {
 		
 		//segment lines
 		x = xo;
-		x = drawSegLine(g2, x, yc, CedColors.hbSegmentLine, DC.HB_COLOR, "HB Segment");
-		x = drawSegLine(g2, x, yc, CedColors.tbSegmentLine, DC.TB_COLOR, "TB Segment");
+		x = drawSegLine(g2, x, yc, CedColors.hbSegmentLine, CedColors.HB_COLOR, "HB Segment");
+		x = drawSegLine(g2, x, yc, CedColors.tbSegmentLine, CedColors.TB_COLOR, "TB Segment");
 		
 		//tracks
 		yc += 18;
 		x = xo;
 		x = quickString(g, xo, yc, "Tracks   ");
-		x = drawLine(g2, x, yc, DC.HB_COLOR, "HB ");
-		x = drawLine(g2, x, yc, DC.TB_COLOR, "TB ");
+		x = drawLine(g2, x, yc, CedColors.HB_COLOR, "HB ");
+		x = drawLine(g2, x, yc, CedColors.TB_COLOR, "TB ");
 		x = drawLine(g2, x, yc, CedColors.cvtTrackColor, "CVT ");
 
 	}

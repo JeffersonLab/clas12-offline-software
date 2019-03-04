@@ -563,7 +563,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
 			return false;
 		}
-		return _controlPanel.getDisplayArray().showDoca();
+		return _controlPanel.getDisplayArray().showHBDoca();
 	}
 	
 	/**
