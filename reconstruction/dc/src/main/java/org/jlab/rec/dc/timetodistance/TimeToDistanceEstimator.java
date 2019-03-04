@@ -2,6 +2,8 @@ package org.jlab.rec.dc.timetodistance;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import org.jlab.rec.dc.Constants;
+import static org.jlab.rec.dc.timetodistance.TableLoader.BfieldValues;
 
 
 public class TimeToDistanceEstimator {
@@ -42,14 +44,8 @@ public class TimeToDistanceEstimator {
     * @return the distance to the wire in cm
     */
     public double interpolateOnGrid(double Bf, double alpha, double t,  int SecIdx, int SlyrIdx) {
-        // for a given value of B find the bin edges in Tesla and the corresponding index:
-        // if(alpha==30)
-        //	 alpha-=0.0001;
+        
         double B = Math.abs(Bf);
-        //reset range
-        if(B>3.0) {
-            B=3.0;
-        }
         
         int binlowB  = this.getBIdx(B);
         int binhighB = binlowB + 1; 
@@ -58,8 +54,8 @@ public class TimeToDistanceEstimator {
             binhighB = TableLoader.maxBinIdxB;
         }
 
-        double B1 = binlowB*0.5;
-        double B2 = binhighB*0.5;
+        double B1 = BfieldValues[binlowB];
+        double B2 = BfieldValues[binhighB];
 
          // for alpha ranges		
         int binlowAlpha  = this.getAlphaIdx(alpha);
@@ -91,11 +87,21 @@ public class TimeToDistanceEstimator {
          // interpolate in d for 2 values of alpha:		 
         double f_B_alpha1_t = interpolateLinear(t, this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha)*2., this.getTimeNextIdx(t, SecIdx, SlyrIdx, binhighB, binlowAlpha)*2., f_B_alpha1_t1, f_B_alpha1_t2);
         double f_B_alpha2_t = interpolateLinear(t, this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binhighAlpha)*2., this.getTimeNextIdx(t, SecIdx, SlyrIdx, binhighB, binhighAlpha)*2., f_B_alpha2_t1, f_B_alpha2_t2);
+//if( TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binlowB][binlowAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha)]==0)
+//    System.out.println(SlyrIdx+" binlowB "+binlowB+" binlowAlpha "+binlowAlpha+" t "+this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binlowAlpha)+" time "+t);
+//if(TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binlowB][binhighAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binhighAlpha)]==0)
+//    System.out.println(SlyrIdx+" binlowB "+binlowB+" binhighAlpha "+binhighAlpha+" t "+this.getTimeIdx(t, SecIdx, SlyrIdx, binlowB, binhighAlpha)+" time "+t);
+//if(TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binhighB][binlowAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binlowAlpha)]==0)
+//    System.out.println(SlyrIdx+" binhighB "+binhighB+" binlowAlpha "+binlowAlpha+" t "+this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binlowAlpha)+" time "+t);
+//if(TableLoader.DISTFROMTIME[SecIdx][SlyrIdx][binhighB][binhighAlpha][this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binhighAlpha)]==0)
+//    System.out.println(SlyrIdx+" binhighB "+binhighB+" binhighAlpha "+binhighAlpha+" t "+this.getTimeIdx(t, SecIdx, SlyrIdx, binhighB, binhighAlpha)+" time "+t);
 
-         // interpolate in alpha: (cos30-cosA)
+        // interpolate in alpha: (cos30-cosA)
         double f_B_alpha_t = interpolateLinear(Math.cos(Math.toRadians(30.))-Math.cos(Math.toRadians(alpha)), 
                     Math.cos(Math.toRadians(30.))-Math.cos(Math.toRadians(alpha1)), 
                     Math.cos(Math.toRadians(30.))-Math.cos(Math.toRadians(alpha2)), f_B_alpha1_t, f_B_alpha2_t);
+        
+        
         return f_B_alpha_t;
 
     /*
@@ -168,14 +174,29 @@ public class TimeToDistanceEstimator {
      * @return B field bin
      */
     public int getBIdx(double b1) {
-        // double bfield = (double)ibfield*0.5;
-        int binIdx = (int) ((1+b1)*2) -2;
+        
+//        int binIdx = (int) ((1+b1)*2) -2;
+//        if(binIdx<0) {
+//            binIdx = TableLoader.minBinIdxB;
+//        }
+//        if(binIdx>TableLoader.maxBinIdxB) {
+//            binIdx = TableLoader.maxBinIdxB;
+//        }
+        int maxBinIdxB = TableLoader.BfieldValues.length-1;
+        DecimalFormat df = new DecimalFormat("#");
+        df.setRoundingMode(RoundingMode.CEILING);
+       
+        int binIdx =0;
+        try{
+            binIdx = Integer.parseInt(df.format(b1*b1) ) -1; 
+        } catch (NumberFormatException e) {
+            System.out.println(" field bin error "+b1+" ");
+        }
         if(binIdx<0) {
-            binIdx = TableLoader.minBinIdxB;
+            binIdx = 0;
         }
-        if(binIdx>TableLoader.maxBinIdxB) {
-            binIdx = TableLoader.maxBinIdxB;
-        }
+        if(binIdx>maxBinIdxB)
+            binIdx = maxBinIdxB;
         return binIdx;
     }
     /**

@@ -152,7 +152,7 @@ public class HitReader {
         noiseAnalysis.clear();
 
 
-         noiseAnalysis.findNoise(sector, superlayerNum, layerNum, wire, results);
+        noiseAnalysis.findNoise(sector, superlayerNum, layerNum, wire, results);
 
         for (int i = 0; i < size; i++) {
             boolean passHit = true;
@@ -265,7 +265,8 @@ public class HitReader {
         double[] tProp = new double[rows];
         double[] tFlight = new double[rows];
         double[] trkDoca = new double[rows];
-
+        double[] alpha = new double[rows];
+        
         for (int i = 0; i < rows; i++) {
             id[i] = bank.getShort("id", i);
             sector[i] = bank.getByte("sector", i);
@@ -281,6 +282,8 @@ public class HitReader {
             trkID[i] = bank.getShort("trkID", i);
             tProp[i] = bank.getFloat("TProp", i);
             tFlight[i] = bank.getFloat("TFlight", i);
+            alpha[i] = bank.getFloat("Alpha",i);
+            
             if (event.hasBank("MC::Particle") ||
                     event.getBank("RUN::config").getInt("run", 0) < 100) {
                 tProp[i] = 0;
@@ -314,7 +317,7 @@ public class HitReader {
             hit.setTProp(tProp[i]);
             hit.setTFlight(tFlight[i]);
             hit.set_Beta(this.readBeta(event, trkID[i]));
-
+            hit.setAlpha(alpha[i]);
             double T0Sub = (tdc[i] - tProp[i] - tFlight[i] - T_0);
 
             if (Constants.isUSETSTART()) {

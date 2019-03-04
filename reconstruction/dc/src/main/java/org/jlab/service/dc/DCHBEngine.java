@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.swimtools.MagFieldsEngine;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.swimtools.Swimmer;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
@@ -176,18 +177,18 @@ public class DCHBEngine extends DCEngine {
             return true;
         }
         List<Segment> rmSegs = new ArrayList<>();
-        // clean up hit-based segments
-        double trkDocOverCellSize;
-        for (Segment se : segments) {
-            trkDocOverCellSize = 0;
-            for (FittedHit fh : se.get_fittedCluster()) {
-                trkDocOverCellSize += fh.get_ClusFitDoca() / fh.get_CellSize();
-            }
-            if (trkDocOverCellSize / se.size() > 1.1) {
-                rmSegs.add(se);
-            }
-        }
-        segments.removeAll(rmSegs);
+//        // clean up hit-based segments
+//        double trkDocOverCellSize;
+//        for (Segment se : segments) {
+//            trkDocOverCellSize = 0;
+//            for (FittedHit fh : se.get_fittedCluster()) {
+//                trkDocOverCellSize += fh.get_ClusFitDoca() / fh.get_CellSize();
+//            }
+//            if (trkDocOverCellSize / se.size() > 1.1) {
+//                rmSegs.add(se);
+//            }
+//        }
+//        segments.removeAll(rmSegs);
         /* 16 */
         CrossMaker crossMake = new CrossMaker();
         List<Cross> crosses = crossMake.find_Crosses(segments, dcDetector);
@@ -202,6 +203,8 @@ public class DCHBEngine extends DCEngine {
             return true;
         }
         /* 17 */
+        RoadFinder rf = new RoadFinder();
+        
         CrossListFinder crossLister = new CrossListFinder();
 
         CrossList crosslist = crossLister.candCrossLists(crosses,
@@ -220,12 +223,13 @@ public class DCHBEngine extends DCEngine {
         /* 19 */
         List<Track> selectedTracks = new ArrayList<Track>();
         // track found
-        int trkId = 1;
+        int trkId = 1; 
         if (trkcands.size() > 0) { 
             // remove overlaps
             //trkcandFinder.removeOverlappingTracks(trkcands);
             for (Track trk : trkcands) {
-                if(trk.get_FitChi2()>Constants.MAXCHI2)
+                
+                if(trk.get_FitChi2()>50)
                     continue;
                 // reset the id
                 trk.set_Id(trkId);
@@ -241,63 +245,20 @@ public class DCHBEngine extends DCEngine {
                 selectedTracks.add(trk);
                 trkId++;
             }
-        }
+        } 
+        
         List<Segment> crossSegsNotOnTrack = new ArrayList<>();
-        List<Segment> psegments = new ArrayList<>();
-
+        
         for (Cross c : crosses) {
             if (!c.get_Segment1().isOnTrack)
                 crossSegsNotOnTrack.add(c.get_Segment1());
             if (!c.get_Segment2().isOnTrack)
                 crossSegsNotOnTrack.add(c.get_Segment2());
         }
-        RoadFinder rf = new RoadFinder();
-        List<Road> allRoads = rf.findRoads(segments, dcDetector);
-        List<Segment> Segs2Road = new ArrayList<>();
-        for (Road r : allRoads) {
-            Segs2Road.clear();
-            int missingSL = -1;
-            for (int ri = 0; ri < 3; ri++) {
-                if (r.get(ri).associatedCrossId == -1) {
-                    if (r.get(ri).get_Superlayer() % 2 == 1) {
-                        missingSL = r.get(ri).get_Superlayer() + 1;
-                    } else {
-                        missingSL = r.get(ri).get_Superlayer() - 1;
-                    }
-                }
-            }
-            for (int ri = 0; ri < 3; ri++) {
-                for (Segment s : crossSegsNotOnTrack) {
-                    if (s.get_Sector() == r.get(ri).get_Sector() &&
-                            s.get_Region() == r.get(ri).get_Region() &&
-                            s.associatedCrossId == r.get(ri).associatedCrossId &&
-                            r.get(ri).associatedCrossId != -1) {
-                        if (s.get_Superlayer() % 2 == missingSL % 2)
-                            Segs2Road.add(s);
-                    }
-                }
-            }
-            if (Segs2Road.size() == 2) {
-                Segment pSegment = rf.findRoadMissingSegment(Segs2Road,
-                        dcDetector,
-                        r.a);
-                if (pSegment != null)
-                    psegments.add(pSegment);
-            }
-        }
-        segments.addAll(psegments);
-        List<Cross> pcrosses = crossMake.find_Crosses(segments, dcDetector);
-        CrossList pcrosslist = crossLister.candCrossLists(pcrosses,
-                false,
-                super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST),
-                dcDetector,
-                null,
-                dcSwim);
-        List<Track> mistrkcands = trkcandFinder.getTrackCands(pcrosslist,
-                dcDetector,
-                Swimmer.getTorScale(),
-                dcSwim);
+        
 
+        List<Track> mistrkcands = this.Find5OutOf6Tracks(segments, crossSegsNotOnTrack, 
+                dcDetector,rf,crossMake,crossLister,trkcandFinder, dcSwim);
         // remove overlaps
         if (mistrkcands.size() > 0) {
             //trkcandFinder.removeOverlappingTracks(mistrkcands);
@@ -395,6 +356,60 @@ public class DCHBEngine extends DCEngine {
         writer.close();
         double t = System.currentTimeMillis() - t1;
         System.out.println(t1 + " TOTAL  PROCESSING TIME = " + (t / (float) counter));
+    }
+
+    private List<Track> Find5OutOf6Tracks(List<Segment> segments, List<Segment> crossSegsNotOnTrack, DCGeant4Factory dcDetector, 
+            RoadFinder rf, CrossMaker crossMake, CrossListFinder crossLister, TrackCandListFinder trkcandFinder, Swim dcSwim) {
+        
+        List<Segment> psegments = new ArrayList<>();
+
+        List<Road> allRoads = rf.findRoads(segments, dcDetector);
+        List<Segment> Segs2Road = new ArrayList<>();
+        for (Road r : allRoads) {
+            Segs2Road.clear();
+            int missingSL = -1;
+            for (int ri = 0; ri < 3; ri++) {
+                if (r.get(ri).associatedCrossId == -1) {
+                    if (r.get(ri).get_Superlayer() % 2 == 1) {
+                        missingSL = r.get(ri).get_Superlayer() + 1;
+                    } else {
+                        missingSL = r.get(ri).get_Superlayer() - 1;
+                    }
+                }
+            }
+            for (int ri = 0; ri < 3; ri++) {
+                for (Segment s : crossSegsNotOnTrack) {
+                    if (s.get_Sector() == r.get(ri).get_Sector() &&
+                            s.get_Region() == r.get(ri).get_Region() &&
+                            s.associatedCrossId == r.get(ri).associatedCrossId &&
+                            r.get(ri).associatedCrossId != -1) {
+                        if (s.get_Superlayer() % 2 == missingSL % 2)
+                            Segs2Road.add(s);
+                    }
+                }
+            }
+            if (Segs2Road.size() == 2) {
+                Segment pSegment = rf.findRoadMissingSegment(Segs2Road,
+                        dcDetector,
+                        r.a);
+                if (pSegment != null)
+                    psegments.add(pSegment);
+            }
+        }
+        segments.addAll(psegments);
+        List<Cross> pcrosses = crossMake.find_Crosses(segments, dcDetector);
+        CrossList pcrosslist = crossLister.candCrossLists(pcrosses,
+                false,
+                super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST),
+                dcDetector,
+                null,
+                dcSwim);
+        List<Track> mistrkcands = trkcandFinder.getTrackCands(pcrosslist,
+                dcDetector,
+                Swimmer.getTorScale(),
+                dcSwim);
+   
+        return mistrkcands;
     }
 
 }

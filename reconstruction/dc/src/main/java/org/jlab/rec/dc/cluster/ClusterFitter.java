@@ -188,7 +188,12 @@ public class ClusterFitter {
             if(Double.isNaN(trkDoca)) 
                 return;
             clus.get(i).set_ClusFitDoca(trkDoca);
-
+            
+            //get local angle
+            double cosTrkAngle = 1. / Math.sqrt(1. + 
+                    clus.get_clusterLineFitSlope() * clus.get_clusterLineFitSlope());
+       
+            clus.get(i).setAlpha(Math.toDegrees(Math.acos(cosTrkAngle)));
             //
             if (Math.abs(residual) < 0.350) // less than the average resolution
             {

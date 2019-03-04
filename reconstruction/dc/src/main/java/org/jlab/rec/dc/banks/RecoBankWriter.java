@@ -84,7 +84,7 @@ public class RecoBankWriter {
             bank.setFloat("B", i, (float) hitlist.get(i).getB());
             bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
             bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
-
+            bank.setFloat("Alpha", i, (float)hitlist.get(i).getAlpha());
             if(hitlist.get(i).get_AssociatedHBTrackID()>-1 && !event.hasBank("MC::Particle")) {
                 bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
                 bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
@@ -221,36 +221,7 @@ public class RecoBankWriter {
         }
 
         return bank;
-
     }
-//
-//    /**
-//     *
-//     * @param event the EvioEvent
-//     * @return segments bank
-//     */
-////    private DataBank fillHBSegmentsTrajectoryBank(DataEvent event, List<Segment> seglist) {
-//        DataBank bank = event.createBank("HitBasedTrkg::HBSegmentTrajectory", seglist.size() * 6);
-//
-//        int index = 0;
-//        for (Segment aSeglist : seglist) {
-//            if (aSeglist.get_Id() == -1) {
-//                continue;
-//            }
-//            SegmentTrajectory trj = aSeglist.get_Trajectory();
-//            for (int l = 0; l < 6; l++) {
-//                bank.setShort("segmentID", index, (short) trj.get_SegmentId());
-//                bank.setByte("sector", index, (byte) trj.get_Sector());
-//                bank.setByte("superlayer", index, (byte) trj.get_Superlayer());
-//                bank.setByte("layer", index, (byte) (l + 1));
-//                bank.setShort("matchedHitID", index, (short) trj.getMatchedHitId()[l]);
-//                bank.setFloat("trkDoca", index, (float) trj.getTrkDoca()[l]);
-//                index++;
-//            }
-//        }
-//        //bank.show();
-//        return bank;
-//    }
 
     /**
      *
@@ -454,6 +425,8 @@ public class RecoBankWriter {
             bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
             bank.setFloat("T0", i, (float) hitlist.get(i).getT0());
             bank.setFloat("TStart", i, (float) hitlist.get(i).getTStart());
+            bank.setFloat("Alpha", i, (float)hitlist.get(i).getAlpha());
+            
             if(bank.getDescriptor().hasEntry("beta")){
                bank.setFloat("beta", i, (float) hitlist.get(i).get_Beta());
             }
@@ -614,43 +587,6 @@ public class RecoBankWriter {
         return bank;
 
     }
-
-//    /**
-//     *
-//     * @param event the EvioEvent
-//     * @return segments bank
-//     */
-//    private DataBank fillTBSegmentsTrajectoryBank(DataEvent event, List<Segment> seglist) {
-//        if(event.hasBank("TimeBasedTrkg::TBSegmentTrajectory")) { // for second pass tracking
-//                HipoDataEvent de = (HipoDataEvent) event;
-//                HipoEvent dde = de.getHipoEvent();
-////                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBSegmentTrajectory");
-//                ////event.show();
-//                //group.show();
-//                dde.removeGroup("TimeBasedTrkg::TBSegmentTrajectory");
-//        }
-//        DataBank bank = event.createBank("TimeBasedTrkg::TBSegmentTrajectory", seglist.size() * 6);
-//
-//        int index = 0;
-//        for (Segment aSeglist : seglist) {
-//            if (aSeglist.get_Id() == -1) {
-//                continue;
-//            }
-//            SegmentTrajectory trj = aSeglist.get_Trajectory();
-//            for (int l = 0; l < 6; l++) {
-//                bank.setShort("segmentID", index, (short) trj.get_SegmentId());
-//                bank.setByte("sector", index, (byte) trj.get_Sector());
-//                bank.setByte("superlayer", index, (byte) trj.get_Superlayer());
-//                bank.setByte("layer", index, (byte) (l + 1));
-//                bank.setShort("matchedHitID", index, (short) trj.getMatchedHitId()[l]);
-//                bank.setFloat("trkDoca", index, (float) trj.getTrkDoca()[l]);
-//                index++;
-//            }
-//        }
-//        //bank.show();
-//        return bank;
-//    }
-
     /**
      *
      * @param event the EvioEvent

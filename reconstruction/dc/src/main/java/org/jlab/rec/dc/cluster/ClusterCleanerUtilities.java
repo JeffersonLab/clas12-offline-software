@@ -720,8 +720,8 @@ public class ClusterCleanerUtilities {
 /**
      * Prunes the input hit list to remove noise candidates; the algorithm finds
      * contiguous hits in a layer (column) and removes hits according to the
-     * number (Nc) of such contiguous hits in a given layer. If Nc=3, keep only
-     * the middle hit If Nc=4, keep only the first and last hit in that column;
+     * number (Nc) of such contiguous hits in a given layer. If Nc=3 or
+     * Nc=4, keep only the first and last hit in that column;
      * if Nc > 4, keep the first 2 and last 2 hits in that column, if Nc > 10
      * remove all hits in that column.
      *

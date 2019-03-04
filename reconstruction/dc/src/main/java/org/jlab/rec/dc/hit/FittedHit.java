@@ -370,6 +370,23 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         this.set_Doca(distance);
         this._TimeToDistance = distance;
     }
+    
+    private double _alpha;
+    /**
+     * 
+     * @return local angle
+     */
+    public double getAlpha() {
+        return _alpha;
+    }
+    /**
+     * 
+     * @param alpha local angle
+     */
+    public void setAlpha(double alpha) {
+        this._alpha = alpha;
+    }
+    
     /**
      * 
      * @return doca to cluster fit line (cm)
