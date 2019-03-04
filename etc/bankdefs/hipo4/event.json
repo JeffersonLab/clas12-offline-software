@@ -460,8 +460,7 @@
         "info": "Event Header Bank, shadowing REC::Event with FT-based start time",
         "entries": [
             {"name":"EvCAT",    "id":1, "type":"S", "info":"Event Category, if >0:  e-, e-p, e-pi+....."},
-            {"name":"STTime",   "id":2, "type":"F", "info":"Event Start Time (ns)"},
-            {"name":"pindex",   "id":3, "type":"S", "info":"index of the (FT) particle used to determine start time"}
+            {"name":"STTime",   "id":2, "type":"F", "info":"Event Start Time (ns)"}
         ]
     },
     {
@@ -472,7 +471,8 @@
         "entries": [
             {"name":"pid",          "id":1,  "type":"I", "info":"particle id in LUND conventions"},
             {"name":"beta",         "id":2,  "type":"F", "info":"particle beta measured by TOF"},
-            {"name":"chi2pid",      "id":3,  "type":"F", "info":"Chi2 of assigned PID"}
+            {"name":"chi2pid",      "id":3,  "type":"F", "info":"Chi2 of assigned PID"},
+            {"name":"status",       "id":4,  "type":"S", "info":"particle status (represents detector collection it passed)"}
         ]
     }
 ]

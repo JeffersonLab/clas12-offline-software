@@ -184,6 +184,23 @@ public class DetectorData {
         return bank;
     }
     /**
+     * creates a bank with particles information.
+     * @param particles
+     * @param event
+     * @param bank_name
+     * @return 
+     */
+    public static DataBank getDetectorParticleShadowBank(List<DetectorParticle> particles, DataEvent event, String bank_name){
+        DataBank bank = event.createBank(bank_name, particles.size());
+        for(int row = 0; row < particles.size(); row++){
+            bank.setInt("pid",row,particles.get(row).getPid());
+            bank.setFloat("beta", row, (float) particles.get(row).getBeta());
+            bank.setShort("status", row, (short) particles.get(row).getStatus().getValue());
+            bank.setFloat("chi2pid", row, (float) particles.get(row).getPidQuality());
+        }
+        return bank;
+    }
+    /**
      * creates a detector response bank
      * @param responses
      * @param event
@@ -309,6 +326,12 @@ public class DetectorData {
        bank.setFloat("BCG", 0, detectorEvent.getEventHeader().getBeamChargeGated());
        bank.setDouble("LT", 0, detectorEvent.getEventHeader().getLivetime());
        bank.setShort("EvCAT", 0, detectorEvent.getEventHeader().getEventCategory());
+       return bank;
+   }
+   public static DataBank getEventShadowBank(DetectorEvent detectorEvent, DataEvent event, String bank_name){
+       DataBank bank = event.createBank(bank_name, 1);
+       bank.setFloat("STTime", 0, (float) detectorEvent.getEventHeader().getStartTimeFT());
+       bank.setShort("EvCAT", 0, detectorEvent.getEventHeader().getEventCategoryFT());
        return bank;
    }
       

@@ -25,7 +25,9 @@ public class EBEngine extends ReconstructionEngine {
 
     // output banks:
     String eventBank        = null;
+    String eventBankFT      = null;
     String particleBank     = null;
+    String particleBankFT   = null;
     String calorimeterBank  = null;
     String scintillatorBank = null;
     String cherenkovBank    = null;
@@ -34,7 +36,7 @@ public class EBEngine extends ReconstructionEngine {
     String ftBank           = null;
     String trajectoryBank   = null;
     String covMatrixBank    = null;
-
+    
     // inputs banks:
     String trackType        = null;
     String ftofHitsType     = null;
@@ -170,7 +172,19 @@ public class EBEngine extends ReconstructionEngine {
                 DataBank bankCovMat = DetectorData.getCovMatrixBank(eb.getEvent().getParticles(), de, covMatrixBank);
                 if (bankCovMat != null) de.appendBanks(bankCovMat);
             }
-        
+      
+            // update PID for FT-based start time:
+            // WARNING:  this modified particles
+            analyzer.processEventFT(eb.getEvent());
+            if (eb.getEvent().getEventHeader().getStartTimeFT()>0 && eventBankFT!=null) {
+                DataBank bankEveFT = DetectorData.getEventShadowBank(eb.getEvent(), de, eventBankFT);
+                de.appendBanks(bankEveFT);
+                if (particleBankFT!=null) {
+                    DataBank bankPFT = DetectorData.getDetectorParticleShadowBank(eb.getEvent().getParticles(), de, particleBankFT);
+                    de.appendBanks(bankPFT);
+                }
+            }
+          
         }
 
         return true;
@@ -184,6 +198,14 @@ public class EBEngine extends ReconstructionEngine {
         this.particleBank = particleBank;
     }
 
+    public void setEventBankFT(String eventBank) {
+        this.eventBankFT = eventBank;
+    }
+
+    public void setParticleBankFT(String particleBank) {
+        this.particleBankFT = particleBank;
+    }
+    
     public void setCalorimeterBank(String calorimeterBank) {
         this.calorimeterBank = calorimeterBank;
     }

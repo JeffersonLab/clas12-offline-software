@@ -16,6 +16,7 @@ public class DetectorHeader {
     private float beamChargeGated = 0;
     private float    livetime = -1;
     private short eventCategory = 0;
+    private short eventCategoryFT = 0;
 
     public DetectorHeader() {
     }
@@ -58,6 +59,10 @@ public class DetectorHeader {
     
     public short getEventCategory() {
         return eventCategory;
+    }
+
+    public short getEventCategoryFT() {
+        return eventCategoryFT;
     }
 
     public void setEvent(int event) {

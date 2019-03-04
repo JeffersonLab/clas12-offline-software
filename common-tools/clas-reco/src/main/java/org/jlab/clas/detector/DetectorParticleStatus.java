@@ -2,7 +2,13 @@ package org.jlab.clas.detector;
 
 import org.jlab.detector.base.DetectorType;
 /**
- * A particle status definition based on detector "topology"
+ * A particle status definition based on detector "topology".
+ * Negative means it's the one used to determine start time.
+ *
+ * FIXME: This was moved from a previous classless incarnation
+ * with only a single status variable.  Now should simplify and
+ * just use counters on detector hits as the base variables instead.
+ *
  * @author baltzell
  */
 public class DetectorParticleStatus {
@@ -27,12 +33,12 @@ public class DetectorParticleStatus {
 
     private void setValue(int status) {
         this.status=status;
-        this.isForward = ( (int)(this.status/REGION) & FORWARD ) > 0;
-        this.isCentral = ( (int)(this.status/REGION) & CENTRAL ) > 0;
-        this.isTagger  = ( (int)(this.status/REGION) & TAGGER  ) > 0;
-        this.nCherenkov    = this.status%(10*CHERENKOV)/CHERENKOV;
-        this.nCalorimeter  = this.status%(10*CALORIMETER)/CALORIMETER;
-        this.nScintillator = this.status%(10*SCINTILLATOR)/SCINTILLATOR;
+        this.isForward = ( (int)(Math.abs(this.status)/REGION) & FORWARD ) > 0;
+        this.isCentral = ( (int)(Math.abs(this.status)/REGION) & CENTRAL ) > 0;
+        this.isTagger  = ( (int)(Math.abs(this.status)/REGION) & TAGGER  ) > 0;
+        this.nCherenkov    = Math.abs(this.status)%(10*CHERENKOV)/CHERENKOV;
+        this.nCalorimeter  = Math.abs(this.status)%(10*CALORIMETER)/CALORIMETER;
+        this.nScintillator = Math.abs(this.status)%(10*SCINTILLATOR)/SCINTILLATOR;
     }
 
     public int getValue()             { return this.status; }
@@ -42,6 +48,15 @@ public class DetectorParticleStatus {
     public int getScintillatorCount() { return this.nScintillator; }
     public int getCalorimeterCount()  { return this.nCalorimeter; }
     public int getCherenkovCount()    { return this.nCherenkov; }
+
+    public void setTriggerParticle(boolean isTriggerParticle) {
+        if (isTriggerParticle) {
+            this.setValue(-Math.abs(this.status));
+        }
+        else {
+            this.setValue(Math.abs(this.status));
+        }
+    }
 
     public static DetectorParticleStatus create(DetectorParticle p,final double minNpheHtcc,final double minNpheLtcc) {
 
@@ -109,6 +124,10 @@ public class DetectorParticleStatus {
             status += CHERENKOV;
         }
         status += CHERENKOV*p.countResponses(DetectorType.RICH);
+
+        if (p.isTriggerParticle()) {
+            status = -status;
+        }
 
         DetectorParticleStatus dps=new DetectorParticleStatus();
         dps.setValue(status);

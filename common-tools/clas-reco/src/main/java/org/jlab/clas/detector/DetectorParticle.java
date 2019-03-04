@@ -247,8 +247,8 @@ public class DetectorParticle implements Comparable {
      */
     public void setTriggerParticle(boolean val) {
         isTriggerParticle=val;
+        particleStatus.setTriggerParticle(val);
     }
-
     
     public int getSector(DetectorType type,int layer) {
         DetectorResponse hit = this.getHit(type,layer);
