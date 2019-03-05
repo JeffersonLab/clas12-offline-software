@@ -88,11 +88,12 @@ public class HitReader {
 			int c = bankTDC.getShort("component", j);
 			int o = bankTDC.getByte("order", j);
 
-			double tdc = ((double)bankTDC.getInt("TDC",j) * 0.02345) - triggerPhase;
+			int key = s*1000 + l*100 + c*10 + (o-2);
+
+			double tdc = ((double)bankTDC.getInt("TDC",j) * 0.02345);
 
 			if( tdc <= 0 ) continue;
 
-			int key = s*1000 + l*100 + c*10 + (o-2);
 			//System.out.println("s,l,c,o: "+key+" tdc: "+tdc);
 
 
@@ -133,7 +134,7 @@ public class HitReader {
 			//System.out.println("Found a candidate PMT hit! slco: "+sector+" "+layer+" "+component+" "+order+" "+adc+" "+ftdc+" "+tdc);
 
 			BandHitCandidate newHit = new BandHitCandidate( sector,layer,component,order,
-					triggerPhase, adc, tdc, ftdc );
+					adc, tdc, ftdc ,triggerPhase);
 			candidates.add(newHit);
 
 		}

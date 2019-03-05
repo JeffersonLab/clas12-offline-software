@@ -20,7 +20,7 @@ public class RecoBankWriter {
 		DataBank bank =  event.createBank("BAND::hits", hitlist.size());
 
 		if (bank == null) {
-			System.err.println("COULD NOT CREATE A BAND::Hits BANK!!!!!!");
+			//System.err.println("COULD NOT CREATE A BAND::Hits BANK!!!!!!");
 			return null;
 		}
 

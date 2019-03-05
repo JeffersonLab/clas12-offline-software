@@ -15,12 +15,12 @@ public class BandHitFinder {
 		// empty constructor
 	}
 
-	/** author:  F.Hauenstein, Efrain Segarra
+	/** author:  Efrain Segarra, Florian Hauenstein.
 	 This class contains the core of the code. The find hits method reconstruct good band hits from raw hits
 	 using various cuts and matching.
 	 For the start good hits are defined with only up to 5 coincidence hit in the active area of a BAND area and no 
 	 hit in the veto counters.
-		TODO:	- geometry, attenuation, time-walk
+		TODO:
 			- more sophisticated stuff for vetoing
 			- keeping track of pmts that have already been matched
 	*/
@@ -48,9 +48,47 @@ public class BandHitFinder {
 
 				//check if hit is in the veto counter (layer 6). 
 				if (hit1.GetLayer() == 6) {
-					//System.err.println("veto fired, event can not be good :-(");
 
-					return new ArrayList<BandHit>();
+					//  Vetos only have one PMT, so call them 'left' and add them to our
+					//  coincidence list and move on
+					
+					BandHit Hit = new BandHit();  
+
+					int sector 		= hit1.GetSector();    
+					int layer 		= hit1.GetLayer(); 
+					int component 		= hit1.GetComponent(); 
+
+					double tdcleft 		= hit1.GetTimeCorr();
+					double ftdcleft 	= hit1.GetFtdc();
+					double adcleft 		= hit1.GetAdc();
+
+					Hit.SetSector(sector);
+					Hit.SetLayer(layer);
+					Hit.SetComponent(component);
+
+					Hit.SetMeanTime_TDC(0.);
+					Hit.SetMeanTime_FADC(0.);
+					Hit.SetDiffTime_TDC(0.);
+					Hit.SetDiffTime_FADC(0.);
+					Hit.SetAdcLeft(adcleft);
+					Hit.SetAdcRight(0.);
+					Hit.SetTLeft_FADC(ftdcleft);
+					Hit.SetTRight_FADC(0.);
+					Hit.SetTLeft_TDC(tdcleft);
+					Hit.SetTRight_TDC(0.);
+					Hit.SetX(0.);
+					Hit.SetY(0.);
+					Hit.SetZ(0.);
+					Hit.SetUx(0.);
+					Hit.SetUy(0.);
+					Hit.SetUz(0.);
+
+					// Print for debugging:
+					//Hit.Print();
+
+					coincidences.add(Hit);
+					continue;
+					//return new ArrayList<BandHit>();
 				}
 
 				// for each hit get sector, component and layer to check if there 
@@ -65,6 +103,8 @@ public class BandHitFinder {
 				// different side. Off-set the start of the list to make sure no repeats:
 				for (int j = i+1; j < candidates.size(); j++) {	
 					BandHitCandidate hit2 = candidates.get(j);   
+
+					if (hit2.GetLayer() == 6) continue; // skip any veto because cannot pair them
 
 					if (hit2.GetSector() != sector ) continue;       // both must be in the same sector
 					if (hit2.GetLayer() != layer) continue;          // both must be in the same layer
@@ -102,14 +142,14 @@ public class BandHitFinder {
 					
 					// -----------------------------------------------------------------------------------------------
 					// Time-walk correction
-					double time_walk_params[] = CalibrationConstantsLoader.TIMEWALK.get( Integer.valueOf(barKey) );
-					double parA = time_walk_params[0];
-					double parB = time_walk_params[1];
-					double errA = time_walk_params[2];
-					double errB = time_walk_params[3];
-					
-					tdcleft  = tdcleft  - (ftdcleft  + parA/Math.sqrt(adcleft ) + parB);
-					tdcright = tdcright - (ftdcright + parA/Math.sqrt(adcright) + parB);
+					double time_walk_paramsL[] = CalibrationConstantsLoader.TIMEWALK_L.get( Integer.valueOf(barKey) );
+					double parA_L = time_walk_paramsL[0];
+					double parB_L = time_walk_paramsL[1];
+					tdcleft  = tdcleft  ;//- (ftdcleft  + parA_L/Math.sqrt(adcleft ) + parB_L);
+					double time_walk_paramsR[] = CalibrationConstantsLoader.TIMEWALK_R.get( Integer.valueOf(barKey) );
+					double parA_R = time_walk_paramsR[0];
+					double parB_R = time_walk_paramsR[1];
+					tdcright = tdcright ;//- (ftdcright + parA_R/Math.sqrt(adcright) + parB_R);
 					// -----------------------------------------------------------------------------------------------
 					
 					// Form the L-R time
@@ -161,8 +201,7 @@ public class BandHitFinder {
 					double mu_cm = CalibrationConstantsLoader.FADC_ATTEN_LENGTH.get( Integer.valueOf(barKey) ); // in [cm]
 					double adcL_corr = adcleft * Math.exp( (sectorLen/2.-xpos_fadc) / mu_cm );
 					double adcR_corr = adcright* Math.exp( (sectorLen/2.+xpos_fadc) / mu_cm );
-					//System.out.println("Before/after mu correction: " + adcleft + " / " + adcL_corr + " , " + adcright + " / " + adcR_corr);
-					//System.out.println("\tmu,position: " + mu_cm + " " + xpos_fadc);
+					//System.out.println(barKey+"\t"+xpos_fadc+"\t"+(adcleft-adcright)+"\t"+(adcL_corr-adcR_corr));
 
 
 					// Create a new BandHit and fill it with the relevant info:
@@ -187,7 +226,7 @@ public class BandHitFinder {
 					Hit.SetUx(xposHitUnc);
 					Hit.SetUy(yposHitUnc);
 					Hit.SetUz(zposHitUnc);
-					
+
 					// Print for debugging:
 					//Hit.Print();
 
@@ -198,24 +237,11 @@ public class BandHitFinder {
 				}  // close loop over j
 			} // close loop over i  		
 
-			// At this stage an array of coincidence hits from type BandHit exists
-			//We are only interested if we have five or less hits surviving all cuts, thus "good" events should 
-			//have a coincidences array of length 5 or less
+			// At this stage an array of coincidence hits from type BandHit exists. Now we can skim those coincidence
+			// hits for some neutral candidate particles
+			if( coincidences.size() > 0 ) return advancedHitFinder(coincidences);
 
-			//Next line is for the future when the advancedHitFinder is correctly implemented
-			//	return advancedHitFinder(coincidences);
-
-
-			if ( coincidences.size()>0 ) {
-				//System.out.println("In BandHitFinder found " + coincidences.size() + " coincidence hits");
-				//for (int i = 0; i < (coincidences.size()); i++) {
-				//	System.out.println("Hit "+i+" : sector "+ coincidences.get(i).GetSector()+ " layer "+ coincidences.get(i).GetLayer()+" component " + coincidences.get(i).GetComponent());
-				//}
-				return coincidences;
-			}
-			else {
-				return new ArrayList<BandHit>();
-			}
+			else{ return new ArrayList<BandHit>(); }
 
 
 		}  // closes if candidates array has non-zero entries...
@@ -227,15 +253,25 @@ public class BandHitFinder {
 	public ArrayList<BandHit> advancedHitFinder(ArrayList<BandHit> coincidences) 
 	{
 
-		/** author:  F.Hauenstein
-		 * This function implements better reconstruction methods for BandHits. It is called from BandHitFinder::findGoodHits function
-		 * so that all hits given to this function are already calibrated and coincidences on a bar
+		/** author:  Efrain Segarra.
+ 		 	Currently this function just searches if veto layer hit in the coincidence list. 
+			Otherwise, returns 'betterHits'. In the future we'd like to do some more sophisticated
+			neutral candidate searching.
 		 */
 
-		ArrayList<BandHit> betterHits = new ArrayList<BandHit>();      // array list of all coincidence hits in BAND with no veto fired
 
-		//
+		ArrayList<BandHit> betterHits = new ArrayList<BandHit>();
 
+		for( int hit = 0 ; hit < coincidences.size() ; hit++){
+			BandHit thisHit = coincidences.get(hit);
+			if( thisHit.GetLayer() == 6 ){
+				return new ArrayList<BandHit>();
+			}
+			else{
+				betterHits.add( thisHit );
+			}
+
+		}
 		return betterHits;
 	}
 
