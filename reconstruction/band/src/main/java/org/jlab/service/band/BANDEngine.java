@@ -100,10 +100,8 @@ public class BANDEngine extends ReconstructionEngine {
 		String outputFile="test.hipo";
 		HipoDataSync  writer = new HipoDataSync();
 		writer.open(outputFile);
-		int nofevents=0;
 
-		while(reader.hasEvent() && nofevents<5) {
-
+		while(reader.hasEvent()) {
 			DataEvent event = (DataEvent) reader.getNextEvent();
 			//System.out.println("***********  NEXT EVENT ************");
 			//event.show();
@@ -113,7 +111,6 @@ public class BANDEngine extends ReconstructionEngine {
 			//}
 			en.processDataEvent(event);
 			writer.writeEvent(event);
-			nofevents++;
 			//event.getBank("band::hits").show();
 
 		}		

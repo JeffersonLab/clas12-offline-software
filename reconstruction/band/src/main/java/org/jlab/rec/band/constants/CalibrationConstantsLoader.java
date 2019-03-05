@@ -32,7 +32,8 @@ public class CalibrationConstantsLoader {
 	public static Map<Integer, Double> FADC_MT_L2L_OFFSET = new HashMap<Integer,Double>  ();	// FADC mean time layer-by-layer offset [ns]
 	public static Map<Integer, Double> FADC_MT_L2L_RES    = new HashMap<Integer,Double>  ();	// FADC mean time layer resolution [ns]
 	public static Map<Integer, Double> FADC_ATTEN_LENGTH  = new HashMap<Integer,Double>  ();	// FADC attenuation length [cm]
-	public static Map<Integer, double[]> TIMEWALK         = new HashMap<Integer,double[]>(); 	// Parameters for time-walk correction
+	public static Map<Integer, double[]> TIMEWALK_L       = new HashMap<Integer,double[]>(); 	// Parameters for time-walk correction for L PMTs
+	public static Map<Integer, double[]> TIMEWALK_R       = new HashMap<Integer,double[]>(); 	// Parameters for time-walk correction for R PMTs
 
 	public static double JITTER_PERIOD = 0;
 	public static int JITTER_PHASE = 0;
@@ -48,12 +49,14 @@ public class CalibrationConstantsLoader {
 		dbprovider = new DatabaseConstantProvider(runno, var); // reset using the new variation
 
 		// load table reads entire table and makes an array of variables for each column in the table.
+		dbprovider.loadTable("/calibration/band/time_jitter"	    );
 		dbprovider.loadTable("/calibration/band/lr_offsets"         );
 		dbprovider.loadTable("/calibration/band/effective_velocity" );
 		dbprovider.loadTable("/calibration/band/paddle_offsets"     );
 		dbprovider.loadTable("/calibration/band/layer_offsets"      );
 		dbprovider.loadTable("/calibration/band/attenuation_lengths");
-		dbprovider.loadTable("/calibration/band/time_walk_corr"     );
+		dbprovider.loadTable("/calibration/band/time_walk_corr_left"     );
+		dbprovider.loadTable("/calibration/band/time_walk_corr_right"     );
 
 		//disconncect from database. Important to do this after loading tables.
 		dbprovider.disconnect(); 
@@ -74,24 +77,45 @@ public class CalibrationConstantsLoader {
 			TDC_T_OFFSET.put( 	Integer.valueOf(key), 	Double.valueOf(tdc_off ) );
 			FADC_T_OFFSET.put( 	Integer.valueOf(key), 	Double.valueOf(fadc_off) );
 		}
+
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// Time-walk correction parameters
-		for(int i =0; i< dbprovider.length("/calibration/band/time_walk_corr/sector"); i++) {
+		// Time-walk correction parameters for left PMTs
+		for(int i =0; i< dbprovider.length("/calibration/band/time_walk_corr_left/sector"); i++) {
 			// Get sector, layer, component
-			int sector 		= dbprovider.getInteger("/calibration/band/time_walk_corr/sector"   , 	i);	    
-			int layer 		= dbprovider.getInteger("/calibration/band/time_walk_corr/layer"    , 	i);
-			int component 	= dbprovider.getInteger("/calibration/band/time_walk_corr/component", 	i);
+			int sector 		= dbprovider.getInteger("/calibration/band/time_walk_corr_left/sector"   , 	i);	    
+			int layer 		= dbprovider.getInteger("/calibration/band/time_walk_corr_left/layer"    , 	i);
+			int component 	= dbprovider.getInteger("/calibration/band/time_walk_corr_left/component", 	i);
 			// Get parameters
-			double parA = dbprovider.getDouble("/calibration/band/time_walk_corr/par_a",i);
-			double parB = dbprovider.getDouble("/calibration/band/time_walk_corr/par_b",i);
+			double parA = dbprovider.getDouble("/calibration/band/time_walk_corr_left/par_a",i);
+			double parB = dbprovider.getDouble("/calibration/band/time_walk_corr_left/par_b",i);
 			// Get errors
-			double errA = dbprovider.getDouble("/calibration/band/time_walk_corr/err_a",i);
-			double errB = dbprovider.getDouble("/calibration/band/time_walk_corr/err_b",i);
+			double errA = dbprovider.getDouble("/calibration/band/time_walk_corr_left/err_a",i);
+			double errB = dbprovider.getDouble("/calibration/band/time_walk_corr_left/err_b",i);
 			// Put in the maps
 			int key = sector*100+layer*10+component;
 			double time_walk_params[] = {parA,parB,errA,errB};
-			TIMEWALK.put(Integer.valueOf(key), time_walk_params);
+			TIMEWALK_L.put(Integer.valueOf(key), time_walk_params);
 		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// Time-walk correction parameters for right PMTs
+		for(int i =0; i< dbprovider.length("/calibration/band/time_walk_corr_right/sector"); i++) {
+			// Get sector, layer, component
+			int sector 		= dbprovider.getInteger("/calibration/band/time_walk_corr_right/sector"   , 	i);	    
+			int layer 		= dbprovider.getInteger("/calibration/band/time_walk_corr_right/layer"    , 	i);
+			int component 	= dbprovider.getInteger("/calibration/band/time_walk_corr_right/component", 	i);
+			// Get parameters
+			double parA = dbprovider.getDouble("/calibration/band/time_walk_corr_right/par_a",i);
+			double parB = dbprovider.getDouble("/calibration/band/time_walk_corr_right/par_b",i);
+			// Get errors
+			double errA = dbprovider.getDouble("/calibration/band/time_walk_corr_right/err_a",i);
+			double errB = dbprovider.getDouble("/calibration/band/time_walk_corr_right/err_b",i);
+			// Put in the maps
+			int key = sector*100+layer*10+component;
+			double time_walk_params[] = {parA,parB,errA,errB};
+			TIMEWALK_R.put(Integer.valueOf(key), time_walk_params);
+		}
+
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Speed of lights
 		for(int i =0; i< dbprovider.length("/calibration/band/effective_velocity/sector"); i++) {
@@ -110,9 +134,17 @@ public class CalibrationConstantsLoader {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// TDC time jitter
-		JITTER_PERIOD = dbprovider.getDouble("/calibration/band/time_jitter/period", 0);
-		JITTER_PHASE  = dbprovider.getInteger("/calibration/band/time_jitter/phase", 0);
-		JITTER_CYCLES = dbprovider.getInteger("/calibration/band/time_jitter/cycles", 0);
+		for( int i = 0; i < dbprovider.length("/calibration/band/time_jitter/sector"); i++){
+			int sector 		= dbprovider.getInteger("/calibration/band/time_jitter/sector",          i);
+			int layer 		= dbprovider.getInteger("/calibration/band/time_jitter/layer",          i);
+			int component 		= dbprovider.getInteger("/calibration/band/time_jitter/component",          i);
+			double period 		= dbprovider.getDouble("/calibration/band/time_jitter/period", i);
+			double phase 		= dbprovider.getDouble("/calibration/band/time_jitter/phase", i);
+			double cycles 		= dbprovider.getDouble("/calibration/band/time_jitter/cycles", i);
+			JITTER_PERIOD = dbprovider.getDouble("/calibration/band/time_jitter/period", 0);
+			JITTER_PHASE  = dbprovider.getInteger("/calibration/band/time_jitter/phase", 0);
+			JITTER_CYCLES = dbprovider.getInteger("/calibration/band/time_jitter/cycles", 0);
+		}
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Paddle-to-paddle offsets
