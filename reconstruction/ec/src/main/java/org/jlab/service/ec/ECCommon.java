@@ -154,15 +154,17 @@ public class ECCommon {
       	List<ECStrip>  strips = new ArrayList<ECStrip>();
         IndexedList<List<Integer>>  tdcs = new IndexedList<List<Integer>>(3);  
         
-		IndexedTable   jitter = manager.getConstants(run, "/calibration/ec/time_jitter");
-		IndexedTable   offset = manager.getConstants(run, "/calibration/ec/fadc_offset");
-		IndexedTable  goffset = manager.getConstants(run, "/calibration/ec/fadc_global_offset");
+		IndexedTable    jitter = manager.getConstants(run, "/calibration/ec/time_jitter");
+		IndexedTable        fo = manager.getConstants(run, "/calibration/ec/fadc_offset");
+		IndexedTable       tmf = manager.getConstants(run, "/calibration/ec/tmf_offset"); 
+		IndexedTable       fgo = manager.getConstants(run, "/calibration/ec/fadc_global_offset");
+		IndexedTable       gtw = manager.getConstants(run, "/calibration/ec/global_time_walk");
         
-        double PERIOD = jitter.getDoubleValue("period",0,0,0);
-        int    PHASE  = jitter.getIntValue("phase",0,0,0); 
-        int    CYCLES = jitter.getIntValue("cycles",0,0,0);
+        double PERIOD  = jitter.getDoubleValue("period",0,0,0);
+        int    PHASE   = jitter.getIntValue("phase",0,0,0); 
+        int    CYCLES  = jitter.getIntValue("cycles",0,0,0);        
+        float FTOFFSET = (float) fgo.getDoubleValue("global_offset",0,0,0); //global shift of trigger time
         
-        float TOFFSET = (float) goffset.getDoubleValue("global_offset",0,0,0);
 	    int triggerPhase = 0;
     	
         if(CYCLES>0&&event.hasBank("RUN::config")==true){
@@ -192,7 +194,8 @@ public class ECCommon {
                 int  il = bank.getByte("layer", i); 
                 int  ip = bank.getShort("component", i);
                 int adc = bank.getInt("ADC", i);
-                float t = bank.getFloat("time", i) + (float) offset.getDoubleValue("offset",is,il,0);
+                float t = bank.getFloat("time", i) + (float) tmf.getDoubleValue("offset",is,il,ip) // FADC-TDC offset (sector, layer, PMT)
+                                                   + (float)  fo.getDoubleValue("offset",is,il,0); // FADC-TDC offset (sector, layer) 
                 
                 ECStrip  strip = new ECStrip(is, il, ip); 
                 
@@ -206,9 +209,10 @@ public class ECCommon {
                 float  tmax = 1000; int tdc = 0;
                 
                 if (tdcs.hasItem(is,il,ip)) {
+                    float radc = (float)Math.sqrt(adc);
                     for (float tdcc : tdcs.getItem(is,il,ip)) {
-                        float tdif = (tps*tdcc-triggerPhase-TOFFSET)-t; 
-                        if (Math.abs(tdif)<30&&tdif<tmax) {tmax = tdif; tdc = (int)tdcc;}
+                         float tdif = tps*tdcc - (float)gtw.getDoubleValue("time_walk",is,il,0)/radc - triggerPhase - FTOFFSET - t; 
+                        if (Math.abs(tdif)<10&&tdif<tmax) {tmax = tdif; tdc = (int)tdcc;}
                     }
                     strip.setTDC(tdc); 
                 }              
