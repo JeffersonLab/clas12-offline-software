@@ -8,7 +8,6 @@ import javax.swing.event.EventListenerList;
 
 import cnuphys.bCNU.graphics.colorscale.ColorScaleModel;
 import cnuphys.bCNU.log.Log;
-import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.central.CentralXYView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.IAccumulator;

@@ -968,7 +968,7 @@ public class SectorView extends CedView implements ChangeListener {
 
 		double totalOcc = 100.*DC.getInstance().totalOccupancy();
 		double sectorOcc = 100.*DC.getInstance().totalSectorOccupancy(sector);
-		String occStr = "total DC occ " + DoubleFormat.doubleFormat(totalOcc, 2) + "%" + " sector " + sector +
+		String occStr = "Total DC occ " + DoubleFormat.doubleFormat(totalOcc, 2) + "%" + " sector " + sector +
 				" occ " + DoubleFormat.doubleFormat(sectorOcc, 2) + "%";
 		feedbackStrings.add("$aqua$" + occStr);
 

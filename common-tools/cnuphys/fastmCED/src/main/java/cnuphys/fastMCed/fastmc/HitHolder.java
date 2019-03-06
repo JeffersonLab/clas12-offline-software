@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.geom.DetectorHit;
-import org.jlab.geom.DetectorId;
-
 import cnuphys.bCNU.util.Bits;
 
 /**

@@ -1,7 +1,5 @@
 package cnuphys.snr.clas12;
 
-import java.util.Random;
-
 import cnuphys.snr.ExtendedWord;
 import cnuphys.snr.NoiseReductionParameters;
 

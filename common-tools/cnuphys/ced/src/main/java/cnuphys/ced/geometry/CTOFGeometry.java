@@ -2,10 +2,6 @@ package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
 
-import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
-import org.jlab.detector.volume.Geant4Basic;
-import org.jlab.geometry.prim.Line3d;
-
 public class CTOFGeometry {
 
 	//fake geomety

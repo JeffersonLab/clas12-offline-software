@@ -409,6 +409,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	 * @param message
 	 *            the message
 	 */
+	@Override
 	public void peekAtMessage(Message message) {
 		// default: do nothing
 	}

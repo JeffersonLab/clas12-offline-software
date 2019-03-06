@@ -298,9 +298,9 @@ public class FastMCed extends BaseMDIApplication
 			_instance.createMenus();
 			_instance.placeViewsOnVirtualDesktop();
 
-			_instance._generatorLabel= _instance.createLabel(" GENERATOR  none");
-	     	_instance._streamLabel= _instance.createLabel(" STREAM "  + StreamReason.STOPPED);
-			_instance._eventNumberLabel= _instance.createLabel("  Event #                 ");
+			FastMCed._generatorLabel= _instance.createLabel(" GENERATOR  none");
+	     	FastMCed._streamLabel= _instance.createLabel(" STREAM "  + StreamReason.STOPPED);
+			FastMCed._eventNumberLabel= _instance.createLabel("  Event #                 ");
 			MagneticFields.getInstance().addMagneticFieldChangeListener(_instance);
 
 		}

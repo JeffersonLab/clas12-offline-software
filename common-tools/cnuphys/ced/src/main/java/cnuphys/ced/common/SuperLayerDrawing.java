@@ -24,7 +24,6 @@ import cnuphys.bCNU.util.MathUtilities;
 import cnuphys.bCNU.util.VectorSupport;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.CedView;
-import cnuphys.ced.cedview.projecteddc.ISuperLayer;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCHit;

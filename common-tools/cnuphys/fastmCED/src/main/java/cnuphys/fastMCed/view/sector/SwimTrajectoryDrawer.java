@@ -5,7 +5,6 @@ import java.awt.geom.Point2D;
 
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.magneticfield.swim.ASwimTrajectoryDrawer;
-import cnuphys.fastMCed.eventio.PhysicsEventManager;
 import cnuphys.fastMCed.geometry.GeometryManager;
 import cnuphys.fastMCed.streaming.StreamManager;
 import cnuphys.magfield.FastMath;

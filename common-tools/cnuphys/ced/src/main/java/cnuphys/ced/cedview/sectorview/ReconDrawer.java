@@ -2,21 +2,13 @@ package cnuphys.ced.cedview.sectorview;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Stroke;
 import java.awt.geom.Point2D;
 import java.util.List;
 
-import org.jlab.geom.prim.Point3D;
-
 import cnuphys.bCNU.format.DoubleFormat;
-import cnuphys.bCNU.graphics.GraphicsUtilities;
-import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.util.UnicodeSupport;
-import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.Cluster;
@@ -26,14 +18,9 @@ import cnuphys.ced.event.data.DCHit;
 import cnuphys.ced.event.data.DCHitList;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.FTOF;
-import cnuphys.ced.event.data.HBSegments;
 import cnuphys.ced.event.data.Hit1;
 import cnuphys.ced.event.data.Hit1List;
-import cnuphys.ced.event.data.Segment;
-import cnuphys.ced.event.data.SegmentList;
-import cnuphys.ced.event.data.TBSegments;
 import cnuphys.ced.frame.CedColors;
-import cnuphys.ced.item.SectorSuperLayer;
 
 public class ReconDrawer extends SectorViewDrawer  {
 	
@@ -57,11 +44,11 @@ public class ReconDrawer extends SectorViewDrawer  {
 		}
 		
 		// DC HB and TB Hits
-		drawDCDOCA(g, container);
+		drawDCReconAndDOCA(g, container);
 
-		// Reconstructed hits
+		// Reconstructed FTOF hits
 		if (_view.showReconHits()) {
-			drawReconHits(g, container);
+			drawFTOFReconHits(g, container);
 		}
 		
 		//Reconstructed clusters
@@ -90,13 +77,13 @@ public class ReconDrawer extends SectorViewDrawer  {
 	}
 	
 
-	// draw reconstructed hits
-	private void drawReconHits(Graphics g, IContainer container) {
+	// draw FTOF reconstructed hits
+	private void drawFTOFReconHits(Graphics g, IContainer container) {
 		drawReconHitList(g, container, FTOF.getInstance().getHits());
 	}
 
 	// draw reconstructed DC hit based hits
-	private void drawDCDOCA(Graphics g, IContainer container) {
+	private void drawDCReconAndDOCA(Graphics g, IContainer container) {
 		if (_view.showHB()) {
 			drawDCHitList(g, container, CedColors.HB_COLOR, DC.getInstance().getHBHits(), false);
 		}

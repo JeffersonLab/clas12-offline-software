@@ -7,8 +7,6 @@ import java.util.Vector;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-
 import org.jlab.geom.DetectorHit;
 import org.jlab.geom.DetectorId;
 import org.jlab.geom.prim.Point3D;

@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.projecteddc;
+package cnuphys.ced.alldata.graphics;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -8,6 +8,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+import cnuphys.ced.common.ISector;
 import cnuphys.lund.X11Colors;
 import cnuphys.splot.plot.GraphicsUtilities;
 

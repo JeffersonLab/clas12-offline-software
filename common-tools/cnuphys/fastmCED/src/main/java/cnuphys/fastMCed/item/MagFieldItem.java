@@ -203,7 +203,7 @@ public class MagFieldItem extends AItem implements MagneticFieldChangeListener {
 				if (displayOption == MagFieldDisplayArray.BMAGDISPLAY) {
 					
 					//note conversion to Tesla
-					float bmag = _activeProbe.fieldMagnitude((float)x, (float)y, (float)z) /10;
+					float bmag = _activeProbe.fieldMagnitude(x, y, z) /10;
 
 					Color color = _colorScaleModelTorus.getColor(bmag);
 					g.setColor(color);

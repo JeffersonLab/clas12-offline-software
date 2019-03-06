@@ -1,9 +1,5 @@
 package cnuphys.bCNU.attributes;
 
-import java.awt.Color;
-import java.awt.event.ItemListener;
-
-import javax.swing.JCheckBox;
 import javax.swing.JSlider;
 
 public class AttributeSliderEditor extends AttributeEditor<JSlider> {

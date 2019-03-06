@@ -16,9 +16,6 @@ import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 
-import cnuphys.fastMCed.fastmc.AugmentedDetectorHit;
-import cnuphys.fastMCed.fastmc.ParticleHits;
-
 public class FTOFGeometry {
 
 	public static final int PANEL_1A = 0;

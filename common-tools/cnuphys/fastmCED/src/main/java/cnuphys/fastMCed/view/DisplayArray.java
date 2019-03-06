@@ -1,15 +1,10 @@
 package cnuphys.fastMCed.view;
 
 
-import java.awt.Color;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import javax.swing.AbstractButton;
-
 import cnuphys.bCNU.component.checkboxarray.CheckBoxArray;
-import cnuphys.bCNU.util.Bits;
-import cnuphys.bCNU.util.X11Colors;
 
 /**
  * Create the display flags based on bits. This allows for a common appearance

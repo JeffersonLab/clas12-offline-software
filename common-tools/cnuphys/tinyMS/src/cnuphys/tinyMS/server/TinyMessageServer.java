@@ -488,6 +488,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 	 * This allows you to take a peek at it first.
 	 * @param message the message
 	 */
+	@Override
 	public void peekAtMessage(Message message) {
 		
 		_bytesTransferred += message.getDataLength();

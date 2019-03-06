@@ -48,6 +48,7 @@ public final class Solenoid extends MagneticField {
 	 * Checks this field active. 
 	 * @return <code>true</code> if this field is active;
 	 */
+	@Override
 	public boolean isActive() {
 		return MagneticFields.getInstance().hasActiveSolenoid();
 	}

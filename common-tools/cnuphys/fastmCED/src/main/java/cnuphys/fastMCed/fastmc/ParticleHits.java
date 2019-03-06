@@ -11,7 +11,6 @@ import cnuphys.fastMCed.geometry.DCGeometry;
 import cnuphys.fastMCed.geometry.FTOFGeometry;
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.lund.LundId;
-import cnuphys.lund.LundStyle;
 import cnuphys.lund.LundSupport;
 import cnuphys.splot.plot.DoubleFormat;
 

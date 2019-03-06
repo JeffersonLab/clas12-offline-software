@@ -25,15 +25,12 @@ import javax.swing.JPopupMenu;
 import cnuphys.bCNU.drawable.DrawableChangeType;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.feedback.IFeedbackProvider;
-import cnuphys.bCNU.format.DoubleFormat;
-import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.style.IStyled;
 import cnuphys.bCNU.graphics.style.Styled;
 import cnuphys.bCNU.item.ItemModification.ModificationType;
 import cnuphys.bCNU.layer.LogicalLayer;
-import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.BaseView;
 

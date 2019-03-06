@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.swing.JFrame;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;

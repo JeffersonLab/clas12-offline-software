@@ -2,6 +2,7 @@ package basic;
 
 import java.awt.Color;
 
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
@@ -22,7 +23,7 @@ public class BasicLineDrawing {
 	 */
 	public static void drawLine(GLAutoDrawable drawable, float x1, float y1, float z1, float x2, float y2, float z2) {
 		GL2 gl2 = drawable.getGL().getGL2();
-		gl2.glBegin(GL2.GL_LINES);
+		gl2.glBegin(GL.GL_LINES);
 		gl2.glVertex3f(x1, y1, z1);
 		gl2.glVertex3f(x2, y2, z2);
 		gl2.glEnd();
@@ -58,10 +59,10 @@ public class BasicLineDrawing {
 			
 			BasicColorSupport3D.setColor(gl2, color);
 			
-			gl2.glBegin(GL2.GL_LINES);
+			gl2.glBegin(GL.GL_LINES);
 
 			for (int i = 0; i < len; i++) {
-				gl2.glBegin(GL2.GL_LINES);
+				gl2.glBegin(GL.GL_LINES);
 				gl2.glVertex3f(x1[i], y1[i], z1[i]);
 				gl2.glVertex3f(x2[i], y2[i], z2[i]);
 				gl2.glEnd();

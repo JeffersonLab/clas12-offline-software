@@ -10,7 +10,6 @@ import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.item.BaseBeamLineItem;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.view.BaseView;
-import cnuphys.fastMCed.eventio.PhysicsEventManager;
 import cnuphys.fastMCed.streaming.StreamManager;
 import cnuphys.fastMCed.view.sector.SectorView;
 

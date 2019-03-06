@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.projecteddc;
+package cnuphys.ced.common;
 
 public interface ISector {
 

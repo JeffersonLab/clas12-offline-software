@@ -15,7 +15,6 @@ import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JSlider;
 import javax.swing.Timer;
 
 import cnuphys.bCNU.component.InfoWindow;

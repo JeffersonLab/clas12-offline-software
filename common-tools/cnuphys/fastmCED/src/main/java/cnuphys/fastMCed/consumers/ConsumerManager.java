@@ -236,6 +236,7 @@ public class ConsumerManager extends Vector<PhysicsEventConsumer> implements IPh
 	 * @param generator
 	 *            the now active generator
 	 */
+	@Override
 	public void newEventGenerator(final AEventGenerator generator) {
 		for (PhysicsEventConsumer consumer : this) {
 			if (consumer.isActive()) {

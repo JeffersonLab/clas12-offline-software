@@ -21,9 +21,7 @@ import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.cedview.central.CentralXYView;
 import cnuphys.ced.cedview.central.CentralZView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
-import cnuphys.ced.cedview.projecteddc.ProjectedDCView;
 import cnuphys.ced.cedview.sectorview.SectorView;
-import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.frame.CedColors;
 
@@ -84,7 +82,7 @@ public class DrawingLegend extends JComponent {
 		// view dependent drawing
 		if (_view != null) {
 			if ((_view instanceof SectorView) ||
-					(_view instanceof DCXYView) || (_view instanceof ProjectedDCView)) {
+					(_view instanceof DCXYView)) {
 				paintForwardViewLegend(g, x, yc);
 			}
 			

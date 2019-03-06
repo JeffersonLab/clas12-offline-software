@@ -6,7 +6,6 @@ import org.jlab.detector.geom.dc.DCGeantFactory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.component.DriftChamberWire;
 import org.jlab.geom.detector.dc.DCDetector;
-import org.jlab.geom.detector.dc.DCFactoryUpdated;
 import org.jlab.geom.detector.dc.DCLayer;
 import org.jlab.geom.detector.dc.DCSector;
 import org.jlab.geom.detector.dc.DCSuperlayer;

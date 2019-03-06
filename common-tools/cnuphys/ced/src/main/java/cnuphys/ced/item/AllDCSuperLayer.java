@@ -11,7 +11,6 @@ import org.jlab.geom.prim.Point3D;
 
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.alldc.AllDCAccumView;
-import cnuphys.ced.cedview.alldc.AllDCView;
 import cnuphys.ced.cedview.alldc.IAllDC;
 import cnuphys.ced.clasio.ClasIoEventManager;
 //import cnuphys.ced.dcnoise.NoiseEventListener;

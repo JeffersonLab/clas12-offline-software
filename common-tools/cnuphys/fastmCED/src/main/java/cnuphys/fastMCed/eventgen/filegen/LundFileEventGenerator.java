@@ -1,6 +1,5 @@
 package cnuphys.fastMCed.eventgen.filegen;
 
-import java.awt.Toolkit;
 import java.io.File;
 
 import org.jlab.clas.physics.PhysicsEvent;

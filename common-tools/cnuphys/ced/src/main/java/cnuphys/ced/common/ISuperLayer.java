@@ -1,4 +1,4 @@
-package cnuphys.ced.cedview.projecteddc;
+package cnuphys.ced.common;
 
 import org.jlab.geom.prim.Plane3D;
 import cnuphys.bCNU.item.PolygonItem;

@@ -1,10 +1,7 @@
 package cnuphys.tinyMS.table;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
-import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;

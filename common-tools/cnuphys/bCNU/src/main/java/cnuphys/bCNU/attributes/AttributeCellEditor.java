@@ -3,23 +3,12 @@
  */
 package cnuphys.bCNU.attributes;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
 import java.util.EventObject;
 
 import javax.swing.JTable;
 import javax.swing.event.CellEditorListener;
 import javax.swing.table.TableCellEditor;
-
-import cnuphys.bCNU.dialog.ColorDialog;
-import cnuphys.bCNU.dialog.DialogUtilities;
-import cnuphys.bCNU.dialog.FontDialog;
-import cnuphys.bCNU.graphics.style.FillStyle;
-import cnuphys.bCNU.graphics.style.LineStyle;
-import cnuphys.bCNU.graphics.style.SymbolType;
-import cnuphys.bCNU.graphics.style.TextAlignment;
-import cnuphys.bCNU.log.Log;
 
 public class AttributeCellEditor implements TableCellEditor {
 

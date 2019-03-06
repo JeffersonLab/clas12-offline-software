@@ -15,7 +15,7 @@ public class FMTGeometry {
 	
 	public static double FVT_Pitch = 0.525/10.; //strip width
 	//public static double FVT_interstrip = 0.125/10.; //inter strip
-        public static final double FVT_YCentral = (double)FVT_Halfstrips*FVT_Pitch/2.;
+        public static final double FVT_YCentral = FVT_Halfstrips*FVT_Pitch/2.;
 	//public static double FVT_PitchS = FVT_Pitch+FVT_interstrip;
 	public static double FVT_Interlayer = 1.190;
 	public static double FVT_Interlayer_offset = 0.20; // 3to4
@@ -63,7 +63,7 @@ public class FMTGeometry {
                 FVT_Zlayer[5] = 36.4497;
 		for(int i=0;i<FVT_Nlayers;i++) { 
 			//FVT_Zlayer[i] = FVT_Z1stlayer+i*FVT_Interlayer;
-			FVT_Alpha[i] = (double) i*Math.PI/3.+FVT_Angle1stlayer;
+			FVT_Alpha[i] = i*Math.PI/3.+FVT_Angle1stlayer;
 			
 		}
 		

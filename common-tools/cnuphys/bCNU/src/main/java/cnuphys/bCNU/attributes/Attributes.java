@@ -1,22 +1,9 @@
 package cnuphys.bCNU.attributes;
 
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.Rectangle;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.UUID;
 import java.util.Vector;
-
-import javax.swing.JComponent;
-
-import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.bCNU.graphics.style.LineStyle;
-import cnuphys.bCNU.graphics.style.SymbolType;
 
 @SuppressWarnings("serial")
 	public class Attributes extends Vector<Attribute> implements Comparator<Attribute>{

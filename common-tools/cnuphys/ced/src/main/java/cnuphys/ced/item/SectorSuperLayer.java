@@ -8,9 +8,9 @@ import java.util.List;
 
 import org.jlab.geom.prim.Plane3D;
 
-import cnuphys.ced.cedview.projecteddc.ISuperLayer;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.common.ISuperLayer;
 import cnuphys.ced.common.SuperLayerDrawing;
 import cnuphys.ced.event.data.DCHit;
 import cnuphys.ced.geometry.DCGeometry;

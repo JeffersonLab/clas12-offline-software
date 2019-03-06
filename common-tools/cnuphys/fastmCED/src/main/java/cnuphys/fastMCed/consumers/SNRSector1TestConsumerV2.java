@@ -41,7 +41,7 @@ public class SNRSector1TestConsumerV2 extends ASNRConsumer {
 		if (reason == StreamReason.STOPPED) {
 			double ntot = streamNMissed + streamNFound;
 			if (ntot > 1) {
-				System.err.println("percentage of missed = " + (100. * ((double) streamNMissed)) / ntot);
+				System.err.println("percentage of missed = " + (100. * (streamNMissed)) / ntot);
 			}
 		}
 	}

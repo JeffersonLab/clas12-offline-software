@@ -6,6 +6,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2ES1;
 import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.glu.GLUquadric;
@@ -252,7 +253,7 @@ public class Support3D {
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glLineWidth(lineWidth);
 
-		gl.glBegin(GL2GL3.GL_QUADS);
+		gl.glBegin(GL2ES3.GL_QUADS);
 		setColor(gl, color);
 
 		int numPoints = coords.length / 3;
@@ -300,7 +301,7 @@ public class Support3D {
 		gl.glEnable(GL2.GL_POLYGON_STIPPLE);
 		gl.glPolygonStipple(halftone, 0);
 
-		gl.glBegin(GL2GL3.GL_QUADS);
+		gl.glBegin(GL2ES3.GL_QUADS);
 		setColor(gl, color);
 
 		int numPoints = coords.length / 3;
@@ -358,7 +359,7 @@ public class Support3D {
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glLineWidth(lineWidth);
 
-		gl.glBegin(GL2GL3.GL_QUADS);
+		gl.glBegin(GL2ES3.GL_QUADS);
 		setColor(gl, color);
 		gl.glVertex3f(coords[i1], coords[i1 + 1], coords[i1 + 2]);
 		gl.glVertex3f(coords[i2], coords[i2 + 1], coords[i2 + 2]);

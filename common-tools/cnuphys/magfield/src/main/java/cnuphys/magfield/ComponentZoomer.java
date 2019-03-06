@@ -68,8 +68,8 @@ public class ComponentZoomer implements MouseListener, MouseMotionListener {
 			System.out.println("Dragging ended.");
 			_endPP = new Point(e.getX(), e.getY());
 			
-			int delX = (int)(Math.abs(_endPP.x - _startPP.x));
-			int delY = (int)(Math.abs(_endPP.y - _startPP.y));
+			int delX = (Math.abs(_endPP.x - _startPP.x));
+			int delY = (Math.abs(_endPP.y - _startPP.y));
 			
 			if ((delX > 4) &&  delY > 4) {
 				Rectangle r = rectangleFromPoints(_startPP, _endPP);

@@ -708,14 +708,6 @@ public class SectorView extends AView implements ChangeListener {
 			feedbackStrings.add("potential right track: " + rightTrack);
 		}
 
-//
-//		double totalOcc = 100.*DC.getInstance().totalOccupancy();
-//		double sectorOcc = 100.*DC.getInstance().totalSectorOccupancy(sector);
-//		String occStr = "total DC occ " + DoubleFormat.doubleFormat(totalOcc, 2) + "%" + " sector " + sector +
-//				" occ " + DoubleFormat.doubleFormat(sectorOcc, 2) + "%";
-//		feedbackStrings.add("$aqua$" + occStr);
-
-		
 
 	}
 

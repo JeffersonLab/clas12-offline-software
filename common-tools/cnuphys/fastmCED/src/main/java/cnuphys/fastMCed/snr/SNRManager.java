@@ -11,7 +11,6 @@ import cnuphys.fastMCed.fastmc.AugmentedDetectorHit;
 import cnuphys.fastMCed.fastmc.ParticleHits;
 import cnuphys.snr.ExtendedWord;
 import cnuphys.snr.NoiseReductionParameters;
-import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
 import cnuphys.snr.clas12.Clas12ThreeLevelAnalysis;
 

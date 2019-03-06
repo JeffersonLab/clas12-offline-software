@@ -8,7 +8,6 @@ import com.jogamp.opengl.GLAutoDrawable;
 import bCNU3D.GrowablePointSet;
 import bCNU3D.Panel3D;
 import bCNU3D.Support3D;
-import bCNU3D.Vector3f;
 
 public class GrowablePointSets3D extends Item3D  {
 	

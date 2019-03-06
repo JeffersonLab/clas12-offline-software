@@ -1,7 +1,6 @@
 package cnuphys.bCNU.eliza;
 
 import java.io.*;
-import cnuphys.bCNU.util.Environment;
 
 /**
  * Eliza main class. Stores the processed script. Does the input

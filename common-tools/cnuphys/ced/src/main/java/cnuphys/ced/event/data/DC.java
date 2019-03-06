@@ -1,7 +1,5 @@
 package cnuphys.ced.event.data;
 
-import java.awt.Color;
-
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.util.SoundUtils;

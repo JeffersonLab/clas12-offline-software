@@ -39,7 +39,6 @@ import cnuphys.ced.cedview.central.CentralXYView;
 import cnuphys.ced.cedview.central.CentralZView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
 import cnuphys.ced.cedview.ft.FTCalXYView;
-import cnuphys.ced.cedview.projecteddc.ProjectedDCView;
 import cnuphys.ced.cedview.sectorview.DisplaySectors;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventMenu;
@@ -113,7 +112,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	// the singleton
 	private static Ced _instance;
 	
-	private static final String _release = "build 1.006f";
+	private static final String _release = "build 1.006g";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -168,7 +167,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 	private CentralZView _centralZView;
 	private FTCalXYView _ftcalXyView;
 	private DCXYView _dcXyView;
-	private ProjectedDCView _projectedDCView;
+	
 	private ECView _ecView;
 	private PCALView _pcalView;
 	private LogView _logView;
@@ -292,7 +291,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// note no constraint means "center"
 		_virtualView.moveTo(_dcXyView, 7);
-		_virtualView.moveTo(_projectedDCView, 8);
 
 		_virtualView.moveTo(_pcalView, 4);
 		_virtualView.moveTo(_ecView, 5);
@@ -373,9 +371,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener,
 
 		// add a DC XY View
 		_dcXyView = DCXYView.createDCXYView();
-
-		// projected dC view
-		_projectedDCView = ProjectedDCView.createProjectedDCView();
 
 		// add an ec view
 		_ecView = ECView.createECView();

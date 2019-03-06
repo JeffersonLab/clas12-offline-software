@@ -109,6 +109,7 @@ public class TSSolution extends Solution {
 	 * Get the y value for the plot.
 	 * @return the y value for the plot
 	 */
+	@Override
 	public double getPlotY() {
 		return getEnergy();
 	}

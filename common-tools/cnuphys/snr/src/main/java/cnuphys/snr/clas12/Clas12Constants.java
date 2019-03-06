@@ -1,7 +1,5 @@
 package cnuphys.snr.clas12;
 
-import cnuphys.snr.NoiseReductionParameters;
-
 public class Clas12Constants {
 
 	//obvious geometric constants

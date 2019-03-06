@@ -26,7 +26,6 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
 import cnuphys.magfield.FastMath;
-import cnuphys.magfield.FieldProbe;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.DefaultSwimStopper;
 import cnuphys.swim.SwimTrajectory;

@@ -1,15 +1,10 @@
 package adapter3D;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeListener;
-
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
 import com.jogamp.newt.event.InputEvent;

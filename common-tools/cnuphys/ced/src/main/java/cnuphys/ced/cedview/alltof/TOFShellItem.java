@@ -11,7 +11,7 @@ import java.util.List;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.item.PolygonItem;
 import cnuphys.bCNU.layer.LogicalLayer;
-import cnuphys.ced.cedview.projecteddc.ISector;
+import cnuphys.ced.common.ISector;
 import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.TdcAdcHit;

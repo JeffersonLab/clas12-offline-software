@@ -76,6 +76,7 @@ public class AttributeTable extends JTable {
 		putClientProperty("terminateEditOnFocusLost", true);
 		
 		_nameRenderer = new DefaultTableCellRenderer() {
+			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
 				Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 				c.setFont(defaultFont);
@@ -183,6 +184,7 @@ public class AttributeTable extends JTable {
 	public JScrollPane getScrollPane() {
 		if (_scrollPane == null) {
 			_scrollPane = new JScrollPane(this) {
+				@Override
 				public Dimension getPreferredSize() {
 					Dimension d = super.getPreferredSize();
 					d.width = _nameWidth + _valueWidth + 20;

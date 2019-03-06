@@ -158,6 +158,7 @@ public class Ising2DSolution extends Solution {
 	 * Get the y value for the plot.
 	 * @return the y value for the plot
 	 */
+	@Override
 	public double getPlotY() {
 		return getAbsMagnetization();
 	}

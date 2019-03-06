@@ -1,7 +1,6 @@
 package cnuphys.fastMCed.eventgen.random;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Random;

@@ -2,7 +2,6 @@ package cnuphys.swimZ;
 
 import java.util.ArrayList;
 
-import Jama.Matrix;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.IMagField;
 import cnuphys.magfield.MagneticField;
@@ -10,7 +9,6 @@ import cnuphys.magfield.RotatedCompositeProbe;
 import cnuphys.rk4.DefaultStopper;
 import cnuphys.rk4.IRkListener;
 import cnuphys.rk4.IStopper;
-import cnuphys.rk4.RungeKutta;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.rk4.RungeKuttaZ;
 

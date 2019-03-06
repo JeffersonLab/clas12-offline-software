@@ -4,7 +4,6 @@ import java.util.Random;
 
 import cnuphys.swimZ.SwimZ;
 import cnuphys.swimZ.SwimZException;
-import cnuphys.swimZ.SwimZResult;
 import cnuphys.swimZ.SwimZStateVector;
 
 public class SmallDZTest {

@@ -1,6 +1,5 @@
 package cnuphys.ced.ced3d;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.KeyEvent;
 
@@ -11,7 +10,6 @@ import javax.swing.JPanel;
 import adapter3D.KeyboardLabel;
 import bCNU3D.Panel3D;
 import cnuphys.bCNU.graphics.component.CommonBorder;
-import cnuphys.bCNU.util.UnicodeSupport;
 
 @SuppressWarnings("serial")
 public class KeyboardLegend extends JPanel {

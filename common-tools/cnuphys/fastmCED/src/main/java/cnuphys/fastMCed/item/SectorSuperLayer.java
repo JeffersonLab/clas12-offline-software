@@ -14,7 +14,6 @@ import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.fastMCed.eventio.PhysicsEventManager;
 import cnuphys.fastMCed.geometry.DCGeometry;
 import cnuphys.fastMCed.geometry.GeometryManager;
-import cnuphys.fastMCed.snr.SNRManager;
 import cnuphys.fastMCed.streaming.StreamManager;
 import cnuphys.fastMCed.view.sector.ISuperLayer;
 import cnuphys.fastMCed.view.sector.SectorView;
