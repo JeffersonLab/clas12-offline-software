@@ -159,11 +159,13 @@ public class ECCommon {
 		IndexedTable       tmf = manager.getConstants(run, "/calibration/ec/tmf_offset"); 
 		IndexedTable       fgo = manager.getConstants(run, "/calibration/ec/fadc_global_offset");
 		IndexedTable       gtw = manager.getConstants(run, "/calibration/ec/global_time_walk");
+		IndexedTable    tmfcut = manager.getConstants(run,  "/calibration/ec/tmf_window");
         
         double PERIOD  = jitter.getDoubleValue("period",0,0,0);
         int    PHASE   = jitter.getIntValue("phase",0,0,0); 
         int    CYCLES  = jitter.getIntValue("cycles",0,0,0);        
         float FTOFFSET = (float) fgo.getDoubleValue("global_offset",0,0,0); //global shift of trigger time
+        float  TMFCUT  = (float) tmfcut.getDoubleValue("window", 0,0,0); //acceptance window for TDC-FADC times
         
 	    int triggerPhase = 0;
     	
@@ -212,7 +214,7 @@ public class ECCommon {
                     float radc = (float)Math.sqrt(adc);
                     for (float tdcc : tdcs.getItem(is,il,ip)) {
                          float tdif = tps*tdcc - (float)gtw.getDoubleValue("time_walk",is,il,0)/radc - triggerPhase - FTOFFSET - t; 
-                        if (Math.abs(tdif)<10&&tdif<tmax) {tmax = tdif; tdc = (int)tdcc;}
+                        if (Math.abs(tdif)<TMFCUT&&tdif<tmax) {tmax = tdif; tdc = (int)tdcc;}
                     }
                     strip.setTDC(tdc); 
                 }              
