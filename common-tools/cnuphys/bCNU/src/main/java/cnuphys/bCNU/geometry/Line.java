@@ -140,6 +140,13 @@ public class Line {
 		return "Line from " + getP0() + " to " + getP1();
 	}
 
+	/**
+	 * Get the center of the line
+	 * @return the center of the line
+	 */
+	public Point getCenter() {
+		return getP(0.5);
+	}
 	
 	//testing
 	public static void main(String arg[]) {

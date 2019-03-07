@@ -122,6 +122,71 @@ public class Plane {
 		String pstr = String.format("abcd = [%10.6G, %10.6G, %10.6G, %10.6G]", abcd[0], abcd[1], abcd[2], abcd[3]);
 		return pstr + "  p = " + _ro + " norm = " + _norm;
 	}
+
+
+	
+	public Line planeIntersection(Plane plane) {
+		Vector s = Vector.cross(_norm, plane._norm);
+		
+		if (s.length() < Constants.TINY) {
+			return null;
+		}
+		
+		//ned to find one point
+		Point p0 = new Point();
+		double abcd0[] = new double[4];
+		double abcd1[] = new double[4];
+		
+		this.getABCD(abcd0);
+		plane.getABCD(abcd1);
+		
+		//try setting z to 0
+		double ans[] = solve(abcd0[0], abcd0[1], abcd0[3], abcd1[0], abcd1[1], abcd1[3]);
+		if (ans != null) {
+			p0.set(ans[0], ans[1], 0);
+		}
+		else {//try setting y to 0
+			ans = solve(abcd0[0], abcd0[2], abcd0[3], abcd1[0], abcd1[2], abcd1[3]);
+			if (ans != null) {
+				p0.set(ans[0], 0, ans[1]);
+			}
+			else {//try setting x to 0
+				ans = solve(abcd0[1], abcd0[2], abcd0[3], abcd1[1], abcd1[2], abcd1[3]);
+				if (ans != null) {
+					p0.set(0, ans[0], ans[1]);
+				}
+				else {//toast
+					return null;
+				}
+				
+			}
+			
+		}
+		
+		Point p1 = new Point(p0.x + s.x, p0.y + s.y, p0.z + s.z);
+		return new Line(p0, p1);
+	}
+	
+	//solve simultaneous 
+	// a1x + b1y = d1
+	// a2x + b2y = d2
+	//by Cramer's rule
+	private double[] solve(double a1, double b1, double d1, double a2, double b2, double d2) {
+		double deter = a1*b2 - a2*b1;
+		if (Math.abs(deter) < Constants.TINY) {
+			return null;
+		}
+		
+		double ans[] = new double[2];
+		
+		double deterx = d1*b2 - d2*b1;
+		double detery = a1*d2 - a2*d1;
+		ans[0] = deterx/deter;
+		ans[1] = detery/deter;
+		return ans;
+	}
+	
+	
 	
 	public static void main(String arg[]) {
 //		Plane p = constantPhiPlane(30);
@@ -148,7 +213,10 @@ public class Plane {
 		t = plane.lineIntersection(line, intersection);
 		System.out.println(" t = " + t + "   intersect: " + intersection + "  phicheck = " + Math.toDegrees(Math.atan2(intersection.y, intersection.x)));
 		
-
+		//intersection of two phi planes should be z axis
+		Plane pp1 = constantPhiPlane(57);
+		Plane pp2 = constantPhiPlane(57);
+        System.out.println("Intersection of two phi planes: " + pp1.planeIntersection(pp2));
 	}
 
 }
