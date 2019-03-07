@@ -1,4 +1,4 @@
-package cnuphys.bCNU.util;
+package cnuphys.ced.geometry.util;
 
 import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.log.Log;

@@ -2,9 +2,10 @@ package cnuphys.ced.event.data;
 
 import java.util.List;
 import org.jlab.geom.prim.Point3D;
+
 import cnuphys.bCNU.util.UnicodeSupport;
-import cnuphys.bCNU.util.VectorSupport;
 import cnuphys.ced.cedview.CedView;
+import cnuphys.ced.geometry.util.VectorSupport;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.splot.plot.DoubleFormat;
