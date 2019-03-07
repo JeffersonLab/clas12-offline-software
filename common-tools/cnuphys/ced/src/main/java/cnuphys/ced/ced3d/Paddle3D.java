@@ -51,11 +51,13 @@ public abstract class Paddle3D {
 	 *            the color
 	 */
 	protected void drawPaddle(GLAutoDrawable drawable, Color color) {
-		Support3D.drawQuad(drawable, _coords, 0, 1, 2, 3, color, 1f, _frame);
-		Support3D.drawQuad(drawable, _coords, 3, 7, 6, 2, color, 1f, _frame);
-		Support3D.drawQuad(drawable, _coords, 0, 4, 7, 3, color, 1f, _frame);
-		Support3D.drawQuad(drawable, _coords, 0, 4, 5, 1, color, 1f, _frame);
-		Support3D.drawQuad(drawable, _coords, 1, 5, 6, 2, color, 1f, _frame);
-		Support3D.drawQuad(drawable, _coords, 4, 5, 6, 7, color, 1f, _frame);
+		
+		//think in terms of a rectangular slab
+		Support3D.drawQuad(drawable, _coords, 0, 1, 2, 3, color, 1f, _frame); //front
+		Support3D.drawQuad(drawable, _coords, 3, 7, 6, 2, color, 1f, _frame); //bottom
+		Support3D.drawQuad(drawable, _coords, 0, 4, 7, 3, color, 1f, _frame); //left
+		Support3D.drawQuad(drawable, _coords, 0, 4, 5, 1, color, 1f, _frame); //top
+		Support3D.drawQuad(drawable, _coords, 1, 5, 6, 2, color, 1f, _frame); //right
+		Support3D.drawQuad(drawable, _coords, 4, 5, 6, 7, color, 1f, _frame); //back
 	}
 }

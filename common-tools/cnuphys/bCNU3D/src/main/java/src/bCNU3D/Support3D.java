@@ -7,7 +7,6 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2ES1;
 import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2ES3;
-import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.glu.GLUquadric;
 import com.jogamp.opengl.util.gl2.GLUT;
@@ -266,6 +265,8 @@ public class Support3D {
 		gl.glEnd();
 
 		if (frame) {
+			
+			//a quad has four vertices therefor 12 points
 			int numQuad = coords.length / 12;
 			for (int i = 0; i < numQuad; i++) {
 				gl.glBegin(GL.GL_LINE_STRIP);

@@ -42,14 +42,14 @@ public class Plane {
 	/**
 	 * Compute the intersection of an infinite line with the plane 
 	 * @param line the line
-	 * @param intersection the 
+	 * @param intersection will hold the point of intersection
 	 * @return the t parameter. If NaN it means the line is parallel to
 	 * the plane. If t [0,1] then the segment intersects the line. If t outside
 	 * [0, 1] the infinite line intersects the plane, but not the segment
 	 */
 	public double lineIntersection(Line line, Point intersection) {
 		
-		//use the formulafor the t parameter
+		//use the formula for the t parameter
 		// t = ((ro - po) dot n)/(l dot n)
 		// po "start" point of line
 		// l is the "dP" of the line
@@ -65,7 +65,7 @@ public class Plane {
 			return Double.NaN;
 		}
 		
-		Point pmr = Vector.difference(_ro, line.getPo());
+		Point pmr = Vector.difference(_ro, line.getP0());
 		double numer = pmr.dot(_norm);
 		
 		double t = numer/ldotn;
@@ -73,6 +73,28 @@ public class Plane {
 		return t;
 	}
 
+	/**
+	 * 
+	 * @param line the line
+	 * @param intersection will hold the point of intersection
+	 * @param lineType one of the Constants INFINITE or SEGMENT
+	 * @return the t parameter. If NaN, then either the line is parallel to the plane
+	 * or we are treating as a line segment and the segment does not "reach" the plane 
+	 */
+	public double lineIntersection(Line line, Point intersection, int lineType) {
+		double t = lineIntersection(line, intersection);
+		
+		if (!Double.isNaN(t)) { //at least infinite line intersects
+			if (lineType == Constants.SEGMENT) {
+				if ((t < 0) || (t > 1)) {
+					t = Double.NaN;
+					intersection.set(Double.NaN, Double.NaN, Double.NaN);
+				}
+			}
+		}
+		
+		return t;
+	}
 	
 	/**
 	 * Create a plane of constant azimuthal angle phi

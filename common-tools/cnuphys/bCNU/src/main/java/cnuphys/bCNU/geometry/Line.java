@@ -28,11 +28,11 @@ public class Line {
 	}
 	
 	/**
-	 * Get the po point. This is just an arbitrary point on an infinite line,
+	 * Get the po "start" point. This is just an arbitrary point on an infinite line,
 	 * but the starting point if this is a directed line segment
 	 * @return the "starting" point.
 	 */
-	public Point getPo() {
+	public Point getP0() {
 		return _po;
 	}
 	
@@ -45,7 +45,27 @@ public class Line {
 	}
 	
 	/**
-	 * Get the p1 point. This is just an arbitrary point on an infinite line,
+	 * Get one of the endpoints
+	 * @param end one of the Constants START or END
+	 * @return the requested endpoint
+	 */
+	public Point getEndpoint(int end) {
+
+		switch (end) {
+		case Constants.START:
+			return getP0();
+
+		case Constants.END:
+			return getP1();
+
+		default:
+			return null;
+		}
+	}
+
+	
+	/**
+	 * Get the p1 "end" point. This is just an arbitrary point on an infinite line,
 	 * but the end point if this is a directed line segment
 	 * @return the "end" point.
 	 */
@@ -109,6 +129,15 @@ public class Line {
 	 */
 	public boolean pointOnLine(Point p) {
 		return pointOnLine(p, Constants.TINY);
+	}
+	
+	/**
+	 * Get a String representation
+	 * @return a String representation of the Line
+	 */
+	@Override
+	public String toString() {
+		return "Line from " + getP0() + " to " + getP1();
 	}
 
 	
