@@ -18,8 +18,7 @@ public class LayerControl implements IDrawableListener {
 	/**
 	 * Constructor for a layer controller.
 	 * 
-	 * @param container
-	 *            the parent container.
+	 * @param container the parent container.
 	 */
 	public LayerControl(IContainer container) {
 		_container = container;
@@ -32,18 +31,15 @@ public class LayerControl implements IDrawableListener {
 	 * Come here when the LAYERS have been changed--typically added.
 	 */
 	@Override
-	public void drawableChanged(DrawableList list, IDrawable drawable,
-			DrawableChangeType type) {
+	public void drawableChanged(DrawableList list, IDrawable drawable, DrawableChangeType type) {
 
-		LogicalLayer layer = (drawable == null) ? null
-				: (LogicalLayer) drawable;
+		LogicalLayer layer = (drawable == null) ? null : (LogicalLayer) drawable;
 		String name = (layer == null) ? "null" : layer.getName();
 
 		// some containers may not have views--i.e. on dialogs
 		BaseView view = _container.getView();
 
-		String viewName = view != null ? _container.getView().getName()
-				: "(non-view)";
+		String viewName = view != null ? _container.getView().getName() : "(non-view)";
 
 		switch (type) {
 		case ADDED:

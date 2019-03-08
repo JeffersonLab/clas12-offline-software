@@ -16,19 +16,16 @@ public interface IDrawable extends IVisible {
 	/**
 	 * Draw the drawable.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	public void draw(Graphics g, IContainer container);
 
 	/**
-	 * This tells the drawable, for example that any thing is has cached, such
-	 * as a pixel based polygon, needs to be recomputed.
+	 * This tells the drawable, for example that any thing is has cached, such as a
+	 * pixel based polygon, needs to be recomputed.
 	 * 
-	 * @param dirty
-	 *            the value of the dirty flag.
+	 * @param dirty the value of the dirty flag.
 	 */
 	public void setDirty(boolean dirty);
 

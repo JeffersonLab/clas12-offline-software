@@ -15,6 +15,6 @@ package cnuphys.splot.pdata;
  *         <li><code>STRIP</code> xy strip chart
  */
 public enum DataSetType {
-    XYY, XYXY, XYEXYE, XYEEXYEE, H1D, H2D, STRIP, UNKNOWN;
+	XYY, XYXY, XYEXYE, XYEEXYEE, H1D, H2D, STRIP, UNKNOWN;
 
 }

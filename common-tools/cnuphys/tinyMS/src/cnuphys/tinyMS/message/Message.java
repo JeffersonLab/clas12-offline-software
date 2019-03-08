@@ -25,11 +25,10 @@ public class Message {
 	private byte[] _serializedBytes;
 
 	/**
-	 * Create a message with just a header. This is private. The clients should
-	 * use the static createMessage methods.
+	 * Create a message with just a header. This is private. The clients should use
+	 * the static createMessage methods.
 	 * 
-	 * @param header
-	 *            the header of the message
+	 * @param header the header of the message
 	 */
 	private Message(Header header) {
 		_header = header;
@@ -38,8 +37,7 @@ public class Message {
 	/**
 	 * Set a payload made of a single byte.
 	 * 
-	 * @param v
-	 *            the byte to use as the payload.
+	 * @param v the byte to use as the payload.
 	 */
 	public void setPayload(byte v) {
 		byte vals[] = { v };
@@ -49,8 +47,7 @@ public class Message {
 	/**
 	 * Set a payload made of a single short.
 	 * 
-	 * @param v
-	 *            the short to use as the payload.
+	 * @param v the short to use as the payload.
 	 */
 	public void setPayload(short v) {
 		short vals[] = { v };
@@ -60,8 +57,7 @@ public class Message {
 	/**
 	 * Set a payload made of a single int.
 	 * 
-	 * @param v
-	 *            the int to use as the payload.
+	 * @param v the int to use as the payload.
 	 */
 	public void setPayload(int v) {
 		int vals[] = { v };
@@ -71,8 +67,7 @@ public class Message {
 	/**
 	 * Set a payload made of a single long.
 	 * 
-	 * @param v
-	 *            the long to use as the payload.
+	 * @param v the long to use as the payload.
 	 */
 	public void setPayload(long v) {
 		long vals[] = { v };
@@ -82,8 +77,7 @@ public class Message {
 	/**
 	 * Set a payload made of a single float.
 	 * 
-	 * @param v
-	 *            the float to use as the payload.
+	 * @param v the float to use as the payload.
 	 */
 	public void setPayload(float v) {
 		float vals[] = { v };
@@ -93,8 +87,7 @@ public class Message {
 	/**
 	 * Set a payload made of a single double.
 	 * 
-	 * @param v
-	 *            the double to use as the payload.
+	 * @param v the double to use as the payload.
 	 */
 	public void setPayload(double v) {
 		double vals[] = { v };
@@ -102,12 +95,11 @@ public class Message {
 	}
 
 	/**
-	 * Add (or replace) a payload to the message. If the payload doesn't match
-	 * any of the recognized data types, a null payload is used.
+	 * Add (or replace) a payload to the message. If the payload doesn't match any
+	 * of the recognized data types, a null payload is used.
 	 * 
-	 * @param payload
-	 *            the payload to add to the message. Should be one of the known
-	 *            data types. @see cnuphys.tinyMS.common.DataType
+	 * @param payload the payload to add to the message. Should be one of the known
+	 *                data types. @see cnuphys.tinyMS.common.DataType
 	 */
 	public void setPayload(Object payload) {
 
@@ -115,9 +107,10 @@ public class Message {
 		DataType dtype = DataType.NO_DATA;
 
 		_payload = payload;
-		
+
 		/*
-		 * len is ALWAYS the length in bytes, so must multiply by the size of the atoming type
+		 * len is ALWAYS the length in bytes, so must multiply by the size of the
+		 * atoming type
 		 */
 
 		if (payload == null) {
@@ -128,23 +121,23 @@ public class Message {
 		} else if (payload instanceof short[]) {
 			dtype = DataType.SHORT_ARRAY;
 			// for a short array, len is the number of elements
-			len = 2*((short[]) payload).length;
+			len = 2 * ((short[]) payload).length;
 		} else if (payload instanceof int[]) {
 			dtype = DataType.INT_ARRAY;
 			// for an int array, len is the number of elements
-			len = 4*((int[]) payload).length;
+			len = 4 * ((int[]) payload).length;
 		} else if (payload instanceof long[]) {
 			dtype = DataType.LONG_ARRAY;
 			// for a long array, len is the number of elements
-			len = 8*((long[]) payload).length;
+			len = 8 * ((long[]) payload).length;
 		} else if (payload instanceof float[]) {
 			dtype = DataType.FLOAT_ARRAY;
 			// for a float array, len is the number of elements
-			len = 4*((float[]) payload).length;
+			len = 4 * ((float[]) payload).length;
 		} else if (payload instanceof double[]) {
 			dtype = DataType.DOUBLE_ARRAY;
 			// for a double array, len is the number of elements
-			len = 8*((double[]) payload).length;
+			len = 8 * ((double[]) payload).length;
 		} else if (payload instanceof String) {
 			dtype = DataType.STRING;
 			// for a single string, len is the char length of the string
@@ -175,12 +168,9 @@ public class Message {
 	/**
 	 * Send a message to the server to be logged
 	 * 
-	 * @param clientId
-	 *            the client id
-	 * @param level
-	 *            the level of the log message
-	 * @param logStr
-	 *            the actual string to log at the server
+	 * @param clientId the client id
+	 * @param level    the level of the log message
+	 * @param logStr   the actual string to log at the server
 	 * @return the message
 	 */
 	public static Message createServerLogMessage(int clientId, Log.Level level, String logStr) {
@@ -191,11 +181,10 @@ public class Message {
 	}
 
 	/**
-	 * Convenience routine for the server to create a ping message. The ping
-	 * message originates on the server. The client sends it back.
+	 * Convenience routine for the server to create a ping message. The ping message
+	 * originates on the server. The client sends it back.
 	 * 
-	 * @param clientId
-	 *            the id of the destination client
+	 * @param clientId the id of the destination client
 	 * @return a Message with type MessageType.PING. These are initiated by the
 	 *         server.
 	 */
@@ -209,13 +198,11 @@ public class Message {
 
 	/**
 	 * Convenience routine to create a handshake message. These originate on the
-	 * server and are sent to the client when he first connects. The response
-	 * from the client is used to verify the client as trusted. This message,
-	 * when it arrives at the client, will also serve to notify the client of
-	 * his own Id.
+	 * server and are sent to the client when he first connects. The response from
+	 * the client is used to verify the client as trusted. This message, when it
+	 * arrives at the client, will also serve to notify the client of his own Id.
 	 * 
-	 * @param clientId
-	 *            the id of the destination client
+	 * @param clientId the id of the destination client
 	 * @return a message of type Message.HANDSHAKE
 	 */
 	public static Message createHandshakeMessage(int clientId) {
@@ -224,11 +211,10 @@ public class Message {
 	}
 
 	/**
-	 * Convenience routine to create a logout message. It should only originate
-	 * from a client, the client is telling the server he is logging out.
+	 * Convenience routine to create a logout message. It should only originate from
+	 * a client, the client is telling the server he is logging out.
 	 * 
-	 * @param clientId
-	 *            the id of the client logging out
+	 * @param clientId the id of the client logging out
 	 * @return a message of type Message.LOGOUT
 	 */
 	public static Message createLogoutMessage(int clientId) {
@@ -239,10 +225,8 @@ public class Message {
 	/**
 	 * Convenience routine to create a subscribe message.
 	 * 
-	 * @param clientId
-	 *            the id of the client subscribing
-	 * @param topic
-	 *            the topic
+	 * @param clientId the id of the client subscribing
+	 * @param topic    the topic
 	 * @return a message of type Message.SUBSCRIBE
 	 */
 	public static Message createSubscribeMessage(int clientId, String topic) {
@@ -255,10 +239,8 @@ public class Message {
 	/**
 	 * Convenience routine to create an unsubscribe message.
 	 * 
-	 * @param clientId
-	 *            the id of the client unsubscribing
-	 * @param topic
-	 *            the topic
+	 * @param clientId the id of the client unsubscribing
+	 * @param topic    the topic
 	 * @return a message of type Message.UNSUBSCRIBE
 	 */
 	public static Message createUnsubscribeMessage(int clientId, String topic) {
@@ -269,11 +251,10 @@ public class Message {
 	}
 
 	/**
-	 * Convenience routine to create a shutdown message. It should only
-	 * originate from the server, telling the client to shutdown.
+	 * Convenience routine to create a shutdown message. It should only originate
+	 * from the server, telling the client to shutdown.
 	 * 
-	 * @param clientId
-	 *            the id of the client being shut down
+	 * @param clientId the id of the client being shut down
 	 * @return a message of type Message.SHUTDOWN
 	 */
 	public static Message createShutdownMessage(int clientId) {
@@ -282,14 +263,11 @@ public class Message {
 	}
 
 	/**
-	 * Convenience routine to create a client message with no payload. You can
-	 * then Set a payload with {@link setPayload}. This uses the default tag of
-	 * 0.
+	 * Convenience routine to create a client message with no payload. You can then
+	 * Set a payload with {@link setPayload}. This uses the default tag of 0.
 	 * 
-	 * @param clientId
-	 *            the id of the client sending the message
-	 * @param topic
-	 *            the topic of the message
+	 * @param clientId the id of the client sending the message
+	 * @param topic    the topic of the message
 	 * @return a message of type Message.DATA
 	 */
 	public static Message createMessage(int clientId, String topic) {
@@ -297,15 +275,12 @@ public class Message {
 	}
 
 	/**
-	 * Convenience routine to create a client message with no payload. You can
-	 * then Set a payload with {@link setPayload}.
+	 * Convenience routine to create a client message with no payload. You can then
+	 * Set a payload with {@link setPayload}.
 	 * 
-	 * @param clientId
-	 *            the id of the client sending the message
-	 * @param tag
-	 *            an optional tag
-	 * @param topic
-	 *            the topic of the message
+	 * @param clientId the id of the client sending the message
+	 * @param tag      an optional tag
+	 * @param topic    the topic of the message
 	 * @return a message of type Message.DATA
 	 */
 	public static Message createMessage(int clientId, short tag, String topic) {
@@ -462,8 +437,8 @@ public class Message {
 	}
 
 	/**
-	 * Get the tag of the message. The tag is not used internally. It is an
-	 * extra (and optional) id hook that can be used by clients.
+	 * Get the tag of the message. The tag is not used internally. It is an extra
+	 * (and optional) id hook that can be used by clients.
 	 * 
 	 * @return the message tag
 	 */
@@ -510,11 +485,11 @@ public class Message {
 	}
 
 	/**
-	 * If true, the bytes were swapped when creating this header from a read of
-	 * a DataInputStream.
+	 * If true, the bytes were swapped when creating this header from a read of a
+	 * DataInputStream.
 	 * 
-	 * @return <code>true</code> if the header required a swap to match the
-	 *         magic word. If so, the payload will require swapping too.
+	 * @return <code>true</code> if the header required a swap to match the magic
+	 *         word. If so, the payload will require swapping too.
 	 */
 	public boolean isSwap() {
 		return _header.isSwap();
@@ -534,8 +509,7 @@ public class Message {
 	/**
 	 * Read a message from an input stream
 	 * 
-	 * @param inputStream
-	 *            the stream to read from
+	 * @param inputStream the stream to read from
 	 * @return the message, if successful
 	 * @throws IOException
 	 * @throws EOFException
@@ -560,10 +534,10 @@ public class Message {
 	// read the payload
 	private static void readPayload(Message message, DataInputStream inputStream, DataType dtype, int len)
 			throws IOException {
-		
+
 		/*
-		 * len is ALWAYS the length in bytes, so must divide by the size of the atomic type
-		 * to get the array len
+		 * len is ALWAYS the length in bytes, so must divide by the size of the atomic
+		 * type to get the array len
 		 */
 
 		switch (dtype) {
@@ -656,8 +630,7 @@ public class Message {
 	/**
 	 * Write the message to an output stream.
 	 * 
-	 * @param outputStream
-	 *            the output stream to write to.
+	 * @param outputStream the output stream to write to.
 	 * @throws IOException
 	 */
 	protected void writeMessage(DataOutputStream outputStream) throws IOException {
@@ -677,9 +650,10 @@ public class Message {
 	// write the payload to an output stream
 
 	private void writePayload(DataOutputStream outputStream) throws IOException {
-		
+
 		/*
-		 * getDataLength() is ALWAYS the length in bytes, so must divide by the size of the atomic type
+		 * getDataLength() is ALWAYS the length in bytes, so must divide by the size of
+		 * the atomic type
 		 */
 
 		try {
@@ -690,35 +664,35 @@ public class Message {
 
 			case SHORT_ARRAY:
 				short shorts[] = (short[]) _payload;
-				for (int i = 0; i < getDataLength()/2; i++) {
+				for (int i = 0; i < getDataLength() / 2; i++) {
 					outputStream.writeShort(shorts[i]);
 				}
 				break;
 
 			case INT_ARRAY:
 				int ints[] = (int[]) _payload;
-				for (int i = 0; i < getDataLength()/4; i++) {
+				for (int i = 0; i < getDataLength() / 4; i++) {
 					outputStream.writeInt(ints[i]);
 				}
 				break;
 
 			case LONG_ARRAY:
 				long longs[] = (long[]) _payload;
-				for (int i = 0; i < getDataLength()/8; i++) {
+				for (int i = 0; i < getDataLength() / 8; i++) {
 					outputStream.writeLong(longs[i]);
 				}
 				break;
 
 			case FLOAT_ARRAY:
 				float floats[] = (float[]) _payload;
-				for (int i = 0; i < getDataLength()/4; i++) {
+				for (int i = 0; i < getDataLength() / 4; i++) {
 					outputStream.writeFloat(floats[i]);
 				}
 				break;
 
 			case DOUBLE_ARRAY:
 				double doubles[] = (double[]) _payload;
-				for (int i = 0; i < getDataLength()/8; i++) {
+				for (int i = 0; i < getDataLength() / 8; i++) {
 					outputStream.writeDouble(doubles[i]);
 				}
 				break;
@@ -745,8 +719,8 @@ public class Message {
 			} // end switch
 		} catch (SocketException e) {
 
-			String ms = "Socket exception when writing a mesage payload." + 
-			"\nThe message data type is " + getDataType();
+			String ms = "Socket exception when writing a mesage payload." + "\nThe message data type is "
+					+ getDataType();
 			System.out.println(ms);
 			e.printStackTrace();
 		}
@@ -755,8 +729,7 @@ public class Message {
 	/**
 	 * Farm out a message for a processor
 	 * 
-	 * @param processor
-	 *            the processor
+	 * @param processor the processor
 	 */
 	public void process(IMessageProcessor processor) {
 

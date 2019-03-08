@@ -29,15 +29,12 @@ public class FourPoints2D {
 	/**
 	 * Add another point. The index will be incremented
 	 * 
-	 * @param x
-	 *            the horizontal coordinate
-	 * @param y
-	 *            the vertical coordinate
+	 * @param x the horizontal coordinate
+	 * @param y the vertical coordinate
 	 */
 	public void add(double x, double y) {
 		if (_currentIndex > 3) {
-			System.err
-					.println("Cannot add a fifth point to this FourPoints2D object");
+			System.err.println("Cannot add a fifth point to this FourPoints2D object");
 			return;
 		}
 		_points[_currentIndex] = new Point2D.Double(x, y);
@@ -47,8 +44,7 @@ public class FourPoints2D {
 	/**
 	 * Get the point for a given index
 	 * 
-	 * @param index
-	 *            should be [0..3]
+	 * @param index should be [0..3]
 	 * @return the corresponding point
 	 */
 	public Point2D.Double get(int index) {

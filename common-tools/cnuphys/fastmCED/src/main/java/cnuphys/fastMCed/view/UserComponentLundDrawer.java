@@ -20,8 +20,7 @@ import cnuphys.lund.LundId;
 public class UserComponentLundDrawer extends AUserComponentDrawer {
 
 	// convenience reference to event manager
-	private static PhysicsEventManager _eventManager = PhysicsEventManager
-			.getInstance();
+	private static PhysicsEventManager _eventManager = PhysicsEventManager.getInstance();
 
 	public UserComponentLundDrawer(AView view) {
 		super(view);
@@ -30,10 +29,8 @@ public class UserComponentLundDrawer extends AUserComponentDrawer {
 	/**
 	 * Draw on the component.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on the view.
+	 * @param g         the graphics context.
+	 * @param container the container on the view.
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {

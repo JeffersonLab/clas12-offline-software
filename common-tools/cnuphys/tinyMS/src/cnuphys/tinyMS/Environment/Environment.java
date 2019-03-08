@@ -81,8 +81,7 @@ public final class Environment {
 
 			// Get host address
 			_hostAddress = addr.getHostAddress();
-		}
-		catch (UnknownHostException e) {
+		} catch (UnknownHostException e) {
 			_hostName = "???";
 			_hostAddress = "???";
 		}
@@ -94,8 +93,7 @@ public final class Environment {
 		Iterator<ImageWriter> iterator = ImageIO.getImageWritersByFormatName("png");
 		if ((iterator == null) || !iterator.hasNext()) {
 			System.out.println("no png writer");
-		}
-		else {
+		} else {
 			_pngWriter = iterator.next(); // take the first
 		}
 
@@ -159,15 +157,13 @@ public final class Environment {
 	/**
 	 * Convenience routine for getting a system property.
 	 * 
-	 * @param keyName
-	 *            the key name of the property
+	 * @param keyName the key name of the property
 	 * @return the property, or <code>null</null>.
 	 */
 	private String getProperty(String keyName) {
 		try {
 			return System.getProperty(keyName);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			return null;
 		}
 	}
@@ -281,8 +277,7 @@ public final class Environment {
 	/**
 	 * On Mac, uses the say command to say something.
 	 * 
-	 * @param sayThis
-	 *            the string to say
+	 * @param sayThis the string to say
 	 */
 	public void say(String sayThis) {
 		if (sayThis == null) {
@@ -291,8 +286,7 @@ public final class Environment {
 		if (isMac()) {
 			try {
 				Runtime.getRuntime().exec("say -v Karen " + sayThis);
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -336,8 +330,7 @@ public final class Environment {
 			String arry[] = { UIManager.getSystemLookAndFeelClassName(), "Metal", "CDE/Motif", "Nimbus",
 					UIManager.getCrossPlatformLookAndFeelClassName() };
 			preferredLnF = arry;
-		}
-		else {
+		} else {
 			String arry[] = { UIManager.getSystemLookAndFeelClassName(), "Windows",
 					UIManager.getCrossPlatformLookAndFeelClassName() };
 			preferredLnF = arry;
@@ -358,8 +351,7 @@ public final class Environment {
 
 						defaults.put("RadioButtonMenuItem.checkIcon", MetalIconFactory.getRadioButtonMenuItemIcon());
 						return;
-					}
-					catch (Exception e) {
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
@@ -378,10 +370,8 @@ public final class Environment {
 	/**
 	 * Useful for making common look components
 	 * 
-	 * @param component
-	 *            the component
-	 * @param color
-	 *            the background color--if <code>null</code> use default.
+	 * @param component the component
+	 * @param color     the background color--if <code>null</code> use default.
 	 */
 	public void commonize(JComponent component, Color color) {
 		component.setOpaque(true);
@@ -392,8 +382,7 @@ public final class Environment {
 	/**
 	 * Print a memory report
 	 * 
-	 * @param message
-	 *            a message to add on
+	 * @param message a message to add on
 	 */
 	public static String memoryReport(String message) {
 		System.gc();
@@ -457,8 +446,7 @@ public final class Environment {
 	/**
 	 * Main program for testing.
 	 * 
-	 * @param arg
-	 *            command line arguments (ignored).
+	 * @param arg command line arguments (ignored).
 	 */
 	public static void main(String arg[]) {
 		Environment env = Environment.getInstance();

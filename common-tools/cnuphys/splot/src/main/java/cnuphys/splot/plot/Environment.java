@@ -73,18 +73,15 @@ public final class Environment {
 		}
 
 		// any png image writers?
-		Iterator<ImageWriter> iterator = ImageIO
-				.getImageWritersByFormatName("png");
+		Iterator<ImageWriter> iterator = ImageIO.getImageWritersByFormatName("png");
 		if ((iterator == null) || !iterator.hasNext()) {
 			System.err.println("no png writer");
-		}
-		else {
+		} else {
 			_pngWriter = iterator.next(); // take the first
 		}
 
 		// icon for about ced dialog
-		_cnuIcon = ImageManager.getInstance()
-				.loadImageIcon("images/cnuicon.png");
+		_cnuIcon = ImageManager.getInstance().loadImageIcon("images/cnuicon.png");
 
 	}
 
@@ -228,11 +225,9 @@ public final class Environment {
 		sb.append("Temp Directory: " + getTempDirectory() + "\n");
 		sb.append("OS Name: " + getOsName() + "\n");
 		sb.append("Home Directory: " + getHomeDirectory() + "\n");
-		sb.append("Current Working Directory: " + getCurrentWorkingDirectory()
-				+ "\n");
+		sb.append("Current Working Directory: " + getCurrentWorkingDirectory() + "\n");
 		sb.append("Class Path: " + getClassPath() + "\n");
-		sb.append("PNG Writer: " + ((_pngWriter == null) ? "none" : _pngWriter)
-				+ "\n");
+		sb.append("PNG Writer: " + ((_pngWriter == null) ? "none" : _pngWriter) + "\n");
 		return sb.toString();
 	}
 
@@ -286,8 +281,7 @@ public final class Environment {
 	 */
 	public Color getDefaultPanelBackgroundColor() {
 		if (_defaultPanelBackgroundColor == null) {
-			_defaultPanelBackgroundColor = UIManager
-					.getColor("Panel.background");
+			_defaultPanelBackgroundColor = UIManager.getColor("Panel.background");
 			if (_defaultPanelBackgroundColor == null) {
 				_defaultPanelBackgroundColor = new Color(238, 238, 238);
 			}
@@ -300,7 +294,7 @@ public final class Environment {
 	 * Useful for making common look components
 	 * 
 	 * @param component the component
-	 * @param color the background color--if <code>null</code> use default.
+	 * @param color     the background color--if <code>null</code> use default.
 	 */
 	public void commonize(JComponent component, Color color) {
 		component.setOpaque(true);
@@ -323,12 +317,9 @@ public final class Environment {
 		if (message != null) {
 			System.err.println(message);
 		}
-		System.err.println("Total memory in JVM: "
-				+ DoubleFormat.doubleFormat(total, 1) + "MB");
-		System.err.println(" Free memory in JVM: "
-				+ DoubleFormat.doubleFormat(free, 1) + "MB");
-		System.err.println(" Used memory in JVM: "
-				+ DoubleFormat.doubleFormat(used, 1) + "MB");
+		System.err.println("Total memory in JVM: " + DoubleFormat.doubleFormat(total, 1) + "MB");
+		System.err.println(" Free memory in JVM: " + DoubleFormat.doubleFormat(free, 1) + "MB");
+		System.err.println(" Used memory in JVM: " + DoubleFormat.doubleFormat(used, 1) + "MB");
 		System.err.println();
 	}
 

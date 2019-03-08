@@ -14,19 +14,17 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
-
 public class StreamCapturePane extends JScrollPane {
 
 	private static final Color transparent = new Color(0, 0, 0, 0);
 
 	// red terminal
-	public static SimpleAttributeSet RED_TERMINAL = createStyle(Color.red,
-			transparent, "monospaced", 11, false, false);
+	public static SimpleAttributeSet RED_TERMINAL = createStyle(Color.red, transparent, "monospaced", 11, false, false);
 
 	// black terminal
-	public static SimpleAttributeSet BLACK_TERMINAL = createStyle(Color.black,
-			transparent, "monospaced", 11, false, false);
-	
+	public static SimpleAttributeSet BLACK_TERMINAL = createStyle(Color.black, transparent, "monospaced", 11, false,
+			false);
+
 	private Vector<CachedText> _cachedText = new Vector<CachedText>();
 
 	/**
@@ -38,29 +36,28 @@ public class StreamCapturePane extends JScrollPane {
 
 	protected SimpleAttributeSet defaultStyle = BLACK_TERMINAL;
 
-	//captured printstreams for err and out
+	// captured printstreams for err and out
 	private CapturedPrintStream _outCps;
 	private CapturedPrintStream _errCps;
-	
+
 	private PrintStream stdErr;
 	private PrintStream stdOut;
-	
+
 	/**
 	 * Constructor will also create the text pane itself.
 	 * 
 	 */
 	public StreamCapturePane() {
 		super();
-		
+
 		stdErr = System.err;
 		stdOut = System.out;
-				
-		
+
 		createTextPane();
 		textPane.setBackground(Color.white);
 		getViewport().add(textPane);
-		
-		//capture stdout and stdin
+
+		// capture stdout and stdin
 		_outCps = new CapturedPrintStream() {
 
 			@Override
@@ -75,8 +72,8 @@ public class StreamCapturePane extends JScrollPane {
 				_cachedText.add(new CachedText(s, CachedText.STDOUT));
 			}
 		};
-		
-		//capture stdout and stdin
+
+		// capture stdout and stdin
 		_errCps = new CapturedPrintStream() {
 
 			@Override
@@ -91,11 +88,11 @@ public class StreamCapturePane extends JScrollPane {
 				_cachedText.add(new CachedText(s, CachedText.STDERR));
 			}
 		};
-		
+
 		System.setOut(_outCps);
 		System.setErr(_errCps);
 	}
-	
+
 	public void writeCachedText() {
 		try {
 			for (CachedText ct : _cachedText) {
@@ -105,17 +102,16 @@ public class StreamCapturePane extends JScrollPane {
 
 		}
 	}
-	
+
 	public void unCapture() {
 		System.setOut(stdOut);
 		System.setErr(stdErr);
 	}
-	
+
 	/**
 	 * Set the background, by setting the underlying text pane's background.
 	 * 
-	 * @param c
-	 *            the color to use.
+	 * @param c the color to use.
 	 */
 	@Override
 	public void setBackground(Color c) {
@@ -128,73 +124,50 @@ public class StreamCapturePane extends JScrollPane {
 	/**
 	 * Create a style, not underlined, no with default spacing.
 	 * 
-	 * @param fg
-	 *            the foreground color.
-	 * @param fontFamily
-	 *            the font family to use,
-	 * @param fontSize
-	 *            the font size to use,
-	 * @param italic
-	 *            if <code>true</code>, use italic.
-	 * @param bold
-	 *            if <code>true</code>, make bold.
+	 * @param fg         the foreground color.
+	 * @param fontFamily the font family to use,
+	 * @param fontSize   the font size to use,
+	 * @param italic     if <code>true</code>, use italic.
+	 * @param bold       if <code>true</code>, make bold.
 	 * @return the style.
 	 */
-	public static SimpleAttributeSet createStyle(Color fg, String fontFamily,
-			int fontSize, boolean italic, boolean bold) {
-		return createStyle(fg, Color.white, fontFamily, fontSize, italic, bold,
-				false, 0, 2);
+	public static SimpleAttributeSet createStyle(Color fg, String fontFamily, int fontSize, boolean italic,
+			boolean bold) {
+		return createStyle(fg, Color.white, fontFamily, fontSize, italic, bold, false, 0, 2);
 	}
 
 	/**
 	 * Create a style, not underlined with default spacing.
 	 * 
-	 * @param fg
-	 *            the foreground color.
-	 * @param bg
-	 *            the background color.
-	 * @param fontFamily
-	 *            the font family to use,
-	 * @param fontSize
-	 *            the font size to use,
-	 * @param italic
-	 *            if <code>true</code>, use italic.
-	 * @param bold
-	 *            if <code>true</code>, make bold.
+	 * @param fg         the foreground color.
+	 * @param bg         the background color.
+	 * @param fontFamily the font family to use,
+	 * @param fontSize   the font size to use,
+	 * @param italic     if <code>true</code>, use italic.
+	 * @param bold       if <code>true</code>, make bold.
 	 * @return the style.
 	 */
-	public static SimpleAttributeSet createStyle(Color fg, Color bg,
-			String fontFamily, int fontSize, boolean italic, boolean bold) {
-		return createStyle(fg, bg, fontFamily, fontSize, italic, bold, false,
-				0, 2);
+	public static SimpleAttributeSet createStyle(Color fg, Color bg, String fontFamily, int fontSize, boolean italic,
+			boolean bold) {
+		return createStyle(fg, bg, fontFamily, fontSize, italic, bold, false, 0, 2);
 	}
 
 	/**
 	 * Create a style
 	 * 
-	 * @param fg
-	 *            the foreground color.
-	 * @param bg
-	 *            the background color.
-	 * @param fontFamily
-	 *            the font family to use,
-	 * @param fontSize
-	 *            the font size to use,
-	 * @param italic
-	 *            if <code>true</code>, use italic.
-	 * @param bold
-	 *            if <code>true</code>, make bold.
-	 * @param underline
-	 *            if <code>true</code>, underline.
-	 * @param spaceAbove
-	 *            space above.
-	 * @param spaceBelow
-	 *            space below.
+	 * @param fg         the foreground color.
+	 * @param bg         the background color.
+	 * @param fontFamily the font family to use,
+	 * @param fontSize   the font size to use,
+	 * @param italic     if <code>true</code>, use italic.
+	 * @param bold       if <code>true</code>, make bold.
+	 * @param underline  if <code>true</code>, underline.
+	 * @param spaceAbove space above.
+	 * @param spaceBelow space below.
 	 * @return the style.
 	 */
-	public static SimpleAttributeSet createStyle(Color fg, Color bg,
-			String fontFamily, int fontSize, boolean italic, boolean bold,
-			boolean underline, int spaceAbove, int spaceBelow) {
+	public static SimpleAttributeSet createStyle(Color fg, Color bg, String fontFamily, int fontSize, boolean italic,
+			boolean bold, boolean underline, int spaceAbove, int spaceBelow) {
 		SimpleAttributeSet style = new SimpleAttributeSet();
 		StyleConstants.setForeground(style, fg);
 		StyleConstants.setBackground(style, bg);
@@ -230,8 +203,7 @@ public class StreamCapturePane extends JScrollPane {
 	/**
 	 * Append a message to the underlying text area.
 	 * 
-	 * @param text
-	 *            the message to append.
+	 * @param text the message to append.
 	 */
 
 	public void append(String text) {
@@ -241,11 +213,9 @@ public class StreamCapturePane extends JScrollPane {
 	/**
 	 * Append some text with a specific style.
 	 * 
-	 * @param text
-	 *            the text to append.
-	 * @param style
-	 *            the style to use, can be one of the class constants such as
-	 *            BOLD_RED.
+	 * @param text  the text to append.
+	 * @param style the style to use, can be one of the class constants such as
+	 *              BOLD_RED.
 	 */
 	public void append(final String text, final AttributeSet style) {
 		baseAppend(text, style);
@@ -256,13 +226,10 @@ public class StreamCapturePane extends JScrollPane {
 	/**
 	 * Append some text with a specific style.
 	 * 
-	 * @param text
-	 *            the text to append.
-	 * @param style
-	 *            the style to use, can be one of the class constants such as
-	 *            BOLD_RED.
-	 * @param writeTime
-	 *            if <code>true</code> writes out a time stamp.
+	 * @param text      the text to append.
+	 * @param style     the style to use, can be one of the class constants such as
+	 *                  BOLD_RED.
+	 * @param writeTime if <code>true</code> writes out a time stamp.
 	 */
 	private void baseAppend(final String text, final AttributeSet style) {
 		if (text == null) {
@@ -305,8 +272,7 @@ public class StreamCapturePane extends JScrollPane {
 	/**
 	 * Set the default style.
 	 * 
-	 * @param defaultStyle
-	 *            the new default style
+	 * @param defaultStyle the new default style
 	 */
 	public void setDefaultStyle(SimpleAttributeSet defaultStyle) {
 		this.defaultStyle = defaultStyle;

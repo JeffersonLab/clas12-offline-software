@@ -45,11 +45,9 @@ public class PrintUtilities implements Printable {
 			// nt.concatenate(g2d.getTransform());
 			// g2d.setTransform(nt);
 
-			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-					RenderingHints.VALUE_ANTIALIAS_OFF);
+			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-			g2d.translate(pageFormat.getImageableX(),
-					pageFormat.getImageableY());
+			g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
 
 			// TODO CACULATE CORRECT SCALE FACTOR
 			g2d.scale(0.75, 0.75);

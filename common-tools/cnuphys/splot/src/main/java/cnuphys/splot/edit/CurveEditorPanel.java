@@ -33,17 +33,14 @@ import cnuphys.splot.style.LineStyle;
 import cnuphys.splot.style.StyleEditorPanel;
 import cnuphys.splot.style.SymbolType;
 
-public class CurveEditorPanel extends JPanel
-		implements ActionListener, PropertyChangeListener {
+public class CurveEditorPanel extends JPanel implements ActionListener, PropertyChangeListener {
 
 	// the underlying plot canvas
 	protected PlotCanvas _plotCanvas;
 
 	// list font
-	protected static Font _listFont = Environment.getInstance()
-			.getCommonFont(12);
-	protected static Font _textFont = Environment.getInstance()
-			.getCommonFont(10);
+	protected static Font _listFont = Environment.getInstance().getCommonFont(12);
+	protected static Font _textFont = Environment.getInstance().getCommonFont(10);
 
 	// curve table
 	private CurveTable _curveTable;
@@ -119,8 +116,7 @@ public class CurveEditorPanel extends JPanel
 		JPanel nPanel = getOpaquePanel();
 		nPanel.setLayout(new BorderLayout(0, 4));
 
-		Collection<DataColumn> ycols = _plotCanvas.getDataSet()
-				.getAllColumnsByType(DataColumnType.Y);
+		Collection<DataColumn> ycols = _plotCanvas.getDataSet().getAllColumnsByType(DataColumnType.Y);
 		final DefaultListModel<DataColumn> model = new DefaultListModel<DataColumn>();
 		for (DataColumn dc : ycols) {
 			model.addElement(dc);
@@ -184,7 +180,6 @@ public class CurveEditorPanel extends JPanel
 			_stylePanel.getLineWidthSelector().addPropertyChangeListener(this);
 		}
 
-
 		IColorChangeListener iccl = new IColorChangeListener() {
 
 			@Override
@@ -193,12 +188,9 @@ public class CurveEditorPanel extends JPanel
 				if (curve != null) {
 
 					if (component == _stylePanel.getSymbolColor()) {
-						curve.getStyle().setFillColor(
-								_stylePanel.getSymbolColor().getColor());
-					}
-					else if (component == _stylePanel.getLineColor()) {
-						curve.getStyle().setLineColor(
-								_stylePanel.getLineColor().getColor());
+						curve.getStyle().setFillColor(_stylePanel.getSymbolColor().getColor());
+					} else if (component == _stylePanel.getLineColor()) {
+						curve.getStyle().setLineColor(_stylePanel.getLineColor().getColor());
 					}
 					_plotCanvas.repaint();
 				}
@@ -240,12 +232,9 @@ public class CurveEditorPanel extends JPanel
 		_textArea.setContentType("text/html");
 
 		if (Environment.getInstance().isLinux()) {
-			_textArea.setText(
-					"<body style=\"font-size:10px;color:blue\">CNU sPlot</body>");
-		}
-		else {
-			_textArea.setText(
-					"<body style=\"font-size:11px;color:blue\">CNU sPlot</body>");
+			_textArea.setText("<body style=\"font-size:10px;color:blue\">CNU sPlot</body>");
+		} else {
+			_textArea.setText("<body style=\"font-size:11px;color:blue\">CNU sPlot</body>");
 		}
 		JScrollPane scrollPane = new JScrollPane(_textArea);
 		scrollPane.setBorder(new CommonBorder("Fit Parameters"));
@@ -276,27 +265,23 @@ public class CurveEditorPanel extends JPanel
 		Object source = e.getSource();
 		if (source == _stylePanel.getSymbolSelector()) {
 			EnumComboBox ecb = (EnumComboBox) source;
-			SymbolType stype = SymbolType
-					.getValue((String) ecb.getSelectedItem());
+			SymbolType stype = SymbolType.getValue((String) ecb.getSelectedItem());
 
 			if (curve.getStyle().getSymbolType() != stype) {
 				curve.getStyle().setSymbolType(stype);
 				_plotCanvas.repaint();
 			}
 
-		}
-		else if (source == _stylePanel.getLineSelector()) {
+		} else if (source == _stylePanel.getLineSelector()) {
 			EnumComboBox ecb = (EnumComboBox) source;
-			LineStyle lineStyle = LineStyle
-					.getValue((String) ecb.getSelectedItem());
+			LineStyle lineStyle = LineStyle.getValue((String) ecb.getSelectedItem());
 
 			if (curve.getStyle().getLineStyle() != lineStyle) {
 				curve.getStyle().setLineStyle(lineStyle);
 				_plotCanvas.repaint();
 			}
 
-		}
-		else if (source == _fitPanel.getFitSelector()) {
+		} else if (source == _fitPanel.getFitSelector()) {
 			EnumComboBox ecb = (EnumComboBox) source;
 			FitType fitType = FitType.getValue((String) ecb.getSelectedItem());
 
@@ -315,8 +300,8 @@ public class CurveEditorPanel extends JPanel
 	}
 
 	/**
-	 * The canvas or a widget has fired a property change. This is used as a
-	 * simple notification mechanism.
+	 * The canvas or a widget has fired a property change. This is used as a simple
+	 * notification mechanism.
 	 */
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
@@ -324,8 +309,7 @@ public class CurveEditorPanel extends JPanel
 		if (PlotCanvas.DONEDRAWINGPROP.equals(evt.getPropertyName())) {
 			setTextArea();
 			return;
-		}
-		else if (PlotCanvas.DATACLEAREDPROP.equals(evt.getPropertyName())) {
+		} else if (PlotCanvas.DATACLEAREDPROP.equals(evt.getPropertyName())) {
 			// all plot data cleared
 			_curveTable.clear();
 			return;
@@ -345,10 +329,10 @@ public class CurveEditorPanel extends JPanel
 				_plotCanvas.repaint();
 			}
 		}
-		
+
 		if (StyleEditorPanel.LINEWIDTHPROP.equals(evt.getPropertyName())) {
 			int lwidth = (Integer) evt.getNewValue();
-			float fwidth = (lwidth/2.f);
+			float fwidth = (lwidth / 2.f);
 			IStyled style = curve.getStyle();
 			System.err.println("Setting line width to: " + fwidth);
 			if (style.getLineWidth() != fwidth) {
@@ -357,9 +341,7 @@ public class CurveEditorPanel extends JPanel
 			}
 		}
 
-
-		else if (FitEditorPanel.POLYNOMIALORDERPROP
-				.equals(evt.getPropertyName())) {
+		else if (FitEditorPanel.POLYNOMIALORDERPROP.equals(evt.getPropertyName())) {
 			int porder = (Integer) evt.getNewValue();
 			Fit fit = curve.getFit();
 			if (fit.getPolynomialOrder() != porder) {

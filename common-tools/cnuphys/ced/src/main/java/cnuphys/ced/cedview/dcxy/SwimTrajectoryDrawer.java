@@ -21,10 +21,8 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	/**
 	 * Actual drawing method
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the base container
+	 * @param g         the graphics context
+	 * @param container the base container
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
@@ -34,13 +32,11 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	}
 
 	/**
-	 * Here we have a chance to veto a trajectory. For example, we may decide
-	 * that the trajectory won't appear on this view (assuming a view owns this
-	 * drawer) and so don't bother to compute it. The default implementation
-	 * vetoes nothing.
+	 * Here we have a chance to veto a trajectory. For example, we may decide that
+	 * the trajectory won't appear on this view (assuming a view owns this drawer)
+	 * and so don't bother to compute it. The default implementation vetoes nothing.
 	 * 
-	 * @param trajectory
-	 *            the trajectory to test.
+	 * @param trajectory the trajectory to test.
 	 * @return <code>true</code> if this trajectory is vetoed.
 	 */
 	@Override
@@ -51,10 +47,8 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	/**
 	 * Just us the xy coordinates directly. Ignore z.
 	 * 
-	 * @param v3d
-	 *            the 3D vector (meters)
-	 * @param wp
-	 *            the projected world point.
+	 * @param v3d the 3D vector (meters)
+	 * @param wp  the projected world point.
 	 */
 	@Override
 	public void project(double[] v3d, Point2D.Double wp) {

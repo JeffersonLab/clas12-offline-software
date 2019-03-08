@@ -9,11 +9,10 @@ public class DefaultSwimStopper implements IStopper {
 	protected double _finalPathLength = Double.NaN;
 
 	/**
-	 * A default swim stopper that will stop if either a max pathlength is
-	 * exceeded or if a radial coordinate is exceeded
+	 * A default swim stopper that will stop if either a max pathlength is exceeded
+	 * or if a radial coordinate is exceeded
 	 * 
-	 * @param maxR
-	 *            the max radial coordinate in meters. Give a negative
+	 * @param maxR the max radial coordinate in meters. Give a negative
 	 */
 	public DefaultSwimStopper(final double maxR) {
 		_rMaxSq = maxR * maxR;
@@ -43,8 +42,7 @@ public class DefaultSwimStopper implements IStopper {
 	/**
 	 * Set the final path length in meters
 	 * 
-	 * @param finalPathLength
-	 *            the final path length in meters
+	 * @param finalPathLength the final path length in meters
 	 */
 	@Override
 	public void setFinalT(double finalPathLength) {

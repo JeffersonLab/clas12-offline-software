@@ -22,8 +22,7 @@ public class BeamLineItem extends BaseBeamLineItem {
 	/**
 	 * Create a beamline item which is a glorified line.
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
+	 * @param layer the Layer this item is on.
 	 */
 	public BeamLineItem(LogicalLayer layer) {
 		super(layer);
@@ -32,10 +31,8 @@ public class BeamLineItem extends BaseBeamLineItem {
 	/**
 	 * Custom drawer for the item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
@@ -50,7 +47,7 @@ public class BeamLineItem extends BaseBeamLineItem {
 		double targetZ = Double.NaN;
 		if (view instanceof SectorView) {
 			targetZ = ((SectorView) view).getTargetZ();
-		} 
+		}
 
 		// draw it?
 		if (!Double.isNaN(targetZ)) {
@@ -73,7 +70,6 @@ public class BeamLineItem extends BaseBeamLineItem {
 
 	// no feedback for beamline
 	@Override
-	public void getFeedbackStrings(IContainer container, Point pp,
-			Point2D.Double wp, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
 	}
 }

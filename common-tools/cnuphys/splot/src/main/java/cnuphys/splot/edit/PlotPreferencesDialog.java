@@ -44,8 +44,8 @@ public class PlotPreferencesDialog extends SimpleDialog {
 	}
 
 	/**
-	 * Override to create the component that goes in the center. Usually this is
-	 * the "main" component.
+	 * Override to create the component that goes in the center. Usually this is the
+	 * "main" component.
 	 * 
 	 * @return the component that is placed in the center
 	 */
@@ -67,8 +67,7 @@ public class PlotPreferencesDialog extends SimpleDialog {
 	protected void handleCommand(String command) {
 		if (CLOSE.equals(command)) {
 			setVisible(false);
-		}
-		else if (APPLY.equals(command)) {
+		} else if (APPLY.equals(command)) {
 			_genPanel.apply();
 		}
 	}

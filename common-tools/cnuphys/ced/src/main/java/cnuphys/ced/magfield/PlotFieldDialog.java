@@ -84,10 +84,8 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 	/**
 	 * Create the dialog for ploting the field
 	 * 
-	 * @param parent
-	 *            the parent dialog
-	 * @param modal
-	 *            the usual meaning
+	 * @param parent the parent dialog
+	 * @param modal  the usual meaning
 	 */
 	public PlotFieldDialog(JFrame parent, boolean modal) {
 		super(parent, "Magnetic Field Plotter", modal, null);
@@ -114,8 +112,7 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 
 	@Override
 	protected String[] getColumnNames() {
-		String labels[] = { "Component", "|B| (1) " + 
-				MagneticFields.getInstance().getCurrentConfiguration() };
+		String labels[] = { "Component", "|B| (1) " + MagneticFields.getInstance().getCurrentConfiguration() };
 		return labels;
 	}
 
@@ -316,8 +313,8 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 		}
 		if (hotIndex < 0) {
 			hotIndex = curveCount;
-			DataColumn newCurve = _canvas.getDataSet().addCurve("Component", "|B| (" + (hotIndex + 1) + ") " + 
-					MagneticFields.getInstance().getCurrentConfiguration());
+			DataColumn newCurve = _canvas.getDataSet().addCurve("Component",
+					"|B| (" + (hotIndex + 1) + ") " + MagneticFields.getInstance().getCurrentConfiguration());
 			newCurve.getFit().setFitType(FitType.CONNECT);
 			newCurve.getStyle().setSymbolType(SymbolType.NOSYMBOL);
 			newCurve.getStyle().setLineColor(_curveColors[hotIndex % _curveColors.length]);
@@ -329,7 +326,7 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 		double min = _varPanels[_whichVaries].getMinValue();
 		double max = _varPanels[_whichVaries].getMaxValue();
 		double del = (max - min) / (_numPlotPoints - 1);
-		
+
 		float x;
 		float y;
 		float z;
@@ -341,29 +338,29 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 			switch (_whichVaries) {
 			case Z:
 				phiRad = Math.toRadians(_varPanels[PHI].getFixedValue());
-				x = (float)(_varPanels[RHO].getFixedValue() * Math.cos(phiRad));
-				y = (float)(_varPanels[RHO].getFixedValue() * Math.sin(phiRad));
-				z = (float)val;
+				x = (float) (_varPanels[RHO].getFixedValue() * Math.cos(phiRad));
+				y = (float) (_varPanels[RHO].getFixedValue() * Math.sin(phiRad));
+				z = (float) val;
 				mag = probe.fieldMagnitude(x, y, z);
 				break;
 
 			case RHO:
 				phiRad = Math.toRadians(_varPanels[PHI].getFixedValue());
-				x = (float)(val * Math.cos(phiRad));
-				y = (float)(val * Math.sin(phiRad));
-				z = (float)_varPanels[Z].getFixedValue();
+				x = (float) (val * Math.cos(phiRad));
+				y = (float) (val * Math.sin(phiRad));
+				z = (float) _varPanels[Z].getFixedValue();
 				mag = probe.fieldMagnitude(x, y, z);
 				break;
 
 			case PHI:
 				phiRad = Math.toRadians(val);
-				x = (float)(_varPanels[RHO].getFixedValue() * Math.cos(phiRad));
-				y = (float)(_varPanels[RHO].getFixedValue() * Math.sin(phiRad));
-				z = (float)_varPanels[Z].getFixedValue();
+				x = (float) (_varPanels[RHO].getFixedValue() * Math.cos(phiRad));
+				y = (float) (_varPanels[RHO].getFixedValue() * Math.sin(phiRad));
+				z = (float) _varPanels[Z].getFixedValue();
 				mag = probe.fieldMagnitude(x, y, z);
 				break;
 			}
-			
+
 			mag = mag / 10; // to tesla
 			try {
 				_canvas.getDataSet().addToCurve(hotIndex, val, mag);

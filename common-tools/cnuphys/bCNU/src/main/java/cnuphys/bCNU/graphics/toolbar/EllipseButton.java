@@ -14,8 +14,7 @@ public class EllipseButton extends ToolBarToggleButton implements IRubberbanded 
 	/**
 	 * Create a button for creating ellipses by rubberbanding.
 	 * 
-	 * @param container
-	 *            the container using this button.
+	 * @param container the container using this button.
 	 */
 	public EllipseButton(IContainer container) {
 		super(container, "images/ellipse.gif", "Create an ellipse");
@@ -42,8 +41,7 @@ public class EllipseButton extends ToolBarToggleButton implements IRubberbanded 
 		if ((b.width < 3) || (b.height < 3)) {
 			return;
 		}
-		AItem item = container.createEllipseItem(
-				container.getAnnotationLayer(), b);
+		AItem item = container.createEllipseItem(container.getAnnotationLayer(), b);
 		if (item != null) {
 			item.setDraggable(true);
 			item.setRotatable(true);

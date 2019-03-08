@@ -33,11 +33,10 @@ public class ColorLabel extends JComponent {
 	/**
 	 * Create an inert color label.
 	 * 
-	 * @param color the color.
+	 * @param color  the color.
 	 * @param prompt the prompt string.
 	 */
-	public ColorLabel(IColorChangeListener listener, Color color, Font font,
-			String prompt) {
+	public ColorLabel(IColorChangeListener listener, Color color, Font font, String prompt) {
 
 		_currentColor = color;
 		setFont(font);
@@ -55,8 +54,7 @@ public class ColorLabel extends JComponent {
 //					return;
 //				}
 
-				ColorDialog cd = new ColorDialog(_prompt, _currentColor, false,
-						true);
+				ColorDialog cd = new ColorDialog(_prompt, _currentColor, false, true);
 
 				cd.setVisible(true);
 
@@ -91,8 +89,7 @@ public class ColorLabel extends JComponent {
 			g.setColor(Color.red);
 			g.drawLine(4, 4, _rectSize, _rectSize);
 			g.drawLine(4, _rectSize, _rectSize, 4);
-		}
-		else {
+		} else {
 			g.setColor(enabled ? _currentColor : Color.gray);
 			g.fillRect(2, 2, _rectSize, _rectSize);
 		}

@@ -22,8 +22,7 @@ public class SerialIO {
 	/**
 	 * Deserializes a serializable object from a file.
 	 * 
-	 * @param fullfn
-	 *            the full path of the file containing the serialized object.
+	 * @param fullfn the full path of the file containing the serialized object.
 	 * @return the deserialized object.
 	 */
 	public static Object serialRead(String fullfn) {
@@ -36,8 +35,7 @@ public class SerialIO {
 			f = new FileInputStream(fullfn);
 			s = new ObjectInputStream(f);
 			obj = s.readObject();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -46,8 +44,7 @@ public class SerialIO {
 
 				try {
 					f.close();
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -55,8 +52,7 @@ public class SerialIO {
 			if (s != null) {
 				try {
 					s.close();
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -67,8 +63,7 @@ public class SerialIO {
 	/**
 	 * Deserializes a serializable object from a byte array
 	 * 
-	 * @param bytes
-	 *            the byte array containing the serialized object
+	 * @param bytes the byte array containing the serialized object
 	 * @return the deserialized object
 	 */
 	public static Object serialRead(byte[] bytes) {
@@ -82,8 +77,7 @@ public class SerialIO {
 			f = new ByteArrayInputStream(bytes);
 			s = new ObjectInputStream(f);
 			obj = s.readObject();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -92,8 +86,7 @@ public class SerialIO {
 
 				try {
 					f.close();
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -114,11 +107,9 @@ public class SerialIO {
 	/**
 	 * Serializes a serializable object to a file.
 	 * 
-	 * @param obj
-	 *            the serializable object.
+	 * @param obj    the serializable object.
 	 * 
-	 * @param fullfn
-	 *            the full path.
+	 * @param fullfn the full path.
 	 */
 	public static void serialWrite(Serializable obj, String fullfn) {
 
@@ -142,8 +133,7 @@ public class SerialIO {
 			if (f != null) {
 				try {
 					f.close();
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -152,8 +142,7 @@ public class SerialIO {
 
 				try {
 					s.close();
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -163,8 +152,7 @@ public class SerialIO {
 	/**
 	 * Serializes a serializable object to a byte array.
 	 * 
-	 * @param obj
-	 *            the serializable object.
+	 * @param obj the serializable object.
 	 * @return the array of bytes.
 	 */
 	public static byte[] serialWrite(Serializable obj) {
@@ -191,8 +179,7 @@ public class SerialIO {
 			if (f != null) {
 				try {
 					f.close();
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -200,8 +187,7 @@ public class SerialIO {
 			if (s != null) {
 				try {
 					s.close();
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}

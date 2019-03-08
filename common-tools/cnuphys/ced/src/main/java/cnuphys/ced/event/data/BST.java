@@ -14,6 +14,7 @@ public class BST extends DetectorData {
 
 	/**
 	 * Public access to the singleton
+	 * 
 	 * @return the BST singleton
 	 */
 	public static BST getInstance() {
@@ -22,14 +23,15 @@ public class BST extends DetectorData {
 		}
 		return _instance;
 	}
-	
+
 	@Override
 	public void newClasIoEvent(DataEvent event) {
 		_adcHits = new AdcHitList("BST::adc");
 	}
-	
+
 	/**
 	 * Update the list. This is probably needed only during accumulation
+	 * 
 	 * @return the updated list
 	 */
 	public AdcHitList updateAdcList() {
@@ -39,26 +41,25 @@ public class BST extends DetectorData {
 
 	/**
 	 * Get the adc hit list
+	 * 
 	 * @return the adc hit list
 	 */
 	public AdcHitList getHits() {
 		return _adcHits;
 	}
-	
-	
+
 	/**
 	 * Get a collection of all strip, adc doublets for a given sector and layer
 	 * 
 	 * @param sector the 1-based sector
-	 * @param layer the 1-based layer
-	 * @return a collection of all strip, adc doublets for a given sector and
-	 *         layer. It is a collection of integer arrays. For each array, the
-	 *         0 entry is the 1-based strip and the 1 entry is the adc.
+	 * @param layer  the 1-based layer
+	 * @return a collection of all strip, adc doublets for a given sector and layer.
+	 *         It is a collection of integer arrays. For each array, the 0 entry is
+	 *         the 1-based strip and the 1 entry is the adc.
 	 */
-	public Vector<int[]> allStripsForSectorAndLayer(int sector,
-			int layer) {
+	public Vector<int[]> allStripsForSectorAndLayer(int sector, int layer) {
 		Vector<int[]> strips = new Vector<int[]>();
-		
+
 		AdcHitList hits = getHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (AdcHit hit : hits) {

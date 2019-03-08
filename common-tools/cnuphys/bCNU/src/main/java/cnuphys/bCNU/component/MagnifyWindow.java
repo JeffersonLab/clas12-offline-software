@@ -64,9 +64,8 @@ public class MagnifyWindow extends JWindow {
 			public void paintComponent(Graphics g) {
 				if (_customDraw == null) {
 					super.paintComponent(g);
-				}
-				else {
-	//				System.err.println("Custom draw");
+				} else {
+					// System.err.println("Custom draw");
 					_customDraw.draw(g, _container);
 				}
 			}
@@ -112,10 +111,8 @@ public class MagnifyWindow extends JWindow {
 	/**
 	 * Magnify a view
 	 * 
-	 * @param sContainer
-	 *            the container to magnify
-	 * @param me
-	 *            the mouse event which contains the location
+	 * @param sContainer the container to magnify
+	 * @param me         the mouse event which contains the location
 	 */
 	public static synchronized void magnify(final BaseContainer sContainer, MouseEvent me) {
 		if (_magnifyWindow == null) {

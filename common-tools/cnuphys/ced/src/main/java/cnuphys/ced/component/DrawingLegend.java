@@ -26,10 +26,9 @@ import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.frame.CedColors;
 
 public class DrawingLegend extends JComponent {
-	
 
 	private static final Font labelFont = new Font("SansSerif", Font.PLAIN, 9);
-	
+
 	private static final Color bgColor = new Color(120, 120, 120);
 
 	// parent view
@@ -38,8 +37,7 @@ public class DrawingLegend extends JComponent {
 	/**
 	 * Set the parent view
 	 * 
-	 * @param view
-	 *            the parent view
+	 * @param view the parent view
 	 */
 	public void setView(BaseView view) {
 		_view = view;
@@ -81,11 +79,10 @@ public class DrawingLegend extends JComponent {
 
 		// view dependent drawing
 		if (_view != null) {
-			if ((_view instanceof SectorView) ||
-					(_view instanceof DCXYView)) {
+			if ((_view instanceof SectorView) || (_view instanceof DCXYView)) {
 				paintForwardViewLegend(g, x, yc);
 			}
-			
+
 			else if ((_view instanceof CentralXYView) || (_view instanceof CentralZView)) {
 				paintCentralViewLegend(g, x, yc);
 			}
@@ -93,20 +90,20 @@ public class DrawingLegend extends JComponent {
 
 	}
 
-	//paint the legent for the central 2D views
+	// paint the legent for the central 2D views
 	private void paintCentralViewLegend(Graphics g, int x, int yc) {
 		int xo = x;
 		Graphics2D g2 = (Graphics2D) g;
 		x = drawCross(g, x, yc, DataDrawSupport.BST_CROSS);
 		x = drawCross(g, x, yc, DataDrawSupport.BMT_CROSS);
-		
-		yc += 18;
-		SymbolDraw.drawUpTriangle(g, xo, yc, 3, 
-				X11Colors.getX11Color("Dark Green"), X11Colors.getX11Color("Aquamarine"));
 
-		quickString(g, xo+16, yc, "hit strip midpoint");
-		
-		//tracks
+		yc += 18;
+		SymbolDraw.drawUpTriangle(g, xo, yc, 3, X11Colors.getX11Color("Dark Green"),
+				X11Colors.getX11Color("Aquamarine"));
+
+		quickString(g, xo + 16, yc, "hit strip midpoint");
+
+		// tracks
 		yc += 18;
 		x = xo;
 		x = quickString(g, xo, yc, "Tracks   ");
@@ -116,9 +113,9 @@ public class DrawingLegend extends JComponent {
 
 	}
 
-	//paint the legend for sector views
+	// paint the legend for sector views
 	private void paintForwardViewLegend(Graphics g, int x, int yc) {
-		
+
 		int xo = x;
 		Graphics2D g2 = (Graphics2D) g;
 		x = drawCross(g, x, yc, DataDrawSupport.HB_CROSS);
@@ -126,14 +123,13 @@ public class DrawingLegend extends JComponent {
 		x = drawCross(g, x, yc, DataDrawSupport.FMT_CROSS);
 		x = drawCircle(g, x, yc, CedColors.docaTruthLine, "TB Doca");
 		yc += 18;
-		
-		
-		//segment lines
+
+		// segment lines
 		x = xo;
 		x = drawSegLine(g2, x, yc, CedColors.hbSegmentLine, CedColors.HB_COLOR, "HB Segment");
 		x = drawSegLine(g2, x, yc, CedColors.tbSegmentLine, CedColors.TB_COLOR, "TB Segment");
-		
-		//tracks
+
+		// tracks
 		yc += 18;
 		x = xo;
 		x = quickString(g, xo, yc, "Tracks   ");
@@ -142,50 +138,48 @@ public class DrawingLegend extends JComponent {
 		x = drawLine(g2, x, yc, CedColors.cvtTrackColor, "CVT ");
 
 	}
-	
+
 	private int drawLine(Graphics2D g2, int x, int yc, Color lineColor, String str) {
 		g2.setColor(CedColors.docaTruthFill);
 		g2.setStroke(GraphicsUtilities.getStroke(6f, LineStyle.SOLID));
-		g2.drawLine(x, yc, x+26, yc);
+		g2.drawLine(x, yc, x + 26, yc);
 		g2.setColor(lineColor);
 		g2.setStroke(GraphicsUtilities.getStroke(2f, LineStyle.SOLID));
-		g2.drawLine(x, yc, x+26, yc);
-		
+		g2.drawLine(x, yc, x + 26, yc);
+
 		x += 36;
-		return quickString(g2, x, yc-2, str) + 18;
+		return quickString(g2, x, yc - 2, str) + 18;
 	}
 
-	
 	private int drawSegLine(Graphics2D g2, int x, int yc, Color lineColor, Color endColor, String str) {
 		g2.setColor(CedColors.docaTruthFill);
 		g2.setStroke(GraphicsUtilities.getStroke(6f, LineStyle.SOLID));
-		g2.drawLine(x, yc, x+30, yc);
+		g2.drawLine(x, yc, x + 30, yc);
 		g2.setColor(lineColor);
 		g2.setStroke(GraphicsUtilities.getStroke(2f, LineStyle.SOLID));
-		g2.drawLine(x, yc, x+30, yc);
-		
+		g2.drawLine(x, yc, x + 30, yc);
+
 		SymbolDraw.drawOval(g2, x, yc, 2, 2, endColor, endColor);
-		SymbolDraw.drawOval(g2, x+30, yc, 2, 2, endColor, endColor);
+		SymbolDraw.drawOval(g2, x + 30, yc, 2, 2, endColor, endColor);
 		x += 40;
-		return quickString(g2, x, yc-2, str) + 18;
+		return quickString(g2, x, yc - 2, str) + 18;
 	}
 
 	private int drawCross(Graphics g, int x, int y, int mode) {
 		DataDrawSupport.drawCross(g, x, y, mode);
-		
-		x += (2*DataDrawSupport.CROSSHALF);
+
+		x += (2 * DataDrawSupport.CROSSHALF);
 		String s = DataDrawSupport.prefix[mode] + "cross";
 		return quickString(g, x, y, s) + 14;
 	}
-	
+
 	private int drawCircle(Graphics g, int x, int y, Color color, String s) {
 		SymbolDraw.drawOval(g, x, y, DataDrawSupport.CROSSHALF, DataDrawSupport.CROSSHALF, color, Color.black);
-		x += (2*DataDrawSupport.CROSSHALF);
+		x += (2 * DataDrawSupport.CROSSHALF);
 		return quickString(g, x, y, s) + 16;
 	}
 
-
-	//draw a string, returns the x position plus the string width
+	// draw a string, returns the x position plus the string width
 	private int quickString(Graphics g, int x, int yc, String s) {
 		FontMetrics fm = getFontMetrics(labelFont);
 		g.setColor(Color.black);

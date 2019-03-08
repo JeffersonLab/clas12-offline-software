@@ -33,8 +33,8 @@ public class ImageManager {
 	private static ImageManager imageManager = getInstance();
 
 	/**
-	 * This constructor takes no arguments. It is the private constructor used
-	 * to make the singleton.
+	 * This constructor takes no arguments. It is the private constructor used to
+	 * make the singleton.
 	 */
 	private ImageManager() {
 	}
@@ -59,15 +59,13 @@ public class ImageManager {
 	/**
 	 * Load an image from file or the jar file.
 	 * 
-	 * @param imageFileName
-	 *            the image files name.
-	 * @param component
-	 *            a component to serve as an ImageObserver(any component should
-	 *            do).
+	 * @param imageFileName the image files name.
+	 * @param component     a component to serve as an ImageObserver(any component
+	 *                      should do).
 	 * @return the image
 	 */
 	public Image loadImage(String imageFileName, Component component) {
-		
+
 		URL imageURL = getClass().getClassLoader().getResource(imageFileName);
 		Image image = null;
 
@@ -90,10 +88,8 @@ public class ImageManager {
 	/**
 	 * Load an image icon from a buffered image.
 	 * 
-	 * @param bufferedImage
-	 *            the buffered image.
-	 * @param hashKey
-	 *            the hashtable key.
+	 * @param bufferedImage the buffered image.
+	 * @param hashKey       the hashtable key.
 	 * @return the image icon.
 	 */
 	public ImageIcon loadImageIcon(BufferedImage bufferedImage, String hashKey) {
@@ -120,8 +116,7 @@ public class ImageManager {
 	/**
 	 * Load an image icon from file or the jar file.
 	 * 
-	 * @param imageFileName
-	 *            the image file name, relative to class path.
+	 * @param imageFileName the image file name, relative to class path.
 	 * @return the loaded ImageIcon, or <code>null</code>.
 	 */
 	public ImageIcon loadImageIcon(String imageFileName) {
@@ -158,13 +153,11 @@ public class ImageManager {
 	/**
 	 * Load an image from a local file.
 	 * 
-	 * @param fileName
-	 *            the name of the file holding the image. It will first treat
-	 *            this as an absolute path. If that fails, it will try to uses
-	 *            it relative to the current working directory. If that fails,
-	 *            relative to the home directory. If that fails, we cave.
-	 * @param component
-	 *            a component to use as an observer. Any component should do.
+	 * @param fileName  the name of the file holding the image. It will first treat
+	 *                  this as an absolute path. If that fails, it will try to uses
+	 *                  it relative to the current working directory. If that fails,
+	 *                  relative to the home directory. If that fails, we cave.
+	 * @param component a component to use as an observer. Any component should do.
 	 * @return the loaded image, or <code>null</code>.
 	 */
 	public Image loadImageFromFile(String fileName, Component component) {
@@ -200,10 +193,8 @@ public class ImageManager {
 	/**
 	 * Load an image from a URL
 	 * 
-	 * @param url
-	 *            The url of the image
-	 * @param c
-	 *            A component to use as an observer
+	 * @param url The url of the image
+	 * @param c   A component to use as an observer
 	 * @return the image found at the url
 	 */
 	public Image loadImageFromURL(URL url, Component c) {
@@ -226,8 +217,7 @@ public class ImageManager {
 	/**
 	 * Try to obtain an ImageIcon from the cache.
 	 * 
-	 * @param key
-	 *            the has key.
+	 * @param key the has key.
 	 * @return an ImageIcom from the key, or null.
 	 */
 	public ImageIcon get(String key) {
@@ -237,10 +227,8 @@ public class ImageManager {
 	/**
 	 * Place an ImageIcon into the cache.
 	 * 
-	 * @param key
-	 *            the hask key to use.
-	 * @param imageIcon
-	 *            the ImageIcon to cache.
+	 * @param key       the hask key to use.
+	 * @param imageIcon the ImageIcon to cache.
 	 */
 	public void put(String key, ImageIcon imageIcon) {
 		if (imageIcon != null) {

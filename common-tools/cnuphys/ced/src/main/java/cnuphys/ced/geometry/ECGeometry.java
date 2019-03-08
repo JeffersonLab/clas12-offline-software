@@ -32,13 +32,12 @@ public class ECGeometry {
 
 	/** constant for the u strip index */
 	public static final int EC_W = 2;
-	
-	//** stack names names */
-	public static final String STACK_NAMES[] = {"Inner", "Outer"};
 
-	//** plane or "view" names */
-	public static final String PLANE_NAMES[] = {"U", "V", "W"};
+	// ** stack names names */
+	public static final String STACK_NAMES[] = { "Inner", "Outer" };
 
+	// ** plane or "view" names */
+	public static final String PLANE_NAMES[] = { "U", "V", "W" };
 
 	/** there are 36 strips for u, v and w */
 	public static final int EC_NUMSTRIP = 36;
@@ -104,11 +103,10 @@ public class ECGeometry {
 	}
 
 	/**
-	 * Get the normal vector in sector xyz (cm) from the nominal target to the
-	 * front plane of the inner EC. All coordinates are in cm.
+	 * Get the normal vector in sector xyz (cm) from the nominal target to the front
+	 * plane of the inner EC. All coordinates are in cm.
 	 * 
-	 * @param index
-	 *            the plane, EC_INNER or EC_OUTER
+	 * @param index the plane, EC_INNER or EC_OUTER
 	 * @return the normal vector for the given plane
 	 */
 	public static Point3D getR0(int index) {
@@ -118,25 +116,21 @@ public class ECGeometry {
 	/**
 	 * Get the front plane of the PCAL
 	 * 
-	 * @param sector
-	 *            the 1-based sector [1..6]
-	 * @param plane
-	 *            EC_INNER or EC_OUTER
+	 * @param sector the 1-based sector [1..6]
+	 * @param plane  EC_INNER or EC_OUTER
 	 * @return the front plane of the PCAL
 	 */
 	public static Plane3D getFrontPlane(int sector, int plane) {
 		Point3D clasr0 = new Point3D();
 		GeometryManager.sectorToClas(sector, clasr0, _r0[plane]);
-		Plane3D plane3D = new Plane3D(clasr0.x(), clasr0.y(), clasr0.z(),
-				clasr0.x(), clasr0.y(), clasr0.z());
+		Plane3D plane3D = new Plane3D(clasr0.x(), clasr0.y(), clasr0.z(), clasr0.x(), clasr0.y(), clasr0.z());
 		return plane3D;
 	}
 
 	/**
 	 * Get the coordinate transformation object
 	 * 
-	 * @param index
-	 *            the plane, EC_INNER or EC_OUTER
+	 * @param index the plane, EC_INNER or EC_OUTER
 	 * @return the coordinate transformations
 	 */
 	public static Transformations getTransformations(int index) {
@@ -190,10 +184,8 @@ public class ECGeometry {
 	/**
 	 * Get a point from the IJK boundary
 	 * 
-	 * @param planeIndex
-	 *            the plane index (EC_INNER or EC_OUTER) [0,1]
-	 * @param pointIndex
-	 *            the point index [0..2]
+	 * @param planeIndex the plane index (EC_INNER or EC_OUTER) [0,1]
+	 * @param pointIndex the point index [0..2]
 	 * @return the corresponding point
 	 */
 	public static Point3D getTrianglePoint(int planeIndex, int pointIndex) {
@@ -203,26 +195,20 @@ public class ECGeometry {
 	/**
 	 * Get a point from a u, v or w strip
 	 * 
-	 * @param planeIndex
-	 *            either EC_INNER or EC_OUTER [0, 1]
-	 * @param stripType
-	 *            EC_U, EC_V, or EC_W [0..2]
-	 * @param stripIndex
-	 *            the strip index [0..(EC_NUMSTRIP-1)]
-	 * @param pointIndex
-	 *            the point index [0..3]
+	 * @param planeIndex either EC_INNER or EC_OUTER [0, 1]
+	 * @param stripType  EC_U, EC_V, or EC_W [0..2]
+	 * @param stripIndex the strip index [0..(EC_NUMSTRIP-1)]
+	 * @param pointIndex the point index [0..3]
 	 * @return
 	 */
-	public static Point3D getStripPoint(int planeIndex, int stripType,
-			int stripIndex, int pointIndex) {
+	public static Point3D getStripPoint(int planeIndex, int stripType, int stripIndex, int pointIndex) {
 		return _strips[planeIndex][stripType][stripIndex][pointIndex];
 	}
 
 	/**
 	 * Get the minimum value if the sector x coordinate in cm
 	 * 
-	 * @param planeIndex
-	 *            the plane index (EC_INNER or EC_OUTER) [0,1]
+	 * @param planeIndex the plane index (EC_INNER or EC_OUTER) [0,1]
 	 * @return the minimum value of the i coordinate
 	 */
 	public static double getXmin(int planeIndex) {
@@ -232,8 +218,7 @@ public class ECGeometry {
 	/**
 	 * Get the minimum value if the sector x coordinate in cm
 	 * 
-	 * @param planeIndex
-	 *            the plane index (EC_INNER or EC_OUTER) [0,1]
+	 * @param planeIndex the plane index (EC_INNER or EC_OUTER) [0,1]
 	 * @return the minimum value of the i coordinate
 	 */
 	public static double getXmax(int planeIndex) {
@@ -243,8 +228,7 @@ public class ECGeometry {
 	/**
 	 * Get the minimum value if the i coordinate in cm
 	 * 
-	 * @param planeIndex
-	 *            the plane index (EC_INNER or EC_OUTER) [0,1]
+	 * @param planeIndex the plane index (EC_INNER or EC_OUTER) [0,1]
 	 * @return the minimum value of the i coordinate
 	 */
 	public static double getImin(int planeIndex) {
@@ -254,8 +238,7 @@ public class ECGeometry {
 	/**
 	 * Get the maximum value if the i coordinate in cm
 	 * 
-	 * @param planeIndex
-	 *            the plane index (EC_INNER or EC_OUTER) [0,1]
+	 * @param planeIndex the plane index (EC_INNER or EC_OUTER) [0,1]
 	 * @return the maximum value of the i coordinate
 	 */
 	public static double getImax(int planeIndex) {
@@ -265,8 +248,7 @@ public class ECGeometry {
 	/**
 	 * Get the minimum value if the j coordinate in cm
 	 * 
-	 * @param planeIndex
-	 *            the plane index (EC_INNER or EC_OUTER) [0,1]
+	 * @param planeIndex the plane index (EC_INNER or EC_OUTER) [0,1]
 	 * @return the minimum value of the j coordinate
 	 */
 	public static double getJmin(int planeIndex) {
@@ -276,8 +258,7 @@ public class ECGeometry {
 	/**
 	 * Get the maximum value if the j coordinate in cm
 	 * 
-	 * @param planeIndex
-	 *            the plane index (EC_INNER or EC_OUTER) [0,1]
+	 * @param planeIndex the plane index (EC_INNER or EC_OUTER) [0,1]
 	 * @return the maximum value of the j coordinate
 	 */
 	public static double getJmax(int planeIndex) {
@@ -287,10 +268,8 @@ public class ECGeometry {
 	/**
 	 * For the front face of a given plane, compute z from x
 	 * 
-	 * @param planeIndex
-	 *            EC_INNER or EC_OUTER [0,1]
-	 * @param x
-	 *            the x coordinate in cm
+	 * @param planeIndex EC_INNER or EC_OUTER [0,1]
+	 * @param x          the x coordinate in cm
 	 * @return the z coordinate in cm
 	 */
 	public static double zFromX(int planeIndex, double x) {
@@ -302,8 +281,7 @@ public class ECGeometry {
 	/**
 	 * Get the midplane sector cs corners in cm
 	 * 
-	 * @param index
-	 *            should be EC_INNER or EC_OUTER
+	 * @param index should be EC_INNER or EC_OUTER
 	 * @return the corners for the inner or outer EC
 	 */
 	private static FourPoints2D getCorners(int index) {
@@ -311,22 +289,18 @@ public class ECGeometry {
 	}
 
 	/**
-	 * Obtain the shell (for sector views) for the whole inner or outer EC
-	 * correct for the relative phi.
+	 * Obtain the shell (for sector views) for the whole inner or outer EC correct
+	 * for the relative phi.
 	 * 
-	 * @param planeIndex
-	 *            should be EC_INNER or EC_OUTER
-	 * @param stripType
-	 *            should be EC_U, EC_V, or EC_W
-	 * @param projectionPlane 
-	 *            the projection plane
+	 * @param planeIndex      should be EC_INNER or EC_OUTER
+	 * @param stripType       should be EC_U, EC_V, or EC_W
+	 * @param projectionPlane the projection plane
 	 * @return the shell for the whole panel.
 	 */
-	public static Point2D.Double[] getShell(int planeIndex, int stripType,
-			Plane3D projectionPlane) {
+	public static Point2D.Double[] getShell(int planeIndex, int stripType, Plane3D projectionPlane) {
 
 		Point2D.Double wp[] = GeometryManager.allocate(4);
-		
+
 		// get last visible (intersecting) strip
 		int lastIndex = EC_NUMSTRIP - 1;
 //		while (!doesProjectedPolyFullyIntersect(planeIndex, stripType, lastIndex, projectionPlane)) {
@@ -338,16 +312,15 @@ public class ECGeometry {
 
 		Point2D.Double lastPP[] = null;
 		lastPP = getIntersections(planeIndex, stripType, lastIndex, projectionPlane, true);
-		
+
 		int firstIndex = 0;
-			
+
 //		while (!doesProjectedPolyFullyIntersect(planeIndex, stripType, firstIndex, projectionPlane)) {
 //			firstIndex++;
 //		}
 		Point2D.Double firstPP[] = null;
 		firstPP = getIntersections(planeIndex, stripType, firstIndex, projectionPlane, true);
 
-		
 //		if ((planeIndex == ECGeometry.EC_INNER) && (stripType ==  ECGeometry.EC_W)) {
 //			System.err.println("FIRSTINDEX: " + firstIndex + "  LASTINDEX: " + lastIndex);
 //		}
@@ -371,17 +344,13 @@ public class ECGeometry {
 
 	/**
 	 * Converts 1-based uvw triplets to a pixel. NOTE: not all uvw triplets are
-	 * "real". For example, there is no (36, 36, 36) triplet; those strips do
-	 * not intersect. Proper triplets have u + w + w = (2N+1) or (2N+2), where N
-	 * = 36. Possible uvw triplets always yield a positive pixel value from
-	 * [1..1296].
+	 * "real". For example, there is no (36, 36, 36) triplet; those strips do not
+	 * intersect. Proper triplets have u + w + w = (2N+1) or (2N+2), where N = 36.
+	 * Possible uvw triplets always yield a positive pixel value from [1..1296].
 	 * 
-	 * @param u
-	 *            the 1.based [1..36] u strip
-	 * @param v
-	 *            the 1 based [1..36] v strip
-	 * @param w
-	 *            the 1 based [1..36] w strip
+	 * @param u the 1.based [1..36] u strip
+	 * @param v the 1 based [1..36] v strip
+	 * @param w the 1 based [1..36] w strip
 	 * @return the pixel. Should be [1..1296]
 	 */
 	public static int pixelFromUVW(int u, int v, int w) {
@@ -391,10 +360,8 @@ public class ECGeometry {
 	/**
 	 * Converts a pixel back to a uvw triplet
 	 * 
-	 * @param pixel
-	 *            the pixel. Only meaningful for pixels in the range [1..1296]
-	 * @param uvw
-	 *            holds the 1-based strip ids
+	 * @param pixel the pixel. Only meaningful for pixels in the range [1..1296]
+	 * @param uvw   holds the 1-based strip ids
 	 */
 	public static void uvwFromPixel(int pixel, int uvw[]) {
 		double root = Math.sqrt(pixel - 1.0);
@@ -409,12 +376,9 @@ public class ECGeometry {
 	/**
 	 * Is this uvw triplet a good pixel?
 	 * 
-	 * @param u
-	 *            the 1-based u strip [1..36]
-	 * @param v
-	 *            the 1-based v strip [1..36]
-	 * @param w
-	 *            the 1-based w strip [1..36]
+	 * @param u the 1-based u strip [1..36]
+	 * @param v the 1-based v strip [1..36]
+	 * @param w the 1-based w strip [1..36]
 	 * @return <code>true</code> if this combination is actually realized.
 	 */
 	public static boolean goodPixel(int u, int v, int w) {
@@ -425,13 +389,10 @@ public class ECGeometry {
 	/**
 	 * Convert ijk coordinates to sector xyz
 	 * 
-	 * @param localP
-	 *            the ijk coordinates
-	 * @param sectorXYZ
-	 *            the sector xyz coordinates
+	 * @param localP    the ijk coordinates
+	 * @param sectorXYZ the sector xyz coordinates
 	 */
-	public static void ijkToSectorXYZ(int plane, Point3D localP,
-			double[] sectorXYZ) {
+	public static void ijkToSectorXYZ(int plane, Point3D localP, double[] sectorXYZ) {
 
 		Point3D sectorP = new Point3D();
 		_transformations[plane].localToSector(localP, sectorP);
@@ -467,17 +428,14 @@ public class ECGeometry {
 
 		// note the indices in the getSuperlayer are 1 and 2 instead
 		// of 0 and 1 because the geo package uses 0 for PCAL
-		clas_ecSuperlayer[EC_INNER] = GeometryManager.local_Cal_Sector0
-				.getSuperlayer(1);
-		clas_ecSuperlayer[EC_OUTER] = GeometryManager.local_Cal_Sector0
-				.getSuperlayer(2);
+		clas_ecSuperlayer[EC_INNER] = GeometryManager.local_Cal_Sector0.getSuperlayer(1);
+		clas_ecSuperlayer[EC_OUTER] = GeometryManager.local_Cal_Sector0.getSuperlayer(2);
 
 		ECLayer ecLayer[][] = new ECLayer[2][3];
 
 		for (int plane = 0; plane < 2; plane++) {
 			for (int stripType = 0; stripType < 3; stripType++) {
-				ecLayer[plane][stripType] = clas_ecSuperlayer[plane]
-						.getLayer(stripType);
+				ecLayer[plane][stripType] = clas_ecSuperlayer[plane].getLayer(stripType);
 			}
 		}
 
@@ -505,16 +463,11 @@ public class ECGeometry {
 		for (int plane = 0; plane < 2; plane++) {
 			for (int stripType = 0; stripType < 3; stripType++) {
 				for (int stripId = 0; stripId < EC_NUMSTRIP; stripId++) {
-					ScintillatorPaddle strip = ecLayer[plane][stripType]
-							.getComponent(stripId);
-					_strips[plane][stripType][stripId][0] = strip
-							.getVolumePoint(4);
-					_strips[plane][stripType][stripId][1] = strip
-							.getVolumePoint(5);
-					_strips[plane][stripType][stripId][2] = strip
-							.getVolumePoint(1);
-					_strips[plane][stripType][stripId][3] = strip
-							.getVolumePoint(0);
+					ScintillatorPaddle strip = ecLayer[plane][stripType].getComponent(stripId);
+					_strips[plane][stripType][stripId][0] = strip.getVolumePoint(4);
+					_strips[plane][stripType][stripId][1] = strip.getVolumePoint(5);
+					_strips[plane][stripType][stripId][2] = strip.getVolumePoint(1);
+					_strips[plane][stripType][stripId][3] = strip.getVolumePoint(0);
 
 					Point3D p0 = _strips[plane][stripType][stripId][0];
 					Point3D p1 = _strips[plane][stripType][stripId][0];
@@ -547,16 +500,12 @@ public class ECGeometry {
 		// triangles
 
 		_triangleIJK[EC_INNER][0] = new Point3D(minI[EC_INNER], 0, 0);
-		_triangleIJK[EC_INNER][1] = new Point3D(maxI[EC_INNER], maxJ[EC_INNER],
-				0);
-		_triangleIJK[EC_INNER][2] = new Point3D(maxI[EC_INNER], minJ[EC_INNER],
-				0);
+		_triangleIJK[EC_INNER][1] = new Point3D(maxI[EC_INNER], maxJ[EC_INNER], 0);
+		_triangleIJK[EC_INNER][2] = new Point3D(maxI[EC_INNER], minJ[EC_INNER], 0);
 
 		_triangleIJK[EC_OUTER][0] = new Point3D(minI[EC_OUTER], 0, 0);
-		_triangleIJK[EC_OUTER][1] = new Point3D(maxI[EC_OUTER], maxJ[EC_OUTER],
-				0);
-		_triangleIJK[EC_OUTER][2] = new Point3D(maxI[EC_OUTER], minJ[EC_OUTER],
-				0);
+		_triangleIJK[EC_OUTER][1] = new Point3D(maxI[EC_OUTER], maxJ[EC_OUTER], 0);
+		_triangleIJK[EC_OUTER][2] = new Point3D(maxI[EC_OUTER], minJ[EC_OUTER], 0);
 
 		// sector view midplane shells
 
@@ -578,10 +527,8 @@ public class ECGeometry {
 		_corners[EC_INNER].add(rP2.z(), rP2.x());
 		_corners[EC_INNER].add(rP3.z(), rP3.x());
 
-		double dely = _corners[EC_INNER].getPoints()[0].y
-				- _corners[EC_INNER].getPoints()[3].y;
-		double delx = _corners[EC_INNER].getPoints()[0].x
-				- _corners[EC_INNER].getPoints()[3].x;
+		double dely = _corners[EC_INNER].getPoints()[0].y - _corners[EC_INNER].getPoints()[3].y;
+		double delx = _corners[EC_INNER].getPoints()[0].x - _corners[EC_INNER].getPoints()[3].x;
 		SLOPES[EC_INNER] = dely / delx;
 
 		// outer
@@ -600,10 +547,8 @@ public class ECGeometry {
 		_corners[EC_OUTER].add(rP2.z(), rP2.x());
 		_corners[EC_OUTER].add(rP3.z(), rP3.x());
 
-		dely = _corners[EC_OUTER].getPoints()[0].y
-				- _corners[EC_OUTER].getPoints()[3].y;
-		delx = _corners[EC_OUTER].getPoints()[0].x
-				- _corners[EC_OUTER].getPoints()[3].x;
+		dely = _corners[EC_OUTER].getPoints()[0].y - _corners[EC_OUTER].getPoints()[3].y;
+		delx = _corners[EC_OUTER].getPoints()[0].x - _corners[EC_OUTER].getPoints()[3].x;
 		SLOPES[EC_OUTER] = dely / delx;
 
 		finalizeGeometry();
@@ -613,17 +558,12 @@ public class ECGeometry {
 	/**
 	 * Get the triangle for a given view for 3D
 	 * 
-	 * @param sector
-	 *            the sector 1..6
-	 * @param stack
-	 *            (aka the superlayer) 1..2 for inner and outer
-	 * @param view
-	 *            (aka layer) 1..3 for u, v, w
-	 * @param coords
-	 *            will hold the corners as [x1, y1, z1, ..., x3, y3, z3]
+	 * @param sector the sector 1..6
+	 * @param stack  (aka the superlayer) 1..2 for inner and outer
+	 * @param view   (aka layer) 1..3 for u, v, w
+	 * @param coords will hold the corners as [x1, y1, z1, ..., x3, y3, z3]
 	 */
-	public static void getViewTriangle(int sector, int stack, int view,
-			float coords[]) {
+	public static void getViewTriangle(int sector, int stack, int view, float coords[]) {
 		// argh the geometry pakage superlayers are 1,2 rather than 0,1 because
 		// they use 0 for PCAL. So stack does not need the -1, but view still
 		// does.
@@ -668,19 +608,13 @@ public class ECGeometry {
 	/**
 	 * Get the strips for use by 3D view
 	 * 
-	 * @param sector
-	 *            the sector 1..6
-	 * @param stack
-	 *            (aka the superlayer) 1..2 for inner and outer
-	 * @param view
-	 *            (aka layer) 1..3 for u, v, w
-	 * @param strip
-	 *            1..36
-	 * @param coords
-	 *            holds the eight corners as [x1, y1, z1..x8, y8, z8]
+	 * @param sector the sector 1..6
+	 * @param stack  (aka the superlayer) 1..2 for inner and outer
+	 * @param view   (aka layer) 1..3 for u, v, w
+	 * @param strip  1..36
+	 * @param coords holds the eight corners as [x1, y1, z1..x8, y8, z8]
 	 */
-	public static void getStrip(int sector, int stack, int view, int strip,
-			float coords[]) {
+	public static void getStrip(int sector, int stack, int view, int strip, float coords[]) {
 		// argh the geometry pakage superlayers are 1,2 rather than 0,1 because
 		// they use 0 for PCAL. So stack does not need the -1, but view still
 		// does.
@@ -729,57 +663,45 @@ public class ECGeometry {
 			coords[j + 2] = (float) v[i].z();
 		}
 	}
-	
+
 	/**
 	 * 
-	 * @param superlayer
-	 *            0, 1 (EC_INNER or EC_OUTER)
-	 * @param layer
-	 *            EC_U, EC_V, EC_W
-	 * @param stripid
-	 *            the 0-based paddle id
-	 * @param projectionPlane 
-	 *            the projection plane
+	 * @param superlayer      0, 1 (EC_INNER or EC_OUTER)
+	 * @param layer           EC_U, EC_V, EC_W
+	 * @param stripid         the 0-based paddle id
+	 * @param projectionPlane the projection plane
 	 * @return <code>true</code> if the projected polygon fully intersects the plane
 	 */
-	public static boolean doesProjectedPolyFullyIntersect(int superlayer, int layer,
-			int stripid, 
+	public static boolean doesProjectedPolyFullyIntersect(int superlayer, int layer, int stripid,
 			Plane3D projectionPlane) {
-		
-		ECLayer ecLayer = GeometryManager.clas_Cal_Sector0.getSuperlayer(
-				superlayer + 1).getLayer(layer);
+
+		ECLayer ecLayer = GeometryManager.clas_Cal_Sector0.getSuperlayer(superlayer + 1).getLayer(layer);
 
 		ScintillatorPaddle strip = ecLayer.getComponent(stripid);
 		return GeometryManager.doesProjectedPolyIntersect(strip, projectionPlane, 6, 4);
 	}
 
-
 	/**
-	 * Get the intersections of a with a constant phi plane. If the paddle does
-	 * not intersect (happens as phi grows) return null;
+	 * Get the intersections of a with a constant phi plane. If the paddle does not
+	 * intersect (happens as phi grows) return null;
 	 * 
-	 * @param superlayer
-	 *            0, 1 (EC_INNER or EC_OUTER)
-	 * @param layer
-	 *            EC_U, EC_V, EC_W
-	 * @param stripid
-	 *            the 0-based paddle id
-	 * @param projectionPlane 
-	 *            the projection plane
+	 * @param superlayer      0, 1 (EC_INNER or EC_OUTER)
+	 * @param layer           EC_U, EC_V, EC_W
+	 * @param stripid         the 0-based paddle id
+	 * @param projectionPlane the projection plane
 	 * @return the intersection points (z component will be 0).
 	 */
-	public static Point2D.Double[] getIntersections(int superlayer, int layer,
-			int stripid, Plane3D projectionPlane, boolean offset) {
+	public static Point2D.Double[] getIntersections(int superlayer, int layer, int stripid, Plane3D projectionPlane,
+			boolean offset) {
 		// argh the geometry package superlayers are 1,2 rather than 0,1 because
 		// they use 0 for PCAL--hence the +1
 
-		ECLayer ecLayer = GeometryManager.clas_Cal_Sector0.getSuperlayer(
-				superlayer+1).getLayer(layer);
+		ECLayer ecLayer = GeometryManager.clas_Cal_Sector0.getSuperlayer(superlayer + 1).getLayer(layer);
 		ScintillatorPaddle strip = ecLayer.getComponent(stripid);
-		
+
 		Point2D.Double wp[] = GeometryManager.allocate(4);
 		boolean isects = GeometryManager.getProjectedPolygon(strip, projectionPlane, 6, 4, wp, null);
-		
+
 		// note reordering
 		Point2D.Double p2d[] = new Point2D.Double[4];
 
@@ -806,8 +728,7 @@ public class ECGeometry {
 		return p2d;
 	}
 
-	private static void offsetLine(Point2D.Double start, Point2D.Double end,
-			double len) {
+	private static void offsetLine(Point2D.Double start, Point2D.Double end, double len) {
 		double delx = len * COSTHETA;
 		double dely = len * SINTHETA;
 		start.x += delx;
@@ -832,8 +753,7 @@ public class ECGeometry {
 		for (int i = 0; i < 8; i++) {
 			int j = 3 * i;
 
-			System.err.println(String.format("%8.1f, %8.1f, %8.1f", coords[j],
-					coords[j + 1], coords[j + 2]));
+			System.err.println(String.format("%8.1f, %8.1f, %8.1f", coords[j], coords[j + 1], coords[j + 2]));
 		}
 
 		System.err.println();
@@ -843,8 +763,7 @@ public class ECGeometry {
 		for (int i = 0; i < 8; i++) {
 			int j = 3 * i;
 
-			System.err.println(String.format("%8.1f, %8.1f, %8.1f", coords[j],
-					coords[j + 1], coords[j + 2]));
+			System.err.println(String.format("%8.1f, %8.1f, %8.1f", coords[j], coords[j + 1], coords[j + 2]));
 		}
 
 	}

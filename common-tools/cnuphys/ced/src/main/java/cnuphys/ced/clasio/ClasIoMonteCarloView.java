@@ -19,7 +19,6 @@ public class ClasIoMonteCarloView extends ClasIoTrajectoryInfoView {
 	protected Vector<TrajectoryRowData> getRowData() {
 		return null;
 	}
-	
 
 	@Override
 	public void newClasIoEvent(DataEvent event) {
@@ -29,8 +28,7 @@ public class ClasIoMonteCarloView extends ClasIoTrajectoryInfoView {
 		if (!_eventManager.isAccumulating()) {
 			ISwimAll allSwimmer = _eventManager.getMCSwimmer();
 			if (allSwimmer != null) {
-				TrajectoryTableModel model = _trajectoryTable
-						.getTrajectoryModel();
+				TrajectoryTableModel model = _trajectoryTable.getTrajectoryModel();
 				model.setData(allSwimmer.getRowData());
 				model.fireTableDataChanged();
 				_trajectoryTable.repaint();
@@ -44,6 +42,7 @@ public class ClasIoMonteCarloView extends ClasIoTrajectoryInfoView {
 
 	/**
 	 * Change the event source type
+	 * 
 	 * @param source the new source: File, ET
 	 */
 	@Override

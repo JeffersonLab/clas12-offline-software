@@ -31,25 +31,18 @@ public class SplashScreen extends Window {
 	/**
 	 * Create a translucent window to use as a splash screen
 	 * 
-	 * @param imagePath
-	 *            the path to the splash screen image
-	 * @param opacity
-	 *            the smaller the number, the more transparent
-	 * @param minDuration
-	 *            the minimum duration in milliseconds that you want the splash
-	 *            screen to be visible.
-	 * @throws HeadlessException
-	 *             , FileNotFoundException
+	 * @param imagePath   the path to the splash screen image
+	 * @param opacity     the smaller the number, the more transparent
+	 * @param minDuration the minimum duration in milliseconds that you want the
+	 *                    splash screen to be visible.
+	 * @throws HeadlessException , FileNotFoundException
 	 */
-	public SplashScreen(String imagePath, float opacity, long minDuration,
-			List<TransientText> transientText) throws HeadlessException,
-			FileNotFoundException {
+	public SplashScreen(String imagePath, float opacity, long minDuration, List<TransientText> transientText)
+			throws HeadlessException, FileNotFoundException {
 		super(null);
 		try {
-			Class<?> awtUtilitiesClass = Class
-					.forName("com.sun.awt.AWTUtilities");
-			Method mSetWindowOpacity = awtUtilitiesClass.getMethod(
-					"setWindowOpacity", Window.class, float.class);
+			Class<?> awtUtilitiesClass = Class.forName("com.sun.awt.AWTUtilities");
+			Method mSetWindowOpacity = awtUtilitiesClass.getMethod("setWindowOpacity", Window.class, float.class);
 			mSetWindowOpacity.invoke(null, this, opacity);
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -72,8 +65,7 @@ public class SplashScreen extends Window {
 	/**
 	 * Add transient text to the collection of transient texts.
 	 * 
-	 * @param transientText
-	 *            the transient text to add.
+	 * @param transientText the transient text to add.
 	 */
 	public void addTransientText(TransientText transientText) {
 		if (_transientText == null) {

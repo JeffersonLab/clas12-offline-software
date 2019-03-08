@@ -37,7 +37,7 @@ public class McHitDrawer extends ECViewDrawer {
 		if (!_view.showMcTruth()) {
 			return;
 		}
-		
+
 		if (!_view.isSingleEventMode()) {
 			return;
 		}
@@ -53,8 +53,7 @@ public class McHitDrawer extends ECViewDrawer {
 		double z[] = ECAL.avgZ();
 		int stack[] = ECAL.stack();
 
-		if ((x == null) || (y == null) || (z == null) || (x.length < 1)
-				|| (stack == null)) {
+		if ((x == null) || (y == null) || (z == null) || (x.length < 1) || (stack == null)) {
 			return;
 		}
 
@@ -88,18 +87,13 @@ public class McHitDrawer extends ECViewDrawer {
 				int sector = GeometryManager.getSector(labXYZ[0], labXYZ[1]);
 				localP.setZ(0);
 
-				List<String> fbs = ECAL.gemcHitFeedback(hitIndex, 
-						DataSupport.FB_CLAS_XYZ + DataSupport.FB_CLAS_RTP
-						+ DataSupport.FB_LOCAL_XYZ
-						+ DataSupport.FB_TOTEDEP, 
-						ECGeometry.getTransformations(plane));
-				
-				// get the right item
-				_view.getHexSectorItem(sector).ijkToScreen(container, localP,
-						pp);
+				List<String> fbs = ECAL.gemcHitFeedback(hitIndex, DataSupport.FB_CLAS_XYZ + DataSupport.FB_CLAS_RTP
+						+ DataSupport.FB_LOCAL_XYZ + DataSupport.FB_TOTEDEP, ECGeometry.getTransformations(plane));
 
-				FeedbackRect rr = new FeedbackRect(FeedbackRect.Dtype.EC, pp.x - 4, pp.y - 4, 8, 8,
-						hitIndex, 0, fbs);
+				// get the right item
+				_view.getHexSectorItem(sector).ijkToScreen(container, localP, pp);
+
+				FeedbackRect rr = new FeedbackRect(FeedbackRect.Dtype.EC, pp.x - 4, pp.y - 4, 8, 8, hitIndex, 0, fbs);
 				_fbRects.addElement(rr);
 
 				DataDrawSupport.drawGemcHit(g, pp);
@@ -110,18 +104,14 @@ public class McHitDrawer extends ECViewDrawer {
 	/**
 	 * Use what was drawn to generate feedback strings
 	 * 
-	 * @param container
-	 *            the drawing container
-	 * @param screenPoint
-	 *            the mouse location
-	 * @param worldPoint
-	 *            the corresponding world location
-	 * @param feedbackStrings
-	 *            add strings to this collection
+	 * @param container       the drawing container
+	 * @param screenPoint     the mouse location
+	 * @param worldPoint      the corresponding world location
+	 * @param feedbackStrings add strings to this collection
 	 */
 	@Override
-	public void feedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public void feedback(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
 		if (_fbRects.isEmpty()) {
 			return;
@@ -130,11 +120,11 @@ public class McHitDrawer extends ECViewDrawer {
 		int strips[] = ECAL.strip();
 		int stacks[] = ECAL.stack();
 		int views[] = ECAL.view();
-		
+
 		if ((strips == null) || (stacks == null) || (views == null)) {
 			return;
 		}
-		
+
 		for (FeedbackRect rr : _fbRects) {
 			boolean contains = rr.contains(screenPoint, feedbackStrings);
 			if (contains && (rr.hitIndex >= 0)) {
@@ -143,18 +133,14 @@ public class McHitDrawer extends ECViewDrawer {
 
 				// additional feedback
 				if (rr.type == FeedbackRect.Dtype.EC) {
-					
+
 					int strip = strips[hitIndex];
 					int stack = stacks[hitIndex];
 					int view = views[hitIndex];
-					
 
 					if ((strip > 0) && (stack > 0) && (view > 0)) {
-						String s = DataSupport.trueColor + "Gemc Hit "
-								+ " plane "
-								+ DataDrawSupport.EC_PLANE_NAMES[stack]
-								+ " type "
-								+ DataDrawSupport.EC_VIEW_NAMES[view]
+						String s = DataSupport.trueColor + "Gemc Hit " + " plane "
+								+ DataDrawSupport.EC_PLANE_NAMES[stack] + " type " + DataDrawSupport.EC_VIEW_NAMES[view]
 								+ " strip " + strip;
 						feedbackStrings.add(s);
 					}

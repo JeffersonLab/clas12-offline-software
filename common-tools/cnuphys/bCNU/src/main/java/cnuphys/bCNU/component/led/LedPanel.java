@@ -35,10 +35,8 @@ public class LedPanel extends JPanel {
 	/**
 	 * Create a LED panel.
 	 * 
-	 * @param gap
-	 *            the spacing
-	 * @param orientation
-	 *            the orientation.
+	 * @param gap         the spacing
+	 * @param orientation the orientation.
 	 */
 	public LedPanel(int gap, Orientation orientation) {
 
@@ -56,14 +54,10 @@ public class LedPanel extends JPanel {
 	/**
 	 * Create a LED panel using a grid layout
 	 * 
-	 * @param numRow
-	 *            the number of rows
-	 * @param numCol
-	 *            the number of columns
-	 * @param hgap
-	 *            the horizontal pixel gap
-	 * @param vgap
-	 *            the vertical pixel gap
+	 * @param numRow the number of rows
+	 * @param numCol the number of columns
+	 * @param hgap   the horizontal pixel gap
+	 * @param vgap   the vertical pixel gap
 	 */
 	public LedPanel(int numRow, int numCol, int hgap, int vgap) {
 		setLayout(new GridLayout(numRow, numCol, hgap, vgap));
@@ -71,12 +65,9 @@ public class LedPanel extends JPanel {
 	}
 
 	/**
-	 * @param state
-	 *            the initial state.
-	 * @param label
-	 *            the initial label.
-	 * @param ledListener
-	 *            the lister for clicks.
+	 * @param state       the initial state.
+	 * @param label       the initial label.
+	 * @param ledListener the lister for clicks.
 	 * @return the added Led
 	 */
 	public Led addLed(LedState state, String label, LedListener ledListener) {
@@ -92,8 +83,7 @@ public class LedPanel extends JPanel {
 	/**
 	 * Get the LED state.
 	 * 
-	 * @param label
-	 *            the unique label for the led.
+	 * @param label the unique label for the led.
 	 * @return the state of the led.
 	 */
 	public LedState getLedState(String label) {
@@ -109,10 +99,8 @@ public class LedPanel extends JPanel {
 	/**
 	 * Set the state of the led.
 	 * 
-	 * @param label
-	 *            the unique label for the led.
-	 * @param state
-	 *            the new state of the led.
+	 * @param label the unique label for the led.
+	 * @param state the new state of the led.
 	 */
 	public void setLedState(String label, LedState state) {
 		if (leds != null) {
@@ -133,10 +121,8 @@ public class LedPanel extends JPanel {
 	 * Set the state of the led. This allows for only two statesm RED and GREEN
 	 * corresponding to on and off.
 	 * 
-	 * @param label
-	 *            the unique label for the led.
-	 * @param on
-	 *            the new state of the led.
+	 * @param label the unique label for the led.
+	 * @param on    the new state of the led.
 	 */
 	public void setLedState(String label, boolean on) {
 		setLedState(label, on ? LedState.GREEN : LedState.RED);
@@ -145,8 +131,7 @@ public class LedPanel extends JPanel {
 	/**
 	 * Convenience method to set all Leds to a given state.
 	 * 
-	 * @param state
-	 *            the desired state for all leds.
+	 * @param state the desired state for all leds.
 	 */
 	public void setAll(LedState state) {
 		if (leds != null) {

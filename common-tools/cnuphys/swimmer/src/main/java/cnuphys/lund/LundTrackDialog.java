@@ -131,9 +131,8 @@ public class LundTrackDialog extends JDialog {
 	/**
 	 * Create a dialog used to swim a particle
 	 * 
-	 * @param swimmer
-	 *            Object that will swim (integrate) the particle through B
-	 *            field.
+	 * @param swimmer Object that will swim (integrate) the particle through B
+	 *                field.
 	 */
 	private LundTrackDialog() {
 		setTitle("Swim a Lund Particle");
@@ -227,9 +226,9 @@ public class LundTrackDialog extends JDialog {
 	 * Swim the particle
 	 */
 	private void doCommonSwim() {
-		
+
 		Swimmer swimmer = new Swimmer();
-		
+
 		swimmer.getProbe().getField().printConfiguration(System.out);
 
 		try {
@@ -643,12 +642,9 @@ public class LundTrackDialog extends JDialog {
 	/**
 	 * Create a nice padded panel.
 	 * 
-	 * @param hpad
-	 *            the pixel pad on the left and right
-	 * @param vpad
-	 *            the pixel pad on the top and bottom
-	 * @param component
-	 *            the main component placed in the center.
+	 * @param hpad      the pixel pad on the left and right
+	 * @param vpad      the pixel pad on the top and bottom
+	 * @param component the main component placed in the center.
 	 * @return the padded panel
 	 */
 	public static JPanel paddedPanel(int hpad, int vpad, Component component) {
@@ -671,12 +667,9 @@ public class LundTrackDialog extends JDialog {
 	/**
 	 * Center a component.
 	 * 
-	 * @param component
-	 *            The Component to center.
-	 * @param dh
-	 *            offset from horizontal center.
-	 * @param dv
-	 *            offset from vertical center.
+	 * @param component The Component to center.
+	 * @param dh        offset from horizontal center.
+	 * @param dv        offset from vertical center.
 	 */
 	public static void centerComponent(Component component) {
 

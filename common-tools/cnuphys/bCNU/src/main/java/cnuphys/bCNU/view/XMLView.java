@@ -18,8 +18,7 @@ import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.xml.tree.SAXJTree;
 
 @SuppressWarnings("serial")
-public class XMLView extends BaseView implements IFileHandler,
-		IFileTreeListener {
+public class XMLView extends BaseView implements IFileHandler, IFileTreeListener {
 
 	// constant used for file tree width
 	private static final int FILE_PANEL_WIDTH = 200;
@@ -47,16 +46,15 @@ public class XMLView extends BaseView implements IFileHandler,
 	 * Constructor for XML view.
 	 */
 	public XMLView() {
-		super(PropertySupport.TITLE, "XML Tree", PropertySupport.ICONIFIABLE, true,
-			PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
-			PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 700,
-			PropertySupport.HEIGHT, 700, PropertySupport.VISIBLE, false);
+		super(PropertySupport.TITLE, "XML Tree", PropertySupport.ICONIFIABLE, true, PropertySupport.MAXIMIZABLE, true,
+				PropertySupport.CLOSABLE, true, PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 700,
+				PropertySupport.HEIGHT, 700, PropertySupport.VISIBLE, false);
 
 		_saxTree = new SAXJTree();
 		_fileTreePanel = createFileTreePanel();
 
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-				false, _fileTreePanel, _saxTree.getScrollPane());
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, false, _fileTreePanel,
+				_saxTree.getScrollPane());
 		splitPane.setResizeWeight(0.2);
 
 		add(splitPane);
@@ -79,23 +77,18 @@ public class XMLView extends BaseView implements IFileHandler,
 	}
 
 	/**
-	 * Handle a file--probably resulting from a drop. This is essentially a call
-	 * to open the file.
+	 * Handle a file--probably resulting from a drop. This is essentially a call to
+	 * open the file.
 	 * 
-	 * @param parent
-	 *            the object being affected, usually but not always a view
-	 * @param file
-	 *            the file in question.
+	 * @param parent the object being affected, usually but not always a view
+	 * @param file   the file in question.
 	 */
 	@Override
-	public void handleFile(Object parent, File file,
-			IFileHandler.HandleAction action) {
-		System.err.println("must handle file: " + file.getPath() + "  reason: "
-				+ action);
+	public void handleFile(Object parent, File file, IFileHandler.HandleAction action) {
+		System.err.println("must handle file: " + file.getPath() + "  reason: " + action);
 
 		// use the factory to create the correct handler.
-		AFileHandler fileHandler = FileHandlerFactory.createFileHandler(parent,
-				file);
+		AFileHandler fileHandler = FileHandlerFactory.createFileHandler(parent, file);
 		if (fileHandler != null) {
 			fileHandler.handleFile(parent, file, action);
 		}
@@ -104,12 +97,9 @@ public class XMLView extends BaseView implements IFileHandler,
 	/**
 	 * Handle multiple files, e.g., because of a drag and drop.
 	 * 
-	 * @param parent
-	 *            the object being affected (might be null).
-	 * @param files
-	 *            the files to handle
-	 * @param action
-	 *            the action that initiated the need to handle this file
+	 * @param parent the object being affected (might be null).
+	 * @param files  the files to handle
+	 * @param action the action that initiated the need to handle this file
 	 */
 	@Override
 	public void handleFiles(Object parent, File files[], HandleAction action) {
@@ -125,8 +115,7 @@ public class XMLView extends BaseView implements IFileHandler,
 		File file = new File(fullPath);
 		if (file.exists()) {
 			// use the factory to create the correct handler.
-			AFileHandler fileHandler = FileHandlerFactory.createFileHandler(
-					this, file);
+			AFileHandler fileHandler = FileHandlerFactory.createFileHandler(this, file);
 			if (fileHandler != null) {
 				fileHandler.handleFile(this, file, HandleAction.OPEN);
 			}

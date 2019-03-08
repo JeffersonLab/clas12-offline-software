@@ -12,8 +12,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
 
 @SuppressWarnings("serial")
-public class LineWrapCellRenderer extends JTextArea implements
-		TableCellRenderer {
+public class LineWrapCellRenderer extends JTextArea implements TableCellRenderer {
 	protected static Border noFocusBorder;
 
 	private Color unselectedForeground;
@@ -50,17 +49,15 @@ public class LineWrapCellRenderer extends JTextArea implements
 	}
 
 	@Override
-	public Component getTableCellRendererComponent(JTable table, Object value,
-			boolean isSelected, boolean hasFocus, int row, int column) {
+	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+			int row, int column) {
 
 		if (isSelected) {
 			super.setForeground(table.getSelectionForeground());
 			super.setBackground(table.getSelectionBackground());
 		} else {
-			super.setForeground((unselectedForeground != null) ? unselectedForeground
-					: table.getForeground());
-			super.setBackground((unselectedBackground != null) ? unselectedBackground
-					: table.getBackground());
+			super.setForeground((unselectedForeground != null) ? unselectedForeground : table.getForeground());
+			super.setBackground((unselectedBackground != null) ? unselectedBackground : table.getBackground());
 		}
 
 		setFont(table.getFont());
@@ -68,10 +65,8 @@ public class LineWrapCellRenderer extends JTextArea implements
 		if (hasFocus) {
 			setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
 			if (table.isCellEditable(row, column)) {
-				super.setForeground(UIManager
-						.getColor("Table.focusCellForeground"));
-				super.setBackground(UIManager
-						.getColor("Table.focusCellBackground"));
+				super.setForeground(UIManager.getColor("Table.focusCellForeground"));
+				super.setBackground(UIManager.getColor("Table.focusCellBackground"));
 			}
 		} else {
 			setBorder(noFocusBorder);

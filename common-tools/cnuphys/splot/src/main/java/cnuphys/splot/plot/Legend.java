@@ -33,6 +33,7 @@ public class Legend extends DraggableRectangle {
 
 	/**
 	 * Create a Legend rectangle
+	 * 
 	 * @param canvas the parent plot canvas
 	 */
 	public Legend(PlotCanvas canvas) {
@@ -46,7 +47,7 @@ public class Legend extends DraggableRectangle {
 	 * @param g the graphics context
 	 */
 	public void draw(Graphics g) {
-	//	System.err.println(toString());
+		// System.err.println(toString());
 		DataSet ds = _canvas.getDataSet();
 
 		if (ds == null) {
@@ -107,12 +108,10 @@ public class Legend extends DraggableRectangle {
 			legStr += (" " + curve.getHistoData().statStr());
 		}
 
-		g.drawString(legStr, x + width - _maxStringWidth - HGAP,
-				yc + fm.getHeight() / 2);
+		g.drawString(legStr, x + width - _maxStringWidth - HGAP, yc + fm.getHeight() / 2);
 
 		if ((_numVisCurves > 1) && fit.getFit() != FitType.NOLINE) {
-			GraphicsUtilities.drawStyleLine(g, style, x + HGAP, yc,
-					x + HGAP + _params.getLegendLineLength(), yc);
+			GraphicsUtilities.drawStyleLine(g, style, x + HGAP, yc, x + HGAP + _params.getLegendLineLength(), yc);
 		}
 
 		SymbolDraw.drawSymbol(g, x + HGAP + _extra / 2, yc, curve.getStyle());
@@ -135,8 +134,7 @@ public class Legend extends DraggableRectangle {
 				Fit fit = dc.getFit();
 				if ((_numVisCurves > 1) && fit.getFitType() != FitType.NOLINE) {
 					_extra = _params.getLegendLineLength();
-				}
-				else {
+				} else {
 					Styled style = dc.getStyle();
 					if (style.getSymbolType() != SymbolType.NOSYMBOL) {
 						_extra = Math.max(_extra, style.getSymbolSize());
@@ -172,7 +170,7 @@ public class Legend extends DraggableRectangle {
 
 		return height;
 	}
-	
+
 	// get the vertical space needed for a curve
 	private int spaceNeeded(DataColumn curve) {
 		FontMetrics fm = _canvas.getFontMetrics(_params.getTextFont());

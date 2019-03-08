@@ -7,17 +7,16 @@ import cnuphys.bCNU.component.EnumComboBox;
 public enum TriggerMatch {
 
 	EXACT, ANY, ALL;
-	
+
 	/**
 	 * A map for the names of the match types
 	 */
-	public static EnumMap<TriggerMatch, String> names = new EnumMap<TriggerMatch, String>(
-			TriggerMatch.class);
+	public static EnumMap<TriggerMatch, String> names = new EnumMap<TriggerMatch, String>(TriggerMatch.class);
 
 	static {
 		names.put(EXACT, "  Exact  ");
-		names.put(ANY,   "    Any  ");
-		names.put(ALL,   "    All  ");
+		names.put(ANY, "    Any  ");
+		names.put(ALL, "    All  ");
 	}
 
 	/**
@@ -31,6 +30,7 @@ public enum TriggerMatch {
 
 	/**
 	 * Get a description of the pattern
+	 * 
 	 * @return a description of the pattern
 	 */
 	public String getDescription() {

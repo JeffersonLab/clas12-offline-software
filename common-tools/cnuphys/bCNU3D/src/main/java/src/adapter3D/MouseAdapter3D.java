@@ -12,8 +12,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLJPanel;
 
-public class MouseAdapter3D implements MouseListener, MouseMotionListener,
-		MouseWheelListener {
+public class MouseAdapter3D implements MouseListener, MouseMotionListener, MouseWheelListener {
 
 	protected int prevMouseX;
 	protected int prevMouseY;
@@ -36,7 +35,7 @@ public class MouseAdapter3D implements MouseListener, MouseMotionListener,
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		
+
 		final int x = e.getX();
 		final int y = e.getY();
 		int width = 0, height = 0;
@@ -50,14 +49,12 @@ public class MouseAdapter3D implements MouseListener, MouseMotionListener,
 			GLAutoDrawable glad = (GLAutoDrawable) source;
 			width = glad.getSurfaceWidth();
 			height = glad.getSurfaceHeight();
-		} else if (GLProfile.isAWTAvailable()
-				&& source instanceof java.awt.Component) {
+		} else if (GLProfile.isAWTAvailable() && source instanceof java.awt.Component) {
 			java.awt.Component comp = (java.awt.Component) source;
 			width = comp.getWidth();
 			height = comp.getHeight();
 		} else {
-			throw new RuntimeException(
-					"Event source neither Window nor Component: " + source);
+			throw new RuntimeException("Event source neither Window nor Component: " + source);
 		}
 		float theta1 = 360.0f * ((float) (x - prevMouseX) / (float) width);
 		float theta2 = 360.0f * ((float) (prevMouseY - y) / (float) height);

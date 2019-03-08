@@ -23,8 +23,7 @@ public class PathBasedItem extends AItem {
 	/**
 	 * Create an object that is based on a java Path2D object.
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
+	 * @param layer the Layer this item is on.
 	 */
 	public PathBasedItem(LogicalLayer layer) {
 		super(layer);
@@ -33,31 +32,26 @@ public class PathBasedItem extends AItem {
 	/**
 	 * Custom drawer for the item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
 		// TODO use dirty. If the item is not dirty, should be able to draw
 		// the _lastDrawnPolygon directly;
-		_lastDrawnPolygon = WorldGraphicsUtilities.drawPath2D(g, container,
-				_path, _style, true);
+		_lastDrawnPolygon = WorldGraphicsUtilities.drawPath2D(g, container, _path, _style, true);
 
 	}
 
 	/**
-	 * Checks whether the item should be drawn. This is an additional check,
-	 * beyond the simple visibility flag check. For example, it might check
-	 * whether the item intersects the area being drawn.
+	 * Checks whether the item should be drawn. This is an additional check, beyond
+	 * the simple visibility flag check. For example, it might check whether the
+	 * item intersects the area being drawn.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
-	 * @return <code>true</code> if the item passes any and all tests, and
-	 *         should be drawn.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
+	 * @return <code>true</code> if the item passes any and all tests, and should be
+	 *         drawn.
 	 */
 	@Override
 	public boolean shouldDraw(Graphics g, IContainer container) {
@@ -89,12 +83,10 @@ public class PathBasedItem extends AItem {
 	/**
 	 * Check whether the (rendered) item contains the given screen point.
 	 * 
-	 * @param container
-	 *            the graphical container rendering the item.
-	 * @param screenPoint
-	 *            a pixel location.
-	 * @return <code>true</code> if the item, as rendered on the given
-	 *         container, contains the given screen point.
+	 * @param container   the graphical container rendering the item.
+	 * @param screenPoint a pixel location.
+	 * @return <code>true</code> if the item, as rendered on the given container,
+	 *         contains the given screen point.
 	 */
 	@Override
 	public boolean contains(IContainer container, Point screenPoint) {
@@ -112,8 +104,7 @@ public class PathBasedItem extends AItem {
 	/**
 	 * get the bounding rect.
 	 * 
-	 * @param container
-	 *            the container being rendered
+	 * @param container the container being rendered
 	 * @return the bounding box.
 	 */
 	@Override
@@ -140,8 +131,7 @@ public class PathBasedItem extends AItem {
 	/**
 	 * Get the rotation point
 	 * 
-	 * @param container
-	 *            the container bing rendered
+	 * @param container the container bing rendered
 	 * @return the rotation point where rotations are initiated
 	 */
 	@Override
@@ -151,8 +141,7 @@ public class PathBasedItem extends AItem {
 			return null;
 		}
 
-		Point2D.Double wp = WorldGraphicsUtilities.polygonIntersection(_focus,
-				getAzimuth(), _path);
+		Point2D.Double wp = WorldGraphicsUtilities.polygonIntersection(_focus, getAzimuth(), _path);
 
 		// now try to extend by 15 pixels
 		if (_focus != null) {
@@ -203,11 +192,9 @@ public class PathBasedItem extends AItem {
 			_path.transform(at);
 
 			if (_secondaryPoints != null) {
-				Path2D.Double path2 = (Path2D.Double) _modification
-						.getSecondaryPath().clone();
+				Path2D.Double path2 = (Path2D.Double) _modification.getSecondaryPath().clone();
 				path2.transform(at);
-				WorldGraphicsUtilities.pathToWorldPolygon(path2,
-						_secondaryPoints);
+				WorldGraphicsUtilities.pathToWorldPolygon(path2, _secondaryPoints);
 			}
 
 			// fix focus
@@ -237,16 +224,13 @@ public class PathBasedItem extends AItem {
 			angle = ((int) angle);
 
 			// minus is for cw v. ccw
-			at = AffineTransform.getRotateInstance(Math.toRadians(-angle),
-					anchor.x, anchor.y);
+			at = AffineTransform.getRotateInstance(Math.toRadians(-angle), anchor.x, anchor.y);
 			_path.transform(at);
 
 			if (_secondaryPoints != null) {
-				Path2D.Double path2 = (Path2D.Double) _modification
-						.getSecondaryPath().clone();
+				Path2D.Double path2 = (Path2D.Double) _modification.getSecondaryPath().clone();
 				path2.transform(at);
-				WorldGraphicsUtilities.pathToWorldPolygon(path2,
-						_secondaryPoints);
+				WorldGraphicsUtilities.pathToWorldPolygon(path2, _secondaryPoints);
 			}
 
 			setAzimuth(_modification.getStartAzimuth() + angle);
@@ -273,31 +257,29 @@ public class PathBasedItem extends AItem {
 
 	/**
 	 * Rotate the item
+	 * 
 	 * @param angle the angle in degrees
 	 */
 	public void rotate(double angle) {
-	    if (Math.abs(angle) < 0.05) {
-		return;
-	    }
-	    double azim = getAzimuth();
-	    Point2D.Double anchor = WorldGraphicsUtilities.getCentroid(_path);
-	    
+		if (Math.abs(angle) < 0.05) {
+			return;
+		}
+		double azim = getAzimuth();
+		Point2D.Double anchor = WorldGraphicsUtilities.getCentroid(_path);
+
 		// minus is for cw v. ccw
-	    AffineTransform at = AffineTransform.getRotateInstance(Math.toRadians(-angle),
-				anchor.x, anchor.y);
+		AffineTransform at = AffineTransform.getRotateInstance(Math.toRadians(-angle), anchor.x, anchor.y);
 		_path.transform(at);
 
 		if (_secondaryPoints != null) {
-			Path2D.Double path2 = (Path2D.Double) _modification
-					.getSecondaryPath().clone();
+			Path2D.Double path2 = (Path2D.Double) _modification.getSecondaryPath().clone();
 			path2.transform(at);
-			WorldGraphicsUtilities.pathToWorldPolygon(path2,
-					_secondaryPoints);
+			WorldGraphicsUtilities.pathToWorldPolygon(path2, _secondaryPoints);
 		}
 
-	    setAzimuth(azim + angle);
+		setAzimuth(azim + angle);
 	}
-	
+
 	/**
 	 * Simple scaling of the object.
 	 */
@@ -305,18 +287,14 @@ public class PathBasedItem extends AItem {
 		_path = (Path2D.Double) (_modification.getStartPath().clone());
 		Point2D.Double startPoint = _modification.getStartWorldPoint();
 		Point2D.Double currentPoint = _modification.getCurrentWorldPoint();
-		double scale = currentPoint.distance(_focus)
-				/ startPoint.distance(_focus);
-		AffineTransform at = AffineTransform.getTranslateInstance(_focus.x,
-				_focus.y);
+		double scale = currentPoint.distance(_focus) / startPoint.distance(_focus);
+		AffineTransform at = AffineTransform.getTranslateInstance(_focus.x, _focus.y);
 		at.concatenate(AffineTransform.getScaleInstance(scale, scale));
-		at.concatenate(AffineTransform.getTranslateInstance(-_focus.x,
-				-_focus.y));
+		at.concatenate(AffineTransform.getTranslateInstance(-_focus.x, -_focus.y));
 		_path.transform(at);
 
 		if (_secondaryPoints != null) {
-			Path2D.Double path2 = (Path2D.Double) _modification
-					.getSecondaryPath().clone();
+			Path2D.Double path2 = (Path2D.Double) _modification.getSecondaryPath().clone();
 			path2.transform(at);
 			WorldGraphicsUtilities.pathToWorldPolygon(path2, _secondaryPoints);
 		}
@@ -325,8 +303,8 @@ public class PathBasedItem extends AItem {
 
 	/**
 	 * Reshape the items based on the modification. This is type dependent-- for
-	 * example a rectangle will want to keep looking like a rectangle. The
-	 * default implementation is to scale
+	 * example a rectangle will want to keep looking like a rectangle. The default
+	 * implementation is to scale
 	 */
 	protected void reshape() {
 		scale();
@@ -340,16 +318,13 @@ public class PathBasedItem extends AItem {
 
 	/**
 	 * Give two points (presumably the start and current mouse positions) and a
-	 * vertex (presumable the focus as a pixel point) this computes and angle.
-	 * Give the assumptions above, it is how much the original path will need to
-	 * be rotated.
+	 * vertex (presumable the focus as a pixel point) this computes and angle. Give
+	 * the assumptions above, it is how much the original path will need to be
+	 * rotated.
 	 * 
-	 * @param p1
-	 *            one end point
-	 * @param vertex
-	 *            the vertex point
-	 * @param p2
-	 *            the other end point
+	 * @param p1     one end point
+	 * @param vertex the vertex point
+	 * @param p2     the other end point
 	 * @return the angle in degrees.
 	 */
 	protected double threePointAngle(Point p1, Point vertex, Point p2) {
@@ -388,15 +363,13 @@ public class PathBasedItem extends AItem {
 			return null;
 		}
 		Rectangle2D r2d = _path.getBounds2D();
-		return new Rectangle2D.Double(r2d.getX(), r2d.getY(), r2d.getWidth(),
-				r2d.getHeight());
+		return new Rectangle2D.Double(r2d.getX(), r2d.getY(), r2d.getWidth(), r2d.getHeight());
 	}
 
 	/**
 	 * Get the bounds if the path contains only a single point
 	 * 
-	 * @param container
-	 *            the container being rendered.
+	 * @param container the container being rendered.
 	 * @return the bounds if the path contains only a single point
 	 */
 	protected Rectangle singlePointBounds(IContainer container) {

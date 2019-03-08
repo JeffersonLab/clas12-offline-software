@@ -26,11 +26,9 @@ public class Styled implements IStyled {
 	private int _symbolSize = 8;
 
 	// for random combinations
-	private static final Color _colors[] = { Color.black, Color.red, Color.blue,
-			Color.gray };
-	private static final SymbolType _symbols[] = { SymbolType.SQUARE,
-			SymbolType.CIRCLE, SymbolType.DIAMOND, SymbolType.CROSS,
-			SymbolType.DOWNTRIANGLE, SymbolType.UPTRIANGLE };
+	private static final Color _colors[] = { Color.black, Color.red, Color.blue, Color.gray };
+	private static final SymbolType _symbols[] = { SymbolType.SQUARE, SymbolType.CIRCLE, SymbolType.DIAMOND,
+			SymbolType.CROSS, SymbolType.DOWNTRIANGLE, SymbolType.UPTRIANGLE };
 
 	/**
 	 * Create with all defaults.
@@ -52,15 +50,15 @@ public class Styled implements IStyled {
 	/**
 	 * Create a Styled object
 	 * 
-	 * @param fillColor the fill color
-	 * @param lineColor the line color
-	 * @param lineStyle the line style
-	 * @param lineWidth the line width
+	 * @param fillColor  the fill color
+	 * @param lineColor  the line color
+	 * @param lineStyle  the line style
+	 * @param lineWidth  the line width
 	 * @param symbolType the symbol type
 	 * @param symbolSize the symbol size
 	 */
-	public Styled(Color fillColor, Color lineColor, LineStyle lineStyle,
-			float lineWidth, SymbolType symbolType, int symbolSize) {
+	public Styled(Color fillColor, Color lineColor, LineStyle lineStyle, float lineWidth, SymbolType symbolType,
+			int symbolSize) {
 		_fillColor = fillColor;
 		_lineColor = lineColor;
 		_lineStyle = lineStyle;
@@ -80,19 +78,18 @@ public class Styled implements IStyled {
 	}
 
 	/**
-	 * Create with all defaults but the given fill color. The link color is set
-	 * a little darker or lighter.
+	 * Create with all defaults but the given fill color. The link color is set a
+	 * little darker or lighter.
 	 * 
-	 * @param fillColor the fill color to user.
-	 * @param darkerLineColor if true/false make line color darker/lighter than
-	 *            fill color.
+	 * @param fillColor       the fill color to user.
+	 * @param darkerLineColor if true/false make line color darker/lighter than fill
+	 *                        color.
 	 */
 	public Styled(Color fillColor, boolean darkerLineColor) {
 		_fillColor = fillColor;
 		if (darkerLineColor) {
 			_lineColor = fillColor.darker();
-		}
-		else {
+		} else {
 			_lineColor = fillColor.brighter();
 		}
 
@@ -112,7 +109,7 @@ public class Styled implements IStyled {
 	public Color getLineColor() {
 		return _lineColor;
 	}
-	
+
 	@Override
 	public Color getFitColor() {
 		if (_fitColor == null) {
@@ -120,7 +117,6 @@ public class Styled implements IStyled {
 		}
 		return _fitColor;
 	}
-
 
 	@Override
 	public LineStyle getLineStyle() {
@@ -151,7 +147,7 @@ public class Styled implements IStyled {
 	public void setFitColor(Color fitColor) {
 		_fitColor = fitColor;
 	}
-	
+
 	/**
 	 * Set the line style
 	 * 

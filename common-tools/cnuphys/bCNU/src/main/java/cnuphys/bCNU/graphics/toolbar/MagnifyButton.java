@@ -18,8 +18,7 @@ public class MagnifyButton extends ToolBarToggleButton {
 	/**
 	 * Create the button for magnification
 	 * 
-	 * @param container
-	 *            the owner container.
+	 * @param container the owner container.
 	 */
 	public MagnifyButton(IContainer container) {
 		super(container, "images/magnify.png", "Magnification");
@@ -29,8 +28,7 @@ public class MagnifyButton extends ToolBarToggleButton {
 	/**
 	 * Handle a mouse enter (into the container) event (if this tool is active).
 	 * 
-	 * @param mouseEvent
-	 *            the causal event.
+	 * @param mouseEvent the causal event.
 	 */
 	@Override
 	public void mouseEntered(MouseEvent mouseEvent) {
@@ -39,8 +37,7 @@ public class MagnifyButton extends ToolBarToggleButton {
 	/**
 	 * Handle a mouse exit (into the container) event (if this tool is active).
 	 * 
-	 * @param mouseEvent
-	 *            the causal event.
+	 * @param mouseEvent the causal event.
 	 */
 	@Override
 	public void mouseExited(MouseEvent mouseEvent) {
@@ -50,8 +47,7 @@ public class MagnifyButton extends ToolBarToggleButton {
 	/**
 	 * Handle a mouse press (into the container) event (if this tool is active).
 	 * 
-	 * @param mouseEvent
-	 *            the causal event.
+	 * @param mouseEvent the causal event.
 	 */
 	@Override
 	public void mousePressed(MouseEvent mouseEvent) {
@@ -60,8 +56,7 @@ public class MagnifyButton extends ToolBarToggleButton {
 	/**
 	 * Handle a mouse move (into the container) event (if this tool is active).
 	 * 
-	 * @param mouseEvent
-	 *            the causal event.
+	 * @param mouseEvent the causal event.
 	 */
 	@Override
 	public void mouseMoved(MouseEvent mouseEvent) {

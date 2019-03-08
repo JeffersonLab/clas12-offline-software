@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 public abstract class CapturedPrintStream extends PrintStream {
-	
+
 	/**
 	 * Capture a standard stream
 	 */

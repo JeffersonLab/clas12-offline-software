@@ -20,8 +20,7 @@ public class StyleEditorPanel extends JPanel {
 	public static final String SYMBOLSIZEPROP = "Symbol Size";
 	public static final String LINEWIDTHPROP = "Line Width";
 
-	private static final Font _font = Environment.getInstance()
-			.getCommonFont(10);
+	private static final Font _font = Environment.getInstance().getCommonFont(10);
 
 	// change symbol type
 	EnumComboBox _symbolSelector;
@@ -37,10 +36,9 @@ public class StyleEditorPanel extends JPanel {
 
 	// symbol size
 	protected TextFieldSlider _symbolSizeSelector;
-	
+
 	// line size
 	protected TextFieldSlider _lineSizeSelector;
-
 
 	/**
 	 * Create the stye editing panel.
@@ -85,8 +83,7 @@ public class StyleEditorPanel extends JPanel {
 
 		if (type != DataSetType.H1D) {
 			String labels[] = { "4", "8", "12", "16", "20", "24", "28" };
-			_symbolSizeSelector = new TextFieldSlider(4, 28, 8, _font, 1,
-					labels, 180, 40, "Symbol Size") {
+			_symbolSizeSelector = new TextFieldSlider(4, 28, 8, _font, 1, labels, 180, 40, "Symbol Size") {
 
 				@Override
 				public double sliderValueToRealValue() {
@@ -105,27 +102,24 @@ public class StyleEditorPanel extends JPanel {
 
 				@Override
 				public void valueChanged() {
-					firePropertyChange(SYMBOLSIZEPROP, -1,
-							_symbolSizeSelector.getValue());
+					firePropertyChange(SYMBOLSIZEPROP, -1, _symbolSizeSelector.getValue());
 				}
 
 			};
 		}
-		
-		//line size 
+
+		// line size
 		String szLabels[] = { "0", "2", "4", "6", "8", "10", "12" };
-		_lineSizeSelector = new TextFieldSlider(0, 24, 1, _font, 1,
-				szLabels, 180, 40, "Line Width") {
-		
+		_lineSizeSelector = new TextFieldSlider(0, 24, 1, _font, 1, szLabels, 180, 40, "Line Width") {
 
 			@Override
 			public double sliderValueToRealValue() {
-				return getValue()/2.;
+				return getValue() / 2.;
 			}
 
 			@Override
 			public int realValueToSliderValue(double val) {
-				return (int) (2*val);
+				return (int) (2 * val);
 			}
 
 			@Override
@@ -136,8 +130,7 @@ public class StyleEditorPanel extends JPanel {
 
 			@Override
 			public void valueChanged() {
-				firePropertyChange(LINEWIDTHPROP, -1,
-						_lineSizeSelector.getValue());
+				firePropertyChange(LINEWIDTHPROP, -1, _lineSizeSelector.getValue());
 			}
 
 		};
@@ -193,8 +186,7 @@ public class StyleEditorPanel extends JPanel {
 	public void setStyle(IStyled style) {
 		if (style != null) {
 			if (_symbolSelector != null) {
-				_symbolSelector
-						.setSelectedItem(style.getSymbolType().getName());
+				_symbolSelector.setSelectedItem(style.getSymbolType().getName());
 			}
 			if (_lineSelector != null) {
 				_lineSelector.setSelectedItem(style.getLineStyle().getName());
@@ -219,7 +211,7 @@ public class StyleEditorPanel extends JPanel {
 	public TextFieldSlider getSymbolSizeSelector() {
 		return _symbolSizeSelector;
 	}
-	
+
 	/**
 	 * Get the line width slider
 	 * 
@@ -228,7 +220,6 @@ public class StyleEditorPanel extends JPanel {
 	public TextFieldSlider getLineWidthSelector() {
 		return _lineSizeSelector;
 	}
-
 
 	/**
 	 * Get the symbol selector

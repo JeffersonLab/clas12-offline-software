@@ -9,33 +9,28 @@ public class HitRecord {
 
 	public Point3D avgHit;
 	/**
-	 * The 1-based ints (int order) used to identify the hit. For example, in EC
-	 * the ints are sect, stack, view, strip.For DC they are sect, superlayer,
-	 * layer, wire.
+	 * The 1-based ints (int order) used to identify the hit. For example, in EC the
+	 * ints are sect, stack, view, strip.For DC they are sect, superlayer, layer,
+	 * wire.
 	 */
 	public int[] ids;
 
 	/**
 	 * Hold information about a hit
 	 * 
-	 * @param dContainer
-	 *            the data container
-	 * @param hIndex
-	 *            the 0-based hit index
-	 * @param idArray
-	 *            The 1-based ints (int order) used to identify the hit. For
-	 *            example, in EC the ints are sect, stack, view, strip.For DC
-	 *            they are sect, superlayer, layer, wire.
+	 * @param dContainer the data container
+	 * @param hIndex     the 0-based hit index
+	 * @param idArray    The 1-based ints (int order) used to identify the hit. For
+	 *                   example, in EC the ints are sect, stack, view, strip.For DC
+	 *                   they are sect, superlayer, layer, wire.
 	 */
-	public HitRecord(double avgX[], double avgY[],
-			double avgZ[], int hIndex, int... idArray) {
+	public HitRecord(double avgX[], double avgY[], double avgZ[], int hIndex, int... idArray) {
 		hitIndex = hIndex;
 		ids = idArray;
 
 		if ((avgX != null) && (avgX.length > hIndex)) {
-			//convert to cm
-			avgHit = new Point3D(avgX[hIndex] / 10, avgY[hIndex] / 10,
-					avgZ[hIndex] / 10);
+			// convert to cm
+			avgHit = new Point3D(avgX[hIndex] / 10, avgY[hIndex] / 10, avgZ[hIndex] / 10);
 		}
 	}
 

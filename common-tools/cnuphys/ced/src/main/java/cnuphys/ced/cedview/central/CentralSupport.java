@@ -11,11 +11,10 @@ public class CentralSupport {
 	/**
 	 * Mark which panels have hits. Used by CentralZView and SectorView(s).
 	 * 
-	 * @param panels
-	 *            the list of panels
+	 * @param panels the list of panels
 	 */
-	public static void markPanelHits(CedView view,  List<BSTxyPanel> panels) {
-		
+	public static void markPanelHits(CedView view, List<BSTxyPanel> panels) {
+
 		if (panels == null) {
 			return;
 		}
@@ -25,12 +24,11 @@ public class CentralSupport {
 				panel.hit[0] = false;
 				panel.hit[1] = false;
 				panel.hit[2] = false;
-			}
-			else {
+			} else {
 				Log.getInstance().warning("Unexpected null panel in CentralSupport.markPanelHits.");
 			}
 		}
 
-	} //markPanelHits
+	} // markPanelHits
 
 }

@@ -51,12 +51,11 @@ public class ActionLabel extends JLabel {
 	}
 
 	/**
-	 * Notify listeners we have a new event ready for display. All they may want
-	 * is the notification that a new event has arrived. But the event itself is
-	 * passed along.
+	 * Notify listeners we have a new event ready for display. All they may want is
+	 * the notification that a new event has arrived. But the event itself is passed
+	 * along.
 	 * 
-	 * @param evioEvent
-	 *            the event in question;
+	 * @param evioEvent the event in question;
 	 */
 	private void notifyActionListeners() {
 
@@ -83,8 +82,7 @@ public class ActionLabel extends JLabel {
 	/**
 	 * Remove an ActionListener.
 	 * 
-	 * @param listener
-	 *            the ActionListener to remove.
+	 * @param listener the ActionListener to remove.
 	 */
 	public void removeActionListener(ActionListener listener) {
 
@@ -98,8 +96,7 @@ public class ActionLabel extends JLabel {
 	/**
 	 * Add an ActionListener.
 	 * 
-	 * @param listener
-	 *            the ActionListener listener to add.
+	 * @param listener the ActionListener listener to add.
 	 */
 	public void addActionListener(ActionListener listener) {
 

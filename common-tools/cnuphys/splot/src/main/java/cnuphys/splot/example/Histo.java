@@ -67,8 +67,8 @@ public class Histo extends AExample {
 		PlotParameters params = _canvas.getParameters();
 		params.setMinExponentY(6);
 		params.setNumDecimalY(0);
-		
-		//test gradient
+
+		// test gradient
 		params.setGradientDrawing(true);
 	}
 

@@ -25,31 +25,27 @@ public class FTCalXYPolygon extends Polygon {
 	/**
 	 * Create a XY Polygon for the CND
 	 * 
-	 * @param Id
-	 *            the paddle ID
+	 * @param Id the paddle ID
 	 */
 	public FTCalXYPolygon(int paddleId) {
 		this.paddleId = paddleId;
 		paddle = FTCALGeometry.getPaddle(paddleId);
 
-		// System.err.println("PADDLE ID: " + paddleId + "   good paddle: " +
+		// System.err.println("PADDLE ID: " + paddleId + " good paddle: " +
 		// (paddle != null));
 	}
 
 	/**
 	 * Draw the polygon
 	 * 
-	 * @param g
-	 *            the graphics object
-	 * @param container
-	 *            the drawing container
+	 * @param g         the graphics object
+	 * @param container the drawing container
 	 */
 	public void draw(Graphics g, IContainer container) {
 		reset();
 		Point pp = new Point();
 		for (int i = 0; i < 4; i++) {
-			container.worldToLocal(pp, paddle.getVolumePoint(i).x(), paddle
-					.getVolumePoint(i).y());
+			container.worldToLocal(pp, paddle.getVolumePoint(i).x(), paddle.getVolumePoint(i).y());
 			addPoint(pp.x, pp.y);
 		}
 
@@ -62,22 +58,23 @@ public class FTCalXYPolygon extends Polygon {
 
 	/**
 	 * Get the feedback strings
+	 * 
 	 * @param container
 	 * @param screenPoint
 	 * @param worldPoint
 	 * @param feedbackStrings
 	 * @return
 	 */
-	public boolean getFeedbackStrings(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public boolean getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
 		if (!contains(screenPoint)) {
 			return false;
 		}
 
 		fbString("red", "Id " + paddleId, feedbackStrings);
-		
-		//get the xy indices
+
+		// get the xy indices
 		Point p = FTCALGeometry.getXYIndices(paddleId);
 		fbString("red", "XY Indices [" + p.x + ", " + p.y + "]", feedbackStrings);
 

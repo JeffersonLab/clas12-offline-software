@@ -59,29 +59,26 @@ import cnuphys.swim.SwimTrajectory2D;
 
 @SuppressWarnings("serial")
 public class CentralXYView extends CedXYView {
-	
-	
-	//for naming clones
-	private static int CLONE_COUNT = 0;
-	
-	//base title
-	private static final String _baseTitle = "Central XY";
 
+	// for naming clones
+	private static int CLONE_COUNT = 0;
+
+	// base title
+	private static final String _baseTitle = "Central XY";
 
 	private BSTxyPanel _closestPanel;
 
-	private static Color _panelColors[] = { X11Colors.getX11Color("sky blue"),
-			X11Colors.getX11Color("light blue") };
-	
+	private static Color _panelColors[] = { X11Colors.getX11Color("sky blue"), X11Colors.getX11Color("light blue") };
+
 	private static Color _ctofColors[] = { new Color(240, 240, 240), new Color(224, 224, 224) };
 
 	// the CND xy polygons
 	private CNDXYPolygon _cndPoly[][] = new CNDXYPolygon[3][48];
-	
-	//the CTOF polygons
+
+	// the CTOF polygons
 	private CTOFXYPolygon _ctofPoly[] = new CTOFXYPolygon[48];
-	
-	//Micro megas [sector][layer]
+
+	// Micro megas [sector][layer]
 	private BMTSectorItem _bmtItems[][];
 
 	// units are mm
@@ -89,16 +86,15 @@ public class CentralXYView extends CedXYView {
 	// Rectangle2D.Double(
 	// 200., -200., -400., 400.);
 
-	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
-			400, -400, -800, 800);
+	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(400, -400, -800, 800);
 
 	// used to draw swum trajectories (if any) in the after drawer
 	private SwimTrajectoryDrawer _swimTrajectoryDrawer;
 
 	// draws reconstructed crosses
 	private CrossDrawerXY _crossDrawer;
-	
-	//draws hits
+
+	// draws hits
 	private CentralXYHitDrawer _hitDrawer;
 
 	/**
@@ -111,26 +107,24 @@ public class CentralXYView extends CedXYView {
 
 		_crossDrawer = new CrossDrawerXY(this);
 		_hitDrawer = new CentralXYHitDrawer(this);
-		
+
 		// draws any swum trajectories (in the after draw)
 		_swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
 
 		// add the CND polys
 		for (int layer = 1; layer <= 3; layer++) {
 			for (int paddleId = 1; paddleId <= 48; paddleId++) {
-				_cndPoly[layer - 1][paddleId - 1] = new CNDXYPolygon(layer,
-						paddleId);
+				_cndPoly[layer - 1][paddleId - 1] = new CNDXYPolygon(layer, paddleId);
 			}
 		}
-		
-		//ad the ctof polygons
+
+		// ad the ctof polygons
 		for (int paddleId = 1; paddleId <= 48; paddleId++) {
 			_ctofPoly[paddleId - 1] = new CTOFXYPolygon(paddleId);
 		}
 
 	}
-	
-	
+
 //	/**
 //	 * Get the Micromegas sector item
 //	 * @param sector [1..3]
@@ -154,37 +148,27 @@ public class CentralXYView extends CedXYView {
 		// make it square
 		int width = d.width;
 		int height = width;
-		
+
 		String title = _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")"));
 
 		// create the view
-		final CentralXYView view = new CentralXYView(
-				PropertySupport.WORLDSYSTEM, _defaultWorldRectangle, 
-				PropertySupport.WIDTH, width,
-				PropertySupport.HEIGHT, height, 
-				PropertySupport.LEFTMARGIN, LMARGIN, 
-				PropertySupport.TOPMARGIN, TMARGIN,
-				PropertySupport.RIGHTMARGIN, RMARGIN,
-				PropertySupport.BOTTOMMARGIN, BMARGIN, 
-				PropertySupport.TOOLBAR, true, 
-				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
-				PropertySupport.VISIBLE, true,
-				PropertySupport.TITLE, title,
-				PropertySupport.STANDARDVIEWDECORATIONS, true);
+		final CentralXYView view = new CentralXYView(PropertySupport.WORLDSYSTEM, _defaultWorldRectangle,
+				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height, PropertySupport.LEFTMARGIN, LMARGIN,
+				PropertySupport.TOPMARGIN, TMARGIN, PropertySupport.RIGHTMARGIN, RMARGIN, PropertySupport.BOTTOMMARGIN,
+				BMARGIN, PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
+				PropertySupport.VISIBLE, true, PropertySupport.TITLE, title, PropertySupport.STANDARDVIEWDECORATIONS,
+				true);
 
 		view._controlPanel = new ControlPanel(view,
-				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK
-						+ ControlPanel.ACCUMULATIONLEGEND
+				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
 						+ ControlPanel.DRAWLEGEND,
-				DisplayBits.ACCUMULATION + DisplayBits.CROSSES
-						+ DisplayBits.MCTRUTH + DisplayBits.RECONHITS + DisplayBits.ADC_HITS
-						+ DisplayBits.CVTTRACKS + DisplayBits.COSMICS +
-						DisplayBits.GLOBAL_HB +  DisplayBits.GLOBAL_TB,
+				DisplayBits.ACCUMULATION + DisplayBits.CROSSES + DisplayBits.MCTRUTH + DisplayBits.RECONHITS
+						+ DisplayBits.ADC_HITS + DisplayBits.CVTTRACKS + DisplayBits.COSMICS + DisplayBits.GLOBAL_HB
+						+ DisplayBits.GLOBAL_TB,
 				3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
 		view.pack();
-
 
 		// add quick zooms
 		view.addQuickZoom("BST & BMT", -190, -190, 190, 190);
@@ -211,8 +195,7 @@ public class CentralXYView extends CedXYView {
 
 				Rectangle screenRect = container.getInsetRectangle();
 				g.setColor(Color.white);
-				g.fillRect(screenRect.x, screenRect.y, screenRect.width,
-						screenRect.height);
+				g.fillRect(screenRect.x, screenRect.y, screenRect.width, screenRect.height);
 
 				drawBSTPanels(g, container);
 			}
@@ -227,25 +210,24 @@ public class CentralXYView extends CedXYView {
 	 */
 	@Override
 	protected void setAfterDraw() {
-		
+
 		IDrawable afterDraw = new DrawableAdapter() {
 
 			@Override
 			public void draw(Graphics g, IContainer container) {
 
 				if (!_eventManager.isAccumulating()) {
-					
+
 					_hitDrawer.draw(g, container);
-					
+
 					_swimTrajectoryDrawer.draw(g, container);
 					if (showCosmics()) {
 						drawCosmicTracks(g, container);
 					}
-					
+
 					if (showCrosses()) {
 						_crossDrawer.draw(g, container);
 					}
-
 
 					Rectangle screenRect = getActiveScreenRectangle(container);
 					drawAxes(g, container, screenRect, true);
@@ -263,13 +245,13 @@ public class CentralXYView extends CedXYView {
 
 		CosmicList cosmics;
 		cosmics = Cosmics.getInstance().getCosmics();
-		
+
 		if ((cosmics == null) || cosmics.isEmpty()) {
 			return;
 		}
 
 		Shape oldClip = clipView(g);
-		
+
 		Point p1 = new Point();
 		Point p2 = new Point();
 		for (Cosmic cosmic : cosmics) {
@@ -277,14 +259,14 @@ public class CentralXYView extends CedXYView {
 			double y2 = -100;
 			double x1 = cosmic.trkline_yx_slope * y1 + cosmic.trkline_yx_interc;
 			double x2 = cosmic.trkline_yx_slope * y2 + cosmic.trkline_yx_interc;
-			//convert to mm
+			// convert to mm
 			x1 *= 10;
 			x2 *= 10;
 			y1 *= 10;
 			y2 *= 10;
 			container.worldToLocal(p1, x1, y1);
 			container.worldToLocal(p2, x2, y2);
-			
+
 			g.setColor(Color.red);
 			g.drawLine(p1.x, p1.y, p2.x, p2.y);
 
@@ -295,7 +277,8 @@ public class CentralXYView extends CedXYView {
 
 	/**
 	 * Get the panel based on the layer and sector
-	 * @param layer 1..8
+	 * 
+	 * @param layer  1..8
 	 * @param sector 1..24
 	 * @return the panel
 	 */
@@ -330,12 +313,10 @@ public class CentralXYView extends CedXYView {
 
 		Rectangle sr = container.getInsetRectangle();
 		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
-		
 
 		// BST panels
 		for (BSTxyPanel panel : panels) {
-			drawBSTPanel(g2, container, panel,
-					_panelColors[(panel.getSector()) % 2]);
+			drawBSTPanel(g2, container, panel, _panelColors[(panel.getSector()) % 2]);
 		}
 
 		// CND Polys
@@ -347,22 +328,20 @@ public class CentralXYView extends CedXYView {
 			}
 
 		}
-		
+
 		// CTOF Polys
 		for (int paddleId = 1; paddleId <= 48; paddleId++) {
 			if (_ctofPoly[paddleId - 1] != null) {
 				_ctofPoly[paddleId - 1].draw(g2, container, paddleId, _ctofColors[paddleId % 2]);
 			}
 		}
-		
 
 		g.setClip(oldClip);
 	}
 
 	// draw one BST panel
-	public void drawBSTPanel(Graphics2D g2, IContainer container,
-			BSTxyPanel panel, Color color) {
-		
+	public void drawBSTPanel(Graphics2D g2, IContainer container, BSTxyPanel panel, Color color) {
+
 		Stroke oldStroke = g2.getStroke();
 		g2.setColor(color);
 		Point p1 = new Point();
@@ -393,35 +372,34 @@ public class CentralXYView extends CedXYView {
 			pmid.x = (p1.x + p2.x) / 2;
 			pmid.y = (p1.y + p2.y) / 2;
 //			String s = "" + panel.getSector();
-			//TODO fix HACK
+			// TODO fix HACK
 //			String s = "" + svtSectorHack(panel.getLayer(), panel.getSector());
-			String s = "" +  panel.getSector();
-			extendLine(porig, pmid, 4 + panel.getLayer() / 2, fm.stringWidth(s),
-					fm.getHeight());
+			String s = "" + panel.getSector();
+			extendLine(porig, pmid, 4 + panel.getLayer() / 2, fm.stringWidth(s), fm.getHeight());
 			g2.drawString(s, pmid.x, pmid.y);
 		}
 	}
-	
+
 //	/**
 //	 * Rotates the sector number by 180 degrees
 //	 * @param layer the layer 1..8
 //	 * @param sector the sector 1..N
 //	 */
 	public int svtSectorHack(int layer, int sector) {
-		int superlayer = (layer-1) / 2; //zero based
+		int superlayer = (layer - 1) / 2; // zero based
 		int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
-		int n2 = numSect/2;
+		int n2 = numSect / 2;
 		int hackSect = (sector + n2) % numSect;
 		if (hackSect == 0) {
 			hackSect = numSect;
 		}
-	//	System.err.println("LAY: " + layer + "  SUPL: " + superlayer + " SECT " + sector + "  NUMSECT: " + 
-	//	numSect + "  hackSect: " + hackSect);
+		// System.err.println("LAY: " + layer + " SUPL: " + superlayer + " SECT " +
+		// sector + " NUMSECT: " +
+		// numSect + " hackSect: " + hackSect);
 		return hackSect;
 	}
 
-	private static void extendLine(Point p0, Point p1, int del, int sw,
-			int fh) {
+	private static void extendLine(Point p0, Point p1, int del, int sw, int fh) {
 		double dx = p1.x - p0.x;
 		double dy = p1.y - p0.y;
 		double theta = Math.atan2(dy, dx);
@@ -434,12 +412,10 @@ public class CentralXYView extends CedXYView {
 		if (quad == 0) {
 			delx = delx - sw;
 			// dely = dely + fh/2;
-		}
-		else if (quad == 2) {
+		} else if (quad == 2) {
 			delx = delx + 2;
 			dely = dely + fh / 2;
-		}
-		else if (quad == 3) {
+		} else if (quad == 3) {
 			delx = delx - sw;
 			dely = dely + fh / 2;
 		}
@@ -448,36 +424,34 @@ public class CentralXYView extends CedXYView {
 		p1.y += dely;
 	}
 
-
-
 	/**
-	 * This adds the detector items. 
+	 * This adds the detector items.
 	 */
 	@Override
 	protected void addItems() {
-		//BMT sectors for now only layers 5 & 6		
-		LogicalLayer detectorLayer = getContainer().getLogicalLayer(
-				_detectorLayerName);
-		
+		// BMT sectors for now only layers 5 & 6
+		LogicalLayer detectorLayer = getContainer().getLogicalLayer(_detectorLayerName);
+
 		_bmtItems = new BMTSectorItem[3][6];
-	    for (int sect = 1; sect <= 3; sect++) {
-	    	for (int lay = 1; lay <= 6; lay++) {
-	    		_bmtItems[sect-1][lay-1] = new BMTSectorItem(detectorLayer, sect, lay);
-	    	}
-	    }
+		for (int sect = 1; sect <= 3; sect++) {
+			for (int lay = 1; lay <= 6; lay++) {
+				_bmtItems[sect - 1][lay - 1] = new BMTSectorItem(detectorLayer, sect, lay);
+			}
+		}
 	}
-	
+
 	/**
 	 * Get the BMT Sector item
-	 * @param sector the geo sector  1..3
-	 * @param layer the layer 1..6
+	 * 
+	 * @param sector the geo sector 1..3
+	 * @param layer  the layer 1..6
 	 * @return the BMS Sector Item
 	 */
 	public BMTSectorItem getBMTSectorItem(int sector, int layer) {
 		if ((sector < 1) || (sector > 3) || (layer < 1) || (layer > 6)) {
 			return null;
 		}
-		return _bmtItems[sector-1][layer-1];
+		return _bmtItems[sector - 1][layer - 1];
 	}
 
 	/**
@@ -493,16 +467,15 @@ public class CentralXYView extends CedXYView {
 	 * Some view specific feedback. Should always call super.getFeedbackStrings
 	 * first.
 	 * 
-	 * @param container the base container for the view.
+	 * @param container   the base container for the view.
 	 * @param screenPoint the pixel point
-	 * @param worldPoint the corresponding world location.
+	 * @param worldPoint  the corresponding world location.
 	 */
 	@Override
-	public void getFeedbackStrings(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
-		basicFeedback(container, screenPoint, worldPoint, "mm",
-				feedbackStrings);
+		basicFeedback(container, screenPoint, worldPoint, "mm", feedbackStrings);
 
 		if (!Environment.getInstance().isDragging()) {
 			BSTxyPanel newClosest = getClosest(worldPoint);
@@ -513,15 +486,12 @@ public class CentralXYView extends CedXYView {
 		}
 
 		if (_closestPanel != null) {
-			
+
 			int region = (_closestPanel.getLayer() + 1) / 2;
-			fbString("red", "svt layer " + _closestPanel.getLayer(),
-					feedbackStrings);
+			fbString("red", "svt layer " + _closestPanel.getLayer(), feedbackStrings);
 			fbString("red", "svt region " + region, feedbackStrings);
-			fbString("red", "svt sector " + _closestPanel.getSector(),
-					feedbackStrings);
-		}
-		else {
+			fbString("red", "svt sector " + _closestPanel.getSector(), feedbackStrings);
+		} else {
 			double rad = Math.hypot(worldPoint.x, worldPoint.y);
 			boolean found = false;
 
@@ -531,9 +501,8 @@ public class CentralXYView extends CedXYView {
 				for (int layer = 1; layer <= 3; layer++) {
 					for (int paddleId = 1; paddleId <= 48; paddleId++) {
 
-						found = _cndPoly[layer - 1][paddleId - 1]
-								.getFeedbackStrings(container, screenPoint,
-										worldPoint, feedbackStrings);
+						found = _cndPoly[layer - 1][paddleId - 1].getFeedbackStrings(container, screenPoint, worldPoint,
+								feedbackStrings);
 
 						if (found) {
 							break;
@@ -546,31 +515,28 @@ public class CentralXYView extends CedXYView {
 
 				}
 			}
-			
-			//ctof
+
+			// ctof
 			else if ((rad > CTOFGeometry.RINNER) && (rad < CTOFGeometry.ROUTER)) {
-				
-	
+
 				for (int index = 0; index < 48; index++) {
 					if (_ctofPoly[index].contains(screenPoint)) {
-						int paddle = index+1;
+						int paddle = index + 1;
 						TdcAdcHit hit = null;
-			  		    TdcAdcHitList hits = CTOF.getInstance().getHits();
+						TdcAdcHitList hits = CTOF.getInstance().getHits();
 						if ((hits != null) && !hits.isEmpty()) {
 							hit = hits.get(0, 0, paddle);
 						}
-						
+
 						if (hit == null) {
 							feedbackStrings.add("$dodger blue$" + "CTOF paddle " + paddle);
-						}
-						else {
+						} else {
 							hit.tdcAdcFeedback("CTOF paddle", feedbackStrings);
 						}
 
 						break;
 					}
-					
-					
+
 				}
 			}
 
@@ -588,9 +554,9 @@ public class CentralXYView extends CedXYView {
 				}
 			}
 		}
-		
-		//BMT?
-		
+
+		// BMT?
+
 		if (showADCHits()) {
 			AdcHitList adcHits = BMT.getInstance().getADCHits();
 			if ((adcHits != null) && !adcHits.isEmpty()) {
@@ -615,16 +581,14 @@ public class CentralXYView extends CedXYView {
 				}
 			}
 		}
-		
+
 		// near a swum trajectory?
 		double mindist = _swimTrajectoryDrawer.closestApproach(worldPoint);
-		double pixlen = WorldGraphicsUtilities.getMeanPixelDensity(container)
-				* mindist;
+		double pixlen = WorldGraphicsUtilities.getMeanPixelDensity(container) * mindist;
 
 		_lastTrajStr = null; // for hovering response
 		if (pixlen < 25.0) {
-			SwimTrajectory2D traj2D = _swimTrajectoryDrawer
-					.getClosestTrajectory();
+			SwimTrajectory2D traj2D = _swimTrajectoryDrawer.getClosestTrajectory();
 			if (traj2D != null) {
 				traj2D.addToFeedback(feedbackStrings);
 				_lastTrajStr = traj2D.summaryString();
@@ -635,10 +599,9 @@ public class CentralXYView extends CedXYView {
 		getGemcFeedback(container, screenPoint, worldPoint, feedbackStrings);
 
 		// reconstructed feedback?
-		_crossDrawer.feedback(container, screenPoint, worldPoint,
-				feedbackStrings);
-		
-		//hit feedback
+		_crossDrawer.feedback(container, screenPoint, worldPoint, feedbackStrings);
+
+		// hit feedback
 		_hitDrawer.feedback(container, screenPoint, worldPoint, feedbackStrings);
 
 	}
@@ -669,27 +632,29 @@ public class CentralXYView extends CedXYView {
 	}
 
 	// feedback from simulated data
-	private void getGemcFeedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	private void getGemcFeedback(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
 	}
-	
+
 	/**
 	 * Get a CTOF scintillator polygon
+	 * 
 	 * @param index1 the 1=based index [1..48]
 	 * @return the most recently drawn polygon
 	 */
 	public CTOFXYPolygon getCTOFPolygon(int index1) {
-		int index0 = index1-1;
+		int index0 = index1 - 1;
 		if ((index0 < 0) || (index0 > 47)) {
 			return null;
 		}
 		return _ctofPoly[index0];
 	}
-	
+
 	/**
 	 * Get the CND polygon from Gagik's geometry layer and paddle
-	 * @param layer 1..3
+	 * 
+	 * @param layer    1..3
 	 * @param paddleId 1..48
 	 * @return the CND polygon
 	 */
@@ -701,14 +666,14 @@ public class CentralXYView extends CedXYView {
 			return null;
 		}
 
-
-		return _cndPoly[layer-1][paddleId-1];
+		return _cndPoly[layer - 1][paddleId - 1];
 	}
-	
+
 	/**
 	 * Get the CND polygon from "real" numbering
-	 * @param sector 1..24
-	 * @param layer 1..3
+	 * 
+	 * @param sector    1..24
+	 * @param layer     1..3
 	 * @param component 1..2
 	 * @return the CND polygon
 	 */
@@ -723,48 +688,46 @@ public class CentralXYView extends CedXYView {
 			return null;
 		}
 
-		int real[] = {sector, layer, component};
-        int geo[] = new int[3];
-        
-        CNDGeometry.realTripletToGeoTriplet(geo, real);
-		
+		int real[] = { sector, layer, component };
+		int geo[] = new int[3];
+
+		CNDGeometry.realTripletToGeoTriplet(geo, real);
+
 		return getCNDPolygon(geo[1], geo[2]);
 	}
-
 
 	/**
 	 * Get world point from lab coordinates
 	 * 
-	 * @param x lab x in mm
-	 * @param y lab y in mm
-	 * @param z lab z in mm
+	 * @param x  lab x in mm
+	 * @param y  lab y in mm
+	 * @param z  lab z in mm
 	 * @param wp the world point
 	 */
-	public void getWorldFromLabXYZ(double x, double y, double z,
-			Point2D.Double wp) {
+	public void getWorldFromLabXYZ(double x, double y, double z, Point2D.Double wp) {
 		wp.x = x;
 		wp.y = y;
 	}
-	
-	
+
 	/**
-	 * Clone the view. 
+	 * Clone the view.
+	 * 
 	 * @return the cloned view
 	 */
 	@Override
 	public BaseView cloneView() {
 		super.cloneView();
 		CLONE_COUNT++;
-		
-		//limit
+
+		// limit
 		if (CLONE_COUNT > 2) {
 			return null;
 		}
-		
+
 		Rectangle vr = getBounds();
 		vr.x += 40;
 		vr.y += 40;
-		
+
 		CentralXYView view = createCentralXYView();
 		view.setBounds(vr);
 		return view;

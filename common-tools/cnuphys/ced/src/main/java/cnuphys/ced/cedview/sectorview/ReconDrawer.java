@@ -22,10 +22,11 @@ import cnuphys.ced.event.data.Hit1;
 import cnuphys.ced.event.data.Hit1List;
 import cnuphys.ced.frame.CedColors;
 
-public class ReconDrawer extends SectorViewDrawer  {
-	
+public class ReconDrawer extends SectorViewDrawer {
+
 	/**
 	 * Reconstructed hits drawer
+	 * 
 	 * @param view
 	 */
 	public ReconDrawer(SectorView view) {
@@ -42,7 +43,7 @@ public class ReconDrawer extends SectorViewDrawer  {
 		if (!_view.isSingleEventMode()) {
 			return;
 		}
-		
+
 		// DC HB and TB Hits
 		drawDCReconAndDOCA(g, container);
 
@@ -50,32 +51,30 @@ public class ReconDrawer extends SectorViewDrawer  {
 		if (_view.showReconHits()) {
 			drawFTOFReconHits(g, container);
 		}
-		
-		//Reconstructed clusters
+
+		// Reconstructed clusters
 		if (_view.showClusters()) {
 			drawClusters(g, container);
 		}
-		
+
 		if (_view.showDCHBSegments()) {
 			for (int supl = 1; supl <= 6; supl++) {
 				_view.getSuperLayerDrawer(0, supl).drawHitBasedSegments(g, container);
 			}
 		}
-		
+
 		if (_view.showDCTBSegments()) {
 			for (int supl = 1; supl <= 6; supl++) {
 				_view.getSuperLayerDrawer(0, supl).drawTimeBasedSegments(g, container);
-			}			
+			}
 		}
 
-		
 	}
-	
+
 	// draw reconstructed clusters
 	private void drawClusters(Graphics g, IContainer container) {
 		drawClusterList(g, container, AllEC.getInstance().getClusters());
 	}
-	
 
 	// draw FTOF reconstructed hits
 	private void drawFTOFReconHits(Graphics g, IContainer container) {
@@ -92,23 +91,21 @@ public class ReconDrawer extends SectorViewDrawer  {
 		}
 	}
 
-
 	/**
 	 * Use what was drawn to generate feedback strings
 	 * 
-	 * @param container the drawing container
-	 * @param screenPoint the mouse location
-	 * @param worldPoint the corresponding world location
+	 * @param container       the drawing container
+	 * @param screenPoint     the mouse location
+	 * @param worldPoint      the corresponding world location
 	 * @param feedbackStrings add strings to this collection
-	 * @param option 0 for hit based, 1 for time based
+	 * @param option          0 for hit based, 1 for time based
 	 */
 	@Override
-	public void vdrawFeedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings,
-			int option) {
-		
+	public void vdrawFeedback(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings, int option) {
+
 		if (_view.showClusters()) {
-			//EC
+			// EC
 			ClusterList clusters = AllEC.getInstance().getClusters();
 			if ((clusters != null) && !clusters.isEmpty()) {
 				for (Cluster cluster : clusters) {
@@ -121,7 +118,7 @@ public class ReconDrawer extends SectorViewDrawer  {
 				}
 			}
 		}
-		
+
 		if (_view.showReconHits()) {
 			// FTOF
 			Hit1List hits = FTOF.getInstance().getHits();
@@ -142,9 +139,9 @@ public class ReconDrawer extends SectorViewDrawer  {
 				}
 
 			}
-		}		
-		
-		//DC HB Recon Hits
+		}
+
+		// DC HB Recon Hits
 		if (_view.showDCHBHits()) {
 			DCHitList hits = DC.getInstance().getHBHits();
 			if ((hits != null) && !hits.isEmpty()) {
@@ -158,9 +155,8 @@ public class ReconDrawer extends SectorViewDrawer  {
 				}
 			}
 		}
-		
+
 	}
-	
 
 	// for writing out a vector
 	private String vecStr(String prompt, double vx, double vy, double vz) {
@@ -168,27 +164,23 @@ public class ReconDrawer extends SectorViewDrawer  {
 	}
 
 	// for writing out a vector
-	private String vecStr(String prompt, double vx, double vy, double vz,
-			int ndig) {
-		return prompt + " (" + DoubleFormat.doubleFormat(vx, ndig) + ", "
-				+ DoubleFormat.doubleFormat(vy, ndig) + ", "
+	private String vecStr(String prompt, double vx, double vy, double vz, int ndig) {
+		return prompt + " (" + DoubleFormat.doubleFormat(vx, ndig) + ", " + DoubleFormat.doubleFormat(vy, ndig) + ", "
 				+ DoubleFormat.doubleFormat(vz, ndig) + ")";
 	}
-	
 
-	//draw a reconstructed cluster list
+	// draw a reconstructed cluster list
 	private void drawClusterList(Graphics g, IContainer container, ClusterList clusters) {
 		if ((clusters == null) || clusters.isEmpty()) {
 			return;
 		}
-		
+
 		Point2D.Double wp = new Point2D.Double();
 		Point pp = new Point();
 
 		for (Cluster cluster : clusters) {
 			if (_view.containsSector(cluster.sector)) {
-				_view.projectClasToWorld(cluster.x, cluster.y, 
-						cluster.z,  _view.getProjectionPlane(), wp);
+				_view.projectClasToWorld(cluster.x, cluster.y, cluster.z, _view.getProjectionPlane(), wp);
 				container.worldToLocal(pp, wp);
 				cluster.setLocation(pp);
 				DataDrawSupport.drawReconCluster(g, pp);
@@ -196,7 +188,7 @@ public class ReconDrawer extends SectorViewDrawer  {
 		}
 	}
 
-	//draw a reconstructed hit list
+	// draw a reconstructed hit list
 	private void drawReconHitList(Graphics g, IContainer container, Hit1List hits) {
 		if ((hits == null) || hits.isEmpty()) {
 			return;
@@ -204,11 +196,10 @@ public class ReconDrawer extends SectorViewDrawer  {
 
 		Point2D.Double wp = new Point2D.Double();
 		Point pp = new Point();
-		
-		
+
 		for (Hit1 hit : hits) {
 			if (_view.containsSector(hit.sector)) {
-				_view.projectClasToWorld(hit.x, hit.y, hit.z,  _view.getProjectionPlane(), wp);
+				_view.projectClasToWorld(hit.x, hit.y, hit.z, _view.getProjectionPlane(), wp);
 				container.worldToLocal(pp, wp);
 				hit.setLocation(pp);
 				DataDrawSupport.drawReconHit(g, pp);
@@ -216,21 +207,19 @@ public class ReconDrawer extends SectorViewDrawer  {
 		}
 
 	}
-	
-	//draw a reconstructed hit list
+
+	// draw a reconstructed hit list
 	private void drawDCHitList(Graphics g, IContainer container, Color fillColor, DCHitList hits, boolean isTimeBased) {
 		if ((hits == null) || hits.isEmpty()) {
 			return;
 		}
-						
+
 		for (DCHit hit : hits) {
 			if (_view.containsSector(hit.sector)) {
 				_view.drawDCHit(g, container, fillColor, Color.black, hit, isTimeBased);
 			}
 		}
 
-
 	}
-
 
 }

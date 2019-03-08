@@ -15,8 +15,7 @@ public enum ResizePolicy {
 	/**
 	 * A map for the names of the fill styles.
 	 */
-	public static EnumMap<ResizePolicy, String> names = new EnumMap<ResizePolicy, String>(
-			ResizePolicy.class);
+	public static EnumMap<ResizePolicy, String> names = new EnumMap<ResizePolicy, String>(ResizePolicy.class);
 
 	static {
 		names.put(NORMAL, "Normal");
@@ -26,13 +25,12 @@ public enum ResizePolicy {
 	/**
 	 * Returns the enum value from the name.
 	 * 
-	 * @param name
-	 *            the name to match.
+	 * @param name the name to match.
 	 * @return the <code>FillStyle</code> that corresponds to the name. Returns
 	 *         <code>null</code> if no match is found. Note it will check (case
-	 *         insensitive) both the map and the <code>name()</code> result,
-	 *         thus "Solid" or "SOLID" or "SoLiD" will return the
-	 *         <code>SOLID</code> value.
+	 *         insensitive) both the map and the <code>name()</code> result, thus
+	 *         "Solid" or "SOLID" or "SoLiD" will return the <code>SOLID</code>
+	 *         value.
 	 */
 	public static ResizePolicy getValue(String name) {
 		if (name == null) {
@@ -60,9 +58,9 @@ public enum ResizePolicy {
 	}
 
 	/**
-	 * Returns the array of nice (more readable) names from the enum map. These
-	 * are more suitable than the raw names for presentations in radio boxes,
-	 * lists, etc.
+	 * Returns the array of nice (more readable) names from the enum map. These are
+	 * more suitable than the raw names for presentations in radio boxes, lists,
+	 * etc.
 	 * 
 	 * @return the string array of nice names for display.
 	 */

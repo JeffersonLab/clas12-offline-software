@@ -61,8 +61,7 @@ public class IpPortPanel extends JPanel {
 	/**
 	 * Set the IP address
 	 * 
-	 * @param ipAddress
-	 *            the new IP address
+	 * @param ipAddress the new IP address
 	 */
 	public void setIpAddress(String ipAddress) {
 		_ipField.setText(ipAddress);
@@ -87,8 +86,7 @@ public class IpPortPanel extends JPanel {
 	/**
 	 * Set the port number
 	 * 
-	 * @param port
-	 *            the new port
+	 * @param port the new port
 	 */
 	public void setPort(int port) {
 		portField.setText(String.valueOf(port));
@@ -118,8 +116,7 @@ public class IpPortPanel extends JPanel {
 
 		testFrame.setLayout(new BorderLayout());
 
-		IpPortPanel ippanel = new IpPortPanel(Environment.getInstance()
-				.getHostAddress(), 63215);
+		IpPortPanel ippanel = new IpPortPanel(Environment.getInstance().getHostAddress(), 63215);
 
 		testFrame.add(ippanel, BorderLayout.NORTH);
 

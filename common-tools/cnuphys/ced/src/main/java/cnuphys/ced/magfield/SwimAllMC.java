@@ -29,28 +29,25 @@ public class SwimAllMC implements ISwimAll {
 	private static final double RMAX = 10.0;
 	private static final double PATHMAX = 10.0;
 
-	
 	/**
 	 * Get all the row data so the trajectory dialog can be updated.
 	 * 
-	 * @param manager
-	 *            the swim manager
+	 * @param manager the swim manager
 	 * @return a vector of TrajectoryRowData objects.
 	 */
 	@Override
 	public Vector<TrajectoryRowData> getRowData() {
-		
+
 		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
 		if (event == null) {
 			return null;
 		}
-		
+
 		boolean hasBank = event.hasBank("MC::Particle");
 		if (!hasBank) {
 			return null;
 		}
-		
-		
+
 		DataManager dm = DataManager.getInstance();
 
 		int pid[] = dm.getIntArray(event, "MC::Particle.pid");
@@ -59,7 +56,7 @@ public class SwimAllMC implements ISwimAll {
 		if (len < 1) {
 			return null;
 		}
-		
+
 		float px[] = dm.getFloatArray(event, "MC::Particle.px");
 		if (px == null) {
 			return null;
@@ -69,11 +66,10 @@ public class SwimAllMC implements ISwimAll {
 		float vx[] = dm.getFloatArray(event, "MC::Particle.vx");
 		float vy[] = dm.getFloatArray(event, "MC::Particle.vy");
 		float vz[] = dm.getFloatArray(event, "MC::Particle.vz");
-				
-		
-		//According to email from Raffella of 11/14/18 the units in MC::Particle
-		//are now cm and GeV.
-		
+
+		// According to email from Raffella of 11/14/18 the units in MC::Particle
+		// are now cm and GeV.
+
 		Vector<TrajectoryRowData> v = new Vector<TrajectoryRowData>(len);
 
 		try {
@@ -82,15 +78,15 @@ public class SwimAllMC implements ISwimAll {
 				LundId lid = LundSupport.getInstance().get(pid[index]);
 
 				if (lid != null) {
-					double pxo = 1000*px[index]; // Convert GeV to MeV
-					double pyo = 1000*py[index];
-					double pzo = 1000*pz[index];
+					double pxo = 1000 * px[index]; // Convert GeV to MeV
+					double pyo = 1000 * py[index];
+					double pzo = 1000 * pz[index];
 					double p = Math.sqrt(pxo * pxo + pyo * pyo + pzo * pzo);
 					double theta = Math.toDegrees(Math.acos(pzo / p));
 					// filter out 0 theta
 					if (theta > 0.01) {
 
-						double x = vx[index]; //keep in cm
+						double x = vx[index]; // keep in cm
 						double y = vy[index];
 						double z = vz[index];
 
@@ -103,8 +99,7 @@ public class SwimAllMC implements ISwimAll {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.getInstance().error(
-					"Exception while load MC records into table");
+			Log.getInstance().error("Exception while load MC records into table");
 			Log.getInstance().exception(e);
 			return null;
 		}
@@ -112,36 +107,31 @@ public class SwimAllMC implements ISwimAll {
 		return v;
 	}
 
-	
 	/**
 	 * Swim all Monte Carlo particles
 	 * 
-	 * @param manager
-	 *            the swim manager
+	 * @param manager the swim manager
 	 */
 	@Override
 	public void swimAll() {
-		
+
 		// System.err.println("SWIM ALL MC");
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
-		
-
 
 		Swimming.clearMCTrajectories(); // clear all existing trajectories
-		
+
 		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
 		if (event == null) {
 			return;
 		}
-		
+
 		boolean hasBank = event.hasBank("MC::Particle");
 		if (!hasBank) {
 			return;
 		}
 
-		
 //		if (ClasIoEventManager.getInstance().isSourceEvioFile()) {
 //			System.err.println("not swimming for evio file");
 //			return;
@@ -155,18 +145,18 @@ public class SwimAllMC implements ISwimAll {
 		if (len < 1) {
 			return;
 		}
-		
+
 		float px[] = dm.getFloatArray(event, "MC::Particle.px");
 		if (px == null) {
 			return;
 		}
-		
-		//According to email from Raffella of 11/14/18 the units in MC::Particle
-		//are now cm and GeV.
 
-		float py[] = dm.getFloatArray(event, "MC::Particle.py"); //GeV
+		// According to email from Raffella of 11/14/18 the units in MC::Particle
+		// are now cm and GeV.
+
+		float py[] = dm.getFloatArray(event, "MC::Particle.py"); // GeV
 		float pz[] = dm.getFloatArray(event, "MC::Particle.pz");
-		float vx[] = dm.getFloatArray(event, "MC::Particle.vx"); //cm
+		float vx[] = dm.getFloatArray(event, "MC::Particle.vx"); // cm
 		float vy[] = dm.getFloatArray(event, "MC::Particle.vy");
 		float vz[] = dm.getFloatArray(event, "MC::Particle.vz");
 
@@ -197,27 +187,26 @@ public class SwimAllMC implements ISwimAll {
 							swim(lid, pxo, pyo, pzo, x, y, z);
 						}
 					} // lid != null
-				} //else
+				} // else
 
 			}
 		} catch (Exception e) {
-			Log.getInstance()
-					.error("Exception while swimming all MC particles");
+			Log.getInstance().error("Exception while swimming all MC particles");
 			Log.getInstance().exception(e);
 			return;
 		}
 
 	}
-	
+
 	/**
 	 * 
 	 * @param lid the lund id
-	 * @param px x component of momentum in GeV/c
-	 * @param py y component of momentum in GeV/c
-	 * @param pz z component of momentum in GeV/c
-	 * @param x x vertex coordinate in meters
-	 * @param y y vertex coordinate in meters
-	 * @param z z vertex coordinate in meters
+	 * @param px  x component of momentum in GeV/c
+	 * @param py  y component of momentum in GeV/c
+	 * @param pz  z component of momentum in GeV/c
+	 * @param x   x vertex coordinate in meters
+	 * @param y   y vertex coordinate in meters
+	 * @param z   z vertex coordinate in meters
 	 */
 	private void swim(LundId lid, double px, double py, double pz, double x, double y, double z) {
 		double p = Math.sqrt(px * px + py * py + pz * pz);
@@ -232,8 +221,7 @@ public class SwimAllMC implements ISwimAll {
 		// + z + ")");
 		SwimTrajectory traj;
 		try {
-			traj = swimmer.swim(lid.getCharge(), x, y,
-					z, p, theta, phi, stopper, 0, PATHMAX, stepSize,
+			traj = swimmer.swim(lid.getCharge(), x, y, z, p, theta, phi, stopper, 0, PATHMAX, stepSize,
 					Swimmer.CLAS_Tolerance, null);
 			traj.setLundId(lid);
 			Swimming.addMCTrajectory(traj);

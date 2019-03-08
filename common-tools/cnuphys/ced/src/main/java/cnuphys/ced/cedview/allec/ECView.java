@@ -33,11 +33,11 @@ public class ECView extends HexView {
 
 	// sector items
 	private ECHexSectorItem _hexItems[];
-	
-	//for naming clones
+
+	// for naming clones
 	private static int CLONE_COUNT = 0;
-	
-	//base title
+
+	// base title
 	private static final String _baseTitle = "ECAL";
 
 	// for drawing MC hits
@@ -47,14 +47,13 @@ public class ECView extends HexView {
 	private static final double _xsize = 430.0;
 	private static final double _ysize = _xsize * 1.154734;
 
-	protected static Rectangle2D.Double _defaultWorld = new Rectangle2D.Double(
-			_xsize, -_ysize, -2 * _xsize, 2 * _ysize);
+	protected static Rectangle2D.Double _defaultWorld = new Rectangle2D.Double(_xsize, -_ysize, -2 * _xsize,
+			2 * _ysize);
 
 	/**
 	 * Create an allDCView
 	 * 
-	 * @param keyVals
-	 *            variable set of arguments.
+	 * @param keyVals variable set of arguments.
 	 */
 	private ECView(String title) {
 		super(getAttributes(title));
@@ -84,11 +83,9 @@ public class ECView extends HexView {
 	@Override
 	protected void addControls() {
 
-		_controlPanel = new ControlPanel(this, ControlPanel.DISPLAYARRAY
-				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND,
-				DisplayBits.ACCUMULATION
-				+ DisplayBits.MCTRUTH + DisplayBits.INNEROUTER
-				+ DisplayBits.UVWSTRIPS, 3, 5);
+		_controlPanel = new ControlPanel(this,
+				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND,
+				DisplayBits.ACCUMULATION + DisplayBits.MCTRUTH + DisplayBits.INNEROUTER + DisplayBits.UVWSTRIPS, 3, 5);
 
 		add(_controlPanel, BorderLayout.EAST);
 		pack();
@@ -108,16 +105,13 @@ public class ECView extends HexView {
 	// add items to the view
 	@Override
 	protected void addItems() {
-		LogicalLayer detectorLayer = getContainer().getLogicalLayer(
-				_detectorLayerName);
+		LogicalLayer detectorLayer = getContainer().getLogicalLayer(_detectorLayerName);
 
 		_hexItems = new ECHexSectorItem[6];
 
 		for (int sector = 0; sector < 6; sector++) {
-			_hexItems[sector] = new ECHexSectorItem(detectorLayer, this,
-					sector + 1);
-			_hexItems[sector].getStyle().setFillColor(
-					X11Colors.getX11Color("steel blue"));
+			_hexItems[sector] = new ECHexSectorItem(detectorLayer, this, sector + 1);
+			_hexItems[sector].getStyle().setFillColor(X11Colors.getX11Color("steel blue"));
 		}
 	}
 
@@ -173,16 +167,14 @@ public class ECView extends HexView {
 		props.put(PropertySupport.TOOLBAR, true);
 		props.put(PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS);
 		props.put(PropertySupport.VISIBLE, true);
-		props.put(PropertySupport.BACKGROUND,
-				X11Colors.getX11Color("Alice Blue"));
+		props.put(PropertySupport.BACKGROUND, X11Colors.getX11Color("Alice Blue"));
 		props.put(PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		return PropertySupport.toObjectArray(props);
 	}
 
 	@Override
-	public void getFeedbackStrings(IContainer container, Point pp,
-			Point2D.Double wp, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
 
 		if (displayInner()) {
 			feedbackStrings.add("$white$INNER plane");
@@ -217,10 +209,8 @@ public class ECView extends HexView {
 	/**
 	 * Convert ijk coordinates to sector xyz
 	 * 
-	 * @param pijk
-	 *            the ijk coordinates
-	 * @param sectorXYZ
-	 *            the sector xyz coordinates
+	 * @param pijk      the ijk coordinates
+	 * @param sectorXYZ the sector xyz coordinates
 	 */
 	public void ijkToSectorXYZ(Point3D pijk, double[] sectorXYZ) {
 		boolean inner = displayInner();
@@ -232,16 +222,13 @@ public class ECView extends HexView {
 	/**
 	 * Convert sector xyz to ijk coordinates
 	 * 
-	 * @param pijk
-	 *            the ijk coordinates
-	 * @param sectorXYZ
-	 *            the sector xyz coordinates
+	 * @param pijk      the ijk coordinates
+	 * @param sectorXYZ the sector xyz coordinates
 	 */
 	public void sectorXYZToIJK(Point3D pijk, double[] sectorXYZ) {
 		boolean inner = displayInner();
 
-		Point3D r0 = inner ? ECGeometry.getR0(ECGeometry.EC_INNER) : ECGeometry
-				.getR0(ECGeometry.EC_OUTER);
+		Point3D r0 = inner ? ECGeometry.getR0(ECGeometry.EC_INNER) : ECGeometry.getR0(ECGeometry.EC_OUTER);
 
 		double delx = sectorXYZ[0] - r0.x();
 		double dely = sectorXYZ[1] - r0.y();
@@ -256,10 +243,8 @@ public class ECView extends HexView {
 	/**
 	 * Lab (CLAS) 3D Cartesian coordinates to world graphical coordinates.
 	 * 
-	 * @param labXYZ
-	 *            the lab 3D coordinates
-	 * @param wp
-	 *            will hold the graphical world coordinates
+	 * @param labXYZ the lab 3D coordinates
+	 * @param wp     will hold the graphical world coordinates
 	 */
 	public void labXYZToWorld(double labXYZ[], Point2D.Double wp) {
 		wp.setLocation(labXYZ[0], labXYZ[1]);
@@ -268,32 +253,32 @@ public class ECView extends HexView {
 	/**
 	 * Get the hex item for the given 1-based sector
 	 * 
-	 * @param sector
-	 *            the 1-based sector
+	 * @param sector the 1-based sector
 	 * @return the corresponding item
 	 */
 	public ECHexSectorItem getHexSectorItem(int sector) {
 		return _hexItems[sector - 1];
 	}
-	
+
 	/**
-	 * Clone the view. 
+	 * Clone the view.
+	 * 
 	 * @return the cloned view
 	 */
 	@Override
 	public BaseView cloneView() {
 		super.cloneView();
 		CLONE_COUNT++;
-		
-		//limit
+
+		// limit
 		if (CLONE_COUNT > 2) {
 			return null;
 		}
-		
+
 		Rectangle vr = getBounds();
 		vr.x += 40;
 		vr.y += 40;
-		
+
 		ECView view = createECView();
 		view.setBounds(vr);
 		return view;

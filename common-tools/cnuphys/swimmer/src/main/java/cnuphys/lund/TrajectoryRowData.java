@@ -1,9 +1,9 @@
 package cnuphys.lund;
 
 public class TrajectoryRowData {
-	
-	protected int trackId;  //track id
-	
+
+	protected int trackId; // track id
+
 	// the lund id
 	protected LundId lundId;
 
@@ -34,23 +34,16 @@ public class TrajectoryRowData {
 	/**
 	 * Create a data row for display in the table.
 	 * 
-	 * @param lundId
-	 *            the full lundId object
-	 * @param xo
-	 *            the vertex x (cm)
-	 * @param yo
-	 *            the vertex y (cm)
-	 * @param zo
-	 *            the vertex z (cm)
-	 * @param p
-	 *            the initial momentum (MeV/c)
-	 * @param theta
-	 *            the initial polar angle (degrees)
-	 * @param phi
-	 *            the initial azimuthal angle (degrees)
+	 * @param lundId the full lundId object
+	 * @param xo     the vertex x (cm)
+	 * @param yo     the vertex y (cm)
+	 * @param zo     the vertex z (cm)
+	 * @param p      the initial momentum (MeV/c)
+	 * @param theta  the initial polar angle (degrees)
+	 * @param phi    the initial azimuthal angle (degrees)
 	 */
-	public TrajectoryRowData(int trackId, LundId lundId, double xo, double yo, double zo, double p, double theta, double phi,
-			int status, String source) {
+	public TrajectoryRowData(int trackId, LundId lundId, double xo, double yo, double zo, double p, double theta,
+			double phi, int status, String source) {
 		super();
 		this.trackId = trackId;
 		this.lundId = lundId;
@@ -67,33 +60,37 @@ public class TrajectoryRowData {
 			lundId = LundSupport.getInstance().get(0);
 		}
 	}
- 
+
 	/**
 	 * Get the track id
+	 * 
 	 * @return the track id
 	 */
 	public int getTrackId() {
 		return trackId;
 	}
-	
+
 	/**
 	 * Get the charge in units of e.
+	 * 
 	 * @return the charge. -99 on failure.
 	 */
 	public int getCharge() {
 		return (lundId == null) ? -99 : lundId.getCharge();
 	}
-	
+
 	/**
 	 * Get the source, probably a bank name
+	 * 
 	 * @return the source
 	 */
 	public String getSource() {
 		return source;
 	}
-	
+
 	/**
 	 * Get the status
+	 * 
 	 * @return the status
 	 */
 	public int getStatus() {

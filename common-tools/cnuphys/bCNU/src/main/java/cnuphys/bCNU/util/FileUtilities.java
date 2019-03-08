@@ -37,8 +37,7 @@ public class FileUtilities {
 	/**
 	 * Fixes a string so that any file separators match the current platform.
 	 * 
-	 * @param s
-	 *            the input string.
+	 * @param s the input string.
 	 * @return the string with the correct file separator.
 	 */
 	public static String fixSeparator(String s) {
@@ -57,8 +56,7 @@ public class FileUtilities {
 	/**
 	 * Fixes a string so that any path separators match the current platform.
 	 * 
-	 * @param s
-	 *            the input string.
+	 * @param s the input string.
 	 * @return the string with the correct path separator.
 	 */
 	public static String fixPathSeparator(String s) {
@@ -77,8 +75,7 @@ public class FileUtilities {
 	/**
 	 * Attempt to break a path down into its components.
 	 * 
-	 * @param path
-	 *            the path to break down.
+	 * @param path the path to break down.
 	 * @return an array of components.
 	 */
 	public static String[] tokenizePath(String path) {
@@ -111,10 +108,8 @@ public class FileUtilities {
 	/**
 	 * This method breaks a string into an array of tokens.
 	 * 
-	 * @param str
-	 *            the string to decompose.
-	 * @param delimiter
-	 *            the delimiter
+	 * @param str       the string to decompose.
+	 * @param delimiter the delimiter
 	 * @return an array of tokens
 	 */
 
@@ -134,8 +129,7 @@ public class FileUtilities {
 	/**
 	 * This method breaks a string into an array of tokens.
 	 * 
-	 * @param str
-	 *            the string to decompose.
+	 * @param str the string to decompose.
 	 * @return an array of tokens
 	 */
 
@@ -155,15 +149,12 @@ public class FileUtilities {
 	/**
 	 * Obtain a filter based on file extensions.
 	 * 
-	 * @param filterDescription
-	 *            the filter description.
-	 * @param extensions
-	 *            Variable length list of extensions to filter on. If no filter,
-	 *            pass null.
+	 * @param filterDescription the filter description.
+	 * @param extensions        Variable length list of extensions to filter on. If
+	 *                          no filter, pass null.
 	 * @return a filter based on the extensions
 	 */
-	public static FileFilter extensionFilter(final String filterDescription,
-			final String... extensions) {
+	public static FileFilter extensionFilter(final String filterDescription, final String... extensions) {
 		FileFilter ff = null;
 
 		if ((extensions != null) && (extensions.length > 0)) {
@@ -200,42 +191,32 @@ public class FileUtilities {
 	/**
 	 * Open a predefined save dialog
 	 * 
-	 * @param defaultDirName
-	 *            the starting directory.
-	 * @param defaultFileName
-	 *            the default name of the saved file.
-	 * @param filterDescription
-	 *            the filter description.
-	 * @param extensions
-	 *            Variable length list of extensions to filter on. If no filter,
-	 *            pass null.
+	 * @param defaultDirName    the starting directory.
+	 * @param defaultFileName   the default name of the saved file.
+	 * @param filterDescription the filter description.
+	 * @param extensions        Variable length list of extensions to filter on. If
+	 *                          no filter, pass null.
 	 * @return the File object of the saved file, or <code>null</code>.
 	 */
-	public static File saveFile(String defaultDirName, String defaultFileName,
-			String filterDescription, String... extensions) {
-		return saveFile(defaultDirName, defaultFileName, filterDescription,
-				null, extensions);
+	public static File saveFile(String defaultDirName, String defaultFileName, String filterDescription,
+			String... extensions) {
+		return saveFile(defaultDirName, defaultFileName, filterDescription, null, extensions);
 	}
 
 	/**
 	 * Open a predefined save dialog
 	 * 
-	 * @param defaultDirName
-	 *            the starting directory.
-	 * @param defaultFileName
-	 *            the default name of the saved file.
-	 * @param filterDescription
-	 *            the filter description.
-	 * @param accessory
-	 *            an acessory component used to customize the file chooser
-	 * @param extensions
-	 *            Variable length list of extensions to filter on. If no filter,
-	 *            pass null.
+	 * @param defaultDirName    the starting directory.
+	 * @param defaultFileName   the default name of the saved file.
+	 * @param filterDescription the filter description.
+	 * @param accessory         an acessory component used to customize the file
+	 *                          chooser
+	 * @param extensions        Variable length list of extensions to filter on. If
+	 *                          no filter, pass null.
 	 * @return the File object of the saved file, or <code>null</code>.
 	 */
-	public static File saveFile(String defaultDirName, String defaultFileName,
-			String filterDescription, JComponent accessory,
-			String... extensions) {
+	public static File saveFile(String defaultDirName, String defaultFileName, String filterDescription,
+			JComponent accessory, String... extensions) {
 
 		FileFilter ff = extensionFilter(filterDescription, extensions);
 
@@ -261,10 +242,9 @@ public class FileUtilities {
 			// already exists?
 
 			if (file.exists()) {
-				int answer = JOptionPane.showConfirmDialog(null, filename
-						+ "  already exists. Do you want to overwrite it?",
-						"Overwite Existing File?", JOptionPane.YES_NO_OPTION,
-						JOptionPane.QUESTION_MESSAGE, ImageManager.cnuIcon);
+				int answer = JOptionPane.showConfirmDialog(null,
+						filename + "  already exists. Do you want to overwrite it?", "Overwite Existing File?",
+						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, ImageManager.cnuIcon);
 
 				if (answer == JFileChooser.APPROVE_OPTION) {
 					return file;
@@ -285,17 +265,13 @@ public class FileUtilities {
 	/**
 	 * Open a predefined open file dialog
 	 * 
-	 * @param defaultDirName
-	 *            the starting directory.
-	 * @param filterDescription
-	 *            the filter description.
-	 * @param extensions
-	 *            Variable length list of extensions to filter on. If no filter,
-	 *            pass null.
+	 * @param defaultDirName    the starting directory.
+	 * @param filterDescription the filter description.
+	 * @param extensions        Variable length list of extensions to filter on. If
+	 *                          no filter, pass null.
 	 * @return the File object of the saved file, or <code>null</code>.
 	 */
-	public static File openFile(String defaultDirName,
-			String filterDescription, String... extensions) {
+	public static File openFile(String defaultDirName, String filterDescription, String... extensions) {
 
 		FileFilter ff = extensionFilter(filterDescription, extensions);
 
@@ -324,17 +300,13 @@ public class FileUtilities {
 	/**
 	 * Open a predefined open file dialog
 	 * 
-	 * @param defaultDirName
-	 *            the starting directory.
-	 * @param filterDescription
-	 *            the filter description.
-	 * @param extensions
-	 *            Variable length list of extensions to filter on. If no filter,
-	 *            pass null.
+	 * @param defaultDirName    the starting directory.
+	 * @param filterDescription the filter description.
+	 * @param extensions        Variable length list of extensions to filter on. If
+	 *                          no filter, pass null.
 	 * @return the File object of the saved file, or <code>null</code>.
 	 */
-	public static File[] openFiles(String defaultDirName,
-			String filterDescription, String... extensions) {
+	public static File[] openFiles(String defaultDirName, String filterDescription, String... extensions) {
 
 		FileFilter ff = extensionFilter(filterDescription, extensions);
 
@@ -359,11 +331,9 @@ public class FileUtilities {
 	/**
 	 * Strip the leading directory.
 	 * 
-	 * @param fullName
-	 *            the full path name
-	 * @param keepExtension
-	 *            if <code>true</code> keep the extension, otherwise strip that
-	 *            too.
+	 * @param fullName      the full path name
+	 * @param keepExtension if <code>true</code> keep the extension, otherwise strip
+	 *                      that too.
 	 * @return the bare file name.
 	 */
 	public static String bareName(String fullName, boolean keepExtension) {
@@ -390,10 +360,8 @@ public class FileUtilities {
 	/**
 	 * Given a search path and a baseName, find a file.
 	 * 
-	 * @param searchPath
-	 *            the search path, e.g. "dir1;dir2;..."
-	 * @param baseName
-	 *            the base file name with extension, e.g., myfile.txt
+	 * @param searchPath the search path, e.g. "dir1;dir2;..."
+	 * @param baseName   the base file name with extension, e.g., myfile.txt
 	 * @return the first matching file.
 	 */
 	public static File findFile(String searchPath, String baseName) {
@@ -419,10 +387,8 @@ public class FileUtilities {
 	/**
 	 * Given a search path and a baseName, find a readable file.
 	 * 
-	 * @param searchPath
-	 *            the search path, e.g. "dir1;dir2;..."
-	 * @param baseName
-	 *            the base file name with extension, e.g., myfile.txt
+	 * @param searchPath the search path, e.g. "dir1;dir2;..."
+	 * @param baseName   the base file name with extension, e.g., myfile.txt
 	 * @return the first matching file that can be read.
 	 */
 	public static File findReadableFile(String searchPath, String baseName) {
@@ -444,10 +410,8 @@ public class FileUtilities {
 	}
 
 	/**
-	 * @param defaultDir
-	 *            the defaultDir to set
-	 * @param checkExist
-	 *            if <code>true</code>, only set if it exists.
+	 * @param defaultDir the defaultDir to set
+	 * @param checkExist if <code>true</code>, only set if it exists.
 	 */
 	public static void setDefaultDir(String defaultDir, boolean checkExist) {
 
@@ -463,8 +427,7 @@ public class FileUtilities {
 	}
 
 	/**
-	 * @param defaultDir
-	 *            the defaultDir to set
+	 * @param defaultDir the defaultDir to set
 	 */
 	public static void setDefaultDir(String defaultDir) {
 		setDefaultDir(defaultDir, true);
@@ -478,15 +441,12 @@ public class FileUtilities {
 	}
 
 	/**
-	 * Takes an ascii file and returns an array of the non comment strings.
-	 * Comments start with a given character (e.g., "!" or "#".) Inline comments
-	 * starting with the usual "//" are also removed. Blank lines are also
-	 * removed.
+	 * Takes an ascii file and returns an array of the non comment strings. Comments
+	 * start with a given character (e.g., "!" or "#".) Inline comments starting
+	 * with the usual "//" are also removed. Blank lines are also removed.
 	 * 
-	 * @param file
-	 *            the file to be parsed.
-	 * @param commentChar
-	 *            if this is the first character the line is a comment line
+	 * @param file        the file to be parsed.
+	 * @param commentChar if this is the first character the line is a comment line
 	 * @return a string array of the non-comment text
 	 */
 	public static String[] nonComments(File file, String commentChar) {
@@ -554,20 +514,17 @@ public class FileUtilities {
 	public static int appendOrOverwrite(String prompt) {
 		Object[] options = { "Append", "Overwrite", "Cancel" };
 
-		return JOptionPane.showOptionDialog(null, prompt,
-				"Append or Overwrite?", JOptionPane.YES_NO_CANCEL_OPTION,
+		return JOptionPane.showOptionDialog(null, prompt, "Append or Overwrite?", JOptionPane.YES_NO_CANCEL_OPTION,
 				JOptionPane.QUESTION_MESSAGE, ImageManager.cnuIcon, options, options[0]);
 	}
 
 	/**
-	 * Converts a base path and some other path to the relative path (for the
-	 * other path) For example if basePath is "/Users/heddle/clax/wd" and
-	 * otherPath is "/Users/heddle/myws" this returns "../../myws"
+	 * Converts a base path and some other path to the relative path (for the other
+	 * path) For example if basePath is "/Users/heddle/clax/wd" and otherPath is
+	 * "/Users/heddle/myws" this returns "../../myws"
 	 * 
-	 * @param basePath
-	 *            the base path from which we denote relative paths
-	 * @param otherPath
-	 *            the path that we want to relativize
+	 * @param basePath  the base path from which we denote relative paths
+	 * @param otherPath the path that we want to relativize
 	 * @return the relative path
 	 */
 	public static String convertToRelativePath(String basePath, String otherPath) {
@@ -594,8 +551,7 @@ public class FileUtilities {
 
 			// Find common root
 			for (index = 0; index < length; index++) {
-				if (absoluteDirectories[index]
-						.equals(relativeDirectories[index])) {
+				if (absoluteDirectories[index].equals(relativeDirectories[index])) {
 					lastCommonRoot = index;
 				} else {
 					break;
@@ -614,8 +570,7 @@ public class FileUtilities {
 				for (index = lastCommonRoot + 1; index < relativeDirectories.length - 1; index++) {
 					relativePath.append(relativeDirectories[index] + "/");
 				}
-				relativePath
-						.append(relativeDirectories[relativeDirectories.length - 1]);
+				relativePath.append(relativeDirectories[relativeDirectories.length - 1]);
 			}
 		}
 		return relativePath == null ? null : relativePath.toString();
@@ -625,23 +580,18 @@ public class FileUtilities {
 	 * Scan from a root, digging down, looking for a named directory. Hidden
 	 * directories (starting with a ".") are skipped.
 	 * 
-	 * @param root
-	 *            the root dir to start from, if null the home dir is used.
-	 * @param baseName
-	 *            the baseName of the dir you are looking for. It can be a
-	 *            subpath such as "bankdefs/trunk/clas12".
-	 * @param maxLevel
-	 *            the maximum number of levels to drill down
+	 * @param root     the root dir to start from, if null the home dir is used.
+	 * @param baseName the baseName of the dir you are looking for. It can be a
+	 *                 subpath such as "bankdefs/trunk/clas12".
+	 * @param maxLevel the maximum number of levels to drill down
 	 * @return the first matching dir that is found, or null.
 	 */
 	public static File findDirectory(String root, String baseName, int maxLevel) {
-		return findDirectory(fixSeparator(root), baseName, 0,
-				Math.max(Math.min(maxLevel, 15), 1));
+		return findDirectory(fixSeparator(root), baseName, 0, Math.max(Math.min(maxLevel, 15), 1));
 	}
 
 	// recursive call used by public findDirectory
-	private static File findDirectory(String root, String baseName,
-			int currentLevel, int maxLevel) {
+	private static File findDirectory(String root, String baseName, int currentLevel, int maxLevel) {
 
 		if (baseName == null) {
 			return null;
@@ -667,13 +617,11 @@ public class FileUtilities {
 
 		for (File file : files) {
 
-			if (file.isDirectory() && !file.getName().startsWith(".")
-					&& !file.getName().startsWith("$")) {
+			if (file.isDirectory() && !file.getName().startsWith(".") && !file.getName().startsWith("$")) {
 				if (file.getPath().endsWith(baseName)) {
 					return file;
 				} else {
-					File ff = findDirectory(file.getPath(), baseName,
-							currentLevel + 1, maxLevel);
+					File ff = findDirectory(file.getPath(), baseName, currentLevel + 1, maxLevel);
 					if (ff != null) {
 						return ff;
 					}
@@ -685,26 +633,21 @@ public class FileUtilities {
 	}
 
 	/**
-	 * Scan from a root, digging down, looking for a named file. Hidden
-	 * directories and files (starting with a ".") are skipped.
+	 * Scan from a root, digging down, looking for a named file. Hidden directories
+	 * and files (starting with a ".") are skipped.
 	 * 
-	 * @param root
-	 *            the root dir to start from, if null the home dir is used.
-	 * @param baseName
-	 *            the baseName of the file you are looking for. It can be a
-	 *            subpath such as "bankdefs/trunk/clas12/field.data".
-	 * @param maxLevel
-	 *            the maximum number of levels to drill down
+	 * @param root     the root dir to start from, if null the home dir is used.
+	 * @param baseName the baseName of the file you are looking for. It can be a
+	 *                 subpath such as "bankdefs/trunk/clas12/field.data".
+	 * @param maxLevel the maximum number of levels to drill down
 	 * @return the first matching file that is found, or null.
 	 */
 	public static File findFile(String root, String baseName, int maxLevel) {
-		return findFile(fixSeparator(root), baseName, 0,
-				Math.max(Math.min(maxLevel, 15), 1));
+		return findFile(fixSeparator(root), baseName, 0, Math.max(Math.min(maxLevel, 15), 1));
 	}
 
 	// recursive call used by public findDirectory
-	private static File findFile(String root, String baseName,
-			int currentLevel, int maxLevel) {
+	private static File findFile(String root, String baseName, int currentLevel, int maxLevel) {
 
 		if (baseName == null) {
 			return null;
@@ -730,11 +673,9 @@ public class FileUtilities {
 
 		for (File file : files) {
 			// skip hidden files
-			if (!file.getName().startsWith(".")
-					&& !file.getName().startsWith("$")) {
+			if (!file.getName().startsWith(".") && !file.getName().startsWith("$")) {
 				if (file.isDirectory()) {
-					File ff = findFile(file.getPath(), baseName,
-							currentLevel + 1, maxLevel);
+					File ff = findFile(file.getPath(), baseName, currentLevel + 1, maxLevel);
 					if (ff != null) {
 						return ff;
 					}
@@ -749,10 +690,8 @@ public class FileUtilities {
 	/**
 	 * Concatenate all the files in a directory into a single string
 	 * 
-	 * @param dir
-	 *            the directory in question
-	 * @param extension
-	 *            the extension filter (e.g., "xml");
+	 * @param dir       the directory in question
+	 * @param extension the extension filter (e.g., "xml");
 	 * @return a single string;
 	 */
 	public static String concatenate(File dir, String extension) {
@@ -783,10 +722,8 @@ public class FileUtilities {
 	/**
 	 * Obtain a list of classes found in a jar file
 	 * 
-	 * @param jarFile
-	 *            the jar file to examine
-	 * @param ignoreInner
-	 *            if true, ignore if contains a "$"
+	 * @param jarFile     the jar file to examine
+	 * @param ignoreInner if true, ignore if contains a "$"
 	 * @return list of classes found in a jar file
 	 */
 	public static Vector<String> getJarEntries(File jarFile, boolean ignoreInner) {
@@ -822,6 +759,5 @@ public class FileUtilities {
 		}
 		return classes;
 	}
-
 
 }

@@ -20,8 +20,7 @@ import java.util.StringTokenizer;
  * @version 1.0
  */
 public final class Solenoid extends MagneticField {
-	
-	
+
 	// private constructor
 	/**
 	 * Instantiates a new solenoid.
@@ -43,16 +42,16 @@ public final class Solenoid extends MagneticField {
 			return true;
 		}
 	}
-	
+
 	/**
-	 * Checks this field active. 
+	 * Checks this field active.
+	 * 
 	 * @return <code>true</code> if this field is active;
 	 */
 	@Override
 	public boolean isActive() {
 		return MagneticFields.getInstance().hasActiveSolenoid();
 	}
-
 
 	/**
 	 * Obtain a solenoid object from a binary file, probably
@@ -62,15 +61,13 @@ public final class Solenoid extends MagneticField {
 	 * @return the solenoid object
 	 * @throws FileNotFoundException the file not found exception
 	 */
-	public static Solenoid fromBinaryFile(File file)
-			throws FileNotFoundException {
+	public static Solenoid fromBinaryFile(File file) throws FileNotFoundException {
 		Solenoid solenoid = new Solenoid();
 		solenoid.readBinaryMagneticField(file);
 		// is the field ready to use?
 		System.out.println(solenoid.toString());
 		return solenoid;
 	}
-    
 
 	/**
 	 * Get the name of the field
@@ -81,8 +78,7 @@ public final class Solenoid extends MagneticField {
 	public String getName() {
 		return "Solenoid";
 	}
-		
-	
+
 	/**
 	 * Get some data as a string.
 	 * 
@@ -94,14 +90,16 @@ public final class Solenoid extends MagneticField {
 		s += super.toString();
 		return s;
 	}
-	
+
 	/**
 	 * Print the current configuration
+	 * 
 	 * @param ps the print stream
 	 */
 	@Override
 	public void printConfiguration(PrintStream ps) {
-		ps.println(String.format("SOLENOID scale: %6.3f file: %s", _scaleFactor, MagneticFields.getInstance().getSolenoidBaseName()));
+		ps.println(String.format("SOLENOID scale: %6.3f file: %s", _scaleFactor,
+				MagneticFields.getInstance().getSolenoidBaseName()));
 	}
 
 	/**
@@ -115,15 +113,13 @@ public final class Solenoid extends MagneticField {
 		File asciiFile = new File("../../../data/clas12SolenoidFieldMap.dat.txt");
 		if (!asciiFile.exists()) {
 			System.out.println("File not found: " + asciiFile.getPath());
-		}
-		else {
+		} else {
 			System.out.println("File found: " + asciiFile.getPath());
 
 			FileReader fileReader;
 			try {
 				fileReader = new FileReader(asciiFile);
-				final BufferedReader bufferedReader = new BufferedReader(
-						fileReader);
+				final BufferedReader bufferedReader = new BufferedReader(fileReader);
 
 				// prepare the binary file
 				String binaryFileName = "../../../data/clas12-fieldmap-solenoid.dat";
@@ -138,8 +134,7 @@ public final class Solenoid extends MagneticField {
 				float zmin = -300.0f;
 				float zmax = 300.0f;
 
-				DataOutputStream dos = new DataOutputStream(
-						new FileOutputStream(binaryFileName));
+				DataOutputStream dos = new DataOutputStream(new FileOutputStream(binaryFileName));
 				try {
 					// write the header
 					dos.writeInt(0xced);
@@ -209,8 +204,8 @@ public final class Solenoid extends MagneticField {
 	/**
 	 * Get the next non comment line
 	 * 
-	 * @param bufferedReader a buffered reader which should be linked to an
-	 *            ascii file
+	 * @param bufferedReader a buffered reader which should be linked to an ascii
+	 *                       file
 	 * @return the next non comment line (or <code>null</code>)
 	 */
 	private static String nextNonComment(BufferedReader bufferedReader) {
@@ -232,9 +227,5 @@ public final class Solenoid extends MagneticField {
 
 		return s;
 	}
-
-
-
-
 
 }

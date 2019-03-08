@@ -7,19 +7,18 @@ public class ExtendedWord {
 
 	// Used for clarity. In JAVA, longs are 64 bits on all machines.
 	private static int WORDSIZE = 64;
-	
-	//for use in hask keys
+
+	// for use in hask keys
 	private static final String HASH_DELIM = "$";
 	private static final int HASHRADIX = 36;
 
 	// Word with all bits on
 	private static final long ALLBITSON = 0xFFFFFFFFFFFFFFFFL;
-	
-	//for base62 encoding
+
+	// for base62 encoding
 	private static final char[] digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 	private static final int RADIX62 = 62;
-    private static final long MAX62 = Long.MAX_VALUE / RADIX62;
-
+	private static final long MAX62 = Long.MAX_VALUE / RADIX62;
 
 	/**
 	 * Holds the composite words. words[0] is least significant.
@@ -37,11 +36,10 @@ public class ExtendedWord {
 	protected ExtendedWord rightWorkSpace;
 
 	/**
-	 * Creates an extended word made up of an array of longs. Note that in JAVA
-	 * a long is always 64 bits, independent of machine.
+	 * Creates an extended word made up of an array of longs. Note that in JAVA a
+	 * long is always 64 bits, independent of machine.
 	 * 
-	 * @param bitsNeeded
-	 *            the number of bits needed.
+	 * @param bitsNeeded the number of bits needed.
 	 */
 	public ExtendedWord(int bitsNeeded) {
 		int n = 1 + (bitsNeeded - 1) / WORDSIZE;
@@ -53,9 +51,10 @@ public class ExtendedWord {
 	 */
 	public ExtendedWord() {
 	}
-	
+
 	/**
 	 * Create using words
+	 * 
 	 * @param words the words
 	 */
 	public ExtendedWord(long words[]) {
@@ -65,8 +64,7 @@ public class ExtendedWord {
 	/**
 	 * Set the bit at a given location
 	 * 
-	 * @param bit
-	 *            the bit to set.
+	 * @param bit the bit to set.
 	 */
 	public void setBit(int bit) {
 		int wordIndex = bit / WORDSIZE;
@@ -77,8 +75,7 @@ public class ExtendedWord {
 	/**
 	 * Check if a given bit is on,
 	 * 
-	 * @param bit
-	 *            the bit to check.
+	 * @param bit the bit to check.
 	 * @return <code>true</code> if the bit is set.
 	 */
 	public boolean checkBit(int bit) {
@@ -104,9 +101,10 @@ public class ExtendedWord {
 			words[i] = ALLBITSON;
 		}
 	}
-	
+
 	/**
 	 * See if this extended word is zero
+	 * 
 	 * @return <code>if this extended word is zero
 	 */
 	public boolean isZero() {
@@ -155,15 +153,12 @@ public class ExtendedWord {
 	}
 
 	/**
-	 * Perform a bitwise and on two extended words. They are assumed to be of
-	 * the same size.
+	 * Perform a bitwise and on two extended words. They are assumed to be of the
+	 * same size.
 	 * 
-	 * @param u
-	 *            one of the extended words
-	 * @param v
-	 *            the other extended word.
-	 * @param result
-	 *            where the result is stored. Can be u or v.
+	 * @param u      one of the extended words
+	 * @param v      the other extended word.
+	 * @param result where the result is stored. Can be u or v.
 	 */
 	public static void bitwiseAnd(ExtendedWord u, ExtendedWord v, ExtendedWord result) {
 		for (int i = 0; i < u.words.length; i++) {
@@ -175,12 +170,9 @@ public class ExtendedWord {
 	 * Perform a bitwise or on two extended words. They are assumed to be of the
 	 * same size.
 	 * 
-	 * @param u
-	 *            one of the extended words
-	 * @param v
-	 *            the other extended word.
-	 * @param result
-	 *            where the result is stored. Can be u or v.
+	 * @param u      one of the extended words
+	 * @param v      the other extended word.
+	 * @param result where the result is stored. Can be u or v.
 	 */
 	public static void bitwiseOr(ExtendedWord u, ExtendedWord v, ExtendedWord result) {
 		for (int i = 0; i < u.words.length; i++) {
@@ -189,15 +181,12 @@ public class ExtendedWord {
 	}
 
 	/**
-	 * Perform a bitwise xor on two extended words. They are assumed to be of
-	 * the same size.
+	 * Perform a bitwise xor on two extended words. They are assumed to be of the
+	 * same size.
 	 * 
-	 * @param u
-	 *            one of the extended words
-	 * @param v
-	 *            the other extended word.
-	 * @param result
-	 *            where the result is stored. Can be u or v.
+	 * @param u      one of the extended words
+	 * @param v      the other extended word.
+	 * @param result where the result is stored. Can be u or v.
 	 */
 	public static void bitwiseXor(ExtendedWord u, ExtendedWord v, ExtendedWord result) {
 		for (int i = 0; i < u.words.length; i++) {
@@ -206,11 +195,10 @@ public class ExtendedWord {
 	}
 
 	/**
-	 * Shift the extended word right. CURRENT LIMITATION: can only shift up to
-	 * 64 bits.
+	 * Shift the extended word right. CURRENT LIMITATION: can only shift up to 64
+	 * bits.
 	 * 
-	 * @param n
-	 *            the number of places to shift.
+	 * @param n the number of places to shift.
 	 */
 	public void shiftRight(int n) {
 		int len = words.length;
@@ -234,8 +222,7 @@ public class ExtendedWord {
 	 * Shift the extended word left. CURRENT LIMITATION: can only shift up to 64
 	 * bits.
 	 * 
-	 * @param n
-	 *            the number of places to shift.
+	 * @param n the number of places to shift.
 	 */
 	public void shiftLeft(int n) {
 		int len = words.length;
@@ -258,8 +245,7 @@ public class ExtendedWord {
 	/**
 	 * Bleed the specified number of bits left.
 	 * 
-	 * @param n
-	 *            the number of bits to bleed left.
+	 * @param n the number of bits to bleed left.
 	 */
 	public synchronized void bleedRight(int n) {
 		if (rightWorkSpace == null) {
@@ -294,8 +280,7 @@ public class ExtendedWord {
 	/**
 	 * Bleed the specified number of bits left.
 	 * 
-	 * @param n
-	 *            the number of bits to bleed left.
+	 * @param n the number of bits to bleed left.
 	 */
 	public synchronized void bleedLeft(int n) {
 		if (leftWorkSpace == null) {
@@ -352,18 +337,17 @@ public class ExtendedWord {
 	/**
 	 * Return a binary string representation of a byte.
 	 * 
-	 * @param b
-	 *            the byte in question. Sample results
-	 *            <p>
-	 *            b = 17 -> 00010001
-	 *            <p>
-	 *            b = 127 -> 01111111
-	 *            <p>
-	 *            b = 128 (-128) -> 10000000
-	 *            <p>
-	 *            b = 129 (-127) -> 10000001
-	 *            <p>
-	 *            b = 255 (-1) -> 11111111
+	 * @param b the byte in question. Sample results
+	 *          <p>
+	 *          b = 17 -> 00010001
+	 *          <p>
+	 *          b = 127 -> 01111111
+	 *          <p>
+	 *          b = 128 (-128) -> 10000000
+	 *          <p>
+	 *          b = 129 (-127) -> 10000001
+	 *          <p>
+	 *          b = 255 (-1) -> 11111111
 	 * @return a binary string representation.
 	 */
 	private static String binaryString(long b) {
@@ -384,10 +368,8 @@ public class ExtendedWord {
 	/**
 	 * checkBit returns true if the control bit is set in the bits variable.
 	 * 
-	 * @param word
-	 *            the long that holds the bits.
-	 * @param _b
-	 *            the bit to check.
+	 * @param word the long that holds the bits.
+	 * @param _b   the bit to check.
 	 * @return <code>true</code> if the bit is set.
 	 */
 	private static boolean checkBit(long word, int bit) {
@@ -398,10 +380,8 @@ public class ExtendedWord {
 	/**
 	 * setBit sets the given control bit.
 	 * 
-	 * @param bits
-	 *            The long that holds the bits.
-	 * @param bit
-	 *            the bit to set.
+	 * @param bits The long that holds the bits.
+	 * @param bit  the bit to set.
 	 * @return The modified bits.
 	 */
 	private static long setBit(long bits, int bit) {
@@ -409,34 +389,35 @@ public class ExtendedWord {
 		return bits;
 	}
 
-
 	/**
 	 * Get the underlying words
+	 * 
 	 * @return the words
 	 */
 	public long[] getWords() {
 		return words;
 	}
-	
-	public static int countCommonBits(ExtendedWord a, ExtendedWord b, ExtendedWord work1, ExtendedWord work2, ExtendedWord work3) {
+
+	public static int countCommonBits(ExtendedWord a, ExtendedWord b, ExtendedWord work1, ExtendedWord work2,
+			ExtendedWord work3) {
 
 		bitwiseAnd(a, b, work1);
 		a.negate();
 		b.negate();
 		bitwiseAnd(a, b, work2);
-		
+
 		bitwiseOr(work1, work2, work3);
-		
-		//restore
+
+		// restore
 		a.negate();
 		b.negate();
 
 		return work3.bitCount();
 	}
-	
 
 	/**
 	 * Hash this ExtendedWord into a String
+	 * 
 	 * @return a String suitable as a hash or map key
 	 */
 	public String hashKey() {
@@ -456,9 +437,10 @@ public class ExtendedWord {
 
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Hash this ExtendedWord into a String in base 62
+	 * 
 	 * @return a String suitable as a hash or map key
 	 */
 	public String hashKey62() {
@@ -479,176 +461,170 @@ public class ExtendedWord {
 		return sb.toString();
 	}
 
-	
 	/**
 	 * Convert back to an ExtendedWord from a hash key
+	 * 
 	 * @param hash the key
 	 * @return the equivalent ExtendedWord
 	 */
 	public static ExtendedWord fromHash(String hash) {
 		StringTokenizer t = new StringTokenizer(hash, HASH_DELIM);
 		int num = t.countTokens();
-		
+
 		long[] words = new long[num];
 		for (int i = 0; i < num; i++) {
 			words[i] = Long.valueOf(t.nextToken(), HASHRADIX);
 		}
-		
+
 		return new ExtendedWord(words);
 	}
-	
+
 	/**
 	 * Convert back to an ExtendedWord from a hash key
+	 * 
 	 * @param hash the key
 	 * @return the equivalent ExtendedWord
 	 */
 	public static ExtendedWord fromHash62(String hash) {
 		StringTokenizer t = new StringTokenizer(hash, HASH_DELIM);
 		int num = t.countTokens();
-		
+
 		long[] words = new long[num];
 		for (int i = 0; i < num; i++) {
 			words[i] = parseLong62(t.nextToken());
 		}
-		
+
 		return new ExtendedWord(words);
 	}
 
-	
-	
-	  /**
-	     * Helper for parsing longs.
-	     *
-	     * @param str the string to parse
-	     * @return the parsed long value
-	     * @throws NumberFormatException if there is an error
-	     * @throws NullPointerException if decode is true and str is null
-	     * @see #parseLong(String, int)
-	     * @see #decode(String)
-	     */
-	    private static long parseLong62(String str)
-	    {
-	      if (str == null) {
-	        throw new NumberFormatException();
-	      }
-	      
-	      int index = 0;
-	      int len = str.length();
-	      boolean isNeg = false;
-	      
-	      if (len == 0) {
-	        throw new NumberFormatException();
-	      }
-	      
-	      int ch = str.charAt(index);
-	      if (ch == '-')
-	        {
-	          if (len == 1)
-	            throw new NumberFormatException();
-	          
-	          isNeg = true;
-	          ch = str.charAt(++index);
-	        }
-
-	      if (index == len) {
-	        throw new NumberFormatException();
-	      }
-	  	      	  
-	      long val = 0;
-	      while (index < len)
-	        {
-	      if (val < 0 || val > MAX62)
-	        throw new NumberFormatException();
-	  
-	          ch = digit62(str.charAt(index++));
-	          val = val * RADIX62 + ch;
-	          if (ch < 0 || (val < 0 && (! isNeg || val != Long.MIN_VALUE)))
-	            throw new NumberFormatException();
-	        }
-	      return isNeg ? -val : val;
-	    }
-	    
-	    //get the value of a digit for base 62
-	    private static int digit62(char ch) {
-	    	if (Character.isDigit(ch)) {
-	    		return ch - '0';
-	    	}
-	    	
-	    	else if (Character.isLowerCase(ch)) {
-	    		return 10 + ch - 'a';
-	    	}
-	    	
-	    	return 36 + ch - 'A';
-	    }	
 	/**
-	 * Encode a long into a base 62 String. Based on the 
-	 * toString implementation in the Java Long class.
+	 * Helper for parsing longs.
+	 *
+	 * @param str the string to parse
+	 * @return the parsed long value
+	 * @throws NumberFormatException if there is an error
+	 * @throws NullPointerException  if decode is true and str is null
+	 * @see #parseLong(String, int)
+	 * @see #decode(String)
+	 */
+	private static long parseLong62(String str) {
+		if (str == null) {
+			throw new NumberFormatException();
+		}
+
+		int index = 0;
+		int len = str.length();
+		boolean isNeg = false;
+
+		if (len == 0) {
+			throw new NumberFormatException();
+		}
+
+		int ch = str.charAt(index);
+		if (ch == '-') {
+			if (len == 1)
+				throw new NumberFormatException();
+
+			isNeg = true;
+			ch = str.charAt(++index);
+		}
+
+		if (index == len) {
+			throw new NumberFormatException();
+		}
+
+		long val = 0;
+		while (index < len) {
+			if (val < 0 || val > MAX62)
+				throw new NumberFormatException();
+
+			ch = digit62(str.charAt(index++));
+			val = val * RADIX62 + ch;
+			if (ch < 0 || (val < 0 && (!isNeg || val != Long.MIN_VALUE)))
+				throw new NumberFormatException();
+		}
+		return isNeg ? -val : val;
+	}
+
+	// get the value of a digit for base 62
+	private static int digit62(char ch) {
+		if (Character.isDigit(ch)) {
+			return ch - '0';
+		}
+
+		else if (Character.isLowerCase(ch)) {
+			return 10 + ch - 'a';
+		}
+
+		return 36 + ch - 'A';
+	}
+
+	/**
+	 * Encode a long into a base 62 String. Based on the toString implementation in
+	 * the Java Long class.
+	 * 
 	 * @param number the number to encode
 	 * @return a base 62 number
 	 */
 	public static String encode62(long num) {
-				
-		   // For negative numbers, print out the absolute value w/ a leading '-'.
-		      // Use an array large enough for a binary number.
-		      char[] buffer = new char[65];
-		      int i = 65;
-		      boolean isNeg = false;
-		      if (num < 0)
-		        {
-		          isNeg = true;
-		          num = -num;
-		  
-		          // When the value is MIN_VALUE, it overflows when made positive
-		          if (num < 0)
-		        {
-		          buffer[--i] = digits[(int) (-(num + RADIX62) % RADIX62)];
-		          num = -(num / RADIX62);
-		        }
-		        }
-		  
-		     do
-		        {
-		          buffer[--i] = digits[(int) (num % RADIX62)];
-		          num /= RADIX62;
-		        }
-		      while (num > 0);
-		  
-		      if (isNeg)
-		        buffer[--i] = '-';
-		  
-		      // Package constructor avoids an array copy.
-		      return new String(buffer, i, 65 - i);		
-		
-    }
+
+		// For negative numbers, print out the absolute value w/ a leading '-'.
+		// Use an array large enough for a binary number.
+		char[] buffer = new char[65];
+		int i = 65;
+		boolean isNeg = false;
+		if (num < 0) {
+			isNeg = true;
+			num = -num;
+
+			// When the value is MIN_VALUE, it overflows when made positive
+			if (num < 0) {
+				buffer[--i] = digits[(int) (-(num + RADIX62) % RADIX62)];
+				num = -(num / RADIX62);
+			}
+		}
+
+		do {
+			buffer[--i] = digits[(int) (num % RADIX62)];
+			num /= RADIX62;
+		} while (num > 0);
+
+		if (isNeg)
+			buffer[--i] = '-';
+
+		// Package constructor avoids an array copy.
+		return new String(buffer, i, 65 - i);
+
+	}
 
 	public static void main(String arg[]) {
 		ExtendedWord a = new ExtendedWord(112);
 		ExtendedWord b = new ExtendedWord(112);
-		
+
 		Random rand = new Random();
 		a.words[0] = rand.nextLong();
 		a.words[1] = rand.nextLong();
 		b.words[0] = rand.nextLong();
 		b.words[1] = rand.nextLong();
-		
+
 		String ahash = a.hashKey();
 		String bhash = b.hashKey();
-		
+
 //		System.err.println("" + a);
 		System.err.println("ahash [" + ahash + "]");
 		System.err.println("bhash [" + bhash + "]");
-		
+
 		ExtendedWord ap = fromHash(ahash);
 		ExtendedWord bp = fromHash(bhash);
-		
+
 		System.err.println(" a = " + a);
 		System.err.println("ap = " + ap);
 		System.err.println(" b = " + b);
 		System.err.println("bp = " + bp);
-		
+
 		System.err.println("\nNow try base 62");
 //		System.err.println("digitsChar62[0] = " + digitsChar62[61]);
-		
+
 		String ahash62 = a.hashKey62();
 		String bhash62 = b.hashKey62();
 		System.err.println("ahash62 [" + ahash62 + "]");
@@ -663,5 +639,5 @@ public class ExtendedWord {
 		System.err.println("b62 = " + b62);
 
 	}
-	
+
 }

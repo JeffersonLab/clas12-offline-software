@@ -11,30 +11,30 @@ import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.frame.Ced;
 
 public abstract class AEventFilter implements IEventFilter {
-	
-	//a name for the filter
+
+	// a name for the filter
 	private String _name = "???";
-	
-	//the active flag
+
+	// the active flag
 	private boolean _isActive;
 
-	//used primarily for event filter menu
+	// used primarily for event filter menu
 	protected JMenuItem _menuComponent;
-	
+
 	public AEventFilter() {
-		
+
 		ActionListener al = new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				toggleActiveState();
 			}
-			
+
 		};
-		
+
 		_menuComponent = new JMenuItem();
 		_menuComponent.addActionListener(al);
-		
+
 //		_menuLabel.setFont(Fonts.defaultBoldFont);
 		_menuComponent.setOpaque(true);
 	}
@@ -44,7 +44,7 @@ public abstract class AEventFilter implements IEventFilter {
 		fixMenuComponent();
 		Ced.getCed().fixEventFilteringLabel();
 	}
-	
+
 	@Override
 	public void setActive(boolean active) {
 		_isActive = active;
@@ -66,24 +66,24 @@ public abstract class AEventFilter implements IEventFilter {
 	public String getName() {
 		return _name;
 	}
-	
+
 	/**
 	 * Get the menu component
+	 * 
 	 * @return the menu component
 	 */
 	@Override
 	public JComponent getMenuComponent() {
 		return _menuComponent;
 	}
-	
-	//fix the label
+
+	// fix the label
 	private void fixMenuComponent() {
 		if (isActive()) {
 			_menuComponent.setBackground(Color.black);
 			_menuComponent.setForeground(Color.red);
 			_menuComponent.setText("  " + getName() + " [Filter is Active]  ");
-		}
-		else {
+		} else {
 			_menuComponent.setBackground(X11Colors.getX11Color("Alice Blue"));
 			_menuComponent.setForeground(X11Colors.getX11Color("Dark Blue"));
 			_menuComponent.setText("  " + getName() + " [Filter is Inactive]  ");

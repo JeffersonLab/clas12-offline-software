@@ -73,18 +73,17 @@ public final class Rubberband {
 
 	// Listener to notify when we are done.
 	private IRubberbanded _rubberbanded;
-	
+
 	private PlotCanvas _canvas;
 
 	/**
 	 * Create a Rubberband
 	 * 
-	 * @param container the parent component being rubberbanded
+	 * @param container    the parent component being rubberbanded
 	 * @param rubberbanded who gets notified when we are done.
-	 * @param policy the stretching shape policy.
+	 * @param policy       the stretching shape policy.
 	 */
-	public Rubberband(PlotCanvas canvas, IRubberbanded rubberbanded,
-			Policy policy) {
+	public Rubberband(PlotCanvas canvas, IRubberbanded rubberbanded, Policy policy) {
 		_canvas = canvas;
 		setComponent(canvas);
 		_rubberbanded = rubberbanded;
@@ -116,39 +115,32 @@ public final class Rubberband {
 					if (polyMode()) {
 						if (_tempPoly == null) {
 							startRubberbanding(event.getPoint());
-						}
-						else {
+						} else {
 							if (event.getClickCount() == 2) {
 								endRubberbanding(event.getPoint());
-							}
-							else {
+							} else {
 								addPoint(_tempPoly, event.getX(), event.getY());
 							}
 						}
-					}
-					else if (radArcMode()) {
+					} else if (radArcMode()) {
 						if (_tempPoly == null) {
 							startRubberbanding(event.getPoint());
-						}
-						else {
+						} else {
 							addPoint(_tempPoly, event.getX(), event.getY());
 							if (_tempPoly.npoints == 3) {
 								endRubberbanding(event.getPoint());
 							}
 						}
-					}
-					else if (lineMode()) {
+					} else if (lineMode()) {
 						if (_tempPoly == null) {
 							startRubberbanding(event.getPoint());
-						}
-						else {
+						} else {
 							addPoint(_tempPoly, event.getX(), event.getY());
 							if (_tempPoly.npoints == 2) {
 								endRubberbanding(event.getPoint());
 							}
 						}
-					}
-					else { // rects and ovals by dragging
+					} else { // rects and ovals by dragging
 						startRubberbanding(event.getPoint());
 					}
 				}
@@ -192,8 +184,7 @@ public final class Rubberband {
 			@Override
 			public void mouseMoved(MouseEvent event) {
 				if (isActive()) {
-					if ((polyMode() || radArcMode() || lineMode())
-							&& (_tempPoly != null)) {
+					if ((polyMode() || radArcMode() || lineMode()) && (_tempPoly != null)) {
 						setCurrent(event.getPoint());
 					}
 				}
@@ -261,8 +252,8 @@ public final class Rubberband {
 	}
 
 	/**
-	 * Draw the rubber band outline. Erasing is not necessary because we are
-	 * saving a background image.
+	 * Draw the rubber band outline. Erasing is not necessary because we are saving
+	 * a background image.
 	 * 
 	 * @param g the graphics context.
 	 */
@@ -278,30 +269,25 @@ public final class Rubberband {
 		case YONLY:
 		case RECTANGLE_PRESERVE_ASPECT:
 			g.fillRect(rect.x, rect.y, rect.width, rect.height);
-			GraphicsUtilities.drawHighlightedRectangle(g, rect,
-					_highlightColor1, _highlightColor2);
+			GraphicsUtilities.drawHighlightedRectangle(g, rect, _highlightColor1, _highlightColor2);
 			break;
 
 		case LINE:
-			GraphicsUtilities.drawHighlightedLine(g, _startPt.x, _startPt.y,
-					_currentPt.x, _currentPt.y, _highlightColor1,
-					_highlightColor2);
+			GraphicsUtilities.drawHighlightedLine(g, _startPt.x, _startPt.y, _currentPt.x, _currentPt.y,
+					_highlightColor1, _highlightColor2);
 			break;
 
 		case OVAL:
 			g.fillOval(rect.x, rect.y, rect.width, rect.height);
-			GraphicsUtilities.drawHighlightedOval(g, rect, _highlightColor1,
-					_highlightColor2);
+			GraphicsUtilities.drawHighlightedOval(g, rect, _highlightColor1, _highlightColor2);
 			break;
 
 		case RADARC:
 
 			if (_tempPoly.npoints == 1) {
-				GraphicsUtilities.drawHighlightedLine(g, _tempPoly.xpoints[0],
-						_tempPoly.ypoints[0], _currentPt.x, _currentPt.y,
-						_highlightColor1, _highlightColor2);
-			}
-			else if (_tempPoly.npoints == 2) {
+				GraphicsUtilities.drawHighlightedLine(g, _tempPoly.xpoints[0], _tempPoly.ypoints[0], _currentPt.x,
+						_currentPt.y, _highlightColor1, _highlightColor2);
+			} else if (_tempPoly.npoints == 2) {
 				double xc = _tempPoly.xpoints[0];
 				double yc = _tempPoly.ypoints[0];
 				double x1 = _tempPoly.xpoints[1];
@@ -342,41 +328,31 @@ public final class Rubberband {
 				int pixrad = (int) r1;
 				int size = (int) (2 * r1);
 
-				g.fillArc(_tempPoly.xpoints[0] - pixrad,
-						_tempPoly.ypoints[0] - pixrad, size, size, startAngle,
+				g.fillArc(_tempPoly.xpoints[0] - pixrad, _tempPoly.ypoints[0] - pixrad, size, size, startAngle,
 						arcAngle);
-				GraphicsUtilities.drawHighlightedArc(g,
-						_tempPoly.xpoints[0] - pixrad,
-						_tempPoly.ypoints[0] - pixrad, size, size, startAngle,
-						arcAngle, _highlightColor1, _highlightColor2);
+				GraphicsUtilities.drawHighlightedArc(g, _tempPoly.xpoints[0] - pixrad, _tempPoly.ypoints[0] - pixrad,
+						size, size, startAngle, arcAngle, _highlightColor1, _highlightColor2);
 
-				GraphicsUtilities.drawHighlightedLine(g, _tempPoly.xpoints[0],
-						_tempPoly.ypoints[0], _tempPoly.xpoints[1],
-						_tempPoly.ypoints[1], _highlightColor1,
-						_highlightColor2);
-				GraphicsUtilities.drawHighlightedLine(g, _tempPoly.xpoints[0],
-						_tempPoly.ypoints[0], (int) x2, (int) y2,
+				GraphicsUtilities.drawHighlightedLine(g, _tempPoly.xpoints[0], _tempPoly.ypoints[0],
+						_tempPoly.xpoints[1], _tempPoly.ypoints[1], _highlightColor1, _highlightColor2);
+				GraphicsUtilities.drawHighlightedLine(g, _tempPoly.xpoints[0], _tempPoly.ypoints[0], (int) x2, (int) y2,
 						_highlightColor1, _highlightColor2);
 			}
 
 			break;
 
 		case POLYLINE:
-			tpoly = new Polygon(_tempPoly.xpoints, _tempPoly.ypoints,
-					_tempPoly.npoints);
+			tpoly = new Polygon(_tempPoly.xpoints, _tempPoly.ypoints, _tempPoly.npoints);
 			addPoint(tpoly, _currentPt.x, _currentPt.y);
-			GraphicsUtilities.drawHighlightedPolyline(g, tpoly.xpoints,
-					tpoly.ypoints, tpoly.npoints, _highlightColor1,
+			GraphicsUtilities.drawHighlightedPolyline(g, tpoly.xpoints, tpoly.ypoints, tpoly.npoints, _highlightColor1,
 					_highlightColor2);
 			break;
 
 		case POLYGON:
-			tpoly = new Polygon(_tempPoly.xpoints, _tempPoly.ypoints,
-					_tempPoly.npoints);
+			tpoly = new Polygon(_tempPoly.xpoints, _tempPoly.ypoints, _tempPoly.npoints);
 			addPoint(tpoly, _currentPt.x, _currentPt.y);
 			g.fillPolygon(tpoly);
-			GraphicsUtilities.drawHighlightedShape(g, tpoly, _highlightColor1,
-					_highlightColor2);
+			GraphicsUtilities.drawHighlightedShape(g, tpoly, _highlightColor1, _highlightColor2);
 			break;
 		}
 	}
@@ -391,11 +367,9 @@ public final class Rubberband {
 		Rectangle b = _canvas.getActiveBounds();
 		if (_policy == Policy.RECTANGLE_PRESERVE_ASPECT) {
 			GraphicsUtilities.rectangleARFixedAdjust(b, getStart(), cp);
-		}
-		else if ((_policy == Policy.XONLY) && (cp != _startPt)) {
+		} else if ((_policy == Policy.XONLY) && (cp != _startPt)) {
 			cp.y = b.y + b.height;
-		}
-		else if ((_policy == Policy.YONLY) && (cp != _startPt)) {
+		} else if ((_policy == Policy.YONLY) && (cp != _startPt)) {
 			cp.x = b.x + b.width;
 		}
 
@@ -461,7 +435,6 @@ public final class Rubberband {
 			anchorPt.x = b.x;
 		}
 
-
 		_startPt.setLocation(anchorPt);
 		_currentPt.setLocation(anchorPt);
 
@@ -498,8 +471,7 @@ public final class Rubberband {
 		// hack with veryFirst prevents flash
 		if (veryFirst) {
 			veryFirst = false;
-		}
-		else {
+		} else {
 			g.drawImage(_image, 0, 0, _component);
 		}
 		g.dispose();
@@ -561,8 +533,7 @@ public final class Rubberband {
 		case RADARC:
 			if ((_poly == null) || (_poly.npoints < 1)) {
 				return null;
-			}
-			else {
+			} else {
 				Point p[] = new Point[_poly.npoints];
 				int x[] = _poly.xpoints;
 				int y[] = _poly.ypoints;
@@ -597,16 +568,12 @@ public final class Rubberband {
 		if (polyMode() || radArcMode()) {
 			if (_poly == null) {
 				return null;
-			}
-			else {
+			} else {
 				return _poly.getBounds();
 			}
-		}
-		else { // rect or oval
-			return new Rectangle(
-					(_currentPt.x < _startPt.x) ? _currentPt.x : _startPt.x,
-					(_currentPt.y < _startPt.y) ? _currentPt.y : _startPt.y,
-					Math.abs(_currentPt.x - _startPt.x),
+		} else { // rect or oval
+			return new Rectangle((_currentPt.x < _startPt.x) ? _currentPt.x : _startPt.x,
+					(_currentPt.y < _startPt.y) ? _currentPt.y : _startPt.y, Math.abs(_currentPt.x - _startPt.x),
 					Math.abs(_currentPt.y - _startPt.y));
 		}
 	}

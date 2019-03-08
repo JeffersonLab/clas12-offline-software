@@ -41,12 +41,11 @@ import cnuphys.bCNU.view.BaseView;
  */
 @SuppressWarnings("serial")
 public class AllDCView extends CedView implements IAllDC {
-	
-	
-	//for naming clones
+
+	// for naming clones
 	private static int CLONE_COUNT = 0;
-	
-	//base title
+
+	// base title
 	protected static final String _baseTitle = "All Drift Chambers";
 
 	/**
@@ -67,29 +66,27 @@ public class AllDCView extends CedView implements IAllDC {
 
 	/**
 	 * The all dc view is rendered on 2x3 grid. Each grid is 1x1 in world
-	 * coordinates. Thus the whole view has width = 3 and height = 2. These
-	 * offesets move the sector to the right spot on the grid.
+	 * coordinates. Thus the whole view has width = 3 and height = 2. These offesets
+	 * move the sector to the right spot on the grid.
 	 */
 	protected static double _xoffset[] = { 0.0, 1.0, 2.0, 0.0, 1.0, 2.0 };
 
 	/**
 	 * The all dc view is rendered on 2x3 grid. Each grid is 1x1 in world
-	 * coordinates. Thus the whole view has width = 3 and height = 2. These
-	 * offesets move the sector to the right spot on the grid.
+	 * coordinates. Thus the whole view has width = 3 and height = 2. These offesets
+	 * move the sector to the right spot on the grid.
 	 */
 	protected static double _yoffset[] = { 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 };
 
 	// all the superlayer items indexed by sector (0..5) and superlayer (0..5)
 	protected AllDCSuperLayer _superLayerItems[][];
 
-	protected static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
-			0.0, 0.0, 3.0, 2.0);
+	protected static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(0.0, 0.0, 3.0, 2.0);
 
 	/**
 	 * Create an allDCView
 	 * 
-	 * @param keyVals
-	 *            variable set of arguments.
+	 * @param keyVals variable set of arguments.
 	 */
 	protected AllDCView(Object... keyVals) {
 		super(keyVals);
@@ -112,17 +109,16 @@ public class AllDCView extends CedView implements IAllDC {
 		Dimension d = GraphicsUtilities.screenFraction(0.65);
 
 		// create the view
-		view = new AllDCView(
-				PropertySupport.WORLDSYSTEM,
-				_defaultWorldRectangle,
-				PropertySupport.WIDTH,
-				d.width, // container width, not total view width
-				PropertySupport.HEIGHT,
-				d.height, // container height, not total view width
-				PropertySupport.TOOLBAR, true, 
-				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
-				PropertySupport.VISIBLE, true,
-				PropertySupport.TITLE, _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")")),
+		view = new AllDCView(PropertySupport.WORLDSYSTEM, _defaultWorldRectangle, PropertySupport.WIDTH, d.width, // container
+																													// width,
+																													// not
+																													// total
+																													// view
+																													// width
+				PropertySupport.HEIGHT, d.height, // container height, not total view width
+				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
+				PropertySupport.VISIBLE, true, PropertySupport.TITLE,
+				_baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")")),
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL + ControlPanel.DISPLAYARRAY
@@ -139,7 +135,7 @@ public class AllDCView extends CedView implements IAllDC {
 	 */
 	private void setBeforeDraw() {
 		// style for sector rects
-		
+
 		_sectorStyle = new Styled(X11Colors.getX11Color("dark slate gray"));
 		_sectorStyle.setLineColor(Color.lightGray);
 
@@ -149,21 +145,16 @@ public class AllDCView extends CedView implements IAllDC {
 			@Override
 			public void draw(Graphics g, IContainer container) {
 				g.setFont(labelFont);
-				
-				Graphics2D g2 = (Graphics2D)g;
-				g2.setRenderingHint(
-				        RenderingHints.KEY_TEXT_ANTIALIASING,
-				        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-				
+
+				Graphics2D g2 = (Graphics2D) g;
+				g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
 				for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
-					WorldGraphicsUtilities.drawWorldRectangle(g, container,
-							_sectorWorldRects[sector], _sectorStyle);
+					WorldGraphicsUtilities.drawWorldRectangle(g, container, _sectorWorldRects[sector], _sectorStyle);
 					double left = _sectorWorldRects[sector].x;
-					double top = _sectorWorldRects[sector].y
-							+ _sectorWorldRects[sector].height;
+					double top = _sectorWorldRects[sector].y + _sectorWorldRects[sector].height;
 					g.setColor(Color.red);
-					WorldGraphicsUtilities.drawWorldText(g, container, left,
-							top, "Sector " + (sector + 1), 8, 14);
+					WorldGraphicsUtilities.drawWorldText(g, container, left, top, "Sector " + (sector + 1), 8, 14);
 				}
 			}
 
@@ -171,7 +162,6 @@ public class AllDCView extends CedView implements IAllDC {
 
 		getContainer().setBeforeDraw(_beforeDraw);
 	}
-
 
 	/**
 	 * Set the views before draw
@@ -203,30 +193,23 @@ public class AllDCView extends CedView implements IAllDC {
 		double x13 = left + defaultWorld.width / 3.0;
 		double x23 = right - defaultWorld.width / 3.0;
 
-		_sectorWorldRects[0] = new Rectangle2D.Double(left, ymid, x13 - left,
-				top - ymid);
-		_sectorWorldRects[1] = new Rectangle2D.Double(x13, ymid, x23 - x13, top
-				- ymid);
-		_sectorWorldRects[2] = new Rectangle2D.Double(x23, ymid, right - x13,
-				top - ymid);
+		_sectorWorldRects[0] = new Rectangle2D.Double(left, ymid, x13 - left, top - ymid);
+		_sectorWorldRects[1] = new Rectangle2D.Double(x13, ymid, x23 - x13, top - ymid);
+		_sectorWorldRects[2] = new Rectangle2D.Double(x23, ymid, right - x13, top - ymid);
 
-		_sectorWorldRects[3] = new Rectangle2D.Double(left, bottom, x13 - left,
-				ymid - bottom);
-		_sectorWorldRects[4] = new Rectangle2D.Double(x13, bottom, x23 - x13,
-				ymid - bottom);
-		_sectorWorldRects[5] = new Rectangle2D.Double(x23, bottom, right - x23,
-				ymid - bottom);
+		_sectorWorldRects[3] = new Rectangle2D.Double(left, bottom, x13 - left, ymid - bottom);
+		_sectorWorldRects[4] = new Rectangle2D.Double(x13, bottom, x23 - x13, ymid - bottom);
+		_sectorWorldRects[5] = new Rectangle2D.Double(x23, bottom, right - x23, ymid - bottom);
 	}
 
 	/**
-	 * This adds the detector items. The AllDC view is not faithful to geometry.
-	 * All we really uses in the number of superlayers, number of layers, and
-	 * number of wires.
+	 * This adds the detector items. The AllDC view is not faithful to geometry. All
+	 * we really uses in the number of superlayers, number of layers, and number of
+	 * wires.
 	 */
 	private void addItems() {
 		// use sector 0 all the same
-		LogicalLayer detectorLayer = getContainer().getLogicalLayer(
-				_detectorLayerName);
+		LogicalLayer detectorLayer = getContainer().getLogicalLayer(_detectorLayerName);
 
 		double width = 0.92; // full width of each sector is 1.0;
 		double xo = (1.0 - width) / 2.0;
@@ -237,8 +220,7 @@ public class AllDCView extends CedView implements IAllDC {
 		double topMargin = 0.06; // will get bigger if TOF added
 		double superLayerGap = 0.02; // between superlayers
 		double regionGap = 0.04; // between regions
-		double whiteSpace = bottomMargin + topMargin + 3 * superLayerGap + 2
-				* regionGap;
+		double whiteSpace = bottomMargin + topMargin + 3 * superLayerGap + 2 * regionGap;
 		double height = (1.0 - whiteSpace) / GeoConstants.NUM_SUPERLAYER;
 
 		// cache all the superlayer items we are about to create
@@ -248,8 +230,8 @@ public class AllDCView extends CedView implements IAllDC {
 		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
 			double yo = bottomMargin;
 			for (int superLayer = 0; superLayer < GeoConstants.NUM_SUPERLAYER; superLayer++) {
-				Rectangle2D.Double wr = new Rectangle2D.Double(_xoffset[sector]
-						+ xo, _yoffset[sector] + yo, width, height);
+				Rectangle2D.Double wr = new Rectangle2D.Double(_xoffset[sector] + xo, _yoffset[sector] + yo, width,
+						height);
 
 				// note we add superlayer items with 0-based sector and
 				// superLayer
@@ -257,13 +239,11 @@ public class AllDCView extends CedView implements IAllDC {
 
 				_superLayerItems[sector][superLayer] = null;
 				if (sector < 3) {
-					_superLayerItems[sector][superLayer] = new AllDCSuperLayer(
-							detectorLayer, this, wr, sector, superLayer,
-							GeoConstants.NUM_WIRE);
+					_superLayerItems[sector][superLayer] = new AllDCSuperLayer(detectorLayer, this, wr, sector,
+							superLayer, GeoConstants.NUM_WIRE);
 				} else {
-					_superLayerItems[sector][superLayer] = new AllDCSuperLayer(
-							detectorLayer, this, wr, sector, 5 - superLayer,
-							GeoConstants.NUM_WIRE);
+					_superLayerItems[sector][superLayer] = new AllDCSuperLayer(detectorLayer, this, wr, sector,
+							5 - superLayer, GeoConstants.NUM_WIRE);
 				}
 
 				if ((superLayer % 2) == 0) {
@@ -279,10 +259,8 @@ public class AllDCView extends CedView implements IAllDC {
 	/**
 	 * Get the AllDCSuperLayer item for the given sector and superlayer.
 	 * 
-	 * @param sector
-	 *            the zero-based sector [0..5]
-	 * @param superLayer
-	 *            the zero based super layer [0..5]
+	 * @param sector     the zero-based sector [0..5]
+	 * @param superLayer the zero based super layer [0..5]
 	 * @return the AllDCSuperLayer item for the given sector and superlayer (or
 	 *         <code>null</code>).
 	 */
@@ -300,28 +278,24 @@ public class AllDCView extends CedView implements IAllDC {
 	 * Some view specific feedback. Should always call super.getFeedbackStrings
 	 * first.
 	 * 
-	 * @param container
-	 *            the base container for the view.
-	 * @param screenPoint
-	 *            the pixel point
-	 * @param worldPoint
-	 *            the corresponding world location.
+	 * @param container   the base container for the view.
+	 * @param screenPoint the pixel point
+	 * @param worldPoint  the corresponding world location.
 	 */
 	@Override
-	public void getFeedbackStrings(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
 		// get the common information
-		super.getFeedbackStrings(container, screenPoint, worldPoint,
-				feedbackStrings);
+		super.getFeedbackStrings(container, screenPoint, worldPoint, feedbackStrings);
 		// feedbackStrings.add("#DC hits: " + _numHits);
-		
+
 		int sector = getSector(container, screenPoint, worldPoint);
 
-		double totalOcc = 100.*DC.getInstance().totalOccupancy();
-		double sectorOcc = 100.*DC.getInstance().totalSectorOccupancy(sector);
-		String occStr = "Total DC occ " + DoubleFormat.doubleFormat(totalOcc, 2) + "%" + " sector " + sector +
-				" occ " + DoubleFormat.doubleFormat(sectorOcc, 2) + "%";
+		double totalOcc = 100. * DC.getInstance().totalOccupancy();
+		double sectorOcc = 100. * DC.getInstance().totalSectorOccupancy(sector);
+		String occStr = "Total DC occ " + DoubleFormat.doubleFormat(totalOcc, 2) + "%" + " sector " + sector + " occ "
+				+ DoubleFormat.doubleFormat(sectorOcc, 2) + "%";
 		feedbackStrings.add("$aqua$" + occStr);
 
 	}
@@ -329,17 +303,13 @@ public class AllDCView extends CedView implements IAllDC {
 	/**
 	 * Get the sector corresponding to the current pointer location..
 	 * 
-	 * @param container
-	 *            the base container for the view.
-	 * @param screenPoint
-	 *            the pixel point
-	 * @param worldPoint
-	 *            the corresponding world location.
+	 * @param container   the base container for the view.
+	 * @param screenPoint the pixel point
+	 * @param worldPoint  the corresponding world location.
 	 * @return the sector [1..6] or -1 for none.
 	 */
 	@Override
-	public int getSector(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint) {
+	public int getSector(IContainer container, Point screenPoint, Point2D.Double worldPoint) {
 		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
 			if (_sectorWorldRects[sector].contains(worldPoint)) {
 				return sector + 1; // convert to 1-based index
@@ -351,40 +321,35 @@ public class AllDCView extends CedView implements IAllDC {
 	/**
 	 * Get the world rectangle for a given cell (the wire is in the center)
 	 * 
-	 * @param sector
-	 *            the 1-based sector
-	 * @param superLayer
-	 *            the 1-based super layer
-	 * @param layer
-	 *            the 1-based layer [1..6]
-	 * @param wire
-	 *            the 1-based wire [1..] return the world rectangle cell for
-	 *            this layer, wire
+	 * @param sector     the 1-based sector
+	 * @param superLayer the 1-based super layer
+	 * @param layer      the 1-based layer [1..6]
+	 * @param wire       the 1-based wire [1..] return the world rectangle cell for
+	 *                   this layer, wire
 	 */
-	public void getCell(int sector, int superLayer, int layer, int wire,
-			Rectangle2D.Double wr) {
+	public void getCell(int sector, int superLayer, int layer, int wire, Rectangle2D.Double wr) {
 		_superLayerItems[sector - 1][superLayer - 1].getCell(layer, wire, wr);
 	}
-	
-	
+
 	/**
-	 * Clone the view. 
+	 * Clone the view.
+	 * 
 	 * @return the cloned view
 	 */
 	@Override
 	public BaseView cloneView() {
 		super.cloneView();
 		CLONE_COUNT++;
-		
-		//limit
+
+		// limit
 		if (CLONE_COUNT > 2) {
 			return null;
 		}
-		
+
 		Rectangle vr = getBounds();
 		vr.x += 40;
 		vr.y += 40;
-		
+
 		AllDCView view = createAllDCView();
 		view.setBounds(vr);
 		return view;
@@ -393,15 +358,17 @@ public class AllDCView extends CedView implements IAllDC {
 
 	/**
 	 * Get the underlying view
+	 * 
 	 * @return the underlying view
 	 */
 	@Override
 	public CedView getView() {
 		return this;
 	}
-	
+
 	/**
 	 * Is this the standard alldc view?
+	 * 
 	 * @return <code>true/code> if this is the standard alldc view.
 	 */
 	@Override

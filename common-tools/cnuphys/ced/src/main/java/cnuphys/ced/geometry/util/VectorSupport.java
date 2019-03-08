@@ -20,8 +20,7 @@ public class VectorSupport {
 	/**
 	 * Create a vector as a double array from its components
 	 * 
-	 * @param comp
-	 *            an arbitrary number of components
+	 * @param comp an arbitrary number of components
 	 * @return the vrctor
 	 */
 	public static double[] createVector(double... comp) {
@@ -31,8 +30,7 @@ public class VectorSupport {
 	/**
 	 * Get the square of the magnitude of the vector.
 	 * 
-	 * @param v
-	 *            the vector (of any length)
+	 * @param v the vector (of any length)
 	 * @return the square of the magnitude of the vector
 	 */
 	public static double lengthSquared(float v[]) {
@@ -50,8 +48,7 @@ public class VectorSupport {
 	/**
 	 * Get the square of the magnitude of the vector.
 	 * 
-	 * @param v
-	 *            the vector (of any length)
+	 * @param v the vector (of any length)
 	 * @return the square of the magnitude of the vector
 	 */
 	public static double lengthSquared(double v[]) {
@@ -69,8 +66,7 @@ public class VectorSupport {
 	/**
 	 * Get the magnitude of the vector.
 	 * 
-	 * @param v
-	 *            the vector (of any length)
+	 * @param v the vector (of any length)
 	 * @return the magnitude of the vector
 	 */
 	public static double length(float v[]) {
@@ -84,8 +80,7 @@ public class VectorSupport {
 	/**
 	 * Get the magnitude of the vector.
 	 * 
-	 * @param v
-	 *            the vector (of any length)
+	 * @param v the vector (of any length)
 	 * @return the magnitude of the vector
 	 */
 	public static double length(double v[]) {
@@ -99,11 +94,9 @@ public class VectorSupport {
 	/**
 	 * Set all the components
 	 * 
-	 * @param v
-	 *            the vector (of any length)
-	 * @param components
-	 *            the vector components. The number of entries should match the
-	 *            length of v.
+	 * @param v          the vector (of any length)
+	 * @param components the vector components. The number of entries should match
+	 *                   the length of v.
 	 */
 	public static void set(double v[], double... components) {
 		if ((v == null) || (components == null)) {
@@ -115,8 +108,7 @@ public class VectorSupport {
 		int clen = components.length;
 
 		if (vlen != clen) {
-			logWarning("unmatched lengths in set method. Vlen=" + vlen
-					+ " Clen=" + clen);
+			logWarning("unmatched lengths in set method. Vlen=" + vlen + " Clen=" + clen);
 		}
 
 		for (int i = 0; i < Math.min(vlen, clen); i++) {
@@ -127,10 +119,8 @@ public class VectorSupport {
 	/**
 	 * Scale the vector
 	 * 
-	 * @param v
-	 *            the vector
-	 * @param scaleFactor
-	 *            the scale factor
+	 * @param v           the vector
+	 * @param scaleFactor the scale factor
 	 */
 	public void scale(double v[], double scaleFactor) {
 
@@ -153,10 +143,8 @@ public class VectorSupport {
 	/**
 	 * Returns a string representation of the form: "(x,y,z)".
 	 * 
-	 * @param v
-	 *            the vector (of any length)
-	 * @param numDec
-	 *            the number of decimal places for each coordinate.
+	 * @param v      the vector (of any length)
+	 * @param numDec the number of decimal places for each coordinate.
 	 * @return a String representation of the vector
 	 */
 	public static String toString(double v[], int numDec) {
@@ -181,13 +169,11 @@ public class VectorSupport {
 	}
 
 	/**
-	 * Returns a string representation of the form: "(x,y,z)" using three
-	 * decimals points.
+	 * Returns a string representation of the form: "(x,y,z)" using three decimals
+	 * points.
 	 * 
-	 * @param v
-	 *            the vector (of any length)
-	 * @param numDec
-	 *            the number of decimal places for each coordinate.
+	 * @param v      the vector (of any length)
+	 * @param numDec the number of decimal places for each coordinate.
 	 * @return a String representation of the vector
 	 */
 	public static String toString(double v[]) {
@@ -197,8 +183,7 @@ public class VectorSupport {
 	/**
 	 * Obtain a unit vector in the same direction as this vector
 	 * 
-	 * @param v
-	 *            the vector (of any length)
+	 * @param v the vector (of any length)
 	 * @return a unit vector in the same direction as this vector
 	 */
 	public static double[] unitVector(double v[]) {
@@ -224,10 +209,8 @@ public class VectorSupport {
 	/**
 	 * Usual inner product
 	 * 
-	 * @param v1
-	 *            one vector on any length
-	 * @param v2
-	 *            another vector of matching length
+	 * @param v1 one vector on any length
+	 * @param v2 another vector of matching length
 	 * @return the dot product
 	 */
 	public static double dot(double[] v1, double[] v2) {
@@ -240,8 +223,7 @@ public class VectorSupport {
 		int len2 = v2.length;
 
 		if (len1 != len2) {
-			logWarning("unmatched lengths in dot (product) method. len1="
-					+ len1 + " len2=" + len2);
+			logWarning("unmatched lengths in dot (product) method. len1=" + len1 + " len2=" + len2);
 		}
 
 		double sum = 0;
@@ -253,14 +235,12 @@ public class VectorSupport {
 	}
 
 	/**
-	 * Get the vector cross product. The vectors must match and be 2D or 3D. A
-	 * 3D vector is return. For for two 2D inputs, the result look like
+	 * Get the vector cross product. The vectors must match and be 2D or 3D. A 3D
+	 * vector is return. For for two 2D inputs, the result look like
 	 * 
 	 * 
-	 * @param v1
-	 *            one vector
-	 * @param v2
-	 *            another vector
+	 * @param v1 one vector
+	 * @param v2 another vector
 	 * @return the magnitude of the cross product
 	 */
 	public static double[] cross(double[] v1, double[] v2) {
@@ -273,14 +253,12 @@ public class VectorSupport {
 		int len2 = v2.length;
 
 		if (len1 != len2) {
-			logWarning("unmatched lengths in cross (product) method. len1="
-					+ len1 + " len2=" + len2);
+			logWarning("unmatched lengths in cross (product) method. len1=" + len1 + " len2=" + len2);
 			return null;
 		}
 
 		if ((len1 < 2) || (len1 > 3)) {
-			logWarning("weird lengths in cross (product) method. len1=" + len1
-					+ " len2=" + len2);
+			logWarning("weird lengths in cross (product) method. len1=" + len1 + " len2=" + len2);
 			return null;
 		}
 
@@ -327,10 +305,8 @@ public class VectorSupport {
 	/**
 	 * Get the angle between two vectors
 	 * 
-	 * @param v1
-	 *            one vector of any length (2 or 3)
-	 * @param v2
-	 *            another vector of matching length
+	 * @param v1 one vector of any length (2 or 3)
+	 * @param v2 another vector of matching length
 	 * @return the angle between the vectors in degrees.
 	 */
 	public static double angleBetween(double[] v1, double[] v2) {
@@ -357,10 +333,8 @@ public class VectorSupport {
 	/**
 	 * Project one vector onto another vector
 	 * 
-	 * @param v
-	 *            the vector being projected
-	 * @param a
-	 *            the vector defining the projection direction.
+	 * @param v the vector being projected
+	 * @param a the vector defining the projection direction.
 	 * @return the result of projecting v in the direction of a.
 	 */
 	public static double[] project(double[] v, double[] a) {
@@ -369,8 +343,7 @@ public class VectorSupport {
 		int lena = a.length;
 
 		if (lenv != lena) {
-			logWarning("unmatched lengths in project method. lenv=" + lenv
-					+ " lena=" + lena);
+			logWarning("unmatched lengths in project method. lenv=" + lenv + " lena=" + lena);
 		}
 		int len = Math.min(lenv, lena);
 
@@ -393,10 +366,8 @@ public class VectorSupport {
 	/**
 	 * The vector difference a - b
 	 * 
-	 * @param a
-	 *            one vector
-	 * @param b
-	 *            the vector being subtracted
+	 * @param a one vector
+	 * @param b the vector being subtracted
 	 * @return the difference a - b
 	 */
 	public static double[] diff(double a[], double b[]) {
@@ -409,8 +380,7 @@ public class VectorSupport {
 		int lena = a.length;
 
 		if (lenb != lena) {
-			logWarning("unmatched lengths in project method. lena=" + lena
-					+ " lenb=" + lenb);
+			logWarning("unmatched lengths in project method. lena=" + lena + " lenb=" + lenb);
 		}
 		int len = Math.min(lenb, lena);
 		double c[] = new double[len];

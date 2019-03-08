@@ -32,13 +32,13 @@ public class SplotMenus implements ActionListener {
 	protected JMenuItem _dataItem;
 	protected JMenuItem _clearItem;
 	protected JMenuItem _curveItem;
-	
+
 	protected JCheckBoxMenuItem _showExtraCB;
-	
+
 	/**
 	 * Create a set of menus and items for sPlot
 	 * 
-	 * @param canvas the plot canvas being controlled
+	 * @param canvas  the plot canvas being controlled
 	 * @param menuBar the menu bar
 	 * @param addQuit if <code>true</code> include a quit item
 	 */
@@ -50,8 +50,8 @@ public class SplotMenus implements ActionListener {
 	/**
 	 * Create a set of menus and items for sPlot
 	 * 
-	 * @param canvas the plot canvas being controlled
-	 * @param popup a popup to hold the menus
+	 * @param canvas  the plot canvas being controlled
+	 * @param popup   a popup to hold the menus
 	 * @param addQuit if <code>true</code> include a quit item
 	 */
 	public SplotMenus(PlotCanvas canvas, JPopupMenu popup, boolean addQuit) {
@@ -68,7 +68,7 @@ public class SplotMenus implements ActionListener {
 	// make the file menu
 	protected void makeFileMenu(Container container, boolean addQuit) {
 		_fileMenu = new JMenu("File");
-		
+
 		if (addQuit) {
 //			_fileMenu.addSeparator();
 			_quitItem = addMenuItem("Quit", 'Q', _fileMenu);
@@ -92,9 +92,9 @@ public class SplotMenus implements ActionListener {
 	/**
 	 * Convenience routine for adding a menu item.
 	 * 
-	 * @param label the menu label.
+	 * @param label     the menu label.
 	 * @param accelChar the accelerator character.
-	 * @param menu the menu to add the item to.
+	 * @param menu      the menu to add the item to.
 	 */
 
 	protected JMenuItem addMenuItem(String label, char accelChar, JMenu menu) {
@@ -105,8 +105,7 @@ public class SplotMenus implements ActionListener {
 				mitem = new JMenuItem(label);
 				menu.add(mitem);
 				if (accelChar != '\0') {
-					KeyStroke keyStroke = KeyStroke
-							.getKeyStroke("control " + accelChar);
+					KeyStroke keyStroke = KeyStroke.getKeyStroke("control " + accelChar);
 					mitem.setAccelerator(keyStroke);
 				}
 
@@ -117,7 +116,7 @@ public class SplotMenus implements ActionListener {
 
 		return mitem;
 	}
-	
+
 	protected JCheckBoxMenuItem addMenuCheckBox(String label, JMenu menu, boolean selected) {
 		JCheckBoxMenuItem cb = null;
 
@@ -139,27 +138,23 @@ public class SplotMenus implements ActionListener {
 
 		if (source == _quitItem) {
 			System.exit(0);
-		}
-		else if (source == _prefItem) {
+		} else if (source == _prefItem) {
 			_plotCanvas.showPreferencesEditor();
-		}
-		else if (source == _dataItem) {
+		} else if (source == _dataItem) {
 			_plotCanvas.showDataEditor();
-		}
-		else if (source == _curveItem) {
+		} else if (source == _curveItem) {
 			CurveEditorDialog cd = new CurveEditorDialog(_plotCanvas);
 			DialogUtilities.centerDialog(cd);
 			cd.selectFirstCurve();
 			cd.setVisible(true);
-		}
-		else if (source == _clearItem) {
+		} else if (source == _clearItem) {
 			DataSet ds = _plotCanvas.getDataSet();
 			DataSetType dsType = null;
 			if (ds != null) {
 				dsType = ds.getType();
 			}
 			_plotCanvas.clearPlot();
-			
+
 			if (dsType != null) {
 				try {
 					ds = new DataSet(dsType);
@@ -168,8 +163,7 @@ public class SplotMenus implements ActionListener {
 					e1.printStackTrace();
 				}
 			}
-		}
-		else if (source == _showExtraCB) {
+		} else if (source == _showExtraCB) {
 			_plotCanvas.getParameters().setExtraDrawing(_showExtraCB.isSelected());
 			_plotCanvas.repaint();
 		}

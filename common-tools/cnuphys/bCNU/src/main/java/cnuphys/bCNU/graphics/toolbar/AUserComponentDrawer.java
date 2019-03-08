@@ -48,8 +48,7 @@ public abstract class AUserComponentDrawer extends DrawableAdapter {
 	/**
 	 * Create a User Component (on the toolbar) drawer for a given view.
 	 * 
-	 * @param view
-	 *            the view with a toolbar that has a user component.
+	 * @param view the view with a toolbar that has a user component.
 	 */
 	public AUserComponentDrawer(BaseView view) {
 		_view = view;
@@ -59,10 +58,8 @@ public abstract class AUserComponentDrawer extends DrawableAdapter {
 	/**
 	 * Draw on the component.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on the view.
+	 * @param g         the graphics context.
+	 * @param container the container on the view.
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
@@ -120,12 +117,9 @@ public abstract class AUserComponentDrawer extends DrawableAdapter {
 	/**
 	 * Draw a line for use on a toolbar user component, most likely
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param x
-	 *            the horizontal staring point
-	 * @param yc
-	 *            the central vertical position
+	 * @param g  the graphics context
+	 * @param x  the horizontal staring point
+	 * @param yc the central vertical position
 	 * @return the offset
 	 */
 	public int drawLineForLegend(Graphics g, int x, int yc, LundId lid) {
@@ -138,8 +132,7 @@ public abstract class AUserComponentDrawer extends DrawableAdapter {
 		int linelen = 30;
 
 		if ((lid != null)) {
-			GraphicsUtilities.drawHighlightedLine(g2, x, yc, x + linelen, yc,
-					style.getLineColor(),
+			GraphicsUtilities.drawHighlightedLine(g2, x, yc, x + linelen, yc, style.getLineColor(),
 					ASwimTrajectoryDrawer.getHighlightColor(lid));
 		} else {
 			g.setColor(style.getLineColor());
@@ -154,7 +147,7 @@ public abstract class AUserComponentDrawer extends DrawableAdapter {
 		g.setFont(labelFont);
 		FontMetrics fm = g.getFontMetrics(labelFont);
 		g.setColor(Color.black);
-		
+
 		int esw = 0;
 		if (lid != null) {
 			g.drawString(lid.getName(), x, yc + fm.getAscent() / 2 - 3);

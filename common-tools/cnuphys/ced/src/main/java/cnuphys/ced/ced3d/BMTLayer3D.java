@@ -20,9 +20,7 @@ public class BMTLayer3D extends DetectorItem3D {
 	protected static final Color outlineHitColor = new Color(0, 255, 64, 24);
 
 	protected static final float CROSS_LEN = 3f; // in cm
-	protected static final Color crossColor = X11Colors
-			.getX11Color("dark orange");
-
+	protected static final Color crossColor = X11Colors.getX11Color("dark orange");
 
 	// the 1=based sect
 	private int _sector;
@@ -36,21 +34,19 @@ public class BMTLayer3D extends DetectorItem3D {
 		_layer = layer;
 	}
 
-
 	@Override
 	public void drawShape(GLAutoDrawable drawable) {
 		float coords6[] = new float[6];
-		int region = (_layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+		int region = (_layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 
 		Color color = (BMTGeometry.getGeometry().isZLayer(_layer) ? X11Colors.getX11Color("gray", getVolumeAlpha())
 				: X11Colors.getX11Color("light green", getVolumeAlpha()));
 
-		
 		if (BMTGeometry.getGeometry().isZLayer(_layer)) {
 			int numStrips = Constants.getCRZNSTRIPS()[region];
 			for (int strip = 1; strip <= numStrips; strip++) {
 				BMTGeometry.getGeometry().getCRZEndPoints(_sector, _layer, strip, coords6);
-				if (!Float.isNaN(coords6[0])) {							
+				if (!Float.isNaN(coords6[0])) {
 					Support3D.drawLine(drawable, coords6, color, 2f);
 				}
 			}
@@ -59,12 +55,11 @@ public class BMTLayer3D extends DetectorItem3D {
 
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
-		
+
 		float coords6[] = new float[6];
 //		float coords36[] = new float[36];
 //		boolean drawOutline = false;
 
-		
 		AdcHitList hits = BMT.getInstance().getADCHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (AdcHit hit : hits) {
@@ -79,7 +74,7 @@ public class BMTLayer3D extends DetectorItem3D {
 							if (BMTGeometry.getGeometry().isZLayer(layer)) {
 								BMTGeometry.getGeometry().getCRZEndPoints(sector, layer, strip, coords6);
 
-								if (!Float.isNaN(coords6[0])) {							
+								if (!Float.isNaN(coords6[0])) {
 									Support3D.drawLine(drawable, coords6, dgtzColor, STRIPLINEWIDTH);
 								}
 							}
@@ -88,44 +83,38 @@ public class BMTLayer3D extends DetectorItem3D {
 					} // match sector and layer
 				} // hit not null
 			} // loop on hits
-		} //hits not null
-		
+		} // hits not null
 
 //
 //		if (drawOutline) { // if any hits, draw it once
 //			BSTGeometry.getLayerQuads(_sector, _layer, coords36);
 //			Support3D.drawQuads(drawable, coords36, outlineHitColor, 1f, true);
 //		}
-		
 
 		// reconstructed crosses?
 		if (_cedPanel3D.showReconCrosses()) {
-			
-			//BMT
+
+			// BMT
 			CrossList2 crosses = BMTCrosses.getInstance().getCrosses();
 			int len = (crosses == null) ? 0 : crosses.size();
 			for (int i = 0; i < len; i++) {
 				Cross2 cross = crosses.elementAt(i);
 				if (cross != null) {
-					//no longer convert (already in cm)
+					// no longer convert (already in cm)
 					float x1 = cross.x;
 					float y1 = cross.y;
 					float z1 = cross.z;
 
-					Support3D.drawLine(drawable, x1, y1, z1, cross.ux,
-							cross.uy, cross.uz, CROSS_LEN,
-							crossColor, 3f);
-					Support3D.drawLine(drawable, x1, y1, z1, cross.ux,
-							cross.uy, cross.uz,
-							(float) (1.1 * CROSS_LEN), Color.black, 1f);
+					Support3D.drawLine(drawable, x1, y1, z1, cross.ux, cross.uy, cross.uz, CROSS_LEN, crossColor, 3f);
+					Support3D.drawLine(drawable, x1, y1, z1, cross.ux, cross.uy, cross.uz, (float) (1.1 * CROSS_LEN),
+							Color.black, 1f);
 
 					drawCrossPoint(drawable, x1, y1, z1, crossColor);
 				}
-			} //bmt
-		
-			
-		}	
+			} // bmt
+
 		}
+	}
 
 	// show BMT?
 	@Override

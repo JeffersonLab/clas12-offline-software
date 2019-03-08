@@ -20,8 +20,8 @@ public class ExtensionFileFilter extends FileFilter implements FilenameFilter {
 
 	@Override
 	/*
-	 * Return <code>true</code> if this file should be shown in the directory
-	 * pane, <code>false</code> if it shouldn't.
+	 * Return <code>true</code> if this file should be shown in the directory pane,
+	 * <code>false</code> if it shouldn't.
 	 * 
 	 * Files that begin with "." are ignored.
 	 * 
@@ -88,10 +88,8 @@ public class ExtensionFileFilter extends FileFilter implements FilenameFilter {
 	}
 
 	/**
-	 * @param dir
-	 *            the directory in which the file was found.
-	 * @param name
-	 *            the name of the file.
+	 * @param dir  the directory in which the file was found.
+	 * @param name the name of the file.
 	 */
 	@Override
 	public boolean accept(File dir, String name) {

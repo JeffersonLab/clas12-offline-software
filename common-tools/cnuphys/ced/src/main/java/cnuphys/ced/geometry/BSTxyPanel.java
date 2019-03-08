@@ -27,12 +27,9 @@ public class BSTxyPanel implements Comparable<BSTxyPanel> {
 	/**
 	 * Create an BSTxyPanel. The panel is really just a thick line
 	 * 
-	 * @param sect
-	 *            1-based
-	 * @param lay
-	 *            1..8
-	 * @param vals
-	 *            should be an array of 10 numbers x y x y z0..z5
+	 * @param sect 1-based
+	 * @param lay  1..8
+	 * @param vals should be an array of 10 numbers x y x y z0..z5
 	 */
 	public BSTxyPanel(int sect, int lay, double vals[]) {
 		_sector = sect;
@@ -55,8 +52,7 @@ public class BSTxyPanel implements Comparable<BSTxyPanel> {
 	/**
 	 * Get the z index, 0..2 for the three sensitive areas
 	 * 
-	 * @param z
-	 *            the z value
+	 * @param z the z value
 	 * @return the z index or -1 for out of range
 	 */
 	public int getZIndex(double z) {
@@ -75,8 +71,7 @@ public class BSTxyPanel implements Comparable<BSTxyPanel> {
 	/**
 	 * Get the perpendicular distance to the panel line segment
 	 * 
-	 * @param wp
-	 *            the point in question
+	 * @param wp the point in question
 	 * @return the perpendicular distance
 	 */
 	public double pointToLineDistance(Point2D.Double wp) {
@@ -93,8 +88,8 @@ public class BSTxyPanel implements Comparable<BSTxyPanel> {
 	}
 
 	/**
-	 * the "sector" 1..max, max depends on layer, max = {10, 14, 18, 24} for
-	 * layers {(1,2), (3,4), (5,6), (7,8)} respectively
+	 * the "sector" 1..max, max depends on layer, max = {10, 14, 18, 24} for layers
+	 * {(1,2), (3,4), (5,6), (7,8)} respectively
 	 * 
 	 * @return the sector
 	 */
@@ -195,8 +190,7 @@ public class BSTxyPanel implements Comparable<BSTxyPanel> {
 	/**
 	 * Set the perp value used by the z view for ordering
 	 * 
-	 * @param perpVal
-	 *            the new perp value
+	 * @param perpVal the new perp value
 	 */
 	public void setPerp(double perpVal) {
 		perp = perpVal;

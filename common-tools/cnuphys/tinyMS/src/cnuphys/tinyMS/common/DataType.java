@@ -8,13 +8,13 @@ package cnuphys.tinyMS.common;
  */
 public enum DataType {
 
-	NO_DATA, BYTE_ARRAY, SHORT_ARRAY, INT_ARRAY, LONG_ARRAY, FLOAT_ARRAY, DOUBLE_ARRAY, STRING_ARRAY, STRING, SERIALIZED_OBJECT, STREAMED;
+	NO_DATA, BYTE_ARRAY, SHORT_ARRAY, INT_ARRAY, LONG_ARRAY, FLOAT_ARRAY, DOUBLE_ARRAY, STRING_ARRAY, STRING,
+	SERIALIZED_OBJECT, STREAMED;
 
 	/**
 	 * Obtain the name of the DataType enum from the ordinal value.
 	 * 
-	 * @param value
-	 *            the ordinal value to match.
+	 * @param value the ordinal value to match.
 	 * @return the name, or "UNKNOWN".
 	 */
 	public static String getName(int value) {
@@ -26,8 +26,7 @@ public enum DataType {
 	/**
 	 * Obtain the DataType enum from the ordinal value.
 	 * 
-	 * @param value
-	 *            the ordinal value to match.
+	 * @param value the ordinal value to match.
 	 * @return the matching enum, or <code>null</code>.
 	 */
 	public static DataType getDataType(int value) {
@@ -46,8 +45,7 @@ public enum DataType {
 	/**
 	 * Is this a valid type?
 	 * 
-	 * @param value
-	 *            the ordinal value to match.
+	 * @param value the ordinal value to match.
 	 * @return <code>true</code> if this is a valid type..
 	 */
 	public static boolean isValidDataType(int value) {

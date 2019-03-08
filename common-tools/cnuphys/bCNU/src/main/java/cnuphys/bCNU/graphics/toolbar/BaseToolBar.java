@@ -29,8 +29,7 @@ import cnuphys.bCNU.util.Fonts;
  * 
  */
 @SuppressWarnings("serial")
-public class BaseToolBar extends CommonToolBar
-		implements MouseListener, MouseMotionListener {
+public class BaseToolBar extends CommonToolBar implements MouseListener, MouseMotionListener {
 
 	public static final int ELLIPSEBUTTON = 01;
 	public static final int TEXTBUTTON = 02;
@@ -45,9 +44,9 @@ public class BaseToolBar extends CommonToolBar
 	public static final int RADARCBUTTON = 02000;
 	public static final int POLYLINEBUTTON = 04000;
 	public static final int MAGNIFYBUTTON = 010000;
-	
+
 	public static final int NOZOOM = 020000;
-	public static final int CLONEBUTTON  = 040000;
+	public static final int CLONEBUTTON = 040000;
 
 	public static final int PANBUTTON = 0100000;
 	public static final int UNDOZOOMBUTTON = 0100000;
@@ -59,20 +58,16 @@ public class BaseToolBar extends CommonToolBar
 	public static final int NOCAMERABUTTON = 020000000;
 	public static final int CENTERBUTTON = 040000000;
 
-	public static final int DRAWING = ELLIPSEBUTTON + TEXTBUTTON
-			+ RECTANGLEBUTTON + POLYGONBUTTON + LINEBUTTON + RADARCBUTTON
-			+ POLYLINEBUTTON;
+	public static final int DRAWING = ELLIPSEBUTTON + TEXTBUTTON + RECTANGLEBUTTON + POLYGONBUTTON + LINEBUTTON
+			+ RADARCBUTTON + POLYLINEBUTTON;
 
-	public static final int EVERYTHING = 07777777777 & ~NOCAMERABUTTON
-			& ~NOPRINTERBUTTON & ~NOZOOM ;
-	public static final int STANDARD = EVERYTHING & ~CONTROLPANELBUTTON
-			& ~USERCOMPONENT & ~CLONEBUTTON;
+	public static final int EVERYTHING = 07777777777 & ~NOCAMERABUTTON & ~NOPRINTERBUTTON & ~NOZOOM;
+	public static final int STANDARD = EVERYTHING & ~CONTROLPANELBUTTON & ~USERCOMPONENT & ~CLONEBUTTON;
 
 	public static final int NODRAWING = EVERYTHING & ~DRAWING;
 
 	// only the text button
-	public static final int TEXTDRAWING = STANDARD & ~DRAWING + TEXTBUTTON
-			& ~RANGEBUTTON;
+	public static final int TEXTDRAWING = STANDARD & ~DRAWING + TEXTBUTTON & ~RANGEBUTTON;
 
 	// nobuttons!
 	public static final int NOTHING = 017777777777;
@@ -81,8 +76,8 @@ public class BaseToolBar extends CommonToolBar
 	 * Text field used for messages
 	 */
 	private JTextField _textField;
-	
-	//the clone button
+
+	// the clone button
 	private CloneButton _cloneButton;
 
 	// Zoom int by a fixed percentage
@@ -182,7 +177,7 @@ public class BaseToolBar extends CommonToolBar
 	 * Create a tool bar.
 	 * 
 	 * @param container the container this toolbar controls.
-	 * @param bits controls which tools are added.
+	 * @param bits      controls which tools are added.
 	 */
 	public BaseToolBar(IContainer container, int bits) {
 		// box layout needed for user component to work
@@ -234,7 +229,7 @@ public class BaseToolBar extends CommonToolBar
 			if (Bits.checkBit(bits, PANBUTTON)) {
 				_panButton = new PanButton(_container);
 			}
-			
+
 			if (Bits.checkBit(bits, CLONEBUTTON)) {
 				_cloneButton = new CloneButton(_container);
 			}
@@ -323,12 +318,11 @@ public class BaseToolBar extends CommonToolBar
 		add(_textButton);
 		add(_deleteButton);
 		add(_rectgridButton);
-		
+
 		if (_cloneButton != null) {
 			add(Box.createHorizontalStrut(8));
 		}
 		add(_cloneButton);
-
 
 		// add the text field?
 
@@ -343,8 +337,7 @@ public class BaseToolBar extends CommonToolBar
 
 			FontMetrics fm = getFontMetrics(_textField.getFont());
 			Dimension d = _textField.getPreferredSize();
-			d.width = fm
-					.stringWidth(" ( 9999.99999 , 9999.99999 ) XXXXXXXXXXX");
+			d.width = fm.stringWidth(" ( 9999.99999 , 9999.99999 ) XXXXXXXXXXX");
 			_textField.setPreferredSize(d);
 			_textField.setMaximumSize(d);
 
@@ -388,8 +381,7 @@ public class BaseToolBar extends CommonToolBar
 
 		if (text == null) {
 			_textField.setText("");
-		}
-		else {
+		} else {
 			_textField.setText(text);
 		}
 	}
@@ -634,7 +626,7 @@ public class BaseToolBar extends CommonToolBar
 	public WorldButton getWorldButton() {
 		return _worldButton;
 	}
-	
+
 	/**
 	 * Get the toolbar's clone button.
 	 * 
@@ -643,7 +635,6 @@ public class BaseToolBar extends CommonToolBar
 	public CloneButton getCloneButton() {
 		return _cloneButton;
 	}
-
 
 	/**
 	 * Get the toolbar's zoom-in button.
@@ -664,9 +655,9 @@ public class BaseToolBar extends CommonToolBar
 	}
 
 	/**
-	 * The mouse was clicked. Note that the order the events will come is
-	 * PRESSED, RELEASED, CLICKED. And a CLICKED will happen only if the mouse
-	 * was not moved between press and release.
+	 * The mouse was clicked. Note that the order the events will come is PRESSED,
+	 * RELEASED, CLICKED. And a CLICKED will happen only if the mouse was not moved
+	 * between press and release.
 	 * 
 	 * @param mouseEvent the causal event.
 	 */
@@ -683,21 +674,17 @@ public class BaseToolBar extends CommonToolBar
 			return;
 		}
 
-		boolean mb1 = (mouseEvent.getButton() == MouseEvent.BUTTON1)
-				&& !mouseEvent.isControlDown();
+		boolean mb1 = (mouseEvent.getButton() == MouseEvent.BUTTON1) && !mouseEvent.isControlDown();
 		boolean mb3 = (mouseEvent.getButton() == MouseEvent.BUTTON3)
-				|| ((mouseEvent.getButton() == MouseEvent.BUTTON1)
-						&& mouseEvent.isControlDown());
+				|| ((mouseEvent.getButton() == MouseEvent.BUTTON1) && mouseEvent.isControlDown());
 
 		if (mb1) {
 			if (mouseEvent.getClickCount() == 1) { // single click
 				mtb.mouseClicked(mouseEvent);
-			}
-			else { // double (or more) clicks
+			} else { // double (or more) clicks
 				mtb.mouseDoubleClicked(mouseEvent);
 			}
-		}
-		else if (mb3) {
+		} else if (mb3) {
 			// mtb.mouseButton3Click(mouseEvent);
 		}
 
@@ -735,15 +722,15 @@ public class BaseToolBar extends CommonToolBar
 	}
 
 	/**
-	 * The mouse was pressed. Note that the order the events will come is
-	 * PRESSED, RELEASED, CLICKED. And a CLICKED will happen only if the mouse
-	 * was not moved between press and release.
+	 * The mouse was pressed. Note that the order the events will come is PRESSED,
+	 * RELEASED, CLICKED. And a CLICKED will happen only if the mouse was not moved
+	 * between press and release.
 	 * 
 	 * @param me the causal event.
 	 */
 	@Override
 	public void mousePressed(MouseEvent me) {
-		
+
 		if (!_container.getComponent().isEnabled()) {
 			return;
 		}
@@ -759,8 +746,7 @@ public class BaseToolBar extends CommonToolBar
 
 			// hack, if mouse button 2
 			if (mtb == _pointerButton) {
-				if ((_boxZoomButton != null)
-						&& (me.getButton() == MouseEvent.BUTTON2)) {
+				if ((_boxZoomButton != null) && (me.getButton() == MouseEvent.BUTTON2)) {
 					mtb = _boxZoomButton;
 				}
 			}
@@ -772,10 +758,10 @@ public class BaseToolBar extends CommonToolBar
 	}
 
 	/**
-	 * The mouse was clicked. Note that the order the events will come is
-	 * PRESSED, RELEASED, CLICKED. And a CLICKED will happen only if the mouse
-	 * was not moved between press and release. Also, the RELEASED will come
-	 * even if the mouse was dragged off the container.
+	 * The mouse was clicked. Note that the order the events will come is PRESSED,
+	 * RELEASED, CLICKED. And a CLICKED will happen only if the mouse was not moved
+	 * between press and release. Also, the RELEASED will come even if the mouse was
+	 * dragged off the container.
 	 * 
 	 * @param me the causal event.
 	 */
@@ -822,8 +808,8 @@ public class BaseToolBar extends CommonToolBar
 	}
 
 	/**
-	 * The mouse has moved. Note will not come here if mouse button pressed,
-	 * will go to DRAG instead.
+	 * The mouse has moved. Note will not come here if mouse button pressed, will go
+	 * to DRAG instead.
 	 * 
 	 * @param me the causal event.
 	 */
@@ -900,12 +886,11 @@ public class BaseToolBar extends CommonToolBar
 	 * Add the lasso button
 	 * 
 	 * @param lassoListener will respond to the lasso selections
-	 * @param xormode will cause the lasso to rubberband in simpler xormode.
-	 *            This works better for 3D containers.
+	 * @param xormode       will cause the lasso to rubberband in simpler xormode.
+	 *                      This works better for 3D containers.
 	 */
 	public void addLassoButton(ILassoListener lassoListener, boolean xormode) {
-		_lassoRectButton = new LassoRectButton(_container, lassoListener,
-				xormode);
+		_lassoRectButton = new LassoRectButton(_container, lassoListener, xormode);
 		add(_lassoRectButton);
 	}
 
@@ -913,13 +898,11 @@ public class BaseToolBar extends CommonToolBar
 	 * Add the funnellasso button
 	 * 
 	 * @param lassoListener will respond to the funnel lasso selections
-	 * @param xormode will cause the funnel lasso to rubberband in simpler
-	 *            xormode. This works better for 3D containers.
+	 * @param xormode       will cause the funnel lasso to rubberband in simpler
+	 *                      xormode. This works better for 3D containers.
 	 */
-	public void addFunnelLassoButton(ILassoListener lassoListener,
-			boolean xormode) {
-		_funnellassoRectButton = new FunnelLassoRectButton(_container,
-				lassoListener, xormode);
+	public void addFunnelLassoButton(ILassoListener lassoListener, boolean xormode) {
+		_funnellassoRectButton = new FunnelLassoRectButton(_container, lassoListener, xormode);
 		add(_funnellassoRectButton);
 	}
 

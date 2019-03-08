@@ -40,9 +40,9 @@ public class Tracker extends Thread {
 
 	/**
 	 * The run method. It will keep trying to deque a new job. If none are
-	 * available, the thread will stop (because of the wait in the jobQueue's
-	 * get method. When a job is added, this thread will wake up because of the
-	 * notify call in the jobQueue's put method.
+	 * available, the thread will stop (because of the wait in the jobQueue's get
+	 * method. When a job is added, this thread will wake up because of the notify
+	 * call in the jobQueue's put method.
 	 */
 	@Override
 	public void run() {
@@ -54,14 +54,12 @@ public class Tracker extends Thread {
 
 			// notify listeners that a run completed
 
-			notifyTrackerListeners(runnable,
-					TrackerEvent.TrackerEventType.RUNCOMPLETED);
+			notifyTrackerListeners(runnable, TrackerEvent.TrackerEventType.RUNCOMPLETED);
 
 			// if empty, notify listeners that all runs completed
 
 			if (jobQueue.isEmpty()) {
-				notifyTrackerListeners(null,
-						TrackerEvent.TrackerEventType.ALLRUNSCOMPLETED);
+				notifyTrackerListeners(null, TrackerEvent.TrackerEventType.ALLRUNSCOMPLETED);
 			}
 		}
 	}
@@ -69,13 +67,10 @@ public class Tracker extends Thread {
 	/**
 	 * Notify interested parties that a tracker event occurred.
 	 * 
-	 * @param runnable
-	 *            the runnable that finished, or null if all finished.
-	 * @param type
-	 *            the type of event.
+	 * @param runnable the runnable that finished, or null if all finished.
+	 * @param type     the type of event.
 	 */
-	public void notifyTrackerListeners(Runnable runnable,
-			TrackerEvent.TrackerEventType type) {
+	public void notifyTrackerListeners(Runnable runnable, TrackerEvent.TrackerEventType type) {
 
 		TrackerEvent te = new TrackerEvent(type, runnable);
 
@@ -100,8 +95,7 @@ public class Tracker extends Thread {
 	/**
 	 * Add a TrackerListener.
 	 * 
-	 * @param tl
-	 *            the TrackerListener to add.
+	 * @param tl the TrackerListener to add.
 	 */
 	public void addTrackerListener(ITrackerListener tl) {
 
@@ -119,8 +113,7 @@ public class Tracker extends Thread {
 	/**
 	 * Remove a TrackerListener.
 	 * 
-	 * @param tl
-	 *            the TrackerListener to remove.
+	 * @param tl the TrackerListener to remove.
 	 */
 
 	public void removeTrackerListener(ITrackerListener tl) {
@@ -133,8 +126,8 @@ public class Tracker extends Thread {
 	}
 
 	/**
-	 * Starts the thread. Does nothing if already running, as indicated by the
-	 * run flag.
+	 * Starts the thread. Does nothing if already running, as indicated by the run
+	 * flag.
 	 */
 	@Override
 	public void start() {

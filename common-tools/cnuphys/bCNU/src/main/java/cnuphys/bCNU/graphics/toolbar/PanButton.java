@@ -28,8 +28,7 @@ public class PanButton extends ToolBarToggleButton {
 	/**
 	 * Create a button for panning the container.
 	 * 
-	 * @param container
-	 *            the owner container.
+	 * @param container the owner container.
 	 */
 	public PanButton(IContainer container) {
 		super(container, "images/pan.gif", "Pan the view");
@@ -44,10 +43,8 @@ public class PanButton extends ToolBarToggleButton {
 			pan_x = startx;
 			pan_y = starty;
 
-			baseimage = GraphicsUtilities.getComponentImage(container
-					.getComponent());
-			image = GraphicsUtilities.getComponentImageBuffer(container
-					.getComponent());
+			baseimage = GraphicsUtilities.getComponentImage(container.getComponent());
+			image = GraphicsUtilities.getComponentImageBuffer(container.getComponent());
 			return;
 		}
 
@@ -57,10 +54,8 @@ public class PanButton extends ToolBarToggleButton {
 	/**
 	 * Updates the results of a pan.
 	 * 
-	 * @param mouseEvent
-	 *            the new current location.
-	 * @param container
-	 *            the container.
+	 * @param mouseEvent the new current location.
+	 * @param container  the container.
 	 */
 	public void update(MouseEvent mouseEvent, IContainer container) {
 
@@ -79,8 +74,7 @@ public class PanButton extends ToolBarToggleButton {
 			Graphics gg = image.getGraphics();
 			gg.setColor(container.getComponent().getBackground());
 			gg.fillRect(0, 0, image.getWidth(), image.getHeight());
-			gg.drawImage(baseimage, total_dx, total_dy,
-					container.getComponent());
+			gg.drawImage(baseimage, total_dx, total_dy, container.getComponent());
 			gg.dispose();
 
 			Graphics g = container.getComponent().getGraphics();
@@ -94,8 +88,7 @@ public class PanButton extends ToolBarToggleButton {
 	/**
 	 * Local pan method
 	 * 
-	 * @param mouseEvent
-	 *            the causal event.
+	 * @param mouseEvent the causal event.
 	 */
 	private void pan(MouseEvent mouseEvent) {
 		if (startx < -99999) {
@@ -126,8 +119,7 @@ public class PanButton extends ToolBarToggleButton {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
+	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
 	 */
 	@Override
 	public void mouseReleased(MouseEvent mouseEvent) {

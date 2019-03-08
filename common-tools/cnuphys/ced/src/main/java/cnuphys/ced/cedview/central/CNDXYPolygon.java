@@ -31,36 +31,33 @@ public class CNDXYPolygon extends Polygon {
 	 * The paddleId 1..48
 	 */
 	public int paddleId;
-	
+
 	private static final Color _navy = X11Colors.getX11Color("navy");
 	private static final Color _powder = X11Colors.getX11Color("powder blue");
-	
-	private static Font _font = Fonts.hugeFont;
-	
-	//"REAL" numbering
-	int sector; //1..24
-	int _leftRight; //1..2
 
+	private static Font _font = Fonts.hugeFont;
+
+	// "REAL" numbering
+	int sector; // 1..24
+	int _leftRight; // 1..2
 
 	private ScintillatorPaddle paddle;
 
 	/**
 	 * Create a XY Polygon for the CND
 	 * 
-	 * @param layer
-	 *            the layer 1..3
-	 * @param paddleId
-	 *            the paddle ID 1..48
+	 * @param layer    the layer 1..3
+	 * @param paddleId the paddle ID 1..48
 	 */
 	public CNDXYPolygon(int layer, int paddleId) {
 		this.layer = layer;
 		this.paddleId = paddleId;
 		paddle = CNDGeometry.getPaddle(layer, paddleId);
-		
+
 		int real[] = new int[3];
-		int geo[] ={1, layer, paddleId};
+		int geo[] = { 1, layer, paddleId };
 		CNDGeometry.geoTripletToRealTriplet(geo, real);
-		
+
 		sector = real[0];
 		_leftRight = real[2];
 	}
@@ -68,33 +65,28 @@ public class CNDXYPolygon extends Polygon {
 	/**
 	 * Draw the polygon
 	 * 
-	 * @param g
-	 *            the graphics object
-	 * @param container
-	 *            the drawing container
+	 * @param g         the graphics object
+	 * @param container the drawing container
 	 */
 	public void draw(Graphics g, IContainer container) {
 		draw(g, container, CedXYView.LIGHT, Color.black);
 	}
-	
+
 	/**
 	 * Draw the polygon
 	 * 
-	 * @param g
-	 *            the graphics object
-	 * @param container
-	 *            the drawing container
+	 * @param g         the graphics object
+	 * @param container the drawing container
 	 */
 	public void draw(Graphics g, IContainer container, Color fillColor, Color lineColor) {
 		reset();
 		Point pp = new Point();
-		
+
 		Point2D.Double wp[] = new Point2D.Double[4];
-		
+
 		for (int i = 0; i < 4; i++) {
 			// convert cm to mm
-			wp[i] = new Point2D.Double(10 * paddle.getVolumePoint(i).x(),
-					10 * paddle.getVolumePoint(i).y());
+			wp[i] = new Point2D.Double(10 * paddle.getVolumePoint(i).x(), 10 * paddle.getVolumePoint(i).y());
 			container.worldToLocal(pp, wp[i]);
 
 			addPoint(pp.x, pp.y);
@@ -106,15 +98,15 @@ public class CNDXYPolygon extends Polygon {
 		}
 		g.setColor(lineColor);
 		g.drawPolygon(this);
-		
+
 		if ((_leftRight == 1) && (layer == 2)) {
 			Point2D.Double centroid = WorldGraphicsUtilities.getCentroid(wp);
 			container.worldToLocal(pp, centroid);
 			g.setColor(_powder);
 			g.setFont(_font);
-			g.drawString("" + sector, pp.x-6, pp.y+6);
+			g.drawString("" + sector, pp.x - 6, pp.y + 6);
 			g.setColor(_navy);
-			g.drawString("" + sector, pp.x-5, pp.y+7);
+			g.drawString("" + sector, pp.x - 5, pp.y + 7);
 
 		}
 
@@ -122,18 +114,18 @@ public class CNDXYPolygon extends Polygon {
 
 	/**
 	 * Get the feedback strings
-	 * @param container the cdrawing container
-	 * @param screenPoint the mouse location
-	 * @param worldPoint the corresponding world point
+	 * 
+	 * @param container       the cdrawing container
+	 * @param screenPoint     the mouse location
+	 * @param worldPoint      the corresponding world point
 	 * @param feedbackStrings where to add the strings
-	 * @return true 
+	 * @return true
 	 */
-	public boolean getFeedbackStrings(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public boolean getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
-		
 		CND cnd = CND.getInstance();
-		
+
 		if (!contains(screenPoint)) {
 			return false;
 		}
@@ -177,11 +169,11 @@ public class CNDXYPolygon extends Polygon {
 					}
 				}
 			}
-		} else { //accumulated
+		} else { // accumulated
 
 			int[][][] cndAccumData = AccumulationManager.getInstance().getAccumulatedCNDData();
-			int count = cndAccumData[sector-1][layer-1][_leftRight-1];
-			fbString("cyan", "accumulated count " + count, feedbackStrings);			//TODO FINISH
+			int count = cndAccumData[sector - 1][layer - 1][_leftRight - 1];
+			fbString("cyan", "accumulated count " + count, feedbackStrings); // TODO FINISH
 		}
 
 		return true;

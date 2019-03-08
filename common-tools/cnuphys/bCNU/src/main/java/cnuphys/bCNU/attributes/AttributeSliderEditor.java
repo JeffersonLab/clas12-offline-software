@@ -4,17 +4,15 @@ import javax.swing.JSlider;
 
 public class AttributeSliderEditor extends AttributeEditor<JSlider> {
 
-	
 	/**
 	 * Create an Boolean editor.
 	 * 
 	 * @param attributeTable the owner table.
-	 * @param attribute the attribute
+	 * @param attribute      the attribute
 	 */
-	public AttributeSliderEditor(AttributeTable attributeTable,
-			Attribute attribute) {
+	public AttributeSliderEditor(AttributeTable attributeTable, Attribute attribute) {
 
-		super(attributeTable, attribute, (JSlider)(attribute.getValue()));
+		super(attributeTable, attribute, (JSlider) (attribute.getValue()));
 
 		if ((attributeTable == null) || (attribute == null)) {
 			return;

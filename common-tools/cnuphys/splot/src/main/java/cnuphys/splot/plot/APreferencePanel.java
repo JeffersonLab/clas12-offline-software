@@ -19,7 +19,7 @@ public abstract class APreferencePanel extends JPanel implements KeyListener {
 	/**
 	 * Create a panel for use in editing plot preferences
 	 * 
-	 * @param canvas the plot canvas
+	 * @param canvas  the plot canvas
 	 * @param tabname the name that will appear on the editor tab
 	 */
 	public APreferencePanel(PlotCanvas canvas, String tabname) {

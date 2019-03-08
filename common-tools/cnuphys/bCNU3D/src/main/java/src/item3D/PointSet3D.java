@@ -17,20 +17,19 @@ public class PointSet3D extends Item3D {
 
 	// the point size
 	private float _pointSize;
-	
-	//draw circular points?
+
+	// draw circular points?
 	private boolean _circular;
 
 	/**
 	 * Create a set of same color and size points for use on a Panel3D.
 	 * 
-	 * @param panel3D the owner 3D panel
-	 * @param coords the points as [x1, y1, z1, ..., xn, yn, zn]
-	 * @param color the color of the points
+	 * @param panel3D   the owner 3D panel
+	 * @param coords    the points as [x1, y1, z1, ..., xn, yn, zn]
+	 * @param color     the color of the points
 	 * @param pointSize the drawing size of the points
 	 */
-	public PointSet3D(Panel3D panel3D, float[] coords, Color color,
-			float pointSize, boolean circular) {
+	public PointSet3D(Panel3D panel3D, float[] coords, Color color, float pointSize, boolean circular) {
 		super(panel3D);
 		_coords = coords;
 		_color = color;
@@ -42,7 +41,7 @@ public class PointSet3D extends Item3D {
 	public void draw(GLAutoDrawable drawable) {
 		Support3D.drawPoints(drawable, _coords, _color, _pointSize, _circular);
 	}
-	
+
 	public void setCoords(float[] coords) {
 		_coords = coords;
 	}

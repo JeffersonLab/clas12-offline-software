@@ -13,8 +13,8 @@ public class Ising2DDialog extends SimpleDialog {
 	}
 
 	/**
-	 * Override to create the component that goes in the center. Usually this is
-	 * the "main" component.
+	 * Override to create the component that goes in the center. Usually this is the
+	 * "main" component.
 	 * 
 	 * @return the component that is placed in the center
 	 */
@@ -26,8 +26,7 @@ public class Ising2DDialog extends SimpleDialog {
 
 		return i2dPanel;
 	}
-	
-	
+
 	public static void main(String arg[]) {
 		Ising2DDialog dialog = new Ising2DDialog();
 		dialog.setVisible(true);

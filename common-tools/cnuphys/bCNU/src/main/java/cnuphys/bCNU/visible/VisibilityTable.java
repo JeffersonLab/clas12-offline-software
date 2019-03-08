@@ -35,10 +35,8 @@ public class VisibilityTable extends JTable implements ItemListener {
 	/**
 	 * Create a table for toggling visibility (probably of logical layers)
 	 * 
-	 * @param container
-	 *            container holding the list of drawables (prpbably layers)
-	 * @param visList
-	 *            the list of drawables
+	 * @param container container holding the list of drawables (prpbably layers)
+	 * @param visList   the list of drawables
 	 */
 	public VisibilityTable(IContainer container, Vector<IDrawable> visList) {
 		super(new VisibilityTableModel(visList));
@@ -66,9 +64,8 @@ public class VisibilityTable extends JTable implements ItemListener {
 		// check box renderer
 		DefaultTableCellRenderer checkBoxRenderer = new DefaultTableCellRenderer() {
 			@Override
-			public Component getTableCellRendererComponent(JTable table,
-					Object value, boolean isSelected, boolean hasFocus,
-					int row, int column) {
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+					boolean hasFocus, int row, int column) {
 				JCheckBox cb = new JCheckBox();
 				cb.setSelected((Boolean) value);
 				cb.setBackground(Color.white);
@@ -81,8 +78,7 @@ public class VisibilityTable extends JTable implements ItemListener {
 		// change renderer for value column
 		JCheckBox cb = new JCheckBox();
 		cb.addItemListener(this);
-		TableColumn column = getColumnModel().getColumn(
-				VisibilityTableModel.DISPLAY_VALUE);
+		TableColumn column = getColumnModel().getColumn(VisibilityTableModel.DISPLAY_VALUE);
 		column.setCellRenderer(checkBoxRenderer);
 		column.setCellEditor(new DefaultCellEditor(cb));
 
@@ -90,8 +86,7 @@ public class VisibilityTable extends JTable implements ItemListener {
 
 		IconTableCellRenderer itcr = new IconTableCellRenderer();
 
-		TableColumn column2 = getColumnModel().getColumn(
-				VisibilityTableModel.ENABLED);
+		TableColumn column2 = getColumnModel().getColumn(VisibilityTableModel.ENABLED);
 		column2.setCellRenderer(itcr);
 
 		// no reordering
@@ -130,8 +125,7 @@ public class VisibilityTable extends JTable implements ItemListener {
 	/**
 	 * One of the vis toggles has changed. Refresh the container.
 	 * 
-	 * @param e
-	 *            the causal event
+	 * @param e the causal event
 	 */
 	@Override
 	public void itemStateChanged(ItemEvent e) {
@@ -181,8 +175,7 @@ public class VisibilityTable extends JTable implements ItemListener {
 			} else if (contents.isDataFlavorSupported(DataFlavor.stringFlavor)) {
 				int newRow = getSelectedRow();
 				try {
-					String layerName = (String) contents
-							.getTransferData(DataFlavor.stringFlavor);
+					String layerName = (String) contents.getTransferData(DataFlavor.stringFlavor);
 					vistable.reorderTable(layerName, newRow);
 				} catch (Throwable e) {
 					e.printStackTrace();

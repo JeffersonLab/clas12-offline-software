@@ -21,8 +21,7 @@ public class BSTPanel3D extends DetectorItem3D {
 	protected static final Color outlineHitColor = new Color(0, 255, 64, 24);
 
 	protected static final float CROSS_LEN = 3f; // in cm
-	protected static final Color crossColor = X11Colors
-			.getX11Color("dark green");
+	protected static final Color crossColor = X11Colors.getX11Color("dark green");
 
 	// the 1=based sect
 	private int _sector;
@@ -43,18 +42,17 @@ public class BSTPanel3D extends DetectorItem3D {
 		BSTGeometry.getLayerQuads(_sector, _layer, coords);
 
 		Color color = ((_layer % 2) == 0) ? X11Colors.getX11Color("coral", getVolumeAlpha())
-			: X11Colors.getX11Color("Powder Blue", getVolumeAlpha());
+				: X11Colors.getX11Color("Powder Blue", getVolumeAlpha());
 		Support3D.drawQuads(drawable, coords, color, 1f, true);
 	}
 
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
-		
+
 		float coords6[] = new float[6];
 		float coords36[] = new float[36];
 		boolean drawOutline = false;
 
-		
 		AdcHitList hits = BST.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (AdcHit hit : hits) {
@@ -65,27 +63,24 @@ public class BSTPanel3D extends DetectorItem3D {
 						drawOutline = true;
 						int strip = hit.component;
 						BSTGeometry.getStrip(sector, layer, strip, coords6);
-						
+
 						if (showHits()) {
 							Support3D.drawLine(drawable, coords6, dgtzColor, STRIPLINEWIDTH);
 						}
 
-					}  //match sector and layer
-				}  //hit not null
-			} //loop on hits
-		} //hits not null
-		
-
+					} // match sector and layer
+				} // hit not null
+			} // loop on hits
+		} // hits not null
 
 		if (drawOutline) { // if any hits, draw it once
 			BSTGeometry.getLayerQuads(_sector, _layer, coords36);
 			Support3D.drawQuads(drawable, coords36, outlineHitColor, 1f, true);
 		}
-		
 
 		// reconstructed crosses?
 		if (_cedPanel3D.showReconCrosses()) {
-			//BST
+			// BST
 			CrossList2 crosses = BSTCrosses.getInstance().getCrosses();
 			int len = (crosses == null) ? 0 : crosses.size();
 			for (int i = 0; i < len; i++) {
@@ -96,25 +91,21 @@ public class BSTPanel3D extends DetectorItem3D {
 					float y1 = cross.y;
 					float z1 = cross.z;
 
-					Support3D.drawLine(drawable, x1, y1, z1, cross.ux,
-							cross.uy, cross.uz, CROSS_LEN,
-							crossColor, 3f);
-					Support3D.drawLine(drawable, x1, y1, z1, cross.ux,
-							cross.uy, cross.uz,
-							(float) (1.1 * CROSS_LEN), Color.black, 1f);
+					Support3D.drawLine(drawable, x1, y1, z1, cross.ux, cross.uy, cross.uz, CROSS_LEN, crossColor, 3f);
+					Support3D.drawLine(drawable, x1, y1, z1, cross.ux, cross.uy, cross.uz, (float) (1.1 * CROSS_LEN),
+							Color.black, 1f);
 
 					drawCrossPoint(drawable, x1, y1, z1, crossColor);
 				}
-			} //svt
-			
-			
+			} // svt
+
 		}
-		
-		//cosmics?
+
+		// cosmics?
 		if (_cedPanel3D.showCosmics()) {
 			CosmicList cosmics;
 			cosmics = Cosmics.getInstance().getCosmics();
-			
+
 			if ((cosmics != null) && !cosmics.isEmpty()) {
 				for (Cosmic cosmic : cosmics) {
 					float y1 = 1000;
@@ -123,26 +114,24 @@ public class BSTPanel3D extends DetectorItem3D {
 					float x2 = cosmic.trkline_yx_slope * y2 + cosmic.trkline_yx_interc;
 					float z1 = cosmic.trkline_yz_slope * y1 + cosmic.trkline_yz_interc;
 					float z2 = cosmic.trkline_yz_slope * y2 + cosmic.trkline_yz_interc;
-					
-					//no longer have to convert to cm?
-					
+
+					// no longer have to convert to cm?
+
 //					x1 /= 10;
 //					x2 /= 10;
 //					y1 /= 10;
 //					y2 /= 10;
 //					z1 /= 10;
 //					z2 /= 10;
-					
+
 					Support3D.drawLine(drawable, x1, y1, z1, x2, y2, z2, Color.red, 1f);
 
 				}
 			}
 
 		}
-		
 
-		
-		//cosmics
+		// cosmics
 
 	}
 

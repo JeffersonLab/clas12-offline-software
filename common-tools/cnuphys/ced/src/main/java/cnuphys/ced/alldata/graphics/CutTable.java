@@ -17,15 +17,12 @@ import javax.swing.table.TableColumn;
 public class CutTable extends JTable implements ItemListener {
 
 	private DefaultTableCellRenderer def_renderer = new DefaultTableCellRenderer();
-	
 
 	/**
 	 * Create a table for toggling activity of plot cuts
 	 * 
-	 * @param container
-	 *            container holding the list of drawables (prpbably layers)
-	 * @param cutList
-	 *            the list of iCuts
+	 * @param container container holding the list of drawables (prpbably layers)
+	 * @param cutList   the list of iCuts
 	 */
 	public CutTable(Vector<ICut> cutList) {
 		super(new CutTableModel(cutList));
@@ -49,9 +46,8 @@ public class CutTable extends JTable implements ItemListener {
 		// check box renderer
 		final DefaultTableCellRenderer checkBoxRenderer = new DefaultTableCellRenderer() {
 			@Override
-			public Component getTableCellRendererComponent(JTable table,
-					Object value, boolean isSelected, boolean hasFocus,
-					int row, int column) {
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+					boolean hasFocus, int row, int column) {
 				JCheckBox cb = new JCheckBox();
 				cb.setSelected((Boolean) value);
 				cb.setBackground(Color.white);
@@ -64,8 +60,7 @@ public class CutTable extends JTable implements ItemListener {
 		// change renderer for active column
 		JCheckBox cb = new JCheckBox();
 		cb.addItemListener(this);
-		TableColumn column = getColumnModel().getColumn(
-				CutTableModel.ACTIVE);
+		TableColumn column = getColumnModel().getColumn(CutTableModel.ACTIVE);
 		column.setCellRenderer(checkBoxRenderer);
 		column.setCellEditor(new DefaultCellEditor(cb));
 
@@ -81,12 +76,10 @@ public class CutTable extends JTable implements ItemListener {
 	/**
 	 * One of the vis toggles has changed. Refresh the container.
 	 * 
-	 * @param e
-	 *            the causal event
+	 * @param e the causal event
 	 */
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 	}
-
 
 }

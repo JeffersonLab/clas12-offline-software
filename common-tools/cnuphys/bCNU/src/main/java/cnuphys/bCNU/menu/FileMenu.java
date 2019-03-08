@@ -43,8 +43,8 @@ public class FileMenu extends JMenu {
 		};
 
 		JMenuItem item = new JMenuItem("Save View Configuration...");
-		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit
-				.getDefaultToolkit().getMenuShortcutKeyMask()));
+		item.setAccelerator(
+				KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		item.addActionListener(al);
 		add(item);
 	}
@@ -61,8 +61,8 @@ public class FileMenu extends JMenu {
 		};
 
 		JMenuItem item = new JMenuItem("Delete View Configuration");
-		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, Toolkit
-				.getDefaultToolkit().getMenuShortcutKeyMask()));
+		item.setAccelerator(
+				KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		item.addActionListener(al);
 		add(item);
 	}
@@ -78,8 +78,8 @@ public class FileMenu extends JMenu {
 		};
 
 		JMenuItem item = new JMenuItem("Quit");
-		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, Toolkit
-				.getDefaultToolkit().getMenuShortcutKeyMask()));
+		item.setAccelerator(
+				KeyStroke.getKeyStroke(KeyEvent.VK_Q, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		item.addActionListener(al);
 		add(item);
 	}

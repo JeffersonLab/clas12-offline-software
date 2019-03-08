@@ -69,8 +69,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 	 * Create a canvas
 	 * 
 	 * @param xmin
-	 * @param perpMin
-	 *            min value in direction perpendicular to z (the beam direction)
+	 * @param perpMin min value in direction perpendicular to z (the beam direction)
 	 * @param width
 	 * @param height
 	 */
@@ -103,7 +102,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 
 		};
 		MagneticFields.getInstance().addMagneticFieldChangeListener(mflistener);
-		
+
 		new ComponentZoomer(this);
 	}
 
@@ -151,8 +150,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 	/**
 	 * Draw a single trajectory
 	 * 
-	 * @param g
-	 *            the graphics context
+	 * @param g      the graphics context
 	 * @param bounds
 	 */
 	protected void drawTrajectories(Graphics g, Rectangle bounds) {
@@ -442,14 +440,11 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 		}
 	}
 
-
 	/**
 	 * This converts a screen or pixel point to a world point.
 	 * 
-	 * @param pp
-	 *            contains the local (screen-pixel) point.
-	 * @param wp
-	 *            will hold the resultant world point.
+	 * @param pp contains the local (screen-pixel) point.
+	 * @param wp will hold the resultant world point.
 	 */
 	@Override
 	public void localToWorld(Point pp, Point.Double wp) {
@@ -461,10 +456,8 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 	/**
 	 * This converts a world point to a screen or pixel point.
 	 * 
-	 * @param pp
-	 *            will hold the resultant local (screen-pixel) point.
-	 * @param wp
-	 *            contains world point.
+	 * @param pp will hold the resultant local (screen-pixel) point.
+	 * @param wp contains world point.
 	 */
 	@Override
 	public void worldToLocal(Point pp, Point.Double wp) {
@@ -650,7 +643,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 	@Override
 	public void setWorldSystem(Double wr) {
 		_worldSystem.setRect(wr.x, wr.y, wr.width, wr.height);
-		
+
 	}
 
 }

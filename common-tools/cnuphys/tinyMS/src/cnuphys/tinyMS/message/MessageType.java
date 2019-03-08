@@ -16,9 +16,10 @@ package cnuphys.tinyMS.message;
  * removed. Other clients will be notified that the client has left.
  * <li><code>PING</code> Pings originate from the server side and are sent to
  * every client at an interval of TinyMessageServer.PINGINTERVAL in milliseconds
- * (now set at 5000, or 5 seconds).
- * * <li><code>SERVERLOG</code> Used by a client to send a message to the server for logging
- <li><code>SHUTDOWN</code> This is the server telling a client to shut down
+ * (now set at 5000, or 5 seconds). *
+ * <li><code>SERVERLOG</code> Used by a client to send a message to the server
+ * for logging
+ * <li><code>SHUTDOWN</code> This is the server telling a client to shut down
  * </ul>
  * 
  * @author heddle
@@ -31,8 +32,7 @@ public enum MessageType {
 	/**
 	 * Obtain the name from the value.
 	 * 
-	 * @param value
-	 *            the value to match.
+	 * @param value the value to match.
 	 * @return the name, or "UNKNOWN".
 	 */
 	public static String getName(int value) {
@@ -44,8 +44,7 @@ public enum MessageType {
 	/**
 	 * Obtain the enum from the value.
 	 * 
-	 * @param value
-	 *            the ordinal value to match.
+	 * @param value the ordinal value to match.
 	 * @return the matching enum, or <code>null</code>.
 	 */
 	public static MessageType getMessageType(int value) {
@@ -64,8 +63,7 @@ public enum MessageType {
 	/**
 	 * Is this a valid message type?
 	 * 
-	 * @param value
-	 *            the value to match.
+	 * @param value the value to match.
 	 * @return <code>true</code> if this is a valid type.
 	 */
 	public static boolean isValidMessageType(int value) {

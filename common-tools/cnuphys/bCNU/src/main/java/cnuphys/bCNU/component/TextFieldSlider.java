@@ -36,9 +36,8 @@ public abstract class TextFieldSlider extends JPanel implements ChangeListener {
 
 	private int _defaultValue;
 
-	public TextFieldSlider(int min, int max, int value, Font font,
-			int minorTickSpacing, String labels[], int sliderWidth,
-			int textFieldWidth, String borderTitle) {
+	public TextFieldSlider(int min, int max, int value, Font font, int minorTickSpacing, String labels[],
+			int sliderWidth, int textFieldWidth, String borderTitle) {
 		_defaultValue = value;
 		_slider = new JSlider(SwingConstants.HORIZONTAL, min, max, value);
 		_slider.addChangeListener(this);
@@ -123,9 +122,9 @@ public abstract class TextFieldSlider extends JPanel implements ChangeListener {
 	}
 
 	/**
-	 * Take the current slider value and convert in to the real value. This
-	 * allows, for example, to have a slider range of 0 to 100 mapped to a
-	 * real-valued range that is not even necessarily linear.
+	 * Take the current slider value and convert in to the real value. This allows,
+	 * for example, to have a slider range of 0 to 100 mapped to a real-valued range
+	 * that is not even necessarily linear.
 	 * 
 	 * @return the real value corresponding to the current slider value.
 	 */
@@ -136,25 +135,23 @@ public abstract class TextFieldSlider extends JPanel implements ChangeListener {
 	 * example, to have a slider range of 0 to 100 mapped to a real-valued range
 	 * that is not even necessarily linear.
 	 * 
-	 * @param val
-	 *            the real value to convert.
-	 * @return the corresponding slider value. (The slider is not automatically
-	 *         set to this value)
+	 * @param val the real value to convert.
+	 * @return the corresponding slider value. (The slider is not automatically set
+	 *         to this value)
 	 */
 	public abstract int realValueToSliderValue(double val);
 
 	/**
 	 * Convert format real value into a display string
 	 * 
-	 * @param val
-	 *            the value to format
+	 * @param val the value to format
 	 * @return the formatted value
 	 */
 	public abstract String valueString(double val);
 
 	/**
-	 * This is called when the value changes, with by the slider or by entrring
-	 * text into the text field and hitting return.
+	 * This is called when the value changes, with by the slider or by entrring text
+	 * into the text field and hitting return.
 	 */
 	public abstract void valueChanged();
 
@@ -179,8 +176,7 @@ public abstract class TextFieldSlider extends JPanel implements ChangeListener {
 	/**
 	 * Convenience method to set the slider value
 	 * 
-	 * @param val
-	 *            the value to set
+	 * @param val the value to set
 	 */
 	public void setValue(int val) {
 		_slider.setValue(val);

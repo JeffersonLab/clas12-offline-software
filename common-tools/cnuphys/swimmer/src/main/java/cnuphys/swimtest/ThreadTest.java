@@ -10,16 +10,13 @@ import cnuphys.swim.Swimmer;
 
 public class ThreadTest {
 
-	
-	//test many points on different threads
+	// test many points on different threads
 	public static void threadTest(final int num, final int numThread) {
-		
+
 		SwimTest.memoryReport("staring thread test");
-		
+
 		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
 
-
-		
 		Runnable runnable = new Runnable() {
 
 			@Override
@@ -29,7 +26,7 @@ public class ThreadTest {
 				long seed = 5347632765L;
 
 				Random rand = new Random(seed);
-				
+
 				double hdata[] = new double[3];
 
 				long time = System.currentTimeMillis();
@@ -42,7 +39,7 @@ public class ThreadTest {
 				int charge = -1;
 
 				for (int i = 0; i < num; i++) {
-					
+
 					if ((i % 20) == 0) {
 						System.err.println(Thread.currentThread().getName() + "[" + i + "]");
 					}
@@ -55,14 +52,14 @@ public class ThreadTest {
 					try {
 						traj = swimmer.swim(charge, x0, y0, z0, pTot, theta, phi, z, accuracy, 10, 10, stepSize,
 								Swimmer.CLAS_Tolerance, hdata);
-						
+
 						if (i == 0) {
-				            double lastY[] = traj.lastElement();
-				            SwimTest.printVect(lastY, "Thread " + Thread.currentThread().getName() + " first ");
+							double lastY[] = traj.lastElement();
+							SwimTest.printVect(lastY, "Thread " + Thread.currentThread().getName() + " first ");
 						}
-						if (i == (num-1)) {
-				            double lastY[] = traj.lastElement();
-				            SwimTest.printVect(lastY, "Thread " + Thread.currentThread().getName() + " last ");
+						if (i == (num - 1)) {
+							double lastY[] = traj.lastElement();
+							SwimTest.printVect(lastY, "Thread " + Thread.currentThread().getName() + " last ");
 						}
 					} catch (RungeKuttaException e) {
 						// TODO Auto-generated catch block
@@ -70,11 +67,9 @@ public class ThreadTest {
 					}
 
 				}
-				
+
 				System.err.println("Thread " + Thread.currentThread().getName() + "  ending millis: "
 						+ (System.currentTimeMillis() - time));
-				
-
 
 			}
 		};

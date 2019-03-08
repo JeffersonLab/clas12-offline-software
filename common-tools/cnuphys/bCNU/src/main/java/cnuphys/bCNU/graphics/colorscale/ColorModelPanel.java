@@ -18,70 +18,61 @@ import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.view.BaseView;
 
 public class ColorModelPanel extends JPanel implements ActionListener {
-	
-	//the legend
+
+	// the legend
 	private ColorModelLegend _legend;
-	
-	//a slider
-	//private JSlider _slider;
-	
-	//the model
+
+	// a slider
+	// private JSlider _slider;
+
+	// the model
 	private ColorScaleModel _model;
 	private ColorScaleModel _monoModel;
-	
-	//max value of the slider
+
+	// max value of the slider
 	private static final int MAXVAL = 1000;
-	
-	//radio buttons
+
+	// radio buttons
 	private JRadioButton _colorRB;
 	private JRadioButton _monoRB;
 	private BaseView _view;
-	
+
 	/**
 	 * Create a panel with a slider and a color legend
 	 * 
-	 * @param model
-	 *            the color model
-	 * @param desiredWidth
-	 *            pixel width
-	 * @param name
-	 *            a name
-	 * @param gap
-	 *            a spacing
-	 * @param initRelValue
-	 *            normalized value 0..1
+	 * @param model        the color model
+	 * @param desiredWidth pixel width
+	 * @param name         a name
+	 * @param gap          a spacing
+	 * @param initRelValue normalized value 0..1
 	 */
 	public ColorModelPanel(ColorScaleModel model, int desiredWidth, String name, int gap, double initRelVal) {
 		this(null, model, desiredWidth, name, gap, initRelVal, false, false);
 	}
-	
+
 	/**
 	 * Create a panel with a slider and a color legend
 	 * 
-	 * @param model
-	 *            the color model
-	 * @param desiredWidth
-	 *            pixel width
-	 * @param name
-	 *            a name
-	 * @param gap
-	 *            a spacing
-	 * @param initRelValue
-	 *            normalized value 0..1
-	 * @param incRB if <code>true</code> include the color monochrome radio buttons
+	 * @param model        the color model
+	 * @param desiredWidth pixel width
+	 * @param name         a name
+	 * @param gap          a spacing
+	 * @param initRelValue normalized value 0..1
+	 * @param incRB        if <code>true</code> include the color monochrome radio
+	 *                     buttons
 	 * @param colorDefault if <code>true</code> default to color
 	 */
-	public ColorModelPanel(BaseView view, ColorScaleModel model, int desiredWidth, String name, int gap, double initRelVal,
-			boolean includeRadioButtons, boolean colorDefault) {
-		
+	public ColorModelPanel(BaseView view, ColorScaleModel model, int desiredWidth, String name, int gap,
+			double initRelVal, boolean includeRadioButtons, boolean colorDefault) {
+
 		_view = view;
-		_model= model;
-		
+		_model = model;
+
 		setLayout(new BorderLayout(4, 4));
-		
+
 		_legend = new ColorModelLegend(_model, desiredWidth, null, gap);
 		_legend.setBorder(null);
-		
+
 //		_slider = new JSlider(JSlider.HORIZONTAL, 0, MAXVAL, MAXVAL/2) {
 //			
 //			@Override
@@ -91,42 +82,42 @@ public class ColorModelPanel extends JPanel implements ActionListener {
 //				return sd;
 //			}
 //		};
-		
+
 //		setValue(initRelVal);
-		
+
 		if (includeRadioButtons) {
 			addNorth(colorDefault);
 		}
-		
+
 		add(_legend, BorderLayout.CENTER);
 //		add(_slider, BorderLayout.SOUTH);
 		setBorder(new CommonBorder(name));
 	}
-	
+
 	private void addNorth(boolean colorDefault) {
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 2));
-		
+
 		ButtonGroup bg = new ButtonGroup();
-		
+
 		_colorRB = new JRadioButton("Color", colorDefault);
 		_monoRB = new JRadioButton("Monochrome", !colorDefault);
-		
+
 		_colorRB.addActionListener(this);
 		_monoRB.addActionListener(this);
-		
+
 		bg.add(_colorRB);
 		bg.add(_monoRB);
-		
+
 		GraphicsUtilities.setSizeSmall(_colorRB);
 		GraphicsUtilities.setSizeSmall(_monoRB);
-		
+
 		panel.add(_colorRB);
 		panel.add(_monoRB);
-		
+
 		add(panel, BorderLayout.NORTH);
 	}
-	
+
 //	/**
 //	 * Get the slider component
 //	 * @return the slider
@@ -153,7 +144,7 @@ public class ColorModelPanel extends JPanel implements ActionListener {
 //		int ival = _slider.getValue();
 //		return ((double)ival)/((double)MAXVAL);
 //	}
-	
+
 //	/**
 //	 * Gets the absolute value
 //	 * This assumes a uniform values array
@@ -170,43 +161,41 @@ public class ColorModelPanel extends JPanel implements ActionListener {
 //		
 //		return min + relVal*(max - min);
 //	}
-	
+
 	@Override
 	public Insets getInsets() {
 		Insets def = super.getInsets();
-		return new Insets(def.top + 2, def.left + 2, def.bottom + 2,
-				def.right + 2);
+		return new Insets(def.top + 2, def.left + 2, def.bottom + 2, def.right + 2);
 	}
 
 	/**
 	 * Main program for testing
+	 * 
 	 * @param arg command arguments ignored
 	 */
 	public static void main(String arg[]) {
-		//now make the frame to display
+		// now make the frame to display
 		JFrame testFrame = new JFrame("Color Scale");
-		
-		
+
 		Color colors[] = ColorScaleModel.getWeatherMapColors(4);
-		double values[] = ColorScaleModel.uniformValueArray(colors, 100,  500);
+		double values[] = ColorScaleModel.uniformValueArray(colors, 100, 500);
 		ColorScaleModel model = new ColorScaleModel("Test", values, colors);
-		
+
 		/**
 		 * Create a panel with a slider and a color legend
-		 * @param model the color model
+		 * 
+		 * @param model        the color model
 		 * @param desiredWidth pixel width
-		 * @param name a name
-		 * @param gap a spacing
+		 * @param name         a name
+		 * @param gap          a spacing
 		 * @param initRelValue normalized value 0..1
 		 */
-		
-		
-		
+
 		ColorModelPanel panel = new ColorModelPanel(null, model, 280, "Panel", 20, 0.5, true, true);
-		
+
 		testFrame.setLayout(new BorderLayout(8, 8));
 		testFrame.add(panel, BorderLayout.CENTER);
-		
+
 		// set up what to do if the window is closed
 		WindowAdapter windowAdapter = new WindowAdapter() {
 			@Override
@@ -215,7 +204,7 @@ public class ColorModelPanel extends JPanel implements ActionListener {
 				System.exit(1);
 			}
 		};
-		
+
 //		ChangeListener changeListener = new ChangeListener() {
 //
 //			@Override
@@ -225,7 +214,7 @@ public class ColorModelPanel extends JPanel implements ActionListener {
 //			}
 //			
 //		};
-		
+
 //		panel.getSlider().addChangeListener(changeListener);
 
 		testFrame.addWindowListener(windowAdapter);
@@ -237,23 +226,21 @@ public class ColorModelPanel extends JPanel implements ActionListener {
 				testFrame.setVisible(true);
 			}
 		});
-		
-		
 
 	}
-	
+
 	/**
 	 * Get the color scale model if there is one.
+	 * 
 	 * @return the color scale model for accumulation, etc.
 	 */
 	public ColorScaleModel getColorScaleModel() {
 		if (_legend != null) {
 			return _legend.getColorScaleModel();
 		}
-		
+
 		return null;
 	}
-
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -263,20 +250,19 @@ public class ColorModelPanel extends JPanel implements ActionListener {
 			if (_view != null) {
 				_view.refresh();
 			}
-			
-		}
-		else if (e.getSource() == _monoRB) {
+
+		} else if (e.getSource() == _monoRB) {
 			if (_monoModel == null) {
 				_monoModel = ColorScaleModel.getMonochromeModel(_model);
 			}
 			System.out.println("hey man");
 			_legend.setColorScaleModel(_monoModel);
-			
+
 			if (_view != null) {
 				_view.refresh();
 			}
 		}
-		
+
 	}
 
 }

@@ -40,8 +40,7 @@ public class NodeTableModel extends DefaultTableModel {
 	/**
 	 * Find the row by the value in the name column
 	 * 
-	 * @param name
-	 *            the column name to search for
+	 * @param name the column name to search for
 	 * @return the row, or -1
 	 */
 	public int findRowByName(String name) {
@@ -58,9 +57,10 @@ public class NodeTableModel extends DefaultTableModel {
 
 		return -1;
 	}
-	
+
 	/**
 	 * Get the event being displayed
+	 * 
 	 * @return the event being displayed
 	 */
 	public DataEvent getCurrentEvent() {
@@ -90,10 +90,8 @@ public class NodeTableModel extends DefaultTableModel {
 	/**
 	 * Get the value at a given row and column
 	 * 
-	 * @param row
-	 *            the 0-based row
-	 * @param col
-	 *            the 0-based column
+	 * @param row the 0-based row
+	 * @param col the 0-based column
 	 * @return the value at a given row and column
 	 */
 	@Override
@@ -133,8 +131,7 @@ public class NodeTableModel extends DefaultTableModel {
 	}
 
 	/**
-	 * @param data
-	 *            the data to set
+	 * @param data the data to set
 	 */
 	public void setData(DataEvent event) {
 		clear();
@@ -144,9 +141,9 @@ public class NodeTableModel extends DefaultTableModel {
 			String banks[] = event.getBankList();
 			if (banks != null) {
 				for (String bank : banks) {
-					
+
 					_data = DataManager.getInstance().hasData(event);
-					
+
 //					String columns[] = event.getColumnList(bank);
 //					if (columns != null) {
 //						for (String column : columns) {
@@ -165,8 +162,7 @@ public class NodeTableModel extends DefaultTableModel {
 	/**
 	 * Get the column name of the bank column at the given row
 	 * 
-	 * @param row
-	 *            the row in question
+	 * @param row the row in question
 	 * @return the corresponding data bank column name, or <code>null</code>
 	 */
 	public ColumnData getColumnData(int row) {

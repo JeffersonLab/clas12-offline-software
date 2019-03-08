@@ -20,45 +20,31 @@ public class CheckBoxData {
 	 * Create an object that will possibly then be placed in a
 	 * <code>CommonCheckBoxArray</code>.
 	 * 
-	 * @param label
-	 *            the check box label.
-	 * @param intialState
-	 *            the initial state of the selection.
-	 * @param enabled
-	 *            whether the check box is selectable.
-	 * @param radioStyle
-	 *            controls whether it is a radio style button.
-	 * @param itemListener
-	 *            listens for changes on the button.
-	 * @param textColor
-	 *            the next color. Will use black if this is null.
+	 * @param label        the check box label.
+	 * @param intialState  the initial state of the selection.
+	 * @param enabled      whether the check box is selectable.
+	 * @param radioStyle   controls whether it is a radio style button.
+	 * @param itemListener listens for changes on the button.
+	 * @param textColor    the next color. Will use black if this is null.
 	 */
-	public CheckBoxData(String label, boolean intialState, boolean enabled,
-			boolean radioStyle, ItemListener itemListener, Color textColor) {
-		this(label, intialState, enabled, radioStyle, null, itemListener,
-				textColor);
+	public CheckBoxData(String label, boolean intialState, boolean enabled, boolean radioStyle,
+			ItemListener itemListener, Color textColor) {
+		this(label, intialState, enabled, radioStyle, null, itemListener, textColor);
 	}
 
 	/**
 	 * Create an object that will possibly then be placed in a
 	 * <code>CheckBoxArray</code>.
 	 * 
-	 * @param label
-	 *            the check box label.
-	 * @param initialState
-	 *            the initial state of the selection.
-	 * @param enabled
-	 *            whether the check box is selectable.
-	 * @param font
-	 *            the font to use.
-	 * @param itemListener
-	 *            listens for changes on the button.
-	 * @param textColor
-	 *            the next color. Will use black if this is null.
+	 * @param label        the check box label.
+	 * @param initialState the initial state of the selection.
+	 * @param enabled      whether the check box is selectable.
+	 * @param font         the font to use.
+	 * @param itemListener listens for changes on the button.
+	 * @param textColor    the next color. Will use black if this is null.
 	 */
-	public CheckBoxData(String label, boolean initialState, boolean enabled,
-			boolean radioStyle, Font font, ItemListener itemListener,
-			Color textColor) {
+	public CheckBoxData(String label, boolean initialState, boolean enabled, boolean radioStyle, Font font,
+			ItemListener itemListener, Color textColor) {
 
 		if (radioStyle) {
 			_checkBox = new JRadioButton(label);
@@ -105,8 +91,7 @@ public class CheckBoxData {
 	/**
 	 * Convenience method to set the underlying checkbox's selection state.
 	 * 
-	 * @param selected
-	 *            the value for the state.
+	 * @param selected the value for the state.
 	 */
 	public void setSelected(boolean selected) {
 		_checkBox.setSelected(selected);
@@ -115,8 +100,7 @@ public class CheckBoxData {
 	/**
 	 * Convenience method to set the underlying checkbox's enabled state.
 	 * 
-	 * @param enabled
-	 *            the value for the state.
+	 * @param enabled the value for the state.
 	 */
 	public void setEnabled(boolean enabled) {
 		_checkBox.setEnabled(enabled);

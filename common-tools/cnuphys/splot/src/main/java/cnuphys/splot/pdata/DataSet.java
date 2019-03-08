@@ -35,20 +35,20 @@ public class DataSet extends DefaultTableModel {
 
 	// most sets do not have x errors
 	private boolean _hasXErrors;
-	
+
 	/**
 	 * This constructor is for a 2D histogram
+	 * 
 	 * @param h2d
 	 */
 	public DataSet(Histo2DData h2d) throws DataSetException {
 		if (h2d == null) {
-			throw (new DataSetException(
-					"Must supply at least one histogram data object."));
+			throw (new DataSetException("Must supply at least one histogram data object."));
 		}
-		
+
 		_type = DataSetType.H2D;
 
-		//just one column
+		// just one column
 		_columns.add(new DataColumn(DataColumnType.Y, h2d.getName()));
 		getColumn(0).setHistoData2D(h2d);
 		getColumn(0).initStyle();
@@ -64,8 +64,7 @@ public class DataSet extends DefaultTableModel {
 	 */
 	public DataSet(HistoData... histos) throws DataSetException {
 		if ((histos == null) || (histos.length < 1)) {
-			throw (new DataSetException(
-					"Must supply at least one histogram data object."));
+			throw (new DataSetException("Must supply at least one histogram data object."));
 		}
 		_type = DataSetType.H1D;
 
@@ -88,7 +87,7 @@ public class DataSet extends DefaultTableModel {
 	 * Create a dataset for a simple strip chart
 	 * 
 	 * @param stripData the StripData data object
-	 * @param colNames should be just two of them
+	 * @param colNames  should be just two of them
 	 */
 	public DataSet(StripData stripData, String... colNames) {
 		_type = DataSetType.STRIP;
@@ -103,14 +102,13 @@ public class DataSet extends DefaultTableModel {
 	/**
 	 * Create a dataset of a specific type
 	 * 
-	 * @param type the dataset type
-	 * @param colNames the column names. There should be one name for every
-	 *            expected column based on the type.
-	 * @throws DataSetException When the number of columns is inconsistent with
-	 *             the type
+	 * @param type     the dataset type
+	 * @param colNames the column names. There should be one name for every expected
+	 *                 column based on the type.
+	 * @throws DataSetException When the number of columns is inconsistent with the
+	 *                          type
 	 */
-	public DataSet(DataSetType type, String... colNames)
-			throws DataSetException {
+	public DataSet(DataSetType type, String... colNames) throws DataSetException {
 		super(colNames, 0);
 		_type = type;
 		int colCount = (colNames == null) ? 0 : colNames.length;
@@ -132,8 +130,7 @@ public class DataSet extends DefaultTableModel {
 			// two
 
 			if ((colCount % 2) != 0) {
-				throw new DataSetException("The number of columns " + colCount
-						+ " is not divisible by 2.");
+				throw new DataSetException("The number of columns " + colCount + " is not divisible by 2.");
 			}
 			for (int i = 0; i < colCount / 2; i++) {
 				int j = i * 2;
@@ -149,15 +146,13 @@ public class DataSet extends DefaultTableModel {
 
 			if ((colCount % 3) != 0) {
 				throw new DataSetException(
-						"The number of columns for type XYEXYE " + colCount
-								+ " is not divisible by 3.");
+						"The number of columns for type XYEXYE " + colCount + " is not divisible by 3.");
 			}
 			for (int i = 0; i < colCount / 3; i++) {
 				int j = i * 3;
 				_columns.add(new DataColumn(DataColumnType.X, colNames[j]));
 				_columns.add(new DataColumn(DataColumnType.Y, colNames[j + 1]));
-				_columns.add(
-						new DataColumn(DataColumnType.YERR, colNames[j + 2]));
+				_columns.add(new DataColumn(DataColumnType.YERR, colNames[j + 2]));
 				getColumn(j + 1).initStyle();
 				getColumn(j + 1).initFit();
 			}
@@ -170,25 +165,21 @@ public class DataSet extends DefaultTableModel {
 			_hasXErrors = true;
 			if ((colCount % 4) != 0) {
 				throw new DataSetException(
-						"The number of columns for type XYEEXYEE " + colCount
-								+ " is not divisible by 4.");
+						"The number of columns for type XYEEXYEE " + colCount + " is not divisible by 4.");
 			}
 			for (int i = 0; i < colCount / 4; i++) {
 				int j = i * 3;
 				_columns.add(new DataColumn(DataColumnType.X, colNames[j]));
 				_columns.add(new DataColumn(DataColumnType.Y, colNames[j + 1]));
-				_columns.add(
-						new DataColumn(DataColumnType.XERR, colNames[j + 2]));
-				_columns.add(
-						new DataColumn(DataColumnType.YERR, colNames[j + 3]));
+				_columns.add(new DataColumn(DataColumnType.XERR, colNames[j + 2]));
+				_columns.add(new DataColumn(DataColumnType.YERR, colNames[j + 3]));
 				getColumn(j + 1).initStyle();
 				getColumn(j + 1).initFit();
 			}
 			break;
 
 		case H1D:
-			throw (new DataSetException(
-					"Use DataSet(HistoData[]) constructor for 1D histograms."));
+			throw (new DataSetException("Use DataSet(HistoData[]) constructor for 1D histograms."));
 
 		default:
 			break;
@@ -205,12 +196,11 @@ public class DataSet extends DefaultTableModel {
 	 */
 	public DataColumn addCurve(String xname, String yname) {
 
-		DataColumn newCurve = null; 
-		
+		DataColumn newCurve = null;
+
 		switch (getType()) {
 		case XYY:
-			System.err.println(
-					"[sPlot] Can not add curve for type: " + getType());
+			System.err.println("[sPlot] Can not add curve for type: " + getType());
 			break;
 
 		case XYXY:
@@ -225,28 +215,23 @@ public class DataSet extends DefaultTableModel {
 			break;
 
 		case XYEXYE:
-			System.err.println(
-					"[sPlot] Can not add curve for type: " + getType());
+			System.err.println("[sPlot] Can not add curve for type: " + getType());
 			break;
 
 		case XYEEXYEE:
-			System.err.println(
-					"[sPlot] Can not add curve for type: " + getType());
+			System.err.println("[sPlot] Can not add curve for type: " + getType());
 			break;
 
 		case H1D:
-			System.err.println(
-					"[sPlot] Can not add curve for type: " + getType());
+			System.err.println("[sPlot] Can not add curve for type: " + getType());
 			break;
 
 		case STRIP:
-			System.err.println(
-					"[sPlot] Can not add curve for type: " + getType());
+			System.err.println("[sPlot] Can not add curve for type: " + getType());
 			break;
-			
+
 		case UNKNOWN:
-			System.err.println(
-					"[sPlot] Can not add curve for type: " + getType());
+			System.err.println("[sPlot] Can not add curve for type: " + getType());
 			break;
 		}
 
@@ -255,7 +240,7 @@ public class DataSet extends DefaultTableModel {
 		// colNames.add(dc.getName());
 		// }
 		// setColumnIdentifiers(colNames);
-		
+
 		return newCurve;
 	}
 
@@ -263,15 +248,13 @@ public class DataSet extends DefaultTableModel {
 	 * Add data to a specific curve. For now limited to type XYXY only.
 	 * 
 	 */
-	public void addToCurve(int curveIndex, double... vals)
-			throws DataSetException {
+	public void addToCurve(int curveIndex, double... vals) throws DataSetException {
 
 		int count = getColumnCount();
 
 		switch (getType()) {
 		case XYY:
-			System.err.println(
-					"[sPlot] Can not add to curve for type: " + getType());
+			System.err.println("[sPlot] Can not add to curve for type: " + getType());
 			break;
 
 		case XYXY:
@@ -281,36 +264,29 @@ public class DataSet extends DefaultTableModel {
 				DataColumn ycol = _columns.get(2 * curveIndex + 1);
 				xcol.add(vals[0]);
 				ycol.add(vals[1]);
-			}
-			else {
-				System.err.println("[sPlot] Curve index out of range for type: "
-						+ getType());
+			} else {
+				System.err.println("[sPlot] Curve index out of range for type: " + getType());
 			}
 			break;
 
 		case XYEXYE:
-			System.err.println(
-					"[sPlot] Can not add to curve for type: " + getType());
+			System.err.println("[sPlot] Can not add to curve for type: " + getType());
 			break;
 
 		case XYEEXYEE:
-			System.err.println(
-					"[sPlot] Can not add to curve for type: " + getType());
+			System.err.println("[sPlot] Can not add to curve for type: " + getType());
 			break;
 
 		case H1D:
-			System.err.println(
-					"[sPlot] Can not add to curve for type: " + getType());
+			System.err.println("[sPlot] Can not add to curve for type: " + getType());
 			break;
-			
+
 		case STRIP:
-			System.err.println(
-					"[sPlot] Can not add to curve for type: " + getType());
+			System.err.println("[sPlot] Can not add to curve for type: " + getType());
 			break;
 
 		case UNKNOWN:
-			System.err.println(
-					"[sPlot] Can not add to curve for type: " + getType());
+			System.err.println("[sPlot] Can not add to curve for type: " + getType());
 			break;
 		}
 		notifyListeners();
@@ -355,15 +331,14 @@ public class DataSet extends DefaultTableModel {
 	}
 
 	/**
-	 * Get a curve from an index. E.g., f the index is 0 it will return the 1st
-	 * Y column. Y Columns are also known as "curves".
+	 * Get a curve from an index. E.g., f the index is 0 it will return the 1st Y
+	 * column. Y Columns are also known as "curves".
 	 * 
 	 * @param index the index
 	 * @return the corresponding curve
 	 */
 	public DataColumn getCurve(int index) {
-		Vector<DataColumn> ycols = (Vector<DataColumn>) getAllColumnsByType(
-				DataColumnType.Y);
+		Vector<DataColumn> ycols = (Vector<DataColumn>) getAllColumnsByType(DataColumnType.Y);
 
 		if ((ycols == null) || (index >= ycols.size())) {
 			return null;
@@ -373,15 +348,14 @@ public class DataSet extends DefaultTableModel {
 	}
 
 	/**
-	 * Get a x column from an index. E.g., f the index is 0 it will return the
-	 * 1st X column.
+	 * Get a x column from an index. E.g., f the index is 0 it will return the 1st X
+	 * column.
 	 * 
 	 * @param index the index
 	 * @return the corresponding X column
 	 */
 	public DataColumn getXColumn(int index) {
-		Vector<DataColumn> xcols = (Vector<DataColumn>) getAllColumnsByType(
-				DataColumnType.X);
+		Vector<DataColumn> xcols = (Vector<DataColumn>) getAllColumnsByType(DataColumnType.X);
 
 		if ((xcols == null) || (index >= xcols.size())) {
 			return null;
@@ -546,24 +520,19 @@ public class DataSet extends DefaultTableModel {
 	public Vector<HistoData> getAllHistos() {
 		Vector<HistoData> v = new Vector<HistoData>();
 		if (is1DHistoSet()) {
-			Collection<DataColumn> ycols = getAllColumnsByType(
-					DataColumnType.Y);
+			Collection<DataColumn> ycols = getAllColumnsByType(DataColumnType.Y);
 			if (!ycols.isEmpty()) {
 				for (DataColumn yc : ycols) {
 					if (yc.isHistogram1D()) {
 						v.add(yc.getHistoData());
-					}
-					else {
-						System.err.println(
-								"All Y columns in a HistoDataset must be hitograms");
+					} else {
+						System.err.println("All Y columns in a HistoDataset must be hitograms");
 						System.exit(1);
 					}
 				}
 			}
-		}
-		else {
-			System.err.println(
-					"Should not be asking for histos in a non-histo dataset.");
+		} else {
+			System.err.println("Should not be asking for histos in a non-histo dataset.");
 			System.exit(1);
 		}
 		return v;
@@ -583,8 +552,7 @@ public class DataSet extends DefaultTableModel {
 					xmin = Math.min(xmin, hd.getMinX());
 				}
 			}
-		}
-		else {
+		} else {
 			xmin = getDataMin(DataColumnType.X);
 		}
 		return xmin;
@@ -605,16 +573,15 @@ public class DataSet extends DefaultTableModel {
 					xmax = Math.max(xmax, hd.getMaxX());
 				}
 			}
-		}
-		else {
+		} else {
 			xmax = getDataMax(DataColumnType.X);
 		}
 		return xmax;
 	}
 
 	/**
-	 * Convenience function to get the minimum value of the y data. If there is
-	 * more than one y column, it returns the overall minimum.
+	 * Convenience function to get the minimum value of the y data. If there is more
+	 * than one y column, it returns the overall minimum.
 	 * 
 	 * @return the minimum value of the y data
 	 */
@@ -627,16 +594,15 @@ public class DataSet extends DefaultTableModel {
 					ymin = Math.min(ymin, hd.getMinY());
 				}
 			}
-		}
-		else {
+		} else {
 			ymin = getDataMin(DataColumnType.Y);
 		}
 		return ymin;
 	}
 
 	/**
-	 * Convenience function to get the maximum value of the y data. If there is
-	 * more than one y column, it returns the overall maximum.
+	 * Convenience function to get the maximum value of the y data. If there is more
+	 * than one y column, it returns the overall maximum.
 	 * 
 	 * @return the maximum value of the y data
 	 */
@@ -649,8 +615,7 @@ public class DataSet extends DefaultTableModel {
 					ymax = Math.max(ymax, hd.getMaxY());
 				}
 			}
-		}
-		else {
+		} else {
 			ymax = getDataMax(DataColumnType.Y);
 		}
 		return ymax;
@@ -664,8 +629,7 @@ public class DataSet extends DefaultTableModel {
 	 */
 	public double getDataMin(DataColumnType type) {
 		if (is1DHistoSet()) {
-			System.err.println(
-					"Should not be calling \"getDataMin\" for histo datasets");
+			System.err.println("Should not be calling \"getDataMin\" for histo datasets");
 			System.exit(1);
 		}
 
@@ -687,8 +651,7 @@ public class DataSet extends DefaultTableModel {
 	 */
 	public double getDataMax(DataColumnType type) {
 		if (is1DHistoSet()) {
-			System.err.println(
-					"Should not be calling \"getDataMax\" for histo datasets");
+			System.err.println("Should not be calling \"getDataMax\" for histo datasets");
 			System.exit(1);
 		}
 
@@ -704,8 +667,7 @@ public class DataSet extends DefaultTableModel {
 
 	/**
 	 * Get the minimal array of a column. The minimal array is a copy from the
-	 * underlying GrowableArray that is the same size as the amount of real
-	 * data.
+	 * underlying GrowableArray that is the same size as the amount of real data.
 	 * 
 	 * @param index the column index
 	 * @return the minimal array
@@ -741,18 +703,16 @@ public class DataSet extends DefaultTableModel {
 	public void add(double... vals) throws DataSetException {
 
 		int count = (vals == null) ? 0 : vals.length;
-		
+
 		if (_type == DataSetType.H2D) {
 			if (count == 2) {
 				getColumn(0).histo2DAdd(vals[0], vals[1]);
 			}
 			return;
 		}
-		
-		
+
 		if (count > getColumnCount()) {
-			String msg = "Expected " + getColumnCount()
-					+ " values in add, but got: " + count;
+			String msg = "Expected " + getColumnCount() + " values in add, but got: " + count;
 			throw new DataSetException(msg);
 		}
 
@@ -767,13 +727,12 @@ public class DataSet extends DefaultTableModel {
 	 * Add data value to a specific column.
 	 * 
 	 * @param column the column
-	 * @param val the value
+	 * @param val    the value
 	 */
 	public void add(int column, double val) throws DataSetException {
 
 		if (column >= getColumnCount()) {
-			String msg = "In DataSet add, only " + getColumnCount()
-					+ " columns, but got column index of : " + column;
+			String msg = "In DataSet add, only " + getColumnCount() + " columns, but got column index of : " + column;
 			throw new DataSetException(msg);
 		}
 
@@ -809,8 +768,7 @@ public class DataSet extends DefaultTableModel {
 		// order is flipped so it goes in order as added
 		for (int i = 0; i < listeners.length; i += 2) {
 			if (listeners[i] == DataChangeListener.class) {
-				DataChangeListener listener = (DataChangeListener) listeners[i
-						+ 1];
+				DataChangeListener listener = (DataChangeListener) listeners[i + 1];
 				listener.dataSetChanged(this);
 			}
 
@@ -839,8 +797,7 @@ public class DataSet extends DefaultTableModel {
 	 * @param DataChangeListener the DataChangeListener to remove.
 	 */
 
-	public void removeDataChangeListener(
-			DataChangeListener DataChangeListener) {
+	public void removeDataChangeListener(DataChangeListener DataChangeListener) {
 
 		if ((DataChangeListener == null) || (_listenerList == null)) {
 			return;
@@ -888,12 +845,10 @@ public class DataSet extends DefaultTableModel {
 			if (is1DHistoSet()) {
 				HistoData hd = dc.getHistoData();
 				return hd.getNumberBins();
-			}
-			else if (is2DHistoSet()) {
+			} else if (is2DHistoSet()) {
 				Histo2DData h2d = dc.getHistoData2D();
 				return (h2d == null) ? 0 : 1;
-			}
-			else {
+			} else {
 				rowCount = dc.size();
 			}
 		}
@@ -936,15 +891,13 @@ public class DataSet extends DefaultTableModel {
 		double split[] = intFract(-val);
 		boolean asInt = (split[0] != 0.) && Math.abs(split[1]) < 1.0e-6;
 
-		String s = asInt ? DoubleFormat.doubleFormat(val, 0)
-				: DoubleFormat.doubleFormat(val, 4, 2);
+		String s = asInt ? DoubleFormat.doubleFormat(val, 0) : DoubleFormat.doubleFormat(val, 4, 2);
 		return s;
 	}
 
 	private static double[] intFract(double d) {
 		BigDecimal bd = BigDecimal.valueOf(d);
-		return new double[] { bd.intValue(),
-				bd.remainder(BigDecimal.ONE).doubleValue() };
+		return new double[] { bd.intValue(), bd.remainder(BigDecimal.ONE).doubleValue() };
 	}
 
 	@Override

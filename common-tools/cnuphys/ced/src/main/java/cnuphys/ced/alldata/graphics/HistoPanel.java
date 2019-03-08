@@ -24,7 +24,6 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 	private JFormattedTextField _minValTF;
 
 	private JFormattedTextField _maxValTF;
-	
 
 	private SelectPanel _sp;
 
@@ -51,7 +50,7 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 	}
 
 	private void addEast() {
-		
+
 		JPanel p = new JPanel();
 		p.setLayout(new BorderLayout(0, 0));
 
@@ -60,14 +59,14 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 		_numBinsTF = integerField(sp, "Number of Bins", _numBins);
 		_minValTF = decimalField(sp, "Min Value", _minVal);
 		_maxValTF = decimalField(sp, "Max Value", _maxVal);
-		
+
 		_numBinsTF.addPropertyChangeListener("value", this);
 		_minValTF.addPropertyChangeListener("value", this);
 		_maxValTF.addPropertyChangeListener("value", this);
 		p.add(sp, BorderLayout.NORTH);
 		add(p, BorderLayout.EAST);
 	}
-	
+
 	private JTextField numField(JPanel p, String title, int defValue) {
 		final JTextField tf = new JTextField();
 
@@ -100,7 +99,7 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 			}
 		};
 		tf.addKeyListener(kl);
-		
+
 		tf.setText("" + defValue);
 		tf.setColumns(8);
 		JPanel panel = titledPanel(title);
@@ -110,8 +109,7 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 		return tf;
 	}
 
-	private JFormattedTextField integerField(JPanel p, String title,
-			int defValue) {
+	private JFormattedTextField integerField(JPanel p, String title, int defValue) {
 		NumberFormat numberFormat = NumberFormat.getNumberInstance();
 		numberFormat.setMaximumFractionDigits(0);
 		numberFormat.setGroupingUsed(false);
@@ -127,8 +125,7 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 		return tf;
 	}
 
-	private JFormattedTextField decimalField(JPanel p, String title,
-			double defValue) {
+	private JFormattedTextField decimalField(JPanel p, String title, double defValue) {
 		NumberFormat numberFormat = NumberFormat.getNumberInstance();
 		numberFormat.setMaximumFractionDigits(4);
 		numberFormat.setGroupingUsed(false);
@@ -157,17 +154,16 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 		Object source = e.getSource();
 		if (source == _numBinsTF) {
 			_numBins = ((Number) _numBinsTF.getValue()).intValue();
-		}
-		else if (source == _minValTF) {
+		} else if (source == _minValTF) {
 			_minVal = ((Number) _minValTF.getValue()).doubleValue();
-		}
-		else if (source == _maxValTF) {
+		} else if (source == _maxValTF) {
 			_maxVal = ((Number) _maxValTF.getValue()).doubleValue();
 		}
 	}
 
 	/**
 	 * Create the histogram data
+	 * 
 	 * @return the histogram data
 	 */
 	public HistoData getHistoData() {
@@ -182,28 +178,31 @@ public class HistoPanel extends JPanel implements PropertyChangeListener {
 
 		return new HistoData(name, _minVal, _maxVal, _numBins);
 	}
-	
+
 	/**
 	 * Get the number of bins
+	 * 
 	 * @return the number of bins
 	 */
 	public int getNumBins() {
 		return ((Number) _numBinsTF.getValue()).intValue();
 	}
-	
+
 	/**
 	 * Get the minimum value
+	 * 
 	 * @return the minimum value
 	 */
 	public double getMinVal() {
 		return ((Number) _minValTF.getValue()).doubleValue();
-	} 
-	
+	}
+
 	/**
 	 * Get the maximum value
+	 * 
 	 * @return the maximum value
 	 */
 	public double getMaxVal() {
 		return ((Number) _maxValTF.getValue()).doubleValue();
-	} 
+	}
 }

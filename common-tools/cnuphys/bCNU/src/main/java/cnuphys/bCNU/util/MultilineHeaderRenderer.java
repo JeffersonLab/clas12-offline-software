@@ -29,8 +29,8 @@ public class MultilineHeaderRenderer extends JList implements TableCellRenderer 
 	}
 
 	@Override
-	public Component getTableCellRendererComponent(JTable table, Object value,
-			boolean isSelected, boolean hasFocus, int row, int column) {
+	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+			int row, int column) {
 		setFont(table.getFont());
 		String str = (value == null) ? "" : value.toString();
 		BufferedReader br = new BufferedReader(new StringReader(str));

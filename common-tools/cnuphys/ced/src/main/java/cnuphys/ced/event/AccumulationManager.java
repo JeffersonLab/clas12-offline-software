@@ -63,13 +63,14 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	private static AccumulationManager instance;
 
 	// private static final Color NULLCOLOR = new Color(128, 128, 128);
-	//private static final Color NULLCOLOR = Color.gray;
+	// private static final Color NULLCOLOR = Color.gray;
 
 //	private static final Color HOTCOLOR = X11Colors.getX11Color("red");
 
-	// CND accumulated accumulated data indices are sector, layer, order (0 or 1, adc only)
+	// CND accumulated accumulated data indices are sector, layer, order (0 or 1,
+	// adc only)
 	private int _CNDAccumulatedData[][][];
-	
+
 	// HTCC accumulated accumulated data indices are sector, ring, half
 	private int _HTCCAccumulatedData[][][];
 
@@ -128,9 +129,9 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		// FTCAL data
 		_FTCALAccumulatedData = new int[476];
 
-		//cnd data (24 sectors, 3 layers, left and right)
+		// cnd data (24 sectors, 3 layers, left and right)
 		_CNDAccumulatedData = new int[24][3][2];
-		
+
 		// htcc data
 		_HTCCAccumulatedData = new int[GeoConstants.NUM_SECTOR][4][2];
 
@@ -188,7 +189,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		for (int i = 0; i < _FTCALAccumulatedData.length; i++) {
 			_FTCALAccumulatedData[i] = 0;
 		}
-		
+
 		// clear accumulated CND
 		for (int sector = 0; sector < 24; sector++) {
 			for (int layer = 0; layer < 3; layer++) {
@@ -197,7 +198,6 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 				}
 			}
 		}
-
 
 		// clear accumulated HTCC
 		for (int sector = 0; sector < GeoConstants.NUM_SECTOR; sector++) {
@@ -313,7 +313,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	public int[] getAccumulatedFTCALData() {
 		return _FTCALAccumulatedData;
 	}
-	
+
 	/**
 	 * Get the accumulated CND data
 	 * 
@@ -322,7 +322,6 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	public int[][][] getAccumulatedCNDData() {
 		return _CNDAccumulatedData;
 	}
-	
 
 	/**
 	 * Get the accumulated HTCC data
@@ -383,7 +382,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	public int getMedianBSTCount() {
 		return getMedian(_BSTAccumulatedData);
 	}
-	
+
 	public int getMedianCTOFCount() {
 		return getMedian(_CTOFAccumulatedData);
 	}
@@ -415,14 +414,13 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	/**
 	 * Get the median count for a given superlayer across all sectors
 	 * 
-	 * @param suplay
-	 *            the superlayer 0..5
+	 * @param suplay the superlayer 0..5
 	 * @return the median count for a given superlayer across all sectors
 	 */
 	public int getMedianDCCount(int suplay) {
 		ArrayList<Integer> v = new ArrayList<>(24192);
 
-		//specialized because of the suplay fixed
+		// specialized because of the suplay fixed
 		for (int sect = 0; sect < 6; sect++) {
 			for (int lay = 0; lay < 6; lay++) {
 				for (int wire = 0; wire < 12; wire++) {
@@ -467,7 +465,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	public int getMedianFTCALCount() {
 		return getMedian(_FTCALAccumulatedData);
 	}
-	
+
 	/**
 	 * Get the median counts for CND
 	 * 
@@ -530,7 +528,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	public int getMedianFTOF1ACount() {
 		return getMedian(_FTOF1AAccumulatedData);
 	}
-	
+
 	/**
 	 * Get the median counts on any ftof1b panel
 	 * 
@@ -549,12 +547,10 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		return getMedian(_FTOF2AccumulatedData);
 	}
 
-
 	/**
 	 * Get the color to use
 	 * 
-	 * @param fract
-	 *            the fraction (compared to max hits)
+	 * @param fract the fraction (compared to max hits)
 	 * @return the color to use
 	 */
 	public Color getColor(ColorScaleModel model, double fract) {
@@ -570,10 +566,8 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	/**
 	 * Get a color via getColor but add an alpha value
 	 * 
-	 * @param value
-	 *            the value
-	 * @param alpha
-	 *            the alpha value [0..255]
+	 * @param value the value
+	 * @param alpha the alpha value [0..255]
 	 * @return the color corresponding to the value.
 	 */
 	public Color getAlphaColor(ColorScaleModel model, double value, int alpha) {
@@ -594,10 +588,8 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	/**
 	 * Get the average occupancy for a given sector and superlayer
 	 * 
-	 * @param sect0
-	 *            0 based sector 0..5
-	 * @param supl0
-	 *            0 based superlayer 0..5
+	 * @param sect0 0 based sector 0..5
+	 * @param supl0 0 based superlayer 0..5
 	 * @return the occupancy
 	 */
 	public double getAverageDCOccupancy(int sect0, int supl0) {
@@ -620,8 +612,8 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		// FTCal Data
 		AdcHitList ftcalList = FTCAL.getInstance().updateAdcList();
 		accumFTCAL(ftcalList);
-		
-		//CND a special case
+
+		// CND a special case
 		CND.getInstance().updateData();
 		accumCND();
 
@@ -695,7 +687,6 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		}
 	}
 
-	
 	// accumulate CND which is a special case
 	private void accumCND() {
 		CND cnd = CND.getInstance();
@@ -704,19 +695,19 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 			byte[] sect = cnd.adc_sect;
 			byte[] layer = cnd.adc_layer;
 			byte[] order = cnd.adc_order;
-			
+
 			for (int i = 0; i < adcCount; i++) {
-				
-				int sect0 = sect[i]-1;
-				int lay0  = layer[i]-1;
-				//note order is already a zero based quantity
+
+				int sect0 = sect[i] - 1;
+				int lay0 = layer[i] - 1;
+				// note order is already a zero based quantity
 				int ord0 = order[i];
-				
+
 				_CNDAccumulatedData[sect0][lay0][ord0] += 1;
 			}
 		}
 	}
-	
+
 	// accumulate htcc
 	private void accumHTCC(AdcHitList list) {
 		if ((list == null) || list.isEmpty()) {
@@ -883,8 +874,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	/**
 	 * Change the event source type
 	 * 
-	 * @param source
-	 *            the new source: File, ET
+	 * @param source the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
@@ -914,8 +904,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	/**
 	 * Notify listeners we of an accumulation event
 	 * 
-	 * @param reason
-	 *            should be one of the ACCUMULATION_X constants
+	 * @param reason should be one of the ACCUMULATION_X constants
 	 * 
 	 */
 	public void notifyListeners(int reason) {
@@ -938,8 +927,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	/**
 	 * Remove an Accumulation listener.
 	 * 
-	 * @param listener
-	 *            the Accumulation listener to remove.
+	 * @param listener the Accumulation listener to remove.
 	 */
 	public void removeAccumulationListener(IAccumulationListener listener) {
 
@@ -955,8 +943,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	/**
 	 * Add an Accumulation listener.
 	 * 
-	 * @param listener
-	 *            the Accumulation listener to add.
+	 * @param listener the Accumulation listener to add.
 	 */
 	public void addAccumulationListener(IAccumulationListener listener) {
 
@@ -1007,14 +994,10 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	/**
 	 * Get the prectange hit rate in the accumulated data for a given wire
 	 * 
-	 * @param sect0
-	 *            0 based sector 0..5
-	 * @param supl0
-	 *            0 based superlayer 0..5
-	 * @param lay0
-	 *            0 based layer 0..5
-	 * @param wire0
-	 *            0 based wire 0..111
+	 * @param sect0 0 based sector 0..5
+	 * @param supl0 0 based superlayer 0..5
+	 * @param lay0  0 based layer 0..5
+	 * @param wire0 0 based wire 0..111
 	 * @return the occupancy
 	 */
 	public double getAccumulatedWireHitPercentage(int sect0, int supl0, int lay0, int wire0) {
@@ -1035,7 +1018,7 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	public boolean ignoreIfAccumulating() {
 		return false;
 	}
-	
+
 	// get the median of a 1D array of ints
 	private int getMedian(int[] data) {
 

@@ -96,10 +96,8 @@ public class Fonts {
 	/**
 	 * Scale a font
 	 * 
-	 * @param font
-	 *            the font to scale
-	 * @param scaleFactor
-	 *            the multiplicative scale factor
+	 * @param font        the font to scale
+	 * @param scaleFactor the multiplicative scale factor
 	 * @return the derived font
 	 */
 	public static Font scaleFont(Font font, float scaleFactor) {
@@ -109,10 +107,8 @@ public class Fonts {
 	/**
 	 * Obtain a font from the common family
 	 * 
-	 * @param style
-	 *            bitwise Font.PLAIN, Font.BOLD, etc
-	 * @param size
-	 *            the size
+	 * @param style bitwise Font.PLAIN, Font.BOLD, etc
+	 * @param size  the size
 	 * @return the common font.
 	 */
 	public static Font commonFont(int style, int size) {

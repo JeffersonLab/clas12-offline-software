@@ -43,10 +43,8 @@ public class ShowHideTable extends JTable {
 	/**
 	 * Create a table for toggling visibility (or any check box list)
 	 * 
-	 * @param showHideList
-	 *            the objects that can be hidden
-	 * @param colNames
-	 *            the column names
+	 * @param showHideList the objects that can be hidden
+	 * @param colNames     the column names
 	 */
 	public ShowHideTable(Vector<IShowHide> showHideList, String[] colNames) {
 		super(new ShowHideTableModel(showHideList, colNames));
@@ -71,9 +69,8 @@ public class ShowHideTable extends JTable {
 		// check box renderer
 		DefaultTableCellRenderer dcr = new DefaultTableCellRenderer() {
 			@Override
-			public Component getTableCellRendererComponent(JTable table,
-					Object value, boolean isSelected, boolean hasFocus,
-					int row, int column) {
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+					boolean hasFocus, int row, int column) {
 				JCheckBox cb = new JCheckBox();
 				GraphicsUtilities.setSizeSmall(cb);
 				cb.setSelected((Boolean) value);
@@ -87,8 +84,7 @@ public class ShowHideTable extends JTable {
 		// change renderer for value column
 		JCheckBox cb = new JCheckBox();
 		cb.addItemListener(_itemListener);
-		TableColumn column = getColumnModel().getColumn(
-				ShowHideTableModel.DISPLAY_VALUE);
+		TableColumn column = getColumnModel().getColumn(ShowHideTableModel.DISPLAY_VALUE);
 		column.setCellRenderer(dcr);
 		column.setCellEditor(new DefaultCellEditor(cb));
 
@@ -108,8 +104,7 @@ public class ShowHideTable extends JTable {
 					int col = columnAtPoint(p);
 
 					if (col == 0) {
-						IShowHide ish = getShowHideDataModel().getElementAtRow(
-								row);
+						IShowHide ish = getShowHideDataModel().getElementAtRow(row);
 						boolean vis = ish.isVisible();
 						ish.setVisible(!vis);
 						getShowHideDataModel().notifyModelChangeListeners(ish);
@@ -207,8 +202,7 @@ public class ShowHideTable extends JTable {
 	 * Add an <code>IShowHideListener</code>.
 	 * 
 	 * @see IShowHideListener
-	 * @param modelListener
-	 *            the <code>IShowHideListener</code> to add.
+	 * @param modelListener the <code>IShowHideListener</code> to add.
 	 */
 	public void addModelListener(IShowHideListener modelListener) {
 		getShowHideDataModel().addModelListener(modelListener);

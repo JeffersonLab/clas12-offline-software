@@ -13,10 +13,8 @@ public class LabeledTextField extends JPanel {
 	/**
 	 * Create a labeled text field.
 	 * 
-	 * @param label
-	 *            the label to serve as a prompt.
-	 * @param numcol
-	 *            the default number of columns in the text field.
+	 * @param label  the label to serve as a prompt.
+	 * @param numcol the default number of columns in the text field.
 	 */
 	public LabeledTextField(String label, int numcol) {
 
@@ -30,8 +28,7 @@ public class LabeledTextField extends JPanel {
 	/**
 	 * Set the text in the text field.
 	 * 
-	 * @param s
-	 *            the text to place in the text field.
+	 * @param s the text to place in the text field.
 	 */
 	public void setText(String s) {
 		_textField.setText(s);

@@ -9,14 +9,12 @@ import cnuphys.bCNU.graphics.rubberband.Rubberband;
 import cnuphys.bCNU.item.AItem;
 
 @SuppressWarnings("serial")
-public class RectangleButton extends ToolBarToggleButton implements
-		IRubberbanded {
+public class RectangleButton extends ToolBarToggleButton implements IRubberbanded {
 
 	/**
 	 * Create a button for creating rectangles by rubberbanding.
 	 * 
-	 * @param container
-	 *            the container using this button.
+	 * @param container the container using this button.
 	 */
 	public RectangleButton(IContainer container) {
 		super(container, "images/rectangle.gif", "Create a rectangle");
@@ -25,14 +23,12 @@ public class RectangleButton extends ToolBarToggleButton implements
 	/**
 	 * The mouse has been pressed, start rubber banding.
 	 * 
-	 * @param mouseEvent
-	 *            the causal mouse event.
+	 * @param mouseEvent the causal mouse event.
 	 */
 	@Override
 	public void mousePressed(MouseEvent mouseEvent) {
 		if (rubberband == null) {
-			rubberband = new Rubberband(container, this,
-					Rubberband.Policy.RECTANGLE);
+			rubberband = new Rubberband(container, this, Rubberband.Policy.RECTANGLE);
 			rubberband.setActive(true);
 			rubberband.startRubberbanding(mouseEvent.getPoint());
 		}
@@ -50,8 +46,7 @@ public class RectangleButton extends ToolBarToggleButton implements
 		if ((b.width < 3) || (b.height < 3)) {
 			return;
 		}
-		AItem item = container.createRectangleItem(
-				container.getAnnotationLayer(), b);
+		AItem item = container.createRectangleItem(container.getAnnotationLayer(), b);
 		if (item != null) {
 			item.setRightClickable(true);
 			item.setDraggable(true);

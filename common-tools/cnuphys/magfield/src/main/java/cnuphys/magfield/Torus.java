@@ -12,23 +12,22 @@ import java.io.PrintStream;
  */
 
 public class Torus extends MagneticField {
-		
-	//has part of the solenoid been added in to remove the overlap?
+
+	// has part of the solenoid been added in to remove the overlap?
 	protected boolean _addedSolenoid;
-		
-	//if is full, then no assumed 12-fold symmetry
+
+	// if is full, then no assumed 12-fold symmetry
 	private boolean _fullMap;
-		
+
 	/**
-	 * Instantiates a new torus.
-	 * Note q1 = phi, q2 = rho, q3 = z
+	 * Instantiates a new torus. Note q1 = phi, q2 = rho, q3 = z
 	 */
 	private Torus() {
 		setCoordinateNames("phi", "rho", "z");
 		_scaleFactor = -1; // default
 		_addedSolenoid = false;
 	}
-	
+
 	/**
 	 * Checks whether the field has been set to always return zero.
 	 * 
@@ -42,9 +41,10 @@ public class Torus extends MagneticField {
 			return true;
 		}
 	}
-	
+
 	/**
-	 * Checks this field active. 
+	 * Checks this field active.
+	 * 
 	 * @return <code>true</code> if this field is active;
 	 */
 	@Override
@@ -52,7 +52,6 @@ public class Torus extends MagneticField {
 		return MagneticFields.getInstance().hasActiveTorus();
 	}
 
-	
 	/**
 	 * Has part of the solenoid been added in to remove the overlap?
 	 * @return<code>true</code> if the solenoid was added in.
@@ -73,16 +72,17 @@ public class Torus extends MagneticField {
 		Torus torus = new Torus();
 		torus.readBinaryMagneticField(file);
 		double phiMax = torus.getPhiMax();
-		
+
 		torus._fullMap = (phiMax > 100.);
-		
+
 		System.out.println(torus.toString());
 
 		return torus;
 	}
-	
+
 	/**
 	 * Get the maximum phi coordinate of the field boundary (deg)
+	 * 
 	 * @return the maximum phi coordinate of the field boundary
 	 */
 	public double getPhiMax() {
@@ -95,12 +95,12 @@ public class Torus extends MagneticField {
 
 	/**
 	 * Get the minimum phi coordinate of the field boundary (deg)
+	 * 
 	 * @return the minimum phi coordinate of the field boundary
 	 */
 	public double getPhiMin() {
 		return q1Coordinate.getMin();
 	}
-	
 
 	/**
 	 * Get the name of the field
@@ -111,15 +111,16 @@ public class Torus extends MagneticField {
 	public String getName() {
 		return "Torus";
 	}
-	
+
 	/**
 	 * Check whether there is an assume 12-fold symmetry
+	 * 
 	 * @return <code>true</code> if this is a full map
 	 */
 	public boolean isFullMap() {
 		return _fullMap;
 	}
-	
+
 	/**
 	 * Get some data as a string.
 	 * 
@@ -131,28 +132,31 @@ public class Torus extends MagneticField {
 		s += super.toString();
 		return s;
 	}
-	
+
 	/**
 	 * Used to add the solenoid into the torus. Experimental!!
+	 * 
 	 * @param compositeIndex the composite index
-	 * @param result the solenoid field added in
+	 * @param result         the solenoid field added in
 	 */
 	public void addToField(int compositeIndex, float[] result) {
-		int index = 3*compositeIndex;
+		int index = 3 * compositeIndex;
 		for (int i = 0; i < 3; i++) {
 			int j = index + i;
-			field.put(j, field.get(j) + (float)(_scaleFactor*result[i]));
+			field.put(j, field.get(j) + (float) (_scaleFactor * result[i]));
 		}
 		_addedSolenoid = true;
 	}
-	
+
 	/**
 	 * Print the current configuration
+	 * 
 	 * @param ps the print stream
 	 */
 	@Override
 	public void printConfiguration(PrintStream ps) {
-		ps.println(String.format("TORUS scale: %6.3f file: %s", _scaleFactor, MagneticFields.getInstance().getTorusBaseName()));
+		ps.println(String.format("TORUS scale: %6.3f file: %s", _scaleFactor,
+				MagneticFields.getInstance().getTorusBaseName()));
 	}
 
 }

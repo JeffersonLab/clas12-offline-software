@@ -25,28 +25,25 @@ import cnuphys.ced.event.IAccumulationListener;
  *
  */
 @SuppressWarnings("serial")
-public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
-		IClasIoEventListener, IAccumulationListener {
-	
+public class ClasIoPresentBankPanel extends JPanel
+		implements ActionListener, IClasIoEventListener, IAccumulationListener {
+
 	// the event manager
 	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	// hash table
-	private Hashtable<String, ActionLabel> _alabels = new Hashtable<String, ActionLabel>(
-			193);
+	private Hashtable<String, ActionLabel> _alabels = new Hashtable<String, ActionLabel>(193);
 
 	// the node table
 	private NodeTable _nodeTable;
 
-	private Hashtable<String, ClasIoBankDialog> _dataBanks = new Hashtable<>(
-			193);
-	
+	private Hashtable<String, ClasIoBankDialog> _dataBanks = new Hashtable<>(193);
+
 	/**
-	 * This panel holds all the known banks in a grid of buttons. Banks present
-	 * will be clickable, and will cause the table to scroll to that name
+	 * This panel holds all the known banks in a grid of buttons. Banks present will
+	 * be clickable, and will cause the table to scroll to that name
 	 * 
-	 * @param nodeTable
-	 *            the table
+	 * @param nodeTable the table
 	 */
 	public ClasIoPresentBankPanel(NodeTable nodeTable) {
 		_nodeTable = nodeTable;
@@ -163,7 +160,6 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 		// _nodeTable.makeNameVisible(ae.getActionCommand());
 	}
 
-	
 	@Override
 	public void newClasIoEvent(DataEvent event) {
 		if (!_eventManager.isAccumulating()) {
@@ -189,9 +185,10 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 			break;
 		}
 	}
-	
+
 	/**
 	 * Change the event source type
+	 * 
 	 * @param source the new source: File, ET
 	 */
 	@Override
@@ -200,12 +197,13 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 
 	/**
 	 * Tests whether this listener is interested in events while accumulating
-	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 * 
+	 * @return <code>true</code> if this listener is NOT interested in events while
+	 *         accumulating
 	 */
 	@Override
 	public boolean ignoreIfAccumulating() {
 		return true;
 	}
-
 
 }

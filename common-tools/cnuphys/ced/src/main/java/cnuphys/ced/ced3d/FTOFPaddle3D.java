@@ -23,12 +23,9 @@ public class FTOFPaddle3D {
 	private static boolean _frame = true;
 
 	/**
-	 * @param sector
-	 *            1-based sector
-	 * @param superLayer
-	 *            the "superlayer" [PANEL_1A, PANEL_1B, PANEL_2] (0, 1, 2)
-	 * @param paddleId
-	 *            1-based paddle Id
+	 * @param sector     1-based sector
+	 * @param superLayer the "superlayer" [PANEL_1A, PANEL_1B, PANEL_2] (0, 1, 2)
+	 * @param paddleId   1-based paddle Id
 	 */
 	public FTOFPaddle3D(int sector, int superLayer, int paddleId) {
 		_sector = sector;
@@ -69,10 +66,8 @@ public class FTOFPaddle3D {
 	/**
 	 * Draw the paddle
 	 * 
-	 * @param drawable
-	 *            the drawable
-	 * @param color
-	 *            the color
+	 * @param drawable the drawable
+	 * @param color    the color
 	 */
 	protected void drawPaddle(GLAutoDrawable drawable, Color color) {
 		Support3D.drawQuad(drawable, _coords, 0, 1, 2, 3, color, 1f, _frame);

@@ -28,7 +28,7 @@ import cnuphys.fastMCed.eventio.IPhysicsEventListener;
 
 public class FastMCMenuAddition implements ActionListener, IPhysicsEventListener, IStreamProcessor {
 
-	//the physics event manager
+	// the physics event manager
 	private PhysicsEventManager _physicsEventManager = PhysicsEventManager.getInstance();
 
 	// the open menu
@@ -39,7 +39,7 @@ public class FastMCMenuAddition implements ActionListener, IPhysicsEventListener
 	// the next menu item
 	private JMenuItem _nextItem;
 
-	//the stream menu item
+	// the stream menu item
 	private JMenuItem _streamItem;
 
 	// the parent menu
@@ -59,7 +59,6 @@ public class FastMCMenuAddition implements ActionListener, IPhysicsEventListener
 	 */
 	public FastMCMenuAddition(JMenu menu) {
 		_menu = menu;
-
 
 		// add things in reverse order because of the items already in the file
 		// menu
@@ -103,20 +102,17 @@ public class FastMCMenuAddition implements ActionListener, IPhysicsEventListener
 
 		return _recentMenu;
 	}
-	
 
 	/**
 	 * Update the recent files for the recent file menu.
 	 * 
-	 * @param path
-	 *            the path to the file
+	 * @param path the path to the file
 	 */
 	private void updateRecentFiles(String path) {
 		if (path == null) {
 			return;
 		}
-		Vector<String> recentFiles = Environment.getInstance()
-				.getPreferenceList(_recentFileKey);
+		Vector<String> recentFiles = Environment.getInstance().getPreferenceList(_recentFileKey);
 		if (recentFiles == null) {
 			recentFiles = new Vector<String>(10);
 		}
@@ -127,8 +123,7 @@ public class FastMCMenuAddition implements ActionListener, IPhysicsEventListener
 		if (recentFiles.size() > 9) {
 			recentFiles.removeElementAt(9);
 		}
-		Environment.getInstance().savePreferenceList(_recentFileKey,
-				recentFiles);
+		Environment.getInstance().savePreferenceList(_recentFileKey, recentFiles);
 
 		// add to menu
 		addRecentFileMenu(path, true);
@@ -153,10 +148,10 @@ public class FastMCMenuAddition implements ActionListener, IPhysicsEventListener
 			public void actionPerformed(ActionEvent ae) {
 				try {
 					String fn = ae.getActionCommand();
-					
+
 //					System.err.println("RECENT FILE: [" + fn + "]");
 					File file = new File(fn);
-					
+
 					LundFileEventGenerator generator = new LundFileEventGenerator(file);
 					GeneratorManager.getInstance().setFileGeneratorSelected();
 					_physicsEventManager.setFileEventGenerator(generator);
@@ -177,19 +172,17 @@ public class FastMCMenuAddition implements ActionListener, IPhysicsEventListener
 		}
 
 	}
-	
+
 	// add a menu item
 	private JMenuItem addItem(String label) {
 		return addItem(label, 0);
 	}
 
-
 	// convenience method to add menu item
 	private JMenuItem addItem(String label, int accelKey) {
 		JMenuItem item = new JMenuItem(label);
 		if (accelKey > 0) {
-			item.setAccelerator(KeyStroke.getKeyStroke(accelKey,
-					ActionEvent.CTRL_MASK));
+			item.setAccelerator(KeyStroke.getKeyStroke(accelKey, ActionEvent.CTRL_MASK));
 		}
 
 		item.addActionListener(this);
@@ -200,8 +193,7 @@ public class FastMCMenuAddition implements ActionListener, IPhysicsEventListener
 	/**
 	 * New fast mc event
 	 * 
-	 * @param event
-	 *            the generated physics event
+	 * @param event the generated physics event
 	 */
 	@Override
 	public void newPhysicsEvent(PhysicsEvent event, List<ParticleHits> particleHits) {
@@ -210,16 +202,16 @@ public class FastMCMenuAddition implements ActionListener, IPhysicsEventListener
 
 	/**
 	 * A new event generator is active
+	 * 
 	 * @param generator the now active generator
 	 */
 	@Override
 	public void newEventGenerator(final AEventGenerator generator) {
 		if ((generator != null) && (generator instanceof LundFileEventGenerator)) {
-			updateRecentFiles(((LundFileEventGenerator)generator).getFile().getPath());
+			updateRecentFiles(((LundFileEventGenerator) generator).getFile().getPath());
 		}
 		fixMenuState();
 	}
-	
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -236,17 +228,17 @@ public class FastMCMenuAddition implements ActionListener, IPhysicsEventListener
 			_streamDialog.setVisible(true);
 			_streamDialog.toFront();
 			fixMenuState();
-		} 
+		}
 	}
 
 	// fix the menus state
 	private void fixMenuState() {
 		boolean hasAnotherEvent = _physicsEventManager.moreEvents();
 		boolean streaming = StreamManager.getInstance().isStarted();
-	//	boolean paused = StreamManager.getInstance().isPaused();
+		// boolean paused = StreamManager.getInstance().isPaused();
 		boolean stopped = StreamManager.getInstance().isStopped();
 		boolean dialogVis = (_streamDialog != null) && _streamDialog.isVisible();
-		
+
 		_recentMenu.setEnabled(!dialogVis && stopped);
 		_openItem.setEnabled(!dialogVis && stopped);
 
@@ -268,6 +260,5 @@ public class FastMCMenuAddition implements ActionListener, IPhysicsEventListener
 	public String flagExplanation() {
 		return "No way";
 	}
-
 
 }

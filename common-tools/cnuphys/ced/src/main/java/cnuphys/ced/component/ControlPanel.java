@@ -103,13 +103,10 @@ public class ControlPanel extends JPanel implements ChangeListener {
 	/**
 	 * Create a view control panel
 	 * 
-	 * @param container
-	 *            the parent container
-	 * @param controlPanelBits
-	 *            the bits fo which components are added
-	 * @param displayArrayBits
-	 *            the bits for which display flags are added to the display
-	 *            array.
+	 * @param container        the parent container
+	 * @param controlPanelBits the bits fo which components are added
+	 * @param displayArrayBits the bits for which display flags are added to the
+	 *                         display array.
 	 */
 	public ControlPanel(CedView view, int controlPanelBits, int displayArrayBits, int nc, int hgap) {
 		_view = view;
@@ -139,28 +136,26 @@ public class ControlPanel extends JPanel implements ChangeListener {
 	/**
 	 * Add a component to the south, below the feedback.
 	 * 
-	 * @param component
-	 *            the added component
+	 * @param component the added component
 	 */
 	public void addSouth(JComponent component) {
 		add(component, BorderLayout.SOUTH);
 	}
-	
+
 	// used only by the special accumulation only all dc view
 	private void addForAllDCAccumView(CedView view, JTabbedPane tabbedPane) {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout(2, 2));
 
 		panel.setBorder(new CommonBorder("Visibility"));
-		
-		//main panel
+
+		// main panel
 		AllDCAccumPanel apan = new AllDCAccumPanel(view);
 		panel.add(apan, BorderLayout.CENTER);
-		
-		
+
 		// accumulation
-		_colorPanel = new ColorModelPanel(AccumulationManager.colorScaleModel, 160,
-				"Relative Accumulation", 10, _view.getMedianSetting());
+		_colorPanel = new ColorModelPanel(AccumulationManager.colorScaleModel, 160, "Relative Accumulation", 10,
+				_view.getMedianSetting());
 
 //		_colorPanel.getSlider().setEnabled(false);
 //		_colorPanel.getSlider().addChangeListener(this);
@@ -170,25 +165,25 @@ public class ControlPanel extends JPanel implements ChangeListener {
 		tabbedPane.add(panel, "display");
 
 	}
-	
+
 	/**
 	 * Get the color scale model if there is one.
+	 * 
 	 * @return the color scale model for accumulation, etc.
 	 */
 	public ColorScaleModel getColorScaleModel() {
 		if (_colorPanel != null) {
 			return _colorPanel.getColorScaleModel();
 		}
-		
+
 		return null;
 	}
-
 
 	// use a tabbed pane to save space
 	private JTabbedPane addTabbedPane(CedView view, int controlPanelBits, int displayArrayBits) {
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.setFont(Fonts.smallFont);
-		
+
 		if (Bits.checkBit(controlPanelBits, ALLDC_ACCUM_ONLY)) {
 			addForAllDCAccumView(view, tabbedPane);
 			return tabbedPane;
@@ -259,10 +254,10 @@ public class ControlPanel extends JPanel implements ChangeListener {
 		}
 
 		// target z slider
-		//if (Bits.checkBit(controlPanelBits, TARGETSLIDER)) {
-			// let's disable--just takes up space
-			// box.add(createTargetSlider());
-		//}
+		// if (Bits.checkBit(controlPanelBits, TARGETSLIDER)) {
+		// let's disable--just takes up space
+		// box.add(createTargetSlider());
+		// }
 
 		// basic.add(box);
 

@@ -11,22 +11,21 @@ package cnuphys.magfield;
 
 public enum LengthUnit {
 
-    CM, M;
+	CM, M;
 
-    /**
-     * Get the length unit from an integer
-     * 
-     * @param val
-     *            the integer value
-     * @return the length unit
-     */
-    public static LengthUnit fromInt(int val) {
-	if (val == 0) {
-	    return CM;
-	} else if (val == 1) {
-	    return M;
+	/**
+	 * Get the length unit from an integer
+	 * 
+	 * @param val the integer value
+	 * @return the length unit
+	 */
+	public static LengthUnit fromInt(int val) {
+		if (val == 0) {
+			return CM;
+		} else if (val == 1) {
+			return M;
+		}
+		return null;
 	}
-	return null;
-    }
 
 }

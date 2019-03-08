@@ -28,8 +28,7 @@ import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.TextUtilities;
 
 @SuppressWarnings("serial")
-public class RangeSlider extends JComponent implements MouseMotionListener,
-		MouseListener {
+public class RangeSlider extends JComponent implements MouseMotionListener, MouseListener {
 
 	public static final IValueLabeler defaultLabeler = new IValueLabeler() {
 
@@ -40,8 +39,7 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 
 	};
 
-	private static Rectangle nullRectangle = new Rectangle(-999999, -999999, 0,
-			0);
+	private static Rectangle nullRectangle = new Rectangle(-999999, -999999, 0, 0);
 
 	// Listener list for slider updates.
 	protected EventListenerList _listenerList;
@@ -83,12 +81,10 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 	protected int trimLen = 0;
 
 	// flag icon for min current value
-	protected static ImageIcon minImage = ImageManager.getInstance()
-			.loadImageIcon("images/rightflag.png");
+	protected static ImageIcon minImage = ImageManager.getInstance().loadImageIcon("images/rightflag.png");
 
 	// flag icon for max current value
-	protected static ImageIcon maxImage = ImageManager.getInstance()
-			.loadImageIcon("images/leftflag.png");
+	protected static ImageIcon maxImage = ImageManager.getInstance().loadImageIcon("images/leftflag.png");
 
 	// protected static ImageIcon minImage = ImageManager.getInstance()
 	// .loadImageIcon("images/upflag.png");
@@ -98,8 +94,7 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 	// .loadImageIcon("images/downflag.png");
 	//
 	// the length of the pin part of a thumb
-	protected static final int PINHEIGHT = (minImage != null) ? minImage
-			.getIconHeight() : 0;
+	protected static final int PINHEIGHT = (minImage != null) ? minImage.getIconHeight() : 0;
 
 	// extent above/below trench
 	protected static final int PINEXTRA = 2;
@@ -156,19 +151,16 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 	/**
 	 * Create a Range Slider with two thumbs
 	 * 
-	 * @param fullRange
-	 *            the full range of the slider.
-	 * @param valueLabeler
-	 *            knows the appropriate way to draw labels for the values. For
-	 *            example, if the values represent unix times, the labeler might
-	 *            convert unix times to readable strings.
+	 * @param fullRange    the full range of the slider.
+	 * @param valueLabeler knows the appropriate way to draw labels for the values.
+	 *                     For example, if the values represent unix times, the
+	 *                     labeler might convert unix times to readable strings.
 	 */
 	public RangeSlider(Range fullRange, IValueLabeler valueLabeler) {
 		_fullRange = fullRange;
 		_currentRange = new Range(_fullRange);
 		setValueLabeler(valueLabeler);
-		setBackground(Environment.getInstance()
-				.getDefaultPanelBackgroundColor());
+		setBackground(Environment.getInstance().getDefaultPanelBackgroundColor());
 		setOpaque(true);
 		addMouseMotionListener(this);
 		addMouseListener(this);
@@ -185,8 +177,7 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 	/**
 	 * Paint the component
 	 * 
-	 * @param g
-	 *            the graphics context
+	 * @param g the graphics context
 	 */
 	@Override
 	public void paintComponent(Graphics g) {
@@ -215,18 +206,14 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 		int ymid = b.height / 2;
 
 		// get the full range strings and their widths
-		String fullRangeMinString = _valueLabeler.valueString(_fullRange
-				.getMinValue());
-		String fullRangeMaxString = _valueLabeler.valueString(_fullRange
-				.getMaxValue());
+		String fullRangeMinString = _valueLabeler.valueString(_fullRange.getMinValue());
+		String fullRangeMaxString = _valueLabeler.valueString(_fullRange.getMaxValue());
 		int fullRangeMinStrW = fm.stringWidth(fullRangeMinString);
 		int fullRangeMaxStrW = fm.stringWidth(fullRangeMaxString);
 
 		// get the current range strings and their widths
-		String currentRangeMinString = _valueLabeler.valueString(_currentRange
-				.getMinValue());
-		String currentRangeMaxString = _valueLabeler.valueString(_currentRange
-				.getMaxValue());
+		String currentRangeMinString = _valueLabeler.valueString(_currentRange.getMinValue());
+		String currentRangeMaxString = _valueLabeler.valueString(_currentRange.getMaxValue());
 		int currentRangeMinStrW = fm.stringWidth(currentRangeMinString);
 		int currentRangeMaxStrW = fm.stringWidth(currentRangeMaxString);
 
@@ -253,23 +240,20 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 		int curMax = getX(_currentRange.getMaxValue());
 
 		minThumbRectangle.setBounds(curMin, ymid - ih + PINEXTRA + 2, iw, ih);
-		minThumbDragBounds.setBounds(delMin, minThumbRectangle.y, curMax
-				- delMin + 1, ih);
+		minThumbDragBounds.setBounds(delMin, minThumbRectangle.y, curMax - delMin + 1, ih);
 
 		// maxThumbRectangle.setBounds(curMax - iw + 1, ymid - PINEXTRA, iw,
 		// ih);
-		maxThumbRectangle.setBounds(curMax - iw + 1, ymid - ih + PINEXTRA + 2,
-				iw, ih);
-		maxThumbDragBounds.setBounds(curMin + 1, maxThumbRectangle.y, delMin
-				+ trenchWidth - curMin - 1, ih);
+		maxThumbRectangle.setBounds(curMax - iw + 1, ymid - ih + PINEXTRA + 2, iw, ih);
+		maxThumbDragBounds.setBounds(curMin + 1, maxThumbRectangle.y, delMin + trenchWidth - curMin - 1, ih);
 
 		drawImage(g, minImage, minThumbRectangle);
 		drawImage(g, maxImage, maxThumbRectangle);
 
 		rangeBounds.setBounds(curMin, ymid - 4, curMax - curMin, 9);
 		fillRect(g, rangeColor, rangeBounds);
-		GraphicsUtilities.drawSimple3DRect(g, rangeBounds.x, rangeBounds.y,
-				rangeBounds.width, rangeBounds.height, false);
+		GraphicsUtilities.drawSimple3DRect(g, rangeBounds.x, rangeBounds.y, rangeBounds.width, rangeBounds.height,
+				false);
 
 		// draw a line indicating runTime (animation) if it is in range
 		if (inCurrentRange(runTime)) {
@@ -310,11 +294,8 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 			// g.drawString(rtString, xx, yy);
 			// }
 			int yy = ymid - 5;
-			runTimeBackgroundRectangle.setBounds(xx, yy - fm.getAscent(),
-					runTimeStrW, fm.getAscent());
-			fillRect(g, Environment.getInstance()
-					.getDefaultPanelBackgroundColor(),
-					runTimeBackgroundRectangle);
+			runTimeBackgroundRectangle.setBounds(xx, yy - fm.getAscent(), runTimeStrW, fm.getAscent());
+			fillRect(g, Environment.getInstance().getDefaultPanelBackgroundColor(), runTimeBackgroundRectangle);
 			g.setColor(Color.blue);
 			g.drawString(rtString, xx, yy);
 
@@ -324,8 +305,7 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 				runTimeDragBounds.setBounds(nullRectangle);
 			} else {
 				runTimeRectangle.setBounds(rtx - 4, ymid - 8, 8, 16);
-				runTimeDragBounds.setBounds(curMin, ymid - 8, curMax - curMin,
-						16);
+				runTimeDragBounds.setBounds(curMin, ymid - 8, curMax - curMin, 16);
 
 				fillRect(g, runTimeFill, runTimeRectangle);
 			}
@@ -341,12 +321,10 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 
 		// draw the current range strings
 		g.setColor(currentColor);
-		g.drawString(currentRangeMinString, curMin - currentRangeMinStrW / 2,
-				ymid - ih + 2);
+		g.drawString(currentRangeMinString, curMin - currentRangeMinStrW / 2, ymid - ih + 2);
 		// g.drawString(currentRangeMaxString, curMax - currentRangeMaxStrW / 2,
 		// ymid + ih + fm.getHeight());
-		g.drawString(currentRangeMaxString, curMax - currentRangeMaxStrW / 2,
-				ymid - ih + 2);
+		g.drawString(currentRangeMaxString, curMax - currentRangeMaxStrW / 2, ymid - ih + 2);
 
 		// draw the trench;
 		g.setColor(Color.white);
@@ -355,13 +333,12 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 		g.drawLine(delMin, ymid, delMin + trenchWidth, ymid);
 
 		// draw full range strings
-		TextUtilities.drawGhostText(g, fullRangeMinString, delMin
-				- fullRangeMinStrW / 2, ymid + 1 + PINEXTRA + fm.getHeight());
+		TextUtilities.drawGhostText(g, fullRangeMinString, delMin - fullRangeMinStrW / 2,
+				ymid + 1 + PINEXTRA + fm.getHeight());
 		// TextUtilities.drawGhostText(g, fullRangeMaxString, delMin +
 		// trenchWidth
 		// - fullRangeMaxStrW / 2 -1, ymid - 3 - PINEXTRA);
-		TextUtilities.drawGhostText(g, fullRangeMaxString, delMin + trenchWidth
-				- fullRangeMaxStrW / 2 - 1,
+		TextUtilities.drawGhostText(g, fullRangeMaxString, delMin + trenchWidth - fullRangeMaxStrW / 2 - 1,
 				ymid + 1 + PINEXTRA + fm.getHeight());
 	}
 
@@ -406,8 +383,7 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 	 */
 	protected int getPreferredHeight() {
 		FontMetrics fm = getFontMetrics(_font);
-		return -PINHEIGHT - 3 + 2
-				* (1 + (PINHEIGHT - PINEXTRA) + VGAP + 1 + fm.getHeight());
+		return -PINHEIGHT - 3 + 2 * (1 + (PINHEIGHT - PINEXTRA) + VGAP + 1 + fm.getHeight());
 	}
 
 	@Override
@@ -440,8 +416,7 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 	/**
 	 * Remove a range slider listener.
 	 * 
-	 * @param listener
-	 *            the range slider listener to remove.
+	 * @param listener the range slider listener to remove.
 	 */
 	public void removeRangeSliderListener(IRangeSliderListener listener) {
 
@@ -455,8 +430,7 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 	/**
 	 * Add a range slider listener.
 	 * 
-	 * @param listener
-	 *            the range slider listener to add.
+	 * @param listener the range slider listener to add.
 	 */
 	public void addRangeSliderListener(IRangeSliderListener listener) {
 
@@ -486,8 +460,7 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 		// those that are interested in this event
 		for (int i = listeners.length - 2; i >= 0; i -= 2) {
 			if (listeners[i] == IRangeSliderListener.class) {
-				((IRangeSliderListener) listeners[i + 1])
-						.rangeSliderChanged(this);
+				((IRangeSliderListener) listeners[i + 1]).rangeSliderChanged(this);
 			}
 		}
 	}
@@ -587,8 +560,7 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 			int newX = (pp.x - startX) + refStartX;
 			newX = inBounds(newX, runTimeDragBounds);
 			runTime = getValue(newX);
-			runTime = Math.max(_currentRange.getMinValue(),
-					Math.min(_currentRange.getMaxValue(), runTime));
+			runTime = Math.max(_currentRange.getMinValue(), Math.min(_currentRange.getMaxValue(), runTime));
 			repaint();
 			runtimeAdjusted(true);
 		}
@@ -615,8 +587,7 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 	}
 
 	/**
-	 * @param valueLabeler
-	 *            the valueLabeler to set
+	 * @param valueLabeler the valueLabeler to set
 	 */
 	public void setValueLabeler(IValueLabeler valueLabeler) {
 		_valueLabeler = valueLabeler;
@@ -640,8 +611,7 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 	 * Check whether the given value is in the current range. It is an inclusive
 	 * check.
 	 * 
-	 * @param val
-	 *            the value to test.
+	 * @param val the value to test.
 	 * @return <code>true</code> if the value is equal to a limit or between the
 	 *         limits.
 	 */
@@ -650,11 +620,9 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 	}
 
 	/**
-	 * Check whether the given value is in the full range. It is an inclusive
-	 * check.
+	 * Check whether the given value is in the full range. It is an inclusive check.
 	 * 
-	 * @param val
-	 *            the value to test.
+	 * @param val the value to test.
 	 * @return <code>true</code> if the value is equal to a limit or between the
 	 *         limits.
 	 */
@@ -665,8 +633,7 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 	/**
 	 * Set a new full range. Will set the current range to be the full extent.
 	 * 
-	 * @param fullRange
-	 *            the new full range
+	 * @param fullRange the new full range
 	 */
 	public void setFullRange(Range fullRange) {
 		_fullRange = new Range(fullRange);
@@ -677,25 +644,20 @@ public class RangeSlider extends JComponent implements MouseMotionListener,
 	/**
 	 * Called when the animation run button is selected
 	 * 
-	 * @param del
-	 *            the increment of the runTime value. It will be incremented
-	 *            from the current range min time to the max time in steps of
-	 *            del.
-	 * @param nonAWTRunnable
-	 *            will be called first in each step and executed in a non-AWT
-	 *            thread.
-	 * @param awtRunnable
-	 *            will be placed on the AWT thread when the non AWT runnable
-	 *            finishes
+	 * @param del            the increment of the runTime value. It will be
+	 *                       incremented from the current range min time to the max
+	 *                       time in steps of del.
+	 * @param nonAWTRunnable will be called first in each step and executed in a
+	 *                       non-AWT thread.
+	 * @param awtRunnable    will be placed on the AWT thread when the non AWT
+	 *                       runnable finishes
 	 */
-	public void run(final long del, final Runnable nonAWTRunnable,
-			final Runnable awtRunnable) {
+	public void run(final long del, final Runnable nonAWTRunnable, final Runnable awtRunnable) {
 		if (running) {
 			System.err.println("Already running. That's rarely a good sign.");
 		}
 
-		if ((runTime < _currentRange.getMinValue() || (runTime >= _currentRange
-				.getMaxValue()))) {
+		if ((runTime < _currentRange.getMinValue() || (runTime >= _currentRange.getMaxValue()))) {
 			runTime = _currentRange.getMinValue();
 		}
 

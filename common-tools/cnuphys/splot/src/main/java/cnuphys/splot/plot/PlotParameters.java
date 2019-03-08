@@ -5,19 +5,19 @@ import java.awt.Font;
 import java.util.Vector;
 
 public class PlotParameters {
-	
-	//for legend 
+
+	// for legend
 	private Font _textFont = Environment.getInstance().getCommonFont(12);
 	private Color _textFillColor = new Color(240, 240, 240, 164);
 	private Color _textTextColor = Color.black;
 	private Color _textBorderColor = Color.black;
-	
-	//for extra text
+
+	// for extra text
 	private Font _extraFont = Environment.getInstance().getCommonFont(10);
 	private Color _extraFillColor = new Color(240, 240, 248, 164);
 	private Color _extraTextColor = Color.black;
 	private Color _extraBorderColor = Color.black;
-	
+
 	// force include zero on plots?
 	private boolean _includeYzero = false;
 	private boolean _includeXzero = false;
@@ -26,17 +26,17 @@ public class PlotParameters {
 	private boolean _useYDataLimits = false;
 	private boolean _useXDataLimits = false;
 
-	//legend related
+	// legend related
 	private int _legendLineLength = 70;
 	private boolean _legendBorder = true;
 	private boolean _drawLegend = true;
-	
-	//extra text
+
+	// extra text
 	private boolean _extraBorder = true;
 	private boolean _drawExtra = true;
 	private String[] _extraStrings;
-	
-	//color scale
+
+	// color scale
 	private boolean _drawGradient = false;
 
 	private Font _titleFont = Environment.getInstance().getCommonFont(20);
@@ -93,23 +93,25 @@ public class PlotParameters {
 	public void mustIncludeYZero(boolean incZero) {
 		_includeYzero = incZero;
 	}
-	
+
 	/**
 	 * Get the extra strings for a second legend like display
+	 * 
 	 * @return the extra strings
 	 */
 	public String[] getExtraStrings() {
 		return _extraStrings;
 	}
-	
+
 	/**
 	 * Set the extra strings for a second legend like display
+	 * 
 	 * @param extraStrings the new extra strings array
 	 */
 	public void setExtraStrings(String... extraStrings) {
 		_extraStrings = extraStrings;
 	}
-	
+
 	/**
 	 * Check whether the extra text border is drawn
 	 * 
@@ -127,7 +129,6 @@ public class PlotParameters {
 	public void setExtraBorder(boolean extraBorder) {
 		_extraBorder = extraBorder;
 	}
-	
 
 	/**
 	 * Check whether the legend border is drawn
@@ -218,7 +219,6 @@ public class PlotParameters {
 	public Font getTextFont() {
 		return _textFont;
 	}
-	
 
 	/**
 	 * Set the extra text fill color
@@ -248,7 +248,7 @@ public class PlotParameters {
 	}
 
 	/**
-	 * Get the extra text  color
+	 * Get the extra text color
 	 * 
 	 * @return the extra text color
 	 */
@@ -367,8 +367,8 @@ public class PlotParameters {
 	/**
 	 * Check whether we should use x data limits rather than "nice values"
 	 * 
-	 * @return <code>true</code> we should use x data limits rather than
-	 *         "nice values"
+	 * @return <code>true</code> we should use x data limits rather than "nice
+	 *         values"
 	 */
 	public boolean useXDataLimits() {
 		return _useXDataLimits;
@@ -386,8 +386,8 @@ public class PlotParameters {
 	/**
 	 * Check whether we should use y data limits rather than "nice values"
 	 * 
-	 * @return <code>true</code> we should use y data limits rather than
-	 *         "nice values"
+	 * @return <code>true</code> we should use y data limits rather than "nice
+	 *         values"
 	 */
 	public boolean useYDataLimits() {
 		return _useYDataLimits;
@@ -463,8 +463,7 @@ public class PlotParameters {
 	 * @param title the plot title
 	 */
 	public void setPlotTitle(String title) {
-		_canvas.remoteFirePropertyChange(PlotCanvas.TITLECHANGEPROP,
-				getPlotTitle(), title);
+		_canvas.remoteFirePropertyChange(PlotCanvas.TITLECHANGEPROP, getPlotTitle(), title);
 		_plotTitle = title;
 	}
 
@@ -492,8 +491,7 @@ public class PlotParameters {
 	 * @param label the plot x axis label
 	 */
 	public void setXLabel(String label) {
-		_canvas.remoteFirePropertyChange(PlotCanvas.XLABELCHANGEPROP,
-				getXLabel(), label);
+		_canvas.remoteFirePropertyChange(PlotCanvas.XLABELCHANGEPROP, getXLabel(), label);
 		_xLabel = label;
 	}
 
@@ -503,8 +501,7 @@ public class PlotParameters {
 	 * @param label the plot y axis label
 	 */
 	public void setYLabel(String label) {
-		_canvas.remoteFirePropertyChange(PlotCanvas.YLABELCHANGEPROP,
-				getYLabel(), label);
+		_canvas.remoteFirePropertyChange(PlotCanvas.YLABELCHANGEPROP, getYLabel(), label);
 		_yLabel = label;
 	}
 
@@ -525,7 +522,7 @@ public class PlotParameters {
 	public void setExtraDrawing(boolean draw) {
 		_drawExtra = draw;
 	}
-	
+
 	/**
 	 * Check whether we should draw a legend
 	 * 
@@ -544,7 +541,6 @@ public class PlotParameters {
 		_drawLegend = draw;
 	}
 
-	
 	/**
 	 * Check whether we should draw a gradient
 	 * 

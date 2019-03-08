@@ -25,8 +25,7 @@ import javax.swing.event.ListSelectionListener;
 import cnuphys.bCNU.util.Fonts;
 
 @SuppressWarnings("serial")
-public class FontDialog extends JDialog implements ListSelectionListener,
-		ItemListener {
+public class FontDialog extends JDialog implements ListSelectionListener, ItemListener {
 
 	/**
 	 * The last selected family, used for default in null constructor.
@@ -71,8 +70,8 @@ public class FontDialog extends JDialog implements ListSelectionListener,
 	/**
 	 * The list of font sizes
 	 */
-	private String fontSizes[] = { "8", "10", "11", "12", "14", "16", "18",
-			"20", "24", "30", "36", "40", "48", "60", "72" };
+	private String fontSizes[] = { "8", "10", "11", "12", "14", "16", "18", "20", "24", "30", "36", "40", "48", "60",
+			"72" };
 
 	/**
 	 * The display area. Use a JLabel as the AWT label doesn't always honor
@@ -88,8 +87,8 @@ public class FontDialog extends JDialog implements ListSelectionListener,
 	}
 
 	/**
-	 * Construct a FontChooser -- Sets title and gets array of fonts on the
-	 * system. Builds a GUI to let the user choose one font at one size.
+	 * Construct a FontChooser -- Sets title and gets array of fonts on the system.
+	 * Builds a GUI to let the user choose one font at one size.
 	 */
 	public FontDialog(Font inFont) {
 		setTitle("Font Selection");
@@ -145,8 +144,7 @@ public class FontDialog extends JDialog implements ListSelectionListener,
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				previewFont();
-				lastFont = new Font(returnFont.getFamily(), returnFont
-						.getStyle(), returnFont.getSize());
+				lastFont = new Font(returnFont.getFamily(), returnFont.getStyle(), returnFont.getSize());
 				dispose();
 				setVisible(false);
 			}
@@ -179,8 +177,7 @@ public class FontDialog extends JDialog implements ListSelectionListener,
 	 */
 	private JList createFontList() {
 
-		String[] fontList = GraphicsEnvironment.getLocalGraphicsEnvironment()
-				.getAvailableFontFamilyNames();
+		String[] fontList = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 
 		JList list = new JList(fontList);
 
@@ -189,8 +186,8 @@ public class FontDialog extends JDialog implements ListSelectionListener,
 	}
 
 	/**
-	 * Called from the action handlers to get the font info, build a font, and
-	 * set it.
+	 * Called from the action handlers to get the font info, build a font, and set
+	 * it.
 	 */
 	protected void previewFont() {
 		String resultName = (String) (fontFamilyList.getSelectedValue());
@@ -218,8 +215,7 @@ public class FontDialog extends JDialog implements ListSelectionListener,
 	/**
 	 * One of the list's was selected. Redo the preview.
 	 * 
-	 * @param lse
-	 *            the list selection event.
+	 * @param lse the list selection event.
 	 */
 	@Override
 	public void valueChanged(ListSelectionEvent lse) {
@@ -229,8 +225,7 @@ public class FontDialog extends JDialog implements ListSelectionListener,
 	/**
 	 * One of check boxes was selected.
 	 * 
-	 * @param ise
-	 *            the state changed event.
+	 * @param ise the state changed event.
 	 */
 	@Override
 	public void itemStateChanged(ItemEvent ise) {

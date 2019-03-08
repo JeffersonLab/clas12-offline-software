@@ -38,19 +38,17 @@ public class FastMath {
 	 */
 	public static double atan2(double y, double x) {
 
-
 		switch (_mathLib) {
 		case FAST:
 			return org.apache.commons.math3.util.FastMath.atan2(y, x);
 		case SUPERFAST:
-			return Icecore.atan2((float)y, (float)x);
+			return Icecore.atan2((float) y, (float) x);
 		default:
 			return Math.atan2(y, x);
 		}
 
 	}
-	
-	
+
 	/**
 	 * Might use standard or fast atan2
 	 * 
@@ -72,8 +70,7 @@ public class FastMath {
 	public static double atan2Deg(double y, double x) {
 		return Math.toDegrees(atan2(y, x));
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param x
@@ -92,7 +89,8 @@ public class FastMath {
 	public static double acos(double x) {
 
 		switch (_mathLib) {
-		case FAST: case SUPERFAST:
+		case FAST:
+		case SUPERFAST:
 			return org.apache.commons.math3.util.FastMath.acos(x);
 		default:
 			return Math.acos(x);
@@ -102,29 +100,31 @@ public class FastMath {
 
 	/**
 	 * Arc cosine returned in degrees
+	 * 
 	 * @param x the cosine value
 	 * @return acos in degrees
 	 */
 	public static double acos2Deg(double x) {
 		return Math.toDegrees(acos(x));
 	}
-	
-	
+
 	/**
 	 * Fast version of usual square root
+	 * 
 	 * @param x the value
 	 * @return the square root of x
 	 */
 	public static double sqrt(double x) {
 		switch (_mathLib) {
-		case FAST: case SUPERFAST:
+		case FAST:
+		case SUPERFAST:
 			return org.apache.commons.math3.util.FastMath.sqrt(x);
 		default:
 			return Math.sqrt(x);
 		}
 
 	}
-	
+
 	/**
 	 * Might use standard or fast sin
 	 * 
@@ -144,7 +144,6 @@ public class FastMath {
 
 	}
 
-	
 	/**
 	 * Might use standard or fast cos
 	 * 
@@ -162,7 +161,7 @@ public class FastMath {
 			return Math.cos(x);
 		}
 	}
-	
+
 	/**
 	 * Get the math lib being used
 	 * 
@@ -171,12 +170,11 @@ public class FastMath {
 	public static MathLib getMathLib() {
 		return _mathLib;
 	}
-	
+
 	/**
 	 * Vector length.
 	 *
-	 * @param v
-	 *            the v
+	 * @param v the v
 	 * @return the float
 	 */
 	public static float vectorLength(float v[]) {
@@ -186,60 +184,55 @@ public class FastMath {
 		return (float) sqrt(vx * vx + vy * vy + vz * vz);
 	}
 
-
-
 	/**
 	 * Set the math library to use
 	 * 
-	 * @param lib
-	 *            the math library enum
+	 * @param lib the math library enum
 	 */
 	public static void setMathLib(MathLib lib) {
 		_mathLib = lib;
 	}
 
-	
-	//faster sin and cos from gamers
-	 public static final class Riven {
+	// faster sin and cos from gamers
+	public static final class Riven {
 
-	        private static final int SIN_BITS, SIN_MASK, SIN_COUNT;
-	        private static final float radFull, radToIndex;
-	        private static final float degFull, degToIndex;
-	        private static final float[] sin, cos;
+		private static final int SIN_BITS, SIN_MASK, SIN_COUNT;
+		private static final float radFull, radToIndex;
+		private static final float degFull, degToIndex;
+		private static final float[] sin, cos;
 
-	        static {
-	            SIN_BITS = 12;
-	            SIN_MASK = ~(-1 << SIN_BITS);
-	            SIN_COUNT = SIN_MASK + 1;
+		static {
+			SIN_BITS = 12;
+			SIN_MASK = ~(-1 << SIN_BITS);
+			SIN_COUNT = SIN_MASK + 1;
 
-	            radFull = (float) (Math.PI * 2.0);
-	            degFull = (float) (360.0);
-	            radToIndex = SIN_COUNT / radFull;
-	            degToIndex = SIN_COUNT / degFull;
+			radFull = (float) (Math.PI * 2.0);
+			degFull = (float) (360.0);
+			radToIndex = SIN_COUNT / radFull;
+			degToIndex = SIN_COUNT / degFull;
 
-	            sin = new float[SIN_COUNT];
-	            cos = new float[SIN_COUNT];
+			sin = new float[SIN_COUNT];
+			cos = new float[SIN_COUNT];
 
-	            for (int i = 0; i < SIN_COUNT; i++) {
-	                sin[i] = (float) Math.sin((i + 0.5f) / SIN_COUNT * radFull);
-	                cos[i] = (float) Math.cos((i + 0.5f) / SIN_COUNT * radFull);
-	            }
+			for (int i = 0; i < SIN_COUNT; i++) {
+				sin[i] = (float) Math.sin((i + 0.5f) / SIN_COUNT * radFull);
+				cos[i] = (float) Math.cos((i + 0.5f) / SIN_COUNT * radFull);
+			}
 
-	            // Four cardinal directions (credits: Nate)                                                                                                                                                         
-	            for (int i = 0; i < 360; i += 90) {
-	                sin[(int) (i * degToIndex) & SIN_MASK] = (float) Math.sin(i * Math.PI / 180.0);
-	                cos[(int) (i * degToIndex) & SIN_MASK] = (float) Math.cos(i * Math.PI / 180.0);
-	            }
-	        }
+			// Four cardinal directions (credits: Nate)
+			for (int i = 0; i < 360; i += 90) {
+				sin[(int) (i * degToIndex) & SIN_MASK] = (float) Math.sin(i * Math.PI / 180.0);
+				cos[(int) (i * degToIndex) & SIN_MASK] = (float) Math.cos(i * Math.PI / 180.0);
+			}
+		}
 
-	        public static final float sin(float rad) {
-	            return sin[(int) (rad * radToIndex) & SIN_MASK];
-	        }
+		public static final float sin(float rad) {
+			return sin[(int) (rad * radToIndex) & SIN_MASK];
+		}
 
-	        public static final float cos(float rad) {
-	            return cos[(int) (rad * radToIndex) & SIN_MASK];
-	        }
-	    }
-
+		public static final float cos(float rad) {
+			return cos[(int) (rad * radToIndex) & SIN_MASK];
+		}
+	}
 
 }

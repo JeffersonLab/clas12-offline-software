@@ -71,10 +71,8 @@ public class SuperLayerDrawing {
 	/**
 	 * Constructor
 	 * 
-	 * @param view
-	 *            the owner view
-	 * @param isupl
-	 *            the superlayer geometry interface
+	 * @param view  the owner view
+	 * @param isupl the superlayer geometry interface
 	 */
 	public SuperLayerDrawing(CedView view, ISuperLayer isupl) {
 		_view = view;
@@ -153,12 +151,9 @@ public class SuperLayerDrawing {
 	/**
 	 * Draw the wires.
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param reallyClose
-	 *            if <code>true</code> we are really close
+	 * @param g           the graphics context
+	 * @param container   the rendering container
+	 * @param reallyClose if <code>true</code> we are really close
 	 */
 	private void drawWires(Graphics g, IContainer container, boolean reallyClose) {
 		Point pp = new Point(); // workspace
@@ -194,12 +189,9 @@ public class SuperLayerDrawing {
 	/**
 	 * Draw the masks showing the effect of the noise finding algorithm
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param parameters
-	 *            the noise algorithm parameters
+	 * @param g          the graphics context
+	 * @param container  the rendering container
+	 * @param parameters the noise algorithm parameters
 	 */
 	private void drawMasks(Graphics g, IContainer container, NoiseReductionParameters parameters) {
 		for (int wire = 0; wire < parameters.getNumWire(); wire++) {
@@ -218,17 +210,12 @@ public class SuperLayerDrawing {
 	 * Draws the masking that shows where the noise algorithm thinks there are
 	 * segments. Anything not masked is noise.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the rendering container
-	 * @param wire
-	 *            the ZERO BASED wire 0..
-	 * @param shifts
-	 *            the parameter shifts for this direction
-	 * @param sign
-	 *            the direction 1 for left -1 for right * @param wr essentially
-	 *            workspace
+	 * @param g         the graphics context.
+	 * @param container the rendering container
+	 * @param wire      the ZERO BASED wire 0..
+	 * @param shifts    the parameter shifts for this direction
+	 * @param sign      the direction 1 for left -1 for right * @param wr
+	 *                  essentially workspace
 	 */
 	private void drawMask(Graphics g, IContainer container, int wire, int shifts[], int sign) {
 
@@ -267,10 +254,8 @@ public class SuperLayerDrawing {
 	/**
 	 * Draw hits and related data
 	 * 
-	 * @param g
-	 *            The graphics object
-	 * @param container
-	 *            the drawing container
+	 * @param g         The graphics object
+	 * @param container the drawing container
 	 */
 	private void drawHits(Graphics g, IContainer container, boolean reallyClose, boolean segmentsOnly) {
 
@@ -283,7 +268,7 @@ public class SuperLayerDrawing {
 
 	// draw hits in accumulated mode
 	private void drawAccumulatedHits(Graphics g, IContainer container, boolean reallyClose, boolean segmentsOnly) {
-		
+
 		if (segmentsOnly) {
 			return;
 		}
@@ -299,7 +284,7 @@ public class SuperLayerDrawing {
 				int hit = dcAccumulatedData[sect0][supl0][lay0][wire0];
 				double fract = _view.getMedianSetting() * (((double) hit) / (1 + medianHit));
 				Color color = AccumulationManager.getInstance().getColor(_view.getColorScaleModel(), fract);
-				
+
 				g.setColor(color);
 				Polygon hexagon = getHexagon(container, lay0 + 1, wire0 + 1);
 				if (hexagon != null) {
@@ -347,18 +332,12 @@ public class SuperLayerDrawing {
 	/**
 	 * Draw a single dc hit
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param layer
-	 *            1-based layer 1..6
-	 * @param wire
-	 *            1-based wire 1..112
-	 * @param noise
-	 *            is noise hit
-	 * @param pid
-	 *            gemc particle id
+	 * @param g         the graphics context
+	 * @param container the rendering container
+	 * @param layer     1-based layer 1..6
+	 * @param wire      1-based wire 1..112
+	 * @param noise     is noise hit
+	 * @param pid       gemc particle id
 	 */
 	private void drawDCHit(Graphics g, IContainer container, int layer, int wire, boolean noise, int pid) {
 
@@ -404,23 +383,18 @@ public class SuperLayerDrawing {
 	/**
 	 * Draw a single dc hit
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param layer
-	 *            1-based layer 1..6
-	 * @param wire
-	 *            1-based wire 1..112
-	 * @param location
-	 *            location
+	 * @param g         the graphics context
+	 * @param container the rendering container
+	 * @param layer     1-based layer 1..6
+	 * @param wire      1-based wire 1..112
+	 * @param location  location
 	 */
 	private void drawReconDCHit(Graphics g, IContainer container, Color hitFill, Color hitLine, int layer, int wire,
 			Point location) {
 
 		// get the hexagon
 		Polygon hexagon = getHexagon(container, layer, wire);
-		
+
 		if (hexagon == null) {
 			return;
 		}
@@ -441,18 +415,12 @@ public class SuperLayerDrawing {
 	/**
 	 * Draw a single dc hit
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param layer
-	 *            1-based layer 1..6
-	 * @param wire
-	 *            1-based wire 1..112
-	 * @param noise
-	 *            is noise hit
-	 * @param pid
-	 *            gemc particle id
+	 * @param g         the graphics context
+	 * @param container the rendering container
+	 * @param layer     1-based layer 1..6
+	 * @param wire      1-based wire 1..112
+	 * @param noise     is noise hit
+	 * @param pid       gemc particle id
 	 */
 	private void drawBasicDCHit(Graphics g, IContainer container, int layer, int wire, boolean noise, int pid) {
 
@@ -467,22 +435,17 @@ public class SuperLayerDrawing {
 	/**
 	 * Draw a single dc hit
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param layer
-	 *            1-based layer 1..6
-	 * @param wire
-	 *            1-based wire 1..112
-	 * @param noise
-	 *            is noise hit
+	 * @param g         the graphics context
+	 * @param container the rendering container
+	 * @param layer     1-based layer 1..6
+	 * @param wire      1-based wire 1..112
+	 * @param noise     is noise hit
 	 */
-	public void drawReconDCHitAndDOCA(Graphics g, IContainer container, Color fillColor, Color frameColor, DCHit hit, boolean isTimeBased) {
+	public void drawReconDCHitAndDOCA(Graphics g, IContainer container, Color fillColor, Color frameColor, DCHit hit,
+			boolean isTimeBased) {
 
 		drawReconDCHit(g, container, fillColor, frameColor, hit.layer, hit.wire, hit.getLocation());
-		
-		
+
 		if (WorldGraphicsUtilities
 				.getMeanPixelDensity(_view.getContainer()) > SuperLayerDrawing.wireThreshold[_iSupl.superlayer()]) {
 
@@ -494,10 +457,8 @@ public class SuperLayerDrawing {
 	/**
 	 * Obtain a crude outline of a sense wire layer
 	 * 
-	 * @param container
-	 *            the container being rendered
-	 * @param layer
-	 *            the layer in question--a 1-based sensewire layer [1..6]
+	 * @param container the container being rendered
+	 * @param layer     the layer in question--a 1-based sensewire layer [1..6]
 	 * @return a layer outline
 	 */
 	public Polygon getLayerPolygon(IContainer container, int layer) {
@@ -527,13 +488,12 @@ public class SuperLayerDrawing {
 	}
 
 	/**
-	 * Gets the layer from the screen point. This only gives sensible results if
-	 * the world point has already passed the "inside" test.
+	 * Gets the layer from the screen point. This only gives sensible results if the
+	 * world point has already passed the "inside" test.
 	 * 
-	 * @param pp
-	 *            the screen point in question.
-	 * @return the layer containing the given world point. It returns [1..6] or
-	 *         -1 on failure
+	 * @param pp the screen point in question.
+	 * @return the layer containing the given world point. It returns [1..6] or -1
+	 *         on failure
 	 */
 	public int getLayer(IContainer container, Point pp) {
 
@@ -556,12 +516,9 @@ public class SuperLayerDrawing {
 	/**
 	 * Get the layer and the wire we are in
 	 * 
-	 * @param container
-	 *            holds 1-based layer and wire
-	 * @param pp
-	 *            the mouse point
-	 * @param data
-	 *            holds results [later, wire]
+	 * @param container holds 1-based layer and wire
+	 * @param pp        the mouse point
+	 * @param data      holds results [later, wire]
 	 */
 	public void getLayerAndWire(IContainer container, Point pp, int[] data) {
 		data[0] = -1;
@@ -601,8 +558,7 @@ public class SuperLayerDrawing {
 	/**
 	 * Get the layer polygon
 	 * 
-	 * @param layer
-	 *            the 1-based layer [1..6]
+	 * @param layer the 1-based layer [1..6]
 	 * @return the layer polygon
 	 */
 	public Polygon getLayerPolygon(int layer) {
@@ -612,14 +568,10 @@ public class SuperLayerDrawing {
 	/**
 	 * Highlight a noise hit on a drift chamber
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the drawing container
-	 * @param simple
-	 *            if <code>true</code>, use simpler drawing
-	 * @param hexagon
-	 *            the cell hexagon
+	 * @param g         the graphics context
+	 * @param container the drawing container
+	 * @param simple    if <code>true</code>, use simpler drawing
+	 * @param hexagon   the cell hexagon
 	 */
 	public void highlightNoiseHit(Graphics g, IContainer container, boolean simple, Polygon hexagon) {
 
@@ -654,12 +606,9 @@ public class SuperLayerDrawing {
 	/**
 	 * Gets the cell hexagon as a screen polygon.
 	 * 
-	 * @param container
-	 *            the container being rendered.
-	 * @param layer
-	 *            the 1-based layer 1..6
-	 * @param wire
-	 *            the one based wire 1..112
+	 * @param container the container being rendered.
+	 * @param layer     the 1-based layer 1..6
+	 * @param wire      the one based wire 1..112
 	 * @return the cell hexagon
 	 */
 	public Polygon getHexagon(IContainer container, int layer, int wire) {
@@ -690,8 +639,7 @@ public class SuperLayerDrawing {
 	/**
 	 * flip a poly created for the upper sector to the lower sector
 	 * 
-	 * @param wpoly
-	 *            the polygon to flip
+	 * @param wpoly the polygon to flip
 	 */
 	public static void flipPolyToLowerSector(Point2D.Double wpoly[]) {
 		for (Point2D.Double wp : wpoly) {
@@ -702,14 +650,10 @@ public class SuperLayerDrawing {
 	/**
 	 * Get the projected wire location
 	 * 
-	 * @param superlayer
-	 *            the 1-based superlayer 1..6
-	 * @param layer
-	 *            the 1-based layer 1..6
-	 * @param wire
-	 *            the 1-based wire 1..112
-	 * @param isLower
-	 *            if <code>true</code> flip to lower sector (SectorView only)
+	 * @param superlayer the 1-based superlayer 1..6
+	 * @param layer      the 1-based layer 1..6
+	 * @param wire       the 1-based wire 1..112
+	 * @param isLower    if <code>true</code> flip to lower sector (SectorView only)
 	 * @return the point, which might have NaNs
 	 */
 	public Point2D.Double wire(int superlayer, int layer, int wire, boolean isLower) {
@@ -733,24 +677,18 @@ public class SuperLayerDrawing {
 	/**
 	 * Draw a distance of closest approach circle
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param layer
-	 *            the 1-based layer 1..6
-	 * @param wire
-	 *            the 1-based wire 1..112
-	 * @param doca2d
-	 *            the doca in mm
+	 * @param g         the graphics context
+	 * @param container the rendering container
+	 * @param layer     the 1-based layer 1..6
+	 * @param wire      the 1-based wire 1..112
+	 * @param doca2d    the doca in mm
 	 */
 	public void drawDOCA(Graphics g, IContainer container, DCHit hit, boolean isTimeBased) {
 
-		
-		float docas[] = {-1, -1};
+		float docas[] = { -1, -1 };
 		Color frameColor;
-		Color fillColors[] = {CedColors.DOCA_COLOR, CedColors.TRKDOCA_COLOR};
-	
+		Color fillColors[] = { CedColors.DOCA_COLOR, CedColors.TRKDOCA_COLOR };
+
 		if (isTimeBased) {
 			docas[0] = _view.showTBDoca() ? hit.doca : 0f;
 			docas[1] = _view.showTBTrkDoca() ? hit.trkDoca : 0f;
@@ -758,17 +696,16 @@ public class SuperLayerDrawing {
 		} else { // hit based
 			docas[0] = _view.showHBDoca() ? hit.doca : 0f;
 			docas[1] = _view.showHBTrkDoca() ? hit.trkDoca : 0f;
-			frameColor = CedColors.HB_DOCAFRAME;			
+			frameColor = CedColors.HB_DOCAFRAME;
 		}
 
 		for (int j = 0; j < docas.length; j++) {
-			
+
 			float radius = docas[j];
 			if (radius < 1.0e-5) {
 				continue;
 			}
-			
-			
+
 			if (radius > 5) {
 
 				String wmsg = "Very large doca radius: " + radius + " cm. Sect: " + _iSupl.sector() + " supl: "
@@ -803,15 +740,11 @@ public class SuperLayerDrawing {
 	}
 
 	/**
-	 * projected space point. Projected by finding the closest point on the
-	 * plane.
+	 * projected space point. Projected by finding the closest point on the plane.
 	 * 
-	 * @param x
-	 *            the x coordinate
-	 * @param y
-	 *            the y coordinate
-	 * @param z
-	 *            the z coordinate
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @param z the z coordinate
 	 * @return the projected space point
 	 */
 	public Point3D projectedPoint(double x, double y, double z, Point2D.Double wp) {
@@ -820,10 +753,8 @@ public class SuperLayerDrawing {
 
 	/**
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the drawing container
+	 * @param g         the graphics context
+	 * @param container the drawing container
 	 */
 	public void drawHitBasedSegments(Graphics g, IContainer container) {
 
@@ -832,13 +763,13 @@ public class SuperLayerDrawing {
 		}
 
 		SegmentList segments = HBSegments.getInstance().getSegments();
-		
+
 		if ((segments != null) && !segments.isEmpty()) {
 			Point2D.Double wp1 = new Point2D.Double();
 			Point2D.Double wp2 = new Point2D.Double();
 			for (Segment segment : segments) {
 				if ((segment.sector == _iSupl.sector()) && (segment.superlayer == _iSupl.superlayer())) {
-					
+
 					projectedPoint(segment.x1, 0, segment.z1, wp1);
 					projectedPoint(segment.x2, 0, segment.z2, wp2);
 					drawSegment(g, container, _view, wp1, wp2, CedColors.hbSegmentLine, CedColors.HB_COLOR);
@@ -851,10 +782,8 @@ public class SuperLayerDrawing {
 
 	/**
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the drawing container
+	 * @param g         the graphics context
+	 * @param container the drawing container
 	 */
 	public void drawTimeBasedSegments(Graphics g, IContainer container) {
 
@@ -873,12 +802,11 @@ public class SuperLayerDrawing {
 //						System.err.println("seg sect 4 and superlayer " + segment.superlayer);
 //						System.err.println(String.format("    (%-9.4f, %-9.4f), (%-9.4f, %-9.4f)", segment.z1, segment.x1, segment.z2, segment.x2));
 //					}
-					
-					
+
 					projectedPoint(segment.x1, 0, segment.z1, wp1);
 					projectedPoint(segment.x2, 0, segment.z2, wp2);
-					
-					//have top flip if lower sector
+
+					// have top flip if lower sector
 					if (_iSupl.isLowerSector()) {
 						wp1.y = -wp1.y;
 						wp2.y = -wp2.y;
@@ -889,7 +817,7 @@ public class SuperLayerDrawing {
 //						System.err.println("    pp1: " + wp1);
 //						System.err.println("    pp2: " + wp2);
 //					}
-					
+
 					drawSegment(g, container, _view, wp1, wp2, CedColors.tbSegmentLine, CedColors.TB_COLOR);
 
 				}
@@ -925,14 +853,12 @@ public class SuperLayerDrawing {
 	}
 
 	/**
-	 * Gets the wire from the world point. This only gives sensible results if
-	 * the world point has already passed the "inside" test and we used getLayer
-	 * on the same point to get the layer.
+	 * Gets the wire from the world point. This only gives sensible results if the
+	 * world point has already passed the "inside" test and we used getLayer on the
+	 * same point to get the layer.
 	 * 
-	 * @param layer
-	 *            the one based layer [1..6]
-	 * @param wp
-	 *            the world point in question.
+	 * @param layer the one based layer [1..6]
+	 * @param wp    the world point in question.
 	 * @return the closest wire index on the given layer in range [1..112].
 	 */
 	public int getWire(int layer, Point2D.Double wp) {
@@ -958,17 +884,12 @@ public class SuperLayerDrawing {
 	}
 
 	/**
-	 * Add any appropriate feedback strings
-	 * panel.
+	 * Add any appropriate feedback strings panel.
 	 * 
-	 * @param container
-	 *            the Base container.
-	 * @param screenPoint
-	 *            the mouse location.
-	 * @param worldPoint
-	 *            the corresponding world point.
-	 * @param feedbackStrings
-	 *            the List of feedback strings to add to.
+	 * @param container       the Base container.
+	 * @param screenPoint     the mouse location.
+	 * @param worldPoint      the corresponding world point.
+	 * @param feedbackStrings the List of feedback strings to add to.
 	 */
 	public void getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
 			List<String> feedbackStrings) {

@@ -26,9 +26,9 @@ public class PCALGeometry {
 
 	/** constant for the u strip index */
 	public static final int PCAL_W = 2;
-	
-	//** plane or "view" names */
-	public static final String PLANE_NAMES[] = {"U", "V", "W"};
+
+	// ** plane or "view" names */
+	public static final String PLANE_NAMES[] = { "U", "V", "W" };
 
 	/** there are 36 strips for u, v and w */
 	public static final int PCAL_NUMSTRIP[] = { 68, 62, 62 };
@@ -73,7 +73,6 @@ public class PCALGeometry {
 
 	// used for coordinate transformations
 	private static Transformations _transformations;
-	
 
 	/**
 	 * Obtain the separation between the front of the inner and the front of the
@@ -86,8 +85,8 @@ public class PCALGeometry {
 	}
 
 	/**
-	 * Get the normal vector in sector xyz (cm) from the nominal target to the
-	 * front plane of the inner EC. All coordinates are in cm.
+	 * Get the normal vector in sector xyz (cm) from the nominal target to the front
+	 * plane of the inner EC. All coordinates are in cm.
 	 * 
 	 * @return the normal vector for the given plane
 	 */
@@ -98,15 +97,13 @@ public class PCALGeometry {
 	/**
 	 * Get the front plane of the PCAL
 	 * 
-	 * @param sector
-	 *            the 1-based sector [1..6]
+	 * @param sector the 1-based sector [1..6]
 	 * @return the front plane of the PCAL
 	 */
 	public static Plane3D getFrontPlane(int sector) {
 		Point3D clasr0 = new Point3D();
 		GeometryManager.sectorToClas(sector, clasr0, _r0);
-		Plane3D plane = new Plane3D(clasr0.x(), clasr0.y(), clasr0.z(),
-				clasr0.x(), clasr0.y(), clasr0.z());
+		Plane3D plane = new Plane3D(clasr0.x(), clasr0.y(), clasr0.z(), clasr0.x(), clasr0.y(), clasr0.z());
 		return plane;
 	}
 
@@ -153,8 +150,7 @@ public class PCALGeometry {
 	/**
 	 * Get a point from the IJK boundary
 	 * 
-	 * @param pointIndex
-	 *            the point index [0..2]
+	 * @param pointIndex the point index [0..2]
 	 * @return the corresponding point
 	 */
 	public static Point3D getTrianglePoint(int pointIndex) {
@@ -164,16 +160,12 @@ public class PCALGeometry {
 	/**
 	 * Get a point from a u, v or w strip
 	 * 
-	 * @param stripType
-	 *            EC_U, EC_V, or EC_W [0..2]
-	 * @param stripIndex
-	 *            the strip index [0..(PCAL_NUMSTRIP-1)]
-	 * @param pointIndex
-	 *            the point index [0..3]
+	 * @param stripType  EC_U, EC_V, or EC_W [0..2]
+	 * @param stripIndex the strip index [0..(PCAL_NUMSTRIP-1)]
+	 * @param pointIndex the point index [0..3]
 	 * @return
 	 */
-	public static Point3D getStripPoint(int stripType, int stripIndex,
-			int pointIndex) {
+	public static Point3D getStripPoint(int stripType, int stripIndex, int pointIndex) {
 		return _strips[stripType][stripIndex][pointIndex];
 	}
 
@@ -234,8 +226,7 @@ public class PCALGeometry {
 	/**
 	 * For the front face of a given plane, compute z from x
 	 * 
-	 * @param x
-	 *            the x coordinate in cm
+	 * @param x the x coordinate in cm
 	 * @return the z coordinate in cm
 	 */
 	public static double zFromX(double x) {
@@ -247,12 +238,9 @@ public class PCALGeometry {
 	/**
 	 * Get the triangle for a given view for 3D
 	 * 
-	 * @param sector
-	 *            the sector 1..6
-	 * @param view
-	 *            (aka layer) 1..3 for u, v, w
-	 * @param coords
-	 *            will hold the corners as [x1, y1, z1, ..., x3, y3, z3]
+	 * @param sector the sector 1..6
+	 * @param view   (aka layer) 1..3 for u, v, w
+	 * @param coords will hold the corners as [x1, y1, z1, ..., x3, y3, z3]
 	 */
 	public static void getViewTriangle(int sector, int view, float coords[]) {
 		// in geometry package, PCAL is same sa EC with stack (superlayer) = 0
@@ -263,14 +251,10 @@ public class PCALGeometry {
 	/**
 	 * Get the strips for use by 3D view
 	 * 
-	 * @param sector
-	 *            the sector 1..6
-	 * @param view
-	 *            (aka layer) 1..3 for u, v, w
-	 * @param strip
-	 *            1..36
-	 * @param coords
-	 *            holds the eight corners as [x1, y1, z1..x8, y8, z8]
+	 * @param sector the sector 1..6
+	 * @param view   (aka layer) 1..3 for u, v, w
+	 * @param strip  1..36
+	 * @param coords holds the eight corners as [x1, y1, z1..x8, y8, z8]
 	 */
 	public static void getStrip(int sector, int view, int strip, float coords[]) {
 		// in geometry package, PCAL is same sa EC with stack (superlayer) = 0
@@ -281,10 +265,8 @@ public class PCALGeometry {
 	 * Obtain the shell (for sector views) for the whole PCAL correct for the
 	 * relative phi.
 	 * 
-	 * @param stripType
-	 *            should be PCAL_U, PCAL_V, or PCAL_W
-	 * @param projectionPlane
-	 *            the projection plane
+	 * @param stripType       should be PCAL_U, PCAL_V, or PCAL_W
+	 * @param projectionPlane the projection plane
 	 * @return the shell for the whole panel.
 	 */
 	public static Point2D.Double[] getShell(int stripType, Plane3D projectionPlane) {
@@ -305,15 +287,15 @@ public class PCALGeometry {
 
 		Point2D.Double lastPP[] = null;
 		lastPP = getIntersections(stripType, lastIndex, projectionPlane, true);
-		
+
 		int firstIndex = 0;
-			
+
 		while (!doesProjectedPolyFullyIntersect(stripType, firstIndex, projectionPlane)) {
 			firstIndex++;
 		}
 		Point2D.Double firstPP[] = null;
 		firstPP = getIntersections(stripType, firstIndex, projectionPlane, true);
-		
+
 		if (lastPP[0].y > firstPP[0].y) {
 			wp[0] = lastPP[0];
 			wp[1] = firstPP[1];
@@ -333,10 +315,8 @@ public class PCALGeometry {
 	/**
 	 * Convert ijk coordinates to sector xyz
 	 * 
-	 * @param pijk
-	 *            the ijk coordinates
-	 * @param sectorXYZ
-	 *            the sector xyz coordinates
+	 * @param pijk      the ijk coordinates
+	 * @param sectorXYZ the sector xyz coordinates
 	 */
 	public static void ijkToSectorXYZ(Point3D localP, double[] sectorXYZ) {
 
@@ -373,8 +353,7 @@ public class PCALGeometry {
 		SINTHETA = Math.sin(THETA);
 		TANTHETA = Math.tan(THETA);
 
-		ECSuperlayer ecSuperlayer = GeometryManager.local_Cal_Sector0
-				.getSuperlayer(EC_PCAL);
+		ECSuperlayer ecSuperlayer = GeometryManager.local_Cal_Sector0.getSuperlayer(EC_PCAL);
 
 		ECLayer[] ecLayer = new ECLayer[3];
 
@@ -395,8 +374,7 @@ public class PCALGeometry {
 
 		for (int stripType = 0; stripType < 3; stripType++) {
 			for (int stripId = 0; stripId < PCAL_NUMSTRIP[stripType]; stripId++) {
-				ScintillatorPaddle strip = ecLayer[stripType]
-						.getComponent(stripId);
+				ScintillatorPaddle strip = ecLayer[stripType].getComponent(stripId);
 				_strips[stripType][stripId][0] = strip.getVolumePoint(4);
 				_strips[stripType][stripId][1] = strip.getVolumePoint(5);
 				_strips[stripType][stripId][2] = strip.getVolumePoint(1);
@@ -461,46 +439,35 @@ public class PCALGeometry {
 	} // initialize
 
 	/**
-	 * @param layer
-	 *            PCAL_U, PCAL_V, PCAL_W
-	 * @param stripid
-	 *            the 0-based paddle id
-	 * @param projectionPlane
-	 *            the projection plane
+	 * @param layer           PCAL_U, PCAL_V, PCAL_W
+	 * @param stripid         the 0-based paddle id
+	 * @param projectionPlane the projection plane
 	 * @return <code>true</code> if the projected polygon fully intersects the plane
 	 */
-	public static boolean doesProjectedPolyFullyIntersect(int layer,
-			int stripid, 
-			Plane3D projectionPlane) {
-		
-		ECLayer ecLayer = GeometryManager.clas_Cal_Sector0.getSuperlayer(
-				EC_PCAL).getLayer(layer);
+	public static boolean doesProjectedPolyFullyIntersect(int layer, int stripid, Plane3D projectionPlane) {
+
+		ECLayer ecLayer = GeometryManager.clas_Cal_Sector0.getSuperlayer(EC_PCAL).getLayer(layer);
 		ScintillatorPaddle strip = ecLayer.getComponent(stripid);
 		Point2D.Double wp[] = GeometryManager.allocate(4);
 		return GeometryManager.doesProjectedPolyIntersect(strip, projectionPlane, 6, 4);
 	}
 
 	/**
-	 * Get the intersections of a with a constant phi plane. If the paddle does
-	 * not intersect (happens as phi grows) return null;
+	 * Get the intersections of a with a constant phi plane. If the paddle does not
+	 * intersect (happens as phi grows) return null;
 	 * 
-	 * @param layer
-	 *            PCAL_U, PCAL_V, PCAL_W
-	 * @param stripid
-	 *            the 0-based paddle id
-	 * @param projectionPlane
-	 *            the projection plane
+	 * @param layer           PCAL_U, PCAL_V, PCAL_W
+	 * @param stripid         the 0-based paddle id
+	 * @param projectionPlane the projection plane
 	 * @return the intersection points (z component will be 0).
 	 */
-	public static Point2D.Double[] getIntersections(int layer, int stripid,
-			Plane3D projectionPlane, boolean offset) {
+	public static Point2D.Double[] getIntersections(int layer, int stripid, Plane3D projectionPlane, boolean offset) {
 
-		ECLayer ecLayer = GeometryManager.clas_Cal_Sector0.getSuperlayer(
-				EC_PCAL).getLayer(layer);
+		ECLayer ecLayer = GeometryManager.clas_Cal_Sector0.getSuperlayer(EC_PCAL).getLayer(layer);
 		ScintillatorPaddle strip = ecLayer.getComponent(stripid);
 		Point2D.Double wp[] = GeometryManager.allocate(4);
 		boolean isects = GeometryManager.getProjectedPolygon(strip, projectionPlane, 6, 4, wp, null);
-		
+
 		// note reordering
 		Point2D.Double p2d[] = new Point2D.Double[4];
 
@@ -527,8 +494,7 @@ public class PCALGeometry {
 		return p2d;
 	}
 
-	private static void offsetLine(Point2D.Double start, Point2D.Double end,
-			double len) {
+	private static void offsetLine(Point2D.Double start, Point2D.Double end, double len) {
 		double delx = len * COSTHETA;
 		double dely = len * SINTHETA;
 		start.x += delx;

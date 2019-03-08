@@ -52,8 +52,8 @@ public class MenuManager {
 	}
 
 	/**
-	 * This one is used after the menu manager is created. Then you can add
-	 * menus to the main frame without a reference to it.
+	 * This one is used after the menu manager is created. Then you can add menus to
+	 * the main frame without a reference to it.
 	 * 
 	 * @return the menu manager for the one and only BaseMDIApplication.
 	 */
@@ -72,8 +72,8 @@ public class MenuManager {
 		}
 		// put into the menu hash
 		_menus.put(menu.getText(), menu);
-		
-		//seems to be necessary on some linus platforms
+
+		// seems to be necessary on some linus platforms
 		menu.setForeground(Color.black);
 	}
 
@@ -133,12 +133,11 @@ public class MenuManager {
 	 * Convenience routine for adding a checkbox menu item.
 	 * 
 	 * @param label the menu label.
-	 * @param menu optional menu to add the item to.
+	 * @param menu  optional menu to add the item to.
 	 * @param ilist optional ItemListener.
 	 */
 
-	public static JCheckBoxMenuItem addCheckboxMenuItem(String label,
-			JMenu menu, ItemListener ilist) {
+	public static JCheckBoxMenuItem addCheckboxMenuItem(String label, JMenu menu, ItemListener ilist) {
 		return addCheckboxMenuItem(label, menu, ilist, false);
 	}
 
@@ -146,13 +145,12 @@ public class MenuManager {
 	 * Convenience routine for adding a checkbox menu item.
 	 * 
 	 * @param label the menu label.
-	 * @param menu optional menu to add the item to.
+	 * @param menu  optional menu to add the item to.
 	 * @param ilist optional ItemListener.
 	 * @param state initial state.
 	 */
 
-	public static JCheckBoxMenuItem addCheckboxMenuItem(String label,
-			JMenu menu, ItemListener ilist, boolean state) {
+	public static JCheckBoxMenuItem addCheckboxMenuItem(String label, JMenu menu, ItemListener ilist, boolean state) {
 
 		JCheckBoxMenuItem mitem = null;
 
@@ -172,15 +170,14 @@ public class MenuManager {
 	/**
 	 * Convenience routine for adding a menu item.
 	 * 
-	 * @param label the menu label.
+	 * @param label    the menu label.
 	 * @param mnemonic the mnemonic character.
-	 * @param index the index (0 based) at which to add the item.
-	 * @param menu the menu to add the item to.
-	 * @param alist optional action listener.
+	 * @param index    the index (0 based) at which to add the item.
+	 * @param menu     the menu to add the item to.
+	 * @param alist    optional action listener.
 	 */
 
-	public static JMenuItem addMenuItem(String label, char mnemonic, int index,
-			JMenu menu, ActionListener alist) {
+	public static JMenuItem addMenuItem(String label, char mnemonic, int index, JMenu menu, ActionListener alist) {
 		JMenuItem mitem = null;
 
 		if ((label != null) && (menu != null)) {
@@ -207,14 +204,13 @@ public class MenuManager {
 	/**
 	 * Convenience routine for adding a menu item.
 	 * 
-	 * @param label the menu label.
+	 * @param label    the menu label.
 	 * @param mnemonic the mnemonic character.
-	 * @param menu the menu to add the item to.
-	 * @param alist optional action listener.
+	 * @param menu     the menu to add the item to.
+	 * @param alist    optional action listener.
 	 */
 
-	public static JMenuItem addMenuItem(String label, char mnemonic, JMenu menu,
-			ActionListener alist) {
+	public static JMenuItem addMenuItem(String label, char mnemonic, JMenu menu, ActionListener alist) {
 
 		return addMenuItem(label, mnemonic, -1, menu, alist);
 	}
@@ -224,12 +220,11 @@ public class MenuManager {
 	 * 
 	 * @param label the menu label.
 	 * @param index the index (0 based) at which to add the item.
-	 * @param menu the menu to add the item to.
+	 * @param menu  the menu to add the item to.
 	 * @param alist optional action listener.
 	 */
 
-	public static JMenuItem addMenuItem(String label, int index, JMenu menu,
-			ActionListener alist) {
+	public static JMenuItem addMenuItem(String label, int index, JMenu menu, ActionListener alist) {
 
 		return addMenuItem(label, '\0', index, menu, alist);
 	}
@@ -238,12 +233,11 @@ public class MenuManager {
 	 * Convenience routine for adding a menu item.
 	 * 
 	 * @param label the menu label;
-	 * @param menu the menu to add the item to.
+	 * @param menu  the menu to add the item to.
 	 * @param alist optional action listener.
 	 */
 
-	public static JMenuItem addMenuItem(String label, JMenu menu,
-			ActionListener alist) {
+	public static JMenuItem addMenuItem(String label, JMenu menu, ActionListener alist) {
 
 		return addMenuItem(label, '\0', menu, alist);
 	}

@@ -19,40 +19,40 @@ import cnuphys.splot.plot.GraphicsUtilities;
 
 @SuppressWarnings("serial")
 public class AllDCAccumPanel extends JPanel implements ActionListener, ItemListener {
-	
-	
-	//the view owner
+
+	// the view owner
 	private AllDCAccumView _allDCAccumView;
-	
-	//the reset button
+
+	// the reset button
 	private JButton _resetButton;
 
 	public AllDCAccumPanel(CedView view) {
-		_allDCAccumView = (AllDCAccumView)view;
+		_allDCAccumView = (AllDCAccumView) view;
 		setLayout(new BorderLayout(2, 2));
 		addCenter();
 		addSouth();
 	}
-	
-	//add the center panel
-	
+
+	// add the center panel
+
 	private JCheckBox _currentEventButton;
 	private JRadioButton _allDataButton;
 	private JRadioButton _hideNoiseButton;
 	private JRadioButton _noiseOnlyButton;
-	private void addCenter()  {
+
+	private void addCenter() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new VerticalFlowLayout());
-		
+
 		ButtonGroup bg = new ButtonGroup();
-		
+
 		_allDataButton = addRB("Show all data", bg, true, panel);
 		_hideNoiseButton = addRB("Exclude noise data", bg, false, panel);
 		_noiseOnlyButton = addRB("Show noise only", bg, false, panel);
-		
+
 		add(panel, BorderLayout.CENTER);
 	}
-	
+
 	private JRadioButton addRB(String label, ButtonGroup bg, boolean selected, JPanel panel) {
 		JRadioButton rb = new JRadioButton(label, selected);
 		rb.addItemListener(this);
@@ -61,12 +61,12 @@ public class AllDCAccumPanel extends JPanel implements ActionListener, ItemListe
 		panel.add(rb);
 		return rb;
 	}
-	
-	//add the south panel
+
+	// add the south panel
 	private void addSouth() {
 		JPanel p = new JPanel();
 		p.setLayout(new FlowLayout(FlowLayout.CENTER, 6, 0));
-		
+
 		_resetButton = new JButton("Reset");
 		GraphicsUtilities.setSizeSmall(_resetButton);
 		_resetButton.addActionListener(this);
@@ -84,8 +84,7 @@ public class AllDCAccumPanel extends JPanel implements ActionListener, ItemListe
 		Object source = e.getSource();
 		if (source == _resetButton) {
 			_allDCAccumView.reset();
-		}
-		else {
+		} else {
 			System.err.println(e.getActionCommand());
 		}
 
@@ -103,11 +102,9 @@ public class AllDCAccumPanel extends JPanel implements ActionListener, ItemListe
 			if (rb.isSelected()) {
 				if (rb == _allDataButton) {
 					_allDCAccumView.setMode(AllDCAccumView.SHOW_ALL_MODE);
-				}
-				else if (rb == _hideNoiseButton) {
+				} else if (rb == _hideNoiseButton) {
 					_allDCAccumView.setMode(AllDCAccumView.HIDE_NOISE_MODE);
-				}
-				else if (rb == _noiseOnlyButton) {
+				} else if (rb == _noiseOnlyButton) {
 					_allDCAccumView.setMode(AllDCAccumView.NOISE_ONLY_MODE);
 				}
 //				System.err.println("[" + rb.getActionCommand() + "] is selected");

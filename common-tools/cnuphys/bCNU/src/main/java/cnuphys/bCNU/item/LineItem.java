@@ -17,29 +17,23 @@ public class LineItem extends AItem {
 	/**
 	 * Create a world line object.
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
-	 * @param wp0
-	 *            start of the line.
-	 * @param wp1
-	 *            end of the line of the line.
+	 * @param layer the Layer this item is on.
+	 * @param wp0   start of the line.
+	 * @param wp1   end of the line of the line.
 	 */
 	public LineItem(LogicalLayer layer, Point2D.Double wp0, Point2D.Double wp1) {
 		super(layer);
 		_line = new Line2D.Double(wp0, wp1);
-		_focus = new Point2D.Double(0.5 * (wp0.x + wp1.x),
-				0.5 * (wp0.y + wp1.y));
+		_focus = new Point2D.Double(0.5 * (wp0.x + wp1.x), 0.5 * (wp0.y + wp1.y));
 	}
 
 	/**
 	 * Check whether the (rendered) item contains the given screen point.
 	 * 
-	 * @param container
-	 *            the graphical container rendering the item.
-	 * @param screenPoint
-	 *            a pixel location.
-	 * @return <code>true</code> if the item, as rendered on the given
-	 *         container, contains the given screen point.
+	 * @param container   the graphical container rendering the item.
+	 * @param screenPoint a pixel location.
+	 * @return <code>true</code> if the item, as rendered on the given container,
+	 *         contains the given screen point.
 	 */
 	@Override
 	public boolean contains(IContainer container, Point screenPoint) {
@@ -48,8 +42,7 @@ public class LineItem extends AItem {
 
 		// get intersection
 		Point2D.Double wpi = new Point2D.Double();
-		MathUtilities.perpendicularIntersection(_line.x1, _line.y1, _line.x2,
-				_line.y2, wp, wpi);
+		MathUtilities.perpendicularIntersection(_line.x1, _line.y1, _line.x2, _line.y2, wp, wpi);
 
 		Point pi = new Point();
 		container.worldToLocal(pi, wpi);
@@ -60,33 +53,27 @@ public class LineItem extends AItem {
 	/**
 	 * Custom drawer for the item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
-		WorldGraphicsUtilities.drawWorldLine(g, container, _line.x1, _line.y1,
-				_line.x2, _line.y2, _style);
+		WorldGraphicsUtilities.drawWorldLine(g, container, _line.x1, _line.y1, _line.x2, _line.y2, _style);
 	}
 
 	/**
-	 * Checks whether the item should be drawn. This is an additional check,
-	 * beyond the simple visibility flag check. For example, it might check
-	 * whether the item intersects the area being drawn.
+	 * Checks whether the item should be drawn. This is an additional check, beyond
+	 * the simple visibility flag check. For example, it might check whether the
+	 * item intersects the area being drawn.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
-	 * @return <code>true</code> if the item passes any and all tests, and
-	 *         should be drawn.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
+	 * @return <code>true</code> if the item passes any and all tests, and should be
+	 *         drawn.
 	 */
 	@Override
 	public boolean shouldDraw(Graphics g, IContainer container) {
-		Rectangle r = WorldGraphicsUtilities.getBounds(container, _line.x1,
-				_line.y1, _line.x2, _line.y2);
+		Rectangle r = WorldGraphicsUtilities.getBounds(container, _line.x1, _line.y1, _line.x2, _line.y2);
 		return container.getComponent().getBounds().intersects(r);
 	}
 
@@ -156,8 +143,7 @@ public class LineItem extends AItem {
 	// called by the modify method to tell the item to update its focus.
 	// (because the item was dragged.) The default method is the path centroid.
 	protected void updateFocus() {
-		_focus = new Point2D.Double(0.5 * (_line.x1 + _line.x2),
-				0.5 * (_line.y1 + _line.y2));
+		_focus = new Point2D.Double(0.5 * (_line.x1 + _line.x2), 0.5 * (_line.y1 + _line.y2));
 	}
 
 	/**
@@ -171,8 +157,7 @@ public class LineItem extends AItem {
 			return null;
 		}
 		Rectangle2D r2d = _line.getBounds2D();
-		return new Rectangle2D.Double(r2d.getX(), r2d.getY(), r2d.getWidth(),
-				r2d.getHeight());
+		return new Rectangle2D.Double(r2d.getX(), r2d.getY(), r2d.getWidth(), r2d.getHeight());
 	}
 
 }

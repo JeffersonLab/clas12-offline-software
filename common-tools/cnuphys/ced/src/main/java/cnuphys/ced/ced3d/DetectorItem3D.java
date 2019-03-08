@@ -15,13 +15,13 @@ public abstract class DetectorItem3D extends Item3D {
 	protected static final float MC_POINTSIZE = 3f;
 	protected static final float CROSS_POINTSIZE = 5f;
 	protected static final Color cosmicColor = Color.lightGray;
-	
+
 	protected static final float STRIPLINEWIDTH = 10f;
 	protected static final float WIRELINEWIDTH = 3f;
 
 	// the event manager
 	ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
-	
+
 	protected CedPanel3D _cedPanel3D;
 
 	public DetectorItem3D(CedPanel3D panel3D) {
@@ -49,16 +49,14 @@ public abstract class DetectorItem3D extends Item3D {
 	/**
 	 * Draw the boundary
 	 * 
-	 * @param drawable
-	 *            the GL drawable
+	 * @param drawable the GL drawable
 	 */
 	public abstract void drawShape(GLAutoDrawable drawable);
 
 	/**
 	 * Draw the data
 	 * 
-	 * @param drawable
-	 *            the GL drawable
+	 * @param drawable the GL drawable
 	 */
 	public abstract void drawData(GLAutoDrawable drawable);
 
@@ -75,9 +73,9 @@ public abstract class DetectorItem3D extends Item3D {
 	}
 
 	/**
-	 * Obtain the MC truth color, which corresponds
-	 * to the LundId
-	 * @param pid the particle lund id array
+	 * Obtain the MC truth color, which corresponds to the LundId
+	 * 
+	 * @param pid   the particle lund id array
 	 * @param index index into the array
 	 * @return the truth color
 	 */
@@ -94,10 +92,10 @@ public abstract class DetectorItem3D extends Item3D {
 
 		return lid.getStyle().getFillColor();
 	}
-	
+
 	/**
-	 * Obtain the MC truth color, which corresponds
-	 * to the LundId
+	 * Obtain the MC truth color, which corresponds to the LundId
+	 * 
 	 * @param lundId
 	 * @return the truth color
 	 */
@@ -111,7 +109,6 @@ public abstract class DetectorItem3D extends Item3D {
 		return lid.getStyle().getFillColor();
 	}
 
-
 	/**
 	 * Draw a MC 3D point
 	 * 
@@ -121,22 +118,16 @@ public abstract class DetectorItem3D extends Item3D {
 	 * @param zcm
 	 * @param truthColor
 	 */
-	protected void drawMCPoint(GLAutoDrawable drawable, double xcm, double ycm,
-			double zcm, Color truthColor) {
-		Support3D.drawPoint(drawable, xcm, ycm, zcm, Color.black,
-				MC_POINTSIZE + 2, true);
+	protected void drawMCPoint(GLAutoDrawable drawable, double xcm, double ycm, double zcm, Color truthColor) {
+		Support3D.drawPoint(drawable, xcm, ycm, zcm, Color.black, MC_POINTSIZE + 2, true);
 		Support3D.drawPoint(drawable, xcm, ycm, zcm, truthColor, MC_POINTSIZE, true);
 
 	}
 
-	protected void drawCrossPoint(GLAutoDrawable drawable, double xcm,
-			double ycm, double zcm, Color crossColor) {
-		Support3D.drawPoint(drawable, xcm, ycm, zcm, Color.red,
-				CROSS_POINTSIZE + 2, true);
-		Support3D.drawPoint(drawable, xcm, ycm, zcm, crossColor,
-				CROSS_POINTSIZE, true);
+	protected void drawCrossPoint(GLAutoDrawable drawable, double xcm, double ycm, double zcm, Color crossColor) {
+		Support3D.drawPoint(drawable, xcm, ycm, zcm, Color.red, CROSS_POINTSIZE + 2, true);
+		Support3D.drawPoint(drawable, xcm, ycm, zcm, crossColor, CROSS_POINTSIZE, true);
 
 	}
-
 
 }

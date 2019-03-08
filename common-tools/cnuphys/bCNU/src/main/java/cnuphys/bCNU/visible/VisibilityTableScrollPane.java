@@ -29,22 +29,18 @@ public class VisibilityTableScrollPane extends JScrollPane {
 	/**
 	 * Constructor will also create the table itself.
 	 * 
-	 * @param container
-	 *            container holding the list of drawables (prpbably layers)
-	 * @param visList
-	 *            the list of drawables
-	 * @param label
-	 *            a label for the list
+	 * @param container container holding the list of drawables (prpbably layers)
+	 * @param visList   the list of drawables
+	 * @param label     a label for the list
 	 */
 
-	public VisibilityTableScrollPane(IContainer container,
-			Vector<IDrawable> visList, String label) {
+	public VisibilityTableScrollPane(IContainer container, Vector<IDrawable> visList, String label) {
 		super();
 		visTable = new VisibilityTable(container, visList);
 		getViewport().add(visTable);
 
-		setBorder(BorderFactory.createTitledBorder(null, label,
-				TitledBorder.LEADING, TitledBorder.TOP, null, Color.blue));
+		setBorder(BorderFactory.createTitledBorder(null, label, TitledBorder.LEADING, TitledBorder.TOP, null,
+				Color.blue));
 	}
 
 	/**
@@ -88,16 +84,14 @@ public class VisibilityTableScrollPane extends JScrollPane {
 	}
 
 	/**
-	 * @param height
-	 *            The height to set.
+	 * @param height The height to set.
 	 */
 	public void setHeight(int height) {
 		this.height = height;
 	}
 
 	/**
-	 * @param width
-	 *            The width to set.
+	 * @param width The width to set.
 	 */
 	public void setWidth(int width) {
 		this.width = width;

@@ -10,13 +10,13 @@ import javax.swing.table.DefaultTableCellRenderer;
 import cnuphys.lund.X11Colors;
 
 public class AttributeCellRenderer extends DefaultTableCellRenderer {
-	
+
 	private static final Color editableColor = X11Colors.getX11Color("Alice Blue");
 	private static final Color notEditableColor = new Color(240, 240, 240);
-	
-	//the table
+
+	// the table
 	private AttributeTable _attributeTable;
-	
+
 	public AttributeCellRenderer(AttributeTable table) {
 		_attributeTable = table;
 	}

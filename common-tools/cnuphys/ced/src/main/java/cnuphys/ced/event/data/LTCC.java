@@ -10,6 +10,7 @@ public class LTCC extends DetectorData {
 
 	/**
 	 * Public access to the singleton
+	 * 
 	 * @return the FTOF singleton
 	 */
 	public static LTCC getInstance() {
@@ -18,14 +19,15 @@ public class LTCC extends DetectorData {
 		}
 		return _instance;
 	}
-	
+
 	@Override
 	public void newClasIoEvent(DataEvent event) {
 		_adcHits = new AdcHitList("LTCC::adc");
 	}
-	
+
 	/**
 	 * Update the list. This is probably needed only during accumulation
+	 * 
 	 * @return the updated list
 	 */
 	public AdcHitList updateAdcList() {
@@ -35,6 +37,7 @@ public class LTCC extends DetectorData {
 
 	/**
 	 * Get the adc hit list
+	 * 
 	 * @return the adc hit list
 	 */
 	public AdcHitList getHits() {

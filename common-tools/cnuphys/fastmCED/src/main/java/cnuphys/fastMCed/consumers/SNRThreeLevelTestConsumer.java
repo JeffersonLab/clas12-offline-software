@@ -10,16 +10,17 @@ import cnuphys.fastMCed.streaming.StreamProcessStatus;
 import cnuphys.fastMCed.streaming.StreamReason;
 
 /**
- * This is to test the rewrite of two level SNR
- * <BR>Level 1: Normal SNR That finds isolated noise and segments candidates in each superlayer.
- * The output is an extended word for each superlayer
- * <BR>Level 2 
+ * This is to test the rewrite of two level SNR <BR>
+ * Level 1: Normal SNR That finds isolated noise and segments candidates in each
+ * superlayer. The output is an extended word for each superlayer <BR>
+ * Level 2
+ * 
  * @author heddle
  *
  */
 public class SNRThreeLevelTestConsumer extends PhysicsEventConsumer {
-	
-	//the SNR Manager singleton
+
+	// the SNR Manager singleton
 	SNRManager snrManager = SNRManager.getInstance();
 
 	@Override

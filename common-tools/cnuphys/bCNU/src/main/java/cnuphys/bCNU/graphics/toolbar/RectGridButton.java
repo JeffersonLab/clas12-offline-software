@@ -7,14 +7,12 @@ import cnuphys.bCNU.graphics.rubberband.IRubberbanded;
 import cnuphys.bCNU.graphics.rubberband.Rubberband;
 
 @SuppressWarnings("serial")
-public class RectGridButton extends ToolBarToggleButton implements
-		IRubberbanded {
+public class RectGridButton extends ToolBarToggleButton implements IRubberbanded {
 
 	/**
 	 * Create a button for creating rectangles by rubberbanding.
 	 * 
-	 * @param container
-	 *            the container using this button.
+	 * @param container the container using this button.
 	 */
 	public RectGridButton(IContainer container) {
 		super(container, "images/rectgrid.gif", "Create a rectangular grid");
@@ -23,14 +21,12 @@ public class RectGridButton extends ToolBarToggleButton implements
 	/**
 	 * The mouse has been pressed, start rubber banding.
 	 * 
-	 * @param mouseEvent
-	 *            the causal mouse event.
+	 * @param mouseEvent the causal mouse event.
 	 */
 	@Override
 	public void mousePressed(MouseEvent mouseEvent) {
 		if (rubberband == null) {
-			rubberband = new Rubberband(container, this,
-					Rubberband.Policy.RECTANGLE);
+			rubberband = new Rubberband(container, this, Rubberband.Policy.RECTANGLE);
 			rubberband.setActive(true);
 			rubberband.startRubberbanding(mouseEvent.getPoint());
 		}

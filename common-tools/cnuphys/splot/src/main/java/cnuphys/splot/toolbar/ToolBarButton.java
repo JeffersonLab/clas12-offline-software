@@ -18,17 +18,15 @@ public class ToolBarButton extends JButton {
 	/**
 	 * Constructor
 	 * 
-	 * @param container the owner container.
+	 * @param container     the owner container.
 	 * @param imageFileName the name if the file holding the icon
-	 * @param toolTip a string for a tool tip
+	 * @param toolTip       a string for a tool tip
 	 */
-	public ToolBarButton(String imageFileName, String toolTip,
-			String actionCommand) {
+	public ToolBarButton(String imageFileName, String toolTip, String actionCommand) {
 		super();
 
 		setActionCommand(actionCommand);
-		ImageIcon imageIcon = ImageManager.getInstance()
-				.loadImageIcon(imageFileName);
+		ImageIcon imageIcon = ImageManager.getInstance().loadImageIcon(imageFileName);
 		setFocusPainted(true);
 		setBorderPainted(true);
 
@@ -47,8 +45,8 @@ public class ToolBarButton extends JButton {
 	/**
 	 * Get the appropriate cursor for this tool.
 	 * 
-	 * @return the cursor appropriate when the mouse is in the container (and
-	 *         this button is active).
+	 * @return the cursor appropriate when the mouse is in the container (and this
+	 *         button is active).
 	 */
 	public Cursor canvasCursor() {
 		return Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);

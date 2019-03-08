@@ -13,11 +13,10 @@ import cnuphys.bCNU.dialog.DialogUtilities;
 import cnuphys.bCNU.graphics.ImageManager;
 
 public class DefineExpressionDialog extends JDialog implements ActionListener {
-	
-	//close button
+
+	// close button
 	private JButton _closeButton;
-	
-	
+
 	private NameVariablePanel _namedVariablePanel;
 
 	public DefineExpressionDialog() {
@@ -25,7 +24,7 @@ public class DefineExpressionDialog extends JDialog implements ActionListener {
 		setModal(true);
 		setLayout(new BorderLayout(4, 4));
 		setIconImage(ImageManager.cnuIcon.getImage());
-		
+
 		_namedVariablePanel = new NameVariablePanel();
 		add(_namedVariablePanel, BorderLayout.CENTER);
 
@@ -34,14 +33,14 @@ public class DefineExpressionDialog extends JDialog implements ActionListener {
 		DialogUtilities.centerDialog(this);
 
 	}
-	
+
 	private void addSouth() {
 		JPanel sp = new JPanel();
 		sp.setLayout(new FlowLayout(FlowLayout.CENTER, 200, 10));
-		
-		_closeButton = new JButton(" Close  ");		
+
+		_closeButton = new JButton(" Close  ");
 		_closeButton.addActionListener(this);
-		
+
 		sp.add(_closeButton);
 		add(sp, BorderLayout.SOUTH);
 	}

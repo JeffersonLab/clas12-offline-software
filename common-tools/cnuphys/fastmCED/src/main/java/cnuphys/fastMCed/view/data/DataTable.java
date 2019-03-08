@@ -13,7 +13,7 @@ import cnuphys.lund.HeaderRenderer;
 import cnuphys.lund.SimpleRenderer;
 
 public class DataTable extends JTable {
-	
+
 	// a scroll pane for this table
 	private JScrollPane _scrollPane;
 

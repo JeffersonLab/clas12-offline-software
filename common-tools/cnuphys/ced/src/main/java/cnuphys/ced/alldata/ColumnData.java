@@ -7,7 +7,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 
 public class ColumnData implements Comparable<ColumnData> {
 
-	/** type is unknown*/
+	/** type is unknown */
 	public static final int UNKNOWN = 0;
 
 	/** type is a byte */
@@ -18,7 +18,7 @@ public class ColumnData implements Comparable<ColumnData> {
 
 	/** type is an int */
 	public static final int INT32 = 3;
-	
+
 	/** type is a long int */
 	public static final int INT64 = 4;
 
@@ -27,9 +27,9 @@ public class ColumnData implements Comparable<ColumnData> {
 
 	/** type is a double */
 	public static final int FLOAT64 = 6;
-	
+
 	/** type names */
-	public static String[] typeNames = {"Unknown", "byte", "short", "int", "long", "float", "double"};
+	public static String[] typeNames = { "Unknown", "byte", "short", "int", "long", "float", "double" };
 
 	// the bank name
 	private String _bankName;
@@ -42,16 +42,16 @@ public class ColumnData implements Comparable<ColumnData> {
 
 	// the full name
 	private String _fullName;
-	
-	//used for table rendering
+
+	// used for table rendering
 	public int bankIndex;
-	
+
 	/**
 	 * Holds the data for one column, one event
 	 * 
-	 * @param bankName the bank name
+	 * @param bankName   the bank name
 	 * @param columnName the column name
-	 * @param type the data type (one of the class constants)
+	 * @param type       the data type (one of the class constants)
 	 */
 	public ColumnData(String bankName, String columnName, int type) {
 		_bankName = bankName;
@@ -59,43 +59,40 @@ public class ColumnData implements Comparable<ColumnData> {
 		_fullName = bankName + "." + columnName;
 
 		if ((type < 1) || (type > 6) || (type == 24)) {
-			Log.getInstance()
-					.warning("Bank: [" + _bankName + "] Column: [" + columnName
-							+ "] bad data type in ColumnData constructor: ["
-							+ type + "]");
+			Log.getInstance().warning("Bank: [" + _bankName + "] Column: [" + columnName
+					+ "] bad data type in ColumnData constructor: [" + type + "]");
 			type = 0;
 		}
 		_type = type;
 	}
-	
+
 	@Override
 	public String toString() {
-		return "bank name: [" + _bankName + 
-				"] column name: [" + _columnName +
-				"] full name: [" + _fullName +
-				"] data type: " + typeNames[_type];
+		return "bank name: [" + _bankName + "] column name: [" + _columnName + "] full name: [" + _fullName
+				+ "] data type: " + typeNames[_type];
 	}
-	
+
 	/**
 	 * Get the name of the data type
+	 * 
 	 * @return the name of the data type
 	 */
 	public String getTypeName() {
 		if ((_type < 0) || (_type >= typeNames.length)) {
 			return "???";
-		}
-		else {
+		} else {
 			return typeNames[_type];
 		}
 	}
-	
+
 	/**
 	 * Get the length of the backing data array
+	 * 
 	 * @param event the current event
 	 * @return the length of the array
 	 */
 	public int getLength(DataEvent event) {
-		
+
 		if (event != null) {
 			try {
 				switch (_type) {
@@ -110,9 +107,9 @@ public class ColumnData implements Comparable<ColumnData> {
 				case INT32:
 					int ints[] = event.getInt(_fullName);
 					return (ints == null) ? 0 : ints.length;
-					
+
 				case INT64:
-					//TODO MAJOR HACK
+					// TODO MAJOR HACK
 					long longs[] = event.getLong(_fullName);
 					return (longs == null) ? 0 : longs.length;
 
@@ -129,10 +126,9 @@ public class ColumnData implements Comparable<ColumnData> {
 				e.printStackTrace();
 			}
 		}
-		
+
 		return 0;
 	}
-	
 
 	/**
 	 * Get the data array as an object. It is up to the caller to cast it to the
@@ -143,7 +139,7 @@ public class ColumnData implements Comparable<ColumnData> {
 	public Object getDataArray(DataEvent event) {
 
 		Object oa = null;
-		
+
 		if (event != null) {
 			try {
 				switch (_type) {
@@ -158,7 +154,7 @@ public class ColumnData implements Comparable<ColumnData> {
 				case INT32:
 					oa = event.getInt(_fullName);
 					break;
-					
+
 				case INT64:
 					oa = event.getLong(_fullName);
 					break;
@@ -173,20 +169,21 @@ public class ColumnData implements Comparable<ColumnData> {
 				}
 			} catch (Exception e) {
 				System.err.println(e.getMessage() + " Exception with fullName: " + _fullName);
-	//			e.printStackTrace();
+				// e.printStackTrace();
 			}
 		}
 
 		return oa;
 	}
-	
+
 	/**
 	 * Get the array with double values regardless of type
+	 * 
 	 * @return the data as a double array
 	 */
 	public double[] getAsDoubleArray(DataEvent event) {
 		double da[] = null;
-		
+
 		if (event != null) {
 			switch (_type) {
 			case INT8:
@@ -241,16 +238,17 @@ public class ColumnData implements Comparable<ColumnData> {
 
 		return da;
 	}
-	
+
 	/**
 	 * Get the length of the underlying data array
+	 * 
 	 * @return the length of the underlying data array
 	 */
 	public int length(DataEvent event) {
-		
+
 		int len = 0;
 		Object oa = getDataArray(event);
-		
+
 		if (oa != null) {
 			switch (_type) {
 			case INT8:
@@ -264,7 +262,7 @@ public class ColumnData implements Comparable<ColumnData> {
 			case INT32:
 				len = ((int[]) oa).length;
 				break;
-				
+
 			case INT64:
 				len = ((long[]) oa).length;
 				break;
@@ -278,7 +276,7 @@ public class ColumnData implements Comparable<ColumnData> {
 				break;
 			}
 		}
-		
+
 		return len;
 	}
 
@@ -317,39 +315,41 @@ public class ColumnData implements Comparable<ColumnData> {
 	public int getType() {
 		return _type;
 	}
-	
-	//a check to avoid null messages and errors
+
+	// a check to avoid null messages and errors
 	private static DataEvent hasData(String fullName) {
 		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
 		if (event == null) {
 			return null;
 		}
-		
+
 		ColumnData cd = DataManager.getInstance().getColumnData(fullName);
 		if (cd == null) {
 			return null;
 		}
-		
+
 		if (!event.hasBank(cd.getBankName())) {
 			return null;
 		}
-		
+
 		return event;
 	}
-	
+
 	/**
 	 * Obtain a byte array from the current event for the given full name
-	 * @param fullName the full name 
+	 * 
+	 * @param fullName the full name
 	 * @return the array, or <code>null</code>
 	 */
-	public static byte[] getByteArray(String fullName) {	
+	public static byte[] getByteArray(String fullName) {
 		DataEvent event = hasData(fullName);
 		return (event == null) ? null : DataManager.getInstance().getByteArray(event, fullName);
 	}
 
 	/**
 	 * Obtain a short array from the current event for the given full name
-	 * @param fullName the full name 
+	 * 
+	 * @param fullName the full name
 	 * @return the array, or <code>null</code>
 	 */
 	public static short[] getShortArray(String fullName) {
@@ -359,17 +359,19 @@ public class ColumnData implements Comparable<ColumnData> {
 
 	/**
 	 * Obtain an int array from the current event for the given full name
-	 * @param fullName the full name 
+	 * 
+	 * @param fullName the full name
 	 * @return the array, or <code>null</code>
 	 */
 	public static int[] getIntArray(String fullName) {
 		DataEvent event = hasData(fullName);
 		return (event == null) ? null : DataManager.getInstance().getIntArray(event, fullName);
 	}
-	
+
 	/**
 	 * Obtain a long array from the current event for the given full name
-	 * @param fullName the full name 
+	 * 
+	 * @param fullName the full name
 	 * @return the array, or <code>null</code>
 	 */
 	public static long[] getLongArray(String fullName) {
@@ -377,10 +379,10 @@ public class ColumnData implements Comparable<ColumnData> {
 		return (event == null) ? null : DataManager.getInstance().getLongArray(event, fullName);
 	}
 
-
 	/**
 	 * Obtain a float array from the current event for the given full name
-	 * @param fullName the full name 
+	 * 
+	 * @param fullName the full name
 	 * @return the array, or <code>null</code>
 	 */
 	public static float[] getFloatArray(String fullName) {
@@ -390,14 +392,14 @@ public class ColumnData implements Comparable<ColumnData> {
 
 	/**
 	 * Obtain double array from the current event for the given full name
-	 * @param fullName the full name 
+	 * 
+	 * @param fullName the full name
 	 * @return the array, or <code>null</code>
 	 */
 	public static double[] getDoubleArray(String fullName) {
 		DataEvent event = hasData(fullName);
 		return (event == null) ? null : DataManager.getInstance().getDoubleArray(event, fullName);
 	}
-
 
 	@Override
 	public int compareTo(ColumnData o) {

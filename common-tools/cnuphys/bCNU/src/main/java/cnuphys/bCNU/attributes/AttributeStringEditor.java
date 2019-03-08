@@ -11,20 +11,17 @@ import java.awt.event.KeyListener;
 import javax.swing.JTextField;
 
 @SuppressWarnings("serial")
-public class AttributeStringEditor extends AttributeEditor<JTextField> implements FocusListener,
-		KeyListener {
-	
-	
+public class AttributeStringEditor extends AttributeEditor<JTextField> implements FocusListener, KeyListener {
+
 	String oldText = null;
 
 	/**
 	 * Create a String editor.
 	 * 
 	 * @param attributeTable the owner table.
-	 * @param attribute the attribute
+	 * @param attribute      the attribute
 	 */
-	public AttributeStringEditor(AttributeTable attributeTable,
-			Attribute attribute) {
+	public AttributeStringEditor(AttributeTable attributeTable, Attribute attribute) {
 
 		super(attributeTable, attribute, new JTextField());
 
@@ -54,8 +51,7 @@ public class AttributeStringEditor extends AttributeEditor<JTextField> implement
 				attribute.setValue(newText);
 			}
 
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 
@@ -82,17 +78,16 @@ public class AttributeStringEditor extends AttributeEditor<JTextField> implement
 	public void keyReleased(KeyEvent e) {
 		checkTextChange();
 	}
-	
-	
+
 	/**
 	 * Render the value for display
+	 * 
 	 * @param value the
 	 */
 	@Override
 	public void renderValue(Object value) {
-		String val = (String)value;
+		String val = (String) value;
 		component.setText(val);
 	}
-
 
 }

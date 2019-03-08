@@ -1,6 +1,5 @@
 package cnuphys.fastMCed.geometry;
 
-
 import java.awt.geom.Point2D;
 import java.util.Vector;
 
@@ -21,12 +20,10 @@ public class GeometryManager {
 	 */
 	private static GeometryManager instance;
 
-
 	/**
 	 * Private constructor for the singleton.
 	 */
 	private GeometryManager() {
-		
 
 		// DC Geometry
 		DCGeometry.initialize();
@@ -47,7 +44,6 @@ public class GeometryManager {
 		}
 		return instance;
 	}
-
 
 	/**
 	 * Get the sector [1..6] from the phi value
@@ -96,8 +92,7 @@ public class GeometryManager {
 	}
 
 	/**
-	 * Obtains the relative phi (relative to the midplane of the appropriate
-	 * sector)
+	 * Obtains the relative phi (relative to the midplane of the appropriate sector)
 	 * 
 	 * @param absPhi the absolute value of phi
 	 * @return the relative phi (i.e., the "slider" value)
@@ -132,7 +127,7 @@ public class GeometryManager {
 	/**
 	 * Converts the lab 3D coordinates to sector 3D coordinates
 	 * 
-	 * @param clasP the lab 3D Cartesian coordinates (not modified)
+	 * @param clasP   the lab 3D Cartesian coordinates (not modified)
 	 * @param sectorP the sector 3D Cartesian coordinates (modified)
 	 */
 	public static void clasToSector(Point3D clasP, Point3D sectorP) {
@@ -146,8 +141,7 @@ public class GeometryManager {
 		if (sector == 1) {
 			sectorP.setX(clasP.x());
 			sectorP.setY(clasP.y());
-		}
-		else {
+		} else {
 			double x = clasP.x();
 			double y = clasP.y();
 			double midPlanePhi = Math.toRadians(60 * (sector - 1));
@@ -160,13 +154,13 @@ public class GeometryManager {
 		// z coordinates are the same
 		sectorP.setZ(clasP.z());
 	}
-	
+
 	/**
 	 * Converts the lab 3D coordinates to sector 3D coordinates
 	 * 
-	 * @param x the lab (clas) x coordinate
-	 * @param y the lab (clas) y coordinate
-	 * @param z the lab (clas) z coordinate
+	 * @param x       the lab (clas) x coordinate
+	 * @param y       the lab (clas) y coordinate
+	 * @param z       the lab (clas) z coordinate
 	 * @param sectorP the sector 3D Cartesian coordinates (modified)
 	 */
 	public static void clasToSector(double x, double y, double z, Point3D sectorP) {
@@ -174,16 +168,14 @@ public class GeometryManager {
 		clasToSector(clasP, sectorP);
 	}
 
-
 	/**
 	 * Converts the sector 3D coordinates to clas (lab) 3D coordinates
 	 * 
-	 * @param sector the 1-based sector [1..6]
-	 * @param clasP the lab 3D Cartesian coordinates (modified)
+	 * @param sector  the 1-based sector [1..6]
+	 * @param clasP   the lab 3D Cartesian coordinates (modified)
 	 * @param sectorP the sector 3D Cartesian coordinates (not modified)
 	 */
-	public static void sectorToClas(int sector, Point3D clasP,
-			Point3D sectorP) {
+	public static void sectorToClas(int sector, Point3D clasP, Point3D sectorP) {
 
 		if ((sector < 1) || (sector > 6)) {
 			String wstr = "Bad sector: " + sector + " in sectorToClas";
@@ -194,8 +186,7 @@ public class GeometryManager {
 		if (sector == 1) {
 			clasP.setX(sectorP.x());
 			clasP.setY(sectorP.y());
-		}
-		else {
+		} else {
 			double x = sectorP.x();
 			double y = sectorP.y();
 			double midPlanePhi = Math.toRadians(60 * (sector - 1));
@@ -227,7 +218,7 @@ public class GeometryManager {
 	/**
 	 * Converts the lab 3D coordinates to sector 3D coordinates
 	 * 
-	 * @param labXYZ the lab 3D Cartesian coordinates
+	 * @param labXYZ    the lab 3D Cartesian coordinates
 	 * @param sectorXYZ the sector 3D Cartesian coordinates
 	 */
 	public static void labXYZToSectorXYZ(double labXYZ[], double sectorXYZ[]) {
@@ -241,8 +232,7 @@ public class GeometryManager {
 		if (sector == 1) {
 			sectorXYZ[0] = labXYZ[0];
 			sectorXYZ[1] = labXYZ[1];
-		}
-		else {
+		} else {
 			double x = labXYZ[0];
 			double y = labXYZ[1];
 			double midPlanePhi = Math.toRadians(60 * (sector - 1));
@@ -259,12 +249,11 @@ public class GeometryManager {
 	/**
 	 * Converts the lab 3D coordinates to sector 3D coordinates
 	 * 
-	 * @param sector the 1-based sector [1..6]
-	 * @param labXYZ the lab 3D Cartesian coordinates
+	 * @param sector    the 1-based sector [1..6]
+	 * @param labXYZ    the lab 3D Cartesian coordinates
 	 * @param sectorXYZ the sector 3D Cartesian coordinates
 	 */
-	public static void sectorXYZToLabXYZ(int sector, double labXYZ[],
-			double sectorXYZ[]) {
+	public static void sectorXYZToLabXYZ(int sector, double labXYZ[], double sectorXYZ[]) {
 
 		if ((sector < 1) || (sector > 6)) {
 			String wstr = "Bad sector: " + sector + " in sectorXYZToLabXYZ";
@@ -275,8 +264,7 @@ public class GeometryManager {
 		if (sector == 1) {
 			labXYZ[0] = sectorXYZ[0];
 			labXYZ[1] = sectorXYZ[1];
-		}
-		else {
+		} else {
 			double x = sectorXYZ[0];
 			double y = sectorXYZ[1];
 			double midPlanePhi = Math.toRadians(60 * (sector - 1));
@@ -291,10 +279,8 @@ public class GeometryManager {
 		labXYZ[2] = sectorXYZ[2];
 	}
 
-	
-	
 	private static boolean lengthTest(double len, Point3D p0, Point3D p1, Point3D pint) {
-		
+
 		double lentest = p0.distance(pint);
 		if (lentest > len) {
 			return false;
@@ -307,23 +293,21 @@ public class GeometryManager {
 
 		return true;
 	}
-	
+
 	/**
 	 * 
 	 * @return if the projected polygon intersects the plane
 	 */
-	public static boolean doesProjectedPolyIntersect(AbstractComponent geoObj, 
-			Plane3D projectionPlane, 
-			int startIndex, 
+	public static boolean doesProjectedPolyIntersect(AbstractComponent geoObj, Plane3D projectionPlane, int startIndex,
 			int count) {
-		
+
 		Point3D pp[] = new Point3D[count];
 		for (int i = 0; i < count; i++) {
 			pp[i] = new Point3D();
 		}
-		
+
 		int isectsCount = 0;
-		for (int i = 0; i <count; i++) {
+		for (int i = 0; i < count; i++) {
 			int index = startIndex + i;
 			Line3D l3d = geoObj.getVolumeEdge(index);
 			projectionPlane.intersection(l3d, pp[i]);
@@ -335,53 +319,49 @@ public class GeometryManager {
 
 		return isectsCount > 2;
 	}
-	
+
 	/**
 	 * Get a world 2D polygon from a clas geo object like a FTOF slab.
-	 * @param geoObj the geometric object
+	 * 
+	 * @param geoObj          the geometric object
 	 * @param projectionPlane the projection plane
-	 * @param startIndex the firstIndex of the volume edges corresponding to a "long" edge
-	 * @param count the number of such edges (should be contiguous!)
-	 * @param wp will hold the world 2D polygon
-	 * @param centroid optionally compute the centroid.
+	 * @param startIndex      the firstIndex of the volume edges corresponding to a
+	 *                        "long" edge
+	 * @param count           the number of such edges (should be contiguous!)
+	 * @param wp              will hold the world 2D polygon
+	 * @param centroid        optionally compute the centroid.
 	 */
-	public static boolean getProjectedPolygon(AbstractComponent geoObj, 
-			Plane3D projectionPlane, 
-			int startIndex, 
-			int count, 
-			Point2D.Double wp[], 
-			Point2D.Double centroid) {
-		
-		
+	public static boolean getProjectedPolygon(AbstractComponent geoObj, Plane3D projectionPlane, int startIndex,
+			int count, Point2D.Double wp[], Point2D.Double centroid) {
+
 		Point3D pp[] = new Point3D[count];
 		for (int i = 0; i < count; i++) {
 			pp[i] = new Point3D();
 		}
 
-		for (int i = 0; i <count; i++) {
+		for (int i = 0; i < count; i++) {
 			int index = startIndex + i;
 			Line3D l3d = geoObj.getVolumeEdge(index);
 			projectionPlane.intersection(l3d, pp[i]);
 		}
-		
+
 		Vector<Line3D> lines = new Vector<Line3D>();
 		for (int i = 0; i < count; i++) {
-			int j = (i+1) % count;
+			int j = (i + 1) % count;
 			lines.add(new Line3D(pp[i], pp[j]));
 		}
-		
+
 		for (int i = 0; i < count; i++) {
 			wp[i].x = pp[i].z();
 			wp[i].y = Math.hypot(pp[i].x(), pp[i].y());
 		}
-		
+
 		if (centroid != null) {
 			average(wp, centroid);
 		}
-		
+
 		return doesProjectedPolyIntersect(geoObj, projectionPlane, startIndex, count);
 	}
-	
 
 	// faster than centroid, and good enough
 	private static void average(Point2D.Double wp[], Point2D.Double centroid) {
@@ -397,15 +377,15 @@ public class GeometryManager {
 		centroid.x = xsum / size;
 		centroid.y = ysum / size;
 	}
-	
-	
+
 	/**
 	 * Create an XY plane
+	 * 
 	 * @param z the z location of the plane
 	 * @return the new plane
 	 */
 	public static Plane3D xyPlane(double z) {
-		//can use arbitrary wire
+		// can use arbitrary wire
 		Point3D p1 = new Point3D(0, 0, 0);
 		Point3D p2 = new Point3D(0, 0, 100);
 		Line3D l3d = new Line3D(p1, p2);
@@ -413,9 +393,9 @@ public class GeometryManager {
 		return new Plane3D(origin, l3d.direction());
 	}
 
-
 	/**
 	 * Get a plane of constant phi
+	 * 
 	 * @param phi the azimutha angle in degrees
 	 * @return a plane of constant phi
 	 */
@@ -441,20 +421,21 @@ public class GeometryManager {
 		}
 		return wp;
 	}
-	
+
 	/**
 	 * Create a Geometry package Path3D object from the trajectory
+	 * 
 	 * @param traj the swum trajectory
 	 * @return the Path3D object
 	 */
 	public static Path3D fromSwimTrajectory(SwimTrajectory traj) {
-		Path3D path= new Path3D();
+		Path3D path = new Path3D();
 		if (traj != null) {
 			for (double[] tp : traj) {
-				//convert to cm
-				double x = 100.*tp[0];
-				double y = 100.*tp[1];
-				double z = 100.*tp[2];
+				// convert to cm
+				double x = 100. * tp[0];
+				double y = 100. * tp[1];
+				double z = 100. * tp[2];
 				path.addPoint(x, y, z);
 			}
 		}

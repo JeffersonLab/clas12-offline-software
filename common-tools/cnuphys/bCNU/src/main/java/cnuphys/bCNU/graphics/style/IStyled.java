@@ -14,8 +14,7 @@ public interface IStyled {
 	/**
 	 * Set the color used for fill the interior area.
 	 * 
-	 * @param fillColor
-	 *            the fill color.
+	 * @param fillColor the fill color.
 	 */
 	public void setFillColor(Color fillColor);
 
@@ -29,8 +28,7 @@ public interface IStyled {
 	/**
 	 * Set the color used for fill the line drawing.
 	 * 
-	 * @param lineColor
-	 *            the fill color.
+	 * @param lineColor the fill color.
 	 */
 	public void setLineColor(Color lineColor);
 
@@ -44,8 +42,7 @@ public interface IStyled {
 	/**
 	 * Set the style used for drawing lines.
 	 * 
-	 * @param lineStyle
-	 *            the line style.
+	 * @param lineStyle the line style.
 	 */
 	public void setLineStyle(LineStyle lineStyle);
 
@@ -59,8 +56,7 @@ public interface IStyled {
 	/**
 	 * Set the symbol used for drawing points.
 	 * 
-	 * @param symbolType
-	 *            the symbol used for drawing points.
+	 * @param symbolType the symbol used for drawing points.
 	 */
 	public void setSymbolType(SymbolType symbolType);
 
@@ -74,8 +70,7 @@ public interface IStyled {
 	/**
 	 * Set the line width for drawing lines.
 	 * 
-	 * @param lineWidth
-	 *            the line width in pixels.
+	 * @param lineWidth the line width in pixels.
 	 */
 	public void setLineWidth(int lineWidth);
 
@@ -89,8 +84,7 @@ public interface IStyled {
 	/**
 	 * Set symbol size (full width) in pixels.
 	 * 
-	 * @param symbolSize
-	 *            symbol size (full width) in pixels.
+	 * @param symbolSize symbol size (full width) in pixels.
 	 */
 	public void setSymbolSize(int symbolSize);
 }

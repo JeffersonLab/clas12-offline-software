@@ -15,12 +15,11 @@ public class TrajectoryTableModel extends DefaultTableModel {
 			"y" + SUBZERO + " (cm)", "z" + SUBZERO + " (cm)", "p (MeV)", SMALL_THETA + " (deg)", SMALL_PHI + " (deg)",
 			"KE (MeV)", "Et (MeV)", "status", "source" };
 
-	protected static final int columnWidths[] = {
-			70, // track id
+	protected static final int columnWidths[] = { 70, // track id
 			70, // lund id
 			82, // name
 			137, // mass
-			60,  // charge
+			60, // charge
 			122, // xo
 			122, // yo
 			122, // zo
@@ -29,8 +28,8 @@ public class TrajectoryTableModel extends DefaultTableModel {
 			122, // phi
 			147, // KE
 			147, // Etot
-			70, //status
-			280 //source
+			70, // status
+			280 // source
 	};
 
 	// the model data
@@ -96,7 +95,7 @@ public class TrajectoryTableModel extends DefaultTableModel {
 
 				case 3:
 					return getStr(traj.getMass(), 3);
-					
+
 				case 4:
 					return "" + traj.getCharge();
 
@@ -123,10 +122,10 @@ public class TrajectoryTableModel extends DefaultTableModel {
 
 				case 12:
 					return getStr(traj.getMass() + traj.getKineticEnergy(), 3);
-					
+
 				case 13:
 					return "" + traj.getStatus();
-					
+
 				case 14:
 					return traj.getSource();
 				}
@@ -151,8 +150,7 @@ public class TrajectoryTableModel extends DefaultTableModel {
 	}
 
 	/**
-	 * @param data
-	 *            the data to set
+	 * @param data the data to set
 	 */
 	public void setData(Vector<TrajectoryRowData> data) {
 		this.data = data;

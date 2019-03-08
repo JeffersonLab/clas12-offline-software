@@ -6,18 +6,16 @@ public class AttributeShortEditor extends AttributeIntegerValueEditor<Short> {
 	 * Create a Short editor.
 	 * 
 	 * @param attributeTable the owner table.
-	 * @param attribute the attribute
+	 * @param attribute      the attribute
 	 */
-	public AttributeShortEditor(AttributeTable attributeTable,
-			Attribute attribute) {
+	public AttributeShortEditor(AttributeTable attributeTable, Attribute attribute) {
 		super(attributeTable, attribute);
 	}
-	
 
 	@Override
 	protected void setStartValue() {
 		startValue = Short.MIN_VALUE;
-		
+
 	}
 
 	@Override
@@ -25,12 +23,10 @@ public class AttributeShortEditor extends AttributeIntegerValueEditor<Short> {
 		Short newValue = startValue;
 		try {
 			newValue = Short.parseShort(vText);
-		}
-		catch (NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			newValue = startValue;
 		}
 		return newValue;
 	}
-
 
 }

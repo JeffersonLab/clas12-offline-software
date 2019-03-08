@@ -42,71 +42,49 @@ public class Axis3D extends Line3D {
 
 	/** text renderer */
 	private TextRenderer _renderer;
-	
-	//if null will use default
+
+	// if null will use default
 	private String _label;
 
 	/**
 	 * Create a coordinate axis
 	 * 
-	 * @param panel3D
-	 *            the owner 3D panel
+	 * @param panel3D   the owner 3D panel
 	 * 
-	 * @param type
-	 *            the type
-	 * @param vmin
-	 *            the minimum value
-	 * @param vmax
-	 *            the maximum value
-	 * @param color
-	 *            the color of the axes
-	 * @param lineWidth
-	 *            the line width
-	 * @param numTicks
-	 *            the number of ticks
-	 * @param tickColor
-	 *            the color of the ticks
-	 * @param textColor
-	 *            the text color
-	 * @param font
-	 *            the text font
-	 * @param numdec
-	 *            the number of decimals to display
+	 * @param type      the type
+	 * @param vmin      the minimum value
+	 * @param vmax      the maximum value
+	 * @param color     the color of the axes
+	 * @param lineWidth the line width
+	 * @param numTicks  the number of ticks
+	 * @param tickColor the color of the ticks
+	 * @param textColor the text color
+	 * @param font      the text font
+	 * @param numdec    the number of decimals to display
 	 */
-	public Axis3D(Panel3D panel3D, AxisType type, String label, float vmin, float vmax, Color color, float lineWidth, int numTicks,
-			Color tickColor, Color textColor, Font font, int numDec) {
+	public Axis3D(Panel3D panel3D, AxisType type, String label, float vmin, float vmax, Color color, float lineWidth,
+			int numTicks, Color tickColor, Color textColor, Font font, int numDec) {
 		this(panel3D, type, label, vmin, vmax, 0f, color, lineWidth, numTicks, tickColor, textColor, font, numDec);
 	}
 
 	/**
 	 * Create a coordinate axis
 	 * 
-	 * @param panel3D
-	 *            the owner 3D panel
+	 * @param panel3D   the owner 3D panel
 	 * 
-	 * @param type
-	 *            the type
-	 * @param vmin
-	 *            the minimum value
-	 * @param vmax
-	 *            the maximum value
-	 * @param color
-	 *            the color of the axes
-	 * @param lineWidth
-	 *            the line width
-	 * @param numTicks
-	 *            the number of ticks
-	 * @param tickColor
-	 *            the color of the ticks
-	 * @param textColor
-	 *            the text color
-	 * @param font
-	 *            the text font
-	 * @param numdec
-	 *            the number of decimals to display
+	 * @param type      the type
+	 * @param vmin      the minimum value
+	 * @param vmax      the maximum value
+	 * @param color     the color of the axes
+	 * @param lineWidth the line width
+	 * @param numTicks  the number of ticks
+	 * @param tickColor the color of the ticks
+	 * @param textColor the text color
+	 * @param font      the text font
+	 * @param numdec    the number of decimals to display
 	 */
-	public Axis3D(Panel3D panel3D, AxisType type, String label, float vmin, float vmax, float offset, Color color, float lineWidth,
-			int numTicks, Color tickColor, Color textColor, Font font, int numDec) {
+	public Axis3D(Panel3D panel3D, AxisType type, String label, float vmin, float vmax, float offset, Color color,
+			float lineWidth, int numTicks, Color tickColor, Color textColor, Font font, int numDec) {
 		super(panel3D, getEndpoints(type, vmin, vmax), color, lineWidth);
 		_type = type;
 		_label = label;

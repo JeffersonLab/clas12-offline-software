@@ -23,7 +23,6 @@ public class TrajectoryInfoView extends ATrajectoryInfoView {
 	protected Vector<TrajectoryRowData> getRowData() {
 		return null;
 	}
-	
 
 	@Override
 	public void newPhysicsEvent(PhysicsEvent event, List<ParticleHits> particleHits) {
@@ -32,20 +31,19 @@ public class TrajectoryInfoView extends ATrajectoryInfoView {
 		if (StreamManager.getInstance().isStarted()) {
 			return;
 		}
-		
+
 		ISwimAll allSwimmer = _eventManager.getAllSwimmer();
 		if (allSwimmer != null) {
-			TrajectoryTableModel model = _trajectoryTable
-					.getTrajectoryModel();
+			TrajectoryTableModel model = _trajectoryTable.getTrajectoryModel();
 			model.setData(allSwimmer.getRowData());
 			model.fireTableDataChanged();
 			_trajectoryTable.repaint();
 		}
 	}
 
-
 	/**
 	 * A new event generator is active
+	 * 
 	 * @param generator the now active generator
 	 */
 	@Override

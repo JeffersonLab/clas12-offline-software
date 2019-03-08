@@ -28,19 +28,17 @@ public class KeyboardLabel extends JPanel {
 	private static Font _font = new Font("SansSerif", Font.PLAIN, 10);
 	private static final Font _bfont = new Font(Font.MONOSPACED, Font.PLAIN, 10);
 
-	
 	private Panel3D _panel3D;
 
-	public KeyboardLabel(Panel3D panel, String explanation,
-			String keys[], int vkeys[], boolean shifted[]) {
-		
-	    setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-	       		
+	public KeyboardLabel(Panel3D panel, String explanation, String keys[], int vkeys[], boolean shifted[]) {
+
+		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+
 		_panel3D = panel;
-		
+
 		for (int i = 0; i < keys.length; i++) {
 			KLButton button = new KLButton(keys[i], vkeys[i], shifted[i]) {
-				
+
 				@Override
 				public Dimension getPreferredSize() {
 					Dimension d = super.getPreferredSize();
@@ -49,44 +47,39 @@ public class KeyboardLabel extends JPanel {
 					d.height = fm.getHeight() + 4;
 					return d;
 				}
-				
+
 			};
-			
+
 			button.setFont(_bfont);
 
 			add(button);
 			add(Box.createHorizontalStrut(6));
 		}
 
-		
 		JLabel lab = new JLabel(explanation);
 		lab.setFont(_font);
-		
+
 		add(lab);
-		
+
 		add(Box.createHorizontalGlue());
 	}
 
-	
-	
 	class KLButton extends JButton {
-		
-		
-		KLButton (final String label, final int vk, final boolean shifted) {
+
+		KLButton(final String label, final int vk, final boolean shifted) {
 			super(label.trim());
-			
+
 			ActionListener al = new ActionListener() {
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					KeyAdapter3D.handleVK(_panel3D, vk, shifted);
 				}
-				
+
 			};
-			
+
 			addActionListener(al);
 		}
-				
-		
+
 	}
 }

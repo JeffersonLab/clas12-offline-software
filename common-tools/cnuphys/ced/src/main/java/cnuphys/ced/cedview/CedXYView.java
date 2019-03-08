@@ -30,10 +30,8 @@ public abstract class CedXYView extends CedView {
 	protected static int BMARGIN = 50;
 
 	// line stroke
-	public static Stroke stroke = GraphicsUtilities.getStroke(2.0f,
-			LineStyle.SOLID);
-	public static Stroke stroke2 = GraphicsUtilities.getStroke(3f,
-			LineStyle.SOLID);
+	public static Stroke stroke = GraphicsUtilities.getStroke(2.0f, LineStyle.SOLID);
+	public static Stroke stroke2 = GraphicsUtilities.getStroke(3f, LineStyle.SOLID);
 
 	public static final Color TRANS1 = new Color(192, 192, 192, 128);
 	public static final Color TRANS2 = new Color(192, 192, 192, 64);
@@ -43,8 +41,7 @@ public abstract class CedXYView extends CedView {
 	/**
 	 * Constructor
 	 * 
-	 * @param keyVals
-	 *            variable length argument list
+	 * @param keyVals variable length argument list
 	 */
 	public CedXYView(Object... keyVals) {
 		super(keyVals);
@@ -64,15 +61,14 @@ public abstract class CedXYView extends CedView {
 	protected abstract void setAfterDraw();
 
 	/**
-	 * This adds the detector items. The AllDC view is not faithful to geometry.
-	 * All we really uses in the number of superlayers, number of layers, and
-	 * number of wires.
+	 * This adds the detector items. The AllDC view is not faithful to geometry. All
+	 * we really uses in the number of superlayers, number of layers, and number of
+	 * wires.
 	 */
 	protected abstract void addItems();
 
 	// draw the axes
-	protected void drawAxes(Graphics g, IContainer container, Rectangle bounds,
-			boolean drawPhi) {
+	protected void drawAxes(Graphics g, IContainer container, Rectangle bounds, boolean drawPhi) {
 		Rectangle sr = getActiveScreenRectangle(container);
 		// Rectangle sr = container.getInsetRectangle();
 
@@ -153,9 +149,8 @@ public abstract class CedXYView extends CedView {
 		// g.setFont(labelFont);
 		// fm = getFontMetrics(labelFont);
 
-		Rectangle r = new Rectangle(left - fm.stringWidth("x") - 4, top
-				- fm.getHeight() / 2 + 1, (right - left + fm.stringWidth("x")
-				+ fm.stringWidth("y") + 9), (bottom - top) + fm.getHeight() + 2);
+		Rectangle r = new Rectangle(left - fm.stringWidth("x") - 4, top - fm.getHeight() / 2 + 1,
+				(right - left + fm.stringWidth("x") + fm.stringWidth("y") + 9), (bottom - top) + fm.getHeight() + 2);
 
 		g.setColor(TRANS1);
 		g.fillRect(r.x, r.y, r.width, r.height);
@@ -166,8 +161,7 @@ public abstract class CedXYView extends CedView {
 		g.drawLine(right, bottom, right, top);
 
 		g.drawString("y", right + 3, top + fm.getHeight() / 2 - 1);
-		g.drawString("x", left - fm.stringWidth("x") - 2,
-				bottom + fm.getHeight() / 2);
+		g.drawString("x", left - fm.stringWidth("x") - 2, bottom + fm.getHeight() / 2);
 //		g.drawString("y", left - fm.stringWidth("y") - 2, top + fm.getHeight() / 2 - 1);
 //		g.drawString("x", right+3,
 //				bottom + fm.getHeight() / 2);
@@ -195,46 +189,36 @@ public abstract class CedXYView extends CedView {
 	}
 
 	@Override
-	public int getSector(IContainer container, Point screenPoint,
-			Double worldPoint) {
+	public int getSector(IContainer container, Point screenPoint, Double worldPoint) {
 		return 0;
 	}
 
 	/**
 	 * Some basic feedback
 	 * 
-	 * @param container
-	 *            the drawing container
-	 * @param screenPoint
-	 *            the pixel location
-	 * @param worldPoint
-	 *            the world location
-	 * @param units
-	 *            the unit string e.g., "mm" or "cm"
-	 * @param feedbackStrings
-	 *            the list to add to
+	 * @param container       the drawing container
+	 * @param screenPoint     the pixel location
+	 * @param worldPoint      the world location
+	 * @param units           the unit string e.g., "mm" or "cm"
+	 * @param feedbackStrings the list to add to
 	 */
-	protected void basicFeedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, String units,
+	protected void basicFeedback(IContainer container, Point screenPoint, Point2D.Double worldPoint, String units,
 			List<String> feedbackStrings) {
 
 		// get the common information
-		super.getFeedbackStrings(container, screenPoint, worldPoint,
-				feedbackStrings);
+		super.getFeedbackStrings(container, screenPoint, worldPoint, feedbackStrings);
 
 		Rectangle sr = getActiveScreenRectangle(container);
 		if (!sr.contains(screenPoint)) {
 			return;
 		}
 
-		fbString("yellow", "xy " + Point2DSupport.toString(worldPoint) + " "
-				+ units, feedbackStrings);
-		fbString("yellow", "radius " + 
-				DoubleFormat.doubleFormat(Math.hypot(worldPoint.x, worldPoint.y), 2) + " "
-				+ units, feedbackStrings);
+		fbString("yellow", "xy " + Point2DSupport.toString(worldPoint) + " " + units, feedbackStrings);
+		fbString("yellow",
+				"radius " + DoubleFormat.doubleFormat(Math.hypot(worldPoint.x, worldPoint.y), 2) + " " + units,
+				feedbackStrings);
 		double phi = Math.toDegrees(Math.atan2(worldPoint.y, worldPoint.x));
-		fbString("yellow", "phi " + DoubleFormat.doubleFormat(phi, 2)
-				+ UnicodeSupport.DEGREE, feedbackStrings);
+		fbString("yellow", "phi " + DoubleFormat.doubleFormat(phi, 2) + UnicodeSupport.DEGREE, feedbackStrings);
 
 	}
 

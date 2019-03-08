@@ -7,7 +7,7 @@ public final class CachedText {
 	// which standard stream
 	public static final int STDOUT = 0;
 	public static final int STDERR = 1;
-	
+
 	public Log log = Log.getInstance();
 
 	public final String text;

@@ -15,13 +15,13 @@ public class AcceptanceMapperConsumer extends PhysicsEventConsumer {
 
 	private int uniqueLayerThreshold = 32;
 	private String _errStr = "???";
-	
+
 	double thetaMin = Double.POSITIVE_INFINITY;
 	double thetaMax = Double.NEGATIVE_INFINITY;
-	
+
 	double phiMin = Double.NaN;
 	double phiMax = Double.NaN;
-	
+
 	@Override
 	public String getConsumerName() {
 		return "Acceptance Mapper";
@@ -32,11 +32,11 @@ public class AcceptanceMapperConsumer extends PhysicsEventConsumer {
 		if (reason == StreamReason.STOPPED) {
 			System.err.println("ACCEPTMAP thetaMin = " + thetaMin + " at phi = " + phiMin);
 			System.err.println("ACCEPTMAP thetaMax = " + thetaMax + " at phi = " + phiMax);
-			
+
 			thetaMin = Double.POSITIVE_INFINITY;
 			thetaMax = Double.NEGATIVE_INFINITY;
 			phiMin = Double.NaN;
-		 phiMax = Double.NaN;
+			phiMax = Double.NaN;
 
 		}
 	}
@@ -44,13 +44,13 @@ public class AcceptanceMapperConsumer extends PhysicsEventConsumer {
 	@Override
 	public StreamProcessStatus streamingPhysicsEvent(PhysicsEvent event, List<ParticleHits> particleHits) {
 		int uniqueCount = uniqueLayCount(particleHits);
-		
+
 		if (uniqueCount >= uniqueLayerThreshold) {
 			GeneratedParticleRecord gpr = particleHits.get(0).getGeneratedParticleRecord();
-			
+
 			double theta = gpr.getTheta();
 			double phi = gpr.getPhi();
-			
+
 			if (theta < thetaMin) {
 				thetaMin = theta;
 				phiMin = phi;
@@ -59,7 +59,7 @@ public class AcceptanceMapperConsumer extends PhysicsEventConsumer {
 				thetaMax = theta;
 				phiMax = phi;
 			}
-			
+
 		}
 		return StreamProcessStatus.CONTINUE;
 	}
@@ -72,7 +72,7 @@ public class AcceptanceMapperConsumer extends PhysicsEventConsumer {
 	public String flagExplanation() {
 		return _errStr;
 	}
-	
+
 	private int uniqueLayCount(List<ParticleHits> particleHits) {
 		HitHolder hitHolder = particleHits.get(0).getHitHolder(DetectorId.DC);
 		int count = hitHolder.sectorUniqueLayerCount(0);

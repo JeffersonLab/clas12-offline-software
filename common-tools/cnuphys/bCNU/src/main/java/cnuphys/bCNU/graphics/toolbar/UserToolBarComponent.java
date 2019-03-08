@@ -29,8 +29,7 @@ public class UserToolBarComponent extends JComponent {
 	/**
 	 * Set the user draw for this user toolbar component.
 	 * 
-	 * @param userDraw
-	 *            the userDraw to set
+	 * @param userDraw the userDraw to set
 	 */
 	public void setUserDraw(IDrawable userDraw) {
 		_userDraw = userDraw;

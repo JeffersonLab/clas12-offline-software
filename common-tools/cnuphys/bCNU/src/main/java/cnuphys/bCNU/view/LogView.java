@@ -13,9 +13,8 @@ import cnuphys.bCNU.util.PropertySupport;
 public class LogView extends BaseView {
 
 	public LogView() {
-		super(PropertySupport.TITLE, "Log", PropertySupport.ICONIFIABLE, true,
-				PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
-				PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 600,
+		super(PropertySupport.TITLE, "Log", PropertySupport.ICONIFIABLE, true, PropertySupport.MAXIMIZABLE, true,
+				PropertySupport.CLOSABLE, true, PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, 600,
 				PropertySupport.HEIGHT, 600, PropertySupport.VISIBLE, false);
 		add(new SimpleLogPane());
 	}

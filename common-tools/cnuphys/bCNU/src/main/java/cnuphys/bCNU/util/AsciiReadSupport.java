@@ -24,8 +24,8 @@ public class AsciiReadSupport {
 	/**
 	 * Get the next non comment line
 	 * 
-	 * @param bufferedReader
-	 *            a buffered reader which should be linked to an ascii file
+	 * @param bufferedReader a buffered reader which should be linked to an ascii
+	 *                       file
 	 * @return the next non comment line (or <code>null</code>)
 	 */
 	public static String nextNonComment(BufferedReader bufferedReader) {
@@ -51,8 +51,7 @@ public class AsciiReadSupport {
 	/**
 	 * Counts the number of non-comment lines in a file
 	 * 
-	 * @param file
-	 *            the file in question
+	 * @param file the file in question
 	 * @return the number of non-comment lines in the file
 	 */
 	public static int countNonCommentLines(File file) {
@@ -92,8 +91,7 @@ public class AsciiReadSupport {
 	/**
 	 * Read an entire ascii file into a single string.
 	 * 
-	 * @param file
-	 *            the file to read
+	 * @param file the file to read
 	 * @return the string with the entire content of the file
 	 */
 	public static String asciiFileToString(File file) {
@@ -138,8 +136,7 @@ public class AsciiReadSupport {
 	/**
 	 * Count the lines in an ASCII file, without skipping comment
 	 * 
-	 * @param file
-	 *            the file in question
+	 * @param file the file in question
 	 * @return the number of lines in the file
 	 */
 	public static int countLines(File file) {
@@ -182,8 +179,8 @@ public class AsciiReadSupport {
 	/**
 	 * Get the next tokens from a buffered reader
 	 * 
-	 * @param bufferedReader
-	 *            a buffered reader which should be linked to an ascii file
+	 * @param bufferedReader a buffered reader which should be linked to an ascii
+	 *                       file
 	 * @return the next set of white-space separated tokens.
 	 */
 	public static String[] nextTokens(BufferedReader bufferedReader) {
@@ -194,10 +191,9 @@ public class AsciiReadSupport {
 	/**
 	 * Skip lines in an ascii file
 	 * 
-	 * @param n
-	 *            the number of lines to skip
-	 * @param bufferedReader
-	 *            a buffered reader which should be linked to an ascii file
+	 * @param n              the number of lines to skip
+	 * @param bufferedReader a buffered reader which should be linked to an ascii
+	 *                       file
 	 */
 	public static void skipLines(int n, BufferedReader bufferedReader) {
 		for (int i = 0; i < n; i++) {

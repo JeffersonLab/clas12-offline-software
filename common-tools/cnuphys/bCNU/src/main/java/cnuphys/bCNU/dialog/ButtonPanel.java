@@ -34,8 +34,7 @@ public class ButtonPanel extends JPanel {
 
 	public static final int USE_OKCANCELAPPLY = USE_OK | USE_CANCEL | USE_APPLY;
 
-	public static final int USE_OKCANCELDELETE = USE_OK | USE_CANCEL
-			| USE_DELETE;
+	public static final int USE_OKCANCELDELETE = USE_OK | USE_CANCEL | USE_DELETE;
 
 	/**
 	 * Constant indicating an "OK" response
@@ -100,8 +99,7 @@ public class ButtonPanel extends JPanel {
 	/**
 	 * The constructor.
 	 * 
-	 * @param labels
-	 *            The button labels.
+	 * @param labels The button labels.
 	 */
 
 	public ButtonPanel(String labels[]) {
@@ -111,10 +109,8 @@ public class ButtonPanel extends JPanel {
 	/**
 	 * The constructor.
 	 * 
-	 * @param labels
-	 *            The button labels.
-	 * @param alist
-	 *            Optional action listener.
+	 * @param labels The button labels.
+	 * @param alist  Optional action listener.
 	 */
 
 	public ButtonPanel(String labels[], ActionListener alist) {
@@ -124,12 +120,9 @@ public class ButtonPanel extends JPanel {
 	/**
 	 * The constructor.
 	 * 
-	 * @param labels
-	 *            The button labels.
-	 * @param alist
-	 *            Optional action listener.
-	 * @param spacing
-	 *            The spacing between labels.
+	 * @param labels  The button labels.
+	 * @param alist   Optional action listener.
+	 * @param spacing The spacing between labels.
 	 */
 
 	public ButtonPanel(String labels[], ActionListener alist, int spacing) {
@@ -140,18 +133,13 @@ public class ButtonPanel extends JPanel {
 	/**
 	 * The constructor.
 	 * 
-	 * @param labels
-	 *            the button labels.
-	 * @param alist
-	 *            optional action listener.
-	 * @param spacing
-	 *            the spacing between labels.
-	 * @param alignment
-	 *            the layout alignment
+	 * @param labels    the button labels.
+	 * @param alist     optional action listener.
+	 * @param spacing   the spacing between labels.
+	 * @param alignment the layout alignment
 	 */
 
-	public ButtonPanel(String labels[], ActionListener alist, int spacing,
-			int alignment) {
+	public ButtonPanel(String labels[], ActionListener alist, int spacing, int alignment) {
 
 		super(new FlowLayout(alignment, spacing, 0));
 		this.labels = labels;
@@ -175,8 +163,7 @@ public class ButtonPanel extends JPanel {
 	/**
 	 * Add the buttons to the panel.
 	 * 
-	 * @param alist
-	 *            An action listener.
+	 * @param alist An action listener.
 	 */
 
 	protected void addButtons(ActionListener alist) {
@@ -199,10 +186,8 @@ public class ButtonPanel extends JPanel {
 	/**
 	 * Enable or disable a button.
 	 * 
-	 * @param index
-	 *            the index of the button. If -1, applies to all.
-	 * @param state
-	 *            if true, enable, else disable.
+	 * @param index the index of the button. If -1, applies to all.
+	 * @param state if true, enable, else disable.
 	 */
 
 	public void setEnabled(int index, boolean state) {
@@ -223,10 +208,8 @@ public class ButtonPanel extends JPanel {
 	/**
 	 * Set tooltip
 	 * 
-	 * @param index
-	 *            The index of the button.
-	 * @param tip
-	 *            tooltip string
+	 * @param index The index of the button.
+	 * @param tip   tooltip string
 	 */
 
 	public void setToolTip(int index, String tip) {
@@ -238,25 +221,20 @@ public class ButtonPanel extends JPanel {
 	@Override
 	public Insets getInsets() {
 		Insets def = super.getInsets();
-		return new Insets(def.top + 2, def.left + 2, def.bottom + 2,
-				def.right + 2);
+		return new Insets(def.top + 2, def.left + 2, def.bottom + 2, def.right + 2);
 	}
 
 	/**
-	 * Makes a button panel with combinations of OK, Save, Save As, Cancel,
-	 * Apply, and Delete
+	 * Makes a button panel with combinations of OK, Save, Save As, Cancel, Apply,
+	 * and Delete
 	 * 
-	 * @param opt
-	 *            Bitwise combination of USE_OK, USE_CANCEL, USE_APPLY,
-	 *            USE_DELETE
-	 * @param actionListener
-	 *            Action listener for button clicks
-	 * @param spacing
-	 *            The spacing between labels.
+	 * @param opt            Bitwise combination of USE_OK, USE_CANCEL, USE_APPLY,
+	 *                       USE_DELETE
+	 * @param actionListener Action listener for button clicks
+	 * @param spacing        The spacing between labels.
 	 */
 
-	public static ButtonPanel closeOutPanel(int opt,
-			ActionListener actionListener, int spacing) {
+	public static ButtonPanel closeOutPanel(int opt, ActionListener actionListener, int spacing) {
 
 		Vector<String> vl = new Vector<String>(7);
 

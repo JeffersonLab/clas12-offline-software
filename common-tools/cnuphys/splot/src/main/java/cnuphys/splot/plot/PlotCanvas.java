@@ -48,8 +48,7 @@ import cnuphys.splot.toolbar.ToolBarButton;
 import cnuphys.splot.toolbar.ToolBarToggleButton;
 
 public class PlotCanvas extends JComponent
-		implements MouseListener, MouseMotionListener, IRubberbanded,
-		IToolBarListener, TableModelListener {
+		implements MouseListener, MouseMotionListener, IRubberbanded, IToolBarListener, TableModelListener {
 
 	public static final String DONEDRAWINGPROP = "Done Drawing";
 	public static final String TITLECHANGEPROP = "Plot Title Change";
@@ -77,8 +76,7 @@ public class PlotCanvas extends JComponent
 	private boolean _needsRescale;
 
 	// the world system of the active area
-	private Rectangle2D.Double _worldSystem = new Rectangle2D.Double(0, 0, 1,
-			1);
+	private Rectangle2D.Double _worldSystem = new Rectangle2D.Double(0, 0, 1, 1);
 
 	// convert from screen to data
 	protected AffineTransform _localToWorld;
@@ -102,13 +100,13 @@ public class PlotCanvas extends JComponent
 
 	// legend and floating label dragging
 	private Legend _legend;
-	
+
 	// extra and floating label dragging
 	private ExtraText _extra;
-	
-	//color gradient
+
+	// color gradient
 	private Gradient _gradient;
-	
+
 	// data drawer
 	private DataDrawer _dataDrawer;
 
@@ -127,13 +125,12 @@ public class PlotCanvas extends JComponent
 	/**
 	 * Create a plot canvas for plotting a dataset
 	 * 
-	 * @param dataSet the dataset to plot. It might contain many curves
+	 * @param dataSet   the dataset to plot. It might contain many curves
 	 * @param plotTitle the plot title
-	 * @param xLabel the x axis label
-	 * @param yLabel the y axis label
+	 * @param xLabel    the x axis label
+	 * @param yLabel    the y axis label
 	 */
-	public PlotCanvas(DataSet dataSet, String plotTitle, String xLabel,
-			String yLabel) {
+	public PlotCanvas(DataSet dataSet, String plotTitle, String xLabel, String yLabel) {
 
 		setBackground(Color.white);
 		_parameters = new PlotParameters(this);
@@ -150,7 +147,6 @@ public class PlotCanvas extends JComponent
 				e.printStackTrace();
 			}
 		}
-		
 
 		setDataSet(dataSet);
 
@@ -295,13 +291,9 @@ public class PlotCanvas extends JComponent
 		if (params.manualRangeX()) {
 			xmin = params.getManualXMin();
 			xmax = params.getManualXMax();
-		}
-		else if (_parameters.useXDataLimits()) {
-		}
-		else {
-			NiceScale ns = new NiceScale(xmin, xmax,
-					_plotTicks.getNumMajorTickX() + 2,
-					_parameters.includeXZero());
+		} else if (_parameters.useXDataLimits()) {
+		} else {
+			NiceScale ns = new NiceScale(xmin, xmax, _plotTicks.getNumMajorTickX() + 2, _parameters.includeXZero());
 			xmin = ns.getNiceMin();
 			xmax = ns.getNiceMax();
 		}
@@ -309,14 +301,10 @@ public class PlotCanvas extends JComponent
 		if (params.manualRangeY()) {
 			ymin = params.getManualYMin();
 			ymax = params.getManualYMax();
-		}
-		else if (_parameters.useYDataLimits()) {
+		} else if (_parameters.useYDataLimits()) {
 			// do nothing
-		}
-		else {
-			NiceScale ns = new NiceScale(ymin, ymax,
-					_plotTicks.getNumMajorTickY() + 2,
-					_parameters.includeYZero());
+		} else {
+			NiceScale ns = new NiceScale(ymin, ymax, _plotTicks.getNumMajorTickY() + 2, _parameters.includeYZero());
 			ymin = ns.getNiceMin();
 			ymax = ns.getNiceMax();
 		}
@@ -334,9 +322,9 @@ public class PlotCanvas extends JComponent
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-			
+
 		Rectangle b = getBounds();
-		
+
 		g.setColor(getBackground());
 		g.fillRect(0, 0, b.width, b.height);
 
@@ -348,8 +336,7 @@ public class PlotCanvas extends JComponent
 
 		// frame the active area
 		g.setColor(Color.black);
-		g.drawRect(_activeBounds.x, _activeBounds.y, _activeBounds.width,
-				_activeBounds.height);
+		g.drawRect(_activeBounds.x, _activeBounds.y, _activeBounds.width, _activeBounds.height);
 
 		// draw the ticks and legend
 		_plotTicks.draw(g);
@@ -357,7 +344,7 @@ public class PlotCanvas extends JComponent
 		if (_parameters.legendDrawing()) {
 			_legend.draw(g);
 		}
-		
+
 		if (_parameters.extraDrawing()) {
 			_extra.draw(g);
 		}
@@ -373,8 +360,7 @@ public class PlotCanvas extends JComponent
 	/**
 	 * Data is being added, possibly very quickly, so lets schedule a redraw
 	 * 
-	 * @param rescale if <code>true</code> the world system will also be
-	 *            rescaled
+	 * @param rescale if <code>true</code> the world system will also be rescaled
 	 */
 	public void needsRedraw(boolean rescale) {
 		_needsRedraw = true;
@@ -395,8 +381,7 @@ public class PlotCanvas extends JComponent
 		Rectangle bounds = getBounds();
 		if (bounds == null) {
 			_activeBounds = null;
-		}
-		else {
+		} else {
 			int left = 0;
 			int top = 0;
 			int right = left + bounds.width;
@@ -413,7 +398,7 @@ public class PlotCanvas extends JComponent
 
 			left += leftMargin;
 			top += _topMargin;
-			right -= _rightMargin;			
+			right -= _rightMargin;
 			bottom -= bottomMargin;
 
 			if (_activeBounds == null) {
@@ -444,12 +429,9 @@ public class PlotCanvas extends JComponent
 		double scaleX = _worldSystem.width / _activeBounds.width;
 		double scaleY = _worldSystem.height / _activeBounds.height;
 
-		_localToWorld = AffineTransform.getTranslateInstance(_worldSystem.x,
-				_worldSystem.getMaxY());
-		_localToWorld
-				.concatenate(AffineTransform.getScaleInstance(scaleX, -scaleY));
-		_localToWorld.concatenate(AffineTransform
-				.getTranslateInstance(-_activeBounds.x, -_activeBounds.y));
+		_localToWorld = AffineTransform.getTranslateInstance(_worldSystem.x, _worldSystem.getMaxY());
+		_localToWorld.concatenate(AffineTransform.getScaleInstance(scaleX, -scaleY));
+		_localToWorld.concatenate(AffineTransform.getTranslateInstance(-_activeBounds.x, -_activeBounds.y));
 
 		try {
 			_worldToLocal = _localToWorld.createInverse();
@@ -477,7 +459,7 @@ public class PlotCanvas extends JComponent
 			_legend.setCurrentPoint(e.getPoint());
 			repaint();
 		}
-		
+
 		if (_extra.isDraggingPrimed()) {
 			_extra.setDragging(true);
 		}
@@ -490,7 +472,7 @@ public class PlotCanvas extends JComponent
 			_extra.setCurrentPoint(e.getPoint());
 			repaint();
 		}
-		
+
 		if (_gradient.isDraggingPrimed()) {
 			_gradient.setDragging(true);
 		}
@@ -503,7 +485,6 @@ public class PlotCanvas extends JComponent
 			_gradient.setCurrentPoint(e.getPoint());
 			repaint();
 		}
-
 
 	}
 
@@ -528,17 +509,14 @@ public class PlotCanvas extends JComponent
 
 		else if (!activeBoundsContains(pp.x, pp.y)) {
 			_locationString = " ";
-		}
-		else {
+		} else {
 			// pp.x -= _activeBounds.x;
 			// pp.y -= _activeBounds.y;
 			localToWorld(pp, _workPoint);
-			_locationString = String.format("<html>(x, y) = (%7.2f, %-7.2f)",
-					_workPoint.x, _workPoint.y);
+			_locationString = String.format("<html>(x, y) = (%7.2f, %-7.2f)", _workPoint.x, _workPoint.y);
 
 			if (_dataSet.is1DHistoSet()) {
-				Vector<DataColumn> ycols = (Vector<DataColumn>) _dataSet
-						.getAllVisibleCurves();
+				Vector<DataColumn> ycols = (Vector<DataColumn>) _dataSet.getAllVisibleCurves();
 				int size = ycols.size();
 
 				for (int i = 0; i < size; i++) {
@@ -546,19 +524,16 @@ public class PlotCanvas extends JComponent
 					String s = HistoData.statusString(this, hd, pp, _workPoint);
 					if (s != null) {
 						Color lc = ycols.get(i).getStyle().getLineColor();
-						_locationString += "&nbsp&nbsp"
-								+ colorStr(s, GraphicsUtilities.colorToHex(lc));
+						_locationString += "&nbsp&nbsp" + colorStr(s, GraphicsUtilities.colorToHex(lc));
 						// break;
 					}
 				}
-			}
-			else if (_dataSet.is2DHistoSet()) {
+			} else if (_dataSet.is2DHistoSet()) {
 				Histo2DData h2d = _dataSet.getColumn(0).getHistoData2D();
 				String s = Histo2DData.statusString(this, h2d, pp, _workPoint);
 				if (s != null) {
 					Color lc = Color.red;
-					_locationString += "&nbsp&nbsp"
-							+ colorStr(s, GraphicsUtilities.colorToHex(lc));
+					_locationString += "&nbsp&nbsp" + colorStr(s, GraphicsUtilities.colorToHex(lc));
 					// break;
 				}
 			}
@@ -626,8 +601,7 @@ public class PlotCanvas extends JComponent
 
 		if (CommonToolBar.CENTER.equals(command)) {
 			recenterAtClick(e.getPoint());
-		}
-		else if ((SwingUtilities.isLeftMouseButton(e) && e.isControlDown())) {
+		} else if ((SwingUtilities.isLeftMouseButton(e) && e.isControlDown())) {
 			if (CommonToolBar.POINTER.equals(command)) {
 				_plotPopup.show(e.getComponent(), e.getX(), e.getY());
 			}
@@ -649,42 +623,31 @@ public class PlotCanvas extends JComponent
 
 		String command = toolbarCommand();
 
-		if (isPointer() && _parameters.legendDrawing()
-				&& _legend.contains(e.getPoint())) {
+		if (isPointer() && _parameters.legendDrawing() && _legend.contains(e.getPoint())) {
 			_legend.setDraggingPrimed(true);
 			_legend.setCurrentPoint(e.getPoint());
-		}
-		else if (isPointer() && _parameters.extraDrawing()
-				&& _extra.contains(e.getPoint())) {
+		} else if (isPointer() && _parameters.extraDrawing() && _extra.contains(e.getPoint())) {
 			_extra.setDraggingPrimed(true);
 			_extra.setCurrentPoint(e.getPoint());
-		}
-		else if (isPointer() && _parameters.gradientDrawing()
-				&& _gradient.contains(e.getPoint())) {
+		} else if (isPointer() && _parameters.gradientDrawing() && _gradient.contains(e.getPoint())) {
 			_gradient.setDraggingPrimed(true);
 			_gradient.setCurrentPoint(e.getPoint());
 		}
 
 		else {
 
-			if (CommonToolBar.BOXZOOM.equals(command)
-					&& (_rubberband == null)) {
-				
+			if (CommonToolBar.BOXZOOM.equals(command) && (_rubberband == null)) {
+
 				if (getDataSet().is1DHistoSet()) {
-					
+
 					if (e.isShiftDown()) {
-						_rubberband = new Rubberband(this, this,
-						Rubberband.Policy.XONLY);
-					}
-					else {
-						_rubberband = new Rubberband(this, this,
-						Rubberband.Policy.YONLY);
+						_rubberband = new Rubberband(this, this, Rubberband.Policy.XONLY);
+					} else {
+						_rubberband = new Rubberband(this, this, Rubberband.Policy.YONLY);
 					}
 
-			}
-				else {
-					_rubberband = new Rubberband(this, this,
-							Rubberband.Policy.RECTANGLE);
+				} else {
+					_rubberband = new Rubberband(this, this, Rubberband.Policy.RECTANGLE);
 				}
 				_rubberband.setActive(true);
 				_rubberband.startRubberbanding(e.getPoint());
@@ -696,13 +659,11 @@ public class PlotCanvas extends JComponent
 
 	// get the active toolbar toggle butto command
 	private String toolbarCommand() {
-		return (_toolbar != null) ? _toolbar.getActiveCommand()
-				: CommonToolBar.POINTER;
+		return (_toolbar != null) ? _toolbar.getActiveCommand() : CommonToolBar.POINTER;
 	}
 
 	/**
-	 * The mouse has been released on plot canvas. A release comes before the
-	 * click
+	 * The mouse has been released on plot canvas. A release comes before the click
 	 * 
 	 * @param e the mouseEvent
 	 */
@@ -786,7 +747,7 @@ public class PlotCanvas extends JComponent
 			_worldToLocal.transform(wp, pp);
 		}
 	}
-	
+
 	public void worldToLocal(Rectangle r, Rectangle.Double wr) {
 		// New version to accommodate world with x decreasing right
 		Point2D.Double wp0 = new Point2D.Double(wr.getMinX(), wr.getMinY());
@@ -886,7 +847,7 @@ public class PlotCanvas extends JComponent
 		_toolbar = toolbar;
 		doButtonAction(button.getActionCommand());
 	}
-	
+
 	public void doButtonAction(String command) {
 		if (CommonToolBar.ZOOMIN.equals(command)) {
 			scale(0.85);
@@ -906,7 +867,7 @@ public class PlotCanvas extends JComponent
 			takePicture();
 		}
 	}
-	
+
 	/**
 	 * Print
 	 */
@@ -915,8 +876,7 @@ public class PlotCanvas extends JComponent
 	}
 
 	public File getSavePngFile() {
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG File",
-				"png", "PNG");
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG File", "png", "PNG");
 
 		File selectedFile = null;
 		JFileChooser chooser = new JFileChooser(_dataFilePath);
@@ -929,10 +889,8 @@ public class PlotCanvas extends JComponent
 
 				if (selectedFile.exists()) {
 					int answer = JOptionPane.showConfirmDialog(null,
-							selectedFile.getAbsolutePath()
-									+ "  already exists. Do you want to overwrite it?",
-							"Overwite Existing File?",
-							JOptionPane.YES_NO_OPTION);
+							selectedFile.getAbsolutePath() + "  already exists. Do you want to overwrite it?",
+							"Overwite Existing File?", JOptionPane.YES_NO_OPTION);
 
 					if (answer != JFileChooser.APPROVE_OPTION) {
 						selectedFile = null;
@@ -944,10 +902,9 @@ public class PlotCanvas extends JComponent
 		return selectedFile;
 	}
 
-
-/**
- * Take a picture, sanve as png
- */
+	/**
+	 * Take a picture, sanve as png
+	 */
 	public void takePicture() {
 		try {
 
@@ -966,8 +923,7 @@ public class PlotCanvas extends JComponent
 				ImageOutputStream ios = ImageIO.createImageOutputStream(file);
 				Environment.getInstance().getPngWriter().setOutput(ios);
 
-				bi = GraphicsUtilities
-						.getComponentImage((_parent != null) ? _parent : this);
+				bi = GraphicsUtilities.getComponentImage((_parent != null) ? _parent : this);
 
 				Environment.getInstance().getPngWriter().write(bi);
 				ios.close();
@@ -979,8 +935,7 @@ public class PlotCanvas extends JComponent
 	}
 
 	@Override
-	public void toggleButtonActivated(CommonToolBar toolbar,
-			ToolBarToggleButton button) {
+	public void toggleButtonActivated(CommonToolBar toolbar, ToolBarToggleButton button) {
 		_toolbar = toolbar;
 	}
 
@@ -1010,8 +965,7 @@ public class PlotCanvas extends JComponent
 	 * @param oldValue
 	 * @param newValue
 	 */
-	public void remoteFirePropertyChange(String propName, Object oldValue,
-			Object newValue) {
+	public void remoteFirePropertyChange(String propName, Object oldValue, Object newValue) {
 		firePropertyChange(propName, oldValue, newValue);
 	}
 
@@ -1023,20 +977,21 @@ public class PlotCanvas extends JComponent
 
 	/**
 	 * Get the canavas's plot ticks
+	 * 
 	 * @return the plot ticks
 	 */
 	public PlotTicks getPlotTicks() {
 		return _plotTicks;
 	}
-	
+
 	/**
 	 * Get the canvas's color gradient
+	 * 
 	 * @return the color gradient
 	 */
 	public Gradient getGradient() {
 		return _gradient;
 	}
-
 
 	/**
 	 * Set which toggle button is selected

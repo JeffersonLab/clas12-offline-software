@@ -52,8 +52,7 @@ public class ClasIoEventFrame extends JFrame {
 
 	public static void main(String arg[]) {
 
-		System.out.println("App name: "
-				+ Environment.getInstance().getApplicationName());
+		System.out.println("App name: " + Environment.getInstance().getApplicationName());
 
 		final ClasIoEventFrame testFrame = new ClasIoEventFrame("EVIO Events");
 

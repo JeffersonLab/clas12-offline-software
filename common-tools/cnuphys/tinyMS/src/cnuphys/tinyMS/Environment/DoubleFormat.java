@@ -13,10 +13,8 @@ public class DoubleFormat {
 	/**
 	 * Format a double
 	 * 
-	 * @param value
-	 *            the value to format.
-	 * @param numdec
-	 *            the number of digits right of the decimal.
+	 * @param value  the value to format.
+	 * @param numdec the number of digits right of the decimal.
 	 */
 	public static String doubleFormat(double value, int numdec) {
 		return doubleFormat(value, numdec, false);
@@ -25,12 +23,9 @@ public class DoubleFormat {
 	/**
 	 * Format a double
 	 * 
-	 * @param value
-	 *            the value to format.
-	 * @param numdec
-	 *            the number of digits right of the decimal.
-	 * @param scinot
-	 *            if <code>true</code>, use scientific notation.
+	 * @param value  the value to format.
+	 * @param numdec the number of digits right of the decimal.
+	 * @param scinot if <code>true</code>, use scientific notation.
 	 */
 	public static String doubleFormat(double value, int numdec, boolean scinot) {
 
@@ -80,12 +75,10 @@ public class DoubleFormat {
 	 * 1.234567E-7 <br>
 	 * </code>
 	 * 
-	 * @param value
-	 *            the value to format.
-	 * @param numdec
-	 *            the number of digits right of the decimal.
-	 * @param minExponent
-	 *            the minimum (absolute value) index for scientific notation.
+	 * @param value       the value to format.
+	 * @param numdec      the number of digits right of the decimal.
+	 * @param minExponent the minimum (absolute value) index for scientific
+	 *                    notation.
 	 */
 
 	public static String doubleFormat(double value, int numdec, int minExponent) {
@@ -101,8 +94,7 @@ public class DoubleFormat {
 
 		if (exponent < minExponent) {
 			return doubleFormat(value, numdec, false);
-		}
-		else {
+		} else {
 			return doubleFormat(value, numdec, true);
 		}
 

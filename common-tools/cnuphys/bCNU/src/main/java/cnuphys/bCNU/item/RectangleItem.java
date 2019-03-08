@@ -13,18 +13,16 @@ public class RectangleItem extends PolygonItem {
 	/**
 	 * Create a world rectangle object.
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
-	 * @param wr
-	 *            the initial bounds of the item.
+	 * @param layer the Layer this item is on.
+	 * @param wr    the initial bounds of the item.
 	 */
 	public RectangleItem(LogicalLayer layer, Rectangle2D.Double wr) {
 		super(layer, WorldGraphicsUtilities.getPoints(wr));
 	}
 
 	/**
-	 * Reshape the item based on the modification. Keep in mind that if control
-	 * or shift was pressed, the item will scale rather than coming here.
+	 * Reshape the item based on the modification. Keep in mind that if control or
+	 * shift was pressed, the item will scale rather than coming here.
 	 */
 	@Override
 	protected void reshape() {
@@ -35,8 +33,7 @@ public class RectangleItem extends PolygonItem {
 		Point2D.Double pp = _modification.getCurrentWorldPoint();
 
 		_path = (Path2D.Double) (_modification.getStartPath().clone());
-		Point2D.Double[] wpoly = WorldGraphicsUtilities
-				.pathToWorldPolygon(_path);
+		Point2D.Double[] wpoly = WorldGraphicsUtilities.pathToWorldPolygon(_path);
 
 		Point2D.Double pj = wpoly[j];
 		Point2D.Double pi = wpoly[i];

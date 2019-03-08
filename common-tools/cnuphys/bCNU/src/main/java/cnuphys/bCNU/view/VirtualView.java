@@ -42,8 +42,8 @@ public class VirtualView extends BaseView
 	private Vector<BaseView> _views = new Vector<BaseView>();
 
 	private static int _numcol = 8;
-	
-	//minimum height hack
+
+	// minimum height hack
 	private static final int MINHEIGHT = 60;
 
 	private int _currentCol = 0;
@@ -73,8 +73,7 @@ public class VirtualView extends BaseView
 	/**
 	 * Create a virtual view view
 	 * 
-	 * @param keyVals
-	 *            variable set of arguments.
+	 * @param keyVals variable set of arguments.
 	 */
 	private VirtualView(Object... keyVals) {
 		super(keyVals);
@@ -93,8 +92,7 @@ public class VirtualView extends BaseView
 
 		setBackground(_bg);
 		getContainer().getComponent().setBackground(_bg);
-		
-		
+
 		getContainer().getComponent().addMouseMotionListener(this);
 		getContainer().getComponent().addMouseListener(this);
 
@@ -105,7 +103,7 @@ public class VirtualView extends BaseView
 		setAfterDraw();
 
 		_instance = this;
-		
+
 	}
 
 	/**
@@ -148,8 +146,6 @@ public class VirtualView extends BaseView
 			_offsets[col] = new Point((int) (col * dx), (int) (dy));
 		}
 	}
-	
-	
 
 	/**
 	 * Create the view's before drawer.
@@ -159,7 +155,7 @@ public class VirtualView extends BaseView
 		IDrawable beforeDraw = new DrawableAdapter() {
 
 			@Override
-			public void draw(Graphics g, IContainer container) {	
+			public void draw(Graphics g, IContainer container) {
 				Rectangle cr = getColRect(_currentCol);
 				g.setColor(_fill);
 				g.fillRect(cr.x + 1, cr.y + 1, cr.width - 1, cr.height - 1);
@@ -204,7 +200,7 @@ public class VirtualView extends BaseView
 
 				g.setColor(Color.green);
 				g.drawRect(cr.x, cr.y, cr.width - 1, cr.height - 1);
-				
+
 			}
 
 		};
@@ -232,13 +228,13 @@ public class VirtualView extends BaseView
 		_numcol = numcol;
 		VirtualView view = null;
 		Rectangle2D.Double world = getWorld();
-		
+
 		int cell_width = 40;
-		int cell_height = 1 + ((9*cell_width)/16);
+		int cell_height = 1 + ((9 * cell_width) / 16);
 		int width = numcol * cell_width;
 //		int height = (int) ((width * world.height) / world.width);
 		int height = cell_height;
-		
+
 		if (Environment.getInstance().isLinux()) {
 			height += 23;
 		}
@@ -246,24 +242,20 @@ public class VirtualView extends BaseView
 			height += 23;
 		}
 
-
 		// create the view
 		view = new VirtualView(PropertySupport.WORLDSYSTEM, world, PropertySupport.LEFT, 0, PropertySupport.TOP, 0,
 				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height, PropertySupport.TOOLBAR, false,
-				PropertySupport.VISIBLE, true, PropertySupport.BACKGROUND, Color.white,
-				PropertySupport.TITLE, VVTITLE, PropertySupport.STANDARDVIEWDECORATIONS, false,
-				PropertySupport.ICONIFIABLE, false, PropertySupport.RESIZABLE, true, 
-				PropertySupport.MAXIMIZABLE, false, PropertySupport.CLOSABLE, false);
+				PropertySupport.VISIBLE, true, PropertySupport.BACKGROUND, Color.white, PropertySupport.TITLE, VVTITLE,
+				PropertySupport.STANDARDVIEWDECORATIONS, false, PropertySupport.ICONIFIABLE, false,
+				PropertySupport.RESIZABLE, true, PropertySupport.MAXIMIZABLE, false, PropertySupport.CLOSABLE, false);
 
 		view._offsets = new Point[_numcol];
-		//view.pack();
-		
-		
+		// view.pack();
+
 		Insets insets = view.getInsets();
 		view.setSize(width, height + insets.top);
 		return view;
 	}
-		
 
 	/**
 	 * Get the number of columns
@@ -458,10 +450,8 @@ public class VirtualView extends BaseView
 	/**
 	 * Virtual view: no offesetting!
 	 * 
-	 * @param dh
-	 *            the horizontal change
-	 * @param dv
-	 *            the vertical change
+	 * @param dh the horizontal change
+	 * @param dv the vertical change
 	 */
 	@Override
 	public void offset(int dh, int dv) {
@@ -567,10 +557,8 @@ public class VirtualView extends BaseView
 	/**
 	 * Move a view to the center of a specific virtual cell
 	 * 
-	 * @param view
-	 *            the view to move
-	 * @param col
-	 *            the col
+	 * @param view the view to move
+	 * @param col  the col
 	 */
 	public void moveTo(BaseView view, int col) {
 		if (view == null) {
@@ -579,36 +567,27 @@ public class VirtualView extends BaseView
 
 		moveTo(view, col, 0, 0);
 	}
-	
+
 	/**
 	 * Move a view to a specific virtual cell
 	 * 
-	 * @param view
-	 *            the view to move
-	 * @param col
-	 *            the col
-	 * @param dh
-	 *            additional horizontal offset
-	 * @param dv
-	 *            additional vertical offset
+	 * @param view the view to move
+	 * @param col  the col
+	 * @param dh   additional horizontal offset
+	 * @param dv   additional vertical offset
 	 */
 	public void moveToStart(BaseView view, int col, int constraint) {
 		Point start = view.getStartingLocation();
 		moveTo(view, col, start.x, start.y, constraint);
 	}
-	
 
 	/**
 	 * Move a view to a specific virtual cell
 	 * 
-	 * @param view
-	 *            the view to move
-	 * @param col
-	 *            the col
-	 * @param dh
-	 *            additional horizontal offset
-	 * @param dv
-	 *            additional vertical offset
+	 * @param view the view to move
+	 * @param col  the col
+	 * @param dh   additional horizontal offset
+	 * @param dv   additional vertical offset
 	 */
 	public void moveTo(BaseView view, int col, int dh, int dv) {
 
@@ -651,10 +630,8 @@ public class VirtualView extends BaseView
 	/**
 	 * Move a view to a specific virtual cell
 	 * 
-	 * @param view
-	 *            the view to move
-	 * @param col
-	 *            the col
+	 * @param view the view to move
+	 * @param col  the col
 	 */
 	public void moveTo(BaseView view, int col, boolean fit) {
 
@@ -702,31 +679,23 @@ public class VirtualView extends BaseView
 	/**
 	 * Move a view to a specific virtual cell
 	 * 
-	 * @param view
-	 *            the view to move
-	 * @param col
-	 *            the col
-	 * @param constraint
-	 *            constraint constant
+	 * @param view       the view to move
+	 * @param col        the col
+	 * @param constraint constraint constant
 	 */
 	public void moveTo(BaseView view, int col, int constraint) {
 		moveTo(view, col, 0, 0, constraint);
 
 	}
-	
+
 	/**
 	 * Move a view to a specific virtual cell
 	 * 
-	 * @param view
-	 *            the view to move
-	 * @param col
-	 *            the col
-	 * @param delh
-	 *            additional horizontal offset
-	 * @param delv
-	 *            additional vertical offset
-	 * @param constraint
-	 *            constraint constant
+	 * @param view       the view to move
+	 * @param col        the col
+	 * @param delh       additional horizontal offset
+	 * @param delv       additional vertical offset
+	 * @param constraint constraint constant
 	 */
 	public void moveTo(BaseView view, int col, int delh, int delv, int constraint) {
 
@@ -797,12 +766,10 @@ public class VirtualView extends BaseView
 			int yf = (int) (bottom - bounds.height - 7 * slop);
 			dh = xf - x0;
 			dv = yf - y0;
-		}
-		else if (constraint == CENTERLEFT) {
+		} else if (constraint == CENTERLEFT) {
 			int xf = (int) (left + slop);
 			dh = xf - x0;
-		}
-		else if (constraint == CENTERRIGHT) {
+		} else if (constraint == CENTERRIGHT) {
 			int xf = (int) (right - bounds.width - 2 * slop);
 			dh = xf - x0;
 		}
@@ -810,12 +777,10 @@ public class VirtualView extends BaseView
 		view.offset(dh + delh, dv + delv);
 	}
 
-
 	/**
 	 * Activates the view's cell so that it is visible
 	 * 
-	 * @param view
-	 *            the view
+	 * @param view the view
 	 */
 	public void activateViewCell(BaseView view) {
 
@@ -850,8 +815,7 @@ public class VirtualView extends BaseView
 	/**
 	 * Is a given view visible (crue test)
 	 * 
-	 * @param view
-	 *            the view to check
+	 * @param view the view to check
 	 * @return <code>true</code> if the view appears to be visible.
 	 */
 	public boolean isViewVisible(BaseView view) {
@@ -870,7 +834,7 @@ public class VirtualView extends BaseView
 
 	@Override
 	public void componentResized(ComponentEvent arg0) {
-		Dimension size  = getSize();
+		Dimension size = getSize();
 		if (size.height < MINHEIGHT) {
 			size.height = MINHEIGHT;
 			setSize(size);

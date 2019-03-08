@@ -30,12 +30,11 @@ public class DCGeometry {
 	private static double minWireZ;
 	private static double maxWireZ;
 
-
 	/**
-	 * These are the drift chamber wires from the geometry service. The indices
-	 * are 0-based: [superlayer 0:5][layer 0:5][wire 0:111]
-	 * NOTE: a DriftChamberWire is actually the full hexagonal volume. Its getLine
-	 * method returns the line of the sense wire.
+	 * These are the drift chamber wires from the geometry service. The indices are
+	 * 0-based: [superlayer 0:5][layer 0:5][wire 0:111] NOTE: a DriftChamberWire is
+	 * actually the full hexagonal volume. Its getLine method returns the line of
+	 * the sense wire.
 	 */
 	private static DriftChamberWire wires[][][];
 
@@ -43,12 +42,12 @@ public class DCGeometry {
 	 * Initialize the DC Geometry by loading all the wires
 	 */
 	public static void initialize() {
-				
+
 		ConstantProvider cp = GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.DC, 4013, "default");
-		
-        DCGeantFactory factory = new DCGeantFactory();
-        
-        _dcDetector = factory.createDetectorCLAS(cp);
+
+		DCGeantFactory factory = new DCGeantFactory();
+
+		_dcDetector = factory.createDetectorCLAS(cp);
 
 //		if (_dcDataProvider == null) {
 //			_dcDataProvider = GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.DC);
@@ -74,10 +73,9 @@ public class DCGeometry {
 			for (int lay = 0; lay < 6; lay++) {
 				DCLayer dcLayer = sl.getLayer(lay);
 
-
 				for (int w = 0; w < 112; w++) {
 					DriftChamberWire dcw = dcLayer.getComponent(w);
-					
+
 					wires[suplay][lay][w] = dcw;
 
 					Line3D line = dcw.getLine();
@@ -113,12 +111,9 @@ public class DCGeometry {
 	/**
 	 * Used by the 3D drawing
 	 * 
-	 * @param sector
-	 *            the 1-based sector
-	 * @param superlayer
-	 *            1 based superlayer [1..6]
-	 * @param coords
-	 *            holds 6*3 = 18 values [x1, y1, z1, ..., x6, y6, z6]
+	 * @param sector     the 1-based sector
+	 * @param superlayer 1 based superlayer [1..6]
+	 * @param coords     holds 6*3 = 18 values [x1, y1, z1, ..., x6, y6, z6]
 	 */
 	public static void superLayerVertices(int sector, int superlayer, float[] coords) {
 
@@ -227,15 +222,12 @@ public class DCGeometry {
 	}
 
 	/**
-	 * Get the midpoint of the untransformed wire in sector 1 NOTE: the indices
-	 * are 1-based
+	 * Get the midpoint of the untransformed wire in sector 1 NOTE: the indices are
+	 * 1-based
 	 * 
-	 * @param superlayer
-	 *            the superlayer [1..6]
-	 * @param layer
-	 *            the layer [1..6]
-	 * @param wire
-	 *            the wire [1..112]
+	 * @param superlayer the superlayer [1..6]
+	 * @param layer      the layer [1..6]
+	 * @param wire       the wire [1..112]
 	 * @return the mid point of the wire in sector 1
 	 */
 	public static Point3D getMidPoint(int superlayer, int layer, int wire) {
@@ -245,14 +237,10 @@ public class DCGeometry {
 	/**
 	 * Get the wire in given sector NOTE: the indices are 1-based
 	 * 
-	 * @param sector
-	 *            the 1-based sector [1..6]
-	 * @param superlayer
-	 *            the superlayer [1..6]
-	 * @param layer
-	 *            the layer [1..6]
-	 * @param wire
-	 *            the wire [1..112]
+	 * @param sector     the 1-based sector [1..6]
+	 * @param superlayer the superlayer [1..6]
+	 * @param layer      the layer [1..6]
+	 * @param wire       the wire [1..112]
 	 * @return the wire transformed to the given sector
 	 */
 	public static Line3D getWire(int sector, int superlayer, int layer, int wire) {
@@ -268,12 +256,9 @@ public class DCGeometry {
 	/**
 	 * Get the wire in sector 0 NOTE: the indices are 1-based
 	 * 
-	 * @param superlayer
-	 *            the superlayer [1..6]
-	 * @param layer
-	 *            the layer [1..6]
-	 * @param wire
-	 *            the wire [1..112]
+	 * @param superlayer the superlayer [1..6]
+	 * @param layer      the layer [1..6]
+	 * @param wire       the wire [1..112]
 	 * @return the untransformed wire in sector 0
 	 */
 	public static DriftChamberWire getWire(int superlayer, int layer, int wire) {
@@ -283,12 +268,9 @@ public class DCGeometry {
 	/**
 	 * Get the origin of the wire in sector 0 NOTE: the indices are 1-based
 	 * 
-	 * @param superlayer
-	 *            the superlayer [1..6]
-	 * @param layer
-	 *            the layer [1..6]
-	 * @param wire
-	 *            the wire [1..112]
+	 * @param superlayer the superlayer [1..6]
+	 * @param layer      the layer [1..6]
+	 * @param wire       the wire [1..112]
 	 * @return the origin (one end) of the wire in sector 0
 	 */
 	public static Point3D getOrigin(int superlayer, int layer, int wire) {
@@ -298,12 +280,9 @@ public class DCGeometry {
 	/**
 	 * Get the end of the wire in sector 0 NOTE: the indices are 1-based
 	 * 
-	 * @param superlayer
-	 *            the superlayer [1..6]
-	 * @param layer
-	 *            the layer [1..6]
-	 * @param wire
-	 *            the wire [1..112]
+	 * @param superlayer the superlayer [1..6]
+	 * @param layer      the layer [1..6]
+	 * @param wire       the wire [1..112]
 	 * @return the end (one end) of the wire in sector 0
 	 */
 	public static Point3D getEnd(int superlayer, int layer, int wire) {
@@ -311,19 +290,15 @@ public class DCGeometry {
 	}
 
 	/**
-	 * Get the intersections of a dcwire with a constant phi plane. If the wire
-	 * does not intersect (happens as phi grows) return null;
+	 * Get the intersections of a dcwire with a constant phi plane. If the wire does
+	 * not intersect (happens as phi grows) return null;
 	 * 
 	 * NOTE: the indices are 1-based
 	 * 
-	 * @param superlayer
-	 *            the superlayer [1..6]
-	 * @param layer
-	 *            the layer [1..6]
-	 * @param wire
-	 *            the wire [1..112]
-	 * @param projectionPlane
-	 *            the projection plane
+	 * @param superlayer      the superlayer [1..6]
+	 * @param layer           the layer [1..6]
+	 * @param wire            the wire [1..112]
+	 * @param projectionPlane the projection plane
 	 */
 	public static boolean getHexagon(int superlayer, int layer, int wire, Plane3D projectionPlane, Point2D.Double wp[],
 			Point2D.Double centroid) {
@@ -331,7 +306,7 @@ public class DCGeometry {
 		DriftChamberWire dcw = DCGeometry.getWire(superlayer, layer, wire);
 		return GeometryManager.getProjectedPolygon(dcw, projectionPlane, 10, 6, wp, centroid);
 	}
-	
+
 	public static boolean doesHexagonIntersect(int superlayer, int layer, int wire, Plane3D projectionPlane) {
 		DriftChamberWire dcw = DCGeometry.getWire(superlayer, layer, wire);
 		return GeometryManager.doesProjectedPolyIntersect(dcw, projectionPlane, 10, 6);
@@ -342,14 +317,10 @@ public class DCGeometry {
 	 * 
 	 * NOTE: the indices are 1-based
 	 * 
-	 * @param superlayer
-	 *            the superlayer [1..6]
-	 * @param layer
-	 *            the layer [1..6]
-	 * @param wire
-	 *            the wire [1..112]
-	 * @param transform3D
-	 *            the transformation to the constant phi
+	 * @param superlayer  the superlayer [1..6]
+	 * @param layer       the layer [1..6]
+	 * @param wire        the wire [1..112]
+	 * @param transform3D the transformation to the constant phi
 	 * @return the approximate center of the projected hexagon
 	 */
 	public static Point2D.Double getCenter(int superlayer, int layer, int wire, Plane3D projectionPlane) {
@@ -370,10 +341,8 @@ public class DCGeometry {
 	/**
 	 * Get a super layer plane
 	 * 
-	 * @param sector
-	 *            the 1-based sector (result IS sector dependent)
-	 * @param superlayer
-	 *            the 1-based superlayer
+	 * @param sector     the 1-based sector (result IS sector dependent)
+	 * @param superlayer the 1-based superlayer
 	 * @return the plane perpendicular to the wires for this superlayer
 	 */
 	public static Plane3D getSuperlayerPlane(int sector, int superlayer) {
@@ -388,14 +357,10 @@ public class DCGeometry {
 	 * 
 	 * NOTE: the indices are 1-based
 	 * 
-	 * @param superlayer
-	 *            the superlayer [1..6]
-	 * @param layer
-	 *            the layer [1..6]
-	 * @param wire
-	 *            the wire [1..112]
-	 * @param phi
-	 *            the relative phi (degrees)
+	 * @param superlayer the superlayer [1..6]
+	 * @param layer      the layer [1..6]
+	 * @param wire       the wire [1..112]
+	 * @param phi        the relative phi (degrees)
 	 * 
 	 * @return the position of the sense wire
 	 */
@@ -432,18 +397,13 @@ public class DCGeometry {
 	 * 
 	 * NOTE: the indices are 1-based
 	 * 
-	 * @param superlayer
-	 *            the superlayer [1..6]
-	 * @param layer
-	 *            the layer [1..6]
-	 * @param wire
-	 *            the wire [1..112]
-	 * @param transform3D
-	 *            the transformation to the constant phi
-	 * @param wp
-	 *            on return will hold the two extended points. The 0 point will
-	 *            be to the "right" of wire 0. The 1 point will be to the left
-	 *            of wire 111.
+	 * @param superlayer  the superlayer [1..6]
+	 * @param layer       the layer [1..6]
+	 * @param wire        the wire [1..112]
+	 * @param transform3D the transformation to the constant phi
+	 * @param wp          on return will hold the two extended points. The 0 point
+	 *                    will be to the "right" of wire 0. The 1 point will be to
+	 *                    the left of wire 111.
 	 */
 	public static void getLayerExtendedPoints(int superLayer, int layer, Plane3D projectionPlane, Point2D.Double wp[]) {
 
@@ -463,7 +423,7 @@ public class DCGeometry {
 
 		extPoint(first, second, wp[0]);
 		extPoint(last, nexttolast, wp[1]);
-		
+
 	}
 
 	/**
@@ -471,19 +431,15 @@ public class DCGeometry {
 	 * 
 	 * NOTE: the indices are 1-based
 	 * 
-	 * @param superlayer
-	 *            the superlayer [1..6]
-	 * @param layer
-	 *            the layer [1..6]
-	 * @param transform3D
-	 *            the transformation to the constant phi
-	 * @param wp
-	 *            a four point layer boundary
+	 * @param superlayer  the superlayer [1..6]
+	 * @param layer       the layer [1..6]
+	 * @param transform3D the transformation to the constant phi
+	 * @param wp          a four point layer boundary
 	 */
 	public static void getLayerPolygon(int superLayer, int layer, Plane3D plane, Point2D.Double wp[]) {
 
 		Point2D.Double hex[] = GeometryManager.allocate(6);
-		
+
 		boolean useOldGeo = Ced.useOldDCGeo();
 
 		int firstWire = 1;
@@ -491,17 +447,12 @@ public class DCGeometry {
 			firstWire++;
 		}
 //		System.err.println("FIRST WIRE: " + firstWire);
-		
+
 		getHexagon(superLayer, layer, 1, plane, hex, null);
 
 		/*
-		 * The mappings of the old geo hex indices to the new is
-		 * 0 --> 5
-		 * 1 --> 4
-		 * 2 --> 3
-		 * 3 --> 2
-		 * 4 --> 1
-		 * 5 --> 0
+		 * The mappings of the old geo hex indices to the new is 0 --> 5 1 --> 4 2 --> 3
+		 * 3 --> 2 4 --> 1 5 --> 0
 		 */
 
 		if (useOldGeo) {
@@ -520,54 +471,48 @@ public class DCGeometry {
 //		for (int i = 0; i < 6; i++)
 //		System.err.println(String.format("hex[%d] = [%-6.1f, %-6.1f]", i, hex[i].x, hex[i].y));
 //	}
-		
-		
-		
-		int sindex = Math.max(13, firstWire+8);
+
+		int sindex = Math.max(13, firstWire + 8);
 		getHexagon(superLayer, layer, sindex, plane, hex, null);
-		
+
 		if (useOldGeo) {
 			assignFromHex(wp, 1, hex, 0);
 			assignFromHex(wp, 10, hex, 3);
-		}
-		else {
+		} else {
 			assignFromHex(wp, 1, hex, 5);
 			assignFromHex(wp, 10, hex, 2);
 		}
-		
-		sindex = Math.max(57, sindex+12);
+
+		sindex = Math.max(57, sindex + 12);
 		getHexagon(superLayer, layer, 57, plane, hex, null);
-		
+
 		if (useOldGeo) {
 			assignFromHex(wp, 2, hex, 0);
 			assignFromHex(wp, 9, hex, 3);
-		}
-		else {
+		} else {
 			assignFromHex(wp, 2, hex, 5);
 			assignFromHex(wp, 9, hex, 2);
 		}
 
-		sindex = Math.max(99, sindex+29);
+		sindex = Math.max(99, sindex + 29);
 		getHexagon(superLayer, layer, 99, plane, hex, null);
-		
+
 		if (useOldGeo) {
 			assignFromHex(wp, 3, hex, 0);
 			assignFromHex(wp, 8, hex, 3);
-		}
-		else {
+		} else {
 			assignFromHex(wp, 3, hex, 5);
 			assignFromHex(wp, 8, hex, 2);
 		}
 
 		getHexagon(superLayer, layer, 112, plane, hex, null);
-		
+
 		if (useOldGeo) {
 			assignFromHex(wp, 4, hex, 0);
 			assignFromHex(wp, 5, hex, 1);
 			assignFromHex(wp, 6, hex, 2);
 			assignFromHex(wp, 7, hex, 3);
-		}
-		else {
+		} else {
 			assignFromHex(wp, 4, hex, 5);
 			assignFromHex(wp, 5, hex, 4);
 			assignFromHex(wp, 6, hex, 3);
@@ -580,12 +525,9 @@ public class DCGeometry {
 	 * 
 	 * NOTE: the indices are 1-based
 	 * 
-	 * @param superlayer
-	 *            the superlayer [1..6]
-	 * @param transform3D
-	 *            the transformation to the constant phi
-	 * @param wp
-	 *            a four point super layer boundary
+	 * @param superlayer  the superlayer [1..6]
+	 * @param transform3D the transformation to the constant phi
+	 * @param wp          a four point super layer boundary
 	 */
 	public static void getSuperLayerPolygon(int superLayer, Plane3D projectionPlane, Point2D.Double wp[]) {
 
@@ -639,12 +581,11 @@ public class DCGeometry {
 	}
 
 	private static void assignFromHex(Point2D.Double wp[], int wpIndex, Point2D.Double hex[], int hexIndex) {
-		
+
 		hexIndex = hexIndex % 6;
 		Point2D.Double p = new Point2D.Double(hex[hexIndex].x, hex[hexIndex].y);
 		wp[wpIndex] = p;
 	}
-
 
 	// extend a point
 	private static void extPoint(Point2D.Double p0, Point2D.Double p1, Point2D.Double ext) {
@@ -657,12 +598,13 @@ public class DCGeometry {
 		ext.x = p0.x + (p0.x - p1.x);
 		ext.y = p0.y + (p0.y - p1.y);
 	}
-	
+
 	/**
 	 * print the wire location
+	 * 
 	 * @param superlayer the 0-based superlayer
-	 * @param layer the zero based layer
-	 * @param wire the zero based wire
+	 * @param layer      the zero based layer
+	 * @param wire       the zero based wire
 	 */
 	public static void printWire(int superlayer, int layer, int wire) {
 
@@ -679,20 +621,18 @@ public class DCGeometry {
 		double ym = dcw.getMidpoint().y();
 		double zm = dcw.getMidpoint().z();
 
-		System.out.println(
-				String.format("supl %d lay %d wire %d end (%-4.1f, %-4.1f, %-4.1f) end (%-4.1f, %-4.1f, %-4.1f) mid (%-4.1f, %-4.1f, %-4.1f)",
-						superlayer+1, layer+1, wire+1, x1, y1, z1, x2, y2, z2, xm, ym, zm));
+		System.out.println(String.format(
+				"supl %d lay %d wire %d end (%-4.1f, %-4.1f, %-4.1f) end (%-4.1f, %-4.1f, %-4.1f) mid (%-4.1f, %-4.1f, %-4.1f)",
+				superlayer + 1, layer + 1, wire + 1, x1, y1, z1, x2, y2, z2, xm, ym, zm));
 
 	}
 
-	
 	public static void main(String arg[]) {
 		initialize();
 
 		printWire(0, 0, 65);
 		printWire(4, 3, 75);
 
-		
 //		DriftChamberWire dcw = wires[0][0][0];
 //		System.out.println("num vol edges: " + dcw.getNumVolumeEdges());
 //		for (int i = 0; i < dcw.getNumVolumeEdges(); i++) {

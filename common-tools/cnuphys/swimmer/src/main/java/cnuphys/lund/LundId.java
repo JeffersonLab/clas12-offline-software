@@ -38,27 +38,19 @@ public class LundId implements Comparable<LundId> {
 
 	private static int labelRectSize = 10;
 	// shouldn't happen, unrecognized lund id
-	public static final JComponent unknownLabel = getLabelForLegend(
-			Color.black, Color.cyan, "???");
+	public static final JComponent unknownLabel = getLabelForLegend(Color.black, Color.cyan, "???");
 
 	/**
 	 * Create a Lund ID
 	 * 
-	 * @param type
-	 *            "Lepton", "InterBoson", "Nucleus", "Baryon", or "Meson"
-	 * @param name
-	 *            e.g., "pi+"
-	 * @param id
-	 *            the Lund Id
-	 * @param mass
-	 *            the mass in GeV/c^2
-	 * @param chargeX3
-	 *            three times the charge
-	 * @param spinX2
-	 *            twice the spin
+	 * @param type     "Lepton", "InterBoson", "Nucleus", "Baryon", or "Meson"
+	 * @param name     e.g., "pi+"
+	 * @param id       the Lund Id
+	 * @param mass     the mass in GeV/c^2
+	 * @param chargeX3 three times the charge
+	 * @param spinX2   twice the spin
 	 */
-	public LundId(String type, String name, int id, double mass, int chargeX3,
-			int spinX2) {
+	public LundId(String type, String name, int id, double mass, int chargeX3, int spinX2) {
 		super();
 		_type = type;
 		_name = name;
@@ -139,8 +131,8 @@ public class LundId implements Comparable<LundId> {
 	@Override
 	public String toString() {
 		String massStr = DoubleFormat.doubleFormat(_mass, 3, 3);
-		return String.format("%-20s %-11s  %-7d  %-8s q = %2d 2s = %-2d",
-				_name, _type, _id, massStr, _chargeX3 / 3, _spinX2);
+		return String.format("%-20s %-11s  %-7d  %-8s q = %2d 2s = %-2d", _name, _type, _id, massStr, _chargeX3 / 3,
+				_spinX2);
 	}
 
 	/**
@@ -171,8 +163,7 @@ public class LundId implements Comparable<LundId> {
 	/**
 	 * Get the momentum from the kinetic energy
 	 * 
-	 * @param t
-	 *            the kinetic energy in GeV
+	 * @param t the kinetic energy in GeV
 	 * @return the momentum in Gev/c
 	 */
 	public double pFromT(double t) {
@@ -209,25 +200,20 @@ public class LundId implements Comparable<LundId> {
 		if (style == null) {
 			return getLabelForLegend(Color.lightGray, Color.darkGray, _name);
 		} else {
-			return getLabelForLegend(style.getFillColor(),
-					style.getLineColor(), _name);
+			return getLabelForLegend(style.getFillColor(), style.getLineColor(), _name);
 		}
 	}
 
 	/**
 	 * Obtain a fixed size label to place on a legend.
 	 * 
-	 * @param fillColor
-	 *            the fill color
-	 * @param lineColor
-	 *            the line color
-	 * @param name
-	 *            the name of the particle
+	 * @param fillColor the fill color
+	 * @param lineColor the line color
+	 * @param name      the name of the particle
 	 * @return the label component
 	 */
 	@SuppressWarnings("serial")
-	private static JComponent getLabelForLegend(final Color fillColor,
-			final Color lineColor, final String name) {
+	private static JComponent getLabelForLegend(final Color fillColor, final Color lineColor, final String name) {
 		JComponent component = new JComponent() {
 
 			@Override
@@ -257,12 +243,9 @@ public class LundId implements Comparable<LundId> {
 	/**
 	 * Draw a line for use on a toolbar user component, most likely
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param x
-	 *            the horizontal staring point
-	 * @param yc
-	 *            the central vertical position
+	 * @param g  the graphics context
+	 * @param x  the horizontal staring point
+	 * @param yc the central vertical position
 	 * @return the offset
 	 */
 	public int drawLineForLegend(Graphics g, int x, int yc) {
