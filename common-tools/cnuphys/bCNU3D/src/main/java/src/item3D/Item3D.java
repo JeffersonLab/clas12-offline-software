@@ -15,11 +15,17 @@ public abstract class Item3D {
 	/** property for line width. Default is 1f */
 	public static final String LINE_WIDTH = "LINE_WIDTH";
 
-	/** property for color. Default is defined below */
-	public static final String COLOR = "COLOR";
+	/** property for fill color. Default is defined below */
+	public static final String FILLCOLOR = "FILLCOLOR";
+	
+	/** property for fill alpha. Default is defined below */
+	public static final String FILLALPHA = "FILLALPHA";
 
-	/** property for color. Default is defined below */
+	/** property for line or frame color. Default is defined below */
 	public static final String LINECOLOR = "LINECOLOR";
+
+	/** property for line alpha. Default is defined below */
+	public static final String LINEALPHA = "LINEALPHA";
 
 	/** property for text color. Default is defined below */
 	public static final String TEXT_COLOR = "TEXT_COLOR";
@@ -45,6 +51,8 @@ public abstract class Item3D {
 
 	// defaults
 	private static final float _defaultLineWidth = 1f;
+	private static final int _defaultFillAlpha = 128;
+	private static final int _defaultLineAlpha = 128;
 	private static final Color _defaultFillColor = Color.yellow;
 	private static final Color _defaultLineColor = Color.gray;
 	private static final Color _defaultTextColor = Color.white;
@@ -66,8 +74,10 @@ public abstract class Item3D {
 	protected void defaultProperties() {
 		_properties = new Properties();
 		_properties.put(LINE_WIDTH, _defaultLineWidth);
-		_properties.put(COLOR, _defaultFillColor);
+		_properties.put(FILLCOLOR, _defaultFillColor);
+		_properties.put(FILLALPHA, _defaultFillAlpha);
 		_properties.put(LINECOLOR, _defaultLineColor);
+		_properties.put(LINEALPHA, _defaultLineAlpha);
 		_properties.put(TEXT_COLOR, _defaultTextColor);
 		_properties.put(FONT, _defaultFont);
 	}
@@ -235,9 +245,37 @@ public abstract class Item3D {
 	 */
 	public Color getFillColor() {
 		try {
-			return getColor(COLOR);
+			Color color = getColor(FILLCOLOR);
+			color = setAlpha(color, getFillAlpha());
+			return color;
 		} catch (Bad3DPropertyException e) {
 			return _defaultFillColor;
+		}
+	}
+	
+	/**
+	 * Convenience method to get the fill alpha for this item
+	 * 
+	 * @return the fill aplha.
+	 */
+	public int getFillAlpha() {
+		try {
+			return getInt(FILLALPHA);
+		} catch (Bad3DPropertyException e) {
+			return _defaultFillAlpha;
+		}
+	}
+
+	/**
+	 * Convenience method to get the line (frame) alpha for this item
+	 * 
+	 * @return the line (frame) alpha.
+	 */
+	public int getLineAlpha() {
+		try {
+			return getInt(LINEALPHA);
+		} catch (Bad3DPropertyException e) {
+			return _defaultLineAlpha;
 		}
 	}
 
@@ -246,9 +284,11 @@ public abstract class Item3D {
 	 * 
 	 * @return the line (frame) color.
 	 */
-	public Color getFrameColor() {
+	public Color getLineColor() {
 		try {
-			return getColor(LINECOLOR);
+			Color color = getColor(LINECOLOR);
+			color = setAlpha(color, getLineAlpha());
+			return color;
 		} catch (Bad3DPropertyException e) {
 			return _defaultLineColor;
 		}
@@ -286,7 +326,8 @@ public abstract class Item3D {
 	 * @param color the fill color.
 	 */
 	public void setFillColor(Color color) {
-		put(COLOR, color);
+		put(FILLALPHA, color.getAlpha());
+		put(FILLCOLOR, color);
 	}
 
 	/**
@@ -295,8 +336,29 @@ public abstract class Item3D {
 	 * @param color the line (frame) color.
 	 */
 	public void setLineColor(Color color) {
+		put(LINEALPHA, color.getAlpha());
 		put(LINECOLOR, color);
 	}
+	
+	/**
+	 * Convenience method to set the fill alpha
+	 * 
+	 * @param alpha the fill alpha [0..255].
+	 */
+	public void setFillAlpha(int alpha) {
+		put(FILLALPHA, alpha);
+	}
+
+
+	/**
+	 * Convenience method to set the line (frame) alpha
+	 * 
+	 * @param alpha the line (frame) alpha [0..255].
+	 */
+	public void setLineAlpha(int alpha) {
+		put(LINEALPHA, alpha);
+	}
+
 
 	/**
 	 * Convenience method to set the text color
@@ -390,6 +452,25 @@ public abstract class Item3D {
 	 */
 	public Panel3D getPanel3D() {
 		return _panel3D;
+	}
+	
+	/**
+	 * Set the alpha of a color. If it already has the given alpha
+	 * it just returns the color. If not, it makes a new color
+	 * with the same RGB components and the new alpha
+	 * @param color the color to change
+	 * @param alpha the alpha [0..255] 0 is transparent, 255 is opaque
+	 * @return the color
+	 */
+	public Color setAlpha(Color color, int alpha) {
+		
+		alpha = Math.max(0,  Math.min(255, alpha));
+		int a = color.getAlpha();
+		if (a == alpha) {
+			return color;
+		}
+		
+		return new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
 	}
 
 }

@@ -4,6 +4,7 @@ import item3D.Axes3D;
 import item3D.Cylinder;
 import item3D.Item3D;
 import item3D.PointSet3D;
+import item3D.SlabItem;
 import item3D.Triangle3D;
 
 import java.awt.BorderLayout;
@@ -614,6 +615,8 @@ public class Panel3D extends JPanel implements GLEventListener {
 				// 0f, 0f, 0f, 100f, 0f, -100f, 50f, 100, 100f, new Color(255,
 				// 0, 0, 64), 2f, true));
 
+				addItem(SlabItem.testSlab(this, 50, 500));
+
 				addItem(new Triangle3D(this, 500f, 0f, -200f, -500f, 500f, 0f, 0f, -100f, 500f,
 						new Color(255, 0, 0, 64), 1f, true));
 
@@ -624,6 +627,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 						new Color(0, 255, 0, 64), 2f, true));
 
 				addItem(new Cylinder(this, 0f, 0f, 0f, 300f, 300f, 300f, 50f, new Color(0, 255, 255, 128)));
+				
 
 				// Cube cube = new Cube(this, 0.25f, 0.25f, 0.25f, 0.5f,
 				// Color.yellow);

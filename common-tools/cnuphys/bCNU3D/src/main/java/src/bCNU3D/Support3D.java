@@ -225,6 +225,18 @@ public class Support3D {
 	 */
 	public static void drawQuads(GLAutoDrawable drawable, float coords[], Color color, float lineWidth, boolean frame) {
 
+		drawQuads(drawable, coords, color, (frame ? color.darker() : null), lineWidth);
+	}
+	
+	/**
+	 * @param drawable  the openGL drawable
+	 * @param coords    the coordinate array
+	 * @param color     the color
+	 * @param lineWidth the line width
+	 * @param frame     if <code>true</code> frame in slightly darker color
+	 */
+	public static void drawQuads(GLAutoDrawable drawable, float coords[], Color color, Color lineColor, float lineWidth) {
+
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glLineWidth(lineWidth);
 
@@ -240,13 +252,13 @@ public class Support3D {
 
 		gl.glEnd();
 
-		if (frame) {
+		if (lineColor != null) {
 
 			// a quad has four vertices therefor 12 points
 			int numQuad = coords.length / 12;
 			for (int i = 0; i < numQuad; i++) {
 				gl.glBegin(GL.GL_LINE_STRIP);
-				setColor(gl, color.darker());
+				setColor(gl, lineColor);
 
 				int j = i * 12;
 
@@ -818,4 +830,6 @@ public class Support3D {
 	public static float[] toArray(float... v) {
 		return v;
 	}
+	
+
 }
