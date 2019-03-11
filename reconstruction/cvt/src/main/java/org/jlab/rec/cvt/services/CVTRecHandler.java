@@ -46,8 +46,7 @@ public class CVTRecHandler {
     SVTStripFactory svtIdealStripFactory;
     
     public CVTRecHandler() {
-        DatabaseConstantProvider cp=new DatabaseConstantProvider(10, "default");
-        org.jlab.detector.geant4.v2.SVT.SVTConstants.connect(cp);
+        org.jlab.rec.cvt.svt.Constants.Load();
         SVTGeom = new org.jlab.rec.cvt.svt.Geometry();
         BMTGeom = new org.jlab.rec.cvt.bmt.Geometry();
     }
@@ -240,9 +239,10 @@ public class CVTRecHandler {
     
     List<ArrayList<Cross>> crosses = null;
     public void loadCrosses() {
-    	 crosses = new ArrayList<ArrayList<Cross>>();
+    	   crosses = new ArrayList<ArrayList<Cross>>();
          CrossMaker crossMake = new CrossMaker();
          crosses = crossMake.findCrosses(clusters, SVTGeom);
+         this.CleanupSpuriousCrosses(crosses, null) ;
     }
     
     public List<ArrayList<Cross>> getCrosses() {
