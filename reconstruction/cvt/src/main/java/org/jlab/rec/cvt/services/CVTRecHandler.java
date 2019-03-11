@@ -239,9 +239,10 @@ public class CVTRecHandler {
     
     List<ArrayList<Cross>> crosses = null;
     public void loadCrosses() {
-    	 crosses = new ArrayList<ArrayList<Cross>>();
+    	   crosses = new ArrayList<ArrayList<Cross>>();
          CrossMaker crossMake = new CrossMaker();
          crosses = crossMake.findCrosses(clusters, SVTGeom);
+         this.CleanupSpuriousCrosses(crosses, null) ;
     }
     
     public List<ArrayList<Cross>> getCrosses() {

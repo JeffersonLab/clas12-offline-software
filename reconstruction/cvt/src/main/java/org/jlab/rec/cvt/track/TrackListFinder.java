@@ -156,6 +156,10 @@ public class TrackListFinder {
     	for( Track t : trkcands ) {
     		int N = 0;
     		for( Cross c : t ) {
+
+          // do not check on BMTC
+          if( c.get_DetectorType().equalsIgnoreCase("C") == true ) continue;
+
     			if( track.contains(c) ) { N++;  }
     		}
     		if( N >= 2 ) list.add( t );
