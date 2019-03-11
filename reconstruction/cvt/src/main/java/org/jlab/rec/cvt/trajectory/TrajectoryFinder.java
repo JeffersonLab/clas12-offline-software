@@ -10,7 +10,7 @@ import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
-import org.jlab.rec.cvt.svt.Constants;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
 /**
  * A driver class to find the trajectory of a track candidate. NOTE THAT THE
@@ -60,7 +60,7 @@ public class TrajectoryFinder {
 
         traj.addAll(SVTCrossList);
 
-        int[] Sectors = new int[org.jlab.rec.cvt.svt.Constants.NLAYR];
+        int[] Sectors = new int[org.jlab.detector.geant4.v2.SVT.SVTConstants.NLAYERS];
         for (int k = 0; k < SVTCrossList.size(); k++) {
             int l = SVTCrossList.get(k).get_Region() * 2 - 1;
             Sectors[l - 1] = SVTCrossList.get(k).get_Sector();
@@ -70,7 +70,7 @@ public class TrajectoryFinder {
         for (int a = 0; a < Sectors.length; a++) {
             if (Sectors[a] == 0) {
 
-                Point3D I = helix.getPointAtRadius(org.jlab.rec.cvt.svt.Constants.MODULERADIUS[a][0]);
+                Point3D I = helix.getPointAtRadius(org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[a/2][a%2]);
 
                 int sec = svt_geo.findSectorFromAngle(a + 1, I);
                 Sectors[a] = sec;
@@ -81,7 +81,7 @@ public class TrajectoryFinder {
 
         ArrayList<StateVec> stateVecs = new ArrayList<StateVec>();
         // SVT
-        for (int l = 0; l < org.jlab.rec.cvt.svt.Constants.NLAYR; l++) {
+        for (int l = 0; l < org.jlab.detector.geant4.v2.SVT.SVTConstants.NLAYERS; l++) {
             int layer = l + 1;
             int sector = Sectors[l];
 
@@ -127,8 +127,8 @@ public class TrajectoryFinder {
 
         }
         //BMT
-        for (int l = org.jlab.rec.cvt.svt.Constants.NLAYR; l < org.jlab.rec.cvt.svt.Constants.NLAYR + 2 * org.jlab.rec.cvt.bmt.Constants.NREGIONS; l++) {
-            int BMTRegIdx = (l - org.jlab.rec.cvt.svt.Constants.NLAYR) / 2;
+        for (int l = org.jlab.detector.geant4.v2.SVT.SVTConstants.NLAYERS; l < org.jlab.detector.geant4.v2.SVT.SVTConstants.NLAYERS + 2 * org.jlab.rec.cvt.bmt.Constants.NREGIONS; l++) {
+            int BMTRegIdx = (l - org.jlab.detector.geant4.v2.SVT.SVTConstants.NLAYERS) / 2;
 
             if (org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTRegIdx] == 0) {
                 continue; // Use the correctly defined geometry
@@ -280,8 +280,8 @@ public class TrajectoryFinder {
 
         double[][][] SVTIntersections = calc_trackIntersSVT(ray, svt_geo);
 
-        for (int l = 0; l < Constants.NLAYR; l++) {
-            for (int s = 0; s < Constants.NSECT[l]; s++) {
+        for (int l = 0; l < org.jlab.detector.geant4.v2.SVT.SVTConstants.NLAYERS; l++) {
+            for (int s = 0; s < org.jlab.detector.geant4.v2.SVT.SVTConstants.NSECTORS[l/2]; s++) {
 
                 if (SVTIntersections[l][s][0] != -999) {
 
@@ -423,7 +423,7 @@ public class TrajectoryFinder {
                 value = false;		// same sector 
             } 
             double deltaXt = Math.sqrt((stVec.x() - c.get_Point().x()) * (stVec.x() - c.get_Point().x()) + (stVec.y() - c.get_Point().y()) * (stVec.y() - c.get_Point().y()));
-            if (deltaXt > org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH / 2) {
+            if (deltaXt > org.jlab.detector.geant4.v2.SVT.SVTConstants.ACTIVESENWID / 2) {
                 value = false; // within 1/2 module width
             }
             
@@ -441,7 +441,7 @@ public class TrajectoryFinder {
                     value = false;
                 }
             	
-                if (Math.abs(stVec.z() - c.get_Point0().z()) > Constants.interTol) {
+                if (Math.abs(stVec.z() - c.get_Point0().z()) > org.jlab.rec.cvt.Constants.interTol) {
                     value = false;
                 }
             }
@@ -450,7 +450,7 @@ public class TrajectoryFinder {
                     value = false;
                 }
                 double deltaXt = Math.sqrt((stVec.x() - c.get_Point().x()) * (stVec.x() - c.get_Point().x()) + (stVec.y() - c.get_Point().y()) * (stVec.y() - c.get_Point().y()));
-                if (deltaXt > 2*Constants.interTol) {
+                if (deltaXt > 2*org.jlab.rec.cvt.Constants.interTol) {
                     value = false;
                 }
             }
@@ -579,9 +579,9 @@ public class TrajectoryFinder {
 
     private double[][][] calc_trackIntersSVT(Ray ray, org.jlab.rec.cvt.svt.Geometry svt_geo) {
         //[l][s], [0,1,2,3,4]=x,y,z,phi,theta,estimated centroid strip
-        double[][][] result = new double[org.jlab.rec.cvt.svt.Constants.NLAYR][org.jlab.rec.cvt.svt.Constants.NSECT[org.jlab.rec.cvt.svt.Constants.NLAYR - 1]][7];
-        for (int l = 0; l < org.jlab.rec.cvt.svt.Constants.NLAYR; l++) {
-            for (int s = 0; s < org.jlab.rec.cvt.svt.Constants.NSECT[l]; s++) {
+        double[][][] result = new double[org.jlab.detector.geant4.v2.SVT.SVTConstants.NLAYERS][org.jlab.detector.geant4.v2.SVT.SVTConstants.NSECTORS[(org.jlab.detector.geant4.v2.SVT.SVTConstants.NLAYERS - 1)/2]][7];
+        for (int l = 0; l < org.jlab.detector.geant4.v2.SVT.SVTConstants.NLAYERS; l++) {
+            for (int s = 0; s < org.jlab.detector.geant4.v2.SVT.SVTConstants.NSECTORS[l/2]; s++) {
                 result[l][s][0] = -999;
                 result[l][s][1] = -999;
                 result[l][s][2] = -999;
@@ -590,8 +590,8 @@ public class TrajectoryFinder {
             }
         }
         //Layer 1-8:
-        for (int l = 0; l < org.jlab.rec.cvt.svt.Constants.NLAYR; l++) {
-            for (int s = 0; s < org.jlab.rec.cvt.svt.Constants.NSECT[l]; s++) {
+        for (int l = 0; l < org.jlab.detector.geant4.v2.SVT.SVTConstants.NLAYERS; l++) {
+            for (int s = 0; s < org.jlab.detector.geant4.v2.SVT.SVTConstants.NSECTORS[l/2]; s++) {
 
                 double[] trkIntersInf = this.getIntersectionTrackWithSVTModule(s, l, ray.get_yxinterc(), ray.get_yxslope(), ray.get_yzinterc(), ray.get_yzslope(), svt_geo);
 
@@ -601,7 +601,7 @@ public class TrajectoryFinder {
                     continue;
                 }
 
-                if ((Math.sqrt(p.x() * p.x() + p.y() * p.y()) <= Math.sqrt(0.25 * Constants.ACTIVESENLEN * Constants.ACTIVESENWIDTH + Constants.MODULERADIUS[l][0] * Constants.MODULERADIUS[l][0]))) {
+                if ((Math.sqrt(p.x() * p.x() + p.y() * p.y()) <= Math.sqrt(0.25 * org.jlab.detector.geant4.v2.SVT.SVTConstants.ACTIVESENLEN * org.jlab.detector.geant4.v2.SVT.SVTConstants.ACTIVESENWID + org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[l/2][l%2] * org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[l/2][l%2]))) {
 
                     Vector3D n = svt_geo.findBSTPlaneNormal(s + 1, l + 1);
                     Vector3D ui = new Vector3D(n.y(), -n.x(), 0); //longitudinal vector along the local x direction of the module
@@ -656,12 +656,12 @@ public class TrajectoryFinder {
 
         if (Math.abs(dot) > epsilon) {
             //threeVec w = new threeVec(_yxinterc2+Constants.MODULERADIUS[l][0]*Math.sin(angle), -Constants.MODULERADIUS[l][0]*Math.cos(angle), _yzinterc2);
-            Vector3D w = new Vector3D(_yxinterc2 - Constants.MODULERADIUS[l][0] * n.x(), -Constants.MODULERADIUS[l][0] * n.y(), _yzinterc2);
+            Vector3D w = new Vector3D(_yxinterc2 - org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[l/2][l%2] * n.x(), -org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[l/2][l%2] * n.y(), _yzinterc2);
             double y = -(n.x() * w.x() + n.y() * w.y() + n.z() * w.z()) / dot;
             //threeVec Delt = new threeVec(y*_yxslope2+_yxinterc2+Constants.MODULERADIUS[l][0]*Math.sin(angle),y-Constants.MODULERADIUS[l][0]*Math.cos(angle),0);
-            Vector3D Delt = new Vector3D(y * _yxslope2 + _yxinterc2 - Constants.MODULERADIUS[l][0] * n.x(), y - Constants.MODULERADIUS[l][0] * n.y(), 0);
+            Vector3D Delt = new Vector3D(y * _yxslope2 + _yxinterc2 - org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[l/2][l%2] * n.x(), y - org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[l/2][l%2] * n.y(), 0);
 
-            if (Delt.mag() < Constants.ACTIVESENWIDTH / 2 + Constants.TOLTOMODULEEDGE) {
+            if (Delt.mag() < org.jlab.detector.geant4.v2.SVT.SVTConstants.ACTIVESENWID / 2 + org.jlab.rec.cvt.Constants.TOLTOMODULEEDGE) {
                 inters[0] = y * _yxslope2 + _yxinterc2;
                 inters[1] = y;
                 inters[2] = y * _yzslope2 + _yzinterc2;
@@ -744,7 +744,7 @@ public class TrajectoryFinder {
         if (hits2 == null) {
             return;
         }
-        HitArray = new Hit[Constants.NLAYR][Constants.NSECT[Constants.NLAYR - 1]][Constants.NSTRIP];
+        HitArray = new Hit[org.jlab.detector.geant4.v2.SVT.SVTConstants.NLAYERS][org.jlab.detector.geant4.v2.SVT.SVTConstants.NSECTORS[(org.jlab.detector.geant4.v2.SVT.SVTConstants.NLAYERS - 1)/2]][org.jlab.detector.geant4.v2.SVT.SVTConstants.NSTRIPS];
 
         // initializing non-zero Hit Array entries
         // with valid hits

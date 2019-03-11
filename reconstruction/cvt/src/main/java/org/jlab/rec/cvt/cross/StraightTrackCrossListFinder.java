@@ -304,7 +304,7 @@ public class StraightTrackCrossListFinder {
                     }
                     if (closestCross != null) // if there is a closest point it has to be within the cuts
                     {
-                        if (Math.abs(closestCross.get_Point0().x() - p.get_Point0().x()) < org.jlab.rec.cvt.svt.Constants.MAXDISTTOTRAJXY && Math.abs(closestCross.get_Point0().y() - p.get_Point0().y()) < org.jlab.rec.cvt.svt.Constants.MAXDISTTOTRAJXY) {
+                        if (Math.abs(closestCross.get_Point0().x() - p.get_Point0().x()) < org.jlab.rec.cvt.Constants.MAXDISTTOTRAJXY && Math.abs(closestCross.get_Point0().y() - p.get_Point0().y()) < org.jlab.rec.cvt.Constants.MAXDISTTOTRAJXY) {
                             crossList.add(closestCross);
 
                         }
@@ -415,7 +415,7 @@ public class StraightTrackCrossListFinder {
                 continue;
             }
 
-            for (int s = 0; s < org.jlab.rec.cvt.svt.Constants.NSECT[l]; s++) {
+            for (int s = 0; s < org.jlab.detector.geant4.v2.SVT.SVTConstants.NSECTORS[l/2]; s++) {
 
                 double epsilon = 1e-6;
                 Vector3D n = svt_geo.findBSTPlaneNormal(s + 1, l + 1);
@@ -425,7 +425,7 @@ public class StraightTrackCrossListFinder {
                 if (Math.abs(dot) < epsilon) {
                     continue;
                 }
-                double R = (org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l][0] + org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l + 1][0]) / 2.;
+                double R = (org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[l/2][0] + org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[l/2][1]) / 2.;
 
                 Vector3D w = new Vector3D(yxinterc - R * n.x(), -R * n.y(), 0);
 
@@ -433,7 +433,7 @@ public class StraightTrackCrossListFinder {
 
                 Vector3D Delt = new Vector3D(fac * yxslope + yxinterc - R * n.x(), fac - R * n.y(), 0);
 
-                if (Delt.mag() < org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH / 2) {
+                if (Delt.mag() < org.jlab.detector.geant4.v2.SVT.SVTConstants.ACTIVESENWID / 2) {
                     double tX = fac * yxslope + yxinterc;
                     double tY = fac;
                     Cross cross2D = new Cross("SVT", "", s + 1, (int) (l + 2) / 2, -1); // 2-dimentional cross object corresponding to a point on the trajectory line in the xy plane

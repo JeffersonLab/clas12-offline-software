@@ -12,11 +12,11 @@ import org.jlab.rec.cvt.trajectory.Helix;
 
 import Jama.Matrix;
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.rec.cvt.svt.Constants;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
 public class StateVecs {
 
-    final static double speedLight = Constants.LIGHTVEL;
+    final static double speedLight = org.jlab.rec.cvt.Constants.LIGHTVEL;
 
     public List<B> bfieldPoints = new ArrayList<B>();
     public Map<Integer, StateVec> trackTraj = new HashMap<Integer, StateVec>();
@@ -295,7 +295,7 @@ public class StateVecs {
     }
 
     private double get_t_ov_X0(double radius) {
-        double value = Constants.SILICONTHICK / Constants.SILICONRADLEN;
+        double value = org.jlab.detector.geant4.v2.SVT.SVTConstants.SILICONTHK / org.jlab.rec.cvt.Constants.SILICONRADLEN;
         if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0]) 
             value = org.jlab.rec.cvt.bmt.Constants.get_T_OVER_X0()[this.getBMTLayer(radius)-1];
         return value;
@@ -303,8 +303,8 @@ public class StateVecs {
     
     private double detMat_Z_ov_A_timesThickn(double radius) {    
         double value = 0;
-        if(radius>=Constants.MODULERADIUS[0][0]&& radius<org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0])
-            value = org.jlab.rec.cvt.svt.Constants.detMatZ_ov_A_timesThickn;
+        if(radius>=org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[0][0]&& radius<org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0])
+            value = org.jlab.rec.cvt.Constants.detMatZ_ov_A_timesThickn;
         if(radius>=org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[0] && this.getBMTLayer(radius)>0)
             value = org.jlab.rec.cvt.bmt.Constants.getEFF_Z_OVER_A()[this.getBMTLayer(radius)-1];
         return value;
@@ -329,7 +329,7 @@ public class StateVecs {
     private double[] ELoss_hypo(StateVec iVec, int dir) {
         double[] Eloss = new double[3]; //Eloss for pion, kaon, proton hypotheses
 
-        if (dir < 0  || Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)<Constants.MODULERADIUS[0][0]) {
+        if (dir < 0  || Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)<org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[0][0]) {
             return Eloss;
         }
 
@@ -373,7 +373,7 @@ public class StateVecs {
         });
 
         // if (iVec.k % 2 == 1 && dir > 0) {
-        if (dir >0 && Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)>=Constants.MODULERADIUS[0][0]) {
+        if (dir >0 && Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)>org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[0][0]) {
             Vector3D trkDir = this.P(iVec.k);
             trkDir.unit();
             double cosEntranceAngle = Math.abs(this.P(iVec.k).z());

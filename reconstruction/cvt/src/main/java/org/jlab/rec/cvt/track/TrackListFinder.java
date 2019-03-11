@@ -90,10 +90,10 @@ public class TrackListFinder {
         }
         TotE /= (double) NbHits;
 
-        if (TotE <= org.jlab.rec.cvt.svt.Constants.PIDCUTOFF) {
+        if (TotE <= org.jlab.rec.cvt.Constants.PIDCUTOFF) {
             trk.set_PID("pion");
         }
-        if (TotE > org.jlab.rec.cvt.svt.Constants.PIDCUTOFF) {
+        if (TotE > org.jlab.rec.cvt.Constants.PIDCUTOFF) {
             trk.set_PID("proton");
         }
     }
@@ -173,7 +173,11 @@ public class TrackListFinder {
             Track bestTrk = null;
 
             for(int i =0; i<trkList.size(); i++) {
-                    if(trkList.get(i).getNDF()>=ndf) {
+
+                    if( Double.isNaN(trkList.get(i).getChi2()) == false && 
+                        trkList.get(i).getChi2() < 1e4 &&
+                        trkList.get(i).getNDF()>=ndf) {
+
                         ndf = trkList.get(i).getNDF();
                         if( trkList.get(i).getNDF()==ndf ) {
                         	if(trkList.get(i).getChi2()/(double)trkList.get(i).getNDF()<bestChi2) {

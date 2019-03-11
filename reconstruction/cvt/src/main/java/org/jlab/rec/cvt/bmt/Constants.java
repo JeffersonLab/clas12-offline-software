@@ -60,6 +60,14 @@ public class Constants {
     public static double[][] Cx= new double[NREGIONS*2][3];   //x-position of Center of detector frame
     public static double[][] Cy= new double[NREGIONS*2][3];   //y-position of Center of detector frame
     public static double[][] Cz= new double[NREGIONS*2][3];   //z-position of Center of detector frame
+    
+    public static double RxAll=0.0; //Rotation to apply to all tiles to "pre-align it with SVT"
+    public static double RyAll=0.0; //Rotation to apply to all tiles to "pre-align it with SVT"
+    public static double RzAll=0.0; //Rotation to apply to all tiles to "pre-align it with SVT"
+    public static double CxAll=0.0; //Translation to apply to all tiles to "pre-align it with SVT"
+    public static double CyAll=0.0; //Translation to apply to all tiles to "pre-align it with SVT"
+    public static double CzAll=0.0; //Translation to apply to all tiles to "pre-align it with SVT"
+    
     public static double[] ThetaL_grid = new double[405];    //Lorentz angle grid
     public static double[] E_grid = new double[405];         //Electric field value of the grid
     public static double[] B_grid = new double[405];        //Magnetic field value of the grid
@@ -363,7 +371,7 @@ public class Constants {
    	}
   }
   public static synchronized void setRx(int layer, int sector, double cRx) {
-   	Rx[layer-1][sector-1]  = cRx;
+   	    Rx[layer-1][sector-1]  = cRx;
   }
   public static synchronized void setRy(int layer, int sector, double cRy) {
   		Ry[layer-1][sector-1]  = cRy;
@@ -380,4 +388,63 @@ public class Constants {
  public static synchronized void setCz(int layer, int sector, double cCz) {
  	   	Cz[layer-1][sector-1]  = cCz;
  }
+ 
+ 
+ public static synchronized double getRx(int layer, int sector) {
+	    return Rx[layer-1][sector-1];
+}
+public static synchronized double getRy(int layer, int sector) {
+		return Ry[layer-1][sector-1];
+}
+public static synchronized double getRz(int layer, int sector) {
+	   	return Rz[layer-1][sector-1];
+}
+public static synchronized double getCx(int layer, int sector) {
+		return Cx[layer-1][sector-1];
+}
+public static synchronized double getCy(int layer, int sector) {
+		return Cy[layer-1][sector-1];
+}
+public static synchronized double getCz(int layer, int sector) {
+	   	return Cz[layer-1][sector-1];
+}
+ 
+ 
+ public static synchronized void setRxAll(double cRxAll) {
+	    RxAll  = cRxAll;
+ }
+ public static synchronized void setRyAll(double cRyAll) {
+		RyAll  = cRyAll;
+ }
+ public static synchronized void setRzAll(double cRzAll) {
+	   	RzAll  = cRzAll;
+ }
+ public static synchronized void setCxAll(double cCxAll) {
+		CxAll  = cCxAll;
+ }
+ public static synchronized void setCyAll(double cCyAll) {
+		CyAll  = cCyAll;
+ }
+ public static synchronized void setCzAll(double cCzAll) {
+	   	CzAll  = cCzAll;
+ }
+ 
+ public static synchronized double getRxAll() {
+	    return RxAll;
+}
+public static synchronized double getRyAll() {
+		return RyAll;
+}
+public static synchronized double getRzAll() {
+	   	return RzAll;
+}
+public static synchronized double getCxAll() {
+		return CxAll;
+}
+public static synchronized double getCyAll() {
+		return CyAll;
+}
+public static synchronized double getCzAll() {
+	   	return CzAll;
+}
 }

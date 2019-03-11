@@ -6,7 +6,7 @@ import java.util.List;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.bmt.Geometry;
 import org.jlab.rec.cvt.cluster.Cluster;
-import org.jlab.rec.cvt.svt.Constants;
+import org.jlab.rec.cvt.Constants;
 
 /**
  * Driver class to make crosses
@@ -67,11 +67,11 @@ public class CrossMaker {
         //loop over the clusters
         // inner clusters
         for (Cluster inlayerclus : svt_innerlayrclus) {
-            if(inlayerclus.get_TotalEnergy()<org.jlab.rec.cvt.svt.Constants.ETOTCUT)
+            if(inlayerclus.get_TotalEnergy()<org.jlab.rec.cvt.Constants.ETOTCUT)
                 continue;
             // outer clusters
             for (Cluster outlayerclus : svt_outerlayrclus) {
-                if(outlayerclus.get_TotalEnergy()<org.jlab.rec.cvt.svt.Constants.ETOTCUT)
+                if(outlayerclus.get_TotalEnergy()<org.jlab.rec.cvt.Constants.ETOTCUT)
                     continue;
                 // the diffence in layers between outer and inner is 1 for a double layer
                 if (outlayerclus.get_Layer() - inlayerclus.get_Layer() != 1) {
@@ -116,9 +116,9 @@ public class CrossMaker {
         double Z = svt_geo.transformToFrame(Cluster1.get_Sector(), Cluster1.get_Layer(), c.get_Point().x(), c.get_Point().y(), c.get_Point().z(), "local", "").z();
         if(Z<0)
             Z=0;
-        if(Z>Constants.ACTIVESENLEN)
-            Z=Constants.ACTIVESENLEN;
-        Cluster1.set_CentroidError(Cluster1.get_ResolutionAlongZ(Z, svt_geo) / (Constants.PITCH / Math.sqrt(12.)));
+        if(Z>org.jlab.detector.geant4.v2.SVT.SVTConstants.ACTIVESENLEN)
+            Z=org.jlab.detector.geant4.v2.SVT.SVTConstants.ACTIVESENLEN;
+        Cluster1.set_CentroidError(Cluster1.get_ResolutionAlongZ(Z, svt_geo) / (org.jlab.detector.geant4.v2.SVT.SVTConstants.READOUTPITCH / Math.sqrt(12.)));
     }
     /**
      *
@@ -260,14 +260,14 @@ public class CrossMaker {
      */
     public List<Cross> crossLooperCands(List<ArrayList<Cross>> crosses) {
         // nb SVT layers
-        int nlayr = Constants.NLAYR;
+        int nlayr = org.jlab.detector.geant4.v2.SVT.SVTConstants.NLAYERS;
         // list of crosses in a sector
         ArrayList<ArrayList<ArrayList<Cross>>> secList = new ArrayList<ArrayList<ArrayList<Cross>>>();
 
         //initialize
         for (int i = 0; i < nlayr; i++) {
             secList.add(i, new ArrayList<ArrayList<Cross>>());
-            for (int j = 0; j < Constants.NSECT[i]; j++) {
+            for (int j = 0; j < org.jlab.detector.geant4.v2.SVT.SVTConstants.NSECTORS[i/2]; j++) {
                 secList.get(i).add(j, new ArrayList<Cross>());
             }
         }
@@ -284,7 +284,7 @@ public class CrossMaker {
         ArrayList<Cross> listOfCrossesToRm = new ArrayList<Cross>();
 
         for (int i = 0; i < nlayr; i++) {
-            for (int j = 0; j < Constants.NSECT[i]; j++) {
+            for (int j = 0; j < org.jlab.detector.geant4.v2.SVT.SVTConstants.NSECTORS[i/2]; j++) {
                 //System.out.println(" number of crosses in sector "+(j+1)+" = "+secList.get(i).get(j).size());
                 if (secList.get(i).get(j).size() > Constants.MAXNUMCROSSESINMODULE) {
                     listOfCrossesToRm.addAll(secList.get(i).get(j));

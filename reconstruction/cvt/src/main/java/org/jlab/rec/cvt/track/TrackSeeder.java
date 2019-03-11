@@ -11,7 +11,6 @@ import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.fit.CircleFitPars;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter;
-import org.jlab.rec.cvt.svt.Constants;
 
 public class TrackSeeder {
     public int NBINS = 36;
@@ -463,13 +462,13 @@ public class TrackSeeder {
             //if(shift==0)
             if (fitTrk.get_chisq()[0] < chisqMax) {
                 chisqMax = fitTrk.get_chisq()[0];
-                if(chisqMax<Constants.CIRCLEFIT_MAXCHI2)
+                if(chisqMax<org.jlab.rec.cvt.Constants.CIRCLEFIT_MAXCHI2)
                     cand.update_Crosses(svt_geo);
                 //i=fitIter;
             }
         }
         //System.out.println(" Seed fitter "+fitTrk.get_chisq()[0]+" "+fitTrk.get_chisq()[1]); 
-        if(chisqMax>Constants.CIRCLEFIT_MAXCHI2)
+        if(chisqMax>org.jlab.rec.cvt.Constants.CIRCLEFIT_MAXCHI2)
             cand=null;
         return cand;
     }
@@ -568,7 +567,7 @@ public class TrackSeeder {
             return false;
         }
         double dzdr_bmt = z_bmt / r_bmt;
-        if (Math.abs(1 - (dzdrsum / (double) (trkCand.get_Crosses().size())) / ((dzdrsum + dzdr_bmt) / (double) (trkCand.get_Crosses().size() + 1))) <= Constants.dzdrcut) // add this to the track
+        if (Math.abs(1 - (dzdrsum / (double) (trkCand.get_Crosses().size())) / ((dzdrsum + dzdr_bmt) / (double) (trkCand.get_Crosses().size() + 1))) <= org.jlab.rec.cvt.Constants.dzdrcut) // add this to the track
         {
             pass = true;
         } 
@@ -590,7 +589,7 @@ public class TrackSeeder {
                     continue;
                 }
 
-                if (rad_withBmt < Constants.radcut || Math.abs((rad_withBmt - ave_seed_rad) / ave_seed_rad) > 0.75)           
+                if (rad_withBmt < org.jlab.rec.cvt.Constants.radcut || Math.abs((rad_withBmt - ave_seed_rad) / ave_seed_rad) > 0.75)           
                 {
                     pass = false;
                 }
