@@ -199,7 +199,7 @@ public class EventBuilder {
         final int index = particle.getDetectorHit(responses,type,layer,distance);
         if (index>=0) {
             particle.addResponse(responses.get(index),true);
-            responses.get(index).setAssociation(pindex);
+            responses.get(index).addAssociation(pindex);
             return true;
         }
         return false;
