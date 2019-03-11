@@ -333,7 +333,8 @@ public class DetectorParticle implements Comparable {
     public DetectorResponse  getResponse(DetectorType type, int layer){
         return this.getHit(type,layer);
     }
-    
+   
+    public DetectorTrack getTrack() {return this.detectorTrack; }
     public double getBeta(){ return this.particleBeta;}
     public double getNDF() {return this.detectorTrack.getNDF();}
     public double getTrackChi2() {return this.detectorTrack.getchi2();}

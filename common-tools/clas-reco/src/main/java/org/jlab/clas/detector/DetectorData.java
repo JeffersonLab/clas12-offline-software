@@ -634,15 +634,17 @@ public class DetectorData {
                 double cy   = bank.getFloat("cy",row);
                 double cz   = bank.getFloat("cz",row);
                 double energy = bank.getFloat("energy",row);
-                int pid = -1;
 
                 DetectorTrack track = new DetectorTrack(charge, cx*energy ,cy*energy, cz*energy);
                 track.setDetectorID(DetectorType.FTCAL.getDetectorId());
                 DetectorParticle particle = new DetectorParticle(track);
                 
-                if(charge==0) pid = 22;
-                if(charge<0) pid = 11;
+                int pid = 0;
+                if (charge==0) pid = 22;
+                else if (charge<0) pid = 11;
                
+                particle.setBeta(1.0);
+                particle.setPidQuality(0.0);
                 particle.setPid(pid);
                 particles.add(particle);
             }

@@ -220,6 +220,14 @@ public class EventBuilder {
                 if(index>=0){
                     p.addResponse(this.detectorResponses.get(index));
                     this.detectorResponses.get(index).setAssociation(n);
+
+                    // make an artificial cross for FTHODO clusters:
+                    final double x=this.detectorResponses.get(index).getPosition().x();
+                    final double y=this.detectorResponses.get(index).getPosition().y();
+                    final double z=this.detectorResponses.get(index).getPosition().z();
+                    final double mag = Math.sqrt(x*x+y*y+z*z);
+                    p.getTrack().addCross(x,y,z,x/mag,y/mag,z/mag);
+                    p.getTrack().setPath(mag);
                 }
 
                 final int particle_hodoID = this.ftIndices.get(ftParticleCounter).get(DetectorType.FTHODO);
