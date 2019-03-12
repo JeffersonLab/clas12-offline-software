@@ -620,7 +620,7 @@ public class ClusterCleanerUtilities {
                     }
                     hitsInSameLayerLists.add(hitsInLayer);
                 } else {
-                    baseClusterHits.addAll(hitsInLayer); // safe all good hits to base cluster
+                    baseClusterHits.addAll(hitsInLayer); // save all good hits to base cluster
                 }
             }
         }
@@ -774,7 +774,7 @@ public class ClusterCleanerUtilities {
      * @param clus
      * @return a new cluster that is contiguous
      */
-    public FittedCluster IsolatedHitsPruner(FittedCluster clus) {
+    public void IsolatedHitsPruner(FittedCluster clus) {
 
         int min = 1000;
         int max = -1000;
@@ -810,26 +810,33 @@ public class ClusterCleanerUtilities {
             int layer = clus.get(i).get_Layer();
             if (layer == 1) // look of neighbor in next layer
             {
-                if (HitArray[layer][wire - 1] != null || HitArray[layer][wire - 2] != null || HitArray[layer][wire] != null || HitArray[layer - 1][wire - 2] != null || HitArray[layer - 1][wire] != null) {
+                if (HitArray[layer-1][wire - 2] != null || HitArray[layer-1][wire] != null
+                        || HitArray[layer][wire - 2] != null || HitArray[layer][wire - 1] != null || HitArray[layer][wire] != null              
+                        ) {
                     fcluster.add(clus.get(i));
                 }
             }
             if (layer == 6) // look of neighbor in previous layer
             {
-                if (HitArray[layer - 2][wire - 1] != null || HitArray[layer - 2][wire - 2] != null || HitArray[layer - 2][wire] != null || HitArray[layer - 1][wire - 2] != null || HitArray[layer - 1][wire] != null) {
+                if (HitArray[layer-2][wire - 2] != null || HitArray[layer-2][wire - 1] != null || HitArray[layer-2][wire] != null 
+                        || HitArray[layer-1][wire - 2] != null  || HitArray[layer-1][wire] != null      
+                        ) {
                     fcluster.add(clus.get(i));
                 }
             }
             if (layer > 1 && layer < 6) // look of neighbor in next and previous layers
             {
-                if (HitArray[layer][wire - 1] != null || HitArray[layer][wire - 2] != null || HitArray[layer][wire] != null || HitArray[layer - 2][wire - 1] != null || HitArray[layer - 2][wire - 2] != null || HitArray[layer - 2][wire] != null || HitArray[layer - 1][wire - 2] != null || HitArray[layer - 1][wire] != null) {
+                if (HitArray[layer-2][wire - 2] != null || HitArray[layer-2][wire - 1] != null || HitArray[layer-2][wire] != null 
+                        || HitArray[layer-1][wire - 2] != null  || HitArray[layer-1][wire] != null
+                        || HitArray[layer][wire - 2] != null || HitArray[layer][wire - 1] != null || HitArray[layer][wire] != null              
+                        ) {
                     fcluster.add(clus.get(i));
                 }
             }
 
         }
-
-        return fcluster;
+        clus.clear();
+        clus.addAll(fcluster);
     }
 
     public void outOfTimersRemover(FittedCluster fClus, boolean removeHit) {

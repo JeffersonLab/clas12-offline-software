@@ -615,7 +615,7 @@ public class TrackCandListFinder {
                 for (FittedHit h1 : c.get_Segment1()) {
                     if (Math.abs(st.getZ() - h1.get_Z()) < 0.1 && c.get_Segment1().get_Id()>-1) {
                          try { 
-                            if((h1.get_X() - st.getProjector())>h1.get_CellSize()*2) 
+                            if((h1.get_X() - st.getProjector())>h1.get_CellSize()*20) 
                                 continue;
                             FittedHit ch1 = (FittedHit) ((FittedHit) h1.clone());
                             ch1.set_Id(h1.get_Id());
@@ -652,7 +652,7 @@ public class TrackCandListFinder {
                 for (FittedHit h1 : c.get_Segment2()) {
                     if (Math.abs(st.getZ() - h1.get_Z()) < 0.1 && c.get_Segment2().get_Id()>-1) {
                          try { 
-                            if((h1.get_X() - st.getProjector())>h1.get_CellSize()*2) 
+                            if((h1.get_X() - st.getProjector())>h1.get_CellSize()*20) 
                                 continue;
                             FittedHit ch1 = (FittedHit) ((FittedHit) h1.clone());
                             ch1.set_Id(h1.get_Id());

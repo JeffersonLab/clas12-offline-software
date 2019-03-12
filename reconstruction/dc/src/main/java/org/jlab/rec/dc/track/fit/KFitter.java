@@ -78,11 +78,17 @@ public class KFitter {
             this.chi2kf = 0;
             if (i > 1) {
                 //get new state vec at 1st measurement after propagating back from the last filtered state
-                sv.transport(sector,
-                        svzLength - 1,
-                        0,
-                        sv.trackTraj.get(svzLength - 1),
-                        sv.trackCov.get(svzLength- 1));
+//                sv.transport(sector,
+//                        svzLength - 1,
+//                        0,
+//                        sv.trackTraj.get(svzLength - 1),
+//                        sv.trackCov.get(svzLength- 1));
+                for (int k = svzLength-1; k > 0; k--) {
+                sv.transport(sector, k, k - 1,
+                        sv.trackTraj.get(k),
+                        sv.trackCov.get(k));
+                    this.filter(k - 1);
+                }
             }
             for (int k = 0; k < svzLength - 1; k++) {
                 sv.transport(sector, k, k + 1,

@@ -192,7 +192,7 @@ public class ClusterFinder {
                 continue;
             //System.out.println(" I passed this cluster "+clus.printInfo());
             FittedCluster fClus = new FittedCluster(clus);
-            //FittedCluster fClus = ct.IsolatedHitsPruner(fclus);
+            //ct.IsolatedHitsPruner(fClus);
             // Flag out-of-timers
             //if(Constants.isSimulation==true) {
             ct.outOfTimersRemover(fClus, true); // remove outoftimers
@@ -204,7 +204,7 @@ public class ClusterFinder {
                 continue;
             selectedClusList.add(fClus); 
         }
-
+        
         //System.out.println(" Clusters Step 2");
         // for(FittedCluster c : selectedClusList)
         //	for(FittedHit h : c)
@@ -217,17 +217,22 @@ public class ClusterFinder {
 
             cf.SetFitArray(clus, "LC"); 
             cf.Fit(clus, true);
-
-            if (clus.get_fitProb() > Constants.HITBASEDTRKGMINFITHI2PROB || clus.size() < Constants.HITBASEDTRKGNONSPLITTABLECLSSIZE) {            
+            if(clus.get_fitProb()<Constants.HITBASEDTRKGMINFITHI2PROB) { 
+                ct.IsolatedHitsPruner(clus);
+            }
+            if (clus.get_fitProb() > Constants.HITBASEDTRKGMINFITHI2PROB || 
+                    (clus.size() < Constants.HITBASEDTRKGNONSPLITTABLECLSSIZE && clus.get_fitProb()!=0) ){            
                 fittedClusList.add(clus); //if the chi2 prob is good enough, then just add the cluster, or if the cluster is not split-able because it has too few hits                
-            } else {          
+            } else {  
+                
                 List<FittedCluster> splitClus = ct.ClusterSplitter(clus, selectedClusList.size(), cf);
                 fittedClusList.addAll(splitClus);              
             }
         }
+        
         ArrayList rmHits = new ArrayList<FittedHit>();
         for (FittedCluster clus : fittedClusList) {
-            if (clus != null && clus.size() > 3 ) {
+            if (clus != null && clus.size() > 3 && clus.get_fitProb()>Constants.HITBASEDTRKGMINFITHI2PROB) {
                 rmHits.clear();
                 // update the hits
                 for (FittedHit fhit : clus) {
