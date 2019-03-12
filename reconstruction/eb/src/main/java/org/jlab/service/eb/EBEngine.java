@@ -124,7 +124,7 @@ public class EBEngine extends ReconstructionEngine {
 
         // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer(ccdb);
-        analyzer.processEvent(eb.getEvent());
+        analyzer.processEvent(eb.getEvent(),rf);
 
         // Add Forward Tagger particles:
         eb.processForwardTagger(de);
@@ -175,7 +175,7 @@ public class EBEngine extends ReconstructionEngine {
       
             // update PID for FT-based start time:
             // WARNING:  this modified particles
-            analyzer.processEventFT(eb.getEvent());
+            analyzer.processEventFT(eb.getEvent(),rf);
             if (eb.getEvent().getEventHeader().getStartTimeFT()>0 && eventBankFT!=null) {
                 DataBank bankEveFT = DetectorData.getEventShadowBank(eb.getEvent(), de, eventBankFT);
                 de.appendBanks(bankEveFT);

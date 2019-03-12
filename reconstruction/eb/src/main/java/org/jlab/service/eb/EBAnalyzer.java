@@ -17,6 +17,7 @@ import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
 import org.jlab.rec.eb.EBUtil;
 import org.jlab.rec.eb.SamplingFractions;
+import org.jlab.rec.eb.EBRadioFrequency;
 
 /**
  * @author gavalian
@@ -52,7 +53,7 @@ public class EBAnalyzer {
      * REC::Particle bank already.
      *
      */
-    public void processEventFT(DetectorEvent event) {
+    public void processEventFT(DetectorEvent event, EBRadioFrequency ebrf) {
 
         if (event.getParticles().size() <= 0) return;
 
@@ -69,16 +70,12 @@ public class EBAnalyzer {
         List<DetectorParticle> chargedFD = new ArrayList<DetectorParticle>();
 
         // corresponding response candidates, to avoid excessive searches during combinatorics:
-        List<DetectorResponse> electronFTC = new ArrayList<DetectorResponse>();
         List<DetectorResponse> chargedFTOF = new ArrayList<DetectorResponse>();
 
         // load the candidates:
         for (DetectorParticle p : event.getParticles()) {
             if (p.getStatus().isTagger() && p.getPid()==11) {
-                DetectorResponse ftc = p.getHit(DetectorType.FTCAL);
-                if (ftc==null) throw new RuntimeException("FT electron without FTC!");
                 electronFT.add(p);
-                electronFTC.add(ftc);
             }
             else if (p.getStatus().isForward() && p.getCharge()!=0) {
                 DetectorResponse ftof1a = p.getHit(DetectorType.FTOF,2);
@@ -95,28 +92,13 @@ public class EBAnalyzer {
         int iMinTimeDiffFT = -1;
 
         // anything relevant must be better than half-bucket:
-        // FIXME:  get this from EBCCDBEnum.RF_BUCKET_LENGTH/2
-        double minTimeDiff = 2.0;
+        double minTimeDiff = this.ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH)/2;
 
         // loop over FT electron candidates:
         for (int itag=0; itag<electronFT.size(); itag++) {
 
-            // the FT calorimeter hit for this FT electron:
-            final DetectorResponse ftc = electronFTC.get(itag);
-
-            // this would be a straight line from (0,0,0): 
-            final double pathFT = ftc.getPosition().mag();
-
-            // assume beta=1 and calculate vertex time:
-            final double vtxTimeFT = ftc.getTime() -
-                pathFT/PhysicsConstants.speedOfLight();
-
             // calculate RF-corrected FT start time:
-            // should we really compare against RF-corrected time?
-            // or would comparing vertex times make more sense, and
-            // then correcting for RF after choosing the best match?
-            //double deltatr = - vtxTimeFT + rfTime + (1000+0.5)*rfPeriod;
-            //double rfCorr     = deltatr % rfPeriod - rfPeriod/2;             
+            final double startTimeFT = ebrf.getStartTime(electronFT.get(itag),DetectorType.FTCAL,-1);
             
             // loop over FD charged particles:
             for (int ifd=0; ifd<chargedFD.size(); ifd++) {
@@ -141,24 +123,20 @@ public class EBAnalyzer {
                         pathFD/PhysicsConstants.speedOfLight()/beta;
 
                     // check for a new best FT-FD timing match:
-                    if (Math.abs(vtxTimeFD-vtxTimeFT) < Math.abs(minTimeDiff)) {
-                        minTimeDiff = vtxTimeFD-vtxTimeFT;
+                    if (Math.abs(vtxTimeFD-startTimeFT) < Math.abs(minTimeDiff)) {
+                        minTimeDiff = vtxTimeFD-startTimeFT;
                         iMinTimeDiffFT = itag;
                     }
                 }
             }
         }
        
-        System.err.println("dog");
-
         // no good FT, abort:
         if (iMinTimeDiffFT<0) return;
 
         // set start time:
-        // FIXME:  get real RF-corrected start time,
-        // after centralizing RF-correction over in EBRadioFrequency
-        // to not duplicate code again ...
-        event.getEventHeader().setStartTimeFT(125);
+        final double startTime = ebrf.getStartTime(electronFT.get(iMinTimeDiffFT),DetectorType.FTCAL,-1);
+        event.getEventHeader().setStartTimeFT(startTime);
         
         // reassign trigger particle:
         for (DetectorParticle p : event.getParticles()) {
@@ -172,7 +150,7 @@ public class EBAnalyzer {
         this.assignNeutralMomenta(event);
     }
     
-    public void processEvent(DetectorEvent event) {
+    public void processEvent(DetectorEvent event, EBRadioFrequency ebrf) {
 
         // abort, rely on default init of DetectorEvent:
         if (event.getParticles().size() <= 0) return;
@@ -191,39 +169,16 @@ public class EBAnalyzer {
             trigger.setBeta(trigger.getTheoryBeta(trigger.getPid()));
             trigger.setMass(PDGDatabase.getParticleById(trigger.getPid()).mass());
 
-            double time = 0.0;
-            double path = 0.0;
-
             // prefer FTOF Panel 1B:
             if (trigger.hasHit(DetectorType.FTOF, 2)==true){
-                time = trigger.getTime(DetectorType.FTOF, 2);
-                path = trigger.getPathLength(DetectorType.FTOF, 2);
+                startTime = ebrf.getStartTime(trigger,DetectorType.FTOF,2);
                 foundTriggerTime = true;
             }
 
             // else use FTOF Panel 1A:
             else if (trigger.hasHit(DetectorType.FTOF, 1)==true){
-                time = trigger.getTime(DetectorType.FTOF, 1);
-                path = trigger.getPathLength(DetectorType.FTOF, 1);
+                startTime = ebrf.getStartTime(trigger,DetectorType.FTOF,1);
                 foundTriggerTime = true;
-            }
-            
-            // set startTime based on FTOF:
-            if (foundTriggerTime) {
-                final double tgpos = ccdb.getDouble(EBCCDBEnum.TARGET_POSITION);
-                final double rfOffset = ccdb.getDouble(EBCCDBEnum.RF_OFFSET);
-                final double rfBucketLength = ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH); 
-
-                final double tof = path/PhysicsConstants.speedOfLight()/trigger.getBeta();
-                final double vertexTime = time - tof;
-
-                final double vzCorr = 0;//(tgpos - trigger.vertex().z()) / PhysicsConstants.speedOfLight();
-
-                final double deltatr = - vertexTime + event.getEventHeader().getRfTime() - vzCorr +
-                    + (EBConstants.RF_LARGE_INTEGER+0.5)*rfBucketLength;
-                final double rfCorr = deltatr % rfBucketLength - rfBucketLength/2;
-                
-                startTime = vertexTime + rfCorr;
             }
         }
 
