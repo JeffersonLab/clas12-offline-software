@@ -90,10 +90,10 @@ public class TrackListFinder {
         }
         TotE /= (double) NbHits;
 
-        if (TotE <= org.jlab.rec.cvt.svt.Constants.PIDCUTOFF) {
+        if (TotE <= org.jlab.rec.cvt.Constants.PIDCUTOFF) {
             trk.set_PID("pion");
         }
-        if (TotE > org.jlab.rec.cvt.svt.Constants.PIDCUTOFF) {
+        if (TotE > org.jlab.rec.cvt.Constants.PIDCUTOFF) {
             trk.set_PID("proton");
         }
     }
@@ -157,10 +157,10 @@ public class TrackListFinder {
     		int N = 0;
     		for( Cross c : t ) {
 
-          // do not check on BMTC
-          if( c.get_DetectorType().equalsIgnoreCase("C") == true ) continue;
+		    // do not check on BMTC
+		    if( c.get_DetectorType().equalsIgnoreCase("C") == true ) continue;
 
-    			if( track.contains(c) ) { N++;  }
+		    if( track.contains(c) ) { N++;  }
     		}
     		if( N >= 2 ) list.add( t );
     	}

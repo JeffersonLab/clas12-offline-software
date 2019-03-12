@@ -46,7 +46,8 @@ public class CVTRecHandler {
     SVTStripFactory svtIdealStripFactory;
     
     public CVTRecHandler() {
-        org.jlab.rec.cvt.svt.Constants.Load();
+        DatabaseConstantProvider cp=new DatabaseConstantProvider(10, "default");
+        org.jlab.detector.geant4.v2.SVT.SVTConstants.connect(cp);
         SVTGeom = new org.jlab.rec.cvt.svt.Geometry();
         BMTGeom = new org.jlab.rec.cvt.bmt.Geometry();
     }
