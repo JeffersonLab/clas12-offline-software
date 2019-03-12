@@ -1,0 +1,8 @@
+#!/bin/bash
+
+echo "INSTALLATION DIRECTORY = " @CLAS12_INSTALL_DIR@
+
+java -Xmx2048m -Xms1024m \
+  -cp "@CLAS12_INSTALL_DIR@/lib/clas/*:@CLAS12_INSTALL_DIR@/lib/plugins/*" \
+  org.jlab.jnp.hipo.utils.HipoUtilities $*
+
