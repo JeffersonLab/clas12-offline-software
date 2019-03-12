@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.geom.prim.Line3D;
-import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
 /**

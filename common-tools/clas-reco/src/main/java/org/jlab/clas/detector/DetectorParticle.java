@@ -1,6 +1,5 @@
 package org.jlab.clas.detector;
 
-import static java.lang.Math.abs;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import java.util.ArrayList;
@@ -11,7 +10,6 @@ import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.DetectorDescriptor;
-import org.jlab.clas.detector.DetectorParticleStatus;
 
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
@@ -19,7 +17,6 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
 import org.jlab.clas.pdg.PDGDatabase;
-import org.jlab.clas.pdg.PDGParticle;
 import org.jlab.clas.pdg.PhysicsConstants;
 
 /**

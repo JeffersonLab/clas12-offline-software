@@ -6,10 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataEvent;
-import org.jlab.clas.detector.DetectorData;
 
+import org.jlab.detector.base.DetectorType;
+
+import org.jlab.clas.detector.DetectorData;
 import org.jlab.clas.detector.DetectorHeader;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
@@ -21,7 +22,6 @@ import org.jlab.clas.detector.CherenkovResponse;
 import org.jlab.rec.eb.EBConstants;
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
-import org.jlab.rec.eb.EBUtil;
 import org.jlab.rec.eb.SamplingFractions;
 
 /**
