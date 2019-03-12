@@ -527,8 +527,13 @@ public class EBAnalyzer {
         public double PIDQuality(DetectorParticle p, int pid, DetectorEvent event) {
             double q=DetectorParticle.DEFAULTQUALITY;
 
+            // FT can't really to a pid quality:
+            if (p.getStatus().isTagger()) {
+                q = 0;
+            }
+
             // electron/positron:
-            if (abs(pid)==11) {
+            else if (abs(pid)==11) {
                 q = SamplingFractions.getNSigma(pid,p,ccdb);
             }
 
