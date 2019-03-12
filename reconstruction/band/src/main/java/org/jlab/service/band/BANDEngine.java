@@ -2,6 +2,9 @@ package org.jlab.service.band;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
+
+import javax.naming.event.NamingEvent;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataBank;
@@ -63,7 +66,23 @@ public class BANDEngine extends ReconstructionEngine {
 
 	@Override
 		public boolean init() {
-			// TODO Auto-generated method stub
+			
+			String[]  bandTables = new String[]{
+				"/calibration/band/time_jitter",
+				"/calibration/band/lr_offsets",
+				"/calibration/band/effective_velocity",
+				"/calibration/band/paddle_offsets",
+				"/calibration/band/layer_offsets",
+				"/calibration/band/attenuation_lengths",
+				"/calibration/band/time_walk_corr_left",
+				"/calibration/band/time_walk_corr_right",
+				"/calibration/band/attenuation", 
+    		};
+    
+			requireConstants(Arrays.asList(bandTables));
+    		
+
+		
 			return true;
 		}
 
@@ -79,7 +98,7 @@ public class BANDEngine extends ReconstructionEngine {
 			// Load the constants
 			//-------------------
 			if(Run!=newRun) {
-				CalibrationConstantsLoader.Load(newRun,"default"); 
+				CalibrationConstantsLoader.Load(newRun,"default",this.getConstantsManager()); 
 				Run = newRun;
 				Parameters.CreateGeometry(); // loading BAND params
 			}
@@ -100,8 +119,10 @@ public class BANDEngine extends ReconstructionEngine {
 		String outputFile="test.hipo";
 		HipoDataSync  writer = new HipoDataSync();
 		writer.open(outputFile);
+		
+		int nevent = 0;
 
-		while(reader.hasEvent()) {
+		while(reader.hasEvent() && nevent<2) {
 			DataEvent event = (DataEvent) reader.getNextEvent();
 			//System.out.println("***********  NEXT EVENT ************");
 			//event.show();
@@ -112,6 +133,7 @@ public class BANDEngine extends ReconstructionEngine {
 			en.processDataEvent(event);
 			writer.writeEvent(event);
 			//event.getBank("band::hits").show();
+			nevent++;
 
 		}		
 		writer.close();

@@ -1,12 +1,13 @@
 package org.jlab.rec.band.constants;
 
+import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
-import org.netlib.util.doubleW;
+import org.jlab.utils.groups.IndexedTable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.Adler32;
 import java.lang.Integer;
-import java.awt.List;
 import java.lang.Double;
 
 /**
@@ -39,58 +40,50 @@ public class CalibrationConstantsLoader {
 	public static int JITTER_PHASE = 0;
 	public static int JITTER_CYCLES = 0;
 
-
-	static DatabaseConstantProvider dbprovider = null;
-
-	public static synchronized void Load(int runno, String var) {
+	public static synchronized void Load(int runno, String var, ConstantsManager manager) {
 
 		//System.out.println("*Loading calibration constants*");
-
-		dbprovider = new DatabaseConstantProvider(runno, var); // reset using the new variation
-
-		// load table reads entire table and makes an array of variables for each column in the table.
-		dbprovider.loadTable("/calibration/band/time_jitter"	    );
-		dbprovider.loadTable("/calibration/band/lr_offsets"         );
-		dbprovider.loadTable("/calibration/band/effective_velocity" );
-		dbprovider.loadTable("/calibration/band/paddle_offsets"     );
-		dbprovider.loadTable("/calibration/band/layer_offsets"      );
-		dbprovider.loadTable("/calibration/band/attenuation_lengths");
-		dbprovider.loadTable("/calibration/band/time_walk_corr_left"     );
-		dbprovider.loadTable("/calibration/band/time_walk_corr_right"     );
-
-		//disconncect from database. Important to do this after loading tables.
-		dbprovider.disconnect(); 
-		dbprovider.show();
-
+		manager.setVariation(var);
+		
+	    IndexedTable  lroffsets  = manager.getConstants(runno, "/calibration/band/lr_offsets");
+	    IndexedTable  timewalkL  = manager.getConstants(runno, "/calibration/band/time_walk_corr_left");
+	    IndexedTable  timewalkR  = manager.getConstants(runno, "/calibration/band/time_walk_corr_right");
+	    IndexedTable  effvel     = manager.getConstants(runno, "/calibration/band/effective_velocity");
+	    IndexedTable  timejitter = manager.getConstants(runno, "/calibration/band/time_jitter");
+	    IndexedTable  attenuation= manager.getConstants(runno, "/calibration/band/attenuation_lengths");
+	    IndexedTable  paddleoffs = manager.getConstants(runno, "/calibration/band/paddle_offsets");
+	    IndexedTable  layeroffs	 = manager.getConstants(runno, "/calibration/band/layer_offsets");
+	    
+	    
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Time offsets
-		for(int i =0; i< dbprovider.length("/calibration/band/lr_offsets/sector"); i++) {
+		for(int i = 0; i < lroffsets.getRowCount(); i++) {
 			// Get sector, layer, component
-			int sector 		= dbprovider.getInteger("/calibration/band/lr_offsets/sector", 		i);	    
-			int layer 		= dbprovider.getInteger("/calibration/band/lr_offsets/layer", 		i);
-			int component 	= dbprovider.getInteger("/calibration/band/lr_offsets/component", 	i);
+			int sector    = Integer.parseInt((String)lroffsets.getValueAt(i, 0));
+       	    int layer     = Integer.parseInt((String)lroffsets.getValueAt(i, 1));
+       	    int component = Integer.parseInt((String)lroffsets.getValueAt(i, 2));
 			// Get the actual offsets
-			double tdc_off 	= dbprovider.getDouble("/calibration/band/lr_offsets/tdc_off", 		i);
-			double fadc_off = dbprovider.getDouble("/calibration/band/lr_offsets/fadc_off", 	i);
+			double tdc_off 	= lroffsets.getDoubleValue("tdc_off",  sector, layer, component);
+			double fadc_off = lroffsets.getDoubleValue("fadc_off", sector, layer, component);
 			// Put in the maps
 			int key = sector*100+layer*10+component;
 			TDC_T_OFFSET.put( 	Integer.valueOf(key), 	Double.valueOf(tdc_off ) );
-			FADC_T_OFFSET.put( 	Integer.valueOf(key), 	Double.valueOf(fadc_off) );
+			FADC_T_OFFSET.put( 	Integer.valueOf(key), 	Double.valueOf(fadc_off) );		
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Time-walk correction parameters for left PMTs
-		for(int i =0; i< dbprovider.length("/calibration/band/time_walk_corr_left/sector"); i++) {
+		for(int i = 0; i < timewalkL.getRowCount(); i++) {
 			// Get sector, layer, component
-			int sector 		= dbprovider.getInteger("/calibration/band/time_walk_corr_left/sector"   , 	i);	    
-			int layer 		= dbprovider.getInteger("/calibration/band/time_walk_corr_left/layer"    , 	i);
-			int component 	= dbprovider.getInteger("/calibration/band/time_walk_corr_left/component", 	i);
+			int sector    = Integer.parseInt((String)timewalkL.getValueAt(i, 0));
+       	    int layer     = Integer.parseInt((String)timewalkL.getValueAt(i, 1));
+       	    int component = Integer.parseInt((String)timewalkL.getValueAt(i, 2));
 			// Get parameters
-			double parA = dbprovider.getDouble("/calibration/band/time_walk_corr_left/par_a",i);
-			double parB = dbprovider.getDouble("/calibration/band/time_walk_corr_left/par_b",i);
-			// Get errors
-			double errA = dbprovider.getDouble("/calibration/band/time_walk_corr_left/err_a",i);
-			double errB = dbprovider.getDouble("/calibration/band/time_walk_corr_left/err_b",i);
+			double parA = timewalkL.getDoubleValue("par_a", sector, layer, component); 
+			double parB = timewalkL.getDoubleValue("par_b", sector, layer, component); 
+			//Get errors
+			double errA = timewalkL.getDoubleValue("err_a", sector, layer, component); 
+			double errB = timewalkL.getDoubleValue("err_b", sector, layer, component); 
 			// Put in the maps
 			int key = sector*100+layer*10+component;
 			double time_walk_params[] = {parA,parB,errA,errB};
@@ -99,17 +92,17 @@ public class CalibrationConstantsLoader {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Time-walk correction parameters for right PMTs
-		for(int i =0; i< dbprovider.length("/calibration/band/time_walk_corr_right/sector"); i++) {
+		for(int i = 0; i < timewalkR.getRowCount(); i++) {
 			// Get sector, layer, component
-			int sector 		= dbprovider.getInteger("/calibration/band/time_walk_corr_right/sector"   , 	i);	    
-			int layer 		= dbprovider.getInteger("/calibration/band/time_walk_corr_right/layer"    , 	i);
-			int component 	= dbprovider.getInteger("/calibration/band/time_walk_corr_right/component", 	i);
-			// Get parameters
-			double parA = dbprovider.getDouble("/calibration/band/time_walk_corr_right/par_a",i);
-			double parB = dbprovider.getDouble("/calibration/band/time_walk_corr_right/par_b",i);
+			int sector    = Integer.parseInt((String)timewalkR.getValueAt(i, 0));
+       	    int layer     = Integer.parseInt((String)timewalkR.getValueAt(i, 1));
+       	    int component = Integer.parseInt((String)timewalkR.getValueAt(i, 2));
+       	    // Get parameters
+			double parA = timewalkR.getDoubleValue("par_a", sector, layer, component); 
+			double parB = timewalkR.getDoubleValue("par_b", sector, layer, component); 
 			// Get errors
-			double errA = dbprovider.getDouble("/calibration/band/time_walk_corr_right/err_a",i);
-			double errB = dbprovider.getDouble("/calibration/band/time_walk_corr_right/err_b",i);
+			double errA = timewalkR.getDoubleValue("err_a", sector, layer, component); 
+			double errB = timewalkR.getDoubleValue("err_b", sector, layer, component);
 			// Put in the maps
 			int key = sector*100+layer*10+component;
 			double time_walk_params[] = {parA,parB,errA,errB};
@@ -118,80 +111,72 @@ public class CalibrationConstantsLoader {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Speed of lights
-		for(int i =0; i< dbprovider.length("/calibration/band/effective_velocity/sector"); i++) {
+		for(int i = 0; i < effvel.getRowCount(); i++) {
 			// Get sector, layer, component
-			int sector 		= dbprovider.getInteger("/calibration/band/effective_velocity/sector",		i);	    
-			int layer 		= dbprovider.getInteger("/calibration/band/effective_velocity/layer",		i);
-			int component 	= dbprovider.getInteger("/calibration/band/effective_velocity/component",	i);
+			int sector 	   = Integer.parseInt((String)effvel.getValueAt(i, 0));    
+			int layer 	   = Integer.parseInt((String)effvel.getValueAt(i, 1));    
+			int component  = Integer.parseInt((String)effvel.getValueAt(i, 2));    
 			// Get the velocities
-			double veff_tdc		= dbprovider.getDouble("/calibration/band/effective_velocity/veff_tdc", 	i);
-			double veff_fadc	= dbprovider.getDouble("/calibration/band/effective_velocity/veff_fadc",	i);
+			double veff_tdc		= effvel.getDoubleValue("veff_tdc",  sector, layer, component);
+			double veff_fadc	= effvel.getDoubleValue("veff_fadc", sector, layer, component);
 			// Put in the maps
 			int key = sector*100+layer*10+component;
 			TDC_VEFF.put(	Integer.valueOf(key),		Double.valueOf(veff_tdc) );
 			FADC_VEFF.put(	Integer.valueOf(key), 		Double.valueOf(veff_fadc) );
+			
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// TDC time jitter
-		for( int i = 0; i < dbprovider.length("/calibration/band/time_jitter/sector"); i++){
-			int sector 		= dbprovider.getInteger("/calibration/band/time_jitter/sector",          i);
-			int layer 		= dbprovider.getInteger("/calibration/band/time_jitter/layer",          i);
-			int component 		= dbprovider.getInteger("/calibration/band/time_jitter/component",          i);
-			double period 		= dbprovider.getDouble("/calibration/band/time_jitter/period", i);
-			double phase 		= dbprovider.getDouble("/calibration/band/time_jitter/phase", i);
-			double cycles 		= dbprovider.getDouble("/calibration/band/time_jitter/cycles", i);
-			JITTER_PERIOD = dbprovider.getDouble("/calibration/band/time_jitter/period", 0);
-			JITTER_PHASE  = dbprovider.getInteger("/calibration/band/time_jitter/phase", 0);
-			JITTER_CYCLES = dbprovider.getInteger("/calibration/band/time_jitter/cycles", 0);
+		for( int i = 0; i < timejitter.getRowCount(); i++){
+			JITTER_PERIOD = timejitter.getDoubleValue("period", 0,0,0);
+			JITTER_PHASE  = timejitter.getIntValue("phase", 0,0,0);
+			JITTER_CYCLES = timejitter.getIntValue("cycles", 0,0,0);	
 		}
-
+		
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Paddle-to-paddle offsets
-		for(int i =0; i< dbprovider.length("/calibration/band/paddle_offsets/sector"); i++) {
-			int sector 		= dbprovider.getInteger("/calibration/band/paddle_offsets/sector",		i);	    
-			int layer 		= dbprovider.getInteger("/calibration/band/paddle_offsets/layer",		i);
-			int component 	= dbprovider.getInteger("/calibration/band/paddle_offsets/component",	i);
-
+		for(int i =0; i < paddleoffs.getRowCount(); i++) {
+			// Get sector, layer, component
+			int sector 	   = Integer.parseInt((String)paddleoffs.getValueAt(i, 0));    
+			int layer 	   = Integer.parseInt((String)paddleoffs.getValueAt(i, 1));    
+			int component  = Integer.parseInt((String)paddleoffs.getValueAt(i, 2)); 
 			// Get offset and resolution for FADC
-			double p2p_off_fadc	= dbprovider.getDouble("/calibration/band/paddle_offsets/offset_fadc", 	i);
-			double p2p_res_fadc	= dbprovider.getDouble("/calibration/band/paddle_offsets/resolution_fadc",	i);
-
-			// Put in maps
+			double p2p_off_fadc	= paddleoffs.getDoubleValue("offset_fadc",  sector, layer, component);
+			double p2p_res_fadc	= paddleoffs.getDoubleValue("resolution_fadc",  sector, layer, component);
+			// Put in maps 
 			int key = sector*100+layer*10+component;
 			FADC_MT_P2P_OFFSET.put(	Integer.valueOf(key),		Double.valueOf(p2p_off_fadc) );
 			FADC_MT_P2P_RES.put(	Integer.valueOf(key),		Double.valueOf(p2p_res_fadc) );
 
 		}
-
+		
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Layer-to-layer offsets
-		for(int i =0; i< dbprovider.length("/calibration/band/layer_offsets/sector"); i++) {
-			int sector 		= dbprovider.getInteger("/calibration/band/layer_offsets/sector",		i);	    
-			int layer 		= dbprovider.getInteger("/calibration/band/layer_offsets/layer",		i);
-			int component 	= dbprovider.getInteger("/calibration/band/layer_offsets/component",	i);
-
+		for(int i =0; i < layeroffs.getRowCount(); i++) {
+			// Get sector, layer, component
+			int sector 	   = Integer.parseInt((String)layeroffs.getValueAt(i, 0));    
+			int layer 	   = Integer.parseInt((String)layeroffs.getValueAt(i, 1));    
+			int component  = Integer.parseInt((String)layeroffs.getValueAt(i, 2)); 
 			// Get offset and resolution for FADC
-			double l2l_off_fadc	= dbprovider.getDouble("/calibration/band/layer_offsets/offset_fadc", 	i);
-			double l2l_res_fadc	= dbprovider.getDouble("/calibration/band/layer_offsets/resolution_fadc",	i);
-
+			double l2l_off_fadc	= layeroffs.getDoubleValue("offset_fadc",  sector, layer, component);
+			double l2l_res_fadc	= layeroffs.getDoubleValue("resolution_fadc",  sector, layer, component);
 			// Put in maps
 			int key = sector*100+layer*10+component;
 			FADC_MT_L2L_OFFSET.put(	Integer.valueOf(key),		Double.valueOf(l2l_off_fadc) );
 			FADC_MT_L2L_RES.put(	Integer.valueOf(key),		Double.valueOf(l2l_res_fadc) );
 		}
-
+		
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Attenuation constants
-		for( int i=0; i < dbprovider.length("/calibration/band/attenuation_lengths/sector"); i++){
-			int sector 	 	= dbprovider.getInteger("/calibration/band/attenuation_lengths/sector", 	i);
-			int layer		= dbprovider.getInteger("/calibration/band/attenuation_lengths/layer",		i);
-			int component		= dbprovider.getInteger("/calibration/band/attenuation_lengths/component",	i);
-
+		for( int i=0; i < attenuation.getRowCount(); i++){
+			// Get sector, layer, component
+			int sector 	   = Integer.parseInt((String)attenuation.getValueAt(i, 0));    
+			int layer 	   = Integer.parseInt((String)attenuation.getValueAt(i, 1));    
+			int component  = Integer.parseInt((String)attenuation.getValueAt(i, 2)); 
 			// Grab attenuation length
-			double atten		= dbprovider.getDouble("/calibration/band/attenuation_lengths/atten_len",	i);
-			double atten_err	= dbprovider.getDouble("/calibration/band/attenuation_lengths/atten_len_err",	i);
-
+			double atten		= attenuation.getDoubleValue("atten_len",  sector, layer, component);
+			double atten_err	= attenuation.getDoubleValue("atten_len_err",  sector, layer, component);
 			// Put in map
 			int key = sector*100+layer*10+component;
 			FADC_ATTEN_LENGTH.put(	Integer.valueOf(key),		Double.valueOf(atten) 	);
@@ -200,7 +185,7 @@ public class CalibrationConstantsLoader {
 		CSTLOADED = true;
 		//System.out.println("SUCCESSFULLY LOADED band CALIBRATION CONSTANTS....");
 
-		setDB(dbprovider);
+		
 
 	} 
 
@@ -212,12 +197,11 @@ public class CalibrationConstantsLoader {
 	}
 
 
-
 	public static final void setDB(DatabaseConstantProvider dB) {
 		DB = dB;
 	}
 
 	public static void main (String arg[]) {
-		CalibrationConstantsLoader.Load(10,"default");
+	//	CalibrationConstantsLoader.Load(10,"default");
 	}
 }

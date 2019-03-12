@@ -1,6 +1,6 @@
 package org.jlab.rec.band.hit;
 
-import org.jlab.rec.band.constants.Parameters;
+
 
 public class BandHitCandidate {
 
