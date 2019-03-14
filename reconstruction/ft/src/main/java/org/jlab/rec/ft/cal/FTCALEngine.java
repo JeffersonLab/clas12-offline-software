@@ -93,7 +93,7 @@ public class FTCALEngine extends ReconstructionEngine {
     public static void main (String arg[])  {
 		FTCALEngine cal = new FTCALEngine();
 		cal.init();
-		String input = "/Users/devita/Work/clas12/simulations/tests/clas12Tags/4a.2.2/out.hipo";
+		String input = "/Users/devita/Work/clas12/simulations/clas12Tags/4.3.1/out.hipo";
 		HipoDataSource  reader = new HipoDataSource();
 //		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/out_header.ev";
 //		EvioSource  reader = new EvioSource();

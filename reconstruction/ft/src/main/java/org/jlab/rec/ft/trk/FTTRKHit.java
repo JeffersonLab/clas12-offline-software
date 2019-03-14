@@ -11,6 +11,7 @@ import org.jlab.geom.prim.Point3D;
 /**
  *
  * @author devita
+ * @author filippi
  */
 public class FTTRKHit implements Comparable<FTTRKHit>{
 	// class implements Comparable interface to allow for sorting a collection of hits by wire number values
@@ -26,7 +27,7 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
 	 */
 	public FTTRKHit(int sector, int layer, int strip, double Edep) {
 		this._Sector = sector;
-		this._Layer = layer;
+		this._Layer = layer;  
 		this._Strip = strip;
 		this._Edep = Edep;	
                 
@@ -35,16 +36,30 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
 		double y0 = FTTRKConstantsLoader.stripsY[layer-1][strip-1][0];
 		double y1 = FTTRKConstantsLoader.stripsY[layer-1][strip-1][1];
 		double Z  = FTTRKConstantsLoader.Zlayer[layer-1]; // z
+        
 		Line3D seg = new Line3D();
 		seg.setOrigin(new Point3D(x0,y0,Z));
 		seg.setEnd(new Point3D(x1,y1,Z));
 		set_StripSegment(seg);
+//                System.out.println("++++++++++++ strip origin, layer " + layer + " strip " + strip + " x " + x0 + " y0 " + y0 + " z0 " + Z);
+//                System.out.println("++++++++++++ strip end, layer " + layer + " strip " + strip + " x1 " + x1 + " y1 " + y1);
+                
+                /// for debugging purposes 
+                int Slayer = this.get_SuperLayer(layer);
+                double x0loc = FTTRKConstantsLoader.stripsXloc[Slayer][strip-1][0];
+                double x1loc = FTTRKConstantsLoader.stripsXloc[Slayer][strip-1][1];
+                double y0loc = FTTRKConstantsLoader.stripsYloc[Slayer][strip-1][0];
+                double y1loc = FTTRKConstantsLoader.stripsYloc[Slayer][strip-1][1];
+//                System.out.println("~~~~~~~~~~~ strip origin local frame " + " x " + x0loc + " y " + y0loc + " layer " + layer + " Slayer " + Slayer);
+//                System.out.println("~~~~~~~~~~~ strip endpoint local frame " + " x " + x1loc + " y " + y1loc + " layer " + layer + " Slayer " + Slayer);
+//                System.out.println("");
+//                
 	}
 	
 	
-	private int _Sector;      					        //	   sector[1...24]
-	private int _Layer;    	 					        //	   layer [1,...6]
-	private int _Strip;    	 				                //	   strip [1...256]
+	private int _Sector;      					        //	   sector[1]
+	private int _Layer;    	 					        //	   layer [1,..4]
+	private int _Strip;    	 				                //	   strip [1...768]
 
 	private double _Edep;      					        //	   Reconstructed time, for now it is the gemc time
 	private Line3D _StripSegment;						//         The geometry segment representing the strip position
@@ -57,7 +72,7 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
 	
 	/**
 	 * 
-	 * @return the sector (1...24)
+	 * @return the sector (1)
 	 */
 	public int get_Sector() {
 		return _Sector;
@@ -74,7 +89,7 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
 
 	/**
 	 * 
-	 * @return the layer (1...8)
+	 * @return the layer (1-4)
 	 */
 	public int get_Layer() {
 		return _Layer;
@@ -88,9 +103,17 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
 		this._Layer = _Layer;
 	}
 
+        	/**
+	 * 
+	 * @return the superlayer: 0 (for bottom modules, 1,3), 1 (for top modules, 2, 4)
+	 */
+	public int get_SuperLayer(int _Layer){
+		return (_Layer+1)%2;
+	}
+        
 	/**
 	 * 
-	 * @return the wire number (1...256)
+	 * @return the wire number (1...768)
 	 */
 	public int get_Strip() {
 		return _Strip;
@@ -146,22 +169,24 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
 		this._Id = _Id;
 	}
 
-
 	/**
 	 * 
-	 * @return region (1...4)
+	 * @return region (1-2)
 	 */
+        
         public int get_Region() {
             return (int) (this._Layer+1)/2;
          }
+        
         /**
          * 
          * @return superlayer 1 or 2 in region (1...4)
          */
+        /*
         public int get_RegionSlayer() {
             return (this._Layer+1)%2+1;
 	}
-
+        */
         public Line3D get_StripSegment() {
 		return _StripSegment;
 	}

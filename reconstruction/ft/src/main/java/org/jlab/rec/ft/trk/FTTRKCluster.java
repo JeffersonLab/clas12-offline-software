@@ -11,6 +11,7 @@ import org.jlab.geom.prim.Line3D;
 /**
  *
  * @author devita
+ * @author filippi
  */
     public class FTTRKCluster extends ArrayList<FTTRKHit> implements Comparable<FTTRKCluster>{
 
@@ -63,7 +64,7 @@ import org.jlab.geom.prim.Line3D;
 	
 	/**
 	 * 
-	 * @return the layer of the cluster (1...8)
+	 * @return the layer of the cluster (1...4)
 	 */
 	public int get_Layer() {
 		return _Layer;
@@ -71,7 +72,7 @@ import org.jlab.geom.prim.Line3D;
 	
 	/**
 	 * 
-	 * @param _Superlayer  the layer of the cluster (1...6)
+	 * @param set the layer of the cluster (1...4)
 	 */
 	public void set_Layer(int _Layer) {
 		this._Layer = _Layer;
@@ -93,21 +94,23 @@ import org.jlab.geom.prim.Line3D;
 		this._Id = _Id;
 	}
 
+       
 	/**
 	 * 
-	 * @return region (1...4)
+	 * @return region (1...4) // this is not useful
 	 */
-    public int get_Region() {
-     	return (int) (this._Layer+1)/2;
-     }
-    
-    /**
-     * 
-     * @return superlayer 1 or 2 in region (1...4)
-     */
-    public int get_RegionSlayer() {
-    	return (this._Layer+1)%2+1;
-	}
+        public int get_Region() {
+               return (int) (this._Layer+1)/2;
+        }
+//   
+//    /**
+//     * 
+//     * @return superlayer 1 or 2 in region (1...4)
+//     */
+//    public int get_RegionSlayer() {
+//    	return (this._Layer+1)%2+1;
+//	}
+//    
     
     /**
      * 
@@ -188,7 +191,9 @@ import org.jlab.geom.prim.Line3D;
                             double z2 = thehit.get_StripSegment().end().z();
 				
 			    totEn += strpEn;
-			    weightedStrp+= strpEn*(double)FTTRKConstantsLoader.stripsYloc[strpNb-1][0];	
+                            int layer = thehit.get_Layer();
+                            int Slayer = thehit.get_SuperLayer(layer);
+			    weightedStrp+= strpEn*(double)FTTRKConstantsLoader.stripsYloc[Slayer][strpNb-1][0];	
 			    weightedStripEndPoint1X+= strpEn*x1;
 			    weightedStripEndPoint1Y+= strpEn*y1;
 			    weightedStripEndPoint1Z+= strpEn*z1;
