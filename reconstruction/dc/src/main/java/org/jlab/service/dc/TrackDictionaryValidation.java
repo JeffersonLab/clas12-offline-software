@@ -70,6 +70,7 @@ public class TrackDictionaryValidation {
             DataEvent event = reader.getNextEvent();
             nevent++;
             if(nevent%10000 == 0) System.out.println("Analyzed " + nevent + " events, found " + newDictionary.size() + " roads");
+            DataBank runConfig       = null;
             DataBank recParticle     = null;
             DataBank recCalorimeter  = null;
             DataBank recScintillator = null;
@@ -77,9 +78,12 @@ public class TrackDictionaryValidation {
             DataBank recTrack        = null;
             DataBank tbtTrack        = null;
             DataBank ecalCluster     = null;
-            DataBank tbtHits = null;
+            DataBank tbtHits         = null;
             DataBank htccRec         = null;
             DataBank htccADC         = null;
+            if (event.hasBank("RUN::config")) {
+                runConfig = event.getBank("RUN::config");
+            }            
             if (event.hasBank("REC::Particle")) {
                 recParticle = event.getBank("REC::Particle");
             }
@@ -240,7 +244,7 @@ public class TrackDictionaryValidation {
 //                                                }
                                                 }
                                             if(htccPMTsMatched.size() != nhits) {
-                                                System.out.println("Mismatch in HTCC cluster size " + nhits +"/"+htccPMTsMatched.size()+"/"+htccPMTs.size() + " " + thetaCC + " " +  phiCC + " " +((phiCC+30)%60-30));
+                                                System.out.println("Mismatch in HTCC cluster size " +  runConfig.getInt("event",0) + " " + nhits +"/"+htccPMTsMatched.size()+"/"+htccPMTs.size() + " " + thetaCC + " " +  phiCC + " " +((phiCC+30)%60-30));
 //                                                for(int iPMT = 0; iPMT < htccPMTs.size(); iPMT++) {
 //                                                    int htccSector    = htccPMTs.get(iPMT)[0];
 //                                                    int htccLayer     = htccPMTs.get(iPMT)[1];
@@ -952,7 +956,7 @@ public class TrackDictionaryValidation {
 //                                                    runConfig.show();recCherenkov.show(); htccRec.show();htccADC.show();
 //                                                }
                                             }
-                                            if(htccPMTsMatched.size() != nhits) System.out.println("Mismatch in HTCC cluster size " + nhits +"/"+htccPMTsMatched.size()+"/"+htccPMTs.size() + " " + thetaCC + " " +  phiCC);
+                                            if(htccPMTsMatched.size() != nhits) System.out.println("Mismatch in HTCC cluster size " + runConfig.getInt("event",0) + " " + nhits +"/"+htccPMTsMatched.size()+"/"+htccPMTs.size() + " " + thetaCC + " " +  phiCC);
                                             htcc = this.htccMask(htccPMTsMatched);
                                         }
                                     }
