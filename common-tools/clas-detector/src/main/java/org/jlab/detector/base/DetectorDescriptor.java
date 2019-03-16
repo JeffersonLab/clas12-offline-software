@@ -51,7 +51,11 @@ public class DetectorDescriptor implements Comparable<DetectorDescriptor> {
     public int getSlot(){ return this.hw_SLOT;}
     public int getSector(){return this.dt_SECTOR;}
     public int getOrder(){ return this.dt_ORDER;}
- 
+
+    public void setSector(int sector){
+        this.dt_SECTOR=sector;
+    }
+    
     public void setOrder(int order){        
         this.dt_ORDER = order;
         if(this.dt_ORDER<0||this.dt_ORDER>3){
