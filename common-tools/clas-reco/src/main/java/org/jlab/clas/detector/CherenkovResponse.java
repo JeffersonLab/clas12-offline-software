@@ -112,6 +112,8 @@ public class CherenkovResponse extends DetectorResponse {
             if (parts.get(ipart).getCharge()==0) continue;
             if (parts.get(ipart).getTrackDetectorID()!=DetectorType.DC.getDetectorId()) continue;
             if (parts.get(ipart).countResponses(this.getDescriptor().getType()) > 0) continue;
+            if (parts.get(ipart).getTrackSector() > 0 && this.getSector() > 0 &&
+                parts.get(ipart).getTrackSector() != this.getSector()) continue;
             TrackResidual tr=getTrackResidual(parts.get(ipart));
             if (trBest == null || tr.compareTo(trBest)<0) {//getConeAngle() < trBest.getConeAngle()) {
                 if (tr.getDeltaTheta() < this.getDeltaTheta() &&
