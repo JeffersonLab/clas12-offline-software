@@ -6,7 +6,6 @@ import org.jlab.utils.groups.IndexedTable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.Adler32;
 import java.lang.Integer;
 import java.lang.Double;
 
@@ -32,6 +31,10 @@ public class CalibrationConstantsLoader {
 	public static Map<Integer, Double> FADC_MT_P2P_RES    = new HashMap<Integer,Double>  ();	// FADC mean time paddle resolution [ns]
 	public static Map<Integer, Double> FADC_MT_L2L_OFFSET = new HashMap<Integer,Double>  ();	// FADC mean time layer-by-layer offset [ns]
 	public static Map<Integer, Double> FADC_MT_L2L_RES    = new HashMap<Integer,Double>  ();	// FADC mean time layer resolution [ns]
+	public static Map<Integer, Double> TDC_MT_P2P_OFFSET  = new HashMap<Integer,Double>  ();	// TDC mean time paddle-to-paddle offset [ns]
+	public static Map<Integer, Double> TDC_MT_P2P_RES     = new HashMap<Integer,Double>  ();	// TDC mean time paddle resolution [ns]
+	public static Map<Integer, Double> TDC_MT_L2L_OFFSET  = new HashMap<Integer,Double>  ();	// TDC mean time layer-by-layer offset [ns]
+	public static Map<Integer, Double> TDC_MT_L2L_RES     = new HashMap<Integer,Double>  ();	// TDC mean time layer resolution [ns]
 	public static Map<Integer, Double> FADC_ATTEN_LENGTH  = new HashMap<Integer,Double>  ();	// FADC attenuation length [cm]
 	public static Map<Integer, double[]> TIMEWALK_L       = new HashMap<Integer,double[]>(); 	// Parameters for time-walk correction for L PMTs
 	public static Map<Integer, double[]> TIMEWALK_R       = new HashMap<Integer,double[]>(); 	// Parameters for time-walk correction for R PMTs
@@ -51,9 +54,10 @@ public class CalibrationConstantsLoader {
 	    IndexedTable  effvel     = manager.getConstants(runno, "/calibration/band/effective_velocity");
 	    IndexedTable  timejitter = manager.getConstants(runno, "/calibration/band/time_jitter");
 	    IndexedTable  attenuation= manager.getConstants(runno, "/calibration/band/attenuation_lengths");
-	    IndexedTable  paddleoffs = manager.getConstants(runno, "/calibration/band/paddle_offsets");
-	    IndexedTable  layeroffs	 = manager.getConstants(runno, "/calibration/band/layer_offsets");
-	    
+	    IndexedTable  paddleoffs_fadc = manager.getConstants(runno, "/calibration/band/paddle_offsets");
+	    IndexedTable  layeroffs_fadc  = manager.getConstants(runno, "/calibration/band/layer_offsets");
+	    IndexedTable  paddleoffs_tdc  = manager.getConstants(runno, "/calibration/band/paddle_offsets_tdc");
+	    IndexedTable  layeroffs_tdc   = manager.getConstants(runno, "/calibration/band/layer_offsets_tdc");	    
 	    
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Time offsets
@@ -135,15 +139,15 @@ public class CalibrationConstantsLoader {
 		}
 		
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// Paddle-to-paddle offsets
-		for(int i =0; i < paddleoffs.getRowCount(); i++) {
+		// Paddle-to-paddle offsets FADC
+		for(int i =0; i < paddleoffs_fadc.getRowCount(); i++) {
 			// Get sector, layer, component
-			int sector 	   = Integer.parseInt((String)paddleoffs.getValueAt(i, 0));    
-			int layer 	   = Integer.parseInt((String)paddleoffs.getValueAt(i, 1));    
-			int component  = Integer.parseInt((String)paddleoffs.getValueAt(i, 2)); 
+			int sector 	   = Integer.parseInt((String)paddleoffs_fadc.getValueAt(i, 0));    
+			int layer 	   = Integer.parseInt((String)paddleoffs_fadc.getValueAt(i, 1));    
+			int component  = Integer.parseInt((String)paddleoffs_fadc.getValueAt(i, 2)); 
 			// Get offset and resolution for FADC
-			double p2p_off_fadc	= paddleoffs.getDoubleValue("offset_fadc",  sector, layer, component);
-			double p2p_res_fadc	= paddleoffs.getDoubleValue("resolution_fadc",  sector, layer, component);
+			double p2p_off_fadc	= paddleoffs_fadc.getDoubleValue("offset_fadc",  sector, layer, component);
+			double p2p_res_fadc	= paddleoffs_fadc.getDoubleValue("resolution_fadc",  sector, layer, component);
 			// Put in maps 
 			int key = sector*100+layer*10+component;
 			FADC_MT_P2P_OFFSET.put(	Integer.valueOf(key),		Double.valueOf(p2p_off_fadc) );
@@ -152,20 +156,53 @@ public class CalibrationConstantsLoader {
 		}
 		
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// Layer-to-layer offsets
-		for(int i =0; i < layeroffs.getRowCount(); i++) {
+		// Layer-to-layer offsets FADC
+		for(int i =0; i < layeroffs_fadc.getRowCount(); i++) {
 			// Get sector, layer, component
-			int sector 	   = Integer.parseInt((String)layeroffs.getValueAt(i, 0));    
-			int layer 	   = Integer.parseInt((String)layeroffs.getValueAt(i, 1));    
-			int component  = Integer.parseInt((String)layeroffs.getValueAt(i, 2)); 
+			int sector 	   = Integer.parseInt((String)layeroffs_fadc.getValueAt(i, 0));    
+			int layer 	   = Integer.parseInt((String)layeroffs_fadc.getValueAt(i, 1));    
+			int component  = Integer.parseInt((String)layeroffs_fadc.getValueAt(i, 2)); 
 			// Get offset and resolution for FADC
-			double l2l_off_fadc	= layeroffs.getDoubleValue("offset_fadc",  sector, layer, component);
-			double l2l_res_fadc	= layeroffs.getDoubleValue("resolution_fadc",  sector, layer, component);
+			double l2l_off_fadc	= layeroffs_fadc.getDoubleValue("offset_fadc",  sector, layer, component);
+			double l2l_res_fadc	= layeroffs_fadc.getDoubleValue("resolution_fadc",  sector, layer, component);
 			// Put in maps
 			int key = sector*100+layer*10+component;
 			FADC_MT_L2L_OFFSET.put(	Integer.valueOf(key),		Double.valueOf(l2l_off_fadc) );
 			FADC_MT_L2L_RES.put(	Integer.valueOf(key),		Double.valueOf(l2l_res_fadc) );
 		}
+		
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// Paddle-to-paddle offsets
+		for(int i =0; i < paddleoffs_tdc.getRowCount(); i++) {
+			// Get sector, layer, component
+			int sector 	   = Integer.parseInt((String)paddleoffs_tdc.getValueAt(i, 0));    
+			int layer 	   = Integer.parseInt((String)paddleoffs_tdc.getValueAt(i, 1));    
+			int component  = Integer.parseInt((String)paddleoffs_tdc.getValueAt(i, 2)); 
+			// Get offset and resolution for FADC
+			double p2p_off_tdc	= paddleoffs_tdc.getDoubleValue("offset_tdc",  sector, layer, component);
+			double p2p_res_tdc	= paddleoffs_tdc.getDoubleValue("resolution_tdc",  sector, layer, component);
+			// Put in maps 
+			int key = sector*100+layer*10+component;
+			TDC_MT_P2P_OFFSET.put(	Integer.valueOf(key),		Double.valueOf(p2p_off_tdc) );
+			TDC_MT_P2P_RES.put(	 	Integer.valueOf(key),		Double.valueOf(p2p_res_tdc) );
+
+		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// Layer-to-layer offsets
+		for(int i =0; i < layeroffs_tdc.getRowCount(); i++) {
+			// Get sector, layer, component
+			int sector 	   = Integer.parseInt((String)layeroffs_tdc.getValueAt(i, 0));    
+			int layer 	   = Integer.parseInt((String)layeroffs_tdc.getValueAt(i, 1));    
+			int component  = Integer.parseInt((String)layeroffs_tdc.getValueAt(i, 2)); 
+			// Get offset and resolution for FADC
+			double l2l_off_tdc	= layeroffs_tdc.getDoubleValue("offset_tdc",  sector, layer, component);
+			double l2l_res_tdc	= layeroffs_tdc.getDoubleValue("resolution_tdc",  sector, layer, component);
+			// Put in maps
+			int key = sector*100+layer*10+component;
+			TDC_MT_L2L_OFFSET.put(	Integer.valueOf(key),		Double.valueOf(l2l_off_tdc) );
+			TDC_MT_L2L_RES.put(	Integer.valueOf(key),			Double.valueOf(l2l_res_tdc) );
+}
 		
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Attenuation constants

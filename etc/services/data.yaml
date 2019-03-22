@@ -27,6 +27,8 @@ services:
 #  - class: org.jlab.service.cnd.CNDEngine
   - class: org.jlab.service.cnd.CNDCalibrationEngine
     name: CND
+  - class: org.jlab.service.band.BANDEngine
+    name: BAND
   - class: org.jlab.service.htcc.HTCCReconstructionService
     name: HTCC
   - class: org.jlab.service.ltcc.LTCCEngine
@@ -53,15 +55,15 @@ configuration:
       torusXShift: "0.0"
       torusYShift: "0.0"
       torusZShift: "0.0"
-    DCHB:  
-# example of how to set variation and timestamp for a service, uncomment to use        
+    DCHB:
+# example of how to set variation and timestamp for a service, uncomment to use
 #      variation: default
-#      timestamp: 08/22/2018  
+#      timestamp: 08/22/2018
       useStartTime: "true"
       wireDistortionsFlag: "true"
       geomDBVariation: may_2018_engineers
     DCTB:
       geomDBVariation: may_2018_engineers
-      
+
 mime-types:
   - binary/data-hipo

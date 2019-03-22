@@ -73,10 +73,11 @@ public class BANDEngine extends ReconstructionEngine {
 				"/calibration/band/effective_velocity",
 				"/calibration/band/paddle_offsets",
 				"/calibration/band/layer_offsets",
+				"/calibration/band/paddle_offsets_tdc",
+				"/calibration/band/layer_offsets_tdc",
 				"/calibration/band/attenuation_lengths",
 				"/calibration/band/time_walk_corr_left",
-				"/calibration/band/time_walk_corr_right",
-				"/calibration/band/attenuation", 
+				"/calibration/band/time_walk_corr_right"
     		};
     
 			requireConstants(Arrays.asList(bandTables));

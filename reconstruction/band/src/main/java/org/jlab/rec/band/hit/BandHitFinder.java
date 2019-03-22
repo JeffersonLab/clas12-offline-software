@@ -145,11 +145,11 @@ public class BandHitFinder {
 					double time_walk_paramsL[] = CalibrationConstantsLoader.TIMEWALK_L.get( Integer.valueOf(barKey) );
 					double parA_L = time_walk_paramsL[0];
 					double parB_L = time_walk_paramsL[1];
-					tdcleft  = tdcleft  ;//- (ftdcleft  + parA_L/Math.sqrt(adcleft ) + parB_L);
+					tdcleft  = tdcleft - (parA_L/Math.sqrt(adcleft ) + parB_L);
 					double time_walk_paramsR[] = CalibrationConstantsLoader.TIMEWALK_R.get( Integer.valueOf(barKey) );
 					double parA_R = time_walk_paramsR[0];
 					double parB_R = time_walk_paramsR[1];
-					tdcright = tdcright ;//- (ftdcright + parA_R/Math.sqrt(adcright) + parB_R);
+					tdcright = tdcright - (parA_R/Math.sqrt(adcright) + parB_R);
 					// -----------------------------------------------------------------------------------------------
 					
 					// Form the L-R time
@@ -170,9 +170,9 @@ public class BandHitFinder {
 					// Form mean time
 					double mtime_tdc =
 							( tdcleft + tdcright )/2. 
-							  - Math.abs(CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) ))/2. ;
-							  //- CalibrationConstantsLoader.TDC_MT_P2P_OFFSET.get(Integer.valueOf(barKey) ) 
-							  //- CalibrationConstantsLoader.TDC_MT_L2L_OFFSET.get(Integer.valueOf(barKey) ) ;
+							  - Math.abs(CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) ))/2. 
+							  - CalibrationConstantsLoader.TDC_MT_P2P_OFFSET.get(Integer.valueOf(barKey) ) 
+							  - CalibrationConstantsLoader.TDC_MT_L2L_OFFSET.get(Integer.valueOf(barKey) ) ;
 					double mtime_fadc = 
 							( ftdcleft + ftdcright )/2.
 							 - Math.abs(CalibrationConstantsLoader.FADC_T_OFFSET.get( Integer.valueOf(barKey) ))/2.
@@ -257,6 +257,7 @@ public class BandHitFinder {
  		 	Currently this function just searches if veto layer hit in the coincidence list. 
 			Otherwise, returns 'betterHits'. In the future we'd like to do some more sophisticated
 			neutral candidate searching.
+			Cut on Layer 6 is removed for now to have cosmics and laser data in the output as well.
 		 */
 
 
@@ -264,12 +265,12 @@ public class BandHitFinder {
 
 		for( int hit = 0 ; hit < coincidences.size() ; hit++){
 			BandHit thisHit = coincidences.get(hit);
-			if( thisHit.GetLayer() == 6 ){
-				return new ArrayList<BandHit>();
-			}
-			else{
+			//if( thisHit.GetLayer() == 6 ){
+			//	return new ArrayList<BandHit>();
+			//}
+			//else{
 				betterHits.add( thisHit );
-			}
+			//}
 
 		}
 		return betterHits;
