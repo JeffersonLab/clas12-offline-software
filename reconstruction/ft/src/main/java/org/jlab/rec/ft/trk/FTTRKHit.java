@@ -26,6 +26,7 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
 	 * @param Edep (for gemc output without digitization)
 	 */
 	public FTTRKHit(int sector, int layer, int strip, double Edep) {
+                int debug = FTTRKReconstruction.debugMode;
 		this._Sector = sector;
 		this._Layer = layer;  
 		this._Strip = strip;
@@ -41,19 +42,21 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
 		seg.setOrigin(new Point3D(x0,y0,Z));
 		seg.setEnd(new Point3D(x1,y1,Z));
 		set_StripSegment(seg);
-//                System.out.println("++++++++++++ strip origin, layer " + layer + " strip " + strip + " x " + x0 + " y0 " + y0 + " z0 " + Z);
-//                System.out.println("++++++++++++ strip end, layer " + layer + " strip " + strip + " x1 " + x1 + " y1 " + y1);
-                
+                if(debug>=1){
+                    System.out.println("++++++++++++ strip origin, layer " + layer + " strip " + strip + " x " + x0 + " y0 " + y0 + " z0 " + Z);
+                    System.out.println("++++++++++++ strip end, layer " + layer + " strip " + strip + " x1 " + x1 + " y1 " + y1);
+                }
                 /// for debugging purposes 
                 int Slayer = this.get_SuperLayer(layer);
                 double x0loc = FTTRKConstantsLoader.stripsXloc[Slayer][strip-1][0];
                 double x1loc = FTTRKConstantsLoader.stripsXloc[Slayer][strip-1][1];
                 double y0loc = FTTRKConstantsLoader.stripsYloc[Slayer][strip-1][0];
                 double y1loc = FTTRKConstantsLoader.stripsYloc[Slayer][strip-1][1];
-//                System.out.println("~~~~~~~~~~~ strip origin local frame " + " x " + x0loc + " y " + y0loc + " layer " + layer + " Slayer " + Slayer);
-//                System.out.println("~~~~~~~~~~~ strip endpoint local frame " + " x " + x1loc + " y " + y1loc + " layer " + layer + " Slayer " + Slayer);
-//                System.out.println("");
-//                
+                if(debug>=1){
+                    System.out.println("~~~~~~~~~~~ strip origin local frame " + " x " + x0loc + " y " + y0loc + " layer " + layer + " Slayer " + Slayer);
+                    System.out.println("~~~~~~~~~~~ strip endpoint local frame " + " x " + x1loc + " y " + y1loc + " layer " + layer + " Slayer " + Slayer);
+                    System.out.println("");
+                }
 	}
 	
 	
@@ -107,7 +110,7 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
 	 * 
 	 * @return the superlayer: 0 (for bottom modules, 1,3), 1 (for top modules, 2, 4)
 	 */
-	public int get_SuperLayer(int _Layer){
+        public int get_SuperLayer(int _Layer){
 		return (_Layer+1)%2;
 	}
         
@@ -178,15 +181,6 @@ public class FTTRKHit implements Comparable<FTTRKHit>{
             return (int) (this._Layer+1)/2;
          }
         
-        /**
-         * 
-         * @return superlayer 1 or 2 in region (1...4)
-         */
-        /*
-        public int get_RegionSlayer() {
-            return (this._Layer+1)%2+1;
-	}
-        */
         public Line3D get_StripSegment() {
 		return _StripSegment;
 	}

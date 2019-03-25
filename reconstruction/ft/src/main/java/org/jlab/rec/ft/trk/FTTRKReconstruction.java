@@ -19,7 +19,7 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class FTTRKReconstruction {
 
-    public int debugMode = 0;
+    public static int debugMode = 0;
 
     public FTTRKReconstruction() {
     }
@@ -47,23 +47,17 @@ public class FTTRKReconstruction {
 
     public ArrayList<FTTRKCluster> findClusters(List<FTTRKHit> hits)
     {
+        int debugMode=FTTRKReconstruction.debugMode;
     	// cluster finding algorithm
 	// the loop is done over sectors 
 
 	int Nlayers = FTTRKConstantsLoader.Nlayers;
 	int Nstrips = FTTRKConstantsLoader.Nstrips;
-        /*
-        int logStripsBottom[] = FTTRKConstantsLoader.longStripsDown;
-        int longStripsUp[] =  FTTRKConstantsLoader.longStripsUp;
-        int shortStripsLeft[] = FTTRKConstantsLoader.shortStripsLeft;
-        int shortStripsRight[] = FTTRKConstantsLoader.shortStripsRight;
-        */
-	boolean[][] checked;
+ 	boolean[][] checked;
 	FTTRKHit[][] HitArray;        
         ArrayList<FTTRKCluster> clusters = new ArrayList<FTTRKCluster>();
-
-        // 
-        
+        FTTRKHit[] clusterHitAtBorder = new FTTRKHit[3];
+        int[] limitingStrip = {127, 383, 639};  // strip numbering from 0 to 767
         
         // a boolean array to avoid double counting at the numbering discontinuities
         checked = new boolean[Nstrips][Nlayers] ;
@@ -76,196 +70,108 @@ public class FTTRKReconstruction {
         // a Hit Array is used to identify clusters
         HitArray = new FTTRKHit[Nstrips][Nlayers] ;
 
-
         // initializing non-zero Hit Array entries
         // fill with valid hits
         for(FTTRKHit hit : hits) {
-
             if(hit.get_Strip()==-1) continue;
-
             int w = hit.get_Strip();
             int l = hit.get_Layer();
 
-            if(w>0 && w<=Nstrips)	{						
+            if(w>0 && w<=Nstrips){						
                     HitArray[w-1][l-1] = hit;
                     if(debugMode>=1) System.out.println(w + " " + l + " " + HitArray[w-1][l-1].printInfo());
             }
 
         }
-        int cid = 1;  // cluster id, will increment with each new good cluster
-        int cidLim = 1;
+        int cid = 0;  // cluster id, will increment with each new good cluster
 
-        // for each layer and sector, a loop over the strips
-        // is done to define clusters in that module's layer
+        // for each layer and sector, loop over the strips:
+        // once one is selected for the first time, loop over the remainder
         // clusters are delimited by strips with no hits
         
-        // divide the layer geometry in two parts: U part with contiguous numbering, I part is the insert on the other side coresponding to the hole section
-        int nUStrips = 2*FTTRKConstantsLoader.Longstrips + FTTRKConstantsLoader.SideHalfstrips;
-        int nIStrips = FTTRKConstantsLoader.SideHalfstrips;
-        
-        for(int il=0; il<Nlayers; il++) {		
-//            int is  = 0;  // strip index in the loop
-            // looping over strip regions. Start with U strips, then I strips, then check contiguity for extremal strips
-            boolean isUstripAtLimit = false, isIstripAtLimit = false;
-            for(int is = 0; is < nUStrips; is++){
-                // iss: physical strip number (not consecutive)
-                // is: strip ordering number
-                // loop on U stips (1-384 + 641-768)
-                int iss = FTTRKConstantsLoader.UStrips[is];
-                if(HitArray[iss][il] != null && !checked[is][il]){
-                    // how many strips in the cluster
-                    int nst = 1;
-                    // if there is a strip start to store it as a cluster seed
-                    ArrayList<FTTRKHit> clusterHits = new ArrayList<FTTRKHit>();
-                    
-                    // adding all hits in this and all the subsequent
-                    // strip until there's a strip with no hit
-                    int issnext = iss+1;
-                    int isnext = is+1;
-                    // check if the next strip is hit (but only if it's not the last one on the layer)
-                    while(HitArray[issnext][il] != null  && issnext<Nstrips) {
-                        nst++;
-                        checked[issnext][il]=true;
-                        clusterHits.add(new FTTRKHit(HitArray[issnext][il].get_Sector(),HitArray[issnext][il].get_Layer(),
-                                HitArray[issnext][il].get_Strip(),HitArray[issnext][il].get_Edep()));
-                        // check if the hit strip is at the border of U/I regions
-                        if((issnext==FTTRKConstantsLoader.Longstrips-1) || 
-                                (issnext==(FTTRKConstantsLoader.Longstrips+FTTRKConstantsLoader.SideHalfstrips-1))) 
-                            isUstripAtLimit=true;
-                        if(debugMode>=1) System.out.println(issnext);
-                        issnext++; 
-                        isnext++;
-//                        if(issnext == )
-//                        if(issnext!=Nstrips){issnext++;}else{System.out.println("dove vai ? " + is + " " + iss); break;}
-                    }
-                    // define new cluster
-                    if(isUstripAtLimit){
-                        FTTRKCluster clusterAtLimit = new FTTRKCluster(1, il+1, cidLim++); 
-                    }else{
-                        // add hits to the cluster
-                        FTTRKCluster this_cluster = new FTTRKCluster(1, il+1, cid++);  
-                        this_cluster.addAll(clusterHits);
-                        this_cluster.calc_CentroidParams();
-                        //make arraylist
-                        clusters.add(this_cluster);
-                        if(debugMode>=1) System.out.println((iss-1) + " cluster identifier in FTTRKReco, UStrip section " + cid + " layer " + il);
-                    }        
-                }   
-            }
-            
-            /* 
-            // loop on Istrips (half strips on one side of the hole: 385-640)
-            for(int is=0; is < nIStrips; is++){
-            int iss = FTTRKConstantsLoader.IStrips[is];
-                if(HitArray[iss][il] != null && !checked[is][il]){
-                    // how many strips in the cluster
-                    int nst = 1;
-                    // if there is a strip start to store it as a cluster seed
-                    ArrayList<FTTRKHit> clusterHits = new ArrayList<FTTRKHit>();
-                    
-                    // adding all hits in this and all the subsequent
-                    // strip until there's a strip with no hit
-                    int issnext = iss+1;
-                    int isnext = is+1;
-                    // check if the next strip is hit (but only if it's not the last one on the layer)
-                    while(HitArray[issnext][il] != null  && isnext<nIStrips) {
-                        nst++;
-                        checked[issnext][il]=true;
-                        clusterHits.add(new FTTRKHit(HitArray[issnext][il].get_Sector(),HitArray[issnext][il].get_Layer(),
-                                HitArray[issnext][il].get_Strip(),HitArray[issnext][il].get_Edep()));
-                        // check if the hit strip is at the border of I regions
-                        if((issnext==FTTRKConstantsLoader.Longstrips+FTTRKConstantsLoader.SideHalfstrips) || 
-                                    (issnext==(FTTRKConstantsLoader.Longstrips+2*FTTRKConstantsLoader.SideHalfstrips-1)))
-                                isIstripAtLimit=true;
-                        issnext++; 
-                        isnext++;
-                  // define new cluster
-                    if(isIstripAtLimit){
-                        FTTRKCluster clusterAtLimit = new FTTRKCluster(1, il+1, cidLim++); 
-                    }else{
-                        // add hits to the cluster
-                        FTTRKCluster this_cluster = new FTTRKCluster(1, il+1, cid++);  
-                        this_cluster.addAll(clusterHits);
-                        this_cluster.calc_CentroidParams();
-                        //make arraylist
-                        clusters.add(this_cluster);
-                        System.out.println((iss-1) + " cluster identifier in FTTRKReco , IStrip section" + cid);
-                    }        
-                }   
-            }
-            */
-            // if there is any extremal strip check whether there is a contiguity
-            if(isUstripAtLimit){;  // do something - check if there is a limiting strip and join it to the next cluster (if any)
-            }       
-            if(isIstripAtLimit){;   // do something
-            }
-        
-         
- 
-/*  old stuff to be deleted      
-            // looping over all strips
-            while(is<nstrip) {
-                // if there's a hit, it's a cluster candidate
-                if(HitArray[is][il] != null&&!checked[is][il])
-                {
-                    // vector of hits in the cluster candidate
-                    ArrayList<FTTRKHit> clusterHits = new ArrayList<FTTRKHit>();
-
-                    // adding all hits in this and all the subsequent
-                    // strip until there's a strip with no hit
-                    // Strip 1 and 513 needs a particular loop
-                    // strips in bottom layer and in top layer have different numberings according to regions, beware of contiguity
-                    // between different regions
-   
-                    nstripRight
-                    if(il==1 || il==3){
-                        // all strips
-                        while(HitArray[is][il] != null  && is<nstrip) {
-                            checked[is][il]=true;
-                            clusterHits.add(new FTTRKHit(HitArray[is][il].get_Sector(),HitArray[is][il].get_Layer(),HitArray[is][il].get_Strip(),HitArray[is][il].get_Edep()));
-                            if (is!=nstrip) is++; //Since strip 512 is on a edge
-                            else break;
-                        }        
-                        // if there is a limiting strip check on the other side
-
-                        
-                    }else if(il==2 || il ==4){  
-                    }
-                    
-*/                    
-                    /*
-                    if (is==0){
-                        int js=832;
-                        while(HitArray[js][il] != null  && js<nstrip) {
-                            checked[js][il]=true;
-                            clusterHits.add(new FTTRKHit(HitArray[js][il].get_Sector(),HitArray[js][il].get_Layer(),HitArray[js][il].get_Strip(),HitArray[js][il].get_Edep()));
-                            js++;
+        for(int il=0; il<Nlayers; il++) {
+            // loop on first strip		
+            for(int is = 0; is < Nstrips; is++){
+                ArrayList<FTTRKHit> clusterHits = new ArrayList<FTTRKHit>();
+                int nst=0;
+                if(HitArray[is][il] != null && !checked[is][il]){
+                    // select one fired strip 
+                    checked[is][il]=true;
+                    // if it's fired it is the seed of the cluster (which may be formed by one stip only
+                    clusterHits.add(new FTTRKHit(HitArray[is][il].get_Sector(),HitArray[is][il].get_Layer(),
+                                HitArray[is][il].get_Strip(),HitArray[is][il].get_Edep()));
+                    if(debugMode>=1) System.out.println("hitArray " + HitArray[is][il].printInfo());
+                    // now check if there are tother strips to be added to the cluster
+                    int isnext = is;
+                    // is it a limiting strip?
+                    if(is==limitingStrip[0]){ // strip 127: next one can be 384 or 128
+                        if(HitArray[limitingStrip[0]+1][il] != null){
+                            isnext++;   
+                        }else if(HitArray[limitingStrip[1]+1][il] != null){
+                            isnext = limitingStrip[1]+1;
+                        }
+                        while(HitArray[isnext][il] != null && isnext<Nstrips){
+                            nst++;
+                            checked[isnext][il]=true;
+                            clusterHits.add(new FTTRKHit(HitArray[isnext][il].get_Sector(),HitArray[isnext][il].get_Layer(),
+                                HitArray[isnext][il].get_Strip(),HitArray[isnext][il].get_Edep()));   
+                            isnext++;
+                        }                        
+                    }else if(is==limitingStrip[1]){
+                        isnext = limitingStrip[2]+1;
+                        while(HitArray[isnext][il] != null && isnext<Nstrips){
+                            nst++;
+                            checked[isnext][il]=true;
+                            clusterHits.add(new FTTRKHit(HitArray[isnext][il].get_Sector(),HitArray[isnext][il].get_Layer(),
+                                HitArray[isnext][il].get_Strip(),HitArray[isnext][il].get_Edep()));   
+                            isnext++;
+                        }
+                    }else if(is==limitingStrip[2]){ // strip 383||639: next strip is 640
+                        isnext = limitingStrip[2]+1;
+                        while(HitArray[isnext][il] != null && isnext<Nstrips){
+                            nst++;
+                            checked[isnext][il]=true;
+                            clusterHits.add(new FTTRKHit(HitArray[isnext][il].get_Sector(),HitArray[isnext][il].get_Layer(),
+                                HitArray[isnext][il].get_Strip(),HitArray[isnext][il].get_Edep()));   
+                            isnext++;
+                        }
+                    }else{ 
+                    // the first strip is not at the border of any zone, check is other strips can be added to the cluster
+                        while(HitArray[isnext][il] != null && isnext<Nstrips){
+                            nst++;
+                            checked[isnext][il]=true;
+                            clusterHits.add(new FTTRKHit(HitArray[isnext][il].get_Sector(),HitArray[isnext][il].get_Layer(),
+                                HitArray[isnext][il].get_Strip(),HitArray[isnext][il].get_Edep()));
+                            // is the next strip at the borders?
+                            if(isnext==limitingStrip[0] && !checked[isnext][il]){
+                                if(HitArray[limitingStrip[0]+1] != null){
+                                    isnext++;
+                                }else if(HitArray[limitingStrip[1]+1] != null && !checked[isnext][il]){
+                                    isnext = limitingStrip[1]+1;
+                                }
+                            }else if(isnext==limitingStrip[1]){
+                                isnext = limitingStrip[2]+1; 
+                            }else{  // covers the case of limitingStrip[2]
+                                isnext++;
+                            }
                         }
                     }
-
-                    if (is==512){
-                        int sj=320;
-                        while(HitArray[sj][il] != null  && sj<512) {
-                            checked[sj][il]=true;
-                            clusterHits.add(new FTTRKHit(HitArray[sj][il].get_Sector(),HitArray[sj][il].get_Layer(),HitArray[sj][il].get_Strip(),HitArray[sj][il].get_Edep()));
-                            sj++;
-                        }
-                    }
-*/
-                    //For all strips
+                    FTTRKCluster this_cluster = new FTTRKCluster(1, il+1, cid++);
+                    this_cluster.addAll(clusterHits);
+                    this_cluster.calc_CentroidParams();
+                    clusters.add(this_cluster);
+                    if(debugMode>=1) System.out.println("cluster number " + cid + " size " + clusterHits.size() + " layer " + this_cluster.get_Layer() + 
+                            " " + this_cluster.get_MaxStrip() + "-" + this_cluster.get_MinStrip() + " " + this_cluster.get_Centroid()) ;
                     
-
-             // if no hits, check for next wire coordinate
-//                is++;
-        
-
+                } // check on seed                   
+            }   // end loop on strips
         }   // end loop on layers
         return clusters;
-        
     }
     
     public ArrayList<FTTRKCross> findCrosses(List<FTTRKCluster> clusters) {
 
+        int debugMode=FTTRKReconstruction.debugMode;
         // first separate the segments according to layers
         ArrayList<FTTRKCluster> allinnerlayrclus = new ArrayList<FTTRKCluster>();
         ArrayList<FTTRKCluster> allouterlayrclus = new ArrayList<FTTRKCluster>();
@@ -300,8 +206,12 @@ public class FTTRKReconstruction {
 
                     this_cross.set_CrossParams();
                     //make arraylist
-                    crosses.add(this_cross);
-                    if(debugMode>=1) System.out.println(this_cross.printInfo() + " " + crosses.size());
+                    // check if the cross center is in a physical position
+                    double radXCenter = Math.sqrt(this_cross.get_Point().x()*this_cross.get_Point().x() + 
+                            this_cross.get_Point().y()*this_cross.get_Point().y());
+                    if(debugMode>=1) System.out.println("cross radius =============" + radXCenter);
+                    if(radXCenter > FTTRKConstantsLoader.InnerHole && radXCenter < FTTRKConstantsLoader.Rmax) crosses.add(this_cross);
+                    if(debugMode>=1) System.out.println("cross info :" + this_cross.printInfo() + " " + crosses.size());
                 }
             }
         }
@@ -357,6 +267,7 @@ public class FTTRKReconstruction {
             event.appendBanks(bankHits);
         }
         // cluster bank
+        if(debugMode>=1) System.out.println("cluster bank size " + clusters.size());
         if(clusters.size()!=0){
             DataBank bankCluster = event.createBank("FTTRK::clusters", clusters.size());    
             if(bankCluster==null){
@@ -376,6 +287,7 @@ public class FTTRKReconstruction {
             event.appendBanks(bankCluster);
         }
         // cross bank
+        if(debugMode>=1) System.out.println("crosses bank size " + crosses.size());
         if(crosses.size()!=0){        
             DataBank bankCross = event.createBank("FTTRK::crosses", crosses.size());
             if(bankCross==null){

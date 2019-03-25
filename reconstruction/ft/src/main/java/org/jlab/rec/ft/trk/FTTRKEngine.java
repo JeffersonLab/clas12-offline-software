@@ -120,9 +120,14 @@ public class FTTRKEngine extends ReconstructionEngine {
 
     
     public static void main (String arg[]) {
+        int debug = FTTRKReconstruction.debugMode;
 	FTTRKEngine trk = new FTTRKEngine();
 	trk.init();
-	String input =  "/Users/devita/Work/clas12/simulations/clas12Tags/4.3.1/out.hipo";
+//	String input =  "/disk2/Clas/ForwardTrackerReconstruction/DATA/out.hipo";
+//        String input =  "/disk2/Clas/ForwardTrackerReconstruction/DATA/out_allTracks.hipo";
+        String input =  "/Users/devita/Work/clas12/simulations/clas12Tags/4.3.1/out.hipo";
+//        String input =  "/home/filippi/clas/ForwardTracker/out_allTracks.hipo";
+//        String input =  "/home/filippi/clas/ForwardTracker/out.hipo";
 	HipoDataSource  reader = new HipoDataSource();
 	reader.open(input);
 		
@@ -135,31 +140,39 @@ public class FTTRKEngine extends ReconstructionEngine {
         H1F h3 = new H1F("Time",100, -2, 2);         
         h3.setOptStat(Integer.parseInt("1111")); h3.setTitleX("Time"); h3.setTitleY("Counts");
 
-        H2F hHitL1 = new H2F("hHitL1","cross y vs x detector 1", 100, -13., 13., 100, -13., 13.);
-        H2F hHitL2 = new H2F("hHitL2","cross y vs x detector 2", 100, -13., 13., 100, -13., 13.);
-        H2F hHitMatch = new H2F("hHitL2","cross y vs x match", 100, -13., 13., 100, -13., 13.);
+        float lim = 15;
+        H2F hHitL1 = new H2F("hHitL1","cross y vs x detector 1", 100, -lim, lim, 100, -lim, lim);
+        H2F hHitL2 = new H2F("hHitL2","cross y vs x detector 2", 100, -lim, lim, 100, -lim, lim);
+        H2F hHitMatch = new H2F("hHitL2","cross y vs x match", 100, -lim, lim, 100, -lim, lim);
 //        H2F hHitL3 = new H2F("hHitL3","hit y vs x layer 3", 100, -13., 13., 100, -13., 13.);
 //        H2F hHitL4 = new H2F("hHitL4","hit y vs x layer 4", 100, -13., 13., 100, -13., 13.);
         hHitL1.setTitleX("x cross detector 1"); hHitL1.setTitleY("y cross detector 1");
-        hHitL2.setTitleX("x cross detector 2"); hHitL1.setTitleY("y cross detector 2");
+        hHitL2.setTitleX("x cross detector 2"); hHitL2.setTitleY("y cross detector 2");
         hHitMatch.setTitleX("x cross detector match"); hHitMatch.setTitleY("y cross detector match");                
-        DataLine segment[] = new DataLine[FTTRKConstantsLoader.Nstrips];
- 
+        DataLine segment[] = new DataLine[FTTRKConstantsLoader.Nstrips*4];
+
         JFrame frameClusters = new JFrame("FT strips in clusters");
         frameClusters.setSize(800,800);
         EmbeddedCanvas canvasCl = new EmbeddedCanvas();
+        JFrame frameClustersSingleLay = new JFrame("FT strips in clusters single layers");
+        frameClustersSingleLay.setSize(800,800);
+        EmbeddedCanvas canvasClSingleLay = new EmbeddedCanvas();
+        canvasClSingleLay.divide(2,2);
         
 //        hHitL3.setTitleX("x hit layer3"); hHitL1.setTitleY("y hit layer 3");
 //        hHitL4.setTitleX("x hit layer4"); hHitL1.setTitleY("y hit layer 4");
         
-        int nc1 = 0, nc2 = 0, ncmatch = 0, nStripsInClusters = 0;   
-//        while(reader.hasEvent()){
-//        int nev1 = 1; int nev2 = nev1+1; for(int nev=nev1; nev<nev2; nev++){
-        int nev1 = 1; int nev2 = nev1+1; for(int nev=nev1; nev<nev2; nev++){    
+        int nc1 = 0, nc2 = 0, ncmatch = 0;   
+        while(reader.hasEvent()){
+//        int nev1 = 0; int nev2 = nev1+1; for(int nev=nev1; nev<nev2; nev++){   // 1 event
+//        int nev1 = 1; int nev2 = nev1+1; for(int nev=nev1; nev<50; nev++){    
+//        int nev1 = 1; int nev2 = nev1+500; for(int nev=nev1; nev<nev2; nev++){  
             DataEvent event = (DataEvent) reader.getNextEvent();
+//            if(nev!=49) continue;
             
             ArrayList<FTTRKCluster> clusters = new ArrayList();
             clusters = trk.processDataEventAndGetClusters(event);
+            int nStripsInClusters = 0;
 
             DetectorEvent detectorEvent = DetectorData.readDetectorEvent(event);
             PhysicsEvent            gen = detectorEvent.getGeneratedEvent();
@@ -172,57 +185,50 @@ public class FTTRKEngine extends ReconstructionEngine {
                     float energy = bank.getFloat("energy",i);
                     float time   = bank.getFloat("time",i);
                     
-                    System.out.println("layer " + layer + " strip " + comp);
+                    if(debug>=1) System.out.println("layer " + layer + " strip " + comp);
                     h1.fill(comp,layer);
                     h2.fill(energy);
                     h3.fill(time);
             	}
             }            
           
+            
             // iterate along the cluster list for every event
+            if(debug>=1) System.out.println("clusters size --- " + clusters.size());
+ //           DataLine segment[] = new DataLine[clusters.size()];
             if(clusters.size()!=0){
                 // get one cluster and iterate over all the strips contained in it
+                canvasCl.cd(1); canvasCl.draw(hHitL1);
+                for(int l=0; l<4; l++){
+                    canvasClSingleLay.cd(l); 
+                    if(l==2 || l==3){canvasClSingleLay.draw(hHitL2);}else{canvasClSingleLay.draw(hHitL1);}
+                }
                 for(int i = 0; i < clusters.size(); i++){
                     // get a single cluster and count its strip, extract the information on extremal points of the segment
                     FTTRKCluster singleCluster = clusters.get(i);
                     int nst = singleCluster.size();
+                    if(debug>=1) System.out.println("nst - " + nst);
                     for(int j=0; j<nst; j++){
                         Line3D seg = singleCluster.get(j).get_StripSegment();
-                        System.out.println("total number of clusters " + clusters.size() + " - number of cluster " + i + " cluster size " + 
+                        if(debug>=1) System.out.println("total number of clusters " + clusters.size() + " - number of cluster " + i + " cluster size " + 
                                 singleCluster.size() + " strip# " + j + " clusterId " + singleCluster.get_Id() + 
-                                " layer " + singleCluster.get_Layer() + " seed strip number " + singleCluster.get_SeedStrip() + " segment -------------- " + seg.origin().x() + " " + seg.origin().y());
+                                " layer " + singleCluster.get_Layer() + " seed strip number " + singleCluster.get_SeedStrip() + 
+                                " segment -------------- " + seg.origin().x() + " " + seg.origin().y() + " " + seg.end().x() + " " + seg.end().y());
                         segment[nStripsInClusters] = new DataLine(seg.origin().x(), seg.origin().y(), seg.end().x(), seg.end().y());
-                        canvasCl.draw(hHitL1);
+                        int lay = singleCluster.get_Layer();
+                        segment[nStripsInClusters].setLineColor(lay);
+ //                       canvasCl.cd(1); canvasCl.draw(hHitL1);
+                        if(debug>=1) System.out.println("nStripsInCluster " + nStripsInClusters);
                         canvasCl.draw(segment[nStripsInClusters]);
+                        canvasClSingleLay.cd(lay-1); canvasClSingleLay.draw(segment[nStripsInClusters]);
+                        
                         nStripsInClusters++;
                     }
                 }
             }
-/*            
-            System.out.println("is there the cluster bank? " + event.hasBank("FTTRK::clusters"));
-            if(event.hasBank("FTTRK::clusters")){
-                DataBank cluBank = event.getBank("FTTRK::clusters");
-                int nrows = cluBank.rows();
-                Line3D seg;
-                for(int i=0; i<nrows; i++){
-                    short size = cluBank.getShort("size",i);
-                    System.out.println("size" + size);
-                    if(size!=0){;
-                        nStripsInClusters++;
-                        byte layer = cluBank.getByte("layer", i);
-                        short clId = cluBank.getShort("id", i);
-                        float cent = cluBank.getFloat("centroid", i);
-                        FTTRKCluster cluster = new FTTRKCluster(1, layer, clId);
-                        cluster.set
-                        System.out.println(cluster.printInfo());
-                        seg = cluster.get_StripSegment();
-                        segment[i] = new DataLine(seg.origin().x(), seg.origin().y(), seg.end().x(), seg.end().y());
-                        System.out.println("-------------- clusterId " + clId + " centroid " + cent);
-                    }
-                }
-            }
-  */          
-            System.out.println("is there the crosses bank? " + event.hasBank("FTTRK::crosses"));
+
+        
+            if(debug>=1) System.out.println("is there the crosses bank? " + event.hasBank("FTTRK::crosses"));
             if(event.hasBank("FTTRK::crosses")){
                 DataBank crossBank = event.getBank("FTTRK::crosses");
                 int nrows = crossBank.rows();
@@ -236,7 +242,7 @@ public class FTTRKEngine extends ReconstructionEngine {
                     det[i] = crossBank.getByte("detector",i);
                     x[i] = crossBank.getFloat("x", i);
                     y[i] = crossBank.getFloat("y", i);
-                    System.out.println("detector " + det[i] + " x " + x[i] + " y " + y[i]);
+                    if(debug>=2) System.out.println("number of crosses " + nrows + " detector " + det[i] + " x " + x[i] + " y " + y[i]);
                     
                     if(det[i]==1) {hHitL1.fill(x[i], y[i]); nc1++;}
                     if(det[i]==2) {hHitL2.fill(x[i], y[i]); nc2++;}
@@ -244,7 +250,7 @@ public class FTTRKEngine extends ReconstructionEngine {
                 /// loop on all crosses on detector 1 and 2 and find the oone with better matching
                 double minDistance = 1000;
                 int iBest = -1, jBest = -1;
-                System.out.println("number of rows " + nrows);
+                if(debug>=1) System.out.println("number of rows " + nrows);
                 if(nrows>1){
                     for(int i=0; i<nrows; i++){
                         for(int j=nrows-1; j>i; j--){
@@ -257,8 +263,9 @@ public class FTTRKEngine extends ReconstructionEngine {
                             }
                         }
                     }
-                    System.out.println("minimum distance " + minDistance);
+                    if(debug>=1) System.out.println("minimum distance " + minDistance);
                     double distTolerance = 0.1;
+                    distTolerance = 1000;
                     if(minDistance < distTolerance) {
                             hHitMatch.fill((x[iBest]+x[jBest])/2., (y[iBest]+y[jBest])/2.);
                             ncmatch++;
@@ -266,8 +273,9 @@ public class FTTRKEngine extends ReconstructionEngine {
                 }
              }    
         }
-        System.out.println("number of found crosses: module 1: " + nc1 + " module 2: " + nc2 + " matching crosses " + ncmatch);
+    
         
+        if(debug>=1) System.out.println("number of found crosses: module 1: " + nc1 + " module 2: " + nc2 + " matching crosses " + ncmatch);
         
         JFrame frame = new JFrame("FT Reconstruction");
         frame.setSize(800,800);
@@ -287,8 +295,6 @@ public class FTTRKEngine extends ReconstructionEngine {
         canvas2.cd(0); canvas2.draw(hHitL1);
         canvas2.cd(1); canvas2.draw(hHitL2);
         canvas2.cd(2); canvas2.draw(hHitMatch);      
-//        for(int i=0; i<nStripsInClusters; i++){canvas2.draw(segment[i]);}
-//      canvas2.cd(3); canvas2.draw(hHitL4);
         frame2.add(canvas2);
         frame2.setLocationRelativeTo(null);
         frame2.setVisible(true); 
@@ -296,5 +302,14 @@ public class FTTRKEngine extends ReconstructionEngine {
         frameClusters.add(canvasCl);    
         frameClusters.setLocationRelativeTo(null);
         frameClusters.setVisible(true);
-	}		
+
+        frameClustersSingleLay.add(canvasClSingleLay);    
+        frameClustersSingleLay.setLocationRelativeTo(null);
+        frameClustersSingleLay.setVisible(true);
+        
+        
+    }
 }
+
+        
+    

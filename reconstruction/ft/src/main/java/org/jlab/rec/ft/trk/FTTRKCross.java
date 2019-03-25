@@ -26,8 +26,8 @@ public class FTTRKCross extends ArrayList<FTTRKCluster> implements Comparable<FT
 	/**
 	 * 
 	 * @param sector the sector (1)
-	 * @param region the region (1...3)
-	 * @param rid the cross ID (if there are only 3 crosses in the event, the ID corresponds to the region index
+	 * @param region the region (1...4)
+	 * @param rid the cross ID (if there are only 2 crosses in the event, the ID corresponds to the region index)
 	 */
 	public FTTRKCross(int sector, int region, int rid) {
 		this._Sector = sector;
