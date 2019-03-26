@@ -20,7 +20,7 @@ public class EBUtil {
 
         boolean isElectron=true;
 
-        if (nphe < EBConstants.HTCC_NPHE_CUT)
+        if (nphe < ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT))
             isElectron=false;
         
         else if (abs(sfNSigma) > EBConstants.ECAL_SF_NSIGMA)

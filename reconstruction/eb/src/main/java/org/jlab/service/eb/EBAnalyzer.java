@@ -242,8 +242,8 @@ public class EBAnalyzer {
            
             final boolean isElectron = EBUtil.isSimpleElectron(p,ccdb);
             
-            final boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>EBConstants.HTCC_NPHE_CUT;
-            final boolean ltccSignalCheck = p.getNphe(DetectorType.LTCC)>EBConstants.LTCC_NPHE_CUT;
+            final boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT);
+            final boolean ltccSignalCheck = p.getNphe(DetectorType.LTCC)>ccdb.getDouble(EBCCDBEnum.LTCC_NPHE_CUT);
             
             final boolean htccPionThreshold = p.vector().mag()>EBConstants.HTCC_PION_THRESHOLD;
             final boolean ltccPionThreshold = p.vector().mag()>EBConstants.LTCC_PION_THRESHOLD;
