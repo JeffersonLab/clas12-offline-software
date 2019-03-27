@@ -110,7 +110,7 @@ public class FTTRKReconstruction {
                         }else if(HitArray[limitingStrip[1]+1][il] != null){
                             isnext = limitingStrip[1]+1;
                         }
-                        while(HitArray[isnext][il] != null && isnext<Nstrips){
+                        while(isnext<Nstrips && HitArray[isnext][il] != null){
                             nst++;
                             checked[isnext][il]=true;
                             clusterHits.add(new FTTRKHit(HitArray[isnext][il].get_Sector(),HitArray[isnext][il].get_Layer(),
@@ -119,7 +119,7 @@ public class FTTRKReconstruction {
                         }                        
                     }else if(is==limitingStrip[1]){
                         isnext = limitingStrip[2]+1;
-                        while(HitArray[isnext][il] != null && isnext<Nstrips){
+                        while(isnext<Nstrips && HitArray[isnext][il] != null){
                             nst++;
                             checked[isnext][il]=true;
                             clusterHits.add(new FTTRKHit(HitArray[isnext][il].get_Sector(),HitArray[isnext][il].get_Layer(),
@@ -128,7 +128,7 @@ public class FTTRKReconstruction {
                         }
                     }else if(is==limitingStrip[2]){ // strip 383||639: next strip is 640
                         isnext = limitingStrip[2]+1;
-                        while(HitArray[isnext][il] != null && isnext<Nstrips){
+                        while(isnext<Nstrips && HitArray[isnext][il] != null){
                             nst++;
                             checked[isnext][il]=true;
                             clusterHits.add(new FTTRKHit(HitArray[isnext][il].get_Sector(),HitArray[isnext][il].get_Layer(),
@@ -137,7 +137,7 @@ public class FTTRKReconstruction {
                         }
                     }else{ 
                     // the first strip is not at the border of any zone, check is other strips can be added to the cluster
-                        while(HitArray[isnext][il] != null && isnext<Nstrips){
+                        while(isnext<Nstrips && HitArray[isnext][il] != null){
                             nst++;
                             checked[isnext][il]=true;
                             clusterHits.add(new FTTRKHit(HitArray[isnext][il].get_Sector(),HitArray[isnext][il].get_Layer(),
