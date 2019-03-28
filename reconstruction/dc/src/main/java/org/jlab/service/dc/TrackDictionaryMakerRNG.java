@@ -60,10 +60,10 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         super.LoadTables();
         return true;
     }
-    public void processFile(float torScale, float solScale, int charge, int n, long seed,
+    public void processFile(int duplicates, float torScale, float solScale, int charge, int n, long seed,
             float pMin, float pMax, float thMin, float thMax, float phiMin, float phiMax, float vzMin, float vzMax) {
         
-        Swimmer.setMagneticFieldsScales(torScale, solScale, -1.9);
+        Swimmer.setMagneticFieldsScales(solScale, torScale, -1.9);
         Swim sw = new Swim();
         PrintWriter pw = null;
         try {
@@ -77,21 +77,23 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     +"\n ThMaxDeg:\t"  +String.valueOf(thMax)
                     +"\n PhiMinDeg:\t" +String.valueOf(phiMin)
                     +"\n PhiMaxDeg:\t" +String.valueOf(phiMax)
-                    +"\n VzMinDeg:\t"  +String.valueOf(vzMin)
-                    +"\n VzMaxDeg:\t"  +String.valueOf(vzMax)
+                    +"\n VzMinCm:\t"   +String.valueOf(vzMin)
+                    +"\n VzMaxCm:\t"   +String.valueOf(vzMax)
                     +"\n Seed:\t\t"    +String.valueOf(seed)
-                    +"\n NTracks:\t"   +String.valueOf(n));
+                    +"\n NTracks:\t"   +String.valueOf(n)
+                    +"\n Duplicates:\t"+String.valueOf(duplicates));
             String fileName = "TracksDicTorus"+String.valueOf(torScale)+"Solenoid"+String.valueOf(solScale)
                     +"Charge"+String.valueOf(charge)+"n"+String.valueOf(n)+"Seed"+String.valueOf(seed)
                     +"PMinGev" +String.valueOf(pMin)+"PMaxGeV" +String.valueOf(pMax)
                     +"ThMinDeg" +String.valueOf(thMin)+"ThMaxDeg" +String.valueOf(thMax)
                     +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax)
-                    +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax)+".txt";
+                    +"VzMinCm" +String.valueOf(vzMin)+"VzMaxCm" +String.valueOf(vzMax)
+                    +"Duplicates" +String.valueOf(duplicates)+".txt";
             pw = new PrintWriter(fileName);
             this.r.setSeed(seed);
             System.out.println("\n Random generator seed set to: " + seed);
             System.out.println("\n Dictionary file name: " + fileName + "\n");
-            this.ProcessTracks(pw, dcDetector, ftofDetector, pcalDetector, sw, charge, n, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax);
+            this.ProcessTracks(pw, dcDetector, ftofDetector, pcalDetector, sw, charge, n, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax,duplicates);
             pw.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(TrackDictionaryMakerRNG.class.getName()).log(Level.SEVERE, null, ex);
@@ -106,11 +108,11 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         double rx = x * Math.cos(Math.toRadians(25.)) + z * Math.sin(Math.toRadians(25.));
         return new Vector3d(rx, y, rz);
     }
-    public Point3D rotateToTiltedCoordSys(Point3D labFramePars){
+    public Point3D rotateToTiltedCoordSys(int sector, Point3D labFramePars){
         double[] XinSec = new double[3];
         double[] XinTiltSec = new double[3];
 
-        int sector = this.getSector(labFramePars.x(), labFramePars.y(), labFramePars.z());
+//        int sector = this.getSector(labFramePars.x(), labFramePars.y(), labFramePars.z());
 
         if ((sector < 1) || (sector > 6)) {
             return new Point3D(0,0,0);
@@ -164,9 +166,10 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         swimVal = sw.SwimToPlaneLab(175.);
 
         //Point3D rotatedP = tw.rotateToTiltedCoordSys(new Point3D(px, py, pz));
-        Point3D rotatedP = this.rotateToTiltedCoordSys(new Point3D(swimVal[3], swimVal[4], swimVal[5]));
-        Point3D rotatedX = this.rotateToTiltedCoordSys(new Point3D(swimVal[0], swimVal[1], swimVal[2]));
         int sector = this.getSector(swimVal[0], swimVal[1], swimVal[2]);
+        
+        Point3D rotatedP = this.rotateToTiltedCoordSys(sector, new Point3D(swimVal[3], swimVal[4], swimVal[5]));
+        Point3D rotatedX = this.rotateToTiltedCoordSys(sector, new Point3D(swimVal[0], swimVal[1], swimVal[2]));
 //System.out.println(" sector in TrackDictionary "+sector);
         List<Integer> Wi = new ArrayList<Integer>();
         List<Integer> Di = new ArrayList<Integer>();
@@ -240,7 +243,8 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             float PMin, float PMax, 
             float ThMin, float ThMax, 
             float PhiMin, float PhiMax, 
-            float VzMin, float VzMax) {
+            float VzMin, float VzMax,
+            int duplicates) {
         double[] swimVal = new double[8];
         Map<ArrayList<Integer>, Integer> newDictionary = new HashMap<>();
         int[] wireArray = new int[36];
@@ -268,8 +272,8 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             int sector = this.getSector(swimVal[0], swimVal[1], swimVal[2]);
 
             //Point3D rotatedP = tw.rotateToTiltedCoordSys(new Point3D(px, py, pz));
-            Point3D rotatedP = this.rotateToTiltedCoordSys(new Point3D(swimVal[3], swimVal[4], swimVal[5]));
-            Point3D rotatedX = this.rotateToTiltedCoordSys(new Point3D(swimVal[0], swimVal[1], swimVal[2]));
+            Point3D rotatedP = this.rotateToTiltedCoordSys(sector, new Point3D(swimVal[3], swimVal[4], swimVal[5]));
+            Point3D rotatedX = this.rotateToTiltedCoordSys(sector, new Point3D(swimVal[0], swimVal[1], swimVal[2]));
 
             //List<Integer> Wi = new ArrayList<Integer>();
             //List<Integer> Wf = new ArrayList<Integer>();
@@ -321,7 +325,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
 
             Line3d trkLine = new Line3d(rotateToSectorCoordSys(trkTOF[0],trkTOF[1],trkTOF[2]), rotateToSectorCoordSys(trkPCAL[0], trkPCAL[1], trkPCAL[2])) ;
 
-            List<DetHit> hits = ftofDetector.getIntersections(trkLine);
+            List<DetHit> hits  = ftofDetector.getIntersections(trkLine);
             List<DetHit> hits2 = pcalDetector.getIntersections(trkLine);
 
             if(hits.size()==0) {
@@ -333,7 +337,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     trkPCAL[ii]=0;
             }
 
-            int paddle1b = 0; int paddle2 = 0; int pcalU =0;
+            int paddle1b = 0; int paddle2 = 0; int pcalU =0; int pcalV=0; int pcalW=0; int htcc=0;
             if (hits != null && hits.size() > 0) {
                 for (DetHit hit : hits) {
                     FTOFDetHit fhit = new FTOFDetHit(hit);
@@ -348,6 +352,10 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     PCALDetHit phit = new PCALDetHit(hit2);
                     if(phit.getLayer()==1)
                         pcalU = phit.getPaddle();
+                    if(phit.getLayer()==2)
+                        pcalV = phit.getPaddle();
+                    if(phit.getLayer()==3)
+                        pcalW = phit.getPaddle();
                 }
             }
             //Wl1.get(0)= wire in SL1, L1;  Wl2.get(0)= wire in SL1, L2; Wl1.get(5)= wire in SL6, L1;  Wl2.get(5)= wire in SL6, L2; 
@@ -357,30 +365,36 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             }
             if (count(Wl3) >=3) {
                 ArrayList<Integer> wires = new ArrayList<Integer>();
-                    for (int k = 0; k < 6; k++) {
-                        for (int l=0; l<6; l++) {
-                            if(wireArray[k*6 +l] != -1) {
-                               wires.add(wireArray[k*6+l]);
-                               break;
-                            }
+                for (int k = 0; k < 6; k++) {
+                    for (int l=0; l<1; l++) {
+                        if(wireArray[k*6 +l] > 0) {
+                           wires.add(wireArray[k*6+l]);
+                           break;
                         }
                     }
-                if(newDictionary.containsKey(wires))  {
+                }
+                if(wires.size()!=6)continue;
+                wires.add(paddle1b);
+                wires.add(paddle2);
+                wires.add(pcalU);
+                wires.add(pcalV);
+                wires.add(pcalW);
+                wires.add(htcc);
+                if(newDictionary.containsKey(wires) && duplicates!=0)  {
                         int nRoad = newDictionary.get(wires) + 1;
                         newDictionary.replace(wires, nRoad);
                        // System.out.println(" Number of duplicate roads "+nRoad+" p "+p+" theta "+thetaDeg+" phi "+phiDeg+" vz "+vzCm);
                 }
                 else {
                     newDictionary.put(wires, 1);
-                /*    System.out.printf("%d\t%.1f\t %.1f\t %.1f\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    + "%d\t %d\t %d\t %d\t %d\t %d\t "
-                    +"%d\t %.1f\t\n",
-                    //+ "%.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", 
+                /*    System.out.printf("%d\t%.2f\t%.2f\t%.2f\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%.2f\t%d\t%d\t%d\t%d\n",
                     q, p, thetaDeg, phiDeg,
                     Wl1.get(0), Wl2.get(0), Wl3.get(0), Wl4.get(0), Wl5.get(0), Wl6.get(0), 
                     Wl1.get(1), Wl2.get(1), Wl3.get(1), Wl4.get(1), Wl5.get(1), Wl6.get(1), 
@@ -388,8 +402,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     Wl1.get(3), Wl2.get(3), Wl3.get(3), Wl4.get(3), Wl5.get(3), Wl6.get(3), 
                     Wl1.get(4), Wl2.get(4), Wl3.get(4), Wl4.get(4), Wl5.get(4), Wl6.get(4), 
                     Wl1.get(5), Wl2.get(5), Wl3.get(5), Wl4.get(5), Wl5.get(5), Wl6.get(5), 
-                    //trkTOF[0], trkTOF[1], trkTOF[2], trkPCAL[0], trkPCAL[1], trkPCAL[2]);
-                    paddle, vzCm);  */
+                    paddle, vzCm, paddle2, pcalU, pcalV, pcalW);  */
                     pw.printf("%d\t%.2f\t%.2f\t%.2f\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
@@ -397,8 +410,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
-                    + "%d\t%.2f\t%d\t%d\n",
-                    //+ "%.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", 
+                    + "%d\t%.2f\t%d\t%d\t%d\t%d\t%d\n",
                     q, p, thetaDeg, phiDeg,
                     Wl1.get(0), Wl2.get(0), Wl3.get(0), Wl4.get(0), Wl5.get(0), Wl6.get(0), 
                     Wl1.get(1), Wl2.get(1), Wl3.get(1), Wl4.get(1), Wl5.get(1), Wl6.get(1), 
@@ -406,15 +418,14 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     Wl1.get(3), Wl2.get(3), Wl3.get(3), Wl4.get(3), Wl5.get(3), Wl6.get(3), 
                     Wl1.get(4), Wl2.get(4), Wl3.get(4), Wl4.get(4), Wl5.get(4), Wl6.get(4), 
                     Wl1.get(5), Wl2.get(5), Wl3.get(5), Wl4.get(5), Wl5.get(5), Wl6.get(5), 
-                    //trkTOF[0], trkTOF[1], trkTOF[2], trkPCAL[0], trkPCAL[1], trkPCAL[2]);
-                    paddle1b, vzCm, paddle2, pcalU);
+                    paddle1b, vzCm, paddle2, pcalU, pcalV, pcalW, htcc);
                 }   
             }
         }
         System.out.println("\t" + numRandoms + " tracks generated, " + newDictionary.size() + " roads found");
     }
 
-    public static void ProcessCosmics(PrintWriter pw, DCGeant4Factory dcDetector, TrackDictionaryMakerRNG tw, Swim sw) {
+    public void ProcessCosmics(PrintWriter pw, DCGeant4Factory dcDetector, TrackDictionaryMakerRNG tw, Swim sw) {
 
         double XMin = 35.;
         double XMax = 350;
@@ -459,9 +470,11 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                         double py = p * Math.sin(Math.toRadians(phi)) * Math.sin(Math.toRadians(theta));
                         double pz = p * Math.cos(Math.toRadians(theta));
 
-                        Point3D rotatedP = tw.rotateToTiltedCoordSys(new Point3D(px, py, pz));
+                        int sector = this.getSector(x,y,z);
+                        
+                        Point3D rotatedP = tw.rotateToTiltedCoordSys(sector, new Point3D(px, py, pz));
 
-                        Point3D rotatedX = tw.rotateToTiltedCoordSys(new Point3D(x, y, z));
+                        Point3D rotatedX = tw.rotateToTiltedCoordSys(sector, new Point3D(x, y, z));
 
                         sw.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), 1);
 
@@ -541,10 +554,12 @@ public class TrackDictionaryMakerRNG extends DCEngine{
        
        // Line3D trkLine = new Line3D(new Point3D(trk[0], trk[1], trk[2]), new Vector3D(trk[3], trk[4], trk[5]).asUnit());
         double wMax = Math.abs(dcDetector.getWireMidpoint(sector-1, sl, 0, 0).x
-                - dcDetector.getWireMidpoint(sector-1, sl, 0, 1).x) / 2.;
+                             - dcDetector.getWireMidpoint(sector-1, sl, 0, 1).x) / 2.;
 
         double min = 1000;
         int w = -1;
+        double wLeft  = 0;
+        double wRight = 0;
         for (int i = 0; i < 112; i++) {
             eu.mihosoft.vrl.v3d.Vector3d p3dl = dcDetector.getWireLeftend(sector-1, sl, l, i);
             eu.mihosoft.vrl.v3d.Vector3d p3dr = dcDetector.getWireRightend(sector-1, sl, l, i);
@@ -553,12 +568,15 @@ public class TrackDictionaryMakerRNG extends DCEngine{
            
             if (wl.distance(new Point3D(trk[0], trk[1], trk[2])).length() < min) { 
                 min = wl.distance(new Point3D(trk[0], trk[1], trk[2])).length();
+                wLeft = p3dl.y;
+                wRight= p3dr.y;
                 w = i; //System.out.println(" min "+min+" wire "+(i+1)+" sl "+sl+" l "+l+" trk "+trk[0]+", "+trk[1]+", "+trk[2]+" mp "+dcDetector.getWireMidpoint(sl, l, i)+" : "+dcDetector.getWireMidpoint(sl, l, 0).z);
-            } 
+            }  
         }
 
-        if (min < wMax*1.01) {
+        if (min < wMax*1.01 && trk[1]>(wLeft-wMax) && trk[1]<(wRight+wMax)) {
             Wi.add(w + 1); //System.out.println("min "+min);
+ //           System.out.println(w + " " + sl + " " + l + " " + wLeft + " " + wRight);
         } else {
             Wi.add(0);
         }
@@ -664,6 +682,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         
         OptionParser parser = new OptionParser("dict-maker");
 
+        parser.addOption("-dupli","0","remove duplicates");
         parser.addOption("-t","-1.0");
         parser.addOption("-s","-1.0");
         parser.addOption("-q","-1");
@@ -688,6 +707,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             float solenoid = (float) parser.getOption("-s").doubleValue();
             int charge = parser.getOption("-q").intValue();
             int n = parser.getOption("-n").intValue();
+            int duplicates = parser.getOption("-dupli").intValue();
             float pMin = (float) parser.getOption("-pmin").doubleValue();
             float pMax = (float) parser.getOption("-pmax").doubleValue();
             float thMin = (float) parser.getOption("-thmin").doubleValue();
@@ -700,7 +720,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
 //            tm.r.setSeed(seed);
             String dcVar = parser.getOption("-var").stringValue();
             tm.resetGeom(dcVar);
-            tm.processFile(torus, solenoid, charge, n, seed, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax);
+            tm.processFile(duplicates,torus, solenoid, charge, n, seed, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax);
         } else {
             System.out.println(" FIELDS NOT SET");
         }

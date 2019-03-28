@@ -188,6 +188,15 @@ public class DetectorResponse {
         }
         return result;
     }
+
+    public static int getSector(final double phi) {
+        // shift in positive-phi direction by 3.5 sectors, result in [0,2*pi):
+        final double phiShifted = Math.IEEEremainder(phi+Math.PI/6,2.*Math.PI)+Math.PI;
+        // shifted sector number: 
+        final int sectorShifted = (int)(phiShifted / (Math.PI/3)) + 1;
+        // rotate back to proper sector:
+        return sectorShifted<=3 ? sectorShifted-3+6 : sectorShifted-3;
+    }
     
     @Override
     public String toString(){

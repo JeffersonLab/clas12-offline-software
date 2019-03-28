@@ -1,7 +1,8 @@
 #!/bin/bash
 
-usage='build-coatjava.sh [--nospotbugs] [--nomaps] [--nounittests]'
+usage='build-coatjava.sh [--quiet] [--nospotbugs] [--nomaps] [--nounittests]'
 
+quiet="no"
 runSpotBugs="yes"
 downloadMaps="yes"
 runUnitTests="yes"
@@ -19,16 +20,28 @@ do
     elif [ "$xx" == "--nounittests" ]
     then
         runUnitTests="no"
+    elif [ "$xx" == "--quiet" ]
+    then
+        quiet="yes"
     else
         echo $usage
         exit
     fi
 done
 
+wget='wget'
+mvn='mvn'
+if [ "$quiet" == "yes" ]
+then
+    wget='wget --progress=dot:mega'
+    mvn='mvn -q -B'
+fi
+
 # download the default field maps, as defined in bin/env.sh:
 # (and duplicated in etc/services/reconstruction.yaml):
 source `dirname $0`/bin/env.sh
 if [ $downloadMaps == "yes" ]; then
+  echo 'Retrieving field maps ...'
   webDir=http://clasweb.jlab.org/clas12offline/magfield
   locDir=etc/data/magfield
   mkdir -p $locDir
@@ -36,7 +49,7 @@ if [ $downloadMaps == "yes" ]; then
   for map in $SOLENOIDMAP $TORUSMAP
   do
     # -N only redownloads if timestamp/filesize is newer/different
-    wget -N --no-check-certificate $webDir/$map
+    $wget -N --no-check-certificate $webDir/$map
   done
   cd -
 fi
@@ -45,8 +58,8 @@ rm -rf coatjava
 mkdir -p coatjava
 cp -r bin coatjava/
 cp -r etc coatjava/
-# create schema directories for partial reconstruction outputs
-./bin/bankSplit.py coatjava/etc/bankdefs/hipo
+# create schema directories for partial reconstruction outputs		
+python etc/bankdefs/util/bankSplit.py coatjava/etc/bankdefs/hipo || exit 1
 mkdir -p coatjava/lib/clas
 cp external-dependencies/JEventViewer-1.1.jar coatjava/lib/clas/
 cp external-dependencies/vecmath-1.3.1-2.jar coatjava/lib/clas/
@@ -63,23 +76,23 @@ rm -rf ~/.m2/repository/org/jlab
 
 unset CLAS12DIR
 if [ $runUnitTests == "yes" ]; then
-	mvn install # also runs unit tests
+	$mvn install # also runs unit tests
 	if [ $? != 0 ] ; then echo "mvn install failure" ; exit 1 ; fi
 else
-	mvn -Dmaven.test.skip=true install
+	$mvn -Dmaven.test.skip=true install
 	if [ $? != 0 ] ; then echo "mvn install failure" ; exit 1 ; fi
 fi
 
 if [ $runSpotBugs == "yes" ]; then
 	# mvn com.github.spotbugs:spotbugs-maven-plugin:spotbugs # spotbugs goal produces a report target/spotbugsXml.xml for each module
-	mvn com.github.spotbugs:spotbugs-maven-plugin:check # check goal produces a report and produces build failed if bugs
+	$mvn com.github.spotbugs:spotbugs-maven-plugin:check # check goal produces a report and produces build failed if bugs
 	# the spotbugsXml.xml file is easiest read in a web browser
 	# see http://spotbugs.readthedocs.io/en/latest/maven.html and https://spotbugs.github.io/spotbugs-maven-plugin/index.html for more info
 	if [ $? != 0 ] ; then echo "spotbugs failure" ; exit 1 ; fi
 fi
 
 cd common-tools/coat-lib
-mvn package
+$mvn package
 if [ $? != 0 ] ; then echo "mvn package failure" ; exit 1 ; fi
 cd -
 
@@ -96,5 +109,6 @@ cp reconstruction/rich/target/clas12detector-rich-*-SNAPSHOT.jar coatjava/lib/se
 cp reconstruction/fvt/target/clas12detector-fmt-*-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/eb/target/clas12detector-eb-*-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/band/target/clas12detector-band-*-SNAPSHOT.jar coatjava/lib/services/
+
 
 echo "COATJAVA SUCCESSFULLY BUILT !"
