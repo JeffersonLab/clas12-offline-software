@@ -105,6 +105,7 @@ public class ECCommon {
 		IndexedTable      ggs = manager.getConstants(run, "/calibration/ec/global_gain_shift");
 		IndexedTable      gtw = manager.getConstants(run, "/calibration/ec/global_time_walk");
 		IndexedTable       ev = manager.getConstants(run, "/calibration/ec/effective_velocity");
+		IndexedTable      tgo = manager.getConstants(run, "/calibration/ec/tdc_global_offset");
     
         if (singleEvent) resetHistos();        
         
@@ -144,6 +145,8 @@ public class ECCommon {
                             time.getDoubleValue("a2", sector, layer, component),
                             time.getDoubleValue("a3", sector, layer, component),
                             time.getDoubleValue("a4", sector, layer, component));
+            strip.setGlobalTimingOffset(tgo.getDoubleValue("offset",0,0,0)); //global shift of TDC acceptance window
+
         }
             
         return ecStrips;

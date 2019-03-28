@@ -124,11 +124,11 @@ public class ECPeak {
             Line3D line = this.peakStrips.get(i).getLine();
             
             double energy = this.peakStrips.get(i).getEnergy();
-//            double     le = Math.log(energy);
+//            double     le = Math.log(energy);  //ECReconstructionTest fails to find PCAL cluster for this choice
             double     le = energy;
             
             this.peakDistanceEdge += 
-                    //peakStrips.get(i).getDistanceEdge() + 
+//                    peakStrips.get(i).getDistanceEdge() + 
                     peakStrips.get(i).getDistanceEdge()*le;
             
             pointOrigin.setX(pointOrigin.x()+line.origin().x()*le);
