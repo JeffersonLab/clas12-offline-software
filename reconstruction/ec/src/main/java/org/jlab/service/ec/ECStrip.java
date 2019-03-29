@@ -27,6 +27,7 @@ public class ECStrip implements Comparable {
     private double    iAttenLengthA = 1.0;
     private double    iAttenLengthB = 50000.0;
     private double    iAttenLengthC = 0.0;
+    private double        iTiming00 = 0; // Global TDC offset
 	private double        iTimingA0 = 0; // Offset in ns (before applying a1)
 	private double        iTimingA1 = 1; // ns -> TDC conv. factor (TDC = ns/a1)
 	private double        iTimingA2 = 0; // time-walk factor (time_ns = time_ns + a2/sqrt(adc))
@@ -137,12 +138,12 @@ public class ECStrip implements Comparable {
         
         public double getTWCTime() {
         	double radc = Math.sqrt(iADC);
-          	return getPhaseCorrectedTime() - gtw/radc - iTimingA2/radc - iTimingA3 - iTimingA4/Math.sqrt(radc);          	
+          	return getPhaseCorrectedTime() - gtw/radc - iTimingA2/radc - iTimingA3 - iTimingA4/Math.sqrt(radc) - iTiming00;          	
         } 
         
     	public double getTime() {
         	double radc = Math.sqrt(iADC);
-          	return getPhaseCorrectedTime() - gtw/radc - iTimingA2/radc - iTimingA3 - iTimingA4/Math.sqrt(radc) - iTimingA0;          	
+          	return getPhaseCorrectedTime() - gtw/radc - iTimingA2/radc - iTimingA3 - iTimingA4/Math.sqrt(radc) - iTimingA0 - iTiming00;          	
         }         
     } 
     
@@ -195,6 +196,10 @@ public class ECStrip implements Comparable {
 		this.iTimingA3 = a3;
 		this.iTimingA4 = a4;
 	}  
+	
+	public void setGlobalTimingOffset(double val) {
+		this.iTiming00 = val;
+	}
 	
 	public double[] getTiming() {
 		double[] array = new double[5];

@@ -12,7 +12,6 @@ import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.groot.data.H1F;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.utils.groups.IndexedList;
 import org.jlab.utils.groups.IndexedTable;
 
@@ -106,12 +105,13 @@ public class ECCommon {
 		IndexedTable      ggs = manager.getConstants(run, "/calibration/ec/global_gain_shift");
 		IndexedTable      gtw = manager.getConstants(run, "/calibration/ec/global_time_walk");
 		IndexedTable       ev = manager.getConstants(run, "/calibration/ec/effective_velocity");
+		IndexedTable      tgo = manager.getConstants(run, "/calibration/ec/tdc_global_offset");
     
         if (singleEvent) resetHistos();        
         
         List<ECStrip>  ecStrips = null;
         
-        if(event instanceof HipoDataEvent) ecStrips = ECCommon.readStripsHipo(event, run, manager);
+        ecStrips = ECCommon.readStripsHipo(event, run, manager);  
         
         if(ecStrips==null) return new ArrayList<ECStrip>();
         
@@ -145,6 +145,8 @@ public class ECCommon {
                             time.getDoubleValue("a2", sector, layer, component),
                             time.getDoubleValue("a3", sector, layer, component),
                             time.getDoubleValue("a4", sector, layer, component));
+            strip.setGlobalTimingOffset(tgo.getDoubleValue("offset",0,0,0)); //global shift of TDC acceptance window
+
         }
             
         return ecStrips;
@@ -155,15 +157,19 @@ public class ECCommon {
       	List<ECStrip>  strips = new ArrayList<ECStrip>();
         IndexedList<List<Integer>>  tdcs = new IndexedList<List<Integer>>(3);  
         
-		IndexedTable   jitter = manager.getConstants(run, "/calibration/ec/time_jitter");
-		IndexedTable   offset = manager.getConstants(run, "/calibration/ec/fadc_offset");
-		IndexedTable  goffset = manager.getConstants(run, "/calibration/ec/fadc_global_offset");
+		IndexedTable    jitter = manager.getConstants(run, "/calibration/ec/time_jitter");
+		IndexedTable        fo = manager.getConstants(run, "/calibration/ec/fadc_offset");
+		IndexedTable       tmf = manager.getConstants(run, "/calibration/ec/tmf_offset"); 
+		IndexedTable       fgo = manager.getConstants(run, "/calibration/ec/fadc_global_offset");
+		IndexedTable       gtw = manager.getConstants(run, "/calibration/ec/global_time_walk");
+		IndexedTable    tmfcut = manager.getConstants(run,  "/calibration/ec/tmf_window");
         
-        double PERIOD = jitter.getDoubleValue("period",0,0,0);
-        int    PHASE  = jitter.getIntValue("phase",0,0,0); 
-        int    CYCLES = jitter.getIntValue("cycles",0,0,0);
+        double PERIOD  = jitter.getDoubleValue("period",0,0,0);
+        int    PHASE   = jitter.getIntValue("phase",0,0,0); 
+        int    CYCLES  = jitter.getIntValue("cycles",0,0,0);        
+        float FTOFFSET = (float) fgo.getDoubleValue("global_offset",0,0,0); //global shift of trigger time
+        float  TMFCUT  = (float) tmfcut.getDoubleValue("window", 0,0,0); //acceptance window for TDC-FADC times
         
-        float TOFFSET = (float) goffset.getDoubleValue("global_offset",0,0,0);
 	    int triggerPhase = 0;
     	
         if(CYCLES>0&&event.hasBank("RUN::config")==true){
@@ -193,7 +199,8 @@ public class ECCommon {
                 int  il = bank.getByte("layer", i); 
                 int  ip = bank.getShort("component", i);
                 int adc = bank.getInt("ADC", i);
-                float t = bank.getFloat("time", i) + (float) offset.getDoubleValue("offset",is,il,0);
+                float t = bank.getFloat("time", i) + (float) tmf.getDoubleValue("offset",is,il,ip) // FADC-TDC offset (sector, layer, PMT)
+                                                   + (float)  fo.getDoubleValue("offset",is,il,0); // FADC-TDC offset (sector, layer) 
                 
                 ECStrip  strip = new ECStrip(is, il, ip); 
                 
@@ -207,9 +214,10 @@ public class ECCommon {
                 float  tmax = 1000; int tdc = 0;
                 
                 if (tdcs.hasItem(is,il,ip)) {
+                    float radc = (float)Math.sqrt(adc);
                     for (float tdcc : tdcs.getItem(is,il,ip)) {
-                        float tdif = (tps*tdcc-triggerPhase-TOFFSET)-t; 
-                        if (Math.abs(tdif)<30&&tdif<tmax) {tmax = tdif; tdc = (int)tdcc;}
+                         float tdif = tps*tdcc - (float)gtw.getDoubleValue("time_walk",is,il,0)/radc - triggerPhase - FTOFFSET - t; 
+                        if (Math.abs(tdif)<TMFCUT&&tdif<tmax) {tmax = tdif; tdc = (int)tdcc;}
                     }
                     strip.setTDC(tdc); 
                 }              

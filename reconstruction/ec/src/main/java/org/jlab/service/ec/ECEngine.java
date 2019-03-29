@@ -5,29 +5,21 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.clas.reco.io.EvioHipoEvent;
 import org.jlab.detector.base.DetectorCollection;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
-import org.jlab.detector.decode.CLASDecoder;
 import org.jlab.geom.base.Detector;
 import org.jlab.groot.data.H1F;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.hipo.HipoDataEvent;
-import org.jlab.io.hipo.HipoDataSync;
+
 /**
  *
  * @author gavalian
  */
 public class ECEngine extends ReconstructionEngine {
-
-    EvioHipoEvent convertor = new EvioHipoEvent();            
-    HipoDataSync     writer = new HipoDataSync();
-    CLASDecoder     decoder = new CLASDecoder();
     
-    Detector        ecDetector = null;
+    Detector              ecDetector = null;
     public Boolean             debug = false;
     public Boolean  isSingleThreaded = false;
     public Boolean       singleEvent = false;
@@ -74,7 +66,7 @@ public class ECEngine extends ReconstructionEngine {
             if(ecClusters.size()==2) {for(ECCluster c : ecClusters) System.out.println(c);}
         }
 	    
-        if(de instanceof HipoDataEvent) this.writeHipoBanks(de,ecStrips,ecPeaks,ecClusters);
+        this.writeHipoBanks(de,ecStrips,ecPeaks,ecClusters);  
         
         if (isSingleThreaded) {
         	ECCommon.clearMyStructures();
@@ -237,9 +229,12 @@ public class ECEngine extends ReconstructionEngine {
             "/calibration/ec/time_jitter",
             "/calibration/ec/fadc_offset",
             "/calibration/ec/fadc_global_offset",
+            "/calibration/ec/tdc_global_offset",
             "/calibration/ec/global_gain_shift",
             "/calibration/ec/global_time_walk",
-            "/calibration/ec/effective_velocity"
+            "/calibration/ec/effective_velocity",
+            "/calibration/ec/tmf_offset",
+            "/calibration/ec/tmf_window"
         };
         
         
