@@ -68,7 +68,7 @@ public class EBTwoTrackTest {
 
     DataBank mcBank=null,ctrkBank=null,calBank=null,ctofBank=null;
     DataBank trkBank=null,tofBank=null,htccBank=null,ltccBank=null;
-    DataBank recPartBank=null,recTrkBank=null,recFtBank=null;
+    DataBank recPartBank=null,recFtPartBank=null,recTrkBank=null,recFtBank=null;
     DataBank recCalBank=null,recSciBank=null,recCheBank=null;
     DataBank ftcBank=null,fthBank=null,ftpartBank=null,recBank=null;
 
@@ -204,6 +204,7 @@ public class EBTwoTrackTest {
         tofBank     = getBank(de,"FTOF::clusters");
         trkBank     = getBank(de,"TimeBasedTrkg::TBTracks");
         recPartBank = getBank(de,"REC::Particle");
+        recFtPartBank = getBank(de,"RECFT::Particle");
         mcBank      = getBank(de,"MC::Particle");
         recCheBank  = getBank(de,"REC::Cherenkov");
         recCalBank  = getBank(de,"REC::Calorimeter");
