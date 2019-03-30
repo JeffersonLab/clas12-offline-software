@@ -123,6 +123,9 @@ public class PDGDatabase {
 		if (particleDatabase.containsKey(pid) == true) {
 			mass = particleDatabase.get(pid).mass();
 		}
+                else {
+                    System.out.println("PDGDatabase::Error -> there is no particle with pid " + pid);
+                }
 		return mass;
 	}
 }
