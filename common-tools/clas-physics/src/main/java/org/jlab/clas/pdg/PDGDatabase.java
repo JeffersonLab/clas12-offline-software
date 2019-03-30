@@ -118,10 +118,11 @@ public class PDGDatabase {
 		}
 	}
 
-	public static double getParticleMass(int pid) {
+	public static double getParticleMass(int pid)  {
+                double mass =0.0;
 		if (particleDatabase.containsKey(pid) == true) {
-			particleDatabase.get(pid).mass();
+			mass = particleDatabase.get(pid).mass();
 		}
-		return 0.0;
+		return mass;
 	}
 }
