@@ -63,7 +63,7 @@ public class EBAnalyzer {
             event.getParticle(0).getStatus().isForward()) return;
 
         // Match FT against these hypotheses in FD:
-        final int[] hypotheses = new int[]{-11,11,-211,211,2212};
+        final int[] hypotheses = new int[]{-11,11,-211,211,-321,321,2212};
     
         // particle candidates for FT-FD time-matching:
         List<DetectorParticle> electronFT = new ArrayList<DetectorParticle>();
