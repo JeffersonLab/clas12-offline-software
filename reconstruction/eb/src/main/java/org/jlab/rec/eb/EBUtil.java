@@ -13,23 +13,26 @@ public class EBUtil {
      * Perform a basic true/false identification for electrons.
      */
     public static boolean isSimpleElectron(DetectorParticle p,EBCCDBConstants ccdb) {
-        
-        final double pcalEnergy = p.getEnergy(DetectorType.ECAL,1);
+       
+        // require ECAL:
+        final int sector = p.getSector(DetectorType.ECAL);
+        if (sector<1) return false;
+       
+        // requre HTCC photoelectrons:
         final double nphe = p.getNphe(DetectorType.HTCC);
+        if (nphe < ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT)) return false;
+        
+        // require ECAL sampling fraction:
         final double sfNSigma = SamplingFractions.getNSigma(11,p,ccdb);
-
-        boolean isElectron=true;
-
-        if (nphe < EBConstants.HTCC_NPHE_CUT)
-            isElectron=false;
-        
-        else if (abs(sfNSigma) > EBConstants.ECAL_SF_NSIGMA)
-            isElectron=false;
-        
-        else if (pcalEnergy < EBConstants.PCAL_ELEC_MINENERGY)
-            isElectron=false;
-        
-        return isElectron;
+        final double nSigmaCut = ccdb.getSectorDouble(EBCCDBEnum.ELEC_SF_nsigma,sector);
+        if (abs(sfNSigma) > nSigmaCut) return false;
+       
+        // require PCAL minimum energy:
+        final double minPcalEnergy = ccdb.getSectorDouble(EBCCDBEnum.ELEC_PCAL_min_energy,sector);
+        final double pcalEnergy = p.getEnergy(DetectorType.ECAL,1);
+        if (pcalEnergy < minPcalEnergy) return false;
+       
+        return true;
     }
 
     /**
