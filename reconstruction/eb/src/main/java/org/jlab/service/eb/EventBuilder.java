@@ -410,17 +410,24 @@ class TriggerOptions {
     
     public int getSoftwareTriggerScore(DetectorParticle p,EBCCDBConstants ccdb) {
 
-        final double npheCut = ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT);
-        final double sfNSigma = SamplingFractions.getNSigma(11,p,ccdb);
-
         int score = 0;
+
+        final double npheCut = ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT);
         if(p.getNphe(DetectorType.HTCC) > npheCut){
             score += 10;
         }
-        if(abs(sfNSigma) < EBConstants.ECAL_SF_NSIGMA &&
-            p.getEnergy(DetectorType.ECAL,1) > EBConstants.PCAL_ELEC_MINENERGY) {
-            score += 100;
+        
+        final int sector = p.getSector(DetectorType.ECAL);
+        if (sector > 0) {
+            final double nSigmaCut = ccdb.getSectorDouble(EBCCDBEnum.ELEC_SF_nsigma,sector);
+            final double sfNSigma = SamplingFractions.getNSigma(11,p,ccdb);
+            final double minPcalEnergy = ccdb.getSectorDouble(EBCCDBEnum.ELEC_PCAL_min_energy,sector);
+            if(abs(sfNSigma) < nSigmaCut &&
+                    p.getEnergy(DetectorType.ECAL,1) > minPcalEnergy) {
+                score += 100;
+            }
         }
+
         if(p.hasHit(DetectorType.FTOF,1)==true || p.hasHit(DetectorType.FTOF,2)==true){
             score += 1000;
         }
