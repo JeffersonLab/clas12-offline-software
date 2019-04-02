@@ -50,12 +50,16 @@ public class ECCluster {
     }
     
     public double getRawEnergy(){
-        return getRawEnergy(0)+getRawEnergy(1)+getRawEnergy(2);
+        return getRawEnergy(0)+getRawEnergy(1)+getRawEnergy(2); 
     }
     
     public double getRawEnergy(int view){
         return  this.clusterPeaks.get(view).getEnergy();
-    }  
+    } 
+    
+    public double getRawADC(int view){
+        return  this.clusterPeaks.get(view).getADC();
+    } 
     
     public void setEnergy(double energy){
         this.clusterEnergy = energy;
@@ -70,22 +74,31 @@ public class ECCluster {
     }  
     
 	public double getTime() {
-		// For cluster time use timing from U,V,W peak with largest energy		
-		if ((this.getEnergy(0) > this.getEnergy(1)) && 
-			(this.getEnergy(0) > this.getEnergy(2))) return this.getTime(0);
+		// For cluster time use timing from U,V,W peak with largest reconstructed energy		
+		if      ((this.getEnergy(0) > this.getEnergy(1)) && 
+			     (this.getEnergy(0) > this.getEnergy(2))) return this.getTime(0);
 		else if ((this.getEnergy(1) > this.getEnergy(0)) && 
 				 (this.getEnergy(1) > this.getEnergy(2))) return this.getTime(1);
-		else return this.getTime(2);
+		else                                              return this.getTime(2);
 	}  
 	
 	public double getRawEnergyTime() {
-		// For cluster time use timing from U,V,W peak with largest energy		
-		if ((this.getRawEnergy(0) > this.getRawEnergy(1)) && 
-			(this.getRawEnergy(0) > this.getRawEnergy(2))) return this.getTime(0);
+		// For cluster time use timing from U,V,W peak with largest raw energy (no attenuation correction)		
+		if      ((this.getRawEnergy(0) > this.getRawEnergy(1)) && 
+			     (this.getRawEnergy(0) > this.getRawEnergy(2))) return this.getTime(0);
 		else if ((this.getRawEnergy(1) > this.getRawEnergy(0)) && 
 				 (this.getRawEnergy(1) > this.getRawEnergy(2))) return this.getTime(1);
-		else return this.getTime(2);
-	} 	
+		else                                                    return this.getTime(2);
+	} 
+	
+	public double getRawADCTime() {
+		// For cluster time use timing from U,V,W peak with largest raw ADC (no gain correction)		
+		if      ((this.getRawADC(0) > this.getRawADC(1)) && 
+			     (this.getRawADC(0) > this.getRawADC(2))) return this.getTime(0);
+		else if ((this.getRawADC(1) > this.getRawADC(0)) && 
+				 (this.getRawADC(1) > this.getRawADC(2))) return this.getTime(1);
+		else                                              return this.getTime(2);
+	} 
 	
     public double getTime(int view){
         return this.clusterPeaks.get(view).getTime(clusterHitPosition);

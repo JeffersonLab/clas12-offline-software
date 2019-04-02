@@ -12,6 +12,7 @@ import org.jlab.geometry.prim.Straight;
 import eu.mihosoft.vrl.v3d.Primitive;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -211,6 +212,7 @@ public abstract class Geant4Basic {
 
     public String gemcString() {
         StringBuilder str = new StringBuilder();
+        DecimalFormat df = new DecimalFormat("#.####");
 
         if (motherVolume == null) {
             str.append(String.format("%18s | |", volumeName));
@@ -219,8 +221,8 @@ public abstract class Geant4Basic {
         }
 
         Vector3d pos = getLocalPosition();
-        str.append(String.format("%f*%s %f*%s %f*%s | ",
-                pos.x, Length.unit(), pos.y, Length.unit(), pos.z, Length.unit()));
+        str.append(String.format("%s*%s %s*%s %s*%s | ",
+                df.format(pos.x), Length.unit(), df.format(pos.y), Length.unit(), df.format(pos.z), Length.unit()));
 
         if (rotationValues[0] == 0 && rotationValues[1] == 0 && rotationValues[2] == 0) {
             str.append("0 0 0 ");
@@ -229,12 +231,12 @@ public abstract class Geant4Basic {
                 str.append(String.format("ordered: %s ", new StringBuilder(this.rotationOrder).reverse().toString()));
             }
             for (int irot = 0; irot < rotationValues.length; irot++) {
-                str.append(Math.toDegrees(rotationValues[rotationValues.length - irot - 1])).append("*deg ");
+                str.append(df.format(Math.toDegrees(rotationValues[rotationValues.length - irot - 1]))).append("*deg ");
             }
         }
         str.append(String.format("| %8s | ", this.getType()));
         volumeDimensions.stream()
-                .forEach(dim -> str.append(dim.value).append("*").append(dim.unit).append(" "));
+                .forEach(dim -> str.append(df.format(dim.value)).append("*").append(dim.unit).append(" "));
         str.append(" | ");
 
         int[] ids = this.getId();
