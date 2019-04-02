@@ -61,7 +61,7 @@ public class TrajectorySurfaces {
             for(int isup =0; isup<6; isup++) {
                 for(int il =0; il<6; il++) {
                     d = dcDetector.getWireMidpoint(is, isup, il, iw).z; 
-                    this._DetectorPlanes.get(is).add(new Surface("DC"+(index-6), index++, is*6+il+1,d, n.x(), n.y(), n.z()));                    
+                    this._DetectorPlanes.get(is).add(new Surface("DC"+(index-6), index++, isup*6+il+1,d, n.x(), n.y(), n.z()));
                 }
             } 
             index=7; // end of MM + HTCC);
