@@ -378,8 +378,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 		// 3D view?
 		if (_use3D) {
 			ViewManager.getInstance().getViewMenu().addSeparator();
-			_forward3DView = new ForwardView3D();
-			_central3DView = new CentralView3D();
+//			_forward3DView = new ForwardView3D();
+//			_central3DView = new CentralView3D();
 			_ftCal3DView = new FTCalView3D();
 		}
 

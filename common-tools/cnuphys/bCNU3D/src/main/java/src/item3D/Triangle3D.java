@@ -70,6 +70,7 @@ public class Triangle3D extends Item3D {
 //	System.err.println("Coords len: " + _coords.length);
 
 		setFillColor(color);
+		
 		setLineWidth(lineWidth);
 	}
 

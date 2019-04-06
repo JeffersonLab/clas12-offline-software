@@ -172,4 +172,42 @@ public class Slab extends Polytube {
 
 		}
 	}
+	
+	/**
+	 * Get all six quads at once
+	 * @param quads all the quads in canonical order
+	 */
+	public void getQuads(float quads[]) {
+		insert(quads, 0, get(0).getP0());
+		insert(quads, 3, get(1).getP0());
+		insert(quads, 6, get(2).getP0());
+		insert(quads, 9, get(3).getP0());
+		
+		insert(quads, 12, get(0).getP0());
+		insert(quads, 15, get(0).getP1());
+		insert(quads, 18, get(1).getP1());
+		insert(quads, 21, get(1).getP0());
+
+		insert(quads, 24, get(1).getP0());
+		insert(quads, 27, get(1).getP1());
+		insert(quads, 30, get(2).getP1());
+		insert(quads, 33, get(2).getP0());
+		
+		insert(quads, 36, get(2).getP0());
+		insert(quads, 39, get(2).getP1());
+		insert(quads, 42, get(3).getP1());
+		insert(quads, 45, get(3).getP0());
+
+		insert(quads, 48, get(3).getP0());
+		insert(quads, 51, get(3).getP1());
+		insert(quads, 54, get(0).getP1());
+		insert(quads, 57, get(0).getP0());
+		
+		insert(quads, 60, get(0).getP1());
+		insert(quads, 63, get(1).getP1());
+		insert(quads, 66, get(2).getP1());
+		insert(quads, 69, get(3).getP1());
+
+
+	}
 }
