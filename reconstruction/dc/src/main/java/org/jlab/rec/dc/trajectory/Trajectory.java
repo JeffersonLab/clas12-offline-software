@@ -4,6 +4,8 @@ import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorLayer;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
@@ -143,6 +145,10 @@ public class Trajectory extends ArrayList<Cross> {
         private double _pathLen;
         private double _Bdl;
         private double _dEdx;
+        private int _DetId;
+        private int _LayerId;
+        private String _DetName;
+
 
         public int getTrkId() {
             return _TrkId;
@@ -224,8 +230,6 @@ public class Trajectory extends ArrayList<Cross> {
             this._dEdx = _dEdx;
         }
 
-        private int _DetId;
-
         public int getDetId() {
             return _DetId;
         }
@@ -234,14 +238,20 @@ public class Trajectory extends ArrayList<Cross> {
             this._DetId = _DetId;
         }
 
-        private String _Name;
+        public int getLayerId() {
+            return _LayerId;
+        }
+
+        public void setLayerId(int _LayerId) {
+            this._LayerId = _LayerId;
+        }
 
         public String getDetName() {
-            return _Name;
+            return _DetName;
         }
 
         public void setDetName(String name) {
-            this._Name = name;
+            this._DetName = name;
         }
     }
     
@@ -273,11 +283,12 @@ public class Trajectory extends ArrayList<Cross> {
         double[] trkPars = new double[8];
         if(trkPars==null)
             return;
+        
         //HTCC
         double[] trkParsCheren = dcSwim.SwimToSphere(175.);
         if(trkParsCheren==null)
             return;
-        this.FillTrajectory(id, trajectory, trkParsCheren, trkParsCheren[6], trkParsCheren[7], 0, ts); 
+        this.FillTrajectory(id, trajectory, trkParsCheren, trkParsCheren[6], trkParsCheren[7], DetectorType.HTCC.getName(),DetectorType.HTCC.getDetectorId(), 1); 
         // Swim to target
         dcSwim.SetSwimParameters(trkParsCheren[0], trkParsCheren[1], trkParsCheren[2], -trkParsCheren[3], -trkParsCheren[4], -trkParsCheren[5], -q);
         double[] trkTar3 = dcSwim.SwimToPlaneLab(tarWall);
@@ -287,7 +298,7 @@ public class Trajectory extends ArrayList<Cross> {
             trkTar3[b]*=-1;
         } 
         
-        this.FillTrajectory(id, trajectory, trkTar3, tarWall-z, Math.abs((tarWall-z)*b[2]), 102, ts);
+        this.FillTrajectory(id, trajectory, trkTar3, tarWall-z, Math.abs((tarWall-z)*b[2]), "TARGET", 100, 2);
         
         double[] trkTar1 = dcSwim.SwimToPlaneLab(tarCenter);
         if(trkTar1==null)
@@ -295,7 +306,8 @@ public class Trajectory extends ArrayList<Cross> {
         for (int b = 3; b<6; b++) {
             trkTar1[b]*=-1;
         } 
-        this.FillTrajectory(id, trajectory, trkTar1, tarCenter-z, Math.abs((tarWall-z)*b[2]), 101, ts);
+        this.FillTrajectory(id, trajectory, trkTar1, tarCenter-z, Math.abs((tarWall-z)*b[2]), "TARGET", 100, 1);
+        
         
         //reset track to swim forward
         dcSwim.SetSwimParameters(x, y, z, px, py, pz, q);
@@ -311,60 +323,67 @@ public class Trajectory extends ArrayList<Cross> {
         double iBdl = 0;
         for(int j = 0; j<ts.getDetectorPlanes().get(is).size(); j++) {
             
-            if(j>0 ) {
-                dcSwim.SetSwimParameters(trkPars[0], trkPars[1], trkPars[2], trkPars[3], trkPars[4], trkPars[5], q);
-            }
-            trkPars = dcSwim.SwimToPlaneBoundary(ts.getDetectorPlanes().get(is).get(j).get_d(), new Vector3D(ts.getDetectorPlanes().get(is).get(j).get_nx(),
-            ts.getDetectorPlanes().get(is).get(j).get_ny(),ts.getDetectorPlanes().get(is).get(j).get_nz()),1);
+            Surface surface=ts.getDetectorPlanes().get(is).get(j);
+//            if(surface.getDetectorIndex()==DetectorType.DC.getDetectorId()) {  // start swiming from previous DC layer
+//                dcSwim.SetSwimParameters(trkPars[0], trkPars[1], trkPars[2], trkPars[3], trkPars[4], trkPars[5], q);
+//            }
+//            System.out.println(j + " " + ts.getDetectorPlanes().get(is).get(j).getDetectorName());
+            trkPars = dcSwim.SwimToPlaneBoundary(surface.get_d(), new Vector3D(surface.get_nx(),surface.get_ny(),surface.get_nz()),1);
             if(trkPars==null)
                 return;
-            if(j==42) {
+            if(surface.getDetectorIndex()==DetectorType.LTCC.getDetectorId()) { // LTCC
                 for(int k =0; k<6; k++ )
                 trkParsCheren[k] = trkPars[k];
             }
-            if(ts.getDetectorPlanes().get(is).get(j).getDetectorName().startsWith("FTOF")) {
+            if(surface.getDetectorIndex()==DetectorType.FTOF.getDetectorId()) {
                 int FTOFDt = getFTOFPanel(new Line3d(new Vector3d(trkPars[0]-100*trkPars[3],trkPars[1]-100*trkPars[4],trkPars[2]-100*trkPars[5]), new Vector3d(trkPars[0]+100*trkPars[3],trkPars[1]+100*trkPars[4],trkPars[2]+100*trkPars[5])), ftofDetector);
-                if(FTOFDt==3) {
+//                if(is==0) System.out.println(FTOFDt + " " + j + " " +ts.getDetectorPlanes().get(is).get(j).getDetectorName() + " " + ts.getDetectorPlanes().get(is).get(j).getDetectorIndex() 
+//                                             + " " + ts.getDetectorPlanes().get(is).get(j).get_nz());
+                if(FTOFDt==3 && false) {
                     pathLen+=trkPars[6];
                     iBdl+=trkPars[7];
-                    this.FillTrajectory(id, trajectory, trkPars, pathLen, iBdl, j+1, ts); 
+                    this.FillTrajectory(id, trajectory, trkPars, pathLen, iBdl, surface.getDetectorName(), surface.getDetectorIndex(), surface.getDetectorLayer()); 
+                    if(is==0) System.out.println(ts.getDetectorPlanes().get(is).get(j).getDetectorName() + " " + ts.getDetectorPlanes().get(is).get(j).getDetectorIndex() 
+                    + " " + ts.getDetectorPlanes().get(is).get(j).get_nz());
                     return;
                 } else {
-                    if(j==44) {
+                    if(ts.getDetectorPlanes().get(is).get(j).getDetectorLayer()==DetectorLayer.FTOF1B) {
                         //reset start swim point
-                        dcSwim.SetSwimParameters(trkParsCheren[0], trkParsCheren[1], trkParsCheren[2], trkParsCheren[3], trkParsCheren[4], trkParsCheren[5], q);
+//                        dcSwim.SetSwimParameters(trkParsCheren[0], trkParsCheren[1], trkParsCheren[2], trkParsCheren[3], trkParsCheren[4], trkParsCheren[5], q);
                         trkPars = dcSwim.SwimToPlaneBoundary(ts.getDetectorPlanes().get(is).get(j).get_d(), new Vector3D(ts.getDetectorPlanes().get(is).get(j).get_nx(),
                         ts.getDetectorPlanes().get(is).get(j).get_ny(),ts.getDetectorPlanes().get(is).get(j).get_nz()),1);
             
                         pathLen+=trkPars[6];
                         iBdl+=trkPars[7];
-                        this.FillTrajectory(id, trajectory, trkPars, pathLen, iBdl, j+1, ts); 
+                        this.FillTrajectory(id, trajectory, trkPars, pathLen, iBdl, surface.getDetectorName(), surface.getDetectorIndex(), surface.getDetectorLayer()); 
                     }
-                    if(j==45) {
+                    else if(ts.getDetectorPlanes().get(is).get(j).getDetectorLayer()==DetectorLayer.FTOF1A) {
                         //1a
                         pathLen+=trkPars[6];
                         iBdl+=trkPars[7];
-                        this.FillTrajectory(id, trajectory, trkPars, pathLen, iBdl, j+1, ts); 
+                        this.FillTrajectory(id, trajectory, trkPars, pathLen, iBdl, surface.getDetectorName(), surface.getDetectorIndex(), surface.getDetectorLayer()); 
+                    }
+                    else if(ts.getDetectorPlanes().get(is).get(j).getDetectorLayer()==DetectorLayer.FTOF2) {
+                        //1a
+                        pathLen+=trkPars[6];
+                        iBdl+=trkPars[7];
+                        this.FillTrajectory(id, trajectory, trkPars, pathLen, iBdl, surface.getDetectorName(), surface.getDetectorIndex(), surface.getDetectorLayer()); 
                     }
                 }
             } else {
                 pathLen+=trkPars[6];
                 iBdl+=trkPars[7];
-                this.FillTrajectory(id, trajectory, trkPars, pathLen, iBdl, j+1, ts); 
+                this.FillTrajectory(id, trajectory, trkPars, pathLen, iBdl, surface.getDetectorName(), surface.getDetectorIndex(),surface.getDetectorLayer()); 
             }
             
         }
     }
 
-    private void FillTrajectory(int id, List<TrajectoryStateVec> trajectory, double[] trkPars, double pathLen, double iBdl, int i, TrajectorySurfaces ts) {
+    private void FillTrajectory(int id, List<TrajectoryStateVec> trajectory, double[] trkPars, double pathLen, double iBdl, String name, int detector, int layer) {
         TrajectoryStateVec sv = new TrajectoryStateVec();
-        sv.setDetId(i);
-        if(i==0)
-            sv.setDetName("HTCC");
-        if(i>0 && i<100)
-            sv.setDetName(ts.getDetectorPlanes().get(0).get(i-1).getDetectorName());
-        if(i>100)
-            sv.setDetName("TAR");
+        sv.setDetName(name);
+        sv.setDetId(detector);
+        sv.setLayerId(layer);
         sv.setTrkId(id);
         sv.setX(trkPars[0]);
         sv.setY(trkPars[1]);

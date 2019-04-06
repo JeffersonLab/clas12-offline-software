@@ -481,8 +481,9 @@ public class DetectorData {
                // this could be optimized:
                if (trajBank!=null) {
                    for (int ii=0; ii<trajBank.rows(); ii++) {
-                       if (trajBank.getInt("tid",ii) !=  trkId) continue;
-                       int detId=trajBank.getInt("did",ii);
+                       if (trajBank.getInt("id",ii) !=  trkId) continue;
+                       int detId=trajBank.getInt("detector",ii);
+                       int layId=trajBank.getByte("layer",ii);
                        float bField=trajBank.getFloat("B",ii);
                        float pathLength=trajBank.getFloat("L",ii);
                        float xx=trajBank.getFloat("x",ii);
