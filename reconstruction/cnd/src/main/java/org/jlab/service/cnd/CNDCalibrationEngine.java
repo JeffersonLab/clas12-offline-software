@@ -210,7 +210,9 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
                 "/calibration/cnd/Attenuation",
                 "/calibration/cnd/Status_LR",
                 "/calibration/cnd/Energy",
-                "/calibration/cnd/time_jitter"
+                "/calibration/cnd/time_jitter",
+		"/geometry/cnd/cndgeom",
+		"/geometry/target"
             };
 	@Override
 	public boolean init() {
@@ -324,5 +326,4 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	}
 
 }
-
 
