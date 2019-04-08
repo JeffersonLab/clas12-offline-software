@@ -26,7 +26,7 @@ public class TestEvent {
 		config.putInt("run", 0, (int) 11);
 		config.putInt("event", 0, (int) 1);
 		config.putInt("unixtime", 0, (int) 0);
-		config.putInt("trigger", 0, (int) 0);
+		config.putLong("trigger", 0, (long) 0);
 		config.putLong("timestamp", 0, (long) 0);
 		config.putByte("type", 0, (byte) 0);
 		config.putByte("mode", 0, (byte) 0);
@@ -138,7 +138,7 @@ public class TestEvent {
 		config.putInt("run", 0, (int) 11);
 		config.putInt("event", 0, (int) 1);
 		config.putInt("unixtime", 0, (int) 0);
-		config.putInt("trigger", 0, (int) 0);
+		config.putLong("trigger", 0, (long) 0);
 		config.putLong("timestamp", 0, (long) 0);
 		config.putByte("type", 0, (byte) 0);
 		config.putByte("mode", 0, (byte) 0);
@@ -343,7 +343,7 @@ public class TestEvent {
 		config.putInt("run", 0, (int) 11);
 		config.putInt("event", 0, (int) 1);
 		config.putInt("unixtime", 0, (int) 0);
-                config.putInt("trigger", 0, (int) 0);
+		config.putLong("trigger", 0, (long) 0);
 		config.putLong("timestamp", 0, (long) 0);
 		config.putByte("type", 0, (byte) 0);
 		config.putByte("mode", 0, (byte) 0);

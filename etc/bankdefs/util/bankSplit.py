@@ -6,7 +6,7 @@ import os
 
 # print usage
 if len(sys.argv)<2:
-   print "usage: bankSplit.py coatjavahipobankfolder (e.g. coatjava/etc/bankdefs/hipo/)"
+   print "usage: bankSplit.py coatjavahipobankfolder (e.g. coatjava/etc/bankdefs/hipo4/)"
    sys.exit()
 
 # hipo schema directory
@@ -42,7 +42,7 @@ for filename in os.listdir("./"):
             sys.exit(1)
         # loop over banks in the json file
 	for bank in datastore:
-	    bankname = bank['bank']
+	    bankname = bank['name']
 	    file = open(workdirectory + singledirectory + bankname + ".json", 'w')
 	    file.write(json.dumps([bank], sort_keys=True, indent=4))
 	    file.close
