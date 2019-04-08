@@ -12,7 +12,7 @@
       { "name":"ADC"       , "type":"I", "info":"ADC maximum"},
       { "name":"time"      , "type":"F", "info":"time from pulse fit"},
       { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"},
-      { "name":"integral"  , "type":"B", "info":"ADC integral (sum over the pulse)"},
+      { "name":"integral"  , "type":"I", "info":"ADC integral (sum over the pulse)"},
       { "name":"timestamp" , "type":"L", "info":"timestamp"}
     ]
   },
@@ -155,7 +155,7 @@
       { "name":"ADC"       , "type":"I", "info":"ADC maximum"},
       { "name":"time"      , "type":"F", "info":"time from pulse fit"},
       { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"},
-      { "name":"integral"  , "type":"B", "info":"ADC integral (sum over the pulse)"},
+      { "name":"integral"  , "type":"I", "info":"ADC integral (sum over the pulse)"},
       { "name":"timestamp" , "type":"L", "info":"timestamp"}
     ]
   },
@@ -230,7 +230,7 @@
       { "name":"ADC"       , "type":"I", "info":"ADC maximum"},
       { "name":"time"      , "type":"F", "info":"time from pulse fit"},
       { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"},
-      { "name":"integral"  , "type":"B", "info":"ADC integral (sum over the pulse)"},
+      { "name":"integral"  , "type":"I", "info":"ADC integral (sum over the pulse)"},
       { "name":"timestamp" , "type":"L", "info":"timestamp"}
     ]
   },
@@ -425,7 +425,16 @@
     "info": "VTP bank",
     "entries":[
       { "name":"crate"     , "type":"B", "info":"crate number"},
-      { "name":"value"     , "type":"I", "info":"vtp value"}
+      { "name":"word"     , "type":"I", "info":"vtp value"}
+    ]
+  },
+  {
+    "name" : "RAW::epics",
+    "group": 20000,
+    "item" : 15,
+    "info" : "EPICS bank",
+    "entries":[
+        { "name":"json"    , "type":"B", "info":"json character" }
     ]
   }
 ]

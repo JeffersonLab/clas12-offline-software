@@ -395,11 +395,11 @@ public class RecoBankWriter {
      private DataBank fillTBHitsBank(DataEvent event, List<FittedHit> hitlist) {
         if(event.hasBank("TimeBasedTrkg::TBHits")) { // for second pass tracking
                 HipoDataEvent de = (HipoDataEvent) event;
-                HipoEvent dde = de.getHipoEvent();
+               // HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBHits");
                 ////event.show();
                 //group.show();
-                dde.removeGroup("TimeBasedTrkg::TBHits");
+                //dde.removeGroup("TimeBasedTrkg::TBHits");
         }
         DataBank bank = event.createBank("TimeBasedTrkg::TBHits", hitlist.size());
 
@@ -478,11 +478,11 @@ public class RecoBankWriter {
     private DataBank fillTBClustersBank(DataEvent event, List<FittedCluster> cluslist) {
         if(event.hasBank("TimeBasedTrkg::TBClusters")) { // for second pass tracking
                 HipoDataEvent de = (HipoDataEvent) event;
-                HipoEvent dde = de.getHipoEvent();
+                //HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBClusters");
                 ////event.show();
                 //group.show();
-                dde.removeGroup("TimeBasedTrkg::TBClusters");
+                //dde.removeGroup("TimeBasedTrkg::TBClusters");
         }
         DataBank bank = event.createBank("TimeBasedTrkg::TBClusters", cluslist.size());
 
@@ -546,11 +546,11 @@ public class RecoBankWriter {
     private DataBank fillTBSegmentsBank(DataEvent event, List<Segment> seglist) {
         if(event.hasBank("TimeBasedTrkg::TBSegments")) { // for second pass tracking
                 HipoDataEvent de = (HipoDataEvent) event;
-                HipoEvent dde = de.getHipoEvent();
+                //HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBSegments");
                 ////event.show();
                 //group.show();
-                dde.removeGroup("TimeBasedTrkg::TBSegments");
+                //dde.removeGroup("TimeBasedTrkg::TBSegments");
         }
         DataBank bank = event.createBank("TimeBasedTrkg::TBSegments", seglist.size());
 
@@ -654,11 +654,11 @@ public class RecoBankWriter {
 
         if(event.hasBank("TimeBasedTrkg::TBCrosses")) { // for second pass tracking
                 HipoDataEvent de = (HipoDataEvent) event;
-                HipoEvent dde = de.getHipoEvent();
+                //HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBCrosses");
                 ////event.show();
                 //group.show();
-                dde.removeGroup("TimeBasedTrkg::TBCrosses");
+                //dde.removeGroup("TimeBasedTrkg::TBCrosses");
         }
         int banksize=0;
         for (Cross aCrosslist1 : crosslist) {
@@ -701,11 +701,11 @@ public class RecoBankWriter {
     private DataBank fillTBTracksBank(DataEvent event, List<Track> candlist) {
         if(event.hasBank("TimeBasedTrkg::TBTracks")) { // for second pass tracking
                 HipoDataEvent de = (HipoDataEvent) event;
-                HipoEvent dde = de.getHipoEvent();
+                //HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBTracks");
                 ////event.show();
                 //group.show();
-                dde.removeGroup("TimeBasedTrkg::TBTracks");
+                //dde.removeGroup("TimeBasedTrkg::TBTracks");
         }
         DataBank bank = event.createBank("TimeBasedTrkg::TBTracks", candlist.size());
 
