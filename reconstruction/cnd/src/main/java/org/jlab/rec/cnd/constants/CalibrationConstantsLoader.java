@@ -36,6 +36,7 @@ public class CalibrationConstantsLoader {
 	public static double[] ZOFFSET                  = new double[3];
 	public static double[] THICKNESS                = new double[1];
 	public static double[] INNERRADIUS              = new double[1];
+	public static double[] ZTARGET                  = new double[1];
 	//Calibration and geometry parameters from DB    
 
 	public static boolean arEnergyibConstantsLoaded = false;
@@ -72,28 +73,37 @@ public class CalibrationConstantsLoader {
                     EFFVEL[iSec-1][iLay-1][1] = tabJs.get(5).getDoubleValue("veff_R", iSec, iLay, 1);
                     ATNLEN[iSec-1][iLay-1][0] = tabJs.get(6).getDoubleValue("attlen_L", iSec, iLay, 1);
                     ATNLEN[iSec-1][iLay-1][1] = tabJs.get(6).getDoubleValue("attlen_R", iSec, iLay, 1);
-                    Status_LR[iSec-1][iLay-1][0] = tabJs.get(7).getIntValue("/calibration/cnd/Status_LR/status_L", iSec, iLay, 1);
-                    Status_LR[iSec-1][iLay-1][1] = tabJs.get(7).getIntValue("/calibration/cnd/Status_LR/status_R", iSec, iLay, 1);
-                    MIPDIRECT[iSec-1][iLay-1][0]    = tabJs.get(8).getDoubleValue("/calibration/cnd/Energy/mip_dir_L", iSec, iLay, 1);
-                    MIPINDIRECT[iSec-1][iLay-1][0]  = tabJs.get(8).getDoubleValue("/calibration/cnd/Energy/mip_indir_L", iSec, iLay, 1);
-                    MIPDIRECT[iSec-1][iLay-1][1]    = tabJs.get(8).getDoubleValue("/calibration/cnd/Energy/mip_dir_R", iSec, iLay, 1);
-                    MIPINDIRECT[iSec-1][iLay-1][1]  = tabJs.get(8).getDoubleValue("/calibration/cnd/Energy/mip_indir_R", iSec, iLay, 1);
+                    Status_LR[iSec-1][iLay-1][0] = tabJs.get(7).getIntValue("status_L", iSec, iLay, 1);
+                    Status_LR[iSec-1][iLay-1][1] = tabJs.get(7).getIntValue("status_R", iSec, iLay, 1);
+                    MIPDIRECT[iSec-1][iLay-1][0]    = tabJs.get(8).getDoubleValue("mip_dir_L", iSec, iLay, 1);
+                    MIPINDIRECT[iSec-1][iLay-1][0]  = tabJs.get(8).getDoubleValue("mip_indir_L", iSec, iLay, 1);
+                    MIPDIRECT[iSec-1][iLay-1][1]    = tabJs.get(8).getDoubleValue("mip_dir_R", iSec, iLay, 1);
+                    MIPINDIRECT[iSec-1][iLay-1][1]  = tabJs.get(8).getDoubleValue("mip_indir_R", iSec, iLay, 1);
                 }
             }
             JITTER_PERIOD = tabJs.get(9).getDoubleValue("period", 0, 0, 0);
             JITTER_PHASE  = tabJs.get(9).getIntValue("phase",  0, 0, 0);
             JITTER_CYCLES = tabJs.get(9).getIntValue("cycles", 0, 0, 0);
 
-            //for(int iLay = 1; iLay <=3; iLay++) {
-            //    LENGTH[iLay-1]  = tabJs.get(10).getDoubleValue("Length", 0, iLay, 0);
-            //    ZOFFSET[iLay-1] = tabJs.get(10).getDoubleValue("UpstreamZOffset", 0, iLay, 0);// not right structure for common tools
-            //}
-            LENGTH = new double[]{665.72, 700.0, 734.28};
-            //INNERRADIUS[0] = tabJs.get(11).getDoubleValue("InnerRadius", 0, 0, 0);            
-            //THICKNESS[0] = tabJs.get(11).getDoubleValue("Thickness", 0, 0, 0);  // not right structure for common tools
-            INNERRADIUS[0] = 290.0;            
-            THICKNESS[0] = 30.0;  
-//
+            for(int iLay = 1; iLay <=3; iLay++) {
+                LENGTH[iLay-1]  = 10.*tabJs.get(10).getDoubleValue("Length", 1, iLay, 1);
+                ZOFFSET[iLay-1] = 10.*tabJs.get(10).getDoubleValue("UpstreamZOffset", 1, iLay, 1);// not right structure for common tools
+            }
+
+            //LENGTH = new double[]{665.72, 700.0, 734.28};
+            INNERRADIUS[0] = 10.*tabJs.get(10).getDoubleValue("InnerRadius", 1, 1, 1);            
+            THICKNESS[0] = 10.*tabJs.get(10).getDoubleValue("Thickness", 1, 1, 1);  // not right structure for common tools
+	    
+	    ZTARGET[0] = tabJs.get(11).getDoubleValue("position", 0, 0, 0);  // not right structure for common tools
+            //INNERRADIUS[0] = 290.0;            
+            //THICKNESS[0] = 30.0;  
+
+	System.out.println("Target Position "+ZTARGET[0]);
+	System.out.println("Radius and thickness "+INNERRADIUS[0]+" "+THICKNESS[0]);
+	 for(int iLay = 1; iLay <=3; iLay++) {
+	System.out.println("Length and Zoff "+LENGTH[iLay-1]+" "+ZOFFSET[iLay-1]);
+            }
+
             CSTLOADED = true;
             System.out.println("SUCCESSFULLY LOADED CND CALIBRATION CONSTANTS....");
 
