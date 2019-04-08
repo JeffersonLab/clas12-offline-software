@@ -37,7 +37,8 @@ public class TrajectorySurfaces {
     
     double FVT_Z1stlayer = 30.2967; // z-distance between target center and strips of the first layer.
     double FVT_Interlayer = 1.190;  // Keep this for now until the Geometry service is ready... or remove FMT from traj.
-    public void LoadSurfaces(DCGeant4Factory dcDetector,
+    public void LoadSurfaces(double targetPosition, double targetLength,
+            DCGeant4Factory dcDetector,
             FTOFGeant4Factory ftofDetector,
             ECGeant4Factory ecDetector,
             PCALGeant4Factory pcalDetector) {
@@ -51,11 +52,15 @@ public class TrajectorySurfaces {
 
             System.out.println(" CREATING SURFACES FOR SECTOR "+(is+1));
             this._DetectorPlanes.add(new ArrayList<Surface>());
+            
+            // add target center and downstream wall
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.TARGET, DetectorLayer.TARGET_DOWNSTREAM, targetPosition+targetLength/2, 0., 0., 1.));
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.TARGET, DetectorLayer.TARGET_CENTER, targetPosition, 0., 0., 1.));
+            
             //add FMT
             for(int i=0;i<6;i++) { 
-                d = FVT_Z1stlayer+i*FVT_Interlayer;
-                
-                this._DetectorPlanes.get(is).add(new Surface("FMT", DetectorType.FMT.getDetectorId(), i+1, d, 0., 0., 1.));
+                d = FVT_Z1stlayer+i*FVT_Interlayer;               
+                this._DetectorPlanes.get(is).add(new Surface(DetectorType.FMT, i+1, d, 0., 0., 1.));
             } 
             index=7; // end of MM + HTCC(7)
             // Add DC
@@ -63,38 +68,38 @@ public class TrajectorySurfaces {
             for(int isup =0; isup<6; isup++) {
                 for(int il =5; il<6; il++) { // include only layer 6
                     d = dcDetector.getWireMidpoint(is, isup, il, iw).z; 
-                    this._DetectorPlanes.get(is).add(new Surface("DC", DetectorType.DC.getDetectorId(), isup*6+il+1,d, n.x(), n.y(), n.z()));
+                    this._DetectorPlanes.get(is).add(new Surface(DetectorType.DC, isup*6+il+1,d, n.x(), n.y(), n.z()));
                 }
             } 
             //outer detectors           
             //LTCC
-            this._DetectorPlanes.get(is).add(new Surface("LTCC", DetectorType.LTCC.getDetectorId(),1, 624.23, n.x(), n.y(), n.z())); 
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.LTCC,1, 624.23, n.x(), n.y(), n.z())); 
              //FTOF 2 
-            Vector3D  P = ftofDetector.getMidPlane(is+1, 3).point().toVector3D();
-            n = ftofDetector.getMidPlane(is+1, 3).normal();
+            Vector3D  P = ftofDetector.getMidPlane(is+1, DetectorLayer.FTOF2).point().toVector3D();
+            n = ftofDetector.getMidPlane(is+1, DetectorLayer.FTOF2).normal();
             d = P.dot(n);
-            this._DetectorPlanes.get(is).add(new Surface("FTOF", DetectorType.FTOF.getDetectorId(), DetectorLayer.FTOF2, -d, -n.x(), -n.y(), -n.z())); 
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.FTOF, DetectorLayer.FTOF2, -d, -n.x(), -n.y(), -n.z())); 
             //FTOF 18 
-            P = ftofDetector.getMidPlane(is+1, 2).point().toVector3D();
-            n = ftofDetector.getMidPlane(is+1, 2).normal();
+            P = ftofDetector.getMidPlane(is+1, DetectorLayer.FTOF1B).point().toVector3D();
+            n = ftofDetector.getMidPlane(is+1, DetectorLayer.FTOF1B).normal();
             d = P.dot(n);
-            this._DetectorPlanes.get(is).add(new Surface("FTOF", DetectorType.FTOF.getDetectorId(), DetectorLayer.FTOF1B, -d, -n.x(), -n.y(), -n.z())); 
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.FTOF, DetectorLayer.FTOF1B, -d, -n.x(), -n.y(), -n.z())); 
             //FTOF 1A
-            P = ftofDetector.getMidPlane(is+1, 1).point().toVector3D();
-            n = ftofDetector.getMidPlane(is+1, 1).normal();
+            P = ftofDetector.getMidPlane(is+1, DetectorLayer.FTOF1A).point().toVector3D();
+            n = ftofDetector.getMidPlane(is+1, DetectorLayer.FTOF1A).normal();
             d = P.dot(n);
-            this._DetectorPlanes.get(is).add(new Surface("FTOF", DetectorType.FTOF.getDetectorId(), DetectorLayer.FTOF1A, -d, -n.x(), -n.y(), -n.z())); 
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.FTOF, DetectorLayer.FTOF1A, -d, -n.x(), -n.y(), -n.z())); 
             //// NEED TO CHANGE TO V PLANE
             //PCAL
             P = pcalDetector.getFrontalFace(is+1).point().toVector3D();
             n = pcalDetector.getFrontalFace(is+1).normal();
             d = P.dot(n);            
-            this._DetectorPlanes.get(is).add(new Surface("ECAL", DetectorType.ECAL.getDetectorId(), DetectorLayer.PCAL_V, -d, -n.x(), -n.y(), -n.z())); 
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.PCAL_V, -d, -n.x(), -n.y(), -n.z())); 
             //ECin
             P = ecDetector.getFrontalFace(is+1).point().toVector3D();
             n = ecDetector.getFrontalFace(is+1).normal();
             d = P.dot(n);
-            this._DetectorPlanes.get(is).add(new Surface("ECAL", DetectorType.ECAL.getDetectorId(), DetectorLayer.EC_INNER_V, -d, -n.x(), -n.y(), -n.z())); 
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.EC_INNER_V, -d, -n.x(), -n.y(), -n.z())); 
         }
     }
     private Point3D RotateFromTSCtoLabC(double X, double Y, double Z, int sector) {

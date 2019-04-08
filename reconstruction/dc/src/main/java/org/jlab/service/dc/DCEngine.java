@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.ECGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
@@ -106,25 +107,28 @@ public class DCEngine extends ReconstructionEngine {
         }
         
         // Load the geometry
-        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, Optional.ofNullable(geomDBVar).orElse("default"));
+        String geoVariation = Optional.ofNullable(geomDBVar).orElse("default");
+        ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, geoVariation);
         dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
         for(int l=0; l<6; l++) {
             Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
-            System.out.println("****************** WPDIST READ *********FROM "+geomDBVar+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
+            System.out.println("****************** WPDIST READ *********FROM "+geoVariation+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
         }
+        // Load target
+        ConstantProvider providerTG = GeometryFactory.getConstants(DetectorType.TARGET, 11, geoVariation);
+        double targetPosition = providerTG.getDouble("/geometry/target/position",0);
+        double targetLength   = providerTG.getDouble("/geometry/target/length",0);
         // Load other geometries
-        ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, "default");
-        ftofDetector = new FTOFGeant4Factory(providerFTOF);
-        
-        ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, "default");
-        ecDetector = new ECGeant4Factory(providerEC);
+        ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, geoVariation);
+        ftofDetector = new FTOFGeant4Factory(providerFTOF);        
+        ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, geoVariation);
+        ecDetector   = new ECGeant4Factory(providerEC);
         pcalDetector = new PCALGeant4Factory(providerEC);
-        
-        
         System.out.println(" -- Det Geometry constants are Loaded " );
+
         // create the surfaces
         tSurf = new TrajectorySurfaces();
-        tSurf.LoadSurfaces(dcDetector, ftofDetector, ecDetector, pcalDetector);
+        tSurf.LoadSurfaces(targetPosition, targetLength,dcDetector, ftofDetector, ecDetector, pcalDetector);
         
         // Get the constants for the correct variation
         String ccDBVar = this.getEngineConfigString("constantsDBVariation");

@@ -485,7 +485,7 @@ public class DetectorData {
                        int detId=trajBank.getInt("detector",ii);
                        int layId=trajBank.getByte("layer",ii);
                        float bField=trajBank.getFloat("B",ii);
-                       float pathLength=trajBank.getFloat("L",ii);
+                       float pathLength=trajBank.getFloat("path",ii);
                        float xx=trajBank.getFloat("x",ii);
                        float yy=trajBank.getFloat("y",ii);
                        float zz=trajBank.getFloat("z",ii);

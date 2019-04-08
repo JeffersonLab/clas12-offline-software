@@ -769,7 +769,15 @@ public class RecoBankWriter {
     }
 
     private DataBank fillTrajectoryBank(DataEvent event, List<Track> tracks) {
-        DataBank bank = event.createBank("TimeBasedTrkg::Trajectory", tracks.size()*21);
+        int size=0;
+        for (Track track : tracks) {
+            if (track == null)
+                continue;
+            if (track.trajectory == null)
+                continue;
+            size+=track.trajectory.size();
+        }       
+        DataBank bank = event.createBank("TimeBasedTrkg::Trajectory", size);
         int i1=0;
         for (Track track : tracks) {
             if (track == null)
@@ -791,7 +799,7 @@ public class RecoBankWriter {
                 bank.setFloat("ty",       i1, (float) ((float) track.trajectory.get(j).getpY() / track.get_P()));
                 bank.setFloat("tz",       i1, (float) ((float) track.trajectory.get(j).getpZ() / track.get_P()));
                 bank.setFloat("B",        i1, (float) track.trajectory.get(j).getiBdl());
-                bank.setFloat("L",        i1, (float) track.trajectory.get(j).getPathLen());
+                bank.setFloat("path",     i1, (float) track.trajectory.get(j).getPathLen());
                 i1++;
             }
         }
