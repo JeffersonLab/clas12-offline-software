@@ -1,16 +1,11 @@
 package org.jlab.rec.dc.trajectory;
 
-import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
-import org.jlab.detector.hits.DetHit;
-import org.jlab.detector.hits.FTOFDetHit;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.geometry.prim.Line3d;
 import org.jlab.rec.dc.cross.Cross;
 
 
@@ -274,7 +269,8 @@ public class Trajectory extends ArrayList<Cross> {
         this.FillTrajectory(id, trajectory, trkParsCheren, trkParsCheren[6], trkParsCheren[7], DetectorType.HTCC, 1); 
         pathLen = trkParsCheren[6];
         iBdl    = trkParsCheren[7]; 
-        
+//        System.out.println( "HTCC" + " " + trkParsCheren[0] + " " + trkParsCheren[1] + " " + trkParsCheren[2] + " " + trkParsCheren[6] + " " + trkParsCheren[7]);
+
         int is = this._Sector-1;
         // loop over surfaces: Target, FMT, DC, LTCC, FTOF, ECAL
         for(int j = 0; j<ts.getDetectorPlanes().get(is).size(); j++) {
@@ -296,10 +292,11 @@ public class Trajectory extends ArrayList<Cross> {
 //            if(surface.getDetectorIndex()==DetectorType.DC.getDetectorId()) {  // start swiming from previous DC layer
 //                dcSwim.SetSwimParameters(trkPars[0], trkPars[1], trkPars[2], trkPars[3], trkPars[4], trkPars[5], q);
 //            }
-//            System.out.println(j + " " + ts.getDetectorPlanes().get(is).get(j).getDetectorName());
   
             double[] trkPars = dcSwim.SwimToPlaneBoundary(surface.get_d(), new Vector3D(surface.get_nx(),surface.get_ny(),surface.get_nz()),dir);
             if(trkPars==null) return;
+            
+//            System.out.println(surface.getDetectorType().getName() + " " + surface.getDetectorLayer() + " " + trkPars[0] + " " + trkPars[1] + " " + trkPars[2] + " " + trkPars[6] + " " + trkPars[7]);
 
             // if surface correspond to target, invert unit vector before is saved and calculate manually the pathlength
             if(surface.getDetectorType()==DetectorType.TARGET) {

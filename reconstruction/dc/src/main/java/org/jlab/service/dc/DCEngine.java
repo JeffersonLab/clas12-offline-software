@@ -5,12 +5,12 @@ import java.util.Optional;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.ECGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.geant4.v2.PCALGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
+import org.jlab.geom.base.Detector;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.trajectory.TrajectorySurfaces;
@@ -22,8 +22,7 @@ public class DCEngine extends ReconstructionEngine {
     //AtomicInteger Run = new AtomicInteger(0);
     DCGeant4Factory dcDetector;
     FTOFGeant4Factory ftofDetector;
-    ECGeant4Factory ecDetector;
-    PCALGeant4Factory pcalDetector; 
+    Detector          ecalDetector = null;
     TrajectorySurfaces tSurf;
     String clasDictionaryPath ;
     String variationName;
@@ -122,13 +121,12 @@ public class DCEngine extends ReconstructionEngine {
         ConstantProvider providerFTOF = GeometryFactory.getConstants(DetectorType.FTOF, 11, geoVariation);
         ftofDetector = new FTOFGeant4Factory(providerFTOF);        
         ConstantProvider providerEC = GeometryFactory.getConstants(DetectorType.ECAL, 11, geoVariation);
-        ecDetector   = new ECGeant4Factory(providerEC);
-        pcalDetector = new PCALGeant4Factory(providerEC);
+        ecalDetector =  GeometryFactory.getDetector(DetectorType.ECAL, 11, geoVariation);
         System.out.println(" -- Det Geometry constants are Loaded " );
 
         // create the surfaces
         tSurf = new TrajectorySurfaces();
-        tSurf.LoadSurfaces(targetPosition, targetLength,dcDetector, ftofDetector, ecDetector, pcalDetector);
+        tSurf.LoadSurfaces(targetPosition, targetLength,dcDetector, ftofDetector, ecalDetector);
         
         // Get the constants for the correct variation
         String ccDBVar = this.getEngineConfigString("constantsDBVariation");

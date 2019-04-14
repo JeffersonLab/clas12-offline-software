@@ -12,8 +12,7 @@ import org.jlab.detector.base.DetectorType;
 
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
-import org.jlab.detector.geant4.v2.ECGeant4Factory;
-import org.jlab.detector.geant4.v2.PCALGeant4Factory;
+import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 /**
@@ -40,8 +39,7 @@ public class TrajectorySurfaces {
     public void LoadSurfaces(double targetPosition, double targetLength,
             DCGeant4Factory dcDetector,
             FTOFGeant4Factory ftofDetector,
-            ECGeant4Factory ecDetector,
-            PCALGeant4Factory pcalDetector) {
+            Detector ecalDetector) {
        
         int iw =0;
         
@@ -91,15 +89,19 @@ public class TrajectorySurfaces {
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.FTOF, DetectorLayer.FTOF1A, -d, -n.x(), -n.y(), -n.z())); 
             //// NEED TO CHANGE TO V PLANE
             //PCAL
-            P = pcalDetector.getFrontalFace(is+1).point().toVector3D();
-            n = pcalDetector.getFrontalFace(is+1).normal();
+            int superLayer = (int) ((DetectorLayer.PCAL_V-1)/3);
+            int localLayer = (DetectorLayer.PCAL_V-1)%3;
+            P = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().point().toVector3D();
+            n = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().normal();
             d = P.dot(n);            
-            this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.PCAL_V, -d, -n.x(), -n.y(), -n.z())); 
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.PCAL_V, d, n.x(), n.y(), n.z())); 
             //ECin
-            P = ecDetector.getFrontalFace(is+1).point().toVector3D();
-            n = ecDetector.getFrontalFace(is+1).normal();
+            superLayer = (int) ((DetectorLayer.EC_INNER_V-1)/3);
+            localLayer = (DetectorLayer.EC_INNER_V-1)%3;
+            P = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().point().toVector3D();
+            n = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().normal();
             d = P.dot(n);
-            this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.EC_INNER_V, -d, -n.x(), -n.y(), -n.z())); 
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.EC_INNER_V, d, n.x(), n.y(), n.z())); 
         }
     }
     private Point3D RotateFromTSCtoLabC(double X, double Y, double Z, int sector) {
