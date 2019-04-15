@@ -102,6 +102,13 @@ public class TrajectorySurfaces {
             n = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().normal();
             d = P.dot(n);
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.EC_INNER_V, d, n.x(), n.y(), n.z())); 
+            //ECout
+            superLayer = (int) ((DetectorLayer.EC_OUTER_V-1)/3);
+            localLayer = (DetectorLayer.EC_OUTER_V-1)%3;
+            P = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().point().toVector3D();
+            n = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().normal();
+            d = P.dot(n);
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.EC_OUTER_V, d, n.x(), n.y(), n.z())); 
         }
     }
     private Point3D RotateFromTSCtoLabC(double X, double Y, double Z, int sector) {
