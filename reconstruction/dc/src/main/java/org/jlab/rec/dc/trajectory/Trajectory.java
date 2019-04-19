@@ -285,7 +285,6 @@ public class Trajectory extends ArrayList<Cross> {
             
             //handle DC differently
             if(surface.getDetectorType()==DetectorType.DC) {
-            //    dcSwim.SetSwimParameters(trkParsCheren[0], trkParsCheren[1],trkParsCheren[2], trkParsCheren[3], trkParsCheren[4], trkParsCheren[5], q);
                 // create a trackVec in the lab and rotate it to the DC TSC frame for track propagation
                 tv.set(trkParsCheren[0], trkParsCheren[1],trkParsCheren[2], trkParsCheren[3], trkParsCheren[4], trkParsCheren[5]) ;
                 tv.TransformToTiltSectorFrame();
@@ -307,6 +306,10 @@ public class Trajectory extends ArrayList<Cross> {
                 }
                 else if(surface.getDetectorType()==DetectorType.FMT) {
                     dcSwim.SetSwimParameters(x, y, z, px, py, pz, q);
+                    dir=1;
+                }
+                else {
+                    dcSwim.SetSwimParameters(trkParsCheren[0], trkParsCheren[1], trkParsCheren[2], trkParsCheren[3], trkParsCheren[4], trkParsCheren[5], q);
                     dir=1;
                 }
             
