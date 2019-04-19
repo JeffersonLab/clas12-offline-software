@@ -29,6 +29,7 @@ import org.jlab.rec.dc.track.fit.KFitter;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
+import org.jlab.utils.groups.IndexedTable;
 
 public class DCTBEngine extends DCEngine {
 
@@ -42,8 +43,7 @@ public class DCTBEngine extends DCEngine {
     private int newRun = 0;
     private TimeToDistanceEstimator tde;
     private double tarCent=-1.942;
-    public double xB = 0;
-    public double yB = 0;
+
     public DCTBEngine() {
         super("DCTB");
         tde = new TimeToDistanceEstimator();
@@ -72,7 +72,6 @@ public class DCTBEngine extends DCEngine {
         if(newRun==0)
             return true;
         if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
-           this.getBeamOffsetParams(newRun, "default");
            Run.set(newRun);
         }
         double T_Start = 0;
@@ -209,6 +208,10 @@ public class DCTBEngine extends DCEngine {
         }
         
         //6) find the list of  track candidates
+        // read beam offsets from database
+        IndexedTable beamOffset = this.getConstantsManager().getConstants(newRun, "/geometry/beam/position");
+        double beamXoffset = beamOffset.getDoubleValue("x_offset", 0,0,0);
+        double beamYoffset = beamOffset.getDoubleValue("y_offset", 0,0,0);
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         TrajectoryFinder trjFind = new TrajectoryFinder();
         for(int i = 0; i < TrackArray.length; i++) {
@@ -234,7 +237,7 @@ public class DCTBEngine extends DCEngine {
                 TrackArray[i].set_P(1./Math.abs(kFit.finalStateVec.Q));
                 TrackArray[i].set_Q((int)Math.signum(kFit.finalStateVec.Q));
                 trkcandFinder.setTrackPars(TrackArray[i], new Trajectory(), trjFind, fn, 
-                        kFit.finalStateVec.z, dcDetector, dcSwim, xB, yB);
+                        kFit.finalStateVec.z, dcDetector, dcSwim, beamXoffset, beamYoffset);
                 // candidate parameters are set from the state vector
                 TrackArray[i].set_FitChi2(kFit.chi2); 
                 TrackArray[i].set_FitNDF(kFit.NDF);
@@ -319,25 +322,5 @@ public class DCTBEngine extends DCEngine {
         }
         return miss;
     }
-    
-    /**
-     * 
-     * @param run
-     * @param variation 
-     */
-    public void getBeamOffsetParams(int run, String variation) {
-    System.out.println(" Beam PARS FILLED..... for Run "+run+" with VARIATION "+variation);
-        DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(run, variation);
-        dbprovider.loadTable("/test/beam_pos");
-        //disconnect from database. Important to do this after loading tables.
-        dbprovider.disconnect();
-        double r = dbprovider.getDouble("/test/beam_pos/r",0);
-        double phi = dbprovider.getDouble("/test/beam_pos/phi0",0);
-        
-        xB = 0.1*r*Math.cos(Math.toRadians(phi));
-        yB = 0.1*r*Math.sin(Math.toRadians(phi));
-        
-        System.out.println(" READ BEAM OFFSET TERMS xB = "+xB+"  yB = "+yB);
-    }
-   
+       
 }
