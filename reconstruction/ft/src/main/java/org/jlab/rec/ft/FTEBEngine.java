@@ -81,24 +81,24 @@ public class FTEBEngine extends ReconstructionEngine {
 
             if (event instanceof EvioDataEvent) {
                 EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
-                if (bank.getByte("Type")[0] == 0) {
+                if (bank.getByte("Type",0) == 0) {
                     isMC = true;
                 }
-                if (bank.getByte("Mode")[0] == 1) {
+                if (bank.getByte("Mode",0)== 1) {
                     isCosmics = true;
                 }
-                run = bank.getInt("Run")[0];
+                run = bank.getInt("Run",0);
                 fieldScale = bank.getFloat("Solenoid")[0];
             } else {
                 DataBank bank = event.getBank("RUN::config");
-                if (bank.getByte("type")[0] == 0) {
+                if (bank.getByte("type",0) == 0) {
                     isMC = true;
                 }
-                if (bank.getByte("mode")[0] == 1) {
+                if (bank.getByte("mode",0)== 1) {
                     isCosmics = true;
                 }
-                run = bank.getInt("run")[0];
-                fieldScale = bank.getFloat("solenoid")[0];
+                run = bank.getInt("run",0);
+                fieldScale = bank.getFloat("solenoid",0);
             }
             this.setSolenoid(fieldScale);
         }

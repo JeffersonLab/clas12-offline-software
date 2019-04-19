@@ -12,7 +12,9 @@ import org.jlab.analysis.physics.TestEvent;
 import org.jlab.analysis.math.ClasMath;
 
 import org.jlab.clas.swimtools.MagFieldsEngine;
+import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.utils.CLASResources;
+import org.jlab.utils.system.ClasUtilsFile;
 
 
 /**
@@ -33,7 +35,12 @@ public class DCReconstructionTest {
     catch (Exception e) {
         e.printStackTrace();
     }
-    DataEvent testEvent = TestEvent.getDCSector1ElectronEvent();
+    
+    String dir = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4");
+    SchemaFactory schemaFactory = new SchemaFactory();
+    schemaFactory.initFromDirectory(dir);
+		
+    DataEvent testEvent = TestEvent.getDCSector1ElectronEvent(schemaFactory);
     MagFieldsEngine enf = new MagFieldsEngine();
     //enf.init();
     enf.processDataEvent(testEvent);
