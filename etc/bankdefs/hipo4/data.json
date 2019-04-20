@@ -365,7 +365,7 @@
     "name" : "HEL::adc",
     "group": 22000,
     "item" : 11,
-    "info": "ADC bank for the Helicity signals",
+    "info": "ADC bank for the Helicity signals.  Compoment 1/2/3 is helicity/sync/quartet.",
     "entries":[
       { "name":"sector"    , "type":"B", "info":"sector (=1)"},
       { "name":"layer"     , "type":"B", "info":"layer (=1)"},
@@ -375,6 +375,21 @@
       { "name":"time"      , "type":"F", "info":"time from pulse fit"},
       { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
     ]
+  },
+  {
+      "name": "HEL::flip",
+      "group": 22000,
+      "item":  12,
+      "info":  "Helicity flips from ADC bank.  State values are -1/0/+1, where 0 is invalid.",
+      "entries": [
+          {"name":"run",         "id":1, "type":"I", "info":"run number"},
+          {"name":"event",       "id":2, "type":"I", "info":"event number"},
+          {"name":"timestamp",   "id":3, "type":"L", "info":"timestamp (4ns)"},
+          {"name":"helicity",    "id":4, "type":"B", "info":"helicity state with half-wave plate correction"},
+          {"name":"helicityRaw", "id":5, "type":"B", "info":"helicity state without half-wave plate correction"},
+          {"name":"sync",        "id":6, "type":"B", "info":"sync state"},
+          {"name":"quartet",     "id":7, "type":"B", "info":"quartet state"}
+      ]
   },
   {
     "name" : "RAW::adc",
