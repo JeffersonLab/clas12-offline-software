@@ -594,7 +594,7 @@ public class DetectorData {
                                yy+track.getMaxLineLength()*cy,
                                zz+track.getMaxLineLength()*cz);
                        // FIXME:  pending layer from CVT trajectory bank
-                       track.addTrajectoryPoint(detId,0,traj);
+                       track.addTrajectoryPoint(-1,detId,traj);
                    }
                }
 
