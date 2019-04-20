@@ -16,6 +16,8 @@ public class RCDBProvider {
 
     private org.rcdb.JDBCProvider provider;
 
+    private int debugMode = 2;
+
     public RCDBProvider(){
         String address = DEFAULTADDRESS;
         String envAddress = this.getEnvironment();
@@ -59,20 +61,27 @@ public class RCDBProvider {
     private void initialize(String address){
         provider = RCDB.createProvider(address);
         try {
+            if (debugMode>1) {
+                System.out.println("[RCDB] --->  open connection with : " + address);
+            }
             provider.connect();
         }
         catch (Exception e) {
         }
-        if(provider.isConnected()==true){
-            System.out.println("[DB] --->  database connection  : success");
-        } else {
-            System.out.println("[DB] --->  database connection  : failed");
+        if (debugMode>1) {
+            if(provider.isConnected()==true){
+                System.out.println("[RCDB] --->  database connection  : success");
+            } else {
+                System.out.println("[RCDB] --->  database connection  : failed");
+            }
         }
     }
 
     public void disconnect(){
         if (provider.isConnected()) {
-            System.out.println("[DB] --->  database disconnect  : success");
+            if (debugMode>1) {
+                System.out.println("[RCDB] --->  database disconnect  : success");
+            }
             provider.close();
         }
     }
