@@ -87,11 +87,13 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/calibration/mvt/lorentz");
         dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_fullfield");
         dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_midfield");
-        dbprovider.disconnect();
-        
+
         //beam offset table
         dbprovider.loadTable("/geometry/beam/position");
-       //  dbprovider.show();
+        
+        dbprovider.disconnect();
+        
+      //  dbprovider.show();
         // Getting the Constants
         // 1) pitch info 
         for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_strip_L1/Group_size"); i++) {
@@ -245,7 +247,8 @@ public class CCDBConstantsLoader {
         double yb = dbprovider.getDouble("/geometry/beam/position/y_offset", 0); 
         double exb = dbprovider.getDouble("/geometry/beam/position/x_error", 0);     
         double eyb = dbprovider.getDouble("/geometry/beam/position/y_error", 0); 
-        double err = (Math.pow(xb*exb,2)+Math.pow(yb*eyb,2))/Math.sqrt(xb*xb+yb*yb);
+        double err = 0;
+        if(Math.sqrt(xb*xb+yb*yb)!=0) err = Math.sqrt((Math.pow(xb*exb,2)+Math.pow(yb*eyb,2))/(xb*xb+yb*yb));
         org.jlab.rec.cvt.Constants.setXb(xb);
         org.jlab.rec.cvt.Constants.setYb(yb);
         org.jlab.rec.cvt.Constants.setRbErr(err);
