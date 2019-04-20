@@ -1,6 +1,8 @@
 package org.jlab.rec.cnd.constants;
 
+import java.util.ArrayList;
 import java.util.List;
+import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.utils.groups.IndexedTable;
 
 
@@ -12,38 +14,53 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class CalibrationConstantsLoader {
 
-	public CalibrationConstantsLoader() {
-		// TODO Auto-generated constructor stub
-	}
-	public static boolean CSTLOADED = false;
+        private final static String[]  cndTables = new String[]{
+                "/calibration/cnd/UturnEloss",
+                "/calibration/cnd/UturnTloss",
+                "/calibration/cnd/TimeOffsets_LR",
+                "/calibration/cnd/TDC_conv",
+                "/calibration/cnd/TimeOffsets_layer",
+                "/calibration/cnd/EffV",
+                "/calibration/cnd/Attenuation",
+                "/calibration/cnd/Status_LR",
+                "/calibration/cnd/Energy",
+                "/calibration/cnd/time_jitter",
+		"/geometry/cnd/cndgeom",
+		"/geometry/target"
+            };
 
-	// Instantiating the constants arrays
-	public static double[][] UTURNELOSS 		= new double[24][3];
-	public static double[][] UTURNTLOSS 		= new double[24][3];
-	public static double[][] TIMEOFFSETSLR 		= new double[24][3];	
-	public static double[][][] TDCTOTIMESLOPE	= new double[24][3][2];
-	public static double[][][] TDCTOTIMEOFFSET	= new double[24][3][2];	
-	public static double[][] TIMEOFFSETSECT 	= new double[24][3];
-	public static double[][][] EFFVEL 		= new double[24][3][2];
-	public static double[][][] ATNLEN               = new double[24][3][2];
-	public static double[][][] MIPDIRECT 		= new double[24][3][2];
-	public static double[][][] MIPINDIRECT		= new double[24][3][2];
-	public static int[][][] Status_LR 		= new int[24][3][2];
-	public static double JITTER_PERIOD              = 0;
-	public static int JITTER_PHASE                  = 0;
-	public static int JITTER_CYCLES                 = 0;
-	public static double[] LENGTH                   = new double[3];
-	public static double[] ZOFFSET                  = new double[3];
-	public static double[] THICKNESS                = new double[1];
-	public static double[] INNERRADIUS              = new double[1];
-	public static double[] ZTARGET                  = new double[1];
+        public CalibrationConstantsLoader(int run, ConstantsManager ccdb) {
+            this.Load(run, ccdb);
+        }
+
+        // Instantiating the constants arrays
+	public double[][] UTURNELOSS 		= new double[24][3];
+	public double[][] UTURNTLOSS 		= new double[24][3];
+	public double[][] TIMEOFFSETSLR 		= new double[24][3];	
+	public double[][][] TDCTOTIMESLOPE	= new double[24][3][2];
+	public double[][][] TDCTOTIMEOFFSET	= new double[24][3][2];	
+	public double[][] TIMEOFFSETSECT 	= new double[24][3];
+	public double[][][] EFFVEL 		= new double[24][3][2];
+	public double[][][] ATNLEN               = new double[24][3][2];
+	public double[][][] MIPDIRECT 		= new double[24][3][2];
+	public double[][][] MIPINDIRECT		= new double[24][3][2];
+	public int[][][] Status_LR 		= new int[24][3][2];
+	public double JITTER_PERIOD              = 0;
+	public int JITTER_PHASE                  = 0;
+	public int JITTER_CYCLES                 = 0;
+	public double[] LENGTH                   = new double[3];
+	public double[] ZOFFSET                  = new double[3];
+	public double[] THICKNESS                = new double[1];
+	public double[] INNERRADIUS              = new double[1];
+	public double[] ZTARGET                  = new double[1];
 	//Calibration and geometry parameters from DB    
 
-	public static boolean arEnergyibConstantsLoaded = false;
-	public static synchronized void Load(List<IndexedTable> tabJs) {
-            if(CSTLOADED)
-                return;
-            System.out.println(" LOADING CONSTANTS ");
+        public static String[] getCndTables() {
+            return cndTables;
+        }
+
+        
+	public final void Load(int run, ConstantsManager ccdb) {
 
             // load table reads entire table and makes an array of variables for each column in the table.
             //tabJs(0): ("/calibration/cnd/UturnEloss");
@@ -58,6 +75,10 @@ public class CalibrationConstantsLoader {
             //tabJs(9): ("/calibration/cnd/time_jitter");
             //tabJs(10): ("/geometry/cnd/layer");
             //tabJs(11): ("/geometry/cnd/cnd");
+            List<IndexedTable> tabJs = new ArrayList<IndexedTable>();
+            for(String tbStg : cndTables) {
+                tabJs.add(ccdb.getConstants(run, tbStg));
+            }
 
             for (int iSec = 1; iSec <=24; iSec++) {
                 for(int iLay = 1; iLay <=3; iLay++) {
@@ -98,16 +119,13 @@ public class CalibrationConstantsLoader {
             //INNERRADIUS[0] = 290.0;            
             //THICKNESS[0] = 30.0;  
 
-	System.out.println("Target Position "+ZTARGET[0]);
-	System.out.println("Radius and thickness "+INNERRADIUS[0]+" "+THICKNESS[0]);
-	 for(int iLay = 1; iLay <=3; iLay++) {
-	System.out.println("Length and Zoff "+LENGTH[iLay-1]+" "+ZOFFSET[iLay-1]);
-            }
+//            System.out.println("Target Position "+ZTARGET[0]);
+//            System.out.println("Radius and thickness "+INNERRADIUS[0]+" "+THICKNESS[0]);
+//            for(int iLay = 1; iLay <=3; iLay++) {
+//              System.out.println("Length and Zoff "+LENGTH[iLay-1]+" "+ZOFFSET[iLay-1]);
+//            }
 
-            CSTLOADED = true;
-            System.out.println("SUCCESSFULLY LOADED CND CALIBRATION CONSTANTS....");
-
-	} 
+    } 
 
 
 }

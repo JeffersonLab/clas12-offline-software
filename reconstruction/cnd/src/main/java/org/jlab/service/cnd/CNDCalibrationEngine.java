@@ -73,16 +73,10 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
                return true;
 
             if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
-                List<IndexedTable> tabJs = new ArrayList<IndexedTable>();
-                for(String tbStg : cndTables) {
-                    tabJs.add(this.getConstantsManager().getConstants(newRun, tbStg));
-                }
-               
-                CalibrationConstantsLoader.Load(tabJs);    
-
-                Run.set(newRun);
-           }
+                 Run.set(newRun);
+            }
             
+                CalibrationConstantsLoader constantsLoader = new CalibrationConstantsLoader(newRun, this.getConstantsManager());
 		//event.show();
 		//System.out.println("in data process ");
             
@@ -94,7 +88,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 //			hcvt++;
 //		}
 
-		halfhits = HitReader.getCndHalfHits(event);		
+		halfhits = HitReader.getCndHalfHits(event, constantsLoader);		
 		//1) exit if halfhit list is empty
 		if(halfhits.size()==0 ){
 			//			System.out.println("fin de process (0) : ");
@@ -104,14 +98,14 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 
 		//2) find the CND hits from these half-hits
 		CndHitFinder hitFinder = new CndHitFinder();
-		hits = hitFinder.findHits(halfhits,0);
+		hits = hitFinder.findHits(halfhits,0, constantsLoader);
 
 		CvtGetHTrack cvttry = new CvtGetHTrack();
-		cvttry.getCvtHTrack(event); // get the list of helix associated with the event
+		cvttry.getCvtHTrack(event,constantsLoader); // get the list of helix associated with the event
 
 		//int flag=0;
 		for (CndHit hit : hits){ // findlength for charged particles
-			double length =hitFinder.findLength(hit, cvttry.getHelices(),0);
+			double length =hitFinder.findLength(hit, cvttry.getHelices(),0,constantsLoader);
 			if (length!=0){
 				hit.set_tLength(length); // the path length is non zero only when there is a match with cvt track
 				//if(flag==0){match++;}
@@ -200,47 +194,15 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 		
 	}
 
-        String[]  cndTables = new String[]{
-                "/calibration/cnd/UturnEloss",
-                "/calibration/cnd/UturnTloss",
-                "/calibration/cnd/TimeOffsets_LR",
-                "/calibration/cnd/TDC_conv",
-                "/calibration/cnd/TimeOffsets_layer",
-                "/calibration/cnd/EffV",
-                "/calibration/cnd/Attenuation",
-                "/calibration/cnd/Status_LR",
-                "/calibration/cnd/Energy",
-                "/calibration/cnd/time_jitter",
-		"/geometry/cnd/cndgeom",
-		"/geometry/target"
-            };
 	@Override
 	public boolean init() {
             // TODO Auto-generated method stub
             rbc = new RecoBankWriter();
             System.out.println("in init ");
             
-
-        requireConstants(Arrays.asList(cndTables));
-        
-        // Get the constants for the correct variation
-        String ccDBVar = this.getEngineConfigString("constantsDBVariation");
-        if (ccDBVar!=null) {
-            System.out.println("["+this.getName()+"] run with constants variation based on yaml ="+ccDBVar);
-        }
-        else {
-            ccDBVar = System.getenv("CCDBVAR");
-            if (ccDBVar!=null) {
-                System.out.println("["+this.getName()+"] run with constants variation chosen based on env ="+ccDBVar);
-            }
-        } 
-        if (ccDBVar==null) {
-            System.out.println("["+this.getName()+"] run with default constants");
-        }
-        // Load the calibration constants
-        String dcvariationName = Optional.ofNullable(ccDBVar).orElse("default");
-        this.getConstantsManager().setVariation(dcvariationName);
-		return true;
+            requireConstants(Arrays.asList(CalibrationConstantsLoader.getCndTables()));
+            this.getConstantsManager().setVariation("default");
+            return true;
 	}
 
 
