@@ -243,8 +243,12 @@ public class CCDBConstantsLoader {
          // beam offset
         double xb = dbprovider.getDouble("/geometry/beam/position/x_offset", 0);     
         double yb = dbprovider.getDouble("/geometry/beam/position/y_offset", 0); 
+        double exb = dbprovider.getDouble("/geometry/beam/position/x_error", 0);     
+        double eyb = dbprovider.getDouble("/geometry/beam/position/y_error", 0); 
+        double err = (Math.pow(xb*exb,2)+Math.pow(yb*eyb,2))/Math.sqrt(xb*xb+yb*yb);
         org.jlab.rec.cvt.Constants.setXb(xb);
         org.jlab.rec.cvt.Constants.setYb(yb);
+        org.jlab.rec.cvt.Constants.setRbErr(err);
          
         Constants.setCRCRADIUS(CRCRADIUS);
         Constants.setCRZRADIUS(CRZRADIUS);
