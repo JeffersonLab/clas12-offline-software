@@ -24,7 +24,7 @@ public class CndHitFinder {
 	// The following method are used to calculate the length the particle is travelling in the paddle while depositing energy.
 
 	// flag to distinguish between calibration mode 0 (loose cuts) and reconstruction mode 1 (tighter cuts)
-	
+
 	public ArrayList<CndHit> findHits(ArrayList<HalfHit> halfhits,int flag) 
 	{
 
@@ -109,17 +109,35 @@ public class CndHitFinder {
 
 					if (deltaR<delta) 
 					{
-						hit_d = hit1;
-						hit_n = hit2;
-						pad_d = i;
-						pad_n = j;
+
+						if(hit1.Component()==1){
+							hit_d = hit1;
+							hit_n = hit2;
+							pad_d = i;
+							pad_n = j;
+						}
+						else{
+							hit_d = hit2;
+							hit_n = hit1;
+							pad_d = j;
+							pad_n = i;
+						}
 					}
 					else if (deltaR>delta) 
 					{                                                                         
-						hit_d = hit2;
-						hit_n = hit1;
-						pad_d = j;
-						pad_n = i;
+
+						if(hit1.Component()==1){
+							hit_d = hit2;
+							hit_n = hit1;
+							pad_d = j;
+							pad_n = i;
+						}
+						else{
+							hit_d = hit1;
+							hit_n = hit2;
+							pad_d = i;
+							pad_n = j;
+						}			
 					}
 					else continue; 		
 
@@ -179,7 +197,7 @@ public class CndHitFinder {
 					else if (hit_d.Component() == 2) phi_hit = (block-1) * Parameters.BlockSlice + 0.75*Parameters.BlockSlice;
 
 					//in mm
-					z_hit = (((-1.*CalibrationConstantsLoader.ZOFFSET[lay-1]) + (CalibrationConstantsLoader.LENGTH[lay-1]/2.)) + Z_av);    // z co-ordinate of hit in the paddle wrt Central Detector centre                                                                   
+					z_hit = (((-1.*CalibrationConstantsLoader.ZOFFSET[lay-1]) + (CalibrationConstantsLoader.LENGTH[lay-1]/2.)) + Z_av)+(CalibrationConstantsLoader.ZTARGET[0]*10);    // z co-ordinate of hit in the paddle wrt Central Detector centre                                                                   
 					r_hit = CalibrationConstantsLoader.INNERRADIUS[0] + (lay - 0.5)*CalibrationConstantsLoader.THICKNESS[0] + (lay-1)*Parameters.LayerGap;
 					path = Math.sqrt(r_hit*r_hit + z_hit*z_hit); 
 
@@ -367,63 +385,63 @@ public class CndHitFinder {
 		}
 		return length; 
 
-	} //findLength function for charged particles
+		} //findLength function for charged particles
 
 
 
-	public double findLengthNeutral(Point3D vertex, CndHit hit){
+		public double findLengthNeutral(Point3D vertex, CndHit hit){
 
-		// not finished	
+			// not finished	
 
-		// if the particle is not charged, it is not detected in the cvt and we can calculate its pathlength using reconstructed vertex				
-		double length = 0.;
+			// if the particle is not charged, it is not detected in the cvt and we can calculate its pathlength using reconstructed vertex				
+			double length = 0.;
 
-		if( vertex!=null){
+			if( vertex!=null){
 
-			double xi = hit.X();
-			double yi = hit.Y();
-			double zi = hit.Z();
-			Point3D hitpoint = new Point3D(xi,yi,zi);
-			double energyNCorr=hit.Edep();
-			int lay = hit.Layer();
-			double entryradius = CalibrationConstantsLoader.INNERRADIUS[0] + (lay-1)*CalibrationConstantsLoader.THICKNESS[0] + (lay-1)*Parameters.LayerGap;
-			double escaperadius = CalibrationConstantsLoader.INNERRADIUS[0] + (lay)*CalibrationConstantsLoader.THICKNESS[0] + (lay-1)*Parameters.LayerGap;	
-			// get the length of the path as the distance between the two intersection points of 
-			// the line between the hit point and the vertex and 2 cylinders corresponding to the hit paddle.		
+				double xi = hit.X();
+				double yi = hit.Y();
+				double zi = hit.Z();
+				Point3D hitpoint = new Point3D(xi,yi,zi);
+				double energyNCorr=hit.Edep();
+				int lay = hit.Layer();
+				double entryradius = CalibrationConstantsLoader.INNERRADIUS[0] + (lay-1)*CalibrationConstantsLoader.THICKNESS[0] + (lay-1)*Parameters.LayerGap;
+				double escaperadius = CalibrationConstantsLoader.INNERRADIUS[0] + (lay)*CalibrationConstantsLoader.THICKNESS[0] + (lay-1)*Parameters.LayerGap;	
+				// get the length of the path as the distance between the two intersection points of 
+				// the line between the hit point and the vertex and 2 cylinders corresponding to the hit paddle.		
 
-			//set the cylinders
-			Point3D center = new Point3D(0.,0.,-1.*CalibrationConstantsLoader.LENGTH[lay-1]);
-			Point3D origin1 = new Point3D(entryradius,0.,0.);
-			Point3D origin2 = new Point3D(escaperadius,0.,0.);
-			Vector3D normal = new Vector3D(0.,0.,1.);
-			Arc3D arc1 = new Arc3D(origin1,center,normal,Math.PI*2.);
-			Arc3D arc2 = new Arc3D(origin2,center,normal,Math.PI*2.);
-			Cylindrical3D cyl1 = new Cylindrical3D(arc1,2.*CalibrationConstantsLoader.LENGTH[lay-1]);
-			Cylindrical3D cyl2 = new Cylindrical3D(arc2,2.*CalibrationConstantsLoader.LENGTH[lay-1]);
-			// the cylinders are biggers than the actual cnd but it is just for convenience, as the hit point is in the cnd anyway
+				//set the cylinders
+				Point3D center = new Point3D(0.,0.,-1.*CalibrationConstantsLoader.LENGTH[lay-1]);
+				Point3D origin1 = new Point3D(entryradius,0.,0.);
+				Point3D origin2 = new Point3D(escaperadius,0.,0.);
+				Vector3D normal = new Vector3D(0.,0.,1.);
+				Arc3D arc1 = new Arc3D(origin1,center,normal,Math.PI*2.);
+				Arc3D arc2 = new Arc3D(origin2,center,normal,Math.PI*2.);
+				Cylindrical3D cyl1 = new Cylindrical3D(arc1,2.*CalibrationConstantsLoader.LENGTH[lay-1]);
+				Cylindrical3D cyl2 = new Cylindrical3D(arc2,2.*CalibrationConstantsLoader.LENGTH[lay-1]);
+				// the cylinders are biggers than the actual cnd but it is just for convenience, as the hit point is in the cnd anyway
 
-			//set the line between the vertex and the hit point
-			Line3D line = new Line3D(vertex,hitpoint);
+				//set the line between the vertex and the hit point
+				Line3D line = new Line3D(vertex,hitpoint);
 
-			//find intersection points
-			List<Point3D> entrypoints = new ArrayList<Point3D>();
-			List<Point3D> exitpoints = new ArrayList<Point3D>();
-			cyl1.intersectionRay(line, entrypoints);
-			cyl2.intersectionRay(line, exitpoints);
-			if(entrypoints.size()==1 && exitpoints.size()==1){
-				length=entrypoints.get(0).distance(exitpoints.get(0));
-				System.err.println("length neutral " + length);
+				//find intersection points
+				List<Point3D> entrypoints = new ArrayList<Point3D>();
+				List<Point3D> exitpoints = new ArrayList<Point3D>();
+				cyl1.intersectionRay(line, entrypoints);
+				cyl2.intersectionRay(line, exitpoints);
+				if(entrypoints.size()==1 && exitpoints.size()==1){
+					length=entrypoints.get(0).distance(exitpoints.get(0));
+					System.err.println("length neutral " + length);
+				}
+				else {
+					System.err.println("probleme intersection"+" entrypoints nb "+entrypoints.size()+" exitpoints nb "+exitpoints.size());}
+
+				hit.set_Edep(energyNCorr*(Math.max(length, CalibrationConstantsLoader.THICKNESS[0])/CalibrationConstantsLoader.THICKNESS[0]));
+				return length;
 			}
-			else {
-				System.err.println("probleme intersection"+" entrypoints nb "+entrypoints.size()+" exitpoints nb "+exitpoints.size());}
+			else return length;
 
-			hit.set_Edep(energyNCorr*(Math.max(length, CalibrationConstantsLoader.THICKNESS[0])/CalibrationConstantsLoader.THICKNESS[0]));
-			return length;
-		}
-		else return length;
-
-	} // fingLengthNeutral
+		} // fingLengthNeutral
 
 
 
-} // CndHitFinder
+	} // CndHitFinder
