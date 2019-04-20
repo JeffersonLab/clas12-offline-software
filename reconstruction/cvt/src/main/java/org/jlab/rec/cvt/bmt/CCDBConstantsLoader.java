@@ -90,7 +90,7 @@ public class CCDBConstantsLoader {
         dbprovider.disconnect();
         
         //beam offset table
-        dbprovider.loadTable("/test/beam_pos");
+        dbprovider.loadTable("/geometry/beam/position");
        //  dbprovider.show();
         // Getting the Constants
         // 1) pitch info 
@@ -241,16 +241,11 @@ public class CCDBConstantsLoader {
         	 
         }
          // beam offset
-        double r = dbprovider.getDouble("/test/beam_pos/r", 0);     
-        double r_err = dbprovider.getDouble("/test/beam_pos/err_r", 0); 
-        double phi_deg = dbprovider.getDouble("/test/beam_pos/phi0", 0); 
-        double phi = Math.toRadians(phi_deg);
-        double xb = r*Math.cos(phi);
-        double yb = r*Math.sin(phi);
+        double xb = dbprovider.getDouble("/geometry/beam/position/x_offset", 0);     
+        double yb = dbprovider.getDouble("/geometry/beam/position/y_offset", 0); 
         org.jlab.rec.cvt.Constants.setXb(xb);
         org.jlab.rec.cvt.Constants.setYb(yb);
-        org.jlab.rec.cvt.Constants.setRbErr(r_err);
-        
+         
         Constants.setCRCRADIUS(CRCRADIUS);
         Constants.setCRZRADIUS(CRZRADIUS);
         Constants.setCRZNSTRIPS(CRZNSTRIPS);
