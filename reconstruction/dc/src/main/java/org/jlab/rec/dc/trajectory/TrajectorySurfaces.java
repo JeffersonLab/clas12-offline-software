@@ -86,7 +86,7 @@ public class TrajectorySurfaces {
             d = P.dot(n);
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.FTOF, DetectorLayer.FTOF1A, -d, -n.x(), -n.y(), -n.z())); 
             //LTCC
-            this._DetectorPlanes.get(is).add(new Surface(DetectorType.LTCC,1, 624.23, -n.x(), -n.y(), -n.z())); 
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.LTCC,1, 653.09, -n.x(), -n.y(), -n.z())); 
             //PCAL
             int superLayer = (int) ((DetectorLayer.PCAL_V-1)/3);
             int localLayer = (DetectorLayer.PCAL_V-1)%3;

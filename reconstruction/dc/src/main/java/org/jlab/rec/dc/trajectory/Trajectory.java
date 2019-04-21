@@ -298,11 +298,18 @@ public class Trajectory extends ArrayList<Cross> {
                 trkPars[3]=tv.px();
                 trkPars[4]=tv.py();
                 trkPars[5]=tv.pz();
-            } else {
-                // set swimming starting point depending on surface
-                if(surface.getDetectorType()==DetectorType.TARGET && surface.getDetectorLayer()==DetectorLayer.TARGET_DOWNSTREAM) {
-                    dcSwim.SetSwimParameters(trkParsCheren[0], trkParsCheren[1], trkParsCheren[2], -trkParsCheren[3], -trkParsCheren[4], -trkParsCheren[5], -q);
-                    dir=-1;
+            } 
+            // set swimming starting point depending on surface
+            else {
+                if(surface.getDetectorType()==DetectorType.TARGET) {
+                    if(surface.getDetectorLayer()==DetectorLayer.TARGET_DOWNSTREAM) {
+                        dcSwim.SetSwimParameters(trkParsCheren[0], trkParsCheren[1], trkParsCheren[2], -trkParsCheren[3], -trkParsCheren[4], -trkParsCheren[5], -q);
+                        dir=-1;
+                    }
+                    else {
+                        dcSwim.SetSwimParameters(trkPars[0], trkPars[1], trkPars[2], -trkPars[3], -trkPars[4], -trkPars[5], -q);
+                        dir=-1;
+                    }
                 }
                 else if(surface.getDetectorType()==DetectorType.FMT) {
                     dcSwim.SetSwimParameters(x, y, z, px, py, pz, q);
