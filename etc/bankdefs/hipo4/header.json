@@ -14,7 +14,8 @@
             {"name":"mode",         "type":"B", "info":"run mode"},
             {"name":"torus",        "type":"F", "info":"torus setting relative value(-1.0 to 1.0)"},
             {"name":"solenoid",     "type":"F", "info":"solenoid field setting (-1.0 to 1.0)"},
-            {"name":"helicityL3",   "type":"B", "info":"delay-corrected online L3 helicity (0=UDF)"}
+            {"name":"helicityL3",   "type":"B", "info":"online-delay-corrected helicity, with HWP-correction (0=UDF)"},
+            {"name":"helicityRawL3","type":"B", "info":"online-delay-corrected helicity (0=UDF)"}
         ]
     },
     {

@@ -382,13 +382,14 @@
       "item":  12,
       "info":  "Helicity flips from ADC bank.  State values are -1/0/+1, where 0 is invalid.",
       "entries": [
-          {"name":"run",         "id":1, "type":"I", "info":"run number"},
-          {"name":"event",       "id":2, "type":"I", "info":"event number"},
-          {"name":"timestamp",   "id":3, "type":"L", "info":"timestamp (4ns)"},
-          {"name":"helicity",    "id":4, "type":"B", "info":"helicity state with half-wave plate correction"},
-          {"name":"helicityRaw", "id":5, "type":"B", "info":"helicity state without half-wave plate correction"},
-          {"name":"sync",        "id":6, "type":"B", "info":"sync state"},
-          {"name":"quartet",     "id":7, "type":"B", "info":"quartet state"}
+          {"name":"run",         "type":"I", "info":"run number"},
+          {"name":"event",       "type":"I", "info":"event number"},
+          {"name":"timestamp",   "type":"L", "info":"timestamp (4ns)"},
+          {"name":"helicity",    "type":"B", "info":"helicity state with half-wave plate correction"},
+          {"name":"helicityRaw", "type":"B", "info":"helicity state without half-wave plate correction"},
+          {"name":"pair",        "type":"B", "info":"pair sync state"},
+          {"name":"pattern",     "type":"B", "info":"pattern sync state"},
+          {"name":"status",      "type":"B", "info":"status"}
       ]
   },
   {

@@ -19,16 +19,17 @@ public class HelicityState {
     private static final byte SECTOR=1;
     private static final byte LAYER=1;
     private static final byte HELICITY_COMPONENT=1;
-    private static final byte SYNC_COMPONENT=2;
-    private static final byte QUARTET_COMPONENT=3;
+    private static final byte PAIRSYNC_COMPONENT=2;
+    private static final byte PATTERNSYNC_COMPONENT=3;
 
     private HelicityBit helicityRaw = HelicityBit.UDF;
     private HelicityBit helicity    = HelicityBit.UDF;
-    private HelicityBit sync        = HelicityBit.UDF;
-    private HelicityBit quartet     = HelicityBit.UDF;
+    private HelicityBit pairSync    = HelicityBit.UDF;
+    private HelicityBit patternSync = HelicityBit.UDF;
     private long timestamp   = 0;
     private int  event       = 0;
     private int  run         = 0;
+    private byte status      = -1;
 
     public HelicityState(){}
 
@@ -47,16 +48,20 @@ public class HelicityState {
                 case HELICITY_COMPONENT:
                     state.helicityRaw = state.getFadcState(adcBank.getShort("ped",ii));
                     break;
-                case SYNC_COMPONENT:
-                    state.sync = state.getFadcState(adcBank.getShort("ped",ii));
+                case PAIRSYNC_COMPONENT:
+                    state.pairSync = state.getFadcState(adcBank.getShort("ped",ii));
                     break;
-                case QUARTET_COMPONENT:
-                    state.quartet = state.getFadcState(adcBank.getShort("ped",ii));
+                case PATTERNSYNC_COMPONENT:
+                    state.patternSync = state.getFadcState(adcBank.getShort("ped",ii));
                     break;
                 default:
                     break;
             }
         }
+        state.status=0;
+        if (state.helicityRaw==HelicityBit.UDF) state.status |= 0x1;
+        if (state.pairSync==HelicityBit.UDF)    state.status |= 0x2;
+        if (state.patternSync==HelicityBit.UDF) state.status |= 0x4;
         state.fixMissingReadouts();
         return state;
     }
@@ -70,10 +75,11 @@ public class HelicityState {
         state.run         = flipBank.getInt("run",0);
         state.event       = flipBank.getInt("event",0);
         state.timestamp   = flipBank.getLong("timestamp",0);
+        state.status      = flipBank.getByte("status",0);
         state.helicity    = HelicityBit.create(flipBank.getByte("helicity",0));
         state.helicityRaw = HelicityBit.create(flipBank.getByte("helicityRaw",0));
-        state.sync        = HelicityBit.create(flipBank.getByte("sync",0));
-        state.quartet     = HelicityBit.create(flipBank.getByte("quartet",0));
+        state.pairSync    = HelicityBit.create(flipBank.getByte("pair",0));
+        state.patternSync = HelicityBit.create(flipBank.getByte("pattern",0));
         return state;
     }
    
@@ -88,10 +94,11 @@ public class HelicityState {
         state.run         = flipBank.getInt("run",0);
         state.event       = flipBank.getInt("event",0);
         state.timestamp   = flipBank.getLong("timestamp",0);
+        state.status      = flipBank.getByte("status",0);
         state.helicity    = HelicityBit.create(flipBank.getByte("helicity",0));
         state.helicityRaw = HelicityBit.create(flipBank.getByte("helicityRaw",0));
-        state.sync        = HelicityBit.create(flipBank.getByte("sync",0));
-        state.quartet     = HelicityBit.create(flipBank.getByte("quartet",0));
+        state.pairSync    = HelicityBit.create(flipBank.getByte("pair",0));
+        state.patternSync = HelicityBit.create(flipBank.getByte("pattern",0));
         return state;
     }
 
@@ -109,11 +116,11 @@ public class HelicityState {
      */
     private void fixMissingReadouts() {
         if (this.helicityRaw!=HelicityBit.UDF ||
-            this.sync!=HelicityBit.UDF ||
-            this.quartet!=HelicityBit.UDF) {
+            this.pairSync!=HelicityBit.UDF ||
+            this.patternSync!=HelicityBit.UDF) {
             if (this.helicityRaw==HelicityBit.UDF) this.helicityRaw=HelicityBit.MINUS;
-            if (this.sync==HelicityBit.UDF) this.sync=HelicityBit.MINUS;
-            if (this.quartet==HelicityBit.UDF) this.quartet=HelicityBit.MINUS;
+            if (this.pairSync==HelicityBit.UDF) this.pairSync=HelicityBit.MINUS;
+            if (this.patternSync==HelicityBit.UDF) this.patternSync=HelicityBit.MINUS;
         }
     }
 
@@ -127,7 +134,7 @@ public class HelicityState {
     @Override
     public String toString() {
         return String.format("%d %+d/%+d/%+d",
-            this.timestamp,this.helicityRaw.value(),this.sync.value(),this.quartet.value());
+            this.timestamp,this.helicityRaw.value(),this.pairSync.value(),this.patternSync.value());
     }
 
     public String getInfo(HelicityState other,int counter) {
@@ -143,10 +150,11 @@ public class HelicityState {
         bank.putInt("run", 0, this.run);
         bank.putInt("event", 0, this.event);
         bank.putLong("timestamp", 0, this.timestamp);
+        bank.putByte("status", 0, this.status);
         bank.putByte("helicity", 0, this.helicity.value());
         bank.putByte("helicityRaw", 0, this.helicityRaw.value());
-        bank.putByte("sync", 0, this.sync.value());
-        bank.putByte("quartet", 0, this.quartet.value());
+        bank.putByte("pair", 0, this.pairSync.value());
+        bank.putByte("pattern", 0, this.patternSync.value());
         return bank;
     }
 
@@ -155,8 +163,8 @@ public class HelicityState {
      */
     public final boolean isValid() {
         return this.helicityRaw!=HelicityBit.UDF &&
-               this.sync!=HelicityBit.UDF &&
-               this.quartet!=HelicityBit.UDF;
+               this.pairSync!=HelicityBit.UDF &&
+               this.patternSync!=HelicityBit.UDF;
     }
 
     /**
@@ -165,8 +173,8 @@ public class HelicityState {
      */
     public boolean equals(HelicityState other) {
         if (this.helicityRaw != other.helicityRaw) return false;
-        if (this.sync != other.sync) return false;
-        return this.quartet == other.quartet;
+        if (this.pairSync != other.pairSync) return false;
+        return this.patternSync == other.patternSync;
     }
 
     /**
@@ -185,7 +193,7 @@ public class HelicityState {
     public long getTimestamp() { return this.timestamp; }
     public HelicityBit getHelicityRaw() { return this.helicityRaw; }
     public HelicityBit getHelicity() { return this.helicity; }
-    public HelicityBit getSync() { return this.sync; }
-    public HelicityBit getQuartet() { return this.quartet; }
+    public HelicityBit getSync() { return this.pairSync; }
+    public HelicityBit getQuartet() { return this.patternSync; }
 
 }

@@ -21,8 +21,8 @@ import org.jlab.io.hipo.HipoDataSource;
  *   only actually predicting if the timestamp/count is past the measured range).
  *
  * The generator gives HelicityBit, while measured sequence gives HelicityState.
- * The former includes only the helicity signal, while the latter adds quartet
- * and sync signals, timestamps, and run and event numbers.
+ * The former includes only the helicity signal, while the latter adds pair- and
+ * pattern-sync signals, timestamps, and run and event numbers.
  *
  * @author baltzell
  */
@@ -34,7 +34,6 @@ public class HelicitySequence implements Comparator<HelicityState> {
 
     private boolean analyzed=false;
     private final List<HelicityState> states=new ArrayList<>();
-    private final List<Long> timestamps=new ArrayList<>();
     private final HelicityGenerator generator=new HelicityGenerator();
     private int generatorOffset=0;
     private final int debug=0;
@@ -122,7 +121,10 @@ public class HelicitySequence implements Comparator<HelicityState> {
         if (!this.analyzed) this.analyze();
         if (timestamp < this.getTimestamp(0)) return -1;
         if (timestamp > this.getTimestamp(this.size()-1)) return -1;
-        final int index=Collections.binarySearch(this.timestamps,timestamp);
+        // make a fake state for timestamp search:
+        HelicityState state=new HelicityState();
+        state.setTimestamp(timestamp);
+        final int index=Collections.binarySearch(this.states,state,new HelicitySequence());
         return index<0 ? -index-2 : index;
     }
 
@@ -254,11 +256,9 @@ public class HelicitySequence implements Comparator<HelicityState> {
 
         this.rejectFalseFlips();
 
-        // load timestamp list for binary search and initialize the generator:
-        this.timestamps.clear();
+        // initialize the generator:
         this.generator.reset();
         for (int ii=0; ii<this.states.size(); ii++) {
-            this.timestamps.add(this.states.get(ii).getTimestamp());
             if (!this.generator.initialized() &&
                  this.states.get(ii).getQuartet()==HelicityBit.MINUS) {
                 if (this.generator.size()==0) {

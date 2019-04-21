@@ -488,6 +488,10 @@ public class CLASDecoder4 {
         }
         */
 
+        // retrieve fcup calibrations from CCDB:
+        IndexedTable hwpTable = this.detectorDecoder.scalerManager.
+                getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/hwp");
+
         bank.putInt("run",        0, localRun);
         bank.putInt("event",      0, localEvent);
         bank.putInt("unixtime",   0, localTime);
@@ -495,7 +499,8 @@ public class CLASDecoder4 {
         bank.putFloat("torus",    0, torus);
         bank.putFloat("solenoid", 0, solenoid);
         bank.putLong("timestamp", 0, timeStamp);
-        bank.putByte("helicityL3",0, helicityL3);
+        bank.putByte("helicityRawL3",0, helicityL3);
+        bank.putByte("helicityL3",0,(byte)(helicityL3*hwpTable.getIntValue("hwp",0,0,0)));
 
         return bank;
     }
