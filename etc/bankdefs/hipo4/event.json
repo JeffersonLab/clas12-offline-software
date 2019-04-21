@@ -5,8 +5,6 @@
         "item": 10,
         "info": "Event Header Bank",
         "entries": [
-                {"name":"NRUN",     "type":"I", "info":"Run Number"},
-                {"name":"NEVENT",   "type":"I", "info":"Event Number"},
                 {"name":"EVNTime",  "type":"F", "info":"Event Time"},
                 {"name":"TYPE",     "type":"B", "info":"Event Type (Data or MC)"},
                 {"name":"EvCAT",    "type":"S", "info":"Event Category, if >0:  e-, e-p, e-pi+....."},
@@ -187,8 +185,6 @@
         "item" : 30,
         "info": "Event Header Bank",
         "entries": [
-                {"name":"NRUN",     "type":"I", "info":"Run Number"},
-                {"name":"NEVENT",   "type":"I", "info":"Event Number"},
                 {"name":"EVNTime",  "type":"F", "info":"Event Time"},
                 {"name":"TYPE",     "type":"B", "info":"Event Type (Data or MC)"},
                 {"name":"EvCAT",    "type":"S", "info":"Event Category, if >0:  e-, e-p, e-pi+....."},
