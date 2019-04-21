@@ -160,15 +160,7 @@
             {"name":"status",       "type":"S", "info":"status of the track"},
             {"name":"q",            "type":"B",  "info":"charge of the track"},
             {"name":"chi2",         "type":"F", "info":"Chi2 (or quality) track fitting"},
-            {"name":"NDF",          "type":"S", "info":"number of degrees of freedom in track fitting"},
-            {"name":"px_nomm",      "type":"F", "info":"x component of the momentum with no MM (cm)"},
-            {"name":"py_nomm",      "type":"F", "info":"y component of the momentum with no MM (cm)"},
-            {"name":"pz_nomm",      "type":"F", "info":"z component of the momentum with no MM (cm)"},
-            {"name":"vx_nomm",      "type":"F", "info":"x component of the vertex (cm)"},
-            {"name":"vy_nomm",      "type":"F", "info":"y component of the vertex (cm)"},
-            {"name":"vz_nomm",      "type":"F", "info":"z component of the vertex (cm)"},
-            {"name":"chi2_nomm",    "type":"F", "info":"Chi2 (or quality) track fitting"},
-            {"name":"NDF_nomm",     "type":"S", "info":"number of degrees of freedom in track fitting with no MM"}
+            {"name":"NDF",          "type":"S", "info":"number of degrees of freedom in track fitting"}
         ]
     },
     {
