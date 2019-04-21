@@ -92,8 +92,6 @@
             {"name":"x",            "type":"F", "info":"X coordinate of the hit (cm)"},
             {"name":"y",            "type":"F", "info":"Y coordinate of the hit (cm)"},
             {"name":"z",            "type":"F", "info":"Z coordinate of the hit (cm)"},
-            {"name":"theta",        "type":"F", "info":"DEPRECATED, TO BE REMOVED.  Theta of the matched hit (deg)"},
-            {"name":"phi",          "type":"F", "info":"DEPRECATED, TO BE REMOVED.  Phi of the mathced hit (deg)"},
             {"name":"dtheta",       "type":"F", "info":"Expected Theta Resolution (deg)"},
             {"name":"dphi",         "type":"F", "info":"Expected Phi Resolution (deg)"},
             {"name":"status",       "type":"S", "info":"hit status"}
@@ -276,8 +274,6 @@
             {"name":"x",            "type":"F", "info":"X coordinate of the hit (cm)"},
             {"name":"y",            "type":"F", "info":"Y coordinate of the hit (cm)"},
             {"name":"z",            "type":"F", "info":"Z coordinate of the hit (cm)"},
-            {"name":"theta",        "type":"F", "info":"DEPRECATED, TO BE REMOVED.  Theta of the matched hit (deg)"},
-            {"name":"phi",          "type":"F", "info":"DEPRECATED, TO BE REMOVED.  Phi of the mathced hit (deg)"},
             {"name":"dtheta",       "type":"F", "info":"Expected Theta Resolution (deg)"},
             {"name":"dphi",         "type":"F", "info":"Expected Phi Resolution (deg)"},
             {"name":"status",       "type":"S", "info":"hit status"}

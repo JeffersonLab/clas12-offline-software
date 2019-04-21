@@ -262,8 +262,6 @@ public class DetectorData {
            bank.setFloat("x", row, (float) c.getHitPosition().x());
            bank.setFloat("y", row, (float) c.getHitPosition().y());
            bank.setFloat("z", row, (float) c.getHitPosition().z());
-           bank.setFloat("theta", row, (float) c.getTheta());
-           bank.setFloat("phi", row, (float) c.getPhi());
            bank.setFloat("dtheta", row, (float) c.getDeltaTheta());
            bank.setFloat("dphi", row, (float) c.getDeltaPhi());
            bank.setFloat("path", row, (float) c.getPath());

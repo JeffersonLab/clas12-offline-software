@@ -333,15 +333,13 @@ public class EBio {
             int nrows = bank.rows();
             for(int i = 0; i < nrows; i++){
                 int nphe  = bank.getInt("nphe", i);
-                double theta   = bank.getDouble("theta", i);
                 double dtheta = bank.getDouble("dtheta",i);
-                double phi = bank.getDouble("phi",i);
                 double dphi = bank.getDouble("dphi",i);
                 double x = bank.getDouble("x",i);
                 double y = bank.getDouble("y",i);
                 double z = bank.getDouble("z",i);
                 double time = bank.getFloat("time",i);
-                CherenkovResponse che = new CherenkovResponse(theta,phi,dtheta,dphi);
+                CherenkovResponse che = new CherenkovResponse(dtheta,dphi);
                 che.setHitPosition(x, y, z);
                 che.setEnergy(nphe);
                 che.setTime(time);

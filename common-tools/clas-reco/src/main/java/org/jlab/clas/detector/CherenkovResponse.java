@@ -44,23 +44,15 @@ public class CherenkovResponse extends DetectorResponse {
     private double  hitDeltaPhi   = 0.0;
     private double  hitDeltaTheta = 0.0;
     
-    // FIXME:  remove this, use hitPosition instead:
-    private double  hitTheta      = 0.0;
-    private double  hitPhi        = 0.0;
-
     // FIXME:  remove this, use DetectorResponse's hitPosition instead:
     private Point3D hitPosition = new Point3D();
 
-    public CherenkovResponse(double theta, double phi, double dtheta, double dphi){
-        hitTheta = theta;
-        hitPhi   = phi;
+    public CherenkovResponse(double dtheta, double dphi){
         hitDeltaTheta  = dtheta;
         hitDeltaPhi    = dphi;
     }
 
     public double getNphe() {return this.getEnergy(); }
-    public double getTheta() {return this.hitTheta;}
-    public double getPhi() {return this.hitPhi;}
     public double getDeltaTheta(){ return this.hitDeltaTheta;}
     public double getDeltaPhi() {return this.hitDeltaPhi;}
 
@@ -137,36 +129,25 @@ public class CherenkovResponse extends DetectorResponse {
                 double z = bank.getFloat("z",row);
                 double time = bank.getFloat("time",row);
                 double nphe = bank.getFloat("nphe", row);
-
-                // FIXME: unify LTCC/HTCC detector banks
-                // Here we have to treat them differently:
-                // 3.  HTCC provides both x/y/z and theta/phi, while LTCC provides only x/y/z.
-                //     The current convention in EB is to use only x/y/z, while theta/phi is
-                //     just propogated.
-
-                double theta=0,phi=0,dtheta=0,dphi=0;
+                double theta = Math.atan2(Math.sqrt(x*x+y*y),z);
+                double phi   = Math.atan2(y,x);
 
                 // FIXME:  move these constants to CCDB
+                double dtheta=0,dphi=0;
                 if (type==DetectorType.HTCC) {
                     dtheta = 10*3.14159/180; // based on MC
                     dphi   = 18*3.14159/180; // based on MC
-                    theta = bank.getFloat("theta", row);
-                    phi   = bank.getFloat("phi",row);
                 }
-
                 else if (type==DetectorType.LTCC) {
                     dtheta = (35-5)/18*2 * 3.14159/180; // +/- 2 mirrors
                     dphi   = 10*3.14159/180;
-                    theta = Math.atan2(Math.sqrt(x*x+y*y),z);
-                    phi   = Math.atan2(y,x);
                 }
-
                 else {
                     throw new RuntimeException(
                             "CherenkovResponse::readHipoEvent:  invalid DetectorType: "+type);
                 }
 
-                CherenkovResponse che = new CherenkovResponse(theta,phi,dtheta,dphi);
+                CherenkovResponse che = new CherenkovResponse(dtheta,dphi);
                 che.setHitPosition(x, y, z);
                 che.setHitIndex(row);
                 che.setEnergy(nphe);
