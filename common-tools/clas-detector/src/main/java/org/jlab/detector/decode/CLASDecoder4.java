@@ -12,6 +12,8 @@ import java.sql.Time;
 import java.util.Date;
 
 import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.helicity.HelicityState;
+
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioSource;
@@ -469,6 +471,7 @@ public class CLASDecoder4 {
         int   localTime = this.codaDecoder.getUnixTime();
         long  timeStamp = this.codaDecoder.getTimeStamp();
         long triggerBits = this.codaDecoder.getTriggerBits();
+        byte  helicityL3 = this.codaDecoder.getHelicityLevel3();
 
         if(nrun>0){
             localRun = nrun;
@@ -485,6 +488,10 @@ public class CLASDecoder4 {
         }
         */
 
+        // retrieve fcup calibrations from CCDB:
+        IndexedTable hwpTable = this.detectorDecoder.scalerManager.
+                getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/hwp");
+
         bank.putInt("run",        0, localRun);
         bank.putInt("event",      0, localEvent);
         bank.putInt("unixtime",   0, localTime);
@@ -492,7 +499,8 @@ public class CLASDecoder4 {
         bank.putFloat("torus",    0, torus);
         bank.putFloat("solenoid", 0, solenoid);
         bank.putLong("timestamp", 0, timeStamp);
-
+        bank.putByte("helicityRawL3",0, helicityL3);
+        bank.putByte("helicityL3",0,(byte)(helicityL3*hwpTable.getIntValue("hwp",0,0,0)));
 
         return bank;
     }
@@ -589,6 +597,20 @@ public class CLASDecoder4 {
         return scalerBank;
     }
 
+    public Bank createHelicityFlipBank(Event event,HelicityState state) {
+        IndexedTable hwpTable=this.detectorDecoder.scalerManager.getConstants(
+                this.detectorDecoder.getRunNumber(),"/runcontrol/hwp");
+        state.setHalfWavePlate((byte)hwpTable.getIntValue("hwp",0,0,0));
+        if(schemaFactory.hasSchema("RUN::config")) {
+            Bank configBank = new Bank(schemaFactory.getSchema("RUN::config"));
+            event.read(configBank);
+            state.setTimestamp(configBank.getLong("timestamp",0));
+            state.setEvent(configBank.getInt("event",0));
+            state.setRun(configBank.getInt("run",0));
+        }
+        return state.getFlipBank(this.schemaFactory);
+    }
+
     public static void main(String[] args){
 
         OptionParser parser = new OptionParser("decoder");
@@ -652,6 +674,7 @@ public class CLASDecoder4 {
 
             Bank   rawScaler = new Bank(writer.getSchemaFactory().getSchema("RAW::scaler"));
             Bank  rawRunConf = new Bank(writer.getSchemaFactory().getSchema("RUN::config"));
+            Bank  helicityAdc = new Bank(writer.getSchemaFactory().getSchema("HEL::adc"));
             Event scalerEvent = new Event();
 
 
@@ -673,6 +696,9 @@ public class CLASDecoder4 {
             for(String inputFile : inputList){
                 EvioSource reader = new EvioSource();
                 reader.open(inputFile);
+
+                HelicityState prevHelicity = new HelicityState();
+
                 while(reader.hasEvent()==true){
                     EvioDataEvent event = (EvioDataEvent) reader.getNextEvent();
 
@@ -693,8 +719,20 @@ public class CLASDecoder4 {
                     int eventTag;
                     decodedEvent.read(rawScaler);
                     decodedEvent.read(rawRunConf);
-                        
-                    if(rawScaler.getRows()>0 || epics!=null) {
+                    decodedEvent.read(helicityAdc);
+
+                    // check for changes to helicity state:
+                    Bank helicityFlip = null;
+                    if (helicityAdc.getRows()>0) {
+                        HelicityState thisHelicity = HelicityState.createFromFadcBank(helicityAdc);
+                        if (!thisHelicity.isValid() || !thisHelicity.equals(prevHelicity)) {
+                            helicityFlip = decoder.createHelicityFlipBank(decodedEvent,thisHelicity);
+                            //System.out.println("FLIP:  "+thisHelicity.getInfo(prevHelicity,counter));
+                            prevHelicity = thisHelicity;
+                        }
+                    }
+
+                    if(rawScaler.getRows()>0 || epics!=null || helicityFlip!=null) {
                         scalerEvent.reset();
 
                         if(rawScaler.getRows()>0) scalerEvent.write(rawScaler);
@@ -710,7 +748,12 @@ public class CLASDecoder4 {
                             decodedEvent.write(epics);
                             scalerEvent.write(epics);
                         }
-                        
+
+                        if (helicityFlip!=null) {
+                            decodedEvent.write(helicityFlip);
+                            scalerEvent.write(helicityFlip);
+                        }
+
                         writer.addEvent(scalerEvent, 1);
                     }
 
@@ -725,6 +768,7 @@ public class CLASDecoder4 {
             }
             writer.close();
         }
+
         /*
         CLASDecoder decoder = new CLASDecoder();
         EvioSource reader = new EvioSource();
