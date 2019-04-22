@@ -377,6 +377,19 @@
     ]
   },
   {
+    "name" : "BAND::tdc",
+    "group": 22100,
+    "item" : 12,
+    "info": "TDC bank for the Backward Angle Neutron Detector",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (=1)"},
+      { "name":"layer"     , "type":"B", "info":"layer (=1)"},
+      { "name":"component" , "type":"S", "info":"signal (1-2)"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
+      { "name":"TDC"       , "type":"I", "info":"TDC value"}
+    ]
+  },
+  {
     "name" : "HEL::adc",
     "group": 22000,
     "item" : 11,
