@@ -21,6 +21,7 @@ import org.jlab.detector.decode.DetectorDataDgtz.ADCData;
 import org.jlab.detector.decode.DetectorDataDgtz.SCALERData;
 import org.jlab.detector.decode.DetectorDataDgtz.TDCData;
 import org.jlab.detector.decode.DetectorDataDgtz.VTPData;
+import org.jlab.detector.helicity.HelicityBit;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioSource;
 import org.jlab.io.evio.EvioTreeBranch;
@@ -42,6 +43,7 @@ public class CodaEventDecoder {
     private long  timeStamp = 0L;
     private int timeStampErrors = 0;
     private long    triggerBits = 0;
+    private byte helicityLevel3 = HelicityBit.UDF.value();
     private List<Integer> triggerWords = new ArrayList<>(); 
     JsonObject  epicsData = new JsonObject();
 
@@ -109,7 +111,11 @@ public class CodaEventDecoder {
     }
 
     public long getTimeStamp() {
-        return timeStamp;
+        return this.timeStamp;
+    }
+
+    public byte getHelicityLevel3() {
+        return this.helicityLevel3;
     }
 
     public void setTimeStamp(EvioDataEvent event) {
@@ -344,6 +350,15 @@ public class CodaEventDecoder {
                 this.runNumber = intData[3];
                 this.eventNumber = intData[4];
                 if(intData[5]!=0) this.unixTime  = intData[5];
+                if ( (intData[7] & 0x1) == 0) {
+                    this.helicityLevel3=HelicityBit.UDF.value();
+                }
+                else if ((intData[7]>>1 & 0x1) == 0) {
+                    this.helicityLevel3=HelicityBit.MINUS.value();
+                }
+                else {
+                    this.helicityLevel3=HelicityBit.PLUS.value();
+                }
                 /*System.out.println(" set run number and event nubmber = "
                 + this.runNumber + "  " + this.eventNumber + "  " + this.unixTime + "  " + intData[5]
                 );

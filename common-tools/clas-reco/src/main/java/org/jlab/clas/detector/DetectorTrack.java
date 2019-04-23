@@ -1,12 +1,9 @@
 package org.jlab.clas.detector;
 
-import java.util.Map;
-import java.util.LinkedHashMap;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.geom.prim.Line3D;
-import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
 /**
@@ -18,20 +15,24 @@ public class DetectorTrack implements Comparable {
 
     public class TrajectoryPoint {
         private int detId = -1;
+        private int layId = -1;
         private Line3D traj=null;
         private float bField = 0;
         private float pathLength = -1;
-        public TrajectoryPoint(int detId,Line3D traj,float bField,float pathLength) {
+        public TrajectoryPoint(int detId,int layId,Line3D traj,float bField,float pathLength) {
             this.detId=detId;
+            this.layId=layId;
             this.traj=traj;
             this.bField=bField;
             this.pathLength=pathLength;
         }
-        public TrajectoryPoint(int detId,Line3D traj) {
+        public TrajectoryPoint(int detId,int layId,Line3D traj) {
+            this.layId=layId;
             this.detId=detId;
             this.traj=traj;
         }
-        public int getDetId() { return detId; }
+        public int getDetectorId() { return detId; }
+        public int getLayerId()  { return layId; }
         public Line3D getCross() { return traj; }
         public float getBField() { return bField; }
         public float getPathLength() { return pathLength; }
@@ -56,8 +57,8 @@ public class DetectorTrack implements Comparable {
 
     private float[][] covMatrix = new float[5][5];
     private List<Line3D> trackCrosses = new ArrayList<Line3D>();
-   
-    private Map<Integer,TrajectoryPoint> trajectory = new LinkedHashMap<Integer,TrajectoryPoint>();
+  
+    private List<TrajectoryPoint> trajectory = new ArrayList<>();
     
     private double MAX_LINE_LENGTH = 1500.0;
 
@@ -113,19 +114,24 @@ public class DetectorTrack implements Comparable {
         this.trackVertex.setXYZ(vx, vy, vz);
     }
 
-    public void addTrajectoryPoint(int detId,Line3D traj,float bField,float pathLength) {
-        this.trajectory.put(detId,new TrajectoryPoint(detId,traj,bField,pathLength));
+    public void addTrajectoryPoint(int detId,int layId,Line3D traj,float bField,float pathLength) {
+        this.trajectory.add(new TrajectoryPoint(detId,layId,traj,bField,pathLength));
     }
-    public void addTrajectoryPoint(int detId,Line3D traj) {
-        this.trajectory.put(detId,new TrajectoryPoint(detId,traj));
+    public void addTrajectoryPoint(int detId,int layId,Line3D traj) {
+        this.trajectory.add(new TrajectoryPoint(detId,layId,traj));
     }
 
-    public Line3D getTrajectoryPoint(int detId) {
-        if (!this.trajectory.containsKey(detId)) return null;
-        return this.trajectory.get(detId).getCross();
+    public Line3D getTrajectoryPoint(int detId,int layId) {
+        for (int ii=0; ii<this.trajectory.size(); ii++) {
+            if (this.trajectory.get(ii).getDetectorId()==detId &&
+                this.trajectory.get(ii).getLayerId()==layId) {
+                return this.trajectory.get(ii).getCross();
+            }
+        }
+        return null;
     }
     
-    public Map<Integer,TrajectoryPoint> getTrajectory() {
+    public List<TrajectoryPoint> getTrajectory() {
         return this.trajectory;
     }
     
