@@ -359,18 +359,19 @@ public class DetectorData {
                DetectorParticle p = particles.get(i);
                if(p.getTrackDetector()==DetectorType.DC.getDetectorId() ||
                   p.getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
-                   for (int detId : p.getTrackTrajectory().keySet()) {
+                   List <DetectorTrack.TrajectoryPoint> traj = p.getTrackTrajectory();
+                   for (int j=0; j<traj.size(); j++) {
                        bank.setShort("index", row, (short) p.getTrackIndex());
                        bank.setShort("pindex", row, (short) i);
-                       bank.setShort("detId", row, (byte) detId);
-                       DetectorTrack.TrajectoryPoint tp = p.getTrackTrajectory().get(detId);
-                       bank.setFloat("pathlength",row, tp.getPathLength());
-                       bank.setFloat("x",row, (float)tp.getCross().origin().x());
-                       bank.setFloat("y",row, (float)tp.getCross().origin().y());
-                       bank.setFloat("z",row, (float)tp.getCross().origin().z());
-                       bank.setFloat("cx",row, (float)tp.getCross().direction().x());
-                       bank.setFloat("cy",row, (float)tp.getCross().direction().y());
-                       bank.setFloat("cz",row, (float)tp.getCross().direction().z());
+                       bank.setByte("detector", row, (byte) traj.get(j).getDetectorId());
+                       bank.setByte("layer", row, (byte) traj.get(j).getLayerId());
+                       bank.setFloat("path",row, traj.get(j).getPathLength());
+                       bank.setFloat("x",row, (float)traj.get(j).getCross().origin().x());
+                       bank.setFloat("y",row, (float)traj.get(j).getCross().origin().y());
+                       bank.setFloat("z",row, (float)traj.get(j).getCross().origin().z());
+                       bank.setFloat("cx",row, (float)traj.get(j).getCross().direction().asUnit().x());
+                       bank.setFloat("cy",row, (float)traj.get(j).getCross().direction().asUnit().y());
+                       bank.setFloat("cz",row, (float)traj.get(j).getCross().direction().asUnit().z());
                        row = row + 1;
                    }
                }
@@ -481,10 +482,11 @@ public class DetectorData {
                // this could be optimized:
                if (trajBank!=null) {
                    for (int ii=0; ii<trajBank.rows(); ii++) {
-                       if (trajBank.getInt("tid",ii) !=  trkId) continue;
-                       int detId=trajBank.getInt("did",ii);
+                       if (trajBank.getInt("id",ii) !=  trkId) continue;
+                       int detId=trajBank.getInt("detector",ii);
+                       int layId=trajBank.getByte("layer",ii);
                        float bField=trajBank.getFloat("B",ii);
-                       float pathLength=trajBank.getFloat("L",ii);
+                       float pathLength=trajBank.getFloat("path",ii);
                        float xx=trajBank.getFloat("x",ii);
                        float yy=trajBank.getFloat("y",ii);
                        float zz=trajBank.getFloat("z",ii);
@@ -492,7 +494,7 @@ public class DetectorData {
                                xx+track.getMaxLineLength()*trajBank.getFloat("tx",ii),
                                yy+track.getMaxLineLength()*trajBank.getFloat("ty",ii),
                                zz+track.getMaxLineLength()*trajBank.getFloat("tz",ii));
-                       track.addTrajectoryPoint(detId,traj,bField,pathLength);
+                       track.addTrajectoryPoint(detId,layId,traj,bField,pathLength);
                    }
                }
                if (covBank!=null) {
@@ -591,7 +593,8 @@ public class DetectorData {
                                xx+track.getMaxLineLength()*cx,
                                yy+track.getMaxLineLength()*cy,
                                zz+track.getMaxLineLength()*cz);
-                       track.addTrajectoryPoint(detId,traj);
+                       // FIXME:  pending layer from CVT trajectory bank
+                       track.addTrajectoryPoint(-1,detId,traj);
                    }
                }
 

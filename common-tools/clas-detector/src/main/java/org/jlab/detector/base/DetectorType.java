@@ -27,6 +27,7 @@ public enum DetectorType {
     RTPC      (19, "RTPC"),
     HEL       (20, "HEL"),
     BAND      (21, "BAND"),
+    TARGET    (100, "TARGET"),
     ECIN      (110, "ECIN"),
     ECOUT     (111, "ECOUT"),
     ECTOT     (112, "ECTOT"),
