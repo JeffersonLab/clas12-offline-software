@@ -27,6 +27,8 @@ services:
 #  - class: org.jlab.service.cnd.CNDEngine
   - class: org.jlab.service.cnd.CNDCalibrationEngine
     name: CND
+  - class: org.jlab.service.band.BANDEngine
+    name: BAND
   - class: org.jlab.service.htcc.HTCCReconstructionService
     name: HTCC
   - class: org.jlab.service.ltcc.LTCCEngine
@@ -45,7 +47,7 @@ configuration:
   io-services:
     writer:
       compression: 2
-# settings below are for GEMC, compatible with 4a.2.5      
+# settings below are for GEMC, compatible with 4a.2.5
   services:
     MAGFIELDS:
       solenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat

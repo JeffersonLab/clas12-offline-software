@@ -69,12 +69,16 @@ public class ConstantsManager {
         }
         return descriptor.getMap().get(table);
     }
-   
-    public RCDBConstants.RCDBConstant getRcdbConstant(int run,String name) {
+  
+    public RCDBConstants getRcdbConstants(int run) {
         if(this.rcdbConstants.containsKey(run)==false){
             this.loadConstantsForRun(run);
         }
-        return rcdbConstants.get(run).get(name);
+        return this.rcdbConstants.get(run);
+    }
+    
+    public RCDBConstants.RCDBConstant getRcdbConstant(int run,String name) {
+        return getRcdbConstants(run).get(name);
     }
     
     private synchronized void loadConstantsForRun(int run){

@@ -7,46 +7,37 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jlab.clas.physics.Particle;
 import org.jlab.utils.options.OptionParser;
 
 public class TrackDictionaryMerger {
 
-    private Map<ArrayList<Integer>, String> dictionary = null;
-            
+    private Map<ArrayList<Byte>, Particle> dictionary = null;
+    private int nlines;
+    private int nfull;
+    private int ndupli;            
+    
     public TrackDictionaryMerger(){
 
     }
 
-    public Map<ArrayList<Integer>, String> getDictionary() {
+    public Map<ArrayList<Byte>, Particle> getDictionary() {
         return dictionary;
     }
     
     public boolean init() {
         this.dictionary = new HashMap<>();
+        this.nlines = 0;
+        this.ndupli = 0;
+        this.nfull  = 0;
         return true;
-    }
-        
-    public void printDictionary(String fileName) throws IOException {
-        if(this.dictionary !=null) {
-            File fileDict = new File(fileName);
-            BufferedWriter txtwriter = null;
-            try {
-                txtwriter = new BufferedWriter(new FileWriter(fileDict));
-                for(Map.Entry<ArrayList<Integer>, String> entry : this.dictionary.entrySet()) {
-                    ArrayList<Integer> wires = entry.getKey();
-                    String road = entry.getValue();
-                    txtwriter.write(road);
-                }
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            } 
-        }
     }
     
     
@@ -64,10 +55,11 @@ public class TrackDictionaryMerger {
             String line = null;
             while ((line = txtreader.readLine()) != null) {
                 nLines++;
+                this.nlines++;
                 String[] lineValues;
                 lineValues  = line.split("\t");
-                ArrayList<Integer> wires = new ArrayList<Integer>();
-                if(lineValues.length < 42) {
+                ArrayList<Byte> wires = new ArrayList<Byte>();
+                if(lineValues.length < 47) {
                     System.out.println("WARNING: dictionary line " + nLines + " incomplete: skipping");
                 }
                 else {
@@ -84,26 +76,39 @@ public class TrackDictionaryMerger {
                     // take wire id of first layer in each superlayer, id>0
                     for(int i=0; i<6; i++) {
                         int wire = Integer.parseInt(lineValues[4+i*6]);
-                        if(wire>0) wires.add(wire);
+                        if(wire>0) wires.add((byte) wire);
                     }
                     // keep only roads with 6 superlayers
                     if(wires.size()!=6) continue;
                     int paddle1b = Integer.parseInt(lineValues[40]);
                     int paddle2  = Integer.parseInt(lineValues[42]);
                     int pcalu    = Integer.parseInt(lineValues[43]);
+                    int pcalv    = Integer.parseInt(lineValues[44]);
+                    int pcalw    = Integer.parseInt(lineValues[45]);
+                    int htcc     = Integer.parseInt(lineValues[46]);
+                    wires.add((byte) paddle1b);
+                    wires.add((byte) paddle2);
+                    wires.add((byte) pcalu);
+                    wires.add((byte) pcalv);
+                    wires.add((byte) pcalw);
+                    wires.add((byte) htcc);
                     nFull++;
+                    this.nfull++;
                     if(this.dictionary.containsKey(wires)) {
                         nDupli++;
+                        this.ndupli++;
                         if(nDupli<10) System.out.println("WARNING: found duplicate road");
                         else if(nDupli==10) System.out.println("WARNING: reached maximum number of warnings, switching to silent mode");
                     }
                     else {
-                        this.dictionary.put(wires, line);
+                        this.dictionary.put(wires, road);
                     }
                 }
-                if(nLines % 1000000 == 0) System.out.println("Read " + nLines + " roads with " + nFull + " full ones, " + nDupli + " duplicates and " + this.dictionary.keySet().size() + " good ones");
+                if(nLines % 1000000 == 0) System.out.println("Number of processed/full/duplicates in current file " + nLines + "/" + nFull + "/" + nDupli + " and in merged dictionary " 
+                               + this.nlines + "/" + this.nfull + "/" + this.ndupli + ", current dictionary size: " + this.dictionary.keySet().size());
             }
-            System.out.println("Found " + nLines + " roads with " + nFull + " full ones, " + nDupli + " duplicates and " + this.dictionary.keySet().size() + " good ones");
+            System.out.println("Number of processed/full/duplicates in current file " + nLines + "/" + nFull + "/" + nDupli + " and in merged dictionary " 
+                               + this.nlines + "/" + this.nfull + "/" + this.ndupli + ", current dictionary size: " + this.dictionary.keySet().size());
         } 
         catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -113,11 +118,62 @@ public class TrackDictionaryMerger {
         } 
    }
     
-    private void setDictionary(Map<ArrayList<Integer>, String> newDictionary) {
+    private void setDictionary(Map<ArrayList<Byte>, Particle> newDictionary) {
         this.dictionary = newDictionary;
     }
     
-
+    private void writeDictionary(String dictName) {
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(dictName);
+            for(Map.Entry<ArrayList<Byte>, Particle> entry : this.dictionary.entrySet()) {
+                ArrayList<Byte> road = entry.getKey();
+                Particle        part = entry.getValue();
+                if(road.size()<12) {
+                    continue;
+                }
+                else {
+                    int wl1 = road.get(0);
+                    int wl2 = road.get(1);
+                    int wl3 = road.get(2);
+                    int wl4 = road.get(3);
+                    int wl5 = road.get(4);
+                    int wl6 = road.get(5);
+                    int paddle1b = road.get(6);
+                    int paddle2  = road.get(7);
+                    int pcalU    = road.get(8);
+                    int pcalV    = road.get(9);
+                    int pcalW    = road.get(10);
+                    int htcc     = road.get(11);
+                    pw.printf("%d\t%.2f\t%.2f\t%.2f\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%.2f\t%d\t%d\t%d\t%d\t"
+                    + "%d\n",
+                    //+ "%.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", 
+                    part.charge(), part.p(), Math.toDegrees(part.theta()), Math.toDegrees(part.phi()),
+                    road.get(0), 0, 0, 0, 0, 0, 
+                    road.get(1), 0, 0, 0, 0, 0, 
+                    road.get(2), 0, 0, 0, 0, 0, 
+                    road.get(3), 0, 0, 0, 0, 0, 
+                    road.get(4), 0, 0, 0, 0, 0, 
+                    road.get(5), 0, 0, 0, 0, 0,  
+                    paddle1b, part.vz(), paddle2, pcalU, pcalV, pcalW, htcc);
+                }
+            }
+            pw.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(TrackDictionaryMakerRNG.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+        }
+       
+    }
+    
+    
     public static void main(String[] args) {
         
         OptionParser parser = new OptionParser("dict-validation");
@@ -141,6 +197,8 @@ public class TrackDictionaryMerger {
 
             for(String inputFile : inputList){
                 tm.readDictionary(inputFile);
+                tm.writeDictionary(outputFile);
+
             }
         }
         else {

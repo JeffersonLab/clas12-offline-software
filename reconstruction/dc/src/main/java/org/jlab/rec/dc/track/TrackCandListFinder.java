@@ -587,6 +587,49 @@ public class TrackCandListFinder {
         return sector;
     }
 
+        public void setTrackPars(Track cand,
+                             Trajectory traj,
+                             TrajectoryFinder trjFind,
+                             StateVec stateVec, double z,
+                             DCGeant4Factory getDcDetector,
+                             Swim dcSwim, double xB, double yB) {
+        this.setTrackPars(cand, traj, trjFind, stateVec, z, getDcDetector, dcSwim);
+        double pz = cand.get_P() / Math.sqrt(stateVec.tanThetaX() * stateVec.tanThetaX() +
+                stateVec.tanThetaY() * stateVec.tanThetaY() + 1);
+
+        Cross C = new Cross(cand.get(cand.size() - 1).get_Sector(), cand.get(cand.size() - 1).get_Region(), -1);
+
+        Point3D R3TrkPoint = C.getCoordsInLab(stateVec.x(), stateVec.y(), z);
+        Point3D R3TrkMomentum = C.getCoordsInLab(pz * stateVec.tanThetaX(),
+                pz * stateVec.tanThetaY(), pz);
+        dcSwim.SetSwimParameters(R3TrkPoint.x(), R3TrkPoint.y(),
+                R3TrkPoint.z(),
+                -R3TrkMomentum.x(),
+                -R3TrkMomentum.y(),
+                -R3TrkMomentum.z(),
+                -cand.get_Q());
+        
+        int sector = cand.get(cand.size() - 1).get_Sector();
+        double theta_n = ((double) (sector - 1)) * Math.toRadians(60.);
+        
+        double x_n = Math.cos(theta_n);
+        double y_n = Math.sin(theta_n);
+        double d = x_n*xB + y_n*yB;
+        double[] Vt = dcSwim.SwimToPlaneBoundary(d, new Vector3D(x_n, y_n, 0), -1);
+        
+        if(Vt==null)
+            return;
+        double xOrFix = Vt[0];
+        double yOrFix = Vt[1];
+        double zOrFix = Vt[2];
+        double pxOrFix = -Vt[3];
+        double pyOrFix = -Vt[4];
+        double pzOrFix = -Vt[5];
+        
+        cand.set_Vtx0(new Point3D(xOrFix, yOrFix, zOrFix));
+        cand.set_pAtOrig(new Vector3D(pxOrFix, pyOrFix, pzOrFix));
+    }
+    
     /**
      * @param cand          the track candidate
      * @param traj          the track trajectory
@@ -654,14 +697,6 @@ public class TrackCandListFinder {
         double pyOr = -VecAtTarIn[4];
         double pzOr = -VecAtTarIn[5];
 
-        //if(traj!=null && trjFind!=null) { 
-        //        traj.set_Trajectory(trjFind.getStateVecsAlongTrajectory(xOr, yOr, zOr, pxOr/pzOr, pyOr/pzOr, cand.get_P(),cand.get_Q(), getDcDetector));
-        //        cand.set_Trajectory(traj.get_Trajectory());
-        //}
-        //cand.set_Vtx0_TiltedCS(trakOrigTiltSec);
-        //cand.set_pAtOrig_TiltedCS(pAtOrigTiltSec.toVector3D());
-
-        //Cross C = new Cross(cand.get(2).get_Sector(), cand.get(2).get_Region(), -1);
         Cross C = new Cross(cand.get(cand.size() - 1).get_Sector(), cand.get(cand.size() - 1).get_Region(), -1);
 
         Point3D trkR1X = C.getCoordsInLab(xOr, yOr, zOr);
