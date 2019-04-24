@@ -17,6 +17,7 @@ import org.jlab.rec.tof.banks.BaseHit;
 import org.jlab.rec.tof.banks.BaseHitReader;
 import org.jlab.rec.tof.banks.IMatchedHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
+import org.jlab.rec.tof.track.Track;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -66,7 +67,7 @@ public class HitReader implements IMatchedHit {
      * @param geometry the FTOF geometry from package
      */
     public void fetch_Hits(DataEvent event, long timeStamp, FTOFGeant4Factory geometry,
-            List<Line3d> trks, double[] paths, int[] ids, 
+            ArrayList<Track> tracks, 
             IndexedTable constants0, 
             IndexedTable constants1, 
             IndexedTable constants2, 
@@ -86,7 +87,7 @@ public class HitReader implements IMatchedHit {
         7: "/calibration/ftof/time_jitter"),
         8: "/calibration/ftof/time_walk_pos") );
         */
-        _numTrks = trks.size();
+        _numTrks = tracks.size();
 
         double triggerPhase = this.getTriggerPhase(timeStamp, constants7);
         
@@ -167,7 +168,7 @@ public class HitReader implements IMatchedHit {
             // add this hit
             hits.add(hit);
         }
-        List<Hit> updated_hits = matchHitsToDCTrk(hits, geometry, trks, paths, ids);
+        List<Hit> updated_hits = matchHitsToDCTrk(hits, geometry, tracks);
 
         ArrayList<ArrayList<Hit>> DetHits = new ArrayList<ArrayList<Hit>>();
         for (int j = 0; j < 3; j++) {
@@ -313,52 +314,77 @@ public class HitReader implements IMatchedHit {
     }
 
     private List<Hit> matchHitsToDCTrk(List<Hit> FTOFhits,
-            FTOFGeant4Factory ftofDetector, List<Line3d> trks, double[] paths, int[] ids) {
-        if (trks == null || trks.size() == 0) {
+            FTOFGeant4Factory ftofDetector, ArrayList<Track> tracks) {
+        if (tracks == null || tracks.size() == 0) {
             return FTOFhits; // no hits were matched with DC tracks
         }
         
-        // Instantiates the list of hits
+        // Instantiates the final list of hits
         List<Hit> hitList = new ArrayList<Hit>();
         
-       for(Hit ftofHit : FTOFhits) {
-            // loop over tracks and find closest intesrsection
-            double deltaPaddle = 1;
-            int          imatchedTrk = -1;
-            FTOFDetHit matchedTRkHit = null;
-            for (int i = 0; i < trks.size(); i++) {
-                Line3d trk = trks.get(i);
-                List<DetHit> trkHits = ftofDetector.getIntersections(trk);
-                if (trkHits != null && trkHits.size() > 0) {
-                    for (DetHit hit : trkHits) {
-                        FTOFDetHit trkHit = new FTOFDetHit(hit);
-                        // check if intersection is in the "positive direction" and reject other hits
-                        double dir = trkHit.mid().minus(trk.origin()).dot(trk.end().minus(trk.origin()));
-                        // include only given paddles and neighbours
-                        if(Math.abs(trkHit.getPaddle()-ftofHit.get_Paddle())<=deltaPaddle && dir>0) {
-                            deltaPaddle = Math.abs(trkHit.getPaddle()-ftofHit.get_Paddle());
-                            imatchedTrk = i;
-                            matchedTRkHit = new FTOFDetHit(hit);                            
+        // Instantiates map of track intersections with the paddles
+        Map<Integer, ArrayList<Track>> trkHitsMap = new HashMap<Integer, ArrayList<Track>>();
+        // calculate track intersections
+        for (int i = 0; i < tracks.size(); i++) {
+            Track trk = tracks.get(i);
+//            System.out.println(tracks.size() + " " + i + trk.toString());
+            List<DetHit> trkHits = ftofDetector.getIntersections(trk.getLine());
+            if (trkHits != null && trkHits.size() > 0) {
+                for (DetHit hit : trkHits) {
+                    FTOFDetHit trkHit = new FTOFDetHit(hit);
+                    // check if intersection is in the "positive direction" and reject other intersections
+                    double dir = trkHit.mid().minus(trk.getLine().origin()).dot(trk.getLine().end().minus(trk.getLine().origin()));
+//                    System.out.println(trkHit.getPaddle() + " " + dir);
+                    if(dir>0) {
+                        // create the new track updating the path to the intersection point
+                        Track ctofTrkHit = new Track(trk.getId(),trk.getLine(),trk.getPath()+trk.getLine().origin().distance(hit.mid()));
+                        ctofTrkHit.setHit(trkHit);
+                        // if map entry for the given paddle doesn't already exist, add it
+                        if(!trkHitsMap.containsKey(trkHit.getPaddle())) { 
+                            ArrayList<Track> list = new ArrayList<Track>();
+                            trkHitsMap.put(trkHit.getPaddle(), list);
                         }
+                        // add the track/intersection to the map
+                        trkHitsMap.get(trkHit.getPaddle()).add(ctofTrkHit);
                     }
                 }
             }
-            if(imatchedTrk!=-1) {
-                ftofHit._AssociatedTrkId = ids[imatchedTrk];
-                ftofHit.set_matchedTrackHit(matchedTRkHit);
-                ftofHit.set_matchedTrack(trks.get(imatchedTrk));
-                double deltaPath = trks.get(imatchedTrk).origin().distance(matchedTRkHit.mid());
-                double pathLenTruBar = matchedTRkHit.origin().distance(matchedTRkHit.end());
-                ftofHit.set_TrkPathLenThruBar(pathLenTruBar);
-                ftofHit.set_TrkPathLen(paths[imatchedTrk] + deltaPath);
+        }
+        
+        for(Hit ftofHit : FTOFhits) {
+            // loop over tracks and find closest intesrsection
+            double deltaPaddle = 1;
+            Track matchedTrk   = null;
+            for (int i = -1; i <= 1; i++) {
+                int iPaddle = ftofHit.get_Paddle()+i;
+//                System.out.println(ctofHit.toString());
+                if(trkHitsMap.containsKey(iPaddle)) {
+                    ArrayList<Track> paddleTrackHits = trkHitsMap.get(ftofHit.get_Paddle()+i);
+                    for(Track paddleTrack : paddleTrackHits) {
+                        FTOFDetHit trkHit = new FTOFDetHit(paddleTrack.getHit());
+//                        System.out.println(trkHit.getPaddle());
+                        if(Math.abs(trkHit.getPaddle()-ftofHit.get_Paddle())<=deltaPaddle) {
+                            deltaPaddle = Math.abs(trkHit.getPaddle()-ftofHit.get_Paddle());
+                            matchedTrk = paddleTrack;                            
+                        }
+                    }
+                }
+            }            
+            if(matchedTrk!=null) {
+                FTOFDetHit trkHit = new FTOFDetHit(matchedTrk.getHit());
+                ftofHit._AssociatedTrkId = matchedTrk.getId();
+                ftofHit.set_matchedTrackHit(trkHit);
+                ftofHit.set_matchedTrack(matchedTrk.getLine());
+                ftofHit.set_TrkPathLenThruBar(trkHit.origin().distance(trkHit.end()));
+                ftofHit.set_TrkPathLen(matchedTrk.getPath());
                 // get the coordinates for the track hit, which is defined
                 // as the mid-point between its entrance and its exit from
                 // the bar
-                ftofHit.set_TrkPosition(new Point3D(matchedTRkHit.mid().x,matchedTRkHit.mid().y, matchedTRkHit.mid().z));
+                ftofHit.set_TrkPosition(new Point3D(trkHit.mid().x,trkHit.mid().y, trkHit.mid().z));
                 // compute the local y at the middle of the bar :
                 // ----------------------------------------------
                 Point3D origPaddleLine = ftofHit.get_paddleLine().origin();
-                Point3D trkPosinMidlBar = new Point3D(matchedTRkHit.mid().x,matchedTRkHit.mid().y, matchedTRkHit.mid().z);
+                Point3D trkPosinMidlBar = new Point3D(trkHit.mid().x,trkHit.mid().y, trkHit.mid().z);
                 double Lov2 = ftofHit.get_paddleLine().length() / 2;
                 double barOrigToTrkPos = origPaddleLine.distance(trkPosinMidlBar);
                 // local y:
@@ -367,7 +393,6 @@ public class HitReader implements IMatchedHit {
             // save hit in final list
             hitList.add(ftofHit);
         }
-        
         return hitList;
     }
 

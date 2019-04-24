@@ -22,6 +22,7 @@ import org.jlab.rec.tof.cluster.ftof.ClusterMatcher;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
 import org.jlab.geometry.prim.Line3d;
+import org.jlab.rec.tof.track.Track;
 
 /**
  *
@@ -127,15 +128,13 @@ public class FTOFEngine extends ReconstructionEngine {
         // Get the list of track lines which will be used for matching the FTOF
         // hit to the DC hit
         TrackReader trkRead = new TrackReader();
-        trkRead.fetch_Trks(event);
-        List<Line3d> trkLines = trkRead.get_TrkLines();
-        double[] paths = trkRead.get_Paths();
-        int[] ids = trkRead.getTrkId();
+        ArrayList<Track> tracks = trkRead.fetch_Trks(event);
+
         List<Hit> hits = new ArrayList<Hit>(); // all hits
         List<Cluster> clusters = new ArrayList<Cluster>(); // all clusters
         // read in the hits for FTOF
         HitReader hitRead = new HitReader();
-        hitRead.fetch_Hits(event, timeStamp, geometry, trkLines, paths, ids, 
+        hitRead.fetch_Hits(event, timeStamp, geometry, tracks, 
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/attenuation"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/effective_velocity"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_offsets"),
