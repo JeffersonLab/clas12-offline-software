@@ -25,6 +25,7 @@ import org.jlab.rec.tof.cluster.Cluster;
 import org.jlab.rec.tof.cluster.ClusterFinder;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ctof.Hit;
+import org.jlab.rec.tof.track.Track;
 
 /**
  *
@@ -105,15 +106,13 @@ public class CTOFEngine extends ReconstructionEngine {
         // Get the list of track lines which will be used for matching the CTOF
         // hit to the CVT track
         TrackReader trkRead = new TrackReader();
-        trkRead.fetch_Trks(event);
-        List<Line3d> trkLines = trkRead.get_TrkLines();
-        double[] paths = trkRead.get_Paths();
-        int[] ids = trkRead.getTrkId();
+        ArrayList<Track> tracks = trkRead.fetch_Trks(event);
+        
         List<Hit> hits = new ArrayList<Hit>(); // all hits
         List<Cluster> clusters = new ArrayList<Cluster>(); // all clusters
         // read in the hits for CTOF
         HitReader hitRead = new HitReader();
-        hitRead.fetch_Hits(event, timeStamp, geometry, trkLines, paths, ids, 
+        hitRead.fetch_Hits(event, timeStamp, geometry, tracks, 
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/attenuation"),
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/effective_velocity"),
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/time_offsets"),
