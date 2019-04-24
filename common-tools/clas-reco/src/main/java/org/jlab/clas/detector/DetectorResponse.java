@@ -2,12 +2,10 @@ package org.jlab.clas.detector;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
-import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;

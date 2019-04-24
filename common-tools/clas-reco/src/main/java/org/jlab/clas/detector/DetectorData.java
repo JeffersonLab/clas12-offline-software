@@ -7,7 +7,6 @@ import java.util.Map;
 import org.jlab.clas.physics.Particle;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
-import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -177,9 +176,25 @@ public class DetectorData {
             bank.setFloat("vx", row, (float) particles.get(row).vertex().x());
             bank.setFloat("vy", row, (float) particles.get(row).vertex().y());
             bank.setFloat("vz", row, (float) particles.get(row).vertex().z());
-//            bank.setFloat("mass", row, (float) particles.get(row).getMass());
             bank.setFloat("beta", row, (float) particles.get(row).getBeta());
-            bank.setShort("status", row, (short) particles.get(row).getStatus());
+            bank.setShort("status", row, (short) particles.get(row).getStatus().getValue());
+            bank.setFloat("chi2pid", row, (float) particles.get(row).getPidQuality());
+        }
+        return bank;
+    }
+    /**
+     * creates a bank with particles information.
+     * @param particles
+     * @param event
+     * @param bank_name
+     * @return 
+     */
+    public static DataBank getDetectorParticleShadowBank(List<DetectorParticle> particles, DataEvent event, String bank_name){
+        DataBank bank = event.createBank(bank_name, particles.size());
+        for(int row = 0; row < particles.size(); row++){
+            bank.setInt("pid",row,particles.get(row).getPid());
+            bank.setFloat("beta", row, (float) particles.get(row).getBeta());
+            bank.setShort("status", row, (short) particles.get(row).getStatus().getValue());
             bank.setFloat("chi2pid", row, (float) particles.get(row).getPidQuality());
         }
         return bank;
@@ -311,6 +326,12 @@ public class DetectorData {
        bank.setFloat("BCG", 0, detectorEvent.getEventHeader().getBeamChargeGated());
        bank.setDouble("LT", 0, detectorEvent.getEventHeader().getLivetime());
        bank.setShort("EvCAT", 0, detectorEvent.getEventHeader().getEventCategory());
+       return bank;
+   }
+   public static DataBank getEventShadowBank(DetectorEvent detectorEvent, DataEvent event, String bank_name){
+       DataBank bank = event.createBank(bank_name, 1);
+       bank.setFloat("STTime", 0, (float) detectorEvent.getEventHeader().getStartTimeFT());
+       bank.setShort("EvCAT", 0, detectorEvent.getEventHeader().getEventCategoryFT());
        return bank;
    }
       
@@ -616,15 +637,17 @@ public class DetectorData {
                 double cy   = bank.getFloat("cy",row);
                 double cz   = bank.getFloat("cz",row);
                 double energy = bank.getFloat("energy",row);
-                int pid = -1;
 
                 DetectorTrack track = new DetectorTrack(charge, cx*energy ,cy*energy, cz*energy);
                 track.setDetectorID(DetectorType.FTCAL.getDetectorId());
                 DetectorParticle particle = new DetectorParticle(track);
                 
-                if(charge==0) pid = 22;
-                if(charge<0) pid = 11;
+                int pid = 0;
+                if (charge==0) pid = 22;
+                else if (charge<0) pid = 11;
                
+                particle.setBeta(1.0);
+                particle.setPidQuality(0.0);
                 particle.setPid(pid);
                 particles.add(particle);
             }

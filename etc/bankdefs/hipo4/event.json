@@ -453,5 +453,27 @@
             {"name":"cz",      "id":11, "type":"F", "info":"direction cosline of the track at the detector surface"},
             {"name":"path",    "id":12, "type":"F", "info":"pathlength of the track to the detector surface from the DOCA point (cm)"}
         ]
+    },
+    {
+        "name": "RECFT::Event",
+        "group": 300,
+        "item": 41,
+        "info": "Event Header Bank, shadowing REC::Event with FT-based start time",
+        "entries": [
+            {"name":"EvCAT",    "id":1, "type":"S", "info":"Event Category, if >0:  e-, e-p, e-pi+....."},
+            {"name":"STTime",   "id":2, "type":"F", "info":"Event Start Time (ns)"}
+        ]
+    },
+    {
+        "name": "RECFT::Particle",
+        "group": 300,
+        "item" : 42,
+        "info": "Reconstructed Particle Information, shadowing REC::Particle with FT-based start time",
+        "entries": [
+            {"name":"pid",          "id":1,  "type":"I", "info":"particle id in LUND conventions"},
+            {"name":"beta",         "id":2,  "type":"F", "info":"particle beta measured by TOF"},
+            {"name":"chi2pid",      "id":3,  "type":"F", "info":"Chi2 of assigned PID"},
+            {"name":"status",       "id":4,  "type":"S", "info":"particle status (represents detector collection it passed)"}
+        ]
     }
 ]
