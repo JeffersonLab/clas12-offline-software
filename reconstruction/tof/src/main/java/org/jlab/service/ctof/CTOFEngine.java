@@ -59,7 +59,8 @@ public class CTOFEngine extends ReconstructionEngine {
                     "/calibration/ctof/status",
                     "/calibration/ctof/gain_balance",
                     "/calibration/ctof/time_jitter",
-                    "/calibration/ctof/fadc_offset"
+                    "/calibration/ctof/fadc_offset",
+                    "/calibration/ctof/hpos"
                 };
         
         requireConstants(Arrays.asList(ctofTables));
@@ -81,7 +82,9 @@ public class CTOFEngine extends ReconstructionEngine {
         }
 
         DataBank bank = event.getBank("RUN::config");
-		
+//	System.out.println();
+//	System.out.println(bank.getInt("event", 0));
+        
         // Load the constants
         //-------------------
         final int newRun = bank.getInt("run", 0);
@@ -118,7 +121,8 @@ public class CTOFEngine extends ReconstructionEngine {
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/status"),
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/gain_balance"),
             this.getConstantsManager().getConstants(newRun, "/calibration/ctof/time_jitter"),
-            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/fadc_offset"));
+            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/fadc_offset"),
+            this.getConstantsManager().getConstants(newRun, "/calibration/ctof/hpos"));
 
         // 1) get the hits
         List<Hit> CTOFHits = hitRead.get_CTOFHits();

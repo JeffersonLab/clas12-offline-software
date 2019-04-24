@@ -57,6 +57,7 @@ public class FTOFEngine extends ReconstructionEngine {
                     "/calibration/ftof/gain_balance",
                     "/calibration/ftof/tdc_conv",
                     "/calibration/ftof/time_jitter",
+                    "/calibration/ftof/time_walk_pos",
                  };
         
         requireConstants(Arrays.asList(ftofTables));
@@ -142,7 +143,8 @@ public class FTOFEngine extends ReconstructionEngine {
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/status"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/gain_balance"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/tdc_conv"),
-                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_jitter") );
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_jitter"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_walk_pos"));
 
         // 1) get the hits
         List<Hit> FTOF1AHits = hitRead.get_FTOF1AHits();
