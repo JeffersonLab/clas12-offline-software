@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.ECGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
@@ -72,7 +73,7 @@ public class DCEngine extends ReconstructionEngine {
             }
         }
         if (wireDistortionsFlag==null) {
-             System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (off in MC, on in data)");
+             System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (off)");
         }
     }
     public void LoadTables() {
@@ -87,6 +88,7 @@ public class DCEngine extends ReconstructionEngine {
             "/calibration/dc/time_corrections/tdctimingcuts",
             "/calibration/dc/time_jitter",
             "/calibration/dc/tracking/wire_status",
+            "/geometry/beam/position"
         };
 
         requireConstants(Arrays.asList(dcTables));
@@ -147,7 +149,6 @@ public class DCEngine extends ReconstructionEngine {
         variationName = dcvariationName;
         this.getConstantsManager().setVariation(dcvariationName);
     }
-    
     
     @Override
     public boolean processDataEvent(DataEvent event) {

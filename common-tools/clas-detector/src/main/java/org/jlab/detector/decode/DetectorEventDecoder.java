@@ -116,7 +116,7 @@ public class DetectorEventDecoder {
         });
         fitterManager.init(keysFitter, tablesFitter);
 
-        scalerManager.init(Arrays.asList(new String[]{"/runcontrol/fcup"}));
+        scalerManager.init(Arrays.asList(new String[]{"/runcontrol/fcup","/runcontrol/hwp"}));
     }
     /**
      * Set the flag to use extended fitter instead of basic fitter

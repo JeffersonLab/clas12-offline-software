@@ -3,7 +3,9 @@ package org.jlab.service.dc;
 import Jama.Matrix;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -27,6 +29,7 @@ import org.jlab.rec.dc.track.fit.KFitter;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
+import org.jlab.utils.groups.IndexedTable;
 
 public class DCTBEngine extends DCEngine {
 
@@ -35,7 +38,9 @@ public class DCTBEngine extends DCEngine {
 //    ECGeant4Factory ecDetector;
 //    PCALGeant4Factory pcalDetector; 
 //    TrajectorySurfaces tSurf;
+    private AtomicInteger Run = new AtomicInteger(0);
     
+    private int newRun = 0;
     private TimeToDistanceEstimator tde;
 
     public DCTBEngine() {
@@ -60,10 +65,12 @@ public class DCTBEngine extends DCEngine {
         DataBank bank = event.getBank("RUN::config");
         // Load the constants
         //-------------------
-        int newRun = bank.getInt("run", 0);
+        newRun = bank.getInt("run", 0);
         if(newRun==0)
             return true;
-
+        if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
+           Run.set(newRun);
+        }
         double T_Start = 0;
         if(Constants.isUSETSTART() == true) {
             if(event.hasBank("RECHB::Event")==true) {
@@ -198,6 +205,10 @@ public class DCTBEngine extends DCEngine {
         }
         
         //6) find the list of  track candidates
+        // read beam offsets from database
+        IndexedTable beamOffset = this.getConstantsManager().getConstants(newRun, "/geometry/beam/position");
+        double beamXoffset = beamOffset.getDoubleValue("x_offset", 0,0,0);
+        double beamYoffset = beamOffset.getDoubleValue("y_offset", 0,0,0);
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         TrajectoryFinder trjFind = new TrajectoryFinder();
         for(int i = 0; i < TrackArray.length; i++) {
@@ -223,7 +234,7 @@ public class DCTBEngine extends DCEngine {
                 TrackArray[i].set_P(1./Math.abs(kFit.finalStateVec.Q));
                 TrackArray[i].set_Q((int)Math.signum(kFit.finalStateVec.Q));
                 trkcandFinder.setTrackPars(TrackArray[i], new Trajectory(), trjFind, fn, 
-                        kFit.finalStateVec.z, dcDetector, dcSwim);
+                        kFit.finalStateVec.z, dcDetector, dcSwim, beamXoffset, beamYoffset);
                 // candidate parameters are set from the state vector
                 TrackArray[i].set_FitChi2(kFit.chi2); 
                 TrackArray[i].set_FitNDF(kFit.NDF);
@@ -308,6 +319,5 @@ public class DCTBEngine extends DCEngine {
         }
         return miss;
     }
-    
-   
+       
 }

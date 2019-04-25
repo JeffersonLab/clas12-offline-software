@@ -47,9 +47,9 @@
         "entries": [
             {"name":"index",        "id":1,  "type":"S", "info":"index of the hit in the specific detector bank"},
             {"name":"pindex",       "id":2,  "type":"S", "info":"row number in the particle bank hit is associated with"},
-            {"name":"detector",     "id":3,  "type":"B",  "info":"Detector ID, defined in COATJAVA DetectorType"},
-            {"name":"sector",       "id":4,  "type":"B",  "info":"Sector of the Detector hit"},
-            {"name":"layer",        "id":5,  "type":"B",  "info":"Layer of the Detector hit"},
+            {"name":"detector",     "id":3,  "type":"B", "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
+            {"name":"sector",       "id":4,  "type":"B", "info":"Sector of the Detector hit"},
+            {"name":"layer",        "id":5,  "type":"B", "info":"Layer ID as defined in org.jlab.detector.DetectorLayer"},
             {"name":"energy",       "id":6,  "type":"F", "info":"Energy associated with the hit (GeV)"},
             {"name":"time",         "id":7,  "type":"F", "info":"Time associated with the hit (ns)"},
             {"name":"path",         "id":8,  "type":"F", "info":"Path from vertex to the hit position (cm)"},
@@ -83,8 +83,8 @@
         "entries": [
             {"name":"index",        "id":1,  "type":"S", "info":"index of the hit in the specific detector bank"},
             {"name":"pindex",       "id":2,  "type":"S", "info":"row number in the particle bank hit is associated with"},
-            {"name":"detector",     "id":3,  "type":"B",  "info":"Detector ID, defined in COATJAVA DetectorType"},
-            {"name":"sector",       "id":4,  "type":"B",  "info":"Sector of the Detector hit"},
+            {"name":"detector",     "id":3,  "type":"B", "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
+            {"name":"sector",       "id":4,  "type":"B", "info":"Sector of the Detector hit"},
             {"name":"nphe",         "id":5,  "type":"F", "info":"Number of photoelectrons from Cherenkov radiation"},
             {"name":"time",         "id":6,  "type":"F", "info":"Time associated with the hit (ns)"},
             {"name":"path",         "id":7,  "type":"F", "info":"Path from vertex to the hit position (cm)"},
@@ -107,7 +107,7 @@
         "entries": [
             {"name":"index",        "id":1,  "type":"S",  "info":"index of the cluster in the specific detector bank"},
             {"name":"pindex",       "id":2,  "type":"S",  "info":"row number in the particle bank hit is associated with"},
-            {"name":"detector",     "id":3,  "type":"B",   "info":"Detector ID, defined in COATJAVA DetectorType"},
+            {"name":"detector",     "id":3,  "type":"B",  "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
             {"name":"energy",       "id":4,  "type":"F",  "info":"Energy associated with the cluster (GeV)"},
             {"name":"time",         "id":5,  "type":"F",  "info":"Time associated with the cluster (cm)"},
             {"name":"path",         "id":6,  "type":"F",  "info":"Path from vertex to the cluster position (cm)"},
@@ -119,7 +119,7 @@
             {"name":"dy",           "id":12, "type":"F",  "info":"Cluster width in y" },
             {"name":"radius",       "id":13, "type":"F",  "info":"Cluster radius" },
             {"name":"size",         "id":14, "type":"S",  "info":"size of the cluster"},
-            {"name":"status",       "id":15, "type":"S", "info":"hit status"}
+            {"name":"status",       "id":15, "type":"S",  "info":"hit status"}
         ]
     },
     {
@@ -130,9 +130,9 @@
         "entries": [
             {"name":"index",        "id":1,  "type":"S", "info":"index of the hit in the specific detector bank"},
             {"name":"pindex",       "id":2,  "type":"S", "info":"row number in the particle bank hit is associated with"},
-            {"name":"detector",     "id":3,  "type":"B",  "info":"Detector ID, defined in COATJAVA DetectorType"},
-            {"name":"sector",       "id":4,  "type":"B",  "info":"Sector of the Detector hit"},
-            {"name":"layer",        "id":5,  "type":"B",  "info":"Layer of the Detector hit"},
+            {"name":"detector",     "id":3,  "type":"B", "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
+            {"name":"sector",       "id":4,  "type":"B", "info":"Sector of the Detector hit"},
+            {"name":"layer",        "id":5,  "type":"B", "info":"Layer ID as defined in org.jlab.detector.DetectorLayer"},
             {"name":"component",    "id":6,  "type":"S", "info":"Component of the Detector hit"},
             {"name":"energy",       "id":7,  "type":"F", "info":"Energy associated with the hit (MeV)"},
             {"name":"time",         "id":8,  "type":"F", "info":"Time associated with the hit (ns)"},
@@ -155,10 +155,10 @@
         "entries": [
             {"name":"index",        "id":1,  "type":"S", "info":"index of the track in the specific detector bank"},
             {"name":"pindex",       "id":2,  "type":"S", "info":"row number in the particle bank hit is associated with"},
-            {"name":"detector",     "id":3,  "type":"B",  "info":"Detector ID, defined in COATJAVA DetectorType"},
-            {"name":"sector",       "id":4,  "type":"B",  "info":"Sector of the track"},
+            {"name":"detector",     "id":3,  "type":"B", "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
+            {"name":"sector",       "id":4,  "type":"B", "info":"Sector of the track"},
             {"name":"status",       "id":5,  "type":"S", "info":"status of the track"},
-            {"name":"q",            "id":6,  "type":"B",  "info":"charge of the track"},
+            {"name":"q",            "id":6,  "type":"B", "info":"charge of the track"},
             {"name":"chi2",         "id":7,  "type":"F", "info":"Chi2 (or quality) track fitting"},
             {"name":"NDF",          "id":8,  "type":"S", "info":"number of degrees of freedom in track fitting"},
             {"name":"px_nomm",      "id":9,  "type":"F", "info":"x component of the momentum with no MM (cm)"},
@@ -179,16 +179,16 @@
         "entries": [
             {"name":"index",        "id":1,  "type":"S",  "info":"index of the cross in the specific detector bank"},
             {"name":"pindex",       "id":2,  "type":"S",  "info":"row number in the track bank hit is associated with"},
-            {"name":"detector",     "id":3,  "type":"B",   "info":"Detector ID, defined in COATJAVA DetectorType"},
-            {"name":"sector",       "id":4,  "type":"B",   "info":"sector of the track"},
-            {"name":"layer",        "id":5,  "type":"B",   "info":"layer of the track"},
+            {"name":"detector",     "id":3,  "type":"B",  "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
+            {"name":"sector",       "id":4,  "type":"B",  "info":"sector of the track"},
+            {"name":"layer",        "id":5,  "type":"B",  "info":"Layer ID as defined in org.jlab.detector.DetectorLayer"},
             {"name":"c_x",          "id":6,  "type":"F",  "info":"Cross x-position in the lab (in cm)"},
             {"name":"c_y",          "id":7,  "type":"F",  "info":"Cross y-position in the lab (in cm)"},
             {"name":"c_z",          "id":8,  "type":"F",  "info":"Cross z-position in the lab (in cm)"},
             {"name":"c_ux",         "id":9,  "type":"F",  "info":"Cross unit x-direction vector in the lab"},
             {"name":"c_uy",         "id":10, "type":"F",  "info":"Cross unit y-direction vector in the lab"},
             {"name":"c_uz",         "id":11, "type":"F",  "info":"Cross unit z-direction vector in the lab"},
-            {"name":"status",       "id":12, "type":"S", "info":"hit status"}
+            {"name":"status",       "id":12, "type":"S",  "info":"hit status"}
         ]
     },
     {
@@ -239,9 +239,9 @@
         "entries": [
             {"name":"index",        "id":1,  "type":"S", "info":"index of the hit in the specific detector bank"},
             {"name":"pindex",       "id":2,  "type":"S", "info":"row number in the particle bank hit is associated with"},
-            {"name":"detector",     "id":3,  "type":"B",  "info":"Detector ID, defined in COATJAVA DetectorType"},
-            {"name":"sector",       "id":4,  "type":"B",  "info":"Sector of the Detector hit"},
-            {"name":"layer",        "id":5,  "type":"B",  "info":"Layer of the Detector hit"},
+            {"name":"detector",     "id":3,  "type":"B", "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
+            {"name":"sector",       "id":4,  "type":"B", "info":"Sector of the Detector hit"},
+            {"name":"layer",        "id":5,  "type":"B", "info":"Layer ID as defined in org.jlab.detector.DetectorLayer"},
             {"name":"energy",       "id":6,  "type":"F", "info":"Energy associated with the hit (GeV)"},
             {"name":"time",         "id":7,  "type":"F", "info":"Time associated with the hit (ns)"},
             {"name":"path",         "id":8,  "type":"F", "info":"Path from vertex to the hit position (cm)"},
@@ -275,8 +275,8 @@
         "entries": [
             {"name":"index",        "id":1,  "type":"S", "info":"index of the hit in the specific detector bank"},
             {"name":"pindex",       "id":2,  "type":"S", "info":"row number in the particle bank hit is associated with"},
-            {"name":"detector",     "id":3,  "type":"B",  "info":"Detector ID, defined in COATJAVA DetectorType"},
-            {"name":"sector",       "id":4,  "type":"B",  "info":"Sector of the Detector hit"},
+            {"name":"detector",     "id":3,  "type":"B", "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
+            {"name":"sector",       "id":4,  "type":"B", "info":"Sector of the Detector hit"},
             {"name":"nphe",         "id":5,  "type":"F", "info":"Number of photoelectrons from Cherenkov radiation"},
             {"name":"time",         "id":6,  "type":"F", "info":"Time associated with the hit (ns)"},
             {"name":"path",         "id":7,  "type":"F", "info":"Path from vertex to the hit position (cm)"},
@@ -299,7 +299,7 @@
         "entries": [
             {"name":"index",        "id":1,  "type":"S",  "info":"index of the cluster in the specific detector bank"},
             {"name":"pindex",       "id":2,  "type":"S",  "info":"row number in the particle bank hit is associated with"},
-            {"name":"detector",     "id":3,  "type":"B",   "info":"Detector ID, defined in COATJAVA DetectorType"},
+            {"name":"detector",     "id":3,  "type":"B",  "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
             {"name":"energy",       "id":4,  "type":"F",  "info":"Energy associated with the cluster (GeV)"},
             {"name":"time",         "id":5,  "type":"F",  "info":"Time associated with the cluster (ns)"},
             {"name":"path",         "id":6,  "type":"F",  "info":"Path from vertex to the cluster position (cm)"},
@@ -311,7 +311,7 @@
             {"name":"dy",           "id":12, "type":"F",  "info":"Cluster width in y" },
             {"name":"radius",       "id":13, "type":"F",  "info":"Cluster radius" },
             {"name":"size",         "id":14, "type":"S",  "info":"size of the cluster"},
-            {"name":"status",       "id":15, "type":"S", "info":"hit status"}
+            {"name":"status",       "id":15, "type":"S",  "info":"hit status"}
         ]
     },
     {
@@ -322,9 +322,9 @@
         "entries": [
             {"name":"index",        "id":1,  "type":"S", "info":"index of the hit in the specific detector bank"},
             {"name":"pindex",       "id":2,  "type":"S", "info":"row number in the particle bank hit is associated with"},
-            {"name":"detector",     "id":3,  "type":"B",  "info":"Detector ID, defined in COATJAVA DetectorType"},
-            {"name":"sector",       "id":4,  "type":"B",  "info":"Sector of the Detector hit"},
-            {"name":"layer",        "id":5,  "type":"B",  "info":"Layer of the Detector hit"},
+            {"name":"detector",     "id":3,  "type":"B", "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
+            {"name":"sector",       "id":4,  "type":"B", "info":"Sector of the Detector hit"},
+            {"name":"layer",        "id":5,  "type":"B", "info":"Layer ID as defined in org.jlab.detector.DetectorLayer"},
             {"name":"component",    "id":6,  "type":"S", "info":"Component of the Detector hit"},
             {"name":"energy",       "id":7,  "type":"F", "info":"Energy associated with the hit (MeV)"},
             {"name":"time",         "id":8,  "type":"F", "info":"Time associated with the hit (ns)"},
@@ -347,10 +347,10 @@
         "entries": [
             {"name":"index",        "id":1,  "type":"S", "info":"index of the track in the specific detector bank"},
             {"name":"pindex",       "id":2,  "type":"S", "info":"row number in the particle bank hit is associated with"},
-            {"name":"detector",     "id":3,  "type":"B",  "info":"Detector ID, defined in COATJAVA DetectorType"},
-            {"name":"sector",       "id":4,  "type":"B",  "info":"Sector of the track"},
+            {"name":"detector",     "id":3,  "type":"B", "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
+            {"name":"sector",       "id":4,  "type":"B", "info":"Sector of the track"},
             {"name":"status",       "id":5,  "type":"S", "info":"status of the track"},
-            {"name":"q",            "id":6,  "type":"B",  "info":"charge of the track"},
+            {"name":"q",            "id":6,  "type":"B", "info":"charge of the track"},
             {"name":"chi2",         "id":7,  "type":"F", "info":"Chi2 (or quality) track fitting"},
             {"name":"NDF",          "id":8,  "type":"S", "info":"number of degrees of freedom in track fitting"},
             {"name":"px_nomm",      "id":9,  "type":"F", "info":"x component of the momentum with no MM (GeV)"},
@@ -371,16 +371,16 @@
         "entries": [
             {"name":"index",        "id":1,  "type":"S",  "info":"index of the cross in the specific detector bank"},
             {"name":"pindex",       "id":2,  "type":"S",  "info":"row number in the track bank hit is associated with"},
-            {"name":"detector",     "id":3,  "type":"B",   "info":"Detector ID, defined in COATJAVA DetectorType"},
-            {"name":"sector",       "id":4,  "type":"B",   "info":"sector of the track"},
-            {"name":"layer",        "id":5,  "type":"B",   "info":"layer of the track"},
+            {"name":"detector",     "id":3,  "type":"B",  "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
+            {"name":"sector",       "id":4,  "type":"B",  "info":"sector of the track"},
+            {"name":"layer",        "id":5,  "type":"B",  "info":"layer of the track"},
             {"name":"c_x",          "id":6,  "type":"F",  "info":"Cross x-position in the lab (in cm)"},
             {"name":"c_y",          "id":7,  "type":"F",  "info":"Cross y-position in the lab (in cm)"},
             {"name":"c_z",          "id":8,  "type":"F",  "info":"Cross z-position in the lab (in cm)"},
             {"name":"c_ux",         "id":9,  "type":"F",  "info":"Cross unit x-direction vector in the lab"},
             {"name":"c_uy",         "id":10, "type":"F",  "info":"Cross unit y-direction vector in the lab"},
             {"name":"c_uz",         "id":11, "type":"F",  "info":"Cross unit z-direction vector in the lab"},
-            {"name":"status",       "id":12, "type":"S", "info":"hit status"}
+            {"name":"status",       "id":12, "type":"S",  "info":"hit status"}
         ]
     },
     {
@@ -398,7 +398,7 @@
             {"name":"C15",          "id":7,  "type":"F", "info":"C15 covariance matrix element at last superlayer used in the fit"},
             {"name":"C22",          "id":8,  "type":"F", "info":"C22 covariance matrix element at last superlayer used in the fit"},
             {"name":"C23",          "id":9,  "type":"F", "info":"C23 covariance matrix element at last superlayer used in the fit"},
-            {"name":"C24",          "id":10,  "type":"F", "info":"C24 covariance matrix element at last superlayer used in the fit"},
+            {"name":"C24",          "id":10, "type":"F", "info":"C24 covariance matrix element at last superlayer used in the fit"},
             {"name":"C25",          "id":11, "type":"F", "info":"C25 covariance matrix element at last superlayer used in the fit"},
             {"name":"C33",          "id":12, "type":"F", "info":"C33 covariance matrix element at last superlayer used in the fit"},
             {"name":"C34",          "id":13, "type":"F", "info":"C34 covariance matrix element at last superlayer used in the fit"},
@@ -440,17 +440,40 @@
         "item" : 40,
         "info": "Trajectory information for Particles bank",
         "entries": [
-            {"name":"pindex",       "id":1,  "type":"S", "info":"index of the particle in REC::Particle"},
-            {"name":"index",        "id":2,  "type":"S", "info":"index of the track in its tracking bank"},
-            {"name":"detId",        "id":3,  "type":"S", "info":"representative index of the detector"},
-            {"name":"q",            "id":4,  "type":"B",  "info":"charge of the track"},
-            {"name":"x",            "id":5,  "type":"F", "info":"x-position of the track at the detector surface (cm)"},
-            {"name":"y",            "id":6,  "type":"F", "info":"y-position of the track at the detector surface (cm)"},
-            {"name":"z",            "id":7,  "type":"F", "info":"z-position of the track at the detector surface (cm)"},
-            {"name":"cx",           "id":8,  "type":"F", "info":"direction cosline of the track at the detector surface"},
-            {"name":"cy",           "id":9,  "type":"F", "info":"direction cosline of the track at the detector surface"},
-            {"name":"cz",           "id":10, "type":"F", "info":"direction cosline of the track at the detector surface"},
-            {"name":"pathlength",   "id":11, "type":"F", "info":"pathlength of the track to the detector surface from the DOCA point (cm)"}
+            {"name":"pindex",  "id":1,  "type":"S", "info":"index of the particle in REC::Particle"},
+            {"name":"index",   "id":2,  "type":"S", "info":"index of the track in its tracking bank"},
+            {"name":"detector","id":3,  "type":"B", "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
+            {"name":"layer",   "id":4,  "type":"B", "info":"Layer ID as defined in org.jlab.detector.DetectorLayer"},
+            {"name":"q",       "id":5,  "type":"B", "info":"charge of the track"},
+            {"name":"x",       "id":6,  "type":"F", "info":"x-position of the track at the detector surface (cm)"},
+            {"name":"y",       "id":7,  "type":"F", "info":"y-position of the track at the detector surface (cm)"},
+            {"name":"z",       "id":8,  "type":"F", "info":"z-position of the track at the detector surface (cm)"},
+            {"name":"cx",      "id":9,  "type":"F", "info":"direction cosline of the track at the detector surface"},
+            {"name":"cy",      "id":10, "type":"F", "info":"direction cosline of the track at the detector surface"},
+            {"name":"cz",      "id":11, "type":"F", "info":"direction cosline of the track at the detector surface"},
+            {"name":"path",    "id":12, "type":"F", "info":"pathlength of the track to the detector surface from the DOCA point (cm)"}
+        ]
+    },
+    {
+        "name": "RECFT::Event",
+        "group": 300,
+        "item": 41,
+        "info": "Event Header Bank, shadowing REC::Event with FT-based start time",
+        "entries": [
+            {"name":"EvCAT",    "id":1, "type":"S", "info":"Event Category, if >0:  e-, e-p, e-pi+....."},
+            {"name":"STTime",   "id":2, "type":"F", "info":"Event Start Time (ns)"}
+        ]
+    },
+    {
+        "name": "RECFT::Particle",
+        "group": 300,
+        "item" : 42,
+        "info": "Reconstructed Particle Information, shadowing REC::Particle with FT-based start time",
+        "entries": [
+            {"name":"pid",          "id":1,  "type":"I", "info":"particle id in LUND conventions"},
+            {"name":"beta",         "id":2,  "type":"F", "info":"particle beta measured by TOF"},
+            {"name":"chi2pid",      "id":3,  "type":"F", "info":"Chi2 of assigned PID"},
+            {"name":"status",       "id":4,  "type":"S", "info":"particle status (represents detector collection it passed)"}
         ]
     }
 ]

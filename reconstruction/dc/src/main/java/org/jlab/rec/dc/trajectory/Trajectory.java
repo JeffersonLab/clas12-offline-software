@@ -271,30 +271,68 @@ public class Trajectory extends ArrayList<Cross> {
         iBdl    = trkParsCheren[7]; 
 //        System.out.println( "HTCC" + " " + trkParsCheren[0] + " " + trkParsCheren[1] + " " + trkParsCheren[2] + " " + trkParsCheren[6] + " " + trkParsCheren[7]);
 
-        int is = this._Sector-1;
+        int is = _Sector-1;
         // loop over surfaces: Target, FMT, DC, LTCC, FTOF, ECAL
+        double[] trkPars = null;
+        double[] DCtrkPars = null;
+        TrackVec tv = new TrackVec() ;
+        tv.setSector(_Sector);
+        tv.FrameRefId  = 0;
         for(int j = 0; j<ts.getDetectorPlanes().get(is).size(); j++) {
             
             Surface surface=ts.getDetectorPlanes().get(is).get(j);
-            
             // set swimming starting point depending on surface
-            if(surface.getDetectorType()==DetectorType.TARGET && surface.getDetectorLayer()==DetectorLayer.TARGET_DOWNSTREAM) {
-                dcSwim.SetSwimParameters(trkParsCheren[0], trkParsCheren[1], trkParsCheren[2], -trkParsCheren[3], -trkParsCheren[4], -trkParsCheren[5], -q);
-                dir=-1;
-            }
-            else if(surface.getDetectorType()==DetectorType.FMT) {
-                dcSwim.SetSwimParameters(x, y, z, px, py, pz, q);
-                dir=1;
-            }
-            else if(surface.getDetectorType()==DetectorType.DC) {
-                dcSwim.SetSwimParameters(trkParsCheren[0], trkParsCheren[1],trkParsCheren[2], trkParsCheren[3], trkParsCheren[4], trkParsCheren[5], q);
-            }
+            
+            //handle DC differently
+            if(surface.getDetectorType()==DetectorType.DC) {
+                // create a trackVec in the lab and rotate it to the DC TSC frame for track propagation
+                tv.set(trkParsCheren[0], trkParsCheren[1],trkParsCheren[2], trkParsCheren[3], trkParsCheren[4], trkParsCheren[5]) ;
+                tv.TransformToTiltSectorFrame();
+                dcSwim.SetSwimParameters(tv.x(), tv.y(), tv.z(), tv.px(), tv.py(), tv.pz(), q);
+                DCtrkPars = dcSwim.SwimToPlaneTiltSecSys(this.get_Sector(), surface.get_d());
+                tv.set(DCtrkPars[0], DCtrkPars[1],DCtrkPars[2], DCtrkPars[3], DCtrkPars[4], DCtrkPars[5]) ;
+                tv.TransformToLabFrame(_Sector);
+                trkPars[0]=tv.x();
+                trkPars[1]=tv.y();
+                trkPars[2]=tv.z();
+                trkPars[3]=tv.px();
+                trkPars[4]=tv.py();
+                trkPars[5]=tv.pz();
+            } 
+            // set swimming starting point depending on surface
+            else {
+                if(surface.getDetectorType()==DetectorType.TARGET) {
+                    if(surface.getDetectorLayer()==DetectorLayer.TARGET_DOWNSTREAM) {
+                        dcSwim.SetSwimParameters(trkParsCheren[0], trkParsCheren[1], trkParsCheren[2], -trkParsCheren[3], -trkParsCheren[4], -trkParsCheren[5], -q);
+                        dir=-1;
+                    }
+                    else {
+                        dcSwim.SetSwimParameters(trkPars[0], trkPars[1], trkPars[2], -trkPars[3], -trkPars[4], -trkPars[5], -q);
+                        dir=-1;
+                    }
+                }
+                else if(surface.getDetectorType()==DetectorType.FMT) {
+                    dcSwim.SetSwimParameters(x, y, z, px, py, pz, q);
+                    dir=1;
+                }
+                else {
+                    dcSwim.SetSwimParameters(trkParsCheren[0], trkParsCheren[1], trkParsCheren[2], trkParsCheren[3], trkParsCheren[4], trkParsCheren[5], q);
+                    dir=1;
+                }
+            
+                // Swim in the lab for all detectors that are not DC
+                trkPars = dcSwim.SwimToPlaneBoundary(surface.get_d(), new Vector3D(surface.get_nx(),surface.get_ny(),surface.get_nz()),dir);
+            
+            }    
+            
 //            if(surface.getDetectorIndex()==DetectorType.DC.getDetectorId()) {  // start swiming from previous DC layer
 //                dcSwim.SetSwimParameters(trkPars[0], trkPars[1], trkPars[2], trkPars[3], trkPars[4], trkPars[5], q);
 //            }
   
-            double[] trkPars = dcSwim.SwimToPlaneBoundary(surface.get_d(), new Vector3D(surface.get_nx(),surface.get_ny(),surface.get_nz()),dir);
-            if(trkPars==null) return;
+            if(trkPars==null) {
+                //System.out.println(" Failed swim");
+                return;
+            }
             
 //            System.out.println(surface.getDetectorType().getName() + " " + surface.getDetectorLayer() + " " + trkPars[0] + " " + trkPars[1] + " " + trkPars[2] + " " + trkPars[6] + " " + trkPars[7]);
 

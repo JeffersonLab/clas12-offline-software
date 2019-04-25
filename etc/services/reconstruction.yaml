@@ -56,12 +56,6 @@ configuration:
       torusXShift: "0.0"
       torusYShift: "0.0"
       torusZShift: "0.0"
-    DCHB:
-      useStartTime: "true"
-      wireDistortionsFlag: "false"
-      geomDBVariation: may_2018_engineers
-    DCTB:
-      geomDBVariation: may_2018_engineers
 
 mime-types:
   - binary/data-hipo

@@ -13,7 +13,6 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
-import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 /**
  * A class to load the geometry constants used in the DC reconstruction. The
@@ -41,8 +40,6 @@ public class TrajectorySurfaces {
             FTOFGeant4Factory ftofDetector,
             Detector ecalDetector) {
        
-        int iw =0;
-        
         double d = 0;
         Vector3D n;
         for(int is =0; is<6; is++) {
@@ -62,16 +59,17 @@ public class TrajectorySurfaces {
             } 
             index=7; // end of MM + HTCC(7)
             // Add DC
-            n = this.RotateFromTSCtoLabC(0,0,1, is+1).toVector3D();
+            //n = this.RotateFromTSCtoLabC(0,0,1, is+1).toVector3D();
+            // don't rotate to the lab
+            n = new Vector3D(0,0,1);
             for(int isup =0; isup<6; isup++) {
                 for(int il =5; il<6; il++) { // include only layer 6
-                    d = dcDetector.getWireMidpoint(is, isup, il, iw).z; 
+                    d = dcDetector.getWireMidpoint(is, isup, il, 0).z; 
                     this._DetectorPlanes.get(is).add(new Surface(DetectorType.DC, isup*6+il+1,d, n.x(), n.y(), n.z()));
+                    
                 }
             } 
             //outer detectors           
-            //LTCC
-            this._DetectorPlanes.get(is).add(new Surface(DetectorType.LTCC,1, 624.23, n.x(), n.y(), n.z())); 
              //FTOF 2 
             Vector3D  P = ftofDetector.getMidPlane(is+1, DetectorLayer.FTOF2).point().toVector3D();
             n = ftofDetector.getMidPlane(is+1, DetectorLayer.FTOF2).normal();
@@ -87,7 +85,8 @@ public class TrajectorySurfaces {
             n = ftofDetector.getMidPlane(is+1, DetectorLayer.FTOF1A).normal();
             d = P.dot(n);
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.FTOF, DetectorLayer.FTOF1A, -d, -n.x(), -n.y(), -n.z())); 
-            //// NEED TO CHANGE TO V PLANE
+            //LTCC
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.LTCC,1, 653.09, -n.x(), -n.y(), -n.z())); 
             //PCAL
             int superLayer = (int) ((DetectorLayer.PCAL_V-1)/3);
             int localLayer = (DetectorLayer.PCAL_V-1)%3;
@@ -111,13 +110,13 @@ public class TrajectorySurfaces {
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.EC_OUTER_V, d, n.x(), n.y(), n.z())); 
         }
     }
-    private Point3D RotateFromTSCtoLabC(double X, double Y, double Z, int sector) {
-        double rzs = -X * Math.sin(Math.toRadians(25.)) + Z * Math.cos(Math.toRadians(25.));
-        double rxs = X * Math.cos(Math.toRadians(25.)) + Z * Math.sin(Math.toRadians(25.));
-        
-        double rx = rxs * Math.cos((sector - 1) * Math.toRadians(60.)) - Y * Math.sin((sector - 1) * Math.toRadians(60.));
-        double ry = rxs * Math.sin((sector - 1) * Math.toRadians(60.)) + Y * Math.cos((sector - 1) * Math.toRadians(60.));
-
-        return new Point3D(rx,ry,rzs);
-    }
+//    private Point3D RotateFromTSCtoLabC(double X, double Y, double Z, int sector) {
+//        double rzs = -X * Math.sin(Math.toRadians(25.)) + Z * Math.cos(Math.toRadians(25.));
+//        double rxs = X * Math.cos(Math.toRadians(25.)) + Z * Math.sin(Math.toRadians(25.));
+//        
+//        double rx = rxs * Math.cos((sector - 1) * Math.toRadians(60.)) - Y * Math.sin((sector - 1) * Math.toRadians(60.));
+//        double ry = rxs * Math.sin((sector - 1) * Math.toRadians(60.)) + Y * Math.cos((sector - 1) * Math.toRadians(60.));
+//
+//        return new Point3D(rx,ry,rzs);
+//    }
 }
