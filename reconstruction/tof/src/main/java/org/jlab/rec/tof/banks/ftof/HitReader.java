@@ -1,23 +1,19 @@
 package org.jlab.rec.tof.banks.ftof;
 
-import eu.mihosoft.vrl.v3d.Vector3d;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.geometry.prim.Line3d;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.tof.banks.BaseHit;
 import org.jlab.rec.tof.banks.BaseHitReader;
 import org.jlab.rec.tof.banks.IMatchedHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
 import org.jlab.rec.tof.track.Track;
+import org.jlab.utils.groups.IndexedList;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -323,7 +319,7 @@ public class HitReader implements IMatchedHit {
         List<Hit> hitList = new ArrayList<Hit>();
         
         // Instantiates map of track intersections with the paddles
-        Map<Integer, ArrayList<Track>> trkHitsMap = new HashMap<Integer, ArrayList<Track>>();
+        IndexedList<ArrayList<Track>> trkHitsMap = new IndexedList<ArrayList<Track>>(3);
         // calculate track intersections
         for (int i = 0; i < tracks.size(); i++) {
             Track trk = tracks.get(i);
@@ -337,15 +333,15 @@ public class HitReader implements IMatchedHit {
 //                    System.out.println(trkHit.getPaddle() + " " + dir);
                     if(dir>0) {
                         // create the new track updating the path to the intersection point
-                        Track ctofTrkHit = new Track(trk.getId(),trk.getLine(),trk.getPath()+trk.getLine().origin().distance(hit.mid()));
-                        ctofTrkHit.setHit(trkHit);
+                        Track ftofTrkHit = new Track(trk.getId(),trk.getLine(),trk.getPath()+trk.getLine().origin().distance(hit.mid()));
+                        ftofTrkHit.setHit(trkHit);
                         // if map entry for the given paddle doesn't already exist, add it
-                        if(!trkHitsMap.containsKey(trkHit.getPaddle())) { 
+                        if(!trkHitsMap.hasItem(trkHit.getSector(),trkHit.getLayer(),trkHit.getPaddle())) { 
                             ArrayList<Track> list = new ArrayList<Track>();
-                            trkHitsMap.put(trkHit.getPaddle(), list);
+                            trkHitsMap.add(list,trkHit.getSector(),trkHit.getLayer(),trkHit.getPaddle());
                         }
                         // add the track/intersection to the map
-                        trkHitsMap.get(trkHit.getPaddle()).add(ctofTrkHit);
+                        trkHitsMap.getItem(trkHit.getSector(),trkHit.getLayer(),trkHit.getPaddle()).add(ftofTrkHit);
                     }
                 }
             }
@@ -353,17 +349,19 @@ public class HitReader implements IMatchedHit {
         
         for(Hit ftofHit : FTOFhits) {
             // loop over tracks and find closest intesrsection
-            double deltaPaddle = 1;
+            double deltaPaddle = 2;
             Track matchedTrk   = null;
+            int sector = ftofHit.get_Sector();
+            int layer  = ftofHit.get_Panel();
             for (int i = -1; i <= 1; i++) {
                 int iPaddle = ftofHit.get_Paddle()+i;
 //                System.out.println(ctofHit.toString());
-                if(trkHitsMap.containsKey(iPaddle)) {
-                    ArrayList<Track> paddleTrackHits = trkHitsMap.get(ftofHit.get_Paddle()+i);
+                if(trkHitsMap.hasItem(sector,layer,iPaddle)) {
+                    ArrayList<Track> paddleTrackHits = trkHitsMap.getItem(sector,layer,iPaddle);
                     for(Track paddleTrack : paddleTrackHits) {
                         FTOFDetHit trkHit = new FTOFDetHit(paddleTrack.getHit());
 //                        System.out.println(trkHit.getPaddle());
-                        if(Math.abs(trkHit.getPaddle()-ftofHit.get_Paddle())<=deltaPaddle) {
+                        if(Math.abs(trkHit.getPaddle()-ftofHit.get_Paddle())<deltaPaddle) {
                             deltaPaddle = Math.abs(trkHit.getPaddle()-ftofHit.get_Paddle());
                             matchedTrk = paddleTrack;                            
                         }
