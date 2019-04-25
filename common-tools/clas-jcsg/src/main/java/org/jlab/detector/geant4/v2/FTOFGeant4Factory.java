@@ -90,10 +90,10 @@ public final class FTOFGeant4Factory extends Geant4Factory {
             paddles.get(ipaddle).setMother(panelVolume);
         }
 
-        if (layer == 2) {
-            G4Trd pbShield = new G4Trd("ftof_shield_sector" + sector,
+        if (layer != 2) {
+            G4Trd pbShield = new G4Trd("ftof_shield_p" + gemcLayerNames[layer-1] + "_sector" + sector,
                     panel_mother_dx1, panel_mother_dx2, pbthickness / 2.0, pbthickness / 2.0, panel_mother_dz);
-            pbShield.translate(0.0, panel_mother_dy + microgap + pbthickness / 2.0, 0.0);
+            pbShield.translate(0.0, - panel_mother_dy - microgap - pbthickness / 2.0, 0.0);
             pbShield.setMother(panelVolume);
         }
 

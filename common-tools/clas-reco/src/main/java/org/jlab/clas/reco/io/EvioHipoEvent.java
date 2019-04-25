@@ -517,8 +517,8 @@ public class EvioHipoEvent {
                 hipoBank.setFloat("lifetime",i, (float) (evioBank.getDouble("ltime", i)) );
                 hipoBank.setByte("type",     i, (byte)  (evioBank.getDouble("type", i)) );
                 hipoBank.setInt("pid",       i, (int)   (evioBank.getDouble("pid", i)) );
-                hipoBank.setByte("parent",   i, (byte)  (evioBank.getDouble("parent", i)) );
-                hipoBank.setByte("daughter", i, (byte)  (evioBank.getDouble("daughter", i)) );
+                hipoBank.setByte("parent",   i, (byte)  (evioBank.getDouble("parentID", i)) );
+                hipoBank.setByte("daughter", i, (byte)  (evioBank.getDouble("daughterID", i)) );
                 hipoBank.setFloat("px",      i, (float) (evioBank.getDouble("px", i)) );
                 hipoBank.setFloat("py",      i, (float) (evioBank.getDouble("py", i)) );
                 hipoBank.setFloat("pz",      i, (float) (evioBank.getDouble("pz", i)) );

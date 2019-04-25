@@ -259,6 +259,7 @@ public class DetectorData {
            bank.setShort("index", row, (short) c.getHitIndex());
            bank.setShort("pindex", row, (short) c.getAssociation());
            bank.setByte("detector", row, (byte) c.getDescriptor().getType().getDetectorId());
+           bank.setByte("sector", row, (byte) c.getDescriptor().getSector());
            bank.setFloat("x", row, (float) c.getHitPosition().x());
            bank.setFloat("y", row, (float) c.getHitPosition().y());
            bank.setFloat("z", row, (float) c.getHitPosition().z());

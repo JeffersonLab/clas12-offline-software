@@ -210,7 +210,7 @@ public final class PCALGeant4Factory extends Geant4Factory {
                 double xstrip = ystrip * Math.tan(-walpha);
                 stripVol.translate(xstrip, ystrip, 0);
                 stripVol.setMother(layerVol);
-                hshort += wstrip;
+                hshort += 2*wstrip;
             }
 
             hshort = dwrap;

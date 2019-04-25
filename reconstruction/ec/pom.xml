@@ -9,11 +9,24 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
+  <build>
+      <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <configuration>
+                  <source>1.8</source>
+                  <target>1.8</target>
+              </configuration>
+          </plugin>
+      </plugins>
+  </build>
+
   <parent>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>5.7.4-SNAPSHOT</version>
+    <version>5.9.0-SNAPSHOT</version>
   </parent>
 
   <repositories>
@@ -33,37 +46,37 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-io</artifactId>
-      <version>5.7.4-SNAPSHOT</version>
+      <version>5.9.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-detector</artifactId>
-      <version>5.7.4-SNAPSHOT</version>
+      <version>5.9.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-geometry</artifactId>
-      <version>5.7.4-SNAPSHOT</version>
+      <version>5.9.0-SNAPSHOT</version>
     </dependency>
 
 	<dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-reco</artifactId>
-      <version>5.7.4-SNAPSHOT</version>
+      <version>5.9.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-physics</artifactId>
-      <version>5.7.4-SNAPSHOT</version>
+      <version>5.9.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-analysis</artifactId>
-      <version>5.7.4-SNAPSHOT</version>
+      <version>5.9.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>

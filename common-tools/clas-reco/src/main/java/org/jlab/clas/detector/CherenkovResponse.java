@@ -137,12 +137,13 @@ public class CherenkovResponse extends DetectorResponse {
                 double z = bank.getFloat("z",row);
                 double time = bank.getFloat("time",row);
                 double nphe = bank.getFloat("nphe", row);
+                int sector = 0;
 
                 // FIXME: unify LTCC/HTCC detector banks
                 // Here we have to treat them differently:
                 // 3.  HTCC provides both x/y/z and theta/phi, while LTCC provides only x/y/z.
                 //     The current convention in EB is to use only x/y/z, while theta/phi is
-                //     just propogated.
+                //     just propogated.  HTCC also doesn't provide sector, so we calculate it.
 
                 double theta=0,phi=0,dtheta=0,dphi=0;
 
@@ -152,13 +153,15 @@ public class CherenkovResponse extends DetectorResponse {
                     dphi   = 18*3.14159/180; // based on MC
                     theta = bank.getFloat("theta", row);
                     phi   = bank.getFloat("phi",row);
+                    sector = DetectorResponse.getSector(phi);
                 }
 
                 else if (type==DetectorType.LTCC) {
                     dtheta = (35-5)/18*2 * 3.14159/180; // +/- 2 mirrors
                     dphi   = 10*3.14159/180;
-                    theta = Math.atan2(Math.sqrt(x*x+y*y),z);
-                    phi   = Math.atan2(y,x);
+                    theta  = Math.atan2(Math.sqrt(x*x+y*y),z);
+                    phi    = Math.atan2(y,x);
+                    sector = bank.getByte("sector",row);
                 }
 
                 else {
@@ -171,6 +174,7 @@ public class CherenkovResponse extends DetectorResponse {
                 che.setHitIndex(row);
                 che.setEnergy(nphe);
                 che.setTime(time);
+                che.getDescriptor().setSector(sector);
                 che.getDescriptor().setType(type);
 
                 // only LTCC currently reports status:
