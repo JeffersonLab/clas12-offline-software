@@ -40,6 +40,9 @@ public class DCReconstructionTest {
     DCHBEngine engineHB = new DCHBEngine();
     engineHB.init();
     engineHB.processDataEvent(testEvent);
+    if(testEvent.hasBank("HitBasedTrkg::HBTracks")) {
+        testEvent.getBank("HitBasedTrkg::HBTracks").show();
+    }
     
     assertEquals(testEvent.hasBank("HitBasedTrkg::HBTracks"), true);
     assertEquals(testEvent.getBank("HitBasedTrkg::HBTracks").rows(), 1);
@@ -52,6 +55,9 @@ public class DCReconstructionTest {
     DCTBEngine engineTB = new DCTBEngine();
     engineTB.init();
     engineTB.processDataEvent(testEvent);
+    if(testEvent.hasBank("TimeBasedTrkg::TBTracks")) {
+        testEvent.getBank("TimeBasedTrkg::TBTracks").show();
+    }
     
     assertEquals(testEvent.hasBank("TimeBasedTrkg::TBTracks"), true);
     assertEquals(testEvent.getBank("TimeBasedTrkg::TBTracks").rows(), 1);

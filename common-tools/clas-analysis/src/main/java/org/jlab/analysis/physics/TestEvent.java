@@ -14,7 +14,6 @@ public class TestEvent {
 		HipoDataSync writer = new HipoDataSync();
 		HipoDataEvent testEvent = (HipoDataEvent) writer.createEvent();
 		DataBank config = testEvent.createBank("RUN::config", 1);
-		DataBank DCtdc = testEvent.createBank("DC::tdc", 37);
 		
 		// this event is based on a gemc event with
 		// one generated electron with p=2.5, th=25, ph=0
@@ -33,88 +32,27 @@ public class TestEvent {
 		config.setFloat("torus", 0, (float) -1.0);
 		config.setFloat("solenoid", 0, (float) 0.0);
 		
-		for(int i = 0; i < 37; i++) {
-			DCtdc.setByte("sector", i, (byte) 1);
-			DCtdc.setByte("order", i, (byte) 2);
-			if(i >= 32) DCtdc.setByte("layer", i, (byte) i);
-			else DCtdc.setByte("layer", i, (byte) (i+1));
-		}
-		
-		DCtdc.setShort("component", 0, (short) 62);
-		DCtdc.setShort("component", 1, (short) 63);
-		DCtdc.setShort("component", 2, (short) 62);
-		DCtdc.setShort("component", 3, (short) 63);
-		DCtdc.setShort("component", 4, (short) 62);
-		DCtdc.setShort("component", 5, (short) 63);
-		DCtdc.setShort("component", 6, (short) 63);
-		DCtdc.setShort("component", 7, (short) 63);
-		DCtdc.setShort("component", 8, (short) 63);
-		DCtdc.setShort("component", 9, (short) 63);
-		DCtdc.setShort("component", 10, (short) 63);
-		DCtdc.setShort("component", 11, (short) 63);
-		DCtdc.setShort("component", 12, (short) 58);
-		DCtdc.setShort("component", 13, (short) 58);
-		DCtdc.setShort("component", 14, (short) 58);
-		DCtdc.setShort("component", 15, (short) 58);
-		DCtdc.setShort("component", 16, (short) 58);
-		DCtdc.setShort("component", 17, (short) 58);
-		DCtdc.setShort("component", 18, (short) 57);
-		DCtdc.setShort("component", 19, (short) 58);
-		DCtdc.setShort("component", 20, (short) 57);
-		DCtdc.setShort("component", 21, (short) 58);
-		DCtdc.setShort("component", 22, (short) 57);
-		DCtdc.setShort("component", 23, (short) 58);
-		DCtdc.setShort("component", 24, (short) 51);
-		DCtdc.setShort("component", 25, (short) 51);
-		DCtdc.setShort("component", 26, (short) 51);
-		DCtdc.setShort("component", 27, (short) 51);
-		DCtdc.setShort("component", 28, (short) 50);
-		DCtdc.setShort("component", 29, (short) 51);
-		DCtdc.setShort("component", 30, (short) 50);
-		DCtdc.setShort("component", 31, (short) 51);
-		DCtdc.setShort("component", 32, (short) 50);
-		DCtdc.setShort("component", 33, (short) 50);
-		DCtdc.setShort("component", 34, (short) 50);
-		DCtdc.setShort("component", 35, (short) 50);
-		DCtdc.setShort("component", 36, (short) 50);
-
-		DCtdc.setInt("TDC", 0, (int) 54);
-		DCtdc.setInt("TDC", 1, (int) 88);
-		DCtdc.setInt("TDC", 2, (int) 58);
-		DCtdc.setInt("TDC", 3, (int) 83);
-		DCtdc.setInt("TDC", 4, (int) 53);
-		DCtdc.setInt("TDC", 5, (int) 88);
-		DCtdc.setInt("TDC", 6, (int) 42);
-		DCtdc.setInt("TDC", 7, (int) 112);
-		DCtdc.setInt("TDC", 8, (int) 41);
-		DCtdc.setInt("TDC", 9, (int) 110);
-		DCtdc.setInt("TDC", 10, (int) 46);
-		DCtdc.setInt("TDC", 11, (int) 104);
-		DCtdc.setInt("TDC", 12, (int) 32);
-		DCtdc.setInt("TDC", 13, (int) 204);
-		DCtdc.setInt("TDC", 14, (int) 83);
-		DCtdc.setInt("TDC", 15, (int) 137);
-		DCtdc.setInt("TDC", 16, (int) 151);
-		DCtdc.setInt("TDC", 17, (int) 81);
-		DCtdc.setInt("TDC", 18, (int) 276);
-		DCtdc.setInt("TDC", 19, (int) 57);
-		DCtdc.setInt("TDC", 20, (int) 167);
-		DCtdc.setInt("TDC", 21, (int) 136);
-		DCtdc.setInt("TDC", 22, (int) 94);
-		DCtdc.setInt("TDC", 23, (int) 225);
-		DCtdc.setInt("TDC", 24, (int) 110);
-		DCtdc.setInt("TDC", 25, (int) 190);
-		DCtdc.setInt("TDC", 26, (int) 334);
-		DCtdc.setInt("TDC", 27, (int) 2);
-		DCtdc.setInt("TDC", 28, (int) 354);
-		DCtdc.setInt("TDC", 29, (int) 188);
-		DCtdc.setInt("TDC", 30, (int) 158);
-		DCtdc.setInt("TDC", 31, (int) 424);
-		DCtdc.setInt("TDC", 32, (int) 679);
-		DCtdc.setInt("TDC", 33, (int) 37);
-		DCtdc.setInt("TDC", 34, (int) 312);
-		DCtdc.setInt("TDC", 35, (int) 260);
-		DCtdc.setInt("TDC", 36, (int) 68);
+                int[] layer = {    1,   2,   3,   4,   5,   6,   7,   8,   9,  10
+                              ,   11,  12,  13,  14,  15,  16,  17,  18,  19,  20
+                              ,   21,  22,  23,  24,  25,  26,  26,  27,  28,  29
+                              ,   30,  31,  31,  32,  33,  34,  35,  36};
+                int[] component = {    63,  64,  63,  64,  63,  64,  64,  64,  64,  64
+                                  ,   64,  64,  59,  60,  59,  60,  59,  60,  59,  59
+                                  ,   59,  59,  59,  59,  52,  53,  52,  52,  52,  52
+                                  ,   52,  52,  51,  52,  51,  52,  51,  51};
+                int[]  TDC = {   73,  74,  79,  72,  77,  75,  21, 145,  27, 136
+                             ,   29, 136, 149, 124,  99, 192,  43, 260,  89, 142
+                             ,  159,  69, 243,   3,  88, 456, 547,  67, 256, 280
+                             ,   56, 537, 484,  96, 220, 312,  18, 423};
+      
+                DataBank DCtdc  = testEvent.createBank("DC::tdc", layer.length);
+		for(int i = 0; i < layer.length; i++) {
+			DCtdc.setByte("sector",     i, (byte) 1);
+			DCtdc.setByte("order",      i, (byte) 2);
+			DCtdc.setByte("layer",      i, (byte) layer[i]);
+		        DCtdc.setShort("component", i, (short) component[i]);
+		        DCtdc.setInt("TDC",         i, TDC[i]);
+                }
 		
 		testEvent.appendBank(config);
 		testEvent.appendBank(DCtdc);
