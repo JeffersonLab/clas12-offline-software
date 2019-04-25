@@ -73,7 +73,7 @@ public class DCEngine extends ReconstructionEngine {
             }
         }
         if (wireDistortionsFlag==null) {
-             System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (off in MC, on in data)");
+             System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (off)");
         }
     }
     public void LoadTables() {

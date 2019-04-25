@@ -13,8 +13,6 @@ public class TestEvent {
 
 	public static HipoDataEvent getDCSector1ElectronEvent(SchemaFactory schemaFactory) {
                 Event testEvent = new Event();
-                Bank config = new Bank(schemaFactory.getSchema("RUN::config"), 1);
-                Bank DCtdc  = new Bank(schemaFactory.getSchema("DC::tdc"), 37);
 		
 		// this event is based on a gemc event with
 		// one generated electron with p=2.5, th=25, ph=0
@@ -23,6 +21,7 @@ public class TestEvent {
 		// updated to use non-linear t2d
 		// updated to include mini-stagger
 
+                Bank config = new Bank(schemaFactory.getSchema("RUN::config"), 1);
 		config.putInt("run", 0, (int) 11);
 		config.putInt("event", 0, (int) 1);
 		config.putInt("unixtime", 0, (int) 0);
@@ -33,91 +32,37 @@ public class TestEvent {
 		config.putFloat("torus", 0, (float) -1.0);
 		config.putFloat("solenoid", 0, (float) 0.0);
 		
-		for(int i = 0; i < 37; i++) {
-			DCtdc.putByte("sector", i, (byte) 1);
-			DCtdc.putByte("order", i, (byte) 2);
-			if(i >= 32) DCtdc.putByte("layer", i, (byte) i);
-			else DCtdc.putByte("layer", i, (byte) (i+1));
-		}
-		
-		DCtdc.putShort("component", 0, (short) 62);
-		DCtdc.putShort("component", 1, (short) 63);
-		DCtdc.putShort("component", 2, (short) 62);
-		DCtdc.putShort("component", 3, (short) 63);
-		DCtdc.putShort("component", 4, (short) 62);
-		DCtdc.putShort("component", 5, (short) 63);
-		DCtdc.putShort("component", 6, (short) 63);
-		DCtdc.putShort("component", 7, (short) 63);
-		DCtdc.putShort("component", 8, (short) 63);
-		DCtdc.putShort("component", 9, (short) 63);
-		DCtdc.putShort("component", 10, (short) 63);
-		DCtdc.putShort("component", 11, (short) 63);
-		DCtdc.putShort("component", 12, (short) 58);
-		DCtdc.putShort("component", 13, (short) 58);
-		DCtdc.putShort("component", 14, (short) 58);
-		DCtdc.putShort("component", 15, (short) 58);
-		DCtdc.putShort("component", 16, (short) 58);
-		DCtdc.putShort("component", 17, (short) 58);
-		DCtdc.putShort("component", 18, (short) 57);
-		DCtdc.putShort("component", 19, (short) 58);
-		DCtdc.putShort("component", 20, (short) 57);
-		DCtdc.putShort("component", 21, (short) 58);
-		DCtdc.putShort("component", 22, (short) 57);
-		DCtdc.putShort("component", 23, (short) 58);
-		DCtdc.putShort("component", 24, (short) 51);
-		DCtdc.putShort("component", 25, (short) 51);
-		DCtdc.putShort("component", 26, (short) 51);
-		DCtdc.putShort("component", 27, (short) 51);
-		DCtdc.putShort("component", 28, (short) 50);
-		DCtdc.putShort("component", 29, (short) 51);
-		DCtdc.putShort("component", 30, (short) 50);
-		DCtdc.putShort("component", 31, (short) 51);
-		DCtdc.putShort("component", 32, (short) 50);
-		DCtdc.putShort("component", 33, (short) 50);
-		DCtdc.putShort("component", 34, (short) 50);
-		DCtdc.putShort("component", 35, (short) 50);
-		DCtdc.putShort("component", 36, (short) 50);
+                Bank event = new Bank(schemaFactory.getSchema("RECHB::Event"), 1);
+		event.putFloat("STTime", 0, (float) 124.25);
 
-		DCtdc.putInt("TDC", 0, (int) 54);
-		DCtdc.putInt("TDC", 1, (int) 88);
-		DCtdc.putInt("TDC", 2, (int) 58);
-		DCtdc.putInt("TDC", 3, (int) 83);
-		DCtdc.putInt("TDC", 4, (int) 53);
-		DCtdc.putInt("TDC", 5, (int) 88);
-		DCtdc.putInt("TDC", 6, (int) 42);
-		DCtdc.putInt("TDC", 7, (int) 112);
-		DCtdc.putInt("TDC", 8, (int) 41);
-		DCtdc.putInt("TDC", 9, (int) 110);
-		DCtdc.putInt("TDC", 10, (int) 46);
-		DCtdc.putInt("TDC", 11, (int) 104);
-		DCtdc.putInt("TDC", 12, (int) 32);
-		DCtdc.putInt("TDC", 13, (int) 204);
-		DCtdc.putInt("TDC", 14, (int) 83);
-		DCtdc.putInt("TDC", 15, (int) 137);
-		DCtdc.putInt("TDC", 16, (int) 151);
-		DCtdc.putInt("TDC", 17, (int) 81);
-		DCtdc.putInt("TDC", 18, (int) 276);
-		DCtdc.putInt("TDC", 19, (int) 57);
-		DCtdc.putInt("TDC", 20, (int) 167);
-		DCtdc.putInt("TDC", 21, (int) 136);
-		DCtdc.putInt("TDC", 22, (int) 94);
-		DCtdc.putInt("TDC", 23, (int) 225);
-		DCtdc.putInt("TDC", 24, (int) 110);
-		DCtdc.putInt("TDC", 25, (int) 190);
-		DCtdc.putInt("TDC", 26, (int) 334);
-		DCtdc.putInt("TDC", 27, (int) 2);
-		DCtdc.putInt("TDC", 28, (int) 354);
-		DCtdc.putInt("TDC", 29, (int) 188);
-		DCtdc.putInt("TDC", 30, (int) 158);
-		DCtdc.putInt("TDC", 31, (int) 424);
-		DCtdc.putInt("TDC", 32, (int) 679);
-		DCtdc.putInt("TDC", 33, (int) 37);
-		DCtdc.putInt("TDC", 34, (int) 312);
-		DCtdc.putInt("TDC", 35, (int) 260);
-		DCtdc.putInt("TDC", 36, (int) 68);
+
+                int[] layer = {    1,   2,   3,   4,   5,   6,   7,   8,   9,  10
+                              ,   11,  12,  13,  14,  15,  16,  17,  18,  19,  20
+                              ,   21,  22,  23,  24,  25,  26,  26,  27,  28,  29
+                              ,   30,  31,  31,  32,  33,  34,  35,  36};
+                int[] component = {    63,  64,  63,  64,  63,  64,  64,  64,  64,  64
+                                  ,   64,  64,  59,  60,  59,  60,  59,  60,  59,  59
+                                  ,   59,  59,  59,  59,  52,  53,  52,  52,  52,  52
+                                  ,   52,  52,  51,  52,  51,  52,  51,  51};
+                int[]  TDC = {   73,  74,  79,  72,  77,  75,  21, 145,  27, 136
+                             ,   29, 136, 149, 124,  99, 192,  43, 260,  89, 142
+                             ,  159,  69, 243,   3,  88, 456, 547,  67, 256, 280
+                             ,   56, 537, 484,  96, 220, 312,  18, 423};
+      
+                Bank DCtdc  = new Bank(schemaFactory.getSchema("DC::tdc"), layer.length);
+		for(int i = 0; i < layer.length; i++) {
+			DCtdc.putByte("sector",     i, (byte) 1);
+			DCtdc.putByte("order",      i, (byte) 2);
+			DCtdc.putByte("layer",      i, (byte) layer[i]);
+		        DCtdc.putShort("component", i, (short) component[i]);
+		        DCtdc.putInt("TDC",         i, TDC[i]);
+                }
+
+
 		
 		testEvent.write(config);
 		testEvent.write(DCtdc);
+		testEvent.write(event);
                 testEvent.show();
                 HipoDataEvent hipoEvent = new HipoDataEvent(testEvent,schemaFactory);
                 hipoEvent.show();
