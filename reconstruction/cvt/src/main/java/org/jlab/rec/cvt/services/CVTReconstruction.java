@@ -17,6 +17,7 @@ import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
 import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.Track;
+import org.jlab.rec.cvt.track.Track;
 //import org.jlab.service.eb.EBHBEngine;
 //import org.jlab.service.eb.EBTBEngine;
 
@@ -83,7 +84,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             //MagneticFields.getInstance().setSolenoidShift(shift);
 //            this.setFieldsConfig(newConfig);
             
-            CCDBConstantsLoader.Load(new DatabaseConstantProvider(bank.getInt("run", 0), "default"));
+//CCDBConstantsLoader.Load(new DatabaseConstantProvider(bank.getInt("run", 0), "default"));
         }
         this.setFieldsConfig(newConfig);
 
@@ -93,6 +94,7 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         if (Run != newRun) {
             this.setRun(newRun);
+            this.loadConstants( bank.getInt("run",0) );
         }
       
         Run = newRun;
@@ -126,8 +128,14 @@ public class CVTReconstruction extends ReconstructionEngine {
         RecoBankWriter rbc = new RecoBankWriter();
 
         if( recHandler.loadClusters( event ) == false ) { return true; };
-       
+     
+        // skip  high busy events 
+        if( recHandler.getSVThits().size() > 700 ) return true; 
+ 
         recHandler.loadCrosses();
+
+        // skip  high busy events with more than 1k crosses in svt 
+        if( recHandler.getCrosses().get(0).size() > 1000 ) { return true; } 
 
         //System.out.println(" Number of crosses "+crosses.get(0).size()+" + "+crosses.get(1).size());
         if(Constants.isCosmicsData()==true) { 
@@ -145,17 +153,34 @@ public class CVTReconstruction extends ReconstructionEngine {
         return true;
     }
     
-    public boolean init() {
+    public boolean loadConstants( int run ) {
         System.out.println(" ........................................ trying to connect to db ");
 //        CCDBConstantsLoader.Load(new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default"));
-        CCDBConstantsLoader.Load(new DatabaseConstantProvider(10, "default"));
+        CCDBConstantsLoader.Load(new DatabaseConstantProvider(run, "default"));
                
-        DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
+        DatabaseConstantProvider cp = new DatabaseConstantProvider(run, "default");
 //        DatabaseConstantProvider cp = new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default");
         cp = SVTConstants.connect( cp );
         SVTConstants.loadAlignmentShifts( cp );
         cp.disconnect();    
         this.setSVTDB(cp);
+        
+        
+        //TrkSwimmer.getMagneticFields();
+        return true;
+    }
+
+    public boolean init() {
+        //System.out.println(" ........................................ trying to connect to db ");
+////        CCDBConstantsLoader.Load(new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default"));
+        //CCDBConstantsLoader.Load(new DatabaseConstantProvider(10, "default"));
+               
+        //DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
+////        DatabaseConstantProvider cp = new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default");
+        //cp = SVTConstants.connect( cp );
+        //SVTConstants.loadAlignmentShifts( cp );
+        //cp.disconnect();    
+        //this.setSVTDB(cp);
         
         
         //TrkSwimmer.getMagneticFields();

@@ -25,7 +25,7 @@ public class EBCCDBConstants {
             "photon_sf",
             "neutron_beta",
             "cnd_neutron_beta",
-            "pid",
+            "pid_cuts",
             "ecal_matching",
             "ftof_matching",
             "ctof_matching",
@@ -39,6 +39,7 @@ public class EBCCDBConstants {
     
     private static final String[] otherTableNames={
         "/runcontrol/fcup",
+        "/runcontrol/hwp",
         "/geometry/target",
         "/calibration/ftof/tres",
         //"/calibration/ctof/tres"
@@ -103,6 +104,9 @@ public class EBCCDBConstants {
         if (!dbSectorArrays.get(key).containsKey(sector))
             throw new RuntimeException("Missing Integer Key:  "+sector);
         return dbSectorArrays.get(key).get(sector);
+    }
+    public Double getSectorDouble(EBCCDBEnum key, int sector) {
+        return getSectorArray(key,sector)[0];
     }
 
     public IndexedTable getTable(String tableName) {
@@ -178,6 +182,9 @@ public class EBCCDBConstants {
         for (int ii=0; ii<=6; ii++) {
             this.loadSectorArray(key,tableName,colNames,ii);
         }
+    }
+    private void loadSectorDouble(EBCCDBEnum key,String tableName,String colName) {
+        loadSectorsArrays(key,tableName,new String[]{colName});
     }
     
     public void show() {
@@ -271,7 +278,11 @@ public class EBCCDBConstants {
         loadDouble(EBCCDBEnum.FCUP_slope,"/runcontrol/fcup","slope",0,0,0);
         loadDouble(EBCCDBEnum.FCUP_offset,"/runcontrol/fcup","offset",0,0,0);
         loadDouble(EBCCDBEnum.FCUP_atten,"/runcontrol/fcup","atten",0,0,0);
+        loadInteger(EBCCDBEnum.HWP_position,"/runcontrol/hwp","hwp",0,0,0);
 
+        loadSectorDouble(EBCCDBEnum.ELEC_SF_nsigma,"pid_cuts","e_sf_nsigma");
+        loadSectorDouble(EBCCDBEnum.ELEC_PCAL_min_energy,"pid_cuts","e_pcal_energy");
+        
         //loadDouble(EBCCDBEnum.HTCC_PION_THRESHOLD,
         //loadDouble(EBCCDBEnum.LTCC_PION_THRESHOLD,
         //loadDouble(EBCCDBEnum.LTCC_KAON_THRESHOLD,
@@ -290,10 +301,7 @@ public class EBCCDBConstants {
         loadInteger(EBCCDBEnum.RF_JITTER_PHASE ,"rf/jitter","phase",0,0,0);
         loadDouble(EBCCDBEnum.RF_JITTER_PERIOD,"rf/jitter","period",0,0,0);
         
-        //loadDouble(EBCCDBEnum.TRIGGER_ID,
-
         //this.show();
-
         currentRun = run;
         isLoaded = true;
     }

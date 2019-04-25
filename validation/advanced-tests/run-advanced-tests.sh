@@ -29,7 +29,7 @@ esac
 
 
 chmod +x install-claracre-clas.sh
-./install-claracre-clas.sh -l local
+echo Y | ./install-claracre-clas.sh -f 4.3.9 -l local
 if [ $? != 0 ] ; then echo "clara installation error" ; exit 1 ; fi
 rm install-claracre-clas.sh
 
@@ -51,7 +51,7 @@ if [ $? != 0 ] ; then echo "wget validation files failure" ; exit 1 ; fi
 tar -zxvf twoTrackEvents_809_raw.evio.tar.gz
 
 # run decoder
-$COAT/bin/decoder -t -0.5 -s 0.0 -i ./twoTrackEvents_809_raw.evio -o ./twoTrackEvents_809.hipo -c 2
+$COAT/bin/decoder4 -t -0.5 -s 0.0 -i ./twoTrackEvents_809_raw.evio -o ./twoTrackEvents_809.hipo -c 2
 
 # run reconstruction with clara
 echo "set inputDir $PWD/" > cook.clara

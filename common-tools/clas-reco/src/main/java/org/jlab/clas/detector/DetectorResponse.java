@@ -2,12 +2,10 @@ package org.jlab.clas.detector;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
-import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -27,6 +25,7 @@ public class DetectorResponse {
     private Double           particlePath   = 0.0;
     private int              association    = -1;
     private int              hitIndex       = -1;
+    private int                      status = -1;
 
     public DetectorResponse(){
         super();
@@ -41,11 +40,13 @@ public class DetectorResponse {
     public void   setMatchPosition(double x, double y, double z){this.hitPositionMatched.setXYZ(x, y, z);}
     public void   setPath(double path){ this.particlePath = path;}
     public void   setEnergy(double energy) { this.detectorEnergy = energy; }
+    public void   setStatus(int status) { this.status = status; }
     
     public double getTime(){ return this.detectorTime;}
     public double getEnergy(){ return this.detectorEnergy; }
     public double getPath(){ return this.particlePath;}
     public int    getSector(){return this.descriptor.getSector();}
+    public int    getStatus(){return this.status;}
 
     public Vector3D getPosition(){ return this.hitPosition;}
     public Vector3D getMatchedPosition(){ return this.hitPositionMatched;}
@@ -184,6 +185,15 @@ public class DetectorResponse {
             }
         }
         return result;
+    }
+
+    public static int getSector(final double phi) {
+        // shift in positive-phi direction by 3.5 sectors, result in [0,2*pi):
+        final double phiShifted = Math.IEEEremainder(phi+Math.PI/6,2.*Math.PI)+Math.PI;
+        // shifted sector number: 
+        final int sectorShifted = (int)(phiShifted / (Math.PI/3)) + 1;
+        // rotate back to proper sector:
+        return sectorShifted<=3 ? sectorShifted-3+6 : sectorShifted-3;
     }
     
     @Override

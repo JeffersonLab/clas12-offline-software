@@ -1,15 +1,17 @@
-package org.jlab.service.eb;
+package org.jlab.rec.eb;
 
 import java.util.ArrayList;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
-import org.jlab.rec.eb.EBCCDBConstants;
-import org.jlab.rec.eb.EBCCDBEnum;
+import org.jlab.clas.detector.DetectorParticle;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.clas.pdg.PhysicsConstants;
 
 /**
  *
  * @author devita
+ * @author baltzell
  */
 public class EBRadioFrequency {
 
@@ -18,11 +20,34 @@ public class EBRadioFrequency {
     
     private ArrayList<rfSignal> rfSignals = new ArrayList<rfSignal>();
     private double rfTime = -100;
+   
+    private final boolean doVzCorrection = false;
     
     public EBRadioFrequency(EBCCDBConstants ccdb) {
         this.ccdb=ccdb;
     }
 
+    public double  getStartTime(DetectorParticle p,final DetectorType type,final int layer) {
+        final double tgpos = this.ccdb.getDouble(EBCCDBEnum.TARGET_POSITION);
+        final double rfBucketLength = this.ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH);
+
+        final double pathLength = p.getPathLength(type,layer);
+        final double time = p.getTime(type,layer);
+
+        final double tof = pathLength/PhysicsConstants.speedOfLight()/p.getBeta();
+        final double vertexTime = time - tof;
+
+        final double vzCorr = doVzCorrection ?
+                (tgpos - p.vertex().z()) / PhysicsConstants.speedOfLight() :
+                0.0;
+
+        final double deltatr = - vertexTime - vzCorr
+                + this.rfTime + this.ccdb.getDouble(EBCCDBEnum.RF_OFFSET)
+                + (EBConstants.RF_LARGE_INTEGER+0.5)*rfBucketLength;
+        final double rfCorr = deltatr % rfBucketLength - rfBucketLength/2;
+
+        return vertexTime + rfCorr;
+    }
     
     public double getTime(DataEvent event) {
         this.processEvent(event);

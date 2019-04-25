@@ -23,9 +23,13 @@ import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.geant4.v2.PCALGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
+import org.jlab.geom.DetectorHit;
 import org.jlab.geom.base.ConstantProvider;
+import org.jlab.geom.base.Detector;
+import org.jlab.geom.prim.Path3D;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.rec.dc.Constants;
+import static org.jlab.service.dc.TrackDictionaryMakerRNG.rotateToSectorCoordSys;
 
 import org.jlab.utils.options.OptionParser;
 
@@ -63,7 +67,7 @@ public class TrackDictionaryMaker extends DCEngine{
                     +"Charge"+String.valueOf(charge)+"InvPBinSizeiGeV"+String.valueOf(pBinSize)
                     +"PhiMinDeg" +String.valueOf(phiMin)+"PhiMaxDeg" +String.valueOf(phiMax)
                     +"VzCm" +String.valueOf(vz)+".txt");
-            this.ProcessTracks(pw, dcDetector, ftofDetector, pcalDetector, sw, charge, pBinSize, phiMin, phiMax, vz);
+            this.ProcessTracks(pw, dcDetector, ftofDetector, ecalDetector, sw, charge, pBinSize, phiMin, phiMax, vz);
             pw.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(TrackDictionaryMaker.class.getName()).log(Level.SEVERE, null, ex);
@@ -193,7 +197,7 @@ public class TrackDictionaryMaker extends DCEngine{
     private List<Integer> Wl6 = new ArrayList<Integer>();
     private String entry;
     
-    public void ProcessTracks(PrintWriter pw,DCGeant4Factory dcDetector, FTOFGeant4Factory ftofDetector, PCALGeant4Factory pcalDetector, Swim sw, int q, float pBinSize, float PhiMin, float PhiMax, float Vz) {
+    public void ProcessTracks(PrintWriter pw,DCGeant4Factory dcDetector, FTOFGeant4Factory ftofDetector, Detector ecalDetector, Swim sw, int q, float pBinSize, float PhiMin, float PhiMax, float Vz) {
         double[] swimVal = new double[8];
         //for(int i = 0; i < 2; i++) {
             //int q = (int) Math.pow(-1, i);
@@ -292,31 +296,41 @@ public class TrackDictionaryMaker extends DCEngine{
                             */
                         }
                         double[] trkTOF = sw.SwimToPlaneTiltSecSys(sector, 668.1);
-                        double[] trkPCAL = sw.SwimToPlaneTiltSecSys(sector, 698.8);
+                        double[] trkPCAL = sw.SwimToPlaneTiltSecSys(sector, 800.0);
 
 
                         Line3d trkLine = new Line3d(rotateToSectorCoordSys(trkTOF[0],trkTOF[1],trkTOF[2]), rotateToSectorCoordSys(trkPCAL[0], trkPCAL[1], trkPCAL[2])) ;
 
-                        List<DetHit> hits = ftofDetector.getIntersections(trkLine);
-                        List<DetHit> hits2 = pcalDetector.getIntersections(trkLine);
+                        List<DetHit> hits  = ftofDetector.getIntersections(trkLine);
+                        Vector3d tof3 = rotateToSectorCoordSys(trkTOF[0],trkTOF[1],trkTOF[2]);
+                        Vector3d cal3 = rotateToSectorCoordSys(trkPCAL[0], trkPCAL[1], trkPCAL[2]);
+                        Path3D path = new Path3D(new Point3D(tof3.x, tof3.y, tof3.z), new Point3D(cal3.x,cal3.y,cal3.z));
+                        List<DetectorHit> hits3 = ecalDetector.getHits(path);
+            
 
-                        if(hits.size()==0) {
-                            for(int ii =0; ii<3; ii++)
-                                trkTOF[ii]=0;
-                        }
-                        if(hits2.size()==0) {
-                            for(int ii =0; ii<3; ii++)
-                                trkPCAL[ii]=0;
-                        }
-
-                        int paddle = 0;
+                        int paddle1b = 0; int paddle2 = 0; int pcalU =0; int pcalV=0; int pcalW=0; int htcc=0;
                         if (hits != null && hits.size() > 0) {
                             for (DetHit hit : hits) {
                                 FTOFDetHit fhit = new FTOFDetHit(hit);
-                                if(fhit.getLayer()==1 || fhit.getLayer()==3)
-                                    paddle = fhit.getPaddle();
+                                if(fhit.getLayer()==2)
+                                    paddle1b = fhit.getPaddle();
+                                if(fhit.getLayer()==3)
+                                    paddle2 = fhit.getPaddle();
                             }
                         }
+                        if (hits3 != null && hits3.size() > 0) {
+                            for (DetectorHit hit3 : hits3) {
+                                if(hit3.getSuperlayerId()+1==1) {
+                                    if(hit3.getLayerId()+1==1 && pcalU==0) 
+                                        pcalU = hit3.getComponentId()+1;
+                                    if(hit3.getLayerId()+1==2 && pcalV==0) 
+                                        pcalV = hit3.getComponentId()+1;
+                                    if(hit3.getLayerId()+1==3 && pcalW==0) 
+                                        pcalW = hit3.getComponentId()+1;
+                                }
+                            }
+                        }
+                        
 
                         if (count(Wl3) >4) {
                             if(String.valueOf(q)+
@@ -326,7 +340,7 @@ public class TrackDictionaryMaker extends DCEngine{
                                     String.valueOf(Wl1.get(3))+ String.valueOf(Wl2.get(3))+ String.valueOf(Wl3.get(3))+ String.valueOf(Wl4.get(3))+ String.valueOf(Wl5.get(3))+ String.valueOf(Wl6.get(3))+ 
                                     String.valueOf(Wl1.get(4))+ String.valueOf(Wl2.get(4))+ String.valueOf(Wl3.get(4))+ String.valueOf(Wl4.get(4))+ String.valueOf(Wl5.get(4))+ String.valueOf(Wl6.get(4))+ 
                                     String.valueOf(Wl1.get(5))+ String.valueOf(Wl2.get(5))+ String.valueOf(Wl3.get(5))+ String.valueOf(Wl4.get(5))+ String.valueOf(Wl5.get(5))+ String.valueOf(Wl6.get(5))+
-                                    String.valueOf(paddle)==entry)
+                                    String.valueOf(paddle1b)==entry)
                                 continue;
                             entry = String.valueOf(q)+
                                     String.valueOf(Wl1.get(0))+ String.valueOf(Wl2.get(0))+ String.valueOf(Wl3.get(0))+ String.valueOf(Wl4.get(0))+ String.valueOf(Wl5.get(0))+ String.valueOf(Wl6.get(0))+ 
@@ -335,7 +349,7 @@ public class TrackDictionaryMaker extends DCEngine{
                                     String.valueOf(Wl1.get(3))+ String.valueOf(Wl2.get(3))+ String.valueOf(Wl3.get(3))+ String.valueOf(Wl4.get(3))+ String.valueOf(Wl5.get(3))+ String.valueOf(Wl6.get(3))+ 
                                     String.valueOf(Wl1.get(4))+ String.valueOf(Wl2.get(4))+ String.valueOf(Wl3.get(4))+ String.valueOf(Wl4.get(4))+ String.valueOf(Wl5.get(4))+ String.valueOf(Wl6.get(4))+ 
                                     String.valueOf(Wl1.get(5))+ String.valueOf(Wl2.get(5))+ String.valueOf(Wl3.get(5))+ String.valueOf(Wl4.get(5))+ String.valueOf(Wl5.get(5))+ String.valueOf(Wl6.get(5))+
-                                    String.valueOf(paddle);
+                                    String.valueOf(paddle1b);
                             
                             pw.printf("%d\t%.1f\t %.1f\t %.1f\t "
                                 + "%d\t %d\t %d\t %d\t %d\t %d\t "
@@ -354,7 +368,7 @@ public class TrackDictionaryMaker extends DCEngine{
                                 Wl1.get(4), Wl2.get(4), Wl3.get(4), Wl4.get(4), Wl5.get(4), Wl6.get(4), 
                                 Wl1.get(5), Wl2.get(5), Wl3.get(5), Wl4.get(5), Wl5.get(5), Wl6.get(5), 
                                 //trkTOF[0], trkTOF[1], trkTOF[2], trkPCAL[0], trkPCAL[1], trkPCAL[2]);
-                                paddle, vz);
+                                paddle1b, vz);
                             
                             //System.out.printf("%d\t\t%.1f\t\t %.1f\t\t %.1f\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %d\t\t %.1f\t\t %.1f\t\t %.1f\t\t %.1f\t\t %.1f\t\t %.1f\t\t\n", q, p, theta, phi, Wi.get(0), Wf.get(0), Wi.get(1), Wf.get(1), Wi.get(2), Wf.get(2),Wi.get(3), Wf.get(3), Wi.get(4), Wf.get(4), Wi.get(5), Wf.get(5), trkTOF[0], trkTOF[1], trkTOF[2], trkPCAL[0], trkPCAL[1], trkPCAL[2]);
 

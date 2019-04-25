@@ -1,7 +1,7 @@
 [
  {
   "bank": "HEADER::info",
-  "group": 51001,
+  "group": 31001,
   "info": "Event Header Information",
   "items": [
       {"name": "nrun",      "type": "int32",    "id": 1,  "info": "run number"},
@@ -17,7 +17,7 @@
  },
  {
   "bank": "EVENT::particle",
-  "group": 52001,
+  "group": 31021,
   "info": "Container Bank for reconstructed CLAS6 Data",
   "items": [
       {"name": "status",  "type": "int8",   "id": 1,    "info": "status of the particle"},
@@ -39,7 +39,7 @@
  },
  {
   "bank": "EVENT::detector",
-  "group": 52002,
+  "group": 31022,
   "info": "Detector information for reconstructed CLAS6 Data",
   "items": [
       {"name": "scsector", "type": "int32",    "id": 1,  "info": "sector of TOF"},
@@ -60,7 +60,7 @@
  },
  {
   "bank": "DETECTOR::ecpb",
-  "group": 53001,
+  "group": 31031,
   "info": "EC detector bank",
   "items": [
       {"name": "sector",   "type": "int8",     "id": 1,   "info": "hit sector"},
@@ -76,7 +76,7 @@
  },
  {
   "bank": "DETECTOR::scpb",
-  "group": 53002,
+  "group": 31032,
   "info": "SC detector bank",
   "items": [
       {"name": "sector",   "type": "int8",     "id": 1,   "info": "hit sector"},
@@ -88,7 +88,7 @@
  },
  {
   "bank": "DETECTOR::ccpb",
-  "group": 53003,
+  "group": 31033,
   "info": "CC detector bank",
   "items": [
       {"name": "sector",   "type": "int8",     "id": 1,   "info": "hit sector"},
@@ -99,7 +99,7 @@
  },
  {
   "bank": "DETECTOR::lcpb",
-  "group": 53004,
+  "group": 31034,
   "info": "LC detector bank",
   "items": [
       {"name": "sector",   "type": "int8",     "id": 1,   "info": "hit sector"},
@@ -114,7 +114,7 @@
  },
  {
   "bank": "TAGGER::tgpb",
-  "group": 54001,
+  "group": 31041,
   "info": "Tagger bank",
   "items": [
       {"name": "status",   "type": "int8",     "id": 1,   "info": "hit status"},
@@ -126,7 +126,7 @@
  },
  {
   "bank": "DETECTOR::icpb",
-  "group": 55001,
+  "group": 31051,
   "info": "IC detector bank",
   "items": [
       {"name": "etc",      "type": "float",    "id": 1,   "info": "Reconstructed total energy"},

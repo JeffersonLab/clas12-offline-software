@@ -94,7 +94,10 @@ public class GeometryFactory {
             provider.loadTable("/geometry/cvt/svt/material/box");
             provider.loadTable("/geometry/cvt/svt/material/tube");
             provider.loadTable("/geometry/cvt/svt/alignment");
+        }
 
+        if(type==DetectorType.TARGET){
+            provider.loadTable("/geometry/target");
         }
         
         provider.disconnect();

@@ -161,7 +161,23 @@ public final class Plane3D implements Transformable, Showable {
     public Vector3D normal() {
         return normal;
     }
-
+    /**
+     * Calculates a Line3D object with origin at the given
+     * point and the end at the plane, length is the distance
+     * to the plane.
+     * @param p point in space
+     * @param distance line with end point on the plane
+     */
+    public void distance(Point3D p, Line3D distance){
+        double sn,sd,sb;
+        Vector3D diff = new Vector3D(p.x()-point.x(),p.y()-point.y(), p.z()-point.z());
+        sn = -normal.dot(diff);        
+        sd =  normal.dot(normal);
+        sb = sn / sd;
+        distance.origin().set(p.x(), p.y(), p.z());
+        distance.end().set(p.x()+sb*normal.x(),
+                p.y() + sb*normal.y(),p.z() + sb*normal.z());        
+    }
     /**
      * Finds the intersection of the given infinite with this plane. If an
      * intersection point is found it will be stored in the given point. Return
