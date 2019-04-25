@@ -160,7 +160,7 @@ public class Constants {
 
     public static int[][] STBLOC;
 
-    private static boolean USETSTART = false;
+    private static boolean USETSTART = true;
 
     public static boolean isUSETSTART() {
         return USETSTART;
@@ -170,7 +170,7 @@ public class Constants {
         Constants.USETSTART = USETSTART;
     }
     
-    private static double WIREDIST = 1.0;
+    private static double WIREDIST = 0.0;
 
     /**
      * @return the WIREDIST
