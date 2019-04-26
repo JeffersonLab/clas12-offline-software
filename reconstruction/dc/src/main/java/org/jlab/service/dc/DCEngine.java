@@ -33,25 +33,25 @@ public class DCEngine extends ReconstructionEngine {
         String useSTTConf = this.getEngineConfigString("useSTT");
         
         if (useSTTConf!=null) {
-            System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on yaml ="+useSTTConf);
+            System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on yaml = "+useSTTConf);
             Constants.setUSETSTART(Boolean.valueOf(useSTTConf));
         }
         else {
             useSTTConf = System.getenv("COAT_DC_USESTT");
             if (useSTTConf!=null) {
-                System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on env ="+useSTTConf);
+                System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on env = "+useSTTConf);
                 Constants.setUSETSTART(Boolean.valueOf(useSTTConf));
             }
         }
         if (useSTTConf==null) {
-             System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on default ="+Constants.isUSETSTART());
+             System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on default = "+Constants.isUSETSTART());
         }
         
         // Wire distortions
         String wireDistortionsFlag = this.getEngineConfigString("wireDistortion");
         
         if (wireDistortionsFlag!=null) {
-            System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on yaml ="+wireDistortionsFlag);
+            System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on yaml = "+wireDistortionsFlag);
             if(Boolean.valueOf(wireDistortionsFlag)==true) {
                 Constants.setWIREDIST(1.0);
             } else {
@@ -61,7 +61,7 @@ public class DCEngine extends ReconstructionEngine {
         else {
             wireDistortionsFlag = System.getenv("COAT_DC_USEWIREDISTORTION");
             if (wireDistortionsFlag!=null) {
-                System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on env ="+wireDistortionsFlag);
+                System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on env = "+wireDistortionsFlag);
                 if(Boolean.valueOf(wireDistortionsFlag)==true) {
                     Constants.setWIREDIST(1.0);
                 } else {
@@ -90,14 +90,14 @@ public class DCEngine extends ReconstructionEngine {
 
         requireConstants(Arrays.asList(dcTables));
         // Get the constants for the correct variation
-        String geomDBVar = this.getEngineConfigString("geometryDBVariation");
+        String geomDBVar = this.getEngineConfigString("geometryVariation");
         if (geomDBVar!=null) {
-            System.out.println("["+this.getName()+"] run with geometry variation based on yaml ="+geomDBVar);
+            System.out.println("["+this.getName()+"] run with geometry variation based on yaml = "+geomDBVar);
         }
         else {
-            geomDBVar = System.getenv("COAT_DC_GEOMETRYDBVARIATION");
+            geomDBVar = System.getenv("COAT_DC_GEOMETRYVARIATION");
             if (geomDBVar!=null) {
-                System.out.println("["+this.getName()+"] run with geometry variation chosen based on env ="+geomDBVar);
+                System.out.println("["+this.getName()+"] run with geometry variation chosen based on env = "+geomDBVar);
             }
         } 
         if (geomDBVar==null) {
@@ -130,12 +130,12 @@ public class DCEngine extends ReconstructionEngine {
         // Get the constants for the correct variation
         String ccDBVar = this.getEngineConfigString("variation");
         if (ccDBVar!=null) {
-            System.out.println("["+this.getName()+"] run with constants variation based on yaml ="+ccDBVar);
+            System.out.println("["+this.getName()+"] run with constants variation based on yaml = "+ccDBVar);
         }
         else {
             ccDBVar = System.getenv("COAT_DC_VARIATION");
             if (ccDBVar!=null) {
-                System.out.println("["+this.getName()+"] run with constants variation chosen based on env ="+ccDBVar);
+                System.out.println("["+this.getName()+"] run with constants variation chosen based on env = "+ccDBVar);
             }
         } 
         if (ccDBVar==null) {
