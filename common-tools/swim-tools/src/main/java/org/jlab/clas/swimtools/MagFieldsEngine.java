@@ -51,7 +51,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
         catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("aaaaa)");
+
          // Field Shifts
         String solShift = this.getEngineConfigString("solenoidShift");
         
