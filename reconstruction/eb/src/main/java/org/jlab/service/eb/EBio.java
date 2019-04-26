@@ -83,9 +83,8 @@ public class EBio {
                 
                 DetectorParticle p = new DetectorParticle();
                 
-                int trStatus = bank.getInt("status", i);
-                
-                p.setStatus(100+10*trStatus);
+                //int trStatus = bank.getInt("status", i);
+                //p.setStatus(100+10*trStatus);
                 p.vector().setXYZ(
                         bank.getDouble("p0_x",i),
                         bank.getDouble("p0_y",i),
@@ -136,7 +135,7 @@ public class EBio {
                 double d0 = bank.getDouble("d0", i);
                 
                 DetectorParticle part = new DetectorParticle();
-                part.setStatus(200);
+                //part.setStatus(200);
                 double pz = pt*tandip;
                 double py = pt*Math.sin(phi0);
                 double px = pt*Math.cos(phi0);
@@ -191,7 +190,7 @@ public class EBio {
             
             DetectorParticle p = particles.get(i);
             
-            bank.setInt("status", i, p.getStatus());
+            //bank.setInt("status", i, p.getStatus());
             bank.setInt("charge", i, p.getCharge());
             bank.setInt("pid", i, p.getPid());
             

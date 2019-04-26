@@ -131,16 +131,21 @@ public class CherenkovResponse extends DetectorResponse {
                 double nphe = bank.getFloat("nphe", row);
                 double theta = Math.atan2(Math.sqrt(x*x+y*y),z);
                 double phi   = Math.atan2(y,x);
+                int sector = 0;
 
                 // FIXME:  move these constants to CCDB
                 double dtheta=0,dphi=0;
                 if (type==DetectorType.HTCC) {
                     dtheta = 10*3.14159/180; // based on MC
                     dphi   = 18*3.14159/180; // based on MC
+                    // HTCC reconstruction does not provide a sector,
+                    // so we calculate it based on hit position:
+                    sector = DetectorResponse.getSector(phi);
                 }
                 else if (type==DetectorType.LTCC) {
                     dtheta = (35-5)/18*2 * 3.14159/180; // +/- 2 mirrors
                     dphi   = 10*3.14159/180;
+                    sector = bank.getByte("sector",row);
                 }
                 else {
                     throw new RuntimeException(
@@ -152,6 +157,7 @@ public class CherenkovResponse extends DetectorResponse {
                 che.setHitIndex(row);
                 che.setEnergy(nphe);
                 che.setTime(time);
+                che.getDescriptor().setSector(sector);
                 che.getDescriptor().setType(type);
 
                 // only LTCC currently reports status:

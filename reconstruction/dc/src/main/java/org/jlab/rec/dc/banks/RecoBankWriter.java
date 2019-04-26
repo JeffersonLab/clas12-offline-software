@@ -769,7 +769,15 @@ public class RecoBankWriter {
     }
 
     private DataBank fillTrajectoryBank(DataEvent event, List<Track> tracks) {
-        DataBank bank = event.createBank("TimeBasedTrkg::Trajectory", tracks.size()*21);
+        int size=0;
+        for (Track track : tracks) {
+            if (track == null)
+                continue;
+            if (track.trajectory == null)
+                continue;
+            size+=track.trajectory.size();
+        }       
+        DataBank bank = event.createBank("TimeBasedTrkg::Trajectory", size);
         int i1=0;
         for (Track track : tracks) {
             if (track == null)
@@ -778,19 +786,20 @@ public class RecoBankWriter {
                 continue;
 
             for (int j = 0; j < track.trajectory.size(); j++) {
-                if (track.trajectory.get(j).getDetName().startsWith("DC") && (j - 6) % 6 != 0)
+                if (track.trajectory.get(j).getDetName().equals("DC") && (track.trajectory.get(j).getLayerId() - 6) % 6 != 0)
                     continue;  // save the last layer in a superlayer
 
-                bank.setShort("did", i1, (short) track.trajectory.get(j).getDetId());
-                bank.setShort("tid", i1, (short) track.get_Id());
-                bank.setFloat("x", i1, (float) track.trajectory.get(j).getX());
-                bank.setFloat("y", i1, (float) track.trajectory.get(j).getY());
-                bank.setFloat("z", i1, (float) track.trajectory.get(j).getZ());
-                bank.setFloat("tx", i1, (float) ((float) track.trajectory.get(j).getpX() / track.get_P()));
-                bank.setFloat("ty", i1, (float) ((float) track.trajectory.get(j).getpY() / track.get_P()));
-                bank.setFloat("tz", i1, (float) ((float) track.trajectory.get(j).getpZ() / track.get_P()));
-                bank.setFloat("B", i1, (float) track.trajectory.get(j).getiBdl());
-                bank.setFloat("L", i1, (float) track.trajectory.get(j).getPathLen());
+                bank.setShort("id",       i1, (short) track.get_Id());
+                bank.setShort("detector", i1, (short) track.trajectory.get(j).getDetId());
+                bank.setByte("layer",     i1, (byte) track.trajectory.get(j).getLayerId());
+                bank.setFloat("x",        i1, (float) track.trajectory.get(j).getX());
+                bank.setFloat("y",        i1, (float) track.trajectory.get(j).getY());
+                bank.setFloat("z",        i1, (float) track.trajectory.get(j).getZ());
+                bank.setFloat("tx",       i1, (float) ((float) track.trajectory.get(j).getpX() / track.get_P()));
+                bank.setFloat("ty",       i1, (float) ((float) track.trajectory.get(j).getpY() / track.get_P()));
+                bank.setFloat("tz",       i1, (float) ((float) track.trajectory.get(j).getpZ() / track.get_P()));
+                bank.setFloat("B",        i1, (float) track.trajectory.get(j).getiBdl());
+                bank.setFloat("path",     i1, (float) track.trajectory.get(j).getPathLen());
                 i1++;
             }
         }

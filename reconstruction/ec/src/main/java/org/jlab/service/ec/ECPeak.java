@@ -18,7 +18,7 @@ public class ECPeak {
     private DetectorDescriptor  desc       = new DetectorDescriptor(DetectorType.ECAL);
     private List<ECStrip>       peakStrips = new ArrayList<ECStrip>();
     private Line3D              peakLine   = new Line3D();
-    private int                 indexMaxStrip = -1;
+    public int                  indexMaxStrip = -1;
     private int                 peakOrder     = -1;
     private double              peakDistanceEdge = 0.0;
     private double              peakMoment       = 0.0;
@@ -63,7 +63,7 @@ public class ECPeak {
     }
         
     public double getTime(){
-        if(this.indexMaxStrip>0 && this.indexMaxStrip < this.peakStrips.size()-1){
+        if(this.indexMaxStrip >= 0 && this.indexMaxStrip < this.peakStrips.size()){
             return this.peakStrips.get(indexMaxStrip).getTime();
         }
             return 0.0;
@@ -124,11 +124,11 @@ public class ECPeak {
             Line3D line = this.peakStrips.get(i).getLine();
             
             double energy = this.peakStrips.get(i).getEnergy();
-//            double     le = Math.log(energy);
+//            double     le = Math.log(energy);  //ECReconstructionTest fails to find PCAL cluster for this choice
             double     le = energy;
             
             this.peakDistanceEdge += 
-                    //peakStrips.get(i).getDistanceEdge() + 
+//                    peakStrips.get(i).getDistanceEdge() + 
                     peakStrips.get(i).getDistanceEdge()*le;
             
             pointOrigin.setX(pointOrigin.x()+line.origin().x()*le);

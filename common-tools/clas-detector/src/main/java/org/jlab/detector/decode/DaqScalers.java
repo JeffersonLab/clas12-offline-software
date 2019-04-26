@@ -126,8 +126,11 @@ public class DaqScalers {
 
         private static final boolean GATEINVERTED=false;
 
-        private byte helicity=-1;
-        private byte quartet=-1;
+        private final byte UDF=0;
+        private final byte POSITIVE=1;
+        private final byte NEGATIVE=-1;
+        private byte helicity=UDF;
+        private byte quartet=UDF;
         public byte getHelicity() { return this.helicity; }
         public byte getQuartet() { return this.quartet; }
 
@@ -157,8 +160,8 @@ public class DaqScalers {
                 if (bank.getInt("slot",k)==SLOT_GATED) {
                     switch (bank.getInt("channel",k)) {
                         case CHAN_FCUP:
-                            this.helicity = bank.getByte("helicity",k);
-                            this.quartet = bank.getByte("quartet",k);
+                            this.helicity = bank.getByte("helicity",k) > 0 ? POSITIVE : NEGATIVE;
+                            this.quartet = bank.getByte("quartet",k)   > 0 ? POSITIVE : NEGATIVE;
                             this.gatedFcup = bank.getLong("value",k);
                             break;
                         case CHAN_SLM:
