@@ -47,15 +47,11 @@ configuration:
   io-services:
     writer:
       compression: 2
-# settings below are for GEMC, compatible with 4a.2.5
+# settings below are for GEMC, compatible with 4.3.0
   services:
     MAGFIELDS:
       solenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
       torusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
-      solenoidShift: "0.0"
-      torusXShift: "0.0"
-      torusYShift: "0.0"
-      torusZShift: "0.0"
 
 mime-types:
   - binary/data-hipo

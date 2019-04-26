@@ -24,7 +24,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
             System.out.println("["+this.getName()+"] Torus Map chosen based on yaml: "+torusMap);
         }
         else {
-            torusMap = System.getenv("TORUSMAP");
+            torusMap = System.getenv("COAT_MAGFIELD_TORUSMAP");
             if (torusMap!=null) {
                 System.out.println("["+this.getName()+"] Torus Map chosen based on env: "+torusMap);
             }
@@ -36,7 +36,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
             System.out.println("["+this.getName()+"] solenoid Map chosen based on yaml: "+solenoidMap);
         }
         else {
-            solenoidMap = System.getenv("SOLENOIDMAP");
+            solenoidMap = System.getenv("COAT_MAGFIELD_SOLENOIDMAP");
             if (solenoidMap!=null) {
                 System.out.println("["+this.getName()+"] solenoid Map chosen based on env: "+solenoidMap);
             }
@@ -51,7 +51,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
         catch (Exception e) {
             e.printStackTrace();
         }
-        
+        System.out.println("aaaaa)");
          // Field Shifts
         String solShift = this.getEngineConfigString("solenoidShift");
         
@@ -60,7 +60,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
             Swimmer.set_zShift(Float.valueOf(solShift));
         }
         else {
-            solShift = System.getenv("SOLSHIFT");
+            solShift = System.getenv("COAT_MAGFIELD_SOLENOIDSHIFT");
             if (solShift!=null) {
                 System.out.println("["+this.getName()+"] run with solenoid z shift in tracking config chosen based on env ="+solShift);
                 Swimmer.set_zShift(Float.valueOf(solShift));
@@ -78,7 +78,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
             Swimmer.setTorXShift(Float.valueOf(TorX));
         }
         else {
-            TorX = System.getenv("TORXSHIFT");
+            TorX = System.getenv("COAT_MAGFIELD_TORUSXSHIFT");
             if (TorX!=null) {
                 System.out.println("["+this.getName()+"] run with torus x shift in tracking config chosen based on env ="+TorX);
                 Swimmer.setTorXShift(Float.valueOf(TorX));
@@ -96,7 +96,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
             Swimmer.setTorYShift(Float.valueOf(TorY));
         }
         else {
-            TorY = System.getenv("TORYSHIFT");
+            TorY = System.getenv("COAT_MAGFIELD_TORUSYSHIFT");
             if (TorY!=null) {
                 System.out.println("["+this.getName()+"] run with torus y shift in tracking config chosen based on env ="+TorY);
                 Swimmer.setTorYShift(Float.valueOf(TorY));
@@ -114,7 +114,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
             Swimmer.setTorZShift(Float.valueOf(TorZ));
         }
         else {
-            TorZ = System.getenv("TORZSHIFT");
+            TorZ = System.getenv("COAT_MAGFIELD_TORUSZSHIFT");
             if (TorZ!=null) {
                 System.out.println("["+this.getName()+"] run with torus z shift in tracking config chosen based on env ="+TorZ);
                 Swimmer.setTorZShift(Float.valueOf(TorZ));
