@@ -70,7 +70,7 @@ public class EBTwoTrackTest {
     DataBank trkBank=null,tofBank=null,htccBank=null,ltccBank=null;
     DataBank recPartBank=null,recFtPartBank=null,recTrkBank=null,recFtBank=null;
     DataBank recCalBank=null,recSciBank=null,recCheBank=null;
-    DataBank ftcBank=null,fthBank=null,ftpartBank=null,recBank=null;
+    DataBank ftcBank=null,fthBank=null,ftpartBank=null,recBank=null,runBank=null;;
 
     Map <Integer,List<Integer>> recCalMap=new HashMap<Integer,List<Integer>>();
     Map <Integer,List<Integer>> recCheMap=new HashMap<Integer,List<Integer>>();
@@ -219,6 +219,7 @@ public class EBTwoTrackTest {
         calBank     = getBank(de,"ECAL::clusters");
         ctofBank    = getBank(de,"CTOF::hits");
         recBank     = getBank(de,"REC::Event");
+        runBank     = getBank(de,"RUN::config");
         loadMaps();
     }
    
@@ -402,9 +403,9 @@ public class EBTwoTrackTest {
                 }
             }
             if (mcalo!=ncalo || mscin!=nscin || mcher!=ncher) { recPartBank.show(); recCalBank.show(); recSciBank.show(); recCheBank.show(); }
-            assertEquals(String.format("Cherenkov Count, Event >%d<",recBank.getInt("NEVENT",0)),ncher,mcher);
-            assertEquals(String.format("Calorimeter Count, Event >%d<",recBank.getInt("NEVENT",0)),ncalo,mcalo);
-            assertEquals(String.format("Scintillator Count, Event >%d<",recBank.getInt("NEVENT",0)),nscin,mscin);
+            assertEquals(String.format("Cherenkov Count, Event >%d<",runBank.getInt("event",0)),ncher,mcher);
+            assertEquals(String.format("Calorimeter Count, Event >%d<",runBank.getInt("event",0)),ncalo,mcalo);
+            assertEquals(String.format("Scintillator Count, Event >%d<",runBank.getInt("event",0)),nscin,mscin);
         }
     }
 
