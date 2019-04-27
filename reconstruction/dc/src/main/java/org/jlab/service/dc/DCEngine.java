@@ -30,7 +30,7 @@ public class DCEngine extends ReconstructionEngine {
 
     public void setStartTimeOption() {
         // Load config
-        String useSTTConf = this.getEngineConfigString("useSTT");
+        String useSTTConf = this.getEngineConfigString("dcUseSTT");
         
         if (useSTTConf!=null) {
             System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on yaml = "+useSTTConf);
@@ -48,7 +48,7 @@ public class DCEngine extends ReconstructionEngine {
         }
         
         // Wire distortions
-        String wireDistortionsFlag = this.getEngineConfigString("wireDistortion");
+        String wireDistortionsFlag = this.getEngineConfigString("dcWireDistortion");
         
         if (wireDistortionsFlag!=null) {
             System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on yaml = "+wireDistortionsFlag);
@@ -70,7 +70,7 @@ public class DCEngine extends ReconstructionEngine {
             }
         }
         if (wireDistortionsFlag==null) {
-             System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (off)");
+             System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (MC-off/Data-on)");
         }
     }
     public void LoadTables() {
@@ -90,7 +90,7 @@ public class DCEngine extends ReconstructionEngine {
 
         requireConstants(Arrays.asList(dcTables));
         // Get the constants for the correct variation
-        String geomDBVar = this.getEngineConfigString("geometryVariation");
+        String geomDBVar = this.getEngineConfigString("dcGeometryVariation");
         if (geomDBVar!=null) {
             System.out.println("["+this.getName()+"] run with geometry variation based on yaml = "+geomDBVar);
         }

@@ -18,8 +18,8 @@ public class MagFieldsEngine extends ReconstructionEngine {
      * determine torus and solenoid map name from yaml, else env, else crash
      */
     public void initializeMagneticFields() {
-        String torusMap=this.getEngineConfigString("torusMap");
-        String solenoidMap=this.getEngineConfigString("solenoidMap");
+        String torusMap=this.getEngineConfigString("magfieldTorusMap");
+        String solenoidMap=this.getEngineConfigString("magfieldSolenoidMap");
         if (torusMap!=null) {
             System.out.println("["+this.getName()+"] Torus Map chosen based on yaml: "+torusMap);
         }
@@ -38,7 +38,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
         else {
             solenoidMap = System.getenv("COAT_MAGFIELD_SOLENOIDMAP");
             if (solenoidMap!=null) {
-                System.out.println("["+this.getName()+"] solenoid Map chosen based on env: "+solenoidMap);
+                System.out.println("["+this.getName()+"] Solenoid Map chosen based on env: "+solenoidMap);
             }
         }
         if (solenoidMap==null) {
@@ -53,7 +53,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
         }
 
          // Field Shifts
-        String solShift = this.getEngineConfigString("solenoidShift");
+        String solShift = this.getEngineConfigString("magfieldSolenoidShift");
         
         if (solShift!=null) {
             System.out.println("["+this.getName()+"] run with solenoid z shift in tracking config chosen based on yaml = "+solShift+" cm");
@@ -71,7 +71,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
             // this.solenoidShift = (float) 0;
         }
         //torus:
-        String TorX = this.getEngineConfigString("torusXShift");
+        String TorX = this.getEngineConfigString("magfieldTorusXShift");
         
         if (TorX!=null) {
             System.out.println("["+this.getName()+"] run with torus x shift in tracking config chosen based on yaml = "+TorX+" cm");
@@ -89,7 +89,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
             // this.solenoidShift = (float) 0;
         }
         
-        String TorY = this.getEngineConfigString("torusYShift");
+        String TorY = this.getEngineConfigString("magfieldTorusYShift");
         
         if (TorY!=null) {
             System.out.println("["+this.getName()+"] run with torus y shift in tracking config chosen based on yaml = "+TorY+" cm");
@@ -107,7 +107,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
             // this.solenoidShift = (float) 0;
         }
         
-        String TorZ = this.getEngineConfigString("torusZShift");
+        String TorZ = this.getEngineConfigString("magfieldTorusZShift");
         
         if (TorZ!=null) {
             System.out.println("["+this.getName()+"] run with torus z shift in tracking config chosen based on yaml = "+TorZ+" cm");

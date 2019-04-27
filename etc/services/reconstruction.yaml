@@ -49,8 +49,24 @@ configuration:
 # settings below are for GEMC, compatible with 4.3.0
   services:
     MAGFIELDS:
-      solenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
-      torusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
-
+      magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
+      magfieldTorusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
+# examples of yaml settings for mapfields 
+#      magfieldTorusXShift: "0.0"
+#      magfieldTorusYShift: "0.0"
+#      magfieldTorusZShift: "0.0"
+# examples of yaml settings for DC services 
+#    DCHB:
+#      variation: default
+#      dcGeometryVariation: rga_spring2018
+#      dcUseSTT: "true"
+#      dcWireDistortion: "true"
+#    DCTB:
+#      variation: default
+#      dcGeometryVariation: rga_spring2018
+# example of how to set variation and timestamp for a service, uncomment to use
+#    EBTB:
+#      variation: default
+#      timestamp: 08/22/2018
 mime-types:
   - binary/data-hipo
