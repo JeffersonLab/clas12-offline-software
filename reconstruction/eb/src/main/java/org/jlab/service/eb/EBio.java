@@ -35,7 +35,7 @@ public class EBio {
         }
 
         // helicity:
-        if(event.hasBank("HEL::adc")) {
+        if(ccdb.getInteger(EBCCDBEnum.HELICITY_delay)==0 && event.hasBank("HEL::adc")) {
             final int helComponent=1;
             final int helHalf=2000;
             DataBank bank = event.getBank("HEL::adc");

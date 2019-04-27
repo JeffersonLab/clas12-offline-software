@@ -40,6 +40,7 @@ public class EBCCDBConstants {
     private static final String[] otherTableNames={
         "/runcontrol/fcup",
         "/runcontrol/hwp",
+        "/runcontrol/helicity",
         "/geometry/target",
         "/calibration/ftof/tres",
         //"/calibration/ctof/tres"
@@ -300,6 +301,12 @@ public class EBCCDBConstants {
         loadInteger(EBCCDBEnum.RF_JITTER_CYCLES,"rf/jitter","cycles",0,0,0);
         loadInteger(EBCCDBEnum.RF_JITTER_PHASE ,"rf/jitter","phase",0,0,0);
         loadDouble(EBCCDBEnum.RF_JITTER_PERIOD,"rf/jitter","period",0,0,0);
+
+        loadDouble(EBCCDBEnum.HELICITY_frequency,"/runcontrol/helicity","frequency",0,0,0);
+        loadDouble(EBCCDBEnum.HELICITY_tsettle,"/runcontrol/helicity","tsettle",0,0,0);
+        loadDouble(EBCCDBEnum.HELICITY_tstable,"/runcontrol/helicity","tstable",0,0,0);
+        loadInteger(EBCCDBEnum.HELICITY_delay,"/runcontrol/helicity","delay",0,0,0);
+        loadInteger(EBCCDBEnum.HELICITY_pattern,"/runcontrol/helicity","pattern",0,0,0);
         
         //this.show();
         currentRun = run;
