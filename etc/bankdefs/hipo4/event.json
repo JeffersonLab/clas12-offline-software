@@ -5,17 +5,15 @@
         "item": 10,
         "info": "Event Header Bank",
         "entries": [
-                {"name":"EVNTime",  "type":"F", "info":"Event Time"},
-                {"name":"TYPE",     "type":"B", "info":"Event Type (Data or MC)"},
-                {"name":"EvCAT",    "type":"S", "info":"Event Category, if >0:  e-, e-p, e-pi+....."},
-                {"name":"NPGP",     "type":"S", "info":"Number of Final (Timed-based) Reconstructed Particles*100 + Number of Geometrically Reconstructed Particles"},
-                {"name":"TRG",      "type":"L", "info":"Trigger Type (CLAS12_e-, FT_CLAS12_h, CLAS12_H,...) + Prescale Factor for that Trigger"},
-                {"name":"BCG",      "type":"F", "info":"Beam charge, gated (nano-Coulomb)"},
-                {"name":"LT",       "type":"D", "info":"Lifetime"},
-                {"name":"STTime",   "type":"F", "info":"Event Start Time (ns)"},
-                {"name":"RFTime",   "type":"F", "info":"RF Time (ns)"},
-                {"name":"Helic",    "type":"B", "info":"Helicity of Event (0 or 1, else undefined)"},
-                {"name":"PTIME",    "type":"F", "info":"Event Processing Time (UNIX Time = seconds)"}
+                {"name":"category",   "type":"L", "info":"Undefined"},
+                {"name":"topology",   "type":"L", "info":"Undefined"},
+                {"name":"beamCharge", "type":"F", "info":"Beam charge, gated (nano-Coulomb)"},
+                {"name":"liveTime",   "type":"D", "info":"Lifetime"},
+                {"name":"STTime",     "type":"F", "info":"Event Start Time (ns)"},
+                {"name":"RFTime",     "type":"F", "info":"RF Time (ns)"},
+                {"name":"helicity",   "type":"B", "info":"Helicity of Event (0 or 1, else undefined), with HWP-correction"},
+                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (0 or 1, else undefined)"},
+                {"name":"procTime",   "type":"F", "info":"Event Processing Time (UNIX Time = seconds)"}
             ]
     },
     {
@@ -186,17 +184,15 @@
         "item" : 30,
         "info": "Event Header Bank",
         "entries": [
-                {"name":"EVNTime",  "type":"F", "info":"Event Time"},
-                {"name":"TYPE",     "type":"B", "info":"Event Type (Data or MC)"},
-                {"name":"EvCAT",    "type":"S", "info":"Event Category, if >0:  e-, e-p, e-pi+....."},
-                {"name":"NPGP",     "type":"S", "info":"Number of Final (Timed-based) Reconstructed Particles*100 + Number of Geometrically Reconstructed Particles"},
-                {"name":"TRG",      "type":"L", "info":"Trigger Type (CLAS12_e-, FT_CLAS12_h, CLAS12_H,...) + Prescale Factor for that Trigger"},
-                {"name":"BCG",      "type":"F", "info":"Faraday Cup Gated (nano-Coulomb)"},
-                {"name":"LT",       "type":"D", "info":"Clock"},
-                {"name":"STTime",   "type":"F", "info":"Event Start Time (ns)"},
-                {"name":"RFTime",   "type":"F", "info":"RF Time (ns)"},
-                {"name":"Helic",    "type":"B", "info":"Helicity of Event (0 or 1 else undefined)"},
-                {"name":"PTIME",    "type":"F", "info":"Event Processing Time (UNIX Time = seconds)"}
+                {"name":"category",   "type":"L", "info":"Undefined"},
+                {"name":"topology",   "type":"L", "info":"Undefined"},
+                {"name":"beamCharge", "type":"F", "info":"Beam charge, gated (nano-Coulomb)"},
+                {"name":"liveTime",   "type":"D", "info":"Lifetime"},
+                {"name":"STTime",     "type":"F", "info":"Event Start Time (ns)"},
+                {"name":"RFTime",     "type":"F", "info":"RF Time (ns)"},
+                {"name":"helicity",   "type":"B", "info":"Helicity of Event (0 or 1, else undefined), with HWP-correction"},
+                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (0 or 1, else undefined)"},
+                {"name":"procTime",   "type":"F", "info":"Event Processing Time (UNIX Time = seconds)"}
             ]
     },
     {

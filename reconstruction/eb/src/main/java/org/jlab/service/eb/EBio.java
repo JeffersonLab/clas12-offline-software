@@ -43,9 +43,8 @@ public class EBio {
                 if (bank.getInt("component",ii)==helComponent) {
                     byte helicity=-1;
                     if (bank.getInt("ped",ii)>helHalf) helicity=1;
-                    // correct for HWP position:
-                    helicity *= ccdb.getInteger(EBCCDBEnum.HWP_position);
-                    dHeader.setHelicity(helicity);
+                    dHeader.setHelicityRaw(helicity);
+                    dHeader.setHelicity((byte)(helicity*ccdb.getInteger(EBCCDBEnum.HWP_position)));
                     break;
                 }
             }

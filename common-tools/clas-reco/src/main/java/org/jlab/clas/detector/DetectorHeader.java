@@ -13,6 +13,7 @@ public class DetectorHeader {
     private double  startTime = -1000.0;
     private double startTimeFT = -1000.0;
     private byte     helicity = 0;
+    private byte     helicityRaw = 0;
     private float beamChargeGated = 0;
     private float    livetime = -1;
     private short eventCategory = 0;
@@ -47,6 +48,10 @@ public class DetectorHeader {
 
     public byte getHelicity() {
 	 return helicity;
+    }
+
+    public byte getHelicityRaw() {
+	 return helicityRaw;
     }
 
     public float getLivetime() {
@@ -91,6 +96,10 @@ public class DetectorHeader {
 
     public void setHelicity(byte helicity) {
         this.helicity = helicity;
+    }
+
+    public void setHelicityRaw(byte helicity) {
+        this.helicityRaw = helicity;
     }
 
     public void setBeamChargeGated(float bcg) {
