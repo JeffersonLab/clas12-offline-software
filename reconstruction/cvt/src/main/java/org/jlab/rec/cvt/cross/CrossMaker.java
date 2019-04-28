@@ -96,6 +96,8 @@ public class CrossMaker {
                     this_cross.set_Id(rid);
                     // sets the cross parameters (point3D and associated error) from the SVT geometry
                     this_cross.set_CrossParamsSVT(null, svt_geo); 
+                    this_cross.set_Sector(inlayerclus.get_Sector());
+                    this_cross.set_Region(inlayerclus.get_Region());
                     // the uncorrected point obtained from default estimate that the track is at 90 deg wrt the module should not be null
                     if (this_cross.get_Point0() != null) {
                         //pass the cross to the arraylist of crosses

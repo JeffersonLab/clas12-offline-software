@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.io.*;
 import java.util.Scanner;
+import Jama.Matrix;
 
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
@@ -206,8 +207,11 @@ public class Geometry {
         }
         return new Point3D(xt, yt, zt);
     }*/
-    
+      
 public Point3D transformToFrame(int sector, int layer, double x, double y, double z, String frame, String MiddlePlane) {
+	
+		double RADIUS=org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(layer-1)/2][(layer-1)%2];
+		if (MiddlePlane.equals("middle")) RADIUS=(org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(layer-1)/2][0]+org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(layer-1)/2][1])/2.;
     	
         // global rotation angle
         double Glob_rangl = ((double) -(sector - 1) / (double) org.jlab.detector.geant4.v2.SVT.SVTConstants.NSECTORS[(layer-1)/2]) * 2. * Math.PI + org.jlab.detector.geant4.v2.SVT.SVTConstants.PHI0;
@@ -215,9 +219,9 @@ public Point3D transformToFrame(int sector, int layer, double x, double y, doubl
         // angle to rotate to global frame
         double Loc_to_Glob_rangl = Glob_rangl - org.jlab.detector.geant4.v2.SVT.SVTConstants.PHI0;
 
-        double lTx = org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(layer-1)/2][(layer-1)%2]  * Math.cos(Glob_rangl);
-        double lTy = org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(layer-1)/2][(layer-1)%2]  * Math.sin(Glob_rangl);
-        double lTz = org.jlab.detector.geant4.v2.SVT.SVTConstants.Z0ACTIVE[(layer-1)/2];
+        double lTx = RADIUS  * Math.cos(Glob_rangl);
+        double lTy = RADIUS  * Math.sin(Glob_rangl);
+        double lTz = org.jlab.detector.geant4.v2.SVT.SVTConstants.Z0ACTIVE[(layer-1)/2];//-org.jlab.detector.geant4.v2.SVT.SVTConstants.DEADZNLEN;
 
         //rotate and translate
         double cosRotation = Math.cos(Loc_to_Glob_rangl);
@@ -228,15 +232,16 @@ public Point3D transformToFrame(int sector, int layer, double x, double y, doubl
         double zt = 0;
 
         if (frame.equals("lab")) {
-            xt = (x - 0.5 * org.jlab.detector.geant4.v2.SVT.SVTConstants.ACTIVESENWID)  * cosRotation - y * sinRotation + lTx;
-            yt = (x - 0.5 * org.jlab.detector.geant4.v2.SVT.SVTConstants.ACTIVESENWID) * sinRotation + y * cosRotation + lTy;
+            xt = (x - 0.5 * org.jlab.detector.geant4.v2.SVT.SVTConstants.ACTIVESENWID-this.getLocTx(layer, sector))  * cosRotation - y * sinRotation + lTx;
+            yt = (x - 0.5 * org.jlab.detector.geant4.v2.SVT.SVTConstants.ACTIVESENWID-this.getLocTx(layer, sector)) * sinRotation + y * cosRotation + lTy;
             zt = z + lTz;
         }
         if (frame.equals("local")) {
-            xt = (x - lTx) * cosRotation + (y - lTy) * sinRotation + 0.5 * org.jlab.detector.geant4.v2.SVT.SVTConstants.ACTIVESENWID;
+            xt = (x - lTx) * cosRotation + (y - lTy) * sinRotation + 0.5 * org.jlab.detector.geant4.v2.SVT.SVTConstants.ACTIVESENWID+this.getLocTx(layer,sector);
             yt = -(x - lTx) * sinRotation + (y - lTy) * cosRotation;
             zt = z - lTz;
         }
+      
         return new Point3D(xt, yt, zt);
     }
     //*** point and its error
@@ -449,11 +454,11 @@ public Point3D transformToFrame(int sector, int layer, double x, double y, doubl
         double Strip = (double) strip;
         double StripUp = Strip + 1;
         if (strip == org.jlab.detector.geant4.v2.SVT.SVTConstants.NSTRIPS) {
-            StripUp = (double) org.jlab.detector.geant4.v2.SVT.SVTConstants.NSTRIPS; //edge strip
+            StripUp = (double) org.jlab.detector.geant4.v2.SVT.SVTConstants.NSTRIPS-1; //edge strip so let's consider that there is a virtual next strip with same pitch
         }
         double StripDown = Strip - 1;
         if (strip == 1) {
-            StripDown = 1; //edge strip
+            StripDown = 2; //edge strip so let's consider that there is a virtual next strip with same pitch
         }
 
         double pitchToNextStrp = Math.abs(getXAtZ(lay, (double) StripUp, Z) - getXAtZ(lay, (double) Strip, Z)); // this is P- in the formula below
@@ -549,6 +554,73 @@ public Point3D transformToFrame(int sector, int layer, double x, double y, doubl
         return InterPoint;
 
     }
+    
+    public int getIntersectionSector(Helix helix, int layer) {
+    	Point3D Or = this.getPlaneModuleOrigin(1, layer);
+        
+        double cs=helix.getCurvilinearAbsAtRadius(Math.sqrt(Or.x()*Or.x()+Or.y()*Or.y()));
+        Vector3D Ideal=helix.getHelixPoint(cs);
+        Point3D I=new Point3D(Ideal.x(), Ideal.y(), Ideal.z());
+        int sector=findSectorFromAngle(layer, I);
+    
+        return sector;
+    }
+    
+    public double getRefinedIntersection(Helix helix, int layer, int sector) {
+    	//Find the intersection between the helix and the ideal svt plane
+    	Point3D Or = this.transformToFrame(sector, layer, 15*org.jlab.detector.geant4.v2.SVT.SVTConstants.ACTIVESENWID, 0, 0, "lab", "");
+               
+        double cs=org.jlab.rec.cvt.Constants.KFitterStepsize; 
+        
+        Vector3D norm=this.findBSTPlaneNormal(sector, layer);
+    	
+        double range=2*org.jlab.rec.cvt.Constants.KFitterStepsize; //mm... computing distance of 3 points to cylinder or plane
+    	double csold=cs;
+    	for (int iter=0;iter<5;iter++) {
+    		Vector3D inter=Point_LabToDetFrame(layer, sector, helix.getHelixPoint(cs));
+    		Vector3D interinf=Point_LabToDetFrame(layer, sector, helix.getHelixPoint(cs-range));
+    		Vector3D intersup=Point_LabToDetFrame(layer, sector, helix.getHelixPoint(cs+range));
+    		    		
+    		//When inter is in the plane of the module, the scalar product with the normal vector is 0
+    		inter.setXYZ(inter.x()-Or.x(), inter.y()-Or.y(), inter.z()-Or.z());
+    		interinf.setXYZ(interinf.x()-Or.x(), interinf.y()-Or.y(), interinf.z()-Or.z());
+    		intersup.setXYZ(intersup.x()-Or.x(), intersup.y()-Or.y(), intersup.z()-Or.z());
+    	
+    		double[][] A=new double[3][3];
+    		double[][] B=new double[3][1];
+    	
+    		B[0][0]=inter.dot(norm); B[0][0]=B[0][0]*B[0][0];
+    		B[1][0]=interinf.dot(norm); B[1][0]=B[1][0]*B[1][0];
+    		B[2][0]=intersup.dot(norm); B[2][0]=B[2][0]*B[2][0];
+    	
+    		A[0][0]=cs*cs;
+    		A[0][1]=cs;
+    		A[0][2]=1;
+    	
+    		A[1][0]=(cs-range)*(cs-range);
+    		A[1][1]=cs-range;
+    		A[1][2]=1;
+    	
+    		A[2][0]=(cs+range)*(cs+range);
+    		A[2][1]=cs+range;
+    		A[2][2]=1;
+    		
+    		
+    		Matrix matA=new Matrix(A);
+    		if (matA.det()>1.e-20) {
+    			Matrix invA=matA.inverse();
+    			Matrix matB=new Matrix(B);
+    			Matrix result=invA.times(matB);
+    		
+    			cs=-result.get(1, 0)/2./result.get(0, 0);
+    			range=Math.abs(cs-csold)/10.;
+    		}
+    	}
+        
+          	
+    	return cs;
+    }
+    
     
     //****
     // in the local coordinate system 
@@ -850,7 +922,7 @@ public static void applyInverseShift( Vector3d aPoint, double[] aShift, Vector3d
 		new_point.setX(new_point.x()+this.getCx(layer,sector));
 		new_point.setY(new_point.y()+this.getCy(layer,sector));
 		new_point.setZ(new_point.z()+this.getCz(layer,sector));
-	
+				
 		return new_point;
 	}
  
@@ -876,7 +948,7 @@ public static void applyInverseShift( Vector3d aPoint, double[] aShift, Vector3d
 	
 		return new_point;
 	}
-
+	
 	public Vector3D getIntersectWithRay(int layer, int sectorcluster, Vector3D slope_lab, Vector3D pt_lab) {
 		Vector3D inter=new Vector3D();
 		//int sector=findSectorFromAngle(layer,pt_line);
@@ -932,6 +1004,17 @@ public static void applyInverseShift( Vector3d aPoint, double[] aShift, Vector3d
 		return dist;
 	}
 	
+	public double getLocalX(double xdet, double ydet, double zdet, int lay, int sec) {
+		Point3D Loc=new Point3D(this.transformToFrame(sec, lay, xdet, ydet, zdet, "local", "")); //Prediction
+		return Loc.x();
+	}
+	
+	public double getMeasurementAtZ(double xdet, double ydet, double zdet,int layer, int sector, double strip) {
+		Point3D Loc=new Point3D(this.transformToFrame(sector, layer, xdet, ydet, zdet, "local", ""));
+		double x_strip=this.getXAtZ(layer, strip, Loc.z());
+		return x_strip;
+	}
+	
     public static void main(String arg[]) throws FileNotFoundException {
 
         
@@ -963,49 +1046,6 @@ public static void applyInverseShift( Vector3d aPoint, double[] aShift, Vector3d
         System.out.println(EP2u.toString());
         System.out.println(EP1v.toString());
         System.out.println(EP2v.toString());
-
-        //System.out.println(geo.calcNearestStrip(25.66, -66.55, 1.37,2, 10) );
-        //System.out.println(geo.transformToFrame(8, 1, 66.3, 7.8, 38.6, "local", "").z()-Constants.ACTIVESENLEN*2-2*0.835-Constants.ACTIVESENLEN/2);
-        /*
-	    	Line3D stripLine1 = svt.createStrip(s1-1);
-	    	Line3D stripLine2 = svt.createStrip(s2-1);	    	
-			stripLine2.rotateZ(Math.toRadians(180));
-			Transformation3D transform = new Transformation3D();
-			transform.translateXYZ( -svt.DEADZNWID + svt.MODULEWID/2 , 0, -svt.DEADZNLEN + svt.MODULELEN/2 ); // align 
-			
-	    	transform.apply( stripLine1 );
-			transform.apply( stripLine2 );
-         */
- /*
-	    	double[] LC = geo.getLocCoord(136,39);
-			double LC_x = LC[0];
-			double LC_z = LC[1];
-			
-			Point3D crPoint = geo.transformToFrame( 10,  2-1, LC_x, 0, LC_z, "lab", "middle");
-			
-	    	
-	    	double m1 = (stripLine1.origin().x() - stripLine1.end().x() )/(stripLine1.origin().z() - stripLine1.end().z() );
-	    	double m2 = (stripLine2.origin().x() - stripLine2.end().x() )/(stripLine2.origin().z() - stripLine2.end().z() );
-	    	double b1 = stripLine1.origin().x() - stripLine1.origin().z()*m1;
-	    	double b2 = stripLine2.origin().x() - stripLine2.origin().z()*m2;
-	    	double z = (b2-b1)/(m1-m2);
-			double x = m1*z +b1;
-	    	System.out.println(" x "+x +" z "+z+" my geo "+crPoint.toString());
-	    	
-	    	System.out.println(geo.getPlaneModuleOrigin(1, 1).toString() );
-         */
- /*
-	    	int l = 1;
-	    	int s = 6;
-	    	double s10 = geo.calcNearestStrip(0., Constants.MODULERADIUS[l-1][s-1], 0, l, s);
-	    	double s20 = geo.calcNearestStrip(0., Constants.MODULERADIUS[l][s-1], 0, l+1, s);
-	    	
-	    	double s1 = geo.calcNearestStrip(0.5, Constants.MODULERADIUS[l-1][s-1], 0, l, s);
-	    	double s2 = geo.calcNearestStrip(0.5, Constants.MODULERADIUS[l][s-1], 0, l+1, s);
-	    	
-	    	
-	    	System.out.println("D "+geo.getLocCoord(s10, s20)[0]+","+geo.getLocCoord(s10, s20)[1]+"  ;  "+geo.getLocCoord(s1, s2)[0]+","+geo.getLocCoord(s1, s2)[1]);
-         */
     }
 
 	public int getNbModule(int lay) {
@@ -1038,27 +1078,38 @@ public static void applyInverseShift( Vector3d aPoint, double[] aShift, Vector3d
 	}
 	
 	public double getRx(int lay, int sec) {
-		return Rx[lay-1][sec-1];
+		if (!org.jlab.rec.cvt.Constants.WithAlignment) return 0.0;
+		return org.jlab.detector.geant4.v2.SVT.SVTConstants.Rx[lay-1][sec-1];
 	}
 	
 	public double getRy(int lay, int sec) {
-		return Ry[lay-1][sec-1];
+		if (!org.jlab.rec.cvt.Constants.WithAlignment) return 0.0;
+		return org.jlab.detector.geant4.v2.SVT.SVTConstants.Ry[lay-1][sec-1];
 	}
 	
 	public double getRz(int lay, int sec) {
-		return Rz[lay-1][sec-1];
+		if (!org.jlab.rec.cvt.Constants.WithAlignment) return 0.0;
+		return org.jlab.detector.geant4.v2.SVT.SVTConstants.Rz[lay-1][sec-1];
 	}
 	
 	public double getCx(int lay, int sec) {
-		return Cx[lay-1][sec-1];
+		if (!org.jlab.rec.cvt.Constants.WithAlignment) return 0.0;
+		return org.jlab.detector.geant4.v2.SVT.SVTConstants.Tx[lay-1][sec-1];
 	}
 	
 	public double getCy(int lay, int sec) {
-		return Cy[lay-1][sec-1];
+		if (!org.jlab.rec.cvt.Constants.WithAlignment) return 0.0;
+		return org.jlab.detector.geant4.v2.SVT.SVTConstants.Ty[lay-1][sec-1];
 	}
 	
 	public double getCz(int lay, int sec) {
-		return Cz[lay-1][sec-1];
+		if (!org.jlab.rec.cvt.Constants.WithAlignment) return 0.0;
+		return org.jlab.detector.geant4.v2.SVT.SVTConstants.Tz[lay-1][sec-1];
+	}
+	
+	public double getLocTx(int lay, int sec) {
+		if (!org.jlab.rec.cvt.Constants.WithAlignment) return 0.0;
+		return org.jlab.detector.geant4.v2.SVT.SVTConstants.LocTx[lay-1][sec-1];
 	}
 	
 	public void LoadMisalignmentFromFile(String FileName) throws IOException{
@@ -1086,6 +1137,12 @@ public static void applyInverseShift( Vector3d aPoint, double[] aShift, Vector3d
 			}
 		}
 		
+	}
+
+	public double getRadius(int layer) {
+		// TODO Auto-generated method stub
+		double Rm=org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(layer - 1)/2][(layer - 1)%2];
+		return Rm;
 	}
 
 }

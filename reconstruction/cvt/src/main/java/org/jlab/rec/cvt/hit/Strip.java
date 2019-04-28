@@ -147,15 +147,13 @@ public class Strip {
             int theLorentzCorrectedStrip = geo.getZStrip(layer, theLorentzCorrectedAngle);
             // get the strip number after correcting for Lorentz angle
             this.set_LCStrip(theLorentzCorrectedStrip);
-
-            double sigma = org.jlab.rec.cvt.bmt.Constants.SigmaDrift / Math.cos(org.jlab.rec.cvt.bmt.Constants.getThetaL()); // max sigma for drift distance  (hDrift) = total gap from top to mesh
+            
 
             int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6double Z0=0;
             //max phi err
-            double phiErrL = sigma / org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region];
-
+            
             double phiErr = org.jlab.rec.cvt.bmt.Constants.getCRZWIDTH()[num_region] / org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region] / Math.sqrt(12.);
-            this.set_PhiErr(Math.sqrt(phiErr * phiErr + phiErrL * phiErrL));
+            this.set_PhiErr(phiErr);
             //System.out.println("arcerr "+org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]+" * "+Math.toDegrees(sigma/org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]));
             this.set_PhiErr0(phiErr);
         }

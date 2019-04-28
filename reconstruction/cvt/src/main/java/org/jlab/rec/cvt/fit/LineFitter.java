@@ -34,6 +34,7 @@ public class LineFitter {
                     if ((sigma_y.get(i) * sigma_y.get(i) + sigma_x.get(i) * sigma_x.get(i)) == 0) {
                         return false;
                     }
+                    
                     w.add(i, 1. / (sigma_y.get(i) * sigma_y.get(i) + sigma_x.get(i) * sigma_x.get(i)));
                     //w.get(i) = 1./(sigma_x.get(i)*sigma_x.get(i)); 
                     Sw += w.get(i);
@@ -71,7 +72,7 @@ public class LineFitter {
             double slopeEr = Math.sqrt(Sw / determ);
             double intercEr = Math.sqrt(Sxx / determ);
             double SlInCov = -Sx / determ;
-
+          
             if (Math.abs(slopeSol) >= 0 && Math.abs(intercSol) >= 0) {
 
                 // calculate the chi^2

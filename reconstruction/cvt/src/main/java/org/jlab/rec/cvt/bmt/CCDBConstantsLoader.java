@@ -19,7 +19,7 @@ public class CCDBConstantsLoader {
     //private static DatabaseConstantProvider DB;
     
 
-    public static final synchronized void Load(DatabaseConstantProvider dbprovider) {
+    public static final synchronized void Load(DatabaseConstantProvider dbprovider, boolean WithAlignment) {
         // initialize the constants
         //Z detector characteristics
         int NREGIONS = 3;
@@ -245,22 +245,45 @@ public class CCDBConstantsLoader {
         	 
         }
          
+        if (WithAlignment) {
         //Loading alignment constant in tables
-        Constants.setRxAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Rx", 0));
-        Constants.setRyAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Ry", 0));
-        Constants.setRzAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Rz", 0));
-        Constants.setCxAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Tx", 0));
-        Constants.setCyAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Ty", 0));
-        Constants.setCzAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Tz", 0));
+        	Constants.setRxAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Rx", 0));
+        	Constants.setRyAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Ry", 0));
+        	Constants.setRzAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Rz", 0));
+        	Constants.setCxAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Tx", 0));
+        	Constants.setCyAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Ty", 0));
+        	Constants.setCzAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Tz", 0));
+        	
 
-        for (int i=0;i<dbprovider.length("/test/mvt/MVTAlignment/Rx");i++) {
-          // for the alignment table, layer numbering goes from 7 to 12. Adding "-6" to bring it back to [1,6] range
-          Constants.setRx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Rx",i));
-          Constants.setRy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Ry",i));
-          Constants.setRz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Rz",i));
-          Constants.setCx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Tx",i));
-          Constants.setCy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Ty",i));
-          Constants.setCz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Tz",i));
+        	for (int i=0;i<dbprovider.length("/test/mvt/MVTAlignment/Rx");i++) {
+        		// for the alignment table, layer numbering goes from 7 to 12. Adding "-6" to bring it back to [1,6] range
+        		Constants.setRx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Rx",i));
+        		Constants.setRy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Ry",i));
+        		Constants.setRz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Rz",i));
+        		Constants.setCx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Tx",i));
+        		Constants.setCy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Ty",i));
+        		Constants.setCz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Tz",i));
+        	}
+        	System.out.println(Constants.getRxAll()+" "+Constants.getRyAll()+" "+Constants.getRzAll()+" "+Constants.getCxAll()+" "+Constants.getCyAll()+" "+Constants.getCzAll());
+        }
+        else {
+        	Constants.setRxAll(0);
+        	Constants.setRyAll(0);
+        	Constants.setRzAll(0);
+        	Constants.setCxAll(0);
+        	Constants.setCyAll(0);
+        	Constants.setCzAll(0);
+
+        	for (int i=0;i<dbprovider.length("/test/mvt/MVTAlignment/Rx");i++) {
+        		// for the alignment table, layer numbering goes from 7 to 12. Adding "-6" to bring it back to [1,6] range
+        		Constants.setRx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
+        		Constants.setRy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
+        		Constants.setRz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
+        		Constants.setCx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
+        		Constants.setCy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
+        		Constants.setCz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
+        	}
+        	System.out.println(Constants.getRxAll()+" "+Constants.getRyAll()+" "+Constants.getRzAll()+" "+Constants.getCxAll()+" "+Constants.getCyAll()+" "+Constants.getCzAll());
         }
 
         // beam offset
@@ -270,8 +293,10 @@ public class CCDBConstantsLoader {
         double phi = Math.toRadians(phi_deg);
         double xb = r*Math.cos(phi);
         double yb = r*Math.sin(phi);
-        org.jlab.rec.cvt.Constants.setXb(xb);
-        org.jlab.rec.cvt.Constants.setYb(yb);
+        org.jlab.rec.cvt.Constants.setXb(0);
+        org.jlab.rec.cvt.Constants.setYb(0);
+        /*org.jlab.rec.cvt.Constants.setXb(-10);//mm
+        org.jlab.rec.cvt.Constants.setYb(10);*/
         org.jlab.rec.cvt.Constants.setRbErr(r_err);
         
         Constants.setCRCRADIUS(CRCRADIUS);

@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.fit.StateVecs.B;
+import org.jlab.rec.cvt.track.fit.StateVecs.CovMat;
 import org.jlab.rec.cvt.track.fit.StateVecs.StateVec;
 import org.jlab.rec.cvt.trajectory.Helix;
 
@@ -22,9 +24,18 @@ public class KFitter {
 
     StateVecs sv = new StateVecs();
     MeasVecs mv = new MeasVecs();
-
-    public StateVec finalStateVec;
-
+    
+    public Helix KFHelix;
+    
+    public int totNumIter =1;// 5;
+    double newChisq = Double.POSITIVE_INFINITY;
+    
+    public double chi2 = 0;
+    public int NDF = 0;
+    
+    //public ArrayList<HitOnTrack> TrjPoints = new ArrayList<HitOnTrack>();
+    public ArrayList<StateVec> TrjPoints = new ArrayList<StateVec>();
+    
     public KFitter(Seed trk, org.jlab.rec.cvt.svt.Geometry geo, Swim swimmer) {
         this.init(trk, geo, null, swimmer);
     }
@@ -32,7 +43,7 @@ public class KFitter {
     public KFitter(Seed trk, org.jlab.rec.cvt.svt.Geometry geo, DataEvent event, Swim swimmer) {
         this.init(trk, geo, event, swimmer);
     }
-
+    
     public void init(Seed trk, org.jlab.rec.cvt.svt.Geometry geo, DataEvent event, Swim swimmer) {
         //Helix helix = trk.get_Helix();
         mv.setMeasVecs(trk, geo);
@@ -64,15 +75,15 @@ public class KFitter {
         //take first plane along beam line with n = y-dir;
         sv.Layer.add(0);
         sv.Sector.add(0);
-        sv.X0.add((double) Constants.getXb());
-        sv.Y0.add((double) Constants.getYb());
+       
+        sv.X0.add((double) 0.0);
+        sv.Y0.add((double) 0.0);
         sv.Z0.add((double) 0.0);
         for (int i = 1; i < mv.measurements.size(); i++) {
             sv.Layer.add(mv.measurements.get(i).layer);
             sv.Sector.add(mv.measurements.get(i).sector);
-            //Point3D ref = geo.intersectionOfHelixWithPlane(mv.measurements.get(i).layer, mv.measurements.get(i).sector,  helix) ;
-            //ref = new Point3D(0,Constants.MODULERADIUS[mv.measurements.get(i).layer-1][0], 0);
-            Point3D ref = new Point3D(Constants.getXb(), Constants.getYb(), 0);
+            
+            Point3D ref = new Point3D(0, 0, 0);
             sv.X0.add(ref.x());
             sv.Y0.add(ref.y());
             sv.Z0.add(ref.z());
@@ -80,95 +91,72 @@ public class KFitter {
         sv.init(trk, this, swimmer);
     }
 
-    public int totNumIter = 5;
-    double newChisq = Double.POSITIVE_INFINITY;
-
     public void runFitter(org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
-        double newchisq = Double.POSITIVE_INFINITY;
-        this.NDF = sv.X0.size()-5; 
+        this.NDF = mv.measurements.size()-6; 
+        this.chi2= Double.POSITIVE_INFINITY;
+        
         for (int it = 0; it < totNumIter; it++) {
+        	
             this.chi2 = 0;
-            TrjPoints.clear();
+            
             for (int k = 0; k < sv.X0.size() - 1; k++) {
                 if (sv.trackCov.get(k) == null || mv.measurements.get(k + 1) == null) {
                     return;
                 }
-                sv.transport(k, k + 1, sv.trackTraj.get(k), sv.trackCov.get(k), sgeo, bgeo, mv.measurements.get(k + 1).type, swimmer);
+              
+                sv.new_transport(k, k + 1, sv.trackTrajFilt.get(k), sv.trackCovFilt.get(k), sgeo, bgeo, mv.measurements.get(k + 1).type, swimmer);
                 this.filter(k + 1, sgeo, bgeo, swimmer);
             }
+            //System.out.println("Back propagation....................................");
+            //Filtered StateVector and smoothed StateVector are the same for the last layer
+            sv.trackTrajSmooth.put(sv.X0.size() -1,sv.trackTrajFilt.get(sv.X0.size() - 1));
+            sv.trackCovSmooth.put(sv.X0.size() -1,sv.trackCovFilt.get(sv.X0.size() - 1));
+         
             
-            for (int k =  sv.X0.size() - 1; k>1 ;k--) {
-                if (sv.trackCov.get(k) == null || mv.measurements.get(k - 1) == null) {
-                    return;
-                }
-                sv.transport(k, k - 1, sv.trackTraj.get(k), sv.trackCov.get(k), sgeo, bgeo, mv.measurements.get(k - 1).type, swimmer);
-                this.filter(k - 1, sgeo, bgeo, swimmer);
-            }
-
-            if (it < totNumIter - 1) {
-              this.Rinit(swimmer); 
-            }
-            this.chi2=this.calc_chi2(sgeo);
-            if(this.chi2<newchisq) {
-                newchisq=this.chi2;
-                KFHelix = sv.setTrackPars(1);
-                this.setTrajectory();
-            } else {
-                this.chi2 =newchisq ;
-                break;
-            }
+            for (int k = sv.X0.size() - 2; k > 0; k--) {this.smoother(k, sgeo, bgeo, swimmer);}
+            
+            //To extrapolate to "Vertex"
+            sv.new_transport(1, 0, sv.trackTrajSmooth.get(1), sv.trackCovSmooth.get(1), sgeo, bgeo, mv.measurements.get(0).type, swimmer);
+            this.chi2=this.calc_chi2(sgeo, bgeo);
+            
+            KFHelix = sv.setSvPars(sv.trackTrajSmooth.get(0),sv.trackCovSmooth.get(0).covMat);
+                      
         }
+        KFHelix = sv.setSvPars(sv.trackTrajSmooth.get(0),sv.trackCovSmooth.get(0).covMat);
+        this.setTrajectory();
        
-        //KFHelix = sv.setTrackPars(sv.X0.size() - 1);
-        //this.setTrajectory();
         
     }
-    public List<HitOnTrack> TrjPoints = new ArrayList<HitOnTrack>();
-
+    
     public void setTrajectory() {
-        TrjPoints.clear();
+    	TrjPoints.clear();
+    	
         for (int k = 1; k < sv.trackTraj.size(); k++) {
-            int layer = mv.measurements.get(k).layer;
-            double x = sv.trackTraj.get(k).x;
-            double y = sv.trackTraj.get(k).y;
-            double z = sv.trackTraj.get(k).z;
-            double azi = sv.trackTraj.get(k).phi0 + sv.trackTraj.get(k).phi;
-            //System.out.println("Trj "+x+","+y+","+z);
-            double invKappa = 1. / Math.abs(sv.trackTraj.get(k).kappa);
-            double px = -invKappa * Math.sin(azi);
-            double py = invKappa * Math.cos(azi);
-            double pz = invKappa * sv.trackTraj.get(k).tanL;
-            TrjPoints.add(new HitOnTrack(layer, x, y, z, px, py, pz));
-
-//            System.out.println(" Traj layer "+layer+" x "+x+" y "+y+" z "+z);
+        	TrjPoints.add(sv.trackTrajSmooth.get(k));
         }
     }
 
     public void Rinit(Swim swimmer) {
-        Helix helix = sv.setTrackPars(sv.X0.size() - 1);
+        Helix helix = sv.setSvPars(sv.trackTrajSmooth.get(0),sv.trackCovSmooth.get(0).covMat);
 
-        sv.trackTraj.get(0).x = -helix.get_dca() * Math.sin(helix.get_phi_at_dca());
-        sv.trackTraj.get(0).y = helix.get_dca() * Math.cos(helix.get_phi_at_dca());
-        sv.trackTraj.get(0).z = helix.get_Z0();
-        double xcen = (1. / helix.get_curvature() - helix.get_dca()) * Math.sin(helix.get_phi_at_dca());
-        double ycen = (-1. / helix.get_curvature() + helix.get_dca()) * Math.cos(helix.get_phi_at_dca());
+        sv.trackTraj.get(0).refx = sv.trackTrajSmooth.get(0).refx;
+        sv.trackTraj.get(0).refy = sv.trackTrajSmooth.get(0).refy;
+        sv.trackTraj.get(0).refz = sv.trackTrajSmooth.get(0).refz;
+       
         B Bf = sv.new B(0, 0, 0, 0, swimmer);
         sv.trackTraj.get(0).alpha = Bf.alpha;
         sv.trackTraj.get(0).kappa = Bf.alpha * helix.get_curvature();
-        sv.trackTraj.get(0).phi0 = Math.atan2(ycen, xcen);
-        if (sv.trackTraj.get(0).kappa < 0) {
-            sv.trackTraj.get(0).phi0 = Math.atan2(-ycen, -xcen);
-        }
+       
+        sv.trackTraj.get(0).phi0 = helix.get_phi_at_dca();
         sv.trackTraj.get(0).dz = helix.get_Z0();
         sv.trackTraj.get(0).tanL = helix.get_tandip();
         sv.trackTraj.get(0).d_rho = helix.get_dca();
         sv.trackTraj.get(0).phi = 0;
 
-        sv.trackCov.get(0).covMat = sv.trackCov.get(sv.X0.size() - 1).covMat;
+        sv.trackCov.get(0).covMat = sv.trackCovSmooth.get(0).covMat;
     }
-    public Helix KFHelix;
     
-    public Track OutputTrack(Seed trk, org.jlab.rec.cvt.svt.Geometry geo, Swim swimmer) {
+    public Track OutputTrack(Seed trk, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
    
         Track cand = new Track(KFHelix, swimmer);
         
@@ -176,64 +164,57 @@ public class KFitter {
             this.setFitFailed = true;
         cand.setNDF(NDF);
         cand.setChi2(chi2);
-        
-        for (Cross c : trk.get_Crosses()) {
-            if (c.get_Detector().equalsIgnoreCase("SVT")) {
-                continue;
-            }
-           // System.out.println("output  track trajectory   "+this.TrjPoints.size());
-            for (HitOnTrack h : this.TrjPoints) {
-                //System.out.println(" hot : layer "+h.layer+" x "+h.x+" y "+h.y+" z "+h.z);
-                if (c.get_Cluster1().get_Layer() == h.layer - 6) {
-                    if (Math.sqrt(h.x * h.x + h.y * h.y) < 100) {
-                        this.setFitFailed = true;
-                    }
-                    //System.err.println(c.get_Cluster1().get_Layer()+") error in traj "+this.TrjPoints.size());
-//                    if (Double.isNaN(c.get_Point().x())) {
-//                        c.set_Point(new Point3D(h.x, h.y, c.get_Point().z()));
-//                    }
-//                    if (Double.isNaN(c.get_Point().z())) {
-//                        c.set_Point(new Point3D(c.get_Point().x(), c.get_Point().y(), h.z));
-//                    }
-
-                }
-            }
-        }
         cand.addAll(trk.get_Crosses());
-
-//        cand.finalUpdate_Crosses(geo);
-
+        cand.setTrajectory(TrjPoints);
         return cand;
     }
 
-    public double chi2 = 0;
-    public int NDF = 0;
-
-    private double calc_chi2(org.jlab.rec.cvt.svt.Geometry sgeo) {
+    private double calc_chi2(org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo) {
         //get the measurement
         double m = 0;
         //get the projector state
         double h = 0;
+        double diff = 0;
         double chi2 =0;
-        m=0;
-        h=0;
+        
         for(int k = 1; k< sv.X0.size(); k++) {
-            
+            m=0;
+            h=0;
+            diff=0;
+            sv.trackTrajSmooth.get(k).clusID=mv.measurements.get(k).ID;
             if (mv.measurements.get(k).type == 0) {
-                m = mv.measurements.get(k).centroid;
-                h = mv.h(sv.trackTraj.get(k), sgeo);
-
+            	m = sgeo.getMeasurementAtZ(sv.trackTrajSmooth.get(k).xdet, sv.trackTrajSmooth.get(k).ydet, sv.trackTrajSmooth.get(k).zdet,
+                		mv.measurements.get(k).layer, mv.measurements.get(k).sector,mv.measurements.get(k).centroid); //Because of the stereo angle, SVT measurement depends on zdet
+                h = mv.h(sv.trackTrajSmooth.get(k), sgeo); //For SVT, Returns Local x
+                
+                diff=m-h;
+                
+                double V = sgeo.getSingleStripResolution(mv.measurements.get(k).layer, (int) mv.measurements.get(k).centroid, 
+                		sgeo.transformToFrame(mv.measurements.get(k).sector, mv.measurements.get(k).layer,sv.trackTrajSmooth.get(k).xdet, sv.trackTrajSmooth.get(k).ydet, sv.trackTrajSmooth.get(k).zdet , "local", "").z());
+                V = V * V;
+                chi2 += (m - h) * (m - h) / V;
+                
+               
             }
             if (mv.measurements.get(k).type == 1) {
                 m = Math.atan2(mv.measurements.get(k).y, mv.measurements.get(k).x);
-                h = mv.hPhi(sv.trackTraj.get(k));
+                h = mv.hPhi(sv.trackTrajSmooth.get(k));
+                diff=m-h;
+				if (diff>Math.PI) diff=Math.PI-diff;
+				if (diff<-Math.PI) diff=-diff-Math.PI;
+                chi2 += (m - h) * (m - h) / mv.measurements.get(k).error;
+                
             }
             if (mv.measurements.get(k).type == 2) {
                 m = mv.measurements.get(k).z;
-                h = mv.hZ(sv.trackTraj.get(k));
+                h = mv.hZ(sv.trackTrajSmooth.get(k));
+                diff=m-h;
+                chi2 += (m - h) * (m - h) / mv.measurements.get(k).error;
+                
             }
-
-            chi2 += (m - h) * (m - h) / mv.measurements.get(k).error;
+            
+            sv.trackTrajSmooth.get(k).residual=diff;
+            if (mv.measurements.get(k).type == 1) sv.trackTrajSmooth.get(k).residual=bgeo.getRadius(mv.measurements.get(k).layer-6)*(m-h);  
         }  
        return chi2;
 
@@ -249,18 +230,31 @@ public class KFitter {
             double m = 0;
             //get the projector state
             double h = 0;
+            //Difference m-h
+            double delta = 0;
+            
             if (mv.measurements.get(k).type == 0) {
-                m = mv.measurements.get(k).centroid;
-                h = mv.h(sv.trackTraj.get(k), sgeo);
-
+            	m = sgeo.getMeasurementAtZ(sv.trackTraj.get(k).xdet, sv.trackTraj.get(k).ydet, sv.trackTraj.get(k).zdet,
+                		mv.measurements.get(k).layer, mv.measurements.get(k).sector,mv.measurements.get(k).centroid); //Because of the stereo angle, SVT measurement depends on zdet
+                h = mv.h(sv.trackTraj.get(k), sgeo); //For SVT, Returns Local x
+                
+                V = sgeo.getSingleStripResolution(mv.measurements.get(k).layer, (int) mv.measurements.get(k).centroid, 
+                		sgeo.transformToFrame(mv.measurements.get(k).sector, mv.measurements.get(k).layer,sv.trackTraj.get(k).xdet, sv.trackTraj.get(k).ydet, sv.trackTraj.get(k).zdet , "local", "").z());
+                V = V * V;
+                delta=m-h;
+                
             }
             if (mv.measurements.get(k).type == 1) {
                 m = Math.atan2(mv.measurements.get(k).y, mv.measurements.get(k).x);
                 h = mv.hPhi(sv.trackTraj.get(k));
+                delta=m-h;
+                if (delta>Math.PI) delta=Math.PI-delta;
+                if (delta<-Math.PI) delta=delta+2*Math.PI;
             }
             if (mv.measurements.get(k).type == 2) {
                 m = mv.measurements.get(k).z;
                 h = mv.hZ(sv.trackTraj.get(k));
+                delta=m-h;
             }
             //get the projector Matrix
             double[] H = new double[5];
@@ -273,12 +267,11 @@ public class KFitter {
                 {H[3] * H[0] / V, H[3] * H[1] / V, H[3] * H[2] / V, H[3] * H[3] / V, H[3] * H[4] / V},
                 {H[4] * H[0] / V, H[4] * H[1] / V, H[4] * H[2] / V, H[4] * H[3] / V, H[4] * H[4] / V}
             };
-
+            
             Matrix Ci = null;
             //this.printMatrix(new Matrix(HTGH));System.err.println("-------------------------------\n");
             if (this.isNonsingular(sv.trackCov.get(k).covMat) == false) {
                 //System.err.println("Covariance Matrix is non-invertible - quit filter!");
-                //this.printMatrix(sv.trackCov.get(k).covMat);
                 return;
             }
             try {
@@ -286,7 +279,7 @@ public class KFitter {
             } catch (Exception e) {
                 return;
             }
-
+           
             Matrix Ca = null;
             try {
                 Ca = Ci.plus(new Matrix(HTGH));
@@ -294,13 +287,14 @@ public class KFitter {
                 return;
             }
             if (Ca != null && this.isNonsingular(Ca) == false) {
-                //System.err.println("Covariance Matrix is non-invertible - quit filter!");
+                //System.err.println("Covariance Matrix Ca is non-invertible - quit filter!");
                 return;
             }
             if (Ca != null && this.isNonsingular(Ca) == true) {
-                if (Ca.inverse() != null) {
-                    Matrix CaInv = Ca.inverse();
-                    sv.trackCov.get(k).covMat = CaInv;
+            	 if (Ca.inverse() != null) {
+                	Matrix CaInv = Ca.inverse();
+                    sv.trackCovFilt.get(k).covMat = CaInv;
+                    //this.printMatrix(sv.trackCov.get(k).covMat);
                     //System.err.println("Error: e");
                 } else {
                     return;
@@ -308,92 +302,85 @@ public class KFitter {
             } else {
                 return;
             }
-
+            
             for (int j = 0; j < 5; j++) {
                 // the gain matrix
                 K[j] = 0;
                 for (int i = 0; i < 5; i++) {
-                    K[j] += H[i] * sv.trackCov.get(k).covMat.get(j, i) / V;
+                    K[j] += H[i] * sv.trackCovFilt.get(k).covMat.get(j, i) / V; //The multiplication with V is already taken into account in line 313
                 }
-
             }
+            
             double drho_filt = sv.trackTraj.get(k).d_rho;
             double phi0_filt = sv.trackTraj.get(k).phi0;
             double kappa_filt = sv.trackTraj.get(k).kappa;
             double dz_filt = sv.trackTraj.get(k).dz;
             double tanL_filt = sv.trackTraj.get(k).tanL;
-            if (mv.measurements.get(k).type == 0) {
-                drho_filt += K[0] * (mv.measurements.get(k).centroid - h);
-                phi0_filt += K[1] * (mv.measurements.get(k).centroid - h);
-                kappa_filt += K[2] * (mv.measurements.get(k).centroid - h);
-                dz_filt += K[3] * (mv.measurements.get(k).centroid - h);
-                tanL_filt += K[4] * (mv.measurements.get(k).centroid - h);
-            }
-            if (mv.measurements.get(k).type == 1) {
-                double phiM = Math.atan2(mv.measurements.get(k).y, mv.measurements.get(k).x);
-                drho_filt += K[0] * (phiM - h);
-                phi0_filt += K[1] * (phiM - h);
-                kappa_filt += K[2] * (phiM - h);
-                dz_filt += K[3] * (phiM - h);
-                tanL_filt += K[4] * (phiM - h);
-            }
-            if (mv.measurements.get(k).type == 2) {
-                drho_filt += K[0] * (mv.measurements.get(k).z - h);
-                phi0_filt += K[1] * (mv.measurements.get(k).z - h);
-                kappa_filt += K[2] * (mv.measurements.get(k).z - h);
-                dz_filt += K[3] * (mv.measurements.get(k).z - h);
-                tanL_filt += K[4] * (mv.measurements.get(k).z - h);
-            }
+            
+            drho_filt += K[0] * delta;
+            phi0_filt += K[1] * delta;
+            kappa_filt += K[2] * delta;
+            dz_filt += K[3] * delta;
+            tanL_filt += K[4] * delta;
+                     
+            
+            sv.trackTrajFilt.get(k).d_rho = drho_filt;
+            sv.trackTrajFilt.get(k).phi0 = phi0_filt;
+            sv.trackTrajFilt.get(k).kappa = kappa_filt;
+            sv.trackTrajFilt.get(k).dz = dz_filt;
+            sv.trackTrajFilt.get(k).tanL = tanL_filt;
+            
 
-            StateVec fVec = sv.new StateVec(sv.trackTraj.get(k).k);
-            fVec.d_rho = drho_filt;
-            fVec.phi0 = phi0_filt;
-            fVec.kappa = kappa_filt;
-            fVec.dz = dz_filt;
-            fVec.tanL = tanL_filt;
-            fVec.alpha = sv.trackTraj.get(k).alpha;
-
-            sv.getStateVecAtModule(k, fVec, sgeo, bgeo, mv.measurements.get(k).type, swimmer);
-
-            double f_h = 0;
-            if (mv.measurements.get(k).type == 0) {
-                f_h = mv.h(fVec, sgeo);
-            }
-            if (mv.measurements.get(k).type == 1) {
-                f_h = mv.hPhi(fVec);
-            }
-            if (mv.measurements.get(k).type == 2) {
-                f_h = mv.hZ(fVec);
-            }
-
-            if(Math.signum(sv.trackTraj.get(k).d_rho)!=Math.signum(drho_filt))
-                return;
-            if ((m - f_h) * (m - f_h) / V < (m - h) * (m - h) / V) {
-                sv.trackTraj.get(k).d_rho = drho_filt;
-                sv.trackTraj.get(k).phi0 = phi0_filt;
-                sv.trackTraj.get(k).kappa = kappa_filt;
-                sv.trackTraj.get(k).dz = dz_filt;
-                sv.trackTraj.get(k).tanL = tanL_filt;
-                sv.getStateVecAtModule(k, sv.trackTraj.get(k), sgeo, bgeo, mv.measurements.get(k).type, swimmer);
-                //chi2 += (m - f_h) * (m - f_h) / V;
-
-                //	sv.trackTraj.put(k, fVec);
-            } else {
-               // chi2 += (m - h) * (m - h) / V;
-            }
-            //chi2+=(mv.measurements.get(k).centroid - f_h)*(mv.measurements.get(k).centroid - f_h)/V;
-
-        }
+            sv.getStateVecAtModule(k, sv.trackTrajFilt.get(k), sgeo, bgeo, mv.measurements.get(k).type, swimmer);
+            
+          }
     }
 
+    private void smoother(int k, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
+    	Matrix Ak=sv.trackCovFilt.get(k).covMat.times(sv.trackTransport.get(k+1).transpose()).times(sv.trackCov.get(k+1).covMat.inverse());
+    	
+    	double[] diff=new double [5];
+    	diff[0]=sv.trackTrajSmooth.get(k+1).d_rho-sv.trackTraj.get(k+1).d_rho;
+    	diff[1]=sv.trackTrajSmooth.get(k+1).phi0-sv.trackTraj.get(k+1).phi0;
+    	diff[2]=sv.trackTrajSmooth.get(k+1).kappa-sv.trackTraj.get(k+1).kappa;
+    	diff[3]=sv.trackTrajSmooth.get(k+1).dz-sv.trackTraj.get(k+1).dz;
+    	diff[4]=sv.trackTrajSmooth.get(k+1).tanL-sv.trackTraj.get(k+1).tanL;
+    	
+    	double[] SmoothCorrection=new double [5];
+    	for (int j = 0; j < 5; j++) {
+            // the gain matrix
+            SmoothCorrection[j] = 0;
+            for (int i = 0; i < 5; i++) {
+            	SmoothCorrection[j] += diff[i] * Ak.get(j, i);
+            }
+        }
+    	
+    	StateVecs.StateVec sv_Smooth=sv.new StateVec(k);
+    	StateVecs.CovMat covMat_Smooth=sv.new CovMat(k);
+    	sv_Smooth.Duplicate(sv.trackTrajFilt.get(k)) ;
+    	sv.trackTrajSmooth.put(k,sv_Smooth);
+    	sv.trackCovSmooth.put(k,covMat_Smooth);
+    	
+    	sv.trackTrajSmooth.get(k).d_rho+=SmoothCorrection[0];
+    	sv.trackTrajSmooth.get(k).phi0+=SmoothCorrection[1];
+    	sv.trackTrajSmooth.get(k).kappa+=SmoothCorrection[2];
+    	sv.trackTrajSmooth.get(k).dz+=SmoothCorrection[3];
+    	sv.trackTrajSmooth.get(k).tanL+=SmoothCorrection[4];
+    	
+    	sv.getStateVecAtModule(k, sv.trackTrajSmooth.get(k), sgeo, bgeo, mv.measurements.get(k).type, swimmer);
+    	
+    	sv.trackCovSmooth.get(k).covMat=sv.trackCovFilt.get(k).covMat.plus(Ak.times(sv.trackCovSmooth.get(k+1).covMat.minus(sv.trackCov.get(k+1).covMat)).times(Ak.transpose()));
+    }
+    
     /**
      * prints the matrix -- used for debugging
      *
      * @param C matrix
      */
     public void printMatrix(Matrix C) {
+    	System.out.println("////////////////");
         for (int k = 0; k < 5; k++) {
-            //System.out.println(C.get(k, 0)+"	"+C.get(k, 1)+"	"+C.get(k, 2)+"	"+C.get(k, 3)+"	"+C.get(k, 4));
+            System.out.println(C.get(k, 0)+"	"+C.get(k, 1)+"	"+C.get(k, 2)+"	"+C.get(k, 3)+"	"+C.get(k, 4));
         }
     }
 
@@ -404,37 +391,8 @@ public class KFitter {
         } else {
             return true;
         }
-        /*
-	      for (int j = 0; j < mat.getColumnDimension(); j++) {
-	        // if (Math.abs(mat.get(j, j)) < 0.00000000001) {
-	         if (Math.abs(mat.get(j, j)) < 0.0000000001) {
-	            return false;
-	         }
-	      }
-         */
+      
 
-    }
-
-    public class HitOnTrack {
-
-        int layer;
-        double x;
-        double y;
-        double z;
-        double px;
-        double py;
-        double pz;
-
-        HitOnTrack(int layer, double x, double y, double z, double px, double py, double pz) {
-            this.layer = layer;
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.px = px;
-            this.py = py;
-            this.pz = pz;
-
-        }
     }
 
 }

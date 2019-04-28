@@ -128,7 +128,7 @@ public class TrackCandListFinder {
      * @param list the input list of crosses
      * @return an array list of track candidates in the SVT
      */
-    public void getHelicalTrack(Seed cand, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
+    /*public void getHelicalTrack(Seed cand, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
         X.clear();
         Y.clear();
         Z.clear();
@@ -205,14 +205,14 @@ public class TrackCandListFinder {
         }
         // remove clones
 
-    }
+    }*/
 
     /**
      *
      * @param crossList the input list of crosses
      * @return an array list of track candidates in the SVT
      */
-    public ArrayList<Track> getHelicalTracks(CrossList crossList, 
+   /* public ArrayList<Track> getHelicalTracks(CrossList crossList, 
             org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo,
             Swim swimmer) {
 
@@ -322,7 +322,7 @@ public class TrackCandListFinder {
 
         return passedcands;
 
-    }
+    }*/
 
     /**
      *

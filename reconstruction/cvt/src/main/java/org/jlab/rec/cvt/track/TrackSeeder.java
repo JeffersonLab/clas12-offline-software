@@ -264,7 +264,7 @@ public class TrackSeeder {
             //	if(seeds.get(s).size()<4)
             //	continue;
             
-            Track cand = fitSeed(seedCrosses.get(s), svt_geo, 5, false, swimmer);
+            Track cand = fitSeed(seedCrosses.get(s), svt_geo, 1, false, swimmer);//5
             if (cand != null) {
                 Seed seed = new Seed();
                 seed.set_Crosses(seedCrosses.get(s));
@@ -289,7 +289,7 @@ public class TrackSeeder {
                     
                     for (Seed bseed : BMTmatches) {
                         //refit using the BMT
-                        Track bcand = fitSeed(bseed.get_Crosses(), svt_geo, 5, false, swimmer);
+                        Track bcand = fitSeed(bseed.get_Crosses(), svt_geo, 1, false, swimmer);//5
                         if (bcand != null) {
                             seed = new Seed();
                             seed.set_Crosses(bseed.get_Crosses());
@@ -414,12 +414,12 @@ public class TrackSeeder {
                 X.add(j, SVTCrosses.get(j).get_Point().x());
                 Y.add(j, SVTCrosses.get(j).get_Point().y());
                 if (useSVTdipAngEst == 1) {
-                    Z.add(j, SVTCrosses.get(j).get_Point().z());
+                   Z.add(j, SVTCrosses.get(j).get_Point().z());
                     Rho.add(j, Math.sqrt(SVTCrosses.get(j).get_Point().x() * SVTCrosses.get(j).get_Point().x()
                             + SVTCrosses.get(j).get_Point().y() * SVTCrosses.get(j).get_Point().y()));
                     ErrRho.add(j, Math.sqrt(SVTCrosses.get(j).get_PointErr().x() * SVTCrosses.get(j).get_PointErr().x()
                             + SVTCrosses.get(j).get_PointErr().y() * SVTCrosses.get(j).get_PointErr().y()));
-                    ErrZ.add(j, SVTCrosses.get(j).get_PointErr().z());
+                   ErrZ.add(j, SVTCrosses.get(j).get_PointErr().z());
                 }
                 ErrRt.add(j, Math.sqrt(SVTCrosses.get(j).get_PointErr().x() * SVTCrosses.get(j).get_PointErr().x()
                         + SVTCrosses.get(j).get_PointErr().y() * SVTCrosses.get(j).get_PointErr().y()));
@@ -443,10 +443,10 @@ public class TrackSeeder {
                     ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
                 }
             }
-            X.add((double) 0);
+            /*X.add((double) 0);
             Y.add((double) 0);
 
-            ErrRt.add((double) 0.1);
+            ErrRt.add((double) 0.1);*/
             
             fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
             
@@ -462,8 +462,7 @@ public class TrackSeeder {
             //if(shift==0)
             if (fitTrk.get_chisq()[0] < chisqMax) {
                 chisqMax = fitTrk.get_chisq()[0];
-                if(chisqMax<org.jlab.rec.cvt.Constants.CIRCLEFIT_MAXCHI2)
-                    cand.update_Crosses(svt_geo);
+                //if(chisqMax<org.jlab.rec.cvt.Constants.CIRCLEFIT_MAXCHI2) cand.update_Crosses(svt_geo);
                 //i=fitIter;
             }
         }

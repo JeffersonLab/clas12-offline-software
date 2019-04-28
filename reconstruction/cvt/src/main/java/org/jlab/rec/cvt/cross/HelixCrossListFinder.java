@@ -168,7 +168,7 @@ public class HelixCrossListFinder {
             //this.MatchBMTC(s, theListsByRegionBMTC.get(1), svt_geo); // match the seed to each BMT region
             //this.MatchBMTC(s, theListsByRegionBMTC.get(2), svt_geo); // match the seed to each BMT region
            
-            Track trk = s.seedFit.fitSeed(s, svt_geo, 3, true, swimmer);
+            Track trk = s.seedFit.fitSeed(s, svt_geo, 1, true, swimmer);
             if(trk==null)
                 continue;
             //match to r1

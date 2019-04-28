@@ -46,7 +46,7 @@ public class CVTRecHandler {
     SVTStripFactory svtIdealStripFactory;
     
     public CVTRecHandler() {
-        DatabaseConstantProvider cp=new DatabaseConstantProvider(10, "default");
+    	DatabaseConstantProvider cp=new DatabaseConstantProvider(10, "default");
         org.jlab.detector.geant4.v2.SVT.SVTConstants.connect(cp);
         SVTGeom = new org.jlab.rec.cvt.svt.Geometry();
         BMTGeom = new org.jlab.rec.cvt.bmt.Geometry();
@@ -97,7 +97,7 @@ public class CVTRecHandler {
             //MagneticFields.getInstance().setSolenoidShift(shift);
 //            this.setFieldsConfig(newConfig);
             
-            CCDBConstantsLoader.Load(new DatabaseConstantProvider(bank.getInt("run", 0), "default"));
+            CCDBConstantsLoader.Load(new DatabaseConstantProvider(bank.getInt("run", 0), "default"), org.jlab.rec.cvt.Constants.WithAlignment);
         }
         this.setFieldsConfig(newConfig);
 
@@ -240,7 +240,7 @@ public class CVTRecHandler {
     
     List<ArrayList<Cross>> crosses = null;
     public void loadCrosses() {
-    	   crosses = new ArrayList<ArrayList<Cross>>();
+    	 crosses = new ArrayList<ArrayList<Cross>>();
          CrossMaker crossMake = new CrossMaker();
          crosses = crossMake.findCrosses(clusters, SVTGeom);
          this.CleanupSpuriousCrosses(crosses, null) ;
@@ -319,137 +319,36 @@ public class CVTRecHandler {
 		TrackSeederCA trseed = new TrackSeederCA();
         
         KFitter kf;
-        List<Track> trkcands = new ArrayList<Track>();
+        List<Track> trks = new ArrayList<Track>();
         
         //List<Seed> seeds = trseed.findSeed(SVTclusters, SVTGeom, crosses.get(1), BMTGeom);
         List<Seed> seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
-        
+       
         for (Seed seed : seeds) { 
-            
             kf = new KFitter(seed, SVTGeom, swimmer );
             kf.runFitter(SVTGeom, BMTGeom, swimmer);
             //System.out.println(" OUTPUT SEED......................");
-            trkcands.add(kf.OutputTrack(seed, SVTGeom, swimmer));
+            trks.add(kf.OutputTrack(seed, SVTGeom, BMTGeom, swimmer));
             if (kf.setFitFailed == false) {
-                trkcands.get(trkcands.size() - 1).set_TrackingStatus(2);
+                trks.get(trks.size() - 1).set_TrackingStatus(2);
            } else {
-                trkcands.get(trkcands.size() - 1).set_TrackingStatus(1);
+                trks.get(trks.size() - 1).set_TrackingStatus(1);
            }
         }
+              
 
-        if (trkcands.size() == 0) {
+        if (trks.size() == 0) {
             this.CleanupSpuriousCrosses(crosses, null) ;
             return null;
         }
-
+        
         //This last part does ELoss C
         TrackListFinder trkFinder = new TrackListFinder();
-        trks = new ArrayList<Track>();
-        trks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom, swimmer);
-        for( int i=0;i<trks.size();i++) { trks.get(i).set_Id(i+1);}
+        trkFinder.removeBadTracks(trks); // If chi2 is very bad, we delete it before doing the overlapping track study
+        trkFinder.removeOverlappingTracks(trks); //Determine which track is the best if they share two measurements
+        trkFinder.updateCrosses(trks, crosses); //Once we have kept only good tracks, we can update the cross.
+       
         
-//        System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + trks.size());
-        trkFinder.removeOverlappingTracks(trks); //turn off until debugged
-
-        
-//      FIXME: workaround to properly assign the position and direction to the BMT crosses. to be understood where it comes from the not correct one  
-        for( Track t : trks ) {
-	    	for( Cross c : t ) {
-	        	if (Double.isNaN(c.get_Point0().x())) {
-	        		double r = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[c.get_Region()-1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
-	        		Point3D p = t.get_helix().getPointAtRadius(r);
-	                c.set_Point(new Point3D(p.x(), p.y(), c.get_Point().z()));
-	                Vector3D v = t.get_helix().getTrackDirectionAtRadius(r);
-	                c.set_Dir(v);
-	            }
-	            if (Double.isNaN(c.get_Point0().z())) {
-	        		double r = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[c.get_Region()-1]+org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
-	        		Point3D p = t.get_helix().getPointAtRadius(r);
-	                c.set_Point(new Point3D(c.get_Point().x(), c.get_Point().y(), p.z()));
-	                Vector3D v = t.get_helix().getTrackDirectionAtRadius(r);
-	                c.set_Dir(v);
-	            }
-	    	}
-        }
-        
-        
-        for (int c = 0; c < trks.size(); c++) {
-            trks.get(c).set_Id(c + 1);
-            for (int ci = 0; ci < trks.get(c).size(); ci++) {
-
-                if (crosses.get(0) != null && crosses.get(0).size() > 0) {
-//                    for (Cross crsSVT : crosses.get(0)) {
-                	for (int jj=0 ; jj < crosses.get(0).size(); jj++) {
-                		Cross crsSVT = crosses.get(0).get(jj);
-                        if (crsSVT.get_Sector() == trks.get(c).get(ci).get_Sector() && crsSVT.get_Cluster1()!=null && crsSVT.get_Cluster2()!=null 
-                                && trks.get(c).get(ci).get_Cluster1()!=null && trks.get(c).get(ci).get_Cluster2()!=null
-                                && crsSVT.get_Cluster1().get_Id() == trks.get(c).get(ci).get_Cluster1().get_Id()
-                                && crsSVT.get_Cluster2().get_Id() == trks.get(c).get(ci).get_Cluster2().get_Id()) {  
-                            crsSVT.set_Point(trks.get(c).get(ci).get_Point());
-                            trks.get(c).get(ci).set_Id(crsSVT.get_Id());
-                            crsSVT.set_PointErr(trks.get(c).get(ci).get_PointErr());
-                            crsSVT.set_Dir(trks.get(c).get(ci).get_Dir());
-                            crsSVT.set_DirErr(trks.get(c).get(ci).get_DirErr());
-                            crsSVT.set_AssociatedTrackID(c + 1);
-                            crsSVT.get_Cluster1().set_AssociatedTrackID(c + 1);
-                            for (FittedHit h : crsSVT.get_Cluster1()) {
-                                h.set_AssociatedTrackID(c + 1);
-                            }
-                            for (FittedHit h : crsSVT.get_Cluster2()) {
-                                h.set_AssociatedTrackID(c + 1);
-                            }
-                            crsSVT.get_Cluster2().set_AssociatedTrackID(c + 1);
-
-                        }
-                    }
-                }
-                if (crosses.get(1) != null && crosses.get(1).size() > 0) {
-//                    for (Cross crsBMT : crosses.get(1)) {
-                	for (int jj=0 ; jj < crosses.get(1).size(); jj++) {
-                		Cross crsBMT = crosses.get(1).get(jj);
-                        if (crsBMT.get_Id() == trks.get(c).get(ci).get_Id()) {
-                            crsBMT.set_Point(trks.get(c).get(ci).get_Point());
-                            crsBMT.set_PointErr(trks.get(c).get(ci).get_PointErr());
-                            crsBMT.set_Dir(trks.get(c).get(ci).get_Dir());
-                            crsBMT.set_DirErr(trks.get(c).get(ci).get_DirErr());
-                            crsBMT.set_AssociatedTrackID(c + 1);
-                            crsBMT.get_Cluster1().set_AssociatedTrackID(c + 1);
-                            for (FittedHit h : crsBMT.get_Cluster1()) {
-                                h.set_AssociatedTrackID(c + 1);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        /// remove direction information from crosses that were part of duplicates, now removed. TODO: Should I put it in the clone removal?  
-        for( Cross c : crosses.get(1) ) {
-        	if( c.get_AssociatedTrackID() < 0 ) {
-        		c.set_Dir( new Vector3D(0,0,0));
-        		c.set_DirErr( new Vector3D(0,0,0));
-        		if( c.get_DetectorType().equalsIgnoreCase("C")) {
-//        			System.out.println(c + " " + c.get_AssociatedTrackID());
-        			c.set_Point(new Point3D(Double.NaN,Double.NaN,c.get_Point().z()));
-//        			System.out.println(c.get_Point());
-        		}
-        		else {
-        			c.set_Point(new Point3D(c.get_Point().x(),c.get_Point().y(),Double.NaN));
-        		}
-        	}
-        }
-        for( Cross c : crosses.get(0) ) {
-        	if( c.get_AssociatedTrackID() < 0 ) {
-        		c.set_Dir( new Vector3D(0,0,0));
-        		c.set_DirErr( new Vector3D(0,0,0));
-        	}
-        }
-        
-        //------------------------
-        // set index associations
-        if (trks.size() > 0) {
-            this.CleanupSpuriousCrosses(crosses, null) ;
-        }
         return trks;
     }
 
@@ -459,7 +358,7 @@ public class CVTRecHandler {
         
         if( crosses.get(0) != null ) {
 	        for(Cross c : crosses.get(0)) {
-	            double z = SVTGeom.transformToFrame(c.get_Sector(), c.get_Region()*2, c.get_Point().x(), c.get_Point().y(),c.get_Point().z(), "local", "").z();
+	            double z = SVTGeom.transformToFrame(c.get_Sector(), c.get_Region()*2, c.get_Point().x(), c.get_Point().y(),c.get_Point().z(), "local", "middle").z();
 	            if(z<-0.1 || z>SVTConstants.MODULELEN) {
 	                rmCrosses.add(c);
 	            }
@@ -492,7 +391,7 @@ public class CVTRecHandler {
     public boolean init() {
         System.out.println(" ........................................ trying to connect to db ");
 //        CCDBConstantsLoader.Load(new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default"));
-        CCDBConstantsLoader.Load(new DatabaseConstantProvider(10, "default"));
+        CCDBConstantsLoader.Load(new DatabaseConstantProvider(10, "default"), org.jlab.rec.cvt.Constants.WithAlignment);
                
         DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
 //        DatabaseConstantProvider cp = new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default");

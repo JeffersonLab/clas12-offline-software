@@ -1,6 +1,8 @@
 package org.jlab.rec.cvt.bmt;
 
 import java.util.Random;
+import org.jlab.rec.cvt.trajectory.Helix;
+import Jama.Matrix;
 
 import org.jlab.geom.prim.Vector3D;
 
@@ -286,60 +288,6 @@ public class Geometry {
 
         return sigma;
 
-    }
-
-    /**
-     *
-     * @param layer
-     * @param x x-coordinate of the hit in the lab frame
-     * @param y y-coordinate of the hit in the lab frame
-     * @param z z-coordinate of the hit in the lab frame
-     * @return X[] = the smeared position x = X[0], y = X[1], z = X[2] taking
-     * the Lorentz angle into account
-     */
-    /*
-	public double[] smearedPosition(int layer, double x, double y, double z) {
-		
-		double[] newPos = new double[3];
-        Random rand = new Random();
-        
-		int num_region = (int) (layer+1)/2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6;
-
-		double sigma =0;
-		if(layer%2==0) if(Double.isNaN(z)) {// C layer
-			sigma = getSigmaLongit(layer, x, y); //  longitudinal shower profile
-			// changes z
-			z = this.randomGaus(z, sigma, rand);
-		}
-		
-		if(layer%2==1)  {// Z layer
-			sigma = getSigmaAzimuth(layer, x, y); //  azimuth shower profile taking into account the Lorentz angle
-			// changes phi
-			double phicorr = (this.randomGaus(0, sigma, rand)/Math.cos(Constants.getThetaL())
-					-(Math.sqrt(x*x+y*y)-Constants.getCRZRADIUS()[num_region]+
-							Constants.hStrip2Det)*Math.tan(Constants.getThetaL()))/Constants.getCRZRADIUS()[num_region];
-			double phi = Math.atan2(y, x); 
-			phi+=phicorr;
-			
-			x = Math.sqrt(x*x+y*y)*Math.cos(phi);
-			y = Math.sqrt(x*x+y*y)*Math.sin(phi);
-		}
-		newPos[0] = x;
-		newPos[1] = y;
-		newPos[2] = z;
-		
-		return newPos;
-	}
-     */
-    private double randomGaus(double mean, double width, Random aRandom) {
-        if (width <= 0) {
-            return 0;
-        }
-
-        double smear = width * aRandom.nextGaussian();
-        double randomNumber = mean + smear;
-
-        return randomNumber;
     }
    
     public Vector3D Slope_CVTToDetFrame(int layer, int sector, Vector3D slope) {	
@@ -695,6 +643,69 @@ public class Geometry {
             isOK = true;
         }
         return isOK;
+    }
+    
+    public double getRefinedIntersection(Helix traj, int layer, int sector) {
+    	double rm = 0;
+        if (getZorC(layer)==1) {
+            rm = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(layer-1) / 2] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
+        }
+        else {
+            rm = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(layer-1) / 2] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
+        }
+    	double cs=org.jlab.rec.cvt.Constants.KFitterStepsize; 
+    	Vector3D inter=traj.getHelixPoint(cs);
+    	
+    	double range=2*org.jlab.rec.cvt.Constants.KFitterStepsize; //mm... computing distance of 3 points to cylinder or plane
+    	double csold=cs;
+    	for (int iter=0;iter<5;iter++) {
+    		inter=LabToDetFrame(layer, sector, traj.getHelixPoint(cs));
+    		Vector3D interinf=LabToDetFrame(layer, sector, traj.getHelixPoint(cs-range));
+    		Vector3D intersup=LabToDetFrame(layer, sector, traj.getHelixPoint(cs+range));
+    	
+    		double[][] A=new double[3][3];
+    		double[][] B=new double[3][1];
+    	
+    		B[0][0]=Math.sqrt(inter.x()*inter.x()+inter.y()*inter.y())-rm; B[0][0]=B[0][0]*B[0][0];
+    		B[1][0]=Math.sqrt(interinf.x()*interinf.x()+interinf.y()*interinf.y())-rm; B[1][0]=B[1][0]*B[1][0];
+    		B[2][0]=Math.sqrt(intersup.x()*intersup.x()+intersup.y()*intersup.y())-rm; B[2][0]=B[2][0]*B[2][0];
+    	
+    		A[0][0]=cs*cs;
+    		A[0][1]=cs;
+    		A[0][2]=1;
+    	
+    		A[1][0]=(cs-range)*(cs-range);
+    		A[1][1]=cs-range;
+    		A[1][2]=1;
+    	
+    		A[2][0]=(cs+range)*(cs+range);
+    		A[2][1]=cs+range;
+    		A[2][2]=1;
+    		
+    		
+    		Matrix matA=new Matrix(A);
+    		if (matA.det()>1.e-20) {
+    			Matrix invA=matA.inverse();
+    			Matrix matB=new Matrix(B);
+    			Matrix result=invA.times(matB);
+    		
+    			cs=-result.get(1, 0)/2./result.get(0, 0);
+    			range=Math.abs(cs-csold)/10.;
+    		}
+    	}
+    	   	
+    	return cs;
+    }
+    
+    public double getRadius(int layer) {
+    	double rm=0;
+    	 if (getZorC(layer)==1) {
+             rm = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(layer-1) / 2] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
+         }
+         else {
+             rm = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[(layer-1) / 2] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
+         }
+    	return rm;
     }
 
     public static final synchronized int getZorC(int layer) {

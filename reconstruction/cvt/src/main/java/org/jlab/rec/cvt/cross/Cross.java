@@ -504,6 +504,18 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     public void set_AssociatedTrackID(int associatedTrackID) {
         AssociatedTrackID = associatedTrackID;
     }
+    
+    public Cross Duplicate() {
+    	Cross newCross=new Cross(this.get_Detector(),this.get_DetectorType(),this.get_Sector(),this.get_Region(),-this.get_Id());
+    	newCross.set_Cluster1(this.get_Cluster1());
+    	newCross.set_Cluster2(this.get_Cluster2());
+    	newCross.set_Dir(this.get_Dir());
+    	newCross.set_Point0(this.get_Point0());
+    	newCross.set_Point(this.get_Point());
+    	newCross.set_PointErr0(this.get_PointErr0());
+    	newCross.set_PointErr(this.get_PointErr());
+    	return newCross;
+    }
 
     public static void main(String arg[]) {
 

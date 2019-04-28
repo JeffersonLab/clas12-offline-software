@@ -38,14 +38,10 @@ public class TrackSeederCA {
       	  if( cell.get_state() >= mstate-1 ){
           
 //             if the cell has been already used for one track candidate, then skip it
-            if( cell.is_used() ) continue;
-            if( cell.get_plane().equalsIgnoreCase("XY") ) {
-              if( cell.get_c1().is_usedInXYcand() || cell.get_c2().is_usedInXYcand() ) { continue;}
-            }
-
-            //if( cell.get_plane().equalsIgnoreCase("ZR") ) {
-              //if( cell.get_c1().is_usedInZRcand() || cell.get_c2().is_usedInZRcand() ) continue;
-            //}
+      		  if( cell.is_used() ) continue;
+      		  if( cell.get_plane().equalsIgnoreCase("XY") ) {
+      			  if( cell.get_c1().is_usedInXYcand() || cell.get_c2().is_usedInXYcand() ) { continue;}
+      		  }
 
       		  //if( cell.get_plane().equalsIgnoreCase("ZR") ) {
       			  //if( cell.get_c1().is_usedInZRcand() || cell.get_c2().is_usedInZRcand() ) continue;
@@ -177,7 +173,7 @@ public class TrackSeederCA {
           camaker.set_aCvsR(45);         // max angle between the cell and the radius to the first cell
         }
         if( plane.equalsIgnoreCase("ZR") ){
-          camaker.set_cosBtwCells(0.9); // it only applies to the BMTC cross only cells
+          camaker.set_cosBtwCells(0.95); // it only applies to the BMTC cross only cells
           camaker.set_abCrs(30.);
           camaker.set_aCvsR(90.);
         }
@@ -234,16 +230,15 @@ public class TrackSeederCA {
 //        System.out.println(seedlist.size());
 	    for (int s = 0; s < seedCrosses.size(); s++) {
 	    	Collections.sort(seedCrosses.get(s));      // TODO: check why sorting matters
-		    Track cand = fitSeed(seedCrosses.get(s), svt_geo, 5, false, swimmer);
+	    	Track cand = fitSeed(seedCrosses.get(s), svt_geo, 5, false, swimmer);
+		    
 		    if (cand != null) {
 		    	cands.add(cand);
 		    }
 	    }
-//	    for( int i=0;i<cands.size();i++)cands.get(i).set_Id(i+1);
-//	    cands = rmDuplicate( cands ); // TODO
-	    
+
 	    for( Track cand : cands ) {
-	    	cand.finalUpdate_Crosses(svt_geo); // this should update the Z position, only for display purposes 
+	    	//cand.finalUpdate_Crosses(svt_geo); // this should update the Z position, only for display purposes 
 	        Seed seed = new Seed();
 	        seed.set_Crosses(cand);
 	        seed.set_Helix(cand.get_helix());
@@ -334,6 +329,7 @@ public class TrackSeederCA {
       // loop over each xytrack to find ZR candidates
       // ---------------------------------------------
 //      for( List<Cross> xycross : xytracks ){ // ALERT: this throw a concurrent modification exception 
+    
       for( int ixy=0; ixy< xytracks.size();ixy++ ){
     	List<Cross> xycross = xytracks.get(ixy);
         ArrayList<Cross> crsZR = new ArrayList<Cross>();
@@ -352,7 +348,7 @@ public class TrackSeederCA {
         	  sector = c.get_Sector()-1;
           }
         }
-//        System.out.println(sector);
+        
         if( sector < 0 ) continue;
         Collections.sort(svtcrs);
 //        Collections.sort(svtcrs,Collections.reverseOrder());
@@ -415,8 +411,7 @@ public class TrackSeederCA {
  		   	if( fpars == null ) continue;
  		   	double b = fpars.intercept();
  		   	double m = fpars.slope();
-        	
- 		   	
+        	 		   	
           seedCrosses.add( new ArrayList<Cross>() );
           int scsize = seedCrosses.size();
           // add svt
@@ -433,7 +428,7 @@ public class TrackSeederCA {
 			   double r2 = org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(l2-1)/2][(l2-1)%2];
 			   double nstr2 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r2 - b)/m, l2, s2);
 			   
-			   if( Math.abs( c1 - nstr1 ) < 8 && Math.abs( c2 - nstr2 ) < 8 )
+			   if( Math.abs( c1 - nstr1 ) < 8 && Math.abs( c2 - nstr2 ) < 8 )			   
 				   seedCrosses.get(scsize-1).add(c);
           }
 
@@ -579,15 +574,16 @@ public class TrackSeederCA {
                     ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
                 }
             }
-            X.add((double) 0);
-            Y.add((double) 0);
+            /*X.add((double) 0);
+            Y.add((double) 0);*/
 
-            ErrRt.add((double) 0.1);
-            
+            //ErrRt.add((double) 0.1);
+            //ErrRt.add((double) 50);
+                                   
             fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
             
             if (fitTrk.get_helix() == null) { 
-                return null;
+            	return null;
             }
 
             cand = new Track(fitTrk.get_helix(), swimmer);

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.rec.cvt.trajectory.Helix;
+import org.jlab.geom.prim.Vector3D;
 
 import Jama.Matrix;
 
@@ -87,7 +88,7 @@ public class HelicalTrackFitter {
         boolean circlefitstatusOK = _circlefit.fitStatus(X, Y, W, X.size());
 
         if (!circlefitstatusOK) { 
-            return FitStatus.CircleFitFailed;
+        	return FitStatus.CircleFitFailed;
         }
 
         //  Corroborate using the simple circle calculator
@@ -127,24 +128,24 @@ public class HelicalTrackFitter {
         }
 
         if (passed_fits == 0) {
-            return FitStatus.AllCircleCalcsFailed;
+        	return FitStatus.AllCircleCalcsFailed;
         }
 
         double avechi2Max = 1.;
         if (passed_fits > 0) {
             averageChi2 = chi2 / passed_fits;
             if (averageChi2 > avechi2Max) {
-                return FitStatus.CircleCalcInconsistentWithFit;
+            	return FitStatus.CircleCalcInconsistentWithFit;
             }
         }
 
         //Line fit
         _linefit = new LineFitter();
-
+        
         boolean linefitstatusOK = _linefit.fitStatus(Rho, Z, errRho, ErrZ, Z.size());
 
         if (!linefitstatusOK) {
-            return FitStatus.LineFitFailed; 
+        	return FitStatus.LineFitFailed; 
         }
         //  Get the results of the fits
         _linefitpars = _linefit.getFit();
@@ -156,14 +157,14 @@ public class HelicalTrackFitter {
         double fit_phi_at_dca = _circlefitpars.phi();
         double fit_curvature = _circlefitpars.rho();
         double fit_tandip = _linefitpars.slope();
-
+        
         //double fit_Z0 = _linefitpars.intercept();
         double fit_Z0 = _linefitpars.intercept();
         //fit_Z0 = (Math.abs(fit_dca)-_linefitpars.intercept())/ _linefitpars.slope() ; //reset for displaced vertex
         //System.out.println("fit z0 "+_linefitpars.intercept());
         //require vertex position inside of the inner barrel
         if (Math.abs(fit_dca) > org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[0][0]) {
-//            if (Math.abs(fit_dca) > Constants.MODULERADIUS[0][0] || Math.abs(fit_Z0) > 100) {
+        	//            if (Math.abs(fit_dca) > Constants.MODULERADIUS[0][0] || Math.abs(fit_Z0) > 100) {
             return null;
         }
 
@@ -196,8 +197,8 @@ public class HelicalTrackFitter {
         fit_covmatrix.set(3, 3, _linefitpars.interceptErr() * _linefitpars.interceptErr());
         fit_covmatrix.set(4, 4, _linefitpars.slopeErr() * _linefitpars.slopeErr());
 
-        Helix helixresult = new Helix(fit_dca, fit_phi_at_dca, fit_curvature, fit_Z0, fit_tandip, fit_covmatrix);
-
+        Helix helixresult = new Helix(fit_dca, fit_phi_at_dca, fit_curvature, fit_Z0, fit_tandip, new Vector3D(0,0,0) ,fit_covmatrix);
+        
         set_helix(helixresult);
         _chisq[0] = _circlefitpars.chisq();
         _chisq[1] = _linefitpars.chisq();
@@ -205,7 +206,7 @@ public class HelicalTrackFitter {
         //System.out.println("chi2 "+_chisq[0]+" " + _chisq[1]);
         //  Create the HelicalTrackFit for this helix
         _helicalfitoutput = new HelicalTrackFitPars(helixresult, _chisq);
-
+      
         return FitStatus.Successful;
     }
 

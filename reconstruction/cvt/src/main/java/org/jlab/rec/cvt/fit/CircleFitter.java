@@ -70,9 +70,9 @@ public class CircleFitter {
 
         // Insure that there are at least three points to perform the fit
         if (NP < 3) {
-            return false;
+        	return false;
         }
-
+       
         // Initialization of the Sum of the Weight parameters
         Sw = 0;
         Sx = 0;
@@ -229,7 +229,7 @@ public class CircleFitter {
 
         // transformation to a new reference point
         propagatePars(_xref, _yref, x, y, Math.cos(_phi), Math.sin(_phi));
-
+        
         return true;
     }
 
@@ -307,6 +307,7 @@ public class CircleFitter {
         // update parameters
         _xpca = _xref + _dca * Math.sin(_phi);
         _ypca = _yref - _dca * Math.cos(_phi);
+        
     }
 
     public CircleFitPars getFit() {
@@ -331,7 +332,7 @@ public class CircleFitter {
         //	xm.add((double) 5.);
         //	ym.add((double) 5.);
         //	wm.add((double) 1.);
-        xm.add((double) 59.109);
+        /*xm.add((double) 59.109);
         ym.add((double) 29.104);
         wm.add((double) 1.);
         xm.add((double) 86.68);
@@ -339,6 +340,34 @@ public class CircleFitter {
         wm.add((double) 1.);
         xm.add((double) 112.275);
         ym.add((double) 46.82);
+        wm.add((double) 1.);*/
+        /*xm.add((double) 1.0);
+        ym.add((double) 0.0);
+        wm.add((double) 1.);
+        xm.add((double) 3.0);
+        ym.add((double) 2.0);
+        wm.add((double) 1.);
+        xm.add((double) 5.0);
+        ym.add((double) 0.0);
+        wm.add((double) 1.);*/
+        /*xm.add((double) -1.0);
+        ym.add((double) 0.0);
+        wm.add((double) 1.);
+        xm.add((double) -2.0);
+        ym.add((double) -1.0);
+        wm.add((double) 1.);
+        xm.add((double) -3.0);
+        ym.add((double) 0.0);
+        wm.add((double) 1.);*/
+        
+        xm.add((double) 2.0);
+        ym.add((double) 2.0);
+        wm.add((double) 1.);
+        xm.add((double) 4.0);
+        ym.add((double) 2.0);
+        wm.add((double) 1.);
+        xm.add((double) 4.0);
+        ym.add((double) 4.0);
         wm.add((double) 1.);
 
         List<Double> P0 = new ArrayList<Double>(2);

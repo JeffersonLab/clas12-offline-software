@@ -136,7 +136,6 @@ public class CVTReconstruction extends ReconstructionEngine {
         // skip  high busy events with more than 1k crosses in svt 
         if( recHandler.getCrosses().get(0).size() > 1000 ) { return true; } 
 
-        //System.out.println(" Number of crosses "+crosses.get(0).size()+" + "+crosses.get(1).size());
         if(Constants.isCosmicsData()==true) { 
             List<StraightTrack> cosmics = recHandler.cosmicsTracking();   
         	rbc.appendCVTCosmicsBanks(event, recHandler.getSVThits(), recHandler.getBMThits(), 
@@ -155,7 +154,7 @@ public class CVTReconstruction extends ReconstructionEngine {
     public boolean loadConstants( int run ) {
         System.out.println(" ........................................ trying to connect to db ");
 //        CCDBConstantsLoader.Load(new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default"));
-        CCDBConstantsLoader.Load(new DatabaseConstantProvider(run, "default"));
+        CCDBConstantsLoader.Load(new DatabaseConstantProvider(run, "default"),org.jlab.rec.cvt.Constants.WithAlignment);
                
         DatabaseConstantProvider cp = new DatabaseConstantProvider(run, "default");
 //        DatabaseConstantProvider cp = new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default");

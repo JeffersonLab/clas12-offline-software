@@ -29,6 +29,8 @@ public class Constants {
     public static final double CTOFINNERRADIUS = 250;     // 250 mm
     public static final double CTOFOUTRRADIUS = 250 + 33;  // 283  mm
     
+    public static double KFitterStepsize=5;//mm
+    
     private static double _Xb =0;
     private static double _Yb =0;
     private static double _RbErr = 1./Math.sqrt(12.);
@@ -79,6 +81,9 @@ public class Constants {
     public static int BSTEXCLUDEDFITREGION = 0;
     public static double MAXDISTTOTRAJXY = 5; //max xy dist to cross in cm
 
+    // For alignment
+    public static final boolean WithAlignment=true;
+    
     public static double getXb() {
         return _Xb;
     }
@@ -273,6 +278,8 @@ public class Constants {
         33.208568, 34.188705, 35.230920, 36.341388, 37.527131, 38.796172,
         40.157721, 41.622399, 43.202525, 44.912465, 46.769077, 48.792279,
         51.005773, 53.437996, 56.123356, 59.103894};
+
+	public static final int Nsigma_per_point = 15; //To clean cvt tracks... if chi2 is too large, just delete the track
 
     //public static final int CVTCONFIGSTARTREG = 2; // for 3SVT+3BMT
 

@@ -25,6 +25,8 @@ public class Helix {
     private double _curvature;    // track curvature = 1/R, where R is the radius of the circle 
     private double _Z0;           // intersect of the helix axis with the z-axis
     private double _tandip;       // tangent of the dip angle
+    private double _dip;          // dip angle 
+    private Vector3D _refpoint;     // Reference point needed to define dca
     private Matrix _covmatrix = new Matrix(5, 5);
     //error matrix (assuming that the circle fit and line fit parameters are uncorrelated)
     // | d_dca*d_dca                   d_dca*d_phi_at_dca            d_dca*d_curvature        0            0             |
@@ -34,16 +36,24 @@ public class Helix {
     // | 0                              0                             0                       0        d_tandip*d_tandip |
     // 
 
-    public Helix(double dca, double phi_at_doca, double curvature, double Z0, double tandip, Matrix covmatrix) {
+    public Helix(double dca, double phi_at_doca, double curvature, double Z0, double tandip, Vector3D pivot, Matrix covmatrix) {
         set_dca(dca);
         set_phi_at_dca(phi_at_doca);
         set_curvature(curvature);
         set_Z0(Z0);
         set_tandip(tandip);
         set_covmatrix(covmatrix);
-
+        set_pivot(pivot);
     }
 
+    public void set_pivot(Vector3D pivot) {
+    	_refpoint=pivot;
+    }
+    
+    public Vector3D get_pivot() {
+    	return _refpoint;
+    }
+    
     public double get_dca() {
         return _dca;
     }
@@ -82,6 +92,11 @@ public class Helix {
 
     public void set_tandip(double tandip) {
         this._tandip = tandip;
+        this._dip=Math.atan(tandip);
+    }
+    
+    public double get_dip() {
+        return this._dip;
     }
 
     public Matrix get_covmatrix() {
@@ -114,30 +129,41 @@ public class Helix {
 
     // radius of circle
     public double radius() {
-        double C = Math.abs(_curvature);
-        if (C == 0) {
-            System.err.println("Helix Curvature should not be zero");
+        
+        if (_curvature == 0) {
+            //System.err.println("Helix Curvature should not be zero");
             return 0;
         }
-        return 1. / C;
+        return 1. /_curvature;
     }
 
     //  (x,y) coordinates of the circle center
     public double xcen() {
-        return (radius() - this.get_dca()) * Math.sin(this.get_phi_at_dca());
+        return (radius() + this.get_dca()) * Math.sin(this.get_phi_at_dca())+_refpoint.x();
     }
 
     public double ycen() {
-        return (-radius() + this.get_dca()) * Math.cos(this.get_phi_at_dca());
+        return (-radius() - this.get_dca()) * Math.cos(this.get_phi_at_dca())+_refpoint.y();
     }
 
-    //  (x,y) coordinates of the dca
+    //  (x,y) coordinates of the dca in lab frame
     public double xdca() {
-        return this.get_dca() * Math.cos(this.get_phi_at_dca());
+        return this.get_dca() * Math.sin(this.get_phi_at_dca())+ _refpoint.x();
     }
 
     public double ydca() {
-        return this.get_dca() * Math.sin(this.get_phi_at_dca());
+        return (-this.get_dca() * Math.cos(this.get_phi_at_dca()))+ _refpoint.y();
+    }
+    
+    public double PhiRotdca() {
+    	double xd=this.xdca();
+    	double yd=this.ydca();
+    	double xc=this.xcen();
+    	double yc=this.ycen();
+    	
+    	double phi=Math.atan2(yc-yd, xc-xd);
+    	
+    	return phi;
     }
 
     public double getArcLength_dca(Point3D refpoint) {
@@ -181,7 +207,7 @@ public class Helix {
         return charge;
     }
 
-    public Point3D getPointAtRadius(double r) {
+   public Point3D getPointAtRadius(double r) {
         // a method to return a point (as a vector) at a given radial position.	
         if (_curvature == 0) {
             return null;
@@ -205,6 +231,97 @@ public class Helix {
 
         return new Point3D(x, y, z);
     }
+    
+    public double getCurvilinearAbsAtRadius(double r) {
+        // a method to return a point (as a vector) at a given radial position.	
+    	// Works only if ref point is 0,0
+        if (_curvature == 0) {
+            return Double.NaN;
+        }
+        
+        if (r<Math.abs(this.get_dca())||r>(this.get_dca()+2*Math.abs(this.radius()))) {
+        	return Double.NaN;
+        }
+        
+        double d0 = this.get_dca();
+        //double Xref=-Math.abs(d0)-Math.abs(this.radius());
+        double Xref=-d0-Math.abs(this.radius());
+        double radii = this.radius()*this.radius();
+        
+        /*omega=1/_curvature;
+        double par = 1. - ((r * r - d0 * d0) * omega * omega) / (2. * (1. + d0 * omega));
+        double s = Math.abs(Math.acos(par) / omega)/Math.cos(_dip);*/
+        double x=(radii+Xref*Xref-r*r)/(2.*Xref);
+        double phi=Math.PI-Math.acos(x/Math.abs(this.radius()));
+        double s=Math.abs(this.radius())*phi/Math.cos(_dip);
+        return s;
+    }
+    
+    public Vector3D getHelixPoint(double s) {
+    	//S is an absciss along the path of the particle, s1>s0 means the particle is going forward in time
+    	double z0=this._Z0;
+    	
+    	
+        double radius = 1./_curvature;
+           
+        double x=0;
+        double y=0;
+        double z=0;
+        
+        double xn=0;
+        double yn=0;
+        
+    	      
+        if (Math.abs(_curvature)>1.e-8) {
+        	xn = Math.signum(radius)*this._dca+Math.abs(radius)*(1-Math.cos(s*Math.cos(_dip)/Math.abs(radius)));//x0-
+        	yn = radius*Math.sin(s*Math.cos(_dip)/Math.abs(radius));
+        }
+              
+        else { //Straight line
+        	xn = Math.signum(radius)*this._dca;//x0-
+        	yn = Math.signum(radius)*s*Math.cos(_dip);
+        }
+        double phirot=this.PhiRotdca();
+       
+        
+       x=Math.cos(phirot)*xn-yn*Math.sin(phirot)+ _refpoint.x();
+       y=Math.sin(phirot)*xn+yn*Math.cos(phirot)+ _refpoint.y();            
+       z = z0 + s * Math.sin(_dip) + _refpoint.z();
+        
+    	return new Vector3D(x,y,z);
+    }
+    
+    public Vector3D getHelixDir(double s) {
+    	   	
+        double radius = 1./_curvature;
+      
+        
+        double xn=0;
+        double yn=0;
+      
+        
+        double x=0;
+        double y=0;
+        double z=0;
+    	             
+        if (Math.abs(_curvature)>1.e-8) {
+        	xn = Math.cos(_dip)*Math.sin(s*Math.cos(_dip)/Math.abs(radius));
+        	yn = Math.signum(radius)*Math.cos(_dip)*Math.cos(s*Math.cos(_dip)/Math.abs(radius));
+        }
+        
+        else { //Straight line
+        	xn = 0;
+        	yn = Math.signum(radius)*Math.cos(_dip);
+        }
+        double phirot=this.PhiRotdca();
+       
+        x=Math.cos(phirot)*xn-yn*Math.sin(phirot);
+        y=Math.sin(phirot)*xn+yn*Math.cos(phirot);  
+        z = Math.sin(_dip);
+        
+    	return new Vector3D(x,y,z);
+    }
+    
 
     public Vector3D getTrackDirectionAtRadius(double r) {
         // a method to return a point (as a vector) at a given radial position.
@@ -230,6 +347,53 @@ public class Helix {
         Vector3D trkDir = new Vector3D(ux, uy, uz);
 
         return trkDir.asUnit();
+    }
+    
+    public double getCurvAbsForPCAToPoint(Vector3D BeamPoint) {
+    	//Return Curvilinear Abscisse to Point of closest approach of the Helix to another point (Beam for instance)
+    	double cs=0; 
+    	
+    	
+    	double range=10; //mm... computing distance of 3 points to cylinder or plane
+    	double csold=cs;
+    	for (int iter=0;iter<5;iter++) {
+    		Vector3D inter=this.getHelixPoint(cs);
+    		Vector3D interinf=this.getHelixPoint(cs-range);
+    		Vector3D intersup=this.getHelixPoint(cs+range);
+    	
+    		double[][] A=new double[3][3];
+    		double[][] B=new double[3][1];
+    	
+    		B[0][0]=Math.sqrt((inter.x()-BeamPoint.x())*(inter.x()-BeamPoint.x())+(inter.y()-BeamPoint.y())*(inter.y()-BeamPoint.y())); B[0][0]=B[0][0]*B[0][0];
+    		B[1][0]=Math.sqrt((interinf.x()-BeamPoint.x())*(interinf.x()-BeamPoint.x())+(interinf.y()-BeamPoint.y())*(interinf.y()-BeamPoint.y())); B[1][0]=B[1][0]*B[1][0];
+    		B[2][0]=Math.sqrt((intersup.x()-BeamPoint.x())*(intersup.x()-BeamPoint.x())+(intersup.y()-BeamPoint.y())*(intersup.y()-BeamPoint.y())); B[2][0]=B[2][0]*B[2][0];
+    	
+    		A[0][0]=cs*cs;
+    		A[0][1]=cs;
+    		A[0][2]=1;
+    	
+    		A[1][0]=(cs-range)*(cs-range);
+    		A[1][1]=cs-range;
+    		A[1][2]=1;
+    	
+    		A[2][0]=(cs+range)*(cs+range);
+    		A[2][1]=cs+range;
+    		A[2][2]=1;
+    		
+    		
+    		Matrix matA=new Matrix(A);
+    		if (matA.det()>1.e-20) {
+    			Matrix invA=matA.inverse();
+    			Matrix matB=new Matrix(B);
+    			Matrix result=invA.times(matB);
+    		
+    			cs=-result.get(1, 0)/2./result.get(0, 0);
+    			range=Math.abs(cs-csold)/10.;
+    		}
+    	}
+    	
+    	
+    	return cs;
     }
 
     public static void main(String arg[]) {
