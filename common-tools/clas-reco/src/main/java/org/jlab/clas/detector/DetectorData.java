@@ -315,7 +315,7 @@ public class DetectorData {
 
    public static DataBank getEventBank(DetectorEvent detectorEvent, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, 1);
-       bank.setFloat("STTime", 0, (float) detectorEvent.getEventHeader().getStartTime());
+       bank.setFloat("startTime", 0, (float) detectorEvent.getEventHeader().getStartTime());
        bank.setFloat("RFTime", 0, (float) detectorEvent.getEventHeader().getRfTime());
        bank.setByte("helicity", 0, detectorEvent.getEventHeader().getHelicity());
        bank.setByte("helicityRaw", 0, detectorEvent.getEventHeader().getHelicityRaw());
@@ -325,7 +325,7 @@ public class DetectorData {
    }
    public static DataBank getEventShadowBank(DetectorEvent detectorEvent, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, 1);
-       bank.setFloat("STTime", 0, (float) detectorEvent.getEventHeader().getStartTimeFT());
+       bank.setFloat("startTime", 0, (float) detectorEvent.getEventHeader().getStartTimeFT());
        bank.setShort("EvCAT", 0, detectorEvent.getEventHeader().getEventCategoryFT());
        return bank;
    }

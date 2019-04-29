@@ -59,7 +59,7 @@ public class DCTBEngine extends DCEngine {
             System.err.println("RUN CONDITIONS NOT READ AT TIMEBASED LEVEL!");
             return true;
         }
-        //if(event.getBank("RECHB::Event").getFloat("STTime", 0)<0)
+        //if(event.getBank("RECHB::Event").getFloat("startTime", 0)<0)
         //    return true; // require the start time to reconstruct the tracks in the event
         
         DataBank bank = event.getBank("RUN::config");
@@ -74,7 +74,7 @@ public class DCTBEngine extends DCEngine {
         double T_Start = 0;
         if(Constants.isUSETSTART() == true) {
             if(event.hasBank("RECHB::Event")==true) {
-                T_Start = event.getBank("RECHB::Event").getFloat("STTime", 0);
+                T_Start = event.getBank("RECHB::Event").getFloat("startTime", 0);
                 if(T_Start<0) {
                     return true; // quit if start time not found in data
                 }

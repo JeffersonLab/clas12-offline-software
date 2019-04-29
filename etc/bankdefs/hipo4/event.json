@@ -9,7 +9,7 @@
                 {"name":"topology",   "type":"L", "info":"Undefined"},
                 {"name":"beamCharge", "type":"F", "info":"Beam charge, gated (nano-Coulomb)"},
                 {"name":"liveTime",   "type":"D", "info":"Lifetime"},
-                {"name":"STTime",     "type":"F", "info":"Event Start Time (ns)"},
+                {"name":"startTime",  "type":"F", "info":"Event Start Time (ns)"},
                 {"name":"RFTime",     "type":"F", "info":"RF Time (ns)"},
                 {"name":"helicity",   "type":"B", "info":"Helicity of Event (0 or 1, else undefined), with HWP-correction"},
                 {"name":"helicityRaw","type":"B", "info":"Helicity of Event (0 or 1, else undefined)"},
@@ -188,7 +188,7 @@
                 {"name":"topology",   "type":"L", "info":"Undefined"},
                 {"name":"beamCharge", "type":"F", "info":"Beam charge, gated (nano-Coulomb)"},
                 {"name":"liveTime",   "type":"D", "info":"Lifetime"},
-                {"name":"STTime",     "type":"F", "info":"Event Start Time (ns)"},
+                {"name":"startTime",  "type":"F", "info":"Event Start Time (ns)"},
                 {"name":"RFTime",     "type":"F", "info":"RF Time (ns)"},
                 {"name":"helicity",   "type":"B", "info":"Helicity of Event (0 or 1, else undefined), with HWP-correction"},
                 {"name":"helicityRaw","type":"B", "info":"Helicity of Event (0 or 1, else undefined)"},
@@ -418,7 +418,6 @@
             {"name":"index",   "type":"S", "info":"index of the track in its tracking bank"},
             {"name":"detector","type":"B", "info":"DetectorID as defined in org.jlab.detector.DetectorType"},
             {"name":"layer",   "type":"B", "info":"Layer ID as defined in org.jlab.detector.DetectorLayer"},
-            {"name":"q",       "type":"B", "info":"charge of the track"},
             {"name":"x",       "type":"F", "info":"x-position of the track at the detector surface (cm)"},
             {"name":"y",       "type":"F", "info":"y-position of the track at the detector surface (cm)"},
             {"name":"z",       "type":"F", "info":"z-position of the track at the detector surface (cm)"},
@@ -434,8 +433,8 @@
         "item": 41,
         "info": "Event Header Bank, shadowing REC::Event with FT-based start time",
         "entries": [
-            {"name":"EvCAT",    "id":1, "type":"S", "info":"Event Category, if >0:  e-, e-p, e-pi+....."},
-            {"name":"STTime",   "id":2, "type":"F", "info":"Event Start Time (ns)"}
+            {"name":"EvCAT",     "type":"S", "info":"Event Category, if >0:  e-, e-p, e-pi+....."},
+            {"name":"startTime", "type":"F", "info":"Event Start Time (ns)"}
         ]
     },
     {
@@ -444,10 +443,10 @@
         "item" : 42,
         "info": "Reconstructed Particle Information, shadowing REC::Particle with FT-based start time",
         "entries": [
-            {"name":"pid",          "id":1,  "type":"I", "info":"particle id in LUND conventions"},
-            {"name":"beta",         "id":2,  "type":"F", "info":"particle beta measured by TOF"},
-            {"name":"chi2pid",      "id":3,  "type":"F", "info":"Chi2 of assigned PID"},
-            {"name":"status",       "id":4,  "type":"S", "info":"particle status (represents detector collection it passed)"}
+            {"name":"pid",     "type":"I", "info":"particle id in LUND conventions"},
+            {"name":"beta",    "type":"F", "info":"particle beta measured by TOF"},
+            {"name":"chi2pid", "type":"F", "info":"Chi2 of assigned PID"},
+            {"name":"status",  "type":"S", "info":"particle status (represents detector collection it passed)"}
         ]
     }
 ]
