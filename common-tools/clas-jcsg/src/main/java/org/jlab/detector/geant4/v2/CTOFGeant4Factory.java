@@ -31,11 +31,11 @@ public final class CTOFGeant4Factory extends Geant4Factory {
     
     public CTOFGeant4Factory(ConstantProvider cp) {
         
-        globalOffset = cp.getDouble(tgdbpath+"position", 0);
-        double cadRadius = cp.getDouble(caddbpath+"radius", 0); 
-        double cadThick  = cp.getDouble(caddbpath+"thickness", 0); 
-        double cadAngle  = cp.getDouble(caddbpath+"angle", 0);
-        double cadOffset = cp.getDouble(caddbpath+"offset", 0);
+        this.globalOffset = cp.getDouble(tgdbpath+"position", 0);
+        double cadRadius  = cp.getDouble(caddbpath+"radius", 0); 
+        double cadThick   = cp.getDouble(caddbpath+"thickness", 0); 
+        double cadAngle   = cp.getDouble(caddbpath+"angle", 0);
+        double cadOffset  = cp.getDouble(caddbpath+"offset", 0);
         motherVolume = new G4World("fc");
 
         ClassLoader cloader = getClass().getClassLoader();
@@ -80,6 +80,11 @@ public final class CTOFGeant4Factory extends Geant4Factory {
     public double getThickness(int ipaddle){
         CTOFpaddle pad = (CTOFpaddle) motherVolume.getChildren().get(ipaddle - 1);
         return pad.getThickness();
+    }
+    
+    public double getRadius(int ipaddle){
+        CTOFpaddle pad = (CTOFpaddle) motherVolume.getChildren().get(ipaddle - 1);
+        return pad.center.magnitude();
     }
     
     private class CTOFpaddle extends G4Stl {

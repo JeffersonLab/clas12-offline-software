@@ -80,6 +80,7 @@ public class GeometryFactory {
         if(type==DetectorType.CTOF){
             provider.loadTable("/geometry/ctof/ctof");
             provider.loadTable("/geometry/ctof/cad");
+            provider.loadTable("/geometry/target");
         }
         
         if(type==DetectorType.FTCAL){

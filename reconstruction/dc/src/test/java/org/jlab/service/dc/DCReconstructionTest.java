@@ -43,7 +43,7 @@ public class DCReconstructionTest {
 		
     DataEvent testEvent = TestEvent.getDCSector1ElectronEvent(schemaFactory);
     MagFieldsEngine enf = new MagFieldsEngine();
-    //enf.init();
+    enf.init();
     enf.processDataEvent(testEvent);
     DCHBEngine engineHB = new DCHBEngine();
     engineHB.init();
