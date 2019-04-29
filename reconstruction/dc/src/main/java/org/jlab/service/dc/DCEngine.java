@@ -30,14 +30,14 @@ public class DCEngine extends ReconstructionEngine {
 
     public void setStartTimeOption() {
         // Load config
-        String useSTTConf = this.getEngineConfigString("dcUseSTT");
+        String useSTTConf = this.getEngineConfigString("dcUseStartTime");
         
         if (useSTTConf!=null) {
             System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on yaml = "+useSTTConf);
             Constants.setUSETSTART(Boolean.valueOf(useSTTConf));
         }
         else {
-            useSTTConf = System.getenv("COAT_DC_USESTT");
+            useSTTConf = System.getenv("COAT_DC_USESTARTTIME");
             if (useSTTConf!=null) {
                 System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on env = "+useSTTConf);
                 Constants.setUSETSTART(Boolean.valueOf(useSTTConf));
@@ -59,7 +59,7 @@ public class DCEngine extends ReconstructionEngine {
             }
         }
         else {
-            wireDistortionsFlag = System.getenv("COAT_DC_USEWIREDISTORTION");
+            wireDistortionsFlag = System.getenv("COAT_DC_WIREDISTORTION");
             if (wireDistortionsFlag!=null) {
                 System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on env = "+wireDistortionsFlag);
                 if(Boolean.valueOf(wireDistortionsFlag)==true) {
