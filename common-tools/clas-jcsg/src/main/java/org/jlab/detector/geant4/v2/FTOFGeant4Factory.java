@@ -30,6 +30,12 @@ public final class FTOFGeant4Factory extends Geant4Factory {
     private final double motherGap = 4.0 * Length.cm;
     private final double pbthickness = 0.005 * Length.in;
     private final double microgap = 0.001;
+    private final double[][] align_deltaX = new double[6][3];
+    private final double[][] align_deltaY = new double[6][3];
+    private final double[][] align_deltaZ = new double[6][3];
+    private final double[][] align_rotX = new double[6][3];
+    private final double[][] align_rotY = new double[6][3];
+    private final double[][] align_rotZ = new double[6][3];
 
     private final String[] stringLayers = new String[]{
         "/geometry/ftof/panel1a",
@@ -42,6 +48,19 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
     public FTOFGeant4Factory(ConstantProvider provider) {
         motherVolume = new G4World("fc");
+
+        int alignrows = provider.length("/geometry/ftof/alignment/sector");
+        for(int irow = 0; irow< alignrows; irow++) {
+            int isector = provider.getInteger("/geometry/ftof/alignment/sector",irow)-1;
+            int ilayer = provider.getInteger("/geometry/ftof/alignment/layer",irow)-1;
+
+            align_deltaX[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/deltaX",irow);
+            align_deltaY[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/deltaY",irow);
+            align_deltaZ[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/deltaZ",irow);
+            align_rotX[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/rotX",irow);
+            align_rotY[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/rotY",irow);
+            align_rotZ[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/rotZ",irow);
+        }
 
         for (int sector = 1; sector <= 6; sector++) {
             for (int layer = 1; layer <= 3; layer++) {
@@ -71,9 +90,9 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         double panel_mother_dz = panel_width / 2.0;
 
         G4Trd panelVolume = new G4Trd("ftof_p" + gemcLayerNames[layer - 1] + "_s" + sector,
-                panel_mother_dx1 + motherGap, panel_mother_dx2 + motherGap,
-                panel_mother_dy + motherGap, panel_mother_dy + motherGap,
-                panel_mother_dz + motherGap);
+                panel_mother_dx1 + 1.1*motherGap, panel_mother_dx2 +1.1*motherGap,
+                panel_mother_dy + 1.1*motherGap, panel_mother_dy + 1.1*motherGap,
+                panel_mother_dz + 1.1*motherGap);
         panelVolume.setId(FTOFID, sector, layer, 0);
 
         double panel_pos_xy = dist2edge * Math.sin(thmin) + panel_width / 2 * Math.cos(thtilt) + panel_mother_dy * Math.sin(thtilt);
@@ -82,21 +101,33 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         double panel_pos_z = dist2edge * Math.cos(thmin) - panel_width / 2 * Math.sin(thtilt) + panel_mother_dy * Math.cos(thtilt);
 
         panelVolume.rotate("xyz", Math.toRadians(-90) - thtilt, 0.0, Math.toRadians(-30.0 - sector * 60.0));
-        panelVolume.translate(panel_pos_x, panel_pos_y, panel_pos_z);
+        panelVolume.translate(panel_pos_x + align_deltaX[sector-1][layer-1],
+                              panel_pos_y + align_deltaY[sector-1][layer-1],
+                              panel_pos_z + align_deltaZ[sector-1][layer-1]);
+
+        G4Trd alignVolume = new G4Trd("layeralignment_p" + gemcLayerNames[layer - 1] + "_s" + sector,
+                panel_mother_dx1 + motherGap, panel_mother_dx2 + motherGap,
+                panel_mother_dy + motherGap, panel_mother_dy + motherGap,
+                panel_mother_dz + motherGap);
+        alignVolume.setId(FTOFID, sector, layer, 1000);
+        alignVolume.rotate("xyz", Math.toRadians(align_rotX[sector-1][layer-1]),
+                                  Math.toRadians(align_rotY[sector-1][layer-1]),
+                                  Math.toRadians(align_rotZ[sector-1][layer-1]));
 
         for (int ipaddle = 0; ipaddle < paddles.size(); ipaddle++) {
             paddles.get(ipaddle).setName("panel" + gemcLayerNames[layer - 1] + "_sector" + sector + "_paddle_" + (ipaddle + 1));
             paddles.get(ipaddle).setId(FTOFID, sector, layer, ipaddle + 1);
-            paddles.get(ipaddle).setMother(panelVolume);
+            paddles.get(ipaddle).setMother(alignVolume);
         }
 
         if (layer != 2) {
             G4Trd pbShield = new G4Trd("ftof_shield_p" + gemcLayerNames[layer-1] + "_sector" + sector,
                     panel_mother_dx1, panel_mother_dx2, pbthickness / 2.0, pbthickness / 2.0, panel_mother_dz);
             pbShield.translate(0.0, - panel_mother_dy - microgap - pbthickness / 2.0, 0.0);
-            pbShield.setMother(panelVolume);
+            pbShield.setMother(alignVolume);
         }
 
+        alignVolume.setMother(panelVolume);
         return panelVolume;
     }
 
