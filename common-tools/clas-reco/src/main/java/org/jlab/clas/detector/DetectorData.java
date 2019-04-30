@@ -278,8 +278,6 @@ public class DetectorData {
            bank.setFloat("x", row, (float) c.getHitPosition().x());
            bank.setFloat("y", row, (float) c.getHitPosition().y());
            bank.setFloat("z", row, (float) c.getHitPosition().z());
-           bank.setFloat("theta", row, (float) c.getTheta());
-           bank.setFloat("phi", row, (float) c.getPhi());
            bank.setFloat("dtheta", row, (float) c.getDeltaTheta());
            bank.setFloat("dphi", row, (float) c.getDeltaPhi());
            bank.setFloat("path", row, (float) c.getPath());
@@ -317,8 +315,6 @@ public class DetectorData {
 
    public static DataBank getEventBank(DetectorEvent detectorEvent, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, 1);
-       bank.setInt("NRUN", 0, detectorEvent.getEventHeader().getRun());
-       bank.setInt("NEVENT", 0, detectorEvent.getEventHeader().getEvent());
        bank.setLong("TRG", 0, detectorEvent.getEventHeader().getTrigger());
        bank.setFloat("STTime", 0, (float) detectorEvent.getEventHeader().getStartTime());
        bank.setFloat("RFTime", 0, (float) detectorEvent.getEventHeader().getRfTime());
@@ -349,12 +345,6 @@ public class DetectorData {
                bank.setByte( "q",       row, (byte)  p.getCharge());
                bank.setFloat("chi2",    row, (float) p.getTrackChi2());
                bank.setShort("NDF",     row, (short) p.getNDF());
-               bank.setFloat("px_nomm", row, (float) p.vector().x());
-               bank.setFloat("py_nomm", row, (float) p.vector().y());
-               bank.setFloat("pz_nomm", row, (float) p.vector().z());
-               bank.setFloat("vx_nomm", row, (float) p.vertex().x());
-               bank.setFloat("vy_nomm", row, (float) p.vertex().y());
-               bank.setFloat("vz_nomm", row, (float) p.vertex().z());
                bank.setShort("status",  row, (short) p.getTrackStatus());
                row = row + 1;
            }

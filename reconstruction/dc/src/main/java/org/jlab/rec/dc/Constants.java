@@ -170,7 +170,7 @@ public class Constants {
         Constants.USETSTART = USETSTART;
     }
     
-    private static double WIREDIST = 0.0;
+    private static double WIREDIST = 1.0;
 
     /**
      * @return the WIREDIST

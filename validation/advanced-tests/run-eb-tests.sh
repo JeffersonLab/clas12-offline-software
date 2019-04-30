@@ -20,10 +20,10 @@ then
 fi
 
 # geometry variation for DC
-geoDbVariation="may_2018_engineers"
+geoDbVariation="default"
 if [[ $webVersion = *"4a.2.2"* ]] || [[ $webVersion = *"4a.2.3"* ]] || [[ $webVersion = *"4a.2.4"* ]]
 then
-    geoDbVariation="default"
+    geoDbVariation="dc_geo_gemc424"
 fi
 
 nEvents=-1
