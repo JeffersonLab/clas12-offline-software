@@ -130,7 +130,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
                 panel_mother_dx1 + 1.05*motherGap, panel_mother_dx2 + 1.05*motherGap,
                 panel_mother_dy + 1.05*motherGap, panel_mother_dy + 1.05*motherGap,
                 panel_mother_dz + 1.05*motherGap);
-        alignVolume.setId(FTOFID, sector, layer, 1000);
+        alignVolume.setId(FTOFID, sector, layer, 1001);
         alignVolume.rotate("xyz", Math.toRadians(align_rotX[sector-1][layer-1]),
                                   Math.toRadians(align_rotY[sector-1][layer-1]),
                                   Math.toRadians(align_rotZ[sector-1][layer-1]));
