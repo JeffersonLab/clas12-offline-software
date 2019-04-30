@@ -100,33 +100,42 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         double panel_pos_y = panel_pos_xy * Math.sin(Math.toRadians(sector * 60 - 60));
         double panel_pos_z = dist2edge * Math.cos(thmin) - panel_width / 2 * Math.sin(thtilt) + panel_mother_dy * Math.cos(thtilt);
 
-        panelVolume.rotate("xyz", Math.toRadians(-90) - thtilt, 0.0, Math.toRadians(-30.0 - sector * 60.0));
+        //panelVolume.rotate("xyz", Math.toRadians(-90) - thtilt, 0.0, Math.toRadians(-30.0 - sector * 60.0));
+        panelVolume.rotate("xyz", 0.0, -thtilt, Math.toRadians(-(sector-1) * 60.0));
         panelVolume.translate(panel_pos_x + align_deltaX[sector-1][layer-1],
                               panel_pos_y + align_deltaY[sector-1][layer-1],
                               panel_pos_z + align_deltaZ[sector-1][layer-1]);
 
-        G4Trd alignVolume = new G4Trd("layeralignment_p" + gemcLayerNames[layer - 1] + "_s" + sector,
+        G4Trd zxy2xyzVolume = new G4Trd("zxy2xyz_p" + gemcLayerNames[layer - 1] + "_s" + sector,
                 panel_mother_dx1 + motherGap, panel_mother_dx2 + motherGap,
                 panel_mother_dy + motherGap, panel_mother_dy + motherGap,
                 panel_mother_dz + motherGap);
-        alignVolume.setId(FTOFID, sector, layer, 1000);
-        alignVolume.rotate("xyz", Math.toRadians(align_rotX[sector-1][layer-1]),
-                                  Math.toRadians(align_rotY[sector-1][layer-1]),
-                                  Math.toRadians(align_rotZ[sector-1][layer-1]));
+        zxy2xyzVolume.setId(FTOFID, sector, layer, 1000);
+        zxy2xyzVolume.rotate("xyz", Math.toRadians(90), 0.0, Math.toRadians(90));
 
         for (int ipaddle = 0; ipaddle < paddles.size(); ipaddle++) {
             paddles.get(ipaddle).setName("panel" + gemcLayerNames[layer - 1] + "_sector" + sector + "_paddle_" + (ipaddle + 1));
             paddles.get(ipaddle).setId(FTOFID, sector, layer, ipaddle + 1);
-            paddles.get(ipaddle).setMother(alignVolume);
+            paddles.get(ipaddle).setMother(zxy2xyzVolume);
         }
 
         if (layer != 2) {
             G4Trd pbShield = new G4Trd("ftof_shield_p" + gemcLayerNames[layer-1] + "_sector" + sector,
                     panel_mother_dx1, panel_mother_dx2, pbthickness / 2.0, pbthickness / 2.0, panel_mother_dz);
             pbShield.translate(0.0, - panel_mother_dy - microgap - pbthickness / 2.0, 0.0);
-            pbShield.setMother(alignVolume);
+            pbShield.setMother(zxy2xyzVolume);
         }
 
+        G4Trd alignVolume = new G4Trd("layeralignment_p" + gemcLayerNames[layer - 1] + "_s" + sector,
+                panel_mother_dx1 + 1.05*motherGap, panel_mother_dx2 + 1.05*motherGap,
+                panel_mother_dy + 1.05*motherGap, panel_mother_dy + 1.05*motherGap,
+                panel_mother_dz + 1.05*motherGap);
+        alignVolume.setId(FTOFID, sector, layer, 1000);
+        alignVolume.rotate("xyz", Math.toRadians(align_rotX[sector-1][layer-1]),
+                                  Math.toRadians(align_rotY[sector-1][layer-1]),
+                                  Math.toRadians(align_rotZ[sector-1][layer-1]));
+
+        zxy2xyzVolume.setMother(alignVolume);
         alignVolume.setMother(panelVolume);
         return panelVolume;
     }
