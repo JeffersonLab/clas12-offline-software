@@ -51,10 +51,12 @@ public class GeometryFactory {
             provider.loadTable("/geometry/pcal/Uview");
             provider.loadTable("/geometry/pcal/Vview");
             provider.loadTable("/geometry/pcal/Wview");
+            provider.loadTable("/geometry/pcal/alignment");
             provider.loadTable("/geometry/ec/ec");
             provider.loadTable("/geometry/ec/uview");
             provider.loadTable("/geometry/ec/vview");
             provider.loadTable("/geometry/ec/wview");
+            provider.loadTable("/geometry/ec/alignment");
         }
         
         if(type==DetectorType.FTOF){
