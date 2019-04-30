@@ -179,7 +179,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         if (sector >= 1 && sector <= 6
                 && layer >= 1 && layer <= 3) {
 
-            List<Geant4Basic> panel = motherVolume.getChildren().get(ivolume).getChildren();
+            List<Geant4Basic> panel = motherVolume.getChildren().get(ivolume).get(0).get(0).getChildren();
             int npaddles = panel.size();
 
             if (paddle >= 1 && paddle <= npaddles) {
@@ -195,7 +195,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
     public double getThickness(int sector, int layer, int paddle) {
         int ivolume = (sector - 1) * 3 + layer - 1;
 
-        Geant4Basic panel = motherVolume.getChildren().get(ivolume);
+        Geant4Basic panel = motherVolume.getChildren().get(ivolume).get(0).get(0);
         G4Box pad = (G4Box) panel.getChildren().get(paddle-1);
         return pad.getYHalfLength()*2.;      
     }
@@ -210,7 +210,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
         int ivolume = (sector - 1) * 3 + layer - 1;
 
-        Geant4Basic panel = motherVolume.getChildren().get(ivolume);
+        Geant4Basic panel = motherVolume.getChildren().get(ivolume).get(0).get(0);
         G4Box padl = (G4Box) panel.getChildren().get(1);
         Vector3d point = new Vector3d(padl.getVertex(0)); //first corner of the paddle on the upstream face
         Vector3d normal = new Vector3d(panel.getLineY().diff().normalized());
@@ -228,7 +228,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
         int ivolume = (sector - 1) * 3 + layer - 1;
 
-        Geant4Basic panel = motherVolume.getChildren().get(ivolume);
+        Geant4Basic panel = motherVolume.getChildren().get(ivolume).get(0).get(0);
         G4Box padl = (G4Box) panel.getChildren().get(1);
         double x=(padl.getLineY().origin().x+padl.getLineY().end().x)/2;
         double y=(padl.getLineY().origin().y+padl.getLineY().end().y)/2;
