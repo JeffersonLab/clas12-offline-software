@@ -5,11 +5,8 @@ import java.util.Optional;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
-import org.jlab.detector.geant4.v2.ECGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
-import org.jlab.detector.geant4.v2.PCALGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.base.Detector;
 import org.jlab.io.base.DataEvent;
@@ -33,28 +30,28 @@ public class DCEngine extends ReconstructionEngine {
 
     public void setStartTimeOption() {
         // Load config
-        String useSTTConf = this.getEngineConfigString("useStartTime");
+        String useSTTConf = this.getEngineConfigString("dcUseStartTime");
         
         if (useSTTConf!=null) {
-            System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on yaml ="+useSTTConf);
+            System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on yaml = "+useSTTConf);
             Constants.setUSETSTART(Boolean.valueOf(useSTTConf));
         }
         else {
-            useSTTConf = System.getenv("USESTT");
+            useSTTConf = System.getenv("COAT_DC_USESTARTTIME");
             if (useSTTConf!=null) {
-                System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on env ="+useSTTConf);
+                System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on env = "+useSTTConf);
                 Constants.setUSETSTART(Boolean.valueOf(useSTTConf));
             }
         }
         if (useSTTConf==null) {
-             System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on default ="+Constants.isUSETSTART());
+             System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on default = "+Constants.isUSETSTART());
         }
         
         // Wire distortions
-        String wireDistortionsFlag = this.getEngineConfigString("wireDistort");
+        String wireDistortionsFlag = this.getEngineConfigString("dcWireDistortion");
         
         if (wireDistortionsFlag!=null) {
-            System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on yaml ="+wireDistortionsFlag);
+            System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on yaml = "+wireDistortionsFlag);
             if(Boolean.valueOf(wireDistortionsFlag)==true) {
                 Constants.setWIREDIST(1.0);
             } else {
@@ -62,9 +59,9 @@ public class DCEngine extends ReconstructionEngine {
             }
         }
         else {
-            wireDistortionsFlag = System.getenv("USEWIREDIST");
+            wireDistortionsFlag = System.getenv("COAT_DC_WIREDISTORTION");
             if (wireDistortionsFlag!=null) {
-                System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on env ="+wireDistortionsFlag);
+                System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on env = "+wireDistortionsFlag);
                 if(Boolean.valueOf(wireDistortionsFlag)==true) {
                     Constants.setWIREDIST(1.0);
                 } else {
@@ -73,7 +70,7 @@ public class DCEngine extends ReconstructionEngine {
             }
         }
         if (wireDistortionsFlag==null) {
-             System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (off)");
+             System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (MC-off/Data-on)");
         }
     }
     public void LoadTables() {
@@ -93,14 +90,14 @@ public class DCEngine extends ReconstructionEngine {
 
         requireConstants(Arrays.asList(dcTables));
         // Get the constants for the correct variation
-        String geomDBVar = this.getEngineConfigString("geomDBVariation");
+        String geomDBVar = this.getEngineConfigString("dcGeometryVariation");
         if (geomDBVar!=null) {
-            System.out.println("["+this.getName()+"] run with geometry variation based on yaml ="+geomDBVar);
+            System.out.println("["+this.getName()+"] run with geometry variation based on yaml = "+geomDBVar);
         }
         else {
-            geomDBVar = System.getenv("GEOMDBVAR");
+            geomDBVar = System.getenv("COAT_DC_GEOMETRYVARIATION");
             if (geomDBVar!=null) {
-                System.out.println("["+this.getName()+"] run with geometry variation chosen based on env ="+geomDBVar);
+                System.out.println("["+this.getName()+"] run with geometry variation chosen based on env = "+geomDBVar);
             }
         } 
         if (geomDBVar==null) {
@@ -131,14 +128,14 @@ public class DCEngine extends ReconstructionEngine {
         tSurf.LoadSurfaces(targetPosition, targetLength,dcDetector, ftofDetector, ecalDetector);
         
         // Get the constants for the correct variation
-        String ccDBVar = this.getEngineConfigString("constantsDBVariation");
+        String ccDBVar = this.getEngineConfigString("variation");
         if (ccDBVar!=null) {
-            System.out.println("["+this.getName()+"] run with constants variation based on yaml ="+ccDBVar);
+            System.out.println("["+this.getName()+"] run with constants variation based on yaml = "+ccDBVar);
         }
         else {
-            ccDBVar = System.getenv("CCDBVAR");
+            ccDBVar = System.getenv("COAT_DC_VARIATION");
             if (ccDBVar!=null) {
-                System.out.println("["+this.getName()+"] run with constants variation chosen based on env ="+ccDBVar);
+                System.out.println("["+this.getName()+"] run with constants variation chosen based on env = "+ccDBVar);
             }
         } 
         if (ccDBVar==null) {

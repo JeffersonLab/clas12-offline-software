@@ -46,7 +46,7 @@ if [ $downloadMaps == "yes" ]; then
   locDir=etc/data/magfield
   mkdir -p $locDir
   cd $locDir
-  for map in $SOLENOIDMAP $TORUSMAP
+  for map in $COAT_MAGFIELD_SOLENOIDMAP $COAT_MAGFIELD_TORUSMAP
   do
     # -N only redownloads if timestamp/filesize is newer/different
     $wget -N --no-check-certificate $webDir/$map
