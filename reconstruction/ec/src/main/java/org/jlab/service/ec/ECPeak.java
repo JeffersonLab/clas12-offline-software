@@ -120,12 +120,15 @@ public class ECPeak {
         this.peakMoment3      = 0.0;
         
         double logSumm = 0.0;
+        double summE   = 0.0;
+        
         for(int i = 0; i < this.peakStrips.size(); i++){
             Line3D line = this.peakStrips.get(i).getLine();
             
             double energy = this.peakStrips.get(i).getEnergy();
+            double energyMev = energy*1000.0;
 //            double     le = Math.log(energy);  //ECReconstructionTest fails to find PCAL cluster for this choice
-            double     le = energy;
+            double     le = Math.log(energyMev);
             
             this.peakDistanceEdge += 
 //                    peakStrips.get(i).getDistanceEdge() + 
@@ -140,6 +143,8 @@ public class ECPeak {
             pointEnd.setZ(pointEnd.z()+line.end().z()*le);
             
             logSumm += le;
+            
+            summE   += energy;
         }
         
         this.peakDistanceEdge = this.peakDistanceEdge/logSumm;
@@ -153,6 +158,10 @@ public class ECPeak {
                 pointEnd.y()/logSumm,
                 pointEnd.z()/logSumm
         );
+        
+        
+        
+        
         // Calculating Moments of the shower peak
         for(int i = 0; i < this.peakStrips.size(); i++){            
             double stripDistance = this.peakStrips.get(i).getDistanceEdge();
@@ -164,10 +173,11 @@ public class ECPeak {
         }
         
         this.peakMoment = this.peakMoment/logSumm;
+        
         if(this.peakMoment2<0.0000000001){
             this.peakMoment2 = 4.5/12.0;
         } else {
-            this.peakMoment2 = this.peakMoment2/logSumm;        
+            this.peakMoment2 = this.peakMoment2/logSumm;
         }
         double sigma3    = Math.sqrt(this.peakMoment2);
         this.peakMoment3 = this.peakMoment3/logSumm/(sigma3*sigma3*sigma3);
