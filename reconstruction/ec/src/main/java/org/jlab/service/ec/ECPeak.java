@@ -166,10 +166,11 @@ public class ECPeak {
         for(int i = 0; i < this.peakStrips.size(); i++){            
             double stripDistance = this.peakStrips.get(i).getDistanceEdge();
             double dist = this.peakDistanceEdge - stripDistance;
-            double energy = this.peakStrips.get(i).getEnergy();
-            this.peakMoment  += Math.abs(dist)*energy;
-            this.peakMoment2 += dist*dist*energy;
-            this.peakMoment3 += energy*dist*dist*dist;            
+            double energyMev = this.peakStrips.get(i).getEnergy()*1000.0;
+            double energyLog = Math.log(energyMev);
+            this.peakMoment  += dist*dist*dist*dist*energyLog;
+            this.peakMoment2 += dist*dist*energyLog;
+            this.peakMoment3 += energyLog*dist*dist*dist;
         }
         
         this.peakMoment = this.peakMoment/logSumm;
@@ -181,6 +182,7 @@ public class ECPeak {
         }
         double sigma3    = Math.sqrt(this.peakMoment2);
         this.peakMoment3 = this.peakMoment3/logSumm/(sigma3*sigma3*sigma3);
+        this.peakMoment = this.peakMoment/logSumm/(sigma3*sigma3*sigma3*sigma3);
     }
     
     public double getDistanceEdge(){
