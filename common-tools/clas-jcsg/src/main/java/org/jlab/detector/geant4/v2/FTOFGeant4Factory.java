@@ -59,6 +59,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
             align_rotY[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/rotY",irow);
             align_rotZ[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/rotZ",irow);
         }
+
         for (int sector = 1; sector <= 6; sector++) {
             for (int layer = 1; layer <= 3; layer++) {
                 Geant4Basic layerVolume = createPanel(provider, sector, layer);
@@ -77,6 +78,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
         List<G4Box> paddles = this.createLayer(cp, layer);
 
+        // x is along the paddle, y perpendicular to the panel and z in the panel plane pointing outward
         double panel_mother_dx1 = paddles.get(0).getXHalfLength();
         double panel_mother_dx2 = paddles.get(paddles.size() - 1).getXHalfLength()
                 + (paddles.get(paddles.size() - 1).getXHalfLength() - paddles.get(paddles.size() - 2).getXHalfLength());
@@ -87,43 +89,54 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         double panel_mother_dz = panel_width / 2.0;
 
         G4Trd panelVolume = new G4Trd("ftof_p" + gemcLayerNames[layer - 1] + "_s" + sector,
-                panel_mother_dx1 + motherGap, panel_mother_dx2 + motherGap,
+                panel_mother_dx1 + motherGap, panel_mother_dx2 +motherGap,
                 panel_mother_dy + motherGap, panel_mother_dy + motherGap,
                 panel_mother_dz + motherGap);
         panelVolume.setId(FTOFID, sector, layer, 0);
 
-        double panel_pos_xy = dist2edge * Math.sin(thmin) + panel_width / 2 * Math.cos(thtilt) + panel_mother_dy * Math.sin(thtilt);
-        double panel_pos_x = panel_pos_xy * Math.cos(Math.toRadians(sector * 60 - 60));
-        double panel_pos_y = panel_pos_xy * Math.sin(Math.toRadians(sector * 60 - 60));
-        double panel_pos_z = dist2edge * Math.cos(thmin) - panel_width / 2 * Math.sin(thtilt) + panel_mother_dy * Math.cos(thtilt);
+        double panel_pos_x = dist2edge * Math.sin(thmin) + (panel_width/2 + align_deltaX[sector-1][layer-1]) * Math.cos(thtilt) + (panel_mother_dy+align_deltaZ[sector-1][layer-1]) * Math.sin(thtilt);
+        double panel_pos_y = align_deltaY[sector-1][layer-1];
+        double panel_pos_z = dist2edge * Math.cos(thmin) - (panel_width/2 + align_deltaX[sector-1][layer-1]) * Math.sin(thtilt) + (panel_mother_dy+align_deltaZ[sector-1][layer-1]) * Math.cos(thtilt);
+        Vector3d pos_vec = new Vector3d(panel_pos_x, panel_pos_y, panel_pos_z);
+        pos_vec.rotateZ(Math.toRadians((sector-1)*60));
 
-        // rotate the panel to be in the tilted sector coordinate frame
-        panelVolume.rotate("xyz", Math.toRadians(-90), 0.0, Math.toRadians(-90));
-        // apply rotations from the alignment table
-        panelVolume.rotate("xyz", Math.toRadians(align_rotX[sector-1][layer-1]),
-                                  Math.toRadians(align_rotY[sector-1][layer-1]),
-                                  Math.toRadians(align_rotZ[sector-1][layer-1]));
-        // apply displacement still in the sector coordinate frame
-        panelVolume.translate(align_deltaX[sector-1][layer-1],
-                              align_deltaY[sector-1][layer-1],
-                              align_deltaZ[sector-1][layer-1]);
-        // rotate to the lab
-        panelVolume.rotate("xyz", 0.0, - thtilt, Math.toRadians(- (sector-1) * 60.0));
-        panelVolume.translate(panel_pos_x, panel_pos_y, panel_pos_z);
+        //panelVolume.rotate("xyz", Math.toRadians(-90) - thtilt, 0.0, Math.toRadians(-30.0 - sector * 60.0));
+        panelVolume.rotate("xyz", 0.0, -thtilt, Math.toRadians(-(sector-1) * 60.0));
+        panelVolume.translate(pos_vec);
+
+        G4Trd zxy2xyzVolume = new G4Trd("zxy2xyz_p" + gemcLayerNames[layer - 1] + "_s" + sector,
+                panel_mother_dx1 + motherGap-0.8, panel_mother_dx2 + motherGap-0.8,
+                panel_mother_dy + motherGap-0.8, panel_mother_dy + motherGap-0.8,
+                panel_mother_dz + motherGap-0.8);
+        zxy2xyzVolume.setId(FTOFID, sector, layer, 1000);
+        zxy2xyzVolume.rotate("xyz", Math.toRadians(-90), 0.0, Math.toRadians(-90));
 
         for (int ipaddle = 0; ipaddle < paddles.size(); ipaddle++) {
             paddles.get(ipaddle).setName("panel" + gemcLayerNames[layer - 1] + "_sector" + sector + "_paddle_" + (ipaddle + 1));
             paddles.get(ipaddle).setId(FTOFID, sector, layer, ipaddle + 1);
-            paddles.get(ipaddle).setMother(panelVolume);
+            paddles.get(ipaddle).setMother(zxy2xyzVolume);
+//            paddles.get(ipaddle).setMother(panelVolume);
         }
 
         if (layer != 2) {
             G4Trd pbShield = new G4Trd("ftof_shield_p" + gemcLayerNames[layer-1] + "_sector" + sector,
                     panel_mother_dx1, panel_mother_dx2, pbthickness / 2.0, pbthickness / 2.0, panel_mother_dz);
             pbShield.translate(0.0, - panel_mother_dy - microgap - pbthickness / 2.0, 0.0);
-            pbShield.setMother(panelVolume);
+            pbShield.setMother(zxy2xyzVolume);
+//            pbShield.setMother(panelVolume);
         }
 
+        G4Trd alignVolume = new G4Trd("layeralignment_p" + gemcLayerNames[layer - 1] + "_s" + sector,
+                panel_mother_dx1 + motherGap-0.4, panel_mother_dx2 + motherGap-0.4,
+                panel_mother_dy + motherGap-0.4, panel_mother_dy + motherGap-0.4,
+                panel_mother_dz + motherGap-0.4);
+        alignVolume.setId(FTOFID, sector, layer, 1001);
+        alignVolume.rotate("xyz", Math.toRadians(align_rotX[sector-1][layer-1]),
+                                  Math.toRadians(align_rotY[sector-1][layer-1]),
+                                  Math.toRadians(align_rotZ[sector-1][layer-1]));
+
+        zxy2xyzVolume.setMother(alignVolume);
+        alignVolume.setMother(panelVolume);
         return panelVolume;
     }
 
@@ -166,7 +179,8 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         if (sector >= 1 && sector <= 6
                 && layer >= 1 && layer <= 3) {
 
-            List<Geant4Basic> panel = motherVolume.getChildren().get(ivolume).getChildren();
+            List<Geant4Basic> panel = motherVolume.getChildren().get(ivolume)
+                .getChildren().get(0).getChildren().get(0).getChildren();
             int npaddles = panel.size();
 
             if (paddle >= 1 && paddle <= npaddles) {
@@ -182,7 +196,8 @@ public final class FTOFGeant4Factory extends Geant4Factory {
     public double getThickness(int sector, int layer, int paddle) {
         int ivolume = (sector - 1) * 3 + layer - 1;
 
-        Geant4Basic panel = motherVolume.getChildren().get(ivolume);
+        Geant4Basic panel = motherVolume.getChildren().get(ivolume)
+                .getChildren().get(0).getChildren().get(0);
         G4Box pad = (G4Box) panel.getChildren().get(paddle-1);
         return pad.getYHalfLength()*2.;      
     }
@@ -197,7 +212,8 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
         int ivolume = (sector - 1) * 3 + layer - 1;
 
-        Geant4Basic panel = motherVolume.getChildren().get(ivolume);
+        Geant4Basic panel = motherVolume.getChildren().get(ivolume)
+                .getChildren().get(0).getChildren().get(0);
         G4Box padl = (G4Box) panel.getChildren().get(1);
         Vector3d point = new Vector3d(padl.getVertex(0)); //first corner of the paddle on the upstream face
         Vector3d normal = new Vector3d(panel.getLineY().diff().normalized());
@@ -215,7 +231,8 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
         int ivolume = (sector - 1) * 3 + layer - 1;
 
-        Geant4Basic panel = motherVolume.getChildren().get(ivolume);
+        Geant4Basic panel = motherVolume.getChildren().get(ivolume)
+                .getChildren().get(0).getChildren().get(0);
         G4Box padl = (G4Box) panel.getChildren().get(1);
         double x=(padl.getLineY().origin().x+padl.getLineY().end().x)/2;
         double y=(padl.getLineY().origin().y+padl.getLineY().end().y)/2;
@@ -231,7 +248,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
     
     
     public static void main(String[] args) {
-        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.FTOF,11,"default");
+        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.FTOF, 11, "default");
         FTOFGeant4Factory factory = new FTOFGeant4Factory(cp);
             
         for (int sector = 1; sector <= 1; sector++) {
