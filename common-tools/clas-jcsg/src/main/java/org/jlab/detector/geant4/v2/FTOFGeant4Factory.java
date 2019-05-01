@@ -18,8 +18,6 @@ import static org.jlab.detector.units.SystemOfUnits.Length;
 import org.jlab.detector.volume.G4World;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.prim.Plane3D;
-import org.jlab.geom.prim.Vector3D;
-import org.jlab.geometry.prim.Line3d;
 
 /**
  *
@@ -30,6 +28,12 @@ public final class FTOFGeant4Factory extends Geant4Factory {
     private final double motherGap = 4.0 * Length.cm;
     private final double pbthickness = 0.005 * Length.in;
     private final double microgap = 0.001;
+    private final double[][] align_deltaX = new double[6][3];
+    private final double[][] align_deltaY = new double[6][3];
+    private final double[][] align_deltaZ = new double[6][3];
+    private final double[][] align_rotX = new double[6][3];
+    private final double[][] align_rotY = new double[6][3];
+    private final double[][] align_rotZ = new double[6][3];
 
     private final String[] stringLayers = new String[]{
         "/geometry/ftof/panel1a",
@@ -43,6 +47,18 @@ public final class FTOFGeant4Factory extends Geant4Factory {
     public FTOFGeant4Factory(ConstantProvider provider) {
         motherVolume = new G4World("fc");
 
+        int alignrows = provider.length("/geometry/ftof/alignment/sector");
+        for(int irow = 0; irow< alignrows; irow++) {
+            int isector = provider.getInteger("/geometry/ftof/alignment/sector",irow)-1;
+            int ilayer = provider.getInteger("/geometry/ftof/alignment/layer",irow)-1;
+
+            align_deltaX[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/deltaX",irow);
+            align_deltaY[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/deltaY",irow);
+            align_deltaZ[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/deltaZ",irow);
+            align_rotX[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/rotX",irow);
+            align_rotY[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/rotY",irow);
+            align_rotZ[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/rotZ",irow);
+        }
         for (int sector = 1; sector <= 6; sector++) {
             for (int layer = 1; layer <= 3; layer++) {
                 Geant4Basic layerVolume = createPanel(provider, sector, layer);
@@ -81,7 +97,18 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         double panel_pos_y = panel_pos_xy * Math.sin(Math.toRadians(sector * 60 - 60));
         double panel_pos_z = dist2edge * Math.cos(thmin) - panel_width / 2 * Math.sin(thtilt) + panel_mother_dy * Math.cos(thtilt);
 
-        panelVolume.rotate("xyz", Math.toRadians(-90) - thtilt, 0.0, Math.toRadians(-30.0 - sector * 60.0));
+        // rotate the panel to be in the tilted sector coordinate frame
+        panelVolume.rotate("xyz", Math.toRadians(-90), 0.0, Math.toRadians(-90));
+        // apply rotations from the alignment table
+        panelVolume.rotate("xyz", Math.toRadians(align_rotX[sector-1][layer-1]),
+                                  Math.toRadians(align_rotY[sector-1][layer-1]),
+                                  Math.toRadians(align_rotZ[sector-1][layer-1]));
+        // apply displacement still in the sector coordinate frame
+        panelVolume.translate(align_deltaX[sector-1][layer-1],
+                              align_deltaY[sector-1][layer-1],
+                              align_deltaZ[sector-1][layer-1]);
+        // rotate to the lab
+        panelVolume.rotate("xyz", 0.0, - thtilt, Math.toRadians(- (sector-1) * 60.0));
         panelVolume.translate(panel_pos_x, panel_pos_y, panel_pos_z);
 
         for (int ipaddle = 0; ipaddle < paddles.size(); ipaddle++) {
@@ -204,7 +231,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
     
     
     public static void main(String[] args) {
-        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.FTOF);
+        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.FTOF,11,"default");
         FTOFGeant4Factory factory = new FTOFGeant4Factory(cp);
             
         for (int sector = 1; sector <= 1; sector++) {

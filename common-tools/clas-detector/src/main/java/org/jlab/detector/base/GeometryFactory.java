@@ -66,6 +66,7 @@ public class GeometryFactory {
             provider.loadTable("/geometry/ftof/panel1b/panel");
             provider.loadTable("/geometry/ftof/panel2/paddles");
             provider.loadTable("/geometry/ftof/panel2/panel");
+            provider.loadTable("/geometry/ftof/alignment");
         }
         
         if(type==DetectorType.BST){
