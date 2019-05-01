@@ -95,16 +95,15 @@ public final class FTOFGeant4Factory extends Geant4Factory {
                 panel_mother_dz + motherGap);
         panelVolume.setId(FTOFID, sector, layer, 0);
 
-        double panel_pos_xy = dist2edge * Math.sin(thmin) + panel_width / 2 * Math.cos(thtilt) + panel_mother_dy * Math.sin(thtilt);
-        double panel_pos_x = panel_pos_xy * Math.cos(Math.toRadians(sector * 60 - 60));
-        double panel_pos_y = panel_pos_xy * Math.sin(Math.toRadians(sector * 60 - 60));
+        double panel_pos_x = dist2edge * Math.sin(thmin) + panel_width / 2 * Math.cos(thtilt) + panel_mother_dy * Math.sin(thtilt);
         double panel_pos_z = dist2edge * Math.cos(thmin) - panel_width / 2 * Math.sin(thtilt) + panel_mother_dy * Math.cos(thtilt);
+        Vector3d pos_vec = new Vector3d(panel_pos_x + align_deltaX[sector-1][layer-1],
+          align_deltaY[sector-1][layer-1], panel_pos_z + align_deltaZ[sector-1][layer-1]);
+        pos_vec.rotateZ(Math.toRadians((sector-1)*60));
 
         //panelVolume.rotate("xyz", Math.toRadians(-90) - thtilt, 0.0, Math.toRadians(-30.0 - sector * 60.0));
         panelVolume.rotate("xyz", 0.0, -thtilt, Math.toRadians(-(sector-1) * 60.0));
-        panelVolume.translate(panel_pos_x + align_deltaX[sector-1][layer-1],
-                              panel_pos_y + align_deltaY[sector-1][layer-1],
-                              panel_pos_z + align_deltaZ[sector-1][layer-1]);
+        panelVolume.translate(pos_vec);
 
         G4Trd zxy2xyzVolume = new G4Trd("zxy2xyz_p" + gemcLayerNames[layer - 1] + "_s" + sector,
                 panel_mother_dx1 + motherGap-0.8, panel_mother_dx2 + motherGap-0.8,
