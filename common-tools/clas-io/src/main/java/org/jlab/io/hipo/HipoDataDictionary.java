@@ -32,7 +32,7 @@ public class HipoDataDictionary implements DataDictionary {
         
         SchemaFactory factory = new SchemaFactory();
         String envCLAS = System.getenv("CLAS12DIR");
-        factory.initFromDirectory(envCLAS + "/" + "etc/bankdefs/hipo");
+        factory.initFromDirectory(envCLAS + "/" + "etc/bankdefs/hipo4");
         List<Schema> entries = factory.getSchemaList();
         //System.out.println(" schema size = " + entries.size());
         for(Schema sch : entries){
