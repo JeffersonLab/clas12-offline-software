@@ -257,7 +257,7 @@ public class HitReader implements IMatchedHit {
             // loop over tracks and find closest intesrsection
             double deltaPaddle = 2;
             Track matchedTrk   = null;
-            for (int i = -1; i <= 1; i++) {
+            for (int i = 0; i <= 0; i++) { // exact matching based on paddle number
                 int iPaddle = ctofHit.get_Paddle()+i;
 //                System.out.println(ctofHit.toString());
                 if(trkHitsMap.hasItem(iPaddle)) {
