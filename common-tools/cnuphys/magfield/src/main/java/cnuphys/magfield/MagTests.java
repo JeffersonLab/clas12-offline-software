@@ -44,7 +44,7 @@ public class MagTests {
 	// test many traj on different threads
 	private static void threadTest(final int num, final int numThread) {
 
-		memoryReport("staring thread test");
+		memoryReport("starting thread test");
 
 		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
 
@@ -457,6 +457,14 @@ public class MagTests {
 		System.out.println("avg " + (sum / 5.) + " sec");
 
 	}
+	
+	
+	//convert the torus to ASCII for GEMC
+	private static void convertTorusToAscii() {
+		
+		ToAscii.torusToAscii(MagneticFields.getInstance().getTorus(), 
+				"/Users/heddle/magfield/FullTorus.txt");
+	}
 
 	public static JMenu getTestMenu() {
 
@@ -467,6 +475,8 @@ public class MagTests {
 		final JMenuItem test4Item = new JMenuItem("Sameness Test");
 		final JMenuItem test5Item = new JMenuItem("MathLib Test");
 		final JMenuItem threadItem = new JMenuItem("Thread Test");
+		final JMenuItem asciiItem = new JMenuItem("Convert Torus to ASCII");
+
 
 		ActionListener al1 = new ActionListener() {
 
@@ -482,6 +492,8 @@ public class MagTests {
 					mathTest();
 				} else if (e.getSource() == threadItem) {
 					threadTest(10000000, 8);
+				} else if (e.getSource() == asciiItem) {
+					convertTorusToAscii();
 				}
 			}
 
@@ -492,11 +504,14 @@ public class MagTests {
 		test4Item.addActionListener(al1);
 		test5Item.addActionListener(al1);
 		threadItem.addActionListener(al1);
+		asciiItem.addActionListener(al1);
 		testMenu.add(test0Item);
 		testMenu.add(test1Item);
 		testMenu.add(test4Item);
 		testMenu.add(test5Item);
 		testMenu.add(threadItem);
+		testMenu.addSeparator();
+		testMenu.add(asciiItem);
 		testMenu.addSeparator();
 
 		// now for rectangular grids
@@ -571,8 +586,12 @@ public class MagTests {
 			// "Symm_solenoid_r601_phi1_z1201_2008.dat");
 //			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_08May2018.dat",
 //					"Symm_solenoid_r601_phi1_z1201_2008.dat");
-			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat",
-					"Symm_solenoid_r601_phi1_z1201_2008.dat");
+//			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat",
+//					"Symm_solenoid_r601_phi1_z1201_2008.dat");
+//			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat",
+//					"SolenoidMarch2019_BIN.dat");
+			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_08May2018.dat",
+					"Symm_solenoid_r601_phi1_z1201_13June2018.dat");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			System.exit(1);
