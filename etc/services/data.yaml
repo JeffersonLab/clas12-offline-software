@@ -49,7 +49,7 @@ configuration:
   services:
     MAGFIELDS:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
-      magfieldTorusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
+      magfieldTorusMap: Full_torus_r251_phi181_z251_08May2018.dat
       variation: rga_spring2018
     CND:
       variation: rga_spring2018
