@@ -55,6 +55,8 @@ configuration:
       variation: rga_spring2018
     CTOF:
       variation: rga_spring2018
+    CVT:
+      variation: rga_spring2018
     DCHB:
       variation: rga_spring2018
       dcGeometryVariation: rga_spring2018

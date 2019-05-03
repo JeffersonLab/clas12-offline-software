@@ -445,7 +445,7 @@ public class StateVecs {
 
     }
 
-
+    private double shift = org.jlab.rec.cvt.Constants.getZoffset();
     public class B {
 
         final int k;
@@ -467,7 +467,7 @@ public class StateVecs {
             this.y = y;
             this.z = z;
 
-            swimmer.BfieldLab(x / 10, y / 10, z / 10, b);
+            swimmer.BfieldLab(x / 10, y / 10, z / 10 + shift, b);
             this.Bx = b[0];
             this.By = b[1];
             this.Bz = b[2];

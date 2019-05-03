@@ -108,7 +108,7 @@ public final class CTOFGeant4Factory extends Geant4Factory {
             offset = cp.getDouble(ctofdbpath+"offset", padnum-1);
             
             center = getCenter(radius, thickness, angle);
-            centerline = new Line3d(new Vector3d(center.x, center.y, -length/2+offset), new Vector3d(center.x, center.y, length/2+offset+globalOffset));
+            centerline = new Line3d(new Vector3d(center.x, center.y, -length/2+offset+globalOffset), new Vector3d(center.x, center.y, length/2+offset+globalOffset));
         }
 
         @Override

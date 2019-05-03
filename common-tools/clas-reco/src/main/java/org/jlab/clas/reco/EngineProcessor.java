@@ -248,7 +248,7 @@ public class EngineProcessor {
     
     public static void main(String[] args){
         
-        OptionParser parser = new OptionParser("notsouseful-util");
+        OptionParser parser = new OptionParser("clas12recon");
         parser.addRequired("-o","output.hipo");
         parser.addRequired("-i","input.hipo");
         parser.setRequiresInputList(false);
