@@ -558,7 +558,7 @@ public class CLASDecoder {
                     decodedEvent.appendBanks(trigger);
 
                     HipoDataEvent dhe = (HipoDataEvent) decodedEvent;
-                    writer.writeEvent(dhe.getHipoEvent());
+                    //writer.writeEvent(dhe.getHipoEvent());
                     
                     counter++;
                     progress.updateStatus();

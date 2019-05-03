@@ -35,7 +35,7 @@ public class EBio {
         }
 
         // helicity:
-        if(event.hasBank("HEL::adc")) {
+        if(ccdb.getInteger(EBCCDBEnum.HELICITY_delay)==0 && event.hasBank("HEL::adc")) {
             final int helComponent=1;
             final int helHalf=2000;
             DataBank bank = event.getBank("HEL::adc");
@@ -43,9 +43,8 @@ public class EBio {
                 if (bank.getInt("component",ii)==helComponent) {
                     byte helicity=-1;
                     if (bank.getInt("ped",ii)>helHalf) helicity=1;
-                    // correct for HWP position:
-                    helicity *= ccdb.getInteger(EBCCDBEnum.HWP_position);
-                    dHeader.setHelicity(helicity);
+                    dHeader.setHelicityRaw(helicity);
+                    dHeader.setHelicity((byte)(helicity*ccdb.getInteger(EBCCDBEnum.HWP_position)));
                     break;
                 }
             }
@@ -83,9 +82,8 @@ public class EBio {
                 
                 DetectorParticle p = new DetectorParticle();
                 
-                int trStatus = bank.getInt("status", i);
-                
-                p.setStatus(100+10*trStatus);
+                //int trStatus = bank.getInt("status", i);
+                //p.setStatus(100+10*trStatus);
                 p.vector().setXYZ(
                         bank.getDouble("p0_x",i),
                         bank.getDouble("p0_y",i),
@@ -136,7 +134,7 @@ public class EBio {
                 double d0 = bank.getDouble("d0", i);
                 
                 DetectorParticle part = new DetectorParticle();
-                part.setStatus(200);
+                //part.setStatus(200);
                 double pz = pt*tandip;
                 double py = pt*Math.sin(phi0);
                 double px = pt*Math.cos(phi0);
@@ -191,7 +189,7 @@ public class EBio {
             
             DetectorParticle p = particles.get(i);
             
-            bank.setInt("status", i, p.getStatus());
+            //bank.setInt("status", i, p.getStatus());
             bank.setInt("charge", i, p.getCharge());
             bank.setInt("pid", i, p.getPid());
             
@@ -333,15 +331,13 @@ public class EBio {
             int nrows = bank.rows();
             for(int i = 0; i < nrows; i++){
                 int nphe  = bank.getInt("nphe", i);
-                double theta   = bank.getDouble("theta", i);
                 double dtheta = bank.getDouble("dtheta",i);
-                double phi = bank.getDouble("phi",i);
                 double dphi = bank.getDouble("dphi",i);
                 double x = bank.getDouble("x",i);
                 double y = bank.getDouble("y",i);
                 double z = bank.getDouble("z",i);
                 double time = bank.getFloat("time",i);
-                CherenkovResponse che = new CherenkovResponse(theta,phi,dtheta,dphi);
+                CherenkovResponse che = new CherenkovResponse(dtheta,dphi);
                 che.setHitPosition(x, y, z);
                 che.setEnergy(nphe);
                 che.setTime(time);

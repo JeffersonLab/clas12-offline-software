@@ -269,7 +269,7 @@ public class RecoBankWriter {
             bank.setFloat("err_x", index, (float) (crosses.get(i).get(j).get_PointErr().x()/10.));
             bank.setFloat("err_y", index, (float) (crosses.get(i).get(j).get_PointErr().y()/10.));
             bank.setFloat("err_z", index, (float) (crosses.get(i).get(j).get_PointErr().z()/10.));
-            bank.setInt("trkID", index, crosses.get(i).get(j).get_AssociatedTrackID());
+            bank.setShort("trkID", index, (short) crosses.get(i).get(j).get_AssociatedTrackID());
            
             if (crosses.get(i).get(j).get_Dir() != null && 
                     !Double.isNaN(crosses.get(i).get(j).get_Dir().x()) &&
@@ -525,9 +525,9 @@ public class RecoBankWriter {
             }
             for (StateVec stVec : trks.get(i).get_Trajectory()) {
 
-                bank.setInt("ID", k, trks.get(i).get_Id());
-                bank.setInt("LayerTrackIntersPlane", k, stVec.get_SurfaceLayer());
-                bank.setInt("SectorTrackIntersPlane", k, stVec.get_SurfaceSector());
+                bank.setShort("ID", k, (short) trks.get(i).get_Id());
+                bank.setByte("LayerTrackIntersPlane", k, (byte) stVec.get_SurfaceLayer());
+                bank.setByte("SectorTrackIntersPlane", k, (byte) stVec.get_SurfaceSector());
                 bank.setFloat("XtrackIntersPlane", k, (float) (stVec.x()/10.));
                 bank.setFloat("YtrackIntersPlane", k, (float) (stVec.y()/10.));
                 bank.setFloat("ZtrackIntersPlane", k, (float) (stVec.z()/10.));

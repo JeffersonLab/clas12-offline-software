@@ -26,5 +26,8 @@ public class DetectorLayer {
     public static final byte FTOF1B=2;
     public static final byte FTOF2=3;
 
+    public static final byte TARGET_CENTER=1;
+    public static final byte TARGET_DOWNSTREAM=2;
+    public static final byte TARGET_UPSTREAM=3;
 }
 

@@ -24,7 +24,6 @@ services:
     name: CVT
   - class: org.jlab.service.ctof.CTOFEngine
     name: CTOF
-#  - class: org.jlab.service.cnd.CNDEngine
   - class: org.jlab.service.cnd.CNDCalibrationEngine
     name: CND
   - class: org.jlab.service.band.BANDEngine
@@ -51,21 +50,13 @@ configuration:
 #      schema_dir: "/home/clas12-1/chef/myClara/plugins/clas12/etc/bankdefs/dst"
   services:
     MAGFIELDS:
-      torusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
-      solenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
-      solenoidShift: "-1.9"
-      torusXShift: "0.0"
-      torusYShift: "0.0"
-      torusZShift: "0.0"
-    DCHB:
+      magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
+      magfieldTorusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
+      magfieldSolenoidShift: "-1.9"
 # example of how to set variation and timestamp for a service, uncomment to use
+#    EBTB:
 #      variation: default
 #      timestamp: 08/22/2018
-      useStartTime: "true"
-      wireDistortionsFlag: "true"
-      geomDBVariation: may_2018_engineers
-    DCTB:
-      geomDBVariation: may_2018_engineers
 
 mime-types:
   - binary/data-hipo

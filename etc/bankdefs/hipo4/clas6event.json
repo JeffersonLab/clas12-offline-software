@@ -1,0 +1,148 @@
+[
+ {
+  "name": "HEADER::info",
+  "group": 31000,
+  "item" : 1,
+  "info": "Event Header Information",
+  "entries": [
+      {"name": "nrun",      "type": "I",    "info": "run number"},
+      {"name": "nevt",      "type": "I",    "info": "event number"},
+      {"name": "trigger",   "type": "I",    "info": "trigger type"},
+      {"name": "helicity",  "type": "B",    "info": "faraday cup gated"},
+      {"name": "fc",        "type": "F",    "info": "faraday cup"},
+      {"name": "fcg",       "type": "F",    "info": "faraday cup gated"},
+      {"name": "stt",       "type": "F",    "info": "start time"},
+      {"name": "rastr1",    "type": "S",    "info": "rastr 1"},
+      {"name": "rastr2",    "type": "S",    "info": "rastr 2"}
+  ]
+ },
+ {
+  "name": "EVENT::particle",
+  "group": 31000,
+  "item" : 21,
+  "info": "Container Bank for reconstructed CLAS6 Data",
+  "entries": [
+      {"name": "status",  "type": "B",   "info": "status of the particle"},
+      {"name": "charge",  "type": "B",   "info": "charge of the particle"},
+      {"name": "pid",     "type": "I",   "info": "particle ID"},
+      {"name": "mass",    "type": "F",   "info": "particle mass calculated from beta"},
+      {"name": "px",      "type": "F",   "info": "x component of momentum"},
+      {"name": "py",      "type": "F",   "info": "y component of momentum"},
+      {"name": "pz",      "type": "F",   "info": "z component of momentum"},
+      {"name": "vx",      "type": "F",   "info": "x component of vertex"},
+      {"name": "vy",      "type": "F",   "info": "y component of vertex"},
+      {"name": "vz",      "type": "F",   "info": "z component of vertex"},
+      {"name": "dcstat",  "type": "B",   "info": "pointer to dc bank"},
+      {"name": "ecstat",  "type": "B",   "info": "pointer to ec bank"},
+      {"name": "scstat",  "type": "B",   "info": "pointer to sc bank"},
+      {"name": "ccstat",  "type": "B",   "info": "pointer to cc bank"},
+      {"name": "lcstat",  "type": "B",   "info": "pointer to cc bank"}
+  ]
+ },
+ {
+  "name": "EVENT::detector",
+  "group": 31000,
+  "item" : 22,
+  "info": "Detector information for reconstructed CLAS6 Data",
+  "entries": [
+      {"name": "scsector", "type": "I",   "info": "sector of TOF"},
+      {"name": "scpaddle", "type": "I",   "info": "paddle of TOF"},
+      {"name": "ecsector", "type": "I",   "info": "sector of EC"},
+      {"name": "ccnphe",   "type": "F",   "info": "number of photoelectrons in CC"},
+      {"name": "sctime",   "type": "F",   "info": "time in TOF corrected with TOF"},
+      {"name": "scpath",   "type": "F",   "info": "path in TOF corrected with TOF"},
+      {"name": "ectime",   "type": "F",   "info": ""},
+      {"name": "ecpath",   "type": "F",   "info": ""},
+      {"name": "ecin",     "type": "F",   "info": ""},
+      {"name": "ecout",    "type": "F",   "info": ""},
+      {"name": "ectot",    "type": "F",   "info": ""},
+      {"name": "ecu",      "type": "F",   "info": ""},
+      {"name": "ecv",      "type": "F",   "info": ""},
+      {"name": "ecw",      "type": "F",   "info": ""}
+    ]
+ },
+ {
+  "name": "DETECTOR::ecpb",
+  "group": 31000,
+  "item" : 31,
+  "info": "EC detector bank",
+  "entries": [
+      {"name": "sector",   "type": "B",     "info": "hit sector"},
+      {"name": "etot",     "type": "F",     "info": "total  energy of the hit"},
+      {"name": "ein",      "type": "F",     "info": "inner  energy of the hit"},
+      {"name": "eout",     "type": "F",     "info": "outter energy of the hit"},
+      {"name": "time",     "type": "F",     "info": "time of the hit"},
+      {"name": "path",     "type": "F",     "info": "path of the hit"},
+      {"name": "x",        "type": "F",     "info": "x coordinate of the hit"},
+      {"name": "y",        "type": "F",     "info": "y coordinate of the hit"},
+      {"name": "z",        "type": "F",     "info": "z coordinate of the hit"}
+  ]
+ },
+ {
+  "name": "DETECTOR::scpb",
+  "group": 31000,
+  "item" : 32,
+  "info": "SC detector bank",
+  "entries": [
+      {"name": "sector",   "type": "B",     "info": "hit sector"},
+      {"name": "paddle",   "type": "B",     "info": "hit sector"},
+      {"name": "edep",     "type": "F",     "info": "deposited energy"},
+      {"name": "time",     "type": "F",     "info": "time of the hit"},
+      {"name": "path",     "type": "F",     "info": "path of the hit"}
+  ]
+ },
+ {
+  "name": "DETECTOR::ccpb",
+  "group": 31000,
+  "item" : 33,
+  "info": "CC detector bank",
+  "entries": [
+      {"name": "sector",   "type": "B",     "info": "hit sector"},
+      {"name": "nphe",     "type": "F",     "info": "number of photo-electrons"},
+      {"name": "time",     "type": "F",     "info": "time of the hit"},
+      {"name": "path",     "type": "F",     "info": "path of the hit"}
+  ]
+ },
+ {
+  "name": "DETECTOR::lcpb",
+  "group": 31000,
+  "item" : 34,
+  "info": "LC detector bank",
+  "entries": [
+      {"name": "sector",   "type": "B",     "info": "hit sector"},
+      {"name": "etot",     "type": "F",     "info": "total  energy of the hit"},
+      {"name": "ein",      "type": "F",     "info": "inner  energy of the hit"},
+      {"name": "time",     "type": "F",     "info": "time of the hit"},
+      {"name": "path",     "type": "F",     "info": "path of the hit"},
+      {"name": "x",        "type": "F",     "info": "x coordinate of the hit"},
+      {"name": "y",        "type": "F",     "info": "y coordinate of the hit"},
+      {"name": "z",        "type": "F",     "info": "z coordinate of the hit"}
+  ]
+ },
+ {
+  "name": "TAGGER::tgpb",
+  "group": 31000,
+  "item" : 41,
+  "info": "Tagger bank",
+  "entries": [
+      {"name": "status",   "type": "B",     "info": "hit status"},
+      {"name": "tid",      "type": "S",     "info": "T-counter id"},
+      {"name": "eid",      "type": "S",     "info": "E-counter id"},
+      {"name": "time",     "type": "F",     "info": "time of the tagger hit"},
+      {"name": "energy",   "type": "F",     "info": "energy of the tagger hit"}
+    ]
+ },
+ {
+  "name": "DETECTOR::icpb",
+  "group": 31000,
+  "item" : 51,
+  "info": "IC detector bank",
+  "entries": [
+      {"name": "etc",      "type": "F",       "info": "Reconstructed total energy"},
+      {"name": "ecc",      "type": "F",       "info": "Energy of central hit crystal in cluster"},
+      {"name": "tc",       "type": "F",       "info": "Time relative to event start time"},
+      {"name": "xc",       "type": "F",       "info": "x coord of hit (diff from ich_x)"},
+      {"name": "yc",       "type": "F",       "info": "y coord of hit (diff from ich_y)"}
+  ]
+ }
+]

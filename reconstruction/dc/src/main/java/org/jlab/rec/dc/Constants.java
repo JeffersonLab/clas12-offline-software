@@ -160,7 +160,7 @@ public class Constants {
 
     public static int[][] STBLOC;
 
-    private static boolean USETSTART = false;
+    private static boolean USETSTART = true;
 
     public static boolean isUSETSTART() {
         return USETSTART;

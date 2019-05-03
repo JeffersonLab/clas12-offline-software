@@ -154,8 +154,8 @@ public class FTCALReconstruction {
                 return;
             }
             for(int i = 0; i < clusters.size(); i++){
-                            bankCluster.setInt("id", i,clusters.get(i).getID());
-                            bankCluster.setInt("size", i,clusters.get(i).getSize());
+                            bankCluster.setShort("id", i,(short) clusters.get(i).getID());
+                            bankCluster.setShort("size", i,(short) clusters.get(i).getSize());
                             bankCluster.setFloat("x",i,(float) (clusters.get(i).getX()/10.0));
                             bankCluster.setFloat("y",i, (float) (clusters.get(i).getY()/10.0));
                             bankCluster.setFloat("z",i, (float) (clusters.get(i).getZ()/10.0));
@@ -256,10 +256,10 @@ public class FTCALReconstruction {
             DataBank bankDGTZ = event.getBank("FTCAL::adc");
             int nrows = bankDGTZ.rows();
             for(int row = 0; row < nrows; row++){
-                int isector     = bankDGTZ.getInt("sector",row);
-                int ilayer      = bankDGTZ.getInt("layer",row);
-                int icomponent  = bankDGTZ.getInt("component",row);
-                int iorder      = bankDGTZ.getInt("order",row);
+                int isector     = bankDGTZ.getByte("sector",row);
+                int ilayer      = bankDGTZ.getByte("layer",row);
+                int icomponent  = bankDGTZ.getShort("component",row);
+                int iorder      = bankDGTZ.getByte("order",row);
                 int adc         = bankDGTZ.getInt("ADC",row);
                 float time      = bankDGTZ.getFloat("time",row);
                 if(adc!=-1 && time!=-1){

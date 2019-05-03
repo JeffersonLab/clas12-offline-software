@@ -21,10 +21,13 @@ import org.jlab.detector.decode.DetectorDataDgtz.ADCData;
 import org.jlab.detector.decode.DetectorDataDgtz.SCALERData;
 import org.jlab.detector.decode.DetectorDataDgtz.TDCData;
 import org.jlab.detector.decode.DetectorDataDgtz.VTPData;
+import org.jlab.detector.helicity.HelicityBit;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioSource;
 import org.jlab.io.evio.EvioTreeBranch;
 import org.jlab.utils.data.DataUtils;
+
+import org.jlab.jnp.utils.json.JsonObject;
 
 //import sun.awt.image.IntegerComponentRaster;
 
@@ -40,7 +43,9 @@ public class CodaEventDecoder {
     private long  timeStamp = 0L;
     private int timeStampErrors = 0;
     private long    triggerBits = 0;
+    private byte helicityLevel3 = HelicityBit.UDF.value();
     private List<Integer> triggerWords = new ArrayList<>(); 
+    JsonObject  epicsData = new JsonObject();
 
     public CodaEventDecoder(){
 
@@ -67,9 +72,15 @@ public class CodaEventDecoder {
         rawEntries.addAll(vtpEntries);
         List<DetectorDataDgtz>  scalerEntries = this.getDataEntries_Scalers(event);
         rawEntries.addAll(scalerEntries);
+
+        this.getDataEntries_EPICS(event);
         this.setTimeStamp(event);
-//        this.getDataEntries_Epics(event);
+
         return rawEntries;
+    }
+
+    public JsonObject getEpicsData(){
+        return this.epicsData;
     }
 
     public List<Integer> getTriggerWords(){
@@ -100,7 +111,11 @@ public class CodaEventDecoder {
     }
 
     public long getTimeStamp() {
-        return timeStamp;
+        return this.timeStamp;
+    }
+
+    public byte getHelicityLevel3() {
+        return this.helicityLevel3;
     }
 
     public void setTimeStamp(EvioDataEvent event) {
@@ -335,6 +350,15 @@ public class CodaEventDecoder {
                 this.runNumber = intData[3];
                 this.eventNumber = intData[4];
                 if(intData[5]!=0) this.unixTime  = intData[5];
+                if ( (intData[7] & 0x1) == 0) {
+                    this.helicityLevel3=HelicityBit.UDF.value();
+                }
+                else if ((intData[7]>>1 & 0x1) == 0) {
+                    this.helicityLevel3=HelicityBit.MINUS.value();
+                }
+                else {
+                    this.helicityLevel3=HelicityBit.PLUS.value();
+                }
                 /*System.out.println(" set run number and event nubmber = "
                 + this.runNumber + "  " + this.eventNumber + "  " + this.unixTime + "  " + intData[5]
                 );
@@ -1069,25 +1093,33 @@ public class CodaEventDecoder {
         return entries;
     }
 
-    public List<DetectorDataDgtz> getDataEntries_Epics(EvioDataEvent event){
-        List<DetectorDataDgtz> epicsEntries = new ArrayList<DetectorDataDgtz>();
+    public void getDataEntries_EPICS(EvioDataEvent event){
+        epicsData = new JsonObject();
         List<EvioTreeBranch> branches = this.getEventBranches(event);
         for(EvioTreeBranch branch : branches){
-            int  crate = branch.getTag();
-//            EvioTreeBranch cbranch = this.getEventBranch(branches, branch.getTag());
             for(EvioNode node : branch.getNodes()){
                 if(node.getTag()==57620) {
                     byte[] stringData =  ByteDataTransformer.toByteArray(node.getStructureBuffer(true));
-//                    System.out.println("Found epics bank " + stringData.length);
-                    String value = new String(stringData);
-//                    System.out.println(stringData.length + " " + value);
-//                    for(int i=0; i<stringData.length; i++) {
-//                        System.out.println(stringData.length + " " + i + " " + stringData[i]);                        
-//                    }
+                    //System.out.println("Found epics bank " + stringData.length);
+                    String cdata = new String(stringData);
+                    String[] vars = cdata.trim().split("\n");
+                    for (String var : vars) {
+                        String[] fields=var.trim().replaceAll("  "," ").split(" ");
+                        if (fields.length != 2) continue;
+                        String key = fields[1].trim();
+                        String sval = fields[0].trim();
+                        try {
+                            float fval = Float.parseFloat(sval);
+                            epicsData.add(key,fval);
+                        }
+                        catch (NumberFormatException e) {
+                            System.err.println("WARNING:  Ignoring EPICS Bank row:  "+var);
+                        }
+                    }
+                    //System.out.println(epicsData);
                 }
             }
         }
-        return epicsEntries;
     }
 
     public List<DetectorDataDgtz> getDataEntries_Scalers(EvioDataEvent event){

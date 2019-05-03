@@ -26,7 +26,7 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
         this.helices = helices;
     }
 
-    public void getCvtHTrack(DataEvent event) {
+    public void getCvtHTrack(DataEvent event, CalibrationConstantsLoader ccdb) {
 
         helices.clear();
 
@@ -103,9 +103,9 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
                 // first index 0...2 is layer index
                 // second index 0...2 corresponds to entrance, middle and exit of track wrt the counter
                 for (int lay = 1; lay <= 3; lay++) {
-                    double radius       = CalibrationConstantsLoader.INNERRADIUS[0] + (lay - 0.5) * CalibrationConstantsLoader.THICKNESS[0] + (lay - 1) * Parameters.LayerGap;
-                    double entryradius  = CalibrationConstantsLoader.INNERRADIUS[0] + (lay - 1) * CalibrationConstantsLoader.THICKNESS[0] + (lay - 1) * Parameters.LayerGap;
-                    double escaperadius = CalibrationConstantsLoader.INNERRADIUS[0] + (lay) * CalibrationConstantsLoader.THICKNESS[0] + (lay - 1) * Parameters.LayerGap;
+                    double radius       = ccdb.INNERRADIUS[0] + (lay - 0.5) * ccdb.THICKNESS[0] + (lay - 1) * Parameters.LayerGap;
+                    double entryradius  = ccdb.INNERRADIUS[0] + (lay - 1) * ccdb.THICKNESS[0] + (lay - 1) * Parameters.LayerGap;
+                    double escaperadius = ccdb.INNERRADIUS[0] + (lay) * ccdb.THICKNESS[0] + (lay - 1) * Parameters.LayerGap;
                     trk._TrkInters.get(lay - 1).add(trk.get_Helix().getPointAtRadius(entryradius));
                     Point3D Xm = trk.get_Helix().getPointAtRadius(radius);
                     trk._TrkInters.get(lay - 1).add(Xm);

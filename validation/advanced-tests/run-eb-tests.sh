@@ -1,7 +1,7 @@
 #!/bin/bash
 
 webDir=http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/eb
-webVersion=4a.2.5-fid-r11
+webVersion=4.3.0-fid-r11
 webDir=$webDir/$webVersion
 
 # coatjava must already be built at ../../coatjava/
@@ -20,10 +20,10 @@ then
 fi
 
 # geometry variation for DC
-geoDbVariation="may_2018_engineers"
+geoDbVariation="default"
 if [[ $webVersion = *"4a.2.2"* ]] || [[ $webVersion = *"4a.2.3"* ]] || [[ $webVersion = *"4a.2.4"* ]]
 then
-    geoDbVariation="default"
+    geoDbVariation="dc_geo_gemc424"
 fi
 
 nEvents=-1
