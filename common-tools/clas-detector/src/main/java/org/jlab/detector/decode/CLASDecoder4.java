@@ -471,7 +471,6 @@ public class CLASDecoder4 {
         int   localTime = this.codaDecoder.getUnixTime();
         long  timeStamp = this.codaDecoder.getTimeStamp();
         long triggerBits = this.codaDecoder.getTriggerBits();
-        byte  helicityL3 = this.codaDecoder.getHelicityLevel3();
 
         if(nrun>0){
             localRun = nrun;
@@ -488,10 +487,6 @@ public class CLASDecoder4 {
         }
         */
 
-        // retrieve fcup calibrations from CCDB:
-        IndexedTable hwpTable = this.detectorDecoder.scalerManager.
-                getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/hwp");
-
         bank.putInt("run",        0, localRun);
         bank.putInt("event",      0, localEvent);
         bank.putInt("unixtime",   0, localTime);
@@ -499,9 +494,18 @@ public class CLASDecoder4 {
         bank.putFloat("torus",    0, torus);
         bank.putFloat("solenoid", 0, solenoid);
         bank.putLong("timestamp", 0, timeStamp);
-        bank.putByte("helicityRawL3",0, helicityL3);
-        bank.putByte("helicityL3",0,(byte)(helicityL3*hwpTable.getIntValue("hwp",0,0,0)));
 
+        return bank;
+    }
+
+    public Bank createOnlineHelicityBank() {
+        if (schemaFactory.hasSchema("HEL::online")==false) return null;
+        Bank bank = new Bank(schemaFactory.getSchema("HEL::online"), 1);
+        byte  helicityL3 = this.codaDecoder.getHelicityLevel3();
+        IndexedTable hwpTable = this.detectorDecoder.scalerManager.
+                getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/hwp");
+        bank.putByte("helicityRaw",0, helicityL3);
+        bank.putByte("helicity",0,(byte)(helicityL3*hwpTable.getIntValue("hwp",0,0,0)));
         return bank;
     }
 
@@ -708,6 +712,8 @@ public class CLASDecoder4 {
                     if(header!=null) decodedEvent.write(header);
                     Bank   trigger = decoder.createTriggerBank();
                     if(trigger!=null) decodedEvent.write(trigger);
+                    Bank onlineHelicity = decoder.createOnlineHelicityBank();
+                    if(onlineHelicity!=null) decodedEvent.write(onlineHelicity);
                     //decodedEvent.appendBanks(header);
                     //decodedEvent.appendBanks(trigger);
 
