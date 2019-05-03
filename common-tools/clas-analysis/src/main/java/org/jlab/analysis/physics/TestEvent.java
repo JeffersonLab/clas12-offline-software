@@ -33,7 +33,7 @@ public class TestEvent {
 		config.putFloat("solenoid", 0, (float) 0.0);
 		
                 Bank event = new Bank(schemaFactory.getSchema("RECHB::Event"), 1);
-		event.putFloat("STTime", 0, (float) 124.25);
+		event.putFloat("startTime", 0, (float) 124.25);
 
 
                 int[] layer = {    1,   2,   3,   4,   5,   6,   7,   8,   9,  10

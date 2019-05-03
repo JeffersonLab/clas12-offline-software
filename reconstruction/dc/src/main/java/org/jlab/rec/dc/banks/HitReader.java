@@ -303,7 +303,7 @@ public class HitReader {
                     event.getBank("RUN::config").getInt("run", 0) > 100) {
                 T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
                 if (event.hasBank("RECHB::Event"))
-                    T_Start = event.getBank("RECHB::Event").getFloat("STTime", 0);
+                    T_Start = event.getBank("RECHB::Event").getFloat("startTime", 0);
             }
 
             FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], tdc[i], id[i]);
@@ -375,7 +375,7 @@ public class HitReader {
         int[] trkID = new int[rows];
         double[] tProp = new double[rows];
         double[] tFlight = new double[rows];
-        double startTime = (double) event.getBank("REC::Event").getFloat("STTime", 0);
+        double startTime = (double) event.getBank("REC::Event").getFloat("startTime", 0);
 
         if (startTime < 0)
             return;

@@ -508,7 +508,7 @@ public class EBTwoTrackTest {
             recPartBank.show();
         }
 
-        final float startTime=recBank.getFloat("STTime",0);
+        final float startTime=recBank.getFloat("startTime",0);
 
         for (int ii=0; ii<recPartBank.rows(); ii++) {
             if (recPartBank.getShort("status",ii)/1000 == 1) {

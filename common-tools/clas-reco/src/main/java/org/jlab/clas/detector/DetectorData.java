@@ -315,18 +315,17 @@ public class DetectorData {
 
    public static DataBank getEventBank(DetectorEvent detectorEvent, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, 1);
-       bank.setLong("TRG", 0, detectorEvent.getEventHeader().getTrigger());
-       bank.setFloat("STTime", 0, (float) detectorEvent.getEventHeader().getStartTime());
+       bank.setFloat("startTime", 0, (float) detectorEvent.getEventHeader().getStartTime());
        bank.setFloat("RFTime", 0, (float) detectorEvent.getEventHeader().getRfTime());
-       bank.setByte("Helic", 0, detectorEvent.getEventHeader().getHelicity());
-       bank.setFloat("BCG", 0, detectorEvent.getEventHeader().getBeamChargeGated());
-       bank.setDouble("LT", 0, detectorEvent.getEventHeader().getLivetime());
-       bank.setShort("EvCAT", 0, detectorEvent.getEventHeader().getEventCategory());
+       bank.setByte("helicity", 0, detectorEvent.getEventHeader().getHelicity());
+       bank.setByte("helicityRaw", 0, detectorEvent.getEventHeader().getHelicityRaw());
+       bank.setFloat("beamCharge", 0, detectorEvent.getEventHeader().getBeamChargeGated());
+       bank.setDouble("liveTime", 0, detectorEvent.getEventHeader().getLivetime());
        return bank;
    }
    public static DataBank getEventShadowBank(DetectorEvent detectorEvent, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, 1);
-       bank.setFloat("STTime", 0, (float) detectorEvent.getEventHeader().getStartTimeFT());
+       bank.setFloat("startTime", 0, (float) detectorEvent.getEventHeader().getStartTimeFT());
        bank.setShort("EvCAT", 0, detectorEvent.getEventHeader().getEventCategoryFT());
        return bank;
    }

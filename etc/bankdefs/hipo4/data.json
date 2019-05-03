@@ -421,6 +421,16 @@
       ]
   },
   {
+      "name": "HEL::online",
+      "group": 22000,
+      "item":  13,
+      "info": "Helicity with online delay-correction in Level3 trigger",
+      "entries":[
+          {"name":"helicity",   "type":"B", "info":"online-delay-corrected helicity, with HWP-correction (0=UDF)"},
+          {"name":"helicityRaw","type":"B", "info":"online-delay-corrected helicity (0=UDF)"}
+      ]
+  },
+  {
     "name" : "RAW::adc",
     "group": 20000,
     "item" : 11,

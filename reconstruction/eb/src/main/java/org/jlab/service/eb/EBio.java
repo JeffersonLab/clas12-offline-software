@@ -35,7 +35,7 @@ public class EBio {
         }
 
         // helicity:
-        if(event.hasBank("HEL::adc")) {
+        if(ccdb.getInteger(EBCCDBEnum.HELICITY_delay)==0 && event.hasBank("HEL::adc")) {
             final int helComponent=1;
             final int helHalf=2000;
             DataBank bank = event.getBank("HEL::adc");
@@ -43,9 +43,8 @@ public class EBio {
                 if (bank.getInt("component",ii)==helComponent) {
                     byte helicity=-1;
                     if (bank.getInt("ped",ii)>helHalf) helicity=1;
-                    // correct for HWP position:
-                    helicity *= ccdb.getInteger(EBCCDBEnum.HWP_position);
-                    dHeader.setHelicity(helicity);
+                    dHeader.setHelicityRaw(helicity);
+                    dHeader.setHelicity((byte)(helicity*ccdb.getInteger(EBCCDBEnum.HWP_position)));
                     break;
                 }
             }
