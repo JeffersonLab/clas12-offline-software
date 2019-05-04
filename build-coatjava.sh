@@ -46,7 +46,7 @@ if [ $downloadMaps == "yes" ]; then
   locDir=etc/data/magfield
   mkdir -p $locDir
   cd $locDir
-  for map in $COAT_MAGFIELD_SOLENOIDMAP $COAT_MAGFIELD_TORUSMAP
+  for map in $COAT_MAGFIELD_SOLENOIDMAP $COAT_MAGFIELD_TORUSMAP $COAT_MAGFIELD_TORUSSECONDARYMAP
   do
     # -N only redownloads if timestamp/filesize is newer/different
     $wget -N --no-check-certificate $webDir/$map
@@ -65,8 +65,8 @@ cp external-dependencies/JEventViewer-1.1.jar coatjava/lib/clas/
 cp external-dependencies/vecmath-1.3.1-2.jar coatjava/lib/clas/
 mkdir -p coatjava/lib/utils
 cp external-dependencies/jclara-4.3-SNAPSHOT.jar coatjava/lib/utils
-cp external-dependencies/clas12mon-3.0.jar coatjava/lib/utils
-cp external-dependencies/KPP-Plots-2.0.jar coatjava/lib/utils
+cp external-dependencies/clas12mon-3.1.jar coatjava/lib/utils
+cp external-dependencies/KPP-Plots-3.0.jar coatjava/lib/utils
 #cp external-dependencies/jaw-1.0.jar coatjava/lib/utils
 mkdir -p coatjava/lib/services
 

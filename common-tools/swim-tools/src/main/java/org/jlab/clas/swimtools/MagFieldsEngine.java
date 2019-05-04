@@ -1,14 +1,18 @@
 package org.jlab.clas.swimtools;
 
 import cnuphys.magfield.MagneticFields;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.utils.CLASResources;
+import org.jlab.utils.groups.IndexedTable;
 
 public class MagFieldsEngine extends ReconstructionEngine {
 
+    private String solShift =null;
+    
     public MagFieldsEngine() {
         super("MagFields","ziegler","1.0");
     }
@@ -53,7 +57,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
         }
 
          // Field Shifts
-        String solShift = this.getEngineConfigString("magfieldSolenoidShift");
+        solShift = this.getEngineConfigString("magfieldSolenoidShift");
         
         if (solShift!=null) {
             System.out.println("["+this.getName()+"] run with solenoid z shift in tracking config chosen based on yaml = "+solShift+" cm");
@@ -67,7 +71,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
             }
         }
         if (solShift==null) {
-            System.out.println("["+this.getName()+"] run with solenoid z shift in tracking set to 0 cm");
+            System.out.println("["+this.getName()+"] run with solenoid z shift based on CCDB CD position");
             // this.solenoidShift = (float) 0;
         }
         //torus:
@@ -126,6 +130,14 @@ public class MagFieldsEngine extends ReconstructionEngine {
         }
     }
     
+    private void loadTables() {
+        String[]  ccdbTables = new String[]{ "/geometry/target"};
+
+        requireConstants(Arrays.asList(ccdbTables));
+        this.getConstantsManager().setVariation("default");
+                
+    }
+
     @Override
     public boolean processDataEvent(DataEvent event) {
         DataBank bank = event.getBank("RUN::config");
@@ -135,10 +147,12 @@ public class MagFieldsEngine extends ReconstructionEngine {
         if(newRun==0)
             return true;
         
-        //double shift =0;
-        //if(newRun>1890) {
-        //    shift = -1.9;
-        //}
+        if(solShift==null) { // if no shift is set in the yaml file or environment, read from CCDB
+            // will read target position and assume that is representative of the shift of the whole CD
+            IndexedTable targetPosition = this.getConstantsManager().getConstants(newRun, "/geometry/target");
+            Swimmer.set_zShift((float) targetPosition.getDoubleValue("position", 0,0,0));
+        }
+        
         Swimmer.setMagneticFieldsScales(bank.getFloat("solenoid", 0), bank.getFloat("torus", 0), 
                 (double) 0.0, (double) 0.0, (double)Swimmer.get_zShift(),
                 (double)Swimmer.getTorXShift(), (double)Swimmer.getTorYShift(), (double)Swimmer.getTorZShift());
@@ -149,6 +163,7 @@ public class MagFieldsEngine extends ReconstructionEngine {
 
     @Override
     public boolean init() {
+        this.loadTables();
         this.initializeMagneticFields();
         return true;
     }

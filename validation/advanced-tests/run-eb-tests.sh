@@ -140,7 +140,7 @@ then
     then
         GEOMDBVAR=$geoDbVariation
         export GEOMDBVAR
-        ../../coatjava/bin/notsouseful-util -i ${webFileStub}.hipo -o out_${webFileStub}.hipo -c 2
+        ../../coatjava/bin/recon-util -i ${webFileStub}.hipo -o out_${webFileStub}.hipo -c 2
     else
         echo "set inputDir $PWD/" > cook.clara
         echo "set outputDir $PWD/" >> cook.clara

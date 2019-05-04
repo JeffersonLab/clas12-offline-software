@@ -197,7 +197,7 @@ public class CndHitFinder {
 					else if (hit_d.Component() == 2) phi_hit = (block-1) * Parameters.BlockSlice + 0.75*Parameters.BlockSlice;
 
 					//in mm
-					z_hit = (((-1.*ccdb.ZOFFSET[lay-1]) + (ccdb.LENGTH[lay-1]/2.)) + Z_av)-(ccdb.ZTARGET[0]*10);    // z co-ordinate of hit in the paddle wrt Central Detector centre                                                                   
+					z_hit = (((-1.*ccdb.ZOFFSET[lay-1]) + (ccdb.LENGTH[lay-1]/2.)) + Z_av)+(ccdb.ZTARGET[0]*10);    // z co-ordinate of hit in the paddle wrt Central Detector centre                                                                   
 					r_hit = ccdb.INNERRADIUS[0] + (lay - 0.5)*ccdb.THICKNESS[0] + (lay-1)*Parameters.LayerGap;
 					path = Math.sqrt(r_hit*r_hit + z_hit*z_hit); 
 

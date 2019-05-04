@@ -91,6 +91,9 @@ public class CCDBConstantsLoader {
         //beam offset table
         dbprovider.loadTable("/geometry/beam/position");
         
+        //target position table
+        dbprovider.loadTable("/geometry/target");
+        
         dbprovider.disconnect();
         
       //  dbprovider.show();
@@ -252,6 +255,10 @@ public class CCDBConstantsLoader {
         org.jlab.rec.cvt.Constants.setXb(xb);
         org.jlab.rec.cvt.Constants.setYb(yb);
         org.jlab.rec.cvt.Constants.setRbErr(err);
+        
+        // target position
+        double ztarget = dbprovider.getDouble("/geometry/target/position", 0);
+        org.jlab.rec.cvt.Constants.setZoffset(ztarget);
          
         Constants.setCRCRADIUS(CRCRADIUS);
         Constants.setCRZRADIUS(CRZRADIUS);

@@ -32,6 +32,8 @@ public class Constants {
     private static double _Xb =0;
     private static double _Yb =0;
     private static double _RbErr = 1./Math.sqrt(12.);
+    
+    private static double _Zoffset = 0;
 
     public static double getXb() {
         return _Xb;
@@ -55,6 +57,14 @@ public class Constants {
 
     public static synchronized void setRbErr(double RbErr) {
         _RbErr = RbErr;
+    }
+
+    public static double getZoffset() {
+        return _Zoffset;
+    }
+
+    public static void setZoffset(double _Zoffset) {
+        Constants._Zoffset = _Zoffset;
     }
 
     //public static final boolean DEBUGMODE =false;
