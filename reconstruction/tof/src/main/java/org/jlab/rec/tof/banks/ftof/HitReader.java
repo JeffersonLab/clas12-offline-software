@@ -72,7 +72,8 @@ public class HitReader implements IMatchedHit {
             IndexedTable constants5, 
             IndexedTable constants6, 
             IndexedTable constants7, 
-            IndexedTable constants8) {/*
+            IndexedTable constants8, 
+            IndexedTable constants9) {/*
         0: "/calibration/ftof/attenuation"),
         1: "/calibration/ftof/effective_velocity"),
         2: "/calibration/ftof/time_offsets"),
@@ -81,7 +82,8 @@ public class HitReader implements IMatchedHit {
         5: "/calibration/ftof/gain_balance"),
         6: "/calibration/ftof/tdc_conv"),
         7: "/calibration/ftof/time_jitter"),
-        8: "/calibration/ftof/time_walk_pos") );
+        8: "/calibration/ftof/time_walk_pos"),
+        9: "/calibration/ftof/fadc_offset") );
         */
         _numTrks = tracks.size();
 
@@ -89,7 +91,7 @@ public class HitReader implements IMatchedHit {
         
         BaseHitReader hitReader = new BaseHitReader();
         IMatchedHit MH = this;
-        List<BaseHit> hitList = hitReader.get_MatchedHits(event, MH, triggerPhase, constants6, constants7);
+        List<BaseHit> hitList = hitReader.get_MatchedHits(event, MH, triggerPhase, constants6, constants9);
 
         if (hitList.size() == 0) {
             // System.err.println("there is no FTOF bank ");
@@ -402,15 +404,16 @@ public class HitReader implements IMatchedHit {
     @Override
     public List<BaseHit> MatchHits(ArrayList<BaseHit> ADCandTDCLists, double timeJitter, IndexedTable tdcConv, IndexedTable ADCandTDCOffsets) {
         ArrayList<BaseHit> matchLists = new ArrayList<BaseHit>();
-
+        int debug=0;
         if (ADCandTDCLists != null) {
             Collections.sort(ADCandTDCLists);
-//            System.out.println("Sorted");
-//            for (BaseHit h : ADCandTDCLists) {
-//                System.out.println(" : " + h.get_Sector() + " " + h.get_Layer() + " " + h.get_Component() + " "
-//                        + h.ADC1 + " " + h.ADC2 + " " + h.TDC1 + " " + h.TDC2 + " i: " + h.ADCbankHitIdx1 + " " + h.ADCbankHitIdx2
-//                        + " " + h.TDCbankHitIdx1 + " " + h.TDCbankHitIdx2);
-//            }
+            
+            if(debug>1) { 
+                System.out.println("List of hits for matching");
+                for(BaseHit h : ADCandTDCLists)
+                System.out.println(h.get_Sector()+":"+h.get_Layer()+":"+h.get_Component()+"   --   "+h.ADC1+"; "+h.ADC2+"; "+h.ADCTime1+"; "+h.ADCTime2+"; "+h.TDC1+"; "+h.TDC2+"; ");
+            }
+                
             double t1 = -1;
             double t2 = -1; // t1, t2 not yet used in selection
             int adc1 = -1;
@@ -429,43 +432,77 @@ public class HitReader implements IMatchedHit {
 
             for (int i = 0; i < ADCandTDCLists.size(); i++) {
                 BaseHit h = ADCandTDCLists.get(i);
+                double tdconv1 = tdcConv.getDoubleValue("left",   h.get_Sector(), h.get_Layer(), h.get_Component());
+                double tdconv2 = tdcConv.getDoubleValue("right",  h.get_Sector(), h.get_Layer(), h.get_Component());
+                double offset1 = ADCandTDCOffsets.getDoubleValue("left",  h.get_Sector(), h.get_Layer(), h.get_Component());
+                double offset2 = ADCandTDCOffsets.getDoubleValue("right", h.get_Sector(), h.get_Layer(), h.get_Component());
+                double width   = ADCandTDCOffsets.getDoubleValue("width", h.get_Sector(), h.get_Layer(), h.get_Component());
+                if(debug>1) System.out.println("Working on hit " + i + "   --   "+h.ADC1+"; "+h.ADC2+"; "+h.ADCTime1+"; "+h.ADCTime2+"; "+h.TDC1+"; "+h.TDC2+"; ");
                 if (h.get_ADC1() > 0) {
                     adc1 = h.get_ADC1();
                     if (h.get_ADCTime1() > 0) {
                         t1 = h.get_ADCTime1();
+                    }                    
+                    if (adc2 > 0 && Math.abs(adc1 - adc2) < 8000) {
+                        hitlists.get(index1).add(h); // matched hit
+                        if(debug>1) System.out.println("ADC1 hit added to " + index1 + ", advancing pointer to next hit");
+                        index1++;
                     }
-
-                    hitlists.get(index1).add(h);
-                    index1++;
+                    if (adc2 == -1) {
+                        hitlists.get(index1).add(h); // not matched hit
+                        if(debug>1) System.out.println("New ADC1 hit created, advancing pointer to next hit");
+                        index1++;
+                    }                    
                 }
                 if (h.get_ADC2() > 0) {
                     adc2 = h.get_ADC2();
                     if (h.get_ADCTime2() > 0) {
                         t2 = h.get_ADCTime2();
                     }
-
                     if (adc1 > 0 && Math.abs(adc1 - adc2) < 8000) {
                         hitlists.get(index2).add(h); // matched hit
+                        if(debug>1) System.out.println("ADC2 hit added to " + index2 + ", advancing pointer to next hit");
                         index2++;
                     }
                     if (adc1 == -1) {
                         hitlists.get(index2).add(h); // not matched hit
+                        if(debug>1) System.out.println("New ADC2 hit created, advancing pointer to next hit");
                         index2++;
                     }
                 }
                 if (h.get_TDC1() > 0) {
                     tdc1 = h.get_TDC1();
-                    hitlists.get(index3).add(h);
-                    index3++;
+                    if(debug>1) System.out.println("TDC check value : " + Math.abs(tdc1 * tdconv1 -timeJitter - (t1 + offset1)) + " to be compared to width of " + width);
+                    if (adc1 > 0 && Math.abs(tdc1 * tdconv1 -timeJitter - (t1 + offset1)) < width) {
+                        hitlists.get(index3).add(h);
+                        if(debug>1) System.out.println("TDC1 hit added to " + index3 + ", advancing pointer to next hit");
+                        index3++;
+                    }
+                    if (adc1 == -1) {
+                        hitlists.get(index3).add(h); // not matched hit
+                        if(debug>1) System.out.println("New TDC1 hit created, advancing pointer to next hit");
+                        index3++;
+                    }
                 }
                 if (h.get_TDC2() > 0) {
                     tdc2 = h.get_TDC2();
-                    if (tdc1 > 0 && Math.abs(tdc1 - tdc2) * 24. / 1000. < 35) {
+//                    if (tdc1 > 0 && Math.abs(tdc1 - tdc2) * 24. / 1000. < 50) {
+//                        hitlists.get(index4).add(h);
+//                        index4++;
+//                    }
+//                    if (tdc1 == -1) {
+//                        hitlists.get(index4).add(h); // not matched hit
+//                        index4++;
+//                    }
+                    if(debug>1) System.out.println("TDC check value : " + Math.abs(tdc2 * tdconv2 -timeJitter - (t2 + offset2)) + " to be compared to width of " + width);
+                    if (adc2 > 0 && Math.abs(tdc2 * tdconv2 -timeJitter - (t2 + offset2)) < width) {
                         hitlists.get(index4).add(h);
+                        if(debug>1) System.out.println("TDC2 hit added to " + index4 + ", advancing pointer to next hit");
                         index4++;
                     }
-                    if (tdc1 == -1) {
+                    if (adc2 == -1) {
                         hitlists.get(index4).add(h); // not matched hit
+                        if(debug>1) System.out.println("New TDC2 hit created, advancing pointer to next hit");
                         index4++;
                     }
                 }
@@ -535,9 +572,8 @@ public class HitReader implements IMatchedHit {
                     hit.TDCbankHitIdx2 = tdc_idx2;
 
                     matchLists.add(hit);
-//                    System.out.println(i+")  s "+hit.get_Sector()+" l "+hit.get_Layer()+" c "+hit.get_Component()+" adcL "+hit.get_ADC1()+" adcR "+hit.get_ADC2()+" tdcL "+
-//                                                 hit.get_TDC1()+" tdcR "+hit.get_TDC2());
-
+                    if(debug>1) System.out.println(i+")  s "+hit.get_Sector()+" l "+hit.get_Layer()+" c "+hit.get_Component()+" adcL "+hit.get_ADC1()+" adcR "+hit.get_ADC2()+" tdcL "+
+                    hit.get_TDC1()+" tdcR "+hit.get_TDC2() +" tdcLx "+hit.TDCbankHitIdx1+" tdcRx "+hit.TDCbankHitIdx2);
                 }
             }
 
