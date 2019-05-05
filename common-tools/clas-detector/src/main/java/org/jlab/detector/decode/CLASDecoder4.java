@@ -12,6 +12,7 @@ import java.sql.Time;
 import java.util.Date;
 
 import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.helicity.HelicityBit;
 import org.jlab.detector.helicity.HelicityState;
 
 import org.jlab.io.base.DataEvent;
@@ -499,7 +500,8 @@ public class CLASDecoder4 {
     }
 
     public Bank createOnlineHelicityBank() {
-        if (schemaFactory.hasSchema("HEL::online")==false) return null;
+        if (schemaFactory.hasSchema("HEL::online")==false ||
+            this.codaDecoder.getHelicityLevel3()==HelicityBit.NAN.value()) return null;
         Bank bank = new Bank(schemaFactory.getSchema("HEL::online"), 1);
         byte  helicityL3 = this.codaDecoder.getHelicityLevel3();
         IndexedTable hwpTable = this.detectorDecoder.scalerManager.
