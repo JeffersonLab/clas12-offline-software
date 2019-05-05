@@ -164,7 +164,7 @@ public class HitReader implements IMatchedHit {
             hit.set_StatusWord(this.set_StatusWord(hit.Status1(constants4), hit.Status2(constants4), ADCL[i], TDCL[i], ADCR[i], TDCR[i]));
             hit.setPaddleLine(geometry);
             // add this hit
-            hits.add(hit);
+            if(passHit(hit))hits.add(hit);
         }
         List<Hit> updated_hits = matchHitsToDCTrk(hits, geometry, tracks);
 
@@ -286,6 +286,16 @@ public class HitReader implements IMatchedHit {
         }
         return statusWord;
 
+    }
+
+    private boolean passHit(Hit hit) {
+        // drop hits that miss both ADCs or both TDCs
+        boolean pass = false;
+        String status = hit.get_StatusWord();
+        if (status.equals("1111") ) {
+            pass = true;
+        }
+        return pass;
     }
 
     private int passTDC(int tDC) {
