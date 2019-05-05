@@ -350,7 +350,7 @@ public class CodaEventDecoder {
                 this.runNumber = intData[3];
                 this.eventNumber = intData[4];
                 if(intData[5]!=0) this.unixTime  = intData[5];
-                this.helicityLevel3=HelicityBit.NAN.value();
+                this.helicityLevel3=HelicityBit.DNE.value();
                 if(intData.length>7) {
                     if ( (intData[7] & 0x1) == 0) {
                         this.helicityLevel3=HelicityBit.UDF.value();

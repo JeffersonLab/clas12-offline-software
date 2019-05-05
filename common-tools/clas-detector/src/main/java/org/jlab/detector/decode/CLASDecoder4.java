@@ -501,7 +501,7 @@ public class CLASDecoder4 {
 
     public Bank createOnlineHelicityBank() {
         if (schemaFactory.hasSchema("HEL::online")==false ||
-            this.codaDecoder.getHelicityLevel3()==HelicityBit.NAN.value()) return null;
+            this.codaDecoder.getHelicityLevel3()==HelicityBit.DNE.value()) return null;
         Bank bank = new Bank(schemaFactory.getSchema("HEL::online"), 1);
         byte  helicityL3 = this.codaDecoder.getHelicityLevel3();
         IndexedTable hwpTable = this.detectorDecoder.scalerManager.
