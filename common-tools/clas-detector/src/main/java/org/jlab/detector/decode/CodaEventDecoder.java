@@ -350,16 +350,18 @@ public class CodaEventDecoder {
                 this.runNumber = intData[3];
                 this.eventNumber = intData[4];
                 if(intData[5]!=0) this.unixTime  = intData[5];
-                if ( (intData[7] & 0x1) == 0) {
-                    this.helicityLevel3=HelicityBit.UDF.value();
-                }
-                else if ((intData[7]>>1 & 0x1) == 0) {
-                    this.helicityLevel3=HelicityBit.MINUS.value();
-                }
-                else {
-                    this.helicityLevel3=HelicityBit.PLUS.value();
-                }
-                /*System.out.println(" set run number and event nubmber = "
+                this.helicityLevel3=HelicityBit.DNE.value();
+                if(intData.length>7) {
+                    if ( (intData[7] & 0x1) == 0) {
+                        this.helicityLevel3=HelicityBit.UDF.value();
+                    }
+                    else if ((intData[7]>>1 & 0x1) == 0) {
+                        this.helicityLevel3=HelicityBit.MINUS.value();
+                    }
+                    else {
+                        this.helicityLevel3=HelicityBit.PLUS.value();
+                    }
+                }                /*System.out.println(" set run number and event nubmber = "
                 + this.runNumber + "  " + this.eventNumber + "  " + this.unixTime + "  " + intData[5]
                 );
                 System.out.println(" EVENT BUFFER LENGTH = " + intData.length);

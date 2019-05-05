@@ -9,6 +9,7 @@ package org.jlab.detector.helicity;
  */
 public enum HelicityBit {
 
+    DNE   (  9 ),
     UDF   (  0 ),
     PLUS  (  1 ),
     MINUS ( -1 );
