@@ -238,6 +238,7 @@ public class HipoDataEvent implements DataEvent {
     }*/
     
     public byte[] getByte(String path) {
+        
         /*HipoNode node = this.getHipoNodeByPath(path);        
         if(node==null){
             System.out.println("\n>>>>> error : getting node failed : " + path);
