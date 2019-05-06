@@ -1,31 +1,22 @@
 package org.jlab.rec.rich;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.swing.JFrame;
-import org.jlab.clas.detector.DetectorData;
-import org.jlab.clas.detector.DetectorEvent;
-
-import org.jlab.clas.physics.GenericKinematicFitter;
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.geom.prim.Vector3D;
-import org.jlab.groot.data.H1F;
-import org.jlab.groot.data.H2F;
-import org.jlab.groot.graphics.EmbeddedCanvas;
-import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.hipo.HipoDataSource;
+import java.util.Arrays;
 
 public class RICHEBEngine extends ReconstructionEngine {
 
-    RICHEventBuilder reco;
-    int Run = -1;
-    int debugMode=0;
+    private RICHPMTReconstruction    rpmt;
+    private RICHEventBuilder         reb;
+    private RICHTool                 tool;
+
+    private int Run = -1;
+    private int Ncalls = 0;
+
+    private long EBRICH_start_time;
     
+
     // ----------------
     public RICHEBEngine() {
     // ----------------
@@ -33,18 +24,49 @@ public class RICHEBEngine extends ReconstructionEngine {
 
     }
 
+
     @Override
     // ----------------
     public boolean init() {
     // ----------------
-        //config = new FTConfig();
 
-	if(debugMode>=1){
-	    System.out.print("RICH Engine Initialization");
-	}
-        reco = new RICHEventBuilder();
-	reco.init();
-        reco.debugMode=0;
+        int debugMode = 0;
+
+        init_CCDB();
+
+        tool = new RICHTool();
+        tool.init(getConstantsManager().getConstants(0, "/calibration/rich/aerogel") );
+   
+        rpmt = new RICHPMTReconstruction(tool);
+
+        reb = new RICHEventBuilder(tool);
+
+        boolean ccdb = init_CCDB();
+
+        return true;
+
+    }
+
+ 
+    // ----------------
+    public boolean init_CCDB() {
+    // ----------------
+
+        String[] aeroTables = new String[]{
+                    "/calibration/rich/aerogel"
+                 };
+
+        requireConstants(Arrays.asList(aeroTables));
+
+        // Get the constants for the correct variation
+        getConstantsManager().setVariation("default");
+
+        /*int newRun = 2467;
+        IndexedTable prova = getConstantsManager().getConstants(newRun, "/calibration/rich/aerogel");
+
+        for (int i=1; i<=16; i++){
+          System.out.format(" PROVA %10.5f %5.2f \n",prova.getDoubleValue("n400", 4,201,i),prova.getDoubleValue("planarity", 4,201,i));
+        }*/
 
         return true;
 
@@ -56,25 +78,38 @@ public class RICHEBEngine extends ReconstructionEngine {
     public boolean processDataEvent(DataEvent event) {
     // ----------------
 
-	if(debugMode>=1){
-	    System.out.print("RICH Engine: Event Process");
-	}
+        int debugMode = 0;
 
-	reco.ProcessRawPMTData(event);
+	Ncalls++;
+
+        if(debugMode>=1){
+            System.out.println("---------------------------------");
+            System.out.println("RICH Engine call: "+Ncalls+" New Event Process "+reb.getEventID()+"\n");
+            System.out.println("---------------------------------");
+        }
 
 	/*
-        List<FTParticle> FTparticles = new ArrayList<FTParticle>();
-        List<FTResponse> FTresponses = new ArrayList<FTResponse>();
-
-        //Run = config.setRunConditionsParameters(event, "FTEB", Run);
-        reco.init(config.getSolenoid());
-        FTresponses = reco.addResponses(event);
-        FTparticles = reco.initFTparticles(FTresponses);
-        reco.matchToHODO(FTresponses, FTparticles);
-        reco.writeBanks(event, FTparticles);
+	Initialize the RICH event
 	*/
+        reb.init_Event(event);
+
+	/*
+	Process RICH signals to get hits and clusters
+	*/
+        rpmt.processRawData(event);
+
+        tool.save_ProcessTime(0);
+
+	/*
+	Process RICH-DC event reconstruction
+	*/
+        if( !reb.process_Data(event)) return false;
+
+        tool.save_ProcessTime(6);
+        tool.dump_ProcessTime();
+
         return true;
 
     }
-    
+
 }
