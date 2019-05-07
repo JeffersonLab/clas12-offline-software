@@ -1,0 +1,66 @@
+[
+	{   
+		"name" : "CNF::configuration",
+		"group": 100,
+		"item" : 1,
+		"info" : "configuration bank",
+		"entries" : [
+			{"name":"experiment",    "type":"I", "info":"Experiment ID number: CLAS12: 03120112; CLAS6 03120106; Hall A 12 GeV: 08120112; EIC interaction point 1: 05090301;"},
+			{"name":"probe",         "type":"S", "info":"PDG Monte Carlo Number Scheme: electron: 11; electron neutrino: 12; "},
+			{"name":"target",        "type":"S", "info":"DG Monte Carlo Number Scheme: proton: 2212; deuteron: 1000010020; helium: 1000020040"},
+			{"name":"npart",         "type":"S", "info":"number of particles in the final state"},
+			{"name":"part1ID",       "type":"S", "info":"Final state particle 1 ID"},
+			{"name":"part2ID",       "type":"S", "info":"Final state particle 2 ID"},
+			{"name":"part3ID",       "type":"S", "info":"Final state particle 3 ID"},
+			{"name":"s",             "type":"F", "info":"Center of mass energy"},
+			{"name":"pxBoost",       "type":"F", "info":"Target boost in the lab X component"},
+			{"name":"pyBoost",       "type":"F", "info":"Target boost in the lab Y component"},
+			{"name":"pzBoost",       "type":"F", "info":"Target boost in the lab Z component"},
+			{"name":"thetaProbePol" ,"type":"F", "info":"Probe polarization polar angle w.r.t. beam / boost direction"},
+			{"name":"phiProbePol"   ,"type":"F", "info":"Probe polarization azimuthal angle w.r.t. beam / boost direction"},
+			{"name":"thetaTargetPol","type":"F", "info":"Target polarization polar angle w.r.t. beam / boost direction"},
+			{"name":"phiTargetPol"  ,"type":"F", "info":"Target polarization azimuthal angle w.r.t. beam / boost direction"}
+		]
+	},
+	{
+		"name" : "CNF::DVCSevent",
+		"group" : 100,
+		"item" : 2,
+		"info" : "DVCS event bank",
+		"entries" : [
+			{"name":"CFF_H_Im",   "type":"F", "info":"DVCS Compton Form Factor H imaginary part"},
+			{"name":"CFF_H_Re",   "type":"F", "info":"DVCS Compton Form Factor H real part"},
+			{"name":"CFF_Ht_Im",  "type":"F", "info":"DVCS Compton Form Factor Ht imaginary part"},
+			{"name":"CFF_Ht_Re",  "type":"F", "info":"DVCS Compton Form Factor Ht real part"},
+			{"name":"CFF_E_Im",   "type":"F", "info":"DVCS Compton Form Factor E imaginary part"},
+			{"name":"CFF_E_Re",   "type":"F", "info":"DVCS Compton Form Factor E real part"},
+			{"name":"CFF_Et_Im",  "type":"F", "info":"DVCS Compton Form Factor Et imaginary part"},
+			{"name":"CFF_Et_Re",  "type":"F", "info":"DVCS Compton Form Factor Et real part"},
+			{"name":"total_xsec", "type":"F", "info":"Total unpolarized cross-section"},
+			{"name":"BSA",        "type":"F", "info":"beam spin asymmetry"},
+			{"name":"LTSA",       "type":"F", "info":"target longitudinal spin asymmetry"},
+			{"name":"TTSA",       "type":"F", "info":"target transverse spin asymmetry"},
+			{"name":"xB",         "type":"F", "info":"Kinematics: Bjorken x"},
+			{"name":"Q2",         "type":"F", "info":"Kinematics: invariant mass of the virtual photon"},
+			{"name":"t",          "type":"F", "info":"Kinematics: Mandelstam transfer to the proton"},
+			{"name":"phi",        "type":"F", "info":"Kinematics: phi angle between leptonic and hadronic planes"},
+			{"name":"phie",       "type":"F", "info":"Kinematics: electron azimuthal angle"}
+		]
+	},
+	{
+		"name" : "CNF::Particles",
+		"group" : 100,
+		"item" : 3,
+		"info" : "particle bank",
+		"entries" : [
+			{"name":"flag",       "type":"S", "info":"type flag: 0: generated; 1: reconstructed"},
+			{"name":"pid",        "type":"S", "info":"PDG Monte Carlo Number Scheme"},
+			{"name":"mom",        "type":"F", "info":"Kinematics: momentum"},
+			{"name":"the",        "type":"F", "info":"Kinematics: polar angle"},
+			{"name":"phi",        "type":"F", "info":"Kinematics: azimuthal angle"},
+			{"name":"vx",         "type":"F", "info":"Kinematics: vertex x position"},
+			{"name":"vy",         "type":"F", "info":"Kinematics: vertex y position"},
+			{"name":"vz",         "type":"F", "info":"Kinematics: vertex z position"}
+		]
+	}
+]
