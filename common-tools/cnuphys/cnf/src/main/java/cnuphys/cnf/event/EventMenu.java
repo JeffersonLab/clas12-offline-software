@@ -1,4 +1,4 @@
-package cnuphys.cnf.clasio;
+package cnuphys.cnf.event;
 
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -30,9 +30,9 @@ import cnuphys.bCNU.util.Environment;
 import cnuphys.cnf.frame.Cnf;
 
 @SuppressWarnings("serial")
-public class ClasIoEventMenu extends JMenu implements ActionListener, IClasIoEventListener {
+public class EventMenu extends JMenu implements ActionListener, IEventListener {
 
-	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
+	private EventManager _eventManager = EventManager.getInstance();
 
 	// to find recently opened files from the preferences
 	private static String _recentFileKey = "RecentEventFiles";
@@ -40,7 +40,6 @@ public class ClasIoEventMenu extends JMenu implements ActionListener, IClasIoEve
 	// the menu items
 	private JMenuItem quitItem;
 	private JMenuItem nextItem;
-	private JMenuItem prevItem;
 	private JMenuItem accumulationItem;
 
 	// recently opened menu
@@ -72,7 +71,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener, IClasIoEve
 	 * @param includeAccumulation include accumulation option
 	 * @param includeQuit         include quite option
 	 */
-	public ClasIoEventMenu(boolean includeAccumulation, boolean includeQuit) {
+	public EventMenu(boolean includeAccumulation, boolean includeQuit) {
 		super("Events");
 
 		_eventManager.addClasIoEventListener(this, 1);
@@ -102,9 +101,6 @@ public class ClasIoEventMenu extends JMenu implements ActionListener, IClasIoEve
 
 		// next
 		nextItem = addMenuItem("Next Event", KeyEvent.VK_N);
-
-		// previous
-		prevItem = addMenuItem("Previous Event", KeyEvent.VK_P);
 
 		// goto
 		add(createGoToPanel());
@@ -168,7 +164,6 @@ public class ClasIoEventMenu extends JMenu implements ActionListener, IClasIoEve
 		// System.err.println("FIX STATE: nextOK: " + nextOK);
 
 		nextItem.setEnabled(nextOK);
-		prevItem.setEnabled(_eventManager.isPrevOK());
 		evnum.setEnabled(_eventManager.isGotoOK());
 		_periodEvent.setEnabled(nextOK);
 		_periodTF.setEnabled(nextOK);
@@ -210,7 +205,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener, IClasIoEve
 				dataFilePath = file.getPath();
 
 				if (_hipoEventFileFilter.accept(file)) {
-					ClasIoEventManager.getInstance().openHipoEventFile(file);
+					EventManager.getInstance().openHipoEventFile(file);
 				} 
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -273,7 +268,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener, IClasIoEve
 
 					if (file.exists()) {
 						try {
-							ClasIoEventManager.getInstance().openHipoEventFile(file);						} catch (FileNotFoundException e) {
+							EventManager.getInstance().openHipoEventFile(file);						} catch (FileNotFoundException e) {
 							e.printStackTrace();
 						} catch (IOException e) {
 							e.printStackTrace();
@@ -433,8 +428,6 @@ public class ClasIoEventMenu extends JMenu implements ActionListener, IClasIoEve
 
 		if (source == nextItem) {
 			_eventManager.getNextEvent();
-		} else if (source == prevItem) {
-			_eventManager.getPreviousEvent();
 		} else if (source == quitItem) {
 			System.exit(0);
 		}
@@ -464,25 +457,5 @@ public class ClasIoEventMenu extends JMenu implements ActionListener, IClasIoEve
 		fixState();
 	}
 
-	/**
-	 * Change the event source type
-	 * 
-	 * @param source the new source: File, ET
-	 */
-	@Override
-	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
-		fixState();
-	}
-
-	/**
-	 * Tests whether this listener is interested in events while accumulating
-	 * 
-	 * @return <code>true</code> if this listener is NOT interested in events while
-	 *         accumulating
-	 */
-	@Override
-	public boolean ignoreIfAccumulating() {
-		return true;
-	}
 
 }

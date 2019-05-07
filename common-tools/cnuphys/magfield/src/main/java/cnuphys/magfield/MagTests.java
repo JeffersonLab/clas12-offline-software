@@ -458,10 +458,14 @@ public class MagTests {
 
 	}
 	
+	//load the ascii torus
+	private static void loadAsciiTorus() {	
+		ToAscii.readAsciiToris("/Users/heddle/magfield/FullTorus.txt");
+	}
+
 	
 	//convert the torus to ASCII for GEMC
-	private static void convertTorusToAscii() {
-		
+	private static void convertTorusToAscii() {		
 		ToAscii.torusToAscii(MagneticFields.getInstance().getTorus(), 
 				"/Users/heddle/magfield/FullTorus.txt");
 	}
@@ -476,6 +480,7 @@ public class MagTests {
 		final JMenuItem test5Item = new JMenuItem("MathLib Test");
 		final JMenuItem threadItem = new JMenuItem("Thread Test");
 		final JMenuItem asciiItem = new JMenuItem("Convert Torus to ASCII");
+		final JMenuItem loadItem = new JMenuItem("Load ASCII Torus");
 
 
 		ActionListener al1 = new ActionListener() {
@@ -494,6 +499,8 @@ public class MagTests {
 					threadTest(10000000, 8);
 				} else if (e.getSource() == asciiItem) {
 					convertTorusToAscii();
+				}  else if (e.getSource() == loadItem) {
+					loadAsciiTorus();
 				}
 			}
 
@@ -505,6 +512,8 @@ public class MagTests {
 		test5Item.addActionListener(al1);
 		threadItem.addActionListener(al1);
 		asciiItem.addActionListener(al1);
+		loadItem.addActionListener(al1);
+		
 		testMenu.add(test0Item);
 		testMenu.add(test1Item);
 		testMenu.add(test4Item);
@@ -512,6 +521,7 @@ public class MagTests {
 		testMenu.add(threadItem);
 		testMenu.addSeparator();
 		testMenu.add(asciiItem);
+		testMenu.add(loadItem);
 		testMenu.addSeparator();
 
 		// now for rectangular grids

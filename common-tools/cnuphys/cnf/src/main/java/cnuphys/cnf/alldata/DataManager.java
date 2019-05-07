@@ -50,9 +50,14 @@ public class DataManager {
 		String allBanks[] = _dictionary.getDescriptorList();
 		ArrayList<String> okbanks = new ArrayList<String>();
 		for (String s : allBanks) {
+			System.out.print("Found bank [" + s + "] added: ");
 			// check for exclusions
 			if (include(s)) {
 				okbanks.add(s);
+				System.out.println(" YES");
+			}
+			else {
+				System.out.println(" NO");
 			}
 		}
 		_knownBanks = new String[okbanks.size()];
@@ -84,6 +89,7 @@ public class DataManager {
 	 * @return the collection of recognized columns
 	 */
 	public ArrayList<ColumnData> getColumnData() {
+
 		if (_columnData == null) {
 			return null;
 		}
@@ -120,6 +126,7 @@ public class DataManager {
 	 */
 
 	public ArrayList<ColumnData> hasData(DataEvent event, String bankName) {
+
 		ArrayList<ColumnData> list = new ArrayList<ColumnData>();
 
 		String columns[] = event.getColumnList(bankName);
@@ -150,12 +157,9 @@ public class DataManager {
 					for (String columnName : columns) {
 						ColumnData cd = getColumnData(bankName, columnName);
 
-//						if ("HitBasedTrkg::HBCrosses.Cluster_ID".equals(bankName + "." + columnName)) {
-//							(new Throwable()).printStackTrace();
-//						}
 						if (cd == null) {
-//							Log.getInstance().warning("Dictionary does not seem to know about bank named [" + bankName
-//									+ "." + columnName + "] May be a disconnect with json files");
+							Log.getInstance().warning("Dictionary does not seem to know about bank named [" + bankName
+									+ "." + columnName + "] May be a disconnect with json files");
 						} else {
 							list.add(cd);
 						}
@@ -184,6 +188,7 @@ public class DataManager {
 			}
 			cd.bankIndex = bankIndex;
 		}
+		
 		return list;
 	}
 
@@ -200,6 +205,7 @@ public class DataManager {
 
 	// initialize the column data
 	private void initializeColumnData() {
+
 		_columnData = new Hashtable<String, ColumnData>();
 
 		Log.getInstance().info("Initializing column data from discovered bank definitions.");
@@ -214,11 +220,6 @@ public class DataManager {
 				String entries[] = dd.getEntryList();
 				for (String columnName : entries) {
 					int type = dd.getProperty("type", columnName);
-
-					if ((columnName.contains("timestamp"))) {
-						// TODO MAJOR HACK (STILL NEEDED)!
-						type = 4;
-					}
 
 					if ((type < 1) || (type > 6) || (type == 24)) {
 //							Log.getInstance()
@@ -261,7 +262,8 @@ public class DataManager {
 	 * @return the ColumnData
 	 */
 	public ColumnData getColumnData(String bankName, String columnName) {
-		return _columnData.get(bankName + "." + columnName);
+		ColumnData cd = _columnData.get(bankName + "." + columnName);
+		return cd;
 	}
 
 	/**
@@ -271,7 +273,8 @@ public class DataManager {
 	 * @return the ColumnData
 	 */
 	public ColumnData getColumnData(String fullName) {
-		return _columnData.get(fullName);
+		ColumnData cd = _columnData.get(fullName);
+		return cd;
 	}
 
 	/**
@@ -282,23 +285,8 @@ public class DataManager {
 	 * @return the array, or <code>null</code>
 	 */
 	public byte[] getByteArray(DataEvent event, String fullName) {
-		byte[] array = null;
 		ColumnData cd = getColumnData(fullName);
-		if (cd == null) {
-			// Log.getInstance().warning("In ColumnData.getByteArray, requested array for
-			// non-existent column: [" + fullName + "]");
-		} else {
-			Object o = cd.getDataArray(event);
-			if (o != null) {
-				if (o instanceof byte[]) {
-					array = (byte[]) o;
-				} else {
-					// Log.getInstance().warning("In ColumnData.getByteArray, requested array for
-					// non-matching column: [" + fullName + "]");
-				}
-			}
-		}
-		return array;
+		return (cd == null) ? null : cd.getByteArray(event);
 	}
 
 	/**
@@ -309,23 +297,8 @@ public class DataManager {
 	 * @return the array, or <code>null</code>
 	 */
 	public short[] getShortArray(DataEvent event, String fullName) {
-		short[] array = null;
 		ColumnData cd = getColumnData(fullName);
-		if (cd == null) {
-			// Log.getInstance().warning("In ColumnData.getShortArray, requested array for
-			// non-existent column: [" + fullName + "]");
-		} else {
-			Object o = cd.getDataArray(event);
-			if (o != null) {
-				if (o instanceof short[]) {
-					array = (short[]) o;
-				} else {
-					// Log.getInstance().warning("In ColumnData.getShortArray, requested array for
-					// non-matching column: [" + fullName + "]");
-				}
-			}
-		}
-		return array;
+		return (cd == null) ? null : cd.getShortArray(event);
 	}
 
 	/**
@@ -336,23 +309,8 @@ public class DataManager {
 	 * @return the array, or <code>null</code>
 	 */
 	public int[] getIntArray(DataEvent event, String fullName) {
-		int[] array = null;
 		ColumnData cd = getColumnData(fullName);
-		if (cd == null) {
-			// Log.getInstance().warning("In ColumnData.getIntArray, requested array for
-			// non-existent column: [" + fullName + "]");
-		} else {
-			Object o = cd.getDataArray(event);
-			if (o != null) {
-				if (o instanceof int[]) {
-					array = (int[]) o;
-				} else {
-					// Log.getInstance().warning("In ColumnData.getIntArray, requested array for
-					// non-matching column: [" + fullName + "]");
-				}
-			}
-		}
-		return array;
+		return (cd == null) ? null : cd.getIntArray(event);
 	}
 
 	/**
@@ -363,23 +321,8 @@ public class DataManager {
 	 * @return the array, or <code>null</code>
 	 */
 	public long[] getLongArray(DataEvent event, String fullName) {
-		long[] array = null;
 		ColumnData cd = getColumnData(fullName);
-		if (cd == null) {
-			// Log.getInstance().warning("In ColumnData.getIntArray, requested array for
-			// non-existent column: [" + fullName + "]");
-		} else {
-			Object o = cd.getDataArray(event);
-			if (o != null) {
-				if (o instanceof long[]) {
-					array = (long[]) o;
-				} else {
-					// Log.getInstance().warning("In ColumnData.getIntArray, requested array for
-					// non-matching column: [" + fullName + "]");
-				}
-			}
-		}
-		return array;
+		return (cd == null) ? null : cd.getLongArray(event);
 	}
 
 	/**
@@ -390,23 +333,8 @@ public class DataManager {
 	 * @return the array, or <code>null</code>
 	 */
 	public float[] getFloatArray(DataEvent event, String fullName) {
-		float[] array = null;
 		ColumnData cd = getColumnData(fullName);
-		if (cd == null) {
-			// Log.getInstance().warning("In ColumnData.getFloatArray, requested array for
-			// non-existent column: [" + fullName + "]");
-		} else {
-			Object o = cd.getDataArray(event);
-			if (o != null) {
-				if (o instanceof float[]) {
-					array = (float[]) o;
-				} else {
-					// Log.getInstance().warning("In ColumnData.getFloatArray, requested array for
-					// non-matching column: [" + fullName + "]");
-				}
-			}
-		}
-		return array;
+		return (cd == null) ? null : cd.getFloatArray(event);
 	}
 
 	/**
@@ -417,23 +345,8 @@ public class DataManager {
 	 * @return the array, or <code>null</code>
 	 */
 	public double[] getDoubleArray(DataEvent event, String fullName) {
-		double[] array = null;
 		ColumnData cd = getColumnData(fullName);
-		if (cd == null) {
-			// Log.getInstance().warning("In ColumnData.getDoubleArray, requested array for
-			// non-existent column: [" + fullName + "]");
-		} else {
-			Object o = cd.getDataArray(event);
-			if (o != null) {
-				if (o instanceof double[]) {
-					array = (double[]) o;
-				} else {
-					// Log.getInstance().warning("In ColumnData.getDoubleArray, requested array for
-					// non-matching column: [" + fullName + "]");
-				}
-			}
-		}
-		return array;
+		return (cd == null) ? null : cd.getDoubleArray(event);
 	}
 
 	/**
@@ -456,9 +369,6 @@ public class DataManager {
 	 * @return a list of detector responses
 	 */
 	public List<DetectorResponse> getDetectorResponse(DataEvent event, String bankName, DetectorType type) {
-
-		// TODO remove aftergagik fixes
-		// if (true) return null;
 
 		if (event == null) {
 			return null;

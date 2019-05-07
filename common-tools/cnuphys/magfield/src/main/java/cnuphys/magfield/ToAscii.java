@@ -2,9 +2,15 @@ package cnuphys.magfield;
 
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
+
+import cnuphys.magfield.converter.AsciiReader;
 
 public class ToAscii {
+	
+	private static float MINVAL = (float)(1.0e-6);
 
 	/**
 	 * Write the Torus to Ascii
@@ -53,13 +59,24 @@ public class ToAscii {
 					float bz = torus.getB3(compositeIndex);
 					
 					
-					String s = String.format("%3.0f %3.0f %3.0f %12.5E %12.5E %12.5E", 
-							p, r, z, bp, br, bz);
+					String s = String.format("%-3.0f %-3.0f %-3.0f %s %s %s", 
+							p, r, z, vStr(bp), vStr(br), vStr(bz));
+					
+					s = s.replace("   ", " ");
+					s = s.replace("  ", " ");					
 					stringLn(dos, 0, s);
 				}
 			}
 		}
 		
+	}
+	
+	private static String vStr(float val) {
+		if (Math.abs(val) < MINVAL) {
+			return "0";
+		}
+		
+		return String.format("%11.4E", val);
 	}
 	
 	private static void writeAsciiHeader(DataOutputStream dos, Torus torus) {
@@ -116,6 +133,49 @@ public class ToAscii {
 		}
 	}
 	
+	
+	private static int _lineCount;
+	private static int _dataCount;
+	private static boolean _headerRead = false;
+	
+	public static void readAsciiToris(String path) {
+		
+		final File file = new File(path);
+		_lineCount = 0;
+		_dataCount = 0;
+		
+		try {
+			new AsciiReader(file) {
+
+				@Override
+				protected void processLine(String line) {
+					
+					//arggh. For some unknown reason the string has a null \0
+					//character between every real character
+					line = line.replace("\0", "");
+					_lineCount++;
+					
+					if (!_headerRead) {
+						if (line.contains("</mfield>")) {
+							System.out.println("Done reading header");
+							_headerRead = true;
+						}
+					}
+					else { //data line
+						_dataCount++;
+					}
+				}
+
+				@Override
+				public void done() {
+					System.out.println("Read " + _lineCount + " lines. Data lines: " + _dataCount);
+				}
+				
+			};
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
 	
 //	<mfield>
 //    <description name="torus_version3.0" factory="ASCII" comment="clas12 superconducting torus"/>

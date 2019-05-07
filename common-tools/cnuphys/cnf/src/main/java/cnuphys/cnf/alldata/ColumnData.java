@@ -1,9 +1,10 @@
 package cnuphys.cnf.alldata;
 
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.log.Log;
-import cnuphys.cnf.clasio.ClasIoEventManager;
+import cnuphys.cnf.event.EventManager;
 
 public class ColumnData implements Comparable<ColumnData> {
 
@@ -19,17 +20,35 @@ public class ColumnData implements Comparable<ColumnData> {
 	/** type is an int */
 	public static final int INT32 = 3;
 
-	/** type is a long int */
-	public static final int INT64 = 4;
-
 	/** type is a float */
-	public static final int FLOAT32 = 5;
+	public static final int FLOAT32 = 4;
 
 	/** type is a double */
-	public static final int FLOAT64 = 6;
+	public static final int FLOAT64 = 5;
+
+	/** type is a string */
+	public static final int STRING = 6;
+
+	/** type is a group */
+	public static final int GROUP = 7;
+
+	/** type is a long int */
+	public static final int INT64 = 8;
+
+	/** type is a vector3f */
+	public static final int VECTOR3F = 9;
+
+	/** type is a composite */
+	public static final int COMPOSITE = 10;
+
+	/** type is a table */
+	public static final int TABLE = 11;
+
+	/** type is a branch */
+	public static final int BRANCH = 12;
 
 	/** type names */
-	public static String[] typeNames = { "Unknown", "byte", "short", "int", "long", "float", "double" };
+	public static String[] typeNames = { "Unknown", "byte", "short", "int", "float", "double", "string", "group", "long", "vector3f", "composite", "table", "branch"};
 
 	// the bank name
 	private String _bankName;
@@ -97,28 +116,27 @@ public class ColumnData implements Comparable<ColumnData> {
 			try {
 				switch (_type) {
 				case INT8:
-					byte bytes[] = event.getByte(_fullName);
+					byte bytes[] = getByteArray(event);
 					return (bytes == null) ? 0 : bytes.length;
 
 				case INT16:
-					short shorts[] = event.getShort(_fullName);
+					short shorts[] = getShortArray(event);
 					return (shorts == null) ? 0 : shorts.length;
 
 				case INT32:
-					int ints[] = event.getInt(_fullName);
+					int ints[] = getIntArray(event);
 					return (ints == null) ? 0 : ints.length;
 
 				case INT64:
-					// TODO MAJOR HACK
-					long longs[] = event.getLong(_fullName);
+					long longs[] = getLongArray(event);
 					return (longs == null) ? 0 : longs.length;
 
 				case FLOAT32:
-					float floats[] = event.getFloat(_fullName);
+					float floats[] = getFloatArray(event);
 					return (floats == null) ? 0 : floats.length;
 
 				case FLOAT64:
-					double doubles[] = event.getDouble(_fullName);
+					double doubles[] = getDoubleArray(event);
 					return (doubles == null) ? 0 : doubles.length;
 				}
 			} catch (Exception e) {
@@ -129,51 +147,70 @@ public class ColumnData implements Comparable<ColumnData> {
 
 		return 0;
 	}
+	
+	/**
+	 * Get a byte array for the bank and column names in the given event
+	 * @param event the given event
+	 * @return a byte array
+	 */
+	public byte[] getByteArray(DataEvent event) {
+		DataBank bank = event.getBank(_bankName);
+		byte[] array = bank.getByte(_columnName);
+		return array;
+	}
+	
+	/**
+	 * Get a short array for the bank and column names in the given event
+	 * @param event the given event
+	 * @return a shortarray
+	 */
+	public short[] getShortArray(DataEvent event) {
+		DataBank bank = event.getBank(_bankName);
+		short[] array = bank.getShort(_columnName);
+		return array;
+	}
 
 	/**
-	 * Get the data array as an object. It is up to the caller to cast it to the
-	 * correct type of array.
-	 * 
-	 * @return the data array corresponding to the type
+	 * Get an int array for the bank and column names in the given event
+	 * @param event the given event
+	 * @return an int array
 	 */
-	public Object getDataArray(DataEvent event) {
-
-		Object oa = null;
-
-		if (event != null) {
-			try {
-				switch (_type) {
-				case INT8:
-					oa = event.getByte(_fullName);
-					break;
-
-				case INT16:
-					oa = event.getShort(_fullName);
-					break;
-
-				case INT32:
-					oa = event.getInt(_fullName);
-					break;
-
-				case INT64:
-					oa = event.getLong(_fullName);
-					break;
-
-				case FLOAT32:
-					oa = event.getFloat(_fullName);
-					break;
-
-				case FLOAT64:
-					oa = event.getDouble(_fullName);
-					break;
-				}
-			} catch (Exception e) {
-				System.err.println(e.getMessage() + " Exception with fullName: " + _fullName);
-				// e.printStackTrace();
-			}
-		}
-
-		return oa;
+	public int[] getIntArray(DataEvent event) {
+		DataBank bank = event.getBank(_bankName);
+		int[] array = bank.getInt(_columnName);
+		return array;
+	}
+	
+	/**
+	 * Get a long array for the bank and column names in the given event
+	 * @param event the given event
+	 * @return a long array
+	 */
+	public long[] getLongArray(DataEvent event) {
+		DataBank bank = event.getBank(_bankName);
+		long[] array = bank.getLong(_columnName);
+		return array;
+	}
+	/**
+	 * Get a float array for the bank and column names in the given event
+	 * @param event the given event
+	 * @return a float array
+	 */
+	public float[] getFloatArray(DataEvent event) {
+		DataBank bank = event.getBank(_bankName);
+		float[] array = bank.getFloat(_columnName);
+		return array;
+	}
+	
+	/**
+	 * Get a double array for the bank and column names in the given event
+	 * @param event the given event
+	 * @return a double array
+	 */
+	public double[] getDoubleArray(DataEvent event) {
+		DataBank bank = event.getBank(_bankName);
+		double[] array = bank.getDouble(_columnName);
+		return array;
 	}
 
 	/**
@@ -247,35 +284,38 @@ public class ColumnData implements Comparable<ColumnData> {
 	public int length(DataEvent event) {
 
 		int len = 0;
-		Object oa = getDataArray(event);
 
-		if (oa != null) {
 			switch (_type) {
 			case INT8:
-				len = ((byte[]) oa).length;
+				byte ba[] = getByteArray(event);
+				len = (ba != null) ? ba.length : 0;
 				break;
 
 			case INT16:
-				len = ((short[]) oa).length;
+				short sa[] = getShortArray(event);
+				len = (sa != null) ? sa.length : 0;
 				break;
 
 			case INT32:
-				len = ((int[]) oa).length;
+				int ia[] = getIntArray(event);
+				len = (ia != null) ? ia.length : 0;
 				break;
 
 			case INT64:
-				len = ((long[]) oa).length;
+				long la[] = getLongArray(event);
+				len = (la != null) ? la.length : 0;
 				break;
 
 			case FLOAT32:
-				len = ((float[]) oa).length;
+				float fa[] = getFloatArray(event);
+				len = (fa != null) ? fa.length : 0;
 				break;
 
 			case FLOAT64:
-				len = ((double[]) oa).length;
+				double da[] = getDoubleArray(event);
+				len = (da != null) ? da.length : 0;
 				break;
 			}
-		}
 
 		return len;
 	}
@@ -318,7 +358,7 @@ public class ColumnData implements Comparable<ColumnData> {
 
 	// a check to avoid null messages and errors
 	private static DataEvent hasData(String fullName) {
-		DataEvent event = ClasIoEventManager.getInstance().getCurrentEvent();
+		DataEvent event = EventManager.getInstance().getCurrentEvent();
 		if (event == null) {
 			return null;
 		}

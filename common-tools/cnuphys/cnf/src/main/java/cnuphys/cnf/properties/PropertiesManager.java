@@ -20,6 +20,9 @@ public class PropertiesManager {
 	// private constructor for simgleton
 	private PropertiesManager() {
 	}
+	
+	/** property event string */
+	public static final String STATE_CHANGE = "state change";
 
 	/**
 	 * Get the singleton for the Properties Manager

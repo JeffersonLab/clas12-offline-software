@@ -3,6 +3,8 @@ package cnuphys.cnf.frame;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
@@ -13,10 +15,12 @@ import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.application.Desktop;
+import cnuphys.bCNU.component.MagnifyWindow;
+import cnuphys.bCNU.dialog.TextDisplayDialog;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.menu.MenuManager;
 import cnuphys.bCNU.util.Environment;
@@ -25,13 +29,16 @@ import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.view.LogView;
 import cnuphys.bCNU.view.ViewManager;
 import cnuphys.bCNU.view.VirtualView;
-import cnuphys.cnf.clasio.ClasIoEventManager;
-import cnuphys.cnf.clasio.ClasIoEventMenu;
+import cnuphys.cnf.alldata.DataManager;
+import cnuphys.cnf.event.EventManager;
+import cnuphys.cnf.event.EventMenu;
+import cnuphys.cnf.event.EventView;
 import cnuphys.cnf.properties.PropertiesManager;
 import cnuphys.lund.X11Colors;
+import cnuphys.splot.example.MemoryUsageDialog;
 
 @SuppressWarnings("serial")
-public class Cnf extends BaseMDIApplication implements PropertyChangeListener {
+public class Cnf extends BaseMDIApplication {
 
 	// singleton
 	private static Cnf _instance;
@@ -52,11 +59,26 @@ public class Cnf extends BaseMDIApplication implements PropertyChangeListener {
 	private LogView _logView;
 
 	// event menu
-	private ClasIoEventMenu _eventMenu;
+	private EventMenu _eventMenu;
 	
 	// event number label on menu bar
 	private static JLabel _eventNumberLabel;
+	
+	// memory usage dialog
+	private MemoryUsageDialog _memoryUsage;
 
+	// Environment display
+	private TextDisplayDialog _envDisplay;
+
+	/** Last selected data file */
+	private static String dataFilePath;
+	
+	//views
+	private EventView _eventView;
+
+
+	//stream events menu item
+	private static JMenuItem _streamItem;
 
 	/**
 	 * Constructor (private--used to create singleton)
@@ -116,44 +138,8 @@ public class Cnf extends BaseMDIApplication implements PropertyChangeListener {
 	private void restoreDefaultViewLocations() {
 
 		_virtualView.moveTo(_logView, 7, VirtualView.CENTER);
+		_virtualView.moveTo(_eventView, 0, VirtualView.CENTER);
 
-//		_virtualView.moveToStart(_sectorView14, 0, VirtualView.UPPERLEFT);
-//		_virtualView.moveToStart(_sectorView25, 0, VirtualView.UPPERLEFT);
-//		_virtualView.moveToStart(_sectorView36, 0, VirtualView.UPPERLEFT);
-//
-//		_virtualView.moveTo(_plotView, 0, VirtualView.CENTER);
-//
-//		_virtualView.moveTo(dcHistoGrid, 13);
-//		_virtualView.moveTo(ftofHistoGrid, 14);
-//		_virtualView.moveTo(bstHistoGrid, 15);
-//		_virtualView.moveTo(pcalHistoGrid, 16);
-//		_virtualView.moveTo(ecHistoGrid, 17);
-//
-//		_virtualView.moveTo(_allDCView, 3);
-//		if (_experimental) {
-//			_virtualView.moveTo(_allDCAccumView, 18);
-//		}
-//		_virtualView.moveTo(_eventView, 6, VirtualView.CENTER);
-//		_virtualView.moveTo(_centralXYView, 2, VirtualView.BOTTOMLEFT);
-//		_virtualView.moveTo(_centralZView, 2, VirtualView.UPPERRIGHT);
-//
-//		// note no constraint means "center"
-//		_virtualView.moveTo(_dcXyView, 7);
-//
-//		_virtualView.moveTo(_pcalView, 4);
-//		_virtualView.moveTo(_ecView, 5);
-//		_virtualView.moveTo(_monteCarloView, 1, VirtualView.TOPCENTER);
-//		_virtualView.moveTo(_reconEventView, 1, VirtualView.BOTTOMCENTER);
-//
-//		_virtualView.moveTo(_tofView, 11, VirtualView.CENTER);
-//
-//		_virtualView.moveTo(_ftcalXyView, 12, VirtualView.CENTER);
-//
-//		if (_use3D) {
-//			_virtualView.moveTo(_forward3DView, 9, VirtualView.CENTER);
-//			_virtualView.moveTo(_central3DView, 10, VirtualView.BOTTOMLEFT);
-//			_virtualView.moveTo(_ftCal3DView, 10, VirtualView.BOTTOMRIGHT);
-//		}
 
 		Log.getInstance().config("reset views on virtual dekstop");
 
@@ -167,6 +153,10 @@ public class Cnf extends BaseMDIApplication implements PropertyChangeListener {
 		// add a virtual view
 		_virtualView = VirtualView.createVirtualView(8);
 		ViewManager.getInstance().getViewMenu().addSeparator();
+		
+		// add event view
+		_eventView = EventView.createEventView();
+
 
 		// add the log view
 		_logView = new LogView(800, 750, true);
@@ -186,7 +176,7 @@ public class Cnf extends BaseMDIApplication implements PropertyChangeListener {
 	 * 
 	 * @return the event menu
 	 */
-	public ClasIoEventMenu getEventMenu() {
+	public EventMenu getEventMenu() {
 		return _eventMenu;
 	}
 
@@ -194,7 +184,7 @@ public class Cnf extends BaseMDIApplication implements PropertyChangeListener {
 	 * Fix the event count label
 	 */
 	public void fixEventCount() {
-		int count = ClasIoEventManager.getInstance().getEventCount();
+		int count = EventManager.getInstance().getEventCount();
 		if (count < Integer.MAX_VALUE) {
 			_eventCountLabel.setText("Event Count: " + count);
 		} else {
@@ -205,15 +195,46 @@ public class Cnf extends BaseMDIApplication implements PropertyChangeListener {
 	// add to the event menu
 	private void addToEventMenu() {
 
+		_eventMenu.remove(0);
+		createStreamMenuItem();
 		_eventCountLabel = new JMenuItem("Event Count: N/A");
 		_eventCountLabel.setOpaque(true);
 		_eventCountLabel.setBackground(Color.white);
 		_eventCountLabel.setForeground(X11Colors.getX11Color("Dark Blue"));
 		_eventMenu.add(_eventCountLabel);
 	}
+	
+	//create the menu item to stream to the end of the file
+	private void createStreamMenuItem() {
+		
+		ActionListener al = new ActionListener() {
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+			}
+			
+		};
+		_streamItem = new JMenuItem("Stream to End of File");
+		_streamItem.setEnabled(false);
+		_streamItem.addActionListener(al);
+		_eventMenu.add(_streamItem, 0);
+	}
+
+	
+	/**
+	 * Notification of a change
+	 */
+	public void propertyChange(Object source, String name, Object oldVal, Object newVal) {
+		if (name.equals(PropertiesManager.STATE_CHANGE)) {
+			System.err.println("Cnf received a STATE_CHANGE notice");
+			
+			//any events remaining
+			int numRemaining = EventManager.getInstance().getNumRemainingEvents();
+			
+			//set selectability
+			_streamItem.setEnabled(numRemaining > 0);
+		}
+
 	}
 
 	/**
@@ -224,7 +245,8 @@ public class Cnf extends BaseMDIApplication implements PropertyChangeListener {
 	public static Cnf getInstance() {
 		if (_instance == null) {
 			_instance = new Cnf(PropertySupport.TITLE, "cnf " + _release, PropertySupport.BACKGROUNDIMAGE,
-					"images/cnu.png", PropertySupport.FRACTION, 0.9);
+					"images/cnu.png", PropertySupport.FRACTION, 0.9,
+					PropertySupport.BACKGROUNDIMAGE, "images/cnfbg.png");
 
 			_instance.addInitialViews();
 			_instance.createMenus();
@@ -266,6 +288,46 @@ public class Cnf extends BaseMDIApplication implements PropertyChangeListener {
 	}
 
 
+	// create the options menu
+	private void addToOptionMenu(JMenu omenu) {
+		omenu.add(MagnifyWindow.magificationMenu());
+		omenu.addSeparator();
+
+		final JMenuItem memPlot = new JMenuItem("Memory Usage...");
+		final JMenuItem environ = new JMenuItem("Environment...");
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				Object source = e.getSource();
+
+				if (source == memPlot) {
+					if (_memoryUsage == null) {
+						_memoryUsage = new MemoryUsageDialog(_instance);
+					}
+
+					_memoryUsage.setVisible(true);
+				}
+
+				else if (source == environ) {
+					if (_envDisplay == null) {
+						_envDisplay = new TextDisplayDialog("Environment Information");
+					}
+					_envDisplay.setText(Environment.getInstance().toString());
+					_envDisplay.setVisible(true);
+				}
+
+			}
+
+		};
+		environ.addActionListener(al);
+		memPlot.addActionListener(al);
+		omenu.add(environ);
+		omenu.add(memPlot);
+
+	}
+
 	/**
 	 * Add items to existing menus and/or create new menus NOTE: Swim menu is
 	 * created by the SwimManager
@@ -273,9 +335,74 @@ public class Cnf extends BaseMDIApplication implements PropertyChangeListener {
 	private void createMenus() {
 		MenuManager mmgr = MenuManager.getInstance();
 
-		_eventMenu = new ClasIoEventMenu(true, false);
+		_eventMenu = new EventMenu(true, false);
 		mmgr.addMenu(_eventMenu);
+		
+		// the options menu
+		addToOptionMenu(mmgr.getOptionMenu());
+		
+		// add to the file menu
+		addToFileMenu();
+
+		//add to the event menu
+		addToEventMenu();
+
 	}
+	
+	// add to the file menu
+	private void addToFileMenu() {
+		MenuManager mmgr = MenuManager.getInstance();
+		JMenu fmenu = mmgr.getFileMenu();
+
+		fmenu.insertSeparator(0);
+
+		// restore default config
+		final JMenuItem defConItem = new JMenuItem("Restore Default Configuration");
+
+		ActionListener al1 = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Object source = e.getSource();
+
+				if (source == defConItem) {
+					restoreDefaultViewLocations();
+					refresh();
+				}
+			}
+		};
+
+		defConItem.addActionListener(al1);
+		fmenu.add(defConItem, 0);
+
+
+		// some event file menus
+
+		fmenu.insertSeparator(0);
+
+		fmenu.add(EventMenu.getRecentEventFileMenu(), 0);
+		fmenu.add(EventMenu.getOpenHipoEventFileItem(), 0);
+	}
+	
+
+
+
+	/**
+	 * Set the default directory in which to look for event files.
+	 * 
+	 * @param defaultDataDir default directory in which to look for event files
+	 */
+	public static void setDefaultDataDir(String defaultDataDir) {
+		dataFilePath = defaultDataDir;
+	}
+
+
+	/**
+	 * Refresh all views (with containers)
+	 */
+	public static void refresh() {
+		ViewManager.getInstance().refreshAllViews();
+	}
+
 
 	// this is so we can find json files
 	private static void initClas12Dir() throws IOException {
@@ -299,7 +426,7 @@ public class Cnf extends BaseMDIApplication implements PropertyChangeListener {
 		}
 
 		String cwd = Environment.getInstance().getCurrentWorkingDirectory();
-		clas12dir = cwd + "/../../../../../cnuphys/coatjava";
+		clas12dir = cwd + "/../../../coatjava";
 		clasDir = new File(clas12dir);
 
 		if (clasDir.exists() && clasDir.isDirectory()) {
@@ -363,6 +490,10 @@ public class Cnf extends BaseMDIApplication implements PropertyChangeListener {
 				done = (i >= len);
 			} // !done
 		} // end command arg processing
+		
+		// initialize data columns
+		DataManager.getInstance();
+
 
 		// now make the frame visible, in the AWT thread
 		EventQueue.invokeLater(new Runnable() {
@@ -372,24 +503,14 @@ public class Cnf extends BaseMDIApplication implements PropertyChangeListener {
 				getInstance();
 				getInstance().setVisible(true);
 				getInstance().fixTitle();
-
-				// initialize data columns
-//				DataManager.getInstance();
+				
 				System.out.println("cnf  " + _release + " is ready.");
 			}
 
 		});
 		Log.getInstance().info(Environment.getInstance().toString());
 
-		// try to update the log for fun
-//		try {
-//			updateCedLog();
-//		}
-//		catch (Exception e) {
-//		}
-
-		Log.getInstance().info("ced is ready.");
-//		Environment.getInstance().say("c e d is ready");
+		Log.getInstance().info("cnf is ready.");
 
 	} // end main
 

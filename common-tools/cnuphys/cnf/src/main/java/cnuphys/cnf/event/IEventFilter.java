@@ -1,4 +1,4 @@
-package cnuphys.cnf.clasio;
+package cnuphys.cnf.event;
 
 import javax.swing.JComponent;
 
