@@ -32,7 +32,7 @@ public class RICHEBEngine extends ReconstructionEngine {
 
         int debugMode = 0;
 
-        init_CCDB();
+        boolean ccdb = init_CCDB();
 
         tool = new RICHTool();
         tool.init(getConstantsManager().getConstants(0, "/calibration/rich/aerogel") );
@@ -40,8 +40,6 @@ public class RICHEBEngine extends ReconstructionEngine {
         rpmt = new RICHPMTReconstruction(tool);
 
         reb = new RICHEventBuilder(tool);
-
-        boolean ccdb = init_CCDB();
 
         return true;
 
