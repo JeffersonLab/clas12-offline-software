@@ -94,6 +94,7 @@ public class TableLoader {
         T0LOADED = true;
     }
     
+    public static int maxTBin = -1;
     public static synchronized void Fill(IndexedTable tab) {
         //CCDBTables 0 =  "/calibration/dc/signal_generation/doca_resolution";
         //CCDBTables 1 =  "/calibration/dc/time_to_distance/t2d";
@@ -143,8 +144,10 @@ public class TableLoader {
                                         //System.err.println("Problem with tbin");
                                         continue;
                                     }
+                                    if(tbin>maxTBin)
+                                        maxTBin = tbin;
                                     //if(tbin>maxBinIdxT[s][r][ibfield][icosalpha]) {
-                                        maxBinIdxT[s][r][ibfield][icosalpha] = nBinsT; 
+                                        //maxBinIdxT[s][r][ibfield][icosalpha] = nBinsT; 
                                     //} //System.out.println("tbin "+tbin+" tmax "+tmax+ "s "+s+" sl "+r );
                                     if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]==0) {
                                         // firstbin = bi
@@ -165,10 +168,32 @@ public class TableLoader {
                         }
                 }
         }	
-        //TableLoader.test();
+        TableLoader.fillMissingTableBins();
+        
         T2DLOADED = true;
      }
 
+    private static void fillMissingTableBins() {
+        
+        for(int s = 0; s<6; s++ ){ // loop over sectors
+
+            for(int r = 0; r<6; r++ ){ //loop over slys
+                
+                for(int ibfield =0; ibfield<maxBinIdxB+1; ibfield++) {
+                    
+                    for(int icosalpha =0; icosalpha<maxBinIdxAlpha+1; icosalpha++) {
+                        
+                        for(int tbin = 0; tbin<maxTBin; tbin++) {
+                            if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]!=0 && DISTFROMTIME[s][r][ibfield][icosalpha][tbin+1]==0) {
+                                DISTFROMTIME[s][r][ibfield][icosalpha][tbin+1] = DISTFROMTIME[s][r][ibfield][icosalpha][tbin];
+                            }
+                        }
+                        
+                    }
+                }
+            }
+        }
+    }
     /**
      * 
      * @param x distance to wire in cm

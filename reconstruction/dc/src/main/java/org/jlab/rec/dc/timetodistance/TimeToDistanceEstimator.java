@@ -4,6 +4,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import org.jlab.rec.dc.Constants;
 import static org.jlab.rec.dc.timetodistance.TableLoader.BfieldValues;
+import static org.jlab.rec.dc.timetodistance.TableLoader.maxTBin;
 
 
 public class TimeToDistanceEstimator {
@@ -162,8 +163,8 @@ public class TimeToDistanceEstimator {
         if(binIdx<0) {
             binIdx = TableLoader.minBinIdxT;
         }
-        if(binIdx>TableLoader.maxBinIdxT[is][ir][ibfield][icosalpha]) {
-            binIdx = TableLoader.maxBinIdxT[is][ir][ibfield][icosalpha] ;
+        if(binIdx>maxTBin) {
+            binIdx = maxTBin ;
         }
 
         return binIdx;
