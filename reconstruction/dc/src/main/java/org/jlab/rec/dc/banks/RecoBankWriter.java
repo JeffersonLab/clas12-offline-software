@@ -434,6 +434,9 @@ public class RecoBankWriter {
             if(bank.getDescriptor().hasEntry("fitResidual")){
                bank.setFloat("fitResidual", i, (float) hitlist.get(i).get_TrkResid());
             }
+            if(bank.getDescriptor().hasEntry("Alpha")){
+               bank.setFloat("Alpha", i, (float) hitlist.get(i).getAlpha());
+            }
             bank.setFloat("doca", i, (float) hitlist.get(i).get_Doca());
             bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
             bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());

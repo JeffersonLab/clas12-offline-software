@@ -18,8 +18,7 @@ import org.jlab.utils.groups.IndexedTable;
  *
  */
 public class FittedHit extends Hit implements Comparable<Hit> {
-
-  
+    
     private double _X;              	// X at Z in local coord. system
     private double _XMP;            	// X at the MidPlane in sector coord. system
     private double _Z;              	// Z in the sector coord. system
@@ -345,6 +344,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         if (_TrkgStatus != -1 && this.get_Time() > 0) {
            
             double alpha = Math.acos(cosTrkAngle);
+            this.setAlpha(Math.toDegrees(alpha));
             double ralpha = this.reducedAngle(alpha);
             double beta = this.get_Beta(); 
             double x = this.get_ClusFitDoca();
@@ -903,4 +903,22 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     public double get_DeltaTimeBeta() {
         return _deltatime_beta ;
     }
+    
+    // local angle 
+    private double _alpha;
+    
+    /**
+     * @return the _alpha
+     */
+    public double getAlpha() {
+        return _alpha;
+    }
+
+    /**
+     * @param _alpha the _alpha to set
+     */
+    public void setAlpha(double _alpha) {
+        this._alpha = _alpha;
+    }
+  
 }
