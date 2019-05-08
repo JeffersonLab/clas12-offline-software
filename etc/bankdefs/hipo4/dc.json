@@ -197,6 +197,7 @@
         {"name":"X",            "type":"F", "info":"wire x-coordinate  in tilted-sector"},
         {"name":"Z",            "type":"F", "info":"wire z-coordinate  in tilted-sector"},
         {"name":"B",            "type":"F", "info":"B-field intensity at hit position in tilted-sector system"},
+        {"name":"Alpha",        "type":"F", "info":"local angle (degr.) in tilted-sector system"},
         {"name":"TProp",        "type":"F", "info":"t propagation along the wire (ns)"},
         {"name":"TFlight",      "type":"F", "info":"time of flight correction (ns)"},      
         {"name":"T0",           "type":"F", "info":"T0 (ns)"},
