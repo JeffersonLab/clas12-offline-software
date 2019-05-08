@@ -10,7 +10,7 @@ import org.jlab.rec.dc.track.Track;
 public class MeasVecs {
 
     public List<MeasVec> measurements = new ArrayList<MeasVec>();
-
+    public List<FittedHit> matchedHits = new ArrayList<FittedHit>();
     public int ndf=0;
     /**
      * The state projector - it projects the state onto the measurement
@@ -83,8 +83,10 @@ public class MeasVecs {
                     //if(trkcand.get(c).get(s).get(h).get_Time()/CCDBConstants.getTMAXSUPERLAYER()[trkcand.get(c).get(s).get(h).get_Sector()-1][trkcand.get(c).get(s).get(h).get_Superlayer()-1]<1.1)
                     //	hot._hitError = 100000; //exclude outoftimers from fit
                     
-                    if(Math.abs(trkcand.get(c).get(s).get(h).get_Residual())<1)
+                    //if(Math.abs(trkcand.get(c).get(s).get(h).get_Residual())<1) {
+//                        matchedHits.add((FittedHit) hitOnTrk.clone());
                         hOTS.add(hot);
+                    //}
 
                 }
             }
@@ -149,9 +151,8 @@ public class MeasVecs {
                 hot._hitError = err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1 + 2 * Z * err_cov1 + trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr()*trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr();
                 //hot._hitError = trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr();
 
-                if(Math.abs(trk.get_ListOfHBSegments().get(s).get(h).get_Residual())<1) 
-                    hOTS.add(hot);
-                
+                //if(Math.abs(trk.get_ListOfHBSegments().get(s).get(h).get_Residual())<1) 
+                    hOTS.add(hot);               
             }
         }
         Collections.sort(hOTS); // sort the collection in order of increasing Z value (i.e. going downstream from the target)

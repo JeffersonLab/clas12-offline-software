@@ -37,13 +37,7 @@ public class StateVecs {
         // get the maximum value of the B field
         dcSwim = swimmer;
         rk = new RungeKutta();
-        //double phi = Math.toRadians(29.5);
-        //double rho = 44.0;
-        //double z = 436.0;
-        //swimmer.BfieldLab(rho*FastMath.cos(phi), rho*FastMath.sin(phi), z, lbf);
-        //Bmax = Math.sqrt(lbf[0]*lbf[0]+lbf[1]*lbf[1]+lbf[2]*lbf[2]) *(2.366498/4.322871999651699); // scales according to torus scale by reading the map and averaging the value
-     }
-    
+    }
     
     /**
      * 
@@ -204,24 +198,17 @@ public class StateVecs {
     public void init(Track trkcand, double z0, KFitter kf) {
         
         if (trkcand.get_StateVecAtReg1MiddlePlane() != null) {
-            dcSwim.SetSwimParameters(-1, trkcand.get_StateVecAtReg1MiddlePlane().x(), trkcand.get_StateVecAtReg1MiddlePlane().y(), trkcand.get(0).get_Point().z(),
-                    trkcand.get_StateVecAtReg1MiddlePlane().tanThetaX(), trkcand.get_StateVecAtReg1MiddlePlane().tanThetaY(), trkcand.get_P(),
-                    trkcand.get_Q());
-
-            double[] VecAtFirstMeasSite = dcSwim.SwimToPlaneTiltSecSys(trkcand.get(0).get_Sector(), z0);
-            if(VecAtFirstMeasSite==null){
-                kf.setFitFailed = true;
-                return;
-            }
+            
             StateVec initSV = new StateVec(0);
-            initSV.x = VecAtFirstMeasSite[0];
-            initSV.y = VecAtFirstMeasSite[1];
-            initSV.z = VecAtFirstMeasSite[2];
-            initSV.tx = VecAtFirstMeasSite[3] / VecAtFirstMeasSite[5];
-            initSV.ty = VecAtFirstMeasSite[4] / VecAtFirstMeasSite[5];
+            initSV.x = trkcand.get_StateVecAtReg1MiddlePlane().x();
+            initSV.y = trkcand.get_StateVecAtReg1MiddlePlane().y();
+            initSV.z = trkcand.get(0).get_Point().z();
+            initSV.tx = trkcand.get_StateVecAtReg1MiddlePlane().tanThetaX();
+            initSV.ty = trkcand.get_StateVecAtReg1MiddlePlane().tanThetaY();
             initSV.Q = trkcand.get_Q() / trkcand.get_P();
-            dcSwim.Bfield(trkcand.get(0).get_Sector(), initSV.x, initSV.y, initSV.z, bf);
-            initSV.B = Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2]);
+            
+            rk.SwimToZ(trkcand.get(0).get_Sector(), initSV, dcSwim, z0, bf);
+            
             this.trackTraj.put(0, initSV);
         } else {
             kf.setFitFailed = true;
@@ -255,14 +242,6 @@ public class StateVecs {
         this.trackCov.put(0, initCM);
     }
 
-    public void printMatrix(Matrix C) {
-        for (int k = 0; k < 5; k++) {
-            for (int j = 0; j < 5; j++) {
-                System.out.println("C["+j+"]["+k+"] = "+C.get(j, k));
-            }
-        }
-    }
-
     void initFromHB(Track trkcand, double z0, KFitter kf) { 
         if (trkcand != null && trkcand.get_CovMat()!=null) {
             dcSwim.SetSwimParameters(trkcand.get_Vtx0().x(), trkcand.get_Vtx0().y(), trkcand.get_Vtx0().z(), 
@@ -293,7 +272,7 @@ public class StateVecs {
             initSV.tx = VecAtFirstMeasSite[3] / VecAtFirstMeasSite[5];
             initSV.ty = VecAtFirstMeasSite[4] / VecAtFirstMeasSite[5];
             initSV.Q = trkcand.get_Q() / trkcand.get_pAtOrig().mag(); 
-            dcSwim.Bfield(trkcand.get(0).get_Sector(), initSV.x, initSV.y, initSV.z, bf);
+            rk.SwimToZ(trkcand.get(0).get_Sector(), initSV, dcSwim, z0, bf);
             initSV.B = Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2]);
             this.trackTraj.put(0, initSV); 
             
@@ -306,6 +285,16 @@ public class StateVecs {
         }
         
     }
+    
+    
+    public void printMatrix(Matrix C) {
+        for (int k = 0; k < 5; k++) {
+            for (int j = 0; j < 5; j++) {
+                System.out.println("C["+j+"]["+k+"] = "+C.get(j, k));
+            }
+        }
+    }
+    
     /**
      * The state vector representing the track at a given measurement site
      */
@@ -323,6 +312,11 @@ public class StateVecs {
         
         StateVec(int k) {
             this.k = k;
+        }
+
+        String printInfo() {
+            return this.k+"] = "+(float)this.x+", "+(float)this.y+", "+(float)this.z+", "
+                    +(float)this.tx+", "+(float)this.ty+", "+(float)this.Q+" B = "+(float)this.B;
         }
     }
     /**
