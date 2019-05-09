@@ -68,7 +68,8 @@ public final class Environment {
 
 			// Get hostname
 			_hostName = addr.getHostName();
-		} catch (UnknownHostException e) {
+		}
+		catch (UnknownHostException e) {
 			_hostName = "???";
 		}
 
@@ -76,7 +77,8 @@ public final class Environment {
 		Iterator<ImageWriter> iterator = ImageIO.getImageWritersByFormatName("png");
 		if ((iterator == null) || !iterator.hasNext()) {
 			System.err.println("no png writer");
-		} else {
+		}
+		else {
 			_pngWriter = iterator.next(); // take the first
 		}
 
@@ -141,7 +143,8 @@ public final class Environment {
 	private String getProperty(String keyName) {
 		try {
 			return System.getProperty(keyName);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			return null;
 		}
 	}

@@ -116,7 +116,7 @@ public class ColorPanel extends JPanel implements ItemListener, ChangeListener {
 		sp.add(new JLabel("Old Color:"));
 		sp.add(oldcolorlabel);
 
-		// make the transparancy slider
+		// make the transparency slider
 
 		JPanel tpanel = new JPanel(new BorderLayout(2, 0));
 		// tpanel.add("North", new JLabel("Transparency"));
@@ -160,6 +160,9 @@ public class ColorPanel extends JPanel implements ItemListener, ChangeListener {
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
+		if (nocolorcb != null) {
+			colorChooser.setEnabled(!noColor());
+		}
 	}
 
 	/**
@@ -237,7 +240,8 @@ public class ColorPanel extends JPanel implements ItemListener, ChangeListener {
 			alpha = Math.max(0, Math.min(255, alpha));
 			return new Color(bcolor.getRed(), bcolor.getGreen(), bcolor.getBlue(), alpha);
 
-		} else {
+		}
+		else {
 			return bcolor;
 		}
 	}

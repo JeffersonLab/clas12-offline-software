@@ -240,8 +240,8 @@ public class HistoGridView extends ScrollableGridView implements MouseListener, 
 
 		DataSet ds = canvas.getDataSet();
 		ds.getCurveStyle(0).setFillColor(X11Colors.getX11Color("dark red"));
-		ds.getCurveStyle(0).setLineColor(new Color(0, 0, 0, 32));
-		ds.getCurveStyle(0).setFitColor(X11Colors.getX11Color("dodger blue"));
+		ds.getCurveStyle(0).setBorderColor(new Color(0, 0, 0, 32));
+		ds.getCurveStyle(0).setFitLineColor(X11Colors.getX11Color("dodger blue"));
 		ds.getCurve(0).getFit().setFitType(FitType.NOLINE);
 
 		PlotPanel ppanel = new PlotPanel(canvas, PlotPanel.VERYBARE);

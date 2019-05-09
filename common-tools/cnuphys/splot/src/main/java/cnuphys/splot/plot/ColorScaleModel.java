@@ -113,11 +113,14 @@ public class ColorScaleModel {
 
 		if (relativeDifference(value, _minVal) < TINY) {
 			return _zeroColor;
-		} else if (relativeDifference(value, _maxVal) < TINY) {
+		}
+		else if (relativeDifference(value, _maxVal) < TINY) {
 			return _colors[collen - 1];
-		} else if (value < _minVal) {
+		}
+		else if (value < _minVal) {
 			return _tooSmallColor;
-		} else if (value > _maxVal) {
+		}
+		else if (value > _maxVal) {
 			return _tooBigColor;
 		}
 
@@ -161,7 +164,8 @@ public class ColorScaleModel {
 
 		if (minv == maxv) {
 			return 1.0;
-		} else {
+		}
+		else {
 			return Math.abs((v1 - v2) / (maxv - minv));
 		}
 	}

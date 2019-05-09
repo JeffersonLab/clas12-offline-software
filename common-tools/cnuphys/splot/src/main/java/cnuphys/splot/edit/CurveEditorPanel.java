@@ -33,6 +33,12 @@ import cnuphys.splot.style.LineStyle;
 import cnuphys.splot.style.StyleEditorPanel;
 import cnuphys.splot.style.SymbolType;
 
+/**
+ * Used to edit parameters for curves on a plot
+ * 
+ * @author heddle
+ *
+ */
 public class CurveEditorPanel extends JPanel implements ActionListener, PropertyChangeListener {
 
 	// the underlying plot canvas
@@ -155,7 +161,8 @@ public class CurveEditorPanel extends JPanel implements ActionListener, Property
 		if (_curveTable != null) {
 			try {
 				_curveTable.getSelectionModel().setSelectionInterval(0, 0);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -169,8 +176,8 @@ public class CurveEditorPanel extends JPanel implements ActionListener, Property
 			_stylePanel.getSymbolSelector().addActionListener(this);
 		}
 
-		if (_stylePanel.getLineSelector() != null) {
-			_stylePanel.getLineSelector().addActionListener(this);
+		if (_stylePanel.getBorderSelector() != null) {
+			_stylePanel.getBorderSelector().addActionListener(this);
 		}
 
 		if (_stylePanel.getSymbolSizeSelector() != null) {
@@ -189,8 +196,12 @@ public class CurveEditorPanel extends JPanel implements ActionListener, Property
 
 					if (component == _stylePanel.getSymbolColor()) {
 						curve.getStyle().setFillColor(_stylePanel.getSymbolColor().getColor());
-					} else if (component == _stylePanel.getLineColor()) {
-						curve.getStyle().setLineColor(_stylePanel.getLineColor().getColor());
+					}
+					else if (component == _stylePanel.getBorderColor()) {
+						curve.getStyle().setBorderColor(_stylePanel.getBorderColor().getColor());
+					}
+					else if (component == _stylePanel.getFitLineColor()) {
+						curve.getStyle().setFitLineColor(_stylePanel.getFitLineColor().getColor());
 					}
 					_plotCanvas.repaint();
 				}
@@ -202,8 +213,11 @@ public class CurveEditorPanel extends JPanel implements ActionListener, Property
 		if (_stylePanel.getSymbolColor() != null) {
 			_stylePanel.getSymbolColor().setColorListener(iccl);
 		}
-		if (_stylePanel.getLineColor() != null) {
-			_stylePanel.getLineColor().setColorListener(iccl);
+		if (_stylePanel.getBorderColor() != null) {
+			_stylePanel.getBorderColor().setColorListener(iccl);
+		}
+		if (_stylePanel.getFitLineColor() != null) {
+			_stylePanel.getFitLineColor().setColorListener(iccl);
 		}
 
 		_stylePanel.setEnabled(false);
@@ -233,7 +247,8 @@ public class CurveEditorPanel extends JPanel implements ActionListener, Property
 
 		if (Environment.getInstance().isLinux()) {
 			_textArea.setText("<body style=\"font-size:10px;color:blue\">CNU sPlot</body>");
-		} else {
+		}
+		else {
 			_textArea.setText("<body style=\"font-size:11px;color:blue\">CNU sPlot</body>");
 		}
 		JScrollPane scrollPane = new JScrollPane(_textArea);
@@ -272,16 +287,18 @@ public class CurveEditorPanel extends JPanel implements ActionListener, Property
 				_plotCanvas.repaint();
 			}
 
-		} else if (source == _stylePanel.getLineSelector()) {
+		}
+		else if (source == _stylePanel.getBorderSelector()) {
 			EnumComboBox ecb = (EnumComboBox) source;
 			LineStyle lineStyle = LineStyle.getValue((String) ecb.getSelectedItem());
 
-			if (curve.getStyle().getLineStyle() != lineStyle) {
-				curve.getStyle().setLineStyle(lineStyle);
+			if (curve.getStyle().getFitLineStyle() != lineStyle) {
+				curve.getStyle().setFitLineStyle(lineStyle);
 				_plotCanvas.repaint();
 			}
 
-		} else if (source == _fitPanel.getFitSelector()) {
+		}
+		else if (source == _fitPanel.getFitSelector()) {
 			EnumComboBox ecb = (EnumComboBox) source;
 			FitType fitType = FitType.getValue((String) ecb.getSelectedItem());
 
@@ -309,7 +326,8 @@ public class CurveEditorPanel extends JPanel implements ActionListener, Property
 		if (PlotCanvas.DONEDRAWINGPROP.equals(evt.getPropertyName())) {
 			setTextArea();
 			return;
-		} else if (PlotCanvas.DATACLEAREDPROP.equals(evt.getPropertyName())) {
+		}
+		else if (PlotCanvas.DATACLEAREDPROP.equals(evt.getPropertyName())) {
 			// all plot data cleared
 			_curveTable.clear();
 			return;
@@ -335,8 +353,8 @@ public class CurveEditorPanel extends JPanel implements ActionListener, Property
 			float fwidth = (lwidth / 2.f);
 			IStyled style = curve.getStyle();
 			System.err.println("Setting line width to: " + fwidth);
-			if (style.getLineWidth() != fwidth) {
-				style.setLineWidth(fwidth);
+			if (style.getFitLineWidth() != fwidth) {
+				style.setFitLineWidth(fwidth);
 				_plotCanvas.repaint();
 			}
 		}

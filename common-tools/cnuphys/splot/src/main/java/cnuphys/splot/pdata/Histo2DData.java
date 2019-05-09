@@ -361,7 +361,8 @@ public class Histo2DData {
 	public int getBinX(double val) {
 		if (val < getMinX()) {
 			return OUTOFRANGE;
-		} else if (val > getMaxX()) {
+		}
+		else if (val > getMaxX()) {
 			return OUTOFRANGE;
 		}
 
@@ -385,7 +386,8 @@ public class Histo2DData {
 	public int getBinY(double val) {
 		if (val < getMinY()) {
 			return OUTOFRANGE;
-		} else if (val > getMaxY()) {
+		}
+		else if (val > getMaxY()) {
 			return OUTOFRANGE;
 		}
 

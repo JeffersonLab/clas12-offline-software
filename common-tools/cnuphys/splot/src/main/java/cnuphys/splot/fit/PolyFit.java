@@ -21,7 +21,8 @@ public class PolyFit extends Fitsvd implements IValueGetter {
 		try {
 			fit();
 			fit.setFit(this);
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			System.err.println("Polynomial fit failed.");
 		}
 	}

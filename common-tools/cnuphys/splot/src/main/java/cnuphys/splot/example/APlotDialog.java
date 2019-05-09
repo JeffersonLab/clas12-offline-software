@@ -42,7 +42,8 @@ public abstract class APlotDialog extends JDialog {
 			String xLabel = getXAxisLabel();
 			String yLabel = getYAxisLabel();
 			_canvas = new PlotCanvas(dataSet, plotTitle, xLabel, yLabel);
-		} catch (DataSetException e) {
+		}
+		catch (DataSetException e) {
 			e.printStackTrace();
 			return;
 		}

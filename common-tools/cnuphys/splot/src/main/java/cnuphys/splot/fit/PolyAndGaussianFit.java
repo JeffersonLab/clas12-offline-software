@@ -30,7 +30,8 @@ public class PolyAndGaussianFit extends Fitmrq implements IValueGetter {
 		try {
 			fit();
 			fit.setFit(this);
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			System.err.println("Gaussian plus Polynomial fit failed.");
 		}
 	}
@@ -53,7 +54,8 @@ public class PolyAndGaussianFit extends Fitmrq implements IValueGetter {
 		for (int i = 0; i < ntot; i++) {
 			if (i < ng3) {
 				aa[i] = bb[i];
-			} else {
+			}
+			else {
 				aa[i] = 1.0;
 			}
 		}

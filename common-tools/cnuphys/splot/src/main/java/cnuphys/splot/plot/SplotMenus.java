@@ -8,6 +8,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 
@@ -32,6 +33,7 @@ public class SplotMenus implements ActionListener {
 	protected JMenuItem _dataItem;
 	protected JMenuItem _clearItem;
 	protected JMenuItem _curveItem;
+	protected JMenuItem _axesItem;
 
 	protected JCheckBoxMenuItem _showExtraCB;
 
@@ -82,6 +84,7 @@ public class SplotMenus implements ActionListener {
 		_prefItem = addMenuItem("Preferences...", 'P', _editMenu);
 //		_dataItem = addMenuItem("Data...", 'D', _editMenu);
 		_curveItem = addMenuItem("Curves...", 'C', _editMenu);
+		_axesItem = addMenuItem("Axes...", 'A', _editMenu);
 		_editMenu.addSeparator();
 		_showExtraCB = addMenuCheckBox("Show any Extra Text", _editMenu, canvas.getParameters().extraDrawing());
 		_editMenu.addSeparator();
@@ -110,7 +113,8 @@ public class SplotMenus implements ActionListener {
 				}
 
 				mitem.addActionListener(this);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 			}
 		}
 
@@ -125,7 +129,8 @@ public class SplotMenus implements ActionListener {
 				cb = new JCheckBoxMenuItem(label, selected);
 				menu.add(cb);
 				cb.addActionListener(this);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 			}
 		}
 
@@ -138,16 +143,37 @@ public class SplotMenus implements ActionListener {
 
 		if (source == _quitItem) {
 			System.exit(0);
-		} else if (source == _prefItem) {
+		}
+		else if (source == _prefItem) {
 			_plotCanvas.showPreferencesEditor();
-		} else if (source == _dataItem) {
+		}
+		else if (source == _dataItem) {
 			_plotCanvas.showDataEditor();
-		} else if (source == _curveItem) {
+		}
+		else if (source == _curveItem) {
 			CurveEditorDialog cd = new CurveEditorDialog(_plotCanvas);
 			DialogUtilities.centerDialog(cd);
 			cd.selectFirstCurve();
 			cd.setVisible(true);
-		} else if (source == _clearItem) {
+		}
+		else if (source == _axesItem) {
+			DataSetType type = _plotCanvas.getType();
+			// XYY, XYXY, XYEXYE, XYEEXYEE, H1D, H2D, STRIP, UNKNOWN;
+			switch (type) {
+			case UNKNOWN:
+			case H1D:
+			case H2D:
+			case STRIP:
+				JOptionPane.showMessageDialog(null, "Axes editing is not yet supported for this type of plot.",
+						"Not Supported", JOptionPane.INFORMATION_MESSAGE);
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		else if (source == _clearItem) {
 			DataSet ds = _plotCanvas.getDataSet();
 			DataSetType dsType = null;
 			if (ds != null) {
@@ -159,11 +185,13 @@ public class SplotMenus implements ActionListener {
 				try {
 					ds = new DataSet(dsType);
 					_plotCanvas.setDataSet(ds);
-				} catch (DataSetException e1) {
+				}
+				catch (DataSetException e1) {
 					e1.printStackTrace();
 				}
 			}
-		} else if (source == _showExtraCB) {
+		}
+		else if (source == _showExtraCB) {
 			_plotCanvas.getParameters().setExtraDrawing(_showExtraCB.isSelected());
 			_plotCanvas.repaint();
 		}

@@ -19,47 +19,76 @@ public interface IStyled {
 	public void setFillColor(Color fillColor);
 
 	/**
-	 * Get the color used for line drawing.
+	 * Get the color used for symbol borders.
 	 * 
-	 * @return the line color.
+	 * @return the symbol border color.
 	 */
-	public Color getLineColor();
+	public Color getBorderColor();
 
 	/**
-	 * Set the color used for fill the line drawing.
+	 * Set the color used for symbol borders.
 	 * 
-	 * @param lineColor the line color.
+	 * @param borderColor the border color.
 	 */
-	public void setLineColor(Color lineColor);
+	public void setBorderColor(Color borderColor);
 
 	/**
 	 * Get the color used for fits.
 	 * 
-	 * @return the fit color.
+	 * @return the fit line color.
 	 */
 
-	public Color getFitColor();
+	public Color getFitLineColor();
 
 	/**
-	 * Set the color used for fill the fit drawing.
+	 * Get the color used for auxiliary lines.
+	 * 
+	 * @return the auxiliary line color.
+	 */
+
+	public Color getAuxLineColor();
+
+	/**
+	 * Set the color used for the fit drawing.
 	 * 
 	 * @param fitColor the fit color.
 	 */
-	public void setFitColor(Color fitColor);
+	public void setFitLineColor(Color fitColor);
 
 	/**
-	 * Get the style used for drawing lines.
+	 * Set the color used for auxiliary lines.
 	 * 
-	 * @return the line style.
+	 * @param auxColor the auxiliary line color.
 	 */
-	public LineStyle getLineStyle();
+	public void setAuxLineColor(Color auxColor);
 
 	/**
-	 * Set the style used for drawing lines.
+	 * Get the style used for drawing fits.
 	 * 
-	 * @param lineStyle the line style.
+	 * @return the line style for fits.
 	 */
-	public void setLineStyle(LineStyle lineStyle);
+	public LineStyle getFitLineStyle();
+
+	/**
+	 * Get the style used for drawing fits.
+	 * 
+	 * @return the line style for fits.
+	 */
+	public LineStyle getAuxLineStyle();
+
+	/**
+	 * Set the style used for drawing fits.
+	 * 
+	 * @param lineStyle the fit line style.
+	 */
+	public void setFitLineStyle(LineStyle lineStyle);
+
+	/**
+	 * Set the style used for drawing auxiliary lines.
+	 * 
+	 * @param lineStyle the auxiliary line style.
+	 */
+	public void setAuxLineStyle(LineStyle lineStyle);
 
 	/**
 	 * Get the symbol used for drawing points.
@@ -76,18 +105,32 @@ public interface IStyled {
 	public void setSymbolType(SymbolType symbolType);
 
 	/**
-	 * Get the line width for drawing lines.
+	 * Get the line width for drawing fits.
 	 * 
-	 * @return the line width in pixels.
+	 * @return the fit line width in pixels.
 	 */
-	public float getLineWidth();
+	public float getFitLineWidth();
 
 	/**
-	 * Set the line width for drawing lines.
+	 * Get the line width for drawing auxiliary lines.
+	 * 
+	 * @return the auxiliary line width in pixels.
+	 */
+	public float getAuxLineWidth();
+
+	/**
+	 * Set the line width for drawing fit lines.
 	 * 
 	 * @param lineWidth the line width in pixels.
 	 */
-	public void setLineWidth(float lineWidth);
+	public void setFitLineWidth(float lineWidth);
+
+	/**
+	 * Set the line width for drawing auxiliary lines.
+	 * 
+	 * @param lineWidth the auxiliary line width in pixels.
+	 */
+	public void setAuxLineWidth(float lineWidth);
 
 	/**
 	 * Get the symbol size (full width) in pixels.

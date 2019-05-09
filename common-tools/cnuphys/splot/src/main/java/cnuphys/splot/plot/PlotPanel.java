@@ -243,7 +243,8 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 					}
 				}
 			};
-		} else {
+		}
+		else {
 			lab = new JLabel(text != null ? text : " ");
 		}
 		lab.setFont(font);
@@ -307,10 +308,12 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 		if (PlotCanvas.TITLECHANGEPROP.equals(evt.getPropertyName())) {
 			_titleLabel.setText((String) evt.getNewValue());
 			_titleLabel.repaint();
-		} else if (PlotCanvas.XLABELCHANGEPROP.equals(evt.getPropertyName())) {
+		}
+		else if (PlotCanvas.XLABELCHANGEPROP.equals(evt.getPropertyName())) {
 			_xLabel.setText((String) evt.getNewValue());
 			_xLabel.repaint();
-		} else if (PlotCanvas.YLABELCHANGEPROP.equals(evt.getPropertyName())) {
+		}
+		else if (PlotCanvas.YLABELCHANGEPROP.equals(evt.getPropertyName())) {
 			_yLabel.setText((String) evt.getNewValue());
 			_yLabel.repaint();
 		}

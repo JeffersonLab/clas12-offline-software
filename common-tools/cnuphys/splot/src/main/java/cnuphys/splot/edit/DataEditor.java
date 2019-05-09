@@ -92,7 +92,8 @@ public class DataEditor extends SimpleDialog implements TableModelListener {
 	protected void handleCommand(String command) {
 		if (CLOSE.equals(command)) {
 			setVisible(false);
-		} else if (APPLY.equals(command)) {
+		}
+		else if (APPLY.equals(command)) {
 		}
 	}
 

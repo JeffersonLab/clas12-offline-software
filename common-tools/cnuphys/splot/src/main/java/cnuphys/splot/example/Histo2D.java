@@ -53,7 +53,8 @@ public class Histo2D extends AExample {
 //			System.err.print("X, Y: " + x + ", " + y);
 			try {
 				ds.add(x, y);
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 			}
 		}

@@ -73,7 +73,8 @@ public class GrowableArray {
 
 		try {
 			System.arraycopy(_data, 0, acopy, 0, _dataLen);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 
 			System.err.println("Exception in GrowableArray.getMinimalCopy: " + e.getMessage());
 			System.err.println("_dataLen: " + _dataLen);
@@ -122,7 +123,8 @@ public class GrowableArray {
 		if (_dataLen == 1) {
 			_minValue = val;
 			_maxValue = val;
-		} else {
+		}
+		else {
 			_minValue = Math.min(_minValue, val);
 			_maxValue = Math.max(_maxValue, val);
 		}

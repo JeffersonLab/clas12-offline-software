@@ -21,7 +21,8 @@ public class AltPolynomialFit extends Fitmrq implements IValueGetter {
 		try {
 			fit();
 			fit.setFit(this);
-		} catch (IllegalArgumentException e) {
+		}
+		catch (IllegalArgumentException e) {
 			System.err.println("Alt Polynomial fit failed.");
 			e.printStackTrace();
 		}

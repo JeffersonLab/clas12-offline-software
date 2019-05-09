@@ -32,7 +32,8 @@ public class DoubleFormat {
 		StringBuffer pattern = new StringBuffer();
 		if (numdec < 1) {
 			pattern.append("0");
-		} else {
+		}
+		else {
 			pattern.append("0.");
 		}
 
@@ -99,7 +100,8 @@ public class DoubleFormat {
 
 		if (exponent < minExponent) {
 			return doubleFormat(value, numdec, false);
-		} else { // use sci not
+		}
+		else { // use sci not
 			return doubleFormat(value, numdec, true);
 		}
 

@@ -77,7 +77,8 @@ public class Gaussians extends AExample {
 			try {
 				ds.add(x[0], spreadFactor() * y[0], sig[0], x[1], spreadFactor() * y[1], sig[1], x[2],
 						spreadFactor() * y[2], sig[2]);
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 				System.exit(1);
 			}

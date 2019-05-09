@@ -103,7 +103,8 @@ public class Gradient extends DraggableRectangle {
 
 		if (_zeroMaxScale) {
 			w = w + HGAP + fm.stringWidth("max");
-		} else {
+		}
+		else {
 			// TODO implement
 		}
 

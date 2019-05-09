@@ -103,8 +103,8 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 		if (curve != null) {
 			curve.getFit().setFitType(FitType.CONNECT);
 			curve.getStyle().setSymbolType(SymbolType.NOSYMBOL);
-			curve.getStyle().setLineColor(_curveColors[0]);
-			curve.getStyle().setLineWidth(2f);
+			curve.getStyle().setFitLineColor(_curveColors[0]);
+			curve.getStyle().setFitLineWidth(2f);
 		}
 
 		return ds;
@@ -317,8 +317,8 @@ public class PlotFieldDialog extends APlotDialog implements ActionListener {
 					"|B| (" + (hotIndex + 1) + ") " + MagneticFields.getInstance().getCurrentConfiguration());
 			newCurve.getFit().setFitType(FitType.CONNECT);
 			newCurve.getStyle().setSymbolType(SymbolType.NOSYMBOL);
-			newCurve.getStyle().setLineColor(_curveColors[hotIndex % _curveColors.length]);
-			newCurve.getStyle().setLineWidth(2f);
+			newCurve.getStyle().setFitLineColor(_curveColors[hotIndex % _curveColors.length]);
+			newCurve.getStyle().setFitLineWidth(2f);
 		}
 
 		FieldProbe probe = FieldProbe.factory();

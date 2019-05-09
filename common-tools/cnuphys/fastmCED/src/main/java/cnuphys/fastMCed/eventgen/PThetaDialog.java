@@ -94,7 +94,7 @@ public class PThetaDialog extends APlotDialog {
 			dc.getStyle().setSymbolType(SymbolType.SQUARE);
 			dc.getStyle().setSymbolSize(3);
 			dc.getStyle().setFillColor(fillColor);
-			dc.getStyle().setLineColor(null);
+			dc.getStyle().setBorderColor(null);
 		}
 
 		// many options controlled via plot parameters

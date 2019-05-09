@@ -119,14 +119,16 @@ public enum FitType {
 					sb.append(pmString("b", fab.b, fab.sigb) + "<BR>");
 					sb.append(errorType(curveFit));
 					sb.append(chiSqString(fab.chi2));
-				} else if (fit instanceof Fitexy) {
+				}
+				else if (fit instanceof Fitexy) {
 					Fitexy fitexy = (Fitexy) fit;
 					sb.append(pmString("a", fitexy.a, fitexy.siga) + "<BR>");
 					sb.append(pmString("b", fitexy.b, fitexy.sigb) + "<BR>");
 					sb.append(errorType(curveFit));
 					sb.append(chiSqString(fitexy.chi2));
 				}
-			} else {
+			}
+			else {
 				sb.append(warning("LINEAR FIT PROBLEM"));
 			}
 			break; // LINE
@@ -143,7 +145,8 @@ public enum FitType {
 				}
 				sb.append(errorType(curveFit));
 				sb.append(chiSqString(fsvd.chisq));
-			} else {
+			}
+			else {
 				sb.append(warning("POLYNOMIAL FIT PROBLEM"));
 			}
 			break; // POLYNOMIAL
@@ -165,7 +168,8 @@ public enum FitType {
 				sb.append(colorStr("S/" + UnicodeSupport.SQRT + "2 = " + valStr(a[3] / Math.sqrt(2)), "gray") + _EOL);
 				sb.append(errorType(curveFit));
 				sb.append(chiSqString(chisq));
-			} else {
+			}
+			else {
 				sb.append(warning("ERF FIT PROBLEM"));
 			}
 			break; // ERF
@@ -187,7 +191,8 @@ public enum FitType {
 				sb.append(colorStr("S/" + UnicodeSupport.SQRT + "2 = " + valStr(a[3] / Math.sqrt(2)), "gray") + _EOL);
 				sb.append(errorType(curveFit));
 				sb.append(chiSqString(chisq));
-			} else {
+			}
+			else {
 				sb.append(warning("ERFC FIT PROBLEM"));
 			}
 			break; // ERFC
@@ -205,7 +210,8 @@ public enum FitType {
 				}
 				sb.append(errorType(curveFit));
 				sb.append(chiSqString(faltp.chisq));
-			} else {
+			}
+			else {
 				sb.append(warning("ALTERNATE POLY FIT PROBLEM"));
 			}
 			break; // ALTPOLYNOMIAL
@@ -228,7 +234,8 @@ public enum FitType {
 				}
 				sb.append(errorType(curveFit));
 				sb.append(chiSqString(fg.chisq));
-			} else {
+			}
+			else {
 				sb.append(warning("GAUSSIAN FIT PROBLEM"));
 			}
 			break; // GAUSSIANS
@@ -262,7 +269,8 @@ public enum FitType {
 
 				sb.append(errorType(curveFit));
 				sb.append(chiSqString(fpg.chisq));
-			} else {
+			}
+			else {
 				sb.append(warning("GAUSSIAN PLUS POLY FIT PROBLEM"));
 			}
 			break;
@@ -329,7 +337,8 @@ public enum FitType {
 	private static String valStr(double val) {
 		if (Double.isNaN(val)) {
 			return "Nan";
-		} else if (Double.isInfinite(val)) {
+		}
+		else if (Double.isInfinite(val)) {
 			return UnicodeSupport.INFINITY;
 		}
 		return DoubleFormat.doubleFormat(val, 4, 3);

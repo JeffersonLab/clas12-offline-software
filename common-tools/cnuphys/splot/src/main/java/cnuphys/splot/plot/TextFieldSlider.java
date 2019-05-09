@@ -74,7 +74,8 @@ public abstract class TextFieldSlider extends JPanel implements ChangeListener {
 					try {
 						double val = Double.parseDouble(_textField.getText());
 						_slider.setValue(realValueToSliderValue(val));
-					} catch (Exception e) {
+					}
+					catch (Exception e) {
 
 					}
 				}

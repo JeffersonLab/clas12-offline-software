@@ -76,7 +76,8 @@ public class ErfTest extends AExample {
 		for (int i = 0; i < _rawdata.length - 2; i += 3) {
 			try {
 				ds.add(_rawdata[i], _rawdata[i + 1], _rawdata[i + 2]);
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 				System.exit(1);
 			}

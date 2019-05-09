@@ -172,7 +172,8 @@ public class ButtonPanel extends JPanel {
 				if (alist != null) {
 					buttons[i].addActionListener(alist);
 				}
-			} else {
+			}
+			else {
 				buttons[i] = null;
 			}
 		}
@@ -193,7 +194,8 @@ public class ButtonPanel extends JPanel {
 					buttons[i].setEnabled(state);
 				}
 			}
-		} else if (index < buttons.length) {
+		}
+		else if (index < buttons.length) {
 			if (buttons[index] != null) {
 				buttons[index].setEnabled(state);
 			}

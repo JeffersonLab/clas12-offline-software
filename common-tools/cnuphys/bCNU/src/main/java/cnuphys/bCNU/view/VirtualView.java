@@ -619,7 +619,7 @@ public class VirtualView extends BaseView
 
 		int xc = (int) (x + dx / 2);
 		int yc = (int) (y + dy / 2);
-
+		
 		Rectangle bounds = view.getBounds();
 		int delx = xc - (bounds.x + bounds.width / 2);
 		int dely = (yc - 40) - (bounds.y + bounds.height / 2);

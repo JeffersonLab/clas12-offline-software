@@ -129,7 +129,9 @@ public class ViewManager extends Vector<BaseView> implements InternalFrameListen
 			Log.getInstance().config("ViewManager: removed view: " + view.getTitle());
 
 			notifyListeners(view, false);
-			return super.remove(view);
+			boolean removed = super.remove(view);
+			view.dispose();
+			return removed;
 		}
 		return false;
 	}

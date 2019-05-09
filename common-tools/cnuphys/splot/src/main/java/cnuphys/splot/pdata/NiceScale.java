@@ -96,7 +96,8 @@ public class NiceScale {
 				niceFraction = 5;
 			else
 				niceFraction = 10;
-		} else {
+		}
+		else {
 			if (fraction <= 1)
 				niceFraction = 1;
 			else if (fraction <= 2)

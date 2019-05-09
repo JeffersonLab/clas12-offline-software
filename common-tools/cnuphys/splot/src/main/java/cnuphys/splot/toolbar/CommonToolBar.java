@@ -86,11 +86,14 @@ public class CommonToolBar extends JToolBar implements ActionListener, ItemListe
 	public void setSelectedToggle(String s) {
 		if (s == null) {
 			_pointerButton.setSelected(true);
-		} else if (s.equals(BOXZOOM)) {
+		}
+		else if (s.equals(BOXZOOM)) {
 			_boxZoomButton.setSelected(true);
-		} else if (s.equals(CENTER)) {
+		}
+		else if (s.equals(CENTER)) {
 			_recenterButton.setSelected(true);
-		} else {
+		}
+		else {
 			_pointerButton.setSelected(true);
 		}
 	}
@@ -221,7 +224,8 @@ public class CommonToolBar extends JToolBar implements ActionListener, ItemListe
 					return (ToolBarToggleButton) ab;
 				}
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 

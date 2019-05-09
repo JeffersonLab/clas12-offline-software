@@ -48,7 +48,8 @@ public abstract class AExample extends JFrame {
 
 		try {
 			_canvas = new PlotCanvas(createDataSet(), getPlotTitle(), getXAxisLabel(), getYAxisLabel());
-		} catch (DataSetException e) {
+		}
+		catch (DataSetException e) {
 			e.printStackTrace();
 			return;
 		}

@@ -1243,7 +1243,8 @@ public class SectorView extends CedView implements ChangeListener {
 
 	private void setCurveStyle(PlotCanvas canvas, int index) {
 		int cindex = index % plotColors.length;
-		canvas.getDataSet().getCurveStyle(index).setLineColor(plotColors[cindex]);
+		canvas.getDataSet().getCurveStyle(index).setFitLineColor(plotColors[cindex]);
+		canvas.getDataSet().getCurveStyle(index).setBorderColor(plotColors[cindex]);
 		canvas.getDataSet().getCurveStyle(index).setFillColor(plotColors[cindex]);
 		canvas.getDataSet().getCurveStyle(index).setSymbolType(cnuphys.splot.style.SymbolType.X);
 		canvas.getDataSet().getCurveStyle(index).setSymbolSize(6);

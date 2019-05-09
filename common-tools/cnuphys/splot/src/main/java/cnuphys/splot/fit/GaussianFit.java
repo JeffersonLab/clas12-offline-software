@@ -205,7 +205,8 @@ public class GaussianFit extends Fitmrq implements IValueGetter {
 				aa[i + 1] = xmin + delX * (i / 3);
 				aa[i + 2] = result[1] / numGauss;
 			}
-		} else {
+		}
+		else {
 			for (int i = 0; i < ng3; i++) {
 				aa[i] = 1.;
 			}

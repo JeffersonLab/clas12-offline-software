@@ -83,7 +83,8 @@ public class ErfcFit extends Fitmrq implements IValueGetter {
 		if (imin == imax) {
 			if (imin > 0) {
 				imin--;
-			} else if (imax < (yy.length - 1)) {
+			}
+			else if (imax < (yy.length - 1)) {
 				imax++;
 			}
 		}

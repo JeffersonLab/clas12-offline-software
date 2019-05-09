@@ -43,7 +43,8 @@ public class LineWithXAndYErrors extends AExample {
 		for (int i = 0; i < x.length; i++) {
 			try {
 				ds.add(x[i], y[i], xSig[i], ySig[i]);
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 			}
 		}

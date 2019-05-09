@@ -62,7 +62,8 @@ public class EnumComboBox extends JComboBox {
 
 		if (defaultKey != null) {
 			setSelectedItem(enumMap.get(defaultKey));
-		} else if (_extraChoice != null) {
+		}
+		else if (_extraChoice != null) {
 			setSelectedItem(_extraChoice);
 		}
 

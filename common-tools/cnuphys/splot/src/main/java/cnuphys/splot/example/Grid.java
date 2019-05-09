@@ -31,6 +31,7 @@ import cnuphys.splot.pdata.StripData;
 import cnuphys.splot.plot.Environment;
 import cnuphys.splot.plot.GraphicsUtilities;
 import cnuphys.splot.plot.HorizontalLine;
+import cnuphys.splot.plot.LimitsMethod;
 import cnuphys.splot.plot.PlotCanvas;
 import cnuphys.splot.plot.PlotGrid;
 import cnuphys.splot.plot.PlotParameters;
@@ -94,7 +95,8 @@ public class Grid extends JFrame implements IValueGetter {
 				setPreferences(canvas, index);
 
 				_plotGrid.addPlotCanvas(canvas);
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 				return;
 			}
@@ -265,7 +267,8 @@ public class Grid extends JFrame implements IValueGetter {
 			for (int i = 0; i < ErfTest._rawdata.length - 2; i += 3) {
 				try {
 					ds.add(ErfTest._rawdata[i], ErfTest._rawdata[i + 1], ErfTest._rawdata[i + 2]);
-				} catch (DataSetException e) {
+				}
+				catch (DataSetException e) {
 					e.printStackTrace();
 					System.exit(1);
 				}
@@ -278,7 +281,8 @@ public class Grid extends JFrame implements IValueGetter {
 				try {
 					ds.add(LineWithXAndYErrors.x[i], LineWithXAndYErrors.y[i], LineWithXAndYErrors.xSig[i],
 							LineWithXAndYErrors.ySig[i]);
-				} catch (DataSetException e) {
+				}
+				catch (DataSetException e) {
 					e.printStackTrace();
 				}
 			}
@@ -323,7 +327,8 @@ public class Grid extends JFrame implements IValueGetter {
 				try {
 					ds.add(x[0], spreadFactor() * y[0], sig[0], x[1], spreadFactor() * y[1], sig[1], x[2],
 							spreadFactor() * y[2], sig[2]);
-				} catch (DataSetException e) {
+				}
+				catch (DataSetException e) {
 					e.printStackTrace();
 					System.exit(1);
 				}
@@ -348,7 +353,8 @@ public class Grid extends JFrame implements IValueGetter {
 				double y2 = normDev2.dev();
 				try {
 					ds.add(y1, y2);
-				} catch (DataSetException e) {
+				}
+				catch (DataSetException e) {
 					e.printStackTrace();
 				}
 			}
@@ -362,7 +368,8 @@ public class Grid extends JFrame implements IValueGetter {
 
 				try {
 					ds.add(xx, yy);
-				} catch (DataSetException e) {
+				}
+				catch (DataSetException e) {
 					e.printStackTrace();
 				}
 			}
@@ -400,12 +407,13 @@ public class Grid extends JFrame implements IValueGetter {
 			break;
 
 		case 2:
-			ds.getCurveStyle(0).setLineColor(Color.red);
+			ds.getCurveStyle(0).setBorderColor(Color.red);
+			ds.getCurveStyle(0).setFitLineColor(Color.red);
 			ds.getCurveStyle(0).setFillColor(new Color(128, 0, 0, 48));
 			ds.getCurveStyle(0).setSymbolType(SymbolType.NOSYMBOL);
 			params.setMinExponentY(6);
 			params.setNumDecimalY(0);
-			params.setUseXDataLimits(true);
+			params.setXLimitsMethod(LimitsMethod.USEDATALIMITS);
 			params.mustIncludeYZero(true);
 			break;
 
@@ -420,11 +428,12 @@ public class Grid extends JFrame implements IValueGetter {
 
 		case 4:
 			ds.getCurveStyle(0).setFillColor(new Color(196, 196, 196, 64));
-			ds.getCurveStyle(0).setLineColor(Color.black);
+			ds.getCurveStyle(0).setBorderColor(Color.black);
+			ds.getCurveStyle(0).setBorderColor(Color.black);
 			ds.getCurve(0).getFit().setFitType(FitType.GAUSSIANS);
 
 			ds.getCurveStyle(1).setFillColor(new Color(196, 196, 196, 64));
-			ds.getCurveStyle(1).setLineColor(Color.red);
+			ds.getCurveStyle(1).setBorderColor(Color.red);
 			ds.getCurve(1).getFit().setFitType(FitType.GAUSSIANS);
 
 			params.setMinExponentY(6);
@@ -440,7 +449,7 @@ public class Grid extends JFrame implements IValueGetter {
 				dc.getStyle().setSymbolType(SymbolType.CIRCLE);
 				dc.getStyle().setSymbolSize(4);
 				dc.getStyle().setFillColor(fillColor);
-				dc.getStyle().setLineColor(null);
+				dc.getStyle().setBorderColor(null);
 			}
 
 			// many options controlled via plot parameters

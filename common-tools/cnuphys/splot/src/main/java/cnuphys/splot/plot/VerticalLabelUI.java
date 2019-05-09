@@ -60,7 +60,8 @@ public class VerticalLabelUI extends BasicLabelUI {
 	public static ComponentUI createUI(JComponent c) {
 		if (System.getSecurityManager() != null) {
 			return SAFE_VERTICAL_LABEL_UI;
-		} else {
+		}
+		else {
 			return verticalLabelUI;
 		}
 	}
@@ -118,7 +119,8 @@ public class VerticalLabelUI extends BasicLabelUI {
 		Graphics2D g2 = (Graphics2D) g.create();
 		if (clockwise) {
 			g2.rotate(Math.PI / 2, c.getSize().width / 2, c.getSize().width / 2);
-		} else {
+		}
+		else {
 			g2.rotate(-Math.PI / 2, c.getSize().height / 2, c.getSize().height / 2);
 		}
 		super.paint(g2, c);

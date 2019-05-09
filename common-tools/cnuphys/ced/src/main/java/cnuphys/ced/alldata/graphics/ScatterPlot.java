@@ -124,7 +124,7 @@ public class ScatterPlot extends PlotDialog {
 			dc.getStyle().setSymbolType(SymbolType.CIRCLE);
 			dc.getStyle().setSymbolSize(4);
 			dc.getStyle().setFillColor(fillColor);
-			dc.getStyle().setLineColor(null);
+			dc.getStyle().setBorderColor(null);
 		}
 
 		PlotPanel ppanel = new PlotPanel(canvas, PlotPanel.STANDARD);

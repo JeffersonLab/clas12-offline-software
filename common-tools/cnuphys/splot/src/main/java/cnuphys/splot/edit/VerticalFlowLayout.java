@@ -144,7 +144,8 @@ public class VerticalFlowLayout implements LayoutManager2, Serializable {
 			// Yes, valid
 			AlignedComponent alcomp = new AlignedComponent(comp, name);
 			components.add(alcomp);
-		} else {
+		}
+		else {
 			// No, not valid
 			throw new IllegalArgumentException("Cannot add component: constraint is invalid.");
 		}
@@ -184,7 +185,8 @@ public class VerticalFlowLayout implements LayoutManager2, Serializable {
 					}
 				}
 			}
-		} else {
+		}
+		else {
 			throw new IllegalArgumentException("Cannot remove component: component is null.");
 		}
 	}
@@ -274,7 +276,8 @@ public class VerticalFlowLayout implements LayoutManager2, Serializable {
 				m_preferredSize.width += xx;
 				m_preferredSize.height += yy;
 
-			} else {
+			}
+			else {
 				// just set preferred size to size of border.
 				m_preferredSize = new Dimension(xx, yy);
 			}
@@ -347,7 +350,8 @@ public class VerticalFlowLayout implements LayoutManager2, Serializable {
 					if (bUniformWidths == true) {
 						// get the width of the widest component
 						compWidth = m_widestWidth + (m_internalPadX * 2);
-					} else {
+					}
+					else {
 						// compute width based on preferred size
 						compWidth = comp.getPreferredSize().width + (m_internalPadX * 2);
 					}
@@ -355,10 +359,12 @@ public class VerticalFlowLayout implements LayoutManager2, Serializable {
 					if ((alignment.equals(LEFT)) || (parentWidth == 0) || (compWidth > parentWidth)) {
 						// left margin
 						comp.setLocation(xPos, yPos);
-					} else if (alignment.equals(RIGHT)) {
+					}
+					else if (alignment.equals(RIGHT)) {
 						// right margin
 						comp.setLocation(parentWidth - xRight - compWidth, yPos);
-					} else {
+					}
+					else {
 						// centered between margins
 						int centerPos = xPos + (parentWidth - xPos - xRight) / 2;
 						comp.setLocation(centerPos - (compWidth / 2), yPos);
@@ -385,7 +391,8 @@ public class VerticalFlowLayout implements LayoutManager2, Serializable {
 	public void addLayoutComponent(Component comp, Object constraints) {
 		if ((constraints == null) || (constraints instanceof String)) {
 			addLayoutComponent((String) constraints, comp);
-		} else {
+		}
+		else {
 			throw new IllegalArgumentException("cannot add to layout: constraint must be a string (or null)");
 		}
 	}

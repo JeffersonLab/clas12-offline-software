@@ -13,6 +13,8 @@ import javax.swing.ImageIcon;
 
 public class ImageManager {
 
+	public static ImageIcon cnuIcon = ImageManager.getInstance().loadImageIcon("images/cnuicon.png");
+
 	/**
 	 * A memory only cache for Images (not ImageIcons).
 	 */
@@ -44,7 +46,8 @@ public class ImageManager {
 		if (imageManager == null) {
 			try {
 				imageManager = new ImageManager();
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -179,7 +182,8 @@ public class ImageManager {
 			tracker.addImage(image, id);
 			tracker.waitForAll();
 
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -203,7 +207,8 @@ public class ImageManager {
 			tracker.addImage(image, id);
 			tracker.waitForAll();
 
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 

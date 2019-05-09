@@ -143,7 +143,8 @@ public class PlotCanvas extends JComponent
 		if (dataSet == null) {
 			try {
 				dataSet = new DataSet(DataSetType.XYY, "X", "Y");
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 			}
 		}
@@ -189,6 +190,18 @@ public class PlotCanvas extends JComponent
 			}
 		};
 		new Timer(delay, taskPerformer).start();
+	}
+
+	/**
+	 * Get the DataSet type
+	 * 
+	 * @return the data set type
+	 */
+	public DataSetType getType() {
+		if (_dataSet == null) {
+			return DataSetType.UNKNOWN;
+		}
+		return _dataSet.getType();
 	}
 
 	/**
@@ -263,7 +276,8 @@ public class PlotCanvas extends JComponent
 	}
 
 	/**
-	 * Set the world system based on the dataset
+	 * Set the world system based on the dataset This is where the plot limits are
+	 * set.
 	 */
 	public void setWorldSystem() {
 
@@ -287,29 +301,46 @@ public class PlotCanvas extends JComponent
 		double ymax = _dataSet.getYmax();
 
 		PlotParameters params = getParameters();
-
-		if (params.manualRangeX()) {
+		
+		LimitsMethod xMethod = params.getXLimitsMethod();
+		LimitsMethod yMethod = params.getYLimitsMethod();
+		
+		switch (xMethod) {
+		case MANUALLIMITS:
 			xmin = params.getManualXMin();
 			xmax = params.getManualXMax();
-		} else if (_parameters.useXDataLimits()) {
-		} else {
+			break;
+			
+		case ALGORITHMICLIMITS:
 			NiceScale ns = new NiceScale(xmin, xmax, _plotTicks.getNumMajorTickX() + 2, _parameters.includeXZero());
 			xmin = ns.getNiceMin();
 			xmax = ns.getNiceMax();
+			break;
+			
+		case USEDATALIMITS:  //do nothing
+			break;
 		}
-
-		if (params.manualRangeY()) {
+		
+		switch (yMethod) {
+		case MANUALLIMITS:
 			ymin = params.getManualYMin();
 			ymax = params.getManualYMax();
-		} else if (_parameters.useYDataLimits()) {
-			// do nothing
-		} else {
+			break;
+			
+		case ALGORITHMICLIMITS:
 			NiceScale ns = new NiceScale(ymin, ymax, _plotTicks.getNumMajorTickY() + 2, _parameters.includeYZero());
 			ymin = ns.getNiceMin();
 			ymax = ns.getNiceMax();
+			break;
+			
+		case USEDATALIMITS:  //do nothing
+			break;
 		}
 
 		// try nice values
+		
+		System.err.println("X " + xMethod + "(" + xmin + ", " + xmax+ ")");
+		System.err.println("Y " + yMethod + "(" + ymin + ", " + ymax+ ")");
 
 		_worldSystem.setFrame(xmin, ymin, xmax - xmin, ymax - ymin);
 	}
@@ -341,7 +372,7 @@ public class PlotCanvas extends JComponent
 		// draw the ticks and legend
 		_plotTicks.draw(g);
 
-		if (_parameters.legendDrawing()) {
+		if (_parameters.isLegendDrawn()) {
 			_legend.draw(g);
 		}
 
@@ -381,7 +412,8 @@ public class PlotCanvas extends JComponent
 		Rectangle bounds = getBounds();
 		if (bounds == null) {
 			_activeBounds = null;
-		} else {
+		}
+		else {
 			int left = 0;
 			int top = 0;
 			int right = left + bounds.width;
@@ -435,7 +467,8 @@ public class PlotCanvas extends JComponent
 
 		try {
 			_worldToLocal = _localToWorld.createInverse();
-		} catch (NoninvertibleTransformException e) {
+		}
+		catch (NoninvertibleTransformException e) {
 			// e.printStackTrace();
 		}
 	}
@@ -509,7 +542,8 @@ public class PlotCanvas extends JComponent
 
 		else if (!activeBoundsContains(pp.x, pp.y)) {
 			_locationString = " ";
-		} else {
+		}
+		else {
 			// pp.x -= _activeBounds.x;
 			// pp.y -= _activeBounds.y;
 			localToWorld(pp, _workPoint);
@@ -523,12 +557,13 @@ public class PlotCanvas extends JComponent
 					HistoData hd = ycols.get(i).getHistoData();
 					String s = HistoData.statusString(this, hd, pp, _workPoint);
 					if (s != null) {
-						Color lc = ycols.get(i).getStyle().getLineColor();
+						Color lc = ycols.get(i).getStyle().getFitLineColor();
 						_locationString += "&nbsp&nbsp" + colorStr(s, GraphicsUtilities.colorToHex(lc));
 						// break;
 					}
 				}
-			} else if (_dataSet.is2DHistoSet()) {
+			}
+			else if (_dataSet.is2DHistoSet()) {
 				Histo2DData h2d = _dataSet.getColumn(0).getHistoData2D();
 				String s = Histo2DData.statusString(this, h2d, pp, _workPoint);
 				if (s != null) {
@@ -593,7 +628,7 @@ public class PlotCanvas extends JComponent
 		if (_rubberband != null) {
 			return;
 		}
-		if (_parameters.legendDrawing() && _legend.contains(e.getPoint())) {
+		if (_parameters.isLegendDrawn() && _legend.contains(e.getPoint())) {
 			return;
 		}
 
@@ -601,7 +636,8 @@ public class PlotCanvas extends JComponent
 
 		if (CommonToolBar.CENTER.equals(command)) {
 			recenterAtClick(e.getPoint());
-		} else if ((SwingUtilities.isLeftMouseButton(e) && e.isControlDown())) {
+		}
+		else if ((SwingUtilities.isLeftMouseButton(e) && e.isControlDown())) {
 			if (CommonToolBar.POINTER.equals(command)) {
 				_plotPopup.show(e.getComponent(), e.getX(), e.getY());
 			}
@@ -623,13 +659,15 @@ public class PlotCanvas extends JComponent
 
 		String command = toolbarCommand();
 
-		if (isPointer() && _parameters.legendDrawing() && _legend.contains(e.getPoint())) {
+		if (isPointer() && _parameters.isLegendDrawn() && _legend.contains(e.getPoint())) {
 			_legend.setDraggingPrimed(true);
 			_legend.setCurrentPoint(e.getPoint());
-		} else if (isPointer() && _parameters.extraDrawing() && _extra.contains(e.getPoint())) {
+		}
+		else if (isPointer() && _parameters.extraDrawing() && _extra.contains(e.getPoint())) {
 			_extra.setDraggingPrimed(true);
 			_extra.setCurrentPoint(e.getPoint());
-		} else if (isPointer() && _parameters.gradientDrawing() && _gradient.contains(e.getPoint())) {
+		}
+		else if (isPointer() && _parameters.gradientDrawing() && _gradient.contains(e.getPoint())) {
 			_gradient.setDraggingPrimed(true);
 			_gradient.setCurrentPoint(e.getPoint());
 		}
@@ -642,11 +680,13 @@ public class PlotCanvas extends JComponent
 
 					if (e.isShiftDown()) {
 						_rubberband = new Rubberband(this, this, Rubberband.Policy.XONLY);
-					} else {
+					}
+					else {
 						_rubberband = new Rubberband(this, this, Rubberband.Policy.YONLY);
 					}
 
-				} else {
+				}
+				else {
 					_rubberband = new Rubberband(this, this, Rubberband.Policy.RECTANGLE);
 				}
 				_rubberband.setActive(true);
@@ -928,7 +968,8 @@ public class PlotCanvas extends JComponent
 				Environment.getInstance().getPngWriter().write(bi);
 				ios.close();
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 

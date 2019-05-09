@@ -264,7 +264,8 @@ public class DataSet extends DefaultTableModel {
 				DataColumn ycol = _columns.get(2 * curveIndex + 1);
 				xcol.add(vals[0]);
 				ycol.add(vals[1]);
-			} else {
+			}
+			else {
 				System.err.println("[sPlot] Curve index out of range for type: " + getType());
 			}
 			break;
@@ -278,6 +279,10 @@ public class DataSet extends DefaultTableModel {
 			break;
 
 		case H1D:
+			System.err.println("[sPlot] Can not add to curve for type: " + getType());
+			break;
+
+		case H2D:
 			System.err.println("[sPlot] Can not add to curve for type: " + getType());
 			break;
 
@@ -525,13 +530,15 @@ public class DataSet extends DefaultTableModel {
 				for (DataColumn yc : ycols) {
 					if (yc.isHistogram1D()) {
 						v.add(yc.getHistoData());
-					} else {
+					}
+					else {
 						System.err.println("All Y columns in a HistoDataset must be hitograms");
 						System.exit(1);
 					}
 				}
 			}
-		} else {
+		}
+		else {
 			System.err.println("Should not be asking for histos in a non-histo dataset.");
 			System.exit(1);
 		}
@@ -552,7 +559,8 @@ public class DataSet extends DefaultTableModel {
 					xmin = Math.min(xmin, hd.getMinX());
 				}
 			}
-		} else {
+		}
+		else {
 			xmin = getDataMin(DataColumnType.X);
 		}
 		return xmin;
@@ -573,7 +581,8 @@ public class DataSet extends DefaultTableModel {
 					xmax = Math.max(xmax, hd.getMaxX());
 				}
 			}
-		} else {
+		}
+		else {
 			xmax = getDataMax(DataColumnType.X);
 		}
 		return xmax;
@@ -594,7 +603,8 @@ public class DataSet extends DefaultTableModel {
 					ymin = Math.min(ymin, hd.getMinY());
 				}
 			}
-		} else {
+		}
+		else {
 			ymin = getDataMin(DataColumnType.Y);
 		}
 		return ymin;
@@ -615,7 +625,8 @@ public class DataSet extends DefaultTableModel {
 					ymax = Math.max(ymax, hd.getMaxY());
 				}
 			}
-		} else {
+		}
+		else {
 			ymax = getDataMax(DataColumnType.Y);
 		}
 		return ymax;
@@ -845,10 +856,12 @@ public class DataSet extends DefaultTableModel {
 			if (is1DHistoSet()) {
 				HistoData hd = dc.getHistoData();
 				return hd.getNumberBins();
-			} else if (is2DHistoSet()) {
+			}
+			else if (is2DHistoSet()) {
 				Histo2DData h2d = dc.getHistoData2D();
 				return (h2d == null) ? 0 : 1;
-			} else {
+			}
+			else {
 				rowCount = dc.size();
 			}
 		}

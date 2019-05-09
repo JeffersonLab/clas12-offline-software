@@ -17,7 +17,7 @@ public class SymbolDraw {
 
 	public static void drawSymbol(Graphics g, int x, int y, IStyled style) {
 
-		drawSymbol(g, x, y, style.getSymbolType(), style.getSymbolSize(), style.getLineColor(), style.getFillColor());
+		drawSymbol(g, x, y, style.getSymbolType(), style.getSymbolSize(), style.getBorderColor(), style.getFillColor());
 	}
 
 	/**
@@ -32,8 +32,8 @@ public class SymbolDraw {
 	public static void drawGhostSymbol(Graphics g, int x, int y, IStyled style) {
 
 		drawSymbol(g, x, y + 1, style.getSymbolType(), style.getSymbolSize(), Color.white, style.getFillColor());
-		drawSymbol(g, x, y, style.getSymbolType(), style.getSymbolSize(), style.getLineColor(), style.getFillColor());
-		drawSymbol(g, x, y - 1, style.getSymbolType(), style.getSymbolSize(), style.getLineColor(),
+		drawSymbol(g, x, y, style.getSymbolType(), style.getSymbolSize(), style.getBorderColor(), style.getFillColor());
+		drawSymbol(g, x, y - 1, style.getSymbolType(), style.getSymbolSize(), style.getBorderColor(),
 				style.getFillColor());
 	}
 

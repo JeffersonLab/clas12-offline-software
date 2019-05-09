@@ -60,13 +60,13 @@ public class ReconstructionPlotGrid extends PlotGridDialog implements IAccumulat
 		params.setLegendLineLength(40);
 
 		VerticalLine vline = (new VerticalLine(canvas, 0));
-		vline.getStyle().setLineColor(Color.red);
-		vline.getStyle().setLineWidth(1.5f);
-		vline.getStyle().setLineStyle(LineStyle.DOT);
+		vline.getStyle().setBorderColor(Color.red);
+		vline.getStyle().setFitLineWidth(1.5f);
+		vline.getStyle().setFitLineStyle(LineStyle.DOT);
 		params.addPlotLine(vline);
 
 		ds.getCurveStyle(0).setFillColor(new Color(196, 196, 196, 64));
-		ds.getCurveStyle(0).setLineColor(Color.black);
+		ds.getCurveStyle(0).setFitLineColor(Color.black);
 		ds.getCurve(0).getFit().setFitType(FitType.GAUSSIANS);
 
 		params.setMinExponentY(6);

@@ -42,7 +42,8 @@ public class StraightLine extends AExample {
 		for (int i = 0; i < x.length; i++) {
 			try {
 				ds.add(x[i], y[i], sig[i]);
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 			}
 		}

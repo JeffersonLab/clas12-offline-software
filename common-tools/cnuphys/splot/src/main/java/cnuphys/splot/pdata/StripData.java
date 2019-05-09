@@ -64,7 +64,8 @@ public class StripData {
 
 				try {
 					_dataSet.add(t, val);
-				} catch (DataSetException e) {
+				}
+				catch (DataSetException e) {
 					e.printStackTrace();
 				}
 			}

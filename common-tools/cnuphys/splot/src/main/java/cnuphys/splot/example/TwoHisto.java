@@ -59,7 +59,8 @@ public class TwoHisto extends AExample {
 			double y2 = normDev2.dev();
 			try {
 				ds.add(y1, y2);
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 			}
 		}
@@ -70,11 +71,11 @@ public class TwoHisto extends AExample {
 		DataSet ds = _canvas.getDataSet();
 
 		ds.getCurveStyle(0).setFillColor(new Color(196, 196, 196, 64));
-		ds.getCurveStyle(0).setLineColor(Color.black);
+		ds.getCurveStyle(0).setBorderColor(Color.black);
 		ds.getCurve(0).getFit().setFitType(FitType.GAUSSIANS);
 
 		ds.getCurveStyle(1).setFillColor(new Color(196, 196, 196, 64));
-		ds.getCurveStyle(1).setLineColor(Color.red);
+		ds.getCurveStyle(1).setBorderColor(Color.red);
 		ds.getCurve(1).getFit().setFitType(FitType.GAUSSIANS);
 
 		PlotParameters params = _canvas.getParameters();

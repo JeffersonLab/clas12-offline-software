@@ -198,7 +198,8 @@ public class SimpleDialog extends JDialog implements ActionListener {
 				if (label.equals(blabel)) {
 					return button;
 				}
-			} else if (c instanceof Container) {
+			}
+			else if (c instanceof Container) {
 				AbstractButton button = getButton((Container) c, label);
 				if (button != null) {
 					return button;

@@ -9,6 +9,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import cnuphys.splot.plot.GraphicsUtilities;
+import cnuphys.splot.plot.ImageManager;
 
 public class DialogUtilities {
 
@@ -79,7 +80,8 @@ public class DialogUtilities {
 
 		if (inp == null) {
 			str = new String("");
-		} else {
+		}
+		else {
 			str = new String(inp);
 		}
 
@@ -94,7 +96,8 @@ public class DialogUtilities {
 			if (newgap < oldgap) {
 				str = str2;
 				oldgap = newgap;
-			} else {
+			}
+			else {
 				break;
 			}
 		}
@@ -137,6 +140,7 @@ public class DialogUtilities {
 	public static int yesNoDialog(String prompt, String... options) {
 
 		JOptionPane pane = new JOptionPane(prompt);
+		pane.setIcon(ImageManager.cnuIcon);
 
 		pane.setOptions(options);
 		JDialog dialog = pane.createDialog(null, "Dilaog");

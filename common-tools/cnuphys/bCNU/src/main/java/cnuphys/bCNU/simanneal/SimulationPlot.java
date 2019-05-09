@@ -78,9 +78,9 @@ public class SimulationPlot extends PlotPanel implements IUpdateListener {
 			dc.getFit().setFitType(FitType.NOLINE);
 			dc.getStyle().setSymbolType(SymbolType.CIRCLE);
 			dc.getStyle().setSymbolSize(3);
-			dc.getStyle().setLineWidth(1.5f);
+			dc.getStyle().setFitLineWidth(1.5f);
 		}
-		ycols.get(0).getStyle().setLineColor(Color.red);
+		ycols.get(0).getStyle().setBorderColor(Color.red);
 
 		PlotTicks ticks = _plotCanvas.getPlotTicks();
 		ticks.setNumMajorTickY(5);

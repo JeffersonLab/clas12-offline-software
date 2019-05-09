@@ -146,7 +146,8 @@ public class DataColumn extends GrowableArray {
 		_name = name;
 		if (_isHisto1D) {
 			_histoData1D.setName(name);
-		} else if (_isHisto2D) {
+		}
+		else if (_isHisto2D) {
 			_histoData2D.setName(name);
 		}
 	}
@@ -240,7 +241,8 @@ public class DataColumn extends GrowableArray {
 			if (_histoData2D != null) {
 				_histoData2D.add(xval, yval);
 			}
-		} else {
+		}
+		else {
 			System.err.println("In DataColumn, histo2DAdd(x,y) inexplicably called for non-2D histogram");
 		}
 	}
@@ -255,7 +257,8 @@ public class DataColumn extends GrowableArray {
 
 		if (_isHisto1D) {
 			_histoData1D.add(val);
-		} else {
+		}
+		else {
 			super.add(val);
 		}
 
@@ -268,7 +271,8 @@ public class DataColumn extends GrowableArray {
 		long n;
 		if (_isHisto1D) {
 			n = _histoData1D.getTotalCount();
-		} else {
+		}
+		else {
 			n = size();
 		}
 		_sumVal += val;
@@ -276,7 +280,8 @@ public class DataColumn extends GrowableArray {
 		if (n == 1) {
 			_M = val;
 			_Q = 0;
-		} else {
+		}
+		else {
 			double fac = (val - _M);
 			double fac2 = fac / n;
 			_M = _M + fac2;
@@ -293,7 +298,8 @@ public class DataColumn extends GrowableArray {
 		long n;
 		if (_isHisto1D) {
 			n = _histoData1D.getTotalCount();
-		} else {
+		}
+		else {
 			n = size();
 		}
 
@@ -312,15 +318,18 @@ public class DataColumn extends GrowableArray {
 		long n;
 		if (_isHisto1D) {
 			n = _histoData1D.getTotalCount();
-		} else {
+		}
+		else {
 			n = size();
 		}
 
 		if (n == 0) {
 			return Double.NaN;
-		} else if (n == 1) {
+		}
+		else if (n == 1) {
 			return 0.;
-		} else {
+		}
+		else {
 			return _Q / n;
 		}
 	}
@@ -351,7 +360,8 @@ public class DataColumn extends GrowableArray {
 		super.clear();
 		if (_isHisto1D) {
 			_histoData1D.clear();
-		} else if (_isHisto2D) {
+		}
+		else if (_isHisto2D) {
 			_histoData2D.clear();
 		}
 

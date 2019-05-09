@@ -90,14 +90,15 @@ public class CurveDrawer {
 		g.setColor(style.getFillColor());
 		g.fillPolygon(poly);
 
-		Color lineColor = style.getLineColor();
-		Color borderColor;
-		if (lineColor == null) {
+		Color borderColor = style.getBorderColor();
+		if (borderColor == null) {
 			borderColor = _transGray;
-		} else {
-			borderColor = new Color(lineColor.getRed(), lineColor.getGreen(), lineColor.getBlue(), 16);
 		}
-		g.setColor(style.getLineColor());
+		else {
+			// borderColor = new Color(borderColor.getRed(), borderColor.getGreen(),
+			// borderColor.getBlue(), 16);
+		}
+		g.setColor(borderColor);
 		g.drawPolygon(poly);
 
 		long counts[] = hd.getCounts();
@@ -282,7 +283,8 @@ public class CurveDrawer {
 		int size = fit.size();
 		if (fit.getFitType() == FitType.LINE) {
 			return (size > 1);
-		} else {
+		}
+		else {
 			return (size > 2);
 		}
 	}
@@ -301,14 +303,20 @@ public class CurveDrawer {
 		Graphics2D g2 = (Graphics2D) g;
 
 		Stroke oldStroke = g2.getStroke();
-		g2.setStroke(GraphicsUtilities.getStroke(style.getLineWidth(), style.getLineStyle()));
+		g2.setStroke(GraphicsUtilities.getStroke(style.getFitLineWidth(), style.getFitLineStyle()));
 
-		g2.setColor(style.getFitColor());
+		Color fitColor = style.getFitLineColor();
+		if (fitColor == null) {
+			return;
+		}
+		g2.setColor(fitColor);
 
 		double x[] = yfit.getX();
 		double y[] = yfit.getY();
 
-		switch (yfit.getFitType()) {
+		FitType fitType = yfit.getFitType();
+
+		switch (fitType) {
 		case NOLINE:
 			break;
 
@@ -340,7 +348,7 @@ public class CurveDrawer {
 				g2.setColor(style.getFillColor());
 				g.fillRect(p0.x, p0.y, p1.x - p0.x, bottom - p0.y);
 
-				g2.setColor(style.getFitColor());
+				g2.setColor(style.getFitLineColor());
 				g2.drawLine(p0.x, p0.y, p1.x, p0.y);
 				g2.drawLine(p1.x, p0.y, p1.x, p1.y);
 				p0.setLocation(p1);
@@ -351,7 +359,8 @@ public class CurveDrawer {
 			if (yfit.isDirty()) {
 				try {
 					FitUtilities.fitStraightLine(yfit);
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					System.err.println("Line Fit FAILED");
 					yfit.setDirty();
 					return;
@@ -360,7 +369,8 @@ public class CurveDrawer {
 			if (plotCanvas.getDataSet().hasXErrors()) {
 				LinearExyFit lexyfit = (LinearExyFit) yfit.getFit();
 				drawValueGetter(g2, plotCanvas, lexyfit);
-			} else {
+			}
+			else {
 				LineFit lfit = (LineFit) yfit.getFit();
 				drawValueGetter(g2, plotCanvas, lfit);
 			}
@@ -371,7 +381,8 @@ public class CurveDrawer {
 				try {
 					// FitUtilities.doFit(yfit, "cnuphys.splot.fit.ErfFit");
 					FitUtilities.fitErf(yfit);
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					System.err.println("Erf Fit FAILED");
 					yfit.setDirty();
 					return;
@@ -390,7 +401,8 @@ public class CurveDrawer {
 					yfit.hold(1, 0.5);
 					// FitUtilities.doFit(yfit, "cnuphys.splot.fit.ErfcFit");
 					FitUtilities.fitErfc(yfit);
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					System.err.println("Erfc Fit FAILED");
 					yfit.setDirty();
 					return;
@@ -409,7 +421,8 @@ public class CurveDrawer {
 					// FitUtilities.doFit(yfit,
 					// "cnuphys.splot.fit.GaussianFit");
 					FitUtilities.fitGaussians(yfit);
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					System.err.println("Gaussian Fit FAILED: " + e.getMessage());
 					yfit.setDirty();
 					return;
@@ -503,7 +516,8 @@ public class CurveDrawer {
 				poly = new Path2D.Float();
 				poly.moveTo(pp.x, pp.y);
 
-			} else {
+			}
+			else {
 				poly.lineTo(pp.x, pp.y);
 			}
 		}

@@ -19,7 +19,8 @@ public class FitUtilities {
 		if (fit.getSigmaX() != null) {
 			System.err.println("Fitting with X Errors");
 			new LinearExyFit(fit);
-		} else {
+		}
+		else {
 			new LineFit(fit);
 		}
 	}
@@ -292,7 +293,8 @@ public class FitUtilities {
 
 		if (n == 0) {
 			return result;
-		} else if (n == 1) {
+		}
+		else if (n == 1) {
 			result[0] = x[0];
 			result[1] = 0;
 			return result;
@@ -341,11 +343,14 @@ public class FitUtilities {
 
 		if (hasXErr && hasYErr) {
 			fit.setErrorType(Fit.ErrorType.XY_Errors);
-		} else if (hasXErr && !hasYErr) {
+		}
+		else if (hasXErr && !hasYErr) {
 			fit.setErrorType(Fit.ErrorType.X_Errors);
-		} else if (!hasXErr && hasYErr) {
+		}
+		else if (!hasXErr && hasYErr) {
 			fit.setErrorType(Fit.ErrorType.Y_Errors);
-		} else {
+		}
+		else {
 			fit.setErrorType(Fit.ErrorType.No_Errors);
 		}
 
@@ -390,7 +395,8 @@ public class FitUtilities {
 				}
 			}
 			parallelSort(fit.getX(), fit.getY(), fit.getSigmaX(), fit.getSigmaY());
-		} else {
+		}
+		else {
 			parallelSort(fit.getX(), fit.getY(), fit.getSigmaY());
 		}
 

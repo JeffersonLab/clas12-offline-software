@@ -54,7 +54,7 @@ public class ColorLabel extends JComponent {
 //					return;
 //				}
 
-				ColorDialog cd = new ColorDialog(_prompt, _currentColor, false, true);
+				ColorDialog cd = new ColorDialog(_prompt, _currentColor, true, true);
 
 				cd.setVisible(true);
 
@@ -89,7 +89,8 @@ public class ColorLabel extends JComponent {
 			g.setColor(Color.red);
 			g.drawLine(4, 4, _rectSize, _rectSize);
 			g.drawLine(4, _rectSize, _rectSize, 4);
-		} else {
+		}
+		else {
 			g.setColor(enabled ? _currentColor : Color.gray);
 			g.fillRect(2, 2, _rectSize, _rectSize);
 		}

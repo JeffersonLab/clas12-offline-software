@@ -134,7 +134,8 @@ public class CurveTable extends JTable {
 				boolean rowSelected = table.getSelectedRow() == row;
 				if (!rowSelected) {
 					jtf.setBackground(_unselectedColor);
-				} else {
+				}
+				else {
 					jtf.setBackground(Color.yellow);
 				}
 				return jtf;

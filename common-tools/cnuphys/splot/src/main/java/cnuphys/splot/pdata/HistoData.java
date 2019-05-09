@@ -199,7 +199,8 @@ public class HistoData {
 		double res[] = getBasicStatistics();
 		if (_rmsInHistoLegend) {
 			return String.format(UnicodeSupport.SMALL_MU + ": %-6.2f " + "rms: %-6.2f", res[0], res[2]);
-		} else {
+		}
+		else {
 			return String.format(UnicodeSupport.SMALL_MU + ": %-6.2f " + UnicodeSupport.SMALL_SIGMA + ": %-6.2f",
 					res[0], res[1]);
 		}
@@ -311,9 +312,11 @@ public class HistoData {
 		int bin = getBin(value);
 		if (bin == UNDERFLOW) {
 			_underCount++;
-		} else if (bin == OVERFLOW) {
+		}
+		else if (bin == OVERFLOW) {
 			_overCount++;
-		} else {
+		}
+		else {
 			_counts[bin]++;
 		}
 
@@ -330,9 +333,11 @@ public class HistoData {
 		int bin = getBin(val);
 		if (bin == UNDERFLOW) {
 			_underCount += count;
-		} else if (bin == OVERFLOW) {
+		}
+		else if (bin == OVERFLOW) {
 			_overCount += count;
-		} else {
+		}
+		else {
 			_counts[bin] = count;
 		}
 	}
@@ -395,7 +400,8 @@ public class HistoData {
 	public int getBin(double val) {
 		if (val < getMinX()) {
 			return UNDERFLOW;
-		} else if (val > getMaxX()) {
+		}
+		else if (val > getMaxX()) {
 			return OVERFLOW;
 		}
 

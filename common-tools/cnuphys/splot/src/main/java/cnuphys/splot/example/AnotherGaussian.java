@@ -173,7 +173,8 @@ public class AnotherGaussian extends AExample {
 
 			try {
 				ds.add(rawData[i], rawData[i + 1], rawData[i + 2]);
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 				System.exit(1);
 			}

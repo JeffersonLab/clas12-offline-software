@@ -111,7 +111,8 @@ public class Legend extends DraggableRectangle {
 		g.drawString(legStr, x + width - _maxStringWidth - HGAP, yc + fm.getHeight() / 2);
 
 		if ((_numVisCurves > 1) && fit.getFit() != FitType.NOLINE) {
-			GraphicsUtilities.drawStyleLine(g, style, x + HGAP, yc, x + HGAP + _params.getLegendLineLength(), yc);
+			GraphicsUtilities.drawStyleLine(g, style.getFitLineColor(), style.getFitLineWidth(),
+					style.getFitLineStyle(), x + HGAP, yc, x + HGAP + _params.getLegendLineLength(), yc);
 		}
 
 		SymbolDraw.drawSymbol(g, x + HGAP + _extra / 2, yc, curve.getStyle());
@@ -134,7 +135,8 @@ public class Legend extends DraggableRectangle {
 				Fit fit = dc.getFit();
 				if ((_numVisCurves > 1) && fit.getFitType() != FitType.NOLINE) {
 					_extra = _params.getLegendLineLength();
-				} else {
+				}
+				else {
 					Styled style = dc.getStyle();
 					if (style.getSymbolType() != SymbolType.NOSYMBOL) {
 						_extra = Math.max(_extra, style.getSymbolSize());

@@ -60,7 +60,8 @@ public class TripleGaussian extends AExample {
 
 			try {
 				ds.add(x, -spreadFactor() * y, sig);
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 				System.exit(1);
 			}

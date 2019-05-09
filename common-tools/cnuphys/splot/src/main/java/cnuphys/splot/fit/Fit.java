@@ -401,7 +401,8 @@ public class Fit {
 
 		if (Environment.getInstance().isLinux()) {
 			return "<body style=\"font-size:8px;color:blue\">" + sb.toString() + "</body>";
-		} else {
+		}
+		else {
 			return "<body style=\"font-size:9px;color:blue\">" + sb.toString() + "</body>";
 		}
 	}

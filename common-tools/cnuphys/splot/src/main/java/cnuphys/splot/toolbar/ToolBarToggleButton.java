@@ -113,7 +113,8 @@ public class ToolBarToggleButton extends JToggleButton {
 			try {
 				ImageIcon enabledImageIcon = ImageManager.getInstance().loadImageIcon(enabledFileName);
 				setSelectedIcon(enabledImageIcon);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -157,7 +158,8 @@ public class ToolBarToggleButton extends JToggleButton {
 
 		if (customCursor != null) {
 			return customCursor;
-		} else {
+		}
+		else {
 			return Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
 		}
 	}

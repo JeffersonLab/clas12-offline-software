@@ -47,7 +47,8 @@ public class OneXThreeY extends AExample {
 
 			try {
 				ds.add(x, x, x * x, x * x * x);
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 			}
 		}

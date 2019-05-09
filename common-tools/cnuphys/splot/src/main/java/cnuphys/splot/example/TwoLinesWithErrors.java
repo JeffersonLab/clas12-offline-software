@@ -46,10 +46,12 @@ public class TwoLinesWithErrors extends AExample {
 				if (i < 10) {
 					ds.add(i, i + 2 * Math.random(), 2.0 * Math.random(), i + 0.5, 10 - i + 2 * Math.random(),
 							2.0 * Math.random());
-				} else {
+				}
+				else {
 					ds.add(i, i + 2 * Math.random(), 2.0 * Math.random());
 				}
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 				System.exit(1);
 			}

@@ -98,7 +98,8 @@ public class DataTable extends JTable {
 	protected void selectedCell(int row, int col) {
 		try {
 			_currentValue = Double.parseDouble((String) getModel().getValueAt(row, col));
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			_currentValue = Double.NaN;
 		}
 	}
@@ -136,7 +137,8 @@ public class DataTable extends JTable {
 		DataSet ds = null;
 		try {
 			ds = new DataSet(DataSetType.XYEXYE, names);
-		} catch (DataSetException e1) {
+		}
+		catch (DataSetException e1) {
 			e1.printStackTrace();
 			System.exit(1);
 		}
@@ -146,10 +148,12 @@ public class DataTable extends JTable {
 				if (i < 10) {
 					ds.add(i, i + 2 * Math.random(), 2.0 * Math.random(), i + 0.5, 10 - i + 2 * Math.random(),
 							2.0 * Math.random());
-				} else {
+				}
+				else {
 					ds.add(i, i + 2 * Math.random(), 2.0 * Math.random());
 				}
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 				System.exit(1);
 			}
@@ -201,7 +205,8 @@ public class DataTable extends JTable {
 					DataSet ds = (DataSet) getModel();
 					ds.setAllFitsDirty();
 				}
-			} catch (NumberFormatException e) {
+			}
+			catch (NumberFormatException e) {
 				val = _currentValue;
 			}
 			return val;

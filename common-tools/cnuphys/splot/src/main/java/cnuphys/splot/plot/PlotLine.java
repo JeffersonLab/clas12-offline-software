@@ -16,11 +16,11 @@ import cnuphys.splot.style.SymbolType;
  */
 public abstract class PlotLine {
 
-	// for weiting lines to xml
+//	public Styled(Color fillColor, Color borderColor, Color fitLineColor, Color auxLineColor, LineStyle fitLineStyle,
+//			LineStyle auxLineStyle, float fitLineWidth, float auxLineWidth, SymbolType symbolType, int symbolSize) {
 
 	// default style
-	protected static Styled _defaultStyle = new Styled(null, Color.lightGray, LineStyle.LONG_DASH, 0.75f,
-			SymbolType.NOSYMBOL, 0);
+	protected static Styled _defaultStyle = new Styled();
 
 	// the plot canvas
 	protected PlotCanvas _canvas;
@@ -66,7 +66,8 @@ public abstract class PlotLine {
 		wp.setLocation(getX1(), getY1());
 		_canvas.worldToLocal(p1, wp);
 
-		GraphicsUtilities.drawStyleLine(g, _style, p0.x, p0.y, p1.x, p1.y);
+		GraphicsUtilities.drawStyleLine(g, _style.getAuxLineColor(), _style.getAuxLineWidth(), _style.getAuxLineStyle(),
+				p0.x, p0.y, p1.x, p1.y);
 	}
 
 	public abstract double getX0();

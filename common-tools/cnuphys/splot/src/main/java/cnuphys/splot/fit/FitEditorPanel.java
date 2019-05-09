@@ -178,7 +178,8 @@ public class FitEditorPanel extends JPanel {
 			remove(_polynomialOrderSelector);
 			remove(_gaussianCountSelector);
 			remove(_histoCBPanel);
-		} else {
+		}
+		else {
 
 			if (curve.isHistogram1D()) {
 				HistoData hd = curve.getHistoData();

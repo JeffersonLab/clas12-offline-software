@@ -188,25 +188,32 @@ public class GraphicsUtilities {
 			float fLineWidth = lineWidth;
 			if (lineStyle.equals(LineStyle.SOLID)) {
 				stroke = new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-			} else if (lineStyle.equals(LineStyle.DASH)) {
+			}
+			else if (lineStyle.equals(LineStyle.DASH)) {
 				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
 						new float[] { 10.0f, 10.0f }, 0.0f);
-			} else if (lineStyle.equals(LineStyle.DOT_DASH)) {
+			}
+			else if (lineStyle.equals(LineStyle.DOT_DASH)) {
 				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
 						new float[] { 4.0f, 4.0f, 10.0f, 4.0f }, 0.0f);
-			} else if (lineStyle.equals(LineStyle.DOT)) {
+			}
+			else if (lineStyle.equals(LineStyle.DOT)) {
 				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
 						new float[] { 4.0f, 4f }, 0.0f);
-			} else if (lineStyle.equals(LineStyle.DOUBLE_DASH)) {
+			}
+			else if (lineStyle.equals(LineStyle.DOUBLE_DASH)) {
 				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
 						new float[] { 10.0f, 4.0f, 10.0f, 10.0f }, 0.0f);
-			} else if (lineStyle.equals(LineStyle.LONG_DASH)) {
+			}
+			else if (lineStyle.equals(LineStyle.LONG_DASH)) {
 				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
 						new float[] { 15.0f, 15.0f }, 0.0f);
-			} else if (lineStyle.equals(LineStyle.LONG_DOT_DASH)) {
+			}
+			else if (lineStyle.equals(LineStyle.LONG_DOT_DASH)) {
 				stroke = new BasicStroke(fLineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
 						new float[] { 6.0f, 4.0f, 15.0f, 4.0f }, 0.0f);
-			} else {
+			}
+			else {
 				stroke = new BasicStroke(lineWidth);
 			}
 
@@ -348,7 +355,8 @@ public class GraphicsUtilities {
 
 			component.setLocation(x, y);
 
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			component.setLocation(200, 200);
 			e.printStackTrace();
 		}
@@ -393,7 +401,8 @@ public class GraphicsUtilities {
 			double ar = rw / rh;
 			double pw = sign_x * ar * Math.abs(p.y - p0.y);
 			p.x = p0.x + (int) pw;
-		} else {
+		}
+		else {
 			int sign_y = (p.y > p0.y) ? 1 : -1;
 			double ar = rh / rw;
 			double ph = sign_y * ar * Math.abs(p.x - p0.x);
@@ -427,7 +436,8 @@ public class GraphicsUtilities {
 
 		if (p1 == null) {
 			return new Rectangle(p2.x, p2.y, 0, 0);
-		} else if (p2 == null) {
+		}
+		else if (p2 == null) {
 			return new Rectangle(p1.x, p1.y, 0, 0);
 		}
 
@@ -481,7 +491,8 @@ public class GraphicsUtilities {
 		if (outsie) {
 			tc = Color.white;
 			bc = Color.black;
-		} else {
+		}
+		else {
 			tc = Color.black;
 			bc = Color.white;
 		}
@@ -537,7 +548,8 @@ public class GraphicsUtilities {
 		if (outsie) {
 			tc = Color.white;
 			bc = Color.black;
-		} else {
+		}
+		else {
 			tc = Color.black;
 			bc = Color.white;
 		}
@@ -618,7 +630,8 @@ public class GraphicsUtilities {
 		if (outsie) {
 			tc = Color.white;
 			bc = Color.black;
-		} else {
+		}
+		else {
 			tc = Color.black;
 			bc = Color.white;
 		}
@@ -1091,7 +1104,8 @@ public class GraphicsUtilities {
 				return true;
 
 			}
-		} else {
+		}
+		else {
 			t = (y - y1) / dy;
 			if ((t < 0.0) || (t > 1.0)) {
 				return false;
@@ -1177,7 +1191,8 @@ public class GraphicsUtilities {
 		g.drawString(s, 0, 0);
 		try {
 			g.transform(translation.createInverse());
-		} catch (NoninvertibleTransformException e) {
+		}
+		catch (NoninvertibleTransformException e) {
 			e.printStackTrace();
 		}
 	}
@@ -1254,7 +1269,8 @@ public class GraphicsUtilities {
 			c2 = (c2 == null) ? highlightColor2 : c2;
 			drawHighlightedLine(g, x, y, (int) baseX, (int) baseY, c1, c2);
 
-		} else {
+		}
+		else {
 			g.drawLine(x, y, (int) baseX, (int) baseY);
 		}
 		g.fillPolygon(xPoints, yPoints, 3);
@@ -1273,12 +1289,13 @@ public class GraphicsUtilities {
 	 * @param x2    ending x
 	 * @param y2    ending y
 	 */
-	public static void drawStyleLine(Graphics g, Styled style, int x1, int y1, int x2, int y2) {
+	public static void drawStyleLine(Graphics g, Color lineColor, float lineWidth, LineStyle lineStyle, int x1, int y1,
+			int x2, int y2) {
 		Graphics2D g2 = (Graphics2D) g;
-		g2.setColor(style.getLineColor());
+		g2.setColor(lineColor);
 
 		Stroke oldStroke = g2.getStroke();
-		g2.setStroke(GraphicsUtilities.getStroke(style.getLineWidth(), style.getLineStyle()));
+		g2.setStroke(GraphicsUtilities.getStroke(lineWidth, lineStyle));
 
 		g2.drawLine(x1, y1, x2, y2);
 		g2.setStroke(oldStroke);
@@ -1333,7 +1350,8 @@ public class GraphicsUtilities {
 			int b = Integer.parseInt(hex.substring(4, 6), 16);
 			int a = Integer.parseInt(hex.substring(6, 8), 16);
 			return new Color(r, g, b, a);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 			return Color.black;
 		}
@@ -1397,7 +1415,8 @@ public class GraphicsUtilities {
 									MetalIconFactory.getRadioButtonMenuItemIcon());
 						}
 						return;
-					} catch (Exception e) {
+					}
+					catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
