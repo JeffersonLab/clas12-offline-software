@@ -9,6 +9,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
+
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -70,7 +72,7 @@ public class NodePanel extends JPanel
 	 * Create a node panel for displaying events
 	 */
 	public NodePanel() {
-		_eventManager.addClasIoEventListener(this, 1);
+		_eventManager.addEventListener(this, 1);
 
 		setLayout(new BorderLayout());
 		addCenter();
@@ -156,7 +158,7 @@ public class NodePanel extends JPanel
 	}
 
 	/**
-	 * Set the model data based on a clasIO DataEvent
+	 * Set the model data based on a hipo DataEvent
 	 * 
 	 * @param event the event
 	 */
@@ -189,7 +191,7 @@ public class NodePanel extends JPanel
 					MenuSelectionManager.defaultManager().clearSelectedPath();
 					try {
 						int enumber = Integer.parseInt(eventNumberInput.getText());
-						_eventManager.gotoEvent(enumber + 1);
+						_eventManager.gotoEvent(enumber);
 					} catch (Exception e) {
 						eventNumberInput.setText("");
 					}
@@ -262,15 +264,6 @@ public class NodePanel extends JPanel
 	 */
 	public void setEventNumber(int eventNumber) {
 		_eventInfoPanel.setEventNumber(eventNumber);
-	}
-
-	/**
-	 * Set the displayed run number value.
-	 * 
-	 * @param runNumber run number.
-	 */
-	public void setRunNumber(int runNumber) {
-		_eventInfoPanel.setRunNumber(runNumber);
 	}
 
 	/**
@@ -474,32 +467,61 @@ public class NodePanel extends JPanel
 	}
 
 	/**
-	 * Part of the IClasIoEventListener interface
+	 * Part of the IEventListener interface
 	 * 
 	 * @param event the new current event
 	 */
 	@Override
-	public void newClasIoEvent(DataEvent event) {
+	public void newEvent(DataEvent event, boolean isStreaming) {
+		if (isStreaming) {
+			return;
+		}
 		setData(event);
 		setEventNumber(_eventManager.getEventNumber());
 		fixButtons();
 	}
+	
 
 	/**
-	 * Part of the IClasIoEventListener interface
-	 * 
-	 * @param path the new path to the event file
+	 * Streaming start message
+	 * @param file file being streamed
+	 * @param numToStream number that will be streamed
 	 */
 	@Override
-	public void openedNewEventFile(String path) {
+	public void streamingStarted(File file, int numToStream) {
+	}
+	
+	/**
+	 * Streaming ended message
+	 * @param file the file that was streamed
+	 * @param int the reason the streaming ended
+	 */
+	@Override
+	public void streamingEnded(File file, int reason) {
+	}
+
+	/**
+	 * Part of the IEventListener interface
+	 * 
+	 * @param file the new file
+	 */
+	@Override
+	public void openedNewEventFile(File file) {
 		setEventNumber(0);
-		setRunNumber(-1);
 
 		// set the text field
-		setSource(path);
+		setSource(file.getAbsolutePath());
 		setNumberOfEvents(_eventManager.getEventCount());
 		fixButtons();
 	}
 
+	/**
+	 * Rewound the current file
+	 * @param file the file
+	 */
+	@Override
+	public void rewoundFile(File file) {
+		
+	}
 
 }

@@ -11,12 +11,16 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+
+import org.jlab.io.base.DataEvent;
+
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.component.MagnifyWindow;
@@ -29,16 +33,21 @@ import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.view.LogView;
 import cnuphys.bCNU.view.ViewManager;
 import cnuphys.bCNU.view.VirtualView;
+import cnuphys.cnf.alldata.ColumnData;
 import cnuphys.cnf.alldata.DataManager;
 import cnuphys.cnf.event.EventManager;
 import cnuphys.cnf.event.EventMenu;
 import cnuphys.cnf.event.EventView;
+import cnuphys.cnf.event.IEventListener;
+import cnuphys.cnf.export.ExportManager;
+import cnuphys.cnf.plot.PlotManager;
+import cnuphys.cnf.plot.PlotWrapper;
 import cnuphys.cnf.properties.PropertiesManager;
 import cnuphys.lund.X11Colors;
 import cnuphys.splot.example.MemoryUsageDialog;
 
 @SuppressWarnings("serial")
-public class Cnf extends BaseMDIApplication {
+public class Cnf extends BaseMDIApplication implements IEventListener {
 
 	// singleton
 	private static Cnf _instance;
@@ -52,6 +61,9 @@ public class Cnf extends BaseMDIApplication {
 	// for the event count
 	private JMenuItem _eventCountLabel;
 
+	// event remaining label 
+	private JMenuItem _eventRemainingLabel;
+
 	// the virtual view
 	private VirtualView _virtualView;
 
@@ -61,7 +73,7 @@ public class Cnf extends BaseMDIApplication {
 	// event menu
 	private EventMenu _eventMenu;
 	
-	// event number label on menu bar
+	// event number label 
 	private static JLabel _eventNumberLabel;
 	
 	// memory usage dialog
@@ -76,6 +88,8 @@ public class Cnf extends BaseMDIApplication {
 	//views
 	private EventView _eventView;
 
+	//rewind item
+	private static JMenuItem _rewindItem;
 
 	//stream events menu item
 	private static JMenuItem _streamItem;
@@ -114,6 +128,7 @@ public class Cnf extends BaseMDIApplication {
 		};
 
 		addComponentListener(cl);
+		EventManager.getInstance().addEventListener(this, 2);
 	}
 
 	// arrange the views on the virtual desktop
@@ -137,9 +152,21 @@ public class Cnf extends BaseMDIApplication {
 	 */
 	private void restoreDefaultViewLocations() {
 
-		_virtualView.moveTo(_logView, 7, VirtualView.CENTER);
+		_virtualView.moveTo(_logView, 13, VirtualView.CENTER);
 		_virtualView.moveTo(_eventView, 0, VirtualView.CENTER);
 
+		//all the plots
+		Collection<PlotWrapper> wrappers = PlotWrapper.getAllWrappers();
+		if (!wrappers.isEmpty()) {
+			for (PlotWrapper wrapper : wrappers) {
+				int id = wrapper.getId();			
+				int vvcol = 1 + id / 4;	
+				int normId = id % 4;	
+				int row = normId / 2;	
+				int col = normId % 2;	
+				_virtualView.moveTo(wrapper.getView(), Math.min(vvcol, 13), 40 + col*400, 40 + row*400);
+			}
+		}
 
 		Log.getInstance().config("reset views on virtual dekstop");
 
@@ -151,16 +178,20 @@ public class Cnf extends BaseMDIApplication {
 	private void addInitialViews() {
 
 		// add a virtual view
-		_virtualView = VirtualView.createVirtualView(8);
+		_virtualView = VirtualView.createVirtualView(14);
 		ViewManager.getInstance().getViewMenu().addSeparator();
 		
 		// add event view
 		_eventView = EventView.createEventView();
 
-
 		// add the log view
 		_logView = new LogView(800, 750, true);
-//		_logView.setVisible(true);
+		
+		//test plot rtemove later
+		
+		ColumnData xdata =  DataManager.getInstance().getColumnData("CNF::DVCSevent.BSA");
+		ColumnData ydata =  DataManager.getInstance().getColumnData("CNF::DVCSevent.phi");
+		PlotWrapper.create2DScatterPlot(xdata, ydata);
 
 		// log some environment info
 		Log.getInstance().config(Environment.getInstance().toString());
@@ -183,59 +214,135 @@ public class Cnf extends BaseMDIApplication {
 	/**
 	 * Fix the event count label
 	 */
-	public void fixEventCount() {
+	public void fixEventMenuLabels() {
 		int count = EventManager.getInstance().getEventCount();
 		if (count < Integer.MAX_VALUE) {
 			_eventCountLabel.setText("Event Count: " + count);
 		} else {
 			_eventCountLabel.setText("Event Count: N/A");
 		}
+		
+		int numRemain = EventManager.getInstance().getNumRemainingEvents();
+		_eventRemainingLabel.setText("Events Remaining: " + numRemain);
 	}
 
 	// add to the event menu
 	private void addToEventMenu() {
 
-		_eventMenu.remove(0);
+	//	_eventMenu.remove(0);
 		createStreamMenuItem();
 		_eventCountLabel = new JMenuItem("Event Count: N/A");
 		_eventCountLabel.setOpaque(true);
 		_eventCountLabel.setBackground(Color.white);
 		_eventCountLabel.setForeground(X11Colors.getX11Color("Dark Blue"));
 		_eventMenu.add(_eventCountLabel);
+		
+		_eventRemainingLabel = new JMenuItem("Events Remaining: N/A");
+		_eventRemainingLabel.setOpaque(true);
+		_eventRemainingLabel.setBackground(Color.white);
+		_eventRemainingLabel.setForeground(X11Colors.getX11Color("Dark Blue"));
+		_eventMenu.add(_eventRemainingLabel);
+
 	}
 	
 	//create the menu item to stream to the end of the file
 	private void createStreamMenuItem() {
-		
+
 		ActionListener al = new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				Object source = e.getSource();
+				if (source == _streamItem) {
+					EventManager.getInstance().streamToEndOfFile();
+				}
+				else if (source == _rewindItem) {
+					EventManager.getInstance().rewindFile();
+				}
 			}
-			
+
 		};
+		
+		_eventMenu.insertSeparator(1);
+		
+		_rewindItem = new JMenuItem("Rewind to Start of File");
+		_rewindItem.setEnabled(false);
+		_rewindItem.addActionListener(al);
+		_eventMenu.add(_rewindItem, 2);
+
 		_streamItem = new JMenuItem("Stream to End of File");
 		_streamItem.setEnabled(false);
 		_streamItem.addActionListener(al);
-		_eventMenu.add(_streamItem, 0);
+		_eventMenu.add(_streamItem, 3);
+		_eventMenu.insertSeparator(4);
 	}
 
 	
 	/**
-	 * Notification of a change
+	 * a new event has arrived.
+	 * 
+	 * @param event the new event
+	 * @param isStreaming <code>true</code> if this is during file streaming
 	 */
-	public void propertyChange(Object source, String name, Object oldVal, Object newVal) {
-		if (name.equals(PropertiesManager.STATE_CHANGE)) {
-			System.err.println("Cnf received a STATE_CHANGE notice");
-			
-			//any events remaining
-			int numRemaining = EventManager.getInstance().getNumRemainingEvents();
-			
-			//set selectability
-			_streamItem.setEnabled(numRemaining > 0);
+	public void newEvent(final DataEvent event, boolean isStreaming) {
+		if (EventManager.getInstance().isStreaming()) {
+			return;
 		}
 
+		fixState();
 	}
+
+	/**
+	 * Opened a new event file
+	 * 
+	 * @param file the new file
+	 */
+	public void openedNewEventFile(File file) {
+		fixState();
+	}
+	
+	/**
+	 * Rewound the current file
+	 * @param file the file
+	 */
+	public void rewoundFile(File file) {
+		fixState();
+	}
+	
+	/**
+	 * Streaming start message
+	 * @param file file being streamed
+	 * @param numToStream number that will be streamed
+	 */
+	public void streamingStarted(File file, int numToStream) {
+	}
+	
+	/**
+	 * Streaming ended message
+	 * @param file the file that was streamed
+	 * @param int the reason the streaming ended
+	 */
+	public void streamingEnded(File file, int reason) {
+		fixState();
+	}
+	
+	private void fixState() {		
+		
+		//any events remaining
+		int numRemaining = EventManager.getInstance().getNumRemainingEvents();
+		
+		//number of events
+		int eventCount = EventManager.getInstance().getEventCount();
+		
+		//set selectability
+		_streamItem.setEnabled(numRemaining > 0);
+		
+		_rewindItem.setEnabled(eventCount > 0);
+		
+		//fix labels
+		fixEventMenuLabels();
+	}
+	
 
 	/**
 	 * private access to the Cnf singleton.
@@ -335,7 +442,7 @@ public class Cnf extends BaseMDIApplication {
 	private void createMenus() {
 		MenuManager mmgr = MenuManager.getInstance();
 
-		_eventMenu = new EventMenu(true, false);
+		_eventMenu = new EventMenu(true);
 		mmgr.addMenu(_eventMenu);
 		
 		// the options menu
@@ -346,6 +453,13 @@ public class Cnf extends BaseMDIApplication {
 
 		//add to the event menu
 		addToEventMenu();
+		
+		//the plot menu
+		getJMenuBar().add(PlotManager.getPlotMenu());
+		
+		//the export menu
+		getJMenuBar().add(ExportManager.getExportMenu());
+
 
 	}
 	
@@ -491,9 +605,11 @@ public class Cnf extends BaseMDIApplication {
 			} // !done
 		} // end command arg processing
 		
-		// initialize data columns
-		DataManager.getInstance();
-
+		// initialize managers
+		DataManager.getInstance(); //data columns
+		PlotManager.getInstance(); //plots
+		ExportManager.getInstance(); //exporters
+		
 
 		// now make the frame visible, in the AWT thread
 		EventQueue.invokeLater(new Runnable() {

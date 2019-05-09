@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
 import java.util.Hashtable;
 
 import javax.swing.BorderFactory;
@@ -45,7 +46,7 @@ public class PresentBankPanel extends JPanel
 	 */
 	public PresentBankPanel(NodeTable nodeTable) {
 		_nodeTable = nodeTable;
-		_eventManager.addClasIoEventListener(this, 1);
+		_eventManager.addEventListener(this, 1);
 		setLayout(new GridLayout(40, 4, 2, 0));
 
 		// get all the known banks
@@ -93,7 +94,7 @@ public class PresentBankPanel extends JPanel
 
 	// convenience method to make a button
 	private ActionLabel makeLabel(final String label) {
-		final ActionLabel alabel = new ActionLabel(label, false);
+		final ActionLabel alabel = new ActionLabel(label, false, true);
 		alabel.setOpaque(true);
 
 		MouseListener ml = new MouseListener() {
@@ -158,13 +159,41 @@ public class PresentBankPanel extends JPanel
 	}
 
 	@Override
-	public void newClasIoEvent(DataEvent event) {
-		update();
+	public void newEvent(DataEvent event, boolean isStreaming) {
+		if (!isStreaming) {
+			update();
+		}
 	}
 
 	@Override
-	public void openedNewEventFile(String path) {
+	public void openedNewEventFile(File file) {
+	}
+
+	/**
+	 * Rewound the current file
+	 * @param file the file
+	 */
+	@Override
+	public void rewoundFile(File file) {
+		
 	}
 
 
+	/**
+	 * Streaming start message
+	 * @param file file being streamed
+	 * @param numToStream number that will be streamed
+	 */
+	@Override
+	public void streamingStarted(File file, int numToStream) {
+	}
+	
+	/**
+	 * Streaming ended message
+	 * @param file the file that was streamed
+	 * @param int the reason the streaming ended
+	 */
+	@Override
+	public void streamingEnded(File file, int reason) {
+	}
 }

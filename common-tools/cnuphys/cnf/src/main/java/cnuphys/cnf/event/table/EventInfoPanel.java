@@ -32,9 +32,6 @@ public class EventInfoPanel extends JPanel {
 	/** Panel in which to place event viewing controls. */
 	JPanel controlPanel;
 
-	/** run number */
-	private NamedLabel runLabel;
-
 	/**
 	 * Create the panel that goes in the north - top of the GUI. This will hold 4
 	 * labels. One showing the current event source. The second showing the current
@@ -51,7 +48,6 @@ public class EventInfoPanel extends JPanel {
 		eventSourceLabel = new NamedLabel("source", "event_source", 400);
 		eventNumberLabel = new NamedLabel("event #", "event #", 65);
 		numEventsLabel = new NamedLabel("count", "event #", 65);
-		runLabel = new NamedLabel("run #", "event #", 65);
 
 		// limit size of labels
 		Dimension d1 = eventSourceLabel.getPreferredSize();
@@ -60,7 +56,6 @@ public class EventInfoPanel extends JPanel {
 		eventSourceLabel.setMaximumSize(d1);
 		eventNumberLabel.setMaximumSize(d2);
 		numEventsLabel.setMaximumSize(d2);
-		runLabel.setMaximumSize(d2);
 
 		// panels
 
@@ -74,8 +69,6 @@ public class EventInfoPanel extends JPanel {
 		_numPanel.add(eventNumberLabel);
 		_numPanel.add(Box.createHorizontalStrut(3));
 		_numPanel.add(numEventsLabel);
-		_numPanel.add(Box.createHorizontalStrut(3));
-		_numPanel.add(runLabel);
 
 		controlPanel = new JPanel();
 		controlPanel.setPreferredSize(new Dimension(200, 1)); // width to be
@@ -133,19 +126,6 @@ public class EventInfoPanel extends JPanel {
 	public void setEventNumber(int eventNumber) {
 		if (eventNumber > -1) {
 			eventNumberLabel.setText("" + eventNumber);
-		}
-	}
-
-	/**
-	 * Set the displayed run number value.
-	 * 
-	 * @param runNumber the run number.
-	 */
-	public void setRunNumber(int runNumber) {
-		if (runNumber > -1) {
-			runLabel.setText("" + runNumber);
-		} else {
-			runLabel.setText("");
 		}
 	}
 

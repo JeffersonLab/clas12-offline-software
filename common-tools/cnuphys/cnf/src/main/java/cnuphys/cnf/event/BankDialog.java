@@ -128,7 +128,7 @@ public class BankDialog extends JDialog implements ItemListener {
 					}
 				}
 			} catch (Exception e) {
-				Log.getInstance().warning("ClasIoBankDialog could not parse: [" + vs + "]");
+				Log.getInstance().warning("BankDialog could not parse: [" + vs + "]");
 			}
 		}
 	}

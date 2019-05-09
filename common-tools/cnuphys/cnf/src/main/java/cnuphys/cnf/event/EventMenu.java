@@ -40,7 +40,6 @@ public class EventMenu extends JMenu implements ActionListener, IEventListener {
 	// the menu items
 	private JMenuItem quitItem;
 	private JMenuItem nextItem;
-	private JMenuItem accumulationItem;
 
 	// recently opened menu
 	private static JMenu _recentMenu;
@@ -66,15 +65,14 @@ public class EventMenu extends JMenu implements ActionListener, IEventListener {
 	private static FileFilter _hipoEventFileFilter;
 
 	/**
-	 * The event menu used for the clasio package
+	 * The event menu 
 	 * 
-	 * @param includeAccumulation include accumulation option
 	 * @param includeQuit         include quite option
 	 */
-	public EventMenu(boolean includeAccumulation, boolean includeQuit) {
+	public EventMenu(boolean includeQuit) {
 		super("Events");
 
-		_eventManager.addClasIoEventListener(this, 1);
+		_eventManager.addEventListener(this, 1);
 
 		if (_hipoEventFileFilter == null) {
 			_hipoEventFileFilter = new FileFilter() {
@@ -90,13 +88,6 @@ public class EventMenu extends JMenu implements ActionListener, IEventListener {
 					return "Hipo Event Files";
 				}
 			};
-		}
-
-
-		// accumulate
-		if (includeAccumulation) {
-			accumulationItem = addMenuItem("Accumulate Events...", KeyEvent.VK_A);
-			addSeparator();
 		}
 
 		// next
@@ -172,10 +163,6 @@ public class EventMenu extends JMenu implements ActionListener, IEventListener {
 			if (_nextEventTimer != null) {
 				_nextEventTimer.stop();
 			}
-		}
-
-		if (accumulationItem != null) {
-			accumulationItem.setEnabled(_eventManager.isNextOK());
 		}
 	}
 
@@ -434,27 +421,58 @@ public class EventMenu extends JMenu implements ActionListener, IEventListener {
 	}
 
 	/**
-	 * Part of the IClasIoEventListener interface
+	 * Part of the IEventListener interface
 	 * 
-	 * @param event the new current event
+	 * @param event       the new current event
+	 * @param isStreaming <code>true</code> if this is during file streaming
 	 */
 	@Override
-	public void newClasIoEvent(DataEvent event) {
-		fixState();
+	public void newEvent(DataEvent event, boolean isStreaming) {
+		if (!isStreaming) {
+			fixState();
+		}
 	}
 
 	/**
-	 * Part of the IClasIoEventListener interface
+	 * Part of the IEventListener interface
 	 * 
-	 * @param path the new path to the event file
+	 * @param file the new file
 	 */
 	@Override
-	public void openedNewEventFile(String path) {
+	public void openedNewEventFile(File file) {
 
+		String path = file.getAbsolutePath();
+		
 		// remember which file was chosen
 		setDefaultDataDir(path);
 		updateRecentFiles(path);
 		fixState();
+	}
+	
+	/**
+	 * Rewound the current file
+	 * @param file the file
+	 */
+	@Override
+	public void rewoundFile(File file) {
+	}
+
+	/**
+	 * Streaming start message
+	 * @param file file being streamed
+	 * @param numToStream number that will be streamed
+	 */
+	@Override
+	public void streamingStarted(File file, int numToStream) {
+	}
+	
+	/**
+	 * Streaming ended message
+	 * @param file the file that was streamed
+	 * @param int the reason the streaming ended
+	 */
+	@Override
+	public void streamingEnded(File file, int reason) {
 	}
 
 

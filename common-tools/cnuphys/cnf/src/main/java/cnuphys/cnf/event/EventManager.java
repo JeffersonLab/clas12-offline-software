@@ -18,6 +18,20 @@ import cnuphys.cnf.frame.Cnf;
 import cnuphys.cnf.properties.PropertiesManager;
 
 public class EventManager {
+	
+	//streaming related constants
+	private static final int START_STREAMING      = 0;
+	private static final int STOP_STREAMING       = 1;
+	
+	/** Constant indicated streaming successfully completed */
+	public static final int STREAMING_COMPLETED   = 0;
+
+	/** Constant indicated streaming was cancelled before completion */
+	public static final int STREAMING_CANCELLED   = 1;
+
+	
+	//are we streaming?
+	private static boolean _streaming = false;
 
 	// A sorted list of banks present in the current event
 	private String _currentBanks[];
@@ -27,15 +41,6 @@ public class EventManager {
 
 	// all the filters
 	private ArrayList<IEventFilter> _eventFilters = new ArrayList<>();
-
-	// sources of events (the type, not the actual source)
-	public enum EventSourceType {
-		HIPOFILE
-	}
-
-	// for firing property changes
-	public static final String SWIM_ALL_MC_PROP = "SWIM ALL MC";
-	public static final String SWIM_ALL_RECON_PROP = "SWIM ALL RECON";
 
 
 	// list of view listeners. There are actually three lists. Those in index 0
@@ -61,21 +66,6 @@ public class EventManager {
 	// private constructor for singleton
 	private EventManager() {
 		_dataSource = new HipoDataSource();
-		
-		IEventListener listener = new IEventListener () {
-
-			@Override
-			public void newClasIoEvent(DataEvent event) {
-			}
-
-			@Override
-			public void openedNewEventFile(String path) {
-				Cnf.getInstance().propertyChange(this, PropertiesManager.STATE_CHANGE, 0, 0);
-			}
-			
-		};
-		
-		addClasIoEventListener(listener, 0);
 	}
 
 	/**
@@ -144,14 +134,10 @@ public class EventManager {
 
 		_dataSource = new HipoDataSource();
 		_dataSource.open(file.getPath());
-		notifyEventListeners(_currentHipoFile);
+		notifyEventListeners(_currentHipoFile, 0);
 		
-		System.out.println("Event file size: " +_dataSource.getSize());
-
 		_currentEvent = null;
 		_eventIndex = 0;
-
-		// TODO check if I need to skip the first event
 
 		try {
 			getNextEvent();
@@ -161,7 +147,7 @@ public class EventManager {
 	}
 
 	/**
-	 * Get the number of events available, 0 for ET since that is unknown.
+	 * Get the number of events available.
 	 * 
 	 * @return the number of events available
 	 */
@@ -222,48 +208,22 @@ public class EventManager {
 		if (_dataSource.hasEvent()) {
 			_currentEvent = _dataSource.getNextEvent();
 			_eventIndex++;
-			ifPassSetEvent(_currentEvent, 0);
+			ifPassSetEvent(_currentEvent);
 		}
+		
 		return _currentEvent;
 	}
 
 	// set the event only if it passes filtering
-	// option = 1 used by previous event
-	private void ifPassSetEvent(DataEvent event, int option) {
+	private void ifPassSetEvent(DataEvent event) {
 		if (event != null) {
 			if (passFilters(event)) {
 				setNextEvent(event);
 			} else {
-				if (option == 0) {
-					getNextEvent();
-				} else if (option == 1) {
-					if (_eventIndex == 0) {
-						setNextEvent(event);
-					} else {
-						getPreviousEvent();
-					}
-				}
+				getNextEvent();
 			}
 		}
 
-	}
-
-	/**
-	 * Get the bytes for serialization
-	 * 
-	 * @param dataEvent the dataEvent
-	 * @return bytes for serialization
-	 */
-	public byte[] getEventBytesForSerializing(DataEvent dataEvent) {
-
-		if (dataEvent != null) {
-			if (dataEvent instanceof HipoDataEvent) {
-				ByteBuffer bb = _currentEvent.getEventBuffer();
-				return bb.array();
-			}
-		}
-
-		return null;
 	}
 
 	/**
@@ -273,20 +233,6 @@ public class EventManager {
 	 */
 	public boolean hasEvent() {
 		return ((_dataSource != null) && _dataSource.hasEvent());
-	}
-
-	/**
-	 * Get the previous event from the current compact reader
-	 * 
-	 * @return the previous event, if possible.
-	 */
-	public DataEvent getPreviousEvent() {
-
-
-		_currentEvent = _dataSource.getPreviousEvent();
-		ifPassSetEvent(_currentEvent, 1);
-
-		return _currentEvent;
 	}
 
 	// skip over n events
@@ -346,9 +292,13 @@ public class EventManager {
 		}
 		return _currentEvent;
 	}
+	
+	//streaming notifications
+	
+	
 
 	// new event file notification
-	private void notifyEventListeners(File file) {
+	private void notifyEventListeners(File file, int opt) {
 
 		for (int index = 0; index < 3; index++) {
 			if (_viewListenerList[index] != null) {
@@ -359,7 +309,12 @@ public class EventManager {
 				// listeners.
 				for (int i = listeners.length - 2; i >= 0; i -= 2) {
 					if (listeners[i] == IEventListener.class) {
-						((IEventListener) listeners[i + 1]).openedNewEventFile(file.getAbsolutePath());
+						if (opt == 0) {
+							((IEventListener) listeners[i + 1]).openedNewEventFile(file);
+						}
+						if (opt == 1) {
+							((IEventListener) listeners[i + 1]).rewoundFile(file);
+						}
 					}
 				}
 			}
@@ -384,6 +339,9 @@ public class EventManager {
 		return false;
 	}
 
+	
+	
+	
 	/**
 	 * Notify listeners we have a new event ready for display. All they may want is
 	 * the notification that a new event has arrived. But the event itself is passed
@@ -406,11 +364,7 @@ public class EventManager {
 				for (int i = listeners.length - 2; i >= 0; i -= 2) {
 					IEventListener listener = (IEventListener) listeners[i + 1];
 					if (listeners[i] == IEventListener.class) {
-						boolean notify = true;
-
-						if (notify) {
-							listener.newClasIoEvent(_currentEvent);
-						}
+						listener.newEvent(_currentEvent, _streaming);
 					}
 				}
 			}
@@ -428,12 +382,12 @@ public class EventManager {
 	}
 
 	/**
-	 * Remove a IClasIoEventListener. IClasIoEventListener listeners listen for new
+	 * Remove a IEventListener. IEventListener listeners listen for new
 	 * events.
 	 * 
-	 * @param listener the IClasIoEventListener listener to remove.
+	 * @param listener the IEventListener listener to remove.
 	 */
-	public void removeClasIoEventListener(IEventListener listener) {
+	public void removeEventListener(IEventListener listener) {
 
 		if (listener == null) {
 			return;
@@ -447,17 +401,17 @@ public class EventManager {
 	}
 
 	/**
-	 * Add a IClasIoEventListener. IClasIoEventListener listeners listen for new
+	 * Add a IEventListener. IEventListener listeners listen for new
 	 * events.
 	 * 
-	 * @param listener the IClasIoEventListener listener to add.
+	 * @param listener the IEventListener listener to add.
 	 * @param index    Determines gross notification order. Those in index 0 are
 	 *                 notified first. Then those in index 1. Finally those in index
 	 *                 2. The Data containers should be in index 0. The trajectory
 	 *                 and noise in index 1, and the regular views in index 2 (they
 	 *                 are notified last)
 	 */
-	public void addClasIoEventListener(IEventListener listener, int index) {
+	public void addEventListener(IEventListener listener, int index) {
 
 		if (listener == null) {
 			return;
@@ -547,6 +501,75 @@ public class EventManager {
 				_eventFilters.add(filter);
 			}
 		}
+	}
+	
+	/**
+	 * Rewind the current file
+	 */
+	public void rewindFile() {
+		gotoEvent(1);
+		notifyEventListeners(_currentHipoFile, 1);
+	}
+	
+	
+	/**
+	 * Send a streaming related notification to the listeners
+	 * @param option either START_STREAMING or STOP_STREAMING
+	 * @param reason (only used for stop streaming) either STREAMING_COMPLETED or STREAMING_CANCELLED
+	 */
+	protected void notifyEventListenersStreaming(int option, int reason) {
+		
+		for (int index = 0; index < 3; index++) {
+			if (_viewListenerList[index] != null) {
+				// Guaranteed to return a non-null array
+				Object[] listeners = _viewListenerList[index].getListenerList();
+
+				// This weird loop is the bullet proof way of notifying all
+				// listeners.
+				for (int i = listeners.length - 2; i >= 0; i -= 2) {
+					IEventListener listener = (IEventListener) listeners[i + 1];
+					if (listeners[i] == IEventListener.class) {
+						
+						if (option == START_STREAMING) {
+							listener.streamingStarted(_currentHipoFile, getNumRemainingEvents());
+						}
+						else if (option == STOP_STREAMING) {
+							listener.streamingEnded(_currentHipoFile, reason);
+						}
+					}
+				}
+			}
+
+		} // index loop
+		
+	}
+
+	
+	/**
+	 * Stream to the end of the file
+	 */
+	public void streamToEndOfFile() {
+		_streaming = true;
+		
+		notifyEventListenersStreaming(START_STREAMING, -1);
+		
+		int numRemain = getNumRemainingEvents();
+
+		for (int i = 0; i < numRemain; i++) {
+			getNextEvent();
+		}
+		
+		_streaming = false;
+		notifyEventListenersStreaming(STOP_STREAMING, STREAMING_COMPLETED);
+		reloadCurrentEvent();
+	}
+	
+	/**
+	 * Set whether we are streaming
+	 * @return <code>true</coder> id we are streaming
+	 */
+	public boolean isStreaming() {
+		return _streaming;
 	}
 
 }

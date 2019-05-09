@@ -95,7 +95,7 @@ public class NodeTable extends JTable {
 	}
 
 	/**
-	 * Set the model data based on a clasIO DataEvent
+	 * Set the model data based on a hipo DataEvent
 	 * 
 	 * @param event the event
 	 */
