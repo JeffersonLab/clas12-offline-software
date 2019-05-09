@@ -10,6 +10,8 @@ import org.jlab.rec.cnd.constants.CalibrationConstantsLoader;
 import org.jlab.rec.cnd.constants.Parameters;
 import org.jlab.rec.cvt.trajectory.Helix;
 
+import org.jlab.geom.prim.Vector3D;
+
 public class CvtGetHTrack { // this class is used to extract helical tracks from the cvt event bank. 
 
     public CvtGetHTrack() {
@@ -94,7 +96,8 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
                 //track.set_Q(q);
                 //helix.add(track);	
                 CVTTrack trk = new CVTTrack();
-                trk.set_Helix(new Helix(dca, phi0, rho, z0, tandip, null));
+                trk.set_Helix(new Helix(dca, phi0, rho, z0, tandip, new Vector3D(0,0,0), null));
+
                 trk.set_Id(trkID);
 
 				//(VZ)

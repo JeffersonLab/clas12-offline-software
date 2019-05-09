@@ -31,7 +31,7 @@ public class ECReconstructionTest {
     
     assertEquals(testEvent.hasBank("FAKE::Bank"), false);
     assertEquals(testEvent.hasBank("ECAL::clusters"), true);
-    assertEquals(testEvent.getBank("ECAL::clusters").rows(), 3);
+    assertEquals(testEvent.getBank("ECAL::clusters").rows(), 3);    
   }
 
 }

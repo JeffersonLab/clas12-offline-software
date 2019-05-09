@@ -12,7 +12,6 @@ import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.groot.data.H1F;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.utils.groups.IndexedList;
 import org.jlab.utils.groups.IndexedTable;
 
@@ -34,6 +33,7 @@ public class ECCommon {
     public static Boolean         debug = false;
     public static Boolean isSingleThreaded = false;
     public static Boolean      singleEvent = false;
+    public static Boolean    useNewTimeCal =  true;
     public static String         variation = "default";
     
     private static double[] AtoE  = {15,10,10};   // SCALED ADC to Energy in MeV
@@ -102,13 +102,16 @@ public class ECCommon {
         IndexedTable    atten = manager.getConstants(run, "/calibration/ec/attenuation");
         IndexedTable     gain = manager.getConstants(run, "/calibration/ec/gain");
 		IndexedTable     time = manager.getConstants(run, "/calibration/ec/timing");
-		IndexedTable    shift = manager.getConstants(run, "/calibration/ec/global_gain_shift");
+		IndexedTable      ggs = manager.getConstants(run, "/calibration/ec/global_gain_shift");
+		IndexedTable      gtw = manager.getConstants(run, "/calibration/ec/global_time_walk");
+		IndexedTable       ev = manager.getConstants(run, "/calibration/ec/effective_velocity");
+		IndexedTable      tgo = manager.getConstants(run, "/calibration/ec/tdc_global_offset");
     
         if (singleEvent) resetHistos();        
         
         List<ECStrip>  ecStrips = null;
         
-        if(event instanceof HipoDataEvent) ecStrips = ECCommon.readStripsHipo(event, run, manager);
+        ecStrips = ECCommon.readStripsHipo(event, run, manager);  
         
         if(ecStrips==null) return new ArrayList<ECStrip>();
         
@@ -134,13 +137,16 @@ public class ECCommon {
             strip.setAttenuation(atten.getDoubleValue("A", sector,layer,component),
                                  atten.getDoubleValue("B", sector,layer,component),
                                  atten.getDoubleValue("C", sector,layer,component));
-            strip.setGain(gain.getDoubleValue("gain", sector,layer,component)*shift.getDoubleValue("gain_shift",sector,layer,0)); 
-            strip.setVeff(veff);
+            strip.setGain(gain.getDoubleValue("gain", sector,layer,component)*ggs.getDoubleValue("gain_shift",sector,layer,0)); 
+            strip.setGlobalTimeWalk(gtw.getDoubleValue("time_walk",sector,layer,0)); 
+            strip.setVeff(ev.getDoubleValue("veff",sector,layer,component));
             strip.setTiming(time.getDoubleValue("a0", sector, layer, component),
                             time.getDoubleValue("a1", sector, layer, component),
                             time.getDoubleValue("a2", sector, layer, component),
                             time.getDoubleValue("a3", sector, layer, component),
                             time.getDoubleValue("a4", sector, layer, component));
+            strip.setGlobalTimingOffset(tgo.getDoubleValue("offset",0,0,0)); //global shift of TDC acceptance window
+
         }
             
         return ecStrips;
@@ -151,15 +157,19 @@ public class ECCommon {
       	List<ECStrip>  strips = new ArrayList<ECStrip>();
         IndexedList<List<Integer>>  tdcs = new IndexedList<List<Integer>>(3);  
         
-		IndexedTable   jitter = manager.getConstants(run, "/calibration/ec/time_jitter");
-		IndexedTable   offset = manager.getConstants(run, "/calibration/ec/fadc_offset");
-		IndexedTable  goffset = manager.getConstants(run, "/calibration/ec/fadc_global_offset");
+		IndexedTable    jitter = manager.getConstants(run, "/calibration/ec/time_jitter");
+		IndexedTable        fo = manager.getConstants(run, "/calibration/ec/fadc_offset");
+		IndexedTable       tmf = manager.getConstants(run, "/calibration/ec/tmf_offset"); 
+		IndexedTable       fgo = manager.getConstants(run, "/calibration/ec/fadc_global_offset");
+		IndexedTable       gtw = manager.getConstants(run, "/calibration/ec/global_time_walk");
+		IndexedTable    tmfcut = manager.getConstants(run,  "/calibration/ec/tmf_window");
         
-        double PERIOD = jitter.getDoubleValue("period",0,0,0);
-        int    PHASE  = jitter.getIntValue("phase",0,0,0); 
-        int    CYCLES = jitter.getIntValue("cycles",0,0,0);
+        double PERIOD  = jitter.getDoubleValue("period",0,0,0);
+        int    PHASE   = jitter.getIntValue("phase",0,0,0); 
+        int    CYCLES  = jitter.getIntValue("cycles",0,0,0);        
+        float FTOFFSET = (float) fgo.getDoubleValue("global_offset",0,0,0); //global shift of trigger time
+        float  TMFCUT  = (float) tmfcut.getDoubleValue("window", 0,0,0); //acceptance window for TDC-FADC times
         
-        float TOFFSET = (float) goffset.getDoubleValue("global_offset",0,0,0);
 	    int triggerPhase = 0;
     	
         if(CYCLES>0&&event.hasBank("RUN::config")==true){
@@ -186,10 +196,11 @@ public class ECCommon {
             DataBank bank = event.getBank("ECAL::adc");
             for(int i = 0; i < bank.rows(); i++){
                 int  is = bank.getByte("sector", i);
-                int  il = bank.getByte("layer", i);
+                int  il = bank.getByte("layer", i); 
                 int  ip = bank.getShort("component", i);
                 int adc = bank.getInt("ADC", i);
-                float t = bank.getFloat("time", i) + (float) offset.getDoubleValue("offset",is,il,0);
+                float t = bank.getFloat("time", i) + (float) tmf.getDoubleValue("offset",is,il,ip) // FADC-TDC offset (sector, layer, PMT)
+                                                   + (float)  fo.getDoubleValue("offset",is,il,0); // FADC-TDC offset (sector, layer) 
                 
                 ECStrip  strip = new ECStrip(is, il, ip); 
                 
@@ -200,14 +211,13 @@ public class ECCommon {
                 if (variation=="clas6") sca = 1.0;               
                 if(strip.getADC()>sca*ECCommon.stripThreshold[ind[il-1]]) strips.add(strip); 
                 
-                Integer[] tdcc; float  tmax = 1000; int tdc = 0;
+                float  tmax = 1000; int tdc = 0;
                 
                 if (tdcs.hasItem(is,il,ip)) {
-                    List<Integer> list = new ArrayList<Integer>();
-                    list = tdcs.getItem(is,il,ip); tdcc=new Integer[list.size()]; list.toArray(tdcc);       
-                    for (int ii=0; ii<tdcc.length; ii++) {
-                    	    float tdif = (tps*tdcc[ii]-triggerPhase-TOFFSET)-t; 
-                    	    if (Math.abs(tdif)<30&&tdif<tmax) {tmax = tdif; tdc = tdcc[ii];}
+                    float radc = (float)Math.sqrt(adc);
+                    for (float tdcc : tdcs.getItem(is,il,ip)) {
+                         float tdif = tps*tdcc - (float)gtw.getDoubleValue("time_walk",is,il,0)/radc - triggerPhase - FTOFFSET - t; 
+                        if (Math.abs(tdif)<TMFCUT&&tdif<tmax) {tmax = tdif; tdc = (int)tdcc;}
                     }
                     strip.setTDC(tdc); 
                 }              
@@ -219,18 +229,18 @@ public class ECCommon {
     
     public static List<ECPeak>  createPeaks(List<ECStrip> stripList){
         List<ECPeak>  peakList = new ArrayList<ECPeak>();
-        if(stripList.size()>1){
-            ECPeak  firstPeak = new ECPeak(stripList.get(0));
-            peakList.add(firstPeak);
-            for(int loop = 1; loop < stripList.size(); loop++){
+        if(stripList.size()>1){ //Require minimum of 2 strips/event to reject uncorrelated hot channels
+            ECPeak  firstPeak = new ECPeak(stripList.get(0)); //Seed the first peak with the first strip
+            peakList.add(firstPeak); 
+            for(int loop = 1; loop < stripList.size(); loop++){ //Loop over all strips 
                 boolean stripAdded = false;                
                 for(ECPeak  peak : peakList){
-                    if(peak.addStrip(stripList.get(loop))==true){
+                    if(peak.addStrip(stripList.get(loop))==true){ //Add adjacent strip to newly seeded peak
                         stripAdded = true;
                     }
                 }
                 if(stripAdded==false){
-                    ECPeak  newPeak = new ECPeak(stripList.get(loop));
+                    ECPeak  newPeak = new ECPeak(stripList.get(loop)); //Non-adjacent strip seeds new peak
                     peakList.add(newPeak);
                 }
             }

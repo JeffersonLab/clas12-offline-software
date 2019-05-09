@@ -95,6 +95,8 @@ public class CalorimeterResponse extends DetectorResponse {
                 }
                 response.setEnergy(bank.getFloat("energy", row));
                 response.setTime(bank.getFloat("time", row));
+                response.setStatus(bank.getInt("status",row));
+
                 responseList.add((DetectorResponse)response);
             }
         }

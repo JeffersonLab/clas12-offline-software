@@ -222,6 +222,7 @@ public class DetectorData {
            bank.setFloat("time", row, (float) r.getTime());
            bank.setFloat("energy", row, (float) r.getEnergy());
            bank.setFloat("chi2", row, (float) 0.0);
+           bank.setShort("status",row,(short) r.getStatus());
        }
        return bank;
    }
@@ -246,6 +247,7 @@ public class DetectorData {
            bank.setFloat("time", row, (float) r.getTime());
            bank.setFloat("energy", row, (float) r.getEnergy());
            bank.setFloat("chi2", row, (float) 0.0);
+           bank.setShort("status",row,(short) r.getStatus());
        }
        return bank;
    }
@@ -257,6 +259,7 @@ public class DetectorData {
            bank.setShort("index", row, (short) c.getHitIndex());
            bank.setShort("pindex", row, (short) c.getAssociation());
            bank.setByte("detector", row, (byte) c.getDescriptor().getType().getDetectorId());
+           bank.setByte("sector", row, (byte) c.getDescriptor().getSector());
            bank.setFloat("x", row, (float) c.getHitPosition().x());
            bank.setFloat("y", row, (float) c.getHitPosition().y());
            bank.setFloat("z", row, (float) c.getHitPosition().z());
@@ -268,6 +271,7 @@ public class DetectorData {
            bank.setFloat("time", row, (float) c.getTime());
            bank.setFloat("nphe", row, (float) c.getEnergy());
            bank.setFloat("chi2", row, (float) 0.0);
+           bank.setShort("status",row,(short) c.getStatus());
        }
        return bank;
    }
@@ -330,6 +334,7 @@ public class DetectorData {
                bank.setFloat("vx_nomm", row, (float) p.vertex().x());
                bank.setFloat("vy_nomm", row, (float) p.vertex().y());
                bank.setFloat("vz_nomm", row, (float) p.vertex().z());
+               bank.setInt(  "status",  row, (int)   p.getTrackStatus());
                row = row + 1;
            }
        }
