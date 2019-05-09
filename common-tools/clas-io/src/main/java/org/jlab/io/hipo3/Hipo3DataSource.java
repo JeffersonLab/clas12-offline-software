@@ -9,6 +9,7 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventList;
+import org.jlab.io.base.DataEventType;
 import org.jlab.io.base.DataSource;
 import org.jlab.io.evio.EvioDataDictionary;
 import org.jlab.io.base.DataSourceType;
@@ -108,6 +109,11 @@ public class Hipo3DataSource implements DataSource {
                 + hipoEvent.getDataBuffer().length);
         hipoEvent.showNodes();*/
         Hipo3DataEvent  evioEvent = new Hipo3DataEvent(hipoEvent.getDataBuffer(),hipoEvent.getSchemaFactory());
+        if(reader.hasNext()==true){
+            evioEvent.setType(DataEventType.EVENT_ACCUMULATE);
+        } else {
+            evioEvent.setType(DataEventType.EVENT_STOP);
+        }
         return evioEvent;
     }
 
