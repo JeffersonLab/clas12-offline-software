@@ -46,7 +46,7 @@ public class HelicitySequenceDelayed extends HelicitySequence {
     public void show() {
         HelicityState prev=super.get(0);
         for (int ii=0; ii<this.size(); ii++) {
-            if (super.get(ii).getQuartet()==HelicityBit.PLUS) continue;
+            if (super.get(ii).getPatternSync()==HelicityBit.PLUS) continue;
             System.out.println(String.format("%4d %6s %6s %6s",
                     ii,
                     super.get(ii).getInfo(prev,ii),

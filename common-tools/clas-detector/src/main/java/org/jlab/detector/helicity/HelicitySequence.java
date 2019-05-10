@@ -214,7 +214,7 @@ public class HelicitySequence implements Comparator<HelicityState> {
     public void show() {
         HelicityState prev=this.states.get(0);
         for (int ii=0; ii<this.states.size(); ii++) {
-            if (this.states.get(ii).getQuartet()==HelicityBit.PLUS) continue;
+            if (this.states.get(ii).getPatternSync()==HelicityBit.PLUS) continue;
             System.out.println(String.format("%4d %6s %6s %6s",
                     ii,
                     this.get(ii).getInfo(prev,ii),
@@ -276,7 +276,7 @@ public class HelicitySequence implements Comparator<HelicityState> {
         for (int ii=0; ii<this.states.size(); ii++) {
             // generator operates on the pattern sync:
             if (!this.generator.initialized() &&
-                 this.states.get(ii).getQuartet()==HelicityBit.MINUS) {
+                 this.states.get(ii).getPatternSync()==HelicityBit.MINUS) {
                 if (this.generator.size()==0) {
                     this.generatorOffset=ii;
                 }
@@ -310,17 +310,17 @@ public class HelicitySequence implements Comparator<HelicityState> {
             }
             
             // check if neighboring syncs are the same (they shouldn't be):
-            if (this.states.get(ii).getSync().value() == this.states.get(ii-1).getSync().value()) {
+            if (this.states.get(ii).getPairSync().value() == this.states.get(ii-1).getPairSync().value()) {
                 syncErrors++;
                 if (debug>1) System.err.println("ERROR: HelicitySequence SYNC: "+ii);
             }
 
             // check if quartet sequence is broken (should be 1minus + 3plus):
             if (ii > 2) {
-                if (this.states.get(ii-0).getQuartet().value()+
-                    this.states.get(ii-1).getQuartet().value()+
-                    this.states.get(ii-2).getQuartet().value()+
-                    this.states.get(ii-3).getQuartet().value() != 2) {
+                if (this.states.get(ii-0).getPatternSync().value()+
+                    this.states.get(ii-1).getPatternSync().value()+
+                    this.states.get(ii-2).getPatternSync().value()+
+                    this.states.get(ii-3).getPatternSync().value() != 2) {
                     quartetErrors++;
                     if (debug>1) System.err.println("ERROR:  HelicitySequence QUARTET: "+ii);
                 }
