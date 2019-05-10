@@ -8,10 +8,17 @@ import java.util.ArrayList;
  *
  * This calculates the first helicity state in each pattern (quartet/octet/toggle),
  * according to the specs here:
+ * 
  * https://hallaweb.jlab.org/equipment/daq/HelicityUsersGuideFeb4.pdf
- * Note, the convention there is HIGH=0=+ and LOW=1=-.
  *
+ * Note, the convention above, and internally in this class, is HIGH=0=+ and LOW=1=-.
+ *
+ * Note, this pseudorandom generator operates on raw helicity, and does not produce
+ * the same sequence if you just reverse all the states, so the HWP-corrected
+ * helicity cannot be used here.
+ * 
  * User calls addState() until initialized()==true, then getState().
+ *
  * Public interface requires HelicityBit (not integers).
  *
  * @author baltzell
@@ -70,18 +77,36 @@ public final class HelicityGenerator {
 
     /**
      * Let the user add a state to initialize the sequence.
+     * 
+     * This must be the first helicity state in the next pattern.
+     * 
      * Requires initialized()==false and a defined HelicityBit.
      *
-     * @param state = the HelicityBit to add to the sequence.
+     * @param bit = the HelicityBit to add to the sequence.  This must
+     * be the raw helicity, e.g. HelicityState.getHelicityRaw(), not the
+     * HWP-corrected version.
      */
-    public void addState(HelicityBit state) {
-        if (state==HelicityBit.UDF)
+    public void addState(HelicityBit bit) {
+        if (bit==HelicityBit.UDF)
             throw new RuntimeException("Helicity state undefined.");
         if (this.initialized())
             throw new RuntimeException("Already initialized");
-        this.shiftRegister(state==HelicityBit.PLUS?0:1);
+        this.shiftRegister(bit==HelicityBit.PLUS?0:1);
     }
 
+    /**
+     * Let the user add a state to initialize the sequence.
+     * 
+     * This must be the first helicity state in the next pattern.
+     * 
+     * Requires initialized()==false and a defined HelicityState.
+     *
+     * @param state = the HelicityState to add to the sequence.
+     */
+    public void addState(HelicityState state) {
+        this.addState(state.getHelicityRaw());
+    }
+    
     /**
      * Get the nth state in the sequence.
      * Requires initialized()==true.

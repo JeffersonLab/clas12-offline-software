@@ -99,11 +99,16 @@ public class HelicitySequenceDelayed extends HelicitySequence {
             if (nevents%100!=0) continue;
             //if (nflips>200) break;
             final long timestamp = event.getBank("RUN::config").getLong("timestamp",0);
-            final byte l3 = event.getBank("RUN::config").getByte("helicityL3",0);
-            final byte l4b = seq.findPrediction(timestamp)==null ? -9 : seq.findPrediction(timestamp).value();
-            final byte l4c = seq.find(timestamp)==null ? -9 : seq.find(timestamp).getHelicity().value();
+            //final byte l3 = event.getBank("RUN::config").getByte("helicityL3",0);
+            
+            final byte l3 = event.getBank("HEL::online").getByte("helicity",0);
+            
+            final byte predicted = seq.findPrediction(timestamp)==null ? -9 : seq.findPrediction(timestamp).value();
+            
+            final byte measured = seq.find(timestamp)==null ? -9 : seq.find(timestamp).getHelicity().value();
+            
             System.out.println(String.format("%d %5d l3=%+d l4b=%+d l4c=%+d",
-                    timestamp,nflips,l3,l4b,l4c));
+                    timestamp,nflips,l3,predicted,measured));
         }
 
     }

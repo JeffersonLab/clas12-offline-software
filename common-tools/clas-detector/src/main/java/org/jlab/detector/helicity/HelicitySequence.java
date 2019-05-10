@@ -32,11 +32,12 @@ public class HelicitySequence implements Comparator<HelicityState> {
     public static final double TIMESTAMP_CLOCK=250.0e6; // Hz
     public static final double HELICITY_CLOCK=29.56; // Hz
 
+    private boolean halfWavePlate=false;
     private boolean analyzed=false;
     private final List<HelicityState> states=new ArrayList<>();
     private final HelicityGenerator generator=new HelicityGenerator();
     private int generatorOffset=0;
-    private final int debug=0;
+    private final int debug=2;
 
     public HelicitySequence(){}
 
@@ -172,7 +173,12 @@ public class HelicitySequence implements Comparator<HelicityState> {
         final int nQuartet = (n-this.generatorOffset)/4;
         final int nBitInQuartet = (n-this.generatorOffset)%4;
         HelicityBit firstBitInQuartet = this.generator.getState(nQuartet);
-        return HelicitySequence.getBitInQuartet(firstBitInQuartet,nBitInQuartet);
+        HelicityBit bit = getBitInQuartet(firstBitInQuartet,nBitInQuartet);
+        
+        // the generator operates on the raw states, so flip it if the HWP is in:
+        // (or should we leave it to the user code to flip it properly?)
+        if (this.halfWavePlate) bit=HelicityBit.getFlipped(bit);
+        return bit;
     }
 
     /**
@@ -252,19 +258,29 @@ public class HelicitySequence implements Comparator<HelicityState> {
      */
     protected final boolean analyze() {
 
-        if (debug>1) System.out.println("ANALYZING ....");
+        if (debug>0) System.out.println("ANALYZING ....");
 
         this.rejectFalseFlips();
 
+        if (this.states.size()>0) {
+            // just use first state to determine whether HWP is in:
+            this.halfWavePlate = this.states.get(0).getHelicity().value() !=
+                                 this.states.get(0).getHelicityRaw().value();
+            if (debug>1) {
+                System.out.println("HWP: "+this.halfWavePlate);
+            }
+        }
+        
         // initialize the generator:
         this.generator.reset();
         for (int ii=0; ii<this.states.size(); ii++) {
+            // generator operates on the pattern sync:
             if (!this.generator.initialized() &&
                  this.states.get(ii).getQuartet()==HelicityBit.MINUS) {
                 if (this.generator.size()==0) {
                     this.generatorOffset=ii;
                 }
-                this.generator.addState(this.states.get(ii).getHelicity());
+                this.generator.addState(this.states.get(ii));
             }
         }
 
@@ -279,16 +295,24 @@ public class HelicitySequence implements Comparator<HelicityState> {
      */
     public final boolean integrityCheck() {
 
+        int hwpErrors=0;
         int syncErrors=0;
         int quartetErrors=0;
         int timestampErrors=0;
 
         for (int ii=1; ii<this.states.size(); ii++) {
 
+            // check that HWP is consistent across all states:
+            if (this.states.get(ii).getHelicity().value()*this.states.get(ii).getHelicityRaw().value() !=
+                this.states.get(ii-1).getHelicity().value()*this.states.get(ii-1).getHelicityRaw().value()) {
+                hwpErrors++;
+                if (debug>1) System.err.println("ERROR:  HelicitySequence HWP: "+ii);
+            }
+            
             // check if neighboring syncs are the same (they shouldn't be):
             if (this.states.get(ii).getSync().value() == this.states.get(ii-1).getSync().value()) {
                 syncErrors++;
-                if (debug>2) System.err.println("ERROR: HelicitySequence SYNC:"+ii);
+                if (debug>1) System.err.println("ERROR: HelicitySequence SYNC: "+ii);
             }
 
             // check if quartet sequence is broken (should be 1minus + 3plus):
@@ -298,7 +322,7 @@ public class HelicitySequence implements Comparator<HelicityState> {
                     this.states.get(ii-2).getQuartet().value()+
                     this.states.get(ii-3).getQuartet().value() != 2) {
                     quartetErrors++;
-                    if (debug>2) System.err.println("ERROR:  HelicitySequence QUARTET: "+ii);
+                    if (debug>1) System.err.println("ERROR:  HelicitySequence QUARTET: "+ii);
                 }
             }
 
@@ -306,7 +330,7 @@ public class HelicitySequence implements Comparator<HelicityState> {
             final double seconds = (this.getTimestamp(ii)-this.getTimestamp(ii-1))/TIMESTAMP_CLOCK;
             if (seconds < (1.0-0.5)/HELICITY_CLOCK || seconds > (1.0+0.5)/HELICITY_CLOCK) {
                 timestampErrors++;
-                if (debug>2) System.err.println("ERROR:  HelicitySequence TIMESTAMP: "+ii+" "+
+                if (debug>1) System.err.println("ERROR:  HelicitySequence TIMESTAMP: "+ii+" "+
                         this.getTimestamp(ii)+" "+this.getTimestamp(ii-1));
             }
         }
@@ -322,24 +346,20 @@ public class HelicitySequence implements Comparator<HelicityState> {
             }
         }
 
-        if (debug>1) {
+        if (debug>0) {
+            System.out.println("HWP       ERRORS:  "+hwpErrors);
             System.out.println("SYNC      ERRORS:  "+syncErrors);
             System.out.println("QUARTET   ERRORS:  "+quartetErrors);
             System.out.println("TIMESTAMP ERRORS:  "+timestampErrors);
             System.out.println("GENERATOR ERRORS:  "+generatorErrors);
         }
 
-        return (syncErrors + quartetErrors + timestampErrors + generatorErrors) == 0;
+        return (hwpErrors + syncErrors + quartetErrors + timestampErrors + generatorErrors) == 0;
     }
 
     public static void main(String[] args) {
 
         HelicitySequence seq=new HelicitySequence();
-
-        for (int ii=0; ii<4; ii++)
-            System.out.println(HelicityBit.PLUS+" "+getBitInQuartet(HelicityBit.PLUS,ii));
-        for (int ii=0; ii<4; ii++)
-            System.out.println(HelicityBit.MINUS+" "+getBitInQuartet(HelicityBit.MINUS,ii));
 
         final String dir="/Users/baltzell/data/CLAS12/rg-b/decoded/";
         final String file="clas_006432.evio.00041-00042.hipo";
@@ -355,6 +375,8 @@ public class HelicitySequence implements Comparator<HelicityState> {
             seq.addState(state);
         }
 
+        seq.analyze();
+        
         seq.show();
     }
 }
