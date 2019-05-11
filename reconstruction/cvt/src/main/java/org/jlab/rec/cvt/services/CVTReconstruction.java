@@ -1,6 +1,8 @@
 package org.jlab.rec.cvt.services;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.clas.swimtools.Swim;
@@ -18,6 +20,7 @@ import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
 import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.Track;
+import org.jlab.utils.groups.IndexedTable;
 //import org.jlab.service.eb.EBHBEngine;
 //import org.jlab.service.eb.EBTBEngine;
 
@@ -96,7 +99,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             this.setRun(newRun);
             this.loadConstants( bank.getInt("run",0) );
         }
-      
+
         Run = newRun;
         this.setRun(Run);
     }
@@ -121,8 +124,9 @@ public class CVTReconstruction extends ReconstructionEngine {
     public boolean processDataEvent(DataEvent event) {
 		
         CVTRecHandler recHandler = new CVTRecHandler(SVTGeom,BMTGeom);
-        setRunConditionsParameters(event, this.getFieldsConfig(), this.getRun(), false, "");
-
+        setRunConditionsParameters(event, this.getFieldsConfig(), this.getRun(), false, "");            
+        double shift = org.jlab.rec.cvt.Constants.getZoffset();
+        
         Swim swimmer = new Swim();
         
         RecoBankWriter rbc = new RecoBankWriter();
@@ -141,14 +145,14 @@ public class CVTReconstruction extends ReconstructionEngine {
         if(Constants.isCosmicsData()==true) { 
             List<StraightTrack> cosmics = recHandler.cosmicsTracking();   
         	rbc.appendCVTCosmicsBanks(event, recHandler.getSVThits(), recHandler.getBMThits(), 
-        									 recHandler.getSVTclusters(), recHandler.getBMTclusters(), 
-        									 recHandler.getCrosses(), cosmics);
+        					 recHandler.getSVTclusters(), recHandler.getBMTclusters(), 
+        					 recHandler.getCrosses(), cosmics, shift);
         } 
         else {
             List<Track> trks = recHandler.beamTracking(swimmer);   
         	rbc.appendCVTBanks(event, recHandler.getSVThits(), recHandler.getBMThits(), 
-        									 recHandler.getSVTclusters(), recHandler.getBMTclusters(), 
-        									 recHandler.getCrosses(), trks);
+        				  recHandler.getSVTclusters(), recHandler.getBMTclusters(), 
+        				  recHandler.getCrosses(), trks, shift);
         }
         return true;
     }
@@ -156,16 +160,18 @@ public class CVTReconstruction extends ReconstructionEngine {
     public boolean loadConstants( int run ) {
         System.out.println(" ........................................ trying to connect to db ");
 //        CCDBConstantsLoader.Load(new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default"));
-        CCDBConstantsLoader.Load(new DatabaseConstantProvider(run, "default"));
+        // Load the calibration constants
+        String variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        CCDBConstantsLoader.Load(new DatabaseConstantProvider(run, variationName));
                
-        DatabaseConstantProvider cp = new DatabaseConstantProvider(run, "default");
+        DatabaseConstantProvider cp = new DatabaseConstantProvider(run, variationName);
 //        DatabaseConstantProvider cp = new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default");
         cp = SVTConstants.connect( cp );
         SVTConstants.loadAlignmentShifts( cp );
         cp.disconnect();    
         this.setSVTDB(cp);
         
-        
+       
         //TrkSwimmer.getMagneticFields();
         return true;
     }

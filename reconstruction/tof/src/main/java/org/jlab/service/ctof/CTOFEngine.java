@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.coda.jevio.EvioException;
@@ -68,7 +69,8 @@ public class CTOFEngine extends ReconstructionEngine {
        
        // Get the constants for the correct variation
         this.getConstantsManager().setVariation("default");
-        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.CTOF, 11, "default");
+        String engineVariation = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.CTOF, 11, engineVariation);
         geometry = new CTOFGeant4Factory(cp);
         
         return true;
@@ -95,7 +97,7 @@ public class CTOFEngine extends ReconstructionEngine {
             return false;
         }
         if (timeStamp==-1) {
-            System.err.println("FTOFEngine:  got 0 timestamp, skipping event");
+            System.err.println("CTOFEngine:  got 0 timestamp, skipping event");
             return false;
         }
 

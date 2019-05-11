@@ -26,7 +26,7 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
         this.helices = helices;
     }
 
-    public void getCvtHTrack(DataEvent event) {
+    public void getCvtHTrack(DataEvent event, CalibrationConstantsLoader ccdb) {
 
         helices.clear();
 
@@ -55,12 +55,12 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
             for (int i = 0; i < nt; i++) {
                 //Matrix m = new Matrix(5,5);
                 int trkID = i;
-                double dca = bank.getFloat("d0", i);
-                double phi0 = bank.getFloat("phi0", i);
-                double z0 = bank.getFloat("z0", i);
+                double dca    = bank.getFloat("d0", i)*10.;
+                double phi0   = bank.getFloat("phi0", i);
+                double z0     = bank.getFloat("z0", i)*10.;
                 double tandip = bank.getFloat("tandip", i);
-                int q = bank.getInt("q", i);
-                double pt = bank.getFloat("pt", i);
+                int q         = bank.getInt("q", i);
+                double pt     = bank.getFloat("pt", i);
                 // use the formula R=pt/qB to get the curvature (see cvt reconstruction class Track)/Pt is in Gev
                 double rho = (0.000299792458 * q * 5. * config.getFloat("solenoid", 0)) / pt;
 				// the max value of B is set to 5.Tesla 
@@ -103,9 +103,9 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
                 // first index 0...2 is layer index
                 // second index 0...2 corresponds to entrance, middle and exit of track wrt the counter
                 for (int lay = 1; lay <= 3; lay++) {
-                    double radius       = CalibrationConstantsLoader.INNERRADIUS[0] + (lay - 0.5) * CalibrationConstantsLoader.THICKNESS[0] + (lay - 1) * Parameters.LayerGap;
-                    double entryradius  = CalibrationConstantsLoader.INNERRADIUS[0] + (lay - 1) * CalibrationConstantsLoader.THICKNESS[0] + (lay - 1) * Parameters.LayerGap;
-                    double escaperadius = CalibrationConstantsLoader.INNERRADIUS[0] + (lay) * CalibrationConstantsLoader.THICKNESS[0] + (lay - 1) * Parameters.LayerGap;
+                    double radius       = ccdb.INNERRADIUS[0] + (lay - 0.5) * ccdb.THICKNESS[0] + (lay - 1) * Parameters.LayerGap;
+                    double entryradius  = ccdb.INNERRADIUS[0] + (lay - 1) * ccdb.THICKNESS[0] + (lay - 1) * Parameters.LayerGap;
+                    double escaperadius = ccdb.INNERRADIUS[0] + (lay) * ccdb.THICKNESS[0] + (lay - 1) * Parameters.LayerGap;
                     trk._TrkInters.get(lay - 1).add(trk.get_Helix().getPointAtRadius(entryradius));
                     Point3D Xm = trk.get_Helix().getPointAtRadius(radius);
                     trk._TrkInters.get(lay - 1).add(Xm);

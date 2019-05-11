@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jlab.clas</groupId>
   <artifactId>common-tools</artifactId>
-  <version>5.9.0-SNAPSHOT</version>
+  <version>6.1.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <parent>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../parent/pom.xml</relativePath>
-    <version>5.9.0-SNAPSHOT</version>
+    <version>6.1.1-SNAPSHOT</version>
   </parent>
 
   <build>
@@ -37,6 +37,7 @@
     <module>clas-analysis</module> 
     <module>swim-tools</module>
     <module>clas-math</module>
-    <module>clas-eventmerger</module>
+<!--    <module>clas-eventmerger</module> -->
+
   </modules>
 </project>

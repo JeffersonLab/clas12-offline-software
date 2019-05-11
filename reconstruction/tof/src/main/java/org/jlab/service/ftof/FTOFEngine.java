@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
+import org.jlab.geom.base.ConstantProvider;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
@@ -67,33 +71,11 @@ public class FTOFEngine extends ReconstructionEngine {
        // Get the constants for the correct variation
         this.getConstantsManager().setVariation("default");
         
-        // Get the geometry
-        DatabaseConstantProvider db = new DatabaseConstantProvider( 11, "default");
-        // using
-        // the
-        // new
-        // run
-        // load the geometry tables
-        db.loadTable("/geometry/ftof/panel1a/paddles");
-        db.loadTable("/geometry/ftof/panel1a/panel");
-        db.loadTable("/geometry/ftof/panel1b/paddles");
-        db.loadTable("/geometry/ftof/panel1b/panel");
-        db.loadTable("/geometry/ftof/panel2/paddles");
-        db.loadTable("/geometry/ftof/panel2/panel");
-
-        // disconncect from database. Important to do this after loading tables.
-        db.disconnect();
+        // Get geometry database provider, load the geometry tables and create geometry
+        String engineVariation = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        ConstantProvider db = GeometryFactory.getConstants(DetectorType.FTOF, 11, engineVariation);
         geometry = new FTOFGeant4Factory(db);
-        // Load the Calibration Constants
-        // if (CCDBConstantsLoader.CSTLOADED == false) {
-        // DatabaseConstantProvider db = CCDBConstantsLoader.Load();
-        // }
-        // if(db!=null) {
-        // Detector ftofdet = GeometryFactory.getDetector(DetectorType.FTOF);
-        // ConstantProvider cp =
-        // GeometryFactory.getConstants(DetectorType.FTOF);
-        // geometry = new FTOFGeant4Factory(db);
-        // }
+
         return true;
     }
 

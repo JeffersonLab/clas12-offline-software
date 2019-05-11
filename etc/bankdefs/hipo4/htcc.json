@@ -1,0 +1,27 @@
+[
+ {
+    "name": "HTCC::rec",
+    "group": 21500,
+    "item" : 22,
+    "info": "reconstructed clusters in HTCC",
+    "entries": [
+       {"name":"id",          "id":1, "type":"S", "info":"id of the hit"},
+       {"name":"nhits",       "id":2, "type":"S", "info":"number of hits in cluster"},
+       {"name":"nphe",        "id":3, "type":"F", "info":"number of photoelectrons in cluster"},
+       {"name":"ntheta",      "id":4, "type":"S", "info":"ntheta"},
+       {"name":"nphi",        "id":5, "type":"S", "info":"nphi"},
+       {"name":"mintheta",    "id":6, "type":"S", "info":"Minimum theta angle"},
+       {"name":"maxtheta",    "id":7, "type":"S", "info":"Maximum theta angle"},
+       {"name":"minphi",      "id":8, "type":"S", "info":"Minimum phi angle"},
+       {"name":"maxphi",      "id":9, "type":"S", "info" :"Maximum phi angle"},
+       {"name":"time",        "id":10, "type":"F", "info":"Time at the vertex"},
+       {"name":"theta",       "id":11, "type":"F", "info":"Theta of the cluster"},
+       {"name":"dtheta",      "id":12, "type":"F", "info":"Error of the theta"},
+       {"name":"phi",         "id":13, "type":"F", "info":"Phi of the cluster"},
+       {"name":"dphi",        "id":14, "type":"F", "info":"Error of the phi"},
+       {"name":"x",           "id":15, "type":"F", "info":"X coordinate of the hit"},
+       {"name":"y",           "id":16, "type":"F", "info":"Y coordinate of the hit"},
+       {"name":"z",           "id":17, "type":"F", "info":"Z coordinate of the hit"}
+    ]
+  }
+ ]
