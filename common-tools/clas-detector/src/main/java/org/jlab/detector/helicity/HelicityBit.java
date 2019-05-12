@@ -14,7 +14,7 @@ public enum HelicityBit {
     PLUS  (  1 ),
     MINUS ( -1 );
 
-    private int value;
+    private final int value;
 
     HelicityBit(int value) {
         this.value=value;

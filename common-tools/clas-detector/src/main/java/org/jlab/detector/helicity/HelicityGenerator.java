@@ -71,8 +71,7 @@ public final class HelicityGenerator {
      * Requires initialized()==true.
      */
     private void shiftRegister() {
-        final int nextBit = this.getNextBit();
-        this.shiftRegister(nextBit);
+        this.shiftRegister(this.getNextBit());
     }
 
     /**
@@ -124,27 +123,4 @@ public final class HelicityGenerator {
         return this.states.get(n) == 0 ?
             HelicityBit.PLUS : HelicityBit.MINUS;
     }
-
-    public static void main(String[] args) {
-        HelicityGenerator hg=new HelicityGenerator();
-        // invent and load some pattern:
-        while (!hg.initialized()) {
-            hg.addState(HelicityBit.MINUS);
-            hg.addState(HelicityBit.PLUS);
-            if (hg.initialized()) break;
-            hg.addState(HelicityBit.PLUS);
-            hg.addState(HelicityBit.MINUS);
-            if (hg.initialized()) break;
-            hg.addState(HelicityBit.PLUS);
-            hg.addState(HelicityBit.MINUS);
-            if (hg.initialized()) break;
-            hg.addState(HelicityBit.MINUS);
-            hg.addState(HelicityBit.PLUS);
-        }
-        for (int ii=0; ii<50; ii++) {
-            System.out.println(ii+" "+hg.getState(ii));
-        }
-    }
-
 }
-

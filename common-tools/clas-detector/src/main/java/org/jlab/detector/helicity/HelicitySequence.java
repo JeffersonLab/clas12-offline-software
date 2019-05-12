@@ -5,25 +5,30 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import org.jlab.io.base.DataEvent;
-import org.jlab.io.base.DataBank;
-import org.jlab.io.hipo.HipoDataSource;
-
 /**
  * Stores a sequence of helicity states and provides timestamp- or state-count-
  * based lookup of helicity state based on the measured sequence or pseudo-random
  * generator sequence, and provides some integrity checking of the sequence, 
  * including comparing the measured and generator sequences.
+ *
+ * Getter methods naming convention:
+ * "find"    - lookup state based on timestamp
+ * "get"     - lookup state based on state count
+ * "predict" - use pseudorandom generator (if necessary)
+ *
+ * The generator methods are able to look past the measured range, while the
+ * non-generator methods cannot.  Return values are null if the helicity cannot
+ * be determined.
  * 
- * - timestamp-based lookup is denoted by "find" in method names.
- * - count-based lookup is denoted by "get" in method names.
- * - generator-based lookup is denoted by "predict" in method names (although it's 
- *   only actually predicting if the timestamp/count is past the measured range).
+ * The inputs to initialize the sequence are HelicityState objects, one per window
+ * at the helicity board clock frequency, which contain important information for
+ * constructing and validating the sequence (e.g. helicity and sync bits and timestamps).
+ * 
+ * The return values from getters are just HelicityBit objects and represent the
+ * HWP-corrected helicity.
  *
- * The generator gives HelicityBit, while measured sequence gives HelicityState.
- * The former includes only the helicity signal, while the latter adds pair- and
- * pattern-sync signals, timestamps, and run and event numbers.
- *
+ * See org.jlab.detector.HelicityAnalysis for an example on using this class.
+ * 
  * @author baltzell
  */
 public class HelicitySequence implements Comparator<HelicityState> {
@@ -37,9 +42,17 @@ public class HelicitySequence implements Comparator<HelicityState> {
     private final List<HelicityState> states=new ArrayList<>();
     private final HelicityGenerator generator=new HelicityGenerator();
     private int generatorOffset=0;
-    private final int debug=2;
+    private int debug=0;
 
     public HelicitySequence(){}
+
+    public void setVerbosity(int verbosity) {
+        this.debug=verbosity;
+    }
+   
+    public boolean getHalfWavePlate() {
+        return this.halfWavePlate;
+    }
 
     /**
      * Compare based on timestamp for sorting and List insertion.
@@ -134,7 +147,7 @@ public class HelicitySequence implements Comparator<HelicityState> {
      * @param n = the index of the state, where 0 corresponds to the first state
      * @return the helicity state, null if outside the mesaured range
      */
-    public HelicityState get(int n) {
+    protected HelicityState getState(int n) {
         if (!this.analyzed) this.analyze();
         if (n < 0 || n>this.states.size()-1) return null;
         return this.states.get(n);
@@ -145,10 +158,32 @@ public class HelicitySequence implements Comparator<HelicityState> {
      * @param timestamp = TI timestamp (units = 4 ns)
      * @return the helicity state, null if timestamp is outside of measured range
      */
-    public HelicityState find(long timestamp) {
+    protected HelicityState findState(long timestamp) {
         final int index = this.findIndex(timestamp);
         if (index < 0) return null;
-        return this.get(index);
+        return this.getState(index);
+    }
+
+    /**
+     * Get the nth state in the measured sequence.
+     * @param n = the index of the state, where 0 corresponds to the first state
+     * @return the helicity state, null if outside the mesaured range
+     */
+    public HelicityBit get(int n) {
+        HelicityState state = this.getState(n);
+        if (state==null) return null;
+        else return state.getHelicity();
+    }
+
+    /**
+     * Find the state corresponding to a given timestamp in the measured sequence.
+     * @param timestamp = TI timestamp (units = 4 ns)
+     * @return the helicity state, null if timestamp is outside of measured range
+     */
+    public HelicityBit find(long timestamp) {
+        HelicityState state = this.findState(timestamp);
+        if (state==null) return null;
+        else return state.getHelicity();
     }
 
     /**
@@ -217,8 +252,8 @@ public class HelicitySequence implements Comparator<HelicityState> {
             if (this.states.get(ii).getPatternSync()==HelicityBit.PLUS) continue;
             System.out.println(String.format("%4d %6s %6s %6s",
                     ii,
-                    this.get(ii).getInfo(prev,ii),
-                    this.get(ii).getHelicity(),
+                    this.getState(ii).getInfo(prev,ii),
+                    this.getState(ii).getHelicity(),
                     this.getPrediction(ii)));
             prev=this.states.get(ii);
         }
@@ -357,26 +392,4 @@ public class HelicitySequence implements Comparator<HelicityState> {
         return (hwpErrors + syncErrors + quartetErrors + timestampErrors + generatorErrors) == 0;
     }
 
-    public static void main(String[] args) {
-
-        HelicitySequence seq=new HelicitySequence();
-
-        final String dir="/Users/baltzell/data/CLAS12/rg-b/decoded/";
-        final String file="clas_006432.evio.00041-00042.hipo";
-
-        HipoDataSource reader=new HipoDataSource();
-        reader.open(dir+file);
-
-        while (reader.hasEvent()) {
-            DataEvent event = reader.getNextEvent();
-            if (!event.hasBank("HEL::flip")) continue;
-            DataBank bank=event.getBank("HEL::flip");
-            HelicityState state=HelicityState.createFromFlipBank(bank);
-            seq.addState(state);
-        }
-
-        seq.analyze();
-        
-        seq.show();
-    }
 }
