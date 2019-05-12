@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.geom.base.Detector;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -214,6 +216,7 @@ public class TrackCandListFinder {
      */
     public ArrayList<Track> getHelicalTracks(CrossList crossList, 
             org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo,
+            CTOFGeant4Factory ctof_geo, Detector cnd_geo,
             Swim swimmer) {
 
         X.clear();
@@ -311,7 +314,7 @@ public class TrackCandListFinder {
                 TrajectoryFinder trjFind = new TrajectoryFinder();
 
                 //Trajectory traj = trjFind.findTrajectory(passedcands.get(ic).get_Id(), trkHelix, passedcands.get(ic), svt_geo, bmt_geo, "final");
-                Trajectory traj = trjFind.findTrajectory(ic+1, trkHelix, passedcands.get(ic), svt_geo, bmt_geo, "final");
+                Trajectory traj = trjFind.findTrajectory(ic+1, passedcands.get(ic), svt_geo, bmt_geo, ctof_geo, cnd_geo, swimmer, "final");
 
                 passedcands.get(ic).set_Trajectory(traj.get_Trajectory());
 

@@ -79,22 +79,25 @@
         {"name":"Cross18_ID",          "type":"S", "info":"ID of cross in the track"}
     ]
   },
-  {
+    {
     "name": "CVTRec::Trajectory",
     "group": 20500,
     "item" : 29,   
-    "info": "reconstructed SVT straight tracks trajectory",
+    "info": "Trajectory bank",
     "entries": [
-        {"name":"ID",                      "type":"S", "info":"ID"},
-        {"name":"LayerTrackIntersPlane",   "type":"B", "info":"Layer of intersection of Track "},
-        {"name":"SectorTrackIntersPlane",  "type":"B", "info":"Sector of intersection of Track "},
-        {"name":"XtrackIntersPlane",       "type":"F", "info":"x of intersection of Track "},
-        {"name":"YtrackIntersPlane",       "type":"F", "info":"y of intersection of Track "},
-        {"name":"ZtrackIntersPlane",       "type":"F", "info":"z of intersection of Track "},
-        {"name":"PhiTrackIntersPlane",     "type":"F", "info":"Local phi of intersection of Track"},
-        {"name":"ThetaTrackIntersPlane",   "type":"F", "info":"Local theta of intersection of Track"},
-        {"name":"trkToMPlnAngl",           "type":"F", "info":"Local angle of intersection of Track with the module surface"},
-        {"name":"CalcCentroidStrip",       "type":"F", "info":"Estimated Centroid"}
+        {"name":"id",       "type":"S", "info":"id of the track"},
+        {"name":"detector", "type":"S", "info":"id of the detector"},
+        {"name":"sector",   "type":"B", "info":"id of the sector"},
+        {"name":"layer",    "type":"B", "info":"id of the layer"},
+        {"name":"x",        "type":"F", "info":"track x position at detector surface (cm)"},
+        {"name":"y",        "type":"F", "info":"track y position at detector surface (cm)"},
+        {"name":"z",        "type":"F", "info":"track z position at detector surface (cm)"},
+        {"name":"phi",      "type":"F", "info":"local phi at detector surface (deg)"},
+        {"name":"theta",    "type":"F", "info":"local theta at detector surface"},
+        {"name":"langle",   "type":"F", "info":"local angle with module surface"},
+        {"name":"centroid", "type":"F", "info":"estimated strip centroid"},
+        {"name":"path",     "type":"F", "info":"pathlength of the track from the track vertex to the detector surface (cm)"}
     ]
   }
+
 ]
