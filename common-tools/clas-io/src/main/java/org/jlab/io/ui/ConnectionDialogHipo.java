@@ -58,8 +58,6 @@ public class ConnectionDialogHipo extends BasicDialog {
     
     /**
      * Create the panel for selected
-     * @param id
-     * @param level
      */
     public ConnectionDialogHipo() {
         super("Connection.....", true, closeoutButtons);

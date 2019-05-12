@@ -74,6 +74,9 @@ mkdir -p coatjava/lib/services
 rm -rf ~/.m2/repository/org/hep/hipo
 rm -rf ~/.m2/repository/org/jlab
 
+### how to build javadocs:
+#mvn javadoc:javadoc -Ddoclint=none
+
 unset CLAS12DIR
 if [ $runUnitTests == "yes" ]; then
 	$mvn install # also runs unit tests

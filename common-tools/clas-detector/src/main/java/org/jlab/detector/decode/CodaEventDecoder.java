@@ -1242,8 +1242,6 @@ public class CodaEventDecoder {
 
     /**
      * decoding bank that contains TI time stamp.
-     * @param crate
-     * @param node
      * @param event
      * @return
      */

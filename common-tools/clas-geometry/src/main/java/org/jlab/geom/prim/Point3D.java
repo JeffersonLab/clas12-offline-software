@@ -37,10 +37,8 @@ public final class Point3D implements Transformable, Showable {
         set(x, y, z);
     }
     /**
-     * Constructs a new {@code Point3D} by adding the given vector to the given
-     * point.
-     * @param point  the origin point
-     * @param vector the direction vector
+     * Constructs a new {@code Point3D} with the given vector.
+     * @param v the vector
      */
     public Point3D(Vector3D v) {
         set(v.x(), v.y(), v.z());
