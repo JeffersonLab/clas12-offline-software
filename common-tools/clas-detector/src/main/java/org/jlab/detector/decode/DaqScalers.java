@@ -18,7 +18,7 @@ import org.jlab.utils.groups.IndexedTable;
  * DSC2.  Integrating since beginning of run, useful for beam charge normalization.
  *
  * @see <a href="https://logbooks.jlab.org/comment/14616">logbook entry</a>
- * @see "common-tools/clas-detector/doc"
+ * and common-tools/clas-detector/doc
  *
  * The EPICS equation for converting Faraday Cup raw scaler S to beam current I:
  *   I [nA] = (S [Hz] - offset ) / slope * attenuation;
