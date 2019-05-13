@@ -337,11 +337,6 @@ public class PlotCanvas extends JComponent
 			break;
 		}
 
-		// try nice values
-		
-		System.err.println("X " + xMethod + "(" + xmin + ", " + xmax+ ")");
-		System.err.println("Y " + yMethod + "(" + ymin + ", " + ymax+ ")");
-
 		_worldSystem.setFrame(xmin, ymin, xmax - xmin, ymax - ymin);
 	}
 

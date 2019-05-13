@@ -187,9 +187,6 @@ public class OneAxisLimitsPanel extends JPanel implements ActionListener {
 			break;
 		}
 		
-		System.err.println("Using method = " + _method1 + "  for " + _axis);
-
-
 	}
 	
 	private double getValue(JFormattedTextField tf, double v) {
