@@ -29,4 +29,10 @@ public enum HelicityBit {
         return UDF;
     }
 
+    public static HelicityBit getFlipped(HelicityBit bit) {
+        if (bit==PLUS) return MINUS;
+        if (bit==MINUS) return PLUS;
+        return UDF;
+    }
+
 }
