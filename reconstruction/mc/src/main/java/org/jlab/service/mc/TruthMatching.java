@@ -36,6 +36,7 @@ public class TruthMatching extends ReconstructionEngine {
   @Override
   public boolean processDataEvent(DataEvent event) {
 
+    //System.out.print( " ******* EVENT " + event.getBank("RUN::config").getInt("event",0));
     // check if the event contains the MC banks
     if( event.hasBank( "MC::True") == false ){
       System.err.print(" [ WARNING, TruthMatching ]: no MC::True bank found" );
@@ -195,6 +196,7 @@ public class TruthMatching extends ReconstructionEngine {
     public byte  detector;
     public byte  layer;
     public byte  superlayer;
+    public byte  sector;
   }
 
   // ======================================
@@ -233,6 +235,7 @@ public class TruthMatching extends ReconstructionEngine {
         int countBST = 0;
         int countBMTC = 0;
         int countBMTZ = 0;
+        byte BMTsector = 0;
         
         // check if the cluster has been used in the reconstructed track
         for( RecCluster c : clsPerMCp.get(i) ){
@@ -243,8 +246,11 @@ public class TruthMatching extends ReconstructionEngine {
             }
 
             if( c.detector == (byte) DetectorType.BMT.getDetectorId() ){ 
-              if( c.layer == 1 || c.layer == 4 || c.layer == 6 ) countBMTC++;
-              else countBMTZ++;
+              if( BMTsector == 0 ) BMTsector = c.sector; // assign the sector of the first cluster
+              if( c.sector == BMTsector ){ // check if they are in the same sector
+                if( c.layer == 1 || c.layer == 4 || c.layer == 6 ) countBMTC++;
+                else countBMTZ++;
+              }
             }
             if( c.detector == (byte) DetectorType.BST.getDetectorId() ){ countBST++; }
             
@@ -281,9 +287,9 @@ public class TruthMatching extends ReconstructionEngine {
         if( detector == (byte) DetectorType.DC.getDetectorId() ){
           int testSL = 0;
           for( byte l = 1; l <= 6; l++ ){ 
-            if( countSL.get( l ) >= 5 ) testSL++;  // per SuperLayer at least 5 out of 6 layers need to be fired
+            if( countSL.get( l ) >= 4 ) testSL++;  // per SuperLayer at least 5 out of 6 layers need to be fired
           }
-          if( testSL > 4 ){  // at least 5 out of 6 SuperLayers need to be fired
+          if( testSL >= 5 ){  // at least 5 out of 6 SuperLayers need to be fired
             m.reconstructable = 1; 
             //System.out.println( " Yeah! DC track found! " );
           }
@@ -478,6 +484,7 @@ public class TruthMatching extends ReconstructionEngine {
       h.detector = (byte) det.getDetectorId();
       h.layer    = bank.getByte( "layer", i );
       h.superlayer = (DetectorType.DC == det ) ? bank.getByte( "superlayer", i ) : -1;
+      h.sector   = (byte) bank.getByte( "sector", i );
       cls.add( h );
     }
     return cls;
