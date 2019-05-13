@@ -8,18 +8,11 @@ mvn javadoc:javadoc -Ddoclint=none
 src=target/site/apidocs
 dest=docs/javadoc
 
-rm -rf $dest
-
-for dir in `find common-tools/*/$src reconstruction/*/$src -maxdepth 0 -mindepth 0 -type d`
+for dir in `find . -type d | grep $src$`
 do
-    topName=${dir%%/*}
-    packageName=${dir#*/}
-    packageName=${packageName%%/*}
-    destDir=$dest/$topName
-
-    mkdir -p $destDir
-
-    cp -r $dir $destDir/$packageName
-
+    mkdir -p $dest/${dir%$src}
+    cp -r $dir/* $dest/${dir%$src}
 done
+
+#scp -r docs/javadoc/* ifarm:/group/clas/www/clasweb/html/clas12offline/docs/javadoc
 
