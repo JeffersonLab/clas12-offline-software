@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.jlab.clas.clas.math.FastMath;
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.geom.prim.Point3D;
-import org.jlab.rec.dc.cross.Cross;
 import org.jlab.rec.dc.track.Track;
 
 public class StateVecs {
@@ -242,38 +240,20 @@ public class StateVecs {
         this.trackCov.put(0, initCM);
     }
 
+    
     void initFromHB(Track trkcand, double z0, KFitter kf) { 
-        if (trkcand != null && trkcand.get_CovMat()!=null) {
-            dcSwim.SetSwimParameters(trkcand.get_Vtx0().x(), trkcand.get_Vtx0().y(), trkcand.get_Vtx0().z(), 
-                    trkcand.get_pAtOrig().x(), trkcand.get_pAtOrig().y(), trkcand.get_pAtOrig().z(), trkcand.get_Q());
-            double[] VecInDCVolume = dcSwim.SwimToPlaneLab(175.);
-            if(VecInDCVolume==null){
-                kf.setFitFailed = true;
-                return;
-            }
-            // rotate to TCS
-            Cross C = new Cross(trkcand.get(0).get_Sector(), trkcand.get(0).get_Region(), -1);
-        
-            Point3D trkR1X = C.getCoordsInTiltedSector(VecInDCVolume[0],VecInDCVolume[1],VecInDCVolume[2]);
-            Point3D trkR1P = C.getCoordsInTiltedSector(VecInDCVolume[3],VecInDCVolume[4],VecInDCVolume[5]);
+        if (trkcand != null && trkcand.getFinalStateVec()!=null 
+                && trkcand.get_CovMat()!=null) {
             
-            dcSwim.SetSwimParameters(trkR1X.x(), trkR1X.y(), trkR1X.z(), 
-                    trkR1P.x(), trkR1P.y(), trkR1P.z(), trkcand.get_Q());
-            
-            double[] VecAtFirstMeasSite = dcSwim.SwimToPlaneTiltSecSys(trkcand.get(0).get_Sector(), z0);
-            if(VecAtFirstMeasSite==null){
-                kf.setFitFailed = true;
-                return;
-            }
             StateVec initSV = new StateVec(0);
-            initSV.x = VecAtFirstMeasSite[0];
-            initSV.y = VecAtFirstMeasSite[1];
-            initSV.z = VecAtFirstMeasSite[2];
-            initSV.tx = VecAtFirstMeasSite[3] / VecAtFirstMeasSite[5];
-            initSV.ty = VecAtFirstMeasSite[4] / VecAtFirstMeasSite[5];
-            initSV.Q = trkcand.get_Q() / trkcand.get_pAtOrig().mag(); 
+            initSV.x = trkcand.getFinalStateVec().x();
+            initSV.y = trkcand.getFinalStateVec().y();
+            initSV.z = trkcand.getFinalStateVec().getZ();
+            initSV.tx = trkcand.getFinalStateVec().tanThetaX();
+            initSV.ty = trkcand.getFinalStateVec().tanThetaY();
+            initSV.Q = ((double) trkcand.get_Q())/trkcand.get_P();
+            
             rk.SwimToZ(trkcand.get(0).get_Sector(), initSV, dcSwim, z0, bf);
-            initSV.B = Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2]);
             this.trackTraj.put(0, initSV); 
             
             CovMat initCM = new CovMat(0);
@@ -285,7 +265,6 @@ public class StateVecs {
         }
         
     }
-    
     
     public void printMatrix(Matrix C) {
         for (int k = 0; k < 5; k++) {

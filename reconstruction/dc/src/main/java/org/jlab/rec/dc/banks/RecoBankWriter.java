@@ -62,7 +62,7 @@ public class RecoBankWriter {
         for (int i = 0; i < hitlist.size(); i++) {
             if (hitlist.get(i).get_Id() == -1) {
                 continue;
-            }
+        }
 
             bank.setShort("id", i, (short) hitlist.get(i).get_Id());
             bank.setShort("status", i, (short) 0);
@@ -339,6 +339,12 @@ public class RecoBankWriter {
             bank.setShort("Cross3_ID", i, (short) candlist.get(i).get(2).get_Id());
             bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
             bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
+            bank.setFloat("x", i, (float) candlist.get(i).getFinalStateVec().x());
+            bank.setFloat("y", i, (float) candlist.get(i).getFinalStateVec().y());
+            bank.setFloat("z", i, (float) candlist.get(i).getFinalStateVec().getZ());
+            bank.setFloat("tx", i, (float) candlist.get(i).getFinalStateVec().tanThetaX());
+            bank.setFloat("ty", i, (float) candlist.get(i).getFinalStateVec().tanThetaY());
+            
         }
         //bank.show();
         return bank;
@@ -444,7 +450,7 @@ public class RecoBankWriter {
             bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
             bank.setByte("trkID", i, (byte) hitlist.get(i).get_AssociatedTBTrackID());
             bank.setFloat("timeResidual", i, (float) hitlist.get(i).get_TimeResidual());
-
+            
             bank.setInt("TDC",i,hitlist.get(i).get_TDC());
             bank.setFloat("B", i, (float) hitlist.get(i).getB());
             bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
