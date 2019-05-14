@@ -442,7 +442,7 @@ public class TrackCandListFinder {
     }
 
     
-        public void setTrackPars(Track cand,
+    public void setTrackPars(Track cand,
                              Trajectory traj,
                              TrajectoryFinder trjFind,
                              StateVec stateVec, double z,
@@ -464,15 +464,23 @@ public class TrackCandListFinder {
                 -R3TrkMomentum.z(),
                 -cand.get_Q());
         
-        int sector = cand.get(cand.size() - 1).get_Sector();
-        double theta_n = ((double) (sector - 1)) * Math.toRadians(60.);       
-        double x_n = Math.cos(theta_n);
-        double y_n = Math.sin(theta_n);
-        double d = x_n*xB + y_n*yB; 
-        double[] Vt = dcSwim.SwimToPlaneBoundary(d, new Vector3D(x_n, y_n, 0), -1); 
+        double[] Vt = null;
+        Vt = dcSwim.SwimToBeamLine(xB, yB);
         
-        if(Vt==null)
+        if(Vt==null ) {
+            //System.out.println(" Swim to Beam Failed... Trying Swim to plane...");
+        
+            int sector = cand.get(cand.size() - 1).get_Sector();
+            double theta_n = ((double) (sector - 1)) * Math.toRadians(60.);       
+            double x_n = Math.cos(theta_n);
+            double y_n = Math.sin(theta_n);
+            double d = x_n*xB + y_n*yB; 
+            Vt = dcSwim.SwimToPlaneBoundary(d, new Vector3D(x_n, y_n, 0), -1); 
+        }
+        if(Vt==null) {
+            //System.out.println(" Swim to Plane Failed... ");
             return;
+        }
         double xOrFix = Vt[0];
         double yOrFix = Vt[1];
         double zOrFix = Vt[2];

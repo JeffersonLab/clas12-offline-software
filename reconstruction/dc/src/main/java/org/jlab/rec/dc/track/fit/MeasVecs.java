@@ -25,7 +25,7 @@ public class MeasVecs {
         hMatrix[0] = 1;
         hMatrix[1] = -Math.tan((Math.toRadians(s * 6.)));
         // add geometric corrections
-        hMatrix[1]-= w*(4./l)*(1 - y/(l/2.));        
+        //hMatrix[1]-= w*(4./l)*(1 - y/(l/2.));        
         return hMatrix;
     }
 
@@ -41,7 +41,7 @@ public class MeasVecs {
 
         double val = stateV[0] - Math.tan((Math.toRadians(s * 6.))) * stateV[1]; 
         // add geometric corrections
-        val+= w*(1 - stateV[1]/(l/2.))*(1 - stateV[1]/(l/2.));       
+        val+= w;       
         return val;
     }
 

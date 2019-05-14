@@ -592,7 +592,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         
         double MaxSag = Constants.getWIREDIST()*A*C*wire*wire*FastMath.cos(Math.toRadians(25.))*FastMath.cos(Math.toRadians(30.));
         
-        double delta_x = MaxSag*(1.-y/(0.5*wireLen))*(1.-y/(0.5*wireLen));
+        double delta_x = MaxSag*(1.-Math.abs(y)/(0.5*wireLen))*(1.-Math.abs(y)/(0.5*wireLen));
         
         x+=delta_x;
         
