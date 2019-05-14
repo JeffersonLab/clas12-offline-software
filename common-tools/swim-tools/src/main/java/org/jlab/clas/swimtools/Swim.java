@@ -689,7 +689,9 @@ public class Swim {
         private double _xB;
         private double _yB;
         double min = Double.POSITIVE_INFINITY;
-        
+        double thetaRad = Math.toRadians(_theta);
+        double phiRad = Math.toRadians(_phi);
+        double pz = _pTot * Math.cos(thetaRad);
         private BeamLineSwimStopper(double xB, double yB) {
                 // DC reconstruction units are cm. Swim units are m. Hence scale by
                 // 100
@@ -703,7 +705,7 @@ public class Swim {
                 double r = Math.sqrt((_xB-y[0]* 100.) * (_xB-y[0]* 100.) + (_yB-y[1]* 100.) * (_yB-y[1]* 100.));
                 if(r<min)
                     min = r;
-                return (r > min);
+                return (r > min );
 
         }
 
@@ -737,7 +739,7 @@ public class Swim {
             return null;
         BeamLineSwimStopper stopper = new BeamLineSwimStopper(xB, yB);
 
-        SwimTrajectory st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, 20e-6,
+        SwimTrajectory st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize,
                         0.0005);
         if(st==null)
             return null;
