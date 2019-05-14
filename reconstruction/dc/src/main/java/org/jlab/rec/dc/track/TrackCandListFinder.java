@@ -448,11 +448,65 @@ public class TrackCandListFinder {
                              StateVec stateVec, double z,
                              DCGeant4Factory getDcDetector,
                              Swim dcSwim, double xB, double yB) {
-        this.setTrackPars(cand, traj, trjFind, stateVec, z, getDcDetector, dcSwim);
+        
         double pz = cand.get_P() / Math.sqrt(stateVec.tanThetaX() * stateVec.tanThetaX() +
                 stateVec.tanThetaY() * stateVec.tanThetaY() + 1);
 
+        //System.out.println("Setting track params for ");stateVec.printInfo();
+        dcSwim.SetSwimParameters(stateVec.x(), stateVec.y(), z,
+                pz * stateVec.tanThetaX(), pz * stateVec.tanThetaY(), pz,
+                cand.get_Q());
+
+        // swimming to a ref points outside of the last DC region
+        double[] VecAtTarOut = dcSwim.SwimToPlaneTiltSecSys(cand.get(0).get_Sector(), 592);
+        if(VecAtTarOut==null)
+            return;
+        
+        double xOuter = VecAtTarOut[0];
+        double yOuter = VecAtTarOut[1];
+        double zOuter = VecAtTarOut[2];
+        double uxOuter = VecAtTarOut[3] / cand.get_P();
+        double uyOuter = VecAtTarOut[4] / cand.get_P();
+        double uzOuter = VecAtTarOut[5] / cand.get_P();
+        //Cross crossR = new Cross(cand.get(2).get_Sector(), cand.get(2).get_Region(), -1);
+        Cross crossR = new Cross(cand.get(cand.size() - 1).get_Sector(),
+                cand.get(cand.size() - 1).get_Region(), -1);
+        Point3D xOuterExtp = crossR.getCoordsInLab(xOuter, yOuter, zOuter);
+        Point3D uOuterExtp = crossR.getCoordsInLab(uxOuter, uyOuter, uzOuter);
+
+        //set the pseudocross at extrapolated position
+        cand.set_PostRegion3CrossPoint(xOuterExtp);
+        cand.set_PostRegion3CrossDir(uOuterExtp);
+
+        dcSwim.SetSwimParameters(stateVec.x(), stateVec.y(), z,
+                -pz * stateVec.tanThetaX(), -pz * stateVec.tanThetaY(), -pz,
+                -cand.get_Q());
+
+        //swimming to a ref point upstream of the first DC region
+        double[] VecAtTarIn = dcSwim.SwimToPlaneTiltSecSys(cand.get(0).get_Sector(), 180);
+        if (VecAtTarIn == null) {
+            cand.fit_Successful = false;
+            return;
+        }
+
+        if (VecAtTarIn[6] + VecAtTarOut[6] < Constants.MINPATH) {
+            cand.fit_Successful = false;
+            return;
+        }
+
+        double xOr = VecAtTarIn[0];
+        double yOr = VecAtTarIn[1];
+        double zOr = VecAtTarIn[2];
+        double pxOr = -VecAtTarIn[3];
+        double pyOr = -VecAtTarIn[4];
+        double pzOr = -VecAtTarIn[5];
+
         Cross C = new Cross(cand.get(cand.size() - 1).get_Sector(), cand.get(cand.size() - 1).get_Region(), -1);
+
+        Point3D trkR1X = C.getCoordsInLab(xOr, yOr, zOr);
+        Point3D trkR1P = C.getCoordsInLab(pxOr, pyOr, pzOr);
+        cand.set_Region1TrackX(new Point3D(trkR1X.x(), trkR1X.y(), trkR1X.z()));
+        cand.set_Region1TrackP(new Point3D(trkR1P.x(), trkR1P.y(), trkR1P.z()));
 
         Point3D R3TrkPoint = C.getCoordsInLab(stateVec.x(), stateVec.y(), z);
         Point3D R3TrkMomentum = C.getCoordsInLab(pz * stateVec.tanThetaX(),
@@ -463,24 +517,34 @@ public class TrackCandListFinder {
                 -R3TrkMomentum.y(),
                 -R3TrkMomentum.z(),
                 -cand.get_Q());
-        
+        // recalc new vertex using plane stopper
+        //int sector = cand.get(2).get_Sector();
         double[] Vt = null;
+        int sector = cand.get(cand.size() - 1).get_Sector();
+        double theta_n = ((double) (sector - 1)) * Math.toRadians(60.);
+        double x_n = Math.cos(theta_n);
+        double y_n = Math.sin(theta_n);
+        double d = x_n*xB + y_n*yB; 
+        
         Vt = dcSwim.SwimToBeamLine(xB, yB);
-        
-        if(Vt==null ) {
-            //System.out.println(" Swim to Beam Failed... Trying Swim to plane...");
-        
-            int sector = cand.get(cand.size() - 1).get_Sector();
-            double theta_n = ((double) (sector - 1)) * Math.toRadians(60.);       
-            double x_n = Math.cos(theta_n);
-            double y_n = Math.sin(theta_n);
-            double d = x_n*xB + y_n*yB; 
-            Vt = dcSwim.SwimToPlaneBoundary(d, new Vector3D(x_n, y_n, 0), -1); 
-        }
-        if(Vt==null) {
-            //System.out.println(" Swim to Plane Failed... ");
+        if(Vt==null)
             return;
-        }
+        double[] VecAtHtccSurf = dcSwim.SwimToSphere(175);
+        double xInner = VecAtHtccSurf[0];
+        double yInner = VecAtHtccSurf[1];
+        double zInner = VecAtHtccSurf[2];
+        double uxInner = VecAtHtccSurf[3] / cand.get_P();
+        double uyInner = VecAtHtccSurf[4] / cand.get_P();
+        double uzInner = VecAtHtccSurf[5] / cand.get_P();
+
+        //set the pseudocross at extrapolated position
+        cand.set_PreRegion1CrossPoint(new Point3D(xInner, yInner, zInner));
+        cand.set_PreRegion1CrossDir(new Point3D(uxInner, uyInner, uzInner));
+
+        if(Math.abs(Vt[2]-R3TrkPoint.z())<Constants.MINPATH)  // swim to line fails...default swim to plane
+            Vt = dcSwim.SwimToPlaneBoundary(d, new Vector3D(x_n, y_n, 0), -1); 
+        if(Vt==null)
+            return;
         double xOrFix = Vt[0];
         double yOrFix = Vt[1];
         double zOrFix = Vt[2];
@@ -488,8 +552,17 @@ public class TrackCandListFinder {
         double pyOrFix = -Vt[4];
         double pzOrFix = -Vt[5];
         
+        double PathInFromR3 = Vt[6];
+
+        double totPathLen = PathInFromR3 + VecAtTarOut[6];
+        cand.set_TotPathLen(totPathLen);
+        
         cand.set_Vtx0(new Point3D(xOrFix, yOrFix, zOrFix));
+        
         cand.set_pAtOrig(new Vector3D(pxOrFix, pyOrFix, pzOrFix));
+        
+        cand.fit_Successful = true;
+        cand.set_TrackingInfoString(trking);
     }
 
     public void removeOverlappingTracks(List<Track> trkcands) {

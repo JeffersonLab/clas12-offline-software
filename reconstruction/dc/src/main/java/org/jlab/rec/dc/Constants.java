@@ -162,6 +162,7 @@ public class Constants {
 
     private static boolean USETSTART = true;
     public static double SEEDCUT = 5000;
+    public static double MINPATH = 200;
 
     public static boolean isUSETSTART() {
         return USETSTART;
