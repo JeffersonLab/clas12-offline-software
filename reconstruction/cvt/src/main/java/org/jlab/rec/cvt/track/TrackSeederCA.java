@@ -541,6 +541,7 @@ public class TrackSeederCA {
 
             cand = new Track(null, swimmer);
             cand.addAll(SVTCrosses);
+            double explFact = 20.0; // 
             for (int j = 0; j < SVTCrosses.size(); j++) {
                 X.add(j, SVTCrosses.get(j).get_Point().x());
                 Y.add(j, SVTCrosses.get(j).get_Point().y());
@@ -548,11 +549,11 @@ public class TrackSeederCA {
                     Z.add(j, SVTCrosses.get(j).get_Point().z());
                     Rho.add(j, Math.sqrt(SVTCrosses.get(j).get_Point().x() * SVTCrosses.get(j).get_Point().x()
                             + SVTCrosses.get(j).get_Point().y() * SVTCrosses.get(j).get_Point().y()));
-                    ErrRho.add(j, Math.sqrt(SVTCrosses.get(j).get_PointErr().x() * SVTCrosses.get(j).get_PointErr().x()
+                    ErrRho.add(j, explFact *  Math.sqrt(SVTCrosses.get(j).get_PointErr().x() * SVTCrosses.get(j).get_PointErr().x()
                             + SVTCrosses.get(j).get_PointErr().y() * SVTCrosses.get(j).get_PointErr().y()));
-                    ErrZ.add(j, SVTCrosses.get(j).get_PointErr().z());
+                    ErrZ.add(j, explFact *  SVTCrosses.get(j).get_PointErr().z());
                 }
-                ErrRt.add(j, Math.sqrt(SVTCrosses.get(j).get_PointErr().x() * SVTCrosses.get(j).get_PointErr().x()
+                ErrRt.add(j, explFact * Math.sqrt(SVTCrosses.get(j).get_PointErr().x() * SVTCrosses.get(j).get_PointErr().x()
                         + SVTCrosses.get(j).get_PointErr().y() * SVTCrosses.get(j).get_PointErr().y()));
             }
 
@@ -560,7 +561,7 @@ public class TrackSeederCA {
                 for (int j = svtSz; j < svtSz + bmtZSz; j++) {
                     X.add(j, BMTCrossesZ.get(j - svtSz).get_Point().x());
                     Y.add(j, BMTCrossesZ.get(j - svtSz).get_Point().y());
-                    ErrRt.add(j, Math.sqrt(BMTCrossesZ.get(j - svtSz).get_PointErr().x() * BMTCrossesZ.get(j - svtSz).get_PointErr().x()
+                    ErrRt.add(j, explFact * Math.sqrt(BMTCrossesZ.get(j - svtSz).get_PointErr().x() * BMTCrossesZ.get(j - svtSz).get_PointErr().x()
                             + BMTCrossesZ.get(j - svtSz).get_PointErr().y() * BMTCrossesZ.get(j - svtSz).get_PointErr().y()));
                 }
             }
@@ -570,12 +571,12 @@ public class TrackSeederCA {
                     Rho.add(j, org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_Region() - 1]
                             + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
                     
-                    ErrRho.add(j, org.jlab.rec.cvt.bmt.Constants.hStrip2Det / Math.sqrt(12.));
-                    ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
+                    ErrRho.add(j, explFact *  org.jlab.rec.cvt.bmt.Constants.hStrip2Det / Math.sqrt(12.));
+                    ErrZ.add(j, explFact *  BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
                 }
             }
-            /*X.add((double) 0);
-            Y.add((double) 0);*/
+            //X.add((double) 0);
+            //Y.add((double) 0);
 
             //ErrRt.add((double) 0.1);
             //ErrRt.add((double) 50);

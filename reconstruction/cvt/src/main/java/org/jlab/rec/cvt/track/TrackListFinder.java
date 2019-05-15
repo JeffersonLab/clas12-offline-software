@@ -204,7 +204,7 @@ public class TrackListFinder {
             
             //Once we have the best and smallest track, we look if each point added to this track are not too far off (for the moment we set the limit at 15 sigma)
             for(int i =0; i<trkList.size(); i++) {
-            	if (trkList.get(i).getNDF()>=ndf&&trkList.get(i).getChi2()<bestChi2+(trkList.get(i).getNDF()-ndf)*225){
+            	if (trkList.get(i).getNDF()>=ndf&&trkList.get(i).getChi2()<bestChi2+(trkList.get(i).getNDF()-ndf)* Constants.Nsigma_per_point* Constants.Nsigma_per_point){
             		ndf=trkList.get(i).getNDF();
             		bestTrk=trkList.get(i);
             		bestChi2=trkList.get(i).getChi2();
