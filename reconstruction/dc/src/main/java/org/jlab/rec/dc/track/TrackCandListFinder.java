@@ -517,34 +517,23 @@ public class TrackCandListFinder {
                 -R3TrkMomentum.y(),
                 -R3TrkMomentum.z(),
                 -cand.get_Q());
-        // recalc new vertex using plane stopper
-        //int sector = cand.get(2).get_Sector();
-        double[] Vt = null;
-        int sector = cand.get(cand.size() - 1).get_Sector();
-        double theta_n = ((double) (sector - 1)) * Math.toRadians(60.);
-        double x_n = Math.cos(theta_n);
-        double y_n = Math.sin(theta_n);
-        double d = x_n*xB + y_n*yB; 
         
-        Vt = dcSwim.SwimToBeamLine(xB, yB);
+        
+        double[] Vt = dcSwim.SwimToBeamLine(xB, yB);
         if(Vt==null)
             return;
-        double[] VecAtHtccSurf = dcSwim.SwimToSphere(175);
-        double xInner = VecAtHtccSurf[0];
-        double yInner = VecAtHtccSurf[1];
-        double zInner = VecAtHtccSurf[2];
-        double uxInner = VecAtHtccSurf[3] / cand.get_P();
-        double uyInner = VecAtHtccSurf[4] / cand.get_P();
-        double uzInner = VecAtHtccSurf[5] / cand.get_P();
-
-        //set the pseudocross at extrapolated position
-        cand.set_PreRegion1CrossPoint(new Point3D(xInner, yInner, zInner));
-        cand.set_PreRegion1CrossDir(new Point3D(uxInner, uyInner, uzInner));
-
-        if(Math.abs(Vt[2]-R3TrkPoint.z())<Constants.MINPATH)  // swim to line fails...default swim to plane
-            Vt = dcSwim.SwimToPlaneBoundary(d, new Vector3D(x_n, y_n, 0), -1); 
-        if(Vt==null)
-            return;
+        
+       // recalc new vertex using plane stopper
+        //int sector = cand.get(2).get_Sector();
+        //double[] Vt = null;
+        //int sector = cand.get(cand.size() - 1).get_Sector();
+        //double theta_n = ((double) (sector - 1)) * Math.toRadians(60.);
+        //double x_n = Math.cos(theta_n);
+        //double y_n = Math.sin(theta_n);
+        //double d = x_n*xB + y_n*yB; 
+        //Vt = dcSwim.SwimToPlaneBoundary(d, new Vector3D(x_n, y_n, 0), -1); 
+        //if(Vt==null)
+        //    return;
         double xOrFix = Vt[0];
         double yOrFix = Vt[1];
         double zOrFix = Vt[2];
@@ -563,6 +552,21 @@ public class TrackCandListFinder {
         
         cand.fit_Successful = true;
         cand.set_TrackingInfoString(trking);
+        
+        dcSwim.SetSwimParameters(xOrFix, yOrFix, zOrFix,
+                pxOrFix, pyOrFix, pzOrFix,
+                cand.get_Q());
+        double[] VecAtHtccSurf = dcSwim.SwimToSphere(175);
+        double xInner = VecAtHtccSurf[0];
+        double yInner = VecAtHtccSurf[1];
+        double zInner = VecAtHtccSurf[2];
+        double uxInner = VecAtHtccSurf[3] / cand.get_P();
+        double uyInner = VecAtHtccSurf[4] / cand.get_P();
+        double uzInner = VecAtHtccSurf[5] / cand.get_P();
+        
+        //set the pseudocross at extrapolated position
+        cand.set_PreRegion1CrossPoint(new Point3D(xInner, yInner, zInner));
+        cand.set_PreRegion1CrossDir(new Point3D(uxInner, uyInner, uzInner));
     }
 
     public void removeOverlappingTracks(List<Track> trkcands) {
