@@ -348,27 +348,34 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             double ralpha = this.reducedAngle(alpha);
             double beta = this.get_Beta(); 
             double x = this.get_ClusFitDoca();
-            //TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
+           
             double deltatime_beta = 0;
             
             if (x != -1) {
-                //double V_0 = tab.getDoubleValue("v0", this.get_Sector(), this.get_Superlayer(),0); ==> floating cst must be fixed
-                double V_0 = Constants.V0AVERAGED;
-                //deltatime_beta = (Math.sqrt(x * x + (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta) * (CCDBConstants.getDISTBETA()[this.get_Sector() - 1][this.get_Superlayer() - 1] * beta * beta)) - x) / CCDBConstants.getV0()[this.get_Sector() - 1][this.get_Superlayer() - 1];
-                deltatime_beta = (Math.sqrt(x * x + (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta) * (tab.getDoubleValue("distbeta", this.get_Sector(), this.get_Superlayer(),0) * beta * beta)) - x) / V_0;
-
+                deltatime_beta = calcDeltaTimeBeta(x, tab, beta);
             }
+            
+            distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), deltatime_beta), secIdx, slIdx) ;
+            deltatime_beta = calcDeltaTimeBeta(distance, tab, beta);
             this.set_DeltaTimeBeta(deltatime_beta);
-            double correctedTime = (this.get_Time() - deltatime_beta);
-            if(correctedTime<=0)
-                correctedTime=0.01;
-
-            distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), correctedTime, secIdx, slIdx) ;
+            distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), deltatime_beta), secIdx, slIdx) ;
             
         }
         
         this.set_Doca(distance);
         this._TimeToDistance = distance;
+    }
+    public double getCorrectedTime(double t, double dbt) {
+        double correctedTime = t -dbt;
+        if(correctedTime<=0)
+            correctedTime=0.01; // fixes edge effects ... to be improved
+        return correctedTime;
+    }
+    public double calcDeltaTimeBeta(double x, IndexedTable tab, double beta){
+        return (Math.sqrt(x * x + (tab.getDoubleValue("distbeta", this.get_Sector(), 
+                this.get_Superlayer(),0) * beta * beta) * 
+                (tab.getDoubleValue("distbeta", this.get_Sector(), 
+                        this.get_Superlayer(),0) * beta * beta)) - x) / Constants.V0AVERAGED;
     }
     /**
      * 
