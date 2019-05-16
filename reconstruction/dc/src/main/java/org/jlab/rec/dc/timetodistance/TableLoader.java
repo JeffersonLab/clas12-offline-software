@@ -245,7 +245,8 @@ public class TableLoader {
         if(x>dmax)
             x=dmax;
         // Assume a functional form (time=x/v0+a*(x/dmax)**n+b*(x/dmax)**m)
-        return T2DFunctions.ExpoFcn(x, alpha, bfield, v_0, delta_nm, FracDmaxAtMinVel, tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, r+1);
+        return T2DFunctions.ExpoFcn(x, alpha, bfield, v_0, delta_nm, FracDmaxAtMinVel, 
+                tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, r+1) + delta_T0[s][r];
     }
     
     public static double[][] delta_T0 = new double[6][6];
