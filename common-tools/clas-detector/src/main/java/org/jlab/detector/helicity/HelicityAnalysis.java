@@ -10,19 +10,20 @@ import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
 
 /**
- * An example of reading the helicity flips and analyzing the sequence.
+ * An example of reading the helicity flips, analyzing the sequence, and getting
+ * the state for any event.
  * 
  * @author baltzell
  */
 public class HelicityAnalysis {
 
     /**
-     * This reads tag=1 events for HEL::flip banks, and initializes
-     * a helicity sequence with delay set to zero.  The delay can be
-     * changed later before a user tries to access the sequence.
+     * This reads tag=1 events for HEL::flip banks, and initializes and returns
+     * a {@link HelicitySequenceDelayed} with delay set to zero.  The delay can
+     * be changed later before a user tries to access the sequence.
      * 
-     * @param filenames = list of names of HIPO file to read
-     * @return  unanalyzed HelicitySequence 
+     * @param filenames list of names of HIPO file to read
+     * @return  unanalyzed sequence
      */
     public static HelicitySequenceDelayed readSequence(List<String> filenames) {
         
@@ -65,10 +66,13 @@ public class HelicityAnalysis {
         if (args.length>0) filenames.addAll(Arrays.asList(args));
         else               filenames.add(dir+file);
        
-        // initialize a sequence from files (tag=1 events):
+        // initialize a sequence from tag=1 events:
         HelicitySequenceDelayed seq = HelicityAnalysis.readSequence(filenames);
         final boolean integrity = seq.analyze();
-        if (!integrity) System.err.println("\n\n######### OOPS\n\n");
+        if (!integrity) {
+            System.err.println("\n\n######### OOPS\n\n");
+            // We may want to investigate further, or discard events.
+        }
 
         // print the sequence:
         seq.show();
@@ -111,14 +115,29 @@ public class HelicityAnalysis {
                 HelicityBit level3 = HelicityBit.UDF;
                 HelicityBit predicted = HelicityBit.UDF;
                 HelicityBit measured = HelicityBit.UDF;
-                
-                // read 'em if we've got 'em:
+               
+                // Get RUN::config.timestamp for this event:
                 if (rcfgBank.getRows()>0) 
                     timestamp = rcfgBank.getLong("timestamp",0);
+
+                // Get HEL::online.rawHelicity, the online, delay-corrected
+                // helicity for this event (if available):
                 if (onliBank.getRows()>0)
                     level3 = HelicityBit.create(onliBank.getByte("helicity",0));
+
+                // Get the offline, delay-corrected helicity for this event based
+                // on the measured sequence.  If this timestamp is outside the
+                // measured range, the bit will be null. 
                 if (seq.find(timestamp)!=null)
                     measured = seq.find(timestamp);
+
+                // Same as previous, except use the pseudo-random generator's
+                // prediction which provides for bits later than the measured range.
+                // For example, the last N windows in a given file are measured in
+                // the next file (or not at all if it's the last file in a run),
+                // so will only be accessible with the generator.  If you try to 
+                // use a timestamp before the measured sequence, the generator will
+                // return null.
                 if (seq.findPrediction(timestamp)!=null)
                     predicted = seq.findPrediction(timestamp);
 
