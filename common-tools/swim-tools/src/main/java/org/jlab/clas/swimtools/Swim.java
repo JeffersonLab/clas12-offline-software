@@ -703,7 +703,7 @@ public class Swim {
         public boolean stopIntegration(double t, double[] y) {
 
                 double r = Math.sqrt((_xB-y[0]* 100.) * (_xB-y[0]* 100.) + (_yB-y[1]* 100.) * (_yB-y[1]* 100.));
-                if(r<min)
+                if(r<min && y[2]<2.0) //start at about 2 meters before target.  Avoid inbending stopping when P dir changes
                     min = r;
                 return (r > min );
 
