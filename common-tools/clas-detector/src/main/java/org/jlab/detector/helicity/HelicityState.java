@@ -39,6 +39,12 @@ public class HelicityState {
         else                     return HelicityBit.MINUS;
     }
 
+    /**
+     * Create a state from a HEL::adc org.jlab.jnp.hipo4.data.Bank
+     * 
+     * @param adcBank HEL::adc
+     * @return state extracted from the bank
+     */
     public static HelicityState createFromFadcBank(Bank adcBank) {
         HelicityState state=new HelicityState();
         for (int ii=0; ii<adcBank.getRows(); ii++) {
@@ -67,8 +73,10 @@ public class HelicityState {
     }
 
     /**
-     * @param flipBank = HEL::flip
-     * @return = HelicityState extracted from the bank
+     * Create a state from a HEL::flip org.jlab.jnp.hipo4.data.Bank
+     * 
+     * @param flipBank HEL::flip
+     * @return state extracted from the bank
      */
     public static HelicityState createFromFlipBank(Bank flipBank) {
         HelicityState state = new HelicityState();
@@ -84,10 +92,12 @@ public class HelicityState {
     }
    
     /**
+     * Create a state from a HEL::flip org.jlab.io.base.DataBank
+     * 
      * FIXME:  can we not cast/convert between DataBank and Bank?
      * 
-     * @param flipBank = HEL::flip
-     * @return HelicityState extracted from the bank
+     * @param flipBank HEL::flip
+     * @return state extracted from the bank
      */
     public static HelicityState createFromFlipBank(DataBank flipBank) {
         HelicityState state = new HelicityState();
@@ -179,7 +189,7 @@ public class HelicityState {
 
     /**
      * Assign the half-wave-plate-corrected helicity
-     * @param hwp = the HWP status (-1/0/1=IN/UDF/OUT, same as CCDB) 
+     * @param hwp the HWP status (-1/0/1=IN/UDF/OUT, same as CCDB) 
      */
     public void setHalfWavePlate(byte hwp) {
         this.helicity = HelicityBit.create((byte)(hwp*this.helicityRaw.value()));
