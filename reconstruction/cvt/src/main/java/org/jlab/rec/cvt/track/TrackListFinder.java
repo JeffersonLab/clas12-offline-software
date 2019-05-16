@@ -110,7 +110,18 @@ public class TrackListFinder {
         		trkcands.remove(initial_size-i);
         		continue;
         	}
-        	if (trkcands.get(initial_size-i).getChi2()>Constants.Nsigma_per_point*Constants.Nsigma_per_point*(trkcands.get(initial_size-i).getNDF()+5)) trkcands.remove(initial_size-i);
+        	if (trkcands.get(initial_size-i).getChi2()>Constants.Nsigma_per_point*Constants.Nsigma_per_point*(trkcands.get(initial_size-i).getNDF()+5)) {
+        		trkcands.remove(initial_size-i);
+        		continue;
+        	}
+        	if (trkcands.get(initial_size-i).getNDF()<Constants.NDF_Min) {
+        		trkcands.remove(initial_size-i);
+        		continue;
+        	}
+        	if (trkcands.get(initial_size-i).get_Pt()<Constants.Pt_Min) {
+        		trkcands.remove(initial_size-i);
+        		continue;
+        	}
         }
     }
      
@@ -195,16 +206,16 @@ public class TrackListFinder {
             Track bestTrk = null;
             //The best and smallest track
             for (int i =0; i<trkList.size(); i++) {
-            	if (trkList.get(i).getNDF()<ndf||(trkList.get(i).getNDF()==ndf&&trkList.get(i).getChi2()<bestChi2)) {
+            	if (trkList.get(i).getNDF()>ndf||(trkList.get(i).getNDF()==ndf&&trkList.get(i).getChi2()<bestChi2)) {
             		ndf=trkList.get(i).getNDF();
             		bestTrk=trkList.get(i);
             		bestChi2=trkList.get(i).getChi2();
             	}
             }
             
-            //Once we have the best and smallest track, we look if each point added to this track are not too far off (for the moment we set the limit at 15 sigma)
+            //Once we have the best and smallest track, we look if each point added to this track are not too far off (for the moment we set the limit at N_sigma_per_point)
             for(int i =0; i<trkList.size(); i++) {
-            	if (trkList.get(i).getNDF()>=ndf&&trkList.get(i).getChi2()<bestChi2+(trkList.get(i).getNDF()-ndf)* Constants.Nsigma_per_point* Constants.Nsigma_per_point){
+            	if (trkList.get(i).getNDF()<ndf&&trkList.get(i).getChi2()<bestChi2+(trkList.get(i).getNDF()-ndf)* Constants.Nsigma_per_point* Constants.Nsigma_per_point){
             		ndf=trkList.get(i).getNDF();
             		bestTrk=trkList.get(i);
             		bestChi2=trkList.get(i).getChi2();

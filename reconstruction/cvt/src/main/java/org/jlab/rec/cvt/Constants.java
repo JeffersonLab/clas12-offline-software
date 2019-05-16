@@ -281,6 +281,10 @@ public class Constants {
 
 	public static final int Nsigma_per_point = 5; //To clean cvt tracks... if chi2 is too large, just delete the track
 
+	public static final int NDF_Min = 2;
+
+	public static final double Pt_Min = 0.3;
+
     //public static final int CVTCONFIGSTARTREG = 2; // for 3SVT+3BMT
 
     public static synchronized void Load(boolean isCosmics, boolean isSVTonly, double SolenoidScale) {
