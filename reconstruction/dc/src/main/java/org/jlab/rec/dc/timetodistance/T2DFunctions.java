@@ -11,6 +11,7 @@ package org.jlab.rec.dc.timetodistance;
  */
 public class T2DFunctions {
     
+    
     public static synchronized double ExpoFcn(double x, double alpha, double bfield, double v_0, double delta_nm, double R,
         double tmax, double dmax, double delBf, double Bb1, double Bb2, double Bb3, double Bb4, int superlayer)  {
 
@@ -48,16 +49,8 @@ public class T2DFunctions {
         //      now calculate function    
         double time = x/v_0 + a*Math.pow(xhat, n) + balpha*Math.pow(xhat, m);
 
-        //     and here's a parameterization of the change in time due to a non-zero
-        //     bfield for where xhat=x/dmaxalpha where dmaxalpha is the 'dmax' for 
-        //	   a track with local angle alpha (for local angle = alpha)
-
-        double deltatime_bfield = delBf*Math.pow(bfield,2)*tmax*(Bb1*xhatalpha+Bb2*Math.pow(xhatalpha, 2)+
-                     Bb3*Math.pow(xhatalpha, 3)+Bb4*Math.pow(xhatalpha, 4));
-        if(superlayer==2 || superlayer==3) {
-            //calculate the time at alpha deg. and at a non-zero bfield	          
-            time += deltatime_bfield;
-        }
+        //B correction
+        time+=T2DFunctions.CorrectForB(delBf, bfield, tmax, xhatalpha, Bb1, Bb2, Bb3, Bb4, superlayer);
         return time;
     }
     
@@ -163,14 +156,8 @@ public class T2DFunctions {
                 
         time = a*x*x*x*x*x + b*x*x*x*x + c*x*x*x + d*x*x + e*x ;
         
-        //     and here's a parameterization of the change in time due to a non-zero
-        //     bfield for where xhat=x/dmaxalpha where dmaxalpha is the 'dmax' for 
-        //	   a track with local angle alpha (for local angle = alpha)
-
-        double deltatime_bfield = delBf*Math.pow(bfield,2)*tmax*(Bb1*xhatalpha+Bb2*Math.pow(xhatalpha, 2)+
-                     Bb3*Math.pow(xhatalpha, 3)+Bb4*Math.pow(xhatalpha, 4));
-        //calculate the time at alpha deg. and at a non-zero bfield	          
-        time += deltatime_bfield;
+        //B correction
+        time+=T2DFunctions.CorrectForB(delBf, bfield, tmax, xhatalpha, Bb1, Bb2, Bb3, Bb4, superlayer);
         
         return time;
     }
@@ -253,14 +240,8 @@ public class T2DFunctions {
                 
         time = a*x*x*x*x + b*x*x*x + c*x*x + d*x + e;
         
-        //     and here's a parameterization of the change in time due to a non-zero
-        //     bfield for where xhat=x/dmaxalpha where dmaxalpha is the 'dmax' for 
-        //	   a track with local angle alpha (for local angle = alpha)
-
-        double deltatime_bfield = delBf*Math.pow(bfield,2)*tmax*(Bb1*xhatalpha+Bb2*Math.pow(xhatalpha, 2)+
-                     Bb3*Math.pow(xhatalpha, 3)+Bb4*Math.pow(xhatalpha, 4));
-        //calculate the time at alpha deg. and at a non-zero bfield	          
-        time += deltatime_bfield;
+        //B correction
+        time+=T2DFunctions.CorrectForB(delBf, bfield, tmax, xhatalpha, Bb1, Bb2, Bb3, Bb4, superlayer);
         
         return time;
     }
@@ -361,19 +342,13 @@ public class T2DFunctions {
         double a = (tmax -  b*dmaxalpha*dmaxalpha*dmaxalpha - c*dmaxalpha*dmaxalpha - d*dmaxalpha)/(dmaxalpha*dmaxalpha*dmaxalpha*dmaxalpha) ;       
         time = a*x*x*x*x + b*x*x*x + c*x*x + d*x ;
         
-        //     and here's a parameterization of the change in time due to a non-zero
-        //     bfield for where xhat=x/dmaxalpha where dmaxalpha is the 'dmax' for 
-        //	   a track with local angle alpha (for local angle = alpha)
-
-        double deltatime_bfield = delBf*Math.pow(bfield,2)*tmax*(Bb1*xhatalpha+Bb2*Math.pow(xhatalpha, 2)+
-                     Bb3*Math.pow(xhatalpha, 3)+Bb4*Math.pow(xhatalpha, 4));
-        //calculate the time at alpha deg. and at a non-zero bfield	          
-        time += deltatime_bfield;
+        //B correction
+        time+=T2DFunctions.CorrectForB(delBf, bfield, tmax, xhatalpha, Bb1, Bb2, Bb3, Bb4, superlayer);
         
         return time;
     }
     public static synchronized double polyFcnSpline(double x, double alpha, double bfield, double v_0, double vm, double R, 
-            double tmax, double dmax, double delBf, double Bb1, double Bb2, double Bb3, double Bb4, int sl) {
+            double tmax, double dmax, double delBf, double Bb1, double Bb2, double Bb3, double Bb4, int superlayer) {
         
         if(x>dmax)
             x=dmax;
@@ -471,16 +446,39 @@ public class T2DFunctions {
         
         time = a*x*x*x + b*x*x + c*x + d ;
         
-        //     and here's a parameterization of the change in time due to a non-zero
-        //     bfield for where xhat=x/dmaxalpha where dmaxalpha is the 'dmax' for 
-        //	   a track with local angle alpha (for local angle = alpha)
-
-        double deltatime_bfield = delBf*Math.pow(bfield,2)*tmax*(Bb1*xhatalpha+Bb2*Math.pow(xhatalpha, 2)+
-                     Bb3*Math.pow(xhatalpha, 3)+Bb4*Math.pow(xhatalpha, 4));
-        //calculate the time at alpha deg. and at a non-zero bfield	          
-        time += deltatime_bfield;
+        //B correction
+        time+=T2DFunctions.CorrectForB(delBf, bfield, tmax, xhatalpha, Bb1, Bb2, Bb3, Bb4, superlayer);
         
         return time;
         
+    }
+
+    /**
+     * 
+     * @param delBf
+     * @param bfield
+     * @param tmax
+     * @param xhatalpha
+     * @param Bb1
+     * @param Bb2
+     * @param Bb3
+     * @param Bb4
+     * @param superlayer
+     * @return 
+     */
+    private static double CorrectForB(double delBf, double bfield, double tmax, 
+            double xhatalpha, double Bb1, double Bb2, double Bb3, double Bb4, int superlayer) {
+        //     and here's a parameterization of the change in time due to a non-zero
+        //     bfield for where xhat=x/dmaxalpha where dmaxalpha is the 'dmax' for 
+        //	   a track with local angle alpha (for local angle = alpha)
+        double time = 0;
+        if(superlayer==3 || superlayer==4) {
+            double deltatime_bfield = delBf*Math.pow(bfield,2)*tmax*(Bb1*xhatalpha+Bb2*Math.pow(xhatalpha, 2)+
+                     Bb3*Math.pow(xhatalpha, 3)+Bb4*Math.pow(xhatalpha, 4));
+        
+            //calculate the time at alpha deg. and at a non-zero bfield	          
+            time += deltatime_bfield;
+        }
+        return time;
     }
 }

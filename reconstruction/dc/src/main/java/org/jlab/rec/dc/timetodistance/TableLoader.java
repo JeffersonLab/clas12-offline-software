@@ -165,7 +165,7 @@ public class TableLoader {
                                 for(int idist =0; idist<nxmax; idist++) {
 
                                     double x = (double)(idist+1)*stepSize;
-                                    double timebfield = calc_Time( x,  alpha, bfield, s, r) ;
+                                    double timebfield = calc_Time( x,  alpha, bfield, s+1, r+1) ;
                                     
                                     int tbin = Integer.parseInt(df.format(timebfield/2.) ) -1;
                                     
@@ -228,11 +228,13 @@ public class TableLoader {
      * @param x distance to wire in cm
      * @param alpha local angle in deg
      * @param bfield B field value a x in T
-     * @param s sector idx 
-     * @param r superlayer idx
+     * @param sector sector  
+     * @param superlayer superlayer 
      * @return returns time (ns) when given inputs of distance x (cm), local angle alpha (degrees) and magnitude of bfield (Tesla).  
      */
-    public static synchronized double calc_Time(double x, double alpha, double bfield, int s, int r) {
+    public static synchronized double calc_Time(double x, double alpha, double bfield, int sector, int superlayer) {
+        int s = sector - 1;
+        int r = superlayer - 1;
         double dmax = 2.*Constants.wpdist[r]; 
         double tmax = Tmax[s][r];
         double v_0 = v0[s][r];
@@ -246,7 +248,7 @@ public class TableLoader {
             x=dmax;
         // Assume a functional form (time=x/v0+a*(x/dmax)**n+b*(x/dmax)**m)
         return T2DFunctions.ExpoFcn(x, alpha, bfield, v_0, delta_nm, FracDmaxAtMinVel, 
-                tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, r+1) + delta_T0[s][r];
+                tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, superlayer) + delta_T0[s][r];
     }
     
     public static double[][] delta_T0 = new double[6][6];
