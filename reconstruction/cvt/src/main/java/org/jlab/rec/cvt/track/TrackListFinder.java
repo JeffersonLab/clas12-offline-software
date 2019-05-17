@@ -126,25 +126,31 @@ public class TrackListFinder {
     }
      
     public void removeOverlappingTracks(List<Track> trkcands) {
-            if(trkcands==null)
-                return;
+            if(trkcands==null) {
+            	System.out.println("Pas de trace dans le overlap study");
+            	return;
+            }
             
-            List<Track> selectedTracks =new ArrayList<Track>();
-            List<Track> list = new  ArrayList<Track>();
-            List<Track> rejected = new  ArrayList<Track>();
+            List<Track> selectedTracks =new ArrayList<Track>(); //List of tracks we will keep while we analyze all candidates in trkcands
+            List<Track> list = new  ArrayList<Track>(); //Container for overlapping tracks, reinitialize at each events
+            List<Track> rejected = new  ArrayList<Track>(); //List of tracks already analyzed and considered as bad ones.
+            
             for(int i =0; i<trkcands.size(); i++) { 
                 
-                list.clear();
+                list.clear();//We look at a new candidate... we reinitialize this container to store the overlapping track with trkcands.get(i)
+                
                 if(trkcands.get(i)==null) {
                     continue;
                 }
-                if( rejected.contains( trkcands.get(i) ) ) continue;
                 
-                this.getOverlapLists(trkcands.get(i), trkcands, list);
+                if( rejected.contains( trkcands.get(i) ) ) continue; //If we have already found a track that is better than this candidate, there is no need to re-analyze it.
                 
-                Track selectedTrk = this.FindBestTrack(list);
-                if(selectedTrk==null)
-                    continue;
+                this.getOverlapLists(trkcands.get(i), trkcands, list); //Compare trkcands.get(i) with all tracks to find overlaps... list must contains at least trkcands.get(i)
+                
+                Track selectedTrk = this.FindBestTrack(list); //Return the best track among the candidates. If only trkcands.get(i) in list, it will return trkcands.get(i)
+                if(selectedTrk==null&&list.size()>0)
+                    System.out.println("Houston... there is a problem with FindBestTrack in removeOverlappingTracks");
+                
                 if(selectedTracks.contains(selectedTrk)==false)
                         selectedTracks.add(selectedTrk);
                 
@@ -155,10 +161,13 @@ public class TrackListFinder {
                 }
 
             }
+            
             if( rejected != null )
             	selectedTracks.removeAll(rejected);
+           
             if(trkcands!=null)
                 trkcands.removeAll(trkcands);
+            
             if(selectedTracks!=null)
                 trkcands.addAll(selectedTracks);
             
@@ -183,13 +192,20 @@ public class TrackListFinder {
     // --------------------------------------------------------------------
     //  two tracks are considered the same if they share at least 2 crosses
     // --------------------------------------------------------------------
-			
+		//NB: track is not excluded from trkcands... so list will at least contain track itself
+    	
     	for( Track t : trkcands ) {
     		int N = 0;
     		for( Cross c : t ) {
-    			// do not check on BMTC
-    	        //if( c.get_DetectorType().equalsIgnoreCase("C") == true ) continue;
-    			if( track.contains(c) ) { N++;  }
+    			if( track.contains(c)&& c.get_Detector().equals("BMT") ) { N++;  } //For Micromegas... one cross is uniquely assigned to one cluster
+    			if (c.get_Detector().equals("SVT")) { //For SVT... a cluster can be assigned to several crosses
+    				for( Cross cr : track ) {
+    					if (cr.get_Detector().equals("SVT")) {
+    						if (cr.get_Cluster1().get_Id()==c.get_Cluster1().get_Id()) { N++;  } 
+    						if (cr.get_Cluster2().get_Id()==c.get_Cluster2().get_Id()) { N++;  }
+    					}
+    				}
+    			}
     		}
     		if( N >= 2 ) list.add( t );
     	}
@@ -201,9 +217,9 @@ public class TrackListFinder {
     //  Select the candidate with the highest number of NDF
     //    if two have the same ndf, get the one with the better chi2/ndf
     // --------------------------------------------------------------------
-            double bestChi2 = 9999999;
-            int ndf = 12;
-            Track bestTrk = null;
+            double bestChi2 = trkList.get(0).getChi2();
+            int ndf = trkList.get(0).getNDF();
+            Track bestTrk = trkList.get(0);
             //The best and smallest track
             for (int i =0; i<trkList.size(); i++) {
             	if (trkList.get(i).getNDF()>ndf||(trkList.get(i).getNDF()==ndf&&trkList.get(i).getChi2()<bestChi2)) {
