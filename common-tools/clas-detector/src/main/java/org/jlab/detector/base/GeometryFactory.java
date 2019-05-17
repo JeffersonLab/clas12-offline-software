@@ -8,6 +8,7 @@ package org.jlab.detector.base;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.base.Detector;
+import org.jlab.geom.detector.cnd.CNDFactory;
 import org.jlab.geom.detector.dc.DCFactory;
 import org.jlab.geom.detector.ec.ECFactory;
 import org.jlab.geom.detector.ftof.FTOFFactory;
@@ -76,8 +77,9 @@ public class GeometryFactory {
         }
         
         if(type==DetectorType.CND){
-            provider.loadTable("/geometry/cnd/cnd");
-            provider.loadTable("/geometry/cnd/layer");
+//            provider.loadTable("/geometry/cnd/cnd");
+//            provider.loadTable("/geometry/cnd/layer");
+            provider.loadTable("/geometry/cnd/cndgeom");
         }
         
         if(type==DetectorType.CTOF){
@@ -148,6 +150,12 @@ public class GeometryFactory {
         if(type==DetectorType.FTOF){
             FTOFFactory factory = new FTOFFactory();
             Detector ftof = factory.getDetectorGeant4(provider);
+            return   ftof;
+        }
+                
+        if(type==DetectorType.CND){
+            CNDFactory factory = new CNDFactory();
+            Detector ftof = factory.createDetectorCLAS(provider);
             return   ftof;
         }
         

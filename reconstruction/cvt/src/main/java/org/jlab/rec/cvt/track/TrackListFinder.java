@@ -3,6 +3,8 @@ package org.jlab.rec.cvt.track;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.geom.base.Detector;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -25,6 +27,7 @@ public class TrackListFinder {
      */
     public List<Track> getTracks(List<Track> cands, 
             org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo,
+            CTOFGeant4Factory ctof_geo, Detector cnd_geo,
             Swim bstSwim) {
         List<Track> tracks = new ArrayList<Track>();
         if (cands.size() == 0) {
@@ -59,7 +62,7 @@ public class TrackListFinder {
 
                 TrajectoryFinder trjFind = new TrajectoryFinder();
 
-                Trajectory traj = trjFind.findTrajectory(trk.get_Id(), trk.get_helix(), trk, svt_geo, bmt_geo, "final");
+                Trajectory traj = trjFind.findTrajectory(trk.get_Id(), trk, svt_geo, bmt_geo, ctof_geo, cnd_geo, bstSwim, "final");
 
                 trk.set_Trajectory(traj.get_Trajectory());
 

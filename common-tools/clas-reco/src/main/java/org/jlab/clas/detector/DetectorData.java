@@ -586,14 +586,16 @@ public class DetectorData {
                // this could be optimized:
                if (trajBank!=null) {
                    for (int ii=0; ii<trajBank.rows(); ii++) {
-                       if (trajBank.getInt("ID",ii) !=  trkId) continue;
-                       int detId=trajBank.getInt("LayerTrackIntersPlane",ii);
-                       float xx=trajBank.getFloat("XtrackIntersPlane",ii);
-                       float yy=trajBank.getFloat("YtrackIntersPlane",ii);
-                       float zz=trajBank.getFloat("ZtrackIntersPlane",ii);
+                       if (trajBank.getInt("id",ii) !=  trkId) continue;
+                       int   detId=trajBank.getInt("detector",ii);
+                       int   layId=trajBank.getByte("layer",ii);
+                       float pathLength=trajBank.getFloat("path",ii);
+                       float xx=trajBank.getFloat("x",ii);
+                       float yy=trajBank.getFloat("y",ii);
+                       float zz=trajBank.getFloat("z",ii);
 
-                       float theta=trajBank.getFloat("ThetaTrackIntersPlane",ii);
-                       float phi  =trajBank.getFloat("PhiTrackIntersPlane",ii);
+                       float theta=trajBank.getFloat("theta",ii);
+                       float phi  =trajBank.getFloat("phi",ii);
                        
                        float cz = (float)(Math.cos(theta));
                        float cx = (float)(Math.sin(theta)*Math.cos(phi));
@@ -603,8 +605,7 @@ public class DetectorData {
                                xx+track.getMaxLineLength()*cx,
                                yy+track.getMaxLineLength()*cy,
                                zz+track.getMaxLineLength()*cz);
-                       // FIXME:  pending layer from CVT trajectory bank
-                       track.addTrajectoryPoint(-1,detId,traj);
+                       track.addTrajectoryPoint(detId,layId,traj,0,pathLength);
                    }
                }
 
