@@ -55,12 +55,12 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
             for (int i = 0; i < nt; i++) {
                 //Matrix m = new Matrix(5,5);
                 int trkID = i;
-                double dca = bank.getFloat("d0", i);
-                double phi0 = bank.getFloat("phi0", i);
-                double z0 = bank.getFloat("z0", i);
+                double dca    = bank.getFloat("d0", i)*10.;
+                double phi0   = bank.getFloat("phi0", i);
+                double z0     = bank.getFloat("z0", i)*10.;
                 double tandip = bank.getFloat("tandip", i);
-                int q = bank.getInt("q", i);
-                double pt = bank.getFloat("pt", i);
+                int q         = bank.getInt("q", i);
+                double pt     = bank.getFloat("pt", i);
                 // use the formula R=pt/qB to get the curvature (see cvt reconstruction class Track)/Pt is in Gev
                 double rho = (0.000299792458 * q * 5. * config.getFloat("solenoid", 0)) / pt;
 				// the max value of B is set to 5.Tesla 

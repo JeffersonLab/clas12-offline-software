@@ -88,7 +88,8 @@ public class HipoDataSource implements DataSource {
     @Override
     public int getSize() {
         //return reader.
-        return 1;
+        //return 1;
+        return reader.getEventCount();
     }
 
     @Override

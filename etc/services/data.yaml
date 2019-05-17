@@ -49,8 +49,26 @@ configuration:
   services:
     MAGFIELDS:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
-      magfieldTorusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
-      magfieldSolenoidShift: "-1.9"
-
+      magfieldTorusMap: Full_torus_r251_phi181_z251_08May2018.dat
+      variation: rga_spring2018
+    CND:
+      variation: rga_spring2018
+    CTOF:
+      variation: rga_spring2018
+    CVT:
+      variation: rga_spring2018
+    DCHB:
+      variation: rga_spring2018
+      dcGeometryVariation: rga_spring2018
+    DCTB:
+      variation: rga_spring2018
+      dcGeometryVariation: rga_spring2018
+    EC:
+      variation: rga_spring2018
+    FTOFHB:
+      variation: rga_spring2018
+    FTOFTB:
+      variation: rga_spring2018
+      
 mime-types:
   - binary/data-hipo

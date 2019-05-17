@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
+import org.jlab.geom.base.ConstantProvider;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
@@ -22,6 +26,7 @@ import org.jlab.rec.tof.cluster.ftof.ClusterMatcher;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
 import org.jlab.geometry.prim.Line3d;
+import org.jlab.rec.tof.track.Track;
 
 /**
  *
@@ -57,6 +62,8 @@ public class FTOFEngine extends ReconstructionEngine {
                     "/calibration/ftof/gain_balance",
                     "/calibration/ftof/tdc_conv",
                     "/calibration/ftof/time_jitter",
+                    "/calibration/ftof/time_walk_pos",
+                    "/calibration/ftof/fadc_offset",
                  };
         
         requireConstants(Arrays.asList(ftofTables));
@@ -64,33 +71,11 @@ public class FTOFEngine extends ReconstructionEngine {
        // Get the constants for the correct variation
         this.getConstantsManager().setVariation("default");
         
-        // Get the geometry
-        DatabaseConstantProvider db = new DatabaseConstantProvider( 11, "default");
-        // using
-        // the
-        // new
-        // run
-        // load the geometry tables
-        db.loadTable("/geometry/ftof/panel1a/paddles");
-        db.loadTable("/geometry/ftof/panel1a/panel");
-        db.loadTable("/geometry/ftof/panel1b/paddles");
-        db.loadTable("/geometry/ftof/panel1b/panel");
-        db.loadTable("/geometry/ftof/panel2/paddles");
-        db.loadTable("/geometry/ftof/panel2/panel");
-
-        // disconncect from database. Important to do this after loading tables.
-        db.disconnect();
+        // Get geometry database provider, load the geometry tables and create geometry
+        String engineVariation = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        ConstantProvider db = GeometryFactory.getConstants(DetectorType.FTOF, 11, engineVariation);
         geometry = new FTOFGeant4Factory(db);
-        // Load the Calibration Constants
-        // if (CCDBConstantsLoader.CSTLOADED == false) {
-        // DatabaseConstantProvider db = CCDBConstantsLoader.Load();
-        // }
-        // if(db!=null) {
-        // Detector ftofdet = GeometryFactory.getDetector(DetectorType.FTOF);
-        // ConstantProvider cp =
-        // GeometryFactory.getConstants(DetectorType.FTOF);
-        // geometry = new FTOFGeant4Factory(db);
-        // }
+
         return true;
     }
 
@@ -126,15 +111,13 @@ public class FTOFEngine extends ReconstructionEngine {
         // Get the list of track lines which will be used for matching the FTOF
         // hit to the DC hit
         TrackReader trkRead = new TrackReader();
-        trkRead.fetch_Trks(event);
-        List<Line3d> trkLines = trkRead.get_TrkLines();
-        double[] paths = trkRead.get_Paths();
-        int[] ids = trkRead.getTrkId();
+        ArrayList<Track> tracks = trkRead.fetch_Trks(event);
+
         List<Hit> hits = new ArrayList<Hit>(); // all hits
         List<Cluster> clusters = new ArrayList<Cluster>(); // all clusters
         // read in the hits for FTOF
         HitReader hitRead = new HitReader();
-        hitRead.fetch_Hits(event, timeStamp, geometry, trkLines, paths, ids, 
+        hitRead.fetch_Hits(event, timeStamp, geometry, tracks, 
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/attenuation"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/effective_velocity"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_offsets"),
@@ -142,7 +125,9 @@ public class FTOFEngine extends ReconstructionEngine {
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/status"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/gain_balance"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/tdc_conv"),
-                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_jitter") );
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_jitter"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_walk_pos"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/fadc_offset"));
 
         // 1) get the hits
         List<Hit> FTOF1AHits = hitRead.get_FTOF1AHits();

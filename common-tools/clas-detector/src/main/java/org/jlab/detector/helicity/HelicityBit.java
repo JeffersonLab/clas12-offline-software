@@ -9,6 +9,7 @@ package org.jlab.detector.helicity;
  */
 public enum HelicityBit {
 
+    DNE   (  9 ),
     UDF   (  0 ),
     PLUS  (  1 ),
     MINUS ( -1 );
@@ -25,6 +26,12 @@ public enum HelicityBit {
         for(HelicityBit hb: HelicityBit.values()) {
             if (hb.value() == value) return hb;
         }
+        return UDF;
+    }
+
+    public static HelicityBit getFlipped(HelicityBit bit) {
+        if (bit==PLUS) return MINUS;
+        if (bit==MINUS) return PLUS;
         return UDF;
     }
 

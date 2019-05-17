@@ -19,4 +19,4 @@ echo "LIBRARY DIRECTORY      = " $DATAMINING/lib/clas/
 #java -cp "$DATAMINING/lib/clas/core/*" org.jlab.coda.eventViewer.EventTreeFrame $*
 #java -Xms1024m -cp "$DATAMINING/lib/clas/*:$DATAMINING/lib/plugins/*" org.jlab.io.hipo.HipoDataSync $*
 #java -Xms1024m -cp "$DATAMINING/lib/clas/*:$DATAMINING/lib/plugins/*" org.jlab.clas.reco.io.HipoFileUtils $*
-java -Xmx2048m -Xms1024m -cp "$DATAMINING/lib/clas/*:$DATAMINING/lib/plugins/*" org.jlab.jnp.hipo4.utils.HipoUtilities $*
+java -Xmx2048m -Xms1024m -cp "$DATAMINING/lib/clas/*:$DATAMINING/lib/plugins/*" org.jlab.jnp.hipo.utils.HipoUtilities $*

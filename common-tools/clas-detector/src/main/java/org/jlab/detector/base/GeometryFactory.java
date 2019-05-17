@@ -51,10 +51,12 @@ public class GeometryFactory {
             provider.loadTable("/geometry/pcal/Uview");
             provider.loadTable("/geometry/pcal/Vview");
             provider.loadTable("/geometry/pcal/Wview");
+            provider.loadTable("/geometry/pcal/alignment");
             provider.loadTable("/geometry/ec/ec");
             provider.loadTable("/geometry/ec/uview");
             provider.loadTable("/geometry/ec/vview");
             provider.loadTable("/geometry/ec/wview");
+            provider.loadTable("/geometry/ec/alignment");
         }
         
         if(type==DetectorType.FTOF){
@@ -64,6 +66,7 @@ public class GeometryFactory {
             provider.loadTable("/geometry/ftof/panel1b/panel");
             provider.loadTable("/geometry/ftof/panel2/paddles");
             provider.loadTable("/geometry/ftof/panel2/panel");
+            provider.loadTable("/geometry/ftof/alignment");
         }
         
         if(type==DetectorType.BST){
@@ -80,6 +83,7 @@ public class GeometryFactory {
         if(type==DetectorType.CTOF){
             provider.loadTable("/geometry/ctof/ctof");
             provider.loadTable("/geometry/ctof/cad");
+            provider.loadTable("/geometry/target");
         }
         
         if(type==DetectorType.FTCAL){

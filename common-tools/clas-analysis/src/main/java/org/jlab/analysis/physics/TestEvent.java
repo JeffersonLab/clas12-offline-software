@@ -11,6 +11,7 @@ import org.jlab.jnp.hipo4.data.SchemaFactory;
  */
 public class TestEvent {
 
+
 	public static HipoDataEvent getDCSector1ElectronEvent(SchemaFactory schemaFactory) {
                 Event testEvent = new Event();
 		

@@ -153,7 +153,7 @@ public class Path3D implements Transformable, Showable {
      * Constructs a new {@code Line3D} from a line contained in this path to the
      * given point such that the length of the constructed line is minimal.
      *
-     * @param line the line
+     * @param pl the line
      * @return the line with minimum distance from the path to the point, or
      * null if this path contains fewer than 2 points
      */

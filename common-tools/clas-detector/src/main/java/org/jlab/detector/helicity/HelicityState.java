@@ -193,7 +193,7 @@ public class HelicityState {
     public long getTimestamp() { return this.timestamp; }
     public HelicityBit getHelicityRaw() { return this.helicityRaw; }
     public HelicityBit getHelicity() { return this.helicity; }
-    public HelicityBit getSync() { return this.pairSync; }
-    public HelicityBit getQuartet() { return this.patternSync; }
+    public HelicityBit getPairSync() { return this.pairSync; }
+    public HelicityBit getPatternSync() { return this.patternSync; }
 
 }
