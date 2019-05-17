@@ -27,7 +27,7 @@ import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.component.TransparentPanel;
 import cnuphys.bCNU.util.Environment;
-import cnuphys.cnf.frame.Cnf;
+import cnuphys.cnf.frame.Def;
 
 @SuppressWarnings("serial")
 public class EventMenu extends JMenu implements ActionListener, IEventListener {
@@ -185,7 +185,7 @@ public class EventMenu extends JMenu implements ActionListener, IEventListener {
 		JFileChooser chooser = new JFileChooser(dataFilePath);
 		chooser.setSelectedFile(null);
 		chooser.setFileFilter(_hipoEventFileFilter);
-		int returnVal = chooser.showOpenDialog(Cnf.getInstance());
+		int returnVal = chooser.showOpenDialog(Def.getInstance());
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = chooser.getSelectedFile();
 			try {

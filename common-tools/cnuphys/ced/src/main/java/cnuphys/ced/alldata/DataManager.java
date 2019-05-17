@@ -282,23 +282,8 @@ public class DataManager {
 	 * @return the array, or <code>null</code>
 	 */
 	public byte[] getByteArray(DataEvent event, String fullName) {
-		byte[] array = null;
 		ColumnData cd = getColumnData(fullName);
-		if (cd == null) {
-			// Log.getInstance().warning("In ColumnData.getByteArray, requested array for
-			// non-existent column: [" + fullName + "]");
-		} else {
-			Object o = cd.getDataArray(event);
-			if (o != null) {
-				if (o instanceof byte[]) {
-					array = (byte[]) o;
-				} else {
-					// Log.getInstance().warning("In ColumnData.getByteArray, requested array for
-					// non-matching column: [" + fullName + "]");
-				}
-			}
-		}
-		return array;
+		return (cd == null) ? null : cd.getByteArray(event);
 	}
 
 	/**
@@ -309,23 +294,8 @@ public class DataManager {
 	 * @return the array, or <code>null</code>
 	 */
 	public short[] getShortArray(DataEvent event, String fullName) {
-		short[] array = null;
 		ColumnData cd = getColumnData(fullName);
-		if (cd == null) {
-			// Log.getInstance().warning("In ColumnData.getShortArray, requested array for
-			// non-existent column: [" + fullName + "]");
-		} else {
-			Object o = cd.getDataArray(event);
-			if (o != null) {
-				if (o instanceof short[]) {
-					array = (short[]) o;
-				} else {
-					// Log.getInstance().warning("In ColumnData.getShortArray, requested array for
-					// non-matching column: [" + fullName + "]");
-				}
-			}
-		}
-		return array;
+		return (cd == null) ? null : cd.getShortArray(event);
 	}
 
 	/**
@@ -336,23 +306,8 @@ public class DataManager {
 	 * @return the array, or <code>null</code>
 	 */
 	public int[] getIntArray(DataEvent event, String fullName) {
-		int[] array = null;
 		ColumnData cd = getColumnData(fullName);
-		if (cd == null) {
-			// Log.getInstance().warning("In ColumnData.getIntArray, requested array for
-			// non-existent column: [" + fullName + "]");
-		} else {
-			Object o = cd.getDataArray(event);
-			if (o != null) {
-				if (o instanceof int[]) {
-					array = (int[]) o;
-				} else {
-					// Log.getInstance().warning("In ColumnData.getIntArray, requested array for
-					// non-matching column: [" + fullName + "]");
-				}
-			}
-		}
-		return array;
+		return (cd == null) ? null : cd.getIntArray(event);
 	}
 
 	/**
@@ -363,23 +318,8 @@ public class DataManager {
 	 * @return the array, or <code>null</code>
 	 */
 	public long[] getLongArray(DataEvent event, String fullName) {
-		long[] array = null;
 		ColumnData cd = getColumnData(fullName);
-		if (cd == null) {
-			// Log.getInstance().warning("In ColumnData.getIntArray, requested array for
-			// non-existent column: [" + fullName + "]");
-		} else {
-			Object o = cd.getDataArray(event);
-			if (o != null) {
-				if (o instanceof long[]) {
-					array = (long[]) o;
-				} else {
-					// Log.getInstance().warning("In ColumnData.getIntArray, requested array for
-					// non-matching column: [" + fullName + "]");
-				}
-			}
-		}
-		return array;
+		return (cd == null) ? null : cd.getLongArray(event);
 	}
 
 	/**
@@ -390,23 +330,8 @@ public class DataManager {
 	 * @return the array, or <code>null</code>
 	 */
 	public float[] getFloatArray(DataEvent event, String fullName) {
-		float[] array = null;
 		ColumnData cd = getColumnData(fullName);
-		if (cd == null) {
-			// Log.getInstance().warning("In ColumnData.getFloatArray, requested array for
-			// non-existent column: [" + fullName + "]");
-		} else {
-			Object o = cd.getDataArray(event);
-			if (o != null) {
-				if (o instanceof float[]) {
-					array = (float[]) o;
-				} else {
-					// Log.getInstance().warning("In ColumnData.getFloatArray, requested array for
-					// non-matching column: [" + fullName + "]");
-				}
-			}
-		}
-		return array;
+		return (cd == null) ? null : cd.getFloatArray(event);
 	}
 
 	/**
@@ -417,23 +342,8 @@ public class DataManager {
 	 * @return the array, or <code>null</code>
 	 */
 	public double[] getDoubleArray(DataEvent event, String fullName) {
-		double[] array = null;
 		ColumnData cd = getColumnData(fullName);
-		if (cd == null) {
-			// Log.getInstance().warning("In ColumnData.getDoubleArray, requested array for
-			// non-existent column: [" + fullName + "]");
-		} else {
-			Object o = cd.getDataArray(event);
-			if (o != null) {
-				if (o instanceof double[]) {
-					array = (double[]) o;
-				} else {
-					// Log.getInstance().warning("In ColumnData.getDoubleArray, requested array for
-					// non-matching column: [" + fullName + "]");
-				}
-			}
-		}
-		return array;
+		return (cd == null) ? null : cd.getDoubleArray(event);
 	}
 
 	/**

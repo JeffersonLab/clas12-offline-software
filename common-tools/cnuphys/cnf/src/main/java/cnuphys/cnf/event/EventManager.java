@@ -3,19 +3,16 @@ package cnuphys.cnf.event;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import javax.swing.event.EventListenerList;
 
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataSource;
-import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 
 import cnuphys.cnf.alldata.DataManager;
-import cnuphys.cnf.frame.Cnf;
-import cnuphys.cnf.properties.PropertiesManager;
+import cnuphys.cnf.frame.Def;
 
 public class EventManager {
 	
@@ -144,6 +141,22 @@ public class EventManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Do we have a hipo file?
+	 * @return <code>true</code> if we have a file
+	 */
+	public boolean haveOpenFile() {
+		return _currentHipoFile != null;
+	}
+	
+	/**
+	 * Get the current hipo file
+	 * @return the current hipo file
+	 */
+	public File getCurrentFile() {
+		return _currentHipoFile;
 	}
 
 	/**
@@ -319,7 +332,7 @@ public class EventManager {
 				}
 			}
 		}
-		Cnf.getInstance().fixTitle();
+		Def.getInstance().fixTitle();
 
 	}
 
@@ -377,7 +390,7 @@ public class EventManager {
 	// final steps
 	private void finalSteps() {
 
-		Cnf.setEventNumberLabel(getEventNumber());
+		Def.setEventNumberLabel(getEventNumber());
 
 	}
 

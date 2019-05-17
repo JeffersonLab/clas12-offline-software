@@ -235,7 +235,7 @@ public class ClasIoEventManager {
 						// System.out.println("****** pid column null: " + (cd == null));
 
 						if (cd != null) {
-							int pid[] = (int[]) (cd.getDataArray(_currentEvent));
+							int pid[] = (int[]) (cd.getIntArray(_currentEvent));
 							if ((pid != null) && (pid.length > 0)) {
 								for (int pdgid : pid) {
 									LundId lid = LundSupport.getInstance().get(pdgid);

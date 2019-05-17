@@ -183,7 +183,16 @@ public class SplotMenus implements ActionListener {
 
 			if (dsType != null) {
 				try {
-					ds = new DataSet(dsType);
+
+					if (dsType == DataSetType.H1D) {
+						ds = new DataSet(ds.getColumn(0).getHistoData());
+					}
+					else if (dsType == DataSetType.H2D) {
+						ds = new DataSet(ds.getColumn(0).getHistoData2D());
+					}
+					else {
+						ds = new DataSet(dsType);
+					}
 					_plotCanvas.setDataSet(ds);
 				}
 				catch (DataSetException e1) {

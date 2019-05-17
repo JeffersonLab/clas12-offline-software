@@ -224,7 +224,7 @@ public class ColumnData implements Comparable<ColumnData> {
 		if (event != null) {
 			switch (_type) {
 			case INT8:
-				byte b[] = event.getByte(_fullName);
+				byte b[] = getByteArray(event);
 				int len = (b == null) ? 0 : b.length;
 				if (len > 0) {
 					da = new double[len];
@@ -235,7 +235,7 @@ public class ColumnData implements Comparable<ColumnData> {
 				break;
 
 			case INT16:
-				short s[] = event.getShort(_fullName);
+				short s[] = getShortArray(event);
 				len = (s == null) ? 0 : s.length;
 				if (len > 0) {
 					da = new double[len];
@@ -246,7 +246,7 @@ public class ColumnData implements Comparable<ColumnData> {
 				break;
 
 			case INT32:
-				int i[] = event.getInt(_fullName);
+				int i[] = getIntArray(event);
 				len = (i == null) ? 0 : i.length;
 				if (len > 0) {
 					da = new double[len];
@@ -257,7 +257,7 @@ public class ColumnData implements Comparable<ColumnData> {
 				break;
 
 			case FLOAT32:
-				float f[] = event.getFloat(_fullName);
+				float f[] = getFloatArray(event);
 				len = (f == null) ? 0 : f.length;
 				if (len > 0) {
 					da = new double[len];
@@ -268,7 +268,7 @@ public class ColumnData implements Comparable<ColumnData> {
 				break;
 
 			case FLOAT64:
-				da = event.getDouble(_fullName);
+				da = getDoubleArray(event);
 				break;
 			}
 		}

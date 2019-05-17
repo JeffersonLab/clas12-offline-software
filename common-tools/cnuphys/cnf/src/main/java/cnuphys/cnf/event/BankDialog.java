@@ -22,7 +22,7 @@ import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.cnf.alldata.DataManager;
 import cnuphys.cnf.event.datatable.BankDataTable;
-import cnuphys.cnf.frame.Cnf;
+import cnuphys.cnf.frame.Def;
 import cnuphys.cnf.properties.PropertiesManager;
 
 public class BankDialog extends JDialog implements ItemListener {
@@ -44,7 +44,7 @@ public class BankDialog extends JDialog implements ItemListener {
 	private static int count = 0;
 
 	public BankDialog(String bankName) {
-		super(Cnf.getInstance(), bankName, false);
+		super(Def.getInstance(), bankName, false);
 
 		_bankName = bankName;
 		setLayout(new BorderLayout(4, 4));

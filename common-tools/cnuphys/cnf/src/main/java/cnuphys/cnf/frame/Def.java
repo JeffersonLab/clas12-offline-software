@@ -1,5 +1,11 @@
-package cnuphys.cnf.frame;
+ package cnuphys.cnf.frame;
 
+ /**
+  * This this the frame (GUI window) for the Data Exporter Framework (def).
+  * def is an application developed for the Center for Nuclear Femtogrophy funded 
+  * short-term project: Visualizing Femto-Scale Dynamics (proposal CNF19-09). 
+  */
+ 
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -7,12 +13,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JLabel;
@@ -30,27 +32,25 @@ import cnuphys.bCNU.menu.MenuManager;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.PropertySupport;
+import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.LogView;
 import cnuphys.bCNU.view.ViewManager;
 import cnuphys.bCNU.view.VirtualView;
-import cnuphys.cnf.alldata.ColumnData;
 import cnuphys.cnf.alldata.DataManager;
+import cnuphys.cnf.alldata.graphics.DefinitionManager;
 import cnuphys.cnf.event.EventManager;
 import cnuphys.cnf.event.EventMenu;
 import cnuphys.cnf.event.EventView;
 import cnuphys.cnf.event.IEventListener;
 import cnuphys.cnf.export.ExportManager;
-import cnuphys.cnf.plot.PlotManager;
-import cnuphys.cnf.plot.PlotWrapper;
 import cnuphys.cnf.properties.PropertiesManager;
-import cnuphys.lund.X11Colors;
 import cnuphys.splot.example.MemoryUsageDialog;
 
 @SuppressWarnings("serial")
-public class Cnf extends BaseMDIApplication implements IEventListener {
+public class Def extends BaseMDIApplication implements IEventListener {
 
 	// singleton
-	private static Cnf _instance;
+	private static Def _instance;
 
 	// release string
 	private static final String _release = "build 0.01";
@@ -101,7 +101,7 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 	 *                pairs. For example, PropertySupport.NAME, "my application",
 	 *                PropertySupport.CENTER, true, etc.
 	 */
-	private Cnf(Object... keyVals) {
+	private Def(Object... keyVals) {
 		super(keyVals);
 
 		ComponentListener cl = new ComponentListener() {
@@ -152,21 +152,8 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 	 */
 	private void restoreDefaultViewLocations() {
 
-		_virtualView.moveTo(_logView, 13, VirtualView.CENTER);
+		_virtualView.moveTo(_logView, 3, VirtualView.CENTER);
 		_virtualView.moveTo(_eventView, 0, VirtualView.CENTER);
-
-		//all the plots
-		Collection<PlotWrapper> wrappers = PlotWrapper.getAllWrappers();
-		if (!wrappers.isEmpty()) {
-			for (PlotWrapper wrapper : wrappers) {
-				int id = wrapper.getId();			
-				int vvcol = 1 + id / 4;	
-				int normId = id % 4;	
-				int row = normId / 2;	
-				int col = normId % 2;	
-				_virtualView.moveTo(wrapper.getView(), Math.min(vvcol, 13), 40 + col*400, 40 + row*400);
-			}
-		}
 
 		Log.getInstance().config("reset views on virtual dekstop");
 
@@ -178,7 +165,7 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 	private void addInitialViews() {
 
 		// add a virtual view
-		_virtualView = VirtualView.createVirtualView(14);
+		_virtualView = VirtualView.createVirtualView(4);
 		ViewManager.getInstance().getViewMenu().addSeparator();
 		
 		// add event view
@@ -187,11 +174,11 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 		// add the log view
 		_logView = new LogView(800, 750, true);
 		
-		//test plot rtemove later
+		//test plot remove later
 		
-		ColumnData xdata =  DataManager.getInstance().getColumnData("CNF::DVCSevent.BSA");
-		ColumnData ydata =  DataManager.getInstance().getColumnData("CNF::DVCSevent.phi");
-		PlotWrapper.create2DScatterPlot(xdata, ydata);
+//		ColumnData xdata =  DataManager.getInstance().getColumnData("CNF::DVCSevent.BSA");
+//		ColumnData ydata =  DataManager.getInstance().getColumnData("CNF::DVCSevent.phi");
+//		PlotWrapper.create2DScatterPlot(xdata, ydata);
 
 		// log some environment info
 		Log.getInstance().config(Environment.getInstance().toString());
@@ -284,6 +271,7 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 	 * @param event the new event
 	 * @param isStreaming <code>true</code> if this is during file streaming
 	 */
+	@Override
 	public void newEvent(final DataEvent event, boolean isStreaming) {
 		if (EventManager.getInstance().isStreaming()) {
 			return;
@@ -297,6 +285,7 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 	 * 
 	 * @param file the new file
 	 */
+	@Override
 	public void openedNewEventFile(File file) {
 		fixState();
 	}
@@ -305,6 +294,7 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 	 * Rewound the current file
 	 * @param file the file
 	 */
+	@Override
 	public void rewoundFile(File file) {
 		fixState();
 	}
@@ -314,6 +304,7 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 	 * @param file file being streamed
 	 * @param numToStream number that will be streamed
 	 */
+	@Override
 	public void streamingStarted(File file, int numToStream) {
 	}
 	
@@ -322,6 +313,7 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 	 * @param file the file that was streamed
 	 * @param int the reason the streaming ended
 	 */
+	@Override
 	public void streamingEnded(File file, int reason) {
 		fixState();
 	}
@@ -345,14 +337,14 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 	
 
 	/**
-	 * private access to the Cnf singleton.
+	 * private access to the Def singleton.
 	 * 
-	 * @return the singleton Cnf (the main application frame.)
+	 * @return the singleton Def (the main application frame.)
 	 */
-	public static Cnf getInstance() {
+	public static Def getInstance() {
 		if (_instance == null) {
-			_instance = new Cnf(PropertySupport.TITLE, "cnf " + _release, PropertySupport.BACKGROUNDIMAGE,
-					"images/cnu.png", PropertySupport.FRACTION, 0.9,
+			_instance = new Def(PropertySupport.TITLE, "def " + _release, PropertySupport.BACKGROUNDIMAGE,
+					"images/cnu.png", PropertySupport.FRACTION, 0.7,
 					PropertySupport.BACKGROUNDIMAGE, "images/cnfbg.png");
 
 			_instance.addInitialViews();
@@ -432,6 +424,8 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 		memPlot.addActionListener(al);
 		omenu.add(environ);
 		omenu.add(memPlot);
+		
+
 
 	}
 
@@ -442,7 +436,7 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 	private void createMenus() {
 		MenuManager mmgr = MenuManager.getInstance();
 
-		_eventMenu = new EventMenu(true);
+		_eventMenu = new EventMenu(false);
 		mmgr.addMenu(_eventMenu);
 		
 		// the options menu
@@ -454,8 +448,8 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 		//add to the event menu
 		addToEventMenu();
 		
-		//the plot menu
-		getJMenuBar().add(PlotManager.getPlotMenu());
+		//the definition menu
+		getJMenuBar().add(DefinitionManager.getInstance().getMenu());
 		
 		//the export menu
 		getJMenuBar().add(ExportManager.getExportMenu());
@@ -566,7 +560,7 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 	}
 
 	/**
-	 * Main program launches the cnf gui.
+	 * Main program launches the def gui.
 	 * <p>
 	 * Command line arguments:</br>
 	 * -p [dir] dir is the default directory
@@ -607,7 +601,7 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 		
 		// initialize managers
 		DataManager.getInstance(); //data columns
-		PlotManager.getInstance(); //plots
+		DefinitionManager.getInstance(); 
 		ExportManager.getInstance(); //exporters
 		
 
@@ -620,13 +614,13 @@ public class Cnf extends BaseMDIApplication implements IEventListener {
 				getInstance().setVisible(true);
 				getInstance().fixTitle();
 				
-				System.out.println("cnf  " + _release + " is ready.");
+				System.out.println("def  " + _release + " is ready.");
 			}
 
 		});
 		Log.getInstance().info(Environment.getInstance().toString());
 
-		Log.getInstance().info("cnf is ready.");
+		Log.getInstance().info("def is ready.");
 
 	} // end main
 

@@ -28,7 +28,9 @@ import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFieldInitializationException;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
+import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKuttaException;
+import cnuphys.swim.DefaultSwimStopper;
 import cnuphys.swim.SwimMenu;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimmer;
@@ -478,8 +480,63 @@ public class SwimTest {
 			@Override
 			public void run() {
 				testFrame.setVisible(true);
+				runLineTest();
 			}
 		});
+
+	}
+	
+	private static void runLineTest() {
+		System.out.println("Running line test");
+		
+		double px = -7.623109e-02;
+		double py = 6.664333e-09;
+		double pz = 1.998547e+00;
+		
+		double x0 = 0.892645;
+		double y0 = 0;
+		double z0 = 5.749990;
+		
+		double rMax = 7;
+		
+		double P = Math.sqrt(px*px + py*py + pz*pz);
+		
+		
+		// for swimming backwards
+		px = -px;
+		py = -py;
+		pz = -pz;
+		double theta = FastMath.acos2Deg(pz / P);
+		double phi = FastMath.atan2Deg(py, px);
+		System.out.println(String.format("Swim backwards use P: %9.6f  theta: %9.6f  phi: %9.6f", P, theta, phi));
+		
+		// create a stopper
+		DefaultSwimStopper stopper = new DefaultSwimStopper(rMax);
+
+		
+//		IStopper stopper = new IStopper() {
+//
+//			@Override
+//			public boolean stopIntegration(double t, double[] y) {
+//				return y[2] < 0;
+//			}
+//
+//			@Override
+//			public double getFinalT() {
+//				return 0;
+//			}
+//
+//			@Override
+//			public void setFinalT(double finalT) {
+//			}
+//			
+//		};
+//		
+		
+		Swimmer swimmer = new Swimmer();
+	// 	swimmer.swim(charge, xo, yo, zo, momentum, theta, phi, rmax, maxPathLength, stepSize, distanceBetweenSaves)
+		
+		
 
 	}
 }

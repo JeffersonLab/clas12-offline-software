@@ -44,7 +44,8 @@ public class SplashWindowCED extends JWindow {
 			"images/cedSS14.png", "images/cedSS15.png", "images/cedSS16.png",
 
 	};
-	private int _picIndex = (int) (Integer.MAX_VALUE * Math.random()) % _cedPics.length;
+//	private int _picIndex = (int) (Integer.MAX_VALUE * Math.random()) % _cedPics.length;
+	private int _picIndex = 0;
 	private ImageIcon _cedImage;
 	private JLabel _cedLabel;
 
@@ -60,12 +61,14 @@ public class SplashWindowCED extends JWindow {
 	public SplashWindowCED(String title, Color bg, int width, String version) {
 
 		setLayout(new BorderLayout(2, 2));
+		
+		_cedPics[0] = "images/cedSS14.png";
 
 		for (int i = 0; i < 30; i++) {
 			int r1 = ThreadLocalRandom.current().nextInt(0, _cedPics.length);
 			int r2 = ThreadLocalRandom.current().nextInt(0, _cedPics.length);
 
-			if (r1 != r2) {
+			if ((r1 != 0) && (r2 != 0) && (r1 != r2)) {
 				String temp = _cedPics[r1];
 				_cedPics[r1] = _cedPics[r2];
 				_cedPics[r2] = temp;
