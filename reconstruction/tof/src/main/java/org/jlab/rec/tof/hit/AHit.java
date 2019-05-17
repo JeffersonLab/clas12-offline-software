@@ -1256,8 +1256,19 @@ public abstract class AHit implements Comparable<AHit> {
         return tw1pos*Math.pow(y, 2)+tw2pos*y;
     }
     
+    /**  
+    * Calculate position dependent correction to timing offsets  
+    * Currently used for CTOF
+    * @param y hit position along the paddle
+    * @param hposa first correction parameter
+    * @param hposb second correction parameter
+    * @param hposc third correction parameter, currently not used
+    * @param hposd fourth correction parameter, currently not used
+    * @param hpose fifth correction parameter, currently not used
+    * @return time offset in ns
+    */     
     private double calc_Hpos(double y, double hposa, double hposb, double hposc, double hposd, double hpose) {
-        return 0;
+       return hposa*Math.exp(hposb*y);
     }
     
     public void printInfo() {
