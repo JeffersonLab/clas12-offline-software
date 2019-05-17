@@ -67,8 +67,12 @@ public class HipoDataBank implements DataBank  {
     }
 
     public double[] getDouble(String path) {
+        int    nrows = this.hipoGroup.getRows();
+        double[] result = new double[nrows];
+        for(int i = 0; i < nrows; i++) result[i] = hipoGroup.getDouble(path, i);
+        return result;
         //return this.hipoGroup.getNode(path).getDouble();
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -92,8 +96,12 @@ public class HipoDataBank implements DataBank  {
     }
 
     public float[] getFloat(String path) {
+        int    nrows = this.hipoGroup.getRows();
+        float[] result = new float[nrows];
+        for(int i = 0; i < nrows; i++) result[i] = hipoGroup.getFloat(path, i);
+        return result;
         //return this.hipoGroup.getNode(path).getFloat();
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public float getFloat(String path, int index) {
@@ -113,8 +121,12 @@ public class HipoDataBank implements DataBank  {
     }
 
     public int[] getInt(String path) {
+        int    nrows = this.hipoGroup.getRows();
+        int[] result = new int[nrows];
+        for(int i = 0; i < nrows; i++) result[i] = hipoGroup.getInt(path, i);
+        return result;
         //return this.getGroup().getNode(path).getInt();
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public int getInt(String path, int index) {
@@ -134,8 +146,12 @@ public class HipoDataBank implements DataBank  {
     }
 
     public short[] getShort(String path) {
+        int    nrows = this.hipoGroup.getRows();
+        short[] result = new short[nrows];
+        for(int i = 0; i < nrows; i++) result[i] = hipoGroup.getShort(path, i);
+        return result;
         //return this.hipoGroup.getNode(path).getShort();
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public short getShort(String path, int index) {
@@ -155,7 +171,11 @@ public class HipoDataBank implements DataBank  {
     }
 
     public long[] getLong(String path) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int    nrows = this.hipoGroup.getRows();
+        long[] result = new long[nrows];
+        for(int i = 0; i < nrows; i++) result[i] = hipoGroup.getLong(path, i);
+        return result;
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public long getLong(String path, int index) {
@@ -175,8 +195,12 @@ public class HipoDataBank implements DataBank  {
     }
     
     public byte[] getByte(String path) {
+        int    nrows = this.hipoGroup.getRows();
+        byte[] result = new byte[nrows];
+        for(int i = 0; i < nrows; i++) result[i] = hipoGroup.getByte(path, i);
+        return result;
         //return this.hipoGroup.getNode(path).getByte();
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public byte getByte(String path, int index) {

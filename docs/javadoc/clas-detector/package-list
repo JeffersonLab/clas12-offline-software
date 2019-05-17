@@ -1,6 +1,0 @@
-org.jlab.detector.base
-org.jlab.detector.calib.tasks
-org.jlab.detector.calib.utils
-org.jlab.detector.decode
-org.jlab.detector.examples
-org.jlab.detector.view
