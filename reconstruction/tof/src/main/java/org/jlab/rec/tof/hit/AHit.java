@@ -1257,7 +1257,7 @@ public abstract class AHit implements Comparable<AHit> {
     }
     
     private double calc_Hpos(double y, double hposa, double hposb, double hposc, double hposd, double hpose) {
-        return 0;
+       return hposa*Math.exp(hposb*y);
     }
     
     public void printInfo() {
