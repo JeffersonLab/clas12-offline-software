@@ -26,9 +26,11 @@ import java.util.*;
 // ----------------------------------------------------------------------------
 
 public class TruthMatching extends ReconstructionEngine {
+    public int debug;
 
     public TruthMatching() {
         super("TruthMatching", "fbossu", "0.0");
+        debug = 0;
     }
 
   public boolean init() { return true; } 
@@ -414,11 +416,11 @@ public class TruthMatching extends ReconstructionEngine {
       if( cluster.detector != DetectorType.DC.getDetectorId() ) {
         List<RecHit> hits = rechits.get( (int) cluster.id );
         if( hits == null ){
-          System.out.println( "cluster " + cluster.id + " no rec hit found");
+          if( this.debug > 2 ) System.out.println( "cluster " + cluster.id + " no rec hit found");
           continue;
         }
         if( mchits == null ){
-          System.out.println( "cluster " + cluster.id + " not matched");
+          if( this.debug > 2 )System.out.println( "cluster " + cluster.id + " not matched");
           continue;
         }
 
@@ -427,7 +429,7 @@ public class TruthMatching extends ReconstructionEngine {
             cluster.nHitMatched++;
             if( cluster.mctid > 0 ){
               if( cluster.mctid != mchits.get(h.id).tid )
-                System.out.println( " WARNING: detector " + cluster.detector + " cluster id " + cluster.id + 
+                if( this.debug > 0 )System.out.println( " WARNING: detector " + cluster.detector + " cluster id " + cluster.id + 
                                     "; mc track changed from " + cluster.mctid + " to " + mchits.get(h.id).tid );
             }
             cluster.mctid = (short) mchits.get(h.id).tid;
@@ -512,7 +514,7 @@ public class TruthMatching extends ReconstructionEngine {
     }
 
     if( event.hasBank( bankName ) == false ){
-      System.err.println(" [ WARNING, TruthMatching ]: no " + bankName + " bank found, " + det.getName() );
+      if( this.debug > 1 )System.err.println(" [ WARNING, TruthMatching ]: no " + bankName + " bank found, " + det.getName() );
       return null; 
     }
    
