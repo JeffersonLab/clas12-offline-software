@@ -182,8 +182,13 @@ public class DCTBEngine extends DCEngine {
             HBtrk.set_Sector(trkbank.getByte("sector", i));
             HBtrk.set_Q(trkbank.getByte("q", i));
             HBtrk.set_pAtOrig(new Vector3D(trkbank.getFloat("p0_x", i), trkbank.getFloat("p0_y", i), trkbank.getFloat("p0_z", i)));
+            HBtrk.set_P(HBtrk.get_pAtOrig().mag());
             HBtrk.set_Vtx0(new Point3D(trkbank.getFloat("Vtx0_x", i), trkbank.getFloat("Vtx0_y", i), trkbank.getFloat("Vtx0_z", i)));
             HBtrk.set_FitChi2(trkbank.getFloat("chi2", i));
+            StateVec HBFinalSV = new StateVec(trkbank.getFloat("x", i), trkbank.getFloat("y", i), 
+                    trkbank.getFloat("tx", i), trkbank.getFloat("ty", i));
+            HBFinalSV.setZ(trkbank.getFloat("z", i));
+            HBtrk.setFinalStateVec(HBFinalSV);
             Matrix initCMatrix = new Matrix(new double[][]{
             {trkcovbank.getFloat("C11", i), trkcovbank.getFloat("C12", i), trkcovbank.getFloat("C13", i), trkcovbank.getFloat("C14", i), trkcovbank.getFloat("C15", i)},
             {trkcovbank.getFloat("C21", i), trkcovbank.getFloat("C22", i), trkcovbank.getFloat("C23", i), trkcovbank.getFloat("C24", i), trkcovbank.getFloat("C25", i)},
