@@ -1,0 +1,35 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "tile id", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "MAROC channel id", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "order: 2 - TDCL , 3 - TDCR", 
+                "name": "order", 
+                "type": "B"
+            }, 
+            {
+                "info": "TDC value", 
+                "name": "TDC", 
+                "type": "I"
+            }
+        ], 
+        "group": 21800, 
+        "info": "TDC bank for the Ring Imaging Cerenkov Counter", 
+        "item": 12, 
+        "name": "RICH::tdc"
+    }
+]

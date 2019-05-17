@@ -1,0 +1,90 @@
+[
+    {
+        "entries": [
+            {
+                "info": "index of the cluster in the specific detector bank", 
+                "name": "index", 
+                "type": "S"
+            }, 
+            {
+                "info": "row number in the particle bank hit is associated with", 
+                "name": "pindex", 
+                "type": "S"
+            }, 
+            {
+                "info": "Detector ID, as defined in org.jlab.detector.base.DetectorType", 
+                "name": "detector", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "Energy associated with the cluster (GeV)", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Time associated with the cluster (ns)", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "Path from vertex to the cluster position (cm)", 
+                "name": "path", 
+                "type": "F"
+            }, 
+            {
+                "info": "Chi2 (or quality) of cluster-particle matching", 
+                "name": "chi2", 
+                "type": "F"
+            }, 
+            {
+                "info": "X coordinate of the cluster", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "Y coordinate of the cluster", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "Z coordinate of the cluster", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster width in x", 
+                "name": "dx", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster width in y", 
+                "name": "dy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster radius", 
+                "name": "radius", 
+                "type": "F"
+            }, 
+            {
+                "info": "size of the cluster", 
+                "name": "size", 
+                "type": "S"
+            }, 
+            {
+                "info": "hit status", 
+                "name": "status", 
+                "type": "S"
+            }
+        ], 
+        "group": 300, 
+        "info": "Forward Tagger information for Particles bank", 
+        "item": 34, 
+        "name": "REC::ForwardTagger"
+    }
+]

@@ -1,0 +1,65 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the cluster", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "sector of the cluster's seed hit", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer of the cluster's seed hit", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "component of the cluster's seed hit", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "number of hits of the cluster", 
+                "name": "nhits", 
+                "type": "S"
+            }, 
+            {
+                "info": "Sum of E dep (MeV) of the hits", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "info": "center of X coor (cm) of the hits", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "center of Y coor (cm) of the hits", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "center of Z coor (cm) of the hits", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "center of time (ns) of the hits", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "cluster status", 
+                "name": "status", 
+                "type": "S"
+            }
+        ], 
+        "group": 20300, 
+        "info": "reconstructed cluster info from CND and CTOF", 
+        "item": 22, 
+        "name": "CND::clusters"
+    }
+]

@@ -1,0 +1,35 @@
+[
+    {
+        "entries": [
+            {
+                "info": "Reconstructed total energy", 
+                "name": "etc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Energy of central hit crystal in cluster", 
+                "name": "ecc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Time relative to event start time", 
+                "name": "tc", 
+                "type": "F"
+            }, 
+            {
+                "info": "x coord of hit (diff from ich_x)", 
+                "name": "xc", 
+                "type": "F"
+            }, 
+            {
+                "info": "y coord of hit (diff from ich_y)", 
+                "name": "yc", 
+                "type": "F"
+            }
+        ], 
+        "group": 31000, 
+        "info": "IC detector bank", 
+        "item": 51, 
+        "name": "DETECTOR::icpb"
+    }
+]

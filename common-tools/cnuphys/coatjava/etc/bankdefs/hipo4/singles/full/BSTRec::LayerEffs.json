@@ -1,0 +1,30 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "excluded layer residual of the matched cluster centroid", 
+                "name": "residual", 
+                "type": "F"
+            }, 
+            {
+                "info": "status (-1: not used, i.e. no track; 0: inefficient; 1: efficient", 
+                "name": "status", 
+                "type": "B"
+            }
+        ], 
+        "group": 20200, 
+        "info": "layer efficiencies", 
+        "item": 26, 
+        "name": "BSTRec::LayerEffs"
+    }
+]

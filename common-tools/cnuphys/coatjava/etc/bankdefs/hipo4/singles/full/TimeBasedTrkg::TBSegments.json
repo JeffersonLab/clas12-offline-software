@@ -1,0 +1,160 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the segment", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "status of the segment", 
+                "name": "status", 
+                "type": "S"
+            }, 
+            {
+                "info": "sector of the segment", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "superlayer of superlayer", 
+                "name": "superlayer", 
+                "type": "B"
+            }, 
+            {
+                "info": "associated cluster id", 
+                "name": "Cluster_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit1 in cluster", 
+                "name": "Hit1_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit2 in cluster", 
+                "name": "Hit2_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit3 in cluster", 
+                "name": "Hit3_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit4 in cluster", 
+                "name": "Hit4_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit5 in cluster", 
+                "name": "Hit5_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit6 in cluster", 
+                "name": "Hit6_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit7 in cluster", 
+                "name": "Hit7_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit8 in cluster", 
+                "name": "Hit8_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit9 in cluster", 
+                "name": "Hit9_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit10 in cluster", 
+                "name": "Hit10_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit11 in cluster", 
+                "name": "Hit11_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit12 in cluster", 
+                "name": "Hit12_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "average wire number", 
+                "name": "avgWire", 
+                "type": "F"
+            }, 
+            {
+                "info": "fit chisq prob.", 
+                "name": "fitChisqProb", 
+                "type": "F"
+            }, 
+            {
+                "info": "line fit slope", 
+                "name": "fitSlope", 
+                "type": "F"
+            }, 
+            {
+                "info": "error on slope", 
+                "name": "fitSlopeErr", 
+                "type": "F"
+            }, 
+            {
+                "info": "line fit intercept", 
+                "name": "fitInterc", 
+                "type": "F"
+            }, 
+            {
+                "info": "error on the intercept", 
+                "name": "fitIntercErr", 
+                "type": "F"
+            }, 
+            {
+                "info": "Segment 1st endpoint x coordinate in the sector coordinate system (for ced display)", 
+                "name": "SegEndPoint1X", 
+                "type": "F"
+            }, 
+            {
+                "info": "Segment 1st endpoint z coordinate in the sector coordinate system (for ced display)", 
+                "name": "SegEndPoint1Z", 
+                "type": "F"
+            }, 
+            {
+                "info": "Segment 2nd endpoint x coordinate in the sector coordinate system (for ced display)", 
+                "name": "SegEndPoint2X", 
+                "type": "F"
+            }, 
+            {
+                "info": "Segment 2nd endpoint z coordinate in the sector coordinate system (for ced display)", 
+                "name": "SegEndPoint2Z", 
+                "type": "F"
+            }, 
+            {
+                "info": "sum of hit residuals", 
+                "name": "resiSum", 
+                "type": "F"
+            }, 
+            {
+                "info": "sum of the hit times", 
+                "name": "timeSum", 
+                "type": "F"
+            }, 
+            {
+                "info": "size of segment", 
+                "name": "size", 
+                "type": "B"
+            }
+        ], 
+        "group": 20600, 
+        "info": "reconstructed segments using DC timing information", 
+        "item": 33, 
+        "name": "TimeBasedTrkg::TBSegments"
+    }
+]

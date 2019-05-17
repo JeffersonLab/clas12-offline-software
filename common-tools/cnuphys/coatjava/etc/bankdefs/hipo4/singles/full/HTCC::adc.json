@@ -1,0 +1,45 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector (1-6)", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "half sector (1 or 2)", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "ring (1,2,3,4)", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "order: 0 - ADCL , 1 - ADCR", 
+                "name": "order", 
+                "type": "B"
+            }, 
+            {
+                "info": "ADC integral from pulse fit", 
+                "name": "ADC", 
+                "type": "I"
+            }, 
+            {
+                "info": "time from pulse fit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "pedestal from pulse analysis", 
+                "name": "ped", 
+                "type": "S"
+            }
+        ], 
+        "group": 21500, 
+        "info": "ADC bank for the High Threshold Cerenkov Counter", 
+        "item": 11, 
+        "name": "HTCC::adc"
+    }
+]

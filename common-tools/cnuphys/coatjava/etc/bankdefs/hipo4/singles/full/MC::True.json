@@ -1,0 +1,145 @@
+[
+    {
+        "entries": [
+            {
+                "info": "detector ID", 
+                "name": "detector", 
+                "type": "B"
+            }, 
+            {
+                "info": "ID of the first particle entering the sensitive volume", 
+                "name": "pid", 
+                "type": "I"
+            }, 
+            {
+                "info": "ID of the mother of the first particle entering the sensitive volume", 
+                "name": "mpid", 
+                "type": "I"
+            }, 
+            {
+                "info": "Track ID of the first particle entering the sensitive volume", 
+                "name": "tid", 
+                "type": "I"
+            }, 
+            {
+                "info": "Track ID of the mother of the first particle entering the sensitive volume", 
+                "name": "mtid", 
+                "type": "I"
+            }, 
+            {
+                "info": "Track ID of the original track that generated the first particle entering the sensitive volume", 
+                "name": "otid", 
+                "type": "I"
+            }, 
+            {
+                "info": "Energy of the track", 
+                "name": "trackE", 
+                "type": "F"
+            }, 
+            {
+                "info": "Total Energy Deposited", 
+                "name": "totEdep", 
+                "type": "F"
+            }, 
+            {
+                "info": "Average X position in global reference system", 
+                "name": "avgX", 
+                "type": "F"
+            }, 
+            {
+                "info": "Average Y position in global reference system", 
+                "name": "avgY", 
+                "type": "F"
+            }, 
+            {
+                "info": "Average Z position in global reference system", 
+                "name": "avgZ", 
+                "type": "F"
+            }, 
+            {
+                "info": "Average X position in local reference system", 
+                "name": "avgLx", 
+                "type": "F"
+            }, 
+            {
+                "info": "Average Y position in local reference system", 
+                "name": "avgLy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Average Z position in local reference system", 
+                "name": "avgLz", 
+                "type": "F"
+            }, 
+            {
+                "info": "x component of momentum of the particle entering the sensitive volume", 
+                "name": "px", 
+                "type": "F"
+            }, 
+            {
+                "info": "y component of momentum of the particle entering the sensitive volume", 
+                "name": "py", 
+                "type": "F"
+            }, 
+            {
+                "info": "z component of momentum of the particle entering the sensitive volume", 
+                "name": "pz", 
+                "type": "F"
+            }, 
+            {
+                "info": "x component of primary vertex of the particle entering the sensitive volume", 
+                "name": "vx", 
+                "type": "F"
+            }, 
+            {
+                "info": "y component of primary vertex of the particle entering the sensitive volume", 
+                "name": "vy", 
+                "type": "F"
+            }, 
+            {
+                "info": "z component of primary vertex of the particle entering the sensitive volume", 
+                "name": "vz", 
+                "type": "F"
+            }, 
+            {
+                "info": "x component of primary vertex of the mother of the particle entering the sensitive volume", 
+                "name": "mvx", 
+                "type": "F"
+            }, 
+            {
+                "info": "y component of primary vertex of the mother of the particle entering the sensitive volume", 
+                "name": "mvy", 
+                "type": "F"
+            }, 
+            {
+                "info": "z component of primary vertex of the mother of the particle entering the sensitive volume", 
+                "name": "mvz", 
+                "type": "F"
+            }, 
+            {
+                "info": "Average time", 
+                "name": "avgT", 
+                "type": "F"
+            }, 
+            {
+                "info": "Number of geant4 steps", 
+                "name": "nsteps", 
+                "type": "I"
+            }, 
+            {
+                "info": "Process that created the FP. see gemc.jlab.org", 
+                "name": "procID", 
+                "type": "I"
+            }, 
+            {
+                "info": "Hit number", 
+                "name": "hitn", 
+                "type": "I"
+            }
+        ], 
+        "group": 40, 
+        "info": "True detector information from GEANT4", 
+        "item": 4, 
+        "name": "MC::True"
+    }
+]

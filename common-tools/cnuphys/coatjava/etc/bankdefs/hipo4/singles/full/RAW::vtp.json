@@ -1,0 +1,20 @@
+[
+    {
+        "entries": [
+            {
+                "info": "crate number", 
+                "name": "crate", 
+                "type": "B"
+            }, 
+            {
+                "info": "vtp value", 
+                "name": "word", 
+                "type": "I"
+            }
+        ], 
+        "group": 20000, 
+        "info": "VTP bank", 
+        "item": 14, 
+        "name": "RAW::vtp"
+    }
+]

@@ -1,0 +1,65 @@
+[
+    {
+        "entries": [
+            {
+                "info": "index of the particle in REC::Particle", 
+                "name": "pindex", 
+                "type": "S"
+            }, 
+            {
+                "info": "index of the track in its tracking bank", 
+                "name": "index", 
+                "type": "S"
+            }, 
+            {
+                "info": "DetectorID as defined in org.jlab.detector.DetectorType", 
+                "name": "detector", 
+                "type": "B"
+            }, 
+            {
+                "info": "Layer ID as defined in org.jlab.detector.DetectorLayer", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "x-position of the track at the detector surface (cm)", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "y-position of the track at the detector surface (cm)", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "z-position of the track at the detector surface (cm)", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "direction cosline of the track at the detector surface", 
+                "name": "cx", 
+                "type": "F"
+            }, 
+            {
+                "info": "direction cosline of the track at the detector surface", 
+                "name": "cy", 
+                "type": "F"
+            }, 
+            {
+                "info": "direction cosline of the track at the detector surface", 
+                "name": "cz", 
+                "type": "F"
+            }, 
+            {
+                "info": "pathlength of the track to the detector surface from the DOCA point (cm)", 
+                "name": "path", 
+                "type": "F"
+            }
+        ], 
+        "group": 300, 
+        "info": "Trajectory information for Particles bank", 
+        "item": 40, 
+        "name": "REC::Traj"
+    }
+]

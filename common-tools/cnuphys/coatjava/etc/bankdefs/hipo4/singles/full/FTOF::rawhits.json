@@ -1,0 +1,75 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the hit", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "status of the hit", 
+                "name": "status", 
+                "type": "S"
+            }, 
+            {
+                "info": "sector of FTOF", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "panel id of FTOF (1-1A, 2-1B, 3-2", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "paddle id of FTOF", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "E dep (MeV) from L PMT", 
+                "name": "energy_left", 
+                "type": "F"
+            }, 
+            {
+                "info": "E dep (MeV) from R PMT", 
+                "name": "energy_right", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit time (ns) from L PMT", 
+                "name": "time_left", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit time (ns) from R PMT", 
+                "name": "time_right", 
+                "type": "F"
+            }, 
+            {
+                "info": "E dep unc (MeV) from L PMT", 
+                "name": "energy_left_unc", 
+                "type": "F"
+            }, 
+            {
+                "info": "E dep unc (MeV) from R PMT", 
+                "name": "energy_right_unc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit time unc (ns) from L PMT", 
+                "name": "time_left_unc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit time unc (ns) from R PMT", 
+                "name": "time_right_unc", 
+                "type": "F"
+            }
+        ], 
+        "group": 21200, 
+        "info": "reconstructed hit info from L/R FTOF PMTs", 
+        "item": 20, 
+        "name": "FTOF::rawhits"
+    }
+]

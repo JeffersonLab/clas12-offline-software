@@ -1,0 +1,35 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector (=1)", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer (=1)", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "signal (1-2)", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "order: 2 - TDCL , 3 - TDCR", 
+                "name": "order", 
+                "type": "B"
+            }, 
+            {
+                "info": "TDC value", 
+                "name": "TDC", 
+                "type": "I"
+            }
+        ], 
+        "group": 22100, 
+        "info": "TDC bank for the Backward Angle Neutron Detector", 
+        "item": 12, 
+        "name": "BAND::tdc"
+    }
+]

@@ -1,0 +1,75 @@
+[
+    {
+        "entries": [
+            {
+                "info": "Hit id", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "Hit sector", 
+                "name": "sector", 
+                "type": "S"
+            }, 
+            {
+                "info": "Hit tile", 
+                "name": "tile", 
+                "type": "S"
+            }, 
+            {
+                "info": "Hit pmt", 
+                "name": "pmt", 
+                "type": "S"
+            }, 
+            {
+                "info": "Hit anode", 
+                "name": "anode", 
+                "type": "S"
+            }, 
+            {
+                "info": "Hit idx", 
+                "name": "idx", 
+                "type": "S"
+            }, 
+            {
+                "info": "Hit idy", 
+                "name": "idy", 
+                "type": "S"
+            }, 
+            {
+                "info": "Hit glx", 
+                "name": "glx", 
+                "type": "S"
+            }, 
+            {
+                "info": "Hit gly", 
+                "name": "gly", 
+                "type": "S"
+            }, 
+            {
+                "info": "Hit time", 
+                "name": "time", 
+                "type": "S"
+            }, 
+            {
+                "info": "Hit cluster", 
+                "name": "cluster", 
+                "type": "S"
+            }, 
+            {
+                "info": "Hit xtalk", 
+                "name": "xtalk", 
+                "type": "S"
+            }, 
+            {
+                "info": "Hit duration", 
+                "name": "duration", 
+                "type": "S"
+            }
+        ], 
+        "group": 22000, 
+        "info": "Reconstructed Hits in RICH", 
+        "item": 21, 
+        "name": "RICH::hits"
+    }
+]

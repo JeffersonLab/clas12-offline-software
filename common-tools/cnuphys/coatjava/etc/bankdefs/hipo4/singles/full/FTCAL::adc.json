@@ -1,0 +1,45 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector (=1)", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer (=1)", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "crystal id", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "order: 0 - ADCL , 1 - ADCR", 
+                "name": "order", 
+                "type": "B"
+            }, 
+            {
+                "info": "ADC integral from pulse fit", 
+                "name": "ADC", 
+                "type": "I"
+            }, 
+            {
+                "info": "time from pulse fit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "pedestal from pulse analysis", 
+                "name": "ped", 
+                "type": "S"
+            }
+        ], 
+        "group": 21000, 
+        "info": "ADC bank for the Forward Tagger Calorimeter", 
+        "item": 11, 
+        "name": "FTCAL::adc"
+    }
+]

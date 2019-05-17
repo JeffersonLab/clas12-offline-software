@@ -1,0 +1,100 @@
+[
+    {
+        "entries": [
+            {
+                "info": "index of the first track in Tracks bank", 
+                "name": "index1", 
+                "type": "S"
+            }, 
+            {
+                "info": "index of the second track in Tracks bank", 
+                "name": "index2", 
+                "type": "S"
+            }, 
+            {
+                "info": "x-position of the common vertex (cm)", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "y-position of the common vertex (cm)", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "z-position of the common vertex (cm)", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "x-position of the first track at the DOCA point (cm)", 
+                "name": "x1", 
+                "type": "F"
+            }, 
+            {
+                "info": "y-position of the first track at the DOCA point (cm)", 
+                "name": "y1", 
+                "type": "F"
+            }, 
+            {
+                "info": "z-position of the first track at the DOCA point (cm)", 
+                "name": "z1", 
+                "type": "F"
+            }, 
+            {
+                "info": "x-direction vector of the first track at the DOCA point (cm)", 
+                "name": "cx1", 
+                "type": "F"
+            }, 
+            {
+                "info": "y-direction vector of the first track at the DOCA point (cm)", 
+                "name": "cy1", 
+                "type": "F"
+            }, 
+            {
+                "info": "z-direction vector of the first track at the DOCA point (cm)", 
+                "name": "cz1", 
+                "type": "F"
+            }, 
+            {
+                "info": "x-position of the second track at the DOCA point (cm)", 
+                "name": "x2", 
+                "type": "F"
+            }, 
+            {
+                "info": "y-position of the second track at the DOCA point (cm)", 
+                "name": "y2", 
+                "type": "F"
+            }, 
+            {
+                "info": "z-position of the second track at the DOCA point (cm)", 
+                "name": "z2", 
+                "type": "F"
+            }, 
+            {
+                "info": "x-direction vector of the second track at the DOCA point (cm)", 
+                "name": "cx2", 
+                "type": "F"
+            }, 
+            {
+                "info": "y-direction vector of the second track at the DOCA point (cm)", 
+                "name": "cy2", 
+                "type": "F"
+            }, 
+            {
+                "info": "z-direction vector of the second track at the DOCA point (cm)", 
+                "name": "cz2", 
+                "type": "F"
+            }, 
+            {
+                "info": "The distance between two tracks (cm)", 
+                "name": "r", 
+                "type": "F"
+            }
+        ], 
+        "group": 300, 
+        "info": "Track Cross information for Particles bank", 
+        "item": 39, 
+        "name": "REC::VertDoca"
+    }
+]

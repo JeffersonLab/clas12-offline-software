@@ -1,0 +1,35 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector (1-6)", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer (1..9)", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "strip", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "order: 2 - TDCL , 3 - TDCR", 
+                "name": "order", 
+                "type": "B"
+            }, 
+            {
+                "info": "TDC value", 
+                "name": "TDC", 
+                "type": "I"
+            }
+        ], 
+        "group": 20700, 
+        "info": "TDC bank for the Electromagnetic Calorimeter", 
+        "item": 12, 
+        "name": "ECAL::tdc"
+    }
+]

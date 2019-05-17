@@ -1,0 +1,50 @@
+[
+    {
+        "entries": [
+            {
+                "info": "hit ID", 
+                "name": "ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "hit sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "hit layer", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "hit strip", 
+                "name": "strip", 
+                "type": "I"
+            }, 
+            {
+                "info": "fitted hit residual", 
+                "name": "fitResidual", 
+                "type": "F"
+            }, 
+            {
+                "info": "tracking status", 
+                "name": "trkingStat", 
+                "type": "I"
+            }, 
+            {
+                "info": "associated cluster ID", 
+                "name": "clusterID", 
+                "type": "S"
+            }, 
+            {
+                "info": "associated track ID", 
+                "name": "trkID", 
+                "type": "S"
+            }
+        ], 
+        "group": 20200, 
+        "info": "reconstructed BST hits on track", 
+        "item": 21, 
+        "name": "BSTRec::Hits"
+    }
+]

@@ -1,0 +1,60 @@
+[
+    {
+        "entries": [
+            {
+                "info": "number of particles in the event (User Defined)", 
+                "name": "npart", 
+                "type": "S"
+            }, 
+            {
+                "info": "Mass number of the target (User Defined)", 
+                "name": "atarget", 
+                "type": "S"
+            }, 
+            {
+                "info": "Atomic number oif the target (User Defined)", 
+                "name": "ztarget", 
+                "type": "S"
+            }, 
+            {
+                "info": "Target polarization (User Defined)", 
+                "name": "ptarget", 
+                "type": "F"
+            }, 
+            {
+                "info": "Beam polarization", 
+                "name": "pbeam", 
+                "type": "F"
+            }, 
+            {
+                "info": "Beam type (User Defined)", 
+                "name": "btype", 
+                "type": "S"
+            }, 
+            {
+                "info": "Beam energy (GeV) (User Defined)", 
+                "name": "ebeam", 
+                "type": "F"
+            }, 
+            {
+                "info": "Interacted nucleon ID (proton=2212, neutron=2112 (User Defined)", 
+                "name": "targetid", 
+                "type": "S"
+            }, 
+            {
+                "info": "Process ID (User Defined)", 
+                "name": "processid", 
+                "type": "S"
+            }, 
+            {
+                "info": "Event weight (User Defined)", 
+                "name": "weight", 
+                "type": "F"
+            }
+        ], 
+        "group": 40, 
+        "info": "Lund header bank for the generated event", 
+        "item": 1, 
+        "name": "MC::Event"
+    }
+]

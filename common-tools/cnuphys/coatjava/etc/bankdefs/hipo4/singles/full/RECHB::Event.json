@@ -1,0 +1,55 @@
+[
+    {
+        "entries": [
+            {
+                "info": "Undefined", 
+                "name": "category", 
+                "type": "L"
+            }, 
+            {
+                "info": "Undefined", 
+                "name": "topology", 
+                "type": "L"
+            }, 
+            {
+                "info": "Beam charge, gated (nano-Coulomb)", 
+                "name": "beamCharge", 
+                "type": "F"
+            }, 
+            {
+                "info": "Lifetime", 
+                "name": "liveTime", 
+                "type": "D"
+            }, 
+            {
+                "info": "Event Start Time (ns)", 
+                "name": "startTime", 
+                "type": "F"
+            }, 
+            {
+                "info": "RF Time (ns)", 
+                "name": "RFTime", 
+                "type": "F"
+            }, 
+            {
+                "info": "Helicity of Event (0 or 1, else undefined), with HWP-correction", 
+                "name": "helicity", 
+                "type": "B"
+            }, 
+            {
+                "info": "Helicity of Event (0 or 1, else undefined)", 
+                "name": "helicityRaw", 
+                "type": "B"
+            }, 
+            {
+                "info": "Event Processing Time (UNIX Time = seconds)", 
+                "name": "procTime", 
+                "type": "F"
+            }
+        ], 
+        "group": 300, 
+        "info": "Event Header Bank", 
+        "item": 10, 
+        "name": "RECHB::Event"
+    }
+]

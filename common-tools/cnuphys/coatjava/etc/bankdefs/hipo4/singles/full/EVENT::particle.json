@@ -1,0 +1,85 @@
+[
+    {
+        "entries": [
+            {
+                "info": "status of the particle", 
+                "name": "status", 
+                "type": "B"
+            }, 
+            {
+                "info": "charge of the particle", 
+                "name": "charge", 
+                "type": "B"
+            }, 
+            {
+                "info": "particle ID", 
+                "name": "pid", 
+                "type": "I"
+            }, 
+            {
+                "info": "particle mass calculated from beta", 
+                "name": "mass", 
+                "type": "F"
+            }, 
+            {
+                "info": "x component of momentum", 
+                "name": "px", 
+                "type": "F"
+            }, 
+            {
+                "info": "y component of momentum", 
+                "name": "py", 
+                "type": "F"
+            }, 
+            {
+                "info": "z component of momentum", 
+                "name": "pz", 
+                "type": "F"
+            }, 
+            {
+                "info": "x component of vertex", 
+                "name": "vx", 
+                "type": "F"
+            }, 
+            {
+                "info": "y component of vertex", 
+                "name": "vy", 
+                "type": "F"
+            }, 
+            {
+                "info": "z component of vertex", 
+                "name": "vz", 
+                "type": "F"
+            }, 
+            {
+                "info": "pointer to dc bank", 
+                "name": "dcstat", 
+                "type": "B"
+            }, 
+            {
+                "info": "pointer to ec bank", 
+                "name": "ecstat", 
+                "type": "B"
+            }, 
+            {
+                "info": "pointer to sc bank", 
+                "name": "scstat", 
+                "type": "B"
+            }, 
+            {
+                "info": "pointer to cc bank", 
+                "name": "ccstat", 
+                "type": "B"
+            }, 
+            {
+                "info": "pointer to cc bank", 
+                "name": "lcstat", 
+                "type": "B"
+            }
+        ], 
+        "group": 31000, 
+        "info": "Container Bank for reconstructed CLAS6 Data", 
+        "item": 21, 
+        "name": "EVENT::particle"
+    }
+]

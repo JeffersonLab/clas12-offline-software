@@ -1,0 +1,55 @@
+[
+    {
+        "entries": [
+            {
+                "info": "hit sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "total  energy of the hit", 
+                "name": "etot", 
+                "type": "F"
+            }, 
+            {
+                "info": "inner  energy of the hit", 
+                "name": "ein", 
+                "type": "F"
+            }, 
+            {
+                "info": "outter energy of the hit", 
+                "name": "eout", 
+                "type": "F"
+            }, 
+            {
+                "info": "time of the hit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "path of the hit", 
+                "name": "path", 
+                "type": "F"
+            }, 
+            {
+                "info": "x coordinate of the hit", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "y coordinate of the hit", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "z coordinate of the hit", 
+                "name": "z", 
+                "type": "F"
+            }
+        ], 
+        "group": 31000, 
+        "info": "EC detector bank", 
+        "item": 31, 
+        "name": "DETECTOR::ecpb"
+    }
+]

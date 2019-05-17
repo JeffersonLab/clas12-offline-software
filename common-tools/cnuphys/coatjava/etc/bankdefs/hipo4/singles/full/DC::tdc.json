@@ -1,0 +1,35 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector (1..6)", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer (1..36)", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "wire number (1..112)", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "order: 2 - TDCL , 3 - TDCR", 
+                "name": "order", 
+                "type": "B"
+            }, 
+            {
+                "info": "TDC value", 
+                "name": "TDC", 
+                "type": "I"
+            }
+        ], 
+        "group": 20600, 
+        "info": "TDC bank for the Drift Chambers", 
+        "item": 12, 
+        "name": "DC::tdc"
+    }
+]

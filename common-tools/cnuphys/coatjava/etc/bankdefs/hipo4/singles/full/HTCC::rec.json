@@ -1,0 +1,112 @@
+[
+    {
+        "entries": [
+            {
+                "id": 1, 
+                "info": "id of the hit", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "id": 2, 
+                "info": "number of hits in cluster", 
+                "name": "nhits", 
+                "type": "S"
+            }, 
+            {
+                "id": 3, 
+                "info": "number of photoelectrons in cluster", 
+                "name": "nphe", 
+                "type": "F"
+            }, 
+            {
+                "id": 4, 
+                "info": "ntheta", 
+                "name": "ntheta", 
+                "type": "S"
+            }, 
+            {
+                "id": 5, 
+                "info": "nphi", 
+                "name": "nphi", 
+                "type": "S"
+            }, 
+            {
+                "id": 6, 
+                "info": "Minimum theta angle", 
+                "name": "mintheta", 
+                "type": "S"
+            }, 
+            {
+                "id": 7, 
+                "info": "Maximum theta angle", 
+                "name": "maxtheta", 
+                "type": "S"
+            }, 
+            {
+                "id": 8, 
+                "info": "Minimum phi angle", 
+                "name": "minphi", 
+                "type": "S"
+            }, 
+            {
+                "id": 9, 
+                "info": "Maximum phi angle", 
+                "name": "maxphi", 
+                "type": "S"
+            }, 
+            {
+                "id": 10, 
+                "info": "Time at the vertex", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "id": 11, 
+                "info": "Theta of the cluster", 
+                "name": "theta", 
+                "type": "F"
+            }, 
+            {
+                "id": 12, 
+                "info": "Error of the theta", 
+                "name": "dtheta", 
+                "type": "F"
+            }, 
+            {
+                "id": 13, 
+                "info": "Phi of the cluster", 
+                "name": "phi", 
+                "type": "F"
+            }, 
+            {
+                "id": 14, 
+                "info": "Error of the phi", 
+                "name": "dphi", 
+                "type": "F"
+            }, 
+            {
+                "id": 15, 
+                "info": "X coordinate of the hit", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "id": 16, 
+                "info": "Y coordinate of the hit", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "id": 17, 
+                "info": "Z coordinate of the hit", 
+                "name": "z", 
+                "type": "F"
+            }
+        ], 
+        "group": 21500, 
+        "info": "reconstructed clusters in HTCC", 
+        "item": 22, 
+        "name": "HTCC::rec"
+    }
+]

@@ -1,0 +1,35 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector (1-6)", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "panel (1-1A, 2-1B, 3-2B", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "paddle", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "order: 2 - TDCL , 3 - TDCR", 
+                "name": "order", 
+                "type": "B"
+            }, 
+            {
+                "info": "TDC value", 
+                "name": "TDC", 
+                "type": "I"
+            }
+        ], 
+        "group": 21200, 
+        "info": "TDC bank for the Forward Time of Flight", 
+        "item": 12, 
+        "name": "FTOF::tdc"
+    }
+]

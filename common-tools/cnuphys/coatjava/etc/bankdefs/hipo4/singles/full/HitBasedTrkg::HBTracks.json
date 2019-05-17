@@ -1,0 +1,180 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the track", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "status of the track", 
+                "name": "status", 
+                "type": "S"
+            }, 
+            {
+                "info": "sector of the track", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "Upstream Region 1 cross x-position in the lab (in cm)", 
+                "name": "c1_x", 
+                "type": "F"
+            }, 
+            {
+                "info": "Upstream Region 1 cross y-position in the lab (in cm)", 
+                "name": "c1_y", 
+                "type": "F"
+            }, 
+            {
+                "info": "Upstream Region 1 cross z-position in the lab (in cm)", 
+                "name": "c1_z", 
+                "type": "F"
+            }, 
+            {
+                "info": "Upstream Region 1 cross unit x-direction vector in the lab", 
+                "name": "c1_ux", 
+                "type": "F"
+            }, 
+            {
+                "info": "Upstream Region 1 cross unit y-direction vector in the lab", 
+                "name": "c1_uy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Upstream Region 1 cross unit z-direction vector in the lab", 
+                "name": "c1_uz", 
+                "type": "F"
+            }, 
+            {
+                "info": "Downstream Region 3 cross x-position in the lab (in cm)", 
+                "name": "c3_x", 
+                "type": "F"
+            }, 
+            {
+                "info": "Downstream Region 3 cross y-position in the lab (in cm)", 
+                "name": "c3_y", 
+                "type": "F"
+            }, 
+            {
+                "info": "Downstream Region 3 cross z-position in the lab (in cm)", 
+                "name": "c3_z", 
+                "type": "F"
+            }, 
+            {
+                "info": "Downstream Region 3 cross unit x-direction vector in the lab", 
+                "name": "c3_ux", 
+                "type": "F"
+            }, 
+            {
+                "info": "Downstream Region 3 cross unit y-direction vector in the lab", 
+                "name": "c3_uy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Downstream Region 3 cross unit z-direction vector in the lab", 
+                "name": "c3_uz", 
+                "type": "F"
+            }, 
+            {
+                "info": "Upstream Region 1 track x-position in the lab (in cm)", 
+                "name": "t1_x", 
+                "type": "F"
+            }, 
+            {
+                "info": "Upstream Region 1 track y-position in the lab (in cm)", 
+                "name": "t1_y", 
+                "type": "F"
+            }, 
+            {
+                "info": "Upstream Region 1 track z-position in the lab (in cm)", 
+                "name": "t1_z", 
+                "type": "F"
+            }, 
+            {
+                "info": "Upstream Region 1 track unit x-momentum vector in the lab", 
+                "name": "t1_px", 
+                "type": "F"
+            }, 
+            {
+                "info": "Upstream Region 1 track unit y-momentum vector in the lab", 
+                "name": "t1_py", 
+                "type": "F"
+            }, 
+            {
+                "info": "Upstream Region 1 track unit z-momentum vector in the lab", 
+                "name": "t1_pz", 
+                "type": "F"
+            }, 
+            {
+                "info": "Vertex x-position of the swam track to the DOCA to the beamline (in cm)", 
+                "name": "Vtx0_x", 
+                "type": "F"
+            }, 
+            {
+                "info": "Vertex y-position of the swam track to the DOCA to the beamline (in cm)", 
+                "name": "Vtx0_y", 
+                "type": "F"
+            }, 
+            {
+                "info": "Vertex z-position of the swam track to the DOCA to the beamline (in cm)", 
+                "name": "Vtx0_z", 
+                "type": "F"
+            }, 
+            {
+                "info": "3-momentum x-coordinate of the swam track to the DOCA to the beamline (in cm)", 
+                "name": "p0_x", 
+                "type": "F"
+            }, 
+            {
+                "info": "3-momentum y-coordinate of the swam track to the DOCA to the beamline (in cm)", 
+                "name": "p0_y", 
+                "type": "F"
+            }, 
+            {
+                "info": "3-momentum z-coordinate of the swam track to the DOCA to the beamline (in cm)", 
+                "name": "p0_z", 
+                "type": "F"
+            }, 
+            {
+                "info": "id of first cross on track", 
+                "name": "Cross1_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of second cross on track", 
+                "name": "Cross2_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of third cross on track", 
+                "name": "Cross3_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "charge of the track", 
+                "name": "q", 
+                "type": "B"
+            }, 
+            {
+                "info": "pathlength of the track", 
+                "name": "pathlength", 
+                "type": "F"
+            }, 
+            {
+                "info": "fit chi2 of the track", 
+                "name": "chi2", 
+                "type": "F"
+            }, 
+            {
+                "info": "fit ndf of the track", 
+                "name": "ndf", 
+                "type": "S"
+            }
+        ], 
+        "group": 20600, 
+        "info": "reconstructed tracks using DC wire positions", 
+        "item": 26, 
+        "name": "HitBasedTrkg::HBTracks"
+    }
+]

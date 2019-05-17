@@ -1,0 +1,60 @@
+[
+    {
+        "entries": [
+            {
+                "info": "track ID", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "track Charge", 
+                "name": "charge", 
+                "type": "B"
+            }, 
+            {
+                "info": "track Energy", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "info": "track Cx", 
+                "name": "cx", 
+                "type": "F"
+            }, 
+            {
+                "info": "track Cy", 
+                "name": "cy", 
+                "type": "F"
+            }, 
+            {
+                "info": "track Cz", 
+                "name": "cz", 
+                "type": "F"
+            }, 
+            {
+                "info": "track Time", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "pointer to cluster bank", 
+                "name": "calID", 
+                "type": "S"
+            }, 
+            {
+                "info": "pointer to signal bank", 
+                "name": "hodoID", 
+                "type": "S"
+            }, 
+            {
+                "info": "pointer to cross banks", 
+                "name": "trkID", 
+                "type": "S"
+            }
+        ], 
+        "group": 20900, 
+        "info": "Reconstructed Particles in FT", 
+        "item": 24, 
+        "name": "FT::particles"
+    }
+]

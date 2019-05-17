@@ -1,0 +1,50 @@
+[
+    {
+        "entries": [
+            {
+                "info": "index of the track in the specific detector bank", 
+                "name": "index", 
+                "type": "S"
+            }, 
+            {
+                "info": "row number in the particle bank hit is associated with", 
+                "name": "pindex", 
+                "type": "S"
+            }, 
+            {
+                "info": "Detector ID, as defined in org.jlab.detector.base.DetectorType", 
+                "name": "detector", 
+                "type": "B"
+            }, 
+            {
+                "info": "Sector of the track", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "status of the track", 
+                "name": "status", 
+                "type": "S"
+            }, 
+            {
+                "info": "charge of the track", 
+                "name": "q", 
+                "type": "B"
+            }, 
+            {
+                "info": "Chi2 (or quality) track fitting", 
+                "name": "chi2", 
+                "type": "F"
+            }, 
+            {
+                "info": "number of degrees of freedom in track fitting", 
+                "name": "NDF", 
+                "type": "S"
+            }
+        ], 
+        "group": 300, 
+        "info": "Track information for Particles bank", 
+        "item": 16, 
+        "name": "RECHB::Track"
+    }
+]

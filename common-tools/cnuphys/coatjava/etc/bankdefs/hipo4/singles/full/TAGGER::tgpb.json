@@ -1,0 +1,35 @@
+[
+    {
+        "entries": [
+            {
+                "info": "hit status", 
+                "name": "status", 
+                "type": "B"
+            }, 
+            {
+                "info": "T-counter id", 
+                "name": "tid", 
+                "type": "S"
+            }, 
+            {
+                "info": "E-counter id", 
+                "name": "eid", 
+                "type": "S"
+            }, 
+            {
+                "info": "time of the tagger hit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "energy of the tagger hit", 
+                "name": "energy", 
+                "type": "F"
+            }
+        ], 
+        "group": 31000, 
+        "info": "Tagger bank", 
+        "item": 41, 
+        "name": "TAGGER::tgpb"
+    }
+]

@@ -1,0 +1,105 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the hit", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of the hit", 
+                "name": "status", 
+                "type": "S"
+            }, 
+            {
+                "info": "DC sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "DC superlayer (1...6)", 
+                "name": "superlayer", 
+                "type": "B"
+            }, 
+            {
+                "info": "DC layer in superlayer (1...6)", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "wire id of DC", 
+                "name": "wire", 
+                "type": "S"
+            }, 
+            {
+                "info": "raw time of the hit", 
+                "name": "TDC", 
+                "type": "I"
+            }, 
+            {
+                "info": "track doca of the hit (in cm)", 
+                "name": "trkDoca", 
+                "type": "F"
+            }, 
+            {
+                "info": "error on track doca of the hit", 
+                "name": "docaError", 
+                "type": "F"
+            }, 
+            {
+                "info": "Left/Right ambiguity of the hit", 
+                "name": "LR", 
+                "type": "B"
+            }, 
+            {
+                "info": "x in planar local coordinate system", 
+                "name": "LocX", 
+                "type": "F"
+            }, 
+            {
+                "info": "y in planar local coordinate system", 
+                "name": "LocY", 
+                "type": "F"
+            }, 
+            {
+                "info": "wire x-coordinate  in tilted-sector", 
+                "name": "X", 
+                "type": "F"
+            }, 
+            {
+                "info": "wire z-coordinate  in tilted-sector", 
+                "name": "Z", 
+                "type": "F"
+            }, 
+            {
+                "info": "B-field intensity at hit position in tilted-sector system", 
+                "name": "B", 
+                "type": "F"
+            }, 
+            {
+                "info": "t propagation along the wire", 
+                "name": "TProp", 
+                "type": "F"
+            }, 
+            {
+                "info": "time of flight correction", 
+                "name": "TFlight", 
+                "type": "F"
+            }, 
+            {
+                "info": "ID of associated cluster", 
+                "name": "clusterID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of associated track", 
+                "name": "trkID", 
+                "type": "B"
+            }
+        ], 
+        "group": 20600, 
+        "info": "reconstructed hits using DC wire positions", 
+        "item": 21, 
+        "name": "HitBasedTrkg::HBHits"
+    }
+]

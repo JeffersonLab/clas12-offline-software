@@ -1,0 +1,82 @@
+[
+    {
+        "entries": [
+            {
+                "id": 1, 
+                "info": "distance fomr u edge", 
+                "name": "distU", 
+                "type": "F"
+            }, 
+            {
+                "id": 2, 
+                "info": "distance from v edge", 
+                "name": "distV", 
+                "type": "F"
+            }, 
+            {
+                "id": 3, 
+                "info": "distance from w edge", 
+                "name": "distW", 
+                "type": "F"
+            }, 
+            {
+                "id": 4, 
+                "info": "second moment", 
+                "name": "m1u", 
+                "type": "F"
+            }, 
+            {
+                "id": 5, 
+                "info": "second moment", 
+                "name": "m1v", 
+                "type": "F"
+            }, 
+            {
+                "id": 6, 
+                "info": "second moment", 
+                "name": "m1w", 
+                "type": "F"
+            }, 
+            {
+                "id": 7, 
+                "info": "second moment", 
+                "name": "m2u", 
+                "type": "F"
+            }, 
+            {
+                "id": 8, 
+                "info": "second moment", 
+                "name": "m2v", 
+                "type": "F"
+            }, 
+            {
+                "id": 9, 
+                "info": "second moment", 
+                "name": "m2w", 
+                "type": "F"
+            }, 
+            {
+                "id": 10, 
+                "info": "third moment", 
+                "name": "m3u", 
+                "type": "F"
+            }, 
+            {
+                "id": 11, 
+                "info": "third moment", 
+                "name": "m3v", 
+                "type": "F"
+            }, 
+            {
+                "id": 12, 
+                "info": "third moment", 
+                "name": "m3w", 
+                "type": "F"
+            }
+        ], 
+        "group": 20700, 
+        "info": "ECCAL bank for clusters containing distances an moments", 
+        "item": 25, 
+        "name": "ECAL::moments"
+    }
+]

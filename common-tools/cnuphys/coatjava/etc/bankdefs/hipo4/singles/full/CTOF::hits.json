@@ -1,0 +1,135 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the hit", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "status of the hit", 
+                "name": "status", 
+                "type": "S"
+            }, 
+            {
+                "info": "match CVT track id", 
+                "name": "trkID", 
+                "type": "S"
+            }, 
+            {
+                "info": "sector of CTOF", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "panel id of CTOF", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "paddle id of CTOF", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "E dep (MeV) of hit", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit time (ns)", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "E dep unc (MeV) of hit", 
+                "name": "energy_unc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit time unc (ns)", 
+                "name": "time_unc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Global X coor (cm) of hit", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "Global Y coor (cm) of hit", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "Global Z coor (cm) of hit", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "Global X coor unc (cm) of hit", 
+                "name": "x_unc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Global Y coor unc (cm) of hit", 
+                "name": "y_unc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Global Z coor unc (cm) of hit", 
+                "name": "z_unc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Global X coor (cm) of hit from CVT info -trkID index", 
+                "name": "tx", 
+                "type": "F"
+            }, 
+            {
+                "info": "Global Y coor (cm) of hit from CVT info - trkID index", 
+                "name": "ty", 
+                "type": "F"
+            }, 
+            {
+                "info": "Global Z coor (cm) of hit from CVT info - trkID index", 
+                "name": "tz", 
+                "type": "F"
+            }, 
+            {
+                "info": "index of hit with ADCU in adc bank, starts at zero", 
+                "name": "adc_idx1", 
+                "type": "S"
+            }, 
+            {
+                "info": "index of hit with ADCD in adc bank, starts at zero", 
+                "name": "adc_idx2", 
+                "type": "S"
+            }, 
+            {
+                "info": "index of hit with TDCU in tdc bank, starts at zero", 
+                "name": "tdc_idx1", 
+                "type": "S"
+            }, 
+            {
+                "info": "index of hit with TDCD in tdc bank, starts at zero", 
+                "name": "tdc_idx2", 
+                "type": "S"
+            }, 
+            {
+                "info": "pathlength of the track from the vertex (doca point to the beamline to the midpoint between the entrance and exit of the hit bar", 
+                "name": "pathLength", 
+                "type": "F"
+            }, 
+            {
+                "info": "pathlength of the track from the entrance point to the exit point through the hit bar", 
+                "name": "pathLengthThruBar", 
+                "type": "F"
+            }
+        ], 
+        "group": 20400, 
+        "info": "reconstructed hit info from CTOF", 
+        "item": 21, 
+        "name": "CTOF::hits"
+    }
+]

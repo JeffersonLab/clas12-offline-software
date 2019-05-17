@@ -1,0 +1,65 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the track", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of the detector", 
+                "name": "detector", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of the layer", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "track x position at detector surface (cm)", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "track y position at detector surface (cm)", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "track z position at detector surface (cm)", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "track unit direction vector x component at detector surface", 
+                "name": "tx", 
+                "type": "F"
+            }, 
+            {
+                "info": "track unit direction vector y component at detector surface", 
+                "name": "ty", 
+                "type": "F"
+            }, 
+            {
+                "info": "track unit direction vector z component at detector surface", 
+                "name": "tz", 
+                "type": "F"
+            }, 
+            {
+                "info": "B-field magnitude at detector surface (cm)", 
+                "name": "B", 
+                "type": "F"
+            }, 
+            {
+                "info": "pathlength of the track from the track vertex to the detector surface (cm)", 
+                "name": "path", 
+                "type": "F"
+            }
+        ], 
+        "group": 20600, 
+        "info": "Trajectory bank", 
+        "item": 53, 
+        "name": "TimeBasedTrkg::Trajectory"
+    }
+]

@@ -1,0 +1,45 @@
+[
+    {
+        "entries": [
+            {
+                "info": "crate id", 
+                "name": "crate", 
+                "type": "B"
+            }, 
+            {
+                "info": "slot id", 
+                "name": "slot", 
+                "type": "B"
+            }, 
+            {
+                "info": "channel id", 
+                "name": "channel", 
+                "type": "S"
+            }, 
+            {
+                "info": "order: 0 - ADCL , 1 - ADCR", 
+                "name": "order", 
+                "type": "B"
+            }, 
+            {
+                "info": "ADC integral from pulse fit", 
+                "name": "ADC", 
+                "type": "I"
+            }, 
+            {
+                "info": "time from pulse fit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "pedestal from pulse analysis", 
+                "name": "ped", 
+                "type": "S"
+            }
+        ], 
+        "group": 20000, 
+        "info": "ADC bank for untranslated signals", 
+        "item": 11, 
+        "name": "RAW::adc"
+    }
+]

@@ -1,0 +1,118 @@
+[
+    {
+        "entries": [
+            {
+                "id": 1, 
+                "info": "id of the hit", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "id": 2, 
+                "info": "status of the hit", 
+                "name": "status", 
+                "type": "S"
+            }, 
+            {
+                "id": 3, 
+                "info": "sector of ECAL", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "id": 4, 
+                "info": "Layer of ECAL (1-3:PCAL, 4-6:ECIN, 7-9:ECOUT", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "id": 5, 
+                "info": "X coordinate of the hit", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "id": 6, 
+                "info": "Y coordinate of the hit", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "id": 7, 
+                "info": "Z coordinate of the hit", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "id": 8, 
+                "info": "Energy of the hit", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "id": 9, 
+                "info": "Energy of the hit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "id": 10, 
+                "info": "width of U peak", 
+                "name": "widthU", 
+                "type": "F"
+            }, 
+            {
+                "id": 11, 
+                "info": "width of V peak", 
+                "name": "widthV", 
+                "type": "F"
+            }, 
+            {
+                "id": 12, 
+                "info": "width of W peak", 
+                "name": "widthW", 
+                "type": "F"
+            }, 
+            {
+                "id": 13, 
+                "info": "id of U peak", 
+                "name": "idU", 
+                "type": "B"
+            }, 
+            {
+                "id": 14, 
+                "info": "id of V peak", 
+                "name": "idV", 
+                "type": "B"
+            }, 
+            {
+                "id": 15, 
+                "info": "id of W peak", 
+                "name": "idW", 
+                "type": "B"
+            }, 
+            {
+                "id": 16, 
+                "info": "U coordinate ", 
+                "name": "coordU", 
+                "type": "I"
+            }, 
+            {
+                "id": 17, 
+                "info": "V coordinate", 
+                "name": "coordV", 
+                "type": "I"
+            }, 
+            {
+                "id": 18, 
+                "info": "W coordinate", 
+                "name": "coordW", 
+                "type": "I"
+            }
+        ], 
+        "group": 20700, 
+        "info": "reconstructed clusters in ECAL", 
+        "item": 23, 
+        "name": "ECAL::clusters"
+    }
+]

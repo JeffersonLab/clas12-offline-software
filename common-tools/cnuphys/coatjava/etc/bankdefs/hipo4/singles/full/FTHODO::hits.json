@@ -1,0 +1,60 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector number", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer number", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "component number", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "Hit X position (cm)", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit Y position (cm)", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit Z position (cm)", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit Energy", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit Time", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit Pointer to ADC bank", 
+                "name": "hitID", 
+                "type": "S"
+            }, 
+            {
+                "info": "Hit Pointer to Cluster Bank", 
+                "name": "clusterID", 
+                "type": "S"
+            }
+        ], 
+        "group": 21100, 
+        "info": "Reconstructed Hits in FT hodoscope", 
+        "item": 21, 
+        "name": "FTHODO::hits"
+    }
+]

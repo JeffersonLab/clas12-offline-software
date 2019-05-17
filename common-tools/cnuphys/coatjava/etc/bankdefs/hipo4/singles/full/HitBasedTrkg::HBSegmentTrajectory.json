@@ -1,0 +1,40 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the segment", 
+                "name": "segmentID", 
+                "type": "S"
+            }, 
+            {
+                "info": "sector of DC", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "superlayer", 
+                "name": "superlayer", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "matched hit id", 
+                "name": "matchedHitID", 
+                "type": "S"
+            }, 
+            {
+                "info": "calculated track doca", 
+                "name": "trkDoca", 
+                "type": "F"
+            }
+        ], 
+        "group": 20600, 
+        "info": "reconstructed segment trajectory from hit-based tracking", 
+        "item": 24, 
+        "name": "HitBasedTrkg::HBSegmentTrajectory"
+    }
+]

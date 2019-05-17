@@ -1,0 +1,55 @@
+[
+    {
+        "entries": [
+            {
+                "info": "run number", 
+                "name": "nrun", 
+                "type": "I"
+            }, 
+            {
+                "info": "event number", 
+                "name": "nevt", 
+                "type": "I"
+            }, 
+            {
+                "info": "trigger type", 
+                "name": "trigger", 
+                "type": "I"
+            }, 
+            {
+                "info": "faraday cup gated", 
+                "name": "helicity", 
+                "type": "B"
+            }, 
+            {
+                "info": "faraday cup", 
+                "name": "fc", 
+                "type": "F"
+            }, 
+            {
+                "info": "faraday cup gated", 
+                "name": "fcg", 
+                "type": "F"
+            }, 
+            {
+                "info": "start time", 
+                "name": "stt", 
+                "type": "F"
+            }, 
+            {
+                "info": "rastr 1", 
+                "name": "rastr1", 
+                "type": "S"
+            }, 
+            {
+                "info": "rastr 2", 
+                "name": "rastr2", 
+                "type": "S"
+            }
+        ], 
+        "group": 31000, 
+        "info": "Event Header Information", 
+        "item": 1, 
+        "name": "HEADER::info"
+    }
+]

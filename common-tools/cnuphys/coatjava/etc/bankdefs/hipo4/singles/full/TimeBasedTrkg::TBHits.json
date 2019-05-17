@@ -1,0 +1,135 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the hit", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of the hit", 
+                "name": "status", 
+                "type": "S"
+            }, 
+            {
+                "info": "DC sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "DC superlayer (1...6)", 
+                "name": "superlayer", 
+                "type": "B"
+            }, 
+            {
+                "info": "DC layer in superlayer (1...6)", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "wire id of DC", 
+                "name": "wire", 
+                "type": "S"
+            }, 
+            {
+                "info": "raw time of the hit", 
+                "name": "TDC", 
+                "type": "I"
+            }, 
+            {
+                "info": "doca of the hit calculated from TDC (in cm)", 
+                "name": "doca", 
+                "type": "F"
+            }, 
+            {
+                "info": "uncertainty on doca of the hit calculated from TDC (in cm)", 
+                "name": "docaError", 
+                "type": "F"
+            }, 
+            {
+                "info": "track doca of the hit (in cm)", 
+                "name": "trkDoca", 
+                "type": "F"
+            }, 
+            {
+                "info": "time residual of the hit (in cm)", 
+                "name": "timeResidual", 
+                "type": "F"
+            }, 
+            {
+                "info": "fit residual of the hit (in cm, from KF)", 
+                "name": "fitResidual", 
+                "type": "F"
+            }, 
+            {
+                "info": "Left/Right ambiguity of the hit", 
+                "name": "LR", 
+                "type": "B"
+            }, 
+            {
+                "info": "wire x-coordinate  in tilted-sector", 
+                "name": "X", 
+                "type": "F"
+            }, 
+            {
+                "info": "wire z-coordinate  in tilted-sector", 
+                "name": "Z", 
+                "type": "F"
+            }, 
+            {
+                "info": "B-field intensity at hit position in tilted-sector system", 
+                "name": "B", 
+                "type": "F"
+            }, 
+            {
+                "info": "t propagation along the wire (ns)", 
+                "name": "TProp", 
+                "type": "F"
+            }, 
+            {
+                "info": "time of flight correction (ns)", 
+                "name": "TFlight", 
+                "type": "F"
+            }, 
+            {
+                "info": "T0 (ns)", 
+                "name": "T0", 
+                "type": "F"
+            }, 
+            {
+                "info": "event start time used (ns)", 
+                "name": "TStart", 
+                "type": "F"
+            }, 
+            {
+                "info": "ID of associated cluster", 
+                "name": "clusterID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of associated track", 
+                "name": "trkID", 
+                "type": "B"
+            }, 
+            {
+                "info": "time used in tracking (ns)", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "beta used in tracking", 
+                "name": "beta", 
+                "type": "F"
+            }, 
+            {
+                "info": "beta-dependent time correction used in tracking", 
+                "name": "tBeta", 
+                "type": "F"
+            }
+        ], 
+        "group": 20600, 
+        "info": "reconstructed hits using DC timing information", 
+        "item": 31, 
+        "name": "TimeBasedTrkg::TBHits"
+    }
+]

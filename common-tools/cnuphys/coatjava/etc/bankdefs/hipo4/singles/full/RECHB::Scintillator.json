@@ -1,0 +1,95 @@
+[
+    {
+        "entries": [
+            {
+                "info": "index of the hit in the specific detector bank", 
+                "name": "index", 
+                "type": "S"
+            }, 
+            {
+                "info": "row number in the particle bank hit is associated with", 
+                "name": "pindex", 
+                "type": "S"
+            }, 
+            {
+                "info": "Detector ID, as defined in org.jlab.detector.base.DetectorType", 
+                "name": "detector", 
+                "type": "B"
+            }, 
+            {
+                "info": "Sector of the Detector hit", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "Layer ID, as defined in org.jlab.detector.base.DetectorLayer", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "Component of the Detector hit", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "Energy associated with the hit (MeV)", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Time associated with the hit (ns)", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "Path from vertex to the hit position (cm)", 
+                "name": "path", 
+                "type": "F"
+            }, 
+            {
+                "info": "Chi2 (or quality) of hit-track matching", 
+                "name": "chi2", 
+                "type": "F"
+            }, 
+            {
+                "info": "X coordinate of the hit (cm)", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "Y coordinate of the hit (cm)", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "Z coordinate of the hit (cm)", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "X coordinate of the matched hit (cm)", 
+                "name": "hx", 
+                "type": "F"
+            }, 
+            {
+                "info": "Y coordinate of the mathced hit (cm)", 
+                "name": "hy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Z coordinate of the matched hit (cm)", 
+                "name": "hz", 
+                "type": "F"
+            }, 
+            {
+                "info": "hit status", 
+                "name": "status", 
+                "type": "S"
+            }
+        ], 
+        "group": 300, 
+        "info": "Scintillator Responses for Particles bank", 
+        "item": 15, 
+        "name": "RECHB::Scintillator"
+    }
+]

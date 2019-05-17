@@ -1,0 +1,22 @@
+[
+    {
+        "entries": [
+            {
+                "id": 1, 
+                "info": "id of the RF signal", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "id": 2, 
+                "info": "time of RF signal", 
+                "name": "time", 
+                "type": "F"
+            }
+        ], 
+        "group": 10000, 
+        "info": "RF information", 
+        "item": 12, 
+        "name": "RUN::rf"
+    }
+]

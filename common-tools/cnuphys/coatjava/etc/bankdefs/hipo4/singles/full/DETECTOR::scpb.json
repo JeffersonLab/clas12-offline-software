@@ -1,0 +1,35 @@
+[
+    {
+        "entries": [
+            {
+                "info": "hit sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "hit sector", 
+                "name": "paddle", 
+                "type": "B"
+            }, 
+            {
+                "info": "deposited energy", 
+                "name": "edep", 
+                "type": "F"
+            }, 
+            {
+                "info": "time of the hit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "path of the hit", 
+                "name": "path", 
+                "type": "F"
+            }
+        ], 
+        "group": 31000, 
+        "info": "SC detector bank", 
+        "item": 32, 
+        "name": "DETECTOR::scpb"
+    }
+]

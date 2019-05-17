@@ -1,0 +1,80 @@
+[
+    {
+        "entries": [
+            {
+                "info": "index", 
+                "name": "index", 
+                "type": "B"
+            }, 
+            {
+                "info": "particle lifetime (ns) (User Defined)", 
+                "name": "lifetime", 
+                "type": "F"
+            }, 
+            {
+                "info": "particle type (1 is active)", 
+                "name": "type", 
+                "type": "B"
+            }, 
+            {
+                "info": "particle id", 
+                "name": "pid", 
+                "type": "I"
+            }, 
+            {
+                "info": "index of the parent (User Defined)", 
+                "name": "parent", 
+                "type": "B"
+            }, 
+            {
+                "info": "index of the first daughter (User Defined)", 
+                "name": "daughter", 
+                "type": "B"
+            }, 
+            {
+                "info": "x component of the momentum (GeV)", 
+                "name": "px", 
+                "type": "F"
+            }, 
+            {
+                "info": "y component of the momentum (GeV)", 
+                "name": "py", 
+                "type": "F"
+            }, 
+            {
+                "info": "z component of the momentum (GeV)", 
+                "name": "pz", 
+                "type": "F"
+            }, 
+            {
+                "info": "Energy of the particle (GeV) (User Defined)", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "info": "mass of the particle (GeV) (User Defined)", 
+                "name": "mass", 
+                "type": "F"
+            }, 
+            {
+                "info": "x component of the vertex (cm)", 
+                "name": "vx", 
+                "type": "F"
+            }, 
+            {
+                "info": "y component of the vertex (cm)", 
+                "name": "vy", 
+                "type": "F"
+            }, 
+            {
+                "info": "z component of the vertex (cm)", 
+                "name": "vz", 
+                "type": "F"
+            }
+        ], 
+        "group": 40, 
+        "info": "Generated Particle information from Lund", 
+        "item": 3, 
+        "name": "MC::Lund"
+    }
+]

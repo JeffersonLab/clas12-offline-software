@@ -1,0 +1,64 @@
+[
+    {
+        "entries": [
+            {
+                "id": 1, 
+                "info": "sector of ECAL", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "id": 2, 
+                "info": "Layer of ECAL (1-3:PCAL, 4-6:ECIN, 7-9:ECOUT", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "id": 3, 
+                "info": "Energy of the hit", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "id": 4, 
+                "info": "raw U peak energy", 
+                "name": "rawEU", 
+                "type": "F"
+            }, 
+            {
+                "id": 5, 
+                "info": "raw V peak energy", 
+                "name": "rawEV", 
+                "type": "F"
+            }, 
+            {
+                "id": 6, 
+                "info": "raw W peak energy", 
+                "name": "rawEW", 
+                "type": "F"
+            }, 
+            {
+                "id": 7, 
+                "info": "recon U peak energy", 
+                "name": "recEU", 
+                "type": "F"
+            }, 
+            {
+                "id": 8, 
+                "info": "recon V peak energy", 
+                "name": "recEV", 
+                "type": "F"
+            }, 
+            {
+                "id": 9, 
+                "info": "recon W peak energy", 
+                "name": "recEW", 
+                "type": "F"
+            }
+        ], 
+        "group": 20700, 
+        "info": "Raw and recon peak energy from ECAL", 
+        "item": 24, 
+        "name": "ECAL::calib"
+    }
+]

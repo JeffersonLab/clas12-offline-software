@@ -1,0 +1,65 @@
+[
+    {
+        "entries": [
+            {
+                "info": "particle id in LUND conventions", 
+                "name": "pid", 
+                "type": "I"
+            }, 
+            {
+                "info": "x component of the momentum (GeV)", 
+                "name": "px", 
+                "type": "F"
+            }, 
+            {
+                "info": "y component of the momentum (GeV)", 
+                "name": "py", 
+                "type": "F"
+            }, 
+            {
+                "info": "z component of the momentum (GeV)", 
+                "name": "pz", 
+                "type": "F"
+            }, 
+            {
+                "info": "x component of the vertex (cm)", 
+                "name": "vx", 
+                "type": "F"
+            }, 
+            {
+                "info": "y component of the vertex (cm)", 
+                "name": "vy", 
+                "type": "F"
+            }, 
+            {
+                "info": "z component of the vertex (cm)", 
+                "name": "vz", 
+                "type": "F"
+            }, 
+            {
+                "info": "particle charge", 
+                "name": "charge", 
+                "type": "B"
+            }, 
+            {
+                "info": "particle beta measured by TOF", 
+                "name": "beta", 
+                "type": "F"
+            }, 
+            {
+                "info": "Chi2 of assigned PID", 
+                "name": "chi2pid", 
+                "type": "F"
+            }, 
+            {
+                "info": "particle status (represents detector collection it passed)", 
+                "name": "status", 
+                "type": "S"
+            }
+        ], 
+        "group": 300, 
+        "info": "Reconstructed Particle Information", 
+        "item": 31, 
+        "name": "REC::Particle"
+    }
+]
