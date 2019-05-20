@@ -107,8 +107,10 @@ public class KFitter {
                 sv.new_transport(k, k + 1, sv.trackTrajFilt.get(k), sv.trackCovFilt.get(k), sgeo, bgeo, mv.measurements.get(k + 1).type, swimmer);
                 this.filter(k + 1, sgeo, bgeo, swimmer);
             }
-            //System.out.println("Back propagation....................................");
-            //Filtered StateVector and smoothed StateVector are the same for the last layer
+            
+            sv.trackTrajFilt.get(sv.X0.size() - 1).pathlength=0; 
+            //During the smoothing, we compute the pathlength... Warning: Once we are at the vertex and knows the pathlength, 
+            //we will change it following the convention 0 at dca to beam.
             sv.trackTrajSmooth.put(sv.X0.size() -1,sv.trackTrajFilt.get(sv.X0.size() - 1));
             sv.trackCovSmooth.put(sv.X0.size() -1,sv.trackCovFilt.get(sv.X0.size() - 1));
          
@@ -160,7 +162,11 @@ public class KFitter {
    
         Track cand = new Track(KFHelix, swimmer);
         
-        if(cand.get_P()<0.05)
+        //Reassign correctly the pathlength in correct ordering
+        double Total_pathlength=sv.trackTrajSmooth.get(0).pathlength;
+        for (int i=0; i<sv.trackTrajSmooth.size();i++) {sv.trackTrajSmooth.get(i).pathlength=Total_pathlength-sv.trackTrajSmooth.get(i).pathlength;}
+        
+        if(cand.get_Pt()<0.05)
             this.setFitFailed = true;
         cand.setNDF(NDF);
         cand.setChi2(chi2);
@@ -368,6 +374,11 @@ public class KFitter {
     	sv.trackTrajSmooth.get(k).tanL+=SmoothCorrection[4];
     	
     	sv.getStateVecAtModule(k, sv.trackTrajSmooth.get(k), sgeo, bgeo, mv.measurements.get(k).type, swimmer);
+    	double deltaPhi=sv.trackTrajSmooth.get(k+1).phi-sv.trackTrajSmooth.get(k).phi;
+    	if (deltaPhi>2*Math.PI) deltaPhi=deltaPhi-2*Math.PI;
+    	if (deltaPhi<-2*Math.PI) deltaPhi=deltaPhi+2*Math.PI;
+    	sv.trackTrajSmooth.get(k).pathlength=sv.trackTrajSmooth.get(k+1).pathlength
+    			+Math.abs(sv.trackTrajSmooth.get(k).get_Radius()*(1+Math.abs(sv.trackTrajSmooth.get(k).tanL))*deltaPhi);
     	
     	sv.trackCovSmooth.get(k).covMat=sv.trackCovFilt.get(k).covMat.plus(Ak.times(sv.trackCovSmooth.get(k+1).covMat.minus(sv.trackCov.get(k+1).covMat)).times(Ak.transpose()));
     }

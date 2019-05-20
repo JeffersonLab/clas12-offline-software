@@ -46,23 +46,15 @@ public class StateVecs {
         Helix kHelix = setSvPars(kVec, null);
         double csPoint=0;
         Vector3D InitialPos=kHelix.getHelixPoint(csPoint);
+        kVec.x=InitialPos.x();
+        kVec.y=InitialPos.y();
+        kVec.z=InitialPos.z();
     	if (k>0) {        
-    		if (Layer.get(k)>6) { //BMT
-    			csPoint=bmt_geo.getRefinedIntersection(kHelix, Layer.get(k)-6, Sector.get(k));
-    			Vector3D temp=kHelix.getHelixPoint(csPoint);
-    			kVec.x=temp.x();
-    			kVec.y=temp.y();
-    			kVec.z=temp.z();
-                     
-    		} else {
-    			csPoint=svt_geo.getRefinedIntersection(kHelix, Layer.get(k), Sector.get(k));
-    			Vector3D temp=kHelix.getHelixPoint(csPoint);
-    			kVec.x=temp.x();
-    			kVec.y=temp.y();
-    			kVec.z=temp.z();
-    		}
-            		
-    		Vector3D labpos=new Vector3D(kVec.x, kVec.y, kVec.z);
+    		if (Layer.get(k)>6) csPoint=bmt_geo.getRefinedIntersection(kHelix, Layer.get(k)-6, Sector.get(k));
+    		else csPoint=svt_geo.getRefinedIntersection(kHelix, Layer.get(k), Sector.get(k));
+    			
+    		Vector3D temp=kHelix.getHelixPoint(csPoint);	
+    		Vector3D labpos=new Vector3D(temp.x(), temp.y(), temp.z());
     		Vector3D detpos;
     		if (type>0) {
     			detpos=bmt_geo.LabToDetFrame(Layer.get(k)-6, Sector.get(k), labpos);
@@ -82,7 +74,7 @@ public class StateVecs {
     		kVec.z=temp.z();
     	}
 		
-        kVec.phi=(csPoint)*Math.cos(kHelix.get_dip())/kHelix.radius();
+        kVec.phi=Math.atan2(kVec.y-kHelix.ycen(), kVec.x-kHelix.xcen());
         Vector3D tempDir=kHelix.getHelixDir(csPoint);
         kVec.dirx=tempDir.x();
         kVec.diry=tempDir.y();
@@ -181,7 +173,8 @@ public class StateVecs {
         		sv_f.x=Poslab.x();
         		sv_f.y=Poslab.y();
         		sv_f.z=Poslab.z();
-        		sv_f.phi=sv_i.phi+step*Math.cos(iHelix.get_dip())/iHelix.radius();
+        		        		
+        		if (f==0) sv_f.pathlength=sv_i.pathlength+Math.abs(step);
         		
         	}
         	else {
@@ -190,16 +183,19 @@ public class StateVecs {
         			AtModule=true;
         		}
         		else {
-        			Poslab=iHelix.getHelixPoint(iHelix.getCurvAbsForPCAToPoint(new Vector3D(org.jlab.rec.cvt.Constants.getXb(),org.jlab.rec.cvt.Constants.getYb(),0)));
+        			double cs=iHelix.getCurvAbsForPCAToPoint(new Vector3D(org.jlab.rec.cvt.Constants.getXb(),org.jlab.rec.cvt.Constants.getYb(),0));
+        			Poslab=iHelix.getHelixPoint(cs);
         			sv_f.x=Poslab.x();
             		sv_f.y=Poslab.y();
             		sv_f.z=Poslab.z();
+            		sv_f.pathlength=sv_i.pathlength-cs;// The convention is supposed to be cs>0 implies we walk alongside the particle. Now, we are supposed to have performed a step too far (we have passed the PCA... 
+            		//which means that the pathlength is too long.)
             	}
         	}
         	
         	//Angle of pivot point
         	phi_i=Math.atan2(Yc - sv_i.refy, Xc - sv_i.refx);
-            if (Bf.alpha / sv_i.kappa < 0) {
+            if (sv_i.alpha / sv_i.kappa < 0) {
                 phi_i = Math.atan2(-Yc + sv_i.refy, -Xc + sv_i.refx);
             }
         	
@@ -214,7 +210,7 @@ public class StateVecs {
             	sv_f.refz=0;
             }
         	phi_f = Math.atan2(Yc - sv_f.refy, Xc - sv_f.refx);
-            if (Bf.alpha / sv_f.kappa < 0) {
+            if (sv_f.alpha / sv_f.kappa < 0) {
                 phi_f = Math.atan2(-Yc + sv_f.refy, -Xc + sv_f.refx);
             }
            
@@ -226,12 +222,12 @@ public class StateVecs {
             
             sv_f.phi0 = sv_i.phi0+delta;
             
-            sv_f.d_rho = (Xc - sv_f.refx) * Math.cos(phi_f) + (Yc - sv_f.refy) * Math.sin(phi_f) - Bf.alpha / sv_i.kappa;
+            sv_f.d_rho = (Xc - sv_f.refx) * Math.cos(phi_f) + (Yc - sv_f.refy) * Math.sin(phi_f) - sv_i.alpha / sv_i.kappa;
             
            
             sv_f.kappa = sv_i.kappa;
 
-            sv_f.dz = sv_i.refz - sv_f.refz + sv_i.dz - (Bf.alpha / sv_i.kappa) * delta * sv_i.tanL;
+            sv_f.dz = sv_i.refz - sv_f.refz + sv_i.dz - (sv_i.alpha / sv_i.kappa) * delta * sv_i.tanL;
             
             sv_f.tanL = sv_i.tanL;
            
@@ -455,6 +451,7 @@ public class StateVecs {
         public double alpha;
         public double residual;
         public double ali_residual;
+        public double pathlength;
                         
         StateVec(int k) {
             this.k = k;
@@ -468,6 +465,10 @@ public class StateVecs {
 
         public void set_ELoss(double[] _ELoss) {
             this._ELoss = _ELoss;
+        }
+        
+        public double get_Radius() {
+        	return this.alpha/this.kappa;
         }
         
         public void Duplicate(StateVec ToCopy) {
@@ -496,6 +497,7 @@ public class StateVecs {
         	this.phi=ToCopy.phi;
         	this.residual=ToCopy.residual;
         	this.ali_residual=ToCopy.ali_residual;
+        	this.pathlength=ToCopy.pathlength;
         	return ;
         }
 
@@ -540,11 +542,7 @@ public class StateVecs {
             this.By = b[1];
             this.Bz = b[2];
             this.alpha = 1. / (StateVecs.speedLight * b[2]);
-            //this.alpha = 1. / (StateVecs.speedLight * Math.sqrt(b[2]*b[2]));
-            
-            
-           //this.alpha = 1. / (StateVecs.speedLight * Math.sqrt(b[0]*b[0]+b[1]*b[1]+b[2]*b[2]));
-           //this.alpha = 1. / (5.);
+         
         }
     }
 
@@ -576,15 +574,11 @@ public class StateVecs {
 
     public Vector3D P(int kf) {
         if (this.trackTraj.get(kf) != null) {
-            //double x = this.trackTraj.get(kf).x;
-            //double y = this.trackTraj.get(kf).y;
-            //double z = this.trackTraj.get(kf).z; 
-            //B Bf = new B(kf, x, y, z);
+         
             double px = Math.signum(1 / this.trackTraj.get(kf).kappa) * Math.cos(this.trackTraj.get(kf).phi0 + this.trackTraj.get(kf).phi);
             double py = Math.signum(1 / this.trackTraj.get(kf).kappa) * Math.sin(this.trackTraj.get(kf).phi0 + this.trackTraj.get(kf).phi);
             double pz = Math.signum(1 / this.trackTraj.get(kf).kappa) * this.trackTraj.get(kf).tanL;
-            //int q = (int) Math.signum(this.trackTraj.get(kf).kappa);
-
+           
             return new Vector3D(px, py, pz);
         } else {
             return new Vector3D(0, 0, 0);
@@ -592,21 +586,7 @@ public class StateVecs {
 
     }
 
-    /*public Helix setTrackPars(int kf) {
-    	//Track parameters are defined at Xb Yb (this is why h_omega = kappa/this.trackTraj.get(0).alpha)
-        double h_dca = this.trackTrajSmooth.get(kf).d_rho;
-        double h_phi0 = this.trackTrajSmooth.get(kf).phi0;
-        double kappa = this.trackTrajSmooth.get(kf).kappa;
-        double h_omega = kappa/this.trackTrajSmooth.get(kf).alpha;
-        double h_dz = this.trackTrajSmooth.get(kf).dz;
-        double h_tandip = this.trackTrajSmooth.get(kf).tanL;
-    	        
-        Helix trkHelix = new Helix(h_dca, h_phi0, h_omega, h_dz, h_tandip, new Vector3D(this.trackTrajSmooth.get(kf).refx,this.trackTrajSmooth.get(kf).refy,this.trackTrajSmooth.get(kf).refz), this.trackCovSmooth.get(kf).covMat);
-       // System.out.println("x "+x+" y "+y+" z "+z+" p "+p_unc+" pt "+Math.sqrt(px*px+py*py) +" theta "+Math.toDegrees(Math.acos(pz/Math.sqrt(px*px+py*py+pz*pz)))+" phi "+Math.toDegrees(Math.atan2(py, px))+" q "+q);
-
-        return trkHelix;
-    }*/
-    
+      
     public Helix setSvPars(StateVec sv, Matrix Cov) {
     	//Track parameters are defined at Xb Yb (this is why h_omega = kappa/this.trackTraj.get(0).alpha)
         double h_phi0 = sv.phi0;

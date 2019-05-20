@@ -220,7 +220,7 @@ public class TrackListFinder {
             double bestChi2 = trkList.get(0).getChi2();
             int ndf = trkList.get(0).getNDF();
             Track bestTrk = trkList.get(0);
-            //The best and smallest track
+            //The best and tallest track
             for (int i =0; i<trkList.size(); i++) {
             	if (trkList.get(i).getNDF()>ndf||(trkList.get(i).getNDF()==ndf&&trkList.get(i).getChi2()<bestChi2)) {
             		ndf=trkList.get(i).getNDF();
@@ -297,6 +297,27 @@ public class TrackListFinder {
 			}
 		}
 		crosses.get(0).addAll(temp);
+	}
+
+	public void FinalizeTrackToCTOF_CND(List<Track> trks) {
+		Swim swimmer = new Swim();
+        double px=0;
+        double py=0;
+        double pz=0;
+        
+		for (int t=0; t<trks.size();t++) {
+			int trksize=trks.get(t).getTrajectory().size();
+			px=trks.get(t).get_P()*trks.get(t).getTrajectory().get(trksize-1).dirx;
+			py=trks.get(t).get_P()*trks.get(t).getTrajectory().get(trksize-1).diry;
+			pz=trks.get(t).get_P()*trks.get(t).getTrajectory().get(trksize-1).dirz;
+			swimmer.SetSwimParameters(trks.get(t).getTrajectory().get(trksize-1).x/10., trks.get(t).getTrajectory().get(trksize-1).y/10., trks.get(t).getTrajectory().get(trksize-1).z/10., px, py, pz,trks.get(t).get_Q() );
+			double[] pointAtCylRad=swimmer.SwimToCylinder(Constants.CTOFINNERRADIUS/10);
+			trks.get(t).set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0], pointAtCylRad[1], pointAtCylRad[2]));
+            trks.get(t).set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3], pointAtCylRad[4], pointAtCylRad[5]));
+            trks.get(t).set_pathLength(pointAtCylRad[6]+trks.get(t).getTrajectory().get(trksize-1).pathlength/10.);
+           
+		}
+		
 	}
 
 }
