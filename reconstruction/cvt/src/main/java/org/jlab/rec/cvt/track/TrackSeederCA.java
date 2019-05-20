@@ -215,45 +215,39 @@ public class TrackSeederCA {
         List<ArrayList<Cross>> xytracks =  getCAcandidates( xynodes, swimmer);
 
 //        System.out.println( " XY tracks " + xytracks );
-        //// TODO: TEST TEST TEST
-        // test if a first fit to move the SVT crosses helps
-//        for( ArrayList<Cross> acr : xytracks ) {
-//		    Track xycand = fitSeed(acr, svt_geo, 5, false);
-//		    // update
-//        }
-        
         
 
+        // find ZR candidates and match with XY
+        // ------------------------------------
         List<ArrayList<Cross>> seedCrosses = CAonRZ( xytracks, bmtC_crosses, svt_geo, bmt_geo, swimmer);
         
         List<Track> cands = new ArrayList<Track>();
-//        System.out.println(seedlist.size());
-	    for (int s = 0; s < seedCrosses.size(); s++) {
-	    	Collections.sort(seedCrosses.get(s));      // TODO: check why sorting matters
-	    	Track cand = fitSeed(seedCrosses.get(s), svt_geo, 5, false, swimmer);
-		    
-		    if (cand != null) {
-		    	cands.add(cand);
-		    }
-	    }
+        for (int s = 0; s < seedCrosses.size(); s++) {
+          Collections.sort(seedCrosses.get(s));      // TODO: check why sorting matters
+          Track cand = fitSeed(seedCrosses.get(s), svt_geo, 5, false, swimmer);
+          
+          if (cand != null) {
+            cands.add(cand);
+          }
+        }
 
-	    for( Track cand : cands ) {
-	    	//cand.finalUpdate_Crosses(svt_geo); // this should update the Z position, only for display purposes 
-	        Seed seed = new Seed();
-	        seed.set_Crosses(cand);
-	        seed.set_Helix(cand.get_helix());
-	        seedlist.add(seed);
-	        List<Cluster> clusters = new ArrayList<Cluster>();
-	        for(Cross c : seed.get_Crosses()) { 
-	            if(c.get_Detector().equalsIgnoreCase("SVT")) {
-	                clusters.add(c.get_Cluster1());
-	                clusters.add(c.get_Cluster2());
-            	} else {
-                	clusters.add(c.get_Cluster1());
-            	}
-        	}
-        	seed.set_Clusters(clusters);
-	    }
+        for( Track cand : cands ) {
+          //cand.finalUpdate_Crosses(svt_geo); // this should update the Z position, only for display purposes 
+            Seed seed = new Seed();
+            seed.set_Crosses(cand);
+            seed.set_Helix(cand.get_helix());
+            seedlist.add(seed);
+            List<Cluster> clusters = new ArrayList<Cluster>();
+            for(Cross c : seed.get_Crosses()) { 
+                if(c.get_Detector().equalsIgnoreCase("SVT")) {
+                    clusters.add(c.get_Cluster1());
+                    clusters.add(c.get_Cluster2());
+                } else {
+                    clusters.add(c.get_Cluster1());
+                }
+            }
+            seed.set_Clusters(clusters);
+        }
 
         return seedlist;
     }
@@ -325,13 +319,23 @@ public class TrackSeederCA {
       List<ArrayList<Cross>> seedCrosses = new ArrayList<ArrayList<Cross>>();
 
       if( bmtC_crosses == null ) return null;
-//      System.out.println("not null bmtc");
+
+      // run CA over BMT_C crosses per sector
+      // ---------------------------------------------
+      List< List< ArrayList< Cross > > > zrTrksPerSector = new ArrayList<List<ArrayList<Cross>>>();
+      for( int i = 0 ; i < 3 ; i++ ){
+
+        List<Cell> zrnodes = runCAMaker( "ZR", 5, bmtC_crosses.get( i ) , bmt_geo, swimmer);
+        List<ArrayList<Cross>> zrtracks =  getCAcandidates( zrnodes, swimmer);
+        zrTrksPerSector.add( zrtracks );
+      }
+
+
+
       // loop over each xytrack to find ZR candidates
       // ---------------------------------------------
-//      for( List<Cross> xycross : xytracks ){ // ALERT: this throw a concurrent modification exception 
-    
       for( int ixy=0; ixy< xytracks.size();ixy++ ){
-    	List<Cross> xycross = xytracks.get(ixy);
+        List<Cross> xycross = xytracks.get(ixy);
         ArrayList<Cross> crsZR = new ArrayList<Cross>();
         // get the SVT crosses
         ArrayList<Cross> svtcrs = new ArrayList<Cross>();
@@ -340,116 +344,75 @@ public class TrackSeederCA {
         //------------------------------------------------------------------
         int sector = -1;
         for( Cross c : xycross ){
-          if( c.get_Detector().equalsIgnoreCase("SVT")){
-            svtcrs.add(c);
-//            System.out.print( " " + c.get_Id() + " " +c.get_Detector() + " " + c.get_DetectorType() + " ; " );
+          if( c.get_Detector().equalsIgnoreCase("BMT")){
+        	  sector = c.get_Sector();
           }
           else {
-        	  sector = c.get_Sector()-1;
+            svtcrs.add( c );
           }
         }
-        
-        if( sector < 0 ) continue;
-        Collections.sort(svtcrs);
-//        Collections.sort(svtcrs,Collections.reverseOrder());
-//        for( Cross c : svtcrs ){
-//            System.out.print( " " + c.get_Id() + " " +c.get_Detector() + " " + c.get_DetectorType() + " ; " );
-//        }
-//        System.out.println();
-//        crsZR.addAll(svtcrs);
+        if( sector <= 0 ) continue;
 
-        // add all the BMT_C crosses
-        //--------------------------
-//        for( Cross c : bmtC_crosses.get(sector) ){
-//            System.out.print( " " + c.get_Id() + " " +c.get_Detector() + " " + c.get_DetectorType() + " ; " );
-//        }
-//        System.out.println();
-        if( bmtC_crosses.get(sector) == null  || bmtC_crosses.get(sector).size() == 0 ) continue;
-        crsZR.addAll( bmtC_crosses.get(sector) );
+        List<ArrayList<Cross>> zrtracks =  zrTrksPerSector.get( sector-1 );
 
-//        System.out.println("\n....\t"+crsZR);
-        // sort 
-//        Collections.sort(crsZR,Collections.reverseOrder());
-//        Collections.sort(crsZR);
-        
-        // run the CAmaker
-        List<Cell> zrnodes = runCAMaker( "ZR", 5, crsZR, bmt_geo, swimmer);
-//System.out.println(zrnodes);
-        List<ArrayList<Cross>> zrtracks =  getCAcandidates( zrnodes, swimmer);
-
-//        System.out.println("sector" + sector + " len " + zrtracks.size());  
+        //System.out.println("sector" + sector + " len " + zrtracks.size());  
         
         // collect crosses for candidates
         //--------------------------------
         for( List<Cross> zrcross : zrtracks ){
-          // count svt crosses. If none, skip the candidate // TODO
-          //int Nsvt = 0;
-          //for( Cross c : zrcross ){
-            //if( c.get_Detector().equalsIgnoreCase("SVT")){
-          	  //Nsvt++;
-            //}
-          //}
-          //if( Nsvt == 0 ) continue;
-          
-        	
           // FIT ZR BMT
           // ---------------------------
-    		List<Double> R = new ArrayList<Double>();
-    		List<Double> Z = new ArrayList<Double>();
-    		List<Double> EZ= new ArrayList<Double>();
-    		
-    		for( Cross c : zrcross ) {
-    			R.add( org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[c.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det );
-    			Z.add( c.get_Point().z() );
-    			EZ.add( c.get_PointErr().z());
-    		}
-    		
-    		LineFitter ft = new LineFitter();
-    		boolean status = ft.fitStatus(Z, R, EZ, null, Z.size());
-    		if( status == false ) { System.err.println(" BMTC FIT FAILED");}
-    		LineFitPars fpars = ft.getFit();
- 		   	if( fpars == null ) continue;
- 		   	double b = fpars.intercept();
- 		   	double m = fpars.slope();
-        	 		   	
+          List<Double> R = new ArrayList<Double>();
+          List<Double> Z = new ArrayList<Double>();
+          List<Double> EZ= new ArrayList<Double>();
+          
+          for( Cross c : zrcross ) {
+            R.add( org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[c.get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det );
+            Z.add( c.get_Point().z() );
+            EZ.add( c.get_PointErr().z());
+          }
+          
+          LineFitter ft = new LineFitter();
+          boolean status = ft.fitStatus(Z, R, EZ, null, Z.size());
+          if( status == false ) { System.err.println(" BMTC FIT FAILED");}
+          LineFitPars fpars = ft.getFit();
+          if( fpars == null ) continue;
+          double b = fpars.intercept();
+          double m = fpars.slope();
+                    
           seedCrosses.add( new ArrayList<Cross>() );
           int scsize = seedCrosses.size();
           // add svt
           for( Cross c : svtcrs ){
-			   int l1 = c.get_Cluster1().get_Layer();
-			   int s1 = c.get_Cluster1().get_Sector();
-			   double c1 = c.get_Cluster1().get_Centroid();
-			   double r1 = org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(l1-1)/2][(l1-1)%2];
-			   double nstr1 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r1 - b)/m, l1, s1);
+            int l1 = c.get_Cluster1().get_Layer();
+            int s1 = c.get_Cluster1().get_Sector();
+            double c1 = c.get_Cluster1().get_Centroid();
+            double r1 = org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(l1-1)/2][(l1-1)%2];
+            double nstr1 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r1 - b)/m, l1, s1);
 
-			   int l2 = c.get_Cluster2().get_Layer();
-			   int s2 = c.get_Cluster2().get_Sector();
-			   double c2 = c.get_Cluster2().get_Centroid();
-			   double r2 = org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(l2-1)/2][(l2-1)%2];
-			   double nstr2 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r2 - b)/m, l2, s2);
-			   
-			   if( Math.abs( c1 - nstr1 ) < 8 && Math.abs( c2 - nstr2 ) < 8 )			   
-				   seedCrosses.get(scsize-1).add(c);
+            int l2 = c.get_Cluster2().get_Layer();
+            int s2 = c.get_Cluster2().get_Sector();
+            double c2 = c.get_Cluster2().get_Centroid();
+            double r2 = org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(l2-1)/2][(l2-1)%2];
+            double nstr2 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r2 - b)/m, l2, s2);
+            
+            if( Math.abs( c1 - nstr1 ) < 8 && Math.abs( c2 - nstr2 ) < 8 )			   
+              seedCrosses.get(scsize-1).add(c);
           }
 
-//          for( Cross c : zrcross ){
-//            if( c.get_Detector().equalsIgnoreCase("SVT")){
-//              seedCrosses.get(scsize-1).add(c); 
-//            }
-//          }
 
-          // add bmt z
+            // add bmt z
           for( Cross c : xycross ){
             if( c.get_Detector().equalsIgnoreCase("BMT")){
               seedCrosses.get(scsize-1).add(c); 
             }              
           }
 
-          // add bmt c
+            // add bmt c
           for( Cross c : zrcross ){
             if( c.get_Detector().equalsIgnoreCase("BMT")){
               seedCrosses.get(scsize-1).add(c); 
-            }              
+            }
           }
         }
       }
