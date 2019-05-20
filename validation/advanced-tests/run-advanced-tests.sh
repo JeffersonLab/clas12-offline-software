@@ -29,7 +29,7 @@ esac
 
 
 chmod +x install-claracre-clas.sh
-echo Y | ./install-claracre-clas.sh -l local
+echo Y | ./install-claracre-clas.sh -f 4.3.9 -l local
 if [ $? != 0 ] ; then echo "clara installation error" ; exit 1 ; fi
 rm install-claracre-clas.sh
 

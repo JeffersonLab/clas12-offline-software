@@ -1,12 +1,20 @@
 package org.jlab.rec.cvt.services;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
+import org.jlab.geom.base.ConstantProvider;
+import org.jlab.geom.base.Detector;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
@@ -17,6 +25,8 @@ import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
 import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.Track;
+import org.jlab.rec.cvt.track.Track;
+import org.jlab.utils.groups.IndexedTable;
 //import org.jlab.service.eb.EBHBEngine;
 //import org.jlab.service.eb.EBTBEngine;
 
@@ -31,6 +41,8 @@ public class CVTReconstruction extends ReconstructionEngine {
 
     org.jlab.rec.cvt.svt.Geometry SVTGeom;
     org.jlab.rec.cvt.bmt.Geometry BMTGeom;
+    CTOFGeant4Factory CTOFGeom;
+    Detector          CNDGeom ;
     SVTStripFactory svtIdealStripFactory;
     
     public CVTReconstruction() {
@@ -83,7 +95,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             //MagneticFields.getInstance().setSolenoidShift(shift);
 //            this.setFieldsConfig(newConfig);
             
-            CCDBConstantsLoader.Load(new DatabaseConstantProvider(bank.getInt("run", 0), "default"));
+//CCDBConstantsLoader.Load(new DatabaseConstantProvider(bank.getInt("run", 0), "default"));
         }
         this.setFieldsConfig(newConfig);
 
@@ -93,8 +105,9 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         if (Run != newRun) {
             this.setRun(newRun);
+            this.loadConstants( bank.getInt("run",0) );
         }
-      
+
         Run = newRun;
         this.setRun(Run);
     }
@@ -118,45 +131,75 @@ public class CVTReconstruction extends ReconstructionEngine {
 	@Override
     public boolean processDataEvent(DataEvent event) {
 		
-        CVTRecHandler recHandler = new CVTRecHandler(SVTGeom,BMTGeom);
-        setRunConditionsParameters(event, this.getFieldsConfig(), this.getRun(), false, "");
-
+        CVTRecHandler recHandler = new CVTRecHandler(SVTGeom,BMTGeom,CTOFGeom,CNDGeom);
+        setRunConditionsParameters(event, this.getFieldsConfig(), this.getRun(), false, "");            
+        double shift = org.jlab.rec.cvt.Constants.getZoffset();
+        
         Swim swimmer = new Swim();
         
         RecoBankWriter rbc = new RecoBankWriter();
 
         if( recHandler.loadClusters( event ) == false ) { return true; };
-       
+     
+        // skip  high busy events 
+        if( recHandler.getSVThits().size() > 700 ) return true; 
+ 
         recHandler.loadCrosses();
+
+        // skip  high busy events with more than 1k crosses in svt 
+        if( recHandler.getCrosses().get(0).size() > 1000 ) { return true; } 
 
         //System.out.println(" Number of crosses "+crosses.get(0).size()+" + "+crosses.get(1).size());
         if(Constants.isCosmicsData()==true) { 
             List<StraightTrack> cosmics = recHandler.cosmicsTracking();   
         	rbc.appendCVTCosmicsBanks(event, recHandler.getSVThits(), recHandler.getBMThits(), 
-        									 recHandler.getSVTclusters(), recHandler.getBMTclusters(), 
-        									 recHandler.getCrosses(), cosmics);
+        					 recHandler.getSVTclusters(), recHandler.getBMTclusters(), 
+        					 recHandler.getCrosses(), cosmics, shift);
         } 
         else {
             List<Track> trks = recHandler.beamTracking(swimmer);   
         	rbc.appendCVTBanks(event, recHandler.getSVThits(), recHandler.getBMThits(), 
-        									 recHandler.getSVTclusters(), recHandler.getBMTclusters(), 
-        									 recHandler.getCrosses(), trks);
+        				  recHandler.getSVTclusters(), recHandler.getBMTclusters(), 
+        				  recHandler.getCrosses(), trks, shift);
         }
         return true;
     }
     
-    public boolean init() {
+    public boolean loadConstants( int run ) {
         System.out.println(" ........................................ trying to connect to db ");
 //        CCDBConstantsLoader.Load(new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default"));
-        CCDBConstantsLoader.Load(new DatabaseConstantProvider(10, "default"));
+        // Load the calibration constants
+        String variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        CCDBConstantsLoader.Load(new DatabaseConstantProvider(run, variationName));
                
-        DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
+        DatabaseConstantProvider cp = new DatabaseConstantProvider(run, variationName);
 //        DatabaseConstantProvider cp = new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default");
         cp = SVTConstants.connect( cp );
         SVTConstants.loadAlignmentShifts( cp );
         cp.disconnect();    
-        this.setSVTDB(cp);
+        this.setSVTDB(cp);       
+               
+        //TrkSwimmer.getMagneticFields();
+        return true;
+    }
+
+    public boolean init() {
+        //System.out.println(" ........................................ trying to connect to db ");
+////        CCDBConstantsLoader.Load(new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default"));
+        //CCDBConstantsLoader.Load(new DatabaseConstantProvider(10, "default"));
+               
+        //DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
+////        DatabaseConstantProvider cp = new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default");
+        //cp = SVTConstants.connect( cp );
+        //SVTConstants.loadAlignmentShifts( cp );
+        //cp.disconnect();    
+        //this.setSVTDB(cp);
         
+        // Load other geometries
+        String variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, 11, variationName);
+        CTOFGeom = new CTOFGeant4Factory(providerCTOF);        
+        CNDGeom =  GeometryFactory.getDetector(DetectorType.CND, 11, variationName);
         
         //TrkSwimmer.getMagneticFields();
         return true;

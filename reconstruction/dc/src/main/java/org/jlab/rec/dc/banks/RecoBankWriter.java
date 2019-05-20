@@ -62,7 +62,7 @@ public class RecoBankWriter {
         for (int i = 0; i < hitlist.size(); i++) {
             if (hitlist.get(i).get_Id() == -1) {
                 continue;
-            }
+        }
 
             bank.setShort("id", i, (short) hitlist.get(i).get_Id());
             bank.setShort("status", i, (short) 0);
@@ -339,6 +339,12 @@ public class RecoBankWriter {
             bank.setShort("Cross3_ID", i, (short) candlist.get(i).get(2).get_Id());
             bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
             bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
+            bank.setFloat("x", i, (float) candlist.get(i).getFinalStateVec().x());
+            bank.setFloat("y", i, (float) candlist.get(i).getFinalStateVec().y());
+            bank.setFloat("z", i, (float) candlist.get(i).getFinalStateVec().getZ());
+            bank.setFloat("tx", i, (float) candlist.get(i).getFinalStateVec().tanThetaX());
+            bank.setFloat("ty", i, (float) candlist.get(i).getFinalStateVec().tanThetaY());
+            
         }
         //bank.show();
         return bank;
@@ -395,11 +401,11 @@ public class RecoBankWriter {
      private DataBank fillTBHitsBank(DataEvent event, List<FittedHit> hitlist) {
         if(event.hasBank("TimeBasedTrkg::TBHits")) { // for second pass tracking
                 HipoDataEvent de = (HipoDataEvent) event;
-                HipoEvent dde = de.getHipoEvent();
+               // HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBHits");
                 ////event.show();
                 //group.show();
-                dde.removeGroup("TimeBasedTrkg::TBHits");
+                //dde.removeGroup("TimeBasedTrkg::TBHits");
         }
         DataBank bank = event.createBank("TimeBasedTrkg::TBHits", hitlist.size());
 
@@ -434,6 +440,9 @@ public class RecoBankWriter {
             if(bank.getDescriptor().hasEntry("fitResidual")){
                bank.setFloat("fitResidual", i, (float) hitlist.get(i).get_TrkResid());
             }
+            if(bank.getDescriptor().hasEntry("Alpha")){
+               bank.setFloat("Alpha", i, (float) hitlist.get(i).getAlpha());
+            }
             bank.setFloat("doca", i, (float) hitlist.get(i).get_Doca());
             bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
             bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());
@@ -441,7 +450,7 @@ public class RecoBankWriter {
             bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
             bank.setByte("trkID", i, (byte) hitlist.get(i).get_AssociatedTBTrackID());
             bank.setFloat("timeResidual", i, (float) hitlist.get(i).get_TimeResidual());
-
+            
             bank.setInt("TDC",i,hitlist.get(i).get_TDC());
             bank.setFloat("B", i, (float) hitlist.get(i).getB());
             bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
@@ -478,11 +487,11 @@ public class RecoBankWriter {
     private DataBank fillTBClustersBank(DataEvent event, List<FittedCluster> cluslist) {
         if(event.hasBank("TimeBasedTrkg::TBClusters")) { // for second pass tracking
                 HipoDataEvent de = (HipoDataEvent) event;
-                HipoEvent dde = de.getHipoEvent();
+                //HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBClusters");
                 ////event.show();
                 //group.show();
-                dde.removeGroup("TimeBasedTrkg::TBClusters");
+                //dde.removeGroup("TimeBasedTrkg::TBClusters");
         }
         DataBank bank = event.createBank("TimeBasedTrkg::TBClusters", cluslist.size());
 
@@ -546,11 +555,11 @@ public class RecoBankWriter {
     private DataBank fillTBSegmentsBank(DataEvent event, List<Segment> seglist) {
         if(event.hasBank("TimeBasedTrkg::TBSegments")) { // for second pass tracking
                 HipoDataEvent de = (HipoDataEvent) event;
-                HipoEvent dde = de.getHipoEvent();
+                //HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBSegments");
                 ////event.show();
                 //group.show();
-                dde.removeGroup("TimeBasedTrkg::TBSegments");
+                //dde.removeGroup("TimeBasedTrkg::TBSegments");
         }
         DataBank bank = event.createBank("TimeBasedTrkg::TBSegments", seglist.size());
 
@@ -654,11 +663,11 @@ public class RecoBankWriter {
 
         if(event.hasBank("TimeBasedTrkg::TBCrosses")) { // for second pass tracking
                 HipoDataEvent de = (HipoDataEvent) event;
-                HipoEvent dde = de.getHipoEvent();
+                //HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBCrosses");
                 ////event.show();
                 //group.show();
-                dde.removeGroup("TimeBasedTrkg::TBCrosses");
+                //dde.removeGroup("TimeBasedTrkg::TBCrosses");
         }
         int banksize=0;
         for (Cross aCrosslist1 : crosslist) {
@@ -701,11 +710,11 @@ public class RecoBankWriter {
     private DataBank fillTBTracksBank(DataEvent event, List<Track> candlist) {
         if(event.hasBank("TimeBasedTrkg::TBTracks")) { // for second pass tracking
                 HipoDataEvent de = (HipoDataEvent) event;
-                HipoEvent dde = de.getHipoEvent();
+                //HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBTracks");
                 ////event.show();
                 //group.show();
-                dde.removeGroup("TimeBasedTrkg::TBTracks");
+                //dde.removeGroup("TimeBasedTrkg::TBTracks");
         }
         DataBank bank = event.createBank("TimeBasedTrkg::TBTracks", candlist.size());
 
@@ -769,7 +778,15 @@ public class RecoBankWriter {
     }
 
     private DataBank fillTrajectoryBank(DataEvent event, List<Track> tracks) {
-        DataBank bank = event.createBank("TimeBasedTrkg::Trajectory", tracks.size()*21);
+        int size=0;
+        for (Track track : tracks) {
+            if (track == null)
+                continue;
+            if (track.trajectory == null)
+                continue;
+            size+=track.trajectory.size();
+        }       
+        DataBank bank = event.createBank("TimeBasedTrkg::Trajectory", size);
         int i1=0;
         for (Track track : tracks) {
             if (track == null)
@@ -778,19 +795,20 @@ public class RecoBankWriter {
                 continue;
 
             for (int j = 0; j < track.trajectory.size(); j++) {
-                if (track.trajectory.get(j).getDetName().startsWith("DC") && (j - 6) % 6 != 0)
+                if (track.trajectory.get(j).getDetName().equals("DC") && (track.trajectory.get(j).getLayerId() - 6) % 6 != 0)
                     continue;  // save the last layer in a superlayer
 
-                bank.setShort("did", i1, (short) track.trajectory.get(j).getDetId());
-                bank.setShort("tid", i1, (short) track.get_Id());
-                bank.setFloat("x", i1, (float) track.trajectory.get(j).getX());
-                bank.setFloat("y", i1, (float) track.trajectory.get(j).getY());
-                bank.setFloat("z", i1, (float) track.trajectory.get(j).getZ());
-                bank.setFloat("tx", i1, (float) ((float) track.trajectory.get(j).getpX() / track.get_P()));
-                bank.setFloat("ty", i1, (float) ((float) track.trajectory.get(j).getpY() / track.get_P()));
-                bank.setFloat("tz", i1, (float) ((float) track.trajectory.get(j).getpZ() / track.get_P()));
-                bank.setFloat("B", i1, (float) track.trajectory.get(j).getiBdl());
-                bank.setFloat("L", i1, (float) track.trajectory.get(j).getPathLen());
+                bank.setShort("id",       i1, (short) track.get_Id());
+                bank.setShort("detector", i1, (short) track.trajectory.get(j).getDetId());
+                bank.setByte("layer",     i1, (byte) track.trajectory.get(j).getLayerId());
+                bank.setFloat("x",        i1, (float) track.trajectory.get(j).getX());
+                bank.setFloat("y",        i1, (float) track.trajectory.get(j).getY());
+                bank.setFloat("z",        i1, (float) track.trajectory.get(j).getZ());
+                bank.setFloat("tx",       i1, (float) ((float) track.trajectory.get(j).getpX() / track.get_P()));
+                bank.setFloat("ty",       i1, (float) ((float) track.trajectory.get(j).getpY() / track.get_P()));
+                bank.setFloat("tz",       i1, (float) ((float) track.trajectory.get(j).getpZ() / track.get_P()));
+                bank.setFloat("B",        i1, (float) track.trajectory.get(j).getiBdl());
+                bank.setFloat("path",     i1, (float) track.trajectory.get(j).getPathLen());
                 i1++;
             }
         }

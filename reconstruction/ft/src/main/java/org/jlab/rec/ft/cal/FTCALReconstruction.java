@@ -24,17 +24,18 @@ public class FTCALReconstruction {
 
         IndexedTable charge2Energy = manager.getConstants(run, "/calibration/ft/ftcal/charge_to_energy");
         IndexedTable timeOffsets   = manager.getConstants(run, "/calibration/ft/ftcal/time_offsets");
+        IndexedTable timeWalk      = manager.getConstants(run, "/calibration/ft/ftcal/time_walk");
         IndexedTable cluster       = manager.getConstants(run, "/calibration/ft/ftcal/cluster");
 
         if(this.debugMode>=1) System.out.println("\nAnalyzing new event");
         List<FTCALHit> allhits = null;
         
         if(event instanceof EvioDataEvent) {
-            allhits = this.readRawHits(event,charge2Energy,timeOffsets,cluster);
+            allhits = this.readRawHits(event,charge2Energy,timeOffsets,timeWalk,cluster);
         }
         
         if(event instanceof HipoDataEvent) {
-            allhits = this.readRawHitsHipo(event,charge2Energy,timeOffsets,cluster);
+            allhits = this.readRawHitsHipo(event,charge2Energy,timeOffsets,timeWalk,cluster);
         }
         if(debugMode>=1) {
             System.out.println("Found " + allhits.size() + " hits");
@@ -153,8 +154,8 @@ public class FTCALReconstruction {
                 return;
             }
             for(int i = 0; i < clusters.size(); i++){
-                            bankCluster.setInt("id", i,clusters.get(i).getID());
-                            bankCluster.setInt("size", i,clusters.get(i).getSize());
+                            bankCluster.setShort("id", i,(short) clusters.get(i).getID());
+                            bankCluster.setShort("size", i,(short) clusters.get(i).getSize());
                             bankCluster.setFloat("x",i,(float) (clusters.get(i).getX()/10.0));
                             bankCluster.setFloat("y",i, (float) (clusters.get(i).getY()/10.0));
                             bankCluster.setFloat("z",i, (float) (clusters.get(i).getZ()/10.0));
@@ -223,7 +224,7 @@ public class FTCALReconstruction {
         }
     }
 
-    public List<FTCALHit> readRawHits(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable cluster) {
+    public List<FTCALHit> readRawHits(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable timeWalk, IndexedTable cluster) {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTCAL:dgtz bank");
 
@@ -238,7 +239,7 @@ public class FTCALReconstruction {
                 int adc         = bankDGTZ.getInt("ADC",row);
                 int tdc         = bankDGTZ.getInt("TDC",row);
                 if(adc!=-1 && tdc!=-1){
-                    FTCALHit hit = new FTCALHit(row,icomponent, adc, tdc, charge2Energy, timeOffsets, cluster);
+                    FTCALHit hit = new FTCALHit(row,icomponent, adc, tdc, charge2Energy, timeOffsets, timeWalk, cluster);
 	             hits.add(hit); 
 	        }	          
             }
@@ -246,7 +247,7 @@ public class FTCALReconstruction {
         return hits;
     }
     
-    public List<FTCALHit> readRawHitsHipo(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable cluster) {
+    public List<FTCALHit> readRawHitsHipo(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable timeWalk, IndexedTable cluster) {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTCAL:adc bank");
 
@@ -255,14 +256,14 @@ public class FTCALReconstruction {
             DataBank bankDGTZ = event.getBank("FTCAL::adc");
             int nrows = bankDGTZ.rows();
             for(int row = 0; row < nrows; row++){
-                int isector     = bankDGTZ.getInt("sector",row);
-                int ilayer      = bankDGTZ.getInt("layer",row);
-                int icomponent  = bankDGTZ.getInt("component",row);
-                int iorder      = bankDGTZ.getInt("order",row);
+                int isector     = bankDGTZ.getByte("sector",row);
+                int ilayer      = bankDGTZ.getByte("layer",row);
+                int icomponent  = bankDGTZ.getShort("component",row);
+                int iorder      = bankDGTZ.getByte("order",row);
                 int adc         = bankDGTZ.getInt("ADC",row);
                 float time      = bankDGTZ.getFloat("time",row);
                 if(adc!=-1 && time!=-1){
-                    FTCALHit hit = new FTCALHit(row,icomponent, adc, time, charge2Energy, timeOffsets, cluster);
+                    FTCALHit hit = new FTCALHit(row,icomponent, adc, time, charge2Energy, timeOffsets, timeWalk, cluster);
 	             hits.add(hit); 
 	        }	          
             }

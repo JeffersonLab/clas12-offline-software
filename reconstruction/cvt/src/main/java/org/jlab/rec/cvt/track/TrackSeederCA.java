@@ -39,14 +39,18 @@ public class TrackSeederCA {
       	  if( cell.get_state() >= mstate-1 ){
           
 //             if the cell has been already used for one track candidate, then skip it
-      		  if( cell.is_used() ) continue;
-      		  if( cell.get_plane().equalsIgnoreCase("XY") ) {
-      			  if( cell.get_c1().is_usedInXYcand() || cell.get_c2().is_usedInXYcand() ) { continue;}
-      		  }
+            if( cell.is_used() ) continue;
+            if( cell.get_plane().equalsIgnoreCase("XY") ) {
+              if( cell.get_c1().is_usedInXYcand() || cell.get_c2().is_usedInXYcand() ) { continue;}
+            }
 
-      		  if( cell.get_plane().equalsIgnoreCase("ZR") ) {
-      			  if( cell.get_c1().is_usedInZRcand() || cell.get_c2().is_usedInZRcand() ) continue;
-      		  }
+            //if( cell.get_plane().equalsIgnoreCase("ZR") ) {
+              //if( cell.get_c1().is_usedInZRcand() || cell.get_c2().is_usedInZRcand() ) continue;
+            //}
+
+      		  //if( cell.get_plane().equalsIgnoreCase("ZR") ) {
+      			  //if( cell.get_c1().is_usedInZRcand() || cell.get_c2().is_usedInZRcand() ) continue;
+      		  //}
       		 
       		  int candlen = 1;
       		  ArrayList<Cell> cand = new ArrayList<Cell>();
@@ -430,7 +434,7 @@ public class TrackSeederCA {
 			   double r2 = org.jlab.rec.cvt.svt.Constants.MODULERADIUS[l2-1][s2-1];
 			   double nstr2 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r2 - b)/m, l2, s2);
 			   
-			   if( Math.abs( c1 - nstr1 ) < 4 && Math.abs( c2 - nstr2 ) < 4 )			   
+			   if( Math.abs( c1 - nstr1 ) < 8 && Math.abs( c2 - nstr2 ) < 8 )
 				   seedCrosses.get(scsize-1).add(c);
           }
 

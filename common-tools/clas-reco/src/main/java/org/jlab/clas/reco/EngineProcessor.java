@@ -72,7 +72,7 @@ public class EngineProcessor {
             "MAGFIELDS",
             "FTCAL", "FTHODO", "FTEB",
             "DCHB","FTOFHB","EC",
-            "CVT","CTOF","CND",
+            "CVT","CTOF","CND","BAND",
             "HTCC","LTCC","RICHEB","EBHB",
             "DCTB","FTOFTB","EBTB"
         };
@@ -89,6 +89,7 @@ public class EngineProcessor {
             "org.jlab.service.ctof.CTOFEngine",
             //"org.jlab.service.cnd.CNDEngine",
             "org.jlab.service.cnd.CNDCalibrationEngine",
+            "org.jlab.service.band.BANDEngine",
             "org.jlab.service.htcc.HTCCReconstructionService",
             "org.jlab.service.ltcc.LTCCEngine",
             "org.jlab.rec.rich.RICHEBEngine",
@@ -247,12 +248,13 @@ public class EngineProcessor {
     
     public static void main(String[] args){
         
-        OptionParser parser = new OptionParser("notsouseful-util");
+        OptionParser parser = new OptionParser("recon-util");
         parser.addRequired("-o","output.hipo");
         parser.addRequired("-i","input.hipo");
         parser.setRequiresInputList(false);
         parser.addOption("-c","0","use default configuration [0 - no, 1 - yes/default, 2 - all services] ");
         parser.addOption("-n","-1","number of events to process");
+        parser.setDescription("previously known as notsouseful-util");
         
         parser.parse(args);
         

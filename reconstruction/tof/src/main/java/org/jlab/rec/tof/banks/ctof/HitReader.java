@@ -2,6 +2,7 @@ package org.jlab.rec.tof.banks.ctof;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,8 @@ import org.jlab.rec.tof.banks.BaseHit;
 import org.jlab.rec.tof.banks.BaseHitReader;
 import org.jlab.rec.tof.banks.IMatchedHit;
 import org.jlab.rec.tof.hit.ctof.Hit;
+import org.jlab.rec.tof.track.Track;
+import org.jlab.utils.groups.IndexedList;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -39,15 +42,13 @@ public class HitReader implements IMatchedHit {
         this._CTOFHits = _Hits;
     }
 
-    private int _numTrks;
-
     /**
      *
      * @param event the evio event
      * @param geometry the CTOF geometry from package
      */
     public void fetch_Hits(DataEvent event, long timeStamp, CTOFGeant4Factory geometry,
-            List<Line3d> trks, double[] paths, int[] ids,
+            ArrayList<Track> tracks,
             IndexedTable constants0, 
             IndexedTable constants1, 
             IndexedTable constants2, 
@@ -55,7 +56,8 @@ public class HitReader implements IMatchedHit {
             IndexedTable constants4, 
             IndexedTable constants5, 
             IndexedTable constants6, 
-            IndexedTable constants7) {
+            IndexedTable constants7, 
+            IndexedTable constants8) {
         /*
         0: "/calibration/ctof/attenuation"),
         1: "/calibration/ctof/effective_velocity"),
@@ -64,9 +66,9 @@ public class HitReader implements IMatchedHit {
         4: "/calibration/ctof/status"));
         5: "/calibration/ctof/gain_balance"),
         6: "/calibration/ctof/time_jitter"),
-        7: "/calibration/ctof/fadc_offset"));
+        7: "/calibration/ctof/fadc_offset"),
+        7: "/calibration/ctof/hpos"));
         */
-        _numTrks = trks.size();
 
         double triggerPhase = this.getTriggerPhase(timeStamp, constants6);
         
@@ -125,7 +127,7 @@ public class HitReader implements IMatchedHit {
             // add this hit
             if(passHit(hit))hits.add(hit);
         }
-        List<Hit> updated_hits = matchHitsToCVTTrk(hits, geometry, trks, paths, ids);
+        List<Hit> updated_hits = matchHitsToCVTTrk(hits, geometry, tracks);
 
         ArrayList<ArrayList<Hit>> DetHits = new ArrayList<ArrayList<Hit>>();
         for (int j = 0; j < 3; j++) {
@@ -140,7 +142,8 @@ public class HitReader implements IMatchedHit {
              constants1, 
              constants2, 
              constants3, 
-             constants5);
+             constants5, 
+             constants8);
             // DetHits.get(hit.get_Panel()-1).add(hit);
         }
         // List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);
@@ -214,71 +217,85 @@ public class HitReader implements IMatchedHit {
         return pass;
     }
     
-    private List<Hit> matchHitsToCVTTrk(List<Hit> CTOFhits, CTOFGeant4Factory ctofDetector, List<Line3d> trks, double[] paths, int[] ids) {
-        if (trks == null || trks.size() == 0) {
+    private List<Hit> matchHitsToCVTTrk(List<Hit> CTOFhits, CTOFGeant4Factory ctofDetector, ArrayList<Track> tracks) {
+        if (tracks == null || tracks.size() == 0) {
             return CTOFhits; // no hits were matched with DC tracks
         }
-        Map<String, org.jlab.rec.tof.hit.ctof.Hit> ctofHits = new LinkedHashMap<String, org.jlab.rec.tof.hit.ctof.Hit>();
+        // Instantiates the final list of hits
+        List<Hit> hitList = new ArrayList<Hit>();
         
-        // Instantiates the list of hits
-        List<org.jlab.rec.tof.hit.ctof.Hit> hitList = new ArrayList<org.jlab.rec.tof.hit.ctof.Hit>();
-        
-        String det ;
-        for (org.jlab.rec.tof.hit.ctof.Hit fhit : CTOFhits) {
-            det = new String("C");
-            det+=fhit.get_Paddle();
-            ctofHits.put(det, fhit);
-        }
-        for (int i = 0; i < trks.size(); i++) { // looping over the tracks find
-            // the intersection of the track
-            // with that plane
-            Line3d trk = trks.get(i);
-            List<DetHit> hits = ctofDetector.getIntersections(trk);
-            String mdet ; 
-            if (hits != null && hits.size() > 0) {
-                for (DetHit hit : hits) {
-                    CTOFDetHit fhit = new CTOFDetHit(hit);
-                    
-                    // add buffer for matched hits
-                    //----------------------------
-                    for (int j = -1; j<=1; j++) {
-                        mdet = new String("C");
-                        mdet+=fhit.getPaddle() + j;
-
-                        if(ctofHits.containsKey(mdet)) {
-                            ctofHits.get(mdet)._AssociatedTrkId = ids[i];
-                            ctofHits.get(mdet).set_matchedTrackHit(fhit);
-                            ctofHits.get(mdet).set_matchedTrack(trks.get(i));
-                            double deltaPath = trks.get(i).origin().distance(
-                                        fhit.mid());
-                            double pathLenTruBar = fhit.origin().distance(
-                                    fhit.end());
-                            ctofHits.get(mdet).set_TrkPathLenThruBar(pathLenTruBar);
-                            ctofHits.get(mdet).set_TrkPathLen(paths[i] + deltaPath);
-                            // get the coordinates for the track hit, which is defined
-                            // as the mid-point between its entrance and its exit from
-                            // the bar
-                            ctofHits.get(mdet).set_TrkPosition(new Point3D(fhit.mid().x,
-                                    fhit.mid().y, fhit.mid().z));
-                            // compute the local y at the middle of the bar :
-                            // ----------------------------------------------
-                            Point3D origPaddleLine = ctofHits.get(mdet).get_paddleLine().origin();
-                            Point3D trkPosinMidlBar = new Point3D(fhit.mid().x,
-                                    fhit.mid().y, fhit.mid().z);
-                            double Lov2 = ctofHits.get(mdet).get_paddleLine().length() / 2;
-                            double barOrigToTrkPos = origPaddleLine
-                                    .distance(trkPosinMidlBar);
-                            // local y:
-                            ctofHits.get(mdet).set_yTrk(barOrigToTrkPos - Lov2);
-                           // hitList.add(ftofHits.get(mdet));
+        // Instantiates map of track intersections with the paddles
+        IndexedList<ArrayList<Track>> trkHitsMap = new IndexedList<ArrayList<Track>>(1);
+        // calculate track intersections
+        for (int i = 0; i < tracks.size(); i++) {
+            Track trk = tracks.get(i);
+//            System.out.println(tracks.size() + " " + i + trk.toString());
+            List<DetHit> trkHits = ctofDetector.getIntersections(trk.getLine());
+            if (trkHits != null && trkHits.size() > 0) {
+                for (DetHit hit : trkHits) {
+                    CTOFDetHit trkHit = new CTOFDetHit(hit);
+                    // check if intersection is in the "positive direction" and reject other intersections
+                    double dir = trkHit.mid().minus(trk.getLine().origin()).dot(trk.getLine().end().minus(trk.getLine().origin()));
+//                    System.out.println(trkHit.getPaddle() + " " + dir);
+                    if(dir>0) {
+                        // create the new track updating the path to the intersection point
+                        Track ctofTrkHit = new Track(trk.getId(),trk.getLine(),trk.getPath()+trk.getLine().origin().distance(hit.mid()));
+                        ctofTrkHit.setHit(trkHit);
+                        // if map entry for the given paddle doesn't already exist, add it
+                        if(!trkHitsMap.hasItem(trkHit.getPaddle())) { 
+                            ArrayList<Track> list = new ArrayList<Track>();
+                            trkHitsMap.add(list, trkHit.getPaddle());
                         }
+                        // add the track/intersection to the map
+                        trkHitsMap.getItem(trkHit.getPaddle()).add(ctofTrkHit);
                     }
                 }
             }
         }
-        for (Map.Entry<String, org.jlab.rec.tof.hit.ctof.Hit> hits : ctofHits.entrySet()) {
-            hitList.add(hits.getValue());
+        
+       for(Hit ctofHit : CTOFhits) {
+            // loop over tracks and find closest intesrsection
+            double deltaPaddle = 2;
+            Track matchedTrk   = null;
+            for (int i = 0; i <= 0; i++) { // exact matching based on paddle number
+                int iPaddle = ctofHit.get_Paddle()+i;
+//                System.out.println(ctofHit.toString());
+                if(trkHitsMap.hasItem(iPaddle)) {
+                    ArrayList<Track> paddleTrackHits = trkHitsMap.getItem(ctofHit.get_Paddle()+i);
+                    for(Track paddleTrack : paddleTrackHits) {
+                        CTOFDetHit trkHit = new CTOFDetHit(paddleTrack.getHit());
+//                        System.out.println(trkHit.getPaddle());
+                        if(Math.abs(trkHit.getPaddle()-ctofHit.get_Paddle())<deltaPaddle) {
+                            deltaPaddle = Math.abs(trkHit.getPaddle()-ctofHit.get_Paddle());
+                            matchedTrk = paddleTrack;                            
+                        }
+                    }
+                }
+            }
+            if(matchedTrk!=null) {
+                CTOFDetHit trkHit = new CTOFDetHit(matchedTrk.getHit());
+                ctofHit._AssociatedTrkId = matchedTrk.getId();
+                ctofHit.set_matchedTrackHit(trkHit);
+                ctofHit.set_matchedTrack(matchedTrk.getLine());
+                ctofHit.set_TrkPathLenThruBar(trkHit.origin().distance(trkHit.end()));
+                ctofHit.set_TrkPathLen(matchedTrk.getPath());
+                // get the coordinates for the track hit, which is defined
+                // as the mid-point between its entrance and its exit from
+                // the bar
+                ctofHit.set_TrkPosition(new Point3D(trkHit.mid().x,trkHit.mid().y, trkHit.mid().z));
+                // compute the local y at the middle of the bar :
+                // ----------------------------------------------
+                Point3D origPaddleLine = ctofHit.get_paddleLine().origin();
+                Point3D trkPosinMidlBar = new Point3D(trkHit.mid().x,trkHit.mid().y, trkHit.mid().z);
+                double Lov2 = ctofHit.get_paddleLine().length() / 2;
+                double barOrigToTrkPos = origPaddleLine.distance(trkPosinMidlBar);
+                // local y:
+                ctofHit.set_yTrk(barOrigToTrkPos - Lov2);
+            }
+            // save hit in final list
+            hitList.add(ctofHit);
         }
+        
         
         return hitList;
     }
@@ -357,12 +374,16 @@ public class HitReader implements IMatchedHit {
     @Override
     public List<BaseHit> MatchHits(ArrayList<BaseHit> ADCandTDCLists, double timeJitter, IndexedTable tdcConv, IndexedTable ADCandTDCOffsets) {
         ArrayList<BaseHit> matchLists = new ArrayList<BaseHit>();
-
+        int debug=0;
         if (ADCandTDCLists != null) {
             Collections.sort(ADCandTDCLists);
-//             System.out.println("Trigger phase: " + timeJitter);
-//             for(BaseHit h : ADCandTDCLists)
-//             System.out.println(h.get_Sector()+":"+h.get_Layer()+":"+h.get_Component()+"   --   "+h.ADC1+"; "+h.ADC2+"; "+h.ADCTime1+"; "+h.ADCTime2+"; "+h.TDC1+"; "+h.TDC2+"; ");
+            
+            if(debug>1) { 
+                System.out.println("List of hits for matching");
+                for(BaseHit h : ADCandTDCLists)
+                System.out.println(h.get_Sector()+":"+h.get_Layer()+":"+h.get_Component()+"   --   "+h.ADC1+"; "+h.ADC2+"; "+h.ADCTime1+"; "+h.ADCTime2+"; "+h.TDC1+"; "+h.TDC2+"; ");
+            }
+                
             double t1 = -1;
             double t2 = -1; // t1, t2 not yet used in selection
             int adc1 = -1;
@@ -386,6 +407,7 @@ public class HitReader implements IMatchedHit {
                 double offset1 = ADCandTDCOffsets.getDoubleValue("upstream",   h.get_Sector(), h.get_Layer(), h.get_Component());
                 double offset2 = ADCandTDCOffsets.getDoubleValue("downstream", h.get_Sector(), h.get_Layer(), h.get_Component());
                 double width  = ADCandTDCOffsets.getDoubleValue("width", h.get_Sector(), h.get_Layer(), h.get_Component());
+                if(debug>1) System.out.println("Working on hit " + i + "   --   "+h.ADC1+"; "+h.ADC2+"; "+h.ADCTime1+"; "+h.ADCTime2+"; "+h.TDC1+"; "+h.TDC2+"; ");
                 if (h.get_ADC1() > 0) {
                     adc1 = h.get_ADC1();
                     if (h.get_ADCTime1() > 0) {
@@ -393,10 +415,12 @@ public class HitReader implements IMatchedHit {
                     }                    
                     if (adc2 > 0 && Math.abs(adc1 - adc2) < 16000) {
                         hitlists.get(index1).add(h); // matched hit
+                        if(debug>1) System.out.println("ADC1 hit added to " + index1 + ", advancing pointer to next hit");
                         index1++;
                     }
                     if (adc2 == -1) {
                         hitlists.get(index1).add(h); // not matched hit
+                        if(debug>1) System.out.println("New ADC1 hit created, advancing pointer to next hit");
                         index1++;
                     }                    
                 }
@@ -407,10 +431,12 @@ public class HitReader implements IMatchedHit {
                     }
                     if (adc1 > 0 && Math.abs(adc1 - adc2) < 16000) {
                         hitlists.get(index2).add(h); // matched hit
+                        if(debug>1) System.out.println("ADC2 hit added to " + index2 + ", advancing pointer to next hit");
                         index2++;
                     }
                     if (adc1 == -1) {
                         hitlists.get(index2).add(h); // not matched hit
+                        if(debug>1) System.out.println("New ADC2 hit created, advancing pointer to next hit");
                         index2++;
                     }
                 }
@@ -424,12 +450,15 @@ public class HitReader implements IMatchedHit {
 //                        hitlists.get(index3).add(h); // not matched hit
 //                        index3++;
 //                    }
+                    if(debug>1) System.out.println("TDC check value : " + Math.abs(tdc1 * tdconv1 -timeJitter - (t1 + offset1)));
                     if (adc1 > 0 && Math.abs(tdc1 * tdconv1 -timeJitter - (t1 + offset1)) < width) {
                         hitlists.get(index3).add(h);
+                        if(debug>1) System.out.println("TDC1 hit added to " + index3 + ", advancing pointer to next hit");
                         index3++;
                     }
                     if (adc1 == -1) {
                         hitlists.get(index3).add(h); // not matched hit
+                        if(debug>1) System.out.println("New TDC1 hit created, advancing pointer to next hit");
                         index3++;
                     }
                 }
@@ -443,12 +472,15 @@ public class HitReader implements IMatchedHit {
 //                        hitlists.get(index4).add(h); // not matched hit
 //                        index4++;
 //                    }
+                    if(debug>1) System.out.println("TDC check value : " + Math.abs(tdc2 * tdconv2 -timeJitter - (t2 + offset2)));
                     if (adc2 > 0 && Math.abs(tdc2 * tdconv2 -timeJitter - (t2 + offset2)) < width) {
                         hitlists.get(index4).add(h);
+                        if(debug>1) System.out.println("TDC2 hit added to " + index4 + ", advancing pointer to next hit");
                         index4++;
                     }
                     if (adc2 == -1) {
                         hitlists.get(index4).add(h); // not matched hit
+                        if(debug>1) System.out.println("New TDC2 hit created, advancing pointer to next hit");
                         index4++;
                     }
                 }
@@ -518,8 +550,8 @@ public class HitReader implements IMatchedHit {
                     hit.TDCbankHitIdx2 = tdc_idx2;
 
                     matchLists.add(hit);
-//                    System.out.println(i+")  s "+hit.get_Sector()+" l "+hit.get_Layer()+" c "+hit.get_Component()+" adcL "+hit.get_ADC1()+" adcR "+hit.get_ADC2()+" tdcL "+
-//                    hit.get_TDC1()+" tdcR "+hit.get_TDC2() +" tdcLx "+hit.TDCbankHitIdx1+" tdcRx "+hit.TDCbankHitIdx2);
+                    if(debug>1) System.out.println(i+")  s "+hit.get_Sector()+" l "+hit.get_Layer()+" c "+hit.get_Component()+" adcL "+hit.get_ADC1()+" adcR "+hit.get_ADC2()+" tdcL "+
+                    hit.get_TDC1()+" tdcR "+hit.get_TDC2() +" tdcLx "+hit.TDCbankHitIdx1+" tdcRx "+hit.TDCbankHitIdx2);
 
                 }
             }

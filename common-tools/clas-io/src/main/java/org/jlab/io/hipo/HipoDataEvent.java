@@ -8,18 +8,17 @@ package org.jlab.io.hipo;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataDictionary;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventType;
-import org.jlab.jnp.hipo.data.HipoEvent;
-import org.jlab.jnp.hipo.data.HipoGroup;
-import org.jlab.jnp.hipo.data.HipoNode;
-import org.jlab.jnp.hipo.schema.Schema;
-import org.jlab.jnp.hipo.schema.Schema.SchemaEntry;
-import org.jlab.jnp.hipo.schema.SchemaFactory;
+import org.jlab.jnp.hipo4.data.Bank;
+import org.jlab.jnp.hipo4.data.Event;
+import org.jlab.jnp.hipo4.data.SchemaFactory;
+import org.jlab.jnp.hipo4.data.Schema;
 
 /**
  *
@@ -27,30 +26,41 @@ import org.jlab.jnp.hipo.schema.SchemaFactory;
  */
 public class HipoDataEvent implements DataEvent {
     
-    private HipoEvent hipoEvent = null;
+    private Event hipoEvent = null;
+    private SchemaFactory schemaFactory = null;
+    
     private DataEventType eventType = DataEventType.EVENT_ACCUMULATE;
     
     public HipoDataEvent(byte[] array, SchemaFactory factory){
-        hipoEvent = new HipoEvent(array,factory);
+        hipoEvent = new Event(array.length);
+        hipoEvent.initFrom(array);
+        schemaFactory = factory;
     }
     
-    public HipoDataEvent(HipoEvent event){
+    public HipoDataEvent(Event event){
         this.hipoEvent = event;
     }
     
-    public HipoEvent  getHipoEvent(){return this.hipoEvent;}
+    public HipoDataEvent(Event event,SchemaFactory factory){
+        this.hipoEvent = event;
+        schemaFactory = factory;
+    }
+    
+    public Event  getHipoEvent(){return this.hipoEvent;}
     
     public void initDictionary(SchemaFactory factory){
-        this.hipoEvent.getSchemaFactory().copy(factory);
+        //this.hipoEvent.getSchemaFactory().copy(factory);
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     @Override
     public String[] getBankList() {
-        List<Schema> schemaList = hipoEvent.getSchemaFactory().getSchemaList();
+        List<Schema> schemaList = schemaFactory.getSchemaList();
         List<String> existingBanks = new ArrayList<String>();
         for(Schema schema : schemaList){
             int group = schema.getGroup();
-            if(hipoEvent.hasGroup(group)==true){
+            int item  = schema.getItem();
+            if(hipoEvent.scan(group, item)>0){
                 existingBanks.add(schema.getName());
             }
         }
@@ -61,27 +71,32 @@ public class HipoDataEvent implements DataEvent {
     }
 
     public String[] getColumnList(String bank_name) {
-       List<String> columnsList = this.hipoEvent.getSchemaFactory().getSchema(bank_name).schemaEntryList();       
-        String[] columns = new String[columnsList.size()];
-        for(int i = 0; i < columns.length; i++) columns[i] = columnsList.get(i);
+        Schema schema = schemaFactory.getSchema(bank_name);
+        int  ncolumns = schemaFactory.getSchema(bank_name).getElements();
+        //List<String> columnsList = schemaFactory.getSchema(bank_name).getElements();
+        String[] columns = new String[ncolumns];
+        for(int i = 0; i < columns.length; i++) columns[i] = schema.getElementName(i);
         return columns;
     }
 
+    @Override
     public DataDictionary getDictionary() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
     public ByteBuffer getEventBuffer() {
-        ByteBuffer buffer = ByteBuffer.wrap(this.hipoEvent.getDataBuffer());
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
-        return buffer;
+        //ByteBuffer buffer = ByteBuffer.wrap(this.hipoEvent.getEventBuffer()
+        //buffer.order(ByteOrder.LITTLE_ENDIAN);
+        return hipoEvent.getEventBuffer();
     }
 
+    @Override
     public void appendBank(DataBank bank) {
         if(bank==null) return;
         if(bank instanceof HipoDataBank){
-            HipoGroup group =  ((HipoDataBank) bank).getGroup();
-            hipoEvent.writeGroup(group);
+            Bank group =  ((HipoDataBank) bank).getBank();
+            hipoEvent.write(group);
         }
     }
 
@@ -93,17 +108,21 @@ public class HipoDataEvent implements DataEvent {
 
     @Override
     public boolean hasBank(String name) {
-        return (this.hipoEvent.hasGroup(name));
+        Schema schema = schemaFactory.getSchema(name);
+        if(schema==null) return false;
+        return hipoEvent.scan(schema.getGroup(),schema.getItem())>0;
     }
 
     @Override
     public DataBank getBank(String bank_name) {
-        if(this.hipoEvent.getSchemaFactory().hasSchema(bank_name)==true){
-            //Schema schema = this.hipoEvent.getSchemaFactory().getSchema(bank_name);
-            //Map<Integer,HipoNode> map = this.hipoEvent.getGroup(schema.getGroup());
-            HipoGroup group = hipoEvent.getGroup(bank_name);
-            HipoDataBank bank = new HipoDataBank(group.getNodesMap(),group.getSchema());
-            return bank;
+        
+        Schema schema = schemaFactory.getSchema(bank_name);
+        
+        if(schema!=null){            
+            Bank bank = new Bank(schema);            
+            hipoEvent.read(bank);
+            HipoDataBank dataBank = new HipoDataBank(bank);
+            return dataBank;
         }        
         //HipoDataBank bank = new HipoDataBank();
         return null;
@@ -122,13 +141,13 @@ public class HipoDataEvent implements DataEvent {
     }
 
     public double[] getDouble(String path) {
-        HipoNode node = this.getHipoNodeByPath(path);        
+        /*HipoNode node = this.getHipoNodeByPath(path);        
         if(node==null){
             System.out.println("\n>>>>> error : getting node failed : " + path);
             return new double[0];
         }
-        return node.getDouble();
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return node.getDouble();*/
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void setDouble(String path, double[] arr) {
@@ -140,13 +159,13 @@ public class HipoDataEvent implements DataEvent {
     }
 
     public float[] getFloat(String path) {
-        HipoNode node = this.getHipoNodeByPath(path);        
+       /* HipoNode node = this.getHipoNodeByPath(path);        
         if(node==null){
             System.out.println("\n>>>>> error : getting node failed : " + path);
             return new float[0];
         }
-        return node.getFloat();
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return node.getFloat();*/
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void setFloat(String path, float[] arr) {
@@ -158,12 +177,13 @@ public class HipoDataEvent implements DataEvent {
     }
 
     public int[] getInt(String path) {
-        HipoNode node = this.getHipoNodeByPath(path);        
+        /*HipoNode node = this.getHipoNodeByPath(path);        
         if(node==null){
             System.out.println("\n>>>>> error : getting node failed : " + path);
             return new int[0];
         }
-        return node.getInt();
+        return node.getInt();*/
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void setInt(String path, int[] arr) {
@@ -175,12 +195,13 @@ public class HipoDataEvent implements DataEvent {
     }
 
     public short[] getShort(String path) {
-        HipoNode node = this.getHipoNodeByPath(path);        
+        /*HipoNode node = this.getHipoNodeByPath(path);        
         if(node==null){
             System.out.println("\n>>>>> error : getting node failed : " + path);
             return new short[0];
         }
-        return node.getShort();
+        return node.getShort();*/
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void setShort(String path, short[] arr) {
@@ -191,7 +212,7 @@ public class HipoDataEvent implements DataEvent {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public HipoNode getHipoNodeByPath(String path){
+ /*   public HipoNode getHipoNodeByPath(String path){
         String[] bank_and_item = path.split("[.]+");
         if(bank_and_item.length<2){
             System.out.println("\n>>>>> error : syntax error in path name : " + path);
@@ -214,15 +235,17 @@ public class HipoDataEvent implements DataEvent {
         
         HipoNode node = hipoEvent.getNode(schema.getGroup(), entry.getId());
         return node;
-    }
+    }*/
     
     public byte[] getByte(String path) {
-        HipoNode node = this.getHipoNodeByPath(path);        
+        
+        /*HipoNode node = this.getHipoNodeByPath(path);        
         if(node==null){
             System.out.println("\n>>>>> error : getting node failed : " + path);
             return new byte[0];
         }
-        return node.getByte();
+        return node.getByte();*/
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void setByte(String path, byte[] arr) {
@@ -246,11 +269,31 @@ public class HipoDataEvent implements DataEvent {
     }
     
     public void showBankByOrder(int order){
-        this.hipoEvent.showGroupByOrder(order);
+       // this.hipoEvent.showGroupByOrder(order);
     }
     
     @Override
     public DataBank createBank(String bank_name, int rows) {
+        
+        //System.out.println(" CREATING BANK = " + bank_name);
+        
+        Schema schema = schemaFactory.getSchema(bank_name);
+        if(schema ==null) {
+            System.out.println(" SCHEMA FOR ["+bank_name + "] = NULL");
+            List<String>  scList = schemaFactory.getSchemaKeys();
+            System.out.println(" SCHEMA FACTORY SIZE = " + scList.size());
+            Collections.sort(scList);
+            for(String sc : scList){
+                System.out.println("\t ----> " + sc);
+            }
+        }
+        //System.out.println("SCHEMA = " + schema.getName());
+        
+        Bank   bank   = new Bank(schema,rows);
+        
+        HipoDataBank dataBank = new HipoDataBank(bank);
+        return dataBank;
+        /*
         if(this.hipoEvent.getSchemaFactory().hasSchema(bank_name)==false){
             System.out.println(">>>>> error :  descriptor not found : " + bank_name);
             System.out.println(">>>>> error : number of descriptors : " + 
@@ -261,12 +304,12 @@ public class HipoDataEvent implements DataEvent {
         }
         HipoGroup group = this.hipoEvent.getSchemaFactory().getSchema(bank_name).createGroup(rows);
         HipoDataBank bank = new HipoDataBank(group);
-        return bank;
+        return bank;*/
     }
 
     @Override
     public void removeBank(String bankName) {
-        this.hipoEvent.removeGroup(bankName);
+        //this.hipoEvent.removeGroup(bankName);
     }
 
     @Override
@@ -277,7 +320,7 @@ public class HipoDataEvent implements DataEvent {
 
     @Override
     public long[] getLong(String path) {
-        HipoNode node = this.getHipoNodeByPath(path);        
+       /* HipoNode node = this.getHipoNodeByPath(path);        
         if(node==null){
             System.out.println("\n>>>>> error : getting node failed : " + path);
             return new long[0];
@@ -285,7 +328,8 @@ public class HipoDataEvent implements DataEvent {
         int size = node.getDataSize();
         long[] data = new long[size];
         for(int i =0; i < data.length; i++) data[i] = node.getLong(i);
-        return data;
+        return data;*/
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

@@ -1,0 +1,45 @@
+[ 
+ {
+    "name": "RICH::hits",
+    "group": 22000,
+    "item" : 21,   
+    "info": "Reconstructed Hits in RICH",
+    "entries": [
+              {"name":"id",          "type":"S", "info":"Hit id"},
+              {"name":"sector",      "type":"S", "info":"Hit sector"},
+              {"name":"tile",        "type":"S", "info":"Hit tile"},
+              {"name":"pmt",         "type":"S", "info":"Hit pmt" },
+              {"name":"anode",       "type":"S", "info":"Hit anode" },
+              {"name":"idx",         "type":"S", "info":"Hit idx" },
+              {"name":"idy",         "type":"S", "info":"Hit idy" },
+              {"name":"glx",         "type":"S", "info":"Hit glx" },
+              {"name":"gly",         "type":"S", "info":"Hit gly" },
+              {"name":"time",        "type":"S", "info":"Hit time" },
+              {"name":"cluster",     "type":"S", "info":"Hit cluster" },
+              {"name":"xtalk",       "type":"S", "info":"Hit xtalk" },
+              {"name":"duration",    "type":"S", "info":"Hit duration" }
+    ]
+  },
+   {
+    "name": "RICH::clusters",
+    "group": 22000,
+    "item" : 22,   
+    "info": "Reconstructed Clusters in RICH",
+    "entries": [
+            {"name":"id",         "type":"S", "info":"Clu id"},
+            {"name":"size",       "type":"S", "info":"Clu size"},
+            {"name":"sector",     "type":"S", "info":"Clu sector"},
+            {"name":"tile",       "type":"S", "info":"Clu tile"},
+            {"name":"pmt",        "type":"S", "info":"Clu pmt"},
+            {"name":"charge",     "type":"F", "info":"Clu charge" },
+            {"name":"time",       "type":"F", "info":"Clu time" },
+            {"name":"x",          "type":"F", "info":"Clu x" },
+            {"name":"y",          "type":"F", "info":"Clu y" },
+            {"name":"z",          "type":"F", "info":"Clu z" },
+            {"name":"wtime",      "type":"F", "info":"Clu wtime" },
+            {"name":"wx",         "type":"F", "info":"Clu wx" },
+            {"name":"wy",         "type":"F", "info":"Clu wy" },
+            {"name":"wz",         "type":"F", "info":"Clu wz" }
+        ]
+     }
+]

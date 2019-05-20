@@ -68,9 +68,9 @@ public class EBTwoTrackTest {
 
     DataBank mcBank=null,ctrkBank=null,calBank=null,ctofBank=null;
     DataBank trkBank=null,tofBank=null,htccBank=null,ltccBank=null;
-    DataBank recPartBank=null,recTrkBank=null,recFtBank=null;
+    DataBank recPartBank=null,recFtPartBank=null,recTrkBank=null,recFtBank=null;
     DataBank recCalBank=null,recSciBank=null,recCheBank=null;
-    DataBank ftcBank=null,fthBank=null,ftpartBank=null,recBank=null;
+    DataBank ftcBank=null,fthBank=null,ftpartBank=null,recBank=null,runBank=null;;
 
     Map <Integer,List<Integer>> recCalMap=new HashMap<Integer,List<Integer>>();
     Map <Integer,List<Integer>> recCheMap=new HashMap<Integer,List<Integer>>();
@@ -204,6 +204,7 @@ public class EBTwoTrackTest {
         tofBank     = getBank(de,"FTOF::clusters");
         trkBank     = getBank(de,"TimeBasedTrkg::TBTracks");
         recPartBank = getBank(de,"REC::Particle");
+        recFtPartBank = getBank(de,"RECFT::Particle");
         mcBank      = getBank(de,"MC::Particle");
         recCheBank  = getBank(de,"REC::Cherenkov");
         recCalBank  = getBank(de,"REC::Calorimeter");
@@ -218,6 +219,7 @@ public class EBTwoTrackTest {
         calBank     = getBank(de,"ECAL::clusters");
         ctofBank    = getBank(de,"CTOF::hits");
         recBank     = getBank(de,"REC::Event");
+        runBank     = getBank(de,"RUN::config");
         loadMaps();
     }
    
@@ -401,9 +403,9 @@ public class EBTwoTrackTest {
                 }
             }
             if (mcalo!=ncalo || mscin!=nscin || mcher!=ncher) { recPartBank.show(); recCalBank.show(); recSciBank.show(); recCheBank.show(); }
-            assertEquals(String.format("Cherenkov Count, Event >%d<",recBank.getInt("NEVENT",0)),ncher,mcher);
-            assertEquals(String.format("Calorimeter Count, Event >%d<",recBank.getInt("NEVENT",0)),ncalo,mcalo);
-            assertEquals(String.format("Scintillator Count, Event >%d<",recBank.getInt("NEVENT",0)),nscin,mscin);
+            assertEquals(String.format("Cherenkov Count, Event >%d<",runBank.getInt("event",0)),ncher,mcher);
+            assertEquals(String.format("Calorimeter Count, Event >%d<",runBank.getInt("event",0)),ncalo,mcalo);
+            assertEquals(String.format("Scintillator Count, Event >%d<",runBank.getInt("event",0)),nscin,mscin);
         }
     }
 
@@ -477,6 +479,10 @@ public class EBTwoTrackTest {
         final double gEff = (double)nFtPhotons / nEvents;
         final double hEff = (double)nFtFd / nEvents;
         System.out.println("\n#############################################################");
+        System.out.print("\nFT Electrons:  "+nFtElectrons);
+        System.out.print("\nHadrons   Sectors: ");
+        for (int k=0; k<6; k++) System.out.print(String.format(" %4d",nHadronsSector[k]));
+        System.out.println("\n");
         System.out.println(String.format("FT eEff = %.3f",eEff));
         System.out.println(String.format("FT gEff = %.3f",gEff));
         System.out.println(String.format("FD hEff = %.3f",hEff));
@@ -489,39 +495,44 @@ public class EBTwoTrackTest {
     // This is for Forward Tagger;
     private void processEventFT(DataEvent event) {
 
-        if (ftcBank!=null) {
+        if (ftcBank==null) return;
 
-            nEvents++;
+        nEvents++;
 
-            if (recBank!=null && recPartBank!=null && recFtBank!=null) {
+        if (recBank==null || recPartBank==null || recFtBank==null) return;
 
-                if (debug) {
-                    System.out.println("\n\n#############################################################\n");
-                    if (ftpartBank!=null) ftpartBank.show();
-                    recFtBank.show();
-                    recPartBank.show();
+        if (debug) {
+            System.out.println("\n\n#############################################################\n");
+            if (ftpartBank!=null) ftpartBank.show();
+            recFtBank.show();
+            recPartBank.show();
+        }
+
+        final float startTime=recBank.getFloat("startTime",0);
+
+        for (int ii=0; ii<recPartBank.rows(); ii++) {
+            if (recPartBank.getShort("status",ii)/1000 == 1) {
+                switch (recPartBank.getInt("pid",ii)) {
+                    case 11:
+                        nFtElectrons++;
+                        break;
+                    case 22:
+                        nFtPhotons++;
+                        break;
                 }
+            }
+        }
 
-                final float startTime=recBank.getFloat("STTime",0);
-
-                for (int ii=0; ii<recFtBank.rows(); ii++) {
-                    final int irp = recFtBank.getInt("pindex",ii);
-                    final int pid = recPartBank.getInt("pid",irp);
-                    if      (pid==22) nFtPhotons++;
-                    else if (pid==11) nFtElectrons++;
-                }
-
-                for (int ii=0; ii<recPartBank.rows() && (startTime>0 || fdCharge==0); ii++) {
-                    final int pid = recPartBank.getInt("pid",ii);
-                    if (pid==hadronPDG) {
-                        final double px=recPartBank.getFloat("px",ii);
-                        final double py=recPartBank.getFloat("py",ii);
-                        final int sector = ClasMath.getSectorFromPhi(Math.atan2(py,px));
-                        if (sector==hadronSector || (pid==11 && sector==electronSector)) {
-                            nFtFd++;
-                            break;
-                        }
-                    }
+        for (int ii=0; ii<recPartBank.rows() && (startTime>0 || fdCharge==0); ii++) {
+            final int pid = recPartBank.getInt("pid",ii);
+            if (pid==hadronPDG) {
+                final double px=recPartBank.getFloat("px",ii);
+                final double py=recPartBank.getFloat("py",ii);
+                final int sector = ClasMath.getSectorFromPhi(Math.atan2(py,px));
+                nHadronsSector[sector-1]++;
+                if (sector==hadronSector || (pid==11 && sector==electronSector)) {
+                    nFtFd++;
+                    break;
                 }
             }
         }
