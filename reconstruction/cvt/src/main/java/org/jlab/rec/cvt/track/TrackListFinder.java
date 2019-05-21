@@ -256,6 +256,7 @@ public class TrackListFinder {
                 			crosses.get(0).get(jj).set_Point(new Point3D(trks.get(t).getTrajectory().get(tp).xdet,trks.get(t).getTrajectory().get(tp).ydet,trks.get(t).getTrajectory().get(tp).zdet));
             	   			crosses.get(0).get(jj).set_Dir(new Vector3D(trks.get(t).getTrajectory().get(tp).dirx,trks.get(t).getTrajectory().get(tp).diry,trks.get(t).getTrajectory().get(tp).dirz));
             	   			crosses.get(0).get(jj).get_Cluster1().set_CentroidResidual(trks.get(t).getTrajectory().get(tp).residual);
+            	   			crosses.get(0).get(jj).get_Cluster1().set_SeedResidual(trks.get(t).getTrajectory().get(tp).excl_residual);
             	   			crosses.get(0).get(jj).get_Cluster1().set_AssociatedTrackID(trks.get(t).get_Id());
             	   			crosses.get(0).get(jj).set_AssociatedTrackID(trks.get(t).get_Id());
             	   			for (FittedHit h : crosses.get(0).get(jj).get_Cluster1()) {
@@ -270,6 +271,7 @@ public class TrackListFinder {
                 			crosses.get(0).get(jj).set_Point(new Point3D(trks.get(t).getTrajectory().get(tp).xdet,trks.get(t).getTrajectory().get(tp).ydet,trks.get(t).getTrajectory().get(tp).zdet));
             	   			crosses.get(0).get(jj).set_Dir(new Vector3D(trks.get(t).getTrajectory().get(tp).dirx,trks.get(t).getTrajectory().get(tp).diry,trks.get(t).getTrajectory().get(tp).dirz));
             	   			crosses.get(0).get(jj).get_Cluster2().set_CentroidResidual(trks.get(t).getTrajectory().get(tp).residual);
+            	   			crosses.get(0).get(jj).get_Cluster2().set_SeedResidual(trks.get(t).getTrajectory().get(tp).excl_residual);
             	   			crosses.get(0).get(jj).get_Cluster2().set_AssociatedTrackID(trks.get(t).get_Id());
             	   			crosses.get(0).get(jj).set_AssociatedTrackID(trks.get(t).get_Id());
             	   			for (FittedHit h : crosses.get(0).get(jj).get_Cluster2()) {
@@ -285,6 +287,7 @@ public class TrackListFinder {
             	   			crosses.get(1).get(jj).set_Point(new Point3D(trks.get(t).getTrajectory().get(tp).xdet,trks.get(t).getTrajectory().get(tp).ydet,trks.get(t).getTrajectory().get(tp).zdet));
             	   			crosses.get(1).get(jj).set_Dir(new Vector3D(trks.get(t).getTrajectory().get(tp).dirx,trks.get(t).getTrajectory().get(tp).diry,trks.get(t).getTrajectory().get(tp).dirz));
             	   			crosses.get(1).get(jj).get_Cluster1().set_CentroidResidual(trks.get(t).getTrajectory().get(tp).residual);
+            	   			crosses.get(1).get(jj).get_Cluster1().set_SeedResidual(trks.get(t).getTrajectory().get(tp).excl_residual);
             	   			crosses.get(1).get(jj).get_Cluster1().set_AssociatedTrackID(trks.get(t).get_Id());
             	   			crosses.get(1).get(jj).set_AssociatedTrackID(trks.get(t).get_Id());
             	   			for (FittedHit h : crosses.get(1).get(jj).get_Cluster1()) {

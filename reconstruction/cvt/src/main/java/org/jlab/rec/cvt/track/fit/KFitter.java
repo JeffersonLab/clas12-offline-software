@@ -113,13 +113,14 @@ public class KFitter {
             //we will change it following the convention 0 at dca to beam.
             sv.trackTrajSmooth.put(sv.X0.size() -1,sv.trackTrajFilt.get(sv.X0.size() - 1));
             sv.trackCovSmooth.put(sv.X0.size() -1,sv.trackCovFilt.get(sv.X0.size() - 1));
-         
-            
-            for (int k = sv.X0.size() - 2; k > 0; k--) {this.smoother(k, sgeo, bgeo, swimmer);}
+                        
+            for (int k = sv.X0.size() - 2; k > 0; k--) {
+            	this.smoother(k, sgeo, bgeo, swimmer);
+            }
             
             //To extrapolate to "Vertex"
             sv.new_transport(1, 0, sv.trackTrajSmooth.get(1), sv.trackCovSmooth.get(1), sgeo, bgeo, mv.measurements.get(0).type, swimmer);
-            this.chi2=this.calc_chi2(sgeo, bgeo);
+            this.chi2=this.getResiduals_Chi2(sgeo, bgeo, swimmer);
             
             KFHelix = sv.setSvPars(sv.trackTrajSmooth.get(0),sv.trackCovSmooth.get(0).covMat);
                       
@@ -175,11 +176,13 @@ public class KFitter {
         return cand;
     }
 
-    private double calc_chi2(org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo) {
+    private double getResiduals_Chi2(org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
         //get the measurement
         double m = 0;
-        //get the projector state
+        //get the projector state... excl-suffix indicates that we have excluded from KF the site K
         double h = 0;
+        double h_excl = 0;
+        double excl_diff=0;
         double diff = 0;
         double chi2 =0;
         
@@ -187,45 +190,99 @@ public class KFitter {
             m=0;
             h=0;
             diff=0;
+            excl_diff=0;
+            h_excl=0;
             sv.trackTrajSmooth.get(k).clusID=mv.measurements.get(k).ID;
+            //SVT 
             if (mv.measurements.get(k).type == 0) {
             	m = sgeo.getMeasurementAtZ(sv.trackTrajSmooth.get(k).xdet, sv.trackTrajSmooth.get(k).ydet, sv.trackTrajSmooth.get(k).zdet,
                 		mv.measurements.get(k).layer, mv.measurements.get(k).sector,mv.measurements.get(k).centroid); //Because of the stereo angle, SVT measurement depends on zdet
                 h = mv.h(sv.trackTrajSmooth.get(k), sgeo); //For SVT, Returns Local x
-                
                 diff=m-h;
-                
                 double V = sgeo.getSingleStripResolution(mv.measurements.get(k).layer, (int) mv.measurements.get(k).centroid, 
                 		sgeo.transformToFrame(mv.measurements.get(k).sector, mv.measurements.get(k).layer,sv.trackTrajSmooth.get(k).xdet, sv.trackTrajSmooth.get(k).ydet, sv.trackTrajSmooth.get(k).zdet , "local", "").z());
-                V = V * V;
-                chi2 += (m - h) * (m - h) / V;
                 
-               
+                mv.measurements.get(k).error = V * V;
+                h_excl=mv.h(this.getStateVecExcludingSite(k,diff, sgeo, bgeo, swimmer),sgeo);//Important... V must be updated for SVT before calling getStateVecExcludingSite
+                
+                
+                excl_diff=m-h_excl;             
             }
+            //BMT Z
             if (mv.measurements.get(k).type == 1) {
                 m = Math.atan2(mv.measurements.get(k).y, mv.measurements.get(k).x);
                 h = mv.hPhi(sv.trackTrajSmooth.get(k));
                 diff=m-h;
-				if (diff>Math.PI) diff=Math.PI-diff;
+                if (diff>Math.PI) diff=Math.PI-diff;
 				if (diff<-Math.PI) diff=-diff-Math.PI;
-                chi2 += (m - h) * (m - h) / mv.measurements.get(k).error;
-                
+				
+                h_excl=mv.hPhi(this.getStateVecExcludingSite(k,diff, sgeo, bgeo, swimmer));
+                excl_diff=m-h_excl;
+							
+				if (excl_diff>Math.PI) excl_diff=Math.PI-excl_diff;
+				if (excl_diff<-Math.PI) excl_diff=-excl_diff-Math.PI;
+                                
             }
+            //BMT C
             if (mv.measurements.get(k).type == 2) {
                 m = mv.measurements.get(k).z;
                 h = mv.hZ(sv.trackTrajSmooth.get(k));
                 diff=m-h;
-                chi2 += (m - h) * (m - h) / mv.measurements.get(k).error;
                 
+                h_excl=mv.hZ(this.getStateVecExcludingSite(k,diff, sgeo, bgeo, swimmer));
+                excl_diff=m-h_excl;             
             }
             
+            //Increment the chi2
+            chi2 += diff * diff / mv.measurements.get(k).error;
+            
+            //Associate residual infos to the state vectors
+            sv.trackTrajSmooth.get(k).excl_residual=excl_diff;//m-this.ExcludingSite(k,diff,mv.measurements.get(k).error);
             sv.trackTrajSmooth.get(k).residual=diff;
-            if (mv.measurements.get(k).type == 1) sv.trackTrajSmooth.get(k).residual=bgeo.getRadius(mv.measurements.get(k).layer-6)*(m-h);  
+            
+            //Prefer to give a spatial residual for BMT Z
+            if (mv.measurements.get(k).type == 1) {
+            	sv.trackTrajSmooth.get(k).residual=bgeo.getRadius(mv.measurements.get(k).layer-6)*diff;  
+            	sv.trackTrajSmooth.get(k).excl_residual=bgeo.getRadius(mv.measurements.get(k).layer-6)*excl_diff;  
+            }
         }  
        return chi2;
 
     }
-    private void filter(int k, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
+    
+    private StateVec getStateVecExcludingSite(int k, double diff, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
+		    	
+    	StateVec dummy=sv.new StateVec(-k);
+    	dummy.Duplicate(sv.trackTrajSmooth.get(k));
+    	double V = mv.measurements.get(k).error;
+        double[] H = new double[5];
+        H = mv.H(dummy, sv, sgeo, bgeo, mv.measurements.get(k).type, swimmer);
+        
+        double[] K_star=new double[5];
+        double coeff=0;
+        for (int i=0;i<5;i++) {
+        	K_star[i]=0;
+        	for (int j=0;j<5;j++) {
+        		K_star[i]+=sv.trackCovSmooth.get(k).covMat.get(i, j)*H[j];
+        	}
+        	coeff+=K_star[i]*H[i];
+        }
+        
+        coeff=coeff-V;
+        coeff=1/coeff;
+        
+        dummy.d_rho=dummy.d_rho+coeff*K_star[0]*diff;
+        dummy.phi0=dummy.phi0+coeff*K_star[1]*diff;
+        dummy.kappa=dummy.kappa+coeff*K_star[2]*diff;
+        dummy.dz=dummy.dz+coeff*K_star[3]*diff;
+        dummy.tanL=dummy.tanL+coeff*K_star[4]*diff;
+        
+        sv.getStateVecAtModule(dummy.k, dummy, sgeo, bgeo, mv.measurements.get(k).type, swimmer);
+        
+        return dummy;
+	}
+
+	private void filter(int k, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
 
         if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null) {
 
@@ -288,7 +345,8 @@ public class KFitter {
            
             Matrix Ca = null;
             try {
-                Ca = Ci.plus(new Matrix(HTGH));
+            	sv.MeasurementDerivative.put(k, new Matrix(HTGH));
+                Ca = Ci.plus(sv.MeasurementDerivative.get(k));
             } catch (Exception e) {
                 return;
             }

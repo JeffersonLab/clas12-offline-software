@@ -29,6 +29,7 @@ public class StateVecs {
     
     //Transport Matrix between step k-1 and step k
     public Map<Integer, Matrix> trackTransport = new HashMap<Integer, Matrix>();
+    public Map<Integer, Matrix> MeasurementDerivative = new HashMap<Integer, Matrix>();
 
     public StateVec StateVec;
     public CovMat CovMat;
@@ -450,7 +451,7 @@ public class StateVecs {
         public double dz;
         public double alpha;
         public double residual;
-        public double ali_residual;
+        public double excl_residual;
         public double pathlength;
                         
         StateVec(int k) {
@@ -496,7 +497,7 @@ public class StateVecs {
         	this.alpha=ToCopy.alpha;
         	this.phi=ToCopy.phi;
         	this.residual=ToCopy.residual;
-        	this.ali_residual=ToCopy.ali_residual;
+        	this.excl_residual=ToCopy.excl_residual;
         	this.pathlength=ToCopy.pathlength;
         	return ;
         }
