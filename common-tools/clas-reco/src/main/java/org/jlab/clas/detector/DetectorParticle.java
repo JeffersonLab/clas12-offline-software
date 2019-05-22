@@ -3,6 +3,7 @@ package org.jlab.clas.detector;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.List;
 
@@ -42,6 +43,9 @@ public class DetectorParticle implements Comparable {
 
     private Vector3 particleCrossPosition  = new Vector3();
     private Vector3 particleCrossDirection = new Vector3();
+  
+    // let multiple particles share the same hit for these detectors:
+    private final DetectorType[] sharedDetectors = {DetectorType.FTOF,DetectorType.CTOF};
     
     private Line3D  driftChamberEnter = new Line3D();
     
@@ -534,13 +538,29 @@ public class DetectorParticle implements Comparable {
         double   minimumDistance = 500.0;
         int      bestIndex       = -1;
 
+        boolean hitSharing=false;
+        for (int ii=0; ii<sharedDetectors.length && this.getCharge()!=0; ii++) {
+        //for (int ii=0; ii<sharedDetectors.length; ii++) {
+            if (type == sharedDetectors[ii]) {
+                hitSharing=true;
+                break;
+            }
+        }
+
         for(int loop = 0; loop < hitList.size(); loop++){
            
             DetectorResponse response = hitList.get(loop);
+ 
+            // same-sector requirement between hit and track:
+            if (response.getSector()>0 && this.detectorTrack.getSector()>0) {
+              if (response.getSector() != this.detectorTrack.getSector()) {
+                  continue;
+              }
+            }
             
             if(response.getDescriptor().getType()==type &&
                (detectorLayer<=0 || response.getDescriptor().getLayer()==detectorLayer) &&
-               response.getAssociation()<0) {
+               (hitSharing || response.getAssociation()<0)) {
                 hitPoint.set(
                         response.getPosition().x(),
                         response.getPosition().y(),
