@@ -7,9 +7,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.Random;
+import java.util.StringTokenizer;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
@@ -460,14 +463,76 @@ public class MagTests {
 	
 	//load the ascii torus
 	private static void loadAsciiTorus() {	
-		ToAscii.readAsciiToris("/Users/heddle/magfield/FullTorus.txt");
+		ToAscii.readAsciiTorus("/Users/heddle/magfield/FullTorus.txt");
 	}
 
+	private static void scanCSVFile() {
+
+		try {
+			FileReader fileReader = new FileReader("/Users/heddle/magfield/FullTorus.csv");
+			final BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+			int lineCount = 0;
+
+			String vals[] = new String[6];
+			
+			float bmax = Float.NEGATIVE_INFINITY;
+			float phi = Float.NaN;
+			float r = Float.NaN;
+			float z = Float.NaN;
+			
+			boolean reading = true;
+			while (reading) {
+				String s = bufferedReader.readLine();
+				if (s != null) {
+					tokens(s, ",", vals);
+					
+					float bx = Float.parseFloat(vals[3]);
+					float by = Float.parseFloat(vals[4]);
+					float bz = Float.parseFloat(vals[5]);
+					
+					float b = (float)(Math.sqrt(bx*bx + by*by + bz*bz));
+					if (b > bmax) {
+						bmax = b;
+						phi = Float.parseFloat(vals[0]);
+						r = Float.parseFloat(vals[1]);
+						z = Float.parseFloat(vals[2]);
+					}
+					
+					lineCount++;
+					if ((lineCount % 500000) == 0) {
+						System.out.println("line count = " + lineCount);
+					}
+				} else {
+					reading = false;
+				}
+			}
+
+			System.out.println("line count = " + lineCount);
+			System.out.println("bmax = " + bmax + " kG at (phi, rho, z) = (" + phi + ", " + r + ", " + z +")");
+			bufferedReader.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void tokens(String str, String delimiter, String[] vals) {
+
+		StringTokenizer t = new StringTokenizer(str, delimiter);
+		int num = t.countTokens();
+		String lines[] = new String[num];
+
+		for (int i = 0; i < num; i++) {
+			vals[i] = t.nextToken();
+		}
+	}
 	
 	//convert the torus to ASCII for GEMC
 	private static void convertTorusToAscii() {		
+//		ToAscii.torusToAscii(MagneticFields.getInstance().getTorus(), 
+//				"/Users/heddle/magfield/FullTorus.txt", false);
 		ToAscii.torusToAscii(MagneticFields.getInstance().getTorus(), 
-				"/Users/heddle/magfield/FullTorus.txt");
+				"/Users/heddle/magfield/FullTorus.csv", true);
 	}
 
 	public static JMenu getTestMenu() {
@@ -480,6 +545,7 @@ public class MagTests {
 		final JMenuItem test5Item = new JMenuItem("MathLib Test");
 		final JMenuItem threadItem = new JMenuItem("Thread Test");
 		final JMenuItem asciiItem = new JMenuItem("Convert Torus to ASCII");
+		final JMenuItem scanItem = new JMenuItem("Scan csv file");
 		final JMenuItem loadItem = new JMenuItem("Load ASCII Torus");
 
 
@@ -499,7 +565,9 @@ public class MagTests {
 					threadTest(10000000, 8);
 				} else if (e.getSource() == asciiItem) {
 					convertTorusToAscii();
-				}  else if (e.getSource() == loadItem) {
+				} else if (e.getSource() == scanItem) {
+					scanCSVFile();
+				} else if (e.getSource() == loadItem) {
 					loadAsciiTorus();
 				}
 			}
@@ -512,6 +580,7 @@ public class MagTests {
 		test5Item.addActionListener(al1);
 		threadItem.addActionListener(al1);
 		asciiItem.addActionListener(al1);
+		scanItem.addActionListener(al1);
 		loadItem.addActionListener(al1);
 		
 		testMenu.add(test0Item);
@@ -521,6 +590,7 @@ public class MagTests {
 		testMenu.add(threadItem);
 		testMenu.addSeparator();
 		testMenu.add(asciiItem);
+		testMenu.add(scanItem);
 		testMenu.add(loadItem);
 		testMenu.addSeparator();
 

@@ -44,7 +44,7 @@ public class BankDialog extends JDialog implements ItemListener {
 	private static int count = 0;
 
 	public BankDialog(String bankName) {
-		super(Def.getInstance(), bankName, false);
+		super(Def.getFrame(), bankName, false);
 
 		_bankName = bankName;
 		setLayout(new BorderLayout(4, 4));

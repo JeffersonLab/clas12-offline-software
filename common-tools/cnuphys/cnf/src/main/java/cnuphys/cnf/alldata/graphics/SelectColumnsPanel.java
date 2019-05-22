@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -78,6 +79,26 @@ public class SelectColumnsPanel extends JPanel implements ListSelectionListener 
 			_clist.setList(_blist.getSelectedValue());
 		}
 
+	}
+	
+	/**
+	 * Get the selected bank 
+	 * @return the selected bank  (or <code>null</code>
+	 */
+	public String getSelectedBank() {
+		return _blist.getSelectedValue();
+	}
+	
+	/**
+	 * Get the selected columns 
+	 * @return a list of selected columns  (or <code>null</code>
+	 */
+	public List<String> getSelectedColumns() {
+		List<String> slist = _clist.getSelectedValuesList();
+		if ((slist == null) || slist.isEmpty()) {
+			return null;
+		}
+		return slist;
 	}
 
 	/**

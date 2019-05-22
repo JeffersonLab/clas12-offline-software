@@ -179,26 +179,31 @@ public class SplotMenus implements ActionListener {
 			if (ds != null) {
 				dsType = ds.getType();
 			}
-			_plotCanvas.clearPlot();
+//			_plotCanvas.clearPlot();
 
 			if (dsType != null) {
-				try {
-
-					if (dsType == DataSetType.H1D) {
-						ds = new DataSet(ds.getColumn(0).getHistoData());
-					}
-					else if (dsType == DataSetType.H2D) {
-						ds = new DataSet(ds.getColumn(0).getHistoData2D());
-					}
-					else {
-						ds = new DataSet(dsType);
-					}
-					_plotCanvas.setDataSet(ds);
-				}
-				catch (DataSetException e1) {
-					e1.printStackTrace();
-				}
+				ds.clear();
 			}
+//			if (dsType != null) {
+//				try {
+//
+//					if (dsType == DataSetType.H1D) {
+//						ds = new DataSet(ds.getColumn(0).getHistoData());
+//					}
+//					else if (dsType == DataSetType.H2D) {
+//						ds = new DataSet(ds.getColumn(0).getHistoData2D());
+//					}
+//					else {
+//						ds = new DataSet(dsType);
+//					}
+//					_plotCanvas.setDataSet(ds);
+//				}
+//				catch (DataSetException e1) {
+//					e1.printStackTrace();
+//				}
+//			}
+			
+			_plotCanvas.needsRedraw(true);
 		}
 		else if (source == _showExtraCB) {
 			_plotCanvas.getParameters().setExtraDrawing(_showExtraCB.isSelected());

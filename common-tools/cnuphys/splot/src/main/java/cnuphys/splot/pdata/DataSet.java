@@ -21,9 +21,6 @@ import cnuphys.splot.style.SymbolType;
  */
 public class DataSet extends DefaultTableModel {
 
-	/** The XML root element name */
-	public static final String XmlRootElementName = "DataSet";
-
 	// the data
 	Vector<DataColumn> _columns = new Vector<DataColumn>();
 
@@ -185,6 +182,33 @@ public class DataSet extends DefaultTableModel {
 			break;
 		}
 	}
+	
+	/**
+	 * Get the number of data points in the first column of
+	 * a plot.
+	 * @return the number of data points
+	 */
+	public long size() {
+
+		long count = -1;
+		if (getColumnCount() != 0) {
+			DataColumn dc = _columns.firstElement();
+
+			if (is1DHistoSet()) {
+				HistoData hd = dc.getHistoData();
+				count =  hd.getTotalCount();
+			}
+			else if (is2DHistoSet()) {
+				Histo2DData h2d = dc.getHistoData2D();
+				count =  h2d.getTotalCount();
+			}
+			else {
+				count = dc.size();
+			}
+		}
+		return count;
+	}
+
 
 	// XYY, XYXY, XYEXYE, XYEEXYEE, H1D, UNKNOWN;
 
@@ -765,7 +789,7 @@ public class DataSet extends DefaultTableModel {
 	// notify listeners of a change in the data
 	public void notifyListeners() {
 
-		fireTableDataChanged();
+//		fireTableDataChanged();
 
 		if (_listenerList == null) {
 			return;

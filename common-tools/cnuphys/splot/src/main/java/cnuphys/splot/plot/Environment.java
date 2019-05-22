@@ -35,17 +35,11 @@ public final class Environment {
 	// the java class path
 	private String _classPath;
 
-	// the host name
-	private String _hostName;
-
 	// png image writer, if there is one
 	private ImageWriter _pngWriter;
 
 	// default panel background color
 	private Color _defaultPanelBackgroundColor;
-
-	// cnu logo
-	private ImageIcon _cnuIcon;
 
 	// common fonts
 	private Font _commonFonts[] = new Font[50];
@@ -63,16 +57,6 @@ public final class Environment {
 		_tempDirectory = getProperty("java.io.tmpdir");
 		_classPath = getProperty("java.class.path");
 
-		try {
-			InetAddress addr = InetAddress.getLocalHost();
-
-			// Get hostname
-			_hostName = addr.getHostName();
-		}
-		catch (UnknownHostException e) {
-			_hostName = "???";
-		}
-
 		// any png image writers?
 		Iterator<ImageWriter> iterator = ImageIO.getImageWritersByFormatName("png");
 		if ((iterator == null) || !iterator.hasNext()) {
@@ -81,19 +65,6 @@ public final class Environment {
 		else {
 			_pngWriter = iterator.next(); // take the first
 		}
-
-		// icon for about ced dialog
-		_cnuIcon = ImageManager.getInstance().loadImageIcon("images/cnuicon.png");
-
-	}
-
-	/**
-	 * Get the CNU icon
-	 * 
-	 * @return the CNU Icon
-	 */
-	public ImageIcon getCNUIcon() {
-		return _cnuIcon;
 	}
 
 	/**
@@ -204,15 +175,6 @@ public final class Environment {
 	}
 
 	/**
-	 * Gets the host name.
-	 * 
-	 * @return the host name.
-	 */
-	public String getHostName() {
-		return _hostName;
-	}
-
-	/**
 	 * Convert to a string representation.
 	 * 
 	 * @return a string representation of the <code>Environment</code> object.
@@ -223,7 +185,6 @@ public final class Environment {
 		StringBuffer sb = new StringBuffer(1024);
 		sb.append("Environment: \n");
 
-		sb.append("Host Name: " + getHostName() + "\n");
 		sb.append("User Name: " + getUserName() + "\n");
 		sb.append("Temp Directory: " + getTempDirectory() + "\n");
 		sb.append("OS Name: " + getOsName() + "\n");

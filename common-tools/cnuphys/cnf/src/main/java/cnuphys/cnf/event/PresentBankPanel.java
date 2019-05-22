@@ -118,6 +118,8 @@ public class PresentBankPanel extends JPanel
 						if (!bdlog.isVisible()) {
 							bdlog.setVisible(true);
 						}
+						
+						bdlog.toFront();
 					}
 				}
 			}

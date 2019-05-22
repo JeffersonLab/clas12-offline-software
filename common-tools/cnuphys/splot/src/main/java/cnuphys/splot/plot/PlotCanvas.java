@@ -66,7 +66,7 @@ public class PlotCanvas extends JComponent
 	private int _rightMargin = 10;
 
 	// for saving files
-	private String _dataFilePath = Environment.getInstance().getHomeDirectory();
+	private static String _dataFilePath;
 
 	// the bounds of the plot
 	private Rectangle _activeBounds;
@@ -131,6 +131,10 @@ public class PlotCanvas extends JComponent
 	 * @param yLabel    the y axis label
 	 */
 	public PlotCanvas(DataSet dataSet, String plotTitle, String xLabel, String yLabel) {
+		
+		if (_dataFilePath == null) {
+			_dataFilePath = Environment.getInstance().getHomeDirectory();
+		}
 
 		setBackground(Color.white);
 		_parameters = new PlotParameters(this);
@@ -190,8 +194,9 @@ public class PlotCanvas extends JComponent
 			}
 		};
 		new Timer(delay, taskPerformer).start();
+		
 	}
-
+	
 	/**
 	 * Get the DataSet type
 	 * 
@@ -237,6 +242,7 @@ public class PlotCanvas extends JComponent
 	 * @param ds the new dataset
 	 */
 	public void setDataSet(DataSet ds) {
+
 		_dataSet = ds;
 		if (_dataSet != null) {
 			_dataSet.notifyListeners();
@@ -245,17 +251,17 @@ public class PlotCanvas extends JComponent
 		repaint();
 	}
 
-	/**
-	 * Clear the plot of all data. It will have a null dataset.
-	 */
-	public void clearPlot() {
-		_dataSet = null;
-		setWorldSystem();
-		_parameters.setPlotTitle("No Plot");
-
-		firePropertyChange(DATACLEAREDPROP, 0, 1);
-		repaint();
-	}
+//	/**
+//	 * Clear the plot of all data. It will have a null dataset.
+//	 */
+//	public void clearPlot() {
+//		_dataSet = null;
+//		setWorldSystem();
+//		_parameters.setPlotTitle("No Plot");
+//
+//		firePropertyChange(DATACLEAREDPROP, 0, 1);
+//		repaint();
+//	}
 
 	/**
 	 * Get the underlying dataset
@@ -542,7 +548,7 @@ public class PlotCanvas extends JComponent
 			// pp.x -= _activeBounds.x;
 			// pp.y -= _activeBounds.y;
 			localToWorld(pp, _workPoint);
-			_locationString = String.format("<html>(x, y) = (%7.2f, %-7.2f)", _workPoint.x, _workPoint.y);
+			_locationString = String.format("<html>(x, y) = (%7.2f, %-7.2f)<br>count = %d", _workPoint.x, _workPoint.y, _dataSet.size());
 
 			if (_dataSet.is1DHistoSet()) {
 				Vector<DataColumn> ycols = (Vector<DataColumn>) _dataSet.getAllVisibleCurves();

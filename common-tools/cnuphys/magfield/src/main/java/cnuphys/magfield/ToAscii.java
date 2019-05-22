@@ -4,26 +4,36 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.nio.charset.StandardCharsets;
 
 import cnuphys.magfield.converter.AsciiReader;
 
 public class ToAscii {
 	
 	private static float MINVAL = (float)(1.0e-6);
+	
+	private static boolean _csv;
 
 	/**
 	 * Write the Torus to Ascii
 	 */
-	public static void torusToAscii(Torus torus, String path) {
+	public static void torusToAscii(Torus torus, String path, boolean csv) {
 		
+		_csv = csv;
 		
-		System.out.println("Converting Torus To Ascii");
+		System.out.println("Converting Torus To Ascii. CSV: " + csv);
+		
+		if (_csv) {
+			MINVAL = (float)(1.0e-4);
+		}
+		
 		File asciiFile = new File(path);
-		
+
 		try {
 			DataOutputStream dos = new DataOutputStream(new FileOutputStream(asciiFile));
-			writeAsciiHeader(dos, torus);
+
+			if (!_csv) {
+				writeAsciiHeader(dos, torus);
+			}
 			writeData(dos, torus);
 			dos.close();
 		}
@@ -54,16 +64,33 @@ public class ToAscii {
 					
 					int compositeIndex = torus.getCompositeIndex(pidx, ridx, zidx);
 					
-					float bp = torus.getB1(compositeIndex);
-					float br = torus.getB2(compositeIndex);
+					float bx = torus.getB1(compositeIndex);
+					float by = torus.getB2(compositeIndex);
 					float bz = torus.getB3(compositeIndex);
 					
+					String s = null;
 					
-					String s = String.format("%-3.0f %-3.0f %-3.0f %s %s %s", 
-							p, r, z, vStr(bp), vStr(br), vStr(bz));
+					if (_csv) {
+						s = String.format("%-3.0f,%-3.0f,%-3.0f,%s,%s,%s", 
+								p, r, z, vStr(bx), vStr(by), vStr(bz));
+					}
+					else {
+						s = String.format("%-3.0f %-3.0f %-3.0f %s %s %s", 
+								p, r, z, vStr(bx), vStr(by), vStr(bz));
+					}
 					
 					s = s.replace("   ", " ");
-					s = s.replace("  ", " ");					
+					s = s.replace("  ", " ");		
+					s = s.replace("0E", "E");		
+					s = s.replace("0E", "E");		
+					s = s.replace("0E", "E");		
+					s = s.replace("0E", "E");		
+					s = s.replace("E+00", "");		
+					
+					if (_csv) {
+						s = s.replace(", ", ",");		
+						s = s.replace(" ,", ",");		
+					}
 					stringLn(dos, 0, s);
 				}
 			}
@@ -123,11 +150,12 @@ public class ToAscii {
 		
 		try {
 			for (int i = 0; i < leadingSpace; i++) {
-				dos.writeChars(" ");
+				dos.writeBytes(" ");
 			}
-			dos.writeChars(str);
 			
-			dos.writeChars("\n");
+			dos.writeBytes(str);
+			
+			dos.writeBytes("\n");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -138,7 +166,7 @@ public class ToAscii {
 	private static int _dataCount;
 	private static boolean _headerRead = false;
 	
-	public static void readAsciiToris(String path) {
+	public static void readAsciiTorus(String path) {
 		
 		final File file = new File(path);
 		_lineCount = 0;

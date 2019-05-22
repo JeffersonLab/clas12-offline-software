@@ -108,6 +108,7 @@ public class Histo2DData {
 			}
 		}
 	}
+	
 
 	/**
 	 * Clear the data

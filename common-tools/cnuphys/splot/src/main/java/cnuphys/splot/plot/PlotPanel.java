@@ -179,7 +179,7 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 	private JLabel makeStatusLabel() {
 		Font font = _canvas.getParameters().getStatusFont();
 		FontMetrics fm = getFontMetrics(font);
-		final int height = 4 + 2 * (fm.getHeight() + 2);
+		final int height = 4 + 3 * (fm.getHeight() + 2);
 		Color bg = X11Colors.getX11Color("alice blue");
 
 		JLabel label = new JLabel() {

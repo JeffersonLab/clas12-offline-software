@@ -159,10 +159,16 @@ public class ConverterSolenoid {
 	}
 
 	// process all the files
+	
+	
+	//Scale factor from Veronica
+	
+	private static final double _SCALEFACT = 0.9576;
 	private static void processAllFiles(ArrayList<ZFile> zfiles, GridData gdata[]) throws IOException {
 		if (!zfiles.isEmpty()) {
 
-			File bfile = new File(getDataDir(), "solenoid.dat");
+			File bfile = new File(getDataDir(), "Symm_solenoid_r601_phi1_z1201_21May2019.dat");
+			System.out.println("binary file [" + bfile.getAbsolutePath() + "]");
 			DataOutputStream dos = new DataOutputStream(new FileOutputStream(bfile));
 
 			int nPhi = gdata[PHI].n;
@@ -228,9 +234,9 @@ public class ConverterSolenoid {
 							if ((tokens != null) && (tokens.length == 7)) {
 
 								// note t to kG
-								float Bx = Float.parseFloat(tokens[3]) * 10;
-								float By = Float.parseFloat(tokens[4]) * 10;
-								float Bz = Float.parseFloat(tokens[5]) * 10;
+								float Bx = (float)(_SCALEFACT * Double.parseDouble(tokens[3]) * 10);
+								float By = (float)(_SCALEFACT * Double.parseDouble(tokens[4]) * 10);
+								float Bz = (float)(_SCALEFACT * Double.parseDouble(tokens[5]) * 10);
 								float Brho = Bx;
 								float Bphi = By;
 
@@ -246,8 +252,8 @@ public class ConverterSolenoid {
 									System.err.println("RHOINDX: " + rhoIndex + "  ZINDX:  " + iVal);
 
 									double x = Double.parseDouble(tokens[0]) / 10;
-									double y = Double.parseDouble(tokens[1]);
-									double z = Double.parseDouble(tokens[2]);
+									double y = Double.parseDouble(tokens[1]) / 10;
+									double z = Double.parseDouble(tokens[2]) / 10;
 									double phi = Math.toDegrees(Math.atan2(y, x));
 									double rho = Math.hypot(x, y);
 									System.err.println("PHI: " + phi + "   rho: " + rho + "   z: " + z);
@@ -598,8 +604,8 @@ public class ConverterSolenoid {
 		}
 		System.out.println("Preprocessed Files");
 
-		// convertToBinary(zfiles, gdata);
-		convertToGemc(zfiles, gdata);
+		 convertToBinary(zfiles, gdata);
+		//convertToGemc(zfiles, gdata);
 
 		System.out.println("done");
 	}

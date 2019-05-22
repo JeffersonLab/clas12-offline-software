@@ -5,6 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
 import org.jlab.io.base.DataEvent;
@@ -13,6 +16,7 @@ import org.jlab.io.hipo.HipoDataSource;
 
 import cnuphys.cnf.alldata.DataManager;
 import cnuphys.cnf.frame.Def;
+import cnuphys.cnf.frame.IDefCommon;
 
 public class EventManager {
 	
@@ -323,7 +327,8 @@ public class EventManager {
 				for (int i = listeners.length - 2; i >= 0; i -= 2) {
 					if (listeners[i] == IEventListener.class) {
 						if (opt == 0) {
-							((IEventListener) listeners[i + 1]).openedNewEventFile(file);
+							IEventListener listener = (IEventListener) listeners[i + 1];
+							listener.openedNewEventFile(file);
 						}
 						if (opt == 1) {
 							((IEventListener) listeners[i + 1]).rewoundFile(file);
@@ -332,8 +337,6 @@ public class EventManager {
 				}
 			}
 		}
-		Def.getInstance().fixTitle();
-
 	}
 
 	/**
@@ -389,9 +392,12 @@ public class EventManager {
 
 	// final steps
 	private void finalSteps() {
+		JFrame frame = Def.getFrame();
 
-		Def.setEventNumberLabel(getEventNumber());
-
+		if (frame instanceof IDefCommon) {
+			IDefCommon defCommon = (IDefCommon) frame;
+			defCommon.setEventNumberLabel(getEventNumber());
+		}
 	}
 
 	/**
@@ -562,6 +568,10 @@ public class EventManager {
 	 * Stream to the end of the file
 	 */
 	public void streamToEndOfFile() {
+		
+		boolean isAWTThread = SwingUtilities.isEventDispatchThread();
+		System.out.println("Is AWT Thread: " + isAWTThread);
+		
 		_streaming = true;
 		
 		notifyEventListenersStreaming(START_STREAMING, -1);
@@ -570,6 +580,10 @@ public class EventManager {
 
 		for (int i = 0; i < numRemain; i++) {
 			getNextEvent();
+			
+//			if (!isAWTThread && ((i % 1000) == 0)) {
+//				Thread.currentThread().yield();
+//			}
 		}
 		
 		_streaming = false;

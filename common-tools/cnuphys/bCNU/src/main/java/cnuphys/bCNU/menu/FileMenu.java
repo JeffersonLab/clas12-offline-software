@@ -22,12 +22,19 @@ public class FileMenu extends JMenu {
 
 	public static final String menuLabel = "File";
 
-	// create the file menu
 	public FileMenu() {
+		this(true);
+	}
+
+	// create the file menu
+	public FileMenu(boolean standardMidiApp) {
 		super(menuLabel);
 		MenuManager.setFileMenu(this);
-		addSaveConfigurationItem();
-		addClearConfigurationItem();
+
+		if (standardMidiApp) {
+			addSaveConfigurationItem();
+			addClearConfigurationItem();
+		}
 		addSeparator();
 		addQuitItem();
 	}

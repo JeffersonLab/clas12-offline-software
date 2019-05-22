@@ -64,6 +64,7 @@ public class HistoData {
 		this(name, evenBins(valMin, valMax, numBins));
 		_uniformBins = true;
 	}
+	
 
 	/**
 	 * The data for a 1D histogram where the bin spacing is arbitrary (i.e., not

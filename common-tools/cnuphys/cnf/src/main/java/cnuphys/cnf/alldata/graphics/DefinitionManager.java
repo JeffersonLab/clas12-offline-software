@@ -293,38 +293,6 @@ public class DefinitionManager implements ActionListener {
 		return null;
 	}
 
-	/**
-	 * Add a scatter plot
-	 * 
-	 * @param DataSet the DataSet object
-	 * @return the scatter plot
-	 */
-	public ScatterPlot addScatterPlot(DataSet dataSet) {
-		if (dataSet != null) {
-			String name = ScatterPanel.getTitle(dataSet);
-			if (_plots.containsKey(name)) {
-				JOptionPane.showMessageDialog(null, "Already have a scatter plot named " + name, "Already Exists",
-						JOptionPane.INFORMATION_MESSAGE, ImageManager.cnuIcon);
-				return null;
-			}
-
-			final ScatterPlot splot = new ScatterPlot(dataSet);
-			JMenuItem item = new JMenuItem(name);
-			_plots.put(name, new Holder(name, splot, item));
-
-			ActionListener al = new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					splot.setVisible(true);
-				}
-			};
-			item.addActionListener(al);
-			_menu.add(item);
-
-			return splot;
-		}
-		return null;
-	}
 
 	// define a scatterplot
 	private void defineScatterPlot() {
@@ -341,6 +309,7 @@ public class DefinitionManager implements ActionListener {
 				} else {
 
 					JMenuItem item = new JMenuItem(name);
+					
 					final ScatterPlot plot = new ScatterPlot(dataSet);
 					int count = _plots.size();
 					int x = 10 + 30 * (count % 20);

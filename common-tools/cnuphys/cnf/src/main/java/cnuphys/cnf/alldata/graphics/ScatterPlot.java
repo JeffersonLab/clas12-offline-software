@@ -22,10 +22,13 @@ import cnuphys.splot.style.SymbolType;
 @SuppressWarnings("serial")
 public class ScatterPlot extends PlotDialog {
 
-	private Color fillColor = new Color(255, 0, 0, 96);
+	private static Color fillColor = new Color(255, 0, 0, 96);
 
 	// the data set
 	private DataSet _dataSet;
+	
+	//the plot canvas 
+	private PlotCanvas _canvas;
 
 	// the x and y column data
 	private ColumnData _colDatX;
@@ -45,9 +48,13 @@ public class ScatterPlot extends PlotDialog {
 	public ScatterPlot(DataSet dataSet) {
 		super(ScatterPanel.getTitle(dataSet));
 		_dataSet = dataSet;
+		
+		//create the canvas
+		String title = ScatterPanel.getTitle(_dataSet);
+		String xname = _dataSet.getColumnName(0);
+		String yname = _dataSet.getColumnName(1);
 
-		String xname = dataSet.getColumnName(0);
-		String yname = dataSet.getColumnName(1);
+		_canvas = new PlotCanvas(_dataSet, title, xname, yname);
 
 		boolean isColumnX = DataManager.getInstance().validColumnName(xname);
 		boolean isColumnY = DataManager.getInstance().validColumnName(yname);
@@ -63,7 +70,7 @@ public class ScatterPlot extends PlotDialog {
 			_namedExpressionNameY = yname;
 		}
 
-		_plotPanel = createPlotPanel(_dataSet);
+		_plotPanel = createPlotPanel();
 		add(_plotPanel, BorderLayout.CENTER);
 
 	}
@@ -96,27 +103,23 @@ public class ScatterPlot extends PlotDialog {
 		return _expressionY;
 	}
 
-	private PlotPanel createPlotPanel(DataSet data) {
+	private PlotPanel createPlotPanel() {
 
-		String xn = data.getColumnName(0);
-		String yn = data.getColumnName(1);
-		PlotCanvas canvas = new PlotCanvas(data, ScatterPanel.getTitle(data), xn, yn);
+		_canvas.getParameters().setNumDecimalX(1);
+		_canvas.getParameters().setNumDecimalY(0);
+		_canvas.getParameters().setTitleFont(Fonts.mediumFont);
+		_canvas.getParameters().setAxesFont(Fonts.smallFont);
+		_canvas.getParameters().setMinExponentY(5);
+		_canvas.getParameters().setMinExponentX(4);
+		_canvas.getParameters().setTextFont(Fonts.smallFont);
 
-		canvas.getParameters().setNumDecimalX(1);
-		canvas.getParameters().setNumDecimalY(0);
-		canvas.getParameters().setTitleFont(Fonts.mediumFont);
-		canvas.getParameters().setAxesFont(Fonts.smallFont);
-		canvas.getParameters().setMinExponentY(5);
-		canvas.getParameters().setMinExponentX(4);
-		canvas.getParameters().setTextFont(Fonts.smallFont);
-
-		canvas.getPlotTicks().setDrawBinValue(false);
-		canvas.getPlotTicks().setNumMajorTickX(4);
-		canvas.getPlotTicks().setNumMajorTickY(4);
-		canvas.getPlotTicks().setNumMinorTickX(0);
-		canvas.getPlotTicks().setNumMinorTickY(0);
-		canvas.getPlotTicks().setTickFont(Fonts.smallFont);
-		Collection<DataColumn> ycols = data.getAllColumnsByType(DataColumnType.Y);
+		_canvas.getPlotTicks().setDrawBinValue(false);
+		_canvas.getPlotTicks().setNumMajorTickX(4);
+		_canvas.getPlotTicks().setNumMajorTickY(4);
+		_canvas.getPlotTicks().setNumMinorTickX(0);
+		_canvas.getPlotTicks().setNumMinorTickY(0);
+		_canvas.getPlotTicks().setTickFont(Fonts.smallFont);
+		Collection<DataColumn> ycols = _canvas.getDataSet().getAllColumnsByType(DataColumnType.Y);
 
 		for (DataColumn dc : ycols) {
 			dc.getFit().setFitType(FitType.NOLINE);
@@ -126,7 +129,7 @@ public class ScatterPlot extends PlotDialog {
 			dc.getStyle().setBorderColor(null);
 		}
 
-		PlotPanel ppanel = new PlotPanel(canvas, PlotPanel.STANDARD);
+		PlotPanel ppanel = new PlotPanel(_canvas, PlotPanel.STANDARD);
 		ppanel.setColor(X11Colors.getX11Color("alice blue"));
 
 		ppanel.setBorder(BorderFactory.createEtchedBorder());
@@ -162,6 +165,8 @@ public class ScatterPlot extends PlotDialog {
 
 	@Override
 	protected void clear() {
+		
+				
 		_dataSet.clear();
 		_plotPanel.getCanvas().needsRedraw(true);
 		_errorCount = 0;

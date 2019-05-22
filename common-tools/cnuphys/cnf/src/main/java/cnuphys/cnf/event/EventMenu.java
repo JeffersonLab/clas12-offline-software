@@ -185,7 +185,7 @@ public class EventMenu extends JMenu implements ActionListener, IEventListener {
 		JFileChooser chooser = new JFileChooser(dataFilePath);
 		chooser.setSelectedFile(null);
 		chooser.setFileFilter(_hipoEventFileFilter);
-		int returnVal = chooser.showOpenDialog(Def.getInstance());
+		int returnVal = chooser.showOpenDialog(Def.getFrame());
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = chooser.getSelectedFile();
 			try {
@@ -254,8 +254,10 @@ public class EventMenu extends JMenu implements ActionListener, IEventListener {
 					File file = new File(fn);
 
 					if (file.exists()) {
+//						System.out.println("HEY MAN");
 						try {
-							EventManager.getInstance().openHipoEventFile(file);						} catch (FileNotFoundException e) {
+							EventManager.getInstance().openHipoEventFile(file);
+						} catch (FileNotFoundException e) {
 							e.printStackTrace();
 						} catch (IOException e) {
 							e.printStackTrace();

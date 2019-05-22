@@ -215,10 +215,11 @@ public class DataManager {
 				for (String columnName : entries) {
 					int type = dd.getProperty("type", columnName);
 
-					if ((columnName.contains("timestamp"))) {
-						// TODO MAJOR HACK (STILL NEEDED)!
-						type = 4;
-					}
+//					if ((columnName.contains("timestamp"))) {
+//						// TODO MAJOR HACK (STILL NEEDED)!
+//						ff
+//						type = 4;
+//					}
 
 					if ((type < 1) || (type > 6) || (type == 24)) {
 //							Log.getInstance()

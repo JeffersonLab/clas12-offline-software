@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -28,6 +29,7 @@ import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.component.MagnifyWindow;
 import cnuphys.bCNU.dialog.TextDisplayDialog;
 import cnuphys.bCNU.log.Log;
+import cnuphys.bCNU.menu.FileMenu;
 import cnuphys.bCNU.menu.MenuManager;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
@@ -47,13 +49,15 @@ import cnuphys.cnf.properties.PropertiesManager;
 import cnuphys.splot.example.MemoryUsageDialog;
 
 @SuppressWarnings("serial")
-public class Def extends BaseMDIApplication implements IEventListener {
+public class Def extends BaseMDIApplication implements IEventListener, IDefCommon {
+	
+	private static JFrame _frame;
 
 	// singleton
 	private static Def _instance;
 
 	// release string
-	private static final String _release = "build 0.01";
+	protected static final String _release = "build 0.01";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -72,6 +76,15 @@ public class Def extends BaseMDIApplication implements IEventListener {
 
 	// event menu
 	private EventMenu _eventMenu;
+	
+	// event menu
+	private FileMenu _fileMenu;
+	
+	//export menu
+	private JMenu _exportMenu;
+
+	//definition menu
+	private JMenu _definitionMenu;
 	
 	// event number label 
 	private static JLabel _eventNumberLabel;
@@ -104,6 +117,8 @@ public class Def extends BaseMDIApplication implements IEventListener {
 	private Def(Object... keyVals) {
 		super(keyVals);
 
+		_frame = this;
+		
 		ComponentListener cl = new ComponentListener() {
 
 			@Override
@@ -189,47 +204,12 @@ public class Def extends BaseMDIApplication implements IEventListener {
 		_virtualView.toFront();
 	}
 
-	/**
-	 * Accessor for the event menu
-	 * 
-	 * @return the event menu
-	 */
-	public EventMenu getEventMenu() {
-		return _eventMenu;
-	}
-
-	/**
-	 * Fix the event count label
-	 */
-	public void fixEventMenuLabels() {
-		int count = EventManager.getInstance().getEventCount();
-		if (count < Integer.MAX_VALUE) {
-			_eventCountLabel.setText("Event Count: " + count);
-		} else {
-			_eventCountLabel.setText("Event Count: N/A");
-		}
-		
-		int numRemain = EventManager.getInstance().getNumRemainingEvents();
-		_eventRemainingLabel.setText("Events Remaining: " + numRemain);
-	}
 
 	// add to the event menu
 	private void addToEventMenu() {
-
-	//	_eventMenu.remove(0);
 		createStreamMenuItem();
-		_eventCountLabel = new JMenuItem("Event Count: N/A");
-		_eventCountLabel.setOpaque(true);
-		_eventCountLabel.setBackground(Color.white);
-		_eventCountLabel.setForeground(X11Colors.getX11Color("Dark Blue"));
-		_eventMenu.add(_eventCountLabel);
-		
-		_eventRemainingLabel = new JMenuItem("Events Remaining: N/A");
-		_eventRemainingLabel.setOpaque(true);
-		_eventRemainingLabel.setBackground(Color.white);
-		_eventRemainingLabel.setForeground(X11Colors.getX11Color("Dark Blue"));
-		_eventMenu.add(_eventRemainingLabel);
-
+		_eventCountLabel = DefCommon.addEventCountToEventMenu(_eventMenu);
+		_eventRemainingLabel = DefCommon.addEventRemainingToEventMenu(_eventMenu);
 	}
 	
 	//create the menu item to stream to the end of the file
@@ -241,7 +221,19 @@ public class Def extends BaseMDIApplication implements IEventListener {
 			public void actionPerformed(ActionEvent e) {
 				Object source = e.getSource();
 				if (source == _streamItem) {
-					EventManager.getInstance().streamToEndOfFile();
+					setBusy(true);
+					
+					Runnable runner = new Runnable() {
+
+						@Override
+						public void run() {
+							EventManager.getInstance().streamToEndOfFile();
+						}
+
+					};				
+					
+					(new Thread(runner)).start();
+					setBusy(false);
 				}
 				else if (source == _rewindItem) {
 					EventManager.getInstance().rewindFile();
@@ -262,6 +254,13 @@ public class Def extends BaseMDIApplication implements IEventListener {
 		_streamItem.addActionListener(al);
 		_eventMenu.add(_streamItem, 3);
 		_eventMenu.insertSeparator(4);
+	}
+
+	private void setBusy(boolean busy) {
+		_fileMenu.setEnabled(!busy);
+		_eventMenu.setEnabled(!busy);
+		_exportMenu.setEnabled(!busy);
+		_definitionMenu.setEnabled(!busy);
 	}
 
 	
@@ -332,16 +331,27 @@ public class Def extends BaseMDIApplication implements IEventListener {
 		_rewindItem.setEnabled(eventCount > 0);
 		
 		//fix labels
-		fixEventMenuLabels();
+		DefCommon.fixEventMenuLabels(_eventCountLabel, _eventRemainingLabel);
 	}
 	
+	/**
+	 * Get the frame, which could be this or the DefApp frame
+	 * @return
+	 */
+	public static JFrame getFrame() {
+		return _frame;
+	}
+	
+	protected static void setFrame(JFrame frame) {
+		_frame = frame;
+	}
 
 	/**
 	 * private access to the Def singleton.
 	 * 
 	 * @return the singleton Def (the main application frame.)
 	 */
-	public static Def getInstance() {
+	private static Def getInstance() {
 		if (_instance == null) {
 			_instance = new Def(PropertySupport.TITLE, "def " + _release, PropertySupport.BACKGROUNDIMAGE,
 					"images/cnu.png", PropertySupport.FRACTION, 0.7,
@@ -359,75 +369,24 @@ public class Def extends BaseMDIApplication implements IEventListener {
 
 	// create the event number label
 	private void createEventNumberLabel() {
-		_eventNumberLabel = new JLabel("  Event Num:      is GEMC: false");
-		_eventNumberLabel.setOpaque(true);
-		_eventNumberLabel.setBackground(Color.black);
-		_eventNumberLabel.setForeground(Color.yellow);
-		_eventNumberLabel.setFont(new Font("Dialog", Font.BOLD, 12));
-		_eventNumberLabel.setBorder(BorderFactory.createLineBorder(Color.cyan, 1));
-		setEventNumberLabel(-1);
-
-		getJMenuBar().add(Box.createHorizontalGlue());
-		getJMenuBar().add(_eventNumberLabel);
-		getJMenuBar().add(Box.createHorizontalStrut(5));
+		_eventNumberLabel = DefCommon.createEventNumberLabel(this);
 	}
 
+	
 	/**
-	 * Set the event number label
-	 * 
-	 * @param num the event number
+	 * Fix the title of the main frame
 	 */
-	public static void setEventNumberLabel(int num) {
+	@Override
+	public void fixTitle() {
+		DefCommon.fixTitle(this);
+	}
 
-		if (num < 0) {
-			_eventNumberLabel.setText("  Event Num:      ");
-		} else {
-			_eventNumberLabel.setText("  Event Num: " + num);
-		}
+	@Override
+	public void setEventNumberLabel(int num) {
+		DefCommon.setEventNumberLabel(_eventNumberLabel, num);
 	}
 
 
-	// create the options menu
-	private void addToOptionMenu(JMenu omenu) {
-		omenu.add(MagnifyWindow.magificationMenu());
-		omenu.addSeparator();
-
-		final JMenuItem memPlot = new JMenuItem("Memory Usage...");
-		final JMenuItem environ = new JMenuItem("Environment...");
-		ActionListener al = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-
-				Object source = e.getSource();
-
-				if (source == memPlot) {
-					if (_memoryUsage == null) {
-						_memoryUsage = new MemoryUsageDialog(_instance);
-					}
-
-					_memoryUsage.setVisible(true);
-				}
-
-				else if (source == environ) {
-					if (_envDisplay == null) {
-						_envDisplay = new TextDisplayDialog("Environment Information");
-					}
-					_envDisplay.setText(Environment.getInstance().toString());
-					_envDisplay.setVisible(true);
-				}
-
-			}
-
-		};
-		environ.addActionListener(al);
-		memPlot.addActionListener(al);
-		omenu.add(environ);
-		omenu.add(memPlot);
-		
-
-
-	}
 
 	/**
 	 * Add items to existing menus and/or create new menus NOTE: Swim menu is
@@ -439,8 +398,8 @@ public class Def extends BaseMDIApplication implements IEventListener {
 		_eventMenu = new EventMenu(false);
 		mmgr.addMenu(_eventMenu);
 		
-		// the options menu
-		addToOptionMenu(mmgr.getOptionMenu());
+		//no option menu
+		mmgr.removeMenu(mmgr.getOptionMenu());
 		
 		// add to the file menu
 		addToFileMenu();
@@ -449,10 +408,12 @@ public class Def extends BaseMDIApplication implements IEventListener {
 		addToEventMenu();
 		
 		//the definition menu
-		getJMenuBar().add(DefinitionManager.getInstance().getMenu());
+		_definitionMenu = DefinitionManager.getInstance().getMenu();
+		getJMenuBar().add(_definitionMenu);
 		
 		//the export menu
-		getJMenuBar().add(ExportManager.getExportMenu());
+		_exportMenu = ExportManager.getExportMenu();
+		getJMenuBar().add(_exportMenu);
 
 
 	}
@@ -460,9 +421,9 @@ public class Def extends BaseMDIApplication implements IEventListener {
 	// add to the file menu
 	private void addToFileMenu() {
 		MenuManager mmgr = MenuManager.getInstance();
-		JMenu fmenu = mmgr.getFileMenu();
+		_fileMenu = (FileMenu)(mmgr.getFileMenu());
 
-		fmenu.insertSeparator(0);
+		_fileMenu.insertSeparator(0);
 
 		// restore default config
 		final JMenuItem defConItem = new JMenuItem("Restore Default Configuration");
@@ -480,15 +441,15 @@ public class Def extends BaseMDIApplication implements IEventListener {
 		};
 
 		defConItem.addActionListener(al1);
-		fmenu.add(defConItem, 0);
+		_fileMenu.add(defConItem, 0);
 
 
 		// some event file menus
 
-		fmenu.insertSeparator(0);
+		_fileMenu.insertSeparator(0);
 
-		fmenu.add(EventMenu.getRecentEventFileMenu(), 0);
-		fmenu.add(EventMenu.getOpenHipoEventFileItem(), 0);
+		_fileMenu.add(EventMenu.getRecentEventFileMenu(), 0);
+		_fileMenu.add(EventMenu.getOpenHipoEventFileItem(), 0);
 	}
 	
 
@@ -512,52 +473,6 @@ public class Def extends BaseMDIApplication implements IEventListener {
 	}
 
 
-	// this is so we can find json files
-	private static void initClas12Dir() throws IOException {
-
-		// for running from runnable jar (for coatjava)
-		String clas12dir = System.getProperty("CLAS12DIR");
-
-		if (clas12dir == null) {
-			clas12dir = "coatjava";
-		}
-
-		File clasDir = new File(clas12dir);
-
-		if (clasDir.exists() && clasDir.isDirectory()) {
-			System.err.println("**** Found CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
-			System.setProperty("CLAS12DIR", clas12dir);
-			Log.getInstance().config("CLAS12DIR: " + clas12dir);
-			return;
-		} else {
-			System.err.println("**** Did not find CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
-		}
-
-		String cwd = Environment.getInstance().getCurrentWorkingDirectory();
-		clas12dir = cwd + "/../../../coatjava";
-		clasDir = new File(clas12dir);
-
-		if (clasDir.exists() && clasDir.isDirectory()) {
-			System.err.println("**** Found CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
-			System.setProperty("CLAS12DIR", clas12dir);
-			Log.getInstance().config("CLAS12DIR: " + clas12dir);
-			return;
-		} else {
-			System.err.println("**** Did not find CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
-		}
-
-		throw (new IOException("Could not locate the coatjava directory."));
-	}
-
-	/**
-	 * Fix the title of the main frame
-	 */
-	public void fixTitle() {
-		String title = getTitle();
-
-		// adjust title as needed
-		setTitle(title);
-	}
 
 	/**
 	 * Main program launches the def gui.
@@ -573,7 +488,7 @@ public class Def extends BaseMDIApplication implements IEventListener {
 
 		// init the clas 12 dir wherev the json files are
 		try {
-			initClas12Dir();
+			DefCommon.initClas12Dir();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
@@ -612,7 +527,6 @@ public class Def extends BaseMDIApplication implements IEventListener {
 			public void run() {
 				getInstance();
 				getInstance().setVisible(true);
-				getInstance().fixTitle();
 				
 				System.out.println("def  " + _release + " is ready.");
 			}

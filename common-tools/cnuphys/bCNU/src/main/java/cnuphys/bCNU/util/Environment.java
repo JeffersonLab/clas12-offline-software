@@ -52,9 +52,6 @@ public final class Environment {
 	// the java class path
 	private String _classPath;
 
-	// the host name
-	private String _hostName;
-
 	// the host IP address
 	private String _hostAddress;
 
@@ -94,19 +91,6 @@ public final class Environment {
 
 		_tempDirectory = getProperty("java.io.tmpdir");
 		_classPath = getProperty("java.class.path");
-
-		try {
-			InetAddress addr = InetAddress.getLocalHost();
-
-			// Get hostname
-			_hostName = addr.getHostName();
-
-			// Get host address
-			_hostAddress = addr.getHostAddress();
-		} catch (UnknownHostException e) {
-			_hostName = "???";
-			_hostAddress = "???";
-		}
 
 		// screen information
 		getScreenInformation();
@@ -274,15 +258,6 @@ public final class Environment {
 	 */
 	public String getUserName() {
 		return _userName;
-	}
-
-	/**
-	 * Gets the host name.
-	 * 
-	 * @return the host name.
-	 */
-	public String getHostName() {
-		return _hostName;
 	}
 
 	/**
@@ -596,7 +571,7 @@ public final class Environment {
 	 * @return a short summary string
 	 */
 	public String summaryString() {
-		return " [" + _userName + "]" + " [" + _osName + "]" + " [" + _hostName + "]" + " [" + _currentWorkingDirectory
+		return " [" + _userName + "]" + " [" + _osName + "]" + " [" + _currentWorkingDirectory
 				+ "]";
 	}
 
@@ -645,7 +620,6 @@ public final class Environment {
 			sb.append("Config File: " + file.getAbsolutePath() + "\n");
 		}
 
-		sb.append("Host Name: " + getHostName() + "\n");
 		sb.append("Host Address: " + getHostAddress() + "\n");
 		sb.append("User Name: " + getUserName() + "\n");
 		sb.append("Temp Directory: " + getTempDirectory() + "\n");
