@@ -37,7 +37,7 @@ public final class LTCCHit {
 
     // raw LTCC info
     private final int sector;     // CLAS12 sector (1-6)
-    private final int side;       // side within the segment (left: 1, right: 2)
+    private final int side;       // side within the segment (left: 0, right: 1)
     private final int segment;    // LTCC segment (1-18)
     private final int adc;        // integrated ADC
     private final double rawTime;// hit time
@@ -90,7 +90,7 @@ public final class LTCCHit {
             IndexedTable timing_offset) {
        this.sector = bank.getByte("sector", index);
        this.segment = bank.getShort("component", index);
-       this.side = bank.getByte("order", index) + 1;
+       this.side = bank.getByte("order", index);
        this.adc = bank.getInt("ADC", index);
        this.rawTime = bank.getFloat("time", index);
        //this.pedestal = bank.getShort("ped", index);
@@ -130,7 +130,7 @@ public final class LTCCHit {
     //       LTCCClusterCorrection.calcPosition() for more info.
     public Vector3D getPosition() {
         double phi = Math.toRadians(PHI0[this.segment - 1] 
-                * (this.side == 1 ? -1 : 1))
+                * (this.side == 0 ? -1 : 1))
                 + 2. * Math.PI * (this.sector - 1) / 6.;
         Vector3D v = new Vector3D(RHO0[this.segment - 1]*
                 Math.sin(Math.toRadians(THETA0[this.segment - 1]))*Math.cos(phi),
@@ -201,7 +201,7 @@ public final class LTCCHit {
     }
     
     private int calcLTCCPhiIndex() {
-        return 2 * (this.sector - 1) + (this.side - 1);
+        return 2 * (this.sector - 1) + (this.side);
     }
     
     private Status calcStatus() {
