@@ -6,6 +6,7 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.utils.groups.IndexedTable;
 /**
@@ -356,7 +357,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             }
             
             distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), deltatime_beta), secIdx, slIdx) ;
-            deltatime_beta = calcDeltaTimeBeta(distance, tab, beta);
+            //deltatime_beta = calcDeltaTimeBeta(distance, tab, beta);
+            deltatime_beta = calcDeltaTimeBeta(distance, this.get_Superlayer(), beta);
             this.set_DeltaTimeBeta(deltatime_beta);
             distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), deltatime_beta), secIdx, slIdx) ;
             
@@ -377,6 +379,12 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 (tab.getDoubleValue("distbeta", this.get_Sector(), 
                         this.get_Superlayer(),0) * beta * beta)) - x) / Constants.V0AVERAGED;
     }
+    
+    public double calcDeltaTimeBeta(double x, int superlayer, double beta) {
+        double distbeta = TableLoader.distbetaValues[superlayer-1];
+        return (Math.sqrt(x * x + (distbeta * beta * beta) * (distbeta* beta * beta)) - x) / Constants.V0AVERAGED;
+    }
+    
     /**
      * 
      * @return doca to cluster fit line (cm)

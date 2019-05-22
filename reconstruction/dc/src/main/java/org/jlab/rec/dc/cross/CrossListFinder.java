@@ -32,7 +32,7 @@ public class CrossListFinder  {
      * @param dccrosslist the list of crosses in the event
      * @return the list of crosses determined to be consistent with belonging to a track in the DC
      */
-    private final List<BaseCand> trkCnds = new ArrayList<BaseCand>();
+    private List<BaseCand> trkCnds = new ArrayList<BaseCand>();
     ClusterFitter cf = new ClusterFitter();
     SegmentFinder segFinder = new SegmentFinder();
 

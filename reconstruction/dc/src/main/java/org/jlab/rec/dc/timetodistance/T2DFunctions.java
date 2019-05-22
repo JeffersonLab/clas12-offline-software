@@ -5,6 +5,8 @@
  */
 package org.jlab.rec.dc.timetodistance;
 
+import org.jlab.rec.dc.Constants;
+
 /**
  *
  * @author ziegler
@@ -305,14 +307,8 @@ public class T2DFunctions {
          
         time = a*x*x*x*x + b*x*x*x + c*x*x + d*x ;
         
-        //     and here's a parameterization of the change in time due to a non-zero
-        //     bfield for where xhat=x/dmaxalpha where dmaxalpha is the 'dmax' for 
-        //	   a track with local angle alpha (for local angle = alpha)
-
-        double deltatime_bfield = delBf*Math.pow(bfield,2)*tmax*(Bb1*xhatalpha+Bb2*Math.pow(xhatalpha, 2)+
-                     Bb3*Math.pow(xhatalpha, 3)+Bb4*Math.pow(xhatalpha, 4));
-        //calculate the time at alpha deg. and at a non-zero bfield	          
-        time += deltatime_bfield;
+        //B correction
+        time+=T2DFunctions.CorrectForB(delBf, bfield, tmax, xhatalpha, Bb1, Bb2, Bb3, Bb4, superlayer);
         
         return time;
     }
@@ -322,8 +318,7 @@ public class T2DFunctions {
         if(x>dmax)
             x=dmax;
         double time = 0;
-        // alpha correction for region 2
-        //correctAlphaForB( alpha, bfield, superlayer);
+        // alpha correction 
         double cos30minusalpha=Math.cos(Math.toRadians(30.-alpha));
         double dmaxalpha = dmax*cos30minusalpha;
         double xhatalpha = x/dmaxalpha;
@@ -481,4 +476,6 @@ public class T2DFunctions {
         }
         return time;
     }
+       
+    
 }

@@ -30,6 +30,8 @@ public class TableLoader {
     public static double[][][][][] DISTFROMTIME = new double[6][6][maxBinIdxB+1][maxBinIdxAlpha+1][nBinsT]; // sector slyr alpha Bfield time bins [s][r][ibfield][icosalpha][tbin]
     public static double FracDmaxAtMinVel = 0.615;		// fraction of dmax corresponding to the point in the cell where the velocity is minimal
 
+    public static double[] distbetaValues = new double[]{0.16, 0.16, 0.08, 0.08, 0.08, 0.08};
+    
     /*
      * 
      */
@@ -123,7 +125,7 @@ public class TableLoader {
         AlphaMid[0] = 0;
         AlphaMid[5] = 30;
         AlphaBounds[0][0] = 0;
-        AlphaBounds[5][0] = 30;
+        AlphaBounds[5][1] = 30;
     }
     public static synchronized void Fill(IndexedTable tab) {
         //CCDBTables 0 =  "/calibration/dc/signal_generation/doca_resolution";
@@ -238,7 +240,7 @@ public class TableLoader {
         double dmax = 2.*Constants.wpdist[r]; 
         double tmax = Tmax[s][r];
         double v_0 = v0[s][r];
-        double delta_nm = deltanm[s][r];
+        double v_1 = deltanm[s][r];
         double delBf = delta_bfield_coefficient[s][r]; 
         double Bb1 = b1[s][r];
         double Bb2 = b2[s][r];
@@ -246,8 +248,8 @@ public class TableLoader {
         double Bb4 = b4[s][r];
         if(x>dmax)
             x=dmax;
-        // Assume a functional form (time=x/v0+a*(x/dmax)**n+b*(x/dmax)**m)
-        return T2DFunctions.ExpoFcn(x, alpha, bfield, v_0, delta_nm, FracDmaxAtMinVel, 
+        
+        return T2DFunctions.polyFcnMac(x, alpha, bfield, v_0, v_1, FracDmaxAtMinVel, 
                 tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, superlayer) + delta_T0[s][r];
     }
     
