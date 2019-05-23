@@ -325,7 +325,7 @@ public class RICHTool{
                                    IndexedTable timeoffConstants, IndexedTable misaConstants, IndexedTable paraConstants){
     //------------------------------
 
-        int debugMode = 1;
+        int debugMode = 0;
 
         /*
         * RECONSTRUCTION PARAMETERS
