@@ -40,7 +40,7 @@ public interface IField {
 
 	/**
 	 * Obtain the magnetic field at a given location expressed in Cartesian
-	 * coordinates for the sector system. The oyher "field" methods are for the lab
+	 * coordinates for the sector system. The other "field" methods are for the lab
 	 * system. The field is returned as a Cartesian vector in kiloGauss.
 	 * 
 	 * @param sector the sector [1..6]

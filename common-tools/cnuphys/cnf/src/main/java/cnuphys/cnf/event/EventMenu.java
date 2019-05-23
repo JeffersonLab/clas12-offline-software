@@ -79,7 +79,7 @@ public class EventMenu extends JMenu implements ActionListener, IEventListener {
 
 				@Override
 				public boolean accept(File f) {
-					return f.getPath().endsWith(".hipo") || f.getPath().endsWith(".hippo")
+					return f.isDirectory() || f.getPath().endsWith(".hipo") || f.getPath().endsWith(".hippo")
 							|| f.getPath().contains(".hipo.");
 				}
 

@@ -306,7 +306,7 @@ public class DefFrame extends JFrame implements IEventListener, IDefCommon {
 
 		// init the clas 12 dir wherev the json files are
 		try {
-			DefCommon.initClas12Dir();
+			DefCommon.initClas12Dir(true);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}

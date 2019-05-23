@@ -411,8 +411,11 @@ public class Def extends BaseMDIApplication implements IEventListener, IDefCommo
 		_definitionMenu = DefinitionManager.getInstance().getMenu();
 		getJMenuBar().add(_definitionMenu);
 		
-		//the export menu
+	//	System.out.println("Menu font " + _definitionMenu.getFont());
+		
+		//the export menu with weird font hack
 		_exportMenu = ExportManager.getExportMenu();
+		_exportMenu.setFont(_definitionMenu.getFont());
 		getJMenuBar().add(_exportMenu);
 
 
@@ -488,7 +491,7 @@ public class Def extends BaseMDIApplication implements IEventListener, IDefCommo
 
 		// init the clas 12 dir wherev the json files are
 		try {
-			DefCommon.initClas12Dir();
+			DefCommon.initClas12Dir(false);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
