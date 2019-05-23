@@ -5,31 +5,31 @@ import java.util.Collections;
 import java.util.List;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
 
+import javax.swing.JFrame;
+import org.jlab.groot.graphics.EmbeddedCanvas;
+import org.jlab.groot.data.H1F;
+import org.jlab.groot.data.H2F;
 
 
 public class RICHPMTReconstruction {
 
 
-    private RICHTool                 tool;
+    private RICHTool         tool;
+    private RICHEvent        richevent;
+    private RICHio           richio = new RICHio();
       
     // ----------------
-    public RICHPMTReconstruction(RICHTool richtool) {
+    public RICHPMTReconstruction(RICHEvent richeve, RICHTool richtool) {
     // ----------------
 
         tool = richtool;
-        init();
+        richevent = richeve;
 
     }
-
-    // ----------------
-    public void init() {
-    // ----------------
-   
-    }
-
 
     // ----------------
     public void processRawData(DataEvent event) {
@@ -42,13 +42,13 @@ public class RICHPMTReconstruction {
             System.out.println("---------------------------------");
         }
 
-        List<RICHEdge>     allEdges      =    new ArrayList();
-        List<RICHEdge>     Leads         =    new ArrayList();
-        List<RICHEdge>     Trails        =    new ArrayList();
+        ArrayList<RICHEdge>     allEdges      =    new ArrayList();
+        ArrayList<RICHEdge>     Leads         =    new ArrayList();
+        ArrayList<RICHEdge>     Trails        =    new ArrayList();
 
-        List<RICHHit>      Hits          =    new ArrayList();
-        List<RICHCluster>  AllClusters   =    new ArrayList();
-        List<RICHCluster>  Clusters      =    new ArrayList();
+        ArrayList<RICHHit>      Hits          =    new ArrayList();
+        ArrayList<RICHCluster>  AllClusters   =    new ArrayList();
+        ArrayList<RICHCluster>  Clusters      =    new ArrayList();
 
         // get edges fron banks
         allEdges = readRawBank(event);
@@ -64,19 +64,20 @@ public class RICHPMTReconstruction {
 
         findXTalk(Hits, AllClusters);
 
-        writeBanks(event, Hits, Clusters);
+        richevent.add_Hits(Hits);
+        richevent.add_Clusters(Clusters);
+
+        richio.write_PMTBanks(event, richevent);
 
     }
 
-
-
     // ----------------
-    public List<RICHEdge> readRawBank(DataEvent event) {
+    public ArrayList<RICHEdge> readRawBank(DataEvent event) {
     // ----------------
 
         int debugMode = 0;
 
-        List<RICHEdge> allEdges = null;
+        ArrayList<RICHEdge> allEdges = null;
         
         if(event instanceof EvioDataEvent) {
             if(debugMode>=2)System.out.print("EVIO event found\t");
@@ -100,7 +101,7 @@ public class RICHPMTReconstruction {
     
     
     // ----------------
-    public List<RICHEdge> selectLeadEdges(List<RICHEdge> allEdges) {
+    public ArrayList<RICHEdge> selectLeadEdges(ArrayList<RICHEdge> allEdges) {
     // ----------------
 
         int debugMode = 0;
@@ -109,7 +110,7 @@ public class RICHPMTReconstruction {
         for(int i = 0; i < allEdges.size(); i++) {
             RICHEdge edge = allEdges.get(i);
                 if(RICHEdge.passEdgeSelection(edge)) {
-                        if(edge.get_polarity()==RICHConstants.LEADING_EDGE_POLARITY)Leads.add(edge);      
+                        if(edge.get_polarity()==tool.get_Constants().LEADING_EDGE_POLARITY)Leads.add(edge);      
                 }
         }      
 
@@ -129,7 +130,7 @@ public class RICHPMTReconstruction {
 
 
     // ----------------
-    public List<RICHEdge> selectTrailEdges(List<RICHEdge> allEdges) {
+    public ArrayList<RICHEdge> selectTrailEdges(ArrayList<RICHEdge> allEdges) {
     // ----------------
 
         int debugMode = 0;
@@ -139,7 +140,7 @@ public class RICHPMTReconstruction {
         {
             RICHEdge edge = allEdges.get(i);
                 if(RICHEdge.passEdgeSelection(edge)) {
-                        if(edge.get_polarity()==RICHConstants.TRAILING_EDGE_POLARITY)Trails.add(edge);      
+                        if(edge.get_polarity()==tool.get_Constants().TRAILING_EDGE_POLARITY)Trails.add(edge);      
                 }
         }      
 
@@ -160,14 +161,14 @@ public class RICHPMTReconstruction {
 
 
     // ----------------
-    public List<RICHEdge> readRawEdgesHIPO(DataEvent event) {
+    public ArrayList<RICHEdge> readRawEdgesHIPO(DataEvent event) {
     // ----------------
         // getting raw data bank
 
         int debugMode = 0;
         if(debugMode>=2) System.out.println("Getting raw edges from RICH:tdc bank");
 
-        List<RICHEdge>  edges = new ArrayList<RICHEdge>();
+        ArrayList<RICHEdge>  edges = new ArrayList<RICHEdge>();
         if(event.hasBank("RICH::tdc")==true) {
             DataBank bankDGTZ = event.getBank("RICH::tdc");
             int nrows = bankDGTZ.rows();
@@ -190,12 +191,12 @@ public class RICHPMTReconstruction {
     
 
     // ----------------
-    public List<RICHHit> reconstructHits(List<RICHEdge> Leads, List<RICHEdge >Trails) {
+    public ArrayList<RICHHit> reconstructHits(ArrayList<RICHEdge> Leads, ArrayList<RICHEdge >Trails) {
     // ----------------
 
         int debugMode = 0;
         int nhit=0;
-        List<RICHHit> hits = new ArrayList();
+        ArrayList<RICHHit> hits = new ArrayList();
 
         if(debugMode>=2)System.out.println("Entering hit reconstruction");
         for(int iled=0; iled<Leads.size(); iled++) {
@@ -242,11 +243,11 @@ public class RICHPMTReconstruction {
 
 
     // ----------------
-    public List<RICHCluster> findClusters(List<RICHHit> hits) {
+    public ArrayList<RICHCluster> findClusters(ArrayList<RICHHit> hits) {
     // ----------------
 
         int debugMode = 0;
-        List<RICHCluster> allclusters = new ArrayList();
+        ArrayList<RICHCluster> allclusters = new ArrayList();
         if(debugMode>=2) {
             System.out.println("--------------------\n");
             System.out.println("Building allclusters\n");
@@ -289,11 +290,11 @@ public class RICHPMTReconstruction {
 
 
     // ----------------
-    public List<RICHCluster> selectGoodClusters(List<RICHCluster> allclusters) {
+    public ArrayList<RICHCluster> selectGoodClusters(ArrayList<RICHCluster> allclusters) {
     // ----------------
 
         int debugMode = 0;
-        List<RICHCluster> clusters = new ArrayList();
+        ArrayList<RICHCluster> clusters = new ArrayList();
         if(debugMode>=2) System.out.println("\nSelecting good clusters");
 
         int nclu = 0;
@@ -345,7 +346,7 @@ public class RICHPMTReconstruction {
 
 
     // ----------------
-    public void findXTalk(List<RICHHit> hits, List<RICHCluster> allclusters) {
+    public void findXTalk(ArrayList<RICHHit> hits, ArrayList<RICHCluster> allclusters) {
     // ----------------
 
         int debugMode = 0;
@@ -364,7 +365,7 @@ public class RICHPMTReconstruction {
                 if(hiti.get_cluster()!=0)  continue; // this hit is not yet associated with a cluster
                 if(debugMode==6)System.out.println("Hit pair "+ih+" "+hiti.get_id()+" "+hiti.get_pmt()+" "+hiti.get_channel()+" "+hiti.get_duration()+" "+hiti.get_cluster()+" | " +jh+" "+hitj.get_id()+" "+hitj.get_pmt()+" "+hitj.get_channel()+" "+hitj.get_duration()+" "+hitj.get_cluster());
 
-                if(hiti.get_pmt()==hitj.get_pmt() && hitj.get_duration()*100 < hiti.get_duration()*RICHConstants.GOODHIT_FRAC){
+                if(hiti.get_pmt()==hitj.get_pmt() && hitj.get_duration()*100 < hiti.get_duration()*tool.get_Constants().GOODHIT_FRAC){
                     for(int k=-1; k<=1; k+=2 ) {
                         if(hiti.get_channel() == (k+hitj.get_channel())) {hitj.set_xtalk(1000+hiti.get_id()); if(debugMode==6)System.out.println(" E Xtalk "+hitj.get_xtalk());}
                     }
@@ -373,7 +374,7 @@ public class RICHPMTReconstruction {
         }
 
         for(int iclu=0; iclu<allclusters.size(); iclu++) {
-            if(allclusters.get(iclu).get_size()< RICHConstants.CLUSTER_MIN_SIZE) {
+            if(allclusters.get(iclu).get_size()< tool.get_Constants().CLUSTER_MIN_SIZE) {
                 RICHCluster clu = allclusters.get(iclu);
                 if(debugMode==6)System.out.println("  Cluster "+ iclu +" ID "+clu.get_id());
                 for(int ih = 0; ih< clu.size(); ih++) {
@@ -383,92 +384,13 @@ public class RICHPMTReconstruction {
                         RICHHit hitj = clu.get(jh);
                         if(debugMode==6)System.out.println("Hit pair "+ih+" "+hiti.get_id()+" "+hiti.get_pmt()+" "+hiti.get_channel()+" "+hiti.get_duration()+" | " +jh+" "+hitj.get_id()+" "+hitj.get_pmt()+" "+hitj.get_channel()+" "+hitj.get_duration());
 
-                        if(hitj.get_duration()*100 < hiti.get_duration()*RICHConstants.GOODHIT_FRAC) {hitj.set_xtalk(hiti.get_id()); if(debugMode==6)System.out.println(" O Xtalk "+hitj.get_xtalk());}
+                        if(hitj.get_duration()*100 < hiti.get_duration()*tool.get_Constants().GOODHIT_FRAC) {hitj.set_xtalk(hiti.get_id()); if(debugMode==6)System.out.println(" O Xtalk "+hitj.get_xtalk());}
 
                     }
                 }
             }
         }
 
-    }
-
-
-    // ----------------
-    public void writeBanks(DataEvent event, List<RICHHit> hits, List<RICHCluster> clusters){
-    // ----------------
-        if(event instanceof EvioDataEvent) {
-            //writeEvioBanks(event, hits, clusters);
-        }
-        else if(event instanceof HipoDataEvent) {
-            writeHipoBanks(event, hits, clusters);
-        }
-    }
-
-
-    // ----------------
-    private void writeHipoBanks(DataEvent event, List<RICHHit> hits, List<RICHCluster> clusters){
-    // ----------------
-
-        int debugMode = 0;
-
-        if(debugMode>=1)System.out.println("Creating Bank for Hits"+" "+hits.size()+" and Clusters "+clusters.size());
-        // hits banks
-        if(hits.size()!=0) {
-            if(debugMode>=2)System.out.println(" --> Creating the Hits Bank ");
-                DataBank bankHits = event.createBank("RICH::newhits", hits.size());
-                if(bankHits==null){
-                    System.out.println("ERROR CREATING BANK : RICH::newhits");
-                    return;
-                }
-                for(int i = 0; i < hits.size(); i++){
-                bankHits.setShort("id",i,(short) hits.get(i).get_id());
-                bankHits.setShort("sector",i,(short) hits.get(i).get_sector());
-                bankHits.setShort("tile",i,(short) hits.get(i).get_tile());
-                bankHits.setShort("pmt",i,(short) hits.get(i).get_pmt());
-                bankHits.setShort("anode",i,(short) hits.get(i).get_anode());
-                bankHits.setShort("idx",i,(short) hits.get(i).get_idx());
-                bankHits.setShort("idy",i,(short) hits.get(i).get_idy());
-                bankHits.setShort("glx",i,(short) hits.get(i).get_glx());
-                bankHits.setShort("gly",i,(short) hits.get(i).get_gly());
-                bankHits.setFloat("x",i,(float) (hits.get(i).get_x()));
-                bankHits.setFloat("y",i,(float) (hits.get(i).get_y()));
-                bankHits.setFloat("z",i,(float) hits.get(i).get_z());
-                bankHits.setFloat("time",i,(float) hits.get(i).get_time());
-                bankHits.setFloat("rawtime",i,(float) hits.get(i).get_rawtime());
-                bankHits.setShort("cluster",i,(short) hits.get(i).get_cluster());
-                bankHits.setShort("xtalk",i,(short) hits.get(i).get_xtalk());
-                bankHits.setShort("duration",i,(short) hits.get(i).get_duration());
-            }
-            event.appendBanks(bankHits);
-        }
-
-        // cluster bank
-        if(clusters.size()!=0) {
-            if(debugMode>=2)System.out.println(" --> Creating the Clusters Bank ");
-            DataBank bankCluster = event.createBank("RICH::newclusters", clusters.size());
-            if(bankCluster==null){
-                System.out.println("ERROR CREATING BANK : RICH::newclusters");
-                return;
-            }
-            for(int i = 0; i < clusters.size(); i++){
-                bankCluster.setShort("id", i, (short) clusters.get(i).get_id());
-                bankCluster.setShort("size", i, (short) clusters.get(i).get_size());
-                bankCluster.setShort("sector", i, (short) clusters.get(i).get(0).get_sector());
-                bankCluster.setShort("tile", i, (short) clusters.get(i).get(0).get_tile());
-                bankCluster.setShort("pmt", i, (short) clusters.get(i).get(0).get_pmt());
-                bankCluster.setFloat("charge",i, (float) clusters.get(i).get_charge());
-                bankCluster.setFloat("time",i, (float) clusters.get(i).get_time());
-                bankCluster.setFloat("rawtime",i, (float) clusters.get(i).get_rawtime());
-                bankCluster.setFloat("x",i, (float) (clusters.get(i).get_x()));
-                bankCluster.setFloat("y",i, (float) (clusters.get(i).get_y()));
-                bankCluster.setFloat("z",i, (float) clusters.get(i).get_z());
-                bankCluster.setFloat("wtime",i, (float) clusters.get(i).get_wtime());
-                bankCluster.setFloat("wx",i, (float) clusters.get(i).get_wx());
-                bankCluster.setFloat("wy",i, (float) clusters.get(i).get_wy());
-                bankCluster.setFloat("wz",i, (float) clusters.get(i).get_wz());
-            }
-            event.appendBanks(bankCluster);
-        }
     }
 
 }

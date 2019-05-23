@@ -5,6 +5,8 @@ import org.jlab.clas.pdg.PhysicsConstants;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.jlab.geom.prim.Point3D;
+
 // ----------------
 public class RICHSolution {
 // ----------------
@@ -85,8 +87,8 @@ public class RICHSolution {
 
         double rpath = 0.0;
         for (RICHRay ray : raytracks) {
-            rpath = rpath + ray.diff().magnitude();
-            if(debugMode>=2)System.out.format(" photon ray path %8.2f %8.2f %8.2f --> %8.2f %8.2f \n",ray.diff().x,ray.diff().y,ray.diff().z, ray.diff().magnitude(),rpath);
+            rpath = rpath + ray.direction().mag();
+            if(debugMode>=2)System.out.format(" photon ray path %s --> %8.2f %8.2f \n",ray.direction().toStringBrief(3), ray.direction().mag(),rpath);
         }
         return (float) rpath;
     }
@@ -98,20 +100,36 @@ public class RICHSolution {
         float time = 0;
         int ii=0;
         for (RICHRay ray : raytracks) {
-            double dtime = ray.diff().magnitude()/PhysicsConstants.speedOfLight()*ray.get_refind();
+            double dtime = ray.direction().mag()/PhysicsConstants.speedOfLight()*ray.get_refind();
             time = time + (float) dtime;
-            if(debugMode>=3)System.out.format(" photon ray path %8.2f  n %8.2f  --> %8.2f %8.2f \n", ray.diff().magnitude(),ray.get_refind(),dtime,time);
+            if(debugMode>=3)System.out.format(" photon ray path %8.2f  n %8.2f  --> %8.2f %8.2f \n", ray.direction().mag(),ray.get_refind(),dtime,time);
         }
         return time;
+    }
+
+    // ----------------
+    public int get_firstrefle() {
+    // ----------------
+
+        if(raytracks.size()>2) return raytracks.get(2).get_type();
+        return -1;
+
     }
 
     // ----------------
     public int get_rayrefle() {
     // ----------------
 
+        int debugMode = 0;
+
+        if(debugMode==1)System.out.format("RICHSolution::get_rayrefle \n");
         int nrfl=0;
+        int ira=0;
         for (RICHRay ray : raytracks) {
-            if(ray.get_type() == 1) nrfl++;
+            int refe = (int) ray.get_type()/10000;
+            if(refe == 1) nrfl++;
+            if(debugMode==1)System.out.format(" ray %3d  type %6d  refe %3d  nrfl %4d \n",ira, ray.get_type(), refe, nrfl);
+            ira++;
         }
         return nrfl;
     }
@@ -122,7 +140,8 @@ public class RICHSolution {
 
         int nrfr=0;
         for (RICHRay ray : raytracks) {
-            if(ray.get_type() == 2) nrfr++;
+            int refa = (int) ray.get_type()/10000;
+            if(refa == 2) nrfr++;
         }
         return nrfr;
     }
@@ -266,7 +285,7 @@ public class RICHSolution {
         for (RICHRay ray: rays){
             this.raytracks.add(ray);
         }
-        this.hit  = this.get_lastray().end();
+        this.hit  = toVector3d(this.get_lastray().end());
         this.time = this.get_raytime();
         this.path = this.get_raypath();
         this.nrefle = this.get_rayrefle();
@@ -310,13 +329,23 @@ public class RICHSolution {
         }
     }
 
+     //------------------------------
+     public Vector3d toVector3d(Point3D pin) {
+     //------------------------------
+        return new Vector3d(pin.x(), pin.y(), pin.z());
+     }
+
     // ----------------
-    public void dump_raytrack() {
+    public void dump_raytrack(String head) {
     // ----------------
 
         int ii=0;
         for(RICHRay ray: raytracks){
-            System.out.format(" %d",ii);
+            if(head==null){
+                System.out.format(" %d",ii);
+            }else{
+                System.out.format(" %s %d",head,ii);
+            }
             ray.dumpRay();
             ii++;
         }

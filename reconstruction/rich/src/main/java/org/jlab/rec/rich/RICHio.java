@@ -8,10 +8,6 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.clas.detector.DetectorResponse;
 
-import org.jlab.geom.prim.Point3D;
-import org.jlab.geometry.prim.Line3d;
-import eu.mihosoft.vrl.v3d.Vector3d;
-
 public class RICHio {
 
     /*
@@ -36,12 +32,12 @@ public class RICHio {
         if(event.hasBank("RICH::clusters")){
             event.removeBank("RICH::clusters");
         }
-        if(event.hasBank("RICH::newhits")){
+        /*if(event.hasBank("RICH::newhits")){
             event.removeBank("RICH::newhits");
         }
         if(event.hasBank("RICH::newclusters")){
             event.removeBank("RICH::newclusters");
-        }
+        }*/
         if(event.hasBank("REC::RICH")){
             event.removeBank("REC::RICH");
         }
@@ -56,7 +52,18 @@ public class RICHio {
 
 
     // ----------------
-    public void write_RECBank(DataEvent event, RICHEvent richevent) {
+    public void write_PMTBanks(DataEvent event, RICHEvent richevent) {
+    // ----------------
+
+        if(richevent.get_nHit()>0)write_HitBank(event, richevent);
+
+        if(richevent.get_nClu()>0)write_ClusterBank(event, richevent);
+
+    }
+
+
+    // ----------------
+    public void write_RECBank(DataEvent event, RICHEvent richevent, RICHConstants recopar) {
     // ----------------
 
         int debugMode = 0;
@@ -67,7 +74,7 @@ public class RICHio {
         if(NMAT>0){
 
             String richBank = "REC::RICH";
-            DataBank bankRich = getRichResponseBank(richevent.get_Matches(), event, richBank);
+            DataBank bankRich = getRichResponseBank(richevent.get_Matches(), event, richBank, recopar);
             if(bankRich!=null)event.appendBanks(bankRich);
 
         }
@@ -76,14 +83,99 @@ public class RICHio {
 
 
     // ----------------
-    public void write_CherenkovBanks(DataEvent event, RICHEvent richevent) {
+    public void write_CherenkovBanks(DataEvent event, RICHEvent richevent, RICHConstants recopar) {
     // ----------------
 
         if(richevent.get_nHad()>0)write_HadronBank(event, richevent);
 
         if(richevent.get_nPho()>0)write_PhotonBank(event, richevent);
 
+        if(richevent.get_nPho()>0)write_RingCherBank(event, richevent, recopar);
+
     }
+
+
+    // ----------------
+    private void write_HitBank(DataEvent event, RICHEvent richevent) {
+    // ----------------
+
+        int debugMode = 0;
+
+        int NHIT = richevent.get_nHit();
+        if(debugMode>=1)System.out.format("Creating Bank for %5d Hits \n", NHIT);
+
+        if(NHIT>0) {
+            if(debugMode>=2)System.out.println(" --> Creating the Hits Bank ");
+            DataBank bankHits = event.createBank("RICH::hits", NHIT);
+            if(bankHits==null){
+                System.out.println("ERROR CREATING BANK : RICH::hits");
+                return;
+            }
+
+            for(int i = 0; i < NHIT; i++){
+
+                RICHHit hit = richevent.get_Hit(i);
+
+                bankHits.setShort("id",i,(short) hit.get_id());
+                bankHits.setShort("sector",i,(short) hit.get_sector());
+                bankHits.setShort("tile",i,(short) hit.get_tile());
+                bankHits.setShort("pmt",i,(short) hit.get_pmt());
+                bankHits.setShort("anode",i,(short) hit.get_anode());
+                bankHits.setFloat("x",i,(float) (hit.get_x()));
+                bankHits.setFloat("y",i,(float) (hit.get_y()));
+                bankHits.setFloat("z",i,(float) hit.get_z());
+                bankHits.setFloat("time",i,(float) hit.get_time());
+                bankHits.setFloat("rawtime",i,(float) hit.get_rawtime());
+                bankHits.setShort("cluster",i,(short) hit.get_cluster());
+                bankHits.setShort("xtalk",i,(short) hit.get_xtalk());
+                bankHits.setShort("duration",i,(short) hit.get_duration());
+            }
+            event.appendBanks(bankHits);
+        }
+
+    }
+
+    // ----------------
+    private void write_ClusterBank(DataEvent event, RICHEvent richevent) {
+    // ----------------
+
+        int debugMode = 0;
+
+        int NCLU = richevent.get_nClu();
+        if(debugMode>=1)System.out.format("Creating Bank for %5d Clusters \n", NCLU);
+
+        if(NCLU>0) {
+            if(debugMode>=2)System.out.println(" --> Creating the Clusters Bank ");
+            DataBank bankCluster = event.createBank("RICH::clusters", NCLU);
+            if(bankCluster==null){
+                System.out.println("ERROR CREATING BANK : RICH::clusters");
+                return;
+            }
+
+            for(int i = 0; i < NCLU; i++){
+
+                RICHCluster clu = richevent.get_Cluster(i);
+
+                bankCluster.setShort("id", i, (short) clu.get_id());
+                bankCluster.setShort("size", i, (short) clu.get_size());
+                bankCluster.setShort("sector", i, (short) clu.get(0).get_sector());
+                bankCluster.setShort("tile", i, (short) clu.get(0).get_tile());
+                bankCluster.setShort("pmt", i, (short) clu.get(0).get_pmt());
+                bankCluster.setFloat("charge",i, (float) clu.get_charge());
+                bankCluster.setFloat("time",i, (float) clu.get_time());
+                bankCluster.setFloat("rawtime",i, (float) clu.get_rawtime());
+                bankCluster.setFloat("x",i, (float) (clu.get_x()));
+                bankCluster.setFloat("y",i, (float) (clu.get_y()));
+                bankCluster.setFloat("z",i, (float) clu.get_z());
+                bankCluster.setFloat("wtime",i, (float) clu.get_wtime());
+                bankCluster.setFloat("wx",i, (float) clu.get_wx());
+                bankCluster.setFloat("wy",i, (float) clu.get_wy());
+                bankCluster.setFloat("wz",i, (float) clu.get_wz());
+            }
+            event.appendBanks(bankCluster);
+        }
+    }
+
 
     // ----------------
     public void write_HadronBank(DataEvent event, RICHEvent richevent) {
@@ -138,6 +230,65 @@ public class RICHio {
     }
 
     // ----------------
+    public void write_RingCherBank(DataEvent event, RICHEvent richevent, RICHConstants recopar) {
+    // ----------------
+
+        int debugMode = 0;
+
+        int NPHO = richevent.get_nPho();
+        if(debugMode>=1)System.out.format("Creating Bank for %5d Ring Cherenkovs \n", NPHO);
+        
+        if(NPHO!=0) {
+            if(debugMode>=1)System.out.println(" --> Creating the REC::RingCher Bank ");
+            DataBank bankRing = event.createBank("REC::RingCher", NPHO);
+            if(bankRing==null){
+                System.out.println("ERROR CREATING BANK : REC::RingCher");
+                return;
+            }
+
+            for(int i = 0; i < NPHO; i++){
+
+                RICHParticle pho = richevent.get_Photon(i);
+
+                // only reconstructed photons
+                if(pho.get_type()!=0) continue;
+ 
+                RICHHit hit = richevent.get_Hit( pho.get_hit_index() );
+                RICHParticle had = richevent.get_Hadron( pho.get_ParentIndex() );
+
+                double htime = hit.get_time();
+                double a_time = pho.get_start_time() + pho.analytic.get_time();
+                double t_time = pho.get_start_time() + pho.traced.get_time();
+                double chmi = had.minChAngle();
+                double chma = had.maxChAngle();
+                double dtma = recopar.RICH_TIME_RMS*3;
+
+                double a_etaC = pho.analytic.get_EtaC();
+                double t_etaC = pho.traced.get_EtaC();
+
+                // skip no real Cherenkov solution
+                if((a_etaC<chmi || a_etaC>chma) && (t_etaC<chmi || t_etaC>chma)) continue;
+                if(Math.abs(a_time-htime)>dtma && Math.abs(t_time-htime)>dtma) continue;
+
+                bankRing.setShort("id",i, (short) pho.get_id());
+                bankRing.setShort("hindex",i,(short) pho.get_hit_index());
+                bankRing.setShort("pindex",i,(short) had.get_ParentIndex());
+
+                bankRing.setFloat("apath",i,(float) pho.analytic.get_path());
+                bankRing.setFloat("atime",i,(float) a_time );
+                bankRing.setFloat("aEtaC",i,(float) a_etaC );
+
+                bankRing.setFloat("tpath",i,(float) pho.traced.get_path());
+                bankRing.setFloat("ttime",i,(float) t_time );
+                bankRing.setFloat("tEtaC",i,(float) t_etaC );
+
+            }
+            event.appendBanks(bankRing);
+        }
+    }
+
+
+    // ----------------
     public void write_PhotonBank(DataEvent event, RICHEvent richevent) {
     // ----------------
 
@@ -188,6 +339,7 @@ public class RICHio {
                 bankPhos.setFloat("traced_time",i,(float) pho.traced.get_time());
                 bankPhos.setShort("traced_nrfl",i,(short) pho.traced.get_nrefle());
                 bankPhos.setShort("traced_nrfr",i,(short) pho.traced.get_nrefra());
+                //bankPhos.setShort("traced_1srfl",i,(short) pho.traced.get_firstrefle());
 
                 bankPhos.setFloat("traced_EtaC",i,(float) pho.traced.get_EtaC());
                 bankPhos.setFloat("traced_aeron",i,(float) pho.traced.get_aeron());
@@ -204,11 +356,11 @@ public class RICHio {
     }
 
     // ----------------
-    public DataBank getRichResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
+    public DataBank getRichResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name, RICHConstants recopar){
     // ----------------
 
         int debugMode = 0;
-        if(debugMode>=1)System.out.format("Saving match in RICH::REC bank  Nmatches  %5d \n",responses.size());
+        if(debugMode>=1)System.out.format("Saving match in REC::RICH bank  Nmatches  %5d \n",responses.size());
         DataBank bank = event.createBank(bank_name, responses.size());
         for(int row = 0; row < responses.size(); row++){
             DetectorResponse r = (DetectorResponse) responses.get(row);
@@ -229,10 +381,10 @@ public class RICHio {
             bank.setFloat("energy", row, (float) r.getEnergy());
             float chi2 = (float) (2*Math.sqrt(Math.pow(r.getMatchedPosition().x()-r.getPosition().x(),2)+
                                   Math.pow(r.getMatchedPosition().y()-r.getPosition().y(),2)+
-                                  Math.pow(r.getMatchedPosition().z()-r.getPosition().z(),2))/RICHConstants.RICH_DCMATCH_CHI2);
+                                  Math.pow(r.getMatchedPosition().z()-r.getPosition().z(),2))/recopar.RICH_HITMATCH_RMS);
             bank.setFloat("chi2", row, (float) chi2);
 
-            if(debugMode>=1)System.out.format("RICH::REC Hit id %3d   hit %6.1f %6.1f %6.1f    tk %6.1f %6.1f %6.1f chi2 %8.3f \n",
+            if(debugMode>=1)System.out.format("REC::RICH id %3d   hit %6.1f %6.1f %6.1f    tk %6.1f %6.1f %6.1f chi2 %8.3f \n",
                                   r.getHitIndex(),
                                   r.getPosition().x(),r.getPosition().y(),r.getPosition().z(),
                                   r.getPosition().x()+(r.getMatchedPosition().x()-r.getPosition().x())*2,

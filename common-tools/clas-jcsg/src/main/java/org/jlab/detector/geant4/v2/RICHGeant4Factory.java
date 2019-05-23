@@ -264,7 +264,7 @@ public final class RICHGeant4Factory extends Geant4Factory {
     		  String Layers = String.format("Layer_%d",Layernr);
     		  String name = String.format("%s_component_%d.stl",Layers,_ii);
     		   String Path = String.format("%s/%d",Layers,Layernr);
-              System.out.format(" Loading %s \n",String.format("rich/cad/sector_4/%s_%d.stl",Path,_ii));
+              if(_ii==1)System.out.format(" Loading %s \n",String.format("rich/cad/sector_4/%s_%d.stl",Path,_ii));
               G4Stl component = new G4Stl(String.format("%s", name),
               cloader.getResourceAsStream(String.format("rich/cad/sector_4/%s_%d.stl",Path,_ii)),
               Length.mm / Length.cm);

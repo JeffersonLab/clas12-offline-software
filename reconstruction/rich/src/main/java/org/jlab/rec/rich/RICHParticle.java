@@ -1,14 +1,22 @@
 package org.jlab.rec.rich;
+import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
+import org.jlab.io.base.DataBank;
 
 import java.util.ArrayList;
 
+import org.jlab.io.base.DataEvent;
 import eu.mihosoft.vrl.v3d.Vector3d;
+import eu.mihosoft.vrl.v3d.Vertex;
+import eu.mihosoft.vrl.v3d.Polygon;
 
 import org.jlab.geometry.prim.Line3d;
 
 import org.freehep.math.minuit.FCNBase;
 import org.freehep.math.minuit.FunctionMinimum;
 import org.freehep.math.minuit.MnMigrad;
+import org.freehep.math.minuit.MnScan;
 import org.freehep.math.minuit.MnUserParameters;
 
 import org.jlab.clas.pdg.PhysicsConstants;
@@ -25,6 +33,7 @@ public class RICHParticle {
     private int parent_index = -999;
     private int hit_index = -999;
     private int type = 0;
+    private int status = -1;
     private int CLASpid = -999;
     private int RICHpid = -999;
     private double momentum = 0; 
@@ -33,7 +42,7 @@ public class RICHParticle {
     public Vector3d meas_hit = null;
     private double  meas_time = 0.0;
 
-    public Vector3d lab_origin = null;
+    public Point3D lab_origin = null;
     public Vector3d lab_emission = null;
     public int ilay_emission = 0;
     public int ico_emission = 0;
@@ -69,9 +78,11 @@ public class RICHParticle {
     private static double MRAD = 1000.;
     private static double RAD = 180./Math.PI;
 
+    private RICHConstants recopar = null;
+
 
     // -------------
-    public RICHParticle(int id, int parent_index, int hit_index, double mom, int CLASpid){
+    public RICHParticle(int id, int parent_index, int hit_index, double mom, int CLASpid, RICHTool tool){
     // -------------
     /**
     * Define a generic particle with given momentum
@@ -82,6 +93,8 @@ public class RICHParticle {
         set_hit_index(hit_index);
         set_CLASpid(CLASpid);
         set_momentum(mom);
+
+        recopar = tool.get_Constants();
 
         //if(CLASpid!=22)set_changle();
 
@@ -151,6 +164,10 @@ public class RICHParticle {
     // -------------
 
     // -------------
+    public int get_Status() {return status;}
+    // -------------
+
+    // -------------
     public int get_CLASpid() {return CLASpid;}
     // -------------
 
@@ -193,8 +210,7 @@ public class RICHParticle {
     public double maxChAngle() {
     // ----------------
 
-        for(int k=0 ; k<4; k++) if(ChAngle[k]>0)return ChAngle[k] + 3*RICHConstants.RICH_DIRECT_RMS;
-        //return ChAngle[0] + 5*RICHConstants.RICH_DIRECT_RMS;
+        for(int k=0 ; k<4; k++) if(ChAngle[k]>0)return ChAngle[k] + 3*recopar.RICH_DIRECT_RMS;
         return 0.0;
     }
 
@@ -204,8 +220,7 @@ public class RICHParticle {
     // ----------------
     // calculate the minimum Cherenlov angle compatible with the momentum 
   
-        for(int k=3 ; k>=0; k--) if(ChAngle[k]>0)return Math.max(RICHConstants.RICH_MIN_CHANGLE, ChAngle[k] - 3*RICHConstants.RICH_DIRECT_RMS);
-        //return ChAngle[0] - 5*RICHConstants.RICH_DIRECT_RMS;
+        for(int k=3 ; k>=0; k--) if(ChAngle[k]>0)return Math.max(recopar.RICH_MIN_CHANGLE, ChAngle[k] - 3*recopar.RICH_DIRECT_RMS);
         return 0.0;
     }
 
@@ -218,7 +233,6 @@ public class RICHParticle {
         double arg = 0.0;
         double beta = get_beta(pid);
         if(beta>0) arg = 1.0/beta/refi_emission;
-        //if(beta>0) arg = 1.0/beta/RICHConstants.RICH_AEROGEL_INDEX;
         if(debugMode>=1)  System.out.format(" Expected Ch Angle %8.4f  beta %8.4f  n %7.3f  arg %8.4f\n",get_mass(pid),beta,refi_emission, Math.acos(arg)*MRAD);
         if(arg>0.0 && arg<1.0) return Math.acos(arg);
         return 0.0;
@@ -241,6 +255,10 @@ public class RICHParticle {
     // ----------------
 
     // ----------------
+    public void set_Status(int sta) { this.status = sta; }
+    // ----------------
+
+    // ----------------
     public void set_momentum(double momentum) { this.momentum=momentum; }
     // ----------------
 
@@ -249,11 +267,11 @@ public class RICHParticle {
     // ----------------
 
     // ----------------
-    public void set_origin(Vector3d ori){ this.lab_origin = ori; }
+    public void set_origin(Point3D ori){ this.lab_origin = ori; }
     // ----------------
 
     // ----------------
-    public Vector3d get_origin(){ return this.lab_origin; }
+    public Point3D get_origin(){ return this.lab_origin; }
     // ----------------
 
     // ----------------
@@ -285,7 +303,7 @@ public class RICHParticle {
     public void set_points(RICHParticle hadron, Vector3d impa){
     // ----------------
 
-        this.lab_origin    = hadron.lab_emission;
+        //this.lab_origin    = hadron.lab_emission;
         this.lab_emission  = hadron.lab_emission;
         this.meas_hit = impa;
         this.direct_ray = new Line3d(this.lab_emission, impa);
@@ -310,7 +328,7 @@ public class RICHParticle {
     }
 
     // ----------------
-    public boolean set_points(Vector3d ori, Vector3d end, Vector3d impa, RICHTool tool) {
+    public boolean set_points(Point3D ori, Point3D end, Vector3D impa, int status, RICHTool tool) {
     // ----------------
     
         int debugMode = 0;
@@ -322,23 +340,32 @@ public class RICHParticle {
         }
         this.lab_origin = ori;
 
-        if(tool.FORCE_DC_MATCH==1){
+        if(tool.get_Constants().FORCE_DC_MATCH==1){
             if(debugMode>=1)System.out.println(" FORCE DC-RICH match \n");
-            this.direct_ray = new Line3d(ori, impa);
-            this.meas_hit = impa;
+            this.direct_ray = new Line3d(tool.toVector3d(ori), tool.toVector3d(impa));
+            this.meas_hit = tool.toVector3d(impa);
         }else{
             if(debugMode>=1)System.out.println(" Take hadron track as from DC\n");
-            this.direct_ray = new Line3d(ori, end);
-            this.meas_hit = tool.find_intersection_MAPMT(direct_ray);
+            this.direct_ray = new Line3d(tool.toVector3d(ori), tool.toVector3d(end));
+            Line3D temp = new Line3D(ori, end);
+            if(status==1){
+                // status = 1 means a matching MAPMT cluster has been found, track pointing to MaPMT
+                this.meas_hit = tool.find_intersection_MAPMT(temp);
+            }else{
+                // status != 1 means no matching cluster, track pointing to Mirror
+                this.meas_hit = tool.toVector3d(impa);
+            }
         }
 
         if(this.meas_hit==null){
-            System.out.format("No extrapolatd hit found for track ! \n");
+            if(debugMode>=1)System.out.format("No extrapolatd hit found for track ! \n");
             return false;
         }
 
+        this.status = status;
         this.lab_phi = Math.atan2(direct_ray.diff().y, direct_ray.diff().x);
         this.lab_theta = direct_ray.diff().angle(Vector3d.Z_ONE);
+        if(debugMode>=1)System.out.format("New hadron STATUS %3d\n",this.status);
         return true;
 
     }
@@ -360,37 +387,36 @@ public class RICHParticle {
         if(debugMode>=3)  System.out.println(" \n RICHParticle::set_aerogel_points \n");
         RICHIntersection compo     = null;
 
+        Line3D temp = new Line3D(tool.toPoint3D(direct_ray.origin()), tool.toPoint3D(direct_ray.end()));
+
         if(debugMode>=3)  System.out.println(" Look for intersection with layer 201 \n");
-        RICHIntersection entrance  = tool.find_intersection_Shape3D(direct_ray, tool.get_LayerNumber("aerogel_2cm_B1"), -1, 0, 1);
-        RICHIntersection exit      = tool.find_intersection_Shape3D(direct_ray, tool.get_LayerNumber("aerogel_2cm_B1"), -1, 1, 1);
+        RICHIntersection entrance  = tool.get_Layer("aerogel_2cm_B1").find_Entrance(temp, -1);
+        RICHIntersection exit      = tool.get_Layer("aerogel_2cm_B1").find_Exit(temp, -1);
 
         if(entrance==null || exit==null){
             if(debugMode>=3)  System.out.println(" Look for intersection with layer 202 \n");
-            entrance  = tool.find_intersection_Shape3D(direct_ray, tool.get_LayerNumber("aerogel_2cm_B2"), -1, 0, 1);
-            exit      = tool.find_intersection_Shape3D(direct_ray, tool.get_LayerNumber("aerogel_2cm_B2"), -1, 1, 1);
+            entrance  = tool.get_Layer("aerogel_2cm_B2").find_Entrance(temp, -1);
+            exit      = tool.get_Layer("aerogel_2cm_B2").find_Exit(temp, -1);
         }
 
         if(entrance==null || exit==null){
             if(debugMode>=3)  System.out.println(" Look for intersection with layer 203/204 \n");
-            entrance  = tool.find_intersection_Shape3D(direct_ray, tool.get_LayerNumber("aerogel_3cm_L2"), -1, 0, 1);
-            exit      = tool.find_intersection_Shape3D(direct_ray, tool.get_LayerNumber("aerogel_3cm_L1"), -1, 1, 1);
+            entrance  = tool.get_Layer("aerogel_3cm_L2").find_Entrance(temp, -1);
+            exit      = tool.get_Layer("aerogel_3cm_L1").find_Exit(temp, -1);
             if(debugMode>=1){
-                if(entrance!=null)  System.out.format(" 3cm entrance %4d %6d  %7.2f %7.2f %7.2f \n",entrance.get_layer(),entrance.get_component(), 
-                              entrance.get_pos().x, entrance.get_pos().y, entrance.get_pos().z);
-                if(exit!=null)      System.out.format(" 3cm exit    %4d %6d  %7.2f %7.2f %7.2f \n",exit.get_layer(),exit.get_component(), 
-                              exit.get_pos().x, exit.get_pos().y, exit.get_pos().z);
+                if(entrance!=null)  System.out.format(" 3cm entrance %4d %6d  %s \n",entrance.get_layer(),entrance.get_component(), entrance.get_pos().toStringBrief(2));
+                if(exit!=null)      System.out.format(" 3cm exit     %4d %6d  %s \n",exit.get_layer(),exit.get_component(), exit.get_pos().toStringBrief(2));
             }
         }
-
 
         if(entrance==null || exit==null){
             if(debugMode>=1)System.out.format(" No intersection with aerogel plane found \n");
             return false;
         }
 
-        aero_entrance  = entrance.get_pos();
-        aero_exit      = exit.get_pos();
-        aero_normal    = exit.get_normal();
+        aero_entrance  = tool.toVector3d(entrance.get_pos());
+        aero_exit      = tool.toVector3d(exit.get_pos());
+        aero_normal    = tool.toVector3d(exit.get_normal());
         /*
         *   Take point at 3/4 of path inside aerrogel  
         */
@@ -400,6 +426,7 @@ public class RICHParticle {
         // take the downstream aerogel tile as the one with largest number of phtoons and average emisison point
         ilay_emission  = exit.get_layer();
         ico_emission   = exit.get_component();
+        if(debugMode>=1)System.out.format(" AERO lay %3d ico %3d \n",ilay_emission,ico_emission);
         refi_emission  = tool.get_Component(ilay_emission,ico_emission).get_index();
 
         set_changle();
@@ -485,7 +512,7 @@ public class RICHParticle {
     // ----------------
 
         int debugMode = 0;
-        double n_a = RICHConstants.RICH_AIR_INDEX;
+        double n_a = recopar.RICH_AIR_INDEX;
 
         double Phi_ini = trial_pho.lab_phi;
         double Theta_ini = trial_pho.lab_theta;
@@ -511,7 +538,7 @@ public class RICHParticle {
                     double Function = 999;
                     Vector3d pmt_hit = new Vector3d(0.0, 0.0, 0.0);
                     if(rays!=null){
-                        pmt_hit = rays.get(rays.size()-1).end();
+                        pmt_hit = tool.toVector3d(rays.get(rays.size()-1).end());
                         Function = pmt_hit.distance(meas_hit);
                     }
 
@@ -567,7 +594,7 @@ public class RICHParticle {
     // ----------------
 
         int debugMode = 0;
-        double n_a = RICHConstants.RICH_AIR_INDEX;
+        double n_a = recopar.RICH_AIR_INDEX;
 
         if(trial_pho==null){
             if(debugMode>=1) System.out.format(" Missing starting values from trial photon\n");
@@ -593,7 +620,7 @@ public class RICHParticle {
         double EtaCmin = 0.0;
         if(Math.abs(Cos_EtaC)<1.)EtaCmin = Math.acos(Cos_EtaC);
         int ntrials = 0;
-        while (dist > RICHConstants.RICH_DIRECT_RMS*100/2. && ntrials<10){
+        while (dist > recopar.RICH_DIRECT_RMS*100/2. && ntrials<10){
 
             if(debugMode>=1){ 
                 System.out.format(" Attempt %d  with the %7.1f (%7.2f)  phi %7.2f  EtaC  %7.2f\n",ntrials, the_min*MRAD, the_min*RAD, phi_min*RAD, EtaCmin*MRAD); 
@@ -604,16 +631,16 @@ public class RICHParticle {
  
             int nthe = 0;
             for (nthe=1; nthe<=4; nthe++){
-                double theta_dthe = the_min + RICHConstants.RICH_DIRECT_RMS/nthe;
+                double theta_dthe = the_min + recopar.RICH_DIRECT_RMS/nthe;
                 Vector3d vpho_dthe = new Vector3d( Math.sin(theta_dthe)*Math.cos(phi_min), Math.sin(theta_dthe)*Math.sin(phi_min), Math.cos(theta_dthe));
                 ArrayList<RICHRay> rays_dthe = tool.RayTrace(lab_emission, ilay_emission, ico_emission, vpho_dthe);
                 if(rays_dthe!=null){
                     int nrefle_dthe = get_rayrefle(rays_dthe);
                     if(debugMode>=1) System.out.format("     test %2d  the %7.1f  nrfl %2d vs %2d ",nthe, theta_dthe*MRAD, nrefle_dthe, nrefle_min); 
                     if(nrefle_dthe==nrefle_min){
-                        Vector3d pmt_dthe = rays_dthe.get(rays_dthe.size()-1).end();
+                        Vector3d pmt_dthe = tool.toVector3d(rays_dthe.get(rays_dthe.size()-1).end());
                         Vector3d vers_dthe = pmt_dthe.minus(pmt_min);
-                        dthe = (vec_dist.x*vers_dthe.x + vec_dist.y*vers_dthe.y) / (vers_dthe.x*vers_dthe.x + vers_dthe.y*vers_dthe.y) * RICHConstants.RICH_DIRECT_RMS;
+                        dthe = (vec_dist.x*vers_dthe.x + vec_dist.y*vers_dthe.y) / (vers_dthe.x*vers_dthe.x + vers_dthe.y*vers_dthe.y) * recopar.RICH_DIRECT_RMS;
                         if(debugMode>=1) System.out.format("   --> dthe pos %7.2f %7.2f %7.2f  delta %7.1f (%8.2f %8.2f) \n", 
                                      pmt_dthe.x, pmt_dthe.y, pmt_dthe.z, dthe*MRAD, vers_dthe.x, vers_dthe.y);
                         break;
@@ -624,16 +651,16 @@ public class RICHParticle {
             }
 
             for (int nphi=1; nphi<=4; nphi++){
-                double phi_dphi = phi_min + RICHConstants.RICH_DIRECT_RMS/nphi;
+                double phi_dphi = phi_min + recopar.RICH_DIRECT_RMS/nphi;
                 Vector3d vpho_dphi = new Vector3d( Math.sin(the_min)*Math.cos(phi_dphi), Math.sin(the_min)*Math.sin(phi_dphi), Math.cos(the_min));
                 ArrayList<RICHRay> rays_dphi = tool.RayTrace(lab_emission, ilay_emission, ico_emission, vpho_dphi);
                 if(rays_dphi!=null){
                     int nrefle_dphi = get_rayrefle(rays_dphi);
                     if(debugMode>=1) System.out.format("     test %2d  phi %7.2f  nrfl %2d vs %2d ",nphi, phi_dphi*RAD, nrefle_dphi, nrefle_min); 
                     if(nrefle_dphi==nrefle_min){
-                        Vector3d pmt_dphi = rays_dphi.get(rays_dphi.size()-1).end();
+                        Vector3d pmt_dphi = tool.toVector3d(rays_dphi.get(rays_dphi.size()-1).end());
                         Vector3d vers_dphi = (pmt_dphi.minus(pmt_min));
-                        dphi = (vec_dist.x*vers_dphi.x + vec_dist.y*vers_dphi.y) / (vers_dphi.x*vers_dphi.x + vers_dphi.y*vers_dphi.y) * RICHConstants.RICH_DIRECT_RMS;
+                        dphi = (vec_dist.x*vers_dphi.x + vec_dist.y*vers_dphi.y) / (vers_dphi.x*vers_dphi.x + vers_dphi.y*vers_dphi.y) * recopar.RICH_DIRECT_RMS;
                         if(debugMode>=1) System.out.format("   --> dphi pos %7.2f %7.2f %7.2f  delta %7.2f (%8.2f %8.2f) \n", 
                                      pmt_dphi.x, pmt_dphi.y, pmt_dphi.z, dphi*RAD, vers_dphi.x, vers_dphi.y);
                         break;
@@ -658,7 +685,7 @@ public class RICHParticle {
                         if(nrefle_new==nrefle_min){
                             the_min=the_new;
                             phi_min=phi_new;
-                            pmt_min = rays_min.get(rays_min.size()-1).end();
+                            pmt_min = tool.toVector3d(rays_min.get(rays_min.size()-1).end());
                             vec_dist = meas_hit.minus(pmt_min);
                             dist = Math.sqrt(vec_dist.x*vec_dist.x+vec_dist.y*vec_dist.y);
                             Cos_EtaC = Math.sin(Theta_P)* Math.sin(the_min)*Math.cos(phi_min-Phi_P)+Math.cos(Theta_P)*Math.cos(the_min);
@@ -686,7 +713,7 @@ public class RICHParticle {
             ntrials++;
         }
 
-        if(dist < RICHConstants.RICH_DIRECT_RMS*100.){
+        if(dist < recopar.RICH_DIRECT_RMS*100.){
 
             if(debugMode>=1){
                 System.out.format(" -->  Matched value found using %d calls: result is %8.2f %8.2f  matched hit %7.2f %7.2f %7.2f  dist %7.3f \n", 
@@ -714,12 +741,12 @@ public class RICHParticle {
     // ----------------
 
         int debugMode = 0;
-        double n_a = RICHConstants.RICH_AIR_INDEX;
+        double n_a = recopar.RICH_AIR_INDEX;
 
         // The following definition should be read by the geometry
         // ATT: mismatch con la definizione di emission a 3/4 dell'aerogel
         // ATT: L deve essere calcolato con il coseno
-        double T_r = RICHConstants.RICH_AERO_THICKNESS;
+        double T_r = recopar.RICH_AERO_THICKNESS;
         double L = T_r/2; // middle point is Thickness
         double T_g = hadron.ref_impact.z-hadron.ref_emission.z-L;
 
@@ -805,7 +832,7 @@ public class RICHParticle {
 
         // timing probability
         double meant = start_time + reco.get_time();
-        double sigmat = RICHConstants.RICH_TIME_RMS;
+        double sigmat = recopar.RICH_TIME_RMS;
 
         double funt = 0.0;
         double dfunt = 1;
@@ -814,9 +841,9 @@ public class RICHParticle {
             funt = Math.exp((-0.5)*Math.pow((testtime - meant)/sigmat, 2) )/ (sigmat*Math.sqrt(2* Math.PI));
         }
         
-        double prob = 1 + funt*dfunt + RICHConstants.RICH_BKG_PROBABILITY;
+        double prob = 1 + funt*dfunt + recopar.RICH_BKG_PROBABILITY;
 
-        if(debugMode>=1)if(prob-1>RICHConstants.RICH_BKG_PROBABILITY)System.out.format(
+        if(debugMode>=1)if(prob-1>recopar.RICH_BKG_PROBABILITY)System.out.format(
                      "TIM prob   meant %8.3f  time %8.3f -->  %g  %g \n",
                      meant,testtime,funt*dfunt,Math.log(prob)); 
         return prob;
@@ -849,7 +876,7 @@ public class RICHParticle {
 
         double func = 0.0;
         double dfunc = 1e-3;
-        double sigma = RICHConstants.RICH_DIRECT_RMS;
+        double sigma = recopar.RICH_DIRECT_RMS;
 
         if(mean>0){
             func = Math.exp((-0.5)*Math.pow((reco.get_EtaC() - mean)/sigma, 2) )/ (sigma*Math.sqrt(2* Math.PI));
@@ -857,7 +884,7 @@ public class RICHParticle {
         
         // timing probability
         double meant = start_time + reco.get_time();
-        double sigmat = RICHConstants.RICH_TIME_RMS;
+        double sigmat = recopar.RICH_TIME_RMS;
 
         double funt = 0.0;
         double dfunt = 1;
@@ -866,9 +893,9 @@ public class RICHParticle {
             funt = Math.exp((-0.5)*Math.pow((meas_time - meant)/sigmat, 2) )/ (sigmat*Math.sqrt(2* Math.PI));
         }
         
-        double prob = 1 + func*dfunc*funt*dfunt + RICHConstants.RICH_BKG_PROBABILITY;
+        double prob = 1 + func*dfunc*funt*dfunt + recopar.RICH_BKG_PROBABILITY;
 
-        if(debugMode>=1)if(prob-1>RICHConstants.RICH_BKG_PROBABILITY)System.out.format(
+        if(debugMode>=1)if(prob-1>recopar.RICH_BKG_PROBABILITY)System.out.format(
                      "PID prob %4d    mean %8.3f   etaC %8.3f   meant %8.3f  time %8.3f -->  %g  %g  %g \n",pid,
                      mean*MRAD,reco.get_EtaC()*MRAD,meant,meas_time,func*dfunc,funt*dfunt,Math.log(prob)); 
         return prob;
@@ -906,7 +933,7 @@ public class RICHParticle {
         System.out.format("       ChAngle (mrad)    %8.2f %8.2f %8.2f %8.2f  limits %8.2f %8.2f \n", ChAngle[3]*MRAD, ChAngle[2]*MRAD, ChAngle[1]*MRAD, ChAngle[0]*MRAD,
                                              minChAngle()*MRAD, maxChAngle()*MRAD);
         System.out.println("  ");
-        System.out.format(" TRACK origin     %8.1f %8.1f %8.1f \n", lab_origin.x, lab_origin.y, lab_origin.z);
+        System.out.format(" TRACK origin     %8.1f %8.1f %8.1f \n", lab_origin.x(), lab_origin.y(), lab_origin.z());
         System.out.format("       direction  %8.3f %8.3f %8.3f   theta %8.2f   phi %8.2f \n", lab_direction.x, lab_direction.y, lab_direction.z, lab_theta*RAD, lab_phi*RAD);
         System.out.format("       emission   %8.1f %8.1f %8.1f    time %8.2f  refind %8.4f \n", lab_emission.x, lab_emission.y, lab_emission.z, start_time, refi_emission);
         System.out.format("       impact     %8.1f %8.1f %8.1f    time track %8.2f   vs hit %8.2f \n", meas_hit.x, meas_hit.y, meas_hit.z, traced.get_time(), meas_time);
@@ -951,7 +978,8 @@ public class RICHParticle {
 
         int nrfl=0;
         for (RICHRay ray : rays) {
-            if(ray.get_type() == 1) nrfl++;
+            int refe = (int) ray.get_type()/10000;
+            if(refe == 1) nrfl++;
         }
         return nrfl;
     }

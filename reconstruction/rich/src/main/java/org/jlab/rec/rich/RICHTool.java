@@ -8,6 +8,7 @@ package org.jlab.rec.rich;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.jlab.detector.geant4.v2.RICHGeant4Factory;
@@ -197,20 +198,19 @@ public class RICHTool{
     private static int NCOL=56;
     private static int NPMT=391;
     private static int NPIX=64;
+    private static int NCOMPO=10;
 
-    private static double global_shift[] = {0.0, 0.0, 0.0};
-    private static double global_angle[] = {0.0, 0.0, 0.0};
     private static double pmt_timeoff[][] = new double[NPMT][NPIX];
     private static double pmt_timewalk[][] = new double[NPMT][4];
     private static double aero_refi[][] = new double[4][31];
     private static double aero_plan[][] = new double[4][31];
 
-    private Shape3D rich_survey_plane = null;
-    private Vector3d rich_misa_centre = null;
-    private Vector3d rich_misa_angle  = null;
-    private Vector3d rich_misa_shift  = null;
-    private static Vector3d layer_misa_angle[] = new Vector3d[NLAY];
-    private static Vector3d layer_misa_shift[] = new Vector3d[NLAY];
+    private Vector3D rich_survey_angle  = new Vector3D();
+    private Vector3D rich_survey_shift  = new Vector3D();
+    private Vector3D layer_misa_angle[][] = new Vector3D[NLAY+1][NCOMPO+1];
+    private Vector3D layer_misa_shift[][] = new Vector3D[NLAY+1][NCOMPO+1];
+    private RICHFrame rich_frame = new RICHFrame();
+    private RICHFrame survey_frame = new RICHFrame();
 
     private static int pfirst[] = {1, 7,14,22,31,41,52,64,77, 91,106,122,139,157,176,196,217,239,262,286,311,337,364,392,395};
     private static int plast[]  = {6,13,21,30,40,51,63,76,90,105,121,138,156,175,195,216,238,261,285,310,336,363,391,394,397};
@@ -230,36 +230,31 @@ public class RICHTool{
     private double richprocess_time[] = new double[NTIME];
     private int richprocess_ntimes[] = new int[NTIME];
 
-    public int FTOF_phase_corr = 0;
-    public int DO_MISALIGNMENT = 0;
-    public int MISA_RICH_REF   = 0;
-    public int MISA_PMT_PIVOT  = 0;
-    public int FORCE_DC_MATCH  = 0;
+    private RICHConstants reco_constants = new RICHConstants();
 
     //------------------------------
-    public void init(IndexedTable aeroConstants){
+    public void init(IndexedTable aeroConstants, IndexedTable timewalkConstants, 
+                     IndexedTable timeoffConstants, IndexedTable misaConstants, IndexedTable paraConstants){
     //------------------------------
 
         // start processing time
         init_ProcessTime();
     
-        // to be moved to CCDB
+        // load constants
         if(RICHConstants.READ_FROM_FILES==1){
             init_ConstantsTxT();
         }else{
-            init_ConstantsCCDB(aeroConstants);
+            init_ConstantsCCDB(aeroConstants, timewalkConstants, timeoffConstants, misaConstants, paraConstants);
         }
 
         // global pixel coordinat indexes
         init_GlobalPixelGeo();
 
         // RICH survey
-        this.rich_misa_angle = Vector3d.ZERO;
-        this.rich_misa_shift = Vector3d.ZERO;
-        init_Geo_Align();
+        init_Survey();
 
         // RICH geometry organized on layers of Shape3D area and RICH components 
-        init_Geo_Factory();
+        init_RICHLayers();
 
     } 
 
@@ -321,19 +316,96 @@ public class RICHTool{
 
 
     //------------------------------
-    public void init_ConstantsCCDB(IndexedTable aeroConstants){
+    public RICHConstants get_Constants() {return reco_constants;}
+    //------------------------------
+
+
+    //------------------------------
+    public void init_ConstantsCCDB(IndexedTable aeroConstants, IndexedTable timewalkConstants, 
+                                   IndexedTable timeoffConstants, IndexedTable misaConstants, IndexedTable paraConstants){
     //------------------------------
 
         int debugMode = 1;
-        double mrad = RICHConstants.MRAD;
 
-       /*
+        /*
+        * RECONSTRUCTION PARAMETERS
+        */
+
+        reco_constants.DO_MISALIGNMENT             =  paraConstants.getIntValue("flag1", 4, 0, 0); 
+        reco_constants.FORCE_DC_MATCH              =  paraConstants.getIntValue("flag2", 4, 0, 0);
+        reco_constants.MISA_RICH_REF               =  paraConstants.getIntValue("flag3", 4, 0, 0);
+        reco_constants.MISA_PMT_PIVOT              =  paraConstants.getIntValue("flag4", 4, 0, 0);
+        reco_constants.APPLY_SURVEY                =  paraConstants.getIntValue("flag5", 4, 0, 0);
+
+        reco_constants.DO_ANALYTIC                 =  paraConstants.getIntValue("flag6", 4, 0, 0);
+        reco_constants.THROW_ELECTRONS             =  paraConstants.getIntValue("flag7", 4, 0, 0);
+        reco_constants.THROW_PIONS                 =  paraConstants.getIntValue("flag8", 4, 0, 0);
+        reco_constants.THROW_KAONS                 =  paraConstants.getIntValue("flag9", 4, 0, 0);
+        reco_constants.THROW_PROTONS               =  paraConstants.getIntValue("flag10", 4, 0, 0);
+        reco_constants.THROW_PHOTON_NUMBER         =  paraConstants.getIntValue("flag11", 4, 0, 0);
+        reco_constants.TRACE_PHOTONS               =  paraConstants.getIntValue("flag12", 4, 0, 0);
+
+        reco_constants.REDO_RICH_RECO              =  paraConstants.getIntValue("falg13", 4, 0, 0);
+        reco_constants.DO_MIRROR_HADS              =  paraConstants.getIntValue("flag14", 4, 0, 0);  
+
+        reco_constants.GOODHIT_FRAC                =  paraConstants.getDoubleValue("par1", 4, 0, 0);
+        reco_constants.RICH_DCMATCH_CUT            =  paraConstants.getDoubleValue("par2", 4, 0, 0);
+        reco_constants.RICH_HITMATCH_RMS           =  paraConstants.getDoubleValue("par3", 4, 0, 0);
+        reco_constants.RICH_DIRECT_RMS             =  paraConstants.getDoubleValue("par4", 4, 0, 0) / 1000.;
+        reco_constants.SHOW_PROGRESS_INTERVAL      =  paraConstants.getDoubleValue("par5", 4, 0, 0);
+        reco_constants.THROW_ASSOCIATION_CUT       =  paraConstants.getDoubleValue("par6", 4, 0, 0);
+
+        reco_constants.RICH_TIME_RMS               =  paraConstants.getDoubleValue("par8", 4, 0, 0);
+        reco_constants.MISA_SHIFT_SCALE            =  paraConstants.getDoubleValue("par9", 4, 0, 0);
+        reco_constants.MISA_ANGLE_SCALE            =  paraConstants.getDoubleValue("par10", 4, 0, 0);
+        
+        if(debugMode>=1){
+
+            System.out.format(" \n");
+            System.out.format("CCDB PARA    DO_MISALIGNMENT              %8d \n", reco_constants.DO_MISALIGNMENT); 
+            System.out.format("CCDB PARA    FORCE_DC_MATCH               %8d \n", reco_constants.FORCE_DC_MATCH); 
+            System.out.format("CCDB PARA    MISA_RICH_REF                %8d \n", reco_constants.MISA_RICH_REF); 
+            System.out.format("CCDB PARA    MISA_PMT_PIVOT               %8d \n", reco_constants.MISA_PMT_PIVOT); 
+            System.out.format("CCDB PARA    APPLY_SURVEY                 %8d \n", reco_constants.APPLY_SURVEY); 
+
+            System.out.format("CCDB PARA    DO_ANALYTIC                  %8d \n", reco_constants.DO_ANALYTIC); 
+            System.out.format("CCDB PARA    THROW_ELECTRONS              %8d \n", reco_constants.THROW_ELECTRONS); 
+            System.out.format("CCDB PARA    THROW_PIONS                  %8d \n", reco_constants.THROW_PIONS); 
+            System.out.format("CCDB PARA    THROW_KAONS                  %8d \n", reco_constants.THROW_KAONS); 
+            System.out.format("CCDB PARA    THROW_PROTONS                %8d \n", reco_constants.THROW_PROTONS); 
+            System.out.format("CCDB PARA    THROW_PHOTON_NUMBER          %8d \n", reco_constants.THROW_PHOTON_NUMBER); 
+            System.out.format("CCDB PARA    TRACE_PHOTONS                %8d \n", reco_constants.TRACE_PHOTONS); 
+
+            System.out.format("CCDB PARA    REDO_RICH_RECO               %8d \n", reco_constants.REDO_RICH_RECO); 
+            System.out.format("CCDB PARA    DO_MIRROR_HADS               %8d \n", reco_constants.DO_MIRROR_HADS); 
+
+            System.out.format("CCDB PARA    GOODHIT_FRAC                 %8.4f \n", reco_constants.GOODHIT_FRAC); 
+            System.out.format("CCDB PARA    RICH_DCMATCH_CUT             %8.4f \n", reco_constants.RICH_DCMATCH_CUT); 
+            System.out.format("CCDB PARA    RICH_HITMATCH_RMS            %8.4f \n", reco_constants.RICH_HITMATCH_RMS); 
+            System.out.format("CCDB PARA    RICH_DIRECT_RMS              %8.4f \n", reco_constants.RICH_DIRECT_RMS); 
+            System.out.format("CCDB PARA    SHOW_PROGRESS_INTERVAL       %8.4f \n", reco_constants.SHOW_PROGRESS_INTERVAL); 
+            System.out.format("CCDB PARA    THROW_ASSOCIATION_CUT        %8.4f \n", reco_constants.THROW_ASSOCIATION_CUT); 
+
+            System.out.format("CCDB PARA    RICH_TIME_RMS                %8.4f \n", reco_constants.RICH_TIME_RMS); 
+            System.out.format("CCDB PARA    MISA_SHIFT_SCALE             %8.4f \n", reco_constants.MISA_SHIFT_SCALE); 
+            System.out.format("CCDB PARA    MISA_ANGLE_SCALE             %8.4f \n", reco_constants.MISA_ANGLE_SCALE); 
+            System.out.format(" \n");
+
+        }
+
+        /*
         * TIME_OFFSETs
         */
 
         for(int ipmt=0; ipmt<NPMT; ipmt++){
             for(int ich=0; ich<NPIX; ich++){
-                pmt_timeoff[ipmt][ich]=0.0;
+                pmt_timeoff[ipmt][ich] = (float) timeoffConstants.getDoubleValue("offset", 4, ipmt+1, ich+1); 
+            }
+            if(debugMode>=1){ 
+                if(ipmt<10 || ipmt>380)System.out.format("CCDB TOFF    ipmt %4d  %8.2f (ch1)  %8.2f (ch2)  %8.2f (ch63)  %8.2f (ch64) \n", ipmt+1, 
+                   pmt_timeoff[ipmt][0], pmt_timeoff[ipmt][1], pmt_timeoff[ipmt][62], pmt_timeoff[ipmt][63]);
+                if(ipmt==10)System.out.format("CCDB TOFF     ....... \n");
+                if(ipmt==390)System.out.format("  \n");
             }
         }
 
@@ -341,9 +413,17 @@ public class RICHTool{
         *  TIME_WALKs
         */
 
+        // ATT: time_walk bank definition is wrong
         for(int ipmt=0; ipmt<NPMT; ipmt++){
-            for(int ich=0; ich<4; ich++){
-                pmt_timewalk[ipmt][ich]=0.0;
+            pmt_timewalk[ipmt][0] = (float) timewalkConstants.getDoubleValue("D0", 4, ipmt+1, 0); 
+            pmt_timewalk[ipmt][1] = (float) timewalkConstants.getDoubleValue("m1", 4, ipmt+1, 0); 
+            pmt_timewalk[ipmt][2] = (float) Math.abs(timewalkConstants.getDoubleValue("m2", 4, ipmt+1, 0))*(-1.0); 
+            pmt_timewalk[ipmt][3] = (float) timewalkConstants.getDoubleValue("T0", 4, ipmt+1, 0); 
+            if(debugMode>=1){ 
+                if(ipmt<10 || ipmt>380)System.out.format("CCDB TWALK   ipmt %4d  D0 = %8.2f  T0 = %8.2f  m1 = %8.3f  m2 = %8.3f\n", ipmt+1, 
+                         pmt_timewalk[ipmt][0], pmt_timewalk[ipmt][1] , pmt_timewalk[ipmt][2], pmt_timewalk[ipmt][3]);
+                if(ipmt==10)System.out.format("CCDB TWALK    ....... \n");
+                if(ipmt==390)System.out.format("  \n");
             }
         }
 
@@ -353,9 +433,48 @@ public class RICHTool{
         *  This comes on top of the RICH survey and global transformation
         */
 
-        for (int ilay=0; ilay<NLAY; ilay++){
-            layer_misa_shift[ilay] = new Vector3d(0., 0., 0.);
-            layer_misa_angle[ilay] = new Vector3d(0., 0., 0.);
+        for (int ila=0; ila<NLAY+1; ila++){
+            for (int ico=0; ico<NCOMPO+1; ico++){
+                layer_misa_shift[ila][ico] = new Vector3D(0., 0., 0.);
+                layer_misa_angle[ila][ico] = new Vector3D(0., 0., 0.);
+            }
+        }
+
+        int NMISA = 24;
+        int ccdb_ila[] = {0,201,202,203,204,301,301,301,301,301,301,301,302,302,302,302,302,302,302,302,302,302,302,401};
+        int ccdb_ico[] = {0,  0,  0,  0,  0,  1,  2,  3,  4,  5,  6,  7,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10,  0};
+
+        int tool_ila[] = {0,  1,  2,  3,  4, 11,  5,  6,  9, 10,  7,  8, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 13};
+        int tool_ico[] = {0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10,  0};
+
+        double sscale = reco_constants.MISA_SHIFT_SCALE;
+        double ascale = reco_constants.MISA_ANGLE_SCALE / reco_constants.MRAD;  // to convert in rad
+
+        for (int im=0; im<24; im++){
+
+            int lla = ccdb_ila[im];
+            int cco = ccdb_ico[im];
+            double dx = (double) misaConstants.getIntValue("dx", 4, lla, cco);
+            double dy = (double) misaConstants.getIntValue("dy", 4, lla, cco);
+            double dz = (double) misaConstants.getIntValue("dz", 4, lla, cco);
+            double thx = (double) misaConstants.getIntValue("dthx", 4, lla, cco);
+            double thy = (double) misaConstants.getIntValue("dthy", 4, lla, cco);
+            double thz = (double) misaConstants.getIntValue("dthz", 4, lla, cco);
+
+            // the rotation is assumed to be in the component local ref system
+            int ila = tool_ila[im];
+            int ico = tool_ico[im];
+            layer_misa_shift[ila][ico] = new Vector3D( dx*sscale,  dy*sscale,  dz*sscale);
+            layer_misa_angle[ila][ico] = new Vector3D(thx*ascale, thy*ascale, thz*ascale);
+
+            if(debugMode>=1){
+                if(layer_misa_shift[ila][ico].mag()>0 || layer_misa_angle[ila][ico].mag()>0){
+                    System.out.format("CCDB MISA    ila  %4d ico %3d  (%4d %3d)  shift %s  angle %s \n", lla,cco, ila,ico,
+                               layer_misa_shift[ila][ico].toStringBrief(3), layer_misa_angle[ila][ico].toStringBrief(3));
+                }
+                if(im==23)System.out.format("  \n");
+            }
+
         }
 
 
@@ -367,8 +486,8 @@ public class RICHTool{
         for (int ila=0; ila<4; ila++){
             for (int ico=0; ico<nco[ila]; ico++){
                 aero_refi[ila][ico] = (float) aeroConstants.getDoubleValue("n400", 4,201+ila,ico+1);
-                aero_plan[ila][ico] = (float) aeroConstants.getDoubleValue("planarity", 4,201+ila,ico+1);
-                if(debugMode>=0)System.out.format(" ila %4d  ico %3d  n = %8.5f  pla = %8.2f\n", 201+ila, ico+1, aero_refi[ila][ico], aero_plan[ila][ico]);
+                aero_plan[ila][ico] = (float) aeroConstants.getDoubleValue("planarity", 4,201+ila, ico+1);
+                if(debugMode>=1)System.out.format("CCDB AERO    ila %4d  ico %3d  n = %8.5f  pla = %8.2f\n", 201+ila, ico+1, aero_refi[ila][ico], aero_plan[ila][ico]);
             }
         }
 
@@ -380,8 +499,7 @@ public class RICHTool{
     //------------------------------
     // To be moved to CCDB
 
-        int debugMode = 1;
-        double mrad = RICHConstants.MRAD;
+        int debugMode = 0;
 
        /**
         * TIME_OFFSETs
@@ -402,7 +520,7 @@ public class RICHTool{
                 pmt_timeoff[ipmt-1][ich-1] = off;
 
                 if(debugMode>=1)if(ich==1 || ich==64)
-                          System.out.format("Read TOFF pmt %4d (ich=%3d: %8.2f) \n", ipmt, ich, pmt_timeoff[ipmt-1][ich-1]);
+                          System.out.format("TXT TOFF   pmt %4d (ich=%3d: %8.2f) \n", ipmt, ich, pmt_timeoff[ipmt-1][ich-1]);
 
             }
 
@@ -429,7 +547,7 @@ public class RICHTool{
                 String[] array = currentLine.split(" ");
                 int ipmt = Integer.parseInt(array[0]);
 
-                if(debugMode>=1)System.out.format("Read WALK pmt %d", ipmt);
+                if(debugMode>=1)System.out.format("TXT WALK   pmt %d", ipmt);
                 for (int ich=1; ich<5; ich++){
                     float walk = Float.parseFloat(array[1+(ich-1)*2]);
                     if(ich==4 && walk<-1000)walk= (float)-0.100;
@@ -448,7 +566,6 @@ public class RICHTool{
         }
 
 
-
         /**
         * DC_OFFSETs
         */
@@ -462,61 +579,37 @@ public class RICHTool{
             while ( (currentLine = bf.readLine()) != null) {    
 
                 String[] array = currentLine.split(" ");
-                int idc = Integer.parseInt(array[0]);
+                int idc    = Integer.parseInt(array[0]);
                 int imatch = Integer.parseInt(array[1]);
                 int iref   = Integer.parseInt(array[2]);
                 int ipiv   = Integer.parseInt(array[3]);
+                int isur   = Integer.parseInt(array[4]);
+
+                float  ss  = Float.parseFloat(array[5]);
+                float  sa  = Float.parseFloat(array[6]);
                 
-                DO_MISALIGNMENT = idc;
-                FORCE_DC_MATCH  = imatch;
-                MISA_RICH_REF   = iref;
-                MISA_PMT_PIVOT  = ipiv;
+                reco_constants.DO_MISALIGNMENT = idc;
+                reco_constants.FORCE_DC_MATCH  = imatch;
+                reco_constants.MISA_RICH_REF   = iref;
+                reco_constants.MISA_PMT_PIVOT  = ipiv;
+                reco_constants.APPLY_SURVEY    = isur;
 
-                double dx  =  (double) Float.parseFloat(array[4]);
-                double dy  =  (double) Float.parseFloat(array[5]);
-                double dz  =  (double) Float.parseFloat(array[6]);
-                double thx =  (double) Float.parseFloat(array[7]);
-                double thy =  (double) Float.parseFloat(array[8]);
-                double thz =  (double) Float.parseFloat(array[9]);
+                reco_constants.MISA_SHIFT_SCALE     = (double) ss ;
+                reco_constants.MISA_ANGLE_SCALE     = (double) sa;
 
-                dx=dx/5;
-                dy=dy/5;
-                dz=dz/2;
-                thx=thx/1000;
-                thy=thy/1000;
-                thz=thz/1000;
-
-                double THE = 25./180.*Math.PI;
-                if(MISA_RICH_REF==1){
-                    // Transformation as MAPMT normal (pointing to IP) opposite for lab z (and x) axes
-                    thx=-thx;
-                    thz=-thz;
-                    global_shift[0] = (float) (Math.cos(THE)*dx - Math.sin(THE)*dz);
-                    global_shift[1] = (float) dy;
-                    global_shift[2] = (float) (Math.sin(THE)*dx + Math.cos(THE)*dz);
-
-                    global_angle[0] = (float) (Math.cos(THE)*thx - Math.sin(THE)*thz);
-                    global_angle[1] = (float) thy;
-                    global_angle[2] = (float) (Math.sin(THE)*thx + Math.cos(THE)*thz);
-                }else{
-                    global_shift[0] = (float) dx;
-                    global_shift[1] = (float) dy;
-                    global_shift[2] = (float) dz;
-
-                    global_angle[0] = (float) thx;
-                    global_angle[1] = (float) thy;
-                    global_angle[2] = (float) thz;
-                }
-                
                 if(debugMode>=1){
-                    System.out.format("Read DO_MISALIGNMENT %d \n", idc); 
-                    System.out.format("Read FORCE_DC_MATCH  %d \n", imatch); 
-                    System.out.format("Read MISA_RICH_REF   %d \n", iref); 
-                    System.out.format("Read MISA_PMT_PIVOT  %d \n", ipiv); 
-                    System.out.format("GLOBAL OFF %8.2f %8.2f %8.2f \n", global_shift[0], global_shift[1], global_shift[2]); 
-                    System.out.format("GLOBAL THE %8.4f %8.4f %8.4f \n", global_angle[0], global_angle[1], global_angle[2]); 
+
+                    System.out.format("TEXT PARA    DO_MISALIGNMENT              %7d \n", reco_constants.DO_MISALIGNMENT);
+                    System.out.format("TEXT PARA    FORCE_DC_MATCH               %7d \n", reco_constants.FORCE_DC_MATCH);
+                    System.out.format("TEXT PARA    MISA_RICH_REF                %7d \n", reco_constants.MISA_RICH_REF);
+                    System.out.format("TEXT PARA    MISA_PMT_PIVOT               %7d \n", reco_constants.MISA_PMT_PIVOT);
+                    System.out.format("TEXT PARA    APPLY_SURVEY                 %7d \n", reco_constants.APPLY_SURVEY);
+
+                    System.out.format("TEXT PARA    MISA_SHIFT_SCALE             %7.3f \n", reco_constants.MISA_SHIFT_SCALE);
+                    System.out.format("TEXT PARA    MISA_ANGLE_SCALE             %7.3f \n", reco_constants.MISA_ANGLE_SCALE);
+
                 }
-                
+
             }
 
         } catch (Exception e) {
@@ -526,15 +619,19 @@ public class RICHTool{
         }
 
 
+        double sscale = reco_constants.MISA_SHIFT_SCALE;
+        double ascale = reco_constants.MISA_ANGLE_SCALE / reco_constants.MRAD;  // to convert in rad
+
 
         /**
         *  SINGLE COMPONENT MISALIGNMENT
         *  This comes on top of the RICH survey and global transformation
         */
-
-        for (int ilay=0; ilay<NLAY; ilay++){
-            layer_misa_shift[ilay] = new Vector3d(0., 0., 0.);
-            layer_misa_angle[ilay] = new Vector3d(0., 0., 0.);
+        for (int ila=0; ila<NLAY+1; ila++){
+            for (int ico=0; ico<NCOMPO+1; ico++){
+                layer_misa_shift[ila][ico] = new Vector3D(0., 0., 0.);
+                layer_misa_angle[ila][ico] = new Vector3D(0., 0., 0.);
+            }
         }
 
         String misaco_filename = new String("CALIB_DATA/RICHlayer_misalignment.txt");
@@ -547,23 +644,37 @@ public class RICHTool{
             while ( (currentLine = bf.readLine()) != null) {    
 
                 String[] array = currentLine.split(" ");
-                int ila = Integer.parseInt(array[0]);
+                int isec = Integer.parseInt(array[0]);
+                int lla = Integer.parseInt(array[1]);
+                int cco = Integer.parseInt(array[2]);
 
-                float  dx  = Float.parseFloat(array[1]);
-                float  dy  = Float.parseFloat(array[2]);
-                float  dz  = Float.parseFloat(array[3]);
-                float  thx = Float.parseFloat(array[4]);
-                float  thy = Float.parseFloat(array[5]);
-                float  thz = Float.parseFloat(array[6]);
+                float  dx  = Float.parseFloat(array[3]);
+                float  dy  = Float.parseFloat(array[4]);
+                float  dz  = Float.parseFloat(array[5]);
+                float  thx = Float.parseFloat(array[6]);
+                float  thy = Float.parseFloat(array[7]);
+                float  thz = Float.parseFloat(array[8]);
 
-                // the rotation is assumed to be in the component local ref system
-                layer_misa_shift[ila] = new Vector3d(dx/5., dy/5., dz/5.);
-                //layer_misa_shift[ila] = new Vector3d(dx/2., dy/2., dz/2.);
-                //layer_misa_angle[ila] = new Vector3d(thx/mrad, thy/mrad, thz/mrad);
-                layer_misa_angle[ila] = new Vector3d(thx/mrad*2, thy/mrad*2, thz/mrad*2);
+                int[] ind = {0,0};
+                if(convert_indexes(lla, cco, ind)){
 
-                if(debugMode>=0){
-                    System.out.format("MISA layer %4d shift %s  angle %s \n", ila, toString(layer_misa_shift[ila]), toString(layer_misa_angle[ila]));
+                    int ila=ind[0];
+                    int ico=ind[1];
+                    if(debugMode>=0)System.out.format("MISA conversion %4d %3d --> %4d %3d \n",lla,cco,ila,ico);
+
+                    // the rotation is assumed to be in the component local ref system
+                    layer_misa_shift[ila][ico] = new Vector3D( dx*sscale,  dy*sscale,  dz*sscale);
+                    layer_misa_angle[ila][ico] = new Vector3D(thx*ascale, thy*ascale, thz*ascale);
+
+                    if(debugMode>=0){
+                        if(layer_misa_shift[ila][ico].mag()>0 || layer_misa_angle[ila][ico].mag()>0){
+                            System.out.format("TXT MISA   layer %4d ico %3d  (%4d %3d)  shift %s  angle %s \n", ila,ico,lla,cco, 
+                               layer_misa_shift[ila][ico].toStringBrief(2), layer_misa_angle[ila][ico].toStringBrief(2));
+                        }
+                    }
+
+                }else{
+                    System.out.format("Unsupported imisalignment for layer %3d %3d \n",lla,cco);
                 }
             }
 
@@ -579,6 +690,7 @@ public class RICHTool{
         * AEROGEL OPTCIS
         */
 
+        /*
         String aero_filename = new String("CALIB_DATA/aerogel_passports.txt");
 
         try {
@@ -609,134 +721,155 @@ public class RICHTool{
         }
 
         if(debugMode>=1)System.out.format("initConstants: DONE \n");
-
+        */
     }
 
+
     //------------------------------
-    public void init_Geo_Align(){
+    public boolean convert_indexes(int lla, int cco, int[] ind){
+    //------------------------------
+
+        int[] lateral_compo = {11,5,6,9,10,7,8};
+
+        /*
+        *  Aerogel
+        */
+	if(lla==0 && cco==0){ind[0]=lla; ind[1]=cco; return true;}
+	if(lla>=201 && lla<=204 && cco==0){ind[0]=lla-200; ind[1]=cco; return true;}
+        if(lla==301 && cco>0 && cco<=7) {ind[0]=lateral_compo[cco-1]; ind[1]=0; return true;}
+        if(lla==302){
+            if(cco==0){ind[0]=12; ind[1]=0; return true;}
+            if(cco>0 && cco<11){ind[0]=12; ind[1]=cco; return true;}
+        }
+        if(lla==401 && cco==0){ind[0]=13; ind[1]=cco; return true;}
+
+        return false;
+    }
+
+
+    //------------------------------
+    public void init_Survey(){
     //------------------------------
 
         int debugMode = 0;
 
         if(debugMode>=1){
             System.out.format("---------------\n");
-            System.out.format("Calculate RICH Alignment \n");
+            System.out.format("Calculate RICH Alignment from Survey\n");
             System.out.format("---------------\n");
         }
 
         /* 
         *  Define nominal plane
         */
-        Vector3d RDA = new Vector3d(-300.274,  168.299,  460.327);
-        Vector3d RDB = new Vector3d(-300.309,  -168.299, 460.310);
-        Vector3d RDC = new Vector3d(-31.102,     0., 585.886);
+        Point3D RDA = new Point3D(-300.274,  168.299,  460.327);
+        Point3D RDB = new Point3D(-300.309,  -168.299, 460.310);
+        Point3D RDC = new Point3D(-31.102,     0., 585.886);
 
-        Face3D f = new Triangle3D( toPoint3D(RDA), toPoint3D(RDB), toPoint3D(RDC));
-        Shape3D nomi_plane = new Shape3D(f);
-        Vector3d nomi_n = get_Shape3D_Normal(nomi_plane);
-        Vector3d nomi_b = get_Shape3D_Bary(nomi_plane); 
+        Triangle3D f = new Triangle3D( RDA, RDB, RDC);
+        Vector3D nomi_n = f.normal();
+        Point3D  nomi_b = f.center();
+        Shape3D  nomi_plane = new Shape3D(f);
 
-        rich_survey_plane = new Shape3D(f);
+        Shape3D rich_survey_plane = new Shape3D(f);
         
         /*
         *   Define surveyed plane
         */
-        Vector3d mRDA = new Vector3d(-301.211, 168.505, 467.514);
-        Vector3d mRDB = new Vector3d(-300.514, -167.929, 465.334);
-        Vector3d mRDC = new Vector3d(-31.552, -0.086, 591.329);
+        Point3D mRDA = new Point3D(-301.211, 168.505, 467.514);
+        Point3D mRDB = new Point3D(-300.514, -167.929, 465.334);
+        Point3D mRDC = new Point3D(-31.552, -0.086, 591.329);
 
-        Face3D mf= new Triangle3D( toPoint3D(mRDA), toPoint3D(mRDB), toPoint3D(mRDC));
+        Triangle3D mf= new Triangle3D( mRDA, mRDB, mRDC);
         Shape3D real_plane = new Shape3D(mf);
-        Vector3d real_n = get_Shape3D_Normal(real_plane);
-        Vector3d real_b = get_Shape3D_Bary(real_plane); 
+        Vector3D real_n = mf.normal();
+        Point3D  real_b = mf.center();
 
         if(debugMode>=1){
             // check possible deformations
-            Vector3d check_a = toVector3d(f.point(1)).minus(toVector3d(f.point(0)));
-            Vector3d check_b = toVector3d(f.point(2)).minus(toVector3d(f.point(1)));
-            Vector3d check_c = toVector3d(f.point(2)).minus(toVector3d(f.point(0)));
+            double check_a = f.point(1).distance(f.point(0));
+            double check_b = f.point(2).distance(f.point(1));
+            double check_c = f.point(2).distance(f.point(0));
 
-            Vector3d checp_a = toVector3d(mf.point(1)).minus(toVector3d(mf.point(0)));
-            Vector3d checp_b = toVector3d(mf.point(2)).minus(toVector3d(mf.point(1)));
-            Vector3d checp_c = toVector3d(mf.point(2)).minus(toVector3d(mf.point(0)));
+            double checp_a = mf.point(1).distance(mf.point(0));
+            double checp_b = mf.point(2).distance(mf.point(1));
+            double checp_c = mf.point(2).distance(mf.point(0));
 
-            System.out.format("Sides nominal    %8.3f %8.3f %8.3f \n",check_a.magnitude(), check_b.magnitude(), check_c.magnitude());
-            System.out.format("Sides real       %8.3f %8.3f %8.3f \n",checp_a.magnitude(), checp_b.magnitude(), checp_c.magnitude());
+            System.out.format("Sides nominal    %8.3f %8.3f %8.3f \n",check_a, check_b, check_c);
+            System.out.format("Sides real       %8.3f %8.3f %8.3f \n",checp_a, checp_b, checp_c);
         }
 
         // define shift among barycenters
-        Vector3d diff_b = real_b.minus(nomi_b);
-        rich_misa_centre = nomi_b;
+        Vector3D diff_b = real_b.vectorFrom(nomi_b);
+        //rich_survey_center = nomi_b;
+
+        Vector3D rich_xref = new Vector3D(Math.cos(25/180.*Math.PI),0.,Math.sin(25/180.*Math.PI));
+        Vector3D rich_yref = new Vector3D(0.,1.,0.);
+        Vector3D rich_zref = new Vector3D(-Math.sin(25/180.*Math.PI),0.,Math.cos(25/180.*Math.PI));
+        survey_frame = new RICHFrame (rich_xref, rich_yref, rich_zref, nomi_b.toVector3D());
+
 
         // define rotation angle and vector
-        Vector3d dir = nomi_n.cross(real_n).normalized();
+        Vector3D dir = nomi_n.cross(real_n).asUnit();
         double ang = Math.acos(nomi_n.dot(real_n));
-        Vector3d rota_n = dir.times(ang);
+        Vector3D rota_n = dir.multiply(ang);
 
         double mrad = RICHConstants.MRAD;
 
-        Vector3d misa_shift = null;
-        Vector3d misa_angle = null;
-        if(DO_MISALIGNMENT==1){
-            misa_shift = new Vector3d(diff_b);  
-            misa_angle = new Vector3d(rota_n);
-        }else{
-            misa_shift = new Vector3d(0.,0.,0.);
-            misa_angle = new Vector3d(0.,0.,0.);
-        }
+        rich_survey_shift = diff_b.clone();  
+        rich_survey_angle = rota_n.clone();
 
-        Vector3d dcrich_shift = new Vector3d(global_shift[0], global_shift[1], global_shift[2]);
-        this.rich_misa_shift = new Vector3d(misa_shift.plus(dcrich_shift));
-        Vector3d dcrich_angle = new Vector3d(global_angle[0], global_angle[1], global_angle[2]);
-        this.rich_misa_angle = new Vector3d(misa_angle.plus(dcrich_angle));
+        //Vector3d dcrich_shift = new Vector3d(global_shift[0], global_shift[1], global_shift[2]);
+        //this.rich_survey_shift = new Vector3d(misa_shift.plus(dcrich_shift));
+        //Vector3d dcrich_angle = new Vector3d(global_angle[0], global_angle[1], global_angle[2]);
+        //this.rich_survey_angle = new Vector3d(misa_angle.plus(dcrich_angle));
 
         if(debugMode>=1){
-            System.out.format(" -------------------- \n");
-            System.out.format(" survey angle %7.2f %7.2f %7.2f \n", rota_n.x*mrad, rota_n.y*mrad, rota_n.z*mrad);
-            System.out.format(" survey shift %7.2f %7.2f %7.2f \n", diff_b.x, diff_b.y, diff_b.z);
+            /*System.out.format(" -------------------- \n");
+            System.out.format(" survey angle %s \n", rota_n.multiply(mrad).toStringBrief(2));
+            System.out.format(" survey shift %.2f %7.2f \n", diff_b.x, diff_b.y, diff_b.z);
             System.out.format(" -------------------- \n");
             System.out.format(" misalg angle %7.2f %7.2f %7.2f \n", misa_angle.x*mrad, misa_angle.y*mrad, misa_angle.z*mrad);
             System.out.format(" misalg shift %7.2f %7.2f %7.2f \n", misa_shift.x, misa_shift.y, misa_shift.z);
             System.out.format(" -------------------- \n");
             System.out.format(" extern angle %7.2f %7.2f %7.2f \n", dcrich_angle.x*mrad, dcrich_angle.y*mrad, dcrich_angle.z*mrad);
             System.out.format(" extern shift %7.2f %7.2f %7.2f \n", dcrich_shift.x, dcrich_shift.y, dcrich_shift.z);
-            System.out.format(" -------------------- \n");
-            System.out.format(" rich   angle %7.2f %7.2f %7.2f \n", this.rich_misa_angle.x*mrad, this.rich_misa_angle.y*mrad, this.rich_misa_angle.z*mrad);
-            System.out.format(" rich   shift %7.2f %7.2f %7.2f \n", this.rich_misa_shift.x, this.rich_misa_shift.y, this.rich_misa_shift.z);
+            System.out.format(" -------------------- \n");*/
+            System.out.format(" survey angle %s \n", rich_survey_angle.multiply(mrad).toStringBrief(2));
+            System.out.format(" survey shift %s \n", rich_survey_shift.toStringBrief(2));
             System.out.format(" -------------------- \n");
         
-      
             System.out.format(" Check survey plane \n");
             System.out.format(" -------------------- \n");
-            double thex = this.rich_misa_angle.dot(Vector3d.X_ONE);
-            double they = this.rich_misa_angle.dot(Vector3d.Y_ONE);
-            double thez = this.rich_misa_angle.dot(Vector3d.Z_ONE);
+            double thex = rich_survey_angle.dot(new Vector3D(1.,0.,0.));
+            double they = rich_survey_angle.dot(new Vector3D(0.,1.,0.));
+            double thez = rich_survey_angle.dot(new Vector3D(0.,0.,1.));
 
             System.out.format("Rot Angles NewRef %7.2f | %7.2f %7.2f %7.2f \n", ang*mrad, thex*mrad, they*mrad, thez*mrad);
 
-            Vector3d new_n = new Vector3d(nomi_n);
-            new_n = new_n.rotateZ(thez);
-            new_n = new_n.rotateY(they);
-            new_n = new_n.rotateX(thex);
+            Vector3D new_n = nomi_n.clone();
+            new_n.rotateZ(thez);
+            new_n.rotateY(they);
+            new_n.rotateX(thex);
 
-            System.out.format("Normal nominal %9.6f %9.6f %9.6f \n", nomi_n.x, nomi_n.y, nomi_n.z);
-            System.out.format("Normal real    %9.6f %9.6f %9.6f \n", real_n.x, real_n.y, real_n.z);
-            System.out.format("Normal rotated %9.6f %9.6f %9.6f \n", new_n.x, new_n.y, new_n.z);
+            System.out.format("Normal nominal %s \n", nomi_n.toString());
+            System.out.format("Normal real    %s \n", real_n.toString());
+            System.out.format("Normal rotated %s \n", new_n.toString());
             System.out.format("\n");
-            System.out.format("Baryc  nominal %9.6f %9.6f %9.6f \n", nomi_b.x, nomi_b.y, nomi_b.z);
-            System.out.format("Baryc  real    %9.6f %9.6f %9.6f \n", real_b.x, real_b.y, real_b.z);
-            System.out.format("Baryc  diff    %9.6f %9.6f %9.6f \n", diff_b.x, diff_b.y, diff_b.z);
+            System.out.format("Baryc  nominal %s \n", nomi_b.toString());
+            System.out.format("Baryc  real    %s \n", real_b.toString());
+            System.out.format("Baryc  diff    %s \n", diff_b.toString());
             System.out.format("\n");
 
             show_Shape3D(nomi_plane, null, null);
 
             show_Shape3D(real_plane, null, null);
 
-            // test misalignment angle and shift
-            Face3D at = new Triangle3D( toPoint3D(RDA), toPoint3D(RDB), toPoint3D(RDC));
+            /* test misalignment angle and shift
+            Face3D at = new Triangle3D( RDA, RDB, RDC);
             Shape3D test_plane = new Shape3D(at);
 
-            //misalign_Global_Plane(test_plane, -1);
+            //misalign_TrackingPlane(test_plane, -1);
             show_Shape3D(test_plane, null, null);
 
             double aang = 10./57.3;
@@ -747,6 +880,7 @@ public class RICHTool{
             System.out.format(" nor %s \n", toString(nor));
             System.out.format(" ini %s \n", toString(ini));
             System.out.format(" out %s \n", toString(out));
+            
 
             double aa = Math.acos(ini.dot(nor)/ini.magnitude());
             double bb = Math.acos(out.dot(nor)/out.magnitude());
@@ -762,6 +896,7 @@ public class RICHTool{
             dd = Math.acos(out2.dot(Vector3d.Z_ONE)/out2.magnitude());
             System.out.format(" ini angle vn %8.3f  vz %8.3f \n", aa*57.3, bb*57.3);
             System.out.format(" out angle vn %8.3f  vz %8.3f \n", cc*57.3, dd*57.3);
+            */
 
 
         }
@@ -769,28 +904,31 @@ public class RICHTool{
     }
 
     //------------------------------
-    public void init_Geo_Factory(){
+    public void init_RICHLayers(){
     //------------------------------
     // Take RICHFactory Layers of Geant4 volumes (for GEMC) and convert in coatjava Layers 
     // of RICH components accounting for optical descriptiors plus basic tracking 
     // planes for effective ray tracing
-    // to be done: aerogel cromatic dispersion, mirror reflectivity vs wavelength
+    // ATT: to be done: aerogel cromatic dispersion, mirror reflectivity vs wavelength
 
         int debugMode = 0;
-        // relevant directions for the basic tracking planes
-        Vector3d front   = new Vector3d(-0.42,   0.00,   0.91);
-        Vector3d left    = new Vector3d(-0.50,  -0.87,   0.00);
-        Vector3d right   = new Vector3d(-0.50,   0.87,   0.00);
-        Vector3d bottom  = new Vector3d(-1.00,   0.00,   0.00);
-        Vector3d back    = new Vector3d( 0.42,   0.00,  -0.91);
-        Vector3d sphere  = new Vector3d( 0.76,   0.00,  -0.65);
+
+        /*
+        * relevant characterization of the basic tracking planes
+        */
+        Vector3D front   = new Vector3D(-0.42,   0.00,   0.91);
+        Vector3D left    = new Vector3D(-0.50,  -0.87,   0.00);
+        Vector3D right   = new Vector3D(-0.50,   0.87,   0.00);
+        Vector3D bottom  = new Vector3D(-1.00,   0.00,   0.00);
+        Vector3D back    = new Vector3D( 0.42,   0.00,  -0.91);
+        Vector3D sphere  = new Vector3D( 0.76,   0.00,  -0.65);
 
         int factory_lay[] = {201,202,203,204,301,301,301,301,301,301,301,302,401};
-        int type_lay[] = {1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 4};
-        String strlay[] = {"aerogel_2cm_B1" ,"aerogel_2cm_B2", "aerogel_3cm_L1", "aerogel_3cm_L2", 
+        int type_lay[] = {1, 1, 1, 1, 2, 2, 3, 3, 3, 3, 3, 4, 5};
+        String name_lay[] = {"aerogel_2cm_B1" ,"aerogel_2cm_B2", "aerogel_3cm_L1", "aerogel_3cm_L2", 
                            "mirror_front_B1", "mirror_front_B2", "mirror_left_L1", "mirror_left_L2", "mirror_right_L1", "mirror_right_L2", "mirror_bottom", 
                            "mirror_sphere", "mapmts"};
-        Vector3d veclay[] = {front, front, front, back, front, front, left, left, right, right, bottom, sphere, back};
+        Vector3D view_lay[] = {front, front, front, front, front, front, left, left, right, right, bottom, sphere, back};
 
         /*
         * Generate the layers of components
@@ -799,19 +937,19 @@ public class RICHTool{
 
             int idlayer = factory_lay[ilay];
             int tlayer = type_lay[ilay];
-            String slayer = strlay[ilay];
-            Vector3d vlayer = veclay[ilay];
+            String slayer = name_lay[ilay];
+            Vector3D vlayer = view_lay[ilay];
             if(debugMode>=1){
                 System.out.format("-------------------------\n");
-                System.out.format("Create Layer %d id  %d: %s dir %7.2f %7.2f %7.2f \n",ilay, idlayer, slayer, vlayer.x, vlayer.y, vlayer.z);
+                System.out.format("Create Layer %d id  %d: %s dir %s \n",ilay, idlayer, slayer, vlayer.toStringBrief(2));
                 System.out.format("-------------------------\n");
             }
-            RICHLayer layer = new RICHLayer(idlayer, slayer, vlayer);
+            RICHLayer layer = new RICHLayer(ilay, slayer, vlayer);
 
             for (int ico=0; ico<get_RICHFactory_Size(idlayer); ico++){
                 RICHComponent compo = get_RICHFactory_Component(idlayer, ico);
                 compo.set_type(tlayer);
-                if(debugMode>=1)System.out.format(" Lay %3d component %3d  bary %s\n", idlayer, ico, get_CSGVol_Bary(compo.get_CSGVol()));
+                if(debugMode>=1)System.out.format(" Lay %3d component %3d  bary %s\n", idlayer, ico, get_CSGBary(compo.get_CSGVol()));
 
                 // define optical properties, so far only aerogel
                 if(idlayer<300){  
@@ -829,18 +967,12 @@ public class RICHTool{
                     }
                 }
 
-                if(debugMode>=3 && (idlayer==201 || idlayer==202)){
-                    System.out.format("ECCOLO\n");
-                    compo.showComponent();
-                    dump_StlComponent(compo.get_CSGVol());
-                }
-
                 // regrouping of the planar mirros into planes
                 if(idlayer!=301){
                     layer.add(compo);
                 }else{
                     if(get_PlaneMirrorSide(compo).equals(slayer)){
-                        if(debugMode>=1)System.out.format(" ---> add to Layer %3d id %3d %s \n",ilay,idlayer,slayer);
+                        if(debugMode>=1)System.out.format(" ---> add to Layer %3d %s id (%3d %3d) \n",ilay,slayer,idlayer,ico);
                         layer.add(compo); 
                     }
                 }
@@ -850,11 +982,34 @@ public class RICHTool{
             opticlayers.add(layer);
         }
 
+
         /*
-        * Generate the basic planes  for tracking
+        * Generate the basic planes for tracking
         */
-        generate_Tracking_Planes();
-        show_RICH("Real RICH Geometry", "RR");
+        generate_TrackingPlanes();
+
+
+        /*
+        * Misalign the basic planes for tracking
+        */
+        if(reco_constants.DO_MISALIGNMENT==1)misalign_TrackingPlanes();
+
+        /*
+        * Store the composite planes for tracking
+        */
+        store_TrackingPlanes();
+        
+        /*
+        *  Generate Pixel map on the misaligned MAPMT plane
+        */
+        
+        RICHLayer layer = get_Layer("mapmts");
+        List<Integer> compo_list = layer.get_CompoList();
+        Shape3D compo_misa = layer.get_TrackingSurf();
+        generate_Pixel_Map(layer.get_id(), 0, compo_misa, compo_list);
+
+        if(debugMode>=1)show_Shape3D(compo_misa, null, "CC");
+        if(debugMode>=1)show_RICH("Real RICH Geometry", "RR");
 
     }
 
@@ -876,7 +1031,7 @@ public class RICHTool{
     //------------------------------
 
         int ilay = 12;
-        Face3D compo_face = get_Layer(ilay).get_Component_Face(ipmt-1, 0);
+        Face3D compo_face = get_Layer(ilay).get_CompoFace(ipmt-1, 0);
         Vector3d Vertex = toVector3d( compo_face.point(1) );
         //System.out.format("Misa vtx %8.3f %8.3f %8.3f \n",Vertex.x, Vertex.y, Vertex.z);
         Vector3d VPixel = Vertex.plus(MAPMTpixels.GetPixelCenter(anode));
@@ -885,110 +1040,16 @@ public class RICHTool{
     }
 
     //------------------------------
-    public Shape3D build_Global_Plane_new(Shape3D plane) {
+    public Shape3D build_GlobalPlane(Shape3D plane, Vector3D orient) {
     //------------------------------
         /*
         *  build a global tracking plane from the detailed component surface
-        * ATT: assumes planes with vertical (along y) edges 
+        * ATT: assumes a plane (with unique normal) with vertical (along y) edges 
         */
 
         int debugMode = 0;
         if(plane==null) return null;
-
-        Vector3d extre1 = new Vector3d(0.0, 0.0, 0.0);
-        Vector3d extre2 = new Vector3d(0.0, 0.0, 0.0);
-        Vector3d extre3 = new Vector3d(0.0, 0.0, 0.0);
-        Vector3d extre4 = new Vector3d(0.0, 0.0, 0.0);
-
-        /*
-        * look for two diagonals
-        */
-        int ifound=-1;
-        int jfound=-1;
-        Line3D diagfirst = null;
-        for(int ik=0; ik<2; ik++){
-
-            double distmax = 0.0;
-            Line3D diagmax = null;
-            for (int ifa=0; ifa<plane.size(); ifa++){
-                Face3D fi = plane.face(ifa);
-                for (int ipo=0; ipo<3; ipo++){
-                    if(ifa*3+ipo==ifound)continue;
-
-                    for (int jfa=0; jfa<plane.size(); jfa++){
-                        Face3D fj = plane.face(jfa);
-                        for (int jpo=0; jpo<3; jpo++){
-                            if(jfa*3+jpo==jfound)continue;
-
-                            double dist = fi.point(ipo).distance (fj.point(jpo));
-                            Line3D diag = new Line3D(fi.point(ipo), fj.point(jpo));
-                            if(debugMode>=1)System.out.format("  Points %d %d (%s) %d %d (%s) : dist %7.3f \n",ifa,ipo,toString(fi.point(ipo)), jfa,jpo,toString(fj.point(jpo)), dist);
-                            if(dist>distmax && (diagfirst==null || diagfirst.direction().angle(diag.direction())>0.6)) {
-                                distmax=dist;
-                                ifound=ifa*3+ipo;
-                                jfound=jfa*3+jpo;
-                                diagmax = diag;
-                                if(ik==0){
-                                    extre1 = toVector3d(fi.point(ipo));
-                                    extre2 = toVector3d(fj.point(jpo));
-                                }else{
-                                    extre3 = toVector3d(fi.point(ipo));
-                                    extre4 = toVector3d(fj.point(jpo));
-                                }
-                                if(debugMode>=1)System.out.format("  taken \n");
-                            }
-                            
-                        }  
-                    }
-                }
-            }  
-            diagfirst = diagmax;
-
-        }
-
-        /*
-        *  preserve the same normal of the original plane
-        */
-        Face3D half1 = new Triangle3D( toPoint3D(extre1), toPoint3D(extre2), toPoint3D(extre3));
-        Face3D half2 = new Triangle3D( toPoint3D(extre2), toPoint3D(extre4), toPoint3D(extre3));
-        Shape3D guess_one = new Shape3D(half1, half2);
-
-        Face3D half3 = new Triangle3D( toPoint3D(extre3), toPoint3D(extre2), toPoint3D(extre1));
-        Face3D half4 = new Triangle3D( toPoint3D(extre3), toPoint3D(extre4), toPoint3D(extre2));
-        Shape3D guess_two = new Shape3D(half3, half4);
-
-        Vector3d plane_norm = get_Shape3D_Normal(plane);
-        Vector3d guess_norm = get_Shape3D_Normal(guess_one);
-        double ang = guess_norm.angle(plane_norm)*RICHConstants.RAD;
-
-        if(debugMode>=1){
-            guess_one.show();
-            System.out.format("Guess one normal %7.2f %7.2f %7.2f --> %7.2f \n",guess_norm.x, guess_norm.y, guess_norm.z, ang);
-            guess_two.show();
-            Vector3d other_norm = get_Shape3D_Normal(guess_two);
-            double other_ang = other_norm.angle(plane_norm)*RICHConstants.RAD;
-            System.out.format("Guess two normal %7.2f %7.2f %7.2f --> %7.2f \n",other_norm.x, other_norm.y, other_norm.z, other_ang);
-        }
-
-        if(ang<10){
-            return guess_one;
-        }else{
-            return guess_two;
-        }
-
-    }
-
-
-    //------------------------------
-    public Shape3D build_Global_Plane(Shape3D plane) {
-    //------------------------------
-        /*
-        *  build a global tracking plane from the detailed component surface
-        * ATT: assumes planes with vertical (along y) edges 
-        */
-
-        int debugMode = 0;
-        if(plane==null) return null;
+        if(debugMode>=1)System.out.format("build_GlobalPlane: orient %s \n",orient.toStringBrief(3));
 
         Vector3d extre1 = new Vector3d(0.0, 0.0, 0.0);
         Vector3d extre2 = new Vector3d(0.0, 0.0, 0.0);
@@ -1002,6 +1063,7 @@ public class RICHTool{
         double xmax = -999.0;
         for (int ifa=0; ifa<plane.size(); ifa++){
             Face3D f = plane.face(ifa);
+            if(toTriangle3D(f).normal().angle(orient)>1.e-2)continue;
             for (int ipo=0; ipo<3; ipo++){
 
                 if(f.point(ipo).x() < xmin) xmin=f.point(ipo).x();
@@ -1017,6 +1079,7 @@ public class RICHTool{
         double ymax = -999.0;
         for (int ifa=0; ifa<plane.size(); ifa++){
             Face3D f = plane.face(ifa);
+            if(toTriangle3D(f).normal().angle(orient)>1.e-2)continue;
             for (int ipo=0; ipo<3; ipo++){
 
                 if(Math.abs(f.point(ipo).x() - xmin) < 0.5 && f.point(ipo).y() < ymin ) {
@@ -1037,6 +1100,7 @@ public class RICHTool{
         ymax = -999.0;
         for (int ifa=0; ifa<plane.size(); ifa++){
             Face3D f = plane.face(ifa);
+            if(toTriangle3D(f).normal().angle(orient)>1.e-2)continue;
             for (int ipo=0; ipo<3; ipo++){
 
                 if(Math.abs(f.point(ipo).x() - xmax) < 0.5 && f.point(ipo).y() < ymin ) {
@@ -1061,17 +1125,17 @@ public class RICHTool{
         Face3D half4 = new Triangle3D( toPoint3D(extre3), toPoint3D(extre4), toPoint3D(extre2));
         Shape3D guess_two = new Shape3D(half3, half4);
 
-        Vector3d plane_norm = get_Shape3D_Normal(plane);
-        Vector3d guess_norm = get_Shape3D_Normal(guess_one);
+        Vector3D plane_norm = orient;
+        Vector3D guess_norm = toVector3D(get_Shape3D_Normal(guess_one));
         double ang = guess_norm.angle(plane_norm)*RICHConstants.RAD;
 
         if(debugMode>=1){
             guess_one.show();
-            System.out.format("Guess one normal %7.2f %7.2f %7.2f --> %7.2f \n",guess_norm.x, guess_norm.y, guess_norm.z, ang);
+            System.out.format("Guess one normal %s --> %7.2f \n",guess_norm.toStringBrief(2), ang*57.3);
             guess_two.show();
-            Vector3d other_norm = get_Shape3D_Normal(guess_two);
+            Vector3D other_norm = toVector3D(get_Shape3D_Normal(guess_two));
             double other_ang = other_norm.angle(plane_norm)*RICHConstants.RAD;
-            System.out.format("Guess two normal %7.2f %7.2f %7.2f --> %7.2f \n",other_norm.x, other_norm.y, other_norm.z, other_ang);
+            System.out.format("Guess two normal %s --> %7.2f \n",other_norm.toStringBrief(2), other_ang*57.3);
         }
 
         if(ang<10){
@@ -1084,88 +1148,157 @@ public class RICHTool{
 
 
     //------------------------------
-    public Shape3D build_Component_Plane(int ilay, Vector3d orient, List<Integer> icompos){
+    public void build_GlobalPlanes(RICHLayer layer, Vector3D orient) {
     //------------------------------
-        //build the tracking plane from the components
+        //build the tracking plane of the component with given orientation
 
         int debugMode = 0;
-        Shape3D plane = new Shape3D();
-       
-        RICHLayer layer = opticlayers.get(ilay);
-        Vector3d inside = layer.get_Vinside();
- 
-        if(debugMode>=1){
-            System.out.format("generate tracking plane for layer %d \n",ilay);
-            System.out.format("inside  vect: %7.2f %7.2f %7.2f\n",inside.x, inside.y, inside.z);
-            System.out.format("orient vect: %7.2f %7.2f %7.2f  --> %7.3f\n",orient.x, orient.y, orient.z, orient.angle(inside)*57.3);
+
+
+        if(debugMode>=2){
+            Vector3D inside = layer.get_Vinside();
+            System.out.format("build_GlobalPlane: generate global plane for layer %3d \n",layer.get_id());
+            System.out.format("inside vect: %s \n",inside.toStringBrief(3));
+            System.out.format("orient vect: %s  --> %7.3f\n",orient.toStringBrief(3), orient.angle(inside)*57.3);
         }
 
-        int igo = 0;
-        for (int ico=0; ico<layer.get_size(); ico++){
+        Shape3D global_surf = null;
 
-            if(!layer.is_spherical_mirror()){
-                /*
-                * Build from CSG volumes
-                */
-                RICHComponent compo = opticlayers.get(ilay).get(ico);
+        if(layer.is_mirror()){
 
-                int ipo = 0;
-                for (Polygon pol: compo.get_CSGVol().getPolygons()){
-                    Vector3d pol_norm = get_Poly_Normal(pol);
-                    if(debugMode>=1){System.out.format("Compo %4d pol %4d  angle %7.2f ", ico, ipo, pol_norm.angle(orient)*57.3); dump_Polygon(pol);}
-                    
-                    if(pol_norm.angle(orient)<1e-2){  
-                        // in case of multiple surfaces (i.e. for glass skin mirrors), take the innermost.
-                        Vector3d bary_diff = get_Poly_Bary(pol).minus(layer.get_Barycenter());
+            if(layer.is_planar_mirror()) global_surf = copy_Shape3D(layer.merge_CompoSurfs());
+            if(layer.is_spherical_mirror()) global_surf = copy_Shape3D(layer.get_NominalPlane());
 
-                        if(debugMode>=1){
-                            System.out.format("Compo %d face %d %d : bary %7.2f %7.2f %7.2f vs lay_bary %7.2f %7.2f %7.2f \n",ico,ipo,igo,  
-                                get_Poly_Bary(pol).x, get_Poly_Bary(pol).y, get_Poly_Bary(pol).z, 
-                                layer.get_Barycenter().x, layer.get_Barycenter().y, layer.get_Barycenter().z);
-                            System.out.format(" diff %7.2f %7.2f %7.2f   normal %7.2f %7.2f %7.2f  dor %7.3f \n",  bary_diff.x, bary_diff.y, bary_diff.z,
-                                pol_norm.x, pol_norm.y, pol_norm.z, bary_diff.dot(pol_norm));
-                        }
+        }else{
+            global_surf = build_GlobalPlane(layer.merge_CompoSurfs(), orient);
 
-                        if(bary_diff.dot(pol_norm)>0) {
-                            List<Triangle3D> trias = toTriangle3D(pol);
-                            for(int ifa=0; ifa<trias.size(); ifa++) {plane.addFace(trias.get(ifa)); icompos.add(ico);}
-                            if(debugMode>=1)System.out.format("    ---> take this from compo %4d \n",ico);
-                        }
-                        igo++;
-                    }
-                    ipo++;
-                }
+            if(layer.is_aerogel()){
+                Shape3D other_global = build_GlobalPlane(layer.merge_CompoSurfs(), orient.multiply(-1.0));
+                merge_Shape3D(global_surf, other_global);
+            }
+        }
 
-            }else{
+        layer.set_GlobalSurf( global_surf);
+        if(debugMode>=1 && global_surf.size()>0){
+            String head = String.format("GLOB %3d 0 ",layer.get_id());
+            System.out.format("Globa %3d Normal %s \n",layer.get_id(),toString(get_Shape3D_Normal(global_surf)));
+            for (int ifa=0; ifa<global_surf.size(); ifa++){
+                System.out.format("Face %3d Normal %s \n",ifa,toTriangle3D(global_surf.face(ifa)).normal().asUnit().toStringBrief(3));
+            }
+            show_Shape3D(global_surf, null, head);
+        }
+ 
+    }
 
-                /*
-                * Build from Nominal planes
-                */
-                Shape3D submir = generate_Nominal_Plane(ilay, ico+1, inside);
-                for(int ifa=0; ifa<submir.size(); ifa++) {plane.addFace(submir.face(ifa)); icompos.add(ico);}
-                 
+
+    //------------------------------
+    public void build_CompoSpheres(RICHLayer layer) {
+    //------------------------------
+        //build the spherical surface of the component 
+
+        int debugMode = 0;
+
+        /*
+        *   define the spherical surfaces when needed
+        */
+        if(layer.is_spherical_mirror()){
+
+            Sphere3D sphere = new Sphere3D(-45.868, 0.0, 391.977, 270.);
+            layer.set_TrackingSphere(sphere);
+            for (int ico=0; ico<layer.size(); ico++){ 
+                layer.set_TrackingSphere( new Sphere3D(-45.868, 0.0, 391.977, 270.), ico); 
             }
 
         }
 
-        if(debugMode>=1 && plane.size()>0){
-            plane.show();
-            System.out.format("Plane Normal %s \n",toString(get_Shape3D_Normal(plane)));
-            for(int j = 0; j< icompos.size(); j++) System.out.format("  --> %4d \n",icompos.get(j));
+        if(layer.is_aerogel()){
+
+            for (int ico=0; ico<layer.size(); ico++){
+
+                double radius = layer.get(ico).get_radius();
+                Vector3D normal = layer.get_CompoNormal(ico);
+                Vector3D center = layer.get_CompoCenter(ico, normal);
+
+                Sphere3D sphere = new Sphere3D(center.x(), center.y(), center.z(), radius);
+                if(debugMode>=1)System.out.format(" AERO lay %3d ico %3d : sphere center %s radius %7.2f \n",layer.get_id(),ico,toString(center), radius);
+                layer.set_TrackingSphere(sphere, ico);
+
+            }
         }
-        return plane;
 
     }
 
 
     //------------------------------
-    public Triangle3D toTriangle3D(Face3D face){
+    public void build_CompoSurfs(RICHLayer layer, Vector3D orient) {
     //------------------------------
+        //build the tracking plane of the component with given orientation
 
-        return new Triangle3D(face.point(0), face.point(1), face.point(2));
+        int debugMode = 0;
+
+        Vector3D inside = layer.get_Vinside();
+
+        if(debugMode>=2){
+            System.out.format("build_CompoSurfs: generate tracking plane for layer %3d \n",layer.get_id());
+            System.out.format("inside vect: %s \n",inside.toStringBrief(3));
+            System.out.format("orient vect: %s  --> %7.3f\n",orient.toStringBrief(3), orient.angle(inside)*57.3);
+        }
+
+        for (int ico=0; ico<layer.size(); ico++){
+            RICHComponent compo = layer.get(ico);
+            Shape3D plane = new Shape3D();
+            Vector3D cbary = layer.get_CompoCSGBary(ico);
+
+            if(layer.is_spherical_mirror()){
+
+                /*
+                * Build from Nominal planes (nominal orientation)
+                */
+                Shape3D submir = generate_Nominal_Plane(layer.get_id(), ico+1);
+                for(int ifa=0; ifa<submir.size(); ifa++) plane.addFace(submir.face(ifa)); 
+                     
+            }else{
+
+                /*
+                * Build from CSG volumes
+                */
+                int ipo = 0;
+                int igo = 0;
+                for (Triangle3D tri: toTriangle3D(compo.get_CSGVol().getPolygons()) ){
+
+                    Vector3D tri_norm = tri.normal().asUnit();
+                    double norm_ang = tri_norm.angle(orient);
+                    double norm_oppang = tri_norm.angle(orient.multiply(-1));
+                    Vector3D bary_diff = (tri.center().toVector3D().sub(cbary)).asUnit();
+                    double bary_dot = tri_norm.dot(bary_diff);
+                    if(debugMode>=2){System.out.format("Compo %4d tri %4d  norm_ang %7.2f : %7.2f bary_dot %7.2f (%s %s)", ico, ipo, 
+                                     norm_ang*57.3, norm_oppang*57.3, bary_dot*57.3, toString(tri.center()), toString(cbary));}
+                    
+                    /*
+                    * in case of multiple surfaces (i.e. for glass skin mirrors), take the innermost.
+                    */
+                    if((norm_ang<1e-2 && bary_dot>0) || (layer.is_aerogel() && norm_oppang<1e-2 && bary_dot>0) ){  
+
+                        plane.addFace(tri); 
+                        if(debugMode>=2)System.out.format("    ---> take this face %3d %s\n",igo,tri_norm.toStringBrief(2));
+                        igo++;
+                    }else{
+                        if(debugMode>=2)System.out.format("  \n");
+                    }
+                    ipo++;
+                }
+            }
+
+            compo.set_TrackingSurf(plane);
+            if(debugMode>=1 && plane.size()>0){
+                String head = String.format("COMP %3d %3d ",layer.get_id(),ico);
+                System.out.format("Compo %3d %3d Normal %s \n",layer.get_id(),ico,toString(get_Shape3D_Normal(plane)));
+                show_Shape3D(plane, null, head);
+            }
+        }
 
     }
-
+ 
      //------------------------------
      public Vector3d get_angles(Vector3d vec) {
      //------------------------------
@@ -1206,265 +1339,176 @@ public class RICHTool{
     }
 
 
+    //------------------------------
+    public Triangle3D toTriangle3D(Face3D face){ return new Triangle3D(face.point(0), face.point(1), face.point(2)); }
+    //------------------------------
 
     //------------------------------
-    public List<Triangle3D> toTriangle3D(Polygon pol){
+    public ArrayList<Triangle3D> toTriangle3D(List<Polygon> pols){
     //------------------------------
 
-        List<Triangle3D> trias = new ArrayList<Triangle3D>();
+        ArrayList<Triangle3D> trias = new ArrayList<Triangle3D>();
 
-        for (int iv=2; iv<pol.vertices.size(); iv++){
-            Triangle3D tri = new Triangle3D(toPoint3D(pol.vertices.get(0)), toPoint3D(pol.vertices.get(iv-1)), toPoint3D(pol.vertices.get(iv)));
-            trias.add(tri);
+        for (Polygon pol: pols){
+            for (int iv=2; iv<pol.vertices.size(); iv++){
+                Triangle3D tri = new Triangle3D(toPoint3D(pol.vertices.get(0)), toPoint3D(pol.vertices.get(iv-1)), toPoint3D(pol.vertices.get(iv)));
+                trias.add(tri);
+            }
         }
         
         return trias;
     }
 
-
     //------------------------------
-    public Shape3D generate_PMTplane(){
-    //------------------------------
-        //define the PMT Tracking Plane assuming fixed PMT order
-
-        int debugMode = 0;
-
-        int ilay=12;
-        Vector3d front = new Vector3d(0.42,   0.00,  -0.91);
-
-        // Look for the high-x high-y extreme
-        RICHComponent compo = opticlayers.get(ilay).get(0);
-        Vector3d extre1 = new Vector3d(0.0, 0.0, 0.0);
-
-        for (Polygon pol: compo.get_CSGVol().getPolygons()){
-            //MAPMT front face 
-            if(get_Poly_Normal(pol).angle(front)<5.e-3){  
-                for (Vertex vert: pol.vertices ){
-                    if(debugMode>=1)System.out.format(" Vtx %7.2f %7.2f %7.2f  ",vert.pos.x,vert.pos.y,vert.pos.z);
-                    if(vert.pos.x > extre1.x || vert.pos.y > extre1.y) {
-                        extre1 = vert.pos;
-                        if(debugMode>=1)System.out.format(" ---> ok vert1 \n");
-                    }else{
-                        if(debugMode>=1)System.out.format(" \n");
-                    }
-                 }
-             }
-        }
-
-        // Look for the high-x low-y extreme
-        compo = opticlayers.get(ilay).get(5);
-        Vector3d extre2 = new Vector3d(0.0, 9999.0, 0.0);
-
-        for (Polygon pol: compo.get_CSGVol().getPolygons()){
-            //MAPMT front face 
-            if(get_Poly_Normal(pol).angle(front)<5.e-3){  
-                for (Vertex vert: pol.vertices ){
-                    if(debugMode>=1)System.out.format(" Vtx %7.2f %7.2f %7.2f  ",vert.pos.x,vert.pos.y,vert.pos.z);
-                    if(vert.pos.x > extre2.x || vert.pos.y < extre2.y) {
-                        extre2 = vert.pos;
-                        if(debugMode>=1)System.out.format(" ---> ok vert2 \n");
-                    }else{
-                        if(debugMode>=1)System.out.format(" \n");
-                    }
-                 }
-             }
-        }
-
-        // Look for the low-x high-y extreme
-        compo = opticlayers.get(ilay).get(363);
-        Vector3d extre3 = new Vector3d(9999.0, 0.0, 0.0);
-
-        for (Polygon pol: compo.get_CSGVol().getPolygons()){
-            //MAPMT front face 
-            if(get_Poly_Normal(pol).angle(front)<5.e-3){  
-                for (Vertex vert: pol.vertices ){
-                    if(debugMode>=1)System.out.format(" Vtx %7.2f %7.2f %7.2f  ",vert.pos.x,vert.pos.y,vert.pos.z);
-                    if(vert.pos.x < extre3.x || vert.pos.y > extre3.y) {
-                        extre3 = vert.pos;
-                        if(debugMode>=1)System.out.format(" ---> ok vert3 \n");
-                    }else{
-                        if(debugMode>=1)System.out.format(" \n");
-                    }
-                 }
-             }
-        }
-
-        // Look for the low-x low-y extreme
-        compo = opticlayers.get(ilay).get(390);
-        Vector3d extre4 = new Vector3d(9999.0, 9999.0, 0.0);
-
-        for (Polygon pol: compo.get_CSGVol().getPolygons()){
-            //MAPMT front face 
-            if(get_Poly_Normal(pol).angle(front)<5.e-3){  
-                for (Vertex vert: pol.vertices ){
-                    if(debugMode>=1)System.out.format(" Vtx %7.2f %7.2f %7.2f  ",vert.pos.x,vert.pos.y,vert.pos.z);
-                    if(vert.pos.x < extre4.x || vert.pos.y < extre4.y) {
-                        extre4 = vert.pos;
-                        if(debugMode>=1)System.out.format(" ---> ok vert4 \n");
-                    }else{
-                        if(debugMode>=1)System.out.format(" \n");
-                    }
-                 }
-             }
-        }
-
-        Face3D half1 = new Triangle3D( toPoint3D(extre1), toPoint3D(extre2), toPoint3D(extre3));
-        Face3D half2 = new Triangle3D( toPoint3D(extre2), toPoint3D(extre3), toPoint3D(extre4));
-
-        Shape3D PMTplane = new Shape3D();
-        PMTplane.addFace(half1);
-        PMTplane.addFace(half2);
-        if(debugMode>=1){
-            System.out.format(" ------------------------\n");
-            System.out.format(" Create PMT plane for tracking \n");
-            System.out.format(" ------------------------\n");
-            PMTplane.show();
-        }
-        return PMTplane;
-   
-    }
-
-
-    //------------------------------
-    public void misalign_Global_Plane(Shape3D plane, int ilay){
+    public void misalign_Layer(RICHLayer layer){
     //------------------------------
 
         int debugMode = 0;
 
-        if(debugMode>=1 && ilay==0){
-            System.out.format(" ------------------------\n");
-            System.out.format(" Misalign global plane\n");
-            System.out.format(" ------------------------\n");
-            if(ilay!=12)show_Shape3D(plane, null, null);
-            System.out.format("Old normal %s (%s mrad) \n",toString(get_Shape3D_Normal(plane, 0), 4), toString( get_angles(get_Shape3D_Normal(plane, 0)),4) );
+        /*
+        *  To account for SURVEY
+        */
+        if(reco_constants.APPLY_SURVEY==1){
+            if(debugMode>=1)System.out.format(" --> SURVEY %s %s \n", toString(rich_survey_shift), toString(rich_survey_angle));
+
+            misalign_Element( layer.get_GlobalSurf(), survey_frame, rich_survey_angle, rich_survey_shift);
+            misalign_Element( layer.get_TrackingSphere(), survey_frame, rich_survey_angle, rich_survey_shift);
+            for(int ico=0; ico<layer.size(); ico++){
+                misalign_Element( layer.get_TrackingSurf(ico), survey_frame, rich_survey_angle, rich_survey_shift);
+                misalign_Element( layer.get_TrackingSphere(ico), survey_frame, rich_survey_angle, rich_survey_shift);
+            }
         }
- 
-        /*
-        *   To account for RICH survey
-        */
-        Vector3d r_angle = rich_misa_angle;
-        Vector3d r_shift = rich_misa_shift;
 
-        if(debugMode>=1)System.out.format("Layer %3d  -->  AsRICH %s %s ",ilay, toString(r_shift), toString(r_angle));
-        rotate_AsRICH(plane, r_angle);
-        translate_Shape3D(plane, r_shift);
 
         /*
-        *   To account for internal misalignments
+        *  To account for global RICH misalignments
         */
-        if(ilay>=0 && ilay<=NLAY){
-            Vector3d c_angle = layer_misa_angle[ilay];
-            Vector3d c_shift = layer_misa_shift[ilay];
+        Vector3D rshift = layer_misa_shift[0][0];
+        Vector3D rangle = layer_misa_angle[0][0];
+        if(rangle.mag()>0 || rshift.mag()>0){
+            if(debugMode>=1)System.out.format(" -->  asRICH %s %s \n", toString(rshift), toString(rangle));
+
             
-            if(c_angle.magnitude()>0 || c_shift.magnitude()>0){
-                Vector3d bary = get_Layer(ilay).get_Barycenter(); 
-                if(debugMode>=1){
-                    System.out.format("  -->  AsComponent  %s %s \n", toString(c_shift), toString(c_angle));
-                }
-                rotate_AsComponent(plane, bary, c_angle);
-                translate_AsComponent(plane, c_shift);
-            }else{
-                if(debugMode>=1)System.out.format("  \n");
-            }
+            if(debugMode>=1)System.out.format("     --> global \n");
+            misalign_Element( layer.get_GlobalSurf(), rich_frame, rangle, rshift);
+            misalign_Element( layer.get_TrackingSphere(), rich_frame, rangle, rshift);
 
-            if(debugMode>=1 && ilay==0){
-                show_Shape3D(plane, null, null);
-                System.out.format("New normal %s (%s mrad) \n",toString(get_Shape3D_Normal(plane, 0), 4), toString( get_angles(get_Shape3D_Normal(plane, 0)),4));
+            for(int ico=0; ico<layer.size(); ico++){
+                if(debugMode>=1)System.out.format("     --> compo %3d \n",ico);
+                misalign_Element( layer.get_TrackingSurf(ico), rich_frame, rangle, rshift);
+                misalign_Element( layer.get_TrackingSphere(ico), rich_frame, rangle, rshift);
             }
         }
 
+
+        /*
+        *  To account for Layer misalignment 
+        */
+        int ilay = layer.get_id();
+        RICHFrame lframe = layer.generate_LocalRef();
+        Vector3D lshift = layer_misa_shift[ilay+1][0];
+        Vector3D langle = layer_misa_angle[ilay+1][0];
+        if(langle.mag()>0 || lshift.mag()>0){
+            if(debugMode>=1){System.out.format("    -->  asLayer  %s %s \n", toString(lshift), toString(langle)); }
+
+            if(debugMode>=1)System.out.format("     --> global \n");
+            misalign_Element( layer.get_GlobalSurf(), lframe, langle, lshift);
+            misalign_Element( layer.get_TrackingSphere(), lframe, langle, lshift);
+
+            for(int ico=0; ico<layer.size(); ico++){
+                if(debugMode>=1)System.out.format("     --> compo %3d \n",ico);
+                misalign_Element( layer.get_TrackingSurf(ico), lframe, langle, lshift);
+                misalign_Element( layer.get_TrackingSphere(ico), lframe, langle, lshift);
+            }
+        }
+
+
+        /*
+        *  To account for single Component misalignment 
+        */
+        if(layer.is_spherical_mirror()){
+            for(int ico=0; ico<layer.size(); ico++){
+
+                RICHFrame cframe = layer.generate_LocalRef(ico);
+                Vector3D cangle = layer_misa_angle[ilay+1][ico+1];
+                Vector3D cshift = layer_misa_shift[ilay+1][ico+1];
+
+                if(cangle.mag()==0 && cshift.mag()==0)continue;
+                if(debugMode==1){System.out.format("       -->  asCompo %3d  %s %s \n", ico, toString(cshift), toString(cangle));}
+
+                misalign_Element( layer.get_TrackingSurf(ico), cframe, cangle, cshift);
+                misalign_Element( layer.get_TrackingSphere(ico), cframe, cangle, cshift);
+                if(!layer.CheckSphere(ico))System.out.format("Misalignment issue for lay %3d compo %3d \n",ilay,ico);
+            }
+        }
     }
 
 
     //------------------------------
-    public void generate_Tracking_Planes(){
+    public void generate_TrackingPlanes(){
     //------------------------------
 
         int debugMode = 0;
+
+        rich_frame = survey_frame.clone();
 
         for (int ilay=0; ilay<NLAY; ilay++){
 
+            RICHLayer layer = get_Layer(ilay);
+            Vector3D orient = layer.get_Vinside();
+
             if(debugMode>=1){
                 System.out.format("------------------------\n");
-                System.out.format("Generate tracking for Layer %d %s\n", ilay, get_Layer(ilay).get_Name());
+                System.out.format("Generate tracking for Layer %d %s view %s \n", ilay, layer.get_Name(), orient.toStringBrief(3));
                 System.out.format("------------------------\n");
             }
-
-            RICHLayer layer = get_Layer(ilay);
-
-            layer.generate_Barycenter();
-            Vector3d orient = layer.get_Vinside();
 
             /*
             *  Nominal plane just for reference 
             */
-            layer.set_Nominal_Plane( generate_Nominal_Plane(ilay, 0, orient) );
+            layer.set_NominalPlane( generate_Nominal_Plane(ilay, 0) );
 
-            if(layer.is_spherical_mirror()){
 
-                /*
-                *   define the real mirror spherical surface
-                */
-                Sphere3D sphere = new Sphere3D(-45.868, 0.0, 391.977, 270.);
-                layer.set_Tracking_Sphere(sphere);
+            /*
+            *  For each component, group faces with normal and position vs barycenter along orient
+            */
+            build_CompoSurfs(layer, orient);
+            
 
-                /*
-                *  automatize procedure still to be defined
-                */
-                //layer.set_Global_Plane( layer.get_Nominal_Plane() );
+            /*
+            *  Generate a global plane for fast tracking without gaps
+            *  In case of aerogel add the second global face 
+            */
+            build_GlobalPlanes(layer, orient);
 
-                //System.out.format("Provo col speherical \n");
-                //List<Integer> compo_list = new ArrayList<Integer>();
-                //Shape3D compo_plane = build_Component_Plane(ilay, orient, compo_list );
 
+            /*
+            *  Select the pivot for the RICH rotations
+            */
+            if(layer.is_mapmt()) {
+                if(reco_constants.MISA_PMT_PIVOT==1) rich_frame.set_bref(layer.get_SurfBary());
+                if(debugMode>=0)System.out.format("RICH PIVOT %s \n",rich_frame.bref().toStringBrief(2));
             }
 
 
-                /*
-                *  Group component faces with normal and position vs barycenter along orient
-                *  Generate a global plane for fast tracking without gaps
-                */
-                if(debugMode>=1)System.out.format(" build_Component_Plane %d \n",ilay);
-                List<Integer> compo_list = new ArrayList<Integer>();
-                Shape3D compo_plane = build_Component_Plane(ilay, orient, compo_list );
-                
-                if(debugMode>=1)System.out.format(" build_Global_Plane %d \n",ilay);
-                Shape3D global_plane = null;
-                if(layer.is_mirror()){
-                    if(layer.is_planar_mirror()) global_plane = build_Component_Plane(ilay, orient, compo_list );
-                    if(layer.is_spherical_mirror()) global_plane = generate_Nominal_Plane(ilay, 0, orient);
-                }else{
-                    global_plane = build_Global_Plane(compo_plane);
-                }
-
-
-                /*
-                *  In case of aerogel add the second face 
-                */
-                if(layer.is_aerogel()){
-                    Shape3D other_compo = build_Component_Plane(ilay, orient.negated(), compo_list );
-                    Shape3D other_global = build_Global_Plane(other_compo);
-                   
-                    merge_Shape3D(compo_plane, other_compo);
-                    merge_Shape3D(global_plane, other_global);
-
-                }
-
-                layer.set_Component_Surf( compo_plane, compo_list);
-                layer.set_Global_Plane( global_plane);
-
-                /*
-                *  Take MAPMT plane barycenter as pivot of RICH rotations
-                */
-                if(MISA_PMT_PIVOT==1 && layer.is_mapmt()) {
-                    rich_misa_centre = layer.get_Barycenter();
-                }
-                if(debugMode>=0 && layer.is_mapmt())System.out.format(" RICH PIVO %s \n",toString(rich_misa_centre));
-
-           
+            /*
+            *   define the spherical surfaces when needed
+            */
+            build_CompoSpheres(layer);
 
         }
 
+    }
+
+    //------------------------------
+    public void misalign_TrackingPlanes(){
+    //------------------------------
+
+        int debugMode = 0;
+
+        /*
+        *  Apply misalignment around given PIVOT
+        */
         for (int ilay=0; ilay<NLAY; ilay++){
 
             if(debugMode>=1){
@@ -1475,56 +1519,74 @@ public class RICHTool{
 
             RICHLayer layer = get_Layer(ilay);
 
-            if(layer.is_spherical_mirror()){
+            /*
+            *  Misalign surfs as required
+            */
+            misalign_Layer(layer);
 
-                // to be defined
+            /* 
+            *  Store misalignmed tracking surfaces for fast tracking 
+            */
+            //layer.set_TrackingSurf( layer.merge_CompoSurfs());
+            //layer.set_CompoList( layer.merge_CompoList());
 
-            }else{
-
-                /*
-                *  Misalign both planes as required
-                */
-                Shape3D global_misa = layer.get_Global_Plane();
-                Shape3D compo_misa = layer.get_Component_Surf();
-                List<Integer> compo_list = layer.get_Component_List();
-
-                int do_misa=0;
-                if(layer_misa_angle[ilay].magnitude()>0 || layer_misa_shift[ilay].magnitude()>0)do_misa=1;
-                
-                if(rich_misa_angle.magnitude()>0 || rich_misa_shift.magnitude()>0 || do_misa==1){
-                    if(debugMode>=1)System.out.format("MISA LAYER %3d %s %s \n",ilay, toString(layer_misa_shift[ilay]), toString(layer_misa_angle[ilay]));
-                    misalign_Global_Plane(global_misa, ilay);
-                    misalign_Global_Plane(compo_misa, ilay);
-                }
-
-                /*
-                *  Generate Pixel map on the misaligned MAPMT plane
-                */
-                if(layer.is_mapmt()) {
-                    if(debugMode>=1)show_Shape3D(compo_misa, null, "CC");
-                    generate_Pixel_Map(ilay, 0, compo_misa, compo_list);
-                }
-
-            }
+            /*
+            *  Generate Pixel map on the misaligned MAPMT plane
+            */
+            /*if(layer.is_mapmt()) {
+                List<Integer> compo_list = layer.get_CompoList();
+                Shape3D compo_misa = layer.get_TrackingSurf();
+                if(debugMode>=1)show_Shape3D(compo_misa, null, "CC");
+                generate_Pixel_Map(ilay, 0, compo_misa, compo_list);
+            }*/
 
         }
 
         /*
         *  Check misalignment effect on survey plane
-        */
+        *//*
         if(debugMode>=1){
-            System.out.format("Centre %s\n",toString(rich_misa_centre));
+            System.out.format("Centre %s\n",rich_misa_center.toStringBrief(2));
             double mrad = RICHConstants.MRAD;
             System.out.format(" rich   angle %7.2f %7.2f %7.2f \n", this.rich_misa_angle.x*mrad, this.rich_misa_angle.y*mrad, this.rich_misa_angle.z*mrad);
             System.out.format(" rich   shift %7.2f %7.2f %7.2f \n", this.rich_misa_shift.x, this.rich_misa_shift.y, this.rich_misa_shift.z);
             show_Shape3D(rich_survey_plane,"Nominal survey", null);
-            misalign_Global_Plane(rich_survey_plane, 0);
+            //misalign_TrackingPlane(rich_survey_plane, 0);
             show_Shape3D(rich_survey_plane,"Misalig survey", null);
-        }
-
+        }*/
 
     }
 
+
+    //------------------------------
+    public void store_TrackingPlanes(){
+    //------------------------------
+
+        int debugMode = 0;
+
+        /*
+        *  Store the composite tracking planes
+        */
+        for (int ilay=0; ilay<NLAY; ilay++){
+
+            if(debugMode>=1){
+                System.out.format("------------------------\n");
+                System.out.format("Store    tracking for Layer %d %s\n", ilay, get_Layer(ilay).get_Name());
+                System.out.format("------------------------\n");
+            }
+
+            RICHLayer layer = get_Layer(ilay);
+
+            /* 
+            *  Store misalignmed tracking surfaces for fast tracking 
+            */
+            layer.set_TrackingSurf( layer.merge_CompoSurfs());
+            layer.set_CompoList( layer.merge_CompoList());
+
+        }  
+           
+    }
+ 
     //------------------------------
     public void generate_Pixel_Map(int ilay, int ico, Shape3D compo_plane, List<Integer> compo_list) {
     //------------------------------
@@ -1546,8 +1608,7 @@ public class RICHTool{
             Vector3d vertex       = null;
             for(int ifa=0; ifa<compo_plane.size(); ifa++){
                 if(compo_list.get(ifa)==ico){
-                    if(debugMode>=1)System.out.format("  --> ifa %4d ", ifa);
-                    dump_Face( compo_plane.face(ifa) );
+                    if(debugMode>=1){ System.out.format("  --> ifa %4d ", ifa); dump_Face( compo_plane.face(ifa) ); }
                     if(found==0){
                         Vector3d vp0 = toVector3d( compo_plane.face(ifa).point(0) );
                         Vector3d vp1 = toVector3d( compo_plane.face(ifa).point(1) );
@@ -1572,11 +1633,11 @@ public class RICHTool{
                 MAPMTpixels = new RICHPixel(new Vector3d(0.,0.,0.), downversor, rightversor);
                 if(debugMode>=1){
                     MAPMTpixels.show_Pixels( vertex );
-                    vertex = toVector3d( layer.get_Component_Face(5,0).point(1) );
+                    vertex = toVector3d( layer.get_CompoFace(5,0).point(1) );
                     MAPMTpixels.show_Pixels( vertex );
-                    vertex = toVector3d( layer.get_Component_Face(363,0).point(1) );
+                    vertex = toVector3d( layer.get_CompoFace(363,0).point(1) );
                     MAPMTpixels.show_Pixels( vertex );
-                    vertex = toVector3d( layer.get_Component_Face(390,0).point(1) );
+                    vertex = toVector3d( layer.get_CompoFace(390,0).point(1) );
                     MAPMTpixels.show_Pixels( vertex );
                 }
             }
@@ -1584,12 +1645,12 @@ public class RICHTool{
     }
 
     //------------------------------
-    public Shape3D generate_Nominal_Plane(int ilay, int ico, Vector3d orient){
+    public Shape3D generate_Nominal_Plane(int ilay, int ico){
     //------------------------------
 
         int debugMode = 0;
 
-        if(ilay<0 || ilay>NLAY) return null;
+        if(ilay<0 || ilay>=NLAY) return null;
 
         Point3D extre1 = new Point3D(0.0, 0.0, 0.0);
         Point3D extre2 = new Point3D(0.0, 0.0, 0.0);
@@ -1622,15 +1683,15 @@ public class RICHTool{
 
         // Front mirror
         if((ilay==4 || ilay==5) && ico==0){
-            extre1 = new Point3D(-37.165,  -11.847,  587.781);
-            extre2 = new Point3D(-37.165,  11.847,  587.781);
-            extre3 = new Point3D(165.136,  -85.728,  528.107);
-            extre4 = new Point3D(-165.136,  85.728,  528.107);
+            extre1 = new Point3D(-37.165,  11.847,  587.781);
+            extre2 = new Point3D(-37.165,  -11.847,  587.781);
+            extre3 = new Point3D(-165.136,  85.728,  528.107);
+            extre4 = new Point3D(-165.136,  -85.728,  528.107);
         }
 
         // Left-side mirror
         if((ilay==6 || ilay==7) && ico==0){
-            extre1 = new Point3D(39.849,  12.095,  688.630);
+            extre1 = new Point3D(-39.849,  12.095,  688.630);
             extre2 = new Point3D(-39.849,  12.095,  591.568);
             extre3 = new Point3D(-238.031, 126.515,  526.116);
             extre4 = new Point3D(-229.924, 121.834,  502.935);
@@ -1638,7 +1699,7 @@ public class RICHTool{
 
         // Right-side mirror
         if((ilay==8 || ilay==9) && ico==0){
-            extre1 = new Point3D(39.849,  -12.095,  688.630);
+            extre1 = new Point3D(-39.849,  -12.095,  688.630);
             extre2 = new Point3D(-39.849,  -12.095,  591.568);
             extre3 = new Point3D(-238.031, -126.515,  526.116);
             extre4 = new Point3D(-229.924, -121.834,  502.935);
@@ -1647,17 +1708,17 @@ public class RICHTool{
         // Bottom mirror
         if(ilay==10 && ico==0){
             extre1 = new Point3D(-39.763,  11.500,  591.601);
-            extre2 = new Point3D(-39.763,  -11.500,  687.101);
+            extre2 = new Point3D(-39.763,  -11.500,  591.601);
             extre3 = new Point3D(-39.763,  11.500,  687.101);
-            extre4 = new Point3D(-39.763,  -11.500,  591.601);
+            extre4 = new Point3D(-39.763,  -11.500,  687.101);
         }
 
         //  Spherical mirror
         if(ilay==11){
             if(ico==0){
                 extre1 = new Point3D(-146.861, 77.9926, 629.86);
-                extre2 = new Point3D(-244.481, 134.353, 516.032);
-                extre3 = new Point3D(-146.861, -77.9926, 629.86);
+                extre2 = new Point3D(-146.861, -77.9926, 629.86);
+                extre3 = new Point3D(-244.481, 134.353, 516.032);
                 extre4 = new Point3D(-244.481, -134.353, 516.032);
             }
             if(ico==1){
@@ -1691,22 +1752,22 @@ public class RICHTool{
                 extre4 = new Point3D(-195.842,  41.844, 612.500);
             }
             if(ico==6){
-                extre1 = new Point3D(-239.384,   0.169, 580.210);
-                extre2 = new Point3D(-274.838,   0.160, 535.010);
-                extre3 = new Point3D(-232.914,  69.398, 573.831);
-                extre4 = new Point3D(-267.782,  66.527, 530.594);
+                extre1 = new Point3D(-239.371,   0.150, 580.221);
+                extre2 = new Point3D(-274.840,   0.150, 535.006);
+                extre3 = new Point3D(-232.873,  69.405, 573.896);
+                extre4 = new Point3D(-267.781,  66.526, 530.596);
             }
             if(ico==7){
-                extre1 = new Point3D(-239.384,  -0.169, 580.210);
-                extre2 = new Point3D(-274.838,  -0.160, 535.010);
-                extre3 = new Point3D(-232.914, -69.398, 573.831);
-                extre4 = new Point3D(-267.782, -66.527, 530.594);
+                extre1 = new Point3D(-239.371,  -0.150, 580.221);
+                extre2 = new Point3D(-274.840,  -0.150, 535.010);
+                extre3 = new Point3D(-232.873, -69.404, 573.889);
+                extre4 = new Point3D(-267.782, -66.530, 530.594);
             }
             if(ico==8){
-                extre1 = new Point3D(-236.785,  42.182, 578.124);
-                extre2 = new Point3D(-196.080,  42.185, 612.272);
-                extre3 = new Point3D(-219.114, 119.708, 560.905);
-                extre4 = new Point3D(-186.891, 101.097, 598.779);
+                extre1 = new Point3D(-236.779,  42.186, 578.135);
+                extre2 = new Point3D(-196.078,  42.180, 612.277);
+                extre3 = new Point3D(-219.115, 119.693, 560.915);
+                extre4 = new Point3D(-186.889, 101.102, 598.779);
             }
             if(ico==9){
                 extre1 = new Point3D(-236.810,  41.877, 578.175);
@@ -1731,31 +1792,39 @@ public class RICHTool{
         }
 
         /*
-        *  force the layer orientation
+        *  force the layer orientation 
         */
+        Vector3D vinside = get_Layer(ilay).get_Vinside();
+
         Triangle3D half1 = new Triangle3D( extre1, extre2, extre3);
         Triangle3D half2 = new Triangle3D( extre2, extre4, extre3);
+        Vector3D norm1 = half1.normal().asUnit();
+        Vector3D norm2 = half2.normal().asUnit();
         Shape3D guess_one = new Shape3D(half1, half2);
+        Vector3D norm_one = half1.normal().asUnit();
+        double ang_one = norm_one.angle(vinside)*RICHConstants.RAD;
 
         Triangle3D half3 = new Triangle3D( extre3, extre2, extre1);
         Triangle3D half4 = new Triangle3D( extre3, extre4, extre2);
+        Vector3D norm3 = half3.normal().asUnit();
+        Vector3D norm4 = half4.normal().asUnit();
         Shape3D guess_two = new Shape3D(half3, half4);
-
-        Vector3d vinside = get_Layer(ilay).get_Vinside().normalized();
-        Vector3d guess_norm = toVector3d(half1.normal()).normalized();
-        double ang = guess_norm.angle(vinside)*RICHConstants.RAD;
+        Vector3D norm_two = half3.normal().asUnit();
+        double ang_two = norm_two.angle(vinside)*RICHConstants.RAD;
 
         if(debugMode>=1){
-            System.out.format("Look for Nominal plane %3d\n",ilay);
+            System.out.format("Look for Nominal plane %3d ico %3d\n",ilay,ico);
+            System.out.format("norm1 %s \n",norm1.toStringBrief(3));
+            System.out.format("norm2 %s \n",norm2.toStringBrief(3));
+            System.out.format("norm3 %s \n",norm3.toStringBrief(3));
+            System.out.format("norm4 %s \n",norm4.toStringBrief(3));
             guess_one.show();
-            System.out.format("Guess one normal %7.2f %7.2f %7.2f --> %7.2f \n",guess_norm.x, guess_norm.y, guess_norm.z, ang);
+            System.out.format("Guess one normal %s --> %7.2f \n",norm_one.toStringBrief(3), ang_one);
             guess_two.show();
-            Vector3d other_norm = toVector3d(half3.normal()).normalized();
-            double other_ang = other_norm.angle(vinside)*RICHConstants.RAD;
-            System.out.format("Guess two normal %7.2f %7.2f %7.2f --> %7.2f \n",other_norm.x, other_norm.y, other_norm.z, other_ang);
+            System.out.format("Guess two normal %s --> %7.2f \n",norm_two.toStringBrief(3), ang_two);
         }
 
-        if(ang<10){
+        if(ang_one<30){
             if(debugMode>=1)System.out.format(" --> guess one\n");
             return guess_one;
         }else{
@@ -1774,21 +1843,6 @@ public class RICHTool{
 
     }
 
-    //------------------------------
-    public double get_GlobalShift(int ich){
-    //------------------------------
- 
-        return global_shift[ich-1];
-
-    }
-
-    //------------------------------
-    public double get_GlobalAngle(int ich){
-    //------------------------------
- 
-        return global_angle[ich-1];
-
-    }
 
     //------------------------------
     public double getPMTtimeoff(int ipmt, int ich){
@@ -1849,6 +1903,18 @@ public class RICHTool{
 
 
     //------------------------------
+    public RICHLayer get_Layer(String slay){
+    //------------------------------
+        for (int ila=0; ila<opticlayers.size(); ila++){
+            if(opticlayers.get(ila).get_Name().equals(slay)) {
+                return opticlayers.get(ila);
+            }
+        }  
+        return null;
+    }
+
+
+    //------------------------------
     public RICHLayer get_Layer(int ilay){ 
     //------------------------------
         if(ilay>-1 && ilay<NLAY) return opticlayers.get(ilay);
@@ -1859,7 +1925,6 @@ public class RICHTool{
     //------------------------------
     public RICHComponent get_RICHFactory_Component(int idlay, int ico){ 
     //------------------------------
-        //if(idlay==401) return new RICHComponent(ico, idlay, 1, richfactory.GetPMT(ico+1));
         if(idlay==401) return new RICHComponent(ico, idlay, 1, richfactory.GetPhotocatode(ico+1));
         if(idlay==201 || idlay==202 || idlay==203 || idlay==204 || idlay==301 || idlay==302) 
                   return new RICHComponent(ico, idlay, 1, richfactory.getStlComponent(idlay, ico));
@@ -1879,8 +1944,10 @@ public class RICHTool{
     }
 
     //------------------------------
-    public RICHComponent get_Component(int ilay, int ico){ return opticlayers.get(ilay).get(ico);}
+    public RICHComponent get_Component(int ilay, int ico){ 
     //------------------------------
+        return opticlayers.get(ilay).get(ico);
+    }
 
 
     //------------------------------
@@ -2014,7 +2081,7 @@ public class RICHTool{
      //------------------------------
      public Line3D toLine3D(RICHRay ray) {
      //------------------------------
-        Line3D lout = new Line3D(toPoint3D(ray.origin()), toPoint3D(ray.end()));
+        Line3D lout = new Line3D(ray.origin(), ray.end());
         return lout;
      }
 
@@ -2027,14 +2094,21 @@ public class RICHTool{
 
     }
 
+    //------------------------------
+    public void translate_Sphere3D(Sphere3D sphere, Vector3D shift) { sphere.translateXYZ(shift.x(), shift.y(), shift.z()); }
+    //------------------------------
 
     //------------------------------
-    public void translate_Shape3D(Shape3D shape, Vector3d shift) {
+    public void translate_Shape3D(Shape3D shape, Vector3D shift) { shape.translateXYZ(shift.x(), shift.y(), shift.z()); }
     //------------------------------
 
-        shape.translateXYZ(shift.x, shift.y, shift.z);
+    //------------------------------
+    public void translate_Sphere3D(Sphere3D sphere, Vector3d shift) { sphere.translateXYZ(shift.x, shift.y, shift.z); }
+    //------------------------------
 
-    }
+    //------------------------------
+    public void translate_Shape3D(Shape3D shape, Vector3d shift) { shape.translateXYZ(shift.x, shift.y, shift.z); }
+    //------------------------------
 
     //------------------------------
     public void rotate_Triangle3D(Triangle3D tri, Vector3d angle) {
@@ -2059,13 +2133,14 @@ public class RICHTool{
         System.out.format(" -----------------------\n  %s \n ----------------------- \n", name);
 
         for (int ilay=0; ilay<NLAY; ilay++){
-            if(ilay!=14){
-                RICHLayer layer = get_Layer(ilay);
-                if(!layer.is_spherical_mirror()){
-                    show_Shape3D(layer.get_Global_Plane(), null, head);
-                }else{
-                    show_Shape3D(layer.get_Component_Surf(), null, head);
-                }
+            RICHLayer layer = get_Layer(ilay);
+            if(layer.is_aerogel() || layer.is_mapmt()){
+                show_Shape3D(layer.get_GlobalSurf(), null, head);
+                if(layer.is_aerogel())show_Shape3D(layer.get_TrackingSurf(), null, "AA");
+                if(layer.is_mapmt())show_Shape3D(layer.get_TrackingSurf(), null, "PP");
+            }else{
+                if(layer.is_spherical_mirror()) show_Shape3D(layer.get_GlobalSurf(), null, head);
+                show_Shape3D(layer.get_TrackingSurf(), null, head);
             }
         }
       
@@ -2097,133 +2172,143 @@ public class RICHTool{
     }
 
 
+    // ----------------
+    public void show_Sphere3D(Sphere3D sphere, String name, String head){
+    // ----------------
+
+        if(name!=null) System.out.format(" %s ----------------------- \n", name);
+        if(head==null){
+            System.out.format(" %s %7.2f \n", toString(sphere.getCenter()), sphere.getRadius());
+        }else{
+            System.out.format(" %s %s %7.2f \n", head, toString(sphere.getCenter()), sphere.getRadius());
+        }
+    }
+
 
     //------------------------------
-    public void translate_AsComponent(Shape3D shape, Vector3d shift) {
+    public Vector3D into_LabFrame(Vector3D vec, RICHFrame frame) {
+    //------------------------------
+
+        return into_LabFrame(vec, frame.xref(), frame.yref(), frame.zref());
+
+    }
+
+    //------------------------------
+    public Vector3D into_LabFrame(Vector3D vec, Vector3D xref, Vector3D yref, Vector3D zref) {
+    //------------------------------
+
+        // decompose each vector/rotation along a ref axis (i.e. angle.x*xref) into three cartesian rotation in the lab system 
+        return new Vector3D( vec.z()*zref.x() + vec.y()*yref.x() + vec.x()*xref.x(),
+                             vec.z()*zref.y() + vec.y()*yref.y() + vec.x()*xref.y(),
+                             vec.z()*zref.z() + vec.y()*yref.z() + vec.x()*xref.z());
+    }
+
+
+    //------------------------------
+    public void misalign_Element(Shape3D shape, RICHFrame frame, Vector3D angle, Vector3D shift) {
     //------------------------------
 
         int debugMode = 0;
-        Vector3d zref = get_Shape3D_Normal(shape);
-        Vector3d yref = new Vector3d(0., 1., 0.);
-        // in case of lateral mirrors
-        if(Math.abs(zref.y)>0.6) yref = new Vector3d(0., 0., 1.);
-        Vector3d xref = (yref.cross(zref)).normalized();
 
-        if(debugMode>=1){
-            System.out.format("translate_AsComponent\n");
-            System.out.format("X ref %s\n",toString(xref));
-            System.out.format("Y ref %s\n",toString(yref));
-            System.out.format("Z ref %s\n",toString(zref));
-            System.out.format("Shift  %s\n",toString(shift));
-            System.out.format(" --> Z axis %7.3f \n", shift.z*zref.z + shift.y*yref.z + shift.x*xref.z);
-            System.out.format(" --> Y axis %7.3f \n", shift.z*zref.y + shift.y*yref.y + shift.x*xref.y);
-            System.out.format(" --> X axis %7.3f \n", shift.z*zref.x + shift.y*yref.x + shift.x*xref.x);
-        } 
+        if(shape!=null){
 
-        // decompose each shift along a ref axis (i.e. shift.x*xref) into three cartesian shifts in the lab system 
-        shape.translateXYZ(shift.z*zref.x + shift.y*yref.x + shift.x*xref.x,
-                           shift.z*zref.y + shift.y*yref.y + shift.x*xref.y,
-                           shift.z*zref.z + shift.y*yref.z + shift.x*xref.z);
+            if(debugMode>=1)System.out.format(" FRAME %s %s %s %s\n",frame.xref().toStringBrief(2),frame.yref().toStringBrief(2),
+                                                     frame.zref().toStringBrief(2),frame.bref().toStringBrief(2));
+            if(debugMode>=1)show_Shape3D(shape, "BEFORE", null);
+
+            if(angle.mag()>0){
+                translate_Shape3D(shape, frame.bref().multiply(-1.0));
+
+                Vector3D ang_lab = into_LabFrame(angle, frame);
+                if(debugMode>=1)System.out.format(" ang_lab %s \n", ang_lab.toStringBrief(2));
+                shape.rotateZ(ang_lab.z());
+                shape.rotateY(ang_lab.y());
+                shape.rotateX(ang_lab.x());
+
+                translate_Shape3D(shape, frame.bref());
+            }
+
+            if(shift.mag()>0){
+                Vector3D shift_lab = into_LabFrame(shift, frame);
+                if(debugMode>=1)System.out.format(" shift_lab %s \n", shift_lab.toStringBrief(2));
+                translate_Shape3D(shape, shift_lab);
+            }
+
+            if(debugMode>=1)show_Shape3D(shape, "AFTER ", null);
+        }
 
     }
 
 
     //------------------------------
-    public void rotate_AsComponent(Shape3D shape, Vector3d bary, Vector3d angle) {
+    public void misalign_Element(Sphere3D sphere, RICHFrame frame, Vector3D angle, Vector3D shift) {
     //------------------------------
 
         int debugMode = 0;
-        Vector3d zref = get_Shape3D_Normal(shape);
-        Vector3d yref = new Vector3d(0., 1., 0.);
-        // in case of lateral mirrors
-        if(Math.abs(zref.y)>0.6) yref = new Vector3d(0., 0., 1.);
-        Vector3d xref = (yref.cross(zref)).normalized();
 
-        if(debugMode>=1){
-            System.out.format("rotate_AsComponent\n");
-            System.out.format("bary  %s\n",toString(bary));
-            System.out.format("X ref %s\n",toString(xref));
-            System.out.format("Y ref %s\n",toString(yref));
-            System.out.format("Z ref %s\n",toString(zref));
-            System.out.format("Angle %s\n",toString(angle));
-            System.out.format(" --> Z axis %7.3f \n", angle.z*zref.z + angle.y*yref.z + angle.x*xref.z);
-            System.out.format(" --> Y axis %7.3f \n", angle.z*zref.y + angle.y*yref.y + angle.x*xref.y);
-            System.out.format(" --> X axis %7.3f \n", angle.z*zref.x + angle.y*yref.x + angle.x*xref.x);
-            show_Shape3D(shape, null, null);
-            System.out.format("-----------------\n");
-        } 
+        if(sphere!=null){
 
-        translate_Shape3D(shape, bary.negated());
+            if(debugMode>=1) System.out.format(" FRAME %s %s %s %s\n",frame.xref().toStringBrief(2),frame.yref().toStringBrief(2),
+                                                     frame.zref().toStringBrief(2),frame.bref().toStringBrief(2));
+            if(debugMode>=1)show_Sphere3D(sphere, "BEFORE", null);
 
-        // decompose each rotation along a ref axis (i.e. angle.x*xref) into three cartesian rotation in the lab system 
-        shape.rotateZ(angle.z*zref.z + angle.y*yref.z + angle.x*xref.z);
-        shape.rotateY(angle.z*zref.y + angle.y*yref.y + angle.x*xref.y);
-        shape.rotateX(angle.z*zref.x + angle.y*yref.x + angle.x*xref.x);
+            if(angle.mag()>0){
+                translate_Sphere3D(sphere, frame.bref().multiply(-1.0));
 
-        translate_Shape3D(shape, bary);
-        if(debugMode>=1)show_Shape3D(shape, null, null);
+                Vector3D ang_lab = into_LabFrame(angle, frame);
+                if(debugMode>=1)System.out.format(" ang_lab %s \n", ang_lab.toStringBrief(2));
+                sphere.rotateZ(ang_lab.z());
+                sphere.rotateY(ang_lab.y());
+                sphere.rotateX(ang_lab.x());
+
+                translate_Sphere3D(sphere, frame.bref());
+            }
+            
+            if(shift.mag()>0){
+                Vector3D shift_lab = into_LabFrame(shift, frame);
+                if(debugMode>=1)System.out.format(" shift_lab %s \n", shift_lab.toStringBrief(2));
+                translate_Sphere3D(sphere, shift_lab);
+            }
+
+            if(debugMode>=1)show_Sphere3D(sphere, "AFTER ", null);
+        }
+
+    }
+
+    //------------------------------
+    public Shape3D copy_Shape3D(Shape3D shape) { 
+    //------------------------------
+
+        Shape3D copy = new Shape3D();
+        for (int ifa=0; ifa<shape.size(); ifa++){copy.addFace( toTriangle3D(shape.face(ifa)));}
+        return copy;
+
+    }
+
+    // ----------------
+    public void merge_Shape3D(Shape3D shape, Shape3D other) {
+    // ----------------
+
+        for(int ifa=0; ifa<other.size(); ifa++)shape.addFace( other.face(ifa) );
 
     }
 
 
     //------------------------------
-    public void rotate_AsRICH(Triangle3D tri, Vector3d angle) {
+    public Vector3d get_Shape3D_Center(Shape3D shape) { return toVector3d(shape.center()); }
     //------------------------------
 
-        translate_Triangle3D(tri, rich_misa_centre.negated());
-
-        tri.rotateZ(angle.z);
-        tri.rotateY(angle.y);
-        tri.rotateX(angle.x);
-
-        translate_Triangle3D(tri, rich_misa_centre);
-
-    }
-
-
-    //------------------------------
-    public void rotate_AsRICH(Shape3D shape, Vector3d angle) {
-    //------------------------------
-
-        translate_Shape3D(shape, rich_misa_centre.negated());
-
-        shape.rotateZ(angle.z);
-        shape.rotateY(angle.y);
-        shape.rotateX(angle.x);
-
-        translate_Shape3D(shape, rich_misa_centre);
-
-    }
-
-    //------------------------------
-    public void rotate_Shape3D(Shape3D shape, Vector3d angle) {
-    //------------------------------
-
-        Vector3d bary = get_Shape3D_Bary(shape);
-
-        shape.rotateZ(angle.z);
-        shape.rotateY(angle.y);
-        shape.rotateX(angle.x);
-
-        Vector3d shift = bary.minus( get_Shape3D_Bary(shape) );
-        translate_Shape3D(shape, shift);
-
-    }
-
-     //------------------------------
-     public Vector3d get_Shape3D_Center(Shape3D shape) { return toVector3d(shape.center()); }
-     //------------------------------
-
-     // ----------------
-     public Vector3d get_CSGVol_Bary(CSG CSGVol) {
-     // ----------------
+    
+    // ----------------
+    public Vector3d get_CSGBary(CSG CSGVol) {
+    // ----------------
 
         /*
         *   Avoid double counting of points  
         */
         int debugMode = 0;
         List<Vector3d> pts = new ArrayList<Vector3d>();
-        if(debugMode>=1)System.out.format(" get_CSGVol_Bary %d \n", CSGVol.getPolygons().size());
+        if(debugMode>=1)System.out.format(" get_CSGBary %d \n", CSGVol.getPolygons().size());
 
         double cX=0.0;
         double cY=0.0;
@@ -2258,9 +2343,10 @@ public class RICHTool{
         return new Vector3d(0., 0., 0.);
     }
 
-     //------------------------------
-     public Vector3d get_Shape3D_Bary(Shape3D shape) { 
-     //------------------------------
+
+    //------------------------------
+    public Vector3d get_Shape3D_Bary(Shape3D shape) { 
+    //------------------------------
      
         /*
         *   Avoid double counting of points  
@@ -2300,50 +2386,32 @@ public class RICHTool{
 
         if(np>0)return new Vector3d(cX/np, cY/np, cZ/np);
         return new Vector3d(0., 0., 0.);
-     }
+    }
 
-     //------------------------------
-     public Vector3d get_Triangle3D_Bary(Triangle3D tri) { return toVector3d(tri.center()); }
-     //------------------------------
 
-     //------------------------------
-     public Vector3d get_Shape3D_Normal(Shape3D shape, int iface) {
-     //------------------------------
+    //------------------------------
+    public Vector3d get_Triangle3D_Bary(Triangle3D tri) { return toVector3d(tri.center()); }
+    //------------------------------
+
+
+    //------------------------------
+    public Vector3d get_Shape3D_Normal(Shape3D shape, int iface) {
+    //------------------------------
 
         Triangle3D face = new Triangle3D(shape.face(iface).point(0), shape.face(iface).point(1), shape.face(iface).point(2));
         Vector3D normal = face.normal();
         return toVector3d(normal).normalized(); 
 
-     }
-
-     //------------------------------
-     public Vector3d get_Shape3D_Normal(Shape3D shape) {
-     //------------------------------
-
-        Triangle3D face = new Triangle3D(shape.face(0).point(0), shape.face(0).point(1), shape.face(0).point(2));
-        Vector3D normal = face.normal();
-        return toVector3d(normal).normalized(); 
-
-     }
-
-
-    //------------------------------
-    public boolean into_Shape3D(Line3d direction, Shape3D shape, int iface) {
-    //------------------------------
-
-        //System.out.format("CK %s   %s \n",toString(direction.diff().normalized()), toString(toLine3D(direction).toVector().asUnit())); 
-        if(direction.diff().normalized().dot(get_Shape3D_Normal(shape, iface))<0)return true;
-        return false;
-
     }
 
 
     //------------------------------
-    public boolean out_from_Shape3D(Line3d direction, Shape3D shape, int iface) {
+    public Vector3d get_Shape3D_Normal(Shape3D shape) {
     //------------------------------
 
-        if(direction.diff().normalized().dot(get_Shape3D_Normal(shape, iface))>0)return true;
-        return false;
+        Triangle3D face = new Triangle3D(shape.face(0).point(0), shape.face(0).point(1), shape.face(0).point(2));
+        Vector3D normal = face.normal();
+        return toVector3d(normal).normalized(); 
 
     }
 
@@ -2351,94 +2419,43 @@ public class RICHTool{
     //------------------------------
     public Vector3d get_Poly_Normal(Polygon pol) {
     //------------------------------
-       Vector3d a = pol.vertices.get(0).pos;
-       Vector3d b = pol.vertices.get(1).pos;
-       Vector3d c = pol.vertices.get(2).pos;
-       Vector3d n = b.minus(a).cross(c.minus(a)).normalized();
-       return n;
+        Vector3d a = pol.vertices.get(0).pos;
+        Vector3d b = pol.vertices.get(1).pos;
+        Vector3d c = pol.vertices.get(2).pos;
+        Vector3d n = b.minus(a).cross(c.minus(a)).normalized();
+        return n;
     }
 
-     //------------------------------
-     public Vector3d get_Poly_Bary(Polygon pol) {
-     //------------------------------
+
+    //------------------------------
+    public Vector3d get_Poly_Bary(Polygon pol) {
+    //------------------------------
         Vector3d a = pol.vertices.get(0).pos;
         Vector3d b = pol.vertices.get(1).pos;
         Vector3d c = pol.vertices.get(2).pos;
         Vector3d bary = a.plus(b);
         bary = bary.add(c);
         return bary.dividedBy(3.);
-     }
+    }
 
-     //------------------------------
-     public double get_Poly_Area(Polygon pol) {
-     //------------------------------
+    //------------------------------
+    public double get_Poly_Area(Polygon pol) {
+    //------------------------------
         Vector3d a = pol.vertices.get(0).pos;
         Vector3d b = pol.vertices.get(1).pos;
         Vector3d c = pol.vertices.get(2).pos;
         Line3D base = new Line3D(toPoint3D(a), toPoint3D(b));
         Line3D h = base.distance( toPoint3D(c));
         return base.length()*h.length()/2;
-     }
-
-
-    //------------------------------
-    public double get_Poly_Distance(Point3D point, Polygon pol) {
-    //------------------------------
-
-        Vector3D norm = toVector3D(get_Poly_Normal(pol));
-        Point3D  pref = toPoint3D(pol.vertices.get(0).pos);
-        Plane3D plane = new Plane3D(pref, norm);
-        Line3D line = new Line3D(point, norm);
-        Point3D inter = new Point3D(0.,0.,0.);;
-        int itype = plane.intersection(line, inter); 
-        if(itype>0){
-            return point.distance(inter);
-        }
-        return 999.;
-
-    }
-
-
-    //------------------------------
-    public boolean outfromPoly(Line3d direction, Polygon pol) {
-    //------------------------------
-
-        if(direction.diff().normalized().dot(get_Poly_Normal(pol).normalized())>0)return true;
-        return false;
-
     }
 
     
     //------------------------------
-    public boolean intoPoly(Line3d direction, Polygon pol) {
-    //------------------------------
-
-        if(direction.diff().normalized().dot(get_Poly_Normal(pol).normalized())<0)return true;
-        return false;
-
-    }
-
-    
-    //------------------------------
-    public boolean insidePoly(Polygon pol, Vector3d pos) {
-    //------------------------------
-
-        if(pol.contains(pos)){
-            Point3D point = toPoint3D(pos);
-            //System.out.println(" UU "+get_Poly_Distance(point, pol));
-            if(get_Poly_Distance(point, pol)<RICHConstants.RICH_MATCH_POLYDIST)return true;
-        }
-        return false;
-
-    }
-
-
-    //------------------------------
-    public int getFTOFphase() {return FTOF_phase_corr;}
+    public int getFTOFphase() {return reco_constants.FTOF_PHASE_CORR;}
     //------------------------------
 
     //------------------------------
-    public void setFTOFphase(int phase) { FTOF_phase_corr = phase; }
+    public void setFTOFphase(int phase) { reco_constants.FTOF_PHASE_CORR = phase; }
     //------------------------------
 
 
@@ -2448,42 +2465,43 @@ public class RICHTool{
 
         int debugMode = 0;
 
-        Vector3d front   = new Vector3d(-0.42,   0.00,   0.91);
-        Vector3d left    = new Vector3d(-0.50,  -0.87,   0.00);
-        Vector3d right   = new Vector3d(-0.50,   0.87,   0.00);
-        Vector3d bottom  = new Vector3d(-1.00,   0.00,   0.00);
+        Vector3D front   = new Vector3D(-0.42,   0.00,   0.91);
+        Vector3D left    = new Vector3D(-0.50,  -0.87,   0.00);
+        Vector3D right   = new Vector3D(-0.50,   0.87,   0.00);
+        Vector3D bottom  = new Vector3D(-1.00,   0.00,   0.00);
 
-        Vector3d bary = get_CSGVol_Bary( compo.get_CSGVol() );
+        //ATT: this is before having set the layer components
+        Vector3D bary = toVector3D(get_CSGBary( compo.get_CSGVol() ));
         if(debugMode>=1)System.out.format(" compo bary %s \n", toString(bary));
 
-        for (Polygon pol: compo.get_CSGVol().getPolygons()){
+        for (Triangle3D pol: toTriangle3D(compo.get_CSGVol().getPolygons()) ){
 
             if(debugMode>=1)System.out.format("Test front %7.3f  left %7.3f  right %7.3f  bot %7.3f \n",
-                     get_Poly_Normal(pol).angle(front), get_Poly_Normal(pol).angle(left),
-                     get_Poly_Normal(pol).angle(right), get_Poly_Normal(pol).angle(bottom));
+                     pol.normal().angle(front), pol.normal().angle(left),
+                     pol.normal().angle(right), pol.normal().angle(bottom));
 
-            if(get_Poly_Normal(pol).angle(front)<5.e-3){
-                 if(bary.x > -100){
+            if(pol.normal().angle(front)<5.e-3){
+                 if(bary.x() > -100){
                      return new String("mirror_front_B1");
                  }else{
                      return new String("mirror_front_B2");
                  }
             }
-            if(get_Poly_Normal(pol).angle(left)<5.e-3){
-                 if(bary.x > -100){
+            if(pol.normal().angle(left)<5.e-3){
+                 if(bary.x() > -100){
                      return new String("mirror_left_L1");
                  }else{
                      return new String("mirror_left_L2");
                  }
             }
-            if(get_Poly_Normal(pol).angle(right)<5.e-3){
-                 if(bary.x > -100){
+            if(pol.normal().angle(right)<5.e-3){
+                 if(bary.x() > -100){
                      return new String("mirror_right_L1");
                  }else{
                      return new String("mirror_right_L2");
                  }
             }
-            if(get_Poly_Normal(pol).angle(bottom)<5.e-3){
+            if(pol.normal().angle(bottom)<5.e-3){
                  return new String("mirror_bottom");
             }
             
@@ -2491,14 +2509,6 @@ public class RICHTool{
         return new String("none");
     }
 
-
-    // ----------------
-    public void merge_Shape3D(Shape3D shape, Shape3D other) {
-    // ----------------
-
-        for(int ifa=0; ifa<other.size(); ifa++)shape.addFace( other.face(ifa) );
-
-    }
 
     // ----------------
     public void dump_Face(Face3D face) {
@@ -2565,333 +2575,33 @@ public class RICHTool{
     // ----------------
 
         int debugMode = 0;
-        int ilay=11;
-        Shape3D mirror = opticlayers.get(ilay).get_Global_Plane();
-
-        List<Point3D> inters = new ArrayList<Point3D>();
-        int nint = mirror.intersection(ray, inters);
-        if(debugMode>=1)  System.out.format("RICHTool::find_intersection with Mirror %d (%d, %d): %d \n",8,nint);
-
-        if(nint==1)return toVector3d(inters.get(0));
-        return null;
-
-    }
-
-    // ----------------
-    public Vector3d find_intersection_MAPMT(Line3d ray){
-    // ----------------
-
-        int debugMode = 0;
-        int ilay=get_LayerNumber("mapmts");
-
-        RICHIntersection inter = find_intersection_Shape3D(ray, ilay, -1, 0, 1);
+        RICHIntersection inter = get_Layer("mirror_sphere").find_Entrance(ray, -1);
 
         if(inter!=null){
-            if(debugMode>=1)  System.out.format("RICHTool::find_intersection with MAPMT (%d, %d): %s\n",
-                 inter.get_layer(), inter.get_component(), toString(inter.get_pos()));
-            return inter.get_pos();
+            if(debugMode>=1)  System.out.format("find_intersection with SPHERICAL (%d, %d): %s\n",
+                 inter.get_layer(), inter.get_component(), inter.get_pos().toStringBrief(2));
+            return toVector3d(inter.get_pos());
         }
 
         return null;
-    }
-
-
-
-    // ----------------
-    public RICHIntersection find_intersection_Layer(Line3d ray, int ilay, int ico, int exit, int post){
-    // ----------------
-        /*
-        * Search for the intersection points of ray with the RICH component  
-        * exit=0 Take the first (in z) with track pointing inside as Entrance
-        * exit=1 Take the last (in z) with track pointing outside as Exit
-        * post=0 Take the intersection in backward direction
-        * post=1 Take the intersection in forward direction
-        */
-        //ATT:aggiungere min path
-
-        int debugMode = 0;
-
-        if(ilay<0 || ilay>NLAY) return null;
-
-        RICHLayer layer = opticlayers.get(ilay);
-        Shape3D plane = null;
-        if(ico>0 || !layer.is_aerogel()){
-            if(debugMode>=1)System.out.format("Take global plane \n");
-            plane = layer.get_Global_Plane();
-        }else{
-            if(debugMode>=1)System.out.format("Take compo surf \n");
-            plane = layer.get_Component_Surf();
-        }
-
-        /*
-        *  Take all the intersection with Layer
-        */
-        RICHIntersection intersection = null;
-        List<Point3D> inters = new ArrayList<Point3D>();
-        List<Integer> ifaces = new ArrayList<Integer>();
-
-        int nint = plane.intersection_with_faces(toLine3D(ray), inters, ifaces);
-        if(debugMode>=1) {
-            System.out.format("RICHTool::find_intersection with Shape3D %d (%d, %d): %d \n",ilay,exit,post,nint);
-            for (int ii=0; ii<nint; ii++)System.out.format(" %3d %4d \n",ii,ifaces.get(ii));
-        }
-
-        float vers = (float) ray.diff().dot(Vector3d.Z_ONE);
-        Vector3d point = new Vector3d(0,0,0);
-        if((exit==0 && vers>0) || (exit==1 && vers<0))point.z = 999.;
-        
-        /*
-        *  Select the best intersection 
-        */
-        for (int ii=0; ii<nint; ii++){
-
-            Vector3d G4inter = toVector3d(inters.get(ii));
-            int iface = ifaces.get(ii);
-            int ifacompo = layer.get_Component_Index(iface);
-            if(debugMode>=1)  System.out.format("     Find intersection %3d  %3d  %3d: %s  check poi %7.2f   ori %7.2f   vers %7.2f\n",
-                                      ii,iface,ifacompo,toString(G4inter),point.z,ray.origin().z, vers);
-
-            if(post==1){
-                if(vers>0 && G4inter.z<ray.origin().z){if(debugMode>=1)System.out.format(" Wrong progression \n"); continue;}
-                if(vers<0 && G4inter.z>ray.origin().z){if(debugMode>=1)System.out.format(" Wrong progression \n"); continue;}
-            }else{
-                if(vers>0 && G4inter.z>ray.origin().z){if(debugMode>=1)System.out.format(" Wrong progression \n"); continue;}
-                if(vers<0 && G4inter.z<ray.origin().z){if(debugMode>=1)System.out.format(" Wrong progression \n"); continue;}
-            }
-            if(exit==1){
-                if(into_Shape3D(ray, plane, iface)){if(debugMode>=1)System.out.format(" Wrong direction\n"); continue;}
-            }else{
-                if(out_from_Shape3D(ray, plane, iface)){if(debugMode>=1)System.out.format(" Wrong direction\n"); continue;}
-            }
-
-            Vector3d norm = get_Shape3D_Normal(plane, iface);
-            if(debugMode>=1 && ilay==0)System.out.format(" AERONormal %s \n",toString(norm, 4));
-
-            if(exit==0 && into_Shape3D(ray, plane, iface)){
-                // take the first (in z) entrance point
-                if(debugMode>=1)  System.out.format("     --> ok as moving into Shape %7.2f %7.2f \n", G4inter.z, point.z);
-                if((vers>0 && G4inter.z<point.z) || (vers<0 && G4inter.z>point.z)){
-                    if(debugMode>=1)  System.out.format("         --> taken \n");
-                    point = G4inter;
-                    int icompo = ico;
-                    if(icompo==-1)icompo=ifacompo;
-                        
-                    if(is_Spherical_Mirror(ilay)){
-
-                        Sphere3D sphere = layer.get_Tracking_Sphere();
-                        List<Point3D> crosses = new ArrayList<Point3D>();
-                        int ncross = sphere.intersection(toLine3D(ray), crosses);
-                        for (int ic=0; ic<ncross; ic++){
-                            Vector3d new_point = toVector3d(crosses.get(ic));
-                            if(debugMode>=1)System.out.format(" cross with sphere %7.2f %7.2f %7.2f \n",new_point.x,new_point.y,new_point.z);
-                            if(new_point.distance(G4inter)<RICHConstants.PHOTON_DISTMIN_SPHERE){
-
-                                Vector3d new_norm = toVector3d( sphere.getNormal(new_point.x, new_point.y, new_point.z) );
-                                intersection = new RICHIntersection(ilay, 0, 0, exit, new_point, new_norm);
-                             }
-                        }
-                                
-                    }else{
-                        intersection = new RICHIntersection(ilay, icompo, iface, exit, point, norm);
-                        if(layer.is_aerogel()){ 
-                            if(icompo>=0) intersection.set_nout(get_Component(ilay,icompo).get_index());
-                            if(debugMode>=1)System.out.format("     -->  save aerogel entrance for ilay %4d icompo %4d (%4d %4d) nindx %7.5f \n",
-                                             ilay,icompo,ico,ifacompo,intersection.get_nout());
-                        }
-                    }
-                }
-            }
-
-            if(exit==1 && out_from_Shape3D(ray, plane, iface)){
-                // take the last (in z) exiting point
-                if(debugMode>=1)  System.out.format("     --> ok as moving out of Poly %7.2f %7.2f \n", G4inter.z, point.z);
-                if((vers>0 && G4inter.z>point.z) || (vers<0 && G4inter.z<point.z)){
-                    if(debugMode>=1)  System.out.format("         --> taken \n");
-                    point = G4inter;
-                    int icompo = ico;
-                    if(icompo==-1)icompo=ifacompo;
-                    intersection = new RICHIntersection(ilay, icompo, iface, exit, point, norm);
-                    if(layer.is_aerogel()){
-                        if(icompo>=0)intersection.set_nin(get_Component(ilay,icompo).get_index());
-                        if(debugMode>=1)System.out.format("     -->  save aerogel exit for ilay %4d icompo %4d (%4d %4d) nindx %7.5f \n",
-                                              ilay,icompo, ico, ifacompo, intersection.get_nin());
-                    }
-                }
-            }
-
-        }
-
-        /*
-        *  Correct for non planar shape
-        */
-        if(layer.is_aerogel()){
-            int icompo = intersection.get_component();
-            double radius = layer.get(icompo).get_radius();
-            Vector3d center = layer.get_CompoCenter(icompo, toVector3D(intersection.get_normal()));
-            Vector3d nnorm = intersection.get_normal().times(radius);
-            Vector3d rnorm = new Vector3d (nnorm.x, -nnorm.y, nnorm.z);
-            Vector3d ncenter = center.plus(rnorm);
-            if(debugMode>=1)System.out.format(" aerogel sphere %s %s r %7.3f --> %s \n",toString(center), toString(rnorm), radius, toString(ncenter));
-            Sphere3D sphere = new Sphere3D( ncenter.x, ncenter.y, ncenter.z, radius);
-            RICHIntersection new_inter = null;
-
-            List<Point3D> crosses = new ArrayList<Point3D>();
-            int ncross = sphere.intersection(toLine3D(ray), crosses);
-            for (int ic=0; ic<ncross; ic++){
-                Vector3d new_point = toVector3d(crosses.get(ic));
-                if(debugMode>=1)System.out.format(" cross with sphere %7.2f %7.2f %7.2f \n",new_point.x,new_point.y,new_point.z);
-                if(new_point.distance(intersection.get_pos())<RICHConstants.PHOTON_DISTMIN_SPHERE){
-
-                    Vector3d new_norm = toVector3d( sphere.getNormal(new_point.x, new_point.y, new_point.z) ).negated().normalized();
-                    new_inter = new RICHIntersection(ilay, icompo, 0, exit, new_point, new_norm);
-
-                }
-            }
-            if(new_inter!=null){
-                if(debugMode>=1){
-                    System.out.format(" reset intersection \n");
-                    System.out.format(" pos  %s --> %s \n", toString(intersection.get_pos()), toString(new_inter.get_pos()));
-                    System.out.format(" norm %s --> %s \n", toString(intersection.get_normal()), toString(new_inter.get_normal()));
-                }
-                intersection.set_pos(new_inter.get_pos());
-                intersection.set_normal(new_inter.get_normal());
-            }
-        }
-
-        if(debugMode>=3){
-            if(exit==0)System.out.println(" entrance point "+intersection.get_pos()+"   normal "+intersection.get_normal());
-            if(exit==1)System.out.println(" exit     point "+intersection.get_pos()+"   normal "+intersection.get_normal());
-        }
-
-        return intersection;
 
     }
 
     // ----------------
-    public RICHIntersection find_intersection_Shape3D(Line3d ray, int ilay, int ico, int exit, int post){
+    public Vector3d find_intersection_MAPMT(Line3D ray){
     // ----------------
-        /*
-        * Search for the intersection points of ray with the RICH component  
-        * exit=0 Take the first (in z) with track pointing inside as Entrance
-        * exit=1 Take the last (in z) with track pointing outside as Exit
-        * post=0 Take the intersection in backward direction
-        * post=1 Take the intersection in forward direction
-        */
-        //ATT:aggiungere min path
 
         int debugMode = 0;
 
-        if(ilay<0 || ilay>NLAY) return null;
+        RICHIntersection inter = get_Layer("mapmts").find_Entrance(ray, -1);
 
-        RICHLayer layer = opticlayers.get(ilay);
-        Shape3D plane = null;
-        if(ico>0 || !layer.is_aerogel()){
-            if(debugMode>=1)System.out.format("Take global plane \n");
-            plane = layer.get_Global_Plane();
-        }else{
-            if(debugMode>=1)System.out.format("Take compo surf \n");
-            plane = layer.get_Component_Surf();
+        if(inter!=null){
+            if(debugMode>=1)  System.out.format("find_intersection with MAPMT (%d, %d): %s\n",
+                 inter.get_layer(), inter.get_component(), inter.get_pos().toStringBrief(2));
+            return toVector3d(inter.get_pos());
         }
 
-        RICHIntersection intersection = null;
-        List<Point3D> inters = new ArrayList<Point3D>();
-        List<Integer> ifaces = new ArrayList<Integer>();
-
-        int nint = plane.intersection_with_faces(toLine3D(ray), inters, ifaces);
-        if(debugMode>=1) {
-            System.out.format("RICHTool::find_intersection with Shape3D %d (%d, %d): %d \n",ilay,exit,post,nint);
-            for (int ii=0; ii<nint; ii++)System.out.format(" %3d %4d \n",ii,ifaces.get(ii));
-        }
-
-        float vers = (float) ray.diff().dot(Vector3d.Z_ONE);
-        Vector3d point = new Vector3d(0,0,0);
-        if((exit==0 && vers>0) || (exit==1 && vers<0))point.z = 999.;
-        
-        for (int ii=0; ii<nint; ii++){
-
-            Vector3d G4inter = toVector3d(inters.get(ii));
-            int iface = ifaces.get(ii);
-            int ifacompo = layer.get_Component_Index(iface);
-            if(debugMode>=1)  System.out.format("     Find intersection %3d  %3d  %3d: %s  check poi %7.2f   ori %7.2f   vers %7.2f\n",
-                                      ii,iface,ifacompo,toString(G4inter),point.z,ray.origin().z, vers);
-
-            if(post==1){
-                if(vers>0 && G4inter.z<ray.origin().z){if(debugMode>=1)System.out.format(" Wrong progression \n"); continue;}
-                if(vers<0 && G4inter.z>ray.origin().z){if(debugMode>=1)System.out.format(" Wrong progression \n"); continue;}
-            }else{
-                if(vers>0 && G4inter.z>ray.origin().z){if(debugMode>=1)System.out.format(" Wrong progression \n"); continue;}
-                if(vers<0 && G4inter.z<ray.origin().z){if(debugMode>=1)System.out.format(" Wrong progression \n"); continue;}
-            }
-            if(exit==1){
-                if(into_Shape3D(ray, plane, iface)){if(debugMode>=1)System.out.format(" Wrong direction\n"); continue;}
-            }else{
-                if(out_from_Shape3D(ray, plane, iface)){if(debugMode>=1)System.out.format(" Wrong direction\n"); continue;}
-            }
-
-            Vector3d norm = get_Shape3D_Normal(plane, iface);
-            if(debugMode>=1 && ilay==0)System.out.format(" AERONormal %s \n",toString(norm, 4));
-
-            if(exit==0 && into_Shape3D(ray, plane, iface)){
-                // take the first (in z) entrance point
-                if(debugMode>=1)  System.out.format("     --> ok as moving into Shape %7.2f %7.2f \n", G4inter.z, point.z);
-                if((vers>0 && G4inter.z<point.z) || (vers<0 && G4inter.z>point.z)){
-                    if(debugMode>=1)  System.out.format("         --> taken \n");
-                    point = G4inter;
-                    int icompo = ico;
-                    if(icompo==-1)icompo=ifacompo;
-                        
-                    if(is_Spherical_Mirror(ilay)){
-
-                        Sphere3D sphere = layer.get_Tracking_Sphere();
-                        List<Point3D> crosses = new ArrayList<Point3D>();
-                        int ncross = sphere.intersection(toLine3D(ray), crosses);
-                        for (int ic=0; ic<ncross; ic++){
-                            Vector3d new_point = toVector3d(crosses.get(ic));
-                            if(debugMode>=1)System.out.format(" cross with sphere %7.2f %7.2f %7.2f \n",new_point.x,new_point.y,new_point.z);
-                            if(new_point.distance(G4inter)<RICHConstants.PHOTON_DISTMIN_SPHERE){
-
-                                Vector3d new_norm = toVector3d( sphere.getNormal(new_point.x, new_point.y, new_point.z) );
-                                intersection = new RICHIntersection(ilay, 0, 0, exit, new_point, new_norm);
-                             }
-                        }
-                                
-                    }else{
-                        intersection = new RICHIntersection(ilay, icompo, iface, exit, point, norm);
-                        if(layer.is_aerogel()){ 
-                            if(icompo>=0) intersection.set_nout(get_Component(ilay,icompo).get_index());
-                            if(debugMode>=1)System.out.format("     -->  save aerogel entrance for ilay %4d icompo %4d (%4d %4d) nindx %7.5f \n",
-                                             ilay,icompo,ico,ifacompo,intersection.get_nout());
-                        }
-                    }
-                }
-            }
-
-            if(exit==1 && out_from_Shape3D(ray, plane, iface)){
-                // take the last (in z) exiting point
-                if(debugMode>=1)  System.out.format("     --> ok as moving out of Poly %7.2f %7.2f \n", G4inter.z, point.z);
-                if((vers>0 && G4inter.z>point.z) || (vers<0 && G4inter.z<point.z)){
-                    if(debugMode>=1)  System.out.format("         --> taken \n");
-                    point = G4inter;
-                    int icompo = ico;
-                    if(icompo==-1)icompo=ifacompo;
-                    intersection = new RICHIntersection(ilay, icompo, iface, exit, point, norm);
-                    if(layer.is_aerogel()){
-                        if(icompo>=0)intersection.set_nin(get_Component(ilay,icompo).get_index());
-                        if(debugMode>=1)System.out.format("     -->  save aerogel exit for ilay %4d icompo %4d (%4d %4d) nindx %7.5f \n",
-                                              ilay,icompo, ico, ifacompo, intersection.get_nin());
-                    }
-                }
-            }
-
-        }
-
-        if(debugMode>=3){
-            if(exit==0)System.out.println(" entrance point "+intersection.get_pos()+"   normal "+intersection.get_normal());
-            if(exit==1)System.out.println(" exit     point "+intersection.get_pos()+"   normal "+intersection.get_normal());
-        }
-
-        return intersection;
-
+        return null;
     }
 
 
@@ -2906,99 +2616,63 @@ public class RICHTool{
 
 
     // ----------------
-    public Vector3d Reflection(Vector3d vector1, Vector3d normal) {
+    public Vector3D Reflection(Vector3D vector1, Vector3D normal) {
     // ----------------
 
         int debugMode = 0;
-        Vector3d vin = vector1.normalized();
-        Vector3d vnorm = normal.normalized();
+        Vector3D vin = vector1.asUnit();
+        Vector3D vnorm = normal.asUnit();
 
         double cosI  =  vin.dot(vnorm); 
-        if(debugMode>=1)System.out.println("--Parametro angolo "+ cosI);
+        if(debugMode>=1)System.out.format("Vector in %s  vnorm %s cosI %7.3f \n ",vin.toStringBrief(3),vnorm.toStringBrief(3),cosI);
         if (cosI > 0) {
-            vnorm.set(vnorm.negated());  
+            if(debugMode>=1)System.out.format("ATT: Mirror normal parallel to impinging ray %7.3f \n",cosI);
+            vnorm.scale(-1.0);
         }
 
-        Vector3d vout = vin.minus(vnorm.times(2*(vin.dot(vnorm))));
+        double refle = 2*(vin.dot(vnorm));
+        Vector3D vout = vin.sub(vnorm.multiply(refle));
 
         if(debugMode>=1){
-            System.out.println("La normale sullo specchio vale " + normal);
-            System.out.println("The reflected versor is " + vout.normalized());
+            System.out.format("Mirror normal %s\n",normal.toStringBrief(3));
+            System.out.format("Reflected versor %s\n", vout.asUnit().toStringBrief(3));
         }
 
-        return vout.normalized();
+        return vout.asUnit();
     }
 
-
     // ----------------
-    public Vector3d Transmission(Vector3d vector1, Vector3d normal, double n_1, double n_2) {
+    public Vector3D Transmission2(Vector3D vector1, Vector3D normal, double n_1, double n_2) {
     // ----------------
 
         int debugMode = 0;
         double rn = n_1 / n_2;
 
-        Vector3d vin = vector1.normalized();
-        Vector3d vnorm = normal.normalized();
+        Vector3D vin = vector1.asUnit();
+        Vector3D vnorm = normal.asUnit();
+
         double cosI  =  vin.dot(vnorm); 
-        if (cosI > 0) {
-            vnorm.set(vnorm.negated());
+        if(debugMode>=1)System.out.format("Vector in %s  vnorm %s cosI %7.3f \n ",vin.toStringBrief(3),vnorm.toStringBrief(3),cosI);
+        if (cosI < 0) {
+            if(debugMode>=1)System.out.format("ATT: Mirror normal parallel to impinging ray %7.3f \n",cosI);
+            vnorm.scale(-1.0);
         }
-        if(debugMode>=1)System.out.format("Vector in %s  vnorm %s cosI %7.3f \n ",toString(vin),toString(vnorm),cosI);
+        if(debugMode>=1)System.out.format("Vector in %s  vnorm %s cosI %7.3f \n ",vin.toStringBrief(3),vnorm.toStringBrief(3),cosI);
 
-        Vector3d crossP = vnorm.cross(vin);
-        Vector3d McrossP = vnorm.negated().cross(vin);
-
-        double sqroot = Math.sqrt(1 - rn*rn* crossP.dot(crossP));
-
-        Vector3d secondquantity = new Vector3d(vnorm.times(sqroot));
-        Vector3d firstquantity = new Vector3d(vnorm.cross(McrossP));
-        Vector3d vout = firstquantity.times(rn);
-
-        if(debugMode>=1){
-            System.out.format(" crossP %s \n", toString(crossP));
-            System.out.format("McrossP %s \n", toString(McrossP)); 
-            System.out.format("Variables %7.3f %7.3f \n",crossP.dot(crossP), sqroot); 
-            System.out.format(" first  %s \n", toString(firstquantity));  
-            System.out.format(" secon  %s \n", toString(secondquantity));  
-            System.out.format(" vout   %s \n", toString(vout)); 
-        }
-
-
-        vout.sub(secondquantity);
-
-        if(debugMode>=1)System.out.format("The transmitted vector is %7.3f %7.3f %7.3f for rn = %7.3f (%7.3f %7.3f)\n",vout.x,vout.y,vout.z,rn,n_1,n_2);
-        return vout.normalized();
-
-    }
-
-    // ----------------
-    public Vector3d Transmission2(Vector3d vector1, Vector3d normal, double n_1, double n_2) {
-    // ----------------
-
-        int debugMode = 0;
-        double rn = n_1 / n_2;
-
-        Vector3d vin = vector1.normalized();
-        Vector3d vnorm = normal.normalized();
-
-        if(vnorm.dot(vin)<0){
-            vnorm.set(vnorm.negated());
-        }
-
-        Vector3d vrot = (vnorm.cross(vin)).normalized();
+        Vector3D vrot = (vnorm.cross(vin)).asUnit();
  
         double angi = Math.acos(vin.dot(vnorm)) ;
         double ango = Math.asin( rn * Math.sin(angi));
 
-        Quaternion q = new Quaternion(ango, vrot);
+        Quaternion q = new Quaternion(ango, toVector3d(vrot));
 
-        Vector3d vout = q.rotate(vnorm);
+        Vector3D vout = toVector3D(q.rotate(toVector3d(vnorm)));
 
         if(debugMode>=1){
-            System.out.format(" vin   %s \n", toString(vin));
-            System.out.format(" vnorm %s \n", toString(vnorm)); 
+            System.out.format(" vin   %s \n", vin.toStringBrief(3));
+            System.out.format(" vnorm %s \n", vnorm.toStringBrief(3)); 
             System.out.format(" angles %7.3f %7.3f \n",angi*57.3, ango*57.3);
-            System.out.format(" vout  %s \n", toString(vout)); 
+            System.out.format(" vout  %s \n", vout.toStringBrief(3)); 
         }
 
         return vout;
@@ -3010,46 +2684,44 @@ public class RICHTool{
     // ----------------
 
         int debugMode = 0;
-        Vector3d vori = rayin.origin();
-        Vector3d inVersor = rayin.diff().normalized();
-        Vector3d newVersor = new Vector3d(0, 0, 0);
+        Point3D vori = rayin.origin();
+        Vector3D inVersor = rayin.direction().asUnit();
+        Vector3D newVersor = new Vector3D(0.0, 0.0, 0.0);
         RICHRay rayout = null;
         int type = 0;
  
-        RICHComponent component = opticlayers.get(intersection.get_layer()).get(intersection.get_component());
+        if(debugMode>=1)System.out.format("Ray for %3d %3d \n",intersection.get_layer(), intersection.get_component());
+        //RICHComponent component = opticlayers.get(intersection.get_layer()).get(intersection.get_component());
+        RICHLayer layer = opticlayers.get(intersection.get_layer());
 
-        if(component.is_optical()==true){
+        if(layer.is_optical()==true){
                 
-            if(debugMode>=1)System.out.format("Ray rotation at Optical STL %3d %3d  xyz %6.2f %6.2f %6.2f \n", intersection.get_layer(), intersection.get_component(), vori.x, vori.y, vori.z);
-            //Vector3d vnorm = richfactory.GetNormal_Stl(ivol,vori);
-            Vector3d vnorm = intersection.get_normal();
+            if(debugMode>=1)System.out.format("Ray rotation at Optical compo %3d %3d  xyz %s \n", intersection.get_layer(), intersection.get_component(), vori.toStringBrief(2));
+            Vector3D vnorm = intersection.get_normal();
             if(vnorm != null ){
-                if(component.is_mirror()==true){
+                if(layer.is_mirror()==true){
              
-                    newVersor = Reflection(inVersor, vnorm );
-                    type=1;
-                    if(debugMode>=1)System.out.format(" Reflection at mirror surface norm %7.3f %7.3f %7.3f \n", 
-                                  vnorm.x, vnorm.y, vnorm.z);
+                    newVersor = Reflection(inVersor, vnorm);
+                    type=10000+intersection.get_layer()*100+intersection.get_component()+1;
+                    if(debugMode>=1)System.out.format(" Reflection at mirror surface norm %s \n", vnorm.toStringBrief(3));
 
                 }else{
 
-                    newVersor = Transmission(inVersor, vnorm, intersection.get_nin(), intersection.get_nout());
-                    type=2;
+                    newVersor = Transmission2(inVersor, vnorm, intersection.get_nin(), intersection.get_nout());
+                    type=20000+intersection.get_layer()*100+intersection.get_component()+1;
                     if(debugMode>=1){
-                        System.out.format(" Refraction at surface boundary norm %7.3f %7.3f %7.3f \n",
-                                  vnorm.x, vnorm.y, vnorm.z);
-                        System.out.format(" norm in %s %7.4f \n",toString(vnorm), vnorm.angle(Vector3d.Z_ONE));
-                        System.out.format(" vers in %s %7.4f \n",toString(inVersor), inVersor.angle(Vector3d.Z_ONE));
-                        System.out.format(" vers ou %s %7.4f \n",toString(newVersor), newVersor.angle(Vector3d.Z_ONE));
+                        System.out.format(" Refraction at surface boundary norm %s \n", vnorm.toStringBrief(3));
+                        System.out.format(" norm in %s %7.4f \n",vnorm.toStringBrief(3), vnorm.costheta());
+                        System.out.format(" vers in %s %7.4f \n",inVersor.toStringBrief(3), inVersor.costheta());
+                        System.out.format(" vers ou %s %7.4f \n",newVersor.toStringBrief(3), newVersor.costheta());
                     }
                 }
             }
 
-            if(debugMode>=1)System.out.format(" Versor in %7.3f %7.3f %7.3f   --> out %7.3f %7.3f %7.3f \n", 
-                            inVersor.x, inVersor.y, inVersor.z, newVersor.x, newVersor.y, newVersor.z);
+            if(debugMode>=1)System.out.format(" Versor in %s   --> out %s \n",inVersor.toStringBrief(3), newVersor.toStringBrief(3)); 
         }
 
-        rayout = new RICHRay(vori, vori.plus(newVersor.times(200)));
+        rayout = new RICHRay(vori, newVersor.multiply(200));
         rayout.set_type(type);
         return rayout;
 
@@ -3062,35 +2734,35 @@ public class RICHTool{
     // return the hit position on the PMT plane of a photon emitted at emission with direction vlab
 
         int debugMode = 0;
-        boolean detected = false;
-        boolean lost = false;
         ArrayList<RICHRay> raytracks = new ArrayList<RICHRay>();
-        int n_front_refl = 0;
 
-        RICHRay lastray = new RICHRay(emission, emission.plus(vlab.times(200)));
+        Point3D emi = toPoint3D(emission);
+        Vector3D vdir = toVector3D(vlab);
+
+        RICHRay lastray = new RICHRay(emi, vdir.multiply(200));
         if(debugMode>=1) {
             System.out.format(" --------------------------- \n");
-            System.out.format("Raytrace photon ori %6.2f %6.2f %6.2f  olay %3d  oco %3d  dir %6.2f %6.2f %6.2f \n",emission.x,emission.y,emission.z,orilay,orico,vlab.x,vlab.y,vlab.z); 
+            System.out.format("Raytrace photon ori %s  olay %3d  oco %3d  dir %s \n",emi.toStringBrief(2),orilay,orico,vdir.toStringBrief(3)); 
             System.out.format(" --------------------------- \n");
         }
 
-        RICHIntersection first_intersection = find_intersection_Shape3D(lastray, orilay, orico, 1, 1);
-        if(first_intersection==null){
-            lost=true;
-            return null;
-        }  
+        RICHLayer layer = get_Layer(orilay);
+        if(layer==null)return null;
+
+        RICHIntersection first_intersection = layer.find_Exit(lastray.asLine3D(), orico);
+        if(first_intersection==null)return null;   
+
         if(debugMode>=1){
             System.out.format(" first inter : ");
             first_intersection.showIntersection();
         }
 
-        RICHRay oriray = new RICHRay(emission, first_intersection.get_pos());
-        oriray.set_refind(get_Component(orilay,orico).get_index());
+        Point3D new_pos = first_intersection.get_pos();
+        RICHRay oriray = new RICHRay(emi, new_pos);
+        oriray.set_refind(layer.get(orico).get_index());
         raytracks.add(oriray);
 
-        Vector3d new_pos = first_intersection.get_pos();
-        RICHRay rayin = new RICHRay(new_pos, new_pos.plus(oriray.diff().times(200)));
-
+        RICHRay rayin = new RICHRay(new_pos, oriray.direction().multiply(200));
         lastray = OpticalRotation(rayin, first_intersection);
         lastray.set_refind(RICHConstants.RICH_AIR_INDEX);
         RICHIntersection last_intersection = first_intersection;
@@ -3102,99 +2774,123 @@ public class RICHTool{
             lastray.showRay();
         }
 
-        int jj=1;
+        int jj = 1;
+        int front_nrefl = 0;
+        boolean detected = false;
+        boolean lost = false;
         while( detected == false && lost == false && raytracks.size()<10){
 
-            Vector3d last_ori  = lastray.origin();
-            Vector3d new_hit = null;
+            Point3D last_ori  = lastray.origin();
+            Point3D new_hit = null;
             RICHIntersection new_intersection = null;
-
             if(debugMode>=1)System.out.format(" ray-tracking step %d \n",jj);
-            //int iSTL = 0;
-            //double mindist = 999999.0;
 
-            // next intersection starting from aerogel
             if(last_intersection.get_layer()<4){
   
                 // planar mirrors
-                RICHIntersection test_intersection = find_intersection_Shape3D(lastray, get_LayerNumber("mirror_bottom"), -1, 0, 1);
-                if(test_intersection==null)test_intersection = find_intersection_Shape3D(lastray, get_LayerNumber("mirror_left_L1"), -1, 0, 1);
-                if(test_intersection==null)test_intersection = find_intersection_Shape3D(lastray, get_LayerNumber("mirror_right_L1"), -1, 0, 1);
-                if(test_intersection==null)test_intersection = find_intersection_Shape3D(lastray, get_LayerNumber("mirror_left_L2"), -1, 0, 1);
-                if(test_intersection==null)test_intersection = find_intersection_Shape3D(lastray, get_LayerNumber("mirror_right_L2"), -1, 0, 1);
+                RICHIntersection test_intersection = get_Layer("mirror_bottom").find_Entrance(lastray.asLine3D(), -1);
+                if(test_intersection==null)test_intersection = get_Layer("mirror_left_L1").find_Entrance(lastray.asLine3D(), -1);
+                if(test_intersection==null)test_intersection = get_Layer("mirror_right_L1").find_Entrance(lastray.asLine3D(), -1);
+                if(test_intersection==null)test_intersection = get_Layer("mirror_left_L2").find_Entrance(lastray.asLine3D(), -1);
+                if(test_intersection==null)test_intersection = get_Layer("mirror_right_L2").find_Entrance(lastray.asLine3D(), -1);
                 if(test_intersection!=null){
                     if(debugMode>=1){
-                        System.out.format(" test bottom (%7.2f, %7.2f) : ",last_ori.z, test_intersection.get_pos().distance(last_ori));
+                        System.out.format(" test planar (z %7.2f, step %7.2f) : ",last_ori.z(), test_intersection.get_pos().distance(last_ori));
                         test_intersection.showIntersection();
                     }
-                    if(test_intersection.get_pos().distance(last_ori)>RICHConstants.PHOTON_DISTMIN_TRACING)new_intersection = test_intersection;
+                    //if(test_intersection.get_pos().distance(last_ori)>RICHConstants.PHOTON_DISTMIN_TRACING)new_intersection = test_intersection;
+                    new_intersection = test_intersection;
                 }else{
                     if(debugMode>=1)System.out.format(" no lateral mirror intersection \n");
                 }
 
                 // shperical mirrors
-                if(lastray.diff().dot(Vector3d.Z_ONE)>0){
-                    test_intersection = find_intersection_Shape3D(lastray, get_LayerNumber("mirror_sphere"), -1, 0, 1);
+                if(lastray.direction().costheta()>0){
+                    test_intersection = get_Layer("mirror_sphere").find_EntranceCurved(lastray.asLine3D(), -1);
                     
                     if(test_intersection!=null){
                         if(debugMode>=1){
-                            System.out.format(" test sphere (%7.2f, %7.2f) : ",last_ori.z, test_intersection.get_pos().distance(last_ori));
+                            System.out.format(" test sphere (z %7.2f, step %7.2f) : ",last_ori.z(), test_intersection.get_pos().distance(last_ori));
                             test_intersection.showIntersection();
                         }
-                        if(test_intersection.get_pos().distance(last_ori)>RICHConstants.PHOTON_DISTMIN_TRACING){
-                            if(new_intersection==null || (new_intersection!=null && test_intersection.get_pos().z<new_intersection.get_pos().z)) {
+                        //if(test_intersection.get_pos().distance(last_ori)>RICHConstants.PHOTON_DISTMIN_TRACING){
+                            if(new_intersection==null || (new_intersection!=null && test_intersection.get_pos().z()<new_intersection.get_pos().z())) {
                                 new_intersection = test_intersection;
                             }
-                        }
+                        //}
                     }else{
                         if(debugMode>=1)System.out.format(" no sphere intersection \n");
                     }
 
-                    //Vector3d test_hit = find_PMT_hit(lastray);
-                    RICHIntersection pmt_inter = find_intersection_Shape3D(lastray, get_LayerNumber("mapmts"), -1, 0, 1);
+                    RICHIntersection pmt_inter = get_Layer("mapmts").find_Entrance(lastray.asLine3D(), -1);
                     if(pmt_inter!=null) {
-                        Vector3d test_hit = pmt_inter.get_pos(); 
-                        if(test_hit.distance(last_ori)>RICHConstants.PHOTON_DISTMIN_TRACING){
+                        Point3D test_hit = pmt_inter.get_pos(); 
+                        //if(test_hit.distance(last_ori)>RICHConstants.PHOTON_DISTMIN_TRACING){
                             new_hit=test_hit;
-                            if(debugMode>=1)System.out.format(" test PMT : Hit %7.2f %7.2f %7.2f \n",new_hit.x,new_hit.y,new_hit.z);
-                        }else{
-                            if(debugMode>=1)System.out.format(" too far PMT plane intersection \n");
-                        }
+                            if(debugMode>=1)System.out.format(" test PMT : Hit %s \n",new_hit.toStringBrief(2));
+                        //}else{
+                            //if(debugMode>=1)System.out.format(" too far PMT plane intersection \n");
+                        //}
                     }else{
                         if(debugMode>=1)System.out.format(" no PMT plane intersection \n");
                     }
                 }else{
-                    test_intersection = find_intersection_Shape3D(lastray, get_LayerNumber("mirror_front_B1"), -1, 0, 1);
-                    if(test_intersection==null)test_intersection = find_intersection_Shape3D(lastray, get_LayerNumber("mirror_front_B2"), -1, 0, 1);
+                    test_intersection = get_Layer("mirror_front_B1").find_Entrance(lastray.asLine3D(), -1);
+                    if(test_intersection==null)test_intersection = get_Layer("mirror_front_B2").find_Entrance(lastray.asLine3D(), -1);
                     if(test_intersection!=null){
                         if(debugMode>=1){
-                            System.out.format(" test front (%7.2f, %7.2f) : ",last_ori.z, test_intersection.get_pos().distance(last_ori));
+                            System.out.format(" test front (z %7.2f, step %7.2f) : ",last_ori.z(), test_intersection.get_pos().distance(last_ori));
                             test_intersection.showIntersection();
                         }
-                        if(test_intersection.get_pos().distance(last_ori)>RICHConstants.PHOTON_DISTMIN_TRACING)new_intersection = test_intersection; n_front_refl++;
+                        //if(test_intersection.get_pos().distance(last_ori)>RICHConstants.PHOTON_DISTMIN_TRACING)new_intersection = test_intersection; 
+                        new_intersection = test_intersection;
+                        front_nrefl++;
                     }else{
                         if(debugMode>=1)System.out.format(" no front mirror intersection \n");
                     }
                 }
 
-                if((new_hit==null && new_intersection==null) || (n_front_refl>1)) {
-                    lost = true;
-                    return null;
+            }
+
+            if(new_hit!=null){
+                if(new_intersection==null || new_hit.distance(last_ori) <= new_intersection.get_pos().distance(last_ori)) {
+                    detected=true;
+                    if(debugMode>=1) System.out.format(" found PMT hit %s  dist %6.2f \n", new_hit.toStringBrief(2), new_hit.distance(last_ori));
+                }
+            }
+            if(front_nrefl>1){
+                lost = true; 
+                new_hit=new_intersection.get_pos();
+                if(debugMode>=1) System.out.format(" double front reflection: stop at front %s \n",toString(new_hit));
+            }
+            if(new_hit==null && new_intersection==null){
+                lost = true; 
+                Point3D point = new Point3D(0.0, 0.0, 0.0);;
+                new_hit = new Point3D(lastray.end());
+                Plane3D plane = toTriangle3D(get_Layer(get_LayerNumber("mapmts")).get_Face(0)).plane();
+                if(plane.intersection(lastray.asLine3D(), point)==1){ 
+                    double vers = lastray.direction().costheta();
+                    double Delta_z = point.z()-lastray.origin().z();
+                    if(debugMode>=1) System.out.format(" forced stop at PMT plane: Delta_z %7.3f vers %7.3f \n",Delta_z, vers);
+                    if(Delta_z*vers>0){
+                        new_hit=point;
+                        if(debugMode>=1) System.out.format(" take PMT plane hit %s \n", new_hit.toStringBrief(2));
+                    }else{
+                        if(debugMode>=1) System.out.format(" no Delta_z on PMT plane: take last ray end %s \n", new_hit.toStringBrief(2));
+                    }
+                }else{
+                    if(debugMode>=1) System.out.format(" no hit on PMT plane: take last ray end %s \n", new_hit.toStringBrief(2));
                 }
             }
 
-
-            int end_trace = 0;
-            if(new_hit!=null && new_intersection==null) end_trace=1;
-            if(new_hit!=null && new_intersection!=null && new_hit.distance(last_ori) < new_intersection.get_pos().distance(last_ori)) end_trace=1;
-
-            if(end_trace==1){
-                detected = true;
-                if(debugMode>=1) System.out.format(" found PMT hit %6.2f %6.2f %6.2f  dist %6.2f \n", new_hit.x, new_hit.y, new_hit.z, new_hit.distance(last_ori));
+            if(lost || detected){
+                if(debugMode>=1 && lost) System.out.format("LOST! stop ray-tracing \n");
+                if(debugMode>=1 && detected) System.out.format("DETECTED! stop ray-tracing \n");
 
                 RICHRay newray = new RICHRay(last_ori, new_hit);
                 newray.set_type(lastray.get_type());
                 newray.set_refind((float) RICHConstants.RICH_AIR_INDEX);
+                if(detected)newray.set_detected();
                 raytracks.add(newray);
                 if(debugMode>=1){
                     System.out.format(" --> Add last ray (%7.4f) : ", RICHConstants.RICH_AIR_INDEX);
@@ -3209,8 +2905,7 @@ public class RICHTool{
                 raytracks.add(newray);
 
                 // new ray starting at intersection, to be rotated
-                Vector3d new_end = new_intersection.get_pos().plus(newray.diff().times(200));
-                rayin = new RICHRay(new_intersection.get_pos(), new_end);
+                rayin = new RICHRay(new_intersection.get_pos(), newray.direction().multiply(200));
                 lastray = OpticalRotation(rayin, new_intersection);
                 lastray.set_refind(new_intersection.get_nout());
 
@@ -3227,8 +2922,9 @@ public class RICHTool{
         }
 
         if(debugMode>=1) System.out.format(" --------------------------- \n");
-        if(detected==true)return raytracks;
-        return null;
+        //if(detected==true)return raytracks;
+        return raytracks;
+        //return null;
    }
 
 
@@ -3270,7 +2966,7 @@ public class RICHTool{
         }
 
         double interval = (System.nanoTime()-RICH_LAST_TIME)*1e-9;   //seconds
-        if(iphase==0 && interval > RICHConstants.SHOW_PROGRESS_INTERVAL) {
+        if(iphase==0 && interval > reco_constants.SHOW_PROGRESS_INTERVAL) {
 
             RICH_LAST_TIME = System.nanoTime();
             dump_ProcessTime();
@@ -3309,30 +3005,4 @@ public class RICHTool{
         }
     }
 
-    // ----------------
-    public Vector3d find_PMT_hit(RICHRay ray){
-    // ----------------
-
-        int debugMode = 0;
-        Vector3d pmt_hit = new Vector3d(0., 0., 999.);
-        for (int ipmt=1; ipmt<=391; ipmt++){
-
-            int ii= 0;
-            //for ( Vector3d intersection: richfactory.GetPMT(ipmt).toCSG().getIntersections(ray)) {
-            for ( Vector3d intersection: richfactory.GetPhotocatode(ipmt).toCSG().getIntersections(ray)) {
-
-                if(debugMode>=1)  System.out.format(" PMT %d point %d | %8.2f %8.2f %8.2f  dist %8.2f \n", ipmt, ii, 
-                                         intersection.x, intersection.y, intersection.z, intersection.distance(ray.origin()));
-                ii++;
-                if(intersection.z<pmt_hit.z){
-                    pmt_hit = intersection;
-                    if(debugMode>=1)  System.out.format("    --> hit point \n");
-                }
-            }
-        }
-
-        if(pmt_hit.z==999.)return null;
-        return pmt_hit;
-
-    }
 }

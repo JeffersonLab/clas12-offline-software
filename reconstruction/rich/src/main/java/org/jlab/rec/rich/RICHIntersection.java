@@ -1,6 +1,7 @@
 package org.jlab.rec.rich;
 
-import eu.mihosoft.vrl.v3d.Vector3d;
+import org.jlab.geom.prim.Vector3D;
+import org.jlab.geom.prim.Point3D;
 
 // ----------------
 public class RICHIntersection{
@@ -12,15 +13,15 @@ public class RICHIntersection{
     private int ipoly = 0;
     private int itype = 0;   // 1=entrance, 2=exit
 
-    private Vector3d position = null;
-    private Vector3d normal = null;
+    private Point3D  position = null;
+    private Vector3D normal = null;
 
     private float nin = 0;  
     private float nout = 0;  
 
 
     // ----------------
-    public RICHIntersection(int ilay, int ico, int ipo, int ityp, Vector3d vec, Vector3d vno){
+    public RICHIntersection(int ilay, int ico, int ipo, int ityp, Point3D vec, Vector3D vno){
     // ----------------
         this.ilayer = ilay;
         this.icompo = ico;
@@ -108,25 +109,25 @@ public class RICHIntersection{
     }
 
     // ----------------
-    public Vector3d get_pos() {
+    public Point3D get_pos() {
     // ----------------
         return position;
     }
 
     // ----------------
-    public void set_pos(Vector3d vec) {
+    public void set_pos(Point3D vec) {
     // ----------------
         this.position = vec;
     }
 
     // ----------------
-    public Vector3d get_normal() {
+    public Vector3D get_normal() {
     // ----------------
         return normal;
     }
 
     // ----------------
-    public void set_normal(Vector3d vno) {
+    public void set_normal(Vector3D vno) {
     // ----------------
         this.normal= vno;
     }
@@ -134,10 +135,9 @@ public class RICHIntersection{
     // ----------------
     public void showIntersection() {
     // ----------------
-        System.out.format("   Intersection ilay %3d  ico %3d  ipo %3d  type %3d  rin %6.3f  rout %6.3f  pos %7.2f %7.2f %7.2f  normal %7.2f %7.2f %7.2f \n",  
+        System.out.format("Inter. ilay %3d  ico %3d  ipo %3d  type %3d  rin %6.3f  rout %6.3f  pos %s  normal %s \n",
             this.get_layer(), this.get_component(), this.get_polygon(), this.get_type(), this.get_nin(), this.get_nout(), 
-            this.get_pos().x, this.get_pos().y, this.get_pos().z, 
-            this.get_normal().x, this.get_normal().y, this.get_normal().z);
+            this.get_pos().toStringBrief(3), this.get_normal().toStringBrief(3));
     }
             
 }

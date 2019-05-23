@@ -1,5 +1,6 @@
 package org.jlab.rec.rich;
 
+import org.jlab.detector.geant4.v2.RICHGeant4Factory;
 import eu.mihosoft.vrl.v3d.Vector3d;
 
 // ----------------
@@ -60,16 +61,16 @@ public class RICHHit implements Comparable<RICHHit>{
         }*/
 
         double twalk_corr = 0;
-        double T0 = tool.getPMTtimewalk(pmt, 1);
-        double q1 = tool.getPMTtimewalk(pmt, 2);
+        double D0 = tool.getPMTtimewalk(pmt, 1);
+        double T0 = tool.getPMTtimewalk(pmt, 2);
         double m1 = tool.getPMTtimewalk(pmt, 3);
         double m2 = tool.getPMTtimewalk(pmt, 4);
-        double f1 = m1 * this.duration + q1;
-        double f1T = m1 * T0 + q1;
+        double f1 = m1 * this.duration + T0;
+        double f1T = m1 * D0 + T0;
 
-        double f2 = m2 * (this.duration - T0) + f1T;
+        double f2 = m2 * (this.duration - D0) + f1T;
         twalk_corr = f1;
-        if (this.duration > T0) twalk_corr = f2;
+        if (this.duration > D0) twalk_corr = f2;
 
         this.rawtime   = (float) lead.get_tdc();
         this.time      = (float) (lead.get_tdc() + tool.getFTOFphase()*4 + tool.getPMTtimeoff(pmt, anode) - twalk_corr);
@@ -79,7 +80,7 @@ public class RICHHit implements Comparable<RICHHit>{
             
         if(debugMode>=1)System.out.format("Correzione time  pmt %3d  anode %4d  dur %5d  raw %7.2f  toff %7.2f  twalk (%7.2f %7.2f %7.3f %7.3f --> %7.3f %7.3f) %7.3f  --> time %7.2f \n",
                                            this.pmt,this.anode,this.duration, this.rawtime, tool.getPMTtimeoff(pmt, anode), 
-                                           T0, q1, m1, m2, f1, f2, twalk_corr, this.time);
+                                           D0, T0, m1, m2, f1, f2, twalk_corr, this.time);
 
 	if(debugMode>=1)System.out.format(" Hittime %4d %4d %8d %7.2f %7d %7.2f %7.2f %7.2f \n", hid, pmt, this.duration, this.rawtime, 
                                            tool.getFTOFphase()*4, tool.getPMTtimeoff(pmt, anode), -twalk_corr, this.time);

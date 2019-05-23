@@ -35,7 +35,7 @@ public class RingCherenkovResponse extends DetectorResponse {
             String bankName, DetectorType type){        
     // ----------------
 
-        int debugMode=0;
+        int debugMode = 0;
         ArrayList<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
 
         if(debugMode==1)System.out.print(" reading bank "+bankName);
@@ -50,9 +50,9 @@ public class RingCherenkovResponse extends DetectorResponse {
                 double x = 0.0;
                 double y = 0.0;
                 double z = 0.0;
-                if(bankName.equals("RICH::newclusters")){
+                if(bankName.equals("RICH::clusters")){
                     good=1;
-                    if(debugMode>=1)System.out.print(" ---> uso clusters and charge \n");
+                    if(debugMode>=1)System.out.print(" ---> use clusters and charge \n");
                     energy = bank.getFloat("charge", row);
                     time = bank.getFloat("time", row);
                     x = bank.getFloat("x", row);
@@ -60,7 +60,7 @@ public class RingCherenkovResponse extends DetectorResponse {
                     z = bank.getFloat("z", row);
                 }
 
-                if(bankName.equals("RICH::newhits")){
+                if(bankName.equals("RICH::hits")){
                     int id   = bank.getShort("id", row); 
                     int cluster = bank.getShort("cluster", row); 
                     int xtalk = bank.getShort("xtalk", row);
@@ -70,7 +70,7 @@ public class RingCherenkovResponse extends DetectorResponse {
                     x = bank.getFloat("x", row);
                     y = bank.getFloat("y", row);
                     z = bank.getFloat("z", row);
-                    if(debugMode>=1)System.out.format(" ---> uso hits and duration %4d %4d %4d %4d %4d %8.2f %8.2f \n",row,id,cluster,xtalk,good,energy,time);
+                    if(debugMode>=1)System.out.format(" ---> use hits and duration %4d %4d %4d %4d %4d %8.2f %8.2f \n",row,id,cluster,xtalk,good,energy,time);
                 }
 
                 if(good==1){
@@ -84,6 +84,7 @@ public class RingCherenkovResponse extends DetectorResponse {
                     response.setPosition(x, y, z);
                     response.setTime(time);
                     response.setEnergy(energy);
+                    response.setStatus(1);
 
                     responseList.add((DetectorResponse) response);
                 }

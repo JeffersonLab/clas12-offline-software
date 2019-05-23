@@ -1,6 +1,14 @@
 package org.jlab.rec.rich;
 
+import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
+
+import org.jlab.io.base.DataBank;
+import org.jlab.io.base.DataEvent;
+
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geometry.prim.Line3d;
 import eu.mihosoft.vrl.v3d.Vector3d;
 
 import org.jlab.clas.detector.DetectorResponse;
@@ -11,6 +19,7 @@ public class RICHEvent {
      * A RICH Event is the collected information of the event
      */
 
+    private int runID;
     private int eventID;
     private float eventTime;
     private long exeStart;
@@ -18,12 +27,15 @@ public class RICHEvent {
     private static double MRAD = 1000.;
     private static double RAD = 180./Math.PI;
 
+    private ArrayList<RICHCluster>       clusters  = new ArrayList<RICHCluster>();
+    private ArrayList<RICHHit>               hits  = new ArrayList<RICHHit>();
+
+    private ArrayList<DetectorResponse>   resclus  = new ArrayList<DetectorResponse>();
+    private ArrayList<DetectorResponse>   reshits  = new ArrayList<DetectorResponse>();
+    private ArrayList<DetectorResponse>   matches  = new ArrayList<DetectorResponse>();
+
     private ArrayList<RICHParticle> hadrons = new ArrayList<RICHParticle>();
     private ArrayList<RICHParticle> photons = new ArrayList<RICHParticle>();
-
-    private ArrayList<DetectorResponse>   clusters = new ArrayList<DetectorResponse>();
-    private ArrayList<DetectorResponse>   hits     = new ArrayList<DetectorResponse>();
-    private ArrayList<DetectorResponse>   matches  = new ArrayList<DetectorResponse>();
 
     private double match_chi2 = 0.0;
     private int match_nchi2 = 0;
@@ -40,18 +52,25 @@ public class RICHEvent {
     public void clear(){
     // ----------------
 
+        this.clusters.clear();
+        this.hits.clear();
+
         this.hadrons.clear();
         this.photons.clear();
 
-        this.clusters.clear();
-        this.hits.clear();
+        this.resclus.clear();
+        this.reshits.clear();
         this.matches.clear();
 
     }
 
 
     // ----------------
-    public void set_EventID(int eveID) { eventID = eveID; }
+    public void set_RunID(int ID) { runID = ID; }
+    // ----------------
+
+    // ----------------
+    public void set_EventID(int ID) { eventID = ID; }
     // ----------------
 
     // ----------------
@@ -63,6 +82,14 @@ public class RICHEvent {
     // ----------------
 
     // ----------------
+    public void add_Hit(RICHHit hit){ hits.add(hit); }
+    // ----------------
+
+    // ----------------
+    public void add_Cluster(RICHCluster cluster){ clusters.add(cluster); }
+    // ----------------
+
+    // ----------------
     public void add_Photon(RICHParticle photon){ photons.add(photon); }
     // ----------------
 
@@ -71,15 +98,23 @@ public class RICHEvent {
     // ----------------
 
     // ----------------
-    public void add_Cluster(DetectorResponse cluster){ clusters.add(cluster); }
+    public void add_ResClu(DetectorResponse resclu){ resclus.add(resclu); }
     // ----------------
 
     // ----------------
-    public void add_Hit(DetectorResponse hit){ clusters.add(hit); }
+    public void add_ResHit(DetectorResponse reshit){ reshits.add(reshit); }
     // ----------------
 
     // ----------------
-    public void add_Match(DetectorResponse match){ clusters.add(match); }
+    public void add_Match(DetectorResponse match){ matches.add(match); }
+    // ----------------
+
+    // ----------------
+    public void add_Clusters(ArrayList<RICHCluster> res){if(res!=null) for (RICHCluster clu: res) clusters.add(clu); }
+    // ----------------
+
+    // ----------------
+    public void add_Hits(ArrayList<RICHHit> res){if(res!=null) for (RICHHit hit: res) hits.add(hit); }
     // ----------------
 
     // ----------------
@@ -91,15 +126,19 @@ public class RICHEvent {
     // ----------------
 
     // ----------------
-    public void add_Clusters(ArrayList<DetectorResponse> resps){if(resps!=null) for (DetectorResponse res: resps) clusters.add(res); }
+    public void add_ResClus(ArrayList<DetectorResponse> resps){if(resps!=null) for (DetectorResponse res: resps) resclus.add(res); }
     // ----------------
 
     // ----------------
-    public void add_Hits(ArrayList<DetectorResponse> resps){if(resps!=null) for (DetectorResponse res: resps) hits.add(res); }
+    public void add_ResHits(ArrayList<DetectorResponse> resps){if(resps!=null) for (DetectorResponse res: resps) reshits.add(res); }
     // ----------------
 
     // ----------------
     public void add_Matches(ArrayList<DetectorResponse> resps){if(resps!=null) for (DetectorResponse res: resps) matches.add(res); }
+    // ----------------
+
+    // ----------------
+    public int get_RunID() {return runID;}
     // ----------------
 
     // ----------------
@@ -115,6 +154,14 @@ public class RICHEvent {
     // ----------------
 
     // ----------------
+    public RICHCluster get_Cluster(int i){ return  clusters.get(i); }
+    // ----------------
+
+    // ----------------
+    public RICHHit get_Hit(int i){ return  hits.get(i); }
+    // ----------------
+
+    // ----------------
     public RICHParticle get_Photon(int i){ return  photons.get(i); }
     // ----------------
 
@@ -123,15 +170,23 @@ public class RICHEvent {
     // ----------------
 
     // ----------------
-    public DetectorResponse get_Cluster(int i){ return  clusters.get(i); }
+    public DetectorResponse get_ResClu(int i){ return  resclus.get(i); }
     // ----------------
 
     // ----------------
-    public DetectorResponse get_Hit(int i){ return  hits.get(i); }
+    public DetectorResponse get_ResHit(int i){ return  reshits.get(i); }
     // ----------------
 
     // ----------------
     public DetectorResponse get_Match(int i){ return  matches.get(i); }
+    // ----------------
+
+    // ----------------
+    public ArrayList<RICHCluster> get_Clusters(){ return  clusters; }
+    // ----------------
+
+    // ----------------
+    public ArrayList<RICHHit> get_Hits(){ return  hits; }
     // ----------------
 
     // ----------------
@@ -143,15 +198,23 @@ public class RICHEvent {
     // ----------------
 
     // ----------------
-    public ArrayList<DetectorResponse> get_Clusters(){ return  clusters; }
+    public ArrayList<DetectorResponse> get_ResClus(){ return  resclus; }
     // ----------------
 
     // ----------------
-    public ArrayList<DetectorResponse> get_Hits(){ return  hits; }
+    public ArrayList<DetectorResponse> get_ResHits(){ return  reshits; }
     // ----------------
 
     // ----------------
     public ArrayList<DetectorResponse> get_Matches(){ return  matches; }
+    // ----------------
+
+    // ----------------
+    public int get_nClu() { return  clusters.size(); }
+    // ----------------
+
+    // ----------------
+    public int get_nHit() { return  hits.size(); }
     // ----------------
 
     // ----------------
@@ -163,11 +226,11 @@ public class RICHEvent {
     // ----------------
 
     // ----------------
-    public int get_nClu() { return  clusters.size(); }
+    public int get_nResClu() { return  resclus.size(); }
     // ----------------
 
     // ----------------
-    public int get_nHit() { return  hits.size(); }
+    public int get_nResHit() { return  reshits.size(); }
     // ----------------
 
     // ----------------
@@ -295,16 +358,16 @@ public class RICHEvent {
         if(recotype==0) {
             newRQ = hadron.analytic.assign_PID(lh_el, lh_pi, lh_k, lh_pr, lh_bg);
             hadron.set_RICHpid(hadron.analytic.get_bestH());
-            if(debugMode>=0)System.out.format("NEW ALY eve %8d  mom %6.2f xy %7.2f %7.2f %7.2f %7.2f %8.2f %8.4f  Npho %5d %8.4f %3d %g %3d %g --> %8.5f %7.2f %7.2f %3d %3d | %5d %8.4f \n",eventID, hadron.get_momentum(), 
-                hadron.lab_origin.x, hadron.lab_origin.y, hadron.meas_hit.x, hadron.meas_hit.y, hadron.get_changle(0)*MRAD, hadron.refi_emission,
+            if(debugMode>=1)System.out.format("NEW ALY eve %8d  mom %6.2f xy %7.2f %7.2f %7.2f %7.2f %8.2f %8.4f  Npho %5d %8.4f %3d %g %3d %g --> %8.5f %7.2f %7.2f %3d %3d | %5d %8.4f \n",eventID, hadron.get_momentum(), 
+                hadron.lab_origin.x(), hadron.lab_origin.y(), hadron.meas_hit.x, hadron.meas_hit.y, hadron.get_changle(0)*MRAD, hadron.refi_emission,
                 n_el, lh_el, hadron.analytic.get_bestH(), hadron.analytic.get_bestprob(), hadron.analytic.get_secH(), hadron.analytic.get_secprob(), 
                 newRQ, ch_had*MRAD, ch_el*MRAD, hadron.get_CLASpid(), hadron.get_RICHpid(), match_nchi2, match_chi2);
         }
         if(recotype==1) {
             newRQ = hadron.traced.assign_PID(lh_el, lh_pi, lh_k, lh_pr, lh_bg);
             hadron.set_RICHpid(hadron.traced.get_bestH());
-            if(debugMode>=0)System.out.format("NEW TRA eve %8d  mom %6.2f xy %7.2f %7.2f %7.2f %7.2f %8.2f %8.4f  Npho %5d %8.4f %3d %g %3d %g --> %8.5f %7.2f %7.2f %3d %3d | %5d %8.4f \n",eventID, hadron.get_momentum(), 
-                hadron.lab_origin.x, hadron.lab_origin.y, hadron.meas_hit.x, hadron.meas_hit.y, hadron.get_changle(0)*MRAD, hadron.refi_emission,
+            if(debugMode>=1)System.out.format("NEW TRA eve %8d  mom %6.2f xy %7.2f %7.2f %7.2f %7.2f %8.2f %8.4f  Npho %5d %8.4f %3d %g %3d %g --> %8.5f %7.2f %7.2f %3d %3d | %5d %8.4f \n",eventID, hadron.get_momentum(), 
+                hadron.lab_origin.x(), hadron.lab_origin.y(), hadron.meas_hit.x, hadron.meas_hit.y, hadron.get_changle(0)*MRAD, hadron.refi_emission,
                 n_el, lh_el, hadron.traced.get_bestH(), hadron.traced.get_bestprob(), hadron.traced.get_secH(), hadron.traced.get_secprob(),  
                 newRQ, ch_had*MRAD, ch_el*MRAD, hadron.get_CLASpid(), hadron.get_RICHpid(), match_nchi2, match_chi2);
         }
@@ -352,10 +415,15 @@ public class RICHEvent {
                 RICHParticle richhadron = get_Hadron( photon.get_ParentIndex() );
                 if(debugMode>=1){
                     System.out.format(" --------------------------------- \n");
-                    System.out.format(" Analyze Photon %4d  meas hit %7.2f %7.2f %7.2f \n",jj,photon.meas_hit.x,photon.meas_hit.y,photon.meas_hit.z);
+                    System.out.format(" Analyze Photon %4d  from  Hadron %3d  meas hit %7.2f %7.2f %7.2f \n",jj,richhadron.get_id(), 
+                                       photon.meas_hit.x,photon.meas_hit.y,photon.meas_hit.z);
                     System.out.format(" --------------------------------- \n");
                 }
-                photon.find_EtaC_analytic_migrad(richhadron);
+                if (richhadron.get_Status()==1){
+                    photon.find_EtaC_analytic_migrad(richhadron);
+                }else{
+                    if(debugMode>=1)System.out.format(" Hadron pointing to mirror, skip analytic analysis \n");
+                }
             }
             jj++;
         }
@@ -373,7 +441,8 @@ public class RICHEvent {
                 RICHParticle richhadron = get_Hadron( photon.get_ParentIndex() );
                 if(debugMode>=1){
                     System.out.format(" --------------------------------- \n");
-                    System.out.format(" Trace Photon %4d  meas hit %7.2f %7.2f %7.2f \n",jj,photon.meas_hit.x,photon.meas_hit.y,photon.meas_hit.z);
+                    System.out.format(" Trace Photon %4d  from  Hadron %3d  meas hit %7.2f %7.2f %7.2f \n",jj,richhadron.get_id(), 
+                                       photon.meas_hit.x,photon.meas_hit.y,photon.meas_hit.z);
                     System.out.format(" --------------------------------- \n");
                 }
                 photon.find_EtaC_raytrace_steps(richhadron, tool);
@@ -384,12 +453,14 @@ public class RICHEvent {
 
 
     // ----------------
-    public void associate_Throws(){
+    public void associate_Throws(RICHTool tool){
     // ----------------
 
+        int debugMode = 0;
         match_nchi2 = 0 ;
         match_chi2 = 0.0 ;
-        int debugMode = 0;
+
+        RICHConstants recopar = tool.get_Constants();
 
         if(debugMode>=1)System.out.format("Associate photon with trials \n");
         int jj=0;
@@ -404,7 +475,7 @@ public class RICHEvent {
                         //if(debugMode>=0)System.out.format("  -->  %4d %8.2f %8.2f  dist %8.2f  prev %8.2f \n",ii, trial.meas_hit.x, trial.meas_hit.y, dist, distmin);
                         if(dist < distmin){
                             distmin = dist;
-                            if(distmin<RICHConstants.PHOTON_DISTMIN_ASSOCIATION){
+                            if(distmin<recopar.THROW_ASSOCIATION_CUT){
                                 photon.trial_pho = trial;
                             }
                         }
@@ -414,11 +485,11 @@ public class RICHEvent {
                 if(photon.trial_pho!=null && distmin<4){
                     double tprob=photon.trial_pho.time_probability(photon.get_meas_time(), 1);
                     if(tprob-1>1.e-3){
-                        match_chi2+=Math.pow((distmin/RICHConstants.RICH_PHOMATCH_CHI2),2);
+                        match_chi2+=Math.pow((distmin/recopar.RICH_HITMATCH_RMS),2);
                         match_nchi2++;
                         if(debugMode>=1)System.out.format("  -->  store throw id %d  xy %8.2f %8.2f  time %7.2f  --> dist %7.2f  ch2 %7.2f  tprob %8.6f %10.2f \n",
                             photon.trial_pho.get_id(),photon.trial_pho.meas_hit.x,photon.trial_pho.meas_hit.y, photon.trial_pho.get_meas_time(), 
-                            distmin, (distmin/RICHConstants.RICH_PHOMATCH_CHI2), tprob-1, match_chi2);
+                            distmin, (distmin/recopar.RICH_HITMATCH_RMS), tprob-1, match_chi2);
                     }
                 }
             }
@@ -430,7 +501,7 @@ public class RICHEvent {
     }
 
     // ----------------
-    public void throw_photons(RICHParticle hadron, int Npho, double theta, int type, RICHTool tool){
+    public void throw_Photons(RICHParticle hadron, int Npho, double theta, int type, RICHTool tool){
     // ----------------
 
         int debugMode = 0;
@@ -460,7 +531,8 @@ public class RICHEvent {
             cophi = cophi + dphi/fac;
             if(debugMode>=1){  
                 System.out.println(" ------------------------------------ ");
-                System.out.format(" Throw photon %4d from %4d %6d  at the %8.3f (%8.3f, %8.3f) \n", photons.size(), hadron.ilay_emission, hadron.ico_emission, theta*MRAD, theta*RAD, cophi*RAD);
+                System.out.format(" Throw photon %4d from %4d %6d  at the %8.3f (%8.3f, %8.3f) step %4.1f \n", 
+                                  photons.size(), hadron.ilay_emission, hadron.ico_emission, theta*MRAD, theta*RAD, cophi*RAD, fac);
                 System.out.println(" ------------------------------------ ");
             }
       
@@ -474,7 +546,7 @@ public class RICHEvent {
             if(debugMode>=3) System.out.format(" %d %8.2f --> vpho %8.3f %8.3f %8.3f | %8.3f %8.3f --> %8.3f %8.3f\n", 
                              photons.size(), cophi*RAD, vpho.x, vpho.y, vpho.z, vpho_th*RAD, vpho_phi*RAD, che_th*MRAD, che_th*RAD);
 
-            RICHParticle photon = new RICHParticle(photons.size(), hadron.get_id(), 0, 1.e-6, 22);
+            RICHParticle photon = new RICHParticle(photons.size(), hadron.get_id(), 0, 1.e-6, 22, tool);
             photon.set_points(hadron, hadron.lab_emission.plus(vpho.times(400)));
             photon.set_start_time(hadron.get_start_time());
             photon.set_type(type);
@@ -490,14 +562,17 @@ public class RICHEvent {
 
                 photon.set_meas_hit( photon.traced.get_hit() );
                 photon.set_meas_time( photon.get_start_time() + photon.traced.get_time() );
-                if(debugMode>=1)photon.traced.dump_raytrack();
+                String head = String.format(" THROW %7de %3d ",eventID,photon.get_id());
+                if(debugMode>=1)photon.traced.dump_raytrack(head);
 
                 // store in the event
-                photons.add(photon);
-                fac=1;
-                if (photon.traced.get_rayrefle()>2)fac=2.;
-                //if (photon.traced.get_rayrefle()>2)fac=4.;
-                nk++;
+                if(rays.get(rays.size()-1).is_detected()){
+                    photons.add(photon);
+                    fac=1;
+                    if (photon.traced.get_rayrefle()>2)fac=2.;
+                    //if (photon.traced.get_rayrefle()>2)fac=4.;
+                    nk++;
+                }
             }
 
         }
