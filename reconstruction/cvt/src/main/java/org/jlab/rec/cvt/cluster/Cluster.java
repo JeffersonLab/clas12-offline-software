@@ -2,6 +2,9 @@ package org.jlab.rec.cvt.cluster;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Point3d;
+
+import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 
@@ -31,6 +34,10 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     private double _PhiErr0;
     private double _Z;    							// 		for C-detectors
     private double _ZErr;
+    private double _X;
+    private double _XErr;
+    private double _Y;
+    private double _YErr;
 
     public Cluster(int detector, int detectortype, int sector, int layer, int cid) {
         this._Detector = detector;
@@ -137,7 +144,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
      * (energy-weighted) value, the energy-weighted phi for Z detectors and the
      * energy-weighted z for C detectors
      */
-    public void calc_CentroidParams(org.jlab.rec.cvt.bmt.Geometry geo) {
+    public void calc_CentroidParams( org.jlab.rec.cvt.bmt.Geometry bgeo) {
         // instantiation of variables
         double stripNumCent = 0;		// cluster Lorentz-angle-corrected energy-weighted strip = centroid
         double stripNumCent0 = 0;		// cluster uncorrected energy-weighted strip = centroid
@@ -145,6 +152,10 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         double phiErrCent = 0;			// cluster Lorentz-angle-corrected energy-weighted phi error
         double phiCent0 = 0;			// cluster uncorrected energy-weighted phi
         double phiErrCent0 = 0;			// cluster uncorrected energy-weighted phi error
+        double xCent = 0;			// cluster energy-weighted x
+        double xErrCent = 0;			// cluster energy-weighted x error
+        double yCent = 0;			// cluster energy-weighted y
+        double yErrCent = 0;			// cluster energy-weighted y error
         double zCent = 0;			// cluster energy-weighted z
         double zErrCent = 0;			// cluster energy-weighted z error
         double totEn = 0.;			// cluster total energy
@@ -154,6 +165,10 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         double weightedPhiErrSq = 0;            // Err^2 on Lorentz-angle-corrected energy-weighted phi of the strip 
         double weightedPhi0 = 0;		// Uncorrected energy-weighted phi of the strip 
         double weightedPhiErrSq0 = 0;           // Err^2 on uncorrected energy-weighted phi of the strip 
+        double weightedX = 0;			// Energy-weighted x of the strip
+        double weightedXErrSq = 0;		// Err^2 on  energy-weighted x of the strip
+        double weightedY = 0;			// Energy-weighted y of the strip
+        double weightedYErrSq = 0;		// Err^2 on  energy-weighted y of the strip
         double weightedZ = 0;			// Energy-weighted z of the strip
         double weightedZErrSq = 0;		// Err^2 on  energy-weighted z of the strip
 
@@ -175,6 +190,12 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 if (this.get_Detector()==0) {
                     // for the SVT the analysis only uses the centroid
                     strpNb = thehit.get_Strip().get_Strip();
+                    weightedX+=strpEn*thehit.get_Strip().get_MidPoint().x();
+                    weightedY+=strpEn*thehit.get_Strip().get_MidPoint().y();
+                    weightedZ+=strpEn*thehit.get_Strip().get_MidPoint().z();
+                    weightedXErrSq += strpEn*Math.abs(thehit.get_Strip().get_MidPoint().x()-thehit.get_Strip().get_ImplantPoint().x());
+                    weightedYErrSq += strpEn*Math.abs(thehit.get_Strip().get_MidPoint().y()-thehit.get_Strip().get_ImplantPoint().y());
+                    weightedZErrSq += strpEn*Math.abs(thehit.get_Strip().get_MidPoint().z()-thehit.get_Strip().get_ImplantPoint().z());
                 }
                 if (this.get_Detector()==1) { 
                     // for the BMT the analysis distinguishes between C and Z type detectors
@@ -232,11 +253,15 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             stripNumCent0 = weightedStrp0 / totEn;
             //phiCent = geo.LorentzAngleCorr(phiCent0,this.get_Layer());
             phiCent0 = weightedPhi0 / totEn;
-            phiCent = geo.LorentzAngleCorr(phiCent0,this.get_Layer());
+            phiCent = bgeo.LorentzAngleCorr(phiCent0,this.get_Layer());
+            xCent = weightedX / totEn;
+            yCent = weightedY / totEn;
             zCent = weightedZ / totEn;
             phiErrCent = Math.sqrt(weightedPhiErrSq);
             phiErrCent0 = Math.sqrt(weightedPhiErrSq0);
-            zErrCent = Math.sqrt(weightedZErrSq);
+            xErrCent = weightedXErrSq/totEn;
+            yErrCent = weightedYErrSq/totEn;
+            zErrCent = weightedZErrSq/totEn;
 
             //phiErrCent = Math.sqrt(weightedPhiErrSq);
             //phiErrCent0 = Math.sqrt(weightedPhiErrSq0);
@@ -245,6 +270,15 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
         _TotalEnergy = totEn;
         _Centroid = stripNumCent;
+        if (this.get_Detector()==0) {
+        	_X=xCent;
+        	_Y=yCent;
+        	_Z=zCent;
+        	_XErr=xErrCent+2;
+        	_YErr=yErrCent+2;
+        	_ZErr=zErrCent;
+        	
+        }
         if (this.get_DetectorType() == 1) {
             set_Centroid0(stripNumCent0);
             _Phi = phiCent;
