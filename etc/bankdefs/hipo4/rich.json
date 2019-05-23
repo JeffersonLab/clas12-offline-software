@@ -45,7 +45,7 @@
   },
    {
     "name": "REC::RICH",
-    "group": 300,
+    "group": 22000,
     "item" : 41,   
     "info": "RICH Responses for Particles bank",
     "entries": [

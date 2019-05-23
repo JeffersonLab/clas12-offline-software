@@ -133,7 +133,7 @@ public class RICHEBEngine extends ReconstructionEngine {
         int run = richevent.get_RunID(); 
         if(run>0 && LOAD_TABLES){
 
-            LOAD_TABLES = false;
+            LOAD_TABLES = true;
 
             if(debugMode>=1)System.out.format("LOAD constants from CCDB for run %5d \n",run);
     
