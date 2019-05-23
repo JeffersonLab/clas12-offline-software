@@ -245,8 +245,8 @@ public class RICHEventBuilder{
                 int idet = (int) tbank.getByte("detector",i);
 
                 int charge = tbank.getByte("q", i);
-                Vector3D pvec = DetectorData.readVector(tbank, i, "px_nomm", "py_nomm", "pz_nomm");
-                Vector3D vertex = DetectorData.readVector(tbank, i, "vx_nomm", "vy_nomm", "vz_nomm");
+                Vector3D pvec = DetectorData.readVector(pbank, ipr, "px", "py", "pz");
+                Vector3D vertex = DetectorData.readVector(pbank, ipr, "vx", "vy", "vz");
                 int PID = pbank.getInt("pid",ipr);
 
                 DetectorTrack  tr = new DetectorTrack(charge,pvec.mag(),i);
@@ -270,13 +270,14 @@ public class RICHEventBuilder{
                 for (int j=0; j<rbank.rows(); j++){
                     int jpr = (int) rbank.getShort("pindex",j);
                     int jtk = (int) rbank.getShort("index",j);
-                    int jdet = (int) rbank.getShort("detId",j);
+                    int jdet = (int) rbank.getByte("detector",j);
+                    int jlay = (int) rbank.getByte("layer",j);
                     if(debugMode>=1) System.out.format("traj %3d  part %3d  tk %3d  det %3d  ",j,jpr,jtk,jdet);
 
                     /*
-                    *  trajectory plane 42 till 5b.6.2 - 40 since 5c.7.0
+                    *  trajectory plane 42 till 5b.6.2 - 40 since 5c.7.0 - layer 36 since 6b.1.0
                     */
-                    if (jpr==ipr && jtk==itk && jdet==40){
+                    if (jpr==ipr && jtk==itk && jdet==DetectorType.DC.getDetectorId() && jlay==36){
                         double jx =  (double) rbank.getFloat("x",j);
                         double jy =  (double) rbank.getFloat("y",j);
                         double jz =  (double) rbank.getFloat("z",j);
@@ -285,7 +286,7 @@ public class RICHEventBuilder{
                         double jcz =  (double) rbank.getFloat("cz",j);
                         Vector3d vdir = (new Vector3d(jcx, jcy, jcz)).normalized();
                         tr.addCross(jx, jy, jz, vdir.x, vdir.y, vdir.z);
-                        tr.setPath(rbank.getFloat("pathlength", j));
+                        tr.setPath(rbank.getFloat("path", j));
                         if(debugMode>=1) System.out.format(" --> %7.2f %7.2f %7.2f | %7.2f %7.2f %7.2f -> %7.2f %7.2f %7.2f \n",
                               jx,jy,jz,jcx,jcy,jcz,vdir.x,vdir.y,vdir.z);
                     }else{
@@ -303,7 +304,8 @@ public class RICHEventBuilder{
                if(tr.getSector()==4){
                     DetectorParticle particle = new DetectorParticle(tr);
                     particle.setPid(PID);
-                    particle.setStatus(ipr);
+                    // FIX ME! 
+                    particle.setStatus(ipr, 0.);
                     if(debugMode>=1){showTrack(tr); showParticle(particle);}
                     sector4Event.addParticle(particle);
                     if(debugMode>=1) System.out.format(" ECCOLO !!!!! %7.2f size %6d \n",tr.getLastCross().origin().x(), sector4Event.getParticles().size());
@@ -333,7 +335,7 @@ public class RICHEventBuilder{
                     if(tr.getSector()==4){
 	                DetectorParticle particle = new DetectorParticle(tr);
                         particle.setPid(211);
-                        particle.setStatus(i);
+                        particle.setStatus(i, 0.);
                         if(debugMode>=1){showTrack(tr); showParticle(particle);}
                         sector4Event.addParticle(particle);
                     }
@@ -492,7 +494,7 @@ public class RICHEventBuilder{
                     tool.toString(r.getPosition()), r.getPath(), CLAStime, r.getTime());
             }
 
-            RICHParticle richhadron = new RICHParticle(hindex, p.getStatus(), r.getHitIndex(), p.vector().mag(), CLASpid, tool);
+            RICHParticle richhadron = new RICHParticle(hindex, p.getStatus().getValue(), r.getHitIndex(), p.vector().mag(), CLASpid, tool);
             richhadron.traced.set_time((float) CLAStime);
             richhadron.set_meas_time(r.getTime());
             if(!richhadron.set_points(p.getLastCross().origin(), p.getLastCross().end(), r.getPosition(), r.getStatus(), tool) ){
