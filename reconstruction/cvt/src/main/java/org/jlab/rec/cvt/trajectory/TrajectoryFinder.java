@@ -3,6 +3,10 @@ package org.jlab.rec.cvt.trajectory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.geom.base.Detector;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -11,6 +15,7 @@ import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.svt.Constants;
+import org.jlab.rec.cvt.track.Track;
 
 /**
  * A driver class to find the trajectory of a track candidate. NOTE THAT THE
@@ -32,7 +37,12 @@ public class TrajectoryFinder {
      * @param isFinal
      * @return a trajectory object
      */
-    public Trajectory findTrajectory(int id, Helix helix, ArrayList<Cross> candCrossList, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, String isFinal) {
+    public Trajectory findTrajectory(int id, Track trk, 
+                                    org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, 
+                                    CTOFGeant4Factory ctof_geo, Detector cnd_geo,
+                                    Swim swimmer, String isFinal) {
+        Helix helix = trk.get_helix(); 
+        ArrayList<Cross> candCrossList = trk;
         if(helix ==null)
             return null;
         Trajectory traj = new Trajectory(helix);
@@ -93,6 +103,7 @@ public class TrajectoryFinder {
             StateVec stVec = new StateVec(helixInterWithBstPlane.x(), helixInterWithBstPlane.y(), helixInterWithBstPlane.z(),
                     trkDir.x(), trkDir.y(), trkDir.z());
             stVec.set_planeIdx(l);
+            stVec.set_SurfaceDetector(DetectorType.CVT.getDetectorId());
             stVec.set_SurfaceLayer(layer);
             stVec.set_SurfaceSector(sector);
             stVec.set_CalcCentroidStrip(svt_geo.calcNearestStrip(helixInterWithBstPlane.x(), helixInterWithBstPlane.y(), helixInterWithBstPlane.z(), layer, sector));
@@ -150,6 +161,7 @@ public class TrajectoryFinder {
             stVec.set_planeIdx(l);  
             double phiPos = Math.atan2(stVec.y(),stVec.x());
             int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
+            stVec.set_SurfaceDetector(DetectorType.CVT.getDetectorId());
             stVec.set_SurfaceSector(sector);
             stVec.set_SurfaceLayer(l+1); 
             stVec.set_ID(id);
@@ -209,6 +221,45 @@ public class TrajectoryFinder {
             stateVecs.add(stVec);
                 
         }
+//        // CTOF
+//        if(ctof_geo!=null) {
+//            double radius = ctof_geo.getRadius(1);
+//            int charge = trk.get_Q();
+//            double maxPathLength = 5.0;//very loose cut 
+//            swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
+//                    Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
+//                    trk.get_P(), charge, 
+//                    maxPathLength) ;
+//            double[] inters = swimmer.SwimToCylinder(radius);
+//            StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
+//            stVec.set_SurfaceDetector(DetectorType.CTOF.getDetectorId());
+//            stVec.set_SurfaceSector(1);
+//            stVec.set_SurfaceLayer(1); 
+//            stVec.set_ID(id);
+//            stVec.set_TrkPhiAtSurface(Math.atan2(inters[4], inters[3]));
+//            stVec.set_TrkThetaAtSurface(Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5])));
+//            stVec.set_TrkToModuleAngle(0);
+//            stVec.set_Path(inters[6]*10);
+//            stateVecs.add(stVec);
+//        }
+//        // CND
+//        for(int ilayer=0; ilayer<cnd_geo.getSector(0).getSuperlayer(0).getNumLayers(); ilayer++) {
+//            Point3D center = cnd_geo.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
+//            double radius         = Math.sqrt(center.x()*center.x()+center.y()*center.y());
+//            double[] inters = swimmer.SwimToCylinder(radius);
+//            StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
+//            stVec.set_SurfaceDetector(DetectorType.CND.getDetectorId());
+//            stVec.set_SurfaceSector(1);
+//            stVec.set_SurfaceLayer(ilayer+1); 
+//            stVec.set_ID(id);
+//            stVec.set_TrkPhiAtSurface(Math.atan2(inters[4], inters[3]));
+//            stVec.set_TrkThetaAtSurface(Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5])));
+//            stVec.set_TrkToModuleAngle(0);
+//            stVec.set_Path(inters[6]*10);
+//            stateVecs.add(stVec);
+//        }
+               
+            
         traj.set_Trajectory(stateVecs);
 
         traj.addAll(BMTCrossList);

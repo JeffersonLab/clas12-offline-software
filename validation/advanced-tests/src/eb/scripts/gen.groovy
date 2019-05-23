@@ -19,7 +19,7 @@ double torusScale = -1.0;
 double solenoidScale = 1.0;
 boolean isCentral = false;
 boolean isForwardTagger = false;
-int nEvents = 1000;
+int nEvents = 100;
 
 // parse command line options:
 def cli=new CliBuilder(usage:"gen.groovy -pid <#> [options]", stopAtNonOption:false);//, formatter:hf);
@@ -51,7 +51,7 @@ if (isCentral && isForwardTagger)
 // contstruct filename:
 String fileStub="electron";
 if (isForwardTagger) fileStub+="FT";
-switch (pid) {
+switch (Math.abs(pid)) {
     case 2212:
         fileStub+="proton";
         break;
@@ -66,12 +66,6 @@ switch (pid) {
         break;
     case 22:
         fileStub+="gamma";
-        break;
-    case -22:
-        fileStub+="gamma";
-        break;
-    case -211:
-        fileStub+="pion";
         break;
     default:
         throw new RuntimeException("Invalid PID:  "+pid);
@@ -116,7 +110,7 @@ if (isForwardTagger) {
         2.5,  4.5,
       -10.0, 10.0);   
     }
-    else if (pid==-22 || pid==-211) {
+    else if (pid==-22 || pid==-211 || pid==-2212 || pid==-321) {
         // electron in FT
         pgen1.setRange(
         3.0,  8.0,

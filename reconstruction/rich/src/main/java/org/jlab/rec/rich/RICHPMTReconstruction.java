@@ -173,10 +173,10 @@ public class RICHPMTReconstruction {
             DataBank bankDGTZ = event.getBank("RICH::tdc");
             int nrows = bankDGTZ.rows();
             for(int row = 0; row < nrows; row++){
-                int isector     = bankDGTZ.getInt("sector",row);
-                int ilayer      = bankDGTZ.getInt("layer",row);
-                int icomponent  = bankDGTZ.getInt("component",row);
-                int iorder      = bankDGTZ.getInt("order",row);
+                int isector     = bankDGTZ.getByte("sector",row);
+                int ilayer      = bankDGTZ.getByte("layer",row);
+                int icomponent  = bankDGTZ.getShort("component",row);
+                int iorder      = bankDGTZ.getByte("order",row);
                 int itdc        = bankDGTZ.getInt("TDC",row);
 		if(debugMode>=2)System.out.print(" --> Edge "+row+" sec "+isector+" lay "+ilayer+" comp "+icomponent+" order "+iorder+" tdc "+itdc+"\n");
             if(ilayer<0)ilayer=ilayer+256;

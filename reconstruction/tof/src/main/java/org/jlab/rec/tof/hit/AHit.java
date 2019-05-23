@@ -474,7 +474,9 @@ public abstract class AHit implements Comparable<AHit> {
      * @param ScinBarThickn
      */
     public void set_HitParams(int superlayer, double TW01, double TW02,
-            double TW11, double TW12, double lambda1, double lambda2,
+            double TW11, double TW12, double TW1P, double TW2P, 
+            double HPOSa, double HPOSb, double HPOSc, double HPOSd, double HPOSe,
+            double lambda1, double lambda2,
             double yOffset, double v1, double v2, double v1Unc, double v2Unc,
             double PED1, double PED2, double PED1Unc, double PED2Unc,
             double paddle2paddle, double RFPad, double timeOffset, double triggerPhase, double[] LSBConv,
@@ -516,10 +518,10 @@ public abstract class AHit implements Comparable<AHit> {
                 this.set_yUnc(this.calc_yUnc(status, v1, v2, v1Unc, v2Unc, ADC1Err,
                         ADC2Err));
                 // 4. Compute average hit time:
-                // this.set_t( 0.5*(this.get_t1() - y/v1 + this.get_t2() + y/v2));
                 // // average of times
-                this.set_t(0.5 * (this.get_t1() - (pl / 2 + y) / v1 + this.get_t2() - (pl / 2 - y)
-                        / v2));
+                this.set_t(0.5 * (this.get_t1() - (pl / 2 + y) / v1 + this.get_t2() - (pl / 2 - y) / v2)
+                          + this.calc_TWpos(y, TW1P, TW2P) 
+                          + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
                 // 4.1 Both TDCs --> Getting the uncertainty contribution from each
                 tErr = this.calc_tErr(this.get_y(), this.get_yUnc(), this.get_t1(),
                         this.get_t1Unc(), v1, v1Unc, this.get_t2(),
@@ -575,10 +577,10 @@ public abstract class AHit implements Comparable<AHit> {
                 t12 = this.calc_t12(paddle2paddle, timeOffset, triggerPhase, LSBConv, RFPad);
                 this.set_t1(t12[0]);
                 this.set_t2(t12[1]);
-                // this.set_t( 0.5*(this.get_t1() - y/v1 + this.get_t2() + y/v2));
                 // // average of times
-                this.set_t(0.5 * (this.get_t1() - (pl / 2 + y) / v1 + this.get_t2() - (pl / 2 - y)
-                        / v2));
+                this.set_t(0.5 * (this.get_t1() - (pl / 2 + y) / v1 + this.get_t2() - (pl / 2 - y) / v2) 
+                          + this.calc_TWpos(y, TW1P, TW2P) 
+                          + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
                 tErr12 = this.calc_tErr12(TDC1Err, TDC2Err, LSBConv, LSBConvErr);
                 this.set_t1Unc(tErr12[0]);
                 this.set_t2Unc(tErr12[1]);
@@ -667,13 +669,17 @@ public abstract class AHit implements Comparable<AHit> {
                 // is
                 // valid
                 {
-                    this.set_t(this.get_t1() - (pl / 2 + y) / v1 - yOffset / 2.);
+                    this.set_t(this.get_t1() - (pl / 2 + y) / v1 - yOffset / 2.
+                              + this.calc_TWpos(y, TW1P, TW2P) 
+                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
                 }
                 if (Character.toString(this.get_StatusWord().charAt(3)).equals("1")) // TDC2
                 // is
                 // valid
                 {
-                    this.set_t(this.get_t2() + (y - pl / 2) / v2 + yOffset / 2.);
+                    this.set_t(this.get_t2() + (y - pl / 2) / v2 + yOffset / 2.
+                              + this.calc_TWpos(y, TW1P, TW2P) 
+                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
                 }
                 tErr12 = this.calc_tErr12(TDC1Err, TDC2Err, LSBConv, LSBConvErr);
                 this.set_t1Unc(tErr12[0]);
@@ -749,13 +755,17 @@ public abstract class AHit implements Comparable<AHit> {
                 // is
                 // valid
                 {
-                    this.set_t(this.get_t1() - (pl / 2 + y) / v1 - yOffset / 2.);
+                    this.set_t(this.get_t1() - (pl / 2 + y) / v1 - yOffset / 2.
+                              + this.calc_TWpos(y, TW1P, TW2P) 
+                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
                 }
                 if (Character.toString(this.get_StatusWord().charAt(3)).equals("1")) // TDC2
                 // is
                 // valid
                 {
-                    this.set_t(this.get_t2() + (y - pl / 2) / v2 + yOffset / 2.);
+                    this.set_t(this.get_t2() + (y - pl / 2) / v2 + yOffset / 2.
+                              + this.calc_TWpos(y, TW1P, TW2P) 
+                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
                 }
                 tErr12 = this.calc_tErr12(TDC1Err, TDC2Err, LSBConv, LSBConvErr);
                 this.set_t1Unc(tErr12[0]);
@@ -1242,6 +1252,25 @@ public abstract class AHit implements Comparable<AHit> {
         return E * Math.sqrt(Sq);
     }
 
+    private double calc_TWpos(double y, double tw1pos, double tw2pos) {
+        return tw1pos*Math.pow(y, 2)+tw2pos*y;
+    }
+    
+    /**  
+    * Calculate position dependent correction to timing offsets  
+    * Currently used for CTOF
+    * @param y hit position along the paddle
+    * @param hposa first correction parameter
+    * @param hposb second correction parameter
+    * @param hposc third correction parameter, currently not used
+    * @param hposd fourth correction parameter, currently not used
+    * @param hpose fifth correction parameter, currently not used
+    * @return time offset in ns
+    */     
+    private double calc_Hpos(double y, double hposa, double hposb, double hposc, double hposd, double hpose) {
+       return hposa*Math.exp(hposb*y);
+    }
+    
     public void printInfo() {
         DecimalFormat form = new DecimalFormat("#.##");
         String s = " FTOF Hit in " + " Sector " + this.get_Sector() + " Panel "

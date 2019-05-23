@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
@@ -16,6 +17,20 @@ import org.jlab.rec.dc.trajectory.Trajectory;
  *
  */
 public class Track extends Trajectory implements Comparable<Track>{
+
+    /**
+     * @return the finalStateVec
+     */
+    public StateVec getFinalStateVec() {
+        return finalStateVec;
+    }
+
+    /**
+     * @param finalStateVec the finalStateVec to set
+     */
+    public void setFinalStateVec(StateVec finalStateVec) {
+        this.finalStateVec = finalStateVec;
+    }
 
     /**
      * serialVersionUID
@@ -46,6 +61,7 @@ public class Track extends Trajectory implements Comparable<Track>{
     public boolean fit_Successful;
     private int _missingSuperlayer;
     private int _fitConvergenceStatus;
+    private StateVec finalStateVec ;
     
     
     public Track() {
@@ -354,6 +370,14 @@ public class Track extends Trajectory implements Comparable<Track>{
 
     public void set_ListOfHBSegments(List<Segment> _listOfHBSegments) {
         this._ListOfHBSegments = _listOfHBSegments;
+    }
+    
+    private List<FittedHit> _hitsOnTrack;
+    public void setHitsOnTrack(List<FittedHit> fhits) {
+        _hitsOnTrack = fhits;
+    }
+    public List<FittedHit> getHitsOnTrack() {
+        return _hitsOnTrack;
     }
     
     /**

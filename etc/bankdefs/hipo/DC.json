@@ -387,16 +387,17 @@
     "group": 20653,
     "info": "Trajectory bank",
     "items": [
-        {"name":"tid",     "id":1, "type":"int16", "info":"id of the track"},
-        {"name":"did",     "id":2, "type":"int16", "info":"id of the detector"},
-        {"name":"x",       "id":3, "type":"float",  "info":"track x position at detector surface (cm)"},
-        {"name":"y",       "id":4, "type":"float",  "info":"track y position at detector surface (cm)"},
-        {"name":"z",       "id":5, "type":"float",  "info":"track z position at detector surface (cm)"},
-        {"name":"tx",      "id":6, "type":"float",  "info":"track unit direction vector x component at detector surface"},
-        {"name":"ty",      "id":7, "type":"float",  "info":"track unit direction vector y component at detector surface"},
-        {"name":"tz",      "id":8, "type":"float",  "info":"track unit direction vector z component at detector surface"},
-        {"name":"B",       "id":9, "type":"float",  "info":"B-field magnitude at detector surface (cm)"},
-        {"name":"L",       "id":10, "type":"float",  "info":"pathlength of the track from the DOCA to the Beamline to the detector surface (cm)"}
+        {"name":"id",      "id":1, "type":"int16",  "info":"id of the track"},
+        {"name":"detector","id":2, "type":"int16",  "info":"id of the detector"},
+        {"name":"layer",   "id":3, "type":"int8",   "info":"id of the layer"},
+        {"name":"x",       "id":4, "type":"float",  "info":"track x position at detector surface (cm)"},
+        {"name":"y",       "id":5, "type":"float",  "info":"track y position at detector surface (cm)"},
+        {"name":"z",       "id":6, "type":"float",  "info":"track z position at detector surface (cm)"},
+        {"name":"tx",      "id":7, "type":"float",  "info":"track unit direction vector x component at detector surface"},
+        {"name":"ty",      "id":8, "type":"float",  "info":"track unit direction vector y component at detector surface"},
+        {"name":"tz",      "id":9, "type":"float",  "info":"track unit direction vector z component at detector surface"},
+        {"name":"B",       "id":10, "type":"float",  "info":"B-field magnitude at detector surface (cm)"},
+        {"name":"path",    "id":11, "type":"float",  "info":"pathlength of the track from the track vertex to the detector surface (cm)"}
     ]
  }
  

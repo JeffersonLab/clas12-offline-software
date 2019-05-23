@@ -87,11 +87,16 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/calibration/mvt/lorentz");
         dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_fullfield");
         dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_midfield");
+
+        //beam offset table
+        dbprovider.loadTable("/geometry/beam/position");
+        
+        //target position table
+        dbprovider.loadTable("/geometry/target");
+        
         dbprovider.disconnect();
         
-        //beam offset table
-        dbprovider.loadTable("/test/beam_pos");
-       //  dbprovider.show();
+      //  dbprovider.show();
         // Getting the Constants
         // 1) pitch info 
         for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_strip_L1/Group_size"); i++) {
@@ -241,16 +246,20 @@ public class CCDBConstantsLoader {
         	 
         }
          // beam offset
-        double r = dbprovider.getDouble("/test/beam_pos/r", 0);     
-        double r_err = dbprovider.getDouble("/test/beam_pos/err_r", 0); 
-        double phi_deg = dbprovider.getDouble("/test/beam_pos/phi0", 0); 
-        double phi = Math.toRadians(phi_deg);
-        double xb = r*Math.cos(phi);
-        double yb = r*Math.sin(phi);
+        double xb = dbprovider.getDouble("/geometry/beam/position/x_offset", 0);     
+        double yb = dbprovider.getDouble("/geometry/beam/position/y_offset", 0); 
+        double exb = dbprovider.getDouble("/geometry/beam/position/x_error", 0);     
+        double eyb = dbprovider.getDouble("/geometry/beam/position/y_error", 0); 
+        double err = 0;
+        if(Math.sqrt(xb*xb+yb*yb)!=0) err = Math.sqrt((Math.pow(xb*exb,2)+Math.pow(yb*eyb,2))/(xb*xb+yb*yb));
         org.jlab.rec.cvt.Constants.setXb(xb);
         org.jlab.rec.cvt.Constants.setYb(yb);
-        org.jlab.rec.cvt.Constants.setRbErr(r_err);
+        org.jlab.rec.cvt.Constants.setRbErr(err);
         
+        // target position
+        double ztarget = dbprovider.getDouble("/geometry/target/position", 0);
+        org.jlab.rec.cvt.Constants.setZoffset(ztarget);
+         
         Constants.setCRCRADIUS(CRCRADIUS);
         Constants.setCRZRADIUS(CRZRADIUS);
         Constants.setCRZNSTRIPS(CRZNSTRIPS);

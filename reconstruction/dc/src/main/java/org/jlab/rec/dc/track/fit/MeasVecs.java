@@ -25,7 +25,7 @@ public class MeasVecs {
         hMatrix[0] = 1;
         hMatrix[1] = -Math.tan((Math.toRadians(s * 6.)));
         // add geometric corrections
-        hMatrix[1]-= w*(4./l)*(1 - y/(l/2.));        
+        //hMatrix[1]-= w*(4./l)*(1 - y/(l/2.));        
         return hMatrix;
     }
 
@@ -41,7 +41,7 @@ public class MeasVecs {
 
         double val = stateV[0] - Math.tan((Math.toRadians(s * 6.))) * stateV[1]; 
         // add geometric corrections
-        val+= w*(1 - stateV[1]/(l/2.))*(1 - stateV[1]/(l/2.));       
+        val+= w;       
         return val;
     }
 
@@ -82,8 +82,8 @@ public class MeasVecs {
                     hot._hitError = err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1 + 2 * Z * err_cov1 + trkcand.get(c).get(s).get(h).get_DocaErr()*trkcand.get(c).get(s).get(h).get_DocaErr();
                     //if(trkcand.get(c).get(s).get(h).get_Time()/CCDBConstants.getTMAXSUPERLAYER()[trkcand.get(c).get(s).get(h).get_Sector()-1][trkcand.get(c).get(s).get(h).get_Superlayer()-1]<1.1)
                     //	hot._hitError = 100000; //exclude outoftimers from fit
-                    
-                    if(Math.abs(trkcand.get(c).get(s).get(h).get_Residual())<1)
+                    hot.region = trkcand.get(c).get(s).get(h).get_Region();
+                    //if(Math.abs(trkcand.get(c).get(s).get(h).get_Residual())<1)
                         hOTS.add(hot);
 
                 }
@@ -108,7 +108,7 @@ public class MeasVecs {
             MeasVec meas = new MeasVec(i);
             meas.x = hOTS.get(i)._X;
             meas.z = hOTS.get(i)._Z;
-
+            meas.region = hOTS.get(i).region;
             meas.error = hOTS.get(i)._hitError;
             meas.unc = hOTS.get(i)._Unc; //uncertainty used in KF fit
             meas.tilt = hOTS.get(i)._tilt;
@@ -146,10 +146,10 @@ public class MeasVecs {
                 double err_cov1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitSlIntCov();
 
                 hot._Unc = Math.sqrt(err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1);
-                hot._hitError = err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1 + 2 * Z * err_cov1 + trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr()*trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr();
-                //hot._hitError = trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr();
-
-                if(Math.abs(trk.get_ListOfHBSegments().get(s).get(h).get_Residual())<1) 
+                //hot._hitError = err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1 + 2 * Z * err_cov1 + trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr()*trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr();
+                hot._hitError = trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr()*trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr()*4;
+                hot.region = trk.get_ListOfHBSegments().get(s).get(h).get_Region();
+                //if(Math.abs(trk.get_ListOfHBSegments().get(s).get(h).get_Residual())<1) 
                     hOTS.add(hot);
                 
             }
@@ -173,7 +173,7 @@ public class MeasVecs {
             MeasVec meas = new MeasVec(i);
             meas.x = hOTS.get(i)._X;
             meas.z = hOTS.get(i)._Z;
-
+            meas.region = hOTS.get(i).region;
             meas.error = hOTS.get(i)._hitError;
             meas.unc = hOTS.get(i)._Unc; //uncertainty used in KF fit
             meas.tilt = hOTS.get(i)._tilt;
@@ -194,6 +194,8 @@ public class MeasVecs {
         public double error;
         public double wireLen;
         public double wireMaxSag;
+        boolean reject = false;
+        int region;
         
         MeasVec(int k) {
             this.k = k;
@@ -210,6 +212,7 @@ public class MeasVecs {
         private int _tilt;
         private double _wireLen;
         private double _wireMaxSag;
+        private int region;
 
         HitOnTrack(int superlayer, double X, double Z, double wirelen, double wiremaxsag) {
             _X = X;

@@ -1,9 +1,9 @@
 package org.jlab.clas.detector;
 
-import static java.lang.Math.abs;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.List;
 
@@ -11,13 +11,13 @@ import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.DetectorDescriptor;
+
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
 import org.jlab.clas.pdg.PDGDatabase;
-import org.jlab.clas.pdg.PDGParticle;
 import org.jlab.clas.pdg.PhysicsConstants;
 
 /**
@@ -31,7 +31,6 @@ public class DetectorParticle implements Comparable {
 
     private boolean isTriggerParticle = false;
     private Integer particlePID       = 0;
-    private Integer particleStatus    = 1;
     private Integer particleTrackIndex = -1;
     private Double  particleBeta      = 0.0;
     private Double  particleMass      = 0.0;
@@ -40,8 +39,13 @@ public class DetectorParticle implements Comparable {
     private int     particleScore     = 0; // scores are assigned detector hits
     private double  particleScoreChi2 = 0.0; // chi2 for particle score 
     
+    private DetectorParticleStatus particleStatus = new DetectorParticleStatus();
+
     private Vector3 particleCrossPosition  = new Vector3();
     private Vector3 particleCrossDirection = new Vector3();
+  
+    // let multiple particles share the same hit for these detectors:
+    private final DetectorType[] sharedDetectors = {DetectorType.FTOF,DetectorType.CTOF};
     
     private Line3D  driftChamberEnter = new Line3D();
     
@@ -123,7 +127,7 @@ public class DetectorParticle implements Comparable {
         return particle;
     }
    
-    public Map<Integer,DetectorTrack.TrajectoryPoint> getTrackTrajectory() {
+    public List<DetectorTrack.TrajectoryPoint> getTrackTrajectory() {
         return detectorTrack.getTrajectory();
     }
     
@@ -244,8 +248,8 @@ public class DetectorParticle implements Comparable {
      */
     public void setTriggerParticle(boolean val) {
         isTriggerParticle=val;
+        particleStatus.setTriggerParticle(val);
     }
-
     
     public int getSector(DetectorType type,int layer) {
         DetectorResponse hit = this.getHit(type,layer);
@@ -330,11 +334,11 @@ public class DetectorParticle implements Comparable {
     public DetectorResponse  getResponse(DetectorType type, int layer){
         return this.getHit(type,layer);
     }
-    
+   
+    public DetectorTrack getTrack() {return this.detectorTrack; }
     public double getBeta(){ return this.particleBeta;}
     public double getNDF() {return this.detectorTrack.getNDF();}
     public double getTrackChi2() {return this.detectorTrack.getchi2();}
-    public int    getStatus(){ return this.particleStatus;}
     public int    getTrackDetector() {return this.detectorTrack.getDetectorID();}
     public int    getTrackSector() {return this.detectorTrack.getSector();}
     public int    getTrackDetectorID() {return this.detectorTrack.getDetectorID();}
@@ -342,6 +346,8 @@ public class DetectorParticle implements Comparable {
     public Line3D getFirstCross() {return this.detectorTrack.getFirstCross();}
     public Line3D getLastCross() {return this.detectorTrack.getLastCross();}
 
+    public DetectorParticleStatus getStatus(){ return this.particleStatus;}
+    
     public double getMass(){ return this.particleMass;}
     public int    getPid(){ return this.particlePID;}
     public double getPidQuality() {return this.particleIDQuality;}
@@ -508,7 +514,10 @@ public class DetectorParticle implements Comparable {
         return mass2;
     }
     
-    public void setStatus(int status){this.particleStatus = status;}
+    public void setStatus(double minNpheHtcc,double minNpheLtcc) {
+        this.particleStatus = DetectorParticleStatus.create(this,minNpheHtcc,minNpheLtcc);
+    }
+
     public void setBeta(double beta){ this.particleBeta = beta;}
     public void setMass(double mass){ this.particleMass = mass;}
     public void setPid(int pid){this.particlePID = pid;}
@@ -529,13 +538,29 @@ public class DetectorParticle implements Comparable {
         double   minimumDistance = 500.0;
         int      bestIndex       = -1;
 
+        boolean hitSharing=false;
+        for (int ii=0; ii<sharedDetectors.length && this.getCharge()!=0; ii++) {
+        //for (int ii=0; ii<sharedDetectors.length; ii++) {
+            if (type == sharedDetectors[ii]) {
+                hitSharing=true;
+                break;
+            }
+        }
+
         for(int loop = 0; loop < hitList.size(); loop++){
            
             DetectorResponse response = hitList.get(loop);
+ 
+            // same-sector requirement between hit and track:
+            if (response.getSector()>0 && this.detectorTrack.getSector()>0) {
+              if (response.getSector() != this.detectorTrack.getSector()) {
+                  continue;
+              }
+            }
             
             if(response.getDescriptor().getType()==type &&
                (detectorLayer<=0 || response.getDescriptor().getLayer()==detectorLayer) &&
-               response.getAssociation()<0) {
+               (hitSharing || response.getAssociation()<0)) {
                 hitPoint.set(
                         response.getPosition().x(),
                         response.getPosition().y(),

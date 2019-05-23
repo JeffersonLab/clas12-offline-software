@@ -1,0 +1,24 @@
+[
+ {
+    "name": "LTCC::clusters",
+    "group": 21600,
+    "item" : 22,
+    "info": "reconstructed clusters from the LTCC",
+    "entries": [
+       {"name":"id",          "id":1, "type":"S",  "info":"id of the cluster"},
+       {"name":"status",      "id":2, "type":"B",  "info":"good (1) or bad (0)"},
+       {"name":"sector",      "id":3, "type":"B",   "info":"sector of LTCC"},
+       {"name":"segment",     "id":4, "type":"S",  "info":"weighted central cluster segment"},
+       {"name":"x",           "id":5, "type":"F", "info":"crude cluster center (cm)"},
+       {"name":"y",           "id":6, "type":"F", "info":"crude cluster center (cm)"},
+       {"name":"z",           "id":7, "type":"F", "info":"crude cluster center (cm)"},
+       {"name":"nphe",        "id":8, "type":"F", "info":"number of photo-electrons"},
+       {"name":"time",        "id":9, "type":"F", "info":"cluster time"},
+       {"name":"nHits",      "id":10, "type":"S", "info":"number of hits in this cluster"},
+       {"name":"minTheta",   "id":11, "type":"F", "info":"minimum theta angle of the cluster (deg)"},
+       {"name":"maxTheta",   "id":12, "type":"F", "info":"maximum theta angle of the cluster (deg)"},
+       {"name":"minPhi",     "id":13, "type":"F", "info":"minimum phi angle of the cluster (deg)"},
+       {"name":"maxPhi",     "id":14, "type":"F", "info":"maximum phi angle of the cluster (deg)"}
+    ]
+  }
+]

@@ -25,7 +25,8 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventList;
 import org.jlab.io.base.DataSource;
 import org.jlab.io.base.DataSourceType;
-import org.jlab.jnp.hipo.schema.SchemaFactory;
+import org.jlab.jnp.hipo4.data.SchemaFactory;
+
 import org.jlab.utils.options.OptionParser;
 
 /**
@@ -71,11 +72,14 @@ public class HipoRingSource implements DataSource {
         
         this.dictionary.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
         */
-        dictionary.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
+        
+        String envCLAS = System.getenv("CLAS12DIR");
+        dictionary.initFromDirectory(envCLAS + "/etc/bankdefs/hipo4");
     }
     
     public HipoRingSource(){
-        dictionary.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
+        String envCLAS = System.getenv("CLAS12DIR");
+        dictionary.initFromDirectory(envCLAS + "/etc/bankdefs/hipo4");
     }
     
     public static HipoRingSource  createSourceDaq(){

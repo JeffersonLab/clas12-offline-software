@@ -6,8 +6,11 @@ import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
+import org.jlab.geom.base.Detector;
+import org.jlab.geom.detector.cnd.CNDFactory;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -43,6 +46,8 @@ public class CVTRecHandler {
     RecoBankWriter rbc = new RecoBankWriter();
     org.jlab.rec.cvt.svt.Geometry SVTGeom;
     org.jlab.rec.cvt.bmt.Geometry BMTGeom;
+    CTOFGeant4Factory CTOFGeom;
+    Detector          CNDGeom ;
     SVTStripFactory svtIdealStripFactory;
     
     public CVTRecHandler() {
@@ -51,9 +56,11 @@ public class CVTRecHandler {
         BMTGeom = new org.jlab.rec.cvt.bmt.Geometry();
     }
 
-    public CVTRecHandler(org.jlab.rec.cvt.svt.Geometry svtg, org.jlab.rec.cvt.bmt.Geometry bmtg) {
-        SVTGeom = svtg;
-        BMTGeom = bmtg;
+    public CVTRecHandler(org.jlab.rec.cvt.svt.Geometry svtg, org.jlab.rec.cvt.bmt.Geometry bmtg, CTOFGeant4Factory ctofg, Detector cndg) {
+        SVTGeom  = svtg;
+        BMTGeom  = bmtg;
+        CTOFGeom = ctofg;
+        CNDGeom  = cndg;
     }
     
     String FieldsConfig = "";
@@ -344,7 +351,7 @@ public class CVTRecHandler {
         //This last part does ELoss C
         TrackListFinder trkFinder = new TrackListFinder();
         trks = new ArrayList<Track>();
-        trks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom, swimmer);
+        trks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, swimmer);
         for( int i=0;i<trks.size();i++) { trks.get(i).set_Id(i+1);}
         
 //        System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + trks.size());

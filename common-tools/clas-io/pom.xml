@@ -3,14 +3,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jlab.clas</groupId>
   <artifactId>clas-io</artifactId>
-  <version>5.9.0-SNAPSHOT</version>
+  <version>6.2.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <parent>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>5.9.0-SNAPSHOT</version>
+    <version>6.2.0-SNAPSHOT</version>
   </parent>
 
   <build>
@@ -41,6 +41,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.jlab.jnp</groupId>
+      <artifactId>jnp-hipo4</artifactId>
+      <version>4.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.jlab.coda</groupId>
       <artifactId>et</artifactId>
       <version>14.0</version>
@@ -63,7 +69,7 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-utils</artifactId>
-      <version>5.9.0-SNAPSHOT</version>
+      <version>6.2.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
