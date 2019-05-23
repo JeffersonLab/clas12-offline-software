@@ -43,7 +43,9 @@ public class DCGeometry {
 	 */
 	public static void initialize() {
 
-		ConstantProvider cp = GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.DC, 4013, "default");
+		int run = 4013;
+		String variation = Ced.getGeometryVariation();
+		ConstantProvider cp = GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.DC, run, variation);
 
 		DCGeantFactory factory = new DCGeantFactory();
 

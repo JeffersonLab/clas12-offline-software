@@ -115,6 +115,10 @@ public class SwimTest {
 		final JMenuItem specialItem = new JMenuItem("Special Trouble Cases");
 
 		final JMenuItem planeItem = new JMenuItem("Swim To Plane Test");
+		final JMenuItem rhoItem = new JMenuItem("Swim To Rho (cylinder) Test");
+		
+		
+		
 		ActionListener al = new ActionListener() {
 
 			@Override
@@ -127,7 +131,9 @@ public class SwimTest {
 					ThreadTest.threadTest(100, 8);
 				} else if (e.getSource() == planeItem) {
 					PlaneTest.planeTest();
-				} else if (e.getSource() == oneVtwoItem) {
+				} else if (e.getSource() == rhoItem) {
+					RhoTest.rhoTest();
+				}else if (e.getSource() == oneVtwoItem) {
 					CompareSwimmers.swimmerVswimmer2Test(3344632211L, 10000);
 				} else if (e.getSource() == specialItem) {
 					CompareSwimmers.specialCaseTest();
@@ -150,6 +156,7 @@ public class SwimTest {
 		reconfigItem.addActionListener(al);
 		specialItem.addActionListener(al);
 		planeItem.addActionListener(al);
+		rhoItem.addActionListener(al);
 		menu.add(createTrajItem);
 		menu.add(oneVtwoItem);
 		menu.add(polyItem);
@@ -159,6 +166,7 @@ public class SwimTest {
 		menu.add(specialItem);
 
 		menu.add(planeItem);
+		menu.add(rhoItem);
 		return menu;
 	}
 
@@ -412,6 +420,13 @@ public class SwimTest {
 				String.format("R = [%9.6f, %9.6f, %9.6f] |R| = %9.6f m\nP = [%9.6e, %9.6e, %9.6e] |P| =  %9.6e GeV/c",
 						y[0], y[1], y[2], R, P * y[3], P * y[4], P * y[5], P));
 
+		
+		//now in cylindrical
+		double phi = Math.atan2(y[1], y[0]);
+		double rho = Math.hypot(y[0], y[1]);
+		System.out.println(String.format("[phi, rho, z] = [%9.6f, %9.6f, %9.6f]",
+				Math.toDegrees(phi), rho, y[2]));
+		
 		System.out.println("norm (should be 1): " + norm);
 		System.out.println("--------------------------------------\n");
 	}

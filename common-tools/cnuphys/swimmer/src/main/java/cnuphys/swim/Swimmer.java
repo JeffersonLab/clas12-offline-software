@@ -293,10 +293,132 @@ public final class Swimmer {
 		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _probe);
 		return (new RungeKutta()).uniformStep(uo, 0, maxPathLength, stepSize, deriv, stopper, listener);
 	}
+	
 
 	/**
-	 * Swims a particle with a built it stopper for the maximum value of the radial
-	 * coordinate. This is for the trajectory mode, where you want to cache steps
+	 * Swims a particle with a built it stopper for the rho coordinate.
+	 * This is for the trajectory mode, where you want to cache steps
+	 * along the path. Uses a fixed stepsize algorithm.
+	 * 
+	 * @param charge               the charge: -1 for electron, 1 for proton, etc
+	 * @param xo                   the x vertex position in meters
+	 * @param yo                   the y vertex position in meters
+	 * @param zo                   the z vertex position in meters
+	 * @param momentum             initial momentum in GeV/c
+	 * @param theta                initial polar angle in degrees
+	 * @param phi                  initial azimuthal angle in degrees
+	 * @param fixedRho             the fixed rho value (meters) that terminates (or
+	 *                             maxPathLength if reached first)
+	 * @param accuracy             the accuracy of the fixed z termination, in
+	 *                             meters
+	 * @param stopper              an optional object that can terminate the
+	 *                             swimming based on some condition
+	 * @param maxPathLength        in meters. This determines the max number of
+	 *                             steps based on the step size. If a stopper is
+	 *                             used, the integration might terminate before all
+	 *                             the steps are taken. A reasonable value for CLAS
+	 *                             is 8. meters
+	 * @param stepSize             the uniform step size in meters.
+	 * @param distanceBetweenSaves this distance is in meters. It should be bigger
+	 *                             than stepSize. It is approximately the distance
+	 *                             between "saves" where the point is saved in a
+	 *                             trajectory for later drawing.
+	 * @return the final state vector [x, y, z, px/p, py/p, pz/p]
+	 */
+	public double[] swimRho(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			final double fixedRho, final double accuracy, double maxPathLength, double stepSize) {
+
+		// normally we swim from small rho to a larger rho cutoff.
+		// but we can handle either
+		
+		double rho0 = Math.hypot(xo, yo);
+		
+		final boolean normalDirection = (fixedRho > rho0);
+		DefaultRhoStopper stopper = new DefaultRhoStopper(0, maxPathLength, fixedRho, accuracy, normalDirection);
+
+//		// if no magnetic field or no charge, then simple straight line tracks.
+//		// the path will consist of just two points
+//		if ((_probe == null) || (charge == 0)) {
+//			System.out.println(
+//					"Original Swimmer, straight line field is null: " + (_probe == null) + "  charge: " + charge);
+//			GeneratedParticleRecord genPartRec = new GeneratedParticleRecord(charge, xo, yo, zo, momentum, theta, phi);
+//			
+//			
+//			return straightLineTrajectoryFixedZ(genPartRec, fixedZ);
+//		}
+
+		if (momentum < MINMOMENTUM) {
+			System.err.println("Skipping low momentum swim (C)");
+			double v[] = new double[6];
+			v[0] = xo;
+			v[1] = yo;
+			v[2] = zo;
+			double tr = Math.toRadians(theta);
+			double pr = Math.toRadians(phi);
+			v[3] = Math.cos(tr);
+			double ss = Math.sin(tr);
+			v[4] = xo;
+			v[5] = xo;
+			return v;
+
+		}
+
+		// our first attempt
+		
+//		public int swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+//				IStopper stopper, IRkListener listener, double maxPathLength, double stepSize) {
+
+		int ns = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, null, maxPathLength, stepSize);
+
+		// if we stopped because of max pathlength, we are done (never reached
+		// target rho)
+		double finalPathLength = stopper.getFinalT();
+		if (finalPathLength > maxPathLength) {
+			return stopper.getFinalY();
+		}
+
+		// are we there yet?
+		double lastY[] = stopper.getFinalY();
+		double rholast = Math.hypot(lastY[0], lastY[1]);
+		double del = Math.abs(rholast - fixedRho);
+		int maxtry = 10;
+		int count = 0;
+
+		// reduce the step size
+		stepSize = stepSize / 10;
+
+		while ((count < maxtry) && (del > accuracy)) {
+			xo = lastY[0];
+			yo = lastY[1];
+			zo = lastY[2];
+			double px = lastY[3];
+			double py = lastY[4];
+			double pz = lastY[5];
+
+			stopper = new DefaultRhoStopper(finalPathLength, maxPathLength, fixedRho, accuracy, normalDirection);
+
+			theta = FastMath.acos2Deg(pz);
+			phi = FastMath.atan2Deg(py, px);
+
+			ns = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, null, maxPathLength, stepSize);
+			
+
+			finalPathLength = stopper.getFinalT();
+			// merge the trajectories
+			lastY = stopper.getFinalY();
+			rholast = Math.hypot(lastY[0], lastY[1]);
+			del = Math.abs(rholast - fixedRho);
+			count++;
+			stepSize = stepSize / 10;
+		} // while
+
+		return lastY;
+	}
+
+
+	/**
+	 * Swims a particle with a built it stopper for the z coordinate.
+	 * This is for the trajectory mode, where you want to cache steps
 	 * along the path. Uses a fixed stepsize algorithm.
 	 * 
 	 * @param charge               the charge: -1 for electron, 1 for proton, etc

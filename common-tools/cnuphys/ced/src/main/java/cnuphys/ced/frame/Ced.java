@@ -110,8 +110,12 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 
 	// the singleton
 	private static Ced _instance;
-
-	private static final String _release = "build 1.hipo4";
+	
+	//geometry variation
+	private static String _geoVariation = "default";
+	
+	//ced release 
+	private static final String _release = "build 1.hipo4.01";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -1148,6 +1152,15 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 
 		throw (new IOException("Could not locate the coatjava directory."));
 	}
+	
+	/**
+	 * Get the geometry variation
+	 * @return the geometry variation
+	 */
+	public static String getGeometryVariation() {
+		return _geoVariation;
+	}
+
 
 	/**
 	 * Main program launches the ced gui.
@@ -1159,6 +1172,11 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 	 */
 	public static void main(String[] arg) {
 		FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
+		
+		String variation = System.getProperty("GEOVARIATION");
+		if (variation != null) {
+			_geoVariation = new String(variation);
+		}
 
 		// read in userprefs
 		PropertiesManager.getInstance();
@@ -1279,7 +1297,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 				ClasIoEventManager.getInstance().setUpFilterMenu();
 				// initialize data columns
 //				DataManager.getInstance();
-				System.out.println("ced  " + _release + " is ready.");
+				System.out.println("ced  " + _release + " is ready. Using geomrtey variation: [" + _geoVariation + "]");
 			}
 
 		});
