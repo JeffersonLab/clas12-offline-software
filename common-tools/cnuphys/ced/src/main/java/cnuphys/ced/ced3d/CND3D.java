@@ -16,8 +16,7 @@ public class CND3D extends DetectorItem3D {
 	/**
 	 * The 3D CND
 	 * 
-	 * @param panel3d
-	 *            the 3D panel owner
+	 * @param panel3d the 3D panel owner
 	 */
 	public CND3D(CedPanel3D panel3D) {
 		super(panel3D);

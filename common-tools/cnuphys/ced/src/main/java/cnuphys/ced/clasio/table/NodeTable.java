@@ -35,8 +35,7 @@ public class NodeTable extends JTable {
 		header.setPreferredSize(new Dimension(100, 20));
 		header.setBackground(X11Colors.getX11Color("wheat"));
 		header.setBorder(BorderFactory.createLineBorder(Color.black));
-		DefaultTableCellRenderer dtcr = (DefaultTableCellRenderer) header
-				.getDefaultRenderer();
+		DefaultTableCellRenderer dtcr = (DefaultTableCellRenderer) header.getDefaultRenderer();
 		dtcr.setHorizontalAlignment(SwingConstants.CENTER);
 		dtcr.setBackground(X11Colors.getX11Color("wheat"));
 		dtcr.setBackground(Color.black);
@@ -88,8 +87,7 @@ public class NodeTable extends JTable {
 	/**
 	 * Get the node corresponding to the givens row
 	 * 
-	 * @param row
-	 *            the row in question
+	 * @param row the row in question
 	 * @return the corresponding node, or <code>null</code>
 	 */
 	public ColumnData getColumnData(int row) {
@@ -99,8 +97,7 @@ public class NodeTable extends JTable {
 	/**
 	 * Set the model data based on a clasIO DataEvent
 	 * 
-	 * @param event
-	 *            the event
+	 * @param event the event
 	 */
 	public void setData(DataEvent event) {
 		getNodeModel().setData(event);
@@ -138,8 +135,7 @@ public class NodeTable extends JTable {
 					if ((cd.bankIndex % 2) == 0) {
 						cellComponent.setBackground(X11Colors.getX11Color("alice blue"));
 						cellComponent.setForeground(X11Colors.getX11Color("dark blue"));
-					}
-					else {
+					} else {
 						cellComponent.setBackground(X11Colors.getX11Color("misty rose"));
 						cellComponent.setForeground(X11Colors.getX11Color("dark red"));
 					}
@@ -149,21 +145,20 @@ public class NodeTable extends JTable {
 			return cellComponent;
 		}
 	}
-	
+
 	/**
 	 * Get the event being displayed
+	 * 
 	 * @return the event being displayed
 	 */
 	public DataEvent getCurrentEvent() {
 		return getNodeModel().getCurrentEvent();
 	}
 
-
 	/**
 	 * Make sure the row with the given name is visible
 	 * 
-	 * @param name
-	 *            the name to look for
+	 * @param name the name to look for
 	 */
 	public void makeNameVisible(String name) {
 

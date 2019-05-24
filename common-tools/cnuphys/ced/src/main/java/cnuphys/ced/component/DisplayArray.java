@@ -34,8 +34,23 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	/** Label and access to the accumulated button */
 	public static final String ACCUMULATED_LABEL = "Accum.";
 
+	/** Label and access for trkDoca label */
+	public static final String NODOCA_LABEL = "No Doca";
+
+	/** Label and access for trkDoca label */
+	public static final String ALLDOCA_LABEL = "All Doca";
+
+	/** Label and access for trkDoca label */
+	public static final String TRKDOCA_LABEL = "TrkDoca";
+
+	/** Label and access for doca label */
+	public static final String DOCA_LABEL = "Doca";
+
 	/** Tag and access to the accumulated button group */
 	public static final String ACCUMULATED_BUTTONGROUP = "AccumulatedButtonGroup";
+
+	/** Tag and access to the doca button group */
+	public static final String DOCA_BUTTONGROUP = "DocaButtonGroup";
 
 	/** Tag and access to the inner/outer button group */
 	public static final String INNEROUTER_BUTTONGROUP = "InnerOuterButtonGroup";
@@ -59,14 +74,14 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	public static final String W_LABEL = "W";
 
 	/** Distance scale label */
-	//public static final String SCALE_LABEL = "Scale";
+	// public static final String SCALE_LABEL = "Scale";
 
 	/** BST Hits as crosses */
 	public static final String COSMIC_LABEL = "Cosmic Tracks";
-	
+
 	private static final Color _buttonColor = X11Colors.getX11Color("Dark Red");
 
-	/** Label for reconstructed crosses*/
+	/** Label for reconstructed crosses */
 	private static final String CROSS_LABEL = "Crosses";
 
 	/** Label for dc HB Hits button */
@@ -77,10 +92,10 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 	/** Label for reconstructed hits (other than dc) button */
 	private static final String RECON_HIT_LABEL = "Recon Hits";
-	
+
 	/** Label for reconstructed clusters button */
 	public static final String CLUSTER_LABEL = "Clusters";
-		
+
 	/** Label for reconstructed fmt crosses button */
 	public static final String FMTCROSS_LABEL = "FMT Crosses";
 
@@ -89,15 +104,13 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 	/** Global show TB */
 	private static final String GLOBAL_TB_LABEL = "TB Data";
-	
+
 	/** Global show ADC hits */
 	private static final String GLOBAL_ADC_HIT_LABEL = "ADC Hits";
-	
+
 	/** Label for reconstructed CVT Tracks */
 	private static final String CVT_TRACK_LABEL = "CVT Tracks";
 
-
-	
 	// controls whether any HB data displayed
 	private AbstractButton _showHBButton;
 
@@ -109,22 +122,22 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 	// controls whether reconstructed segments are displayed
 	private AbstractButton _segmentButton;
-	
+
 	// controls whether reconstructed crosses are displayed
 	private AbstractButton _crossButton;
 
 	// controls whether reconstructed hits (not DC) are displayed
 	private AbstractButton _reconHitButton;
-	
-	// controls whether ADC hits 
+
+	// controls whether ADC hits
 	private AbstractButton _adcHitButton;
-	
+
 	// controls display od cvt reconstructed tracks
 	private AbstractButton _cvtTrackButton;
-	
+
 	// controls whether reconstructed clusters are displayed
 	private AbstractButton _clusterButton;
-	
+
 	// controls whether reconstructed fmt crosses are displayed
 	private AbstractButton _fmtCrossButton;
 
@@ -135,13 +148,25 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	private AbstractButton _cosmicButton;
 
 	// controls whether distance scale displayed
-	//private AbstractButton _showScaleButton;
+	// private AbstractButton _showScaleButton;
 
 	// controls whether single events are displayed
 	private AbstractButton _singleEventButton;
 
 	// controls whether accumulated hits are displayed
 	private AbstractButton _accumulatedButton;
+
+	// controls whether all docas are displayed
+	private AbstractButton _noDocaButton;
+
+	// controls whether all docas are displayed
+	private AbstractButton _allDocaButton;
+
+	// controls whether track docas are displayed
+	private AbstractButton _trkDocaButton;
+
+	// controls whether doca columns are displayed
+	private AbstractButton _docaButton;
 
 	// controls whether inner plane displayed for ec
 	private AbstractButton _innerButton;
@@ -162,13 +187,10 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	private CedView _view;
 
 	/**
-	 * Create a display flag array. This constructor produces a two column
-	 * array.
+	 * Create a display flag array. This constructor produces a two column array.
 	 * 
-	 * @param view
-	 *            the parent view
-	 * @param bits
-	 *            controls what flags are added
+	 * @param view the parent view
+	 * @param bits controls what flags are added
 	 */
 	public DisplayArray(CedView view, int bits, int nc, int hgap) {
 		super(nc, hgap, 0);
@@ -176,47 +198,53 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 		// innerouter?
 		if (Bits.checkBit(bits, DisplayBits.INNEROUTER)) {
-			_innerButton = add(INNER_LABEL, true, true, INNEROUTER_BUTTONGROUP,
-					this, X11Colors.getX11Color("teal")).getCheckBox();
+			_innerButton = add(INNER_LABEL, true, true, INNEROUTER_BUTTONGROUP, this, X11Colors.getX11Color("teal"))
+					.getCheckBox();
 
-			_outerButton = add(OUTER_LABEL, false, true,
-					INNEROUTER_BUTTONGROUP, this, X11Colors.getX11Color("teal"))
+			_outerButton = add(OUTER_LABEL, false, true, INNEROUTER_BUTTONGROUP, this, X11Colors.getX11Color("teal"))
 					.getCheckBox();
 		}
 
 		if (Bits.checkBit(bits, DisplayBits.UVWSTRIPS)) {
-			_uButton = add(U_LABEL, true, true, this, Color.black)
-					.getCheckBox();
-			_vButton = add(V_LABEL, true, true, this, Color.black)
-					.getCheckBox();
-			_wButton = add(W_LABEL, true, true, this, Color.black)
-					.getCheckBox();
+			_uButton = add(U_LABEL, true, true, this, Color.black).getCheckBox();
+			_vButton = add(V_LABEL, true, true, this, Color.black).getCheckBox();
+			_wButton = add(W_LABEL, true, true, this, Color.black).getCheckBox();
 		}
 
 		// accumulation?
 		if (Bits.checkBit(bits, DisplayBits.ACCUMULATION)) {
-			_singleEventButton = add(SINGLEEVENT_LABEL,
-					view.isSingleEventMode(), true,
-					ACCUMULATED_BUTTONGROUP, this,
+			_singleEventButton = add(SINGLEEVENT_LABEL, view.isSingleEventMode(), true, ACCUMULATED_BUTTONGROUP, this,
 					X11Colors.getX11Color("teal")).getCheckBox();
 
-			_accumulatedButton = add(ACCUMULATED_LABEL,
-					view.isAccumulatedMode(), true,
-					ACCUMULATED_BUTTONGROUP, this,
+			_accumulatedButton = add(ACCUMULATED_LABEL, view.isAccumulatedMode(), true, ACCUMULATED_BUTTONGROUP, this,
 					X11Colors.getX11Color("teal")).getCheckBox();
+
+		}
+
+		// DOCA Option?
+		if (Bits.checkBit(bits, DisplayBits.DOCA)) {
+			_trkDocaButton = add(NODOCA_LABEL, false, true, DOCA_BUTTONGROUP, this, X11Colors.getX11Color("dark green"))
+					.getCheckBox();
+
+			_allDocaButton = add(ALLDOCA_LABEL, true, true, DOCA_BUTTONGROUP, this, X11Colors.getX11Color("dark green"))
+					.getCheckBox();
+
+			_trkDocaButton = add(TRKDOCA_LABEL, false, true, DOCA_BUTTONGROUP, this,
+					X11Colors.getX11Color("dark green")).getCheckBox();
+
+			_docaButton = add(DOCA_LABEL, false, true, DOCA_BUTTONGROUP, this, X11Colors.getX11Color("dark green"))
+					.getCheckBox();
 
 		}
 
 		// display mc truth?
 		if (Bits.checkBit(bits, DisplayBits.MCTRUTH)) {
-			_mcTruthButton = add(MCTRUTH_LABEL, true, true, this,
-					Color.black).getCheckBox();
+			_mcTruthButton = add(MCTRUTH_LABEL, true, true, this, Color.black).getCheckBox();
 		}
 
 		// cosmics?
 		if (Bits.checkBit(bits, DisplayBits.COSMICS)) {
-			_cosmicButton = add(COSMIC_LABEL, true, true, this,
-					Color.black).getCheckBox();
+			_cosmicButton = add(COSMIC_LABEL, true, true, this, Color.black).getCheckBox();
 		}
 
 		// display scale?
@@ -224,92 +252,73 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 //			_showScaleButton = add(SCALE_LABEL, show_scale, true, this,
 //					Color.black).getCheckBox();
 //		}
-		
+
 		// global hit based data
 		if (Bits.checkBit(bits, DisplayBits.GLOBAL_HB)) {
-			_showHBButton = add(GLOBAL_HB_LABEL, true, true,
-					this, _buttonColor).getCheckBox();
+			_showHBButton = add(GLOBAL_HB_LABEL, true, true, this, _buttonColor).getCheckBox();
 		}
 
 		// global time based data
 		if (Bits.checkBit(bits, DisplayBits.GLOBAL_TB)) {
-			_showTBButton = add(GLOBAL_TB_LABEL, true, true,
-					this, _buttonColor).getCheckBox();
+			_showTBButton = add(GLOBAL_TB_LABEL, true, true, this, _buttonColor).getCheckBox();
 		}
-		
+
 		// reonstructed crosses?
 		if (Bits.checkBit(bits, DisplayBits.CROSSES)) {
-			_crossButton = add(CROSS_LABEL, true, true,
-					this, _buttonColor).getCheckBox();
+			_crossButton = add(CROSS_LABEL, true, true, this, _buttonColor).getCheckBox();
 		}
 
-		
 		// dc reonstructed hits?
 		if (Bits.checkBit(bits, DisplayBits.DC_HITS)) {
-			_dcHitsButton = add(DC_HIT_LABEL, true, true,
-					this, _buttonColor).getCheckBox();
-		}
-		
-		// reconstructed dc segments?
-		if (Bits.checkBit(bits, DisplayBits.SEGMENTS)) {
-			_segmentButton = add(SEGMENT_LABEL, true, true,
-					this, _buttonColor).getCheckBox();
+			_dcHitsButton = add(DC_HIT_LABEL, true, true, this, _buttonColor).getCheckBox();
 		}
 
+		// reconstructed dc segments?
+		if (Bits.checkBit(bits, DisplayBits.SEGMENTS)) {
+			_segmentButton = add(SEGMENT_LABEL, true, true, this, _buttonColor).getCheckBox();
+		}
 
 		// other (not DC) reconstructed hits
 		if (Bits.checkBit(bits, DisplayBits.RECONHITS)) {
-			_reconHitButton = add(RECON_HIT_LABEL,
-					true, true, this, _buttonColor).getCheckBox();
-		}
-		
-		if (Bits.checkBit(bits, DisplayBits.CVTTRACKS)) {
-			_cvtTrackButton = add(CVT_TRACK_LABEL,
-					true, true, this, _buttonColor).getCheckBox();
+			_reconHitButton = add(RECON_HIT_LABEL, true, true, this, _buttonColor).getCheckBox();
 		}
 
-		
+		if (Bits.checkBit(bits, DisplayBits.CVTTRACKS)) {
+			_cvtTrackButton = add(CVT_TRACK_LABEL, true, true, this, _buttonColor).getCheckBox();
+		}
+
 		// ADC hits
 		if (Bits.checkBit(bits, DisplayBits.ADC_HITS)) {
-			_adcHitButton = add(GLOBAL_ADC_HIT_LABEL,
-					true, true, this, _buttonColor).getCheckBox();
+			_adcHitButton = add(GLOBAL_ADC_HIT_LABEL, true, true, this, _buttonColor).getCheckBox();
 		}
 
-		
 		// reconstructed clusters
 		if (Bits.checkBit(bits, DisplayBits.CLUSTERS)) {
-			_clusterButton = add(CLUSTER_LABEL,
-					true, true, this, _buttonColor).getCheckBox();
-		}
-		
-		// reconstructed clusters
-		if (Bits.checkBit(bits, DisplayBits.FMTCROSSES)) {
-			_fmtCrossButton = add(FMTCROSS_LABEL,
-					true, true, this, _buttonColor).getCheckBox();
+			_clusterButton = add(CLUSTER_LABEL, true, true, this, _buttonColor).getCheckBox();
 		}
 
+		// reconstructed clusters
+		if (Bits.checkBit(bits, DisplayBits.FMTCROSSES)) {
+			_fmtCrossButton = add(FMTCROSS_LABEL, true, true, this, _buttonColor).getCheckBox();
+		}
 
 	}
 
 	/**
 	 * A button has been clicked
 	 * 
-	 * @param e
-	 *            the causal event
+	 * @param e the causal event
 	 */
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		AbstractButton button = (AbstractButton) e.getSource();
 		if (button == _singleEventButton) {
 			_view.setMode(CedView.Mode.SINGLE_EVENT);
-		}
-		else if (button == _accumulatedButton) {
+		} else if (button == _accumulatedButton) {
 			_view.setMode(CedView.Mode.ACCUMULATED);
-		}
-		else if (button == _innerButton) {
+		} else if (button == _innerButton) {
 			_view.setBooleanProperty(SHOWINNER_PROPERTY, true);
-		}
-		else if (button == _outerButton) {
+		} else if (button == _outerButton) {
 			_view.setBooleanProperty(SHOWINNER_PROPERTY, false);
 		}
 
@@ -322,13 +331,13 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	/**
 	 * Convenience method to see it we show the montecarlo truth.
 	 * 
-	 * @return <code>true</code> if we are to show the montecarlo truth, if it
-	 *         is available.
+	 * @return <code>true</code> if we are to show the montecarlo truth, if it is
+	 *         available.
 	 */
 	public boolean showMcTruth() {
 		return (_mcTruthButton != null) && _mcTruthButton.isSelected();
 	}
-	
+
 	/**
 	 * Convenience method to see it we show the cosmic tracks.
 	 * 
@@ -375,57 +384,52 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	public boolean showWStrips() {
 		return _wButton == null ? false : _wButton.isSelected();
 	}
-	
+
 	/**
 	 * Convenience method to see if we show the reconstructed clusters.
 	 * 
 	 * @return <code>true</code> if we are to show reconstructed clusters
 	 */
 	public boolean showClusters() {
-		return (_clusterButton != null)
-				&& _clusterButton.isSelected();
+		return (_clusterButton != null) && _clusterButton.isSelected();
 	}
-	
+
 	/**
 	 * Convenience method to see if we show the reconstructed FMT Crosses.
 	 * 
 	 * @return <code>true</code> if we are to show reconstructed FMT Crosses
 	 */
 	public boolean showFMTCrosses() {
-		return (_fmtCrossButton != null)
-				&& _fmtCrossButton.isSelected();
+		return (_fmtCrossButton != null) && _fmtCrossButton.isSelected();
 	}
 
-	
 	/**
-	 * Convenience method to see if we show the reconstructed hits.
-	 * These are reconstructed hits except DC hits
+	 * Convenience method to see if we show the reconstructed hits. These are
+	 * reconstructed hits except DC hits
+	 * 
 	 * @return <code>true</code> if we are to show reconstructed hits.
 	 */
 	public boolean showReconHits() {
-		return (_reconHitButton != null)
-				&& _reconHitButton.isSelected();
+		return (_reconHitButton != null) && _reconHitButton.isSelected();
 	}
-	
+
 	/**
-	 * Convenience method to see if we show the ADC hits.
-	 * These are ADC hits 
+	 * Convenience method to see if we show the ADC hits. These are ADC hits
+	 * 
 	 * @return <code>true</code> if we are to show ADC hits.
 	 */
 	public boolean showADCHits() {
-		return (_adcHitButton != null)
-				&& _adcHitButton.isSelected();
+		return (_adcHitButton != null) && _adcHitButton.isSelected();
 	}
-	
-	
+
 	/**
-	 * Convenience method to see if we show CVT reconstructed tracks.
-	 * These are ADC hits except 
+	 * Convenience method to see if we show CVT reconstructed tracks. These are ADC
+	 * hits except
+	 * 
 	 * @return <code>true</code> if we are to show ADC hits.
 	 */
 	public boolean showCVTTracks() {
-		return (_cvtTrackButton != null)
-				&& _cvtTrackButton.isSelected();
+		return (_cvtTrackButton != null) && _cvtTrackButton.isSelected();
 	}
 
 	/**
@@ -454,7 +458,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	public boolean showDCHBHits() {
 		return showHB() && (_dcHitsButton != null) && _dcHitsButton.isSelected();
 	}
-	
+
 	/**
 	 * Convenience method to see if we show the dc TB reconstructed hits.
 	 * 
@@ -472,7 +476,6 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	public boolean showSegments() {
 		return (_segmentButton != null) && _segmentButton.isSelected();
 	}
-
 
 	/**
 	 * Convenience method to see if we show the dc hb reconstructed segments.
@@ -493,15 +496,14 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	}
 
 	/**
-	 * Convenience method to see if we show the  reconstructed crosses.
+	 * Convenience method to see if we show the reconstructed crosses.
 	 * 
-	 * @return <code>true</code> if we are to show  reconstructed crosses.
+	 * @return <code>true</code> if we are to show reconstructed crosses.
 	 */
 	public boolean showCrosses() {
-		return (_crossButton != null)
-				&& _crossButton.isSelected();
+		return (_crossButton != null) && _crossButton.isSelected();
 	}
-	
+
 	/**
 	 * Convenience method to see if we show the dc HB reconstructed crosses.
 	 * 
@@ -510,7 +512,7 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	public boolean showDCHBCrosses() {
 		return showHB() && showCrosses();
 	}
-	
+
 	/**
 	 * Convenience method to see if we show the dc TB reconstructed crosses.
 	 * 
@@ -520,5 +522,76 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		return showTB() && showCrosses();
 	}
 
+	/**
+	 * Convenience method to see if we show no doca at all.
+	 * 
+	 * @return <code>true</code> if we are to show no doca.
+	 */
+	public boolean showNoDoca() {
+		return (_noDocaButton != null) && _noDocaButton.isSelected();
+	}
+
+	/**
+	 * Convenience method to see if we show all doca at all.
+	 * 
+	 * @return <code>true</code> if we are to show all doca.
+	 */
+	public boolean showAllDoca() {
+		return (_allDocaButton != null) && _allDocaButton.isSelected();
+	}
+
+	/**
+	 * Convenience method to see if we show the track doca column.
+	 * 
+	 * @return <code>true</code> if we are to show track doca column.
+	 */
+	public boolean showTrkDoca() {
+		return showAllDoca() || ((_trkDocaButton != null) && _trkDocaButton.isSelected());
+	}
+
+	/**
+	 * Convenience method to see if we show the doca column.
+	 * 
+	 * @return <code>true</code> if we are to show the doca column.
+	 */
+	public boolean showDoca() {
+		return showAllDoca() || ((_docaButton != null) && _docaButton.isSelected());
+	}
+
+	/**
+	 * Convenience method to see if we show the HB trkDoca column.
+	 * 
+	 * @return <code>true</code> if we are to show HB trkDoca column.
+	 */
+	public boolean showHBTrkDoca() {
+		return showHB() && showTrkDoca();
+	}
+
+	/**
+	 * Convenience method to see if we show the TB trkDoca column.
+	 * 
+	 * @return <code>true</code> if we are to show TB trkDoca column.
+	 */
+	public boolean showTBTrkDoca() {
+		return showTB() && showTrkDoca();
+	}
+
+	/**
+	 * Convenience method to see if we show the HB doca column.
+	 * 
+	 * @return <code>true</code> if we are to show HB doca column.
+	 */
+	public boolean showHBDoca() {
+		return showHB() && showDoca();
+	}
+
+	/**
+	 * Convenience method to see if we show the TB doca column.
+	 * 
+	 * @return <code>true</code> if we are to show TB doca column.
+	 */
+	public boolean showTBDoca() {
+		return showTB() && showDoca();
+	}
 
 }

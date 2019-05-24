@@ -34,13 +34,11 @@ import cnuphys.ced.geometry.bmt.BMTSectorItem;
 import cnuphys.splot.plot.X11Colors;
 
 public class CentralXYHitDrawer implements IDrawable {
-	
+
 	private static Color _baseColor = new Color(255, 0, 0, 60);
 
-
 	// the event manager
-	private final ClasIoEventManager _eventManager = ClasIoEventManager
-			.getInstance();
+	private final ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	private boolean _visible = true;
 
@@ -100,8 +98,7 @@ public class CentralXYHitDrawer implements IDrawable {
 			}
 
 			drawHitsSingleMode(g, container);
-		}
-		else {
+		} else {
 			drawAccumulatedHits(g, container);
 		}
 
@@ -111,13 +108,14 @@ public class CentralXYHitDrawer implements IDrawable {
 
 	/**
 	 * Mouse over feedback
+	 * 
 	 * @param container
 	 * @param screenPoint
 	 * @param worldPoint
 	 * @param feedbackStrings
 	 */
-	public void feedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public void feedback(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 		for (FeedbackRect rr : _fbRects) {
 			rr.contains(screenPoint, feedbackStrings);
 		}
@@ -126,17 +124,34 @@ public class CentralXYHitDrawer implements IDrawable {
 	// only called in single event mode
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		drawBSTAccumulatedHits(g, container);
-	//	drawMicroMegasAccumulateHitsHits(g, container);
+		// drawMicroMegasAccumulateHitsHits(g, container);
 		drawCTOFAccumulatedHits(g, container);
 		drawCNDAccumulatedHits(g, container);
 	}
 
 	// draw accumulated BST hits (panels)
 	private void drawCNDAccumulatedHits(Graphics g, IContainer container) {
-		
+		int medianHit = AccumulationManager.getInstance().getMedianCNDCount();
+
+		int cndData[][][] = AccumulationManager.getInstance().getAccumulatedCNDData();
+
+		for (int sect0 = 0; sect0 < 24; sect0++) {
+			for (int lay0 = 0; lay0 < 3; lay0++) {
+				for (int order = 0; order < 2; order++) {
+
+					int hitCount = cndData[sect0][lay0][order];
+
+					CNDXYPolygon poly = _view.getCNDPolygon(sect0 + 1, lay0 + 1, order + 1);
+					double fract = _view.getMedianSetting() * (((double) hitCount) / (1 + medianHit));
+					Color color = AccumulationManager.getInstance().getColor(_view.getColorScaleModel(), fract);
+
+					poly.draw(g, container, color, Color.black);
+
+				}
+			}
+		}
 	}
 
-	
 	// draw accumulated BST hits (panels)
 	private void drawBSTAccumulatedHits(Graphics g, IContainer container) {
 		// panels
@@ -144,9 +159,8 @@ public class CentralXYHitDrawer implements IDrawable {
 		int medianHit = AccumulationManager.getInstance().getMedianBSTCount();
 
 		// first index is layer 0..7, second is sector 0..23
-		int bstData[][] = AccumulationManager.getInstance()
-				.getAccumulatedBSTData();
-		
+		int bstData[][] = AccumulationManager.getInstance().getAccumulatedBSTData();
+
 		for (int lay0 = 0; lay0 < 8; lay0++) {
 			int supl0 = lay0 / 2;
 			for (int sect0 = 0; sect0 < BSTGeometry.sectorsPerSuperlayer[supl0]; sect0++) {
@@ -154,45 +168,39 @@ public class CentralXYHitDrawer implements IDrawable {
 
 				if (panel != null) {
 					int hitCount = bstData[lay0][sect0];
-					
+
 //					System.err.println("BST layer: " + (lay0+1) +  " sect: " + (sect0+0) + "   hit count " + hitCount);
 
-					double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
-					Color color = AccumulationManager.getInstance()
-							.getColor(fract);
+					double fract = _view.getMedianSetting() * (((double) hitCount) / (1 + medianHit));
+					Color color = AccumulationManager.getInstance().getColor(_view.getColorScaleModel(), fract);
 					_view.drawBSTPanel((Graphics2D) g, container, panel, color);
 
-				}
-				else {
+				} else {
 //					System.err.println("Got a null panel in drawBSTAccumulatedHits.");
 				}
 			}
 		}
 	}
-	
+
 	// draw CTOF accumulated hits
 	private void drawCTOFAccumulatedHits(Graphics g, IContainer container) {
 		int medianHit = AccumulationManager.getInstance().getMedianCTOFCount();
 
-		int ctofData[] = AccumulationManager.getInstance()
-				.getAccumulatedCTOFData();
-		
+		int ctofData[] = AccumulationManager.getInstance().getAccumulatedCTOFData();
+
 		for (int index = 0; index < 48; index++) {
-			CTOFXYPolygon poly = _view.getCTOFPolygon(index+1);
+			CTOFXYPolygon poly = _view.getCTOFPolygon(index + 1);
 			if (poly != null) {
 				int hitCount = ctofData[index];
-				
-				double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 
-				Color color = AccumulationManager.getInstance()
-						.getColor(fract);
-				
-				poly.draw(g, container, index+1, color);
+				double fract = _view.getMedianSetting() * (((double) hitCount) / (1 + medianHit));
+
+				Color color = AccumulationManager.getInstance().getColor(_view.getColorScaleModel(), fract);
+
+				poly.draw(g, container, index + 1, color);
 			}
 		}
 	}
-	
-
 
 	// only called in single event mode
 	private void drawHitsSingleMode(Graphics g, IContainer container) {
@@ -201,46 +209,63 @@ public class CentralXYHitDrawer implements IDrawable {
 		drawCTOFSingleHitsMode(g, container);
 		drawCNDSingleHitsMode(g, container);
 	}
-	
-	// draw CTOF hits
-	private void drawCNDSingleHitsMode(Graphics g,
-			IContainer container) {
-		
-		TdcAdcHitList hits = CND.getInstance().getHits();
 
-		if ((hits != null) && !hits.isEmpty()) {
-			for (TdcAdcHit hit : hits) {
-				
-				//adcs have order = 0, 1
-				if (hit != null){
-					
-				//	System.err.println("ORDER: " + hit.order);
-					
-					int comp = 1 + (hit.order % 2);
-					
-					CNDXYPolygon poly = _view.getCNDPolygon(hit.sector, hit.layer, comp);
-					if (poly != null) {
-						
-						
-						if (hit.order < 2) {  //adc
-							Color color = hits.adcColor(hit);
-							poly.draw(g, container, color, Color.black);
-						}
-						else {
-							poly.draw(g, container, null, Color.red);
-						} //tdc
-						
-					}
-				}
+	// draw CTOF hits
+	private void drawCNDSingleHitsMode(Graphics g, IContainer container) {
+
+		CND cnd = CND.getInstance();
+
+		int adcCount = cnd.getCountAdc();
+		int tdcCount = cnd.getCountTdc();
+
+		// tdc?
+		if (tdcCount > 0) {
+			for (int i = 0; i < tdcCount; i++) {
+				int hsect = cnd.tdc_sect[i];
+				int hlayer = cnd.tdc_layer[i];
+				int hleftright = 1 + (cnd.tdc_order[i] % 2);
+
+				CNDXYPolygon poly = _view.getCNDPolygon(hsect, hlayer, hleftright);
+
+				poly.draw(g, container, Color.lightGray, Color.black);
 			}
 		}
+
+		// adc?
+		if (adcCount > 0) {
+			for (int i = 0; i < adcCount; i++) {
+				int hsect = cnd.adc_sect[i];
+				int hlayer = cnd.adc_layer[i];
+				int hleftright = 1 + (cnd.adc_order[i] % 2);
+
+				CNDXYPolygon poly = _view.getCNDPolygon(hsect, hlayer, hleftright);
+
+				Color color = cnd.adcColor(cnd.adc_ADC[i]);
+				poly.draw(g, container, color, Color.black);
+
+			}
+		}
+
+		// tdc again?
+		if (tdcCount > 0) {
+			for (int i = 0; i < tdcCount; i++) {
+				int hsect = cnd.tdc_sect[i];
+				int hlayer = cnd.tdc_layer[i];
+				int hleftright = 1 + (cnd.tdc_order[i] % 2);
+
+				CNDXYPolygon poly = _view.getCNDPolygon(hsect, hlayer, hleftright);
+
+				g.setColor(Color.black);
+				g.drawLine(poly.xpoints[0], poly.ypoints[0], poly.xpoints[2], poly.ypoints[2]);
+				g.drawLine(poly.xpoints[1], poly.ypoints[1], poly.xpoints[3], poly.ypoints[3]);
+			}
+		}
+
 	}
-	
-	
+
 	// draw CTOF hits
-	private void drawCTOFSingleHitsMode(Graphics g,
-			IContainer container) {
-		
+	private void drawCTOFSingleHitsMode(Graphics g, IContainer container) {
+
 		TdcAdcHitList hits = CTOF.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (TdcAdcHit hit : hits) {
@@ -249,7 +274,7 @@ public class CentralXYHitDrawer implements IDrawable {
 					if (poly != null) {
 						Color color = hits.adcColor(hit);
 						poly.draw(g, container, hit.component, color);
-						
+
 //						g.setColor(color);
 //						g.fillPolygon(poly);
 //						g.setColor(Color.black);
@@ -258,22 +283,21 @@ public class CentralXYHitDrawer implements IDrawable {
 				}
 			}
 		}
-		
+
 	}
 
 	// draw BMT hits
-	private void drawBMTHitsSingleMode(Graphics g,
-			IContainer container) {
-		
+	private void drawBMTHitsSingleMode(Graphics g, IContainer container) {
+
 		Point pp = new Point();
 		Point2D.Double wp = new Point2D.Double();
-		
+
 		AdcHitList hits = BMT.getInstance().getADCHits();
 		if ((hits != null) && !hits.isEmpty()) {
-			
+
 //			Shape oldClip = g.getClip();
 			Graphics2D g2 = (Graphics2D) g;
-			
+
 			for (AdcHit hit : hits) {
 				if (hit != null) {
 					BMTSectorItem bmtItem = _view.getBMTSectorItem(hit.sector, hit.layer);
@@ -341,28 +365,25 @@ public class CentralXYHitDrawer implements IDrawable {
 		}
 	}
 
-	
 	// draw BST hits single event mode
 	private void drawBSTHitsSingleMode(Graphics g, IContainer container) {
-		
+
 		AdcHitList hits = BST.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
-			
+
 //			Shape oldClip = g.getClip();
 			Graphics2D g2 = (Graphics2D) g;
 
 			for (AdcHit hit : hits) {
 				if (hit != null) {
-					
-					BSTxyPanel panel = CentralXYView.getPanel(hit.layer,
-							hit.sector);
-					
+
+					BSTxyPanel panel = CentralXYView.getPanel(hit.layer, hit.sector);
+
 					if (panel != null) {
 						_view.drawBSTPanel(g2, container, panel, _baseColor);
 						_view.drawBSTPanel(g2, container, panel, hits.adcColor(hit));
-	//					_view.drawBSTPanel(g2, container, panel, Color.red);
+						// _view.drawBSTPanel(g2, container, panel, Color.red);
 					}
-
 
 				}
 			}
@@ -379,5 +400,5 @@ public class CentralXYHitDrawer implements IDrawable {
 	@Override
 	public void prepareForRemoval() {
 	}
-	
+
 }

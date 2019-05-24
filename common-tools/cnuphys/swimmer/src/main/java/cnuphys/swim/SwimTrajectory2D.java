@@ -6,7 +6,7 @@ import java.util.List;
 
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.lund.LundId;
-import org.jlab.clas.clas.math.FastMath;
+import cnuphys.magfield.FastMath;
 
 /**
  * A 2D version of the 3D SwimTrajectory where all points have been projected
@@ -28,30 +28,27 @@ public class SwimTrajectory2D {
 
 	// the 2D path
 	private Point.Double[] _path;
-	
+
 	// which CLAS sector we are in (parallel)
 	private byte _sector[];
-	
+
 	private boolean _sectorChange[];
-	
-	//sector with the most points
+
+	// sector with the most points
 	private byte _dominantSector = -1;
-	
 
 	/**
 	 * Create a 2D trajectory from the 3D trajectory
 	 * 
-	 * @param trajectory
-	 *            the 3D trajectory from a swim
-	 * @param projector
-	 *            projects 3D to 2D
+	 * @param trajectory the 3D trajectory from a swim
+	 * @param projector  projects 3D to 2D
 	 */
 	public SwimTrajectory2D(SwimTrajectory trajectory, IProjector projector) {
 		_trajectory3D = trajectory;
 		int size = (trajectory == null) ? 0 : trajectory.size();
 
 		if (size > 1) {
-			
+
 			_path = new Point.Double[size];
 			_sector = new byte[size];
 			_sectorChange = new boolean[size];
@@ -61,21 +58,21 @@ public class SwimTrajectory2D {
 			for (double v3d[] : trajectory) {
 				_path[index] = new Point.Double();
 				_sector[index] = getSector(v3d[0], v3d[1]);
-				
+
 				if (index > 0) {
-					_sectorChange[index] = (_sector[index] != _sector[index-1]);
+					_sectorChange[index] = (_sector[index] != _sector[index - 1]);
 				}
-				
+
 				// for sector this is just the usual worldFromLabXYZ
 				projector.project(v3d, _path[index]);
 				index++;
 			}
-			
-			//get the dominant sector
+
+			// get the dominant sector
 			_dominantSector = -1;
 			byte maxCount = 0;
-			byte[] sects = {0, 0, 0, 0, 0, 0, 0};
-			
+			byte[] sects = { 0, 0, 0, 0, 0, 0, 0 };
+
 			for (int i = 0; i < size; i++) {
 				byte sect = _sector[i];
 				sects[sect]++;
@@ -84,8 +81,7 @@ public class SwimTrajectory2D {
 					maxCount = sects[sect];
 				}
 			}
-			
-			
+
 //			int[] indices = sectChangeIndices();
 //			System.err.print("Dominant Sector: " + _dominantSector + " ");
 //			if (indices != null) {
@@ -97,23 +93,22 @@ public class SwimTrajectory2D {
 //			System.err.println();
 		}
 	}
-	
-	
-	
+
 	/**
 	 * Get the indices of sector changes
+	 * 
 	 * @return the indices of sector changes (or null)
 	 */
 	public int[] sectChangeIndices() {
-		
+
 		int count = sectorChangeCount();
-		
+
 		if (count < 1) {
 			return null;
 		}
-		
+
 		int indices[] = new int[count];
-		
+
 		int index = 0;
 		for (int i = 1; i < _sectorChange.length; i++) {
 			if (_sectorChange[i]) {
@@ -121,12 +116,13 @@ public class SwimTrajectory2D {
 				index++;
 			}
 		}
-		
+
 		return indices;
 	}
-	
+
 	/**
 	 * Get the count of sector changes
+	 * 
 	 * @return the count of sector changes
 	 */
 	public int sectorChangeCount() {
@@ -140,9 +136,10 @@ public class SwimTrajectory2D {
 		}
 		return count;
 	}
-	
+
 	/**
 	 * Get the index of the first sector change. If no change, return -1.
+	 * 
 	 * @return the index of the first sector
 	 */
 	public int firstSectorChangeIndex() {
@@ -153,25 +150,26 @@ public class SwimTrajectory2D {
 				}
 			}
 		}
-		
+
 		return -1;
 	}
-	
+
 	/**
 	 * Get a string describing the sector change
+	 * 
 	 * @param index this should be the first index of the new sector
 	 * @return a string describing the sector change
 	 */
 	public String sectorChangeString(int index) {
 		if ((index > 0) && (_sectorChange != null) && (_sectorChange.length > 1)) {
-			byte sect1 = _sector[index-1];
+			byte sect1 = _sector[index - 1];
 			byte sect2 = _sector[index];
 			return "moved from sector " + sect1 + " to " + sect2;
 		}
-		
+
 		return "";
 	}
-		
+
 	/**
 	 * Get the sector [1..6] from the phi value
 	 * 
@@ -179,7 +177,7 @@ public class SwimTrajectory2D {
 	 * @return the sector [1..6]
 	 */
 	private static byte getSector(double x, double y) {
-		
+
 		double phi = FastMath.atan2Deg(y, x);
 		// convert phi to [0..360]
 
@@ -274,8 +272,7 @@ public class SwimTrajectory2D {
 	/**
 	 * Get the minimum distance to the trajectory.
 	 * 
-	 * @param wp
-	 *            the point in question.
+	 * @param wp the point in question.
 	 * @return the minimum distance from the point to the trajectory.
 	 */
 	public double closestDistance(Point.Double wp) {
@@ -310,25 +307,21 @@ public class SwimTrajectory2D {
 	}
 
 	/**
-	 * Given two points p0 and p1, imagine a line from p0 to p1. Take the line
-	 * to be parameterized by parameter t so that at t = 0 we are at p0 and t =
-	 * 1 we are at p1.
+	 * Given two points p0 and p1, imagine a line from p0 to p1. Take the line to be
+	 * parameterized by parameter t so that at t = 0 we are at p0 and t = 1 we are
+	 * at p1.
 	 * 
-	 * @param p0
-	 *            start point of main line
-	 * @param p1
-	 *            end point of main line
-	 * @param wp
-	 *            the point from which we drop a perpendicular to p0 -> p1
-	 * @param pintersect
-	 *            the intersection point of the perpendicular and the line
-	 *            containing p0-p1. It may or may not actually be between p0 and
-	 *            p1, as specified by the value of t.
-	 * @return the perpendicular distance to the line. If t is between 0 and 1
-	 *         the intersection is on the line. If t < 0 the intersection is on
-	 *         the "infinite line" but not on p0->p1, it is on the p0 side; this
-	 *         returns the distance to p0. If t > 1 the intersection is on the
-	 *         p1 side; this returns the distance to p1.
+	 * @param p0         start point of main line
+	 * @param p1         end point of main line
+	 * @param wp         the point from which we drop a perpendicular to p0 -> p1
+	 * @param pintersect the intersection point of the perpendicular and the line
+	 *                   containing p0-p1. It may or may not actually be between p0
+	 *                   and p1, as specified by the value of t.
+	 * @return the perpendicular distance to the line. If t is between 0 and 1 the
+	 *         intersection is on the line. If t < 0 the intersection is on the
+	 *         "infinite line" but not on p0->p1, it is on the p0 side; this returns
+	 *         the distance to p0. If t > 1 the intersection is on the p1 side; this
+	 *         returns the distance to p1.
 	 */
 	public static double perpendicularDistance(Point.Double p0, Point.Double p1, Point.Double wp,
 			Point.Double pintersect) {
@@ -349,14 +342,14 @@ public class SwimTrajectory2D {
 		// intersection on line
 		return pintersect.distance(wp);
 	}
-	
+
 	/**
 	 * Get the source of the trajectory, e.g., hbtracking
+	 * 
 	 * @return the source of the trajectory
 	 */
 	public String getSource() {
 		return ((_trajectory3D == null) ? "???" : _trajectory3D.getSource());
 	}
-
 
 }

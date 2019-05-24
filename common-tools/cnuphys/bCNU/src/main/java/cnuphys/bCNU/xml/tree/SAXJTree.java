@@ -65,16 +65,14 @@ public class SAXJTree extends JTree {
 
 		// try using plus and minus icons
 		try {
-			basicUi.setCollapsedIcon(ImageManager.getInstance().loadImageIcon(
-					"images/treePlusBox.gif"));
-			basicUi.setExpandedIcon(ImageManager.getInstance().loadImageIcon(
-					"images/treeMinusBox.gif"));
+			basicUi.setCollapsedIcon(ImageManager.getInstance().loadImageIcon("images/treePlusBox.gif"));
+			basicUi.setExpandedIcon(ImageManager.getInstance().loadImageIcon("images/treeMinusBox.gif"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		setBorder(BorderFactory.createTitledBorder(null, "XML elements",
-				TitledBorder.LEADING, TitledBorder.TOP, null, Color.blue));
+		setBorder(BorderFactory.createTitledBorder(null, "XML elements", TitledBorder.LEADING, TitledBorder.TOP, null,
+				Color.blue));
 
 		putClientProperty("JTree.lineStyle", "Angled");
 		setShowsRootHandles(true);
@@ -99,8 +97,7 @@ public class SAXJTree extends JTree {
 	/**
 	 * Build the tree from an xml string
 	 * 
-	 * @param xmlstr
-	 *            the xml string
+	 * @param xmlstr the xml string
 	 * @throws IOException
 	 * @throws SAXException
 	 */
@@ -126,8 +123,7 @@ public class SAXJTree extends JTree {
 	/**
 	 * Build the tree from an xml file
 	 * 
-	 * @param file
-	 *            the xml file
+	 * @param file the xml file
 	 * @throws IOException
 	 * @throws SAXException
 	 */
@@ -206,8 +202,7 @@ public class SAXJTree extends JTree {
 				return parseAttribute(tokens[0]);
 			}
 
-			if ((tokens.length == 2)
-					&& (tokens[0].startsWith("Character Data"))) {
+			if ((tokens.length == 2) && (tokens[0].startsWith("Character Data"))) {
 				return parseCharacterData(tokens[0], tokens[1]);
 			}
 
@@ -284,8 +279,7 @@ public class SAXJTree extends JTree {
 
 		final SAXJTree tree = new SAXJTree();
 
-		testFrame.getContentPane().add(tree.getScrollPane(),
-				BorderLayout.CENTER);
+		testFrame.getContentPane().add(tree.getScrollPane(), BorderLayout.CENTER);
 
 		File file = new File("C:\\temp\\run2.xml");
 		try {
@@ -333,61 +327,50 @@ class JTreeHandler extends DefaultHandler {
 	/**
 	 * Constructor
 	 * 
-	 * @param base
-	 *            the base (root) tree node
+	 * @param base the base (root) tree node
 	 */
 	public JTreeHandler(JTree tree) {
 		this.tree = tree;
 	}
 
 	@Override
-	public void characters(char[] ch, int start, int length)
-			throws SAXException {
+	public void characters(char[] ch, int start, int length) throws SAXException {
 		String s = new String(ch, start, length);
-		DefaultMutableTreeNode data = new DefaultMutableTreeNode(
-				"Character Data: '" + s + "'");
+		DefaultMutableTreeNode data = new DefaultMutableTreeNode("Character Data: '" + s + "'");
 		current.add(data);
 	}
 
 	@Override
-	public void endElement(String uri, String localName, String qName)
-			throws SAXException {
+	public void endElement(String uri, String localName, String qName) throws SAXException {
 		// Walk back up the tree
 		current = (DefaultMutableTreeNode) current.getParent();
 
 	}
 
 	@Override
-	public void ignorableWhitespace(char[] ch, int start, int length)
-			throws SAXException {
-		DefaultMutableTreeNode ws = new DefaultMutableTreeNode(
-				"Whitespace (length = " + length + ")");
+	public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
+		DefaultMutableTreeNode ws = new DefaultMutableTreeNode("Whitespace (length = " + length + ")");
 		current.add(ws);
 
 	}
 
 	@Override
-	public void processingInstruction(String target, String data)
-			throws SAXException {
-		DefaultMutableTreeNode pi = new DefaultMutableTreeNode("PI (target = '"
-				+ target + "', data = '" + data + "')");
+	public void processingInstruction(String target, String data) throws SAXException {
+		DefaultMutableTreeNode pi = new DefaultMutableTreeNode("PI (target = '" + target + "', data = '" + data + "')");
 		current.add(pi);
 
 	}
 
 	@Override
 	public void skippedEntity(String name) throws SAXException {
-		DefaultMutableTreeNode skipped = new DefaultMutableTreeNode(
-				"Skipped Entity: '" + name + "'");
+		DefaultMutableTreeNode skipped = new DefaultMutableTreeNode("Skipped Entity: '" + name + "'");
 		current.add(skipped);
 
 	}
 
 	@Override
-	public void startElement(String namespaceURI, String localName,
-			String qName, Attributes atts) throws SAXException {
-		DefaultMutableTreeNode element = new DefaultMutableTreeNode("Element: "
-				+ localName);
+	public void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws SAXException {
+		DefaultMutableTreeNode element = new DefaultMutableTreeNode("Element: " + localName);
 
 		// is this the root?
 
@@ -403,8 +386,7 @@ class JTreeHandler extends DefaultHandler {
 		// Process attributes
 		for (int i = 0; i < atts.getLength(); i++) {
 			DefaultMutableTreeNode attribute = new DefaultMutableTreeNode(
-					"Attribute (name = '" + atts.getLocalName(i)
-							+ "', value = '" + atts.getValue(i) + "')");
+					"Attribute (name = '" + atts.getLocalName(i) + "', value = '" + atts.getValue(i) + "')");
 			current.add(attribute);
 		}
 

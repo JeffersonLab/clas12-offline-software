@@ -31,14 +31,12 @@ import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.ced.item.PCALHexSectorItem;
 
 public class PCALView extends HexView {
-	
-	
-	//for naming clones
-	private static int CLONE_COUNT = 0;
-	
-	//base title
-	private static final String _baseTitle = "PCAL";
 
+	// for naming clones
+	private static int CLONE_COUNT = 0;
+
+	// base title
+	private static final String _baseTitle = "PCAL";
 
 	// sector items
 	private PCALHexSectorItem _hexItems[];
@@ -49,8 +47,8 @@ public class PCALView extends HexView {
 	private static final double _xsize = 410.0;
 	private static final double _ysize = _xsize * 1.154734;
 	// private static final double _ysize = 1.0;
-	protected static Rectangle2D.Double _defaultWorld = new Rectangle2D.Double(
-			_xsize, -_ysize, -2 * _xsize, 2 * _ysize);
+	protected static Rectangle2D.Double _defaultWorld = new Rectangle2D.Double(_xsize, -_ysize, -2 * _xsize,
+			2 * _ysize);
 
 	// public static final double _XMAX = 400; //cm
 	// public static final double _YMAX = _XMAX;
@@ -58,8 +56,7 @@ public class PCALView extends HexView {
 	/**
 	 * Create an allDCView
 	 * 
-	 * @param keyVals
-	 *            variable set of arguments.
+	 * @param keyVals variable set of arguments.
 	 */
 	private PCALView(String title) {
 		super(getAttributes(title));
@@ -89,10 +86,9 @@ public class PCALView extends HexView {
 	@Override
 	protected void addControls() {
 
-		_controlPanel = new ControlPanel(this, ControlPanel.DISPLAYARRAY
-				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND,
-				DisplayBits.ACCUMULATION
-				+ DisplayBits.MCTRUTH + DisplayBits.UVWSTRIPS, 3, 5);
+		_controlPanel = new ControlPanel(this,
+				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND,
+				DisplayBits.ACCUMULATION + DisplayBits.MCTRUTH + DisplayBits.UVWSTRIPS, 3, 5);
 
 		add(_controlPanel, BorderLayout.EAST);
 		pack();
@@ -112,16 +108,13 @@ public class PCALView extends HexView {
 	// add items to the view
 	@Override
 	protected void addItems() {
-		LogicalLayer detectorLayer = getContainer().getLogicalLayer(
-				_detectorLayerName);
+		LogicalLayer detectorLayer = getContainer().getLogicalLayer(_detectorLayerName);
 
 		_hexItems = new PCALHexSectorItem[6];
 
 		for (int sector = 0; sector < 6; sector++) {
-			_hexItems[sector] = new PCALHexSectorItem(detectorLayer, this,
-					sector + 1);
-			_hexItems[sector].getStyle().setFillColor(
-					X11Colors.getX11Color("dark cyan"));
+			_hexItems[sector] = new PCALHexSectorItem(detectorLayer, this, sector + 1);
+			_hexItems[sector].getStyle().setFillColor(X11Colors.getX11Color("dark cyan"));
 		}
 	}
 
@@ -162,7 +155,6 @@ public class PCALView extends HexView {
 
 	// get the attributes to pass to the super constructor
 	private static Object[] getAttributes(String title) {
-	    
 
 		Properties props = new Properties();
 		props.put(PropertySupport.TITLE, title);
@@ -177,16 +169,14 @@ public class PCALView extends HexView {
 		props.put(PropertySupport.TOOLBAR, true);
 		props.put(PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS);
 		props.put(PropertySupport.VISIBLE, true);
-		props.put(PropertySupport.BACKGROUND,
-				X11Colors.getX11Color("Alice Blue"));
+		props.put(PropertySupport.BACKGROUND, X11Colors.getX11Color("Alice Blue"));
 		props.put(PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		return PropertySupport.toObjectArray(props);
 	}
 
 	@Override
-	public void getFeedbackStrings(IContainer container, Point pp,
-			Point2D.Double wp, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
 
 		super.getFeedbackStrings(container, pp, wp, feedbackStrings);
 
@@ -199,10 +189,8 @@ public class PCALView extends HexView {
 	/**
 	 * Convert ijk coordinates to sector xyz
 	 * 
-	 * @param pijk
-	 *            the ijk coordinates
-	 * @param sectorXYZ
-	 *            the sector xyz coordinates
+	 * @param pijk      the ijk coordinates
+	 * @param sectorXYZ the sector xyz coordinates
 	 */
 	public void ijkToSectorXYZ(Point3D pijk, double[] sectorXYZ) {
 		PCALGeometry.ijkToSectorXYZ(pijk, sectorXYZ);
@@ -211,10 +199,8 @@ public class PCALView extends HexView {
 	/**
 	 * Convert sector xyz to ijk coordinates
 	 * 
-	 * @param pijk
-	 *            the ijk coordinates
-	 * @param sectorXYZ
-	 *            the sector xyz coordinates
+	 * @param pijk      the ijk coordinates
+	 * @param sectorXYZ the sector xyz coordinates
 	 */
 	public void sectorXYZToIJK(Point3D pijk, double[] sectorXYZ) {
 		Point3D sectorP = new Point3D(sectorXYZ[0], sectorXYZ[1], sectorXYZ[2]);
@@ -224,33 +210,32 @@ public class PCALView extends HexView {
 	/**
 	 * Get the hex item for the given 1-based sector
 	 * 
-	 * @param sector
-	 *            the 1-based sector
+	 * @param sector the 1-based sector
 	 * @return the corresponding item
 	 */
 	public PCALHexSectorItem getHexSectorItem(int sector) {
 		return _hexItems[sector - 1];
 	}
 
-	
 	/**
-	 * Clone the view. 
+	 * Clone the view.
+	 * 
 	 * @return the cloned view
 	 */
 	@Override
 	public BaseView cloneView() {
 		super.cloneView();
 		CLONE_COUNT++;
-		
-		//limit
+
+		// limit
 		if (CLONE_COUNT > 2) {
 			return null;
 		}
-		
+
 		Rectangle vr = getBounds();
 		vr.x += 40;
 		vr.y += 40;
-		
+
 		PCALView view = createPCALView();
 		view.setBounds(vr);
 		return view;

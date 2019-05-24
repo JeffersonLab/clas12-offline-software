@@ -65,19 +65,18 @@ public class CutTableModel extends DefaultTableModel {
 		}
 		return _data.size();
 	}
-	
-    @Override 
-    public boolean isCellEditable(int row, int column) {
-    	return (column == 0);
-    }
 
+	@Override
+	public boolean isCellEditable(int row, int column) {
+		return (column == 0);
+	}
 
 	/**
 	 * Set the value at a given row and column.
 	 * 
 	 * @param value The string to set.
-	 * @param row The zero based row.
-	 * @param col The zero based column.
+	 * @param row   The zero based row.
+	 * @param col   The zero based column.
 	 */
 
 	@Override
@@ -133,11 +132,11 @@ public class CutTableModel extends DefaultTableModel {
 			_data.add(icut);
 		}
 	}
-	
+
 	@Override
-    public void removeRow(int row) {
+	public void removeRow(int row) {
 		_data.removeElementAt(row);
-    }
+	}
 
 	/**
 	 * Clear all the data

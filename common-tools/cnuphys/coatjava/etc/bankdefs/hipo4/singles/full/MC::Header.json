@@ -1,0 +1,30 @@
+[
+    {
+        "entries": [
+            {
+                "info": "Run number", 
+                "name": "run", 
+                "type": "I"
+            }, 
+            {
+                "info": "Event number", 
+                "name": "event", 
+                "type": "I"
+            }, 
+            {
+                "info": "Event type", 
+                "name": "type", 
+                "type": "B"
+            }, 
+            {
+                "info": "Beam helicity", 
+                "name": "helicity", 
+                "type": "F"
+            }
+        ], 
+        "group": 40, 
+        "info": "Head bank for the generated event", 
+        "item": 0, 
+        "name": "MC::Header"
+    }
+]

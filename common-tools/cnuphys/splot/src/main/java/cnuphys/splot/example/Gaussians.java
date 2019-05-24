@@ -75,10 +75,10 @@ public class Gaussians extends AExample {
 			}
 
 			try {
-				ds.add(x[0], spreadFactor() * y[0], sig[0], x[1],
-						spreadFactor() * y[1], sig[1], x[2], spreadFactor()
-								* y[2], sig[2]);
-			} catch (DataSetException e) {
+				ds.add(x[0], spreadFactor() * y[0], sig[0], x[1], spreadFactor() * y[1], sig[1], x[2],
+						spreadFactor() * y[2], sig[2]);
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 				System.exit(1);
 			}
@@ -101,14 +101,11 @@ public class Gaussians extends AExample {
 		PlotParameters params = _canvas.getParameters();
 		params.mustIncludeXZero(true);
 		params.mustIncludeYZero(true);
-		
-		String extra[] = {
-				"This is an extra string",
-				"This is a longer extra string",
-				"This is an even longer extra string"
-		};
+
+		String extra[] = { "This is an extra string", "This is a longer extra string",
+				"This is an even longer extra string" };
 		params.setExtraStrings(extra);
-		
+
 	}
 
 	public static void main(String arg[]) {

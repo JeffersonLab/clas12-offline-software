@@ -26,13 +26,11 @@ public class WriterThread extends Thread {
 	private Socket _socket;
 
 	/**
-	 * Create a writer thread. This thread will be used to transmit messages off
-	 * a message queue.
+	 * Create a writer thread. This thread will be used to transmit messages off a
+	 * message queue.
 	 * 
-	 * @param socket
-	 *            the underlying socket
-	 * @param messenger
-	 *            the messenger with the queue
+	 * @param socket    the underlying socket
+	 * @param messenger the messenger with the queue
 	 * @throws IOException
 	 */
 	public WriterThread(Socket socket, IMessenger messenger) throws IOException {
@@ -64,8 +62,7 @@ public class WriterThread extends Thread {
 				if (safeToUse(message)) {
 					_messenger.writeMessage(message);
 				}
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}

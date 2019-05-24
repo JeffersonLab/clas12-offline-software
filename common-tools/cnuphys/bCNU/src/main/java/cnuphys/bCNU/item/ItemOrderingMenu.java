@@ -24,9 +24,8 @@ public class ItemOrderingMenu extends JMenu implements ActionListener {
 	/**
 	 * Used to get from resource bundle
 	 */
-	protected static String moveNames[] = { "Bring {0} to Front of Layer {1}",
-			"Send {0} to Back of Layer {1}", "Bring {0} Forward in Layer {1}",
-			"Send {0} Backward in Layer {1}" };
+	protected static String moveNames[] = { "Bring {0} to Front of Layer {1}", "Send {0} to Back of Layer {1}",
+			"Bring {0} Forward in Layer {1}", "Send {0} Backward in Layer {1}" };
 
 	protected static final int BRINGTOFRONT = 0;
 
@@ -47,8 +46,8 @@ public class ItemOrderingMenu extends JMenu implements ActionListener {
 	}
 
 	/**
-	 * Convenience routing to use the same static menu items on a regular
-	 * menu--for example one that might be on the item popup or the main menu.
+	 * Convenience routing to use the same static menu items on a regular menu--for
+	 * example one that might be on the item popup or the main menu.
 	 * 
 	 * @param item
 	 * @param insertItemName
@@ -88,8 +87,7 @@ public class ItemOrderingMenu extends JMenu implements ActionListener {
 	}
 
 	/**
-	 * Set the menu item text every time, since they might include the item
-	 * name.
+	 * Set the menu item text every time, since they might include the item name.
 	 * 
 	 * @param item
 	 * @param insertItemName

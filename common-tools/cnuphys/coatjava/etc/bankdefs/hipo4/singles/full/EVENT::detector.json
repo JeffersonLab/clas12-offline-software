@@ -1,0 +1,80 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector of TOF", 
+                "name": "scsector", 
+                "type": "I"
+            }, 
+            {
+                "info": "paddle of TOF", 
+                "name": "scpaddle", 
+                "type": "I"
+            }, 
+            {
+                "info": "sector of EC", 
+                "name": "ecsector", 
+                "type": "I"
+            }, 
+            {
+                "info": "number of photoelectrons in CC", 
+                "name": "ccnphe", 
+                "type": "F"
+            }, 
+            {
+                "info": "time in TOF corrected with TOF", 
+                "name": "sctime", 
+                "type": "F"
+            }, 
+            {
+                "info": "path in TOF corrected with TOF", 
+                "name": "scpath", 
+                "type": "F"
+            }, 
+            {
+                "info": "", 
+                "name": "ectime", 
+                "type": "F"
+            }, 
+            {
+                "info": "", 
+                "name": "ecpath", 
+                "type": "F"
+            }, 
+            {
+                "info": "", 
+                "name": "ecin", 
+                "type": "F"
+            }, 
+            {
+                "info": "", 
+                "name": "ecout", 
+                "type": "F"
+            }, 
+            {
+                "info": "", 
+                "name": "ectot", 
+                "type": "F"
+            }, 
+            {
+                "info": "", 
+                "name": "ecu", 
+                "type": "F"
+            }, 
+            {
+                "info": "", 
+                "name": "ecv", 
+                "type": "F"
+            }, 
+            {
+                "info": "", 
+                "name": "ecw", 
+                "type": "F"
+            }
+        ], 
+        "group": 31000, 
+        "info": "Detector information for reconstructed CLAS6 Data", 
+        "item": 22, 
+        "name": "EVENT::detector"
+    }
+]

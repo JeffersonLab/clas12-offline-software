@@ -1,0 +1,45 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector (=1)", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer (=1)", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "paddle (1-48)", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "order: 0 - ADCU , 1 - ADCD", 
+                "name": "order", 
+                "type": "B"
+            }, 
+            {
+                "info": "ADC integral from pulse fit", 
+                "name": "ADC", 
+                "type": "I"
+            }, 
+            {
+                "info": "time from pulse fit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "pedestal from pulse analysis", 
+                "name": "ped", 
+                "type": "S"
+            }
+        ], 
+        "group": 20400, 
+        "info": "ADC bank for the Central Time of Flight", 
+        "item": 11, 
+        "name": "CTOF::adc"
+    }
+]

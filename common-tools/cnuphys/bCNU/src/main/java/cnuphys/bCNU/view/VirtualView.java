@@ -31,6 +31,7 @@ import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
 
+@SuppressWarnings("serial")
 public class VirtualView extends BaseView
 		implements InternalFrameListener, IViewListener, MouseMotionListener, MouseListener {
 
@@ -42,10 +43,12 @@ public class VirtualView extends BaseView
 
 	private static int _numcol = 8;
 
+	// minimum height hack
+	private static final int MINHEIGHT = 60;
+
 	private int _currentCol = 0;
 	private Point _offsets[] = new Point[_numcol];
 
-	// private static final Color _bg = X11Colors.getX11Color("dark blue");
 	private static final Color _bg = Color.gray;
 	private static final Color _fill = X11Colors.getX11Color("alice blue");
 	private static final Color _vwfillInactive = new Color(255, 200, 120, 128);
@@ -70,8 +73,7 @@ public class VirtualView extends BaseView
 	/**
 	 * Create a virtual view view
 	 * 
-	 * @param keyVals
-	 *            variable set of arguments.
+	 * @param keyVals variable set of arguments.
 	 */
 	private VirtualView(Object... keyVals) {
 		super(keyVals);
@@ -90,19 +92,18 @@ public class VirtualView extends BaseView
 
 		setBackground(_bg);
 		getContainer().getComponent().setBackground(_bg);
-		
-		
+
 		getContainer().getComponent().addMouseMotionListener(this);
 		getContainer().getComponent().addMouseListener(this);
 
 		// set the offsets
 		setOffsets();
 
-		// System.err.println("[VV] world: " + getContainer().getWorldSystem());
 		setBeforeDraw();
 		setAfterDraw();
 
 		_instance = this;
+
 	}
 
 	/**
@@ -190,7 +191,6 @@ public class VirtualView extends BaseView
 					g.drawLine(pp.x, 0, pp.x, b.height);
 				}
 
-				double dy = world.height;
 				wp.x = world.x + world.width / 2;
 
 				Rectangle cr = getColRect(_currentCol);
@@ -228,13 +228,13 @@ public class VirtualView extends BaseView
 		_numcol = numcol;
 		VirtualView view = null;
 		Rectangle2D.Double world = getWorld();
-		
+
 		int cell_width = 40;
-		int cell_height = 1 + ((9*cell_width)/16);
+		int cell_height = 1 + ((9 * cell_width) / 16);
 		int width = numcol * cell_width;
 //		int height = (int) ((width * world.height) / world.width);
 		int height = cell_height;
-		
+
 		if (Environment.getInstance().isLinux()) {
 			height += 23;
 		}
@@ -242,24 +242,20 @@ public class VirtualView extends BaseView
 			height += 23;
 		}
 
-
 		// create the view
 		view = new VirtualView(PropertySupport.WORLDSYSTEM, world, PropertySupport.LEFT, 0, PropertySupport.TOP, 0,
 				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height, PropertySupport.TOOLBAR, false,
-				PropertySupport.VISIBLE, true, PropertySupport.BACKGROUND, Color.white,
-				PropertySupport.TITLE, VVTITLE, PropertySupport.STANDARDVIEWDECORATIONS, false,
-				PropertySupport.ICONIFIABLE, false, PropertySupport.RESIZABLE, true, 
-				PropertySupport.MAXIMIZABLE, false, PropertySupport.CLOSABLE, false);
+				PropertySupport.VISIBLE, true, PropertySupport.BACKGROUND, Color.white, PropertySupport.TITLE, VVTITLE,
+				PropertySupport.STANDARDVIEWDECORATIONS, false, PropertySupport.ICONIFIABLE, false,
+				PropertySupport.RESIZABLE, true, PropertySupport.MAXIMIZABLE, false, PropertySupport.CLOSABLE, false);
 
 		view._offsets = new Point[_numcol];
-		//view.pack();
-		
-		
+		// view.pack();
+
 		Insets insets = view.getInsets();
 		view.setSize(width, height + insets.top);
 		return view;
 	}
-		
 
 	/**
 	 * Get the number of columns
@@ -272,7 +268,6 @@ public class VirtualView extends BaseView
 
 	// get the world system
 	private static Rectangle2D.Double getWorld() {
-		// System.err.println("VV getting world");
 		GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		GraphicsDevice[] devices = g.getScreenDevices();
 
@@ -294,7 +289,7 @@ public class VirtualView extends BaseView
 		Object source = e.getSource();
 		if (source instanceof BaseView) {
 			BaseView view = (BaseView) source;
-			// System.err.println("[VV] " + view.getTitle() + " opened");
+
 			if (view.getVirtualItem() != null) {
 				view.getVirtualItem().setLocation();
 				view.getVirtualItem().setVisible(true);
@@ -325,7 +320,6 @@ public class VirtualView extends BaseView
 			BaseView view = (BaseView) source;
 			view.getVirtualItem().setVisible(false);
 			getContainer().refresh();
-			// System.err.println("[VV] " + view.getTitle() + " iconified");
 		}
 	}
 
@@ -336,8 +330,6 @@ public class VirtualView extends BaseView
 			BaseView view = (BaseView) source;
 			view.getVirtualItem().setVisible(true);
 			getContainer().refresh();
-
-			// System.err.println("[VV] " + view.getTitle() + " deiconified");
 		}
 	}
 
@@ -458,10 +450,8 @@ public class VirtualView extends BaseView
 	/**
 	 * Virtual view: no offesetting!
 	 * 
-	 * @param dh
-	 *            the horizontal change
-	 * @param dv
-	 *            the vertical change
+	 * @param dh the horizontal change
+	 * @param dv the vertical change
 	 */
 	@Override
 	public void offset(int dh, int dv) {
@@ -469,7 +459,6 @@ public class VirtualView extends BaseView
 
 	@Override
 	public void mouseClicked(MouseEvent mouseEvent) {
-//		System.err.println("HEY MAN");
 		switch (mouseEvent.getButton()) {
 		case MouseEvent.BUTTON1:
 			if (mouseEvent.getClickCount() == 1) { // single click
@@ -486,8 +475,6 @@ public class VirtualView extends BaseView
 	// handle a double click
 	private void handleDoubleClick(MouseEvent mouseEvent) {
 		Point rc = getRowCol(mouseEvent.getPoint());
-//		 System.err.println("Double clicked on: " + rc.y + ", " + rc.x);
-
 		int clickCol = rc.x;
 		if ((clickCol == _currentCol)) {
 			return;
@@ -570,10 +557,8 @@ public class VirtualView extends BaseView
 	/**
 	 * Move a view to the center of a specific virtual cell
 	 * 
-	 * @param view
-	 *            the view to move
-	 * @param col
-	 *            the col
+	 * @param view the view to move
+	 * @param col  the col
 	 */
 	public void moveTo(BaseView view, int col) {
 		if (view == null) {
@@ -582,36 +567,27 @@ public class VirtualView extends BaseView
 
 		moveTo(view, col, 0, 0);
 	}
-	
+
 	/**
 	 * Move a view to a specific virtual cell
 	 * 
-	 * @param view
-	 *            the view to move
-	 * @param col
-	 *            the col
-	 * @param dh
-	 *            additional horizontal offset
-	 * @param dv
-	 *            additional vertical offset
+	 * @param view the view to move
+	 * @param col  the col
+	 * @param dh   additional horizontal offset
+	 * @param dv   additional vertical offset
 	 */
 	public void moveToStart(BaseView view, int col, int constraint) {
 		Point start = view.getStartingLocation();
 		moveTo(view, col, start.x, start.y, constraint);
 	}
-	
 
 	/**
 	 * Move a view to a specific virtual cell
 	 * 
-	 * @param view
-	 *            the view to move
-	 * @param col
-	 *            the col
-	 * @param dh
-	 *            additional horizontal offset
-	 * @param dv
-	 *            additional vertical offset
+	 * @param view the view to move
+	 * @param col  the col
+	 * @param dh   additional horizontal offset
+	 * @param dv   additional vertical offset
 	 */
 	public void moveTo(BaseView view, int col, int dh, int dv) {
 
@@ -643,7 +619,7 @@ public class VirtualView extends BaseView
 
 		int xc = (int) (x + dx / 2);
 		int yc = (int) (y + dy / 2);
-
+		
 		Rectangle bounds = view.getBounds();
 		int delx = xc - (bounds.x + bounds.width / 2);
 		int dely = (yc - 40) - (bounds.y + bounds.height / 2);
@@ -654,10 +630,8 @@ public class VirtualView extends BaseView
 	/**
 	 * Move a view to a specific virtual cell
 	 * 
-	 * @param view
-	 *            the view to move
-	 * @param col
-	 *            the col
+	 * @param view the view to move
+	 * @param col  the col
 	 */
 	public void moveTo(BaseView view, int col, boolean fit) {
 
@@ -705,31 +679,23 @@ public class VirtualView extends BaseView
 	/**
 	 * Move a view to a specific virtual cell
 	 * 
-	 * @param view
-	 *            the view to move
-	 * @param col
-	 *            the col
-	 * @param constraint
-	 *            constraint constant
+	 * @param view       the view to move
+	 * @param col        the col
+	 * @param constraint constraint constant
 	 */
 	public void moveTo(BaseView view, int col, int constraint) {
 		moveTo(view, col, 0, 0, constraint);
 
 	}
-	
+
 	/**
 	 * Move a view to a specific virtual cell
 	 * 
-	 * @param view
-	 *            the view to move
-	 * @param col
-	 *            the col
-	 * @param delh
-	 *            additional horizontal offset
-	 * @param delv
-	 *            additional vertical offset
-	 * @param constraint
-	 *            constraint constant
+	 * @param view       the view to move
+	 * @param col        the col
+	 * @param delh       additional horizontal offset
+	 * @param delv       additional vertical offset
+	 * @param constraint constraint constant
 	 */
 	public void moveTo(BaseView view, int col, int delh, int delv, int constraint) {
 
@@ -800,27 +766,21 @@ public class VirtualView extends BaseView
 			int yf = (int) (bottom - bounds.height - 7 * slop);
 			dh = xf - x0;
 			dv = yf - y0;
-		}
-		else if (constraint == CENTERLEFT) {
+		} else if (constraint == CENTERLEFT) {
 			int xf = (int) (left + slop);
 			dh = xf - x0;
-			System.err.println("CENTERLEFT DV, DELV = " + dv + "," + delv);
-		}
-		else if (constraint == CENTERRIGHT) {
+		} else if (constraint == CENTERRIGHT) {
 			int xf = (int) (right - bounds.width - 2 * slop);
 			dh = xf - x0;
-			System.err.println("CENTERRIGHT DV, DELV = " + dv + "," + delv);
 		}
 
 		view.offset(dh + delh, dv + delv);
 	}
 
-
 	/**
 	 * Activates the view's cell so that it is visible
 	 * 
-	 * @param view
-	 *            the view
+	 * @param view the view
 	 */
 	public void activateViewCell(BaseView view) {
 
@@ -855,8 +815,7 @@ public class VirtualView extends BaseView
 	/**
 	 * Is a given view visible (crue test)
 	 * 
-	 * @param view
-	 *            the view to check
+	 * @param view the view to check
 	 * @return <code>true</code> if the view appears to be visible.
 	 */
 	public boolean isViewVisible(BaseView view) {
@@ -873,11 +832,14 @@ public class VirtualView extends BaseView
 		return b.intersects(c);
 	}
 
-//	public void reportVisibility() {
-//		System.err.println("-------------");
-//		for (BaseView view : _views) {
-//			System.err.println("View " + view.getTitle() + " VIS: " + isViewVisible(view));
-//		}
-//	}
+	@Override
+	public void componentResized(ComponentEvent arg0) {
+		Dimension size = getSize();
+		if (size.height < MINHEIGHT) {
+			size.height = MINHEIGHT;
+			setSize(size);
+		}
+		super.componentResized(arg0);
+	}
 
 }

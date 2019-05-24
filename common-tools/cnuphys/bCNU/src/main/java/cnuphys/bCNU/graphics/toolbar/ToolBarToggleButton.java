@@ -50,48 +50,46 @@ public class ToolBarToggleButton extends CommonToolBarToggleButton {
 	protected boolean triedOnce = false;
 
 	/**
-	 * The x coordinate of hot spot of a custom cursor, if there is one. A
-	 * negative value means it will use the center of the cursor.
+	 * The x coordinate of hot spot of a custom cursor, if there is one. A negative
+	 * value means it will use the center of the cursor.
 	 */
 	protected int xhot = -1;
 
 	/**
-	 * The y coordinate of hot spot of a custom cursor, if there is one. A
-	 * negative value means it will use the center of the cursor.
+	 * The y coordinate of hot spot of a custom cursor, if there is one. A negative
+	 * value means it will use the center of the cursor.
 	 */
 	protected int yhot = -1;
 
 	/**
 	 * Create a toolbar toggle button with default preferred size of 22x22
 	 * 
-	 * @param container the owner container.
+	 * @param container     the owner container.
 	 * @param imageFileName the name if the file holding the icon
-	 * @param toolTip a string for a tool tip
+	 * @param toolTip       a string for a tool tip
 	 */
-	public ToolBarToggleButton(IContainer container, String imageFileName,
-			String toolTip) {
+	public ToolBarToggleButton(IContainer container, String imageFileName, String toolTip) {
 		this(container, imageFileName, toolTip, 24, 24);
 	}
 
 	/**
 	 * Create a toolbar toggle button
 	 * 
-	 * @param container the owner container.
-	 * @param imageFileName the name if the file holding the icon
-	 * @param toolTip a string for a tool tip
-	 * @param preferredWidth the preferred width in pixels.
+	 * @param container       the owner container.
+	 * @param imageFileName   the name if the file holding the icon
+	 * @param toolTip         a string for a tool tip
+	 * @param preferredWidth  the preferred width in pixels.
 	 * @param preferredHeight the preferred height in pixels.
 	 */
-	public ToolBarToggleButton(IContainer container, String imageFileName,
-			String toolTip, int preferredWidth, int preferredHeight) {
+	public ToolBarToggleButton(IContainer container, String imageFileName, String toolTip, int preferredWidth,
+			int preferredHeight) {
 		super();
 		preferredSize = new Dimension(preferredWidth, preferredHeight);
 
 		this.container = container;
 		setFocusPainted(false);
 
-		ImageIcon imageIcon = ImageManager.getInstance()
-				.loadImageIcon(imageFileName);
+		ImageIcon imageIcon = ImageManager.getInstance().loadImageIcon(imageFileName);
 
 		String bareName = new String(imageFileName);
 		int index = bareName.indexOf(".");
@@ -109,8 +107,7 @@ public class ToolBarToggleButton extends CommonToolBarToggleButton {
 			String ext = imageFileName.substring(index);
 			String enabledFileName = baseName + "enabled" + ext;
 			try {
-				ImageIcon enabledImageIcon = ImageManager.getInstance()
-						.loadImageIcon(enabledFileName);
+				ImageIcon enabledImageIcon = ImageManager.getInstance().loadImageIcon(enabledFileName);
 				setSelectedIcon(enabledImageIcon);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -139,8 +136,7 @@ public class ToolBarToggleButton extends CommonToolBarToggleButton {
 
 		if (!triedOnce) {
 			if (customCursorImageFile != null) {
-				Image image = ImageManager.getInstance()
-						.loadImage(customCursorImageFile, this);
+				Image image = ImageManager.getInstance().loadImage(customCursorImageFile, this);
 				if (image != null) {
 
 					if (xhot < 0) {
@@ -149,9 +145,8 @@ public class ToolBarToggleButton extends CommonToolBarToggleButton {
 					if (yhot < 0) {
 						yhot = image.getHeight(container.getComponent()) / 2;
 					}
-					customCursor = Toolkit.getDefaultToolkit()
-							.createCustomCursor(image, new Point(xhot, yhot),
-									"pointer");
+					customCursor = Toolkit.getDefaultToolkit().createCustomCursor(image, new Point(xhot, yhot),
+							"pointer");
 				}
 			}
 			triedOnce = true;
@@ -159,8 +154,7 @@ public class ToolBarToggleButton extends CommonToolBarToggleButton {
 
 		if (customCursor != null) {
 			return customCursor;
-		}
-		else {
+		} else {
 			return Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
 		}
 	}
@@ -192,14 +186,13 @@ public class ToolBarToggleButton extends CommonToolBarToggleButton {
 
 		if (item != null) {
 			if (item.isRightClickable()) {
-				ItemPopupManager.prepareForPopup(item, container,
-						mouseEvent.getPoint());
+				ItemPopupManager.prepareForPopup(item, container, mouseEvent.getPoint());
 				return;
 			}
 
 		}
-		
-		//handled by subclass?
+
+		// handled by subclass?
 		if (view.rightClicked(mouseEvent)) {
 			return;
 		}

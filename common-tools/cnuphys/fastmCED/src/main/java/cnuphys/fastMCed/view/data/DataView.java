@@ -1,6 +1,5 @@
 package cnuphys.fastMCed.view.data;
 
-
 import java.util.List;
 
 import org.jlab.clas.physics.PhysicsEvent;
@@ -13,18 +12,15 @@ import cnuphys.fastMCed.eventio.IPhysicsEventListener;
 import cnuphys.fastMCed.eventio.PhysicsEventManager;
 import cnuphys.fastMCed.fastmc.ParticleHits;
 
-public class DataView extends BaseView implements
-		IPhysicsEventListener {
+public class DataView extends BaseView implements IPhysicsEventListener {
 
 	protected DataTable _dataTable;
 
 	public DataView(String title, DetectorId detector) {
-		super(PropertySupport.TITLE, title, PropertySupport.ICONIFIABLE, true,
-				PropertySupport.TOOLBAR, false,
-				PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
-				PropertySupport.RESIZABLE, true, PropertySupport.WIDTH, DataTableModel.getPreferredWidth(),
-				PropertySupport.HEIGHT, 700, PropertySupport.LEFT, 700,
-				PropertySupport.TOP, 100, PropertySupport.VISIBLE, true);
+		super(PropertySupport.TITLE, title, PropertySupport.ICONIFIABLE, true, PropertySupport.TOOLBAR, false,
+				PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true, PropertySupport.RESIZABLE, true,
+				PropertySupport.WIDTH, DataTableModel.getPreferredWidth(), PropertySupport.HEIGHT, 700,
+				PropertySupport.LEFT, 700, PropertySupport.TOP, 100, PropertySupport.VISIBLE, true);
 
 		_dataTable = new DataTable(detector);
 		add(_dataTable.getScrollPane());
@@ -34,6 +30,7 @@ public class DataView extends BaseView implements
 
 	/**
 	 * A new event generator is active
+	 * 
 	 * @param generator the now active generator
 	 */
 	@Override

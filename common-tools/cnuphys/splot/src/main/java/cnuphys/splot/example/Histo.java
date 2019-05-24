@@ -52,7 +52,8 @@ public class Histo extends AExample {
 			double y = normDev.dev();
 			try {
 				ds.add(y);
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 			}
 		}
@@ -62,13 +63,13 @@ public class Histo extends AExample {
 	public void setPreferences() {
 		DataSet ds = _canvas.getDataSet();
 		ds.getCurveStyle(0).setFillColor(new Color(196, 196, 196, 64));
-		ds.getCurveStyle(0).setLineColor(Color.black);
+		ds.getCurveStyle(0).setBorderColor(Color.black);
 		ds.getCurve(0).getFit().setFitType(FitType.GAUSSIANS);
 		PlotParameters params = _canvas.getParameters();
 		params.setMinExponentY(6);
 		params.setNumDecimalY(0);
-		
-		//test gradient
+
+		// test gradient
 		params.setGradientDrawing(true);
 	}
 

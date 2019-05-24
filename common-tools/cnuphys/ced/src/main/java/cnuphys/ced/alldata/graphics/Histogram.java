@@ -98,8 +98,8 @@ public class Histogram extends PlotDialog {
 		canvas.getPlotTicks().setTickFont(Fonts.smallFont);
 
 		data.getCurveStyle(0).setFillColor(X11Colors.getX11Color("dark red"));
-		data.getCurveStyle(0).setLineColor(new Color(0, 0, 0, 32));
-		data.getCurveStyle(0).setFitColor(X11Colors.getX11Color("dodger blue"));
+		data.getCurveStyle(0).setBorderColor(new Color(0, 0, 0, 32));
+		data.getCurveStyle(0).setFitLineColor(X11Colors.getX11Color("dodger blue"));
 		data.getCurve(0).getFit().setFitType(FitType.NOLINE);
 
 		PlotPanel ppanel = new PlotPanel(canvas, PlotPanel.STANDARD);
@@ -150,7 +150,9 @@ public class Histogram extends PlotDialog {
 
 	/**
 	 * Tests whether this listener is interested in events while accumulating
-	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 * 
+	 * @return <code>true</code> if this listener is NOT interested in events while
+	 *         accumulating
 	 */
 	@Override
 	public boolean ignoreIfAccumulating() {

@@ -41,12 +41,10 @@ public class NoiseParameterDialog extends JDialog {
 	// left (toward lower wire numbers)
 	private static final int LEAN_RIGHT = 1;
 
-	private static final String leanStr[] = { "left leaning shifts",
-			"right leaning shifts" };
+	private static final String leanStr[] = { "left leaning shifts", "right leaning shifts" };
 
-	private static final String[] slStrings = { "Super Layer 1 (Region 1)",
-			"Super Layer 2 (Region 1)", "Super Layer 3 (Region 2)",
-			"Super Layer 4 (Region 2)", "Super Layer 5 (Region 3)",
+	private static final String[] slStrings = { "Super Layer 1 (Region 1)", "Super Layer 2 (Region 1)",
+			"Super Layer 3 (Region 2)", "Super Layer 4 (Region 2)", "Super Layer 5 (Region 3)",
 			"Super Layer 6 (Region 3)" };
 
 	// spinner maxes for layer shifts
@@ -79,8 +77,8 @@ public class NoiseParameterDialog extends JDialog {
 	private int _reason = DialogUtilities.CANCEL_RESPONSE;
 
 	/**
-	 * Create a dialog for editing the noise parameters. There is just one set
-	 * of six (one per superlayer) common to all sectors.
+	 * Create a dialog for editing the noise parameters. There is just one set of
+	 * six (one per superlayer) common to all sectors.
 	 */
 	public NoiseParameterDialog() {
 		setTitle("DC Noise Algorithm Parameters");
@@ -104,8 +102,8 @@ public class NoiseParameterDialog extends JDialog {
 		_clonedParameters = new NoiseReductionParameters[GeoConstants.NUM_SUPERLAYER];
 		for (int superLayer = 0; superLayer < GeoConstants.NUM_SUPERLAYER; superLayer++) {
 			_clonedParameters[superLayer] = new NoiseReductionParameters();
-			_clonedParameters[superLayer].copyEditableParameters(NoiseManager
-					.getInstance().getParameters(0, superLayer));
+			_clonedParameters[superLayer]
+					.copyEditableParameters(NoiseManager.getInstance().getParameters(0, superLayer));
 		}
 
 		stuffHotParameters();
@@ -164,17 +162,14 @@ public class NoiseParameterDialog extends JDialog {
 
 		ButtonGroup bg = new ButtonGroup();
 
-		segmentButton = new JRadioButton("Superlayer Segments",
-				!NoiseReductionParameters.lookForTracks());
-		trackButton = new JRadioButton("Tracks",
-				NoiseReductionParameters.lookForTracks());
+		segmentButton = new JRadioButton("Superlayer Segments", !NoiseReductionParameters.lookForTracks());
+		trackButton = new JRadioButton("Tracks", NoiseReductionParameters.lookForTracks());
 
 		ActionListener al = new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				NoiseReductionParameters.setLookForTracks(trackButton
-						.isSelected());
+				NoiseReductionParameters.setLookForTracks(trackButton.isSelected());
 				ClasIoEventManager.getInstance().reloadCurrentEvent();
 			}
 
@@ -212,8 +207,7 @@ public class NoiseParameterDialog extends JDialog {
 
 	// number of missing layer selector
 	private void createMissingLayerComboBox() {
-		String[] slStrings = { "Allow no missing layers",
-				"Allow 1 missing layer", "Allow 2 missing layers",
+		String[] slStrings = { "Allow no missing layers", "Allow 1 missing layer", "Allow 2 missing layers",
 				"Allow 3 missing layers", "Allow 4 missing layers" };
 
 		_missingLayerComboBox = new JComboBox(slStrings);
@@ -272,8 +266,7 @@ public class NoiseParameterDialog extends JDialog {
 	/**
 	 * Create a panel for the layer shifts.
 	 * 
-	 * @param lean
-	 *            either LEAN_LEFT or LEAN_RIGHT.
+	 * @param lean either LEAN_LEFT or LEAN_RIGHT.
 	 * @return the layer shift panel.
 	 */
 	private JPanel createLayerShiftArray(final int lean) {
@@ -290,14 +283,12 @@ public class NoiseParameterDialog extends JDialog {
 						NoiseReductionParameters hot = _clonedParameters[_hotIndex];
 						if (lean == LEAN_LEFT) {
 							int leftShifts[] = hot.getLeftLayerShifts();
-							SpinnerNumberModel model = (SpinnerNumberModel) spinner
-									.getModel();
+							SpinnerNumberModel model = (SpinnerNumberModel) spinner.getModel();
 							leftShifts[layer] = model.getNumber().intValue();
 							_miniChamber.repaint();
 						} else {
 							int rightShifts[] = hot.getRightLayerShifts();
-							SpinnerNumberModel model = (SpinnerNumberModel) spinner
-									.getModel();
+							SpinnerNumberModel model = (SpinnerNumberModel) spinner.getModel();
 							rightShifts[layer] = model.getNumber().intValue();
 							_miniChamber.repaint();
 						}
@@ -309,15 +300,13 @@ public class NoiseParameterDialog extends JDialog {
 		};
 
 		for (int layer = 0; layer < GeoConstants.NUM_LAYER; layer++) {
-			SpinnerNumberModel model = new SpinnerNumberModel(0, 0,
-					_spinnerMax[layer], 1);
+			SpinnerNumberModel model = new SpinnerNumberModel(0, 0, _spinnerMax[layer], 1);
 			_shiftSpinner[lean][layer] = new JSpinner(model);
 			_shiftSpinner[lean][layer].addChangeListener(changeListener);
 			if (layer == 0) {
 				_shiftSpinner[lean][layer].setEnabled(false);
 			}
-			_shiftSpinner[lean][layer].setEditor(new JSpinner.DefaultEditor(
-					_shiftSpinner[lean][layer]));
+			_shiftSpinner[lean][layer].setEditor(new JSpinner.DefaultEditor(_shiftSpinner[lean][layer]));
 			panel.add(_shiftSpinner[lean][layer]);
 		}
 
@@ -357,8 +346,7 @@ public class NoiseParameterDialog extends JDialog {
 
 		};
 
-		return ButtonPanel.closeOutPanel(ButtonPanel.USE_OKCANCELAPPLY, alist,
-				30);
+		return ButtonPanel.closeOutPanel(ButtonPanel.USE_OKCANCELAPPLY, alist, 30);
 
 	}
 
@@ -370,17 +358,13 @@ public class NoiseParameterDialog extends JDialog {
 			setVisible(false);
 		}
 
-		if ((reason == DialogUtilities.OK_RESPONSE)
-				|| (reason == DialogUtilities.APPLY_RESPONSE)) {
+		if ((reason == DialogUtilities.OK_RESPONSE) || (reason == DialogUtilities.APPLY_RESPONSE)) {
 			// copy from clone to real data--all sectors the same
 
 			for (int sector = 0; sector < 6; sector++) {
 				for (int superLayer = 0; superLayer < GeoConstants.NUM_SUPERLAYER; superLayer++) {
-					NoiseManager
-							.getInstance()
-							.getParameters(sector, superLayer)
-							.copyEditableParameters(
-									_clonedParameters[superLayer]);
+					NoiseManager.getInstance().getParameters(sector, superLayer)
+							.copyEditableParameters(_clonedParameters[superLayer]);
 				}
 			}
 			ViewManager.getInstance().refreshAllViews();
@@ -395,8 +379,7 @@ public class NoiseParameterDialog extends JDialog {
 	/**
 	 * Why the dialog closed.
 	 * 
-	 * @return either DialogUtilities.OK_RESPONSE or
-	 *         DialogUtilities.CANCEL_RESPONSE
+	 * @return either DialogUtilities.OK_RESPONSE or DialogUtilities.CANCEL_RESPONSE
 	 */
 	public int getReason() {
 		return _reason;

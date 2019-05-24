@@ -20,12 +20,12 @@ public class FTOFGeometry {
 	public static final int PANEL_1A = 0;
 	public static final int PANEL_1B = 1;
 	public static final int PANEL_2 = 2;
-	
-	//the overall detector
+
+	// the overall detector
 	private static FTOFDetector _ftofDetector;
-	
-	//first index -s sector 0..5
-	//2nd index = panel type (superlayer) 0..2 for 1A, 1B, 2
+
+	// first index -s sector 0..5
+	// 2nd index = panel type (superlayer) 0..2 for 1A, 1B, 2
 	private static FTOFLayer[][] _ftofLayers = new FTOFLayer[6][3];
 
 	public static int numPaddles[] = new int[3];
@@ -34,8 +34,8 @@ public class FTOFGeometry {
 	private static FTOFPanel _ftofPanel[] = new FTOFPanel[3];
 	private static String ftofNames[] = { "Panel 1A", "Panel 1B", "Panel 2" };
 
-	private static ConstantProvider tofDataProvider = 
-			GeometryFactory.getConstants(org.jlab.detector.base.DetectorType.FTOF);
+	private static ConstantProvider tofDataProvider = GeometryFactory
+			.getConstants(org.jlab.detector.base.DetectorType.FTOF);
 
 	// only need sector 0
 	private static FTOFSector _clas_sector0;
@@ -48,12 +48,13 @@ public class FTOFGeometry {
 	public static FTOFPanel[] getFtofPanel() {
 		return _ftofPanel;
 	}
-		
+
 	/**
 	 * Get the layer hits
+	 * 
 	 * @param sect0 the 0-based sector 0..5
 	 * @param ptype the panel type (0,1,2) = (1A, 1B, 2)
-	 * @param path the 3D path
+	 * @param path  the 3D path
 	 * @return the layer hits
 	 */
 	public static List<DetectorHit> getHits(int sect0, int ptype, Path3D path) {
@@ -71,45 +72,38 @@ public class FTOFGeometry {
 		System.out.println("===  FTOF Geometry Initialization ===");
 		System.out.println("=====================================");
 
-		_ftofDetector = (new FTOFFactory())
-				.createDetectorCLAS(tofDataProvider);
-		
+		_ftofDetector = (new FTOFFactory()).createDetectorCLAS(tofDataProvider);
+
 		for (int sect = 0; sect < 6; sect++) {
 			FTOFSector ftofSector = _ftofDetector.getSector(sect);
 			for (int ptype = 0; ptype < 3; ptype++) {
-				//only one layer (0)
+				// only one layer (0)
 				_ftofLayers[sect][ptype] = ftofSector.getSuperlayer(ptype).getLayer(0);
 			}
 		}
-		
+
 		_clas_sector0 = _ftofDetector.getSector(0);
 
 		// here superlayers are panels 1a, 1b, 2
 		for (int superLayer = 0; superLayer < 3; superLayer++) {
 
 			// there is only a layer 0
-			FTOFLayer ftofLayer = _clas_sector0.getSuperlayer(superLayer)
-					.getLayer(0);
-			
-			
+			FTOFLayer ftofLayer = _clas_sector0.getSuperlayer(superLayer).getLayer(0);
+
 			numPaddles[superLayer] = ftofLayer.getNumComponents();
 
-			_ftofPanel[superLayer] = new FTOFPanel(ftofNames[superLayer],
-					numPaddles[superLayer]);
+			_ftofPanel[superLayer] = new FTOFPanel(ftofNames[superLayer], numPaddles[superLayer]);
 		}
 
 	}
 
 	/**
 	 * 
-	 * @param superlayer
-	 *            PANEL_1A, PANEL_1B or PANEL_12 (0, 1, 2)
-	 * @param paddleId
-	 *            the 1-based paddle id
+	 * @param superlayer PANEL_1A, PANEL_1B or PANEL_12 (0, 1, 2)
+	 * @param paddleId   the 1-based paddle id
 	 */
 	public static ScintillatorPaddle getPaddle(int superLayer, int paddleId) {
-		FTOFLayer ftofLayer = _clas_sector0.getSuperlayer(superLayer).getLayer(
-				0);
+		FTOFLayer ftofLayer = _clas_sector0.getSuperlayer(superLayer).getLayer(0);
 		ScintillatorPaddle paddle = ftofLayer.getComponent(paddleId - 1);
 		return paddle;
 	}
@@ -117,17 +111,12 @@ public class FTOFGeometry {
 	/**
 	 * Used by the 3D drawing
 	 * 
-	 * @param sector
-	 *            the 1-based sector
-	 * @param superlayer
-	 *            PANEL_1A, PANEL_1B or PANEL_12 (0, 1, 2)
-	 * @param paddleId
-	 *            the 1-based paddle ID
-	 * @param coords
-	 *            holds 8*3 = 24 values [x1, y1, z1, ..., x8, y8, z8]
+	 * @param sector     the 1-based sector
+	 * @param superlayer PANEL_1A, PANEL_1B or PANEL_12 (0, 1, 2)
+	 * @param paddleId   the 1-based paddle ID
+	 * @param coords     holds 8*3 = 24 values [x1, y1, z1, ..., x8, y8, z8]
 	 */
-	public static void paddleVertices(int sector, int superlayer, int paddleId,
-			float[] coords) {
+	public static void paddleVertices(int sector, int superlayer, int paddleId, float[] coords) {
 
 		Point3D v[] = new Point3D[8];
 
@@ -149,11 +138,12 @@ public class FTOFGeometry {
 			coords[j + 2] = (float) v[i].z();
 		}
 	}
-	
+
 	/**
 	 * Chech paddle intersection
+	 * 
 	 * @param superlayer the 0 based superlayer for 1A, 1B, 2
-	 * @param paddleid the 0 based paddle id
+	 * @param paddleid   the 0 based paddle id
 	 * @return if the projected polygon fully intersects the plane
 	 */
 	public static boolean doesProjectedPolyFullyIntersect(int superlayer, int paddleid, Plane3D projectionPlane) {
@@ -177,27 +167,21 @@ public class FTOFGeometry {
 	 * Get the intersections with a constant phi plane. If the paddle does not
 	 * intersect (happens as phi grows) return null;
 	 * 
-	 * @param superlayer
-	 *            0, 1 or 2 for 1A, 1B, 2
-	 * @param paddleid
-	 *            the 0-based paddle id
-	 * @param projectionPlane
-	 *            the projection plane
+	 * @param superlayer      0, 1 or 2 for 1A, 1B, 2
+	 * @param paddleid        the 0-based paddle id
+	 * @param projectionPlane the projection plane
 	 */
-	public static boolean getIntersections(int superlayer,
-			int paddleid, Plane3D projectionPlane, Point2D.Double wp[]) {
-		FTOFLayer ftofLayer = _clas_sector0.getSuperlayer(superlayer).getLayer(
-				0);
+	public static boolean getIntersections(int superlayer, int paddleid, Plane3D projectionPlane, Point2D.Double wp[]) {
+		FTOFLayer ftofLayer = _clas_sector0.getSuperlayer(superlayer).getLayer(0);
 		ScintillatorPaddle paddle = ftofLayer.getComponent(paddleid);
 		return GeometryManager.getProjectedPolygon(paddle, projectionPlane, 6, 4, wp, null);
 	}
 
 	/**
 	 * Get the length of a paddle in cm
-	 * @param superlayer
-	 *            0, 1 or 2 for 1A, 1B, 2
-	 * @param paddleid
-	 *            the 0-based paddle id
+	 * 
+	 * @param superlayer 0, 1 or 2 for 1A, 1B, 2
+	 * @param paddleid   the 0-based paddle id
 	 * @return the length of the paddle
 	 */
 	public static double getLength(int superlayer, int paddleId) {
@@ -205,11 +189,11 @@ public class FTOFGeometry {
 		ScintillatorPaddle paddle = ftofLayer.getComponent(paddleId);
 		return paddle.getLength();
 	}
-	
+
 	/**
 	 * Get an array of all the lengths
-	 * @param superlayer
-	 *            0, 1 or 2 for 1A, 1B, 2
+	 * 
+	 * @param superlayer 0, 1 or 2 for 1A, 1B, 2
 	 * @return an array of all the paddle lengths
 	 */
 	public static double[] getLengths(int superlayer) {
@@ -219,13 +203,13 @@ public class FTOFGeometry {
 		}
 		return length;
 	}
-	
+
 	public static void main(String arg[]) {
 		FTOFGeometry.initialize();
 
 		int superLayer = PANEL_1B;
 		int paddleId = 20;
-		
+
 		ScintillatorPaddle paddle = getPaddle(superLayer, paddleId);
 
 		System.err.println("Num vertex points: " + paddle.getNumVolumePoints());

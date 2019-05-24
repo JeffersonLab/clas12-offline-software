@@ -18,8 +18,7 @@ import cnuphys.bCNU.util.Environment;
  * @author heddle
  */
 @SuppressWarnings("serial")
-public class FunnelLassoRectButton extends ToolBarToggleButton implements
-		IRubberbanded {
+public class FunnelLassoRectButton extends ToolBarToggleButton implements IRubberbanded {
 
 	/**
 	 * Current mouse position.
@@ -35,13 +34,10 @@ public class FunnelLassoRectButton extends ToolBarToggleButton implements
 	/**
 	 * Creates the default pointer button used for selecting objects,
 	 * 
-	 * @param container
-	 *            the owner container.
+	 * @param container the owner container.
 	 */
-	public FunnelLassoRectButton(final IContainer container,
-			ILassoListener lassoListener, boolean xormode) {
-		super(container, "images/lassofunnel.png",
-				"Rubberband a filter rectangle");
+	public FunnelLassoRectButton(final IContainer container, ILassoListener lassoListener, boolean xormode) {
+		super(container, "images/lassofunnel.png", "Rubberband a filter rectangle");
 
 		_lassoListener = lassoListener;
 		_xorMode = xormode;
@@ -53,12 +49,11 @@ public class FunnelLassoRectButton extends ToolBarToggleButton implements
 	}
 
 	/**
-	 * The mouse was clicked. Note that the order the events will come is
-	 * PRESSED, RELEASED, CLICKED. And a CLICKED will happen only if the mouse
-	 * was not moved between press and release.
+	 * The mouse was clicked. Note that the order the events will come is PRESSED,
+	 * RELEASED, CLICKED. And a CLICKED will happen only if the mouse was not moved
+	 * between press and release.
 	 * 
-	 * @param mouseEvent
-	 *            the causal event.
+	 * @param mouseEvent the causal event.
 	 */
 	@Override
 	public void mousePressed(MouseEvent mouseEvent) {
@@ -70,8 +65,7 @@ public class FunnelLassoRectButton extends ToolBarToggleButton implements
 			}
 
 			Environment.getInstance().setDragging(true);
-			rubberband = new Rubberband(container, this,
-					Rubberband.Policy.RECTANGLE, _xorMode);
+			rubberband = new Rubberband(container, this, Rubberband.Policy.RECTANGLE, _xorMode);
 			rubberband.setFillColor(new Color(0, 255, 128, 96));
 			rubberband.setHighlightColor1(Color.cyan);
 			rubberband.setHighlightColor2(Color.orange);
@@ -84,8 +78,7 @@ public class FunnelLassoRectButton extends ToolBarToggleButton implements
 	/**
 	 * Mouse has been dragged with pointer button active.
 	 * 
-	 * @param mouseEvent
-	 *            the causal event.
+	 * @param mouseEvent the causal event.
 	 */
 	@Override
 	public void mouseDragged(MouseEvent mouseEvent) {
@@ -93,12 +86,11 @@ public class FunnelLassoRectButton extends ToolBarToggleButton implements
 	}
 
 	/**
-	 * The mouse was clicked. Note that the order the events will come is
-	 * PRESSED, RELEASED, CLICKED. And a CLICKED will happen only if the mouse
-	 * was not moved between press and release.
+	 * The mouse was clicked. Note that the order the events will come is PRESSED,
+	 * RELEASED, CLICKED. And a CLICKED will happen only if the mouse was not moved
+	 * between press and release.
 	 * 
-	 * @param mouseEvent
-	 *            the causal event.
+	 * @param mouseEvent the causal event.
 	 */
 	@Override
 	public void mouseReleased(MouseEvent mouseEvent) {
@@ -107,8 +99,7 @@ public class FunnelLassoRectButton extends ToolBarToggleButton implements
 	/**
 	 * Handle a mouse double event.
 	 * 
-	 * @param mouseEvent
-	 *            the causal event
+	 * @param mouseEvent the causal event
 	 */
 	@Override
 	public void mouseDoubleClicked(MouseEvent mouseEvent) {
@@ -117,8 +108,7 @@ public class FunnelLassoRectButton extends ToolBarToggleButton implements
 	/**
 	 * Handle a mouse button 3 event.
 	 * 
-	 * @param mouseEvent
-	 *            the causal event
+	 * @param mouseEvent the causal event
 	 */
 	@Override
 	public void mouseButton3Click(MouseEvent mouseEvent) {

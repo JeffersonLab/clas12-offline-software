@@ -18,6 +18,7 @@ import cnuphys.splot.pdata.DataSet;
 
 /**
  * Used to define a scatter plot
+ * 
  * @author heddle
  *
  */
@@ -32,37 +33,35 @@ public class DefineScatterDialog extends JDialog implements ActionListener, Prop
 		setModal(true);
 		setLayout(new BorderLayout(4, 4));
 		setIconImage(ImageManager.cnuIcon.getImage());
-		
+
 		_scatterPanel = new ScatterPanel();
 		add(_scatterPanel, BorderLayout.CENTER);
-		
+
 		SelectPanel sp[] = _scatterPanel.getScatterPanels();
 		sp[0].addPropertyChangeListener(this);
 		sp[1].addPropertyChangeListener(this);
-		
+
 		addSouth();
 		pack();
 		DialogUtilities.centerDialog(this);
 	}
-		
-	//add the buttons
-	private void addSouth(){
+
+	// add the buttons
+	private void addSouth() {
 		JPanel sp = new JPanel();
 		sp.setLayout(new FlowLayout(FlowLayout.CENTER, 200, 10));
-		
+
 		_okButton = new JButton("  OK  ");
 		_okButton.setEnabled(false);
 		_cancelButton = new JButton("Cancel");
-		
+
 		_okButton.addActionListener(this);
 		_cancelButton.addActionListener(this);
-		
+
 		sp.add(_okButton);
 		sp.add(_cancelButton);
 		add(sp, BorderLayout.SOUTH);
 	}
-
-	
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -70,8 +69,7 @@ public class DefineScatterDialog extends JDialog implements ActionListener, Prop
 		if (o == _okButton) {
 			_reason = DialogUtilities.OK_RESPONSE;
 			setVisible(false);
-		}
-		else if (o == _cancelButton) {
+		} else if (o == _cancelButton) {
 			_reason = DialogUtilities.CANCEL_RESPONSE;
 			setVisible(false);
 		}
@@ -79,14 +77,16 @@ public class DefineScatterDialog extends JDialog implements ActionListener, Prop
 
 	/**
 	 * Get the reason the dialog closed
+	 * 
 	 * @return the reason the dialog closed
 	 */
 	public int getReason() {
 		return _reason;
 	}
-	
+
 	/**
 	 * Return a DataSet ready for filling if the user hit ok
+	 * 
 	 * @return a DataSet or <code>null</code>.
 	 */
 	public DataSet getDataSeta() {
@@ -133,11 +133,10 @@ public class DefineScatterDialog extends JDialog implements ActionListener, Prop
 		int reason = dialog.getReason();
 		if (reason == DialogUtilities.OK_RESPONSE) {
 			System.err.println("OK");
-		}
-		else {
+		} else {
 			System.err.println("CANCEL");
 		}
-		
+
 		System.exit(0);
 	}
 

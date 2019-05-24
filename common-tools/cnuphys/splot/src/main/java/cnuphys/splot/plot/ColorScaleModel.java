@@ -12,7 +12,7 @@ public class ColorScaleModel {
 
 	// a standard color scale
 	private static ColorScaleModel _blueToRed;
-	
+
 	/**
 	 * The array of colors
 	 */
@@ -23,25 +23,23 @@ public class ColorScaleModel {
 	 */
 	private static final double TINY = 1.0e-6;
 
-	// Color returned for a too-small 
+	// Color returned for a too-small
 	private Color _tooSmallColor = new Color(240, 240, 240, 64);
 
-	// Color returned for a too-big value 
+	// Color returned for a too-big value
 	private Color _tooBigColor = new Color(64, 64, 64, 64);
-	
+
 	private Color _zeroColor = Color.white;
 
-
 	private double _minVal;
-	
+
 	private double _maxVal;
 
 	/**
-	 * This creates a ColorScaleModel for converting a value into a color. 
+	 * This creates a ColorScaleModel for converting a value into a color.
 	 * 
 	 * @param minVal the minimum value;
-	 * @param maxVal the maximum value
-	 *            the array of colors.
+	 * @param maxVal the maximum value the array of colors.
 	 */
 	public ColorScaleModel(double minVal, double maxVal, Color[] colors) {
 		_colors = colors;
@@ -49,38 +47,32 @@ public class ColorScaleModel {
 		_maxVal = maxVal;
 	}
 
-
 	/**
 	 * Get a standard blue to red colors scale
+	 * 
 	 * @return a standard blue to red color scale
 	 */
 	public static ColorScaleModel blueToRed() {
 		if (_blueToRed == null) {
 			Color colors[] = {
-	//				new Color(0, 0, 139),
-	//				new Color(0, 0, 255),
-	//				new Color(0, 128, 255),
-					new Color(240, 240, 255),
-					new Color(128, 255, 255),
-					new Color(0, 255, 255),
-					new Color(86, 255, 86), //
-					new Color(173, 255, 47),
-					new Color(255, 255, 0),
-					new Color(255, 165, 0),
-					new Color(255, 69, 0),
+					// new Color(0, 0, 139),
+					// new Color(0, 0, 255),
+					// new Color(0, 128, 255),
+					new Color(240, 240, 255), new Color(128, 255, 255), new Color(0, 255, 255), new Color(86, 255, 86), //
+					new Color(173, 255, 47), new Color(255, 255, 0), new Color(255, 165, 0), new Color(255, 69, 0),
 					new Color(255, 0, 0),
-				//	new Color(139, 0, 0),
-					new Color(127, 0, 127)
-			};
+					// new Color(139, 0, 0),
+					new Color(127, 0, 127) };
 			_blueToRed = new ColorScaleModel(0.0, 1.0, colors);
 		}
 
 		return _blueToRed;
 	}
-	
+
 	/**
 	 * Get a color via getColor but add an alpha value
-	 * @param value the value 
+	 * 
+	 * @param value the value
 	 * @param alpha the alpha value [0..255]
 	 * @return the color corresponding to the value.
 	 */
@@ -107,8 +99,7 @@ public class ColorScaleModel {
 	 * <p>
 	 * value = 4 (exactly) -> G
 	 * 
-	 * @param value
-	 *            the for which we want the color.
+	 * @param value the for which we want the color.
 	 * @return the color corresponding to the value.
 	 */
 	public Color getColor(double value) {
@@ -117,22 +108,25 @@ public class ColorScaleModel {
 			// System.err.println("NULL COLOR");
 			return null;
 		}
-		
+
 		int collen = _colors.length;
 
 		if (relativeDifference(value, _minVal) < TINY) {
 			return _zeroColor;
-		} else if (relativeDifference(value, _maxVal) < TINY) {
+		}
+		else if (relativeDifference(value, _maxVal) < TINY) {
 			return _colors[collen - 1];
-		} else if (value < _minVal) {
+		}
+		else if (value < _minVal) {
 			return _tooSmallColor;
-		} else if (value > _maxVal) {
+		}
+		else if (value > _maxVal) {
 			return _tooBigColor;
 		}
-		
-		double fract = (value - _minVal)/(_maxVal - _minVal);
-		
-		int index = (int)((collen-1)*fract);
+
+		double fract = (value - _minVal) / (_maxVal - _minVal);
+
+		int index = (int) ((collen - 1) * fract);
 
 		if (index < 0) {
 			return _tooSmallColor;
@@ -141,11 +135,11 @@ public class ColorScaleModel {
 			return _tooBigColor;
 		}
 
-		double partFract = (collen-1)*fract - index;
+		double partFract = (collen - 1) * fract - index;
 
 		Color c1 = _colors[index];
 		Color c2 = _colors[index + 1];
-		
+
 		Color interpColor = getInterpretedColor(c1, c2, partFract);
 //		System.err.println(DoubleFormat.doubleFormat(partFract, 3) + 
 //				"  red: " + c1.getRed() + ", " + c2.getRed() + ", " + interpColor.getRed() +
@@ -156,13 +150,11 @@ public class ColorScaleModel {
 	}
 
 	/**
-	 * Compute the fraction difference between two points, normalized to the
-	 * full scale.
+	 * Compute the fraction difference between two points, normalized to the full
+	 * scale.
 	 * 
-	 * @param v1
-	 *            one value.
-	 * @param v2
-	 *            the other value.
+	 * @param v1 one value.
+	 * @param v2 the other value.
 	 * @return the fractional difference.
 	 */
 	private double relativeDifference(double v1, double v2) {
@@ -172,7 +164,8 @@ public class ColorScaleModel {
 
 		if (minv == maxv) {
 			return 1.0;
-		} else {
+		}
+		else {
 			return Math.abs((v1 - v2) / (maxv - minv));
 		}
 	}
@@ -205,16 +198,14 @@ public class ColorScaleModel {
 	}
 
 	/**
-	 * @param tooSmallColor
-	 *            the tooSmallColor to set
+	 * @param tooSmallColor the tooSmallColor to set
 	 */
 	public void setTooSmallColor(Color tooSmallColor) {
 		_tooSmallColor = tooSmallColor;
 	}
 
 	/**
-	 * @param tooBigColor
-	 *            the tooBigColor to set
+	 * @param tooBigColor the tooBigColor to set
 	 */
 	public void setTooBigColor(Color tooBigColor) {
 		_tooBigColor = tooBigColor;

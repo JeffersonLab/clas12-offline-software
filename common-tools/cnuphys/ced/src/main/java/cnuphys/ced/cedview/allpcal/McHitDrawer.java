@@ -28,7 +28,6 @@ public class McHitDrawer extends PCALViewDrawer {
 	@Override
 	public void draw(Graphics g, IContainer container) {
 
-
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
@@ -38,7 +37,7 @@ public class McHitDrawer extends PCALViewDrawer {
 		if (!_view.showMcTruth()) {
 			return;
 		}
-		
+
 		if (!_view.isSingleEventMode()) {
 			return;
 		}
@@ -75,18 +74,14 @@ public class McHitDrawer extends PCALViewDrawer {
 			PCALGeometry.getTransformations().clasToLocal(localP, clasP);
 			int sector = GeometryManager.getSector(labXYZ[0], labXYZ[1]);
 			localP.setZ(0);
-			
-			List<String> fbs = PCAL.gemcHitFeedback(hitIndex, 
-					DataSupport.FB_CLAS_XYZ + DataSupport.FB_CLAS_RTP
-					+ DataSupport.FB_LOCAL_XYZ
-					+ DataSupport.FB_TOTEDEP, 
-					PCALGeometry.getTransformations());
+
+			List<String> fbs = PCAL.gemcHitFeedback(hitIndex, DataSupport.FB_CLAS_XYZ + DataSupport.FB_CLAS_RTP
+					+ DataSupport.FB_LOCAL_XYZ + DataSupport.FB_TOTEDEP, PCALGeometry.getTransformations());
 
 			// get the right item
 			_view.getHexSectorItem(sector).ijkToScreen(container, localP, pp);
 
-			FeedbackRect rr = new FeedbackRect(FeedbackRect.Dtype.PCAL, pp.x - 4, pp.y - 4, 8, 8,
-					hitIndex, 0, fbs);
+			FeedbackRect rr = new FeedbackRect(FeedbackRect.Dtype.PCAL, pp.x - 4, pp.y - 4, 8, 8, hitIndex, 0, fbs);
 			_fbRects.addElement(rr);
 
 			DataDrawSupport.drawGemcHit(g, pp);
@@ -96,18 +91,14 @@ public class McHitDrawer extends PCALViewDrawer {
 	/**
 	 * Use what was drawn to generate feedback strings
 	 * 
-	 * @param container
-	 *            the drawing container
-	 * @param screenPoint
-	 *            the mouse location
-	 * @param worldPoint
-	 *            the corresponding world location
-	 * @param feedbackStrings
-	 *            add strings to this collection
+	 * @param container       the drawing container
+	 * @param screenPoint     the mouse location
+	 * @param worldPoint      the corresponding world location
+	 * @param feedbackStrings add strings to this collection
 	 */
 	@Override
-	public void feedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public void feedback(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
 		if (_fbRects.isEmpty()) {
 			return;
@@ -115,7 +106,7 @@ public class McHitDrawer extends PCALViewDrawer {
 
 		int strips[] = PCAL.strip();
 		int views[] = PCAL.view();
-		
+
 		for (FeedbackRect rr : _fbRects) {
 			boolean contains = rr.contains(screenPoint, feedbackStrings);
 			if (contains && (rr.hitIndex >= 0)) {
@@ -124,21 +115,19 @@ public class McHitDrawer extends PCALViewDrawer {
 
 				// additional feedback
 				if (rr.type == FeedbackRect.Dtype.PCAL) {
-					
+
 					int strip = strips[hitIndex];
 					int view = views[hitIndex];
-					
+
 					if ((strip > 0) && (view > 0)) {
-						String s = DataSupport.trueColor + "Gemc Hit "
-								+ " type "
-								+ DataDrawSupport.EC_VIEW_NAMES[view]
+						String s = DataSupport.trueColor + "Gemc Hit " + " type " + DataDrawSupport.EC_VIEW_NAMES[view]
 								+ " strip " + strip;
 						feedbackStrings.add(s);
 					}
 				}
-				
+
 				return;
-			} //contains
+			} // contains
 		}
 
 	}

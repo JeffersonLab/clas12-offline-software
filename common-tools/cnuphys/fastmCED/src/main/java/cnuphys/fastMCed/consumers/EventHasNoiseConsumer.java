@@ -11,13 +11,14 @@ import cnuphys.fastMCed.streaming.StreamReason;
 
 /**
  * This is a test consumer that will flag an event that SNR determined has noise
+ * 
  * @author heddle
  *
  */
 public class EventHasNoiseConsumer extends PhysicsEventConsumer {
-	
+
 	public EventHasNoiseConsumer() {
-		_active = false; //default is not active
+		_active = false; // default is not active
 	}
 
 	@Override
@@ -27,15 +28,14 @@ public class EventHasNoiseConsumer extends PhysicsEventConsumer {
 
 	@Override
 	public void streamingChange(StreamReason reason) {
-		//ignore
+		// ignore
 	}
 
 	@Override
 	public StreamProcessStatus streamingPhysicsEvent(PhysicsEvent event, List<ParticleHits> particleHits) {
 		if (SNRManager.getInstance().getNoiseCount() > 0) {
 			return StreamProcessStatus.FLAG;
-		}
-		else {
+		} else {
 			return StreamProcessStatus.CONTINUE;
 		}
 	}

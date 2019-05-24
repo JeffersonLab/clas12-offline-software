@@ -1,0 +1,35 @@
+[
+    {
+        "entries": [
+            {
+                "info": "crate id", 
+                "name": "crate", 
+                "type": "B"
+            }, 
+            {
+                "info": "slot id", 
+                "name": "slot", 
+                "type": "B"
+            }, 
+            {
+                "info": "channel id", 
+                "name": "channel", 
+                "type": "S"
+            }, 
+            {
+                "info": "order: 2 - TDCL , 3 - TDCR", 
+                "name": "order", 
+                "type": "B"
+            }, 
+            {
+                "info": "TDC value", 
+                "name": "TDC", 
+                "type": "I"
+            }
+        ], 
+        "group": 20000, 
+        "info": "TDC bank for untranslated signals", 
+        "item": 12, 
+        "name": "RAW::tdc"
+    }
+]

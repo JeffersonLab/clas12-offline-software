@@ -1,0 +1,90 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the hit", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "status of the cluster", 
+                "name": "status", 
+                "type": "S"
+            }, 
+            {
+                "info": "matched DC track id", 
+                "name": "trackid", 
+                "type": "S"
+            }, 
+            {
+                "info": "sector of FTOF", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "panel id of FTOF (1-1A, 2-1B, 3-2", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "paddle id of FTOF hit with lowest paddle id in cluster ", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "E dep (MeV) of the cluster", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster hit time (ns)", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "E dep unc (MeV) of the cluster", 
+                "name": "energy_unc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster hit time unc (ns)", 
+                "name": "time_unc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Global X coor (cm) of cluster hit", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "Global Y coor (cm) of cluster hit", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "Global Z coor (cm) of cluster hit", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "Global X coor unc (cm)  of cluster hit", 
+                "name": "x_unc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Global Y coor unc (cm) of cluster hit", 
+                "name": "y_unc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Global Z coor unc (cm) of cluster hit", 
+                "name": "z_unc", 
+                "type": "F"
+            }
+        ], 
+        "group": 21200, 
+        "info": "reconstructed clusters from FTOF", 
+        "item": 32, 
+        "name": "FTOF::clusters"
+    }
+]

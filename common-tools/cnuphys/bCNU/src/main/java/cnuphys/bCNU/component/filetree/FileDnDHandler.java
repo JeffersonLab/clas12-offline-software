@@ -28,12 +28,9 @@ public class FileDnDHandler {
 	/**
 	 * The constructor for a DnD handler.
 	 * 
-	 * @param parent
-	 *            the view parent
-	 * @param target
-	 *            the map container
-	 * @param handler
-	 *            the handler
+	 * @param parent  the view parent
+	 * @param target  the map container
+	 * @param handler the handler
 	 */
 	public FileDnDHandler(Object parent, Component target, IFileHandler handler) {
 		_parent = parent;
@@ -44,8 +41,7 @@ public class FileDnDHandler {
 	/**
 	 * Handles a list of files that have been dropped.
 	 * 
-	 * @param fileList
-	 *            the list of files.
+	 * @param fileList the list of files.
 	 */
 	protected void handleFileList(List<?> fileList) {
 
@@ -58,16 +54,14 @@ public class FileDnDHandler {
 		if (size == 1) {
 			File file = (File) (fileList.get(0));
 			if (file != null) {
-				_handler.handleFile(_parent, file,
-						IFileHandler.HandleAction.DRAGANDDROP);
+				_handler.handleFile(_parent, file, IFileHandler.HandleAction.DRAGANDDROP);
 			}
 		} else { // multiple files
 			File files[] = new File[size];
 			for (int i = 0; i < size; i++) {
 				files[i] = (File) (fileList.get(i));
 			}
-			_handler.handleFiles(_parent, files,
-					IFileHandler.HandleAction.DRAGANDDROP);
+			_handler.handleFiles(_parent, files, IFileHandler.HandleAction.DRAGANDDROP);
 		}
 	}
 

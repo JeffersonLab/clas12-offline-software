@@ -31,24 +31,25 @@ public class ScatterPlot extends PlotDialog {
 	// the x and y column data
 	private ColumnData _colDatX;
 	private ColumnData _colDatY;
-	
-	//the (alternative) x and y expressions
-	private String  _namedExpressionNameX;
-	private String  _namedExpressionNameY;
+
+	// the (alternative) x and y expressions
+	private String _namedExpressionNameX;
+	private String _namedExpressionNameY;
 	private NamedExpression _expressionX;
 	private NamedExpression _expressionY;
 
 	/**
 	 * Create a Scatter Plot
+	 * 
 	 * @param dataSet the underlying data set
 	 */
 	public ScatterPlot(DataSet dataSet) {
 		super(ScatterPanel.getTitle(dataSet));
 		_dataSet = dataSet;
-		
+
 		String xname = dataSet.getColumnName(0);
 		String yname = dataSet.getColumnName(1);
-		
+
 		boolean isColumnX = DataManager.getInstance().validColumnName(xname);
 		boolean isColumnY = DataManager.getInstance().validColumnName(yname);
 
@@ -58,7 +59,7 @@ public class ScatterPlot extends PlotDialog {
 			_namedExpressionNameX = xname;
 		}
 		if (isColumnY) {
-			_colDatY =  DataManager.getInstance().getColumnData(yname);
+			_colDatY = DataManager.getInstance().getColumnData(yname);
 		} else {
 			_namedExpressionNameY = yname;
 		}
@@ -67,45 +68,40 @@ public class ScatterPlot extends PlotDialog {
 		add(_plotPanel, BorderLayout.CENTER);
 
 	}
-	
-	
+
 	/**
 	 * Get the NamedExpression (for X) which might be null
+	 * 
 	 * @return the named expression
 	 */
 	public NamedExpression getNamedExpressionX() {
 		if (_expressionX != null) {
 			return _expressionX;
 		}
-		
-		_expressionX =  DefinitionManager.getInstance()
-				.getNamedExpression(_namedExpressionNameX);
+
+		_expressionX = DefinitionManager.getInstance().getNamedExpression(_namedExpressionNameX);
 		return _expressionX;
 	}
-	
-	
+
 	/**
 	 * Get the NamedExpression (for Y) which might be null
+	 * 
 	 * @return the named expression
 	 */
 	public NamedExpression getNamedExpressionY() {
 		if (_expressionY != null) {
 			return _expressionY;
 		}
-		
-		_expressionY =  DefinitionManager.getInstance()
-				.getNamedExpression(_namedExpressionNameY);
+
+		_expressionY = DefinitionManager.getInstance().getNamedExpression(_namedExpressionNameY);
 		return _expressionY;
 	}
-
-
 
 	private PlotPanel createPlotPanel(DataSet data) {
 
 		String xn = data.getColumnName(0);
 		String yn = data.getColumnName(1);
-		PlotCanvas canvas = new PlotCanvas(data, ScatterPanel.getTitle(data),
-				xn, yn);
+		PlotCanvas canvas = new PlotCanvas(data, ScatterPanel.getTitle(data), xn, yn);
 
 		canvas.getParameters().setNumDecimalX(1);
 		canvas.getParameters().setNumDecimalY(0);
@@ -121,15 +117,14 @@ public class ScatterPlot extends PlotDialog {
 		canvas.getPlotTicks().setNumMinorTickX(0);
 		canvas.getPlotTicks().setNumMinorTickY(0);
 		canvas.getPlotTicks().setTickFont(Fonts.smallFont);
-		Collection<DataColumn> ycols = data
-				.getAllColumnsByType(DataColumnType.Y);
+		Collection<DataColumn> ycols = data.getAllColumnsByType(DataColumnType.Y);
 
 		for (DataColumn dc : ycols) {
 			dc.getFit().setFitType(FitType.NOLINE);
 			dc.getStyle().setSymbolType(SymbolType.CIRCLE);
 			dc.getStyle().setSymbolSize(4);
 			dc.getStyle().setFillColor(fillColor);
-			dc.getStyle().setLineColor(null);
+			dc.getStyle().setBorderColor(null);
 		}
 
 		PlotPanel ppanel = new PlotPanel(canvas, PlotPanel.STANDARD);
@@ -143,15 +138,14 @@ public class ScatterPlot extends PlotDialog {
 	@Override
 	public void newClasIoEvent(DataEvent event) {
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
-			
+
 			NamedExpression expX = getNamedExpressionX();
 			NamedExpression expY = getNamedExpressionY();
 
-			
 			int lenx = getMinLength(event, _colDatX, expX);
 			int leny = getMinLength(event, _colDatY, expY);
 			int len = Math.min(lenx, leny);
-			
+
 			for (int index = 0; index < len; index++) {
 				double valx = getValue(event, index, _colDatX, expX);
 				double valy = getValue(event, index, _colDatY, expY);
@@ -164,7 +158,7 @@ public class ScatterPlot extends PlotDialog {
 				}
 
 			}
-		} //isAccumulating
+		} // isAccumulating
 	}
 
 	@Override
@@ -173,8 +167,6 @@ public class ScatterPlot extends PlotDialog {
 		_plotPanel.getCanvas().needsRedraw(true);
 		_errorCount = 0;
 	}
-
-	
 
 	@Override
 	public String getPlotType() {
@@ -186,10 +178,11 @@ public class ScatterPlot extends PlotDialog {
 		writeDataSetXYXY(writer, _dataSet);
 	}
 
-	
 	/**
 	 * Tests whether this listener is interested in events while accumulating
-	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 * 
+	 * @return <code>true</code> if this listener is NOT interested in events while
+	 *         accumulating
 	 */
 	@Override
 	public boolean ignoreIfAccumulating() {

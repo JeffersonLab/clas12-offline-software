@@ -70,19 +70,20 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	 * Create a client that will connect to a {@link TinyMessageServer}.
 	 * 
 	 * @param clientName the name of the client
-	 * @param hostName the name of the server machine
-	 * @param port the port the server listens on
+	 * @param hostName   the name of the server machine
+	 * @param port       the port the server listens on
 	 * @throws BadSocketException
 	 */
 	public DefaultClient(String clientName, String hostName, int port) throws BadSocketException {
 		this(clientName, ClientSupport.getSocket(hostName, port));
 	}
-	
+
 	/**
 	 * Create a client that will connect to a {@link TinyMessageServer}.
 	 * 
-	 * @param clientName the name of the client. Since the host name and port are not given, this looks for 
-	 * a server on the same local machine using one of the default ports.
+	 * @param clientName the name of the client. Since the host name and port are
+	 *                   not given, this looks for a server on the same local
+	 *                   machine using one of the default ports.
 	 * @throws BadSocketException
 	 */
 	public DefaultClient(String clientName) throws BadSocketException {
@@ -91,15 +92,12 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 
 	/**
 	 * Create a client that will connect to a {@link TinyMessageServer}. Most
-	 * applications will not use this constructor directly (since you won't have
-	 * a socket) but rather the static convenience methods in
-	 * {@link ClientSupport}.
+	 * applications will not use this constructor directly (since you won't have a
+	 * socket) but rather the static convenience methods in {@link ClientSupport}.
 	 * 
-	 * @param clientName
-	 *            descriptive user name. If null, the actual login username will
-	 *            be used.
-	 * @param socket
-	 *            the underlying socket
+	 * @param clientName descriptive user name. If null, the actual login username
+	 *                   will be used.
+	 * @param socket     the underlying socket
 	 * @see ClientSupport
 	 */
 	public DefaultClient(String clientName, Socket socket) throws BadSocketException {
@@ -109,7 +107,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 		}
 		_clientName = (clientName != null) ? clientName : Environment.getInstance().getUserName();
 		_socket = socket;
-		
+
 		// where to place message for transmission
 		_outboundQueue = new MessageQueue(100, 20);
 
@@ -149,8 +147,8 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 
 	/**
 	 * This is a good place for clients to do custom initializations such as
-	 * subscriptions. It is not necessary, but convenient. It is called at the
-	 * end of the constructor.
+	 * subscriptions. It is not necessary, but convenient. It is called at the end
+	 * of the constructor.
 	 */
 	public void initialize() {
 		// base implementation does nothing
@@ -159,8 +157,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	/**
 	 * Subscribe to a topic
 	 * 
-	 * @param topic
-	 *            the topic to subscribe to
+	 * @param topic the topic to subscribe to
 	 */
 	public void subscribe(String topic) {
 		if (Header.acceptableTopic(topic)) {
@@ -176,8 +173,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	/**
 	 * Unsubscribe to a topic
 	 * 
-	 * @param topic
-	 *            the topic to subscribe to
+	 * @param topic the topic to subscribe to
 	 */
 	public void unsubscribe(String topic) {
 		if (Header.acceptableTopic(topic)) {
@@ -203,8 +199,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	/**
 	 * Set the client id
 	 * 
-	 * @param id
-	 *            the client id
+	 * @param id the client id
 	 */
 	protected void setId(int id) {
 		_id = id;
@@ -220,8 +215,8 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	}
 
 	/**
-	 * Get the data input stream. Messages will be read from this stream and
-	 * placed on the inbound queue.
+	 * Get the data input stream. Messages will be read from this stream and placed
+	 * on the inbound queue.
 	 * 
 	 * @return the data input stream
 	 */
@@ -231,8 +226,8 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	}
 
 	/**
-	 * Get the data output stream. Messages will be removed from the outbound
-	 * queue and sent on this stream.
+	 * Get the data output stream. Messages will be removed from the outbound queue
+	 * and sent on this stream.
 	 * 
 	 * @return the data output stream
 	 */
@@ -254,11 +249,10 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 
 	/**
 	 * Get the queue where we place outbound messages. A WriterThread will be
-	 * grabbing the messages and sending them to their destination (to the
-	 * server on the other end).
+	 * grabbing the messages and sending them to their destination (to the server on
+	 * the other end).
 	 * 
-	 * @return the queue where we place outbound messages ready for
-	 *         transmission.
+	 * @return the queue where we place outbound messages ready for transmission.
 	 */
 	@Override
 	public MessageQueue getOutboundQueue() {
@@ -318,7 +312,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 		_alreadyClosed = true;
 
 		(new Throwable()).printStackTrace();
-		
+
 		System.out.println("\n------\nClosing " + getClientName() + "\n-----");
 		_reader.stopReader();
 		_writer.stopWriter();
@@ -338,8 +332,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	/**
 	 * Set the last ping time
 	 * 
-	 * @param ping
-	 *            the last ping time
+	 * @param ping the last ping time
 	 */
 	protected void setLastPing(long ping) {
 		_lastPing = ping;
@@ -357,10 +350,9 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	/**
 	 * Check whether this client subscribes to a topic
 	 * 
-	 * @param topic
-	 *            the topic to subscribe to. This will be trimmed of white space
-	 *            and converted to lower case, i.e., topics are NOT case
-	 *            sensitive.
+	 * @param topic the topic to subscribe to. This will be trimmed of white space
+	 *              and converted to lower case, i.e., topics are NOT case
+	 *              sensitive.
 	 * @return <code>true</code> if this client is subscribed to the topic
 	 */
 	protected boolean isSubscribed(String topic) {
@@ -385,8 +377,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	/**
 	 * Send a message
 	 * 
-	 * @param message
-	 *            the message to send
+	 * @param message the message to send
 	 */
 	protected void send(Message message) {
 		if (message != null) {
@@ -394,8 +385,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 				_outboundQueue.queue(message);
 				try {
 					Thread.sleep(1);
-				}
-				catch (InterruptedException e) {
+				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
@@ -403,12 +393,12 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	}
 
 	/**
-	 * A message is about to be farmed out to the appropriate handler. This
-	 * allows you to take a peek at it first.
+	 * A message is about to be farmed out to the appropriate handler. This allows
+	 * you to take a peek at it first.
 	 * 
-	 * @param message
-	 *            the message
+	 * @param message the message
 	 */
+	@Override
 	public void peekAtMessage(Message message) {
 		// default: do nothing
 	}
@@ -471,8 +461,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	 * A ping has arrived from the server. Log the last ping time and send the
 	 * message back.
 	 * 
-	 * @param message
-	 *            the ping message
+	 * @param message the ping message
 	 */
 	@Override
 	public void processPingMessage(Message message) {
@@ -494,9 +483,9 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	// DOUBLE_ARRAY, STRING_ARRAY, STRING, SERIALIZED_OBJECT;
 
 	/**
-	 * This is a non-administrative message that has arrived from some other
-	 * client. This is what every client will override to deal with messages.
-	 * Only messages for which the client is subscribed will end up here.
+	 * This is a non-administrative message that has arrived from some other client.
+	 * This is what every client will override to deal with messages. Only messages
+	 * for which the client is subscribed will end up here.
 	 */
 	@Override
 	public void processClientMessage(Message message) {
@@ -543,8 +532,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	/**
 	 * Process a SERVERLOG message
 	 * 
-	 * @param message
-	 *            the message to process
+	 * @param message the message to process
 	 */
 	@Override
 	public void processServerLogMessage(Message message) {
@@ -554,8 +542,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	/**
 	 * Process a SUBSCRIBE message
 	 * 
-	 * @param message
-	 *            the message to process
+	 * @param message the message to process
 	 */
 	@Override
 	public void processSubscribeMessage(Message message) {
@@ -571,8 +558,7 @@ public class DefaultClient extends Messenger implements IMessageProcessor, Runna
 	/**
 	 * Process a UNSUBSCRIBE message
 	 * 
-	 * @param message
-	 *            the message to process
+	 * @param message the message to process
 	 */
 	@Override
 	public void processUnsubscribeMessage(Message message) {

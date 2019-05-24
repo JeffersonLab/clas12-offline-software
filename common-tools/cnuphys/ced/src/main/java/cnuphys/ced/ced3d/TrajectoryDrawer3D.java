@@ -18,7 +18,7 @@ import item3D.Item3D;
 public class TrajectoryDrawer3D extends Item3D {
 
 	private CedPanel3D _cedPanel3D;
-	
+
 	public TrajectoryDrawer3D(CedPanel3D panel3D) {
 		super(panel3D);
 		_cedPanel3D = panel3D;
@@ -55,7 +55,8 @@ public class TrajectoryDrawer3D extends Item3D {
 
 				for (SwimTrajectory trajectory : trajectories) {
 					LundId lid = trajectory.getLundId();
-					if ((showCVT && LundSupport.isCVT(lid)) ||(showHB && LundSupport.isHB(lid)) || (showTB && LundSupport.isTB(lid))) {
+					if ((showCVT && LundSupport.isCVT(lid)) || (showHB && LundSupport.isHB(lid))
+							|| (showTB && LundSupport.isTB(lid))) {
 						drawSwimTrajectory(drawable, trajectory);
 					}
 				}

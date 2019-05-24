@@ -1,0 +1,65 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the hit", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of the hit", 
+                "name": "status", 
+                "type": "S"
+            }, 
+            {
+                "info": "paddle id of CTOF", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "E dep (MeV) from U PMT", 
+                "name": "energy_up", 
+                "type": "F"
+            }, 
+            {
+                "info": "E dep (MeV) from D PMT", 
+                "name": "energy_down", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit time (ns) from U PMT", 
+                "name": "time_up", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit time (ns) from D PMT", 
+                "name": "time_down", 
+                "type": "F"
+            }, 
+            {
+                "info": "E dep unc (MeV) from U PMT", 
+                "name": "energy_up_unc", 
+                "type": "F"
+            }, 
+            {
+                "info": "E dep unc (MeV) from D PMT", 
+                "name": "energy_down_unc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit time unc (ns) from U PMT", 
+                "name": "time_up_unc", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit time unc (ns) from D PMT", 
+                "name": "time_down_unc", 
+                "type": "F"
+            }
+        ], 
+        "group": 20400, 
+        "info": "reconstructed hit info from U/D CTOF PMTs", 
+        "item": 20, 
+        "name": "CTOF::rawhits"
+    }
+]

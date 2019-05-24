@@ -3,7 +3,7 @@ package cnuphys.bCNU.util;
 public class UnicodeSupport {
 
 	public static final String OVERLINE = "\u0305";
-	
+
 	public static final String THINSPACE = "\u2009";
 
 	public static final String SUPERPLUS = "\u207A";
@@ -103,10 +103,9 @@ public class UnicodeSupport {
 	/**
 	 * Replace the Latex-like special characters with their unicode equivalents.
 	 * 
-	 * @param s
-	 *            the input string
-	 * @return the output, where special character sequences are replaced by
-	 *         unicode characters.
+	 * @param s the input string
+	 * @return the output, where special character sequences are replaced by unicode
+	 *         characters.
 	 */
 	public static String specialCharReplace(String s) {
 		if (s == null) {

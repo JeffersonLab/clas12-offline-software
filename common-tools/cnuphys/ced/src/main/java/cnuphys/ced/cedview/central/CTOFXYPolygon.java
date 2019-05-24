@@ -19,33 +19,30 @@ public class CTOFXYPolygon extends Polygon {
 	 */
 	public int paddleId;
 
-	//the quad
+	// the quad
 	private Point2D.Double[] wp;
-	
+
 	private Point2D.Double _centroid;
-	
+
 	private static Font _font = Fonts.mediumFont;
 
 	/**
 	 * Create a XY Polygon for the CND
 	 * 
-	 * @param paddleId
-	 *            the paddle ID 1..48
+	 * @param paddleId the paddle ID 1..48
 	 */
 	public CTOFXYPolygon(int paddleId) {
 		this.paddleId = paddleId;
 		wp = CTOFGeometry.getQuad(paddleId);
-		
+
 		_centroid = WorldGraphicsUtilities.getCentroid(wp);
 	}
 
 	/**
 	 * Draw the polygon
 	 * 
-	 * @param g
-	 *            the graphics object
-	 * @param container
-	 *            the drawing container
+	 * @param g         the graphics object
+	 * @param container the drawing container
 	 */
 	public void draw(Graphics g, IContainer container) {
 		reset();
@@ -61,14 +58,12 @@ public class CTOFXYPolygon extends Polygon {
 		g.drawPolygon(this);
 
 	}
-	
+
 	/**
 	 * Draw the polygon
 	 * 
-	 * @param g
-	 *            the graphics object
-	 * @param container
-	 *            the drawing container
+	 * @param g         the graphics object
+	 * @param container the drawing container
 	 */
 	public void draw(Graphics g, IContainer container, int index, Color color) {
 		reset();
@@ -82,14 +77,13 @@ public class CTOFXYPolygon extends Polygon {
 		g.fillPolygon(this);
 		g.setColor(Color.black);
 		g.drawPolygon(this);
-		
+
 		if (index > 0) {
 			container.worldToLocal(pp, _centroid);
 			g.setFont(_font);
-			g.drawString("" + index, pp.x-((index < 10) ? 4 : 8), pp.y+6);
+			g.drawString("" + index, pp.x - ((index < 10) ? 4 : 8), pp.y + 6);
 		}
 
 	}
-
 
 }

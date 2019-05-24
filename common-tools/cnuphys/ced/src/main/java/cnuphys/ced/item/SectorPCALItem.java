@@ -30,27 +30,23 @@ public class SectorPCALItem extends PolygonItem {
 	private SectorView _view;
 
 	// should be PCALGeometry.PCAL_U, PCAL_V, or PCAL_W
-	private int _stripType; //0,1,2
+	private int _stripType; // 0,1,2
 
 	private static final String _stripNames[] = { "U", "V", "W" };
 	private static final Color _pcalFill = X11Colors.getX11Color("mint cream");
 	private static final Color _pcalLine = new Color(140, 140, 140);
-	
-	private static int[] _stripCounts = {68, 62, 62}; //u,v,w
+
+	private static int[] _stripCounts = { 68, 62, 62 }; // u,v,w
 
 	/**
 	 * Create a sector view pcal item
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
-	 * @param stripIndex
-	 *            should be PCAL_U, PCAL_V, or PCAL_W
-	 * @param sector
-	 *            the 1-based sector
+	 * @param layer      the Layer this item is on.
+	 * @param stripIndex should be PCAL_U, PCAL_V, or PCAL_W
+	 * @param sector     the 1-based sector
 	 */
 	public SectorPCALItem(LogicalLayer layer, int stripIndex, int sector) {
-		super(layer, getShell((SectorView) layer.getContainer().getView(),
-				stripIndex, sector));
+		super(layer, getShell((SectorView) layer.getContainer().getView(), stripIndex, sector));
 
 		setRightClickable(false);
 		_sector = sector;
@@ -68,16 +64,14 @@ public class SectorPCALItem extends PolygonItem {
 	/**
 	 * Custom drawer for the item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
 		// TODO use dirty. If the item is not dirty, should be able to draw
 		// the _lastDrawnPolygon directly;
-		
+
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
@@ -95,10 +89,8 @@ public class SectorPCALItem extends PolygonItem {
 
 			if (wp != null) {
 
-				Path2D.Double path2d = WorldGraphicsUtilities
-						.worldPolygonToPath(wp);
-				WorldGraphicsUtilities.drawPath2D(g, container, path2d,
-						_style.getFillColor(), _style.getLineColor(), 0,
+				Path2D.Double path2d = WorldGraphicsUtilities.worldPolygonToPath(wp);
+				WorldGraphicsUtilities.drawPath2D(g, container, path2d, _style.getFillColor(), _style.getLineColor(), 0,
 						LineStyle.SOLID, true);
 			}
 		}
@@ -111,20 +103,16 @@ public class SectorPCALItem extends PolygonItem {
 	/**
 	 * Get a strip outline
 	 * 
-	 * @param stripIndex
-	 *            the 0-based index
+	 * @param stripIndex the 0-based index
 	 * @return
 	 */
 	private Point2D.Double[] getStrip(int stripId) {
-		
-		if (!PCALGeometry.doesProjectedPolyFullyIntersect(_stripType,
-				stripId, _view.getProjectionPlane())) {
+
+		if (!PCALGeometry.doesProjectedPolyFullyIntersect(_stripType, stripId, _view.getProjectionPlane())) {
 			return null;
 		}
-		
-		
-		Point2D.Double wp[] = PCALGeometry.getIntersections(_stripType,
-				stripId, _view.getProjectionPlane(), true);
+
+		Point2D.Double wp[] = PCALGeometry.getIntersections(_stripType, stripId, _view.getProjectionPlane(), true);
 
 		if (wp == null) {
 			return null;
@@ -145,12 +133,11 @@ public class SectorPCALItem extends PolygonItem {
 
 		if (_view.isSingleEventMode()) {
 			drawSingleEventHits(g, container);
-		}
-		else {
+		} else {
 			drawAccumulatedHits(g, container);
 		}
 	}
-	
+
 	// single event drawer
 	private void drawSingleEventHits(Graphics g, IContainer container) {
 
@@ -184,52 +171,41 @@ public class SectorPCALItem extends PolygonItem {
 
 	}
 
-	//accumulated drawer
+	// accumulated drawer
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		int medianHit = AccumulationManager.getInstance().getMedianPCALCount();
 
-		int hits[][][] = AccumulationManager.getInstance()
-				.getAccumulatedPCALData();
+		int hits[][][] = AccumulationManager.getInstance().getAccumulatedPCALData();
 		for (int strip0 = 0; strip0 < _stripCounts[_stripType]; strip0++) {
 			int hitCount = hits[_sector - 1][_stripType][strip0];
-			double fract = _view.getMedianSetting()*(((double) hitCount) /(1 +  medianHit));
-			
+			double fract = _view.getMedianSetting() * (((double) hitCount) / (1 + medianHit));
+
 			Point2D.Double wp[] = getStrip(strip0);
 
 			if (wp != null) {
-				Color color = AccumulationManager.getInstance()
-						.getColor(fract);
-				Path2D.Double path = WorldGraphicsUtilities
-						.worldPolygonToPath(wp);
-				WorldGraphicsUtilities.drawPath2D(g, container, path, color,
-						_style.getLineColor(), 0, LineStyle.SOLID, true);
+				Color color = AccumulationManager.getInstance().getColor(_view.getColorScaleModel(), fract);
+				Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
+				WorldGraphicsUtilities.drawPath2D(g, container, path, color, _style.getLineColor(), 0, LineStyle.SOLID,
+						true);
 			}
 
 		}
 	}
 
-
 	/**
 	 * Get the shell of the ec.
 	 * 
-	 * @param view
-	 *            the view being rendered.
-	 * @param stripType
-	 *            the strip index (0:U, 1:V, 2:W)
-	 * @param sector
-	 *            the 1-based sector 1..6
+	 * @param view      the view being rendered.
+	 * @param stripType the strip index (0:U, 1:V, 2:W)
+	 * @param sector    the 1-based sector 1..6
 	 * @return
 	 */
-	private static Point2D.Double[] getShell(SectorView view, int stripType,
-			int sector) {
+	private static Point2D.Double[] getShell(SectorView view, int stripType, int sector) {
 
-		Point2D.Double wp[] = PCALGeometry.getShell(stripType,
-				view.getProjectionPlane());
+		Point2D.Double wp[] = PCALGeometry.getShell(stripType, view.getProjectionPlane());
 
 		if (wp == null) {
-			Log.getInstance().warning(
-					"null shell in SectorPCALItem stripType = " + stripType
-							+ "  sector = " + sector);
+			Log.getInstance().warning("null shell in SectorPCALItem stripType = " + stripType + "  sector = " + sector);
 			return null;
 		}
 
@@ -244,21 +220,17 @@ public class SectorPCALItem extends PolygonItem {
 	}
 
 	/**
-	 * Add any appropriate feedback strings
-	 * panel. Default implementation returns the item's name.
+	 * Add any appropriate feedback strings panel. Default implementation returns
+	 * the item's name.
 	 * 
-	 * @param container
-	 *            the Base container.
-	 * @param screenPoint
-	 *            the mouse location.
-	 * @param worldPoint
-	 *            the corresponding world point.
-	 * @param feedbackStrings
-	 *            the List of feedback strings to add to.
+	 * @param container       the Base container.
+	 * @param screenPoint     the mouse location.
+	 * @param worldPoint      the corresponding world point.
+	 * @param feedbackStrings the List of feedback strings to add to.
 	 */
 	@Override
-	public void getFeedbackStrings(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
 		if (contains(container, screenPoint)) {
 			feedbackStrings.add(getName());
@@ -269,15 +241,12 @@ public class SectorPCALItem extends PolygonItem {
 		for (int stripId = 0; stripId < PCALGeometry.PCAL_NUMSTRIP[_stripType]; stripId++) {
 			Point2D.Double wp[] = getStrip(stripId);
 			if (wp != null) {
-				Path2D.Double path = WorldGraphicsUtilities
-						.worldPolygonToPath(wp);
+				Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
 
 				if (path.contains(worldPoint)) {
-					feedbackStrings.add("$white$type "
-							+ _stripNames[_stripType] + " strip "
-							+ (stripId + 1));
-					
-					//on a hit?
+					feedbackStrings.add("$white$type " + _stripNames[_stripType] + " strip " + (stripId + 1));
+
+					// on a hit?
 					TdcAdcHitList hits = AllEC.getInstance().getHits();
 					if ((hits != null) && !hits.isEmpty()) {
 						TdcAdcHit hit = hits.get(_sector, _stripType + 1, stripId + 1);

@@ -9,65 +9,47 @@ public class SymbolDraw {
 	/**
 	 * Draws the appropriate symbol at the provided screen location.
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param x
-	 *            the x screen coordinate.
-	 * @param y
-	 *            the y screen coordinate.
-	 * @param style
-	 *            the drawing style to use.
+	 * @param g     the graphics context
+	 * @param x     the x screen coordinate.
+	 * @param y     the y screen coordinate.
+	 * @param style the drawing style to use.
 	 */
 
 	public static void drawSymbol(Graphics g, int x, int y, IStyled style) {
 
-		drawSymbol(g, x, y, style.getSymbolType(), style.getSymbolSize(),
-				style.getLineColor(), style.getFillColor());
+		drawSymbol(g, x, y, style.getSymbolType(), style.getSymbolSize(), style.getBorderColor(), style.getFillColor());
 	}
 
 	/**
 	 * Draws the appropriate symbol at the provided screen location.
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param x
-	 *            the x screen coordinate.
-	 * @param y
-	 *            the y screen coordinate.
-	 * @param style
-	 *            the drawing style to use.
+	 * @param g     the graphics context
+	 * @param x     the x screen coordinate.
+	 * @param y     the y screen coordinate.
+	 * @param style the drawing style to use.
 	 */
 
 	public static void drawGhostSymbol(Graphics g, int x, int y, IStyled style) {
 
-		drawSymbol(g, x, y + 1, style.getSymbolType(), style.getSymbolSize(),
-				Color.white, style.getFillColor());
-		drawSymbol(g, x, y, style.getSymbolType(), style.getSymbolSize(),
-				style.getLineColor(), style.getFillColor());
-		drawSymbol(g, x, y - 1, style.getSymbolType(), style.getSymbolSize(),
-				style.getLineColor(), style.getFillColor());
+		drawSymbol(g, x, y + 1, style.getSymbolType(), style.getSymbolSize(), Color.white, style.getFillColor());
+		drawSymbol(g, x, y, style.getSymbolType(), style.getSymbolSize(), style.getBorderColor(), style.getFillColor());
+		drawSymbol(g, x, y - 1, style.getSymbolType(), style.getSymbolSize(), style.getBorderColor(),
+				style.getFillColor());
 	}
 
 	/**
 	 * Draws the appropriate symbol at the provided screen location.
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param x
-	 *            the x screen coordinate.
-	 * @param y
-	 *            the y screen coordinate.
-	 * @param symbol
-	 *            the symbol to use.
-	 * @param symbolSize
-	 *            the size of the symbol in pixels--typically around 8.
-	 * @param lineColor
-	 *            the outline color.
-	 * @param fillColor
-	 *            the fill color, which is not relevant for some symbols.
+	 * @param g          the graphics context
+	 * @param x          the x screen coordinate.
+	 * @param y          the y screen coordinate.
+	 * @param symbol     the symbol to use.
+	 * @param symbolSize the size of the symbol in pixels--typically around 8.
+	 * @param lineColor  the outline color.
+	 * @param fillColor  the fill color, which is not relevant for some symbols.
 	 */
-	public static void drawSymbol(Graphics g, int x, int y, SymbolType symbol,
-			int symbolSize, Color lineColor, Color fillColor) {
+	public static void drawSymbol(Graphics g, int x, int y, SymbolType symbol, int symbolSize, Color lineColor,
+			Color fillColor) {
 
 		if (symbol == SymbolType.NOSYMBOL) {
 			return;
@@ -103,7 +85,7 @@ public class SymbolDraw {
 		case X:
 			drawX(g, x, y, s2, lineColor);
 			break;
-			
+
 		case NOSYMBOL:
 			break;
 
@@ -113,23 +95,15 @@ public class SymbolDraw {
 	/**
 	 * Draw a simple rectangle
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param x
-	 *            the horizontal center
-	 * @param y
-	 *            the vertical center
-	 * @param w2
-	 *            the half width
-	 * @param h2
-	 *            the half height
-	 * @param lc
-	 *            tThe line color
-	 * @param fc
-	 *            tThe fillcolor
+	 * @param g  the graphics context
+	 * @param x  the horizontal center
+	 * @param y  the vertical center
+	 * @param w2 the half width
+	 * @param h2 the half height
+	 * @param lc tThe line color
+	 * @param fc tThe fillcolor
 	 */
-	public static void drawRectangle(Graphics g, int x, int y, int w2, int h2,
-			Color lc, Color fc) {
+	public static void drawRectangle(Graphics g, int x, int y, int w2, int h2, Color lc, Color fc) {
 
 		// this will ensure all symbols correct size
 		if (lc == null) {
@@ -149,23 +123,15 @@ public class SymbolDraw {
 	/**
 	 * Draw a simple oval
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param x
-	 *            the horizontal center
-	 * @param y
-	 *            the vertical center
-	 * @param w2
-	 *            the half width
-	 * @param h2
-	 *            the half height
-	 * @param lc
-	 *            the line color
-	 * @param fc
-	 *            The fillcolor
+	 * @param g  the graphics context
+	 * @param x  the horizontal center
+	 * @param y  the vertical center
+	 * @param w2 the half width
+	 * @param h2 the half height
+	 * @param lc the line color
+	 * @param fc The fillcolor
 	 */
-	public static void drawOval(Graphics g, int x, int y, int w2, int h2,
-			Color lc, Color fc) {
+	public static void drawOval(Graphics g, int x, int y, int w2, int h2, Color lc, Color fc) {
 
 		// this will ensure all symbols correct size
 		if (lc == null) {
@@ -185,21 +151,14 @@ public class SymbolDraw {
 	/**
 	 * Draw a simple up triangle
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param x
-	 *            the horizontal center
-	 * @param y
-	 *            the vertical center
-	 * @param s2
-	 *            the half-width
-	 * @param lc
-	 *            the line color
-	 * @param fc
-	 *            the fillcolor
+	 * @param g  the graphics context
+	 * @param x  the horizontal center
+	 * @param y  the vertical center
+	 * @param s2 the half-width
+	 * @param lc the line color
+	 * @param fc the fillcolor
 	 */
-	public static void drawUpTriangle(Graphics g, int x, int y, int s2,
-			Color lc, Color fc) {
+	public static void drawUpTriangle(Graphics g, int x, int y, int s2, Color lc, Color fc) {
 
 		// this will ensure all symbols correct size
 		if (lc == null) {
@@ -227,21 +186,14 @@ public class SymbolDraw {
 	/**
 	 * Draw a simple down triangle
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param x
-	 *            the horizontal center
-	 * @param y
-	 *            the vertical center
-	 * @param s2
-	 *            the half-width
-	 * @param lc
-	 *            the line color
-	 * @param fc
-	 *            tThe fillcolor
+	 * @param g  the graphics context
+	 * @param x  the horizontal center
+	 * @param y  the vertical center
+	 * @param s2 the half-width
+	 * @param lc the line color
+	 * @param fc tThe fillcolor
 	 */
-	public static void drawDownTriangle(Graphics g, int x, int y, int s2,
-			Color lc, Color fc) {
+	public static void drawDownTriangle(Graphics g, int x, int y, int s2, Color lc, Color fc) {
 
 		// this will ensure all symbols correct size
 		if (lc == null) {
@@ -269,16 +221,11 @@ public class SymbolDraw {
 	/**
 	 * Draw a simple cross
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param x
-	 *            the horizontal center
-	 * @param y
-	 *            the vertical center
-	 * @param s2
-	 *            the half-width
-	 * @param lc
-	 *            the line color
+	 * @param g  the graphics context
+	 * @param x  the horizontal center
+	 * @param y  the vertical center
+	 * @param s2 the half-width
+	 * @param lc the line color
 	 */
 	public static void drawCross(Graphics g, int x, int y, int s2, Color lc) {
 
@@ -292,16 +239,11 @@ public class SymbolDraw {
 	/**
 	 * Draw a simple X symbol.
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param x
-	 *            the horizontal center
-	 * @param y
-	 *            the vertical center
-	 * @param s2
-	 *            the half-width width
-	 * @param lc
-	 *            the line color
+	 * @param g  the graphics context
+	 * @param x  the horizontal center
+	 * @param y  the vertical center
+	 * @param s2 the half-width width
+	 * @param lc the line color
 	 */
 	public static void drawX(Graphics g, int x, int y, int s2, Color lc) {
 
@@ -315,21 +257,14 @@ public class SymbolDraw {
 	/**
 	 * Draw a simple diamond
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param x
-	 *            the horizontal center
-	 * @param y
-	 *            the vertical center
-	 * @param s2
-	 *            the half-width
-	 * @param lc
-	 *            the line color
-	 * @param fc
-	 *            the fillcolor
+	 * @param g  the graphics context
+	 * @param x  the horizontal center
+	 * @param y  the vertical center
+	 * @param s2 the half-width
+	 * @param lc the line color
+	 * @param fc the fillcolor
 	 */
-	public static void drawDiamond(Graphics g, int x, int y, int s2, Color lc,
-			Color fc) {
+	public static void drawDiamond(Graphics g, int x, int y, int s2, Color lc, Color fc) {
 
 		// this will ensure all symbols correct size
 		if (lc == null) {

@@ -18,25 +18,26 @@ import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.lund.X11Colors;
 
 public class ScrollableGridView extends BaseView {
-	
-	//the scroll pane
+
+	// the scroll pane
 	protected JScrollPane _scrollPane;
-	
-	//row and col count
+
+	// row and col count
 	protected int _numRow;
 	protected int _numCol;
-	
-	//cell size
+
+	// cell size
 	protected int _cellWidth;
 	protected int _cellHeight;
-	
+
 	protected JPanel _gridPanel;
-	
-	//status
+
+	// status
 	protected JLabel _status;
-		
+
 	/**
 	 * Create a scrollable grid
+	 * 
 	 * @param numRow
 	 * @param numCol
 	 * @param cellWidth
@@ -45,27 +46,26 @@ public class ScrollableGridView extends BaseView {
 	 */
 	protected ScrollableGridView(int numRow, int numCol, int cellWidth, int cellHeight, Object... keyVals) {
 		super(keyVals);
-		
+
 		_gridPanel = new JPanel();
 		_gridPanel.setLayout(new GridLayout(numRow, numCol, 2, 2));
 		_gridPanel.setOpaque(true);
 		_gridPanel.setBackground(X11Colors.getX11Color("wheat"));
 
-		
 		_numRow = numRow;
 		_numCol = numCol;
 		_cellWidth = cellWidth;
 		_cellHeight = cellHeight;
-		
+
 		_scrollPane = new JScrollPane(_gridPanel);
 		add(_scrollPane);
-		
+
 		addStatusLine();
 	}
-	
+
 	protected void addStatusLine() {
 		JPanel sp = new JPanel();
-		sp.setLayout(new BorderLayout(2,2));
+		sp.setLayout(new BorderLayout(2, 2));
 		_status = new JLabel(" ");
 
 		_status.setOpaque(true);
@@ -73,24 +73,24 @@ public class ScrollableGridView extends BaseView {
 		_status.setBackground(Color.black);
 		_status.setForeground(Color.cyan);
 
-
 		sp.add(_status, BorderLayout.CENTER);
 		add(sp, BorderLayout.SOUTH);
 	}
-	
+
 	/**
 	 * Set the one-line status text
+	 * 
 	 * @param s the status text
 	 */
 	public void setStatus(String s) {
-		_status.setText((s==null)? "" :s);
+		_status.setText((s == null) ? "" : s);
 	}
-	
+
 	public void addComponent(JComponent c) {
 		c.setBorder(BorderFactory.createEtchedBorder());
 		_gridPanel.add(c);
 	}
-	
+
 	/**
 	 * Get the number of rows in this grid.
 	 * 
@@ -110,7 +110,8 @@ public class ScrollableGridView extends BaseView {
 	}
 
 	/**
-     * Create a scrollable grid
+	 * Create a scrollable grid
+	 * 
 	 * @param title
 	 * @param numRow
 	 * @param numCol
@@ -119,25 +120,21 @@ public class ScrollableGridView extends BaseView {
 	 * @param screenFraction
 	 * @return
 	 */
-	public static ScrollableGridView createScrollableGridView(String title, int numRow, int numCol, int cellWidth, int cellHeight, double screenFraction) {
-		
+	public static ScrollableGridView createScrollableGridView(String title, int numRow, int numCol, int cellWidth,
+			int cellHeight, double screenFraction) {
+
 		int width = numCol * cellWidth;
 		int height = numRow * cellHeight;
-				
-		final ScrollableGridView view  = new ScrollableGridView(numRow, numCol,
-				cellWidth, cellHeight,
-				PropertySupport.WIDTH, width,
-				PropertySupport.HEIGHT, height,
-				PropertySupport.TOOLBAR, false, 
-				PropertySupport.VISIBLE, true, 
-				PropertySupport.TITLE, title,
-				PropertySupport.STANDARDVIEWDECORATIONS, true);
-		
+
+		final ScrollableGridView view = new ScrollableGridView(numRow, numCol, cellWidth, cellHeight,
+				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height, PropertySupport.TOOLBAR, false,
+				PropertySupport.VISIBLE, true, PropertySupport.TITLE, title, PropertySupport.STANDARDVIEWDECORATIONS,
+				true);
+
 		screenFraction = Math.max(0.25, Math.min(1.0, screenFraction));
 		view.setSize(GraphicsUtilities.screenFraction(screenFraction));
-		
-		
-		//test 
+
+		// test
 		for (int row = 1; row <= numRow; row++) {
 			for (int col = 1; col <= numCol; col++) {
 				view.addComponent(testComponent(row, col, cellWidth, cellHeight));
@@ -145,7 +142,7 @@ public class ScrollableGridView extends BaseView {
 		}
 		return view;
 	}
-	
+
 	private static JComponent testComponent(final int row, final int col, final int w, final int h) {
 		JComponent c = new JComponent() {
 			@Override
@@ -155,14 +152,13 @@ public class ScrollableGridView extends BaseView {
 				Rectangle b = getBounds();
 				g.drawString("[ " + row + ", " + col + "]", 8, 20);
 			}
-			
-			
+
 			@Override
 			public Dimension getPreferredSize() {
 				return new Dimension(w, h);
 			}
 		};
-		
+
 		return c;
 	}
 }

@@ -1,7 +1,6 @@
 package cnuphys.swimtest;
 
 import cnuphys.magfield.MagneticFields;
-import cnuphys.magfield.RotatedCompositeProbe;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.SwimTrajectory;
@@ -85,7 +84,6 @@ public class PlaneTest {
 			double lastY[] = traj.lastElement();
 			System.out.println("Distance from plane: " + plane.distanceToPlane(lastY[0], lastY[1], lastY[2]));
 
-
 			traj.computeBDL(swimmer1.getProbe());
 			SwimTest.printSummary("Last for swimmer 1", traj.size(), p, lastY, hdata);
 			System.out.println(
@@ -94,19 +92,19 @@ public class PlaneTest {
 					"**** PATHLENGTH for swimmer 1 = " + 100 * traj.lastElement()[SwimTrajectory.PATHLEN_IDX] + "  cm");
 
 			System.out.println("\nSwimZ");
-			
-			double pperp = p*Math.sin(Math.toRadians(theta));
-			double px = pperp*Math.cos(Math.toRadians(phi));
-			double py = pperp*Math.sin(Math.toRadians(phi));
-			double pz = p*Math.cos(Math.toRadians(theta));
+
+			double pperp = p * Math.sin(Math.toRadians(theta));
+			double px = pperp * Math.cos(Math.toRadians(phi));
+			double py = pperp * Math.sin(Math.toRadians(phi));
+			double pz = p * Math.cos(Math.toRadians(theta));
 			double tp[] = CompareSwimmers.sectorToTilted(px, pz);
-			
+
 			double tpx = tp[0];
 			double tpz = tp[1];
-			
-			double ptheta = Math.toDegrees(Math.acos(tpz/p));
+
+			double ptheta = Math.toDegrees(Math.acos(tpz / p));
 			double pphi = Math.toDegrees(Math.atan2(py, tpx));
-			
+
 //			pphi= 0;
 //			ptheta = -5;
 //			System.out.println("PTHETA = " + ptheta);
@@ -115,17 +113,17 @@ public class PlaneTest {
 			// swimZ uses CM
 			SwimZStateVector szV = new SwimZStateVector(xo * 100, yo * 100, zo * 100, p, ptheta, pphi);
 			SwimZResult szr = swimZ.sectorAdaptiveRK(1, -1, p, szV, distToPlaneCM, stepSizeCM, hdata);
-			
-		
+
 			SwimZStateVector last = szr.last();
 			SwimTest.printSummary("Last for swimZ", szr.size(), p, theta, last, hdata);
-			
+
 			double sr[] = CompareSwimmers.tiltedToSector(last.x, last.z);
-			System.out.println("R in sector coordinates (" + sr[0]/100 + ", " + last.y/100 + ", " + sr[1]/100 + ") m");
+			System.out.println(
+					"R in sector coordinates (" + sr[0] / 100 + ", " + last.y / 100 + ", " + sr[1] / 100 + ") m");
 
 			System.out.println("**** BDL for swimZ = " + szr.sectorGetBDL(1, swimZ.getProbe()) + "  kG cm");
 			System.out.println("**** PATHLENGTH for swimZ = " + szr.getPathLength() + "  cm");
-			
+
 			System.out.println("\n\nTIMING ");
 			int N = 100;
 			long time = System.currentTimeMillis();
@@ -133,13 +131,12 @@ public class PlaneTest {
 				traj = swimmer1.swim(-1, xo, yo, zo, p, theta, phi, plane, accuracy, 9, stepSize,
 						Swimmer.CLAS_Tolerance, hdata);
 			}
-			System.out.println("Swim to plane: " + (System.currentTimeMillis()-time));
+			System.out.println("Swim to plane: " + (System.currentTimeMillis() - time));
 			time = System.currentTimeMillis();
 			for (int i = 0; i < 1000; i++) {
 				szr = swimZ.sectorAdaptiveRK(1, -1, p, szV, distToPlaneCM, stepSizeCM, hdata);
 			}
-			System.out.println("SwimZ: " + (System.currentTimeMillis()-time));
-
+			System.out.println("SwimZ: " + (System.currentTimeMillis() - time));
 
 		} catch (RungeKuttaException e) {
 			// TODO Auto-generated catch block
@@ -150,7 +147,5 @@ public class PlaneTest {
 		}
 
 	}
-	
-
 
 }

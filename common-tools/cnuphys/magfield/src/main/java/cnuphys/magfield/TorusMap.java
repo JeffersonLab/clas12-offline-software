@@ -4,40 +4,33 @@ import java.util.EnumMap;
 
 public enum TorusMap {
 	SYMMETRIC, FULL_025, FULL_050, FULL_075, FULL_100, FULL_125, FULL_150, FULL_200;
-	
-	//map to file names
-	
+
+	// map to file names
+
 	/**
 	 * A map for the base names of the torus map files
 	 */
-	public static EnumMap<TorusMap, String> fileNames = new EnumMap<TorusMap, String>(
-			TorusMap.class);
-	
+	public static EnumMap<TorusMap, String> fileNames = new EnumMap<TorusMap, String>(TorusMap.class);
+
 	/**
 	 * A map for the directories of the torus map files
 	 */
-	public static EnumMap<TorusMap, String> dirNames = new EnumMap<TorusMap, String>(
-			TorusMap.class);
+	public static EnumMap<TorusMap, String> dirNames = new EnumMap<TorusMap, String>(TorusMap.class);
 
-	
 	/**
 	 * A map for the nice names of the torus maps
 	 */
-	public static EnumMap<TorusMap, String> names = new EnumMap<TorusMap, String>(
-			TorusMap.class);
-	
+	public static EnumMap<TorusMap, String> names = new EnumMap<TorusMap, String>(TorusMap.class);
+
 	/**
 	 * A map for whether the maps are full fields
 	 */
-	public static EnumMap<TorusMap, Boolean> fullField = new EnumMap<TorusMap, Boolean>(
-			TorusMap.class);
+	public static EnumMap<TorusMap, Boolean> fullField = new EnumMap<TorusMap, Boolean>(TorusMap.class);
 
 	/**
 	 * A map for whether the maps are found
 	 */
-	public static EnumMap<TorusMap, Boolean> foundField = new EnumMap<TorusMap, Boolean>(
-			TorusMap.class);
-
+	public static EnumMap<TorusMap, Boolean> foundField = new EnumMap<TorusMap, Boolean>(TorusMap.class);
 
 	static {
 		fileNames.put(SYMMETRIC, "clas12-fieldmap-torus.dat");
@@ -48,7 +41,7 @@ public enum TorusMap {
 		fileNames.put(FULL_125, "clas12TorusFull_1.25.dat");
 		fileNames.put(FULL_150, "clas12TorusFull_1.50.dat");
 		fileNames.put(FULL_200, "clas12TorusFull_2.00.dat");
-		
+
 		dirNames.put(SYMMETRIC, "");
 		dirNames.put(FULL_025, "");
 		dirNames.put(FULL_050, "");
@@ -58,7 +51,6 @@ public enum TorusMap {
 		dirNames.put(FULL_150, "");
 		dirNames.put(FULL_200, "");
 
-		
 		names.put(SYMMETRIC, "Symmetric map, 0.25 degree spacing");
 		names.put(FULL_025, "Full map, 0.25 degree spacing");
 		names.put(FULL_050, "Full map, 0.50 degree spacing");
@@ -67,7 +59,7 @@ public enum TorusMap {
 		names.put(FULL_125, "Full map, 1.25 degree spacing");
 		names.put(FULL_150, "Full map, 1.50 degree spacing");
 		names.put(FULL_200, "Full map, 2.00 degree spacing");
-		
+
 		fullField.put(SYMMETRIC, false);
 		fullField.put(FULL_025, true);
 		fullField.put(FULL_050, true);
@@ -87,7 +79,7 @@ public enum TorusMap {
 		foundField.put(FULL_200, false);
 
 	}
-	
+
 	/**
 	 * Get the nice name of the map.
 	 * 
@@ -105,7 +97,6 @@ public enum TorusMap {
 	public String getFileName() {
 		return fileNames.get(this);
 	}
-	
 
 	/**
 	 * Get the dirname name of the map.
@@ -118,12 +109,13 @@ public enum TorusMap {
 
 	/**
 	 * Set the directory name
+	 * 
 	 * @param dname the directory name where the map was found
 	 */
 	public void setDirName(String dname) {
 		dirNames.put(this, dname == null ? "" : dname);
 	}
-	
+
 	/**
 	 * Is this a full field (as opposed to symmetric?)
 	 * 
@@ -141,14 +133,14 @@ public enum TorusMap {
 	public boolean foundField() {
 		return foundField.get(this);
 	}
-	
+
 	/**
 	 * Set whether this field was found
+	 * 
 	 * @param found the value of found
 	 */
 	public void setFound(boolean found) {
 		foundField.put(this, found);
 	}
-
 
 }

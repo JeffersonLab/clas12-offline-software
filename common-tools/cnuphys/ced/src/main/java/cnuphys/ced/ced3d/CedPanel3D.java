@@ -48,7 +48,7 @@ public class CedPanel3D extends Panel3D {
 	public static final String SHOW_BST_LAYER_7 = "BST Layer 7";
 	public static final String SHOW_BST_LAYER_8 = "BST Layer 8";
 	public static final String SHOW_BST_HITS = "BST Hits";
-	
+
 	public static final String SHOW_BMT = "BMT";
 	public static final String SHOW_BMT_LAYER_1 = "BMT Layer 1";
 	public static final String SHOW_BMT_LAYER_2 = "BMT Layer 2";
@@ -57,7 +57,6 @@ public class CedPanel3D extends Panel3D {
 	public static final String SHOW_BMT_LAYER_5 = "BMT Layer 5";
 	public static final String SHOW_BMT_LAYER_6 = "BMT Layer 6";
 	public static final String SHOW_BMT_HITS = "BMT Hits";
-
 
 	public static final String SHOW_SECTOR_1 = "Sector 1";
 	public static final String SHOW_SECTOR_2 = "Sector 2";
@@ -72,15 +71,14 @@ public class CedPanel3D extends Panel3D {
 	public static final String SHOW_CND_LAYER_1 = "CND Layer 1";
 	public static final String SHOW_CND_LAYER_2 = "CND Layer 2";
 	public static final String SHOW_CND_LAYER_3 = "CND Layer 3";
-	
+
 	public static final String SHOW_TB_CROSS = "TB Cross";
 	public static final String SHOW_HB_CROSS = "HB Cross";
 	public static final String SHOW_TB_TRACK = "TB Track";
 	public static final String SHOW_HB_TRACK = "HB Track";
 	public static final String SHOW_CVT_TRACK = "CVT Track";
-	
-	public static final String SHOW_MAP_EXTENTS = "Map Extents";
 
+	public static final String SHOW_MAP_EXTENTS = "Map Extents";
 
 	public static final String SHOW_COSMIC = "Cosmics";
 
@@ -95,7 +93,7 @@ public class CedPanel3D extends Panel3D {
 
 	// display array labels
 	private String _cbaLabels[];
-	
+
 	private CedView3D _view;
 
 	/*
@@ -113,8 +111,8 @@ public class CedPanel3D extends Panel3D {
 	 * 
 	 * @param zdist the initial viewer z distance should be negative
 	 */
-	public CedPanel3D(CedView3D view, float angleX, float angleY, float angleZ, float xDist,
-			float yDist, float zDist, String... cbaLabels) {
+	public CedPanel3D(CedView3D view, float angleX, float angleY, float angleZ, float xDist, float yDist, float zDist,
+			String... cbaLabels) {
 		super(angleX, angleY, angleZ, xDist, yDist, zDist);
 
 		_view = view;
@@ -146,26 +144,24 @@ public class CedPanel3D extends Panel3D {
 			ab.addActionListener(al);
 		}
 		fixSize();
-		
+
 		enableBSTOuterLayers();
 	}
-	
+
 	@Override
 	public void display(GLAutoDrawable drawable) {
 		if (VirtualView.getInstance().isViewVisible(_view)) {
 			super.display(drawable);
-		}
-		else {
+		} else {
 			System.err.println("SKIPPED");
 		}
 	}
-	
 
 	// add north panel
 	private void addNorth() {
 		JPanel np = new JPanel();
 		np.setLayout(new BorderLayout(20, 0));
-		
+
 		JButton nextEvent;
 		ActionListener al = new ActionListener() {
 
@@ -185,7 +181,6 @@ public class CedPanel3D extends Panel3D {
 		GraphicsUtilities.setSizeMini(nextEvent);
 		np.add(nextEvent, BorderLayout.WEST);
 
-
 		_pidLegend = new PIDLegend(this);
 		_volumeAlphaSlider = new AlphaSlider(this, "Volume alpha");
 		np.add(_volumeAlphaSlider, BorderLayout.EAST);
@@ -198,7 +193,7 @@ public class CedPanel3D extends Panel3D {
 		JPanel ep = new JPanel();
 		ep.setLayout(new VerticalFlowLayout());
 
-		ep.add(new KeyboardLegend());
+		ep.add(new KeyboardLegend(this));
 		_checkBoxArray = new CheckBoxArray(2, 4, 4, _cbaLabels);
 		_checkBoxArray.setBorder(new CommonBorder());
 		ep.add(_checkBoxArray);
@@ -235,7 +230,6 @@ public class CedPanel3D extends Panel3D {
 		gljpanel.setPreferredSize(d);
 	}
 
-
 	/**
 	 * Get the alpha for volume drawing
 	 * 
@@ -248,8 +242,7 @@ public class CedPanel3D extends Panel3D {
 	/**
 	 * Get one of the display buttons
 	 * 
-	 * @param label
-	 *            the button label
+	 * @param label the button label
 	 * @return the button or null on failure
 	 */
 	public AbstractButton getDisplayButton(String label) {
@@ -285,22 +278,21 @@ public class CedPanel3D extends Panel3D {
 	/**
 	 * Check if a feature should be drawn
 	 * 
-	 * @param label
-	 *            the label for the check box on the option array
+	 * @param label the label for the check box on the option array
 	 * @return <code>true</code> if the feature should be drawn
 	 */
 	private boolean show(String label) {
 		AbstractButton ab = _checkBoxArray.getButton(label);
 		return (ab == null) ? false : ab.isSelected();
 	}
-	
+
 	public void enableLabel(String label, boolean enabled) {
 		AbstractButton ab = _checkBoxArray.getButton(label);
 		if (ab != null) {
 			ab.setEnabled(enabled);
 		}
 	}
-	
+
 	public void enableBSTOuterLayers() {
 		boolean oldGeo = Ced.getCed().useOldBSTGeometry();
 		enableLabel(SHOW_BST_LAYER_7, oldGeo);
@@ -309,6 +301,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show ECAL?
+	 * 
 	 * @return <code>true</code> if we are to show ECAL
 	 */
 	public boolean showECAL() {
@@ -317,6 +310,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show PCAL?
+	 * 
 	 * @return <code>true</code> if we are to show PCAL
 	 */
 	public boolean showPCAL() {
@@ -325,32 +319,34 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show forward TOF?
+	 * 
 	 * @return <code>true</code> if we are to show FTOF
 	 */
 	public boolean showFTOF() {
 		return show(CedPanel3D.SHOW_FTOF);
 	}
-	
+
 	/**
 	 * Show CTOF?
+	 * 
 	 * @return <code>true</code> if we are to show CTOF
 	 */
 	public boolean showCTOF() {
 		return show(CedPanel3D.SHOW_CTOF);
 	}
 
-
 	/**
 	 * Show BST?
+	 * 
 	 * @return <code>true</code> if we are to show BST
 	 */
 	public boolean showBST() {
 		return show(CedPanel3D.SHOW_BST);
 	}
 
-
 	/**
 	 * Show BMT?
+	 * 
 	 * @return <code>true</code> if we are to show BMT
 	 */
 	public boolean showBMT() {
@@ -359,6 +355,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show CND?
+	 * 
 	 * @return <code>true</code> if we are to show CND
 	 */
 	public boolean showCND() {
@@ -367,6 +364,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show CND Layer 1?
+	 * 
 	 * @return <code>true</code> if we are to show CND Layer 1
 	 */
 	public boolean showCNDLayer1() {
@@ -375,6 +373,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show CND Layer 2?
+	 * 
 	 * @return <code>true</code> if we are to show CND Layer 2
 	 */
 	public boolean showCNDLayer2() {
@@ -383,14 +382,16 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show CND Layer 3?
+	 * 
 	 * @return <code>true</code> if we are to show CND Layer 3
 	 */
 	public boolean showCNDLayer3() {
 		return showCND() && show(CedPanel3D.SHOW_CND_LAYER_3);
 	}
-	
+
 	/**
 	 * Show reconstructed Crosses?
+	 * 
 	 * @return <code>true</code> if we are to show reconstructed crosses
 	 */
 	public boolean showReconCrosses() {
@@ -399,6 +400,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show reconstructed FTOF?
+	 * 
 	 * @return <code>true</code> if we are to show reconstructed ftof
 	 */
 	public boolean showReconFTOF() {
@@ -407,31 +409,34 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show time based track?
+	 * 
 	 * @return <code>true</code> if we are to show time based track
 	 */
 	public boolean showTBTrack() {
 		return show(CedPanel3D.SHOW_TB_TRACK);
 	}
-	
+
 	/**
 	 * Show hit based track?
+	 * 
 	 * @return <code>true</code> if we are to show hit based track
 	 */
 	public boolean showHBTrack() {
 		return show(CedPanel3D.SHOW_HB_TRACK);
 	}
-	
+
 	/**
 	 * Show field map extents
+	 * 
 	 * @return <code>true</code> if we are to show torus and solenoid extent
 	 */
 	public boolean showMapExtents() {
 		return show(CedPanel3D.SHOW_MAP_EXTENTS);
 	}
 
-
 	/**
 	 * Show cvt based track?
+	 * 
 	 * @return <code>true</code> if we are to show cvt based track
 	 */
 	public boolean showCVTTrack() {
@@ -440,14 +445,16 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show time based cross?
+	 * 
 	 * @return <code>true</code> if we are to show time based cross
 	 */
 	public boolean showTBCross() {
 		return show(CedPanel3D.SHOW_TB_CROSS);
 	}
-	
+
 	/**
 	 * Show hit based cross?
+	 * 
 	 * @return <code>true</code> if we are to show hit based cross
 	 */
 	public boolean showHBCross() {
@@ -456,32 +463,34 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show BST Hits?
+	 * 
 	 * @return <code>true</code> if we are to show BST Hits
 	 */
 	public boolean showBSTHits() {
 		return show(CedPanel3D.SHOW_BST_HITS);
 	}
-	
 
 	/**
 	 * Show BMT Hits?
+	 * 
 	 * @return <code>true</code> if we are to show BMT Hits
 	 */
 	public boolean showBMTHits() {
 		return show(CedPanel3D.SHOW_BMT_HITS);
 	}
 
-	
 	/**
 	 * Show DC?
+	 * 
 	 * @return <code>true</code> if we are to show DC
 	 */
 	public boolean showDC() {
 		return show(CedPanel3D.SHOW_DC);
 	}
-	
+
 	/**
 	 * Show BST Layer 1?
+	 * 
 	 * @return <code>true</code> if we are to show BST Layer 1
 	 */
 	public boolean showBSTLayer1() {
@@ -490,6 +499,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show BST Layer 2?
+	 * 
 	 * @return <code>true</code> if we are to show BST Layer 2
 	 */
 	public boolean showBSTLayer2() {
@@ -498,6 +508,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show BST Layer 3?
+	 * 
 	 * @return <code>true</code> if we are to show BST Layer 3
 	 */
 	public boolean showBSTLayer3() {
@@ -506,6 +517,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show BST Layer 4?
+	 * 
 	 * @return <code>true</code> if we are to show BST Layer 4
 	 */
 	public boolean showBSTLayer4() {
@@ -514,6 +526,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show BST Layer 5?
+	 * 
 	 * @return <code>true</code> if we are to show BST Layer 5
 	 */
 	public boolean showBSTLayer5() {
@@ -522,6 +535,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show BST Layer 6?
+	 * 
 	 * @return <code>true</code> if we are to show BST Layer 6
 	 */
 	public boolean showBSTLayer6() {
@@ -530,6 +544,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show BST Layer 7?
+	 * 
 	 * @return <code>true</code> if we are to show BST Layer 7
 	 */
 	public boolean showBSTLayer7() {
@@ -539,16 +554,17 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show BST Layer 8?
+	 * 
 	 * @return <code>true</code> if we are to show BST Layer 8
 	 */
 	public boolean showBSTLayer8() {
 		boolean oldBSTGeometry = Ced.getCed().useOldBSTGeometry();
 		return oldBSTGeometry && showBST() && show(CedPanel3D.SHOW_BST_LAYER_8);
 	}
-	
-	
+
 	/**
 	 * Show BMT Layer 1?
+	 * 
 	 * @return <code>true</code> if we are to show BMT Layer 1
 	 */
 	public boolean showBMTLayer1() {
@@ -557,6 +573,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show BMT Layer 2?
+	 * 
 	 * @return <code>true</code> if we are to show BMT Layer 2
 	 */
 	public boolean showBMTLayer2() {
@@ -565,6 +582,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show BMT Layer 3?
+	 * 
 	 * @return <code>true</code> if we are to show BMT Layer 3
 	 */
 	public boolean showBMTLayer3() {
@@ -573,6 +591,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show BMT Layer 4?
+	 * 
 	 * @return <code>true</code> if we are to show BMT Layer 4
 	 */
 	public boolean showBMTLayer4() {
@@ -581,6 +600,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show BMT Layer 5?
+	 * 
 	 * @return <code>true</code> if we are to show BMT Layer 5
 	 */
 	public boolean showBMTLayer5() {
@@ -589,6 +609,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show BMT Layer 6?
+	 * 
 	 * @return <code>true</code> if we are to show BMT Layer 6
 	 */
 	public boolean showBMTLayer6() {
@@ -597,6 +618,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show sector 1?
+	 * 
 	 * @return <code>true</code> if we are to show sector 1
 	 */
 	public boolean showSector1() {
@@ -605,6 +627,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show sector 2?
+	 * 
 	 * @return <code>true</code> if we are to show sector 2
 	 */
 	public boolean showSector2() {
@@ -613,6 +636,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show sector 3?
+	 * 
 	 * @return <code>true</code> if we are to show sector 3
 	 */
 	public boolean showSector3() {
@@ -621,6 +645,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show sector 4?
+	 * 
 	 * @return <code>true</code> if we are to show sector 4
 	 */
 	public boolean showSector4() {
@@ -629,6 +654,7 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show sector 5?
+	 * 
 	 * @return <code>true</code> if we are to show sector 5
 	 */
 	public boolean showSector5() {
@@ -637,24 +663,25 @@ public class CedPanel3D extends Panel3D {
 
 	/**
 	 * Show sector 6?
+	 * 
 	 * @return <code>true</code> if we are to show sector 6
 	 */
 	public boolean showSector6() {
 		return show(CedPanel3D.SHOW_SECTOR_6);
 	}
-	
+
 	/**
 	 * Show Cosmics?
+	 * 
 	 * @return <code>true</code> if we are to show Cosmics
 	 */
 	public boolean showCosmics() {
 		return show(CedPanel3D.SHOW_COSMIC);
 	}
 
-
-
 	/**
 	 * Show we show the 1-based sector?
+	 * 
 	 * @param sector the sector [1..6]
 	 * @return <code>true</code> if we are to show the sector
 	 */
@@ -676,16 +703,18 @@ public class CedPanel3D extends Panel3D {
 		return false;
 	}
 
-	/** 
+	/**
 	 * Show MC truth?
+	 * 
 	 * @return <code>true</code> if we are to show simulation truth
 	 */
 	public boolean showMCTruth() {
 		return show(CedPanel3D.SHOW_TRUTH);
 	}
 
-	/** 
+	/**
 	 * Show Volumes?
+	 * 
 	 * @return <code>true</code> if we are to show volumes
 	 */
 	public boolean showVolumes() {

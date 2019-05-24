@@ -88,8 +88,7 @@ public class FileTreePanel extends JPanel {
 	/**
 	 * Add a file listener.
 	 * 
-	 * @param fl
-	 *            the filetree listener to add.
+	 * @param fl the filetree listener to add.
 	 */
 	public void addFileTreeListener(IFileTreeListener fl) {
 		if (fileTree != null) {
@@ -100,8 +99,7 @@ public class FileTreePanel extends JPanel {
 	/**
 	 * Return the last selected file in the file tree
 	 * 
-	 * @return the last selected file name (full path) in the file tree
-	 *         (explorer).
+	 * @return the last selected file name (full path) in the file tree (explorer).
 	 */
 	public String getLastSelection() {
 		if (fileTree == null) {
@@ -114,8 +112,7 @@ public class FileTreePanel extends JPanel {
 	/**
 	 * Set the text in the text field.
 	 * 
-	 * @param s
-	 *            the text to set.
+	 * @param s the text to set.
 	 */
 	public void setText(String s) {
 

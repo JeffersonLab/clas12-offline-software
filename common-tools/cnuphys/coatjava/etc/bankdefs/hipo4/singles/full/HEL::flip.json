@@ -1,0 +1,50 @@
+[
+    {
+        "entries": [
+            {
+                "info": "run number", 
+                "name": "run", 
+                "type": "I"
+            }, 
+            {
+                "info": "event number", 
+                "name": "event", 
+                "type": "I"
+            }, 
+            {
+                "info": "timestamp (4ns)", 
+                "name": "timestamp", 
+                "type": "L"
+            }, 
+            {
+                "info": "helicity state with half-wave plate correction", 
+                "name": "helicity", 
+                "type": "B"
+            }, 
+            {
+                "info": "helicity state without half-wave plate correction", 
+                "name": "helicityRaw", 
+                "type": "B"
+            }, 
+            {
+                "info": "pair sync state", 
+                "name": "pair", 
+                "type": "B"
+            }, 
+            {
+                "info": "pattern sync state", 
+                "name": "pattern", 
+                "type": "B"
+            }, 
+            {
+                "info": "status", 
+                "name": "status", 
+                "type": "B"
+            }
+        ], 
+        "group": 22000, 
+        "info": "Helicity flips from ADC bank.  State values are -1/0/+1, where 0 is invalid.", 
+        "item": 12, 
+        "name": "HEL::flip"
+    }
+]

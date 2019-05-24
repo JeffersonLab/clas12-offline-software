@@ -66,8 +66,8 @@ public class XmlDomParser {
 	}
 
 	/**
-	 * Given an xml element and the tag name, look for the tag and get the
-	 * integer content.
+	 * Given an xml element and the tag name, look for the tag and get the integer
+	 * content.
 	 * 
 	 * @param element the xml element.
 	 * @param tagName the name of the tag.
@@ -94,8 +94,8 @@ public class XmlDomParser {
 	}
 
 	/**
-	 * Given an xml element and the tag name, look for the tag and get the
-	 * boolean content.
+	 * Given an xml element and the tag name, look for the tag and get the boolean
+	 * content.
 	 * 
 	 * @param element the xml element.
 	 * @param tagName the name of the tag.
@@ -123,8 +123,8 @@ public class XmlDomParser {
 	}
 
 	/**
-	 * Given an xml element and the tag name, look for the tag and get the
-	 * double content.
+	 * Given an xml element and the tag name, look for the tag and get the double
+	 * content.
 	 * 
 	 * @param element the xml element.
 	 * @param tagName the name of the tag.

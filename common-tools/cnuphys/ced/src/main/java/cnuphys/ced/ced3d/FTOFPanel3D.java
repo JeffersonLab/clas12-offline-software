@@ -21,12 +21,9 @@ public class FTOFPanel3D extends DetectorItem3D {
 	/**
 	 * An FTOF Panel 3D item
 	 * 
-	 * @param panel3d
-	 *            the owner graphical panel
-	 * @param sector
-	 *            the sector 1..6
-	 * @param panelId
-	 *            the super layer [PANEL_1A, PANEL_1B, PANEL_2] (0, 1, 2)
+	 * @param panel3d the owner graphical panel
+	 * @param sector  the sector 1..6
+	 * @param panelId the super layer [PANEL_1A, PANEL_1B, PANEL_2] (0, 1, 2)
 	 */
 	public FTOFPanel3D(CedPanel3D panel3D, int sector, int panelId) {
 		super(panel3D);
@@ -35,8 +32,7 @@ public class FTOFPanel3D extends DetectorItem3D {
 
 		_paddles = new FTOFPaddle3D[FTOFGeometry.numPaddles[panelId]];
 		for (int paddleId = 1; paddleId <= _paddles.length; paddleId++) {
-			_paddles[paddleId - 1] = new FTOFPaddle3D(sector, panelId,
-					paddleId);
+			_paddles[paddleId - 1] = new FTOFPaddle3D(sector, panelId, paddleId);
 		}
 	}
 
@@ -52,8 +48,7 @@ public class FTOFPanel3D extends DetectorItem3D {
 	/**
 	 * Get the paddle
 	 * 
-	 * @param paddleId
-	 *            the 1-based index
+	 * @param paddleId the 1-based index
 	 * @return the paddle
 	 */
 	public FTOFPaddle3D getPaddle(int paddleId) {
@@ -66,17 +61,17 @@ public class FTOFPanel3D extends DetectorItem3D {
 
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
-		
-		//draw tdc adc hits
-			TdcAdcHitList hits = FTOF.getInstance().getTdcAdcHits();
-			if (!hits.isEmpty()) {
-				byte layer = (byte) (_panelId + 1);
-				for (TdcAdcHit hit : hits) {
-					if ((hit.sector == _sector) && (hit.layer == layer)) {
-						getPaddle(hit.component).drawPaddle(drawable, hits.adcColor(hit));
-					}
+
+		// draw tdc adc hits
+		TdcAdcHitList hits = FTOF.getInstance().getTdcAdcHits();
+		if (!hits.isEmpty()) {
+			byte layer = (byte) (_panelId + 1);
+			for (TdcAdcHit hit : hits) {
+				if ((hit.sector == _sector) && (hit.layer == layer)) {
+					getPaddle(hit.component).drawPaddle(drawable, hits.adcColor(hit));
 				}
 			}
+		}
 
 //
 //

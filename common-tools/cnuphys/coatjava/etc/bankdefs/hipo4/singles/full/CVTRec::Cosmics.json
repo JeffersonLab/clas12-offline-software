@@ -1,0 +1,145 @@
+[
+    {
+        "entries": [
+            {
+                "info": "ID", 
+                "name": "ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "trkline_yx_slope", 
+                "name": "trkline_yx_slope", 
+                "type": "F"
+            }, 
+            {
+                "info": "trkline_yx_interc", 
+                "name": "trkline_yx_interc", 
+                "type": "F"
+            }, 
+            {
+                "info": "trkline_yz_slope", 
+                "name": "trkline_yz_slope", 
+                "type": "F"
+            }, 
+            {
+                "info": "trkline_yz_interc", 
+                "name": "trkline_yz_interc", 
+                "type": "F"
+            }, 
+            {
+                "info": "theta (deg)", 
+                "name": "theta", 
+                "type": "F"
+            }, 
+            {
+                "info": "phi (deg)", 
+                "name": "phi", 
+                "type": "F"
+            }, 
+            {
+                "info": "Fit chi^2 ", 
+                "name": "chi2", 
+                "type": "F"
+            }, 
+            {
+                "info": " number of degrees of freedom used in the fit", 
+                "name": "ndf", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross1_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross2_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross3_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross4_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross5_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross6_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross7_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross8_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross9_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross10_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross11_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross12_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross13_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross14_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross15_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross16_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross17_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "ID of cross in the track", 
+                "name": "Cross18_ID", 
+                "type": "S"
+            }
+        ], 
+        "group": 20500, 
+        "info": "reconstructed SVT straight tracks", 
+        "item": 28, 
+        "name": "CVTRec::Cosmics"
+    }
+]

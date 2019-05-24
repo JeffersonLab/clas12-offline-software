@@ -16,19 +16,16 @@ public class RangeButton extends ToolBarToggleButton {
 	/**
 	 * Create the button for placing down a reference point (anchor).
 	 * 
-	 * @param container
-	 *            the owner container.
+	 * @param container the owner container.
 	 */
 	public RangeButton(IContainer container) {
 		super(container, "images/range.gif", "Range");
 	}
 
 	/**
-	 * Handle a mouse clicked (into the map canvas) event (if this tool is
-	 * active)
+	 * Handle a mouse clicked (into the map canvas) event (if this tool is active)
 	 * 
-	 * @param e
-	 *            the MouseEvent
+	 * @param e the MouseEvent
 	 */
 	@Override
 	public void mousePressed(MouseEvent e) {

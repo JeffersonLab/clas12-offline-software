@@ -10,6 +10,7 @@ import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.DataSetException;
 import cnuphys.splot.pdata.StripData;
 import cnuphys.splot.plot.Environment;
+import cnuphys.splot.plot.LimitsMethod;
 import cnuphys.splot.plot.PlotParameters;
 import cnuphys.splot.style.SymbolType;
 
@@ -58,7 +59,7 @@ public class MemoryUsageDialog extends APlotDialog implements IValueGetter {
 	@Override
 	public void setPreferences() {
 		DataSet ds = _canvas.getDataSet();
-		ds.getCurveStyle(0).setLineColor(Color.red);
+		ds.getCurveStyle(0).setBorderColor(Color.red);
 		ds.getCurveStyle(0).setFillColor(new Color(128, 0, 0, 48));
 		ds.getCurveStyle(0).setSymbolType(SymbolType.NOSYMBOL);
 		PlotParameters params = _canvas.getParameters();
@@ -68,7 +69,7 @@ public class MemoryUsageDialog extends APlotDialog implements IValueGetter {
 		params.setStatusFont(_legendFont);
 		params.setMinExponentY(3);
 		params.setNumDecimalY(0);
-		params.setUseXDataLimits(true);
+		params.setXLimitsMethod(LimitsMethod.USEDATALIMITS);
 		params.mustIncludeYZero(true);
 	}
 

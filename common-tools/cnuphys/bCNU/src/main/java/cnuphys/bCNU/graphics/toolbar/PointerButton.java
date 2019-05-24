@@ -20,8 +20,7 @@ import cnuphys.bCNU.util.Environment;
  * @author heddle
  */
 @SuppressWarnings("serial")
-public class PointerButton extends ToolBarToggleButton
-		implements IRubberbanded {
+public class PointerButton extends ToolBarToggleButton implements IRubberbanded {
 
 	/**
 	 * Item being modified (dragged, rotated, resized)
@@ -77,9 +76,9 @@ public class PointerButton extends ToolBarToggleButton
 	}
 
 	/**
-	 * The mouse was clicked. Note that the order the events will come is
-	 * PRESSED, RELEASED, CLICKED. And a CLICKED will happen only if the mouse
-	 * was not moved between press and release.
+	 * The mouse was clicked. Note that the order the events will come is PRESSED,
+	 * RELEASED, CLICKED. And a CLICKED will happen only if the mouse was not moved
+	 * between press and release.
 	 * 
 	 * @param mouseEvent the causal event.
 	 */
@@ -89,9 +88,9 @@ public class PointerButton extends ToolBarToggleButton
 	}
 
 	/**
-	 * The mouse was clicked. Note that the order the events will come is
-	 * PRESSED, RELEASED, CLICKED. And a CLICKED will happen only if the mouse
-	 * was not moved between press and release.
+	 * The mouse was clicked. Note that the order the events will come is PRESSED,
+	 * RELEASED, CLICKED. And a CLICKED will happen only if the mouse was not moved
+	 * between press and release.
 	 * 
 	 * @param mouseEvent the causal event.
 	 */
@@ -102,7 +101,7 @@ public class PointerButton extends ToolBarToggleButton
 			popupTrigger(mouseEvent);
 			return;
 		}
-		
+
 		// get the topmost item
 		_modifiedItem = container.getItemAtPoint(mouseEvent.getPoint());
 		if (_modifiedItem != null) {
@@ -114,8 +113,7 @@ public class PointerButton extends ToolBarToggleButton
 		// no selection, start rubber-banding
 		if (_modifiedItem == null) {
 			if (rubberband == null) {
-				rubberband = new Rubberband(container, this,
-						Rubberband.Policy.RECTANGLE);
+				rubberband = new Rubberband(container, this, Rubberband.Policy.RECTANGLE);
 				rubberband.setActive(true);
 				rubberband.startRubberbanding(mouseEvent.getPoint());
 			}
@@ -152,61 +150,45 @@ public class PointerButton extends ToolBarToggleButton
 
 		if (_modifiedItem != null) {
 			if ((Math.abs(_currentPoint.x - _prevPoint.x) >= MINDRAGSTEP)
-					|| (Math.abs(
-							_currentPoint.y - _prevPoint.y) >= MINDRAGSTEP)) {
+					|| (Math.abs(_currentPoint.y - _prevPoint.y) >= MINDRAGSTEP)) {
 				if (_modifying) {
-					ItemModification itemModification = _modifiedItem
-							.getItemModification();
+					ItemModification itemModification = _modifiedItem.getItemModification();
 					itemModification.setCurrentMousePoint(_currentPoint);
 					_modifiedItem.modify();
 
 					// if this is a drag and I have children, then I have to
 					// trick them into dragging too.
-					if (itemModification
-							.getType() == ItemModification.ModificationType.DRAG) {
-						Vector<AItem> descendants = _modifiedItem
-								.getAllDescendants();
+					if (itemModification.getType() == ItemModification.ModificationType.DRAG) {
+						Vector<AItem> descendants = _modifiedItem.getAllDescendants();
 						if (descendants != null) {
 							for (AItem descendant : descendants) {
-								ItemModification dModification = descendant
-										.getItemModification();
-								dModification
-										.setCurrentMousePoint(_currentPoint);
+								ItemModification dModification = descendant.getItemModification();
+								dModification.setCurrentMousePoint(_currentPoint);
 								descendant.modify();
 							}
 						}
 					}
 
-				}
-				else {
-					_modifying = ((System.currentTimeMillis()
-							- lastClick) > dragDelay);
+				} else {
+					_modifying = ((System.currentTimeMillis() - lastClick) > dragDelay);
 					if (_modifying) {
-						ItemModification itemModification = new ItemModification(
-								_modifiedItem, container, _startPoint,
-								_currentPoint, mouseEvent.isShiftDown(),
-								mouseEvent.isControlDown());
+						ItemModification itemModification = new ItemModification(_modifiedItem, container, _startPoint,
+								_currentPoint, mouseEvent.isShiftDown(), mouseEvent.isControlDown());
 						_modifiedItem.setModificationItem(itemModification);
 						_modifiedItem.startModification();
 
 						// if this is a drag and I have children, then I have to
 						// trick them into dragging too.
 
-						if (itemModification
-								.getType() == ItemModification.ModificationType.DRAG) {
-							Vector<AItem> descendants = _modifiedItem
-									.getAllDescendants();
+						if (itemModification.getType() == ItemModification.ModificationType.DRAG) {
+							Vector<AItem> descendants = _modifiedItem.getAllDescendants();
 							if (descendants != null) {
 								for (AItem descendant : descendants) {
-									ItemModification dModification = new ItemModification(
-											descendant, container, _startPoint,
-											_currentPoint,
-											mouseEvent.isShiftDown(),
+									ItemModification dModification = new ItemModification(descendant, container,
+											_startPoint, _currentPoint, mouseEvent.isShiftDown(),
 											mouseEvent.isControlDown());
-									dModification.setType(
-											ItemModification.ModificationType.DRAG);
-									descendant
-											.setModificationItem(dModification);
+									dModification.setType(ItemModification.ModificationType.DRAG);
+									descendant.setModificationItem(dModification);
 								}
 							}
 						}
@@ -218,9 +200,9 @@ public class PointerButton extends ToolBarToggleButton
 	}
 
 	/**
-	 * The mouse was clicked. Note that the order the events will come is
-	 * PRESSED, RELEASED, CLICKED. And a CLICKED will happen only if the mouse
-	 * was not moved between press and release.
+	 * The mouse was clicked. Note that the order the events will come is PRESSED,
+	 * RELEASED, CLICKED. And a CLICKED will happen only if the mouse was not moved
+	 * between press and release.
 	 * 
 	 * @param mouseEvent the causal event.
 	 */
@@ -228,8 +210,7 @@ public class PointerButton extends ToolBarToggleButton
 	public void mouseReleased(MouseEvent mouseEvent) {
 
 		if (_modifying) {
-			ItemModification itemModification = _modifiedItem
-					.getItemModification();
+			ItemModification itemModification = _modifiedItem.getItemModification();
 			itemModification.setCurrentMousePoint(_currentPoint);
 			_modifiedItem.stopModification();
 			reset();
@@ -271,8 +252,8 @@ public class PointerButton extends ToolBarToggleButton
 	/**
 	 * Select items based on a click.
 	 * 
-	 * @param item if not null, we clicked on this item. If null, we clicked on
-	 *            the container but not on an item.
+	 * @param item       if not null, we clicked on this item. If null, we clicked
+	 *                   on the container but not on an item.
 	 * @param mouseEvent the causal event
 	 */
 	private void selectItemsFromClick(AItem item, MouseEvent mouseEvent) {

@@ -2,11 +2,16 @@ package cnuphys.bCNU.application;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Frame;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Properties;
 
+import javax.swing.FocusManager;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
@@ -32,29 +37,28 @@ import cnuphys.bCNU.view.ViewManager;
  */
 
 @SuppressWarnings("serial")
-public class BaseMDIApplication extends JFrame {
+public class BaseMDIApplication extends JFrame implements KeyEventDispatcher {
 
 	/**
 	 * Attributes created from the variable length arguments.
 	 */
 	protected Properties _properties;
-	
-	//used (optionally) for feedback
+
+	// used (optionally) for feedback
 	private static HeadsUpDisplay _headsUpDisplay;
-	
-	//singleton. Applications cannot create other applications.
-	private static  BaseMDIApplication instance;
+
+	// singleton. Applications cannot create other applications.
+	private static BaseMDIApplication instance;
 
 	/**
 	 * Constructor
 	 * 
-	 * @param keyVals
-	 *            an optional variable length list of attributes in type-value
-	 *            pairs. For example, AttributeType.NAME, "my application",
-	 *            AttributeType.CENTER, true, etc.
+	 * @param keyVals an optional variable length list of attributes in type-value
+	 *                pairs. For example, AttributeType.NAME, "my application",
+	 *                AttributeType.CENTER, true, etc.
 	 */
 	protected BaseMDIApplication(Object... keyVals) {
-		
+
 		if (instance != null) {
 			System.err.println("Singleton violation in BaseMDI Application");
 			System.exit(1);
@@ -77,7 +81,7 @@ public class BaseMDIApplication extends JFrame {
 
 		// Get the attributes that we recognize;
 
-		Color background =  PropertySupport.getBackground(_properties);
+		Color background = PropertySupport.getBackground(_properties);
 		String backgroundImage = PropertySupport.getBackgroundImage(_properties);
 		String title = PropertySupport.getTitle(_properties);
 		boolean maximize = PropertySupport.getMaximize(_properties);
@@ -126,22 +130,26 @@ public class BaseMDIApplication extends JFrame {
 		menuManager.addMenu(ViewManager.getInstance().getViewMenu());
 
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		
+
+		// add a global key listener
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
+
 		instance = this;
 	}
-	
+
 	public static BaseMDIApplication getApplication() {
 		return instance;
 	}
-	
+
 	/**
 	 * Get the heads up display (might be null)
+	 * 
 	 * @return the heads up display
 	 */
 	public static HeadsUpDisplay getHeadsUpDisplay() {
 		return _headsUpDisplay;
 	}
-	
+
 	/**
 	 * Add a heads up display (as a glass pane) for this application
 	 */
@@ -150,6 +158,62 @@ public class BaseMDIApplication extends JFrame {
 		instance.setGlassPane(_headsUpDisplay);
 		instance.getGlassPane().setVisible(true);
 
+	}
+
+	/**
+	 * The global key dispatcher. Default implementation passes the event to type
+	 * handlers.
+	 * 
+	 * @param the key event
+	 * @return <code>false</code> if the event should continue down the chain
+	 */
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent e) {
+
+		int type = e.getID();
+
+		if (type == KeyEvent.KEY_PRESSED) {
+			return handleKeyPressed(e);
+		} else if (type == KeyEvent.KEY_RELEASED) {
+			return handleKeyTyped(e);
+		}
+		if (type == KeyEvent.KEY_TYPED) {
+			return handleKeyReleased(e);
+		}
+		return false;
+	}
+
+	/**
+	 * The dispatcher handed this a key press event. The default implementation does
+	 * nothing.
+	 * 
+	 * @param e the key event
+	 * @return <code>false</code> if the event should continue down the chain
+	 */
+	protected boolean handleKeyPressed(KeyEvent e) {
+		return false;
+	}
+
+	/**
+	 * The dispatcher handed this a key type event. The default implementation does
+	 * nothing.
+	 * 
+	 * @param e the key event
+	 * @return <code>false</code> if the event should continue down the chain
+	 */
+	protected boolean handleKeyTyped(KeyEvent e) {
+		return false;
+	}
+
+	/**
+	 * The dispatcher handed this a key release event. The default implementation
+	 * does nothing.
+	 * 
+	 * @param e the key event
+	 * @return <code>false</code> if the event should continue down the chain
+	 */
+	protected boolean handleKeyReleased(KeyEvent e) {
+		return false;
 	}
 
 }

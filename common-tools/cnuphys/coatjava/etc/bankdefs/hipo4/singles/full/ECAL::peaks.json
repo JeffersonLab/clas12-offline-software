@@ -1,0 +1,88 @@
+[
+    {
+        "entries": [
+            {
+                "id": 1, 
+                "info": "id of the hit", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "id": 2, 
+                "info": "status of the hit", 
+                "name": "status", 
+                "type": "S"
+            }, 
+            {
+                "id": 3, 
+                "info": "sector of ECAL", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "id": 4, 
+                "info": "Layer of ECAL (1-3:PCAL, 4-6:ECIN, 7-9:ECOUT", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "id": 5, 
+                "info": "Energy of the hit", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "id": 6, 
+                "info": "Time of the hit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "id": 7, 
+                "info": "strip origin X coordinate", 
+                "name": "xo", 
+                "type": "F"
+            }, 
+            {
+                "id": 8, 
+                "info": "strip origin Y coordinate", 
+                "name": "yo", 
+                "type": "F"
+            }, 
+            {
+                "id": 9, 
+                "info": "strip origin Z coordinate", 
+                "name": "zo", 
+                "type": "F"
+            }, 
+            {
+                "id": 10, 
+                "info": "strip end    X coordinate", 
+                "name": "xe", 
+                "type": "F"
+            }, 
+            {
+                "id": 11, 
+                "info": "strip end    Y coordinate", 
+                "name": "ye", 
+                "type": "F"
+            }, 
+            {
+                "id": 12, 
+                "info": "strip end    Z coordinate", 
+                "name": "ze", 
+                "type": "F"
+            }, 
+            {
+                "id": 13, 
+                "info": "width of the peak", 
+                "name": "width", 
+                "type": "F"
+            }
+        ], 
+        "group": 20700, 
+        "info": "reconstructed peaks from ECAL", 
+        "item": 22, 
+        "name": "ECAL::peaks"
+    }
+]

@@ -64,30 +64,27 @@ public class DialogUtilities {
 	/**
 	 * Center a dialog
 	 * 
-	 * @param dialog
-	 *            the dialog to center
+	 * @param dialog the dialog to center
 	 */
 
 	public static void centerDialog(JDialog dialog) {
 		GraphicsUtilities.centerComponent(dialog);
 	}
-	
+
 	/**
 	 * Place a component in the upper right
 	 * 
-	 * @param component
-	 *            The Component to center.
+	 * @param component The Component to center.
 	 */
 	public static void upperRightComponent(Component component, int dh, int dv) {
 
 		if (component == null) {
 			return;
 		}
-		
+
 		try {
 
-			GraphicsEnvironment env = GraphicsEnvironment
-					.getLocalGraphicsEnvironment();
+			GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
 			GraphicsDevice[] allScreens = env.getScreenDevices();
 			GraphicsConfiguration gc = allScreens[0].getDefaultConfiguration();
 
@@ -100,8 +97,8 @@ public class DialogUtilities {
 				componentSize.width = bounds.width;
 			}
 
-			int x = bounds.x + bounds.width - componentSize.width -  dh;
-			int y = bounds.y  + dv;
+			int x = bounds.x + bounds.width - componentSize.width - dh;
+			int y = bounds.y + dv;
 
 			component.setLocation(x, y);
 
@@ -112,14 +109,11 @@ public class DialogUtilities {
 		}
 	}
 
-
 	/**
 	 * Convenience routine for padding a string using the default font.
 	 * 
-	 * @param inp
-	 *            The string to be padded.
-	 * @param tstr
-	 *            The test string-- try to return a string the same length
+	 * @param inp  The string to be padded.
+	 * @param tstr The test string-- try to return a string the same length
 	 */
 
 	public String padString(Component c, String inp, String tstr) {
@@ -156,12 +150,9 @@ public class DialogUtilities {
 	/**
 	 * Create a nice padded panel.
 	 * 
-	 * @param hpad
-	 *            the pixel pad on the left and right
-	 * @param vpad
-	 *            the pixel pad on the top and bottom
-	 * @param component
-	 *            the main component placed in the center.
+	 * @param hpad      the pixel pad on the left and right
+	 * @param vpad      the pixel pad on the top and bottom
+	 * @param component the main component placed in the center.
 	 * @return the padded panel
 	 */
 	public static JPanel paddedPanel(int hpad, int vpad, Component component) {

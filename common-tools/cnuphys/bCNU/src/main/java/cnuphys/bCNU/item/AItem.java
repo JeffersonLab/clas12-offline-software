@@ -25,15 +25,12 @@ import javax.swing.JPopupMenu;
 import cnuphys.bCNU.drawable.DrawableChangeType;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.feedback.IFeedbackProvider;
-import cnuphys.bCNU.format.DoubleFormat;
-import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.style.IStyled;
 import cnuphys.bCNU.graphics.style.Styled;
 import cnuphys.bCNU.item.ItemModification.ModificationType;
 import cnuphys.bCNU.layer.LogicalLayer;
-import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.BaseView;
 
@@ -61,12 +58,11 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	protected static final int RPSIZE2 = RPSIZE / 2;
 
 	// icon for rotation
-	protected static ImageIcon rotateIcon = ImageManager.getInstance()
-			.loadImageIcon("images/rotate.png");
+	protected static ImageIcon rotateIcon = ImageManager.getInstance().loadImageIcon("images/rotate.png");
 
 	/**
-	 * The path is used by some items (not point or line based items). NOTE: it
-	 * is world coordinate based.
+	 * The path is used by some items (not point or line based items). NOTE: it is
+	 * world coordinate based.
 	 */
 	protected Path2D.Double _path;
 
@@ -96,11 +92,10 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	protected AItem _parent;
 
 	/**
-	 * The children of this item. Children on only used for grouping items that
-	 * are possibly deleted together and possibly dragged together. Children are
+	 * The children of this item. Children on only used for grouping items that are
+	 * possibly deleted together and possibly dragged together. Children are
 	 * selected, rotated and resized separately. When an item is deleted, all
-	 * descendants are deleted too, but not ancestors. Just like deleted a
-	 * folder.
+	 * descendants are deleted too, but not ancestors. Just like deleted a folder.
 	 */
 	protected Vector<AItem> _children;
 
@@ -135,9 +130,9 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	protected boolean _rightClickable = false;
 
 	/**
-	 * Controls whether the item is locked-which takes precedence over other
-	 * flags. A locked item cannot be dragged, rotated, resized, or
-	 * deleted--regardless of the values of those flags.
+	 * Controls whether the item is locked-which takes precedence over other flags.
+	 * A locked item cannot be dragged, rotated, resized, or deleted--regardless of
+	 * the values of those flags.
 	 */
 	protected boolean _locked = true;
 
@@ -157,8 +152,8 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	protected boolean _selected = false;
 
 	/**
-	 * Flag indicating whether the item is enabled. Objects that are not enabled
-	 * are inert and might be drawn "ghosted."
+	 * Flag indicating whether the item is enabled. Objects that are not enabled are
+	 * inert and might be drawn "ghosted."
 	 */
 	protected boolean _enabled = true;
 
@@ -190,8 +185,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	private static final Color _selectFill = Color.white;
 
 	// used for select points
-	private static final Color _rotateFill = X11Colors
-			.getX11Color("yellow", 64);
+	private static final Color _rotateFill = X11Colors.getX11Color("yellow", 64);
 
 	// used for select points
 	private static final Color _selectLine = Color.black;
@@ -199,8 +193,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Create an item on a specific layer.
 	 * 
-	 * @param layer
-	 *            the layer it is on.
+	 * @param layer the layer it is on.
 	 */
 	public AItem(LogicalLayer layer) {
 		_layer = layer;
@@ -213,16 +206,14 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Draw the item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
 
 		if (_visible) {
-						
+
 			if (shouldDraw(g, container)) {
 
 				// special clip?
@@ -251,10 +242,8 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Draws any selection or rotation rectangles
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	public void drawSelections(Graphics g, IContainer container) {
 
@@ -279,10 +268,8 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 				g.setColor(_rotateFill);
 				g.fillOval(rp.x - RPSIZE2, rp.y - RPSIZE2, RPSIZE, RPSIZE);
 
-				g.drawImage(rotateIcon.getImage(),
-						rp.x - rotateIcon.getIconHeight() / 2 + 1, rp.y
-								- rotateIcon.getIconHeight() / 2 + 1,
-						container.getComponent());
+				g.drawImage(rotateIcon.getImage(), rp.x - rotateIcon.getIconHeight() / 2 + 1,
+						rp.y - rotateIcon.getIconHeight() / 2 + 1, container.getComponent());
 			}
 		}
 
@@ -312,8 +299,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Sets the visibility flag.
 	 * 
-	 * @param visible
-	 *            the new value of the flag
+	 * @param visible the new value of the flag
 	 */
 	@Override
 	public void setVisible(boolean visible) {
@@ -336,8 +322,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Set whether the item can be dragged.
 	 * 
-	 * @param draggable
-	 *            if <code>true</code>, the item can be dragged.
+	 * @param draggable if <code>true</code>, the item can be dragged.
 	 */
 	public void setDraggable(boolean draggable) {
 		_draggable = draggable;
@@ -358,8 +343,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Set whether the item can be deleted.
 	 * 
-	 * @param deletable
-	 *            if <code>true</code>, the item can be deleted.
+	 * @param deletable if <code>true</code>, the item can be deleted.
 	 */
 	public void setDeletable(boolean deletable) {
 		_deletable = deletable;
@@ -380,8 +364,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Set whether the item can be resized.
 	 * 
-	 * @param resizable
-	 *            if <code>true</code>, the item can be resized.
+	 * @param resizable if <code>true</code>, the item can be resized.
 	 */
 	public void setResizable(boolean resizable) {
 		_resizable = resizable;
@@ -402,17 +385,16 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * /** Set whether the item can be rotated.
 	 * 
-	 * @param rotatable
-	 *            if <code>true</code>, the item can be rotated.
+	 * @param rotatable if <code>true</code>, the item can be rotated.
 	 */
 	public void setRotatable(boolean rotatable) {
 		_rotatable = rotatable;
 	}
 
 	/**
-	 * Check whether the item is locked, which takes precedence over other
-	 * flags. A locked item cannot be dragged, rotated, resized, or
-	 * deleted--regardless of the values of those flags.
+	 * Check whether the item is locked, which takes precedence over other flags. A
+	 * locked item cannot be dragged, rotated, resized, or deleted--regardless of
+	 * the values of those flags.
 	 * 
 	 * @return <code>true</code> if the item is locked.
 	 */
@@ -423,8 +405,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Set whether the item is locked.
 	 * 
-	 * @param locked
-	 *            if <code>true</code>, the item is set to locked.
+	 * @param locked if <code>true</code>, the item is set to locked.
 	 */
 	public void setLocked(boolean locked) {
 		_locked = locked;
@@ -442,8 +423,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Sets whether this item is marked as selected.
 	 * 
-	 * @param selected
-	 *            the new value of the flag.
+	 * @param selected the new value of the flag.
 	 */
 	public void setSelected(boolean selected) {
 		_selected = selected;
@@ -451,8 +431,8 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	}
 
 	/**
-	 * Check whether this item is marked as enabled. If the item is enabled, it
-	 * can be selected, otherwise it is inert.
+	 * Check whether this item is marked as enabled. If the item is enabled, it can
+	 * be selected, otherwise it is inert.
 	 * 
 	 * @return <code>true</code> is this item is marked as enabled.
 	 */
@@ -464,9 +444,8 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Sets whether this item is marked as enabled.
 	 * 
-	 * @param enabled
-	 *            the new value of the flag. If the item is enabled, it can be
-	 *            selected, otherwise it is inert.
+	 * @param enabled the new value of the flag. If the item is enabled, it can be
+	 *                selected, otherwise it is inert.
 	 */
 	@Override
 	public void setEnabled(boolean enabled) {
@@ -474,10 +453,10 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	}
 
 	/**
-	 * Check whether this item is marked as dirty. If the item is dirty, the
-	 * next time it is drawn it must be drawn from scratch. Many items are drawn
-	 * from scratch anyway--but some complicated items may be caching data for
-	 * quick redraw.
+	 * Check whether this item is marked as dirty. If the item is dirty, the next
+	 * time it is drawn it must be drawn from scratch. Many items are drawn from
+	 * scratch anyway--but some complicated items may be caching data for quick
+	 * redraw.
 	 * 
 	 * @return <code>true</code> is this item is marked as dirty.
 	 */
@@ -488,11 +467,10 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Sets whether this item is marked as dirty.
 	 * 
-	 * @param dirty
-	 *            the new value of the flag. If the item is dirty, the next time
-	 *            it is drawn it must be drawn from scratch. Many items are
-	 *            drawn from scratch anyway--but some complicated items may be
-	 *            caching data for quick redraw.
+	 * @param dirty the new value of the flag. If the item is dirty, the next time
+	 *              it is drawn it must be drawn from scratch. Many items are drawn
+	 *              from scratch anyway--but some complicated items may be caching
+	 *              data for quick redraw.
 	 */
 	@Override
 	public void setDirty(boolean dirty) {
@@ -505,8 +483,8 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Convenience routine to see if this item should be ignored.
 	 * 
-	 * @return <code>true</code> if the item should be ignored in terms of
-	 *         dragging, ro
+	 * @return <code>true</code> if the item should be ignored in terms of dragging,
+	 *         ro
 	 */
 	public boolean isTrackable() {
 		if (_locked) {
@@ -527,36 +505,30 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Custom drawer for the item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	public abstract void drawItem(Graphics g, IContainer container);
 
 	/**
-	 * Checks whether the item should be drawn. This is an additional check,
-	 * beyond the simple visibility flag check. For example, it might check
-	 * whether the item intersects the area being drawn.
+	 * Checks whether the item should be drawn. This is an additional check, beyond
+	 * the simple visibility flag check. For example, it might check whether the
+	 * item intersects the area being drawn.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
-	 * @return <code>true</code> if the item passes any and all tests, and
-	 *         should be drwan.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
+	 * @return <code>true</code> if the item passes any and all tests, and should be
+	 *         drwan.
 	 */
 	public abstract boolean shouldDraw(Graphics g, IContainer container);
 
 	/**
 	 * Check whether the (rendered) item contains the given screen point.
 	 * 
-	 * @param container
-	 *            the graphical container rendering the item.
-	 * @param screenPoint
-	 *            a pixel location.
-	 * @return <code>true</code> if the item, as rendered on the given
-	 *         container, contains the given screen point.
+	 * @param container   the graphical container rendering the item.
+	 * @param screenPoint a pixel location.
+	 * @return <code>true</code> if the item, as rendered on the given container,
+	 *         contains the given screen point.
 	 */
 	public boolean contains(IContainer container, Point screenPoint) {
 		// do we have a cached polygon?
@@ -591,8 +563,8 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	}
 
 	/**
-	 * Get the drawing style for this item. Through this object you can set the
-	 * fill color, line style, etc.
+	 * Get the drawing style for this item. Through this object you can set the fill
+	 * color, line style, etc.
 	 * 
 	 * @return the style for this item.
 	 */
@@ -603,8 +575,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Set the drawing style for this item.
 	 * 
-	 * @param style
-	 *            the style to set.
+	 * @param style the style to set.
 	 */
 	public void setStyle(IStyled style) {
 		this._style = style;
@@ -613,8 +584,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Set the name of the item.
 	 * 
-	 * @param name
-	 *            the name of the item.
+	 * @param name the name of the item.
 	 */
 	public void setName(String name) {
 		_name = name;
@@ -645,33 +615,25 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	}
 
 	/**
-	 * Add any appropriate feedback strings
-	 * panel. Default implementation returns the item's name.
+	 * Add any appropriate feedback strings panel. Default implementation returns
+	 * the item's name.
 	 * 
-	 * @param container
-	 *            the Base container.
-	 * @param pp
-	 *            the mouse location.
-	 * @param wp
-	 *            the corresponding world point.
-	 * @param feedbackStrings
-	 *            the List of feedback strings to add to.
+	 * @param container       the Base container.
+	 * @param pp              the mouse location.
+	 * @param wp              the corresponding world point.
+	 * @param feedbackStrings the List of feedback strings to add to.
 	 */
 	@Override
-	public void getFeedbackStrings(IContainer container, Point pp,
-			Point2D.Double wp, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
 	}
 
 	/**
-	 * Check if the given rectangle completely encloses the item. This is used
-	 * for rubber band selection. The default implementation should work for
-	 * rectangular objects. More complicated objects (polygons) should
-	 * overwrite.
+	 * Check if the given rectangle completely encloses the item. This is used for
+	 * rubber band selection. The default implementation should work for rectangular
+	 * objects. More complicated objects (polygons) should overwrite.
 	 * 
-	 * @param container
-	 *            the rendering container.
-	 * @param r
-	 *            the bounds
+	 * @param container the rendering container.
+	 * @param r         the bounds
 	 * @return <code>true</code> if the bounds (r) completely enclose the item.
 	 */
 	public boolean enclosed(IContainer container, Rectangle r) {
@@ -690,8 +652,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * get the bounding rectangle of the item.
 	 * 
-	 * @param container
-	 *            the container being rendered
+	 * @param container the container being rendered
 	 * @return the box around the item.
 	 */
 	public Rectangle getBounds(IContainer container) {
@@ -745,21 +706,19 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 			break;
 
 		case ROTATE:
-			_layer.notifyDrawableChangeListeners(this,
-					DrawableChangeType.ROTATED);
+			_layer.notifyDrawableChangeListeners(this, DrawableChangeType.ROTATED);
 			break;
 
 		case RESIZE:
-			_layer.notifyDrawableChangeListeners(this,
-					DrawableChangeType.RESIZED);
+			_layer.notifyDrawableChangeListeners(this, DrawableChangeType.RESIZED);
 			break;
 		}
 		_modification = null;
 	}
 
 	/**
-	 * This gets the focus of the item. Fot pointlike items it will be the
-	 * location. For polygonal items it might be the centroid.
+	 * This gets the focus of the item. Fot pointlike items it will be the location.
+	 * For polygonal items it might be the centroid.
 	 * 
 	 * @return the focus of the item.
 	 */
@@ -768,21 +727,19 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	}
 
 	/**
-	 * This should be overridden by items to do something sensible. They should
-	 * set their focus point which for simple items may their location and for
+	 * This should be overridden by items to do something sensible. They should set
+	 * their focus point which for simple items may their location and for
 	 * complicated items may be where their new centroid should be.
 	 * 
-	 * @param wp
-	 *            the new focus.
+	 * @param wp the new focus.
 	 */
 	public void setFocus(Point2D.Double wp) {
 		_focus = wp;
 	}
 
 	/**
-	 * This gets the screen (pixel) version focus of the item. Fot pointlike
-	 * items it will be the location. For polygobal items it might be the
-	 * centroid.
+	 * This gets the screen (pixel) version focus of the item. Fot pointlike items
+	 * it will be the location. For polygobal items it might be the centroid.
 	 * 
 	 * @return the focus of the item.
 	 */
@@ -799,8 +756,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Get the rotation point
 	 * 
-	 * @param container
-	 *            the container bing rendered
+	 * @param container the container bing rendered
 	 * @return the rotation point where rotations are initiated
 	 */
 	public Point getRotatePoint(IContainer container) {
@@ -820,8 +776,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 			Point pp[] = new Point[_lastDrawnPolygon.npoints];
 			;
 			for (int i = 0; i < _lastDrawnPolygon.npoints; i++) {
-				pp[i] = new Point(_lastDrawnPolygon.xpoints[i],
-						_lastDrawnPolygon.ypoints[i]);
+				pp[i] = new Point(_lastDrawnPolygon.xpoints[i], _lastDrawnPolygon.ypoints[i]);
 			}
 			return pp;
 		}
@@ -852,8 +807,8 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	}
 
 	/**
-	 * Get the modification record which will not be null while the item is
-	 * being modified.
+	 * Get the modification record which will not be null while the item is being
+	 * modified.
 	 * 
 	 * @return the itemModification record.
 	 */
@@ -876,35 +831,29 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Set whether the item will respond to a right click.
 	 * 
-	 * @param rightClickable
-	 *            the new rightClickable flag to set
+	 * @param rightClickable the new rightClickable flag to set
 	 */
 	public void setRightClickable(boolean rightClickable) {
 		_rightClickable = rightClickable;
 	}
 
 	/**
-	 * Called when the item was double clicked. The default implementation is to
-	 * do nothing.
+	 * Called when the item was double clicked. The default implementation is to do
+	 * nothing.
 	 * 
-	 * @param mouseEvent
-	 *            the causal event.
+	 * @param mouseEvent the causal event.
 	 */
 	public void doubleClicked(MouseEvent mouseEvent) {
 	}
-	
 
 	/**
 	 * Is the given point int a select rect?
 	 * 
-	 * @param container
-	 *            the container being rendered
-	 * @param screenPoint
-	 *            the point in question
+	 * @param container   the container being rendered
+	 * @param screenPoint the point in question
 	 * @return the index of the select point, or -1 if not in one
 	 */
-	public int inSelectPoint(IContainer container, Point screenPoint,
-			boolean checkResizable) {
+	public int inSelectPoint(IContainer container, Point screenPoint, boolean checkResizable) {
 		if (checkResizable && !isResizable()) {
 			return -1;
 		}
@@ -919,8 +868,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 
 		int index = 0;
 		for (Point lp : pp) {
-			Rectangle r = new Rectangle(lp.x - SPSIZE2, lp.y - SPSIZE2, SPSIZE,
-					SPSIZE);
+			Rectangle r = new Rectangle(lp.x - SPSIZE2, lp.y - SPSIZE2, SPSIZE, SPSIZE);
 			if (r.contains(screenPoint)) {
 				return index;
 			}
@@ -933,10 +881,8 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * See if we are in the rotate point
 	 * 
-	 * @param container
-	 *            the container being rendered
-	 * @param screenPoint
-	 *            the point in question
+	 * @param container   the container being rendered
+	 * @param screenPoint the point in question
 	 * @return <code>true<code> if we are in the rotate rect.
 	 */
 	public boolean inRotatePoint(IContainer container, Point screenPoint) {
@@ -951,8 +897,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 		if (p == null) {
 			return false;
 		}
-		Rectangle r = new Rectangle(p.x - RPSIZE2, p.y - RPSIZE2, RPSIZE,
-				RPSIZE);
+		Rectangle r = new Rectangle(p.x - RPSIZE2, p.y - RPSIZE2, RPSIZE, RPSIZE);
 
 		return r.contains(screenPoint);
 	}
@@ -960,8 +905,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Called only when a modification starts.
 	 * 
-	 * @param itemModification
-	 *            the itemModification to set
+	 * @param itemModification the itemModification to set
 	 */
 	public void setModificationItem(ItemModification itemModification) {
 		_modification = itemModification;
@@ -970,18 +914,15 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Get this item's popup menu
 	 * 
-	 * @param container
-	 *            the containe the item lives on
-	 * @param pp
-	 *            the location of the click
+	 * @param container the containe the item lives on
+	 * @param pp        the location of the click
 	 * @return the item's popup menu
 	 */
 	public JPopupMenu getPopupMenu(final IContainer container, Point pp) {
 		JPopupMenu menu = new JPopupMenu();
 		menu.add(ItemOrderingMenu.getItemOrderingMenu(this, true));
 
-		final JCheckBoxMenuItem cbitem = new JCheckBoxMenuItem("Locked",
-				isLocked());
+		final JCheckBoxMenuItem cbitem = new JCheckBoxMenuItem("Locked", isLocked());
 
 		final AItem titem = this;
 		ItemListener il = new ItemListener() {
@@ -1020,8 +961,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Set the reference rotation angle in degrees.
 	 * 
-	 * @param azimuth
-	 *            the azimuth to set in degrees
+	 * @param azimuth the azimuth to set in degrees
 	 */
 	public void setAzimuth(double azimuth) {
 		_azimuth = azimuth;
@@ -1045,8 +985,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Set the parent of this item.
 	 * 
-	 * @param parent
-	 *            the parent to set
+	 * @param parent the parent to set
 	 */
 	public void setParent(AItem parent) {
 		this._parent = parent;
@@ -1064,10 +1003,9 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Remove an item as a child of this item.
 	 * 
-	 * @param child
-	 *            the child item to remove, leaving it an orphan (but not
-	 *            deleting it.) The child will still have a reference in some
-	 *            logical layer.
+	 * @param child the child item to remove, leaving it an orphan (but not deleting
+	 *              it.) The child will still have a reference in some logical
+	 *              layer.
 	 */
 	public void removeChild(AItem child) {
 		if (child != null) {
@@ -1081,8 +1019,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Add an item as a child of this item.
 	 * 
-	 * @param child
-	 *            the child item to add.
+	 * @param child the child item to add.
 	 */
 	public void addChild(AItem child) {
 		if (child != null) {
@@ -1095,8 +1032,8 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	}
 
 	/**
-	 * Removes and deletes all children. They will also be removed from their
-	 * host layer, so they are gone as far as this application is concerned.
+	 * Removes and deletes all children. They will also be removed from their host
+	 * layer, so they are gone as far as this application is concerned.
 	 */
 	@SuppressWarnings("unchecked")
 	public void deleteAllChildren() {
@@ -1141,10 +1078,8 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	/**
 	 * Add descendants form a given item to a vector
 	 * 
-	 * @param item
-	 *            the item in question
-	 * @param v
-	 *            the vector, which should be instantiated.
+	 * @param item the item in question
+	 * @param v    the vector, which should be instantiated.
 	 */
 	private static void addDescendants(AItem item, Vector<AItem> v) {
 		if (item.getChildren() != null) {
@@ -1156,9 +1091,8 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	}
 
 	/**
-	 * Get all descendants of this item. The vector returned does not include
-	 * this item itself--so if this item has no children, it returns
-	 * <code>null</code>.
+	 * Get all descendants of this item. The vector returned does not include this
+	 * item itself--so if this item has no children, it returns <code>null</code>.
 	 * 
 	 * @return all descendants of all generations of this item.
 	 */
@@ -1196,7 +1130,6 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 		return getLayer().getContainer();
 	}
 
-
 	/**
 	 * @return the secondary points
 	 */
@@ -1212,17 +1145,16 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	}
 
 	/**
-	 * @param resizePolicy
-	 *            the resizePolicy to set
+	 * @param resizePolicy the resizePolicy to set
 	 */
 	public void setResizePolicy(ResizePolicy resizePolicy) {
 		this._resizePolicy = resizePolicy;
 	}
 
 	/**
-	 * Convenience check to see whether the item's layer is enabled. If it is
-	 * not, you should not be able to select this item (independent of item's
-	 * local selectability)
+	 * Convenience check to see whether the item's layer is enabled. If it is not,
+	 * you should not be able to select this item (independent of item's local
+	 * selectability)
 	 * 
 	 * @return <code>true</code> if the item's layer is enabled.
 	 */

@@ -26,8 +26,8 @@ public class WordList extends Vector {
 	}
 
 	/**
-	 * Find a string in a word list. Return true if the word is in the list,
-	 * false otherwise.
+	 * Find a string in a word list. Return true if the word is in the list, false
+	 * otherwise.
 	 */
 	boolean find(String s) {
 		for (int i = 0; i < size(); i++) {

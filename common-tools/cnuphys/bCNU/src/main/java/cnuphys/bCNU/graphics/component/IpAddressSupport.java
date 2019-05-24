@@ -14,20 +14,16 @@ public class IpAddressSupport {
 
 	public static final String ANY_ADDRESS = "*.*.*.*";
 
-	public static final Pattern BASIC_PATTERN = Pattern.compile("\\b"
-			+ byteStrPar + "\\." + byteStrPar + "\\." + byteStrPar + "\\."
-			+ byteStrPar + "\\b");
+	public static final Pattern BASIC_PATTERN = Pattern
+			.compile("\\b" + byteStrPar + "\\." + byteStrPar + "\\." + byteStrPar + "\\." + byteStrPar + "\\b");
 
 	public static final Pattern SIMPLE_STAR_PATTERN = Pattern
-			.compile(starOrByte + "\\." + starOrByte + "\\." + starOrByte
-					+ "\\." + starOrByte);
+			.compile(starOrByte + "\\." + starOrByte + "\\." + starOrByte + "\\." + starOrByte);
 
 	/**
-	 * Checks whether an IP Address is validated by the basic no wildcard
-	 * pattern
+	 * Checks whether an IP Address is validated by the basic no wildcard pattern
 	 * 
-	 * @param ipAddress
-	 *            the IP address as a string
+	 * @param ipAddress the IP address as a string
 	 * @return <code>true</code> if the ipaddress was validated as legal.
 	 */
 	public static boolean validate(String ipAddress) {
@@ -40,8 +36,7 @@ public class IpAddressSupport {
 	/**
 	 * Checks whether an IP Address matches the simple star wildcard
 	 * 
-	 * @param ipPattern
-	 *            the IP pattern to validate as a string
+	 * @param ipPattern the IP pattern to validate as a string
 	 * @return <code>true</code> if the pattern was validated as legal.
 	 */
 	public static boolean validateSimpleWildcard(String ipPattern) {
@@ -61,8 +56,8 @@ public class IpAddressSupport {
 			return null;
 		}
 
-		String rexp = getTokStr(tokens[0]) + "\\." + getTokStr(tokens[1])
-				+ "\\." + getTokStr(tokens[2]) + "\\." + getTokStr(tokens[3]);
+		String rexp = getTokStr(tokens[0]) + "\\." + getTokStr(tokens[1]) + "\\." + getTokStr(tokens[2]) + "\\."
+				+ getTokStr(tokens[3]);
 
 		// System.out.println("rexp: " + rexp);
 		return rexp;
@@ -71,8 +66,7 @@ public class IpAddressSupport {
 	/**
 	 * Create a Pattern from a filter string.
 	 * 
-	 * @param filterString
-	 *            something like "157.185.*.*"
+	 * @param filterString something like "157.185.*.*"
 	 * @return the pattern that can be used for matching, or <code>null</code>
 	 */
 	public static Pattern createPattern(String filterString) {
@@ -103,12 +97,10 @@ public class IpAddressSupport {
 	/**
 	 * Main program for testing
 	 * 
-	 * @param arg
-	 *            command arguments ignored
+	 * @param arg command arguments ignored
 	 */
 	public static void main(String arg[]) {
-		String addresses[] = { "157.185.22.32", "1.2.3.4", "267.185.22.32",
-				"*.*.*.*", "157.*.*.*", "157.185.*.*" };
+		String addresses[] = { "157.185.22.32", "1.2.3.4", "267.185.22.32", "*.*.*.*", "157.*.*.*", "157.185.*.*" };
 
 		System.out.println("=====================");
 		System.out.println("Testing basic pattern");
@@ -134,8 +126,7 @@ public class IpAddressSupport {
 		System.out.println("Create regexp");
 
 		String s1 = "157.185.*.*";
-		System.out.println("String: " + s1 + "    validated: "
-				+ validateSimpleWildcard(s1));
+		System.out.println("String: " + s1 + "    validated: " + validateSimpleWildcard(s1));
 
 		// String regexp = getRegExpSimpleWildCard(s1);
 		// System.out.println("Regexp: " + regexp);

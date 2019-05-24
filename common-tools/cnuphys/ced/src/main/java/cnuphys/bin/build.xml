@@ -11,7 +11,7 @@
 		<property name="cnudir" value="../../../.."/>
 		
 		<!-- for making classpath -->
-		<property name="coat" value="coatjava/lib/clas/coat-libs-5.1-SNAPSHOT.jar"/>
+		<property name="coat" value="coatjava/lib/clas/coat-libs-6.1.1-SNAPSHOT.jar"/>
 		<property name="vecm" value="coatjava/lib/clas/vecmath-1.3.1-2.jar"/>
 		<property name="glue" value="JOGL/gluegen-rt.jar"/>
 		<property name="jogl" value="JOGL/jogl-all.jar"/>
@@ -27,13 +27,18 @@
 			<fileset includes="coatjava/etc/bankdefs/hipo/*.json, coatjava/lib/clas/*.jar"  
 							dir="${cnudir}" />
 		</copy>
+		<copy todir="${destdir}">
+			<fileset includes="coatjava/etc/bankdefs/hipo4/*.json, coatjava/lib/clas/*.jar"  
+							dir="${cnudir}" />
+		</copy>
 		
-		<!-- copy shell script -->
+		<!-- copy shell scripts -->
 		<copy file="${cnudir}/ced/ced.sh" todir="${destdir}"/>
+		<copy file="${cnudir}/ced/ced3d.sh" todir="${destdir}"/>
 		
 		<!-- copy data (field maps)-->
 		<copy todir="${destdir}">
-			<fileset includes="magfield/*" excludes="**/.project" dir="${homedir}" />
+			<fileset includes="magfield/*" excludes="**/.project  Full*.*" dir="${homedir}" />
 		</copy>
 		
 		<!-- copy jogl from home dir-->

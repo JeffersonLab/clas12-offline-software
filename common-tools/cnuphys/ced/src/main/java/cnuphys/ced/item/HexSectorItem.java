@@ -24,10 +24,8 @@ public abstract class HexSectorItem extends PolygonItem {
 
 	protected static final Color TRANS = new Color(0, 0, 0, 48);
 
-	public static final Stroke THINSTROKE = GraphicsUtilities.getStroke(0.0f,
-			LineStyle.SOLID);
-	public static final Stroke DASHTHINSTROKE = GraphicsUtilities.getStroke(
-			0.0f, LineStyle.DASH);
+	public static final Stroke THINSTROKE = GraphicsUtilities.getStroke(0.0f, LineStyle.SOLID);
+	public static final Stroke DASHTHINSTROKE = GraphicsUtilities.getStroke(0.0f, LineStyle.DASH);
 
 	// 1-based sector
 	protected int _sector;
@@ -41,14 +39,11 @@ public abstract class HexSectorItem extends PolygonItem {
 	/**
 	 * Get a hex sector item
 	 * 
-	 * @param layer
-	 *            the logical layer
-	 * @param sector
-	 *            the 1-based sector
+	 * @param layer  the logical layer
+	 * @param sector the 1-based sector
 	 */
 	public HexSectorItem(LogicalLayer layer, HexView view, int sector) {
-		super(layer, getPoints(view.getContainer().getWorldSystem().getMinX(),
-				sector));
+		super(layer, getPoints(view.getContainer().getWorldSystem().getMinX(), sector));
 		_sector = sector;
 		// the view this item lives on.
 
@@ -59,10 +54,8 @@ public abstract class HexSectorItem extends PolygonItem {
 	/**
 	 * Custom drawer for the item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
@@ -90,19 +83,14 @@ public abstract class HexSectorItem extends PolygonItem {
 	/**
 	 * Draw a dashed thin line based on sector xy points
 	 * 
-	 * @param g2
-	 *            graphics context
-	 * @param container
-	 *            the owner
-	 * @param sp1
-	 *            first sector point
-	 * @param sp2
-	 *            second sector point
-	 * @param color
-	 *            the line color
+	 * @param g2        graphics context
+	 * @param container the owner
+	 * @param sp1       first sector point
+	 * @param sp2       second sector point
+	 * @param color     the line color
 	 */
-	protected void drawDashedThinLine(Graphics2D g2, IContainer container,
-			Point2D.Double sp1, Point2D.Double sp2, Color color) {
+	protected void drawDashedThinLine(Graphics2D g2, IContainer container, Point2D.Double sp1, Point2D.Double sp2,
+			Color color) {
 
 		Stroke oldStroke = g2.getStroke();
 		g2.setStroke(DASHTHINSTROKE);
@@ -119,19 +107,14 @@ public abstract class HexSectorItem extends PolygonItem {
 	/**
 	 * Draw a thin line based on sector xy points
 	 * 
-	 * @param g2
-	 *            graphics context
-	 * @param container
-	 *            the owner
-	 * @param sp1
-	 *            first sector point
-	 * @param sp2
-	 *            second sector point
-	 * @param color
-	 *            the line color
+	 * @param g2        graphics context
+	 * @param container the owner
+	 * @param sp1       first sector point
+	 * @param sp2       second sector point
+	 * @param color     the line color
 	 */
-	protected void drawThinLine(Graphics2D g2, IContainer container,
-			Point2D.Double sp1, Point2D.Double sp2, Color color) {
+	protected void drawThinLine(Graphics2D g2, IContainer container, Point2D.Double sp1, Point2D.Double sp2,
+			Color color) {
 
 		Stroke oldStroke = g2.getStroke();
 		g2.setStroke(THINSTROKE);
@@ -178,10 +161,8 @@ public abstract class HexSectorItem extends PolygonItem {
 	/**
 	 * Rotate a point around the z axis
 	 * 
-	 * @param wp
-	 *            the point being rotated
-	 * @param phi
-	 *            rotation angle in radians
+	 * @param wp  the point being rotated
+	 * @param phi rotation angle in radians
 	 */
 	private static void rotatePoint(Point2D.Double wp, double phi) {
 		double cosPhi = Math.cos(phi);
@@ -194,10 +175,8 @@ public abstract class HexSectorItem extends PolygonItem {
 	/**
 	 * Converts a sector xyz to lab (CLAS) xyz
 	 * 
-	 * @param sp
-	 *            the sector point
-	 * @param lab
-	 *            the lab (CLAS) point
+	 * @param sp  the sector point
+	 * @param lab the lab (CLAS) point
 	 */
 	protected void sectorXYZToLabXYZ(double sectorXYZ[], double labXYZ[]) {
 
@@ -212,10 +191,8 @@ public abstract class HexSectorItem extends PolygonItem {
 	/**
 	 * Converts a lab (CLAS) xy to sector
 	 * 
-	 * @param sp
-	 *            the sector point
-	 * @param lab
-	 *            lab xy point
+	 * @param sp  the sector point
+	 * @param lab lab xy point
 	 */
 	protected void lab2DToSector2D(Point2D.Double sp, Point2D.Double lab) {
 		sp.setLocation(lab);
@@ -227,10 +204,8 @@ public abstract class HexSectorItem extends PolygonItem {
 	/**
 	 * Converts a sector to lab (CLAS) xy
 	 * 
-	 * @param sp
-	 *            the sector point
-	 * @param lab
-	 *            the lab (CLAS) point
+	 * @param sp  the sector point
+	 * @param lab the lab (CLAS) point
 	 */
 	protected void sector2DToLab2D(Point2D.Double sp, Point2D.Double lab) {
 		lab.setLocation(sp);
@@ -242,10 +217,8 @@ public abstract class HexSectorItem extends PolygonItem {
 	/**
 	 * World graphical coordinates to sector coordinates.
 	 * 
-	 * @param sp
-	 *            will hold the sector coordinates
-	 * @param wp
-	 *            the graphical world coordinates
+	 * @param sp will hold the sector coordinates
+	 * @param wp the graphical world coordinates
 	 */
 	protected void worldToSector2D(Point2D.Double sp, Point2D.Double wp) {
 		lab2DToSector2D(sp, wp);
@@ -254,13 +227,10 @@ public abstract class HexSectorItem extends PolygonItem {
 	/**
 	 * Sector to local screen coordinates
 	 * 
-	 * @param pp
-	 *            will hold the screen coordinates
-	 * @param sp
-	 *            the sector coordinates
+	 * @param pp will hold the screen coordinates
+	 * @param sp the sector coordinates
 	 */
-	public void sector2DToLocal(IContainer container, Point pp,
-			Point2D.Double sp) {
+	public void sector2DToLocal(IContainer container, Point pp, Point2D.Double sp) {
 		Point2D.Double wp = new Point2D.Double();
 
 		// world are same as lab
@@ -271,13 +241,10 @@ public abstract class HexSectorItem extends PolygonItem {
 	/**
 	 * local screen coordinates to sector coordinates
 	 * 
-	 * @param pp
-	 *            the screen coordinates
-	 * @param sp
-	 *            will hold the sector coordinates
+	 * @param pp the screen coordinates
+	 * @param sp will hold the sector coordinates
 	 */
-	public void localToSector2D(IContainer container, Point pp,
-			Point2D.Double sp) {
+	public void localToSector2D(IContainer container, Point pp, Point2D.Double sp) {
 		Point2D.Double wp = new Point2D.Double();
 		container.localToWorld(pp, wp);
 		// world are same as lab
@@ -292,13 +259,11 @@ public abstract class HexSectorItem extends PolygonItem {
 	/**
 	 * Returns a string representation of the form: "(x,y,z)".
 	 * 
-	 * @param numDec
-	 *            the number of decimal places for each coordinate.
+	 * @param numDec the number of decimal places for each coordinate.
 	 * @return a String representation of the vector
 	 */
 	protected String vecStr(double v[]) {
-		return "(" + DoubleFormat.doubleFormat(v[0], 2) + ", "
-				+ DoubleFormat.doubleFormat(v[1], 2) + ", "
+		return "(" + DoubleFormat.doubleFormat(v[0], 2) + ", " + DoubleFormat.doubleFormat(v[1], 2) + ", "
 				+ DoubleFormat.doubleFormat(v[2], 2) + ")";
 	}
 

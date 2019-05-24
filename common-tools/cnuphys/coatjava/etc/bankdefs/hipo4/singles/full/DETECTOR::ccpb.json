@@ -1,0 +1,30 @@
+[
+    {
+        "entries": [
+            {
+                "info": "hit sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "number of photo-electrons", 
+                "name": "nphe", 
+                "type": "F"
+            }, 
+            {
+                "info": "time of the hit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "path of the hit", 
+                "name": "path", 
+                "type": "F"
+            }
+        ], 
+        "group": 31000, 
+        "info": "CC detector bank", 
+        "item": 33, 
+        "name": "DETECTOR::ccpb"
+    }
+]

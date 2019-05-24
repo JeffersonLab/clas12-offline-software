@@ -1,0 +1,60 @@
+[
+    {
+        "entries": [
+            {
+                "info": "ID", 
+                "name": "ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "Layer of intersection of Track ", 
+                "name": "LayerTrackIntersPlane", 
+                "type": "B"
+            }, 
+            {
+                "info": "Sector of intersection of Track ", 
+                "name": "SectorTrackIntersPlane", 
+                "type": "B"
+            }, 
+            {
+                "info": "x of intersection of Track ", 
+                "name": "XtrackIntersPlane", 
+                "type": "F"
+            }, 
+            {
+                "info": "y of intersection of Track ", 
+                "name": "YtrackIntersPlane", 
+                "type": "F"
+            }, 
+            {
+                "info": "z of intersection of Track ", 
+                "name": "ZtrackIntersPlane", 
+                "type": "F"
+            }, 
+            {
+                "info": "Local phi of intersection of Track", 
+                "name": "PhiTrackIntersPlane", 
+                "type": "F"
+            }, 
+            {
+                "info": "Local theta of intersection of Track", 
+                "name": "ThetaTrackIntersPlane", 
+                "type": "F"
+            }, 
+            {
+                "info": "Local angle of intersection of Track with the module surface", 
+                "name": "trkToMPlnAngl", 
+                "type": "F"
+            }, 
+            {
+                "info": "Estimated Centroid", 
+                "name": "CalcCentroidStrip", 
+                "type": "F"
+            }
+        ], 
+        "group": 20500, 
+        "info": "reconstructed SVT straight tracks trajectory", 
+        "item": 29, 
+        "name": "CVTRec::Trajectory"
+    }
+]

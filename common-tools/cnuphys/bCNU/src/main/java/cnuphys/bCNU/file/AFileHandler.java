@@ -16,12 +16,9 @@ public abstract class AFileHandler implements IFileHandler {
 	/**
 	 * Handle a file, e.g., because of a drag and drop.
 	 * 
-	 * @param parent
-	 *            the view being affected.
-	 * @param file
-	 *            the file to handle
-	 * @param action
-	 *            the action that initiated the need to handle this file
+	 * @param parent the view being affected.
+	 * @param file   the file to handle
+	 * @param action the action that initiated the need to handle this file
 	 */
 	@Override
 	public void handleFile(Object parent, File file, HandleAction action) {
@@ -47,12 +44,9 @@ public abstract class AFileHandler implements IFileHandler {
 	/**
 	 * Handle multiple files, e.g., because of a drag and drop.
 	 * 
-	 * @param parent
-	 *            the object (often a view) being affected (might be null).
-	 * @param files
-	 *            the files to handle
-	 * @param action
-	 *            the action that initiated the need to handle this file
+	 * @param parent the object (often a view) being affected (might be null).
+	 * @param files  the files to handle
+	 * @param action the action that initiated the need to handle this file
 	 */
 	@Override
 	public void handleFiles(Object parent, File files[], HandleAction action) {
@@ -66,22 +60,17 @@ public abstract class AFileHandler implements IFileHandler {
 	 * Handle an open. This method is abstract and must be supplied by the
 	 * superclass.
 	 * 
-	 * @param parent
-	 *            the object (often a view) being affected.
-	 * @param file
-	 *            the file in question.
+	 * @param parent the object (often a view) being affected.
+	 * @param file   the file in question.
 	 */
 	public abstract void handleOpen(Object parent, File file);
 
 	/**
-	 * Handle an "drag and drop". The default handling is to call the open
-	 * handler-- i.e., the default behavior is to treat a drag and drop as an
-	 * open.
+	 * Handle an "drag and drop". The default handling is to call the open handler--
+	 * i.e., the default behavior is to treat a drag and drop as an open.
 	 * 
-	 * @param parent
-	 *            the object (often a view) being affected.
-	 * @param file
-	 *            the file in question.
+	 * @param parent the object (often a view) being affected.
+	 * @param file   the file in question.
 	 */
 	public void handleDragAndDrop(Object parent, File file) {
 		if (file == null) {
@@ -92,14 +81,11 @@ public abstract class AFileHandler implements IFileHandler {
 	}
 
 	/**
-	 * Handle a "double click". The default handling is to call the open
-	 * handler-- i.e., the default behavior is to treat a double click as an
-	 * open.
+	 * Handle a "double click". The default handling is to call the open handler--
+	 * i.e., the default behavior is to treat a double click as an open.
 	 * 
-	 * @param parent
-	 *            the object (often a view) being affected.
-	 * @param file
-	 *            the file in question.
+	 * @param parent the object (often a view) being affected.
+	 * @param file   the file in question.
 	 */
 	public void handleDoubleClick(Object parent, File file) {
 		if (file == null) {
@@ -111,10 +97,8 @@ public abstract class AFileHandler implements IFileHandler {
 	/**
 	 * The default implementation simply tries to delete the file.
 	 * 
-	 * @param parent
-	 *            the object (often a view) being affected.
-	 * @param file
-	 *            the file in question.
+	 * @param parent the object (often a view) being affected.
+	 * @param file   the file in question.
 	 */
 	public void handleDelete(Object parent, File file) {
 
@@ -125,8 +109,7 @@ public abstract class AFileHandler implements IFileHandler {
 		try {
 			file.delete();
 		} catch (Exception e) {
-			Log.getInstance().error(
-					"File could not be deleted: " + file.getPath());
+			Log.getInstance().error("File could not be deleted: " + file.getPath());
 			e.printStackTrace();
 		}
 	}

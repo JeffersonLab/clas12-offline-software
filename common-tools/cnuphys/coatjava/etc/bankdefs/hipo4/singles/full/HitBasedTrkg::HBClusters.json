@@ -1,0 +1,125 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id of the cluster", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "status of the cluster", 
+                "name": "status", 
+                "type": "S"
+            }, 
+            {
+                "info": "sector of the cluster", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "superlayer of the cluster", 
+                "name": "superlayer", 
+                "type": "B"
+            }, 
+            {
+                "info": "id of hit1 in cluster", 
+                "name": "Hit1_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit2 in cluster", 
+                "name": "Hit2_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit3 in cluster", 
+                "name": "Hit3_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit4 in cluster", 
+                "name": "Hit4_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit5 in cluster", 
+                "name": "Hit5_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit6 in cluster", 
+                "name": "Hit6_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit7 in cluster", 
+                "name": "Hit7_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit8 in cluster", 
+                "name": "Hit8_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit9 in cluster", 
+                "name": "Hit9_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit10 in cluster", 
+                "name": "Hit10_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit11 in cluster", 
+                "name": "Hit11_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "id of hit12 in cluster", 
+                "name": "Hit12_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "average wire number", 
+                "name": "avgWire", 
+                "type": "F"
+            }, 
+            {
+                "info": "fit chisq prob.", 
+                "name": "fitChisqProb", 
+                "type": "F"
+            }, 
+            {
+                "info": "line fit slope", 
+                "name": "fitSlope", 
+                "type": "F"
+            }, 
+            {
+                "info": "error on slope", 
+                "name": "fitSlopeErr", 
+                "type": "F"
+            }, 
+            {
+                "info": "line fit intercept", 
+                "name": "fitInterc", 
+                "type": "F"
+            }, 
+            {
+                "info": "error on the intercept", 
+                "name": "fitIntercErr", 
+                "type": "F"
+            }, 
+            {
+                "info": "cluster size", 
+                "name": "size", 
+                "type": "B"
+            }
+        ], 
+        "group": 20600, 
+        "info": "reconstructed clusters using DC wire positions", 
+        "item": 22, 
+        "name": "HitBasedTrkg::HBClusters"
+    }
+]

@@ -7,27 +7,22 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.List;
 import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.item.PolygonItem;
 import cnuphys.bCNU.layer.LogicalLayer;
-import cnuphys.fastMCed.eventio.PhysicsEventManager;
 import cnuphys.fastMCed.geometry.FTOFPanel;
 import cnuphys.fastMCed.geometry.GeometryManager;
 import cnuphys.fastMCed.streaming.StreamManager;
 import cnuphys.fastMCed.view.sector.SectorView;
 
 public class FTOFPanelItem extends PolygonItem {
-	
+
 	// ftof constants
 	public static final int PANEL_1A = 0;
 	public static final int PANEL_1B = 1;
 	public static final int PANEL_2 = 2;
-	public static final String panelNames[] = { "Panel 1A", "Panel 1B",
-			"Panel 2" };
-	private static final String briefPNames[] = { "1A", "1B",
-	"2" };
-
+	public static final String panelNames[] = { "Panel 1A", "Panel 1B", "Panel 2" };
+	private static final String briefPNames[] = { "1A", "1B", "2" };
 
 	private FTOFPanel _ftofPanel;
 
@@ -40,8 +35,7 @@ public class FTOFPanelItem extends PolygonItem {
 	/**
 	 * Create a FTOFPanelItem
 	 * 
-	 * @param logLayer
-	 *            the Layer this item is on.
+	 * @param logLayer the Layer this item is on.
 	 */
 	public FTOFPanelItem(LogicalLayer logLayer, FTOFPanel panel, int sector) {
 		super(logLayer, getShell((SectorView) logLayer.getContainer().getView(), panel, sector));
@@ -56,12 +50,11 @@ public class FTOFPanelItem extends PolygonItem {
 		_style.setLineWidth(0);
 		_view = (SectorView) getLayer().getContainer().getView();
 	}
-	
+
 	/**
 	 * Get the name from the panel type
 	 * 
-	 * @param panelType
-	 *            one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
+	 * @param panelType one of the constants (PANEL_1A, PANEL_1B, PANEL_2)
 	 * @return the name of the panel type
 	 */
 	public static String name(int panelType) {
@@ -72,21 +65,18 @@ public class FTOFPanelItem extends PolygonItem {
 		}
 	}
 
-
 	/**
 	 * Custom drawer for the item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
 		// TODO use dirty. If the item is not dirty, should be able to draw
 		// the _lastDrawnPolygon directly;
-		
-		//don't draw if streaming
+
+		// don't draw if streaming
 		if (StreamManager.getInstance().isStarted()) {
 			return;
 		}
@@ -104,16 +94,16 @@ public class FTOFPanelItem extends PolygonItem {
 
 		Point2D.Double wp[] = GeometryManager.allocate(4);
 
-		//draw a line marking paddle boundary
+		// draw a line marking paddle boundary
 		for (int i = 0; i < _ftofPanel.getCount(); i++) {
 			boolean isects = _ftofPanel.getPaddle(i, _view.getProjectionPlane(), wp);
 			if (isects) {
-			if (_sector > 3) {
-				wp[0].y = -wp[0].y;
-				wp[3].y = -wp[3].y;
-			}
+				if (_sector > 3) {
+					wp[0].y = -wp[0].y;
+					wp[3].y = -wp[3].y;
+				}
 
-			WorldGraphicsUtilities.drawWorldLine(g, container, wp[0], wp[3], _style);
+				WorldGraphicsUtilities.drawWorldLine(g, container, wp[0], wp[3], _style);
 			}
 		}
 
@@ -124,12 +114,9 @@ public class FTOFPanelItem extends PolygonItem {
 		drawSingleModeHits(g, container);
 	}
 
-
-
-
 	// works for both showMcTruth and not
 	private void drawSingleModeHits(Graphics g, IContainer container) {
-		
+
 		// draw tdc adc hits
 //		TdcAdcHitList hits = FTOF.getInstance().getTdcAdcHits();
 //		if ((hits != null) && !hits.isEmpty()) {
@@ -150,8 +137,6 @@ public class FTOFPanelItem extends PolygonItem {
 //			}
 //		}
 
-
-
 	}
 
 	/**
@@ -166,23 +151,19 @@ public class FTOFPanelItem extends PolygonItem {
 	/**
 	 * Get a paddle outline of the tof panel.
 	 * 
-	 * @param view
-	 *            the view being rendered.
-	 * @param index
-	 *            the zero-based paddle index.
-	 * @param panel
-	 *            the panel holding the geometry data
-	 * @param sector
-	 *            the 1-based sector 1..6
+	 * @param view   the view being rendered.
+	 * @param index  the zero-based paddle index.
+	 * @param panel  the panel holding the geometry data
+	 * @param sector the 1-based sector 1..6
 	 * @return
 	 */
 	private static Point2D.Double[] getPaddle(SectorView view, int index, FTOFPanel panel, int sector) {
 
-		//hide if don't fully intersect, which happens as phi moves away from midplane
+		// hide if don't fully intersect, which happens as phi moves away from midplane
 		if (!doesPaddleFullIntersectPlane(view, index, panel)) {
 			return null;
 		}
-		
+
 		Point2D.Double wp[] = GeometryManager.allocate(4);
 
 		panel.getPaddle(index, view.getProjectionPlane(), wp);
@@ -196,25 +177,19 @@ public class FTOFPanelItem extends PolygonItem {
 
 		return wp;
 	}
-	
-	//does paddle fully intersect projection plane?
-	private static boolean doesPaddleFullIntersectPlane(SectorView view, int index, 
-			FTOFPanel panel) {
-	
+
+	// does paddle fully intersect projection plane?
+	private static boolean doesPaddleFullIntersectPlane(SectorView view, int index, FTOFPanel panel) {
+
 		return panel.paddleFullyIntersects(index, view.getProjectionPlane());
 	}
-	
-
 
 	/**
 	 * Get the shell of the tof panel.
 	 * 
-	 * @param view
-	 *            the view being rendered.
-	 * @param panel
-	 *            the panel holding the geometry data
-	 * @param sector
-	 *            the 1-based sector 1..6
+	 * @param view   the view being rendered.
+	 * @param panel  the panel holding the geometry data
+	 * @param sector the 1-based sector 1..6
 	 * @return
 	 */
 	private static Point2D.Double[] getShell(SectorView view, FTOFPanel panel, int sector) {
@@ -235,35 +210,29 @@ public class FTOFPanelItem extends PolygonItem {
 	}
 
 	/**
-	 * Add any appropriate feedback strings
-	 * panel. Default implementation returns the item's name.
+	 * Add any appropriate feedback strings panel. Default implementation returns
+	 * the item's name.
 	 * 
-	 * @param container
-	 *            the Base container.
-	 * @param screenPoint
-	 *            the mouse location.
-	 * @param worldPoint
-	 *            the corresponding world point.
-	 * @param feedbackStrings
-	 *            the List of feedback strings to add to.
+	 * @param container       the Base container.
+	 * @param screenPoint     the mouse location.
+	 * @param worldPoint      the corresponding world point.
+	 * @param feedbackStrings the List of feedback strings to add to.
 	 */
 	@Override
 	public void getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
 			List<String> feedbackStrings) {
-		
-		//no feedback if streaming
+
+		// no feedback if streaming
 		if (StreamManager.getInstance().isStarted()) {
 			return;
 		}
-
 
 		// which paddle?
 
 		for (int index = 0; index < _ftofPanel.getCount(); index++) {
 
 			Point2D.Double wp[] = getPaddle(_view, index, _ftofPanel, _sector);
-			
-			
+
 			if (wp != null) {
 				Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
 
@@ -282,7 +251,7 @@ public class FTOFPanelItem extends PolygonItem {
 //								.add("$Orange Red$" + getName() + "  sector " + _sector + " paddle " + (index + 1));
 //					}
 //					feedbackStrings.add("$Orange Red$paddle length " + FTOFGeometry.getLength(_ftofPanel.getPanelType(), index) + " cm");
-					
+
 					break;
 				} // path contains wp
 			} // end wp != null

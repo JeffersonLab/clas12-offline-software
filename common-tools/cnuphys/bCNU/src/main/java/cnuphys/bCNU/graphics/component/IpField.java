@@ -97,8 +97,7 @@ public class IpField extends JFormattedTextField implements DocumentListener {
 	// check that the format is valid
 	private void checkDocument(DocumentEvent e) {
 		try {
-			String text = e.getDocument().getText(0,
-					e.getDocument().getLength());
+			String text = e.getDocument().getText(0, e.getDocument().getLength());
 			goodDoc = checkString(text);
 		} catch (BadLocationException ex) {
 			// Do something, OK?

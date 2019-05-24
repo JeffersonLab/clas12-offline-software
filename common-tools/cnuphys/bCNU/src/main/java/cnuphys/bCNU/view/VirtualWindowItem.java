@@ -38,8 +38,7 @@ public class VirtualWindowItem extends RectangleItem {
 	 * Called when the item was double clicked. The default implementation is to
 	 * edit the item's properties.
 	 * 
-	 * @param mouseEvent
-	 *            the causal event.
+	 * @param mouseEvent the causal event.
 	 */
 	@Override
 	public void doubleClicked(MouseEvent mouseEvent) {
@@ -48,8 +47,7 @@ public class VirtualWindowItem extends RectangleItem {
 	/**
 	 * Sets whether this item is marked as selected.
 	 * 
-	 * @param selected
-	 *            the new value of the flag.
+	 * @param selected the new value of the flag.
 	 */
 	@Override
 	public void setSelected(boolean selected) {
@@ -81,15 +79,12 @@ public class VirtualWindowItem extends RectangleItem {
 	/**
 	 * Custom drawer for the item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
-		if (!_baseView.isVisible() || _baseView.isClosed()
-				|| _baseView.isIcon()) {
+		if (!_baseView.isVisible() || _baseView.isClosed() || _baseView.isIcon()) {
 			setEnabled(false);
 		} else {
 			super.drawItem(g, container);
@@ -115,8 +110,7 @@ public class VirtualWindowItem extends RectangleItem {
 		Point2D.Double offset = _vview.totalOffset();
 
 		wr.x = offset.x + bvBounds.x;
-		wr.y = offset.y + world.y + world.height
-				- (bvBounds.y + bvBounds.height);
+		wr.y = offset.y + world.y + world.height - (bvBounds.y + bvBounds.height);
 		wr.width = bvBounds.width;
 		wr.height = bvBounds.height;
 

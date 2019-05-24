@@ -6,11 +6,12 @@ import java.awt.Rectangle;
 
 /**
  * A legend like rectangle for extra text
+ * 
  * @author heddle
  *
  */
 public class ExtraText extends DraggableRectangle {
-	
+
 	// the owner plot panel
 	private PlotCanvas _canvas;
 
@@ -22,9 +23,10 @@ public class ExtraText extends DraggableRectangle {
 
 	// extra v gap
 	private final int VGAP = 2;
-	
+
 	/**
 	 * Create a Extra Text rectangle
+	 * 
 	 * @param canvas the parent plot canvas
 	 */
 	public ExtraText(PlotCanvas canvas) {
@@ -38,7 +40,7 @@ public class ExtraText extends DraggableRectangle {
 	 * @param g the graphics context
 	 */
 	public void draw(Graphics g) {
-		
+
 		String[] extraStrings = _params.getExtraStrings();
 		if ((extraStrings == null) || (extraStrings.length < 1)) {
 			return;
@@ -46,18 +48,17 @@ public class ExtraText extends DraggableRectangle {
 
 		width = getExtraWidth();
 		height = getExtraHeight();
-		
+
 		if ((width < 2) || (height < 2)) {
 			return;
 		}
 
-		//if never dragged, keep at upper right default location
+		// if never dragged, keep at upper right default location
 		if (!_beenMoved) {
 			Rectangle actRect = _canvas.getActiveBounds();
-			int right = actRect.x +  actRect.width;
+			int right = actRect.x + actRect.width;
 			x = right - width - 10;
 		}
-		
 
 		g.setColor(_params.getExtraBackground());
 		g.setFont(_params.getExtraFont());
@@ -79,7 +80,7 @@ public class ExtraText extends DraggableRectangle {
 		}
 
 	}
-	
+
 	// get required width of the extra box
 	private int getExtraWidth() {
 		FontMetrics fm = _canvas.getFontMetrics(_params.getExtraFont());
@@ -93,7 +94,7 @@ public class ExtraText extends DraggableRectangle {
 			maxStringWidth = Math.max(maxStringWidth, fm.stringWidth(s));
 		}
 
-		return maxStringWidth + 2*HGAP;
+		return maxStringWidth + 2 * HGAP;
 	}
 
 	// get required height of the extra text rectangle
@@ -104,7 +105,7 @@ public class ExtraText extends DraggableRectangle {
 			return 0;
 		}
 
-		return VGAP + (extraStrings.length)*(VGAP + fm.getHeight());
+		return VGAP + (extraStrings.length) * (VGAP + fm.getHeight());
 	}
-	
+
 }

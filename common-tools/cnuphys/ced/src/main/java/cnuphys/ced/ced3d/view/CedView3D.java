@@ -22,17 +22,14 @@ import cnuphys.ced.event.IAccumulationListener;
 import cnuphys.lund.SwimTrajectoryListener;
 import cnuphys.swim.Swimming;
 
-public abstract class CedView3D extends BaseView implements
-		IClasIoEventListener, SwimTrajectoryListener, IAccumulationListener,
-		ActionListener {
+public abstract class CedView3D extends BaseView
+		implements IClasIoEventListener, SwimTrajectoryListener, IAccumulationListener, ActionListener {
 
 	// the menu bar
 	private final JMenuBar _menuBar;
-	
 
 	// the event manager
-	private final ClasIoEventManager _eventManager = ClasIoEventManager
-			.getInstance();
+	private final ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	// the 3D panel
 	protected final CedPanel3D _panel3D;
@@ -44,6 +41,7 @@ public abstract class CedView3D extends BaseView implements
 
 	/**
 	 * Create a 3D view
+	 * 
 	 * @param title
 	 * @param angleX
 	 * @param angleY
@@ -52,11 +50,9 @@ public abstract class CedView3D extends BaseView implements
 	 * @param yDist
 	 * @param zDist
 	 */
-	public CedView3D(String title, float angleX, float angleY, float angleZ,
-			float xDist, float yDist, float zDist) {
-		super(PropertySupport.TITLE, title, PropertySupport.ICONIFIABLE, true,
-				PropertySupport.MAXIMIZABLE, true, PropertySupport.CLOSABLE, true,
-				PropertySupport.RESIZABLE, true, PropertySupport.VISIBLE, true);
+	public CedView3D(String title, float angleX, float angleY, float angleZ, float xDist, float yDist, float zDist) {
+		super(PropertySupport.TITLE, title, PropertySupport.ICONIFIABLE, true, PropertySupport.MAXIMIZABLE, true,
+				PropertySupport.CLOSABLE, true, PropertySupport.RESIZABLE, true, PropertySupport.VISIBLE, true);
 
 		_eventManager.addClasIoEventListener(this, 2);
 
@@ -76,9 +72,9 @@ public abstract class CedView3D extends BaseView implements
 		AccumulationManager.getInstance().addAccumulationListener(this);
 	}
 
-	//make the 3d panel
-	protected abstract CedPanel3D make3DPanel(float angleX, float angleY,
-			float angleZ, float xDist, float yDist, float zDist);
+	// make the 3d panel
+	protected abstract CedPanel3D make3DPanel(float angleX, float angleY, float angleZ, float xDist, float yDist,
+			float zDist);
 
 	// add the menus
 	private void addMenus() {
@@ -112,15 +108,15 @@ public abstract class CedView3D extends BaseView implements
 	public void openedNewEventFile(String path) {
 		_panel3D.refresh();
 	}
-	
+
 	/**
 	 * Change the event source type
+	 * 
 	 * @param source the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
 	}
-
 
 	@Override
 	public void accumulationEvent(int reason) {
@@ -157,14 +153,14 @@ public abstract class CedView3D extends BaseView implements
 			_panel3D.refresh();
 		}
 	}
-	
+
 	@Override
 	public void focusGained(FocusEvent e) {
 		if (_panel3D != null) {
 			_panel3D.requestFocus();
 		}
 	}
-	
+
 	@Override
 	public void refresh() {
 		if (_panel3D != null) {
@@ -174,7 +170,9 @@ public abstract class CedView3D extends BaseView implements
 
 	/**
 	 * Tests whether this listener is interested in events while accumulating
-	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 * 
+	 * @return <code>true</code> if this listener is NOT interested in events while
+	 *         accumulating
 	 */
 	@Override
 	public boolean ignoreIfAccumulating() {

@@ -49,8 +49,8 @@ import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 
 @SuppressWarnings("serial")
-public class FileTree extends JTree implements TreeSelectionListener,
-		TreeExpansionListener, DragGestureListener, DragSourceListener {
+public class FileTree extends JTree
+		implements TreeSelectionListener, TreeExpansionListener, DragGestureListener, DragSourceListener {
 
 	public static ImageIcon ICON_COMPUTER;
 
@@ -84,7 +84,7 @@ public class FileTree extends JTree implements TreeSelectionListener,
 	/**
 	 * Create a FileTree.
 	 * 
-	 * @param ff the filter to use.
+	 * @param ff  the filter to use.
 	 * @param ftp the panel that will hold the file tree.
 	 */
 	public FileTree(FileFilter ff, FileTreePanel ftp) {
@@ -103,8 +103,8 @@ public class FileTree extends JTree implements TreeSelectionListener,
 	/**
 	 * Create a FileTree.
 	 * 
-	 * @param ff the filter to use.
-	 * @param ftp the panel that will hold the file tree.
+	 * @param ff            the filter to use.
+	 * @param ftp           the panel that will hold the file tree.
 	 * @param selectionMode from TreeSelectionModel constants.
 	 */
 	public FileTree(FileFilter ff, FileTreePanel ftp, int selectionMode) {
@@ -122,13 +122,10 @@ public class FileTree extends JTree implements TreeSelectionListener,
 
 		DefaultMutableTreeNode top = null;
 		if (Environment.getInstance().isWindows()) {
-			top = new DefaultMutableTreeNode(
-					new IconData(ICON_COMPUTER, null, "My Computer"));
-		}
-		else {
+			top = new DefaultMutableTreeNode(new IconData(ICON_COMPUTER, null, "My Computer"));
+		} else {
 			File rf = new File("/");
-			top = new DefaultMutableTreeNode(
-					new IconData(ICON_COMPUTER, null, new FileNode(rf)));
+			top = new DefaultMutableTreeNode(new IconData(ICON_COMPUTER, null, new FileNode(rf)));
 		}
 
 		DefaultMutableTreeNode node;
@@ -137,13 +134,11 @@ public class FileTree extends JTree implements TreeSelectionListener,
 		if (Environment.getInstance().isWindows()) {
 			roots = File.listRoots();
 			for (int k = 0; k < roots.length; k++) {
-				node = new DefaultMutableTreeNode(new IconData(ICON_DISK, null,
-						new FileNode(roots[k], _fileFilter)));
+				node = new DefaultMutableTreeNode(new IconData(ICON_DISK, null, new FileNode(roots[k], _fileFilter)));
 				top.add(node);
 				node.add(new DefaultMutableTreeNode(true));
 			}
-		}
-		else {
+		} else {
 			File rf = new File("/");
 			roots = rf.listFiles();
 			FileFilter unixRootFF = unixRootFilter();
@@ -152,8 +147,7 @@ public class FileTree extends JTree implements TreeSelectionListener,
 				for (int k = 0; k < roots.length; k++) {
 					if (unixRootFF.accept(roots[k])) {
 						node = new DefaultMutableTreeNode(
-								new IconData(ICON_DISK, null,
-										new FileNode(roots[k], _fileFilter)));
+								new IconData(ICON_DISK, null, new FileNode(roots[k], _fileFilter)));
 						top.add(node);
 						node.add(new DefaultMutableTreeNode(true));
 					}
@@ -194,12 +188,10 @@ public class FileTree extends JTree implements TreeSelectionListener,
 					if (e.getClickCount() == 1) {
 						if (e.getButton() == MouseEvent.BUTTON3) {
 							handleRightClick(e, selRow, selPath);
-						}
-						else {
+						} else {
 							handleSingleClick(selRow, selPath);
 						}
-					}
-					else if (e.getClickCount() == 2) {
+					} else if (e.getClickCount() == 2) {
 						handleDoubleClick(selRow, selPath);
 					}
 				}
@@ -209,8 +201,8 @@ public class FileTree extends JTree implements TreeSelectionListener,
 	}
 
 	/**
-	 * Obtain a default dir, if there is one, which would have been passed in
-	 * via a -p argument. Try to expand the dir in the file tree.
+	 * Obtain a default dir, if there is one, which would have been passed in via a
+	 * -p argument. Try to expand the dir in the file tree.
 	 */
 	public void expandDefaultDir() {
 
@@ -238,30 +230,26 @@ public class FileTree extends JTree implements TreeSelectionListener,
 				return;
 			}
 
-			DefaultMutableTreeNode root = (DefaultMutableTreeNode) getModel()
-					.getRoot();
+			DefaultMutableTreeNode root = (DefaultMutableTreeNode) getModel().getRoot();
 
 			if ((root == null) || (root.getChildCount() < 1)) {
 				return;
 			}
 
 			int tokenIndex = 0;
-			while ((root != null) && (root.getChildCount() > 0)
-					&& (tokenIndex < tokens.length)) {
+			while ((root != null) && (root.getChildCount() > 0) && (tokenIndex < tokens.length)) {
 
 				String token = tokens[tokenIndex];
 				tokenIndex++;
 
 				DefaultMutableTreeNode newRoot = getChild(root, token);
 				if (newRoot != null) {
-					TreeNode pathnodes[] = ((DefaultTreeModel) getModel())
-							.getPathToRoot(newRoot);
+					TreeNode pathnodes[] = ((DefaultTreeModel) getModel()).getPathToRoot(newRoot);
 					TreePath cpath = new TreePath(pathnodes);
 					scrollPathToVisible(cpath);
 					expandPath(cpath);
 					newRoot = getChild(root, token);
-					pathnodes = ((DefaultTreeModel) getModel())
-							.getPathToRoot(newRoot);
+					pathnodes = ((DefaultTreeModel) getModel()).getPathToRoot(newRoot);
 				}
 				root = newRoot;
 			}
@@ -270,23 +258,19 @@ public class FileTree extends JTree implements TreeSelectionListener,
 		}
 	}
 
-	private DefaultMutableTreeNode getChild(DefaultMutableTreeNode parent,
-			String name) {
+	private DefaultMutableTreeNode getChild(DefaultMutableTreeNode parent, String name) {
 		if ((parent == null) || (parent.getChildCount() < 1)) {
 			return null;
 		}
 
 		try {
 			for (Enumeration<?> e = parent.children(); e.hasMoreElements();) {
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) (e
-						.nextElement());
+				DefaultMutableTreeNode node = (DefaultMutableTreeNode) (e.nextElement());
 				FileNode fileNode = getFileNode(node);
 				if (fileNode != null) {
 					File file = fileNode.getFile();
-					if ((file != null)
-							&& (file.exists() && (file.isDirectory()))) {
-						String subTokens[] = FileUtilities
-								.tokenizePath(file.getPath());
+					if ((file != null) && (file.exists() && (file.isDirectory()))) {
+						String subTokens[] = FileUtilities.tokenizePath(file.getPath());
 
 						if ((subTokens != null) && (subTokens.length > 0)) {
 
@@ -294,10 +278,8 @@ public class FileTree extends JTree implements TreeSelectionListener,
 							if (name.equalsIgnoreCase(fname)) {
 								return node;
 							}
-						}
-						else {
-							Log.getInstance().warning(
-									"tokenizer in fileTree getChiild not working properly.");
+						} else {
+							Log.getInstance().warning("tokenizer in fileTree getChiild not working properly.");
 						}
 					}
 				} // fileNode != null
@@ -310,8 +292,7 @@ public class FileTree extends JTree implements TreeSelectionListener,
 	}
 
 	// handle a right click on a file
-	protected void handleRightClick(MouseEvent e, int selRow,
-			TreePath selPath) {
+	protected void handleRightClick(MouseEvent e, int selRow, TreePath selPath) {
 		DefaultMutableTreeNode node = getTreeNode(selPath);
 		FileNode fnode = getFileNode(node);
 		if (fnode != null) {
@@ -390,8 +371,7 @@ public class FileTree extends JTree implements TreeSelectionListener,
 	 */
 	private void notifyFileListeners(final List<File> files) {
 
-		if ((fileListenerList == null) || (files == null)
-				|| (files.size() < 1)) {
+		if ((fileListenerList == null) || (files == null) || (files.size() < 1)) {
 			return;
 		}
 
@@ -407,8 +387,7 @@ public class FileTree extends JTree implements TreeSelectionListener,
 		// those that are interested in this event
 		for (int i = listeners.length - 2; i >= 0; i -= 2) {
 			if (listeners[i] == IFileTreeListener.class) {
-				((IFileTreeListener) listeners[i + 1])
-						.filesDoubleClicked(files);
+				((IFileTreeListener) listeners[i + 1]).filesDoubleClicked(files);
 			}
 		}
 	}
@@ -430,8 +409,7 @@ public class FileTree extends JTree implements TreeSelectionListener,
 		// those that are interested in this event
 		for (int i = listeners.length - 2; i >= 0; i -= 2) {
 			if (listeners[i] == IFileTreeListener.class) {
-				((IFileTreeListener) listeners[i + 1])
-						.fileDoubleClicked(fullPath);
+				((IFileTreeListener) listeners[i + 1]).fileDoubleClicked(fullPath);
 			}
 		}
 	}
@@ -444,15 +422,14 @@ public class FileTree extends JTree implements TreeSelectionListener,
 
 		// gesture recognizer establishes what action starts the dnd
 
-		DragGestureRecognizer dgr = dragSource
-				.createDefaultDragGestureRecognizer(this, // DragSource
-						DnDConstants.ACTION_COPY, // specifies valid actions
-						this // DragGestureListener
+		DragGestureRecognizer dgr = dragSource.createDefaultDragGestureRecognizer(this, // DragSource
+				DnDConstants.ACTION_COPY, // specifies valid actions
+				this // DragGestureListener
 		);
 
 		/*
-		 * Eliminates right mouse clicks as valid actions - useful especially if
-		 * you implement a JPopupMenu for the JTree
+		 * Eliminates right mouse clicks as valid actions - useful especially if you
+		 * implement a JPopupMenu for the JTree
 		 */
 		dgr.setSourceActions(dgr.getSourceActions() & ~InputEvent.BUTTON3_MASK);
 	}
@@ -472,8 +449,7 @@ public class FileTree extends JTree implements TreeSelectionListener,
 			if (_fileTreePanel != null) {
 				_fileTreePanel.setText(fnode.getFile().getAbsolutePath());
 			}
-		}
-		else {
+		} else {
 			selectedNode = null;
 			if (_fileTreePanel != null) {
 				_fileTreePanel.setText("");
@@ -491,8 +467,7 @@ public class FileTree extends JTree implements TreeSelectionListener,
 	public String getLastSelection() {
 		if (selectedNode == null) {
 			return null;
-		}
-		else {
+		} else {
 			try {
 				return selectedNode.getFile().getAbsolutePath();
 			} catch (Exception e) {
@@ -577,8 +552,7 @@ public class FileTree extends JTree implements TreeSelectionListener,
 		}
 		if (obj instanceof FileNode) {
 			return (FileNode) obj;
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
@@ -648,8 +622,7 @@ public class FileTree extends JTree implements TreeSelectionListener,
 
 		// begin the drag
 		try {
-			dragSource.startDrag(dge, DragSource.DefaultCopyDrop, transferable,
-					this);
+			dragSource.startDrag(dge, DragSource.DefaultCopyDrop, transferable, this);
 		} catch (InvalidDnDOperationException e) {
 			e.printStackTrace();
 		}

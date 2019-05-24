@@ -14,11 +14,10 @@ import cnuphys.bCNU.graphics.container.IContainer;
 public abstract class HexView extends CedView {
 
 	/**
-	 * Create a hex view that lays items out in six sectors NOTE: In Hex views,
-	 * the world system should be the same as the 2D (xy) lab system
+	 * Create a hex view that lays items out in six sectors NOTE: In Hex views, the
+	 * world system should be the same as the 2D (xy) lab system
 	 * 
-	 * @param title
-	 *            the title of the view
+	 * @param title the title of the view
 	 */
 	public HexView(Object... keyVals) {
 		super(keyVals);
@@ -39,8 +38,7 @@ public abstract class HexView extends CedView {
 	 * @return the 1-based sector
 	 */
 	@Override
-	public int getSector(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint) {
+	public int getSector(IContainer container, Point screenPoint, Point2D.Double worldPoint) {
 		return getSector(worldPoint);
 	}
 
@@ -70,8 +68,7 @@ public abstract class HexView extends CedView {
 	/**
 	 * Get the azimuthal angle
 	 * 
-	 * @param worldPoint
-	 *            the world point
+	 * @param worldPoint the world point
 	 * @return the value of phi in degrees.
 	 */
 	public double getPhi(Point2D.Double worldPoint) {
@@ -81,31 +78,27 @@ public abstract class HexView extends CedView {
 		}
 		return phi;
 	}
-	
+
 	/**
 	 * From detector xyz get the projected world point.
 	 * 
-	 * @param x
-	 *            the detector x coordinate
-	 * @param y
-	 *            the detector y coordinate
-	 * @param z
-	 *            the detector z coordinate
-	 * @param wp
-	 *            the projected 2D world point.
+	 * @param x  the detector x coordinate
+	 * @param y  the detector y coordinate
+	 * @param z  the detector z coordinate
+	 * @param wp the projected 2D world point.
 	 */
 	@Override
-	public void projectClasToWorld(double x, double y, double z,
-			Plane3D projectionPlane, Point2D.Double wp) {
-		
+	public void projectClasToWorld(double x, double y, double z, Plane3D projectionPlane, Point2D.Double wp) {
+
 		projectedPoint(x, y, z, projectionPlane, wp);
 	}
-	
+
 	/**
 	 * Project a space point. Projected by finding the closest point on the plane.
-	 * @param x the x coordinate
-	 * @param y the y coordinate
-	 * @param z the z coordinate
+	 * 
+	 * @param x  the x coordinate
+	 * @param y  the y coordinate
+	 * @param z  the z coordinate
 	 * @param wp will hold the projected 2D world point
 	 * @return the projected 3D space point
 	 */
@@ -113,17 +106,14 @@ public abstract class HexView extends CedView {
 	public Point3D projectedPoint(double x, double y, double z, Plane3D projectionPlane, Point2D.Double wp) {
 		Point3D p1 = new Point3D(x, y, z);
 		Vector3D normal = projectionPlane.normal();
-		Point3D p2 = new Point3D(p1.x() + normal.x(),
-				p1.y() + normal.y(), p1.z() + normal.z());
+		Point3D p2 = new Point3D(p1.x() + normal.x(), p1.y() + normal.y(), p1.z() + normal.z());
 		Line3D perp = new Line3D(p1, p2);
 		Point3D pisect = new Point3D();
 		projectionPlane.intersection(perp, pisect);
-		
+
 		wp.x = pisect.x();
 		wp.y = pisect.y();
 		return pisect;
 	}
-
-
 
 }

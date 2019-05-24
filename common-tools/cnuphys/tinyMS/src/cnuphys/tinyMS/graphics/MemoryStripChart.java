@@ -100,7 +100,7 @@ public class MemoryStripChart extends JComponent {
 		}
 
 		float used = memoryReport();
-		
+
 		if (_data.size() >= _capacity) {
 			_data.remove(0);
 		}
@@ -145,11 +145,11 @@ public class MemoryStripChart extends JComponent {
 		double right = plotRect.getX();
 		// now the data
 		for (int i = 0; i < _data.size(); i++) {
-			int x = (int)right;
+			int x = (int) right;
 			right += delX;
 			float val = _data.get(i);
 			int h = (int) (plotRect.height * (val / maxPlotVal));
-			dataRect.setBounds(x, plotRect.y + plotRect.height - h, (int)(right-x), h);
+			dataRect.setBounds(x, plotRect.y + plotRect.height - h, (int) (right - x), h);
 
 			g.setColor(rectColors[(i + _timerUpdateIndex) % 4]);
 			g.fillRect(dataRect.x, dataRect.y, dataRect.width, dataRect.height);
@@ -171,8 +171,7 @@ public class MemoryStripChart extends JComponent {
 	/**
 	 * Get the used memory in MB
 	 * 
-	 * @param message
-	 *            a message to add on
+	 * @param message a message to add on
 	 */
 	public float memoryReport() {
 		System.gc();

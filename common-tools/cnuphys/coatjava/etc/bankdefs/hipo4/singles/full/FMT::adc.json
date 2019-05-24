@@ -1,0 +1,55 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector (=1)", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer (1-6)", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "strip", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "order: 0 - ADCL , 1 - ADCR", 
+                "name": "order", 
+                "type": "B"
+            }, 
+            {
+                "info": "ADC maximum", 
+                "name": "ADC", 
+                "type": "I"
+            }, 
+            {
+                "info": "time from pulse fit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "pedestal from pulse analysis", 
+                "name": "ped", 
+                "type": "S"
+            }, 
+            {
+                "info": "ADC integral (sum over the pulse)", 
+                "name": "integral", 
+                "type": "I"
+            }, 
+            {
+                "info": "timestamp", 
+                "name": "timestamp", 
+                "type": "L"
+            }
+        ], 
+        "group": 20800, 
+        "info": "ADC bank for the Forward MicroMegas Tracker", 
+        "item": 11, 
+        "name": "FMT::adc"
+    }
+]

@@ -27,21 +27,16 @@ public abstract class ToolBarButton extends JButton implements ActionListener {
 	/**
 	 * Constructor
 	 * 
-	 * @param container
-	 *            the owner container.
-	 * @param imageFileName
-	 *            the name if the file holding the icon
-	 * @param toolTip
-	 *            a string for a tool tip
+	 * @param container     the owner container.
+	 * @param imageFileName the name if the file holding the icon
+	 * @param toolTip       a string for a tool tip
 	 */
-	public ToolBarButton(IContainer container, String imageFileName,
-			String toolTip) {
+	public ToolBarButton(IContainer container, String imageFileName, String toolTip) {
 		super();
 		this.container = container;
 		addActionListener(this);
 
-		ImageIcon imageIcon = ImageManager.getInstance().loadImageIcon(
-				imageFileName);
+		ImageIcon imageIcon = ImageManager.getInstance().loadImageIcon(imageFileName);
 		setFocusPainted(false);
 		setBorderPainted(false);
 
@@ -59,8 +54,7 @@ public abstract class ToolBarButton extends JButton implements ActionListener {
 	/**
 	 * Respond to an action event. That is, the button was selected.
 	 * 
-	 * @param e
-	 *            the event in question.
+	 * @param e the event in question.
 	 */
 	@Override
 	public abstract void actionPerformed(ActionEvent e);
@@ -68,8 +62,8 @@ public abstract class ToolBarButton extends JButton implements ActionListener {
 	/**
 	 * Get the appropriate cursor for this tool.
 	 * 
-	 * @return the cursor appropriate when the mouse is in the container (and
-	 *         this button is active).
+	 * @return the cursor appropriate when the mouse is in the container (and this
+	 *         button is active).
 	 */
 	public Cursor canvasCursor() {
 		return Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);

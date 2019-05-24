@@ -1,0 +1,40 @@
+[
+    {
+        "entries": [
+            {
+                "info": "scaler crate", 
+                "name": "crate", 
+                "type": "B"
+            }, 
+            {
+                "info": "scaler slot", 
+                "name": "slot", 
+                "type": "B"
+            }, 
+            {
+                "info": "scaler channel (0/32 = FCUP, 1/33 = SLM, 2/24 = Clock)", 
+                "name": "channel", 
+                "type": "S"
+            }, 
+            {
+                "info": "helicity", 
+                "name": "helicity", 
+                "type": "B"
+            }, 
+            {
+                "info": "quartet", 
+                "name": "quartet", 
+                "type": "B"
+            }, 
+            {
+                "info": "scaler value", 
+                "name": "value", 
+                "type": "L"
+            }
+        ], 
+        "group": 20000, 
+        "info": "Scaler bank", 
+        "item": 13, 
+        "name": "RAW::scaler"
+    }
+]

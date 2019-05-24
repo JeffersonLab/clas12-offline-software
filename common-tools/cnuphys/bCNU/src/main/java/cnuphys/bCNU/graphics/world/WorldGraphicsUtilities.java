@@ -51,27 +51,19 @@ public class WorldGraphicsUtilities {
 	private static final int NUMCIRCSTEP = 60;
 
 	// default stroke
-	public static final Stroke DEFAULTSTROKE = GraphicsUtilities.getStroke(1,
-			LineStyle.SOLID);
+	public static final Stroke DEFAULTSTROKE = GraphicsUtilities.getStroke(1, LineStyle.SOLID);
 
 	/**
 	 * Draw a horizontal "etched" world line
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param x
-	 *            x coordinate of start point.
-	 * @param y
-	 *            y coordinate of horizontal line
-	 * @param w
-	 *            the width of the horizontal line
-	 * @param lightAbove
-	 *            if <code>true</code> will be as if lit from above.
+	 * @param g          the graphics context.
+	 * @param container  the container on which it is rendered.
+	 * @param x          x coordinate of start point.
+	 * @param y          y coordinate of horizontal line
+	 * @param w          the width of the horizontal line
+	 * @param lightAbove if <code>true</code> will be as if lit from above.
 	 */
-	public static void drawEtchedHorizontalWorldLine(Graphics g,
-			IContainer container, double x, double y, double w,
+	public static void drawEtchedHorizontalWorldLine(Graphics g, IContainer container, double x, double y, double w,
 			boolean lightAbove) {
 
 		Graphics2D g2 = (Graphics2D) g;
@@ -98,21 +90,14 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Draw a verticle "etched" world line
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param x
-	 *            x coordinate of vertical line
-	 * @param y
-	 *            y coordinate of horizontal line
-	 * @param h
-	 *            the width of the horizontal line
-	 * @param lightLeft
-	 *            if <code>true</code> will be as if lit from left.
+	 * @param g         the graphics context.
+	 * @param container the container on which it is rendered.
+	 * @param x         x coordinate of vertical line
+	 * @param y         y coordinate of horizontal line
+	 * @param h         the width of the horizontal line
+	 * @param lightLeft if <code>true</code> will be as if lit from left.
 	 */
-	public static void drawEtchedVerticalWorldLine(Graphics g,
-			IContainer container, double x, double y, double h,
+	public static void drawEtchedVerticalWorldLine(Graphics g, IContainer container, double x, double y, double h,
 			boolean lightLeft) {
 
 		Graphics2D g2 = (Graphics2D) g;
@@ -139,71 +124,48 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Draw a world line
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param wp0
-	 *            one end point.
-	 * @param wp1
-	 *            another end point.
-	 * @param style
-	 *            the style object to use for color, width, etc.
+	 * @param g         the graphics context.
+	 * @param container the container on which it is rendered.
+	 * @param wp0       one end point.
+	 * @param wp1       another end point.
+	 * @param style     the style object to use for color, width, etc.
 	 */
-	public static void drawWorldLine(Graphics g, IContainer container,
-			Point2D.Double wp0, Point2D.Double wp1, IStyled style) {
+	public static void drawWorldLine(Graphics g, IContainer container, Point2D.Double wp0, Point2D.Double wp1,
+			IStyled style) {
 		drawWorldLine(g, container, wp0.x, wp0.y, wp1.x, wp1.y, style);
 	}
 
 	/**
 	 * Draw a world line
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param x1
-	 *            x coordinate of start point.
-	 * @param y1
-	 *            y coordinate of start point.
-	 * @param x2
-	 *            x coordinate of end point.
-	 * @param y2
-	 *            y coordinate of end point.
-	 * @param style
-	 *            the style object to use for color, width, etc.
+	 * @param g         the graphics context.
+	 * @param container the container on which it is rendered.
+	 * @param x1        x coordinate of start point.
+	 * @param y1        y coordinate of start point.
+	 * @param x2        x coordinate of end point.
+	 * @param y2        y coordinate of end point.
+	 * @param style     the style object to use for color, width, etc.
 	 */
-	public static void drawWorldLine(Graphics g, IContainer container,
-			double x1, double y1, double x2, double y2, IStyled style) {
-		drawWorldLine(g, container, x1, y1, x2, y2, style.getLineColor(),
-				style.getLineWidth(), style.getLineStyle());
+	public static void drawWorldLine(Graphics g, IContainer container, double x1, double y1, double x2, double y2,
+			IStyled style) {
+		drawWorldLine(g, container, x1, y1, x2, y2, style.getLineColor(), style.getLineWidth(), style.getLineStyle());
 	}
 
 	/**
 	 * Draw a world line
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param x1
-	 *            x coordinate of start point.
-	 * @param y1
-	 *            y coordinate of start point.
-	 * @param x2
-	 *            x coordinate of end point.
-	 * @param y2
-	 *            y coordinate of end point.
-	 * @param lineColor
-	 *            the line color (can be <code>null</code>).
-	 * @param lineWidth
-	 *            the line width in pixels.
-	 * @param lineStyle
-	 *            the line style.
+	 * @param g         the graphics context.
+	 * @param container the container on which it is rendered.
+	 * @param x1        x coordinate of start point.
+	 * @param y1        y coordinate of start point.
+	 * @param x2        x coordinate of end point.
+	 * @param y2        y coordinate of end point.
+	 * @param lineColor the line color (can be <code>null</code>).
+	 * @param lineWidth the line width in pixels.
+	 * @param lineStyle the line style.
 	 */
-	public static void drawWorldLine(Graphics g, IContainer container,
-			double x1, double y1, double x2, double y2, Color lineColor,
-			int lineWidth, LineStyle lineStyle) {
+	public static void drawWorldLine(Graphics g, IContainer container, double x1, double y1, double x2, double y2,
+			Color lineColor, int lineWidth, LineStyle lineStyle) {
 
 		if (lineColor == null) {
 			return;
@@ -229,8 +191,7 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Set the stlye defaults
 	 * 
-	 * @param g
-	 *            the graphics context
+	 * @param g the graphics context
 	 */
 	public static void setStyleDefaults(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
@@ -242,17 +203,12 @@ public class WorldGraphicsUtilities {
 	 * Convert two world points (possible line endpoints) to pixel coordinates.
 	 * 
 	 * @param container
-	 * @param p0
-	 *            will hold one pixel point.
-	 * @param p1
-	 *            will hold other pixel point.
-	 * @param wp0
-	 *            one end point.
-	 * @param wp1
-	 *            another end point.
+	 * @param p0        will hold one pixel point.
+	 * @param p1        will hold other pixel point.
+	 * @param wp0       one end point.
+	 * @param wp1       another end point.
 	 */
-	public static void getPixelEnds(IContainer container, Point p0, Point p1,
-			Point2D.Double wp0, Point2D.Double wp1) {
+	public static void getPixelEnds(IContainer container, Point p0, Point p1, Point2D.Double wp0, Point2D.Double wp1) {
 		container.worldToLocal(p0, wp0.x, wp0.y);
 		container.worldToLocal(p1, wp1.x, wp1.y);
 	}
@@ -260,39 +216,28 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Draw a world line 1 pixel wide in solid style
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param x1
-	 *            x coordinate of start point.
-	 * @param y1
-	 *            y coordinate of start point.
-	 * @param x2
-	 *            x coordinate of end point.
-	 * @param y2
-	 *            y coordinate of end point.
-	 * @param lineColor
-	 *            the line color (can be <code>null</code>).
+	 * @param g         the graphics context.
+	 * @param container the container on which it is rendered.
+	 * @param x1        x coordinate of start point.
+	 * @param y1        y coordinate of start point.
+	 * @param x2        x coordinate of end point.
+	 * @param y2        y coordinate of end point.
+	 * @param lineColor the line color (can be <code>null</code>).
 	 */
-	public static void drawWorldLine(Graphics g, IContainer container,
-			double x1, double y1, double x2, double y2, Color lineColor) {
-		drawWorldLine(g, container, x1, y1, x2, y2, lineColor, 1,
-				LineStyle.SOLID);
+	public static void drawWorldLine(Graphics g, IContainer container, double x1, double y1, double x2, double y2,
+			Color lineColor) {
+		drawWorldLine(g, container, x1, y1, x2, y2, lineColor, 1, LineStyle.SOLID);
 	}
 
 	/**
 	 * Get pixel rectangle boundary of two wotld points
 	 * 
 	 * @param container
-	 * @param wp0
-	 *            one end point.
-	 * @param wp1
-	 *            another end point.
+	 * @param wp0       one end point.
+	 * @param wp1       another end point.
 	 * @return pixel rectangle boundary.
 	 */
-	public static Rectangle getBounds(IContainer container, Point2D.Double wp0,
-			Point2D.Double wp1) {
+	public static Rectangle getBounds(IContainer container, Point2D.Double wp0, Point2D.Double wp1) {
 		Point p0 = new Point();
 		Point p1 = new Point();
 		getPixelEnds(container, p0, p1, wp0, wp1);
@@ -314,18 +259,13 @@ public class WorldGraphicsUtilities {
 	 * Get pixel rectangle boundary of two wotld points
 	 * 
 	 * @param container
-	 * @param x1
-	 *            x coordinate of one end point.
-	 * @param y1
-	 *            y coordinate of one end point.
-	 * @param x2
-	 *            x coordinate of other end point.
-	 * @param y2
-	 *            y coordinate of other end point.
+	 * @param x1        x coordinate of one end point.
+	 * @param y1        y coordinate of one end point.
+	 * @param x2        x coordinate of other end point.
+	 * @param y2        y coordinate of other end point.
 	 * @return pixel rectangle boundary.
 	 */
-	public static Rectangle getBounds(IContainer container, double x1,
-			double y1, double x2, double y2) {
+	public static Rectangle getBounds(IContainer container, double x1, double y1, double x2, double y2) {
 		Point p0 = new Point();
 		Point p1 = new Point();
 		container.worldToLocal(p0, x1, y1);
@@ -346,45 +286,29 @@ public class WorldGraphicsUtilities {
 	}
 
 	/**
-	 * Draw a world radarc. This is something with an inner and outer radius and
-	 * an opening and closing angle.
+	 * Draw a world radarc. This is something with an inner and outer radius and an
+	 * opening and closing angle.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param xc
-	 *            the horizontal center.
-	 * @param yc
-	 *            the vertical center.
-	 * @param rmin
-	 *            minimum (inner) radius.
-	 * @param rmax
-	 *            maximum (outer) radius.
-	 * @param startAngle
-	 *            start angle in degrees.
-	 * @param stopAngle
-	 *            stop angle in degrees.
-	 * @param fillColor
-	 *            the fill color (can be <code>null</code>).
-	 * @param lineColor
-	 *            the line color (can be <code>null</code>).
-	 * @param lineWidth
-	 *            the line width in pixels.
-	 * @param lineStyle
-	 *            the line style.
+	 * @param g          the graphics context.
+	 * @param container  the container on which it is rendered.
+	 * @param xc         the horizontal center.
+	 * @param yc         the vertical center.
+	 * @param rmin       minimum (inner) radius.
+	 * @param rmax       maximum (outer) radius.
+	 * @param startAngle start angle in degrees.
+	 * @param stopAngle  stop angle in degrees.
+	 * @param fillColor  the fill color (can be <code>null</code>).
+	 * @param lineColor  the line color (can be <code>null</code>).
+	 * @param lineWidth  the line width in pixels.
+	 * @param lineStyle  the line style.
 	 */
-	public static void drawWorldRadArc(Graphics g, IContainer container,
-			double xc, double yc, double rmin, double rmax, double startAngle,
-			double stopAngle, Color fillColor, Color lineColor, int lineWidth,
-			LineStyle lineStyle) {
+	public static void drawWorldRadArc(Graphics g, IContainer container, double xc, double yc, double rmin, double rmax,
+			double startAngle, double stopAngle, Color fillColor, Color lineColor, int lineWidth, LineStyle lineStyle) {
 
 		Graphics2D g2 = (Graphics2D) g;
 
-		Polygon p0 = createWorldArc(container, xc, yc, rmin, startAngle,
-				stopAngle);
-		Polygon p1 = createWorldArc(container, xc, yc, rmax, stopAngle,
-				startAngle);
+		Polygon p0 = createWorldArc(container, xc, yc, rmin, startAngle, stopAngle);
+		Polygon p1 = createWorldArc(container, xc, yc, rmax, stopAngle, startAngle);
 
 		GeneralPath path = new GeneralPath(Path2D.WIND_EVEN_ODD);
 		path.append(p0, false);
@@ -399,8 +323,7 @@ public class WorldGraphicsUtilities {
 		// outline?
 		if (lineColor != null) {
 			Stroke oldStroke = g2.getStroke();
-			Stroke newStroke = GraphicsUtilities
-					.getStroke(lineWidth, lineStyle);
+			Stroke newStroke = GraphicsUtilities.getStroke(lineWidth, lineStyle);
 			g2.setStroke(newStroke);
 			g2.setColor(lineColor);
 			g2.draw(path);
@@ -410,87 +333,58 @@ public class WorldGraphicsUtilities {
 	}
 
 	/**
-	 * Draw a world radarc. This is something with an inner and outer radius and
-	 * an opening and closing angle. This will draw using a 1 pixel wide solid
-	 * line.
+	 * Draw a world radarc. This is something with an inner and outer radius and an
+	 * opening and closing angle. This will draw using a 1 pixel wide solid line.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param xc
-	 *            the horizontal center.
-	 * @param yc
-	 *            the vertical center.
-	 * @param rmin
-	 *            minimum (inner) radius.
-	 * @param rmax
-	 *            maximum (outer) radius.
-	 * @param startAngle
-	 *            start angle in degrees.
-	 * @param stopAngle
-	 *            stop angle in degrees.
-	 * @param fillColor
-	 *            the fill color (can be <code>null</code>).
-	 * @param lineColor
-	 *            the line color (can be <code>null</code>).
+	 * @param g          the graphics context.
+	 * @param container  the container on which it is rendered.
+	 * @param xc         the horizontal center.
+	 * @param yc         the vertical center.
+	 * @param rmin       minimum (inner) radius.
+	 * @param rmax       maximum (outer) radius.
+	 * @param startAngle start angle in degrees.
+	 * @param stopAngle  stop angle in degrees.
+	 * @param fillColor  the fill color (can be <code>null</code>).
+	 * @param lineColor  the line color (can be <code>null</code>).
 	 */
-	public static void drawWorldRadArc(Graphics g, IContainer container,
-			double xc, double yc, double rmin, double rmax, double startAngle,
-			double stopAngle, Color fillColor, Color lineColor) {
+	public static void drawWorldRadArc(Graphics g, IContainer container, double xc, double yc, double rmin, double rmax,
+			double startAngle, double stopAngle, Color fillColor, Color lineColor) {
 
-		drawWorldRadArc(g, container, xc, yc, rmin, rmax, startAngle,
-				stopAngle, fillColor, lineColor, 1, LineStyle.SOLID);
+		drawWorldRadArc(g, container, xc, yc, rmin, rmax, startAngle, stopAngle, fillColor, lineColor, 1,
+				LineStyle.SOLID);
 	}
 
 	/**
-	 * Draw a world radarc. This is something with an inner and outer radius and
-	 * an opening and closing angle. This will draw using a 1 pixel wide solid
-	 * line.
+	 * Draw a world radarc. This is something with an inner and outer radius and an
+	 * opening and closing angle. This will draw using a 1 pixel wide solid line.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param xc
-	 *            the horizontal center.
-	 * @param yc
-	 *            the vertical center.
-	 * @param rmin
-	 *            minimum (inner) radius.
-	 * @param rmax
-	 *            maximum (outer) radius.
-	 * @param startAngle
-	 *            start angle in degrees.
-	 * @param stopAngle
-	 *            stop angle in degrees.
-	 * @param style
-	 *            An IStyled object, such as an Item.
+	 * @param g          the graphics context.
+	 * @param container  the container on which it is rendered.
+	 * @param xc         the horizontal center.
+	 * @param yc         the vertical center.
+	 * @param rmin       minimum (inner) radius.
+	 * @param rmax       maximum (outer) radius.
+	 * @param startAngle start angle in degrees.
+	 * @param stopAngle  stop angle in degrees.
+	 * @param style      An IStyled object, such as an Item.
 	 */
-	public static void drawWorldRadArc(Graphics g, IContainer container,
-			double xc, double yc, double rmin, double rmax, double startAngle,
-			double stopAngle, IStyled style) {
+	public static void drawWorldRadArc(Graphics g, IContainer container, double xc, double yc, double rmin, double rmax,
+			double startAngle, double stopAngle, IStyled style) {
 
-		drawWorldRadArc(g, container, xc, yc, rmin, rmax, startAngle,
-				stopAngle, style.getFillColor(), style.getLineColor(),
-				style.getLineWidth(), style.getLineStyle());
+		drawWorldRadArc(g, container, xc, yc, rmin, rmax, startAngle, stopAngle, style.getFillColor(),
+				style.getLineColor(), style.getLineWidth(), style.getLineStyle());
 	}
 
 	/**
 	 * Create a screen representation of world circle.
 	 * 
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param xc
-	 *            the horizontal center.
-	 * @param yc
-	 *            the vertical center.
-	 * @param radius
-	 *            the radius.
+	 * @param container the container on which it is rendered.
+	 * @param xc        the horizontal center.
+	 * @param yc        the vertical center.
+	 * @param radius    the radius.
 	 * @return a polygon approximating the world circle.
 	 */
-	public static Polygon createWorldCircle(IContainer container, double xc,
-			double yc, double radius) {
+	public static Polygon createWorldCircle(IContainer container, double xc, double yc, double radius) {
 		int x[] = new int[NUMCIRCSTEP];
 		int y[] = new int[NUMCIRCSTEP];
 
@@ -514,20 +408,15 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Create a screen representation of world donut.
 	 * 
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param xc
-	 *            the horizontal center.
-	 * @param yc
-	 *            the vertical center.
-	 * @param minRadius
-	 *            the min radius.
-	 * @param maxRadius
-	 *            the max radius.
+	 * @param container the container on which it is rendered.
+	 * @param xc        the horizontal center.
+	 * @param yc        the vertical center.
+	 * @param minRadius the min radius.
+	 * @param maxRadius the max radius.
 	 * @return a polygon approximating the world donut.
 	 */
-	public static Polygon createWorldDonut(IContainer container, double xc,
-			double yc, double minRadius, double maxRadius) {
+	public static Polygon createWorldDonut(IContainer container, double xc, double yc, double minRadius,
+			double maxRadius) {
 
 		if (minRadius < TINY) {
 			return createWorldCircle(container, xc, yc, maxRadius);
@@ -569,22 +458,16 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Create a screen representation of world arc.
 	 * 
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param xc
-	 *            the horizontal center.
-	 * @param yc
-	 *            the vertical center.
-	 * @param radius
-	 *            the radius.
-	 * @param startAngle
-	 *            start angle in degrees.
-	 * @param stopAngle
-	 *            stop angle in degrees.
+	 * @param container  the container on which it is rendered.
+	 * @param xc         the horizontal center.
+	 * @param yc         the vertical center.
+	 * @param radius     the radius.
+	 * @param startAngle start angle in degrees.
+	 * @param stopAngle  stop angle in degrees.
 	 * @return the polygon representing the arc.
 	 */
-	public static Polygon createWorldArc(IContainer container, double xc,
-			double yc, double radius, double startAngle, double stopAngle) {
+	public static Polygon createWorldArc(IContainer container, double xc, double yc, double radius, double startAngle,
+			double stopAngle) {
 
 		if (Math.abs(stopAngle - startAngle) > (360.0 - TINY)) {
 			return createWorldCircle(container, xc, yc, radius);
@@ -615,24 +498,16 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Draw a world rectangle.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param worldRectangle
-	 *            the world rectangle being drawn.
-	 * @param fillColor
-	 *            the fill color (can be <code>null</code>).
-	 * @param lineColor
-	 *            the line color (can be <code>null</code>).
-	 * @param lineWidth
-	 *            the line width in pixels.
-	 * @param lineStyle
-	 *            the line style.
+	 * @param g              the graphics context.
+	 * @param container      the container on which it is rendered.
+	 * @param worldRectangle the world rectangle being drawn.
+	 * @param fillColor      the fill color (can be <code>null</code>).
+	 * @param lineColor      the line color (can be <code>null</code>).
+	 * @param lineWidth      the line width in pixels.
+	 * @param lineStyle      the line style.
 	 */
-	public static void drawWorldRectangle(Graphics g, IContainer container,
-			Rectangle2D.Double worldRectangle, Color fillColor,
-			Color lineColor, int lineWidth, LineStyle lineStyle) {
+	public static void drawWorldRectangle(Graphics g, IContainer container, Rectangle2D.Double worldRectangle,
+			Color fillColor, Color lineColor, int lineWidth, LineStyle lineStyle) {
 
 		Graphics2D g2 = (Graphics2D) g;
 
@@ -642,19 +517,16 @@ public class WorldGraphicsUtilities {
 		// fill?
 		if (fillColor != null) {
 			g2.setColor(fillColor);
-			g2.fillRect(rectangle.x, rectangle.y, rectangle.width,
-					rectangle.height);
+			g2.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 		}
 
 		// outline?
 		if (lineColor != null) {
 			Stroke oldStroke = g2.getStroke();
-			Stroke newStroke = GraphicsUtilities
-					.getStroke(lineWidth, lineStyle);
+			Stroke newStroke = GraphicsUtilities.getStroke(lineWidth, lineStyle);
 			g2.setStroke(newStroke);
 			g2.setColor(lineColor);
-			g2.drawRect(rectangle.x, rectangle.y, rectangle.width,
-					rectangle.height);
+			g2.drawRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 			g2.setStroke(oldStroke);
 		}
 
@@ -663,88 +535,62 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Draw a world rectangle with a solid, 1 pixel outline.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param worldRectangle
-	 *            the world rectangle being drawn.
-	 * @param fillColor
-	 *            the fill color (can be <code>null</code>).
-	 * @param lineColor
-	 *            the line color (can be <code>null</code>).
+	 * @param g              the graphics context.
+	 * @param container      the container on which it is rendered.
+	 * @param worldRectangle the world rectangle being drawn.
+	 * @param fillColor      the fill color (can be <code>null</code>).
+	 * @param lineColor      the line color (can be <code>null</code>).
 	 */
-	public static void drawWorldRectangle(Graphics g, IContainer container,
-			Rectangle2D.Double worldRectangle, Color fillColor, Color lineColor) {
-		drawWorldRectangle(g, container, worldRectangle, fillColor, lineColor,
-				1, LineStyle.SOLID);
+	public static void drawWorldRectangle(Graphics g, IContainer container, Rectangle2D.Double worldRectangle,
+			Color fillColor, Color lineColor) {
+		drawWorldRectangle(g, container, worldRectangle, fillColor, lineColor, 1, LineStyle.SOLID);
 	}
 
 	/**
 	 * Draw a world rectangle based on an IStyled object.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param worldRectangle
-	 *            the world rectangle being drawn.
-	 * @param style
-	 *            An IStyled object, such as an Item.
+	 * @param g              the graphics context.
+	 * @param container      the container on which it is rendered.
+	 * @param worldRectangle the world rectangle being drawn.
+	 * @param style          An IStyled object, such as an Item.
 	 */
-	public static void drawWorldRectangle(Graphics g, IContainer container,
-			Rectangle2D.Double worldRectangle, IStyled style) {
-		drawWorldRectangle(g, container, worldRectangle, style.getFillColor(),
-				style.getLineColor(), style.getLineWidth(),
-				style.getLineStyle());
+	public static void drawWorldRectangle(Graphics g, IContainer container, Rectangle2D.Double worldRectangle,
+			IStyled style) {
+		drawWorldRectangle(g, container, worldRectangle, style.getFillColor(), style.getLineColor(),
+				style.getLineWidth(), style.getLineStyle());
 	}
 
 	/**
 	 * Draws outline a highlighted world rectangle.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param wr
-	 *            the rectangle being highlighted.
-	 * @param color1
-	 *            one color for the alternating dash.
-	 * @param color2
-	 *            the other color for the alternating dash.
+	 * @param g         the graphics context.
+	 * @param container the container on which it is rendered.
+	 * @param wr        the rectangle being highlighted.
+	 * @param color1    one color for the alternating dash.
+	 * @param color2    the other color for the alternating dash.
 	 */
 
-	public static void drawHighlightedRectangle(Graphics g,
-			IContainer container, Rectangle2D.Double wr, Color color1,
+	public static void drawHighlightedRectangle(Graphics g, IContainer container, Rectangle2D.Double wr, Color color1,
 			Color color2) {
 
 		Rectangle rectangle = new Rectangle();
 		container.worldToLocal(rectangle, wr);
-		GraphicsUtilities
-				.drawHighlightedRectangle(g, rectangle, color1, color2);
+		GraphicsUtilities.drawHighlightedRectangle(g, rectangle, color1, color2);
 	}
 
 	/**
 	 * Draw a world polygon.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param worldPolygon
-	 *            the world polygon being drawn.
-	 * @param fillColor
-	 *            the fill color (can be <code>null</code>).
-	 * @param lineColor
-	 *            the line color (can be <code>null</code>).
-	 * @param lineWidth
-	 *            the line width in pixels.
-	 * @param lineStyle
-	 *            the line style.
+	 * @param g            the graphics context.
+	 * @param container    the container on which it is rendered.
+	 * @param worldPolygon the world polygon being drawn.
+	 * @param fillColor    the fill color (can be <code>null</code>).
+	 * @param lineColor    the line color (can be <code>null</code>).
+	 * @param lineWidth    the line width in pixels.
+	 * @param lineStyle    the line style.
 	 */
-	public static void drawWorldPolygon(Graphics g, IContainer container,
-			WorldPolygon worldPolygon, Color fillColor, Color lineColor,
-			float lineWidth, LineStyle lineStyle) {
+	public static void drawWorldPolygon(Graphics g, IContainer container, WorldPolygon worldPolygon, Color fillColor,
+			Color lineColor, float lineWidth, LineStyle lineStyle) {
 
 		Graphics2D g2 = (Graphics2D) g;
 
@@ -761,8 +607,7 @@ public class WorldGraphicsUtilities {
 		// outline?
 		if (lineColor != null) {
 			Stroke oldStroke = g2.getStroke();
-			Stroke newStroke = GraphicsUtilities
-					.getStroke(lineWidth, lineStyle);
+			Stroke newStroke = GraphicsUtilities.getStroke(lineWidth, lineStyle);
 			g2.setStroke(newStroke);
 			g2.setColor(lineColor);
 			g2.drawPolygon(polygon);
@@ -774,33 +619,26 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Draws a hit based on the Lund Id.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param bounds
-	 *            the world bounds of the hit being drawn.
-	 * @param id
-	 *            the Id. We will set up special drawing for the common
-	 *            particles. The rest will be drawn normally.
-	 * @param defFillColor
-	 *            if non matching Id (LundId not found) fill in default color.
-	 * @param defLineColor
-	 *            if non matching Id (LundId not found) draw in default color.
+	 * @param g            the graphics context.
+	 * @param container    the container on which it is rendered.
+	 * @param bounds       the world bounds of the hit being drawn.
+	 * @param id           the Id. We will set up special drawing for the common
+	 *                     particles. The rest will be drawn normally.
+	 * @param defFillColor if non matching Id (LundId not found) fill in default
+	 *                     color.
+	 * @param defLineColor if non matching Id (LundId not found) draw in default
+	 *                     color.
 	 */
-	public static void drawLundHit(Graphics g, IContainer container,
-			Rectangle2D.Double bounds, int id, Color defFillColor,
-			Color defLineColor) {
+	public static void drawLundHit(Graphics g, IContainer container, Rectangle2D.Double bounds, int id,
+			Color defFillColor, Color defLineColor) {
 
 		LundId lundId = LundSupport.getInstance().get(id);
 		LundStyle style = lundId.getStyle();
 
 		if (style == null) {
-			drawWorldRectangle(g, container, bounds, defFillColor,
-					defFillColor.darker(), 1, LineStyle.SOLID);
+			drawWorldRectangle(g, container, bounds, defFillColor, defFillColor.darker(), 1, LineStyle.SOLID);
 		} else {
-			drawWorldRectangle(g, container, bounds, style.getFillColor(),
-					style.getFillColor(), 1, LineStyle.SOLID);
+			drawWorldRectangle(g, container, bounds, style.getFillColor(), style.getFillColor(), 1, LineStyle.SOLID);
 		}
 
 		// switch (id) {
@@ -880,8 +718,7 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Create a color legend component for a specific lund id.
 	 * 
-	 * @param id
-	 *            the id
+	 * @param id the id
 	 * @return the component, which will be placed in a legend.
 	 */
 	private static JComponent getLegendComponent(int id) {
@@ -894,26 +731,21 @@ public class WorldGraphicsUtilities {
 	}
 
 	/**
-	 * Draws a hit based on the Lund Id. This accepts a double Id which is
-	 * converted to an int to support GEMC
+	 * Draws a hit based on the Lund Id. This accepts a double Id which is converted
+	 * to an int to support GEMC
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param bounds
-	 *            the world bounds of the hit being drawn.
-	 * @param lundId
-	 *            the Id. We will set up special drawing for the common
-	 *            particles. The rest will be drawn normally.
-	 * @param defFillColor
-	 *            if non matching Id (LundId not found) fill in default color.
-	 * @param defLineColor
-	 *            if non matching Id (LundId not found) draw in default color.
+	 * @param g            the graphics context.
+	 * @param container    the container on which it is rendered.
+	 * @param bounds       the world bounds of the hit being drawn.
+	 * @param lundId       the Id. We will set up special drawing for the common
+	 *                     particles. The rest will be drawn normally.
+	 * @param defFillColor if non matching Id (LundId not found) fill in default
+	 *                     color.
+	 * @param defLineColor if non matching Id (LundId not found) draw in default
+	 *                     color.
 	 */
-	public static void drawLundHit(Graphics g, IContainer container,
-			Rectangle2D.Double bounds, double lundId, Color defFillColor,
-			Color defLineColor) {
+	public static void drawLundHit(Graphics g, IContainer container, Rectangle2D.Double bounds, double lundId,
+			Color defFillColor, Color defLineColor) {
 		int intId = (int) Math.round(lundId);
 		drawLundHit(g, container, bounds, intId, defFillColor, defLineColor);
 	}
@@ -921,42 +753,29 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Draw ghosted (etched) text at the given world point.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param x
-	 *            x coordinate of left of text.
-	 * @param y
-	 *            y coordinate of text baseline.
-	 * @param text
-	 *            the text to write.
+	 * @param g         the graphics context.
+	 * @param container the container on which it is rendered.
+	 * @param x         x coordinate of left of text.
+	 * @param y         y coordinate of text baseline.
+	 * @param text      the text to write.
 	 */
-	public static void drawWorldGhostText(Graphics g, IContainer container,
-			double x, double y, String text) {
+	public static void drawWorldGhostText(Graphics g, IContainer container, double x, double y, String text) {
 		drawWorldGhostText(g, container, x, y, text, 0, 0);
 	}
 
 	/**
 	 * Draw ghosted (etched) text at the given world point.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param x
-	 *            x coordinate of left of text.
-	 * @param y
-	 *            y coordinate of text baseline.
-	 * @param text
-	 *            the text to write.
-	 * @param dh
-	 *            additional horizontal offset.
-	 * @param dv
-	 *            additional vertical offset.
+	 * @param g         the graphics context.
+	 * @param container the container on which it is rendered.
+	 * @param x         x coordinate of left of text.
+	 * @param y         y coordinate of text baseline.
+	 * @param text      the text to write.
+	 * @param dh        additional horizontal offset.
+	 * @param dv        additional vertical offset.
 	 */
-	public static void drawWorldGhostText(Graphics g, IContainer container,
-			double x, double y, String text, int dh, int dv) {
+	public static void drawWorldGhostText(Graphics g, IContainer container, double x, double y, String text, int dh,
+			int dv) {
 		if (text == null) {
 			return;
 		}
@@ -969,23 +788,16 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Draw text at the given world point.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param x
-	 *            x coordinate of left of text.
-	 * @param y
-	 *            y coordinate of text baseline.
-	 * @param text
-	 *            the text to write.
-	 * @param dh
-	 *            additional horizontal offset.
-	 * @param dv
-	 *            additional vertical offset.
+	 * @param g         the graphics context.
+	 * @param container the container on which it is rendered.
+	 * @param x         x coordinate of left of text.
+	 * @param y         y coordinate of text baseline.
+	 * @param text      the text to write.
+	 * @param dh        additional horizontal offset.
+	 * @param dv        additional vertical offset.
 	 */
-	public static void drawWorldText(Graphics g, IContainer container,
-			double x, double y, String text, int dh, int dv) {
+	public static void drawWorldText(Graphics g, IContainer container, double x, double y, String text, int dh,
+			int dv) {
 		if (text == null) {
 			return;
 		}
@@ -998,42 +810,29 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Draw halo text at the given world point.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param x
-	 *            x coordinate of left of text.
-	 * @param y
-	 *            y coordinate of text baseline.
-	 * @param text
-	 *            the text to write.
+	 * @param g         the graphics context.
+	 * @param container the container on which it is rendered.
+	 * @param x         x coordinate of left of text.
+	 * @param y         y coordinate of text baseline.
+	 * @param text      the text to write.
 	 */
-	public static void drawWorldHaloText(Graphics g, IContainer container,
-			double x, double y, String text) {
+	public static void drawWorldHaloText(Graphics g, IContainer container, double x, double y, String text) {
 		drawWorldHaloText(g, container, x, y, text, 0, 0);
 	}
 
 	/**
 	 * Draw halo text at the given world point.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param x
-	 *            x coordinate of left of text.
-	 * @param y
-	 *            y coordinate of text baseline.
-	 * @param text
-	 *            the text to write.
-	 * @param dh
-	 *            additional horizontal offset.
-	 * @param dv
-	 *            additional vertical offset.
+	 * @param g         the graphics context.
+	 * @param container the container on which it is rendered.
+	 * @param x         x coordinate of left of text.
+	 * @param y         y coordinate of text baseline.
+	 * @param text      the text to write.
+	 * @param dh        additional horizontal offset.
+	 * @param dv        additional vertical offset.
 	 */
-	public static void drawWorldHaloText(Graphics g, IContainer container,
-			double x, double y, String text, int dh, int dv) {
+	public static void drawWorldHaloText(Graphics g, IContainer container, double x, double y, String text, int dh,
+			int dv) {
 		if (text == null) {
 			return;
 		}
@@ -1047,53 +846,37 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Draw a world path.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param path
-	 *            the path rectangle being drawn.
-	 * @param style
-	 *            the style for drawing.
-	 * @param closed
-	 *            if true, treat as polygon, else treat as polyline
+	 * @param g         the graphics context.
+	 * @param container the container on which it is rendered.
+	 * @param path      the path rectangle being drawn.
+	 * @param style     the style for drawing.
+	 * @param closed    if true, treat as polygon, else treat as polyline
 	 * @return the polygon that was drawn
 	 */
-	public static Polygon drawPath2D(Graphics g, IContainer container,
-			Path2D.Double path, IStyled style, boolean closed) {
-		return drawPath2D(g, container, path, style.getFillColor(),
-				style.getLineColor(), style.getLineWidth(),
+	public static Polygon drawPath2D(Graphics g, IContainer container, Path2D.Double path, IStyled style,
+			boolean closed) {
+		return drawPath2D(g, container, path, style.getFillColor(), style.getLineColor(), style.getLineWidth(),
 				style.getLineStyle(), closed);
 	}
 
 	/**
 	 * Draw a world path.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the container on which it is rendered.
-	 * @param path
-	 *            the path rectangle being drawn.
-	 * @param fillColor
-	 *            the fill color (can be <code>null</code>).
-	 * @param lineColor
-	 *            the line color (can be <code>null</code>).
-	 * @param lineWidth
-	 *            the line width in pixels.
-	 * @param lineStyle
-	 *            the line style.
-	 * @param closed
-	 *            if true, treat as polygon, else treat as polyline
+	 * @param g         the graphics context.
+	 * @param container the container on which it is rendered.
+	 * @param path      the path rectangle being drawn.
+	 * @param fillColor the fill color (can be <code>null</code>).
+	 * @param lineColor the line color (can be <code>null</code>).
+	 * @param lineWidth the line width in pixels.
+	 * @param lineStyle the line style.
+	 * @param closed    if true, treat as polygon, else treat as polyline
 	 * @return the polygon that was drawn
 	 */
-	public static Polygon drawPath2D(Graphics g, IContainer container,
-			Path2D.Double path, Color fillColor, Color lineColor,
-			int lineWidth, LineStyle lineStyle, boolean closed) {
+	public static Polygon drawPath2D(Graphics g, IContainer container, Path2D.Double path, Color fillColor,
+			Color lineColor, int lineWidth, LineStyle lineStyle, boolean closed) {
 
 		Graphics2D g2 = (Graphics2D) g;
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
 		float flw = lineWidth;
 		if (flw == 0) {
@@ -1133,8 +916,7 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Get the number of points in a path
 	 * 
-	 * @param path
-	 *            the path being examined.
+	 * @param path the path being examined.
 	 * @return the number of elementary points (from moveto and lineto)
 	 */
 	public static int getPathPointCount(Path2D path) {
@@ -1165,6 +947,7 @@ public class WorldGraphicsUtilities {
 
 	/**
 	 * Get the convex hull of a path
+	 * 
 	 * @param path the path in question
 	 * @return the convex hull
 	 */
@@ -1208,47 +991,44 @@ public class WorldGraphicsUtilities {
 
 		return newPath;
 	}
-	
+
 	/**
-	 * Convert a path to a collection of points. This is not a general method,
-	 * it only works for simple paths of line segments. It does not deal with curves.
+	 * Convert a path to a collection of points. This is not a general method, it
+	 * only works for simple paths of line segments. It does not deal with curves.
+	 * 
 	 * @param path the path in question
 	 * @return a collection of vertices
 	 */
 	public static Vector<Point2D.Double> getPoints(Path2D path) {
-	    Vector<Point2D.Double> pointList = new Vector<Point2D.Double>();
-	    double[] coords = new double[2];
-	    int numSubPaths = 0;
-	    for (PathIterator pi = path.getPathIterator(null);
-	         ! pi.isDone();
-	         pi.next()) {
-	        switch (pi.currentSegment(coords)) {
-	        case PathIterator.SEG_MOVETO:
-	        	pointList.add(new Point2D.Double(coords[0], coords[1]));
-	            ++ numSubPaths;
-	            break;
-	        case PathIterator.SEG_LINETO:
-	        	pointList.add(new Point2D.Double(coords[0], coords[1]));
-	            break;
-	        case PathIterator.SEG_CLOSE:
-	            if (numSubPaths > 1) {
-	                throw new IllegalArgumentException("Path contains multiple subpaths");
-	            }
-	            return pointList;
-	        default:
-	            throw new IllegalArgumentException("Path contains curves");
-	        }
-	    }
-	    return pointList;
+		Vector<Point2D.Double> pointList = new Vector<Point2D.Double>();
+		double[] coords = new double[2];
+		int numSubPaths = 0;
+		for (PathIterator pi = path.getPathIterator(null); !pi.isDone(); pi.next()) {
+			switch (pi.currentSegment(coords)) {
+			case PathIterator.SEG_MOVETO:
+				pointList.add(new Point2D.Double(coords[0], coords[1]));
+				++numSubPaths;
+				break;
+			case PathIterator.SEG_LINETO:
+				pointList.add(new Point2D.Double(coords[0], coords[1]));
+				break;
+			case PathIterator.SEG_CLOSE:
+				if (numSubPaths > 1) {
+					throw new IllegalArgumentException("Path contains multiple subpaths");
+				}
+				return pointList;
+			default:
+				throw new IllegalArgumentException("Path contains curves");
+			}
+		}
+		return pointList;
 	}
 
 	/**
 	 * Get an indexed point of a path.
 	 * 
-	 * @param index
-	 *            the index of the point we seek, starting at zero.
-	 * @param path
-	 *            the path being examined.
+	 * @param index the index of the point we seek, starting at zero.
+	 * @param path  the path being examined.
 	 * @return the point, or <code>null</code>
 	 */
 	public static Point2D.Double getPathPointAt(int index, Path2D path) {
@@ -1280,10 +1060,8 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Convert a world path to a pixel polygon
 	 * 
-	 * @param container
-	 *            the container being rendered
-	 * @param path
-	 *            the path being converted
+	 * @param container the container being rendered
+	 * @param path      the path being converted
 	 * @return the pixel polygon
 	 */
 	public static Polygon pathToPolygon(IContainer container, Path2D.Double path) {
@@ -1320,8 +1098,7 @@ public class WorldGraphicsUtilities {
 	 * Counts the needed capacity if you are going to pull out the points an put
 	 * them in a collection. Note: for now only handles moveto and lineto.
 	 * 
-	 * @param path
-	 *            the input path
+	 * @param path the input path
 	 * @return the size needed for a collection
 	 */
 	public static int neededCapacity(Path2D.Double path) {
@@ -1351,8 +1128,7 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Convert a rectangle into a path.
 	 * 
-	 * @param wr
-	 *            the input rectangle
+	 * @param wr the input rectangle
 	 * @return the path corresponding to the rectangle
 	 */
 	public static Path2D.Double worldRectangleToPath(Rectangle2D.Double wr) {
@@ -1371,8 +1147,7 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Convert a polygon into a path.
 	 * 
-	 * @param points
-	 *            the input points
+	 * @param points the input points
 	 * @return the path corresponding to the points
 	 */
 	public static Path2D.Double worldPolygonToPath(Point2D.Double points[]) {
@@ -1396,18 +1171,14 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Computes the intersection of two lines, p1 -> p2, and q1 -> q2.
 	 * 
-	 * @param p1
-	 *            the first end point on line 1
-	 * @param p2
-	 *            the second end point on line 1
-	 * @param q1
-	 *            the first end point on line 2
-	 * @param q2
-	 *            the second end point on line 2
+	 * @param p1 the first end point on line 1
+	 * @param p2 the second end point on line 1
+	 * @param q1 the first end point on line 2
+	 * @param q2 the second end point on line 2
 	 * @return the intersection of the two lines.
 	 */
-	public static Point2D.Double intersection(Point2D.Double p1,
-			Point2D.Double p2, Point2D.Double q1, Point2D.Double q2) {
+	public static Point2D.Double intersection(Point2D.Double p1, Point2D.Double p2, Point2D.Double q1,
+			Point2D.Double q2) {
 		double x1 = p1.x;
 		double x2 = p2.x;
 		double x3 = q1.x;
@@ -1437,15 +1208,13 @@ public class WorldGraphicsUtilities {
 		}
 
 		// could use either t1 (p1 to p2) or t2 (q1 to q2)
-		return new Point2D.Double(p1.x + t1 * (p2.x - p1.x), p1.y + t1
-				* (p2.y - p1.y));
+		return new Point2D.Double(p1.x + t1 * (p2.x - p1.x), p1.y + t1 * (p2.y - p1.y));
 	}
 
 	/**
 	 * Get the for corners of a rectangle as a point array
 	 * 
-	 * @param wr
-	 *            the rectangle in question
+	 * @param wr the rectangle in question
 	 * @return the point array
 	 */
 	public static Point2D.Double[] getPoints(Rectangle2D.Double wr) {
@@ -1460,60 +1229,53 @@ public class WorldGraphicsUtilities {
 		points[3] = new Point2D.Double(x2, y1);
 		return points;
 	}
-	
+
 	/**
 	 * Get donut points given some defining data
 	 * 
-	 * @param wpc
-	 *            the center of the donut
+	 * @param wpc         the center of the donut
 	 * @param radiusInner the inner radius
 	 * @param radiusOuter the outer radius
-	 * @param startAngle the startAngle in degrees measured like the usual polar angle theta
-	 * @param arcAngle
-	 *            the opening angle COUNTERCLOCKWISE in degrees.
+	 * @param startAngle  the startAngle in degrees measured like the usual polar
+	 *                    angle theta
+	 * @param arcAngle    the opening angle COUNTERCLOCKWISE in degrees.
 	 * @return the world point array simulating the radarc
 	 */
-	public static Point2D.Double[] getDonutPoints(Point2D.Double wpc,
-			double radiusInner, double radiusOuter, double startAngle, double arcAngle) {
+	public static Point2D.Double[] getDonutPoints(Point2D.Double wpc, double radiusInner, double radiusOuter,
+			double startAngle, double arcAngle) {
 
 		double theta = Math.toRadians(startAngle);
 		double dTheta = Math.toRadians(arcAngle);
-		double del = dTheta / (NUMCIRCSTEP-1);
-		
-		Point2D.Double wp[] = new Point2D.Double[2*NUMCIRCSTEP ];
-		
+		double del = dTheta / (NUMCIRCSTEP - 1);
+
+		Point2D.Double wp[] = new Point2D.Double[2 * NUMCIRCSTEP];
+
 		for (int i = 0; i < NUMCIRCSTEP; i++) {
-			int j = 2*NUMCIRCSTEP - 1 - i;
-			double ang = theta + i*del;
+			int j = 2 * NUMCIRCSTEP - 1 - i;
+			double ang = theta + i * del;
 			double cos = Math.cos(ang);
 			double sin = Math.sin(ang);
-			double x1 = wpc.x + radiusInner*cos;
-			double y1 = wpc.y + radiusInner*sin;
-			double x2 = wpc.x + radiusOuter*cos;
-			double y2 = wpc.y + radiusOuter*sin;
+			double x1 = wpc.x + radiusInner * cos;
+			double y1 = wpc.y + radiusInner * sin;
+			double x2 = wpc.x + radiusOuter * cos;
+			double y2 = wpc.y + radiusOuter * sin;
 			wp[i] = new Point2D.Double(x1, y1);
 			wp[j] = new Point2D.Double(x2, y2);
 		}
 
-
 		return wp;
 	}
-
 
 	/**
 	 * Get radarc points given some defining data
 	 * 
-	 * @param wpc
-	 *            the center of the arc
-	 * @param wp1
-	 *            the point at the end of the first leg. Thus wpc->wp1 determine
-	 *            the radius.
-	 * @param arcAngle
-	 *            the opening angle COUNTERCLOCKWISE in degrees.
+	 * @param wpc      the center of the arc
+	 * @param wp1      the point at the end of the first leg. Thus wpc->wp1
+	 *                 determine the radius.
+	 * @param arcAngle the opening angle COUNTERCLOCKWISE in degrees.
 	 * @return the world point array simulating the radarc
 	 */
-	public static Point2D.Double[] getRadArcPoints(Point2D.Double wpc,
-			Point2D.Double wp1, double arcAngle) {
+	public static Point2D.Double[] getRadArcPoints(Point2D.Double wpc, Point2D.Double wp1, double arcAngle) {
 
 		double dTheta = Math.toRadians(arcAngle);
 
@@ -1542,17 +1304,13 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Get arc points given some defining data
 	 * 
-	 * @param wpc
-	 *            the center of the arc
-	 * @param wp1
-	 *            the point at the end of the first leg. Thus wpc->wp1 determine
-	 *            the radius.
-	 * @param arcAngle
-	 *            the opening angle COUNTERCLOCKWISE in degrees.
+	 * @param wpc      the center of the arc
+	 * @param wp1      the point at the end of the first leg. Thus wpc->wp1
+	 *                 determine the radius.
+	 * @param arcAngle the opening angle COUNTERCLOCKWISE in degrees.
 	 * @return the world point array simulating the arc
 	 */
-	public static Point2D.Double[] getArcPoints(Point2D.Double wpc,
-			Point2D.Double wp1, double arcAngle) {
+	public static Point2D.Double[] getArcPoints(Point2D.Double wpc, Point2D.Double wp1, double arcAngle) {
 
 		double dTheta = Math.toRadians(arcAngle);
 
@@ -1576,28 +1334,27 @@ public class WorldGraphicsUtilities {
 
 		return wp;
 	}
-	
+
 	/**
 	 * Create a point from a center with a given radius and angle
+	 * 
 	 * @param center the center
 	 * @param radius the radius
-	 * @param theta the angle measured as the usual polar theta
+	 * @param theta  the angle measured as the usual polar theta
 	 * @return the point at the given radius and angle from the center
 	 */
 	public static Point2D.Double radiusPoint(Point2D.Double center, double radius, double theta) {
 		theta = Math.toRadians(theta);
-		double x = center.x + radius*Math.cos(theta);
-		double y = center.y + radius*Math.sin(theta);
+		double x = center.x + radius * Math.cos(theta);
+		double y = center.y + radius * Math.sin(theta);
 		return new Point2D.Double(x, y);
 	}
 
-
 	/**
-	 * Get a world polygon from a path, using (for now at least) only the MoveTo
-	 * and LineTo pats of the path.
+	 * Get a world polygon from a path, using (for now at least) only the MoveTo and
+	 * LineTo pats of the path.
 	 * 
-	 * @param path
-	 *            the path in question
+	 * @param path the path in question
 	 * @return the vertex points
 	 */
 	public static Point2D.Double[] pathToWorldPolygon(Path2D.Double path) {
@@ -1640,17 +1397,14 @@ public class WorldGraphicsUtilities {
 	}
 
 	/**
-	 * Set a world polygon from a path, using (for now at least) only the MoveTo
-	 * and LineTo pats of the path.
+	 * Set a world polygon from a path, using (for now at least) only the MoveTo and
+	 * LineTo pats of the path.
 	 * 
-	 * @param path
-	 *            the path in question
-	 * @param wp
-	 *            the point array--assumes it is big enough and the points have
-	 *            already been created.
+	 * @param path the path in question
+	 * @param wp   the point array--assumes it is big enough and the points have
+	 *             already been created.
 	 */
-	public static void pathToWorldPolygon(Path2D.Double path,
-			Point2D.Double wp[]) {
+	public static void pathToWorldPolygon(Path2D.Double path, Point2D.Double wp[]) {
 
 		if (path == null) {
 			return;
@@ -1683,10 +1437,8 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Contains test
 	 * 
-	 * @param poly
-	 *            the polygon
-	 * @param wp
-	 *            the point to test
+	 * @param poly the polygon
+	 * @param wp   the point to test
 	 * @return <code>true</code> if the point is contained
 	 */
 	public static boolean contains(Point2D.Double poly[], Point2D.Double wp) {
@@ -1695,10 +1447,9 @@ public class WorldGraphicsUtilities {
 	}
 
 	/**
-	 * @param poly
-	 *            array of world points
-	 * @return the centroid of the polygon. Essentially the center of mass
-	 *         treating each vertex as a mass point.
+	 * @param poly array of world points
+	 * @return the centroid of the polygon. Essentially the center of mass treating
+	 *         each vertex as a mass point.
 	 */
 	public static Point2D.Double getCentroid(Point2D.Double poly[]) {
 		double area = area(poly);
@@ -1722,8 +1473,7 @@ public class WorldGraphicsUtilities {
 	}
 
 	/**
-	 * @param path
-	 *            the path whose centroid we want
+	 * @param path the path whose centroid we want
 	 * @return the centroid of the path. Essentially the center of mass treating
 	 *         each vertex as a mass point.
 	 */
@@ -1734,8 +1484,7 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Obtain the area of a polygon.
 	 * 
-	 * @param poly
-	 *            the polygon in question
+	 * @param poly the polygon in question
 	 * @return the area.
 	 */
 	public static double area(Point2D.Double poly[]) {
@@ -1755,8 +1504,7 @@ public class WorldGraphicsUtilities {
 		return 0.5 * sum;
 	}
 
-	public static double longestDiagonal(Point2D.Double focus,
-			Point2D.Double poly[]) {
+	public static double longestDiagonal(Point2D.Double focus, Point2D.Double poly[]) {
 		if ((focus == null) || (poly == null) || (poly.length < 1)) {
 			return Double.NaN;
 		}
@@ -1772,40 +1520,32 @@ public class WorldGraphicsUtilities {
 	}
 
 	/**
-	 * This takes a point and returns the first intersection in finds with a
-	 * path. The intersection is with a line drawn from the point along the
-	 * given azimuth. This may not be general, but for the case of a "focus"
-	 * inside the polygon and not too weird of a polygon it should be fine.
+	 * This takes a point and returns the first intersection in finds with a path.
+	 * The intersection is with a line drawn from the point along the given azimuth.
+	 * This may not be general, but for the case of a "focus" inside the polygon and
+	 * not too weird of a polygon it should be fine.
 	 * 
-	 * @param p0
-	 *            the focus point, or the start of the line.
-	 * @param azimuth
-	 *            the angle in degrees at which the line radiates.
-	 * @param path
-	 *            the path that will be intersected.
+	 * @param p0      the focus point, or the start of the line.
+	 * @param azimuth the angle in degrees at which the line radiates.
+	 * @param path    the path that will be intersected.
 	 * @return the intersection point, or <code>null</code>.
 	 */
-	public static Point2D.Double polygonIntersection(Point2D.Double p0,
-			double azimuth, Path2D.Double path) {
+	public static Point2D.Double polygonIntersection(Point2D.Double p0, double azimuth, Path2D.Double path) {
 		return polygonIntersection(p0, azimuth, pathToWorldPolygon(path));
 	}
 
 	/**
 	 * This takes a point and returns the first intersection in finds with a
-	 * polygon. The intersection is with a line drawn from the point along the
-	 * given azimuth. This may not be general, but for the case of a "focus"
-	 * inside the polygon and not too weird of a polygon it should be fine.
+	 * polygon. The intersection is with a line drawn from the point along the given
+	 * azimuth. This may not be general, but for the case of a "focus" inside the
+	 * polygon and not too weird of a polygon it should be fine.
 	 * 
-	 * @param p0
-	 *            the focus point, or the start of the line.
-	 * @param azimuth
-	 *            the angle in degrees at which the line radiates.
-	 * @param poly
-	 *            the polygon that will be intersected.
+	 * @param p0      the focus point, or the start of the line.
+	 * @param azimuth the angle in degrees at which the line radiates.
+	 * @param poly    the polygon that will be intersected.
 	 * @return the intersection point, or <code>null</code>.
 	 */
-	public static Point2D.Double polygonIntersection(Point2D.Double p0,
-			double azimuth, Point2D.Double poly[]) {
+	public static Point2D.Double polygonIntersection(Point2D.Double p0, double azimuth, Point2D.Double poly[]) {
 		double longest = longestDiagonal(p0, poly);
 		if (Double.isNaN(longest)) {
 			return null;
@@ -1831,18 +1571,13 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Project a world point a length and azimuth angle.
 	 * 
-	 * @param focus
-	 *            the point being projected
-	 * @param distance
-	 *            the distance of the offset.
-	 * @param angle
-	 *            the direction of the offset, in degrees, measured as an
-	 *            azimuth: 0 is north, 90 east, etc. the x axis.
-	 * @param wp
-	 *            holds the result of the operation.
+	 * @param focus    the point being projected
+	 * @param distance the distance of the offset.
+	 * @param angle    the direction of the offset, in degrees, measured as an
+	 *                 azimuth: 0 is north, 90 east, etc. the x axis.
+	 * @param wp       holds the result of the operation.
 	 */
-	public static void project(Point2D.Double focus, double distance,
-			double angle, Point2D.Double wp) {
+	public static void project(Point2D.Double focus, double distance, double angle, Point2D.Double wp) {
 		angle = Math.toRadians(angle);
 		double x = distance * Math.sin(angle);
 		double y = distance * Math.cos(angle);
@@ -1852,21 +1587,16 @@ public class WorldGraphicsUtilities {
 	/**
 	 * Simulate an ellipse
 	 * 
-	 * @param w
-	 *            the width of the ellipse in km
-	 * @param h
-	 *            the height of the ellipse in km
-	 * @param azimuth
-	 *            the rotation of the ellipse in degrees. 0 is north, 90 east,
-	 *            etc.
-	 * @param numFill
-	 *            the number of points to use to create the ellipse
-	 * @param center
-	 *            the center of the ellipse.
+	 * @param w       the width of the ellipse in km
+	 * @param h       the height of the ellipse in km
+	 * @param azimuth the rotation of the ellipse in degrees. 0 is north, 90 east,
+	 *                etc.
+	 * @param numFill the number of points to use to create the ellipse
+	 * @param center  the center of the ellipse.
 	 * @return an array of points to simulate an ellipse
 	 */
-	public static Point2D.Double[] getEllipsePoints(double w, double h,
-			double azimuth, int numFill, Point2D.Double center) {
+	public static Point2D.Double[] getEllipsePoints(double w, double h, double azimuth, int numFill,
+			Point2D.Double center) {
 
 		double w2 = w / 2.0;
 		double h2 = h / 2.0;
@@ -1938,11 +1668,10 @@ public class WorldGraphicsUtilities {
 
 	/**
 	 * Obtain roughly the pixel/unit where unit is the length unit of our world
-	 * system. This is approximate. The bigger this number is the more zoomed in
-	 * we are.
+	 * system. This is approximate. The bigger this number is the more zoomed in we
+	 * are.
 	 * 
-	 * @param container
-	 *            the container in question.
+	 * @param container the container in question.
 	 * @return the rough pixel density, e.g. pixel/cm is cm is the world unit.
 	 */
 	public static double getMeanPixelDensity(IContainer container) {

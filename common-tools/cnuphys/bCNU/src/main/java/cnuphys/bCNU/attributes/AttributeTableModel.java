@@ -4,13 +4,7 @@
 package cnuphys.bCNU.attributes;
 
 import java.awt.Dimension;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Vector;
-
 import javax.swing.JSlider;
 import javax.swing.table.AbstractTableModel;
 
@@ -32,26 +26,25 @@ public class AttributeTableModel extends AbstractTableModel {
 	 */
 	private String cnames[] = { "Key", "Value" };
 
-
-	//the model data
+	// the model data
 	private Attributes _data = new Attributes();
-	
-	//owner table
+
+	// owner table
 	private AttributeTable _table;
-	
-	
+
 	public AttributeTableModel(AttributeTable table) {
 		_table = table;
 	}
-	
+
 	/**
 	 * Get the data
+	 * 
 	 * @return the table data
 	 */
 	public Attributes getData() {
 		return _data;
 	}
-	
+
 	/**
 	 * Get the number of columns.
 	 * 
@@ -69,9 +62,9 @@ public class AttributeTableModel extends AbstractTableModel {
 	 * @return the row containing the attribute with the key, or -1.
 	 */
 	public int getRowFromKey(String attributeKey) {
-		
+
 		int numRow = getRowCount();
-		
+
 		for (int index = 0; index < numRow; index++) {
 			Attribute attribute = _data.elementAt(index);
 			String key = attribute.getKey();
@@ -81,7 +74,7 @@ public class AttributeTableModel extends AbstractTableModel {
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * Tries to find the attribute with the given key
 	 * 
@@ -108,13 +101,13 @@ public class AttributeTableModel extends AbstractTableModel {
 	/**
 	 * Get the object at a given row and column.
 	 * 
-	 * @param rowIndex the zero based row index.
+	 * @param rowIndex    the zero based row index.
 	 * @param columnIndex the zero based column index.
 	 * @return the value as an Object.
 	 */
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		
+
 		Attribute attribute = getAttribute(rowIndex);
 		if (attribute == null) {
 			return null;
@@ -154,6 +147,7 @@ public class AttributeTableModel extends AbstractTableModel {
 
 	/**
 	 * Get the Attribute at the given row
+	 * 
 	 * @param row the row
 	 * @return the Attribute
 	 */
@@ -162,7 +156,7 @@ public class AttributeTableModel extends AbstractTableModel {
 		if ((row < 0) || (row >= numRows)) {
 			return null;
 		}
-		
+
 		return _data.get(row);
 	}
 
@@ -170,28 +164,27 @@ public class AttributeTableModel extends AbstractTableModel {
 	 * Set the value at a given row and column.
 	 * 
 	 * @param object the object to set
-	 * @param row the zero based row.
-	 * @param col the zero based column.
+	 * @param row    the zero based row.
+	 * @param col    the zero based column.
 	 */
 
 	@Override
 	public void setValueAt(Object object, int row, int col) {
-		
+
 		if ((object == null) || !(object instanceof Attribute)) {
 			return;
 		}
-		
+
 		if (row < 0) {
 			return;
 		}
 
-		Attribute attribute = (Attribute)object;
+		Attribute attribute = (Attribute) object;
 		int numRows = getRowCount();
-		
+
 		if (row < numRows) {
 			_data.insertElementAt(attribute, row);
-		}
-		else {
+		} else {
 			_data.add(attribute);
 		}
 
@@ -205,11 +198,11 @@ public class AttributeTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public boolean isCellEditable(int row, int col) {
-		
+
 		if (col == NAME) {
 			return false;
 		}
-		
+
 		Attribute attribute = getAttribute(row);
 		return (attribute == null) ? false : attribute.isEditable();
 	}
@@ -224,8 +217,7 @@ public class AttributeTableModel extends AbstractTableModel {
 	public String getColumnName(int col) {
 		if ((col < 0) || (col >= cnames.length)) {
 			return null;
-		}
-		else {
+		} else {
 			return cnames[col];
 		}
 	}
@@ -243,10 +235,9 @@ public class AttributeTableModel extends AbstractTableModel {
 					_data.add(attribute);
 				}
 			}
-			
+
 			Collections.sort(_data);
 		}
 	}
-
 
 }

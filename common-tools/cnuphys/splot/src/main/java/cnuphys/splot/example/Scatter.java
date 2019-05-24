@@ -52,7 +52,8 @@ public class Scatter extends AExample {
 
 			try {
 				ds.add(x, y);
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 			}
 		}
@@ -65,11 +66,13 @@ public class Scatter extends AExample {
 		Collection<DataColumn> ycols = ds.getAllColumnsByType(DataColumnType.Y);
 
 		for (DataColumn dc : ycols) {
-			dc.getFit().setFitType(FitType.NOLINE);
+			dc.getFit().setFitType(FitType.LINE);
 			dc.getStyle().setSymbolType(SymbolType.CIRCLE);
 			dc.getStyle().setSymbolSize(4);
 			dc.getStyle().setFillColor(fillColor);
-			dc.getStyle().setLineColor(null);
+			dc.getStyle().setBorderColor(null);
+			dc.getStyle().setFitLineColor(Color.black);
+			dc.getStyle().setFitLineWidth(2.0f);
 		}
 
 		// many options controlled via plot parameters
@@ -78,6 +81,7 @@ public class Scatter extends AExample {
 		params.mustIncludeYZero(true);
 		params.addPlotLine(new HorizontalLine(_canvas, 0));
 		params.addPlotLine(new VerticalLine(_canvas, 0));
+		params.setLegendDrawing(true);
 	}
 
 	public static void main(String arg[]) {

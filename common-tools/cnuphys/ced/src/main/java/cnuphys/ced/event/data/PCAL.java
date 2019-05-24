@@ -13,6 +13,7 @@ import cnuphys.ced.geometry.Transformations;
 
 /**
  * static methods to centralize getting data arrays
+ * 
  * @author heddle
  *
  */
@@ -20,30 +21,34 @@ public class PCAL {
 
 	/**
 	 * Get the pid array from the true data
+	 * 
 	 * @return the pid array
 	 */
 	public static int[] pid() {
 		return ColumnData.getIntArray("PCAL::true.pid");
 	}
-	
+
 	/**
 	 * Get the sector array from the dgtz array
+	 * 
 	 * @return the sector array
 	 */
 	public static int[] sector() {
 		return ColumnData.getIntArray("PCAL::dgtz.sector");
 	}
-	
+
 	/**
 	 * Get the stack array from the dgtz array
+	 * 
 	 * @return the stack array (should contain all "1s" for pcal)
 	 */
 	public static int[] stack() {
 		return ColumnData.getIntArray("PCAL::dgtz.stack");
 	}
-	
+
 	/**
 	 * Get the view array from the dgtz array
+	 * 
 	 * @return the view array
 	 */
 	public static int[] view() {
@@ -52,6 +57,7 @@ public class PCAL {
 
 	/**
 	 * Get the strip array from the dgtz array
+	 * 
 	 * @return the strip array
 	 */
 	public static int[] strip() {
@@ -60,143 +66,141 @@ public class PCAL {
 
 	/**
 	 * Get the totEdep array from the true data
+	 * 
 	 * @return the totEdep array
 	 */
 	public static double[] totEdep() {
 		return ColumnData.getDoubleArray("PCAL::true.totEdep");
 	}
-	
-	
+
 	/**
 	 * Get the avgX array from the true data
+	 * 
 	 * @return the avgX array
 	 */
 	public static double[] avgX() {
 		return ColumnData.getDoubleArray("PCAL::true.avgX");
 	}
-	
+
 	/**
 	 * Get the avgY array from the true data
+	 * 
 	 * @return the avgY array
 	 */
 	public static double[] avgY() {
 		return ColumnData.getDoubleArray("PCAL::true.avgY");
 	}
-	
+
 	/**
 	 * Get the avgZ array from the true data
+	 * 
 	 * @return the avgZ array
 	 */
 	public static double[] avgZ() {
 		return ColumnData.getDoubleArray("PCAL::true.avgZ");
 	}
-	
+
 	/**
 	 * Get the avgLx array from the true data
+	 * 
 	 * @return the avgLx array
 	 */
 	public static double[] avgLx() {
 		return ColumnData.getDoubleArray("PCAL::true.avgLx");
 	}
-	
+
 	/**
 	 * Get the avgLy array from the true data
+	 * 
 	 * @return the avgLy array
 	 */
 	public static double[] avgLy() {
 		return ColumnData.getDoubleArray("PCAL::true.avgLy");
 	}
-	
+
 	/**
 	 * Get the avgLz array from the true data
+	 * 
 	 * @return the avgLz array
 	 */
 	public static double[] avgLz() {
 		return ColumnData.getDoubleArray("PCAL::true.avgLz");
 	}
 
-
 	/**
 	 * Get the hitn array from the dgtz data
+	 * 
 	 * @return the hitn array
 	 */
 	public static int[] hitn() {
 		return ColumnData.getIntArray("PCAL::dgtz.hitn");
 	}
-	
+
 	/**
 	 * Get the ADC array from the dgtz data
+	 * 
 	 * @return the ADC array
 	 */
 	public static int[] ADC() {
 		return ColumnData.getIntArray("PCAL::dgtz.ADC");
 	}
-	
+
 	/**
 	 * Get the TDC array from the dgtz data
+	 * 
 	 * @return the TDC array
 	 */
 	public static int[] TDC() {
 		return ColumnData.getIntArray("PCAL::dgtz.TDC");
 	}
 
-	
 	/**
-	 * Get the hit count 
+	 * Get the hit count
+	 * 
 	 * @return the hit count
 	 */
 	public static int hitCount() {
 		int sector[] = sector();
 		return (sector == null) ? 0 : sector.length;
 	}
-	
+
 	/**
 	 * Get the index of the dc hit
 	 * 
-	 * @param sect
-	 *            the 1-based sector
-	 * @param view
-	 *            the 1-based strip type (u, v, w) = (1, 2, 3)
-	 * @param strip
-	 *            the 1-based strip
+	 * @param sect  the 1-based sector
+	 * @param view  the 1-based strip type (u, v, w) = (1, 2, 3)
+	 * @param strip the 1-based strip
 	 * @return the index of a hit with these parameters, or -1 if not found
 	 */
-	public static Vector<HitRecord> matchingHits(int sect, int view,
-			int strip) {
+	public static Vector<HitRecord> matchingHits(int sect, int view, int strip) {
 
-		
-		int hitCount =  hitCount();
+		int hitCount = hitCount();
 		if (hitCount < 1) {
 			return null;
 		}
-		
-		
+
 		Vector<HitRecord> hits = new Vector<HitRecord>();
-		
+
 		int sectors[] = sector();
 		int views[] = view();
 		int strips[] = strip();
 		double avgX[] = avgX();
 		double avgY[] = avgY();
 		double avgZ[] = avgZ();
-		
+
 		for (int i = 0; i < hitCount; i++) {
-			if ((sect == sectors[i]) 
-					&& (view == views[i])
-					&& (strip == strips[i])) {
-				hits.add(new HitRecord(avgX, avgY, avgZ,
-						i, sect, 1, view, strip));
+			if ((sect == sectors[i]) && (view == views[i]) && (strip == strips[i])) {
+				hits.add(new HitRecord(avgX, avgY, avgZ, i, sect, 1, view, strip));
 			}
 
 		}
 		return hits;
 	}
-	
 
 	/**
 	 * Add some dgtz hit feedback for ec and pcal
 	 * 
-	 * @param hitIndex the hit index
+	 * @param hitIndex        the hit index
 	 * @param feedbackStrings the collection of feedback strings
 	 */
 	public static void dgtzFeedback(int hitIndex, List<String> feedbackStrings) {
@@ -213,22 +217,19 @@ public class PCAL {
 		String adcStr = DataSupport.safeString(ADC, hitIndex);
 		String tdcStr = DataSupport.safeString(TDC, hitIndex);
 
-		feedbackStrings.add(DataSupport.dgtzColor + "adc " + adcStr + "  tdc " + tdcStr
-				+ " ns" + "  hit " + hitStr);
+		feedbackStrings.add(DataSupport.dgtzColor + "adc " + adcStr + "  tdc " + tdcStr + " ns" + "  hit " + hitStr);
 
 	}
-	
 
 	/**
 	 * Some true feedback for ec and pcal
 	 * 
 	 * @param hitIndex
-	 * @param bits controls what is displayed
-	 * @param trans a geometry package transformation object
+	 * @param bits     controls what is displayed
+	 * @param trans    a geometry package transformation object
 	 * @return a list of feedback strings
 	 */
-	public static List<String> gemcHitFeedback(int hitIndex,
-			int bits, Transformations trans) {
+	public static List<String> gemcHitFeedback(int hitIndex, int bits, Transformations trans) {
 
 		Vector<String> fbs = new Vector<String>();
 
@@ -244,8 +245,7 @@ public class PCAL {
 
 		int trueCount = (avgX == null) ? 0 : avgX.length;
 		if (hitIndex >= trueCount) {
-			Log.getInstance()
-					.warning("gemcHitFeedback index out of range: " + hitIndex);
+			Log.getInstance().warning("gemcHitFeedback index out of range: " + hitIndex);
 			return fbs;
 		}
 
@@ -261,8 +261,7 @@ public class PCAL {
 			pdgid = pid[hitIndex];
 		}
 
-		String prefix = DataSupport.trueColor + "Gemc Hit [" + (hitIndex + 1) + "] "
-				+ DataSupport.pidStr(pdgid);
+		String prefix = DataSupport.trueColor + "Gemc Hit [" + (hitIndex + 1) + "] " + DataSupport.pidStr(pdgid);
 
 		try {
 			if (Bits.checkBit(bits, DataSupport.FB_CLAS_XYZ)) {
@@ -275,19 +274,16 @@ public class PCAL {
 
 			if (Bits.checkBit(bits, DataSupport.FB_LOCAL_XYZ)) {
 				if (trans != null) {
-					Point3D clasP = new Point3D(labXYZ[0], labXYZ[1],
-							labXYZ[2]);
+					Point3D clasP = new Point3D(labXYZ[0], labXYZ[1], labXYZ[2]);
 					Point3D localP = new Point3D();
-					PCALGeometry.getTransformations().clasToLocal(localP,
-							clasP);
+					PCALGeometry.getTransformations().clasToLocal(localP, clasP);
 					fbs.add(DataSupport.p3dStr(prefix + "loc xyz", localP, 2, "cm"));
 				}
 			}
 
 			if ((totEdep != null) && Bits.checkBit(bits, DataSupport.FB_TOTEDEP)) {
 				if (hitIndex < totEdep.length) {
-					fbs.add(DataSupport.scalarStr(prefix + "tot edep", totEdep[hitIndex], 2,
-							"MeV"));
+					fbs.add(DataSupport.scalarStr(prefix + "tot edep", totEdep[hitIndex], 2, "MeV"));
 				}
 			}
 
@@ -301,11 +297,10 @@ public class PCAL {
 	/**
 	 * Some preliminary feedback for EC and PCAL
 	 * 
-	 * @param hitIndex the hit index
+	 * @param hitIndex        the hit index
 	 * @param feedbackStrings the collection of feedback strings
 	 */
-	public static void preliminaryFeedback(int hitIndex,
-			List<String> feedbackStrings) {
+	public static void preliminaryFeedback(int hitIndex, List<String> feedbackStrings) {
 
 		if (hitIndex < 0) {
 			return;
@@ -318,8 +313,7 @@ public class PCAL {
 			return;
 		}
 
-		feedbackStrings.add("==== " + DataSupport.uvwStr[view[hitIndex] - 1] + " strip "
-				+ strip[hitIndex] + " ====");
+		feedbackStrings.add("==== " + DataSupport.uvwStr[view[hitIndex] - 1] + " strip " + strip[hitIndex] + " ====");
 
 		double avgX[] = avgX();
 		double avgY[] = avgY();
@@ -328,8 +322,7 @@ public class PCAL {
 		double avgLy[] = avgLy();
 		double avgLz[] = avgLz();
 
-		DataSupport.addXYZFeedback(hitIndex, avgX, avgY, avgZ, avgLx, avgLy, avgLz,
-				feedbackStrings);
-	}	
-	
+		DataSupport.addXYZFeedback(hitIndex, avgX, avgY, avgZ, avgLx, avgLy, avgLz, feedbackStrings);
+	}
+
 }

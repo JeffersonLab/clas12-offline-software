@@ -29,30 +29,27 @@ import cnuphys.rk4.RungeKutta;
 @SuppressWarnings("serial")
 public class SwimMenu extends JMenu implements ActionListener {
 
-
 	// show or hide
 	private JRadioButtonMenuItem _showMonteCarloTracks;
 	private JRadioButtonMenuItem _hideMonteCarloTracks;
-
 
 	// show or hide
 	private JRadioButtonMenuItem _showReconTracks;
 	private JRadioButtonMenuItem _hideReconTracks;
 
-	//clear
+	// clear
 	private JMenuItem _clearTracks;
 
 	private boolean _showMonteCarlo = true;
 	private boolean _showRecon = true;
-	
-	//singleton
+
+	// singleton
 	private static SwimMenu _instance;
 
 	/**
 	 * Create a menu for controlling swimming
 	 * 
-	 * @param field
-	 *            object that implements the magnetic field interface.
+	 * @param field object that implements the magnetic field interface.
 	 */
 	private SwimMenu() {
 		super("Swim");
@@ -60,13 +57,10 @@ public class SwimMenu extends JMenu implements ActionListener {
 		add(getLundDialogMenuItem());
 		addSeparator();
 
-
 		// hide or show MC
 		ButtonGroup bgmc = new ButtonGroup();
-		_showMonteCarloTracks = createRadioMenuItem("Show Monte Carlo Tracks",
-				bgmc, _showMonteCarlo);
-		_hideMonteCarloTracks = createRadioMenuItem("Hide Monte Carlo Tracks",
-				bgmc, !_showMonteCarlo);
+		_showMonteCarloTracks = createRadioMenuItem("Show Monte Carlo Tracks", bgmc, _showMonteCarlo);
+		_hideMonteCarloTracks = createRadioMenuItem("Hide Monte Carlo Tracks", bgmc, !_showMonteCarlo);
 		addSeparator();
 		_clearTracks = new JMenuItem("Clear all Tracks");
 		_clearTracks.addActionListener(this);
@@ -75,17 +69,16 @@ public class SwimMenu extends JMenu implements ActionListener {
 
 		// hide or show recon
 		ButtonGroup bgrecon = new ButtonGroup();
-		_showReconTracks = createRadioMenuItem("Show Reconstructed Tracks",
-				bgrecon, _showRecon);
-		_hideReconTracks = createRadioMenuItem("Hide Reconstructed Tracks",
-				bgrecon, !_showRecon);
+		_showReconTracks = createRadioMenuItem("Show Reconstructed Tracks", bgrecon, _showRecon);
+		_hideReconTracks = createRadioMenuItem("Hide Reconstructed Tracks", bgrecon, !_showRecon);
 		addSeparator();
 		add(createEpsPanel());
 		add(createMaxSSPanel());
 	}
-	
+
 	/**
 	 * Accessor for the SwimMenu singleton
+	 * 
 	 * @return the SwimMenu singleton
 	 */
 	public static SwimMenu getInstance() {
@@ -96,8 +89,7 @@ public class SwimMenu extends JMenu implements ActionListener {
 	}
 
 	// convenience method for adding a radio button
-	private JRadioButtonMenuItem createRadioMenuItem(String label,
-			ButtonGroup bg, boolean on) {
+	private JRadioButtonMenuItem createRadioMenuItem(String label, ButtonGroup bg, boolean on) {
 		JRadioButtonMenuItem mi = new JRadioButtonMenuItem(label, on);
 		mi.addActionListener(this);
 		bg.add(mi);
@@ -105,7 +97,7 @@ public class SwimMenu extends JMenu implements ActionListener {
 		return mi;
 	}
 
-	//swimming tolerance
+	// swimming tolerance
 	private JPanel createEpsPanel() {
 		JPanel sp = new JPanel();
 		sp.setBackground(Color.white);
@@ -116,7 +108,7 @@ public class SwimMenu extends JMenu implements ActionListener {
 
 		String s = DoubleFormat.doubleFormat(Swimmer.getEps(), 1, true);
 		final JTextField epsTF = new JTextField(s, 10);
-		
+
 		ActionListener al = new ActionListener() {
 
 			@Override
@@ -132,11 +124,10 @@ public class SwimMenu extends JMenu implements ActionListener {
 					// e.printStackTrace();
 					enumber = Swimmer.getEps();
 				}
-				String s = DoubleFormat.doubleFormat(Swimmer.getEps(), 1,
-						true);
+				String s = DoubleFormat.doubleFormat(Swimmer.getEps(), 1, true);
 				epsTF.setText(s);
 			}
-			
+
 		};
 
 //		KeyAdapter ka = new KeyAdapter() {
@@ -161,7 +152,7 @@ public class SwimMenu extends JMenu implements ActionListener {
 //			}
 //		};
 //		epsTF.addKeyListener(ka);
-		
+
 		epsTF.addActionListener(al);
 
 		sp.add(label);
@@ -170,7 +161,7 @@ public class SwimMenu extends JMenu implements ActionListener {
 		return sp;
 	}
 
-	//step size
+	// step size
 	private JPanel createMaxSSPanel() {
 		JPanel sp = new JPanel();
 		sp.setBackground(Color.white);
@@ -182,8 +173,7 @@ public class SwimMenu extends JMenu implements ActionListener {
 
 //		System.err.println("Current Max Stepsize  (cm): " + 100
 //				* RungeKutta4.getMaxStepSize());
-		String s = DoubleFormat.doubleFormat(
-				100 * RungeKutta.DEFMAXSTEPSIZE, 2, false);
+		String s = DoubleFormat.doubleFormat(100 * RungeKutta.DEFMAXSTEPSIZE, 2, false);
 		final JTextField maxSStf = new JTextField(s, 10);
 
 		KeyAdapter ka = new KeyAdapter() {
@@ -195,15 +185,13 @@ public class SwimMenu extends JMenu implements ActionListener {
 					try {
 						enumber = Double.parseDouble(maxSStf.getText());
 						enumber = Math.min(100, Math.max(0.1, enumber));
-						System.err.println("Changing max step size to "
-								+ enumber + " cm");
+						System.err.println("Changing max step size to " + enumber + " cm");
 						RungeKutta.DEFMAXSTEPSIZE = (enumber / 100); // to meters
 					} catch (Exception e) {
 						// e.printStackTrace();
 						enumber = Swimmer.getEps();
 					}
-					String s = DoubleFormat.doubleFormat(
-							100 * RungeKutta.DEFMAXSTEPSIZE, 2, false);
+					String s = DoubleFormat.doubleFormat(100 * RungeKutta.DEFMAXSTEPSIZE, 2, false);
 					maxSStf.setText(s);
 				}
 			}
@@ -215,7 +203,6 @@ public class SwimMenu extends JMenu implements ActionListener {
 		maxSStf.setEnabled(true);
 		return sp;
 	}
-
 
 	/**
 	 * Get the menu item for the lund track dialog used to swim a particle
@@ -238,10 +225,9 @@ public class SwimMenu extends JMenu implements ActionListener {
 		return mi;
 	}
 
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		
+
 		if (e.getSource() == _clearTracks) {
 			clearTracks();
 			return;
@@ -251,8 +237,8 @@ public class SwimMenu extends JMenu implements ActionListener {
 
 		Swimming.notifyListeners();
 	}
-	
-	//clear all the tracks
+
+	// clear all the tracks
 	private void clearTracks() {
 		Swimming.clearAllTrajectories();
 	}

@@ -15,19 +15,13 @@ public class ProcessRecord {
 	/**
 	 * Constructor
 	 * 
-	 * @param command
-	 *            the command that is being invoked
-	 * @param dir
-	 *            the working directory
-	 * @param pid
-	 *            a process id
-	 * @param userId
-	 *            a user id
-	 * @param ptype
-	 *            a process type
+	 * @param command the command that is being invoked
+	 * @param dir     the working directory
+	 * @param pid     a process id
+	 * @param userId  a user id
+	 * @param ptype   a process type
 	 */
-	public ProcessRecord(String command, String dir, int pid, long userId,
-			int ptype) {
+	public ProcessRecord(String command, String dir, int pid, long userId, int ptype) {
 		super();
 		_command = command;
 		_pid = pid;
@@ -39,8 +33,7 @@ public class ProcessRecord {
 	/**
 	 * Set the OS process
 	 * 
-	 * @param process
-	 *            the OS process
+	 * @param process the OS process
 	 */
 	public void setProcess(Process process) {
 		_process = process;
@@ -109,8 +102,7 @@ public class ProcessRecord {
 	}
 
 	/**
-	 * @param userId
-	 *            the userId to set
+	 * @param userId the userId to set
 	 */
 	public void setUserId(long userId) {
 		this._userId = userId;

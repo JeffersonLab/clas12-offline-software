@@ -110,13 +110,10 @@ public class MagFieldDisplayArray extends CheckBoxArray implements ItemListener 
 	private CedView _view;
 
 	/**
-	 * Create a display flag array. This constructor produces a two column
-	 * array.
+	 * Create a display flag array. This constructor produces a two column array.
 	 * 
-	 * @param view
-	 *            the parent view
-	 * @param bits
-	 *            controls what flags are added
+	 * @param view the parent view
+	 * @param bits controls what flags are added
 	 */
 	public MagFieldDisplayArray(CedView view, int bits) {
 		super(4, 15, 0);
@@ -153,8 +150,7 @@ public class MagFieldDisplayArray extends CheckBoxArray implements ItemListener 
 	/**
 	 * A button has been clicked
 	 * 
-	 * @param e
-	 *            the causal event
+	 * @param e the causal event
 	 */
 	@Override
 	public void itemStateChanged(ItemEvent e) {
@@ -164,38 +160,32 @@ public class MagFieldDisplayArray extends CheckBoxArray implements ItemListener 
 			if (button.isSelected()) {
 				_magFieldDisplayOption = NOMAGDISPLAY;
 			}
-		}
-		else if (button == _showBmagButton) {
+		} else if (button == _showBmagButton) {
 			_view.getMagneticFieldLayer().setVisible(button.isSelected());
 			if (button.isSelected()) {
 				_magFieldDisplayOption = BMAGDISPLAY;
 			}
-		}
-		else if (button == _showBxButton) {
+		} else if (button == _showBxButton) {
 			_view.getMagneticFieldLayer().setVisible(button.isSelected());
 			if (button.isSelected()) {
 				_magFieldDisplayOption = BXDISPLAY;
 			}
-		}
-		else if (button == _showByButton) {
+		} else if (button == _showByButton) {
 			_view.getMagneticFieldLayer().setVisible(button.isSelected());
 			if (button.isSelected()) {
 				_magFieldDisplayOption = BYDISPLAY;
 			}
-		}
-		else if (button == _showBzButton) {
+		} else if (button == _showBzButton) {
 			_view.getMagneticFieldLayer().setVisible(button.isSelected());
 			if (button.isSelected()) {
 				_magFieldDisplayOption = BZDISPLAY;
 			}
-		}
-		else if (button == _showBperpButton) {
+		} else if (button == _showBperpButton) {
 			_view.getMagneticFieldLayer().setVisible(button.isSelected());
 			if (button.isSelected()) {
 				_magFieldDisplayOption = BPERPDISPLAY;
 			}
-		}
-		else if (button == _showBgradButton) {
+		} else if (button == _showBgradButton) {
 			_view.getMagneticFieldLayer().setVisible(button.isSelected());
 			if (button.isSelected()) {
 				_magFieldDisplayOption = BGRADDISPLAY;
@@ -208,8 +198,8 @@ public class MagFieldDisplayArray extends CheckBoxArray implements ItemListener 
 	}
 
 	/**
-	 * Returns the value that specifies what information about the field is to
-	 * be displayed.
+	 * Returns the value that specifies what information about the field is to be
+	 * displayed.
 	 * 
 	 * @return value that specifies what information about the field is to be
 	 *         displayed.

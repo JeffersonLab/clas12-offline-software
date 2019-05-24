@@ -1,0 +1,55 @@
+[
+    {
+        "entries": [
+            {
+                "info": "RUN number from CODA or GEMC", 
+                "name": "run", 
+                "type": "I"
+            }, 
+            {
+                "info": "Event number", 
+                "name": "event", 
+                "type": "I"
+            }, 
+            {
+                "info": "Unix time (seconds)", 
+                "name": "unixtime", 
+                "type": "I"
+            }, 
+            {
+                "info": "trigger bits", 
+                "name": "trigger", 
+                "type": "L"
+            }, 
+            {
+                "info": "time stamp from Trigger Interface (TI) board (4 nanoseconds)", 
+                "name": "timestamp", 
+                "type": "L"
+            }, 
+            {
+                "info": "type of the run", 
+                "name": "type", 
+                "type": "B"
+            }, 
+            {
+                "info": "run mode", 
+                "name": "mode", 
+                "type": "B"
+            }, 
+            {
+                "info": "torus setting relative value(-1.0 to 1.0)", 
+                "name": "torus", 
+                "type": "F"
+            }, 
+            {
+                "info": "solenoid field setting (-1.0 to 1.0)", 
+                "name": "solenoid", 
+                "type": "F"
+            }
+        ], 
+        "group": 10000, 
+        "info": "Run Configuration", 
+        "item": 11, 
+        "name": "RUN::config"
+    }
+]

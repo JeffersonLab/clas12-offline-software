@@ -1,0 +1,70 @@
+[
+    {
+        "entries": [
+            {
+                "info": "Cluster size", 
+                "name": "size", 
+                "type": "S"
+            }, 
+            {
+                "info": "Cluster ID", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "Cluster centroid X moment (cm)", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster centroid Y moment (cm)", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster centroid Z moment (cm)", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster width in x (cm)", 
+                "name": "widthX", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster width in y (cm)", 
+                "name": "widthY", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster radius (cm)", 
+                "name": "radius", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster timing information", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster total energy", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster maximum energy", 
+                "name": "maxEnergy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Cluster reconstructed energy", 
+                "name": "recEnergy", 
+                "type": "F"
+            }
+        ], 
+        "group": 21000, 
+        "info": "Reconstructed Clusters in FT calorimeter", 
+        "item": 22, 
+        "name": "FTCAL::clusters"
+    }
+]

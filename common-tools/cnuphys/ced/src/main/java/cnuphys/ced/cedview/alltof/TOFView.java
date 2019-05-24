@@ -20,10 +20,10 @@ import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.BaseView;
+import cnuphys.ced.alldata.graphics.SectorSelectorPanel;
 import cnuphys.ced.cedview.CedView;
-import cnuphys.ced.cedview.projecteddc.ISector;
-import cnuphys.ced.cedview.projecteddc.SectorSelectorPanel;
 import cnuphys.ced.clasio.ClasIoEventManager;
+import cnuphys.ced.common.ISector;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.AccumulationManager;
@@ -34,43 +34,41 @@ import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.FTOFGeometry;
 
 public class TOFView extends CedView implements ISector {
-	
-	
-	//for naming clones
+
+	// for naming clones
 	private static int CLONE_COUNT = 0;
-	
-	//base title
+
+	// base title
 	private static final String _baseTitle = "CTOF and FTOF";
 
-	
 	// offset left and top
 	private static int LEFT = 40;
 	private static int TOP = 300;
-	
-	//some text stuff
+
+	// some text stuff
 	private static final Font _font = Fonts.hugeFont;
 
 	public static final int FTOF_1A = 0;
 	public static final int FTOF_1B = 1;
-	public static final int FTOF_2  = 2;
-	public static final int ALL_CTOF    = 3;
+	public static final int FTOF_2 = 2;
+	public static final int ALL_CTOF = 3;
 
-	//what sector 1..6
+	// what sector 1..6
 	private int _sector = 1;
 
-	//detector logical layer
+	// detector logical layer
 	private LogicalLayer _detectorLayer;
 
-	//the shells
+	// the shells
 	private TOFShellItem[] shells;
-	
+
 	public TOFView(Object... keyVals) {
 		super(keyVals);
 		addItems();
 		setBeforeDraw();
 		setAfterDraw();
 	}
-	
+
 	/**
 	 * Convenience method for creating a TOFView View.
 	 * 
@@ -78,9 +76,8 @@ public class TOFView extends CedView implements ISector {
 	 */
 	public static TOFView createTOFView() {
 		TOFView view = null;
-		
-		
-		double xo = 0; // cm. 
+
+		double xo = 0; // cm.
 		double zo = 0; // cm.
 		double wheight = 650;
 		double wwidth = 780;
@@ -94,33 +91,28 @@ public class TOFView extends CedView implements ISector {
 		String title = _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")"));
 
 		// create the view
-		view = new TOFView(PropertySupport.WORLDSYSTEM,
-				new Rectangle2D.Double(zo, xo, wwidth, wheight),
+		view = new TOFView(PropertySupport.WORLDSYSTEM, new Rectangle2D.Double(zo, xo, wwidth, wheight),
 
-				PropertySupport.LEFT, LEFT, PropertySupport.TOP, TOP,
-				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height,
-				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS,
-				CedView.NORANGETOOLBARBITS, PropertySupport.VISIBLE, true,
-				PropertySupport.BACKGROUND,
-				X11Colors.getX11Color("Antique White"),
-				PropertySupport.TITLE, title,
+				PropertySupport.LEFT, LEFT, PropertySupport.TOP, TOP, PropertySupport.WIDTH, width,
+				PropertySupport.HEIGHT, height, PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS,
+				CedView.NORANGETOOLBARBITS, PropertySupport.VISIBLE, true, PropertySupport.BACKGROUND,
+				X11Colors.getX11Color("Antique White"), PropertySupport.TITLE, title,
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
-		view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY 
-				+ ControlPanel.DRAWLEGEND + ControlPanel.FEEDBACK
-				+ ControlPanel.ACCUMULATIONLEGEND, DisplayBits.ACCUMULATION
-				+ DisplayBits.MCTRUTH, 3, 5);
+		view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY + ControlPanel.DRAWLEGEND
+				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND,
+				DisplayBits.ACCUMULATION + DisplayBits.MCTRUTH, 3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
-		
-		//select which sector
+
+		// select which sector
 		SectorSelectorPanel ssp = new SectorSelectorPanel(view);
 		view._controlPanel.addSouth(ssp);
 
 		view.pack();
 		return view;
 	}
-	
+
 	/**
 	 * Add all the items on this view
 	 */
@@ -130,17 +122,20 @@ public class TOFView extends CedView implements ISector {
 		shells = new TOFShellItem[4];
 //		public TOFShellItem(LogicalLayer layer,
 //				double x0, double y0, String name, double width, double[] length) {
-		
-		shells[FTOF_1A] = new TOFShellItem(_detectorLayer, this, FTOF_1A, 10, 270, "Panel 1A", 15.22, FTOFGeometry.getLengths(FTOF_1A));
-		shells[FTOF_1B] = new TOFShellItem(_detectorLayer, this, FTOF_1B, 320, 10,  "Panel 1B", 6.09, FTOFGeometry.getLengths(FTOF_1B));
-		shells[FTOF_2] = new TOFShellItem(_detectorLayer, this, FTOF_2, 320, 400,  "Panel 2", 6.09, FTOFGeometry.getLengths(FTOF_2));
+
+		shells[FTOF_1A] = new TOFShellItem(_detectorLayer, this, FTOF_1A, 10, 270, "Panel 1A", 15.22,
+				FTOFGeometry.getLengths(FTOF_1A));
+		shells[FTOF_1B] = new TOFShellItem(_detectorLayer, this, FTOF_1B, 320, 10, "Panel 1B", 6.09,
+				FTOFGeometry.getLengths(FTOF_1B));
+		shells[FTOF_2] = new TOFShellItem(_detectorLayer, this, FTOF_2, 320, 400, "Panel 2", 6.09,
+				FTOFGeometry.getLengths(FTOF_2));
 
 		double ctoflengths[] = new double[48];
-		//fake lengths
+		// fake lengths
 		for (int i = 0; i < 48; i++) {
 			ctoflengths[i] = 200;
 		}
-		shells[ALL_CTOF] = new TOFShellItem(_detectorLayer, this, ALL_CTOF, 90, 10,  "CTOF", 5.0, ctoflengths);
+		shells[ALL_CTOF] = new TOFShellItem(_detectorLayer, this, ALL_CTOF, 90, 10, "CTOF", 5.0, ctoflengths);
 
 	}
 
@@ -152,32 +147,32 @@ public class TOFView extends CedView implements ISector {
 
 			@Override
 			public void draw(Graphics g, IContainer container) {
-				
-				//draw text above panel 2
+
+				// draw text above panel 2
 				if (shells[FTOF_2] != null) {
 					Rectangle rr = new Rectangle();
 					shells[FTOF_2].getStripRectangle(container, 4, rr);
 					g.setFont(_font);
 					g.setColor(Color.black);
 					FontMetrics fm = container.getComponent().getFontMetrics(_font);
-					
-					int xc = rr.x + rr.width/2;
-					int y = rr.y - 6*fm.getHeight();
-					
+
+					int xc = rr.x + rr.width / 2;
+					int y = rr.y - 6 * fm.getHeight();
+
 					y = drawString(g, xc, y, "Sector " + _sector + " for FTOF 1A, 1B, 2", fm);
 					y = drawString(g, xc, y, "Change sector at bottom right", fm);
 					y = drawString(g, xc, y, "(Always shows complete CTOF)", fm);
-					
+
 				}
 			}
 
 		};
 		getContainer().setBeforeDraw(beforeDraw);
 	}
-	
+
 	private int drawString(Graphics g, int xc, int y, String s, FontMetrics fm) {
-		g.drawString(s, xc-fm.stringWidth(s)/2, y);
-		return y + fm.getHeight()+2;
+		g.drawString(s, xc - fm.stringWidth(s) / 2, y);
+		return y + fm.getHeight() + 2;
 	}
 
 	/**
@@ -188,15 +183,14 @@ public class TOFView extends CedView implements ISector {
 
 			@Override
 			public void draw(Graphics g, IContainer container) {
-				
+
 				if (ClasIoEventManager.getInstance().isAccumulating()) {
 					return;
 				}
 
 				if (isSingleEventMode()) {
 					drawSingleEventData(g, container);
-				}
-				else {
+				} else {
 					drawAccumulatedData(g, container);
 				}
 			}
@@ -204,19 +198,18 @@ public class TOFView extends CedView implements ISector {
 		};
 		getContainer().setAfterDraw(afterDraw);
 	}
-	
-	
+
 	private void drawSingleEventData(Graphics g, IContainer container) {
-		//FTOF
+		// FTOF
 		TdcAdcHitList hits = FTOF.getInstance().getTdcAdcHits();
 		if ((hits != null) && !hits.isEmpty()) {
-			
+
 			Rectangle rr = new Rectangle();
 			for (TdcAdcHit hit : hits) {
 				if ((hit != null) && (hit.sector == _sector)) {
 					int layer0 = hit.layer - 1;
 					if ((layer0 >= 0) && (layer0 < 3)) {
-						shells[layer0].getStripRectangle(container, hit.component-1, rr);
+						shells[layer0].getStripRectangle(container, hit.component - 1, rr);
 						Color color = hits.adcColor(hit);
 						g.setColor(color);
 						g.fillRect(rr.x, rr.y, rr.width, rr.height);
@@ -226,16 +219,15 @@ public class TOFView extends CedView implements ISector {
 				}
 			}
 		}
-		
-		
-		//CTOF
+
+		// CTOF
 		hits = CTOF.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
-			
+
 			Rectangle rr = new Rectangle();
 			for (TdcAdcHit hit : hits) {
 				if (hit != null) {
-					shells[ALL_CTOF].getStripRectangle(container, hit.component-1, rr);
+					shells[ALL_CTOF].getStripRectangle(container, hit.component - 1, rr);
 					Color color = hits.adcColor(hit);
 					g.setColor(color);
 					g.fillRect(rr.x, rr.y, rr.width, rr.height);
@@ -246,30 +238,28 @@ public class TOFView extends CedView implements ISector {
 		}
 
 	}
-	
+
 	private void drawAccumulatedData(Graphics g, IContainer container) {
-		
+
 		Rectangle rr = new Rectangle();
 
-		//FTOF
+		// FTOF
 		drawAccumulatedData(g, container, FTOF_1A, rr);
 		drawAccumulatedData(g, container, FTOF_1B, rr);
 		drawAccumulatedData(g, container, FTOF_2, rr);
-		
-		//CTOF
+
+		// CTOF
 		int medianHit = AccumulationManager.getInstance().getMedianCTOFCount();
 
-		int ctofData[] = AccumulationManager.getInstance()
-				.getAccumulatedCTOFData();
-		
+		int ctofData[] = AccumulationManager.getInstance().getAccumulatedCTOFData();
+
 		for (int index = 0; index < 48; index++) {
 			int hitCount = ctofData[index];
 			shells[ALL_CTOF].getStripRectangle(container, index, rr);
-		
-			double fract = getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 
-			Color color = AccumulationManager.getInstance()
-					.getColor(fract);
+			double fract = getMedianSetting() * (((double) hitCount) / (1 + medianHit));
+
+			Color color = AccumulationManager.getInstance().getColor(getColorScaleModel(), fract);
 			g.setColor(color);
 			g.fillRect(rr.x, rr.y, rr.width, rr.height);
 			g.setColor(Color.black);
@@ -277,14 +267,13 @@ public class TOFView extends CedView implements ISector {
 		}
 
 	}
-	
+
 	private void drawAccumulatedData(Graphics g, IContainer container, int panelType, Rectangle rr) {
-		
 
 		int hits[][] = null;
-	
+
 		int medianHit = 0;
-		
+
 		switch (panelType) {
 		case FTOF.PANEL_1A:
 			medianHit = AccumulationManager.getInstance().getMedianFTOF1ACount();
@@ -300,16 +289,15 @@ public class TOFView extends CedView implements ISector {
 			break;
 		}
 
-		
 		if (hits != null) {
 			int sect0 = _sector - 1;
 			for (int paddle0 = 0; paddle0 < hits[sect0].length; paddle0++) {
 
 				int hit = hits[sect0][paddle0];
-				double fract = this.getMedianSetting() *(((double) hit) / (1 + medianHit));
+				double fract = this.getMedianSetting() * (((double) hit) / (1 + medianHit));
 
-				Color color = AccumulationManager.getInstance().getColor(fract);
-				
+				Color color = AccumulationManager.getInstance().getColor(getColorScaleModel(), fract);
+
 				shells[panelType].getStripRectangle(container, paddle0, rr);
 				g.setColor(color);
 				g.fillRect(rr.x, rr.y, rr.width, rr.height);
@@ -321,9 +309,9 @@ public class TOFView extends CedView implements ISector {
 
 	}
 
-
 	/**
 	 * Set the sector
+	 * 
 	 * @param sector the new sector
 	 */
 	@Override
@@ -333,56 +321,53 @@ public class TOFView extends CedView implements ISector {
 		getContainer().refresh();
 	}
 
-	
 	/**
 	 * Every view should be able to say what sector the current point location
 	 * represents.
 	 * 
-	 * @param container
-	 *            the base container for the view.
-	 * @param screenPoint
-	 *            the pixel point
-	 * @param worldPoint
-	 *            the corresponding world location.
+	 * @param container   the base container for the view.
+	 * @param screenPoint the pixel point
+	 * @param worldPoint  the corresponding world location.
 	 * @return the sector [1..6].
 	 */
 	@Override
 	public int getSector(IContainer container, Point screenPoint, Double worldPoint) {
 		return _sector;
 	}
-	
+
 	/**
 	 * Get the sector 1..6
+	 * 
 	 * @return the sector
 	 */
 	@Override
 	public int getSector() {
 		return _sector;
 	}
-	
-	
+
 	/**
-	 * Clone the view. 
+	 * Clone the view.
+	 * 
 	 * @return the cloned view
 	 */
 	@Override
 	public BaseView cloneView() {
 		super.cloneView();
 		CLONE_COUNT++;
-		
-		//limit
+
+		// limit
 		if (CLONE_COUNT > 2) {
 			return null;
 		}
-		
+
 		Rectangle vr = getBounds();
 		vr.x += 40;
 		vr.y += 40;
-		
+
 		TOFView view = createTOFView();
 		view.setBounds(vr);
 		return view;
 
 	}
-	
+
 }

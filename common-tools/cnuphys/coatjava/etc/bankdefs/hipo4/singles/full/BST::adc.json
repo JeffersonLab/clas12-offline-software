@@ -1,0 +1,50 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer (1-6, 1-8 depending on configuration)", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "256 strips per module", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "order: 0 - ADCL , 1 - ADCR", 
+                "name": "order", 
+                "type": "B"
+            }, 
+            {
+                "info": "ADC integral from pulse fit", 
+                "name": "ADC", 
+                "type": "I"
+            }, 
+            {
+                "info": "time from pulse fit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "pedestal from pulse analysis", 
+                "name": "ped", 
+                "type": "S"
+            }, 
+            {
+                "info": "timestamp", 
+                "name": "timestamp", 
+                "type": "L"
+            }
+        ], 
+        "group": 20200, 
+        "info": "ADC bank for the Barrel Silicon Tracker", 
+        "item": 11, 
+        "name": "BST::adc"
+    }
+]

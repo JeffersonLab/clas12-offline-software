@@ -10,7 +10,8 @@ import java.util.List;
 import org.jlab.geom.prim.Point3D;
 
 import cnuphys.ced.cedview.CedView;
-import cnuphys.ced.cedview.alldc.AllDCView;
+import cnuphys.ced.cedview.alldc.AllDCAccumView;
+import cnuphys.ced.cedview.alldc.IAllDC;
 import cnuphys.ced.clasio.ClasIoEventManager;
 //import cnuphys.ced.dcnoise.NoiseEventListener;
 //import cnuphys.ced.dcnoise.NoiseReductionParameters;
@@ -39,7 +40,7 @@ import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.X11Colors;
 
 public class AllDCSuperLayer extends RectangleItem {
-	
+
 	// convenient access to the event manager
 	ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
@@ -62,12 +63,14 @@ public class AllDCSuperLayer extends RectangleItem {
 	private int _numWires;
 
 	// the AllDC view this item lives on
-	private AllDCView _view;
+	private IAllDC _allDC;
+
+	// the parent view
+	private CedView _view;
 
 	// for hits cells
 	private static final Color _defaultHitCellFill = Color.red;
-	private static final Color _defaultHitCellLine = X11Colors
-			.getX11Color("Dark Red");
+	private static final Color _defaultHitCellLine = X11Colors.getX11Color("Dark Red");
 
 	// this is the world rectangle that defines the super layer
 	private Rectangle2D.Double _worldRectangle;
@@ -83,25 +86,19 @@ public class AllDCSuperLayer extends RectangleItem {
 	/**
 	 * Constructor for a geometrically unfaithful "all dc" superlayer.
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
-	 * @param view
-	 *            the AllDCView parent
-	 * @param worldRectangle
-	 *            the boundaries which are not the real boundaries.
-	 * @param sector
-	 *            the sector [0..5]
-	 * @param superLayer
-	 *            the superLayer [0..5]
-	 * @param numWires
-	 *            the number of wires per layer
+	 * @param layer          the Layer this item is on.
+	 * @param alldc          the AllDCView parent
+	 * @param worldRectangle the boundaries which are not the real boundaries.
+	 * @param sector         the sector [0..5]
+	 * @param superLayer     the superLayer [0..5]
+	 * @param numWires       the number of wires per layer
 	 */
-	public AllDCSuperLayer(LogicalLayer layer, AllDCView view,
-			Rectangle2D.Double worldRectangle, int sector, int superLayer,
-			int numWires) {
+	public AllDCSuperLayer(LogicalLayer layer, IAllDC allDC, Rectangle2D.Double worldRectangle, int sector,
+			int superLayer, int numWires) {
 		super(layer, worldRectangle);
 		_worldRectangle = worldRectangle;
-		_view = view;
+		_allDC = allDC;
+		_view = _allDC.getView();
 		_numWires = numWires;
 
 		_style.setFillColor(Color.white);
@@ -124,8 +121,7 @@ public class AllDCSuperLayer extends RectangleItem {
 
 		for (int i = 0; i < GeoConstants.NUM_SUPERLAYER; i++) {
 			// trick to invert layers in lower sector
-			int recIndex = (_sector < 4) ? i
-					: (GeoConstants.NUM_SUPERLAYER - i - 1);
+			int recIndex = (_sector < 4) ? i : (GeoConstants.NUM_SUPERLAYER - i - 1);
 			_layerWorldRects[recIndex] = new Rectangle2D.Double(x, y, w, dy);
 			y += dy;
 		}
@@ -142,8 +138,7 @@ public class AllDCSuperLayer extends RectangleItem {
 
 		// note counting right to left
 		for (int i = 0; i < _numWires; i++) {
-			_positionWorldRects[_numWires - i - 1] = new Rectangle2D.Double(x,
-					y, dx, h);
+			_positionWorldRects[_numWires - i - 1] = new Rectangle2D.Double(x, y, dx, h);
 			x += dx;
 		}
 	}
@@ -151,10 +146,8 @@ public class AllDCSuperLayer extends RectangleItem {
 	/**
 	 * Custom drawer for the item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
@@ -170,52 +163,44 @@ public class AllDCSuperLayer extends RectangleItem {
 		double top = _worldRectangle.y;
 		g.setFont(labelFont);
 		g.setColor(Color.cyan);
-		WorldGraphicsUtilities.drawWorldText(g, container, left, top, ""
-				+ _superLayer, -9, -5);
+		WorldGraphicsUtilities.drawWorldText(g, container, left, top, "" + _superLayer, -9, -5);
 
 		// now the data
 		if (_view.isSingleEventMode()) {
 			singleEventDrawItem(g, container);
 			// shade the layers
 			for (int i = 0; i < GeoConstants.NUM_LAYER; i += 2) {
-				WorldGraphicsUtilities.drawWorldRectangle(g, container,
-						_layerWorldRects[i], cellOverlayColor, null);
+				WorldGraphicsUtilities.drawWorldRectangle(g, container, _layerWorldRects[i], cellOverlayColor, null);
 
 			}
 
 			// causes cell shading
 			for (int i = 0; i < _numWires; i += 2) {
-				WorldGraphicsUtilities.drawWorldRectangle(g, container,
-						_positionWorldRects[i], cellOverlayColor, null);
+				WorldGraphicsUtilities.drawWorldRectangle(g, container, _positionWorldRects[i], cellOverlayColor, null);
 
 			}
 		} else {
 			accumulatedDrawItem(g, container);
 		}
 
-
 		// just to make clean
 		g.setColor(_style.getLineColor());
 		g.drawPolygon(_lastDrawnPolygon);
 	}
-	
 
 	/**
 	 * Draw in single event mode
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
+	 * @param g         the graphics context
+	 * @param container the rendering container
 	 */
 	private void singleEventDrawItem(Graphics g, IContainer container) {
-				
+
 		Rectangle2D.Double wr = new Rectangle2D.Double(); // used over and over
 
 		// draw results of noise reduction? If so will need the parameters
 		// (which have the results)
-		NoiseReductionParameters parameters = _noiseManager.getParameters(
-				_sector - 1, _superLayer - 1);
+		NoiseReductionParameters parameters = _noiseManager.getParameters(_sector - 1, _superLayer - 1);
 
 		// show the noise segment masks?
 		if (_view.showMasks()) {
@@ -230,7 +215,7 @@ public class AllDCSuperLayer extends RectangleItem {
 				}
 			}
 		}
-		
+
 //		int hitCount = DC.hitCount();
 //		
 //		if (hitCount > 0)  {
@@ -260,69 +245,51 @@ public class AllDCSuperLayer extends RectangleItem {
 //			} // for
 //
 //		}
-		
+
 	}
 
 	/**
 	 * Highlight a noise hit
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param dchit
-	 *            the wire hit object
-	 * @param simple
-	 *            if <code>true</code> use simple highlighting
+	 * @param g         the graphics context
+	 * @param container the rendering container
+	 * @param dchit     the wire hit object
+	 * @param simple    if <code>true</code> use simple highlighting
 	 */
-	private void highlightNoiseHit(Graphics g, IContainer container,
-			boolean simple, Rectangle2D.Double cell) {
+	private void highlightNoiseHit(Graphics g, IContainer container, boolean simple, Rectangle2D.Double cell) {
 		if (simple) {
-			WorldGraphicsUtilities.drawWorldRectangle(g, container, cell,
-					Color.black, Color.black);
+			WorldGraphicsUtilities.drawWorldRectangle(g, container, cell, Color.black, Color.black);
 		} else {
-			WorldGraphicsUtilities.drawWorldRectangle(g, container, cell,
-					Color.black, Color.black);
+			WorldGraphicsUtilities.drawWorldRectangle(g, container, cell, Color.black, Color.black);
 
 			double x0 = cell.x;
 			double x1 = cell.getMaxX();
 			double y0 = cell.y;
 			double y1 = cell.getMaxY();
 
-			WorldGraphicsUtilities.drawWorldLine(g, container, x0, y0, x1, y1,
-					Color.gray);
-			WorldGraphicsUtilities.drawWorldLine(g, container, x0, y1, x1, y0,
-					Color.gray);
+			WorldGraphicsUtilities.drawWorldLine(g, container, x0, y0, x1, y1, Color.gray);
+			WorldGraphicsUtilities.drawWorldLine(g, container, x0, y1, x1, y0, Color.gray);
 
-			WorldGraphicsUtilities.drawWorldRectangle(g, container, cell, null,
-					Color.black);
+			WorldGraphicsUtilities.drawWorldRectangle(g, container, cell, null, Color.black);
 		}
 	}
 
 	/**
 	 * Draw a single dc hit
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param dcHit
-	 *            a dc hit object
-	 * @param wire
-	 *            the 1-based wire
-	 * @param noise
-	 *            is this marked as a noise hit
-	 * @param pid
-	 *            the gemc pid
-	 * @param wr
-	 *            workspace
+	 * @param g         the graphics context
+	 * @param container the rendering container
+	 * @param dcHit     a dc hit object
+	 * @param wire      the 1-based wire
+	 * @param noise     is this marked as a noise hit
+	 * @param pid       the gemc pid
+	 * @param wr        workspace
 	 */
-	private void drawDCHit(Graphics g, IContainer container, int layer,
-			int wire, boolean noise, int pid, Rectangle2D.Double wr) {
+	private void drawDCHit(Graphics g, IContainer container, int layer, int wire, boolean noise, int pid,
+			Rectangle2D.Double wr) {
 
 		if (wire > GeoConstants.NUM_WIRE) {
-			String msg = "Bad wire number in drawGemcDCHit " + wire
-					+ " event number " + _eventManager.getEventNumber();
+			String msg = "Bad wire number in drawGemcDCHit " + wire + " event number " + _eventManager.getEventNumber();
 			Log.getInstance().warning(msg);
 			System.err.println(msg);
 			return;
@@ -356,23 +323,18 @@ public class AllDCSuperLayer extends RectangleItem {
 		if ((_view.showNoiseAnalysis()) && noise) {
 			highlightNoiseHit(g, container, !showTruth, wr);
 		} else {
-			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr,
-					hitFill, hitLine);
+			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, hitFill, hitLine);
 		}
 	}
 
 	/**
 	 * Draw the masks showing the effect of the noise finding algorithm
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
-	 * @param parameters
-	 *            the noise algorithm parameters
+	 * @param g          the graphics context
+	 * @param container  the rendering container
+	 * @param parameters the noise algorithm parameters
 	 */
-	private void drawMasks(Graphics g, IContainer container,
-			NoiseReductionParameters parameters) {
+	private void drawMasks(Graphics g, IContainer container, NoiseReductionParameters parameters) {
 
 		Rectangle2D.Double wr = new Rectangle2D.Double();
 
@@ -381,12 +343,10 @@ public class AllDCSuperLayer extends RectangleItem {
 			boolean rightSeg = parameters.getRightSegments().checkBit(wire);
 			if (leftSeg || rightSeg) {
 				if (leftSeg) {
-					drawMask(g, container, wire,
-							parameters.getLeftLayerShifts(), 1, wr);
+					drawMask(g, container, wire, parameters.getLeftLayerShifts(), 1, wr);
 				}
 				if (rightSeg) {
-					drawMask(g, container, wire,
-							parameters.getRightLayerShifts(), -1, wr);
+					drawMask(g, container, wire, parameters.getRightLayerShifts(), -1, wr);
 				}
 			}
 		}
@@ -396,21 +356,14 @@ public class AllDCSuperLayer extends RectangleItem {
 	 * Draws the masking that shows where the noise algorithm thinks there are
 	 * segments. Anything not masked is noise.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the rendering container
-	 * @param wire
-	 *            the ZERO BASED wire 0..
-	 * @param shifts
-	 *            the parameter shifts for this direction
-	 * @param sign
-	 *            the direction 1 for left -1 for right
-	 * @param wr
-	 *            essentially workspace
+	 * @param g         the graphics context.
+	 * @param container the rendering container
+	 * @param wire      the ZERO BASED wire 0..
+	 * @param shifts    the parameter shifts for this direction
+	 * @param sign      the direction 1 for left -1 for right
+	 * @param wr        essentially workspace
 	 */
-	private void drawMask(Graphics g, IContainer container, int wire,
-			int shifts[], int sign, Rectangle2D.Double wr) {
+	private void drawMask(Graphics g, IContainer container, int wire, int shifts[], int sign, Rectangle2D.Double wr) {
 
 		wire++; // convert to 1-based
 
@@ -423,16 +376,14 @@ public class AllDCSuperLayer extends RectangleItem {
 
 		for (int layer = 1; layer <= GeoConstants.NUM_LAYER; layer++) {
 			getCell(layer, wire, wr);
-			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, fill,
-					null);
+			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, fill, null);
 
 			// ugh -- shifts are 0-based
 			for (int shift = 1; shift <= shifts[layer - 1]; shift++) {
 				int tempWire = wire + sign * shift;
 				if ((tempWire > 0) && (tempWire <= GeoConstants.NUM_WIRE)) {
 					getCell(layer, tempWire, wr);
-					WorldGraphicsUtilities.drawWorldRectangle(g, container, wr,
-							fill, null);
+					WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, fill, null);
 				}
 			}
 		}
@@ -442,51 +393,47 @@ public class AllDCSuperLayer extends RectangleItem {
 	/**
 	 * Draw hits in accumulated mode
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the rendering container
+	 * @param g         the graphics context
+	 * @param container the rendering container
 	 */
 	private void accumulatedDrawItem(Graphics g, IContainer container) {
-		
+
 		Rectangle2D.Double wr = new Rectangle2D.Double(); // used over and over
-		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
-				.getAccumulatedDCData();
-		
-		int medianHit = AccumulationManager.getInstance().getMedianDCCount(_superLayer-1);
+		int dcAccumulatedData[][][][] = AccumulationManager.getInstance().getAccumulatedDCData();
+
+		int medianHit = AccumulationManager.getInstance().getMedianDCCount(_superLayer - 1);
 
 		for (int layer = 0; layer < GeoConstants.NUM_LAYER; layer++) {
 			for (int wire = 0; wire < GeoConstants.NUM_WIRE; wire++) {
 				int hitCount = dcAccumulatedData[_sector - 1][_superLayer - 1][layer][wire];
 				getCell(layer + 1, wire + 1, wr);
-				
-				double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
-				
+
+				double fract = _view.getMedianSetting() * (((double) hitCount) / (1 + medianHit));
+
 				AccumulationManager.getInstance();
-				Color color = AccumulationManager.getInstance().getColor(fract);
-				WorldGraphicsUtilities.drawWorldRectangle(g, container, wr,
-						color, color, 1, LineStyle.SOLID);
+				Color color = AccumulationManager.getInstance().getColor(_view.getColorScaleModel(), fract);
+
+				if (color.getRed() > color.getBlue()) {
+					System.out.println("Dude!");
+				}
+
+				WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, color, color, 1, LineStyle.SOLID);
 
 			}
 		}
 	}
 
 	/**
-	 * Add any appropriate feedback strings
-	 * panel.
+	 * Add any appropriate feedback strings panel.
 	 * 
-	 * @param container
-	 *            the Base container.
-	 * @param screenPoint
-	 *            the mouse location.
-	 * @param worldPoint
-	 *            the corresponding world point.
-	 * @param feedbackStrings
-	 *            the List of feedback strings to add to.
+	 * @param container       the Base container.
+	 * @param screenPoint     the mouse location.
+	 * @param worldPoint      the corresponding world point.
+	 * @param feedbackStrings the List of feedback strings to add to.
 	 */
 	@Override
-	public void getFeedbackStrings(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 		if (_worldRectangle.contains(worldPoint)) {
 
 			int layer = getLayer(worldPoint); // 1-based
@@ -496,9 +443,8 @@ public class AllDCSuperLayer extends RectangleItem {
 			// report approximate position
 			// for now nearest wire--could interpolate
 			if ((wire > 0) && (wire <= 112)) {
-				
-				Point3D midPoint = DCGeometry.getMidPoint(_superLayer, layer,
-						wire);
+
+				Point3D midPoint = DCGeometry.getMidPoint(_superLayer, layer, wire);
 
 				double x = midPoint.x();
 				double y = midPoint.y();
@@ -512,20 +458,24 @@ public class AllDCSuperLayer extends RectangleItem {
 				// get absolute phi
 				double phi = (_sector - 1) * 60.0;
 
-				String rtp = "approx " + CedView.rThetaPhi + " "
-						+ DoubleFormat.doubleFormat(r, 1) + "cm, "
-						+ DoubleFormat.doubleFormat(theta, 1)
-						+ UnicodeSupport.DEGREE + ", "
-						+ DoubleFormat.doubleFormat(phi, 1)
-						+ UnicodeSupport.DEGREE;
+				String rtp = "approx " + CedView.rThetaPhi + " " + DoubleFormat.doubleFormat(r, 1) + "cm, "
+						+ DoubleFormat.doubleFormat(theta, 1) + UnicodeSupport.DEGREE + ", "
+						+ DoubleFormat.doubleFormat(phi, 1) + UnicodeSupport.DEGREE;
 				feedbackStrings.add(rtp);
 
 			}
 
-			if (_view.isSingleEventMode()) {
-				singleEventFeedbackStrings(wire, layer, feedbackStrings);
+			if (_allDC.isStandardAllDCView()) {
+
+				if (_view.isSingleEventMode()) {
+					singleEventFeedbackStrings(wire, layer, feedbackStrings);
+				} else {
+					accumulatedFeedbackStrings(wire, layer, feedbackStrings);
+				}
 			} else {
-				accumulatedFeedbackStrings(wire, layer, feedbackStrings);
+				if (_view instanceof AllDCAccumView) {
+					((AllDCAccumView) _view).augmentedFeedback(_sector, _superLayer, layer, wire, feedbackStrings);
+				}
 			}
 
 		} // end contains
@@ -534,85 +484,66 @@ public class AllDCSuperLayer extends RectangleItem {
 	/**
 	 * Get the feedback strings for single event mode
 	 * 
-	 * @param wire
-	 *            [1..6]
-	 * @param layer
-	 *            [1..6]
+	 * @param wire            [1..6]
+	 * @param layer           [1..6]
 	 * @param feedbackStrings
 	 */
-	private void singleEventFeedbackStrings(int wire, int layer,
-			List<String> feedbackStrings) {
+	private void singleEventFeedbackStrings(int wire, int layer, List<String> feedbackStrings) {
 
 		// some occupancy numbers
-		NoiseReductionParameters parameters = _noiseManager.getParameters(
-				_sector - 1, _superLayer - 1);
+		NoiseReductionParameters parameters = _noiseManager.getParameters(_sector - 1, _superLayer - 1);
 
-		feedbackStrings.add(DataSupport.prelimColor
-				+ "Raw Superlayer Occ "
-				+ DoubleFormat.doubleFormat(
-						100.0 * parameters.getRawOccupancy(), 2) + "%");
-		feedbackStrings
-				.add(DataSupport.prelimColor
-						+ "Reduced Superlayer Occ "
-						+ DoubleFormat.doubleFormat(
-								100.0 * parameters.getNoiseReducedOccupancy(),
-								2) + "%");
-		
+		feedbackStrings.add(DataSupport.prelimColor + "Raw Superlayer Occ "
+				+ DoubleFormat.doubleFormat(100.0 * parameters.getRawOccupancy(), 2) + "%");
+		feedbackStrings.add(DataSupport.prelimColor + "Reduced Superlayer Occ "
+				+ DoubleFormat.doubleFormat(100.0 * parameters.getNoiseReducedOccupancy(), 2) + "%");
+
 		DCTdcHitList hits = DC.getInstance().getTDCHits();
 
 		DCTdcHit hit = null;
 		if ((hits != null) && !hits.isEmpty()) {
 			hit = hits.getHit(_sector, _superLayer, layer, wire);
 		}
-		
+
 		if (hit == null) {
-			feedbackStrings.add("superlayer " + _superLayer + "  layer "
-					+ layer + "  wire " + wire);
-		}
-		else {
+			feedbackStrings.add("superlayer " + _superLayer + "  layer " + layer + "  wire " + wire);
+		} else {
 			hit.tdcAdcFeedback(_view.showNoiseAnalysis(), _view.showMcTruth(), feedbackStrings);
 		}
 	}
-		
+
 	/**
 	 * Get the feedback strings for single event mode
 	 * 
-	 * @param wire
-	 *            [1..6]
-	 * @param layer
-	 *            [1..6]
+	 * @param wire            [1..6]
+	 * @param layer           [1..6]
 	 * @param feedbackStrings
 	 */
-	private void accumulatedFeedbackStrings(int wire, int layer,
-			List<String> feedbackStrings) {
-		
-		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
-				.getAccumulatedDCData();
+	private void accumulatedFeedbackStrings(int wire, int layer, List<String> feedbackStrings) {
 
-		double wireRate = AccumulationManager.getInstance().getAccumulatedWireHitPercentage(_sector-1, _superLayer-1, layer-1, wire-1);
-		double avgOccupancy = AccumulationManager.getInstance().getAverageDCOccupancy(_sector-1, _superLayer-1);
+		int dcAccumulatedData[][][][] = AccumulationManager.getInstance().getAccumulatedDCData();
 
-		int hitCount = hitCount = dcAccumulatedData[_sector-1][_superLayer-1][layer-1][wire-1];
-		
-		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
-				"accumulated event count: " + AccumulationManager.getInstance().getAccumulationEventCount());
-		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
-				"avg occupancy superlayer: " + _superLayer + " is "
-				+ DoubleFormat.doubleFormat(100*avgOccupancy, 3) + "%");
-		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
-				"hit rate layer: " + layer + ", wire: " + wire + " is "
-				+ DoubleFormat.doubleFormat(wireRate, 3) + "%");
-		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
-				"hit count layer: " + layer + ", wire: " + wire + " is "
-				+ hitCount);
+		double wireRate = AccumulationManager.getInstance().getAccumulatedWireHitPercentage(_sector - 1,
+				_superLayer - 1, layer - 1, wire - 1);
+		double avgOccupancy = AccumulationManager.getInstance().getAverageDCOccupancy(_sector - 1, _superLayer - 1);
+
+		int hitCount = dcAccumulatedData[_sector - 1][_superLayer - 1][layer - 1][wire - 1];
+
+		feedbackStrings.add(AccumulationManager.accumulationFBColor + "accumulated event count: "
+				+ AccumulationManager.getInstance().getAccumulationEventCount());
+		feedbackStrings.add(AccumulationManager.accumulationFBColor + "avg occupancy superlayer: " + _superLayer
+				+ " is " + DoubleFormat.doubleFormat(100 * avgOccupancy, 3) + "%");
+		feedbackStrings.add(AccumulationManager.accumulationFBColor + "hit rate layer: " + layer + ", wire: " + wire
+				+ " is " + DoubleFormat.doubleFormat(wireRate, 3) + "%");
+		feedbackStrings.add(AccumulationManager.accumulationFBColor + "hit count layer: " + layer + ", wire: " + wire
+				+ " is " + hitCount);
 
 	}
 
 	/**
 	 * For the given world point return the 1-based layer.
 	 * 
-	 * @param worldPoint
-	 *            the point in question
+	 * @param worldPoint the point in question
 	 * @return the layer [1..6]
 	 */
 	private int getLayer(Point2D.Double worldPoint) {
@@ -630,8 +561,7 @@ public class AllDCSuperLayer extends RectangleItem {
 	/**
 	 * For the given world point return the 1-based wire.
 	 * 
-	 * @param worldPoint
-	 *            the point in question
+	 * @param worldPoint the point in question
 	 * @return the wire [1..]
 	 */
 	private int getWire(Point2D.Double worldPoint) {
@@ -649,11 +579,9 @@ public class AllDCSuperLayer extends RectangleItem {
 	/**
 	 * Get the world rectangle for a given cell (the wire is in the center)
 	 * 
-	 * @param layer
-	 *            the 1-based layer [1..6]
-	 * @param wire
-	 *            the 1-based wire [1..] return the world rectangle cell for
-	 *            this layer, wire
+	 * @param layer the 1-based layer [1..6]
+	 * @param wire  the 1-based wire [1..] return the world rectangle cell for this
+	 *              layer, wire
 	 */
 	public void getCell(int layer, int wire, Rectangle2D.Double wr) {
 
@@ -662,8 +590,7 @@ public class AllDCSuperLayer extends RectangleItem {
 
 		Rectangle2D.Double layerRect = _layerWorldRects[lm1];
 		Rectangle2D.Double positionRect = _positionWorldRects[wm1];
-		wr.setFrame(positionRect.x, layerRect.y, positionRect.width,
-				layerRect.height);
+		wr.setFrame(positionRect.x, layerRect.y, positionRect.width, layerRect.height);
 
 	}
 

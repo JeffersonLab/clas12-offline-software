@@ -10,17 +10,14 @@ public class LundStyle {
 	private static final float _LINEWIDTH = 1.5f;
 
 	// strokes for line drawing
-	private static BasicStroke _solid = new BasicStroke(_LINEWIDTH,
-			BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+	private static BasicStroke _solid = new BasicStroke(_LINEWIDTH, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 
-	private static BasicStroke _dashed = new BasicStroke(_LINEWIDTH,
-			BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f, new float[] {
-					10.0f, 10.0f }, 0.0f);
+	private static BasicStroke _dashed = new BasicStroke(_LINEWIDTH, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
+			new float[] { 10.0f, 10.0f }, 0.0f);
 	/**
 	 * Hashtable of styles.
 	 */
-	protected static Hashtable<LundId, LundStyle> styles = new Hashtable<LundId, LundStyle>(
-			143);
+	protected static Hashtable<LundId, LundStyle> styles = new Hashtable<LundId, LundStyle>(143);
 
 	private Stroke _stroke;
 	private Color _lineColor;
@@ -31,10 +28,8 @@ public class LundStyle {
 	/**
 	 * A drawing style for the trajectory
 	 * 
-	 * @param lundId
-	 *            the lund particle id
-	 * @param color
-	 *            the id color
+	 * @param lundId the lund particle id
+	 * @param color  the id color
 	 */
 	private LundStyle(LundId lundId, Color color) {
 
@@ -79,6 +74,24 @@ public class LundStyle {
 	}
 
 	/**
+	 * Set the line color
+	 * 
+	 * @param color the new line color
+	 */
+	public void setLineColor(Color color) {
+		_lineColor = color;
+	}
+
+	/**
+	 * Set the fill color
+	 * 
+	 * @param color the new fill color
+	 */
+	public void setFillColor(Color color) {
+		_fillColor = color;
+	}
+
+	/**
 	 * Get the stroke
 	 * 
 	 * @return the drawing stroke
@@ -90,12 +103,9 @@ public class LundStyle {
 	/**
 	 * Add a lund style into the database
 	 * 
-	 * @param lundId
-	 *            the lund particle id
-	 * @param lineColor
-	 *            the line color
-	 * @return the added style (or if it already existed, taken from the
-	 *         database)
+	 * @param lundId    the lund particle id
+	 * @param lineColor the line color
+	 * @return the added style (or if it already existed, taken from the database)
 	 */
 	public static LundStyle addLundStyle(LundId lundId, Color lineColor) {
 		LundStyle style = styles.get(lundId);
@@ -107,11 +117,10 @@ public class LundStyle {
 	}
 
 	/**
-	 * Get a style for a given lund Id. Returns _unknownStyle if the style
-	 * hasn't been added yet or lundId is null.
+	 * Get a style for a given lund Id. Returns _unknownStyle if the style hasn't
+	 * been added yet or lundId is null.
 	 * 
-	 * @param lundId
-	 *            the Id to match
+	 * @param lundId the Id to match
 	 * @return the style
 	 */
 	public static LundStyle getStyle(LundId lundId) {

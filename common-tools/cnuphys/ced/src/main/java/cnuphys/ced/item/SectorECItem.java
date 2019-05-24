@@ -36,35 +36,26 @@ public class SectorECItem extends PolygonItem {
 
 	private static final String _ecNames[] = { "EC (inner)", "EC (outer)" };
 	private static final String _ecStripNames[] = { "U", "V", "W" };
-	private static final Color _ecFill[] = { new Color(225, 215, 215),
-			new Color(215, 215, 225) };
-	private static final Color _ecLine[] = { Color.gray,
-			Color.gray };
+	private static final Color _ecFill[] = { new Color(225, 215, 215), new Color(215, 215, 225) };
+	private static final Color _ecLine[] = { Color.gray, Color.gray };
 
 	/**
 	 * Create a world polygon item
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
-	 * @param planeIndex
-	 *            should be EC_INNER or EC_OUTER
-	 * @param stripIndex
-	 *            should be EC_U, EC_V, or EC_W
-	 * @param sec
-	 *            tor the 1-based sector
+	 * @param layer      the Layer this item is on.
+	 * @param planeIndex should be EC_INNER or EC_OUTER
+	 * @param stripIndex should be EC_U, EC_V, or EC_W
+	 * @param sec        tor the 1-based sector
 	 */
-	public SectorECItem(LogicalLayer layer, int planeIndex, int stripIndex,
-			int sector) {
-		super(layer, getShell((SectorView) layer.getContainer().getView(),
-				planeIndex, stripIndex, sector));
+	public SectorECItem(LogicalLayer layer, int planeIndex, int stripIndex, int sector) {
+		super(layer, getShell((SectorView) layer.getContainer().getView(), planeIndex, stripIndex, sector));
 
 		setRightClickable(false);
 		_sector = sector;
 		_plane = planeIndex;
 		_stripType = stripIndex;
 
-		_name = _ecNames[_plane] + " " + _ecStripNames[stripIndex] + " sector "
-				+ _sector;
+		_name = _ecNames[_plane] + " " + _ecStripNames[stripIndex] + " sector " + _sector;
 
 		_style.setFillColor(_ecFill[planeIndex]);
 		_style.setLineColor(_ecLine[planeIndex]);
@@ -76,10 +67,8 @@ public class SectorECItem extends PolygonItem {
 	/**
 	 * Custom drawer for the item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
@@ -102,10 +91,8 @@ public class SectorECItem extends PolygonItem {
 			Point2D.Double wp[] = getStrip(stripIndex);
 
 			if (wp != null) {
-				Path2D.Double path2d = WorldGraphicsUtilities
-						.worldPolygonToPath(wp);
-				WorldGraphicsUtilities.drawPath2D(g, container, path2d,
-						_style.getFillColor(), _style.getLineColor(), 0,
+				Path2D.Double path2d = WorldGraphicsUtilities.worldPolygonToPath(wp);
+				WorldGraphicsUtilities.drawPath2D(g, container, path2d, _style.getFillColor(), _style.getLineColor(), 0,
 						LineStyle.SOLID, true);
 			}
 		}
@@ -118,19 +105,17 @@ public class SectorECItem extends PolygonItem {
 	/**
 	 * Get a strip outline
 	 * 
-	 * @param stripIndex
-	 *            the 0-based index
+	 * @param stripIndex the 0-based index
 	 * @return
 	 */
 	private Point2D.Double[] getStrip(int stripId) {
-		
-		if (!ECGeometry.doesProjectedPolyFullyIntersect(_plane, _stripType,
-				stripId, _view.getProjectionPlane())) {
+
+		if (!ECGeometry.doesProjectedPolyFullyIntersect(_plane, _stripType, stripId, _view.getProjectionPlane())) {
 			return null;
 		}
 
-		Point2D.Double wp[] = ECGeometry.getIntersections(_plane, _stripType,
-				stripId, _view.getProjectionPlane(), true);
+		Point2D.Double wp[] = ECGeometry.getIntersections(_plane, _stripType, stripId, _view.getProjectionPlane(),
+				true);
 
 		if (wp == null) {
 			return null;
@@ -148,11 +133,10 @@ public class SectorECItem extends PolygonItem {
 
 	// draw any hits
 	private void drawHits(Graphics g, IContainer container) {
-		
+
 		if (_view.isSingleEventMode()) {
 			drawSingleEventHits(g, container);
-		}
-		else {
+		} else {
 			drawAccumulatedHits(g, container);
 		}
 	}
@@ -193,26 +177,23 @@ public class SectorECItem extends PolygonItem {
 			}
 		}
 	}
-	
+
 	// accumulated drawer
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		int medianHit = AccumulationManager.getInstance().getMedianECALCount(_plane);
-		
-		int hits[][][][] = AccumulationManager.getInstance()
-				.getAccumulatedECALData();
+
+		int hits[][][][] = AccumulationManager.getInstance().getAccumulatedECALData();
 		for (int strip0 = 0; strip0 < 36; strip0++) {
 			int hitCount = hits[_sector - 1][_plane][_stripType][strip0];
-			double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
-			
+			double fract = _view.getMedianSetting() * (((double) hitCount) / (1 + medianHit));
+
 			Point2D.Double wp[] = getStrip(strip0);
 
 			if (wp != null) {
-				Color color = AccumulationManager.getInstance()
-						.getColor(fract);
-				Path2D.Double path = WorldGraphicsUtilities
-						.worldPolygonToPath(wp);
-				WorldGraphicsUtilities.drawPath2D(g, container, path, color,
-						_style.getLineColor(), 0, LineStyle.SOLID, true);
+				Color color = AccumulationManager.getInstance().getColor(_view.getColorScaleModel(), fract);
+				Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
+				WorldGraphicsUtilities.drawPath2D(g, container, path, color, _style.getLineColor(), 0, LineStyle.SOLID,
+						true);
 			}
 
 		}
@@ -221,27 +202,19 @@ public class SectorECItem extends PolygonItem {
 	/**
 	 * Get the shell of the ec.
 	 * 
-	 * @param view
-	 *            the view being rendered.
-	 * @param planeIndex
-	 *            the index (0: inner, 1:outer)
-	 * @param stripType
-	 *            the strip index (0:U, 1:V, 2:W)
-	 * @param sector
-	 *            the 1-based sector 1..6
+	 * @param view       the view being rendered.
+	 * @param planeIndex the index (0: inner, 1:outer)
+	 * @param stripType  the strip index (0:U, 1:V, 2:W)
+	 * @param sector     the 1-based sector 1..6
 	 * @return
 	 */
-	private static Point2D.Double[] getShell(SectorView view, int planeIndex,
-			int stripType, int sector) {
+	private static Point2D.Double[] getShell(SectorView view, int planeIndex, int stripType, int sector) {
 
-		Point2D.Double wp[] = ECGeometry.getShell(planeIndex, stripType,
-				view.getProjectionPlane());
+		Point2D.Double wp[] = ECGeometry.getShell(planeIndex, stripType, view.getProjectionPlane());
 
 		if (wp == null) {
-			Log.getInstance().warning(
-					"null shell in SectorECItem planeIndex = " + planeIndex
-							+ " stripType = " + stripType + "  sector = "
-							+ sector);
+			Log.getInstance().warning("null shell in SectorECItem planeIndex = " + planeIndex + " stripType = "
+					+ stripType + "  sector = " + sector);
 			return null;
 		}
 
@@ -256,21 +229,17 @@ public class SectorECItem extends PolygonItem {
 	}
 
 	/**
-	 * Add any appropriate feedback strings
-	 * panel. Default implementation returns the item's name.
+	 * Add any appropriate feedback strings panel. Default implementation returns
+	 * the item's name.
 	 * 
-	 * @param container
-	 *            the Base container.
-	 * @param screenPoint
-	 *            the mouse location.
-	 * @param worldPoint
-	 *            the corresponding world point.
-	 * @param feedbackStrings
-	 *            the List of feedback strings to add to.
+	 * @param container       the Base container.
+	 * @param screenPoint     the mouse location.
+	 * @param worldPoint      the corresponding world point.
+	 * @param feedbackStrings the List of feedback strings to add to.
 	 */
 	@Override
-	public void getFeedbackStrings(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
 		if (contains(container, screenPoint)) {
 			feedbackStrings.add(getName());
@@ -281,19 +250,17 @@ public class SectorECItem extends PolygonItem {
 		for (int stripId = 0; stripId < ECGeometry.EC_NUMSTRIP; stripId++) {
 			Point2D.Double wp[] = getStrip(stripId);
 			if (wp != null) {
-				Path2D.Double path = WorldGraphicsUtilities
-						.worldPolygonToPath(wp);
+				Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
 
 				if (path.contains(worldPoint)) {
-					feedbackStrings.add("$white$plane " + _ecNames[_plane]
-							+ " type " + _ecStripNames[_stripType] + " strip "
-							+ (stripId + 1));
-					
-					//on a hit?
+					feedbackStrings.add("$white$plane " + _ecNames[_plane] + " type " + _ecStripNames[_stripType]
+							+ " strip " + (stripId + 1));
+
+					// on a hit?
 					TdcAdcHitList hits = AllEC.getInstance().getHits();
 					if ((hits != null) && !hits.isEmpty()) {
-						
-						int layer = 4 + 3*_plane + _stripType;
+
+						int layer = 4 + 3 * _plane + _stripType;
 
 						TdcAdcHit hit = hits.get(_sector, layer, stripId + 1);
 						if (hit != null) {

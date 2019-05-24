@@ -35,9 +35,8 @@ import cnuphys.ced.clasio.IClasIoEventListener;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
 
-public class NodePanel extends JPanel implements ActionListener,
-		ListSelectionListener, IClasIoEventListener, 
-		IAccumulationListener {
+public class NodePanel extends JPanel
+		implements ActionListener, ListSelectionListener, IClasIoEventListener, IAccumulationListener {
 
 	// Text area shows data values for selected nodes.
 	private JTextArea _dataTextArea;
@@ -155,20 +154,18 @@ public class NodePanel extends JPanel implements ActionListener,
 		_nodeTable = new NodeTable();
 		_nodeTable.getSelectionModel().addListSelectionListener(this);
 
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-				false, createDataTextArea(), _nodeTable.getScrollPane());
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, false, createDataTextArea(),
+				_nodeTable.getScrollPane());
 		splitPane.setResizeWeight(0.1);
 		centerPanel.add(splitPane, BorderLayout.CENTER);
 
 		add(centerPanel, BorderLayout.CENTER);
 	}
 
-
 	/**
 	 * Set the model data based on a clasIO DataEvent
 	 * 
-	 * @param event
-	 *            the event
+	 * @param event the event
 	 */
 	public void setData(DataEvent event) {
 		_nodeTable.setData(event);
@@ -202,9 +199,8 @@ public class NodePanel extends JPanel implements ActionListener,
 				if (kev.getKeyCode() == KeyEvent.VK_ENTER) {
 					MenuSelectionManager.defaultManager().clearSelectedPath();
 					try {
-						int enumber = Integer.parseInt(eventNumberInput
-								.getText());
-						_eventManager.gotoEvent(enumber+1);
+						int enumber = Integer.parseInt(eventNumberInput.getText());
+						_eventManager.gotoEvent(enumber + 1);
 					} catch (Exception e) {
 						eventNumberInput.setText("");
 					}
@@ -239,7 +235,7 @@ public class NodePanel extends JPanel implements ActionListener,
 		panel.add(Box.createHorizontalStrut(2));
 		panel.add(label);
 		panel.add(eventNumberInput);
-		
+
 		numPanel.add(panel, 0);
 	}
 
@@ -258,8 +254,7 @@ public class NodePanel extends JPanel implements ActionListener,
 	/**
 	 * /** Set the displayed event source value.
 	 * 
-	 * @param source
-	 *            event source.
+	 * @param source event source.
 	 */
 	public void setSource(String source) {
 		_eventInfoPanel.setSource(source);
@@ -277,23 +272,20 @@ public class NodePanel extends JPanel implements ActionListener,
 	/**
 	 * Set the displayed event number value.
 	 * 
-	 * @param eventNumber
-	 *            event number.
+	 * @param eventNumber event number.
 	 */
 	public void setEventNumber(int eventNumber) {
 		_eventInfoPanel.setEventNumber(eventNumber);
 	}
-	
+
 	/**
 	 * Set the displayed run number value.
 	 * 
-	 * @param runNumber
-	 *            run number.
+	 * @param runNumber run number.
 	 */
 	public void setRunNumber(int runNumber) {
 		_eventInfoPanel.setRunNumber(runNumber);
 	}
-
 
 	/**
 	 * Get the displayed event number value.
@@ -307,8 +299,7 @@ public class NodePanel extends JPanel implements ActionListener,
 	/**
 	 * Set the displayed number-of-events value.
 	 * 
-	 * @param numberOfEvents
-	 *            number of events.
+	 * @param numberOfEvents number of events.
 	 */
 	public void setNumberOfEvents(int numberOfEvents) {
 		_eventInfoPanel.setNumberOfEvents(numberOfEvents);
@@ -322,7 +313,6 @@ public class NodePanel extends JPanel implements ActionListener,
 	public int getNumberOfEvents() {
 		return _eventInfoPanel.getNumberOfEvents();
 	}
-
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -349,8 +339,7 @@ public class NodePanel extends JPanel implements ActionListener,
 	/**
 	 * Update the data text area
 	 *
-	 * @param treeSelectionEvent
-	 *            the causal event.
+	 * @param treeSelectionEvent the causal event.
 	 */
 	protected void updateDataArea(ColumnData cd) {
 
@@ -360,7 +349,7 @@ public class NodePanel extends JPanel implements ActionListener,
 		if (cd == null) {
 			return;
 		}
-		
+
 		DataEvent event = _nodeTable.getCurrentEvent();
 		if (event == null) {
 			return;
@@ -368,13 +357,13 @@ public class NodePanel extends JPanel implements ActionListener,
 
 		DataManager dm = DataManager.getInstance();
 		String fullName = cd.getFullName();
-		
+
 		int lineCounter = 1;
 		int index = 1;
 
 		switch (cd.getType()) {
-		
-		case ColumnData.INT8: //byte
+
+		case ColumnData.INT8: // byte
 			byte bytes[] = dm.getByteArray(event, fullName);
 			if (bytes != null) {
 				for (byte i : bytes) {
@@ -394,12 +383,11 @@ public class NodePanel extends JPanel implements ActionListener,
 						lineCounter++;
 					}
 				}
-			}
-			else {
+			} else {
 				_dataTextArea.append("null data\n");
 			}
 			break;
-			
+
 		case ColumnData.INT16:
 			short shorts[] = dm.getShortArray(event, fullName);
 			if (shorts != null) {
@@ -420,12 +408,11 @@ public class NodePanel extends JPanel implements ActionListener,
 						lineCounter++;
 					}
 				}
-			}
-			else {
+			} else {
 				_dataTextArea.append("null data\n");
 			}
 			break;
-			
+
 		case ColumnData.INT32:
 			int ints[] = dm.getIntArray(event, fullName);
 			if (ints != null) {
@@ -446,19 +433,17 @@ public class NodePanel extends JPanel implements ActionListener,
 						lineCounter++;
 					}
 				}
-			}
-			else {
+			} else {
 				_dataTextArea.append("null data\n");
 			}
 			break;
-			
+
 		case ColumnData.FLOAT32:
 			float floats[] = dm.getFloatArray(event, fullName);
 			if (floats != null) {
 				for (float f : floats) {
 					String doubStr = DoubleFormat.doubleFormat(f, 6, 4);
-					String s = String
-							.format("[%02d]  %s", index++, doubStr);
+					String s = String.format("[%02d]  %s", index++, doubStr);
 					_dataTextArea.append(s);
 					if (lineCounter < floats.length) {
 						if (lineCounter % blankLineEveryNth == 0) {
@@ -469,19 +454,17 @@ public class NodePanel extends JPanel implements ActionListener,
 						lineCounter++;
 					}
 				}
-			}
-			else {
+			} else {
 				_dataTextArea.append("null data\n");
 			}
 			break;
-			
+
 		case ColumnData.FLOAT64:
 			double doubles[] = dm.getDoubleArray(event, fullName);
 			if (doubles != null) {
 				for (double d : doubles) {
 					String doubStr = DoubleFormat.doubleFormat(d, 6, 4);
-					String s = String
-							.format("[%02d]  %s", index++, doubStr);
+					String s = String.format("[%02d]  %s", index++, doubStr);
 					_dataTextArea.append(s);
 					if (lineCounter < doubles.length) {
 						if (lineCounter % blankLineEveryNth == 0) {
@@ -493,25 +476,22 @@ public class NodePanel extends JPanel implements ActionListener,
 					}
 				}
 
-			}
-			else {
+			} else {
 				_dataTextArea.append("null data\n");
 			}
 			break;
-			
-			default:
-				_dataTextArea.append("null data\n");
+
+		default:
+			_dataTextArea.append("null data\n");
 
 		}
-
 
 	}
 
 	/**
 	 * Part of the IClasIoEventListener interface
 	 * 
-	 * @param event
-	 *            the new current event
+	 * @param event the new current event
 	 */
 	@Override
 	public void newClasIoEvent(DataEvent event) {
@@ -527,8 +507,7 @@ public class NodePanel extends JPanel implements ActionListener,
 	/**
 	 * Part of the IClasIoEventListener interface
 	 * 
-	 * @param path
-	 *            the new path to the event file
+	 * @param path the new path to the event file
 	 */
 	@Override
 	public void openedNewEventFile(String path) {
@@ -540,16 +519,16 @@ public class NodePanel extends JPanel implements ActionListener,
 		setNumberOfEvents(_eventManager.getEventCount());
 		fixButtons();
 	}
-	
+
 	/**
 	 * Change the event source type
+	 * 
 	 * @param source the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
 		fixButtons();
 	}
-
 
 	@Override
 	public void accumulationEvent(int reason) {
@@ -568,15 +547,16 @@ public class NodePanel extends JPanel implements ActionListener,
 			break;
 		}
 	}
-	
+
 	/**
 	 * Tests whether this listener is interested in events while accumulating
-	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 * 
+	 * @return <code>true</code> if this listener is NOT interested in events while
+	 *         accumulating
 	 */
 	@Override
 	public boolean ignoreIfAccumulating() {
 		return true;
 	}
-
 
 }

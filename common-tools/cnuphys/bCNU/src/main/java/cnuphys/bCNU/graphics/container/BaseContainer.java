@@ -62,8 +62,7 @@ import cnuphys.bCNU.visible.VisibilityTableScrollPane;
 
 @SuppressWarnings("serial")
 public class BaseContainer extends JComponent
-		implements IContainer, MouseListener, MouseMotionListener,
-		MouseWheelListener, IDrawableListener {
+		implements IContainer, MouseListener, MouseMotionListener, MouseWheelListener, IDrawableListener {
 
 	/**
 	 * A collection of layers. This is the container's model.
@@ -79,7 +78,6 @@ public class BaseContainer extends JComponent
 	 * Each container may or may not have a tool bar.
 	 */
 	protected BaseToolBar _toolBar;
-
 
 	/**
 	 * The logical layer visibility control. It is created when requested.
@@ -115,8 +113,7 @@ public class BaseContainer extends JComponent
 	protected IDrawable _beforeDraw;
 
 	/**
-	 * Option drawer for magnification window rather than just simple
-	 * magnification
+	 * Option drawer for magnification window rather than just simple magnification
 	 */
 	protected IDrawable _magDraw;
 
@@ -126,8 +123,7 @@ public class BaseContainer extends JComponent
 	public int m_maxNumPage = 1;
 
 	/**
-	 * The view that holds this container (might be null for viewless
-	 * container).
+	 * The view that holds this container (might be null for viewless container).
 	 */
 	protected BaseView _view;
 
@@ -155,8 +151,7 @@ public class BaseContainer extends JComponent
 	protected LogicalLayer _annotationLayer;
 
 	// A map of layers added by users.
-	private Hashtable<String, LogicalLayer> _userLayers = new Hashtable<String, LogicalLayer>(
-			47);
+	private Hashtable<String, LogicalLayer> _userLayers = new Hashtable<String, LogicalLayer>(47);
 
 	/**
 	 * Controls the feedback for the container. You can add and remove feedback
@@ -179,8 +174,8 @@ public class BaseContainer extends JComponent
 	protected AffineTransform worldToLocal;
 
 	/**
-	 * Constructor for a container that does not live in a view. It might live
-	 * on a panel, for example
+	 * Constructor for a container that does not live in a view. It might live on a
+	 * panel, for example
 	 * 
 	 * @param worldSystem the default world system.
 	 */
@@ -191,8 +186,8 @@ public class BaseContainer extends JComponent
 	/**
 	 * Constructor
 	 * 
-	 * @param view Every container lives on one view. This is the view, which is
-	 *            an internal frame, that owns this container.
+	 * @param view        Every container lives on one view. This is the view, which
+	 *                    is an internal frame, that owns this container.
 	 * @param worldSystem the default world system.
 	 */
 	public BaseContainer(BaseView view, Rectangle2D.Double worldSystem) {
@@ -202,7 +197,6 @@ public class BaseContainer extends JComponent
 
 		_defaultWorldSystem = copy(worldSystem);
 		_previousWorldSystem = copy(worldSystem);
-
 
 		// create the annotation layer. (not added to userlayer hash)
 		_annotationLayer = new LogicalLayer(this, "Annotations");
@@ -226,8 +220,8 @@ public class BaseContainer extends JComponent
 	}
 
 	/**
-	 * Share the model of another view. Note, this is not a copy, either view
-	 * can modify the layers and items.
+	 * Share the model of another view. Note, this is not a copy, either view can
+	 * modify the layers and items.
 	 * 
 	 * @param sContainer the source container
 	 */
@@ -253,9 +247,10 @@ public class BaseContainer extends JComponent
 		setBackground(Color.gray);
 		setForeground(Color.black);
 	}
-	
+
 	/**
 	 * Test whether the view is on screen
+	 * 
 	 * @return <code>true</code> if the view is on screen
 	 */
 	public boolean isOnScreen() {
@@ -263,13 +258,13 @@ public class BaseContainer extends JComponent
 //			System.err.println("null view");
 			return false;
 		}
-		
+
 		JFrame jf = _view.getParentFrame();
 		if (jf == null) {
 //			System.err.println("null jframe for view " + _view.getTitle());
 			return false;
 		}
-		
+
 		Dimension d = jf.getSize();
 		Rectangle pr = new Rectangle(0, 0, d.width, d.height);
 		Rectangle r = _view.getBounds();
@@ -284,7 +279,7 @@ public class BaseContainer extends JComponent
 	 */
 	@Override
 	public void paintComponent(Graphics g) {
-		
+
 		// if our offscreen buffer is not dirty, use it and we are done.
 		if (!_offscreenBufferDirty) {
 			g.drawImage(_offscreenBuffer, 0, 0, this);
@@ -331,8 +326,8 @@ public class BaseContainer extends JComponent
 	/**
 	 * Add a layer for containing items rendered on this container..
 	 * 
-	 * @param name the name of the layer. If one with that name already exists,
-	 *            it is returned.
+	 * @param name the name of the layer. If one with that name already exists, it
+	 *             is returned.
 	 */
 	@Override
 	public LogicalLayer addLogicalLayer(String name) {
@@ -341,10 +336,8 @@ public class BaseContainer extends JComponent
 		}
 		LogicalLayer layer = _userLayers.get(name);
 		if (layer != null) {
-			Log.getInstance().warning(
-					"Asked to add layer: " + name + " which already exists.");
-		}
-		else {
+			Log.getInstance().warning("Asked to add layer: " + name + " which already exists.");
+		} else {
 			layer = new LogicalLayer(this, name);
 			_userLayers.put(name, layer);
 			addLogicalLayer(layer);
@@ -370,8 +363,8 @@ public class BaseContainer extends JComponent
 	/**
 	 * Get the annotation layer for this obtainer.
 	 * 
-	 * @return the annotation layer for this obtainer. All drawing tools draw on
-	 *         the annotation layer, which is kept on top.
+	 * @return the annotation layer for this obtainer. All drawing tools draw on the
+	 *         annotation layer, which is kept on top.
 	 */
 	@Override
 	public LogicalLayer getAnnotationLayer() {
@@ -379,8 +372,8 @@ public class BaseContainer extends JComponent
 	}
 
 	/**
-	 * Gets a user layer by name. Do not use for the annotation layer-- for that
-	 * use getAnnotationLayer().
+	 * Gets a user layer by name. Do not use for the annotation layer-- for that use
+	 * getAnnotationLayer().
 	 * 
 	 * @param name the name of the user layer.
 	 * @return the layer, or <code>null</code>.
@@ -420,16 +413,13 @@ public class BaseContainer extends JComponent
 		boolean newbuffer = false;
 		if (_offscreenBuffer == null) {
 			newbuffer = true;
-		}
-		else if ((_offscreenBuffer.getWidth() != size.width)
-				|| (_offscreenBuffer.getHeight() != size.height)) {
+		} else if ((_offscreenBuffer.getWidth() != size.width) || (_offscreenBuffer.getHeight() != size.height)) {
 			newbuffer = true;
 		}
 
 		if (newbuffer) {
 			try {
-				_offscreenBuffer = new BufferedImage(size.width, size.height,
-						BufferedImage.TYPE_INT_RGB);
+				_offscreenBuffer = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
 			} catch (Exception e) {
 				Log.getInstance().exception(e);
 				e.printStackTrace();
@@ -466,13 +456,10 @@ public class BaseContainer extends JComponent
 				worldToLocal.transform(wp, pp);
 			} catch (NullPointerException npe) {
 
-				System.err.println(
-						"Null pointer exception in BaseContainer worldToLocal pp = "
-								+ pp + "  wp = " + wp);
+				System.err.println("Null pointer exception in BaseContainer worldToLocal pp = " + pp + "  wp = " + wp);
 				npe.printStackTrace();
 			}
-		}
-		else {
+		} else {
 			// System.err.println("null world to local for " +
 			// _view.getTitle());
 			// Throwable t = new Throwable();
@@ -483,7 +470,7 @@ public class BaseContainer extends JComponent
 	/**
 	 * This converts a world rectangle to a screen or pixel rectangle.
 	 * 
-	 * @param r will hold the resultant local (screen-pixel) rectangle.
+	 * @param r  will hold the resultant local (screen-pixel) rectangle.
 	 * @param wr contains the world rectangle.
 	 */
 	@Override
@@ -506,7 +493,7 @@ public class BaseContainer extends JComponent
 	/**
 	 * This converts a screen or local rectangle to a world rectangle.
 	 * 
-	 * @param r contains the local (screen-pixel) rectangle.
+	 * @param r  contains the local (screen-pixel) rectangle.
 	 * @param wr will hold the resultant world rectangle.
 	 */
 	@Override
@@ -592,8 +579,8 @@ public class BaseContainer extends JComponent
 	}
 
 	/**
-	 * Refresh the container. Base implementation is the offscreen refresh. Sets
-	 * the offscreen buffer to dirty.
+	 * Refresh the container. Base implementation is the offscreen refresh. Sets the
+	 * offscreen buffer to dirty.
 	 */
 	@Override
 	public void refresh() {
@@ -650,8 +637,8 @@ public class BaseContainer extends JComponent
 	}
 
 	/**
-	 * Convenience method for setting the dirty flag for all items on all
-	 * layers. Things that make a container dirty:
+	 * Convenience method for setting the dirty flag for all items on all layers.
+	 * Things that make a container dirty:
 	 * <ol>
 	 * <li>container was resized
 	 * <li>zooming
@@ -725,8 +712,8 @@ public class BaseContainer extends JComponent
 	 * Find all items, if any, at the point.
 	 * 
 	 * @param lp the pixel point in question.
-	 * @return all items across all layers that contain the given point. It may
-	 *         be an empty vector, but it won't be <code>null</null>.
+	 * @return all items across all layers that contain the given point. It may be
+	 *         an empty vector, but it won't be <code>null</null>.
 	 */
 	@Override
 	public Vector<AItem> getItemsAtPoint(Point lp) {
@@ -828,11 +815,9 @@ public class BaseContainer extends JComponent
 	 * @param ymax maximum y coordinate.
 	 */
 	@Override
-	public void zoom(final double xmin, final double xmax, final double ymin,
-			final double ymax) {
+	public void zoom(final double xmin, final double xmax, final double ymin, final double ymax) {
 		prepareToZoom();
-		_worldSystem = new Rectangle2D.Double(xmin, ymin, xmax - xmin,
-				ymax - ymin);
+		_worldSystem = new Rectangle2D.Double(xmin, ymin, xmax - xmin, ymax - ymin);
 		setDirty(true);
 		refresh();
 	}
@@ -846,8 +831,7 @@ public class BaseContainer extends JComponent
 	 * @param ymax maximum y coordinate.
 	 */
 	@Override
-	public void reworld(final double xmin, final double xmax, final double ymin,
-			final double ymax) {
+	public void reworld(final double xmin, final double xmax, final double ymin, final double ymax) {
 		_defaultWorldSystem.setFrame(xmin, ymin, xmax - xmin, ymax - ymin);
 		_previousWorldSystem.setFrame(_defaultWorldSystem);
 		zoom(xmin, xmax, ymin, ymax);
@@ -995,8 +979,7 @@ public class BaseContainer extends JComponent
 		BaseToolBar tb = getToolBar();
 		if (tb == null) {
 			return null;
-		}
-		else {
+		} else {
 			return tb.getActiveButton();
 		}
 	}
@@ -1005,7 +988,7 @@ public class BaseContainer extends JComponent
 	 * Convenience method to update the location string in the toolbar.
 	 * 
 	 * @param mouseEvent the causal event.
-	 * @param dragging <code>true</code> if we are dragging
+	 * @param dragging   <code>true</code> if we are dragging
 	 */
 	@Override
 	public void locationUpdate(MouseEvent mouseEvent, boolean dragging) {
@@ -1027,11 +1010,9 @@ public class BaseContainer extends JComponent
 			if (_feedbackControl != null) {
 				_feedbackControl.updateFeedback(mouseEvent, wp, dragging);
 			}
-		}
-		else if (mtb == _toolBar.getPanButton()) { // pan active
+		} else if (mtb == _toolBar.getPanButton()) { // pan active
 			// do nothing
-		}
-		else { // default case
+		} else { // default case
 			wp = getLocation(mouseEvent);
 			getToolBar().setText(Point2DSupport.toString(wp));
 			if (_feedbackControl != null) {
@@ -1064,13 +1045,12 @@ public class BaseContainer extends JComponent
 	/**
 	 * An item has changed.
 	 * 
-	 * @param list the list it was on, which will be a layer.
+	 * @param list     the list it was on, which will be a layer.
 	 * @param drawable the drawable (item) that changed.
-	 * @param type the type of the change.
+	 * @param type     the type of the change.
 	 */
 	@Override
-	public void drawableChanged(DrawableList list, IDrawable drawable,
-			DrawableChangeType type) {
+	public void drawableChanged(DrawableList list, IDrawable drawable, DrawableChangeType type) {
 
 		LogicalLayer layer = (LogicalLayer) list;
 		AItem item = (drawable == null) ? null : (AItem) drawable;
@@ -1195,9 +1175,9 @@ public class BaseContainer extends JComponent
 	}
 
 	/**
-	 * This is sometimes used as needed (i.e., not created until requested).
-	 * That will generally make it the topmost view--so it is good for things
-	 * like a reference point (YouAreHereItem).
+	 * This is sometimes used as needed (i.e., not created until requested). That
+	 * will generally make it the topmost view--so it is good for things like a
+	 * reference point (YouAreHereItem).
 	 * 
 	 * @return the glass layer.
 	 */
@@ -1280,7 +1260,7 @@ public class BaseContainer extends JComponent
 	 * From a given screen rectangle, create an ellipse item.
 	 * 
 	 * @param layer the layer to put the item on
-	 * @param rect the bounding screen rectangle, probably from rubber banding.
+	 * @param rect  the bounding screen rectangle, probably from rubber banding.
 	 * @return the new item
 	 */
 	@Override
@@ -1319,7 +1299,7 @@ public class BaseContainer extends JComponent
 	 * From a given screen rectangle, create a rectangle item.
 	 * 
 	 * @param layer the layer to put the item on
-	 * @param b the screen rectangle, probably from rubber banding.
+	 * @param b     the screen rectangle, probably from rubber banding.
 	 * @return the new item
 	 */
 	@Override
@@ -1332,9 +1312,8 @@ public class BaseContainer extends JComponent
 		// return new PlotItem(layer, new Point2D.Double(wr.x, wr.y),
 		// b.width, b.height);
 
-		return PlotItem.createHistogram(layer, new Point2D.Double(wr.x, wr.y),
-				b.width, b.height, "Title", "X axis", "Y axis", "curve 1", 1,
-				112, 112);
+		return PlotItem.createHistogram(layer, new Point2D.Double(wr.x, wr.y), b.width, b.height, "Title", "X axis",
+				"Y axis", "curve 1", 1, 112, 112);
 		//// return new RectangleItem(layer, wr);
 	}
 
@@ -1342,8 +1321,8 @@ public class BaseContainer extends JComponent
 	 * From two given screen points, create a line item
 	 * 
 	 * @param layer the layer to put the item on
-	 * @param p0 one screen point, probably from rubber banding.
-	 * @param p1 another screen point, probably from rubber banding.
+	 * @param p0    one screen point, probably from rubber banding.
+	 * @param p1    another screen point, probably from rubber banding.
 	 * @return the new item
 	 */
 	@Override
@@ -1359,16 +1338,15 @@ public class BaseContainer extends JComponent
 	 * Create a radarc item from the given parameters, probably obtained by
 	 * rubberbanding.
 	 * 
-	 * @param layer the layer to put the item on
-	 * @param pc the center of the arc
-	 * @param p1 the point at the end of the first leg. Thus pc->p1 determine
-	 *            the radius.
+	 * @param layer    the layer to put the item on
+	 * @param pc       the center of the arc
+	 * @param p1       the point at the end of the first leg. Thus pc->p1 determine
+	 *                 the radius.
 	 * @param arcAngle the opening angle COUNTERCLOCKWISE in degrees.
 	 * @return the new item
 	 */
 	@Override
-	public AItem createRadArcItem(LogicalLayer layer, Point pc, Point p1,
-			double arcAngle) {
+	public AItem createRadArcItem(LogicalLayer layer, Point pc, Point p1, double arcAngle) {
 		Point2D.Double wpc = new Point2D.Double();
 		Point2D.Double wp1 = new Point2D.Double();
 		localToWorld(pc, wpc);
@@ -1381,7 +1359,7 @@ public class BaseContainer extends JComponent
 	 * From a given screen polygon, create a polygon item.
 	 * 
 	 * @param layer the layer to put the item on
-	 * @param pp the screen polygon, probably from rubber banding.
+	 * @param pp    the screen polygon, probably from rubber banding.
 	 * @return the new item
 	 */
 	@Override
@@ -1402,7 +1380,7 @@ public class BaseContainer extends JComponent
 	 * From a given screen polygon, create a polyline item.
 	 * 
 	 * @param layer the layer to put the item on
-	 * @param pp the screen polyline, probably from rubber banding.
+	 * @param pp    the screen polyline, probably from rubber banding.
 	 * @return the new item
 	 */
 	@Override
@@ -1430,14 +1408,12 @@ public class BaseContainer extends JComponent
 	/**
 	 * Get a scroll pane with a table for controlling logical layer visibility
 	 * 
-	 * @return a scroll pane with a table for controlling logical layer
-	 *         visibility
+	 * @return a scroll pane with a table for controlling logical layer visibility
 	 */
 	@Override
 	public VisibilityTableScrollPane getVisibilityTableScrollPane() {
 		if (_visTable == null) {
-			_visTable = new VisibilityTableScrollPane(this, _layers,
-					"Layers (drag to reorder)");
+			_visTable = new VisibilityTableScrollPane(this, _layers, "Layers (drag to reorder)");
 		}
 		return _visTable;
 	}
@@ -1526,12 +1502,9 @@ public class BaseContainer extends JComponent
 		double scaleX = _worldSystem.width / bounds.width;
 		double scaleY = _worldSystem.height / bounds.height;
 
-		localToWorld = AffineTransform.getTranslateInstance(
-				_worldSystem.getMinX(), _worldSystem.getMaxY());
-		localToWorld
-				.concatenate(AffineTransform.getScaleInstance(scaleX, -scaleY));
-		localToWorld.concatenate(
-				AffineTransform.getTranslateInstance(-bounds.x, -bounds.y));
+		localToWorld = AffineTransform.getTranslateInstance(_worldSystem.getMinX(), _worldSystem.getMaxY());
+		localToWorld.concatenate(AffineTransform.getScaleInstance(scaleX, -scaleY));
+		localToWorld.concatenate(AffineTransform.getTranslateInstance(-bounds.x, -bounds.y));
 
 		try {
 			worldToLocal = localToWorld.createInverse();
@@ -1543,7 +1516,7 @@ public class BaseContainer extends JComponent
 	/**
 	 * Convert a pixel based polygon to a world based polygon.
 	 * 
-	 * @param polygon the pixel based polygon
+	 * @param polygon      the pixel based polygon
 	 * @param worldPolygon the world based polygon
 	 */
 	@Override
@@ -1560,7 +1533,7 @@ public class BaseContainer extends JComponent
 	/**
 	 * Convert a world based polygon to a pixel based polygon.
 	 * 
-	 * @param polygon the pixel based polygon
+	 * @param polygon      the pixel based polygon
 	 * @param worldPolygon the world based polygon
 	 */
 	@Override
@@ -1591,9 +1564,8 @@ public class BaseContainer extends JComponent
 
 	/**
 	 * Obtain the inset rectangle. Insets are the inert region around the
-	 * container's active area. Often there are no insets. Sometimes they are
-	 * used so that text can be written in the inset area, such as for plot
-	 * view.
+	 * container's active area. Often there are no insets. Sometimes they are used
+	 * so that text can be written in the inset area, such as for plot view.
 	 * 
 	 * @return the inset rectangle.
 	 */
@@ -1610,8 +1582,7 @@ public class BaseContainer extends JComponent
 		int right = b.width - _rMargin;
 		int bottom = b.height - _bMargin;
 
-		Rectangle screenRect = new Rectangle(left, top, right - left,
-				bottom - top);
+		Rectangle screenRect = new Rectangle(left, top, right - left, bottom - top);
 		return screenRect;
 
 	}
@@ -1659,7 +1630,7 @@ public class BaseContainer extends JComponent
 	/**
 	 * Recenter the world rectangle.
 	 * 
-	 * @param wr the affected rectangle
+	 * @param wr        the affected rectangle
 	 * @param newCenter the new center.
 	 */
 	private void recenter(Rectangle2D.Double wr, Point2D.Double newCenter) {
@@ -1670,7 +1641,7 @@ public class BaseContainer extends JComponent
 	/**
 	 * SCale the world rectangle, keeping the center fixed.
 	 * 
-	 * @param wr the affected rectangle
+	 * @param wr    the affected rectangle
 	 * @param scale the factor to scale by.
 	 */
 	private void scale(Rectangle2D.Double wr, double scale) {
@@ -1698,15 +1669,17 @@ public class BaseContainer extends JComponent
 
 	/**
 	 * Have you handled the print button so the default action is ignored.
+	 * 
 	 * @return <code>true</code> if the printer button was handled.
 	 */
 	@Override
 	public boolean handledPrint() {
 		return false;
 	}
-	
+
 	/**
 	 * Have you handled the camera button so the default action is ignored.
+	 * 
 	 * @return <code>true</code> if the camera button was handled.
 	 */
 	@Override

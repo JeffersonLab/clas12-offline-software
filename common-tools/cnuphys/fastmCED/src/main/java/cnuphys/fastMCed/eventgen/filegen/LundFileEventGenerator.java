@@ -1,6 +1,5 @@
 package cnuphys.fastMCed.eventgen.filegen;
 
-import java.awt.Toolkit;
 import java.io.File;
 
 import org.jlab.clas.physics.PhysicsEvent;
@@ -11,28 +10,30 @@ import cnuphys.lund.LundFileSupport;
 
 /**
  * A generator that uses a lund file as its source
+ * 
  * @author heddle
  *
  */
 public class LundFileEventGenerator extends AEventGenerator {
-	
-	//the lund file
+
+	// the lund file
 	private File _file;
-	
-	//for parsing lund files
+
+	// for parsing lund files
 	private LundReader _lundReader;
-	
+
 	// the event number
 	private int _eventNum;
 
 	// event count
 	private int _eventCount;
 
-	//the most recently read or created event
+	// the most recently read or created event
 	private PhysicsEvent _currentEvent;
-		
+
 	/**
 	 * A generator based on a lund file
+	 * 
 	 * @param file the lund file
 	 */
 	public LundFileEventGenerator(File file) {
@@ -50,8 +51,7 @@ public class LundFileEventGenerator extends AEventGenerator {
 	public String generatorDescription() {
 		if (_file == null) {
 			return "lund file: none";
-		}
-		else {
+		} else {
 			return "lund file: " + _file.getName() + " #events: " + _eventCount;
 		}
 	}
@@ -68,7 +68,6 @@ public class LundFileEventGenerator extends AEventGenerator {
 		}
 		return _currentEvent;
 	}
-	
 
 	@Override
 	public int eventNumber() {
@@ -84,15 +83,14 @@ public class LundFileEventGenerator extends AEventGenerator {
 	public PhysicsEvent getCurrentEvent() {
 		return _currentEvent;
 	}
-	
+
 	/**
 	 * Get the underlying file
+	 * 
 	 * @return the lund file
 	 */
 	public File getFile() {
 		return _file;
 	}
-	
-	
 
 }

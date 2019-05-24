@@ -1,0 +1,35 @@
+[
+    {
+        "entries": [
+            {
+                "info": "left right ambiguity", 
+                "name": "LR", 
+                "type": "B"
+            }, 
+            {
+                "info": "doca for the hit", 
+                "name": "doca", 
+                "type": "F"
+            }, 
+            {
+                "info": "smeared doca", 
+                "name": "sdoca", 
+                "type": "F"
+            }, 
+            {
+                "info": "time for the hit", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "smeared time", 
+                "name": "stime", 
+                "type": "F"
+            }
+        ], 
+        "group": 20600, 
+        "info": "Drift Chamber DOCA bank", 
+        "item": 14, 
+        "name": "DC::doca"
+    }
+]

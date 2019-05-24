@@ -20,10 +20,8 @@ public class FTOF3D extends DetectorItem3D {
 	/**
 	 * The 3D FTOF
 	 * 
-	 * @param panel3d
-	 *            the 3D panel owner
-	 * @param sector
-	 *            the 1-based sector [1..6]
+	 * @param panel3d the 3D panel owner
+	 * @param sector  the 1-based sector [1..6]
 	 */
 	public FTOF3D(CedPanel3D panel3d, int sector) {
 		super(panel3d);
@@ -39,10 +37,9 @@ public class FTOF3D extends DetectorItem3D {
 
 	@Override
 	public void drawShape(GLAutoDrawable drawable) {
-		
+
 		// GL2 gl = drawable.getGL().getGL2();
-		Color outlineColor = X11Colors.getX11Color("Light Sky Blue",
-				getVolumeAlpha());
+		Color outlineColor = X11Colors.getX11Color("Light Sky Blue", getVolumeAlpha());
 
 		for (FTOFPanel3D panel : _panels) {
 			for (int paddleId = 1; paddleId <= panel.getPaddleCount(); paddleId++) {
@@ -73,18 +70,17 @@ public class FTOF3D extends DetectorItem3D {
 	/**
 	 * Create a set of same color and size points for use on a Panel3D.
 	 * 
-	 * @param panel3D the owner 3D panel
-	 * @param coords the points as [x1, y1, z1, ..., xn, yn, zn]
-	 * @param color the color of the points
+	 * @param panel3D   the owner 3D panel
+	 * @param coords    the points as [x1, y1, z1, ..., xn, yn, zn]
+	 * @param color     the color of the points
 	 * @param pointSize the drawing size of the points
 	 */
 //	public PointSet3D(Panel3D panel3D, float[] coords, Color color,
 //			float pointSize, boolean circular) {
-	
-	
+
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
-		
+
 //		// arggh this sector array is zero based
 //		int sector[] = FTOF.getInstance().reconSector();
 //		if (sector == null) {

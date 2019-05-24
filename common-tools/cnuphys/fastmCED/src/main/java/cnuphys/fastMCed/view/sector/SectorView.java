@@ -41,7 +41,6 @@ import cnuphys.bCNU.item.YouAreHereItem;
 import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.UnicodeSupport;
-import cnuphys.bCNU.util.VectorSupport;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.bCNU.view.PlotView;
@@ -81,16 +80,14 @@ public class SectorView extends AView implements ChangeListener {
 	// for tilted axis
 	private static final Color TRANSCOLOR = new Color(0, 0, 0, 64);
 	private static final Color TRANSCOLOR2 = new Color(255, 255, 255, 64);
-	
-	//for bdl plot
-	private static Color plotColors[] = { X11Colors.getX11Color("Dark Red"),
-			X11Colors.getX11Color("Dark Blue"),
-			X11Colors.getX11Color("Dark Green"), Color.black, Color.gray,
-			X11Colors.getX11Color("wheat") };
-	
-	//for naming clones
-	private static int CLONE_COUNT[] = {0, 0, 0};
-		
+
+	// for bdl plot
+	private static Color plotColors[] = { X11Colors.getX11Color("Dark Red"), X11Colors.getX11Color("Dark Blue"),
+			X11Colors.getX11Color("Dark Green"), Color.black, Color.gray, X11Colors.getX11Color("wheat") };
+
+	// for naming clones
+	private static int CLONE_COUNT[] = { 0, 0, 0 };
+
 	// superlayer (graphical) items. The first index [0..1] is for upper and
 	// lower sectors.
 	// the second is for for super layer 0..5debug
@@ -117,23 +114,20 @@ public class SectorView extends AView implements ChangeListener {
 	// private double _phiRelMidPlane = 0.0;
 
 	// a scale drawer
-	private ScaleDrawer _scaleDrawer = new ScaleDrawer("cm",
-			ScaleDrawer.BOTTOMLEFT);
-
+	private ScaleDrawer _scaleDrawer = new ScaleDrawer("cm", ScaleDrawer.BOTTOMLEFT);
 
 	/**
 	 * Create a sector view
 	 * 
-	 * @param keyVals
-	 *            variable set of arguments.
+	 * @param keyVals variable set of arguments.
 	 */
 	private SectorView(DisplaySectors displaySectors, Object... keyVals) {
 		super(keyVals);
 		_displaySectors = displaySectors;
-		
-		//the projection plane starts as midplane
+
+		// the projection plane starts as midplane
 		projectionPlane = GeometryManager.constantPhiPlane(0);
-		
+
 		addItems();
 		setBeforeDraw();
 		setAfterDraw();
@@ -145,8 +139,7 @@ public class SectorView extends AView implements ChangeListener {
 	/**
 	 * Convenience method for creating a Sector View.
 	 * 
-	 * @param displaySectors
-	 *            controls which opposite sectors are displayed.
+	 * @param displaySectors controls which opposite sectors are displayed.
 	 * @return a new SectorView.
 	 */
 	public static SectorView createSectorView(DisplaySectors displaySectors) {
@@ -176,7 +169,7 @@ public class SectorView extends AView implements ChangeListener {
 			title += "3 and 6";
 			break;
 		}
-		
+
 		if (CLONE_COUNT[displaySectors.ordinal()] > 0) {
 			title += "_(" + CLONE_COUNT[displaySectors.ordinal()] + ")";
 		}
@@ -185,23 +178,18 @@ public class SectorView extends AView implements ChangeListener {
 		view = new SectorView(displaySectors, PropertySupport.WORLDSYSTEM,
 				new Rectangle2D.Double(zo, xo, wwidth, wheight),
 
-				PropertySupport.LEFT, LEFT, PropertySupport.TOP, TOP,
-				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height,
-				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS,
-				AView.TOOLBARBITS, PropertySupport.VISIBLE, true,
-				PropertySupport.BACKGROUND,
+				PropertySupport.LEFT, LEFT, PropertySupport.TOP, TOP, PropertySupport.WIDTH, width,
+				PropertySupport.HEIGHT, height, PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS,
+				AView.TOOLBARBITS, PropertySupport.VISIBLE, true, PropertySupport.BACKGROUND,
 				X11Colors.getX11Color("Alice Blue").darker(),
 				// PropertySupport.BACKGROUND,
 				// X11Colors.getX11Color("dark slate gray"),
 				// PropertySupport.BACKGROUND, Color.lightGray,
-				PropertySupport.TITLE, title,
-				PropertySupport.STANDARDVIEWDECORATIONS, true);
+				PropertySupport.TITLE, title, PropertySupport.STANDARDVIEWDECORATIONS, true);
 
-		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL
-				+ ControlPanel.PHISLIDER
-				+ ControlPanel.FEEDBACK
-				+ ControlPanel.FIELDLEGEND + ControlPanel.TARGETSLIDER,
-				  DisplayBits.MAGFIELD, 3, 5);
+		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL + ControlPanel.PHISLIDER
+				+ ControlPanel.FEEDBACK + ControlPanel.FIELDLEGEND + ControlPanel.TARGETSLIDER, DisplayBits.MAGFIELD, 3,
+				5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
 
@@ -221,15 +209,12 @@ public class SectorView extends AView implements ChangeListener {
 
 		// add a field object, which won't do anything unless we can read in the
 		// field.
-		LogicalLayer magneticFieldLayer = getContainer().getLogicalLayer(
-				_magneticFieldLayerName);
+		LogicalLayer magneticFieldLayer = getContainer().getLogicalLayer(_magneticFieldLayerName);
 		new MagFieldItem(magneticFieldLayer, this);
 		magneticFieldLayer.setVisible(false);
 
-		LogicalLayer detectorLayer = getContainer().getLogicalLayer(
-				_detectorLayerName);
+		LogicalLayer detectorLayer = getContainer().getLogicalLayer(_detectorLayerName);
 		new BeamLineItem(detectorLayer);
-		
 
 		// add the superlayer items
 		for (int superLayer = 0; superLayer < 6; superLayer++) {
@@ -237,31 +222,23 @@ public class SectorView extends AView implements ChangeListener {
 
 			switch (_displaySectors) {
 			case SECTORS14:
-				_superLayers[UPPER_SECTOR][superLayer] = new SectorSuperLayer(
-						detectorLayer, this, 1, superLayer + 1);
-				_superLayers[LOWER_SECTOR][superLayer] = new SectorSuperLayer(
-						detectorLayer, this, 4, superLayer + 1);
+				_superLayers[UPPER_SECTOR][superLayer] = new SectorSuperLayer(detectorLayer, this, 1, superLayer + 1);
+				_superLayers[LOWER_SECTOR][superLayer] = new SectorSuperLayer(detectorLayer, this, 4, superLayer + 1);
 				break;
 
 			case SECTORS25:
-				_superLayers[UPPER_SECTOR][superLayer] = new SectorSuperLayer(
-						detectorLayer, this, 2, superLayer + 1);
-				_superLayers[LOWER_SECTOR][superLayer] = new SectorSuperLayer(
-						detectorLayer, this, 5, superLayer + 1);
+				_superLayers[UPPER_SECTOR][superLayer] = new SectorSuperLayer(detectorLayer, this, 2, superLayer + 1);
+				_superLayers[LOWER_SECTOR][superLayer] = new SectorSuperLayer(detectorLayer, this, 5, superLayer + 1);
 				break;
 
 			case SECTORS36:
-				_superLayers[UPPER_SECTOR][superLayer] = new SectorSuperLayer(
-						detectorLayer, this, 3, superLayer + 1);
-				_superLayers[LOWER_SECTOR][superLayer] = new SectorSuperLayer(
-						detectorLayer, this, 6, superLayer + 1);
+				_superLayers[UPPER_SECTOR][superLayer] = new SectorSuperLayer(detectorLayer, this, 3, superLayer + 1);
+				_superLayers[LOWER_SECTOR][superLayer] = new SectorSuperLayer(detectorLayer, this, 6, superLayer + 1);
 				break;
 			}
 
-			_superLayers[UPPER_SECTOR][superLayer].getStyle().setFillColor(
-					Color.gray);
-			_superLayers[LOWER_SECTOR][superLayer].getStyle().setFillColor(
-					Color.gray);
+			_superLayers[UPPER_SECTOR][superLayer].getStyle().setFillColor(Color.gray);
+			_superLayers[LOWER_SECTOR][superLayer].getStyle().setFillColor(Color.gray);
 		}
 
 		// add forward time of flight items
@@ -285,19 +262,18 @@ public class SectorView extends AView implements ChangeListener {
 			}
 		}
 
-
 	}
-	
+
 	/**
 	 * Get the super layer drawer
+	 * 
 	 * @param upperLower 0 for upper sector, 1 for lower sector
 	 * @param superLayer super layer 1..6
 	 * @return the drawer
 	 */
 	public SuperLayerDrawing getSuperLayerDrawer(int upperLower, int superLayer) {
-		return _superLayers[upperLower][superLayer-1].getSuperLayerDrawer();
+		return _superLayers[upperLower][superLayer - 1].getSuperLayerDrawer();
 	}
-
 
 	/**
 	 * Set the views before draw
@@ -391,17 +367,15 @@ public class SectorView extends AView implements ChangeListener {
 				if ((_scaleDrawer != null) && showScale()) {
 					_scaleDrawer.draw(g, container);
 				}
-				
+
 				// a clean rectangle
 				Rectangle bounds = container.getComponent().getBounds();
-				GraphicsUtilities.drawSimple3DRect(g, 0, 0, bounds.width - 1,
-						bounds.height - 1, false);
+				GraphicsUtilities.drawSimple3DRect(g, 0, 0, bounds.width - 1, bounds.height - 1, false);
 			}
 
 		};
 		getContainer().setAfterDraw(afterDraw);
 	}
-	
 
 	/**
 	 * Get the display sectors which tell us which pair of sectors are being
@@ -413,27 +387,21 @@ public class SectorView extends AView implements ChangeListener {
 		return _displaySectors;
 	}
 
-	
 	/**
 	 * From detector xyz get the projected world point.
 	 * 
-	 * @param x
-	 *            the detector x coordinate
-	 * @param y
-	 *            the detector y coordinate
-	 * @param z
-	 *            the detector z coordinate
-	 * @param wp
-	 *            the projected 2D world point.
+	 * @param x  the detector x coordinate
+	 * @param y  the detector y coordinate
+	 * @param z  the detector z coordinate
+	 * @param wp the projected 2D world point.
 	 */
 	@Override
-	public void projectClasToWorld(double x, double y, double z,
-			Plane3D projectionPlane, Point2D.Double wp) {
-		
+	public void projectClasToWorld(double x, double y, double z, Plane3D projectionPlane, Point2D.Double wp) {
+
 		super.projectClasToWorld(x, y, z, projectionPlane, wp);
 		int sector = GeometryManager.getSector(x, y);
 		if (sector > 3) {
-		  wp.y = - wp.y;
+			wp.y = -wp.y;
 		}
 	}
 
@@ -441,17 +409,13 @@ public class SectorView extends AView implements ChangeListener {
 	 * Every view should be able to say what sector the current point location
 	 * represents.
 	 * 
-	 * @param container
-	 *            the base container for the view.
-	 * @param screenPoint
-	 *            the pixel point
-	 * @param worldPoint
-	 *            the corresponding world location.
+	 * @param container   the base container for the view.
+	 * @param screenPoint the pixel point
+	 * @param worldPoint  the corresponding world location.
 	 * @return the sector [1..6] or -1 for none.
 	 */
 	@Override
-	public int getSector(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint) {
+	public int getSector(IContainer container, Point screenPoint, Point2D.Double worldPoint) {
 		boolean positive = worldPoint.y > 0.0;
 		switch (_displaySectors) {
 		case SECTORS14:
@@ -465,13 +429,14 @@ public class SectorView extends AView implements ChangeListener {
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * Is the sector one of the two on this view
+	 * 
 	 * @param sector the sector [1..6]
 	 */
 	public boolean containsSector(byte sector) {
-		
+
 		switch (_displaySectors) {
 		case SECTORS14:
 			return ((sector == 1) || (sector == 4));
@@ -482,15 +447,14 @@ public class SectorView extends AView implements ChangeListener {
 		case SECTORS36:
 			return ((sector == 3) || (sector == 6));
 		}
-		
+
 		return false;
 	}
 
 	/**
 	 * This is used to listen for changes on components like sliders.
 	 * 
-	 * @param e
-	 *            the causal event.
+	 * @param e the causal event.
 	 */
 	@Override
 	public void stateChanged(ChangeEvent e) {
@@ -501,9 +465,9 @@ public class SectorView extends AView implements ChangeListener {
 			_targetZ = (_controlPanel.getTargetSlider().getValue());
 			getContainer().refresh();
 		} else if (source == _controlPanel.getPhiSlider()) {
-			//change the projection plane
+			// change the projection plane
 			projectionPlane = GeometryManager.constantPhiPlane(getSliderPhi());
-			
+
 			_wiresDirty = true;
 			getContainer().setDirty(true);
 			getContainer().refresh();
@@ -511,20 +475,17 @@ public class SectorView extends AView implements ChangeListener {
 	}
 
 	/**
-	 * Converts the local screen coordinate obtained by a previous localToWorld
-	 * call to full 3D CLAS coordinates
+	 * Converts the local screen coordinate obtained by a previous localToWorld call
+	 * to full 3D CLAS coordinates
 	 * 
-	 * @param screenPoint
-	 *            the pixel point
-	 * @param worldPoint
-	 *            the corresponding world location.
-	 * @param result
-	 *            holds the result. It has five elements. Cartesian x, y, and z
-	 *            are in 0, 1, and 2. Cylindrical rho and phi are in 3 and 3.
-	 *            (And of course cylindrical z is the same as Cartesian z.)
+	 * @param screenPoint the pixel point
+	 * @param worldPoint  the corresponding world location.
+	 * @param result      holds the result. It has five elements. Cartesian x, y,
+	 *                    and z are in 0, 1, and 2. Cylindrical rho and phi are in 3
+	 *                    and 3. (And of course cylindrical z is the same as
+	 *                    Cartesian z.)
 	 */
-	public void getCLASCordinates(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, double result[]) {
+	public void getCLASCordinates(IContainer container, Point screenPoint, Point2D.Double worldPoint, double result[]) {
 		double x = worldPoint.y;
 		double z = worldPoint.x;
 
@@ -555,25 +516,21 @@ public class SectorView extends AView implements ChangeListener {
 	 * Some view specific feedback. Should always call super.getFeedbackStrings
 	 * first.
 	 * 
-	 * @param container
-	 *            the base container for the view.
-	 * @param pp
-	 *            the pixel point
-	 * @param wp
-	 *            the corresponding world location.
+	 * @param container the base container for the view.
+	 * @param pp        the pixel point
+	 * @param wp        the corresponding world location.
 	 */
 	@Override
-	public void getFeedbackStrings(IContainer container, Point pp,
-			Point2D.Double wp, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
 
 		// get the common information
 		super.getFeedbackStrings(container, pp, wp, feedbackStrings);
 
 		double result[] = new double[3];
 		worldToLabXYZ(wp, result);
-		float x = (float)result[0];
-		float y = (float)result[1];
-		float z = (float)result[2];
+		float x = (float) result[0];
+		float y = (float) result[1];
+		float z = (float) result[2];
 
 		String xyz = "xyz " + vecStr(result) + " cm";
 
@@ -583,8 +540,7 @@ public class SectorView extends AView implements ChangeListener {
 		YouAreHereItem item = getContainer().getYouAreHereItem();
 		if (item != null) {
 			Point2D.Double anchor = item.getFocus();
-			String anchorStr = "$khaki$Dist from ref. point: "
-					+ valStr(anchor.distance(wp), 5) + " cm";
+			String anchorStr = "$khaki$Dist from ref. point: " + valStr(anchor.distance(wp), 5) + " cm";
 			feedbackStrings.add(anchorStr);
 		}
 
@@ -596,14 +552,12 @@ public class SectorView extends AView implements ChangeListener {
 		// get absolute phi
 		double absphi = getAbsolutePhi(container, pp, wp);
 
-		String rtp = AView.rThetaPhi + " (" + valStr(r, 2) + "cm, "
-				+ valStr(theta, 2) + UnicodeSupport.DEGREE + ", "
+		String rtp = AView.rThetaPhi + " (" + valStr(r, 2) + "cm, " + valStr(theta, 2) + UnicodeSupport.DEGREE + ", "
 				+ valStr(absphi, 2) + UnicodeSupport.DEGREE + ")";
 		feedbackStrings.add(rtp);
 
 		// cylindrical coordinates which are just the world coordinates!
-		String rzp = AView.rhoZPhi + " (" + valStr(rho, 2) + "cm, "
-				+ valStr(z, 2) + "cm , " + valStr(absphi, 2)
+		String rzp = AView.rhoZPhi + " (" + valStr(rho, 2) + "cm, " + valStr(z, 2) + "cm , " + valStr(absphi, 2)
 				+ UnicodeSupport.DEGREE + ")";
 		feedbackStrings.add(rzp);
 
@@ -611,33 +565,32 @@ public class SectorView extends AView implements ChangeListener {
 		worldToSector(wp, result);
 		String sectxyz = "$yellow$Sector xyz " + vecStr(result) + " cm";
 		feedbackStrings.add(sectxyz);
-				
+
 		if (_activeProbe != null) {
 			float field[] = new float[3];
 			_activeProbe.field(x, y, z, field);
-			
+
 			float grad[] = new float[3];
 			_activeProbe.gradient(x, y, z, grad);
-			
+
 			// convert to Tesla from kG
 			field[0] /= 10.0;
 			field[1] /= 10.0;
 			field[2] /= 10.0;
-			
-			//convert kG/cm to T/m
+
+			// convert kG/cm to T/m
 			grad[0] *= 10.0;
 			grad[1] *= 10.0;
 			grad[2] *= 10.0;
 
-			double bmag = VectorSupport.length(field);
-			double gmag = VectorSupport.length(grad);
-			feedbackStrings.add("$Lawn Green$"
-					+ MagneticFields.getInstance().getActiveFieldDescription());
-			
+			double bmag = vlen(field);
+			double gmag = vlen(grad);
+			feedbackStrings.add("$Lawn Green$" + MagneticFields.getInstance().getActiveFieldDescription());
+
 			boolean hasTorus = MagneticFields.getInstance().hasActiveTorus();
 			boolean hasSolenoid = MagneticFields.getInstance().hasActiveSolenoid();
-			
-			//scale factors
+
+			// scale factors
 			if (hasTorus || hasSolenoid) {
 				String scaleStr = "";
 				if (hasTorus) {
@@ -648,37 +601,30 @@ public class SectorView extends AView implements ChangeListener {
 					double shiftZ = MagneticFields.getInstance().getShiftZ(FieldType.SOLENOID);
 					String shiftStr = "Solenoid Z shift " + valStr(shiftZ, 3) + " cm ";
 					feedbackStrings.add("$Lawn Green$" + shiftStr);
-					
+
 					double solenScale = MagneticFields.getInstance().getScaleFactor(FieldType.SOLENOID);
 					scaleStr += "Solenoid scale " + valStr(solenScale, 3) + " ";
 				}
 				feedbackStrings.add("$Lawn Green$" + scaleStr);
 			}
 
-			
-			feedbackStrings.add("$Lawn Green$Field " + valStr(bmag, 4) + " T "
-					+ vecStr(field) + " T");
-			feedbackStrings.add("$Lawn Green$Grad " + valStr(gmag, 4) + " T/m "
-					+ vecStr(grad) + " T/m");
-		}
-		else {
-			feedbackStrings.add("$Lawn Green$"
-					+ MagneticFields.getInstance().getActiveFieldDescription());
+			feedbackStrings.add("$Lawn Green$Field " + valStr(bmag, 4) + " T " + vecStr(field) + " T");
+			feedbackStrings.add("$Lawn Green$Grad " + valStr(gmag, 4) + " T/m " + vecStr(grad) + " T/m");
+		} else {
+			feedbackStrings.add("$Lawn Green$" + MagneticFields.getInstance().getActiveFieldDescription());
 			feedbackStrings.add("$Lawn Green$Field is Zero");
 		}
 		// near a swum trajectory?
 		double mindist = _swimTrajectoryDrawer.closestApproach(wp);
 
-		double pixlen = WorldGraphicsUtilities.getMeanPixelDensity(container)
-				* mindist;
+		double pixlen = WorldGraphicsUtilities.getMeanPixelDensity(container) * mindist;
 
-		//TODO FIX THIS
+		// TODO FIX THIS
 		_lastTrajStr = null;
 		if (pixlen < 25.0) {
-			SwimTrajectory2D traj2D = _swimTrajectoryDrawer
-					.getClosestTrajectory();
-			
-			//in a sector change diamond
+			SwimTrajectory2D traj2D = _swimTrajectoryDrawer.getClosestTrajectory();
+
+			// in a sector change diamond
 			int sectChangeIndices[] = traj2D.sectChangeIndices();
 			if (sectChangeIndices != null) {
 				Point scpp = new Point();
@@ -686,37 +632,38 @@ public class SectorView extends AView implements ChangeListener {
 				for (int idx : sectChangeIndices) {
 					Point2D.Double scwp = traj2D.getPath()[idx];
 					container.worldToLocal(scpp, scwp);
-					crect.setBounds(scpp.x-4, scpp.y-4, 8, 8);
+					crect.setBounds(scpp.x - 4, scpp.y - 4, 8, 8);
 					if (crect.contains(pp)) {
 						feedbackStrings.add(SwimTrajectory2D.fbColor + traj2D.sectorChangeString(idx));
 					}
 				}
 			}
-			
+
 			if (traj2D != null) {
 				traj2D.addToFeedback(feedbackStrings);
 				_lastTrajStr = traj2D.summaryString();
 			}
 		}
-		
-		//DC Occupancy
+
+		// DC Occupancy
 		int sector = getSector(container, pp, wp);
 		if (sector > 0) {
-			boolean leftTrack = SNRManager.getInstance().potentialLeftTrack(sector-1);
-			boolean rightTrack = SNRManager.getInstance().potentialRightTrack(sector-1);
+			boolean leftTrack = SNRManager.getInstance().potentialLeftTrack(sector - 1);
+			boolean rightTrack = SNRManager.getInstance().potentialRightTrack(sector - 1);
 			feedbackStrings.add("potential left  track: " + leftTrack);
 			feedbackStrings.add("potential right track: " + rightTrack);
 		}
 
-//
-//		double totalOcc = 100.*DC.getInstance().totalOccupancy();
-//		double sectorOcc = 100.*DC.getInstance().totalSectorOccupancy(sector);
-//		String occStr = "total DC occ " + DoubleFormat.doubleFormat(totalOcc, 2) + "%" + " sector " + sector +
-//				" occ " + DoubleFormat.doubleFormat(sectorOcc, 2) + "%";
-//		feedbackStrings.add("$aqua$" + occStr);
+	}
 
-		
+	// convenience method to get length of "vector"
+	private float vlen(float v[]) {
+		double sum = 0;
+		for (float val : v) {
+			sum = sum + val * val;
+		}
 
+		return (float) (Math.sqrt(sum));
 	}
 
 	// convenience call for double formatter
@@ -727,26 +674,22 @@ public class SectorView extends AView implements ChangeListener {
 	/**
 	 * Returns a string representation of the form: "(x,y,z)".
 	 * 
-	 * @param numDec
-	 *            the number of decimal places for each coordinate.
+	 * @param numDec the number of decimal places for each coordinate.
 	 * @return a String representation of the vector
 	 */
 	private String vecStr(double v[]) {
-		return "(" + DoubleFormat.doubleFormat(v[0], 2) + ", "
-				+ DoubleFormat.doubleFormat(v[1], 2) + ", "
+		return "(" + DoubleFormat.doubleFormat(v[0], 2) + ", " + DoubleFormat.doubleFormat(v[1], 2) + ", "
 				+ DoubleFormat.doubleFormat(v[2], 2) + ")";
 	}
 
 	/**
 	 * Returns a string representation of the form: "(x,y,z)".
 	 * 
-	 * @param numDec
-	 *            the number of decimal places for each coordinate.
+	 * @param numDec the number of decimal places for each coordinate.
 	 * @return a String representation of the vector
 	 */
 	private String vecStr(float v[]) {
-		return "(" + DoubleFormat.doubleFormat(v[0], 3) + ", "
-				+ DoubleFormat.doubleFormat(v[1], 3) + ", "
+		return "(" + DoubleFormat.doubleFormat(v[0], 3) + ", " + DoubleFormat.doubleFormat(v[1], 3) + ", "
 				+ DoubleFormat.doubleFormat(v[2], 3) + ")";
 	}
 
@@ -754,10 +697,8 @@ public class SectorView extends AView implements ChangeListener {
 	 * Are the given global x and y in this view? That is, does the sector they
 	 * correspond to in this view based on the calculated phi?
 	 * 
-	 * @param x
-	 *            the global x
-	 * @param y
-	 *            the global y in the same units as x
+	 * @param x the global x
+	 * @param y the global y in the same units as x
 	 * @return <code>true</code> if the point is in
 	 */
 	public boolean inThisView(double x, double y) {
@@ -785,9 +726,10 @@ public class SectorView extends AView implements ChangeListener {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Check whether this sect is on this view
+	 * 
 	 * @param sector the sector [1..6]
 	 * @return <code>true</code> if the sector is on the view.
 	 */
@@ -802,15 +744,14 @@ public class SectorView extends AView implements ChangeListener {
 		case SECTORS36:
 			return ((sector == 3) || (sector == 6));
 		}
-		
+
 		return false;
 	}
 
 	/**
 	 * Check whether a give phi is included in this view's range.
 	 * 
-	 * @param phi
-	 *            the value of phi on decimal degrees.
+	 * @param phi the value of phi on decimal degrees.
 	 * @return <code>true</code> if it is included.
 	 */
 	public boolean inThisView(double phi) {
@@ -819,8 +760,7 @@ public class SectorView extends AView implements ChangeListener {
 		}
 		switch (_displaySectors) {
 		case SECTORS14:
-			return between(phi, 330., 360.) || between(phi, 0., 30.)
-					|| between(phi, 150., 210.);
+			return between(phi, 330., 360.) || between(phi, 0., 30.) || between(phi, 150., 210.);
 
 		case SECTORS25:
 			return between(phi, 30., 90.) || between(phi, 210., 270.);
@@ -839,8 +779,8 @@ public class SectorView extends AView implements ChangeListener {
 
 	/**
 	 * Get the rotation angle to transform from world coordinates to global
-	 * coordinates. This is the sum of the phi for the upper sector of the view
-	 * and the phi relative to the midplane.
+	 * coordinates. This is the sum of the phi for the upper sector of the view and
+	 * the phi relative to the midplane.
 	 * 
 	 * @return the rotation angle to transform from world coordinates to global
 	 *         coordinates, in degrees.
@@ -855,7 +795,7 @@ public class SectorView extends AView implements ChangeListener {
 		}
 		return phiRotate;
 	}
-	
+
 	public double getMidplanePhiRotate() {
 		double phiRotate = 0;
 		if (_displaySectors == DisplaySectors.SECTORS25) {
@@ -865,15 +805,14 @@ public class SectorView extends AView implements ChangeListener {
 		}
 		return phiRotate;
 	}
-	
+
 	/**
-	 * Returns the absolute phi. This is the actual, global phi, e.g, -30 to 30
-	 * for sector 1, 30 to 90 for sector 2, etc.
+	 * Returns the absolute phi. This is the actual, global phi, e.g, -30 to 30 for
+	 * sector 1, 30 to 90 for sector 2, etc.
 	 * 
 	 * @return the absolute phi from the relative phi
 	 */
-	public double getAbsolutePhi(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint) {
+	public double getAbsolutePhi(IContainer container, Point screenPoint, Point2D.Double worldPoint) {
 		int sector = getSector(container, screenPoint, worldPoint);
 		// return (sector - 1) * 60.0 + _phiRelMidPlane;
 		return (sector - 1) * 60.0 + getSliderPhi();
@@ -891,9 +830,8 @@ public class SectorView extends AView implements ChangeListener {
 	/**
 	 * Get the relative phi value, int the range [-30, 30].
 	 * 
-	 * @return the phi value--the slider setting. This is between -30 and 30 for
-	 *         all sectors--i.e., this is the relative phi, not the absolute
-	 *         phi.
+	 * @return the phi value--the slider setting. This is between -30 and 30 for all
+	 *         sectors--i.e., this is the relative phi, not the absolute phi.
 	 */
 	public double getSliderPhi() {
 		// return _phiRelMidPlane;
@@ -905,11 +843,10 @@ public class SectorView extends AView implements ChangeListener {
 	}
 
 	/**
-	 * Get the relative phi (what the slider setting should be) corresponding to
-	 * the absolute value of phi.
+	 * Get the relative phi (what the slider setting should be) corresponding to the
+	 * absolute value of phi.
 	 * 
-	 * @param absPhi
-	 *            the value of phi in degrees, e.g., from a MC track.
+	 * @param absPhi the value of phi in degrees, e.g., from a MC track.
 	 * @return the corresponding slider value;
 	 */
 	private double getRelativePhi(double absPhi) {
@@ -925,29 +862,25 @@ public class SectorView extends AView implements ChangeListener {
 	}
 
 	/**
-	 * Called by a container when a right click is not handled. The usual reason
-	 * is that the right click was on an inert spot.
+	 * Called by a container when a right click is not handled. The usual reason is
+	 * that the right click was on an inert spot.
 	 * 
-	 * @param mouseEvent
-	 *            the causal event.
+	 * @param mouseEvent the causal event.
 	 */
 	@Override
 	public boolean rightClicked(MouseEvent mouseEvent) {
-		
-		JPopupMenu popup = null;
 
+		JPopupMenu popup = null;
 
 		// near a swum trajectory?
 		Point2D.Double wp = new Point2D.Double();
 		getContainer().localToWorld(mouseEvent.getPoint(), wp);
 		double mindist = _swimTrajectoryDrawer.closestApproach(wp);
-		double pixlen = WorldGraphicsUtilities
-				.getMeanPixelDensity(getContainer()) * mindist;
+		double pixlen = WorldGraphicsUtilities.getMeanPixelDensity(getContainer()) * mindist;
 
 		if (pixlen < 25.0) {
-			final SwimTrajectory2D traj2D = _swimTrajectoryDrawer
-					.getClosestTrajectory();
-			
+			final SwimTrajectory2D traj2D = _swimTrajectoryDrawer.getClosestTrajectory();
+
 			if (traj2D == null) {
 				return false;
 			}
@@ -960,11 +893,9 @@ public class SectorView extends AView implements ChangeListener {
 			}
 
 			final JMenuItem rotateItem = new JMenuItem(
-					"Rotate to match trajectory " + UnicodeSupport.SMALL_PHI
-							+ ": " + valStr(desiredPhi, 3));
+					"Rotate to match trajectory " + UnicodeSupport.SMALL_PHI + ": " + valStr(desiredPhi, 3));
 
-			final JMenuItem integralItem = new JMenuItem("<html>Plot  "
-					+ UnicodeSupport.INTEGRAL + "|<bold>B</bold> "
+			final JMenuItem integralItem = new JMenuItem("<html>Plot  " + UnicodeSupport.INTEGRAL + "|<bold>B</bold> "
 					+ UnicodeSupport.TIMES + " <bold>dL</bold>|");
 
 			ActionListener al = new ActionListener() {
@@ -978,8 +909,7 @@ public class SectorView extends AView implements ChangeListener {
 						_controlPanel.getPhiSlider().setValue((int) sliderPhi);
 						getContainer().refresh();
 					} else if (source == integralItem) {
-						PlotView pview = FastMCed.getFastMCed()
-								.getPlotView();
+						PlotView pview = FastMCed.getFastMCed().getPlotView();
 						if (pview != null) {
 							PlotCanvas canvas = pview.getPlotCanvas();
 							try {
@@ -993,19 +923,12 @@ public class SectorView extends AView implements ChangeListener {
 								if (!havePlotData) {
 									initPlot(canvas, traj2D);
 								} else { // have to add a curve
-									int curveCount = canvas.getDataSet()
-											.getCurveCount();
+									int curveCount = canvas.getDataSet().getCurveCount();
 									DataSet dataSet = canvas.getDataSet();
-									dataSet.addCurve(
-											"X",
-											traj2D.summaryString()
-													+ " ["
-													+ MagneticFields
-															.getInstance().getActiveFieldDescription()
-													+ "]");
+									dataSet.addCurve("X", traj2D.summaryString() + " ["
+											+ MagneticFields.getInstance().getActiveFieldDescription() + "]");
 									for (double v[] : traj) {
-										dataSet.addToCurve(curveCount,
-												v[SwimTrajectory.PATHLEN_IDX],
+										dataSet.addToCurve(curveCount, v[SwimTrajectory.PATHLEN_IDX],
 												v[SwimTrajectory.BXDL_IDX]);
 
 										setCurveStyle(canvas, curveCount);
@@ -1013,8 +936,7 @@ public class SectorView extends AView implements ChangeListener {
 
 								}
 
-								ViewManager.getInstance().setVisible(pview,
-										true);
+								ViewManager.getInstance().setVisible(pview, true);
 								canvas.repaint();
 							} catch (DataSetException e) {
 								e.printStackTrace();
@@ -1038,23 +960,18 @@ public class SectorView extends AView implements ChangeListener {
 		return false;
 	}
 
-
-	private void initPlot(PlotCanvas canvas, SwimTrajectory2D traj2D)
-			throws DataSetException {
+	private void initPlot(PlotCanvas canvas, SwimTrajectory2D traj2D) throws DataSetException {
 		SwimTrajectory traj = traj2D.getTrajectory3D();
 		DataSet dataSet = new DataSet(DataSetType.XYXY, "X",
-				traj2D.summaryString() + " ["
-						+ MagneticFields.getInstance().getActiveFieldDescription() + "]");
+				traj2D.summaryString() + " [" + MagneticFields.getInstance().getActiveFieldDescription() + "]");
 
 		canvas.getParameters().setPlotTitle("Magnetic Field Integral");
 		canvas.getParameters().setXLabel("Path Length (m)");
-		canvas.getParameters().setYLabel(
-				"<html>" + UnicodeSupport.INTEGRAL + "|<bold>B</bold> "
-						+ UnicodeSupport.TIMES + " <bold>dL</bold>| kG-m");
+		canvas.getParameters().setYLabel("<html>" + UnicodeSupport.INTEGRAL + "|<bold>B</bold> " + UnicodeSupport.TIMES
+				+ " <bold>dL</bold>| kG-m");
 
 		for (double v[] : traj) {
-			dataSet.add(v[SwimTrajectory.PATHLEN_IDX],
-					v[SwimTrajectory.BXDL_IDX]);
+			dataSet.add(v[SwimTrajectory.PATHLEN_IDX], v[SwimTrajectory.BXDL_IDX]);
 		}
 		canvas.setDataSet(dataSet);
 		setCurveStyle(canvas, 0);
@@ -1062,25 +979,19 @@ public class SectorView extends AView implements ChangeListener {
 
 	private void setCurveStyle(PlotCanvas canvas, int index) {
 		int cindex = index % plotColors.length;
-		canvas.getDataSet().getCurveStyle(index)
-				.setLineColor(plotColors[cindex]);
-		canvas.getDataSet().getCurveStyle(index)
-				.setFillColor(plotColors[cindex]);
-		canvas.getDataSet().getCurveStyle(index)
-				.setSymbolType(cnuphys.splot.style.SymbolType.X);
+		canvas.getDataSet().getCurveStyle(index).setBorderColor(plotColors[cindex]);
+		canvas.getDataSet().getCurveStyle(index).setFillColor(plotColors[cindex]);
+		canvas.getDataSet().getCurveStyle(index).setSymbolType(cnuphys.splot.style.SymbolType.X);
 		canvas.getDataSet().getCurveStyle(index).setSymbolSize(6);
-		canvas.getDataSet().getCurve(index).getFit()
-				.setFitType(FitType.CUBICSPLINE);
+		canvas.getDataSet().getCurve(index).getFit().setFitType(FitType.CUBICSPLINE);
 
 	}
 
 	/**
 	 * Convert world (not global, but graphical world) to clas global (bab)
 	 * 
-	 * @param wp
-	 *            the world point
-	 * @param labXYZ
-	 *            the clas global coordinates
+	 * @param wp     the world point
+	 * @param labXYZ the clas global coordinates
 	 */
 	public void worldToLabXYZ(Point2D.Double wp, double[] labXYZ) {
 		double perp = wp.y;
@@ -1099,10 +1010,8 @@ public class SectorView extends AView implements ChangeListener {
 	/**
 	 * Convert world (not global, but graphical world) to sector
 	 * 
-	 * @param wp
-	 *            the world point
-	 * @param sectorXYZ
-	 *            the sector coordinates
+	 * @param wp        the world point
+	 * @param sectorXYZ the sector coordinates
 	 */
 	public void worldToSector(Point2D.Double wp, double[] sectorXYZ) {
 		double perp = wp.y;
@@ -1123,8 +1032,7 @@ public class SectorView extends AView implements ChangeListener {
 	/**
 	 * Simple test whether this view displays a given 1-based sector
 	 * 
-	 * @param sector
-	 *            the sector [1..6]
+	 * @param sector the sector [1..6]
 	 * @return <code>true</code> if this view displays the given sector
 	 */
 	public boolean isSectorOnView(int sector) {
@@ -1142,9 +1050,9 @@ public class SectorView extends AView implements ChangeListener {
 		return false;
 	}
 
-	
 	/**
 	 * Draw a single wire. All indices are 1-based
+	 * 
 	 * @param g
 	 * @param container
 	 * @param fillColor
@@ -1158,35 +1066,35 @@ public class SectorView extends AView implements ChangeListener {
 	public void drawDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, byte sector,
 			byte superlayer, byte layer, short wire, float trkDoca, Point location) {
 
-		SectorSuperLayer sectSL = _superLayers[(sector < 4) ? 0 : 1][superlayer-1];
+		SectorSuperLayer sectSL = _superLayers[(sector < 4) ? 0 : 1][superlayer - 1];
 //		sectSL.drawDCHit(g, container, fillColor, frameColor, 
 //				layer, wire, trkDoca, location);
-		
+
 	}
-	
+
 	/**
-	 * Clone the view. 
+	 * Clone the view.
+	 * 
 	 * @return the cloned view
 	 */
 	@Override
 	public BaseView cloneView() {
 		super.cloneView();
 		CLONE_COUNT[_displaySectors.ordinal()]++;
-		
-		//limit
+
+		// limit
 		if (CLONE_COUNT[_displaySectors.ordinal()] > 2) {
 			return null;
 		}
-		
+
 		Rectangle vr = getBounds();
 		vr.x += 40;
 		vr.y += 40;
-		
+
 		SectorView view = createSectorView(_displaySectors);
 		view.setBounds(vr);
 		return view;
 
 	}
 
-	
 }

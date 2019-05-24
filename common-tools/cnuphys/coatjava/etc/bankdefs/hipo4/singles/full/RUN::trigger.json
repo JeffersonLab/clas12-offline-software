@@ -1,0 +1,20 @@
+[
+    {
+        "entries": [
+            {
+                "info": "id", 
+                "name": "id", 
+                "type": "I"
+            }, 
+            {
+                "info": "trigger word", 
+                "name": "trigger", 
+                "type": "I"
+            }
+        ], 
+        "group": 10000, 
+        "info": "RUN trigger information", 
+        "item": 13, 
+        "name": "RUN::trigger"
+    }
+]

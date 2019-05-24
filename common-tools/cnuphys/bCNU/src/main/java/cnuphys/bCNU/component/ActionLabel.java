@@ -14,8 +14,14 @@ public class ActionLabel extends JLabel {
 
 	private static int id = 0;
 
-	private static Font enabledFont = new Font("SansSerif", Font.ITALIC, 8);
-	private static Font disabledFont = new Font("SansSerif", Font.BOLD, 8);
+	private static Font enabledFontSmall = new Font("SansSerif", Font.ITALIC, 8);
+	private static Font disabledFontSmall = new Font("SansSerif", Font.BOLD, 8);
+	
+	private static Font enabledFontLarge = new Font("SansSerif", Font.ITALIC, 11);
+	private static Font disabledFontLarge = new Font("SansSerif", Font.BOLD, 11);
+
+	private Font _enabledFont;
+	private Font _disabledFont;
 
 	private static Color enabledFg = Color.red;
 	private static Color disabledFg = Color.gray;
@@ -23,9 +29,35 @@ public class ActionLabel extends JLabel {
 	// list of listeners
 	private EventListenerList _actionListenerList;
 
+	/**
+	 * Create an action label with the default font size (8)
+	 * @param label the label
+	 * @param enabled is enabled or not
+	 */
 	public ActionLabel(String label, boolean enabled) {
+		this(label, enabled, false);
+	}
+	
+	/**
+	 * Create an action label 
+	 * @param label the label
+	 * @param enabled is enabled or not
+	 * @parame larger font determines smaller or larger font size
+	 */
+	public ActionLabel(String label, boolean enabled, boolean largerFont) {
 		super(label);
+		
+		if (largerFont) {
+			_enabledFont = enabledFontLarge;
+			_disabledFont = disabledFontLarge;
+		}
+		else {
+			_enabledFont = enabledFontSmall;
+			_disabledFont = disabledFontSmall;
+		}
+		
 		setEnabled(enabled);
+
 
 		MouseAdapter ma = new MouseAdapter() {
 
@@ -38,25 +70,25 @@ public class ActionLabel extends JLabel {
 		addMouseListener(ma);
 	}
 
+
 	@Override
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
 		if (enabled) {
-			setFont(enabledFont);
+			setFont(_enabledFont);
 			setForeground(enabledFg);
 		} else {
-			setFont(disabledFont);
+			setFont(_disabledFont);
 			setForeground(disabledFg);
 		}
 	}
 
 	/**
-	 * Notify listeners we have a new event ready for display. All they may want
-	 * is the notification that a new event has arrived. But the event itself is
-	 * passed along.
+	 * Notify listeners we have a new event ready for display. All they may want is
+	 * the notification that a new event has arrived. But the event itself is passed
+	 * along.
 	 * 
-	 * @param evioEvent
-	 *            the event in question;
+	 * @param evioEvent the event in question;
 	 */
 	private void notifyActionListeners() {
 
@@ -83,8 +115,7 @@ public class ActionLabel extends JLabel {
 	/**
 	 * Remove an ActionListener.
 	 * 
-	 * @param listener
-	 *            the ActionListener to remove.
+	 * @param listener the ActionListener to remove.
 	 */
 	public void removeActionListener(ActionListener listener) {
 
@@ -98,8 +129,7 @@ public class ActionLabel extends JLabel {
 	/**
 	 * Add an ActionListener.
 	 * 
-	 * @param listener
-	 *            the ActionListener listener to add.
+	 * @param listener the ActionListener listener to add.
 	 */
 	public void addActionListener(ActionListener listener) {
 

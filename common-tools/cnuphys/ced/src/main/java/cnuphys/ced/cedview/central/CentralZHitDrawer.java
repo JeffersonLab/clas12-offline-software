@@ -119,9 +119,9 @@ public class CentralZHitDrawer implements IDrawable {
 
 					if (hitCount > 1) {
 
-						double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
+						double fract = _view.getMedianSetting() * (((double) hitCount) / (1 + medianHit));
 
-						Color color = AccumulationManager.getInstance().getColor(fract);
+						Color color = AccumulationManager.getInstance().getColor(_view.getColorScaleModel(), fract);
 						_view.drawBSTStrip((Graphics2D) g, container, color, sect0 + 1, lay0 + 1, strip0 + 1);
 					}
 
@@ -145,28 +145,28 @@ public class CentralZHitDrawer implements IDrawable {
 
 	// draw gemc simulated hits single event mode
 	private void drawBSTHitsSingleMode(Graphics g, IContainer container) {
-		
+
 		AdcHitList hits = BST.getInstance().getHits();
 		if ((hits != null) && !hits.isEmpty()) {
-			
+
 //			Shape oldClip = g.getClip();
 			Graphics2D g2 = (Graphics2D) g;
 
 			for (AdcHit hit : hits) {
 				if (hit != null) {
-					//HACK GEO SECTOR DOESN"T MATCH REAL
-					//TODO Undo hack when geometry fixed
-					
-					int superlayer = (hit.layer - 1) / 2;
-	                int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
-					int hackSect = (hit.sector + (numSect/2)) % numSect;
-					if (hackSect == 0) hackSect = numSect;
+					// HACK GEO SECTOR DOESN"T MATCH REAL
+					// TODO Undo hack when geometry fixed
 
-					
+					int superlayer = (hit.layer - 1) / 2;
+					int numSect = BSTGeometry.sectorsPerSuperlayer[superlayer];
+					int hackSect = (hit.sector + (numSect / 2)) % numSect;
+					if (hackSect == 0)
+						hackSect = numSect;
+
 					BSTxyPanel panel = CentralXYView.getPanel(hit.layer, hackSect);
 					if (panel != null) {
-						_view.drawBSTStrip(g2, container, Color.red, hit.sector, hit.layer, hit.component);					}
-					else {
+						_view.drawBSTStrip(g2, container, Color.red, hit.sector, hit.layer, hit.component);
+					} else {
 						System.err.println("null BSTZ panel");
 					}
 

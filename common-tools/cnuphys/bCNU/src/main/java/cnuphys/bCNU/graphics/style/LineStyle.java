@@ -8,8 +8,7 @@ public enum LineStyle {
 	/**
 	 * A map for the names of the line styles
 	 */
-	public static EnumMap<LineStyle, String> names = new EnumMap<LineStyle, String>(
-			LineStyle.class);
+	public static EnumMap<LineStyle, String> names = new EnumMap<LineStyle, String>(LineStyle.class);
 
 	static {
 		names.put(SOLID, "Solid");
@@ -33,13 +32,12 @@ public enum LineStyle {
 	/**
 	 * Returns the enum value from the name.
 	 * 
-	 * @param name
-	 *            the name to match.
+	 * @param name the name to match.
 	 * @return the <code>LineStyle</code> that corresponds to the name. Returns
 	 *         <code>null</code> if no match is found. Note it will check (case
-	 *         insensitive) both the map and the <code>name()</code> result,
-	 *         thus "Up Triangle" or "UPTRIANGLE" or "UpTrIaNgLe" will return
-	 *         the <code>UPTRIANGLE</code> value.
+	 *         insensitive) both the map and the <code>name()</code> result, thus
+	 *         "Up Triangle" or "UPTRIANGLE" or "UpTrIaNgLe" will return the
+	 *         <code>UPTRIANGLE</code> value.
 	 */
 	public static LineStyle getValue(String name) {
 		if (name == null) {

@@ -54,10 +54,14 @@ public class CentralPanel3D extends CedPanel3D {
 		// addItem(mchd);
 
 		// svt panels
-		for (int layer = 1; layer <= 8; layer++) {
+		for (int layer = 1; layer <= 6; layer++) {
+			// for (int layer = 1; layer <= 8; layer++) {
 			// geom service uses 0-based superlayer [0,1,2,3] and layer [0,1]
 			int supl = ((layer - 1) / 2); // 0, 1, 2, 3
-			for (int sector = 1; sector <= BSTGeometry.sectorsPerSuperlayer[supl]; sector++) {
+
+			int numSect = BSTGeometry.sectorsPerSuperlayer[supl];
+
+			for (int sector = 1; sector <= numSect; sector++) {
 				BSTPanel3D svt = new BSTPanel3D(this, sector, layer);
 				addItem(svt);
 			}
@@ -80,9 +84,9 @@ public class CentralPanel3D extends CedPanel3D {
 	}
 
 	/**
-	 * This gets the z step used by the mouse and key adapters, to see how fast
-	 * we move in or in in response to mouse wheel or up/down arrows. It should
-	 * be overridden to give something sensible. like the scale/100;
+	 * This gets the z step used by the mouse and key adapters, to see how fast we
+	 * move in or in in response to mouse wheel or up/down arrows. It should be
+	 * overridden to give something sensible. like the scale/100;
 	 * 
 	 * @return the z step (changes to zDist) for moving in and out
 	 */

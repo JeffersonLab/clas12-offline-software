@@ -1,7 +1,6 @@
 package cnuphys.fastMCed.eventgen.random;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Random;
@@ -24,18 +23,18 @@ public class ParticlePanel extends JPanel implements ItemListener {
 
 	// chose a particle
 	private LundComboBox _lundComboBox;
-	
-	//vertex
+
+	// vertex
 	private VariablePanel _xoPanel;
 	private VariablePanel _yoPanel;
 	private VariablePanel _zoPanel;
-	
-	//momentum
+
+	// momentum
 	private VariablePanel _pPanel;
 	private VariablePanel _thetaPanel;
 	private VariablePanel _phiPanel;
-	
-	//random dialog
+
+	// random dialog
 	private RandomEvGenDialog _dialog;
 
 	public ParticlePanel(RandomEvGenDialog dialog, boolean use, int lundIntId) {
@@ -46,7 +45,7 @@ public class ParticlePanel extends JPanel implements ItemListener {
 		add(addCenterPanel(), BorderLayout.CENTER);
 		add(addEastPanel(), BorderLayout.EAST);
 		setBorder(BorderFactory.createEtchedBorder());
-		
+
 		fixState();
 	}
 
@@ -56,7 +55,7 @@ public class ParticlePanel extends JPanel implements ItemListener {
 		_active = new JCheckBox("use", use);
 		_active.addItemListener(this);
 		_lundComboBox = new LundComboBox(false, 950.0, lundIntId);
-		
+
 		panel.add(_active);
 		panel.add(_lundComboBox);
 		return panel;
@@ -65,7 +64,7 @@ public class ParticlePanel extends JPanel implements ItemListener {
 	public JPanel addCenterPanel() {
 		JPanel panel = new JPanel();
 		panel.setLayout(new VerticalFlowLayout());
-		
+
 		_xoPanel = new VariablePanel("Xo", 0, 0, "cm");
 		_yoPanel = new VariablePanel("Yo", 0, 0, "cm");
 		_zoPanel = new VariablePanel("Zo", 0, 0, "cm");
@@ -76,9 +75,10 @@ public class ParticlePanel extends JPanel implements ItemListener {
 
 		return panel;
 	}
-	
+
 	/**
 	 * Check whether this panel is active
+	 * 
 	 * @return <code>if the panel is active
 	 */
 	public boolean isActive() {
@@ -100,8 +100,8 @@ public class ParticlePanel extends JPanel implements ItemListener {
 
 		return panel;
 	}
-	
-	//fix sectability
+
+	// fix sectability
 	private void fixState() {
 		boolean active = isActive();
 		_lundComboBox.setEnabled(active);
@@ -112,44 +112,41 @@ public class ParticlePanel extends JPanel implements ItemListener {
 		_thetaPanel.setEnabled(active);
 		_phiPanel.setEnabled(active);
 	}
-	
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		fixState();
 	}
-	
+
 	/**
 	 * Create a particle to add to an event
+	 * 
 	 * @return a particle to add to an event
 	 */
-	public Particle  createParticle() {
-		
+	public Particle createParticle() {
+
 		Random rand = _dialog.getRandom();
 		int pid = _lundComboBox.getSelectedId().getId();
-		//TODO take into account pperp
+		// TODO take into account pperp
 		double theta = Math.toRadians(_thetaPanel.randomValue(rand));
-		
-		//take into account max pperp
-		//take into account max pperp
-		double altPMax = _dialog.getMaxPPerp()/(0.0001 + Math.sin(theta));
+
+		// take into account max pperp
+		// take into account max pperp
+		double altPMax = _dialog.getMaxPPerp() / (0.0001 + Math.sin(theta));
 		altPMax = Math.min(_pPanel.getMaximumValue(), altPMax);
 		double p = _pPanel.randomValue(altPMax, rand);
 
 		double phi = Math.toRadians(_phiPanel.randomValue(rand));
-		double pperp = p*Math.sin(theta);
-		
-		
-		
-		
-		double px = pperp*Math.cos(phi);
-		double py = pperp*Math.sin(phi);
-		double pz = p*Math.cos(theta);
+		double pperp = p * Math.sin(theta);
+
+		double px = pperp * Math.cos(phi);
+		double py = pperp * Math.sin(phi);
+		double pz = p * Math.cos(theta);
 		double vx = _xoPanel.randomValue(rand);
 		double vy = _yoPanel.randomValue(rand);
 		double vz = _zoPanel.randomValue(rand);
 		Particle part = new Particle(pid, px, py, pz, vx, vy, vz);
-		
+
 		return part;
 	}
 

@@ -29,8 +29,7 @@ public class SwimAllRecon implements ISwimAll {
 	/**
 	 * Get all the row data so the trajectory dialog can be updated.
 	 * 
-	 * @param manager
-	 *            the swim manager
+	 * @param manager the swim manager
 	 * @return a vector of TrajectoryRowData objects.
 	 */
 	@Override
@@ -41,8 +40,7 @@ public class SwimAllRecon implements ISwimAll {
 	/**
 	 * Swim all Monte Carlo particles
 	 * 
-	 * @param manager
-	 *            the swim manager
+	 * @param manager the swim manager
 	 */
 	@Override
 	public void swimAll() {
@@ -50,14 +48,14 @@ public class SwimAllRecon implements ISwimAll {
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
-		
+
 		Swimming.clearReconTrajectories();
 
 		Vector<TrajectoryRowData> data = getRowData();
 		if (data == null) {
 			return;
 		}
-		// System.err.println("SWIM " + data.size() + "  recon trax");
+		// System.err.println("SWIM " + data.size() + " recon trax");
 
 		Swimmer swimmer = new Swimmer();
 		double stepSize = 5e-4; // m
@@ -65,15 +63,12 @@ public class SwimAllRecon implements ISwimAll {
 
 		for (TrajectoryRowData trd : data) {
 			LundId lid = LundSupport.getInstance().get(trd.getId());
-		
 
 			if (lid != null) {
 				SwimTrajectory traj;
 				try {
-					traj = swimmer.swim(lid.getCharge(), trd.getXo() / 100,
-							trd.getYo() / 100, trd.getZo() / 100,
-							trd.getMomentum() / 1000, trd.getTheta(),
-							trd.getPhi(), stopper, 0, PATHMAX, stepSize,
+					traj = swimmer.swim(lid.getCharge(), trd.getXo() / 100, trd.getYo() / 100, trd.getZo() / 100,
+							trd.getMomentum() / 1000, trd.getTheta(), trd.getPhi(), stopper, 0, PATHMAX, stepSize,
 							Swimmer.CLAS_Tolerance, null);
 					traj.setLundId(lid);
 					traj.setSource(trd.getSource());

@@ -46,7 +46,10 @@ import cnuphys.swim.Swimming;
 public class ClasIoEventManager {
 
 	// Unique lund ids in the event (if any)
-	private Vector<LundId> _uniqueLundIds = new Vector<LundId>();
+	private Vector<LundId> _uniqueLundIds = new Vector<>();
+
+	// listen for events even in accumulation mode
+	private Vector<IClasIoEventListener> _specialListeners = new Vector<>();
 
 	// A sorted list of banks present in the current event
 	private String _currentBanks[];
@@ -111,8 +114,8 @@ public class ClasIoEventManager {
 
 	// someone who can swim all recon particles
 	private ISwimAll _allReconSwimmer;
-	
-	//the current port
+
+	// the current port
 	private int _currentPort;
 
 	// the current hipo event file
@@ -169,8 +172,7 @@ public class ClasIoEventManager {
 	/**
 	 * Set the next event (after a getNextEvent)
 	 * 
-	 * @param event
-	 *            the new event
+	 * @param event the new event
 	 */
 	protected void setNextEvent(DataEvent event) {
 		_currentEvent = event;
@@ -181,6 +183,14 @@ public class ClasIoEventManager {
 			if (isAccumulating()) {
 				AccumulationManager.getInstance().newClasIoEvent(event);
 				notifyAllDefinedPlots(event);
+
+				// notify special listeners
+				// the get events even if we are accumulating
+				// e.g., AddDCAccumView
+				for (IClasIoEventListener listener : _specialListeners) {
+					listener.newClasIoEvent(event);
+				}
+
 			} else {
 				_runData.set(_currentEvent);
 				notifyEventListeners();
@@ -225,7 +235,7 @@ public class ClasIoEventManager {
 						// System.out.println("****** pid column null: " + (cd == null));
 
 						if (cd != null) {
-							int pid[] = (int[]) (cd.getDataArray(_currentEvent));
+							int pid[] = (int[]) (cd.getIntArray(_currentEvent));
 							if ((pid != null) && (pid.length > 0)) {
 								for (int pdgid : pid) {
 									LundId lid = LundSupport.getInstance().get(pdgid);
@@ -287,8 +297,7 @@ public class ClasIoEventManager {
 	}
 
 	/**
-	 * @param accumulating
-	 *            the accumulating to set
+	 * @param accumulating the accumulating to set
 	 */
 	public void setAccumulating(boolean accumulating) {
 		_accumulating = accumulating;
@@ -342,8 +351,7 @@ public class ClasIoEventManager {
 	/**
 	 * Open an event file
 	 * 
-	 * @param file
-	 *            the event file
+	 * @param file the event file
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
@@ -381,8 +389,7 @@ public class ClasIoEventManager {
 	/**
 	 * Open an evio event file
 	 * 
-	 * @param file
-	 *            the event file
+	 * @param file the event file
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
@@ -437,8 +444,8 @@ public class ClasIoEventManager {
 			_currentETFile = _etDialog.getFile();
 			_currentStation = _etDialog.getStation();
 			_currentPort = _etDialog.getPort();
-			
-	//		System.err.println("CURRENT PORT: " + _currentPort);
+
+			// System.err.println("CURRENT PORT: " + _currentPort);
 
 			// does the file exist?
 
@@ -446,7 +453,6 @@ public class ClasIoEventManager {
 			Log.getInstance().info("ET Filename: [" + _currentETFile + "]");
 			Log.getInstance().info("ET Station Name: [" + _currentStation + "]");
 			System.err.println("ET File Name:_currentETFile [" + _currentETFile + "]");
-
 
 			try {
 				Log.getInstance().info("Attempting to create EvioETSource.");
@@ -532,8 +538,7 @@ public class ClasIoEventManager {
 	/**
 	 * Set the soure type
 	 * 
-	 * @param type
-	 *            the new source type
+	 * @param type the new source type
 	 */
 	public void setEventSourceType(EventSourceType type) {
 		if (_sourceType != type) {
@@ -689,8 +694,7 @@ public class ClasIoEventManager {
 	/**
 	 * Set the object that can swim all MonteCarlo particles
 	 * 
-	 * @param allSwimmer
-	 *            the object that can swim all MonteCarlo particles
+	 * @param allSwimmer the object that can swim all MonteCarlo particles
 	 */
 	public void setAllMCSwimmer(ISwimAll allSwimmer) {
 		_allMCSwimmer = allSwimmer;
@@ -708,8 +712,7 @@ public class ClasIoEventManager {
 	/**
 	 * Set the object that can swim all reconstructed particles
 	 * 
-	 * @param allSwimmer
-	 *            the object that can swim all reconstructed particles
+	 * @param allSwimmer the object that can swim all reconstructed particles
 	 */
 	public void setAllReconSwimmer(ISwimAll allSwimmer) {
 		_allReconSwimmer = allSwimmer;
@@ -826,6 +829,7 @@ public class ClasIoEventManager {
 	}
 
 	// set the event only if it passes filtering
+	// option = 1 used by previous event
 	private void ifPassSetEvent(DataEvent event, int option) {
 		if (event != null) {
 			if (passFilters(event)) {
@@ -848,8 +852,7 @@ public class ClasIoEventManager {
 	/**
 	 * Get the bytes for serialization
 	 * 
-	 * @param dataEvent
-	 *            the dataEvent
+	 * @param dataEvent the dataEvent
 	 * @return bytes for serialization
 	 */
 	public byte[] getEventBytesForSerializing(DataEvent dataEvent) {
@@ -958,8 +961,7 @@ public class ClasIoEventManager {
 
 	/**
 	 * 
-	 * @param eventNumber
-	 *            a 1-based number 1..num events in file
+	 * @param eventNumber a 1-based number 1..num events in file
 	 * @return the event at the given number (if possible).
 	 */
 	public DataEvent gotoEvent(int eventNumber) {
@@ -1047,8 +1049,7 @@ public class ClasIoEventManager {
 	/**
 	 * Notify listeners we have opened a new file
 	 * 
-	 * @param path
-	 *            the path to the new file
+	 * @param path the path to the new file
 	 */
 	private void notifyEventListeners(EventSourceType source) {
 
@@ -1124,10 +1125,10 @@ public class ClasIoEventManager {
 	 */
 	protected void notifyEventListeners() {
 
-		Swimming.setNotifyOn(false); //prevent refreshes
+		Swimming.setNotifyOn(false); // prevent refreshes
 		Swimming.clearAllTrajectories();
-		Swimming.setNotifyOn(true); //prevent refreshes
-		
+		Swimming.setNotifyOn(true); // prevent refreshes
+
 		_uniqueLundIds = null;
 
 		Ced.getCed().setEventFilteringLabel(isFilteringOn());
@@ -1216,8 +1217,7 @@ public class ClasIoEventManager {
 	 * Get the maximum energy deposited in the cal for the current event. Might be
 	 * NaN if there are no "true" (gemc) banks
 	 * 
-	 * @param plane
-	 *            (0, 1, 2) for (PCAL, EC_INNER, EC_OUTER)
+	 * @param plane (0, 1, 2) for (PCAL, EC_INNER, EC_OUTER)
 	 * @return the max energy deposited in that cal plane in MeV
 	 */
 	public double getMaxEdepCal(int plane) {
@@ -1228,8 +1228,7 @@ public class ClasIoEventManager {
 	 * Remove a IClasIoEventListener. IClasIoEventListener listeners listen for new
 	 * events.
 	 * 
-	 * @param listener
-	 *            the IClasIoEventListener listener to remove.
+	 * @param listener the IClasIoEventListener listener to remove.
 	 */
 	public void removeClasIoEventListener(IClasIoEventListener listener) {
 
@@ -1248,13 +1247,12 @@ public class ClasIoEventManager {
 	 * Add a IClasIoEventListener. IClasIoEventListener listeners listen for new
 	 * events.
 	 * 
-	 * @param listener
-	 *            the IClasIoEventListener listener to add.
-	 * @param index
-	 *            Determines gross notification order. Those in index 0 are notified
-	 *            first. Then those in index 1. Finally those in index 2. The Data
-	 *            containers should be in index 0. The trajectory and noise in index
-	 *            1, and the regular views in index 2 (they are notified last)
+	 * @param listener the IClasIoEventListener listener to add.
+	 * @param index    Determines gross notification order. Those in index 0 are
+	 *                 notified first. Then those in index 1. Finally those in index
+	 *                 2. The Data containers should be in index 0. The trajectory
+	 *                 and noise in index 1, and the regular views in index 2 (they
+	 *                 are notified last)
 	 */
 	public void addClasIoEventListener(IClasIoEventListener listener, int index) {
 
@@ -1282,8 +1280,7 @@ public class ClasIoEventManager {
 	 * Checks if a bank, identified by a string such as "FTOF1B::dgtz", is in the
 	 * current event.
 	 * 
-	 * @param bankName
-	 *            the bank name
+	 * @param bankName the bank name
 	 * @return <code>true</code> if the bank is in the curent event.
 	 */
 	public boolean isBankInCurrentEvent(String bankName) {
@@ -1307,8 +1304,7 @@ public class ClasIoEventManager {
 	/**
 	 * Check whether a given bank is a known bank
 	 * 
-	 * @param bankName
-	 *            the bank name
+	 * @param bankName the bank name
 	 * @return <code>true</code> if the name is recognized.
 	 */
 	public boolean isKnownBank(String bankName) {
@@ -1340,8 +1336,7 @@ public class ClasIoEventManager {
 	/**
 	 * Add an event filter
 	 * 
-	 * @param filter
-	 *            the filter to add
+	 * @param filter the filter to add
 	 */
 	public void addEventFilter(IEventFilter filter) {
 		if (filter != null) {
@@ -1362,4 +1357,14 @@ public class ClasIoEventManager {
 		}
 	}
 
+	/**
+	 * Add a special listener that gets events even if we are accumulating. Example:
+	 * AllDCAccumView
+	 * 
+	 * @param listener the event listener
+	 */
+	public void addSpecialEventListener(IClasIoEventListener listener) {
+		_specialListeners.remove(listener);
+		_specialListeners.add(listener);
+	}
 }

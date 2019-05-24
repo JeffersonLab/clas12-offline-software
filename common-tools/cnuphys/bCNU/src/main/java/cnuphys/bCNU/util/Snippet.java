@@ -61,22 +61,17 @@ public class Snippet {
 	/**
 	 * Draw rotated text.
 	 * 
-	 * @param g
-	 *            the Graphics context.
-	 * @param xo
-	 *            the x pixel coordinate of baseline of the main string of which
-	 *            this is a snippet.
-	 * @param yo
-	 *            the y pixel coordinate of baseline of the main string of which
-	 *            this is a snippet.
-	 * @param angleDegrees
-	 *            the angle of rotation in decimal degrees.
+	 * @param g            the Graphics context.
+	 * @param xo           the x pixel coordinate of baseline of the main string of
+	 *                     which this is a snippet.
+	 * @param yo           the y pixel coordinate of baseline of the main string of
+	 *                     which this is a snippet.
+	 * @param angleDegrees the angle of rotation in decimal degrees.
 	 */
 	public void drawSnippet(Graphics g, int xo, int yo, double angleDegrees) {
 		// GraphicsUtilities.drawRotatedText((Graphics2D)g, _text, _font,
 		// xo + _deltaX, yo + _deltaY, angleDegrees);
-		GraphicsUtilities.drawRotatedText((Graphics2D) g, _text, _font, xo, yo,
-				_deltaX, _deltaY, angleDegrees);
+		GraphicsUtilities.drawRotatedText((Graphics2D) g, _text, _font, xo, yo, _deltaX, _deltaY, angleDegrees);
 	}
 
 	/**
@@ -125,8 +120,7 @@ public class Snippet {
 	/**
 	 * Get the size of a Snippet
 	 * 
-	 * @param c
-	 *            the compoment whose FontMetrics we use
+	 * @param c the compoment whose FontMetrics we use
 	 * @return the dinesion of the snippet
 	 */
 	public Dimension size(Component c) {
@@ -138,15 +132,12 @@ public class Snippet {
 	/**
 	 * Get an array of snippets from a compound string
 	 * 
-	 * @param baseFont
-	 *            the baseline font. Each snippet will have this font or an
-	 *            excursion from this font.
-	 * @param cstr
-	 *            the compound string
+	 * @param baseFont the baseline font. Each snippet will have this font or an
+	 *                 excursion from this font.
+	 * @param cstr     the compound string
 	 * @return the array of snippets
 	 */
-	public static Vector<Snippet> getSnippets(Font baseFont, String cstr,
-			Component component) {
+	public static Vector<Snippet> getSnippets(Font baseFont, String cstr, Component component) {
 
 		// first replace all special characters
 		cstr = UnicodeSupport.specialCharReplace(cstr);
@@ -181,8 +172,7 @@ public class Snippet {
 					if (newline == firstChar) { // new line
 						s = s.substring(1);
 						delX = 0;
-						delY += component.getFontMetrics(currentFont)
-								.getHeight();
+						delY += component.getFontMetrics(currentFont).getHeight();
 					}
 					if (base == firstChar) { // rest to base font
 						s = s.substring(1);
@@ -232,8 +222,7 @@ public class Snippet {
 					}
 				}
 
-				Snippet snippet = new Snippet(delX, delY + extra, currentFont,
-						s);
+				Snippet snippet = new Snippet(delX, delY + extra, currentFont, s);
 				snippets.add(snippet);
 				Dimension d = snippet.size(component);
 				delX += d.width;
@@ -267,8 +256,7 @@ public class Snippet {
 	}
 
 	private static Font smaller(Font font, int del) {
-		return new Font(font.getName(), font.getStyle(), Math.max(4,
-				font.getSize() - del));
+		return new Font(font.getName(), font.getStyle(), Math.max(4, font.getSize() - del));
 	}
 
 	private static Font bigger(Font font, int del) {
@@ -306,10 +294,8 @@ public class Snippet {
 	/**
 	 * This method breaks a string into an array of tokens.
 	 * 
-	 * @param str
-	 *            the string to decompose.
-	 * @param delimiter
-	 *            the delimiter
+	 * @param str       the string to decompose.
+	 * @param delimiter the delimiter
 	 * @return an array of tokens
 	 */
 
@@ -331,8 +317,7 @@ public class Snippet {
 		Font baseFont = Fonts.commonFont(Font.PLAIN, 12);
 		JLabel label = new JLabel("");
 
-		String strs[] = {
-				"\\\\This is a simple \\ntwo line string.\\gSome Greek\\rSome Roman.",
+		String strs[] = { "\\\\This is a simple \\ntwo line string.\\gSome Greek\\rSome Roman.",
 				"plain\\iitalic\\bbold italic\\Bitalic" };
 
 		for (String str : strs) {

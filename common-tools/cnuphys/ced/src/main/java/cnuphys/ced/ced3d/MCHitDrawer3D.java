@@ -54,8 +54,7 @@ public class MCHitDrawer3D extends Item3D {
 				showGemcXYZHits(drawable, PCAL.avgX(), PCAL.avgY(), PCAL.avgZ(), PCAL.pid(), 0);
 			}
 
-		}
-		else if (_panel3D instanceof CentralPanel3D) { // central detectors
+		} else if (_panel3D instanceof CentralPanel3D) { // central detectors
 
 		}
 

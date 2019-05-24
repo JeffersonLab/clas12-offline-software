@@ -20,16 +20,11 @@ public class Line3D extends Item3D {
 	/**
 	 * Create a simple 3D Line item for use on a Panel3D.
 	 * 
-	 * @param panel3D
-	 *            the owner 3D panel
-	 * @param p0
-	 *            one end point as [x, y, z]
-	 * @param p1
-	 *            other end point as [x, y, z]
-	 * @param color
-	 *            the color
-	 * @param lineWidth
-	 *            the line width
+	 * @param panel3D   the owner 3D panel
+	 * @param p0        one end point as [x, y, z]
+	 * @param p1        other end point as [x, y, z]
+	 * @param color     the color
+	 * @param lineWidth the line width
 	 */
 	public Line3D(Panel3D panel3D, float[] p0, float[] p1, Color color, float lineWidth) {
 		super(panel3D);
@@ -47,31 +42,22 @@ public class Line3D extends Item3D {
 			_unitVector[2] = delZ / length;
 		}
 
-		setColor(color);
+		setFillColor(color);
 		setLineWidth(lineWidth);
 	}
 
 	/**
 	 * Create a simple 3D Line item for use on a Panel3D.
 	 * 
-	 * @param panel3D
-	 *            the owner 3D panel
-	 * @param x1
-	 *            x coordinate of one end
-	 * @param y1
-	 *            y coordinate of one end
-	 * @param z1
-	 *            z coordinate of one end
-	 * @param x2
-	 *            x coordinate of other end
-	 * @param y2
-	 *            y coordinate of other end
-	 * @param z2
-	 *            z coordinate of other end
-	 * @param color
-	 *            the color
-	 * @param lineWidth
-	 *            the line width
+	 * @param panel3D   the owner 3D panel
+	 * @param x1        x coordinate of one end
+	 * @param y1        y coordinate of one end
+	 * @param z1        z coordinate of one end
+	 * @param x2        x coordinate of other end
+	 * @param y2        y coordinate of other end
+	 * @param z2        z coordinate of other end
+	 * @param color     the color
+	 * @param lineWidth the line width
 	 */
 	public Line3D(Panel3D panel3D, float x1, float y1, float z1, float x2, float y2, float z2, Color color,
 			float lineWidth) {
@@ -81,14 +67,10 @@ public class Line3D extends Item3D {
 	/**
 	 * Create a simple 3D Line item for use on a Panel3D.
 	 * 
-	 * @param panel3D
-	 *            the owner 3D panel
-	 * @param coords
-	 *            the endpoints as [x1, y1, z1, x2, y2, z2]
-	 * @param color
-	 *            the color
-	 * @param lineWidth
-	 *            the line width
+	 * @param panel3D   the owner 3D panel
+	 * @param coords    the endpoints as [x1, y1, z1, x2, y2, z2]
+	 * @param color     the color
+	 * @param lineWidth the line width
 	 */
 	public Line3D(Panel3D panel3D, float[] coords, Color color, float lineWidth) {
 		this(panel3D, coords[0], coords[1], coords[2], coords[3], coords[4], coords[5], color, lineWidth);
@@ -96,7 +78,7 @@ public class Line3D extends Item3D {
 
 	@Override
 	public void draw(GLAutoDrawable drawable) {
-		Support3D.drawLine(drawable, _p0, _p1, getColor(), getLineWidth());
+		Support3D.drawLine(drawable, _p0, _p1, getFillColor(), getLineWidth());
 	}
 
 	/**
@@ -156,10 +138,8 @@ public class Line3D extends Item3D {
 	/**
 	 * Add many lines to see how it handles them
 	 * 
-	 * @param p3D
-	 *            the panel
-	 * @param n
-	 *            the number to add
+	 * @param p3D the panel
+	 * @param n   the number to add
 	 */
 	public static void lineItemTest(Panel3D p3D, int n) {
 		for (int i = 0; i < n; i++) {

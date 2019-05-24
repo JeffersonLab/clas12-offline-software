@@ -34,34 +34,31 @@ public interface IContainer {
 	/**
 	 * Add a layer for containing items rendered on this container..
 	 * 
-	 * @param name
-	 *            the name of the logical layer. If one with that name already
-	 *            exists, it is returned.
+	 * @param name the name of the logical layer. If one with that name already
+	 *             exists, it is returned.
 	 */
 	public LogicalLayer addLogicalLayer(String name);
 
 	/**
 	 * Add a layer to this container.
 	 * 
-	 * @param layer
-	 *            the logical layer to add.
+	 * @param layer the logical layer to add.
 	 */
 	public void addLogicalLayer(LogicalLayer layer);
 
 	/**
 	 * Get the annotation layer for this obtainer.
 	 * 
-	 * @return the annotation layer for this obtainer. All drawing tools draw on
-	 *         the annotation layer, which is kept on top.
+	 * @return the annotation layer for this obtainer. All drawing tools draw on the
+	 *         annotation layer, which is kept on top.
 	 */
 	public LogicalLayer getAnnotationLayer();
 
 	/**
-	 * Gets a user layer by name. Do not use for the annotation layer-- for that
-	 * use getAnnotationLayer().
+	 * Gets a user layer by name. Do not use for the annotation layer-- for that use
+	 * getAnnotationLayer().
 	 * 
-	 * @param name
-	 *            the name of the logical layer.
+	 * @param name the name of the logical layer.
 	 * @return the layer, or <code>null</code>.
 	 */
 	public LogicalLayer getLogicalLayer(String name);
@@ -69,98 +66,79 @@ public interface IContainer {
 	/**
 	 * Remove a layer for containing items rendered on this container.
 	 * 
-	 * @param layer
-	 *            the layer to remove
+	 * @param layer the layer to remove
 	 */
 	public void removeLogicalLayer(LogicalLayer layer);
 
 	/**
 	 * This converts a screen or pixel point to a world point.
 	 * 
-	 * @param pp
-	 *            contains the local (screen-pixel) point.
-	 * @param wp
-	 *            will hold the resultant world point.
+	 * @param pp contains the local (screen-pixel) point.
+	 * @param wp will hold the resultant world point.
 	 */
 	public void localToWorld(Point pp, Point2D.Double wp);
 
 	/**
 	 * This converts a world point to a screen or pixel point.
 	 * 
-	 * @param pp
-	 *            will hold the resultant local (screen-pixel) point.
-	 * @param wp
-	 *            contains world point.
+	 * @param pp will hold the resultant local (screen-pixel) point.
+	 * @param wp contains world point.
 	 */
 	public void worldToLocal(Point pp, Point2D.Double wp);
 
 	/**
 	 * This converts a world rectangle to a screen or pixel rectangle.
 	 * 
-	 * @param r
-	 *            will hold the resultant local (screen-pixel) rectangle.
-	 * @param wr
-	 *            contains the world rectangle.
+	 * @param r  will hold the resultant local (screen-pixel) rectangle.
+	 * @param wr contains the world rectangle.
 	 */
 	public void worldToLocal(Rectangle r, Rectangle.Double wr);
 
 	/**
 	 * This converts a screen or local rectangle to a world rectangle.
 	 * 
-	 * @param r
-	 *            contains the local (screen-pixel) rectangle.
-	 * @param wr
-	 *            will hold the resultant world rectangle.
+	 * @param r  contains the local (screen-pixel) rectangle.
+	 * @param wr will hold the resultant world rectangle.
 	 */
 	public void localToWorld(Rectangle r, Rectangle.Double wr);
 
 	/**
 	 * This converts a world polygon to a screen or pixel polygon.
 	 * 
-	 * @param polygon
-	 *            will hold the resultant local (screen-pixel) polygon.
-	 * @param worldPolygon
-	 *            contains the world polygon.
+	 * @param polygon      will hold the resultant local (screen-pixel) polygon.
+	 * @param worldPolygon contains the world polygon.
 	 */
 	public void worldToLocal(Polygon polygon, WorldPolygon worldPolygon);
 
 	/**
 	 * This converts a screen or local polygon to a world polygon.
 	 * 
-	 * @param polygon
-	 *            contains the local (screen-pixel) polygon.
-	 * @param worldPolygon
-	 *            will hold the resultant world polygon.
+	 * @param polygon      contains the local (screen-pixel) polygon.
+	 * @param worldPolygon will hold the resultant world polygon.
 	 */
 	public void localToWorld(Polygon polygon, WorldPolygon worldPolygon);
 
 	/**
 	 * This converts a world point to a screen or pixel point.
 	 * 
-	 * @param pp
-	 *            will hold the resultant local (screen-pixel) point.
-	 * @param wx
-	 *            the world x coordinate.
-	 * @param wy
-	 *            the world y coordinate.
+	 * @param pp will hold the resultant local (screen-pixel) point.
+	 * @param wx the world x coordinate.
+	 * @param wy the world y coordinate.
 	 */
 	public void worldToLocal(Point pp, double wx, double wy);
 
 	/**
 	 * Pan the container.
 	 * 
-	 * @param dh
-	 *            the horizontal step in pixels.
-	 * @param dv
-	 *            the vertical step in pixels.
+	 * @param dh the horizontal step in pixels.
+	 * @param dv the vertical step in pixels.
 	 */
 	public void pan(int dh, int dv);
 
 	/**
 	 * Recenter the container at the point of a click.
 	 * 
-	 * @param pp
-	 *            the point in question. It will be the new center.
+	 * @param pp the point in question. It will be the new center.
 	 */
 	public void recenter(Point pp);
 
@@ -177,8 +155,7 @@ public interface IContainer {
 	/**
 	 * Convenience routine to scale the container.
 	 * 
-	 * @param scaleFactor
-	 *            the scale factor.
+	 * @param scaleFactor the scale factor.
 	 */
 	public void scale(double scaleFactor);
 
@@ -190,16 +167,14 @@ public interface IContainer {
 	/**
 	 * Get a scroll pane with a table for controlling logical layer visibility
 	 * 
-	 * @return a scroll pane with a table for controlling logical layer
-	 *         visibility
+	 * @return a scroll pane with a table for controlling logical layer visibility
 	 */
 	public VisibilityTableScrollPane getVisibilityTableScrollPane();
 
 	/**
 	 * This is called when we have completed a rubber banding. pane.
 	 * 
-	 * @param b
-	 *            The rubber band bounds.
+	 * @param b The rubber band bounds.
 	 */
 
 	public void rubberBanded(Rectangle b);
@@ -207,8 +182,7 @@ public interface IContainer {
 	/**
 	 * Find an item, if any, at the point.
 	 * 
-	 * @param lp
-	 *            The pixel point in question.
+	 * @param lp The pixel point in question.
 	 * @return the topmost satisfying item, or null.
 	 */
 	public AItem getItemAtPoint(Point lp);
@@ -216,8 +190,7 @@ public interface IContainer {
 	/**
 	 * Obtain a collection of all enclosed items across all layers.
 	 * 
-	 * @param rect
-	 *            the rectangle in question.
+	 * @param rect the rectangle in question.
 	 * @return all items on all layers enclosed by the rectangle.
 	 */
 
@@ -226,10 +199,9 @@ public interface IContainer {
 	/**
 	 * Find all items, if any, at the point.
 	 * 
-	 * @param lp
-	 *            the pixel point in question.
-	 * @return all items across all layers that contain the given point. It may
-	 *         be an empty vector, but it won't be <code>null</null>.
+	 * @param lp the pixel point in question.
+	 * @return all items across all layers that contain the given point. It may be
+	 *         an empty vector, but it won't be <code>null</null>.
 	 */
 	public Vector<AItem> getItemsAtPoint(Point lp);
 
@@ -243,48 +215,36 @@ public interface IContainer {
 	/**
 	 * Delete all selected items, across all layers.
 	 * 
-	 * @param container
-	 *            the container they lived on.
+	 * @param container the container they lived on.
 	 */
 	public void deleteSelectedItems(IContainer container);
 
 	/**
 	 * Select or deselect all items, across all layers.
 	 * 
-	 * @param select
-	 *            the selection flag.
+	 * @param select the selection flag.
 	 */
 	public void selectAllItems(boolean select);
 
 	/**
 	 * Zooms to the specified area.
 	 * 
-	 * @param xmin
-	 *            minimum x coordinate.
-	 * @param xmax
-	 *            maximum x coordinate.
-	 * @param ymin
-	 *            minimum y coordinate.
-	 * @param ymax
-	 *            maximum y coordinate.
+	 * @param xmin minimum x coordinate.
+	 * @param xmax maximum x coordinate.
+	 * @param ymin minimum y coordinate.
+	 * @param ymax maximum y coordinate.
 	 */
-	public void zoom(final double xmin, final double xmax, final double ymin,
-			final double ymax);
+	public void zoom(final double xmin, final double xmax, final double ymin, final double ymax);
 
 	/**
 	 * Reworld to the specified area.
 	 * 
-	 * @param xmin
-	 *            minimum x coordinate.
-	 * @param xmax
-	 *            maximum x coordinate.
-	 * @param ymin
-	 *            minimum y coordinate.
-	 * @param ymax
-	 *            maximum y coordinate.
+	 * @param xmin minimum x coordinate.
+	 * @param xmax maximum x coordinate.
+	 * @param ymin minimum y coordinate.
+	 * @param ymax maximum y coordinate.
 	 */
-	public void reworld(final double xmin, final double xmax,
-			final double ymin, final double ymax);
+	public void reworld(final double xmin, final double xmax, final double ymin, final double ymax);
 
 	/**
 	 * Get this container's tool bar.
@@ -296,25 +256,27 @@ public interface IContainer {
 	/**
 	 * Set this container's tool bar.
 	 * 
-	 * @param toolBar
-	 *            the new toolbar.
+	 * @param toolBar the new toolbar.
 	 */
 	public void setToolBar(BaseToolBar toolBar);
-	
+
 	/**
 	 * The active toolbar button changed.
+	 * 
 	 * @param activeButton the new active button.
 	 */
 	public void activeToolBarButtonChanged(ToolBarToggleButton activeButton);
-	
+
 	/**
 	 * Have you handled the print button so the default action is ignored.
+	 * 
 	 * @return <code>true</code> if the printer button was handled.
 	 */
 	public boolean handledPrint();
-	
+
 	/**
 	 * Have you handled the camera button so the default action is ignored.
+	 * 
 	 * @return <code>true</code> if the camera button was handled.
 	 */
 	public boolean handledCamera();
@@ -329,10 +291,8 @@ public interface IContainer {
 	/**
 	 * Convenience method to update the location string in the toolbar.
 	 * 
-	 * @param mouseEvent
-	 *            the causal event.
-	 * @param dragging
-	 *            <code>true</code> if we are dragging
+	 * @param mouseEvent the causal event.
+	 * @param dragging   <code>true</code> if we are dragging
 	 */
 	public void locationUpdate(MouseEvent mouseEvent, boolean dragging);
 
@@ -352,16 +312,14 @@ public interface IContainer {
 	/**
 	 * Set the container's view.
 	 * 
-	 * @param view
-	 *            the view to set.
+	 * @param view the view to set.
 	 */
 	public void setView(BaseView view);
 
 	/**
 	 * Sets the feedback pane. This is an optional alternative to a HUD.
 	 * 
-	 * @param feedbackPane
-	 *            the feedback pane.
+	 * @param feedbackPane the feedback pane.
 	 */
 	public void setFeedbackPane(FeedbackPane feedbackPane);
 
@@ -390,15 +348,14 @@ public interface IContainer {
 	/**
 	 * Set the optional YouAreHereItem.
 	 * 
-	 * @param youAreHereItem
-	 *            the youAreHereItem to set
+	 * @param youAreHereItem the youAreHereItem to set
 	 */
 	public void setYouAreHereItem(YouAreHereItem youAreHereItem);
 
 	/**
-	 * This is sometimes used as needed (i.e., not created until requested).
-	 * That will generally make it the topmost view--so it is good for things
-	 * like a reference point (YouAreHereItem).
+	 * This is sometimes used as needed (i.e., not created until requested). That
+	 * will generally make it the topmost view--so it is good for things like a
+	 * reference point (YouAreHereItem).
 	 * 
 	 * @return the glass layer.
 	 */
@@ -408,17 +365,14 @@ public interface IContainer {
 	 * Handle a file, one that probably result from a drag and drop or a double
 	 * click. Treat it like an "open".
 	 * 
-	 * @param file
-	 *            the file to handle.
+	 * @param file the file to handle.
 	 */
 	public void handleFile(File file);
 
 	/**
-	 * Convenience method for setting the dirty flag for all items on all
-	 * layers.
+	 * Convenience method for setting the dirty flag for all items on all layers.
 	 * 
-	 * @param dirty
-	 *            the new value of the dirty flag.
+	 * @param dirty the new value of the dirty flag.
 	 */
 	public void setDirty(boolean dirty);
 
@@ -444,26 +398,22 @@ public interface IContainer {
 	/**
 	 * Set the after-draw drawable for this container.
 	 * 
-	 * @param afterDraw
-	 *            the new after-draw drawable.
+	 * @param afterDraw the new after-draw drawable.
 	 */
 	public void setAfterDraw(IDrawable afterDraw);
 
 	/**
 	 * Set the before-draw drawable.
 	 * 
-	 * @param beforeDraw
-	 *            the new before-draw drawable.
+	 * @param beforeDraw the new before-draw drawable.
 	 */
 	public void setBeforeDraw(IDrawable beforeDraw);
 
 	/**
 	 * From a given screen rectangle, create an ellipse item.
 	 * 
-	 * @param layer
-	 *            the layer to put the item on
-	 * @param b
-	 *            the bounding screen rectangle, probably from rubber banding.
+	 * @param layer the layer to put the item on
+	 * @param b     the bounding screen rectangle, probably from rubber banding.
 	 * @return the new item
 	 */
 	public AItem createEllipseItem(LogicalLayer layer, Rectangle b);
@@ -471,10 +421,8 @@ public interface IContainer {
 	/**
 	 * From a given screen rectangle, create a rectangle item.
 	 * 
-	 * @param layer
-	 *            the layer to put the item on
-	 * @param b
-	 *            the screen rectangle, probably from rubber banding.
+	 * @param layer the layer to put the item on
+	 * @param b     the screen rectangle, probably from rubber banding.
 	 * @return the new item
 	 */
 	public AItem createRectangleItem(LogicalLayer layer, Rectangle b);
@@ -482,12 +430,9 @@ public interface IContainer {
 	/**
 	 * From two given screen points, create a line item
 	 * 
-	 * @param layer
-	 *            the layer to put the item on
-	 * @param p0
-	 *            one screen point, probably from rubber banding.
-	 * @param p1
-	 *            another screen point, probably from rubber banding.
+	 * @param layer the layer to put the item on
+	 * @param p0    one screen point, probably from rubber banding.
+	 * @param p1    another screen point, probably from rubber banding.
 	 * @return the new item
 	 */
 	public AItem createLineItem(LogicalLayer layer, Point p0, Point p1);
@@ -495,10 +440,8 @@ public interface IContainer {
 	/**
 	 * From a given screen polygon, create a polygon item.
 	 * 
-	 * @param layer
-	 *            the layer to put the item on
-	 * @param pp
-	 *            the screen polygon, probably from rubber banding.
+	 * @param layer the layer to put the item on
+	 * @param pp    the screen polygon, probably from rubber banding.
 	 * @return the new item
 	 */
 	public AItem createPolygonItem(LogicalLayer layer, Point pp[]);
@@ -506,10 +449,8 @@ public interface IContainer {
 	/**
 	 * From a given screen polyline, create a polyline item.
 	 * 
-	 * @param layer
-	 *            the layer to put the item on
-	 * @param pp
-	 *            the screen polyline, probably from rubber banding.
+	 * @param layer the layer to put the item on
+	 * @param pp    the screen polyline, probably from rubber banding.
 	 * @return the new item
 	 */
 	public AItem createPolylineItem(LogicalLayer layer, Point pp[]);
@@ -518,25 +459,19 @@ public interface IContainer {
 	 * Create a radarc item from the given parameters, probably obtained by
 	 * rubberbanding.
 	 * 
-	 * @param layer
-	 *            the layer to put the item on
-	 * @param pc
-	 *            the center of the arc
-	 * @param p1
-	 *            the point at the end of the first leg. Thus pc->p1 determing
-	 *            the radius.
-	 * @param arcAngle
-	 *            the angle COUNTERCLOCKWISE in degrees.
+	 * @param layer    the layer to put the item on
+	 * @param pc       the center of the arc
+	 * @param p1       the point at the end of the first leg. Thus pc->p1 determing
+	 *                 the radius.
+	 * @param arcAngle the angle COUNTERCLOCKWISE in degrees.
 	 * @return the new item
 	 */
-	public AItem createRadArcItem(LogicalLayer layer, Point pc, Point p1,
-			double arcAngle);
+	public AItem createRadArcItem(LogicalLayer layer, Point pc, Point p1, double arcAngle);
 
 	/**
 	 * Get a location string for a point
 	 * 
-	 * @param wp
-	 *            the world point in question
+	 * @param wp the world point in question
 	 * @return a location string for a point
 	 */
 	public String getLocationString(Point2D.Double wp);
@@ -568,16 +503,14 @@ public interface IContainer {
 	/**
 	 * Set the world system (does not cause redraw)
 	 * 
-	 * @param wr
-	 *            the new world system
+	 * @param wr the new world system
 	 */
 	public void setWorldSystem(Rectangle2D.Double wr);
 
 	/**
 	 * Obtain the inset rectangle. Insets are the inert region around the
-	 * container's active area. Often there are no insets. Sometimes they are
-	 * used so that text can be written in the inset area, such as for plot
-	 * view.
+	 * container's active area. Often there are no insets. Sometimes they are used
+	 * so that text can be written in the inset area, such as for plot view.
 	 * 
 	 * @return the inset rectangle.
 	 */
@@ -586,32 +519,28 @@ public interface IContainer {
 	/**
 	 * Set the left margin for containers with nonzero insets.
 	 * 
-	 * @param lMargin
-	 *            the left margin
+	 * @param lMargin the left margin
 	 */
 	public void setLeftMargin(int lMargin);
 
 	/**
 	 * Set the top margin for containers with nonzero insets.
 	 * 
-	 * @param tMargin
-	 *            the top margin
+	 * @param tMargin the top margin
 	 */
 	public void setTopMargin(int tMargin);
 
 	/**
 	 * Set the right margin for containers with nonzero insets.
 	 * 
-	 * @param rMargin
-	 *            the right margin
+	 * @param rMargin the right margin
 	 */
 	public void setRightMargin(int rMargin);
 
 	/**
 	 * Set the bottom margin for containers with nonzero insets.
 	 * 
-	 * @param bMargin
-	 *            the bottom margin
+	 * @param bMargin the bottom margin
 	 */
 	public void setBottomMargin(int bMargin);
 

@@ -25,28 +25,25 @@ import cnuphys.ced.event.IAccumulationListener;
  *
  */
 @SuppressWarnings("serial")
-public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
-		IClasIoEventListener, IAccumulationListener {
-	
+public class ClasIoPresentBankPanel extends JPanel
+		implements ActionListener, IClasIoEventListener, IAccumulationListener {
+
 	// the event manager
 	private ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
 	// hash table
-	private Hashtable<String, ActionLabel> _alabels = new Hashtable<String, ActionLabel>(
-			193);
+	private Hashtable<String, ActionLabel> _alabels = new Hashtable<String, ActionLabel>(193);
 
 	// the node table
 	private NodeTable _nodeTable;
 
-	private Hashtable<String, ClasIoBankDialog> _dataBanks = new Hashtable<String, ClasIoBankDialog>(
-			193);
+	private Hashtable<String, ClasIoBankDialog> _dataBanks = new Hashtable<>(193);
 
 	/**
-	 * This panel holds all the known banks in a grid of buttons. Banks present
-	 * will be clickable, and will cause the table to scroll to that name
+	 * This panel holds all the known banks in a grid of buttons. Banks present will
+	 * be clickable, and will cause the table to scroll to that name
 	 * 
-	 * @param nodeTable
-	 *            the table
+	 * @param nodeTable the table
 	 */
 	public ClasIoPresentBankPanel(NodeTable nodeTable) {
 		_nodeTable = nodeTable;
@@ -85,12 +82,12 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 				boolean inCurrent = _eventManager.isBankInCurrentEvent(s);
 				alabel.setEnabled(inCurrent);
 
-				ClasIoBankDialog bd = _dataBanks.get(s);
-				if (bd != null) {
+				ClasIoBankDialog bdlog = _dataBanks.get(s);
+				if (bdlog != null) {
 					if (inCurrent) {
-						bd.update();
+						bdlog.update();
 					} else {
-						bd.clear();
+						bdlog.clear();
 					}
 				}
 			}
@@ -112,14 +109,17 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 					if (clickCount == 1) {
 						_nodeTable.makeNameVisible(label);
 					} else if (clickCount == 2) {
-						ClasIoBankDialog bd = _dataBanks.get(label);
+						ClasIoBankDialog bdlog = _dataBanks.get(label);
 
-						if (bd == null) {
-							bd = new ClasIoBankDialog(label);
-							_dataBanks.put(label, bd);
+						if (bdlog == null) {
+							bdlog = new ClasIoBankDialog(label);
+							_dataBanks.put(label, bdlog);
 						}
-						bd.update();
-						bd.setVisible(true);
+						bdlog.update();
+
+						if (!bdlog.isVisible()) {
+							bdlog.setVisible(true);
+						}
 					}
 				}
 			}
@@ -160,7 +160,6 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 		// _nodeTable.makeNameVisible(ae.getActionCommand());
 	}
 
-	
 	@Override
 	public void newClasIoEvent(DataEvent event) {
 		if (!_eventManager.isAccumulating()) {
@@ -186,9 +185,10 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 			break;
 		}
 	}
-	
+
 	/**
 	 * Change the event source type
+	 * 
 	 * @param source the new source: File, ET
 	 */
 	@Override
@@ -197,12 +197,13 @@ public class ClasIoPresentBankPanel extends JPanel implements ActionListener,
 
 	/**
 	 * Tests whether this listener is interested in events while accumulating
-	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 * 
+	 * @return <code>true</code> if this listener is NOT interested in events while
+	 *         accumulating
 	 */
 	@Override
 	public boolean ignoreIfAccumulating() {
 		return true;
 	}
-
 
 }

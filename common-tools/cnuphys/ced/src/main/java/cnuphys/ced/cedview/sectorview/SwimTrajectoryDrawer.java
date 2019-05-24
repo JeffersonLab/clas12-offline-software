@@ -23,10 +23,8 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	/**
 	 * Actual drawing method
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the base container
+	 * @param g         the graphics context
+	 * @param container the base container
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
@@ -36,74 +34,65 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	}
 
 	/**
-	 * Here we have a chance to veto a trajectory. For example, we may decide
-	 * that the trajectory won't appear on this view (assuming a view owns this
-	 * drawer) and so don't bother to compute it. The default implementation
-	 * vetoes nothing.
+	 * Here we have a chance to veto a trajectory. For example, we may decide that
+	 * the trajectory won't appear on this view (assuming a view owns this drawer)
+	 * and so don't bother to compute it. The default implementation vetoes nothing.
 	 * 
-	 * @param trajectory
-	 *            the trajectory to test.
+	 * @param trajectory the trajectory to test.
 	 * @return <code>true</code> if this trajectory is vetoed.
 	 */
 	@Override
 	protected boolean veto(SwimTrajectory trajectory) {
-	//	if (true) return false;
-		
-		if ((trajectory.userObject != null)
-				&& (trajectory.userObject instanceof SectorView)) {
+		// if (true) return false;
+
+		if ((trajectory.userObject != null) && (trajectory.userObject instanceof SectorView)) {
 			return (trajectory.userObject != _view);
 		}
 
-		
-		
 		boolean onThisView = _view.inThisView(getMostCommonSector(trajectory));
-	//	System.err.println("On this view " + _view.getTitle() + "  " + onThisView);
+		// System.err.println("On this view " + _view.getTitle() + " " + onThisView);
 		return !onThisView;
 	}
-	
+
 	/**
-	 * Get the average phi for this trajectory based on positions, not
-	 * directions
+	 * Get the average phi for this trajectory based on positions, not directions
 	 * 
 	 * @return the average phi value in degrees
 	 */
 	public int getMostCommonSector(SwimTrajectory traj) {
-		
-		int sector[] = {0,0,0,0,0,0,0};
-		
-	//	System.err.println("\n--------------");
-				
+
+		int sector[] = { 0, 0, 0, 0, 0, 0, 0 };
+
+		// System.err.println("\n--------------");
+
 		int step = 1;
 		for (int i = step; i < traj.size(); i += step) {
 			double pos[] = traj.get(i);
 			double x = pos[SwimTrajectory.X_IDX];
 			double y = pos[SwimTrajectory.Y_IDX];
 			double tp = FastMath.atan2Deg(y, x);
-			
-	//		System.err.println("  >>  SECTOR: " + GeometryManager.getSector(tp));
+
+			// System.err.println(" >> SECTOR: " + GeometryManager.getSector(tp));
 			sector[GeometryManager.getSector(tp)] += 1;
 		}
 
 		int maxSector = 1;
-		
+
 		for (int i = 2; i <= 6; i++) {
 			if (sector[i] > sector[maxSector]) {
 				maxSector = i;
 			}
 		}
-		
-	//	System.err.println("MAX SECTOR: " + maxSector);
+
+		// System.err.println("MAX SECTOR: " + maxSector);
 		return maxSector;
 	}
-	
 
 	/**
 	 * From detector xyz get the projected world point.
 	 * 
-	 * @param v3d
-	 *            the 3D vector (meters)
-	 * @param wp
-	 *            the projected world point.
+	 * @param v3d the 3D vector (meters)
+	 * @param wp  the projected world point.
 	 */
 	@Override
 	public void project(double[] v3d, Point2D.Double wp) {
@@ -137,19 +126,17 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 
 	@Override
 	public boolean acceptSimpleTrack(SwimTrajectory2D trajectory) {
-		
-		String source  = trajectory.getSource().toLowerCase();
+
+		String source = trajectory.getSource().toLowerCase();
 
 		if (source.contains("hbtracks")) {
 			return _view.showHB();
-		}
-		else if (source.contains("tbtracks")) {
+		} else if (source.contains("tbtracks")) {
 			return _view.showTB();
-			}
-		else if (source.contains("cvtrec")) {
+		} else if (source.contains("cvtrec")) {
 			return _view.showCVTTracks();
 		}
-		
+
 		return true;
 	}
 

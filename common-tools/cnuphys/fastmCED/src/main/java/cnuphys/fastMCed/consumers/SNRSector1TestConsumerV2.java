@@ -21,13 +21,13 @@ public class SNRSector1TestConsumerV2 extends ASNRConsumer {
 
 	private long totalFoundTime;
 	int numFound;
-	
+
 	private long totalMissedTime;
 	int numMissed;
 
 	int numTrialFound = 100000;
 	int numTrialMissed = 100;
-	
+
 	int streamNFound;
 	int streamNMissed;
 
@@ -41,31 +41,28 @@ public class SNRSector1TestConsumerV2 extends ASNRConsumer {
 		if (reason == StreamReason.STOPPED) {
 			double ntot = streamNMissed + streamNFound;
 			if (ntot > 1) {
-				System.err.println("percentage of missed = " + (100. * ((double) streamNMissed)) / ntot);
+				System.err.println("percentage of missed = " + (100. * (streamNMissed)) / ntot);
 			}
 		}
 	}
 
-
 	@Override
 	public StreamProcessStatus streamingPhysicsEvent(PhysicsEvent event, List<ParticleHits> particleHits) {
-		
+
 		if (_inDictionary == null) {
 			loadOrCreateDictionary(SNRDictionary.IN_BENDER);
 		}
 
 		if (snr.segmentsInAllSuperlayers(0, SNRManager.RIGHT)) {
-			String hash = snr.hashKey(0, SNRManager.RIGHT); 
+			String hash = snr.hashKey(0, SNRManager.RIGHT);
 
 			// see if this key is in the dictionary. If it is we'll get
-			//  a hash of a GeneratedParticleRec back
+			// a hash of a GeneratedParticleRec back
 			String gprHash = _inDictionary.get(hash);
 
-
-			if (gprHash != null) { //match
+			if (gprHash != null) { // match
 				streamNFound++;
-			}
-			else {
+			} else {
 				String nearestKey = _inDictionary.nearestKey(hash);
 				gprHash = _inDictionary.get(nearestKey);
 
@@ -85,35 +82,31 @@ public class SNRSector1TestConsumerV2 extends ASNRConsumer {
 		if ((_inDictionary != null) && !_inDictionary.isEmpty()) {
 			if (PhysicsEventManager.getInstance().getEventGenerator() instanceof RandomEventGenerator) {
 
-				//test is for sector 1 right leaners only
+				// test is for sector 1 right leaners only
 				if (snr.segmentsInAllSuperlayers(0, SNRManager.RIGHT)) {
-					String hash = snr.hashKey(0, SNRManager.RIGHT); 
+					String hash = snr.hashKey(0, SNRManager.RIGHT);
 
 					// see if this key is in the dictionary. If it is we'll get
-					//  a hash of a GeneratedParticleRec back
+					// a hash of a GeneratedParticleRec back
 					String gprHash = _inDictionary.get(hash);
 
-					if (gprHash != null) { //match
-						
+					if (gprHash != null) { // match
+
 						System.err.println("Found Time Test");
 
-						long startTime = mxbean.getCurrentThreadUserTime(); //ns
-						
-						
-						
-						
+						long startTime = mxbean.getCurrentThreadUserTime(); // ns
+
 						for (int i = 0; i < numTrialFound; i++) {
-							hash = snr.hashKey(0, SNRManager.RIGHT); 
+							hash = snr.hashKey(0, SNRManager.RIGHT);
 							gprHash = _inDictionary.get(hash);
 							GeneratedParticleRecord rpr = GeneratedParticleRecord.fromHash(gprHash);
 						}
 						totalFoundTime += (mxbean.getCurrentThreadUserTime() - startTime);
 						numFound += numTrialFound;
-						double avgTimeFound = ((double)totalFoundTime)/numFound;
-						System.err.println("Done found time test. Average time = " + (avgTimeFound/1000000) + " ms");
-						
-						
-					} else {  //no match
+						double avgTimeFound = ((double) totalFoundTime) / numFound;
+						System.err.println("Done found time test. Average time = " + (avgTimeFound / 1000000) + " ms");
+
+					} else { // no match
 						System.err.println("Missed Time Test");
 						long startTime = mxbean.getCurrentThreadUserTime();
 						for (int i = 0; i < numTrialMissed; i++) {
@@ -123,9 +116,9 @@ public class SNRSector1TestConsumerV2 extends ASNRConsumer {
 						}
 						totalMissedTime += (mxbean.getCurrentThreadUserTime() - startTime);
 						numMissed += numTrialMissed;
-						double avgTimeMissed = ((double)totalMissedTime)/numMissed;
-						System.err.println("Done missed time test. Average time = " + (avgTimeMissed/1000000) + " ms");
-
+						double avgTimeMissed = ((double) totalMissedTime) / numMissed;
+						System.err
+								.println("Done missed time test. Average time = " + (avgTimeMissed / 1000000) + " ms");
 
 					}
 				}
@@ -133,6 +126,5 @@ public class SNRSector1TestConsumerV2 extends ASNRConsumer {
 			} // random generator
 		}
 	}
-
 
 }

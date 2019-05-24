@@ -1,6 +1,5 @@
 package cnuphys.magfield;
 
-import org.jlab.clas.clas.math.FastMath;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -70,8 +69,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 	 * Create a canvas
 	 * 
 	 * @param xmin
-	 * @param perpMin
-	 *            min value in direction perpendicular to z (the beam direction)
+	 * @param perpMin min value in direction perpendicular to z (the beam direction)
 	 * @param width
 	 * @param height
 	 */
@@ -104,7 +102,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 
 		};
 		MagneticFields.getInstance().addMagneticFieldChangeListener(mflistener);
-		
+
 		new ComponentZoomer(this);
 	}
 
@@ -152,8 +150,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 	/**
 	 * Draw a single trajectory
 	 * 
-	 * @param g
-	 *            the graphics context
+	 * @param g      the graphics context
 	 * @param bounds
 	 */
 	protected void drawTrajectories(Graphics g, Rectangle bounds) {
@@ -443,14 +440,11 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 		}
 	}
 
-
 	/**
 	 * This converts a screen or pixel point to a world point.
 	 * 
-	 * @param pp
-	 *            contains the local (screen-pixel) point.
-	 * @param wp
-	 *            will hold the resultant world point.
+	 * @param pp contains the local (screen-pixel) point.
+	 * @param wp will hold the resultant world point.
 	 */
 	@Override
 	public void localToWorld(Point pp, Point.Double wp) {
@@ -462,10 +456,8 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 	/**
 	 * This converts a world point to a screen or pixel point.
 	 * 
-	 * @param pp
-	 *            will hold the resultant local (screen-pixel) point.
-	 * @param wp
-	 *            contains world point.
+	 * @param pp will hold the resultant local (screen-pixel) point.
+	 * @param wp contains world point.
 	 */
 	@Override
 	public void worldToLocal(Point pp, Point.Double wp) {
@@ -573,8 +565,8 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 
 					double bmag = Math.sqrt(Bx * Bx + By * By + Bz * Bz);
 					s = String.format(
-							"  xyz ( %-4.2f,  %-4.2f,  %-4.2f) cyl ( %-4.2f,  %-4.2f,  %-4.2f) B %-4.2f (%-4.2f, %-4.2f,  %-4.2f)",
-							xyz[0], xyz[1], xyz[2], phi, rho, xyz[2], bmag / 10, Bx / 10, By / 10, Bz / 10);
+							"  xyz ( %-4.2f,  %-4.2f,  %-4.2f) cyl ( %-4.2f,  %-4.2f,  %-4.2f) B %-9.5f (%-9.5f, %-9.5f,  %-9.5f) kG",
+							xyz[0], xyz[1], xyz[2], phi, rho, xyz[2], bmag, Bx, By, Bz);
 
 					_field.gradient((float) (_workPoint.y), 0f, (float) (_workPoint.x), _workResult);
 					float gx = _workResult[0];
@@ -651,7 +643,7 @@ public class MagneticFieldCanvas extends JComponent implements IComponentZoomabl
 	@Override
 	public void setWorldSystem(Double wr) {
 		_worldSystem.setRect(wr.x, wr.y, wr.width, wr.height);
-		
+
 	}
 
 }

@@ -25,8 +25,7 @@ public class DrawingView extends BaseView implements IFeedbackProvider {
 	/**
 	 * Create a drawing view
 	 * 
-	 * @param keyVals
-	 *            variable set of arguments.
+	 * @param keyVals variable set of arguments.
 	 */
 	private DrawingView(Object... keyVals) {
 		super(keyVals);
@@ -55,17 +54,12 @@ public class DrawingView extends BaseView implements IFeedbackProvider {
 		int height = d.height;
 
 		// create the view
-		view = new DrawingView(
-				PropertySupport.WORLDSYSTEM,
-				new Rectangle2D.Double(0.0, 0.0, width, height),
-				PropertySupport.WIDTH,
-				width, // container width, not total view width
-				PropertySupport.HEIGHT,
-				height, // container height, not total view width
-				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS,
-				BaseToolBar.EVERYTHING, PropertySupport.VISIBLE, true,
-				PropertySupport.BACKGROUND, Color.white, PropertySupport.TITLE, " Drawing View ",
-				PropertySupport.STANDARDVIEWDECORATIONS, true);
+		view = new DrawingView(PropertySupport.WORLDSYSTEM, new Rectangle2D.Double(0.0, 0.0, width, height),
+				PropertySupport.WIDTH, width, // container width, not total view width
+				PropertySupport.HEIGHT, height, // container height, not total view width
+				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS, BaseToolBar.EVERYTHING,
+				PropertySupport.VISIBLE, true, PropertySupport.BACKGROUND, Color.white, PropertySupport.TITLE,
+				" Drawing View ", PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view.pack();
 		return view;
@@ -75,16 +69,12 @@ public class DrawingView extends BaseView implements IFeedbackProvider {
 	 * Some view specific feedback. Should always call super.getFeedbackStrings
 	 * first.
 	 * 
-	 * @param container
-	 *            the base container for the view.
-	 * @param screenPoint
-	 *            the pixel point
-	 * @param worldPoint
-	 *            the corresponding world location.
+	 * @param container   the base container for the view.
+	 * @param screenPoint the pixel point
+	 * @param worldPoint  the corresponding world location.
 	 */
 	@Override
-	public void getFeedbackStrings(IContainer container, Point pp,
-			Point2D.Double wp, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
 
 	}
 

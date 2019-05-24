@@ -292,9 +292,9 @@ public class Converter {
 									System.err.println(
 											"PHIINDX: " + phiIndex + "  RHOINDX: " + rhoIndex + "  ZINDX:  " + iVal);
 
-									double x = Double.parseDouble(tokens[0]) /10;
-									double y = Double.parseDouble(tokens[1]) /10;
-									double z = Double.parseDouble(tokens[2]) /10;
+									double x = Double.parseDouble(tokens[0]) / 10;
+									double y = Double.parseDouble(tokens[1]) / 10;
+									double z = Double.parseDouble(tokens[2]) / 10;
 									double phi = Math.toDegrees(Math.atan2(y, x));
 									double rho = Math.hypot(x, y);
 									System.err.println("PHI: " + phi + "   rho: " + rho + "   z: " + z);

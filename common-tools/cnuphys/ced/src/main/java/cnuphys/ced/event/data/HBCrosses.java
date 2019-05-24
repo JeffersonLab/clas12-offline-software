@@ -1,15 +1,16 @@
 package cnuphys.ced.event.data;
 
 public class HBCrosses extends Crosses {
-	
+
 	private static HBCrosses _instance;
-	
+
 	private HBCrosses() {
 		super("HitBasedTrkg::HBCrosses");
 	}
-	
+
 	/**
 	 * Public access to the singleton
+	 * 
 	 * @return the singleton
 	 */
 	public static HBCrosses getInstance() {
@@ -18,6 +19,5 @@ public class HBCrosses extends Crosses {
 		}
 		return _instance;
 	}
-
 
 }

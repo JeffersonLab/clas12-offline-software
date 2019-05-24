@@ -1,0 +1,80 @@
+[
+    {
+        "entries": [
+            {
+                "info": "index of the hit in the specific detector bank", 
+                "name": "index", 
+                "type": "S"
+            }, 
+            {
+                "info": "row number in the particle bank hit is associated with", 
+                "name": "pindex", 
+                "type": "S"
+            }, 
+            {
+                "info": "Detector ID, as defined in org.jlab.detector.base.DetectorType", 
+                "name": "detector", 
+                "type": "B"
+            }, 
+            {
+                "info": "Sector of the Detector hit", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "Number of photoelectrons from Cherenkov radiation", 
+                "name": "nphe", 
+                "type": "F"
+            }, 
+            {
+                "info": "Time associated with the hit (ns)", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "Path from vertex to the hit position (cm)", 
+                "name": "path", 
+                "type": "F"
+            }, 
+            {
+                "info": "Chi2 (or quality) of hit-track matching", 
+                "name": "chi2", 
+                "type": "F"
+            }, 
+            {
+                "info": "X coordinate of the hit (cm)", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "Y coordinate of the hit (cm)", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "Z coordinate of the hit (cm)", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "Expected Theta Resolution (deg)", 
+                "name": "dtheta", 
+                "type": "F"
+            }, 
+            {
+                "info": "Expected Phi Resolution (deg)", 
+                "name": "dphi", 
+                "type": "F"
+            }, 
+            {
+                "info": "hit status", 
+                "name": "status", 
+                "type": "S"
+            }
+        ], 
+        "group": 300, 
+        "info": "Cherenkov Responses for Particles bank", 
+        "item": 33, 
+        "name": "REC::Cherenkov"
+    }
+]

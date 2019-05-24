@@ -63,18 +63,17 @@ public final class Desktop extends JDesktopPane {
 
 	// the singleton
 	private static Desktop instance;
-	
-	//optional after drawer
+
+	// optional after drawer
 	private IDrawable _afterDraw;
 
 	/**
 	 * Create a desktop pane.
 	 * 
-	 * @param background
-	 *            optional background color.
-	 * @param backgroundImage
-	 *            optional background image. Will be tiled. Probably reference
-	 *            into a jar file, such as "images/background.png".
+	 * @param background      optional background color.
+	 * @param backgroundImage optional background image. Will be tiled. Probably
+	 *                        reference into a jar file, such as
+	 *                        "images/background.png".
 	 */
 	private Desktop(Color background, String backgroundImage) {
 		initializeLookAndFeel();
@@ -94,8 +93,7 @@ public final class Desktop extends JDesktopPane {
 			_icon = ImageManager.getInstance().loadImageIcon(backgroundImage);
 			if (_icon != null) {
 				tile = true;
-				_tileSize = new Dimension(_icon.getIconWidth(),
-						_icon.getIconHeight());
+				_tileSize = new Dimension(_icon.getIconWidth(), _icon.getIconHeight());
 				if ((_tileSize.width < 2) || (_tileSize.height < 2)) {
 					tile = false;
 				}
@@ -107,11 +105,10 @@ public final class Desktop extends JDesktopPane {
 	/**
 	 * Create a desktop pane.
 	 * 
-	 * @param background
-	 *            optional background color.
-	 * @param backgroundImage
-	 *            optional background image. Will be tiled. Probably reference
-	 *            into a jar file, such as "images/background.png".
+	 * @param background      optional background color.
+	 * @param backgroundImage optional background image. Will be tiled. Probably
+	 *                        reference into a jar file, such as
+	 *                        "images/background.png".
 	 */
 	public static Desktop createDesktop(Color background, String backgroundImage) {
 		if (instance == null) {
@@ -130,11 +127,10 @@ public final class Desktop extends JDesktopPane {
 	}
 
 	/**
-	 * The paint method for the desktop. This is where the background
-	 * image gets tiled
+	 * The paint method for the desktop. This is where the background image gets
+	 * tiled
 	 * 
-	 * @param g
-	 *            the graphics context.
+	 * @param g the graphics context.
 	 */
 	@Override
 	public void paintComponent(Graphics g) {
@@ -144,7 +140,7 @@ public final class Desktop extends JDesktopPane {
 		} else {
 			super.paintComponent(g);
 		}
-		
+
 		if (_afterDraw != null) {
 			_afterDraw.draw(g, null);
 		}
@@ -152,17 +148,17 @@ public final class Desktop extends JDesktopPane {
 
 	/**
 	 * Set an "after" draw
+	 * 
 	 * @param afterDraw the drawable
 	 */
 	public void setAfterDraw(IDrawable afterDraw) {
 		_afterDraw = afterDraw;
 	}
-	
+
 	/**
 	 * Tile the background.
 	 * 
-	 * @param g
-	 *            the graphics context
+	 * @param g the graphics context
 	 */
 	private void tile(Graphics g) {
 
@@ -216,8 +212,7 @@ public final class Desktop extends JDesktopPane {
 	/**
 	 * Refresh all or just the top view.
 	 * 
-	 * @param opt
-	 *            one of the class constants such as ALL_VIEWS.
+	 * @param opt one of the class constants such as ALL_VIEWS.
 	 */
 	public void refresh(int opt) {
 		if (opt == ALL_VIEWS) {
@@ -262,8 +257,7 @@ public final class Desktop extends JDesktopPane {
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-		}
-		else {
+		} else {
 			Log.getInstance().info("Did not load a configuration file from [" + file.getPath() + "]");
 		}
 	}
@@ -286,8 +280,7 @@ public final class Desktop extends JDesktopPane {
 	}
 
 	/**
-	 * Write the configuration file that preserves the current arrangement of
-	 * views.
+	 * Write the configuration file that preserves the current arrangement of views.
 	 */
 	public void writeConfigurationFile() {
 
@@ -295,8 +288,7 @@ public final class Desktop extends JDesktopPane {
 
 		if (file.exists()) {
 			int answer = JOptionPane.showConfirmDialog(null,
-					file.getAbsolutePath()
-							+ "  already exists.\nDo you want to overwrite it?",
+					file.getAbsolutePath() + "  already exists.\nDo you want to overwrite it?",
 					"Overwite Existing File?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
 					ImageManager.cnuIcon);
 
@@ -343,9 +335,8 @@ public final class Desktop extends JDesktopPane {
 
 		if (file.exists()) {
 			ImageIcon icon = ImageManager.getInstance().loadImageIcon("images/cnuicon.png");
-			int answer = JOptionPane.showConfirmDialog(null,
-					"Confim delete operation (this can not be undone).",
-					"Delete Configuration?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, 
+			int answer = JOptionPane.showConfirmDialog(null, "Confim delete operation (this can not be undone).",
+					"Delete Configuration?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
 					ImageManager.cnuIcon);
 
 			if (answer != JFileChooser.APPROVE_OPTION) {
@@ -364,18 +355,17 @@ public final class Desktop extends JDesktopPane {
 		LookAndFeelInfo[] lnfinfo = UIManager.getInstalledLookAndFeels();
 
 		String preferredLnF[];
-		
+
 		if (Environment.getInstance().isWindows()) {
-			String arry[] = { UIManager.getSystemLookAndFeelClassName(), "Metal", "CDE/Motif", "Nimbus", 
+			String arry[] = { UIManager.getSystemLookAndFeelClassName(), "Metal", "CDE/Motif", "Nimbus",
+					UIManager.getCrossPlatformLookAndFeelClassName() };
+			preferredLnF = arry;
+		} else {
+			String arry[] = { UIManager.getSystemLookAndFeelClassName(), "Windows",
 					UIManager.getCrossPlatformLookAndFeelClassName() };
 			preferredLnF = arry;
 		}
-		else {
-			String arry[] = { UIManager.getSystemLookAndFeelClassName(),
-					"Windows", UIManager.getCrossPlatformLookAndFeelClassName() };
-			preferredLnF = arry;
-		}
-		
+
 		if ((lnfinfo == null) || (lnfinfo.length < 1)) {
 			System.err.println("No installed look and feels");
 			return;
@@ -394,15 +384,14 @@ public final class Desktop extends JDesktopPane {
 						UIManager.setLookAndFeel(lnfinfo[i].getClassName());
 						UIDefaults defaults = UIManager.getDefaults();
 
-						defaults.put("RadioButtonMenuItem.checkIcon",
-								MetalIconFactory.getRadioButtonMenuItemIcon());
+						defaults.put("RadioButtonMenuItem.checkIcon", MetalIconFactory.getRadioButtonMenuItemIcon());
 						return;
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
 			}
-		} //end for
+		} // end for
 	}
 
 	/**

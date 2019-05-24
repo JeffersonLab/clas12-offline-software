@@ -1,0 +1,50 @@
+[
+    {
+        "name": "RUN::config",
+        "group": 10000,
+        "item" : 11,
+        "info": "Run Configuration",
+        "entries": [
+            {"name":"run",          "type":"I", "info":"RUN number from CODA or GEMC"},
+            {"name":"event",        "type":"I", "info":"Event number"},
+            {"name":"unixtime",     "type":"I", "info":"Unix time (seconds)"},
+            {"name":"trigger",      "type":"L", "info":"trigger bits"},
+            {"name":"timestamp",    "type":"L", "info":"time stamp from Trigger Interface (TI) board (4 nanoseconds)"},
+            {"name":"type",         "type":"B", "info":"type of the run"},
+            {"name":"mode",         "type":"B", "info":"run mode"},
+            {"name":"torus",        "type":"F", "info":"torus setting relative value(-1.0 to 1.0)"},
+            {"name":"solenoid",     "type":"F", "info":"solenoid field setting (-1.0 to 1.0)"}
+        ]
+    },
+    {
+        "name": "RUN::rf",
+        "group": 10000,
+        "item": 12,
+        "info": "RF information",
+        "entries": [
+            {"name":"id",   "id":1, "type":"S", "info":"id of the RF signal"},
+            {"name":"time", "id":2, "type":"F", "info":"time of RF signal"}
+        ]
+    },
+    {
+        "name": "RUN::trigger",
+        "group": 10000,
+        "item": 13,
+        "info": "RUN trigger information",
+        "entries": [
+            {"name":"id",       "type":"I", "info":"id"},
+            {"name":"trigger",  "type":"I", "info":"trigger word"}
+        ]
+    },
+    {
+        "name": "RUN::scaler",
+        "group": 10000,
+        "item": 14,
+        "info": "Scaler information",
+        "entries": [
+            {"name":"fcupgated",  "type":"F", "info":"Beam charge, integrated from beginning of run, gated (nano-Coulomb)"},
+            {"name":"fcup",       "type":"F", "info":"Beam charge, integrated from beginning of run, ungated (nano-Coulomb)"},
+            {"name":"livetime",   "type":"F", "info":"Livetime during one scaler period"}
+        ]
+    }
+]

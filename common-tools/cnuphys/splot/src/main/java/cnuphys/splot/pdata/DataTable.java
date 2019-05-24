@@ -25,15 +25,13 @@ import cnuphys.splot.plot.Environment;
 
 public class DataTable extends JTable {
 
-
 	private double _currentValue = Double.NaN;
 
 	// a scroll pane for this table
 	private JScrollPane _scrollPane;
 
 	// the table font
-	protected static Font _tableFont = Environment.getInstance()
-			.getCommonFont(10);
+	protected static Font _tableFont = Environment.getInstance().getCommonFont(10);
 
 	public DataTable(DataSet dataSet) {
 		super(dataSet);
@@ -55,8 +53,7 @@ public class DataTable extends JTable {
 		header.setPreferredSize(new Dimension(100, 20));
 		header.setBackground(Color.orange);
 		header.setBorder(BorderFactory.createLineBorder(Color.black));
-		DefaultTableCellRenderer dtcr = (DefaultTableCellRenderer) header
-				.getDefaultRenderer();
+		DefaultTableCellRenderer dtcr = (DefaultTableCellRenderer) header.getDefaultRenderer();
 		dtcr.setHorizontalAlignment(SwingConstants.CENTER);
 		header.setDefaultRenderer(dtcr);
 
@@ -100,9 +97,9 @@ public class DataTable extends JTable {
 
 	protected void selectedCell(int row, int col) {
 		try {
-			_currentValue = Double
-					.parseDouble((String) getModel().getValueAt(row, col));
-		} catch (Exception e) {
+			_currentValue = Double.parseDouble((String) getModel().getValueAt(row, col));
+		}
+		catch (Exception e) {
 			_currentValue = Double.NaN;
 		}
 	}
@@ -140,7 +137,8 @@ public class DataTable extends JTable {
 		DataSet ds = null;
 		try {
 			ds = new DataSet(DataSetType.XYEXYE, names);
-		} catch (DataSetException e1) {
+		}
+		catch (DataSetException e1) {
 			e1.printStackTrace();
 			System.exit(1);
 		}
@@ -148,14 +146,14 @@ public class DataTable extends JTable {
 		for (int i = 0; i < 15; i++) {
 			try {
 				if (i < 10) {
-					ds.add(i, i + 2 * Math.random(), 2.0 * Math.random(),
-							i + 0.5, 10 - i + 2 * Math.random(),
+					ds.add(i, i + 2 * Math.random(), 2.0 * Math.random(), i + 0.5, 10 - i + 2 * Math.random(),
 							2.0 * Math.random());
 				}
 				else {
 					ds.add(i, i + 2 * Math.random(), 2.0 * Math.random());
 				}
-			} catch (DataSetException e) {
+			}
+			catch (DataSetException e) {
 				e.printStackTrace();
 				System.exit(1);
 			}
@@ -169,8 +167,7 @@ public class DataTable extends JTable {
 		testFrame.setVisible(true);
 	}
 
-	public class MyTableCellEditor extends AbstractCellEditor
-			implements TableCellEditor {
+	public class MyTableCellEditor extends AbstractCellEditor implements TableCellEditor {
 
 		// This is the component that will handle the editing of the cell value
 		JTextField component = new JTextField();
@@ -179,8 +176,8 @@ public class DataTable extends JTable {
 
 		// This method is called when a cell value is edited by the user.
 		@Override
-		public Component getTableCellEditorComponent(JTable table, Object value,
-				boolean isSelected, int rowIndex, int colIndex) {
+		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex,
+				int colIndex) {
 
 			column = colIndex;
 			component.setFont(_tableFont);
@@ -208,7 +205,8 @@ public class DataTable extends JTable {
 					DataSet ds = (DataSet) getModel();
 					ds.setAllFitsDirty();
 				}
-			} catch (NumberFormatException e) {
+			}
+			catch (NumberFormatException e) {
 				val = _currentValue;
 			}
 			return val;

@@ -24,10 +24,8 @@ public class FitEditorPanel extends JPanel {
 	public static final String USERMSPROP = "Use RMS in Legend";
 	public static final String STATERRPROP = "Show Stat Errors";
 
-	private static final Font _font = Environment.getInstance()
-			.getCommonFont(10);
-	private static final Font _font2 = Environment.getInstance()
-			.getCommonFont(9);
+	private static final Font _font = Environment.getInstance().getCommonFont(10);
+	private static final Font _font2 = Environment.getInstance().getCommonFont(9);
 
 	// change fit style
 	EnumComboBox _fitSelector;
@@ -82,8 +80,7 @@ public class FitEditorPanel extends JPanel {
 	private void createPolySelector() {
 
 		String labels[] = { "0", "2", "4", "6", "8", "10", "12", "14", "16" };
-		_polynomialOrderSelector = new TextFieldSlider(0, 16, 2, _font, 1,
-				labels, 180, 40, "Polynomial Order") {
+		_polynomialOrderSelector = new TextFieldSlider(0, 16, 2, _font, 1, labels, 180, 40, "Polynomial Order") {
 
 			@Override
 			public double sliderValueToRealValue() {
@@ -102,8 +99,7 @@ public class FitEditorPanel extends JPanel {
 
 			@Override
 			public void valueChanged() {
-				firePropertyChange(POLYNOMIALORDERPROP, -1,
-						_polynomialOrderSelector.getValue());
+				firePropertyChange(POLYNOMIALORDERPROP, -1, _polynomialOrderSelector.getValue());
 			}
 
 		};
@@ -135,8 +131,7 @@ public class FitEditorPanel extends JPanel {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				boolean selected = _statErrorCB.isSelected();
-				_statErrorCB.firePropertyChange(STATERRPROP, !selected,
-						selected);
+				_statErrorCB.firePropertyChange(STATERRPROP, !selected, selected);
 			}
 
 		};
@@ -144,13 +139,11 @@ public class FitEditorPanel extends JPanel {
 		_statErrorCB.addItemListener(il);
 	}
 
-
 	// create the selector for the number of gaussians
 	private void createNumGaussSelector() {
 
 		String labels[] = { "1", "2", "3", "4", "5", "6" };
-		_gaussianCountSelector = new TextFieldSlider(1, 6, 1, _font, 1, labels,
-				180, 40, "Number of Gaussians") {
+		_gaussianCountSelector = new TextFieldSlider(1, 6, 1, _font, 1, labels, 180, 40, "Number of Gaussians") {
 
 			@Override
 			public double sliderValueToRealValue() {
@@ -169,8 +162,7 @@ public class FitEditorPanel extends JPanel {
 
 			@Override
 			public void valueChanged() {
-				firePropertyChange(GAUSSIANNUMPROP, -1,
-						_gaussianCountSelector.getValue());
+				firePropertyChange(GAUSSIANNUMPROP, -1, _gaussianCountSelector.getValue());
 			}
 
 		};

@@ -35,6 +35,15 @@ public class LundSupport {
 	private static Color olive = X11Colors.getX11Color("Olive");
 	private static Color powder = X11Colors.getX11Color("Powder Blue");
 
+	/** Unknown negative lepton */
+	public static LundId unknownPlus = new LundId("Lepton", "G" + SUPERPLUS, 0, 0, 3, 0);
+
+	/** Unknown negative lepton */
+	public static LundId unknownMinus = new LundId("Lepton", "G" + SUPERMINUS, -1, 0, -3, 0);
+
+	/** Unknown neutral "lepton" */
+	public static LundId unknownNeutral = new LundId("Lepton", "G" + SUPERZERO, -2, 0, 0, 0);
+
 	/**
 	 * private constructor for the singleton.
 	 */
@@ -74,7 +83,7 @@ public class LundSupport {
 		}
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Obtain the LundID object for a track based particle
 	 * 
@@ -86,12 +95,11 @@ public class LundSupport {
 		}
 		if (q > 0) {
 			return LundSupport.getInstance().get(-99);
-		}
-		else {
+		} else {
 			return LundSupport.getInstance().get(-100);
 		}
 	}
-	
+
 	/**
 	 * Obtain the LundID object for a hit based particle
 	 * 
@@ -103,12 +111,11 @@ public class LundSupport {
 		}
 		if (q > 0) {
 			return LundSupport.getInstance().get(-199);
-		}
-		else {
+		} else {
 			return LundSupport.getInstance().get(-200);
 		}
 	}
-	
+
 	/**
 	 * Obtain the LundID object for a cvt based particle
 	 * 
@@ -120,15 +127,14 @@ public class LundSupport {
 		}
 		if (q > 0) {
 			return LundSupport.getInstance().get(-299);
-		}
-		else {
+		} else {
 			return LundSupport.getInstance().get(-300);
 		}
 	}
 
-
 	/**
 	 * Is this a track based "particle"
+	 * 
 	 * @param lid the id
 	 * @return <code>true</code> if track based
 	 */
@@ -137,12 +143,13 @@ public class LundSupport {
 			return false;
 		}
 		int id = lid.getId();
-		return((id == -101) || (id == -99) || (id == -100));
-				
+		return ((id == -101) || (id == -99) || (id == -100));
+
 	}
 
 	/**
 	 * Is this a hit based "particle"
+	 * 
 	 * @param lid the id
 	 * @return <code>true</code> if hit based
 	 */
@@ -151,12 +158,13 @@ public class LundSupport {
 			return false;
 		}
 		int id = lid.getId();
-		return((id == -201) || (id == -199) || (id == -200));
-				
+		return ((id == -201) || (id == -199) || (id == -200));
+
 	}
-	
+
 	/**
 	 * Is this a cvt based "particle"
+	 * 
 	 * @param lid the id
 	 * @return <code>true</code> if cvt based
 	 */
@@ -165,10 +173,9 @@ public class LundSupport {
 			return false;
 		}
 		int id = lid.getId();
-		return((id == -301) || (id == -299) || (id == -300));
-				
-	}
+		return ((id == -301) || (id == -299) || (id == -300));
 
+	}
 
 	/**
 	 * Obtain the LundID object for an electron
@@ -202,52 +209,43 @@ public class LundSupport {
 	 */
 	private void initialize() {
 		_lundIds = new ArrayList<LundId>(400);
-		
-		//Geantinos or generic 
-		_lundIds.add(new LundId("Lepton", "G" + SUPERPLUS,   0, 0,  3, 0));
-		_lundIds.add(new LundId("Lepton", "G" + SUPERMINUS, -1, 0, -3, 0));
-		_lundIds.add(new LundId("Lepton", "G" + SUPERZERO,   -2, 0, 0, 0));
-		
-		//unknowns (orange--track based)
-		_lundIds.add(new LundId("Lepton", "?TB" + SUPERPLUS,   -99,  0,  3, 0));
-		_lundIds.add(new LundId("Lepton", "?TB" + SUPERMINUS, -101,  0, -3, 0));
-		_lundIds.add(new LundId("Lepton", "?TB" + SUPERZERO,   -100, 0, 0, 0));
-		
-		//unknowns (yellow--hit based)
-		_lundIds.add(new LundId("Lepton", "?HB" + SUPERPLUS,   -199,  0,  3, 0));
-		_lundIds.add(new LundId("Lepton", "?HB" + SUPERMINUS, -201,  0, -3, 0));
-		_lundIds.add(new LundId("Lepton", "?HB" + SUPERZERO,   -200, 0, 0, 0));
-		
-		//unknowns (green--cvt based)
-		_lundIds.add(new LundId("Lepton", "?CVT" + SUPERPLUS,   -299,  0,  3, 0));
-		_lundIds.add(new LundId("Lepton", "?CVT" + SUPERMINUS, -301,  0, -3, 0));
-		_lundIds.add(new LundId("Lepton", "?CVT" + SUPERZERO,   -300, 0, 0, 0));
 
+		// Geantinos or generic
+		_lundIds.add(unknownPlus);
+		_lundIds.add(unknownMinus);
+		_lundIds.add(unknownNeutral);
 
-		
+		// unknowns (orange--track based)
+		_lundIds.add(new LundId("Lepton", "?TB" + SUPERPLUS, -99, 0, 3, 0));
+		_lundIds.add(new LundId("Lepton", "?TB" + SUPERMINUS, -101, 0, -3, 0));
+		_lundIds.add(new LundId("Lepton", "?TB" + SUPERZERO, -100, 0, 0, 0));
+
+		// unknowns (yellow--hit based)
+		_lundIds.add(new LundId("Lepton", "?HB" + SUPERPLUS, -199, 0, 3, 0));
+		_lundIds.add(new LundId("Lepton", "?HB" + SUPERMINUS, -201, 0, -3, 0));
+		_lundIds.add(new LundId("Lepton", "?HB" + SUPERZERO, -200, 0, 0, 0));
+
+		// unknowns (green--cvt based)
+		_lundIds.add(new LundId("Lepton", "?CVT" + SUPERPLUS, -299, 0, 3, 0));
+		_lundIds.add(new LundId("Lepton", "?CVT" + SUPERMINUS, -301, 0, -3, 0));
+		_lundIds.add(new LundId("Lepton", "?CVT" + SUPERZERO, -300, 0, 0, 0));
+
 		_lundIds.add(new LundId("InterBoson", "g", 21, 0, 0, 2));
 		// 510998910
-		_lundIds.add(new LundId("Lepton", "e" + SUPERMINUS, 11, 0.00051099891,
-				-3, 1)); // e-
-		_lundIds.add(new LundId("Lepton", "e" + SUPERPLUS, -11, 0.00051099891,
-				3, 1)); // e+
+		_lundIds.add(new LundId("Lepton", "e" + SUPERMINUS, 11, 0.00051099891, -3, 1)); // e-
+		_lundIds.add(new LundId("Lepton", "e" + SUPERPLUS, -11, 0.00051099891, 3, 1)); // e+
 
 		_lundIds.add(new LundId("Baryon", "p", 2212, 0.93827203, 3, 1));
 		_lundIds.add(new LundId("Baryon", "n", 2112, 0.93956536, 0, 1));
 
-		_lundIds.add(new LundId("Meson", SMALL_PI + SUPERZERO, 111, 0.1349766,
-				0, 0));
-		_lundIds.add(new LundId("Meson", SMALL_PI + SUPERPLUS, 211, 0.13957018,
-				3, 0)); // pi +
-		_lundIds.add(new LundId("Meson", SMALL_PI + SUPERMINUS, -211,
-				0.13957018, -3, 0)); // pi -
+		_lundIds.add(new LundId("Meson", SMALL_PI + SUPERZERO, 111, 0.1349766, 0, 0));
+		_lundIds.add(new LundId("Meson", SMALL_PI + SUPERPLUS, 211, 0.13957018, 3, 0)); // pi +
+		_lundIds.add(new LundId("Meson", SMALL_PI + SUPERMINUS, -211, 0.13957018, -3, 0)); // pi -
 
 		_lundIds.add(new LundId("Lepton", "nu_e", 12, 0, 0, 1));
 		_lundIds.add(new LundId("Lepton", "anti-nu_e", -12, 0, 0, 1));
-		_lundIds.add(new LundId("Lepton", SMALL_MU + SUPERMINUS, 13, 0.1056584,
-				-3, 1)); // mu-
-		_lundIds.add(new LundId("Lepton", SMALL_MU + SUPERPLUS, -13, 0.1056584,
-				3, 1)); // mu+
+		_lundIds.add(new LundId("Lepton", SMALL_MU + SUPERMINUS, 13, 0.1056584, -3, 1)); // mu-
+		_lundIds.add(new LundId("Lepton", SMALL_MU + SUPERPLUS, -13, 0.1056584, 3, 1)); // mu+
 		_lundIds.add(new LundId("Lepton", "nu_mu", 14, 0, 0, 1));
 		_lundIds.add(new LundId("Lepton", "anti-nu_mu", -14, 0, 0, 1));
 		// _lundIds.add(new LundId("Lepton", "tau-", 15, 1.7770, -3, 1));
@@ -276,10 +274,8 @@ public class LundSupport {
 		_lundIds.add(new LundId("Meson", "eta(2S)", 20221, 1.297, 0, 0));
 		_lundIds.add(new LundId("Meson", "eta'", 331, 0.95766, 0, 0));
 		_lundIds.add(new LundId("Meson", "rho0", 113, 0.7685, 0, 2));
-		_lundIds.add(new LundId("Meson", SMALL_RHO + SUPERPLUS, 213, 0.7685, 3,
-				2));
-		_lundIds.add(new LundId("Meson", SMALL_RHO + SUPERMINUS, -213, 0.7685,
-				-3, 2));
+		_lundIds.add(new LundId("Meson", SMALL_RHO + SUPERPLUS, 213, 0.7685, 3, 2));
+		_lundIds.add(new LundId("Meson", SMALL_RHO + SUPERMINUS, -213, 0.7685, -3, 2));
 		_lundIds.add(new LundId("Meson", "rho(2S)0", 30113, 1.46, 0, 2));
 		_lundIds.add(new LundId("Meson", "rho(2S)+", 30213, 1.46, 3, 2));
 		_lundIds.add(new LundId("Meson", "rho(2S)-", -30213, 1.46, -3, 2));
@@ -315,8 +311,7 @@ public class LundSupport {
 		// _lundIds.add(new LundId("Meson", "K_S0", 310, 0.497614, 0, 0));
 		// _lundIds.add(new LundId("Meson", "K_L0", 130, 0.497614, 0, 0));
 		_lundIds.add(new LundId("Meson", "K" + SUPERPLUS, 321, 0.493677, 3, 0));
-		_lundIds.add(new LundId("Meson", "K" + SUPERMINUS, -321, 0.493677, -3,
-				0));
+		_lundIds.add(new LundId("Meson", "K" + SUPERMINUS, -321, 0.493677, -3, 0));
 		// _lundIds.add(new LundId("Meson", "K*0", 313, 0.89600, 0, 2));
 		// _lundIds.add(new LundId("Meson", "anti-K*0", -313, 0.89600, 0, 2));
 		// _lundIds.add(new LundId("Meson", "K*" + SUPERPLUS, 323,
@@ -529,8 +524,7 @@ public class LundSupport {
 		_lundIds.add(new LundId("Baryon", "Delta++", 2224, 1.231, 6, 3));
 		// _lundIds.add(new LundId("Baryon", "anti-Delta--", -2224, 1.231, -6,
 		// 3));
-		_lundIds.add(new LundId("Baryon", BIG_LAMBDA + SUBZERO, 3122, 1.115683,
-				0, 1));
+		_lundIds.add(new LundId("Baryon", BIG_LAMBDA + SUBZERO, 3122, 1.115683, 0, 1));
 		// _lundIds
 		// .add(new LundId("Baryon", "anti-Lambda0", -3122, 1.115683, 0, 1));
 		// _lundIds.add(new LundId("Baryon", "Lambda(1405)0", 13122, 1.406, 0,
@@ -749,11 +743,10 @@ public class LundSupport {
 		// _lundIds.add(new LundId("Baryon", "Omega_b*-", 5334, 6.13, -3, 3));
 		// _lundIds.add(new LundId("Baryon", "anti-Omega_b*+", -5334, 6.13, 3,
 		// 3));
-		 _lundIds.add(new LundId("Nucleus", "deuteron", 1011, 1.8756134, 3,
-		 0));
+		_lundIds.add(new LundId("Nucleus", "deuteron", 1011, 1.8756134, 3, 0));
 		// _lundIds.add(new LundId("Nucleus", "anti-deuteron", -1011, 1.8756134,
 		// -3, 0));
-		 _lundIds.add(new LundId("Nucleus", "t", 1021, 2.80925, 3, 1));
+		_lundIds.add(new LundId("Nucleus", "t", 1021, 2.80925, 3, 1));
 		// _lundIds.add(new LundId("Nucleus", "anti-tritium", -1021, 2.80925,
 		// -3, 1));
 		// _lundIds.add(new LundId("Nucleus", "He3", 1012, 2.80923, 6, 1));
@@ -765,11 +758,9 @@ public class LundSupport {
 	}
 
 	/**
-	 * Finds an LundId object based on the given particle id. Uses a binary
-	 * search.
+	 * Finds an LundId object based on the given particle id. Uses a binary search.
 	 * 
-	 * @param id
-	 *            the id to look for
+	 * @param id the id to look for
 	 * @return the object if found, or <code>null</code>
 	 */
 	public LundId get(int id) {
@@ -789,12 +780,10 @@ public class LundSupport {
 	}
 
 	/**
-	 * Finds an LundId object based on the given particle id. Uses a binary
-	 * search.
+	 * Finds an LundId object based on the given particle id. Uses a binary search.
 	 * 
-	 * @param id
-	 *            the id to look for. This is rounded. This method is to support
-	 *            GEMC.
+	 * @param id the id to look for. This is rounded. This method is to support
+	 *           GEMC.
 	 * @return the object if found, or <code>null</code>
 	 */
 	public LundId get(double id) {
@@ -814,8 +803,7 @@ public class LundSupport {
 	/**
 	 * Convert a geant ID onto a Lund (PDG) id.
 	 * 
-	 * @param geantId
-	 *            the geant Id
+	 * @param geantId the geant Id
 	 * @return the lund (pdg) Id.
 	 */
 	public static int geantToLund(int geantId) {
@@ -921,10 +909,8 @@ public class LundSupport {
 	/**
 	 * Returns the Lund ID of a particle given the mass and charge.
 	 * 
-	 * @param mass
-	 *            the mass of the particle in GeV
-	 * @param charge
-	 *            the charge of the particle in units of electron charge
+	 * @param mass   the mass of the particle in GeV
+	 * @param charge the charge of the particle in units of electron charge
 	 * @return the Geant ID
 	 */
 	public static int massAndChargeToLundId(double mass, int charge) {
@@ -976,11 +962,10 @@ public class LundSupport {
 	 * Used to initialize the styles for some jlab particles of interest.
 	 */
 	private void initStyles() {
-		//Geatininos
+		// Geatininos
 		setStyle(0, Color.pink);
-		
-		
-		//recon tracks
+
+		// recon tracks
 		setStyle(-99, darkOrange);
 		setStyle(-100, darkOrange);
 		setStyle(-101, darkOrange);
@@ -990,8 +975,7 @@ public class LundSupport {
 		setStyle(-299, darkGreen);
 		setStyle(-500, darkGreen);
 		setStyle(-301, darkGreen);
-	
-		
+
 		setStyle(11, Color.red); // e-
 		setStyle(-11, Color.magenta); // e+
 		setStyle(111, wheat); // pi0
@@ -1014,13 +998,10 @@ public class LundSupport {
 	/**
 	 * Set the style for a given lund Id
 	 * 
-	 * @param lundId
-	 *            the id to set the style for.
-	 * @param lineColor
-	 *            the lineColor to use.
-	 * @param darker
-	 *            if <code>true</code> make line color datker, else make it
-	 *            lighter.
+	 * @param lundId    the id to set the style for.
+	 * @param lineColor the lineColor to use.
+	 * @param darker    if <code>true</code> make line color datker, else make it
+	 *                  lighter.
 	 */
 	public static void setStyle(int lundId, Color lineColor) {
 		LundSupport ls = LundSupport.getInstance();
@@ -1033,8 +1014,7 @@ public class LundSupport {
 	/**
 	 * Main program for testing
 	 * 
-	 * @param arg
-	 *            command arguments ignored.
+	 * @param arg command arguments ignored.
 	 */
 	public static void main(String arg[]) {
 		System.out.println("\u00a5123");

@@ -53,26 +53,20 @@ public class Led extends JComponent {
 	/**
 	 * Constructor
 	 * 
-	 * @param state
-	 *            the initial state.
-	 * @param label
-	 *            the label. Should be no more than a few characters.
+	 * @param state the initial state.
+	 * @param label the label. Should be no more than a few characters.
 	 */
 	public Led(LedState state, String label) {
-		this(state, label, LED_WIDTH, LED_HEIGHT, Color.cyan, Color.darkGray,
-				Fonts.mediumFont, true);
+		this(state, label, LED_WIDTH, LED_HEIGHT, Color.cyan, Color.darkGray, Fonts.mediumFont, true);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param state
-	 *            the initial state.
-	 * @param label
-	 *            the label. Should be no more than a few characters.
+	 * @param state the initial state.
+	 * @param label the label. Should be no more than a few characters.
 	 */
-	public Led(LedState state, String label, int width, int height, Color fg,
-			Color bg, Font font, boolean drawBorder) {
+	public Led(LedState state, String label, int width, int height, Color fg, Color bg, Font font, boolean drawBorder) {
 
 		_state = state;
 		_label = label;
@@ -111,8 +105,7 @@ public class Led extends JComponent {
 	/**
 	 * Paint the LED
 	 * 
-	 * @param g
-	 *            the graphics context
+	 * @param g the graphics context
 	 */
 	@Override
 	public void paintComponent(Graphics g) {
@@ -132,8 +125,7 @@ public class Led extends JComponent {
 		// icon
 		ImageIcon icon = getState().getIcon();
 		if (icon != null) {
-			g.drawImage(icon.getImage(), 2,
-					(b.height - icon.getIconHeight()) / 2, this);
+			g.drawImage(icon.getImage(), 2, (b.height - icon.getIconHeight()) / 2, this);
 		}
 
 		// label
@@ -145,8 +137,7 @@ public class Led extends JComponent {
 
 		// border
 		if (_drawBorder) {
-			GraphicsUtilities.drawSimple3DRect(g, 0, 0, b.width - 1,
-					b.height - 1, false);
+			GraphicsUtilities.drawSimple3DRect(g, 0, 0, b.width - 1, b.height - 1, false);
 		}
 
 	}
@@ -154,8 +145,7 @@ public class Led extends JComponent {
 	/**
 	 * Notify listeners of a click.
 	 * 
-	 * @param type
-	 *            The causal event.
+	 * @param type The causal event.
 	 */
 
 	protected void notifyLedListeners(ClickType type) {
@@ -191,8 +181,7 @@ public class Led extends JComponent {
 	/**
 	 * Remove a LedListener.
 	 * 
-	 * @param fl
-	 *            The LedListener listener to remove.
+	 * @param fl The LedListener listener to remove.
 	 */
 	public void removeLedListener(LedListener fl) {
 
@@ -206,8 +195,7 @@ public class Led extends JComponent {
 	/**
 	 * Add a LedListener.
 	 * 
-	 * @param fl
-	 *            the LedListener listener to add.
+	 * @param fl the LedListener listener to add.
 	 */
 	public void addLedListener(LedListener fl) {
 
@@ -234,8 +222,7 @@ public class Led extends JComponent {
 	/**
 	 * Set the state of the LED.
 	 * 
-	 * @param state
-	 *            the new state of the LED.
+	 * @param state the new state of the LED.
 	 */
 	public void setState(LedState state) {
 		_state = state;

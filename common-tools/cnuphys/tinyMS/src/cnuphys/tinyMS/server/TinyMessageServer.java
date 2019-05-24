@@ -17,23 +17,23 @@ import cnuphys.tinyMS.server.gui.ServerFrame;
 import cnuphys.tinyMS.table.ConnectionTable;
 
 public class TinyMessageServer implements IMessageProcessor, Runnable {
-	
+
 	private final String _version = "0.51";
-	
+
 	// the log
 	private Log _log = Log.getInstance();
-	
+
 	// bytes transferred
 	private long _bytesTransferred;
-	
-	//the port used
+
+	// the port used
 	private int _port = -1;
 
 	// clients will ping the server to monitor health
 	protected static final long PINGINTERVAL = 5000;
 
 	// the default ports
-	public static final int DEFAULT_PORTS[] = { 5377, 2953, 3310, 22724};
+	public static final int DEFAULT_PORTS[] = { 5377, 2953, 3310, 22724 };
 
 	// accepting connections?
 	private boolean acceptConnections = true;
@@ -50,27 +50,25 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 	// unique sequential Ids starting at 1 and never reused, so they
 	// will always be in order of Id
 	private Vector<ProxyClient> _proxyClients = new Vector<ProxyClient>();
-	
+
 	// All known topics
 	private Vector<String> _allTopics = new Vector<String>();
 
 	// name of the server
 	private String _name;
-	
-	//the GUI
+
+	// the GUI
 	private ServerFrame _serverFrame;
 
 	// to avoid multiple shutdowns resulting possible resulting from
 	// the shutdown hook thread
 	private boolean _shutDown = false;
-	
+
 	/**
 	 * Create a message server on a specific port.
 	 * 
-	 * @param name
-	 *            descriptive name of the server
-	 * @param port
-	 *            the port to try
+	 * @param name descriptive name of the server
+	 * @param port the port to try
 	 * @throws IOException
 	 */
 	public TinyMessageServer(String name, int port) throws IOException {
@@ -79,8 +77,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 		// try to start on given port
 		try {
 			_serverSocket = startServer(port);
-		}
-		catch (BindException e) {
+		} catch (BindException e) {
 			System.out.println("Port " + port + " appears to be busy.");
 		}
 
@@ -90,8 +87,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 	/**
 	 * Create a message server, trying the default ports.
 	 * 
-	 * @param name
-	 *            descriptive name of the server
+	 * @param name descriptive name of the server
 	 * @throws IOException
 	 */
 	public TinyMessageServer(String name) throws IOException {
@@ -105,8 +101,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 				if (_serverSocket != null) {
 					break;
 				}
-			}
-			catch (BindException e) {
+			} catch (BindException e) {
 				System.out.println("Port " + DEFAULT_PORTS[i] + " appears to be busy.");
 			}
 		}
@@ -128,7 +123,6 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 		_log.config("Tiny Message Server started on " + getHostName() + " " + getHostAddress() + " port: "
 				+ getLocalPort());
 
-
 		// create an input queue and a thread to dequeue
 		// inbound data from remote clients
 		createInboundQueue();
@@ -144,15 +138,14 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 						ProxyClient newClient = new ProxyClient(_serverSocket.accept());
 						_log.info("Adding a new proxy client.");
 						addClient(newClient);
-					}
-					catch (IOException e) {
+					} catch (IOException e) {
 						// socket closed (is OK)
 					}
 				}
 			}
 		};
 		new Thread(acceptThread).start();
-		
+
 		// create a shutdown thread so we can die gracefully even if
 		// killed by a ctrl-c
 
@@ -166,8 +159,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 				System.out.println("\n===========================================");
 				try {
 					shutdown();
-				}
-				catch (IOException e) {
+				} catch (IOException e) {
 				}
 			}
 
@@ -176,13 +168,11 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 		Thread shutDownThread = new Thread(shutDown);
 		Runtime.getRuntime().addShutdownHook(shutDownThread);
 	}
-	
 
 	/**
 	 * Try to start a server on a given port.
 	 * 
-	 * @param port
-	 *            the port to try
+	 * @param port the port to try
 	 * @return the serverSocket if successful, otherwise <code>null</code>
 	 */
 	protected ServerSocket startServer(int port) throws IOException, BindException {
@@ -197,15 +187,15 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 				System.out.println("============================================");
 				_port = port;
 			}
-		}
-		catch (UnknownHostException e) {
+		} catch (UnknownHostException e) {
 		}
 
 		return serverSocket;
 	}
-	
+
 	/**
 	 * Get the port
+	 * 
 	 * @return the port used by the server.
 	 */
 	public int getPort() {
@@ -219,7 +209,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 		_sharedInboundQueue = new MessageQueue(200, 50);
 		new Thread(this).start();
 	}
-	
+
 	@Override
 	public void run() {
 		while (true) {
@@ -230,19 +220,20 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 
 	/**
 	 * Get the server version
+	 * 
 	 * @return the server version
 	 */
 	public String getVersion() {
 		return _version;
 	}
-	
+
 	/**
-	 * Add a new client. It is put in the sorted collection. It should have a
-	 * unique Id, and should go in at the end--but we'll check for a duplicate
-	 * Id which would indicate a serious error.
+	 * Add a new client. It is put in the sorted collection. It should have a unique
+	 * Id, and should go in at the end--but we'll check for a duplicate Id which
+	 * would indicate a serious error.
 	 * 
-	 * @param proxyClient
-	 *            the new proxy client, which corresponds to an actual client.
+	 * @param proxyClient the new proxy client, which corresponds to an actual
+	 *                    client.
 	 */
 	protected synchronized void addClient(ProxyClient proxyClient) {
 		ProxyClient rc = getProxyClient(proxyClient.getId());
@@ -280,12 +271,10 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 	}
 
 	/**
-	 * Get the proxy client from the Id. Note it relies on the fact that client
-	 * Ids are handed out sequentially (and never reused) and always added at
-	 * the end.
+	 * Get the proxy client from the Id. Note it relies on the fact that client Ids
+	 * are handed out sequentially (and never reused) and always added at the end.
 	 * 
-	 * @param id
-	 *            the id of the proxy client to search for
+	 * @param id the id of the proxy client to search for
 	 * @return the remote client, or null
 	 */
 	protected ProxyClient getProxyClient(int id) {
@@ -304,8 +293,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 	/**
 	 * Convenience routine the gets the remote client who sent the message.
 	 * 
-	 * @param message
-	 *            the message received
+	 * @param message the message received
 	 * @return the remote client, or <code>null</code>
 	 */
 	protected ProxyClient getSender(Message message) {
@@ -324,17 +312,19 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 	public ProxyClient[] getProxyClientArray() {
 		return ProxyClient.toArray(_proxyClients);
 	}
-	
+
 	/**
 	 * Get the list of proxy clients
+	 * 
 	 * @return the list of proxy clients
 	 */
 	public List<ProxyClient> getProxyClients() {
 		return _proxyClients;
 	}
-	
+
 	/**
 	 * See if the server has been shut down
+	 * 
 	 * @return <code>true</code> if the server has been shut down
 	 */
 	public boolean isShutDown() {
@@ -343,7 +333,8 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 
 	/**
 	 * Shutdown the server. As a courtesy, notify all the clients.
-	 * @throws IOException 
+	 * 
+	 * @throws IOException
 	 */
 	public void shutdown() throws IOException {
 
@@ -351,7 +342,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 			System.out.println("Server already shut down");
 			return;
 		}
-		
+
 		System.out.println("\n===========================================");
 		System.out.println("***** Server is shutting down from shutdown method. *****");
 		System.out.println("\n===========================================");
@@ -367,8 +358,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 			for (ProxyClient proxyClient : array) {
 				try {
 					proxyClient.shutdown();
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -392,8 +382,8 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 	}
 
 	/**
-	 * Get the port used by the remote client. This will of course be different
-	 * from the server's port.
+	 * Get the port used by the remote client. This will of course be different from
+	 * the server's port.
 	 * 
 	 * @return the port used by the remote client.
 	 */
@@ -448,29 +438,31 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 	public String getName() {
 		return _name;
 	}
-	
+
 	/**
 	 * Get the Gui
+	 * 
 	 * @return the server frame gui
 	 */
 	public ServerFrame getGui() {
 		return _serverFrame;
 	}
-	
+
 	/**
 	 * Get the client table
+	 * 
 	 * @return the client table
 	 */
 	public ConnectionTable getClientTable() {
 		return (_serverFrame == null) ? null : _serverFrame.getClientTable();
 	}
 
-	
 	/**
 	 * Add a topic to the list of known topics. Do knowthing if allready known.
+	 * 
 	 * @param topic the topic to add.
 	 */
-	protected void addTopic(String topic)  {
+	protected void addTopic(String topic) {
 		if (topic != null) {
 			topic = topic.trim().toLowerCase();
 			if (topic.length() > 0) {
@@ -481,15 +473,16 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 			}
 		}
 	}
-	
 
 	/**
-	 * A message is about to be farmed out to the appropriate handler.
-	 * This allows you to take a peek at it first.
+	 * A message is about to be farmed out to the appropriate handler. This allows
+	 * you to take a peek at it first.
+	 * 
 	 * @param message the message
 	 */
+	@Override
 	public void peekAtMessage(Message message) {
-		
+
 		_bytesTransferred += message.getDataLength();
 
 		ProxyClient proxyClient = getSender(message);
@@ -513,8 +506,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 			// for a server forced logout of a client.
 			proxyClient.close();
 			fireTableDataChanged();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -550,7 +542,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 				sender.setUserName(env[1]);
 				sender.setOSName(env[2]);
 				sender.setHostName(env[3]);
-				
+
 				int localPort = Integer.parseInt(env[4]);
 				sender.setLocalPort(localPort);
 
@@ -576,19 +568,18 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 	}
 
 	/**
-	 * A non-administrative message has arrived. This should
-	 * be broadcast to other clients subscribed to the topic
+	 * A non-administrative message has arrived. This should be broadcast to other
+	 * clients subscribed to the topic
 	 */
 	@Override
 	public void processClientMessage(Message message) {
 		broadcastMessage(message);
 	}
-	
+
 	/**
 	 * Process a SERVERLOG message
 	 * 
-	 * @param message
-	 *            the message to process
+	 * @param message the message to process
 	 */
 	@Override
 	public void processServerLogMessage(Message message) {
@@ -597,34 +588,33 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 		String lstr = message.getString();
 		String nstr = getProxyClient(message.getClientId()).getClientName();
 		String s = "[Client: " + nstr + "] " + lstr;
-		
-		//ERROR, CONFIG, WARNING, INFO, EXCEPTION
+
+		// ERROR, CONFIG, WARNING, INFO, EXCEPTION
 		switch (level) {
 		case INFO:
 			_log.info(s);
 			break;
-			
+
 		case CONFIG:
 			_log.config(s);
 			break;
-			
+
 		case ERROR:
 		case EXCEPTION:
 			_log.error(s);
 			break;
-			
+
 		case WARNING:
 			_log.warning(s);
 			break;
-			
+
 		}
 	}
 
 	/**
 	 * Process a SUBSCRIBE message
 	 * 
-	 * @param message
-	 *            the message to process
+	 * @param message the message to process
 	 */
 	@Override
 	public void processSubscribeMessage(Message message) {
@@ -650,12 +640,10 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 		}
 	}
 
-
 	/**
 	 * Process a UNSUBSCRIBE message
 	 * 
-	 * @param message
-	 *            the message to process
+	 * @param message the message to process
 	 */
 	@Override
 	public void processUnsubscribeMessage(Message message) {
@@ -668,8 +656,8 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 				topic = topic.trim().toLowerCase();
 				_log.config("client unsubscription: " + sender.getClientName() + "  topic: " + topic);
 				sender.unsubscribe(topic);
-				
-				//send back as confirmation
+
+				// send back as confirmation
 				sender.send(message);
 			} catch (Exception e) {
 				_log.exception(e);
@@ -677,7 +665,6 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 
 		}
 	}
-
 
 	@Override
 	public boolean accept(Message message) {
@@ -693,11 +680,9 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 		if (sender == null) {
 			_log.warning("Could not match a remote client to message sender.");
 			return false;
-		}
-		else if (sender.isVerified()) {
+		} else if (sender.isVerified()) {
 			return true;
-		}
-		else {
+		} else {
 			_log.warning("Message from unverified client");
 			return false;
 		}
@@ -707,8 +692,7 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 	/**
 	 * Broadcast a message to all clients (except the sender)
 	 * 
-	 * @param message
-	 *            the message to broadcast
+	 * @param message the message to broadcast
 	 */
 	protected void broadcastMessage(Message message) {
 		ProxyClient[] array = getProxyClientArray();
@@ -732,10 +716,9 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 		}
 	}
 
-	
 	/**
-	 * Convenience routine to fire a data changed event
-	 * so that the table (if present)  updates
+	 * Convenience routine to fire a data changed event so that the table (if
+	 * present) updates
 	 */
 	public void fireTableDataChanged() {
 		ServerFrame gui = getGui();
@@ -744,17 +727,18 @@ public class TinyMessageServer implements IMessageProcessor, Runnable {
 		}
 	}
 
-
 	/***
 	 * Get the bytes read by the server
+	 * 
 	 * @return the bytes read since start
 	 */
 	public long getBytesTransferred() {
 		return _bytesTransferred;
 	}
-	
+
 	/**
 	 * Starts a server (well, attempts to) on one of the default ports.
+	 * 
 	 * @param arg the variable arguments
 	 */
 	public static void main(String arg[]) {

@@ -31,7 +31,7 @@ public class DataColumn extends GrowableArray {
 
 	// used by 1D histograms
 	private HistoData _histoData1D;
-	
+
 	// used by 2D histograms
 	private Histo2DData _histoData2D;
 
@@ -53,12 +53,11 @@ public class DataColumn extends GrowableArray {
 	/**
 	 * Create a DataColumn
 	 * 
-	 * @param name the column name
-	 * @param initCap the initial capacity
+	 * @param name      the column name
+	 * @param initCap   the initial capacity
 	 * @param increment the increment when the array grows.
 	 */
-	public DataColumn(DataColumnType type, String name, int initCap,
-			int increment) {
+	public DataColumn(DataColumnType type, String name, int initCap, int increment) {
 		super(initCap, increment);
 		_type = type;
 		_name = name;
@@ -87,7 +86,6 @@ public class DataColumn extends GrowableArray {
 			_histoData1D = histo;
 		}
 	}
-	
 
 	/**
 	 * This gets the histogram 2D data, which for non-histograms will be
@@ -112,7 +110,6 @@ public class DataColumn extends GrowableArray {
 		}
 	}
 
-
 	/**
 	 * Checks whether this is a 1D histogram
 	 * 
@@ -121,7 +118,6 @@ public class DataColumn extends GrowableArray {
 	public boolean isHistogram1D() {
 		return _isHisto1D;
 	}
-	
 
 	/**
 	 * Checks whether this is a 2D histogram
@@ -131,7 +127,6 @@ public class DataColumn extends GrowableArray {
 	public boolean isHistogram2D() {
 		return _isHisto2D;
 	}
-
 
 	/**
 	 * Check whether this "curve" is visible. Only relevant for Y columns.
@@ -237,6 +232,7 @@ public class DataColumn extends GrowableArray {
 
 	/**
 	 * Add used only by 2D histograms
+	 * 
 	 * @param xval the x value
 	 * @param yval the y value
 	 */
@@ -250,7 +246,7 @@ public class DataColumn extends GrowableArray {
 			System.err.println("In DataColumn, histo2DAdd(x,y) inexplicably called for non-2D histogram");
 		}
 	}
-	
+
 	/**
 	 * Add a value to the array, growing it if necessary.
 	 * 
@@ -378,11 +374,11 @@ public class DataColumn extends GrowableArray {
 	 * Set the value at the given index
 	 * 
 	 * @param index the index
-	 * @param val the value at the index
+	 * @param val   the value at the index
 	 */
 	@Override
 	public void set(int index, double val) {
-		
+
 		if (_isHisto2D) {
 			System.err.println("DataColumn,set inexlpicably called for 2D histo");
 			return;

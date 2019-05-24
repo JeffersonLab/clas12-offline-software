@@ -25,14 +25,12 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	/**
 	 * Actual drawing method
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the base container
+	 * @param g         the graphics context
+	 * @param container the base container
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
-		
+
 		if (!ClasIoEventManager.getInstance().isAccumulating()) {
 
 			// mc
@@ -53,12 +51,11 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 
 			// recon
 			if (SwimMenu.getInstance().showReconstructedTracks()) {
-				
-				List<SwimTrajectory> trajectories = Swimming
-						.getReconTrajectories();
-				
+
+				List<SwimTrajectory> trajectories = Swimming.getReconTrajectories();
+
 				int count = (trajectories == null) ? 0 : trajectories.size();
-				
+
 				if (count < 1) {
 					return;
 				}
@@ -76,13 +73,11 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	}
 
 	/**
-	 * Here we have a chance to veto a trajectory. For example, we may decide
-	 * that the trajectory won't appear on this view (assuming a view owns this
-	 * drawer) and so don't bother to compute it. The default implementation
-	 * vetoes nothing.
+	 * Here we have a chance to veto a trajectory. For example, we may decide that
+	 * the trajectory won't appear on this view (assuming a view owns this drawer)
+	 * and so don't bother to compute it. The default implementation vetoes nothing.
 	 * 
-	 * @param trajectory
-	 *            the trajectory to test.
+	 * @param trajectory the trajectory to test.
 	 * @return <code>true</code> if this trajectory is vetoed.
 	 */
 	@Override
@@ -95,17 +90,14 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	/**
 	 * From detector xyz get the projected world point.
 	 * 
-	 * @param v3d
-	 *            the 3D vector (meters)
-	 * @param wp
-	 *            the projected world point.
+	 * @param v3d the 3D vector (meters)
+	 * @param wp  the projected world point.
 	 */
 	@Override
 	public void project(double[] v3d, Point2D.Double wp) {
 
 		// the path in the 3D traj is in meters. We want mm.
-		_view.getWorldFromLabXYZ(1000 * v3d[0], 1000 * v3d[1], 1000 * v3d[2],
-				wp);
+		_view.getWorldFromLabXYZ(1000 * v3d[0], 1000 * v3d[1], 1000 * v3d[2], wp);
 
 	}
 
@@ -137,19 +129,17 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 
 	@Override
 	public boolean acceptSimpleTrack(SwimTrajectory2D trajectory) {
-		
-		String source  = trajectory.getSource().toLowerCase();
+
+		String source = trajectory.getSource().toLowerCase();
 
 		if (source.contains("hbtracks")) {
 			return _view.showHB();
-		}
-		else if (source.contains("tbtracks")) {
+		} else if (source.contains("tbtracks")) {
 			return _view.showTB();
-			}
-		else if (source.contains("cvtrec")) {
+		} else if (source.contains("cvtrec")) {
 			return _view.showCVTTracks();
 		}
-		
+
 		return true;
 	}
 

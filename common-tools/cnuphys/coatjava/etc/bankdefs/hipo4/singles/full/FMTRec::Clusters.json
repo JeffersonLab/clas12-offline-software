@@ -1,0 +1,90 @@
+[
+    {
+        "entries": [
+            {
+                "info": "ID", 
+                "name": "ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "sector", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "cluster size", 
+                "name": "size", 
+                "type": "S"
+            }, 
+            {
+                "info": "cluster total energy", 
+                "name": "ETot", 
+                "type": "F"
+            }, 
+            {
+                "info": "energy of the seed ", 
+                "name": "seedE", 
+                "type": "F"
+            }, 
+            {
+                "info": "seed strip", 
+                "name": "seedStrip", 
+                "type": "I"
+            }, 
+            {
+                "info": "centroid strip number", 
+                "name": "centroid", 
+                "type": "F"
+            }, 
+            {
+                "info": "centroid residual", 
+                "name": "centroidResidual", 
+                "type": "F"
+            }, 
+            {
+                "info": "seed residual", 
+                "name": "seedResidual", 
+                "type": "F"
+            }, 
+            {
+                "info": "Index of hit 1 in cluster", 
+                "name": "Hit1_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "Index of hit 2 in cluster", 
+                "name": "Hit2_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "Index of hit 3 in cluster", 
+                "name": "Hit3_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "Index of hit 4 in cluster", 
+                "name": "Hit4_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "Index of hit 5 in cluster", 
+                "name": "Hit5_ID", 
+                "type": "S"
+            }, 
+            {
+                "info": "associated track ID", 
+                "name": "trkID", 
+                "type": "S"
+            }
+        ], 
+        "group": 20800, 
+        "info": "reconstructed FMT clusters", 
+        "item": 22, 
+        "name": "FMTRec::Clusters"
+    }
+]

@@ -7,7 +7,7 @@ public class ExpressionTable extends JTable {
 
 	public ExpressionTable(int selectionMode) {
 		super(new ExpressionTableModel());
-		
+
 		// multiple selection
 		setSelectionMode(selectionMode);
 
@@ -24,9 +24,10 @@ public class ExpressionTable extends JTable {
 		getTableHeader().setReorderingAllowed(false);
 
 	}
-	
+
 	/**
 	 * Get the Expression table model
+	 * 
 	 * @return the model
 	 */
 	public ExpressionTableModel getExpressionModel() {
@@ -35,12 +36,13 @@ public class ExpressionTable extends JTable {
 
 	/**
 	 * Get the selected (or first selected) named expression
+	 * 
 	 * @return the selected (or first selected) named expression
 	 */
 	public NamedExpression getSelectedExpression() {
 		NamedExpression ne = null;
-		int row =getSelectedRow();
-		
+		int row = getSelectedRow();
+
 		if (row >= 0) {
 			ne = getExpressionModel().getNamedExpression(row);
 		}

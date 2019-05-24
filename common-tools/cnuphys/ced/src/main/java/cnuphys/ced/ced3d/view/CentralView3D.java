@@ -14,22 +14,25 @@ public class CentralView3D extends CedView3D {
 	private static final float thetaz = 90f;
 
 	public CentralView3D() {
-		super("Central Detectors 3D View", thetax, thetay, thetaz, xdist,
-				ydist, zdist);
+		super("Central Detectors 3D View", thetax, thetay, thetaz, xdist, ydist, zdist);
 	}
 
 	@Override
-	protected CedPanel3D make3DPanel(float angleX, float angleY, float angleZ,
-			float xDist, float yDist, float zDist) {
-		return new CentralPanel3D(this, angleX, angleY, angleZ, xDist, yDist, zDist);
+	protected CedPanel3D make3DPanel(float angleX, float angleY, float angleZ, float xDist, float yDist, float zDist) {
+
+		CentralPanel3D panel = new CentralPanel3D(this, angleX, angleY, angleZ, xDist, yDist, zDist);
+		panel.setRotationX(0f);
+		panel.setRotationY(180f);
+		panel.setRotationZ(0f);
+		// panel.refresh();
+
+		return panel;
 	}
-	
 
 	@Override
 	public void refresh() {
 		super.refresh();
-		((CentralPanel3D)_panel3D).enableBSTOuterLayers();
+		((CentralPanel3D) _panel3D).enableBSTOuterLayers();
 	}
-
 
 }

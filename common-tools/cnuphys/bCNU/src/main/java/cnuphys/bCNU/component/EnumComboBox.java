@@ -20,11 +20,9 @@ public class EnumComboBox extends JComboBox {
 	/**
 	 * Create a combobox from an enum map.
 	 * 
-	 * @param enumMap
-	 *            an EnumMap<enum, String>. The enum is the key, and the string,
-	 *            which will become the label, is the value.
-	 * @param defaultKey
-	 *            the enum that should default to "on".
+	 * @param enumMap    an EnumMap<enum, String>. The enum is the key, and the
+	 *                   string, which will become the label, is the value.
+	 * @param defaultKey the enum that should default to "on".
 	 */
 	public EnumComboBox(EnumMap<?, String> enumMap, Enum<?> defaultKey) {
 		this(enumMap, defaultKey, null);
@@ -33,16 +31,12 @@ public class EnumComboBox extends JComboBox {
 	/**
 	 * Create a combobox from an enum map.
 	 * 
-	 * @param enumMap
-	 *            an EnumMap<enum, String>. The enum is the key, and the string,
-	 *            which will become the label, is the value.
-	 * @param defaultKey
-	 *            the enum that should default to "on".
-	 * @param extraChoice
-	 *            an optional extra choice, like "None" or "Any"
+	 * @param enumMap     an EnumMap<enum, String>. The enum is the key, and the
+	 *                    string, which will become the label, is the value.
+	 * @param defaultKey  the enum that should default to "on".
+	 * @param extraChoice an optional extra choice, like "None" or "Any"
 	 */
-	public EnumComboBox(EnumMap<?, String> enumMap, Enum<?> defaultKey,
-			String extraChoice) {
+	public EnumComboBox(EnumMap<?, String> enumMap, Enum<?> defaultKey, String extraChoice) {
 		Set<?> keySet = enumMap.keySet();
 
 		_extraChoice = extraChoice;
@@ -70,11 +64,11 @@ public class EnumComboBox extends JComboBox {
 	}
 
 	/**
-	 * Get the enum corresponding to the selected string, which is the nice name
-	 * of the enum.
+	 * Get the enum corresponding to the selected string, which is the nice name of
+	 * the enum.
 	 * 
-	 * @return the selected enum value. Returns <code>null</code> if
-	 *         "extra choice" was used and selected.
+	 * @return the selected enum value. Returns <code>null</code> if "extra choice"
+	 *         was used and selected.
 	 */
 	public Enum<?> getSelectedEnum() {
 		String niceName = (String) getSelectedItem();

@@ -54,8 +54,7 @@ public class ButcherTableau {
 		_augmented = augmented;
 		if (augmented) {
 			s = rows.length - 2;
-		}
-		else {
+		} else {
 			s = rows.length - 1;
 		}
 
@@ -72,8 +71,7 @@ public class ButcherTableau {
 			for (int col = 0; col <= s; col++) {
 				if ((row < 2) || (col == 0) || (col >= row)) {
 					a[row][col] = Double.NaN;
-				}
-				else {
+				} else {
 					a[row][col] = rows[row - 1][col];
 				}
 			}

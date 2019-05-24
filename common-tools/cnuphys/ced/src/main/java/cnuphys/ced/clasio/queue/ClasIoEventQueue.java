@@ -26,19 +26,17 @@ public class ClasIoEventQueue extends Vector<DataEvent> {
 	/**
 	 * Queue an event. The add will notify threads that are waiting.
 	 * 
-	 * @param event
-	 *            the event to queue
+	 * @param event the event to queue
 	 */
 	public synchronized void queue(DataEvent event) {
 		add(event);
 	}
 
 	/**
-	 * The add, which puts the event in the queue and notifies and consumers
-	 * that are waiting.
+	 * The add, which puts the event in the queue and notifies and consumers that
+	 * are waiting.
 	 * 
-	 * @param event
-	 *            the event to queue
+	 * @param event the event to queue
 	 * @returns <code>true</true> as specified by JAVA.
 	 */
 	@Override
@@ -54,8 +52,7 @@ public class ClasIoEventQueue extends Vector<DataEvent> {
 	/**
 	 * Determines whether queue will accept any new events.
 	 * 
-	 * @param accept
-	 *            if <code>false</code>, will no longer queue events
+	 * @param accept if <code>false</code>, will no longer queue events
 	 */
 	public void setAccept(boolean accept) {
 		_accept = accept;

@@ -1,0 +1,20 @@
+[
+    {
+        "entries": [
+            {
+                "info": "online-delay-corrected helicity, with HWP-correction (0=UDF)", 
+                "name": "helicity", 
+                "type": "B"
+            }, 
+            {
+                "info": "online-delay-corrected helicity (0=UDF)", 
+                "name": "helicityRaw", 
+                "type": "B"
+            }
+        ], 
+        "group": 22000, 
+        "info": "Helicity with online delay-correction in Level3 trigger", 
+        "item": 13, 
+        "name": "HEL::online"
+    }
+]

@@ -43,44 +43,44 @@ import cnuphys.tinyMS.table.ConnectionTable;
 @SuppressWarnings("serial")
 public class ServerFrame extends JFrame implements ActionListener, ListSelectionListener {
 
-	//the server
+	// the server
 	private TinyMessageServer _server;
 
-	//buttons
+	// buttons
 	private JButton _clearButton;
 	private JButton _stopButton;
 	private JButton _shutdownButton;
 
-	//holds the log
+	// holds the log
 	private SimpleLogPane _logPane;
-	
-	//when the gui (and approximately the server) started
+
+	// when the gui (and approximately the server) started
 	private long _startTime;
-	
+
 	// maintenance timer
 	private Timer _timer;
 
-	//how long we've been running
+	// how long we've been running
 	private JLabel _durationLabel;
-	
+
 	// average bandwidth
 	private JLabel _bandwidthLabel;
-	
-	//table stuff
+
+	// table stuff
 	private ConnectionTable _table;
-	
-	//Memory strip chart
+
+	// Memory strip chart
 	private MemoryStripChart _chart;
-	
-	//list of topics
+
+	// list of topics
 	private TopicList _topicList;
-	
+
 	/**
 	 * Create a frame that will monitor the given server
 	 */
 	public ServerFrame(TinyMessageServer server) {
 		super((server != null) ? server.getName() : "Tiny Message Server");
-		
+
 		_startTime = System.currentTimeMillis();
 
 		// set up what to do if the window is closed
@@ -99,16 +99,17 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 
 		addContent();
 		fixGuiState();
-		
-		//listen for table selections
+
+		// listen for table selections
 		_table.getSelectionModel().addListSelectionListener(this);
-		
-		//setup a housekeeping maintenance thread
+
+		// setup a housekeeping maintenance thread
 		setupMaintenanceTimer();
 	}
-	
+
 	// houskeeping timer
 	private long _houseKeepingCount;
+
 	private void setupMaintenanceTimer() {
 		TimerTask task = new TimerTask() {
 
@@ -135,36 +136,35 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		addEast();
 
 		// add a split pane with a capture pane
-		
 
 //		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false, _mainPanel, _logPane);
 //		splitPane.setResizeWeight(0);
 //
 //		add(splitPane, BorderLayout.CENTER);
 	}
-	
+
 	private void addSouth() {
-		//button panel
+		// button panel
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 4));
-		
+
 		_clearButton = makeButton("Clear Log");
 		_stopButton = makeButton("Stop the Server");
 		_shutdownButton = makeButton("Shutdown Client");
 		panel.add(_clearButton);
 		panel.add(_stopButton);
 		panel.add(_shutdownButton);
-		
+
 		add(panel, BorderLayout.SOUTH);
 	}
-	
-	//add the component in the east
+
+	// add the component in the east
 	private void addEast() {
 	}
 
-	//add the components in the center
+	// add the components in the center
 	private void addCenter() {
-		
+
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
 
@@ -172,20 +172,20 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		Dimension d = _logPane.getPreferredSize();
 		d.height = 350;
 		_logPane.setPreferredSize(d);
-		
+
 		panel.add(_logPane, BorderLayout.CENTER);
 		_topicList = new TopicList(_server);
 		panel.add(_topicList.getScrollPane(), BorderLayout.EAST);
-				
-		//the table
+
+		// the table
 		_table = new ConnectionTable(_server);
-		
+
 		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, false, panel, _table.getScrollPane());
 		splitPane.setResizeWeight(0.8);
 
 		add(splitPane, BorderLayout.CENTER);
 	}
-	
+
 	// add the component in the north
 	private void addNorth() {
 		JPanel nPanel = new JPanel();
@@ -198,46 +198,43 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		lPanel.add(Box.createVerticalStrut(4));
 
 		Environment env = Environment.getInstance();
-		String hostName = env.getHostName() + " (" +
-				env.getHostAddress() + ":" + _server.getLocalPort() + ")";
+		String hostName = env.getHostName() + " (" + env.getHostAddress() + ":" + _server.getLocalPort() + ")";
 
 		addLabel(lPanel, "Host: " + hostName, 0);
-		addLabel(lPanel, "Server: " + _server.getName() + 
-				"   Port: " + _server.getPort() +
-				"   Version: " + _server.getVersion(), 6);
+		addLabel(lPanel, "Server: " + _server.getName() + "   Port: " + _server.getPort() + "   Version: "
+				+ _server.getVersion(), 6);
 		_durationLabel = addLabel(lPanel, "Running:" + _server.getName(), 6);
 		_bandwidthLabel = addLabel(lPanel, "Average bandwidth:", 6);
 
 		nPanel.add(lPanel, BorderLayout.CENTER);
-		
-		//memory strip chart
+
+		// memory strip chart
 		_chart = new MemoryStripChart(_server);
 		nPanel.add(_chart, BorderLayout.WEST);
-		
-		Border emptyBorder = BorderFactory
-				.createEmptyBorder(4, 4, 4, 4);
-		nPanel.setBorder(emptyBorder);
-		
-	//	CommonBorder cborder = new CommonBorder("");
 
-	//	nPanel.setBorder(BorderFactory.createCompoundBorder(emptyBorder, cborder));
+		Border emptyBorder = BorderFactory.createEmptyBorder(4, 4, 4, 4);
+		nPanel.setBorder(emptyBorder);
+
+		// CommonBorder cborder = new CommonBorder("");
+
+		// nPanel.setBorder(BorderFactory.createCompoundBorder(emptyBorder, cborder));
 
 		add(nPanel, BorderLayout.NORTH);
 	}
 
-	//add a label
+	// add a label
 	private JLabel addLabel(JPanel lPanel, String s, int gap) {
 		if (gap > 0) {
 			lPanel.add(Box.createVerticalStrut(gap));
 		}
-		
+
 		JLabel label = new JLabel(s);
 		label.setFont(Fonts.mediumBoldFont);
 		lPanel.add(label);
 
 		return label;
 	}
-	
+
 	// convenience function to create a button
 	private JButton makeButton(String label) {
 		JButton button = new JButton(label);
@@ -249,17 +246,16 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 	private void fixGuiState() {
 		boolean haveServer = (_server != null);
 		_stopButton.setEnabled(haveServer);
-		
+
 		boolean rowSelected = false;
 		_shutdownButton.setEnabled(rowSelected);
 	}
 
 	/**
-	 * Convenience method that creates the frame that will monitor the given
-	 * server and also make the frame visible.
+	 * Convenience method that creates the frame that will monitor the given server
+	 * and also make the frame visible.
 	 * 
-	 * @param server
-	 *            the server to monitor (can be <code>null</code>)
+	 * @param server the server to monitor (can be <code>null</code>)
 	 * @return the frame, which will be popped open.
 	 */
 	public static ServerFrame createServerFrame(TinyMessageServer server) {
@@ -274,11 +270,9 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 //					frame.setLocationRelativeTo(null);
 				}
 			});
-		}
-		catch (InvocationTargetException e) {
+		} catch (InvocationTargetException e) {
 			e.printStackTrace();
-		}
-		catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 
@@ -297,8 +291,7 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 				System.out.println("***** Server is shutting down from the server GUI. *****");
 				System.out.println("\n===========================================");
 				_server.shutdown();
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -319,91 +312,87 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 		if (source == _clearButton) {
 			_logPane.clear();
 
-		}
-		else if (source == _stopButton) {
+		} else if (source == _stopButton) {
 			if (reallyStop()) {
 				shutDown();
 			}
-		}
-		else if (source == _shutdownButton) {
+		} else if (source == _shutdownButton) {
 			shutdownClient();
 		}
 
 		fixGuiState();
 	}
-	
-	//shutdown a client
+
+	// shutdown a client
 	private void shutdownClient() {
-		
+
 		if (_table != null) {
 			ProxyClient client = _table.getSelectedClient();
 			if (client != null) {
 				ImageIcon icon = ImageManager.getInstance().loadImageIcon("images/cnuicon.png");
 				int answer = JOptionPane.showConfirmDialog(null,
-						"Do you really want to shutdown client: " + client.getClientName() + "?",
-						"Shutdown a client?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, 
-						icon);
-				
+						"Do you really want to shutdown client: " + client.getClientName() + "?", "Shutdown a client?",
+						JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, icon);
+
 				if (answer == JFileChooser.APPROVE_OPTION) {
 					client.shutdown();
 				}
 			}
 		}
 
-
 	}
-	
+
 	/**
 	 * Tell the GUI to do its houseKeeping
+	 * 
 	 * @param count running index of housekeeping calls.
 	 */
-	public void houseKeeping(long count) {	
+	public void houseKeeping(long count) {
 		uptime();
-		
+
 		if (_server.isShutDown()) {
 			_timer.cancel();
 			System.out.println("Application GUI (Server Frame) detected server shutdown.");
 		}
-		
+
 		int n = 2;
-		//do something every n seconds
+		// do something every n seconds
 		if ((count % n) == 0) {
 			if (_table != null) {
 				_table.fireTableDataChanged();
 			}
 		}
 	}
-	
-	//how long has the server been running?
+
+	// how long has the server been running?
 	private void uptime() {
-		
+
 		if (_server.isShutDown()) {
 			_durationLabel.setText("Server has stopped.");
 			return;
 		}
-		
-		//uptime in seconds
-		long del = (System.currentTimeMillis() - _startTime)/1000;
-		
-		//compute bandwidth
-		int bandwidth = (int)((double)_server.getBytesTransferred()/((double)Math.max(1, del)));
-		
+
+		// uptime in seconds
+		long del = (System.currentTimeMillis() - _startTime) / 1000;
+
+		// compute bandwidth
+		int bandwidth = (int) ((double) _server.getBytesTransferred() / ((double) Math.max(1, del)));
+
 		long days = del / 86400;
 		del = del % 86400;
-		
+
 		long hours = del / 3600;
 		del = del % 3600;
-		
+
 		long minutes = del / 60;
 		long seconds = del % 60;
-		
+
 		String s = String.format("Running: %d days and %02d:%02d:%02d", days, hours, minutes, seconds);
 		_durationLabel.setText(s);
-		
+
 		String bwstr = NumberFormat.getNumberInstance(Locale.US).format(bandwidth);
 		_bandwidthLabel.setText("Average bandwidth: " + bwstr + " bytes/s");
 	}
-	
 
 	/**
 	 * Convenience routine to fire a data changed event
@@ -411,23 +400,21 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 	public void fireTableDataChanged() {
 		if (_table != null) {
 			_table.fireTableDataChanged();
-		}
-		else {
+		} else {
 			System.out.println("DID NOT FIRE TABLE DATA CHANGE (Frame)");
 		}
 	}
-	
+
 	/**
 	 * Do i really want to stop the server?
+	 * 
 	 * @return <code>true</code> if I really want to stop
 	 */
 	public boolean reallyStop() {
 		ImageIcon icon = ImageManager.getInstance().loadImageIcon("images/cnuicon.png");
-		int answer = JOptionPane.showConfirmDialog(null,
-				"Do you really want to stop the server?",
-				"Stop the server?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, 
-				icon);
-		
+		int answer = JOptionPane.showConfirmDialog(null, "Do you really want to stop the server?", "Stop the server?",
+				JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, icon);
+
 		return (answer == JFileChooser.APPROVE_OPTION);
 
 	}
@@ -441,6 +428,7 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 
 	/**
 	 * Get the topic list
+	 * 
 	 * @return the topic list
 	 */
 	public TopicList getTopicList() {
@@ -449,6 +437,7 @@ public class ServerFrame extends JFrame implements ActionListener, ListSelection
 
 	/**
 	 * Get the client table
+	 * 
 	 * @return the client table
 	 */
 	public ConnectionTable getClientTable() {

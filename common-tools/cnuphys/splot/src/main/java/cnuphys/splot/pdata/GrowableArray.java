@@ -38,10 +38,8 @@ public class GrowableArray {
 	/**
 	 * Create a GrowableArray
 	 * 
-	 * @param initCap
-	 *            the initial capacity
-	 * @param increment
-	 *            the increment when the array grows.
+	 * @param initCap   the initial capacity
+	 * @param increment the increment when the array grows.
 	 */
 	public GrowableArray(int initCap, int increment) {
 		_initCap = initCap;
@@ -50,9 +48,9 @@ public class GrowableArray {
 	}
 
 	/**
-	 * Get the number of real data in the array, which in general is less than
-	 * the length of the array. This is the effective length of the array, so
-	 * loops should go from 0 to this value minus 1.
+	 * Get the number of real data in the array, which in general is less than the
+	 * length of the array. This is the effective length of the array, so loops
+	 * should go from 0 to this value minus 1.
 	 * 
 	 * @return the number of real data.
 	 */
@@ -61,9 +59,9 @@ public class GrowableArray {
 	}
 
 	/**
-	 * Get the minimal copy of the data array. This copies the actual data into
-	 * a new array of just the right size. This new array can be used normally,
-	 * i.e., it is safe to use its <code>length</code>.
+	 * Get the minimal copy of the data array. This copies the actual data into a
+	 * new array of just the right size. This new array can be used normally, i.e.,
+	 * it is safe to use its <code>length</code>.
 	 * 
 	 * @return a copy of the data array of just the right length
 	 */
@@ -75,10 +73,10 @@ public class GrowableArray {
 
 		try {
 			System.arraycopy(_data, 0, acopy, 0, _dataLen);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 
-			System.err.println("Exception in GrowableArray.getMinimalCopy: "
-					+ e.getMessage());
+			System.err.println("Exception in GrowableArray.getMinimalCopy: " + e.getMessage());
 			System.err.println("_dataLen: " + _dataLen);
 		}
 		return acopy;
@@ -105,8 +103,7 @@ public class GrowableArray {
 	/**
 	 * Add a value to the array, growing it if necessary.
 	 * 
-	 * @param val
-	 *            the value to add
+	 * @param val the value to add
 	 */
 	public void add(double val) {
 		if (_dataLen == _data.length) {
@@ -126,7 +123,8 @@ public class GrowableArray {
 		if (_dataLen == 1) {
 			_minValue = val;
 			_maxValue = val;
-		} else {
+		}
+		else {
 			_minValue = Math.min(_minValue, val);
 			_maxValue = Math.max(_maxValue, val);
 		}
@@ -167,8 +165,7 @@ public class GrowableArray {
 	/**
 	 * Get the value at the given index
 	 * 
-	 * @param index
-	 *            the index
+	 * @param index the index
 	 * @return the value at the index
 	 */
 	public double get(int index) {
@@ -178,10 +175,8 @@ public class GrowableArray {
 	/**
 	 * Set the value at the given index
 	 * 
-	 * @param index
-	 *            the index
-	 * @param val
-	 *            the value at the index
+	 * @param index the index
+	 * @param val   the value at the index
 	 */
 	public void set(int index, double val) {
 		_data[index] = val;

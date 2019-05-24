@@ -31,7 +31,6 @@ import cnuphys.bCNU.layer.LogicalLayer;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.UnicodeSupport;
-import cnuphys.bCNU.util.VectorSupport;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.cedview.CedView;
@@ -45,6 +44,7 @@ import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.bmt.BMTSectorItem;
 import cnuphys.ced.geometry.bmt.Constants;
+import cnuphys.ced.geometry.util.VectorSupport;
 import cnuphys.ced.geometry.BMTGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.BeamLineItem;
@@ -55,11 +55,10 @@ import cnuphys.swim.SwimTrajectory2D;
 @SuppressWarnings("serial")
 public class CentralZView extends CedView implements ChangeListener {
 
-	
-	//for naming clones
+	// for naming clones
 	private static int CLONE_COUNT = 0;
-	
-	//base title
+
+	// base title
 	private static final String _baseTitle = "Central Z";
 
 	private double _targetZ = 0;
@@ -80,13 +79,10 @@ public class CentralZView extends CedView implements ChangeListener {
 	private static final Color TRANS = new Color(192, 192, 192, 128);
 
 	// line stroke
-	private static Stroke stroke = GraphicsUtilities.getStroke(1.5f,
-			LineStyle.SOLID);
-
+	private static Stroke stroke = GraphicsUtilities.getStroke(1.5f, LineStyle.SOLID);
 
 	// units are mm
-	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
-			-240., -230., 520., 460.);
+	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(-240., -230., 520., 460.);
 
 	// used to draw swum trajectories (if any) in the after drawer
 	private SwimTrajectoryDrawerZ _swimTrajectoryDrawer;
@@ -124,39 +120,34 @@ public class CentralZView extends CedView implements ChangeListener {
 		// make it square
 		int width = d.width;
 		int height = width;
-		
+
 		String title = _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")"));
 
-
 		// create the view
-		view = new CentralZView(PropertySupport.WORLDSYSTEM, _defaultWorldRectangle,
-				PropertySupport.WIDTH, width, // container width, not total view
-											  // width
+		view = new CentralZView(PropertySupport.WORLDSYSTEM, _defaultWorldRectangle, PropertySupport.WIDTH, width, // container
+																													// width,
+																													// not
+																													// total
+																													// view
+																													// width
 				PropertySupport.HEIGHT, height, // container height, not total
 												// view width
-				PropertySupport.LEFTMARGIN, LMARGIN, PropertySupport.TOPMARGIN,
-				TMARGIN, PropertySupport.RIGHTMARGIN, RMARGIN,
-				PropertySupport.BOTTOMMARGIN, BMARGIN, PropertySupport.TOOLBAR,
-				true, PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
-				PropertySupport.VISIBLE, true,
-				PropertySupport.TITLE, title,
-				PropertySupport.STANDARDVIEWDECORATIONS, true);
+				PropertySupport.LEFTMARGIN, LMARGIN, PropertySupport.TOPMARGIN, TMARGIN, PropertySupport.RIGHTMARGIN,
+				RMARGIN, PropertySupport.BOTTOMMARGIN, BMARGIN, PropertySupport.TOOLBAR, true,
+				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS, PropertySupport.VISIBLE, true, PropertySupport.TITLE,
+				title, PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view._controlPanel = new ControlPanel(view,
-				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK
-						+ ControlPanel.ACCUMULATIONLEGEND
-						+ ControlPanel.PHISLIDER + ControlPanel.TARGETSLIDER
-						+ ControlPanel.PHI_SLIDER_BIG + ControlPanel.FIELDLEGEND
-						+ ControlPanel.DRAWLEGEND,
-				DisplayBits.MAGFIELD | DisplayBits.ACCUMULATION
-						| DisplayBits.CROSSES | DisplayBits.MCTRUTH
-						| DisplayBits.COSMICS | DisplayBits.CVTTRACKS
-						| DisplayBits.GLOBAL_HB |  DisplayBits.GLOBAL_TB,
+				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
+						+ ControlPanel.PHISLIDER + ControlPanel.TARGETSLIDER + ControlPanel.PHI_SLIDER_BIG
+						+ ControlPanel.FIELDLEGEND + ControlPanel.DRAWLEGEND,
+				DisplayBits.MAGFIELD | DisplayBits.ACCUMULATION | DisplayBits.CROSSES | DisplayBits.MCTRUTH
+						| DisplayBits.COSMICS | DisplayBits.CVTTRACKS | DisplayBits.GLOBAL_HB | DisplayBits.GLOBAL_TB,
 				3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
 		view.pack();
-		
+
 		view.phiFromSlider();
 		return view;
 	}
@@ -172,8 +163,7 @@ public class CentralZView extends CedView implements ChangeListener {
 			public void draw(Graphics g, IContainer container) {
 				Rectangle screenRect = container.getInsetRectangle();
 				g.setColor(Color.white);
-				g.fillRect(screenRect.x, screenRect.y, screenRect.width,
-						screenRect.height);
+				g.fillRect(screenRect.x, screenRect.y, screenRect.width, screenRect.height);
 
 			}
 
@@ -218,55 +208,48 @@ public class CentralZView extends CedView implements ChangeListener {
 		getContainer().setAfterDraw(afterDraw);
 	}
 
-	//not real items
+	// not real items
 	private void denoteBMT(Graphics g, IContainer container) {
-		
+
 		Graphics2D g2 = (Graphics2D) g;
 		Shape oldClip = g2.getClip();
-		
+
 		// clip the active area
 		Rectangle sr = container.getInsetRectangle();
 		g2.clipRect(sr.x, sr.y, sr.width, sr.height);
 
-
 		for (int layer = 1; layer <= 6; layer++) {
-			double r = BMTSectorItem.innerRadius[layer-1];
-			int region = (layer+1)/2 - 1;
+			double r = BMTSectorItem.innerRadius[layer - 1];
+			int region = (layer + 1) / 2 - 1;
 			double zmin;
 			double zmax;
 			Color color;
-			
+
 			if (BMTGeometry.getGeometry().isZLayer(layer)) {
 				zmin = Constants.getCRZZMIN()[region];
 				zmax = Constants.getCRZZMAX()[region];
 				color = BMTSectorItem.zColor;
-			}
-			else {
+			} else {
 				zmin = Constants.getCRCZMIN()[region];
 				zmax = Constants.getCRCZMAX()[region];
 				color = BMTSectorItem.cColor;
-		}
-			
+			}
+
 			double w = zmax - zmin;
 			double h = BMTSectorItem.FAKEWIDTH;
-			
+
 			Rectangle2D.Double wr = new Rectangle2D.Double(zmin, r, w, h);
-			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, color,
-					Color.gray, 1, LineStyle.SOLID);
+			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, color, Color.gray, 1, LineStyle.SOLID);
 
 			wr.setFrame(zmin, -r - h, w, h);
-			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, color,
-					Color.gray, 1, LineStyle.SOLID);
-
+			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, color, Color.gray, 1, LineStyle.SOLID);
 
 		}
-		
 
 		// hits?
 		if (ClasIoEventManager.getInstance().isAccumulating()) {
 
-		}
-		else {
+		} else {
 			if (isSingleEventMode()) {
 //
 //				int hitCount = BMT.hitCount();
@@ -318,19 +301,19 @@ public class CentralZView extends CedView implements ChangeListener {
 
 		g2.setClip(oldClip);
 	}
-	
+
 	// draw cosmic ray tracks
 	private void drawCosmicTracks(Graphics g, IContainer container) {
 
 		CosmicList cosmics;
 		cosmics = Cosmics.getInstance().getCosmics();
-		
+
 		if ((cosmics == null) || cosmics.isEmpty()) {
 			return;
 		}
 
 		Shape oldClip = clipView(g);
-		
+
 		Point p1 = new Point();
 		Point p2 = new Point();
 		for (Cosmic cosmic : cosmics) {
@@ -340,8 +323,8 @@ public class CentralZView extends CedView implements ChangeListener {
 			double x2 = cosmic.trkline_yx_slope * y2 + cosmic.trkline_yx_interc;
 			double z1 = cosmic.trkline_yz_slope * y1 + cosmic.trkline_yz_interc;
 			double z2 = cosmic.trkline_yz_slope * y2 + cosmic.trkline_yz_interc;
-			
-			//convert to mm
+
+			// convert to mm
 			x1 *= 10;
 			x2 *= 10;
 			y1 *= 10;
@@ -350,7 +333,7 @@ public class CentralZView extends CedView implements ChangeListener {
 			z2 *= 10;
 			labToLocal(x1, y1, z1, p1);
 			labToLocal(x2, y2, z2, p2);
-			
+
 			g.setColor(Color.red);
 			g.drawLine(p1.x, p1.y, p2.x, p2.y);
 
@@ -358,8 +341,6 @@ public class CentralZView extends CedView implements ChangeListener {
 
 		g.setClip(oldClip);
 	}
-
-
 
 	// draw the panels
 	private void drawBSTPanels(Graphics g, IContainer container) {
@@ -401,8 +382,8 @@ public class CentralZView extends CedView implements ChangeListener {
 			for (int j = 0; j < 3; j++) {
 				boolean hit = panel.hit[j];
 
-				WorldGraphicsUtilities.drawWorldPolygon(g2, container, poly[j],
-						hit ? HITFILL : col, col2, 0, LineStyle.SOLID);
+				WorldGraphicsUtilities.drawWorldPolygon(g2, container, poly[j], hit ? HITFILL : col, col2, 0,
+						LineStyle.SOLID);
 			}
 		}
 
@@ -532,8 +513,7 @@ public class CentralZView extends CedView implements ChangeListener {
 
 		g.setColor(X11Colors.getX11Color("dark red"));
 		g.drawLine(xc, yc, right - fm.stringWidth("z") - 4, yc);
-		g.drawString("z", right - fm.stringWidth("z") - 2,
-				yc + fm.getAscent() / 2);
+		g.drawString("z", right - fm.stringWidth("z") - 2, yc + fm.getAscent() / 2);
 
 		int xscale = (int) Math.abs(size2 * _cosphi);
 		int xx = (int) (_sinphi * xscale);
@@ -589,8 +569,7 @@ public class CentralZView extends CedView implements ChangeListener {
 
 				g.drawString(vs, xs, bottom + fh + 1);
 
-			}
-			else {
+			} else {
 				g.drawLine(pp.x, bottom, pp.x, bottom - 5);
 			}
 		}
@@ -606,8 +585,7 @@ public class CentralZView extends CedView implements ChangeListener {
 				int xs = sr.x - fm.stringWidth(vs) - 1;
 
 				g.drawString(vs, xs, pp.y + fh / 2);
-			}
-			else {
+			} else {
 				g.drawLine(sr.x, pp.y, sr.x + 5, pp.y);
 			}
 		}
@@ -620,8 +598,7 @@ public class CentralZView extends CedView implements ChangeListener {
 		}
 		if (Math.abs(val) < 1.0) {
 			return DoubleFormat.doubleFormat(val, 1);
-		}
-		else {
+		} else {
 			return "" + (int) Math.round(val);
 		}
 	}
@@ -631,42 +608,39 @@ public class CentralZView extends CedView implements ChangeListener {
 	}
 
 	/**
-	 * This adds the detector items. The AllDC view is not faithful to geometry.
-	 * All we really uses in the number of superlayers, number of layers, and
-	 * number of wires.
+	 * This adds the detector items. The AllDC view is not faithful to geometry. All
+	 * we really uses in the number of superlayers, number of layers, and number of
+	 * wires.
 	 */
 	private void addItems() {
 
 		// add a field object, which won't do anything unless we can read in the
 		// field.
-		LogicalLayer magneticFieldLayer = getContainer()
-				.getLogicalLayer(_magneticFieldLayerName);
+		LogicalLayer magneticFieldLayer = getContainer().getLogicalLayer(_magneticFieldLayerName);
 		new MagFieldItem(magneticFieldLayer, this);
 		magneticFieldLayer.setVisible(false);
 
-		LogicalLayer detectorLayer = getContainer()
-				.getLogicalLayer(_detectorLayerName);
+		LogicalLayer detectorLayer = getContainer().getLogicalLayer(_detectorLayerName);
 		new BeamLineItem(detectorLayer);
 	}
 
 	@Override
-	public int getSector(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint) {
+	public int getSector(IContainer container, Point screenPoint, Point2D.Double worldPoint) {
 		return 0;
 	}
 
 	/**
-	 * Converts the local screen coordinate obtained by a previous localToWorld
-	 * call to full 3D CLAS coordinates
+	 * Converts the local screen coordinate obtained by a previous localToWorld call
+	 * to full 3D CLAS coordinates
 	 * 
 	 * @param screenPoint the pixel point
-	 * @param worldPoint the corresponding world location.
-	 * @param result holds the result. It has five elements. Cartesian x, y, and
-	 *            z are in 0, 1, and 2. Cylindrical rho and phi are in 3 and 4.
-	 *            (And of course cylindrical z is the same as Cartesian z.)
+	 * @param worldPoint  the corresponding world location.
+	 * @param result      holds the result. It has five elements. Cartesian x, y,
+	 *                    and z are in 0, 1, and 2. Cylindrical rho and phi are in 3
+	 *                    and 4. (And of course cylindrical z is the same as
+	 *                    Cartesian z.)
 	 */
-	public void getCLASCordinates(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, double result[]) {
+	public void getCLASCordinates(IContainer container, Point screenPoint, Point2D.Double worldPoint, double result[]) {
 
 		double labRho = Math.abs(worldPoint.y);
 		double labZ = worldPoint.x;
@@ -684,17 +658,16 @@ public class CentralZView extends CedView implements ChangeListener {
 	 * Some view specific feedback. Should always call super.getFeedbackStrings
 	 * first.
 	 * 
-	 * @param container the base container for the view.
+	 * @param container   the base container for the view.
 	 * @param screenPoint the pixel point
-	 * @param worldPoint the corresponding world location.
+	 * @param worldPoint  the corresponding world location.
 	 */
 	@Override
-	public void getFeedbackStrings(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
 		// get the common information
-		super.getFeedbackStrings(container, screenPoint, worldPoint,
-				feedbackStrings);
+		super.getFeedbackStrings(container, screenPoint, worldPoint, feedbackStrings);
 
 		Rectangle sr = getActiveScreenRectangle(container);
 		if (!sr.contains(screenPoint)) {
@@ -703,20 +676,18 @@ public class CentralZView extends CedView implements ChangeListener {
 
 		// the world coordinates
 		double labRho = Math.abs(worldPoint.y);
-		float labZ = (float)worldPoint.x;
-		float labX = (float)(labRho * _cosphi);
-		float labY = (float)(labRho * _sinphi);
+		float labZ = (float) worldPoint.x;
+		float labX = (float) (labRho * _cosphi);
+		float labY = (float) (labRho * _sinphi);
 		double r = Math.sqrt(labX * labX + labY * labY + labZ * labZ);
 		double theta = Math.toDegrees(Math.atan2(labRho, labZ));
 
 		String xyz = "xyz " + vecStr(labX, labY, labZ) + " mm";
 
-		String rtp = CedView.rThetaPhi + " (" + valStr(r, 2) + " mm, "
-				+ valStr(theta, 2) + UnicodeSupport.DEGREE + ", "
+		String rtp = CedView.rThetaPhi + " (" + valStr(r, 2) + " mm, " + valStr(theta, 2) + UnicodeSupport.DEGREE + ", "
 				+ valStr(_phi, 2) + UnicodeSupport.DEGREE + ")";
 
-		String rzp = CedView.rhoZPhi + " (" + valStr(labRho, 2) + " mm, "
-				+ valStr(labZ, 2) + " mm , " + valStr(_phi, 2)
+		String rzp = CedView.rhoZPhi + " (" + valStr(labRho, 2) + " mm, " + valStr(labZ, 2) + " mm , " + valStr(_phi, 2)
 				+ UnicodeSupport.DEGREE + ")";
 
 		feedbackStrings.add(xyz);
@@ -725,37 +696,31 @@ public class CentralZView extends CedView implements ChangeListener {
 
 		if (_activeProbe != null) {
 			float field[] = new float[3];
-			_activeProbe.field(labX/10, labY/10, labZ/10, field);
+			_activeProbe.field(labX / 10, labY / 10, labZ / 10, field);
 			// convert to Tesla from kG
 			field[0] /= 10.0;
 			field[1] /= 10.0;
 			field[2] /= 10.0;
 
 			double bmag = VectorSupport.length(field);
-			feedbackStrings.add("$Lawn Green$"
-					+ MagneticFields.getInstance().getActiveFieldDescription());
-			feedbackStrings.add("$Lawn Green$Field " + valStr(bmag, 4) + " T "
-					+ vecStr(field) + " T");
+			feedbackStrings.add("$Lawn Green$" + MagneticFields.getInstance().getActiveFieldDescription());
+			feedbackStrings.add("$Lawn Green$Field " + valStr(bmag, 4) + " T " + vecStr(field) + " T");
 		}
 
 		// near a swum trajectory?
 		double mindist = _swimTrajectoryDrawer.closestApproach(worldPoint);
-		double pixlen = WorldGraphicsUtilities.getMeanPixelDensity(container)
-				* mindist;
+		double pixlen = WorldGraphicsUtilities.getMeanPixelDensity(container) * mindist;
 		if (pixlen < 25.0) {
-			SwimTrajectory2D traj2D = _swimTrajectoryDrawer
-					.getClosestTrajectory();
+			SwimTrajectory2D traj2D = _swimTrajectoryDrawer.getClosestTrajectory();
 			if (traj2D != null) {
 				traj2D.addToFeedback(feedbackStrings);
-			}
-			else {
+			} else {
 				System.err.println("null traj");
 			}
 		}
 
 		// reconstructed feedback?
-		_crossDrawer.feedback(container, screenPoint, worldPoint,
-				feedbackStrings);
+		_crossDrawer.feedback(container, screenPoint, worldPoint, feedbackStrings);
 
 	}
 
@@ -766,8 +731,7 @@ public class CentralZView extends CedView implements ChangeListener {
 	 * @return a String representation of the vector
 	 */
 	private String vecStr(float v[]) {
-		return "(" + DoubleFormat.doubleFormat(v[0], 3) + ", "
-				+ DoubleFormat.doubleFormat(v[1], 3) + ", "
+		return "(" + DoubleFormat.doubleFormat(v[0], 3) + ", " + DoubleFormat.doubleFormat(v[1], 3) + ", "
 				+ DoubleFormat.doubleFormat(v[2], 3) + ")";
 	}
 
@@ -783,61 +747,132 @@ public class CentralZView extends CedView implements ChangeListener {
 	 * @return a String representation of the vector
 	 */
 	private String vecStr(double vx, double vy, double vz) {
-		return "(" + DoubleFormat.doubleFormat(vx, 2) + ", "
-				+ DoubleFormat.doubleFormat(vy, 2) + ", "
+		return "(" + DoubleFormat.doubleFormat(vx, 2) + ", " + DoubleFormat.doubleFormat(vy, 2) + ", "
 				+ DoubleFormat.doubleFormat(vz, 2) + ")";
 	}
 
 	/**
 	 * Get the world graphic coordinates from lab XYZ
 	 * 
-	 * @param x the lab x in cm
-	 * @param y the lab y in cm
-	 * @param z the lab z in cm
+	 * @param x  the lab x in cm
+	 * @param y  the lab y in cm
+	 * @param z  the lab z in cm
 	 * @param wp the world point
 	 */
 	public void labToWorld(double x, double y, double z, Point2D.Double wp) {
 		wp.x = z;
 		wp.y = x * _cosphi + y * _sinphi;
-
 	}
 
-	public void labToLocal(double x, double y, double z, Point pp) {
-		Point2D.Double wp = new Point2D.Double();
-		labToWorld(x, y, z, wp);
-		getContainer().worldToLocal(pp, wp);
+	// work arrays and viewer constants
+	private float[] _sCoords = new float[6];
+	private Point _sP1 = new Point();
+	private Point _sP2 = new Point();
+	private Point2D.Double _sWp = new Point2D.Double();
+	private static final double _viewerD = 200; // mm
+	private static final double _minViewerDist = 77.2;
+	private static final double _maxViewerDist = 379.;
+
+	/**
+	 * Convert lab coordinates xyz to local screen coordinates
+	 * 
+	 * @param x  the x coordinate
+	 * @param y  the y coordinate
+	 * @param z  the z coordinate
+	 * @param pp the coordinate will hold the screen coordinates
+	 * @return the alpha value that can be used to simulate depth
+	 */
+	public double labToLocal(double x, double y, double z, Point pp) {
+		labToWorld(x, y, z, _sWp);
+		getContainer().worldToLocal(pp, _sWp);
+
+		// viewer location
+		double vX = _viewerD * _sinphi;
+		double vY = _viewerD * _cosphi;
+
+		// viewer distance
+		double dX = vX - x;
+		double dY = vY - y;
+		double distance = Math.sqrt(dX * dX + dY * dY + z * z);
+
+		double alpha = 1. - ((distance - _minViewerDist) / (_maxViewerDist - _minViewerDist));
+		return alpha;
+//		System.err.println("distance  = " + distance + "  aplha = " + alpha);
 	}
 
 	/**
 	 * Draw an svt strip
 	 * 
-	 * @param g2 graphics context
+	 * @param g2        graphics context
 	 * @param container the container
-	 * @param color the color
-	 * @param sector 1-based sector 1..
-	 * @param layer 1-based layer 1..8
-	 * @param strip 1-based strip 1..255
+	 * @param color     the color
+	 * @param sector    1-based sector 1..
+	 * @param layer     1-based layer 1..8
+	 * @param strip     1-based strip 1..255
 	 */
-	public void drawBSTStrip(Graphics2D g2, IContainer container, Color color,
-			int sector, int layer, int strip) {
 
-		float coords[] = new float[6];
+	public void drawBSTStrip(Graphics2D g2, IContainer container, Color color, int sector, int layer, int strip) {
 
-		BSTGeometry.getStrip(sector, layer, strip, coords);
+		BSTGeometry.getStrip(sector, layer, strip, _sCoords);
 
 		Stroke oldStroke = g2.getStroke();
 		g2.setColor(color);
 		g2.setStroke(stroke);
-		Point p1 = new Point();
-		Point p2 = new Point();
+
+		int nStep = 10;
+		double dT = 1. / nStep;
+		double t1;
+		double t2;
+
+		double dX = _sCoords[3] - _sCoords[0];
+		double dY = _sCoords[4] - _sCoords[1];
+		double dZ = _sCoords[5] - _sCoords[2];
+
+		for (int i = 0; i < nStep; i++) {
+			t1 = i * dT;
+			t2 = t1 + dT;
+
+			double x1 = _sCoords[0] + t1 * dX;
+			double y1 = _sCoords[1] + t1 * dY;
+			double z1 = _sCoords[2] + t1 * dZ;
+
+			double x2 = _sCoords[0] + t2 * dX;
+			double y2 = _sCoords[1] + t2 * dY;
+			double z2 = _sCoords[2] + t2 * dZ;
+
+			// cm to mm
+			double alpha1 = labToLocal(10 * x1, 10 * y1, 10 * z1, _sP1);
+			double alpha2 = labToLocal(10 * x2, 10 * y2, 10 * z2, _sP2);
+
+			drawAlphaLine(g2, _sP1.x, _sP1.y, _sP2.x, _sP2.y, alpha1, alpha2);
+
+		}
+
 		// Just draw a line from (x1,y1,z1) to (x2,y2,z2)
 
-		// cm to mm
-		labToLocal(10 * coords[0], 10 * coords[1], 10 * coords[2], p1);
-		labToLocal(10 * coords[3], 10 * coords[4], 10 * coords[5], p2);
-
-		g2.drawLine(p1.x, p1.y, p2.x, p2.y);
+//		// cm to mm
+//		double alpha1 = labToLocal(10 * _sCoords[0], 10 * _sCoords[1], 10 * _sCoords[2], _sP1);
+//		double alpha2 = labToLocal(10 * _sCoords[3], 10 * _sCoords[4], 10 * _sCoords[5], _sP2);
+//		
+//
+//		drawAlphaLine(g2, _sP1.x, _sP1.y, _sP2.x, _sP2.y, alpha1, alpha2);
 		g2.setStroke(oldStroke);
+
+	}
+
+	private void drawAlphaLine(Graphics2D g2, int x1, int y1, int x2, int y2, double alpha1, double alpha2) {
+		Color baseColor = g2.getColor();
+
+		double alpha = 0.5 * (alpha1 + alpha2);
+
+		int alp = (int) Math.max(0, Math.min(255, 255 * alpha));
+
+		Color ca = new Color(baseColor.getRed(), baseColor.getGreen(), baseColor.getBlue(), alp);
+		g2.setColor(ca);
+
+		g2.drawLine(_sP1.x, _sP1.y, _sP2.x, _sP2.y);
+
+		g2.setColor(baseColor);
 
 	}
 
@@ -863,39 +898,38 @@ public class CentralZView extends CedView implements ChangeListener {
 		if (source == _controlPanel.getTargetSlider()) {
 			_targetZ = (_controlPanel.getTargetSlider().getValue());
 			getContainer().refresh();
-		}
-		else if (source == _controlPanel.getPhiSlider()) {
+		} else if (source == _controlPanel.getPhiSlider()) {
 			phiFromSlider();
 			getContainer().setDirty(true);
 			getContainer().refresh();
 		}
 	}
-	
+
 	private void phiFromSlider() {
 		_phi = _controlPanel.getPhiSlider().getValue();
 		_sinphi = Math.sin(Math.toRadians(_phi));
 		_cosphi = Math.cos(Math.toRadians(_phi));
 	}
-	
-	
+
 	/**
-	 * Clone the view. 
+	 * Clone the view.
+	 * 
 	 * @return the cloned view
 	 */
 	@Override
 	public BaseView cloneView() {
 		super.cloneView();
 		CLONE_COUNT++;
-		
-		//limit
+
+		// limit
 		if (CLONE_COUNT > 2) {
 			return null;
 		}
-		
+
 		Rectangle vr = getBounds();
 		vr.x += 40;
 		vr.y += 40;
-		
+
 		CentralZView view = createCentralZView();
 		view.setBounds(vr);
 		return view;

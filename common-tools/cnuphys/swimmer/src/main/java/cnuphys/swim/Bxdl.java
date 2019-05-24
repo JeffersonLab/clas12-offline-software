@@ -14,25 +14,21 @@ public class Bxdl {
 	/**
 	 * Accumulate the integral of b cross dl
 	 * 
-	 * @param previous
-	 *            the previous accumulation
-	 * @param current
-	 *            the (after returning) current accumulation
-	 * @param p0
-	 *            the starting [x,y,z] position
-	 * @param p1
-	 *            the ending [x,y,z] position
-	 * @param probe
-	 *            the object that can return the magnetic field
+	 * @param previous the previous accumulation
+	 * @param current  the (after returning) current accumulation
+	 * @param p0       the starting [x,y,z] position
+	 * @param p1       the ending [x,y,z] position
+	 * @param probe    the object that can return the magnetic field
 	 */
 	public static void accumulate(Bxdl previous, Bxdl current, double[] p0, double[] p1, FieldProbe probe) {
 
 		if (probe instanceof RotatedCompositeProbe) {
-			System.err.println("SHOULD NOT HAPPEN. In rotated composite field probe, should not call Bxdl accumlate without the sector argument.");
+			System.err.println(
+					"SHOULD NOT HAPPEN. In rotated composite field probe, should not call Bxdl accumlate without the sector argument.");
 
 			(new Throwable()).printStackTrace();
 			System.exit(1);
-			
+
 		}
 
 		double dr[] = new double[3];
@@ -63,22 +59,18 @@ public class Bxdl {
 		current._pathlength = pathlength;
 		current._bxdl = magbxdl;
 	}
-	
+
 	/**
 	 * Accumulate the integral of b cross dl
 	 * 
-	 * @param previous
-	 *            the previous accumulation
-	 * @param current
-	 *            the (after returning) current accumulation
-	 * @param p0
-	 *            the starting [x,y,z] position
-	 * @param p1
-	 *            the ending [x,y,z] position
-	 * @param probe
-	 *            the object that can return the magnetic field
+	 * @param previous the previous accumulation
+	 * @param current  the (after returning) current accumulation
+	 * @param p0       the starting [x,y,z] position
+	 * @param p1       the ending [x,y,z] position
+	 * @param probe    the object that can return the magnetic field
 	 */
-	public static void sectorAccumulate(int sector, Bxdl previous, Bxdl current, double[] p0, double[] p1, RotatedCompositeProbe probe) {
+	public static void sectorAccumulate(int sector, Bxdl previous, Bxdl current, double[] p0, double[] p1,
+			RotatedCompositeProbe probe) {
 
 		double dr[] = new double[3];
 
@@ -130,8 +122,7 @@ public class Bxdl {
 	/**
 	 * Set the cumulative pathlength in meters
 	 * 
-	 * @param pathlength
-	 *            the cumulative pathlength in meters
+	 * @param pathlength the cumulative pathlength in meters
 	 */
 	public void setPathlength(double pathlength) {
 		_pathlength = pathlength;
@@ -140,8 +131,7 @@ public class Bxdl {
 	/**
 	 * Set the cumulative integral |b cross dl| in kG-m
 	 * 
-	 * @param bxdl
-	 *            the cumulative integral b cross dl in kG-m
+	 * @param bxdl the cumulative integral b cross dl in kG-m
 	 */
 	public void setIntegralBxdl(double bxdl) {
 		_bxdl = bxdl;
@@ -150,8 +140,7 @@ public class Bxdl {
 	/**
 	 * Set the values based on another object
 	 * 
-	 * @param bxdl
-	 *            the other object
+	 * @param bxdl the other object
 	 */
 	public void set(Bxdl bxdl) {
 		_pathlength = bxdl._pathlength;

@@ -31,7 +31,7 @@ public class McHitDrawer extends DCXYViewDrawer {
 		if (!_view.showMcTruth()) {
 			return;
 		}
-		
+
 		if (!_view.isSingleEventMode()) {
 			return;
 		}
@@ -87,18 +87,14 @@ public class McHitDrawer extends DCXYViewDrawer {
 	/**
 	 * Use what was drawn to generate feedback strings
 	 * 
-	 * @param container
-	 *            the drawing container
-	 * @param screenPoint
-	 *            the mouse location
-	 * @param worldPoint
-	 *            the corresponding world location
-	 * @param feedbackStrings
-	 *            add strings to this collection
+	 * @param container       the drawing container
+	 * @param screenPoint     the mouse location
+	 * @param worldPoint      the corresponding world location
+	 * @param feedbackStrings add strings to this collection
 	 */
 	@Override
-	public void feedback(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public void feedback(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
 		if (_fbRects.isEmpty()) {
 			return;
@@ -114,10 +110,8 @@ public class McHitDrawer extends DCXYViewDrawer {
 
 	// for writing out a vector
 	private String vecStr(String prompt, double vx, double vy, double vz) {
-		return DataSupport.trueColor + prompt + " ("
-				+ DoubleFormat.doubleFormat(vx, 3) + ", "
-				+ DoubleFormat.doubleFormat(vy, 3) + ", "
-				+ DoubleFormat.doubleFormat(vz, 3) + ")";
+		return DataSupport.trueColor + prompt + " (" + DoubleFormat.doubleFormat(vx, 3) + ", "
+				+ DoubleFormat.doubleFormat(vy, 3) + ", " + DoubleFormat.doubleFormat(vz, 3) + ")";
 	}
-	
+
 }

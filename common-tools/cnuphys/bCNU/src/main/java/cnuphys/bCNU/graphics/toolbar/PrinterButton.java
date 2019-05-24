@@ -10,8 +10,7 @@ public class PrinterButton extends ToolBarButton {
 	/**
 	 * Create a button to print the container.
 	 * 
-	 * @param container
-	 *            the owner container.
+	 * @param container the owner container.
 	 */
 	public PrinterButton(IContainer container) {
 		super(container, "images/printer.gif", "Send view to printer");
@@ -20,12 +19,11 @@ public class PrinterButton extends ToolBarButton {
 	/**
 	 * This is what I do if I am pressed
 	 * 
-	 * @param actionEvent
-	 *            the causal event.
+	 * @param actionEvent the causal event.
 	 */
 	@Override
 	public void actionPerformed(ActionEvent actionEvent) {
-		
+
 		if (container.handledPrint()) {
 			return;
 		}

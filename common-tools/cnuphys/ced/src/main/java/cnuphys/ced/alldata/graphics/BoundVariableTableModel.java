@@ -80,8 +80,7 @@ public class BoundVariableTableModel extends DefaultTableModel {
 
 		return null;
 	}
-	
-	
+
 	/**
 	 * Get the collection of bindings
 	 * 
@@ -94,8 +93,7 @@ public class BoundVariableTableModel extends DefaultTableModel {
 	/**
 	 * Get the name binding at a given row
 	 * 
-	 * @param row
-	 *            the zero based row
+	 * @param row the zero based row
 	 * @return the NameBinding or null.
 	 */
 	public NameBinding getNameBinding(int row) {

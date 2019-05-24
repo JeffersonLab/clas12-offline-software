@@ -1,6 +1,6 @@
 package cnuphys.swimZ;
 
-import org.jlab.clas.clas.math.FastMath;
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.rk4.IDerivative;
 
@@ -11,40 +11,34 @@ public class SwimZDerivative implements IDerivative {
 
 	// the constant member of the state vector
 	protected double _q;
-	
-	//q times v
+
+	// q times v
 	protected double _qv;
 
-	//hold the mag field
+	// hold the mag field
 	protected float B[] = new float[3];
 
 	public SwimZDerivative() {
 		set(0, Double.NaN, null);
 	}
-	
+
 	/**
 	 * The derivative for swimming through a magnetic field
 	 * 
-	 * @param Q
-	 *            -1 for electron, +1 for proton, etc.
-	 * @param p
-	 *            the magnitude of the momentum in GeV/c.
-	 * @param probe
-	 *            the magnetic field getter
+	 * @param Q     -1 for electron, +1 for proton, etc.
+	 * @param p     the magnitude of the momentum in GeV/c.
+	 * @param probe the magnetic field getter
 	 */
 	public SwimZDerivative(int Q, double p, FieldProbe probe) {
 		set(Q, p, probe);
 	}
-	
+
 	/**
 	 * Set the parameters
 	 * 
-	 * @param Q
-	 *            -1 for electron, +1 for proton, etc.
-	 * @param p
-	 *            the magnitude of the momentum in GeV/c.
-	 * @param probe
-	 *            the magnetic field getter
+	 * @param Q     -1 for electron, +1 for proton, etc.
+	 * @param p     the magnitude of the momentum in GeV/c.
+	 * @param probe the magnetic field getter
 	 */
 	public void set(int Q, double p, FieldProbe probe) {
 		_q = Q / p;
@@ -53,18 +47,13 @@ public class SwimZDerivative implements IDerivative {
 	}
 
 	/**
-	 * Compute the derivatives given the value of the independent variable and
-	 * the values of the function. Think of the Differential Equation as being
-	 * dydt = f[y,t].
+	 * Compute the derivatives given the value of the independent variable and the
+	 * values of the function. Think of the Differential Equation as being dydt =
+	 * f[y,t].
 	 * 
-	 * @param z
-	 *            the value of the independent variable (the z coordinate)
-	 *            (input).
-	 * @param x
-	 *            the values of the state vector (x, y, tx, ty, q) at z (input).
-	 * @param dxdz
-	 *            will be filled with the values of the derivatives at z
-	 *            (output).
+	 * @param z    the value of the independent variable (the z coordinate) (input).
+	 * @param x    the values of the state vector (x, y, tx, ty, q) at z (input).
+	 * @param dxdz will be filled with the values of the derivatives at z (output).
 	 */
 	@Override
 	public void derivative(double z, double[] x, double[] dxdz) {

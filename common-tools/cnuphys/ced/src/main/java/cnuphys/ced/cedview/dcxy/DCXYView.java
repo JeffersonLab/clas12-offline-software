@@ -48,14 +48,12 @@ import cnuphys.ced.item.HexSectorItem;
 
 @SuppressWarnings("serial")
 public class DCXYView extends HexView {
-	
-	
-	//for naming clones
-	private static int CLONE_COUNT = 0;
-	
-	//base title
-	private static final String _baseTitle = "DC XY";
 
+	// for naming clones
+	private static int CLONE_COUNT = 0;
+
+	// base title
+	private static final String _baseTitle = "DC XY";
 
 	// sector items
 	private DCHexSectorItem _hexItems[];
@@ -68,64 +66,59 @@ public class DCXYView extends HexView {
 
 	// draws mc hits
 	private McHitDrawer _mcHitDrawer;
-	
-	//for fmt
+
+	// for fmt
 	private FMTCrossDrawer _fmtCrossDrawer;
 
-		
-	//exach superlayer in a different color
-	private static Color _wireColors[] = {Color.red, X11Colors.getX11Color("dark red"), 
-			X11Colors.getX11Color("cadet blue"), X11Colors.getX11Color("dark blue"),
-			X11Colors.getX11Color("olive"), X11Colors.getX11Color("dark green")};
+	// exach superlayer in a different color
+	private static Color _wireColors[] = { Color.red, X11Colors.getX11Color("dark red"),
+			X11Colors.getX11Color("cadet blue"), X11Colors.getX11Color("dark blue"), X11Colors.getX11Color("olive"),
+			X11Colors.getX11Color("dark green") };
 
 	// font for label text
 	private static final Font labelFont = Fonts.commonFont(Font.PLAIN, 11);
 	private static final Color TRANS = new Color(192, 192, 192, 128);
 	private static final Color TRANSTEXT = new Color(64, 64, 192, 40);
 	private static final Font _font = Fonts.commonFont(Font.BOLD, 60);
-	
-	private static Stroke stroke = GraphicsUtilities.getStroke(0.5f,
-			LineStyle.SOLID);
 
-	//the z location of the projection plane
+	private static Stroke stroke = GraphicsUtilities.getStroke(0.5f, LineStyle.SOLID);
+
+	// the z location of the projection plane
 	private double _zplane = 100;
-
 
 	protected static Rectangle2D.Double _defaultWorld;
 
 	static {
-		double _xsize = 1.02*DCGeometry.getAbsMaxWireX();
-		double _ysize = 1.02*_xsize * 1.154734;
+		double _xsize = 1.02 * DCGeometry.getAbsMaxWireX();
+		double _ysize = 1.02 * _xsize * 1.154734;
 
-		_defaultWorld = new Rectangle2D.Double(_xsize, -_ysize, -2 * _xsize,
-				2 * _ysize);
-		
+		_defaultWorld = new Rectangle2D.Double(_xsize, -_ysize, -2 * _xsize, 2 * _ysize);
+
 	}
 
 	/**
 	 * Create an allDCView
 	 * 
-	 * @param keyVals
-	 *            variable set of arguments.
+	 * @param keyVals variable set of arguments.
 	 */
 	private DCXYView(String title) {
 		super(getAttributes(title));
-		
-		//projection plane
+
+		// projection plane
 		projectionPlane = GeometryManager.xyPlane(_zplane);
-		
+
 		// draws any swum trajectories (in the after draw)
 		_swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
 		_crossDrawer = new CrossDrawer(this);
 		_mcHitDrawer = new McHitDrawer(this);
-		
+
 		// fmt cross drawer
 		_fmtCrossDrawer = new FMTCrossDrawer(this);
 
 		setBeforeDraw();
 		setAfterDraw();
 		getContainer().getComponent().setBackground(Color.gray);
-		
+
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
 		JComponent wireLegend = new JComponent() {
@@ -134,24 +127,24 @@ public class DCXYView extends HexView {
 				Rectangle b = getBounds();
 				g.setColor(Color.darkGray);
 				g.fillRect(b.x, b.y, b.width, b.height);
-				int yc = b.y + b.height/2;
+				int yc = b.y + b.height / 2;
 				int linelen = 40;
 				g.setFont(Fonts.mediumFont);
 				FontMetrics fm = this.getFontMetrics(Fonts.mediumFont);
-				
+
 				int x = 6;
 				for (int supl0 = 0; supl0 < 6; supl0++) {
-					String s = " superlayer " + (supl0+1) + "    ";
+					String s = " superlayer " + (supl0 + 1) + "    ";
 					g.setColor(_wireColors[supl0]);
-					g.drawLine(x, yc, x+linelen, yc);
-					g.drawLine(x+1, yc+1, x+linelen+1, yc+1);
+					g.drawLine(x, yc, x + linelen, yc);
+					g.drawLine(x + 1, yc + 1, x + linelen + 1, yc + 1);
 					x = x + linelen + 4;
 					g.setColor(Color.white);
-					g.drawString(s, x, yc+4);
+					g.drawString(s, x, yc + 4);
 					x += fm.stringWidth(s);
 				}
 			}
-			
+
 			@Override
 			public Dimension getPreferredSize() {
 				Dimension d = super.getPreferredSize();
@@ -162,8 +155,8 @@ public class DCXYView extends HexView {
 		panel.add(wireLegend, BorderLayout.CENTER);
 		panel.setBorder(BorderFactory.createEtchedBorder());
 		add(panel, BorderLayout.SOUTH);
-		
-		//add a quick zoom
+
+		// add a quick zoom
 		double qzlim = 25;
 		addQuickZoom("Central Region", -qzlim, -qzlim, qzlim, qzlim);
 
@@ -173,13 +166,12 @@ public class DCXYView extends HexView {
 	@Override
 	protected void addControls() {
 
-		_controlPanel = new ControlPanel(this, ControlPanel.DISPLAYARRAY
-				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
-				+ ControlPanel.DRAWLEGEND, 
-				DisplayBits.ACCUMULATION
-				+ DisplayBits.CROSSES + DisplayBits.FMTCROSSES
-				+ DisplayBits.GLOBAL_HB + DisplayBits.GLOBAL_TB + DisplayBits.CVTTRACKS
-                + DisplayBits.MCTRUTH, 3, 5);
+		_controlPanel = new ControlPanel(this,
+				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
+						+ ControlPanel.DRAWLEGEND,
+				DisplayBits.ACCUMULATION + DisplayBits.CROSSES + DisplayBits.FMTCROSSES + DisplayBits.GLOBAL_HB
+						+ DisplayBits.GLOBAL_TB + DisplayBits.CVTTRACKS + DisplayBits.MCTRUTH,
+				3, 5);
 
 		add(_controlPanel, BorderLayout.EAST);
 		pack();
@@ -200,14 +192,12 @@ public class DCXYView extends HexView {
 	// add items to the view
 	@Override
 	protected void addItems() {
-		LogicalLayer detectorLayer = getContainer().getLogicalLayer(
-				_detectorLayerName);
+		LogicalLayer detectorLayer = getContainer().getLogicalLayer(_detectorLayerName);
 
 		_hexItems = new DCHexSectorItem[6];
 
 		for (int sector = 0; sector < 6; sector++) {
-			_hexItems[sector] = new DCHexSectorItem(detectorLayer, this,
-					sector + 1);
+			_hexItems[sector] = new DCHexSectorItem(detectorLayer, this, sector + 1);
 			_hexItems[sector].getStyle().setFillColor(Color.lightGray);
 		}
 	}
@@ -252,8 +242,8 @@ public class DCXYView extends HexView {
 						_crossDrawer.setMode(CrossDrawer.TB);
 						_crossDrawer.draw(g, container);
 					}
-					
-					//Other (not DC) Crosses
+
+					// Other (not DC) Crosses
 					if (showCrosses()) {
 						_fmtCrossDrawer.draw(g, container);
 					}
@@ -267,18 +257,18 @@ public class DCXYView extends HexView {
 
 		getContainer().setAfterDraw(beforeDraw);
 	}
-	
+
 	private void drawHits(Graphics g, IContainer container) {
-		
+
 		if (isSingleEventMode()) {
-			
+
 			DCTdcHitList hits = DC.getInstance().getTDCHits();
 			if ((hits != null) && !hits.isEmpty()) {
-				
-				Graphics2D g2 = (Graphics2D)g;
+
+				Graphics2D g2 = (Graphics2D) g;
 				Stroke oldStroke = g2.getStroke();
 				g2.setStroke(stroke);
-				
+
 				Point pp1 = new Point();
 				Point pp2 = new Point();
 				Point2D.Double wp1 = new Point2D.Double();
@@ -286,13 +276,12 @@ public class DCXYView extends HexView {
 
 				for (DCTdcHit hit : hits) {
 					projectWire(g, container, hit.sector, hit.superlayer, hit.layer6, hit.wire, wp1, wp2, pp1, pp2);
-					g.setColor(_wireColors[hit.superlayer-1]);
+					g.setColor(_wireColors[hit.superlayer - 1]);
 					g.drawLine(pp1.x, pp1.y, pp2.x, pp2.y);
 				}
-				
+
 				g2.setStroke(oldStroke);
 			}
-
 
 //			
 //			if (showMcTruth()) {
@@ -326,27 +315,25 @@ public class DCXYView extends HexView {
 //				} //hitCount > 0
 //				
 //			}
-		}
-		else {
+		} else {
 			drawAccumulatedHits(g, container);
 		}
 	}
-	
-	private void projectWire(Graphics g, IContainer container, int sect1, int supl1, 
-			int layer1, int wire1, Point2D.Double wp1, Point2D.Double wp2, 
-			Point p1, Point p2) {
+
+	private void projectWire(Graphics g, IContainer container, int sect1, int supl1, int layer1, int wire1,
+			Point2D.Double wp1, Point2D.Double wp2, Point p1, Point p2) {
 		Line3D line = DCGeometry.getWire(sect1, supl1, layer1, wire1);
 		projectClasToWorld(line.origin(), projectionPlane, wp1);
 		projectClasToWorld(line.end(), projectionPlane, wp2);
-		
+
 		container.worldToLocal(p1, wp1);
 		container.worldToLocal(p2, wp2);
 	}
-	
-	//draw the sector numbers
+
+	// draw the sector numbers
 	private void drawSectorNumbers(Graphics g, IContainer container) {
-		double r3over2 = Math.sqrt(3)/2;
-		
+		double r3over2 = Math.sqrt(3) / 2;
+
 		double x = 320;
 		double y = 0;
 		FontMetrics fm = getFontMetrics(_font);
@@ -354,25 +341,24 @@ public class DCXYView extends HexView {
 		g.setColor(TRANSTEXT);
 		Point pp = new Point();
 
-		
 		for (int sect = 1; sect <= 6; sect++) {
 			container.worldToLocal(pp, x, y);
-			
+
 			String s = "" + sect;
 			int sw = fm.stringWidth(s);
-			
-			g.drawString(s, pp.x- sw/2, pp.y + fm.getHeight()/2);
-			
+
+			g.drawString(s, pp.x - sw / 2, pp.y + fm.getHeight() / 2);
+
 			if (sect != 6) {
 				double tx = x;
 				double ty = y;
-				x = 0.5*tx - r3over2*ty;
-				y = r3over2*tx + 0.5*ty;
+				x = 0.5 * tx - r3over2 * ty;
+				y = r3over2 * tx + 0.5 * ty;
 			}
 		}
 	}
 
-	//draw the coordinate system
+	// draw the coordinate system
 	private void drawCoordinateSystem(Graphics g, IContainer container) {
 		// draw coordinate system
 		Component component = container.getComponent();
@@ -385,9 +371,8 @@ public class DCXYView extends HexView {
 		g.setFont(labelFont);
 		FontMetrics fm = getFontMetrics(labelFont);
 
-		Rectangle r = new Rectangle(left - fm.stringWidth("x") - 4, top
-				- fm.getHeight() / 2 + 1, (right - left + fm.stringWidth("x")
-				+ fm.stringWidth("y") + 9), (bottom - top) + fm.getHeight() + 2);
+		Rectangle r = new Rectangle(left - fm.stringWidth("x") - 4, top - fm.getHeight() / 2 + 1,
+				(right - left + fm.stringWidth("x") + fm.stringWidth("y") + 9), (bottom - top) + fm.getHeight() + 2);
 
 		g.setColor(TRANS);
 		g.fillRect(r.x, r.y, r.width, r.height);
@@ -397,16 +382,14 @@ public class DCXYView extends HexView {
 		g.drawLine(right, bottom, right, top);
 
 		g.drawString("y", right + 3, top + fm.getHeight() / 2 - 1);
-		g.drawString("x", left - fm.stringWidth("x") - 2,
-				bottom + fm.getHeight() / 2);
+		g.drawString("x", left - fm.stringWidth("x") - 2, bottom + fm.getHeight() / 2);
 
 	}
 
 	// draw the gemc global hits
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
-		
-		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
-				.getAccumulatedDCData();
+
+		int dcAccumulatedData[][][][] = AccumulationManager.getInstance().getAccumulatedDCData();
 
 		Point pp1 = new Point();
 		Point pp2 = new Point();
@@ -426,7 +409,8 @@ public class DCXYView extends HexView {
 						if (hitCount > 0) {
 							double fract = getMedianSetting() * (((double) hitCount) / (1 + medianHit));
 
-							Color color = AccumulationManager.getInstance().getAlphaColor(fract, 128);
+							Color color = AccumulationManager.getInstance().getAlphaColor(getColorScaleModel(), fract,
+									128);
 
 							projectWire(g, container, sect0 + 1, supl0 + 1, lay0 + 1, wire0 + 1, wp1, wp2, pp1, pp2);
 
@@ -439,8 +423,6 @@ public class DCXYView extends HexView {
 			}
 		}
 	}
-	
-
 
 	// get the attributes to pass to the super constructor
 	private static Object[] getAttributes(String title) {
@@ -459,16 +441,14 @@ public class DCXYView extends HexView {
 		props.put(PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS);
 		props.put(PropertySupport.VISIBLE, true);
 
-		props.put(PropertySupport.BACKGROUND,
-				X11Colors.getX11Color("Alice Blue"));
+		props.put(PropertySupport.BACKGROUND, X11Colors.getX11Color("Alice Blue"));
 		props.put(PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		return PropertySupport.toObjectArray(props);
 	}
 
 	@Override
-	public void getFeedbackStrings(IContainer container, Point pp,
-			Point2D.Double wp, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point pp, Point2D.Double wp, List<String> feedbackStrings) {
 
 		container.worldToLocal(pp, wp);
 
@@ -483,8 +463,8 @@ public class DCXYView extends HexView {
 			_crossDrawer.setMode(CrossDrawer.TB);
 			_crossDrawer.feedback(container, pp, wp, feedbackStrings);
 		}
-		
-		//Other (not DC) Crosses
+
+		// Other (not DC) Crosses
 		if (showCrosses()) {
 			_fmtCrossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
@@ -498,23 +478,18 @@ public class DCXYView extends HexView {
 	/**
 	 * Lab (CLAS) xy coordinates to local screen coordinates.
 	 * 
-	 * @param container
-	 *            the drawing container
-	 * @param pp
-	 *            will hold the graphical world coordinates
-	 * @param lab
-	 *            the lab coordinates
+	 * @param container the drawing container
+	 * @param pp        will hold the graphical world coordinates
+	 * @param lab       the lab coordinates
 	 */
-	public static void labToLocal(IContainer container, Point pp,
-			Point2D.Double lab) {
+	public static void labToLocal(IContainer container, Point pp, Point2D.Double lab) {
 		container.worldToLocal(pp, lab);
 	}
 
 	/**
 	 * Get the hex item for the given 1-based sector
 	 * 
-	 * @param sector
-	 *            the 1-based sector
+	 * @param sector the 1-based sector
 	 * @return the corresponding item
 	 */
 	public HexSectorItem getHexSectorItem(int sector) {
@@ -524,26 +499,26 @@ public class DCXYView extends HexView {
 		}
 		return _hexItems[sector - 1];
 	}
-	
-	
+
 	/**
-	 * Clone the view. 
+	 * Clone the view.
+	 * 
 	 * @return the cloned view
 	 */
 	@Override
 	public BaseView cloneView() {
 		super.cloneView();
 		CLONE_COUNT++;
-		
-		//limit
+
+		// limit
 		if (CLONE_COUNT > 2) {
 			return null;
 		}
-		
+
 		Rectangle vr = getBounds();
 		vr.x += 40;
 		vr.y += 40;
-		
+
 		DCXYView view = createDCXYView();
 		view.setBounds(vr);
 		return view;

@@ -32,15 +32,14 @@ import cnuphys.swim.Swimming;
  */
 public class PhysicsEventManager {
 
-
-	//particle hits corresponding to the current event.
-	//these are the results from the FastMC engine given the tracks
-	//found in Lund file event and swum by Swimmer
+	// particle hits corresponding to the current event.
+	// these are the results from the FastMC engine given the tracks
+	// found in Lund file event and swum by Swimmer
 	private Vector<ParticleHits> _currentParticleHits = new Vector<ParticleHits>();
-		
-	//the current event generator
-    private AEventGenerator _eventGenerator;
-	
+
+	// the current event generator
+	private AEventGenerator _eventGenerator;
+
 	/** Last selected data file */
 	private static String dataFilePath = Environment.getInstance().getCurrentWorkingDirectory() + "/../../../data";
 
@@ -63,10 +62,9 @@ public class PhysicsEventManager {
 
 	// someone who can swim all particles in the current event
 	private ISwimAll _allSwimmer;
-	
-	//cache the lund file generator
-	LundFileEventGenerator _lundFileGenerator;
 
+	// cache the lund file generator
+	LundFileEventGenerator _lundFileGenerator;
 
 	// private constructor for manager
 	private PhysicsEventManager() {
@@ -84,42 +82,46 @@ public class PhysicsEventManager {
 		}
 		return instance;
 	}
-	
+
 	/**
 	 * Get the current event generator
+	 * 
 	 * @return the current event generator
 	 */
 	public AEventGenerator getEventGenerator() {
 		return _eventGenerator;
 	}
-	
+
 	/**
 	 * The file generator gets cached so that it can be restored
+	 * 
 	 * @return the cached file generator
 	 */
 	public LundFileEventGenerator getFileEventGenerator() {
 		return _lundFileGenerator;
 	}
-	
+
 	/**
 	 * Set the lund file generator
+	 * 
 	 * @param generator the lund file generator
 	 */
 	public void setFileEventGenerator(LundFileEventGenerator generator) {
 		_lundFileGenerator = generator;
 	}
-	
+
 	/**
 	 * Set the event generator
+	 * 
 	 * @param generator the new event generator
 	 */
 	public void setEventGenerator(AEventGenerator generator) {
-				
-		//close the current
+
+		// close the current
 		if (_eventGenerator != null) {
 			_eventGenerator.close();
 		}
-		
+
 		_eventGenerator = generator;
 		reset();
 		notifyEventListeners(_eventGenerator);
@@ -161,30 +163,29 @@ public class PhysicsEventManager {
 
 	/**
 	 * Get the next event from the active generator.
+	 * 
 	 * @return the next event from the generator
 	 */
 	public PhysicsEvent nextEvent() {
-		
+
 		PhysicsEvent event = null;
-		
+
 		if (_eventGenerator != null) {
 			event = _eventGenerator.nextEvent();
 			if (event != null) {
 				parseEvent(event);
-			}
-			else {
-	//			Toolkit.getDefaultToolkit().beep();
+			} else {
+				// Toolkit.getDefaultToolkit().beep();
 			}
 		}
-		
+
 		return event;
 	}
 
-
 	// Parse the event, which will convert the PhysicsEvent int
-	//detector hits and load them into _currentParticleHits
+	// detector hits and load them into _currentParticleHits
 	private void parseEvent(PhysicsEvent event) {
-		
+
 		_currentParticleHits.clear();
 		Swimming.setNotifyOn(false); // prevent refreshes
 		Swimming.clearAllTrajectories();
@@ -206,12 +207,20 @@ public class PhysicsEventManager {
 			for (SwimTrajectory traj : trajectories) {
 				if (traj.getLundId() != null) {
 					Path3D path3D = GeometryManager.fromSwimTrajectory(traj);
-					_currentParticleHits.add(new ParticleHits(traj.getLundId(), traj.getGeneratedParticleRecord(), path3D));
+					_currentParticleHits
+							.add(new ParticleHits(traj.getLundId(), traj.getGeneratedParticleRecord(), path3D));
 				}
 			}
 		}
-		
-		//do the SNR analysis
+
+		// Add random noise if requested
+		if (RandomNoiseGenerator.getInstance().isGenerateNoise()) {
+			System.err.println("Generating noise");
+
+			RandomNoiseGenerator.getInstance().generateNoise(_currentParticleHits);
+		}
+
+		// do the SNR analysis
 		SNRManager.getInstance().analyzeSNR(_currentParticleHits);
 
 		// notify all listeners of the event
@@ -225,17 +234,18 @@ public class PhysicsEventManager {
 				public void run() {
 					notifyPhysicsListeners(event);
 				}
-				
+
 			};
 			(new Thread(runnable)).start();
-	//		notifyPhysicsListeners(event);
+			// notifyPhysicsListeners(event);
 		}
 	}
 
 	/**
-	 * Get the hits for all particles in the current event
-	 * These are the results from the FastMC engine given the tracks
-	 * found in Lund file event and swum by Swimmer
+	 * Get the hits for all particles in the current event These are the results
+	 * from the FastMC engine given the tracks found in Lund file event and swum by
+	 * Swimmer
+	 * 
 	 * @return the detector hits for the current event
 	 */
 	public Vector<ParticleHits> getParticleHits() {
@@ -280,6 +290,7 @@ public class PhysicsEventManager {
 
 	/**
 	 * Get a description of the active event generator
+	 * 
 	 * @return a description of the active event generator
 	 */
 	public String getGeneratorDescription() {
@@ -289,8 +300,7 @@ public class PhysicsEventManager {
 	/**
 	 * Set the default directory in which to look for event files.
 	 * 
-	 * @param defaultDataDir
-	 *            default directory in which to look for event files
+	 * @param defaultDataDir default directory in which to look for event files
 	 */
 	public static void setDefaultDataDir(String defaultDataDir) {
 		dataFilePath = defaultDataDir;
@@ -305,7 +315,6 @@ public class PhysicsEventManager {
 		return (_eventGenerator == null) ? null : _eventGenerator.getCurrentEvent();
 	}
 
-
 	/**
 	 * Open a Lund File
 	 * 
@@ -317,14 +326,13 @@ public class PhysicsEventManager {
 		chooser.setFileFilter(_lundFileFilter);
 		int returnVal = chooser.showOpenDialog(null);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File file =  chooser.getSelectedFile();
+			File file = chooser.getSelectedFile();
 			dataFilePath = file.getParent();
 			GeneratorManager.getInstance().setFileGeneratorSelected();
 			_lundFileGenerator = new LundFileEventGenerator(file);
 			setEventGenerator(_lundFileGenerator);
 		}
 	}
-	
 
 	/**
 	 * Reset to the no data state
@@ -388,11 +396,10 @@ public class PhysicsEventManager {
 	}
 
 	/**
-	 * Remove a IPhysicsEventListener. IPhysicsEventListener listeners listen
-	 * for new physics events.
+	 * Remove a IPhysicsEventListener. IPhysicsEventListener listeners listen for
+	 * new physics events.
 	 * 
-	 * @param listener
-	 *            the IPhysicsEventListener listener to remove.
+	 * @param listener the IPhysicsEventListener listener to remove.
 	 */
 	public void removePhysicsListener(IPhysicsEventListener listener) {
 
@@ -408,17 +415,15 @@ public class PhysicsEventManager {
 	}
 
 	/**
-	 * Add a IPhysicsEventListener. IPhysicsEventListener listeners listen for
-	 * new events.
+	 * Add a IPhysicsEventListener. IPhysicsEventListener listeners listen for new
+	 * events.
 	 * 
-	 * @param listener
-	 *            the IPhysicsEventListener listener to add.
-	 * @param index
-	 *            Determines gross notification order. Those in index 0 are
-	 *            notified first. Then those in index 1. Finally those in index
-	 *            2. The Data containers should be in index 0. The trajectory
-	 *            and noise in index 1, and the regular views in index 2 (they
-	 *            are notified last)
+	 * @param listener the IPhysicsEventListener listener to add.
+	 * @param index    Determines gross notification order. Those in index 0 are
+	 *                 notified first. Then those in index 1. Finally those in index
+	 *                 2. The Data containers should be in index 0. The trajectory
+	 *                 and noise in index 1, and the regular views in index 2 (they
+	 *                 are notified last)
 	 */
 	public void addPhysicsListener(IPhysicsEventListener listener, int index) {
 
@@ -431,12 +436,12 @@ public class PhysicsEventManager {
 		}
 
 		_listeners[index].add(IPhysicsEventListener.class, listener);
-		
-		int c0 = (_listeners[0] == null) ? 0 :_listeners[0].getListenerCount() ;
-		int c1 = (_listeners[1] == null) ? 0 :_listeners[1].getListenerCount() ;
-		int c2 = (_listeners[2] == null) ? 0 :_listeners[2].getListenerCount() ;
 
-		System.err.println("num event listeners " + (c0+c1+c2));
+		int c0 = (_listeners[0] == null) ? 0 : _listeners[0].getListenerCount();
+		int c1 = (_listeners[1] == null) ? 0 : _listeners[1].getListenerCount();
+		int c2 = (_listeners[2] == null) ? 0 : _listeners[2].getListenerCount();
+
+		System.err.println("num event listeners " + (c0 + c1 + c2));
 
 	}
 

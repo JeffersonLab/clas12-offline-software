@@ -29,44 +29,42 @@ public class HeadsUpDisplay extends GlassPane {
 	private static final int UPPERRIGHT = 1;
 	private static final int LOWERRIGHT = 2;
 	private static final int LOWERLEFT = 3;
-	
-	//corner choice
+
+	// corner choice
 	private int _desiredCorner = LOWERRIGHT;
-	
-	//the current strings
+
+	// the current strings
 	private List<String> _currentStrings;
-	
+
 	private Rectangle _cornerRect = new Rectangle();
-	
 
 	/**
 	 * Create a HeadsUp display.
 	 * 
-	 * @param container
-	 *            the parent container
+	 * @param container the parent container
 	 */
 	public HeadsUpDisplay(BaseMDIApplication application) {
 		_application = application;
 	}
-	
+
 	@Override
 	public void paintComponent(Graphics g) {
-				
+
 		if (_currentStrings != null) {
 			updateStrings(g, _currentStrings);
 		}
 	}
-	
+
 	public void update(List<String> feedbackStrings) {
 		_currentStrings = feedbackStrings;
-		
+
 		Graphics g = this.getGraphics();
 		repaint();
 	}
 
-	
 	/**
 	 * Set the desired corner
+	 * 
 	 * @param corner the desired corner
 	 */
 	public void setDesiredCorner(int corner) {
@@ -78,8 +76,7 @@ public class HeadsUpDisplay extends GlassPane {
 	/**
 	 * This updates the heads up display.
 	 * 
-	 * @param feedbackStrings
-	 *            the new feedback strings.
+	 * @param feedbackStrings the new feedback strings.
 	 */
 	private void updateStrings(Graphics g, List<String> feedbackStrings) {
 
@@ -99,7 +96,6 @@ public class HeadsUpDisplay extends GlassPane {
 			fbh = fbSize.height;
 		}
 
-
 		// set all four corner rects, later we'll decide which
 		// to use (that the mouse is not in)
 
@@ -107,7 +103,7 @@ public class HeadsUpDisplay extends GlassPane {
 		int top = 40;
 		int right = bounds.width - fbw - 10;
 		int bottom = bounds.height - fbh - 40;
-		
+
 		switch (_desiredCorner) {
 		case UPPERLEFT:
 			_cornerRect.setBounds(left, top, fbw, fbh + 4);
@@ -126,22 +122,17 @@ public class HeadsUpDisplay extends GlassPane {
 		g.setColor(_backgroundColor);
 		g.fillRect(_cornerRect.x, _cornerRect.y, _cornerRect.width, _cornerRect.height);
 
-		
 		drawStrings(g, _cornerRect.x + 2, _cornerRect.y, feedbackStrings);
 	}
 
 	/**
 	 * Draw all the feedback strings
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param x
-	 *            the left
-	 * @param feedbackStrings
-	 *            the strings to be drawn
+	 * @param g               the graphics context
+	 * @param x               the left
+	 * @param feedbackStrings the strings to be drawn
 	 */
-	private void drawStrings(Graphics g, int x, int yo,
-			List<String> feedbackStrings) {
+	private void drawStrings(Graphics g, int x, int yo, List<String> feedbackStrings) {
 		FontMetrics fm = _application.getFontMetrics(_hudFont);
 		int y = yo + fm.getHeight();
 		g.setFont(_hudFont);
@@ -153,8 +144,7 @@ public class HeadsUpDisplay extends GlassPane {
 				if (str.startsWith("$")) {
 					int nextIndex = str.indexOf("$", 1);
 					if ((nextIndex > 3) && (nextIndex < 30)) {
-						String x11color = str.substring(1, nextIndex)
-								.toLowerCase();
+						String x11color = str.substring(1, nextIndex).toLowerCase();
 
 						str = str.substring(nextIndex + 1);
 						Color color = X11Colors.getX11Color(x11color);
@@ -174,16 +164,12 @@ public class HeadsUpDisplay extends GlassPane {
 	 * Get the size needed to draw all the feedback. This also computes all the
 	 * feedback strings on the fly.
 	 * 
-	 * @param bounds
-	 *            the container bounds.
-	 * @param screenPoint
-	 *            the current mouse location.
-	 * @param worldPoint
-	 *            the corresponding world point.
+	 * @param bounds      the container bounds.
+	 * @param screenPoint the current mouse location.
+	 * @param worldPoint  the corresponding world point.
 	 * @return the size needed to draw all the feedback
 	 */
-	private Dimension getFeedbackSize(Rectangle bounds,
-			List<String> feedbackStrings) {
+	private Dimension getFeedbackSize(Rectangle bounds, List<String> feedbackStrings) {
 		int w = 0;
 		int h = 0;
 		int slop = 4;

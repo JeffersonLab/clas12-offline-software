@@ -13,29 +13,24 @@ import cnuphys.bCNU.util.X11Colors;
 public class BaseBeamLineItem extends LineItem {
 
 	// colors used to draw the beamline
-	private static final Color _colors[] = { Color.black,
-			X11Colors.getX11Color("Purple"), Color.lightGray,
+	private static final Color _colors[] = { Color.black, X11Colors.getX11Color("Purple"), Color.lightGray,
 			X11Colors.getX11Color("Violet"), Color.black, };
 
 	/**
 	 * Create a beamline item which is a glorified line.
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
+	 * @param layer the Layer this item is on.
 	 */
 	public BaseBeamLineItem(LogicalLayer layer) {
-		super(layer, new Point2D.Double(-1000.0, 0.0), new Point2D.Double(
-				1000.0, 0.0));
+		super(layer, new Point2D.Double(-1000.0, 0.0), new Point2D.Double(1000.0, 0.0));
 		setName("Beamline");
 	}
 
 	/**
 	 * Custom drawer for the item.
 	 * 
-	 * @param g
-	 *            the graphics context.
-	 * @param container
-	 *            the graphical container being rendered.
+	 * @param g         the graphics context.
+	 * @param container the graphical container being rendered.
 	 */
 	@Override
 	public void drawItem(Graphics g, IContainer container) {

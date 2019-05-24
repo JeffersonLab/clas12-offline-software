@@ -1,7 +1,5 @@
 package cnuphys.lund;
 
-
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,17 +16,15 @@ public abstract class AsciiReader {
 
 	// the number of noncomment lines processed
 	private int nonCommentLineCount;
-	
+
 	private boolean _reading;
-	
+
 	protected int lcount;
-	
 
 	/**
 	 * Constructor
 	 * 
-	 * @param file
-	 *            the ascii file to be processed
+	 * @param file the ascii file to be processed
 	 * @throws FileNotFoundException
 	 */
 	public AsciiReader(File file) throws FileNotFoundException {
@@ -47,7 +43,7 @@ public abstract class AsciiReader {
 		}
 		done();
 	}
-		
+
 	/**
 	 * Stop the reading
 	 */
@@ -56,7 +52,7 @@ public abstract class AsciiReader {
 	}
 
 	/**
-	 * Process one non comment line from the file. 
+	 * Process one non comment line from the file.
 	 * 
 	 * @param line the line to be processed.
 	 */
@@ -68,7 +64,7 @@ public abstract class AsciiReader {
 	public int getNonCommentLineCount() {
 		return nonCommentLineCount;
 	}
-	
+
 	/** Done reading */
 	public abstract void done();
 

@@ -1,0 +1,55 @@
+[
+    {
+        "entries": [
+            {
+                "info": "x id of grid", 
+                "name": "idx", 
+                "type": "B"
+            }, 
+            {
+                "info": "y id of grid", 
+                "name": "idy", 
+                "type": "B"
+            }, 
+            {
+                "info": "Hit X position (cm)", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit Y position (cm)", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit Z position (cm)", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit Energy", 
+                "name": "energy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit Time", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "Hit Pointer to ADC bank", 
+                "name": "hitID", 
+                "type": "S"
+            }, 
+            {
+                "info": "Hit Pointer to Cluster Bank", 
+                "name": "clusterID", 
+                "type": "S"
+            }
+        ], 
+        "group": 21000, 
+        "info": "Reconstructed Hits in FT calorimeter", 
+        "item": 21, 
+        "name": "FTCAL::hits"
+    }
+]

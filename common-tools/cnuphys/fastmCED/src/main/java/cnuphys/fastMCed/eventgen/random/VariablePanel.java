@@ -34,7 +34,7 @@ public class VariablePanel extends JPanel implements FocusListener, KeyListener 
 	private double _minValue;
 	private double _maxValue;
 	private double _del;
-	
+
 	private static int MINTFWIDTH = 80;
 
 	public VariablePanel(final String name, double minVal, double maxVal, final String units) {
@@ -42,10 +42,10 @@ public class VariablePanel extends JPanel implements FocusListener, KeyListener 
 
 		_minValTF = new JFormattedTextField(numberFormat);
 		_maxValTF = new JFormattedTextField(numberFormat);
-		
-		Dimension minDim =_minValTF.getPreferredSize();
+
+		Dimension minDim = _minValTF.getPreferredSize();
 		minDim.width = MINTFWIDTH;
-	
+
 		_minValue = minVal;
 		_maxValue = maxVal;
 
@@ -63,8 +63,8 @@ public class VariablePanel extends JPanel implements FocusListener, KeyListener 
 		add(_maxValTF);
 		add(new JLabel(units));
 	}
-	
-	//set up the text field
+
+	// set up the text field
 	private void initTF(JFormattedTextField tf, Dimension dim, double val) {
 		tf.setMinimumSize(dim);
 		tf.setPreferredSize(dim);
@@ -72,7 +72,7 @@ public class VariablePanel extends JPanel implements FocusListener, KeyListener 
 		tf.addKeyListener(this);
 		tf.setText("" + val);
 	}
-	
+
 	@Override
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
@@ -158,6 +158,7 @@ public class VariablePanel extends JPanel implements FocusListener, KeyListener 
 
 	/**
 	 * Get the minimum value
+	 * 
 	 * @return the minimum value
 	 */
 	public double getMinimumValue() {
@@ -166,6 +167,7 @@ public class VariablePanel extends JPanel implements FocusListener, KeyListener 
 
 	/**
 	 * Get the maximum value
+	 * 
 	 * @return the minimum value
 	 */
 	public double getMaximumValue() {
@@ -175,26 +177,24 @@ public class VariablePanel extends JPanel implements FocusListener, KeyListener 
 	/**
 	 * Generate a random value in range
 	 * 
-	 * @param rand
-	 *            the generator
+	 * @param rand the generator
 	 * @return a random value in range
 	 */
 	public double randomValue(Random rand) {
 		return _minValue + _del * rand.nextDouble();
 	}
-	
+
 	/**
 	 * Generate a random value in range
+	 * 
 	 * @param altMax and alternative max
-	 * @param rand
-	 *            the generator
+	 * @param rand   the generator
 	 * @return a random value in range
 	 */
 	public double randomValue(double altMax, Random rand) {
 		double del = altMax - _minValue;
 		return _minValue + del * rand.nextDouble();
 	}
-
 
 	@Override
 	public String toString() {

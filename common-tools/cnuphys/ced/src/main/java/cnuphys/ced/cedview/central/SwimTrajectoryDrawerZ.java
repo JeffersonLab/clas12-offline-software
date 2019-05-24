@@ -27,10 +27,8 @@ public class SwimTrajectoryDrawerZ extends ASwimTrajectoryDrawer {
 	/**
 	 * Actual drawing method
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the base container
+	 * @param g         the graphics context
+	 * @param container the base container
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
@@ -54,8 +52,7 @@ public class SwimTrajectoryDrawerZ extends ASwimTrajectoryDrawer {
 
 			// recon
 			if (SwimMenu.getInstance().showReconstructedTracks()) {
-				List<SwimTrajectory> trajectories = Swimming
-						.getReconTrajectories();
+				List<SwimTrajectory> trajectories = Swimming.getReconTrajectories();
 				if ((trajectories == null) || (trajectories.size() < 1)) {
 					return;
 				}
@@ -74,13 +71,11 @@ public class SwimTrajectoryDrawerZ extends ASwimTrajectoryDrawer {
 	}
 
 	/**
-	 * Here we have a chance to veto a trajectory. For example, we may decide
-	 * that the trajectory won't appear on this view (assuming a view owns this
-	 * drawer) and so don't bother to compute it. The default implementation
-	 * vetoes nothing.
+	 * Here we have a chance to veto a trajectory. For example, we may decide that
+	 * the trajectory won't appear on this view (assuming a view owns this drawer)
+	 * and so don't bother to compute it. The default implementation vetoes nothing.
 	 * 
-	 * @param trajectory
-	 *            the trajectory to test.
+	 * @param trajectory the trajectory to test.
 	 * @return <code>true</code> if this trajectory is vetoed.
 	 */
 	@Override
@@ -93,10 +88,8 @@ public class SwimTrajectoryDrawerZ extends ASwimTrajectoryDrawer {
 	/**
 	 * From detector xyz get the projected world point.
 	 * 
-	 * @param v3d
-	 *            the 3D vector (meters)
-	 * @param wp
-	 *            the projected world point.
+	 * @param v3d the 3D vector (meters)
+	 * @param wp  the projected world point.
 	 */
 	@Override
 	public void project(double[] v3d, Point2D.Double wp) {
@@ -129,20 +122,18 @@ public class SwimTrajectoryDrawerZ extends ASwimTrajectoryDrawer {
 
 	@Override
 	public boolean acceptSimpleTrack(SwimTrajectory2D trajectory) {
-		//this is a fugly hack. Check to see if it is hit based ot time based 
-		//then check the display flags
+		// this is a fugly hack. Check to see if it is hit based ot time based
+		// then check the display flags
 		LundId lid = trajectory.getTrajectory3D().getLundId();
 		int id = lid.getId();
-		
-		//FUGLY hack
-		if ((id == -99) || (id == -100) || (id == -101)) { //time based
+
+		// FUGLY hack
+		if ((id == -99) || (id == -100) || (id == -101)) { // time based
 			return _view.showTB();
-		}
-		else if ((id == -199) || (id == -200) || (id == -201)) { //hitbased based
+		} else if ((id == -199) || (id == -200) || (id == -201)) { // hitbased based
 			return _view.showHB();
 		}
 
-		
 		return true;
 	}
 

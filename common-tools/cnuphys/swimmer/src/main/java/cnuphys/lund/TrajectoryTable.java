@@ -9,7 +9,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableColumn;
 
 public class TrajectoryTable extends JTable {
-	
+
 	// a scroll pane for this table
 	private JScrollPane _scrollPane;
 

@@ -20,10 +20,8 @@ public class ExpressionTableScrollPane extends JScrollPane {
 	/**
 	 * Constructor will also create the table itself.
 	 * 
-	 * @param cutList
-	 *            the list of cuts
-	 * @param label
-	 *            a label for the list
+	 * @param cutList the list of cuts
+	 * @param label   a label for the list
 	 */
 
 	public ExpressionTableScrollPane(String label, int selectionMode) {
@@ -31,8 +29,8 @@ public class ExpressionTableScrollPane extends JScrollPane {
 		_table = new ExpressionTable(selectionMode);
 		getViewport().add(_table);
 
-		setBorder(BorderFactory.createTitledBorder(null, label,
-				TitledBorder.LEADING, TitledBorder.TOP, null, Color.blue));
+		setBorder(BorderFactory.createTitledBorder(null, label, TitledBorder.LEADING, TitledBorder.TOP, null,
+				Color.blue));
 
 	}
 
@@ -66,14 +64,14 @@ public class ExpressionTableScrollPane extends JScrollPane {
 
 		return _table.getExpressionModel();
 	}
-	
-	
+
 	/**
 	 * Get the selected (or first selected) named expression
+	 * 
 	 * @return the selected (or first selected) named expression
 	 */
 	public NamedExpression getSelectedExpression() {
 		return _table.getSelectedExpression();
 	}
-	
+
 }

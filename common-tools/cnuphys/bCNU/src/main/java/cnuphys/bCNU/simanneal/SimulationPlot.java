@@ -21,21 +21,21 @@ import cnuphys.splot.style.SymbolType;
 
 public class SimulationPlot extends PlotPanel implements IUpdateListener {
 
-	//the simulation
+	// the simulation
 	private Simulation _simulation;
-	
-	//the plot canvas
+
+	// the plot canvas
 	private PlotCanvas _plotCanvas;
-	
-	//the data set
+
+	// the data set
 	private DataSet _dataSet;
-	
-	//the plot parameters
+
+	// the plot parameters
 	private PlotParameters _plotParameters;
-	
-	//use the log of the temperature?
+
+	// use the log of the temperature?
 	private boolean _useLogT;
-	
+
 	// a panel for the plot
 	public SimulationPlot(Simulation simulation) {
 		super(makePlotCanvas(simulation.getAttributes()));
@@ -46,40 +46,41 @@ public class SimulationPlot extends PlotPanel implements IUpdateListener {
 		setPreferences();
 		_simulation.addUpdateListener(this);
 	}
-	
+
 	/**
 	 * Get the plot parameters
+	 * 
 	 * @return the plot parameters
 	 */
 	public PlotParameters getPlotParameters() {
 		return _plotParameters;
 	}
-	
+
 	/**
 	 * Get the plot canvas
+	 * 
 	 * @return the plot canvas
 	 */
 	public PlotCanvas getPlotCanvas() {
 		return _plotCanvas;
 	}
 
-
-	//set preferences
+	// set preferences
 	private void setPreferences() {
 		try {
 			_useLogT = _simulation.getAttributes().getAttribute(Simulation.USELOGTEMP).getBoolean();
 		} catch (InvalidTargetObjectTypeException e) {
 			e.printStackTrace();
 		}
-		
+
 		Vector<DataColumn> ycols = (Vector<DataColumn>) (_dataSet.getAllColumnsByType(DataColumnType.Y));
 		for (DataColumn dc : ycols) {
 			dc.getFit().setFitType(FitType.NOLINE);
 			dc.getStyle().setSymbolType(SymbolType.CIRCLE);
 			dc.getStyle().setSymbolSize(3);
-			dc.getStyle().setLineWidth(1.5f);
+			dc.getStyle().setFitLineWidth(1.5f);
 		}
-		ycols.get(0).getStyle().setLineColor(Color.red);
+		ycols.get(0).getStyle().setBorderColor(Color.red);
 
 		PlotTicks ticks = _plotCanvas.getPlotTicks();
 		ticks.setNumMajorTickY(5);
@@ -88,9 +89,9 @@ public class SimulationPlot extends PlotPanel implements IUpdateListener {
 		_plotParameters.setNumDecimalY(2);
 		_plotParameters.setMinExponentX(4);
 		_plotParameters.setMinExponentY(4);
-	
+
 	}
-	
+
 	private static PlotCanvas makePlotCanvas(Attributes attributes) {
 		String plotTitle = "?";
 		String xLabel = "?";
@@ -104,7 +105,7 @@ public class SimulationPlot extends PlotPanel implements IUpdateListener {
 		}
 
 		DataSet dataSet = null;
-		
+
 		try {
 			dataSet = new DataSet(DataSetType.XYY, xLabel, yLabel);
 		} catch (DataSetException e) {
@@ -121,14 +122,14 @@ public class SimulationPlot extends PlotPanel implements IUpdateListener {
 
 		return plotCanvas;
 	}
-	
+
 	@Override
 	public void updateSolution(Simulation simulation, Solution newSolution, Solution oldSolution) {
 
 		double t = _simulation.getTemperature();
 		double e = newSolution.getPlotY();
 //		System.out.println("T = " + t + "  logT = " + Math.log10(t) + "  E = " + e);
-		
+
 		try {
 			if (_useLogT) {
 				t = Math.log10(t);

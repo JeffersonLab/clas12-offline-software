@@ -10,9 +10,8 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.table.TableCellRenderer;
 
-
 public class HeaderRenderer extends JTextField implements TableCellRenderer {
-	
+
 	public HeaderRenderer() {
 		setBackground(X11Colors.getX11Color("wheat"));
 		setForeground(Color.black);
@@ -22,7 +21,6 @@ public class HeaderRenderer extends JTextField implements TableCellRenderer {
 		setBorder(BorderFactory.createCompoundBorder(lineBorder, emptyBorder));
 
 	}
-
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean arg2, boolean arg3, int arg4,

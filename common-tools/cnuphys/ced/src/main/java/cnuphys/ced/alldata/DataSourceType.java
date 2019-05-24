@@ -3,8 +3,8 @@ package cnuphys.ced.alldata;
 import java.util.EnumMap;
 
 public enum DataSourceType {
-HIPPOFILE, HIPPORING;
-	
+	HIPPOFILE, HIPPORING;
+
 	/**
 	 * A map for the names of the event sources
 	 */
@@ -14,7 +14,7 @@ HIPPOFILE, HIPPORING;
 		names.put(HIPPOFILE, "Hippo File");
 		names.put(HIPPORING, "Hippo Ring");
 	}
-	
+
 	/**
 	 * Get the nice name of the enum.
 	 * 
@@ -23,10 +23,10 @@ HIPPOFILE, HIPPORING;
 	public String getName() {
 		return names.get(this);
 	}
-	
 
 	/*
 	 * Returns the mapped "nice name"
+	 * 
 	 * @see java.lang.Enum#toString()
 	 */
 	@Override
@@ -37,8 +37,7 @@ HIPPOFILE, HIPPORING;
 	/**
 	 * Returns the enum value from the name.
 	 * 
-	 * @param name
-	 *            the name to match.
+	 * @param name the name to match.
 	 * @return the <code>DataSourceType</code> that corresponds to the name. Returns
 	 *         <code>null</code> if no match is found. Note it will check (case
 	 *         insensitive) both the map and the <code>name()</code> result.
@@ -47,7 +46,7 @@ HIPPOFILE, HIPPORING;
 		if (name == null) {
 			return null;
 		}
-		
+
 		for (DataSourceType fs : values()) {
 			if (name.equalsIgnoreCase(fs.name())) {
 				return fs;

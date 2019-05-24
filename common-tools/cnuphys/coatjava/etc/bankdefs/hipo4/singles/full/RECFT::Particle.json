@@ -1,0 +1,30 @@
+[
+    {
+        "entries": [
+            {
+                "info": "particle id in LUND conventions", 
+                "name": "pid", 
+                "type": "I"
+            }, 
+            {
+                "info": "particle beta measured by TOF", 
+                "name": "beta", 
+                "type": "F"
+            }, 
+            {
+                "info": "Chi2 of assigned PID", 
+                "name": "chi2pid", 
+                "type": "F"
+            }, 
+            {
+                "info": "particle status (represents detector collection it passed)", 
+                "name": "status", 
+                "type": "S"
+            }
+        ], 
+        "group": 300, 
+        "info": "Reconstructed Particle Information, shadowing REC::Particle with FT-based start time", 
+        "item": 42, 
+        "name": "RECFT::Particle"
+    }
+]

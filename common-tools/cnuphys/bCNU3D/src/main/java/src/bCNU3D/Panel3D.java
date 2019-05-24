@@ -11,6 +11,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -50,11 +51,10 @@ public class Panel3D extends JPanel implements GLEventListener {
 	};
 
 	protected final DrawMode _drawMode = DrawMode.MANUAL;
-	
-	
-	protected float _xscale = 1.0f; 
-	protected float _yscale = 1.0f; 
-	protected float _zscale = 1.0f; 
+
+	protected float _xscale = 1.0f;
+	protected float _yscale = 1.0f;
+	protected float _zscale = 1.0f;
 
 	protected GLProfile glprofile;
 	protected GLCapabilities glcapabilities;
@@ -74,7 +74,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 	// distance in front of the screen
 	private float _zdist;
 
-	// x and y translation     
+	// x and y translation
 	private float _xdist;
 	private float _ydist;
 
@@ -108,8 +108,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 	 * 
 	 * @param zdist the initial viewer z distance should be negative
 	 */
-	public Panel3D(float angleX, float angleY, float angleZ, float xDist,
-			float yDist, float zDist) {
+	public Panel3D(float angleX, float angleY, float angleZ, float xDist, float yDist, float zDist) {
 		_view_rotx = angleX;
 		_view_roty = angleY;
 		_view_rotz = angleZ;
@@ -118,17 +117,18 @@ public class Panel3D extends JPanel implements GLEventListener {
 		_zdist = zDist;
 
 		setLayout(new BorderLayout(0, 0));
-	//	glprofile = GLProfile.getDefault();
-		
-		glprofile = GLProfile.getMaxFixedFunc(true);
-		
+		glprofile = GLProfile.getDefault();
+
+		System.err.println("Panel3D constructor P1 thread: " + Thread.currentThread().getName());
+
+		// glprofile = GLProfile.getMaxFixedFunc(true);
+
 		glcapabilities = new GLCapabilities(glprofile);
 		glcapabilities.setRedBits(8);
 		glcapabilities.setBlueBits(8);
 		glcapabilities.setGreenBits(8);
 		glcapabilities.setAlphaBits(8);
 		glcapabilities.setDepthBits(32);
-		
 
 		gljpanel = new GLJPanel(glcapabilities);
 		gljpanel.addGLEventListener(this);
@@ -140,7 +140,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 		// GLJPanel in the center
 		add(gljpanel, BorderLayout.CENTER);
-				
+
 		new KeyBindings3D(this);
 
 		_mouseAdapter = new MouseAdapter3D(this);
@@ -150,9 +150,8 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 		createInitialItems();
 		setupMaintenanceTimer();
-		
+
 	}
-	
 
 	// calls refresh at a slow rate to get rid of ghosts
 	private void setupMaintenanceTimer() {
@@ -161,7 +160,6 @@ public class Panel3D extends JPanel implements GLEventListener {
 			@Override
 			public void run() {
 				if (_enableMaintenance) {
-					// System.err.println("maintenance refresh");
 					_doingMaintenance = true;
 					refresh();
 				}
@@ -208,16 +206,16 @@ public class Panel3D extends JPanel implements GLEventListener {
 	private JComponent addWest() {
 		return null;
 	}
-	
+
 	/**
 	 * Get the opengl panel
+	 * 
 	 * @return the opengl panel
 	 */
 	public GLJPanel getGLJPanel() {
 		return gljpanel;
 	}
 
-	
 	public void setScale(float xscale, float yscale, float zscale) {
 		_xscale = xscale;
 		_yscale = yscale;
@@ -250,7 +248,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 		gl.glLoadIdentity(); // reset the model-view matrix
 
 		gl.glTranslatef(_xdist, _ydist, _zdist); // translate into the screen
-		
+
 		gl.glScalef(_xscale, _yscale, _zscale);
 
 		gl.glPushMatrix();
@@ -278,12 +276,9 @@ public class Panel3D extends JPanel implements GLEventListener {
 		gl.glPopMatrix();
 
 		if (_doingMaintenance) {
-			// System.err.println("Disable maintenance");
 			_doingMaintenance = false;
 			_enableMaintenance = false;
-		}
-		else {
-			// System.err.println("Enable maintenance");
+		} else {
 			_enableMaintenance = true;
 		}
 	}
@@ -307,12 +302,10 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 		float values[] = new float[2];
 		gl.glGetFloatv(GL2GL3.GL_LINE_WIDTH_GRANULARITY, values, 0);
-		System.err
-				.println("GL.GL_LINE_WIDTH_GRANULARITY value is " + values[0]);
+		System.err.println("GL.GL_LINE_WIDTH_GRANULARITY value is " + values[0]);
 
 		gl.glGetFloatv(GL2GL3.GL_LINE_WIDTH_RANGE, values, 0);
-		System.err.println("GL.GL_LINE_WIDTH_RANGE values are " + values[0]
-				+ ", " + values[1]);
+		System.err.println("GL.GL_LINE_WIDTH_RANGE values are " + values[0] + ", " + values[1]);
 
 		// Global settings.
 		// gl.glClearColor(0f, 0f,0f, 1.0f); // set background (clear) color
@@ -351,9 +344,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 	}
 
 	@Override
-	public void reshape(GLAutoDrawable drawable, int x, int y, int width,
-			int height) {
-//		System.err.println("called reshape");
+	public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
 		GL2 gl = drawable.getGL().getGL2(); // get the OpenGL 2 graphics context
 
 		if (height == 0) {
@@ -473,8 +464,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 		if (_drawMode == DrawMode.MANUAL) {
 			gljpanel.display();
-		}
-		else if (_drawMode == DrawMode.ANIMATOR) {
+		} else if (_drawMode == DrawMode.ANIMATOR) {
 			if ((animator != null) && (animator.isPaused())) {
 				animator.resume();
 			}
@@ -493,7 +483,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 			_itemList.add(item);
 		}
 	}
-	
+
 	/**
 	 * Add an item to the list. Note that this does not initiate a redraw.
 	 * 
@@ -505,7 +495,6 @@ public class Panel3D extends JPanel implements GLEventListener {
 			_itemList.add(index, item);
 		}
 	}
-
 
 	/**
 	 * Remove an item from the list. Note that this does not initiate a redraw.
@@ -522,15 +511,14 @@ public class Panel3D extends JPanel implements GLEventListener {
 	/**
 	 * Conver GL coordinates to screen coordinates
 	 * 
-	 * @param gl graphics context
-	 * @param objX GL x coordinate
-	 * @param objY GL y coordinate
-	 * @param objZ GL z coordinate
-	 * @param winPos should be float[3]. Will hold screen coords as floats as
-	 *            [x, y, z]. Not sure what z is--ignore.
+	 * @param gl     graphics context
+	 * @param objX   GL x coordinate
+	 * @param objY   GL y coordinate
+	 * @param objZ   GL z coordinate
+	 * @param winPos should be float[3]. Will hold screen coords as floats as [x, y,
+	 *               z]. Not sure what z is--ignore.
 	 */
-	public void project(GL2 gl, float objX, float objY, float objZ,
-			float winPos[]) {
+	public void project(GL2 gl, float objX, float objY, float objZ, float winPos[]) {
 
 		int[] view = new int[4];
 		gl.glGetIntegerv(GL.GL_VIEWPORT, view, 0);
@@ -543,15 +531,12 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 		glu.gluProject(objX, objY, objZ, model, 0, proj, 0, view, 0, winPos, 0);
 
-		// System.err.println("pos: (" + objX + ", " + objY + ", " + objZ +
-		// ") screen: (" + winPos[0] + ", " + winPos[1] + ", " + winPos[2] +
-		// ")");
 	}
 
 	/**
-	 * This gets the z step used by the mouse and key adapters, to see how fast
-	 * we move in or in in response to mouse wheel or up/down arrows. It should
-	 * be overridden to give something sensible. like the scale/100;
+	 * This gets the z step used by the mouse and key adapters, to see how fast we
+	 * move in or in in response to mouse wheel or up/down arrows. It should be
+	 * overridden to give something sensible. like the scale/100;
 	 * 
 	 * @return the z step (changes to zDist) for moving in and out
 	 */
@@ -565,7 +550,6 @@ public class Panel3D extends JPanel implements GLEventListener {
 	 * @param arg
 	 */
 	public static void main(String arg[]) {
-		System.err.println("3D test (A)");
 		final JFrame testFrame = new JFrame("bCNU 3D Panel Test");
 
 		int n = 10000;
@@ -576,6 +560,33 @@ public class Panel3D extends JPanel implements GLEventListener {
 		final int num = n;
 
 		testFrame.setLayout(new BorderLayout(4, 4));
+
+		final Panel3D p3d = createPanel3D();
+
+		testFrame.add(p3d, BorderLayout.CENTER);
+
+		// set up what to do if the window is closed
+		WindowAdapter windowAdapter = new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent event) {
+				System.err.println("Done");
+				System.exit(1);
+			}
+		};
+
+		testFrame.addWindowListener(windowAdapter);
+		testFrame.setBounds(200, 100, 900, 700);
+
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				testFrame.setVisible(true);
+			}
+		});
+
+	}
+
+	private static Panel3D createPanel3D() {
 
 		final float xymax = 600f;
 		final float zmax = 600f;
@@ -593,9 +604,8 @@ public class Panel3D extends JPanel implements GLEventListener {
 			public void createInitialItems() {
 				// coordinate axes
 
-				Axes3D axes = new Axes3D(this, -xymax, xymax, -xymax, xymax,
-						zmin, zmax, null, Color.darkGray, 1f, 7, 7, 8, Color.black,
-						Color.blue, new Font("SansSerif", Font.PLAIN, 11), 0);
+				Axes3D axes = new Axes3D(this, -xymax, xymax, -xymax, xymax, zmin, zmax, null, Color.darkGray, 1f, 7, 7,
+						8, Color.black, Color.blue, new Font("SansSerif", Font.PLAIN, 11), 0);
 				addItem(axes);
 
 				// add some triangles
@@ -604,16 +614,17 @@ public class Panel3D extends JPanel implements GLEventListener {
 				// 0f, 0f, 0f, 100f, 0f, -100f, 50f, 100, 100f, new Color(255,
 				// 0, 0, 64), 2f, true));
 
-				addItem(new Triangle3D(this, 500f, 0f, -200f, -500f, 500f, 0f,
-						0f, -100f, 500f, new Color(255, 0, 0, 64), 1f, true));
+				addItem(new Triangle3D(this, 500f, 0f, -200f, -500f, 500f, 0f, 0f, -100f, 500f,
+						new Color(255, 0, 0, 64), 1f, true));
 
-				addItem(new Triangle3D(this, 0f, 500f, 0f, -300f, -500f, 500f,
-						0f, -100f, 500f, new Color(0, 0, 255, 64), 2f, true));
+				addItem(new Triangle3D(this, 0f, 500f, 0f, -300f, -500f, 500f, 0f, -100f, 500f,
+						new Color(0, 0, 255, 64), 2f, true));
 
-				addItem(new Triangle3D(this, 0f, 0f, 500f, 0f, -400f, -500f,
-						500f, -100f, 500f, new Color(0, 255, 0, 64), 2f, true));
-				
+				addItem(new Triangle3D(this, 0f, 0f, 500f, 0f, -400f, -500f, 500f, -100f, 500f,
+						new Color(0, 255, 0, 64), 2f, true));
+
 				addItem(new Cylinder(this, 0f, 0f, 0f, 300f, 300f, 300f, 50f, new Color(0, 255, 255, 128)));
+				
 
 				// Cube cube = new Cube(this, 0.25f, 0.25f, 0.25f, 0.5f,
 				// Color.yellow);
@@ -643,10 +654,9 @@ public class Panel3D extends JPanel implements GLEventListener {
 			}
 
 			/**
-			 * This gets the z step used by the mouse and key adapters, to see
-			 * how fast we move in or in in response to mouse wheel or up/down
-			 * arrows. It should be overridden to give something sensible. like
-			 * the scale/100;
+			 * This gets the z step used by the mouse and key adapters, to see how fast we
+			 * move in or in in response to mouse wheel or up/down arrows. It should be
+			 * overridden to give something sensible. like the scale/100;
 			 * 
 			 * @return the z step (changes to zDist) for moving in and out
 			 */
@@ -657,28 +667,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 		};
 
-		testFrame.add(p3d, BorderLayout.CENTER);
-		System.err.println("3D test (B)");
-
-		// set up what to do if the window is closed
-		WindowAdapter windowAdapter = new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent event) {
-				System.err.println("Done");
-				System.exit(1);
-			}
-		};
-
-		testFrame.addWindowListener(windowAdapter);
-		testFrame.setBounds(200, 100, 900, 700);
-
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				testFrame.setVisible(true);
-			}
-		});
-
+		return p3d;
 	}
 
 	/**

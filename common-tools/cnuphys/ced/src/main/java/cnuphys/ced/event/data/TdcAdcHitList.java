@@ -19,8 +19,8 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		super();
 
 		/*
-		 * 1) create basic list from the tdc bank and left tdc 2) sort 3) merge
-		 * in right tdc 4) merge in left adc 5) merge in right adc
+		 * 1) create basic list from the tdc bank and left tdc 2) sort 3) merge in right
+		 * tdc 4) merge in left adc 5) merge in right adc
 		 */
 
 		// step 1: basic list from left tdc
@@ -128,24 +128,13 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		return _maxADC;
 	}
 
-	public void modifyInsert(byte sector,
-			byte layer,
-			short component,
-			int tdcL,
-			int tdcR,
-			int adcL,
-			int adcR,
-			int pedL,
-			int pedR,
-			float timeL,
-			float timeR,
-			byte order) {
+	public void modifyInsert(byte sector, byte layer, short component, int tdcL, int tdcR, int adcL, int adcR, int pedL,
+			int pedR, float timeL, float timeR, byte order) {
 		TdcAdcHit hit = new TdcAdcHit(sector, layer, component);
 		int index = Collections.binarySearch(this, hit);
 		if (index >= 0) {
 			hit = this.elementAt(index);
-		}
-		else {
+		} else {
 			index = -(index + 1); // now the insertion point.
 			add(index, hit);
 		}
@@ -248,12 +237,9 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 	/**
 	 * Find the index of a hit
 	 * 
-	 * @param sector
-	 *            the 1-based sector
-	 * @param layer
-	 *            the 1-based layer
-	 * @param component
-	 *            the 1-based component
+	 * @param sector    the 1-based sector
+	 * @param layer     the 1-based layer
+	 * @param component the 1-based component
 	 * @return the index, or -1 if not found
 	 */
 	public int getIndex(byte sector, byte layer, short component) {
@@ -264,8 +250,7 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 		int index = Collections.binarySearch(this, hit);
 		if (index >= 0) {
 			return index;
-		}
-		else { // not found
+		} else { // not found
 			return -1;
 		}
 	}
@@ -273,12 +258,9 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 	/**
 	 * Find the hit
 	 * 
-	 * @param sector
-	 *            the 1-based sector
-	 * @param layer
-	 *            the 1-based layer 1..36
-	 * @param component
-	 *            the 1-based component
+	 * @param sector    the 1-based sector
+	 * @param layer     the 1-based layer 1..36
+	 * @param component the 1-based component
 	 * @return the hit, or null if not found
 	 */
 	public TdcAdcHit get(byte sector, byte layer, short component) {
@@ -289,12 +271,9 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 	/**
 	 * Find the hit
 	 * 
-	 * @param sector
-	 *            the 1-based sector
-	 * @param layer
-	 *            the 1-based layer 1..36
-	 * @param component
-	 *            the 1-based component
+	 * @param sector    the 1-based sector
+	 * @param layer     the 1-based layer 1..36
+	 * @param component the 1-based component
 	 * @return the hit, or null if not found
 	 */
 	public TdcAdcHit get(int sector, int layer, int component) {
@@ -304,8 +283,7 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 	/**
 	 * Get a color with apha based of relative adc
 	 * 
-	 * @param hit
-	 *            the hit
+	 * @param hit the hit
 	 * @return a fill color for adc hits
 	 */
 	public Color adcColor(TdcAdcHit hit) {
@@ -315,10 +293,8 @@ public class TdcAdcHitList extends Vector<TdcAdcHit> {
 	/**
 	 * Get a color with apha based of relative adc
 	 * 
-	 * @param hit
-	 *            the hit
-	 * @param maxAdc
-	 *            the max adc value
+	 * @param hit    the hit
+	 * @param maxAdc the max adc value
 	 * @return a fill color for adc hits
 	 */
 	public Color adcColor(TdcAdcHit hit, int maxAdc) {

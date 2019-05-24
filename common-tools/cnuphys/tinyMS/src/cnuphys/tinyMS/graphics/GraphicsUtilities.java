@@ -40,8 +40,7 @@ public class GraphicsUtilities {
 	/**
 	 * Set component to small size variant. Probably only works on Mac.
 	 * 
-	 * @param component
-	 *            the component to change size
+	 * @param component the component to change size
 	 */
 	public static void setSizeSmall(JComponent component) {
 		component.putClientProperty("JComponent.sizeVariant", "small");
@@ -50,19 +49,17 @@ public class GraphicsUtilities {
 	/**
 	 * Set component to mini size variant. Probably only works on Mac.
 	 * 
-	 * @param component
-	 *            the component to change size
+	 * @param component the component to change size
 	 */
 	public static void setSizeMini(JComponent component) {
 		component.putClientProperty("JComponent.sizeVariant", "mini");
 	}
 
 	/**
-	 * Set button for square style. For mac so you don't have to use those
-	 * wasteful oval buttons when space is tight
+	 * Set button for square style. For mac so you don't have to use those wasteful
+	 * oval buttons when space is tight
 	 * 
-	 * @param button
-	 *            the button to change style
+	 * @param button the button to change style
 	 */
 	public static void setSquareButton(JButton button) {
 		button.putClientProperty("JButton.buttonType", "square");
@@ -72,8 +69,7 @@ public class GraphicsUtilities {
 	 * Set button for textured style. For mac so you don't have to use those
 	 * wasteful oval buttons when space is tight
 	 * 
-	 * @param button
-	 *            the button to change style
+	 * @param button the button to change style
 	 */
 	public static void setTexturedButton(JButton button) {
 		button.putClientProperty("JButton.buttonType", "textured");
@@ -83,10 +79,8 @@ public class GraphicsUtilities {
 	 * Compute a minimal clip from the intersection of the bounds of the current
 	 * clip and a rectangle
 	 * 
-	 * @param currentClip
-	 *            the current clip
-	 * @param rect
-	 *            the rectangle of interest
+	 * @param currentClip the current clip
+	 * @param rect        the rectangle of interest
 	 * @return the intersection bounding rect, or <code>null</code>
 	 */
 	public static Rectangle minClip(Shape currentClip, Rectangle rect) {
@@ -110,8 +104,7 @@ public class GraphicsUtilities {
 	/**
 	 * Center a component.
 	 * 
-	 * @param component
-	 *            The Component to center
+	 * @param component The Component to center
 	 */
 	public static void centerComponent(Component component) {
 		centerComponent(component, 0, 0);
@@ -120,12 +113,9 @@ public class GraphicsUtilities {
 	/**
 	 * Center a component.
 	 * 
-	 * @param component
-	 *            The Component to center.
-	 * @param dh
-	 *            offset from horizontal center.
-	 * @param dv
-	 *            offset from vertical center.
+	 * @param component The Component to center.
+	 * @param dh        offset from horizontal center.
+	 * @param dv        offset from vertical center.
 	 */
 	public static void centerComponent(Component component, int dh, int dv) {
 
@@ -152,8 +142,7 @@ public class GraphicsUtilities {
 
 			component.setLocation(x, y);
 
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			Log.getInstance().exception(e);
 			component.setLocation(200, 200);
 			e.printStackTrace();
@@ -161,12 +150,11 @@ public class GraphicsUtilities {
 	}
 
 	/**
-	 * Returns a dimension that is a specified fraction of the screen size. This
-	 * is useful, for example, to make a farme 85% of the screen.
+	 * Returns a dimension that is a specified fraction of the screen size. This is
+	 * useful, for example, to make a farme 85% of the screen.
 	 * 
-	 * @param fraction
-	 *            the fraction desired, e.g., 0.85. No check for reasonableness
-	 *            is made.
+	 * @param fraction the fraction desired, e.g., 0.85. No check for reasonableness
+	 *                 is made.
 	 * @return the requested dimension.
 	 */
 	public static Dimension screenFraction(double fraction) {
@@ -200,16 +188,13 @@ public class GraphicsUtilities {
 
 	/**
 	 * Adjust a second point so that the rectangle it forms with the first point
-	 * matches an aspect ratio of a given rectangle. Useful for rubber banding
-	 * when you want to preserve the aspect ratio.
+	 * matches an aspect ratio of a given rectangle. Useful for rubber banding when
+	 * you want to preserve the aspect ratio.
 	 * 
-	 * @param r
-	 *            the rectangle whose aspect ration will be mayched.
-	 * @param p0
-	 *            anchor point
-	 * @param p
-	 *            will be adjusted so that p0, p form a rectangle with the same
-	 *            aspected ratio as r.
+	 * @param r  the rectangle whose aspect ration will be mayched.
+	 * @param p0 anchor point
+	 * @param p  will be adjusted so that p0, p form a rectangle with the same
+	 *           aspected ratio as r.
 	 */
 
 	public static void rectangleARFixedAdjust(Rectangle r, Point p0, Point p) {
@@ -225,8 +210,7 @@ public class GraphicsUtilities {
 			double ar = rw / rh;
 			double pw = sign_x * ar * Math.abs(p.y - p0.y);
 			p.x = p0.x + (int) pw;
-		}
-		else {
+		} else {
 			int sign_y = (p.y > p0.y) ? 1 : -1;
 			double ar = rh / rw;
 			double ph = sign_y * ar * Math.abs(p.x - p0.x);
@@ -236,15 +220,12 @@ public class GraphicsUtilities {
 	}
 
 	/**
-	 * Get a rectangle with the same apsect ratio. Useful for rubber banding
-	 * when you want to preserve the aspect ratio.
+	 * Get a rectangle with the same apsect ratio. Useful for rubber banding when
+	 * you want to preserve the aspect ratio.
 	 * 
-	 * @param r
-	 *            the rectangle whose aspect ratio you want to match
-	 * @param p0
-	 *            one point
-	 * @param p
-	 *            a second point
+	 * @param r  the rectangle whose aspect ratio you want to match
+	 * @param p0 one point
+	 * @param p  a second point
 	 * @return a rectangle with the same aspect ratio
 	 */
 	public static Rectangle rectangleARFixed(Rectangle r, Point p0, Point p) {
@@ -255,10 +236,8 @@ public class GraphicsUtilities {
 	/**
 	 * Given two points, return the rectangle
 	 * 
-	 * @param p1
-	 *            one point
-	 * @param p2
-	 *            the other point
+	 * @param p1 one point
+	 * @param p2 the other point
 	 * @return the rectangle created from two points
 	 */
 
@@ -270,8 +249,7 @@ public class GraphicsUtilities {
 
 		if (p1 == null) {
 			return new Rectangle(p2.x, p2.y, 0, 0);
-		}
-		else if (p2 == null) {
+		} else if (p2 == null) {
 			return new Rectangle(p1.x, p1.y, 0, 0);
 		}
 
@@ -285,10 +263,8 @@ public class GraphicsUtilities {
 	/**
 	 * Size and center a JFrame relative to the screen.
 	 * 
-	 * @param frame
-	 *            the frame to size.
-	 * @param fractionalSize
-	 *            the fraction desired of the screen--e.g., 0.85 for 85%.
+	 * @param frame          the frame to size.
+	 * @param fractionalSize the fraction desired of the screen--e.g., 0.85 for 85%.
 	 */
 	public void sizeToScreen(JFrame frame, double fractionalSize) {
 		Dimension d = screenFraction(fractionalSize);
@@ -299,16 +275,11 @@ public class GraphicsUtilities {
 	/**
 	 * Draw an oval with a 3D etching.
 	 * 
-	 * @param g
-	 *            the Graphics context.
-	 * @param r
-	 *            the bounding rectangle.
-	 * @param fc
-	 *            an optional fill color.
-	 * @param ic
-	 *            an optional inner fill color.
-	 * @param outsie
-	 *            if <code>true</code>, the 3D effect is "out", otherwise "in".
+	 * @param g      the Graphics context.
+	 * @param r      the bounding rectangle.
+	 * @param fc     an optional fill color.
+	 * @param ic     an optional inner fill color.
+	 * @param outsie if <code>true</code>, the 3D effect is "out", otherwise "in".
 	 */
 	static public void drawSimple3DOval(Graphics g, Rectangle r, Color fc, Color ic, boolean outsie) {
 
@@ -332,8 +303,7 @@ public class GraphicsUtilities {
 		if (outsie) {
 			tc = Color.white;
 			bc = Color.black;
-		}
-		else {
+		} else {
 			tc = Color.black;
 			bc = Color.white;
 		}
@@ -349,18 +319,12 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a 3d "etching" around a rectangular area..
 	 * 
-	 * @param g
-	 *            the Graphics context.
-	 * @param x
-	 *            the left of the rectangle.
-	 * @param y
-	 *            the top of the rectangle.
-	 * @param w
-	 *            the width of the rectangle.
-	 * @param h
-	 *            the height of the rectangle.
-	 * @param outsie
-	 *            if <code>true</code>, the 3D effect is "out", otherwise "in".
+	 * @param g      the Graphics context.
+	 * @param x      the left of the rectangle.
+	 * @param y      the top of the rectangle.
+	 * @param w      the width of the rectangle.
+	 * @param h      the height of the rectangle.
+	 * @param outsie if <code>true</code>, the 3D effect is "out", otherwise "in".
 	 */
 
 	static public void drawSimple3DRect(Graphics g, int x, int y, int w, int h, boolean outsie) {
@@ -370,20 +334,13 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a 3d rectangle.
 	 * 
-	 * @param g
-	 *            the Graphics context.
-	 * @param x
-	 *            the left of the rectangle.
-	 * @param y
-	 *            the top of the rectangle.
-	 * @param w
-	 *            the width of the rectangle.
-	 * @param h
-	 *            the height of the rectangle.
-	 * @param fc
-	 *            the fill color (if null, no fill).
-	 * @param outsie
-	 *            if <code>true</code>, the 3D effect is "out", otherwise "in".
+	 * @param g      the Graphics context.
+	 * @param x      the left of the rectangle.
+	 * @param y      the top of the rectangle.
+	 * @param w      the width of the rectangle.
+	 * @param h      the height of the rectangle.
+	 * @param fc     the fill color (if null, no fill).
+	 * @param outsie if <code>true</code>, the 3D effect is "out", otherwise "in".
 	 */
 
 	static public void drawSimple3DRect(Graphics g, int x, int y, int w, int h, Color fc, boolean outsie) {
@@ -402,8 +359,7 @@ public class GraphicsUtilities {
 		if (outsie) {
 			tc = Color.white;
 			bc = Color.black;
-		}
-		else {
+		} else {
 			tc = Color.black;
 			bc = Color.white;
 		}
@@ -424,14 +380,10 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a 3d rectangle.
 	 * 
-	 * @param g
-	 *            the Graphics context.
-	 * @param r
-	 *            the rectangle.
-	 * @param fc
-	 *            the fill color.
-	 * @param outsie
-	 *            if <code>true</code>, the 3D effect is "out", otherwise "in".
+	 * @param g      the Graphics context.
+	 * @param r      the rectangle.
+	 * @param fc     the fill color.
+	 * @param outsie if <code>true</code>, the 3D effect is "out", otherwise "in".
 	 */
 
 	static public void drawSimple3DRect(Graphics g, Rectangle r, Color fc, boolean outsie) {
@@ -442,14 +394,10 @@ public class GraphicsUtilities {
 	/**
 	 * Fill and frame a rectangle
 	 * 
-	 * @param g
-	 *            the Graphics context.
-	 * @param r
-	 *            the bounding rectangle.
-	 * @param fill
-	 *            the fill color.
-	 * @param frame
-	 *            the frame (line) color.
+	 * @param g     the Graphics context.
+	 * @param r     the bounding rectangle.
+	 * @param fill  the fill color.
+	 * @param frame the frame (line) color.
 	 */
 
 	public static void fillAndFrameRect(Graphics g, Rectangle r, Color fill, Color frame) {
@@ -473,14 +421,10 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a 3d diamond.
 	 * 
-	 * @param g
-	 *            the Graphics context.
-	 * @param r
-	 *            the bounding rectangle.
-	 * @param fc
-	 *            the fill color.
-	 * @param outsie
-	 *            if <code>true</code>, the 3D effect is "out", otherwise "in".
+	 * @param g      the Graphics context.
+	 * @param r      the bounding rectangle.
+	 * @param fc     the fill color.
+	 * @param outsie if <code>true</code>, the 3D effect is "out", otherwise "in".
 	 */
 
 	static public void drawSimple3DDiamond(Graphics g, Rectangle r, Color fc, boolean outsie) {
@@ -496,8 +440,7 @@ public class GraphicsUtilities {
 		if (outsie) {
 			tc = Color.white;
 			bc = Color.black;
-		}
-		else {
+		} else {
 			tc = Color.black;
 			bc = Color.white;
 		}
@@ -544,20 +487,13 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a simple rectangle symbol.
 	 * 
-	 * @param g
-	 *            the Graphics context.
-	 * @param x
-	 *            the horizontal center.
-	 * @param y
-	 *            the vertical center.
-	 * @param w2
-	 *            the half width.
-	 * @param h2
-	 *            the half height.
-	 * @param lc
-	 *            the line color.
-	 * @param fc
-	 *            the fill color.
+	 * @param g  the Graphics context.
+	 * @param x  the horizontal center.
+	 * @param y  the vertical center.
+	 * @param w2 the half width.
+	 * @param h2 the half height.
+	 * @param lc the line color.
+	 * @param fc the fill color.
 	 */
 
 	public static void drawRectangle(Graphics g, int x, int y, int w2, int h2, Color lc, Color fc) {
@@ -580,20 +516,13 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a simple oval symbol.
 	 * 
-	 * @param g
-	 *            the Graphics context.
-	 * @param x
-	 *            the horizontal center.
-	 * @param y
-	 *            the vertical center.
-	 * @param w2
-	 *            the half width.
-	 * @param h2
-	 *            the half height.
-	 * @param lc
-	 *            the line color.
-	 * @param fc
-	 *            the fill color.
+	 * @param g  the Graphics context.
+	 * @param x  the horizontal center.
+	 * @param y  the vertical center.
+	 * @param w2 the half width.
+	 * @param h2 the half height.
+	 * @param lc the line color.
+	 * @param fc the fill color.
 	 */
 
 	public static void drawOval(Graphics g, int x, int y, int w2, int h2, Color lc, Color fc) {
@@ -616,18 +545,12 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a simple up triangle symbol.
 	 * 
-	 * @param g
-	 *            the Graphics context.
-	 * @param x
-	 *            the horizontal center.
-	 * @param y
-	 *            the vertical center.
-	 * @param s2
-	 *            the half width.
-	 * @param lc
-	 *            the line color.
-	 * @param fc
-	 *            the fill color.
+	 * @param g  the Graphics context.
+	 * @param x  the horizontal center.
+	 * @param y  the vertical center.
+	 * @param s2 the half width.
+	 * @param lc the line color.
+	 * @param fc the fill color.
 	 */
 
 	public static void drawUpTriangle(Graphics g, int x, int y, int s2, Color lc, Color fc) {
@@ -658,18 +581,12 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a simple down triangle symbol.
 	 * 
-	 * @param g
-	 *            the Graphics context.
-	 * @param x
-	 *            the horizontal center.
-	 * @param y
-	 *            the vertical center.
-	 * @param s2
-	 *            the half width.
-	 * @param lc
-	 *            the line color.
-	 * @param fc
-	 *            the fill color.
+	 * @param g  the Graphics context.
+	 * @param x  the horizontal center.
+	 * @param y  the vertical center.
+	 * @param s2 the half width.
+	 * @param lc the line color.
+	 * @param fc the fill color.
 	 */
 
 	public static void drawDownTriangle(Graphics g, int x, int y, int s2, Color lc, Color fc) {
@@ -700,16 +617,11 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a simple cross symbol.
 	 * 
-	 * @param g
-	 *            the Graphics context.
-	 * @param x
-	 *            the horizontal center.
-	 * @param y
-	 *            the vertical center.
-	 * @param s2
-	 *            the half width.
-	 * @param lc
-	 *            the line color.
+	 * @param g  the Graphics context.
+	 * @param x  the horizontal center.
+	 * @param y  the vertical center.
+	 * @param s2 the half width.
+	 * @param lc the line color.
 	 */
 
 	public static void drawCross(Graphics g, int x, int y, int s2, Color lc) {
@@ -724,16 +636,11 @@ public class GraphicsUtilities {
 	/**
 	 * Draw a simple "X" symbol.
 	 * 
-	 * @param g
-	 *            the Graphics context.
-	 * @param x
-	 *            the horizontal center.
-	 * @param y
-	 *            the vertical center.
-	 * @param s2
-	 *            the half width.
-	 * @param lc
-	 *            the line color.
+	 * @param g  the Graphics context.
+	 * @param x  the horizontal center.
+	 * @param y  the vertical center.
+	 * @param s2 the half width.
+	 * @param lc the line color.
 	 */
 
 	public static void drawX(Graphics g, int x, int y, int s2, Color lc) {
@@ -748,16 +655,11 @@ public class GraphicsUtilities {
 	/**
 	 * Draw rotated text.
 	 * 
-	 * @param g
-	 *            the Graphics context.
-	 * @param s
-	 *            the text to draw.
-	 * @param x
-	 *            the x pixel coordinate of baseline.
-	 * @param y
-	 *            the y pixel coordinate of baseline.
-	 * @param angleDegrees
-	 *            the angle of rotation in decimal degrees.
+	 * @param g            the Graphics context.
+	 * @param s            the text to draw.
+	 * @param x            the x pixel coordinate of baseline.
+	 * @param y            the y pixel coordinate of baseline.
+	 * @param angleDegrees the angle of rotation in decimal degrees.
 	 */
 	public static void drawRotatedText(Graphics2D g, String s, Font font, int x, int y, double angleDegrees) {
 
@@ -767,28 +669,15 @@ public class GraphicsUtilities {
 	/**
 	 * Draw rotated text.
 	 * 
-	 * @param g
-	 *            the Graphics context.
-	 * @param s
-	 *            the text to draw.
-	 * @param xo
-	 *            the x pixel coordinate of rotation point.
-	 * @param yo
-	 *            the y pixel coordinate of rotation point.
-	 * @param delX
-	 *            unrotated offset from rotation anchor
-	 * @param delY
-	 *            unrotated offset from rotation anchor
-	 * @param angleDegrees
-	 *            the angle of rotation in decimal degrees.
+	 * @param g            the Graphics context.
+	 * @param s            the text to draw.
+	 * @param xo           the x pixel coordinate of rotation point.
+	 * @param yo           the y pixel coordinate of rotation point.
+	 * @param delX         unrotated offset from rotation anchor
+	 * @param delY         unrotated offset from rotation anchor
+	 * @param angleDegrees the angle of rotation in decimal degrees.
 	 */
-	public static void drawRotatedText(Graphics2D g,
-			String s,
-			Font font,
-			int xo,
-			int yo,
-			int delX,
-			int delY,
+	public static void drawRotatedText(Graphics2D g, String s, Font font, int xo, int yo, int delX, int delY,
 			double angleDegrees) {
 
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -815,8 +704,7 @@ public class GraphicsUtilities {
 		g.drawString(s, 0, 0);
 		try {
 			g.transform(translation.createInverse());
-		}
-		catch (NoninvertibleTransformException e) {
+		} catch (NoninvertibleTransformException e) {
 			e.printStackTrace();
 		}
 	}
@@ -824,8 +712,7 @@ public class GraphicsUtilities {
 	/**
 	 * Get the hex format of the color in the form #rrggbbaa
 	 * 
-	 * @param color
-	 *            the color to convert
+	 * @param color the color to convert
 	 * @return the hex string for the color
 	 */
 	public static String colorToHex(Color color) {
@@ -842,11 +729,10 @@ public class GraphicsUtilities {
 	}
 
 	/**
-	 * Obtain a color from a hex string in common internet format #rrggbbaa. The
-	 * "#" and the aa are optional
+	 * Obtain a color from a hex string in common internet format #rrggbbaa. The "#"
+	 * and the aa are optional
 	 * 
-	 * @param hex
-	 *            the hex string
+	 * @param hex the hex string
 	 * @return the corresponding color or black on error.
 	 */
 	public static Color colorFromHex(String hex) {
@@ -872,8 +758,7 @@ public class GraphicsUtilities {
 			int b = Integer.parseInt(hex.substring(4, 6), 16);
 			int a = Integer.parseInt(hex.substring(6, 8), 16);
 			return new Color(r, g, b, a);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return Color.black;
 		}
@@ -906,19 +791,17 @@ public class GraphicsUtilities {
 	}
 
 	/**
-	 * Run a runnable directly if this is not the EDT (AWT) thread. If it is,
-	 * run on the invokeLater method. Note in either case the runnable WILL be
-	 * run on the EDT.
+	 * Run a runnable directly if this is not the EDT (AWT) thread. If it is, run on
+	 * the invokeLater method. Note in either case the runnable WILL be run on the
+	 * EDT.
 	 * 
-	 * @param runnable
-	 *            the runnable to run
+	 * @param runnable the runnable to run
 	 */
 	public static void invokeInDispatchThreadIfNeeded(Runnable runnable) {
 		if (EventQueue.isDispatchThread()) {
 			// run directly
 			runnable.run();
-		}
-		else {
+		} else {
 			// do all gui events, then run on EDT
 			SwingUtilities.invokeLater(runnable);
 		}

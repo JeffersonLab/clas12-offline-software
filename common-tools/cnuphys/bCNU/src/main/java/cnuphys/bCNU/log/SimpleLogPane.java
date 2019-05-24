@@ -7,7 +7,7 @@ import java.util.EnumMap;
 import javax.swing.text.SimpleAttributeSet;
 
 import cnuphys.bCNU.graphics.component.TextPaneScrollPane;
-import cnuphys.splot.plot.X11Colors;
+import cnuphys.bCNU.util.X11Colors;
 
 /**
  * Combines all log messages into one text pane. Uses different colors to
@@ -30,25 +30,14 @@ public class SimpleLogPane extends TextPaneScrollPane {
 	}
 
 	private static EnumMap<Grade, SimpleAttributeSet> styles;
-	
+
 	static {
 		styles = new EnumMap<Grade, SimpleAttributeSet>(Grade.class);
-		styles.put(
-				Grade.INFO,
-				createStyle(Color.black, "sansserif", INFOFONTSIZE, false,
-						false));
-		styles.put(
-				Grade.CONFIG,
-				createStyle(Color.blue, "sansserif", CONFIGFONTSIZE, false,
-						false));
-		styles.put(
-				Grade.WARNING,
-				createStyle(X11Colors.getX11Color("orange red"), "monospaced", WARNINGFONTSIZE,
-						false, true));
-		styles.put(
-				Grade.ERROR,
-				createStyle(Color.red, "monospaced", ERRORFONTSIZE, false,
-						true));
+		styles.put(Grade.INFO, createStyle(Color.black, "sansserif", INFOFONTSIZE, false, false));
+		styles.put(Grade.CONFIG, createStyle(Color.blue, "sansserif", CONFIGFONTSIZE, false, false));
+		styles.put(Grade.WARNING,
+				createStyle(X11Colors.getX11Color("orange red"), "monospaced", WARNINGFONTSIZE, false, true));
+		styles.put(Grade.ERROR, createStyle(Color.red, "monospaced", ERRORFONTSIZE, false, true));
 	}
 
 	public SimpleLogPane() {
@@ -89,8 +78,7 @@ public class SimpleLogPane extends TextPaneScrollPane {
 	/**
 	 * Fix the message so it gets appended nicely.
 	 * 
-	 * @param message
-	 *            the input message.
+	 * @param message the input message.
 	 * @return the fixed message.
 	 */
 	private String fixMessage(String message) {
@@ -107,10 +95,8 @@ public class SimpleLogPane extends TextPaneScrollPane {
 	/**
 	 * Append the message with the appropriate style.
 	 * 
-	 * @param grade
-	 *            the grade of the messaged.
-	 * @param message
-	 *            the message text.
+	 * @param grade   the grade of the messaged.
+	 * @param message the message text.
 	 */
 	private void append(Grade grade, String message) {
 		append(fixMessage(message), styles.get(grade), (grade == Grade.ERROR));

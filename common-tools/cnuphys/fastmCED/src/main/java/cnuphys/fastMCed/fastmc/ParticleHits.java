@@ -11,6 +11,7 @@ import cnuphys.fastMCed.geometry.DCGeometry;
 import cnuphys.fastMCed.geometry.FTOFGeometry;
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.lund.LundId;
+import cnuphys.lund.LundSupport;
 import cnuphys.splot.plot.DoubleFormat;
 
 /**
@@ -27,8 +28,8 @@ public class ParticleHits {
 
 	// the 3D path that generated the hits
 	private Path3D _path;
-	
-	//contains the vertex and moment information
+
+	// contains the vertex and moment information
 	private GeneratedParticleRecord _genParticleRecord;
 
 	/**
@@ -37,14 +38,26 @@ public class ParticleHits {
 	private EnumMap<DetectorId, HitHolder> hits;
 
 	/**
+	 * Null constructor used for random noise generation
+	 */
+	public ParticleHits() {
+		_lundId = LundSupport.unknownMinus;
+		_lundId.getStyle().setFillColor(Color.cyan);
+
+		hits = new EnumMap<>(DetectorId.class);
+		HitHolder dcHH = new HitHolder(6, 6);
+		HitHolder ftofHH = new HitHolder(6, 0);
+
+		hits.put(DetectorId.DC, dcHH);
+		hits.put(DetectorId.FTOF, ftofHH);
+	}
+
+	/**
 	 * The particle hits for a single trajectory as determined by fastMC
 	 * 
-	 * @param lundId
-	 *            the Lund Id
-	 * @ parm particleRec
-	 *            contains the vertex and momentum information
-	 * @param path
-	 *            the path
+	 * @param lundId      the Lund Id
+	 * @param particleRec contains the vertex and momentum information
+	 * @param path        the path
 	 */
 	public ParticleHits(LundId lundId, GeneratedParticleRecord particleRec, Path3D path) {
 		_lundId = lundId;
@@ -56,7 +69,7 @@ public class ParticleHits {
 		if (charge != 0) {
 			HitHolder dcHH = new HitHolder(6, 6);
 			HitHolder ftofHH = new HitHolder(6, 0);
-			
+
 			dcHH.fill(DCGeometry.getHits(path));
 			ftofHH.fill(FTOFGeometry.getHits(path));
 			hits.put(DetectorId.DC, dcHH);
@@ -74,8 +87,9 @@ public class ParticleHits {
 	}
 
 	/**
-	 * Get the total number of hits across all sectors, superLayers
-	 * and Layers for a given detector type
+	 * Get the total number of hits across all sectors, superLayers and Layers for a
+	 * given detector type
+	 * 
 	 * @param id the DetorId enum value
 	 * @return the total number of hits
 	 */
@@ -83,34 +97,32 @@ public class ParticleHits {
 		HitHolder holder = hits.get(id);
 		if (holder == null) {
 			return 0;
-		}
-		else {
+		} else {
 			return holder.totalHitCount();
 		}
 	}
-	
+
 	/**
 	 * Get the total hit count for a given sector
-	 * @param id the DetorId enum value
-	 * @param sect0
-	 *            the zero based sector
+	 * 
+	 * @param id    the DetorId enum value
+	 * @param sect0 the zero based sector
 	 * @return the total hit count for a sector
 	 */
 	public int sectorHitCount(DetectorId id, int sect0) {
 		HitHolder holder = hits.get(id);
 		if (holder == null) {
 			return 0;
-		}
-		else {
+		} else {
 			return holder.sectorHitCount(sect0);
 		}
 	}
-	
+
 	/**
 	 * Get the total hit count for a given sector
-	 * @param id the DetorId enum value
-	 * @param sect0
-	 *            the zero based sector
+	 * 
+	 * @param id    the DetorId enum value
+	 * @param sect0 the zero based sector
 	 * @param supl0 the zero based superlayer
 	 * @return the the total hit count for a given sector and superLayer
 	 */
@@ -118,44 +130,55 @@ public class ParticleHits {
 		HitHolder holder = hits.get(id);
 		if (holder == null) {
 			return 0;
-		}
-		else {
+		} else {
 			return holder.hitCount(sect0, supl0);
 		}
 	}
 
 	/**
 	 * Get all the hits, all sectors and superLayers
+	 * 
 	 * @return all the hits, all sectors and superLayers
 	 */
 	public ArrayList<AugmentedDetectorHit> getAllHits(DetectorId id) {
 		HitHolder holder = hits.get(id);
 		if (holder == null) {
 			return null;
-		}
-		else {
+		} else {
 			return holder.getAllHits();
 		}
 	}
+
 	/**
 	 * Get the HitHolder
 	 * 
-	 * @param id
-	 *            the detectorId enum value
+	 * @param id the detectorId enum value
 	 */
 	public HitHolder getHitHolder(DetectorId id) {
 		return hits.get(id);
 	}
 
 	/**
+	 * Check if we have a hit at the provided component
+	 * 
+	 * @param id     the detector id
+	 * @param sect0  the zero based sector
+	 * @param supl0  the zero based superlayer
+	 * @param layer0 the zero based layer
+	 * @param comp0  the zero based component id
+	 * @return <code>true</code> if we have a hit at that component
+	 */
+	public boolean hasHit(DetectorId id, int sect0, int supl0, int layer0, int comp0) {
+		HitHolder holder = hits.get(id);
+		return holder.hasHit(sect0, supl0, layer0, comp0);
+	}
+
+	/**
 	 * Get the list of hits
 	 * 
-	 * @param id
-	 *            the detectorId enum value
-	 * @param sect0
-	 *            the zero based sector
-	 * @param supl0
-	 *            the zero based superLayer
+	 * @param id    the detectorId enum value
+	 * @param sect0 the zero based sector
+	 * @param supl0 the zero based superLayer
 	 * @return of list of hits with matching sector and superLayer and a mix of
 	 *         layers and components
 	 */
@@ -176,10 +199,11 @@ public class ParticleHits {
 	public LundId getLundId() {
 		return _lundId;
 	}
-	
+
 	/**
-	 * Get the generated particle record for this trajectory/track.
-	 * It contains information like the vertex and momentum.
+	 * Get the generated particle record for this trajectory/track. It contains
+	 * information like the vertex and momentum.
+	 * 
 	 * @return the generated particle record for this trajectory/track.
 	 */
 	public GeneratedParticleRecord getGeneratedParticleRecord() {
@@ -219,16 +243,12 @@ public class ParticleHits {
 		return _lundId.getStyle().getFillColor();
 	}
 
-
 	/**
 	 * Add hit feedback data to the feedback strings
 	 * 
-	 * @param hit
-	 *            the hit that the mouse is over
-	 * @param lid
-	 *            the Lund Id
-	 * @param feedbackStrings
-	 *            the list of feedbackstrings being added to
+	 * @param hit             the hit that the mouse is over
+	 * @param lid             the Lund Id
+	 * @param feedbackStrings the list of feedbackstrings being added to
 	 */
 	public static void addHitFeedback(AugmentedDetectorHit hit, LundId lid, List<String> feedbackStrings) {
 		if (hit != null) {

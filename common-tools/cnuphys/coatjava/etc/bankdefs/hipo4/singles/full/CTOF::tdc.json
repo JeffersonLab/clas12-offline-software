@@ -1,0 +1,35 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector (=1)", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "layer (=1)", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "paddle (1-48)", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "order: 2 - TDCU , 3 - TDCD", 
+                "name": "order", 
+                "type": "B"
+            }, 
+            {
+                "info": "TDC value", 
+                "name": "TDC", 
+                "type": "I"
+            }
+        ], 
+        "group": 20400, 
+        "info": "TDC bank for the Central Time of Flight", 
+        "item": 12, 
+        "name": "CTOF::tdc"
+    }
+]

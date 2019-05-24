@@ -1,30 +1,29 @@
 package cnuphys.swimZ;
 
-import org.jlab.clas.clas.math.FastMath;
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.RotatedCompositeProbe;
 
 public class SectorSwimZDerivative extends SwimZDerivative {
-	
+
 	private int _sector = 0;
-	
+
 	/**
 	 * Set the sector [1..6]
+	 * 
 	 * @param sector the sector [1..6]
 	 */
 	public void setSector(int sector) {
 		_sector = sector;
 	}
-	
+
 	/**
 	 * Set the parameters
-	 * @param sect the sector [1..6]
-	 * @param Q
-	 *            -1 for electron, +1 for proton, etc.
-	 * @param p
-	 *            the magnitude of the momentum in GeV/c.
-	 * @param probe
-	 *            the magnetic field getter
+	 * 
+	 * @param sect  the sector [1..6]
+	 * @param Q     -1 for electron, +1 for proton, etc.
+	 * @param p     the magnitude of the momentum in GeV/c.
+	 * @param probe the magnetic field getter
 	 */
 	public void set(int sector, int Q, double p, FieldProbe probe) {
 		_sector = sector;
@@ -32,26 +31,20 @@ public class SectorSwimZDerivative extends SwimZDerivative {
 		set(Q, p, probe);
 	}
 
-
 	/**
-	 * Compute the derivatives given the value of the independent variable and
-	 * the values of the function. Think of the Differential Equation as being
-	 * dydt = f[y,t].
+	 * Compute the derivatives given the value of the independent variable and the
+	 * values of the function. Think of the Differential Equation as being dydt =
+	 * f[y,t].
 	 * 
-	 * @param z
-	 *            the value of the independent variable (the z coordinate)
-	 *            (input).
-	 * @param x
-	 *            the values of the state vector (x, y, tx, ty, q) at z (input).
-	 * @param dxdz
-	 *            will be filled with the values of the derivatives at z
-	 *            (output).
+	 * @param z    the value of the independent variable (the z coordinate) (input).
+	 * @param x    the values of the state vector (x, y, tx, ty, q) at z (input).
+	 * @param dxdz will be filled with the values of the derivatives at z (output).
 	 */
 	@Override
 	public void derivative(double z, double[] x, double[] dxdz) {
 
 		// get the field
-		((RotatedCompositeProbe)_probe).field(_sector, (float) x[0], (float) x[1], (float) z, B);
+		((RotatedCompositeProbe) _probe).field(_sector, (float) x[0], (float) x[1], (float) z, B);
 
 		// some needed factors
 		double tx = x[2];

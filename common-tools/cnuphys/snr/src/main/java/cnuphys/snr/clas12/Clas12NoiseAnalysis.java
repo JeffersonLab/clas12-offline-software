@@ -1,7 +1,5 @@
 package cnuphys.snr.clas12;
 
-import java.util.Random;
-
 import cnuphys.snr.ExtendedWord;
 import cnuphys.snr.NoiseReductionParameters;
 
@@ -36,35 +34,24 @@ public class Clas12NoiseAnalysis {
 
 	// default num missing layers
 	private final int[] _defaultMissingLayers = { 2, 2, 2, 2, 2, 2 };
-	
-//	// default layers shifts
-//	private final int[][] _defaultLeftShifts = { { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 },
-//			{ 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 } };
-//
-//	// default layers shifts
-//	private final int[][] _defaultRightShifts = { { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 },
-//			{ 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 } };
 
-
-	// default layers shifts
-	private final int[][] _defaultLeftShifts = { 
-			{ 0, 1, 2, 2, 2, 2 },
-			{ 0, 1, 2, 2, 2, 2 }, 
-			{ 0, 1, 2, 2, 2, 2 },
-			{ 0, 1, 2, 2, 2, 2 },
-			{ 0, 3, 4, 4, 5, 5 }, 
-			{ 0, 3, 4, 4, 5, 5 } 
-			};
+	// // default layers shifts
+	// private final int[][] _defaultLeftShifts = { { 0, 1, 2, 2, 3, 3 }, { 0,
+	// 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 },
+	// { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 } };
+	//
+	// // default layers shifts
+	// private final int[][] _defaultRightShifts = { { 0, 1, 2, 2, 3, 3 }, { 0,
+	// 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 },
+	// { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 }, { 0, 1, 2, 2, 3, 3 } };
 
 	// default layers shifts
-	private final int[][] _defaultRightShifts = { 
-			{ 0, 1, 2, 2, 2, 2 },
-			{ 0, 1, 2, 2, 2, 2 }, 
-			{ 0, 1, 2, 2, 2, 2 },
-			{ 0, 1, 2, 2, 2, 2 }, 
-			{ 0, 3, 4, 4, 5, 5 }, 
-			{ 0, 3, 4, 4, 5, 5 } 
-			};
+	private final int[][] _defaultLeftShifts = { { 0, 1, 2, 2, 2, 2 }, { 0, 1, 2, 2, 2, 2 }, { 0, 1, 2, 2, 2, 2 },
+			{ 0, 1, 2, 2, 2, 2 }, { 0, 3, 4, 4, 5, 5 }, { 0, 3, 4, 4, 5, 5 } };
+
+	// default layers shifts
+	private final int[][] _defaultRightShifts = { { 0, 1, 2, 2, 2, 2 }, { 0, 1, 2, 2, 2, 2 }, { 0, 1, 2, 2, 2, 2 },
+			{ 0, 1, 2, 2, 2, 2 }, { 0, 3, 4, 4, 5, 5 }, { 0, 3, 4, 4, 5, 5 } };
 
 	// default num missing layers for composite chambers (superlayers);
 	// unlike the test program there are 4 composite chambers here
@@ -128,10 +115,8 @@ public class Clas12NoiseAnalysis {
 	/**
 	 * Get the parameters for a given 0-based superlayer
 	 * 
-	 * @param sector
-	 *            the 0-based sector
-	 * @param supl
-	 *            the 0-based superlayer in question
+	 * @param sector the 0-based sector
+	 * @param supl   the 0-based superlayer in question
 	 * @return the parameters for that superlayer
 	 */
 	public NoiseReductionParameters getParameters(int sector, int supl) {
@@ -141,12 +126,9 @@ public class Clas12NoiseAnalysis {
 	/**
 	 * Set the parameters for a given 0-based superlayer
 	 * 
-	 * @param sector
-	 *            the 0-based sector
-	 * @param supl
-	 *            the 0-based superlayer in question
-	 * @param params
-	 *            the parameters for that superlayer
+	 * @param sector the 0-based sector
+	 * @param supl   the 0-based superlayer in question
+	 * @param params the parameters for that superlayer
 	 */
 	public void setParameters(int sector, int supl, NoiseReductionParameters params) {
 		_parameters[sector][supl] = params;
@@ -155,11 +137,9 @@ public class Clas12NoiseAnalysis {
 	/**
 	 * Get the parameters for a composite chamber/superlayer
 	 * 
-	 * @param sector
-	 *            the 0-based sector
-	 * @param lrpm
-	 *            should be LEFT_PLUS (0) RIGHT_PLUS (1) LEFT_MINUS (2)
-	 *            RIGHT_MINUS (3)
+	 * @param sector the 0-based sector
+	 * @param lrpm   should be LEFT_PLUS (0) RIGHT_PLUS (1) LEFT_MINUS (2)
+	 *               RIGHT_MINUS (3)
 	 * @return the parameters for that composite chamber/superlayer
 	 */
 	public NoiseReductionParameters getCompositeParameters(int sector, int lrpm) {
@@ -169,13 +149,10 @@ public class Clas12NoiseAnalysis {
 	/**
 	 * Set the parameters for a composite chamber/superlayer
 	 * 
-	 * @param sector
-	 *            the 0-based sector
-	 * @param lrpm
-	 *            should be LEFT_PLUS (0) RIGHT_PLUS (1) LEFT_MINUS (2)
-	 *            RIGHT_MINUS (3)
-	 * @param params
-	 *            the parameters for that composite chamber/superlayer
+	 * @param sector the 0-based sector
+	 * @param lrpm   should be LEFT_PLUS (0) RIGHT_PLUS (1) LEFT_MINUS (2)
+	 *               RIGHT_MINUS (3)
+	 * @param params the parameters for that composite chamber/superlayer
 	 */
 	public void setCompositeParameters(int sector, int lrpm, NoiseReductionParameters params) {
 		_compositeParameters[sector][lrpm] = params;
@@ -195,21 +172,16 @@ public class Clas12NoiseAnalysis {
 			}
 		}
 	}
-	
+
 	/**
 	 * This methods takes the data arrays and generates the results. The input
 	 * arrays contain 1-based indices, just like in the clasio banks
 	 * 
-	 * @param sector
-	 *            the 1-based sector array
-	 * @param superlayer
-	 *            the 1-based superlayer array
-	 * @param layer
-	 *            the 1-based layer array
-	 * @param wire
-	 *            the 1-based wire array
-	 * @param results
-	 *            container for the results
+	 * @param sector     the 1-based sector array
+	 * @param superlayer the 1-based superlayer array
+	 * @param layer      the 1-based layer array
+	 * @param wire       the 1-based wire array
+	 * @param results    container for the results
 	 */
 	public void findNoise(int sector[], int superlayer[], int layer[], int wire[], Clas12NoiseResult results) {
 		if (sector == null) {
@@ -236,9 +208,9 @@ public class Clas12NoiseAnalysis {
 			for (int supl = 0; supl < NUM_SUPERLAYER; supl++) {
 				_parameters[sect][supl].removeNoise();
 				// prepare for second pass
-				//if we are looking for TRACKS
+				// if we are looking for TRACKS
 				if (NoiseReductionParameters.lookForTracks()) {
-					
+
 					boolean plus = (supl % 2) == 0;
 					int compositeLayer = supl / 2;
 
@@ -289,7 +261,8 @@ public class Clas12NoiseAnalysis {
 							_compositeParameters[sect][RIGHT_PLUS].getPackedData(compositeLayer).clear();
 						}
 
-						//this removes from the NORMAL superlayers was is now noise according to tack finding
+						// this removes from the NORMAL superlayers was is now
+						// noise according to tack finding
 						_parameters[sect][supl].secondPass(LEFT,
 								_compositeParameters[sect][LEFT_PLUS].getPackedData(compositeLayer));
 						_parameters[sect][supl].secondPass(RIGHT,
@@ -326,43 +299,41 @@ public class Clas12NoiseAnalysis {
 	}
 
 	/**
-	 * Set the data for the composite chamber from the left and right segments
-	 * of the corresponding real chamber
+	 * Set the data for the composite chamber from the left and right segments of
+	 * the corresponding real chamber
 	 * 
-	 * @param compParams
-	 *            the composite chamber/superlayer parameters
-	 * @param layer
-	 *            the composite 0-based layer. E.g., if this is 3, then we are
-	 *            setting the results from chamber 3. This "layer" corresponds
-	 *            to an actual SUPERlayer.
-	 * @param segments
-	 *            the segments (left or right) from the real chamber
-	 *            (superlayer)
+	 * @param compParams the composite chamber/superlayer parameters
+	 * @param layer      the composite 0-based layer. E.g., if this is 3, then we
+	 *                   are setting the results from chamber 3. This "layer"
+	 *                   corresponds to an actual SUPERlayer.
+	 * @param segments   the segments (left or right) from the real chamber
+	 *                   (superlayer)
 	 */
 	private void setCompositeLayerPackedData(NoiseReductionParameters compParams, int layer, ExtendedWord segments) {
 		ExtendedWord.copy(segments, compParams.getPackedData(layer));
 	}
-	
-	
-	
-//	public static void main(String arg[]) {
-//		ExtendedWord a = new ExtendedWord(112);
-//		ExtendedWord b = new ExtendedWord(112);
-//		ExtendedWord c = new ExtendedWord(112);
-//		
-//		Random rand = new Random();
-//		a.getWords()[0] = rand.nextLong() >>> 5;
-//		a.getWords()[1] = rand.nextLong() >>> 5;
-//		b.getWords()[0] = rand.nextLong() >>> 5;
-//		b.getWords()[1] = 0;
-//		c.getWords()[0] = 0;
-//		c.getWords()[1] = rand.nextLong() << 5;
-//		
-//		System.out.println(a + "  MSB: " + leftMostBitIndex(a) + "  LSB: " + rightMostBitIndex(a));
-//		System.out.println(b + "  MSB: " + leftMostBitIndex(b) + "  LSB: " + rightMostBitIndex(b));
-//		System.out.println(c + "  MSB: " + leftMostBitIndex(c) + "  LSB: " + rightMostBitIndex(c));
-//
-//	}
-//	
+
+	// public static void main(String arg[]) {
+	// ExtendedWord a = new ExtendedWord(112);
+	// ExtendedWord b = new ExtendedWord(112);
+	// ExtendedWord c = new ExtendedWord(112);
+	//
+	// Random rand = new Random();
+	// a.getWords()[0] = rand.nextLong() >>> 5;
+	// a.getWords()[1] = rand.nextLong() >>> 5;
+	// b.getWords()[0] = rand.nextLong() >>> 5;
+	// b.getWords()[1] = 0;
+	// c.getWords()[0] = 0;
+	// c.getWords()[1] = rand.nextLong() << 5;
+	//
+	// System.out.println(a + " MSB: " + leftMostBitIndex(a) + " LSB: " +
+	// rightMostBitIndex(a));
+	// System.out.println(b + " MSB: " + leftMostBitIndex(b) + " LSB: " +
+	// rightMostBitIndex(b));
+	// System.out.println(c + " MSB: " + leftMostBitIndex(c) + " LSB: " +
+	// rightMostBitIndex(c));
+	//
+	// }
+	//
 
 }

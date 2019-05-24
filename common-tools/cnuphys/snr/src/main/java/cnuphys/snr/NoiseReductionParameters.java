@@ -82,13 +82,12 @@ public class NoiseReductionParameters {
 	 * superlayers, layers and wires
 	 * 
 	 * @param allowedMissingLayers the number of missing layers permitted.
-	 * @param leftLayerShifts the shifts for left leaning tracks. Length should
-	 *            equal numLayers.
-	 * @param rightLayerShifts the shifts for right leaning tracks. Length
-	 *            should equal numLayers.
+	 * @param leftLayerShifts      the shifts for left leaning tracks. Length should
+	 *                             equal numLayers.
+	 * @param rightLayerShifts     the shifts for right leaning tracks. Length
+	 *                             should equal numLayers.
 	 */
-	public NoiseReductionParameters(int allowedMissingLayers,
-			int[] leftLayerShifts, int[] rightLayerShifts) {
+	public NoiseReductionParameters(int allowedMissingLayers, int[] leftLayerShifts, int[] rightLayerShifts) {
 		this(6, 112, allowedMissingLayers, leftLayerShifts, rightLayerShifts);
 	}
 
@@ -97,13 +96,12 @@ public class NoiseReductionParameters {
 	 * superlayers, layers and wires
 	 * 
 	 * @param allowedMissingLayers the number of missing layers permitted.
-	 * @param leftLayerShifts the shifts for left leaning tracks. Length should
-	 *            equal numLayers.
-	 * @param rightLayerShifts the shifts for right leaning tracks. Length
-	 *            should equal numLayers.
+	 * @param leftLayerShifts      the shifts for left leaning tracks. Length should
+	 *                             equal numLayers.
+	 * @param rightLayerShifts     the shifts for right leaning tracks. Length
+	 *                             should equal numLayers.
 	 */
-	public NoiseReductionParameters(int numLayer, int numWire,
-			int allowedMissingLayers, int[] leftLayerShifts,
+	public NoiseReductionParameters(int numLayer, int numWire, int allowedMissingLayers, int[] leftLayerShifts,
 			int[] rightLayerShifts) {
 		_numLayer = numLayer;
 		_numWire = numWire;
@@ -126,19 +124,17 @@ public class NoiseReductionParameters {
 //		int leftShifts[] = { 0, 1, 2, 2, 3, 3 };
 		int rightShifts[] = { 0, 3, 4, 4, 5, 5 };
 		int leftShifts[] = { 0, 3, 4, 4, 5, 5 };
-		return new NoiseReductionParameters(numLay, numWire, numMissing,
-				leftShifts, rightShifts);
+		return new NoiseReductionParameters(numLay, numWire, numMissing, leftShifts, rightShifts);
 	}
 
 	/**
 	 * Get a default set of parameters with CLAS-like numbers
 	 * 
 	 * @param option LEFT_LEAN (0) for left benders, RIGHT_LEAN (1) for right
-	 *            benders
+	 *               benders
 	 * @return a default set of parameters
 	 */
-	public static NoiseReductionParameters getDefaultCompositeParameters(
-			int option) {
+	public static NoiseReductionParameters getDefaultCompositeParameters(int option) {
 		int numLay = 6;
 		int numWire = 112;
 		int numMissing = 0;
@@ -146,14 +142,11 @@ public class NoiseReductionParameters {
 		if (option == LEFT_LEAN) {
 			int leftShifts[] = { 0, 8, 11, 14, 17, 20 };
 			int rightShifts[] = { 0, 0, 0, 0, 0, 0 };
-			return new NoiseReductionParameters(numLay, numWire, numMissing,
-					leftShifts, rightShifts);
-		}
-		else { // right benders
+			return new NoiseReductionParameters(numLay, numWire, numMissing, leftShifts, rightShifts);
+		} else { // right benders
 			int leftShifts[] = { 0, 0, 0, 0, 0, 0 };
 			int rightShifts[] = { 0, 8, 11, 14, 17, 20 };
-			return new NoiseReductionParameters(numLay, numWire, numMissing,
-					leftShifts, rightShifts);
+			return new NoiseReductionParameters(numLay, numWire, numMissing, leftShifts, rightShifts);
 		}
 
 	}
@@ -221,9 +214,9 @@ public class NoiseReductionParameters {
 	 * complete.
 	 * 
 	 * @param layer the 0-based layer 0..5
-	 * @param wire the 0-base wire 0..
-	 * @return true if this was a noise hit--i.e., it is in the raw data but
-	 *         anot the analyzed data
+	 * @param wire  the 0-base wire 0..
+	 * @return true if this was a noise hit--i.e., it is in the raw data but anot
+	 *         the analyzed data
 	 */
 	public boolean isNoiseHit(int layer, int wire) {
 		if (_analyzed) {
@@ -294,8 +287,8 @@ public class NoiseReductionParameters {
 	}
 
 	/**
-	 * Get the left leaning segment staring wire positions. This is meaningful
-	 * only if the analysis has been performed.
+	 * Get the left leaning segment staring wire positions. This is meaningful only
+	 * if the analysis has been performed.
 	 * 
 	 * @return the left leaning segment staring wire positions.
 	 */
@@ -304,8 +297,8 @@ public class NoiseReductionParameters {
 	}
 
 	/**
-	 * Get the right leaning segment staring wire positions.This is meaningful
-	 * only if the analysis has been performed.
+	 * Get the right leaning segment staring wire positions.This is meaningful only
+	 * if the analysis has been performed.
 	 * 
 	 * @return the right leaning segment staring wire positions.
 	 */
@@ -316,8 +309,8 @@ public class NoiseReductionParameters {
 	/**
 	 * Get the packed data arrays.
 	 * 
-	 * @return the packedData this may be raw or may have had the noise
-	 *         removed--use "is anaylyzed" to distinguish
+	 * @return the packedData this may be raw or may have had the noise removed--use
+	 *         "is anaylyzed" to distinguish
 	 */
 	public ExtendedWord[] getPackedData() {
 		return _packedData;
@@ -356,7 +349,7 @@ public class NoiseReductionParameters {
 	 * pack a hit
 	 * 
 	 * @param layer the 0-based layer
-	 * @param wire the 0-based wire
+	 * @param wire  the 0-based wire
 	 */
 	public void packHit(int layer, int wire) {
 		_packedData[layer].setBit(wire);
@@ -366,7 +359,7 @@ public class NoiseReductionParameters {
 	 * pack a hit
 	 * 
 	 * @param layer the 1-based layer
-	 * @param wire the 1-based wire
+	 * @param wire  the 1-based wire
 	 */
 	public void packHitOneBased(int layer, int wire) {
 		_packedData[layer - 1].setBit(wire - 1);
@@ -383,8 +376,8 @@ public class NoiseReductionParameters {
 	}
 
 	/**
-	 * @return the analyzed flag. If <code>tue</code> the data have been
-	 *         anaylzed, and noise bits removed from the packedData arrays.
+	 * @return the analyzed flag. If <code>tue</code> the data have been anaylzed,
+	 *         and noise bits removed from the packedData arrays.
 	 */
 	public boolean isAnalyzed() {
 		return _analyzed;
@@ -410,6 +403,7 @@ public class NoiseReductionParameters {
 		_analyzed = true;
 	}
 
+	// this creates the masks and .ANDS. them with the data
 	private void cleanFromSegments() {
 		// now remove the noise first. Set packedData[0] to contain overlap
 		// (union) of both
@@ -439,27 +433,24 @@ public class NoiseReductionParameters {
 	}
 
 	/**
-	 * Computes the intersection of this parameter set with another. This is
-	 * only used when "this" is an ordinary chamber and the other (passed in) is
-	 * from a composite chamber. In other words, this is where the second pass
-	 * occurs.
+	 * Computes the intersection of this parameter set with another. This is only
+	 * used when "this" is an ordinary chamber and the other (passed in) is from a
+	 * composite chamber. In other words, this is where the second pass occurs.
 	 * 
-	 * @param opt LEFT_LEAN (0) for left benders, RIGHT_LEAN (1) for right
-	 *            benders
-	 * @param compositeData this will be a "layer" from the composite detector
-	 *            after it (the composite detector) has gone through its own
-	 *            1-pass noise removal. What happens is those segments from the
-	 *            real chamber that correspond to noise in the composite chamber
-	 *            are removed and the real data is refiltered (cleaned) from the
-	 *            reduced segments
+	 * @param opt           LEFT_LEAN (0) for left benders, RIGHT_LEAN (1) for right
+	 *                      benders
+	 * @param compositeData this will be a "layer" from the composite detector after
+	 *                      it (the composite detector) has gone through its own
+	 *                      1-pass noise removal. What happens is those segments
+	 *                      from the real chamber that correspond to noise in the
+	 *                      composite chamber are removed and the real data is
+	 *                      refiltered (cleaned) from the reduced segments
 	 */
 	public void secondPass(int opt, ExtendedWord compositeData) {
 		if (opt == LEFT_LEAN) {
 			ExtendedWord.bitwiseAnd(leftSegments, compositeData, leftSegments);
-		}
-		else { // RIGHT_LEAN
-			ExtendedWord.bitwiseAnd(rightSegments, compositeData,
-					rightSegments);
+		} else { // RIGHT_LEAN
+			ExtendedWord.bitwiseAnd(rightSegments, compositeData, rightSegments);
 		}
 		cleanFromSegments();
 	}
@@ -467,12 +458,11 @@ public class NoiseReductionParameters {
 	/**
 	 * Find possible segments.
 	 * 
-	 * @param data the actual data.
+	 * @param data       the actual data.
 	 * @param parameters the parameters and workspace.
-	 * @param direction either left or right.
+	 * @param direction  either left or right.
 	 */
-	private void findPossibleSegments(NoiseReductionParameters parameters,
-			int direction) {
+	private void findPossibleSegments(NoiseReductionParameters parameters, int direction) {
 
 		// set misses to all 1's. That makes our "reservoir" of misses
 		for (int i = 0; i < parameters._allowedMissingLayers; i++) {
@@ -489,18 +479,15 @@ public class NoiseReductionParameters {
 		if (direction == LEFT_LEAN) {
 			segments = parameters.leftSegments;
 			for (int i = 0; i < parameters.getNumLayer(); i++) {
-				ExtendedWord.copy(parameters._packedData[i],
-						parameters.copy[i]);
+				ExtendedWord.copy(parameters._packedData[i], parameters.copy[i]);
 				parameters.copy[i].bleedRight(parameters._leftLayerShifts[i]);
 			}
 			ExtendedWord.copy(parameters._packedData[0], segments);
 
-		}
-		else { // right leaners
+		} else { // right leaners
 			segments = parameters.rightSegments;
 			for (int i = 0; i < parameters.getNumLayer(); i++) {
-				ExtendedWord.copy(parameters._packedData[i],
-						parameters.copy[i]);
+				ExtendedWord.copy(parameters._packedData[i], parameters.copy[i]);
 				parameters.copy[i].bleedLeft(parameters._rightLayerShifts[i]);
 			}
 			ExtendedWord.copy(parameters._packedData[0], segments);
@@ -521,13 +508,10 @@ public class NoiseReductionParameters {
 			// are presently investigating.*
 
 			if (++i < parameters._allowedMissingLayers) { /*
-														   * note from this step
-														   * i is the "NEXT"
-														   * layer
-														   */
+															 * note from this step i is the "NEXT" layer
+															 */
 				numCheck = i;
-			}
-			else {
+			} else {
 				numCheck = parameters._allowedMissingLayers;
 			}
 
@@ -540,12 +524,10 @@ public class NoiseReductionParameters {
 			for (int j = 0; j < numCheck; j++) {
 
 				// first step: use whatever misses are left for this j
-				ExtendedWord.bitwiseOr(parameters.workSpace[j],
-						parameters.misses[j], parameters.workSpace[j + 1]);
+				ExtendedWord.bitwiseOr(parameters.workSpace[j], parameters.misses[j], parameters.workSpace[j + 1]);
 
 				// second step: remove used up misses
-				ExtendedWord.bitwiseAnd(parameters.misses[j],
-						parameters.workSpace[j], parameters.misses[j]);
+				ExtendedWord.bitwiseAnd(parameters.misses[j], parameters.workSpace[j], parameters.misses[j]);
 			}
 			ExtendedWord.copy(parameters.workSpace[numCheck], segments);
 
@@ -553,8 +535,8 @@ public class NoiseReductionParameters {
 	}
 
 	/**
-	 * Get the occupancy of the raw data. This should only be used by ced
-	 * proper, not the test program.
+	 * Get the occupancy of the raw data. This should only be used by ced proper,
+	 * not the test program.
 	 * 
 	 * @return the occupancy of the raw. Multiply by 100 to express as percent.
 	 */
@@ -563,8 +545,8 @@ public class NoiseReductionParameters {
 	}
 
 	/**
-	 * Get the occupancy of the packed data. This should only be used by ced
-	 * proper, not the test program.
+	 * Get the occupancy of the packed data. This should only be used by ced proper,
+	 * not the test program.
 	 * 
 	 * @return the occupancy of the raw. Multiply by 100 to express as percent.
 	 */
@@ -573,8 +555,8 @@ public class NoiseReductionParameters {
 	}
 
 	/**
-	 * Get the occupancy of a set of chamber data. This should only be used by
-	 * ced proper, not the test program.
+	 * Get the occupancy of a set of chamber data. This should only be used by ced
+	 * proper, not the test program.
 	 * 
 	 * @param data either the raw or packed data.
 	 * @return the occupancy. Multiply by 100 to express as percent.
@@ -612,8 +594,7 @@ public class NoiseReductionParameters {
 	}
 
 	/**
-	 * Total number of noise reduced hits (all layers in this
-	 * chamber/superlayer)
+	 * Total number of noise reduced hits (all layers in this chamber/superlayer)
 	 * 
 	 * @return number of noise reduced hits
 	 */
@@ -622,9 +603,9 @@ public class NoiseReductionParameters {
 	}
 
 	/**
-	 * Check whether snr looks for tracks. If true, it will make a second pass
-	 * using composite detector. If false, it will stop at the
-	 * segments-in-superlayers level.
+	 * Check whether snr looks for tracks. If true, it will make a second pass using
+	 * composite detector. If false, it will stop at the segments-in-superlayers
+	 * level.
 	 * 
 	 * @return <code>true</code> if a second pass to look for tracks is used.
 	 */
@@ -633,12 +614,12 @@ public class NoiseReductionParameters {
 	}
 
 	/**
-	 * Set whether snr looks for tracks. If true, it will make a second pass
-	 * using composite detector. If false, it will stop at the
-	 * segments-in-superlayers level.
+	 * Set whether snr looks for tracks. If true, it will make a second pass using
+	 * composite detector. If false, it will stop at the segments-in-superlayers
+	 * level.
 	 * 
-	 * @param lookForTracks flag determining if a second pass to look for tracks
-	 *            is used.
+	 * @param lookForTracks flag determining if a second pass to look for tracks is
+	 *                      used.
 	 */
 	public static void setLookForTracks(boolean lookForTracks) {
 		_lookForTracks = lookForTracks;

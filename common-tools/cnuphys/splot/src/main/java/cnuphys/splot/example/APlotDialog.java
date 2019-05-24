@@ -22,7 +22,7 @@ public abstract class APlotDialog extends JDialog {
 
 	// the menus and items
 	protected SplotMenus _menus;
-	
+
 	protected Properties _properties;
 
 	public APlotDialog(JFrame owner, String title, boolean modal, Properties properties) {
@@ -33,17 +33,17 @@ public abstract class APlotDialog extends JDialog {
 		// Initialize look and feel
 		GraphicsUtilities.initializeLookAndFeel();
 
-	//	System.out.println("Environment: " + Environment.getInstance());
+		// System.out.println("Environment: " + Environment.getInstance());
 
 		try {
-			
+
 			DataSet dataSet = createDataSet();
 			String plotTitle = getPlotTitle();
 			String xLabel = getXAxisLabel();
 			String yLabel = getYAxisLabel();
-			_canvas = new PlotCanvas(dataSet, plotTitle,
-					xLabel, yLabel);
-		} catch (DataSetException e) {
+			_canvas = new PlotCanvas(dataSet, plotTitle, xLabel, yLabel);
+		}
+		catch (DataSetException e) {
 			e.printStackTrace();
 			return;
 		}
@@ -65,46 +65,40 @@ public abstract class APlotDialog extends JDialog {
 		addSouth();
 		addEast();
 		addWest();
-		
+
 		pack();
 		GraphicsUtilities.centerComponent(this);
 	}
-	
-	
+
 	/**
 	 * Add a north component
 	 */
 	protected void addNorth() {
 	}
-	
+
 	/**
 	 * Add a south component
 	 */
 	protected void addSouth() {
 	}
 
-	
 	/**
 	 * Add an east component
 	 */
 	protected void addEast() {
 	}
 
-	
 	/**
 	 * Add a west component
 	 */
 	protected void addWest() {
 	}
 
-
 	@Override
 	public Insets getInsets() {
 		Insets def = super.getInsets();
-		return new Insets(def.top + 2, def.left + 2, def.bottom + 2,
-				def.right + 2);
+		return new Insets(def.top + 2, def.left + 2, def.bottom + 2, def.right + 2);
 	}
-
 
 	/**
 	 * Get the plot canvas
@@ -114,7 +108,6 @@ public abstract class APlotDialog extends JDialog {
 	public PlotCanvas getPlotCanvas() {
 		return _canvas;
 	}
-
 
 	protected abstract DataSet createDataSet() throws DataSetException;
 

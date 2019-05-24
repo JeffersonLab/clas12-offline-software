@@ -78,15 +78,14 @@ public class PropertySupport {
 	public static final Font defaultFont = Fonts.commonFont(Font.PLAIN, 12);
 
 	// default data directory
-	public static String defaultDataDir = Environment.getInstance()
-			.getCurrentWorkingDirectory() + File.separator + "data";
+	public static String defaultDataDir = Environment.getInstance().getCurrentWorkingDirectory() + File.separator
+			+ "data";
 
 	// a default "unknown" string
 	public static final String unknownString = "???";
 
 	// a default world rectangle
-	public static final Rectangle2D.Double defaultWorldRect = new Rectangle2D.Double(
-			0, 0, 1, 1);
+	public static final Rectangle2D.Double defaultWorldRect = new Rectangle2D.Double(0, 0, 1, 1);
 
 	/**
 	 * Create a set of properties from the key values
@@ -119,8 +118,8 @@ public class PropertySupport {
 	}
 
 	/**
-	 * Convert a properties object into an object array. This is the inverse of
-	 * the fromKeyValues method.
+	 * Convert a properties object into an object array. This is the inverse of the
+	 * fromKeyValues method.
 	 * 
 	 * @param props the properties
 	 * @return the corresponding object array.
@@ -145,8 +144,7 @@ public class PropertySupport {
 	}
 
 	/**
-	 * Get an azimuth angle in degrees. Generally 0 is due north, 90 due east,
-	 * etc.
+	 * Get an azimuth angle in degrees. Generally 0 is due north, 90 due east, etc.
 	 * 
 	 * @param props the properties
 	 * @return the aximuth in degrees. On error, return 0.
@@ -234,7 +232,7 @@ public class PropertySupport {
 	public static boolean getVisible(Properties props) {
 		return getBoolean(props, VISIBLE, true);
 	}
-	
+
 	/**
 	 * Get the "scrollable" boolean flag.
 	 * 
@@ -244,7 +242,6 @@ public class PropertySupport {
 	public static boolean getScrollable(Properties props) {
 		return getBoolean(props, SCROLLABLE, false);
 	}
-
 
 	/**
 	 * Get the "use toolbar" boolean flag.
@@ -442,8 +439,7 @@ public class PropertySupport {
 	 * Get the symbol size in pixels
 	 * 
 	 * @param props the properties
-	 * @return get the symbol size (width and height) in pixels. On error return
-	 *         8.
+	 * @return get the symbol size (width and height) in pixels. On error return 8.
 	 */
 	public static int getSymbolSize(Properties props) {
 		int size = getInt(props, SYMBOLSIZE, 8);
@@ -451,8 +447,8 @@ public class PropertySupport {
 	}
 
 	/**
-	 * Get the optional user data. This is any object that the user wants to
-	 * attach to the shape.
+	 * Get the optional user data. This is any object that the user wants to attach
+	 * to the shape.
 	 * 
 	 * @param props the properties
 	 * @return the user data (might be <code>null</code>).
@@ -487,8 +483,7 @@ public class PropertySupport {
 	 * Get the layer id.
 	 * 
 	 * @param props the properties
-	 * @return the layer Id. On error return Integer.MIN_VALUE (-2^31 =
-	 *         -2147483648)
+	 * @return the layer Id. On error return Integer.MIN_VALUE (-2^31 = -2147483648)
 	 */
 	public static int getLayer(Properties props) {
 		return getInt(props, LAYER, Integer.MIN_VALUE);
@@ -509,8 +504,7 @@ public class PropertySupport {
 	 * Get the crate id.
 	 * 
 	 * @param props the properties
-	 * @return the crate Id. On error return Integer.MIN_VALUE (-2^31 =
-	 *         -2147483648)
+	 * @return the crate Id. On error return Integer.MIN_VALUE (-2^31 = -2147483648)
 	 */
 	public static int getCrate(Properties props) {
 		return getInt(props, CRATE, Integer.MIN_VALUE);
@@ -520,8 +514,7 @@ public class PropertySupport {
 	 * Get the slot id.
 	 * 
 	 * @param props the properties
-	 * @return the slot Id. On error return Integer.MIN_VALUE (-2^31 =
-	 *         -2147483648)
+	 * @return the slot Id. On error return Integer.MIN_VALUE (-2^31 = -2147483648)
 	 */
 	public static int getSlot(Properties props) {
 		return getInt(props, SLOT, Integer.MIN_VALUE);
@@ -618,8 +611,7 @@ public class PropertySupport {
 	 * Get a width from the properties
 	 * 
 	 * @param props the properties
-	 * @return the width. On error return Integer.MIN_VALUE (-2^31 =
-	 *         -2147483648)
+	 * @return the width. On error return Integer.MIN_VALUE (-2^31 = -2147483648)
 	 */
 	public static int getWidth(Properties props) {
 		return getInt(props, WIDTH, Integer.MIN_VALUE);
@@ -629,8 +621,7 @@ public class PropertySupport {
 	 * Get a height from the properties
 	 * 
 	 * @param props the properties
-	 * @return the height. On error return Integer.MIN_VALUE (-2^31 =
-	 *         -2147483648)
+	 * @return the height. On error return Integer.MIN_VALUE (-2^31 = -2147483648)
 	 */
 	public static int getHeight(Properties props) {
 		return getInt(props, HEIGHT, Integer.MIN_VALUE);
@@ -640,8 +631,8 @@ public class PropertySupport {
 	 * Get the virtual view panel from the properties
 	 * 
 	 * @param props the properties
-	 * @return the virtual view panel. On error return Integer.MIN_VALUE (-2^31
-	 *         = -2147483648)
+	 * @return the virtual view panel. On error return Integer.MIN_VALUE (-2^31 =
+	 *         -2147483648)
 	 */
 	public static int getVVPanel(Properties props) {
 		return getInt(props, VVPANEL, Integer.MIN_VALUE);
@@ -660,13 +651,12 @@ public class PropertySupport {
 	/**
 	 * Get a world rectangle
 	 * 
-	 * @param props the properties
-	 * @param key the key
+	 * @param props        the properties
+	 * @param key          the key
 	 * @param defaultValue the default value
 	 * @return the world rectangle, or defaultValue upon failure.
 	 */
-	public static Rectangle2D.Double getWorldRectangle(Properties props,
-			String key, Rectangle2D.Double defaultValue) {
+	public static Rectangle2D.Double getWorldRectangle(Properties props, String key, Rectangle2D.Double defaultValue) {
 		Object val = props.get(key);
 		if (val == null) {
 			return defaultValue;
@@ -679,16 +669,15 @@ public class PropertySupport {
 	}
 
 	/**
-	 * Get a color from a properties. Tries to handle both a String (from the
-	 * X11 database, e.g. "coral", "red", "powder blue") and a Java Color value.
+	 * Get a color from a properties. Tries to handle both a String (from the X11
+	 * database, e.g. "coral", "red", "powder blue") and a Java Color value.
 	 * 
-	 * @param props the properties
-	 * @param key the key
+	 * @param props        the properties
+	 * @param key          the key
 	 * @param defaultValue the default value
 	 * @return the color, or defaultValue upon failure.
 	 */
-	public static Color getColor(Properties props, String key,
-			Color defaultValue) {
+	public static Color getColor(Properties props, String key, Color defaultValue) {
 		Object val = props.get(key);
 		if (val == null) {
 			return defaultValue;
@@ -707,8 +696,8 @@ public class PropertySupport {
 	/**
 	 * Get a JComponent from properties.
 	 * 
-	 * @param props the properties
-	 * @param key the key
+	 * @param props        the properties
+	 * @param key          the key
 	 * @param defaultValue the default value
 	 * @return the JComponent value, or on error <code>null</code>.
 	 */
@@ -723,13 +712,12 @@ public class PropertySupport {
 	/**
 	 * Get a String from properties.
 	 * 
-	 * @param props the properties
-	 * @param key the key
+	 * @param props        the properties
+	 * @param key          the key
 	 * @param defaultValue the default value
 	 * @return the String value, or on error the default value.
 	 */
-	public static String getString(Properties props, String key,
-			String defaultValue) {
+	public static String getString(Properties props, String key, String defaultValue) {
 		Object val = props.get(key);
 		if (val == null) {
 			return defaultValue;
@@ -742,11 +730,11 @@ public class PropertySupport {
 	}
 
 	/**
-	 * Get an int from properties. Tries to handle both a String (e.g., "67")
-	 * and Integer value.
+	 * Get an int from properties. Tries to handle both a String (e.g., "67") and
+	 * Integer value.
 	 * 
-	 * @param props the properties
-	 * @param key the key
+	 * @param props        the properties
+	 * @param key          the key
 	 * @param defaultValue the default value
 	 * @return the integer value, or on error the default value.
 	 */
@@ -773,11 +761,11 @@ public class PropertySupport {
 	}
 
 	/**
-	 * Get a double from properties. Tries to handle both a String (e.g.,
-	 * "67.0") and Double value.
+	 * Get a double from properties. Tries to handle both a String (e.g., "67.0")
+	 * and Double value.
 	 * 
 	 * @param props the properties
-	 * @param key the key
+	 * @param key   the key
 	 * @return the double value, or on error return Double.NaN.
 	 */
 	public static double getDouble(Properties props, String key) {
@@ -785,16 +773,15 @@ public class PropertySupport {
 	}
 
 	/**
-	 * Get a double from properties. Tries to handle both a String (e.g.,
-	 * "67.0") and Double value.
+	 * Get a double from properties. Tries to handle both a String (e.g., "67.0")
+	 * and Double value.
 	 * 
-	 * @param props the properties
-	 * @param key the key
+	 * @param props        the properties
+	 * @param key          the key
 	 * @param defaultValue the default value
 	 * @return the double value, or on error return defaultValue
 	 */
-	public static double getDouble(Properties props, String key,
-			double defaultValue) {
+	public static double getDouble(Properties props, String key, double defaultValue) {
 		Object val = props.get(key);
 		if (val == null) {
 			return defaultValue;
@@ -825,11 +812,11 @@ public class PropertySupport {
 	}
 
 	/**
-	 * Get a float from properties. Tries to handle both a String (e.g., "67.0")
-	 * and Float value.
+	 * Get a float from properties. Tries to handle both a String (e.g., "67.0") and
+	 * Float value.
 	 * 
 	 * @param props the properties
-	 * @param key the key
+	 * @param key   the key
 	 * @return the double value, or on error return Float.NaN.
 	 */
 	public static double getFloat(Properties props, String key) {
@@ -837,16 +824,15 @@ public class PropertySupport {
 	}
 
 	/**
-	 * Get a float from properties. Tries to handle both a String (e.g., "67.0")
-	 * and Float value.
+	 * Get a float from properties. Tries to handle both a String (e.g., "67.0") and
+	 * Float value.
 	 * 
-	 * @param props the properties
-	 * @param key the key
+	 * @param props        the properties
+	 * @param key          the key
 	 * @param defaultValue the default value
 	 * @return the double value, or on error return defaultValue
 	 */
-	public static double getFloat(Properties props, String key,
-			double defaultValue) {
+	public static double getFloat(Properties props, String key, double defaultValue) {
 		Object val = props.get(key);
 		if (val == null) {
 			return defaultValue;
@@ -874,16 +860,15 @@ public class PropertySupport {
 	}
 
 	/**
-	 * Get a boolean from properties. Tries to handle both a String (e.g.,
-	 * "true") and Boolean value.
+	 * Get a boolean from properties. Tries to handle both a String (e.g., "true")
+	 * and Boolean value.
 	 * 
 	 * @param props the properties
-	 * @param key the key
-	 * @param boolean defaultVal
+	 * @param key   the key
+	 * @param       boolean defaultVal
 	 * @return the boolean value, or on error the default
 	 */
-	public static boolean getBoolean(Properties props, String key,
-			boolean defaultVal) {
+	public static boolean getBoolean(Properties props, String key, boolean defaultVal) {
 		Object val = props.get(key);
 		if (val == null) {
 			return defaultVal;

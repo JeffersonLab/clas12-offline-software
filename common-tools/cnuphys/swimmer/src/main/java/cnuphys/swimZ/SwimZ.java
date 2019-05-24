@@ -2,7 +2,6 @@ package cnuphys.swimZ;
 
 import java.util.ArrayList;
 
-import Jama.Matrix;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.IMagField;
 import cnuphys.magfield.MagneticField;
@@ -10,19 +9,18 @@ import cnuphys.magfield.RotatedCompositeProbe;
 import cnuphys.rk4.DefaultStopper;
 import cnuphys.rk4.IRkListener;
 import cnuphys.rk4.IStopper;
-import cnuphys.rk4.RungeKutta;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.rk4.RungeKuttaZ;
 
 /**
- * This class holds the parameters and static methods for the swimZ
- * integration. The swimZ integration follows the method described for the
- * HERA-B magnet here: http://arxiv.org/pdf/physics/0511177v1.pdf<br>
+ * This class holds the parameters and static methods for the swimZ integration.
+ * The swimZ integration follows the method described for the HERA-B magnet
+ * here: http://arxiv.org/pdf/physics/0511177v1.pdf<br>
  * <p>
  * The state vector has five elements: <br>
  * (x, y, tx, ty, q) <br>
- * Where x and y are the transverse coordinates (meters), tx = px/pz, ty = py/pz,
- * and q = Q/|p| where Q is the integer charge (e.g. -1 for an electron)
+ * Where x and y are the transverse coordinates (meters), tx = px/pz, ty =
+ * py/pz, and q = Q/|p| where Q is the integer charge (e.g. -1 for an electron)
  * <p>
  * UNITS
  * <ul>
@@ -51,86 +49,85 @@ public class SwimZ {
 
 	// create a do nothing stopper for now
 	private IStopper _stopper = new DefaultStopper();
-	
-	//need an integrator
+
+	// need an integrator
 	private RungeKuttaZ _rk4 = new RungeKuttaZ();
 
-	//storage for values of independent variable z
+	// storage for values of independent variable z
 	private ArrayList<Double> zArray = new ArrayList<Double>(100);
-	
-	//storage for values of the dependent variables (state vector)
+
+	// storage for values of the dependent variables (state vector)
 	private ArrayList<double[]> yArray = new ArrayList<double[]>(100);
 
-	//the derivatives (i.e., the ODEs)
+	// the derivatives (i.e., the ODEs)
 	private SwimZDerivative deriv;
-	
+
 	/**
-	 * In swimming routines that require a tolerance vector, this is a
-	 * reasonable one to use for CLAS. These represent absolute errors in the
-	 * adaptive stepsize algorithms
+	 * In swimming routines that require a tolerance vector, this is a reasonable
+	 * one to use for CLAS. These represent absolute errors in the adaptive stepsize
+	 * algorithms
 	 */
 	private double _eps = 1.0e-3;
 
-	//absolute tolerances
+	// absolute tolerances
 	private double _absoluteTolerance[] = new double[4];
-	
+
 	/**
-	 * SwimZ constructor. Here we create a Swimmer that will use the given
-	 * magnetic field.
+	 * SwimZ constructor. Here we create a Swimmer that will use the given magnetic
+	 * field.
 	 * 
-	 * @param field
-	 *            interface into a magnetic field
+	 * @param field interface into a magnetic field
 	 */
 	public SwimZ() {
 		_probe = FieldProbe.factory();
 		initialize();
 	}
-	
+
 	/**
 	 * Create a swimmer specific to a magnetic field
+	 * 
 	 * @param magneticField the magnetic field
 	 */
 	public SwimZ(MagneticField magneticField) {
 		_probe = FieldProbe.factory(magneticField);
 		initialize();
 	}
-	
+
 	/**
 	 * Create a swimmer specific to a magnetic field
+	 * 
 	 * @param magneticField the magnetic field
 	 */
 	public SwimZ(IMagField magneticField) {
 		_probe = FieldProbe.factory(magneticField);
 		initialize();
 	}
-	
+
 	/**
 	 * Get the underlying field probe
+	 * 
 	 * @return the probe
 	 */
 	public FieldProbe getProbe() {
 		return _probe;
 	}
 
-	
-	//some initialization
+	// some initialization
 	private void initialize() {
-		
+
 		if (_probe instanceof RotatedCompositeProbe) {
 			deriv = new SectorSwimZDerivative();
-		}
-		else {
+		} else {
 			deriv = new SwimZDerivative();
 		}
 
 		setAbsoluteTolerance(1.0e-3);
 	}
-	
+
 	/**
 	 * Set the tolerance used by the CLAS_Tolerance array
 	 * 
-	 * @param eps
-	 *            the baseline absolute tolerance. 
+	 * @param eps the baseline absolute tolerance.
 	 */
 	public void setAbsoluteTolerance(double eps) {
 		_eps = eps;
@@ -156,33 +153,22 @@ public class SwimZ {
 	/**
 	 * Swim to a fixed z over short distances using RK adaptive stepsize
 	 * 
-	 * @param Q
-	 *            the integer charge of the particle (-1 for electron)
-	 * @param p
-	 *            the momentum in GeV/c
-	 * @param start
-	 *            the starting state vector
-	 * @param zf
-	 *            the final z value (cm)
-	 * @param stepSize
-	 *            the initial step size
-	 * @param relTolerance
-	 *            the absolute tolerances on each state variable [x, y, tx, ty]
-	 *            (q = const). So it is an array with four entries, like [1.0e-4
-	 *            cm, 1.0e-4 cm, 1.0e-5, 1.0e05]
-	 * @param hdata
-	 *            An array with three elements. Upon return it will have the
-	 *            min, average, and max step size (in that order).
+	 * @param Q            the integer charge of the particle (-1 for electron)
+	 * @param p            the momentum in GeV/c
+	 * @param start        the starting state vector
+	 * @param zf           the final z value (cm)
+	 * @param stepSize     the initial step size
+	 * @param relTolerance the absolute tolerances on each state variable [x, y, tx,
+	 *                     ty] (q = const). So it is an array with four entries,
+	 *                     like [1.0e-4 cm, 1.0e-4 cm, 1.0e-5, 1.0e05]
+	 * @param hdata        An array with three elements. Upon return it will have
+	 *                     the min, average, and max step size (in that order).
 	 * @return the swim result
 	 * @throws SwimZException
 	 */
-	public SwimZResult adaptiveRK(int Q,
-			double p,
-			SwimZStateVector start,
-			final double zf,
-			double stepSize,
+	public SwimZResult adaptiveRK(int Q, double p, SwimZStateVector start, final double zf, double stepSize,
 			double hdata[]) throws SwimZException {
-		
+
 		if (start == null) {
 			throw new SwimZException("Null starting state vector.");
 		}
@@ -191,8 +177,8 @@ public class SwimZ {
 		if ((Q == 0) || (_probe == null) || _probe.isZeroField()) {
 			return straightLineResult(Q, p, start, zf);
 		}
-		
-		//ARGGH
+
+		// ARGGH
 		if (start.z > zf) {
 			Q = -Q;
 		}
@@ -208,9 +194,9 @@ public class SwimZ {
 
 		int nStep = 0;
 		try {
-			nStep = _rk4.adaptiveStepToTf(yo, start.z, zf, stepSize, zArray, yArray, deriv, _stopper, _absoluteTolerance, hdata);
-		}
-		catch (RungeKuttaException e) {
+			nStep = _rk4.adaptiveStepToTf(yo, start.z, zf, stepSize, zArray, yArray, deriv, _stopper,
+					_absoluteTolerance, hdata);
+		} catch (RungeKuttaException e) {
 			e.printStackTrace();
 		}
 
@@ -229,45 +215,33 @@ public class SwimZ {
 		return result;
 
 	}
-	
+
 	/**
 	 * Swim to a fixed z over short distances using RK adaptive stepsize
 	 * 
-	 * @param sector the sector [1..6]
-	 * @param Q
-	 *            the integer charge of the particle (-1 for electron)
-	 * @param p
-	 *            the momentum in GeV/c
-	 * @param start
-	 *            the starting state vector
-	 * @param zf
-	 *            the final z value (cm)
-	 * @param stepSize
-	 *            the initial step size
-	 * @param relTolerance
-	 *            the absolute tolerances on each state variable [x, y, tx, ty]
-	 *            (q = const). So it is an array with four entries, like [1.0e-4
-	 *            cm, 1.0e-4 cm, 1.0e-5, 1.0e05]
-	 * @param hdata
-	 *            An array with three elements. Upon return it will have the
-	 *            min, average, and max step size (in that order).
+	 * @param sector       the sector [1..6]
+	 * @param Q            the integer charge of the particle (-1 for electron)
+	 * @param p            the momentum in GeV/c
+	 * @param start        the starting state vector
+	 * @param zf           the final z value (cm)
+	 * @param stepSize     the initial step size
+	 * @param relTolerance the absolute tolerances on each state variable [x, y, tx,
+	 *                     ty] (q = const). So it is an array with four entries,
+	 *                     like [1.0e-4 cm, 1.0e-4 cm, 1.0e-5, 1.0e05]
+	 * @param hdata        An array with three elements. Upon return it will have
+	 *                     the min, average, and max step size (in that order).
 	 * @return the swim result
 	 * @throws SwimZException
 	 */
-	public SwimZResult sectorAdaptiveRK(int sector,
-			int Q,
-			double p,
-			SwimZStateVector start,
-			final double zf,
-			double stepSize,
-			double hdata[]) throws SwimZException {
-		
+	public SwimZResult sectorAdaptiveRK(int sector, int Q, double p, SwimZStateVector start, final double zf,
+			double stepSize, double hdata[]) throws SwimZException {
+
 		if (!(_probe instanceof RotatedCompositeProbe)) {
 			System.err.println("Can only call sectorAdaptiveRK with a RotatedComposite Probe");
 			System.exit(1);
 			return null;
 		}
-		
+
 		if (start == null) {
 			throw new SwimZException("Null starting state vector.");
 		}
@@ -276,15 +250,14 @@ public class SwimZ {
 		if ((Q == 0) || (_probe == null) || _probe.isZeroField()) {
 			return straightLineResult(Q, p, start, zf);
 		}
-		
-		//ARGGH
+
+		// ARGGH
 		if (start.z > zf) {
 			Q = -Q;
 		}
 
-
 		// need to set the derivative
-		((SectorSwimZDerivative)deriv).set(sector, Q, p, _probe);
+		((SectorSwimZDerivative) deriv).set(sector, Q, p, _probe);
 
 		double yo[] = { start.x, start.y, start.tx, start.ty };
 
@@ -294,14 +267,14 @@ public class SwimZ {
 
 		int nStep = 0;
 		try {
-			nStep = _rk4.adaptiveStepToTf(yo, start.z, zf, stepSize, zArray, yArray, deriv, _stopper, _absoluteTolerance, hdata);
-		}
-		catch (RungeKuttaException e) {
+			nStep = _rk4.adaptiveStepToTf(yo, start.z, zf, stepSize, zArray, yArray, deriv, _stopper,
+					_absoluteTolerance, hdata);
+		} catch (RungeKuttaException e) {
 //			System.err.println("Integration Failure");
 //			System.err.println("Q = " + Q + "  p = " + p + " zf = " + zf);
 //			int pzSign = (zf < start.z) ? -1 : 1;
 //			System.err.println("Start SV: " + start.normalPrint(p, pzSign));
-			//e.printStackTrace();
+			// e.printStackTrace();
 			throw new SwimZException("Runge Kutta Failure in SwimZ sectorAdaptiveRK");
 		}
 
@@ -324,31 +297,19 @@ public class SwimZ {
 	/**
 	 * Swim to a fixed z using RK adaptive stepsize
 	 * 
-	 * @param Q
-	 *            the integer charge of the particle (-1 for electron)
-	 * @param p
-	 *            the momentum in Gev/c
-	 * @param start
-	 *            the starting state vector
-	 * @param stop
-	 *            will hold the final state vector
-	 * @param zf
-	 *            the final z value
-	 * @param stepSize
-	 *            the initial step size
-	 * @param hdata
-	 *            An array with three elements. Upon return it will have the
-	 *            min, average, and max step size (in that order).
+	 * @param Q        the integer charge of the particle (-1 for electron)
+	 * @param p        the momentum in Gev/c
+	 * @param start    the starting state vector
+	 * @param stop     will hold the final state vector
+	 * @param zf       the final z value
+	 * @param stepSize the initial step size
+	 * @param hdata    An array with three elements. Upon return it will have the
+	 *                 min, average, and max step size (in that order).
 	 * @return the number of steps
 	 * @throws SwimZException
 	 */
-	public int adaptiveRK(int Q,
-			double p,
-			SwimZStateVector start,
-			SwimZStateVector stop,
-			final double zf,
-			double stepSize,
-			double hdata[]) throws SwimZException {
+	public int adaptiveRK(int Q, double p, SwimZStateVector start, SwimZStateVector stop, final double zf,
+			double stepSize, double hdata[]) throws SwimZException {
 		if (start == null) {
 			throw new SwimZException("Null starting state vector.");
 		}
@@ -380,36 +341,30 @@ public class SwimZ {
 
 		int nStep = 0;
 		try {
-			nStep = _rk4.adaptiveStepToTf(yo, start.z, zf, stepSize, deriv, _stopper, listener, _absoluteTolerance, hdata);
-		}
-		catch (RungeKuttaException e) {
+			nStep = _rk4.adaptiveStepToTf(yo, start.z, zf, stepSize, deriv, _stopper, listener, _absoluteTolerance,
+					hdata);
+		} catch (RungeKuttaException e) {
 			e.printStackTrace();
 		}
 
 		return nStep;
 	}
-	
-	
 
 	/**
-	 * Swim to a fixed z over short distances using a parabolic estimate, without intermediate points
+	 * Swim to a fixed z over short distances using a parabolic estimate, without
+	 * intermediate points
 	 * 
-	 * @param Q
-	 *            the integer charge of the particle (-1 for electron)
-	 * @param p
-	 *            the momentum in GeV/c
-	 * @param start
-	 *            the starting state vector
-	 * @param stop at end, holds final state vector
-	 * @param zf
-	 *            the final z value (cm)
+	 * @param Q     the integer charge of the particle (-1 for electron)
+	 * @param p     the momentum in GeV/c
+	 * @param start the starting state vector
+	 * @param stop  at end, holds final state vector
+	 * @param zf    the final z value (cm)
 	 * @return the swim result
 	 * @throws SwimZException
 	 */
 
 	public void parabolicEstimate(int Q, double p, SwimZStateVector start, SwimZStateVector stop, double zf)
 			throws SwimZException {
-		
 
 		if (start == null) {
 			throw new SwimZException("Null starting state vector.");
@@ -421,10 +376,9 @@ public class SwimZ {
 			straightLineResult(Q, p, start, stop, zf);
 			return;
 		}
-		
+
 		double q = Q / p;
 
-		
 		// get the field
 		float B[] = new float[3];
 		double x0 = start.x;
@@ -453,22 +407,15 @@ public class SwimZ {
 		stop.ty = ty0 + qvs * Ay;
 
 	}
-	
-
 
 	/**
 	 * Swim to a fixed z over short distances using a parabolic estimate
 	 * 
-	 * @param Q
-	 *            the integer charge of the particle (-1 for electron)
-	 * @param p
-	 *            the momentum in GeV/c
-	 * @param start
-	 *            the starting state vector
-	 * @param zf
-	 *            the final z value (cm)
-	 * @param stepSize
-	 *            the step size
+	 * @param Q        the integer charge of the particle (-1 for electron)
+	 * @param p        the momentum in GeV/c
+	 * @param start    the starting state vector
+	 * @param zf       the final z value (cm)
+	 * @param stepSize the step size
 	 * @return the swim result
 	 * @throws SwimZException
 	 */

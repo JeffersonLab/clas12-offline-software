@@ -19,10 +19,8 @@ public class BoundVariableTableScrollPane extends JScrollPane {
 	/**
 	 * Constructor will also create the table itself.
 	 * 
-	 * @param cutList
-	 *            the list of cuts
-	 * @param label
-	 *            a label for the list
+	 * @param cutList the list of cuts
+	 * @param label   a label for the list
 	 */
 
 	public BoundVariableTableScrollPane(String label) {
@@ -30,8 +28,8 @@ public class BoundVariableTableScrollPane extends JScrollPane {
 		_table = new BoundVariableTable();
 		getViewport().add(_table);
 
-		setBorder(BorderFactory.createTitledBorder(null, label,
-				TitledBorder.LEADING, TitledBorder.TOP, null, Color.blue));
+		setBorder(BorderFactory.createTitledBorder(null, label, TitledBorder.LEADING, TitledBorder.TOP, null,
+				Color.blue));
 
 	}
 
@@ -65,5 +63,5 @@ public class BoundVariableTableScrollPane extends JScrollPane {
 
 		return _table.getBoundVariableModel();
 	}
-	
+
 }

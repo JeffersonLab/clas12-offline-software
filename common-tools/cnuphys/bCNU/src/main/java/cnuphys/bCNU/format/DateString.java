@@ -20,24 +20,23 @@ public class DateString {
 	 * A formatter to get the time in down to seconds (no day info).
 	 */
 	private static SimpleDateFormat formattershort;
-	
+
 	/**
 	 * A formatter to get the time in down to seconds (no day info).
 	 */
 	private static SimpleDateFormat formatterlong;
 
-	
 	static {
 		TimeZone tz = TimeZone.getDefault();
 		formattermm = new SimpleDateFormat("EEE MMM d  h:mm a");
 		formattermm.setTimeZone(tz);
-		
+
 		formatterss = new SimpleDateFormat("EEE MMM d  h:mm:ss a");
 		formatterss.setTimeZone(tz);
 
 		formattershort = new SimpleDateFormat("h:mm:ss");
 		formattershort.setTimeZone(tz);
-		
+
 		formatterlong = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		formatterlong.setTimeZone(tz);
 
@@ -64,31 +63,27 @@ public class DateString {
 	/**
 	 * Returns the current time.
 	 * 
-	 * @param longtime
-	 *            the time in millis.
+	 * @param longtime the time in millis.
 	 * @return a string representation of the current time, down to minutes.
 	 */
 	public static String dateStringMM(long longtime) {
 		return formattermm.format(new Date(longtime));
 	}
-	
+
 	/**
 	 * Returns the current time.
 	 * 
-	 * @param longtime
-	 *            the time in millis.
+	 * @param longtime the time in millis.
 	 * @return a string representation of the current time, down to minutes.
 	 */
 	public static String dateStringLong() {
 		return formatterlong.format(new Date(System.currentTimeMillis()));
 	}
 
-
 	/**
 	 * Returns the current time.
 	 * 
-	 * @param longtime
-	 *            The time in millis.
+	 * @param longtime The time in millis.
 	 * @return a string representation of the current time, down to seconds.
 	 */
 	public static String dateStringSS(long longtime) {
@@ -107,8 +102,7 @@ public class DateString {
 	/**
 	 * Returns the current time.
 	 * 
-	 * @param ltime
-	 *            a time in milliseconds.
+	 * @param ltime a time in milliseconds.
 	 * @return a string representation of the current time, down to seconds but
 	 *         without day information.
 	 */

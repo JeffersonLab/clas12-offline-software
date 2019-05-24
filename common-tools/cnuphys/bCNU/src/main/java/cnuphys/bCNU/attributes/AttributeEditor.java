@@ -12,7 +12,7 @@ import javax.swing.JSlider;
 public abstract class AttributeEditor<T extends JComponent> {
 
 	/**
-	 * The attribute 
+	 * The attribute
 	 */
 	protected Attribute attribute;
 
@@ -20,40 +20,42 @@ public abstract class AttributeEditor<T extends JComponent> {
 	 * The owner table.
 	 */
 	protected AttributeTable attributeTable;
-	
+
 	/**
 	 * The editor component
 	 */
 	protected T component;
-	
+
 	/**
 	 * Create an editor
+	 * 
 	 * @param attributeTable the table
-	 * @param attribute the attribute being edited
+	 * @param attribute      the attribute being edited
 	 */
 	public AttributeEditor(AttributeTable attributeTable, Attribute attribute, T component) {
 		this.attributeTable = attributeTable;
 		this.attribute = attribute;
-	    this.component = component;
+		this.component = component;
 		this.component.setBorder(null);
 	}
 
 	/**
 	 * Create the appropriate editor for the attribute
-	 * @param attributeTable the table 
-	 * @param attribute the attribute
+	 * 
+	 * @param attributeTable the table
+	 * @param attribute      the attribute
 	 * @return the appropriate editor
 	 */
-	public static AttributeEditor AttributeEditorFactory(AttributeTable attributeTable, Attribute attribute, Object value) {
+	public static AttributeEditor AttributeEditorFactory(AttributeTable attributeTable, Attribute attribute,
+			Object value) {
 
-		
 		AttributeEditor editor = null;
 
 		if (attribute != null) {
-			
+
 			Object valueObj = attribute.getValue();
 			if (valueObj instanceof JSlider) {
-				valueObj = "" + ((JSlider)valueObj).getValue();
+				valueObj = "" + ((JSlider) valueObj).getValue();
 			}
 			AttributeType type = attribute.getType();
 			Class claz = type.getEditorClass();
@@ -81,12 +83,12 @@ public abstract class AttributeEditor<T extends JComponent> {
 
 		return editor;
 	}
-	
+
 	/**
 	 * Render the value for display
+	 * 
 	 * @param value the
 	 */
 	public abstract void renderValue(Object value);
-
 
 }

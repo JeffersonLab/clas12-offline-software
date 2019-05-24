@@ -35,13 +35,13 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 	// axes labels
 	private JLabel _xLabel;
 	private JLabel _yLabel;
-	
-	//how adorned
+
+	// how adorned
 	public static int VERYBARE = -2;
 	public static int BARE = 1;
 	public static int STANDARD = 0;
-	
-	//toolbar
+
+	// toolbar
 	protected CommonToolBar _toolbar;
 
 	protected int _decorations;
@@ -49,10 +49,8 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 	/**
 	 * Create a plot panel for a single xy dataset and a toolbar
 	 * 
-	 * @param dataSet
-	 *            the data set
-	 * @param plotTitle
-	 *            the title of the plot
+	 * @param dataSet   the data set
+	 * @param plotTitle the title of the plot
 	 */
 	public PlotPanel(PlotCanvas canvas) {
 		this(canvas, STANDARD);
@@ -61,18 +59,15 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 	/**
 	 * Create a plot panel for a single xy dataset
 	 * 
-	 * @param dataSet
-	 *            the data set
-	 * @param plotTitle
-	 *            the title of the plot
-	 * @param decorations
-	 *            (stripped down panel?)
+	 * @param dataSet     the data set
+	 * @param plotTitle   the title of the plot
+	 * @param decorations (stripped down panel?)
 	 */
 	public PlotPanel(PlotCanvas canvas, int decorations) {
 		_canvas = canvas;
 		_canvas.setParent(this);
-    	_decorations = decorations;
-    	
+		_decorations = decorations;
+
 		Environment.getInstance().commonize(this, null);
 		setLayout(new BorderLayout(0, 0));
 
@@ -99,14 +94,12 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 		}
 
 	}
-	
+
 	@Override
 	public Insets getInsets() {
 		Insets def = super.getInsets();
-		return new Insets(def.top + 2, def.left + 2, def.bottom + 2,
-				def.right + 2);
+		return new Insets(def.top + 2, def.left + 2, def.bottom + 2, def.right + 2);
 	}
-
 
 	private void addSouth() {
 		// south panel for x axis and status
@@ -119,28 +112,26 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 		PlotParameters parameters = _canvas.getParameters();
 
 		// axes labels
-		_xLabel = makeJLabel(parameters.getXLabel(),
-				parameters.getAxesFont(), SwingConstants.CENTER, Color.white,
-				null, false);
+		_xLabel = makeJLabel(parameters.getXLabel(), parameters.getAxesFont(), SwingConstants.CENTER, Color.white, null,
+				false);
 		_xLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		spanel.add(_xLabel, BorderLayout.CENTER);
 
 		// status label
 		if (_decorations == STANDARD) {
-			
+
 			_status = makeStatusLabel();
-			
+
 //			_status = makeJLabel("  ", parameters.getStatusFont(),
 //					SwingConstants.CENTER, new Color(240, 240, 240),
 //					Color.blue, true);
-			
+
 			_status.setAlignmentX(Component.CENTER_ALIGNMENT);
 			spanel.add(_status, BorderLayout.SOUTH);
 		}
 
 		add(spanel, BorderLayout.SOUTH);
 	}
-	
 
 	// add the north component
 	private void addNorth() {
@@ -165,9 +156,8 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 		npanel.setLayout(new BorderLayout());
 
 		// title label
-		_titleLabel = makeJLabel(_canvas.getParameters().getPlotTitle(),
-				parameters.getTitleFont(), SwingConstants.CENTER, Color.white,
-				null, false);
+		_titleLabel = makeJLabel(_canvas.getParameters().getPlotTitle(), parameters.getTitleFont(),
+				SwingConstants.CENTER, Color.white, null, false);
 		_titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		_toolbar.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -178,21 +168,20 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 		npanel.add(_titleLabel, BorderLayout.CENTER);
 		add(npanel, BorderLayout.NORTH);
 	}
-	
+
 	// add the west component
 	private void addWest() {
 		PlotParameters parameters = _canvas.getParameters();
-		_yLabel = makeRotatedLabel(_canvas.getParameters().getYLabel(),
-				parameters.getAxesFont(), Color.white, null);
+		_yLabel = makeRotatedLabel(_canvas.getParameters().getYLabel(), parameters.getAxesFont(), Color.white, null);
 		add(_yLabel, BorderLayout.WEST);
 	}
-	
+
 	private JLabel makeStatusLabel() {
 		Font font = _canvas.getParameters().getStatusFont();
 		FontMetrics fm = getFontMetrics(font);
-		final int height = 4 + 2*(fm.getHeight()+2);
+		final int height = 4 + 3 * (fm.getHeight() + 2);
 		Color bg = X11Colors.getX11Color("alice blue");
-		
+
 		JLabel label = new JLabel() {
 			@Override
 			public void paint(Graphics g) {
@@ -208,7 +197,7 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 				d.height = height;
 				return d;
 			}
-			
+
 			@Override
 			public Dimension getMinimumSize() {
 				Dimension d = super.getMinimumSize();
@@ -224,26 +213,24 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 			}
 
 		};
-		
+
 		label.setFont(font);
 		label.setOpaque(true);
 		label.setBackground(bg);
 		label.setForeground(Color.black);
 		label.setHorizontalAlignment(SwingConstants.LEFT);
 		label.setVerticalAlignment(SwingConstants.CENTER);
-		
+
 		Border commonBorder = new CommonBorder();
 		Border emptyBorder = BorderFactory.createLineBorder(bg, 2);
-		
+
 		label.setBorder(BorderFactory.createCompoundBorder(commonBorder, emptyBorder));
 
 		return label;
 	}
 
-
 	// convenience function for making a label
-	private JLabel makeJLabel(String text, Font font, int alignment, Color bg,
-			Color fg, boolean excludeFromPrint) {
+	private JLabel makeJLabel(String text, Font font, int alignment, Color bg, Color fg, boolean excludeFromPrint) {
 
 		JLabel lab = null;
 		if (excludeFromPrint) {
@@ -256,7 +243,8 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 					}
 				}
 			};
-		} else {
+		}
+		else {
 			lab = new JLabel(text != null ? text : " ");
 		}
 		lab.setFont(font);
@@ -297,7 +285,7 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 	public PlotCanvas getCanvas() {
 		return _canvas;
 	}
-	
+
 	/**
 	 * Get the plot parameters
 	 * 
@@ -306,7 +294,7 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 	public PlotParameters getParameters() {
 		return _canvas.getParameters();
 	}
-	
+
 	public void setColor(Color bg) {
 		super.setBackground(bg);
 		_canvas.setBackground(bg);
@@ -320,10 +308,12 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 		if (PlotCanvas.TITLECHANGEPROP.equals(evt.getPropertyName())) {
 			_titleLabel.setText((String) evt.getNewValue());
 			_titleLabel.repaint();
-		} else if (PlotCanvas.XLABELCHANGEPROP.equals(evt.getPropertyName())) {
+		}
+		else if (PlotCanvas.XLABELCHANGEPROP.equals(evt.getPropertyName())) {
 			_xLabel.setText((String) evt.getNewValue());
 			_xLabel.repaint();
-		} else if (PlotCanvas.YLABELCHANGEPROP.equals(evt.getPropertyName())) {
+		}
+		else if (PlotCanvas.YLABELCHANGEPROP.equals(evt.getPropertyName())) {
 			_yLabel.setText((String) evt.getNewValue());
 			_yLabel.repaint();
 		}

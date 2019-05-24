@@ -28,22 +28,19 @@ import cnuphys.ced.event.data.FTCAL;
 import cnuphys.ced.geometry.FTCALGeometry;
 
 public class FTCalXYView extends CedXYView {
-	
-	
-	//for naming clones
+
+	// for naming clones
 	private static int CLONE_COUNT = 0;
-	
-	//base title
+
+	// base title
 	private static final String _baseTitle = "FTCal XY";
 
-
 	// units are cm
-	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(
-			20., -20., -40., 40.);
+	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(20., -20., -40., 40.);
 
 	// the CND xy polygons
 	FTCalXYPolygon ftCalPoly[] = new FTCalXYPolygon[332];
-	
+
 	private short[] indices = new short[476];
 
 	/**
@@ -52,16 +49,16 @@ public class FTCalXYView extends CedXYView {
 	 */
 	public FTCalXYView(Object... keyVals) {
 		super(keyVals);
-		
+
 		for (int i = 0; i < indices.length; i++) {
 			indices[i] = -1;
 		}
 
-		//good IDs are the component ids
+		// good IDs are the component ids
 		short goodIds[] = FTCALGeometry.getGoodIds();
 		for (int i = 0; i < 332; i++) {
 			int id = goodIds[i];
-			indices[id] = (short)i; //reverse mapping
+			indices[id] = (short) i; // reverse mapping
 			ftCalPoly[i] = new FTCalXYPolygon(id);
 		}
 
@@ -81,26 +78,19 @@ public class FTCalXYView extends CedXYView {
 		// make it square
 		int width = d.width;
 		int height = width;
-		
+
 		String title = _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")"));
 
-
 		// create the view
-		view = new FTCalXYView(PropertySupport.WORLDSYSTEM,
-				_defaultWorldRectangle, PropertySupport.WIDTH, width,
-				PropertySupport.HEIGHT, height, PropertySupport.LEFTMARGIN,
-				LMARGIN, PropertySupport.TOPMARGIN, TMARGIN,
-				PropertySupport.RIGHTMARGIN, RMARGIN, PropertySupport.BOTTOMMARGIN,
-				BMARGIN, PropertySupport.TOOLBAR, true,
-				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
-				PropertySupport.VISIBLE, true,
-				PropertySupport.TITLE, title,
-				PropertySupport.STANDARDVIEWDECORATIONS, true);
+		view = new FTCalXYView(PropertySupport.WORLDSYSTEM, _defaultWorldRectangle, PropertySupport.WIDTH, width,
+				PropertySupport.HEIGHT, height, PropertySupport.LEFTMARGIN, LMARGIN, PropertySupport.TOPMARGIN, TMARGIN,
+				PropertySupport.RIGHTMARGIN, RMARGIN, PropertySupport.BOTTOMMARGIN, BMARGIN, PropertySupport.TOOLBAR,
+				true, PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS, PropertySupport.VISIBLE, true,
+				PropertySupport.TITLE, title, PropertySupport.STANDARDVIEWDECORATIONS, true);
 
-		view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY
-				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND,
-				DisplayBits.ACCUMULATION
-				+ DisplayBits.MCTRUTH, 3, 5);
+		view._controlPanel = new ControlPanel(view,
+				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND,
+				DisplayBits.ACCUMULATION + DisplayBits.MCTRUTH, 3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
 		view.pack();
@@ -118,8 +108,7 @@ public class FTCalXYView extends CedXYView {
 
 			@Override
 			public void draw(Graphics g, IContainer container) {
-				
-				
+
 				Component component = container.getComponent();
 				Rectangle b = component.getBounds();
 
@@ -130,52 +119,50 @@ public class FTCalXYView extends CedXYView {
 
 				Rectangle screenRect = container.getInsetRectangle();
 				g.setColor(Color.white);
-				g.fillRect(screenRect.x, screenRect.y, screenRect.width,
-						screenRect.height);
-				
-				drawGrid(g, container);
+				g.fillRect(screenRect.x, screenRect.y, screenRect.width, screenRect.height);
 
+				drawGrid(g, container);
 
 				for (FTCalXYPolygon poly : ftCalPoly) {
 					poly.draw(g, container);
 				}
 
 			}
-			
-			//draw the ftcal grid
+
+			// draw the ftcal grid
 			private void drawGrid(Graphics g, IContainer container) {
-				
+
 				g.setColor(Color.lightGray);
-				
+
 				double range[] = new double[2];
 				Point p0 = new Point();
 				Point p1 = new Point();
 				double vmax = FTCALGeometry.getMaxAbsXYExtent();
-				
+
 				for (int ix = -11; ix <= 11; ix++) {
 					if ((ix < -3) || (ix > 4)) {
 						FTCALGeometry.indexToRange(ix, range);
 						container.worldToLocal(p0, range[0], -vmax);
-						container.worldToLocal(p1, range[0], vmax);		
+						container.worldToLocal(p1, range[0], vmax);
 						g.drawLine(p0.x, p0.y, p1.x, p1.y);
-						
+
 						if (ix == 11) {
 							container.worldToLocal(p0, range[1], -vmax);
-							container.worldToLocal(p1, range[1], vmax);		
-							g.drawLine(p0.x, p0.y, p1.x, p1.y);							
+							container.worldToLocal(p1, range[1], vmax);
+							g.drawLine(p0.x, p0.y, p1.x, p1.y);
 						}
-						
+
 						for (int iy = -11; iy <= 11; iy++) {
 							if ((iy < -3) || (iy > 4)) {
 								FTCALGeometry.indexToRange(iy, range);
 								container.worldToLocal(p0, -vmax, range[0]);
-								container.worldToLocal(p1, vmax, range[0]);		
+								container.worldToLocal(p1, vmax, range[0]);
 								g.drawLine(p0.x, p0.y, p1.x, p1.y);
-								
+
 								if (iy == 11) {
 									container.worldToLocal(p0, -vmax, range[1]);
-									container.worldToLocal(p1, vmax, range[1]);		
-									g.drawLine(p0.x, p0.y, p1.x, p1.y);							
+									container.worldToLocal(p1, vmax, range[1]);
+									g.drawLine(p0.x, p0.y, p1.x, p1.y);
 								}
 							}
 						}
@@ -199,8 +186,7 @@ public class FTCalXYView extends CedXYView {
 			public void draw(Graphics g, IContainer container) {
 				if (isSingleEventMode()) {
 					drawSingleEventHits(g, container);
-				}
-				else {
+				} else {
 					drawAccumulatedHits(g, container);
 				}
 				Rectangle screenRect = getActiveScreenRectangle(container);
@@ -210,13 +196,12 @@ public class FTCalXYView extends CedXYView {
 		};
 		getContainer().setAfterDraw(afterDraw);
 	}
-	
-	
-	//single event drawer
+
+	// single event drawer
 	private void drawSingleEventHits(Graphics g, IContainer container) {
-		
+
 		AdcHitList hits = FTCAL.getInstance().getHits();
-		
+
 		System.err.println("DRAWING FTCAL HITS count " + ((hits == null) ? 0 : hits.size()));
 		if ((hits != null) && !hits.isEmpty()) {
 			for (AdcHit hit : hits) {
@@ -230,18 +215,16 @@ public class FTCalXYView extends CedXYView {
 						g.fillPolygon(poly);
 						g.setColor(Color.black);
 						g.drawPolygon(poly);
-					}
-					else {
+					} else {
 						System.err.println("indexing problem in FT");
 					}
 				}
 			}
 		}
 	}
-	
-	//accumulated hits drawer
+
+	// accumulated hits drawer
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
-		
 
 		int medianHit = AccumulationManager.getInstance().getMedianFTCALCount();
 
@@ -251,27 +234,25 @@ public class FTCalXYView extends CedXYView {
 				int index = indices[i];
 				if (index >= 0) {
 					FTCalXYPolygon poly = ftCalPoly[index];
-					double fract = getMedianSetting()*(((double) acchits[i]) / (1 + medianHit));
+					double fract = getMedianSetting() * (((double) acchits[i]) / (1 + medianHit));
 
-					Color color = AccumulationManager.getInstance().getColor(fract);
+					Color color = AccumulationManager.getInstance().getColor(getColorScaleModel(), fract);
 					g.setColor(color);
 					g.fillPolygon(poly);
 					g.setColor(Color.black);
 					g.drawPolygon(poly);
-				}
-				else {
+				} else {
 					System.err.println("indexing problem in FTCAL");
 				}
 			}
 		}
-		
+
 	}
 
-
 	/**
-	 * This adds the detector items. The AllDC view is not faithful to geometry.
-	 * All we really uses in the number of superlayers, number of layers, and
-	 * number of wires.
+	 * This adds the detector items. The AllDC view is not faithful to geometry. All
+	 * we really uses in the number of superlayers, number of layers, and number of
+	 * wires.
 	 */
 	@Override
 	protected void addItems() {
@@ -281,23 +262,20 @@ public class FTCalXYView extends CedXYView {
 	 * Some view specific feedback. Should always call super.getFeedbackStrings
 	 * first.
 	 * 
-	 * @param container
-	 *            the base container for the view.
-	 * @param screenPoint
-	 *            the pixel point
-	 * @param worldPoint
-	 *            the corresponding world location.
+	 * @param container   the base container for the view.
+	 * @param screenPoint the pixel point
+	 * @param worldPoint  the corresponding world location.
 	 */
 	@Override
-	public void getFeedbackStrings(IContainer container, Point screenPoint,
-			Point2D.Double worldPoint, List<String> feedbackStrings) {
+	public void getFeedbackStrings(IContainer container, Point screenPoint, Point2D.Double worldPoint,
+			List<String> feedbackStrings) {
 
 		basicFeedback(container, screenPoint, worldPoint, "cm", feedbackStrings);
-		
+
 		int xindex = FTCALGeometry.valToIndex(worldPoint.x);
 		if (xindex != 0) {
 			int yindex = FTCALGeometry.valToIndex(worldPoint.y);
-		    if (yindex != 0) {
+			if (yindex != 0) {
 
 				boolean found = false;
 
@@ -323,34 +301,32 @@ public class FTCalXYView extends CedXYView {
 
 						break;
 					}
-				} //end for index
-		    
-		    }
+				} // end for index
+
+			}
 		}
 
-
-
 	}
-	
-	
+
 	/**
-	 * Clone the view. 
+	 * Clone the view.
+	 * 
 	 * @return the cloned view
 	 */
 	@Override
 	public BaseView cloneView() {
 		super.cloneView();
 		CLONE_COUNT++;
-		
-		//limit
+
+		// limit
 		if (CLONE_COUNT > 2) {
 			return null;
 		}
-		
+
 		Rectangle vr = getBounds();
 		vr.x += 40;
 		vr.y += 40;
-		
+
 		FTCalXYView view = createFTCalXYView();
 		view.setBounds(vr);
 		return view;

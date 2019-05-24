@@ -38,7 +38,6 @@ public class FastMath {
 	 */
 	public static double atan2(double y, double x) {
 
-
 		switch (_mathLib) {
 		case FAST:
 			return org.apache.commons.math3.util.FastMath.atan2(y, x);
@@ -49,8 +48,7 @@ public class FastMath {
 		}
 
 	}
-	
-	
+
 	/**
 	 * Might use standard or fast atan2
 	 * 
@@ -72,8 +70,7 @@ public class FastMath {
 	public static double atan2Deg(double y, double x) {
 		return Math.toDegrees(atan2(y, x));
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param x
@@ -92,7 +89,8 @@ public class FastMath {
 	public static double acos(double x) {
 
 		switch (_mathLib) {
-		case FAST: case SUPERFAST:
+		case FAST:
+		case SUPERFAST:
 			return org.apache.commons.math3.util.FastMath.acos(x);
 		default:
 			return Math.acos(x);
@@ -102,29 +100,31 @@ public class FastMath {
 
 	/**
 	 * Arc cosine returned in degrees
+	 * 
 	 * @param x the cosine value
 	 * @return acos in degrees
 	 */
 	public static double acos2Deg(double x) {
 		return Math.toDegrees(acos(x));
 	}
-	
-	
+
 	/**
 	 * Fast version of usual square root
+	 * 
 	 * @param x the value
 	 * @return the square root of x
 	 */
 	public static double sqrt(double x) {
 		switch (_mathLib) {
-		case FAST: case SUPERFAST:
+		case FAST:
+		case SUPERFAST:
 			return org.apache.commons.math3.util.FastMath.sqrt(x);
 		default:
 			return Math.sqrt(x);
 		}
 
 	}
-	
+
 	/**
 	 * Might use standard or fast sin
 	 * 
@@ -144,7 +144,6 @@ public class FastMath {
 
 	}
 
-	
 	/**
 	 * Might use standard or fast cos
 	 * 
@@ -162,7 +161,7 @@ public class FastMath {
 			return Math.cos(x);
 		}
 	}
-	
+
 	/**
 	 * Get the math lib being used
 	 * 
@@ -171,12 +170,11 @@ public class FastMath {
 	public static MathLib getMathLib() {
 		return _mathLib;
 	}
-	
+
 	/**
 	 * Vector length.
 	 *
-	 * @param v
-	 *            the v
+	 * @param v the v
 	 * @return the float
 	 */
 	public static float vectorLength(float v[]) {
@@ -186,18 +184,13 @@ public class FastMath {
 		return (float) sqrt(vx * vx + vy * vy + vz * vz);
 	}
 
-
-
 	/**
 	 * Set the math library to use
 	 * 
-	 * @param lib
-	 *            the math library enum
+	 * @param lib the math library enum
 	 */
 	public static void setMathLib(MathLib lib) {
 		_mathLib = lib;
 	}
-
-	
 
 }

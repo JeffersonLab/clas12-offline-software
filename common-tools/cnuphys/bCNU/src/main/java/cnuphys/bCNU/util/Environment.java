@@ -52,9 +52,6 @@ public final class Environment {
 	// the java class path
 	private String _classPath;
 
-	// the host name
-	private String _hostName;
-
 	// the host IP address
 	private String _hostAddress;
 
@@ -76,11 +73,11 @@ public final class Environment {
 	// this is used to recommend to non AWT threads to wait to call for an
 	// update
 	private boolean _dragging;
-	
-	//for scaling things like fonts
+
+	// for scaling things like fonts
 	private float _resolutionScaleFactor;
-	
-	//screen dots per inch
+
+	// screen dots per inch
 	private int _dotsPerInch;
 
 	/**
@@ -95,20 +92,7 @@ public final class Environment {
 		_tempDirectory = getProperty("java.io.tmpdir");
 		_classPath = getProperty("java.class.path");
 
-		try {
-			InetAddress addr = InetAddress.getLocalHost();
-
-			// Get hostname
-			_hostName = addr.getHostName();
-
-			// Get host address
-			_hostAddress = addr.getHostAddress();
-		} catch (UnknownHostException e) {
-			_hostName = "???";
-			_hostAddress = "???";
-		}
-		
-		//screen information
+		// screen information
 		getScreenInformation();
 
 		// any png image writers?
@@ -153,47 +137,48 @@ public final class Environment {
 	}
 
 	/**
-	 * Set whether or not dragging is occurring. This cam be used to pause
-	 * threads that might be affecting the screen.
+	 * Set whether or not dragging is occurring. This cam be used to pause threads
+	 * that might be affecting the screen.
 	 * 
-	 * @param dragging
-	 *            <code>true</code> if dragging is occuring.
+	 * @param dragging <code>true</code> if dragging is occuring.
 	 */
 	public void setDragging(boolean dragging) {
 		_dragging = dragging;
 	}
-	
-	//to help with resolution issues
+
+	// to help with resolution issues
 	private void getScreenInformation() {
-		_dotsPerInch=java.awt.Toolkit.getDefaultToolkit().getScreenResolution(); 
-		double dpcm = _dotsPerInch/2.54;
-		_resolutionScaleFactor = (float) (dpcm/42.91);
+		_dotsPerInch = java.awt.Toolkit.getDefaultToolkit().getScreenResolution();
+		double dpcm = _dotsPerInch / 2.54;
+		_resolutionScaleFactor = (float) (dpcm / 42.91);
 	}
-	
+
 	/**
 	 * For scaling things like fonts. Their size should be multiplied by this.
+	 * 
 	 * @return the resolutionScaleFactor
 	 */
 	public float getResolutionScaleFactor() {
 		return _resolutionScaleFactor;
 	}
-	
+
 	/**
 	 * Get the dots per inch for the main display
+	 * 
 	 * @return the dots per inch
 	 */
 	public double getDotsPerInch() {
 		return _dotsPerInch;
 	}
-	
+
 	/**
 	 * Get the dots per inch for the main display
+	 * 
 	 * @return the dots per inch
 	 */
 	public double getDotsPerCentimeter() {
-		return getDotsPerInch()/2.54;
+		return getDotsPerInch() / 2.54;
 	}
-
 
 	/**
 	 * Public access for the singleton.
@@ -210,8 +195,7 @@ public final class Environment {
 	/**
 	 * Convenience routine for getting a system property.
 	 * 
-	 * @param keyName
-	 *            the key name of the property
+	 * @param keyName the key name of the property
 	 * @return the property, or <code>null</null>.
 	 */
 	private String getProperty(String keyName) {
@@ -277,15 +261,6 @@ public final class Environment {
 	}
 
 	/**
-	 * Gets the host name.
-	 * 
-	 * @return the host name.
-	 */
-	public String getHostName() {
-		return _hostName;
-	}
-
-	/**
 	 * Gets the host address.
 	 * 
 	 * @return the host name.
@@ -327,11 +302,10 @@ public final class Environment {
 	public ImageWriter getPngWriter() {
 		return _pngWriter;
 	}
-	
 
 	/**
-	 * Get the application name. This is the simple part of the name of the
-	 * class with the main metho. That is, if the main method is in
+	 * Get the application name. This is the simple part of the name of the class
+	 * with the main metho. That is, if the main method is in
 	 * com.yomama.yopapa.Dude, this returns "dude" (converts to lower case.)
 	 * 
 	 * @return the application name
@@ -348,22 +322,20 @@ public final class Environment {
 					int index = _applicationName.lastIndexOf(".");
 					_applicationName = _applicationName.substring(index + 1);
 					_applicationName = _applicationName.toLowerCase();
-					Log.getInstance()
-							.config("Application name: " + _applicationName);
+					Log.getInstance().config("Application name: " + _applicationName);
 				}
 			} catch (Exception e) {
 				_applicationName = null;
-				Log.getInstance()
-						.config("Could not determine application name.");
+				Log.getInstance().config("Could not determine application name.");
 			}
 		}
 		return _applicationName;
 	}
 
 	/**
-	 * Gets a File object for the configuration file. There is no guarantee that
-	 * the file exists. It is the application name with a ".xml" extension in
-	 * the user's home directory.
+	 * Gets a File object for the configuration file. There is no guarantee that the
+	 * file exists. It is the application name with a ".xml" extension in the user's
+	 * home directory.
 	 * 
 	 * @return a File object for the configuration file
 	 */
@@ -374,16 +346,13 @@ public final class Environment {
 				try {
 					return new File(getHomeDirectory(), aname + ".xml");
 				} catch (Exception e) {
-					System.err
-							.println("Could not get configuration file object");
+					System.err.println("Could not get configuration file object");
 				}
-			}
-			else { // Unix Based
+			} else { // Unix Based
 				try {
 					return new File(getHomeDirectory(), "." + aname + ".xml");
 				} catch (Exception e) {
-					System.err
-							.println("Could not get configuration file object");
+					System.err.println("Could not get configuration file object");
 				}
 			}
 		}
@@ -393,8 +362,7 @@ public final class Environment {
 	/**
 	 * On Mac, uses the say command to say something.
 	 * 
-	 * @param sayThis
-	 *            the string to say
+	 * @param sayThis the string to say
 	 */
 	public void say(String sayThis) {
 		if (sayThis == null) {
@@ -433,7 +401,7 @@ public final class Environment {
 
 		return _defaultPanelBackgroundColor;
 	}
-	
+
 	/**
 	 * Get a File object representing the preferences file. No guarantee that it
 	 * exists.
@@ -450,8 +418,7 @@ public final class Environment {
 	/**
 	 * Obtain a preference from the key
 	 * 
-	 * @param key
-	 *            the key
+	 * @param key the key
 	 * @return the String corresponding to the key, or <code>null</code>.
 	 */
 	public String getPreference(String key) {
@@ -477,10 +444,8 @@ public final class Environment {
 	 * preferences file. For example, it might be a Vector of recently visited
 	 * files.
 	 * 
-	 * @param key
-	 *            the key
-	 * @param value
-	 *            the vector holding the strings
+	 * @param key   the key
+	 * @param value the vector holding the strings
 	 * @return a Vector of preferences
 	 */
 	public Vector<String> getPreferenceList(String key) {
@@ -504,10 +469,8 @@ public final class Environment {
 	/**
 	 * Save a value in the preferences and write the preferneces file.
 	 * 
-	 * @param key
-	 *            the key
-	 * @param value
-	 *            the value
+	 * @param key   the key
+	 * @param value the value
 	 */
 	public void savePreference(String key, String value) {
 
@@ -528,10 +491,8 @@ public final class Environment {
 	 * preferences file. For example, it might be a Vector of recently visited
 	 * files.
 	 * 
-	 * @param key
-	 *            the key
-	 * @param values
-	 *            the vector holding the strings
+	 * @param key    the key
+	 * @param values the vector holding the strings
 	 */
 	public void savePreferenceList(String key, Vector<String> values) {
 		if ((key == null) || (values == null) || (values.isEmpty())) {
@@ -570,10 +531,8 @@ public final class Environment {
 	/**
 	 * Useful for making common look components
 	 * 
-	 * @param component
-	 *            the component
-	 * @param color
-	 *            the background color--if <code>null</code> use default.
+	 * @param component the component
+	 * @param color     the background color--if <code>null</code> use default.
 	 */
 	public void commonize(JComponent component, Color color) {
 		component.setOpaque(true);
@@ -584,8 +543,7 @@ public final class Environment {
 	/**
 	 * Print a memory report
 	 * 
-	 * @param message
-	 *            a message to add on
+	 * @param message a message to add on
 	 */
 	public static String memoryReport(String message) {
 		System.gc();
@@ -613,7 +571,7 @@ public final class Environment {
 	 * @return a short summary string
 	 */
 	public String summaryString() {
-		return " [" + _userName + "]" + " [" + _osName + "]" + " [" + _hostName + "]" + " [" + _currentWorkingDirectory
+		return " [" + _userName + "]" + " [" + _osName + "]" + " [" + _currentWorkingDirectory
 				+ "]";
 	}
 
@@ -625,7 +583,7 @@ public final class Environment {
 	private String[] splitClassPath() {
 		return splitPath(_classPath);
 	}
-	
+
 	/**
 	 * Split the path into directories and jar files
 	 * 
@@ -634,9 +592,9 @@ public final class Environment {
 	public String[] splitPath(String classPath) {
 		String cp = new String(classPath);
 		cp = cp.replace(".", File.separator);
- 		return FileUtilities.tokens(cp, File.pathSeparator);
+		return FileUtilities.tokens(cp, File.pathSeparator);
 	}
-	
+
 	public GraphicsDevice[] getGraphicsDevices() {
 		GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		GraphicsDevice[] devices = g.getScreenDevices();
@@ -654,17 +612,14 @@ public final class Environment {
 	public String toString() {
 		StringBuilder sb = new StringBuilder(2048);
 		sb.append("Environment: \n");
-		
+
 		File file = getConfigurationFile();
 		if (file == null) {
 			sb.append("Config File: null\n");
-		}
-		else {
+		} else {
 			sb.append("Config File: " + file.getAbsolutePath() + "\n");
 		}
 
-
-		sb.append("Host Name: " + getHostName() + "\n");
 		sb.append("Host Address: " + getHostAddress() + "\n");
 		sb.append("User Name: " + getUserName() + "\n");
 		sb.append("Temp Directory: " + getTempDirectory() + "\n");
@@ -698,7 +653,6 @@ public final class Environment {
 			}
 		}
 
-
 		sb.append("\n" + memoryReport(null));
 		return sb.toString();
 	}
@@ -706,8 +660,7 @@ public final class Environment {
 	/**
 	 * Main program for testing.
 	 * 
-	 * @param arg
-	 *            command line arguments (ignored).
+	 * @param arg command line arguments (ignored).
 	 */
 	public static void main(String arg[]) {
 		Environment env = Environment.getInstance();

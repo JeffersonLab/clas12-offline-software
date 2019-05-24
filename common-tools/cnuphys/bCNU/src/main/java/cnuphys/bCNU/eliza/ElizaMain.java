@@ -1,7 +1,6 @@
 package cnuphys.bCNU.eliza;
 
 import java.io.*;
-import cnuphys.bCNU.util.Environment;
 
 /**
  * Eliza main class. Stores the processed script. Does the input
@@ -114,17 +113,14 @@ public class ElizaMain {
 	/**
 	 * Process a line of input.
 	 * 
-	 * @param s
-	 *            the input string
+	 * @param s the input string
 	 * @return the response
 	 */
 	public String processInput(String s) {
 		String reply;
 		// Do some input transformations first.
-		s = EString.translate(s, "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-				"abcdefghijklmnopqrstuvwxyz");
-		s = EString.translate(s, "@#$%^&*()_-+=~`{[}]|:;<>\\\"",
-				"                          ");
+		s = EString.translate(s, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz");
+		s = EString.translate(s, "@#$%^&*()_-+=~`{[}]|:;<>\\\"", "                          ");
 		s = EString.translate(s, ",?!", "...");
 		// Compress out multiple speace.
 		s = EString.compress(s);
@@ -159,9 +155,9 @@ public class ElizaMain {
 	}
 
 	/**
-	 * Process a sentence. (1) Make pre transformations. (2) Check for quit
-	 * word. (3) Scan sentence for keys, build key stack. (4) Try decompositions
-	 * for each key.
+	 * Process a sentence. (1) Make pre transformations. (2) Check for quit word.
+	 * (3) Scan sentence for keys, build key stack. (4) Try decompositions for each
+	 * key.
 	 */
 	String sentence(String s) {
 		s = pre.translate(s);
@@ -187,10 +183,10 @@ public class ElizaMain {
 	}
 
 	/**
-	 * Decompose a string according to the given key. Try each decomposition
-	 * rule in order. If it matches, assemble a reply and return it. If assembly
-	 * fails, try another decomposition rule. If assembly is a goto rule, return
-	 * null and give the key. If assembly succeeds, return the reply;
+	 * Decompose a string according to the given key. Try each decomposition rule in
+	 * order. If it matches, assemble a reply and return it. If assembly fails, try
+	 * another decomposition rule. If assembly is a goto rule, return null and give
+	 * the key. If assembly succeeds, return the reply;
 	 */
 	String decompose(Key key, String s, Key gotoKey) {
 		String reply[] = new String[10];
@@ -209,9 +205,8 @@ public class ElizaMain {
 	}
 
 	/**
-	 * Assembly a reply from a decomp rule and the input. If the reassembly rule
-	 * is goto, return null and give the gotoKey to use. Otherwise return the
-	 * response.
+	 * Assembly a reply from a decomp rule and the input. If the reassembly rule is
+	 * goto, return null and give the gotoKey to use. Otherwise return the response.
 	 */
 	String assemble(Decomp d, String reply[], Key gotoKey) {
 		String lines[] = new String[3];
@@ -233,8 +228,7 @@ public class ElizaMain {
 			try {
 				n = Integer.parseInt(lines[1]) - 1;
 			} catch (NumberFormatException e) {
-				System.out.println("Number is wrong in reassembly rule "
-						+ lines[1]);
+				System.out.println("Number is wrong in reassembly rule " + lines[1]);
 			}
 			if (n < 0 || n >= reply.length) {
 				System.out.println("Substitution number is bad " + lines[1]);
@@ -300,8 +294,7 @@ public class ElizaMain {
 	}
 
 	private BufferedReader bufferedReaderFromResource() {
-		InputStream inStream = getClass().getClassLoader().getResourceAsStream(
-				"data/elizaScript");
+		InputStream inStream = getClass().getClassLoader().getResourceAsStream("data/elizaScript");
 		return new BufferedReader(new InputStreamReader(inStream));
 	}
 

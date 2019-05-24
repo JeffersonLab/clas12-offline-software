@@ -26,11 +26,11 @@ import cnuphys.bCNU.util.X11Colors;
 import cnuphys.splot.plot.GraphicsUtilities;
 
 public class SplashWindow extends JWindow {
-	
+
 	private JComponent _center;
-	
+
 	private StreamCapturePane _scp;
-	
+
 	// If <code>true</code>, tile the background with an image.
 	boolean tile;
 
@@ -39,33 +39,31 @@ public class SplashWindow extends JWindow {
 
 	// The size of a tile.
 	private Dimension _tileSize;
-	
+
 	private Font _font = Fonts.commonFont(Font.BOLD, 18);
 
 	public SplashWindow(String title, Color bg, int width, String backgroundImage, String version) {
-		
+
 		setLayout(new BorderLayout(2, 2));
-		
+
 		if (backgroundImage != null) {
 			_icon = ImageManager.getInstance().loadImageIcon(backgroundImage);
 			if (_icon != null) {
 				tile = true;
-				_tileSize = new Dimension(_icon.getIconWidth(),
-						_icon.getIconHeight());
+				_tileSize = new Dimension(_icon.getIconWidth(), _icon.getIconHeight());
 				if ((_tileSize.width < 2) || (_tileSize.height < 2)) {
 					tile = false;
 				}
 			}
 		}
 
-		
 		addCenter(bg, width);
 		addSouth(width);
 		addNorth(title, version);
 		pack();
 		GraphicsUtilities.centerComponent(this);
 	}
-	
+
 	/**
 	 * Write out the cached text
 	 */
@@ -78,50 +76,32 @@ public class SplashWindow extends JWindow {
 	@Override
 	public void setVisible(boolean vis) {
 		super.setVisible(vis);
-		
+
 		if (!vis) {
 			if (_scp != null) {
 				_scp.unCapture();
 			}
 		}
 	}
-	
+
 	private void addNorth(String title, String version) {
 		JPanel sp = new JPanel();
 		sp.setLayout(new FlowLayout(FlowLayout.CENTER, 80, 2));
 		sp.setBackground(Color.white);
 
-		String imageNames[] = {
-				"images/anicat.gif",
-				"images/anir2d2.gif",
-				"images/sun.gif",
-				"images/rubik80.gif",
-				"images/bee.gif",
-				"images/loading.gif",
-				"images/progress33.gif",
-				"images/saucer.gif",
-				"images/spinglobe.gif",
-				"images/runner.gif",
-				"images/sun2.gif",
-				"images/push.gif",
-				"images/walker.gif",
-				"images/rooftop.gif",
-				"images/bee2.gif",
-		        "images/stickdancer.gif",
-		        "images/cricket.gif",
-				"images/wiggly.gif"};
-		
+		String imageNames[] = { "images/anicat.gif", "images/anir2d2.gif", "images/sun.gif", "images/rubik80.gif",
+				"images/bee.gif", "images/loading.gif", "images/progress33.gif", "images/saucer.gif",
+				"images/spinglobe.gif", "images/runner.gif", "images/sun2.gif", "images/push.gif", "images/walker.gif",
+				"images/rooftop.gif", "images/bee2.gif", "images/stickdancer.gif", "images/cricket.gif",
+				"images/wiggly.gif" };
 
-		
-		
 		int index = (new Random()).nextInt(imageNames.length);
 		if (index < 0) {
 			System.err.println("Bad index in splashWindow: " + index);
 			index = 0;
-		}
-		else if (index >= imageNames.length) {
+		} else if (index >= imageNames.length) {
 			System.err.println("Bad index in splashWindow: " + index);
-			index = imageNames.length-1;
+			index = imageNames.length - 1;
 		}
 		ImageIcon icon = ImageManager.getInstance().loadImageIcon(imageNames[index]);
 		if ((icon != null) && (icon.getImage() != null)) {
@@ -136,11 +116,9 @@ public class SplashWindow extends JWindow {
 		JLabel label = new JLabel(s);
 		label.setFont(_font);
 		sp.add(label);
-		
 
-		
 		final JButton cb = new JButton("Close");
-		
+
 		ActionListener al = new ActionListener() {
 
 			@Override
@@ -149,27 +127,28 @@ public class SplashWindow extends JWindow {
 					setVisible(false);
 					System.exit(1);
 				}
-				
+
 			}
-			
+
 		};
-		
+
 		cb.addActionListener(al);
 		sp.add(cb);
-		
+
 		sp.setBorder(BorderFactory.createEtchedBorder());
 		add(sp, BorderLayout.NORTH);
 	}
 
 	private void addCenter(final Color bg, final int width) {
 		_center = new JComponent() {
-			
-			private int prefH = (_icon == null) ? 300 : _icon.getIconHeight() ;
+
+			private int prefH = (_icon == null) ? 300 : _icon.getIconHeight();
+
 			@Override
 			public Dimension getPreferredSize() {
 				return new Dimension(width, prefH);
 			}
-			
+
 			@Override
 			public void paintComponent(Graphics g) {
 
@@ -177,13 +156,12 @@ public class SplashWindow extends JWindow {
 					Rectangle b = getBounds();
 					g.setColor(getBackground());
 					g.fillRect(b.x, b.y, b.width, b.height);
-				}
-				else {
+				} else {
 					tile(g);
 				}
-				
+
 			}
-			
+
 			private void tile(Graphics g) {
 
 				Rectangle bounds = getBounds();
@@ -197,25 +175,25 @@ public class SplashWindow extends JWindow {
 						g.drawImage(_icon.getImage(), x, y, this);
 					}
 				}
-				
+
 			}
 
 		};
-		
+
 		_center.setOpaque(true);
 		if (bg != null) {
 			_center.setBackground(bg);
 		} else {
 			_center.setBackground(X11Colors.getX11Color("royal blue"));
 		}
-		
+
 		_center.setSize(new Dimension(width, 300));
-		
+
 		_center.setBorder(BorderFactory.createEtchedBorder());
 		add(_center, BorderLayout.CENTER);
 
 	}
-	
+
 	private void addSouth(final int width) {
 		_scp = new StreamCapturePane() {
 			@Override
@@ -223,7 +201,7 @@ public class SplashWindow extends JWindow {
 				return new Dimension(width, 300);
 			}
 		};
-		
+
 		_scp.setBorder(BorderFactory.createEtchedBorder());
 		add(_scp, BorderLayout.SOUTH);
 	}

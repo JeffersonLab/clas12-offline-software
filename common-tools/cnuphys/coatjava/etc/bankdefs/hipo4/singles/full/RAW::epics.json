@@ -1,0 +1,15 @@
+[
+    {
+        "entries": [
+            {
+                "info": "json character", 
+                "name": "json", 
+                "type": "B"
+            }
+        ], 
+        "group": 20000, 
+        "info": "EPICS bank", 
+        "item": 15, 
+        "name": "RAW::epics"
+    }
+]

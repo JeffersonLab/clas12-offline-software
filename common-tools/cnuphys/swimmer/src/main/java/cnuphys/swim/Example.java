@@ -43,7 +43,7 @@ public class Example {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
+
 		MagneticFields.getInstance().initializeMagneticFields();
 		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
 		swimmer = new Swimmer();
@@ -52,12 +52,12 @@ public class Example {
 //		 example2();
 //		 example3();
 //		 example4();
-		 example5();
-		 example6();
+		example5();
+		example6();
 //		example7();
 //		example7x();
 //		example8();
-		 example9();
+		example9();
 //		example10();
 
 		System.out.println("\nDONE.");
@@ -74,13 +74,12 @@ public class Example {
 		double distanceBetweenSaves = 20 * stepSize;
 
 		// swim the particle, and return the results in a SwimTrajectory object
-		SwimTrajectory traj = swimmer.swim(electron.getCharge(), xo, yo, zo,
-				momentum, theta, phi, rmax, maxPathLength, stepSize,
-				distanceBetweenSaves);
+		SwimTrajectory traj = swimmer.swim(electron.getCharge(), xo, yo, zo, momentum, theta, phi, rmax, maxPathLength,
+				stepSize, distanceBetweenSaves);
 
 		// how many steps did we save:
-		printSummary("\nresult from uniform step stepsize method with storage",
-				20 * traj.size(), momentum, traj.lastElement(), null);
+		printSummary("\nresult from uniform step stepsize method with storage", 20 * traj.size(), momentum,
+				traj.lastElement(), null);
 
 		// make a crude terminal plot
 		terminalPlot(traj, "z (horizontal, cm) vs. x (vertical, cm) [FIXED]");
@@ -97,13 +96,11 @@ public class Example {
 
 		DefaultListener listener = new DefaultListener();
 		DefaultSwimStopper stopper = new DefaultSwimStopper(rmax);
-		int nstep = swimmer.swim(electron.getCharge(), xo, yo, zo, momentum,
-				theta, phi, stopper, listener, maxPathLength, stepSize);
+		int nstep = swimmer.swim(electron.getCharge(), xo, yo, zo, momentum, theta, phi, stopper, listener,
+				maxPathLength, stepSize);
 
 		double[] lastY = listener.getLastStateVector();
-		printSummary(
-				"\nresult from uniform step stepsize method with listener",
-				nstep, momentum, lastY, null);
+		printSummary("\nresult from uniform step stepsize method with listener", nstep, momentum, lastY, null);
 	}
 
 	// example 3 adaptive stepsize, listener and default stopper
@@ -118,12 +115,10 @@ public class Example {
 		double stepSize = 5e-4; // m
 
 		try {
-			int nstep = swimmer.swim(electron.getCharge(), xo, yo, zo,
-					momentum, theta, phi, stopper, listener, maxPathLength,
-					stepSize, Swimmer.CLAS_Tolerance, hdata);
+			int nstep = swimmer.swim(electron.getCharge(), xo, yo, zo, momentum, theta, phi, stopper, listener,
+					maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
 			double[] lastY = listener.getLastStateVector();
-			printSummary("\nresult from adaptive stepsize method with errvect",
-					nstep, momentum, lastY, hdata);
+			printSummary("\nresult from adaptive stepsize method with errvect", nstep, momentum, lastY, hdata);
 		} catch (RungeKuttaException e) {
 			e.printStackTrace();
 		}
@@ -139,16 +134,13 @@ public class Example {
 		// step size in m
 		double stepSize = 5e-4; // m
 		try {
-			SwimTrajectory traj = swimmer.swim(electron.getCharge(), xo, yo,
-					zo, momentum, theta, phi, stopper, 0, maxPathLength, stepSize,
-					Swimmer.CLAS_Tolerance, hdata);
+			SwimTrajectory traj = swimmer.swim(electron.getCharge(), xo, yo, zo, momentum, theta, phi, stopper, 0,
+					maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
 			double[] lastY = traj.lastElement();
-			printSummary(
-					"\nresult from adaptive stepsize method with storage and err vector",
-					traj.size(), momentum, lastY, hdata);
+			printSummary("\nresult from adaptive stepsize method with storage and err vector", traj.size(), momentum,
+					lastY, hdata);
 
-			terminalPlot(traj,
-					"z (horizontal, cm) vs. x (vertical, cm) [ADAPTIVE]");
+			terminalPlot(traj, "z (horizontal, cm) vs. x (vertical, cm) [ADAPTIVE]");
 
 		} catch (RungeKuttaException e) {
 			e.printStackTrace();
@@ -163,16 +155,14 @@ public class Example {
 		DefaultSwimStopper stopper = new DefaultSwimStopper(rmax);
 		double eps = 1.0e-08;
 		double stepSize = 5e-4; // m
-		
+
 		try {
-			int nstep = swimmer.swim(electron.getCharge(), xo, yo, zo,
-					momentum, theta, phi, stopper, listener, maxPathLength,
-					stepSize, eps, hdata);
+			int nstep = swimmer.swim(electron.getCharge(), xo, yo, zo, momentum, theta, phi, stopper, listener,
+					maxPathLength, stepSize, eps, hdata);
 
 			double[] lastY = listener.getLastStateVector();
-			printSummary(
-					"\n\n================\nresult from adaptive stepsize method and yscale",
-					nstep, momentum, lastY, hdata);
+			printSummary("\n\n================\nresult from adaptive stepsize method and yscale", nstep, momentum,
+					lastY, hdata);
 
 		} catch (RungeKuttaException e) {
 			e.printStackTrace();
@@ -189,18 +179,15 @@ public class Example {
 		double stepSize = 5e-4; // m
 		double eps = 1.0e-08;
 		try {
-			SwimTrajectory traj = swimmer.swim(electron.getCharge(), xo, yo,
-					zo, momentum, theta, phi, stopper, maxPathLength, stepSize,
-					eps, hdata);
+			SwimTrajectory traj = swimmer.swim(electron.getCharge(), xo, yo, zo, momentum, theta, phi, stopper,
+					maxPathLength, stepSize, eps, hdata);
 			double[] lastY = traj.lastElement();
-			printSummary(
-					"\nresult from adaptive stepsize method with storage and yscale",
-					traj.size(), momentum, lastY, hdata);
-			terminalPlot(traj,
-					"z (horizontal, cm) vs. x (vertical, cm) [ADAPTIVE]");
+			printSummary("\nresult from adaptive stepsize method with storage and yscale", traj.size(), momentum, lastY,
+					hdata);
+			terminalPlot(traj, "z (horizontal, cm) vs. x (vertical, cm) [ADAPTIVE]");
 
 			// lets try getting integral |b x dl|
-			
+
 			traj.computeBDL(swimmer.getProbe());
 //			terminalPlot(
 //					traj,
@@ -220,21 +207,17 @@ public class Example {
 		double accuracy = 10e-6; // 10 microns
 		double stepSize = 5e-4; // m
 		try {
-			SwimTrajectory traj = swimmer.swim(electron.getCharge(), xo, yo,
-					zo, momentum, theta, phi, ztarget, accuracy, rmax,
-					maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
+			SwimTrajectory traj = swimmer.swim(electron.getCharge(), xo, yo, zo, momentum, theta, phi, ztarget,
+					accuracy, rmax, maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
 			double lastY[] = traj.lastElement();
-			printSummary(
-					"\nresult from adaptive stepsize method with storage and Z cutoff at "
-							+ ztarget, traj.size(), momentum, lastY, hdata);
-			terminalPlot(traj,
-					"z (horizontal, cm) vs. x (vertical, cm) [ADAPTIVE] {STOP at Z=275}");
+			printSummary("\nresult from adaptive stepsize method with storage and Z cutoff at " + ztarget, traj.size(),
+					momentum, lastY, hdata);
+			terminalPlot(traj, "z (horizontal, cm) vs. x (vertical, cm) [ADAPTIVE] {STOP at Z=275}");
 		} catch (RungeKuttaException e) {
 			e.printStackTrace();
 		}
 
 	}
-	
 
 	private static void example8() {
 
@@ -247,15 +230,12 @@ public class Example {
 		// save about every 20th step
 		double distanceBetweenSaves = 20 * stepSize;
 
-		SwimTrajectory traj = swimmer.swim(electron.getCharge(), xo, yo, zo,
-				momentum, theta, phi, ztarget, accuracy, rmax, maxPathLength,
-				stepSize, distanceBetweenSaves);
+		SwimTrajectory traj = swimmer.swim(electron.getCharge(), xo, yo, zo, momentum, theta, phi, ztarget, accuracy,
+				rmax, maxPathLength, stepSize, distanceBetweenSaves);
 		double lastY[] = traj.lastElement();
-		printSummary(
-				"\nresult from fixed stepsize method with storage and Z cutoff at "
-						+ ztarget, 20 * traj.size(), momentum, lastY, null);
-		terminalPlot(traj,
-				"z (horizontal, cm) vs. x (vertical, cm) [UNIFORM] {STOP at Z=2.75}");
+		printSummary("\nresult from fixed stepsize method with storage and Z cutoff at " + ztarget, 20 * traj.size(),
+				momentum, lastY, null);
+		terminalPlot(traj, "z (horizontal, cm) vs. x (vertical, cm) [UNIFORM] {STOP at Z=2.75}");
 
 	}
 
@@ -285,21 +265,18 @@ public class Example {
 		double step = 5.0e-4;
 
 		try {
-			SwimTrajectory traj = swimmer.swim(charge, xo, yo, zo, pTot, theta,
-					phi, zstop, zacc, rMax, maxPath, step,
+			SwimTrajectory traj = swimmer.swim(charge, xo, yo, zo, pTot, theta, phi, zstop, zacc, rMax, maxPath, step,
 					Swimmer.CLAS_Tolerance, hdata);
 			double lastY[] = traj.lastElement();
-			printSummary(
-					"\nresult from adaptive stepsize method with storage and Z cutoff at "
-							+ zstop, traj.size(), momentum, lastY, hdata);
-			terminalPlot(traj,
-					"z (horizontal, cm) vs. x (vertical, cm) [ADAPTIVE] {STOP at Z=275}");
+			printSummary("\nresult from adaptive stepsize method with storage and Z cutoff at " + zstop, traj.size(),
+					momentum, lastY, hdata);
+			terminalPlot(traj, "z (horizontal, cm) vs. x (vertical, cm) [ADAPTIVE] {STOP at Z=275}");
 		} catch (RungeKuttaException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
+
 	// example 7 adaptive fixed z stop
 	private static void example10() {
 		System.out.println("\n=== EXAMPLE 10 ===");
@@ -324,14 +301,12 @@ public class Example {
 				e.printStackTrace();
 			}
 		}
-		double totTime = (System.nanoTime()-start)/1.0e9;
+		double totTime = (System.nanoTime() - start) / 1.0e9;
 
 		System.out.println("\nApprox run time: " + totTime);
 	}
 
-
-	private static void printSummary(String message, int nstep,
-			double momentum, double Q[], double hdata[]) {
+	private static void printSummary(String message, int nstep, double momentum, double Q[], double hdata[]) {
 		System.out.println(message);
 		double R = Math.sqrt(Q[0] * Q[0] + Q[1] * Q[1] + Q[2] * Q[2]);
 		double norm = Math.sqrt(Q[3] * Q[3] + Q[4] * Q[4] + Q[5] * Q[5]);
@@ -344,11 +319,9 @@ public class Example {
 			System.out.println("avg stepsize: " + hdata[1]);
 			System.out.println("max stepsize: " + hdata[2]);
 		}
-		System.out
-				.println(String
-						.format("R = [%8.5f, %8.5f, %8.5f] |R| = %7.4f m\nP = [%7.4e, %7.4e, %7.4e] |P| =  %9.6e GeV/c",
-								Q[0], Q[1], Q[2], R, P * Q[3], P * Q[4], P
-										* Q[5], P));
+		System.out.println(
+				String.format("R = [%8.5f, %8.5f, %8.5f] |R| = %7.4f m\nP = [%7.4e, %7.4e, %7.4e] |P| =  %9.6e GeV/c",
+						Q[0], Q[1], Q[2], R, P * Q[3], P * Q[4], P * Q[5], P));
 		System.out.println("norm (should be 1): " + norm);
 		System.out.println("--------------------------------------\n");
 	}

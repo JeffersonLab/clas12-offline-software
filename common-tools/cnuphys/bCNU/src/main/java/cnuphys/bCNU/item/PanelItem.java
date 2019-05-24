@@ -12,28 +12,22 @@ public class PanelItem extends PixelRectangleItem {
 
 	protected VirtualPanel _virtualPanel = new VirtualPanel();
 
-	
 	/**
-	 * Create a panel whose location is based on world coordinates but whose
-	 * extent is in pixels. And example might be a plot item or image.
+	 * Create a panel whose location is based on world coordinates but whose extent
+	 * is in pixels. And example might be a plot item or image.
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
-	 * @param location
-	 *            the location of the lower-left in world coordinates
-	 * @param width
-	 *            the width in pixels
-	 * @param height
-	 *            the height in pixels
+	 * @param layer    the Layer this item is on.
+	 * @param location the location of the lower-left in world coordinates
+	 * @param width    the width in pixels
+	 * @param height   the height in pixels
 	 */
-	public PanelItem(LogicalLayer layer, Point2D.Double location,
-			int width, int height) {
+	public PanelItem(LogicalLayer layer, Point2D.Double location, int width, int height) {
 		super(layer, location, width, height);
 		_virtualPanel = new VirtualPanel();
 		_virtualPanel.setVisible(true);
 //		_virtualPanel.addMainComponent(new JLabel("Main Component"));
 	}
-	
+
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
 		Rectangle r = getBounds(container);
@@ -47,9 +41,8 @@ public class PanelItem extends PixelRectangleItem {
 			Graphics imageG = image.getGraphics();
 			_virtualPanel.paint(imageG);
 			imageG.dispose();
-			
-			g.drawImage(_virtualPanel.getImage(), r.x, r.y, r.width, r.height,
-					_virtualPanel);
+
+			g.drawImage(_virtualPanel.getImage(), r.x, r.y, r.width, r.height, _virtualPanel);
 //			 g.drawImage(_virtualPanel.getImage(), r.x, r.y, r.x+r.width,
 //			 r.y+r.height, 0, 0, r.width, r.height, _virtualPanel);
 		}

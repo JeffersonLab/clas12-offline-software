@@ -19,8 +19,7 @@ public class EventInfoPanel extends JPanel {
 	private NamedLabel numEventsLabel;
 
 	/**
-	 * A label for displaying the ordinal number of the event from an event
-	 * file.
+	 * A label for displaying the ordinal number of the event from an event file.
 	 */
 	private NamedLabel eventNumberLabel;
 
@@ -32,15 +31,15 @@ public class EventInfoPanel extends JPanel {
 
 	/** Panel in which to place event viewing controls. */
 	JPanel controlPanel;
-	
+
 	/** run number */
 	private NamedLabel runLabel;
 
 	/**
-	 * Create the panel that goes in the north - top of the GUI. This will hold
-	 * 4 labels. One showing the current event source. The second showing the
-	 * current dictionary source. The third showing the event number, and the
-	 * fourth showing the number of events.
+	 * Create the panel that goes in the north - top of the GUI. This will hold 4
+	 * labels. One showing the current event source. The second showing the current
+	 * dictionary source. The third showing the event number, and the fourth showing
+	 * the number of events.
 	 *
 	 * @return the panel.
 	 */
@@ -51,7 +50,7 @@ public class EventInfoPanel extends JPanel {
 
 		eventSourceLabel = new NamedLabel("source", "event_source", 400);
 		eventNumberLabel = new NamedLabel("event #", "event #", 65);
-		numEventsLabel = new NamedLabel("count",     "event #", 65);
+		numEventsLabel = new NamedLabel("count", "event #", 65);
 		runLabel = new NamedLabel("run #", "event #", 65);
 
 		// limit size of labels
@@ -109,8 +108,7 @@ public class EventInfoPanel extends JPanel {
 	/**
 	 * Set the displayed event source value.
 	 * 
-	 * @param source
-	 *            event source.
+	 * @param source event source.
 	 */
 	public void setSource(String source) {
 		if (source != null) {
@@ -130,30 +128,26 @@ public class EventInfoPanel extends JPanel {
 	/**
 	 * Set the displayed event number value.
 	 * 
-	 * @param eventNumber
-	 *            event number.
+	 * @param eventNumber event number.
 	 */
 	public void setEventNumber(int eventNumber) {
 		if (eventNumber > -1) {
 			eventNumberLabel.setText("" + eventNumber);
 		}
 	}
-	
+
 	/**
 	 * Set the displayed run number value.
 	 * 
-	 * @param runNumber
-	 *            the run number.
+	 * @param runNumber the run number.
 	 */
 	public void setRunNumber(int runNumber) {
 		if (runNumber > -1) {
 			runLabel.setText("" + runNumber);
-		}
-		else {
+		} else {
 			runLabel.setText("");
 		}
 	}
-
 
 	/**
 	 * Get the displayed event number value.
@@ -167,8 +161,7 @@ public class EventInfoPanel extends JPanel {
 	/**
 	 * Set the displayed number-of-events value.
 	 * 
-	 * @param numberOfEvents
-	 *            number of events.
+	 * @param numberOfEvents number of events.
 	 */
 	public void setNumberOfEvents(int numberOfEvents) {
 		if (numberOfEvents > -1) {

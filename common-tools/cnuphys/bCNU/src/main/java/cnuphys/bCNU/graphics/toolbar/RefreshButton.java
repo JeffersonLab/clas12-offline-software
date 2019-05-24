@@ -16,8 +16,7 @@ public class RefreshButton extends ToolBarButton {
 	/**
 	 * Create the Refresh button.
 	 * 
-	 * @param container
-	 *            the container this button applies to.
+	 * @param container the container this button applies to.
 	 */
 	public RefreshButton(IContainer container) {
 		super(container, "images/refresh.gif", "Refresh");
@@ -26,8 +25,7 @@ public class RefreshButton extends ToolBarButton {
 	/**
 	 * This is what I do if I am pressed
 	 * 
-	 * @param e
-	 *            The causal event.
+	 * @param e The causal event.
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {

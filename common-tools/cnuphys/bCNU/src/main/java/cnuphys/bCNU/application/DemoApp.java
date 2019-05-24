@@ -2,8 +2,6 @@ package cnuphys.bCNU.application;
 
 import java.awt.EventQueue;
 
-import cnuphys.bCNU.fx.DemoFx2View;
-import cnuphys.bCNU.fx.DemoFxView;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
@@ -28,10 +26,9 @@ public class DemoApp extends BaseMDIApplication {
 	/**
 	 * Constructor (private--used to create singleton)
 	 * 
-	 * @param keyVals
-	 *            an optional variable length list of attributes in type-value
-	 *            pairs. For example, AttributeType.NAME, "my application",
-	 *            AttributeType.CENTER, true, etc.
+	 * @param keyVals an optional variable length list of attributes in type-value
+	 *                pairs. For example, AttributeType.NAME, "my application",
+	 *                AttributeType.CENTER, true, etc.
 	 */
 	private DemoApp(Object... keyVals) {
 		super(keyVals);
@@ -44,10 +41,8 @@ public class DemoApp extends BaseMDIApplication {
 	 */
 	public static DemoApp getInstance() {
 		if (instance == null) {
-			instance = new DemoApp(PropertySupport.TITLE,
-					"Demo Application of Generic bCNU Views",
-					PropertySupport.BACKGROUNDIMAGE, "images/cnu.png",
-					PropertySupport.FRACTION, 0.8);
+			instance = new DemoApp(PropertySupport.TITLE, "Demo Application of Generic bCNU Views",
+					PropertySupport.BACKGROUNDIMAGE, "images/cnu.png", PropertySupport.FRACTION, 0.8);
 
 			instance.addInitialViews();
 		}
@@ -74,21 +69,16 @@ public class DemoApp extends BaseMDIApplication {
 		// xml view
 		XMLView xmlView = new XMLView();
 		xmlView.setVisible(false);
-		
-		//fx view
-		new DemoFxView("JavaFX View", 400, 70, 400, 400);
-		new DemoFx2View("JavaFX2 View", 500, 270, 400, 400);
 
 	}
 
 	/**
 	 * Main program used for testing only.
 	 * <p>
-	 * Command line arguments:</br> -p [dir] dir is the optional default
-	 * directory for the file manager
+	 * Command line arguments:</br>
+	 * -p [dir] dir is the optional default directory for the file manager
 	 * 
-	 * @param arg
-	 *            the command line arguments.
+	 * @param arg the command line arguments.
 	 */
 	public static void main(String[] arg) {
 

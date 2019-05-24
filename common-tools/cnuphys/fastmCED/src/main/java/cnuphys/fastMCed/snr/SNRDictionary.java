@@ -25,7 +25,7 @@ public class SNRDictionary extends HashMap<String, String> implements Serializab
 	private double _solenoidScale = 1.0;
 	private double _torusScale = -1.0;
 
-	/** Should be either IN_BENDER or OUT_BENDER*/
+	/** Should be either IN_BENDER or OUT_BENDER */
 	public int _bendDirection;
 
 	public static final int GOODSIZE = 393241;
@@ -48,38 +48,27 @@ public class SNRDictionary extends HashMap<String, String> implements Serializab
 	/**
 	 * Create a dictionary for a mag field setting
 	 * 
-	 * @param bendDirection
-	 *            should be IN_BENDER or OUT_BENDER
-	 * @param useTorus
-	 *            whether we are using the torus
-	 * @param torusScale
-	 *            the torus scale factor
-	 * @param useSolenoid
-	 *            whether we are using the solenoid
-	 * @param solenoidScale
-	 *            the solenoid scale factor
+	 * @param bendDirection should be IN_BENDER or OUT_BENDER
+	 * @param useTorus      whether we are using the torus
+	 * @param torusScale    the torus scale factor
+	 * @param useSolenoid   whether we are using the solenoid
+	 * @param solenoidScale the solenoid scale factor
 	 */
 	public SNRDictionary(int bendDirection, boolean useTorus, double torusScale, boolean useSolenoid,
 			double solenoidScale) {
-		
+
 		this(bendDirection, useTorus, torusScale, useSolenoid, solenoidScale, GOODSIZE);
 	}
 
 	/**
 	 * Create a dictionary for a mag field setting
 	 * 
-	 * @param bendDirection
-	 *            should be IN_BENDER or OUT_BENDER
-	 * @param useTorus
-	 *            whether we are using the torus
-	 * @param torusScale
-	 *            the torus scale factor
-	 * @param useSolenoid
-	 *            whether we are using the solenoid
-	 * @param solenoidScale
-	 *            the solenoid scale factor
-	 * @param size
-	 *            the hash map size
+	 * @param bendDirection should be IN_BENDER or OUT_BENDER
+	 * @param useTorus      whether we are using the torus
+	 * @param torusScale    the torus scale factor
+	 * @param useSolenoid   whether we are using the solenoid
+	 * @param solenoidScale the solenoid scale factor
+	 * @param size          the hash map size
 	 */
 	public SNRDictionary(int bendDirection, boolean useTorus, double torusScale, boolean useSolenoid,
 			double solenoidScale, int size) {
@@ -90,15 +79,13 @@ public class SNRDictionary extends HashMap<String, String> implements Serializab
 		_useSolenoid = useSolenoid;
 		_solenoidScale = solenoidScale;
 	}
-	
 
 	/**
 	 * Serialize out the dictionary. Warning: will delete if necessary.
 	 * 
-	 * @param dirPath
-	 *            the full path to the directory where the dictionary will be
-	 *            stored. This does not include the name of the dictionary
-	 *            itself, which is auto generated.
+	 * @param dirPath the full path to the directory where the dictionary will be
+	 *                stored. This does not include the name of the dictionary
+	 *                itself, which is auto generated.
 	 * @return the dictionary file
 	 */
 	public File write(String dirPath) {
@@ -114,10 +101,8 @@ public class SNRDictionary extends HashMap<String, String> implements Serializab
 	/**
 	 * Read the dictionary from the serialized file
 	 * 
-	 * @param dirPath
-	 *            the path to the directory
-	 * @param fileName
-	 *            the file name.
+	 * @param dirPath  the path to the directory
+	 * @param fileName the file name.
 	 * @return the dictionary
 	 */
 	public static SNRDictionary read(String dirPath, String fileName) {
@@ -146,7 +131,7 @@ public class SNRDictionary extends HashMap<String, String> implements Serializab
 		if (!incTorus && !incSolenoid) {
 			return "nofield.dct";
 		}
-		
+
 		String bStr = (bendDirection == OUT_BENDER) ? "out" : "in";
 		String tStr = incTorus ? String.format("T%4.2f", torusScale) : "";
 		String sStr = incSolenoid ? String.format("S%4.2f", solenoidScale) : "";
@@ -158,12 +143,11 @@ public class SNRDictionary extends HashMap<String, String> implements Serializab
 	}
 
 	/**
-	 * Find the nearest key, i.e. the key that has a bit pattern of segments
-	 * that has the most in common with the bits associated with the testHash.
+	 * Find the nearest key, i.e. the key that has a bit pattern of segments that
+	 * has the most in common with the bits associated with the testHash.
 	 * 
-	 * @param testHash
-	 *            a hash that is not in the dictionary, so we'd like to find the
-	 *            closest as our guess.
+	 * @param testHash a hash that is not in the dictionary, so we'd like to find
+	 *                 the closest as our guess.
 	 * @return the nearest key
 	 */
 	public String nearestKey(String testHash) {
@@ -213,15 +197,13 @@ public class SNRDictionary extends HashMap<String, String> implements Serializab
 	}
 
 	/**
-	 * Count the number of common bits in the bit patterns represented by these
-	 * two hash keys. An expensive operation. Use sparingly.
+	 * Count the number of common bits in the bit patterns represented by these two
+	 * hash keys. An expensive operation. Use sparingly.
 	 * 
-	 * @param hashKey1
-	 *            one hash key
-	 * @param hashKey2
-	 *            the other hash key
-	 * @return the number of common bits (max value = 6 EW x 2 Long per EW x 64
-	 *         = 768)
+	 * @param hashKey1 one hash key
+	 * @param hashKey2 the other hash key
+	 * @return the number of common bits (max value = 6 EW x 2 Long per EW x 64 =
+	 *         768)
 	 */
 	public static int commonBits(String hashKey1, String hashKey2) {
 

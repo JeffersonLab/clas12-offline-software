@@ -27,11 +27,11 @@ public class ColorScaleModel {
 	 * Constant used for "smallness" check
 	 */
 	private static final double TINY = 1.0e-8;
-	
-	//null color
+
+	// null color
 	private static final Color NULLCOLOR = new Color(0, 0, 0, 16);
 
-	// Color returned for a too-small value (default: null)
+	// Color returned for a too-small value
 	private Color _tooSmallColor = new Color(96, 96, 96, 16);
 
 	// Color returned for a too-big value (default: null)
@@ -46,18 +46,18 @@ public class ColorScaleModel {
 	// Number of rows of display.
 	private int _numberOfRows = 1;
 
+	private Color HOTCOLOR = Color.red;
+
 	/**
 	 * This creates a ColorScaleModel for converting a value into a color. The
-	 * values array should be sorted in ascending order. In any rate, it will
-	 * be. Ideally, there is one more entry in the values array, so that each
-	 * color fits in the space between 2 values. However, this is not a
-	 * requirement. It will still give sensible results. Also, the value array
-	 * is NOT assumed to be equally spaced.
+	 * values array should be sorted in ascending order. In any rate, it will be.
+	 * Ideally, there is one more entry in the values array, so that each color fits
+	 * in the space between 2 values. However, this is not a requirement. It will
+	 * still give sensible results. Also, the value array is NOT assumed to be
+	 * equally spaced.
 	 * 
-	 * @param values
-	 *            the array of values.
-	 * @param colors
-	 *            the array of colors.
+	 * @param values the array of values.
+	 * @param colors the array of colors.
 	 */
 	public ColorScaleModel(double values[], Color[] colors) {
 		this("", values, colors);
@@ -65,18 +65,15 @@ public class ColorScaleModel {
 
 	/**
 	 * This creates a ColorScaleModel for converting a value into a color. The
-	 * values array should be sorted in ascending order. In any rate, it will
-	 * be. Ideally, there is one more entry in the values array, so that each
-	 * color fits in the space between 2 values. However, this is not a
-	 * requirement. It will still give sensible results. Also, the value array
-	 * is NOT assumed to be equally spaced.
+	 * values array should be sorted in ascending order. In any rate, it will be.
+	 * Ideally, there is one more entry in the values array, so that each color fits
+	 * in the space between 2 values. However, this is not a requirement. It will
+	 * still give sensible results. Also, the value array is NOT assumed to be
+	 * equally spaced.
 	 * 
-	 * @param comment
-	 *            an extra comment.
-	 * @param values
-	 *            the array of values.
-	 * @param colors
-	 *            the array of colors.
+	 * @param comment an extra comment.
+	 * @param values  the array of values.
+	 * @param colors  the array of colors.
 	 */
 	public ColorScaleModel(String comment, double values[], Color[] colors) {
 		this(comment, values, colors, 1, 1);
@@ -84,22 +81,17 @@ public class ColorScaleModel {
 
 	/**
 	 * This creates a ColorScaleModel for converting a value into a color. The
-	 * values array should be sorted in ascending order. In any rate, it will
-	 * be. Ideally, there is one more entry in the values array, so that each
-	 * color fits in the space between 2 values. However, this is not a
-	 * requirement. It will still give sensible results. Also, the value array
-	 * is NOT assumed to be equally spaced.
+	 * values array should be sorted in ascending order. In any rate, it will be.
+	 * Ideally, there is one more entry in the values array, so that each color fits
+	 * in the space between 2 values. However, this is not a requirement. It will
+	 * still give sensible results. Also, the value array is NOT assumed to be
+	 * equally spaced.
 	 * 
-	 * @param comment
-	 *            an extra comment.
-	 * @param values
-	 *            the array of values.
-	 * @param colors
-	 *            the array of colors.
-	 * @param precision
-	 *            the number of decimals to display. Use 0 for integers.
-	 * @param numberOfRows
-	 *            the number of rows to us displaying the colors.
+	 * @param comment      an extra comment.
+	 * @param values       the array of values.
+	 * @param colors       the array of colors.
+	 * @param precision    the number of decimals to display. Use 0 for integers.
+	 * @param numberOfRows the number of rows to us displaying the colors.
 	 */
 	public ColorScaleModel(String comment, double values[], Color[] colors, int precision, int numberOfRows) {
 		_comment = comment;
@@ -129,8 +121,7 @@ public class ColorScaleModel {
 	 * <p>
 	 * value = 4 (exactly) -> G
 	 * 
-	 * @param value
-	 *            the for which we want the color.
+	 * @param value the for which we want the color.
 	 * @return the color corresponding to the value.
 	 */
 	public Color getColor(double value) {
@@ -140,10 +131,8 @@ public class ColorScaleModel {
 	/**
 	 * Get a color via getColor but add an alpha value
 	 * 
-	 * @param value
-	 *            the value
-	 * @param alpha
-	 *            the alpha value [0..255]
+	 * @param value the value
+	 * @param alpha the alpha value [0..255]
 	 * @return the color corresponding to the value.
 	 */
 	public Color getAlphaColor(double value, int alpha) {
@@ -169,16 +158,14 @@ public class ColorScaleModel {
 	 * <p>
 	 * value = 4 (exactly) -> G
 	 * 
-	 * @param value
-	 *            the for which we want the color.
-	 * @param useColorInterpolation
-	 *            if <code>true</code>, use color interpolation.
+	 * @param value                 the for which we want the color.
+	 * @param useColorInterpolation if <code>true</code>, use color interpolation.
 	 * @return the color corresponding to the value.
 	 */
 	public Color getColor(double value, boolean useColorInterpolation) {
 
 		if (Double.isNaN(value)) {
-			//System.err.println("NULL COLOR");
+			// System.err.println("NULL COLOR");
 			return NULLCOLOR;
 		}
 
@@ -230,13 +217,11 @@ public class ColorScaleModel {
 	}
 
 	/**
-	 * Compute the fraction difference between two points, normalized to the
-	 * full scale.
+	 * Compute the fraction difference between two points, normalized to the full
+	 * scale.
 	 * 
-	 * @param v1
-	 *            one value.
-	 * @param v2
-	 *            the other value.
+	 * @param v1 one value.
+	 * @param v2 the other value.
 	 * @return the fractional difference.
 	 */
 	private double relativeDifference(double v1, double v2) {
@@ -331,16 +316,14 @@ public class ColorScaleModel {
 	}
 
 	/**
-	 * @param tooSmallColor
-	 *            the tooSmallColor to set
+	 * @param tooSmallColor the tooSmallColor to set
 	 */
 	public void setTooSmallColor(Color tooSmallColor) {
 		_tooSmallColor = tooSmallColor;
 	}
 
 	/**
-	 * @param tooBigColor
-	 *            the tooBigColor to set
+	 * @param tooBigColor the tooBigColor to set
 	 */
 	public void setTooBigColor(Color tooBigColor) {
 		_tooBigColor = tooBigColor;
@@ -391,21 +374,20 @@ public class ColorScaleModel {
 
 		return new Color(r3, g3, b3, a3);
 	}
-	
+
 	/**
 	 * Get a scale such as you might find on a weather map.
+	 * 
 	 * @param n the number of "in between colors"
 	 * @return a set of colors for a weather map
 	 */
 	public static Color[] getWeatherMapColors(int n) {
-		
-		
-		int r[] = { 151, 89,   45,  63,  64,  43,  39, 116, 241, 238, 234};
-		int g[] = {   0, 36,   61,  97, 179, 131, 144, 185, 177, 125,  42};
-		int b[] = { 163, 176, 170, 255, 205, 116,  10,  45,   0,   0,  15};
 
-		n = Math.max(2,  Math.min(20, n));
+		int r[] = { 151, 89, 45, 63, 64, 43, 39, 116, 241, 238, 234 };
+		int g[] = { 0, 36, 61, 97, 179, 131, 144, 185, 177, 125, 42 };
+		int b[] = { 163, 176, 170, 255, 205, 116, 10, 45, 0, 0, 15 };
 
+		n = Math.max(2, Math.min(20, n));
 
 		double f = 1.0 / n;
 
@@ -427,7 +409,84 @@ public class ColorScaleModel {
 		colors[(len - 1) * n] = new Color(r[len - 1], g[len - 1], b[len - 1]);
 		return colors;
 	}
-	
+
+	/**
+	 * Get the off scale color
+	 * 
+	 * @return the hot color
+	 */
+	public Color getHotColor() {
+		return HOTCOLOR;
+	}
+
+	/**
+	 * Get a monochrome model companion to a color model.
+	 * 
+	 * @param model the color model.
+	 * @return a monochrome model companion
+	 */
+	public static ColorScaleModel getMonochromeModel(ColorScaleModel model) {
+		double values[] = model.values;
+
+		Color[] colors = model.colors;
+
+		int len = colors.length;
+		Color mono[] = new Color[len];
+
+		mono[0] = new Color(0f, 0f, 0f);
+		mono[len - 1] = new Color(1f, 1f, 1f);
+		float del = 1.0f / (len - 1);
+
+		for (int i = 1; i < len - 1; i++) {
+			float c = i * del;
+			mono[i] = new Color(c, c, c);
+		}
+
+//		System.out.print("vals [" + values.length + "] ");
+//		for (double v : values) {
+//			String s = String.format("%-4.2f ", v);
+//			System.out.print(s);
+//		}
+//		System.out.println();
+//		
+//		System.out.print("colors [" + mono.length + "] ");
+//		for (Color col : mono) {
+//			float[] comp = col.getColorComponents(null);
+//			String s = String.format("[%-4.2f, %-4.2f, %-4.2f] ", comp[0], comp[1], comp[2]);
+//			System.out.print(s);
+//		}
+//		System.out.println();
+
+		ColorScaleModel mcm = new ColorScaleModel(values, mono);
+
+		mcm.HOTCOLOR = Color.cyan;
+		return mcm;
+	}
+
+	/**
+	 * Create a uniform array of values with one more entry than are in a colors
+	 * array.
+	 * 
+	 * @param colors a colors array
+	 * @param min    the min value
+	 * @param max    the max value
+	 * @return the values array
+	 */
+	public static double[] uniformValueArray(Color colors[], double min, double max) {
+		int len = colors.length;
+		double vals[] = new double[len + 1];
+		double del = (max - min) / len;
+
+		vals[0] = min;
+		vals[len] = max;
+
+		for (int i = 1; i < len; i++) {
+			vals[i] = min + i * del;
+		}
+
+		return vals;
+	}
+
 	public boolean isTooSmall(Color color) {
 		return (_tooSmallColor.equals(color));
 	}

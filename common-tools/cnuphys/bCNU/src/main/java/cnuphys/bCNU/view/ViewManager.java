@@ -21,8 +21,7 @@ import cnuphys.bCNU.menu.MenuManager;
  * 
  */
 @SuppressWarnings("serial")
-public class ViewManager extends Vector<BaseView>
-		implements InternalFrameListener {
+public class ViewManager extends Vector<BaseView> implements InternalFrameListener {
 
 	// singleton instance
 	private static ViewManager instance;
@@ -33,8 +32,8 @@ public class ViewManager extends Vector<BaseView>
 	// the plugin view menu
 	private JMenu _pluginMenu;
 	private boolean _firstPlugin = true;
-	
-	//histogram view
+
+	// histogram view
 	private JMenu _histoMenu;
 	private boolean _firstHisto = true;
 
@@ -50,11 +49,12 @@ public class ViewManager extends Vector<BaseView>
 	private ViewManager() {
 		_viewMenu = new JMenu("Views");
 	}
-	
+
 	/**
 	 * Make the view visible and change to its viretual panel
+	 * 
 	 * @param view the view
-	 * @param vis whether it is visible
+	 * @param vis  whether it is visible
 	 */
 	public void setVisible(BaseView view, boolean vis) {
 		view.setVisible(vis);
@@ -104,8 +104,7 @@ public class ViewManager extends Vector<BaseView>
 				_firstHisto = false;
 			}
 			_histoMenu.add(mi);
-		}
-		else {
+		} else {
 			_viewMenu.add(mi);
 		}
 
@@ -122,17 +121,17 @@ public class ViewManager extends Vector<BaseView>
 	 * Removes (unregisters) a view.
 	 * 
 	 * @param view the View to remove.
-	 * @return <code>true</code> if this ViewManager contained the specified
-	 *         view.
+	 * @return <code>true</code> if this ViewManager contained the specified view.
 	 */
 	public boolean remove(BaseView view) {
 		if (view != null) {
 			view.removeInternalFrameListener(this);
-			Log.getInstance()
-					.config("ViewManager: removed view: " + view.getTitle());
+			Log.getInstance().config("ViewManager: removed view: " + view.getTitle());
 
 			notifyListeners(view, false);
-			return super.remove(view);
+			boolean removed = super.remove(view);
+			view.dispose();
+			return removed;
 		}
 		return false;
 	}
@@ -259,8 +258,7 @@ public class ViewManager extends Vector<BaseView>
 				IViewListener listener = (IViewListener) listeners[i + 1];
 				if (added) {
 					listener.viewAdded(view);
-				}
-				else {
+				} else {
 					listener.viewRemoved(view);
 				}
 			}
@@ -298,5 +296,5 @@ public class ViewManager extends Vector<BaseView>
 
 		_listenerList.remove(IViewListener.class, listener);
 	}
-		
+
 }

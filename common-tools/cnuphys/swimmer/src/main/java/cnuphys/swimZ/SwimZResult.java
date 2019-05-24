@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cnuphys.lund.GeneratedParticleRecord;
-import org.jlab.clas.clas.math.FastMath;
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.swim.SwimTrajectory;
 
@@ -35,27 +35,20 @@ public class SwimZResult {
 	// the sign of pz
 	private int _pzSign;
 
-
-	//the |dl x B| integral in kG cm
+	// the |dl x B| integral in kG cm
 	private double _bdl = Double.NaN;
-	
-	//the pathlength in cm
+
+	// the pathlength in cm
 	private double _pathLength = Double.NaN;;
 
 	/**
-	 * Constructor Create a SwimZResult with the trajectory initialized but
-	 * empty.
+	 * Constructor Create a SwimZResult with the trajectory initialized but empty.
 	 * 
-	 * @param Q
-	 *            the integer charge (-1 for electron)
-	 * @param p
-	 *            the momentum in Gev/c
-	 * @param zo
-	 *            the initial z value in cm;
-	 * @param zf
-	 *            the final z value in cm;
-	 * @param capacity
-	 *            the initial capacity of the trajectory
+	 * @param Q        the integer charge (-1 for electron)
+	 * @param p        the momentum in Gev/c
+	 * @param zo       the initial z value in cm;
+	 * @param zf       the final z value in cm;
+	 * @param capacity the initial capacity of the trajectory
 	 */
 	public SwimZResult(int Q, double p, double zo, double zf, int capacity) {
 		_Q = Q;
@@ -79,8 +72,7 @@ public class SwimZResult {
 	 * Get the momentum three-vector for a given statevector, which should be on
 	 * this result's trajectory.
 	 * 
-	 * @param sv
-	 *            the given state vector
+	 * @param sv the given state vector
 	 * @return the three momentum in x, y, z order in GeV/c
 	 */
 	public double[] getThreeMomentum(SwimZStateVector sv) {
@@ -88,55 +80,57 @@ public class SwimZResult {
 		getThreeMomentum(sv, p3);
 		return p3;
 	}
-	
+
 	/**
 	 * Get the approximate path length in cm
- 	 * @return the approximate path length in cm
+	 * 
+	 * @return the approximate path length in cm
 	 */
 	public double getPathLength() {
-		
+
 		// only compute if necessary
 		if (Double.isNaN(_pathLength)) {
 			_pathLength = 0;
 			int size = size();
-			
+
 			SwimZStateVector prev = null;
 			if (size > 1) {
-				
-				double  dr[] = new double[3];
-				
+
+				double dr[] = new double[3];
+
 				for (SwimZStateVector next : _trajectory) {
 					if (prev != null) {
 						prev.dR(next, dr);
 						_pathLength += vecmag(dr);
-						
-				}
+
+					}
 					prev = next;
 				}
 			}
 		}
-		
+
 		return _pathLength;
 	}
-	
+
 	/**
 	 * Get the approximate integral |B x dL|
-     * @param probe the probe use to compute this result trajectory
+	 * 
+	 * @param probe the probe use to compute this result trajectory
 	 * @return the approximate integral |B x dL| in kG*cm
 	 */
 	public double getBDL(FieldProbe probe) {
-		
+
 		// only compute if necessary
 		if (Double.isNaN(_bdl)) {
 			_bdl = 0;
 			_pathLength = 0;
 			int size = size();
-			
+
 			SwimZStateVector prev = null;
 			if (size > 1) {
-				
-				double  dr[] = new double[3];
-				
+
+				double dr[] = new double[3];
+
 				float b[] = new float[3];
 				double bxdl[] = new double[3];
 
@@ -144,13 +138,13 @@ public class SwimZResult {
 					if (prev != null) {
 						prev.dR(next, dr);
 						_pathLength += vecmag(dr);
-					
-						//get the field at the midpoint
+
+						// get the field at the midpoint
 						float xmid = (float) ((prev.x + next.x) / 2);
 						float ymid = (float) ((prev.y + next.y) / 2);
 						float zmid = (float) ((prev.z + next.z) / 2);
 						probe.field(xmid, ymid, zmid, b);
-						
+
 						cross(b, dr, bxdl);
 						_bdl += vecmag(bxdl);
 
@@ -159,31 +153,31 @@ public class SwimZResult {
 				}
 			}
 		}
-		
+
 		return _bdl;
 	}
-	
-	
+
 	/**
 	 * Get the approximate integral |B x dL|
+	 * 
 	 * @param sector sector 1..6
-     * @param probe the probe use to compute this result trajectory
+	 * @param probe  the probe use to compute this result trajectory
 	 * @return the approximate integral |B x dL| in kG*cm
 	 */
 	public double sectorGetBDL(int sector, FieldProbe probe) {
-		
+
 		// only compute if necessary
 		if (Double.isNaN(_bdl)) {
 			_bdl = 0;
 			_pathLength = 0;
 
 			int size = size();
-			
+
 			SwimZStateVector prev = null;
 			if (size > 1) {
-				
-				double  dr[] = new double[3];
-	
+
+				double dr[] = new double[3];
+
 				float b[] = new float[3];
 				double bxdl[] = new double[3];
 
@@ -191,13 +185,13 @@ public class SwimZResult {
 					if (prev != null) {
 						prev.dR(next, dr);
 						_pathLength += vecmag(dr);
-						
-						//get the field at the midpoint
+
+						// get the field at the midpoint
 						float xmid = (float) ((prev.x + next.x) / 2);
 						float ymid = (float) ((prev.y + next.y) / 2);
 						float zmid = (float) ((prev.z + next.z) / 2);
 						probe.field(sector, xmid, ymid, zmid, b);
-						
+
 						cross(b, dr, bxdl);
 						_bdl += vecmag(bxdl);
 
@@ -206,10 +200,10 @@ public class SwimZResult {
 				}
 			}
 		}
-		
+
 		return _bdl;
 	}
-	
+
 	// usual cross product c = a x b
 	private static void cross(float a[], double b[], double c[]) {
 		c[0] = a[1] * b[2] - a[2] * b[1];
@@ -227,8 +221,7 @@ public class SwimZResult {
 	 * Get the momentum three-vector for a given statevector, which should be on
 	 * this result's trajectory.
 	 * 
-	 * @param sv
-	 *            the given state vector
+	 * @param sv the given state vector
 	 * @p3 on return holds the momentum in x, y, z order in GeV/c
 	 */
 	public void getThreeMomentum(SwimZStateVector sv, double p3[]) {
@@ -298,8 +291,7 @@ public class SwimZResult {
 	/**
 	 * Add a state vector into the trajectory
 	 * 
-	 * @param vector
-	 *            the vector to add
+	 * @param vector the vector to add
 	 */
 	protected void add(SwimZStateVector vector) {
 		_trajectory.add(vector);
@@ -353,8 +345,7 @@ public class SwimZResult {
 	/**
 	 * Get the values of theta and phi from the momentum and a state vector.
 	 * 
-	 * @param sv
-	 *            the statevector, presumably on this trajectory
+	 * @param sv the statevector, presumably on this trajectory
 	 * @return theta and phi in an array, in that order, in degrees.
 	 */
 	public double[] getThetaAndPhi(SwimZStateVector sv) {
@@ -371,8 +362,7 @@ public class SwimZResult {
 	}
 
 	/**
-	 * Get the values of theta and phi from the momentum and the final state
-	 * vector.
+	 * Get the values of theta and phi from the momentum and the final state vector.
 	 * 
 	 * @return theta and phi in an array, in that order, in degrees.
 	 */

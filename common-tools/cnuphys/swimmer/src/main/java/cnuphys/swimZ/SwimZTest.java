@@ -1,7 +1,6 @@
 package cnuphys.swimZ;
 
-import Jama.Matrix;
-import org.jlab.clas.clas.math.FastMath;
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
@@ -38,7 +37,6 @@ public class SwimZTest {
 	private static Swimmer swimmer;
 
 	public static void main(String arg[]) {
-		
 
 		MagneticFields.getInstance().initializeMagneticFields();
 		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
@@ -46,7 +44,7 @@ public class SwimZTest {
 //		swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
 
 		System.out.println("Active Field Description: " + MagneticFields.getInstance().getActiveFieldDescription());
-		
+
 		FastMath.setMathLib(FastMath.MathLib.SUPERFAST);
 		int numTest = 20000;
 //		testParabolicApproximation(numTest);
@@ -94,7 +92,6 @@ public class SwimZTest {
 		partialReport(result, timePerSwim, "PARABOLIC APPROX");
 		footer("SwimZ PARABOLIC APPROX");
 	}
-	
 
 	// test the new SwimZ uniform integrator
 	private static void testUniform(int numTimes) {
@@ -144,7 +141,7 @@ public class SwimZTest {
 		hdataReport(hdata, 1);
 		footer("SwimZ ADAPTIVE");
 	}
-	
+
 	private static void testAdaptiveEndpointOnly(int numTimes) {
 		header("SwimZ ADAPTIVE ENDPOINT ONLY");
 
@@ -171,7 +168,7 @@ public class SwimZTest {
 		footer("SwimZ ADAPTIVE ENDPOINT ONLY");
 
 	}
-	
+
 	// test the old swimmer adaptive
 	private static void testOldAdaptive(int numTimes) {
 		header("Old Swimmer ADAPTIVE");
@@ -214,7 +211,7 @@ public class SwimZTest {
 
 		System.out.println("p: " + pf + " GeV/c" + " time/swim: " + timePerSwim + " ms");
 	}
-	
+
 	private static void partialReport(SwimZStateVector start, SwimZStateVector stop, double timePerSwim, String name) {
 //		double p3v[] = result.getFinalThreeMomentum();
 //		// check
@@ -233,7 +230,6 @@ public class SwimZTest {
 //		System.out.println("p: " + pf + " GeV/c" + " time/swim: " + timePerSwim + " ms");
 		System.out.println("time/swim: " + timePerSwim + " ms");
 	}
-
 
 	private static void printVect(double v[], String s) {
 		String out = String.format("%s [%-12.5f, %-12.5f, %-12.5f]", s, v[0], v[1], v[2]);
@@ -266,20 +262,13 @@ public class SwimZTest {
 	/**
 	 * calls the old swimmer with uniform step size
 	 * 
-	 * @param xo
-	 *            in METERS
-	 * @param yo
-	 *            in METERS
-	 * @param zo
-	 *            in METERS
-	 * @param zf
-	 *            in METERS
-	 * @param p
-	 *            in GeV
-	 * @param theta
-	 *            degrees
-	 * @param phi
-	 *            degrees
+	 * @param xo    in METERS
+	 * @param yo    in METERS
+	 * @param zo    in METERS
+	 * @param zf    in METERS
+	 * @param p     in GeV
+	 * @param theta degrees
+	 * @param phi   degrees
 	 */
 	private static void oldUniform(int Q, double xo, double yo, double zo, double zf, double p, double theta,
 			double phi, boolean printSumm) {
@@ -300,20 +289,13 @@ public class SwimZTest {
 	/**
 	 * Calls the old adaptive method
 	 * 
-	 * @param xo
-	 *            in METERS
-	 * @param yo
-	 *            in METERS
-	 * @param zo
-	 *            in METERS
-	 * @param zf
-	 *            in METERS
-	 * @param p
-	 *            in GeV
-	 * @param theta
-	 *            degrees
-	 * @param phi
-	 *            degrees
+	 * @param xo    in METERS
+	 * @param yo    in METERS
+	 * @param zo    in METERS
+	 * @param zf    in METERS
+	 * @param p     in GeV
+	 * @param theta degrees
+	 * @param phi   degrees
 	 */
 	private static void oldAdaptive(int Q, double xo, double yo, double zo, double zf, double p, double theta,
 			double phi, boolean printSumm) {

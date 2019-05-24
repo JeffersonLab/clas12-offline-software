@@ -298,7 +298,6 @@ public class NoiseTest extends JFrame {
 	 */
 	public static void main(String args[]) {
 
-
 		final NoiseTest noiseTest = new NoiseTest();
 
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {

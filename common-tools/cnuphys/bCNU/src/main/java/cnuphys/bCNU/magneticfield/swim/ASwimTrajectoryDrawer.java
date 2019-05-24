@@ -31,39 +31,34 @@ import cnuphys.swim.Swimming;
  * @author heddle
  *
  */
-public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
-		IProjector {
-	
-	//colors
+public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements IProjector {
+
+	// colors
 	protected static final Color sectChangeColor = X11Colors.getX11Color("purple", 128);
 	protected static final Color tracerColor = new Color(0, 0, 0, 50);
 	protected static final Stroke tracerStroke = GraphicsUtilities.getStroke(3f, LineStyle.SOLID);
 	protected static final Stroke planeStroke = GraphicsUtilities.getStroke(1.5f, LineStyle.SOLID);
 
-	private static RenderingHints renderHints = new RenderingHints(
-			RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+	private static RenderingHints renderHints = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
+			RenderingHints.VALUE_ANTIALIAS_ON);
 	static {
-		renderHints.put(RenderingHints.KEY_RENDERING,
-				RenderingHints.VALUE_RENDER_QUALITY);
+		renderHints.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 	};
 
 	// these are the 2D trajectories
-	protected Vector<SwimTrajectory2D> _trajectories2D = new Vector<SwimTrajectory2D>(
-			20);
+	protected Vector<SwimTrajectory2D> _trajectories2D = new Vector<SwimTrajectory2D>(20);
 
 	protected SwimTrajectory2D _closestTrajectory;
-	
+
 	/** mark sector changes? */
 	protected boolean _markSectChanges = false;
-	protected double _minMarkR = 25; //cm
+	protected double _minMarkR = 25; // cm
 
 	/**
 	 * Actual drawing method
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the base container
+	 * @param g         the graphics context
+	 * @param container the base container
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
@@ -75,7 +70,7 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 
 		if (SwimMenu.getInstance().showMonteCarloTracks()) {
 			List<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
-			
+
 			if (trajectories != null) {
 
 				for (SwimTrajectory trajectory : trajectories) {
@@ -83,8 +78,7 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 					// will
 					// appear on this view (for example)
 					if (!veto(trajectory)) {
-						_trajectories2D.add(new SwimTrajectory2D(trajectory,
-								this));
+						_trajectories2D.add(new SwimTrajectory2D(trajectory, this));
 					}
 				}
 
@@ -99,19 +93,17 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 
 		// reconstructed?
 		if (SwimMenu.getInstance().showReconstructedTracks()) {
-			List<SwimTrajectory> trajectories = Swimming
-					.getReconTrajectories();
+			List<SwimTrajectory> trajectories = Swimming.getReconTrajectories();
 
 			if (trajectories != null) {
 
 				for (SwimTrajectory trajectory : trajectories) {
-										
+
 					// give a chance to veto a trajectory, e.g. no chance it
 					// will
 					// appear on this view (for example)
 					if (!veto(trajectory)) {
-						_trajectories2D.add(new SwimTrajectory2D(trajectory,
-								this));
+						_trajectories2D.add(new SwimTrajectory2D(trajectory, this));
 					}
 				}
 
@@ -126,29 +118,25 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 	}
 
 	/**
-	 * Here we have a chance to veto a trajectory. For example, we may decide
-	 * that the trajectory won't appear on this view (assuming a view owns this
-	 * drawer) and so don't bother to compute it. The default implementation
-	 * vetoes nothing.
+	 * Here we have a chance to veto a trajectory. For example, we may decide that
+	 * the trajectory won't appear on this view (assuming a view owns this drawer)
+	 * and so don't bother to compute it. The default implementation vetoes nothing.
 	 * 
-	 * @param trajectory
-	 *            the trajectory to test.
+	 * @param trajectory the trajectory to test.
 	 * @return <code>true</code> if this trajectory is vetoed.
 	 */
 	protected boolean veto(SwimTrajectory trajectory) {
 		return false;
 	}
-	
-	//denote sector changes
-	private void markSectorChanges(Graphics g, IContainer container,
-			SwimTrajectory2D trajectory) {
-		
-		
+
+	// denote sector changes
+	private void markSectorChanges(Graphics g, IContainer container, SwimTrajectory2D trajectory) {
+
 		int[] indices = trajectory.sectChangeIndices();
 		if (indices == null) {
 			return;
 		}
-		
+
 		SwimTrajectory traj3D = trajectory.getTrajectory3D();
 		Point pp = new Point();
 		for (int idx : indices) {
@@ -165,20 +153,16 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 	/**
 	 * Draw a trajectory
 	 * 
-	 * @param g
-	 *            the graphics object
-	 * @param container
-	 *            the rendering container
-	 * @param trajectory
-	 *            the 2D (already projected) trajectory to draw
+	 * @param g          the graphics object
+	 * @param container  the rendering container
+	 * @param trajectory the 2D (already projected) trajectory to draw
 	 */
-	private void drawSwimTrajectory(Graphics g, IContainer container,
-			SwimTrajectory2D trajectory) {
-		
+	private void drawSwimTrajectory(Graphics g, IContainer container, SwimTrajectory2D trajectory) {
+
 		if (!acceptSimpleTrack(trajectory)) {
 			return;
 		}
-		
+
 //		//unknowns (orange--track based)
 //		_lundIds.add(new LundId("Lepton", "?TB" + SUPERPLUS,   -99,  0,  3, 0));
 //		_lundIds.add(new LundId("Lepton", "?TB" + SUPERMINUS, -101,  0, -3, 0));
@@ -188,22 +172,20 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 //		_lundIds.add(new LundId("Lepton", "?HB" + SUPERPLUS,   -199,  0,  3, 0));
 //		_lundIds.add(new LundId("Lepton", "?HB" + SUPERMINUS, -201,  0, -3, 0));
 //		_lundIds.add(new LundId("Lepton", "?HB" + SUPERZERO,   -300, 0, 0, 0));
-		
+
 		LundId lid = trajectory.getTrajectory3D().getLundId();
 		int id = lid.getId();
-		
-		String source  = trajectory.getSource().toLowerCase();
-	//	System.err.println("SOURCE of TRAJ: [" + source + "]");
+
+		String source = trajectory.getSource().toLowerCase();
+		// System.err.println("SOURCE of TRAJ: [" + source + "]");
 
 		if (source.contains("hbtracks")) {
 			plainDrawSwimTrajectory(g, container, trajectory, Color.yellow);
 			return;
-		}
-		else if (source.contains("tbtracks")) {
+		} else if (source.contains("tbtracks")) {
 			plainDrawSwimTrajectory(g, container, trajectory, X11Colors.getX11Color("dark orange"));
 			return;
-		}
-		else if (source.contains("cvtrec")) {
+		} else if (source.contains("cvtrec")) {
 			plainDrawSwimTrajectory(g, container, trajectory, X11Colors.getX11Color("dark green"));
 			return;
 		}
@@ -219,7 +201,6 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 //			plainDrawSwimTrajectory(g, container, trajectory, Color.yellow);
 //			return;
 //		}
-
 
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setRenderingHints(renderHints);
@@ -242,38 +223,33 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 		}
 
 		if (poly.npoints > 1) {
-			
-			//tracer traj
+
+			// tracer traj
 			g2.setColor(tracerColor);
 			g2.setStroke(tracerStroke);
 			g.drawPolyline(poly.xpoints, poly.ypoints, poly.npoints);
-			
-			
+
 			LundStyle style = LundStyle.getStyle(lid);
 			g.setColor(style.getLineColor());
 			g2.setStroke(style.getStroke());
 			// g.drawPolyline(poly.xpoints, poly.ypoints, poly.npoints);
 
-			GraphicsUtilities.drawHighlightedPolyline(g2, poly.xpoints,
-					poly.ypoints, poly.npoints, style.getLineColor(),
-					getHighlightColor(lid));
+			GraphicsUtilities.drawHighlightedPolyline(g2, poly.xpoints, poly.ypoints, poly.npoints,
+					style.getLineColor(), getHighlightColor(lid));
 
 		}
 
 		g2.setStroke(oldStroke);
 	}
-	
-	public abstract boolean acceptSimpleTrack(SwimTrajectory2D trajectory); 
-	
+
+	public abstract boolean acceptSimpleTrack(SwimTrajectory2D trajectory);
+
 	/**
 	 * Draw a trajectory
 	 * 
-	 * @param g
-	 *            the graphics object
-	 * @param container
-	 *            the rendering container
-	 * @param trajectory
-	 *            the 2D (already projected) trajectory to draw
+	 * @param g          the graphics object
+	 * @param container  the rendering container
+	 * @param trajectory the 2D (already projected) trajectory to draw
 	 */
 	private void plainDrawSwimTrajectory(Graphics g, IContainer container, SwimTrajectory2D trajectory, Color color) {
 
@@ -309,8 +285,7 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 	/**
 	 * Obtain the highlight color for drawing a particle trajectory
 	 * 
-	 * @param lid
-	 *            the Lund Id
+	 * @param lid the Lund Id
 	 * @returnthe highlight color for drawing a particle trajectory
 	 */
 	public static Color getHighlightColor(LundId lid) {
@@ -338,8 +313,7 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements
 	/**
 	 * Get the distance of closest approach to any 2D (projected) trajectory.
 	 * 
-	 * @param wp
-	 *            the point in question
+	 * @param wp the point in question
 	 * @return the closest distance. The closest trajectory will be cached in
 	 *         <code>closestTrajectory</code>.
 	 */

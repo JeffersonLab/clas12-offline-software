@@ -23,84 +23,84 @@ import cnuphys.splot.plot.SplotMenus;
  */
 public abstract class AExample extends JFrame {
 
-    // the plot canvas
-    protected PlotCanvas _canvas;
+	// the plot canvas
+	protected PlotCanvas _canvas;
 
-    // the menus and items
-    protected SplotMenus _menus;
+	// the menus and items
+	protected SplotMenus _menus;
 
-    public AExample() {
-	super("sPlot");
+	public AExample() {
+		super("sPlot");
 
-	// Initialize look and feel
-	GraphicsUtilities.initializeLookAndFeel();
+		// Initialize look and feel
+		GraphicsUtilities.initializeLookAndFeel();
 
-	System.out.println("Environment: " + Environment.getInstance());
+		System.out.println("Environment: " + Environment.getInstance());
 
-	// set up what to do if the window is closed
-	WindowAdapter windowAdapter = new WindowAdapter() {
-	    @Override
-	    public void windowClosing(WindowEvent event) {
-		System.exit(1);
-	    }
-	};
-	addWindowListener(windowAdapter);
+		// set up what to do if the window is closed
+		WindowAdapter windowAdapter = new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent event) {
+				System.exit(1);
+			}
+		};
+		addWindowListener(windowAdapter);
 
-	try {
-	    _canvas = new PlotCanvas(createDataSet(), getPlotTitle(),
-		    getXAxisLabel(), getYAxisLabel());
-	} catch (DataSetException e) {
-	    e.printStackTrace();
-	    return;
+		try {
+			_canvas = new PlotCanvas(createDataSet(), getPlotTitle(), getXAxisLabel(), getYAxisLabel());
+		}
+		catch (DataSetException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		// add the menu bar
+		JMenuBar mb = new JMenuBar();
+		setJMenuBar(mb);
+		_menus = new SplotMenus(_canvas, mb, true);
+		fillData();
+		setPreferences();
+		final PlotPanel ppanel = new PlotPanel(_canvas);
+
+		ppanel.setPreferredSize(new Dimension(750, 700));
+
+		add(ppanel, BorderLayout.CENTER);
+
+		// add a curve panel
+		addEast();
+		pack();
+		GraphicsUtilities.centerComponent(this);
 	}
 
-	// add the menu bar
-	JMenuBar mb = new JMenuBar();
-	setJMenuBar(mb);
-	_menus = new SplotMenus(_canvas, mb, true);
-	fillData();
-	setPreferences();
-	final PlotPanel ppanel = new PlotPanel(_canvas);
+	/**
+	 * Get the plot canvas
+	 * 
+	 * @return the plot canvas
+	 */
+	public PlotCanvas getPlotCanvas() {
+		return _canvas;
+	}
 
-	ppanel.setPreferredSize(new Dimension(750, 700));
+	// add the east component
+	private void addEast() {
+		// _curveEditor = new CurveEditorPanel(_canvas);
+		// add(_curveEditor, BorderLayout.EAST);
+	}
 
-	add(ppanel, BorderLayout.CENTER);
+	protected abstract DataSet createDataSet() throws DataSetException;
 
-	// add a curve panel
-	addEast();
-	pack();
-	GraphicsUtilities.centerComponent(this);
-    }
+	protected abstract String[] getColumnNames();
 
-    /**
-     * Get the plot canvas
-     * 
-     * @return the plot canvas
-     */
-    public PlotCanvas getPlotCanvas() {
-	return _canvas;
-    }
+	protected abstract String getXAxisLabel();
 
-    // add the east component
-    private void addEast() {
-	// _curveEditor = new CurveEditorPanel(_canvas);
-	// add(_curveEditor, BorderLayout.EAST);
-    }
+	protected abstract String getYAxisLabel();
 
-    protected abstract DataSet createDataSet() throws DataSetException;
+	protected abstract String getPlotTitle();
 
-    protected abstract String[] getColumnNames();
+	// fill the plot data
+	public abstract void fillData();
 
-    protected abstract String getXAxisLabel();
-
-    protected abstract String getYAxisLabel();
-
-    protected abstract String getPlotTitle();
-
-    // fill the plot data
-    public abstract void fillData();
-
-    // set the preferences
-    public abstract void setPreferences();
+	// set the preferences
+	public abstract void setPreferences();
 
 }

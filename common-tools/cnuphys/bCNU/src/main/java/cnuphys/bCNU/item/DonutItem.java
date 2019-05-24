@@ -8,29 +8,21 @@ import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.bCNU.layer.LogicalLayer;
 
 public class DonutItem extends PolygonItem {
-	
+
 	/**
 	 * Create a donut item.
 	 * 
-	 * @param layer
-	 *            the Layer this item is on.
-	 * @param wpc
-	 *            the center of the arc
-	 * @param radiusInner
-	 *            the inner radius
-	 * @param radiusOuter
-	 *            the outer radius
-	 * @param startAngle
-	 *            the startAngle in degrees measured like the usual polar angle
-	 *            theta
-	 * @param arcAngle
-	 *            the opening angle COUNTERCLOCKWISE in degrees.
+	 * @param layer       the Layer this item is on.
+	 * @param wpc         the center of the arc
+	 * @param radiusInner the inner radius
+	 * @param radiusOuter the outer radius
+	 * @param startAngle  the startAngle in degrees measured like the usual polar
+	 *                    angle theta
+	 * @param arcAngle    the opening angle COUNTERCLOCKWISE in degrees.
 	 */
-	public DonutItem(LogicalLayer layer, Point2D.Double wpc,
-			double radiusInner, double radiusOuter, double startAngle,
+	public DonutItem(LogicalLayer layer, Point2D.Double wpc, double radiusInner, double radiusOuter, double startAngle,
 			double arcAngle) {
-		super(layer, WorldGraphicsUtilities.getDonutPoints(wpc, radiusInner,
-				radiusOuter, startAngle, arcAngle));
+		super(layer, WorldGraphicsUtilities.getDonutPoints(wpc, radiusInner, radiusOuter, startAngle, arcAngle));
 		setAzimuth(90 - startAngle - arcAngle / 2);
 		// System.err.println("AZIMUTH: " + (90 - startAngle - arcAngle/2));
 		_focus = wpc;

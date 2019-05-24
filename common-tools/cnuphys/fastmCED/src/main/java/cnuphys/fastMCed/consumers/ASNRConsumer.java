@@ -27,11 +27,12 @@ public abstract class ASNRConsumer extends PhysicsEventConsumer {
 		return errStr;
 	}
 
-
 	/**
-	 * Load a dictionary (looking in a dictionaries folder in the home dir,
-	 * clearly that is only temporary). If not found, create an empty dictionary
-	 * @param bendDirection either IN_BENDER or OIUT_BENDER constant from SNRDictionary class.
+	 * Load a dictionary (looking in a dictionaries folder in the home dir, clearly
+	 * that is only temporary). If not found, create an empty dictionary
+	 * 
+	 * @param bendDirection either IN_BENDER or OIUT_BENDER constant from
+	 *                      SNRDictionary class.
 	 */
 	protected void loadOrCreateDictionary(int bendDirection) {
 		double torusScale = 0;
@@ -49,8 +50,7 @@ public abstract class ASNRConsumer extends PhysicsEventConsumer {
 		String fileName = SNRDictionary.getFileName(bendDirection, useTorus, torusScale, useSolenoid, solenoidScale);
 
 		String dirPath = Environment.getInstance().getHomeDirectory() + "/dictionaries";
-		
-		
+
 		SNRDictionary dictionary = null;
 
 		File file = new File(dirPath, fileName);
@@ -65,22 +65,21 @@ public abstract class ASNRConsumer extends PhysicsEventConsumer {
 		if (dictionary == null) {
 			dictionary = new SNRDictionary(bendDirection, useTorus, torusScale, useSolenoid, solenoidScale);
 		}
-		
+
 		if (bendDirection == SNRDictionary.OUT_BENDER) {
 			_outDictionary = dictionary;
-		}
-		else {
+		} else {
 			_inDictionary = dictionary;
 		}
 	}
-	
-	//get the truth information
-	//first entry with matching charge
+
+	// get the truth information
+	// first entry with matching charge
 	protected TrajectoryRowData getTruth(int charge) {
 		ISwimAll allSwimmer = PhysicsEventManager.getInstance().getAllSwimmer();
-		
+
 		boolean found = false;
-		
+
 		for (TrajectoryRowData trajData : allSwimmer.getRowData()) {
 			if (trajData.getCharge() == charge) {
 				return trajData;

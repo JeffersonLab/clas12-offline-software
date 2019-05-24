@@ -1,0 +1,35 @@
+[
+    {
+        "entries": [
+            {
+                "info": "sector (1-6)", 
+                "name": "sector", 
+                "type": "B"
+            }, 
+            {
+                "info": "half sector (1 or 2)", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "ring (1,2,3,4)", 
+                "name": "component", 
+                "type": "S"
+            }, 
+            {
+                "info": "order: 2 - TDCL , 3 - TDCR", 
+                "name": "order", 
+                "type": "B"
+            }, 
+            {
+                "info": "TDC value", 
+                "name": "TDC", 
+                "type": "I"
+            }
+        ], 
+        "group": 21500, 
+        "info": "TDC bank for the High Threshold Cerenkov Counter", 
+        "item": 12, 
+        "name": "HTCC::tdc"
+    }
+]

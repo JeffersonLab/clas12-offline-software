@@ -4,20 +4,21 @@ import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.MaxCountExceededException;
 import org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
 
-import org.jlab.clas.clas.math.FastMath;
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 
 /**
- * This class holds the derivatives (ODE) for swimmin with z as the
- * independent variable. The integration follows the method described for the
- * HERA-B magnet here: http://arxiv.org/pdf/physics/0511177v1.pdf<br>
+ * This class holds the derivatives (ODE) for swimmin with z as the independent
+ * variable. The integration follows the method described for the HERA-B magnet
+ * here: http://arxiv.org/pdf/physics/0511177v1.pdf<br>
  * <p>
  * The "official" state vector has five elements: <br>
  * (x, y, tx, ty, q) <br>
- * Where x and y are the transverse coordinates (meters), tx = px/pz, ty = py/pz,
- * and q = Q/|p| where Q is the integer charge (e.g. -1 for an electron)
+ * Where x and y are the transverse coordinates (meters), tx = px/pz, ty =
+ * py/pz, and q = Q/|p| where Q is the integer charge (e.g. -1 for an electron)
  * <p>
- * However, since q is a constant, we only have four first order differential eqns.
+ * However, since q is a constant, we only have four first order differential
+ * eqns.
  * <p>
  * UNITS
  * <ul>
@@ -31,18 +32,17 @@ import cnuphys.magfield.FieldProbe;
  *
  */
 final class SwimZODE implements FirstOrderDifferentialEquations {
-	
-	
+
 	// obtains the field in kG, coordinates should be in cm
 	private FieldProbe _probe;
 
 	// the constant member of the state vector
 	private double _q;
-	
-	//q times v
+
+	// q times v
 	private double _qv;
 
-	//hold the mag field
+	// hold the mag field
 	private float B[] = new float[3];
 
 	public SwimZODE() {
@@ -52,26 +52,20 @@ final class SwimZODE implements FirstOrderDifferentialEquations {
 	/**
 	 * Create the derivative (i.e. the differential equations)
 	 * 
-	 * @param Q
-	 *            -1 for electron, +1 for proton, etc.
-	 * @param p
-	 *            the magnitude of the momentum in GeV/c.
-	 * @param probe
-	 *            the magnetic field getter
+	 * @param Q     -1 for electron, +1 for proton, etc.
+	 * @param p     the magnitude of the momentum in GeV/c.
+	 * @param probe the magnetic field getter
 	 */
 	public SwimZODE(int Q, double p, FieldProbe probe) {
 		set(Q, p, probe);
 	}
-	
+
 	/**
 	 * Set the parameters
 	 * 
-	 * @param Q
-	 *            -1 for electron, +1 for proton, etc.
-	 * @param p
-	 *            the magnitude of the momentum in GeV/c.
-	 * @param probe
-	 *            the magnetic field getter
+	 * @param Q     -1 for electron, +1 for proton, etc.
+	 * @param p     the magnitude of the momentum in GeV/c.
+	 * @param probe the magnetic field getter
 	 */
 	public void set(int Q, double p, FieldProbe probe) {
 		_q = Q / p;
@@ -79,25 +73,18 @@ final class SwimZODE implements FirstOrderDifferentialEquations {
 		_qv = _q * apacheSwimZ.C;
 	}
 
-
 	/**
-	 * Compute the derivatives given the value of the independent variable and
-	 * the values of the function. Think of the Differential Equation as being
-	 * dydt = f[y,t].
+	 * Compute the derivatives given the value of the independent variable and the
+	 * values of the function. Think of the Differential Equation as being dydt =
+	 * f[y,t].
 	 * 
-	 * @param z
-	 *            the value of the independent variable (the z coordinate)
-	 *            (input).
-	 * @param x
-	 *            the values of the state vector (x, y, tx, ty, q) at z (input).
-	 * @param dxdz
-	 *            will be filled with the values of the derivatives at z
-	 *            (output).
+	 * @param z    the value of the independent variable (the z coordinate) (input).
+	 * @param x    the values of the state vector (x, y, tx, ty, q) at z (input).
+	 * @param dxdz will be filled with the values of the derivatives at z (output).
 	 */
 	@Override
 	public void computeDerivatives(double z, double[] x, double[] dxdz)
 			throws MaxCountExceededException, DimensionMismatchException {
-		
 
 		// get the field
 		_probe.field((float) x[0], (float) x[1], (float) z, B);
@@ -125,5 +112,5 @@ final class SwimZODE implements FirstOrderDifferentialEquations {
 	public int getDimension() {
 		return 4;
 	}
-	
+
 }

@@ -13,7 +13,7 @@ import cnuphys.bCNU.log.Log;
  * 
  */
 public class Fonts {
-	
+
 	// the common font family for uniformity
 	private static String commonFamily;
 
@@ -30,13 +30,13 @@ public class Fonts {
 
 	// common medium font used for components
 	public static Font largeFont = commonFont(Font.PLAIN, 14);
-	
+
 	// common font used for components
 	public static Font defaultFont = commonFont(Font.PLAIN, 12);
-	
+
 	// common font used for components
 	public static Font defaultLargeFont = commonFont(Font.BOLD, 14);
-	
+
 	// common font used for components
 	public static Font defaultBoldFont = commonFont(Font.BOLD, 12);
 
@@ -54,7 +54,7 @@ public class Fonts {
 
 	// common small font used for components
 	public static Font tweenFont = commonFont(Font.PLAIN, 10);
-	
+
 	// common small font used for components
 	public static Font tweenBoldFont = commonFont(Font.BOLD, 10);
 
@@ -66,7 +66,7 @@ public class Fonts {
 
 	// common font when a tiny label is needed
 	public static Font tinyFont = commonFont(Font.PLAIN, 8);
-	
+
 	// normal monospaced font
 	public static Font defaultMono = new Font(Font.MONOSPACED, Font.PLAIN, 12);
 
@@ -79,14 +79,13 @@ public class Fonts {
 	// tiny monospaced font
 	public static Font tinyMono = new Font(Font.MONOSPACED, Font.PLAIN, 8);
 
-	
-	//attempt to scale the fonts
+	// attempt to scale the fonts
 	static {
 		float scaleFact = Environment.getInstance().getResolutionScaleFactor();
 		if (scaleFact < 0.1f) {
 			scaleFact = 1f;
 		}
-		if (Math.abs(scaleFact -1f) > 0.01) {
+		if (Math.abs(scaleFact - 1f) > 0.01) {
 //			hugeFont = scaleFont(hugeFont, scaleFact);
 //			largeFont = scaleFont(largeFont, scaleFact);
 //			defaultFont = scaleFont(defaultFont, scaleFact);
@@ -98,30 +97,28 @@ public class Fonts {
 //			tinyMono = scaleFont(tinyMono, scaleFact);
 		}
 	}
-	
+
 	/**
 	 * Scale a font
-	 * @param font the font to scale
+	 * 
+	 * @param font        the font to scale
 	 * @param scaleFactor the multiplicative scale factor
 	 * @return the derived font
 	 */
 	public static Font scaleFont(Font font, float scaleFactor) {
-		return font.deriveFont(scaleFactor*font.getSize());
+		return font.deriveFont(scaleFactor * font.getSize());
 	}
-	
+
 	/**
 	 * Obtain a font from the common family
 	 * 
-	 * @param style
-	 *            bitwise Font.PLAIN, Font.BOLD, etc
-	 * @param size
-	 *            the size
+	 * @param style bitwise Font.PLAIN, Font.BOLD, etc
+	 * @param size  the size
 	 * @return the common font.
 	 */
 	public static Font commonFont(int style, int size) {
 		if (commonFamily == null) {
-			String[] fnames = GraphicsEnvironment.getLocalGraphicsEnvironment()
-					.getAvailableFontFamilyNames();
+			String[] fnames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 			if (fnames != null) {
 				for (String s : fnames) {
 					if (targetFamily.equalsIgnoreCase(s)) {

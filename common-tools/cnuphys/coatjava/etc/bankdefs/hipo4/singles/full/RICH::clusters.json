@@ -1,0 +1,80 @@
+[
+    {
+        "entries": [
+            {
+                "info": "Clu id", 
+                "name": "id", 
+                "type": "S"
+            }, 
+            {
+                "info": "Clu size", 
+                "name": "size", 
+                "type": "S"
+            }, 
+            {
+                "info": "Clu sector", 
+                "name": "sector", 
+                "type": "S"
+            }, 
+            {
+                "info": "Clu tile", 
+                "name": "tile", 
+                "type": "S"
+            }, 
+            {
+                "info": "Clu pmt", 
+                "name": "pmt", 
+                "type": "S"
+            }, 
+            {
+                "info": "Clu charge", 
+                "name": "charge", 
+                "type": "F"
+            }, 
+            {
+                "info": "Clu time", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
+                "info": "Clu x", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "Clu y", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "Clu z", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "Clu wtime", 
+                "name": "wtime", 
+                "type": "F"
+            }, 
+            {
+                "info": "Clu wx", 
+                "name": "wx", 
+                "type": "F"
+            }, 
+            {
+                "info": "Clu wy", 
+                "name": "wy", 
+                "type": "F"
+            }, 
+            {
+                "info": "Clu wz", 
+                "name": "wz", 
+                "type": "F"
+            }
+        ], 
+        "group": 22000, 
+        "info": "Reconstructed Clusters in RICH", 
+        "item": 22, 
+        "name": "RICH::clusters"
+    }
+]

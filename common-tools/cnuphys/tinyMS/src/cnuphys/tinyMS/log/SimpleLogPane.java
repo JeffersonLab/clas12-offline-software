@@ -24,7 +24,6 @@ public class SimpleLogPane extends TextPaneScrollPane {
 	private static int INFOFONTSIZE = 11;
 	private static int ERRORFONTSIZE = 11;
 
-
 	private static EnumMap<Log.Level, SimpleAttributeSet> styles;
 
 	static {
@@ -75,8 +74,7 @@ public class SimpleLogPane extends TextPaneScrollPane {
 	/**
 	 * Fix the message so it gets appended nicely.
 	 * 
-	 * @param message
-	 *            the input message.
+	 * @param message the input message.
 	 * @return the fixed message.
 	 */
 	private String fixMessage(String message) {
@@ -93,10 +91,8 @@ public class SimpleLogPane extends TextPaneScrollPane {
 	/**
 	 * Append the message with the appropriate style.
 	 * 
-	 * @param grade
-	 *            the grade of the messaged.
-	 * @param message
-	 *            the message text.
+	 * @param grade   the grade of the messaged.
+	 * @param message the message text.
 	 */
 	private void append(Log.Level grade, String message) {
 		append(fixMessage(message), styles.get(grade), true);

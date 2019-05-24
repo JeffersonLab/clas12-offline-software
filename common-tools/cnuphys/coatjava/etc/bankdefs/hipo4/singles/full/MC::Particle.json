@@ -1,0 +1,50 @@
+[
+    {
+        "entries": [
+            {
+                "info": "particle id", 
+                "name": "pid", 
+                "type": "I"
+            }, 
+            {
+                "info": "x component of the momentum", 
+                "name": "px", 
+                "type": "F"
+            }, 
+            {
+                "info": "y component of the momentum", 
+                "name": "py", 
+                "type": "F"
+            }, 
+            {
+                "info": "z component of the momentum", 
+                "name": "pz", 
+                "type": "F"
+            }, 
+            {
+                "info": "x component of the vertex", 
+                "name": "vx", 
+                "type": "F"
+            }, 
+            {
+                "info": "y component of the vertex", 
+                "name": "vy", 
+                "type": "F"
+            }, 
+            {
+                "info": "z component of the vertex", 
+                "name": "vz", 
+                "type": "F"
+            }, 
+            {
+                "info": "vertex time", 
+                "name": "vt", 
+                "type": "F"
+            }
+        ], 
+        "group": 40, 
+        "info": "Generated Particle information", 
+        "item": 2, 
+        "name": "MC::Particle"
+    }
+]

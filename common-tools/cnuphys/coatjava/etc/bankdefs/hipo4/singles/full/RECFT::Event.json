@@ -1,0 +1,20 @@
+[
+    {
+        "entries": [
+            {
+                "info": "Event Category, if >0:  e-, e-p, e-pi+.....", 
+                "name": "EvCAT", 
+                "type": "S"
+            }, 
+            {
+                "info": "Event Start Time (ns)", 
+                "name": "startTime", 
+                "type": "F"
+            }
+        ], 
+        "group": 300, 
+        "info": "Event Header Bank, shadowing REC::Event with FT-based start time", 
+        "item": 41, 
+        "name": "RECFT::Event"
+    }
+]
