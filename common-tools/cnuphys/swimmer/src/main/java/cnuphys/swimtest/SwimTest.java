@@ -495,7 +495,7 @@ public class SwimTest {
 			@Override
 			public void run() {
 				testFrame.setVisible(true);
-				runLineTest();
+//				runLineTest();
 			}
 		});
 

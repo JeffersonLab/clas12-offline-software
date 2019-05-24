@@ -936,8 +936,8 @@ public class MagneticFields {
 		}
 
 		if (torusFile.exists() && torusFile.canRead()) {
-			File solenoidFile = new File(magdir, "Symm_solenoid_r601_phi1_z1201_2008.dat");
-//			File solenoidFile = new File(magdir, "Symm_solenoid_r601_phi1_z1201_13June2018.dat");
+//			File solenoidFile = new File(magdir, "Symm_solenoid_r601_phi1_z1201_2008.dat");
+			File solenoidFile = new File(magdir, "Symm_solenoid_r601_phi1_z1201_13June2018.dat");
 			if (solenoidFile.exists() && solenoidFile.canRead()) {
 				try {
 					MagneticFields.getInstance().initializeMagneticFieldsFromPath(torusFile.getPath(),

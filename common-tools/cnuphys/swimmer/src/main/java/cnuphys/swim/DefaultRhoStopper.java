@@ -11,112 +11,84 @@ import cnuphys.rk4.IStopper;
 public class DefaultRhoStopper implements IStopper {
 
 	private double _targetRho;
-	private boolean _normalDirection;
-	private double _totalPathLength;
+	private double _totS; //total path length
+	private double _prevS; //previous step path length
 	private double _maxS;
 	private double _accuracy;
 	private double _currentRho = Double.NaN;
-	private double[] _finalY; //final state vector
-
-	public DefaultRhoStopper() {
-	}
+	private double[] _uf; //final state vector
+	private double[] _uprev; //last u with the same sign
+	private double _s0; //starting path length
+	
+	private int _dim;   //dimension of our system
+	
+	private int _startSign; //is starting val bigger or smaller than targ value
 
 	/**
 	 * Rho  stopper that doesn't check max R (does check max path length)
 	 * 
+	 * @param uo              starting state vector
 	 * @param s0              starting path length in meters
 	 * @param sMax            maximal path length in meters
 	 * @param targetRho       stopping rho in meters
 	 * @param accuracy        the accuracy in meters
 	 * @param normalDirection <code></code> if going smaller to larger rho
 	 */
-	public DefaultRhoStopper(double s0, double sMax, double targetRho, double accuracy, boolean normalDirection) {
+	public DefaultRhoStopper(double[] uo, double s0, double sMax, double rho0, double targetRho, double accuracy) {
+		
+		_s0 = s0;
+		_dim = uo.length;
+		
+		_uf = new double[_dim];
+		_uprev = new double[_dim];
+		
 		_targetRho = targetRho;
-		_totalPathLength = s0;
+		_totS = 0;
+		_prevS = 0;
 		_maxS = sMax;
-		_normalDirection = normalDirection;
 		_accuracy = accuracy;
-	}
-
-	/**
-	 * Set the starting pathlength. This is only necessary if we are continuing a track.
-	 * @param s0 the starting path length in meters
-	 */
-	public void setS0(double s0) {
-		_totalPathLength = s0;
-	}
-
-	/**
-	 * Set the maximum pathlength in meters
-	 * @param sMax the maximum path length in meters
-	 */
-	public void setSMax(double sMax) {
-		_maxS = sMax;
-	}
-
-	/**
-	 * Set the target value for rho in meters
-	 * @param targetRho the target value for rho in meters
-	 */
-	public void setTargetRho(double targetRho) {
-		_targetRho = targetRho;
-	}
-
-	/**
-	 * Set the accuracy with which you want to hit the rho target value
-	 * @param accuracy in meters
-	 */
-	public void setAccuracy(double accuracy) {
-		_accuracy = accuracy;
-	}
-
-	/**
-	 * Set the normal direction to +1 if rho is increasing
-	 * and -1 if it is decreasing
-	 * @param normalDirection the direction indicator
-	 */
-	public void setNormalDirection(boolean normalDirection) {
-		_normalDirection = normalDirection;
-	}
-
-	//copy onto the final y
-	private void copyToFinalY(double[] y) {
-		int len = y.length;
-		_finalY = new double[len];
-		System.arraycopy(y, 0, _finalY, 0, len);
+		_startSign = sign(rho0);
 	}
 	
+	//get the sign based on the current rho
+	private int sign(double currentRho) {
+		return ((currentRho < _targetRho) ? -1 : 1);
+	}
+
+
+	private void copy(double src[], double[] dest) {
+		System.arraycopy(src, 0, dest, 0, _dim);
+	}
 	
 	@Override
-	public boolean stopIntegration(double s, double[] y) {
-
-		_currentRho = Math.hypot(y[0], y[1]);
-		_totalPathLength = s;
+	public boolean stopIntegration(double s, double[] u) {
+		
+		_currentRho = Math.hypot(u[0], u[1]);
+		_totS = s;
 
 		// within accuracy?
 		if (Math.abs(_currentRho - _targetRho) < _accuracy) {
-            copyToFinalY(y);
+            copy(u, _uf);
 			return true;
 		}
 
 		// independent variable s is the path length
 		if (s > _maxS) {
-            copyToFinalY(y);
+			copy(u, _uf);
 			return true;
 		}
 
-		boolean stop;
-		if (_normalDirection) {
-			stop = (_currentRho > _targetRho);
-		} else {
-			stop = (_currentRho < _targetRho);
+		//stop (and backup/reset to prev) if we crossed the boundary
+		if (sign(_currentRho) != _startSign) {
+			_totS = _prevS;
+			copy(_uprev, _uf);	
+			return true;
 		}
 		
-		if (stop) {
-			copyToFinalY(y);	
-		}
-		
-		return stop;
+		//copy current to previous
+		_prevS = _totS;
+		copy(u, _uprev);	
+		return false;
 	}
 
 	/**
@@ -126,7 +98,7 @@ public class DefaultRhoStopper implements IStopper {
 	 */
 	@Override
 	public double getFinalT() {
-		return _totalPathLength;
+		return _s0 + _totS;
 	}
 
 	/**
@@ -149,8 +121,11 @@ public class DefaultRhoStopper implements IStopper {
 	 * Get the final value of the state vector
 	 * @return
 	 */
-	public double[] getFinalY() {
-		return _finalY;
+	public double[] getFinalU() {
+		if (_uf == null) {
+			System.err.println("Returning null final u");
+		}
+		return _uf;
 	}
 	/**
 	 * Generally this is the same as stop integration. So most will just return
@@ -168,7 +143,7 @@ public class DefaultRhoStopper implements IStopper {
 		boolean stop = Math.abs(_currentRho - _targetRho) < _accuracy;
 		
 		if (stop) {
-			copyToFinalY(y);	
+			copy(_uf, y);	
 		}
 
 		return stop;

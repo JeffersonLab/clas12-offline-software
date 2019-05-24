@@ -4,6 +4,8 @@ import java.util.Random;
 
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
+import cnuphys.rk4.RungeKuttaException;
+import cnuphys.swim.SwimResult;
 import cnuphys.swim.Swimmer;
 
 public class RhoTest {
@@ -23,12 +25,13 @@ public class RhoTest {
 		double stepsize = 0.5e-03;  //m
 		
 		double maxPathLength = 2; //m
-		double accuracy = 5e-3; //m
-		double fixedRho = 0.24;  //m 
+		double accuracy = 5e-4; //m
+		double fixedRho = 0.30;  //m 
 		
 		int num = 100;
 		
-		double uf[] = new double[6];
+		SwimResult uniform = new SwimResult(6);
+		SwimResult adaptive = new SwimResult(6);
 		
 		//generate some random initial conditions
 		Random rand = new Random();
@@ -39,10 +42,26 @@ public class RhoTest {
 		
 
 		Swimmer swimmer = new Swimmer();
+		int ns;
 		
-		int ns = swimmer.swimRho(charge, xo, yo, zo, p, theta, phi, fixedRho, accuracy, maxPathLength, stepsize, uf);
+		//adaptive step
+		try {
+			swimmer.swimRho(charge, xo, yo, zo, p, theta, phi, fixedRho, accuracy, maxPathLength, stepsize, Swimmer.CLAS_Tolerance, adaptive);
+			SwimTest.printSummary("Fixed Rho,  Adaptive step size", adaptive.getNStep(), p, adaptive.getUf(), null);
+			System.out.println("Adaptive Path length = " + adaptive.getFinalS() + " m\n\n");
+		} catch (RungeKuttaException e) {
+			e.printStackTrace();
+		}
+
 		
-		SwimTest.printSummary("Fixed Rho,  Fixed step size", ns, p, uf, null);
+		//uniform step
+		swimmer.swimRho(charge, xo, yo, zo, p, theta, phi, fixedRho, accuracy, maxPathLength, stepsize, uniform);
+		
+		SwimTest.printSummary("Fixed Rho,  Fixed step size", uniform.getNStep(), p, uniform.getUf(), null);
+		System.out.println("Uniform Path length = " + uniform.getFinalS() + " m\n\n");
+		
+		
+		
 	}
 
 }

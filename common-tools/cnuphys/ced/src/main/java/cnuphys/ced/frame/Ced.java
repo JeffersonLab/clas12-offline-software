@@ -1297,7 +1297,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 				ClasIoEventManager.getInstance().setUpFilterMenu();
 				// initialize data columns
 //				DataManager.getInstance();
-				System.out.println("ced  " + _release + " is ready. Using geomrtey variation: [" + _geoVariation + "]");
+				System.out.println("ced  " + _release + " is ready. Using geometry variation: [" + _geoVariation + "]");
 			}
 
 		});
