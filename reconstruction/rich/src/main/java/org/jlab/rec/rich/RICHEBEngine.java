@@ -15,17 +15,13 @@ import java.util.Arrays;
 
 public class RICHEBEngine extends ReconstructionEngine {
 
-    private RICHPMTReconstruction    rpmt;
-    private RICHEventBuilder         reb;
-    private RICHTool                 tool;
-    private RICHEvent                richevent;
-
     private int Run = -1;
     private int Ncalls = 0;
 
     private long EBRICH_start_time;
     private boolean LOAD_TABLES = true;
     
+    private RICHTool  tool = null;
 
     // ----------------
     public RICHEBEngine() {
@@ -44,12 +40,7 @@ public class RICHEBEngine extends ReconstructionEngine {
 
         boolean ccdb = init_CCDB();
 
-        richevent = new RICHEvent();
         tool = new RICHTool();
-
-        rpmt = new RICHPMTReconstruction(richevent, tool);
-
-        reb = new RICHEventBuilder(richevent, tool);
 
         return true;
 
@@ -69,6 +60,9 @@ public class RICHEBEngine extends ReconstructionEngine {
                  };
 
         requireConstants(Arrays.asList(richTables));
+
+        // initialize constants manager default variation, will be then modified based on yaml settings
+        getConstantsManager().setVariation("default");
 
 
         /*int newRun = 2467;
@@ -91,6 +85,12 @@ public class RICHEBEngine extends ReconstructionEngine {
         int debugMode = 0;
 
 	Ncalls++;
+        
+        // create instances of all event-dependent classes in processDataEvent to avoid interferences between different threads when running in clara
+        RICHEvent        richevent = new RICHEvent();
+        RICHio              richio = new RICHio();
+        RICHPMTReconstruction rpmt = new RICHPMTReconstruction(richevent, tool, richio);
+        RICHEventBuilder       reb= new RICHEventBuilder(richevent, tool, richio);
 
         if(debugMode>=1){
             System.out.println("---------------------------------");
@@ -101,7 +101,12 @@ public class RICHEBEngine extends ReconstructionEngine {
 	/*
 	Initialize the RICH event
 	*/
-        init_Event(event);
+        reb.init_Event(event);
+        init_Event(event,richevent,tool);
+
+        // clear RICH output banks
+        if(tool.get_Constants().REDO_RICH_RECO==1)richio.clear_Banks(event); // would be better to move all io operation here rather than passing richio around
+
 
 	/*
 	Process RICH signals to get hits and clusters
@@ -123,13 +128,10 @@ public class RICHEBEngine extends ReconstructionEngine {
     }
 
     // ----------------
-    public void init_Event(DataEvent event) {
+    public void init_Event(DataEvent event, RICHEvent richevent, RICHTool tool) {
     // ----------------
 
         int debugMode = 0;
-
-        reb.init_Event(event);
-
         int run = richevent.get_RunID(); 
         if(run>0 && LOAD_TABLES){
 
@@ -137,9 +139,6 @@ public class RICHEBEngine extends ReconstructionEngine {
 
             if(debugMode>=1)System.out.format("LOAD constants from CCDB for run %5d \n",run);
     
-            // Get the constants for the correct variation
-            getConstantsManager().setVariation("default");
-
             // Get the tables
             tool.init(getConstantsManager().getConstants(run, "/calibration/rich/aerogel"),
                       getConstantsManager().getConstants(run, "/calibration/rich/time_walk"),

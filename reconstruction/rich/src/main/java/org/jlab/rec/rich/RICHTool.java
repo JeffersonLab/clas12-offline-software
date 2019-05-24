@@ -1034,6 +1034,7 @@ public class RICHTool{
         Face3D compo_face = get_Layer(ilay).get_CompoFace(ipmt-1, 0);
         Vector3d Vertex = toVector3d( compo_face.point(1) );
         //System.out.format("Misa vtx %8.3f %8.3f %8.3f \n",Vertex.x, Vertex.y, Vertex.z);
+        System.out.println(MAPMTpixels.GetPixelCenter(anode));
         Vector3d VPixel = Vertex.plus(MAPMTpixels.GetPixelCenter(anode));
         return new Vector3d (VPixel.x, -VPixel.y, VPixel.z);
 
@@ -1487,7 +1488,7 @@ public class RICHTool{
             */
             if(layer.is_mapmt()) {
                 if(reco_constants.MISA_PMT_PIVOT==1) rich_frame.set_bref(layer.get_SurfBary());
-                if(debugMode>=0)System.out.format("RICH PIVOT %s \n",rich_frame.bref().toStringBrief(2));
+                if(debugMode>=1)System.out.format("RICH PIVOT %s \n",rich_frame.bref().toStringBrief(2));
             }
 
 

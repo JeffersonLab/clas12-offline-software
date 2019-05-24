@@ -45,8 +45,8 @@ public class RICHEventBuilder{
     /* 
     *   DATA Event managing classes 
     */
-    private DetectorEvent            sector4Event = new DetectorEvent();  // temporarely only Sector 4 particles !!!
-    private RICHio                   richio       = new RICHio();
+    private DetectorEvent            sector4Event;  // temporarely only Sector 4 particles !!!
+    private RICHio                   richio;
     private RICHEvent                richevent;
 
     private static double Precision = 0.00000000001; //E-11 is my threshold for defying what 0 is
@@ -54,11 +54,13 @@ public class RICHEventBuilder{
     private static double RAD=180/Math.PI;
 
     // ----------------
-    public RICHEventBuilder(RICHEvent richeve, RICHTool richtool) {
+    public RICHEventBuilder(RICHEvent richeve, RICHTool richtool, RICHio io) {
     // ----------------
 
-        tool = richtool;
-        richevent  = richeve;
+        tool         = richtool;
+        richevent    = richeve;
+        richio       = io;
+        sector4Event = new DetectorEvent();  
 
     }
 
@@ -71,9 +73,6 @@ public class RICHEventBuilder{
         // clear RICH reconstruction classes
 	sector4Event.clear();
         richevent.clear();
-
-        // clear RICH output banks
-        if(tool.get_Constants().REDO_RICH_RECO==1)richio.clear_Banks(event);
 
         set_EventInfo(event);
 

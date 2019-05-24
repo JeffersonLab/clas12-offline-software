@@ -20,14 +20,15 @@ public class RICHPMTReconstruction {
 
     private RICHTool         tool;
     private RICHEvent        richevent;
-    private RICHio           richio = new RICHio();
+    private RICHio           richio;
       
     // ----------------
-    public RICHPMTReconstruction(RICHEvent richeve, RICHTool richtool) {
+    public RICHPMTReconstruction(RICHEvent richeve, RICHTool richtool,RICHio io) {
     // ----------------
 
         tool = richtool;
         richevent = richeve;
+        richio = io;
 
     }
 
