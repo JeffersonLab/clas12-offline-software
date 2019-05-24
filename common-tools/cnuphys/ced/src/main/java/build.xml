@@ -38,7 +38,7 @@
 		
 		<!-- copy data (field maps)-->
 		<copy todir="${destdir}">
-			<fileset includes="magfield/*" excludes="**/.project" dir="${homedir}" />
+			<fileset includes="magfield/*" excludes="**/.project  Full*.*" dir="${homedir}" />
 		</copy>
 		
 		<!-- copy jogl from home dir-->
