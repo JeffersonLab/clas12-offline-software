@@ -323,10 +323,11 @@ public final class Swimmer {
 	 *                             than stepSize. It is approximately the distance
 	 *                             between "saves" where the point is saved in a
 	 *                             trajectory for later drawing.
-	 * @return the final state vector [x, y, z, px/p, py/p, pz/p]
+	 * @param uf upon return, the final state vector [x, y, z, px/p, py/p, pz/p]
+	 * @return the number of steps taken
 	 */
-	public double[] swimRho(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
-			final double fixedRho, final double accuracy, double maxPathLength, double stepSize) {
+	public int swimRho(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+			final double fixedRho, final double accuracy, double maxPathLength, double stepSize, double[] uf) {
 
 		// normally we swim from small rho to a larger rho cutoff.
 		// but we can handle either
@@ -349,37 +350,31 @@ public final class Swimmer {
 
 		if (momentum < MINMOMENTUM) {
 			System.err.println("Skipping low momentum swim (C)");
-			double v[] = new double[6];
-			v[0] = xo;
-			v[1] = yo;
-			v[2] = zo;
+			uf[0] = xo;
+			uf[1] = yo;
+			uf[2] = zo;
 			double tr = Math.toRadians(theta);
 			double pr = Math.toRadians(phi);
-			v[3] = Math.cos(tr);
+			uf[3] = Math.cos(tr);
 			double ss = Math.sin(tr);
-			v[4] = xo;
-			v[5] = xo;
-			return v;
-
+			uf[4] = ss*Math.cos(pr);
+			uf[5] = ss*Math.sin(pr);
+			return 0;
 		}
 
 		// our first attempt
-		
-//		public int swim(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
-//				IStopper stopper, IRkListener listener, double maxPathLength, double stepSize) {
-
 		int ns = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, null, maxPathLength, stepSize);
-
+		System.arraycopy(stopper.getFinalY(), 0, uf, 0, uf.length);
+		
 		// if we stopped because of max pathlength, we are done (never reached
 		// target rho)
 		double finalPathLength = stopper.getFinalT();
 		if (finalPathLength > maxPathLength) {
-			return stopper.getFinalY();
+			return ns;
 		}
 
 		// are we there yet?
-		double lastY[] = stopper.getFinalY();
-		double rholast = Math.hypot(lastY[0], lastY[1]);
+		double rholast = Math.hypot(uf[0], uf[1]);
 		double del = Math.abs(rholast - fixedRho);
 		int maxtry = 10;
 		int count = 0;
@@ -388,31 +383,31 @@ public final class Swimmer {
 		stepSize = stepSize / 10;
 
 		while ((count < maxtry) && (del > accuracy)) {
-			xo = lastY[0];
-			yo = lastY[1];
-			zo = lastY[2];
-			double px = lastY[3];
-			double py = lastY[4];
-			double pz = lastY[5];
+			xo = uf[0];
+			yo = uf[1];
+			zo = uf[2];
+			double px = uf[3];
+			double py = uf[4];
+			double pz = uf[5];
 
 			stopper = new DefaultRhoStopper(finalPathLength, maxPathLength, fixedRho, accuracy, normalDirection);
 
 			theta = FastMath.acos2Deg(pz);
 			phi = FastMath.atan2Deg(py, px);
 
-			ns = swim(charge, xo, yo, zo, momentum, theta, phi, stopper, null, maxPathLength, stepSize);
+			ns += swim(charge, xo, yo, zo, momentum, theta, phi, stopper, null, maxPathLength, stepSize);
+			System.arraycopy(stopper.getFinalY(), 0, uf, 0, uf.length);
 			
 
 			finalPathLength = stopper.getFinalT();
 			// merge the trajectories
-			lastY = stopper.getFinalY();
-			rholast = Math.hypot(lastY[0], lastY[1]);
+			rholast = Math.hypot(uf[0], uf[1]);
 			del = Math.abs(rholast - fixedRho);
 			count++;
 			stepSize = stepSize / 10;
 		} // while
 
-		return lastY;
+		return ns;
 	}
 
 
