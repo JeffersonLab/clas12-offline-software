@@ -514,19 +514,19 @@ public class EvioHipoEvent {
             HipoDataBank hipoBank = (HipoDataBank) hipoEvent.createBank("MC::Lund", evioBank.rows());
             for(int i = 0; i < evioBank.rows(); i++){
                 hipoBank.setByte("index",    i, (byte)  (evioBank.getDouble("index", i)) );
-                hipoBank.setFloat("ltime",   i, (float) (evioBank.getDouble("ltime", i)) );
+                hipoBank.setFloat("lifetime",i, (float) (evioBank.getDouble("ltime", i)) );
                 hipoBank.setByte("type",     i, (byte)  (evioBank.getDouble("type", i)) );
                 hipoBank.setInt("pid",       i, (int)   (evioBank.getDouble("pid", i)) );
-                hipoBank.setByte("parent",   i, (byte)  (evioBank.getDouble("parent", i)) );
-                hipoBank.setByte("daughter", i, (byte)  (evioBank.getDouble("daughter", i)) );
+                hipoBank.setByte("parent",   i, (byte)  (evioBank.getDouble("parentID", i)) );
+                hipoBank.setByte("daughter", i, (byte)  (evioBank.getDouble("daughterID", i)) );
                 hipoBank.setFloat("px",      i, (float) (evioBank.getDouble("px", i)) );
                 hipoBank.setFloat("py",      i, (float) (evioBank.getDouble("py", i)) );
                 hipoBank.setFloat("pz",      i, (float) (evioBank.getDouble("pz", i)) );
+                hipoBank.setFloat("energy",  i, (float) (evioBank.getDouble("E", i)) );
+                hipoBank.setFloat("mass",    i, (float) (evioBank.getDouble("mass", i)) );
                 hipoBank.setFloat("vx",      i, (float) (evioBank.getDouble("vx", i)) );
                 hipoBank.setFloat("vy",      i, (float) (evioBank.getDouble("vy", i)) );
                 hipoBank.setFloat("vz",      i, (float) (evioBank.getDouble("vz", i)) );
-                hipoBank.setFloat("E",       i, (float) (evioBank.getDouble("E", i)) );
-                hipoBank.setFloat("mass",    i, (float) (evioBank.getDouble("mass", i)) );
             }
             if(evioBank.rows()>0) hipoEvent.appendBanks(hipoBank);
         }

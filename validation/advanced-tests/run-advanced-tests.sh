@@ -22,14 +22,14 @@ case $OS in
      ;;
      'Darwin')
        echo "Getting Clara..."
-       curl "https://claraweb.jlab.org/clara/_downloads/install-claracre-clas.sh" -o install-claracre-clas.sh
+       curl -OL "https://claraweb.jlab.org/clara/_downloads/install-claracre-clas.sh" -o install-claracre-clas.sh
      ;;
      *) ;;
 esac
 
 
 chmod +x install-claracre-clas.sh
-./install-claracre-clas.sh -l local
+echo Y | ./install-claracre-clas.sh -f 4.3.9 -l local
 if [ $? != 0 ] ; then echo "clara installation error" ; exit 1 ; fi
 rm install-claracre-clas.sh
 
@@ -40,7 +40,7 @@ case $OS in
        wget --no-check-certificate http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/twoTrackEvents_809_raw.evio.tar.gz
      ;;
      'Darwin')
-       curl "http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/twoTrackEvents_809_raw.evio.tar.gz" -o twoTrackEvents_809_raw.evio.tar.gz
+       curl -OL "http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/twoTrackEvents_809_raw.evio.tar.gz" -o twoTrackEvents_809_raw.evio.tar.gz
      ;;
      *) ;;
 esac
@@ -62,6 +62,7 @@ echo "set session s_cook" >> cook.clara
 echo "set description d_cook" >> cook.clara
 ls twoTrackEvents_809.hipo > files.list
 echo "set fileList $PWD/files.list" >> cook.clara
+echo "set servicesFile $CLARA_HOME/plugins/clas12/config/data.yaml" >> cook.clara
 echo "run local" >> cook.clara
 echo "run local" >> cook.clara
 echo "exit" >> cook.clara

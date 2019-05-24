@@ -7,7 +7,7 @@ public class HalfHit {
 	// In the constructor below, bank_index refers to index in the raw CND bank, 
 	// flag is 0 if it's real data or the "direct" signal in the simulation, 1 if it is the "indirect" signal in the simulation.
 
-	public HalfHit(int sector, int layer, int component, double triggerphase, int adc, int tdc, int _indexadc,int _indextdc) 
+	public HalfHit(int sector, int layer, int component, double triggerphase, int adc, int tdc, int _indexadc,int _indextdc, CalibrationConstantsLoader ccdb) 
 	{
 		this._sector = sector;
 		this._layer = layer;
@@ -16,18 +16,18 @@ public class HalfHit {
 		this._indextdc = _indextdc;
 		
 		//first step of the adc and tdc processing
-		this._Eatt = (double)adc  * ((0.1956*CalibrationConstantsLoader.THICKNESS[0])/(2.)); // the 2 accounts for the splitting of the deposited energy along the two coupled paddles
+		this._Eatt = (double)adc  * ((0.1956*ccdb.THICKNESS[0])/(2.)); // the 2 accounts for the splitting of the deposited energy along the two coupled paddles
 		
 		if(component==2){
-                        this._Tprop = ((double)tdc * CalibrationConstantsLoader.TDCTOTIMESLOPE[sector-1][layer-1][component-1])
-                                                   - CalibrationConstantsLoader.TIMEOFFSETSECT[sector-1][layer-1] 
-                                                   - CalibrationConstantsLoader.TIMEOFFSETSLR[sector-1][layer-1] 
+                        this._Tprop = ((double)tdc * ccdb.TDCTOTIMESLOPE[sector-1][layer-1][component-1])
+                                                   - ccdb.TIMEOFFSETSECT[sector-1][layer-1] 
+                                                   - ccdb.TIMEOFFSETSLR[sector-1][layer-1] 
                                                    - triggerphase;
                 }
 
                 if(component==1){
-                        this._Tprop = ((double)tdc * CalibrationConstantsLoader.TDCTOTIMESLOPE[sector-1][layer-1][component-1]) 
-                                                   - CalibrationConstantsLoader.TIMEOFFSETSECT[sector-1][layer-1]
+                        this._Tprop = ((double)tdc * ccdb.TDCTOTIMESLOPE[sector-1][layer-1][component-1]) 
+                                                   - ccdb.TIMEOFFSETSECT[sector-1][layer-1]
                                                    - triggerphase;
                 }
 

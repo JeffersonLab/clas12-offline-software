@@ -7,7 +7,7 @@ import java.util.EnumMap;
 import javax.swing.text.SimpleAttributeSet;
 
 import cnuphys.bCNU.graphics.component.TextPaneScrollPane;
-import cnuphys.splot.plot.X11Colors;
+import cnuphys.bCNU.util.X11Colors;
 
 /**
  * Combines all log messages into one text pane. Uses different colors to

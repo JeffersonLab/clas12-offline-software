@@ -7,7 +7,7 @@ import org.jlab.clara.engine.ClaraSerializer;
 import org.jlab.clara.engine.EngineDataType;
 import org.jlab.clas12.tools.MimeType;
 import org.jlab.clas12.tools.property.JPropertyList;
-import org.jlab.jnp.hipo.data.HipoEvent;
+import org.jlab.jnp.hipo4.data.Event;
 
 
 public final class Clas12Types {
@@ -18,13 +18,15 @@ public final class Clas12Types {
 
         @Override
         public ByteBuffer write(Object data) throws ClaraException {
-            HipoEvent event = (HipoEvent) data;
-            return ByteBuffer.wrap(event.getDataBuffer());
+            Event event = (Event) data;
+            return event.getEventBuffer();
         }
 
         @Override
         public Object read(ByteBuffer buffer) throws ClaraException {
-            return new HipoEvent(buffer.array());
+            Event event = new Event(buffer.array().length);
+            event.initFrom(buffer.array());
+            return event;
         }
     }
         
@@ -35,11 +37,13 @@ public final class Clas12Types {
         
 	public static final EngineDataType PROPERTY_LIST = new EngineDataType(MimeType.PROPERTY_LIST.type(), new ClaraSerializer() {
 
+                @Override
 		public ByteBuffer write(Object data) throws ClaraException {
 			JPropertyList pl = (JPropertyList) data;
 			return ByteBuffer.wrap(pl.getStringRepresentation(true).getBytes());
 		}
 
+                @Override
 		public Object read(ByteBuffer buffer) throws ClaraException {
 			return new JPropertyList(new String(buffer.array()));
 		}

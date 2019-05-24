@@ -1,9 +1,6 @@
 package org.jlab.service.eb;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
 import org.jlab.clas.detector.*;
@@ -13,6 +10,7 @@ import org.jlab.clas.detector.CherenkovResponse;
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
 import org.jlab.rec.eb.EBScalers;
+import org.jlab.rec.eb.EBRadioFrequency;
 
 /**
  *
@@ -25,12 +23,11 @@ public class EBEngine extends ReconstructionEngine {
     boolean dropBanks = false;
     boolean alreadyDroppedBanks = false;
 
-    // static to store across events:
-    static EBScalers ebScalers = new EBScalers();
-
     // output banks:
     String eventBank        = null;
+    String eventBankFT      = null;
     String particleBank     = null;
+    String particleBankFT   = null;
     String calorimeterBank  = null;
     String scintillatorBank = null;
     String cherenkovBank    = null;
@@ -39,9 +36,10 @@ public class EBEngine extends ReconstructionEngine {
     String ftBank           = null;
     String trajectoryBank   = null;
     String covMatrixBank    = null;
-
+    
     // inputs banks:
     String trackType        = null;
+    String ftofHitsType     = null;
     String trajectoryType   = null;
     String covMatrixType    = null;
     
@@ -53,10 +51,13 @@ public class EBEngine extends ReconstructionEngine {
     public void initBankNames() {
         //Initialize bank names
     }
-    
 
     public boolean processDataEvent(DataEvent de) {
-        
+        throw new RuntimeException("EBEngine cannot be used directly.  Use EBTBEngine/EBHBEngine instead.");
+    }
+
+    public boolean processDataEvent(DataEvent de,EBScalers ebs) {
+
         if (this.dropBanks==true) this.dropBanks(de);
 
         // check run number, get constants from CCDB:
@@ -71,7 +72,7 @@ public class EBEngine extends ReconstructionEngine {
 
         EBCCDBConstants ccdb = new EBCCDBConstants(run,this.getConstantsManager());
 
-        DetectorHeader head = EBio.readHeader(de,ebScalers,ccdb);
+        DetectorHeader head = EBio.readHeader(de,ebs,ccdb);
 
         EventBuilder eb = new EventBuilder(ccdb);
         eb.initEvent(head); // clear particles
@@ -83,7 +84,7 @@ public class EBEngine extends ReconstructionEngine {
         eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+ccdb.getDouble(EBCCDBEnum.RF_OFFSET));
         
         List<DetectorResponse> responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL,"ECAL::moments");
-        List<DetectorResponse> responseFTOF = ScintillatorResponse.readHipoEvent(de, "FTOF::hits", DetectorType.FTOF);
+        List<DetectorResponse> responseFTOF = ScintillatorResponse.readHipoEvent(de, ftofHitsType, DetectorType.FTOF);
         List<DetectorResponse> responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
         List<DetectorResponse> responseCND  = ScintillatorResponse.readHipoEvent(de, "CND::clusters", DetectorType.CND);
         List<DetectorResponse> responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
@@ -102,7 +103,8 @@ public class EBEngine extends ReconstructionEngine {
         
         List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks", "CVTRec::Trajectory");
         eb.addTracks(ctracks);
-        
+       
+        // FIXME:  remove need for these indexing bookkeepers:
         eb.getPindexMap().put(0, tracks.size());
         eb.getPindexMap().put(1, ctracks.size());
         
@@ -112,33 +114,20 @@ public class EBEngine extends ReconstructionEngine {
         // Assign trigger/startTime particle: 
         eb.assignTrigger();
  
-        // Create neutrals:
-        // (after assigning trigger particle, to get vertex/momentum right):
-        eb.processNeutralTracks();
-      
-        // old method imported matching from CTOF/CND reconstruction:
-        //List<DetectorParticle> centralParticles = eb.getEvent().getCentralParticles();
-        //ebm.processCentralParticles(de,"CVTRec::Tracks","CTOF::hits","CND::hits",
-        //                            centralParticles, responseCTOF, responseCND);
-       
+        // Make neutrals after assigning trigger particle, to get vertex/momentum right:
 
+        // Create forward neutrals:
+        eb.processNeutralTracks();
+
+        // Create central neutrals:
         ebm.addCentralNeutrals(eb.getEvent());
 
         // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer(ccdb);
-        analyzer.processEvent(eb.getEvent());
+        analyzer.processEvent(eb.getEvent(),rf);
 
         // Add Forward Tagger particles:
-        List<DetectorParticle> ftparticles = DetectorData.readForwardTaggerParticles(de, "FT::particles");       
-        List<Map<DetectorType, Integer>> ftIndices = DetectorData.readForwardTaggerIndex(de,"FT::particles");
-        List<TaggerResponse>        responseFTCAL = TaggerResponse.readHipoEvent(de,"FTCAL::clusters",DetectorType.FTCAL);
-        List<TaggerResponse>        responseFTHODO = TaggerResponse.readHipoEvent(de,"FTHODO::clusters",DetectorType.FTHODO);
-        eb.addParticles(ftparticles);
-        eb.addTaggerResponses(responseFTCAL);
-        eb.addTaggerResponses(responseFTHODO);
-        eb.addFTIndices(ftIndices);
-        eb.forwardTaggerIDMatching();
-
+        eb.processForwardTagger(de);
 
         // create REC:detector banks:
         if(eb.getEvent().getParticles().size()>0){
@@ -168,9 +157,9 @@ public class EBEngine extends ReconstructionEngine {
                 de.appendBanks(bankChe);
             }
             
-            List<TaggerResponse> taggers = eb.getEvent().getTaggerResponseList();
+            List<DetectorResponse> taggers = eb.getEvent().getTaggerResponseList();
             if (ftBank!=null && taggers.size()>0) {
-                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(eb.getEvent().getTaggerResponseList(), de, ftBank);
+                DataBank bankForwardTagger = DetectorData.getForwardTaggerBank(taggers, de, ftBank);
                 de.appendBanks(bankForwardTagger);
             }
 
@@ -183,7 +172,19 @@ public class EBEngine extends ReconstructionEngine {
                 DataBank bankCovMat = DetectorData.getCovMatrixBank(eb.getEvent().getParticles(), de, covMatrixBank);
                 if (bankCovMat != null) de.appendBanks(bankCovMat);
             }
-        
+      
+            // update PID for FT-based start time:
+            // WARNING:  this modified particles
+            analyzer.processEventFT(eb.getEvent(),rf);
+            if (eb.getEvent().getEventHeader().getStartTimeFT()>0 && eventBankFT!=null) {
+                DataBank bankEveFT = DetectorData.getEventShadowBank(eb.getEvent(), de, eventBankFT);
+                de.appendBanks(bankEveFT);
+                if (particleBankFT!=null) {
+                    DataBank bankPFT = DetectorData.getDetectorParticleShadowBank(eb.getEvent().getParticles(), de, particleBankFT);
+                    de.appendBanks(bankPFT);
+                }
+            }
+          
         }
 
         return true;
@@ -197,6 +198,14 @@ public class EBEngine extends ReconstructionEngine {
         this.particleBank = particleBank;
     }
 
+    public void setEventBankFT(String eventBank) {
+        this.eventBankFT = eventBank;
+    }
+
+    public void setParticleBankFT(String particleBank) {
+        this.particleBankFT = particleBank;
+    }
+    
     public void setCalorimeterBank(String calorimeterBank) {
         this.calorimeterBank = calorimeterBank;
     }
@@ -231,6 +240,10 @@ public class EBEngine extends ReconstructionEngine {
     
     public void setTrackType(String trackType) {
         this.trackType = trackType;
+    }
+    
+    public void setFTOFHitsType(String hitsType) {
+        this.ftofHitsType = hitsType;
     }
 
     public void setCovMatrixType(String covMatrixType) {
@@ -271,13 +284,5 @@ public class EBEngine extends ReconstructionEngine {
         System.out.println("["+this.getName()+"] --> event builder is ready....");
         return true;
     }
-/*
-    public boolean init(int run) {
-        System.out.println("["+this.getName()+"] --> manually initting with run "+run+" ...");
-        this.init();
-        ccdb.load(run,this.getConstantsManager());
-        return true;
-    }
-*/
     
 }

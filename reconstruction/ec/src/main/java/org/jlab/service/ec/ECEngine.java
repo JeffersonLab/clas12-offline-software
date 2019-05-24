@@ -3,31 +3,24 @@ package org.jlab.service.ec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
-import org.jlab.clas.reco.io.EvioHipoEvent;
 import org.jlab.detector.base.DetectorCollection;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
-import org.jlab.detector.decode.CLASDecoder;
 import org.jlab.geom.base.Detector;
 import org.jlab.groot.data.H1F;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataEvent;
-import org.jlab.io.hipo.HipoDataEvent;
-import org.jlab.io.hipo.HipoDataSync;
+
 /**
  *
  * @author gavalian
  */
 public class ECEngine extends ReconstructionEngine {
-
-    EvioHipoEvent convertor = new EvioHipoEvent();            
-    HipoDataSync     writer = new HipoDataSync();
-    CLASDecoder     decoder = new CLASDecoder();
     
-    Detector        ecDetector = null;
+    Detector              ecDetector = null;
     public Boolean             debug = false;
     public Boolean  isSingleThreaded = false;
     public Boolean       singleEvent = false;
@@ -60,7 +53,7 @@ public class ECEngine extends ReconstructionEngine {
         List<ECPeak>      ecPeaks  = ECCommon.processPeaks(ECCommon.createPeaks(ecStrips)); // thresholds, split peaks -> update peak-lines          
         List<ECCluster> ecClusters = new ArrayList<ECCluster>();
         ecClusters.addAll(ECCommon.createClusters(ecPeaks,1)); //PCAL
-        ecClusters.addAll(ECCommon.createClusters(ecPeaks,4)); //ECinner
+        ecClusters.addAll(ECCommon.createClusters(ecPeaks,4)); //ECinner 
         ecClusters.addAll(ECCommon.createClusters(ecPeaks,7)); //ECouter
         
         ECCommon.shareClustersEnergy(ecClusters);  // Repair 2 clusters which share the same peaks
@@ -74,7 +67,7 @@ public class ECEngine extends ReconstructionEngine {
             if(ecClusters.size()==2) {for(ECCluster c : ecClusters) System.out.println(c);}
         }
 	    
-        if(de instanceof HipoDataEvent) this.writeHipoBanks(de,ecStrips,ecPeaks,ecClusters);
+        this.writeHipoBanks(de,ecStrips,ecPeaks,ecClusters);  
         
         if (isSingleThreaded) {
         	ECCommon.clearMyStructures();
@@ -132,7 +125,7 @@ public class ECEngine extends ReconstructionEngine {
             bankC.setByte("sector",  c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getSector());
             bankC.setByte("layer",   c,  (byte) clusters.get(c).clusterPeaks.get(0).getDescriptor().getLayer());
             bankC.setFloat("energy", c, (float) clusters.get(c).getEnergy());
-            bankC.setFloat("time",   c, (float) clusters.get(c).getTime());
+            bankC.setFloat("time",   c, (float) clusters.get(c).getRawADCTime());
             bankC.setByte("idU",     c,  (byte) clusters.get(c).UVIEW_ID);
             bankC.setByte("idV",     c,  (byte) clusters.get(c).VVIEW_ID);
             bankC.setByte("idW",     c,  (byte) clusters.get(c).WVIEW_ID);
@@ -197,6 +190,11 @@ public class ECEngine extends ReconstructionEngine {
     	    ECCommon.veff = veff;
     }
     
+    public void setNewTimeCal(boolean val) {
+        System.out.println("ECEngine: useNewTimeCal = "+val);
+    	ECCommon.useNewTimeCal = val;
+    }
+    
     public void setStripThresholds(int thr0, int thr1, int thr2) {
         System.out.println("ECEngine: Strip ADC thresholds = "+thr0+" "+thr1+" "+thr2);
         ECCommon.stripThreshold[0] = thr0;
@@ -232,12 +230,19 @@ public class ECEngine extends ReconstructionEngine {
             "/calibration/ec/time_jitter",
             "/calibration/ec/fadc_offset",
             "/calibration/ec/fadc_global_offset",
-            "/calibration/ec/global_gain_shift"
+            "/calibration/ec/tdc_global_offset",
+            "/calibration/ec/global_gain_shift",
+            "/calibration/ec/global_time_walk",
+            "/calibration/ec/effective_velocity",
+            "/calibration/ec/tmf_offset",
+            "/calibration/ec/tmf_window"
         };
         
-        requireConstants(Arrays.asList(ecTables));
         
-        ecDetector =  GeometryFactory.getDetector(DetectorType.ECAL);
+        requireConstants(Arrays.asList(ecTables));
+        getConstantsManager().setVariation(ECCommon.variation);
+        String variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        ecDetector =  GeometryFactory.getDetector(DetectorType.ECAL,11,variationName);
 
         setCalRun(2);
         setStripThresholds(10,9,8);

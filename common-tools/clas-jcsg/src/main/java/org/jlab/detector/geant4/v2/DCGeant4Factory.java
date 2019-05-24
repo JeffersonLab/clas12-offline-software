@@ -19,6 +19,7 @@ import org.jlab.geom.base.ConstantProvider;
  */
 final class DCdatabase {
 
+    private final int nSectors = 6;
     private final int nRegions = 3;
     private final int nSupers = 6;
 
@@ -38,6 +39,14 @@ final class DCdatabase {
     private final int nguardlayers[] = new int[nSupers];
     private final int nfieldlayers[] = new int[nSupers];
     private final double superwidth[] = new double[nSupers];
+
+    private final double align_dx[][] = new double[nSectors][nRegions];
+    private final double align_dy[][] = new double[nSectors][nRegions];
+    private final double align_dz[][] = new double[nSectors][nRegions];
+
+    private final double align_dthetax[][] = new double[nSectors][nRegions];
+    private final double align_dthetay[][] = new double[nSectors][nRegions];
+    private final double align_dthetaz[][] = new double[nSectors][nRegions];
 
     private int nsensewires;
     private int nguardwires;
@@ -70,7 +79,6 @@ final class DCdatabase {
             backgap[ireg] = cp.getDouble(dcdbpath + "region/backgap", ireg)*Length.cm;
             thopen[ireg] = Math.toRadians(cp.getDouble(dcdbpath + "region/thopen", ireg));
             thtilt[ireg] = Math.toRadians(cp.getDouble(dcdbpath + "region/thtilt", ireg));
-            
         }
         for (int isuper = 0; isuper < nSupers; isuper++) {
             thmin[isuper] = Math.toRadians(cp.getDouble(dcdbpath + "superlayer/thmin", isuper));
@@ -83,9 +91,20 @@ final class DCdatabase {
 
             superwidth[isuper] = wpdist[isuper] * (nsenselayers[isuper] + nguardlayers[isuper] - 1) * cellthickness[isuper];
         }
-        //thtilt[0]-= Math.toRadians(0.2);
-        //thtilt[1]-= Math.toRadians(0.2);
-        //thtilt[2]-= Math.toRadians(0.5);
+
+	   int alignrows = cp.length(dcdbpath+"alignment/dx");
+	   for(int irow = 0; irow< alignrows; irow++) {
+		  int isec = cp.getInteger(dcdbpath + "alignment/sector",irow)-1;
+		  int ireg = cp.getInteger(dcdbpath + "alignment/region",irow)-1;
+
+		  align_dx[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dx",irow);
+		  align_dy[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dy",irow);
+		  align_dz[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dz",irow);
+
+		  align_dthetax[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_x",irow);
+  		  align_dthetay[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_y",irow);
+  		  align_dthetaz[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_z",irow);
+	   }
     }
 
     public double dist2tgt(int ireg) {
@@ -164,12 +183,32 @@ final class DCdatabase {
         return nRegions;
     }
 
+    public int nsectors() {
+        return nSectors;
+    }
+
     public void setMinistaggerStatus(boolean ministaggerStatus) {
         this.ministaggerStatus = ministaggerStatus;
     }
 
     public boolean getMinistaggerStatus(){
         return ministaggerStatus;
+    }
+
+    public double getAlignmentThetaX(int isec, int ireg) {
+        return align_dthetax[isec][ireg];
+    }
+
+    public double getAlignmentThetaY(int isec, int ireg) {
+        return align_dthetay[isec][ireg];
+    }
+
+    public double getAlignmentThetaZ(int isec, int ireg) {
+        return align_dthetaz[isec][ireg];
+    }
+
+    public Vector3d getAlignmentShift(int isec, int ireg) {
+        return new Vector3d(align_dx[isec][ireg], align_dy[isec][ireg], align_dz[isec][ireg]);
     }
 }
 
@@ -181,18 +220,50 @@ final class Wire {
     private final int iwire;
     private final DCdatabase dbref = DCdatabase.getInstance();
 
-    private final double y0mid, z0mid;
-    private final double length;
-
     private final Vector3d midpoint;
     private final Vector3d center;
     private final Vector3d direction;
     private Vector3d leftend;
     private Vector3d rightend;
-    private final Vector3d topend;
-    private final Vector3d bottomend;
 
-    private double w2tgt;
+    public Wire translate(Vector3d vshift) {
+        midpoint.add(vshift);
+        center.add(vshift);
+        leftend.add(vshift);
+        rightend.add(vshift);
+
+        return this;
+    }
+
+    public Wire rotateX(double rotX) {
+        midpoint.rotateX(rotX);
+        center.rotateX(rotX);
+        direction.rotateX(rotX);
+        leftend.rotateX(rotX);
+        rightend.rotateX(rotX);
+
+        return this;
+    }
+
+    public Wire rotateY(double rotY) {
+        midpoint.rotateY(rotY);
+        center.rotateY(rotY);
+        direction.rotateY(rotY);
+        leftend.rotateY(rotY);
+        rightend.rotateY(rotY);
+
+        return this;
+    }
+
+    public Wire rotateZ(double rotZ) {
+        midpoint.rotateZ(rotZ);
+        center.rotateZ(rotZ);
+        direction.rotateZ(rotZ);
+        leftend.rotateZ(rotZ);
+        rightend.rotateZ(rotZ);
+
+        return this;
+    }
 
     private void findEnds() {
         // define vector from wire midpoint to chamber tip (z is wrong!!)
@@ -220,15 +291,15 @@ final class Wire {
         this.ireg = isuper / 2;
 
         // calculate first-wire distance from target
-        w2tgt = dbref.dist2tgt(ireg);
+        double w2tgt = dbref.dist2tgt(ireg);
         if (isuper % 2 > 0) {
             w2tgt += dbref.superwidth(isuper - 1) + dbref.midgap(ireg);
         }
         w2tgt /= Math.cos(dbref.thtilt(ireg) - dbref.thmin(isuper));
 
         // y0 and z0 in the lab for the first wire of the layer
-        y0mid = w2tgt * Math.sin(dbref.thmin(isuper));
-        z0mid = w2tgt * Math.cos(dbref.thmin(isuper));
+        double y0mid = w2tgt * Math.sin(dbref.thmin(isuper));
+        double z0mid = w2tgt * Math.cos(dbref.thmin(isuper));
 
         double cster = Math.cos(dbref.thster(isuper));
         double ctilt = Math.cos(dbref.thtilt(ireg));
@@ -238,10 +309,10 @@ final class Wire {
         double dw2 = dw / cster;
 
         // hh: wire distance in the wire plane
-        double hh = (iwire + ((double)(ilayer % 2)) / 2.0) * dw2;
+        double hh = (iwire-1 + ((double)(ilayer % 2)) / 2.0) * dw2;
         if(ireg==2 && isSensitiveWire(isuper, ilayer, iwire) && dbref.getMinistaggerStatus())
                 hh += ((ilayer%2)*2-1)*0.03;
-        
+
         // ll: layer distance
         double tt = dbref.cellthickness(isuper) * dbref.wpdist(isuper);
         double ll = ilayer * tt;
@@ -256,16 +327,6 @@ final class Wire {
         direction.rotateZ(dbref.thster(isuper));
         direction.rotateX(-dbref.thtilt(ireg));
         findEnds();
-
-        if (leftend.y < rightend.y) {
-            topend = rightend;
-            bottomend = leftend;
-        } else {
-            topend = leftend;
-            bottomend = rightend;
-        }
-
-        length = leftend.minus(rightend).magnitude();
         center = leftend.plus(rightend).dividedBy(2.0);
     }
 
@@ -291,15 +352,21 @@ final class Wire {
     }
 
     public Vector3d top() {
-        return new Vector3d(topend);
+        if (leftend.y < rightend.y) {
+            return new Vector3d(rightend);
+        }
+        return new Vector3d(leftend);
     }
 
     public Vector3d bottom() {
-        return new Vector3d(bottomend);
+        if (leftend.y < rightend.y) {
+            return new Vector3d(leftend);
+        }
+        return new Vector3d(rightend);
     }
 
     public double length() {
-        return length;
+        return leftend.minus(rightend).magnitude();
     }
 
     public Vector3d center() {
@@ -318,16 +385,10 @@ public final class DCGeant4Factory extends Geant4Factory {
     private final double y_enlargement = 3.65;
     private final double z_enlargement = -2.96;
     private final double microgap = 0.01;
-    private final double tiltTSC25 = Math.toRadians(25.);
-    
-    private final Vector3d[][][] wireMids;
-    private final Vector3d[][][] wireLefts;
-    private final Vector3d[][][] wireRights;
-    private final Vector3d[][][] wireMidsTSC25;
-    private final Vector3d[][][] wireLeftsTSC25;
-    private final Vector3d[][][] wireRightsTSC25;
-    private final Vector3d[][] layerMids;
-    private final Vector3d[] regionMids;
+
+    private final Wire[][][][] wires;
+    private final Vector3d[][][] layerMids;
+    private final Vector3d[][] regionMids;
 
     public static boolean MINISTAGGERON=true;
     public static boolean MINISTAGGEROFF=false;
@@ -358,78 +419,123 @@ public final class DCGeant4Factory extends Geant4Factory {
         properties.put("date", "05/08/16");
 
         // define wire and layer points in tilted coordinate frame (z axis is perpendicular to the chamber, y is along the wire)
-        wireMids  = new Vector3d[dbref.nsuperlayers()][][];
-        wireLefts  = new Vector3d[dbref.nsuperlayers()][][];
-        wireRights = new Vector3d[dbref.nsuperlayers()][][];
-        wireMidsTSC25  = new Vector3d[dbref.nsuperlayers()][][];
-        wireLeftsTSC25  = new Vector3d[dbref.nsuperlayers()][][];
-        wireRightsTSC25 = new Vector3d[dbref.nsuperlayers()][][];
-        layerMids = new Vector3d[dbref.nsuperlayers()][];
-        for(int isuper=0; isuper<dbref.nsuperlayers(); isuper++) {
-            wireMids[isuper]   = new Vector3d[dbref.nsenselayers(isuper)][dbref.nsensewires()];
-            wireLefts[isuper]  = new Vector3d[dbref.nsenselayers(isuper)][dbref.nsensewires()];
-            wireRights[isuper] = new Vector3d[dbref.nsenselayers(isuper)][dbref.nsensewires()];
-            wireMidsTSC25[isuper]   = new Vector3d[dbref.nsenselayers(isuper)][dbref.nsensewires()];
-            wireLeftsTSC25[isuper]  = new Vector3d[dbref.nsenselayers(isuper)][dbref.nsensewires()];
-            wireRightsTSC25[isuper] = new Vector3d[dbref.nsenselayers(isuper)][dbref.nsensewires()];
-            layerMids[isuper]  = new Vector3d[dbref.nsenselayers(isuper)];
+        wires = new Wire[dbref.nsectors()][dbref.nsuperlayers()][][];
+        layerMids = new Vector3d[dbref.nsectors()][dbref.nsuperlayers()][];
+        regionMids = new Vector3d[dbref.nsectors()][dbref.nregions()];
 
-            for(int ilayer=0; ilayer<dbref.nsenselayers(isuper); ilayer++) {
-                Wire firstWire = new Wire(isuper, ilayer+1, 1);
-                Wire lastWire = new Wire(isuper, ilayer+1, dbref.nsensewires());
-                Vector3d firstMid = firstWire.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
-                Vector3d lastMid = lastWire.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
-                layerMids[isuper][ilayer] = firstMid.plus(lastMid).dividedBy(2.0);
+        for(int isec = 0; isec < dbref.nsectors(); isec++) {
+            for(int iregion=0; iregion<dbref.nregions(); iregion++) {
+                regionMids[isec][iregion] = getRegion(isec, iregion).getGlobalPosition()
+				.add(dbref.getAlignmentShift(isec, iregion))
+				.rotateZ(Math.toRadians(-isec * 60))
+				.rotateY(-dbref.thtilt(iregion));
+/*
+                //define layerMid using wires (produce slight shift compared to GEMC volumes)
+                regionMids[isec][iregion] = new Vector3d(layerMids[isec][iregion*2][dbref.nsenselayers(iregion*2)-1]);
+                regionMids[isec][iregion] = regionMids[isec][iregion].plus(layerMids[isec][iregion*2+1][0]).dividedBy(2.0);
+*/
+            }
 
-                for(int iwire=0; iwire<dbref.nsensewires(); iwire++) {
-                    Wire ww = new Wire(isuper, ilayer+1, iwire+1);
-                    wireMids[isuper][ilayer][iwire] = ww.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
-                    wireLefts[isuper][ilayer][iwire] = ww.left().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
-                    wireRights[isuper][ilayer][iwire] = ww.right().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
-                    wireMidsTSC25[isuper][ilayer][iwire] = ww.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-tiltTSC25);
-                    wireLeftsTSC25[isuper][ilayer][iwire] = ww.left().rotateZ(Math.toRadians(-90.0)).rotateY(-tiltTSC25);
-                    wireRightsTSC25[isuper][ilayer][iwire] = ww.right().rotateZ(Math.toRadians(-90.0)).rotateY(-tiltTSC25);
-//                    System.out.println((isuper+1) + " " + (ilayer+1) + " " + (iwire+1) + " " + wireLefts[isuper][ilayer][iwire] + " " + wireMids[isuper][ilayer][iwire] + " " + wireRights[isuper][ilayer][iwire]);
-               }
+            for(int isuper=0; isuper<dbref.nsuperlayers(); isuper++) {
+                layerMids[isec][isuper]  = new Vector3d[dbref.nsenselayers(isuper)];
+
+                for(int ilayer=0; ilayer<dbref.nsenselayers(isuper); ilayer++) {
+/*
+                    //define layerMid using wires (produce slight shift compared to GEMC volumes)
+                    Wire firstWire = new Wire(isuper, ilayer+1, 1);
+                    Wire lastWire = new Wire(isuper, ilayer+1, dbref.nsensewires());
+                    Vector3d firstMid = firstWire.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
+                    Vector3d lastMid = lastWire.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
+                    layerMids[isec][isuper][ilayer] = firstMid.plus(lastMid).dividedBy(2.0);
+*/
+                    layerMids[isec][isuper][ilayer] = getLayer(isec, isuper, ilayer).getGlobalPosition()
+					.add(dbref.getAlignmentShift(isec, isuper/2))
+					.rotateZ(Math.toRadians(- isec * 60))
+					.rotateY(-dbref.thtilt(isuper/2));
+                }
+            }
+
+            for(int isuper=0; isuper<dbref.nsuperlayers(); isuper++) {
+                wires[isec][isuper]   = new Wire[dbref.nsenselayers(isuper)][dbref.nsensewires()];
+                for(int ilayer=0; ilayer<dbref.nsenselayers(isuper); ilayer++) {
+                    layerMids[isec][isuper][ilayer].add(regionMids[isec][isuper/2].times(-1.0));
+                    layerMids[isec][isuper][ilayer].rotateZ(Math.toRadians(dbref.getAlignmentThetaZ(isec, isuper/2)));
+                    layerMids[isec][isuper][ilayer].rotateX(Math.toRadians(dbref.getAlignmentThetaX(isec, isuper/2)));
+                    layerMids[isec][isuper][ilayer].rotateY(Math.toRadians(dbref.getAlignmentThetaY(isec, isuper/2)));
+                    layerMids[isec][isuper][ilayer].add(regionMids[isec][isuper/2]);
+
+                    for(int iwire=0; iwire<dbref.nsensewires(); iwire++) {
+                        wires[isec][isuper][ilayer][iwire] = new Wire(isuper, ilayer+1, iwire+1);
+
+                        wires[isec][isuper][ilayer][iwire].rotateZ(Math.toRadians(-90.0 + isec * 60))
+						.translate(dbref.getAlignmentShift(isec, isuper/2))
+						.rotateZ(Math.toRadians(-isec * 60))
+						.rotateY(-dbref.thtilt(isuper/2));
+
+                        //dc alignment implementation
+                        wires[isec][isuper][ilayer][iwire].translate(regionMids[isec][isuper/2].times(-1.0));
+                        wires[isec][isuper][ilayer][iwire].rotateZ(Math.toRadians(dbref.getAlignmentThetaZ(isec, isuper/2)));
+                        wires[isec][isuper][ilayer][iwire].rotateX(Math.toRadians(dbref.getAlignmentThetaX(isec, isuper/2)));
+                        wires[isec][isuper][ilayer][iwire].rotateY(Math.toRadians(dbref.getAlignmentThetaY(isec, isuper/2)));
+                        wires[isec][isuper][ilayer][iwire].translate(regionMids[isec][isuper/2]);
+    //                    System.out.println((isuper+1) + " " + (ilayer+1) + " " + (iwire+1) + " " + wireLefts[isuper][ilayer][iwire] + " " + wireMids[isuper][ilayer][iwire] + " " + wireRights[isuper][ilayer][iwire]);
+                   }
+                }
+
             }
         }
+    }
 
-        regionMids = new Vector3d[dbref.nregions()];
-        for(int iregion=0; iregion<dbref.nregions(); iregion++) {
-            regionMids[iregion] = new Vector3d(layerMids[iregion*2][dbref.nsenselayers(iregion*2)-1]);
-            regionMids[iregion] = regionMids[iregion].plus(layerMids[iregion*2+1][0]).dividedBy(2.0);
-        }
+    public Vector3d getWireMidpoint(int isec, int isuper, int ilayer, int iwire) {
+        return wires[isec][isuper][ilayer][iwire].mid();
+    }
 
+    public Vector3d getWireLeftend(int isec, int isuper, int ilayer, int iwire) {
+        return wires[isec][isuper][ilayer][iwire].left();
+    }
+
+    public Vector3d getWireRightend(int isec, int isuper, int ilayer, int iwire) {
+        return wires[isec][isuper][ilayer][iwire].right();
+    }
+
+    public Vector3d getRegionMidpoint(int isec, int iregion) {
+        return regionMids[isec][iregion].clone();
+    }
+
+    public Vector3d getLayerMidpoint(int isec, int isuper, int ilayer) {
+        return layerMids[isec][isuper][ilayer].clone();
     }
 
     public Vector3d getWireMidpoint(int isuper, int ilayer, int iwire) {
-        return wireMidsTSC25[isuper][ilayer][iwire];
+        return wires[0][isuper][ilayer][iwire].mid();
     }
 
     public Vector3d getWireLeftend(int isuper, int ilayer, int iwire) {
-        return wireLeftsTSC25[isuper][ilayer][iwire];
+        return wires[0][isuper][ilayer][iwire].left();
     }
 
     public Vector3d getWireRightend(int isuper, int ilayer, int iwire) {
-        return wireRightsTSC25[isuper][ilayer][iwire];
-    }
-
-    //this methods should be optimized if we decide to use them in reconstruction
-    public Vector3d getWireDirection(int isuper, int ilayer, int iwire) {
-        Wire ww = new Wire(isuper, ilayer+1, iwire+1);
-        return ww.dir().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
+        return wires[0][isuper][ilayer][iwire].right();
     }
 
     public Vector3d getRegionMidpoint(int iregion) {
-        return regionMids[iregion];
+        return regionMids[0][iregion].clone();
     }
 
     public Vector3d getLayerMidpoint(int isuper, int ilayer) {
-        return layerMids[isuper][ilayer];
+        return layerMids[0][isuper][ilayer].clone();
     }
 
-    public Geant4Basic getRegion(int ireg) {
-        return motherVolume.getChildren().get(ireg*6);
+    public Vector3d getWireDirection(int isuper, int ilayer, int iwire) {
+        return wires[0][isuper][ilayer][iwire].dir();
+    }
+
+    private Geant4Basic getRegion(int isec, int ireg) {
+        return motherVolume.getChildren().get(ireg*6+isec);
+    }
+
+    private Geant4Basic getLayer(int isec, int isuper, int ilayer) {
+        return getRegion(isec, isuper/2).getChildren().get((isuper%2)*6 + ilayer);
     }
     ///////////////////////////////////////////////////
     public Geant4Basic createRegion(int isector, int iregion) {

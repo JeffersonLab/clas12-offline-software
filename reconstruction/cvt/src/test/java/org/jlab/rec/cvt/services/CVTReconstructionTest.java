@@ -11,7 +11,9 @@ import org.jlab.service.eb.EBTBEngine;
 import org.jlab.analysis.physics.TestEvent;
 import org.jlab.analysis.math.ClasMath;
 import org.jlab.clas.swimtools.MagFieldsEngine;
+import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.utils.CLASResources;
+import org.jlab.utils.system.ClasUtilsFile;
 
 /**
  *
@@ -33,10 +35,14 @@ public class CVTReconstructionTest {
             e.printStackTrace();
         }
         
-        DataEvent testEvent = TestEvent.getCVTTestEvent();
+        String dir = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4");
+        SchemaFactory schemaFactory = new SchemaFactory();
+        schemaFactory.initFromDirectory(dir);
+    
+        DataEvent testEvent = TestEvent.getCVTTestEvent(schemaFactory);
 
         MagFieldsEngine enf = new MagFieldsEngine();
-        //enf.init();
+        enf.init();
         enf.processDataEvent(testEvent);
         
         CVTReconstruction CVTengine = new CVTReconstruction();

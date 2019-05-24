@@ -2,7 +2,6 @@ package org.jlab.clas.detector;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
@@ -18,23 +17,42 @@ import org.jlab.io.base.DataEvent;
  */
 public class CherenkovResponse extends DetectorResponse {
 
-    private double  hitTheta      = 0.0;
-    private double  hitPhi        = 0.0;
+    public static class TrackResidual implements Comparable {
+        private double coneAngle;
+        private double dTheta;
+        private double dPhi;
+        public double getDeltaTheta() { return this.dTheta; }
+        public double getDeltaPhi()   { return this.dPhi; }
+        public double getConeAngle()  { return this.coneAngle; }
+        public TrackResidual(CherenkovResponse cher, Line3D track) {
+            Point3D intersection = cher.getIntersection(track);
+            Vector3D vecTrk = intersection.toVector3D();
+            Vector3D vecHit = cher.hitPosition.toVector3D();
+            this.dTheta = vecHit.theta()-vecTrk.theta();
+            this.dPhi = cher.getDeltaPhi(vecHit.phi(),vecTrk.phi());
+            this.coneAngle = vecHit.angle(vecTrk);
+        }
+        public int compareTo(Object o) {
+            TrackResidual other = (TrackResidual)o;
+            if (this.coneAngle < other.getConeAngle()) return -1;
+            if (this.coneAngle > other.getConeAngle()) return  1;
+            return 0;
+        }
+    }
+
+    // theta/phi resolution for this response:
     private double  hitDeltaPhi   = 0.0;
     private double  hitDeltaTheta = 0.0;
-
+    
+    // FIXME:  remove this, use DetectorResponse's hitPosition instead:
     private Point3D hitPosition = new Point3D();
 
-    public CherenkovResponse(double theta, double phi, double dtheta, double dphi){
-        hitTheta = theta;
-        hitPhi   = phi;
+    public CherenkovResponse(double dtheta, double dphi){
         hitDeltaTheta  = dtheta;
         hitDeltaPhi    = dphi;
     }
 
     public double getNphe() {return this.getEnergy(); }
-    public double getTheta() {return this.hitTheta;}
-    public double getPhi() {return this.hitPhi;}
     public double getDeltaTheta(){ return this.hitDeltaTheta;}
     public double getDeltaPhi() {return this.hitDeltaPhi;}
 
@@ -61,32 +79,43 @@ public class CherenkovResponse extends DetectorResponse {
         plane.intersection(line, intersect);
         return intersect;
     }
-
-    public boolean match(Line3D particletrack){
-        Point3D intersection = this.getIntersection(particletrack);
-        Vector3D vecRec = intersection.toVector3D();
-        Vector3D vecHit = this.hitPosition.toVector3D();
-        // FIXME:
-        // 1. remove hardcoded constant (10 degrees)
-        // 2. either use both dphi and dtheta from detector bank (only
-        //    exists for HTCC), or get both from CCDB
-        return (Math.abs(vecHit.theta()-vecRec.theta())<10.0/57.2958
-        && Math.abs(getDeltaPhi(vecHit.phi(),vecRec.phi()))<this.hitDeltaPhi);
-    }
-   
-    public boolean matchToPoint(Line3D trackPoint) {
-        if (trackPoint==null) return false;
-        Vector3D vecTrk = trackPoint.origin().toVector3D();
-        Vector3D vecHit = this.hitPosition.toVector3D();
-        return (Math.abs(vecHit.theta()-vecTrk.theta())<10.0/57.2958
-        && Math.abs(getDeltaPhi(vecHit.phi(),vecTrk.phi()))<this.hitDeltaPhi);
-    }
-
-    public double getDistance(Line3D line){
-        
-        return -1000.0;
-    }
     
+    public TrackResidual getTrackResidual(Line3D particleTrack) {
+        return new TrackResidual(this,particleTrack);
+    }
+
+    public TrackResidual getTrackResidual(DetectorParticle particle) {
+        return new TrackResidual(this,this.getCross(particle));
+    }
+
+    public Line3D getCross(DetectorParticle part) {
+        if (this.getDescriptor().getType() == DetectorType.HTCC)
+            return part.getFirstCross();
+        else if (this.getDescriptor().getType() == DetectorType.LTCC)
+            return part.getLastCross();
+        else
+            throw new RuntimeException("DetectorParticle:getCheckr5noSignal:  invalid type:  "+this.getDescriptor().getType());
+    }
+
+    public int findClosestTrack(List<DetectorParticle> parts) {
+        int best=-1;
+        TrackResidual trBest=null;
+        for (int ipart=0; ipart<parts.size(); ipart++) {
+            if (parts.get(ipart).getCharge()==0) continue;
+            if (parts.get(ipart).getTrackDetectorID()!=DetectorType.DC.getDetectorId()) continue;
+            if (parts.get(ipart).countResponses(this.getDescriptor().getType()) > 0) continue;
+            TrackResidual tr=getTrackResidual(parts.get(ipart));
+            if (trBest == null || tr.compareTo(trBest)<0) {//getConeAngle() < trBest.getConeAngle()) {
+                if (tr.getDeltaTheta() < this.getDeltaTheta() &&
+                    tr.getDeltaPhi() < this.getDeltaPhi()) {
+                    trBest=tr;
+                    best=ipart;
+                }
+            }
+        }
+        return best;
+    }
+
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type){        
         List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
@@ -100,43 +129,40 @@ public class CherenkovResponse extends DetectorResponse {
                 double z = bank.getFloat("z",row);
                 double time = bank.getFloat("time",row);
                 double nphe = bank.getFloat("nphe", row);
+                double theta = Math.atan2(Math.sqrt(x*x+y*y),z);
+                double phi   = Math.atan2(y,x);
+                int sector = 0;
 
-                // FIXME: unify LTCC/HTCC detector banks
-                // Here we have to treat them differently:
-                // 2.  either add dtheta/dphi to LTCC, or ignore HTCC's and use CCDB for both
-                // 3.  HTCC provides both x/y/z and theta/phi, while LTCC provides only x/y/z.
-                //     The current convention in EB is to use only x/y/z, while theta/phi is
-                //     just propogated.
-
-                double theta=0,phi=0,dtheta=0,dphi=0;
-
+                // FIXME:  move these constants to CCDB
+                double dtheta=0,dphi=0;
                 if (type==DetectorType.HTCC) {
-                    dtheta = bank.getFloat("dtheta",row);
-                    dphi = bank.getFloat("dphi",row);
-                    theta = bank.getFloat("theta", row);
-                    phi = bank.getFloat("phi",row);
+                    dtheta = 10*3.14159/180; // based on MC
+                    dphi   = 18*3.14159/180; // based on MC
+                    // HTCC reconstruction does not provide a sector,
+                    // so we calculate it based on hit position:
+                    sector = DetectorResponse.getSector(phi);
                 }
-
                 else if (type==DetectorType.LTCC) {
-                    // Hardcode some dtheta/dphi values for now (for matching):
-                    dtheta = 10*3.14159/180;
+                    dtheta = (35-5)/18*2 * 3.14159/180; // +/- 2 mirrors
                     dphi   = 10*3.14159/180;
-                    // Fill theta/phi:
-                    // Not yet.
+                    sector = bank.getByte("sector",row);
                 }
-
                 else {
                     throw new RuntimeException(
                             "CherenkovResponse::readHipoEvent:  invalid DetectorType: "+type);
                 }
 
-                CherenkovResponse che = new CherenkovResponse(theta,phi,dtheta,dphi);
+                CherenkovResponse che = new CherenkovResponse(dtheta,dphi);
                 che.setHitPosition(x, y, z);
                 che.setHitIndex(row);
                 che.setEnergy(nphe);
                 che.setTime(time);
+                che.getDescriptor().setSector(sector);
                 che.getDescriptor().setType(type);
 
+                // only LTCC currently reports status:
+                if (type==DetectorType.LTCC) che.setStatus(bank.getInt("status",row));
+                
                 responseList.add((DetectorResponse)che);
             }
         }

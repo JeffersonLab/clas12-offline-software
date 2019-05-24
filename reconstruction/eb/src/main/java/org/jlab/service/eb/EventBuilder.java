@@ -1,31 +1,27 @@
 package org.jlab.service.eb;
 
 import static java.lang.Math.abs;
-import static java.lang.Math.pow;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jlab.io.base.DataEvent;
+
 import org.jlab.detector.base.DetectorType;
 
-import org.jlab.clas.detector.CalorimeterResponse;
+import org.jlab.clas.detector.DetectorData;
 import org.jlab.clas.detector.DetectorHeader;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorTrack;
-import org.jlab.clas.detector.CherenkovResponse;
-import org.jlab.clas.detector.ScintillatorResponse;
 import org.jlab.clas.detector.TaggerResponse;
-
-import org.jlab.clas.physics.Vector3;
-import org.jlab.geom.prim.Vector3D;
+import org.jlab.clas.detector.CherenkovResponse;
 
 import org.jlab.rec.eb.EBConstants;
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
-import org.jlab.rec.eb.EBUtil;
 import org.jlab.rec.eb.SamplingFractions;
 
 /**
@@ -38,7 +34,6 @@ public class EventBuilder {
     public EBCCDBConstants ccdb;
     private DetectorEvent               detectorEvent = new DetectorEvent();
     private List<DetectorResponse>  detectorResponses = new ArrayList<DetectorResponse>();
-    private List<TaggerResponse>      taggerResponses = new ArrayList<TaggerResponse>();
     private List<Map<DetectorType,Integer>> ftIndices = new ArrayList<Map<DetectorType,Integer>>();
     private int[]  TriggerList = new int[]{11,-11,211,-211,0};
     private HashMap<Integer,Integer> pindex_map = new HashMap<Integer, Integer>();
@@ -59,10 +54,6 @@ public class EventBuilder {
         detectorResponses.addAll(responses);
     }
 
-    public void addTaggerResponses(List<TaggerResponse> responses){
-        taggerResponses.addAll(responses);
-    }
-    
     public void addFTIndices(List<Map<DetectorType, Integer>> ftindex) {
         ftIndices.addAll(ftindex);
     }
@@ -90,7 +81,10 @@ public class EventBuilder {
      */
     public void setParticleStatuses() {
         for (int ii=0; ii<this.detectorEvent.getParticles().size(); ii++) {
-            EBUtil.setParticleStatus(this.detectorEvent.getParticles().get(ii),ccdb);
+            this.detectorEvent.getParticle(ii).setStatus(
+                    ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT),
+                    ccdb.getDouble(EBCCDBEnum.LTCC_NPHE_CUT)
+                    );
         }
     }
 
@@ -122,15 +116,17 @@ public class EventBuilder {
                 findMatchingHit(n,p,detectorResponses,DetectorType.ECAL, 4, ccdb.getDouble(EBCCDBEnum.ECIN_MATCHING));
                 findMatchingHit(n,p,detectorResponses,DetectorType.ECAL, 7, ccdb.getDouble(EBCCDBEnum.ECOUT_MATCHING));
 
-                // HTCC:
-                int index = p.getCherenkovSignal(this.detectorResponses,DetectorType.HTCC);
-                if(index>=0){
-                    p.addResponse(detectorResponses.get(index));
-                    detectorResponses.get(index).setAssociation(n);
-                } 
+// Treat HTCC specially below, leave this here for now.
+//                // HTCC:
+//                // Find matching cluster for each particle.
+//                int index = p.getCherenkovSignal(this.detectorResponses,DetectorType.HTCC);
+//                if(index>=0){
+//                    p.addResponse(detectorResponses.get(index));
+//                    detectorResponses.get(index).setAssociation(n);
+//                } 
 
                 // LTCC:
-                index = p.getCherenkovSignal(this.detectorResponses,DetectorType.LTCC);
+                int index = p.getCherenkovSignal(this.detectorResponses,DetectorType.LTCC);
                 if(index>=0){
                     p.addResponse(detectorResponses.get(index));
                     detectorResponses.get(index).setAssociation(n);
@@ -145,7 +141,47 @@ public class EventBuilder {
             }
 
         }
+
+        // Special treatment for HTCC, with coarse resolution.
+        // Try all combos of HTCC clusters and particle to find best matches.
+        while (true) {
+            int bestPart=-1;
+            int bestRes=-1;
+            CherenkovResponse.TrackResidual bestTR=null;
+            for (int ires=0; ires<this.detectorResponses.size(); ires++) {
+                if (this.detectorResponses.get(ires).getDescriptor().getType() != DetectorType.HTCC) continue;
+                if (this.detectorResponses.get(ires).getAssociation()>=0) continue;
+                CherenkovResponse che=(CherenkovResponse)this.detectorResponses.get(ires);
+                int ipart = che.findClosestTrack(this.detectorEvent.getParticles());
+                if (ipart < 0) continue;
+                CherenkovResponse.TrackResidual tr = che.getTrackResidual(this.detectorEvent.getParticle(ipart));
+                if (bestTR==null || tr.compareTo(bestTR)<0) {
+                    bestPart = ipart;
+                    bestRes = ires;
+                    bestTR = tr;
+                }
+            }
+            if (bestTR==null) break;
+            this.detectorEvent.getParticle(bestPart).addResponse(this.detectorResponses.get(bestRes),true);
+            this.detectorResponses.get(bestRes).setAssociation(bestPart);
+        }
+       /* 
+        // Special treatment for HTCC, with coarse resolution.
+        // Find matching particle for each cluster.
+        for (int ii=0; ii<this.detectorResponses.size();ii++) {
+            if (this.detectorResponses.get(ii).getAssociation()>=0) continue;
+            if (this.detectorResponses.get(ii) instanceof CherenkovResponse) {
+                CherenkovResponse che = (CherenkovResponse)this.detectorResponses.get(ii);
+                int index = che.findClosestTrack(this.detectorEvent.getParticles());
+                if (index>=0) {
+                    this.detectorEvent.getParticle(index).addResponse(che);
+                    che.setAssociation(index);
+                }
+            }
+        }
+        */
     }
+
 
     /**
      * Find closest matching response of given detector type and layer within given distance.
@@ -166,7 +202,7 @@ public class EventBuilder {
         final int index = particle.getDetectorHit(responses,type,layer,distance);
         if (index>=0) {
             particle.addResponse(responses.get(index),true);
-            responses.get(index).setAssociation(pindex);
+            responses.get(index).addAssociation(pindex);
             return true;
         }
         return false;
@@ -175,47 +211,62 @@ public class EventBuilder {
     public void forwardTaggerIDMatching() {
         int np = this.detectorEvent.getParticles().size();
         if(this.ftIndices.size()>0 && this.detectorEvent.getParticles().size()>0) {
+            int ftParticleCounter = 0;
             for(int n = 0 ; n < np ; n++){
-                int counter = 0;
                 DetectorParticle p = this.detectorEvent.getParticles().get(n);
-                if(p.getTrackDetector()==DetectorType.FTCAL.getDetectorId()) {
-                    int particle_calID = this.ftIndices.get(counter).get(DetectorType.FTCAL);
-                    int index = getForwardTaggerMatch(this.taggerResponses, p, DetectorType.FTCAL, particle_calID);
-                    if(index>=0){
-                        p.addTaggerResponse(this.taggerResponses.get(index));
-                        this.taggerResponses.get(index).setAssociation(n);
-                    }
-      
-                    int particle_hodoID = this.ftIndices.get(counter).get(DetectorType.FTHODO);
-                    index = getForwardTaggerMatch(this.taggerResponses, p, DetectorType.FTHODO, particle_hodoID);
-                    if(index>=0){
-                        p.addTaggerResponse(this.taggerResponses.get(index));
-                        this.taggerResponses.get(index).setAssociation(n);
-                    }
-                    counter = counter + 1;
+                if (p.getTrackDetector() != DetectorType.FTCAL.getDetectorId()) continue;
+                final int particle_calID = this.ftIndices.get(ftParticleCounter).get(DetectorType.FTCAL);
+                int index = getForwardTaggerMatch(this.detectorResponses, p, DetectorType.FTCAL, particle_calID);
+                if(index>=0){
+                    p.addResponse(this.detectorResponses.get(index));
+                    this.detectorResponses.get(index).setAssociation(n);
+
+                    // make an artificial cross for FTHODO clusters:
+                    final double x=this.detectorResponses.get(index).getPosition().x();
+                    final double y=this.detectorResponses.get(index).getPosition().y();
+                    final double z=this.detectorResponses.get(index).getPosition().z();
+                    final double mag = Math.sqrt(x*x+y*y+z*z);
+                    p.getTrack().addCross(x,y,z,x/mag,y/mag,z/mag);
+                    p.getTrack().setPath(mag);
                 }
-        }
+
+                final int particle_hodoID = this.ftIndices.get(ftParticleCounter).get(DetectorType.FTHODO);
+                index = getForwardTaggerMatch(this.detectorResponses, p, DetectorType.FTHODO, particle_hodoID);
+                if(index>=0){
+                    p.addResponse(this.detectorResponses.get(index));
+                    this.detectorResponses.get(index).setAssociation(n);
+                }
+                ftParticleCounter++;
+            }
         }
     }
     
-    public int getForwardTaggerMatch(List<TaggerResponse> hitList, DetectorParticle part, 
+    public int getForwardTaggerMatch(List<DetectorResponse> hitList, DetectorParticle part, 
             DetectorType type, int ft_id) {
         int bestIndex = -1;
         for(int loop = 0; loop < hitList.size(); loop++) {
-            if(type==DetectorType.FTCAL){
-                if(hitList.get(loop).getDescriptor().getType()==type
-                    && hitList.get(loop).getID()==ft_id){
-                    bestIndex = loop;
-                }
+            if (type!=DetectorType.FTCAL && type!=DetectorType.FTHODO) {
+                continue;
             }
-            if(type==DetectorType.FTHODO){
-               if(hitList.get(loop).getDescriptor().getType()==type
-                     &&  hitList.get(loop).getID()==ft_id){
-                   bestIndex = loop;
-               }
+            if (hitList.get(loop).getDescriptor().getType()==type &&
+                ((TaggerResponse)hitList.get(loop)).getID()==ft_id){
+                bestIndex = loop;
+                break;
             }
         }
         return bestIndex;
+    }
+
+    public void processForwardTagger(DataEvent de) {
+        List<DetectorParticle> ftparticles = DetectorData.readForwardTaggerParticles(de, "FT::particles");       
+        List<Map<DetectorType, Integer>> indices = DetectorData.readForwardTaggerIndex(de,"FT::particles");
+        List<DetectorResponse> responseFTCAL = TaggerResponse.readHipoEvent(de,"FTCAL::clusters",DetectorType.FTCAL);
+        List<DetectorResponse> responseFTHODO = TaggerResponse.readHipoEvent(de,"FTHODO::clusters",DetectorType.FTHODO);
+        addParticles(ftparticles);
+        addDetectorResponses(responseFTCAL);
+        addDetectorResponses(responseFTHODO);
+        addFTIndices(indices);
+        forwardTaggerIDMatching();
     }
 
 
@@ -370,17 +421,24 @@ class TriggerOptions {
     
     public int getSoftwareTriggerScore(DetectorParticle p,EBCCDBConstants ccdb) {
 
-        final double npheCut = ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT);
-        final double sfNSigma = SamplingFractions.getNSigma(11,p,ccdb);
-
         int score = 0;
+
+        final double npheCut = ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT);
         if(p.getNphe(DetectorType.HTCC) > npheCut){
             score += 10;
         }
-        if(abs(sfNSigma) < EBConstants.ECAL_SF_NSIGMA &&
-            p.getEnergy(DetectorType.ECAL,1) > EBConstants.PCAL_ELEC_MINENERGY) {
-            score += 100;
+        
+        final int sector = p.getSector(DetectorType.ECAL);
+        if (sector > 0) {
+            final double nSigmaCut = ccdb.getSectorDouble(EBCCDBEnum.ELEC_SF_nsigma,sector);
+            final double sfNSigma = SamplingFractions.getNSigma(11,p,ccdb);
+            final double minPcalEnergy = ccdb.getSectorDouble(EBCCDBEnum.ELEC_PCAL_min_energy,sector);
+            if(abs(sfNSigma) < nSigmaCut &&
+                    p.getEnergy(DetectorType.ECAL,1) > minPcalEnergy) {
+                score += 100;
+            }
         }
+
         if(p.hasHit(DetectorType.FTOF,1)==true || p.hasHit(DetectorType.FTOF,2)==true){
             score += 1000;
         }
@@ -418,11 +476,14 @@ class TriggerOptions {
                        event.getParticle(i).vector().mag() > maxMom){
                         maxMom = event.getParticle(i).vector().mag();
                         index = i;
-                            }
+                    }
                 }
             }
-            // move the trigger particle to the first row:
-            if (index>=0) event.moveUp(index);
+            // assign and move the trigger particle to the first row:
+            if (index>=0) {
+                event.getParticle(index).setTriggerParticle(true);
+                event.moveUp(index);
+            }
         }
 
         return foundTriggerParticle;

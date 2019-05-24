@@ -20,7 +20,7 @@
  * (optional) convert evio file to hipo: 
     * ```$COATJAVA/bin/evio2hipo -o data.hipo input1.evio [input2.evio ...]```
     * see http://clasweb.jlab.org/clas12offline/docs/software/3.0/html/rec/inputfiles.html for more info
- * To run the clustering algorithm, run ```$COATJAVA/bin/notsouseful-util -i data.hipo -o reco.hipo org.jlab.service.ltcc.LTCCEngine```
+ * To run the clustering algorithm, run ```$COATJAVA/bin/recon-util -i data.hipo -o reco.hipo org.jlab.service.ltcc.LTCCEngine```
  * If you want to enable DEBUG output
     * set the ```LTCCEngine.DEBUG``` flag to ```true``` in netbeans (defined in ```org.jlab.service.ltcc.LTCCEngine.java```)
     * rebuild/re-install

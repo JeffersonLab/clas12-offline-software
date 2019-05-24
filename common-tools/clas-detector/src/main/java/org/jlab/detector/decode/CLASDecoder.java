@@ -88,6 +88,26 @@ public class CLASDecoder {
                 
                 dataList = codaDecoder.getDataEntries( (EvioDataEvent) event);
                 
+                //dataList = new ArrayList<DetectorDataDgtz>();
+                //-----------------------------------------------------------------------------
+                // This part reads the BITPACKED FADC data from tag=57638 Format (cmcms)
+                // Then unpacks into Detector Digigitized data, and appends to existing buffer
+                // Modified on 9/5/2018
+                //-----------------------------------------------------------------------------
+                
+                List<FADCData>  fadcPacked = codaDecoder.getADCEntries((EvioDataEvent) event);
+                
+                /*for(FADCData data : fadcPacked){
+                    data.show();
+                }*/
+                
+                if(fadcPacked!=null){
+                    List<DetectorDataDgtz> fadcUnpacked = FADCData.convert(fadcPacked);
+                    dataList.addAll(fadcUnpacked);
+                }
+                //  END of Bitpacked section                
+                //-----------------------------------------------------------------------------
+                //this.decoderDebugMode = 4;
                 if(this.decoderDebugMode>0){
                     System.out.println("\n>>>>>>>>> RAW decoded data");
                     for(DetectorDataDgtz data : dataList){
@@ -297,8 +317,8 @@ public class CLASDecoder {
         
         for(int i = 0; i < vtpDGTZ.size(); i++){
             vtpBANK.setByte("crate", i, (byte) vtpDGTZ.get(i).getDescriptor().getCrate());
-            vtpBANK.setByte("slot", i, (byte) vtpDGTZ.get(i).getDescriptor().getSlot());
-            vtpBANK.setShort("channel", i, (short) vtpDGTZ.get(i).getDescriptor().getChannel());
+//            vtpBANK.setByte("slot", i, (byte) vtpDGTZ.get(i).getDescriptor().getSlot());
+//            vtpBANK.setShort("channel", i, (short) vtpDGTZ.get(i).getDescriptor().getChannel());
             vtpBANK.setInt("word", i, vtpDGTZ.get(i).getVTPData(0).getWord());
         }
         return vtpBANK;
@@ -317,7 +337,7 @@ public class CLASDecoder {
             scalerBANK.setShort("channel", i, (short) scalerDGTZ.get(i).getDescriptor().getChannel());
             scalerBANK.setByte("helicity", i, (byte) scalerDGTZ.get(i).getSCALERData(0).getHelicity());
             scalerBANK.setByte("quartet", i, (byte) scalerDGTZ.get(i).getSCALERData(0).getQuartet());
-            scalerBANK.setInt("value", i, scalerDGTZ.get(i).getSCALERData(0).getValue());
+            scalerBANK.setLong("value", i, scalerDGTZ.get(i).getSCALERData(0).getValue());
         }
 //        if(scalerBANK.rows()>0)scalerBANK.show();
         return scalerBANK;
@@ -334,14 +354,14 @@ public class CLASDecoder {
         
         String[]        adcBankNames = new String[]{"FTOF::adc","ECAL::adc","FTCAL::adc","FTHODO::adc","FTTRK::adc",
                                                     "HTCC::adc","BST::adc","CTOF::adc","CND::adc","LTCC::adc","BMT::adc",
-                                                    "FMT::adc","HEL::adc","RF::adc"};
+                                                    "FMT::adc","HEL::adc","RF::adc","BAND::adc"};
         DetectorType[]  adcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,DetectorType.FTCAL,DetectorType.FTHODO,DetectorType.FTTRK,
                                                           DetectorType.HTCC,DetectorType.BST,DetectorType.CTOF,DetectorType.CND,DetectorType.LTCC,DetectorType.BMT,
-                                                          DetectorType.FMT,DetectorType.HEL,DetectorType.RF};
+                                                          DetectorType.FMT,DetectorType.HEL,DetectorType.RF, DetectorType.BAND};
         
-        String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc","HTCC::tdc","LTCC::tdc","CTOF::tdc","CND::tdc","RF::tdc","RICH::tdc"};
+        String[]        tdcBankNames = new String[]{"FTOF::tdc","ECAL::tdc","DC::tdc","HTCC::tdc","LTCC::tdc","CTOF::tdc","CND::tdc","RF::tdc","RICH::tdc","BAND::tdc"};
         DetectorType[]  tdcBankTypes = new DetectorType[]{DetectorType.FTOF,DetectorType.ECAL,
-            DetectorType.DC,DetectorType.HTCC,DetectorType.LTCC,DetectorType.CTOF,DetectorType.CND,DetectorType.RF,DetectorType.RICH};
+            DetectorType.DC,DetectorType.HTCC,DetectorType.LTCC,DetectorType.CTOF,DetectorType.CND,DetectorType.RF,DetectorType.RICH, DetectorType.BAND};
         
         for(int i = 0; i < adcBankTypes.length; i++){
             DataBank adcBank = getDataBankADC(adcBankNames[i],adcBankTypes[i]);
@@ -538,7 +558,7 @@ public class CLASDecoder {
                     decodedEvent.appendBanks(trigger);
 
                     HipoDataEvent dhe = (HipoDataEvent) decodedEvent;
-                    writer.writeEvent(dhe.getHipoEvent());
+                    //writer.writeEvent(dhe.getHipoEvent());
                     
                     counter++;
                     progress.updateStatus();

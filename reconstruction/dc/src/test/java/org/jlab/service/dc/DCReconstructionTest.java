@@ -1,6 +1,7 @@
 package org.jlab.service.dc;
 
 import cnuphys.magfield.MagneticFields;
+import java.util.Map;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -12,7 +13,9 @@ import org.jlab.analysis.physics.TestEvent;
 import org.jlab.analysis.math.ClasMath;
 
 import org.jlab.clas.swimtools.MagFieldsEngine;
+import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.utils.CLASResources;
+import org.jlab.utils.system.ClasUtilsFile;
 
 
 /**
@@ -33,13 +36,22 @@ public class DCReconstructionTest {
     catch (Exception e) {
         e.printStackTrace();
     }
-    DataEvent testEvent = TestEvent.getDCSector1ElectronEvent();
+    
+    String dir = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4");
+    SchemaFactory schemaFactory = new SchemaFactory();
+    schemaFactory.initFromDirectory(dir);
+		
+    DataEvent testEvent = TestEvent.getDCSector1ElectronEvent(schemaFactory);
+
     MagFieldsEngine enf = new MagFieldsEngine();
-    //enf.init();
+    enf.init();
     enf.processDataEvent(testEvent);
     DCHBEngine engineHB = new DCHBEngine();
     engineHB.init();
     engineHB.processDataEvent(testEvent);
+    if(testEvent.hasBank("HitBasedTrkg::HBTracks")) {
+        testEvent.getBank("HitBasedTrkg::HBTracks").show();
+    }
     
     assertEquals(testEvent.hasBank("HitBasedTrkg::HBTracks"), true);
     assertEquals(testEvent.getBank("HitBasedTrkg::HBTracks").rows(), 1);
@@ -52,6 +64,9 @@ public class DCReconstructionTest {
     DCTBEngine engineTB = new DCTBEngine();
     engineTB.init();
     engineTB.processDataEvent(testEvent);
+    if(testEvent.hasBank("TimeBasedTrkg::TBTracks")) {
+        testEvent.getBank("TimeBasedTrkg::TBTracks").show();
+    }
     
     assertEquals(testEvent.hasBank("TimeBasedTrkg::TBTracks"), true);
     assertEquals(testEvent.getBank("TimeBasedTrkg::TBTracks").rows(), 1);

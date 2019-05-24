@@ -7,7 +7,7 @@ import java.awt.Rectangle;
 
 import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.simanneal.SimulationDisplay;
-import cnuphys.splot.plot.X11Colors;
+import cnuphys.bCNU.util.X11Colors;
 
 /**
  * This is the map

@@ -7,7 +7,7 @@ import org.jlab.geom.Showable;
  * A 3D triangle represented by three points.
  * <p>
  * Since any three points in 3D space that are not collinear define a plane,
- * a face can be converted into a plane via {@link #plane()}.
+ * a face can be converted into a plane via {link #plane()}.
  * <p>
  * The normal of the surface of a face is oriented such that when looking
  * antiparallel to the normal towards the face the face's points wound
@@ -16,9 +16,9 @@ import org.jlab.geom.Showable;
  * <p>
  * The intersection of a line with a face can be calculated using the
  * intersection methods:
- * {@link #intersection(org.jlab.geom.prim.Line3D, org.jlab.geom.prim.Point3D) intersection(...)}, 
- * {@link #intersectionRay(org.jlab.geom.prim.Line3D, org.jlab.geom.prim.Point3D) intersectionRay(...)}, 
- * {@link #intersectionSegment(org.jlab.geom.prim.Line3D, org.jlab.geom.prim.Point3D) intersectionSegment(...)}.
+ * {@link #intersection(org.jlab.geom.prim.Line3D, List) intersection(...)}, 
+ * {@link #intersectionRay(org.jlab.geom.prim.Line3D, List) intersectionRay(...)}, 
+ * {@link #intersectionSegment(org.jlab.geom.prim.Line3D, List) intersectionSegment(...)}.
  *
  * @author gavalian
  */
