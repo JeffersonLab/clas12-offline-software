@@ -19,25 +19,25 @@
   "group": 20222,
   "info": "reconstructed BST clusters",
   "items": [
-            {"name":"ID",              "id":1, "type":"int16"   ,  "info":"ID"},
-            {"name":"sector",          "id":2, "type":"int8"   ,  "info":"sector"},
-            {"name":"layer",           "id":3, "type":"int8"   ,  "info":"layer"},
-            {"name":"size",            "id":4, "type":"int16"   ,  "info":"cluster size"},
-            {"name":"ETot",            "id":5, "type":"float" ,  "info":"cluster total energy"},
-            {"name":"seedE",           "id":6, "type":"float" ,  "info":"energy of the seed "},
-            {"name":"seedStrip",       "id":7, "type":"int32"   ,  "info":"seed strip"},
-            {"name":"centroid",        "id":8, "type":"float"   ,  "info":"centroid strip number"},
-            {"name":"centroidResidual","id":9, "type":"float"   ,  "info":"centroid residual"},
+            {"name":"ID",              "id":1,  "type":"int16"   ,  "info":"ID"},
+            {"name":"sector",          "id":2,  "type":"int8"    ,  "info":"sector"},
+            {"name":"layer",           "id":3,  "type":"int8"    ,  "info":"layer"},
+            {"name":"size",            "id":4,  "type":"int16"   ,  "info":"cluster size"},
+            {"name":"ETot",            "id":5,  "type":"float"   ,  "info":"cluster total energy"},
+            {"name":"seedE",           "id":6,  "type":"float"   ,  "info":"energy of the seed "},
+            {"name":"seedStrip",       "id":7,  "type":"int32"   ,  "info":"seed strip"},
+            {"name":"centroid",        "id":8,  "type":"float"   ,  "info":"centroid strip number"},
+            {"name":"centroidResidual","id":9,  "type":"float"   ,  "info":"centroid residual"},
             {"name":"seedResidual",    "id":10, "type":"float"   ,  "info":"seed residual"},
-            {"name":"Hit1_ID",         "id":11,  "type":"int16" ,  "info":"Index of hit 1 in cluster"},
-            {"name":"Hit2_ID",         "id":12, "type":"int16" ,  "info":"Index of hit 2 in cluster"},
-            {"name":"Hit3_ID",         "id":13, "type":"int16" ,  "info":"Index of hit 3 in cluster"},
-            {"name":"Hit4_ID",         "id":14, "type":"int16" ,  "info":"Index of hit 4 in cluster"},
-            {"name":"Hit5_ID",         "id":15, "type":"int16" ,  "info":"Index of hit 5 in cluster"},
-      {"name":"trkID",           "id":16, "type":"int16"   ,  "info":"associated track ID"}
-       {"name":"Tmin",           "id":17, "type":"float"   ,  "info":"T_min of the cluster"}
-            {"name":"Tmax",           "id":18, "type":"float"   ,  "info":"T_max of the cluster"}
-            {"name":"Strip_Tmin",      "id":19, "type":"int16"   ,  "info":"Strip associated to T_min"}
+            {"name":"Hit1_ID",         "id":11, "type":"int16"   ,  "info":"Index of hit 1 in cluster"},
+            {"name":"Hit2_ID",         "id":12, "type":"int16"   ,  "info":"Index of hit 2 in cluster"},
+            {"name":"Hit3_ID",         "id":13, "type":"int16"   ,  "info":"Index of hit 3 in cluster"},
+            {"name":"Hit4_ID",         "id":14, "type":"int16"   ,  "info":"Index of hit 4 in cluster"},
+            {"name":"Hit5_ID",         "id":15, "type":"int16"   ,  "info":"Index of hit 5 in cluster"},
+            {"name":"trkID",           "id":16, "type":"int16"   ,  "info":"associated track ID"},
+            {"name":"Tmin",            "id":17, "type":"float"   ,  "info":"T_min of the cluster"},
+            {"name":"Tmax",            "id":18, "type":"float"   ,  "info":"T_max of the cluster"},
+            {"name":"Strip_Tmin",      "id":19, "type":"int16"   ,  "info":"Strip associated to T_min"},
             {"name":"Strip_Tmax",      "id":20, "type":"int16"   ,  "info":"Strip associated to T_max"}
             ]
   },
