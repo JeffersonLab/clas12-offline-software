@@ -102,7 +102,7 @@ public class HitReader {
                     continue;
                 }
                 // create the strip object for the BMT
-                Strip BmtStrip = new Strip(bankDGTZ.getInt("component", i), ADCtoEdep);
+                Strip BmtStrip = new Strip(bankDGTZ.getInt("component", i), ADCtoEdep, bankDGTZ.getFloat("time",i));
                 // calculate the strip parameters for the BMT hit
                 BmtStrip.calc_BMTStripParams(geo, bankDGTZ.getInt("sector", i), bankDGTZ.getInt("layer", i)); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
                 // create the hit object for detector type BMT
@@ -149,6 +149,7 @@ public class HitReader {
         int[] layer = new int[rows];
         int[] strip = new int[rows];
         int[] ADC = new int[rows];
+        float[] time= new float[rows];
 
         if (event.hasBank("BST::adc") == true) {
             //bankDGTZ.show();
@@ -163,6 +164,7 @@ public class HitReader {
                 layer[i] = bankDGTZ.getInt("layer", i);
                 strip[i] = bankDGTZ.getInt("component", i);
                 ADC[i] = bankDGTZ.getInt("ADC", i);
+                time[i] = bankDGTZ.getFloat("time", i);
                 
                 double angle = 2. * Math.PI * ((double) (sector[i] - 1) / (double) org.jlab.detector.geant4.v2.SVT.SVTConstants.NSECTORS[(layer[i] - 1)/2]) + org.jlab.detector.geant4.v2.SVT.SVTConstants.PHI0;
                 int hemisphere = (int) Math.signum(Math.sin(angle));
@@ -193,7 +195,7 @@ public class HitReader {
                 //if(adcConv.SVTADCtoDAQ(ADC[i], event)<50)
                 //    continue;
                 // create the strip object with the adc value converted to daq value used for cluster-centroid estimate
-                Strip SvtStrip = new Strip(strip[i], adcConv.SVTADCtoDAQ(ADC[i], event)); 
+                Strip SvtStrip = new Strip(strip[i], adcConv.SVTADCtoDAQ(ADC[i], event), time[i]); 
                 // get the strip endPoints
                  double[][] X = geo.getStripEndPoints(SvtStrip.get_Strip(), (layer[i] - 1) % 2);
                 Point3D EP1 = geo.transformToFrame(sector[i], layer[i], X[0][0], 0, X[0][1], "lab", "");

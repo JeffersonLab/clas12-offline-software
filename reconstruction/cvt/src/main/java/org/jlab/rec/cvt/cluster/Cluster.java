@@ -24,6 +24,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     private int _Sector;      							//	        sector[1...]
     private int _Layer;    	 						//	        layer [1,...]
     private int _Id;								//		cluster Id
+    private int _StripTmin;
+    private int _StripTmax;
     private double _Centroid; 							// 		after LC (Lorentz Correction)
     private double _CentroidError;
     private double _Centroid0; 							// 		before LC
@@ -38,6 +40,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     private double _XErr;
     private double _Y;
     private double _YErr;
+    private float _Tmin;
+    private float _Tmax;
 
     public Cluster(int detector, int detectortype, int sector, int layer, int cid) {
         this._Detector = detector;
@@ -45,7 +49,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         this._Sector = sector;
         this._Layer = layer;
         this._Id = cid;
-
+        this._Tmin= 10000;
+        this._Tmax=0;
     }
 
     /**
@@ -184,7 +189,14 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 FittedHit thehit = this.get(i);
                 // gets the energy value of the strip
                 double strpEn = thehit.get_Strip().get_Edep();
-                
+                if (this._Tmin>thehit.get_Strip().get_Time()) {
+                	this._Tmin=thehit.get_Strip().get_Time();
+                	this._StripTmin=thehit.get_Strip().get_Strip();
+                }
+                if (this._Tmax<thehit.get_Strip().get_Time()) {
+                	this._Tmax=thehit.get_Strip().get_Time();
+                	this._StripTmax=thehit.get_Strip().get_Strip();
+                }
                 int strpNb = -1;
                 int strpNb0 = -1; //before LC
                 if (this.get_Detector()==0) {
@@ -367,6 +379,22 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
     public double get_TotalEnergy() {
         return _TotalEnergy;
+    }
+    
+    public float get_Tmin() {
+    	return _Tmin;
+    }
+    
+    public float get_Tmax() {
+    	return _Tmax;
+    }
+    
+    public int get_StripTmin() {
+    	return _StripTmin;
+    }
+    
+    public int get_StripTmax() {
+    	return _StripTmax;
     }
 
     public void set_TotalEnergy(double _TotalEnergy) {

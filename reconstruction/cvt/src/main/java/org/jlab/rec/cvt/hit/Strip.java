@@ -5,9 +5,11 @@ import org.jlab.geom.prim.Vector3D;
 
 public class Strip {
 
-    public Strip(int strip, double edep) {
+    
+	public Strip(int strip, double edep, float time) {
         this._Strip = strip;
         this._Edep = edep;
+        this._Time= time;
     }
 
     private int _Strip;    	 							//	   strip read from daq 
@@ -20,7 +22,7 @@ public class Strip {
     private double _Z;    								//     for MM C-detectors. the z position at the strip midwidth
     private double _ZErr;
     private double _Edep;      							//     for simulation this corresponds to the energy deposited on the strip, in data it should be an ADC converted value
-
+    private float _Time;
     private Point3D _ImplantPoint;						// 	   the end-point of the strip at implant (lab frame)
     private Point3D _MidPoint;							//	   the mid-point of the strip (lab frame)
     private Vector3D _StripDir;							// 	   unit direction vector along the strip (lab frame)
@@ -84,6 +86,11 @@ public class Strip {
     public double get_Phi0() {
         return _Phi0;
     }
+    
+    public float get_Time() {
+        return _Time;
+    }
+
 
     public void set_Phi0(double _Phi0) {
         this._Phi0 = _Phi0;

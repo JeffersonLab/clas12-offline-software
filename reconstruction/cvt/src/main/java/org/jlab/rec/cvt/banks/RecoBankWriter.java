@@ -85,6 +85,10 @@ public class RecoBankWriter {
             bank.setFloat("centroidResidual", i, (float) cluslist.get(i).get_CentroidResidual());
             bank.setFloat("seedResidual", i, (float) cluslist.get(i).get_SeedResidual()); 
             bank.setShort("trkID", i, (short) cluslist.get(i).get_AssociatedTrackID());
+            bank.setFloat("Tmin", i, (float) cluslist.get(i).get_Tmin());
+            bank.setFloat("Tmax", i, (float) cluslist.get(i).get_Tmax());
+            bank.setInt("Strip_Tmin", i, cluslist.get(i).get_StripTmin());
+            bank.setInt("Strip_Tmax", i, cluslist.get(i).get_StripTmax());
 
             for (int j = 0; j < cluslist.get(i).size(); j++) {
                 if (j < hitIdxArray.length) {
@@ -219,6 +223,11 @@ public class RecoBankWriter {
             bank.setFloat("seedResidual", i, (float) cluslist.get(i).get_SeedResidual());
             bank.setFloat("seedE", i, (float) cluslist.get(i).get_SeedEnergy());
             bank.setShort("trkID", i, (short) cluslist.get(i).get_AssociatedTrackID());
+            bank.setFloat("Tmin", i, (float) cluslist.get(i).get_Tmin());
+            bank.setFloat("Tmax", i, (float) cluslist.get(i).get_Tmax());
+            bank.setInt("Strip_Tmin", i, cluslist.get(i).get_StripTmin());
+            bank.setInt("Strip_Tmax", i, cluslist.get(i).get_StripTmax());
+            
             for (int j = 0; j < cluslist.get(i).size(); j++) {
                 if (j < hitIdxArray.length) {
                     hitIdxArray[j] = cluslist.get(i).get(j).get_Id();
