@@ -12,6 +12,7 @@ import org.jlab.io.base.DataBank;
 
 import org.jlab.utils.groups.IndexedTable;
 import java.util.Arrays;
+import java.util.Optional;
 
 public class RICHEBEngine extends ReconstructionEngine {
 
@@ -38,9 +39,9 @@ public class RICHEBEngine extends ReconstructionEngine {
 
         int debugMode = 0;
 
-        boolean ccdb = init_CCDB();
-
         tool = new RICHTool();
+
+        boolean ccdb = init_CCDB();
 
         return true;
 
@@ -62,9 +63,17 @@ public class RICHEBEngine extends ReconstructionEngine {
         requireConstants(Arrays.asList(richTables));
 
         // initialize constants manager default variation, will be then modified based on yaml settings
-        getConstantsManager().setVariation("default");
+            // Get the constants for the correct variation
+        String engineVariation = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");         
+        getConstantsManager().setVariation(engineVariation);
 
-
+        // Get the tables
+        int run = 11;
+        tool.init(getConstantsManager().getConstants(run, "/calibration/rich/aerogel"),
+                  getConstantsManager().getConstants(run, "/calibration/rich/time_walk"),
+                  getConstantsManager().getConstants(run, "/calibration/rich/time_offset"), 
+                  getConstantsManager().getConstants(run, "/calibration/rich/misalignments"),
+                  getConstantsManager().getConstants(run, "/calibration/rich/parameter") );
         /*int newRun = 2467;
         IndexedTable prova = getConstantsManager().getConstants(newRun, "/calibration/rich/aerogel");
 
@@ -90,7 +99,7 @@ public class RICHEBEngine extends ReconstructionEngine {
         RICHEvent        richevent = new RICHEvent();
         RICHio              richio = new RICHio();
         RICHPMTReconstruction rpmt = new RICHPMTReconstruction(richevent, tool, richio);
-        RICHEventBuilder       reb= new RICHEventBuilder(richevent, tool, richio);
+        RICHEventBuilder       reb = new RICHEventBuilder(richevent, tool, richio);
 
         if(debugMode>=1){
             System.out.println("---------------------------------");
