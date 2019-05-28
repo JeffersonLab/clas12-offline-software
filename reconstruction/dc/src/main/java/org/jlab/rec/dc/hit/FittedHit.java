@@ -6,6 +6,7 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.utils.groups.IndexedTable;
@@ -168,9 +169,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @return The approximate uncertainty on the hit position using the inverse
      * of the gemc smearing function
      */
-    public double get_PosErr(double B, IndexedTable constants0, IndexedTable constants1, TimeToDistanceEstimator tde) {
+    public double get_PosErr(DataEvent event, double B, IndexedTable constants0, IndexedTable constants1, TimeToDistanceEstimator tde) {
 
-        double err = this.get_DocaErr();
+        double err = Constants.CELLRESOL; // default
 
         if (this._TrkgStatus != -1) {
             if (this.get_TimeToDistance() == 0) // if the time-to-dist is not set ... set it
@@ -178,24 +179,25 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 set_TimeToDistance(1.0, B, constants1, tde);
             }
 
-            err = Constants.CELLRESOL; // default
-            double x = this.get_Doca() / this.get_CellSize();
-            double p1 = constants0.getDoubleValue("parameter1", this.get_Sector(),this.get_Superlayer(),0);
-            double p2 = constants0.getDoubleValue("parameter2", this.get_Sector(),this.get_Superlayer(),0);
-            double p3 = constants0.getDoubleValue("parameter3", this.get_Sector(),this.get_Superlayer(),0);
-            double p4 = constants0.getDoubleValue("parameter4", this.get_Sector(),this.get_Superlayer(),0);
-            double scale = constants0.getDoubleValue("scale", this.get_Sector(),this.get_Superlayer(),0);
-            
-            err = (p1 + p2 / ((p3 + x) * (p3 + x)) + p4 * Math.pow(x, 8)) * scale * 0.1; //gives a reasonable approximation to the measured CLAS resolution (in cm! --> scale by 0.1 )
-            
-        }
+            if(event.hasBank("MC::Particle") ||
+                    event.getBank("RUN::config").getInt("run", 0) < 100 ) { // for MC use functional form put in simulation
+                double x = this.get_Doca() / this.get_CellSize();
+                double p1 = constants0.getDoubleValue("parameter1", this.get_Sector(),this.get_Superlayer(),0);
+                double p2 = constants0.getDoubleValue("parameter2", this.get_Sector(),this.get_Superlayer(),0);
+                double p3 = constants0.getDoubleValue("parameter3", this.get_Sector(),this.get_Superlayer(),0);
+                double p4 = constants0.getDoubleValue("parameter4", this.get_Sector(),this.get_Superlayer(),0);
+                double scale = constants0.getDoubleValue("scale", this.get_Sector(),this.get_Superlayer(),0);
 
+                err = (p1 + p2 / ((p3 + x) * (p3 + x)) + p4 * Math.pow(x, 8)) * scale * 0.1; //gives a reasonable approximation to the measured CLAS resolution (in cm! --> scale by 0.1 )
+            }
+        }
+        
         return err;
     }
 
     /**
      *
-     * @return the time residual |fit| - |y| from the fit to the wire positions
+     * @return the time residual |trkDoca| - |Doca| from the fit to the wire positions
      * in the superlayer
      */
     public double get_TimeResidual() {

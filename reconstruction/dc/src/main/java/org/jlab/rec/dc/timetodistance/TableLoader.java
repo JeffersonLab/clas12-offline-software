@@ -249,7 +249,7 @@ public class TableLoader {
         if(x>dmax)
             x=dmax;
         
-        return T2DFunctions.polyFcnMac(x, alpha, bfield, v_0, v_1, FracDmaxAtMinVel, 
+        return T2DFunctions.ExpoFcn(x, alpha, bfield, v_0, v_1, FracDmaxAtMinVel, 
                 tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, superlayer) + delta_T0[s][r];
     }
     

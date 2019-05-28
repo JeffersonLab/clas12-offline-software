@@ -335,7 +335,7 @@ public class HitReader {
             if (hit.get_Time() < 0)
                 hit.set_QualityFac(1);
 
-            hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));
+            hit.set_DocaErr(hit.get_PosErr(event, B[i], constants0, constants1, tde));
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
             if(hit.get_Beta()>0.15 && hit.get_Beta()<=1.40) {
@@ -424,7 +424,7 @@ public class HitReader {
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
 
-            hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));
+            hit.set_DocaErr(hit.get_PosErr(event, B[i], constants0, constants1, tde));
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedTBTrackID(trkID[i]);
 
