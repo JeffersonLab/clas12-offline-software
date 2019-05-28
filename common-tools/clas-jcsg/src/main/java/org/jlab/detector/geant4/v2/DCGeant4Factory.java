@@ -71,7 +71,7 @@ final class DCdatabase {
 
         nguardwires = cp.getInteger(dcdbpath + "layer/nguardwires", 0);
         nsensewires = cp.getInteger(dcdbpath + "layer/nsensewires", 0);
-        ministagger = cp.getInteger(dcdbpath + "ministagger/ministagger", 0);
+        ministagger = cp.getDouble(dcdbpath + "ministagger/ministagger", 0);
 
         for (int ireg = 0; ireg < nRegions; ireg++) {
             dist2tgt[ireg] = cp.getDouble(dcdbpath + "region/dist2tgt", ireg)*Length.cm;
