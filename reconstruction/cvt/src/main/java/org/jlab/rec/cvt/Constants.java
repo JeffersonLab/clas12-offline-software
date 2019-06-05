@@ -35,6 +35,8 @@ public class Constants {
     private static double _Yb =0;
     private static double _RbErr = 1./Math.sqrt(12.);
     
+    private static double _Zoffset = 0;
+
     //A bunch of constants needed and previously in Constants.java in org.jlab.rec.cvt.svt
     //Threshold for svt
     public static int initThresholds = 30;
@@ -106,6 +108,14 @@ public class Constants {
 
     public static synchronized void setRbErr(double RbErr) {
         _RbErr = RbErr;
+    }
+
+    public static double getZoffset() {
+        return _Zoffset;
+    }
+
+    public static void setZoffset(double _Zoffset) {
+        Constants._Zoffset = _Zoffset;
     }
 
     //public static final boolean DEBUGMODE =false;

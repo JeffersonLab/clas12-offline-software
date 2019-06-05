@@ -3,6 +3,8 @@ package org.jlab.rec.cvt.track;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.geom.base.Detector;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -26,6 +28,7 @@ public class TrackListFinder {
      */
     public List<Track> getTracks(List<Track> cands, 
             org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo,
+            CTOFGeant4Factory ctof_geo, Detector cnd_geo,
             Swim bstSwim) {
         List<Track> tracks = new ArrayList<Track>();
         if (cands.size() == 0) {
@@ -60,7 +63,7 @@ public class TrackListFinder {
 
                 TrajectoryFinder trjFind = new TrajectoryFinder();
 
-                Trajectory traj = trjFind.findTrajectory(trk.get_Id(), trk.get_helix(), trk, svt_geo, bmt_geo, "final");
+                Trajectory traj = trjFind.findTrajectory(trk.get_Id(), trk, svt_geo, bmt_geo, ctof_geo, cnd_geo, bstSwim, "final");
 
                 trk.set_Trajectory(traj.get_Trajectory());
 
@@ -302,25 +305,25 @@ public class TrackListFinder {
 		crosses.get(0).addAll(temp);
 	}
 
-	public void FinalizeTrackToCTOF_CND(List<Track> trks) {
-		Swim swimmer = new Swim();
-        double px=0;
-        double py=0;
-        double pz=0;
-        
-		for (int t=0; t<trks.size();t++) {
-			int trksize=trks.get(t).getTrajectory().size();
-			px=trks.get(t).get_P()*trks.get(t).getTrajectory().get(trksize-1).dirx;
-			py=trks.get(t).get_P()*trks.get(t).getTrajectory().get(trksize-1).diry;
-			pz=trks.get(t).get_P()*trks.get(t).getTrajectory().get(trksize-1).dirz;
-			swimmer.SetSwimParameters(trks.get(t).getTrajectory().get(trksize-1).x/10., trks.get(t).getTrajectory().get(trksize-1).y/10., trks.get(t).getTrajectory().get(trksize-1).z/10., px, py, pz,trks.get(t).get_Q() );
-			double[] pointAtCylRad=swimmer.SwimToCylinder(Constants.CTOFINNERRADIUS/10);
-			trks.get(t).set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0], pointAtCylRad[1], pointAtCylRad[2]));
+    public void FinalizeTrackToCTOF_CND(List<Track> trks) {
+        Swim swimmer = new Swim();
+        double px = 0;
+        double py = 0;
+        double pz = 0;
+
+        for (int t = 0; t < trks.size(); t++) {
+            int trksize = trks.get(t).getTrajectory().size();
+            px = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).dirx;
+            py = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).diry;
+            pz = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).dirz;
+            swimmer.SetSwimParameters(trks.get(t).getTrajectory().get(trksize - 1).x / 10., trks.get(t).getTrajectory().get(trksize - 1).y / 10., trks.get(t).getTrajectory().get(trksize - 1).z / 10., px, py, pz, trks.get(t).get_Q());
+            double[] pointAtCylRad = swimmer.SwimToCylinder(Constants.CTOFINNERRADIUS / 10);
+            trks.get(t).set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0], pointAtCylRad[1], pointAtCylRad[2]));
             trks.get(t).set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3], pointAtCylRad[4], pointAtCylRad[5]));
-            trks.get(t).set_pathLength(pointAtCylRad[6]+trks.get(t).getTrajectory().get(trksize-1).pathlength/10.);
-           
-		}
-		
-	}
+            trks.get(t).set_pathLength(pointAtCylRad[6] + trks.get(t).getTrajectory().get(trksize - 1).pathlength / 10.);
+
+        }
+
+    }
 
 }

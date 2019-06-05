@@ -776,14 +776,14 @@ public class MagneticFields {
 	 *             found.
 	 */
 	public void initializeMagneticFieldsFromEnv() throws MagneticFieldInitializationException, FileNotFoundException {
-		_torusPath = sysPropOrEnvVar("TORUSMAP");
+		_torusPath = sysPropOrEnvVar("COAT_MAGFIELD_TORUSMAP");
 		if (_torusPath == null) {
-			System.err.println("No envrionment variable or property named TORUSMAP");
+			System.err.println("No envrionment variable or property named COAT_MAGFIELD_TORUSMAP");
 		}
 
-		_solenoidPath = sysPropOrEnvVar("SOLENOIDMAP");
+		_solenoidPath = sysPropOrEnvVar("COAT_MAGFIELD_SOLENOIDMAP");
 		if (_solenoidPath == null) {
-			System.err.println("No envrionment variable or property named SOLENOIDMAP");
+			System.err.println("No envrionment variable or property named COAT_MAGFIELD_SOLENOIDMAP");
 		}
 
 		if ((_torusPath == null) && (_solenoidPath == null)) {

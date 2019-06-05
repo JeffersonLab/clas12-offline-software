@@ -315,7 +315,7 @@ public class HTCCReconstruction {
         // Fill the output bank
         for (int i = 0; i < size; ++i) {
             HTCCCluster cluster = clusters.get(i);
-            bankClusters.setInt("id", i, 0);
+            bankClusters.setShort("id", i, (short) 0);
             bankClusters.setShort("nhits", i, (short) cluster.getNHitClust());
             bankClusters.setShort("ntheta", i, (short) cluster.getNThetaClust());
             bankClusters.setShort("nphi", i, (short) cluster.getNPhiClust());

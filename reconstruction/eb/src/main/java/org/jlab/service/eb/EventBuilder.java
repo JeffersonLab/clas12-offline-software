@@ -6,10 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataEvent;
-import org.jlab.clas.detector.DetectorData;
 
+import org.jlab.detector.base.DetectorType;
+
+import org.jlab.clas.detector.DetectorData;
 import org.jlab.clas.detector.DetectorHeader;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
@@ -21,7 +22,6 @@ import org.jlab.clas.detector.CherenkovResponse;
 import org.jlab.rec.eb.EBConstants;
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
-import org.jlab.rec.eb.EBUtil;
 import org.jlab.rec.eb.SamplingFractions;
 
 /**
@@ -81,7 +81,10 @@ public class EventBuilder {
      */
     public void setParticleStatuses() {
         for (int ii=0; ii<this.detectorEvent.getParticles().size(); ii++) {
-            EBUtil.setParticleStatus(this.detectorEvent.getParticles().get(ii),ccdb);
+            this.detectorEvent.getParticle(ii).setStatus(
+                    ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT),
+                    ccdb.getDouble(EBCCDBEnum.LTCC_NPHE_CUT)
+                    );
         }
     }
 
@@ -199,7 +202,7 @@ public class EventBuilder {
         final int index = particle.getDetectorHit(responses,type,layer,distance);
         if (index>=0) {
             particle.addResponse(responses.get(index),true);
-            responses.get(index).setAssociation(pindex);
+            responses.get(index).addAssociation(pindex);
             return true;
         }
         return false;
@@ -217,6 +220,14 @@ public class EventBuilder {
                 if(index>=0){
                     p.addResponse(this.detectorResponses.get(index));
                     this.detectorResponses.get(index).setAssociation(n);
+
+                    // make an artificial cross for FTHODO clusters:
+                    final double x=this.detectorResponses.get(index).getPosition().x();
+                    final double y=this.detectorResponses.get(index).getPosition().y();
+                    final double z=this.detectorResponses.get(index).getPosition().z();
+                    final double mag = Math.sqrt(x*x+y*y+z*z);
+                    p.getTrack().addCross(x,y,z,x/mag,y/mag,z/mag);
+                    p.getTrack().setPath(mag);
                 }
 
                 final int particle_hodoID = this.ftIndices.get(ftParticleCounter).get(DetectorType.FTHODO);

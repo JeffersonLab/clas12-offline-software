@@ -6,8 +6,11 @@ import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
+import org.jlab.geom.base.Detector;
+import org.jlab.geom.detector.cnd.CNDFactory;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -43,6 +46,8 @@ public class CVTRecHandler {
     RecoBankWriter rbc = new RecoBankWriter();
     org.jlab.rec.cvt.svt.Geometry SVTGeom;
     org.jlab.rec.cvt.bmt.Geometry BMTGeom;
+    CTOFGeant4Factory CTOFGeom;
+    Detector          CNDGeom ;
     SVTStripFactory svtIdealStripFactory;
     
     public CVTRecHandler() {
@@ -52,9 +57,11 @@ public class CVTRecHandler {
         BMTGeom = new org.jlab.rec.cvt.bmt.Geometry();
     }
 
-    public CVTRecHandler(org.jlab.rec.cvt.svt.Geometry svtg, org.jlab.rec.cvt.bmt.Geometry bmtg) {
-        SVTGeom = svtg;
-        BMTGeom = bmtg;
+    public CVTRecHandler(org.jlab.rec.cvt.svt.Geometry svtg, org.jlab.rec.cvt.bmt.Geometry bmtg, CTOFGeant4Factory ctofg, Detector cndg) {
+        SVTGeom  = svtg;
+        BMTGeom  = bmtg;
+        CTOFGeom = ctofg;
+        CNDGeom  = cndg;
     }
     
     String FieldsConfig = "";
@@ -348,6 +355,11 @@ public class CVTRecHandler {
         trkFinder.removeOverlappingTracks(trks); //Determine which track is the best if they share two measurements
         trkFinder.updateCrosses(trks, crosses); //Once we have kept only good tracks, we can update the cross.
         trkFinder.FinalizeTrackToCTOF_CND(trks); //Get Intersection with CTOF and CND
+
+        
+        // TO BE CHECKED!!
+        if(trks.size()>0) trks = trkFinder.getTracks(trks, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, swimmer);
+        for( int i=0;i<trks.size();i++) { trks.get(i).set_Id(i+1);}
         
         return trks;
     }
@@ -391,7 +403,7 @@ public class CVTRecHandler {
     public boolean init() {
         System.out.println(" ........................................ trying to connect to db ");
 //        CCDBConstantsLoader.Load(new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default"));
-        CCDBConstantsLoader.Load(new DatabaseConstantProvider(10, "default"), org.jlab.rec.cvt.Constants.WithAlignment);
+        CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, "default"), org.jlab.rec.cvt.Constants.WithAlignment);
                
         DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
 //        DatabaseConstantProvider cp = new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default");
