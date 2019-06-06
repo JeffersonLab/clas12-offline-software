@@ -58,6 +58,9 @@ public class CVTReconstructionTest {
         EBTBEngine EBTBengine = new EBTBEngine();
         EBTBengine.init();
         EBTBengine.processDataEvent(testEvent);
+        if(testEvent.hasBank("REC::Particle")) {
+            testEvent.getBank("REC::Particle").show();
+        }
 
         assertEquals(testEvent.hasBank("REC::Particle"), true);
         assertEquals(testEvent.getBank("REC::Particle").rows(), 1);
