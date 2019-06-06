@@ -519,7 +519,7 @@ public class RecoBankWriter {
             if (trks.get(i).getTrajectory() == null) {
                 continue;
             }
-            for (StateVec stVec : trks.get(i).get_Trajectory())
+            for (org.jlab.rec.cvt.track.fit.StateVecs.StateVec stVec : trks.get(i).getTrajectory())
                 bankSize++;
         }
 
@@ -532,20 +532,20 @@ public class RecoBankWriter {
              if(trks.get(i)==null)
                 continue;
             if (trks.get(i).getTrajectory() != null) {
-                for (StateVec stVec : trks.get(i).get_Trajectory()) {
+               for (org.jlab.rec.cvt.track.fit.StateVecs.StateVec stVec : trks.get(i).getTrajectory()) {
 
                     bank.setShort("id",       k, (short) trks.get(i).get_Id());
-                    bank.setShort("detector", k, (byte) stVec.get_SurfaceDetector());
-                    bank.setByte("sector",    k, (byte) stVec.get_SurfaceSector());
-                    bank.setByte("layer",     k, (byte) stVec.get_SurfaceLayer());
-                    bank.setFloat("x",        k, (float) (stVec.x()/10.));
-                    bank.setFloat("y",        k, (float) (stVec.y()/10.));
-                    bank.setFloat("z",        k, (float) (stVec.z()/10. + zShift));
-                    bank.setFloat("phi",      k, (float) stVec.get_TrkPhiAtSurface());
+                    //bank.setShort("detector", k, (byte) stVec.get_SurfaceDetector());
+                    bank.setByte("sector",    k, (byte) stVec.sector);
+                    bank.setByte("layer",     k, (byte) stVec.layer);
+                    bank.setFloat("x",        k, (float) (stVec.xdet/10.));
+                    bank.setFloat("y",        k, (float) (stVec.ydet/10.));
+                    bank.setFloat("z",        k, (float) (stVec.zdet/10. + zShift));
+                    /*bank.setFloat("phi",      k, (float) stVec.get_TrkPhiAtSurface());
                     bank.setFloat("theta",    k, (float) stVec.get_TrkThetaAtSurface());
                     bank.setFloat("langle",   k, (float) stVec.get_TrkToModuleAngle());
                     bank.setFloat("centroid", k, (float) stVec.get_CalcCentroidStrip());
-                    bank.setFloat("path",     k, (float) stVec.get_Path()/10);
+                    bank.setFloat("path",     k, (float) stVec.get_Path()/10);*/
                     k++;
 
                 }
