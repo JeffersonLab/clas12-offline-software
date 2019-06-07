@@ -153,9 +153,9 @@ public class RecoBankWriter {
             if (crosses.get(i).get(j).get_Cluster1() != null) {
                 bank.setShort("Cluster1_ID", index, (short) crosses.get(i).get(j).get_Cluster1().get_Id());
             }
-            if (crosses.get(i).get(j).get_Cluster2() != null) {
+            /*if (crosses.get(i).get(j).get_Cluster2() != null) {
                 bank.setShort("Cluster2_ID", index, (short) crosses.get(i).get(j).get_Cluster2().get_Id());
-            }
+            }*/
             index++;
         }
 
@@ -291,9 +291,7 @@ public class RecoBankWriter {
             if (crosses.get(i).get(j).get_Cluster1() != null) {
                 bank.setShort("Cluster1_ID", index, (short) crosses.get(i).get(j).get_Cluster1().get_Id());
             }
-            if (crosses.get(i).get(j).get_Cluster2() != null) {
-                bank.setShort("Cluster2_ID", index, (short) crosses.get(i).get(j).get_Cluster2().get_Id());
-            }
+            
             index++;
         }
 

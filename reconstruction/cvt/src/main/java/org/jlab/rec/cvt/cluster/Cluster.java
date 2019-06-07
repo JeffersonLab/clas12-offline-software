@@ -376,6 +376,39 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     public void set_ZErr(double _ZErr) {
         this._ZErr = _ZErr;
     }
+    
+    public double get_X() {
+        return _X;
+    }
+
+    public void set_X(double _X) {
+        this._X = _X;
+    }
+
+    public double get_XErr() {
+        return _XErr;
+    }
+
+    public void set_XErr(double _XErr) {
+        this._XErr = _XErr;
+    }
+    
+    public double get_Y() {
+        return _Y;
+    }
+
+    public void set_Y(double _Y) {
+        this._Y = _Y;
+    }
+
+    public double get_YErr() {
+        return _YErr;
+    }
+
+    public void set_YErr(double _YErr) {
+        this._YErr = _YErr;
+    }
+
 
     public double get_TotalEnergy() {
         return _TotalEnergy;

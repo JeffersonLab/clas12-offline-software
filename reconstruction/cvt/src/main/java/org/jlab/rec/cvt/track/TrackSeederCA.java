@@ -241,7 +241,7 @@ public class TrackSeederCA {
             for(Cross c : seed.get_Crosses()) { 
                 if(c.get_Detector().equalsIgnoreCase("SVT")) {
                     clusters.add(c.get_Cluster1());
-                    clusters.add(c.get_Cluster2());
+                   // clusters.add(c.get_Cluster2());
                 } else {
                     clusters.add(c.get_Cluster1());
                 }
@@ -390,13 +390,8 @@ public class TrackSeederCA {
             double r1 = org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(l1-1)/2][(l1-1)%2];
             double nstr1 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r1 - b)/m, l1, s1);
 
-            int l2 = c.get_Cluster2().get_Layer();
-            int s2 = c.get_Cluster2().get_Sector();
-            double c2 = c.get_Cluster2().get_Centroid();
-            double r2 = org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(l2-1)/2][(l2-1)%2];
-            double nstr2 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r2 - b)/m, l2, s2);
-            
-            if( Math.abs( c1 - nstr1 ) < 8 && Math.abs( c2 - nstr2 ) < 8 )			   
+                      
+            if( Math.abs( c1 - nstr1 ) < 8 )			   
               seedCrosses.get(scsize-1).add(c);
           }
 

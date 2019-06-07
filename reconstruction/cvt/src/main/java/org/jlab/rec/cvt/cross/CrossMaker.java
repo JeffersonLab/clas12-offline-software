@@ -38,7 +38,7 @@ public class CrossMaker {
         ArrayList<Cluster> bmt_Zlayrclus = sortedClusters.get(3);
         // arrays of BMT and SVT crosses
         ArrayList<Cross> BMTCrosses = this.findBMTCrosses(bmt_Clayrclus, bmt_Zlayrclus);
-        ArrayList<Cross> SVTCrosses = this.findSVTCrosses(svt_innerlayrclus, svt_outerlayrclus, svt_geo);
+        ArrayList<Cross> SVTCrosses = this.findSVTCrosses_perLayer(svt_innerlayrclus, svt_outerlayrclus, svt_geo);
 
         // instantiate the arraylists of sorted Crosses by detector type
         ArrayList<ArrayList<Cross>> sortedCrosses = new ArrayList<ArrayList<Cross>>();
@@ -113,6 +113,64 @@ public class CrossMaker {
         }
         return crosses;
     }
+    
+    /**
+    *
+    * @param svt_innerlayrclus svt inner layer clusters
+    * @param svt_outerlayrclus svt outer layer clusters
+    * @param svt_geo svt geometry
+    * @return the list of SVT crosses reconstructed from clusters in the inner
+    * and outer layers in a module
+    */
+   public ArrayList<Cross> findSVTCrosses_perLayer(
+           List<Cluster> svt_innerlayrclus,
+           List<Cluster> svt_outerlayrclus,
+           org.jlab.rec.cvt.svt.Geometry svt_geo) {
+       // instantiate the list of crosses
+       ArrayList<Cross> crosses = new ArrayList<Cross>();
+       int rid = 0; // cross id
+       //loop over the clusters
+       // inner clusters
+       for (Cluster inlayerclus : svt_innerlayrclus) {
+           if(inlayerclus.get_TotalEnergy()<org.jlab.rec.cvt.Constants.ETOTCUT)
+               continue;
+         
+                   Cross this_cross = new Cross("SVT", "", inlayerclus.get_Sector(), inlayerclus.get_Region(), rid++);
+                   // cluster1 is the inner layer cluster
+                   this_cross.set_Cluster1(inlayerclus);
+                   // cluster2 is the outer layer cluster
+                   this_cross.set_Id(rid);
+                   // sets the cross parameters (point3D and associated error) from the SVT geometry
+                   this_cross.set_Point(new Point3D(inlayerclus.get_X(), inlayerclus.get_Y(), inlayerclus.get_Z()));
+                   this_cross.set_PointErr(new Point3D(inlayerclus.get_XErr(), inlayerclus.get_YErr(), inlayerclus.get_ZErr()));
+                   this_cross.set_Point0(new Point3D(inlayerclus.get_X(), inlayerclus.get_Y(), inlayerclus.get_Z()));
+                   this_cross.set_Sector(inlayerclus.get_Sector());
+                   this_cross.set_Region(inlayerclus.get_Layer());
+                   crosses.add(this_cross);
+
+       }
+       
+       for (Cluster outlayerclus : svt_outerlayrclus) {
+           if(outlayerclus.get_TotalEnergy()<org.jlab.rec.cvt.Constants.ETOTCUT)
+               continue;
+         
+                   Cross this_cross = new Cross("SVT", "", outlayerclus.get_Sector(), outlayerclus.get_Region(), rid++);
+                   // cluster1 is the inner layer cluster
+                   this_cross.set_Cluster1(outlayerclus);
+                   // cluster2 is the outer layer cluster
+                   this_cross.set_Id(rid);
+                   // sets the cross parameters (point3D and associated error) from the SVT geometry
+                   this_cross.set_Point(new Point3D(outlayerclus.get_X(), outlayerclus.get_Y(), outlayerclus.get_Z()));
+                   this_cross.set_PointErr(new Point3D(outlayerclus.get_XErr(), outlayerclus.get_YErr(), outlayerclus.get_ZErr()));
+                   this_cross.set_Point0(new Point3D(outlayerclus.get_X(), outlayerclus.get_Y(), outlayerclus.get_Z()));
+                   this_cross.set_Sector(outlayerclus.get_Sector());
+                   this_cross.set_Region(outlayerclus.get_Layer());
+                   crosses.add(this_cross);
+
+       }
+       
+       return crosses;
+   }
 
     private void calcCentErr(Cross c, Cluster Cluster1, org.jlab.rec.cvt.svt.Geometry svt_geo) {
         double Z = svt_geo.transformToFrame(Cluster1.get_Sector(), Cluster1.get_Layer(), c.get_Point().x(), c.get_Point().y(), c.get_Point().z(), "local", "").z();

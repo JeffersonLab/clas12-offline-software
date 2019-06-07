@@ -87,10 +87,10 @@ public class TrackListFinder {
                 TotE += trk.get(i).get_Cluster1().get(j).get_Strip().get_Edep();
                 NbHits++;
             }
-            for (int j = 0; j < trk.get(i).get_Cluster2().size(); j++) {
+            /*for (int j = 0; j < trk.get(i).get_Cluster2().size(); j++) {
                 TotE += trk.get(i).get_Cluster2().get(j).get_Strip().get_Edep();
                 NbHits++;
-            }
+            }*/
         }
         TotE /= (double) NbHits;
 
@@ -205,7 +205,6 @@ public class TrackListFinder {
     				for( Cross cr : track ) {
     					if (cr.get_Detector().equals("SVT")) {
     						if (cr.get_Cluster1().get_Id()==c.get_Cluster1().get_Id()) { N++;  } 
-    						if (cr.get_Cluster2().get_Id()==c.get_Cluster2().get_Id()) { N++;  }
     					}
     				}
     			}
@@ -265,12 +264,12 @@ public class TrackListFinder {
             	   			for (FittedHit h : crosses.get(0).get(jj).get_Cluster1()) {
                                 h.set_AssociatedTrackID(trks.get(t).get_Id());
                             }
-        					temp.add(crosses.get(0).get(jj).Duplicate());
-        					temp.get(temp.size()-1).set_Id(-crosses.get(0).get(jj).get_Id());
+        					/*temp.add(crosses.get(0).get(jj).Duplicate());
+        					temp.get(temp.size()-1).set_Id(-crosses.get(0).get(jj).get_Id());*/
                 		}
                 		
                 		//If we have the cluster 2
-                		if (trks.get(t).getTrajectory().get(tp).clusID==crosses.get(0).get(jj).get_Cluster2().get_Id()) {
+                		/*if (trks.get(t).getTrajectory().get(tp).clusID==crosses.get(0).get(jj).get_Cluster2().get_Id()) {
                 			crosses.get(0).get(jj).set_Point(new Point3D(trks.get(t).getTrajectory().get(tp).xdet,trks.get(t).getTrajectory().get(tp).ydet,trks.get(t).getTrajectory().get(tp).zdet));
             	   			crosses.get(0).get(jj).set_Dir(new Vector3D(trks.get(t).getTrajectory().get(tp).dirx,trks.get(t).getTrajectory().get(tp).diry,trks.get(t).getTrajectory().get(tp).dirz));
             	   			crosses.get(0).get(jj).get_Cluster2().set_CentroidResidual(trks.get(t).getTrajectory().get(tp).residual);
@@ -281,7 +280,7 @@ public class TrackListFinder {
                                 h.set_AssociatedTrackID(trks.get(t).get_Id());
                             }
         					
-                		}
+                		}*/
                 	}
                }
                else {
