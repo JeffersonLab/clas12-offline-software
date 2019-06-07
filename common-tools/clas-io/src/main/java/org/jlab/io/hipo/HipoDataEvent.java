@@ -265,7 +265,8 @@ public class HipoDataEvent implements DataEvent {
     }
     
     public void show(){
-        this.hipoEvent.show();
+        //this.hipoEvent.show();
+        this.hipoEvent.scan();
     }
     
     public void showBankByOrder(int order){
