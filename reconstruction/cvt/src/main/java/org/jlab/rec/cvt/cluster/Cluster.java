@@ -295,11 +295,16 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             set_Centroid0(stripNumCent0);
             _Phi = phiCent;
             _PhiErr = phiErrCent;
-
+            _Z=Double.NaN;
+            _ZErr=Double.NaN;
             set_Phi0(phiCent0);
             set_PhiErr0(phiErrCent0);
         }
         if (this.get_DetectorType() == 0) {
+        	_X=Double.NaN;
+        	_Y=Double.NaN;
+        	_XErr=Double.NaN;
+        	_YErr=Double.NaN;
             _Z = zCent;
             _ZErr = zErrCent;
         }
