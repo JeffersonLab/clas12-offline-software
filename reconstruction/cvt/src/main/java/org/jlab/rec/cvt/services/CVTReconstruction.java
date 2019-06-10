@@ -142,7 +142,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         if( recHandler.loadClusters( event ) == false ) { return true; };
      
         // skip  high busy events 
-        if( recHandler.getSVThits().size() > 700 ) return true; 
+        if( recHandler.getCVT().getTotalSVThits() > 700 ) return true; 
  
         recHandler.loadCrosses();
 
@@ -151,14 +151,12 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         if(Constants.isCosmicsData()==true) { 
             List<StraightTrack> cosmics = recHandler.cosmicsTracking();   
-        	rbc.appendCVTCosmicsBanks(event, recHandler.getSVThits(), recHandler.getBMThits(), 
-        					 recHandler.getSVTclusters(), recHandler.getBMTclusters(), 
+        	rbc.appendCVTCosmicsBanks(event, recHandler.getCVT(), 
         					 recHandler.getCrosses(), cosmics, shift);
         } 
         else {
             List<Track> trks = recHandler.beamTracking(swimmer);   
-        	rbc.appendCVTBanks(event, recHandler.getSVThits(), recHandler.getBMThits(), 
-        				  recHandler.getSVTclusters(), recHandler.getBMTclusters(), 
+        	rbc.appendCVTBanks(event, recHandler.getCVT(), 
         				  recHandler.getCrosses(), trks, shift);
         }
         return true;
