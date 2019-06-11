@@ -169,8 +169,8 @@ public class TrackSeederCA {
         camaker.set_plane( plane );
         if( plane.equalsIgnoreCase("XY") ){
           camaker.set_cosBtwCells(0.95);  // min dot product between neighbours 
-          camaker.set_abCrs(20);         // max angle between crosses to form a cell
-          camaker.set_aCvsR(45);         // max angle between the cell and the radius to the first cell
+          camaker.set_abCrs(50);         // max angle between crosses to form a cell
+          camaker.set_aCvsR(60);         // max angle between the cell and the radius to the first cell
         }
         if( plane.equalsIgnoreCase("ZR") ){
           camaker.set_cosBtwCells(0.95); // it only applies to the BMTC cross only cells
@@ -179,7 +179,7 @@ public class TrackSeederCA {
         }
         
         camaker.createCells(crs, bgeom);
-        camaker.findNeigbors();
+        camaker.findNeighbors();
         camaker.evolve( nepochs );
         return camaker.getNodes();  
     }
@@ -211,7 +211,7 @@ public class TrackSeederCA {
         // look for candidates in the XY plane
         // run the cellular automaton over SVT and BMT_Z crosses
 
-        List<Cell> xynodes = runCAMaker( "XY", 5, crosses, bmt_geo, swimmer); 
+        List<Cell> xynodes = runCAMaker( "XY", 10, crosses, bmt_geo, swimmer); 
         List<ArrayList<Cross>> xytracks =  getCAcandidates( xynodes, swimmer);
 
 //        System.out.println( " XY tracks " + xytracks );
@@ -391,8 +391,12 @@ public class TrackSeederCA {
             double nstr1 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r1 - b)/m, l1, s1);
 
                       
-            if( Math.abs( c1 - nstr1 ) < 8 )			   
+            if( Math.abs( c1 - nstr1 ) < 25 ) {	   
               seedCrosses.get(scsize-1).add(c);
+            }
+            else {
+//            	System.out.println( " ELIMINATED cross " + c + " ||   " + c1 + "   " + nstr1 );
+            }
           }
 
 
@@ -499,7 +503,7 @@ public class TrackSeederCA {
 
             cand = new Track(null, swimmer);
             cand.addAll(SVTCrosses);
-            double explFact = 20.0; // 
+            double explFact = 5.0; // 
             for (int j = 0; j < SVTCrosses.size(); j++) {
                 X.add(j, SVTCrosses.get(j).get_Point().x());
                 Y.add(j, SVTCrosses.get(j).get_Point().y());
