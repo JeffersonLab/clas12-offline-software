@@ -475,8 +475,8 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         }
         if (org.jlab.rec.cvt.Constants.isCosmicsData() == false) {
         	org.jlab.rec.cvt.bmt.Geometry bgeom = new org.jlab.rec.cvt.bmt.Geometry();
-        	int thisreg = (this.get_Detector().equalsIgnoreCase("BMT")) ? 3 + bgeom.getLayer( this.get_Region(), this.get_DetectorType()) : this.get_Region();
-        	int argreg  = (arg.get_Detector().equalsIgnoreCase("BMT"))  ? 3 + bgeom.getLayer( arg.get_Region(), arg.get_DetectorType()) : arg.get_Region();
+        	int thisreg = (this.get_Detector().equalsIgnoreCase("BMT")) ? 6 + bgeom.getLayer( this.get_Region(), this.get_DetectorType()) : this.get_Region();
+        	int argreg  = (arg.get_Detector().equalsIgnoreCase("BMT"))  ? 6 + bgeom.getLayer( arg.get_Region(), arg.get_DetectorType()) : arg.get_Region();
             int RegComp = thisreg < argreg ? -1 : thisreg == argreg ? 0 : 1;
 //            int RegComp = this.get_Region() < arg.get_Region() ? -1 : this.get_Region() == arg.get_Region() ? 0 : 1;
             

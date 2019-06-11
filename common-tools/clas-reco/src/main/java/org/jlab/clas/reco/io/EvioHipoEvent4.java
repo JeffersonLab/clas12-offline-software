@@ -191,7 +191,7 @@ public class EvioHipoEvent4 {
                 hipoADC.putByte("layer",  i, (byte) evioBank.getInt("layer",i));
                 hipoADC.putShort("component",  i, (short) evioBank.getInt("strip",i));
                 hipoADC.putInt("ADC",  i, (int) evioBank.getInt("ADC",i));
-                hipoADC.putFloat("time",  i, (float) 0);
+                hipoADC.putFloat("time",  i, (float) 200.0);
                 hipoADC.putShort("ped", i, (short) 0);            
             }
             hipoEvent.write(hipoADC);
