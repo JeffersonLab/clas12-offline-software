@@ -249,8 +249,13 @@ public class TableLoader {
         if(x>dmax)
             x=dmax;
         
-        return T2DFunctions.ExpoFcn(x, alpha, bfield, v_0, v_1, FracDmaxAtMinVel, 
+        if(Constants.getT2D()==0) {
+            return T2DFunctions.ExpoFcn(x, alpha, bfield, v_0, v_1, FracDmaxAtMinVel, 
                 tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, superlayer) + delta_T0[s][r];
+        } else {
+            return T2DFunctions.polyFcnMac(x, alpha, bfield, v_0, v_1, FracDmaxAtMinVel, 
+                tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, superlayer) + delta_T0[s][r];
+        }
     }
     
     public static double[][] delta_T0 = new double[6][6];

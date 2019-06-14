@@ -34,8 +34,7 @@ public class CrossListFinder  {
      */
     private List<BaseCand> trkCnds = new ArrayList<BaseCand>();
     ClusterFitter cf = new ClusterFitter();
-    SegmentFinder segFinder = new SegmentFinder();
-
+    
     public CrossList candCrossLists(List<Cross> dccrosslist, boolean TimeBased, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde, Swim swimmer) {
         //List<List<Cross>> trkCnds = new ArrayList<List<Cross>>();
         trkCnds.clear();
@@ -57,20 +56,26 @@ public class CrossListFinder  {
                 }
             }
 
+            double[] X = new double[3];
+            double[] Y = new double[3];
+            double[] Z = new double[3];
+            double[] errX = new double[3];
+            double[] errY = new double[3];
+            Vector3D traj1 = new Vector3D(0,0,0);
+            Vector3D traj2 = new Vector3D(0,0,0);
+            Vector3D traj3 = new Vector3D(0,0,0);
+
+            TrajectoryParametriz qf1 = new TrajectoryParametriz();
+                            
             // need 3 crosses
             if(!dccrosslistRg1.isEmpty() && !dccrosslistRg2.isEmpty() && !dccrosslistRg3.isEmpty()) {
                 for(Cross c1 : dccrosslistRg1) {
                     for(Cross c2 : dccrosslistRg2) {
                         for(Cross c3 : dccrosslistRg3) {
                             if(c1.get_Sector()!=c2.get_Sector() || c1.get_Sector()!=c3.get_Sector()) {
+                                this.clear(X, Y, Z, errX, errY);
                                 continue;
                             }
-
-                            double[] X = new double[3];
-                            double[] Y = new double[3];
-                            double[] Z = new double[3];
-                            double[] errX = new double[3];
-                            double[] errY = new double[3];
 
                             Z[0] = c1.get_Point().z();
                             Y[0] = c1.get_Point().y();
@@ -88,12 +93,13 @@ public class CrossListFinder  {
                             errX[2] = c3.get_PointErr().x();
                             errY[2] = c3.get_PointErr().y();
                             // ignore point errors and assume the track vertex is close to the origin
-                            TrajectoryParametriz qf1 = new TrajectoryParametriz();
+                            for(int j = 0; j<6; j++)
+                                this.clear(qf1.fitResult[j]);
                             qf1.evaluate(Z, X, errX,Y,errY);
 
-                            Vector3D traj1 = new Vector3D(qf1.fitResult[3][0],qf1.fitResult[4][0],qf1.fitResult[5][0]);
-                            Vector3D traj2 = new Vector3D(qf1.fitResult[3][1],qf1.fitResult[4][1],qf1.fitResult[5][1]);
-                            Vector3D traj3 = new Vector3D(qf1.fitResult[3][2],qf1.fitResult[4][2],qf1.fitResult[5][2]);
+                            traj1.setXYZ(qf1.fitResult[3][0],qf1.fitResult[4][0],qf1.fitResult[5][0]);
+                            traj2.setXYZ(qf1.fitResult[3][1],qf1.fitResult[4][1],qf1.fitResult[5][1]);
+                            traj3.setXYZ(qf1.fitResult[3][2],qf1.fitResult[4][2],qf1.fitResult[5][2]);
 
                             double cosTh1 = traj1.dot(c1.get_Dir().toVector3D());
                             double cosTh2 = traj2.dot(c2.get_Dir().toVector3D());
@@ -254,10 +260,18 @@ public class CrossListFinder  {
         //remake cross
         c.set_CrossParams(DcDetector);
     }
-        private class BaseCand {
-            public double Chisq;
-            public List<Cross> CrossesOnTrack = new ArrayList<Cross>();
+
+    private void clear(double[] ...X) {
+        for(double[] x: X) {
+            for(int i =0; i<x.length; i++) {
+                x[i]=0;
+            }
         }
+    }
+    private class BaseCand {
+        public double Chisq;
+        public List<Cross> CrossesOnTrack = new ArrayList<Cross>();
+    }
 
     private class TrajectoryParametriz {
 

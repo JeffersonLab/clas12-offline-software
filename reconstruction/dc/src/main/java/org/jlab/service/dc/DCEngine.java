@@ -28,7 +28,7 @@ public class DCEngine extends ReconstructionEngine {
         super(name,"ziegler","5.0");
     }
 
-    public void setStartTimeOption() {
+    public void setOptions() {
         // Load config
         String useSTTConf = this.getEngineConfigString("dcUseStartTime");
         
@@ -71,6 +71,32 @@ public class DCEngine extends ReconstructionEngine {
         }
         if (wireDistortionsFlag==null) {
              System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (MC-off/Data-on)");
+        }
+        
+        //T2D Function
+        String T2Dfcn = this.getEngineConfigString("T2DFunc");
+        
+        if (T2Dfcn!=null) {
+            System.out.println("["+this.getName()+"] run with time to distance function in tracking config chosen based on yaml = "+wireDistortionsFlag);
+            if(T2Dfcn.equalsIgnoreCase("Polynomial")) {
+                Constants.setT2D(1);
+            } else {
+                Constants.setT2D(0);
+            }
+        }
+        else {
+            T2Dfcn = System.getenv("COAT_DC_T2DFUNC");
+            if (T2Dfcn!=null) {
+                System.out.println("["+this.getName()+"] run with time to distance function in config chosen based on env = "+wireDistortionsFlag);
+                if(T2Dfcn.equalsIgnoreCase("Polynomial")) {
+                Constants.setT2D(1);
+            } else {
+                Constants.setT2D(0);
+            }
+            }
+        }
+        if (wireDistortionsFlag==null) {
+             System.out.println("["+this.getName()+"] run with time to distance function in in tracking ");
         }
     }
     public void LoadTables() {

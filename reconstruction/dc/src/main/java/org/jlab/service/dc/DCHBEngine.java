@@ -55,7 +55,7 @@ public class DCHBEngine extends DCEngine {
     public boolean init() {
         // Load cuts
         Constants.Load();
-        super.setStartTimeOption();
+        super.setOptions();
         super.LoadTables();
 //        newRun = 809;
 //        long timeStamp = 371468548086L;
