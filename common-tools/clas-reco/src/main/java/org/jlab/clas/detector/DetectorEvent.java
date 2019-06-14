@@ -131,6 +131,9 @@ public class DetectorEvent {
         List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
         for(DetectorParticle p : this.particleList){
             for(DetectorResponse r : p.getDetectorResponses()) {
+                if (responses.contains(r)) {
+                    continue;
+                }
                 for(DetectorType t : types) {
                     if (r.getDescriptor().getType() == t) {
                         responses.add(r);
@@ -160,7 +163,7 @@ public class DetectorEvent {
             this.setAssociation();
         }
     }
-    
+    /*
     public void setAssociation(){
         for(int index = 0; index < this.particleList.size(); index++){
             List<DetectorResponse> responses = particleList.get(index).getDetectorResponses();
@@ -169,7 +172,23 @@ public class DetectorEvent {
             }
         }
     }
+    */
     
+    public void setAssociation(){
+        for(int index = 0; index < this.particleList.size(); index++){
+            for(DetectorResponse r : particleList.get(index).getDetectorResponses()) {
+                r.clearAssociations();
+            }
+        }
+        for(int index = 0; index < this.particleList.size(); index++){
+            for(DetectorResponse r : particleList.get(index).getDetectorResponses()) {
+                if (!r.hasAssociation(index)) {
+                    r.addAssociation(index);
+                }
+            }
+        }
+    }
+
     public void addParticle(double px, double py, double pz,
             double vx, double vy, double vz){
         DetectorParticle particle = new DetectorParticle();

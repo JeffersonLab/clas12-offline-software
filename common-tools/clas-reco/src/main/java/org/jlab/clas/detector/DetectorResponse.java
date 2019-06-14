@@ -23,7 +23,7 @@ public class DetectorResponse {
     private Double             detectorTime = 0.0;
     private Double           detectorEnergy = 0.0;
     private Double           particlePath   = 0.0;
-    private int              association    = -1;
+    private List<Integer>    associations   = new ArrayList();
     private int              hitIndex       = -1;
     private int                      status = -1;
 
@@ -62,9 +62,42 @@ public class DetectorResponse {
     public DetectorDescriptor getDescriptor(){ return this.descriptor;}
     public int getHitIndex(){return hitIndex;}
     public void setHitIndex(int hitIndex) {this.hitIndex = hitIndex;}
-        
-    public int getAssociation(){ return this.association;}
-    public void setAssociation(int asc){ this.association = asc;}
+       
+    // new, many-to-one relationship between tracks and hits:
+    public void addAssociation(int asc){ this.associations.add(asc); }
+    public int getNAssociations() { return this.associations.size(); }
+    public int getAssociation(int index) { return this.associations.get(index); }
+    public boolean hasAssociation(int asc) { return this.associations.contains(asc); }
+    public void clearAssociations() { this.associations.clear(); }
+
+    // if we wanted pindex to store pointers to multiple particles:
+    // (but with pindex being a short, this would be limited to 15 particles)
+    public int getPindexMask() {
+        int pindex=0;
+        for (int a : this.associations) {
+            pindex |= 1<<a;
+        }
+        return pindex;
+    }
+   
+    // temporary, for backward compatibility during development:
+    public int getAssociation(){
+        if (this.associations.size()>0) {
+            return this.associations.get(0);
+        }
+        else {
+            return -1;
+        }
+    }
+    public void setAssociation(int asc) {
+        // block multiple associations for now:
+        if (this.associations.size()>0) {
+            this.associations.set(0,asc);
+        }
+        else {
+            this.associations.add(asc);
+        }
+    }
     
     public Line3D  getDistance(DetectorParticle particle){
         Path3D  trajectory = particle.getTrajectory();

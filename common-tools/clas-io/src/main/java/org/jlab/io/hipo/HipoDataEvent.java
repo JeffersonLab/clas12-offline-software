@@ -265,7 +265,8 @@ public class HipoDataEvent implements DataEvent {
     }
     
     public void show(){
-        this.hipoEvent.show();
+        //this.hipoEvent.show();
+        this.hipoEvent.scan();
     }
     
     public void showBankByOrder(int order){
@@ -309,12 +310,17 @@ public class HipoDataEvent implements DataEvent {
 
     @Override
     public void removeBank(String bankName) {
+        if(schemaFactory.hasSchema(bankName)==true){
+            hipoEvent.remove(schemaFactory.getSchema(bankName));
+        }
         //this.hipoEvent.removeGroup(bankName);
     }
 
     @Override
     public void removeBanks(String... bankNames) {
-        
+        for(String bank : bankNames){
+            removeBank(bank);
+        }
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
