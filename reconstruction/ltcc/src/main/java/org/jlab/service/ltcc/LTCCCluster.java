@@ -143,6 +143,18 @@ public final class LTCCCluster {
         updateStatus();
     }
     
+    public void print() {
+        System.out.println("Cluster info");
+        System.out.printf("Sector: %d\n", getSector());
+        System.out.printf("Segment: %d\n", getSegment());
+        System.out.printf("Nhits: %f\n", getNHits());
+        System.out.printf("Nphe: %f\n", getNphe());
+        System.out.printf("Time: %f\n", getTime());
+        System.out.printf("Theta: %f\n", getPosition().theta());
+        System.out.printf("Phi: %f", getPosition().phi());
+        System.out.println("------");
+    }
+    
     public int getSector() {
         return this.sector;
     }
