@@ -78,7 +78,15 @@ public class HipoDataEvent implements DataEvent {
         for(int i = 0; i < columns.length; i++) columns[i] = schema.getElementName(i);
         return columns;
     }
-
+    
+    public void addSchema(Schema schema){
+        schemaFactory.addSchema(schema);
+    }
+    
+    public void addSchemaList(List<Schema> schemaList){
+        for(Schema schema : schemaList) addSchema(schema);
+    }
+    
     @Override
     public DataDictionary getDictionary() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
