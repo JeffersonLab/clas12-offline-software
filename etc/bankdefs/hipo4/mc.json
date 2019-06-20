@@ -100,5 +100,30 @@
             {"name":"procID",   "type":"I", "info":"Process that created the FP. see gemc.jlab.org"},
             {"name":"hitn",     "type":"I", "info":"Hit number"}
         ]
+    },
+    {
+        "name": "MC::IsParticleMatched",
+        "group": 40,
+        "item" : 5,
+        "info": "MC Particle - Rec Track matching.",
+        "entries": [
+            {"name":"mcTindex",    "type":"S",  "info":"MC Particle index, as in `tid`"},
+            {"name":"recTindex",   "type":"S",  "info":"REC Track ID"},
+            {"name":"isInAcc",     "type":"B",   "info":"Is reconstructable"},
+            {"name":"nMCclusters", "type":"S",  "info":"Number of rec clusters/hits created by the MC particle"},
+            {"name":"fraction",    "type":"F",  "info":"Fraction of clusters used"}
+        ]
+    },
+    {
+        "name": "MC::MatchedClusters",
+        "group": 40,
+        "item" : 6,
+        "info": "Is the hit/rec cluster matched with MC::Particle?",
+        "entries": [
+            {"name":"index",     "type":"S",  "info":"Rec cluster ID"},
+            {"name":"detector",  "type":"B" ,  "info":"Detector id"},
+            {"name":"recTindex", "type":"S",  "info":"REC track index"},
+            {"name":"mcTindex",  "type":"S",  "info":"MC track id, as in `tid`"}
+        ]
     }
 ]
