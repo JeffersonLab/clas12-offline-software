@@ -57,7 +57,7 @@ public class MakerCA {
 		Vector2d va = new Vector2d(xa,ya);
 		Vector2d vb = new Vector2d(xb,yb);
 
-		if( cell.get_c2().get_Region() < 7) {
+		if( cell.get_c2().get_Detector().equalsIgnoreCase("SVT")) {
 			if( (cell.get_c2().get_Region()-1)/2 == (cell.get_c1().get_Region()-1)/2 ) {
 				if(cell.get_c2().get_Sector() == cell.get_c1().get_Sector() ) return true;
 				else return false;
@@ -135,28 +135,26 @@ public class MakerCA {
           				  + bReg + " phi:" + b.get_Point().toVector3D().phi() + " in BMT sector:" + 
           				  bgeom.isInSector(1, b.get_Point().toVector3D().phi(), 0 ));
           	  }
-          	  
+
+          	  // we are looking for cells inside out
           	  if( bReg <= aReg  ) {
 //          		  System.out.println( "  _____ bReg " + bReg + "  aReg " + aReg );
           		  continue; // crosses should be ordered. skip in case they are not
           	  }
+          	  
           	  // we allow skipping one region maximum
-          	  
-          	  // SVT only case
-//          	  if( a.get_Detector().equalsIgnoreCase("SVT") ) {
-          		  if( (bReg - aReg) > 2 ) continue;
-//          	  }
-          	  
-          	  // BMT only case
-//          	  if( b.get_Detector().equalsIgnoreCase("BMT") ) {
-//          		  if( (bReg - aReg) > 2 ) continue;
-//          	  }
-          	  
+          	  // ------------------------------------
+       		  if( (bReg - aReg) > 3 ) continue;
 
-          	  // stay in the same BMT sector
+
+          	  // BMT selection rules 
           	  if( b.get_Detector().equalsIgnoreCase("BMT") ){
           		  if( a.get_Detector().equalsIgnoreCase("BMT")){
+          			  // if not in the same sector, skip
           			  if(b.get_Sector() != a.get_Sector() ) continue;
+          			  
+          			  // check if they have similar times
+          			  if( Math.abs( b.get_Cluster1().get_Tmin() - a.get_Cluster1().get_Tmin() ) > 60. ) continue;
           		  }
           		  else{
           			  double aphi = a.get_Point().toVector3D().phi() ;
@@ -213,7 +211,7 @@ public class MakerCA {
       		  if( n.get_c1().equals(c.get_c2()) ){  			  
       			  if( n.get_dir2D(this._plane).dot(c.get_dir2D(this._plane)) > this._cosBtwCells){
       				  n.addNeighbour(c);
-
+                c.setParent(n);
       				if ( this._debug ) System.out.println( "   . pass cos requirement   add neighbor " + n);
       			  }
       			  else {

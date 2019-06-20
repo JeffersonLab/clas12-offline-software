@@ -23,6 +23,7 @@ public class Cell implements Comparable<Cell> {
 	private String _plane; // plane can be XY or ZR
 	private ArrayList<Cell> nb; // list of neighbor cells 
 	private boolean _used; // has it been used in candidates?
+	private Cell _parent;   
 	public Cell(){}
 	
 	public Cell( Cross a, Cross b ){
@@ -42,6 +43,14 @@ public class Cell implements Comparable<Cell> {
 		this._state = 1;
 		this._plane = plane;
 		this._used = false;
+	}
+	
+	public void setParent( Cell c ) {
+		this._parent =c;
+	}
+	
+	public Cell getParent() {
+		return this._parent;
 	}
 	
 	@Override 
