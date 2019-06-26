@@ -1,0 +1,17 @@
+[   
+ {
+    "name": "RTPC::rec",
+    "group": 1720,
+    "item" : 1,
+    "info": "reconstructed RTPC hits",
+    "items": [
+       {"name":"TID",        "type":"I", "info":"Track ID of the hit"},
+       {"name":"cellID",     "type":"I,  "info":"cell id"},
+       {"name":"time",       "type":"F", "info":"Time (ns)"},
+       {"name":"posX",       "type":"F", "info":"x pos (cm)"},
+       {"name":"posY",       "type":"F", "info":"y pos (cm)"},
+       {"name":"posZ",       "type":"F", "info":"z pos (cm)"},
+       {"name":"tdiff",      "type":"F", "info":"Time shift (ns)"}
+    ]
+  }
+ ]
