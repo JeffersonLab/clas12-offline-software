@@ -48,13 +48,22 @@ public class TrackListFinder {
                 //System.out.println("*******  after EL "+trk.get_P());
 
                 int charge = trk.get_Q();
-                double maxPathLength = 5.0;//very loose cut 
+//                double maxPathLength = 5.0;//very loose cut 
+//                bstSwim.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
+//                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
+//                        trk.get_P(), charge, 
+//                        maxPathLength) ;
+//                double[] pointAtCylRad = bstSwim.SwimToCylinder(Constants.CTOFINNERRADIUS/10);
+                double maxPathLength = 3.0;//very loose cut 
+                double accuracy = 0.1; // accuracy of stopper in cm
+                double stepsize = 0.1; // initial step size
                 bstSwim.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
                         Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                         trk.get_P(), charge, 
-                        maxPathLength) ;
-
-                double[] pointAtCylRad = bstSwim.SwimToCylinder(Constants.CTOFINNERRADIUS/10);
+                        maxPathLength, accuracy, stepsize) ;
+                double[] pointAtCylRad = bstSwim.SwimRho(Constants.CTOFINNERRADIUS/10);
+//                System.out.println(pointAtCylRad[0] + " " + pointAtCylRad[1] + " " + pointAtCylRad[2] + " " +
+//                        Math.sqrt(pointAtCylRad[0]*pointAtCylRad[0]+pointAtCylRad[1]*pointAtCylRad[1])+ " " + pointAtCylRad[6]);
                 trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
                 trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
 

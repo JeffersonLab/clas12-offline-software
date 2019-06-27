@@ -7,6 +7,7 @@ package org.jlab.clas.swimtools;
 
 import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKuttaException;
+import cnuphys.swim.SwimResult;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.util.Plane;
 import cnuphys.swimZ.SwimZException;
@@ -36,8 +37,8 @@ public class Swim {
 
     final double SWIMZMINMOM = 0.75; // GeV/c
     final double MINTRKMOM = 0.05; // GeV/c
-    final double accuracy = 20e-6; // 20 microns
-    final double stepSize = 5.00 * 1.e-4; // 500 microns
+    double accuracy = 20e-6; // 20 microns
+    double stepSize = 5.00 * 1.e-4; // 500 microns
 
     private ProbeCollection PC;
     
@@ -153,6 +154,35 @@ public class Swim {
                     int charge, double maxPathLength) {
 
         _maxPathLength = maxPathLength;
+        _charge = charge;
+        _phi = phiDeg;
+        _theta = thetaDeg;
+        _pTot = p;
+        _x0 = xcm / 100;
+        _y0 = ycm / 100;
+        _z0 = zcm / 100;
+
+    }
+
+    /**
+     * 
+     * @param xcm
+     * @param ycm
+     * @param zcm
+     * @param phiDeg
+     * @param thetaDeg
+     * @param p
+     * @param charge
+     * @param maxPathLength
+     * @param Accuracy
+     * @param StepSize
+     */
+    public void SetSwimParameters(double xcm, double ycm, double zcm, double phiDeg, double thetaDeg, double p,
+                    int charge, double maxPathLength, double Accuracy, double StepSize) {
+
+        _maxPathLength = maxPathLength;
+         accuracy = Accuracy/100;
+         stepSize = StepSize/100;
         _charge = charge;
         _phi = phiDeg;
         _theta = thetaDeg;
@@ -419,6 +449,42 @@ public class Swim {
 
     }
 
+    /**
+     * 
+     * @param radius
+     * @return state  x,y,z,px,py,pz, pathlength, iBdl at the surface 
+     */
+    public double[] SwimRho(double radius)  {
+
+        double[] value = new double[8];
+
+        // using adaptive stepsize
+        if(this.SwimUnPhys)
+            return null;
+
+        try {
+        
+            SwimResult result = new SwimResult(6);
+            
+            PC.CF.swimRho(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, radius/100, accuracy, _rMax, stepSize, cnuphys.swim.Swimmer.CLAS_Tolerance, result);
+
+            value[0] = result.getUf()[0] * 100; // convert back to cm
+            value[1] = result.getUf()[1] * 100; // convert back to cm
+            value[2] = result.getUf()[2] * 100; // convert back to cm
+            value[3] = result.getUf()[3] * _pTot; // normalized values
+            value[4] = result.getUf()[4] * _pTot;
+            value[5] = result.getUf()[5] * _pTot;
+            value[6] = result.getFinalS() * 100;
+            value[7] = 0; // Conversion from kG.m to T.cm
+
+                    
+        } catch (RungeKuttaException e) {
+                e.printStackTrace();
+        }
+        return value;
+
+    }
+    
     private class SphericalBoundarySwimStopper implements IStopper {
 
         private double _finalPathLength = Double.NaN;
