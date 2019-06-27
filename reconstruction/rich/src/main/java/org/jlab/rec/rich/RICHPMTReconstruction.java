@@ -110,7 +110,7 @@ public class RICHPMTReconstruction {
         
         for(int i = 0; i < allEdges.size(); i++) {
             RICHEdge edge = allEdges.get(i);
-                if(RICHEdge.passEdgeSelection(edge)) {
+                if(edge.passEdgeSelection()) {
                         if(edge.get_polarity()==tool.get_Constants().LEADING_EDGE_POLARITY)Leads.add(edge);      
                 }
         }      
@@ -140,7 +140,7 @@ public class RICHPMTReconstruction {
         for(int i = 0; i < allEdges.size(); i++) 
         {
             RICHEdge edge = allEdges.get(i);
-                if(RICHEdge.passEdgeSelection(edge)) {
+                if(edge.passEdgeSelection()) {
                         if(edge.get_polarity()==tool.get_Constants().TRAILING_EDGE_POLARITY)Trails.add(edge);      
                 }
         }      

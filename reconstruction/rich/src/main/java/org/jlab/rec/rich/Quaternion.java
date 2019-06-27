@@ -15,11 +15,12 @@ public class Quaternion {
 	public double y;
 	public double z;
 	public double w;
+
 	// Temporary Quaternion   
-	private static final Quaternion quatTp1 = new Quaternion();
-	private static final Quaternion quatTp2 = new Quaternion();
-	private static final Quaternion quatTp3 = new Quaternion();
-	private static final Quaternion quatTp4 = new Quaternion();
+	private static Quaternion quatTp1 = new Quaternion();
+	private static Quaternion quatTp2 = new Quaternion();
+	private static Quaternion quatTp3 = new Quaternion();
+	private static Quaternion quatTp4 = new Quaternion();
 
 	public Quaternion() {
 	}

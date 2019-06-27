@@ -25,27 +25,32 @@ public class RICHio {
     public void clear_Banks(DataEvent event) {
     // ----------------
 
+        int debugMode = 1;
+
         // remove previous version of banks from the event
         if(event.hasBank("RICH::hits")){
             event.removeBank("RICH::hits");
+            if(debugMode==1)System.out.format("Remove RICH::hits from event \n");
         }
         if(event.hasBank("RICH::clusters")){
             event.removeBank("RICH::clusters");
+            if(debugMode==1)System.out.format("Remove RICH::clusters from event \n");
         }
-        /*if(event.hasBank("RICH::newhits")){
-            event.removeBank("RICH::newhits");
-        }
-        if(event.hasBank("RICH::newclusters")){
-            event.removeBank("RICH::newclusters");
-        }*/
         if(event.hasBank("REC::RICH")){
             event.removeBank("REC::RICH");
+            if(debugMode==1)System.out.format("Remove REC::RICH from event \n");
+        }
+        if(event.hasBank("REC::RingCher")){
+            event.removeBank("REC::RingCher");
+            if(debugMode==1)System.out.format("Remove REC::RingCher from event \n");
         }
         if(event.hasBank("RICH::hadrons")){
             event.removeBank("RICH::hadrons");
+            if(debugMode==1)System.out.format("Remove RICH::hadrons from event \n");
         }
         if(event.hasBank("RICH::photons")){
             event.removeBank("RICH::photons");
+            if(debugMode==1)System.out.format("Remove RICH::photons from event \n");
         }
 
     }
@@ -116,19 +121,19 @@ public class RICHio {
 
                 RICHHit hit = richevent.get_Hit(i);
 
-                bankHits.setShort("id",i,(short) hit.get_id());
-                bankHits.setShort("sector",i,(short) hit.get_sector());
-                bankHits.setShort("tile",i,(short) hit.get_tile());
-                bankHits.setShort("pmt",i,(short) hit.get_pmt());
-                bankHits.setShort("anode",i,(short) hit.get_anode());
-                bankHits.setFloat("x",i,(float) (hit.get_x()));
-                bankHits.setFloat("y",i,(float) (hit.get_y()));
-                bankHits.setFloat("z",i,(float) hit.get_z());
-                bankHits.setFloat("time",i,(float) hit.get_time());
-                bankHits.setFloat("rawtime",i,(float) hit.get_rawtime());
-                bankHits.setShort("cluster",i,(short) hit.get_cluster());
-                bankHits.setShort("xtalk",i,(short) hit.get_xtalk());
-                bankHits.setShort("duration",i,(short) hit.get_duration());
+                bankHits.setShort("id",      i, (short) hit.get_id());
+                bankHits.setShort("sector",  i, (short) hit.get_sector());
+                bankHits.setShort("tile",    i, (short) hit.get_tile());
+                bankHits.setShort("pmt",     i, (short) hit.get_pmt());
+                bankHits.setShort("anode",   i, (short) hit.get_anode());
+                bankHits.setFloat("x",       i, (float) (hit.get_x()));
+                bankHits.setFloat("y",       i, (float) (hit.get_y()));
+                bankHits.setFloat("z",       i, (float) hit.get_z());
+                bankHits.setFloat("time",    i, (float) hit.get_time());
+                bankHits.setFloat("rawtime", i, (float) hit.get_rawtime());
+                bankHits.setShort("cluster", i, (short) hit.get_cluster());
+                bankHits.setShort("xtalk",   i, (short) hit.get_xtalk());
+                bankHits.setShort("duration",i, (short) hit.get_duration());
             }
             event.appendBanks(bankHits);
         }
@@ -156,21 +161,21 @@ public class RICHio {
 
                 RICHCluster clu = richevent.get_Cluster(i);
 
-                bankCluster.setShort("id", i, (short) clu.get_id());
-                bankCluster.setShort("size", i, (short) clu.get_size());
-                bankCluster.setShort("sector", i, (short) clu.get(0).get_sector());
-                bankCluster.setShort("tile", i, (short) clu.get(0).get_tile());
-                bankCluster.setShort("pmt", i, (short) clu.get(0).get_pmt());
-                bankCluster.setFloat("charge",i, (float) clu.get_charge());
-                bankCluster.setFloat("time",i, (float) clu.get_time());
-                bankCluster.setFloat("rawtime",i, (float) clu.get_rawtime());
-                bankCluster.setFloat("x",i, (float) (clu.get_x()));
-                bankCluster.setFloat("y",i, (float) (clu.get_y()));
-                bankCluster.setFloat("z",i, (float) clu.get_z());
-                bankCluster.setFloat("wtime",i, (float) clu.get_wtime());
-                bankCluster.setFloat("wx",i, (float) clu.get_wx());
-                bankCluster.setFloat("wy",i, (float) clu.get_wy());
-                bankCluster.setFloat("wz",i, (float) clu.get_wz());
+                bankCluster.setShort("id",      i, (short) clu.get_id());
+                bankCluster.setShort("size",    i, (short) clu.get_size());
+                bankCluster.setShort("sector",  i, (short) clu.get(0).get_sector());
+                bankCluster.setShort("tile",    i, (short) clu.get(0).get_tile());
+                bankCluster.setShort("pmt",     i, (short) clu.get(0).get_pmt());
+                bankCluster.setFloat("charge",  i, (float) clu.get_charge());
+                bankCluster.setFloat("time",    i, (float) clu.get_time());
+                bankCluster.setFloat("rawtime", i, (float) clu.get_rawtime());
+                bankCluster.setFloat("x",       i, (float) (clu.get_x()));
+                bankCluster.setFloat("y",       i, (float) (clu.get_y()));
+                bankCluster.setFloat("z",       i, (float) clu.get_z());
+                bankCluster.setFloat("wtime",   i, (float) clu.get_wtime());
+                bankCluster.setFloat("wx",      i, (float) clu.get_wx());
+                bankCluster.setFloat("wy",      i, (float) clu.get_wy());
+                bankCluster.setFloat("wz",      i, (float) clu.get_wz());
             }
             event.appendBanks(bankCluster);
         }
@@ -199,29 +204,29 @@ public class RICHio {
                 RICHParticle had = richevent.get_Hadron(i);
 
                 bankHads.setShort("id",i,(short) had.get_id());
-                bankHads.setShort("hit_index",i,(short) had.get_hit_index());
-                bankHads.setShort("particle_index",i,(short) had.get_ParentIndex());
+                bankHads.setShort("hit_index",     i, (short) had.get_hit_index());
+                bankHads.setShort("particle_index",i, (short) had.get_ParentIndex());
 
-                bankHads.setFloat("traced_the",i,(float) had.lab_theta);
-                bankHads.setFloat("traced_phi",i,(float) had.lab_phi);
-                bankHads.setFloat("traced_hitx",i,(float) had.meas_hit.x);
-                bankHads.setFloat("traced_hity",i,(float) had.meas_hit.y);
-                bankHads.setFloat("traced_hitz",i,(float) had.meas_hit.z);
-                bankHads.setFloat("traced_time",i,(float) had.traced.get_time());
-                bankHads.setFloat("traced_path",i,(float) had.traced.get_path());
+                bankHads.setFloat("traced_the",    i, (float) had.lab_theta);
+                bankHads.setFloat("traced_phi",    i, (float) had.lab_phi);
+                bankHads.setFloat("traced_hitx",   i, (float) had.meas_hit.x);
+                bankHads.setFloat("traced_hity",   i, (float) had.meas_hit.y);
+                bankHads.setFloat("traced_hitz",   i, (float) had.meas_hit.z);
+                bankHads.setFloat("traced_time",   i, (float) had.traced.get_time());
+                bankHads.setFloat("traced_path",   i, (float) had.traced.get_path());
 
-                bankHads.setShort("traced_ilay",i,(short) had.ilay_emission);
-                bankHads.setShort("traced_ico",i,(short) had.ico_emission);
-                bankHads.setFloat("traced_emix",i,(float) had.lab_emission.x);
-                bankHads.setFloat("traced_emiy",i,(float) had.lab_emission.y);
-                bankHads.setFloat("traced_emiz",i,(float) had.lab_emission.z);
+                bankHads.setShort("traced_ilay",   i, (short) had.ilay_emission);
+                bankHads.setShort("traced_ico",    i, (short) had.ico_emission);
+                bankHads.setFloat("traced_emix",   i, (float) had.lab_emission.x);
+                bankHads.setFloat("traced_emiy",   i, (float) had.lab_emission.y);
+                bankHads.setFloat("traced_emiz",   i, (float) had.lab_emission.z);
 
-                bankHads.setFloat("EtaC_ele",i,(float) had.get_changle(0));
-                bankHads.setFloat("EtaC_pi",i,(float) had.get_changle(1));
-                bankHads.setFloat("EtaC_k",i,(float) had.get_changle(2));
-                bankHads.setFloat("EtaC_pr",i,(float) had.get_changle(3));
-                bankHads.setFloat("EtaC_min",i,(float) had.minChAngle());
-                bankHads.setFloat("EtaC_max",i,(float) had.maxChAngle());
+                bankHads.setFloat("EtaC_ele",      i, (float) had.get_changle(0));
+                bankHads.setFloat("EtaC_pi",       i, (float) had.get_changle(1));
+                bankHads.setFloat("EtaC_k",        i, (float) had.get_changle(2));
+                bankHads.setFloat("EtaC_pr",       i, (float) had.get_changle(3));
+                bankHads.setFloat("EtaC_min",      i, (float) had.minChAngle());
+                bankHads.setFloat("EtaC_max",      i, (float) had.maxChAngle());
 
             }
             event.appendBanks(bankHads);
@@ -270,17 +275,17 @@ public class RICHio {
                 if((a_etaC<chmi || a_etaC>chma) && (t_etaC<chmi || t_etaC>chma)) continue;
                 if(Math.abs(a_time-htime)>dtma && Math.abs(t_time-htime)>dtma) continue;
 
-                bankRing.setShort("id",i, (short) pho.get_id());
-                bankRing.setShort("hindex",i,(short) pho.get_hit_index());
-                bankRing.setShort("pindex",i,(short) had.get_ParentIndex());
+                bankRing.setShort("id",     i, (short) pho.get_id());
+                bankRing.setShort("hindex", i, (short) pho.get_hit_index());
+                bankRing.setShort("pindex", i, (short) had.get_ParentIndex());
 
-                bankRing.setFloat("apath",i,(float) pho.analytic.get_path());
-                bankRing.setFloat("atime",i,(float) a_time );
-                bankRing.setFloat("aEtaC",i,(float) a_etaC );
+                bankRing.setFloat("apath",  i, (float) pho.analytic.get_path());
+                bankRing.setFloat("atime",  i, (float) a_time );
+                bankRing.setFloat("aEtaC",  i, (float) a_etaC );
 
-                bankRing.setFloat("tpath",i,(float) pho.traced.get_path());
-                bankRing.setFloat("ttime",i,(float) t_time );
-                bankRing.setFloat("tEtaC",i,(float) t_etaC );
+                bankRing.setFloat("tpath",  i, (float) pho.traced.get_path());
+                bankRing.setFloat("ttime",  i, (float) t_time );
+                bankRing.setFloat("tEtaC",  i, (float) t_etaC );
 
             }
             event.appendBanks(bankRing);
@@ -319,8 +324,8 @@ public class RICHio {
                 bankPhos.setFloat("analytic_phi",i,(float) pho.analytic.get_phi());
                 bankPhos.setFloat("analytic_path",i,(float) pho.analytic.get_path());
                 bankPhos.setFloat("analytic_time",i,(float) pho.analytic.get_time());
-                bankPhos.setShort("analytic_nrfl",i,(short) pho.analytic.get_nrefle());
-                bankPhos.setShort("analytic_nrfr",i,(short) pho.analytic.get_nrefra());
+                //bankPhos.setShort("analytic_nrfl",i,(short) pho.analytic.get_nrefle());
+                //bankPhos.setShort("analytic_nrfr",i,(short) pho.analytic.get_nrefra());
 
                 bankPhos.setFloat("analytic_EtaC",i,(float) pho.analytic.get_EtaC());
                 bankPhos.setFloat("analytic_aeron",i,(float) pho.analytic.get_aeron());
@@ -339,7 +344,7 @@ public class RICHio {
                 bankPhos.setFloat("traced_time",i,(float) pho.traced.get_time());
                 bankPhos.setShort("traced_nrfl",i,(short) pho.traced.get_nrefle());
                 bankPhos.setShort("traced_nrfr",i,(short) pho.traced.get_nrefra());
-                //bankPhos.setShort("traced_1srfl",i,(short) pho.traced.get_firstrefle());
+                bankPhos.setShort("traced_1rfl",i,(short) pho.traced.get_firstrefle());
 
                 bankPhos.setFloat("traced_EtaC",i,(float) pho.traced.get_EtaC());
                 bankPhos.setFloat("traced_aeron",i,(float) pho.traced.get_aeron());

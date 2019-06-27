@@ -171,6 +171,7 @@ public class RICHHit implements Comparable<RICHHit>{
         this.anode = anode;
     }
 
+    
     // ----------------
     public int get_idx() {
     // ----------------
@@ -331,7 +332,7 @@ public class RICHHit implements Comparable<RICHHit>{
     }
     
     // ----------------
-    public static boolean passHitSelection(RICHHit hit) {
+    public boolean passHitSelection(RICHHit hit) {
     // ----------------
         // a selection cut to pass the edge
         if(hit.get_time() > 0) {

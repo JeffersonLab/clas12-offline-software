@@ -60,6 +60,7 @@ public class RICHCluster extends ArrayList<RICHHit> {
           return this.get(0).get_rawtime();
     }
 
+  
     // ----------------
     public int get_glx() {
     // ----------------

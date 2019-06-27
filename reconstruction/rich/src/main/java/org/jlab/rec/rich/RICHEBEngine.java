@@ -20,9 +20,9 @@ public class RICHEBEngine extends ReconstructionEngine {
     private int Ncalls = 0;
 
     private long EBRICH_start_time;
-    private boolean LOAD_TABLES = true;
     
     private RICHTool  tool = null;
+    private boolean LOAD_TABLES = true;
 
     // ----------------
     public RICHEBEngine() {
@@ -36,6 +36,8 @@ public class RICHEBEngine extends ReconstructionEngine {
     // ----------------
     public boolean init() {
     // ----------------
+
+        System.out.format("PROVA per Raffaella \n");
 
         int debugMode = 0;
 
@@ -52,6 +54,8 @@ public class RICHEBEngine extends ReconstructionEngine {
     public boolean init_CCDB() {
     // ----------------
 
+        int debugMode = 0;
+
         String[] richTables = new String[]{
                     "/calibration/rich/aerogel",
                     "/calibration/rich/time_walk",
@@ -67,19 +71,18 @@ public class RICHEBEngine extends ReconstructionEngine {
         String engineVariation = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");         
         getConstantsManager().setVariation(engineVariation);
 
-        // Get the tables
-        int run = 11;
-        tool.init(getConstantsManager().getConstants(run, "/calibration/rich/aerogel"),
-                  getConstantsManager().getConstants(run, "/calibration/rich/time_walk"),
-                  getConstantsManager().getConstants(run, "/calibration/rich/time_offset"), 
-                  getConstantsManager().getConstants(run, "/calibration/rich/misalignments"),
-                  getConstantsManager().getConstants(run, "/calibration/rich/parameter") );
-        /*int newRun = 2467;
-        IndexedTable prova = getConstantsManager().getConstants(newRun, "/calibration/rich/aerogel");
+        if(debugMode==1)System.out.format("RICHEBEngine: Load geometry constants from CCDB \n");
 
-        for (int i=1; i<=16; i++){
-          System.out.format(" PROVA %10.5f %5.2f \n",prova.getDoubleValue("n400", 4,201,i),prova.getDoubleValue("planarity", 4,201,i));
-        }*/
+        // Get the constant tables for reconstruction parameters, geometry and optical characterization
+        int run = 11;
+
+        IndexedTable test = getConstantsManager().getConstants(run, "/calibration/rich/parameter");
+
+
+        tool.init_GeoConstants(
+                  getConstantsManager().getConstants(run, "/calibration/rich/parameter"),
+                  getConstantsManager().getConstants(run, "/calibration/rich/aerogel"),
+                  getConstantsManager().getConstants(run, "/calibration/rich/misalignments") );
 
         return true;
 
@@ -142,18 +145,15 @@ public class RICHEBEngine extends ReconstructionEngine {
 
         int debugMode = 0;
         int run = richevent.get_RunID(); 
-        if(run>0 && LOAD_TABLES){
+        if(run>0 && LOAD_TABLES) {
 
-            LOAD_TABLES = true;
+            LOAD_TABLES = false;
 
             if(debugMode>=1)System.out.format("LOAD constants from CCDB for run %5d \n",run);
     
-            // Get the tables
-            tool.init(getConstantsManager().getConstants(run, "/calibration/rich/aerogel"),
-                      getConstantsManager().getConstants(run, "/calibration/rich/time_walk"),
-                      getConstantsManager().getConstants(run, "/calibration/rich/time_offset"), 
-                      getConstantsManager().getConstants(run, "/calibration/rich/misalignments"),
-                      getConstantsManager().getConstants(run, "/calibration/rich/parameter") );
+            // Get the run-dependent tables for time calibration
+            tool.init_TimeConstants( getConstantsManager().getConstants(run, "/calibration/rich/time_walk"),
+                      getConstantsManager().getConstants(run, "/calibration/rich/time_offset") );
 
         }
 

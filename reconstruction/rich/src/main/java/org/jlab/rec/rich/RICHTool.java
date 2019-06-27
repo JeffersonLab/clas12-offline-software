@@ -46,12 +46,12 @@ public class RICHTool{
     }
 
 
-    private static int anode_map[] = {60,58,59,57,52,50,51,49,44,42,43,41,36,34,35,
+    private final static int anode_map[] = {60,58,59,57,52,50,51,49,44,42,43,41,36,34,35,
                      33,28,26,27,25,20,18,19,17,12,10,11,9,4,2,3,1,5,7,6,8,13,15,14,16,21,
                      23,22,24,29,31,30,32,37,39,38,40,45,47,46,48,53,55,54,56,61,63,62,64};
 
 
-    private static int tile2pmt[][]={{   1,   2,   3},  
+    private final static int tile2pmt[][]={{   1,   2,   3},  
                         {   4,   5,   6},  
                         {   7,   0,   8},  
                         {   9,  10,  11},  
@@ -193,17 +193,17 @@ public class RICHTool{
                         { 395, 396, 397}};
 
 
-    private static int NLAY=13;
-    private static int NROW=25;
-    private static int NCOL=56;
-    private static int NPMT=391;
-    private static int NPIX=64;
-    private static int NCOMPO=10;
+    private final static int NLAY=13;
+    private final static int NROW=25;
+    private final static int NCOL=56;
+    private final static int NPMT=391;
+    private final static int NPIX=64;
+    private final static int NCOMPO=10;
 
-    private static double pmt_timeoff[][] = new double[NPMT][NPIX];
-    private static double pmt_timewalk[][] = new double[NPMT][4];
-    private static double aero_refi[][] = new double[4][31];
-    private static double aero_plan[][] = new double[4][31];
+    private double pmt_timeoff[][] = new double[NPMT][NPIX];
+    private double pmt_timewalk[][] = new double[NPMT][4];
+    private double aero_refi[][] = new double[4][31];
+    private double aero_plan[][] = new double[4][31];
 
     private Vector3D rich_survey_angle  = new Vector3D();
     private Vector3D rich_survey_shift  = new Vector3D();
@@ -212,19 +212,19 @@ public class RICHTool{
     private RICHFrame rich_frame = new RICHFrame();
     private RICHFrame survey_frame = new RICHFrame();
 
-    private static int pfirst[] = {1, 7,14,22,31,41,52,64,77, 91,106,122,139,157,176,196,217,239,262,286,311,337,364,392,395};
-    private static int plast[]  = {6,13,21,30,40,51,63,76,90,105,121,138,156,175,195,216,238,261,285,310,336,363,391,394,397};
+    private final static int pfirst[] = {1, 7,14,22,31,41,52,64,77, 91,106,122,139,157,176,196,217,239,262,286,311,337,364,392,395};
+    private final static int plast[]  = {6,13,21,30,40,51,63,76,90,105,121,138,156,175,195,216,238,261,285,310,336,363,391,394,397};
 
     private int nxp[] = new int[397]; // X coordinate of pixel 1 of each mapmt
     private int nyp[] = new int[397]; // Y coordinate of pixel 1 of each mapmt
 
     public RICHGeant4Factory richfactory = new RICHGeant4Factory();
 
-    private static List<RICHLayer> opticlayers = new ArrayList<RICHLayer>();
+    private List<RICHLayer> opticlayers = new ArrayList<RICHLayer>();
 
-    private static RICHPixel MAPMTpixels  = null; 
+    private RICHPixel MAPMTpixels  = null; 
 
-    private static int NTIME = 10;
+    private final static int NTIME = 10;
     private long RICH_START_TIME = (long) 0;
     private long RICH_LAST_TIME = (long) 0;
     private double richprocess_time[] = new double[NTIME];
@@ -233,8 +233,7 @@ public class RICHTool{
     private RICHConstants reco_constants = new RICHConstants();
 
     //------------------------------
-    public void init(IndexedTable aeroConstants, IndexedTable timewalkConstants, 
-                     IndexedTable timeoffConstants, IndexedTable misaConstants, IndexedTable paraConstants){
+    public void init_GeoConstants(IndexedTable aeroConstants, IndexedTable misaConstants, IndexedTable paraConstants){
     //------------------------------
 
         // start processing time
@@ -242,9 +241,11 @@ public class RICHTool{
     
         // load constants
         if(RICHConstants.READ_FROM_FILES==1){
-            init_ConstantsTxT();
+            init_ConstantsTxT(1);
+            init_ConstantsTxT(3);
         }else{
-            init_ConstantsCCDB(aeroConstants, timewalkConstants, timeoffConstants, misaConstants, paraConstants);
+            init_GeoConstantsCCDB(aeroConstants, misaConstants, paraConstants);
+            init_ConstantsTxT(1);
         }
 
         // global pixel coordinat indexes
@@ -257,6 +258,19 @@ public class RICHTool{
         init_RICHLayers();
 
     } 
+
+    //------------------------------
+    public void init_TimeConstants(IndexedTable timewalkConstants, IndexedTable timeoffConstants){
+    //------------------------------
+
+        // load constants
+        if(RICHConstants.READ_FROM_FILES==1){
+            init_ConstantsTxT(2);
+        }else{
+            init_TimeConstantsCCDB(timewalkConstants, timeoffConstants);
+        }
+
+    }
 
 
     //------------------------------
@@ -295,6 +309,7 @@ public class RICHTool{
     }
 
 
+    
     //------------------------------
     public int get_Globalidx(int pmt, int anode) {
     //------------------------------
@@ -321,11 +336,53 @@ public class RICHTool{
 
 
     //------------------------------
-    public void init_ConstantsCCDB(IndexedTable aeroConstants, IndexedTable timewalkConstants, 
-                                   IndexedTable timeoffConstants, IndexedTable misaConstants, IndexedTable paraConstants){
+    public void init_TimeConstantsCCDB(IndexedTable timewalkConstants, IndexedTable timeoffConstants){
     //------------------------------
 
-        int debugMode = 0;
+        int debugMode = 1;
+
+        /*
+        * TIME_OFFSETs
+        */
+
+        for(int ipmt=0; ipmt<NPMT; ipmt++){
+            for(int ich=0; ich<NPIX; ich++){
+                pmt_timeoff[ipmt][ich] = (float) timeoffConstants.getDoubleValue("offset", 4, ipmt+1, ich+1);
+            }
+            if(debugMode>=1){
+                if(ipmt<10 || ipmt>380)System.out.format("CCDB TOFF    ipmt %4d  %8.2f (ch1)  %8.2f (ch2)  %8.2f (ch63)  %8.2f (ch64) \n", ipmt+1,
+                   pmt_timeoff[ipmt][0], pmt_timeoff[ipmt][1], pmt_timeoff[ipmt][62], pmt_timeoff[ipmt][63]);
+                if(ipmt==10)System.out.format("CCDB TOFF     ....... \n");
+                if(ipmt==390)System.out.format("  \n");
+            }
+        }
+
+        /*
+        *  TIME_WALKs
+        */
+
+        // ATT: time_walk bank definition is wrong
+        for(int ipmt=0; ipmt<NPMT; ipmt++){
+            pmt_timewalk[ipmt][0] = (float) timewalkConstants.getDoubleValue("D0", 4, ipmt+1, 0);
+            pmt_timewalk[ipmt][1] = (float) timewalkConstants.getDoubleValue("m1", 4, ipmt+1, 0);
+            pmt_timewalk[ipmt][2] = (float) Math.abs(timewalkConstants.getDoubleValue("m2", 4, ipmt+1, 0))*(-1.0);
+            pmt_timewalk[ipmt][3] = (float) timewalkConstants.getDoubleValue("T0", 4, ipmt+1, 0);
+            if(debugMode>=1){
+                if(ipmt<10 || ipmt>380)System.out.format("CCDB TWALK   ipmt %4d  D0 = %8.2f  T0 = %8.2f  m1 = %8.3f  m2 = %8.3f\n", ipmt+1,
+                         pmt_timewalk[ipmt][0], pmt_timewalk[ipmt][1] , pmt_timewalk[ipmt][2], pmt_timewalk[ipmt][3]);
+                if(ipmt==10)System.out.format("CCDB TWALK    ....... \n");
+                if(ipmt==390)System.out.format("  \n");
+            }
+        }
+
+    }
+
+
+    //------------------------------
+    public void init_GeoConstantsCCDB(IndexedTable paraConstants, IndexedTable aeroConstants, IndexedTable misaConstants){
+    //------------------------------
+
+        int debugMode = 1;
 
         /*
         * RECONSTRUCTION PARAMETERS
@@ -347,6 +404,7 @@ public class RICHTool{
 
         reco_constants.REDO_RICH_RECO              =  paraConstants.getIntValue("falg13", 4, 0, 0);
         reco_constants.DO_MIRROR_HADS              =  paraConstants.getIntValue("flag14", 4, 0, 0);  
+        reco_constants.DO_CURVED_AERO              =  paraConstants.getIntValue("flag15", 4, 0, 0);  
 
         reco_constants.GOODHIT_FRAC                =  paraConstants.getDoubleValue("par1", 4, 0, 0);
         reco_constants.RICH_DCMATCH_CUT            =  paraConstants.getDoubleValue("par2", 4, 0, 0);
@@ -359,6 +417,8 @@ public class RICHTool{
         reco_constants.MISA_SHIFT_SCALE            =  paraConstants.getDoubleValue("par9", 4, 0, 0);
         reco_constants.MISA_ANGLE_SCALE            =  paraConstants.getDoubleValue("par10", 4, 0, 0);
         
+        //ATT: check
+        //reco_constants.FORCE_DC_MATCH              =  1;
         if(debugMode>=1){
 
             System.out.format(" \n");
@@ -378,6 +438,7 @@ public class RICHTool{
 
             System.out.format("CCDB PARA    REDO_RICH_RECO               %8d \n", reco_constants.REDO_RICH_RECO); 
             System.out.format("CCDB PARA    DO_MIRROR_HADS               %8d \n", reco_constants.DO_MIRROR_HADS); 
+            System.out.format("CCDB PARA    DO_CURVED_AERO               %8d \n", reco_constants.DO_CURVED_AERO); 
 
             System.out.format("CCDB PARA    GOODHIT_FRAC                 %8.4f \n", reco_constants.GOODHIT_FRAC); 
             System.out.format("CCDB PARA    RICH_DCMATCH_CUT             %8.4f \n", reco_constants.RICH_DCMATCH_CUT); 
@@ -391,40 +452,6 @@ public class RICHTool{
             System.out.format("CCDB PARA    MISA_ANGLE_SCALE             %8.4f \n", reco_constants.MISA_ANGLE_SCALE); 
             System.out.format(" \n");
 
-        }
-
-        /*
-        * TIME_OFFSETs
-        */
-
-        for(int ipmt=0; ipmt<NPMT; ipmt++){
-            for(int ich=0; ich<NPIX; ich++){
-                pmt_timeoff[ipmt][ich] = (float) timeoffConstants.getDoubleValue("offset", 4, ipmt+1, ich+1); 
-            }
-            if(debugMode>=1){ 
-                if(ipmt<10 || ipmt>380)System.out.format("CCDB TOFF    ipmt %4d  %8.2f (ch1)  %8.2f (ch2)  %8.2f (ch63)  %8.2f (ch64) \n", ipmt+1, 
-                   pmt_timeoff[ipmt][0], pmt_timeoff[ipmt][1], pmt_timeoff[ipmt][62], pmt_timeoff[ipmt][63]);
-                if(ipmt==10)System.out.format("CCDB TOFF     ....... \n");
-                if(ipmt==390)System.out.format("  \n");
-            }
-        }
-
-        /*
-        *  TIME_WALKs
-        */
-
-        // ATT: time_walk bank definition is wrong
-        for(int ipmt=0; ipmt<NPMT; ipmt++){
-            pmt_timewalk[ipmt][0] = (float) timewalkConstants.getDoubleValue("D0", 4, ipmt+1, 0); 
-            pmt_timewalk[ipmt][1] = (float) timewalkConstants.getDoubleValue("m1", 4, ipmt+1, 0); 
-            pmt_timewalk[ipmt][2] = (float) Math.abs(timewalkConstants.getDoubleValue("m2", 4, ipmt+1, 0))*(-1.0); 
-            pmt_timewalk[ipmt][3] = (float) timewalkConstants.getDoubleValue("T0", 4, ipmt+1, 0); 
-            if(debugMode>=1){ 
-                if(ipmt<10 || ipmt>380)System.out.format("CCDB TWALK   ipmt %4d  D0 = %8.2f  T0 = %8.2f  m1 = %8.3f  m2 = %8.3f\n", ipmt+1, 
-                         pmt_timewalk[ipmt][0], pmt_timewalk[ipmt][1] , pmt_timewalk[ipmt][2], pmt_timewalk[ipmt][3]);
-                if(ipmt==10)System.out.format("CCDB TWALK    ....... \n");
-                if(ipmt==390)System.out.format("  \n");
-            }
         }
 
 
@@ -493,235 +520,240 @@ public class RICHTool{
 
     }
 
-
     //------------------------------
-    public void init_ConstantsTxT(){
+    public void init_ConstantsTxT(int flag){
     //------------------------------
     // To be moved to CCDB
 
-        int debugMode = 0;
+        int debugMode = 1;
 
-       /**
-        * TIME_OFFSETs
-        */
-        String off_filename = new String("CALIB_DATA/MIRA/richTimeOffsets.out");
+       if(flag==2){
+           /**
+            * TIME_OFFSETs
+            */
+            String off_filename = new String("CALIB_DATA/MIRA/richTimeOffsets.out");
 
-        try {
+            try {
 
-            BufferedReader bf = new BufferedReader(new FileReader(off_filename));
-            String currentLine = null;
+                BufferedReader bf = new BufferedReader(new FileReader(off_filename));
+                String currentLine = null;
 
-            while ( (currentLine = bf.readLine()) != null) {
+                while ( (currentLine = bf.readLine()) != null) {
 
-                String[] array = currentLine.split(" ");
-                int ipmt = Integer.parseInt(array[0]);
-                int ich  = Integer.parseInt(array[1]);
-                float off = Float.parseFloat(array[4]);
-                pmt_timeoff[ipmt-1][ich-1] = off;
+                    String[] array = currentLine.split(" ");
+                    int ipmt = Integer.parseInt(array[0]);
+                    int ich  = Integer.parseInt(array[1]);
+                    float off = Float.parseFloat(array[4]);
+                    pmt_timeoff[ipmt-1][ich-1] = off;
 
-                if(debugMode>=1)if(ich==1 || ich==64)
-                          System.out.format("TXT TOFF   pmt %4d (ich=%3d: %8.2f) \n", ipmt, ich, pmt_timeoff[ipmt-1][ich-1]);
-
-            }
-
-        } catch (Exception e) {
-
-            System.err.format("Exception occurred trying to read '%s' \n", off_filename);
-            e.printStackTrace();
-
-        }
-
-
-        /*
-        *  TIME_WALKs
-        */
-        String walk_filename = new String("CALIB_DATA/MIRA/richTimeWalks.out");
-
-        try {
-
-            BufferedReader bf = new BufferedReader(new FileReader(walk_filename));
-            String currentLine = null;
-
-            while ( (currentLine = bf.readLine()) != null) {
-
-                String[] array = currentLine.split(" ");
-                int ipmt = Integer.parseInt(array[0]);
-
-                if(debugMode>=1)System.out.format("TXT WALK   pmt %d", ipmt);
-                for (int ich=1; ich<5; ich++){
-                    float walk = Float.parseFloat(array[1+(ich-1)*2]);
-                    if(ich==4 && walk<-1000)walk= (float)-0.100;
-                    pmt_timewalk[ipmt-1][ich-1] = walk;
-                    if(debugMode>=1)System.out.format(" (%d, %8.4f) ", ich, pmt_timewalk[ipmt-1][ich-1]);
-                }
-                if(debugMode>=1)System.out.format("\n");
-
-            }
-
-        } catch (Exception e) {
-
-            System.err.format("Exception occurred trying to read '%s' \n", walk_filename);
-            e.printStackTrace();
-
-        }
-
-
-        /**
-        * DC_OFFSETs
-        */
-        String dcoff_filename = new String("CALIB_DATA/DC_offsets_4013.txt");
-
-        try {
-
-            BufferedReader bf = new BufferedReader(new FileReader(dcoff_filename));
-            String currentLine = null;
-
-            while ( (currentLine = bf.readLine()) != null) {    
-
-                String[] array = currentLine.split(" ");
-                int idc    = Integer.parseInt(array[0]);
-                int imatch = Integer.parseInt(array[1]);
-                int iref   = Integer.parseInt(array[2]);
-                int ipiv   = Integer.parseInt(array[3]);
-                int isur   = Integer.parseInt(array[4]);
-
-                float  ss  = Float.parseFloat(array[5]);
-                float  sa  = Float.parseFloat(array[6]);
-                
-                reco_constants.DO_MISALIGNMENT = idc;
-                reco_constants.FORCE_DC_MATCH  = imatch;
-                reco_constants.MISA_RICH_REF   = iref;
-                reco_constants.MISA_PMT_PIVOT  = ipiv;
-                reco_constants.APPLY_SURVEY    = isur;
-
-                reco_constants.MISA_SHIFT_SCALE     = (double) ss ;
-                reco_constants.MISA_ANGLE_SCALE     = (double) sa;
-
-                if(debugMode>=1){
-
-                    System.out.format("TEXT PARA    DO_MISALIGNMENT              %7d \n", reco_constants.DO_MISALIGNMENT);
-                    System.out.format("TEXT PARA    FORCE_DC_MATCH               %7d \n", reco_constants.FORCE_DC_MATCH);
-                    System.out.format("TEXT PARA    MISA_RICH_REF                %7d \n", reco_constants.MISA_RICH_REF);
-                    System.out.format("TEXT PARA    MISA_PMT_PIVOT               %7d \n", reco_constants.MISA_PMT_PIVOT);
-                    System.out.format("TEXT PARA    APPLY_SURVEY                 %7d \n", reco_constants.APPLY_SURVEY);
-
-                    System.out.format("TEXT PARA    MISA_SHIFT_SCALE             %7.3f \n", reco_constants.MISA_SHIFT_SCALE);
-                    System.out.format("TEXT PARA    MISA_ANGLE_SCALE             %7.3f \n", reco_constants.MISA_ANGLE_SCALE);
+                    if(debugMode>=1)if(ich==1 || ich==64)
+                              System.out.format("TXT TOFF   pmt %4d (ich=%3d: %8.2f) \n", ipmt, ich, pmt_timeoff[ipmt-1][ich-1]);
 
                 }
 
+            } catch (Exception e) {
+
+                System.err.format("Exception occurred trying to read '%s' \n", off_filename);
+                e.printStackTrace();
+
             }
 
-        } catch (Exception e) {
 
-            System.err.format("Exception occurred trying to read '%s' \n", dcoff_filename);
-            e.printStackTrace();
-        }
+            /*
+            *  TIME_WALKs
+            */
+            String walk_filename = new String("CALIB_DATA/MIRA/richTimeWalks.out");
 
+            try {
 
-        double sscale = reco_constants.MISA_SHIFT_SCALE;
-        double ascale = reco_constants.MISA_ANGLE_SCALE / reco_constants.MRAD;  // to convert in rad
+                BufferedReader bf = new BufferedReader(new FileReader(walk_filename));
+                String currentLine = null;
 
+                while ( (currentLine = bf.readLine()) != null) {
 
-        /**
-        *  SINGLE COMPONENT MISALIGNMENT
-        *  This comes on top of the RICH survey and global transformation
-        */
-        for (int ila=0; ila<NLAY+1; ila++){
-            for (int ico=0; ico<NCOMPO+1; ico++){
-                layer_misa_shift[ila][ico] = new Vector3D(0., 0., 0.);
-                layer_misa_angle[ila][ico] = new Vector3D(0., 0., 0.);
+                    String[] array = currentLine.split(" ");
+                    int ipmt = Integer.parseInt(array[0]);
+
+                    if(debugMode>=1)System.out.format("TXT WALK   pmt %d", ipmt);
+                    for (int ich=1; ich<5; ich++){
+                        float walk = Float.parseFloat(array[1+(ich-1)*2]);
+                        if(ich==4 && walk<-1000)walk= (float)-0.100;
+                        pmt_timewalk[ipmt-1][ich-1] = walk;
+                        if(debugMode>=1)System.out.format(" (%d, %8.4f) ", ich, pmt_timewalk[ipmt-1][ich-1]);
+                    }
+                    if(debugMode>=1)System.out.format("\n");
+
+                }
+
+            } catch (Exception e) {
+
+                System.err.format("Exception occurred trying to read '%s' \n", walk_filename);
+                e.printStackTrace();
+
             }
-        }
+       }
 
-        String misaco_filename = new String("CALIB_DATA/RICHlayer_misalignment.txt");
 
-        try {
+        if(flag==1){
 
-            BufferedReader bf = new BufferedReader(new FileReader(misaco_filename));
-            String currentLine = null;
+            /*
+            * DC_OFFSETs
+            */
+            String dcoff_filename = new String("CALIB_DATA/DC_offsets_4013.txt");
 
-            while ( (currentLine = bf.readLine()) != null) {    
+            try {
 
-                String[] array = currentLine.split(" ");
-                int isec = Integer.parseInt(array[0]);
-                int lla = Integer.parseInt(array[1]);
-                int cco = Integer.parseInt(array[2]);
+                BufferedReader bf = new BufferedReader(new FileReader(dcoff_filename));
+                String currentLine = null;
 
-                float  dx  = Float.parseFloat(array[3]);
-                float  dy  = Float.parseFloat(array[4]);
-                float  dz  = Float.parseFloat(array[5]);
-                float  thx = Float.parseFloat(array[6]);
-                float  thy = Float.parseFloat(array[7]);
-                float  thz = Float.parseFloat(array[8]);
+                while ( (currentLine = bf.readLine()) != null) {    
 
-                int[] ind = {0,0};
-                if(convert_indexes(lla, cco, ind)){
+                    String[] array = currentLine.split(" ");
+                    int idc    = Integer.parseInt(array[0]);
+                    int imatch = Integer.parseInt(array[1]);
+                    int iref   = Integer.parseInt(array[2]);
+                    int ipiv   = Integer.parseInt(array[3]);
+                    int isur   = Integer.parseInt(array[4]);
 
-                    int ila=ind[0];
-                    int ico=ind[1];
-                    if(debugMode>=0)System.out.format("MISA conversion %4d %3d --> %4d %3d \n",lla,cco,ila,ico);
+                    float  ss  = Float.parseFloat(array[5]);
+                    float  sa  = Float.parseFloat(array[6]);
+                    
+                    reco_constants.DO_MISALIGNMENT = idc;
+                    reco_constants.FORCE_DC_MATCH  = imatch;
+                    reco_constants.MISA_RICH_REF   = iref;
+                    reco_constants.MISA_PMT_PIVOT  = ipiv;
+                    reco_constants.APPLY_SURVEY    = isur;
 
-                    // the rotation is assumed to be in the component local ref system
-                    layer_misa_shift[ila][ico] = new Vector3D( dx*sscale,  dy*sscale,  dz*sscale);
-                    layer_misa_angle[ila][ico] = new Vector3D(thx*ascale, thy*ascale, thz*ascale);
+                    reco_constants.MISA_SHIFT_SCALE     = (double) ss ;
+                    reco_constants.MISA_ANGLE_SCALE     = (double) sa;
 
-                    if(debugMode>=0){
-                        if(layer_misa_shift[ila][ico].mag()>0 || layer_misa_angle[ila][ico].mag()>0){
-                            System.out.format("TXT MISA   layer %4d ico %3d  (%4d %3d)  shift %s  angle %s \n", ila,ico,lla,cco, 
-                               layer_misa_shift[ila][ico].toStringBrief(2), layer_misa_angle[ila][ico].toStringBrief(2));
-                        }
+                    if(debugMode>=1){
+
+                        System.out.format("TEXT PARA    DO_MISALIGNMENT              %7d \n", reco_constants.DO_MISALIGNMENT);
+                        System.out.format("TEXT PARA    FORCE_DC_MATCH               %7d \n", reco_constants.FORCE_DC_MATCH);
+                        System.out.format("TEXT PARA    MISA_RICH_REF                %7d \n", reco_constants.MISA_RICH_REF);
+                        System.out.format("TEXT PARA    MISA_PMT_PIVOT               %7d \n", reco_constants.MISA_PMT_PIVOT);
+                        System.out.format("TEXT PARA    APPLY_SURVEY                 %7d \n", reco_constants.APPLY_SURVEY);
+
+                        System.out.format("TEXT PARA    MISA_SHIFT_SCALE             %7.3f \n", reco_constants.MISA_SHIFT_SCALE);
+                        System.out.format("TEXT PARA    MISA_ANGLE_SCALE             %7.3f \n", reco_constants.MISA_ANGLE_SCALE);
+
                     }
 
-                }else{
-                    System.out.format("Unsupported imisalignment for layer %3d %3d \n",lla,cco);
+                }
+
+            } catch (Exception e) {
+
+                System.err.format("Exception occurred trying to read '%s' \n", dcoff_filename);
+                e.printStackTrace();
+            }
+
+
+            double sscale = reco_constants.MISA_SHIFT_SCALE;
+            double ascale = reco_constants.MISA_ANGLE_SCALE / reco_constants.MRAD;  // to convert in rad
+
+
+            /*
+            *  SINGLE COMPONENT MISALIGNMENT
+            *  This comes on top of the RICH survey and global transformation
+            */
+            for (int ila=0; ila<NLAY+1; ila++){
+                for (int ico=0; ico<NCOMPO+1; ico++){
+                    layer_misa_shift[ila][ico] = new Vector3D(0., 0., 0.);
+                    layer_misa_angle[ila][ico] = new Vector3D(0., 0., 0.);
                 }
             }
 
-        } catch (Exception e) {
+            String misaco_filename = new String("CALIB_DATA/RICHlayer_misalignment.txt");
 
-            System.err.format("Exception occurred trying to read '%s' \n", misaco_filename);
-            e.printStackTrace();
+            try {
+
+                BufferedReader bf = new BufferedReader(new FileReader(misaco_filename));
+                String currentLine = null;
+
+                while ( (currentLine = bf.readLine()) != null) {    
+
+                    String[] array = currentLine.split(" ");
+                    int isec = Integer.parseInt(array[0]);
+                    int lla = Integer.parseInt(array[1]);
+                    int cco = Integer.parseInt(array[2]);
+
+                    float  dx  = Float.parseFloat(array[3]);
+                    float  dy  = Float.parseFloat(array[4]);
+                    float  dz  = Float.parseFloat(array[5]);
+                    float  thx = Float.parseFloat(array[6]);
+                    float  thy = Float.parseFloat(array[7]);
+                    float  thz = Float.parseFloat(array[8]);
+
+                    int[] ind = {0,0};
+                    if(convert_indexes(lla, cco, ind)){
+
+                        int ila=ind[0];
+                        int ico=ind[1];
+                        if(debugMode>=0)System.out.format("MISA conversion %4d %3d --> %4d %3d \n",lla,cco,ila,ico);
+
+                        // the rotation is assumed to be in the component local ref system
+                        layer_misa_shift[ila][ico] = new Vector3D( dx*sscale,  dy*sscale,  dz*sscale);
+                        layer_misa_angle[ila][ico] = new Vector3D(thx*ascale, thy*ascale, thz*ascale);
+
+                        if(debugMode>=0){
+                            if(layer_misa_shift[ila][ico].mag()>0 || layer_misa_angle[ila][ico].mag()>0){
+                                System.out.format("TXT MISA   layer %4d ico %3d  (%4d %3d)  shift %s  angle %s \n", ila,ico,lla,cco, 
+                                   layer_misa_shift[ila][ico].toStringBrief(2), layer_misa_angle[ila][ico].toStringBrief(2));
+                            }
+                        }
+
+                    }else{
+                        System.out.format("Unsupported imisalignment for layer %3d %3d \n",lla,cco);
+                    }
+                }
+
+            } catch (Exception e) {
+
+                System.err.format("Exception occurred trying to read '%s' \n", misaco_filename);
+                e.printStackTrace();
+            }
         }
 
 
+        if(flag==3){
 
-        /*
-        * AEROGEL OPTCIS
-        */
+            /*
+            * AEROGEL OPTCIS
+            */
 
-        /*
-        String aero_filename = new String("CALIB_DATA/aerogel_passports.txt");
+            String aero_filename = new String("CALIB_DATA/aerogel_passports.txt");
 
-        try {
+            try {
 
-            BufferedReader bf = new BufferedReader(new FileReader(aero_filename));
-            String currentLine = null;
+                BufferedReader bf = new BufferedReader(new FileReader(aero_filename));
+                String currentLine = null;
 
-            while ( (currentLine = bf.readLine()) != null) {    
+                while ( (currentLine = bf.readLine()) != null) {    
 
-                String[] array = currentLine.split(" ");
-                int idlay = Integer.parseInt(array[1]);
-                int iaer = Integer.parseInt(array[2]);
-                
-                if(debugMode>=1)System.out.format("Read optics for AERO lay %3d  compo %3d", idlay, iaer); 
-                float refi = Float.parseFloat(array[5]);
-                float plana = Float.parseFloat(array[11]);
-                aero_refi[idlay-201][iaer-1] = refi;
-                aero_plan[idlay-201][iaer-1] = plana;
-                //aero_refi[idlay-201][iaer-1] = (float) RICHConstants.RICH_AEROGEL_INDEX;
-                if(debugMode>=1)System.out.format(" n = %8.5f   pla = %8.2f \n", aero_refi[idlay-201][iaer-1], aero_plan[idlay-201][iaer-1]);
-                
+                    String[] array = currentLine.split(" ");
+                    int idlay = Integer.parseInt(array[1]);
+                    int iaer = Integer.parseInt(array[2]);
+                    
+                    if(debugMode>=1)System.out.format("Read optics for AERO lay %3d  compo %3d", idlay, iaer); 
+                    float refi = Float.parseFloat(array[5]);
+                    float plana = Float.parseFloat(array[11]);
+                    aero_refi[idlay-201][iaer-1] = refi;
+                    aero_plan[idlay-201][iaer-1] = plana;
+                    //aero_refi[idlay-201][iaer-1] = (float) RICHConstants.RICH_AEROGEL_INDEX;
+                    if(debugMode>=1)System.out.format(" n = %8.5f   pla = %8.2f \n", aero_refi[idlay-201][iaer-1], aero_plan[idlay-201][iaer-1]);
+                    
+                }
+
+            } catch (Exception e) {
+
+                System.err.format("Exception occurred trying to read '%s' \n", aero_filename);
+                e.printStackTrace();
             }
 
-        } catch (Exception e) {
-
-            System.err.format("Exception occurred trying to read '%s' \n", aero_filename);
-            e.printStackTrace();
+            if(debugMode>=1)System.out.format("initConstants: DONE \n");
+            
         }
-
-        if(debugMode>=1)System.out.format("initConstants: DONE \n");
-        */
     }
 
 
@@ -1009,7 +1041,7 @@ public class RICHTool{
         generate_Pixel_Map(layer.get_id(), 0, compo_misa, compo_list);
 
         if(debugMode>=1)show_Shape3D(compo_misa, null, "CC");
-        if(debugMode>=1)show_RICH("Real RICH Geometry", "RR");
+        if(debugMode>=0)show_RICH("Real RICH Geometry", "RR");
 
     }
 
@@ -1034,7 +1066,7 @@ public class RICHTool{
         Face3D compo_face = get_Layer(ilay).get_CompoFace(ipmt-1, 0);
         Vector3d Vertex = toVector3d( compo_face.point(1) );
         //System.out.format("Misa vtx %8.3f %8.3f %8.3f \n",Vertex.x, Vertex.y, Vertex.z);
-        System.out.println(MAPMTpixels.GetPixelCenter(anode));
+        //System.out.println(MAPMTpixels.GetPixelCenter(anode));
         Vector3d VPixel = Vertex.plus(MAPMTpixels.GetPixelCenter(anode));
         return new Vector3d (VPixel.x, -VPixel.y, VPixel.z);
 
@@ -1364,7 +1396,7 @@ public class RICHTool{
     public void misalign_Layer(RICHLayer layer){
     //------------------------------
 
-        int debugMode = 0;
+        int debugMode = 1;
 
         /*
         *  To account for SURVEY
@@ -2134,14 +2166,15 @@ public class RICHTool{
         System.out.format(" -----------------------\n  %s \n ----------------------- \n", name);
 
         for (int ilay=0; ilay<NLAY; ilay++){
+            String ini = head + " "+ ilay;
             RICHLayer layer = get_Layer(ilay);
             if(layer.is_aerogel() || layer.is_mapmt()){
-                show_Shape3D(layer.get_GlobalSurf(), null, head);
+                show_Shape3D(layer.get_GlobalSurf(), null, ini);
                 if(layer.is_aerogel())show_Shape3D(layer.get_TrackingSurf(), null, "AA");
                 if(layer.is_mapmt())show_Shape3D(layer.get_TrackingSurf(), null, "PP");
             }else{
-                if(layer.is_spherical_mirror()) show_Shape3D(layer.get_GlobalSurf(), null, head);
-                show_Shape3D(layer.get_TrackingSurf(), null, head);
+                if(layer.is_spherical_mirror()) show_Shape3D(layer.get_GlobalSurf(), null, ini);
+                show_Shape3D(layer.get_TrackingSurf(), null, ini);
             }
         }
       
@@ -2750,7 +2783,12 @@ public class RICHTool{
         RICHLayer layer = get_Layer(orilay);
         if(layer==null)return null;
 
-        RICHIntersection first_intersection = layer.find_Exit(lastray.asLine3D(), orico);
+        RICHIntersection first_intersection = null;
+        if(reco_constants.DO_CURVED_AERO==1){
+            first_intersection = layer.find_ExitCurved(lastray.asLine3D(), orico);
+        }else{
+            first_intersection = layer.find_Exit(lastray.asLine3D(), orico);
+        }
         if(first_intersection==null)return null;   
 
         if(debugMode>=1){

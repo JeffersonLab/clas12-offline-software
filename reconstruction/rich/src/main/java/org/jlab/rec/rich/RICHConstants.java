@@ -68,6 +68,7 @@ public class RICHConstants {
 
     public int     REDO_RICH_RECO                         =   1;        // if 1 rewrite the RICH banks
     public int     DO_MIRROR_HADS                         =   1;        // if 1 reconstruct hadrons pointing to mirror
+    public int     DO_CURVED_AERO                         =   1;        // if 1 use spherical surface of aerogel
 
     public double  GOODHIT_FRAC                           =   80.;      // Maximum duration (in % of local max) to flag xtalk  
     public double  RICH_DCMATCH_CUT                       =   15.;      // RICH cluster matching cut with tracks 

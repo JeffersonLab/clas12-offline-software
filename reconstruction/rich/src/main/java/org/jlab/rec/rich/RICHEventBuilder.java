@@ -301,10 +301,10 @@ public class RICHEventBuilder{
 
                //if(tr.getSector()==4 && Math.abs(PID)==11 && tr.getLastCross().origin().x()<-170)
                if(tr.getSector()==4){
+                    tr.setStatus(ipr);
                     DetectorParticle particle = new DetectorParticle(tr);
                     particle.setPid(PID);
                     // FIX ME! 
-                    particle.setStatus(ipr, 0.);
                     if(debugMode>=1){showTrack(tr); showParticle(particle);}
                     sector4Event.addParticle(particle);
                     if(debugMode>=1) System.out.format(" ECCOLO !!!!! %7.2f size %6d \n",tr.getLastCross().origin().x(), sector4Event.getParticles().size());
@@ -332,9 +332,9 @@ public class RICHEventBuilder{
                 for(int i = 0 ; i < tracks.size(); i++){
 	            DetectorTrack tr = tracks.get(i);
                     if(tr.getSector()==4){
+                        tr.setStatus(i);
 	                DetectorParticle particle = new DetectorParticle(tr);
                         particle.setPid(211);
-                        particle.setStatus(i, 0.);
                         if(debugMode>=1){showTrack(tr); showParticle(particle);}
                         sector4Event.addParticle(particle);
                     }
@@ -396,9 +396,8 @@ public class RICHEventBuilder{
         richevent.set_exeStart(System.nanoTime());
         if(event.hasBank("REC::Event")==true){
             DataBank bankeve = event.getBank("REC::Event");
-            richevent.set_EventID(bankeve.getInt("NEVENT",0));
 
-            float evttime = bankeve.getFloat("STTime",0);
+            float evttime = bankeve.getFloat("startTime",0);
             richevent.set_EventTime(evttime);
 
             if(debugMode>=1)System.out.format(" Create RICH Event id %8d   time %8.2f \n", richevent.get_EventID(), richevent.get_EventTime()); 
@@ -493,7 +492,7 @@ public class RICHEventBuilder{
                     tool.toString(r.getPosition()), r.getPath(), CLAStime, r.getTime());
             }
 
-            RICHParticle richhadron = new RICHParticle(hindex, p.getStatus().getValue(), r.getHitIndex(), p.vector().mag(), CLASpid, tool);
+            RICHParticle richhadron = new RICHParticle(hindex, p.getTrackStatus(), r.getHitIndex(), p.vector().mag(), CLASpid, tool);
             richhadron.traced.set_time((float) CLAStime);
             richhadron.set_meas_time(r.getTime());
             if(!richhadron.set_points(p.getLastCross().origin(), p.getLastCross().end(), r.getPosition(), r.getStatus(), tool) ){
@@ -518,7 +517,7 @@ public class RICHEventBuilder{
 	    if(debugMode>=1){
                 System.out.format("  ------------------- \n");  
                 System.out.format("  Hadron  %4d  id %4d  from part %4d  and clu  %4d  CLAS eve %7d  pid %5d \n ", hindex, richhadron.get_id(), 
-                                     p.getStatus(), r.getHitIndex(), richevent.get_EventID(), CLASpid);
+                                     p.getTrackStatus(), r.getHitIndex(), richevent.get_EventID(), CLASpid);
                 System.out.format("  ------------------- \n");  
 
                 richhadron.show();
@@ -664,6 +663,7 @@ public class RICHEventBuilder{
 
         r.setPosition(extra.x, extra.y, extra.z);
         r.setPath(p.getPathLength()+dist);
+        r.setStatus(1);
 
         int CLASpid = p.getPid();
         if(CLASpid==0)CLASpid = 211;
@@ -674,7 +674,7 @@ public class RICHEventBuilder{
     }
 
     // ----------------
-    public static double Pi_Likelihood(double angolo) {
+    public double Pi_Likelihood(double angolo) {
     // ----------------
 
         double mean = 0.307;

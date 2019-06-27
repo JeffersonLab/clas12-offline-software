@@ -905,7 +905,7 @@ public class RICHParticle {
 
     /*
     // ----------------
-    public static double set_likelihood(double etaC) {
+    public double set_likelihood(double etaC) {
     // ----------------
 
         double pi = probability(211, etaC)
