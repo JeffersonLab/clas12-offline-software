@@ -1041,7 +1041,7 @@ public class RICHTool{
         generate_Pixel_Map(layer.get_id(), 0, compo_misa, compo_list);
 
         if(debugMode>=1)show_Shape3D(compo_misa, null, "CC");
-        if(debugMode>=0)show_RICH("Real RICH Geometry", "RR");
+        if(debugMode>=1)show_RICH("Real RICH Geometry", "RR");
 
     }
 
