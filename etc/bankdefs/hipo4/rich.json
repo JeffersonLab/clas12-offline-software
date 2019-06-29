@@ -112,8 +112,6 @@
             {"name":"analytic_phi",   "type":"F", "info":"Lab phi angle for analytic solution" },
             {"name":"analytic_path",  "type":"F", "info":"path for analytic solution" },
             {"name":"analytic_time",  "type":"F", "info":"time for analytic solution" },
-            {"name":"analytic_nrfl",  "type":"S", "info":"n reflections for analytic solution" },
-            {"name":"analytic_nrfr",  "type":"S", "info":"n refractions for analytic solution" },
 
             {"name":"analytic_EtaC",  "type":"F", "info":"EtaC angle for analytic solution" },
             {"name":"analytic_aeron", "type":"F", "info":"n for analytic solution" },
@@ -132,6 +130,7 @@
             {"name":"traced_time",    "type":"F", "info":"time for traced solution" },
             {"name":"traced_nrfl",    "type":"S", "info":"n reflections for traced solution" },
             {"name":"traced_nrfr",    "type":"S", "info":"n refractions for traced solution" },
+            {"name":"traced_1rfl",    "type":"S", "info":"layer and component of the first reflection for traced solution" },
 
             {"name":"traced_EtaC",    "type":"F", "info":"EtaC angle for traced solution" },
             {"name":"traced_aeron",   "type":"F", "info":"n for traced solution" },

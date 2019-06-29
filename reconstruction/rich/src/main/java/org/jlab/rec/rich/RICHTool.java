@@ -245,7 +245,7 @@ public class RICHTool{
             init_ConstantsTxT(3);
         }else{
             init_GeoConstantsCCDB(aeroConstants, misaConstants, paraConstants);
-            init_ConstantsTxT(1);
+            //init_ConstantsTxT(1);
         }
 
         // global pixel coordinat indexes
