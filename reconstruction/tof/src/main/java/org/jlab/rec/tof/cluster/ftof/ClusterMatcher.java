@@ -122,9 +122,9 @@ public class ClusterMatcher {
         double ux_mid = X2[1][0] - X1[1][0];
         double uy_mid = X2[1][1] - X1[1][1];
         double uz_mid = X2[1][2] - X1[1][2];
-        double C1a_x_etrapPan1b = C1a.get_x() - ux_mid;
-        double C1a_y_etrapPan1b = C1a.get_y() - uy_mid;
-        double C1a_z_etrapPan1b = C1a.get_z() - uz_mid;
+        double C1a_x_etrapPan1b = C1a.get_x() + ux_mid;
+        double C1a_y_etrapPan1b = C1a.get_y() + uy_mid;
+        double C1a_z_etrapPan1b = C1a.get_z() + uz_mid;
 
         // Matching the cluster position to the track position
         if (Math.abs(C1a.get_x() - C1a.get_xTrk()[0]) > Constants.CLS1ATRKMATCHXPAR
