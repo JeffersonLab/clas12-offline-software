@@ -127,7 +127,7 @@ public class DetectorParticle implements Comparable {
         return particle;
     }
    
-    public List<DetectorTrack.TrajectoryPoint> getTrackTrajectory() {
+    public DetectorTrack.Trajectory getTrackTrajectory() {
         return detectorTrack.getTrajectory();
     }
     
