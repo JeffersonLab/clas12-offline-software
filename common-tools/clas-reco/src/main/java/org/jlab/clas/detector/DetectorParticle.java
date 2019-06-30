@@ -738,10 +738,9 @@ public class DetectorParticle implements Comparable {
         if(response==null) return -1.0;
         return this.getPathLength(response.getPosition());
     }  
-    
+   
+    @Override
     public int compareTo(Object o) {
-
-        System.err.println("DetectorParticle:  Not ready for sorting!!!!!!!!!!!!!!!");
 
         DetectorParticle other = (DetectorParticle) o;
 
@@ -754,10 +753,10 @@ public class DetectorParticle implements Comparable {
 
         // then charge ordering (-,+,0):
         else if (this.getCharge() != other.getCharge()) {
-            if      (this.getCharge()  > 0) return -1;
-            else if (other.getCharge() > 0) return  1;
-            else if (this.getCharge()  < 0) return -1;
+            if      (this.getCharge()  < 0) return -1;
             else if (other.getCharge() < 0) return  1;
+            else if (this.getCharge()  > 0) return -1;
+            else if (other.getCharge() > 0) return  1;
             else throw new RuntimeException("Impossible.");
         }
 

@@ -1,5 +1,6 @@
 package org.jlab.service.eb;
 
+import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
@@ -131,7 +132,9 @@ public class EBEngine extends ReconstructionEngine {
 
         // create REC:detector banks:
         if(eb.getEvent().getParticles().size()>0){
-        
+       
+            Collections.sort(eb.getEvent().getParticles());
+
             eb.setParticleStatuses();
             //eb.setEventStatuses();
             
