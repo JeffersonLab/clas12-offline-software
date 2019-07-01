@@ -271,9 +271,9 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             zCent = weightedZ / totEn;
             phiErrCent = Math.sqrt(weightedPhiErrSq);
             phiErrCent0 = Math.sqrt(weightedPhiErrSq0);
-            xErrCent = weightedXErrSq/totEn;
-            yErrCent = weightedYErrSq/totEn;
-            zErrCent = weightedZErrSq/totEn;
+            xErrCent = Math.sqrt(weightedXErrSq/totEn);
+            yErrCent = Math.sqrt(weightedYErrSq/totEn);
+            zErrCent = Math.sqrt(weightedZErrSq/totEn);
 
             //phiErrCent = Math.sqrt(weightedPhiErrSq);
             //phiErrCent0 = Math.sqrt(weightedPhiErrSq0);

@@ -195,10 +195,7 @@ public class StateVecs {
         	}
         	
         	//Angle of pivot point
-        	phi_i=Math.atan2(Yc - sv_i.refy, Xc - sv_i.refx);
-            if (sv_i.alpha / sv_i.kappa < 0) {
-                phi_i = Math.atan2(-Yc + sv_i.refy, -Xc + sv_i.refx);
-            }
+        	phi_i=sv_i.getPhiRef(Xc, Yc);
         	
             //Angle of new pivot point for f-state vector... chosen to be the position of state vector f
             sv_f.refx=sv_f.x;
@@ -210,10 +207,8 @@ public class StateVecs {
             	sv_f.refy=org.jlab.rec.cvt.Constants.getYb();
             	sv_f.refz=0;
             }
-        	phi_f = Math.atan2(Yc - sv_f.refy, Xc - sv_f.refx);
-            if (sv_f.alpha / sv_f.kappa < 0) {
-                phi_f = Math.atan2(-Yc + sv_f.refy, -Xc + sv_f.refx);
-            }
+            
+        	phi_f = sv_f.getPhiRef(Xc, Yc);
            
             double delta= phi_f-phi_i;
             
@@ -501,6 +496,13 @@ public class StateVecs {
         	this.pathlength=ToCopy.pathlength;
         	return ;
         }
+        
+        public double getPhiRef(double Xc, double Yc) {
+        	if (this.alpha / this.kappa < 0) {
+                return Math.atan2(-Yc + this.refy, -Xc + this.refx);
+            }
+        	else return Math.atan2(Yc - this.refy, Xc - this.refx);
+        }
 
     }
 
@@ -603,7 +605,7 @@ public class StateVecs {
         return trkHelix;
     }
 
-    public void init(Seed trk, KFitter kf, Swim swimmer) {
+    public void initAtBeam(Seed trk, KFitter kf, Swim swimmer) {
         //init stateVec
     	
         StateVec initSV = new StateVec(0);
@@ -621,7 +623,6 @@ public class StateVecs {
         initSV.tanL = trk.get_Helix().get_tandip();
         initSV.d_rho = trk.get_Helix().get_dca();
         initSV.phi = 0;
-        //
        
         this.trackTraj.put(0, initSV);
         this.trackTrajFilt.put(0, initSV);
@@ -644,19 +645,19 @@ public class StateVecs {
             }
         }
 
-        components[0][0] = 10*cov_d02;
-        components[0][1] = 10*cov_d0phi0;
-        components[1][0] = 10*cov_d0phi0;
-        components[1][1] = 10*cov_phi02;
-        components[2][0] = 10*cov_d0rho;
-        components[0][2] = 10*cov_d0rho;
-        components[2][1] = 10*cov_phi0rho;
-        components[1][2] = 10*cov_phi0rho;
-        components[2][2] = 10*cov_rho2;
-        components[3][3] = 10*cov_z02;
-        components[3][4] = 10*cov_z0tandip;
-        components[4][3] = 10*cov_z0tandip;
-        components[4][4] = 10*cov_tandip2;
+        components[0][0] = org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_d0;
+        components[0][1] = cov_d0phi0/Math.sqrt(cov_d02*cov_phi02)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_phi0;
+        components[1][0] = cov_d0phi0/Math.sqrt(cov_d02*cov_phi02)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_phi0;
+        components[1][1] = org.jlab.rec.cvt.Constants.unc_phi0*org.jlab.rec.cvt.Constants.unc_phi0;
+        components[2][0] = cov_d0rho/Math.sqrt(cov_d02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_kappa;
+        components[0][2] = cov_d0rho/Math.sqrt(cov_d02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_kappa;
+        components[2][1] = cov_phi0rho/Math.sqrt(cov_phi02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_phi0*org.jlab.rec.cvt.Constants.unc_kappa;
+        components[1][2] = cov_phi0rho/Math.sqrt(cov_phi02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_phi0*org.jlab.rec.cvt.Constants.unc_kappa;
+        components[2][2] = org.jlab.rec.cvt.Constants.unc_kappa*org.jlab.rec.cvt.Constants.unc_kappa;
+        components[3][3] = org.jlab.rec.cvt.Constants.unc_z0*org.jlab.rec.cvt.Constants.unc_z0;
+        components[3][4] = cov_z0tandip/Math.sqrt(cov_tandip2*cov_z02)*org.jlab.rec.cvt.Constants.unc_z0*org.jlab.rec.cvt.Constants.unc_tanL;
+        components[4][3] = cov_z0tandip/Math.sqrt(cov_tandip2*cov_z02)*org.jlab.rec.cvt.Constants.unc_z0*org.jlab.rec.cvt.Constants.unc_tanL;
+        components[4][4] = org.jlab.rec.cvt.Constants.unc_tanL*org.jlab.rec.cvt.Constants.unc_tanL;
        
         Matrix initCMatrix = new Matrix(components);
 
@@ -664,6 +665,69 @@ public class StateVecs {
         initCM.covMat = initCMatrix;
         this.trackCovFilt.put(0, initCM);
         this.trackCov.put(0, initCM);
+    }
+    
+    public void initAtLastMeas(Seed trk, KFitter kf, MeasVecs mv, Swim swimmer) {
+        //init stateVec
+    	
+        StateVec initSV = new StateVec(Layer.size());
+        initSV.refx = mv.getLastX();
+        initSV.refy = mv.getLastY();
+        initSV.refz = mv.getLastZ();
+        initSV.layer= Layer.get(Layer.size()-1);
+        initSV.sector= Sector.get(Sector.size()-1);
+      
+        B Bf = new B(0, initSV.refx, initSV.refy , initSV.refz, swimmer);
+        initSV.alpha = Bf.alpha;
+        initSV.kappa = Bf.alpha * trk.get_Helix().get_curvature();
+        initSV.phi0 = trk.get_Helix().get_phi_at_dca();
+        initSV.dz = 0;
+        initSV.tanL = trk.get_Helix().get_tandip();
+        initSV.d_rho = 0;
+        initSV.phi = 0;
+        //
+       
+        this.trackTraj.put(mv.measurements.get(mv.measurements.size()-1).k, initSV);
+        this.trackTrajFilt.put(mv.measurements.get(mv.measurements.size()-1).k, initSV);
+        //init covMat
+        Matrix fitCovMat = trk.get_Helix().get_covmatrix();
+        double cov_d02 = fitCovMat.get(0, 0);
+        double cov_d0phi0 = fitCovMat.get(0, 1);
+        double cov_d0rho = Bf.alpha * fitCovMat.get(0, 2);
+        double cov_phi02 = fitCovMat.get(1, 1);
+        double cov_phi0rho = Bf.alpha * fitCovMat.get(1, 2);
+        double cov_rho2 = Bf.alpha * Bf.alpha * fitCovMat.get(2, 2);
+        double cov_z02 = fitCovMat.get(3, 3);
+        double cov_z0tandip = fitCovMat.get(3, 4);
+        double cov_tandip2 = fitCovMat.get(4, 4);
+
+        double components[][] = new double[5][5];
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                components[i][j] = 0;
+            }
+        }
+
+        components[0][0] = org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_d0;
+        components[0][1] = cov_d0phi0/Math.sqrt(cov_d02*cov_phi02)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_phi0;
+        components[1][0] = cov_d0phi0/Math.sqrt(cov_d02*cov_phi02)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_phi0;
+        components[1][1] = org.jlab.rec.cvt.Constants.unc_phi0*org.jlab.rec.cvt.Constants.unc_phi0;
+        components[2][0] = cov_d0rho/Math.sqrt(cov_d02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_kappa;
+        components[0][2] = cov_d0rho/Math.sqrt(cov_d02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_kappa;
+        components[2][1] = cov_phi0rho/Math.sqrt(cov_phi02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_phi0*org.jlab.rec.cvt.Constants.unc_kappa;
+        components[1][2] = cov_phi0rho/Math.sqrt(cov_phi02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_phi0*org.jlab.rec.cvt.Constants.unc_kappa;
+        components[2][2] = org.jlab.rec.cvt.Constants.unc_kappa*org.jlab.rec.cvt.Constants.unc_kappa;
+        components[3][3] = org.jlab.rec.cvt.Constants.unc_z0*org.jlab.rec.cvt.Constants.unc_z0;
+        components[3][4] = cov_z0tandip/Math.sqrt(cov_tandip2*cov_z02)*org.jlab.rec.cvt.Constants.unc_z0*org.jlab.rec.cvt.Constants.unc_tanL;
+        components[4][3] = cov_z0tandip/Math.sqrt(cov_tandip2*cov_z02)*org.jlab.rec.cvt.Constants.unc_z0*org.jlab.rec.cvt.Constants.unc_tanL;
+        components[4][4] = org.jlab.rec.cvt.Constants.unc_tanL*org.jlab.rec.cvt.Constants.unc_tanL;
+       
+        Matrix initCMatrix = new Matrix(components);
+
+        CovMat initCM = new CovMat(mv.measurements.get(mv.measurements.size()-1).k);
+        initCM.covMat = initCMatrix;
+        this.trackCovFilt.put(mv.measurements.get(mv.measurements.size()-1).k, initCM);
+        this.trackCov.put(mv.measurements.get(mv.measurements.size()-1).k, initCM);
     }
 
     public void printMatrix(Matrix C) {

@@ -17,6 +17,7 @@ public class MeasVecs {
         public double x = Double.NaN; // for BMT
         public double y = Double.NaN; // for BMT
         public double z = Double.NaN; // for BMT
+        public double phi = Double.NaN; 
         public double centroid; // for SVT
         public double error;
         public int ID; //ID of the cluster associated to the measurement
@@ -37,6 +38,7 @@ public class MeasVecs {
     }
 
         public void setMeasVecs(Seed trkcand, org.jlab.rec.cvt.svt.Geometry sgeo) {
+        //	System.out.println("In MeasVec.java... New seed");
        // for(Cross c : trkcand.get_Crosses() ) { System.out.println(" crosses in seed passed to KF: "+c.printInfo());}System.out.println(" =========");
         measurements = new ArrayList<MeasVec>();
         MeasVec meas0 = new MeasVec();
@@ -74,6 +76,7 @@ public class MeasVecs {
                 if (trkcand.get_Crosses().get(c).get_DetectorType().equalsIgnoreCase("Z")) {
                     meas.x = trkcand.get_Crosses().get(c).get_Point().x();
                     meas.y = trkcand.get_Crosses().get(c).get_Point().y();
+                    meas.phi = trkcand.get_Crosses().get(c).get_Cluster1().get_Phi();
                     double res = trkcand.get_Crosses().get(c).get_Cluster1().get_PhiErr();
                     meas.error = res * res;
                     meas.type = 1;
@@ -92,6 +95,39 @@ public class MeasVecs {
         Collections.sort(measurements);
         
     }
+        
+    public double getLastZ() {
+    	double LastZ=0;
+    	for (int i=1;i<measurements.size()-1;i++) {
+    		if (!Double.isNaN(measurements.get(measurements.size()-i).z)) {
+    			LastZ=measurements.get(measurements.size()-i).z;
+    			continue;
+    		}
+    	}
+    	return LastZ;
+    }
+    
+    public double getLastX() {
+    	double LastX=0;
+    	for (int i=1;i<measurements.size()-1;i++) {
+    		if (!Double.isNaN(measurements.get(measurements.size()-i).x)) {
+    			LastX=measurements.get(measurements.size()-i).x;
+    			continue;
+    		}
+    	}
+    	return LastX;
+    }
+    
+    public double getLastY() {
+    	double LastY=0;
+    	for (int i=1;i<measurements.size()-1;i++) {
+    		if (!Double.isNaN(measurements.get(measurements.size()-i).y)) {
+    			LastY=measurements.get(measurements.size()-i).y;
+    			continue;
+    		}
+    	}
+    	return LastY;
+    }
 
     
 
@@ -104,8 +140,8 @@ public class MeasVecs {
         }
         int sec = this.measurements.get(stateVec.k).sector;
         int lay = this.measurements.get(stateVec.k).layer;
-       
-        return sgeo.getLocalX(stateVec.xdet, stateVec.ydet, stateVec.zdet, lay, sec);
+      
+        return sgeo.transformToFrame(sec, lay, stateVec.xdet, stateVec.ydet, stateVec.zdet , "local", "").x();
     }
 
     public double hPhi(StateVec stateVec) {
@@ -115,12 +151,47 @@ public class MeasVecs {
     public double hZ(StateVec stateVec) {
         return stateVec.zdet;
     }
+    
+    public double m(StateVec stateVec, org.jlab.rec.cvt.svt.Geometry sgeo) {
+    	double meas=0;
+    	if (this.measurements.get(stateVec.k).type==0) {
+    		meas=sgeo.getMeasurementAtZ(stateVec.xdet, stateVec.ydet, stateVec.zdet,
+            		this.measurements.get(stateVec.k).layer, this.measurements.get(stateVec.k).sector,this.measurements.get(stateVec.k).centroid);
+    	}
+    	if (this.measurements.get(stateVec.k).type==1) {
+    		meas=this.measurements.get(stateVec.k).phi;
+    	}
+    	if (this.measurements.get(stateVec.k).type==2) {
+    		meas=this.measurements.get(stateVec.k).z;
+    	}
+    	return meas;
+    }
+    
+    public double Residual(StateVec stateVec, org.jlab.rec.cvt.svt.Geometry sgeo){
+    	double res=0;
+    	
+    	if (this.measurements.get(stateVec.k).type==0) {
+    		res=m(stateVec, sgeo)-h(stateVec, sgeo);
+    	}
+    	if (this.measurements.get(stateVec.k).type==1) {
+    		res=m(stateVec, sgeo)-hPhi(stateVec);
+    		if (res>Math.PI) res-=2*Math.PI;
+    		if (res<-Math.PI) res+=2*Math.PI;
+    	}
+    	if (this.measurements.get(stateVec.k).type==2) {
+    		res=m(stateVec, sgeo)-hZ(stateVec);
+    	}
+    	
+    	return res;
+    }
 
+    
     public double[] H(StateVec stateVec, StateVecs sv, org.jlab.rec.cvt.svt.Geometry sgeo, 
             org.jlab.rec.cvt.bmt.Geometry bgeo, int type, Swim swimmer) {
         StateVec SVplus = null;// = new StateVec(stateVec.k);
         StateVec SVminus = null;// = new StateVec(stateVec.k);
-       
+        
+        //d_rho derivative
         double delta_d_rho = 0.01;
         SVplus = this.reset(SVplus, stateVec, sv);
         SVminus = this.reset(SVminus, stateVec, sv);
@@ -133,19 +204,9 @@ public class MeasVecs {
         SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type, swimmer);
         
         double delta_m_drho = 0;
-        if (type == 0) {
-            delta_m_drho = (h(SVplus, sgeo) - h(SVminus, sgeo)) / delta_d_rho;
-        }
-        if (type == 2) {
-            delta_m_drho = (hZ(SVplus) - hZ(SVminus)) / delta_d_rho;
-        }
-        if (type == 1) {
-        	double delta=hPhi(SVplus) - hPhi(SVminus);
-        	if (delta>Math.PI) delta=Math.PI-delta;
-            if (delta<-Math.PI) delta=delta+2*Math.PI;
-            delta_m_drho = delta / delta_d_rho;
-        }
-        
+        delta_m_drho = (this.Residual(SVplus, sgeo) - this.Residual(SVminus, sgeo))/ delta_d_rho;
+                
+        //d_phi0 derivative	
         double delta_d_phi0 = Math.toRadians(0.025);
         SVplus = this.reset(SVplus, stateVec, sv);
         SVminus = this.reset(SVminus, stateVec, sv);
@@ -157,19 +218,9 @@ public class MeasVecs {
         SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type, swimmer);
 
         double delta_m_dphi0 = 0;
-        if (type == 0) {
-        	delta_m_dphi0 = (h(SVplus, sgeo) - h(SVminus, sgeo)) / delta_d_phi0;
-        }
-        if (type == 2) {
-            delta_m_dphi0 = (hZ(SVplus) - hZ(SVminus)) / delta_d_phi0;
-        }
-        if (type == 1) {
-        	double delta=hPhi(SVplus) - hPhi(SVminus);
-        	if (delta>Math.PI) delta=Math.PI-delta;
-            if (delta<-Math.PI) delta=delta+2*Math.PI;
-            delta_m_dphi0 = delta / delta_d_phi0;
-        }
-
+       	delta_m_dphi0 = (this.Residual(SVplus, sgeo) - this.Residual(SVminus, sgeo)) / delta_d_phi0;
+        
+        //d_kappa derivative
         double delta_d_kappa = 0.01;
         SVplus = this.reset(SVplus, stateVec, sv);
         SVminus = this.reset(SVminus, stateVec, sv);
@@ -181,19 +232,9 @@ public class MeasVecs {
         SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type, swimmer);
 
         double delta_m_dkappa = 0;
-        if (type == 0) {
-            delta_m_dkappa = (h(SVplus, sgeo) - h(SVminus, sgeo)) / delta_d_kappa;
-        }
-        if (type == 2) {
-            delta_m_dkappa = (hZ(SVplus) - hZ(SVminus)) / delta_d_kappa;
-        }
-        if (type == 1) {
-        	double delta=hPhi(SVplus) - hPhi(SVminus);
-        	if (delta>Math.PI) delta=Math.PI-delta;
-        	if (delta<-Math.PI) delta=delta+2*Math.PI;
-            delta_m_dkappa = delta / delta_d_kappa;
-        }
-
+        delta_m_dkappa = (this.Residual(SVplus, sgeo) - this.Residual(SVminus, sgeo)) / delta_d_kappa;
+                
+       //dz derivative
         double delta_d_dz = 0.1;
         SVplus = this.reset(SVplus, stateVec, sv);
         SVminus = this.reset(SVminus, stateVec, sv);
@@ -203,21 +244,11 @@ public class MeasVecs {
 
         SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type, swimmer);
         SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type, swimmer);
-
+        
         double delta_m_dz = 0;
-        if (type == 0) {
-            delta_m_dz = (h(SVplus, sgeo) - h(SVminus, sgeo)) / delta_d_dz;
-        }
-        if (type == 2) {
-            delta_m_dz = (hZ(SVplus) - hZ(SVminus)) / delta_d_dz;
-        }
-        if (type == 1) {
-        	double delta=hPhi(SVplus) - hPhi(SVminus);
-        	if (delta>Math.PI) delta=Math.PI-delta;
-            if (delta<-Math.PI) delta=delta+2*Math.PI;
-            delta_m_dz = delta / delta_d_dz;
-        }
-
+        delta_m_dz = (this.Residual(SVplus, sgeo) - this.Residual(SVminus, sgeo)) / delta_d_dz;
+        
+        //dtanL derivative
         double delta_d_tanL = 0.01;
         SVplus = this.reset(SVplus, stateVec, sv);
         SVminus = this.reset(SVminus, stateVec, sv);
@@ -229,46 +260,18 @@ public class MeasVecs {
         SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type, swimmer);
 
         double delta_m_dtanL = 0;
-        if (type == 0) {
-            delta_m_dtanL = (h(SVplus, sgeo) - h(SVminus, sgeo)) / delta_d_tanL;
-        }
-        if (type == 2) {
-            delta_m_dtanL = (hZ(SVplus) - hZ(SVminus)) / delta_d_tanL;
-        }
-        if (type == 1) {
-        	double delta=hPhi(SVplus) - hPhi(SVminus);
-        	if (delta>Math.PI) delta=Math.PI-delta;
-            if (delta<-Math.PI) delta=delta+2*Math.PI;
-            delta_m_dtanL = delta / delta_d_tanL;
-        }
-
-        double[] H = new double[]{delta_m_drho, delta_m_dphi0, delta_m_dkappa, delta_m_dz, delta_m_dtanL};
-      
+        delta_m_dtanL =  (this.Residual(SVplus, sgeo) - this.Residual(SVminus, sgeo))/ delta_d_tanL;
+        
+        double[] H = new double[]{-delta_m_drho, -delta_m_dphi0, -delta_m_dkappa, -delta_m_dz, -delta_m_dtanL};
+        //Since residuals are m-h... you need the minus sign to compute the derivative of the projector wrt to track parameter.
+       
         return H;
 
     }
 
     private StateVec reset(StateVec SVplus, StateVec stateVec, StateVecs sv) {
         SVplus = sv.new StateVec(stateVec.k);
-        /*SVplus.d_rho = stateVec.d_rho;
-        SVplus.alpha = stateVec.alpha;
-        SVplus.phi0 = stateVec.phi0;
-        SVplus.kappa = stateVec.kappa;
-        SVplus.dz = stateVec.dz;
-        SVplus.tanL = stateVec.tanL;
-        SVplus.alpha = stateVec.alpha;
-        
-        SVplus.x= stateVec.x;
-        SVplus.y= stateVec.y;
-        SVplus.z= stateVec.z;
-        
-        SVplus.refx= stateVec.refx;
-        SVplus.refy= stateVec.refy;
-        SVplus.refz= stateVec.refz;
-        
-        SVplus.xdet= stateVec.xdet;
-        SVplus.ydet= stateVec.ydet;
-        SVplus.zdet= stateVec.zdet;*/
+       
         SVplus.Duplicate(stateVec);
         return SVplus;
     }

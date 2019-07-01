@@ -273,6 +273,7 @@ public class CVTRecHandler {
 	}
 	
 	public List<Track> beamTracking(Swim swimmer){
+		
 		if( this.crosses == null ) return null;
 		TrackSeederCA trseed = new TrackSeederCA();
         
@@ -283,7 +284,7 @@ public class CVTRecHandler {
         List<Seed> seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
        
         for (Seed seed : seeds) { 
-            kf = new KFitter(seed, SVTGeom, swimmer );
+        	kf = new KFitter(seed, SVTGeom, swimmer );
             kf.runFitter(SVTGeom, BMTGeom, swimmer);
             //System.out.println(" OUTPUT SEED......................");
             trks.add(kf.OutputTrack(seed, SVTGeom, BMTGeom, swimmer));

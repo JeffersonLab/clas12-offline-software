@@ -301,6 +301,14 @@ public class Constants {
 	public static final int MaxBSTSize=4;
 	public static final int Min_Tmin=50;
 	public static final int Max_Tmin=350;
+	
+	//Covariance matrix initialization for KF
+	public static final double unc_d0 = 10;
+	public static final double unc_phi0 = Math.toRadians(10);
+	public static final double unc_tanL = 0.15;
+	public static final double unc_z0 = 10;
+	public static final double unc_kappa = 3;
+	
 
     //public static final int CVTCONFIGSTARTREG = 2; // for 3SVT+3BMT
 
