@@ -210,9 +210,16 @@ public abstract class Geant4Basic {
         System.arraycopy(id, 0, volumeId, 0, volumeId.length);
     }
 
+    
+    private static class SmartFormat {
+        public static String format(double num) {
+            DecimalFormat df = new DecimalFormat( (num < 1e-2) ? "#.#######" : "#.####");
+            return df.format(num);
+        }
+    }
+
     public String gemcString() {
         StringBuilder str = new StringBuilder();
-        DecimalFormat df = new DecimalFormat("#.####");
 
         if (motherVolume == null) {
             str.append(String.format("%18s | |", volumeName));
@@ -222,7 +229,7 @@ public abstract class Geant4Basic {
 
         Vector3d pos = getLocalPosition();
         str.append(String.format("%s*%s %s*%s %s*%s | ",
-                df.format(pos.x), Length.unit(), df.format(pos.y), Length.unit(), df.format(pos.z), Length.unit()));
+                SmartFormat.format(pos.x), Length.unit(), SmartFormat.format(pos.y), Length.unit(), SmartFormat.format(pos.z), Length.unit()));
 
         if (rotationValues[0] == 0 && rotationValues[1] == 0 && rotationValues[2] == 0) {
             str.append("0 0 0 ");
@@ -231,12 +238,12 @@ public abstract class Geant4Basic {
                 str.append(String.format("ordered: %s ", new StringBuilder(this.rotationOrder).reverse().toString()));
             }
             for (int irot = 0; irot < rotationValues.length; irot++) {
-                str.append(df.format(Math.toDegrees(rotationValues[rotationValues.length - irot - 1]))).append("*deg ");
+                str.append(SmartFormat.format(Math.toDegrees(rotationValues[rotationValues.length - irot - 1]))).append("*deg ");
             }
         }
         str.append(String.format("| %8s | ", this.getType()));
         volumeDimensions.stream()
-                .forEach(dim -> str.append(df.format(dim.value)).append("*").append(dim.unit).append(" "));
+                .forEach(dim -> str.append(SmartFormat.format(dim.value)).append("*").append(dim.unit).append(" "));
         str.append(" | ");
 
         int[] ids = this.getId();
