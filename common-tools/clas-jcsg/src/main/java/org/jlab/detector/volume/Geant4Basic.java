@@ -212,9 +212,10 @@ public abstract class Geant4Basic {
 
     
     private static class SmartFormat {
+        private static DecimalFormat largef = new DecimalFormat("#.####");
+        private static DecimalFormat smallf = new DecimalFormat("#.#######");
         public static String format(double num) {
-            DecimalFormat df = new DecimalFormat( (num < 1e-2) ? "#.#######" : "#.####");
-            return df.format(num);
+            return (num < 1e-2) ? smallf.format(num) : largef.format(num);
         }
     }
 
