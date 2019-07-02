@@ -196,7 +196,9 @@ public class CrossMaker {
         // For BMT start id at 1000
         int pid = 1000;
         for (Cluster Zlayerclus : Zlayrclus) {
-            if (Zlayerclus.get_TotalEnergy() < org.jlab.rec.cvt.bmt.Constants.ETOTCUT) {
+            if (Zlayerclus.get_TotalEnergy() < org.jlab.rec.cvt.bmt.Constants.ETOTCUT ||
+            		Zlayerclus.get_Tmin()<Constants.Min_Tmin ||
+            		Zlayerclus.get_Tmin()>Constants.Max_Tmin) {
                 continue;
             }
             // Z detector --> meas phi
@@ -231,7 +233,9 @@ public class CrossMaker {
         }
 
         for (Cluster Clayerclus : Clayrclus) {
-            if (Clayerclus.get_TotalEnergy() < org.jlab.rec.cvt.bmt.Constants.ETOTCUT) {
+            if (Clayerclus.get_TotalEnergy() < org.jlab.rec.cvt.bmt.Constants.ETOTCUT ||
+            		Clayerclus.get_Tmin()<Constants.Min_Tmin ||
+            		Clayerclus.get_Tmin()>Constants.Max_Tmin) {
                 continue;
             }
             // C detector --> meas z
