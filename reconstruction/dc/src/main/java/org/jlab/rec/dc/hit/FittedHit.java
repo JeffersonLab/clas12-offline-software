@@ -2,6 +2,7 @@ package org.jlab.rec.dc.hit;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
 import org.jlab.clas.clas.math.FastMath;
+import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
@@ -179,9 +180,10 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 set_TimeToDistance(1.0, B, constants1, tde);
             }
 
+            double x = this.get_Doca() / this.get_CellSize();
             if(event.hasBank("MC::Particle") ||
                     event.getBank("RUN::config").getInt("run", 0) < 100 ) { // for MC use functional form put in simulation
-                double x = this.get_Doca() / this.get_CellSize();
+                
                 double p1 = constants0.getDoubleValue("parameter1", this.get_Sector(),this.get_Superlayer(),0);
                 double p2 = constants0.getDoubleValue("parameter2", this.get_Sector(),this.get_Superlayer(),0);
                 double p3 = constants0.getDoubleValue("parameter3", this.get_Sector(),this.get_Superlayer(),0);
@@ -189,6 +191,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                 double scale = constants0.getDoubleValue("scale", this.get_Sector(),this.get_Superlayer(),0);
 
                 err = (p1 + p2 / ((p3 + x) * (p3 + x)) + p4 * Math.pow(x, 8)) * scale * 0.1; //gives a reasonable approximation to the measured CLAS resolution (in cm! --> scale by 0.1 )
+            } else {
+                // Mac's new function... to test
+                err = 0.06 - 0.14 * Math.pow(x,1.5) + 0.18 * Math.pow(x,2.5);
             }
         }
         
@@ -346,10 +351,15 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         int secIdx = this.get_Sector() - 1;
         if (_TrkgStatus != -1 && this.get_Time() > 0) {
            
+            //local angle correction
+            double theta0 = Math.acos(1-0.02*B);
             double alpha = Math.acos(cosTrkAngle);
+            // correct alpha with theta0, the angle corresponding to the isochrone lines twist due to the electric field
+            alpha+=Swimmer.getTorScale()*theta0;
+            //reduce the corrected angle
             this.setAlpha(Math.toDegrees(alpha));
             double ralpha = this.reducedAngle(alpha);
-            double beta = this.get_Beta(); 
+            double beta = this.get_Beta0to1(); 
             double x = this.get_ClusFitDoca();
            
             double deltatime_beta = 0;
@@ -816,7 +826,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      */
     public void setSignalTimeOfFlight() {
         if(this.get_Beta()>0 && this.getAssociatedStateVec()!=null)
-            this._SignalTimeOfFlight = (this.getAssociatedStateVec().getPathLength())/(Constants.SPEEDLIGHT*this.get_Beta());
+            this._SignalTimeOfFlight = (this.getAssociatedStateVec().getPathLength())/(Constants.SPEEDLIGHT*this.get_Beta0to1());
             this._tFlight = this._SignalTimeOfFlight;
     }
     
@@ -936,6 +946,17 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      */
     public void setAlpha(double _alpha) {
         this._alpha = _alpha;
+    }
+
+    /**
+     * 
+     * @return a value <=1 resetting beta to 1 for overflows
+     */
+    private double get_Beta0to1() {
+        double beta = this.get_Beta();
+        if(beta>1.0)
+            beta=1.0;
+        return beta;
     }
   
 }

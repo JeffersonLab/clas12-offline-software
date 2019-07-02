@@ -312,9 +312,10 @@ public class HitReader {
             hit.setT0(T_0);
             hit.setTStart(T_Start);
             hit.setTProp(tProp[i]);
-            hit.setTFlight(tFlight[i]);
+            //hit.setTFlight(tFlight[i]);
             hit.set_Beta(this.readBeta(event, trkID[i]));
-
+            //resetting TFlight after beta has been obtained
+            hit.setSignalTimeOfFlight(); 
             double T0Sub = (tdc[i] - tProp[i] - tFlight[i] - T_0);
 
             if (Constants.isUSETSTART()) {
@@ -339,8 +340,8 @@ public class HitReader {
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
             if(hit.get_Beta()>0.15 && hit.get_Beta()<=1.40) {
-                if(hit.get_Beta()>1.0)
-                    hit.set_Beta(1.0);
+                //if(hit.get_Beta()>1.0)
+                //    hit.set_Beta(1.0);
                 hits.add(hit);
             }
         }
@@ -418,8 +419,10 @@ public class HitReader {
             hit.setTStart(startTime);
             hit.setTProp(tProp[i]);
             //reset the time based on new beta
-            double newtFlight = tFlight[i] / hit.get_Beta();
-            hit.setTFlight(newtFlight);
+            //double newtFlight = tFlight[i] / hit.get_Beta();
+            //hit.setTFlight(newtFlight);
+            hit.setSignalTimeOfFlight();
+            double newtFlight = hit.getTFlight();
             hit.set_Time((double) tdc[i] - tProp[i] - newtFlight - T_0 - startTime);
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
@@ -438,8 +441,8 @@ public class HitReader {
             if (hit.get_Time() < 0)
                 hit.set_QualityFac(1);
             if(hit.get_Beta()>0.2 && hit.get_Beta()<=1.30) {
-                if(hit.get_Beta()>1.0)
-                    hit.set_Beta(1.0);
+                //if(hit.get_Beta()>1.0)
+                //    hit.set_Beta(1.0);
                 hits.add(hit);
             }
         }
@@ -462,8 +465,8 @@ public class HitReader {
                         bank.getShort("pindex", i));
             }
         }
-        if(_beta>1.0)
-            _beta=1.0;
+        //if(_beta>1.0)
+        //    _beta=1.0;
         return _beta;
     }
 

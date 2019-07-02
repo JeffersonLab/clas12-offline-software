@@ -95,8 +95,8 @@ public class DCEngine extends ReconstructionEngine {
             }
             }
         }
-        if (wireDistortionsFlag==null) {
-             System.out.println("["+this.getName()+"] run with time to distance function in in tracking ");
+        if (T2Dfcn==null) {
+             System.out.println("["+this.getName()+"] run with time to distance exponential function in tracking ");
         }
     }
     public void LoadTables() {
