@@ -77,7 +77,7 @@ public class DCEngine extends ReconstructionEngine {
         String T2Dfcn = this.getEngineConfigString("T2DFunc");
         
         if (T2Dfcn!=null) {
-            System.out.println("["+this.getName()+"] run with time to distance function in tracking config chosen based on yaml = "+wireDistortionsFlag);
+            System.out.println("["+this.getName()+"] run with time to distance function in tracking config chosen based on yaml = "+T2Dfcn);
             if(T2Dfcn.equalsIgnoreCase("Polynomial")) {
                 Constants.setT2D(1);
             } else {
@@ -87,7 +87,7 @@ public class DCEngine extends ReconstructionEngine {
         else {
             T2Dfcn = System.getenv("COAT_DC_T2DFUNC");
             if (T2Dfcn!=null) {
-                System.out.println("["+this.getName()+"] run with time to distance function in config chosen based on env = "+wireDistortionsFlag);
+                System.out.println("["+this.getName()+"] run with time to distance function in config chosen based on env = "+T2Dfcn);
                 if(T2Dfcn.equalsIgnoreCase("Polynomial")) {
                 Constants.setT2D(1);
             } else {
