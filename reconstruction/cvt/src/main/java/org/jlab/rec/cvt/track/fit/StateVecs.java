@@ -109,10 +109,7 @@ public class StateVecs {
     public void new_transport(int i, int f, StateVec iVec, CovMat icovMat, 
             org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, int type, 
             Swim swimmer) { // s = signed step-size... s=0 at dca... ALWAYS!!!
-    	System.out.println("////////////////");
-        for (int kkk=0; kkk<5; kkk++) {
-       	 System.out.println(icovMat.covMat.get(kkk, 0)+" "+icovMat.covMat.get(kkk, 1)+" "+icovMat.covMat.get(kkk, 2)+" "+icovMat.covMat.get(kkk, 3)+" "+icovMat.covMat.get(kkk, 4));
-        }
+    
     	double Xc, Yc; //Coordinate of the Helix center
     	double Ri=0; //Radius at s=0
     	double Rf=0; //Radius we want to reach
@@ -273,10 +270,7 @@ public class StateVecs {
              Matrix F = new Matrix(FMat);
              Matrix FT = F.transpose();
              Matrix Cpropagated = F.times(fCov.covMat).times(FT);
-            /* System.out.println("////////////////");
-             for (int kkk=0; kkk<5; kkk++) {
-            	 System.out.println(fCov.covMat.get(kkk, 0)+" "+fCov.covMat.get(kkk, 1)+" "+fCov.covMat.get(kkk, 2)+" "+fCov.covMat.get(kkk, 3)+" "+fCov.covMat.get(kkk, 4));
-             }*/
+          
              //Store the transport information
              Matrix fTransStep= F.times(fTransport);
              fTransport=fTransStep;
