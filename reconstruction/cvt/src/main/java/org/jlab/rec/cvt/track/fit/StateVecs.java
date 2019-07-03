@@ -50,6 +50,7 @@ public class StateVecs {
         kVec.x=InitialPos.x();
         kVec.y=InitialPos.y();
         kVec.z=InitialPos.z();
+        
     	if (k>0) {        
     		if (Layer.get(k)>6) csPoint=bmt_geo.getRefinedIntersection(kHelix, Layer.get(k)-6, Sector.get(k));
     		else csPoint=svt_geo.getRefinedIntersection(kHelix, Layer.get(k), Sector.get(k));
@@ -108,7 +109,10 @@ public class StateVecs {
     public void new_transport(int i, int f, StateVec iVec, CovMat icovMat, 
             org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, int type, 
             Swim swimmer) { // s = signed step-size... s=0 at dca... ALWAYS!!!
-    		
+    	System.out.println("////////////////");
+        for (int kkk=0; kkk<5; kkk++) {
+       	 System.out.println(icovMat.covMat.get(kkk, 0)+" "+icovMat.covMat.get(kkk, 1)+" "+icovMat.covMat.get(kkk, 2)+" "+icovMat.covMat.get(kkk, 3)+" "+icovMat.covMat.get(kkk, 4));
+        }
     	double Xc, Yc; //Coordinate of the Helix center
     	double Ri=0; //Radius at s=0
     	double Rf=0; //Radius we want to reach
@@ -154,7 +158,7 @@ public class StateVecs {
         while (((!AtModule&&f>0)||(!AtClosest&&f==0))&&count<Max_count) {
         	
         	Helix iHelix=setSvPars(sv_i, fCov.covMat);// Helix definition and equations valid only if xref=0 and yref=0;
-        	       
+        	
             if (f>0) {
             	if (Layer.get(f)>6) Posdet=bgeo.LabToDetFrame(Layer.get(f)-6, Sector.get(f), new Vector3D(sv_i.x, sv_i.y, sv_i.z));
                 if (Layer.get(f)<7) Posdet=sgeo.Point_LabToDetFrame(Layer.get(f), Sector.get(f), new Vector3D(sv_i.x, sv_i.y, sv_i.z));
@@ -269,7 +273,10 @@ public class StateVecs {
              Matrix F = new Matrix(FMat);
              Matrix FT = F.transpose();
              Matrix Cpropagated = F.times(fCov.covMat).times(FT);
-             
+            /* System.out.println("////////////////");
+             for (int kkk=0; kkk<5; kkk++) {
+            	 System.out.println(fCov.covMat.get(kkk, 0)+" "+fCov.covMat.get(kkk, 1)+" "+fCov.covMat.get(kkk, 2)+" "+fCov.covMat.get(kkk, 3)+" "+fCov.covMat.get(kkk, 4));
+             }*/
              //Store the transport information
              Matrix fTransStep= F.times(fTransport);
              fTransport=fTransStep;
@@ -279,7 +286,7 @@ public class StateVecs {
              if (Cpropagated != null&&AtModule&&i<f) {//Add the noise only at module... and only going forward... Going backward only to get the best estimate at Vertex
                  fCov.covMat = fCov.covMat.plus(this.Q(iVec, f - i));
              } 
-             
+            
              //We will move the pivot point to sv_f... we need to compute the phi0 of the point wrt to the new Helix center
              Bf = new B(f, sv_f.x, sv_f.y, sv_f.z, swimmer);
              sv_f.alpha=Bf.alpha;
@@ -623,20 +630,24 @@ public class StateVecs {
         initSV.tanL = trk.get_Helix().get_tandip();
         initSV.d_rho = trk.get_Helix().get_dca();
         initSV.phi = 0;
+        
+        //If Pt>5 GeV from helical fit, we initialize it at 5 GeV for Kalman filter
+        if (Math.abs(1/initSV.kappa)>5)  initSV.kappa=Math.signum(initSV.kappa)*0.2;
        
         this.trackTraj.put(0, initSV);
         this.trackTrajFilt.put(0, initSV);
         //init covMat
+        //TODO:Absolute values are used to avoid negative term on diagonal of the cov matrix from helical fitter
         Matrix fitCovMat = trk.get_Helix().get_covmatrix();
-        double cov_d02 = fitCovMat.get(0, 0);
+        double cov_d02 = Math.abs(fitCovMat.get(0, 0));
         double cov_d0phi0 = fitCovMat.get(0, 1);
         double cov_d0rho = Bf.alpha * fitCovMat.get(0, 2);
-        double cov_phi02 = fitCovMat.get(1, 1);
+        double cov_phi02 = Math.abs(fitCovMat.get(1, 1));
         double cov_phi0rho = Bf.alpha * fitCovMat.get(1, 2);
-        double cov_rho2 = Bf.alpha * Bf.alpha * fitCovMat.get(2, 2);
-        double cov_z02 = fitCovMat.get(3, 3);
+        double cov_rho2 = Bf.alpha * Bf.alpha * Math.abs(fitCovMat.get(2, 2));
+        double cov_z02 = Math.abs(fitCovMat.get(3, 3));
         double cov_z0tandip = fitCovMat.get(3, 4);
-        double cov_tandip2 = fitCovMat.get(4, 4);
+        double cov_tandip2 = Math.abs(fitCovMat.get(4, 4));
 
         double components[][] = new double[5][5];
         for (int i = 0; i < 5; i++) {
@@ -644,7 +655,7 @@ public class StateVecs {
                 components[i][j] = 0;
             }
         }
-
+      
         components[0][0] = org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_d0;
         components[0][1] = cov_d0phi0/Math.sqrt(cov_d02*cov_phi02)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_phi0;
         components[1][0] = cov_d0phi0/Math.sqrt(cov_d02*cov_phi02)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_phi0;
@@ -707,7 +718,7 @@ public class StateVecs {
                 components[i][j] = 0;
             }
         }
-
+        
         components[0][0] = org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_d0;
         components[0][1] = cov_d0phi0/Math.sqrt(cov_d02*cov_phi02)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_phi0;
         components[1][0] = cov_d0phi0/Math.sqrt(cov_d02*cov_phi02)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_phi0;
