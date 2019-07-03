@@ -78,6 +78,7 @@ public class RICHConstants {
     public double  SHOW_PROGRESS_INTERVAL                 =   10.;      // Time interval between progress dumping (sec)
     public double  THROW_ASSOCIATION_CUT                  =   10.;      // Max distance to set initial values for tracing photons (cm)
     public double  RICH_TIME_RMS                          =   1.5;      // Expected single photon Time resolution (ns)
+    public double  RICH_DEBUG                             =   0.0;      // Flag to activate the printout for debug
 
     public double  MISA_SHIFT_SCALE                       =   1.0;      // Scale factor for misalignment shifts
     public double  MISA_ANGLE_SCALE                       =   1.0;      // Scale factor for misalignment angles

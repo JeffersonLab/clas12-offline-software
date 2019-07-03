@@ -37,7 +37,6 @@ public class RICHEBEngine extends ReconstructionEngine {
     public boolean init() {
     // ----------------
 
-        System.out.format("PROVA per Raffaella \n");
 
         int debugMode = 0;
 

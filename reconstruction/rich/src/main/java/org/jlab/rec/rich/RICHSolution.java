@@ -278,6 +278,10 @@ public class RICHSolution {
     // ----------------
 
     // ----------------
+    public ArrayList<RICHRay> get_raytracks() {return this.raytracks;}
+    // ----------------
+
+    // ----------------
     public void set_raytracks(ArrayList<RICHRay> rays){
     // ----------------
 

@@ -349,10 +349,10 @@ public class RICHTool{
             for(int ich=0; ich<NPIX; ich++){
                 pmt_timeoff[ipmt][ich] = (float) timeoffConstants.getDoubleValue("offset", 4, ipmt+1, ich+1);
             }
-            if(debugMode>=1){
-                if(ipmt<10 || ipmt>380)System.out.format("CCDB TOFF    ipmt %4d  %8.2f (ch1)  %8.2f (ch2)  %8.2f (ch63)  %8.2f (ch64) \n", ipmt+1,
+            if(debugMode>=1 && reco_constants.RICH_DEBUG>0){
+                if(ipmt<10 || ipmt>380)System.out.format("CCDB RICH TOFF    ipmt %4d  %8.2f (ch1)  %8.2f (ch2)  %8.2f (ch63)  %8.2f (ch64) \n", ipmt+1,
                    pmt_timeoff[ipmt][0], pmt_timeoff[ipmt][1], pmt_timeoff[ipmt][62], pmt_timeoff[ipmt][63]);
-                if(ipmt==10)System.out.format("CCDB TOFF     ....... \n");
+                if(ipmt==10)System.out.format("CCDB RICH TOFF     ....... \n");
                 if(ipmt==390)System.out.format("  \n");
             }
         }
@@ -367,10 +367,10 @@ public class RICHTool{
             pmt_timewalk[ipmt][1] = (float) timewalkConstants.getDoubleValue("m1", 4, ipmt+1, 0);
             pmt_timewalk[ipmt][2] = (float) Math.abs(timewalkConstants.getDoubleValue("m2", 4, ipmt+1, 0))*(-1.0);
             pmt_timewalk[ipmt][3] = (float) timewalkConstants.getDoubleValue("T0", 4, ipmt+1, 0);
-            if(debugMode>=1){
-                if(ipmt<10 || ipmt>380)System.out.format("CCDB TWALK   ipmt %4d  D0 = %8.2f  T0 = %8.2f  m1 = %8.3f  m2 = %8.3f\n", ipmt+1,
+            if(debugMode>=1 && reco_constants.RICH_DEBUG>0){
+                if(ipmt<10 || ipmt>380)System.out.format("CCDB RICH TWALK   ipmt %4d  D0 = %8.2f  T0 = %8.2f  m1 = %8.3f  m2 = %8.3f\n", ipmt+1,
                          pmt_timewalk[ipmt][0], pmt_timewalk[ipmt][1] , pmt_timewalk[ipmt][2], pmt_timewalk[ipmt][3]);
-                if(ipmt==10)System.out.format("CCDB TWALK    ....... \n");
+                if(ipmt==10)System.out.format("CCDB RICH TWALK    ....... \n");
                 if(ipmt==390)System.out.format("  \n");
             }
         }
@@ -413,43 +413,45 @@ public class RICHTool{
         reco_constants.SHOW_PROGRESS_INTERVAL      =  paraConstants.getDoubleValue("par5", 4, 0, 0);
         reco_constants.THROW_ASSOCIATION_CUT       =  paraConstants.getDoubleValue("par6", 4, 0, 0);
 
+        reco_constants.RICH_DEBUG                  =  paraConstants.getDoubleValue("par7", 4, 0, 0);
         reco_constants.RICH_TIME_RMS               =  paraConstants.getDoubleValue("par8", 4, 0, 0);
         reco_constants.MISA_SHIFT_SCALE            =  paraConstants.getDoubleValue("par9", 4, 0, 0);
         reco_constants.MISA_ANGLE_SCALE            =  paraConstants.getDoubleValue("par10", 4, 0, 0);
         
         //ATT: check
-        //reco_constants.FORCE_DC_MATCH              =  1;
-        if(debugMode>=1){
+        //reco_constants.RICH_DEBUG                  =  1.0;
+        if(debugMode>=1 && reco_constants.RICH_DEBUG>0){
 
             System.out.format(" \n");
-            System.out.format("CCDB PARA    DO_MISALIGNMENT              %8d \n", reco_constants.DO_MISALIGNMENT); 
-            System.out.format("CCDB PARA    FORCE_DC_MATCH               %8d \n", reco_constants.FORCE_DC_MATCH); 
-            System.out.format("CCDB PARA    MISA_RICH_REF                %8d \n", reco_constants.MISA_RICH_REF); 
-            System.out.format("CCDB PARA    MISA_PMT_PIVOT               %8d \n", reco_constants.MISA_PMT_PIVOT); 
-            System.out.format("CCDB PARA    APPLY_SURVEY                 %8d \n", reco_constants.APPLY_SURVEY); 
+            System.out.format("CCDB RICH PARA    DO_MISALIGNMENT              %8d \n", reco_constants.DO_MISALIGNMENT); 
+            System.out.format("CCDB RICH PARA    FORCE_DC_MATCH               %8d \n", reco_constants.FORCE_DC_MATCH); 
+            System.out.format("CCDB RICH PARA    MISA_RICH_REF                %8d \n", reco_constants.MISA_RICH_REF); 
+            System.out.format("CCDB RICH PARA    MISA_PMT_PIVOT               %8d \n", reco_constants.MISA_PMT_PIVOT); 
+            System.out.format("CCDB RICH PARA    APPLY_SURVEY                 %8d \n", reco_constants.APPLY_SURVEY); 
 
-            System.out.format("CCDB PARA    DO_ANALYTIC                  %8d \n", reco_constants.DO_ANALYTIC); 
-            System.out.format("CCDB PARA    THROW_ELECTRONS              %8d \n", reco_constants.THROW_ELECTRONS); 
-            System.out.format("CCDB PARA    THROW_PIONS                  %8d \n", reco_constants.THROW_PIONS); 
-            System.out.format("CCDB PARA    THROW_KAONS                  %8d \n", reco_constants.THROW_KAONS); 
-            System.out.format("CCDB PARA    THROW_PROTONS                %8d \n", reco_constants.THROW_PROTONS); 
-            System.out.format("CCDB PARA    THROW_PHOTON_NUMBER          %8d \n", reco_constants.THROW_PHOTON_NUMBER); 
-            System.out.format("CCDB PARA    TRACE_PHOTONS                %8d \n", reco_constants.TRACE_PHOTONS); 
+            System.out.format("CCDB RICH PARA    DO_ANALYTIC                  %8d \n", reco_constants.DO_ANALYTIC); 
+            System.out.format("CCDB RICH PARA    THROW_ELECTRONS              %8d \n", reco_constants.THROW_ELECTRONS); 
+            System.out.format("CCDB RICH PARA    THROW_PIONS                  %8d \n", reco_constants.THROW_PIONS); 
+            System.out.format("CCDB RICH PARA    THROW_KAONS                  %8d \n", reco_constants.THROW_KAONS); 
+            System.out.format("CCDB RICH PARA    THROW_PROTONS                %8d \n", reco_constants.THROW_PROTONS); 
+            System.out.format("CCDB RICH PARA    THROW_PHOTON_NUMBER          %8d \n", reco_constants.THROW_PHOTON_NUMBER); 
+            System.out.format("CCDB RICH PARA    TRACE_PHOTONS                %8d \n", reco_constants.TRACE_PHOTONS); 
 
-            System.out.format("CCDB PARA    REDO_RICH_RECO               %8d \n", reco_constants.REDO_RICH_RECO); 
-            System.out.format("CCDB PARA    DO_MIRROR_HADS               %8d \n", reco_constants.DO_MIRROR_HADS); 
-            System.out.format("CCDB PARA    DO_CURVED_AERO               %8d \n", reco_constants.DO_CURVED_AERO); 
+            System.out.format("CCDB RICH PARA    REDO_RICH_RECO               %8d \n", reco_constants.REDO_RICH_RECO); 
+            System.out.format("CCDB RICH PARA    DO_MIRROR_HADS               %8d \n", reco_constants.DO_MIRROR_HADS); 
+            System.out.format("CCDB RICH PARA    DO_CURVED_AERO               %8d \n", reco_constants.DO_CURVED_AERO); 
 
-            System.out.format("CCDB PARA    GOODHIT_FRAC                 %8.4f \n", reco_constants.GOODHIT_FRAC); 
-            System.out.format("CCDB PARA    RICH_DCMATCH_CUT             %8.4f \n", reco_constants.RICH_DCMATCH_CUT); 
-            System.out.format("CCDB PARA    RICH_HITMATCH_RMS            %8.4f \n", reco_constants.RICH_HITMATCH_RMS); 
-            System.out.format("CCDB PARA    RICH_DIRECT_RMS              %8.4f \n", reco_constants.RICH_DIRECT_RMS); 
-            System.out.format("CCDB PARA    SHOW_PROGRESS_INTERVAL       %8.4f \n", reco_constants.SHOW_PROGRESS_INTERVAL); 
-            System.out.format("CCDB PARA    THROW_ASSOCIATION_CUT        %8.4f \n", reco_constants.THROW_ASSOCIATION_CUT); 
+            System.out.format("CCDB RICH PARA    GOODHIT_FRAC                 %8.4f \n", reco_constants.GOODHIT_FRAC); 
+            System.out.format("CCDB RICH PARA    RICH_DCMATCH_CUT             %8.4f \n", reco_constants.RICH_DCMATCH_CUT); 
+            System.out.format("CCDB RICH PARA    RICH_HITMATCH_RMS            %8.4f \n", reco_constants.RICH_HITMATCH_RMS); 
+            System.out.format("CCDB RICH PARA    RICH_DIRECT_RMS              %8.4f \n", reco_constants.RICH_DIRECT_RMS); 
+            System.out.format("CCDB RICH PARA    SHOW_PROGRESS_INTERVAL       %8.4f \n", reco_constants.SHOW_PROGRESS_INTERVAL); 
+            System.out.format("CCDB RICH PARA    THROW_ASSOCIATION_CUT        %8.4f \n", reco_constants.THROW_ASSOCIATION_CUT); 
 
-            System.out.format("CCDB PARA    RICH_TIME_RMS                %8.4f \n", reco_constants.RICH_TIME_RMS); 
-            System.out.format("CCDB PARA    MISA_SHIFT_SCALE             %8.4f \n", reco_constants.MISA_SHIFT_SCALE); 
-            System.out.format("CCDB PARA    MISA_ANGLE_SCALE             %8.4f \n", reco_constants.MISA_ANGLE_SCALE); 
+            System.out.format("CCDB RICH PARA    RICH_DEBUG                   %8.4f \n", reco_constants.RICH_DEBUG); 
+            System.out.format("CCDB RICH PARA    RICH_TIME_RMS                %8.4f \n", reco_constants.RICH_TIME_RMS); 
+            System.out.format("CCDB RICH PARA    MISA_SHIFT_SCALE             %8.4f \n", reco_constants.MISA_SHIFT_SCALE); 
+            System.out.format("CCDB RICH PARA    MISA_ANGLE_SCALE             %8.4f \n", reco_constants.MISA_ANGLE_SCALE); 
             System.out.format(" \n");
 
         }
@@ -494,9 +496,9 @@ public class RICHTool{
             layer_misa_shift[ila][ico] = new Vector3D( dx*sscale,  dy*sscale,  dz*sscale);
             layer_misa_angle[ila][ico] = new Vector3D(thx*ascale, thy*ascale, thz*ascale);
 
-            if(debugMode>=1){
+            if(debugMode>=1 && reco_constants.RICH_DEBUG>0){
                 if(layer_misa_shift[ila][ico].mag()>0 || layer_misa_angle[ila][ico].mag()>0){
-                    System.out.format("CCDB MISA    ila  %4d ico %3d  (%4d %3d)  shift %s  angle %s \n", lla,cco, ila,ico,
+                    System.out.format("CCDB RICH MISA    ila  %4d ico %3d  (%4d %3d)  shift %s  angle %s \n", lla,cco, ila,ico,
                                layer_misa_shift[ila][ico].toStringBrief(3), layer_misa_angle[ila][ico].toStringBrief(3));
                 }
                 if(im==23)System.out.format("  \n");
@@ -514,7 +516,7 @@ public class RICHTool{
             for (int ico=0; ico<nco[ila]; ico++){
                 aero_refi[ila][ico] = (float) aeroConstants.getDoubleValue("n400", 4,201+ila,ico+1);
                 aero_plan[ila][ico] = (float) aeroConstants.getDoubleValue("planarity", 4,201+ila, ico+1);
-                if(debugMode>=1)System.out.format("CCDB AERO    ila %4d  ico %3d  n = %8.5f  pla = %8.2f\n", 201+ila, ico+1, aero_refi[ila][ico], aero_plan[ila][ico]);
+                if(debugMode>=1 && reco_constants.RICH_DEBUG>0)System.out.format("CCDB RICH AERO    ila %4d  ico %3d  n = %8.5f  pla = %8.2f\n", 201+ila, ico+1, aero_refi[ila][ico], aero_plan[ila][ico]);
             }
         }
 
@@ -547,7 +549,7 @@ public class RICHTool{
                     pmt_timeoff[ipmt-1][ich-1] = off;
 
                     if(debugMode>=1)if(ich==1 || ich==64)
-                              System.out.format("TXT TOFF   pmt %4d (ich=%3d: %8.2f) \n", ipmt, ich, pmt_timeoff[ipmt-1][ich-1]);
+                              System.out.format("TXT RICH TOFF   pmt %4d (ich=%3d: %8.2f) \n", ipmt, ich, pmt_timeoff[ipmt-1][ich-1]);
 
                 }
 
@@ -1396,7 +1398,7 @@ public class RICHTool{
     public void misalign_Layer(RICHLayer layer){
     //------------------------------
 
-        int debugMode = 1;
+        int debugMode = 0;
 
         /*
         *  To account for SURVEY

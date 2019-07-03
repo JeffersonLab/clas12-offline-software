@@ -612,7 +612,8 @@ public class RICHParticle {
         double the_min    = trial_pho.lab_theta;
         Vector3d pmt_min  = trial_pho.meas_hit;
         int nrefle_min = trial_pho.traced.get_nrefle();
-        ArrayList<RICHRay> rays_min = null;
+        ArrayList<RICHRay> rays_min = new ArrayList(); 
+        rays_min = trial_pho.traced.get_raytracks();
 
         Vector3d vec_dist = meas_hit.minus(pmt_min);
         double dist = Math.sqrt(vec_dist.x*vec_dist.x+vec_dist.y*vec_dist.y);

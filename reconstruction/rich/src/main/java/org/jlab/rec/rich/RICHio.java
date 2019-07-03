@@ -25,7 +25,7 @@ public class RICHio {
     public void clear_Banks(DataEvent event) {
     // ----------------
 
-        int debugMode = 1;
+        int debugMode = 0;
 
         // remove previous version of banks from the event
         if(event.hasBank("RICH::hits")){
