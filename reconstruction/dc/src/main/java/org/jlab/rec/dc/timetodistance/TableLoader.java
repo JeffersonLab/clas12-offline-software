@@ -28,8 +28,7 @@ public class TableLoader {
     static int minBinIdxT  = 0;
     static int[][][][] maxBinIdxT  = new int[6][6][8][6];
     public static double[][][][][] DISTFROMTIME = new double[6][6][maxBinIdxB+1][maxBinIdxAlpha+1][nBinsT]; // sector slyr alpha Bfield time bins [s][r][ibfield][icosalpha][tbin]
-    public static double FracDmaxAtMinVel = 0.615;		// fraction of dmax corresponding to the point in the cell where the velocity is minimal
-
+    
     //public static double[] distbetaValues = new double[]{0.16, 0.16, 0.08, 0.08, 0.08, 0.08};
     
     /*
@@ -143,6 +142,7 @@ public class TableLoader {
                 for(int r = 0; r<6; r++ ){ //loop over slys
                     // Fill constants
                     delta_T0[s][r] = tab.getDoubleValue("delta_T0", s+1,r+1,0);
+                    FracDmaxAtMinVel[s][r] = tab.getDoubleValue("delta_T0", s+1,r+1,0);//use same table. names strings 
                     deltanm[s][r] = tab.getDoubleValue("deltanm", s+1,r+1,0);
                     v0[s][r] = tab.getDoubleValue("v0", s+1,r+1,0);
                     delta_bfield_coefficient[s][r] = tab.getDoubleValue("delta_bfield_coefficient", s+1,r+1,0); 
@@ -246,15 +246,17 @@ public class TableLoader {
         double Bb2 = b2[s][r];
         double Bb3 = b3[s][r];
         double Bb4 = b4[s][r];
+        double fracDmaxAtMinVel = FracDmaxAtMinVel[s][r];
         if(x>dmax)
             x=dmax;
         
         if(Constants.getT2D()==0) {
-            return T2DFunctions.ExpoFcn(x, alpha, bfield, v_0, v_1, FracDmaxAtMinVel, 
+            fracDmaxAtMinVel = 0.615;
+            return T2DFunctions.ExpoFcn(x, alpha, bfield, v_0, v_1, fracDmaxAtMinVel, 
                 tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, superlayer) + delta_T0[s][r];
         } else {
-            return T2DFunctions.polyFcnMac(x, alpha, bfield, v_0, v_1, FracDmaxAtMinVel, 
-                tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, superlayer) + delta_T0[s][r];
+            return T2DFunctions.polyFcnMac(x, alpha, bfield, v_0, v_1, fracDmaxAtMinVel, 
+                tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, superlayer) ;
         }
     }
     
@@ -267,4 +269,6 @@ public class TableLoader {
     public static double[][] b4 = new double[6][6];
     public static double[][] v0 = new double[6][6];
     public static double[][] Tmax = new double[6][6];
+    public static double[][] FracDmaxAtMinVel = new double[6][6];		// fraction of dmax corresponding to the point in the cell where the velocity is minimal
+
 }
