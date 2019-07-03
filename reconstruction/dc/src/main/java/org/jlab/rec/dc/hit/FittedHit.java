@@ -370,7 +370,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             
             distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), deltatime_beta), secIdx, slIdx) ;
             //deltatime_beta = calcDeltaTimeBeta(distance, tab, beta);
-            deltatime_beta = calcDeltaTimeBeta(distance, this.get_Superlayer(), beta);
+            //deltatime_beta = calcDeltaTimeBeta(distance, this.get_Superlayer(), beta);
             this.set_DeltaTimeBeta(deltatime_beta);
             distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), deltatime_beta), secIdx, slIdx) ;
             
@@ -392,10 +392,10 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                         this.get_Superlayer(),0) * beta * beta)) - x) / Constants.V0AVERAGED;
     }
     
-    public double calcDeltaTimeBeta(double x, int superlayer, double beta) {
-        double distbeta = TableLoader.distbetaValues[superlayer-1];
-        return (Math.sqrt(x * x + (distbeta * beta * beta) * (distbeta* beta * beta)) - x) / Constants.V0AVERAGED;
-    }
+    //public double calcDeltaTimeBeta(double x, int superlayer, double beta) {
+    //    double distbeta = TableLoader.distbetaValues[superlayer-1];
+    //    return (Math.sqrt(x * x + (distbeta * beta * beta) * (distbeta* beta * beta)) - x) / Constants.V0AVERAGED;
+    //}
     
     /**
      * 

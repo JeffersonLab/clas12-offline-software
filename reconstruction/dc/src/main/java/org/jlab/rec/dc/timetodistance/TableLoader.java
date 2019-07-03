@@ -30,7 +30,7 @@ public class TableLoader {
     public static double[][][][][] DISTFROMTIME = new double[6][6][maxBinIdxB+1][maxBinIdxAlpha+1][nBinsT]; // sector slyr alpha Bfield time bins [s][r][ibfield][icosalpha][tbin]
     public static double FracDmaxAtMinVel = 0.615;		// fraction of dmax corresponding to the point in the cell where the velocity is minimal
 
-    public static double[] distbetaValues = new double[]{0.16, 0.16, 0.08, 0.08, 0.08, 0.08};
+    //public static double[] distbetaValues = new double[]{0.16, 0.16, 0.08, 0.08, 0.08, 0.08};
     
     /*
      * 

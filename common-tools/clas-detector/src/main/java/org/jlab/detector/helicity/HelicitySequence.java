@@ -20,14 +20,15 @@ import java.util.Comparator;
  * non-generator methods cannot.  Return values are null if the helicity cannot
  * be determined.
  * 
- * The inputs to initialize the sequence are HelicityState objects, one per window
- * at the helicity board clock frequency, which contain important information for
- * constructing and validating the sequence (e.g. helicity and sync bits and timestamps).
+ * The inputs to initialize the sequence are {@link HelicityState} objects, one
+ * per window at the helicity board clock frequency, which contain important
+ * information for constructing and validating the sequence (e.g. helicity and
+ * sync bits and timestamps).
  * 
- * The return values from getters are just HelicityBit objects and represent the
- * HWP-corrected helicity.
+ * The return values from getters are just {@link HelicityBit} objects and
+ * represent the HWP-corrected helicity.
  *
- * See org.jlab.detector.HelicityAnalysis for an example on using this class.
+ * See {@link HelicityAnalysis} for an example on using this class.
  * 
  * @author baltzell
  */
@@ -75,8 +76,10 @@ public class HelicitySequence implements Comparator<HelicityState> {
 
     /**
      * Add a state to the sequence, unless the same timestamp already exists
-     * or it has undefined bits, and keep them ordered by timestamp.
-     * @param state = the state to add
+     * or it has undefined bits, and keep them ordered by timestamp.  Note,
+     * these {@link HelicityState}s do not have to be added in order, as they
+     * will be automatically ordered by timestamp upon insertion.
+     * @param state the state to add
      * @return whether the state was added
      */
     public final boolean addState(HelicityState state) {
@@ -115,8 +118,8 @@ public class HelicitySequence implements Comparator<HelicityState> {
 
     /**
      * Given the first helicity state in a quartet, get another bit in that quartet.
-     * @param firstBit = first helicity state in the quartet
-     * @param bitIndex = index of the state to retrieve (0/1/2/3)
+     * @param firstBit first helicity state in the quartet
+     * @param bitIndex index of the state to retrieve (0/1/2/3)
      * @return the requested bit
      */
     public final static HelicityBit getBitInQuartet(HelicityBit firstBit, int bitIndex) {
@@ -128,7 +131,7 @@ public class HelicitySequence implements Comparator<HelicityState> {
     /**
      * Get the state index of a TI timestamp.
      * This returns invalid (-1) if the timestamp is not in the range of measured states.
-     * @param timestamp
+     * @param timestamp TI timestamp (i.e. RUN::config.timestamp)
      * @return index
      */
     protected final int findIndex(long timestamp) {
@@ -144,7 +147,7 @@ public class HelicitySequence implements Comparator<HelicityState> {
 
     /**
      * Get the nth state in the measured sequence.
-     * @param n = the index of the state, where 0 corresponds to the first state
+     * @param n the index of the state, where 0 corresponds to the first state
      * @return the helicity state, null if outside the mesaured range
      */
     protected HelicityState getState(int n) {
@@ -155,7 +158,7 @@ public class HelicitySequence implements Comparator<HelicityState> {
 
     /**
      * Find the state corresponding to a given timestamp in the measured sequence.
-     * @param timestamp = TI timestamp (units = 4 ns)
+     * @param timestamp TI timestamp (i.e. RUN::config.timestamp)
      * @return the helicity state, null if timestamp is outside of measured range
      */
     protected HelicityState findState(long timestamp) {
@@ -166,7 +169,7 @@ public class HelicitySequence implements Comparator<HelicityState> {
 
     /**
      * Get the nth state in the measured sequence.
-     * @param n = the index of the state, where 0 corresponds to the first state
+     * @param n the index of the state, where 0 corresponds to the first state
      * @return the helicity state, null if outside the mesaured range
      */
     public HelicityBit get(int n) {
@@ -177,7 +180,7 @@ public class HelicitySequence implements Comparator<HelicityState> {
 
     /**
      * Find the state corresponding to a given timestamp in the measured sequence.
-     * @param timestamp = TI timestamp (units = 4 ns)
+     * @param timestamp TI timestamp (i.e. RUN::config.timestamp)
      * @return the helicity state, null if timestamp is outside of measured range
      */
     public HelicityBit find(long timestamp) {
@@ -194,7 +197,7 @@ public class HelicitySequence implements Comparator<HelicityState> {
      * states were provided to initialize it.  Returns null if generator cannot
      * be initialized or the state is before the measured ones (i.e. negative).
      * 
-     * @param n = the index of the state
+     * @param n the index of the state
      * @return the helicity bit
      */
     public HelicityBit getPrediction(int n) {
@@ -224,7 +227,7 @@ public class HelicitySequence implements Comparator<HelicityState> {
      * states were provided to initialize it.  Returns null if generator cannot
      * be initialized or timestamp is before the measured ones.
      * 
-     * @param timestamp = TI timestamp (units = 4 ns)
+     * @param timestamp TI timestamp (i.e. RUN::config.timestamp)
      * @return the helicity bit
      */
     public HelicityBit findPrediction(long timestamp) {
@@ -246,6 +249,19 @@ public class HelicitySequence implements Comparator<HelicityState> {
         }
     }
 
+    /**
+     * Get whether the pseudo-random generator is initialized.  This must be
+     * true before calling the predict methods, because they require a working
+     * generator.  The number of valid states required to intialize the generator
+     * is {@link HelicityGenerator.REGISTER_SIZE}.
+     * 
+     * @return whether initialized 
+     */
+    public boolean initialized() {
+        if (!this.analyzed) this.analyze();
+        return this.generator.initialized();
+    }
+    
     public void show() {
         HelicityState prev=this.states.get(0);
         for (int ii=0; ii<this.states.size(); ii++) {
@@ -260,11 +276,11 @@ public class HelicitySequence implements Comparator<HelicityState> {
     }
 
     /**
-     * Get the timestamp of a state in the sequence.
-     * @param index = the index of the state
+     * Get the TI-timestamp of a state in the sequence.
+     * @param index the index of the state
      * @return the timestamp of the state
      */
-    private long getTimestamp(int index) {
+    public long getTimestamp(int index) {
         return this.states.get(index).getTimestamp();
     }
 

@@ -31,19 +31,6 @@ public final class HelicityGenerator {
 
     public HelicityGenerator(){}
 
-    public void reset() {
-        this.states.clear();
-        this.register=0;
-    }
-
-    public int size() {
-        return this.states.size();
-    }
-
-    public boolean initialized() {
-        return this.states.size() >= REGISTER_SIZE;
-    }
-
     /**
      * Get the next bit in the sequence.
      * Requires initialized()==true.
@@ -75,13 +62,43 @@ public final class HelicityGenerator {
     }
 
     /**
+     * Reset the generator, clearing all added states, in order to
+     * reuse this {@link HelicityGenerator} for a new sequence.
+     */
+    public void reset() {
+        this.states.clear();
+        this.register=0;
+    }
+
+    /**
+     * Test whether the generator is sufficiently initialized such that
+     * {@link getState(int)} method can be called, based on whether the
+     * number of added states is at least {@link REGISTER_SIZE}.
+     *
+     * @return whether the sequence is initialized
+     */
+    public boolean initialized() {
+        return this.states.size() >= REGISTER_SIZE;
+    }
+
+    /**
+     * Get the number of states currently in the generator's sequence.
+     * 
+     * @return size 
+     */
+    public int size() {
+        return this.states.size();
+    }
+    
+    /**
      * Let the user add a state to initialize the sequence.
      * 
-     * This must be the first helicity state in the next pattern.
-     * 
-     * Requires initialized()==false and a defined HelicityBit.
+     * This must be the first helicity state in the next pattern.  States
+     * must be added serially and without skipped patterns.  Requires 
+     * {@link initialized} is false and a defined HelicityBit, else throws
+     * an exception..
      *
-     * @param bit = the HelicityBit to add to the sequence.  This must
+     * @param bit the HelicityBit to add to the sequence.  This must
      * be the raw helicity, e.g. HelicityState.getHelicityRaw(), not the
      * HWP-corrected version.
      */
@@ -96,21 +113,24 @@ public final class HelicityGenerator {
     /**
      * Let the user add a state to initialize the sequence.
      * 
-     * This must be the first helicity state in the next pattern.
-     * 
-     * Requires initialized()==false and a defined HelicityState.
+     * This just calls {@link #addState(HelicityBit)} with the raw
+     * {@link #HelicityBit} from the given {@link #HelicityState}.
      *
-     * @param state = the HelicityState to add to the sequence.
+     * This must be the first helicity state in the next pattern.  States
+     * must be added serially and without skipped patterns.  Requires
+     * {@link initialized} is false and a defined {@link #HelicityState}.
+     * 
+     * @param state the HelicityState to add to the sequence.
      */
     public void addState(HelicityState state) {
         this.addState(state.getHelicityRaw());
     }
-    
+   
     /**
      * Get the nth state in the sequence.
      * Requires initialized()==true.
      *
-     * @param n = number of states after the first one.
+     * @param n number of states after the first one.
      * @return the nth HelicityBit in the sequence.
      */
     public HelicityBit getState(final int n) {

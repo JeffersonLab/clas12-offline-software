@@ -7,12 +7,14 @@ package org.jlab.clas.swimtools;
 
 import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKuttaException;
+import cnuphys.swim.SwimResult;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.util.Plane;
 import cnuphys.swimZ.SwimZException;
 import cnuphys.swimZ.SwimZResult;
 import cnuphys.swimZ.SwimZStateVector;
 import org.apache.commons.math3.util.FastMath;
+import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
 /**
@@ -36,8 +38,8 @@ public class Swim {
 
     final double SWIMZMINMOM = 0.75; // GeV/c
     final double MINTRKMOM = 0.05; // GeV/c
-    final double accuracy = 20e-6; // 20 microns
-    final double stepSize = 5.00 * 1.e-4; // 500 microns
+    public double accuracy = 20e-6; // 20 microns
+    public double stepSize = 5.00 * 1.e-4; // 500 microns
 
     private ProbeCollection PC;
     
@@ -163,6 +165,35 @@ public class Swim {
 
     }
 
+    /**
+      * 
+      * @param xcm
+      * @param ycm
+      * @param zcm
+      * @param phiDeg
+      * @param thetaDeg
+      * @param p
+      * @param charge
+      * @param maxPathLength
+      * @param Accuracy
+      * @param StepSize
+      */
+    public void SetSwimParameters(double xcm, double ycm, double zcm, double phiDeg, double thetaDeg, double p,
+                     int charge, double maxPathLength, double Accuracy, double StepSize) {
+
+          _maxPathLength = maxPathLength;
+          accuracy = Accuracy/100;
+          stepSize = StepSize/100;
+         _charge = charge;
+         _phi = phiDeg;
+         _theta = thetaDeg;
+         _pTot = p;
+         _x0 = xcm / 100;
+         _y0 = ycm / 100;
+         _z0 = zcm / 100;
+
+    }
+     
     public double[] SwimToPlaneTiltSecSys(int sector, double z_cm) {
         double z = z_cm / 100; // the magfield method uses meters
         double[] value = new double[8];
@@ -419,6 +450,42 @@ public class Swim {
 
     }
 
+     /**
+      * 
+      * @param radius
+      * @return state  x,y,z,px,py,pz, pathlength, iBdl at the surface 
+      */
+     public double[] SwimRho(double radius)  {
+
+          double[] value = new double[8];
+
+          // using adaptive stepsize
+         if(this.SwimUnPhys)
+             return null;
+
+          try {
+
+              SwimResult result = new SwimResult(6);
+
+              PC.CF.swimRho(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, radius/100, accuracy, _rMax, stepSize, cnuphys.swim.Swimmer.CLAS_Tolerance, result);
+
+              value[0] = result.getUf()[0] * 100; // convert back to cm
+             value[1] = result.getUf()[1] * 100; // convert back to cm
+             value[2] = result.getUf()[2] * 100; // convert back to cm
+             value[3] = result.getUf()[3] * _pTot; // normalized values
+             value[4] = result.getUf()[4] * _pTot;
+             value[5] = result.getUf()[5] * _pTot;
+             value[6] = result.getFinalS() * 100;
+             value[7] = 0; // Conversion from kG.m to T.cm
+
+ 
+          } catch (RungeKuttaException e) {
+                 e.printStackTrace();
+         }
+         return value;
+
+      }
+    
     private class SphericalBoundarySwimStopper implements IStopper {
 
         private double _finalPathLength = Double.NaN;
@@ -632,55 +699,105 @@ public class Swim {
         } catch (RungeKuttaException e) {
                 e.printStackTrace();
         }
-
-//		PlaneBoundarySwimStopper stopper = new PlaneBoundarySwimStopper(d, n, dir);
-
-        // this is a uniform stepsize swimmer (dph)
-//		st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, 0.0005);
-//		st.computeBDL(PC.CP);
-//		// st.computeBDL(compositeField);
-//
-//		double[] lastY = st.lastElement();
-//
-//		value[0] = lastY[0] * 100; // convert back to cm
-//		value[1] = lastY[1] * 100; // convert back to cm
-//		value[2] = lastY[2] * 100; // convert back to cm
-//		value[3] = lastY[3] * _pTot; // normalized values
-//		value[4] = lastY[4] * _pTot;
-//		value[5] = lastY[5] * _pTot;
-//		value[6] = lastY[6] * 100;
-//		value[7] = lastY[7] * 10; // Conversion from kG.m to T.cm
-//
-//		double tv1 = Math.abs(tvalue[0]);
-//		double v1 = Math.abs(value[0]);
-//
-//		double fract = (Math.abs(tv1 - v1) / Math.max(tv1, v1));
-//		if (fract > 0.9) {
-//			System.out.println("\nBig Diff fract = " + fract + "   direction = " + dir + "   DIST = " + d);
-//
-//			double vtxR = Math.sqrt(_x0 * _x0 + _y0 * _y0 + _z0 * _z0);
-//			System.out.println("VTX: (" + _x0 + ", " + _y0 + ", " + _z0 + ") VtxR: " + vtxR + "   P: " + _pTot
-//					+ "  theta: " + _theta + "  phi: " + _phi);
-//
-//			printV("tV", tvalue);
-//			printV(" V", value);
-//			// System.out.println("tV: (" + tvalue[0]/100 + ", " + tvalue[1]/100
-//			// + ", " + tvalue[2]/100 + ")");
-//			// System.out.println(" V: (" + value[0]/100 + ", " + value[1]/100 +
-//			// ", " + value[2]/100 + ")");
-//		}
-//
-//		// System.out.println();
-//		// for (int i = 0; i < 8; i++) {
-//		// System.out.print(String.format("%-8.5f ", value[i]));
-//		// }
-//		// System.out.println();
-
         return value;
 
     }
 
+     
+    /**
+     * Swim to any line
+     */
+    private class LineSwimStopper implements IStopper {
+
+        private double _finalPathLength = Double.NaN;
+
+        private double _xB;
+        private double _yB;
+        private double _zB;
+        private Vector3D _dir;
+        
+        double min = Double.POSITIVE_INFINITY;
+        Vector3D trk2Line = new Vector3D(min,min,min);
+        double thetaRad = Math.toRadians(_theta);
+        double phiRad = Math.toRadians(_phi);
+        double pz = _pTot * Math.cos(thetaRad);
+        private LineSwimStopper(double xB, double yB, double zB, Vector3D dir) {
+                // DC reconstruction units are cm. Swim units are m. Hence scale by
+                // 100
+                _xB = xB;
+                _yB = yB;
+                _zB = zB;
+                _dir = dir.asUnit();
+        }
+
+        @Override
+        public boolean stopIntegration(double t, double[] y) {
+                trk2Line.setXYZ(y[0]*100-_xB, y[1]*100-_yB, y[2]*100-_zB);
+                double r = trk2Line.cross(_dir).mag();
+                if(r<min && y[2]<2.0) //start at about 2 meters before target.  Avoid inbending stopping when P dir changes
+                    min = r; 
+                return (r > min );
+
+        }
+
+        /**
+         * Get the final path length in meters
+         *
+         * @return the final path length in meters
+         */
+        @Override
+        public double getFinalT() {
+                return _finalPathLength;
+        }
+
+        /**
+         * Set the final path length in meters
+         *
+         * @param finalPathLength
+         *            the final path length in meters
+         */
+        @Override
+        public void setFinalT(double finalPathLength) {
+                _finalPathLength = finalPathLength;
+        }
+        public double getDocaToLine() {
+            return min;
+        }
+    }
     
+    public double[] SwimToLine(double xB, double yB, double zB, Vector3D dir) {
+
+        double[] value = new double[9];
+        
+        if(this.SwimUnPhys==true)
+            return null;
+        LineSwimStopper stopper = new LineSwimStopper(xB, yB, zB, dir);
+
+        SwimTrajectory st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize,
+                        0.0005);
+        if(st==null)
+            return null;
+        st.computeBDL(PC.CP);
+        // st.computeBDL(compositeField);
+
+        double[] lastY = st.lastElement();
+
+        value[0] = lastY[0] * 100; // convert back to cm
+        value[1] = lastY[1] * 100; // convert back to cm
+        value[2] = lastY[2] * 100; // convert back to cm
+        value[3] = lastY[3] * _pTot; // normalized values
+        value[4] = lastY[4] * _pTot;
+        value[5] = lastY[5] * _pTot;
+        value[6] = lastY[6] * 100;
+        value[7] = lastY[7] * 10; // Conversion from kG.m to T.cm
+        value[8] = stopper.getDocaToLine(); // in cm
+        return value;
+
+    }
+
+    /**
+     * Swim to Beam line assuming it is along z
+     */
     
     private class BeamLineSwimStopper implements IStopper {
 

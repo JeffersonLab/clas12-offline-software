@@ -6,9 +6,15 @@ import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
+import org.jlab.geom.base.ConstantProvider;
+import org.jlab.geom.base.Detector;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
@@ -35,6 +41,8 @@ public class CVTReconstruction extends ReconstructionEngine {
 
     org.jlab.rec.cvt.svt.Geometry SVTGeom;
     org.jlab.rec.cvt.bmt.Geometry BMTGeom;
+    CTOFGeant4Factory CTOFGeom;
+    Detector          CNDGeom ;
     SVTStripFactory svtIdealStripFactory;
     
     public CVTReconstruction() {
@@ -123,7 +131,7 @@ public class CVTReconstruction extends ReconstructionEngine {
 	@Override
     public boolean processDataEvent(DataEvent event) {
 		
-        CVTRecHandler recHandler = new CVTRecHandler(SVTGeom,BMTGeom);
+        CVTRecHandler recHandler = new CVTRecHandler(SVTGeom,BMTGeom,CTOFGeom,CNDGeom);
         setRunConditionsParameters(event, this.getFieldsConfig(), this.getRun(), false, "");            
         double shift = org.jlab.rec.cvt.Constants.getZoffset();
         
@@ -169,9 +177,8 @@ public class CVTReconstruction extends ReconstructionEngine {
         cp = SVTConstants.connect( cp );
         SVTConstants.loadAlignmentShifts( cp );
         cp.disconnect();    
-        this.setSVTDB(cp);
-        
-       
+        this.setSVTDB(cp);       
+               
         //TrkSwimmer.getMagneticFields();
         return true;
     }
@@ -188,6 +195,11 @@ public class CVTReconstruction extends ReconstructionEngine {
         //cp.disconnect();    
         //this.setSVTDB(cp);
         
+        // Load other geometries
+        String variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, 11, variationName);
+        CTOFGeom = new CTOFGeant4Factory(providerCTOF);        
+        CNDGeom =  GeometryFactory.getDetector(DetectorType.CND, 11, variationName);
         
         //TrkSwimmer.getMagneticFields();
         return true;
