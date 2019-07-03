@@ -6,7 +6,7 @@
     "info": "reconstructed RTPC hits",
     "items": [
        {"name":"TID",        "type":"I", "info":"Track ID of the hit"},
-       {"name":"cellID",     "type":"I,  "info":"cell id"},
+       {"name":"cellID",     "type":"I",  "info":"cell id"},
        {"name":"time",       "type":"F", "info":"Time (ns)"},
        {"name":"posX",       "type":"F", "info":"x pos (cm)"},
        {"name":"posY",       "type":"F", "info":"y pos (cm)"},
