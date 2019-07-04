@@ -71,7 +71,7 @@ public class EBio {
             case 2 : bankName = "TimeBasedTrkg::TBTracks"; break;
             default: break;
         }
-        List<DetectorParticle> dpList = new ArrayList<DetectorParticle>();
+        List<DetectorParticle> dpList = new ArrayList<>();
     
         if(event.hasBank(bankName)==true){
             EvioDataBank bank = (EvioDataBank) event.getBank(bankName);
@@ -82,8 +82,6 @@ public class EBio {
                 
                 DetectorParticle p = new DetectorParticle();
                 
-                //int trStatus = bank.getInt("status", i);
-                //p.setStatus(100+10*trStatus);
                 p.vector().setXYZ(
                         bank.getDouble("p0_x",i),
                         bank.getDouble("p0_y",i),
@@ -110,7 +108,6 @@ public class EBio {
                         bank.getDouble("c1_uy", i),
                         bank.getDouble("c1_uz", i)
                 );         
-                //   System.out.println(p.getLowerCross());
                 p.setPath(bank.getDouble("pathlength", i));
                 p.setCharge(bank.getInt("q", i));
                 dpList.add(p);
@@ -121,12 +118,11 @@ public class EBio {
     
     
     public static List<DetectorParticle>  readCentralTracks(DataEvent event){
-        List<DetectorParticle> dpList = new ArrayList<DetectorParticle>();
+        List<DetectorParticle> dpList = new ArrayList<>();
         if(event.hasBank("CVTRec::Tracks")==true){
             EvioDataBank bank = (EvioDataBank) event.getBank("CVTRec::Tracks");
             int nrows = bank.rows();
             for(int i = 0; i < nrows; i++){
-                double p = bank.getDouble("p", i);
                 double pt = bank.getDouble("pt", i);
                 double phi0 = bank.getDouble("phi0", i);
                 double tandip = bank.getDouble("tandip", i);
@@ -134,7 +130,6 @@ public class EBio {
                 double d0 = bank.getDouble("d0", i);
                 
                 DetectorParticle part = new DetectorParticle();
-                //part.setStatus(200);
                 double pz = pt*tandip;
                 double py = pt*Math.sin(phi0);
                 double px = pt*Math.cos(phi0);
@@ -154,7 +149,6 @@ public class EBio {
     public static boolean isTimeBased(DataEvent de){
         boolean tb = false;
         if(de.hasBank("TimeBasedTrkg::TBHits")==true){
-            //de.show();
             return true;
         }
         return tb;
@@ -189,7 +183,6 @@ public class EBio {
             
             DetectorParticle p = particles.get(i);
             
-            //bank.setInt("status", i, p.getStatus());
             bank.setInt("charge", i, p.getCharge());
             bank.setInt("pid", i, p.getPid());
             
@@ -275,7 +268,7 @@ public class EBio {
     }
     
     public static List<DetectorResponse> readECAL(DataEvent event){
-        List<DetectorResponse> ecal = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> ecal = new ArrayList<>();
         if(event.hasBank("ECDetector::clusters")==true){
             EvioDataBank bank = (EvioDataBank) event.getBank("ECDetector::clusters");
             int nrows = bank.rows();
@@ -298,7 +291,7 @@ public class EBio {
     }
     
     public static List<DetectorResponse>  readFTOF(DataEvent event){
-        List<DetectorResponse> ftof = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> ftof = new ArrayList<>();
         if(event.hasBank("FTOFRec::ftofhits")==true){
             EvioDataBank bank = (EvioDataBank) event.getBank("FTOFRec::ftofhits");
             int nrows = bank.rows();
@@ -324,7 +317,7 @@ public class EBio {
     }
     
     public static List<CherenkovResponse> readHTCC(DataEvent event) {
-        List<CherenkovResponse> htcc = new ArrayList<CherenkovResponse>();
+        List<CherenkovResponse> htcc = new ArrayList<>();
         if(event.hasBank("HTCCRec::clusters")==true){
             
             EvioDataBank bank = (EvioDataBank) event.getBank("HTCCRec::clusters");

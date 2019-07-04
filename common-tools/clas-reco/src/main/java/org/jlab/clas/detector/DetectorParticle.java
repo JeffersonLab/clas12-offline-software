@@ -3,8 +3,6 @@ package org.jlab.clas.detector;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.List;
 
 import org.jlab.clas.physics.Particle;
@@ -45,15 +43,15 @@ public class DetectorParticle implements Comparable {
     
     private DetectorParticleStatus particleStatus = new DetectorParticleStatus();
 
-    private Vector3 particleCrossPosition  = new Vector3();
-    private Vector3 particleCrossDirection = new Vector3();
+    private final Vector3 particleCrossPosition  = new Vector3();
+    private final Vector3 particleCrossDirection = new Vector3();
   
     // let multiple particles share the same hit for these detectors:
     private final DetectorType[] sharedDetectors = {DetectorType.FTOF,DetectorType.CTOF};
     
-    private Line3D  driftChamberEnter = new Line3D();
+    private final Line3D  driftChamberEnter = new Line3D();
     
-    private List<DetectorResponse> responseStore = new ArrayList<DetectorResponse>();
+    private final List<DetectorResponse> responseStore = new ArrayList<>();
 
     private DetectorTrack detectorTrack = null;
     
@@ -143,16 +141,9 @@ public class DetectorParticle implements Comparable {
         this.responseStore.add(res);
         if(match==true){
             Line3D distance = this.getDistance(res);
-            
             res.getMatchedPosition().setXYZ(
                     distance.midpoint().x(),
                     distance.midpoint().y(),distance.midpoint().z());
-            
-            /*Vector3D vec = new Vector3D(
-                    this.particleCrossPosition.x(),
-                    particleCrossPosition.y(),
-                    particleCrossPosition.z());
-            */
             res.setPath(this.getPathLength(res.getPosition()));
         }
     }
@@ -272,7 +263,6 @@ public class DetectorParticle implements Comparable {
         return this.getSector(DetectorType.ECAL,1);
     }
 
-
     /**
      * returns chi2 of score.
      * @return 
@@ -359,9 +349,6 @@ public class DetectorParticle implements Comparable {
     
     public Path3D getTrajectory(){
         Path3D  path = new Path3D();
-        //path.addPoint(this.particleCrossPosition.x(), 
-        //        this.particleCrossPosition.y()
-        //        , this.particleCrossPosition.z());
         path.generate(
                 this.particleCrossPosition.x(),
                 this.particleCrossPosition.y(),
@@ -381,15 +368,11 @@ public class DetectorParticle implements Comparable {
     public double   getPathLength(){ return detectorTrack.getPath();}
     public int      getCharge(){ return detectorTrack.getCharge();}
     
-    
-    
     public double   getPathLength(DetectorType type){
         DetectorResponse response = this.getHit(type);
         if(response==null) return -1.0;
         return this.getPathLength(response.getPosition());
     }
-    
-    
     
     public double   getPathLength(Vector3D vec){
         return this.getPathLength(vec.x(), vec.y(), vec.z());
@@ -412,7 +395,6 @@ public class DetectorParticle implements Comparable {
         if(response==null) return -1.0;
         return response.getTime();
     }
-
     
     public double getEnergyFraction(DetectorType type){
         double energy = this.getEnergy(type);
@@ -496,7 +478,6 @@ public class DetectorParticle implements Comparable {
     
     public double getMass2(DetectorType type,int layer, double startTime){
         double beta   = this.getBeta(type,layer,startTime);
-        double energy = this.getEnergy(type);
         double mass2  = this.detectorTrack.getVector().mag2()/(beta*beta) 
                 - this.detectorTrack.getVector().mag2();
         return mass2;
@@ -504,7 +485,6 @@ public class DetectorParticle implements Comparable {
     
     public double getMass2(DetectorType type,double startTime){
         double beta   = this.getBeta(type,startTime);
-        double energy = this.getEnergy(type);
         double mass2  = this.detectorTrack.getVector().mag2()/(beta*beta) 
                 - this.detectorTrack.getVector().mag2();
         return mass2;
@@ -512,7 +492,6 @@ public class DetectorParticle implements Comparable {
     
     public double getMass2(DetectorType type){
         double beta   = this.getBeta(type);
-        double energy = this.getEnergy(type);
         double mass2  = this.detectorTrack.getVector().mag2()/(beta*beta) 
                 - this.detectorTrack.getVector().mag2();
         return mass2;
@@ -544,7 +523,6 @@ public class DetectorParticle implements Comparable {
 
         boolean hitSharing=false;
         for (int ii=0; ii<sharedDetectors.length && this.getCharge()!=0; ii++) {
-        //for (int ii=0; ii<sharedDetectors.length; ii++) {
             if (type == sharedDetectors[ii]) {
                 hitSharing=true;
                 break;

@@ -24,7 +24,7 @@ public class DetectorData {
      * @return 
      */
     public static List<DetectorResponse>  readDetectorResponses(DataEvent event, String bank_name){
-        List<DetectorResponse>  responses = new ArrayList<DetectorResponse>();
+        List<DetectorResponse>  responses = new ArrayList<>();
         if(event.hasBank(bank_name)==true){
             DataBank bank = event.getBank(bank_name);
 
@@ -63,7 +63,7 @@ public class DetectorData {
      * @return 
      */
     public static List<DetectorParticle>  readDetectorParticles(DataEvent event, String bank_name){
-        List<DetectorParticle>  particles = new ArrayList<DetectorParticle>();
+        List<DetectorParticle>  particles = new ArrayList<>();
         if(event.hasBank(bank_name)==true){
             DataBank bank = event.getBank(bank_name);
             int nrows = bank.rows();
@@ -472,7 +472,7 @@ public class DetectorData {
    
    public static List<DetectorTrack>  readDetectorTracks(DataEvent event, String bank_name, String traj_bank_name, String cov_bank_name){
        
-       List<DetectorTrack>  tracks = new ArrayList<DetectorTrack>();
+       List<DetectorTrack>  tracks = new ArrayList<>();
        if(event.hasBank(bank_name)==true){
            DataBank bank = event.getBank(bank_name);
            int nrows = bank.rows();
@@ -557,7 +557,7 @@ public class DetectorData {
        // these are ordered by index (1,2,3,4,5):
        final String[] covVarNames={"d0","phi0","rho","z0","tandip"};
        
-       List<DetectorTrack>  tracks = new ArrayList<DetectorTrack>();
+       List<DetectorTrack>  tracks = new ArrayList<>();
        if(event.hasBank(bank_name)==true){
            DataBank bank = event.getBank(bank_name);
            int nrows = bank.rows();
@@ -641,7 +641,7 @@ public class DetectorData {
    }
    
    public static List<DetectorParticle>  readForwardTaggerParticles(DataEvent event, String bank_name){
-        List<DetectorParticle>  particles = new ArrayList<DetectorParticle>();
+        List<DetectorParticle>  particles = new ArrayList<>();
         if(event.hasBank(bank_name)==true){
             DataBank bank = event.getBank(bank_name);
             int nrows = bank.rows();
@@ -671,13 +671,13 @@ public class DetectorData {
     }
    
    public static List<Map<DetectorType,Integer>>  readForwardTaggerIndex(DataEvent event, String bank_name){
-        List<Map<DetectorType, Integer>>  indexmaps = new ArrayList<Map<DetectorType, Integer>>();
+        List<Map<DetectorType, Integer>>  indexmaps = new ArrayList<>();
         if(event.hasBank(bank_name)==true){
             DataBank bank = event.getBank(bank_name);
             int nrows = bank.rows();
 
             for(int row = 0; row < nrows; row++){
-                Map<DetectorType, Integer> particleFT_indices = new HashMap<DetectorType, Integer>();
+                Map<DetectorType, Integer> particleFT_indices = new HashMap<>();
                 int calID  = bank.getShort("calID", row);
                 int hodoID = bank.getShort("hodoID" , row);
                 particleFT_indices.put(DetectorType.FTCAL, calID);

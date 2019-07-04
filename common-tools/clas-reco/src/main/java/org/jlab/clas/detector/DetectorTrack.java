@@ -56,7 +56,7 @@ public class DetectorTrack implements Comparable {
     private Vector3 trackVertex = new Vector3();
 
     private float[][] covMatrix = new float[5][5];
-    private List<Line3D> trackCrosses = new ArrayList<Line3D>();
+    private List<Line3D> trackCrosses = new ArrayList<>();
   
     private List<TrajectoryPoint> trajectory = new ArrayList<>();
     
@@ -228,7 +228,8 @@ public class DetectorTrack implements Comparable {
     public Line3D getLastCross(){
         return this.trackCrosses.get(this.trackCrosses.size()-1);
     }
-    
+   
+    @Override
     public int compareTo(Object o) {
         DetectorTrack other = (DetectorTrack) o;
         if (this.getVector().mag() == other.getVector().mag()) return 0;

@@ -53,6 +53,7 @@ public class EBEngine extends ReconstructionEngine {
         //Initialize bank names
     }
 
+    @Override
     public boolean processDataEvent(DataEvent de) {
         throw new RuntimeException("EBEngine cannot be used directly.  Use EBTBEngine/EBHBEngine instead.");
     }
