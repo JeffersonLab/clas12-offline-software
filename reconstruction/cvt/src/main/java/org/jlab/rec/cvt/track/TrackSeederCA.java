@@ -428,8 +428,7 @@ public class TrackSeederCA {
     List<Cross> BMTCrossesC = new ArrayList<Cross>();
     List<Cross> BMTCrossesZ = new ArrayList<Cross>();
     List<Cross> SVTCrosses = new ArrayList<Cross>();
-    float b[] = new float[3];
-
+   
     public Track fitSeed(List<Cross> VTCrosses, int fitIter, boolean originConstraint, Swim swimmer) {
     	return fitSeed( VTCrosses,null,fitIter,originConstraint, swimmer);
     }
@@ -554,7 +553,7 @@ public class TrackSeederCA {
             cand.addAll(BMTCrossesC);
             cand.addAll(BMTCrossesZ);
             
-            cand.set_HelicalTrack(fitTrk.get_helix(), swimmer, b);
+            cand.set_HelicalTrack(fitTrk.get_helix(), swimmer);
             if( X.size()>3 )
             	cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]/(X.size()-3));
             else 
