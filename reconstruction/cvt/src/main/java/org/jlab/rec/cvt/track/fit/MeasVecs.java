@@ -189,78 +189,53 @@ public class MeasVecs {
     public double[] H(StateVec stateVec, StateVecs sv, org.jlab.rec.cvt.svt.Geometry sgeo, 
             org.jlab.rec.cvt.bmt.Geometry bgeo, int type, Swim swimmer) {
         StateVec SVplus = null;// = new StateVec(stateVec.k);
-        StateVec SVminus = null;// = new StateVec(stateVec.k);
-        
+        double stateVec_Residual=this.Residual(stateVec, sgeo);
+               
         //d_rho derivative
         double delta_d_rho = 0.01;
         SVplus = this.reset(SVplus, stateVec, sv);
-        SVminus = this.reset(SVminus, stateVec, sv);
-
-        SVplus.d_rho = stateVec.d_rho + delta_d_rho / 2.;
-        SVminus.d_rho = stateVec.d_rho - delta_d_rho / 2.;
-        
+        SVplus.d_rho = stateVec.d_rho + delta_d_rho ;
         SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type, swimmer);
-        
-        SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type, swimmer);
-        
+                      
         double delta_m_drho = 0;
-        delta_m_drho = (this.Residual(SVplus, sgeo) - this.Residual(SVminus, sgeo))/ delta_d_rho;
+        delta_m_drho = (this.Residual(SVplus, sgeo) - stateVec_Residual)/ delta_d_rho;
                 
         //d_phi0 derivative	
         double delta_d_phi0 = Math.toRadians(0.025);
         SVplus = this.reset(SVplus, stateVec, sv);
-        SVminus = this.reset(SVminus, stateVec, sv);
-
-        SVplus.phi0 = stateVec.phi0 + delta_d_phi0 / 2.;
-        SVminus.phi0 = stateVec.phi0 - delta_d_phi0 / 2.;
-
+        SVplus.phi0 = stateVec.phi0 + delta_d_phi0;
         SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type, swimmer);
-        SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type, swimmer);
+        
 
         double delta_m_dphi0 = 0;
-       	delta_m_dphi0 = (this.Residual(SVplus, sgeo) - this.Residual(SVminus, sgeo)) / delta_d_phi0;
+       	delta_m_dphi0 = (this.Residual(SVplus, sgeo) - stateVec_Residual) / delta_d_phi0;
         
         //d_kappa derivative
         double delta_d_kappa = 0.01;
         SVplus = this.reset(SVplus, stateVec, sv);
-        SVminus = this.reset(SVminus, stateVec, sv);
-
-        SVplus.kappa = stateVec.kappa + delta_d_kappa / 2.;
-        SVminus.kappa = stateVec.kappa - delta_d_kappa / 2.;
-
+        SVplus.kappa = stateVec.kappa + delta_d_kappa;
         SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type, swimmer);
-        SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type, swimmer);
-
+        
         double delta_m_dkappa = 0;
-        delta_m_dkappa = (this.Residual(SVplus, sgeo) - this.Residual(SVminus, sgeo)) / delta_d_kappa;
+        delta_m_dkappa = (this.Residual(SVplus, sgeo) - stateVec_Residual) / delta_d_kappa;
                 
        //dz derivative
         double delta_d_dz = 0.1;
         SVplus = this.reset(SVplus, stateVec, sv);
-        SVminus = this.reset(SVminus, stateVec, sv);
-
-        SVplus.dz = stateVec.dz + delta_d_dz / 2.;
-        SVminus.dz = stateVec.dz - delta_d_dz / 2.;
-
+        SVplus.dz = stateVec.dz + delta_d_dz;
         SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type, swimmer);
-        SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type, swimmer);
-        
+                
         double delta_m_dz = 0;
-        delta_m_dz = (this.Residual(SVplus, sgeo) - this.Residual(SVminus, sgeo)) / delta_d_dz;
+        delta_m_dz = (this.Residual(SVplus, sgeo) - stateVec_Residual) / delta_d_dz;
         
         //dtanL derivative
         double delta_d_tanL = 0.01;
         SVplus = this.reset(SVplus, stateVec, sv);
-        SVminus = this.reset(SVminus, stateVec, sv);
-
-        SVplus.tanL = stateVec.tanL + delta_d_tanL / 2.;
-        SVminus.tanL = stateVec.tanL - delta_d_tanL / 2.;
-
+        SVplus.tanL = stateVec.tanL + delta_d_tanL;
         SVplus = sv.newStateVecAtModule(stateVec.k, SVplus, sgeo, bgeo, type, swimmer);
-        SVminus = sv.newStateVecAtModule(stateVec.k, SVminus, sgeo, bgeo, type, swimmer);
-
+        
         double delta_m_dtanL = 0;
-        delta_m_dtanL =  (this.Residual(SVplus, sgeo) - this.Residual(SVminus, sgeo))/ delta_d_tanL;
+        delta_m_dtanL =  (this.Residual(SVplus, sgeo) - stateVec_Residual)/ delta_d_tanL;
         
         double[] H = new double[]{-delta_m_drho, -delta_m_dphi0, -delta_m_dkappa, -delta_m_dz, -delta_m_dtanL};
         //Since residuals are m-h... you need the minus sign to compute the derivative of the projector wrt to track parameter.
