@@ -397,24 +397,9 @@ public class TrackSeederCA {
           seedCrosses.add( new ArrayList<Cross>() );
           int scsize = seedCrosses.size();
           // add svt
-          for( Cross c : svtcrs ){
-            int l1 = c.get_Cluster1().get_Layer();
-            int s1 = c.get_Cluster1().get_Sector();
-            double c1 = c.get_Cluster1().get_Centroid();
-            double r1 = org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(l1-1)/2][(l1-1)%2];
-            double nstr1 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r1 - b)/m, l1, s1);
-
-                      
-            if( Math.abs( c1 - nstr1 ) < 25 ) {	   
-              seedCrosses.get(scsize-1).add(c);
-            }
-            else {
-//            	System.out.println( " ELIMINATED cross " + c + " ||   " + c1 + "   " + nstr1 );
-            }
-          }
-
-
-            // add bmt z
+          for( Cross c : svtcrs ) seedCrosses.get(scsize-1).add(c);
+          
+          // add bmt z
           for( Cross c : xycross ){
             if( c.get_Detector().equalsIgnoreCase("BMT")){
               seedCrosses.get(scsize-1).add(c); 
