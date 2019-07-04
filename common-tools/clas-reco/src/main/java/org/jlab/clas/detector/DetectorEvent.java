@@ -197,8 +197,14 @@ public class DetectorEvent {
         this.addParticle(particle);
     }
     
-
-    
+    public DetectorParticle getTriggerParticle() {
+        for (int ii=0; ii<particleList.size(); ii++) {
+            if (particleList.get(ii).isTriggerParticle()) {
+                return particleList.get(ii);
+            }
+        }
+        return null;
+    }
     
     @Override
     public String toString(){

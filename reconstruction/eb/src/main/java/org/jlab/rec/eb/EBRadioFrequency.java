@@ -21,32 +21,40 @@ public class EBRadioFrequency {
     private ArrayList<rfSignal> rfSignals = new ArrayList<rfSignal>();
     private double rfTime = -100;
    
-    private final boolean doVzCorrection = false;
-    
     public EBRadioFrequency(EBCCDBConstants ccdb) {
         this.ccdb=ccdb;
     }
 
-    public double  getStartTime(DetectorParticle p,final DetectorType type,final int layer) {
+    /**
+     * new-style start time, based on one particle's vertex time (the trigger
+     * particle) and another's z-vertex (e.g. the hadron) 
+     * @param p the particle with which to determine the vertex time (e.g. the trigger particle)
+     * @param type type of detector to use for p's timing info
+     * @param layer layer of detector to use for p's timing info
+     * @param vz the z-vertex to use for the correction
+     * @return 
+     */
+    public double  getStartTime(DetectorParticle p,final DetectorType type,final int layer,final double vz) {
         final double tgpos = this.ccdb.getDouble(EBCCDBEnum.TARGET_POSITION);
         final double rfBucketLength = this.ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH);
-
-        final double pathLength = p.getPathLength(type,layer);
-        final double time = p.getTime(type,layer);
-
-        final double tof = pathLength/PhysicsConstants.speedOfLight()/p.getBeta();
-        final double vertexTime = time - tof;
-
-        final double vzCorr = doVzCorrection ?
-                (tgpos - p.vertex().z()) / PhysicsConstants.speedOfLight() :
-                0.0;
-
+        final double vertexTime = p.getVertexTime(type,layer,p.getPid());
+        final double vzCorr = (tgpos - vz) / PhysicsConstants.speedOfLight();
         final double deltatr = - vertexTime - vzCorr
                 + this.rfTime + this.ccdb.getDouble(EBCCDBEnum.RF_OFFSET)
                 + (EBConstants.RF_LARGE_INTEGER+0.5)*rfBucketLength;
         final double rfCorr = deltatr % rfBucketLength - rfBucketLength/2;
-
         return vertexTime + rfCorr;
+    }
+  
+    /**
+     * "traditional" start time, based only on one particle
+     * @param p the particle with which to determine the start time
+     * @param type type of detector to use for timing info
+     * @param layer layer of detector to use for timing info
+     * @return RF-corrected start time
+     */
+    public double  getStartTime(DetectorParticle p,final DetectorType type,final int layer) {
+        return this.getStartTime(p,type,layer,p.vertex().z());
     }
     
     public double getTime(DataEvent event) {
