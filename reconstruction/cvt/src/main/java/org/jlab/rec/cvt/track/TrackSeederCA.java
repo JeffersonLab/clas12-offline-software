@@ -341,7 +341,7 @@ public class TrackSeederCA {
         for( Cross c : xycross ){
           if( c.get_Detector().equalsIgnoreCase("BMT")){
         	  sector = c.get_Sector();
-        	  minTime += c.get_Cluster1().get_Tmax();
+        	  minTime += c.get_Cluster1().get_Tmin();
         	  nBMTxy += 1;
           }
           else {

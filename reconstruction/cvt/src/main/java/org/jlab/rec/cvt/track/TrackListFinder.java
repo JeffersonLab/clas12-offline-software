@@ -151,12 +151,12 @@ public class TrackListFinder {
                 this.getOverlapLists(trkcands.get(i), trkcands, list); //Compare trkcands.get(i) with all tracks to find overlaps... list must contains at least trkcands.get(i)
                 
                 Track selectedTrk = this.FindBestTrack(list); //Return the best track among the candidates. If only trkcands.get(i) in list, it will return trkcands.get(i)
-                if(selectedTrk==null&&list.size()>0)
-                    System.out.println("Houston... there is a problem with FindBestTrack in removeOverlappingTracks");
+               
+                if(selectedTrk==null&&list.size()>0) System.out.println("Houston... there is a problem with FindBestTrack in removeOverlappingTracks");
                 
                 if(selectedTracks.contains(selectedTrk)==false)
                         selectedTracks.add(selectedTrk);
-                
+               
                 list.remove(selectedTrk);
 
                 for( Track t : list ) {
@@ -164,9 +164,6 @@ public class TrackListFinder {
                 }
 
             }
-            
-            if( rejected != null )
-            	selectedTracks.removeAll(rejected);
            
             if(trkcands!=null)
                 trkcands.removeAll(trkcands);
