@@ -92,23 +92,6 @@ public class EBio {
                         bank.getDouble("Vtx0_y",i),
                         bank.getDouble("Vtx0_z",i));
                 
-                p.setCross( 
-                        bank.getDouble("c3_x", i),
-                        bank.getDouble("c3_y", i),
-                        bank.getDouble("c3_z", i),
-                        bank.getDouble("c3_ux", i),
-                        bank.getDouble("c3_uy", i),
-                        bank.getDouble("c3_uz", i)
-                );
-                p.setLowerCross(
-                        bank.getDouble("c1_x", i),
-                        bank.getDouble("c1_y", i),
-                        bank.getDouble("c1_z", i),
-                        bank.getDouble("c1_ux", i),
-                        bank.getDouble("c1_uy", i),
-                        bank.getDouble("c1_uz", i)
-                );         
-                p.setPath(bank.getDouble("pathlength", i));
                 p.setCharge(bank.getInt("q", i));
                 dpList.add(p);
             }

@@ -99,28 +99,6 @@ public class DetectorResponse {
         }
     }
     
-    public Line3D  getDistance(DetectorParticle particle){
-        Path3D  trajectory = particle.getTrajectory();
-        return trajectory.distance(hitPosition.x(),hitPosition.y(),hitPosition.z());
-    }
-    
-    public int  getParticleMatch(DetectorEvent event){
-        
-        double  distance = 1000.0;
-        int     index    = -1;
-        
-        int nparticles = event.getParticles().size();
-        for(int p = 0; p < nparticles; p++){
-            DetectorParticle  particle = event.getParticles().get(p);
-            Line3D distanceLine = this.getDistance(particle);
-            if(distanceLine.length()<distance){
-                distance = distanceLine.length();
-                index    = p;
-            }
-        }
-        return index;
-    }
-    
     /**
      * reads DetectorResponse List from DataEvent class. it has to contain
      * branches:

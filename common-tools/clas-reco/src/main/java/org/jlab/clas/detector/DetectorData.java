@@ -448,22 +448,6 @@ public class DetectorData {
        return bank;
    }
 
-   public static DataBank getCrossBank(List<DetectorParticle> particles, DataEvent event, String bank_name) {
-       DataBank bank = event.createBank(bank_name, particles.size());
-       for(int row = 0 ; row < particles.size(); row++){
-           DetectorParticle p = particles.get(row);
-           bank.setShort("pindex", row, (short) row);
-           bank.setFloat("c_x", row, (float) p.getCross().x());
-           bank.setFloat("c_y", row, (float) p.getCross().y());
-           bank.setFloat("c_z", row, (float) p.getCross().z());
-           bank.setFloat("c_ux", row, (float) p.getCrossDir().x());
-           bank.setFloat("c_uy", row, (float) p.getCrossDir().y());
-           bank.setFloat("c_uz", row, (float) p.getCrossDir().z());
-
-       }
-       return bank;
-   }
-      
    public static Vector3D  readVector(DataBank bank, int row, String xc, String yc, String zc){
        Vector3D vec = new Vector3D();
        vec.setXYZ(bank.getFloat(xc, row), bank.getFloat(yc, row),bank.getFloat(zc, row));
