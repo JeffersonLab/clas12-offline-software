@@ -50,12 +50,13 @@ public class StateVecs {
         kVec.x=InitialPos.x();
         kVec.y=InitialPos.y();
         kVec.z=InitialPos.z();
+        Vector3D temp;
         
     	if (k>0) {        
     		if (Layer.get(k)>6) csPoint=bmt_geo.getRefinedIntersection(kHelix, Layer.get(k)-6, Sector.get(k));
     		else csPoint=svt_geo.getRefinedIntersection(kHelix, Layer.get(k), Sector.get(k));
     			
-    		Vector3D temp=kHelix.getHelixPoint(csPoint);	
+    		temp=kHelix.getHelixPoint(csPoint);	
     		Vector3D labpos=new Vector3D(temp.x(), temp.y(), temp.z());
     		Vector3D detpos;
     		if (type>0) {
@@ -70,13 +71,13 @@ public class StateVecs {
     	}
     	else {
     		csPoint=kHelix.getCurvAbsForPCAToPoint(new Vector3D(org.jlab.rec.cvt.Constants.getXb(),org.jlab.rec.cvt.Constants.getYb(),0));
-    		Vector3D temp=kHelix.getHelixPoint(csPoint);
+    		temp=kHelix.getHelixPoint(csPoint);
     		kVec.x=temp.x();
     		kVec.y=temp.y();
     		kVec.z=temp.z();
     	}
 		
-        kVec.phi=Math.atan2(kVec.y-kHelix.ycen(), kVec.x-kHelix.xcen());
+        kVec.phi=Math.atan2(temp.y()-kHelix.ycen(), temp.x()-kHelix.xcen());
         Vector3D tempDir=kHelix.getHelixDir(csPoint);
         kVec.dirx=tempDir.x();
         kVec.diry=tempDir.y();
