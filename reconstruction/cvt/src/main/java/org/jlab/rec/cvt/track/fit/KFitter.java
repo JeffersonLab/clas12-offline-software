@@ -213,7 +213,7 @@ public class KFitter {
                 mv.measurements.get(k).error = V * V;
             }
            
-            excl_diff=mv.Residual(this.getStateVecExcludingSite(k,diff, sgeo, bgeo, swimmer),sgeo);//Important... V must be updated for SVT before calling getStateVecExcludingSite
+            if (org.jlab.rec.cvt.Constants.ExcludingSite) excl_diff=mv.Residual(this.getStateVecExcludingSite(k,diff, sgeo, bgeo, swimmer),sgeo);//Important... V must be updated for SVT before calling getStateVecExcludingSite
                        
                             
            
