@@ -74,7 +74,7 @@ public class DCEngine extends ReconstructionEngine {
         }
         
         //T2D Function
-        String T2Dfcn = this.getEngineConfigString("T2DFunc");
+        String T2Dfcn = this.getEngineConfigString("dcT2DFunc");
         
         if (T2Dfcn!=null) {
             System.out.println("["+this.getName()+"] run with time to distance function in tracking config chosen based on yaml = "+T2Dfcn);
