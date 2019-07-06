@@ -2617,6 +2617,8 @@ public class RICHTool{
             if(debugMode>=1)  System.out.format("find_intersection with SPHERICAL (%d, %d): %s\n",
                  inter.get_layer(), inter.get_component(), inter.get_pos().toStringBrief(2));
             return toVector3d(inter.get_pos());
+        }else{
+            if(debugMode>=1)  System.out.format("find NO intersection with SPHERICAL \n");
         }
 
         return null;

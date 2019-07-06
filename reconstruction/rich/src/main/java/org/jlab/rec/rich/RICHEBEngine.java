@@ -103,21 +103,20 @@ public class RICHEBEngine extends ReconstructionEngine {
         RICHPMTReconstruction rpmt = new RICHPMTReconstruction(richevent, tool, richio);
         RICHEventBuilder       reb = new RICHEventBuilder(richevent, tool, richio);
 
-        if(debugMode>=1){
-            System.out.println("---------------------------------");
-            System.out.println("RICH Engine call: "+Ncalls+" New Event Process "+reb.getEventID()+"\n");
-            System.out.println("---------------------------------");
-        }
-
 	/*
 	Initialize the RICH event
 	*/
         reb.init_Event(event);
         init_Event(event,richevent,tool);
 
+        if(debugMode>=1){
+            System.out.println("---------------------------------");
+            System.out.println("RICH Engine call: "+Ncalls+" New Event Process "+reb.getEventID()+"\n");
+            System.out.println("---------------------------------");
+        }
+
         // clear RICH output banks
         if(tool.get_Constants().REDO_RICH_RECO==1)richio.clear_Banks(event); // would be better to move all io operation here rather than passing richio around
-
 
 	/*
 	Process RICH signals to get hits and clusters

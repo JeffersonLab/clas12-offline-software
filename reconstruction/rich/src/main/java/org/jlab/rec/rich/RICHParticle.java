@@ -335,8 +335,10 @@ public class RICHParticle {
 
         if(debugMode>=1){
             System.out.println(" \n RICHParticle::set_points with OFFSETs\n");
-            System.out.println(" TRACK origin "+ori);
-            System.out.println(" TRACK impact "+impa);
+            System.out.println(" TRACK origin "+ ori);
+            System.out.println(" TRACK end    "+ end);
+            System.out.println(" RESP  impact "+impa);
+            System.out.println(" RESP  status "+status);
         }
         this.lab_origin = ori;
 
@@ -352,7 +354,7 @@ public class RICHParticle {
                 // status = 1 means a matching MAPMT cluster has been found, track pointing to MaPMT
                 this.meas_hit = tool.find_intersection_MAPMT(temp);
             }else{
-                // status != 1 means no matching cluster, track pointing to Mirror
+                // status != 1 means no matching cluster, track pointing to RICH 
                 this.meas_hit = tool.toVector3d(impa);
             }
         }

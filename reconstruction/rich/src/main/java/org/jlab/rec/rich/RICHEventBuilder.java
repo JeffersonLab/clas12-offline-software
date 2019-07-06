@@ -271,7 +271,7 @@ public class RICHEventBuilder{
                     int jtk = (int) rbank.getShort("index",j);
                     int jdet = (int) rbank.getByte("detector",j);
                     int jlay = (int) rbank.getByte("layer",j);
-                    if(debugMode>=1) System.out.format("traj %3d  part %3d  tk %3d  det %3d  ",j,jpr,jtk,jdet);
+                    if(debugMode>=1) System.out.format("traj %3d  part %3d  tk %3d  det %3d  lay %3d ",j,jpr,jtk,jdet,jlay);
 
                     /*
                     *  trajectory plane 42 till 5b.6.2 - 40 since 5c.7.0 - layer 36 since 6b.1.0
@@ -292,6 +292,7 @@ public class RICHEventBuilder{
                         if(debugMode>=1) System.out.format("\n");
                     }
                 }
+                if(tr.getCrossCount()==0){if(debugMode>=1)System.out.format("Traj not found \n"); continue;}
 
                 if(debugMode>=1) {
                     Point3D ori = tr.getLastCross().origin();
@@ -299,7 +300,6 @@ public class RICHEventBuilder{
                     System.out.format("lastcross  %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f\n",ori.x(),ori.y(),ori.z(),dir.x(),dir.y(),dir.z());
                 }
 
-               //if(tr.getSector()==4 && Math.abs(PID)==11 && tr.getLastCross().origin().x()<-170)
                if(tr.getSector()==4){
                     tr.setStatus(ipr);
                     DetectorParticle particle = new DetectorParticle(tr);
@@ -347,6 +347,7 @@ public class RICHEventBuilder{
             }
         }
 
+	if(debugMode>=1)System.out.format(" SEC4 PARTICLE founds %3d \n",sector4Event.getParticles().size());
         if(sector4Event.getParticles().size()>0)return true;
         return false;
     }
@@ -653,9 +654,15 @@ public class RICHEventBuilder{
     // ----------------
     public DetectorResponse extrapolate_RICHResponse(DetectorParticle p){
     // ----------------
+
+        int debugMode = 0;
+
         DetectorResponse r = new DetectorResponse(4, 18, 1);
 
         Vector3d extra = tool.find_intersection_UpperHalf_RICH( p.getLastCross());
+        if(extra==null){
+            extra = tool.find_intersection_MAPMT( p.getLastCross());
+        }
 
         if(extra==null) return null;
 
@@ -663,7 +670,7 @@ public class RICHEventBuilder{
 
         r.setPosition(extra.x, extra.y, extra.z);
         r.setPath(p.getPathLength()+dist);
-        r.setStatus(1);
+        r.setStatus(0);
 
         int CLASpid = p.getPid();
         if(CLASpid==0)CLASpid = 211;
