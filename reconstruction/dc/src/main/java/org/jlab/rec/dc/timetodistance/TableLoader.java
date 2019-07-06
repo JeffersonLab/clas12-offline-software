@@ -142,9 +142,10 @@ public class TableLoader {
                 for(int r = 0; r<6; r++ ){ //loop over slys
                     // Fill constants
                     delta_T0[s][r] = tab.getDoubleValue("delta_T0", s+1,r+1,0);
-                    FracDmaxAtMinVel[s][r] = tab.getDoubleValue("delta_T0", s+1,r+1,0);//use same table. names strings 
+                    FracDmaxAtMinVel[s][r] = tab.getDoubleValue("c1", s+1,r+1,0);//use same table. names strings 
                     deltanm[s][r] = tab.getDoubleValue("deltanm", s+1,r+1,0);
                     v0[s][r] = tab.getDoubleValue("v0", s+1,r+1,0);
+                    vmid[s][r] = tab.getDoubleValue("c2", s+1,r+1,0);
                     delta_bfield_coefficient[s][r] = tab.getDoubleValue("delta_bfield_coefficient", s+1,r+1,0); 
                     b1[s][r] = tab.getDoubleValue("b1", s+1,r+1,0);
                     b2[s][r] = tab.getDoubleValue("b2", s+1,r+1,0);
@@ -152,7 +153,7 @@ public class TableLoader {
                     b4[s][r] = tab.getDoubleValue("b4", s+1,r+1,0);
                     Tmax[s][r] = tab.getDoubleValue("tmax", s+1,r+1,0);
                     // end fill constants
-                    
+                    System.out.println(v0[s][r]+" "+vmid[s][r]+" "+FracDmaxAtMinVel[s][r]);
                     double dmax = 2.*Constants.wpdist[r]; 
                     //double tmax = CCDBConstants.getTMAXSUPERLAYER()[s][r];
                     for(int ibfield =0; ibfield<maxBinIdxB+1; ibfield++) {
@@ -239,23 +240,20 @@ public class TableLoader {
         int r = superlayer - 1;
         double dmax = 2.*Constants.wpdist[r]; 
         double tmax = Tmax[s][r];
-        double v_0 = v0[s][r];
-        double v_1 = deltanm[s][r];
         double delBf = delta_bfield_coefficient[s][r]; 
         double Bb1 = b1[s][r];
         double Bb2 = b2[s][r];
         double Bb3 = b3[s][r];
         double Bb4 = b4[s][r];
-        double fracDmaxAtMinVel = FracDmaxAtMinVel[s][r];
         if(x>dmax)
             x=dmax;
         
         if(Constants.getT2D()==0) {
-            fracDmaxAtMinVel = 0.615;
-            return T2DFunctions.ExpoFcn(x, alpha, bfield, v_0, v_1, fracDmaxAtMinVel, 
+            
+            return T2DFunctions.ExpoFcn(x, alpha, bfield, v0[s][r], deltanm[s][r], 0.615, 
                 tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, superlayer) + delta_T0[s][r];
         } else {
-            return T2DFunctions.polyFcnMac(x, alpha, bfield, v_0, v_1, fracDmaxAtMinVel, 
+            return T2DFunctions.polyFcnMac(x, alpha, bfield, v0[s][r], vmid[s][r], FracDmaxAtMinVel[s][r], 
                 tmax, dmax, delBf, Bb1, Bb2, Bb3, Bb4, superlayer) ;
         }
     }
@@ -263,11 +261,12 @@ public class TableLoader {
     public static double[][] delta_T0 = new double[6][6];
     public static double[][] delta_bfield_coefficient = new double[6][6];
     public static double[][] deltanm = new double[6][6];
+    public static double[][] vmid = new double[6][6];
+    public static double[][] v0 = new double[6][6];
     public static double[][] b1 = new double[6][6];
     public static double[][] b2 = new double[6][6];
     public static double[][] b3 = new double[6][6];
     public static double[][] b4 = new double[6][6];
-    public static double[][] v0 = new double[6][6];
     public static double[][] Tmax = new double[6][6];
     public static double[][] FracDmaxAtMinVel = new double[6][6];		// fraction of dmax corresponding to the point in the cell where the velocity is minimal
 
