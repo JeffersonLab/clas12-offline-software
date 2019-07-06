@@ -1,7 +1,7 @@
 [ 
  {
     "name": "RICH::hits",
-    "group": 22000,
+    "group": 21800,
     "item" : 21,   
     "info": "Reconstructed Hits in RICH",
     "entries": [
@@ -22,7 +22,7 @@
   },
    {
     "name": "RICH::clusters",
-    "group": 22000,
+    "group": 21800,
     "item" : 22,   
     "info": "Reconstructed Clusters in RICH",
     "entries": [
@@ -44,9 +44,9 @@
         ]
   },
    {
-    "name": "REC::RICH",
-    "group": 22000,
-    "item" : 41,   
+    "name": "RICH::response",
+    "group": 21800,
+    "item" : 31,   
     "info": "RICH Responses for Particles bank",
     "entries": [
             {"name":"index",        "type":"S", "info":"index of the clu in the specific detector bank"},
@@ -69,8 +69,8 @@
   },
    {
     "name": "RICH::hadrons",
-    "group": 22000,
-    "item" : 23,   
+    "group": 21800,
+    "item" : 32,   
     "info": "Reconstructed Hadrons in RICH",
     "entries": [
             {"name":"id",            "type":"S", "info":"hadron id" },
@@ -98,8 +98,8 @@
   },
    {
     "name": "RICH::photons",
-    "group": 22000,
-    "item" : 24,   
+    "group": 21800,
+    "item" : 33,   
     "info": "Reconstructed Photons in RICH",
     "entries": [
             {"name":"id",             "type":"S", "info":"id" },
@@ -142,9 +142,9 @@
     ]
   },
    {
-    "name": "REC::RingCher",
-    "group": 22000,
-    "item" : 25,   
+    "name": "RICH::ringCher",
+    "group": 21800,
+    "item" : 34,   
     "info": "Reconstructed Cherenov nformation in RICH",
     "entries": [
             {"name":"id",             "type":"S", "info":"id" },

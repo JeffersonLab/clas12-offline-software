@@ -36,13 +36,13 @@ public class RICHio {
             event.removeBank("RICH::clusters");
             if(debugMode==1)System.out.format("Remove RICH::clusters from event \n");
         }
-        if(event.hasBank("REC::RICH")){
-            event.removeBank("REC::RICH");
-            if(debugMode==1)System.out.format("Remove REC::RICH from event \n");
+        if(event.hasBank("RICH::response")){
+            event.removeBank("RICH::response");
+            if(debugMode==1)System.out.format("Remove RICH::response from event \n");
         }
-        if(event.hasBank("REC::RingCher")){
-            event.removeBank("REC::RingCher");
-            if(debugMode==1)System.out.format("Remove REC::RingCher from event \n");
+        if(event.hasBank("RICH::ringCher")){
+            event.removeBank("RICH::ringCher");
+            if(debugMode==1)System.out.format("Remove RICH::ringCher from event \n");
         }
         if(event.hasBank("RICH::hadrons")){
             event.removeBank("RICH::hadrons");
@@ -78,7 +78,7 @@ public class RICHio {
 
         if(NMAT>0){
 
-            String richBank = "REC::RICH";
+            String richBank = "RICH::response";
             DataBank bankRich = getRichResponseBank(richevent.get_Matches(), event, richBank, recopar);
             if(bankRich!=null)event.appendBanks(bankRich);
 
@@ -244,10 +244,10 @@ public class RICHio {
         if(debugMode>=1)System.out.format("Creating Bank for %5d Ring Cherenkovs \n", NPHO);
         
         if(NPHO!=0) {
-            if(debugMode>=1)System.out.println(" --> Creating the REC::RingCher Bank ");
-            DataBank bankRing = event.createBank("REC::RingCher", NPHO);
+            if(debugMode>=1)System.out.println(" --> Creating the RICH::ringCher Bank ");
+            DataBank bankRing = event.createBank("RICH::ringCher", NPHO);
             if(bankRing==null){
-                System.out.println("ERROR CREATING BANK : REC::RingCher");
+                System.out.println("ERROR CREATING BANK : RICH::ringCher");
                 return;
             }
 
@@ -365,7 +365,7 @@ public class RICHio {
     // ----------------
 
         int debugMode = 0;
-        if(debugMode>=1)System.out.format("Saving match in REC::RICH bank  Nmatches  %5d \n",responses.size());
+        if(debugMode>=1)System.out.format("Saving match in RICH::response bank  Nmatches  %5d \n",responses.size());
         DataBank bank = event.createBank(bank_name, responses.size());
         for(int row = 0; row < responses.size(); row++){
             DetectorResponse r = (DetectorResponse) responses.get(row);
@@ -389,7 +389,7 @@ public class RICHio {
                                   Math.pow(r.getMatchedPosition().z()-r.getPosition().z(),2))/recopar.RICH_HITMATCH_RMS);
             bank.setFloat("chi2", row, (float) chi2);
 
-            if(debugMode>=1)System.out.format("REC::RICH id %3d   hit %6.1f %6.1f %6.1f    tk %6.1f %6.1f %6.1f chi2 %8.3f \n",
+            if(debugMode>=1)System.out.format("RICH::response id %3d   hit %6.1f %6.1f %6.1f    tk %6.1f %6.1f %6.1f chi2 %8.3f \n",
                                   r.getHitIndex(),
                                   r.getPosition().x(),r.getPosition().y(),r.getPosition().z(),
                                   r.getPosition().x()+(r.getMatchedPosition().x()-r.getPosition().x())*2,
