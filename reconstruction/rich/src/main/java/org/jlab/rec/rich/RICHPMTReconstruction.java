@@ -218,7 +218,7 @@ public class RICHPMTReconstruction {
                   nhit++;
                   lead.set_hit(nhit);
                   trail.set_hit(nhit);
-                  RICHHit hit = new RICHHit(nhit, tool, lead, trail);
+                  RICHHit hit = new RICHHit(nhit, tool, richevent.getFTOFphase(), lead, trail);
                   hits.add(hit);      
                   break;
 

@@ -36,7 +36,7 @@ public class RICHHit implements Comparable<RICHHit>{
     }
 
     // ----------------
-    public RICHHit(int hid, RICHTool tool, RICHEdge lead, RICHEdge trail) {
+    public RICHHit(int hid, RICHTool tool, int phase, RICHEdge lead, RICHEdge trail) {
     // ----------------
 
 
@@ -73,7 +73,7 @@ public class RICHHit implements Comparable<RICHHit>{
         if (this.duration > D0) twalk_corr = f2;
 
         this.rawtime   = (float) lead.get_tdc();
-        this.time      = (float) (lead.get_tdc() + tool.getFTOFphase()*4 + tool.getPMTtimeoff(pmt, anode) - twalk_corr);
+        this.time      = (float) (lead.get_tdc() + phase*4 + tool.getPMTtimeoff(pmt, anode) - twalk_corr);
         //this.time      = (float) (lead.get_tdc() + tool.getFTOFphase()*4 + tool.getPMTtimeoff(pmt, anode));
         this.cluster   = 0;
         this.xtalk     = 0;
@@ -83,7 +83,7 @@ public class RICHHit implements Comparable<RICHHit>{
                                            D0, T0, m1, m2, f1, f2, twalk_corr, this.time);
 
 	if(debugMode>=1)System.out.format(" Hittime %4d %4d %8d %7.2f %7d %7.2f %7.2f %7.2f \n", hid, pmt, this.duration, this.rawtime, 
-                                           tool.getFTOFphase()*4, tool.getPMTtimeoff(pmt, anode), -twalk_corr, this.time);
+                                           phase*4, tool.getPMTtimeoff(pmt, anode), -twalk_corr, this.time);
 
         //Vector3d CenPos = tool.GetPixelCenter(pmt,anode);
         Vector3d CesPos = tool.get_Pixel_Center(pmt,anode);

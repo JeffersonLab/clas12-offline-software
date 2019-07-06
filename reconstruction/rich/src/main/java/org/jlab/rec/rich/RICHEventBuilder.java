@@ -411,7 +411,7 @@ public class RICHEventBuilder{
 
             //int phase = (int) ((bankrun.getLong("timestamp",0)%6 +1)%6) /2;
             int phase = (int) (bankrun.getLong("timestamp",0)%2);
-            tool.setFTOFphase(phase);
+            richevent.setFTOFphase(phase);
 
             if(debugMode>=1)System.out.println(" Create RICH Event id "+richevent.get_EventID()+" stamp "+bankrun.getLong("timestamp",0)+" phase "+phase);
         }

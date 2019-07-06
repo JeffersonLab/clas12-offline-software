@@ -42,12 +42,6 @@ public class RICHConstants {
     public static final double READ_FROM_FILES            =   0.;      // read values from txt files
 
     // -----------------
-    // Data dependent
-    // -----------------
-
-    public int     FTOF_PHASE_CORR                        =   0; 
-
-    // -----------------
     // Read from CCDB/TEXT 
     // -----------------
 

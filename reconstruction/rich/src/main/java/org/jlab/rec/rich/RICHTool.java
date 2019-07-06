@@ -2486,15 +2486,6 @@ public class RICHTool{
     }
 
     
-    //------------------------------
-    public int getFTOFphase() {return reco_constants.FTOF_PHASE_CORR;}
-    //------------------------------
-
-    //------------------------------
-    public void setFTOFphase(int phase) { reco_constants.FTOF_PHASE_CORR = phase; }
-    //------------------------------
-
-
     // ----------------
     public String get_PlaneMirrorSide(RICHComponent compo) {
     // ----------------

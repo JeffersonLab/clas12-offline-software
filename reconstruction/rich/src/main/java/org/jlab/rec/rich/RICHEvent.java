@@ -23,6 +23,7 @@ public class RICHEvent {
     private int eventID;
     private float eventTime;
     private long exeStart;
+    private int  phase;
 
     private static double MRAD = 1000.;
     private static double RAD = 180./Math.PI;
@@ -80,6 +81,10 @@ public class RICHEvent {
     // ----------------
     public void set_exeStart(long exetime) { exeStart = exetime; }
     // ----------------
+
+    //------------------------------
+    public int getFTOFphase() {return phase;}
+    //------------------------------
 
     // ----------------
     public void add_Hit(RICHHit hit){ hits.add(hit); }
@@ -152,6 +157,10 @@ public class RICHEvent {
     // ----------------
     public long get_exeStart() {return exeStart;}
     // ----------------
+
+    //------------------------------
+    public void setFTOFphase(int phase) { this.phase = phase; }
+    //------------------------------
 
     // ----------------
     public RICHCluster get_Cluster(int i){ return  clusters.get(i); }
