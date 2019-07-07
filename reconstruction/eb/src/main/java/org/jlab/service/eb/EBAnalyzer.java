@@ -61,9 +61,9 @@ public class EBAnalyzer {
         if (event.getParticles().size() <= 0) return;
 
         // An FD electron was already used to get start time, abort:
-        if (event.getEventHeader().getStartTime()>0 &&
-            event.getParticle(0).getPid()==11 &&
-            event.getParticle(0).getStatus().isForward()) return;
+        //if (event.getTriggerParticle()!=null &&
+        //    event.getTriggerParticle().getPid()==11 &&
+        //    event.getTriggerParticle().getStatus().isForward()) return;
 
         // Match FT against these hypotheses in FD:
         final int[] hypotheses = new int[]{-11,11,-211,211,-321,321,2212};
