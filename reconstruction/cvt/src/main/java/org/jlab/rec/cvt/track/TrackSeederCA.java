@@ -163,7 +163,7 @@ public class TrackSeederCA {
         if( plane.equalsIgnoreCase("XY") ){
           camaker.set_cosBtwCells(0.95);  // min dot product between neighbours 
           camaker.set_abCrs(50);         // max angle between crosses to form a cell
-          camaker.set_aCvsR(30);         // max angle between the cell and the radius to the first cell
+          camaker.set_aCvsR(45);         // max angle between the cell and the radius to the first cell
         }
         if( plane.equalsIgnoreCase("ZR") ){
           camaker.set_cosBtwCells(0.95); // it only applies to the BMTC cross only cells
