@@ -16,12 +16,6 @@ public class Quaternion {
 	public double z;
 	public double w;
 
-	// Temporary Quaternion   
-	private static Quaternion quatTp1 = new Quaternion();
-	private static Quaternion quatTp2 = new Quaternion();
-	private static Quaternion quatTp3 = new Quaternion();
-	private static Quaternion quatTp4 = new Quaternion();
-
 	public Quaternion() {
 	}
 
@@ -84,13 +78,14 @@ public class Quaternion {
 	 * @param qb the one that multiply
 	 * @param result of the multiplication 
 	 */
-	public void multiply(Quaternion qb, Quaternion result) {
+	public Quaternion multiply(Quaternion qb) {
 		Quaternion qa = this;
-		quatTp4.w = (qa.w * qb.w) - (qa.x * qb.x) - (qa.y * qb.y) - (qa.z * qb.z);
-		quatTp4.x = (qa.x * qb.w) + (qa.w * qb.x) + (qa.y * qb.z) - (qa.z * qb.y);
-		quatTp4.y = (qa.y * qb.w) + (qa.w * qb.y) + (qa.z * qb.x) - (qa.x * qb.z);
-		quatTp4.z = (qa.z * qb.w) + (qa.w * qb.z) + (qa.x * qb.y) - (qa.y * qb.x);
-		result.set(quatTp4);
+                Quaternion qr = new Quaternion();
+		qr.w = (qa.w * qb.w) - (qa.x * qb.x) - (qa.y * qb.y) - (qa.z * qb.z);
+		qr.x = (qa.x * qb.w) + (qa.w * qb.x) + (qa.y * qb.z) - (qa.z * qb.y);
+		qr.y = (qa.y * qb.w) + (qa.w * qb.y) + (qa.z * qb.x) - (qa.x * qb.z);
+		qr.z = (qa.z * qb.w) + (qa.w * qb.z) + (qa.x * qb.y) - (qa.y * qb.x);
+		return qr;
 	}
 
 	public void conjugate() {
@@ -112,11 +107,13 @@ public class Quaternion {
      */
 
         Vector3d rotatedPoint = new Vector3d(0.,0.,0.);
-        quatTp1.set(0, point.x, point.y, point.z);
-        multiply(quatTp1, quatTp2);
+        Quaternion quatTp1    = new Quaternion(0, point.x, point.y, point.z);
+        Quaternion quatTp2    = new Quaternion();
+        Quaternion quatTp3    = new Quaternion();
+        quatTp2 = this.multiply(quatTp1);
         quatTp1.set(this);
         quatTp1.conjugate();
-        quatTp2.multiply(quatTp1, quatTp3);
+        quatTp3 = quatTp2.multiply(quatTp1);
 
         rotatedPoint.x = quatTp3.x;
         rotatedPoint.y = quatTp3.y;
