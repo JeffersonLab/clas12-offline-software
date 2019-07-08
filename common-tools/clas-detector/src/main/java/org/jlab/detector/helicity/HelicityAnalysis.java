@@ -26,9 +26,8 @@ public class HelicityAnalysis {
      * @return  unanalyzed sequence
      */
     public static HelicitySequenceDelayed readSequence(List<String> filenames) {
-        
-        HelicitySequenceDelayed seq=new HelicitySequenceDelayed(0);
-        seq.setVerbosity(3);
+       
+        HelicitySequenceDelayed seq=new HelicitySequenceDelayed(8);
        
         for (String filename : filenames) {
 
