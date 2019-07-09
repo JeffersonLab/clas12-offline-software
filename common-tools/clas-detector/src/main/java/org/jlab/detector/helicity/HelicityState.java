@@ -12,7 +12,7 @@ import org.jlab.io.base.DataBank;
  *
  * @author baltzell
  */
-public class HelicityState {
+public class HelicityState implements Comparable<HelicityState> {
 
     // FIXME:  these should go in CCDB
     private static final short HALFADC=2000;
@@ -39,6 +39,13 @@ public class HelicityState {
         else                     return HelicityBit.MINUS;
     }
 
+    @Override
+    public int compareTo(HelicityState other) {
+        if (this.getTimestamp() < other.getTimestamp()) return -1;
+        if (this.getTimestamp() > other.getTimestamp()) return +1;
+        return 0;
+    }
+    
     /**
      * Create a state from a HEL::adc org.jlab.jnp.hipo4.data.Bank
      * 
