@@ -45,6 +45,7 @@ public class GeometryFactory {
             provider.loadTable("/geometry/dc/superlayer");
             provider.loadTable("/geometry/dc/layer");
             provider.loadTable("/geometry/dc/alignment");
+            provider.loadTable("/geometry/dc/ministagger");
         }
         
         if(type==DetectorType.ECAL){
