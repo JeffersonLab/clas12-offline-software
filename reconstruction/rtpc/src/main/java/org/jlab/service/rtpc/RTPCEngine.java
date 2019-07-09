@@ -15,7 +15,6 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.rtpc.banks.HitReader;
-import org.jlab.rec.rtpc.banks.RecoBankWriter;
 import org.jlab.rec.rtpc.banks.RecoBankWriter2;
 import org.jlab.rec.rtpc.hit.Hit;
 import org.jlab.rec.rtpc.hit.HitDistance;
@@ -26,14 +25,10 @@ import org.jlab.rec.rtpc.hit.PadAve;
 import org.jlab.rec.rtpc.hit.PadFit;
 import org.jlab.rec.rtpc.hit.PadHit;
 //import org.jlab.rec.rtpc.hit.PulseShapeAnalysis;
-import org.jlab.rec.rtpc.hit.TimeAverage;
 import org.jlab.rec.rtpc.hit.TimeAverage2;
 //import org.jlab.rec.rtpc.hit.TrackDisentangler;
 //import org.jlab.rec.rtpc.hit.TrackFinder;
-import org.jlab.rec.rtpc.hit.TrackFinder2;
 import org.jlab.rec.rtpc.hit.TrackFinder3;
-import org.jlab.rec.rtpc.hit.TrackHitReco;
-import org.jlab.rec.rtpc.hit.TrackHitReco2;
 import org.jlab.rec.rtpc.hit.TrackHitReco3;
 
 
@@ -77,12 +72,8 @@ public class RTPCEngine extends ReconstructionEngine{
 			PadFit pfit = new PadFit();
 			pfit.Fitting(params);
 			
-//			PulseShapeAnalysis psa = new PulseShapeAnalysis();
-//			psa.PSA(params);
-			
-			//TrackFinder TF = new TrackFinder();
-			//TF.FindTrack(params);
-			if(swtch == 1) //outdated build
+
+			if(swtch == 1) //not used normally
 			{
 				HitDistance HD = new HitDistance();
 				HD.FindDistance(params);
@@ -95,23 +86,6 @@ public class RTPCEngine extends ReconstructionEngine{
 				RecoBankWriter2 writer = new RecoBankWriter2();				
 				DataBank recoBank = writer.fillRTPCHitsBank(event, params);
 				event.appendBanks(recoBank);
-			}
-			else    //outdated build
-			{
-				TrackFinder2 TF = new TrackFinder2();
-				TF.FindTrack2(params,false);
-				TimeAverage TA = new TimeAverage();
-				TA.TA(params,false);
-				MapCombine MC = new MapCombine();
-				MC.MC(params,false);
-				/*TrackHitReco TR = new TrackHitReco();
-				TR.Reco(hits,params);*/
-				TrackHitReco2 TR = new TrackHitReco2();
-				TR.Reco(hits,params,false);
-				RecoBankWriter2 writer = new RecoBankWriter2();				
-				DataBank recoBank = writer.fillRTPCHitsBank(event, params);
-				event.appendBanks(recoBank);
-				//recoBank.show();
 			}
 			
 		}
