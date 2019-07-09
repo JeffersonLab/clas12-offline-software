@@ -176,7 +176,7 @@ public class StateVecs {
         		sv_f.x=Poslab.x();
         		sv_f.y=Poslab.y();
         		sv_f.z=Poslab.z();
-        		        		
+        				
         		if (f==0) sv_f.pathlength=sv_i.pathlength+Math.abs(step);
         		
         	}
@@ -292,7 +292,7 @@ public class StateVecs {
         }
         sv_f.layer=Layer.get(f);
         sv_f.sector=Sector.get(f);
-        if (i<f) {
+        if (f!=0) {
         	CovMat fCovFilt = new CovMat(f);
         	fCovFilt.covMat=fCov.covMat;
         	StateVec sv_fFilt = new StateVec(f);
@@ -303,7 +303,7 @@ public class StateVecs {
         	this.trackCovFilt.put(f, fCovFilt);
         	this.trackTransport.put(f, fTransport);
         }      
-        if (i>f) {
+        if (f==0) {
         	this.trackTrajSmooth.put(f, sv_f);
         	this.trackCovSmooth.put(f, fCov);
         }
@@ -673,67 +673,39 @@ public class StateVecs {
         this.trackCov.put(0, initCM);
     }
     
-    public void initAtLastMeas(Seed trk, KFitter kf, MeasVecs mv, Swim swimmer) {
-        //init stateVec
+    public void initAtLastMeas(KFitter kf, MeasVecs mv, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
+        //Try to have a guess of position at last layer
     	
-        StateVec initSV = new StateVec(Layer.size());
-        initSV.refx = mv.getLastX();
-        initSV.refy = mv.getLastY();
-        initSV.refz = mv.getLastZ();
-        initSV.layer= Layer.get(Layer.size()-1);
-        initSV.sector= Sector.get(Sector.size()-1);
-      
-        B Bf = new B(0, initSV.refx, initSV.refy , initSV.refz, swimmer);
-        initSV.alpha = Bf.alpha;
-        initSV.kappa = Bf.alpha * trk.get_Helix().get_curvature();
-        initSV.phi0 = trk.get_Helix().get_phi_at_dca();
-        initSV.dz = 0;
-        initSV.tanL = trk.get_Helix().get_tandip();
-        initSV.d_rho = 0;
-        initSV.phi = 0;
-        //
-       
-        this.trackTraj.put(mv.measurements.get(mv.measurements.size()-1).k, initSV);
-        this.trackTrajFilt.put(mv.measurements.get(mv.measurements.size()-1).k, initSV);
-        //init covMat
-        Matrix fitCovMat = trk.get_Helix().get_covmatrix();
-        double cov_d02 = fitCovMat.get(0, 0);
-        double cov_d0phi0 = fitCovMat.get(0, 1);
-        double cov_d0rho = Bf.alpha * fitCovMat.get(0, 2);
-        double cov_phi02 = fitCovMat.get(1, 1);
-        double cov_phi0rho = Bf.alpha * fitCovMat.get(1, 2);
-        double cov_rho2 = Bf.alpha * Bf.alpha * fitCovMat.get(2, 2);
-        double cov_z02 = fitCovMat.get(3, 3);
-        double cov_z0tandip = fitCovMat.get(3, 4);
-        double cov_tandip2 = fitCovMat.get(4, 4);
-
-        double components[][] = new double[5][5];
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 5; j++) {
-                components[i][j] = 0;
-            }
-        }
+    	this.new_transport(0, mv.measurements.get(mv.measurements.size()-1).k, this.trackTrajFilt.get(0) , this.trackCovFilt.get(0) , sgeo, bgeo, mv.measurements.get(mv.measurements.size()-1).type, swimmer);
+    	if (mv.measurements.get(mv.measurements.size()-1).type==2) {
+    		this.trackTrajFilt.get(mv.measurements.get(mv.measurements.size()-1).k).refz=mv.measurements.get(mv.measurements.size()-1).z;
+    		this.trackTraj.get(mv.measurements.get(mv.measurements.size()-1).k).refz=mv.measurements.get(mv.measurements.size()-1).z;
+    	}
+    	if (mv.measurements.get(mv.measurements.size()-1).type==1) {
+    		this.trackTrajFilt.get(mv.measurements.get(mv.measurements.size()-1).k).refx=mv.measurements.get(mv.measurements.size()-1).x;
+    		this.trackTraj.get(mv.measurements.get(mv.measurements.size()-1).k).refx=mv.measurements.get(mv.measurements.size()-1).x;
+    		
+    		this.trackTrajFilt.get(mv.measurements.get(mv.measurements.size()-1).k).refy=mv.measurements.get(mv.measurements.size()-1).y;
+    		this.trackTraj.get(mv.measurements.get(mv.measurements.size()-1).k).refy=mv.measurements.get(mv.measurements.size()-1).y;
+    	}
+    	
+    	
+    	this.trackCovFilt.remove(mv.measurements.get(mv.measurements.size()-1).k);
+    	this.trackCov.remove(mv.measurements.get(mv.measurements.size()-1).k);
+    	this.trackTransport.remove(mv.measurements.get(mv.measurements.size()-1).k);
+    	
+    	CovMat initCM = new CovMat(mv.measurements.get(mv.measurements.size()-1).k);
+        initCM.covMat= this.trackCov.get(0).covMat;
+    	this.trackCovFilt.put(mv.measurements.get(mv.measurements.size()-1).k, initCM);
+    	this.trackCov.put(mv.measurements.get(mv.measurements.size()-1).k, initCM);
+    	//Remove the 0-object
+        this.trackTraj.remove(0);
+        this.trackTrajFilt.remove(0);
+        this.trackCov.remove(0);
+        this.trackCovFilt.remove(0);
         
-        components[0][0] = org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_d0;
-        components[0][1] = cov_d0phi0/Math.sqrt(cov_d02*cov_phi02)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_phi0;
-        components[1][0] = cov_d0phi0/Math.sqrt(cov_d02*cov_phi02)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_phi0;
-        components[1][1] = org.jlab.rec.cvt.Constants.unc_phi0*org.jlab.rec.cvt.Constants.unc_phi0;
-        components[2][0] = cov_d0rho/Math.sqrt(cov_d02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_kappa;
-        components[0][2] = cov_d0rho/Math.sqrt(cov_d02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_kappa;
-        components[2][1] = cov_phi0rho/Math.sqrt(cov_phi02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_phi0*org.jlab.rec.cvt.Constants.unc_kappa;
-        components[1][2] = cov_phi0rho/Math.sqrt(cov_phi02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_phi0*org.jlab.rec.cvt.Constants.unc_kappa;
-        components[2][2] = org.jlab.rec.cvt.Constants.unc_kappa*org.jlab.rec.cvt.Constants.unc_kappa;
-        components[3][3] = org.jlab.rec.cvt.Constants.unc_z0*org.jlab.rec.cvt.Constants.unc_z0;
-        components[3][4] = cov_z0tandip/Math.sqrt(cov_tandip2*cov_z02)*org.jlab.rec.cvt.Constants.unc_z0*org.jlab.rec.cvt.Constants.unc_tanL;
-        components[4][3] = cov_z0tandip/Math.sqrt(cov_tandip2*cov_z02)*org.jlab.rec.cvt.Constants.unc_z0*org.jlab.rec.cvt.Constants.unc_tanL;
-        components[4][4] = org.jlab.rec.cvt.Constants.unc_tanL*org.jlab.rec.cvt.Constants.unc_tanL;
-       
-        Matrix initCMatrix = new Matrix(components);
-
-        CovMat initCM = new CovMat(mv.measurements.get(mv.measurements.size()-1).k);
-        initCM.covMat = initCMatrix;
-        this.trackCovFilt.put(mv.measurements.get(mv.measurements.size()-1).k, initCM);
-        this.trackCov.put(mv.measurements.get(mv.measurements.size()-1).k, initCM);
+        
+        
     }
 
     public void printMatrix(Matrix C) {

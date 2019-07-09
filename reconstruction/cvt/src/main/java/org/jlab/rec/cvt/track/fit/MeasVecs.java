@@ -93,7 +93,8 @@ public class MeasVecs {
             }
         }
         Collections.sort(measurements);
-        
+        for (int i=0; i<measurements.size();i++) measurements.get(i).k=i;
+       
     }
         
     public double getLastZ() {
@@ -101,7 +102,7 @@ public class MeasVecs {
     	for (int i=1;i<measurements.size()-1;i++) {
     		if (!Double.isNaN(measurements.get(measurements.size()-i).z)) {
     			LastZ=measurements.get(measurements.size()-i).z;
-    			continue;
+    			break;
     		}
     	}
     	return LastZ;
@@ -112,7 +113,7 @@ public class MeasVecs {
     	for (int i=1;i<measurements.size()-1;i++) {
     		if (!Double.isNaN(measurements.get(measurements.size()-i).x)) {
     			LastX=measurements.get(measurements.size()-i).x;
-    			continue;
+    			break;
     		}
     	}
     	return LastX;
@@ -123,7 +124,7 @@ public class MeasVecs {
     	for (int i=1;i<measurements.size()-1;i++) {
     		if (!Double.isNaN(measurements.get(measurements.size()-i).y)) {
     			LastY=measurements.get(measurements.size()-i).y;
-    			continue;
+    			break;
     		}
     	}
     	return LastY;

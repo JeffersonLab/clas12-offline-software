@@ -85,49 +85,71 @@ public class KFitter {
             sv.Z0.add(ref.z());
         }
         sv.initAtBeam(trk, this, swimmer);
-        //sv.initAtBeam(trk, this, mv, swimmer);
+       
     }
 
     public void runFitter(org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
         this.NDF = mv.measurements.size()-6; 
         this.chi2= Double.POSITIVE_INFINITY;
         
+        if (!org.jlab.rec.cvt.Constants.FromTargetToCTOF) sv.initAtLastMeas(this, mv, sgeo, bgeo, swimmer);
+        if (mv.measurements.size()-6<org.jlab.rec.cvt.Constants.NDF_Min) RunningAlgo=false;
+        	
         //Possible to do several iterations if wanted
         for (int it = 0; it < totNumIter; it++) {
-        	
-            this.chi2 = 0;
+        	            
+            if (org.jlab.rec.cvt.Constants.FromTargetToCTOF) {
+            	for (int k = 0; k < sv.X0.size() - 1; k++) {
+            		if (!RunningAlgo) break;
+            		sv.new_transport(k, k + 1, sv.trackTrajFilt.get(k), sv.trackCovFilt.get(k), sgeo, bgeo, mv.measurements.get(k + 1).type, swimmer);
+            		RunningAlgo=this.filter(k + 1, sgeo, bgeo, swimmer);
+            	}
             
-            for (int k = 0; k < sv.X0.size() - 1; k++) {
-                if (!RunningAlgo) continue;
-                sv.new_transport(k, k + 1, sv.trackTrajFilt.get(k), sv.trackCovFilt.get(k), sgeo, bgeo, mv.measurements.get(k + 1).type, swimmer);
-                RunningAlgo=this.filter(k + 1, sgeo, bgeo, swimmer);
-            }
-            
-            if (!RunningAlgo) continue;
-            sv.trackTrajFilt.get(sv.X0.size() - 1).pathlength=0; 
-            //During the smoothing, we compute the pathlength... Warning: Once we are at the vertex and knows the pathlength, 
-            //we will change it following the convention 0 at dca to beam.
-            sv.trackTrajSmooth.put(sv.X0.size() -1,sv.trackTrajFilt.get(sv.X0.size() - 1));
-            sv.trackCovSmooth.put(sv.X0.size() -1,sv.trackCovFilt.get(sv.X0.size() - 1));
+            	if (!RunningAlgo) break;
+            	sv.trackTrajFilt.get(sv.X0.size() - 1).pathlength=0; 
+            	//During the smoothing, we compute the pathlength... Warning: Once we are at the vertex and knows the pathlength, 
+            	//we will change it following the convention 0 at dca to beam.
+            	sv.trackTrajSmooth.put(sv.X0.size() -1,sv.trackTrajFilt.get(sv.X0.size() - 1));
+            	sv.trackCovSmooth.put(sv.X0.size() -1,sv.trackCovFilt.get(sv.X0.size() - 1));
                         
-            for (int k = sv.X0.size() - 2; k > 0; k--) {
-            	if (!RunningAlgo) continue;
-            	RunningAlgo=this.smoother(k, sgeo, bgeo, swimmer);
+            	for (int k = sv.X0.size() - 2; k > 0; k--) {
+            		if (!RunningAlgo) break;
+            		RunningAlgo=this.smoother(k+1, k, sgeo, bgeo, swimmer);
+            	}
+            	
             }
-            if (!RunningAlgo) {
-            	this.chi2=Double.NaN;
-            	this.NDF=-1;
-            	continue;
-            }
+            else {
+            	for (int k = sv.X0.size()-1; k > 1; k--) {
+            		if (!RunningAlgo) break;
+            		sv.new_transport(k, k - 1, sv.trackTrajFilt.get(k), sv.trackCovFilt.get(k), sgeo, bgeo, mv.measurements.get(k - 1).type, swimmer);
+            		RunningAlgo=this.filter(k - 1, sgeo, bgeo, swimmer);
+            	}
             
-            //To extrapolate to "Vertex"
-            sv.new_transport(1, 0, sv.trackTrajSmooth.get(1), sv.trackCovSmooth.get(1), sgeo, bgeo, mv.measurements.get(0).type, swimmer);
-            this.chi2=this.getResiduals_Chi2(sgeo, bgeo, swimmer);
+            	if (!RunningAlgo) break;
+            	sv.trackTrajFilt.get(mv.measurements.get(mv.measurements.size()-1).k).pathlength=0; 
+            	//During the smoothing, we compute the pathlength... Warning: Once we are at the vertex and knows the pathlength, 
+            	//we will change it following the convention 0 at dca to beam.
+            	sv.trackTrajSmooth.put(1,sv.trackTrajFilt.get(1));
+            	sv.trackCovSmooth.put(1,sv.trackCovFilt.get(1));
+                        
+            	for (int k = 2; k < sv.X0.size(); k++) {
+            		if (!RunningAlgo) break;
+            		RunningAlgo=this.smoother(k-1,k, sgeo, bgeo, swimmer);
+            	}
+            }
+                   
                                  
         }
-        
+        // If filetring failed
+        if (!RunningAlgo) {
+    		this.chi2=Double.NaN;
+    		this.NDF=-1;
+    	}
         //If filtering and smoothing done properly, then we have an Helix and a trajectory
         if (RunningAlgo) {
+        	//To extrapolate to "Vertex"
+            sv.new_transport(1, 0, sv.trackTrajSmooth.get(1), sv.trackCovSmooth.get(1), sgeo, bgeo, mv.measurements.get(0).type, swimmer);
+            this.chi2=this.getResiduals_Chi2(sgeo, bgeo, swimmer);
         	KFHelix = sv.setSvPars(sv.trackTrajSmooth.get(0),sv.trackCovSmooth.get(0).covMat);
         	this.setTrajectory();
         }
@@ -137,7 +159,7 @@ public class KFitter {
     public void setTrajectory() {
     	TrjPoints.clear();
     	
-        for (int k = 1; k < sv.trackTraj.size(); k++) {
+        for (int k = 1; k < sv.trackTrajSmooth.size(); k++) {
         	TrjPoints.add(sv.trackTrajSmooth.get(k));
         }
     }
@@ -198,7 +220,7 @@ public class KFitter {
         double chi2 =0;
         
         for(int k = 1; k< sv.X0.size(); k++) {
-            m=0;
+        	m=0;
             h=0;
             diff=mv.Residual(sv.trackTrajSmooth.get(k), sgeo);
             excl_diff=0;
@@ -271,7 +293,7 @@ public class KFitter {
 	private boolean filter(int k, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
 
         if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null) {
-
+        	
             double[] K = new double[5];
             double V = mv.measurements.get(k).error;
 
@@ -368,56 +390,59 @@ public class KFitter {
             
 
             sv.getStateVecAtModule(k, sv.trackTrajFilt.get(k), sgeo, bgeo, mv.measurements.get(k).type, swimmer);
-           
+          
+            return true;
           }
-        return true;
+        return false;
     }
 
-    private boolean smoother(int k, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
-    	 if (this.isNonsingular(sv.trackCov.get(k+1).covMat) == false) {
+    private boolean smoother(int i, int f, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
+    	 if (this.isNonsingular(sv.trackCov.get(i).covMat) == false) {
              //System.err.println("Covariance Matrix is non-invertible - quit filter!");
              return false;
          }
          try {
                   
-        	 Matrix Ak=sv.trackCovFilt.get(k).covMat.times(sv.trackTransport.get(k+1).transpose()).times(sv.trackCov.get(k+1).covMat.inverse());
+        	 Matrix Ak=sv.trackCovFilt.get(f).covMat.times(sv.trackTransport.get(i).transpose()).times(sv.trackCov.get(i).covMat.inverse());
     	
         	 double[] diff=new double [5];
-        	 diff[0]=sv.trackTrajSmooth.get(k+1).d_rho-sv.trackTraj.get(k+1).d_rho;
-        	 diff[1]=sv.trackTrajSmooth.get(k+1).phi0-sv.trackTraj.get(k+1).phi0;
-        	 diff[2]=sv.trackTrajSmooth.get(k+1).kappa-sv.trackTraj.get(k+1).kappa;
-        	 diff[3]=sv.trackTrajSmooth.get(k+1).dz-sv.trackTraj.get(k+1).dz;
-        	 diff[4]=sv.trackTrajSmooth.get(k+1).tanL-sv.trackTraj.get(k+1).tanL;
+        	 diff[0]=sv.trackTrajSmooth.get(i).d_rho-sv.trackTraj.get(i).d_rho;
+        	 diff[1]=sv.trackTrajSmooth.get(i).phi0-sv.trackTraj.get(i).phi0;
+        	 diff[2]=sv.trackTrajSmooth.get(i).kappa-sv.trackTraj.get(i).kappa;
+        	 diff[3]=sv.trackTrajSmooth.get(i).dz-sv.trackTraj.get(i).dz;
+        	 diff[4]=sv.trackTrajSmooth.get(i).tanL-sv.trackTraj.get(i).tanL;
     	
         	 double[] SmoothCorrection=new double [5];
         	 for (int j = 0; j < 5; j++) {
         		 // the gain matrix
         		 SmoothCorrection[j] = 0;
-        		 for (int i = 0; i < 5; i++) {
-        			 SmoothCorrection[j] += diff[i] * Ak.get(j, i);
+        		 for (int ii = 0; ii < 5; ii++) {
+        			 SmoothCorrection[j] += diff[ii] * Ak.get(j, ii);
         		 }
         	 }
     	
-        	 StateVecs.StateVec sv_Smooth=sv.new StateVec(k);
-        	 StateVecs.CovMat covMat_Smooth=sv.new CovMat(k);
-        	 sv_Smooth.Duplicate(sv.trackTrajFilt.get(k)) ;
-        	 sv.trackTrajSmooth.put(k,sv_Smooth);
-        	 sv.trackCovSmooth.put(k,covMat_Smooth);
+        	 StateVecs.StateVec sv_Smooth=sv.new StateVec(f);
+        	 StateVecs.CovMat covMat_Smooth=sv.new CovMat(f);
+        	 sv_Smooth.Duplicate(sv.trackTrajFilt.get(f)) ;
+        	 sv.trackTrajSmooth.put(f,sv_Smooth);
+        	 sv.trackCovSmooth.put(f,covMat_Smooth);
     	
-        	 sv.trackTrajSmooth.get(k).d_rho+=SmoothCorrection[0];
-        	 sv.trackTrajSmooth.get(k).phi0+=SmoothCorrection[1];
-        	 sv.trackTrajSmooth.get(k).kappa+=SmoothCorrection[2];
-        	 sv.trackTrajSmooth.get(k).dz+=SmoothCorrection[3];
-        	 sv.trackTrajSmooth.get(k).tanL+=SmoothCorrection[4];
+        	 sv.trackTrajSmooth.get(f).d_rho+=SmoothCorrection[0];
+        	 sv.trackTrajSmooth.get(f).phi0+=SmoothCorrection[1];
+        	 sv.trackTrajSmooth.get(f).kappa+=SmoothCorrection[2];
+        	 sv.trackTrajSmooth.get(f).dz+=SmoothCorrection[3];
+        	 sv.trackTrajSmooth.get(f).tanL+=SmoothCorrection[4];
     	
-        	 sv.getStateVecAtModule(k, sv.trackTrajSmooth.get(k), sgeo, bgeo, mv.measurements.get(k).type, swimmer);
-        	 double deltaPhi=sv.trackTrajSmooth.get(k+1).phi-sv.trackTrajSmooth.get(k).phi;
+        	 sv.getStateVecAtModule(f, sv.trackTrajSmooth.get(f), sgeo, bgeo, mv.measurements.get(f).type, swimmer);
+        	      	 
+        	 double deltaPhi=sv.trackTrajSmooth.get(i).phi-sv.trackTrajSmooth.get(f).phi;
         	 if (deltaPhi>2*Math.PI) deltaPhi=deltaPhi-2*Math.PI;
         	 if (deltaPhi<-2*Math.PI) deltaPhi=deltaPhi+2*Math.PI;
-        	 	sv.trackTrajSmooth.get(k).pathlength=sv.trackTrajSmooth.get(k+1).pathlength
-        	 			+Math.abs(sv.trackTrajSmooth.get(k).get_Radius()*(1+Math.abs(sv.trackTrajSmooth.get(k).tanL))*deltaPhi);
+        	 	sv.trackTrajSmooth.get(f).pathlength=sv.trackTrajSmooth.get(i).pathlength
+        	 			+Math.abs(sv.trackTrajSmooth.get(f).get_Radius()*(1+Math.abs(sv.trackTrajSmooth.get(f).tanL))*deltaPhi);
     	
-        	 	sv.trackCovSmooth.get(k).covMat=sv.trackCovFilt.get(k).covMat.plus(Ak.times(sv.trackCovSmooth.get(k+1).covMat.minus(sv.trackCov.get(k+1).covMat)).times(Ak.transpose()));
+        	 	sv.trackCovSmooth.get(f).covMat=sv.trackCovFilt.get(f).covMat.plus(Ak.times(sv.trackCovSmooth.get(i).covMat.minus(sv.trackCov.get(i).covMat)).times(Ak.transpose()));
+        	 	
          } catch (Exception e) {
              return false;
          }
