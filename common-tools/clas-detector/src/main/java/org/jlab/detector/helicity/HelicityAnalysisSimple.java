@@ -23,8 +23,10 @@ public class HelicityAnalysisSimple {
      */
     public static void main(String[] args) {
 
-        final String dir="/Users/baltzell/data/CLAS12/rg-b/decoded/";
-        final String file="clas_006432.evio.00041-00042.hipo";
+        final String dir="/Users/baltzell/data/CLAS12/rg-a/decoded/6b.2.0/";
+        final String file="clas_005038.evio.00000-00004.hipo";
+        //final String dir="/Users/baltzell/data/CLAS12/rg-b/decoded/";
+        //final String file="clas_006432.evio.00041-00042.hipo";
         List<String> filenames=new ArrayList<>();
 
         // override with user-inputs if available:
@@ -33,10 +35,15 @@ public class HelicityAnalysisSimple {
 
         // 1!!!1 initialize the helicity sequence:
         HelicitySequenceDelayed seq = HelicityAnalysis.readSequence(filenames);
-        
+       
         seq.setVerbosity(1);
 
+        seq.analyze();
+                
         // now read the full events, e.g. during a normal physics analysis: 
+      
+        int nGoodEvents=0;
+        int nBadEvents=0;
         
         // loop over files:
         for (String filename : filenames) {
@@ -65,13 +72,17 @@ public class HelicityAnalysisSimple {
                 HelicityBit predicted = seq.findPrediction(timestamp);
 
                 if (predicted==null || predicted==HelicityBit.UDF) {
+                    nBadEvents++;
                     System.out.println(String.format("Bad Helicity: event=%d time=%d helicity=%s",evno,timestamp,predicted));
                 }
                 else {
                     // proceed with physics analysis:
+                    nGoodEvents++;
                 }
             }
             reader.close();
         }
+        System.out.println(String.format("HelicityAnalysisSimple:  BAD/GOOD/FRACTION=%d/%d/%.1f%%",
+                nBadEvents,nGoodEvents,((float)nBadEvents)/(nBadEvents+nGoodEvents)));
     }
 }

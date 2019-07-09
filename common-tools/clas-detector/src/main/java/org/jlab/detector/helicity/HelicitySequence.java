@@ -350,7 +350,10 @@ public class HelicitySequence implements Comparator<HelicityState> {
 
         this.analyzed=true;
 
-        return this.integrityCheck() && this.generator.initialize(this.states);
+        boolean integrity=this.integrityCheck();
+
+        boolean geninit=this.generator.initialize(this.states);
+        return integrity && geninit; 
     }
 
     /**
@@ -411,11 +414,11 @@ public class HelicitySequence implements Comparator<HelicityState> {
         }
 
         if (verbosity>0) {
-            System.out.println("HWP       ERRORS:  "+hwpErrors);
-            System.out.println("SYNC      ERRORS:  "+syncErrors);
-            System.out.println("QUARTET   ERRORS:  "+quartetErrors);
-            System.out.println("TIMESTAMP ERRORS:  "+timestampErrors);
-            System.out.println("GENERATOR ERRORS:  "+generatorErrors);
+            System.out.println("HelicitySequence:  HWP       ERRORS:  "+hwpErrors);
+            System.out.println("HelicitySequence:  SYNC      ERRORS:  "+syncErrors);
+            System.out.println("HelicitySequence:  QUARTET   ERRORS:  "+quartetErrors);
+            System.out.println("HelicitySequence:  TIMESTAMP ERRORS:  "+timestampErrors);
+            System.out.println("HelicitySequence:  GENERATOR ERRORS:  "+generatorErrors);
         }
 
         return (hwpErrors + syncErrors + quartetErrors + timestampErrors + generatorErrors) == 0;
