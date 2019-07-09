@@ -53,6 +53,7 @@ public class EBEngine extends ReconstructionEngine {
         //Initialize bank names
     }
 
+    @Override
     public boolean processDataEvent(DataEvent de) {
         throw new RuntimeException("EBEngine cannot be used directly.  Use EBTBEngine/EBHBEngine instead.");
     }
@@ -124,8 +125,8 @@ public class EBEngine extends ReconstructionEngine {
         ebm.addCentralNeutrals(eb.getEvent());
 
         // Do PID etc:
-        EBAnalyzer analyzer = new EBAnalyzer(ccdb);
-        analyzer.processEvent(eb.getEvent(),rf);
+        EBAnalyzer analyzer = new EBAnalyzer(ccdb,rf);
+        analyzer.processEvent(eb.getEvent());
 
         // Add Forward Tagger particles:
         eb.processForwardTagger(de);
@@ -178,7 +179,7 @@ public class EBEngine extends ReconstructionEngine {
       
             // update PID for FT-based start time:
             // WARNING:  this modified particles
-            analyzer.processEventFT(eb.getEvent(),rf);
+            analyzer.processEventFT(eb.getEvent());
             if (eb.getEvent().getEventHeader().getStartTimeFT()>0 && eventBankFT!=null) {
                 DataBank bankEveFT = DetectorData.getEventShadowBank(eb.getEvent(), de, eventBankFT);
                 de.appendBanks(bankEveFT);
