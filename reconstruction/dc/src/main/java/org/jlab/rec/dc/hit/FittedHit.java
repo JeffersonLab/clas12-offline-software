@@ -177,7 +177,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         if (this._TrkgStatus != -1) {
             if (this.get_TimeToDistance() == 0) // if the time-to-dist is not set ... set it
             {
-                set_TimeToDistance(1.0, B, constants1, tde);
+                set_TimeToDistance(event, 1.0, B, constants1, tde);
             }
 
             double x = this.get_Doca() / this.get_CellSize();
@@ -344,7 +344,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     /**
      * sets the calculated distance (in cm) from the time (in ns)
      */
-    public void set_TimeToDistance(double cosTrkAngle, double B, IndexedTable tab,TimeToDistanceEstimator tde) {     
+    public void set_TimeToDistance(DataEvent event, double cosTrkAngle, double B, IndexedTable tab,TimeToDistanceEstimator tde) {     
         
         double distance = 0;
         int slIdx = this.get_Superlayer() - 1;
@@ -355,7 +355,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             double theta0 = Math.acos(1-0.02*B);
             double alpha = Math.acos(cosTrkAngle);
             // correct alpha with theta0, the angle corresponding to the isochrone lines twist due to the electric field
-            alpha+=Swimmer.getTorScale()*theta0;
+            if(event.hasBank("MC::Particle")==false)
+                alpha-=Swimmer.getTorScale()*theta0;
             //reduce the corrected angle
             this.setAlpha(Math.toDegrees(alpha));
             double ralpha = this.reducedAngle(alpha);
@@ -367,12 +368,15 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             if (x != -1) {
                 deltatime_beta = calcDeltaTimeBeta(x, tab, beta);
             }
-            
-            distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), deltatime_beta), secIdx, slIdx) ;
+            if(event.hasBank("MC::Particle")==false) {
+                distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), deltatime_beta), secIdx, slIdx) ;
+            } else {
+                distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), 0), secIdx, slIdx) ;
+            }
             //deltatime_beta = calcDeltaTimeBeta(distance, tab, beta);
             //deltatime_beta = calcDeltaTimeBeta(distance, this.get_Superlayer(), beta);
             this.set_DeltaTimeBeta(deltatime_beta);
-            distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), deltatime_beta), secIdx, slIdx) ;
+            //distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), deltatime_beta), secIdx, slIdx) ;
             
         }
         
@@ -498,9 +502,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * A method to update the hit position information after the fit to the wire
      * positions employing hit-based tracking algorithms has been performed.
      */
-    public void updateHitPositionWithTime(double cosTrkAngle, double B, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
+    public void updateHitPositionWithTime(DataEvent event, double cosTrkAngle, double B, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         if (this.get_Time() > 0) {
-            this.set_TimeToDistance(cosTrkAngle, B, tab, tde);
+            this.set_TimeToDistance(event, cosTrkAngle, B, tab, tde);
         }
    
         double z = DcDetector.getWireMidpoint(this.get_Sector() - 1, this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;        
@@ -952,7 +956,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * 
      * @return a value <=1 resetting beta to 1 for overflows
      */
-    private double get_Beta0to1() {
+    public double get_Beta0to1() {
         double beta = this.get_Beta();
         if(beta>1.0)
             beta=1.0;

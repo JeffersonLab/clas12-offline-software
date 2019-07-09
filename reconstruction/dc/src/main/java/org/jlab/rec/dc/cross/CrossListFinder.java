@@ -7,11 +7,11 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.cluster.ClusterFitter;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
-import org.jlab.rec.dc.segment.SegmentFinder;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.utils.groups.IndexedTable;
 import trackfitter.fitter.LineFitter;
@@ -35,7 +35,10 @@ public class CrossListFinder  {
     private List<BaseCand> trkCnds = new ArrayList<BaseCand>();
     ClusterFitter cf = new ClusterFitter();
     
-    public CrossList candCrossLists(List<Cross> dccrosslist, boolean TimeBased, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde, Swim swimmer) {
+    public CrossList candCrossLists(DataEvent event,
+            List<Cross> dccrosslist, boolean TimeBased, 
+            IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde, 
+            Swim swimmer) {
         //List<List<Cross>> trkCnds = new ArrayList<List<Cross>>();
         trkCnds.clear();
 
@@ -129,9 +132,9 @@ public class CrossListFinder  {
                                 continue; // fit failed
                             }
                             //if(TimeBased && tde!=null) {			
-                            this.updateBFittedHits(c1, tab, DcDetector, tde, swimmer);
-                            this.updateBFittedHits(c2, tab, DcDetector, tde, swimmer);
-                            this.updateBFittedHits(c3, tab, DcDetector, tde, swimmer);
+                            this.updateBFittedHits(event, c1, tab, DcDetector, tde, swimmer);
+                            this.updateBFittedHits(event, c2, tab, DcDetector, tde, swimmer);
+                            this.updateBFittedHits(event, c3, tab, DcDetector, tde, swimmer);
                             //}
                             BaseCand bCand = new BaseCand();
                             bCand.CrossesOnTrack.clear();
@@ -192,12 +195,12 @@ public class CrossListFinder  {
         c1.set_DirErr(estimDirErr);
     }
 
-    private void recalcParsSegment(Segment _Segment1, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
+    private void recalcParsSegment(DataEvent event, Segment _Segment1, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         //refit
         double cosTrkAngle = 1. / Math.sqrt(1. + _Segment1.get_fittedCluster().get_clusterLineFitSlope() * _Segment1.get_fittedCluster().get_clusterLineFitSlope());
         // update the hits
         for (FittedHit fhit : _Segment1.get_fittedCluster()) { 
-            fhit.updateHitPositionWithTime(cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
+            fhit.updateHitPositionWithTime(event, cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
         }
 
          cf.SetFitArray(_Segment1.get_fittedCluster(), "TSC");
@@ -205,7 +208,7 @@ public class CrossListFinder  {
          cosTrkAngle = 1. / Math.sqrt(1. + _Segment1.get_fittedCluster().get_clusterLineFitSlope() * _Segment1.get_fittedCluster().get_clusterLineFitSlope());
 
          for (FittedHit fhit : _Segment1.get_fittedCluster()) {
-            fhit.updateHitPositionWithTime(cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
+            fhit.updateHitPositionWithTime(event, cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
         }
         cf.SetFitArray(_Segment1.get_fittedCluster(), "TSC");
         cf.Fit(_Segment1.get_fittedCluster(), true);
@@ -239,7 +242,7 @@ public class CrossListFinder  {
      * @param tde  time-to-distance utility
      * Updates the B-field information of the hits in the cross segments
      */
-    private void updateBFittedHits(Cross c, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde, Swim swimmer) {
+    private void updateBFittedHits(DataEvent event, Cross c, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde, Swim swimmer) {
         for(int i =0; i<c.get_Segment1().size(); i++) {
             Point3D ref =c.get_Segment1().get(i).getCrossDirIntersWire(); 
             float[] result = new float[3];
@@ -254,8 +257,8 @@ public class CrossListFinder  {
             c.get_Segment2().get(i).setB(Math.sqrt(result[0]*result[0]+result[1]*result[1]+result[2]*result[2]) );
         }
         if(tde!=null) {
-            this.recalcParsSegment(c.get_Segment1(), tab, DcDetector, tde);
-            this.recalcParsSegment(c.get_Segment2(), tab, DcDetector, tde);
+            this.recalcParsSegment(event, c.get_Segment1(), tab, DcDetector, tde);
+            this.recalcParsSegment(event, c.get_Segment2(), tab, DcDetector, tde);
         }
         //remake cross
         c.set_CrossParams(DcDetector);
