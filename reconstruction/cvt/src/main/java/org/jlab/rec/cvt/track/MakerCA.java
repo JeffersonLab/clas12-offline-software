@@ -99,6 +99,21 @@ public class MakerCA {
 		return true;
 	}
 	
+	private boolean checkSVTCellLength( Cell cell ) {
+		double xa = cell.get_Crs2D(1, this._plane).x;
+		double ya = cell.get_Crs2D(1, this._plane).y;
+		double xb = cell.get_Crs2D(2, this._plane).x;
+		double yb = cell.get_Crs2D(2, this._plane).y;
+		if( cell.get_c2().get_Detector().equalsIgnoreCase("SVT")) {
+			if( (cell.get_c2().get_Region()-1)/2 == (cell.get_c1().get_Region()-1)/2 ) {
+				if(cell.get_c2().get_Sector() == cell.get_c1().get_Sector() ) {
+					if (Math.sqrt((xb-xa)*(xb-xa)+(yb-ya)*(yb-ya))>20) return false;
+				}
+			}
+		}
+		return true;
+	}
+	
 	public void createCells( List<Cross> crs, Geometry bgeom ){
 		// this function loops over the crosses and looks for pairs that pass the cuts
 		//
@@ -175,6 +190,11 @@ public class MakerCA {
           		  if( this._debug) System.out.println("    +++ angle check not passed  +++ ");
       			  continue;
       		  }
+      		  
+      		if( this.checkSVTCellLength(scell) == false ) {
+        		  if( this._debug) System.out.println("    +++ Cell Length check not passed  +++ ");
+    			  continue;
+    		  }
       		  	
 
       		  // when running on ZR

@@ -25,6 +25,7 @@ public class MeasVecs {
         public int sector;
         public int type; // 0=svt; 1=BMT Z-det; 2=BMT C-det
         public int k;
+        public boolean FilteredOn;
 
         MeasVec() {
         }
@@ -50,6 +51,7 @@ public class MeasVecs {
         for (int i = 0; i < trkcand.get_Clusters().size(); i++) {
             if(trkcand.get_Clusters().get(i).get_Detector()==0) {
                 MeasVec meas = new MeasVec();
+                meas.FilteredOn = false;
                 meas.centroid = trkcand.get_Clusters().get(i).get_Centroid();
                 meas.type = 0;
                 meas.error = trkcand.get_Clusters().get(i).get_CentroidError()*trkcand.get_Clusters().get(i).get_CentroidError()*trkcand.get_Clusters().get(i).size();
@@ -67,6 +69,7 @@ public class MeasVecs {
             if (trkcand.get_Crosses().get(c).get_Detector().equalsIgnoreCase("BMT")) {
 
                 MeasVec meas = new MeasVec();
+                meas.FilteredOn = false;
                 meas.sector = trkcand.get_Crosses().get(c).get_Sector();
                 meas.layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6;
                 meas.centroid = trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();

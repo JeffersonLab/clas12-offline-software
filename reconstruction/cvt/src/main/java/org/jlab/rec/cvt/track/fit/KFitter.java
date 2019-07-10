@@ -89,10 +89,14 @@ public class KFitter {
     }
 
     public void runFitter(org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
-        this.NDF = mv.measurements.size()-6; 
+        this.NDF = -5; 
         this.chi2= Double.POSITIVE_INFINITY;
         
-        if (!org.jlab.rec.cvt.Constants.FromTargetToCTOF) sv.initAtLastMeas(this, mv, sgeo, bgeo, swimmer);
+        if (!org.jlab.rec.cvt.Constants.FromTargetToCTOF) {
+        	sv.initAtLastMeas(this, mv, sgeo, bgeo, swimmer);
+        	RunningAlgo=this.filter(mv.measurements.get(mv.measurements.size()-1).k, sgeo, bgeo, swimmer);
+        }
+        
         if (mv.measurements.size()-6<org.jlab.rec.cvt.Constants.NDF_Min) RunningAlgo=false;
         	
         //Possible to do several iterations if wanted
@@ -220,38 +224,37 @@ public class KFitter {
         double chi2 =0;
         
         for(int k = 1; k< sv.X0.size(); k++) {
-        	m=0;
-            h=0;
-            diff=mv.Residual(sv.trackTrajSmooth.get(k), sgeo);
-            excl_diff=0;
-            h_excl=0;
-            sv.trackTrajSmooth.get(k).clusID=mv.measurements.get(k).ID;
-            //SVT 
-            if (mv.measurements.get(k).type == 0) {
+        	if (mv.measurements.get(k).FilteredOn) {
+        		m=0;
+        		h=0;
+        		diff=mv.Residual(sv.trackTrajSmooth.get(k), sgeo);
+        		excl_diff=0;
+        		h_excl=0;
+        		sv.trackTrajSmooth.get(k).clusID=mv.measurements.get(k).ID;
+        		//SVT 
+        		if (mv.measurements.get(k).type == 0) {
             	
-                double V = sgeo.getSingleStripResolution(mv.measurements.get(k).layer, (int) mv.measurements.get(k).centroid, 
-                		sgeo.transformToFrame(mv.measurements.get(k).sector, mv.measurements.get(k).layer,sv.trackTrajSmooth.get(k).xdet, sv.trackTrajSmooth.get(k).ydet, sv.trackTrajSmooth.get(k).zdet , "local", "").z());
+        			double V = sgeo.getSingleStripResolution(mv.measurements.get(k).layer, (int) mv.measurements.get(k).centroid, 
+        					sgeo.transformToFrame(mv.measurements.get(k).sector, mv.measurements.get(k).layer,sv.trackTrajSmooth.get(k).xdet, sv.trackTrajSmooth.get(k).ydet, sv.trackTrajSmooth.get(k).zdet , "local", "").z());
                 
-                mv.measurements.get(k).error = V * V;
-            }
+        			mv.measurements.get(k).error = V * V;
+        		}
            
-            if (org.jlab.rec.cvt.Constants.ExcludingSite) excl_diff=mv.Residual(this.getStateVecExcludingSite(k,diff, sgeo, bgeo, swimmer),sgeo);//Important... V must be updated for SVT before calling getStateVecExcludingSite
-                       
-                            
+        		if (org.jlab.rec.cvt.Constants.ExcludingSite) excl_diff=mv.Residual(this.getStateVecExcludingSite(k,diff, sgeo, bgeo, swimmer),sgeo);//Important... V must be updated for SVT before calling getStateVecExcludingSite
+                             
+        		//Increment the chi2
+        		chi2 += diff * diff / mv.measurements.get(k).error;
            
+        		//Associate residual infos to the state vectors
+        		sv.trackTrajSmooth.get(k).excl_residual=excl_diff;//m-this.ExcludingSite(k,diff,mv.measurements.get(k).error);
+        		sv.trackTrajSmooth.get(k).residual=diff;
             
-            //Increment the chi2
-            chi2 += diff * diff / mv.measurements.get(k).error;
-           
-            //Associate residual infos to the state vectors
-            sv.trackTrajSmooth.get(k).excl_residual=excl_diff;//m-this.ExcludingSite(k,diff,mv.measurements.get(k).error);
-            sv.trackTrajSmooth.get(k).residual=diff;
-            
-            //Prefer to give a spatial residual for BMT Z
-            if (mv.measurements.get(k).type == 1) {
-            	sv.trackTrajSmooth.get(k).residual=bgeo.getRadius(mv.measurements.get(k).layer-6)*diff;  
-            	sv.trackTrajSmooth.get(k).excl_residual=bgeo.getRadius(mv.measurements.get(k).layer-6)*excl_diff;  
-            }
+        		//Prefer to give a spatial residual for BMT Z
+        		if (mv.measurements.get(k).type == 1) {
+        			sv.trackTrajSmooth.get(k).residual=bgeo.getRadius(mv.measurements.get(k).layer-6)*diff;  
+        			sv.trackTrajSmooth.get(k).excl_residual=bgeo.getRadius(mv.measurements.get(k).layer-6)*excl_diff;  
+        		}
+        	}
         }  
        return chi2;
 
@@ -303,94 +306,96 @@ public class KFitter {
             double h = 0;
             //Difference m-h
             double delta = mv.Residual(sv.trackTraj.get(k), sgeo);
-            
-            if (mv.measurements.get(k).type == 0) {
-            	
-                
-                V = sgeo.getSingleStripResolution(mv.measurements.get(k).layer, (int) mv.measurements.get(k).centroid, 
+            if (mv.measurements.get(k).layer>3||(mv.measurements.get(k).layer<4&&delta<1)||(this.NDF<1)) {
+            	if (mv.measurements.get(k).type == 0) {
+            	                
+            		V = sgeo.getSingleStripResolution(mv.measurements.get(k).layer, (int) mv.measurements.get(k).centroid, 
                 		sgeo.transformToFrame(mv.measurements.get(k).sector, mv.measurements.get(k).layer,sv.trackTraj.get(k).xdet, sv.trackTraj.get(k).ydet, sv.trackTraj.get(k).zdet , "local", "").z());
-                V = V * V;
+            		V = V * V;
                
-            }
+            	}
            
-            //get the projector Matrix
-            double[] H = new double[5];
-            H = mv.H(sv.trackTraj.get(k), sv, sgeo, bgeo, mv.measurements.get(k).type, swimmer);
+            	//get the projector Matrix
+            	double[] H = new double[5];
+            	H = mv.H(sv.trackTraj.get(k), sv, sgeo, bgeo, mv.measurements.get(k).type, swimmer);
 
-            double[][] HTGH = new double[][]{
-                {H[0] * H[0] / V, H[0] * H[1] / V, H[0] * H[2] / V, H[0] * H[3] / V, H[0] * H[4] / V},
-                {H[1] * H[0] / V, H[1] * H[1] / V, H[1] * H[2] / V, H[1] * H[3] / V, H[1] * H[4] / V},
-                {H[2] * H[0] / V, H[2] * H[1] / V, H[2] * H[2] / V, H[2] * H[3] / V, H[2] * H[4] / V},
-                {H[3] * H[0] / V, H[3] * H[1] / V, H[3] * H[2] / V, H[3] * H[3] / V, H[3] * H[4] / V},
-                {H[4] * H[0] / V, H[4] * H[1] / V, H[4] * H[2] / V, H[4] * H[3] / V, H[4] * H[4] / V}
-            };
+            	double[][] HTGH = new double[][]{
+            		{H[0] * H[0] / V, H[0] * H[1] / V, H[0] * H[2] / V, H[0] * H[3] / V, H[0] * H[4] / V},
+            		{H[1] * H[0] / V, H[1] * H[1] / V, H[1] * H[2] / V, H[1] * H[3] / V, H[1] * H[4] / V},
+            		{H[2] * H[0] / V, H[2] * H[1] / V, H[2] * H[2] / V, H[2] * H[3] / V, H[2] * H[4] / V},
+            		{H[3] * H[0] / V, H[3] * H[1] / V, H[3] * H[2] / V, H[3] * H[3] / V, H[3] * H[4] / V},
+            		{H[4] * H[0] / V, H[4] * H[1] / V, H[4] * H[2] / V, H[4] * H[3] / V, H[4] * H[4] / V}
+            	};
             
-            Matrix Ci = null;
-            //this.printMatrix(new Matrix(HTGH));System.err.println("-------------------------------\n");
-            if (this.isNonsingular(sv.trackCov.get(k).covMat) == false) {
-                //System.err.println("Covariance Matrix is non-invertible - quit filter!");
-                return false;
-            }
-            try {
-                Ci = sv.trackCov.get(k).covMat.inverse();
-            } catch (Exception e) {
-                return false;
-            }
+            	Matrix Ci = null;
+            	//this.printMatrix(new Matrix(HTGH));System.err.println("-------------------------------\n");
+            	if (this.isNonsingular(sv.trackCov.get(k).covMat) == false) {
+            		//System.err.println("Covariance Matrix is non-invertible - quit filter!");
+            		return false;
+            	}
+            	try {
+            		Ci = sv.trackCov.get(k).covMat.inverse();
+            	} catch (Exception e) {
+            		return false;
+            	}
            
-            Matrix Ca = null;
-            try {
-            	sv.MeasurementDerivative.put(k, new Matrix(HTGH));
-                Ca = Ci.plus(sv.MeasurementDerivative.get(k));
-            } catch (Exception e) {
-                return false;
-            }
-            if (Ca != null && this.isNonsingular(Ca) == false) {
-                //System.err.println("Covariance Matrix Ca is non-invertible - quit filter!");
-                return false;
-            }
-            if (Ca != null && this.isNonsingular(Ca) == true) {
-            	 if (Ca.inverse() != null) {
-                	Matrix CaInv = Ca.inverse();
-                    sv.trackCovFilt.get(k).covMat = CaInv;
-                    //this.printMatrix(sv.trackCov.get(k).covMat);
-                    //System.err.println("Error: e");
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+            	Matrix Ca = null;
+            	try {
+            		sv.MeasurementDerivative.put(k, new Matrix(HTGH));
+            		Ca = Ci.plus(sv.MeasurementDerivative.get(k));
+            	} catch (Exception e) {
+            		return false;
+            	}
+            	if (Ca != null && this.isNonsingular(Ca) == false) {
+            		//System.err.println("Covariance Matrix Ca is non-invertible - quit filter!");
+            		return false;
+            	}
+            	if (Ca != null && this.isNonsingular(Ca) == true) {
+            		if (Ca.inverse() != null) {
+            			Matrix CaInv = Ca.inverse();
+            			sv.trackCovFilt.get(k).covMat = CaInv;
+            			//this.printMatrix(sv.trackCov.get(k).covMat);
+            			//System.err.println("Error: e");
+            		} else {
+            			return false;
+            		}
+            	} else {
+            		return false;
+            	}
             
-            for (int j = 0; j < 5; j++) {
-                // the gain matrix
-                K[j] = 0;
-                for (int i = 0; i < 5; i++) {
-                    K[j] += H[i] * sv.trackCovFilt.get(k).covMat.get(j, i) / V; //The multiplication with V is already taken into account in line 313
-                }
-            }
+            	for (int j = 0; j < 5; j++) {
+            		// the gain matrix
+            		K[j] = 0;
+            		for (int i = 0; i < 5; i++) {
+            			K[j] += H[i] * sv.trackCovFilt.get(k).covMat.get(j, i) / V; //The multiplication with V is already taken into account in line 313
+            		}
+            	}
             
-            double drho_filt = sv.trackTraj.get(k).d_rho;
-            double phi0_filt = sv.trackTraj.get(k).phi0;
-            double kappa_filt = sv.trackTraj.get(k).kappa;
-            double dz_filt = sv.trackTraj.get(k).dz;
-            double tanL_filt = sv.trackTraj.get(k).tanL;
+            	double drho_filt = sv.trackTraj.get(k).d_rho;
+            	double phi0_filt = sv.trackTraj.get(k).phi0;
+            	double kappa_filt = sv.trackTraj.get(k).kappa;
+            	double dz_filt = sv.trackTraj.get(k).dz;
+            	double tanL_filt = sv.trackTraj.get(k).tanL;
             
-            drho_filt += K[0] * delta;
-            phi0_filt += K[1] * delta;
-            kappa_filt += K[2] * delta;
-            dz_filt += K[3] * delta;
-            tanL_filt += K[4] * delta;
+            	drho_filt += K[0] * delta;
+            	phi0_filt += K[1] * delta;
+            	kappa_filt += K[2] * delta;
+            	dz_filt += K[3] * delta;
+            	tanL_filt += K[4] * delta;
                      
-            //System.out.println(sv.Layer.get(k)+" "+delta+" "+H[0]+" "+H[1]+" "+H[2]+" "+H[3]+" "+H[4]);
-            sv.trackTrajFilt.get(k).d_rho = drho_filt;
-            sv.trackTrajFilt.get(k).phi0 = phi0_filt;
-            sv.trackTrajFilt.get(k).kappa = kappa_filt;
-            sv.trackTrajFilt.get(k).dz = dz_filt;
-            sv.trackTrajFilt.get(k).tanL = tanL_filt;
+            	//System.out.println(sv.Layer.get(k)+" "+delta+" "+H[0]+" "+H[1]+" "+H[2]+" "+H[3]+" "+H[4]);
+            	sv.trackTrajFilt.get(k).d_rho = drho_filt;
+            	sv.trackTrajFilt.get(k).phi0 = phi0_filt;
+            	sv.trackTrajFilt.get(k).kappa = kappa_filt;
+            	sv.trackTrajFilt.get(k).dz = dz_filt;
+            	sv.trackTrajFilt.get(k).tanL = tanL_filt;
             
 
-            sv.getStateVecAtModule(k, sv.trackTrajFilt.get(k), sgeo, bgeo, mv.measurements.get(k).type, swimmer);
-          
+            	sv.getStateVecAtModule(k, sv.trackTrajFilt.get(k), sgeo, bgeo, mv.measurements.get(k).type, swimmer);
+            	mv.measurements.get(k).FilteredOn=true;
+            	this.NDF++;
+            }
+            
             return true;
           }
         return false;
@@ -402,7 +407,13 @@ public class KFitter {
              return false;
          }
          try {
-                  
+        	 StateVecs.StateVec sv_Smooth=sv.new StateVec(f);
+        	 StateVecs.CovMat covMat_Smooth=sv.new CovMat(f);
+        	 sv_Smooth.Duplicate(sv.trackTrajFilt.get(f)) ;
+        	 sv.trackTrajSmooth.put(f,sv_Smooth);
+        	 sv.trackCovSmooth.put(f,covMat_Smooth);
+        	 
+        	
         	 Matrix Ak=sv.trackCovFilt.get(f).covMat.times(sv.trackTransport.get(i).transpose()).times(sv.trackCov.get(i).covMat.inverse());
     	
         	 double[] diff=new double [5];
@@ -421,11 +432,7 @@ public class KFitter {
         		 }
         	 }
     	
-        	 StateVecs.StateVec sv_Smooth=sv.new StateVec(f);
-        	 StateVecs.CovMat covMat_Smooth=sv.new CovMat(f);
-        	 sv_Smooth.Duplicate(sv.trackTrajFilt.get(f)) ;
-        	 sv.trackTrajSmooth.put(f,sv_Smooth);
-        	 sv.trackCovSmooth.put(f,covMat_Smooth);
+        	 
     	
         	 sv.trackTrajSmooth.get(f).d_rho+=SmoothCorrection[0];
         	 sv.trackTrajSmooth.get(f).phi0+=SmoothCorrection[1];
@@ -434,15 +441,14 @@ public class KFitter {
         	 sv.trackTrajSmooth.get(f).tanL+=SmoothCorrection[4];
     	
         	 sv.getStateVecAtModule(f, sv.trackTrajSmooth.get(f), sgeo, bgeo, mv.measurements.get(f).type, swimmer);
-        	      	 
+        	 sv.trackCovSmooth.get(f).covMat=sv.trackCovFilt.get(f).covMat.plus(Ak.times(sv.trackCovSmooth.get(i).covMat.minus(sv.trackCov.get(i).covMat)).times(Ak.transpose()));
+        	   	 
         	 double deltaPhi=sv.trackTrajSmooth.get(i).phi-sv.trackTrajSmooth.get(f).phi;
         	 if (deltaPhi>2*Math.PI) deltaPhi=deltaPhi-2*Math.PI;
         	 if (deltaPhi<-2*Math.PI) deltaPhi=deltaPhi+2*Math.PI;
         	 	sv.trackTrajSmooth.get(f).pathlength=sv.trackTrajSmooth.get(i).pathlength
         	 			+Math.abs(sv.trackTrajSmooth.get(f).get_Radius()*(1+Math.abs(sv.trackTrajSmooth.get(f).tanL))*deltaPhi);
-    	
-        	 	sv.trackCovSmooth.get(f).covMat=sv.trackCovFilt.get(f).covMat.plus(Ak.times(sv.trackCovSmooth.get(i).covMat.minus(sv.trackCov.get(i).covMat)).times(Ak.transpose()));
-        	 	
+    	       	 	
          } catch (Exception e) {
              return false;
          }
