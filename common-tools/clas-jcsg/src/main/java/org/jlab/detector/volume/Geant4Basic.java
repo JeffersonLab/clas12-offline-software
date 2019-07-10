@@ -211,14 +211,6 @@ public abstract class Geant4Basic {
     }
 
     
-    private static class SmartFormat {
-        private static DecimalFormat largef = new DecimalFormat("#.####");
-        private static DecimalFormat smallf = new DecimalFormat("#.#######");
-        public static String format(double num) {
-            return (num < 1e-2) ? smallf.format(num) : largef.format(num);
-        }
-    }
-
     public String gemcString() {
         StringBuilder str = new StringBuilder();
 
@@ -228,9 +220,11 @@ public abstract class Geant4Basic {
             str.append(String.format("%18s | %8s | ", volumeName, motherVolume.getName()));
         }
 
+        DecimalFormat precisionFormat = new DecimalFormat("#.#######");
+
         Vector3d pos = getLocalPosition();
         str.append(String.format("%s*%s %s*%s %s*%s | ",
-                SmartFormat.format(pos.x), Length.unit(), SmartFormat.format(pos.y), Length.unit(), SmartFormat.format(pos.z), Length.unit()));
+                precisionFormat.format(pos.x), Length.unit(), precisionFormat.format(pos.y), Length.unit(), precisionFormat.format(pos.z), Length.unit()));
 
         if (rotationValues[0] == 0 && rotationValues[1] == 0 && rotationValues[2] == 0) {
             str.append("0 0 0 ");
@@ -239,12 +233,12 @@ public abstract class Geant4Basic {
                 str.append(String.format("ordered: %s ", new StringBuilder(this.rotationOrder).reverse().toString()));
             }
             for (int irot = 0; irot < rotationValues.length; irot++) {
-                str.append(SmartFormat.format(Math.toDegrees(rotationValues[rotationValues.length - irot - 1]))).append("*deg ");
+                str.append(precisionFormat.format(Math.toDegrees(rotationValues[rotationValues.length - irot - 1]))).append("*deg ");
             }
         }
         str.append(String.format("| %8s | ", this.getType()));
         volumeDimensions.stream()
-                .forEach(dim -> str.append(SmartFormat.format(dim.value)).append("*").append(dim.unit).append(" "));
+                .forEach(dim -> str.append(precisionFormat.format(dim.value)).append("*").append(dim.unit).append(" "));
         str.append(" | ");
 
         int[] ids = this.getId();
