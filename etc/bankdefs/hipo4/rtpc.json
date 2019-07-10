@@ -4,7 +4,7 @@
     "group": 1720,
     "item" : 1,
     "info": "reconstructed RTPC hits",
-    "items": [
+    "entries": [
        {"name":"TID",        "type":"I", "info":"Track ID of the hit"},
        {"name":"cellID",     "type":"I",  "info":"cell id"},
        {"name":"time",       "type":"F", "info":"Time (ns)"},
