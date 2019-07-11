@@ -36,7 +36,7 @@ public final class CTOFGeant4Factory extends Geant4Factory {
         double cadThick   = cp.getDouble(caddbpath+"thickness", 0); 
         double cadAngle   = cp.getDouble(caddbpath+"angle", 0);
         double cadOffset  = cp.getDouble(caddbpath+"offset", 0);
-        motherVolume = new G4World("fc");
+        motherVolume = new G4World("root");
 
         ClassLoader cloader = getClass().getClassLoader();
 
