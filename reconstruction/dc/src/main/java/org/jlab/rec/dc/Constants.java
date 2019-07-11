@@ -165,6 +165,8 @@ public class Constants {
     public static double MINPATH = 200;
     public static double BETAHIGH = 1.5;
     public static double BETALOW = 0.15;
+    //max number of hits allowed in the event to do tracking
+    public static double MAXHITS = 2000;
 
     public static boolean isUSETSTART() {
         return USETSTART;
