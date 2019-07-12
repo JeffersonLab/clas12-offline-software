@@ -309,7 +309,7 @@ public class Constants {
 	public static final double unc_z0 = 10;
 	public static final double unc_kappa = 3;
 
-	public static final boolean ExcludingSite = true;
+	public static final boolean ExcludingSite = false;
 
 	public static final boolean FromTargetToCTOF = true;
 	
