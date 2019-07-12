@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.banks;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -379,13 +380,13 @@ public class RecoBankWriter {
                 bank.setFloat("cov_z02", i, -999);
                 bank.setFloat("cov_tandip2", i, -999);
             }
-            bank.setFloat("c_x", i, (float) trkcands.get(i).get_TrackPointAtCTOFRadius().x()); // convert to cm
+            /*bank.setFloat("c_x", i, (float) trkcands.get(i).get_TrackPointAtCTOFRadius().x()); // convert to cm
             bank.setFloat("c_y", i, (float) trkcands.get(i).get_TrackPointAtCTOFRadius().y()); // convert to cm
             bank.setFloat("c_z", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().z() + zShift)); // convert to cm
             bank.setFloat("c_ux", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().x());
             bank.setFloat("c_uy", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().y());
             bank.setFloat("c_uz", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().z());
-            bank.setFloat("pathlength", i, (float) trkcands.get(i).get_pathLength());  // conversion to cm
+            bank.setFloat("pathlength", i, (float) trkcands.get(i).get_pathLength());  // conversion to cm*/
 
             // fills the list of cross ids for crosses belonging to that reconstructed track
             for (int j = 0; j < trkcands.get(i).size(); j++) {
@@ -545,17 +546,26 @@ public class RecoBankWriter {
                for (org.jlab.rec.cvt.track.fit.StateVecs.StateVec stVec : trks.get(i).getTrajectory()) {
 
                     bank.setShort("id",       k, (short) trks.get(i).get_Id());
-                    //bank.setShort("detector", k, (byte) stVec.get_SurfaceDetector());
+                    bank.setShort("detector", k, (byte) stVec.DetectorType);
                     bank.setByte("sector",    k, (byte) stVec.sector);
                     bank.setByte("layer",     k, (byte) stVec.layer);
-                    bank.setFloat("x",        k, (float) (stVec.xdet/10.));
-                    bank.setFloat("y",        k, (float) (stVec.ydet/10.));
-                    bank.setFloat("z",        k, (float) (stVec.zdet/10. + zShift));
+                    if (stVec.DetectorType==DetectorType.BST.getDetectorId()||stVec.DetectorType==DetectorType.BMT.getDetectorId()) {
+                    	bank.setFloat("x",        k, (float) (stVec.xdet/10.));
+                    	bank.setFloat("y",        k, (float) (stVec.ydet/10.));
+                    	bank.setFloat("z",        k, (float) (stVec.zdet/10. + zShift));
+                    	 bank.setFloat("path",     k, (float) (stVec.pathlength/10.));
+                    }
+                    else {
+                    	bank.setFloat("x",        k, (float) stVec.xdet);
+                    	bank.setFloat("y",        k, (float) stVec.ydet);
+                    	bank.setFloat("z",        k, (float) (stVec.zdet + zShift));
+                    	bank.setFloat("path",     k, (float) stVec.pathlength);
+                    }
                     /*bank.setFloat("phi",      k, (float) stVec.get_TrkPhiAtSurface());
                     bank.setFloat("theta",    k, (float) stVec.get_TrkThetaAtSurface());
                     bank.setFloat("langle",   k, (float) stVec.get_TrkToModuleAngle());
-                    bank.setFloat("centroid", k, (float) stVec.get_CalcCentroidStrip());
-                    bank.setFloat("path",     k, (float) stVec.get_Path()/10);*/
+                    bank.setFloat("centroid", k, (float) stVec.get_CalcCentroidStrip());*/
+                   
                     k++;
 
                 }

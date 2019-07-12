@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.track.fit;
 
 import java.util.ArrayList;
 
+
 import org.jlab.geom.prim.Point3D;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.track.Seed;
@@ -12,6 +13,13 @@ import org.jlab.rec.cvt.trajectory.Helix;
 
 import Jama.Matrix;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.base.DetectorType;
+
+/*********
+ * 
+ * @author mdefurne
+ *
+ */
 
 public class KFitter {
 
@@ -164,6 +172,8 @@ public class KFitter {
     	TrjPoints.clear();
     	
         for (int k = 1; k < sv.trackTrajSmooth.size(); k++) {
+        	if (sv.trackTrajSmooth.get(k).layer<7) sv.trackTrajSmooth.get(k).DetectorType=DetectorType.BST.getDetectorId();
+        	if (sv.trackTrajSmooth.get(k).layer>6) sv.trackTrajSmooth.get(k).DetectorType=DetectorType.BMT.getDetectorId();
         	TrjPoints.add(sv.trackTrajSmooth.get(k));
         }
     }

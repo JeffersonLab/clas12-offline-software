@@ -12,6 +12,12 @@ import org.jlab.rec.cvt.trajectory.Helix;
 import Jama.Matrix;
 import org.jlab.clas.swimtools.Swim;
 
+/***********
+ * 
+ * @author mdefurne
+ *
+ */
+
 public class StateVecs {
 
     final static double speedLight = org.jlab.rec.cvt.Constants.LIGHTVEL;
@@ -422,6 +428,7 @@ public class StateVecs {
         public int k;
         public int layer;
         public int sector;
+        public int DetectorType;
         public int clusID;
         //Pivot point coordinates for Helix parameters
         public double refx;
@@ -451,7 +458,7 @@ public class StateVecs {
         public double excl_residual;
         public double pathlength;
                         
-        StateVec(int k) {
+        public StateVec(int k) {
             this.k = k;
         }
         
@@ -717,4 +724,5 @@ public class StateVecs {
     public void printlnStateVec(StateVec S) {
         System.out.println(S.k + ") drho " + S.d_rho + " phi0 " + S.phi0 + " kappa " + S.kappa + " dz " + S.dz + " tanL " + S.tanL + " phi " + S.phi + " x " + S.refx + " y " + S.refy + " z " + S.refz + " alpha " + S.alpha);
     }
+	
 }
