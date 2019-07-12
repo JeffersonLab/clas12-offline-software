@@ -39,7 +39,10 @@ import org.jlab.rec.cvt.track.fit.KFitter;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 
 /**
- *
+ * 
+ * @author mdefurne
+ * @author fbossu
+ * 
  */
 
 public class CVTRecHandler {
@@ -300,7 +303,7 @@ public class CVTRecHandler {
         trkFinder.removeBadTracks(trks); // If chi2 is very bad, we delete it before doing the overlapping track study
         trkFinder.removeOverlappingTracks(trks); //Determine which track is the best if they share two measurements
         trkFinder.updateCrosses(trks, crosses); //Once we have kept only good tracks, we can update the cross.
-        trkFinder.FinalizeTrackToCTOF_CND(trks); //Get Intersection with CTOF and CND
+        trkFinder.FinalizeTrackToCTOF_CND(trks,CTOFGeom,CNDGeom,swimmer); //Get Intersection with CTOF and CND
 
                       
         return trks;
