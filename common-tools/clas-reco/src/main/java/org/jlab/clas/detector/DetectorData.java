@@ -194,6 +194,7 @@ public class DetectorData {
         DataBank bank = event.createBank(bank_name, particles.size());
         for(int row = 0; row < particles.size(); row++){
             bank.setInt("pid",row,particles.get(row).getPid());
+            bank.setFloat("vt", row, (float) particles.get(row).getStartTime());
             bank.setFloat("beta", row, (float) particles.get(row).getBeta());
             bank.setShort("status", row, (short) particles.get(row).getStatus().getValue());
             bank.setFloat("chi2pid", row, (float) particles.get(row).getPidQuality());

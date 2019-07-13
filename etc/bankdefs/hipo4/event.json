@@ -446,6 +446,7 @@
         "info": "Reconstructed Particle Information, shadowing REC::Particle with FT-based start time",
         "entries": [
             {"name":"pid",     "type":"I", "info":"particle id in LUND conventions"},
+            {"name":"vt",      "type":"F", "info":"RF and z corrected vertex time (ns)"},
             {"name":"beta",    "type":"F", "info":"particle beta measured by TOF"},
             {"name":"chi2pid", "type":"F", "info":"Chi2 of assigned PID"},
             {"name":"status",  "type":"S", "info":"particle status (represents detector collection it passed)"}
