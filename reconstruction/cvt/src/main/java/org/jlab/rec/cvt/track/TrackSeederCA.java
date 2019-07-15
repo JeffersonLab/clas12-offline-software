@@ -173,7 +173,7 @@ public class TrackSeederCA {
         
         camaker.createCells(crs, bgeom);
         camaker.findNeighbors();
-        camaker.evolve( nepochs );
+//        camaker.evolve( nepochs );
         return camaker.getNodes();  
     }
     
