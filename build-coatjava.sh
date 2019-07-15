@@ -109,5 +109,6 @@ cp reconstruction/rich/target/clas12detector-rich-*-SNAPSHOT.jar coatjava/lib/se
 cp reconstruction/fvt/target/clas12detector-fmt-*-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/eb/target/clas12detector-eb-*-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/band/target/clas12detector-band-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/mc/target/clas12detector-mc-*-SNAPSHOT.jar coatjava/lib/services/
 
 echo "COATJAVA SUCCESSFULLY BUILT !"

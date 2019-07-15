@@ -271,9 +271,9 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             zCent = weightedZ / totEn;
             phiErrCent = Math.sqrt(weightedPhiErrSq);
             phiErrCent0 = Math.sqrt(weightedPhiErrSq0);
-            xErrCent = weightedXErrSq/totEn;
-            yErrCent = weightedYErrSq/totEn;
-            zErrCent = weightedZErrSq/totEn;
+            xErrCent = Math.sqrt(weightedXErrSq/totEn);
+            yErrCent = Math.sqrt(weightedYErrSq/totEn);
+            zErrCent = Math.sqrt(weightedZErrSq/totEn);
 
             //phiErrCent = Math.sqrt(weightedPhiErrSq);
             //phiErrCent0 = Math.sqrt(weightedPhiErrSq0);
@@ -295,11 +295,16 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             set_Centroid0(stripNumCent0);
             _Phi = phiCent;
             _PhiErr = phiErrCent;
-
+            _Z=Double.NaN;
+            _ZErr=Double.NaN;
             set_Phi0(phiCent0);
             set_PhiErr0(phiErrCent0);
         }
         if (this.get_DetectorType() == 0) {
+        	_X=Double.NaN;
+        	_Y=Double.NaN;
+        	_XErr=Double.NaN;
+        	_YErr=Double.NaN;
             _Z = zCent;
             _ZErr = zErrCent;
         }
@@ -376,6 +381,39 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     public void set_ZErr(double _ZErr) {
         this._ZErr = _ZErr;
     }
+    
+    public double get_X() {
+        return _X;
+    }
+
+    public void set_X(double _X) {
+        this._X = _X;
+    }
+
+    public double get_XErr() {
+        return _XErr;
+    }
+
+    public void set_XErr(double _XErr) {
+        this._XErr = _XErr;
+    }
+    
+    public double get_Y() {
+        return _Y;
+    }
+
+    public void set_Y(double _Y) {
+        this._Y = _Y;
+    }
+
+    public double get_YErr() {
+        return _YErr;
+    }
+
+    public void set_YErr(double _YErr) {
+        this._YErr = _YErr;
+    }
+
 
     public double get_TotalEnergy() {
         return _TotalEnergy;

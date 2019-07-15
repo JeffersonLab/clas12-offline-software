@@ -3,9 +3,11 @@ package org.jlab.rec.cvt.banks;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.cvt.CentralTracker;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.FittedHit;
@@ -26,28 +28,29 @@ public class RecoBankWriter {
      * @return hits bank
      *
      */
-    public DataBank fillSVTHitsBank(DataEvent event, List<FittedHit> hitlist) {
-        if (hitlist == null) {
+    public DataBank fillSVTHitsBank(DataEvent event, CentralTracker CVT) {
+        
+        if (CVT.getTotalSVThits() == 0) {
             return null;
         }
-        if (hitlist.size() == 0) {
-            return null;
-        }
 
-        DataBank bank
-                = event.createBank("BSTRec::Hits", hitlist.size());
-       
-        for (int i = 0; i < hitlist.size(); i++) {
+        DataBank bank = event.createBank("BSTRec::Hits", CVT.getTotalSVThits());
+        
+        int row=0;
+        for (int i = 0; i < CVT.getNbSVTModuleWithHit(); i++) {
+        	for (int j=0; j< CVT.getSVTHitsByID(i).size();j++) {
 
-            bank.setShort("ID", i, (short) hitlist.get(i).get_Id());
+        		bank.setShort("ID", row, (short) CVT.getSVTHitsByID(i).get(j).get_Id());
 
-            bank.setByte("layer", i, (byte) hitlist.get(i).get_Layer());
-            bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
-            bank.setInt("strip", i, hitlist.get(i).get_Strip().get_Strip());
+        		bank.setByte("layer", row, (byte) CVT.getSVTHitsByID(i).get(j).get_Layer());
+        		bank.setByte("sector", row, (byte) CVT.getSVTHitsByID(i).get(j).get_Sector());
+        		bank.setInt("strip", row, CVT.getSVTHitsByID(i).get(j).get_Strip().get_Strip());
 
-            bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
-            bank.setShort("trkID", i, (short) hitlist.get(i).get_AssociatedTrackID());
-
+        		bank.setShort("clusterID", row, (short) CVT.getSVTHitsByID(i).get(j).get_AssociatedClusterID());
+        		bank.setShort("trkID", row, (short) CVT.getSVTHitsByID(i).get(j).get_AssociatedTrackID());
+        		
+        		row++;
+        	}
         }
         //bank.show();
         return bank;
@@ -59,50 +62,54 @@ public class RecoBankWriter {
      * @param cluslist the reconstructed list of fitted clusters in the event
      * @return clusters bank
      */
-    public DataBank fillSVTClustersBank(DataEvent event, List<Cluster> cluslist) {
-        if (cluslist == null) {
-            return null;
-        }
-        if (cluslist.size() == 0) {
+    public DataBank fillSVTClustersBank(DataEvent event, CentralTracker CVT) {
+        
+        if (CVT.getTotalSVTclusters() == 0) {
             return null;
         }
 
-        DataBank bank = event.createBank("BSTRec::Clusters", cluslist.size());
+        DataBank bank = event.createBank("BSTRec::Clusters", CVT.getTotalSVTclusters());
         int[] hitIdxArray = new int[5];
 
-        for (int i = 0; i < cluslist.size(); i++) {
-            for (int j = 0; j < hitIdxArray.length; j++) {
-                hitIdxArray[j] = -1;
-            }
-            bank.setShort("ID", i, (short) cluslist.get(i).get_Id());
-            bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
-            bank.setByte("layer", i, (byte) cluslist.get(i).get_Layer());
-            bank.setShort("size", i, (short) cluslist.get(i).size());
-            bank.setFloat("ETot", i, (float) cluslist.get(i).get_TotalEnergy());
-            bank.setInt("seedStrip", i, cluslist.get(i).get_SeedStrip());
-            bank.setFloat("centroid", i, (float) cluslist.get(i).get_Centroid());
-            bank.setFloat("seedE", i, (float) cluslist.get(i).get_SeedEnergy());
-            bank.setFloat("centroidResidual", i, (float) cluslist.get(i).get_CentroidResidual());
-            bank.setFloat("seedResidual", i, (float) cluslist.get(i).get_SeedResidual()); 
-            bank.setShort("trkID", i, (short) cluslist.get(i).get_AssociatedTrackID());
-            bank.setFloat("Tmin", i, (float) cluslist.get(i).get_Tmin());
-            bank.setFloat("Tmax", i, (float) cluslist.get(i).get_Tmax());
-            bank.setShort("Strip_Tmin", i, (short) cluslist.get(i).get_StripTmin());
-            bank.setShort("Strip_Tmax", i, (short) cluslist.get(i).get_StripTmax());
+        int row=0;
+        
+        for (int i = 0; i < CVT.getNbSVTModuleWithHit(); i++) {
+        	for (int j=0; j< CVT.getSVTClustersByID(i).size(); j++) {
+        		for (int k = 0; k < hitIdxArray.length; k++) {
+        			hitIdxArray[k] = -1;
+        		}
+        		bank.setShort("ID", row, (short) CVT.getSVTClustersByID(i).get(j).get_Id());
+        		bank.setByte("sector", row, (byte) CVT.getSVTClustersByID(i).get(j).get_Sector());
+        		bank.setByte("layer", row, (byte) CVT.getSVTClustersByID(i).get(j).get_Layer());
+        		bank.setShort("size", row, (short) CVT.getSVTClustersByID(i).get(j).size());
+        		bank.setFloat("ETot", row, (float) CVT.getSVTClustersByID(i).get(j).get_TotalEnergy());
+        		bank.setInt("seedStrip", row, CVT.getSVTClustersByID(i).get(j).get_SeedStrip());
+        		bank.setFloat("centroid", row, (float) CVT.getSVTClustersByID(i).get(j).get_Centroid());
+        		bank.setFloat("seedE", row, (float) CVT.getSVTClustersByID(i).get(j).get_SeedEnergy());
+        		bank.setFloat("centroidResidual", row, (float) CVT.getSVTClustersByID(i).get(j).get_CentroidResidual());
+        		bank.setFloat("seedResidual", row, (float) CVT.getSVTClustersByID(i).get(j).get_SeedResidual()); 
+        		bank.setShort("trkID", row, (short) CVT.getSVTClustersByID(i).get(j).get_AssociatedTrackID());
+        		bank.setFloat("Tmin", row, (float) CVT.getSVTClustersByID(i).get(j).get_Tmin());
+        		bank.setFloat("Tmax", row, (float) CVT.getSVTClustersByID(i).get(j).get_Tmax());
+        		bank.setShort("Strip_Tmin", row, (short) CVT.getSVTClustersByID(i).get(j).get_StripTmin());
+        		bank.setShort("Strip_Tmax", row, (short) CVT.getSVTClustersByID(i).get(j).get_StripTmax());
 
-            for (int j = 0; j < cluslist.get(i).size(); j++) {
-                if (j < hitIdxArray.length) {
-                    hitIdxArray[j] = cluslist.get(i).get(j).get_Id();
-                }
-            }
+        		for (int k = 0; k < CVT.getSVTClustersByID(i).get(j).size(); k++) {
+        			if (k < hitIdxArray.length) {
+        				hitIdxArray[k] = CVT.getSVTClustersByID(i).get(j).get(k).get_Id();
+        			}
+        		}
 
-            for (int j = 0; j < hitIdxArray.length; j++) {
-                String hitStrg = "Hit";
-                hitStrg += (j + 1);
-                hitStrg += "_ID";
-                bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
-            }
+        		for (int k = 0; k < hitIdxArray.length; k++) {
+        			String hitStrg = "Hit";
+        			hitStrg += (k + 1);
+        			hitStrg += "_ID";
+        			bank.setShort(hitStrg, row, (short) hitIdxArray[k]);
+        		}
+        		
+        		row++;
 
+        	}
         }
         //bank.show();
         return bank;
@@ -153,9 +160,9 @@ public class RecoBankWriter {
             if (crosses.get(i).get(j).get_Cluster1() != null) {
                 bank.setShort("Cluster1_ID", index, (short) crosses.get(i).get(j).get_Cluster1().get_Id());
             }
-            if (crosses.get(i).get(j).get_Cluster2() != null) {
+            /*if (crosses.get(i).get(j).get_Cluster2() != null) {
                 bank.setShort("Cluster2_ID", index, (short) crosses.get(i).get(j).get_Cluster2().get_Id());
-            }
+            }*/
             index++;
         }
 
@@ -164,28 +171,30 @@ public class RecoBankWriter {
 
     }
 
-    public DataBank fillBMTHitsBank(DataEvent event, List<FittedHit> hitlist) {
-        if (hitlist == null) {
-            return null;
-        }
-        if (hitlist.size() == 0) {
+    public DataBank fillBMTHitsBank(DataEvent event, CentralTracker CVT) {
+        
+        if (CVT.getTotalMVThits() == 0) {
             return null;
         }
 
         DataBank bank
-                = event.createBank("BMTRec::Hits", hitlist.size());
+                = event.createBank("BMTRec::Hits", CVT.getTotalMVThits());
 
-        for (int i = 0; i < hitlist.size(); i++) {
+        int row = 0;
+        
+        for (int i = 0; i < CVT.getNbMVTTileWithHit(); i++) {
+        	for (int j=0; j< CVT.getMVTHitsByID(i).size(); j++) {
+        		bank.setShort("ID", row, (short) CVT.getMVTHitsByID(i).get(j).get_Id());
 
-            bank.setShort("ID", i, (short) hitlist.get(i).get_Id());
+        		bank.setByte("layer", row, (byte) CVT.getMVTHitsByID(i).get(j).get_Layer());
+        		bank.setByte("sector", row, (byte) CVT.getMVTHitsByID(i).get(j).get_Sector());
+        		bank.setInt("strip", row, CVT.getMVTHitsByID(i).get(j).get_Strip().get_Strip());
 
-            bank.setByte("layer", i, (byte) hitlist.get(i).get_Layer());
-            bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
-            bank.setInt("strip", i, hitlist.get(i).get_Strip().get_Strip());
+        		bank.setShort("clusterID", row, (short) CVT.getMVTHitsByID(i).get(j).get_AssociatedClusterID());
+        		bank.setShort("trkID", row, (short) CVT.getMVTHitsByID(i).get(j).get_AssociatedTrackID());
 
-            bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
-            bank.setShort("trkID", i, (short) hitlist.get(i).get_AssociatedTrackID());
-
+        		row++;
+        	}
         }
 
         return bank;
@@ -197,50 +206,54 @@ public class RecoBankWriter {
      * @param cluslist the reconstructed list of fitted clusters in the event
      * @return clusters bank
      */
-    public DataBank fillBMTClustersBank(DataEvent event, List<Cluster> cluslist) {
-        if (cluslist == null) {
-            return null;
-        }
-        if (cluslist.size() == 0) {
+    public DataBank fillBMTClustersBank(DataEvent event, CentralTracker CVT) {
+        
+        if (CVT.getTotalMVTclusters() == 0) {
             return null;
         }
 
-        DataBank bank = event.createBank("BMTRec::Clusters", cluslist.size());
+        DataBank bank = event.createBank("BMTRec::Clusters", CVT.getTotalMVTclusters());
         int[] hitIdxArray = new int[5];
 
-        for (int i = 0; i < cluslist.size(); i++) {
-            for (int j = 0; j < hitIdxArray.length; j++) {
-                hitIdxArray[j] = -1;
-            }
-            bank.setShort("ID", i, (short) cluslist.get(i).get_Id());
-            bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
-            bank.setByte("layer", i, (byte) cluslist.get(i).get_Layer());
-            bank.setShort("size", i, (short) cluslist.get(i).size());
-            bank.setFloat("ETot", i, (float) cluslist.get(i).get_TotalEnergy());
-            bank.setInt("seedStrip", i, cluslist.get(i).get_SeedStrip());
-            bank.setFloat("centroid", i, (float) cluslist.get(i).get_Centroid());
-            bank.setFloat("centroidResidual", i, (float) cluslist.get(i).get_CentroidResidual());
-            bank.setFloat("seedResidual", i, (float) cluslist.get(i).get_SeedResidual());
-            bank.setFloat("seedE", i, (float) cluslist.get(i).get_SeedEnergy());
-            bank.setShort("trkID", i, (short) cluslist.get(i).get_AssociatedTrackID());
-            bank.setFloat("Tmin", i, (float) cluslist.get(i).get_Tmin());
-            bank.setFloat("Tmax", i, (float) cluslist.get(i).get_Tmax());
-            bank.setShort("Strip_Tmin", i, (short) cluslist.get(i).get_StripTmin());
-            bank.setShort("Strip_Tmax", i, (short) cluslist.get(i).get_StripTmax());
-            
-            for (int j = 0; j < cluslist.get(i).size(); j++) {
-                if (j < hitIdxArray.length) {
-                    hitIdxArray[j] = cluslist.get(i).get(j).get_Id();
-                }
-            }
+        int row=0;
+        
+        for (int i = 0; i < CVT.getNbMVTTileWithHit(); i++) {
+        	for (int j=0; j< CVT.getMVTClustersByID(i).size(); j++) {
+        		for (int k = 0; k < hitIdxArray.length; k++) {
+        			hitIdxArray[k] = -1;
+        		}
+        		bank.setShort("ID", row, (short) CVT.getMVTClustersByID(i).get(j).get_Id());
+        		bank.setByte("sector", row, (byte) CVT.getMVTClustersByID(i).get(j).get_Sector());
+        		bank.setByte("layer", row, (byte) CVT.getMVTClustersByID(i).get(j).get_Layer());
+        		bank.setShort("size", row, (short) CVT.getMVTClustersByID(i).get(j).size());
+        		bank.setFloat("ETot", row, (float) CVT.getMVTClustersByID(i).get(j).get_TotalEnergy());
+        		bank.setInt("seedStrip", row, CVT.getMVTClustersByID(i).get(j).get_SeedStrip());
+        		bank.setFloat("centroid", row, (float) CVT.getMVTClustersByID(i).get(j).get_Centroid());
+        		bank.setFloat("seedE", row, (float) CVT.getMVTClustersByID(i).get(j).get_SeedEnergy());
+        		bank.setFloat("centroidResidual", row, (float) CVT.getMVTClustersByID(i).get(j).get_CentroidResidual());
+        		bank.setFloat("seedResidual", row, (float) CVT.getMVTClustersByID(i).get(j).get_SeedResidual()); 
+        		bank.setShort("trkID", row, (short) CVT.getMVTClustersByID(i).get(j).get_AssociatedTrackID());
+        		bank.setFloat("Tmin", row, (float) CVT.getMVTClustersByID(i).get(j).get_Tmin());
+        		bank.setFloat("Tmax", row, (float) CVT.getMVTClustersByID(i).get(j).get_Tmax());
+        		bank.setShort("Strip_Tmin", row, (short) CVT.getMVTClustersByID(i).get(j).get_StripTmin());
+        		bank.setShort("Strip_Tmax", row, (short) CVT.getMVTClustersByID(i).get(j).get_StripTmax());
 
-            for (int j = 0; j < hitIdxArray.length; j++) {
-                String hitStrg = "Hit";
-                hitStrg += (j + 1);
-                hitStrg += "_ID";
-                bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
-            }
+        		for (int k = 0; k < CVT.getMVTClustersByID(i).get(j).size(); k++) {
+        			if (k < hitIdxArray.length) {
+        				hitIdxArray[k] = CVT.getMVTClustersByID(i).get(j).get(k).get_Id();
+        			}
+        		}
 
+        		for (int k = 0; k < hitIdxArray.length; k++) {
+        			String hitStrg = "Hit";
+        			hitStrg += (k + 1);
+        			hitStrg += "_ID";
+        			bank.setShort(hitStrg, row, (short) hitIdxArray[k]);
+        		}
+        		
+        		row++;
+
+        	}
         }
 
         return bank;
@@ -291,9 +304,7 @@ public class RecoBankWriter {
             if (crosses.get(i).get(j).get_Cluster1() != null) {
                 bank.setShort("Cluster1_ID", index, (short) crosses.get(i).get(j).get_Cluster1().get_Id());
             }
-            if (crosses.get(i).get(j).get_Cluster2() != null) {
-                bank.setShort("Cluster2_ID", index, (short) crosses.get(i).get(j).get_Cluster2().get_Id());
-            }
+            
             index++;
         }
 
@@ -369,13 +380,13 @@ public class RecoBankWriter {
                 bank.setFloat("cov_z02", i, -999);
                 bank.setFloat("cov_tandip2", i, -999);
             }
-            bank.setFloat("c_x", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().x() / 10.)); // convert to cm
-            bank.setFloat("c_y", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().y() / 10.)); // convert to cm
-            bank.setFloat("c_z", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().z() / 10. + zShift)); // convert to cm
+            /*bank.setFloat("c_x", i, (float) trkcands.get(i).get_TrackPointAtCTOFRadius().x()); // convert to cm
+            bank.setFloat("c_y", i, (float) trkcands.get(i).get_TrackPointAtCTOFRadius().y()); // convert to cm
+            bank.setFloat("c_z", i, (float) (trkcands.get(i).get_TrackPointAtCTOFRadius().z() + zShift)); // convert to cm
             bank.setFloat("c_ux", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().x());
             bank.setFloat("c_uy", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().y());
             bank.setFloat("c_uz", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().z());
-            bank.setFloat("pathlength", i, (float) (trkcands.get(i).get_pathLength()/10.));  // conversion to cm
+            bank.setFloat("pathlength", i, (float) trkcands.get(i).get_pathLength());  // conversion to cm*/
 
             // fills the list of cross ids for crosses belonging to that reconstructed track
             for (int j = 0; j < trkcands.get(i).size(); j++) {
@@ -535,17 +546,26 @@ public class RecoBankWriter {
                for (org.jlab.rec.cvt.track.fit.StateVecs.StateVec stVec : trks.get(i).getTrajectory()) {
 
                     bank.setShort("id",       k, (short) trks.get(i).get_Id());
-                    //bank.setShort("detector", k, (byte) stVec.get_SurfaceDetector());
+                    bank.setShort("detector", k, (byte) stVec.DetectorType);
                     bank.setByte("sector",    k, (byte) stVec.sector);
                     bank.setByte("layer",     k, (byte) stVec.layer);
-                    bank.setFloat("x",        k, (float) (stVec.xdet/10.));
-                    bank.setFloat("y",        k, (float) (stVec.ydet/10.));
-                    bank.setFloat("z",        k, (float) (stVec.zdet/10. + zShift));
+                    if (stVec.DetectorType==DetectorType.BST.getDetectorId()||stVec.DetectorType==DetectorType.BMT.getDetectorId()) {
+                    	bank.setFloat("x",        k, (float) (stVec.xdet/10.));
+                    	bank.setFloat("y",        k, (float) (stVec.ydet/10.));
+                    	bank.setFloat("z",        k, (float) (stVec.zdet/10. + zShift));
+                    	 bank.setFloat("path",     k, (float) (stVec.pathlength/10.));
+                    }
+                    else {
+                    	bank.setFloat("x",        k, (float) stVec.xdet);
+                    	bank.setFloat("y",        k, (float) stVec.ydet);
+                    	bank.setFloat("z",        k, (float) (stVec.zdet + zShift));
+                    	bank.setFloat("path",     k, (float) stVec.pathlength);
+                    }
                     /*bank.setFloat("phi",      k, (float) stVec.get_TrkPhiAtSurface());
                     bank.setFloat("theta",    k, (float) stVec.get_TrkThetaAtSurface());
                     bank.setFloat("langle",   k, (float) stVec.get_TrkToModuleAngle());
-                    bank.setFloat("centroid", k, (float) stVec.get_CalcCentroidStrip());
-                    bank.setFloat("path",     k, (float) stVec.get_Path()/10);*/
+                    bank.setFloat("centroid", k, (float) stVec.get_CalcCentroidStrip());*/
+                   
                     k++;
 
                 }
@@ -555,30 +575,28 @@ public class RecoBankWriter {
         return bank;
     }
 
-    public void appendCVTBanks(DataEvent event,
-            List<FittedHit> sVThits, List<FittedHit> bMThits,
-            List<Cluster> sVTclusters, List<Cluster> bMTclusters,
+    public void appendCVTBanks(DataEvent event, CentralTracker CVT,
             List<ArrayList<Cross>> crosses, List<Track> trks, double zShift) {
         List<DataBank> svtbanks = new ArrayList<DataBank>();
         List<DataBank> bmtbanks = new ArrayList<DataBank>();
         List<DataBank> cvtbanks = new ArrayList<DataBank>();
 
-        DataBank bank1 = this.fillSVTHitsBank(event, sVThits);
+        DataBank bank1 = this.fillSVTHitsBank(event, CVT);
         if (bank1 != null) {
             svtbanks.add(bank1);
         }
 
-        DataBank bank2 = this.fillBMTHitsBank(event, bMThits);
+        DataBank bank2 = this.fillBMTHitsBank(event, CVT);
         if (bank2 != null) {
             bmtbanks.add(bank2);
         }
 
-        DataBank bank3 = this.fillSVTClustersBank(event, sVTclusters);
+        DataBank bank3 = this.fillSVTClustersBank(event, CVT);
         if (bank3 != null) {
             svtbanks.add(bank3);
         }
 
-        DataBank bank4 = this.fillBMTClustersBank(event, bMTclusters);
+        DataBank bank4 = this.fillBMTClustersBank(event, CVT);
         if (bank4 != null) {
             bmtbanks.add(bank4);
         }
@@ -633,30 +651,28 @@ public class RecoBankWriter {
         //event.show();
     }
 
-    public void appendCVTCosmicsBanks(DataEvent event,
-            List<FittedHit> sVThits, List<FittedHit> bMThits,
-            List<Cluster> sVTclusters, List<Cluster> bMTclusters,
+    public void appendCVTCosmicsBanks(DataEvent event, CentralTracker CVT,
             List<ArrayList<Cross>> crosses, List<StraightTrack> trks, double zShift) {
         List<DataBank> svtbanks = new ArrayList<DataBank>();
         List<DataBank> bmtbanks = new ArrayList<DataBank>();
         List<DataBank> cvtbanks = new ArrayList<DataBank>();
 
-        DataBank bank1 = this.fillSVTHitsBank(event, sVThits);
+        DataBank bank1 = this.fillSVTHitsBank(event, CVT);
         if (bank1 != null) {
             svtbanks.add(bank1);
         }
 
-        DataBank bank2 = this.fillBMTHitsBank(event, bMThits);
+        DataBank bank2 = this.fillBMTHitsBank(event, CVT);
         if (bank2 != null) {
             bmtbanks.add(bank2);
         }
 
-        DataBank bank3 = this.fillSVTClustersBank(event, sVTclusters);
+        DataBank bank3 = this.fillSVTClustersBank(event, CVT);
         if (bank3 != null) {
             svtbanks.add(bank3);
         }
 
-        DataBank bank4 = this.fillBMTClustersBank(event, bMTclusters);
+        DataBank bank4 = this.fillBMTClustersBank(event, CVT);
         if (bank4 != null) {
             bmtbanks.add(bank4);
         }

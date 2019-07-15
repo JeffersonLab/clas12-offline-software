@@ -33,110 +33,101 @@ public class TrackSeederCA {
         if( nodes.size() == 0 ) return trCands;
         Collections.sort( nodes );
         int mstate = nodes.get(0).get_state();
-//        System.out.println( mstate );
-        for( Cell cell : nodes ){
-      	  if( cell.get_state() >= mstate-1 ){
-          
-//             if the cell has been already used for one track candidate, then skip it
-      		  if( cell.is_used() ) continue;
-      		  if( cell.get_plane().equalsIgnoreCase("XY") ) {
-      			  if( cell.get_c1().is_usedInXYcand() || cell.get_c2().is_usedInXYcand() ) { continue;}
-      		  }
-
-      		  //if( cell.get_plane().equalsIgnoreCase("ZR") ) {
-      			  //if( cell.get_c1().is_usedInZRcand() || cell.get_c2().is_usedInZRcand() ) continue;
-      		  //}
-      		 
-      		  int candlen = 1;
-      		  ArrayList<Cell> cand = new ArrayList<Cell>();
-      		  cand.add( cell );
-      		  Cell neighbour = cell;
-      		  while( neighbour.get_neighbors().size() > 0 ){
-      			  Collections.sort(neighbour.get_neighbors());
-      			  int ms = 0; // max state neighbors
-      			  double dist = 99999.;
-      			  double cos = 0.;
-      			  int id = -1;
-      			  for( int ic=0; ic < neighbour.get_neighbors().size();ic++ ){
-      				  Cell cn = neighbour.get_neighbors().get(ic);
-//      				  if(cn.is_used() ) continue;
-//      	      		  if( cn.get_plane().equalsIgnoreCase("XY") ) {
-//      	      			  if( cn.get_c1().is_usedInXYcand() || cn.get_c2().is_usedInXYcand() ) { continue;}
-//      	      		  }
-//
-//      	      		  if( cell.get_plane().equalsIgnoreCase("ZR") ) {
-//      	      			  if( cn.get_c1().is_usedInZRcand() || cn.get_c2().is_usedInZRcand() ) continue;
-//      	      		  }      				  
-      				  if( cn.get_state() != neighbour.get_state()-1) continue;
-      				  if( cn.get_state() >= ms ){
-      					  ms = cn.get_state();
-      					  if( neighbour.get_plane().equalsIgnoreCase("ZR") &&
-      							neighbour.get_c1().get_Detector().equalsIgnoreCase("SVT")  ){
-	      					  if( cn.get_length() < dist ){
-	      						  dist = cn.get_length();
-	      						  id = ic;
-	      					  }
-      					  }
-      					  else {
-	      					  if( neighbour.get_dir2D().dot( cn.get_dir2D() ) > cos ){
-	      						  cos = neighbour.get_dir2D().dot( cn.get_dir2D() );
-	      						  id = ic;
-	      					  }
-      					  }
-      				  }
-      				  else break; // neighbors are sorted, exit if not max state
-      			  }
-      			  if( id < 0 ) break;
-      			  Cell n = neighbour.get_neighbors().get(id);
-      			
-      			  // avoid clones. Set the node and its upper cross to "already used"
-      			  // TODO: should we assign "used" only if a Good candidate is found?
-//      			  n.set_used(true); 
-//      			  if( n.get_plane().equalsIgnoreCase("XY") ) {
-////      				  n.get_c1().set_usedInXYcand( true );
-//      				  n.get_c2().set_usedInXYcand( true );
-//      			  }
-//      			  if( n.get_plane().equalsIgnoreCase("ZR") ) {
-////      				  n.get_c1().set_usedInZRcand( true );
-//      				  n.get_c2().set_usedInZRcand( true );
-//      			  }
-
-//              	  System.out.println(" - " + n);
-      			  cand.add(n);
-      			  neighbour = n;
-      			  candlen += 1;
-      		  }
-      		  
-//      		  System.out.println(" ");
-      		  if( cand.get(0).get_plane().equalsIgnoreCase("XY")) {
-	  			  if( candlen > 2 ){
-	  				  if( fitSeed(getCrossFromCells(cand), 2, false, swimmer) != null) {
-	  					  cellCands.add(cand);
-	  					  
-	  					  for( Cell n : cand ) {
-	  		      			  n.set_used(true); 
-	  		      			  if( n.get_plane().equalsIgnoreCase("XY") ) {
-//	  		      				  n.get_c1().set_usedInXYcand( true );
-	  		      				  n.get_c2().set_usedInXYcand( true );
-	  		      			  }
-	  		      			  if( n.get_plane().equalsIgnoreCase("ZR") ) {
-//	  		      				  n.get_c1().set_usedInZRcand( true );
-	  		      				  n.get_c2().set_usedInZRcand( true );
-	  		      			  }
-	  					  }
-	  				  }
-	  		  	  }
-      		  }
-      		  else {
-	  			  if( candlen > 0 ){
-	  				  cellCands.add(cand);
-	  		  	  }
-      		  }
-      		  
-      	  }
-      	  else break; // nodes are sorted, if it is different to the max state, exit
-//      	  else continue; // nodes are sorted, if it is different to the max state, exit
+        // get list of cells that are good starting candidates
+        // - they have to be at least of Nmax - 2 in score
+        // - they have to be terminals: no parents
+        ArrayList<Cell> starts = new ArrayList<Cell>();
+        for( Cell c : nodes ) {
+        	if( c.get_state() >= (mstate-1) ) { 
+        		if ( c.getParent() == null ) {
+        			
+        			if( c.get_state() == mstate) {
+        				c.get_c2().set_usedInXYcand( true );
+        			}
+        			
+        			starts.add(c);
+            //System.out.println( c );
+        		}
+        	}
+        	else {
+        		break; // they are sorted
+        	}
         }
+        
+        for( Cell start : starts ) {
+        	
+        	if( start.get_state() == mstate - 1 ) {
+        		if( start.get_c2().is_usedInXYcand() ) continue;
+        	}
+        	
+        	// queue. TODO: use utils.collections??
+        	ArrayList<Cell> Q = new ArrayList<Cell>();
+        	Q.add( start );
+        	
+//        	System.out.println( "\n ==== start " + start);
+        	
+          // store all the candidates for this starting node
+          // then chose the longest ones
+          List<ArrayList<Cell>> tempCands = new ArrayList<ArrayList<Cell>>();
+
+          // loop over the queue
+        	while( Q.size() > 0 ) {
+        		
+        		Cell cc = Q.remove( Q.size() - 1 );
+            //System.out.println( cc );
+        		for( Cell nn : cc.get_neighbors() ) {
+        			if( nn.get_state() == cc.get_state() - 1 ){
+        			  nn.setParent( cc );
+        			  Q.add( nn );
+              		}
+        		}
+        		
+            // if the cell has no neighbours, then look backward at the parents to form a candidate
+        		if( cc.get_neighbors().size() == 0 ) {
+        			ArrayList<Cell> tcand = new ArrayList<Cell>();
+        			tcand.add(cc);
+        			Cell pc = cc.getParent();
+        			while( pc != null ) {
+        				tcand.add(pc);
+        				pc = pc.getParent();
+        			}
+        			
+        			if( tcand.size() > 0 ) {
+        				if( tcand.get(0).get_plane().equalsIgnoreCase( "XY" ) )
+        				{
+        					if( tcand.size() > 3 )
+        						tempCands.add(tcand);
+        				}
+        				else {
+    						  tempCands.add(tcand);
+        				}
+        			}
+        		}
+        	}
+          // once all the candidates are found chose the longest
+//System.out.println( " ---  " + start + " \t \t " + tempCands.size() );
+
+          // find the max size
+          int l = 0;
+          for( ArrayList<Cell> cand : tempCands ){
+            if( cand.size() > l ) l = cand.size();
+          }
+
+         // add all the max size candidates to the list
+          int CC = 0;
+          for( ArrayList<Cell> cand : tempCands ){
+            if( cand.size() == l ) { CC++;  cellCands.add(  cand ); 
+//            	for( Cell c : cand ) {
+//            		System.out.println(c);
+//            		System.out.println("     " + c.get_c1());
+//            		System.out.println("     " + c.get_c2());
+//            	}
+            }
+          }
+//System.out.println( " l: " + l + "   CC: " + CC );
+      
+        }
+
         
 //        System.out.println(" cellCands " + cellCands.size() );
          
@@ -155,9 +146,11 @@ public class TrackSeederCA {
     private ArrayList<Cross> getCrossFromCells( List<Cell> l ){
     	if( l == null ) return null;
     	ArrayList<Cross> crs = new ArrayList<Cross>();
-    	crs.add( l.get(0).get_c2());
     	for( Cell c : l) crs.add(c.get_c1());
+    	crs.add( l.get( l.size()-1).get_c2());
     	
+//    	System.out.println();
+//    	for( Cross c : crs ) System.out.println( "\t\t ... c: " + c);
     	return crs;
     }
 
@@ -169,7 +162,7 @@ public class TrackSeederCA {
         camaker.set_plane( plane );
         if( plane.equalsIgnoreCase("XY") ){
           camaker.set_cosBtwCells(0.95);  // min dot product between neighbours 
-          camaker.set_abCrs(20);         // max angle between crosses to form a cell
+          camaker.set_abCrs(50);         // max angle between crosses to form a cell
           camaker.set_aCvsR(45);         // max angle between the cell and the radius to the first cell
         }
         if( plane.equalsIgnoreCase("ZR") ){
@@ -179,8 +172,8 @@ public class TrackSeederCA {
         }
         
         camaker.createCells(crs, bgeom);
-        camaker.findNeigbors();
-        camaker.evolve( nepochs );
+        camaker.findNeighbors();
+//        camaker.evolve( nepochs );
         return camaker.getNodes();  
     }
     
@@ -211,7 +204,7 @@ public class TrackSeederCA {
         // look for candidates in the XY plane
         // run the cellular automaton over SVT and BMT_Z crosses
 
-        List<Cell> xynodes = runCAMaker( "XY", 5, crosses, bmt_geo, swimmer); 
+        List<Cell> xynodes = runCAMaker( "XY", 10, crosses, bmt_geo, swimmer); 
         List<ArrayList<Cross>> xytracks =  getCAcandidates( xynodes, swimmer);
 
 //        System.out.println( " XY tracks " + xytracks );
@@ -241,7 +234,7 @@ public class TrackSeederCA {
             for(Cross c : seed.get_Crosses()) { 
                 if(c.get_Detector().equalsIgnoreCase("SVT")) {
                     clusters.add(c.get_Cluster1());
-                    clusters.add(c.get_Cluster2());
+                   // clusters.add(c.get_Cluster2());
                 } else {
                     clusters.add(c.get_Cluster1());
                 }
@@ -343,19 +336,40 @@ public class TrackSeederCA {
         // look for svt crosses and determine the sector from bmt z crosses
         //------------------------------------------------------------------
         int sector = -1;
+        double minTime = 0;
+        int nBMTxy = 0;
         for( Cross c : xycross ){
           if( c.get_Detector().equalsIgnoreCase("BMT")){
         	  sector = c.get_Sector();
+        	  minTime += c.get_Cluster1().get_Tmin();
+        	  nBMTxy += 1;
           }
           else {
             svtcrs.add( c );
           }
         }
         if( sector <= 0 ) continue;
+        minTime /= nBMTxy;
 
         List<ArrayList<Cross>> zrtracks =  zrTrksPerSector.get( sector-1 );
 
-        //System.out.println("sector" + sector + " len " + zrtracks.size());  
+        //System.out.println("sector" + sector + " len " + zrtracks.size());
+        
+        // check if the ZR candidate maches in time
+        double minTimeZ = 0;
+        int irz = 0;
+        List<Integer> lrz = new ArrayList<Integer>();
+        for( List<Cross> zr : zrtracks ) {
+        	for( Cross c : zr) minTimeZ += c.get_Cluster1().get_Tmin();
+        	minTimeZ /= zr.size();
+        	
+        	if( Math.abs( minTimeZ - minTime ) > 60.   ) {
+//        		System.out.println( " ########### removing ZR for mismatch in time: " + minTimeZ + "  " + minTime);
+        		lrz.add(irz);
+        	}
+        	irz++;
+        }
+        for( int i = lrz.size()-1; i>=0;i--) zrtracks.remove((int)lrz.get(i));
         
         // collect crosses for candidates
         //--------------------------------
@@ -383,25 +397,9 @@ public class TrackSeederCA {
           seedCrosses.add( new ArrayList<Cross>() );
           int scsize = seedCrosses.size();
           // add svt
-          for( Cross c : svtcrs ){
-            int l1 = c.get_Cluster1().get_Layer();
-            int s1 = c.get_Cluster1().get_Sector();
-            double c1 = c.get_Cluster1().get_Centroid();
-            double r1 = org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(l1-1)/2][(l1-1)%2];
-            double nstr1 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r1 - b)/m, l1, s1);
-
-            int l2 = c.get_Cluster2().get_Layer();
-            int s2 = c.get_Cluster2().get_Sector();
-            double c2 = c.get_Cluster2().get_Centroid();
-            double r2 = org.jlab.detector.geant4.v2.SVT.SVTConstants.LAYERRADIUS[(l2-1)/2][(l2-1)%2];
-            double nstr2 = svt_geo.calcNearestStrip(c.get_Point().x(),c.get_Point().y(), (r2 - b)/m, l2, s2);
-            
-            if( Math.abs( c1 - nstr1 ) < 8 && Math.abs( c2 - nstr2 ) < 8 )			   
-              seedCrosses.get(scsize-1).add(c);
-          }
-
-
-            // add bmt z
+          for( Cross c : svtcrs ) seedCrosses.get(scsize-1).add(c);
+          
+          // add bmt z
           for( Cross c : xycross ){
             if( c.get_Detector().equalsIgnoreCase("BMT")){
               seedCrosses.get(scsize-1).add(c); 
@@ -430,8 +428,7 @@ public class TrackSeederCA {
     List<Cross> BMTCrossesC = new ArrayList<Cross>();
     List<Cross> BMTCrossesZ = new ArrayList<Cross>();
     List<Cross> SVTCrosses = new ArrayList<Cross>();
-    float b[] = new float[3];
-
+   
     public Track fitSeed(List<Cross> VTCrosses, int fitIter, boolean originConstraint, Swim swimmer) {
     	return fitSeed( VTCrosses,null,fitIter,originConstraint, swimmer);
     }
@@ -504,7 +501,7 @@ public class TrackSeederCA {
 
             cand = new Track(null, swimmer);
             cand.addAll(SVTCrosses);
-            double explFact = 20.0; // 
+            double explFact = 5.0; // 
             for (int j = 0; j < SVTCrosses.size(); j++) {
                 X.add(j, SVTCrosses.get(j).get_Point().x());
                 Y.add(j, SVTCrosses.get(j).get_Point().y());
@@ -538,11 +535,11 @@ public class TrackSeederCA {
                     ErrZ.add(j, explFact *  BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
                 }
             }
-            //X.add((double) 0);
-            //Y.add((double) 0);
+//            X.add((double) 0);
+//            Y.add((double) 0);
 
             //ErrRt.add((double) 0.1);
-            //ErrRt.add((double) 50);
+//            ErrRt.add((double) 1.5);
                                    
             fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
             
@@ -556,7 +553,7 @@ public class TrackSeederCA {
             cand.addAll(BMTCrossesC);
             cand.addAll(BMTCrossesZ);
             
-            cand.set_HelicalTrack(fitTrk.get_helix(), swimmer, b);
+            cand.set_HelicalTrack(fitTrk.get_helix(), swimmer);
             if( X.size()>3 )
             	cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]/(X.size()-3));
             else 

@@ -232,7 +232,7 @@ public class HitReader {
                 
                 hit.set_Id(id[i]);
                 // add this hit
-                if(SvtStrip.get_Edep()>0)      
+                if(ADC[i]>=0)      
                     hits.add(hit);
             }
         }

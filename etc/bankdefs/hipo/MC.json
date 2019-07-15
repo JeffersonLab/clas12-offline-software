@@ -95,5 +95,28 @@
             {"name":"procID",   "id":26, "type":"int32", "info":"Process that created the FP. see gemc.jlab.org"},
             {"name":"hitn",     "id":27, "type":"int32", "info":"Hit number"}
         ]
+    },
+    {
+        "bank": "MC::IsParticleMatched",
+        "group": 45,
+        "info": "MC Particle - Rec Track matching.",
+        "items": [
+            {"name":"mcTindex",   "id":1,  "type":"int16",  "info":"MC Particle index, as in `tid`"},
+            {"name":"recTindex",  "id":2,  "type":"int16",  "info":"REC Track ID"},
+            {"name":"isInAcc",    "id":3,  "type":"int8",   "info":"Is reconstructable"},
+            {"name":"nMCclusters","id":4,  "type":"int16",  "info":"Number of rec clusters/hits created by the MC particle"},
+            {"name":"fraction",   "id":5,  "type":"float",  "info":"Fraction of clusters used"}
+        ]
+    },
+    {
+        "bank": "MC::MatchedClusters",
+        "group": 46,
+        "info": "Is the hit/rec cluster matched with MC::Particle?",
+        "items": [
+            {"name":"index",    "id":1,  "type":"int16",  "info":"Rec cluster ID"},
+            {"name":"detector", "id":2,  "type":"int8" ,  "info":"Detector id"},
+            {"name":"recTindex","id":3,  "type":"int16",  "info":"REC track index"},
+            {"name":"mcTindex", "id":4,  "type":"int16",  "info":"MC track id, as in `tid`"}
+        ]
     }
 ]

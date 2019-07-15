@@ -22,7 +22,7 @@ import org.jlab.rec.cvt.trajectory.Trajectory;
 public class Track extends Trajectory implements Comparable<Track> {
 
     private int _TrackingStatus;
-
+    float b[] = new float[3];
     public void set_TrackingStatus(int ts) {
         _TrackingStatus = ts;
     }
@@ -30,16 +30,16 @@ public class Track extends Trajectory implements Comparable<Track> {
     public int get_TrackingStatus() {
         return _TrackingStatus;
     }
-    float b[] = new float[3];
+    
 
     /**
      *
      * @param helix helix track parameterization
      */
     public Track(Helix helix, Swim swimmer) {
-        super(helix);
+    	super(helix);
         if (helix != null) {
-            set_HelicalTrack(helix, swimmer, b);
+            set_HelicalTrack(helix, swimmer);
         }
     }
 
@@ -118,9 +118,10 @@ public class Track extends Trajectory implements Comparable<Track> {
      *
      * @param Helix the track helix
      */
-    public void set_HelicalTrack(Helix Helix, Swim swimmer, float b[]) {
+    public void set_HelicalTrack(Helix Helix, Swim swimmer) {
+    	
         if (Helix != null) {
-            swimmer.BfieldLab(Helix.getHelixPoint(0).x(), Helix.getHelixPoint(0).y(), Helix.getHelixPoint(0).z(), b);
+        	swimmer.BfieldLab(Helix.getHelixPoint(0).x()/10., Helix.getHelixPoint(0).y()/10., Helix.getHelixPoint(0).z()/10., b);
             double Bz = Math.abs(b[2]);
             set_Q(((int) Math.signum(Constants.getSolenoidscale()) * Helix.get_charge()));
             double calcPt = Constants.LIGHTVEL * Math.abs(Helix.radius() * Bz);

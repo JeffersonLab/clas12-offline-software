@@ -12,6 +12,12 @@ import org.jlab.rec.cvt.trajectory.Helix;
 import Jama.Matrix;
 import org.jlab.clas.swimtools.Swim;
 
+/***********
+ * 
+ * @author mdefurne
+ *
+ */
+
 public class StateVecs {
 
     final static double speedLight = org.jlab.rec.cvt.Constants.LIGHTVEL;
@@ -50,11 +56,13 @@ public class StateVecs {
         kVec.x=InitialPos.x();
         kVec.y=InitialPos.y();
         kVec.z=InitialPos.z();
+        Vector3D temp;
+        
     	if (k>0) {        
     		if (Layer.get(k)>6) csPoint=bmt_geo.getRefinedIntersection(kHelix, Layer.get(k)-6, Sector.get(k));
     		else csPoint=svt_geo.getRefinedIntersection(kHelix, Layer.get(k), Sector.get(k));
     			
-    		Vector3D temp=kHelix.getHelixPoint(csPoint);	
+    		temp=kHelix.getHelixPoint(csPoint);	
     		Vector3D labpos=new Vector3D(temp.x(), temp.y(), temp.z());
     		Vector3D detpos;
     		if (type>0) {
@@ -69,13 +77,13 @@ public class StateVecs {
     	}
     	else {
     		csPoint=kHelix.getCurvAbsForPCAToPoint(new Vector3D(org.jlab.rec.cvt.Constants.getXb(),org.jlab.rec.cvt.Constants.getYb(),0));
-    		Vector3D temp=kHelix.getHelixPoint(csPoint);
+    		temp=kHelix.getHelixPoint(csPoint);
     		kVec.x=temp.x();
     		kVec.y=temp.y();
     		kVec.z=temp.z();
     	}
 		
-        kVec.phi=Math.atan2(kVec.y-kHelix.ycen(), kVec.x-kHelix.xcen());
+        kVec.phi=Math.atan2(temp.y()-kHelix.ycen(), temp.x()-kHelix.xcen());
         Vector3D tempDir=kHelix.getHelixDir(csPoint);
         kVec.dirx=tempDir.x();
         kVec.diry=tempDir.y();
@@ -108,7 +116,7 @@ public class StateVecs {
     public void new_transport(int i, int f, StateVec iVec, CovMat icovMat, 
             org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, int type, 
             Swim swimmer) { // s = signed step-size... s=0 at dca... ALWAYS!!!
-    		
+    
     	double Xc, Yc; //Coordinate of the Helix center
     	double Ri=0; //Radius at s=0
     	double Rf=0; //Radius we want to reach
@@ -154,7 +162,7 @@ public class StateVecs {
         while (((!AtModule&&f>0)||(!AtClosest&&f==0))&&count<Max_count) {
         	
         	Helix iHelix=setSvPars(sv_i, fCov.covMat);// Helix definition and equations valid only if xref=0 and yref=0;
-        	       
+        	
             if (f>0) {
             	if (Layer.get(f)>6) Posdet=bgeo.LabToDetFrame(Layer.get(f)-6, Sector.get(f), new Vector3D(sv_i.x, sv_i.y, sv_i.z));
                 if (Layer.get(f)<7) Posdet=sgeo.Point_LabToDetFrame(Layer.get(f), Sector.get(f), new Vector3D(sv_i.x, sv_i.y, sv_i.z));
@@ -174,7 +182,7 @@ public class StateVecs {
         		sv_f.x=Poslab.x();
         		sv_f.y=Poslab.y();
         		sv_f.z=Poslab.z();
-        		        		
+        				
         		if (f==0) sv_f.pathlength=sv_i.pathlength+Math.abs(step);
         		
         	}
@@ -195,10 +203,7 @@ public class StateVecs {
         	}
         	
         	//Angle of pivot point
-        	phi_i=Math.atan2(Yc - sv_i.refy, Xc - sv_i.refx);
-            if (sv_i.alpha / sv_i.kappa < 0) {
-                phi_i = Math.atan2(-Yc + sv_i.refy, -Xc + sv_i.refx);
-            }
+        	phi_i=sv_i.getPhiRef(Xc, Yc);
         	
             //Angle of new pivot point for f-state vector... chosen to be the position of state vector f
             sv_f.refx=sv_f.x;
@@ -210,10 +215,8 @@ public class StateVecs {
             	sv_f.refy=org.jlab.rec.cvt.Constants.getYb();
             	sv_f.refz=0;
             }
-        	phi_f = Math.atan2(Yc - sv_f.refy, Xc - sv_f.refx);
-            if (sv_f.alpha / sv_f.kappa < 0) {
-                phi_f = Math.atan2(-Yc + sv_f.refy, -Xc + sv_f.refx);
-            }
+            
+        	phi_f = sv_f.getPhiRef(Xc, Yc);
            
             double delta= phi_f-phi_i;
             
@@ -274,7 +277,7 @@ public class StateVecs {
              Matrix F = new Matrix(FMat);
              Matrix FT = F.transpose();
              Matrix Cpropagated = F.times(fCov.covMat).times(FT);
-             
+          
              //Store the transport information
              Matrix fTransStep= F.times(fTransport);
              fTransport=fTransStep;
@@ -284,7 +287,7 @@ public class StateVecs {
              if (Cpropagated != null&&AtModule&&i<f) {//Add the noise only at module... and only going forward... Going backward only to get the best estimate at Vertex
                  fCov.covMat = fCov.covMat.plus(this.Q(iVec, f - i));
              } 
-             
+            
              //We will move the pivot point to sv_f... we need to compute the phi0 of the point wrt to the new Helix center
              Bf = new B(f, sv_f.x, sv_f.y, sv_f.z, swimmer);
              sv_f.alpha=Bf.alpha;
@@ -295,7 +298,7 @@ public class StateVecs {
         }
         sv_f.layer=Layer.get(f);
         sv_f.sector=Sector.get(f);
-        if (i<f) {
+        if (f!=0) {
         	CovMat fCovFilt = new CovMat(f);
         	fCovFilt.covMat=fCov.covMat;
         	StateVec sv_fFilt = new StateVec(f);
@@ -306,7 +309,7 @@ public class StateVecs {
         	this.trackCovFilt.put(f, fCovFilt);
         	this.trackTransport.put(f, fTransport);
         }      
-        if (i>f) {
+        if (f==0) {
         	this.trackTrajSmooth.put(f, sv_f);
         	this.trackCovSmooth.put(f, fCov);
         }
@@ -425,6 +428,7 @@ public class StateVecs {
         public int k;
         public int layer;
         public int sector;
+        public int DetectorType;
         public int clusID;
         //Pivot point coordinates for Helix parameters
         public double refx;
@@ -454,7 +458,7 @@ public class StateVecs {
         public double excl_residual;
         public double pathlength;
                         
-        StateVec(int k) {
+        public StateVec(int k) {
             this.k = k;
         }
         
@@ -500,6 +504,13 @@ public class StateVecs {
         	this.excl_residual=ToCopy.excl_residual;
         	this.pathlength=ToCopy.pathlength;
         	return ;
+        }
+        
+        public double getPhiRef(double Xc, double Yc) {
+        	if (this.alpha / this.kappa < 0) {
+                return Math.atan2(-Yc + this.refy, -Xc + this.refx);
+            }
+        	else return Math.atan2(Yc - this.refy, Xc - this.refx);
         }
 
     }
@@ -603,7 +614,7 @@ public class StateVecs {
         return trkHelix;
     }
 
-    public void init(Seed trk, KFitter kf, Swim swimmer) {
+    public void initAtBeam(Seed trk, KFitter kf, Swim swimmer) {
         //init stateVec
     	
         StateVec initSV = new StateVec(0);
@@ -621,21 +632,24 @@ public class StateVecs {
         initSV.tanL = trk.get_Helix().get_tandip();
         initSV.d_rho = trk.get_Helix().get_dca();
         initSV.phi = 0;
-        //
+        
+        //If Pt>5 GeV from helical fit, we initialize it at 5 GeV for Kalman filter
+        if (Math.abs(1/initSV.kappa)>5)  initSV.kappa=Math.signum(initSV.kappa)*0.2;
        
         this.trackTraj.put(0, initSV);
         this.trackTrajFilt.put(0, initSV);
         //init covMat
+        //TODO:Absolute values are used to avoid negative term on diagonal of the cov matrix from helical fitter
         Matrix fitCovMat = trk.get_Helix().get_covmatrix();
-        double cov_d02 = fitCovMat.get(0, 0);
+        double cov_d02 = Math.abs(fitCovMat.get(0, 0));
         double cov_d0phi0 = fitCovMat.get(0, 1);
         double cov_d0rho = Bf.alpha * fitCovMat.get(0, 2);
-        double cov_phi02 = fitCovMat.get(1, 1);
+        double cov_phi02 = Math.abs(fitCovMat.get(1, 1));
         double cov_phi0rho = Bf.alpha * fitCovMat.get(1, 2);
-        double cov_rho2 = Bf.alpha * Bf.alpha * fitCovMat.get(2, 2);
-        double cov_z02 = fitCovMat.get(3, 3);
+        double cov_rho2 = Bf.alpha * Bf.alpha * Math.abs(fitCovMat.get(2, 2));
+        double cov_z02 = Math.abs(fitCovMat.get(3, 3));
         double cov_z0tandip = fitCovMat.get(3, 4);
-        double cov_tandip2 = fitCovMat.get(4, 4);
+        double cov_tandip2 = Math.abs(fitCovMat.get(4, 4));
 
         double components[][] = new double[5][5];
         for (int i = 0; i < 5; i++) {
@@ -643,20 +657,20 @@ public class StateVecs {
                 components[i][j] = 0;
             }
         }
-
-        components[0][0] = 10*cov_d02;
-        components[0][1] = 10*cov_d0phi0;
-        components[1][0] = 10*cov_d0phi0;
-        components[1][1] = 10*cov_phi02;
-        components[2][0] = 10*cov_d0rho;
-        components[0][2] = 10*cov_d0rho;
-        components[2][1] = 10*cov_phi0rho;
-        components[1][2] = 10*cov_phi0rho;
-        components[2][2] = 10*cov_rho2;
-        components[3][3] = 10*cov_z02;
-        components[3][4] = 10*cov_z0tandip;
-        components[4][3] = 10*cov_z0tandip;
-        components[4][4] = 10*cov_tandip2;
+      
+        components[0][0] = org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_d0;
+        components[0][1] = cov_d0phi0/Math.sqrt(cov_d02*cov_phi02)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_phi0;
+        components[1][0] = cov_d0phi0/Math.sqrt(cov_d02*cov_phi02)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_phi0;
+        components[1][1] = org.jlab.rec.cvt.Constants.unc_phi0*org.jlab.rec.cvt.Constants.unc_phi0;
+        components[2][0] = cov_d0rho/Math.sqrt(cov_d02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_kappa;
+        components[0][2] = cov_d0rho/Math.sqrt(cov_d02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_d0*org.jlab.rec.cvt.Constants.unc_kappa;
+        components[2][1] = cov_phi0rho/Math.sqrt(cov_phi02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_phi0*org.jlab.rec.cvt.Constants.unc_kappa;
+        components[1][2] = cov_phi0rho/Math.sqrt(cov_phi02*cov_rho2)*org.jlab.rec.cvt.Constants.unc_phi0*org.jlab.rec.cvt.Constants.unc_kappa;
+        components[2][2] = org.jlab.rec.cvt.Constants.unc_kappa*org.jlab.rec.cvt.Constants.unc_kappa;
+        components[3][3] = org.jlab.rec.cvt.Constants.unc_z0*org.jlab.rec.cvt.Constants.unc_z0;
+        components[3][4] = cov_z0tandip/Math.sqrt(cov_tandip2*cov_z02)*org.jlab.rec.cvt.Constants.unc_z0*org.jlab.rec.cvt.Constants.unc_tanL;
+        components[4][3] = cov_z0tandip/Math.sqrt(cov_tandip2*cov_z02)*org.jlab.rec.cvt.Constants.unc_z0*org.jlab.rec.cvt.Constants.unc_tanL;
+        components[4][4] = org.jlab.rec.cvt.Constants.unc_tanL*org.jlab.rec.cvt.Constants.unc_tanL;
        
         Matrix initCMatrix = new Matrix(components);
 
@@ -664,6 +678,41 @@ public class StateVecs {
         initCM.covMat = initCMatrix;
         this.trackCovFilt.put(0, initCM);
         this.trackCov.put(0, initCM);
+    }
+    
+    public void initAtLastMeas(KFitter kf, MeasVecs mv, org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo, Swim swimmer) {
+        //Try to have a guess of position at last layer
+    	
+    	this.new_transport(0, mv.measurements.get(mv.measurements.size()-1).k, this.trackTrajFilt.get(0) , this.trackCovFilt.get(0) , sgeo, bgeo, mv.measurements.get(mv.measurements.size()-1).type, swimmer);
+    	if (mv.measurements.get(mv.measurements.size()-1).type==2) {
+    		this.trackTrajFilt.get(mv.measurements.get(mv.measurements.size()-1).k).refz=mv.measurements.get(mv.measurements.size()-1).z;
+    		this.trackTraj.get(mv.measurements.get(mv.measurements.size()-1).k).refz=mv.measurements.get(mv.measurements.size()-1).z;
+    	}
+    	if (mv.measurements.get(mv.measurements.size()-1).type==1) {
+    		this.trackTrajFilt.get(mv.measurements.get(mv.measurements.size()-1).k).refx=mv.measurements.get(mv.measurements.size()-1).x;
+    		this.trackTraj.get(mv.measurements.get(mv.measurements.size()-1).k).refx=mv.measurements.get(mv.measurements.size()-1).x;
+    		
+    		this.trackTrajFilt.get(mv.measurements.get(mv.measurements.size()-1).k).refy=mv.measurements.get(mv.measurements.size()-1).y;
+    		this.trackTraj.get(mv.measurements.get(mv.measurements.size()-1).k).refy=mv.measurements.get(mv.measurements.size()-1).y;
+    	}
+    	
+    	
+    	this.trackCovFilt.remove(mv.measurements.get(mv.measurements.size()-1).k);
+    	this.trackCov.remove(mv.measurements.get(mv.measurements.size()-1).k);
+    	this.trackTransport.remove(mv.measurements.get(mv.measurements.size()-1).k);
+    	
+    	CovMat initCM = new CovMat(mv.measurements.get(mv.measurements.size()-1).k);
+        initCM.covMat= this.trackCov.get(0).covMat;
+    	this.trackCovFilt.put(mv.measurements.get(mv.measurements.size()-1).k, initCM);
+    	this.trackCov.put(mv.measurements.get(mv.measurements.size()-1).k, initCM);
+    	//Remove the 0-object
+        this.trackTraj.remove(0);
+        this.trackTrajFilt.remove(0);
+        this.trackCov.remove(0);
+        this.trackCovFilt.remove(0);
+        
+        
+        
     }
 
     public void printMatrix(Matrix C) {
@@ -675,4 +724,5 @@ public class StateVecs {
     public void printlnStateVec(StateVec S) {
         System.out.println(S.k + ") drho " + S.d_rho + " phi0 " + S.phi0 + " kappa " + S.kappa + " dz " + S.dz + " tanL " + S.tanL + " phi " + S.phi + " x " + S.refx + " y " + S.refy + " z " + S.refz + " alpha " + S.alpha);
     }
+	
 }

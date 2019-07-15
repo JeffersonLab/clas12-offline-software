@@ -13,6 +13,8 @@ import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
+import org.jlab.rec.cvt.track.fit.StateVecs.StateVec;
+import org.jlab.detector.base.DetectorType;
 
 public class TrackListFinder {
     
@@ -87,10 +89,10 @@ public class TrackListFinder {
                 TotE += trk.get(i).get_Cluster1().get(j).get_Strip().get_Edep();
                 NbHits++;
             }
-            for (int j = 0; j < trk.get(i).get_Cluster2().size(); j++) {
+            /*for (int j = 0; j < trk.get(i).get_Cluster2().size(); j++) {
                 TotE += trk.get(i).get_Cluster2().get(j).get_Strip().get_Edep();
                 NbHits++;
-            }
+            }*/
         }
         TotE /= (double) NbHits;
 
@@ -151,12 +153,12 @@ public class TrackListFinder {
                 this.getOverlapLists(trkcands.get(i), trkcands, list); //Compare trkcands.get(i) with all tracks to find overlaps... list must contains at least trkcands.get(i)
                 
                 Track selectedTrk = this.FindBestTrack(list); //Return the best track among the candidates. If only trkcands.get(i) in list, it will return trkcands.get(i)
-                if(selectedTrk==null&&list.size()>0)
-                    System.out.println("Houston... there is a problem with FindBestTrack in removeOverlappingTracks");
+               
+                if(selectedTrk==null&&list.size()>0) System.out.println("Houston... there is a problem with FindBestTrack in removeOverlappingTracks");
                 
                 if(selectedTracks.contains(selectedTrk)==false)
                         selectedTracks.add(selectedTrk);
-                
+               
                 list.remove(selectedTrk);
 
                 for( Track t : list ) {
@@ -164,9 +166,6 @@ public class TrackListFinder {
                 }
 
             }
-            
-            if( rejected != null )
-            	selectedTracks.removeAll(rejected);
            
             if(trkcands!=null)
                 trkcands.removeAll(trkcands);
@@ -179,17 +178,6 @@ public class TrackListFinder {
                 trkcands.get(c).set_Id(c + 1);
             }
     }
-
-    private boolean ListContainsTrack(List<Track> selectedTracks, Track selectedTrk) { 
-            // not used. Now Track extends Comparables
-            boolean isInList = false;
-            for(Track trk : selectedTracks) {
-                    if(trk.get_Id()==selectedTrk.get_Id())
-                            isInList=true;
-            }
-            return isInList;
-    }
-
 
     private void getOverlapLists(Track track, List<Track> trkcands, List<Track> list) {
     // --------------------------------------------------------------------
@@ -205,7 +193,6 @@ public class TrackListFinder {
     				for( Cross cr : track ) {
     					if (cr.get_Detector().equals("SVT")) {
     						if (cr.get_Cluster1().get_Id()==c.get_Cluster1().get_Id()) { N++;  } 
-    						if (cr.get_Cluster2().get_Id()==c.get_Cluster2().get_Id()) { N++;  }
     					}
     				}
     			}
@@ -245,8 +232,7 @@ public class TrackListFinder {
     }
 
 	public void updateCrosses(List<Track> trks, List<ArrayList<Cross>> crosses) {
-		ArrayList<Cross> temp=new ArrayList<Cross>();
-		
+				
 		//Loop over the track
 		for (int t = 0; t < trks.size(); t++) {
 			//Loop ovver the measurements/state vectors
@@ -265,23 +251,10 @@ public class TrackListFinder {
             	   			for (FittedHit h : crosses.get(0).get(jj).get_Cluster1()) {
                                 h.set_AssociatedTrackID(trks.get(t).get_Id());
                             }
-        					temp.add(crosses.get(0).get(jj).Duplicate());
-        					temp.get(temp.size()-1).set_Id(-crosses.get(0).get(jj).get_Id());
-                		}
-                		
-                		//If we have the cluster 2
-                		if (trks.get(t).getTrajectory().get(tp).clusID==crosses.get(0).get(jj).get_Cluster2().get_Id()) {
-                			crosses.get(0).get(jj).set_Point(new Point3D(trks.get(t).getTrajectory().get(tp).xdet,trks.get(t).getTrajectory().get(tp).ydet,trks.get(t).getTrajectory().get(tp).zdet));
-            	   			crosses.get(0).get(jj).set_Dir(new Vector3D(trks.get(t).getTrajectory().get(tp).dirx,trks.get(t).getTrajectory().get(tp).diry,trks.get(t).getTrajectory().get(tp).dirz));
-            	   			crosses.get(0).get(jj).get_Cluster2().set_CentroidResidual(trks.get(t).getTrajectory().get(tp).residual);
-            	   			crosses.get(0).get(jj).get_Cluster2().set_SeedResidual(trks.get(t).getTrajectory().get(tp).excl_residual);
-            	   			crosses.get(0).get(jj).get_Cluster2().set_AssociatedTrackID(trks.get(t).get_Id());
-            	   			crosses.get(0).get(jj).set_AssociatedTrackID(trks.get(t).get_Id());
-            	   			for (FittedHit h : crosses.get(0).get(jj).get_Cluster2()) {
-                                h.set_AssociatedTrackID(trks.get(t).get_Id());
-                            }
         					
                 		}
+                		
+                		
                 	}
                }
                else {
@@ -302,26 +275,58 @@ public class TrackListFinder {
                
 			}
 		}
-		crosses.get(0).addAll(temp);
+		
 	}
 
-    public void FinalizeTrackToCTOF_CND(List<Track> trks) {
-        Swim swimmer = new Swim();
+    public void FinalizeTrackToCTOF_CND(List<Track> trks,  CTOFGeant4Factory ctof_geo, Detector cnd_geo, Swim swimmer) {
+       
+        double CTOF_radius=ctof_geo.getRadius(1);
         double px = 0;
         double py = 0;
         double pz = 0;
-
+        org.jlab.rec.cvt.track.fit.StateVecs sv=new org.jlab.rec.cvt.track.fit.StateVecs();//Stupid class... need to change it when I am bored.
+        
         for (int t = 0; t < trks.size(); t++) {
+        	boolean keep_swimming=true;// boolean to kill the search of intersection if swimmer cannot catch the previous layer
             int trksize = trks.get(t).getTrajectory().size();
+            StateVec ctof_inter=sv.new StateVec(trksize +1);
+            StateVec[] cnd_inter=new StateVec[cnd_geo.getSector(0).getSuperlayer(0).getNumLayers()];
             px = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).dirx;
             py = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).diry;
             pz = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).dirz;
             swimmer.SetSwimParameters(trks.get(t).getTrajectory().get(trksize - 1).x / 10., trks.get(t).getTrajectory().get(trksize - 1).y / 10., trks.get(t).getTrajectory().get(trksize - 1).z / 10., px, py, pz, trks.get(t).get_Q());
-            double[] pointAtCylRad = swimmer.SwimToCylinder(Constants.CTOFINNERRADIUS / 10);
-            trks.get(t).set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0], pointAtCylRad[1], pointAtCylRad[2]));
-            trks.get(t).set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3], pointAtCylRad[4], pointAtCylRad[5]));
-            trks.get(t).set_pathLength(pointAtCylRad[6] + trks.get(t).getTrajectory().get(trksize - 1).pathlength / 10.);
-
+            double[] pointAtCylRad = swimmer.SwimToCylinder(CTOF_radius);
+            
+            if (pointAtCylRad[6]>15||pointAtCylRad[6]==0) {
+            	keep_swimming=false;
+            	break;
+            }
+            ctof_inter.sector=1; ctof_inter.layer=1;ctof_inter.DetectorType=DetectorType.CTOF.getDetectorId();
+            ctof_inter.xdet=pointAtCylRad[0];ctof_inter.ydet=pointAtCylRad[1];ctof_inter.zdet=pointAtCylRad[2];
+            ctof_inter.dirx=pointAtCylRad[3];ctof_inter.diry=pointAtCylRad[4];ctof_inter.dirz=pointAtCylRad[5];
+            ctof_inter.pathlength=pointAtCylRad[6] + trks.get(t).getTrajectory().get(trksize - 1).pathlength / 10.;
+                        
+            trks.get(t).getTrajectory().add(ctof_inter);
+            
+            for(int ilayer=0; ilayer<cnd_geo.getSector(0).getSuperlayer(0).getNumLayers(); ilayer++) {
+            	trksize = trks.get(t).getTrajectory().size();
+            	if (!keep_swimming) break;
+            	cnd_inter[ilayer]= sv.new StateVec(trksize +1);
+            	Point3D center = cnd_geo.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
+            	double radius  = Math.sqrt(center.x()*center.x()+center.y()*center.y());
+            	 swimmer.SetSwimParameters(pointAtCylRad[0],pointAtCylRad[1] , pointAtCylRad[2], pointAtCylRad[3], pointAtCylRad[4] , pointAtCylRad[5], trks.get(t).get_Q());
+            	 pointAtCylRad= swimmer.SwimToCylinder(radius);
+            	if (pointAtCylRad[6]==0||pointAtCylRad[6]>15) {
+            		keep_swimming=false;
+            		break;
+            	}
+            	cnd_inter[ilayer].layer=ilayer; cnd_inter[ilayer].sector=1;cnd_inter[ilayer].DetectorType=DetectorType.CND.getDetectorId();
+            	cnd_inter[ilayer].xdet=pointAtCylRad[0];cnd_inter[ilayer].ydet=pointAtCylRad[1];cnd_inter[ilayer].zdet=pointAtCylRad[2];
+            	cnd_inter[ilayer].dirx=pointAtCylRad[3];cnd_inter[ilayer].diry=pointAtCylRad[4];cnd_inter[ilayer].dirz=pointAtCylRad[5];
+            	cnd_inter[ilayer].pathlength=pointAtCylRad[6] + trks.get(t).getTrajectory().get(trksize - 1).pathlength;
+            	trks.get(t).getTrajectory().add(cnd_inter[ilayer]);
+            	
+            }
         }
 
     }
