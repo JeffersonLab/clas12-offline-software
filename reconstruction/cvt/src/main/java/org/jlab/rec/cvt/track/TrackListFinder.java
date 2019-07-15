@@ -65,7 +65,7 @@ public class TrackListFinder {
 //                System.out.println(pointAtCylRad[0] + " " + pointAtCylRad[1] + " " + pointAtCylRad[2] + " " +
 //                        Math.sqrt(pointAtCylRad[0]*pointAtCylRad[0]+pointAtCylRad[1]*pointAtCylRad[1])+ " " + pointAtCylRad[6]);
                 trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
-                trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
+                trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3], pointAtCylRad[4], pointAtCylRad[5]).asUnit());
 
                 trk.set_pathLength(pointAtCylRad[6]*10);
 
