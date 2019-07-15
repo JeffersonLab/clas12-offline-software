@@ -230,20 +230,27 @@ public class MakerCA {
       		  if( c.get_neighbors().contains(n))continue;
       		  if( n.get_c1().equals(c.get_c2()) ){  			  
       			  if( n.get_dir2D(this._plane).dot(c.get_dir2D(this._plane)) > this._cosBtwCells){
-      				  n.addNeighbour(c);
-                c.setParent(n);
+      				n.addNeighbour(c);
+      				c.setParent(n);
+
+      				// implement here evolution
+      				if( n.get_state() <= c.get_state() ) n.set_state( c.get_state() + 1);
+      				
       				if ( this._debug ) System.out.println( "   . pass cos requirement   add neighbor " + n);
       			  }
       			  else {
       				if( c.get_c2().get_Region() < 7) { // SVT only
       					if( ( (c.get_c2().get_Region()-1)/2 == (c.get_c1().get_Region()-1)/2 ) ||
-      							( (n.get_c2().get_Region()-1)/2 == (n.get_c1().get_Region()-1)/2 ) ) { // if one of the cell is in the same Region
+      						( (n.get_c2().get_Region()-1)/2 == (n.get_c1().get_Region()-1)/2 ) ) { // if one of the cell is in the same Region
 
-      						if ( this._debug ) System.out.println( "   one of the two cell is in the same region " + n);
+      					  if ( this._debug ) System.out.println( "   one of the two cell is in the same region " + n);
       	      			  if( n.get_dir2D(this._plane).dot(c.get_dir2D(this._plane)) > .01*this._cosBtwCells){
-      	      				  n.addNeighbour(c);
+      	      				n.addNeighbour(c);
+      	      				c.setParent(n);
+      	      				// implement here evolution
+      	      				if( n.get_state() <= c.get_state() ) n.set_state( c.get_state() + 1);
 
-      	      				  if ( this._debug ) System.out.println( "   adding neighbor , cos and angle " +n.get_dir2D(this._plane).dot(c.get_dir2D(this._plane)) +
+      	      				if ( this._debug ) System.out.println( "   adding neighbor , cos and angle " +n.get_dir2D(this._plane).dot(c.get_dir2D(this._plane)) +
       	      						"  " + Math.toDegrees( n.get_dir2D(this._plane).angle((c.get_dir2D(this._plane)) )) );
       	      			  }
       					}
@@ -254,26 +261,26 @@ public class MakerCA {
         }
 	}
 	
-	public void evolve(int N){
-        int[] states = new int[nodes.size()];
-        // evolve
-        for( int i=0; i<N; i++){ // epochs 
-      	  
-      	  // find the state for each cell
-      	  int j=0;
-      	  for( Cell c : nodes ){
-      		  int max = 0;
-      		  for( Cell n : c.get_neighbors() ){
-      			  if( n.get_state() > max ) max = n.get_state(); 
-      		  }
-      		  states[j] =  1 + max ;
-      		  j++;
-      	  }
-      	  // update all cell states at once
-      	  for( j=0;j<nodes.size();j++) nodes.get(j).set_state(states[j]);
-
-        }
-	}
+//	public void evolve(int N){
+//        int[] states = new int[nodes.size()];
+//        // evolve
+//        for( int i=0; i<N; i++){ // epochs 
+//      	  
+//      	  // find the state for each cell
+//      	  int j=0;
+//      	  for( Cell c : nodes ){
+//      		  int max = 0;
+//      		  for( Cell n : c.get_neighbors() ){
+//      			  if( n.get_state() > max ) max = n.get_state(); 
+//      		  }
+//      		  states[j] =  1 + max ;
+//      		  j++;
+//      	  }
+//      	  // update all cell states at once
+//      	  for( j=0;j<nodes.size();j++) nodes.get(j).set_state(states[j]);
+//
+//        }
+//	}
 
 	public double get_aCvsR() {
 		return _aCvsR;
