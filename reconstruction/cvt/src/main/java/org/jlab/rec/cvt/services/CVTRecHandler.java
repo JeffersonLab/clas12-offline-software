@@ -305,7 +305,6 @@ public class CVTRecHandler {
         trkFinder.updateCrosses(trks, crosses); //Once we have kept only good tracks, we can update the cross.
         trkFinder.FinalizeTrackToCTOF_CND(trks,CTOFGeom,CNDGeom,swimmer); //Get Intersection with CTOF and CND
 
-                      
         return trks;
     }
 
