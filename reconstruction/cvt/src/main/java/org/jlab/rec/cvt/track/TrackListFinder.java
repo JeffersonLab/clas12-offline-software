@@ -287,7 +287,26 @@ public class TrackListFinder {
         org.jlab.rec.cvt.track.fit.StateVecs sv=new org.jlab.rec.cvt.track.fit.StateVecs();//Stupid class... need to change it when I am bored.
         
         for (int t = 0; t < trks.size(); t++) {
-        	boolean keep_swimming=true;// boolean to kill the search of intersection if swimmer cannot catch the previous layer
+            
+            // keep original ctof cross definition that goes in Tracks bank
+                Track trk = trks.get(t);
+                int charge = trk.get_Q();
+                double maxPathLength = 5.0;//very loose cut 
+                swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
+                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
+                        trk.get_P(), charge, 
+                        maxPathLength) ;
+
+                double[] pointAtCylRadOrg = swimmer.SwimToCylinder(Constants.CTOFINNERRADIUS/10);
+                trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRadOrg[0]*10, pointAtCylRadOrg[1]*10, pointAtCylRadOrg[2]*10));
+                trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRadOrg[3], pointAtCylRadOrg[4], pointAtCylRadOrg[5]).asUnit());
+
+                trk.set_pathLength(pointAtCylRadOrg[6]*10);
+
+            
+            
+            
+            boolean keep_swimming=true;// boolean to kill the search of intersection if swimmer cannot catch the previous layer
             int trksize = trks.get(t).getTrajectory().size();
             StateVec ctof_inter=sv.new StateVec(trksize +1);
             StateVec[] cnd_inter=new StateVec[cnd_geo.getSector(0).getSuperlayer(0).getNumLayers()];
