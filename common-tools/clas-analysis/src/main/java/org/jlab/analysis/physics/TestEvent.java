@@ -144,7 +144,7 @@ public class TestEvent {
 		for(int i = 0; i < 38; i++) {
 			BMTadc.putByte("sector", i, (byte) 3);
 			BMTadc.putByte("order", i, (byte) 0);
-			BMTadc.putFloat("time", i, (float) 0.0);
+			BMTadc.putFloat("time", i, (float) 200.0);
 			BMTadc.putShort("ped", i, (short) 0);
 			BMTadc.putInt("integral", i, (int) 0);
 			BMTadc.putLong("timestamp", i, (long) 0);
