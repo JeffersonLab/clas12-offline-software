@@ -708,7 +708,7 @@ public class Geometry {
     	return rm;
     }
 
-    public static final synchronized int getZorC(int layer) {
+    public static final int getZorC(int layer) {
         int axis = 0;
         if (layer == 2 || layer == 3 || layer == 5) {
             axis = 1;

@@ -166,31 +166,31 @@ public class HitReader {
                 ADC[i] = bankDGTZ.getInt("ADC", i);
                 time[i] = bankDGTZ.getFloat("time", i);
                 
-                double angle = 2. * Math.PI * ((double) (sector[i] - 1) / (double) org.jlab.detector.geant4.v2.SVT.SVTConstants.NSECTORS[(layer[i] - 1)/2]) + org.jlab.detector.geant4.v2.SVT.SVTConstants.PHI0;
-                int hemisphere = (int) Math.signum(Math.sin(angle));
-                if (sector[i] == 7 && layer[i] > 6) {
-                    hemisphere = 1;
-                }
-                if (sector[i] == 19 && layer[i] > 6) {
-                    hemisphere = -1;
-                }
-                if (omitHemisphere == -2) {
-                    if (layer[i] == omitLayer) {
-                        continue;
-                    }
-                } else {
-                    if (hemisphere == omitHemisphere && layer[i] == omitLayer) {
-                        continue;
-                    }
-
-                }
-                // if the strip is out of range skip
-                if (strip[i] < 1) {
-                    continue;
-                }
-                if (layer[i] > 6) {
-                    continue;
-                }
+//                double angle = 2. * Math.PI * ((double) (sector[i] - 1) / (double) org.jlab.detector.geant4.v2.SVT.SVTConstants.NSECTORS[(layer[i] - 1)/2]) + org.jlab.detector.geant4.v2.SVT.SVTConstants.PHI0;
+//                int hemisphere = (int) Math.signum(Math.sin(angle));
+//                if (sector[i] == 7 && layer[i] > 6) {
+//                    hemisphere = 1;
+//                }
+//                if (sector[i] == 19 && layer[i] > 6) {
+//                    hemisphere = -1;
+//                }
+//                if (omitHemisphere == -2) {
+//                    if (layer[i] == omitLayer) {
+//                        continue;
+//                    }
+//                } else {
+//                    if (hemisphere == omitHemisphere && layer[i] == omitLayer) {
+//                        continue;
+//                    }
+//
+//                }
+//                // if the strip is out of range skip
+//                if (strip[i] < 1) {
+//                    continue;
+//                }
+//                if (layer[i] > 6) {
+//                    continue;
+//                }
                 
                 //if(adcConv.SVTADCtoDAQ(ADC[i], event)<50)
                 //    continue;

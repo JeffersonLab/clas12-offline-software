@@ -162,7 +162,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         return true;
     }
     
-    public boolean loadConstants( int run ) {
+    public synchronized boolean loadConstants( int run ) {
         System.out.println(" ........................................ trying to connect to db ");
 //        CCDBConstantsLoader.Load(new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default"));
 
