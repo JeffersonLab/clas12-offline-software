@@ -84,7 +84,7 @@ public class Constants {
     public static double MAXDISTTOTRAJXY = 5; //max xy dist to cross in cm
 
     // For alignment
-    public static final boolean WithAlignment=true;
+    public static boolean WithAlignment=false;
     
     public static double getXb() {
         return _Xb;
@@ -309,9 +309,9 @@ public class Constants {
 	public static final double unc_z0 = 10;
 	public static final double unc_kappa = 3;
 
-	public static final boolean ExcludingSite = false;
+	public static boolean ExcludingSite = false;
 
-	public static final boolean FromTargetToCTOF = true;
+	public static boolean FromTargetToCTOF = true;
 	
 
     //public static final int CVTCONFIGSTARTREG = 2; // for 3SVT+3BMT

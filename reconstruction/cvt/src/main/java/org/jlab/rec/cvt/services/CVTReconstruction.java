@@ -182,23 +182,30 @@ public class CVTReconstruction extends ReconstructionEngine {
     }
 
     public boolean init() {
-        //System.out.println(" ........................................ trying to connect to db ");
-////        CCDBConstantsLoader.Load(new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default"));
-        //CCDBConstantsLoader.Load(new DatabaseConstantProvider(10, "default"));
-               
-        //DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
-////        DatabaseConstantProvider cp = new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default");
-        //cp = SVTConstants.connect( cp );
-        //SVTConstants.loadAlignmentShifts( cp );
-        //cp.disconnect();    
-        //this.setSVTDB(cp);
-        
+
+        // read configurations set in the yml file
+        // ---------------------------------------
+
+        // use the alignment constants
+        Constants.WithAlignment = Boolean.parseBoolean(Optional.ofNullable(this.getEngineConfigString("WithAlignment")).orElse("false"));
+
+        // KF starts from target or from CTOF
+        Constants.FromTargetToCTOF = Boolean.parseBoolean(Optional.ofNullable(this.getEngineConfigString("FromTargetToCTOF")).orElse("true"));
+
+        // KF computes unbiased residuals
+        Constants.ExcludingSite = Boolean.parseBoolean(Optional.ofNullable(this.getEngineConfigString("ExcludingSite")).orElse("false"));
+
+        System.out.println( "\n +++ CVT configuration +++\n"+
+                            "Use alignment constants: " + Constants.WithAlignment +"\n"+
+                            "Fit outward: "+ Constants.FromTargetToCTOF  +"\n" +
+                            "Compute unbiased residuals: " +Constants.ExcludingSite + "\n +++ \n");
+
         // Load other geometries
         String variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
         ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, 11, variationName);
         CTOFGeom = new CTOFGeant4Factory(providerCTOF);        
         CNDGeom =  GeometryFactory.getDetector(DetectorType.CND, 11, variationName);
-        
+
         //TrkSwimmer.getMagneticFields();
         return true;
     }
