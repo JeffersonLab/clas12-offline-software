@@ -38,7 +38,7 @@ public class TrackSeederCA {
         // - they have to be terminals: no parents
         ArrayList<Cell> starts = new ArrayList<Cell>();
         for( Cell c : nodes ) {
-        	if( c.get_state() >= (mstate-1) ) { 
+        	if( c.get_state() >= (mstate-2) ) { 
         		if ( c.getParent() == null ) {
         			
         			if( c.get_state() == mstate) {
@@ -56,7 +56,7 @@ public class TrackSeederCA {
         
         for( Cell start : starts ) {
         	
-        	if( start.get_state() == mstate - 1 ) {
+        	if( start.get_state() != mstate  ) {
         		if( start.get_c2().is_usedInXYcand() ) continue;
         	}
         	
@@ -356,10 +356,10 @@ public class TrackSeederCA {
         //System.out.println("sector" + sector + " len " + zrtracks.size());
         
         // check if the ZR candidate maches in time
-        double minTimeZ = 0;
-        int irz = 0;
         List<Integer> lrz = new ArrayList<Integer>();
         for( List<Cross> zr : zrtracks ) {
+            double minTimeZ = 0;
+            int irz = 0;
         	for( Cross c : zr) minTimeZ += c.get_Cluster1().get_Tmin();
         	minTimeZ /= zr.size();
         	

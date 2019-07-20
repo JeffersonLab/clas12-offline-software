@@ -130,7 +130,7 @@ public class TrackListFinder {
         }
     }
      
-    public void removeOverlappingTracks(List<Track> trkcands) {
+    public void removeOverlappingTracks(List<Track> trkcands, String plane) {
             if(trkcands==null) {
             	System.out.println("Pas de trace dans le overlap study");
             	return;
@@ -150,7 +150,7 @@ public class TrackListFinder {
                 
                 if( rejected.contains( trkcands.get(i) ) ) continue; //If we have already found a track that is better than this candidate, there is no need to re-analyze it.
                 
-                this.getOverlapLists(trkcands.get(i), trkcands, list); //Compare trkcands.get(i) with all tracks to find overlaps... list must contains at least trkcands.get(i)
+                this.getOverlapLists(trkcands.get(i), trkcands, list, plane); //Compare trkcands.get(i) with all tracks to find overlaps... list must contains at least trkcands.get(i)
                 
                 Track selectedTrk = this.FindBestTrack(list); //Return the best track among the candidates. If only trkcands.get(i) in list, it will return trkcands.get(i)
                
@@ -179,7 +179,7 @@ public class TrackListFinder {
             }
     }
 
-    private void getOverlapLists(Track track, List<Track> trkcands, List<Track> list) {
+    private void getOverlapLists(Track track, List<Track> trkcands, List<Track> list, String plane) {
     // --------------------------------------------------------------------
     //  two tracks are considered the same if they share at least 2 crosses
     // --------------------------------------------------------------------
@@ -187,17 +187,28 @@ public class TrackListFinder {
     	
     	for( Track t : trkcands ) {
     		int N = 0;
+    		int Nc = 0;
     		for( Cross c : t ) {
-    			if( track.contains(c)&& c.get_Detector().equals("BMT") ) { N++;  } //For Micromegas... one cross is uniquely assigned to one cluster
-    			if (c.get_Detector().equals("SVT")) { //For SVT... a cluster can be assigned to several crosses
-    				for( Cross cr : track ) {
-    					if (cr.get_Detector().equals("SVT")) {
-    						if (cr.get_Cluster1().get_Id()==c.get_Cluster1().get_Id()) { N++;  } 
-    					}
-    				}
+//    			if( track.contains(c)&& c.get_DetectorType().equals("Z") ) { N++;  } //For Micromegas... one cross is uniquely assigned to one cluster
+//    			if (c.get_Detector().equals("SVT")) { //For SVT... a cluster can be assigned to several crosses
+//    				for( Cross cr : track ) {
+//    					if (cr.get_Detector().equals("SVT")) {
+//    						if (cr.get_Cluster1().get_Id()==c.get_Cluster1().get_Id()) { N++;  } 
+//    					}
+//    				}
+//    			}
+    			if( track.contains(c)) {
+    				if( c.get_Detector().equals("SVT") || c.get_DetectorType().equals("Z") ) N++;
+    				if( c.get_DetectorType() == "C") Nc++;
     			}
     		}
-    		if( N >= 2 ) list.add( t );
+    		if( plane.equalsIgnoreCase("XY") ) {
+    			if( N >= 2 && Nc > 0) { list.add( t );}
+    		}
+    		else {
+    			if( Nc > 0 ) { list.add( t );}
+    		}
+
     	}
     	
     }
@@ -212,7 +223,8 @@ public class TrackListFinder {
             Track bestTrk = trkList.get(0);
             //The best and tallest track
             for (int i =0; i<trkList.size(); i++) {
-            	if (trkList.get(i).getNDF()>ndf||(trkList.get(i).getNDF()==ndf&&trkList.get(i).getChi2()<bestChi2)) {
+//            	if (trkList.get(i).getNDF()>ndf||(trkList.get(i).getNDF()==ndf&&trkList.get(i).getChi2()<bestChi2)) {
+            	if ((trkList.get(i).getChi2()/trkList.get(i).getNDF()<bestChi2/ndf)) {
             		ndf=trkList.get(i).getNDF();
             		bestTrk=trkList.get(i);
             		bestChi2=trkList.get(i).getChi2();

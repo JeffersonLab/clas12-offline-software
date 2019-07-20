@@ -301,7 +301,10 @@ public class CVTRecHandler {
         //This last part does ELoss C
         TrackListFinder trkFinder = new TrackListFinder();
         trkFinder.removeBadTracks(trks); // If chi2 is very bad, we delete it before doing the overlapping track study
-        trkFinder.removeOverlappingTracks(trks); //Determine which track is the best if they share two measurements
+
+        trkFinder.removeOverlappingTracks(trks, "XY"); //Determine which track is the best if they share two measurements in XY
+        trkFinder.removeOverlappingTracks(trks, "ZR"); //Determine which track is the best if they share two measurements then with BMTC
+        
         trkFinder.updateCrosses(trks, crosses); //Once we have kept only good tracks, we can update the cross.
         trkFinder.FinalizeTrackToCTOF_CND(trks,CTOFGeom,CNDGeom,swimmer); //Get Intersection with CTOF and CND
 
