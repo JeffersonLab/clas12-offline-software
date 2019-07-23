@@ -86,16 +86,6 @@ public class CVTReconstruction extends ReconstructionEngine {
             
             System.out.println("  CHECK CONFIGS..............................." + FieldsConfig + " = ? " + newConfig);
             Constants.Load(isCosmics, isSVTonly, (double) bank.getFloat("solenoid", 0));
-            // Load the Fields
-            //System.out.println("************************************************************SETTING FIELD SCALE *****************************************************");
-            //TrkSwimmer.setMagneticFieldScale(bank.getFloat("solenoid", 0)); // something changed in the configuration
-            //double shift =0;
-            //if(bank.getInt("run", 0)>1840)
-            //    shift = -1.9;
-            //MagneticFields.getInstance().setSolenoidShift(shift);
-//            this.setFieldsConfig(newConfig);
-            
-//CCDBConstantsLoader.Load(new DatabaseConstantProvider(bank.getInt("run", 0), "default"));
         }
         this.setFieldsConfig(newConfig);
 
@@ -163,21 +153,9 @@ public class CVTReconstruction extends ReconstructionEngine {
     }
     
     public synchronized boolean loadConstants( int run ) {
-        System.out.println(" ........................................ trying to connect to db ");
-//        CCDBConstantsLoader.Load(new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default"));
-
-        // Load the calibration constants
-        String variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
-        CCDBConstantsLoader.Load(new DatabaseConstantProvider(run, variationName),org.jlab.rec.cvt.Constants.WithAlignment);
-               
-        DatabaseConstantProvider cp = new DatabaseConstantProvider(run, variationName);
-//        DatabaseConstantProvider cp = new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default");
-        cp = SVTConstants.connect( cp );
-        SVTConstants.loadAlignmentShifts( cp );
-        cp.disconnect();    
-        this.setSVTDB(cp);       
-               
-        //TrkSwimmer.getMagneticFields();
+    	// load BMT HV settings
+        CCDBConstantsLoader.loadHVsettings(new DatabaseConstantProvider( 11, "default"));
+        double a = org.jlab.rec.cvt.bmt.Constants.E_DRIFT[0][0];
         return true;
     }
 
@@ -200,8 +178,32 @@ public class CVTReconstruction extends ReconstructionEngine {
                             "Fit outward: "+ Constants.FromTargetToCTOF  +"\n" +
                             "Compute unbiased residuals: " +Constants.ExcludingSite + "\n +++ \n");
 
-        // Load other geometries
+        // load geometries
+        // ---------------
+        
+        // Geometry constants are the ideal ones, i.e. accessed as run number 11.
+        // Alignment constants are stored in variations
+        
+        // BMT
+        // ===
+        
+        // Load the calibration constants
         String variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, variationName));
+
+        // load alignment constants
+        String alignVariationName = Optional.ofNullable(this.getEngineConfigString("alignmentVariation")).orElse("default");
+        CCDBConstantsLoader.loadAlignmentSettings( new DatabaseConstantProvider(11, alignVariationName),org.jlab.rec.cvt.Constants.WithAlignment);
+        
+        // SVT
+        // ===
+        SVTConstants.connect( new DatabaseConstantProvider(11, variationName) );
+//        SVTConstants.loadAlignmentShifts( cp ); // NOT USED AT THE MOMENT
+        SVTConstants.loadAlignmentConstants(new DatabaseConstantProvider(11, alignVariationName));
+    
+        
+        // Load other geometries
+        // ---------------------
         ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, 11, variationName);
         CTOFGeom = new CTOFGeant4Factory(providerCTOF);        
         CNDGeom =  GeometryFactory.getDetector(DetectorType.CND, 11, variationName);
@@ -209,13 +211,13 @@ public class CVTReconstruction extends ReconstructionEngine {
         //TrkSwimmer.getMagneticFields();
         return true;
     }
-    private DatabaseConstantProvider _SVTDB;
-    private synchronized void setSVTDB(DatabaseConstantProvider SVTDB) {
-        _SVTDB = SVTDB;
-    }
-    private synchronized DatabaseConstantProvider getSVTDB() {
-        return _SVTDB;
-    }
+//    private DatabaseConstantProvider _SVTDB;
+//    private synchronized void setSVTDB(DatabaseConstantProvider SVTDB) {
+//        _SVTDB = SVTDB;
+//    }
+//    private synchronized DatabaseConstantProvider getSVTDB() {
+//        return _SVTDB;
+//    }
 
     
     public static void main(String[] args)  {

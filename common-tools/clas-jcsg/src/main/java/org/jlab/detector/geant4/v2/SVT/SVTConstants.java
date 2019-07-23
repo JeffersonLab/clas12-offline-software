@@ -126,7 +126,6 @@ public class SVTConstants
 		cp.loadTable( ccdbPath +"material/box");
 		cp.loadTable( ccdbPath +"material/tube");
 		cp.loadTable( ccdbPath +"alignment");
-		cp.loadTable( ccdbPathAlignment +"SVTAlignment");
 		//if( loadAlignmentTables ) cp.loadTable( ccdbPath +"alignment/sector"); // possible future tables
 		//if( loadAlignmentTables ) cp.loadTable( ccdbPath +"alignment/layer");
 		
@@ -135,6 +134,35 @@ public class SVTConstants
 		return cp;
 	}
 	
+	public static void loadAlignmentConstants( DatabaseConstantProvider cp ) {
+		cp.loadTable( ccdbPathAlignment +"SVTAlignment");
+		Rx=new double[NREGIONS*2][18];
+		Ry=new double[NREGIONS*2][18];
+		Rz=new double[NREGIONS*2][18];
+		Tx=new double[NREGIONS*2][18];
+		Ty=new double[NREGIONS*2][18];
+		Tz=new double[NREGIONS*2][18];
+		LocTx=new double[NREGIONS*2][18];
+
+		for (int i=0; i<cp.length(ccdbPathAlignment+"SVTAlignment/Rx");i++) {
+			Rx[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Rx", i );
+			Ry[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Ry", i );
+			Rz[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Rz", i );
+			Tx[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Tx", i );
+			Ty[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Ty", i );
+			Tz[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Tz", i );
+			LocTx[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/LocTx", i );
+		}
+		if( VERBOSE ) {
+			System.out.printf("Rx   %8.3f\n", Rx[0][0]);
+			System.out.printf("Ry   %8.3f\n", Ry[0][0]);
+			System.out.printf("Rz   %8.3f\n", Rz[0][0]);
+			System.out.printf("Tx   %8.3f\n", Tx[0][0]);
+			System.out.printf("Ty   %8.3f\n", Ty[0][0]);
+			System.out.printf("Tz   %8.3f\n", Tz[0][0]);
+			System.out.printf("LocTx %8.3f\n", LocTx[0][0]);
+		}
+	}
 	
 	/**
 	 * Returns the path to the database directory that contains the core parameters and constants for the SVT.<br>
@@ -373,24 +401,7 @@ public class SVTConstants
 			NTOTALSECTORS = convertRegionSector2Index( NREGIONS-1, NSECTORS[NREGIONS-1]-1 )+1;
 			NTOTALFIDUCIALS = convertRegionSectorFiducial2Index(NREGIONS-1, NSECTORS[NREGIONS-1]-1, NFIDUCIALS-1  )+1;
 			
-			Rx=new double[NREGIONS*2][18];
-			Ry=new double[NREGIONS*2][18];
-			Rz=new double[NREGIONS*2][18];
-			Tx=new double[NREGIONS*2][18];
-			Ty=new double[NREGIONS*2][18];
-			Tz=new double[NREGIONS*2][18];
-			LocTx=new double[NREGIONS*2][18];
-			
-			for (int i=0; i<cp.length(ccdbPathAlignment+"SVTAlignment/Rx");i++) {
-				Rx[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Rx", i );
-				Ry[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Ry", i );
-				Rz[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Rz", i );
-				Tx[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Tx", i );
-				Ty[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Ty", i );
-				Tz[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/Tz", i );
-				LocTx[cp.getInteger(ccdbPathAlignment+"SVTAlignment/Layer", i )-1][cp.getInteger(ccdbPathAlignment+"SVTAlignment/Sector", i )-1]=cp.getDouble(ccdbPathAlignment+"SVTAlignment/LocTx", i );
-			}
-						
+		
 			// check one constant from each table
 			//if( NREGIONS == 0 || NSECTORS[0] == 0 || FIDCUX == 0 || MATERIALS[0][0] == 0 || SUPPORTRADIUS[0] == 0 )
 				//throw new NullPointerException("please load the following tables from CCDB in "+ccdbPath+"\n svt\n region\n support\n fiducial\n material\n");
@@ -400,7 +411,6 @@ public class SVTConstants
 			if( VERBOSE )
 			{
 				System.out.println();
-				System.out.printf("Rx   %8.3f\n", Rx[0][0]);
 				System.out.printf("NTOTALSECTORS   %4d\n", NTOTALSECTORS );
 				System.out.printf("NTOTALFIDUCIALS %4d\n", NTOTALFIDUCIALS );
 				System.out.printf("PHI0            %8.3f\n", Math.toDegrees(PHI0) );

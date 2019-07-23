@@ -74,6 +74,9 @@ public class CVTRecHandler {
     int Run = -1;
   
     public void setRunConditionsParameters(DataEvent event, String Fields, int iRun, boolean addMisAlignmts, String misAlgnFile) {
+        // -----------------------------------------------------------------------------------------------------
+        // deprecated method, here only for debug mode purposes. Please use the CVTReconstruction method instead
+        // -----------------------------------------------------------------------------------------------------
         if (event.hasBank("RUN::config") == false) {
             System.err.println("RUN CONDITIONS NOT READ!");
             return;
@@ -101,8 +104,6 @@ public class CVTRecHandler {
             
             System.out.println("  CHECK CONFIGS..............................." + FieldsConfig + " = ? " + newConfig);
             Constants.Load(isCosmics, isSVTonly, (double) bank.getFloat("solenoid", 0));
-                      
-            CCDBConstantsLoader.Load(new DatabaseConstantProvider(bank.getInt("run", 0), "default"), org.jlab.rec.cvt.Constants.WithAlignment);
         }
         this.setFieldsConfig(newConfig);
 
@@ -111,6 +112,8 @@ public class CVTRecHandler {
         int newRun = bank.getInt("run", 0);
 
         if (Run != newRun) {
+        	// load new HV settings for BMT
+        	CCDBConstantsLoader.loadHVsettings(new DatabaseConstantProvider(bank.getInt("run", 0), "default"));
             this.setRun(newRun);
         }
       
@@ -285,7 +288,7 @@ public class CVTRecHandler {
         
         //List<Seed> seeds = trseed.findSeed(SVTclusters, SVTGeom, crosses.get(1), BMTGeom);
         List<Seed> seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
-      
+//      System.out.println("  BEAM TRACKING    seeds " + seeds.size());
         for (Seed seed : seeds) { 
         	kf = new KFitter(seed, SVTGeom, swimmer );
             kf.runFitter(SVTGeom, BMTGeom, swimmer);
@@ -297,15 +300,16 @@ public class CVTRecHandler {
                 trks.get(trks.size() - 1).set_TrackingStatus(1);
            }
         }
-        
-        //This last part does ELoss C
+
         TrackListFinder trkFinder = new TrackListFinder();
         trkFinder.removeBadTracks(trks); // If chi2 is very bad, we delete it before doing the overlapping track study
 
-        trkFinder.removeOverlappingTracks(trks, "XY"); //Determine which track is the best if they share two measurements in XY
-        trkFinder.removeOverlappingTracks(trks, "ZR"); //Determine which track is the best if they share two measurements then with BMTC
-        
+        // overlapping tracks are searched first in the XY plane and then, to remove remaining duplicates for BMTC matching in "ZR"
+        trkFinder.removeOverlappingTracks(trks, "XY"); //Determine which track is the best if they share two measurements
+        trkFinder.removeOverlappingTracks(trks, "ZR"); //Determine which track is the best if they share two measurements
+
         trkFinder.updateCrosses(trks, crosses); //Once we have kept only good tracks, we can update the cross.
+ 
         trkFinder.FinalizeTrackToCTOF_CND(trks,CTOFGeom,CNDGeom,swimmer); //Get Intersection with CTOF and CND
 
         return trks;
@@ -349,25 +353,10 @@ public class CVTRecHandler {
 
     public boolean init() {
         System.out.println(" ........................................ trying to connect to db ");
-//        CCDBConstantsLoader.Load(new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default"));
-        CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, "default"), org.jlab.rec.cvt.Constants.WithAlignment);
-               
-        DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
-//        DatabaseConstantProvider cp = new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default");
-        cp = SVTConstants.connect( cp );
-        SVTConstants.loadAlignmentShifts( cp );
-        cp.disconnect();    
-        this.setSVTDB(cp);
-        
-//        TrkSwimmer.getMagneticFields();
+        CVTReconstruction cvtrec = new CVTReconstruction();
+        cvtrec.init();
         return true;
     }
-    private DatabaseConstantProvider _SVTDB;
-    private synchronized void setSVTDB(DatabaseConstantProvider SVTDB) {
-        _SVTDB = SVTDB;
-    }
-    private synchronized DatabaseConstantProvider getSVTDB() {
-        return _SVTDB;
-    }
+
 
 }

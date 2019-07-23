@@ -19,7 +19,7 @@ public class CCDBConstantsLoader {
     //private static DatabaseConstantProvider DB;
     
 
-    public static final synchronized void Load(DatabaseConstantProvider dbprovider, boolean WithAlignment) {
+    public static final synchronized void Load(DatabaseConstantProvider dbprovider) {
         // initialize the constants
         //Z detector characteristics
         int NREGIONS = 3;
@@ -57,8 +57,6 @@ public class CCDBConstantsLoader {
          double[] ELEC_grid = new double [GRID_SIZE];
          double[] MAG_grid = new double [GRID_SIZE];
          
-         // HV settings for Lorentz Angle
-         double [][] HV_DRIFT= new double [NREGIONS*2][3];
          
         // Load the tables
         
@@ -85,19 +83,17 @@ public class CCDBConstantsLoader {
         
          //load Lorentz angle table
         dbprovider.loadTable("/calibration/mvt/lorentz");
-        dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_fullfield");
-        dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_midfield");
-        
-        //Load Misalignment constant
-        dbprovider.loadTable("/test/mvt/MVTAlignment");
-        dbprovider.loadTable("/test/mvt/AllvsSVT");
-              
+//        dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_fullfield");
+//        dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_midfield");
+
         //beam offset table
         dbprovider.loadTable("/geometry/beam/position");
         
         //target position table
         dbprovider.loadTable("/geometry/target");
         
+        // load default HV settings. They need to be updated on a run by run basis
+        loadHVsettings( dbprovider );
         dbprovider.disconnect();
         
       //  dbprovider.show();
@@ -232,66 +228,18 @@ public class CCDBConstantsLoader {
         }
         
         if (GRID_SIZE!=dbprovider.length("/calibration/mvt/lorentz/angle")) {
-         System.out.println("WARNING... Lorentz angle grid is not the same size as the table in CCDBConstant");}
-         for (int i = 0; i < dbprovider.length("/calibration/mvt/lorentz/angle"); i++) {
+            System.out.println("WARNING... Lorentz angle grid is not the same size as the table in CCDBConstant");
+        }
+        for (int i = 0; i < dbprovider.length("/calibration/mvt/lorentz/angle"); i++) {
          	THETA_L_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/angle",i);
          	ELEC_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/Edrift",i);
          	MAG_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/Bfield",i);
-        }
-         
-         for (int i = 0; i<2*NREGIONS; i++) {
-        	 HV_DRIFT[i][0]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_1", i);
-    		 HV_DRIFT[i][1]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_2", i);
-    		 HV_DRIFT[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_3", i);
-        	 if (Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.8) {
-        		 HV_DRIFT[i][0]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_1", i);
-        		 HV_DRIFT[i][1]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_2", i);
-        		 HV_DRIFT[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_3", i);
-        	 }
-        	 
-        }
-         
-        if (WithAlignment) {
-        //Loading alignment constant in tables
-        	Constants.setRxAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Rx", 0));
-        	Constants.setRyAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Ry", 0));
-        	Constants.setRzAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Rz", 0));
-        	Constants.setCxAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Tx", 0));
-        	Constants.setCyAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Ty", 0));
-        	Constants.setCzAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Tz", 0));
-        	
+        } 
+        
+        
 
-        	for (int i=0;i<dbprovider.length("/test/mvt/MVTAlignment/Rx");i++) {
-        		// for the alignment table, layer numbering goes from 7 to 12. Adding "-6" to bring it back to [1,6] range
-        		Constants.setRx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Rx",i));
-        		Constants.setRy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Ry",i));
-        		Constants.setRz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Rz",i));
-        		Constants.setCx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Tx",i));
-        		Constants.setCy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Ty",i));
-        		Constants.setCz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Tz",i));
-        	}
-        	System.out.println(Constants.getRxAll()+" "+Constants.getRyAll()+" "+Constants.getRzAll()+" "+Constants.getCxAll()+" "+Constants.getCyAll()+" "+Constants.getCzAll());
-        }
-        else {
-        	Constants.setRxAll(0);
-        	Constants.setRyAll(0);
-        	Constants.setRzAll(0);
-        	Constants.setCxAll(0);
-        	Constants.setCyAll(0);
-        	Constants.setCzAll(0);
 
-        	for (int i=0;i<dbprovider.length("/test/mvt/MVTAlignment/Rx");i++) {
-        		// for the alignment table, layer numbering goes from 7 to 12. Adding "-6" to bring it back to [1,6] range
-        		Constants.setRx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
-        		Constants.setRy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
-        		Constants.setRz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
-        		Constants.setCx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
-        		Constants.setCy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
-        		Constants.setCz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
-        	}
-        	System.out.println(Constants.getRxAll()+" "+Constants.getRyAll()+" "+Constants.getRzAll()+" "+Constants.getCxAll()+" "+Constants.getCyAll()+" "+Constants.getCzAll());
-        }
-
+        
          // beam offset
         double xb = dbprovider.getDouble("/geometry/beam/position/x_offset", 0);     
         double yb = dbprovider.getDouble("/geometry/beam/position/y_offset", 0); 
@@ -333,14 +281,89 @@ public class CCDBConstantsLoader {
         Constants.setE_grid(ELEC_grid);
         Constants.setB_grid(MAG_grid);
         Constants.setPar_grid();
-        Constants.setE_drift(HV_DRIFT);
         dbprovider.disconnect();
         CSTLOADED = true;
-        System.out
-                .println("SUCCESSFULLY LOADED BMT CONSTANTS....");
+        System.out.println("SUCCESSFULLY LOADED BMT CONSTANTS....");
      //   setDB(dbprovider);
     }
 
+
+	public static void loadHVsettings(DatabaseConstantProvider dbprovider) {
+
+        dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_fullfield");
+        dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_midfield");
+		
+        dbprovider.disconnect();
+		int NREGIONS = 3;
+        
+		// HV settings for Lorentz Angle
+        double [][] HV_DRIFT= new double [NREGIONS*2][3];
+        
+        for (int i = 0; i<2*NREGIONS; i++) {
+        	HV_DRIFT[i][0]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_1", i);
+    		HV_DRIFT[i][1]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_2", i);
+    		HV_DRIFT[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_3", i);
+        	if (Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.8) {
+        	 HV_DRIFT[i][0]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_1", i);
+        	 HV_DRIFT[i][1]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_2", i);
+        	 HV_DRIFT[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_3", i);
+        	}
+        }
+
+        Constants.setE_drift(HV_DRIFT);
+		
+	}
+
+	public static void loadAlignmentSettings( DatabaseConstantProvider dbprovider , boolean WithAlignment) {
+	
+        
+        //Load Misalignment constant
+        dbprovider.loadTable("/test/mvt/MVTAlignment");
+        dbprovider.loadTable("/test/mvt/AllvsSVT");
+
+        if (WithAlignment) {
+        //Loading alignment constant in tables
+        	Constants.setRxAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Rx", 0));
+        	Constants.setRyAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Ry", 0));
+        	Constants.setRzAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Rz", 0));
+        	Constants.setCxAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Tx", 0));
+        	Constants.setCyAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Ty", 0));
+        	Constants.setCzAll(dbprovider.getDouble("/test/mvt/AllvsSVT/Tz", 0));
+        	
+
+        	for (int i=0;i<dbprovider.length("/test/mvt/MVTAlignment/Rx");i++) {
+        		// for the alignment table, layer numbering goes from 7 to 12. Adding "-6" to bring it back to [1,6] range
+        		Constants.setRx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Rx",i));
+        		Constants.setRy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Ry",i));
+        		Constants.setRz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Rz",i));
+        		Constants.setCx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Tx",i));
+        		Constants.setCy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Ty",i));
+        		Constants.setCz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),dbprovider.getDouble("/test/mvt/MVTAlignment/Tz",i));
+        	}
+        	System.out.println(Constants.getRxAll()+" "+Constants.getRyAll()+" "+Constants.getRzAll()+" "+Constants.getCxAll()+" "+Constants.getCyAll()+" "+Constants.getCzAll());
+        }
+        else {
+        	Constants.setRxAll(0);
+        	Constants.setRyAll(0);
+        	Constants.setRzAll(0);
+        	Constants.setCxAll(0);
+        	Constants.setCyAll(0);
+        	Constants.setCzAll(0);
+
+        	for (int i=0;i<dbprovider.length("/test/mvt/MVTAlignment/Rx");i++) {
+        		// for the alignment table, layer numbering goes from 7 to 12. Adding "-6" to bring it back to [1,6] range
+        		Constants.setRx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
+        		Constants.setRy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
+        		Constants.setRz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
+        		Constants.setCx(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
+        		Constants.setCy(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
+        		Constants.setCz(dbprovider.getInteger("/test/mvt/MVTAlignment/Layer",i)-6,dbprovider.getInteger("/test/mvt/MVTAlignment/Sector",i),0);
+        	}
+        	System.out.println(Constants.getRxAll()+" "+Constants.getRyAll()+" "+Constants.getRzAll()+" "+Constants.getCxAll()+" "+Constants.getCyAll()+" "+Constants.getCzAll());
+        }
+	}
+	
+	
     //public static final synchronized DatabaseConstantProvider getDB() {
     //    return DB;
     //}
