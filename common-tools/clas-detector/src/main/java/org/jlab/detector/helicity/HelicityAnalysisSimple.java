@@ -36,7 +36,7 @@ public class HelicityAnalysisSimple {
         // 1!!!1 initialize the helicity sequence:
         HelicitySequenceDelayed seq = HelicityAnalysis.readSequence(filenames);
        
-        seq.setVerbosity(1);
+        seq.setVerbosity(2);
 
         seq.analyze();
                 
@@ -44,6 +44,7 @@ public class HelicityAnalysisSimple {
       
         int nGoodEvents=0;
         int nBadEvents=0;
+        int nMismatches=0;
         
         // loop over files:
         for (String filename : filenames) {
@@ -71,7 +72,13 @@ public class HelicityAnalysisSimple {
                 // 2!!!2 use the timestamp to get the delay-corrected helicity:
                 HelicityBit predicted = seq.findPrediction(timestamp);
 
-                if (predicted==null || predicted==HelicityBit.UDF) {
+                HelicityBit lookup = seq.lookupPrediction(timestamp);
+                if (lookup!=HelicityBit.UDF && predicted!=lookup) {
+                    nMismatches++;
+                }
+                
+                if ( (predicted==null || predicted==HelicityBit.UDF) &&
+                        timestamp>=seq.generator.getTimestamp()) {
                     nBadEvents++;
                     System.out.println(String.format("Bad Helicity: event=%d time=%d helicity=%s",evno,timestamp,predicted));
                 }
@@ -82,7 +89,9 @@ public class HelicityAnalysisSimple {
             }
             reader.close();
         }
-        System.out.println(String.format("HelicityAnalysisSimple:  BAD/GOOD/FRACTION=%d/%d/%.1f%%",
+        System.out.println(String.format("HelicityAnalysisSimple:  BAD/GOOD/FRACTION=%d/%d/%.5f%%",
                 nBadEvents,nGoodEvents,((float)nBadEvents)/(nBadEvents+nGoodEvents)));
+        System.out.println(String.format("HelicityAnalysisSimple:  MISMATCHES/FRACTION=%d/%.5f%%",
+                nMismatches,((float)nMismatches)/(nBadEvents+nGoodEvents)));
     }
 }

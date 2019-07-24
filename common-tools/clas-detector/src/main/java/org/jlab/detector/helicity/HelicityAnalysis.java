@@ -58,8 +58,10 @@ public class HelicityAnalysis {
     
     public static void main(String[] args) {
         
-        final String dir="/Users/baltzell/data/CLAS12/rg-b/decoded/";
-        final String file="clas_006432.evio.00041-00042.hipo";
+        final String dir="/Users/baltzell/data/CLAS12/rg-a/decoded/6b.2.0/";
+        final String file="clas_005038.evio.00000-00004.hipo";
+        //final String dir="/Users/baltzell/data/CLAS12/rg-b/decoded/";
+        //final String file="clas_006432.evio.00041-00042.hipo";
 
         List<String> filenames=new ArrayList<>();
         if (args.length>0) filenames.addAll(Arrays.asList(args));
