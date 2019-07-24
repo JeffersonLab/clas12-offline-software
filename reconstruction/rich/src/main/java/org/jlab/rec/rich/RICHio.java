@@ -279,7 +279,7 @@ public class RICHio {
                 bankRing.setShort("hindex", i, (short) pho.get_hit_index());
                 bankRing.setShort("pindex", i, (short) had.get_ParentIndex());
 
-                bankRing.setShort("time",   i, (short) htime);
+                bankRing.setFloat("time",   i, (float) htime);
                 bankRing.setShort("pmt",    i, (short) hit.get_pmt());
                 bankRing.setShort("anode",  i, (short) hit.get_anode());
 
