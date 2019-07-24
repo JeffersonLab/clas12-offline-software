@@ -38,6 +38,6 @@
     <module>swim-tools</module>
     <module>clas-math</module>
 <!--    <module>clas-eventmerger</module> -->
-
+    <module>clas-tracking</module>
   </modules>
 </project>
