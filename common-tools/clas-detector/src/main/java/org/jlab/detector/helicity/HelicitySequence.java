@@ -169,22 +169,6 @@ public class HelicitySequence implements Comparator<HelicityState> {
     }
    
     /**
-     * Get the state index of a TI timestamp, based only on the first measured
-     * state's timestamp and the helicity periodicity.
-     * This returns invalid (-1) if the timestamp is before the measured states.
-     * @param timestamp
-     * @return index
-     */
-    public int predictIndex(long timestamp) {
-        if (!this.analyzed) this.analyze();
-        if (!this.generator.initialized()) return -1;
-        if (timestamp < this.generator.getTimestamp()) return -1;
-        final int n = (int) ( (timestamp-this.generator.getTimestamp()) /
-                TIMESTAMP_CLOCK * HELICITY_CLOCK );
-        return n+this.generator.getOffset();
-    }
-
-    /**
      * Get the nth state in the measured sequence.
      * @param n the index of the state, where 0 corresponds to the first state
      * @return the helicity state, null if outside the mesaured range
