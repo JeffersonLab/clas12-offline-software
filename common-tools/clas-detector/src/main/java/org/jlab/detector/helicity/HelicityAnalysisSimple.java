@@ -39,11 +39,15 @@ public class HelicityAnalysisSimple {
         seq.setVerbosity(1);
 
         seq.analyze();
-                
+        
+        seq.show();
+        
         // now read the full events, e.g. during a normal physics analysis: 
       
         int nGoodEvents=0;
         int nBadEvents=0;
+        int nMismatches=0;
+        int nMismatches2=0;
         
         // loop over files:
         for (String filename : filenames) {
@@ -67,11 +71,21 @@ public class HelicityAnalysisSimple {
                 if (rcfgBank.getRows()<=0) continue;
                 final int  evno = rcfgBank.getInt("event",0);
                 final long timestamp = rcfgBank.getLong("timestamp",0);
-               
+              
                 // 2!!!2 use the timestamp to get the delay-corrected helicity:
                 HelicityBit predicted = seq.findPrediction(timestamp);
 
-                if (predicted==null || predicted==HelicityBit.UDF) {
+                HelicityBit lookup = seq.lookupPrediction(timestamp);
+                if (lookup!=HelicityBit.UDF && predicted!=lookup) {
+                    nMismatches++;
+                }
+                HelicityBit measured = seq.find(timestamp);
+                if (measured!=HelicityBit.UDF && predicted!=measured) {
+                    nMismatches2++;
+                }
+                
+                if ( (predicted==null || predicted==HelicityBit.UDF) &&
+                        timestamp>=seq.generator.getTimestamp()) {
                     nBadEvents++;
                     System.out.println(String.format("Bad Helicity: event=%d time=%d helicity=%s",evno,timestamp,predicted));
                 }
@@ -82,7 +96,11 @@ public class HelicityAnalysisSimple {
             }
             reader.close();
         }
-        System.out.println(String.format("HelicityAnalysisSimple:  BAD/GOOD/FRACTION=%d/%d/%.1f%%",
-                nBadEvents,nGoodEvents,((float)nBadEvents)/(nBadEvents+nGoodEvents)));
+        System.out.println(String.format("HelicityAnalysisSimple:  BAD/GOOD/FRACTION=%d/%d/%.5f%%",
+                nBadEvents,nGoodEvents,100*((float)nBadEvents)/(nBadEvents+nGoodEvents)));
+        //System.out.println(String.format("HelicityAnalysisSimple:  MISMATCHES/FRACTION=%d/%.5f%%",
+        //        nMismatches,100*((float)nMismatches)/(nBadEvents+nGoodEvents)));
+        System.out.println(String.format("HelicityAnalysisSimple:  MISMATCHES2/FRACTION=%d/%.5f%%",
+                nMismatches2,100*((float)nMismatches2)/(nBadEvents+nGoodEvents)));
     }
 }

@@ -38,11 +38,11 @@ public class HelicitySequence implements Comparator<HelicityState> {
     public static final double TIMESTAMP_CLOCK=250.0e6; // Hz
     public static final double HELICITY_CLOCK=29.56; // Hz
 
-    private boolean halfWavePlate=false;
-    private boolean analyzed=false;
-    private final List<HelicityState> states=new ArrayList<>();
-    private final HelicityGenerator generator=new HelicityGenerator();
-    private int verbosity=0;
+    protected boolean halfWavePlate=false;
+    protected boolean analyzed=false;
+    protected final HelicityGenerator generator=new HelicityGenerator();
+    protected final List<HelicityState> states=new ArrayList<>();
+    protected int verbosity=0;
 
     public HelicitySequence(){}
 
@@ -133,8 +133,10 @@ public class HelicitySequence implements Comparator<HelicityState> {
     }
 
     /**
-     * Get the state index of a TI timestamp.
-     * This returns invalid (-1) if the timestamp is not in the range of measured states.
+     * Get the state index of a TI timestamp, based on binary search
+     * within the measured sequence.
+     * This returns invalid (-1) if the timestamp is not contained within
+     * the range of measured states.
      * @param timestamp TI timestamp (i.e. RUN::config.timestamp)
      * @return index
      */
@@ -146,7 +148,24 @@ public class HelicitySequence implements Comparator<HelicityState> {
         HelicityState state=new HelicityState();
         state.setTimestamp(timestamp);
         final int index=Collections.binarySearch(this.states,state,new HelicitySequence());
-        return index<0 ? -index-2 : index;
+        final int n = index<0 ? -index-2 : index;
+        return n;
+    }
+   
+    /**
+     * Get the state index of a TI timestamp, based only on the first measured
+     * state's timestamp and the helicity periodicity.
+     * This returns invalid (-1) if the timestamp is before the measured states.
+     * @param timestamp
+     * @return index
+     */
+    public int predictIndex(long timestamp) {
+        if (!this.analyzed) this.analyze();
+        if (!this.generator.initialized()) return -1;
+        if (timestamp < this.generator.getTimestamp()) return -1;
+        final int n = (int) ( (timestamp-this.generator.getTimestamp()) /
+                TIMESTAMP_CLOCK * HELICITY_CLOCK );
+        return n+this.generator.getOffset();
     }
 
     /**
@@ -176,7 +195,7 @@ public class HelicitySequence implements Comparator<HelicityState> {
      * @param n the index of the state, where 0 corresponds to the first state
      * @return the helicity state, null if outside the mesaured range
      */
-    public HelicityBit get(int n) {
+    protected HelicityBit get(int n) {
         HelicityState state = this.getState(n);
         if (state==null) return null;
         else return state.getHelicity();
@@ -204,7 +223,7 @@ public class HelicitySequence implements Comparator<HelicityState> {
      * @param n the index of the state
      * @return the helicity bit
      */
-    public HelicityBit getPrediction(int n) {
+    protected HelicityBit getPrediction(int n) {
         if (!this.analyzed) this.analyze();
         if (!this.generator.initialized()) return null;
         if (n-this.generator.getOffset()<0) return null;
@@ -235,10 +254,8 @@ public class HelicitySequence implements Comparator<HelicityState> {
      * @return the helicity bit
      */
     public HelicityBit findPrediction(long timestamp) {
-        if (!this.analyzed) this.analyze();
-        if (timestamp < this.generator.getTimestamp()) return null;
-        final int n = (int) ( (timestamp-this.generator.getTimestamp()) /
-                TIMESTAMP_CLOCK * HELICITY_CLOCK );
+        final int n=this.predictIndex(timestamp);
+        if (n<0) return HelicityBit.UDF;
         return this.getPrediction(n);
         /*
         if (timestamp < this.getTimestamp(0)) return null;
@@ -365,7 +382,8 @@ public class HelicitySequence implements Comparator<HelicityState> {
         int hwpErrors=0;
         int syncErrors=0;
         int quartetErrors=0;
-        int timestampErrors=0;
+        int bigGapErrors=0;
+        int smallGapErrors=0;
 
         for (int ii=1; ii<this.states.size(); ii++) {
 
@@ -395,10 +413,17 @@ public class HelicitySequence implements Comparator<HelicityState> {
 
             // check timestamp deltas:
             final double seconds = (this.getTimestamp(ii)-this.getTimestamp(ii-1))/TIMESTAMP_CLOCK;
-            if (seconds < (1.0-0.5)/HELICITY_CLOCK || seconds > (1.0+0.5)/HELICITY_CLOCK) {
-                timestampErrors++;
+            if (seconds < (1.0-0.5)/HELICITY_CLOCK) {
+                smallGapErrors++;
+                this.states.get(ii).addStatusMask(HelicityState.Mask.SMALLGAP);
                 if (verbosity>1) System.err.println("ERROR:  HelicitySequence TIMESTAMP: "+ii+" "+
-                        this.getTimestamp(ii)+" "+this.getTimestamp(ii-1));
+                        this.getTimestamp(ii)+" "+this.getTimestamp(ii-1)+" "+seconds+"s");
+            }
+            else if (seconds > (1.0+0.5)/HELICITY_CLOCK) {
+                bigGapErrors++;
+                this.states.get(ii).addStatusMask(HelicityState.Mask.BIGGAP);
+                if (verbosity>1) System.err.println("ERROR:  HelicitySequence TIMESTAMP: "+ii+" "+
+                        this.getTimestamp(ii)+" "+this.getTimestamp(ii-1)+" "+seconds+"s");
             }
         }
 
@@ -417,11 +442,12 @@ public class HelicitySequence implements Comparator<HelicityState> {
             System.out.println("HelicitySequence:  HWP       ERRORS:  "+hwpErrors);
             System.out.println("HelicitySequence:  SYNC      ERRORS:  "+syncErrors);
             System.out.println("HelicitySequence:  QUARTET   ERRORS:  "+quartetErrors);
-            System.out.println("HelicitySequence:  TIMESTAMP ERRORS:  "+timestampErrors);
+            System.out.println("HelicitySequence:  BIGGAP    ERRORS:  "+bigGapErrors);
+            System.out.println("HelicitySequence:  SMALLGAP  ERRORS:  "+smallGapErrors);
             System.out.println("HelicitySequence:  GENERATOR ERRORS:  "+generatorErrors);
         }
 
-        return (hwpErrors + syncErrors + quartetErrors + timestampErrors + generatorErrors) == 0;
+        return (hwpErrors+syncErrors+quartetErrors+bigGapErrors+smallGapErrors+generatorErrors) == 0;
     }
 
 }
