@@ -36,7 +36,7 @@ public class HelicityAnalysisSimple {
         // 1!!!1 initialize the helicity sequence:
         HelicitySequenceDelayed seq = HelicityAnalysis.readSequence(filenames);
        
-        seq.setVerbosity(1);
+        seq.setVerbosity(2);
 
         seq.analyze();
         
