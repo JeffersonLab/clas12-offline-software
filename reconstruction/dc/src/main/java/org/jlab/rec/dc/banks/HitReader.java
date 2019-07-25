@@ -100,6 +100,12 @@ public class HitReader {
             return;
         }
 
+        //cut on max number of hits
+        if (event.getBank("DC::tdc").rows()>Constants.MAXHITS) {
+            _DCHits = new ArrayList<>();
+
+            return;
+        }
 //        if(true)return;// DDD BREAK BREAK BREAK
 
         DataBank bankDGTZ = event.getBank("DC::tdc");
