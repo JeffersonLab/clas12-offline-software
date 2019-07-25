@@ -279,6 +279,10 @@ public class RICHio {
                 bankRing.setShort("hindex", i, (short) pho.get_hit_index());
                 bankRing.setShort("pindex", i, (short) had.get_ParentIndex());
 
+                bankRing.setFloat("time",   i, (float) htime);
+                bankRing.setShort("pmt",    i, (short) hit.get_pmt());
+                bankRing.setShort("anode",  i, (short) hit.get_anode());
+
                 bankRing.setFloat("apath",  i, (float) pho.analytic.get_path());
                 bankRing.setFloat("atime",  i, (float) a_time );
                 bankRing.setFloat("aEtaC",  i, (float) a_etaC );

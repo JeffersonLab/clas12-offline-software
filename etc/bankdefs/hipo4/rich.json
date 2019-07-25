@@ -151,6 +151,10 @@
             {"name":"hindex",         "type":"S", "info":"related row in the RICH::hits bank"},
             {"name":"pindex",         "type":"S", "info":"related row in the REC::Particle bank"},
 
+            {"name":"pmt",            "type":"S", "info":"photon hit pmt" },
+            {"name":"anode",          "type":"S", "info":"photon hit anode" },
+            {"name":"time",           "type":"F", "info":"photon hit time" },
+
             {"name":"apath",          "type":"F", "info":"photon path for analytic solution" },
             {"name":"atime",          "type":"F", "info":"photon arrival time for analytic solution" },
             {"name":"aEtaC",          "type":"F", "info":"Cherenkov angle as analytic solution" },
