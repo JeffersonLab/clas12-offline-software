@@ -32,7 +32,7 @@ public class HelicitySequenceDelayed extends HelicitySequence {
      * @return the helicity state, null if outside the mesaured range
      */
     @Override
-    public HelicityBit get(int n) {
+    protected HelicityBit get(int n) {
         return super.get(n+delay);
     }
     
@@ -61,12 +61,13 @@ public class HelicitySequenceDelayed extends HelicitySequence {
      * @return the helicity bit
      */
     @Override
-    public HelicityBit getPrediction(int n) {
+    protected HelicityBit getPrediction(int n) {
         return super.getPrediction(n+delay);
     }
 
     /**
-     * Predict the delay-corrected state of a TI timestamp.
+     * Predict the delay-corrected state of a TI timestamp based only on the
+     * expected periodicity of helicity states and a corrected global timestamp.
      * 
      * This uses the pseudo-random sequence of the helicity hardware to
      * generate the sequence into the infinite future and requires that enough
@@ -78,7 +79,27 @@ public class HelicitySequenceDelayed extends HelicitySequence {
      */
     @Override
     public HelicityBit findPrediction(long timestamp) {
-        return this.getPrediction(super.findIndex(timestamp));
+        final int n=super.predictIndex(timestamp);
+        if (n<0) return HelicityBit.UDF;
+        return this.getPrediction(n);
+    }
+    
+    /**
+     * Predict the delay-corrected state of a TI timestamp based on finding
+     * the timestamp in the sequence of measured states.
+     * 
+     * This uses the pseudo-random sequence of the helicity hardware to
+     * generate the sequence into the infinite future and requires that enough
+     * states were provided to initialize it.  Returns null if generator cannot
+     * be initialized or timestamp is outside the range of measured ones.
+     * 
+     * @param timestamp TI-timestamp (i.e. RUN::config.timestamp)
+     * @return the helicity bit
+     */
+    public HelicityBit lookupPrediction(long timestamp) {
+        final int n=super.findIndex(timestamp);
+        if (n<0) return HelicityBit.UDF;
+        return this.getPrediction(n);
     }
     
     @Override

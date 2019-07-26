@@ -263,6 +263,7 @@ public final class HelicityGenerator {
 
             // store all states timestamps to apply a modulo correction
             List <Double> timestamps = new ArrayList<>();
+            List <Double> timestampsRaw = new ArrayList<>();
             
             for (int jj=0; jj<iStates.size(); jj++) {
 
@@ -277,7 +278,9 @@ public final class HelicityGenerator {
                     }
                     this.timestamp /= timestamps.size();
                     if (this.verbosity>1) {
-                        System.out.println("HelicityGenerator:  modulo-corrected timestamp:  "+timestamps);
+                        System.out.println("HelicityGenerator:  raw timestamps:  "+timestampsRaw);
+                        System.out.println("HelicityGenerator:  timestamps:      "+timestamps);
+                        System.out.println("HelicityGenerator:  modulo-corrected timestamp:  "+this.timestamp);
                     }
                     break;
                 }
@@ -295,6 +298,7 @@ public final class HelicityGenerator {
                     long timeStamp=state.getTimestamp();
                     double corr=(jj-this.offset)/HelicitySequence.HELICITY_CLOCK*HelicitySequence.TIMESTAMP_CLOCK;
                     timestamps.add(timeStamp-corr);
+                    timestampsRaw.add((double)timeStamp);
                     if (this.verbosity>2) {
                         System.out.println(this.verbosity);
                         System.out.println(String.format("HelicityGenerator:  timestamp = %d/%.1f/%.2f",

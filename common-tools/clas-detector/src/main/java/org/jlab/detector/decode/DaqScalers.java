@@ -88,6 +88,17 @@ public class DaqScalers {
         return null;
     }
 
+    public static DaqScalers create(Bank runScalerBank) {
+        DaqScalers ds=new DaqScalers();
+        for (int ii=0; ii<runScalerBank.getRows(); ii++) {
+            ds.livetime=runScalerBank.getFloat("livetime", ii);
+            ds.beamCharge=runScalerBank.getFloat("fcup",ii);
+            ds.beamChargeGated=runScalerBank.getFloat("fcupgated",ii);
+            break; 
+        }
+        return ds;
+    }
+
     /**
     * Same as create(Bank,IndexedTable,double), except relies on DSC2's clock.
     *

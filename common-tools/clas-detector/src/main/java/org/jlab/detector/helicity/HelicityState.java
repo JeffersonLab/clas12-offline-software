@@ -14,6 +14,14 @@ import org.jlab.io.base.DataBank;
  */
 public class HelicityState implements Comparable<HelicityState> {
 
+    public static class Mask {
+        public static final int HELICITY =0x1;
+        public static final int SYNC     =0x2;
+        public static final int PATTERN  =0x4;
+        public static final int BIGGAP   =0x8;
+        public static final int SMALLGAP =0x10;
+    }
+    
     // FIXME:  these should go in CCDB
     private static final short HALFADC=2000;
     private static final byte SECTOR=1;
@@ -33,6 +41,14 @@ public class HelicityState implements Comparable<HelicityState> {
 
     public HelicityState(){}
 
+    public void addStatusMask(int mask) {
+        this.status |= mask;
+    }
+
+    public int getStatus() {
+        return this.status;
+    }
+    
     private HelicityBit getFadcState(short ped) {
         if      (ped == HALFADC) return HelicityBit.UDF;
         else if (ped > HALFADC)  return HelicityBit.PLUS;
@@ -72,9 +88,9 @@ public class HelicityState implements Comparable<HelicityState> {
             }
         }
         state.status=0;
-        if (state.helicityRaw==HelicityBit.UDF) state.status |= 0x1;
-        if (state.pairSync==HelicityBit.UDF)    state.status |= 0x2;
-        if (state.patternSync==HelicityBit.UDF) state.status |= 0x4;
+        if (state.helicityRaw==HelicityBit.UDF) state.status |= Mask.HELICITY;
+        if (state.pairSync==HelicityBit.UDF)    state.status |= Mask.SYNC;
+        if (state.patternSync==HelicityBit.UDF) state.status |= Mask.PATTERN;
         state.fixMissingReadouts();
         return state;
     }

@@ -28,7 +28,7 @@ public class HelicityAnalysis {
     public static HelicitySequenceDelayed readSequence(List<String> filenames) {
        
         HelicitySequenceDelayed seq=new HelicitySequenceDelayed(8);
-       
+
         for (String filename : filenames) {
 
             HipoReader reader = new HipoReader();
@@ -55,18 +55,21 @@ public class HelicityAnalysis {
         
         return seq;
     }
-    
+
     public static void main(String[] args) {
         
-        final String dir="/Users/baltzell/data/CLAS12/rg-b/decoded/";
-        final String file="clas_006432.evio.00041-00042.hipo";
+        final String dir="/Users/baltzell/data/CLAS12/rg-a/decoded/6b.2.0/";
+        final String file="clas_005038.evio.00000-00004.hipo";
+        //final String dir="/Users/baltzell/data/CLAS12/rg-b/decoded/";
+        //final String file="clas_006432.evio.00041-00042.hipo";
 
         List<String> filenames=new ArrayList<>();
         if (args.length>0) filenames.addAll(Arrays.asList(args));
         else               filenames.add(dir+file);
-       
+
         // initialize a sequence from tag=1 events:
         HelicitySequenceDelayed seq = HelicityAnalysis.readSequence(filenames);
+        seq.setVerbosity(1);
         final boolean integrity = seq.analyze();
         if (!integrity) {
             System.err.println("\n\n######### OOPS\n\n");
@@ -82,7 +85,7 @@ public class HelicityAnalysis {
         // now read the full events, e.g. during a normal physics analysis: 
         int nevents=0;
         int nflips=0;
-       
+
         for (String filename : filenames) {
 
             HipoReader reader = new HipoReader();
@@ -114,6 +117,7 @@ public class HelicityAnalysis {
                 HelicityBit level3 = HelicityBit.UDF;
                 HelicityBit predicted = HelicityBit.UDF;
                 HelicityBit measured = HelicityBit.UDF;
+                HelicityBit lookedup = HelicityBit.UDF;
                
                 // Get RUN::config.timestamp for this event:
                 if (rcfgBank.getRows()>0) 
@@ -140,8 +144,11 @@ public class HelicityAnalysis {
                 if (seq.findPrediction(timestamp)!=null)
                     predicted = seq.findPrediction(timestamp);
 
-                System.out.println(String.format("%d %5d L3/Predict/Measured = %6s%6s%6s",
-                        timestamp,nflips,level3,predicted,measured));
+                if (seq.lookupPrediction(timestamp)!=null)
+                    lookedup = seq.lookupPrediction(timestamp);
+                
+                System.out.println(String.format("%d %5d L3/Predict/Measured/Looked = %6s%6s%6s%6s",
+                        timestamp,nflips,level3,predicted,measured,lookedup));
             }
 
             reader.close();
