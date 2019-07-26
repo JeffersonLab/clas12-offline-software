@@ -24,7 +24,6 @@ services:
     name: CVT
   - class: org.jlab.service.ctof.CTOFEngine
     name: CTOF
-#  - class: org.jlab.service.cnd.CNDEngine
   - class: org.jlab.service.cnd.CNDCalibrationEngine
     name: CND
   - class: org.jlab.service.band.BANDEngine
@@ -33,8 +32,6 @@ services:
     name: HTCC
   - class: org.jlab.service.ltcc.LTCCEngine
     name: LTCC
-  - class: org.jlab.rec.rich.RICHEBEngine
-    name: RICH
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
   - class: org.jlab.service.dc.DCTBEngine
@@ -43,25 +40,17 @@ services:
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
     name: EBTB
+  - class: org.jlab.rec.rich.RICHEBEngine
+    name: RICH
 configuration:
   io-services:
     writer:
       compression: 2
-# settings below are for GEMC, compatible with 4a.2.5
+# settings below are for GEMC, compatible with 4.3.0
   services:
     MAGFIELDS:
-      solenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
-      torusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
-      solenoidShift: "0.0"
-      torusXShift: "0.0"
-      torusYShift: "0.0"
-      torusZShift: "0.0"
-    DCHB:
-      useStartTime: "true"
-      wireDistortionsFlag: "false"
-      geomDBVariation: may_2018_engineers
-    DCTB:
-      geomDBVariation: may_2018_engineers
+      magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
+      magfieldTorusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
 
 mime-types:
   - binary/data-hipo

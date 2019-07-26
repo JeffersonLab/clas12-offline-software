@@ -15,10 +15,10 @@ import org.jlab.io.base.DataEvent;
  */
 public class DetectorEvent {
     
-    private List<DetectorParticle>  particleList = new ArrayList<DetectorParticle>();
-    private PhysicsEvent          generatedEvent = new PhysicsEvent();
-    private PhysicsEvent      reconstructedEvent = new PhysicsEvent();
-    private DetectorHeader           eventHeader = new DetectorHeader();
+    private final List<DetectorParticle>  particleList = new ArrayList<>();
+    private final PhysicsEvent          generatedEvent = new PhysicsEvent();
+    private final PhysicsEvent      reconstructedEvent = new PhysicsEvent();
+    private DetectorHeader                 eventHeader = new DetectorHeader();
     
     public DetectorEvent(){
         
@@ -89,7 +89,7 @@ public class DetectorEvent {
      */
     public List<DetectorResponse>  getDetectorResponseList(){
         this.setAssociation();
-        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> responses = new ArrayList<>();
         for(DetectorParticle p : this.particleList){
             for(DetectorResponse r : p.getDetectorResponses()){
                 responses.add(r);
@@ -128,9 +128,12 @@ public class DetectorEvent {
 
    public List<DetectorResponse> getResponseList(DetectorType[] types) {
         this.setAssociation();
-        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> responses = new ArrayList<>();
         for(DetectorParticle p : this.particleList){
             for(DetectorResponse r : p.getDetectorResponses()) {
+                if (responses.contains(r)) {
+                    continue;
+                }
                 for(DetectorType t : types) {
                     if (r.getDescriptor().getType() == t) {
                         responses.add(r);
@@ -143,7 +146,7 @@ public class DetectorEvent {
    }
 
    public List<DetectorParticle> getCentralParticles() {
-       List<DetectorParticle> central = new ArrayList<DetectorParticle>();
+       List<DetectorParticle> central = new ArrayList<>();
        for(DetectorParticle p : this.particleList) {
            if(p.getTrackDetector()==DetectorType.CVT.getDetectorId()){
                central.add(p);
@@ -163,13 +166,19 @@ public class DetectorEvent {
     
     public void setAssociation(){
         for(int index = 0; index < this.particleList.size(); index++){
-            List<DetectorResponse> responses = particleList.get(index).getDetectorResponses();
-            for(DetectorResponse r : responses){
-                r.setAssociation(index);
+            for(DetectorResponse r : particleList.get(index).getDetectorResponses()) {
+                r.clearAssociations();
+            }
+        }
+        for(int index = 0; index < this.particleList.size(); index++){
+            for(DetectorResponse r : particleList.get(index).getDetectorResponses()) {
+                if (!r.hasAssociation(index)) {
+                    r.addAssociation(index);
+                }
             }
         }
     }
-    
+
     public void addParticle(double px, double py, double pz,
             double vx, double vy, double vz){
         DetectorParticle particle = new DetectorParticle();
@@ -178,8 +187,14 @@ public class DetectorEvent {
         this.addParticle(particle);
     }
     
-
-    
+    public DetectorParticle getTriggerParticle() {
+        for (int ii=0; ii<particleList.size(); ii++) {
+            if (particleList.get(ii).isTriggerParticle()) {
+                return particleList.get(ii);
+            }
+        }
+        return null;
+    }
     
     @Override
     public String toString(){

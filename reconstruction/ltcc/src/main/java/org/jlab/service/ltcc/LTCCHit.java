@@ -201,7 +201,7 @@ public final class LTCCHit {
     }
     
     private int calcLTCCPhiIndex() {
-        return 2 * (this.sector - 1) + (this.side - 1);
+      return 2 * (this.sector - 1) + (this.side - 1);
     }
     
     private Status calcStatus() {

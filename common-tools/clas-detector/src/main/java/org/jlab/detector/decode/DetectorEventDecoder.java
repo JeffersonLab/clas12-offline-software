@@ -7,12 +7,10 @@
 package org.jlab.detector.decode;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.detector.decode.DetectorDataDgtz.ADCData;
-import org.jlab.utils.groups.IndexedList;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -20,26 +18,25 @@ import org.jlab.utils.groups.IndexedTable;
  * @author gavalian
  */
 public class DetectorEventDecoder {
-    
+
     ConstantsManager  translationManager = new ConstantsManager();
     ConstantsManager  fitterManager      = new ConstantsManager();
-    
+    ConstantsManager  scalerManager      = new ConstantsManager();
+
     List<String>  tablesTrans            = null;
     List<String>  keysTrans              = null;
-    
+
     List<String>  tablesFitter            = null;
     List<String>  keysFitter              = null;
-    
+
     private  int  runNumber               = 10;
-    
+
     private  BasicFADCFitter      basicFitter     = new BasicFADCFitter();
     private  ExtendedFADCFitter   extendedFitter  = new ExtendedFADCFitter();
     private  MVTFitter            mvtFitter       = new MVTFitter();
-    
+
     private  Boolean          useExtendedFitter   = false;
-    
-    
-    
+
     public DetectorEventDecoder(boolean development){
         if(development==true){
             this.initDecoderDev();
@@ -47,25 +44,39 @@ public class DetectorEventDecoder {
             this.initDecoder();
         }
     }
-    
+
     public void setRunNumber(int run){
         this.runNumber = run;
     }
-    
+
+    public int getRunNumber() {
+        return this.runNumber;
+    }
+
+    public float getRcdbTorusScale() {
+        return ((Double)this.scalerManager.getRcdbConstant(this.runNumber,"torus_scale").
+                getValue()).floatValue();
+    }
+
+    public float getRcdbSolenoidScale() {
+        return ((Double)this.scalerManager.getRcdbConstant(this.runNumber,"solenoid_scale").
+                getValue()).floatValue();
+    }
+
     public DetectorEventDecoder(){
         this.initDecoder();
         /*
         keysTrans = Arrays.asList(new String[]{
             "FTCAL","FTHODO","LTCC","EC","FTOF","HTCC","DC"
         });
-        
+
         tablesTrans = Arrays.asList(new String[]{
             "/daq/tt/ftcal","/daq/tt/fthodo","/daq/tt/ltcc",
             "/daq/tt/ec","/daq/tt/ftof","/daq/tt/htcc","/daq/tt/dc"
         });
-        
+
         translationManager.init(keysTrans,tablesTrans);
-        
+
         keysFitter   = Arrays.asList(new String[]{"FTCAL","FTOF","LTCC","EC","HTCC"});
         tablesFitter = Arrays.asList(new String[]{
             "/daq/fadc/ftcal","/daq/fadc/ftof","/daq/fadc/ltcc","/daq/fadc/ec",
@@ -74,28 +85,28 @@ public class DetectorEventDecoder {
         fitterManager.init(keysFitter, tablesFitter);
         */
     }
-    
+
     public final void initDecoderDev(){
         keysTrans = Arrays.asList(new String[]{ "HTCC","BST"} );
         tablesTrans = Arrays.asList(new String[]{ "/daq/tt/clasdev/htcc","/daq/tt/clasdev/svt" });
-        
+
         keysFitter   = Arrays.asList(new String[]{"HTCC"});
         tablesFitter = Arrays.asList(new String[]{"/daq/fadc/clasdev/htcc"});
         translationManager.init(keysTrans,tablesTrans);
         fitterManager.init(keysFitter, tablesFitter);
     }
-    
+
     public final void initDecoder(){
         keysTrans = Arrays.asList(new String[]{
 		"FTCAL","FTHODO","FTTRK","LTCC","ECAL","FTOF","HTCC","DC","CTOF","CND","BST","RF","BMT","FMT","RICH","HEL","BAND"
         });
-        
+
         tablesTrans = Arrays.asList(new String[]{
             "/daq/tt/ftcal","/daq/tt/fthodo","/daq/tt/fttrk","/daq/tt/ltcc",
             "/daq/tt/ec","/daq/tt/ftof","/daq/tt/htcc","/daq/tt/dc","/daq/tt/ctof","/daq/tt/cnd","/daq/tt/svt",
-            "/daq/tt/rf","/daq/tt/bmt","/daq/tt/fmt","/daq/tt/clasdev/richcosmic","/daq/tt/hel","/daq/tt/band"
+            "/daq/tt/rf","/daq/tt/bmt","/daq/tt/fmt","/daq/tt/rich","/daq/tt/hel","/daq/tt/band"
         });
-        
+
         translationManager.init(keysTrans,tablesTrans);
         
         keysFitter   = Arrays.asList(new String[]{"FTCAL","FTHODO","FTTRK","FTOF","LTCC","ECAL","HTCC","CTOF","CND","BMT","FMT","HEL","RF","BAND"});
@@ -104,13 +115,15 @@ public class DetectorEventDecoder {
             "/daq/fadc/htcc","/daq/fadc/ctof","/daq/fadc/cnd","/daq/config/bmt","/daq/config/fmt","/daq/fadc/hel","/daq/fadc/rf","/daq/fadc/band"
         });
         fitterManager.init(keysFitter, tablesFitter);
+
+        scalerManager.init(Arrays.asList(new String[]{"/runcontrol/fcup","/runcontrol/hwp"}));
     }
     /**
      * Set the flag to use extended fitter instead of basic fitter
      * which simply integrates over given bins inside of the given
-     * windows for the pulse. The pulse parameters are provided by 
+     * windows for the pulse. The pulse parameters are provided by
      * fitterManager (loaded from database).
-     * @param flag 
+     * @param flag
      */
     public void setUseExtendedFitter(boolean flag){
         this.useExtendedFitter = flag;
@@ -118,21 +131,21 @@ public class DetectorEventDecoder {
     /**
      * applies translation table to the digitized data to translate
      * crate,slot channel to sector layer component.
-     * @param detectorData 
+     * @param detectorData
      */
     public void translate(List<DetectorDataDgtz>  detectorData){
-        
+
         for(DetectorDataDgtz data : detectorData){
-            
+
             int crate    = data.getDescriptor().getCrate();
             int slot     = data.getDescriptor().getSlot();
             int channel  = data.getDescriptor().getChannel();
             //if(crate==69){
-	    //System.out.println(" MVT " + crate + " " + slot + 
+	    //System.out.println(" MVT " + crate + " " + slot +
 	    //  "  " + channel);
 	// }
             boolean hasBeenAssigned = false;
-            
+
             for(String table : keysTrans){
                 IndexedTable  tt = translationManager.getConstants(runNumber, table);
                 DetectorType  type = DetectorType.getType(table);
@@ -142,9 +155,9 @@ public class DetectorEventDecoder {
                     int layer     = tt.getIntValue("layer", crate,slot,channel);
                     int component = tt.getIntValue("component", crate,slot,channel);
                     int order     = tt.getIntValue("order", crate,slot,channel);
-                    
+
                     /*if(crate>60&&crate<64){
-                        System.out.println(" SVT " + sector + " " + layer + 
+                        System.out.println(" SVT " + sector + " " + layer +
                                 "  " + component);
                     }*/
                     data.getDescriptor().setSectorLayerComponent(sector, layer, component);
@@ -161,18 +174,18 @@ public class DetectorEventDecoder {
         }
         //Collections.sort(detectorData);
     }
-    
-        public void fitPulses(List<DetectorDataDgtz>  detectorData){
-        for(DetectorDataDgtz data : detectorData){            
+
+    public void fitPulses(List<DetectorDataDgtz>  detectorData){
+        for(DetectorDataDgtz data : detectorData){
             int crate    = data.getDescriptor().getCrate();
             int slot     = data.getDescriptor().getSlot();
             int channel  = data.getDescriptor().getChannel();
-            //System.out.println(" looking for " + crate + "  " 
+            //System.out.println(" looking for " + crate + "  "
             //       + slot + " " + channel);
             for(String table : keysFitter){
                 //custom MM fitter
-            	if( ( (table.equals("BMT"))&&(data.getDescriptor().getType().getName().equals("BMT")) ) 
-                 || ( (table.equals("FMT"))&&(data.getDescriptor().getType().getName().equals("FMT")) ) 
+            	if( ( (table.equals("BMT"))&&(data.getDescriptor().getType().getName().equals("BMT")) )
+                 || ( (table.equals("FMT"))&&(data.getDescriptor().getType().getName().equals("FMT")) )
                  || ( (table.equals("FTTRK"))&&(data.getDescriptor().getType().getName().equals("FTTRK")) ) ){
                     IndexedTable daq = fitterManager.getConstants(runNumber, table);
                     short adcOffset = (short) daq.getDoubleValue("adc_offset", 0, 0, 0);
@@ -190,7 +203,7 @@ public class DetectorEventDecoder {
                 } else {
                     IndexedTable  daq = fitterManager.getConstants(runNumber, table);
                     DetectorType  type = DetectorType.getType(table);
-                    if(daq.hasEntry(crate,slot,channel)==true){                    
+                    if(daq.hasEntry(crate,slot,channel)==true){
                         //basicFitter.setPulse(0, 4).setPedestal(35, 70);
                         //for(int i = 0; i < data.getADCSize(); i++){
                         //    basicFitter.fit(data.getADCData(i));
@@ -205,7 +218,7 @@ public class DetectorEventDecoder {
                                 ADCData adc = data.getADCData(i);
                                 if(adc.getPulseSize()>0){
                                     //System.out.println("-----");
-                                    //System.out.println(" FITTING PULSE " + 
+                                    //System.out.println(" FITTING PULSE " +
                                     //        crate + " / " + slot + " / " + channel);
                                     try {
                                         extendedFitter.fit(nsa, nsb, tet, ped, adc.getPulseArray());
@@ -219,11 +232,11 @@ public class DetectorEventDecoder {
                                     adc.setHeight((short) this.extendedFitter.pulsePeakValue);
                                     adc.setIntegral(adc_corrected);
                                     adc.setTimeWord(this.extendedFitter.t0);
-                                    adc.setPedestal((short) this.extendedFitter.ped);  
-//                                    if(table.equals("RF")&&data.getDescriptor().getType().getName().equals("RF")) 
-//                                        System.out.println(" FITTING PULSE " + 
+                                    adc.setPedestal((short) this.extendedFitter.ped);
+//                                    if(table.equals("RF")&&data.getDescriptor().getType().getName().equals("RF"))
+//                                        System.out.println(" FITTING PULSE " +
 //                                                        crate + " / " + slot + " / " + channel
-//                                                + " " + nsa + " " + nsb + " " + tet 
+//                                                + " " + nsa + " " + nsb + " " + tet
 //                                                + " " + extendedFitter.adc + " " + extendedFitter.ped*(nsa+nsb)
 //                                                + " " + adc.getPedestal() + " " + adc.getADC() + " " + adc.getTime()
 //                                    );

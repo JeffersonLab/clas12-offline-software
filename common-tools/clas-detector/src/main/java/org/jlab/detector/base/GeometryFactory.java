@@ -8,6 +8,7 @@ package org.jlab.detector.base;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.base.Detector;
+import org.jlab.geom.detector.cnd.CNDFactory;
 import org.jlab.geom.detector.dc.DCFactory;
 import org.jlab.geom.detector.ec.ECFactory;
 import org.jlab.geom.detector.ftof.FTOFFactory;
@@ -44,6 +45,7 @@ public class GeometryFactory {
             provider.loadTable("/geometry/dc/superlayer");
             provider.loadTable("/geometry/dc/layer");
             provider.loadTable("/geometry/dc/alignment");
+            provider.loadTable("/geometry/dc/ministagger");
         }
         
         if(type==DetectorType.ECAL){
@@ -51,10 +53,12 @@ public class GeometryFactory {
             provider.loadTable("/geometry/pcal/Uview");
             provider.loadTable("/geometry/pcal/Vview");
             provider.loadTable("/geometry/pcal/Wview");
+            provider.loadTable("/geometry/pcal/alignment");
             provider.loadTable("/geometry/ec/ec");
             provider.loadTable("/geometry/ec/uview");
             provider.loadTable("/geometry/ec/vview");
             provider.loadTable("/geometry/ec/wview");
+            provider.loadTable("/geometry/ec/alignment");
         }
         
         if(type==DetectorType.FTOF){
@@ -64,6 +68,7 @@ public class GeometryFactory {
             provider.loadTable("/geometry/ftof/panel1b/panel");
             provider.loadTable("/geometry/ftof/panel2/paddles");
             provider.loadTable("/geometry/ftof/panel2/panel");
+            provider.loadTable("/geometry/ftof/alignment");
         }
         
         if(type==DetectorType.BST){
@@ -73,13 +78,15 @@ public class GeometryFactory {
         }
         
         if(type==DetectorType.CND){
-            provider.loadTable("/geometry/cnd/cnd");
-            provider.loadTable("/geometry/cnd/layer");
+//            provider.loadTable("/geometry/cnd/cnd");
+//            provider.loadTable("/geometry/cnd/layer");
+            provider.loadTable("/geometry/cnd/cndgeom");
         }
         
         if(type==DetectorType.CTOF){
             provider.loadTable("/geometry/ctof/ctof");
             provider.loadTable("/geometry/ctof/cad");
+            provider.loadTable("/geometry/target");
         }
         
         if(type==DetectorType.FTCAL){
@@ -94,7 +101,10 @@ public class GeometryFactory {
             provider.loadTable("/geometry/cvt/svt/material/box");
             provider.loadTable("/geometry/cvt/svt/material/tube");
             provider.loadTable("/geometry/cvt/svt/alignment");
+        }
 
+        if(type==DetectorType.TARGET){
+            provider.loadTable("/geometry/target");
         }
         
         provider.disconnect();
@@ -141,6 +151,12 @@ public class GeometryFactory {
         if(type==DetectorType.FTOF){
             FTOFFactory factory = new FTOFFactory();
             Detector ftof = factory.getDetectorGeant4(provider);
+            return   ftof;
+        }
+                
+        if(type==DetectorType.CND){
+            CNDFactory factory = new CNDFactory();
+            Detector ftof = factory.createDetectorCLAS(provider);
             return   ftof;
         }
         

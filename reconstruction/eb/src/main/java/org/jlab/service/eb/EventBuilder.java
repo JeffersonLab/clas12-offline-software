@@ -6,10 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataEvent;
-import org.jlab.clas.detector.DetectorData;
 
+import org.jlab.detector.base.DetectorType;
+
+import org.jlab.clas.detector.DetectorData;
 import org.jlab.clas.detector.DetectorHeader;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
@@ -18,10 +19,8 @@ import org.jlab.clas.detector.DetectorTrack;
 import org.jlab.clas.detector.TaggerResponse;
 import org.jlab.clas.detector.CherenkovResponse;
 
-import org.jlab.rec.eb.EBConstants;
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
-import org.jlab.rec.eb.EBUtil;
 import org.jlab.rec.eb.SamplingFractions;
 
 /**
@@ -32,11 +31,12 @@ import org.jlab.rec.eb.SamplingFractions;
 public class EventBuilder {
 
     public EBCCDBConstants ccdb;
-    private DetectorEvent               detectorEvent = new DetectorEvent();
-    private List<DetectorResponse>  detectorResponses = new ArrayList<DetectorResponse>();
-    private List<Map<DetectorType,Integer>> ftIndices = new ArrayList<Map<DetectorType,Integer>>();
-    private int[]  TriggerList = new int[]{11,-11,211,-211,0};
-    private HashMap<Integer,Integer> pindex_map = new HashMap<Integer, Integer>();
+    private final DetectorEvent               detectorEvent = new DetectorEvent();
+    private final List<DetectorResponse>  detectorResponses = new ArrayList<>();
+    private final List<Map<DetectorType,Integer>> ftIndices = new ArrayList<>();
+    private final HashMap<Integer,Integer> pindex_map = new HashMap<>();
+    
+    private static final int[] TRIGGERLIST = new int[]{11,-11,211,-211,0};
 
     public EventBuilder(EBCCDBConstants ccdb){
         this.ccdb=ccdb;
@@ -81,7 +81,10 @@ public class EventBuilder {
      */
     public void setParticleStatuses() {
         for (int ii=0; ii<this.detectorEvent.getParticles().size(); ii++) {
-            EBUtil.setParticleStatus(this.detectorEvent.getParticles().get(ii),ccdb);
+            this.detectorEvent.getParticle(ii).setStatus(
+                    ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT),
+                    ccdb.getDouble(EBCCDBEnum.LTCC_NPHE_CUT)
+                    );
         }
     }
 
@@ -199,7 +202,7 @@ public class EventBuilder {
         final int index = particle.getDetectorHit(responses,type,layer,distance);
         if (index>=0) {
             particle.addResponse(responses.get(index),true);
-            responses.get(index).setAssociation(pindex);
+            responses.get(index).addAssociation(pindex);
             return true;
         }
         return false;
@@ -217,6 +220,14 @@ public class EventBuilder {
                 if(index>=0){
                     p.addResponse(this.detectorResponses.get(index));
                     this.detectorResponses.get(index).setAssociation(n);
+
+                    // make an artificial cross for FTHODO clusters:
+                    final double x=this.detectorResponses.get(index).getPosition().x();
+                    final double y=this.detectorResponses.get(index).getPosition().y();
+                    final double z=this.detectorResponses.get(index).getPosition().z();
+                    final double mag = Math.sqrt(x*x+y*y+z*z);
+                    p.getTrack().addCross(x,y,z,x/mag,y/mag,z/mag);
+                    p.getTrack().setPath(mag);
                 }
 
                 final int particle_hodoID = this.ftIndices.get(ftParticleCounter).get(DetectorType.FTHODO);
@@ -277,7 +288,7 @@ public class EventBuilder {
         // these have ECOUT but no PCAL nor ECIN (previous lines exhausted PCAL and ICIN):
         List<DetectorParticle> partsECOUT = ebm.findNeutrals(7);
         
-        List<DetectorParticle> particles=new ArrayList<DetectorParticle>();
+        List<DetectorParticle> particles=new ArrayList<>();
         particles.addAll(partsPCAL);
         particles.addAll(partsECIN);
         particles.addAll(partsECOUT);
@@ -329,7 +340,7 @@ public class EventBuilder {
     
     public List<DetectorResponse> getUnmatchedResponses(List<DetectorResponse> list, DetectorType type, int layer){
         if (list==null) list=detectorResponses;
-        List<DetectorResponse>  responses = new ArrayList<DetectorResponse>();
+        List<DetectorResponse>  responses = new ArrayList<>();
         for(DetectorResponse r : list){
             if(r.getDescriptor().getType()==type &&
                (r.getDescriptor().getLayer()==layer || layer<=0) &&
@@ -347,24 +358,28 @@ public class EventBuilder {
         boolean hasTrigger=false;
         while(hasTrigger==false) {
 
-            if(TriggerList[i]==11){
-                ElectronTriggerOption electron = new ElectronTriggerOption();
-                hasTrigger = electron.assignSoftwareTrigger(detectorEvent,ccdb);
-            }
-            else if(TriggerList[i]==-11){
-                PositronTriggerOption positron = new PositronTriggerOption();
-                hasTrigger= positron.assignSoftwareTrigger(detectorEvent,ccdb);
-            }
-            else if(TriggerList[i]==-211){
-                NegPionTriggerOption negpion = new NegPionTriggerOption();
-                hasTrigger = negpion.assignSoftwareTrigger(detectorEvent,ccdb);
-            }
-            else if(TriggerList[i]==211){
-                PosPionTriggerOption pospion = new PosPionTriggerOption();
-                hasTrigger = pospion.assignSoftwareTrigger(detectorEvent,ccdb);
-            }
-            else if(TriggerList[i]==0){
-                hasTrigger = true;
+            switch (TRIGGERLIST[i]) {
+                case 11:
+                    ElectronTriggerOption electron = new ElectronTriggerOption();
+                    hasTrigger = electron.assignSoftwareTrigger(detectorEvent,ccdb);
+                    break;
+                case -11:
+                    PositronTriggerOption positron = new PositronTriggerOption();
+                    hasTrigger= positron.assignSoftwareTrigger(detectorEvent,ccdb);
+                    break;
+                case -211:
+                    NegPionTriggerOption negpion = new NegPionTriggerOption();
+                    hasTrigger = negpion.assignSoftwareTrigger(detectorEvent,ccdb);
+                    break;
+                case 211:
+                    PosPionTriggerOption pospion = new PosPionTriggerOption();
+                    hasTrigger = pospion.assignSoftwareTrigger(detectorEvent,ccdb);
+                    break;
+                case 0:
+                    hasTrigger = true;
+                    break;
+                default:
+                    break;
             }
             i++;
         }

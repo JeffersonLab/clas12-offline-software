@@ -9,12 +9,14 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataEventList;
+import org.jlab.io.base.DataEventType;
 import org.jlab.io.base.DataSource;
 import org.jlab.io.evio.EvioDataDictionary;
 import org.jlab.io.base.DataSourceType;
-import org.jlab.jnp.hipo.data.HipoEvent;
-import org.jlab.jnp.hipo.io.HipoReader;
-import org.jlab.jnp.hipo.schema.SchemaFactory;
+import org.jlab.jnp.hipo4.data.Event;
+import org.jlab.jnp.hipo4.data.SchemaFactory;
+import org.jlab.jnp.hipo4.io.HipoReader;
+
 
 /**
  *
@@ -57,7 +59,7 @@ public class HipoDataSource implements DataSource {
     @Override
     public void open(String filename) {
         this.reader.open(filename);
-        System.out.println("[DataSourceDump] --> opened file with events # " + this.reader.getEventCount());
+        System.out.println("[DataSourceDump] --> opened file with events # " );
         //this.reader.getSchemaFactory().show();
         /*
         HipoRecord header = this.reader.getHeaderRecord();
@@ -86,6 +88,8 @@ public class HipoDataSource implements DataSource {
 
     @Override
     public int getSize() {
+        //return reader.
+        //return 1;
         return reader.getEventCount();
     }
 
@@ -101,31 +105,48 @@ public class HipoDataSource implements DataSource {
 
     @Override
     public DataEvent getNextEvent() {
-        HipoEvent  hipoEvent = reader.readNextEvent();
+        Event event = new Event();
+        reader.nextEvent(event);
         /*hipoEvent.getDataBuffer();        
         System.out.println(" GET NEXT HIPO EVENT : DICTIONARY SIZE = " + 
                 hipoEvent.getSchemaFactory().getSchemaList().size() + "  EVENT LENGTH = "
                 + hipoEvent.getDataBuffer().length);
         hipoEvent.showNodes();*/
-        HipoDataEvent  evioEvent = new HipoDataEvent(hipoEvent.getDataBuffer(),hipoEvent.getSchemaFactory());
-        return evioEvent;
+        HipoDataEvent  hipoEvent = new HipoDataEvent(event,reader.getSchemaFactory());
+        if(reader.hasNext()==true){
+            hipoEvent.setType(DataEventType.EVENT_ACCUMULATE);
+        } else {
+            hipoEvent.setType(DataEventType.EVENT_STOP);
+        }
+        return hipoEvent;
     }
 
     @Override
     public DataEvent getPreviousEvent() {
-        HipoEvent  hipoEvent = reader.readPreviousEvent();
+       
+        /*HipoEvent  hipoEvent = reader.readPreviousEvent();
         hipoEvent.getDataBuffer();
-        HipoDataEvent  evioEvent = new HipoDataEvent(hipoEvent.getDataBuffer(),hipoEvent.getSchemaFactory());
-        return evioEvent;
-        
+        HipoDataEvent  evioEvent = new HipoDataEvent(hipoEvent.getDataBuffer(),hipoEvent.getSchemaFactory());*/
+        //return hipoEvent;
+        return null;
     }
 
     @Override
     public DataEvent gotoEvent(int index) {
-        HipoEvent  hipoEvent = reader.readEvent(index);
-        hipoEvent.getDataBuffer();
-        HipoDataEvent  evioEvent = new HipoDataEvent(hipoEvent.getDataBuffer(),hipoEvent.getSchemaFactory());
-        return evioEvent;
+        Event event = new Event();
+        reader.getEvent(event, index);
+        /*hipoEvent.getDataBuffer();        
+        System.out.println(" GET NEXT HIPO EVENT : DICTIONARY SIZE = " + 
+                hipoEvent.getSchemaFactory().getSchemaList().size() + "  EVENT LENGTH = "
+                + hipoEvent.getDataBuffer().length);
+        hipoEvent.showNodes();*/
+        HipoDataEvent  hipoEvent = new HipoDataEvent(event,reader.getSchemaFactory());
+        if(reader.hasNext()==true){
+            hipoEvent.setType(DataEventType.EVENT_ACCUMULATE);
+        } else {
+            hipoEvent.setType(DataEventType.EVENT_STOP);
+        }
+        return hipoEvent;       
     }
     
     @Override

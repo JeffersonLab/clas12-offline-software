@@ -1,25 +1,25 @@
 #!/bin/bash
 
-usage='build-coatjava.sh [--quiet] [--nospotbugs] [--nomaps] [--nounittests]'
+usage='build-coatjava.sh [--quiet] [--spotbugs] [--nomaps] [--unittests]'
 
 quiet="no"
-runSpotBugs="yes"
+runSpotBugs="no"
 downloadMaps="yes"
-runUnitTests="yes"
+runUnitTests="no"
 for xx in $@
 do
-    if [ "$xx" == "--nospotbugs" ]
+    if [ "$xx" == "--spotbugs" ]
     then
-        runSpotBugs="no"
+        runSpotBugs="yes"
     elif [ "$xx" == "-n" ]
     then
         runSpotBugs="no"
     elif [ "$xx" == "--nomaps" ]
     then
         downloadMaps="no"
-    elif [ "$xx" == "--nounittests" ]
+    elif [ "$xx" == "--unittests" ]
     then
-        runUnitTests="no"
+        runUnitTests="yes"
     elif [ "$xx" == "--quiet" ]
     then
         quiet="yes"
@@ -46,7 +46,7 @@ if [ $downloadMaps == "yes" ]; then
   locDir=etc/data/magfield
   mkdir -p $locDir
   cd $locDir
-  for map in $SOLENOIDMAP $TORUSMAP
+  for map in $COAT_MAGFIELD_SOLENOIDMAP $COAT_MAGFIELD_TORUSMAP $COAT_MAGFIELD_TORUSSECONDARYMAP
   do
     # -N only redownloads if timestamp/filesize is newer/different
     $wget -N --no-check-certificate $webDir/$map
@@ -59,14 +59,14 @@ mkdir -p coatjava
 cp -r bin coatjava/
 cp -r etc coatjava/
 # create schema directories for partial reconstruction outputs		
-python etc/bankdefs/util/bankSplit.py coatjava/etc/bankdefs/hipo || exit 1
+python etc/bankdefs/util/bankSplit.py coatjava/etc/bankdefs/hipo4 || exit 1
 mkdir -p coatjava/lib/clas
 cp external-dependencies/JEventViewer-1.1.jar coatjava/lib/clas/
 cp external-dependencies/vecmath-1.3.1-2.jar coatjava/lib/clas/
 mkdir -p coatjava/lib/utils
 cp external-dependencies/jclara-4.3-SNAPSHOT.jar coatjava/lib/utils
-cp external-dependencies/clas12mon-3.0.jar coatjava/lib/utils
-cp external-dependencies/KPP-Plots-2.0.jar coatjava/lib/utils
+cp external-dependencies/clas12mon-3.1.jar coatjava/lib/utils
+cp external-dependencies/KPP-Plots-3.1.jar coatjava/lib/utils
 #cp external-dependencies/jaw-1.0.jar coatjava/lib/utils
 mkdir -p coatjava/lib/services
 
@@ -109,6 +109,5 @@ cp reconstruction/rich/target/clas12detector-rich-*-SNAPSHOT.jar coatjava/lib/se
 cp reconstruction/fvt/target/clas12detector-fmt-*-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/eb/target/clas12detector-eb-*-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/band/target/clas12detector-band-*-SNAPSHOT.jar coatjava/lib/services/
-
 
 echo "COATJAVA SUCCESSFULLY BUILT !"

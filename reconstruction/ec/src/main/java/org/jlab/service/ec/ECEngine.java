@@ -3,6 +3,7 @@ package org.jlab.service.ec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorCollection;
@@ -240,7 +241,8 @@ public class ECEngine extends ReconstructionEngine {
         
         requireConstants(Arrays.asList(ecTables));
         getConstantsManager().setVariation(ECCommon.variation);
-        ecDetector =  GeometryFactory.getDetector(DetectorType.ECAL);
+        String variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        ecDetector =  GeometryFactory.getDetector(DetectorType.ECAL,11,variationName);
 
         setCalRun(2);
         setStripThresholds(10,9,8);

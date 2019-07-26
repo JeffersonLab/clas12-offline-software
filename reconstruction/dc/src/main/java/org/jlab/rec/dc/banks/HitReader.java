@@ -100,6 +100,12 @@ public class HitReader {
             return;
         }
 
+        //cut on max number of hits
+        if (event.getBank("DC::tdc").rows()>Constants.MAXHITS) {
+            _DCHits = new ArrayList<>();
+
+            return;
+        }
 //        if(true)return;// DDD BREAK BREAK BREAK
 
         DataBank bankDGTZ = event.getBank("DC::tdc");
@@ -303,7 +309,7 @@ public class HitReader {
                     event.getBank("RUN::config").getInt("run", 0) > 100) {
                 T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
                 if (event.hasBank("RECHB::Event"))
-                    T_Start = event.getBank("RECHB::Event").getFloat("STTime", 0);
+                    T_Start = event.getBank("RECHB::Event").getFloat("startTime", 0);
             }
 
             FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], tdc[i], id[i]);
@@ -312,9 +318,11 @@ public class HitReader {
             hit.setT0(T_0);
             hit.setTStart(T_Start);
             hit.setTProp(tProp[i]);
-            hit.setTFlight(tFlight[i]);
+            //hit.setTFlight(tFlight[i]);
             hit.set_Beta(this.readBeta(event, trkID[i]));
-
+            hit.setTFlight(tFlight[i]/hit.get_Beta0to1());
+            //resetting TFlight after beta has been obtained
+            //hit.setSignalTimeOfFlight(); 
             double T0Sub = (tdc[i] - tProp[i] - tFlight[i] - T_0);
 
             if (Constants.isUSETSTART()) {
@@ -325,7 +333,7 @@ public class HitReader {
             hit.set_TrkgStatus(0);
             hit.calc_CellSize(DcDetector);
             hit.set_ClusFitDoca(trkDoca[i]);
-            hit.set_TimeToDistance(1.0, B[i], constants1, tde);
+            hit.set_TimeToDistance(event, 1.0, B[i], constants1, tde);
 
             hit.set_QualityFac(0);
             if (hit.get_Doca() > hit.get_CellSize()) {
@@ -335,12 +343,10 @@ public class HitReader {
             if (hit.get_Time() < 0)
                 hit.set_QualityFac(1);
 
-            hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));
+            hit.set_DocaErr(hit.get_PosErr(event, B[i], constants0, constants1, tde));
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
-            if(hit.get_Beta()>0.15 && hit.get_Beta()<=1.40) {
-                if(hit.get_Beta()>1.0)
-                    hit.set_Beta(1.0);
+            if(hit.get_Beta()>0.15) {
                 hits.add(hit);
             }
         }
@@ -375,7 +381,7 @@ public class HitReader {
         int[] trkID = new int[rows];
         double[] tProp = new double[rows];
         double[] tFlight = new double[rows];
-        double startTime = (double) event.getBank("REC::Event").getFloat("STTime", 0);
+        double startTime = (double) event.getBank("REC::Event").getFloat("startTime", 0);
 
         if (startTime < 0)
             return;
@@ -418,17 +424,19 @@ public class HitReader {
             hit.setTStart(startTime);
             hit.setTProp(tProp[i]);
             //reset the time based on new beta
-            double newtFlight = tFlight[i] / hit.get_Beta();
-            hit.setTFlight(newtFlight);
+            //double newtFlight = tFlight[i] / hit.get_Beta();
+            //hit.setTFlight(newtFlight);
+            hit.setSignalTimeOfFlight();
+            double newtFlight = hit.getTFlight();
             hit.set_Time((double) tdc[i] - tProp[i] - newtFlight - T_0 - startTime);
             hit.set_LeftRightAmb(LR[i]);
             hit.set_TrkgStatus(0);
 
-            hit.set_DocaErr(hit.get_PosErr(B[i], constants0, constants1, tde));
+            hit.set_DocaErr(hit.get_PosErr(event, B[i], constants0, constants1, tde));
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedTBTrackID(trkID[i]);
 
-            hit.set_TimeToDistance(1.0, B[i], constants1, tde);
+            hit.set_TimeToDistance(event, 1.0, B[i], constants1, tde);
 
             hit.set_QualityFac(0);
             if (hit.get_Doca() > hit.get_CellSize()) {
@@ -438,8 +446,8 @@ public class HitReader {
             if (hit.get_Time() < 0)
                 hit.set_QualityFac(1);
             if(hit.get_Beta()>0.2 && hit.get_Beta()<=1.30) {
-                if(hit.get_Beta()>1.0)
-                    hit.set_Beta(1.0);
+                //if(hit.get_Beta()>1.0)
+                //    hit.set_Beta(1.0);
                 hits.add(hit);
             }
         }
@@ -462,8 +470,8 @@ public class HitReader {
                         bank.getShort("pindex", i));
             }
         }
-        if(_beta>1.0)
-            _beta=1.0;
+        //if(_beta>1.0)
+        //    _beta=1.0;
         return _beta;
     }
 

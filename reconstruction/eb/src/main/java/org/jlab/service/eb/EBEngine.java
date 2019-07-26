@@ -1,5 +1,6 @@
 package org.jlab.service.eb;
 
+import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
@@ -25,7 +26,9 @@ public class EBEngine extends ReconstructionEngine {
 
     // output banks:
     String eventBank        = null;
+    String eventBankFT      = null;
     String particleBank     = null;
+    String particleBankFT   = null;
     String calorimeterBank  = null;
     String scintillatorBank = null;
     String cherenkovBank    = null;
@@ -34,7 +37,7 @@ public class EBEngine extends ReconstructionEngine {
     String ftBank           = null;
     String trajectoryBank   = null;
     String covMatrixBank    = null;
-
+    
     // inputs banks:
     String trackType        = null;
     String ftofHitsType     = null;
@@ -50,6 +53,7 @@ public class EBEngine extends ReconstructionEngine {
         //Initialize bank names
     }
 
+    @Override
     public boolean processDataEvent(DataEvent de) {
         throw new RuntimeException("EBEngine cannot be used directly.  Use EBTBEngine/EBHBEngine instead.");
     }
@@ -121,7 +125,7 @@ public class EBEngine extends ReconstructionEngine {
         ebm.addCentralNeutrals(eb.getEvent());
 
         // Do PID etc:
-        EBAnalyzer analyzer = new EBAnalyzer(ccdb);
+        EBAnalyzer analyzer = new EBAnalyzer(ccdb,rf);
         analyzer.processEvent(eb.getEvent());
 
         // Add Forward Tagger particles:
@@ -129,7 +133,9 @@ public class EBEngine extends ReconstructionEngine {
 
         // create REC:detector banks:
         if(eb.getEvent().getParticles().size()>0){
-        
+       
+            Collections.sort(eb.getEvent().getParticles());
+
             eb.setParticleStatuses();
             //eb.setEventStatuses();
             
@@ -170,7 +176,19 @@ public class EBEngine extends ReconstructionEngine {
                 DataBank bankCovMat = DetectorData.getCovMatrixBank(eb.getEvent().getParticles(), de, covMatrixBank);
                 if (bankCovMat != null) de.appendBanks(bankCovMat);
             }
-        
+      
+            // update PID for FT-based start time:
+            // WARNING:  this modified particles
+            analyzer.processEventFT(eb.getEvent());
+            if (eb.getEvent().getEventHeader().getStartTimeFT()>0 && eventBankFT!=null) {
+                DataBank bankEveFT = DetectorData.getEventShadowBank(eb.getEvent(), de, eventBankFT);
+                de.appendBanks(bankEveFT);
+                if (particleBankFT!=null) {
+                    DataBank bankPFT = DetectorData.getDetectorParticleShadowBank(eb.getEvent().getParticles(), de, particleBankFT);
+                    de.appendBanks(bankPFT);
+                }
+            }
+          
         }
 
         return true;
@@ -184,6 +202,14 @@ public class EBEngine extends ReconstructionEngine {
         this.particleBank = particleBank;
     }
 
+    public void setEventBankFT(String eventBank) {
+        this.eventBankFT = eventBank;
+    }
+
+    public void setParticleBankFT(String particleBank) {
+        this.particleBankFT = particleBank;
+    }
+    
     public void setCalorimeterBank(String calorimeterBank) {
         this.calorimeterBank = calorimeterBank;
     }

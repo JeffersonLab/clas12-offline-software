@@ -5,15 +5,17 @@
  */
 package org.jlab.io.hipo;
 
+import java.util.List;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataSync;
 
 
 import org.jlab.io.base.DataBank;
-import org.jlab.io.evio.EvioDataBank;
-import org.jlab.jnp.hipo.data.HipoEvent;
-import org.jlab.jnp.hipo.io.HipoWriter;
-import org.jlab.jnp.hipo.schema.SchemaFactory;
+import org.jlab.jnp.hipo4.data.Event;
+import org.jlab.jnp.hipo4.data.Schema;
+import org.jlab.jnp.hipo4.data.SchemaFactory;
+import org.jlab.jnp.hipo4.io.HipoWriter;
+
 
 /**
  *
@@ -26,7 +28,8 @@ public class HipoDataSync implements DataSync {
     public HipoDataSync(){
         this.writer = new HipoWriter();
         this.writer.setCompressionType(2);
-        writer.appendSchemaFactoryFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
+        String env = System.getenv("CLAS12DIR");
+        writer.getSchemaFactory().initFromDirectory(env + "/etc/bankdefs/hipo4");
         System.out.println("[HipoDataSync] ---> dictionary size = " + writer.getSchemaFactory().getSchemaList().size());
         //this.writer.getSchemaFactory().initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
         //this.writer.getSchemaFactory().show();
@@ -35,7 +38,10 @@ public class HipoDataSync implements DataSync {
     public HipoDataSync(SchemaFactory factory){
         this.writer = new HipoWriter();
         this.writer.setCompressionType(2);
-        writer.appendSchemaFactory(factory);
+        List<Schema>  schemas = factory.getSchemaList();
+        for(Schema schema : schemas){
+            writer.getSchemaFactory().addSchema(schema);
+        }
     }
     
     @Override
@@ -50,12 +56,20 @@ public class HipoDataSync implements DataSync {
         this.writer.open(file);
     }
 
+    public void addSchema(Schema schema){
+        writer.getSchemaFactory().addSchema(schema);
+    }
+    
+    public void addSchemaList(List<Schema> schemaList){
+        for(Schema schema : schemaList) addSchema(schema);
+    }
+    
     @Override
     public void writeEvent(DataEvent event) {
         //EvioDataEvent  evioEvent = (EvioDataEvent) event;
         if(event instanceof HipoDataEvent) {
             HipoDataEvent hipoEvent = (HipoDataEvent) event;
-            this.writer.writeEvent(hipoEvent.getHipoEvent());
+            this.writer.addEvent(hipoEvent.getHipoEvent());
         }
     }
 
@@ -67,9 +81,10 @@ public class HipoDataSync implements DataSync {
         this.writer.setCompressionType(type);
     }
     
+    @Override
     public DataEvent createEvent() {
-        HipoEvent event = this.writer.createEvent();
-        return new HipoDataEvent(event);
+        Event event = new Event();
+        return new HipoDataEvent(event,writer.getSchemaFactory());
     }
     
     public static void printUsage(){

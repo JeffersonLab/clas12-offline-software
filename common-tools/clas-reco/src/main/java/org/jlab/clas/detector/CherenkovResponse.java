@@ -18,9 +18,9 @@ import org.jlab.io.base.DataEvent;
 public class CherenkovResponse extends DetectorResponse {
 
     public static class TrackResidual implements Comparable {
-        private double coneAngle;
-        private double dTheta;
-        private double dPhi;
+        private final double coneAngle;
+        private final double dTheta;
+        private final double dPhi;
         public double getDeltaTheta() { return this.dTheta; }
         public double getDeltaPhi()   { return this.dPhi; }
         public double getConeAngle()  { return this.coneAngle; }
@@ -32,6 +32,7 @@ public class CherenkovResponse extends DetectorResponse {
             this.dPhi = cher.getDeltaPhi(vecHit.phi(),vecTrk.phi());
             this.coneAngle = vecHit.angle(vecTrk);
         }
+        @Override
         public int compareTo(Object o) {
             TrackResidual other = (TrackResidual)o;
             if (this.coneAngle < other.getConeAngle()) return -1;
@@ -44,23 +45,15 @@ public class CherenkovResponse extends DetectorResponse {
     private double  hitDeltaPhi   = 0.0;
     private double  hitDeltaTheta = 0.0;
     
-    // FIXME:  remove this, use hitPosition instead:
-    private double  hitTheta      = 0.0;
-    private double  hitPhi        = 0.0;
-
     // FIXME:  remove this, use DetectorResponse's hitPosition instead:
-    private Point3D hitPosition = new Point3D();
+    private final Point3D hitPosition = new Point3D();
 
-    public CherenkovResponse(double theta, double phi, double dtheta, double dphi){
-        hitTheta = theta;
-        hitPhi   = phi;
+    public CherenkovResponse(double dtheta, double dphi){
         hitDeltaTheta  = dtheta;
         hitDeltaPhi    = dphi;
     }
 
     public double getNphe() {return this.getEnergy(); }
-    public double getTheta() {return this.hitTheta;}
-    public double getPhi() {return this.hitPhi;}
     public double getDeltaTheta(){ return this.hitDeltaTheta;}
     public double getDeltaPhi() {return this.hitDeltaPhi;}
 
@@ -126,7 +119,7 @@ public class CherenkovResponse extends DetectorResponse {
 
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type){        
-        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> responseList = new ArrayList<>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
@@ -137,39 +130,30 @@ public class CherenkovResponse extends DetectorResponse {
                 double z = bank.getFloat("z",row);
                 double time = bank.getFloat("time",row);
                 double nphe = bank.getFloat("nphe", row);
+                double theta = Math.atan2(Math.sqrt(x*x+y*y),z);
+                double phi   = Math.atan2(y,x);
                 int sector = 0;
 
-                // FIXME: unify LTCC/HTCC detector banks
-                // Here we have to treat them differently:
-                // 3.  HTCC provides both x/y/z and theta/phi, while LTCC provides only x/y/z.
-                //     The current convention in EB is to use only x/y/z, while theta/phi is
-                //     just propogated.  HTCC also doesn't provide sector, so we calculate it.
-
-                double theta=0,phi=0,dtheta=0,dphi=0;
-
                 // FIXME:  move these constants to CCDB
+                double dtheta=0,dphi=0;
                 if (type==DetectorType.HTCC) {
                     dtheta = 10*3.14159/180; // based on MC
                     dphi   = 18*3.14159/180; // based on MC
-                    theta = bank.getFloat("theta", row);
-                    phi   = bank.getFloat("phi",row);
+                    // HTCC reconstruction does not provide a sector,
+                    // so we calculate it based on hit position:
                     sector = DetectorResponse.getSector(phi);
                 }
-
                 else if (type==DetectorType.LTCC) {
                     dtheta = (35-5)/18*2 * 3.14159/180; // +/- 2 mirrors
                     dphi   = 10*3.14159/180;
-                    theta  = Math.atan2(Math.sqrt(x*x+y*y),z);
-                    phi    = Math.atan2(y,x);
                     sector = bank.getByte("sector",row);
                 }
-
                 else {
                     throw new RuntimeException(
                             "CherenkovResponse::readHipoEvent:  invalid DetectorType: "+type);
                 }
 
-                CherenkovResponse che = new CherenkovResponse(theta,phi,dtheta,dphi);
+                CherenkovResponse che = new CherenkovResponse(dtheta,dphi);
                 che.setHitPosition(x, y, z);
                 che.setHitIndex(row);
                 che.setEnergy(nphe);

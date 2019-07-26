@@ -102,12 +102,12 @@ public class HitReader {
                     continue;
                 }
                 // create the strip object for the BMT
-                Strip BmtStrip = new Strip(bankDGTZ.getInt("component", i), ADCtoEdep);
+                Strip BmtStrip = new Strip((int) bankDGTZ.getShort("component", i), ADCtoEdep);
                 // calculate the strip parameters for the BMT hit
-                BmtStrip.calc_BMTStripParams(geo, bankDGTZ.getInt("sector", i), bankDGTZ.getInt("layer", i)); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
+                BmtStrip.calc_BMTStripParams(geo,(int) bankDGTZ.getByte("sector", i),(int) bankDGTZ.getByte("layer", i)); // for Z detectors the Lorentz angle shifts the strip measurement; calc_Strip corrects for this effect
                 // create the hit object for detector type BMT
                 
-                Hit hit = new Hit(1, this.getZorC(bankDGTZ.getInt("layer", i)), bankDGTZ.getInt("sector", i), bankDGTZ.getInt("layer", i), BmtStrip);
+                Hit hit = new Hit(1, this.getZorC((int) bankDGTZ.getByte("layer", i)),(int) bankDGTZ.getByte("sector", i),(int) bankDGTZ.getByte("layer", i), BmtStrip);
                 // a place holder to set the status of the hit, for simulated data if the strip number is in range and the Edep is above threshold the hit has status 1, useable
                 hit.set_Status(1);
                 //if(BmtStrip.get_Edep()==0)
@@ -159,9 +159,9 @@ public class HitReader {
                 }
 
                 id[i] = i + 1;
-                sector[i] = bankDGTZ.getInt("sector", i);
-                layer[i] = bankDGTZ.getInt("layer", i);
-                strip[i] = bankDGTZ.getInt("component", i);
+                sector[i] = bankDGTZ.getByte("sector", i);
+                layer[i] = bankDGTZ.getByte("layer", i);
+                strip[i] = bankDGTZ.getShort("component", i);
                 ADC[i] = bankDGTZ.getInt("ADC", i);
                 
                 double angle = 2. * Math.PI * ((double) (sector[i] - 1) / (double) org.jlab.rec.cvt.svt.Constants.NSECT[layer[i] - 1]) + org.jlab.rec.cvt.svt.Constants.PHI0[layer[i] - 1];

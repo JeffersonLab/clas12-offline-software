@@ -52,9 +52,7 @@ public final class Vector3D implements Transformable, Showable {
     }
      /**
      * Constructs a new {@code Vector3D} with the given xyz[0], xyz[1], xyz[2] components
-     * @param x the xyz[0] component
-     * @param y the xyz[1] component
-     * @param z the xyz[2] component
+     * @param xyz where x/y/z-components are xyz[0]/[1]/[2]
      */
     public Vector3D(double[] xyz) {
         setXYZ(xyz[0], xyz[1], xyz[2]);
@@ -78,9 +76,6 @@ public final class Vector3D implements Transformable, Showable {
 
     /**
      * Returns a new instance of this vector.
-     * @param x the x component
-     * @param y the y component
-     * @param z the z component
      */
     public Vector3D clone() {
         return new Vector3D(x,y,z);
@@ -485,17 +480,24 @@ public final class Vector3D implements Transformable, Showable {
      * @return the angle between the two vectors
      */
     public double angle(Vector3D v) {
-        final double tol = 1e-6;
-
+        final double tol = 1e-9;
         double a = sqrt(this.r2() * v.r2());
         if (a > tol) {
             double dotprod = this.dot(v);
             double cosangle = dotprod / a;
-            if (abs(cosangle) > (1-tol)) {
-                return 0.;
+            if(cosangle<0){
+                if (abs(cosangle) > (1-tol)) {
+                    return Math.PI;
+                } else {
+                    return acos(cosangle);
+                }
             } else {
-                return acos(cosangle);
-            }
+                if (abs(cosangle) > (1-tol)) {
+                    return 0.;
+                } else {
+                    return acos(cosangle);
+                }
+            }            
         } else {
             return 0.;
         }
@@ -573,5 +575,8 @@ public final class Vector3D implements Transformable, Showable {
         System.out.println(vec);
         System.out.println(vec.mag());
         
+        Vector3D vec1 = new Vector3D(0.0,0.0,1.0);
+        Vector3D vec2 = new Vector3D(0.0,0.0,1.0);
+        System.out.println("angle = " + vec1.angle(vec2));
     }
 }

@@ -130,10 +130,26 @@ public class ECCommon {
             Layer detLayer = detector.getSector(sector-1).getSuperlayer(superlayer).getLayer(localLayer);
             ScintillatorPaddle      paddle = (ScintillatorPaddle) detLayer.getComponent(component-1);
             ScintillatorPaddle firstPaddle = (ScintillatorPaddle) detLayer.getComponent(0);
+            ScintillatorPaddle  lastPaddle = (ScintillatorPaddle) detLayer.getComponent(detLayer.getNumComponents()-1);
+            
             
             strip.getLine().copy(paddle.getLine());
             double distance = paddle.getLine().origin().distance(firstPaddle.getLine().origin());
+
             strip.setDistanceEdge(distance);
+            // Modified on May 1st 2019. This is to account for
+            // the fact that the distance from the edge on PCAL
+            // for layers V and W are calculated from the wider
+            // strips edge.
+            if(layer==2||layer==3){
+                distance = paddle.getLine().origin().distance(lastPaddle.getLine().origin());
+                double hL = 394.2*0.5;
+                double hyp = Math.sqrt(hL*hL + 385.2*385.2);
+                double theta = Math.acos(hL/hyp);
+                double proj  = 4.5*Math.cos(theta);
+                strip.setDistanceEdge(distance + proj);
+            }
+            // End of the edit.
             strip.setAttenuation(atten.getDoubleValue("A", sector,layer,component),
                                  atten.getDoubleValue("B", sector,layer,component),
                                  atten.getDoubleValue("C", sector,layer,component));

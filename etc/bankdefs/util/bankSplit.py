@@ -6,7 +6,7 @@ import os
 
 # print usage
 if len(sys.argv)<2:
-   print "usage: bankSplit.py coatjavahipobankfolder (e.g. coatjava/etc/bankdefs/hipo/)"
+   print "usage: bankSplit.py coatjavahipobankfolder (e.g. coatjava/etc/bankdefs/hipo4/)"
    sys.exit()
 
 # hipo schema directory
@@ -42,17 +42,18 @@ for filename in os.listdir("./"):
             sys.exit(1)
         # loop over banks in the json file
 	for bank in datastore:
-	    bankname = bank['bank']
+	    bankname = bank['name']
 	    file = open(workdirectory + singledirectory + bankname + ".json", 'w')
 	    file.write(json.dumps([bank], sort_keys=True, indent=4))
 	    file.close
 print("Single json files saved in " + workdirectory + singledirectory)
 
 # create dst, calibration and monitoring directories
-dst = ["RUN::config","RAW::scaler","REC::Event","REC::Particle","REC::Calorimeter","REC::Cherenkov","REC::CovMat","REC::ForwardTagger","REC::Scintillator","REC::Track","REC::Traj","RICH::tdc","MC::Event","MC::Header","MC::Lund","MC::Particle","MC::True"]
-calibration = ["BAND::adc","BAND::tdc","BAND::hits","CND::adc","CND::hits","CND::tdc","CTOF::adc","CTOF::hits","CTOF::tdc","CVTRec::Tracks","ECAL::calib","ECAL::clusters","ECAL::peaks","FT::particles","FTCAL::adc","FTCAL::clusters","FTCAL::hits","FTHODO::adc","FTHODO::clusters","FTHODO::hits","FTOF::adc","FTOF::hits","FTOF::tdc","HTCC::adc","HTCC::rec","LTCC::adc","LTCC::clusters","MC::Event","MC::Header","MC::Lund","MC::Particle","MC::True","RAW::scaler","REC::Calorimeter","REC::Cherenkov","REC::CovMat","REC::Event","REC::ForwardTagger","REC::Particle","REC::Scintillator","REC::Track","REC::Traj","RF::adc","RF::tdc","RICH::tdc","RUN::config","RUN::rf","RUN::trigger","TimeBasedTrkg::TBCrosses","TimeBasedTrkg::TBHits","TimeBasedTrkg::TBSegments","TimeBasedTrkg::TBSegmentTrajectory","TimeBasedTrkg::TBTracks","TimeBasedTrkg::Trajectory"]
-monitoring = ["BMTRec::Crosses","BMTRec::Hits","BMTRec::LayerEffs","BSTRec::Crosses","BSTRec::Hits","BSTRec::LayerEffs","BAND::adc","BAND::tdc","BAND::hits","CND::adc","CND::clusters","CND::hits","CND::tdc","CTOF::adc","CTOF::hits","CTOF::tdc","CVTRec::Tracks","CVTRec::Trajectory","ECAL::calib","ECAL::clusters","ECAL::hits","ECAL::peaks","FT::particles","FTCAL::adc","FTCAL::clusters","FTCAL::hits","FTHODO::adc","FTHODO::clusters","FTHODO::hits","FTOF::adc","FTOF::hits","FTOF::tdc","HitBasedTrkg::HBTracks","HTCC::adc","HTCC::rec","LTCC::adc","LTCC::clusters","MC::Event","MC::Header","MC::Lund","MC::Particle","MC::True","RAW::scaler","RAW::vtp","REC::Calorimeter","REC::Cherenkov","REC::CovMat","REC::Event","REC::ForwardTagger","REC::Particle","REC::Scintillator","REC::Track","REC::Traj","RECHB::Calorimeter","RECHB::Cherenkov","RECHB::Event","RECHB::ForwardTagger","RECHB::Particle","RECHB::Scintillator","RECHB::Track","RF::adc","RF::tdc","RICH::tdc","RUN::config","RUN::rf","RUN::trigger","TimeBasedTrkg::TBCrosses","TimeBasedTrkg::TBHits","TimeBasedTrkg::TBSegments","TimeBasedTrkg::TBSegmentTrajectory","TimeBasedTrkg::TBTracks","TimeBasedTrkg::Trajectory"]
+dst = ["RUN::config","RAW::epics","RAW::scaler","REC::Event","REC::Particle","REC::Calorimeter","REC::Cherenkov","REC::CovMat","REC::ForwardTagger","REC::Scintillator","REC::Track","REC::Traj","RECFT::Event","RECFT::Particle","RICH::tdc","RICH::ringCher","RUN::scaler","HEL::flip","HEL::online","MC::Event","MC::Header","MC::Lund","MC::Particle","MC::True"]
+calibration = ["BAND::adc","BAND::tdc","BAND::hits","CND::adc","CND::hits","CND::tdc","CTOF::adc","CTOF::hits","CTOF::tdc","CVTRec::Tracks","ECAL::adc","ECAL::calib","ECAL::clusters","ECAL::peaks","ECAL::tdc","FT::particles","FTCAL::adc","FTCAL::clusters","FTCAL::hits","FTHODO::adc","FTHODO::clusters","FTHODO::hits","FTOF::adc","FTOF::hits","FTOF::tdc","HEL::flip","HEL::online","HTCC::adc","HTCC::rec","LTCC::adc","LTCC::clusters","MC::Event","MC::Header","MC::Lund","MC::Particle","MC::True","RAW::epics","RAW::scaler","REC::Calorimeter","REC::Cherenkov","REC::CovMat","REC::Event","REC::ForwardTagger","REC::Particle","REC::Scintillator","REC::Track","REC::Traj","RECFT::Event","RECFT::Particle","RF::adc","RF::tdc","RICH::tdc","RICH::hits","RICH::hadrons","RICH::photons","RUN::config","RUN::rf","RUN::scaler","RUN::trigger","TimeBasedTrkg::TBCrosses","TimeBasedTrkg::TBHits","TimeBasedTrkg::TBSegments","TimeBasedTrkg::TBSegmentTrajectory","TimeBasedTrkg::TBTracks","TimeBasedTrkg::Trajectory"]
+monitoring = ["BAND::adc","BAND::tdc","BAND::hits","BMT::adc","BMTRec::Clusters","BMTRec::Crosses","BMTRec::Hits","BMTRec::LayerEffs","BST::adc","BSTRec::Clusters","BSTRec::Crosses","BSTRec::Hits","BSTRec::LayerEffs","CND::adc","CND::clusters","CND::hits","CND::tdc","CTOF::adc","CTOF::hits","CTOF::tdc","CVTRec::Tracks","CVTRec::Trajectory","ECAL::adc","ECAL::calib","ECAL::clusters","ECAL::hits","ECAL::peaks","ECAL::tdc","FT::particles","FTCAL::adc","FTCAL::clusters","FTCAL::hits","FTHODO::adc","FTHODO::clusters","FTHODO::hits","FTOF::adc","FTOF::hits","FTOF::tdc","HEL::adc","HEL::flip","HEL::online","HitBasedTrkg::HBTracks","HTCC::adc","HTCC::rec","LTCC::adc","LTCC::clusters","MC::Event","MC::Header","MC::Lund","MC::Particle","MC::True","RAW::epics","RAW::scaler","RAW::vtp","REC::Calorimeter","REC::Cherenkov","REC::CovMat","REC::Event","REC::ForwardTagger","REC::Particle","REC::Scintillator","REC::Track","REC::Traj","RECFT::Event","RECFT::Particle","RECHB::Calorimeter","RECHB::Cherenkov","RECHB::Event","RECHB::ForwardTagger","RECHB::Particle","RECHB::Scintillator","RECHB::Track","RF::adc","RF::tdc","RICH::tdc","RICH::hits","RICH::hadrons","RICH::photons","RUN::config","RUN::rf","RUN::scaler","RUN::trigger","TimeBasedTrkg::TBCrosses","TimeBasedTrkg::TBHits","TimeBasedTrkg::TBSegments","TimeBasedTrkg::TBSegmentTrajectory","TimeBasedTrkg::TBTracks","TimeBasedTrkg::Trajectory"]
 createdirandlinks("dst/", dst)
 createdirandlinks("calibration/", calibration)
 createdirandlinks("monitoring/",  monitoring)
     
+

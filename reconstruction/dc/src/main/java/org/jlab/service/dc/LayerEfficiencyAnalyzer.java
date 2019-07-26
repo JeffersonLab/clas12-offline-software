@@ -280,7 +280,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
             System.err.println("RUN CONDITIONS NOT READ AT TIMEBASED LEVEL!");
             return true;
         }
-        //if(event.getBank("RECHB::Event").getFloat("STTime", 0)<0)
+        //if(event.getBank("RECHB::Event").getFloat("startTime", 0)<0)
         //    return true; // require the start time to reconstruct the tracks in the event
         
         DataBank bank = event.getBank("RUN::config");
@@ -293,7 +293,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         double T_Start = 0;
         if(Constants.isUSETSTART() == true) {
             if(event.hasBank("RECHB::Event")==true) {
-                T_Start = event.getBank("RECHB::Event").getFloat("STTime", 0);
+                T_Start = event.getBank("RECHB::Event").getFloat("startTime", 0);
                 if(T_Start<0) {
                     return true; // quit if start time not found in data
                 }
@@ -339,7 +339,8 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
 
-        clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct, super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
+        clusters = clusFinder.FindTimeBasedClusters(event, hits, cf, ct, 
+                super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
 
         if(clusters.isEmpty()) {
             return true;

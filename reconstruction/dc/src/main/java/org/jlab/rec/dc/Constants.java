@@ -40,7 +40,7 @@ public class Constants {
     public static final double LIGHTVEL = 0.00299792458;        // velocity of light (cm/ns) - conversion factor from radius in cm to momentum in GeV/c
 
     // V0 averaged value in t(beta) term denominator
-    public static final double V0AVERAGED = 0.007;
+    public static final double V0AVERAGED = 0.005; //was 0.007 - modified 05/28/2019
     /// A region-segment contains two segments if they are in the same sector
     /// and region and satisfy the proximity condition:
     /// |Xwires2-Xwires1| = a*Xwires1 + b
@@ -160,7 +160,13 @@ public class Constants {
 
     public static int[][] STBLOC;
 
-    private static boolean USETSTART = false;
+    private static boolean USETSTART = true;
+    public static double SEEDCUT = 5000;
+    public static double MINPATH = 200;
+    public static double BETAHIGH = 1.5;
+    public static double BETALOW = 0.15;
+    //max number of hits allowed in the event to do tracking
+    public static double MAXHITS = 2000;
 
     public static boolean isUSETSTART() {
         return USETSTART;
@@ -170,7 +176,7 @@ public class Constants {
         Constants.USETSTART = USETSTART;
     }
     
-    private static double WIREDIST = 1.0;
+    private static double WIREDIST = 0.0;
 
     /**
      * @return the WIREDIST
@@ -280,6 +286,14 @@ public class Constants {
     public static final String WIRESTAT = "/calibration/dc/tracking/wire_status";
     public static final String TIMEJITTER = "/calibration/dc/time_jitter";
     public static final String HITBASE = "HitBased";
+
+    private static double T2D = 0; 
+    public static void  setT2D(int i) {
+        Constants.T2D = i;
+    }
+    public static double getT2D() {
+        return Constants.T2D;
+    }
 
    
 }

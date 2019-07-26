@@ -24,11 +24,11 @@ public class RecoBankWriter {
     public DataBank CreateOutputBank(DataEvent event, String bankName, int bankSize) {
         if(event.hasBank(bankName)) { // for second pass tracking
             HipoDataEvent de = (HipoDataEvent) event;
-            HipoEvent dde = de.getHipoEvent();
-            HipoGroup group = dde.getGroup(bankName);
+            //HipoEvent dde = de.getHipoEvent();
+            //HipoGroup group = dde.getGroup(bankName);
             ////event.show();
             //group.show();
-            dde.removeGroup(bankName);
+            //dde.removeGroup(bankName);
             return null;
         }
         DataBank bank = event.createBank(bankName, bankSize);

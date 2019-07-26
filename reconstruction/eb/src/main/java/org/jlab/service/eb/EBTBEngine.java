@@ -16,6 +16,7 @@ public class EBTBEngine extends EBEngine {
         super("EBTB");
     }
 
+    @Override
     public boolean processDataEvent(DataEvent de) {
         return super.processDataEvent(de,ebScalers);
     }
@@ -24,6 +25,8 @@ public class EBTBEngine extends EBEngine {
     public void initBankNames() {
         this.setEventBank("REC::Event");
         this.setParticleBank("REC::Particle");
+        this.setEventBankFT("RECFT::Event");
+        this.setParticleBankFT("RECFT::Particle");
         this.setCalorimeterBank("REC::Calorimeter");
         this.setCherenkovBank("REC::Cherenkov");
         this.setScintillatorBank("REC::Scintillator");

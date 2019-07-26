@@ -680,6 +680,89 @@ public class Swim {
 
     }
 
+    
+    
+    private class BeamLineSwimStopper implements IStopper {
+
+        private double _finalPathLength = Double.NaN;
+
+        private double _xB;
+        private double _yB;
+        double min = Double.POSITIVE_INFINITY;
+        double thetaRad = Math.toRadians(_theta);
+        double phiRad = Math.toRadians(_phi);
+        double pz = _pTot * Math.cos(thetaRad);
+        private BeamLineSwimStopper(double xB, double yB) {
+                // DC reconstruction units are cm. Swim units are m. Hence scale by
+                // 100
+                _xB = xB;
+                _yB = yB;
+        }
+
+        @Override
+        public boolean stopIntegration(double t, double[] y) {
+
+                double r = Math.sqrt((_xB-y[0]* 100.) * (_xB-y[0]* 100.) + (_yB-y[1]* 100.) * (_yB-y[1]* 100.));
+                if(r<min && y[2]<2.0) //start at about 2 meters before target.  Avoid inbending stopping when P dir changes
+                    min = r;
+                return (r > min );
+
+        }
+
+        /**
+         * Get the final path length in meters
+         *
+         * @return the final path length in meters
+         */
+        @Override
+        public double getFinalT() {
+                return _finalPathLength;
+        }
+
+        /**
+         * Set the final path length in meters
+         *
+         * @param finalPathLength
+         *            the final path length in meters
+         */
+        @Override
+        public void setFinalT(double finalPathLength) {
+                _finalPathLength = finalPathLength;
+        }
+    }
+    
+    public double[] SwimToBeamLine(double xB, double yB) {
+
+        double[] value = new double[8];
+        
+        if(this.SwimUnPhys==true)
+            return null;
+        BeamLineSwimStopper stopper = new BeamLineSwimStopper(xB, yB);
+
+        SwimTrajectory st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize,
+                        0.0005);
+        if(st==null)
+            return null;
+        st.computeBDL(PC.CP);
+        // st.computeBDL(compositeField);
+
+        double[] lastY = st.lastElement();
+
+        value[0] = lastY[0] * 100; // convert back to cm
+        value[1] = lastY[1] * 100; // convert back to cm
+        value[2] = lastY[2] * 100; // convert back to cm
+        value[3] = lastY[3] * _pTot; // normalized values
+        value[4] = lastY[4] * _pTot;
+        value[5] = lastY[5] * _pTot;
+        value[6] = lastY[6] * 100;
+        value[7] = lastY[7] * 10; // Conversion from kG.m to T.cm
+
+        return value;
+
+    }
+
+    
+    
     private void printV(String pfx, double v[]) {
             double x = v[0] / 100;
             double y = v[1] / 100;

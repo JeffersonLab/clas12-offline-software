@@ -24,7 +24,6 @@ services:
     name: CVT
   - class: org.jlab.service.ctof.CTOFEngine
     name: CTOF
-#  - class: org.jlab.service.cnd.CNDEngine
   - class: org.jlab.service.cnd.CNDCalibrationEngine
     name: CND
   - class: org.jlab.service.band.BANDEngine
@@ -33,8 +32,6 @@ services:
     name: HTCC
   - class: org.jlab.service.ltcc.LTCCEngine
     name: LTCC
-  - class: org.jlab.rec.rich.RICHEBEngine
-    name: RICH
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
   - class: org.jlab.service.dc.DCTBEngine
@@ -43,27 +40,40 @@ services:
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
     name: EBTB
+  - class: org.jlab.rec.rich.RICHEBEngine
+    name: RICH
 configuration:
   io-services:
     writer:
       compression: 2
   services:
     MAGFIELDS:
-      solenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
-      torusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
-      solenoidShift: "-1.9"
-      torusXShift: "0.0"
-      torusYShift: "0.0"
-      torusZShift: "0.0"
+      magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
+      magfieldTorusMap: Full_torus_r251_phi181_z251_08May2018.dat
+      variation: rga_fall2018
+    CND:
+      variation: rga_fall2018
+    CTOF:
+      variation: rga_fall2018
+    CVT:
+      variation: rga_fall2018
     DCHB:
-# example of how to set variation and timestamp for a service, uncomment to use
-#      variation: default
-#      timestamp: 08/22/2018
-      useStartTime: "true"
-      wireDistortionsFlag: "true"
-      geomDBVariation: may_2018_engineers
+      variation: rga_fall2018
+      dcGeometryVariation: rga_fall2018
+      dcT2DFunc: "Polynomial"
     DCTB:
-      geomDBVariation: may_2018_engineers
-
+      variation: rga_fall2018
+      dcGeometryVariation: rga_fall2018
+    EC:
+      variation: rga_fall2018
+    FTOFHB:
+      variation: rga_fall2018
+    FTOFTB:
+      variation: rga_fall2018
+    EBHB:
+      variation: rga_fall2018
+    EBTB:
+      variation: rga_fall2018
+      
 mime-types:
   - binary/data-hipo

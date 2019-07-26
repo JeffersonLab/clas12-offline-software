@@ -14,10 +14,10 @@ import org.jlab.clas.physics.Vector3;
  */
 public class CalorimeterResponse extends DetectorResponse {
 
-    private Vector3 widthUVW = new Vector3(0,0,0);
-    private Vector3 coordUVW = new Vector3(0,0,0);
-    private Vector3 secondMomentUVW = new Vector3(0,0,0);
-    private Vector3 thirdMomentUVW = new Vector3(0,0,0);
+    private final Vector3 widthUVW = new Vector3(0,0,0);
+    private final Vector3 coordUVW = new Vector3(0,0,0);
+    private final Vector3 secondMomentUVW = new Vector3(0,0,0);
+    private final Vector3 thirdMomentUVW = new Vector3(0,0,0);
 
     public void setWidthUVW(float u,float v,float w) {
         widthUVW.setXYZ(u,v,w);
@@ -54,7 +54,7 @@ public class CalorimeterResponse extends DetectorResponse {
 
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type, String momentsBankName){        
-        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> responseList = new ArrayList<>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             DataBank momentsBank=null;

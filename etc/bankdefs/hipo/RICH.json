@@ -1,5 +1,5 @@
 [ 
- {
+   {
     "bank": "RICH::hits",
     "group": 22021,
     "info": "Reconstructed Hits in RICH",
@@ -9,11 +9,11 @@
               {"name":"tile",        "id":3, "type":"int16", "info":"Hit tile"},
               {"name":"pmt",         "id":4, "type":"int16", "info":"Hit pmt" },
               {"name":"anode",       "id":5, "type":"int16", "info":"Hit anode" },
-              {"name":"idx",         "id":6, "type":"int16", "info":"Hit idx" },
-              {"name":"idy",         "id":7, "type":"int16", "info":"Hit idy" },
-              {"name":"glx",         "id":8, "type":"int16", "info":"Hit glx" },
-              {"name":"gly",         "id":9, "type":"int16", "info":"Hit gly" },
-              {"name":"time",        "id":10, "type":"int16", "info":"Hit time" },
+              {"name":"x",           "id":6, "type":"float", "info":"Hit x" },
+              {"name":"y",           "id":7, "type":"float", "info":"Hit y" },
+              {"name":"z",           "id":8, "type":"float", "info":"Hit z" },
+              {"name":"time",        "id":9, "type":"float", "info":"Hit time" },
+              {"name":"rawtime",     "id":10, "type":"float", "info":"Hit rawtime" },
               {"name":"cluster",     "id":11, "type":"int16", "info":"Hit cluster" },
               {"name":"xtalk",       "id":12, "type":"int16", "info":"Hit xtalk" },
               {"name":"duration",    "id":13, "type":"int16", "info":"Hit duration" }
@@ -31,13 +31,130 @@
             {"name":"pmt",        "id":5, "type":"int16", "info":"Clu pmt"},
             {"name":"charge",     "id":6, "type":"float", "info":"Clu charge" },
             {"name":"time",       "id":7, "type":"float", "info":"Clu time" },
-            {"name":"x",          "id":8, "type":"float", "info":"Clu x" },
-            {"name":"y",          "id":9, "type":"float", "info":"Clu y" },
-            {"name":"z",          "id":10,"type":"float", "info":"Clu z" },
-            {"name":"wtime",      "id":11,"type":"float", "info":"Clu wtime" },
-            {"name":"wx",         "id":12,"type":"float", "info":"Clu wx" },
-            {"name":"wy",         "id":13,"type":"float", "info":"Clu wy" },
-            {"name":"wz",         "id":14,"type":"float", "info":"Clu wz" }
-        ]
-     }
+            {"name":"rawtime",    "id":8, "type":"float", "info":"Clu rawtime" },
+            {"name":"x",          "id":9, "type":"float", "info":"Clu x" },
+            {"name":"y",          "id":10, "type":"float", "info":"Clu y" },
+            {"name":"z",          "id":11,"type":"float", "info":"Clu z" },
+            {"name":"wtime",      "id":12,"type":"float", "info":"Clu wtime" },
+            {"name":"wx",         "id":13,"type":"float", "info":"Clu wx" },
+            {"name":"wy",         "id":14,"type":"float", "info":"Clu wy" },
+            {"name":"wz",         "id":15,"type":"float", "info":"Clu wz" }
+    ]
+  },
+   {
+    "bank": "REC::RICH",
+    "group": 341,
+    "info": "RICH Responses for Particles bank",
+    "items": [
+            {"name":"index",        "id":1,  "type":"int16", "info":"index of the clu in the specific detector bank"},
+            {"name":"pindex",       "id":2,  "type":"int16", "info":"row number in the particle bank hit is associated with"},
+            {"name":"detector",     "id":3,  "type":"int8",  "info":"Detector ID, defined in COATJAVA DetectorType"},
+            {"name":"sector",       "id":4,  "type":"int8",  "info":"Sector of the Detector hit"},
+            {"name":"layer",        "id":5,  "type":"int8",  "info":"Layer of the Detector hit"},
+            {"name":"energy",       "id":6,  "type":"float", "info":"Energy associated with the hit"},
+            {"name":"time",         "id":7,  "type":"float", "info":"Time associated with the hit"},
+            {"name":"path",         "id":8,  "type":"float", "info":"Path from vertex to the hit position"},
+            {"name":"chi2",         "id":9,  "type":"float", "info":"Chi2 (or quality) of hit-track matching"},
+            {"name":"x",            "id":10, "type":"float", "info":"X coordinate of the hit"},
+            {"name":"y",            "id":11, "type":"float", "info":"Y coordinate of the hit"},
+            {"name":"z",            "id":12, "type":"float", "info":"Z coordinate of the hit"},
+            {"name":"hx",           "id":13, "type":"float", "info":"X coordinate of the matched hit"},
+            {"name":"hy",           "id":14, "type":"float", "info":"Y coordinate of the mathced hit"},
+            {"name":"hz",           "id":15, "type":"float", "info":"Z coordinate of the matched hit"},
+            {"name":"status",       "id":16, "type":"int16", "info":"hit status"}
+     ]
+  },
+   {
+    "bank": "RICH::hadrons",
+    "group": 22023,
+    "info": "Reconstructed Hadrons in RICH",
+    "items": [
+            {"name":"id",            "id":1, "type":"int16", "info":"hadron id" },
+            {"name":"hit_index",     "id":2, "type":"int16", "info":"row in the RICH clusters bank" },
+            {"name":"particle_index","id":3, "type":"int16", "info":"row in the REC  particle bank" },
+
+            {"name":"traced_the",    "id":4, "type":"float", "info":"Lab theta angle for traced solution" },
+            {"name":"traced_phi",    "id":5, "type":"float", "info":"Lab phi angle for traced solution" },
+            {"name":"traced_hitx",   "id":6, "type":"float", "info":"Lab hitx angle for traced solution" },
+            {"name":"traced_hity",   "id":7, "type":"float", "info":"Lab hity angle for traced solution" },
+            {"name":"traced_hitz",   "id":8, "type":"float", "info":"Lab hitz angle for traced solution" },
+            {"name":"traced_time",   "id":9, "type":"float", "info":"time for traced solution" },
+            {"name":"traced_path",   "id":10,"type":"float", "info":"path for traced solution" },
+            {"name":"traced_ilay",   "id":11,"type":"int16", "info":"emission aero layer for traced solution" },
+            {"name":"traced_ico",    "id":12,"type":"int16", "info":"emission aero component for traced solution" },
+            {"name":"traced_emix",   "id":13,"type":"float", "info":"emission point x for traced solution" },
+            {"name":"traced_emiy",   "id":14,"type":"float", "info":"emission point y for traced solution" },
+            {"name":"traced_emiz",   "id":15,"type":"float", "info":"emission point z for traced solution" },
+
+            {"name":"EtaC_ele",      "id":16, "type":"float", "info":"expected EtaC for electron" },
+            {"name":"EtaC_pi",       "id":17, "type":"float", "info":"expected EtaC for pion" },
+            {"name":"EtaC_k",        "id":18, "type":"float", "info":"expected EtaC for kappa" },
+            {"name":"EtaC_pr",       "id":19, "type":"float", "info":"expected EtaC for proton" },
+            {"name":"EtaC_min",      "id":20, "type":"float", "info":"expected EtaC minimum " },
+            {"name":"EtaC_max",      "id":21, "type":"float", "info":"expected EtaC maximum " }
+     ]
+  },
+   {
+    "bank": "RICH::photons",
+    "group": 22024,
+    "info": "Reconstructed Photons in RICH",
+    "items": [
+            {"name":"id",             "id":1,  "type":"int16", "info":"id" },
+            {"name":"type",           "id":2,  "type":"int16", "info":"reconstructed (0) or expected from pion (1) kaon (2) proton (3) electron (5)" },
+            {"name":"hit_index",      "id":3,  "type":"int16", "info":"row in the RICH  hits bank"},
+            {"name":"hadron_index",   "id":4,  "type":"int16", "info":"row in the RICH  hadron bank"},
+            {"name":"start_time",     "id":5,  "type":"float", "info":"time at emission point"},
+
+            {"name":"analytic_the",   "id":6,  "type":"float", "info":"Lab theta angle for analytic solution" },
+            {"name":"analytic_phi",   "id":7,  "type":"float", "info":"Lab phi angle for analytic solution" },
+            {"name":"analytic_path",  "id":8, "type":"float", "info":"path for analytic solution" },
+            {"name":"analytic_time",  "id":9, "type":"float", "info":"time for analytic solution" },
+            {"name":"analytic_nrfl",  "id":10, "type":"int16", "info":"n reflections for analytic solution" },
+            {"name":"analytic_nrfr",  "id":11, "type":"int16", "info":"n refractions for analytic solution" },
+
+            {"name":"analytic_EtaC",  "id":12,  "type":"float", "info":"EtaC angle for analytic solution" },
+            {"name":"analytic_aeron", "id":13,  "type":"float", "info":"n for analytic solution" },
+            {"name":"analytic_elpr",  "id":14, "type":"float", "info":"electron probability for analytic solution" },
+            {"name":"analytic_pipr",  "id":15, "type":"float", "info":"pion probability for analytic solution" },
+            {"name":"analytic_kpr",   "id":16, "type":"float", "info":"kaon probability for analytic solution" },
+            {"name":"analytic_prpr",  "id":17, "type":"float", "info":"proton probability for analytic solution" },
+            {"name":"analytic_bgpr",  "id":18, "type":"float", "info":"background probability for analytic solution" },
+
+            {"name":"traced_the",     "id":19, "type":"float", "info":"Lab theta angle for traced solution" },
+            {"name":"traced_phi",     "id":20, "type":"float", "info":"Lab phi angle for traced solution" },
+            {"name":"traced_hitx",    "id":21, "type":"float", "info":"Lab hitx angle for traced solution" },
+            {"name":"traced_hity",    "id":22, "type":"float", "info":"Lab hity angle for traced solution" },
+            {"name":"traced_hitz",    "id":23, "type":"float", "info":"Lab hitz angle for traced solution" },
+            {"name":"traced_path",    "id":24, "type":"float", "info":"path for traced solution" },
+            {"name":"traced_time",    "id":25, "type":"float", "info":"time for traced solution" },
+            {"name":"traced_nrfl",    "id":26, "type":"int16", "info":"n reflections for traced solution" },
+            {"name":"traced_nrfr",    "id":27, "type":"int16", "info":"n refractions for traced solution" },
+
+            {"name":"traced_EtaC",    "id":28, "type":"float", "info":"EtaC angle for traced solution" },
+            {"name":"traced_aeron",   "id":29, "type":"float", "info":"n for traced solution" },
+            {"name":"traced_elpr",    "id":30, "type":"float", "info":"electron probability for traced solution" },
+            {"name":"traced_pipr",    "id":31, "type":"float", "info":"pion probability for traced solution" },
+            {"name":"traced_kpr",     "id":32, "type":"float", "info":"kaon probability for traced solution" },
+            {"name":"traced_prpr",    "id":33, "type":"float", "info":"proton probability for traced solution" },
+            {"name":"traced_bgpr",    "id":34, "type":"float", "info":"background probability for traced solution" }
+    ]
+  },
+   {
+    "bank": "REC::RingCher",
+    "group": 22025,
+    "info": "Reconstructed Cherenov nformation in RICH",
+    "items": [
+            {"name":"id",             "id":1,  "type":"int16", "info":"id" },
+            {"name":"hindex",         "id":2,  "type":"int16", "info":"related row in the RICH::hits bank"},
+            {"name":"pindex",         "id":3,  "type":"int16", "info":"related row in the REC::Particle bank"},
+
+            {"name":"apath",          "id":4,  "type":"float", "info":"photon path for analytic solution" },
+            {"name":"atime",          "id":5,  "type":"float", "info":"photon arrival time for analytic solution" },
+            {"name":"aEtaC",          "id":6,  "type":"float", "info":"Cherenkov angle as analytic solution" },
+
+            {"name":"tpath",          "id":7,  "type":"float", "info":"photon path for traced solution" },
+            {"name":"ttime",          "id":8,  "type":"float", "info":"photon arrival time for traced solution" },
+            {"name":"tEtaC",          "id":9,  "type":"float", "info":"Cherenkov angle as traced solution" }
+    ]
+  }
 ]

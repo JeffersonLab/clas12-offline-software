@@ -3,6 +3,7 @@ package org.jlab.service.dc;
 import Jama.Matrix;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -27,6 +28,7 @@ import org.jlab.rec.dc.track.fit.KFitter;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
+import org.jlab.utils.groups.IndexedTable;
 
 public class DCTBEngine extends DCEngine {
 
@@ -35,9 +37,11 @@ public class DCTBEngine extends DCEngine {
 //    ECGeant4Factory ecDetector;
 //    PCALGeant4Factory pcalDetector; 
 //    TrajectorySurfaces tSurf;
+    private AtomicInteger Run = new AtomicInteger(0);
     
+    private int newRun = 0;
     private TimeToDistanceEstimator tde;
-    private double tarCent=-1.942;
+
     public DCTBEngine() {
         super("DCTB");
         tde = new TimeToDistanceEstimator();
@@ -54,22 +58,22 @@ public class DCTBEngine extends DCEngine {
             System.err.println("RUN CONDITIONS NOT READ AT TIMEBASED LEVEL!");
             return true;
         }
-        if(event.hasBank("MC::Event")==true)
-            tarCent=0;
-        //if(event.getBank("RECHB::Event").getFloat("STTime", 0)<0)
+        //if(event.getBank("RECHB::Event").getFloat("startTime", 0)<0)
         //    return true; // require the start time to reconstruct the tracks in the event
         
         DataBank bank = event.getBank("RUN::config");
         // Load the constants
         //-------------------
-        int newRun = bank.getInt("run", 0);
+        newRun = bank.getInt("run", 0);
         if(newRun==0)
             return true;
-
+        if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
+           Run.set(newRun);
+        }
         double T_Start = 0;
         if(Constants.isUSETSTART() == true) {
             if(event.hasBank("RECHB::Event")==true) {
-                T_Start = event.getBank("RECHB::Event").getFloat("STTime", 0);
+                T_Start = event.getBank("RECHB::Event").getFloat("startTime", 0);
                 if(T_Start<0) {
                     return true; // quit if start time not found in data
                 }
@@ -118,7 +122,8 @@ public class DCTBEngine extends DCEngine {
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
 
-        clusters = clusFinder.FindTimeBasedClusters(hits, cf, ct, super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
+        clusters = clusFinder.FindTimeBasedClusters(event, hits, cf, ct, 
+                super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
 
         if(clusters.isEmpty()) {
             rbc.fillAllTBBanks(event, rbc, hits, null, null, null, null);
@@ -177,8 +182,13 @@ public class DCTBEngine extends DCEngine {
             HBtrk.set_Sector(trkbank.getByte("sector", i));
             HBtrk.set_Q(trkbank.getByte("q", i));
             HBtrk.set_pAtOrig(new Vector3D(trkbank.getFloat("p0_x", i), trkbank.getFloat("p0_y", i), trkbank.getFloat("p0_z", i)));
+            HBtrk.set_P(HBtrk.get_pAtOrig().mag());
             HBtrk.set_Vtx0(new Point3D(trkbank.getFloat("Vtx0_x", i), trkbank.getFloat("Vtx0_y", i), trkbank.getFloat("Vtx0_z", i)));
             HBtrk.set_FitChi2(trkbank.getFloat("chi2", i));
+            StateVec HBFinalSV = new StateVec(trkbank.getFloat("x", i), trkbank.getFloat("y", i), 
+                    trkbank.getFloat("tx", i), trkbank.getFloat("ty", i));
+            HBFinalSV.setZ(trkbank.getFloat("z", i));
+            HBtrk.setFinalStateVec(HBFinalSV);
             Matrix initCMatrix = new Matrix(new double[][]{
             {trkcovbank.getFloat("C11", i), trkcovbank.getFloat("C12", i), trkcovbank.getFloat("C13", i), trkcovbank.getFloat("C14", i), trkcovbank.getFloat("C15", i)},
             {trkcovbank.getFloat("C21", i), trkcovbank.getFloat("C22", i), trkcovbank.getFloat("C23", i), trkcovbank.getFloat("C24", i), trkcovbank.getFloat("C25", i)},
@@ -200,6 +210,10 @@ public class DCTBEngine extends DCEngine {
         }
         
         //6) find the list of  track candidates
+        // read beam offsets from database
+        IndexedTable beamOffset = this.getConstantsManager().getConstants(newRun, "/geometry/beam/position");
+        double beamXoffset = beamOffset.getDoubleValue("x_offset", 0,0,0);
+        double beamYoffset = beamOffset.getDoubleValue("y_offset", 0,0,0);
         TrackCandListFinder trkcandFinder = new TrackCandListFinder("TimeBased");
         TrajectoryFinder trjFind = new TrajectoryFinder();
         for(int i = 0; i < TrackArray.length; i++) {
@@ -225,7 +239,7 @@ public class DCTBEngine extends DCEngine {
                 TrackArray[i].set_P(1./Math.abs(kFit.finalStateVec.Q));
                 TrackArray[i].set_Q((int)Math.signum(kFit.finalStateVec.Q));
                 trkcandFinder.setTrackPars(TrackArray[i], new Trajectory(), trjFind, fn, 
-                        kFit.finalStateVec.z, dcDetector, dcSwim);
+                        kFit.finalStateVec.z, dcDetector, dcSwim, beamXoffset, beamYoffset);
                 // candidate parameters are set from the state vector
                 TrackArray[i].set_FitChi2(kFit.chi2); 
                 TrackArray[i].set_FitNDF(kFit.NDF);
@@ -253,9 +267,9 @@ public class DCTBEngine extends DCEngine {
                 // reset the id
                 trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector, dcSwim);
-                trk.calcTrajectory(trkId, dcSwim, trk.get_Vtx0().x(), trk.get_Vtx0().y(), 
-                        trk.get_Vtx0().z(), trk.get_pAtOrig().x(), trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q(), 
-                        ftofDetector, tSurf, tarCent);
+                trk.calcTrajectory(trkId, dcSwim, trk.get_Vtx0().x(), trk.get_Vtx0().y(), trk.get_Vtx0().z(), 
+                        trk.get_pAtOrig().x(), trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q(), 
+                        tSurf);
 //                for(int j = 0; j< trk.trajectory.size(); j++) {
 //                System.out.println(trk.get_Id()+" "+trk.trajectory.size()+" ("+trk.trajectory.get(j).getDetId()+") ["+
 //                            trk.trajectory.get(j).getDetName()+"] "+
@@ -310,6 +324,5 @@ public class DCTBEngine extends DCEngine {
         }
         return miss;
     }
-    
-   
+       
 }

@@ -33,6 +33,9 @@ import org.jlab.utils.options.OptionParser;
 
 import java.util.Random;
 import org.jlab.detector.hits.PCALDetHit;
+import org.jlab.geom.DetectorHit;
+import org.jlab.geom.base.Detector;
+import org.jlab.geom.prim.Path3D;
 
 public class TrackDictionaryMakerRNG extends DCEngine{
 
@@ -93,7 +96,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
             this.r.setSeed(seed);
             System.out.println("\n Random generator seed set to: " + seed);
             System.out.println("\n Dictionary file name: " + fileName + "\n");
-            this.ProcessTracks(pw, dcDetector, ftofDetector, pcalDetector, sw, charge, n, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax,duplicates);
+            this.ProcessTracks(pw, dcDetector, ftofDetector, ecalDetector, sw, charge, n, pMin, pMax, thMin, thMax, phiMin, phiMax, vzMin, vzMax,duplicates);
             pw.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(TrackDictionaryMakerRNG.class.getName()).log(Level.SEVERE, null, ex);
@@ -238,7 +241,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
         }
     }
     public void ProcessTracks(PrintWriter pw,DCGeant4Factory dcDetector, 
-            FTOFGeant4Factory ftofDetector, PCALGeant4Factory pcalDetector, 
+            FTOFGeant4Factory ftofDetector, Detector ecalDetector,
             Swim sw, int q, int numRandoms, 
             float PMin, float PMax, 
             float ThMin, float ThMax, 
@@ -320,22 +323,17 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                             */
             }
             double[] trkTOF = sw.SwimToPlaneTiltSecSys(sector, 668.1);
-            double[] trkPCAL = sw.SwimToPlaneTiltSecSys(sector, 698.8);
+            double[] trkPCAL = sw.SwimToPlaneTiltSecSys(sector, 800.0);
 
 
             Line3d trkLine = new Line3d(rotateToSectorCoordSys(trkTOF[0],trkTOF[1],trkTOF[2]), rotateToSectorCoordSys(trkPCAL[0], trkPCAL[1], trkPCAL[2])) ;
 
             List<DetHit> hits  = ftofDetector.getIntersections(trkLine);
-            List<DetHit> hits2 = pcalDetector.getIntersections(trkLine);
-
-            if(hits.size()==0) {
-                for(int ii =0; ii<3; ii++)
-                    trkTOF[ii]=0;
-            }
-            if(hits2.size()==0) {
-                for(int ii =0; ii<3; ii++)
-                    trkPCAL[ii]=0;
-            }
+            Vector3d tof3 = rotateToSectorCoordSys(trkTOF[0],trkTOF[1],trkTOF[2]);
+            Vector3d cal3 = rotateToSectorCoordSys(trkPCAL[0], trkPCAL[1], trkPCAL[2]);
+            Path3D path = new Path3D(new Point3D(tof3.x, tof3.y, tof3.z), new Point3D(cal3.x,cal3.y,cal3.z));
+            List<DetectorHit> hits3 = ecalDetector.getHits(path);
+            
 
             int paddle1b = 0; int paddle2 = 0; int pcalU =0; int pcalV=0; int pcalW=0; int htcc=0;
             if (hits != null && hits.size() > 0) {
@@ -347,17 +345,19 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                         paddle2 = fhit.getPaddle();
                 }
             }
-            if (hits2 != null && hits2.size() > 0) {
-                for (DetHit hit2 : hits2) {
-                    PCALDetHit phit = new PCALDetHit(hit2);
-                    if(phit.getLayer()==1)
-                        pcalU = phit.getPaddle();
-                    if(phit.getLayer()==2)
-                        pcalV = phit.getPaddle();
-                    if(phit.getLayer()==3)
-                        pcalW = phit.getPaddle();
+            if (hits3 != null && hits3.size() > 0) {
+                for (DetectorHit hit3 : hits3) {
+                    if(hit3.getSuperlayerId()+1==1) {
+                        if(hit3.getLayerId()+1==1 && pcalU==0) 
+                            pcalU = hit3.getComponentId()+1;
+                        if(hit3.getLayerId()+1==2 && pcalV==0) 
+                            pcalV = hit3.getComponentId()+1;
+                        if(hit3.getLayerId()+1==3 && pcalW==0) 
+                            pcalW = hit3.getComponentId()+1;
+                    }
                 }
             }
+            
             //Wl1.get(0)= wire in SL1, L1;  Wl2.get(0)= wire in SL1, L2; Wl1.get(5)= wire in SL6, L1;  Wl2.get(5)= wire in SL6, L2; 
             //wireArray[0]=Wl1.get(0); wireArray[1]=Wl2.get(0); wireArray[2]=Wl3.get(0); wireArray[3]=Wl4.get(0); wireArray[4]=Wl5.get(0); wireArray[5]=Wl6.get(0); 
             for( int j =0; j<6; j++) {

@@ -2,10 +2,7 @@ package org.jlab.clas.detector;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.geom.prim.Line3D;
-import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -51,7 +48,7 @@ public class TaggerResponse extends DetectorResponse {
 
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
         String bankName, DetectorType type){        
-        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> responseList = new ArrayList<>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
