@@ -38,7 +38,7 @@ public class DCGeantFactory implements Factory<DCDetector, DCSector, DCSuperlaye
     
     private void initDetector(ConstantProvider provider){
         if(dcDetector==null){
-            dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);    
+            dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, DCGeant4Factory.ENDPLATESBOWON);    
         }
     }
     

@@ -5,8 +5,6 @@
  */
 package org.jlab.rec.dc.timetodistance;
 
-import org.jlab.rec.dc.Constants;
-
 /**
  *
  * @author ziegler

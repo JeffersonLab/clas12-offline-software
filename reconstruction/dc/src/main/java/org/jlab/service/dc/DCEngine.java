@@ -24,6 +24,7 @@ public class DCEngine extends ReconstructionEngine {
     TrajectorySurfaces tSurf;
     String clasDictionaryPath ;
     String variationName;
+    boolean endplatesBowing;
     public DCEngine(String name) {
         super(name,"ziegler","5.0");
     }
@@ -53,9 +54,11 @@ public class DCEngine extends ReconstructionEngine {
         if (wireDistortionsFlag!=null) {
             System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on yaml = "+wireDistortionsFlag);
             if(Boolean.valueOf(wireDistortionsFlag)==true) {
-                Constants.setWIREDIST(1.0);
+                //Constants.setWIREDIST(1.0);
+                endplatesBowing = DCGeant4Factory.ENDPLATESBOWON;
             } else {
-                Constants.setWIREDIST(0);
+                //Constants.setWIREDIST(0);
+                endplatesBowing = DCGeant4Factory.ENDPLATESBOWOFF;
             }
         }
         else {
@@ -63,9 +66,11 @@ public class DCEngine extends ReconstructionEngine {
             if (wireDistortionsFlag!=null) {
                 System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on env = "+wireDistortionsFlag);
                 if(Boolean.valueOf(wireDistortionsFlag)==true) {
-                    Constants.setWIREDIST(1.0);
+                    //Constants.setWIREDIST(1.0);
+                    endplatesBowing = DCGeant4Factory.ENDPLATESBOWON;
                 } else {
-                    Constants.setWIREDIST(0);
+                    //Constants.setWIREDIST(0);
+                    endplatesBowing = DCGeant4Factory.ENDPLATESBOWOFF;
                 }
             }
         }
@@ -133,7 +138,7 @@ public class DCEngine extends ReconstructionEngine {
         // Load the geometry
         String geoVariation = Optional.ofNullable(geomDBVar).orElse("default");
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, geoVariation);
-        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
+        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, endplatesBowing);
         for(int l=0; l<6; l++) {
             Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
             System.out.println("****************** WPDIST READ *********FROM "+geoVariation+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));

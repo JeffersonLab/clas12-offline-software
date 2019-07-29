@@ -557,23 +557,14 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     }
     
     private double calc_GeomCorr(DCGeant4Factory DcDetector, double y) {
-        
+        //corrects for wire sag only
         double xL = DcDetector.getWireLeftend(this.get_Sector()-1, this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x;
         double xR = DcDetector.getWireRightend(this.get_Sector()-1, this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x;
         double yL = DcDetector.getWireLeftend(this.get_Sector()-1, this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).y;
         double yR = DcDetector.getWireRightend(this.get_Sector()-1, this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).y;
-        
-        double DL = Constants.MAXENDPLTDEFLEC[this.get_Region()-1][this.get_Sector()-1][0];
-        double DR = Constants.MAXENDPLTDEFLEC[this.get_Region()-1][this.get_Sector()-1][1];
+        double x  = DcDetector.getWireMidpoint(this.get_Sector()-1, this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).x;
         
         double wire = this.get_Wire();
-        double normW = (double) wire/112.;
-        
-        xL-=Constants.getWIREDIST()*DL*(normW-3*normW*normW*normW+2*normW*normW*normW*normW);
-        xR-=Constants.getWIREDIST()*DR*(normW-3*normW*normW*normW+2*normW*normW*normW*normW);
-        
-        double x = xR -(yR-y)*((xR-xL)/(yR-yL));
-        
         double wireLen = Math.sqrt((xL-xR)*(xL-xR)+(yL-yR)*(yL-yR));
         int sector = this.get_Sector();
         int A = 0;
