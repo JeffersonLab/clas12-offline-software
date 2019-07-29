@@ -316,12 +316,12 @@ final class Wire {
     }
 
     /**
-     * Correct for endplates bowing in tilted coordinate system.
+     * Correct for endplates bowing in tilted coordinate system. (ziegler)
      */
     public void correctEnds() {
         double iwirn = (double) wire/112.0;
-        //deflection function
-        double defFunc = iwirn - 3 * iwirn*iwirn*iwirn +2 * iwirn*iwirn*iwirn*iwirn;
+        //deflection function has to be 1 at extremum (3.8465409 scales it so it is 1 at first derivative)
+        double defFunc = 3.8465409*(iwirn - 3 * iwirn*iwirn*iwirn +2 * iwirn*iwirn*iwirn*iwirn);
         //max deflection for L and R sides of wire
         double deflMaxL = dbref.endplatesbow(sector-1, ireg, 0);
         double deflMaxR = dbref.endplatesbow(sector-1, ireg, 1); 
@@ -547,7 +547,7 @@ public final class DCGeant4Factory extends Geant4Factory {
 						.rotateZ(Math.toRadians(-isec * 60))
 						.rotateY(-dbref.thtilt(isuper/2));
                         
-                        //implement end-plates bow in the tilted sector coordinate system
+                        //implement end-plates bow in the tilted sector coordinate system (ziegler)
                         wires[isec][isuper][ilayer][iwire].correctEnds();
                         //dc alignment implementation
                         wires[isec][isuper][ilayer][iwire].translate(regionMids[isec][isuper/2].times(-1.0));
