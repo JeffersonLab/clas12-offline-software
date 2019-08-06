@@ -328,50 +328,50 @@ public class TrackListFinder {
             
             
             
-            boolean keep_swimming=true;// boolean to kill the search of intersection if swimmer cannot catch the previous layer
-            int trksize = trks.get(t).getTrajectory().size();
-            StateVec ctof_inter=sv.new StateVec(trksize +1);
-            StateVec[] cnd_inter=new StateVec[cnd_geo.getSector(0).getSuperlayer(0).getNumLayers()];
-            px = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).dirx;
-            py = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).diry;
-            pz = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).dirz;
-            swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
-                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
-                        trk.get_P(), charge, 
-                        maxPathLength, accuracy, stepsize) ;
-            double[] pointAtCylRad = swimmer.SwimRho(CTOF_radius);
-            
-//            if (pointAtCylRad[6]>150||pointAtCylRad[6]==0) {
-//            	keep_swimming=false;
-//            	break;
-//            }
-            ctof_inter.sector=1; ctof_inter.layer=1;ctof_inter.DetectorType=DetectorType.CTOF.getDetectorId();
-            ctof_inter.xdet=pointAtCylRad[0]*10;ctof_inter.ydet=pointAtCylRad[1]*10;ctof_inter.zdet=pointAtCylRad[2]*10;
-            ctof_inter.dirx=pointAtCylRad[3];ctof_inter.diry=pointAtCylRad[4];ctof_inter.dirz=pointAtCylRad[5];
-            ctof_inter.pathlength=pointAtCylRad[6]*10;
-                        
-            trks.get(t).getTrajectory().add(ctof_inter);
-            
-            for(int ilayer=0; ilayer<cnd_geo.getSector(0).getSuperlayer(0).getNumLayers(); ilayer++) {
-            	trksize = trks.get(t).getTrajectory().size();
-            	if (!keep_swimming) break;
-            	cnd_inter[ilayer]= sv.new StateVec(trksize +1);
-            	Point3D center = cnd_geo.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
-            	double radius  = Math.sqrt(center.x()*center.x()+center.y()*center.y());
-            	swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
-                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
-                        trk.get_P(), charge, 
-                        maxPathLength, accuracy, stepsize) ;
-                pointAtCylRad= swimmer.SwimRho(radius);
-//            	if (pointAtCylRad[6]==0||pointAtCylRad[6]>15) {
-//            		keep_swimming=false;
-//            		break;
-//            	}
-            	cnd_inter[ilayer].layer=ilayer; cnd_inter[ilayer].sector=1;cnd_inter[ilayer].DetectorType=DetectorType.CND.getDetectorId();
-            	cnd_inter[ilayer].xdet=pointAtCylRad[0]*10;cnd_inter[ilayer].ydet=pointAtCylRad[1]*10;cnd_inter[ilayer].zdet=pointAtCylRad[2]*10;
-            	cnd_inter[ilayer].dirx=pointAtCylRad[3];cnd_inter[ilayer].diry=pointAtCylRad[4];cnd_inter[ilayer].dirz=pointAtCylRad[5];
-            	cnd_inter[ilayer].pathlength=pointAtCylRad[6]*10;
-            	trks.get(t).getTrajectory().add(cnd_inter[ilayer]);
+//            boolean keep_swimming=true;// boolean to kill the search of intersection if swimmer cannot catch the previous layer
+//            int trksize = trks.get(t).getTrajectory().size();
+//            StateVec ctof_inter=sv.new StateVec(trksize +1);
+//            StateVec[] cnd_inter=new StateVec[cnd_geo.getSector(0).getSuperlayer(0).getNumLayers()];
+//            px = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).dirx;
+//            py = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).diry;
+//            pz = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).dirz;
+//            swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
+//                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
+//                        trk.get_P(), charge, 
+//                        maxPathLength, accuracy, stepsize) ;
+//            double[] pointAtCylRad = swimmer.SwimRho(CTOF_radius);
+//            
+////            if (pointAtCylRad[6]>150||pointAtCylRad[6]==0) {
+////            	keep_swimming=false;
+////            	break;
+////            }
+//            ctof_inter.sector=1; ctof_inter.layer=1;ctof_inter.DetectorType=DetectorType.CTOF.getDetectorId();
+//            ctof_inter.xdet=pointAtCylRad[0]*10;ctof_inter.ydet=pointAtCylRad[1]*10;ctof_inter.zdet=pointAtCylRad[2]*10;
+//            ctof_inter.dirx=pointAtCylRad[3];ctof_inter.diry=pointAtCylRad[4];ctof_inter.dirz=pointAtCylRad[5];
+//            ctof_inter.pathlength=pointAtCylRad[6]*10;
+//                        
+//            trks.get(t).getTrajectory().add(ctof_inter);
+//            
+//            for(int ilayer=0; ilayer<cnd_geo.getSector(0).getSuperlayer(0).getNumLayers(); ilayer++) {
+//            	trksize = trks.get(t).getTrajectory().size();
+//            	if (!keep_swimming) break;
+//            	cnd_inter[ilayer]= sv.new StateVec(trksize +1);
+//            	Point3D center = cnd_geo.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
+//            	double radius  = Math.sqrt(center.x()*center.x()+center.y()*center.y());
+//            	swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
+//                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
+//                        trk.get_P(), charge, 
+//                        maxPathLength, accuracy, stepsize) ;
+//                pointAtCylRad= swimmer.SwimRho(radius);
+////            	if (pointAtCylRad[6]==0||pointAtCylRad[6]>15) {
+////            		keep_swimming=false;
+////            		break;
+////            	}
+//            	cnd_inter[ilayer].layer=ilayer; cnd_inter[ilayer].sector=1;cnd_inter[ilayer].DetectorType=DetectorType.CND.getDetectorId();
+//            	cnd_inter[ilayer].xdet=pointAtCylRad[0]*10;cnd_inter[ilayer].ydet=pointAtCylRad[1]*10;cnd_inter[ilayer].zdet=pointAtCylRad[2]*10;
+//            	cnd_inter[ilayer].dirx=pointAtCylRad[3];cnd_inter[ilayer].diry=pointAtCylRad[4];cnd_inter[ilayer].dirz=pointAtCylRad[5];
+//            	cnd_inter[ilayer].pathlength=pointAtCylRad[6]*10;
+//            	trks.get(t).getTrajectory().add(cnd_inter[ilayer]);
             	
             }
         }
