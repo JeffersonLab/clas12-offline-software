@@ -2,7 +2,7 @@ package org.jlab.service.ltcc.viewer;
 
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataSource;
-import org.jlab.io.hipo.HipoDataSource;
+import org.jlab.io.hipo3.Hipo3DataSource;
 
 import javax.swing.JFrame;
 import java.awt.Dimension;
@@ -13,6 +13,10 @@ import org.jlab.groot.group.DataGroup;
 import org.jlab.groot.data.H1F;
 import org.jlab.service.ltcc.LTCCCluster;
 import org.jlab.service.ltcc.LTCCHit;
+import org.jlab.detector.calib.utils.ConstantsManager;
+import java.util.Arrays;
+import java.util.List;
+import org.jlab.service.ltcc.LTCCClusterFinder;
 
 
 
@@ -24,19 +28,46 @@ public class LTCCViewer {
     
     private final LTCCHistogrammer<LTCCHit> hitHistos;
     private final LTCCHistogrammer<LTCCCluster> clusterHistos;
+    private final ConstantsManager ccdb;
+    private final Boolean DEBUG = true;
+    private final Boolean RECALC = true;
     
     LTCCViewer() {
         hitHistos = new LTCCHitHistos();
         clusterHistos = new LTCCClusterHistos();
+        ccdb = new ConstantsManager();
+        List<String> ccdb_paths = Arrays.asList("/calibration/ltcc/spe");
+        ccdb.init(ccdb_paths);
         setStyle();
     }
     
-    public void process(DataEvent event) {
+    public void process(DataEvent event, Boolean debug) {
+        if (debug) {
+            //event.show();
+        }
         if (event.hasBank("LTCC::adc")) {
-            LTCCHit.loadHits(event).forEach(hit -> process(hit));
+            if (debug) {
+                event.getBank("LTCC::adc").show();
+            }
+            if (!RECALC) {
+                LTCCHit.loadHits(event, ccdb).forEach(hit -> process(hit));
+            } else{  
+                List<LTCCHit> hits = LTCCHit.loadHits(event, ccdb);
+                hits.forEach(hit -> process(hit));
+                List<LTCCCluster> clusters = LTCCClusterFinder.findClusters(hits);
+                clusters.forEach(cluster -> process(cluster));
+                if (debug) {
+                    clusters.forEach(cluster -> cluster.print());
+                }
+            }
         }
         if (event.hasBank("LTCC::clusters")) {
-            LTCCCluster.loadClusters(event, true).forEach(cluster -> process(cluster));
+            if (!RECALC) {
+                LTCCCluster.loadClusters(event, true).forEach(cluster -> process(cluster));
+                if (debug) {
+                    event.getBank("LTCC::clusters").show();
+                }
+            }
         }
     }
 
@@ -96,19 +127,20 @@ public class LTCCViewer {
      * @param args ignored
      */
     public static void main(String[] args) {
-        String inputfile = "/Users/sly2j/Data/CLAS12/rg-a/filtered/ltcc_3432.hipo";
+        String inputfile = "/Users/sjoosten/Data/CLAS12/006715/monitorclas_006715.evio.00041.hipo";
 
-        DataSource reader = new HipoDataSource();
+        DataSource reader = new Hipo3DataSource();
         reader.open(inputfile);
-       
+        
         LTCCViewer viewer = new LTCCViewer();
         
-        // dump the first 10 events
-        for (int i = 0; i < 1; ++i) {
-            reader.getNextEvent().getBank("LTCC::adc").show();
+        // run first 20 events in optional debug mode
+        for (int i = 0; i < 20; ++i) {
+            viewer.process(reader.getNextEvent(), viewer.DEBUG);
         }
+        // the rest in normal mode
         while (reader.hasEvent()) {
-            viewer.process(reader.getNextEvent());
+            viewer.process(reader.getNextEvent(), false);
         }
         
         viewer.show();

@@ -142,43 +142,44 @@ public class TrajectoryFinder {
             stateVecs.add(stVec);
                 
         }
-//        // CTOF
-//        if(ctof_geo!=null) {
-//            double radius = ctof_geo.getRadius(1);
-//            int charge = trk.get_Q();
-//            double maxPathLength = 5.0;//very loose cut 
-//            swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
-//                    Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
-//                    trk.get_P(), charge, 
-//                    maxPathLength) ;
-//            double[] inters = swimmer.SwimToCylinder(radius);
-//            StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
-//            stVec.set_SurfaceDetector(DetectorType.CTOF.getDetectorId());
-//            stVec.set_SurfaceSector(1);
-//            stVec.set_SurfaceLayer(1); 
-//            stVec.set_ID(id);
-//            stVec.set_TrkPhiAtSurface(Math.atan2(inters[4], inters[3]));
-//            stVec.set_TrkThetaAtSurface(Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5])));
-//            stVec.set_TrkToModuleAngle(0);
-//            stVec.set_Path(inters[6]*10);
-//            stateVecs.add(stVec);
-//        }
-//        // CND
-//        for(int ilayer=0; ilayer<cnd_geo.getSector(0).getSuperlayer(0).getNumLayers(); ilayer++) {
-//            Point3D center = cnd_geo.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
-//            double radius         = Math.sqrt(center.x()*center.x()+center.y()*center.y());
-//            double[] inters = swimmer.SwimToCylinder(radius);
-//            StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
-//            stVec.set_SurfaceDetector(DetectorType.CND.getDetectorId());
-//            stVec.set_SurfaceSector(1);
-//            stVec.set_SurfaceLayer(ilayer+1); 
-//            stVec.set_ID(id);
-//            stVec.set_TrkPhiAtSurface(Math.atan2(inters[4], inters[3]));
-//            stVec.set_TrkThetaAtSurface(Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5])));
-//            stVec.set_TrkToModuleAngle(0);
-//            stVec.set_Path(inters[6]*10);
-//            stateVecs.add(stVec);
-//        }
+        if(ctof_geo!=null) {
+            double radius = ctof_geo.getRadius(1);
+            int charge = trk.get_Q();
+            double maxPathLength = 3.0;//very loose cut 
+            double accuracy = 0.1; // accuracy of stopper in cm
+            double stepsize = 0.1; // initial step size
+            swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
+                    Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
+                    trk.get_P(), charge, 
+                    maxPathLength, accuracy, stepsize) ;
+            double[] inters = swimmer.SwimRho(radius);
+            StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
+            stVec.set_SurfaceDetector(DetectorType.CTOF.getDetectorId());
+            stVec.set_SurfaceSector(1);
+            stVec.set_SurfaceLayer(1); 
+            stVec.set_ID(id);
+            stVec.set_TrkPhiAtSurface(Math.atan2(inters[4], inters[3]));
+            stVec.set_TrkThetaAtSurface(Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5])));
+            stVec.set_TrkToModuleAngle(0);
+            stVec.set_Path(inters[6]*10);
+            stateVecs.add(stVec);
+        }
+        // CND
+        for(int ilayer=0; ilayer<cnd_geo.getSector(0).getSuperlayer(0).getNumLayers(); ilayer++) {
+            Point3D center = cnd_geo.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
+            double radius         = Math.sqrt(center.x()*center.x()+center.y()*center.y());
+            double[] inters = swimmer.SwimRho(radius);
+            StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
+            stVec.set_SurfaceDetector(DetectorType.CND.getDetectorId());
+            stVec.set_SurfaceSector(1);
+            stVec.set_SurfaceLayer(ilayer+1); 
+            stVec.set_ID(id);
+            stVec.set_TrkPhiAtSurface(Math.atan2(inters[4], inters[3]));
+            stVec.set_TrkThetaAtSurface(Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5])));
+            stVec.set_TrkToModuleAngle(0);
+            stVec.set_Path(inters[6]*10);
+            stateVecs.add(stVec);
+        }
                
             
         traj.set_Trajectory(stateVecs);
