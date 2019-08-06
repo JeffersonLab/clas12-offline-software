@@ -551,18 +551,11 @@ public class RecoBankWriter {
                     bank.setShort("detector", k, (byte) stVec.DetectorType);
                     bank.setByte("sector",    k, (byte) stVec.sector);
                     bank.setByte("layer",     k, (byte) stVec.layer);
-                    if (stVec.DetectorType==DetectorType.BST.getDetectorId()||stVec.DetectorType==DetectorType.BMT.getDetectorId()) {
-                    	bank.setFloat("x",        k, (float) (stVec.xdet/10.));
-                    	bank.setFloat("y",        k, (float) (stVec.ydet/10.));
-                    	bank.setFloat("z",        k, (float) (stVec.zdet/10. + zShift));
-                    	 bank.setFloat("path",     k, (float) (stVec.pathlength/10.));
-                    }
-                    else {
-                    	bank.setFloat("x",        k, (float) stVec.xdet);
-                    	bank.setFloat("y",        k, (float) stVec.ydet);
-                    	bank.setFloat("z",        k, (float) (stVec.zdet + zShift));
-                    	bank.setFloat("path",     k, (float) stVec.pathlength);
-                    }
+                    bank.setFloat("x",        k, (float) (stVec.xdet/10.));
+                    bank.setFloat("y",        k, (float) (stVec.ydet/10.));
+                    bank.setFloat("z",        k, (float) (stVec.zdet/10. + zShift));
+                    bank.setFloat("path",     k, (float) (stVec.pathlength/10.));
+                    
                     /*bank.setFloat("phi",      k, (float) stVec.get_TrkPhiAtSurface());
                     bank.setFloat("theta",    k, (float) stVec.get_TrkThetaAtSurface());
                     bank.setFloat("langle",   k, (float) stVec.get_TrkToModuleAngle());
