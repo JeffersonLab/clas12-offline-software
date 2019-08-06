@@ -372,8 +372,8 @@ public class TrackListFinder {
 //            	cnd_inter[ilayer].dirx=pointAtCylRad[3];cnd_inter[ilayer].diry=pointAtCylRad[4];cnd_inter[ilayer].dirz=pointAtCylRad[5];
 //            	cnd_inter[ilayer].pathlength=pointAtCylRad[6]*10;
 //            	trks.get(t).getTrajectory().add(cnd_inter[ilayer]);
-            	
-            }
+//            	
+//            }
         }
 
     }
