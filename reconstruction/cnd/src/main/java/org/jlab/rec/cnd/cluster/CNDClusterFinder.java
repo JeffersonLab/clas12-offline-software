@@ -54,7 +54,7 @@ public class CNDClusterFinder {
         int[] subA = new int[1];
         int[] subB = new int[1];
         
-        ArrayList<Integer> clusters_veto;
+        //ArrayList<Integer> clusters_veto;
         ArrayList<Integer> clusters_layermultip;
         ArrayList<Integer> clusters_layer1;
         ArrayList<Integer> clusters_layer2;
@@ -79,7 +79,7 @@ public class CNDClusterFinder {
         
         
         //veto
-        clusters_veto = new ArrayList<Integer>();
+        //clusters_veto = new ArrayList<Integer>();
         //implement layer multiplicity
         clusters_layermultip = new ArrayList<Integer>();
         clusters_layer1 = new ArrayList<Integer>();
@@ -110,7 +110,7 @@ public class CNDClusterFinder {
             clusters_component.add(hits.get(i).Component());
             clusters_status.add(0);
             clusters_layermultip.add(1);
-            clusters_veto.add(-99);
+            //clusters_veto.add(-99);
             
             
             if(hits.get(i).Layer()==1){
@@ -160,12 +160,14 @@ public class CNDClusterFinder {
                 }
                 
                 
-                if(clusters_layer.get(0) == clusters_layer.get(1)){
+                clusters_layermultip.set(0, clusters_layer1.get(0)+clusters_layer2.get(0)+clusters_layer3.get(0));
+                
+                /*if(clusters_layer.get(0) == clusters_layer.get(1)){
                     clusters_layermultip.set(0, clusters_layermultip.get(1) );
                 }
                 else{
                     clusters_layermultip.set(0, clusters_layermultip.get(0) + clusters_layermultip.get(1) );
-                }
+                }*/
                 
                 if(clusters_energysum.get(0)<clusters_energysum.get(1)){
                     clusters_sector.set(0, clusters_sector.get(1) );
@@ -187,7 +189,7 @@ public class CNDClusterFinder {
                 if(clusters_status.get(1) !=0)clusters_status.set(0, clusters_status.get(1));
                 
                 
-                clusters_veto.set(0,cluster_veto(clusters_energysum.get(0),clusters_nhits.get(0),clusters_layermultip.get(0)));
+                //clusters_veto.set(0,cluster_veto(clusters_energysum.get(0),clusters_nhits.get(0),clusters_layermultip.get(0)));
                 
                 
                 clusters_nhits.remove(1);
@@ -205,7 +207,7 @@ public class CNDClusterFinder {
                 clusters_layer3.remove(1);
                 clusters_component.remove(1);
                 clusters_status.remove(1);
-                clusters_veto.remove(1);
+                //clusters_veto.remove(1);
             }
         }
         //// more than two cnd hits
@@ -237,19 +239,7 @@ public class CNDClusterFinder {
                     clusters_yTimesEdep.set(subA[0], clusters_yTimesEdep.get(subA[0]) + clusters_yTimesEdep.get(subB[0]) );
                     clusters_zTimesEdep.set(subA[0], clusters_zTimesEdep.get(subA[0]) + clusters_zTimesEdep.get(subB[0]) );
                     clusters_timeTimesEdep.set(subA[0], clusters_timeTimesEdep.get(subA[0]) + clusters_timeTimesEdep.get(subB[0]) );
-                    
-                    /* if(clusters_layer.get(subA[0]) == 1 || clusters_layer.get(subB[0]) ==1){
-                     layer1 =1;
-                     }
-                     if(clusters_layer.get(subA[0]) == 2 || clusters_layer.get(subB[0]) ==2){
-                     layer2 =1;
-                     }
-                     if(clusters_layer.get(subA[0]) == 3 || clusters_layer.get(subB[0]) ==3){
-                     layer3 =1;
-                     }
-                     
-                     clusters_layermultip.set(subA[0], layer1+layer2+layer3 );*/
-                    
+
                     
                     if(clusters_layer1.get(subA[0]) ==1 || clusters_layer1.get(subB[0])==1){
                         clusters_layer1.set(subA[0], 1);
@@ -262,7 +252,11 @@ public class CNDClusterFinder {
                     }
                     
                     
-                    if(clusters_layer.get(subA[0]) != clusters_layer.get(subB[0])){
+                    
+                    clusters_layermultip.set(subA[0], clusters_layer1.get(subA[0])+clusters_layer2.get(subA[0])+clusters_layer3.get(subA[0]));
+                    
+                    
+                 /*   if(clusters_layer.get(subA[0]) != clusters_layer.get(subB[0])){
                         
                         if(clusters_layermultip.get(subA[0])==1)
                         {
@@ -287,7 +281,7 @@ public class CNDClusterFinder {
                     }
                     else{
                         continue;
-                    }
+                    }*/
                     
                     
                     
@@ -306,7 +300,7 @@ public class CNDClusterFinder {
                     clusters_nhits.remove(subB[0]);
                     clusters_energysum.set(subA[0], clusters_energysum.get(subA[0])+clusters_energysum.get(subB[0]));
                     
-                    clusters_veto.set(subA[0],cluster_veto(clusters_energysum.get(subA[0]),clusters_nhits.get(subA[0]),clusters_layermultip.get(subA[0])));
+                    //clusters_veto.set(subA[0],cluster_veto(clusters_energysum.get(subA[0]),clusters_nhits.get(subA[0]),clusters_layermultip.get(subA[0])));
                     
                     
                     clusters_energysum.remove(subB[0]);
@@ -329,7 +323,7 @@ public class CNDClusterFinder {
                     //*********
                     clusters_component.remove(subB[0]);
                     clusters_status.remove(subB[0]);
-                    clusters_veto.remove(subB[0]);
+                    //clusters_veto.remove(subB[0]);
                 }
             }
             
@@ -356,7 +350,7 @@ public class CNDClusterFinder {
             acluster.set_status(clusters_status.get(i));
             //add veto
             acluster.set_layermultip(clusters_layermultip.get(i));
-            acluster.set_veto(clusters_veto.get(i));
+            acluster.set_veto(cluster_veto(clusters_energysum.get(i),clusters_nhits.get(i),clusters_layermultip.get(i)));
             acluster.set_layer1(clusters_layer1.get(i));
             acluster.set_layer2(clusters_layer2.get(i));
             acluster.set_layer3(clusters_layer3.get(i));
