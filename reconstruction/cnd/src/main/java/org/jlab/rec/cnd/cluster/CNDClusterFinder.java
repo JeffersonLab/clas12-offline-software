@@ -30,7 +30,7 @@ public class CNDClusterFinder {
     public ArrayList<CNDCluster> findClusters(ArrayList<CndHit> hits) {
         ArrayList<CNDCluster> clusters = new ArrayList<CNDCluster>();
         
-        //ArrayList<Hit> ctofhits = new ArrayList<Hit>();
+      
         
         /// variables for clustering of hits
         int size = 0;
@@ -162,12 +162,7 @@ public class CNDClusterFinder {
                 
                 clusters_layermultip.set(0, clusters_layer1.get(0)+clusters_layer2.get(0)+clusters_layer3.get(0));
                 
-                /*if(clusters_layer.get(0) == clusters_layer.get(1)){
-                    clusters_layermultip.set(0, clusters_layermultip.get(1) );
-                }
-                else{
-                    clusters_layermultip.set(0, clusters_layermultip.get(0) + clusters_layermultip.get(1) );
-                }*/
+
                 
                 if(clusters_energysum.get(0)<clusters_energysum.get(1)){
                     clusters_sector.set(0, clusters_sector.get(1) );
@@ -221,9 +216,7 @@ public class CNDClusterFinder {
                 find_closest(0, clusters_x, clusters_y, clusters_z, clusters_time, subA, subB, closest_distance);
                 if(subA[0]==-1 || subB[0]==-1)break;
                 else{
-                    /*int layer1 =0;
-                     int layer2 =0;
-                     int layer3 =0;*/
+
                     
                     int clusters_number_now = clusters_x.size();
                     
@@ -255,37 +248,7 @@ public class CNDClusterFinder {
                     
                     clusters_layermultip.set(subA[0], clusters_layer1.get(subA[0])+clusters_layer2.get(subA[0])+clusters_layer3.get(subA[0]));
                     
-                    
-                 /*   if(clusters_layer.get(subA[0]) != clusters_layer.get(subB[0])){
-                        
-                        if(clusters_layermultip.get(subA[0])==1)
-                        {
-                            clusters_layermultip.set(subA[0], clusters_layermultip.get(subA[0]) + clusters_layermultip.get(subB[0]) );
-                        }
-                        
-                        else if(clusters_layermultip.get(subA[0])==2){
-                            
-                            if((clusters_layer1.get(subA[0])==1 && clusters_layer.get(subB[0])==1) || (clusters_layer2.get(subA[0])==1 && clusters_layer.get(subB[0])==2) || (clusters_layer3.get(subA[0])==1 && clusters_layer.get(subB[0])==3)){
-                                continue;
-                            }
-                            else{
-                                clusters_layermultip.set(subA[0], clusters_layermultip.get(subA[0]) + clusters_layermultip.get(subB[0]) );
-                            }
-                            
-                        }
-                        
-                        else{
-                            continue;
-                        }
-                        
-                    }
-                    else{
-                        continue;
-                    }*/
-                    
-                    
-                    
-                    
+
                     
                     
                     //// mark down the sector, layer, component of the dominant hit
