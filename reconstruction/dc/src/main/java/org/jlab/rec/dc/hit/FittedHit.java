@@ -353,7 +353,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
            
             //local angle correction
             double theta0 = Math.acos(1-0.02*B);
-            double alpha = Math.acos(cosTrkAngle);
+            double alpha = Math.atan2(cosTrkAngle, 1.0);
             // correct alpha with theta0, the angle corresponding to the isochrone lines twist due to the electric field
             if(event.hasBank("MC::Particle")==false)
                 alpha-=Swimmer.getTorScale()*theta0;
