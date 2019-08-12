@@ -228,12 +228,12 @@ public class MeasVecs {
             _wireMaxSag = wiremaxsag;
             _wireLine = wireLine;
             
-            //int s = (int)(superlayer) % 2;
-            //int tilt = 1;
-            //if (s == 0) {
-            //    tilt = -1;
-            //}
-            
+             //int s = (int)(superlayer) % 2;
+             //int tilt = 1;
+             //if (s == 0) {
+             //    tilt = -1;
+             //}
+             //use stereo angle in fit based on wire direction
             _tilt = 90-Math.toDegrees(wireLine.direction().asUnit().angle(new Vector3D(1,0,0)));
         }
 
