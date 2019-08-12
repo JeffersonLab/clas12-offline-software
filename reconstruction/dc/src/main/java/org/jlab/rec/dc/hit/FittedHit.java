@@ -8,7 +8,6 @@ import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.utils.groups.IndexedTable;
 /**
@@ -344,21 +343,23 @@ public class FittedHit extends Hit implements Comparable<Hit> {
     /**
      * sets the calculated distance (in cm) from the time (in ns)
      */
-    public void set_TimeToDistance(DataEvent event, double cosTrkAngle, double B, IndexedTable tab,TimeToDistanceEstimator tde) {     
+    public void set_TimeToDistance(DataEvent event, double trkAngle, double B, IndexedTable tab,TimeToDistanceEstimator tde) {     
         
         double distance = 0;
         int slIdx = this.get_Superlayer() - 1;
         int secIdx = this.get_Sector() - 1;
         if (_TrkgStatus != -1 && this.get_Time() > 0) {
-           
+            
             //local angle correction
             double theta0 = Math.acos(1-0.02*B);
-            double alpha = Math.atan2(cosTrkAngle, 1.0);
+            double alpha = Math.atan(trkAngle);
+            
             // correct alpha with theta0, the angle corresponding to the isochrone lines twist due to the electric field
             if(event.hasBank("MC::Particle")==false)
                 alpha-=Swimmer.getTorScale()*theta0;
-            //reduce the corrected angle
+            
             this.setAlpha(Math.toDegrees(alpha));
+            //reduce the corrected angle 
             double ralpha = this.reducedAngle(alpha);
             double beta = this.get_Beta0to1(); 
             double x = this.get_ClusFitDoca();
@@ -502,9 +503,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * A method to update the hit position information after the fit to the wire
      * positions employing hit-based tracking algorithms has been performed.
      */
-    public void updateHitPositionWithTime(DataEvent event, double cosTrkAngle, double B, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
+    public void updateHitPositionWithTime(DataEvent event, double trkAngle, double B, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         if (this.get_Time() > 0) {
-            this.set_TimeToDistance(event, cosTrkAngle, B, tab, tde);
+            this.set_TimeToDistance(event, trkAngle, B, tab, tde);
         }
    
         double z = DcDetector.getWireMidpoint(this.get_Sector() - 1, this.get_Superlayer() - 1, this.get_Layer() - 1, this.get_Wire() - 1).z;        
@@ -512,8 +513,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         double x = this.calc_GeomCorr(DcDetector, 0);
         //this.set_X(x+this.get_LeftRightAmb()*this.get_TimeToDistance());
         double MPCorr = 1;
-        if (cosTrkAngle > 0.8 & cosTrkAngle <= 1) {
-            MPCorr = cosTrkAngle;
+        double cosTkAng = 1./Math.sqrt(trkAngle*trkAngle + 1.);
+        if (cosTkAng > 0.8 & cosTkAng <= 1) {
+            MPCorr = cosTkAng;
         }
 
         this.set_X(x + this.get_LeftRightAmb() * (this.get_TimeToDistance() / MPCorr) / FastMath.cos(Math.toRadians(6.)));

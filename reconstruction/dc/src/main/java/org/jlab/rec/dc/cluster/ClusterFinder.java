@@ -407,27 +407,24 @@ public class ClusterFinder {
             cf.SetFitArray(clus, "TSC");
             cf.Fit(clus, true);
 
-            double cosTrkAngle = 1. / Math.sqrt(1. + clus.get_clusterLineFitSlope() * clus.get_clusterLineFitSlope());
-
             // update the hits
             for (FittedHit fhit : clus) {
-                fhit.updateHitPositionWithTime(event, cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
+                fhit.updateHitPositionWithTime(event, clus.get_clusterLineFitSlope(), fhit.getB(), tab, DcDetector, tde);
             }
             // iterate till convergence of trkAngle
             double Chi2Diff = 1;
             double prevChi2 = 999999999;
-            double cosTrkAngleFinal = 0;
+            double trkAngleFinal = 0;
             while (Chi2Diff > 0) {
                 cf.SetFitArray(clus, "TSC");
                 cf.Fit(clus, true);
                 Chi2Diff = prevChi2 - clus.get_Chisq();
                 if (Chi2Diff > 0) {
-                    cosTrkAngle = 1. / Math.sqrt(1. + clus.get_clusterLineFitSlope() * clus.get_clusterLineFitSlope());
                     // update the hits
                     for (FittedHit fhit : clus) {
-                        fhit.updateHitPositionWithTime(event, cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
+                        fhit.updateHitPositionWithTime(event, clus.get_clusterLineFitSlope(), fhit.getB(), tab, DcDetector, tde);
                     }
-                    cosTrkAngleFinal = cosTrkAngle;
+                    trkAngleFinal = clus.get_clusterLineFitSlope();
                 }
                 prevChi2 = clus.get_Chisq();
             }
@@ -436,7 +433,7 @@ public class ClusterFinder {
             cf.SetResidualDerivedParams(clus, false, false, DcDetector); //calcTimeResidual=false, resetLRAmbig=false 
 
             for (FittedHit fhit : clus) {
-                fhit.updateHitPositionWithTime(event, cosTrkAngleFinal, fhit.getB(), tab, DcDetector, tde);
+                fhit.updateHitPositionWithTime(event, trkAngleFinal, fhit.getB(), tab, DcDetector, tde);
             }
             cf.SetFitArray(clus, "TSC");
             cf.Fit(clus, true);
