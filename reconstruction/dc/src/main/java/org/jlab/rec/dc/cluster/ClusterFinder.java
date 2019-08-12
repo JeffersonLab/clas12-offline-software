@@ -385,6 +385,11 @@ public class ClusterFinder {
                         newhit.set_TrkgStatus(hit.get_TrkgStatus());
                         newhit.set_LeftRightAmb(-hit.get_LeftRightAmb());
                         newhit.calc_CellSize(DcDetector);
+                        newhit.set_XWire(hit.get_XWire());
+                        newhit.set_Z(hit.get_Z());
+                        newhit.set_WireLength(hit.get_WireLength());
+                        newhit.set_WireMaxSag(hit.get_WireMaxSag());
+                        newhit.set_WireLine(hit.get_WireLine());
                         newhit.updateHitPositionWithTime(event, 1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer						
                         newhit.set_AssociatedClusterID(hit.get_AssociatedClusterID());
                         newhit.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());

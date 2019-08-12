@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.track.Track;
 
@@ -20,10 +22,10 @@ public class MeasVecs {
      * @return a double array corresponding to the 2 entries of the projector
      * matrix
      */
-    public double[] H(double y, int s, double w, double l) {
+    public double[] H(double y, double s, double w, double l) {
         double[] hMatrix = new double[2];
         hMatrix[0] = 1;
-        hMatrix[1] = -Math.tan((Math.toRadians(s * 6.)));
+        hMatrix[1] = -Math.tan((Math.toRadians(s)));
         // add geometric corrections
         //hMatrix[1]-= w*(4./l)*(1 - y/(l/2.));        
         return hMatrix;
@@ -37,9 +39,9 @@ public class MeasVecs {
      * @param s the superlayer (0..1)
      * @return projected measurement
      */
-    public double h(double[] stateV, int s, double w, double l) {
+    public double h(double[] stateV, double s, double w, double l) {
 
-        double val = stateV[0] - Math.tan((Math.toRadians(s * 6.))) * stateV[1]; 
+        double val = stateV[0] - Math.tan((Math.toRadians(s))) * stateV[1]; 
         // add geometric corrections
         val+= w;       
         return val;
@@ -72,7 +74,11 @@ public class MeasVecs {
                     //    continue;
                     //}
                     
-                    HitOnTrack hot = new HitOnTrack(slayr, X, Z, trkcand.get(c).get(s).get(h).get_WireLength(), trkcand.get(c).get(s).get(h).get_WireMaxSag());
+                    HitOnTrack hot = new HitOnTrack(slayr, X, Z, 
+                            trkcand.get(c).get(s).get(h).get_WireLength(), 
+                            trkcand.get(c).get(s).get(h).get_WireMaxSag(),
+                            trkcand.get(c).get(s).get(h).get_WireLine()
+                    );
                     double err_sl1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitSlopeErr();
 
                     double err_it1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitInterceptErr();
@@ -114,6 +120,7 @@ public class MeasVecs {
             meas.tilt = hOTS.get(i)._tilt;
             meas.wireLen = hOTS.get(i)._wireLen;
             meas.wireMaxSag = hOTS.get(i)._wireMaxSag;
+            meas.wireLine = hOTS.get(i)._wireLine;
             this.measurements.add(i, meas);
         }
     }
@@ -133,15 +140,11 @@ public class MeasVecs {
                 double Z = hitOnTrk.get_Z();
                 double X = sl1 * Z + it1;
 
-                //exclude hits that have poor segment
-                //if ((trkcand.get(c).get(s).get(h).get_X() - X) / (trkcand.get(c).get(s).get(h).get_CellSize() / FastMath.cos(Math.toRadians(6.))) > 1.5) {
-                //if(Math.abs(trk.get_ListOfHBSegments().get(s).get(h).get_Residual())>1) {   
-                //    continue;
-                //}
-
-                HitOnTrack hot = new HitOnTrack(slayr, X, Z, hitOnTrk.get_WireLength(), hitOnTrk.get_WireMaxSag());
+                HitOnTrack hot = new HitOnTrack(slayr, X, Z, 
+                        hitOnTrk.get_WireLength(), 
+                        hitOnTrk.get_WireMaxSag(),
+                        hitOnTrk.get_WireLine());
                 double err_sl1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitSlopeErr();
-
                 double err_it1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitInterceptErr();
                 double err_cov1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitSlIntCov();
 
@@ -179,6 +182,7 @@ public class MeasVecs {
             meas.tilt = hOTS.get(i)._tilt;
             meas.wireLen = hOTS.get(i)._wireLen;
             meas.wireMaxSag = hOTS.get(i)._wireMaxSag;
+            meas.wireLine = hOTS.get(i)._wireLine;
             this.measurements.add(i, meas);
             //System.out.println(" measurement "+i+" = "+meas.x+" at "+meas.z);
         }
@@ -190,12 +194,14 @@ public class MeasVecs {
         public double z;
         public double x;
         public double unc;
-        public int tilt;
+        public double tilt;
         public double error;
         public double wireLen;
         public double wireMaxSag;
+        public Line3D wireLine;
         boolean reject = false;
         int region;
+        
         
         MeasVec(int k) {
             this.k = k;
@@ -209,23 +215,26 @@ public class MeasVecs {
         private double _X;
         private double _Z;
         private double _Unc;
-        private int _tilt;
+        private double _tilt;
         private double _wireLen;
         private double _wireMaxSag;
+        private Line3D _wireLine;
         private int region;
 
-        HitOnTrack(int superlayer, double X, double Z, double wirelen, double wiremaxsag) {
+        HitOnTrack(int superlayer, double X, double Z, double wirelen, double wiremaxsag, Line3D wireLine) {
             _X = X;
             _Z = Z;
             _wireLen = wirelen;
             _wireMaxSag = wiremaxsag;
+            _wireLine = wireLine;
             
-            int s = (int) (superlayer) % 2;
-            int tilt = 1;
-            if (s == 0) {
-                tilt = -1;
-            }
-            _tilt = tilt;
+            //int s = (int)(superlayer) % 2;
+            //int tilt = 1;
+            //if (s == 0) {
+            //    tilt = -1;
+            //}
+            
+            _tilt = 90-Math.toDegrees(wireLine.direction().asUnit().angle(new Vector3D(1,0,0)));
         }
 
         @Override

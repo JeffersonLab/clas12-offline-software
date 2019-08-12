@@ -134,6 +134,7 @@ public class RoadFinder  {
                                 0, -1); 
                 //estimate the error on the hit as the cellSize/sqrt(12)
                 pseudoHit.calc_CellSize(DcDetector);
+                pseudoHit.calc_GeomCorr(DcDetector, 0);
                 pseudoHit.set_DocaErr(pseudoHit.get_CellSize()/Math.sqrt(12.));
                 //update the hit position estimate and add to the pseudo-cluster
                 pseudoHit.updateHitPosition(DcDetector);
@@ -174,6 +175,7 @@ public class RoadFinder  {
                             0, -1); 
             pseudoHit.set_DocaErr(pseudoHit.get_CellSize()/Math.sqrt(12.)/FastMath.cos(Math.toRadians(6.)));
             pseudoHit.updateHitPosition(DcDetector);
+            pseudoHit.calc_GeomCorr(DcDetector, 0);
             fpseudoCluster.add(pseudoHit);
     }
      cf.SetFitArray(fpseudoCluster, "TSC");
