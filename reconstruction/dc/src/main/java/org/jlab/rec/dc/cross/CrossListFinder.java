@@ -197,18 +197,18 @@ public class CrossListFinder  {
 
     private void recalcParsSegment(DataEvent event, Segment _Segment1, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         //refit
-        double cosTrkAngle = 1. / Math.sqrt(1. + _Segment1.get_fittedCluster().get_clusterLineFitSlope() * _Segment1.get_fittedCluster().get_clusterLineFitSlope());
+        double trkAngle = _Segment1.get_fittedCluster().get_clusterLineFitSlope();
         // update the hits
         for (FittedHit fhit : _Segment1.get_fittedCluster()) { 
-            fhit.updateHitPositionWithTime(event, cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
+            fhit.updateHitPositionWithTime(event, trkAngle, fhit.getB(), tab, DcDetector, tde);
         }
 
          cf.SetFitArray(_Segment1.get_fittedCluster(), "TSC");
          cf.Fit(_Segment1.get_fittedCluster(), true);
-         cosTrkAngle = 1. / Math.sqrt(1. + _Segment1.get_fittedCluster().get_clusterLineFitSlope() * _Segment1.get_fittedCluster().get_clusterLineFitSlope());
+         trkAngle = _Segment1.get_fittedCluster().get_clusterLineFitSlope();
 
          for (FittedHit fhit : _Segment1.get_fittedCluster()) {
-            fhit.updateHitPositionWithTime(event, cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
+            fhit.updateHitPositionWithTime(event, trkAngle, fhit.getB(), tab, DcDetector, tde);
         }
         cf.SetFitArray(_Segment1.get_fittedCluster(), "TSC");
         cf.Fit(_Segment1.get_fittedCluster(), true);

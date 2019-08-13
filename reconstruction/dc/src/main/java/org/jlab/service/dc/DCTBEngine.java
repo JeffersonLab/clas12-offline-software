@@ -101,17 +101,9 @@ public class DCTBEngine extends DCEngine {
             super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
             super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
             Constants.getT0(), Constants.getT0Err(), dcDetector, tde);
-        hitRead.read_TBHits(event, 
-            super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-            super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde, Constants.getT0(), Constants.getT0Err());
         List<FittedHit> hits = new ArrayList<FittedHit>();
         //I) get the hits
-        if(hitRead.get_TBHits().isEmpty()) {
-            hits = hitRead.get_HBHits();
-
-        } else {
-            hits = hitRead.get_TBHits();
-        }
+        hits = hitRead.get_HBHits();
 
         //II) process the hits
         //1) exit if hit list is empty
