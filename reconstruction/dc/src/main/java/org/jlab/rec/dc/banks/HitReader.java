@@ -320,7 +320,7 @@ public class HitReader {
             hit.setTProp(tProp[i]);
             //hit.setTFlight(tFlight[i]);
             hit.set_Beta(this.readBeta(event, trkID[i]));
-            this.set_BetaFlag(hit, hit.get_Beta());//reset beta for out of range assuming the pion hypothesis and setting a flag
+            this.set_BetaFlag(event, trkID[i], hit, hit.get_Beta());//reset beta for out of range assuming the pion hypothesis and setting a flag
             hit.setTFlight(tFlight[i]/hit.get_Beta0to1());
             //resetting TFlight after beta has been obtained
             //hit.setSignalTimeOfFlight(); 
@@ -356,9 +356,9 @@ public class HitReader {
         this.set_HBHits(hits);
     }
     //betaFlag:0 = OK; -1 = negative; 1 = less than lower cut (0.15); 2 = greater than 1.15 (from HBEB beta vs p plots for data)
-    private void set_BetaFlag(FittedHit hit, double beta) {
+    private void set_BetaFlag(DataEvent event, int trkId, FittedHit hit, double beta) {
         if(beta<0.15) {
-            this.set_ToPionHypothesis(hit);
+            this.set_ToPionHypothesis(event, trkId, hit);
             if(beta<0) {
                 hit.betaFlag = -1;
             } else {
@@ -369,10 +369,12 @@ public class HitReader {
             hit.betaFlag = 2;
         }
     }
-    private void set_ToPionHypothesis(FittedHit hit) {
+    private void set_ToPionHypothesis(DataEvent event, int trkId, FittedHit hit) {
         double piMass = 0.13957018;
         
-        double px, py, pz;
+        double px=0;
+        double py=0;
+        double pz=0;
         if (!event.hasBank("RECHB::Particle") || !event.hasBank("RECHB::Track"))
             return ;
         DataBank bank = event.getBank("RECHB::Track");
