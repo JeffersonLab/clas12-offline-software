@@ -8,9 +8,7 @@ package org.jlab.rec.rtpc.hit;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.JFrame;
 
@@ -19,30 +17,36 @@ import org.jlab.groot.graphics.EmbeddedCanvas;
 
 public class TrackFinder3 {
 
+        
+        private TrackUtils tutil = new TrackUtils();
+        private TrackMap TIDMap = new TrackMap();
+        private List<Integer> TIDList;
+        private Track track;
+        private HashMap<Integer, double[]> ADCMap;// = params.get_R_adc();
+        private List<Integer> PadNum;// = params.get_PadNum();
+        private int TrigWindSize;// = params.get_TrigWindSize();
+        private int StepSize = 120;
+        private double adcthresh = 5e-4; 
+        private int padloopsize;// = PadNum.size();
+        private boolean padSorted = false; 
+        private List<Integer> padTIDlist = new ArrayList<Integer>();
+        private List<Integer> padlist; 
+        private int pad = 0;
+        private double adc = 0; 
+        private int timeadjlimit = 4; 
+        private int parenttid = -1;
+        private String method = "phiz";
+        private int minhitcount = 5; 
+    
 	public TrackFinder3(HitParameters params, boolean draw) {
 		/*	
 		 *Initializations 
 		 */
-		TrackUtils tutil = new TrackUtils();
-		TrackMap TIDMap = new TrackMap();
-		List<Integer> TIDList;
-		Track track;
-		HashMap<Integer, double[]> ADCMap = params.get_R_adc();
-		Vector<Integer> PadNum = params.get_PadNum();
-		int TrigWindSize = params.get_TrigWindSize();
-		int StepSize = 120;
-		double adcthresh = 5e-4; 
-		int padloopsize = PadNum.size();
-		boolean padSorted = false; 
-		List<Integer> padTIDlist = new ArrayList<Integer>();
-		List<Integer> padlist; 
-		int pad = 0;
-		double adc = 0; 
-		int timeadjlimit = 4; 
-		int parenttid = -1;
-		String method = "phiz";
-		int minhitcount = 5; 
 		
+                ADCMap = params.get_R_adc();
+		PadNum = params.get_PadNum();
+                TrigWindSize = params.get_TrigWindSize();
+                padloopsize = PadNum.size();
 		/*
 		 * Main Algorithm
 		 */

@@ -1,7 +1,6 @@
 package org.jlab.rec.rtpc.banks;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Vector;
 
 import org.jlab.clas.physics.Vector3;
 
@@ -13,6 +12,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.rec.rtpc.hit.HitParameters;
 import org.jlab.rec.rtpc.hit.HitVector;
 import org.jlab.rec.rtpc.hit.RecoHitVector;
+import java.util.List;
 import java.util.HashMap;
 
 public class RecoBankWriter2 {
@@ -30,7 +30,7 @@ public class RecoBankWriter2 {
 			return null;*/
 		int listsize = 0;
 		int row = 0;
-		HashMap<Integer, Vector<RecoHitVector>> recohitvector = params.get_recohitvector();
+		HashMap<Integer, List<RecoHitVector>> recohitvector = params.get_recohitvector();
 		
 		for(int TID:recohitvector.keySet()) {
 			for(int i = 0; i < recohitvector.get(TID).size(); i++) {

@@ -2,7 +2,9 @@ package org.jlab.rec.rtpc.hit;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JFrame;
@@ -17,11 +19,11 @@ public class MapCombine {
 
 	public void MC(HitParameters params, boolean draw) {
 		
-		HashMap<Integer,Vector<HitVector>> TAMap = params.get_FinalTIDMap();
-		HashMap<Integer, HashMap<Integer, Vector<Integer>>> TFMap = params.get_strkTIDMap();
+		HashMap<Integer,List<HitVector>> TAMap = params.get_FinalTIDMap();
+		HashMap<Integer, HashMap<Integer, List<Integer>>> TFMap = params.get_strkTIDMap();
 		HashMap<Integer, double[]> ADCMap = params.get_R_adc();
 		
-		Vector<Integer> PadList = new Vector<Integer>();
+		List<Integer> PadList = new ArrayList<Integer>();
 		double maxvalue = 0;
 		double thresh = 0;
 		int TrigWindSize = params.get_TrigWindSize();
@@ -32,12 +34,12 @@ public class MapCombine {
 		
 		HashMap<Integer, Double> weightave = new HashMap<Integer, Double>();
 		HashMap<Integer, Double> weightaveadc = new HashMap<Integer, Double>();
-		HashMap<Integer, Vector<HitVector>> trTFMap = new HashMap<Integer, Vector<HitVector>>();
-		HashMap<Integer, Vector<HitVector>> alltracks = new HashMap<Integer, Vector<HitVector>>();
+		HashMap<Integer, List<HitVector>> trTFMap = new HashMap<Integer, List<HitVector>>();
+		HashMap<Integer, List<HitVector>> alltracks = new HashMap<Integer, List<HitVector>>();
 		HitVector vtmp = new HitVector();
 		HitVector v3tmp = new HitVector();
 		HitVector hitvec = new HitVector();
-		Vector<Vector3> toListvec = new Vector<Vector3>();
+		List<Vector3> toListvec = new ArrayList<Vector3>();
 		double larget = 0;
 		int countadcvalues = 0;
 		
@@ -107,7 +109,7 @@ public class MapCombine {
 			int pad = 0;
 			double avetime = 0;
 			double adc = 0;
-			trTFMap.put(TID,new Vector<HitVector>());
+			trTFMap.put(TID,new ArrayList<HitVector>());
 			for(int p = 0; p < PadList.size(); p++)
 			{
 				pad = PadList.get(p);
@@ -134,7 +136,7 @@ public class MapCombine {
 				{
 					if(trTFMap.get(choosetid).get(j).time() < smalltime && i!=j)
 					{
-						trTFMap.get(choosetid).insertElementAt(trTFMap.get(choosetid).get(i), j);
+						trTFMap.get(choosetid).add(j, trTFMap.get(choosetid).get(i));
 						trTFMap.get(choosetid).remove(i+1);
 						break;
 					}
@@ -145,7 +147,7 @@ public class MapCombine {
 		for(int i : TAMap.keySet())
 		{
 			//toListvec.clear();
-			alltracks.put(newtid, new Vector<HitVector>());
+			alltracks.put(newtid, new ArrayList<HitVector>());
 			for(int j = 0; j < TAMap.get(i).size(); j++)
 			{
 				vtmp = TAMap.get(i).get(j);
@@ -168,7 +170,7 @@ public class MapCombine {
 		{
 			//System.out.println(" ");
 			//toListvec.clear();
-			alltracks.put(newtid, new Vector<HitVector>());			
+			alltracks.put(newtid, new ArrayList<HitVector>());			
 			//for(int pad : trTFMap.get(i).keySet())
 			for(int j = 0; j < trTFMap.get(i).size(); j++)
 			{
@@ -191,7 +193,7 @@ public class MapCombine {
 		HashMap<Integer, JFrame> framemap = new HashMap<Integer, JFrame>();
 		//H2F adcvst = new H2F("adcvst",500,3000,12000,500,0,10);
 		//System.out.println(" ");
-		Vector<Integer> marktid = new Vector<Integer>();
+		List<Integer> marktid = new ArrayList<Integer>();
 		for(int i : alltracks.keySet())
 		{
 			larget = 0;

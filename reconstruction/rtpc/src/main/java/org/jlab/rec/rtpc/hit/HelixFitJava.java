@@ -1,5 +1,6 @@
 package org.jlab.rec.rtpc.hit;
 
+
 public class HelixFitJava {
 
 	void rwsmav(double r[], double a[], double v[], int n)
@@ -708,7 +709,7 @@ public class HelixFitJava {
 	  //  DCA:       distance of closest approach to beamline
 	  //  Chi2:      ch2ph+ch2z/(npt-5) 
 	  \------------------------------------------------------------------------*/
-	  void helix_fit(int PointNum,double szPos[][], double Rho, double A, double B,
+	  HelixFitObject helix_fit(int PointNum,double szPos[][], double Rho, double A, double B,
 	    double Phi, double Theta, double X0, double Y0,double Z0,  
 	    double DCA, double Chi2,int fit_track_to_beamline)
 	  {
@@ -735,7 +736,7 @@ public class HelixFitJava {
 	    if(PointNum>=kMaxHit) PointNum=kMaxHit-1;
 
 	    npt = PointNum;
-	    if(npt<5) return;
+	    if(npt<5) return new HelixFitObject();
 
 
 	    for (jj=0; jj<npt; jj++)
@@ -802,23 +803,26 @@ public class HelixFitJava {
 	    //By Jixie: apply correction, only useful for RTPC12 
 	    //user should provide the next subroutine, it is detector dependence thing
 	    //CorrHelixRPhi(Rho,Phi);
-	    return;
+	    return new HelixFitObject(Rho,A,B,Phi,Theta,X0,Y0,Z0,DCA,Chi2);
 
 	  }
 
 	  /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-	  void HelixFit(int PointNum, double szPos[][], double R, double A, double B,
+	  HelixFitObject HelixFit(int PointNum, double szPos[][], double R, double A, double B,
 	    double Phi_deg, double Theta_deg, double Z0, int fit_track_to_beamline )
 	  {
 	    double PI=Math.acos(0.0)*2;
 	    double Rho=0,Phi=0,Theta=0,X0=0,Y0=0,DCA=0,Chi2=0;
-	    helix_fit(PointNum, szPos, Rho, A, B, Phi, Theta, 
+	    HelixFitObject h = helix_fit(PointNum, szPos, Rho, A, B, Phi, Theta, 
 	      X0, Y0, Z0, DCA, Chi2, fit_track_to_beamline);
 	    
-	    R=Math.abs(Rho);
-	    Phi_deg=Phi*180./PI;
-	    Theta_deg=Theta*180./PI; 
-	    return;
+	    R=Math.abs(h.get_Rho());
+	    Phi_deg=h.get_Phi()*180./PI;
+	    Theta_deg=h.get_Theta()*180./PI; 
+            h.set_Rho(R);
+            h.set_Phi(Phi_deg);
+            h.set_Theta(Theta_deg);
+	    return h;
 	  }
 
 }

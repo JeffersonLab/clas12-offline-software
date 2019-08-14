@@ -5,7 +5,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 public class PadAve {
 	public void TimeAverage(HitParameters params){
@@ -24,14 +25,14 @@ public class PadAve {
 		double weightave = 0;
 		double timesum = 0;
 		HashMap<Integer, double[]> R_adc = params.get_R_adc();
-		HashMap<Integer, Vector<Double>> TimeMap = params.get_TimeMap();
-		Vector<Integer> PadNum = params.get_PadNum();
-		Vector<Integer> PadN = params.get_PadN();
-		Vector<Integer> Pad = params.get_Pad();
-		Vector<Double> ADC = params.get_ADC();
-		Vector<Double> Time_o = params.get_Time_o();
-		Vector<Double> weightavevec = new Vector<Double>();
-		Vector<Double> maxinte = new Vector<Double>();
+		HashMap<Integer, List<Double>> TimeMap = params.get_TimeMap();
+		List<Integer> PadNum = params.get_PadNum();
+		List<Integer> PadN = params.get_PadN();
+		List<Integer> Pad = params.get_Pad();
+		List<Double> ADC = params.get_ADC();
+		List<Double> Time_o = params.get_Time_o();
+		List<Double> weightavevec = new ArrayList<Double>();
+		List<Double> maxinte = new ArrayList<Double>();
 		boolean flag_event = false; 
 		int eventnum = params.get_eventnum();
 		//try{

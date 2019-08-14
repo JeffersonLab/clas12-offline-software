@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JFrame;
 
@@ -32,16 +30,16 @@ public class TrackHitReco3 {
 		HashMap<Integer, GraphErrors> graphmap = new HashMap<Integer, GraphErrors>();
 		HashMap<Integer, GraphErrors> graphmap2 = new HashMap<Integer, GraphErrors>();
                 */
-		HashMap<Integer, Vector<HitVector>> alltracks = params.get_alltracks();
+		HashMap<Integer, List<HitVector>> alltracks = params.get_alltracks();
 		HashMap<Integer, Double> largetmap = params.get_largetmap();
-		HashMap<Integer, Double> tdiffmap = new HashMap<Integer, Double>();
-		HashMap<Integer, Vector<RecoHitVector>> recohitvector = new HashMap<Integer, Vector<RecoHitVector>>();
+		HashMap<Integer, Double> tdiffmap = new HashMap<>();
+		HashMap<Integer, List<RecoHitVector>> recohitvector = new HashMap<>();
 		ReducedTrackMap RTIDMap = params.get_rtrackmap();
-		Vector<Double> TimeVec = new Vector<Double>();
-		Vector<Double> XVec = new Vector<Double>();
-		Vector<Double> YVec = new Vector<Double>();
-		Vector<Double> ZVec = new Vector<Double>();
-		Vector<Integer> Pads = new Vector<Integer>();
+		List<Double> TimeVec = new ArrayList<>();
+		List<Double> XVec = new ArrayList<>();
+		List<Double> YVec = new ArrayList<>();
+		List<Double> ZVec = new ArrayList<>();
+		List<Integer> Pads = new ArrayList<>();
 		int p = 0;
 
 		double a_t1 = -2.48491E-4;
@@ -68,7 +66,7 @@ public class TrackHitReco3 {
 		double b_phi4 = 2.57684E-5;
 		double b_phi5 = 2.10680E-2;
 		if(draw){
-		H1F largetdist = new H1F("largetdist",100,0,10000);
+                    H1F largetdist = new H1F("largetdist",100,0,10000);
                 }
 		double timewindow = 2000;
 		double smalltcut = 300;
@@ -94,7 +92,7 @@ public class TrackHitReco3 {
                         }
 			tdiff = 6000 - larget;
 			tdiffmap.put(TID, tdiff);
-			recohitvector.put(TID, new Vector<RecoHitVector>());
+			recohitvector.put(TID, new ArrayList<>());
 			
 			List<HitVector> allhits = t.getAllHits();
 			for(HitVector hit : allhits) {
@@ -296,7 +294,7 @@ public class TrackHitReco3 {
 		GraphErrors gerroryvsphi = new GraphErrors();*/
 		int counter = 1;
 
-		for(Hit hit : rawHits)
+		/*for(Hit hit : rawHits)
 		{
 			if(true) {
 			cellID = hit.get_cellID();
@@ -513,9 +511,9 @@ public class TrackHitReco3 {
            YVec.add(y_rec);
            ZVec.add(z_rec);*/
 			//}
-           counter++;
+           /*counter++;
 		}
-		}
+		}*/
                 if(draw){
                 /*EmbeddedCanvas c = new EmbeddedCanvas();
 		EmbeddedCanvas c2 = new EmbeddedCanvas();
@@ -635,7 +633,7 @@ public class TrackHitReco3 {
 		params.set_recohitvector(recohitvector);
 	}	
 	
-	double get_rec_coef(double t1, double t2, double t3, double t4, double t5, double z2) {
+	private double get_rec_coef(double t1, double t2, double t3, double t4, double t5, double z2) {
 		double z = z2/1000;
 		return t1*z*z*z*z + t2*z*z*z + t3*z*z + t4*z + t5;
 		

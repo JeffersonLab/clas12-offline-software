@@ -2,7 +2,7 @@ package org.jlab.rec.rtpc.hit;
 
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -14,7 +14,7 @@ public class HitDistance {
 
 	public void FindDistance(HitParameters params) {
 		HashMap<Integer, double[]> ADCMap = params.get_R_adc();
-		Vector<Integer> PadNum = params.get_PadNum();
+		List<Integer> PadNum = params.get_PadNum();
 		int Pad = 0; //initializing pad
 		int Pad2 = 0;
 		int TrigWindSize = params.get_TrigWindSize(); //Trigger Window Size = 10000

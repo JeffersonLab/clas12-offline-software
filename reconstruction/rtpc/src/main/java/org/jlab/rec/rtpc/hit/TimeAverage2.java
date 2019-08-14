@@ -21,23 +21,26 @@ import org.jlab.groot.graphics.EmbeddedCanvas;
 
 public class TimeAverage2 {
 	
+        private ReducedTrackMap RTIDMap = new ReducedTrackMap();
+        private ReducedTrack rtrack; 
+        private TrackMap TIDMap;// = params.get_trackmap();
+        private HashMap<Integer, double[]> ADCMap;// = params.get_R_adc();		
+        private List<Integer> tids;// = TIDMap.getAllTrackIDs();
+        private Track track; 
+        private double adc = 0; 
+        private double adcmax = 0; 
+        private double averagetime = 0; 
+        private double adcthresh = 0; 
+        private double sumnum = 0; 
+        private double sumden = 0; 
+    
 	public TimeAverage2(HitParameters params, boolean draw) {
 		/*	
 		 *Initializations 
 		 */
-                
-		ReducedTrackMap RTIDMap = new ReducedTrackMap();
-		ReducedTrack rtrack; 
-		TrackMap TIDMap = params.get_trackmap();
-		HashMap<Integer, double[]> ADCMap = params.get_R_adc();		
-		List<Integer> tids = TIDMap.getAllTrackIDs();
-		Track track; 
-		double adc = 0; 
-		double adcmax = 0; 
-		double averagetime = 0; 
-		double adcthresh = 0; 
-		double sumnum = 0; 
-		double sumden = 0; 
+                TIDMap = params.get_trackmap();
+                ADCMap = params.get_R_adc();
+                tids = TIDMap.getAllTrackIDs();
 		
 		/*
 		 * Main Algorithm

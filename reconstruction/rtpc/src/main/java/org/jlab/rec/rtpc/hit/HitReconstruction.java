@@ -10,13 +10,10 @@ public class HitReconstruction {
 	}
 
 	public void Reco(HitParameters params) {
-		Vector<Integer> PadNum = params.get_PadNum();
-		Vector<Double> weightave = params.get_weightave();
-		Vector<Double> maxinte = params.get_maxinte();
-		Vector<Double> TimeVec = new Vector<Double>();
-		Vector<Double> XVec = new Vector<Double>();
-		Vector<Double> YVec = new Vector<Double>();
-		Vector<Double> ZVec = new Vector<Double>();
+		List<Integer> PadNum = params.get_PadNum();
+		List<Double> weightave = params.get_weightave();
+		List<Double> maxinte = params.get_maxinte();
+
 		int p = 0;
 		//for(Hit hit : rawHits) {
 		for(p = 0; p<PadNum.size(); p++)	{
@@ -181,19 +178,19 @@ public class HitReconstruction {
 		    			hit.set_PosX(x_rec);
 		    			hit.set_PosY(y_rec);
 		    			hit.set_PosZ(z_rec);*/
-		           TimeVec.add(t_s2pad);
+		           /*TimeVec.add(t_s2pad);
 		           XVec.add(x_rec);
 		           YVec.add(y_rec);
 		           ZVec.add(z_rec);
-		           
+		           */
 		           
 		    			
 		    			
 		}
-		params.set_time(TimeVec);
+		/*params.set_time(TimeVec);
 		params.set_XVec(XVec);
 		params.set_YVec(YVec);
-		params.set_ZVec(ZVec);
+		params.set_ZVec(ZVec);*/
 		//System.out.println(XVec.size() + " " + PadNum.size());
 		//XVec.clear();
 		//YVec.clear();
