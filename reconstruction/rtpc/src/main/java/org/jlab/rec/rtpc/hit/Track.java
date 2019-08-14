@@ -3,13 +3,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
 
 public class Track {
 
-	private HashMap<Integer,ArrayList<Integer>> _track = new HashMap<Integer,ArrayList<Integer>>(84,1.0f);
-	private List<Integer> _l = new ArrayList<Integer>();
+	private HashMap<Integer,ArrayList<Integer>> _track = new HashMap<>(84,1.0f);
+	private List<Integer> _l = new ArrayList<>();
 	//private int _padcount; 
 	private boolean _flagTrack = false;
 	
@@ -24,7 +23,7 @@ public class Track {
 	}
 	
 	public void addTimeSlice(int time) {
-		_track.put(time, new ArrayList<Integer>());
+		_track.put(time, new ArrayList<>());
 	}
 	
 	public void addTimeSlice(int time, List<Integer> l) {
@@ -48,7 +47,7 @@ public class Track {
 	}
 	
 	public List<Integer> getAllTimeSlices(){
-		List<Integer> l = new ArrayList<Integer>();
+		List<Integer> l = new ArrayList<>();
 		for(int i : _track.keySet()) {
 			l.add(i);
 		}
@@ -82,8 +81,8 @@ public class Track {
 	}
 	
 	public Set<Integer> uniquePadList() {
-		List<Integer> slice = new ArrayList<Integer>();
-		Set<Integer> pads = new HashSet<Integer>();
+		List<Integer> slice = new ArrayList<>();
+		Set<Integer> pads = new HashSet<>();
 		for(int time : _track.keySet()) {
 			slice = getTimeSlice(time);
 			for(int pad : slice) {
@@ -96,9 +95,9 @@ public class Track {
 	}
 	
 	public Set<Integer> PadTimeList(int pad) {
-		Set<Integer> times = new HashSet<Integer>();		
+		Set<Integer> times = new HashSet<>();		
 		List<Integer> allslices = getAllTimeSlices(); 
-		List<Integer> t = new ArrayList<Integer>();
+		List<Integer> t = new ArrayList<>();
 		for(int slice : allslices) {
 			t = getTimeSlice(slice);
 			if(t.contains(pad)) {

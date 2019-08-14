@@ -33,7 +33,7 @@ public class PadFit {
         double max_inte=0; // maximum of the integral to help the fit
         double max_t=0; 
         HashMap<Integer, double[]> R_adc = params.get_R_adc();
-        HashMap<Integer, double[]> Adcmap = new HashMap<Integer, double[]>();
+        HashMap<Integer, double[]> Adcmap = new HashMap<>();
         List<Integer> PadNum = params.get_PadNum();
         List<Integer> PadN = params.get_PadN();
         List<Integer> Pad = params.get_Pad();
