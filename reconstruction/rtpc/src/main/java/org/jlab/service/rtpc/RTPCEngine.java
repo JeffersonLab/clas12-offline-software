@@ -13,16 +13,16 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.rtpc.banks.HitReader;
-import org.jlab.rec.rtpc.banks.RecoBankWriter2;
+import org.jlab.rec.rtpc.banks.RecoBankWriter;
 import org.jlab.rec.rtpc.hit.Hit;
 import org.jlab.rec.rtpc.hit.HitParameters;
 import org.jlab.rec.rtpc.hit.PadFit;
 import org.jlab.rec.rtpc.hit.PadHit;
-import org.jlab.rec.rtpc.hit.TimeAverage2;
+import org.jlab.rec.rtpc.hit.TimeAverage;
 //import org.jlab.rec.rtpc.hit.TrackDisentangler;
-import org.jlab.rec.rtpc.hit.TrackFinder3;
-import org.jlab.rec.rtpc.hit.TrackHitReco3;
-import org.jlab.rec.rtpc.hit.HelixFitTest;
+import org.jlab.rec.rtpc.hit.TrackFinder;
+import org.jlab.rec.rtpc.hit.TrackHitReco;
+//import org.jlab.rec.rtpc.hit.HelixFitTest;
 
 
 
@@ -31,7 +31,7 @@ public class RTPCEngine extends ReconstructionEngine{
 
 
     public RTPCEngine() {
-        super("RTPC","charlesg","3.0");
+        super("RTPC","davidp","3.0");
     }
 
     @Override
@@ -46,7 +46,7 @@ public class RTPCEngine extends ReconstructionEngine{
         HitReader hitRead = new HitReader();
         hitRead.fetch_RTPCHits(event);
 
-        List<Hit> hits = new ArrayList<Hit>();
+        List<Hit> hits = new ArrayList<>();
         //I) get the hits
         hits = hitRead.get_RTPCHits();
 
@@ -57,30 +57,18 @@ public class RTPCEngine extends ReconstructionEngine{
         }
 
         if(event.hasBank("RTPC::pos")){
-            PadHit p = new PadHit(hits,params);
-            PadFit pfit = new PadFit(params);
-            TrackFinder3 TF = new TrackFinder3(params,false);	
-            TimeAverage2 TA2 = new TimeAverage2(params,false);
-            //TrackDisentangler TD = new TrackDisentangler(params,true);
-            TrackHitReco3 TR3 = new TrackHitReco3(hits,params,false);
-            //HelixFitTest hft = new HelixFitTest(hits,params);
-            RecoBankWriter2 writer = new RecoBankWriter2();	                               
-            DataBank recoBank = writer.fillRTPCHitsBank(event, params);
+            PadHit PH = new PadHit(hits,params);
+            PadFit PF = new PadFit(params);
+            TrackFinder TF = new TrackFinder(params);	
+            TimeAverage TA = new TimeAverage(params);
+            TrackHitReco TR = new TrackHitReco(params);
+            RecoBankWriter writer = new RecoBankWriter();	                               
+            DataBank recoBank = writer.fillRTPCHitsBank(event,params);
             event.appendBanks(recoBank);			
         }
         else{
             return true;
         }
-
-        /*
-        for(Hit h : hits) {
-                System.out.println("Hit  "+h.get_Id()+" CellID "+h.get_cellID()+" ADC "+h.get_ADC()+" true Edep "+h.get_EdepTrue()+" Edep "+h.get_Edep()+" Time "+h.get_Time()+" "+
-        " true X "+h.get_PosXTrue()+" X "+h.get_PosX()+" true Y "+h.get_PosYTrue()+" Y "+h.get_PosY()+" true Z "+h.get_PosZTrue()+" Z "+h.get_PosZ());
-        }*/
-
-
-
-
         return true;
     }
 

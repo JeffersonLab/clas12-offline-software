@@ -1,45 +1,63 @@
 package org.jlab.rec.rtpc.banks;
 
-import java.util.List;
-
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.rec.rtpc.hit.Hit;
+import org.jlab.rec.rtpc.hit.HitParameters;
+import org.jlab.rec.rtpc.hit.RecoHitVector;
+import java.util.List;
+import java.util.HashMap;
 
 public class RecoBankWriter {
 
-	/**
-	 * 
-	 * @param hitlist the list of  hits that are of the type Hit.
-	 * @return hits bank
-	 *
-	 */
-	public  DataBank fillRTPCHitsBank(DataEvent event, List<Hit> hitlist) {
-		if(hitlist==null)
-			return null;
-		if(hitlist.size()==0)
-			return null;
+    /**
+     * 
+     * @param hitlist the list of  hits that are of the type Hit.
+     * @return hits bank
+     *
+     */
+    public  DataBank fillRTPCHitsBank(DataEvent event, HitParameters params) {
+        /*if(hitlist==null)
+                return null;
+        if(hitlist.size()==0)
+                return null;*/
+        int listsize = 0;
+        int row = 0;
+        HashMap<Integer, List<RecoHitVector>> recotrackmap = params.get_recotrackmap();
+
+        for(int TID : recotrackmap.keySet()) {
+            for(int i = 0; i < recotrackmap.get(TID).size(); i++) {
+                    listsize++;
+            }
+        }
+
+        DataBank bank = event.createBank("RTPC::rec", listsize);
+
+        if (bank == null) {
+            System.err.println("COULD NOT CREATE A BANK!!!!!!");
+            return null;
+        }
 		
+        for(int TID : recotrackmap.keySet()) {
+            for(int i = 0; i < recotrackmap.get(TID).size(); i++) {
+                int cellID = recotrackmap.get(TID).get(i).pad();
+                double x_rec = recotrackmap.get(TID).get(i).x();
+                double y_rec = recotrackmap.get(TID).get(i).y();
+                double z_rec = recotrackmap.get(TID).get(i).z();
+                double time  = recotrackmap.get(TID).get(i).time();
+                double tdiff = recotrackmap.get(TID).get(i).dt();
 
-		DataBank bank = event.createBank("RTPC::rec", hitlist.size());
+                bank.setInt("TID", row, TID);
+                bank.setInt("cellID", row, cellID);
+                bank.setFloat("time", row, (float) time);
+                bank.setFloat("posX", row, (float) x_rec);
+                bank.setFloat("posY", row, (float) y_rec);
+                bank.setFloat("posZ", row, (float) z_rec);				
+                bank.setFloat("tdiff", row, (float) tdiff);
 
-		for(int i =0; i< hitlist.size(); i++) {
-			//System.out.println(hitlist.get(i).get_PosX());
-			bank.setInt("id", i, hitlist.get(i).get_Id());
-			bank.setInt("cellID",i, hitlist.get(i).get_cellID());
-			bank.setFloat("posX",i, (float) hitlist.get(i).get_PosX());
-			bank.setFloat("posY",i, (float) hitlist.get(i).get_PosY());
-			bank.setFloat("posZ",i, (float) hitlist.get(i).get_PosZ());
-			//bank.setDouble("Edep",i, hitlist.get(i).get_Edep());
-			bank.setFloat("time", i, (float) hitlist.get(i).get_Time());
+                row++;
+            }
+        }
 
-          
-		}
-
-		return bank;
-
-	}
-
-	
-	
+        return bank;
+    }	
 }

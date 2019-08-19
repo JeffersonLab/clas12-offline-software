@@ -18,16 +18,16 @@ import org.jlab.groot.graphics.*;
  */
 public class HelixFitTest {
     public HelixFitTest(List<Hit> rawHits, HitParameters params){
-        HashMap<Integer, List<RecoHitVector>> recohitvector = params.get_recohitvector();
+        HashMap<Integer, List<RecoHitVector>> recotrackmap = params.get_recotrackmap();
         
         
         double szpos[][] = new double[1000][3];
         int hit = 0;
-        for(int TID : recohitvector.keySet()){
-            for(hit = 0; hit < recohitvector.get(TID).size(); hit++){
-                szpos[hit][0] = recohitvector.get(TID).get(hit).x();
-                szpos[hit][1] = recohitvector.get(TID).get(hit).y();
-                szpos[hit][2] = recohitvector.get(TID).get(hit).z();
+        for(int TID : recotrackmap.keySet()){
+            for(hit = 0; hit < recotrackmap.get(TID).size(); hit++){
+                szpos[hit][0] = recotrackmap.get(TID).get(hit).x();
+                szpos[hit][1] = recotrackmap.get(TID).get(hit).y();
+                szpos[hit][2] = recotrackmap.get(TID).get(hit).z();
             }
             HelixFitJava h = new HelixFitJava();
             HelixFitObject ho = h.HelixFit(hit,szpos,0,0,0,0,0,0,1);

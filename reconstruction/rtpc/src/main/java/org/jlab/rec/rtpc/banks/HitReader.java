@@ -42,7 +42,7 @@ public class HitReader {
 
  
 
-            List<Hit> hits = new ArrayList<Hit>();
+            List<Hit> hits = new ArrayList<>();
 
             DataBank bankDGTZ = null;
             if(event.hasBank("RTPC::adc")==true)
@@ -59,26 +59,24 @@ public class HitReader {
 
             int[] hitnb 	= new int[rows];
             int[] cellID 	= new int[rows];
-            //int[] ADC 		= new int[rows];
             double[] Time	= new double[rows];
             int[] step      = new int[rows];
             double[] posX 	= new double[rows];
             double[] posY 	= new double[rows];
             double[] posZ 	= new double[rows];
-            //double[] phiRad = new double[rows];
             double[] Edep = new double[rows];
             double[] TShift = new double[rows];
 
             for(int i = 0; i<rows; i++){				
-                hitnb[i] 	= i+1;
-                cellID[i] 	= bankDGTZ.getInt("component", i);                    
+                hitnb[i] = i+1;
+                cellID[i] = bankDGTZ.getInt("component", i);                    
                 Time[i]	= (double) bankTrue.getFloat("time", i);
                 step[i]	= bankTrue.getInt("step", i);
-                Edep[i]     = (double) bankTrue.getFloat("energy", i);
-                TShift[i]   = (double) bankDGTZ.getFloat("timeshift", i);						    
-                posX[i] 	= (double) bankTrue.getFloat("posx", i);
-                posY[i] 	= (double) bankTrue.getFloat("posy", i);
-                posZ[i] 	= (double) bankTrue.getFloat("posz", i);				
+                Edep[i] = (double) bankTrue.getFloat("energy", i);
+                TShift[i] = (double) bankDGTZ.getFloat("timeshift", i);						    
+                posX[i] = (double) bankTrue.getFloat("posx", i);
+                posY[i] = (double) bankTrue.getFloat("posy", i);
+                posZ[i] = (double) bankTrue.getFloat("posz", i);				
                 if(Time[i] <= 0 || Time[i] > 10000) 
                 {
                     Time[i] = 0;
