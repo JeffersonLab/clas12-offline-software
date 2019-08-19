@@ -1,5 +1,5 @@
 package org.jlab.rec.rtpc.hit;
-
+/*
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +21,7 @@ public class MapCombine {
 		
 		HashMap<Integer,List<HitVector>> TAMap = params.get_FinalTIDMap();
 		HashMap<Integer, HashMap<Integer, List<Integer>>> TFMap = params.get_strkTIDMap();
-		HashMap<Integer, double[]> ADCMap = params.get_R_adc();
+		HashMap<Integer, double[]> ADCMap = params.get_ADCMap();
 		
 		List<Integer> PadList = new ArrayList<Integer>();
 		double maxvalue = 0;
@@ -49,7 +49,7 @@ public class MapCombine {
 		jf.setSize(800,600);*/
 		//System.out.println(TIDMap.size());
 		//for(Hit hit : rawHits) {
-		for(int TID : TFMap.keySet()){
+/*		for(int TID : TFMap.keySet()){
 			//System.out.println(" ");
 			larget = 0;
 			PadList.clear();
@@ -202,7 +202,7 @@ public class MapCombine {
 				marktid.add(i);
 				continue;
 			}*/
-			histmap.put(i, new GraphErrors());
+/*			histmap.put(i, new GraphErrors());
 			//System.out.println(i);
 			for(int j = 0; j < alltracks.get(i).size(); j++)
 			{
@@ -227,7 +227,7 @@ public class MapCombine {
 		/*for(int i = 0; i < marktid.size(); i++) {
 			alltracks.remove(i);
 		}*/
-		for(int z : canvasmap.keySet()) {
+/*		for(int z : canvasmap.keySet()) {
 			//canvasmap.get(z).save(z + ".png");
 		}
 		EmbeddedCanvas c_adcvst = new EmbeddedCanvas();
@@ -281,3 +281,4 @@ public class MapCombine {
 	
 	
 }
+*/

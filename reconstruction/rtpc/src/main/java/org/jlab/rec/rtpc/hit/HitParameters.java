@@ -6,16 +6,16 @@ import java.util.HashMap;
 
 public class HitParameters {
 
-    final private int _StepSize = 10;
+    final private int _SignalStepSize = 10;
     final private int _BinSize = 40; 
     final private int _NBinKept = 3; 
     final private int _TrigWindSize = 10000;
     private int _eventnum = 0; 
-    private HashMap<Integer, double[]> _R_adc = new HashMap<>();
+    private ADCMap _ADCMap = new ADCMap();
     private HashMap<Integer, List<Double>> _TimeMap = new HashMap<>();
     private HashMap<Integer, List<HitVector>> _FinalTIDMap = new HashMap<>();
     private List<Integer> _PadN = new ArrayList<>();  // used to read only cell with signal, one entry for each hit         
-    private List<Integer> _PadNum = new ArrayList<>();// used to read only cell with signal, one entry for each cell
+    private List<Integer> _PadList = new ArrayList<>();// used to read only cell with signal, one entry for each cell
     private List<Integer> _Pad = new ArrayList<>();
     private List<Double> _ADC = new ArrayList<>();
     private List<Double> _Time_o = new ArrayList<>();
@@ -34,14 +34,14 @@ public class HitParameters {
     private TrackMap _trackmap = new TrackMap();
     private ReducedTrackMap _rtrackmap = new ReducedTrackMap();
 
-    public int get_StepSize(){return _StepSize;} // step size of the signal before integration (arbitrary value)
+    public int get_SignalStepSize(){return _SignalStepSize;} // step size of the signal before integration (arbitrary value)
     public int get_BinSize(){return _BinSize;} // electronics integrates the signal over 40 ns
     public int get_NBinKept(){return _NBinKept;} // only 1 bin over 3 is kept by the daq
     public int get_TrigWindSize(){return _TrigWindSize;} // Trigger window should be 10 micro
-    public HashMap<Integer, double[]> get_R_adc(){return _R_adc;}
+    public ADCMap get_ADCMap(){return _ADCMap;}
     public HashMap<Integer, List<Double>> get_TimeMap(){return _TimeMap;}
     public List<Integer> get_PadN(){return _PadN;}
-    public List<Integer> get_PadNum(){return _PadNum;}
+    public List<Integer> get_PadList(){return _PadList;}
     public List<Integer> get_Pad(){return _Pad;}
     public List<Double> get_ADC(){return _ADC;}
     public List<Double> get_Time_o(){return _Time_o;}
@@ -68,10 +68,10 @@ public class HitParameters {
     }
 
 
-    public void set_R_adc(HashMap<Integer, double[]> _R_adc){this._R_adc = _R_adc;}
+    public void set_ADCMap(ADCMap _ADCMap){this._ADCMap = _ADCMap;}
     public void set_TimeMap(HashMap<Integer, List<Double>> _TimeMap){this._TimeMap = _TimeMap;}
     public void set_PadN(List<Integer> _PadN){this._PadN = _PadN;}
-    public void set_PadNum(List<Integer> _PadNum){this._PadNum = _PadNum;}
+    public void set_PadList(List<Integer> _PadList){this._PadList = _PadList;}
     public void set_Pad(List<Integer> _Pad){this._Pad = _Pad;}
     public void set_ADC(List<Double> _ADC){this._ADC = _ADC;}
     public void set_Time_o(List<Double> _Time_o){this._Time_o = _Time_o;}

@@ -18,7 +18,7 @@ public class TimeAverage {
     private ReducedTrackMap RTIDMap = new ReducedTrackMap();
     private ReducedTrack rtrack; 
     private TrackMap TIDMap;
-    private HashMap<Integer, double[]> ADCMap;		
+    private ADCMap ADCMap;		
     private List<Integer> tids;
     private Track track; 
     private double adc = 0; 
@@ -33,7 +33,7 @@ public class TimeAverage {
          *Initializations 
          */
         TIDMap = params.get_trackmap();
-        ADCMap = params.get_R_adc();
+        ADCMap = params.get_ADCMap();
         tids = TIDMap.getAllTrackIDs();
 
         /*
@@ -53,14 +53,14 @@ public class TimeAverage {
                 sumden = 0; 
                 timesbypad = track.PadTimeList(pad);
                 for(int time : timesbypad) { //Loop to calculate maximum adc value
-                    adc = ADCMap.get(pad)[time];
+                    adc = ADCMap.getSignal(pad,time);
                     if(adc > adcmax) {
                         adcmax = adc; 
                     }
                 }
                 adcthresh = adcmax/2;
                 for(int time : timesbypad) { //Loop to calculate weighted average time using ADC values which are above half of the maximum
-                    adc = ADCMap.get(pad)[time];
+                    adc = ADCMap.getSignal(pad,time);
                     if(adc > adcthresh) { 
                         sumnum += adc*time;
                         sumden += adc;

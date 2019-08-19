@@ -1,5 +1,5 @@
 package org.jlab.rec.rtpc.hit;
-
+/*
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class PadAve {
 	public void TimeAverage(HitParameters params){
 		
-		int StepSize = params.get_StepSize(); // step size of the signal before integration (arbitrary value)
+		int SignalStepSize = params.get_SignalStepSize(); // step size of the signal before integration (arbitrary value)
 		int BinSize = params.get_BinSize(); // electronics integrates the signal over 40 ns
 		int NBinKept = params.get_NBinKept(); // only 1 bin over 3 is kept by the daq
 		int TrigWindSize = params.get_TrigWindSize(); // Trigger window should be 10 micro
@@ -24,9 +24,9 @@ public class PadAve {
 		double sumdenom = 0;
 		double weightave = 0;
 		double timesum = 0;
-		HashMap<Integer, double[]> R_adc = params.get_R_adc();
+		HashMap<Integer, double[]> ADCMap = params.get_ADCMap();
 		HashMap<Integer, List<Double>> TimeMap = params.get_TimeMap();
-		List<Integer> PadNum = params.get_PadNum();
+		List<Integer> PadList = params.get_PadList();
 		List<Integer> PadN = params.get_PadN();
 		List<Integer> Pad = params.get_Pad();
 		List<Double> ADC = params.get_ADC();
@@ -41,11 +41,11 @@ public class PadAve {
 
 		
 		inte=0;
-		for(int p=0;p<PadNum.size();p++){ 	    	
+		for(int p=0;p<PadList.size();p++){ 	    	
 			inte_tot = 0;
 			max_inte = 0;
-			for(int t=0;t<TrigWindSize;t+=StepSize){  	         		         	
-				if(t>0) inte+=0.5*(R_adc.get(PadNum.get(p))[t-StepSize]+R_adc.get(PadNum.get(p))[t])*StepSize;	         	
+			for(int t=0;t<TrigWindSize;t+=SignalStepSize){  	         		         	
+				if(t>0) inte+=0.5*(ADCMap.get(PadList.get(p))[t-SignalStepSize]+ADCMap.get(PadList.get(p))[t])*SignalStepSize;	         	
 				inte_tot+=inte;	         	
 				if(t%BinSize==0 && t>0){ // integration over BinSize
 					if(t%(BinSize*NBinKept)==0){ // one BinSize over NBinKept is read out, hence added to the histogram							
@@ -53,8 +53,8 @@ public class PadAve {
 						sumnumer+=inte*t;
 						sumdenom+=inte;
 						
-							//write2.write(eventnum + "\t" + PadNum.get(p) + "\t" + t + "\t" + inte + "\r\n");
-							//System.out.println(eventnum + "\t" + PadNum.get(p) + "\t" + t + "\t" + inte + "\r\n");
+							//write2.write(eventnum + "\t" + PadList.get(p) + "\t" + t + "\t" + inte + "\r\n");
+							//System.out.println(eventnum + "\t" + PadList.get(p) + "\t" + t + "\t" + inte + "\r\n");
 						
 					}	             
 					inte=0;
@@ -62,25 +62,16 @@ public class PadAve {
 			}
 			
 			weightave = sumnumer/sumdenom;
-			for(int t=0; t<TimeMap.get(PadNum.get(p)).size(); t++)
+			for(int t=0; t<TimeMap.get(PadList.get(p)).size(); t++)
 			{	
-				timesum += TimeMap.get(PadNum.get(p)).get(t);
+				timesum += TimeMap.get(PadList.get(p)).get(t);
 			}
+*/
+/*
+
 				
-			//try {
-	       	// 	File out = new File("/Users/dpaye001/Desktop/FileOutput/event" /*+ eventnum */+ "/");
-	       	// 	if(!out.exists())
-	       	// 	{out.mkdirs();}
-			//	FileWriter write = new FileWriter("/Users/dpaye001/Desktop/FileOutput/event" /*+ eventnum */+ "/" + "timetest.xls",true);
-			//	write.write(weightave + "\t" + timesum/(TimeMap.get(PadNum.get(p)).size()) + "\t" + PadNum.get(p) + "\r\n");
-			//	write.close();
-				
-				
-			//} catch (IOException e) {
-				
-			//	e.printStackTrace();
-			//}
-			//System.out.println(TimeMap.get(PadNum.get(p)).size());
+
+			//System.out.println(TimeMap.get(PadList.get(p)).size());
 			weightavevec.add(weightave);
 			maxinte.add(max_inte);
 			sumnumer = 0;
@@ -98,3 +89,4 @@ public class PadAve {
 	}
 
 }
+*/

@@ -16,12 +16,12 @@ public class TrackFinder {
     private TrackMap TIDMap = new TrackMap();
     private List<Integer> TIDList;
     private Track track;
-    private HashMap<Integer, double[]> ADCMap;
-    private List<Integer> PadNum;
+    private ADCMap ADCMap;
+    private List<Integer> PadList;
     private int TrigWindSize;
     private int StepSize = 120;//Bin Size of Dream Electronics Output
     private double adcthresh = 5e-4; 
-    private int padloopsize;// = PadNum.size();
+    private int padloopsize;// = PadList.size();
     private boolean padSorted = false; 
     private List<Integer> padTIDlist = new ArrayList<>();
     private List<Integer> padlist; 
@@ -37,10 +37,10 @@ public class TrackFinder {
          *Initializations 
          */
         
-        ADCMap = params.get_R_adc();
-        PadNum = params.get_PadNum();
+        ADCMap = params.get_ADCMap();
+        PadList = params.get_PadList();
         TrigWindSize = params.get_TrigWindSize();
-        padloopsize = PadNum.size();
+        padloopsize = PadList.size();
         /*
          * Main Algorithm
          */
@@ -51,8 +51,8 @@ public class TrackFinder {
             for(int padindex = 0; padindex < padloopsize; padindex++) {
                 padSorted = false;  //Flag to be set when the pad is assigned to a track
                 padTIDlist.clear(); //List of all TIDs assigned to the pad starts empty
-                pad = PadNum.get(padindex);	
-                adc = ADCMap.get(pad)[time];
+                pad = PadList.get(padindex);	
+                adc = ADCMap.getSignal(pad,time);
 
                 if(adc > adcthresh) { //pad adc threshold check
                     PadVector PadVec = params.get_padvector(pad); //initializes the x,y,z,phi for pad

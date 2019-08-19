@@ -10,16 +10,16 @@ public class HitReconstruction {
 	}
 
 	public void Reco(HitParameters params) {
-		List<Integer> PadNum = params.get_PadNum();
+		List<Integer> PadList = params.get_PadList();
 		List<Double> weightave = params.get_weightave();
 		List<Double> maxinte = params.get_maxinte();
 
 		int p = 0;
 		//for(Hit hit : rawHits) {
-		for(p = 0; p<PadNum.size(); p++)	{
+		for(p = 0; p<PadList.size(); p++)	{
 			//reco here
 			
-			int cellID = PadNum.get(p);
+			int cellID = PadList.get(p);
 			double Time = weightave.get(p);
 			//double Edep = maxinte.get(p);
 			//double X = hit.get_PosXTrue();
@@ -191,7 +191,7 @@ public class HitReconstruction {
 		params.set_XVec(XVec);
 		params.set_YVec(YVec);
 		params.set_ZVec(ZVec);*/
-		//System.out.println(XVec.size() + " " + PadNum.size());
+		//System.out.println(XVec.size() + " " + PadList.size());
 		//XVec.clear();
 		//YVec.clear();
 		//ZVec.clear();

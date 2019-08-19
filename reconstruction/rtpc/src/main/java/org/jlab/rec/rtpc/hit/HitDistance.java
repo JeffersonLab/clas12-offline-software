@@ -1,5 +1,5 @@
 package org.jlab.rec.rtpc.hit;
-
+/*
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
@@ -13,8 +13,8 @@ import org.jlab.groot.graphics.EmbeddedCanvas;
 public class HitDistance {
 
 	public void FindDistance(HitParameters params) {
-		HashMap<Integer, double[]> ADCMap = params.get_R_adc();
-		List<Integer> PadNum = params.get_PadNum();
+		HashMap<Integer, double[]> ADCMap = params.get_ADCMap();
+		List<Integer> PadList = params.get_PadList();
 		int Pad = 0; //initializing pad
 		int Pad2 = 0;
 		int TrigWindSize = params.get_TrigWindSize(); //Trigger Window Size = 10000
@@ -52,18 +52,18 @@ public class HitDistance {
 		double ZDelta = Math.pow(6, 2);
 		for(int t = 0; t < TrigWindSize; t+=StepSize)
 		{
-			for(int p = 0; p < PadNum.size(); p ++)
+			for(int p = 0; p < PadList.size(); p ++)
 			{
-				Pad = PadNum.get(p);
+				Pad = PadList.get(p);
 				ADC = ADCMap.get(Pad)[t];
 				if(ADC > thresh)
 				{	
 					Vector3 PadCoords = PadCoords(Pad);
-					for(int p2 = 0; p2 < PadNum.size(); p2++)
+					for(int p2 = 0; p2 < PadList.size(); p2++)
 					{
 						if(p2 != p)
 						{
-							Pad2 = PadNum.get(p2);
+							Pad2 = PadList.get(p2);
 							ADC2 = ADCMap.get(Pad2)[t];
 							if(ADC2 > thresh)
 							{
@@ -126,3 +126,4 @@ public class HitDistance {
 		
 	}
 }
+*/
