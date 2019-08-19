@@ -21,7 +21,7 @@ import org.jlab.rec.rtpc.hit.TimeAverage;
 //import org.jlab.rec.rtpc.hit.TrackDisentangler;
 import org.jlab.rec.rtpc.hit.TrackFinder;
 import org.jlab.rec.rtpc.hit.TrackHitReco;
-//import org.jlab.rec.rtpc.hit.HelixFitTest;
+import org.jlab.rec.rtpc.hit.HelixFitTest;
 
 
 
@@ -66,10 +66,14 @@ public class RTPCEngine extends ReconstructionEngine{
             TimeAverage TA = new TimeAverage(params);
             //Reconstruct Hits in Drift Region
             TrackHitReco TR = new TrackHitReco(params);
+            //Helix Fit Tracks to calculate Track Parameters
+            HelixFitTest HF = new HelixFitTest(params);
             
             RecoBankWriter writer = new RecoBankWriter();	                               
             DataBank recoBank = writer.fillRTPCHitsBank(event,params);
-            event.appendBanks(recoBank);			
+            DataBank trackBank = writer.fillRTPCTrackBank(event,params);
+            event.appendBanks(recoBank);
+            event.appendBanks(trackBank);
         }
         else{
             return true;

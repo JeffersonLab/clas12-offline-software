@@ -6,6 +6,7 @@ import org.jlab.rec.rtpc.hit.HitParameters;
 import org.jlab.rec.rtpc.hit.RecoHitVector;
 import java.util.List;
 import java.util.HashMap;
+import org.jlab.rec.rtpc.hit.FinalTrackInfo;
 
 public class RecoBankWriter {
 
@@ -31,7 +32,8 @@ public class RecoBankWriter {
         }
 
         DataBank bank = event.createBank("RTPC::rec", listsize);
-
+        
+        
         if (bank == null) {
             System.err.println("COULD NOT CREATE A BANK!!!!!!");
             return null;
@@ -56,6 +58,40 @@ public class RecoBankWriter {
 
                 row++;
             }
+        }
+
+        return bank;
+    }	
+    
+    public  DataBank fillRTPCTrackBank(DataEvent event, HitParameters params) {
+        /*if(hitlist==null)
+                return null;
+        if(hitlist.size()==0)
+                return null;*/
+        HashMap<Integer, FinalTrackInfo> finaltrackinfomap = params.get_finaltrackinfomap();
+        int listsize = finaltrackinfomap.size();
+        int row = 0;
+
+        
+        DataBank bank = event.createBank("RTPC::trackinfo", listsize);
+        
+        
+        if (bank == null) {
+            System.err.println("COULD NOT CREATE A BANK!!!!!!");
+            return null;
+        }
+		
+        for(int TID : finaltrackinfomap.keySet()) {
+
+                bank.setInt("TID", row, TID);
+                bank.setFloat("px", row, (float) finaltrackinfomap.get(TID).get_px());
+                bank.setFloat("py", row, (float) finaltrackinfomap.get(TID).get_py());
+                bank.setFloat("pz", row, (float) finaltrackinfomap.get(TID).get_pz());
+                bank.setFloat("vz", row, (float) finaltrackinfomap.get(TID).get_vz());
+                bank.setFloat("trackl", row, (float) finaltrackinfomap.get(TID).get_tl());
+                bank.setFloat("dEdx", row, (float) finaltrackinfomap.get(TID).get_dEdx());
+                row++;
+            
         }
 
         return bank;

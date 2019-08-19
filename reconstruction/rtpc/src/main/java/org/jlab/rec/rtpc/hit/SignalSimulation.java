@@ -33,27 +33,19 @@ public class SignalSimulation {
         TrigWindSize = params.get_TrigWindSize(); // Trigger window should be 10 micro
         NTrigSampl = TrigWindSize/BinSize; // number of time samples
 
-//--Creating the signal on pads with 10 ns steps.
-
         for(Hit hit : rawHits){
 
-            CellID = hit.get_cellID();
-            Time = hit.get_Time();
-            Edep = hit.get_EdepTrue();
-            ADCMap.simulateSignal(CellID,Time,Edep);
-            ADCMap.integrateSignal(CellID);
+            CellID = hit.get_cellID(); //Pad ID number of the hit
+            Time = hit.get_Time(); //Time of the hit
+            Edep = hit.get_EdepTrue(); //Simulated Energy of the hit
+            ADCMap.simulateSignal(CellID,Time,Edep); //Creates a signal based on the Time and the Energy
+            ADCMap.integrateSignal(CellID); //Integrates the signal into 120 ns bins based on DREAM elec specifications
             
-            if(!PadList.contains(CellID)) PadList.add(CellID);
+            if(!PadList.contains(CellID)) PadList.add(CellID); //Maintains a list of all unique Pad IDs
             
         }
         
         params.set_PadList(PadList);
         params.set_ADCMap(ADCMap);
-
     }
-
-
-
-
-
 }

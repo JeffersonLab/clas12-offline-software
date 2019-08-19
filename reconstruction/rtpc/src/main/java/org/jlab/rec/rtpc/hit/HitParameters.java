@@ -33,6 +33,7 @@ public class HitParameters {
     private HashMap<Integer, PadVector> _padmap = new HashMap<>();
     private TrackMap _trackmap = new TrackMap();
     private ReducedTrackMap _rtrackmap = new ReducedTrackMap();
+    private HashMap<Integer, FinalTrackInfo> _finaltrackinfomap;
 
     public int get_SignalStepSize(){return _SignalStepSize;} // step size of the signal before integration (arbitrary value)
     public int get_BinSize(){return _BinSize;} // electronics integrates the signal over 40 ns
@@ -60,6 +61,7 @@ public class HitParameters {
     public HashMap<Integer, List<RecoHitVector>> get_recotrackmap() {return _recotrackmap;}
     public TrackMap get_trackmap() {return _trackmap;}
     public ReducedTrackMap get_rtrackmap() {return _rtrackmap;}
+    public HashMap<Integer, FinalTrackInfo> get_finaltrackinfomap() {return _finaltrackinfomap;}
     public PadVector get_padvector(int pad) {
         if(!_padmap.containsKey(pad)) {
             _padmap.put(pad, new PadVector(pad));
@@ -90,7 +92,10 @@ public class HitParameters {
     public void set_recotrackmap(HashMap<Integer,List<RecoHitVector>> _recotrackmap) {this._recotrackmap = _recotrackmap;}
     public void set_trackmap(TrackMap _trackmap) {this._trackmap = _trackmap;}
     public void set_rtrackmap(ReducedTrackMap _rtrackmap) {this._rtrackmap = _rtrackmap;}
+    public void set_finaltrackinfomap(HashMap<Integer, FinalTrackInfo> _finaltrackinfomap) {this._finaltrackinfomap = _finaltrackinfomap;}
 
+    
     public HitParameters() {}
+
 
 }

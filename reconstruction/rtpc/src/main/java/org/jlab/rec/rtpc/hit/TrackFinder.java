@@ -52,7 +52,7 @@ public class TrackFinder {
                 padSorted = false;  //Flag to be set when the pad is assigned to a track
                 padTIDlist.clear(); //List of all TIDs assigned to the pad starts empty
                 pad = PadList.get(padindex);	
-                adc = ADCMap.getSignal(pad,time);
+                adc = ADCMap.getADC(pad,time);
 
                 if(adc > adcthresh) { //pad adc threshold check
                     PadVector PadVec = params.get_padvector(pad); //initializes the x,y,z,phi for pad

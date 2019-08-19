@@ -53,14 +53,14 @@ public class TimeAverage {
                 sumden = 0; 
                 timesbypad = track.PadTimeList(pad);
                 for(int time : timesbypad) { //Loop to calculate maximum adc value
-                    adc = ADCMap.getSignal(pad,time);
+                    adc = ADCMap.getADC(pad,time);
                     if(adc > adcmax) {
                         adcmax = adc; 
                     }
                 }
                 adcthresh = adcmax/2;
                 for(int time : timesbypad) { //Loop to calculate weighted average time using ADC values which are above half of the maximum
-                    adc = ADCMap.getSignal(pad,time);
+                    adc = ADCMap.getADC(pad,time);
                     if(adc > adcthresh) { 
                         sumnum += adc*time;
                         sumden += adc;

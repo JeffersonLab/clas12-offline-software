@@ -46,9 +46,15 @@ public class HelixFitObject {
     public double get_A(){
         return _A;
     }
+    public void set_A(double A){
+        _A = A;
+    }
     public double get_B(){
         return _B;
     }    
+    public void set_B(double B){
+        _B = B;
+    }
     public double get_Phi(){
         return _Phi;
     }       
@@ -69,13 +75,33 @@ public class HelixFitObject {
     }    
     public double get_Z0(){
         return _Z0;
-    }    
+    }   
+    public void set_Z0(double Z0){
+        _Z0 = Z0;
+    }
     public double get_DCA(){
         return _DCA;
     }    
     public double get_Chi2(){
         return _Chi2;
     }
-        
+    public double get_Mom(){
+        return 0.3*50*get_Rho()/10;
+    }
+    public double get_px(){
+        return get_Mom()*Math.cos(get_Phi())*Math.sin(get_Theta());
+    }
+    public double get_py(){
+        return get_Mom()*Math.sin(get_Phi())*Math.sin(get_Theta());
+    }
+    public double get_pz(){
+        return get_Mom()*Math.cos(get_Theta());
+    }
+    public double get_trackl(){
+        return 0;
+    }
+    public double get_dEdx(){
+        return 0;
+    }
     
 }

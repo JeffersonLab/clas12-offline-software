@@ -16,8 +16,8 @@ public class ADCMap {
     private HashMap<Integer,double[]> _ADCMap;
     private HashMap<Integer,double[]> _intADCMap;
 
-    private int TrigWindSize = 10000;
-    private int SignalStepSize = 10;
+    final private int TrigWindSize = 10000;
+    final private int SignalStepSize = 10;
     
     public ADCMap(){
         _ADCMap = new HashMap<>();
@@ -30,29 +30,31 @@ public class ADCMap {
             _ADCMap.put(Pad, new double[TrigWindSize]);
         }
         for(int tbin=0;tbin<TrigWindSize;tbin+=SignalStepSize){   
-            _ADCMap.get(Pad)[tbin] += EtoS(time,tbin,Edep);
+            _ADCMap.get(Pad)[tbin] += getSignalAtBin(time,tbin,Edep);
         }
     }
     
-    public void integrateSignal(int Pad){
+    public void integrateSignal(int pad){
         double integral = 0;
         int BinSize = 40;
         int NBinKept = 3;
         for(int tbin = 0; tbin < TrigWindSize; tbin += SignalStepSize){  
-            if(tbin>0) integral+=0.5*(_ADCMap.get(Pad)[tbin-SignalStepSize]+_ADCMap.get(Pad)[tbin])*SignalStepSize;	         		         	
+            if(tbin>0){
+                integral+=0.5*(getSignal(pad,tbin-SignalStepSize)+getSignal(pad,tbin))*SignalStepSize;
+            }	         		         	
             if(tbin%BinSize==0 && tbin>0){ // integration over BinSize
                 if(tbin%(BinSize*NBinKept)==0){ // one BinSize over NBinKept is read out
-                    if(!_intADCMap.containsKey(Pad)){
-                        _intADCMap.put(Pad, new double[TrigWindSize]);
+                    if(!_intADCMap.containsKey(pad)){
+                        _intADCMap.put(pad, new double[TrigWindSize]);
                     }
-                    _intADCMap.get(Pad)[tbin] = integral;
+                    _intADCMap.get(pad)[tbin] = integral;
                 }	             
                 integral=0;
             }
         }
     }
     
-    public double getSignal(int Pad, int Time){
+    public double getADC(int Pad, int Time){
         return _intADCMap.get(Pad)[Time];
     }
     
@@ -60,19 +62,26 @@ public class ADCMap {
         return _intADCMap;
     }
     
-    private double EtoS(double tsignal, double t, double e_tot){
+    private double getSignal(int pad, int time){
+        return _ADCMap.get(pad)[time];
+    }
+    
+    private double getSignalAtBin(double tsignal, double t, double edep){
 
-        double sig;
+        double signal_height;
         //t = noise_elec(t);    // change t to simulate the electronics noise, also modifies the amplitude
         double p0 = 0.0;     
         double p2 = 178.158;    
         double p3 = 165.637;     
         double p4 = 165.165;
 
-        if(t<tsignal) sig = p0+e_tot*p2*Math.exp(-(t-tsignal)*(t-tsignal)/(2*p3*p3))/(0.5*(p3+p4)*Math.sqrt(2*Math.PI));
-        else       sig = p0+e_tot*p2*Math.exp(-(t-tsignal)*(t-tsignal)/(2*p4*p4))/(0.5*(p3+p4)*Math.sqrt(2*Math.PI)); 
+        if(t<tsignal){
+            signal_height = p0+edep*p2*Math.exp(-(t-tsignal)*(t-tsignal)/(2*p3*p3))/(0.5*(p3+p4)*Math.sqrt(2*Math.PI));
+        }else{
+            signal_height = p0+edep*p2*Math.exp(-(t-tsignal)*(t-tsignal)/(2*p4*p4))/(0.5*(p3+p4)*Math.sqrt(2*Math.PI));
+        } 
 
-        return sig;
+        return signal_height;
     }
     
     /*private double noise_elec(double time){
