@@ -2,6 +2,7 @@ package org.jlab.rec.eb;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.pow;
+import java.util.List;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.detector.base.DetectorType;
@@ -76,6 +77,23 @@ public class EBUtil {
         }
         return ccdb.getTable(tableName).
             getDoubleValue("tres",sector,layer,component);
+    }
+
+    /**
+     * Calculate beta for given detector type/layer, prioritized by layer:
+     */
+    public static double getNeutralBeta(DetectorParticle p, DetectorType type, List<Integer> layers,double startTime) {
+        double beta=-9999;
+        for (int layer : layers) {
+            DetectorResponse resp = p.getHit(type,layer);
+            if (resp!=null) {
+                beta = resp.getPosition().mag() /
+                    (resp.getTime()-startTime) /
+                    PhysicsConstants.speedOfLight();
+                break;
+            }
+        }
+        return beta;
     }
 
     /**

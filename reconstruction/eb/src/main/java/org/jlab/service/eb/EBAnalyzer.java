@@ -2,7 +2,11 @@ package org.jlab.service.eb;
 
 import static java.lang.Math.abs;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
@@ -34,9 +38,25 @@ public class EBAnalyzer {
     static final int[]  PID_NEGATIVE = new int[]{ 11, -211,-321,-2212};
     static final int[]  PID_NEUTRAL = new int[]{22,2112};
 
+    Map <DetectorType,List<Integer>> chargedBetaDetectors;
+    Map <DetectorType,List<Integer>> neutralBetaDetectors;
+    
     public EBAnalyzer(EBCCDBConstants ccdb,EBRadioFrequency ebrf) {
         this.ccdb=ccdb;
         this.ebrf=ebrf;
+        chargedBetaDetectors=new LinkedHashMap<>();
+        chargedBetaDetectors.put(DetectorType.FTOF,Arrays.asList(2,1,3));
+        chargedBetaDetectors.put(DetectorType.CTOF,Arrays.asList(0));
+        chargedBetaDetectors.put(DetectorType.ECAL,Arrays.asList(1,4,7));
+        chargedBetaDetectors.put(DetectorType.HTCC,Arrays.asList(0));
+        chargedBetaDetectors.put(DetectorType.CND,Arrays.asList(0));
+        chargedBetaDetectors.put(DetectorType.FTCAL,Arrays.asList(0));
+        neutralBetaDetectors=new LinkedHashMap<>();
+        neutralBetaDetectors.put(DetectorType.ECAL,Arrays.asList(1,4,7));
+        neutralBetaDetectors.put(DetectorType.CND,Arrays.asList(0));
+        neutralBetaDetectors.put(DetectorType.FTCAL,Arrays.asList(0));
+        neutralBetaDetectors.put(DetectorType.FTOF,Arrays.asList(2,1,3));
+        neutralBetaDetectors.put(DetectorType.CTOF,Arrays.asList(0));
     }
 
     
@@ -282,6 +302,8 @@ public class EBAnalyzer {
 
         for (DetectorParticle p : event.getParticles()) {
             double beta = -99;
+            final double thisStartTime = p.getCharge()==0 ? startTime : p.getStartTime();
+
             if (p.isTriggerParticle()) {
                 final double mass = PDGDatabase.getParticleById(p.getPid()).mass();
                 final double mom  = p.vector().mag();
@@ -289,36 +311,30 @@ public class EBAnalyzer {
             }
             else {
                 if (p.getCharge()==0) {
-                    if (p.hasHit(DetectorType.ECAL)) {
-                        // NOTE: prioritized by layer: PCAL, else Inner, else Outer
-                        beta = EBUtil.getNeutralBeta(p,DetectorType.ECAL,new int[]{1,4,7},startTime);
-                    }
-                    else if (p.hasHit(DetectorType.CND)) {
-                        beta = EBUtil.getNeutralBeta(p,DetectorType.CND,0,startTime);
-                    }
-                    else if (p.hasHit(DetectorType.FTCAL)) {
-                        beta = EBUtil.getNeutralBeta(p,DetectorType.FTCAL,0,startTime);
+                    for (Entry<DetectorType,List<Integer>> bd : neutralBetaDetectors.entrySet()) {
+                        if (p.hasHit(bd.getKey())) {
+                            beta = EBUtil.getNeutralBeta(p,bd.getKey(),bd.getValue(),startTime);
+                            break;
+                        }
                     }
                 }
                 else {
-                    if (p.hasHit(DetectorType.FTOF, 2)==true){
-                        beta = p.getBeta(DetectorType.FTOF,2, p.getStartTime());
-                    }
-                    else if(p.hasHit(DetectorType.FTOF, 1)==true){
-                        beta = p.getBeta(DetectorType.FTOF, 1,p.getStartTime());
-                    }
-                    else if(p.hasHit(DetectorType.CTOF)==true){
-                        beta = p.getBeta(DetectorType.CTOF ,p.getStartTime());
-                    }
-                    else if(p.hasHit(DetectorType.FTOF, 3)==true){
-                        beta = p.getBeta(DetectorType.FTOF, 3,p.getStartTime());
+                    boolean found=false;
+                    for (Entry<DetectorType,List<Integer>> bd : chargedBetaDetectors.entrySet()) {
+                        for (Integer layer : bd.getValue()) {
+                            if (p.hasHit(bd.getKey(),layer)) {
+                                beta = p.getBeta(bd.getKey(),layer, p.getStartTime());
+                                found=true;
+                                break;
+                            }
+                        }
+                        if (found) break;
                     }
                 }
             }
             p.setBeta(beta);
         }
     }
-
     public void assignPids(DetectorEvent event,final boolean useStartTimeFromFT) {
 
         PIDHypothesis pidHyp = new PIDHypothesis();
@@ -470,14 +486,17 @@ public class EBAnalyzer {
                 for (int ii=0; ii<hypotheses.length; ii++) {
                     if (abs(hypotheses[ii])==11) continue;
                     double dt=Double.MAX_VALUE;
-                    if (p.hasHit(DetectorType.FTOF,2)==true)
-                        dt = p.getVertexTime(DetectorType.FTOF,2,hypotheses[ii]) - p.getStartTime();
-                    else if (p.hasHit(DetectorType.FTOF,1)==true)
-                        dt = p.getVertexTime(DetectorType.FTOF,1,hypotheses[ii]) - p.getStartTime();
-                    else if (p.hasHit(DetectorType.CTOF)==true)
-                        dt = p.getVertexTime(DetectorType.CTOF,0,hypotheses[ii]) - p.getStartTime();
-                    else if (p.hasHit(DetectorType.FTOF,3)==true)
-                        dt = p.getVertexTime(DetectorType.FTOF,3,hypotheses[ii]) - p.getStartTime();
+                    boolean found=false;
+                    for (Entry<DetectorType,List<Integer>> bd : chargedBetaDetectors.entrySet()) {
+                        for (Integer layer : bd.getValue()) {
+                            if (p.hasHit(bd.getKey(),layer)==true) {
+                                dt = p.getVertexTime(bd.getKey(),layer,hypotheses[ii])-p.getStartTime();
+                                found=true;
+                                break;
+                            }
+                        } 
+                        if (found) break;
+                    }
                     if ( abs(dt) < minTimeDiff ) {
                         minTimeDiff=abs(dt);
                         bestPid=hypotheses[ii];
@@ -486,7 +505,6 @@ public class EBAnalyzer {
             }
             return bestPid;
         }
-
 
         /**
          * Get a basic pid quality factor.
@@ -511,21 +529,14 @@ public class EBAnalyzer {
             else if (p.getCharge()!=0) {
                 double sigma = -1;
                 double delta_t = 99999;
-                if (p.hasHit(DetectorType.FTOF,2)==true) {
-                    sigma = EBUtil.getDetTimingResolution(p.getHit(DetectorType.FTOF,2),ccdb);
-                    delta_t = p.getVertexTime(DetectorType.FTOF, 2, pid)-p.getStartTime();
-                }
-                else if (p.hasHit(DetectorType.FTOF,1)==true) {
-                    sigma = EBUtil.getDetTimingResolution(p.getHit(DetectorType.FTOF,1),ccdb);
-                    delta_t = p.getVertexTime(DetectorType.FTOF, 1, pid)-p.getStartTime();
-                }
-                else if (p.hasHit(DetectorType.CTOF)==true) {
-                    sigma = EBUtil.getDetTimingResolution(p.getHit(DetectorType.CTOF,0),ccdb);
-                    delta_t = p.getVertexTime(DetectorType.CTOF, 0, pid)-p.getStartTime();
-                }
-                else if (p.hasHit(DetectorType.FTOF,3)==true) {
-                    sigma = EBUtil.getDetTimingResolution(p.getHit(DetectorType.FTOF,3),ccdb);
-                    delta_t = p.getVertexTime(DetectorType.FTOF, 3, pid)-p.getStartTime();
+
+                for (Entry<DetectorType,List<Integer>> bd : chargedBetaDetectors.entrySet()) {
+                    for (Integer layer : bd.getValue()) {
+                        if (p.hasHit(bd.getKey(),layer)==true) {
+                            sigma = 1;//EBUtil.getDetTimingResolution(p.getHit(bd.getKey(),layer),ccdb);
+                            delta_t = p.getVertexTime(bd.getKey(),layer, pid)-p.getStartTime();
+                        }
+                    }
                 }
                 q = delta_t / sigma;
             }
