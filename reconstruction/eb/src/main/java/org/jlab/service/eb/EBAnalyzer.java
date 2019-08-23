@@ -44,6 +44,8 @@ public class EBAnalyzer {
     public EBAnalyzer(EBCCDBConstants ccdb,EBRadioFrequency ebrf) {
         this.ccdb=ccdb;
         this.ebrf=ebrf;
+
+        // setup prioritization on timing detectors:
         chargedBetaDetectors=new LinkedHashMap<>();
         chargedBetaDetectors.put(DetectorType.FTOF,Arrays.asList(2,1,3));
         chargedBetaDetectors.put(DetectorType.CTOF,Arrays.asList(0));
@@ -530,13 +532,18 @@ public class EBAnalyzer {
                 double sigma = -1;
                 double delta_t = 99999;
 
+                boolean found=false;
                 for (Entry<DetectorType,List<Integer>> bd : chargedBetaDetectors.entrySet()) {
                     for (Integer layer : bd.getValue()) {
                         if (p.hasHit(bd.getKey(),layer)==true) {
-                            sigma = 1;//EBUtil.getDetTimingResolution(p.getHit(bd.getKey(),layer),ccdb);
-                            delta_t = p.getVertexTime(bd.getKey(),layer, pid)-p.getStartTime();
+                            sigma = EBUtil.getDetTimingResolution(p.getHit(bd.getKey(),layer),ccdb);
+                            if (sigma>0) delta_t = p.getVertexTime(bd.getKey(),layer, pid)-p.getStartTime();
+                            found=true;
+                            break;
                         }
+                        if (found) break;
                     }
+                    if (found) break;
                 }
                 q = delta_t / sigma;
             }

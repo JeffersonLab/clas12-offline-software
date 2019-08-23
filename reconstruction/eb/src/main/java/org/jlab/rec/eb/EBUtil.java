@@ -73,7 +73,7 @@ public class EBUtil {
             return 0.065;
         }
         else {
-            throw new RuntimeException("not ready for non-TOF");
+            return 0;//throw new RuntimeException("not ready for non-TOF");
         }
         return ccdb.getTable(tableName).
             getDoubleValue("tres",sector,layer,component);
