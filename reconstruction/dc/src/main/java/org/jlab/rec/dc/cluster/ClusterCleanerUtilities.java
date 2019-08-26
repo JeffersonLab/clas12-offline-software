@@ -376,6 +376,7 @@ public class ClusterCleanerUtilities {
             newhitPos.set_DeltaTimeBeta(hit.get_DeltaTimeBeta());
             newhitPos.setTStart(hit.getTStart());
             newhitPos.setTProp(hit.getTProp());
+            newhitPos.betaFlag= hit.betaFlag;
             newhitPos.setTFlight(hit.getTFlight());
             newhitPos.set_Time(hit.get_Time());
             newhitPos.set_Id(hit.get_Id());
@@ -402,6 +403,7 @@ public class ClusterCleanerUtilities {
             newhitNeg.set_DeltaTimeBeta(hit.get_DeltaTimeBeta());
             newhitNeg.setTStart(hit.getTStart());
             newhitNeg.setTProp(hit.getTProp());
+            newhitNeg.betaFlag= hit.betaFlag;
             newhitNeg.setTFlight(hit.getTFlight());
             newhitNeg.set_Time(hit.get_Time());
             newhitNeg.set_Id(hit.get_Id());

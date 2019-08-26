@@ -8,6 +8,7 @@ import org.jlab.geom.prim.Line3D;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.utils.groups.IndexedTable;
@@ -178,7 +179,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         if (this._TrkgStatus != -1) {
             if (this.get_TimeToDistance() == 0) // if the time-to-dist is not set ... set it
             {
-                set_TimeToDistance(event, 1.0, B, constants1, tde);
+                set_TimeToDistance(event, 0.0, B, constants1, tde);
             }
 
             double x = this.get_Doca() / this.get_CellSize();
@@ -501,7 +502,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * A method to update the hit position information after the fit to the wire
      * positions employing hit-based tracking algorithms has been performed.
      */
-    public void updateHitPositionWithTime(DataEvent event, double trkAngle, double B, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
+    public void updateHitPositionWithTime(DataEvent event, double trkAngle, double B, 
+            IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         if (this.get_Time() > 0) {
             this.set_TimeToDistance(event, trkAngle, B, tab, tde);
         }
@@ -515,10 +517,18 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             MPCorr = cosTkAng;
         }
 
-        this.set_X(x + this.get_LeftRightAmb() * (this.get_TimeToDistance() / MPCorr) / FastMath.cos(Math.toRadians(6.)));
+        this.set_X(x + this.get_LeftRightAmb() * (this.get_TimeToDistance() / MPCorr) );/// FastMath.cos(Math.toRadians(6.)));
         
     }
-    
+    public double corrForMidPlaneProjection(double trkAngle, Line3D wireLine, FittedHit hit) {
+        double tilt = 90-Math.toDegrees(wireLine.direction().asUnit().angle(new Vector3D(1,0,0)));
+        double MPCorr = 1;
+        double cosTkAng = 1./Math.sqrt(trkAngle*trkAngle + 1.);
+        if (cosTkAng > 0.8 & cosTkAng <= 1) {
+            MPCorr = cosTkAng;
+        }
+        return MPCorr ;
+    }
     //public double XatY(DCGeant4Factory DcDetector, double y) {
     //    double x = this.calc_GeomCorr(DcDetector, y);
     //    return x + this.get_LeftRightAmb() * (this.get_TimeToDistance()) ;
@@ -625,7 +635,8 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         double delta_x = MaxSag*(1.-Math.abs(y)/(0.5*wireLen))*(1.-Math.abs(y)/(0.5*wireLen));
         
         x+=delta_x;
-        Line3D wireLine = new Line3D(new Point3D(xL, yL, 0), new Point3D(xR, yR, 0));
+        Line3D wireLine = new Line3D(new Point3D(xL, yL, z), new Point3D(xR, yR, z));
+        wireLine.setOrigin(x, y, z);
         this.set_WireLength(wireLen);
         this.set_WireMaxSag(MaxSag);
         this.set_WireLine(wireLine);
@@ -961,5 +972,34 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             beta=1.0;
         return beta;
     }
+    
+    //make a  copy
+    public FittedHit clone() throws CloneNotSupportedException {
+        FittedHit hitClone = new FittedHit(this.get_Sector(), this.get_Superlayer(), this.get_Layer(), this.get_Wire(),
+                    this.get_TDC(), this.get_Id());
+            hitClone.set_Doca(this.get_Doca());
+            hitClone.set_DocaErr(this.get_DocaErr());
+            hitClone.setT0(this.getT0()); 
+            hitClone.set_Beta(this.get_Beta());  
+            hitClone.setB(this.getB());  
+            hitClone.set_DeltaTimeBeta(this.get_DeltaTimeBeta());
+            hitClone.setTStart(this.getTStart());
+            hitClone.setTProp(this.getTProp());
+            hitClone.setTFlight(this.getTFlight());
+            hitClone.set_Time(this.get_Time());
+            hitClone.set_Id(this.get_Id());
+            hitClone.set_ClusFitDoca(this.get_ClusFitDoca());
+            hitClone.set_LeftRightAmb(this.get_LeftRightAmb());
+            hitClone.set_X(this.get_X());
+            hitClone.set_Z(this.get_Z());
+            hitClone.setAlpha(this.getAlpha());
+            hitClone.set_CellSize(this.get_CellSize());
+            hitClone.set_AssociatedClusterID(this.get_AssociatedClusterID());
+            hitClone.set_AssociatedHBTrackID(this.get_AssociatedHBTrackID());
+            hitClone.betaFlag = this.betaFlag;
+            
+        return hitClone;
+    }
+    
   
 }

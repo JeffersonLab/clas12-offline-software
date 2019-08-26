@@ -5,46 +5,47 @@ import java.util.Collections;
 import java.util.List;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.track.Track;
 
-public class MeasVecs {
+public class MeasVecsDoca {
 
     public List<MeasVec> measurements = new ArrayList<MeasVec>();
 
     public int ndf=0;
-    /**
-     * The state projector - it projects the state onto the measurement
-     *
-     * @param stateV the state vector
-     * @param s the superlayer of the measurement (0..1)
-     * @return a double array corresponding to the 2 entries of the projector
-     * matrix
-     */
-    public double[] H(double y, double s, double w, double l) {
+    
+    public double[] H(double[] stateV, double Z, Line3D wireLine) {
         double[] hMatrix = new double[2];
-        hMatrix[0] = 1;
-        hMatrix[1] = -Math.tan((Math.toRadians(s)));
-        // add geometric corrections
-        //hMatrix[1]-= w*(4./l)*(1 - y/(l/2.));        
+        double[] stateVec = new double[2];
+        double Err = 0.025;
+        double[][] Result = new double[2][2];
+        for(int i = 0; i < 2; i++) {
+            stateVec[0] = stateV[0] + (double)Math.pow(-1, i) * Err;
+            stateVec[1] = stateV[1];
+            Result[i][0] = h(stateVec, Z, wireLine);
+        }
+        for(int i = 0; i < 2; i++) {
+            stateVec[0] = stateV[0];
+            stateVec[1] = stateV[1] + (double)Math.pow(-1, i) * Err;
+            Result[i][1] = h(stateVec, Z, wireLine);
+        }
+        hMatrix[0] = (Result[0][0]-Result[1][0])/(2.*Err);
+        hMatrix[1] = (Result[0][1]-Result[1][1])/(2.*Err);
+        
         return hMatrix;
     }
 
-    /**
-     * The projected measurement derived from the stateVector at the measurement
-     * site
-     *
-     * @param stateV the state vector
-     * @param s the superlayer (0..1)
-     * @return projected measurement
-     */
-    public double h(double[] stateV, double s, double w, double l) {
-
-        double val = stateV[0] - Math.tan((Math.toRadians(s))) * stateV[1]; 
-        // add geometric corrections
-        val+= w;       
-        return val;
+    public double h(double[] stateV, double Z, Line3D wireLine) {
+       
+        Line3D WL = new Line3D();
+        WL.copy(wireLine);
+        WL.copy(WL.distance(new Point3D(stateV[0], stateV[1], Z)));
+        
+        //System.out.println(Math.signum(-WL.direction().x())+
+        //        wireLine.origin().toString()+WL.toString()+" "+stateV[0]+" ,"+stateV[1]);
+        return WL.length()*Math.signum(-WL.direction().x());
     }
 
     public void setMeasVecs(Track trkcand, DCGeant4Factory DcDetector) {
@@ -74,8 +75,7 @@ public class MeasVecs {
                     //    continue;
                     //}
                     
-                    HitOnTrack hot = new HitOnTrack(slayr, X, Z, 
-                            trkcand.get(c).get(s).get(h).get_WireLength(), 
+                    HitOnTrack hot = new HitOnTrack(slayr, X, Z,  
                             trkcand.get(c).get(s).get(h).get_WireMaxSag(),
                             trkcand.get(c).get(s).get(h).get_WireLine()
                     );
@@ -84,13 +84,22 @@ public class MeasVecs {
                     double err_it1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitInterceptErr();
                     double err_cov1 = trkcand.get(c).get(s).get_fittedCluster().get_clusterLineFitSlIntCov();
 
-                    hot._Unc = Math.sqrt(err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1);
+                    hot._Unc[0] = Math.sqrt(err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1);
                     hot._hitError = err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1 + 2 * Z * err_cov1 + trkcand.get(c).get(s).get(h).get_DocaErr()*trkcand.get(c).get(s).get(h).get_DocaErr();
                     //if(trkcand.get(c).get(s).get(h).get_Time()/CCDBConstants.getTMAXSUPERLAYER()[trkcand.get(c).get(s).get(h).get_Sector()-1][trkcand.get(c).get(s).get(h).get_Superlayer()-1]<1.1)
                     //	hot._hitError = 100000; //exclude outoftimers from fit
                     hot.region = trkcand.get(c).get(s).get(h).get_Region();
-                    //if(Math.abs(trkcand.get(c).get(s).get(h).get_Residual())<1)
-                        hOTS.add(hot);
+                    
+                    hot._doca[0] = trkcand.get(c).get(s).get(h).get_ClusFitDoca();
+                    
+                    double LR = Math.signum(trkcand.get(c).get(s).get(h).get_XWire()-trkcand.get(c).get(s).get(h).get_X());
+                    hot._doca[0]*=LR;
+                    hot._Unc[0] = Math.sqrt(err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1);
+                    //hot._hitError = err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1 + 2 * Z * err_cov1 + trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr()*trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr();
+                    hot._hitError = trkcand.get(c).get(s).get(h).get_DocaErr()*trkcand.get(c).get(s).get(h).get_DocaErr();
+                    //System.out.println(" Z "+Z+" ferr "+(float)(hot._Unc /(hot._hitError/4.)));
+                    hot._Unc[0] = hot._hitError ;
+                    hOTS.add(hot);
 
                 }
             }
@@ -101,12 +110,14 @@ public class MeasVecs {
         for (int i = 0; i < hOTS.size(); i++) {
             if (i > 0) {
                 if (Math.abs(hOTS.get(i - 1)._Z - hOTS.get(i)._Z)<0.01) {
-                    hOTS.get(i - 1)._X = (hOTS.get(i - 1)._X / (hOTS.get(i - 1)._Unc * hOTS.get(i - 1)._Unc) + hOTS.get(i)._X / (hOTS.get(i)._Unc * hOTS.get(i)._Unc)) / (1. / (hOTS.get(i - 1)._Unc * hOTS.get(i - 1)._Unc) + 1. / (hOTS.get(i)._Unc * hOTS.get(i)._Unc));
-                    //hOTS.get(i-1)._hitError  = 1./Math.sqrt(1./(hOTS.get(i-1)._hitError*hOTS.get(i-1)._hitError) + 1./(hOTS.get(i)._hitError*hOTS.get(i)._hitError) );
+                    hOTS.get(i - 1)._doca[1] = hOTS.get(i)._doca[0];
+                    hOTS.get(i - 1)._Unc[1] = hOTS.get(i)._Unc[0];
+                    hOTS.get(i - 1)._wireLine[1] = hOTS.get(i)._wireLine[0];
                     hOTS.remove(i);
                 }
             }
         }
+        
 
         measurements = new ArrayList<MeasVec>(hOTS.size());
 
@@ -118,7 +129,7 @@ public class MeasVecs {
             meas.error = hOTS.get(i)._hitError;
             meas.unc = hOTS.get(i)._Unc; //uncertainty used in KF fit
             meas.tilt = hOTS.get(i)._tilt;
-            meas.wireLen = hOTS.get(i)._wireLen;
+            meas.doca = hOTS.get(i)._doca;
             meas.wireMaxSag = hOTS.get(i)._wireMaxSag;
             meas.wireLine = hOTS.get(i)._wireLine;
             this.measurements.add(i, meas);
@@ -140,19 +151,18 @@ public class MeasVecs {
                 double Z = hitOnTrk.get_Z();
                 double X = sl1 * Z + it1;
                 HitOnTrack hot = new HitOnTrack(slayr, X, Z, 
-                        hitOnTrk.get_WireLength(), 
                         hitOnTrk.get_WireMaxSag(),
                         hitOnTrk.get_WireLine());
-                double err_sl1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitSlopeErr();
-                double err_it1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitInterceptErr();
-                double err_cov1 = trk.get_ListOfHBSegments().get(s).get_fittedCluster().get_clusterLineFitSlIntCov();
-
-                hot._Unc = Math.sqrt(err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1);
-                //hot._hitError = err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1 + 2 * Z * err_cov1 + trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr()*trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr();
-                hot._hitError = trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr()*trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr()*4;
+                
+                hot._doca[0] = trk.get_ListOfHBSegments().get(s).get(h).get_Doca();
+                
+                double LR = Math.signum(trk.get_ListOfHBSegments().get(s).get(h).get_XWire()-trk.get_ListOfHBSegments().get(s).get(h).get_X());
+                hot._doca[0]*=LR;
+                hot._hitError = trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr()*trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr();
+                //System.out.println(" Z "+Z+" ferr "+(float)(hot._Unc /(hot._hitError/4.)));
+                hot._Unc[0] = hot._hitError;
                 hot.region = trk.get_ListOfHBSegments().get(s).get(h).get_Region();
-                //if(Math.abs(trk.get_ListOfHBSegments().get(s).get(h).get_Residual())<1) 
-                    hOTS.add(hot);
+                hOTS.add(hot);
                 
             }
         }
@@ -162,8 +172,9 @@ public class MeasVecs {
         for (int i = 0; i < hOTS.size(); i++) {
             if (i > 0) {
                 if (Math.abs(hOTS.get(i - 1)._Z - hOTS.get(i)._Z)<0.01) {
-                    hOTS.get(i - 1)._X = (hOTS.get(i - 1)._X / (hOTS.get(i - 1)._Unc * hOTS.get(i - 1)._Unc) + hOTS.get(i)._X / (hOTS.get(i)._Unc * hOTS.get(i)._Unc)) / (1. / (hOTS.get(i - 1)._Unc * hOTS.get(i - 1)._Unc) + 1. / (hOTS.get(i)._Unc * hOTS.get(i)._Unc));
-                    //hOTS.get(i-1)._hitError  = 1./Math.sqrt(1./(hOTS.get(i-1)._hitError*hOTS.get(i-1)._hitError) + 1./(hOTS.get(i)._hitError*hOTS.get(i)._hitError) );
+                    hOTS.get(i - 1)._doca[1] = hOTS.get(i)._doca[0];
+                    hOTS.get(i - 1)._Unc[1] = hOTS.get(i)._Unc[0];
+                    hOTS.get(i - 1)._wireLine[1] = hOTS.get(i)._wireLine[0];
                     hOTS.remove(i);
                 }
             }
@@ -179,9 +190,10 @@ public class MeasVecs {
             meas.error = hOTS.get(i)._hitError;
             meas.unc = hOTS.get(i)._Unc; //uncertainty used in KF fit
             meas.tilt = hOTS.get(i)._tilt;
-            meas.wireLen = hOTS.get(i)._wireLen;
+            meas.doca = hOTS.get(i)._doca;
             meas.wireMaxSag = hOTS.get(i)._wireMaxSag;
-            meas.wireLine = hOTS.get(i)._wireLine;
+            meas.wireLine[0] = hOTS.get(i)._wireLine[0];
+            meas.wireLine[1] = hOTS.get(i)._wireLine[1];
             this.measurements.add(i, meas);
             //System.out.println(" measurement "+i+" = "+meas.x+" at "+meas.z);
         }
@@ -192,12 +204,12 @@ public class MeasVecs {
         final int k;
         public double z;
         public double x;
-        public double unc;
+        public double[] unc = new double[2];
         public double tilt;
         public double error;
-        public double wireLen;
+        public double[] doca = new double[2];
         public double wireMaxSag;
-        public Line3D wireLine;
+        public Line3D[] wireLine = new Line3D[2];
         boolean reject = false;
         int region;
         
@@ -213,25 +225,23 @@ public class MeasVecs {
         public double _hitError;
         private double _X;
         private double _Z;
-        private double _Unc;
+        private double[] _Unc = new double[2];
         private double _tilt;
-        private double _wireLen;
+        private double[] _doca = new double[2];
         private double _wireMaxSag;
-        private Line3D _wireLine;
+        private Line3D[] _wireLine = new Line3D[2];
         private int region;
 
-        HitOnTrack(int superlayer, double X, double Z, double wirelen, double wiremaxsag, Line3D wireLine) {
+        HitOnTrack(int superlayer, double X, double Z, double wiremaxsag, Line3D wireLine) {
             _X = X;
             _Z = Z;
-            _wireLen = wirelen;
             _wireMaxSag = wiremaxsag;
-            _wireLine = wireLine;
+            _wireLine[0] = wireLine;
+            _doca[0] = -99;
+            _doca[1] = -99;
+            _Unc[0] = 1;
+            _Unc[1] = 1;
             
-             //int s = (int)(superlayer) % 2;
-             //int tilt = 1;
-             //if (s == 0) {
-             //    tilt = -1;
-             //}
              //use stereo angle in fit based on wire direction
             _tilt = 90-Math.toDegrees(wireLine.direction().asUnit().angle(new Vector3D(1,0,0)));
         }

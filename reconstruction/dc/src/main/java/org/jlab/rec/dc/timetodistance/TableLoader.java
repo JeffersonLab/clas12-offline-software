@@ -36,26 +36,25 @@ public class TableLoader {
      */
     public static void test(){
             TimeToDistanceEstimator tde = new TimeToDistanceEstimator();
-            for(int s = 0; s<6; s++ ){ // loop over sectors
-                    for(int r = 0; r<6; r++ ){ //loop over slys
-                            for(int ibfield =0; ibfield<BfieldValues.length; ibfield++) {
+            for(int s = 0; s<1; s++ ){ // loop over sectors
+                    for(int r = 4; r<5; r++ ){ //loop over slys
+                            for(int ibfield =0; ibfield<1; ibfield++) {
+                                for (int tb = 250; tb< 300; tb++) {
+                                    System.out.println(" NEW TIME BIN ");
                                     for(int icosalpha =0; icosalpha<maxBinIdxAlpha+1; icosalpha++) {
                                             //for (int tb = 0; tb< maxBinIdxT[s][r][ibfield][icosalpha]; tb++) {
-                                                for (int tb = 0; tb< nBinsT; tb++) {
-                                                    if(DISTFROMTIME[s][r][ibfield][icosalpha][tb]==0 && tb>1)
-                                                        DISTFROMTIME[s][r][ibfield][icosalpha][tb]=DISTFROMTIME[s][r][ibfield][icosalpha][tb-1];
-                                                    if(DISTFROMTIME[s][r][ibfield][icosalpha][tb]==0)
-                                                        System.out.println("Bbin "+ibfield+" cos "+icosalpha+" tb "+tb);
-                                                //double Xalpha = -(Math.toDegrees(Math.acos(Math.cos(Math.toRadians(30.)) + (icosalpha)*(1. - Math.cos(Math.toRadians(30.)))/5.)) - 30.);
-                                                //double Xtime=(2*tb+1);
+                                                
+                                                    
+                                                double Xalpha = -(Math.toDegrees(Math.acos(Math.cos(Math.toRadians(30.)) + (icosalpha)*(1. - Math.cos(Math.toRadians(30.)))/5.)) - 30.);
+                                                double Xtime=(2*tb+1);
                                                 
                                                 //for (int k=0; k<10; k++){
-                                                //double Bf = (ibfield+0.1*k)*0.5;
-                                                //int bbin = tde.getBIdx(Bf);
-                                                //double Xdoca=tde.interpolateOnGrid((double) Bf, Xalpha, Xtime, s, r);
-                                                  //  System.out.println("Bbin "+ibfield+" B "+ (float)Bf+" sl "+(r+1)+" time "+Xtime+" tb "+tb+" timeBin "+tde.getTimeIdx(Xtime, s, r, ibfield, icosalpha)
-                                                   //         +" icosalpha "+icosalpha+" Xalpha "+(float) Xalpha + " dis "+ (float)DISTFROMTIME[s][r][bbin][icosalpha][tde.getTimeIdx(Xtime, s, r, ibfield, icosalpha)] +" dis' "+
-                                                    //      (float) Xdoca );
+                                                double Bf = (ibfield)*0.5;
+                                                int bbin = tde.getBIdx(Bf);
+                                                double Xdoca=tde.interpolateOnGrid((double) Bf, Xalpha, Xtime, s, r);
+                                                    System.out.println("Bbin "+ibfield+" B "+ (float)Bf+" sl "+(r+1)+" time "+Xtime+" tb "+tb+" timeBin "+tde.getTimeIdx(Xtime, s, r, ibfield, icosalpha)
+                                                            +" icosalpha "+icosalpha+" Xalpha "+(float) Xalpha + " dis "+ (float)DISTFROMTIME[s][r][bbin][icosalpha][tde.getTimeIdx(Xtime, s, r, ibfield, icosalpha)] +" dis' "+
+                                                          (float) Xdoca );
                                                 //}
                                             }
 
@@ -131,7 +130,7 @@ public class TableLoader {
         //CCDBTables 1 =  "/calibration/dc/time_to_distance/t2d";
         //CCDBTables 2 =  "/calibration/dc/time_corrections/T0_correction";	
         if (T2DLOADED) return;
-        System.out.println(" T2D TABLE FILLED.....");
+        
         double stepSize = 0.0010;
         DecimalFormat df = new DecimalFormat("#");
         df.setRoundingMode(RoundingMode.CEILING);
@@ -201,7 +200,8 @@ public class TableLoader {
                 }
         }	
         TableLoader.fillMissingTableBins();
-        
+        TableLoader.test();
+        System.out.println(" T2D TABLE FILLED.....");
         T2DLOADED = true;
      }
 

@@ -13,6 +13,7 @@ import org.jlab.rec.dc.cross.CrossList;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.track.fit.KFitter;
+//import org.jlab.rec.dc.track.fit.KFitterDoca;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;

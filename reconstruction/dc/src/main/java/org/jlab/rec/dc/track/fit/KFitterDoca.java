@@ -1,0 +1,340 @@
+package org.jlab.rec.dc.track.fit;
+
+import Jama.Matrix;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.rec.dc.track.Track;
+import org.jlab.rec.dc.track.fit.StateVecsDoca.CovMat;
+import org.jlab.rec.dc.track.fit.StateVecsDoca.StateVec;
+
+
+/**
+ * @author ziegler
+ */
+public class KFitterDoca {
+
+    public boolean setFitFailed = false;
+
+    private StateVecsDoca sv;
+    private MeasVecsDoca mv = new MeasVecsDoca();
+
+    public StateVec finalStateVec;
+    public CovMat finalCovMat;
+    public List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory;
+    public int totNumIter = 30;
+    private double newChisq = Double.POSITIVE_INFINITY;
+
+    public double chi2 = 0;
+    private double chi2kf = 0;
+    public int NDF = 0;
+    public int ConvStatus = 1;
+
+    public KFitterDoca(Track trk, DCGeant4Factory DcDetector,
+                   boolean TimeBasedUsingHBtrack,
+                   Swim swimmer) {
+        sv = new StateVecsDoca(swimmer);
+        if (TimeBasedUsingHBtrack) {
+            this.initFromHB(trk, DcDetector);
+        } else {
+            this.init(trk, DcDetector);
+        }
+    }
+
+    private void initFromHB(Track trk, DCGeant4Factory DcDetector) {
+        mv.setMeasVecsFromHB(trk, DcDetector);
+        int mSize = mv.measurements.size();
+        sv.Z = new double[mSize];
+
+        for (int i = 0; i < mSize; i++) {
+            sv.Z[i] = mv.measurements.get(i).z;
+        }
+        sv.initFromHB(trk, sv.Z[0], this);
+    }
+
+    public void init(Track trk, DCGeant4Factory DcDetector) {
+        mv.setMeasVecs(trk, DcDetector);
+        int mSize = mv.measurements.size();
+
+        sv.Z = new double[mSize];
+
+        for (int i = 0; i < mSize; i++) {
+            sv.Z[i] = mv.measurements.get(i).z;
+        }
+        sv.init(trk, sv.Z[0], this);
+    }
+    public int interNum = 0;
+    public void runFitter(int sector) {
+        this.chi2 = 0;
+        this.NDF = mv.ndf;
+        int svzLength = sv.Z.length;
+        
+//        IntStream.range(1,totNumIter ).parallel().forEach(i -> {
+        for (int i = 1; i <= totNumIter; i++) {
+            interNum = i;
+            this.chi2kf = 0;
+            if (i > 1) {
+                //get new state vec at 1st measurement after propagating back from the last filtered state
+                /*sv.transport(sector,
+                        svzLength - 1,
+                        0,
+                        sv.trackTraj.get(svzLength - 1),
+                        sv.trackCov.get(svzLength- 1)); */
+                for (int k = svzLength - 1; k >0; k--) {
+                    //if(i==2 && this.totNumIter==30)
+                    //System.out.println("sector " +sector+"stateVec "+sv.trackTraj.get(k).printInfo());
+                    if(k>=2) {
+                        sv.transport(sector, k, k - 2,
+                            sv.trackTraj.get(k),
+                            sv.trackCov.get(k));
+                        this.filter(k - 2);
+                        sv.transport(sector, k - 2, k - 1,
+                            sv.trackTraj.get(k - 2),
+                            sv.trackCov.get(k - 2));
+                        this.filter(k - 1);
+                    } else {
+                        sv.transport(sector, 1, 0,
+                            sv.trackTraj.get(1),
+                            sv.trackCov.get(1));
+                        this.filter(0);
+                    }
+                }
+            }
+            for (int k = 0; k < svzLength - 1; k++) {
+                //if(i==2 && this.totNumIter==30)
+                //System.out.println("stateVec "+sv.trackTraj.get(k).printInfo());
+                sv.transport(sector, k, k + 1,
+                        sv.trackTraj.get(k),
+                        sv.trackCov.get(k));
+                    this.filter(k + 1);
+            }
+            if (i > 1) {
+                if(this.setFitFailed==true)
+                    i = totNumIter;
+                if (this.setFitFailed==false) {
+                    if(this.finalStateVec!=null) {
+                        if(Math.abs(sv.trackTraj.get(svzLength - 1).Q-this.finalStateVec.Q)<5.e-4 &&
+                                Math.abs(sv.trackTraj.get(svzLength - 1).x-this.finalStateVec.x)<1.e-4 &&
+                                Math.abs(sv.trackTraj.get(svzLength - 1).y-this.finalStateVec.y)<1.e-4 &&
+                                Math.abs(sv.trackTraj.get(svzLength - 1).tx-this.finalStateVec.tx)<1.e-6 &&
+                                Math.abs(sv.trackTraj.get(svzLength - 1).ty-this.finalStateVec.ty)<1.e-6) {
+                            i = totNumIter;
+                        }
+                    }
+                    this.finalStateVec = sv.trackTraj.get(svzLength - 1);
+                    this.finalCovMat = sv.trackCov.get(svzLength - 1);
+                    
+                } else {
+                    this.ConvStatus = 1;
+                }
+            }
+        }
+//        });
+        if(totNumIter==1) {
+            this.finalStateVec = sv.trackTraj.get(svzLength - 1);
+            this.finalCovMat = sv.trackCov.get(svzLength - 1);
+        }
+        this.calcFinalChisq(sector);
+
+    }
+
+    public Matrix filterCovMat(double[] H, Matrix C, double V) {
+        Matrix Ci;
+
+        if (!this.isNonsingular(C)) {
+            return null;
+        }
+        try {
+            Ci = C.inverse();
+        } catch (Exception e) {
+            return null;
+        }
+        double[][] HTGH = new double[][]{
+                    {H[0] * H[0] / V, H[0] * H[1] / V, 0, 0, 0},
+                    {H[0] * H[1] / V, H[1] * H[1] / V, 0, 0, 0},
+                    {0, 0, 0, 0, 0},
+                    {0, 0, 0, 0, 0},
+                    {0, 0, 0, 0, 0}
+        };
+        Matrix Ca;
+        try {
+            Ca = Ci.plus(new Matrix(HTGH));
+        } catch (Exception e) {
+            return null;
+        }
+        if (Ca != null && !this.isNonsingular(Ca)) {
+            return null;
+        }
+        if (Ca != null) {
+            Matrix CaInv = Ca.inverse();
+            if (CaInv != null) {
+                return CaInv;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+    private void filter(int k) {
+        if (sv.trackTraj.get(k) != null &&
+                sv.trackCov.get(k).covMat != null &&
+                k < sv.Z.length 
+                && mv.measurements.get(k).reject==false) {
+            
+            
+            double[] K = new double[5];
+            double V = mv.measurements.get(k).unc[0]*4;
+            double[] H = mv.H(new double[]{sv.trackTraj.get(k).x, sv.trackTraj.get(k).y},
+                    mv.measurements.get(k).z,
+                    mv.measurements.get(k).wireLine[0]);
+            Matrix CaInv = this.filterCovMat(H, sv.trackCov.get(k).covMat, V);
+            if (CaInv != null) {
+                    sv.trackCov.get(k).covMat = CaInv;
+                } else {
+                    return;
+            }
+
+            for (int j = 0; j < 5; j++) {
+                // the gain matrix
+                K[j] = (H[0] * sv.trackCov.get(k).covMat.get(j, 0) +
+                        H[1] * sv.trackCov.get(k).covMat.get(j, 1)) / V;
+            }
+            
+            double h = mv.h(new double[]{sv.trackTraj.get(k).x, sv.trackTraj.get(k).y},
+                    mv.measurements.get(k).z,
+                    mv.measurements.get(k).wireLine[0]);
+            
+            double sign = Math.signum(mv.measurements.get(k).doca[0]);
+            //if(this.interNum>1)
+            //    sign = Math.signum(h);
+            double c2 = ((sign*Math.abs(mv.measurements.get(k).doca[0]) - h) * (sign*Math.abs(mv.measurements.get(k).doca[0]) - h) / V);
+            //if(sign!=Math.signum(h) && this.interNum>1) System.out.println(sv.trackTraj.get(k).printInfo()+" h "+(float)h);
+            double x_filt = sv.trackTraj.get(k).x + K[0] * (sign*Math.abs(mv.measurements.get(k).doca[0]) - h);
+            double y_filt = sv.trackTraj.get(k).y + K[1] * (sign*Math.abs(mv.measurements.get(k).doca[0]) - h);
+            double tx_filt = sv.trackTraj.get(k).tx + K[2] * (sign*Math.abs(mv.measurements.get(k).doca[0]) - h);
+            double ty_filt = sv.trackTraj.get(k).ty + K[3] * (sign*Math.abs(mv.measurements.get(k).doca[0]) - h);
+            double Q_filt = sv.trackTraj.get(k).Q + K[4] * (sign*Math.abs(mv.measurements.get(k).doca[0]) - h);
+               
+            //USE THE DOUBLE HIT
+            if(mv.measurements.get(k).doca[1]!=-99) { 
+                //now filter using the other Hit
+                V = mv.measurements.get(k).unc[1]*4;
+                H = mv.H(new double[]{x_filt, y_filt},
+                    mv.measurements.get(k).z,
+                    mv.measurements.get(k).wireLine[1]);
+                CaInv = this.filterCovMat(H, sv.trackCov.get(k).covMat, V);
+                if (CaInv != null) {
+                        sv.trackCov.get(k).covMat = CaInv;
+                    } else {
+                        return;
+                }
+                for (int j = 0; j < 5; j++) {
+                // the gain matrix
+                K[j] = (H[0] * sv.trackCov.get(k).covMat.get(j, 0) +
+                        H[1] * sv.trackCov.get(k).covMat.get(j, 1)) / V;
+                }
+                h=mv.h(new double[]{x_filt, y_filt},
+                    mv.measurements.get(k).z,
+                    mv.measurements.get(k).wireLine[1]);   
+            
+                sign = Math.signum(mv.measurements.get(k).doca[1]);
+                //if(this.interNum>1)
+                //    sign = Math.signum(h);
+                
+                x_filt += K[0] * (sign*Math.abs(mv.measurements.get(k).doca[1]) - h);
+                y_filt += K[1] * (sign*Math.abs(mv.measurements.get(k).doca[1]) - h);
+                tx_filt += K[2] * (sign*Math.abs(mv.measurements.get(k).doca[1]) - h);
+                ty_filt += K[3] * (sign*Math.abs(mv.measurements.get(k).doca[1]) - h);
+                Q_filt += K[4] * (sign*Math.abs(mv.measurements.get(k).doca[1]) - h);
+              
+                c2 += ((sign*Math.abs(mv.measurements.get(k).doca[1]) - h) * (sign*Math.abs(mv.measurements.get(k).doca[1]) - h) / V);
+            } 
+            
+            chi2kf += c2;
+            sv.trackTraj.get(k).x = x_filt;
+            sv.trackTraj.get(k).y = y_filt;
+            sv.trackTraj.get(k).tx = tx_filt;
+            sv.trackTraj.get(k).ty = ty_filt;
+            sv.trackTraj.get(k).Q = Q_filt;
+
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private void smooth(int sector, int k) {
+        this.chi2 = 0;
+        if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null) {
+            sv.transport(sector, k, 0, sv.trackTraj.get(k), sv.trackCov.get(k));
+            for (int k1 = 0; k1 < k; k1++) {
+                sv.transport(sector, k1, k1 + 1, sv.trackTraj.get(k1), sv.trackCov.get(k1));
+                this.filter(k1 + 1);
+            }
+        }
+    }
+
+    private void calcFinalChisq(int sector) {
+        int k = sv.Z.length - 1;
+        this.chi2 = 0;
+        double path = 0;
+        double[] nRj = new double[3];
+        
+        kfStateVecsAlongTrajectory = new ArrayList<>();
+        if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null) {
+            sv.transport(sector, sv.Z.length - 1, 0,
+                    sv.trackTraj.get(sv.Z.length - 1),
+                    sv.trackCov.get(sv.Z.length - 1));
+            org.jlab.rec.dc.trajectory.StateVec svc =
+                    new org.jlab.rec.dc.trajectory.StateVec(sv.trackTraj.get(0).x,
+                            sv.trackTraj.get(0).y,
+                            sv.trackTraj.get(0).tx,
+                            sv.trackTraj.get(0).ty);
+            svc.setZ(sv.trackTraj.get(0).z);
+            svc.setB(sv.trackTraj.get(0).B);
+            path += sv.trackTraj.get(0).deltaPath;
+            svc.setPathLength(path);
+            double h0 = mv.h(new double[]{sv.trackTraj.get(0).x, sv.trackTraj.get(0).y},
+                    mv.measurements.get(0).z,
+                    mv.measurements.get(0).wireLine[0]);
+            svc.setProjector(mv.measurements.get(k).wireLine[0].origin().x()+h0/Math.cos(Math.toRadians(6.)));
+            kfStateVecsAlongTrajectory.add(svc); 
+            double res = (mv.measurements.get(0).doca[0] - h0);
+            chi2 += (mv.measurements.get(0).doca[0] - h0) * (mv.measurements.get(0).doca[0] - h0) / mv.measurements.get(0).error;
+            nRj[mv.measurements.get(0).region-1]+=res*res/mv.measurements.get(0).error;
+            
+            for (int k1 = 0; k1 < k; k1++) {
+                sv.transport(sector, k1, k1 + 1, sv.trackTraj.get(k1), sv.trackCov.get(k1));
+
+                double V = mv.measurements.get(k1 + 1).error;
+                double h = mv.h(new double[]{sv.trackTraj.get(k1 + 1).x, sv.trackTraj.get(k1 + 1).y},
+                    mv.measurements.get(k1 + 1).z,
+                    mv.measurements.get(k1 + 1).wireLine[0]);
+                svc = new org.jlab.rec.dc.trajectory.StateVec(sv.trackTraj.get(k1 + 1).x,
+                        sv.trackTraj.get(k1 + 1).y,
+                        sv.trackTraj.get(k1 + 1).tx,
+                        sv.trackTraj.get(k1 + 1).ty);
+                svc.setZ(sv.trackTraj.get(k1 + 1).z);
+                svc.setB(sv.trackTraj.get(k1 + 1).B);
+                path += sv.trackTraj.get(k1 + 1).deltaPath;
+                svc.setPathLength(path);
+                svc.setProjector(mv.measurements.get(k1 + 1).wireLine[0].origin().x()+h/Math.cos(Math.toRadians(6.)));
+                kfStateVecsAlongTrajectory.add(svc); 
+                res = (mv.measurements.get(k1 + 1).doca[0]  - h);
+                chi2 += (mv.measurements.get(k1 + 1).doca[0]  - h) * (mv.measurements.get(k1 + 1).doca[0]  - h) / V;
+                
+                nRj[mv.measurements.get(k1 + 1).region-1]+=res*res/V;
+            
+            } 
+        } 
+        
+    }
+
+    private boolean isNonsingular(Matrix mat) {
+        double matDet = mat.det();
+        return Math.abs(matDet) >= 1.e-30;
+    }
+
+}

@@ -14,6 +14,7 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.dc.Constants;
 /**
  * A class to load the geometry constants used in the DC reconstruction. The
  * coordinate system used in the Tilted Sector coordinate system.
@@ -39,7 +40,22 @@ public class TrajectorySurfaces {
             DCGeant4Factory dcDetector,
             FTOFGeant4Factory ftofDetector,
             Detector ecalDetector) {
-       
+        // creating Boundaries for MS 
+        Constants.Z[0]= targetPosition;
+        Constants.Z[1]= dcDetector.getWireMidpoint(0, 0, 0, 0).z;
+        Constants.Z[2]= dcDetector.getWireMidpoint(0, 0, 5, 0).z;
+        Constants.Z[3]= dcDetector.getWireMidpoint(0, 1, 0, 0).z;
+        Constants.Z[4]= dcDetector.getWireMidpoint(0, 1, 5, 0).z;
+        Constants.Z[5]= dcDetector.getWireMidpoint(0, 2, 0, 0).z;
+        Constants.Z[6]= dcDetector.getWireMidpoint(0, 2, 5, 0).z;
+        Constants.Z[7]= dcDetector.getWireMidpoint(0, 3, 0, 0).z;
+        Constants.Z[8]= dcDetector.getWireMidpoint(0, 3, 5, 0).z;
+        Constants.Z[9]= dcDetector.getWireMidpoint(0, 4, 0, 0).z;
+        Constants.Z[10]= dcDetector.getWireMidpoint(0, 4, 5, 0).z;
+        Constants.Z[11]= dcDetector.getWireMidpoint(0, 5, 0, 0).z;
+        Constants.Z[12]= dcDetector.getWireMidpoint(0, 5, 5, 0).z;
+        //DcDetector.getWireMidpoint(this.get_Sector()-1, this.get_Superlayer()-1, this.get_Layer()-1, this.get_Wire()-1).z;
+        
         double d = 0;
         Vector3D n;
         for(int is =0; is<6; is++) {
@@ -119,4 +135,6 @@ public class TrajectorySurfaces {
 //
 //        return new Point3D(rx,ry,rzs);
 //    }
+    
+    
 }

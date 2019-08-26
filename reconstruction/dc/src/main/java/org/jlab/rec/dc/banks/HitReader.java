@@ -335,7 +335,7 @@ public class HitReader {
             hit.calc_CellSize(DcDetector);
             hit.calc_GeomCorr(DcDetector, 0);
             hit.set_ClusFitDoca(trkDoca[i]);
-            hit.set_TimeToDistance(event, 1.0, B[i], constants1, tde);
+            hit.set_TimeToDistance(event, 0.0, B[i], constants1, tde);
 
             hit.set_QualityFac(0);
             if (hit.get_Doca() > hit.get_CellSize()) {
@@ -349,8 +349,8 @@ public class HitReader {
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
             
-            hits.add(hit);
-            
+            if(hit.betaFlag != -1)
+                hits.add(hit);            
         }
 
         this.set_HBHits(hits);
@@ -358,9 +358,9 @@ public class HitReader {
     //betaFlag:0 = OK; -1 = negative; 1 = less than lower cut (0.15); 2 = greater than 1.15 (from HBEB beta vs p plots for data)
     private void set_BetaFlag(DataEvent event, int trkId, FittedHit hit, double beta) {
         if(beta<0.15) {
-            this.set_ToPionHypothesis(event, trkId, hit);
             if(beta<0) {
                 hit.betaFlag = -1;
+                this.set_ToPionHypothesis(event, trkId, hit);
             } else {
                 hit.betaFlag = 1;
             }

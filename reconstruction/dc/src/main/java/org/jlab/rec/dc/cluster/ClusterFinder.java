@@ -380,6 +380,7 @@ public class ClusterFinder {
                         newhit.set_DeltaTimeBeta(hit.get_DeltaTimeBeta());
                         newhit.setTStart(hit.getTStart());
                         newhit.setTProp(hit.getTProp());
+                        newhit.betaFlag= hit.betaFlag;
                         newhit.setTFlight(hit.getTFlight());
                         newhit.set_Time(hit.get_Time());
                         newhit.set_Id(hit.get_Id());
