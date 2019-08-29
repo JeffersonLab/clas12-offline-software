@@ -822,9 +822,6 @@ public class HelixFitJava {
             h.set_Rho(R);
             h.set_Phi(Phi_deg);
             h.set_Theta(Theta_deg);
-            h.set_A(A);
-            h.set_B(B);
-            h.set_Z0(Z0);
 	    return h;
 	  }
 

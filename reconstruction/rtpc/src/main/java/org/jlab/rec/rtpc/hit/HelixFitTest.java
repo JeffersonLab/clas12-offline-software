@@ -7,10 +7,6 @@ package org.jlab.rec.rtpc.hit;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
-import org.jlab.groot.data.*;
-import org.jlab.groot.ui.*;
-import org.jlab.groot.graphics.*;
 
 /**
  *
