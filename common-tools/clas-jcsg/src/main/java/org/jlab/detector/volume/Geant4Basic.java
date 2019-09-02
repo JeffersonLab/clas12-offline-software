@@ -210,9 +210,9 @@ public abstract class Geant4Basic {
         System.arraycopy(id, 0, volumeId, 0, volumeId.length);
     }
 
+    
     public String gemcString() {
         StringBuilder str = new StringBuilder();
-        DecimalFormat df = new DecimalFormat("#.####");
 
         if (motherVolume == null) {
             str.append(String.format("%18s | |", volumeName));
@@ -220,9 +220,11 @@ public abstract class Geant4Basic {
             str.append(String.format("%18s | %8s | ", volumeName, motherVolume.getName()));
         }
 
+        DecimalFormat precisionFormat = new DecimalFormat("#.#######");
+
         Vector3d pos = getLocalPosition();
         str.append(String.format("%s*%s %s*%s %s*%s | ",
-                df.format(pos.x), Length.unit(), df.format(pos.y), Length.unit(), df.format(pos.z), Length.unit()));
+                precisionFormat.format(pos.x), Length.unit(), precisionFormat.format(pos.y), Length.unit(), precisionFormat.format(pos.z), Length.unit()));
 
         if (rotationValues[0] == 0 && rotationValues[1] == 0 && rotationValues[2] == 0) {
             str.append("0 0 0 ");
@@ -231,12 +233,12 @@ public abstract class Geant4Basic {
                 str.append(String.format("ordered: %s ", new StringBuilder(this.rotationOrder).reverse().toString()));
             }
             for (int irot = 0; irot < rotationValues.length; irot++) {
-                str.append(df.format(Math.toDegrees(rotationValues[rotationValues.length - irot - 1]))).append("*deg ");
+                str.append(precisionFormat.format(Math.toDegrees(rotationValues[rotationValues.length - irot - 1]))).append("*deg ");
             }
         }
         str.append(String.format("| %8s | ", this.getType()));
         volumeDimensions.stream()
-                .forEach(dim -> str.append(df.format(dim.value)).append("*").append(dim.unit).append(" "));
+                .forEach(dim -> str.append(precisionFormat.format(dim.value)).append("*").append(dim.unit).append(" "));
         str.append(" | ");
 
         int[] ids = this.getId();

@@ -15,7 +15,8 @@ public class EBHBEngine extends EBEngine {
     public EBHBEngine(){
         super("EBHB");
     }
-    
+   
+    @Override
     public boolean processDataEvent(DataEvent de) {
         return super.processDataEvent(de,ebScalers);
     }

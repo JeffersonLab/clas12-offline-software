@@ -92,11 +92,11 @@ public class EngineProcessor {
             "org.jlab.service.band.BANDEngine",
             "org.jlab.service.htcc.HTCCReconstructionService",
             "org.jlab.service.ltcc.LTCCEngine",
-            "org.jlab.rec.rich.RICHEBEngine",
             "org.jlab.service.eb.EBHBEngine",
             "org.jlab.service.dc.DCTBEngine",
             "org.jlab.service.ftof.FTOFTBEngine",
-            "org.jlab.service.eb.EBTBEngine"
+            "org.jlab.service.eb.EBTBEngine",
+            "org.jlab.rec.rich.RICHEBEngine"
         };
         
         for(int i = 0; i < names.length; i++){

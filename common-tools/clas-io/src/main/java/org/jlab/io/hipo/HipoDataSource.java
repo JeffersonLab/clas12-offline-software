@@ -133,11 +133,20 @@ public class HipoDataSource implements DataSource {
 
     @Override
     public DataEvent gotoEvent(int index) {
-       /* HipoEvent  hipoEvent = reader.readEvent(index);
-        hipoEvent.getDataBuffer();
-        HipoDataEvent  evioEvent = new HipoDataEvent(hipoEvent.getDataBuffer(),hipoEvent.getSchemaFactory());
-        return evioEvent;*/
-        return null;
+        Event event = new Event();
+        reader.getEvent(event, index);
+        /*hipoEvent.getDataBuffer();        
+        System.out.println(" GET NEXT HIPO EVENT : DICTIONARY SIZE = " + 
+                hipoEvent.getSchemaFactory().getSchemaList().size() + "  EVENT LENGTH = "
+                + hipoEvent.getDataBuffer().length);
+        hipoEvent.showNodes();*/
+        HipoDataEvent  hipoEvent = new HipoDataEvent(event,reader.getSchemaFactory());
+        if(reader.hasNext()==true){
+            hipoEvent.setType(DataEventType.EVENT_ACCUMULATE);
+        } else {
+            hipoEvent.setType(DataEventType.EVENT_STOP);
+        }
+        return hipoEvent;       
     }
     
     @Override
