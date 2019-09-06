@@ -799,7 +799,7 @@ public class RecoBankWriter {
                     continue;  // save the last layer in a superlayer
 
                 bank.setShort("id",       i1, (short) track.get_Id());
-                bank.setShort("detector", i1, (short) track.trajectory.get(j).getDetId());
+                bank.setByte("detector",  i1, (byte) track.trajectory.get(j).getDetId());
                 bank.setByte("layer",     i1, (byte) track.trajectory.get(j).getLayerId());
                 bank.setFloat("x",        i1, (float) track.trajectory.get(j).getX());
                 bank.setFloat("y",        i1, (float) track.trajectory.get(j).getY());

@@ -239,7 +239,7 @@ public class HitReader implements IMatchedHit {
 //                    System.out.println(trkHit.getPaddle() + " " + dir);
                     if(dir>0) {
                         // create the new track updating the path to the intersection point
-                        Track ctofTrkHit = new Track(trk.getId(),trk.getLine(),trk.getPath()+trk.getLine().origin().distance(hit.mid()));
+                        Track ctofTrkHit = new Track(trk.getId(),trk.getLine(),trk.getPath());
                         ctofTrkHit.setHit(trkHit);
                         // if map entry for the given paddle doesn't already exist, add it
                         if(!trkHitsMap.hasItem(trkHit.getPaddle())) { 
@@ -281,8 +281,10 @@ public class HitReader implements IMatchedHit {
                 ctofHit.set_TrkPathLen(matchedTrk.getPath());
                 // get the coordinates for the track hit, which is defined
                 // as the mid-point between its entrance and its exit from
-                // the bar
-                ctofHit.set_TrkPosition(new Point3D(trkHit.mid().x,trkHit.mid().y, trkHit.mid().z));
+                // the bar                
+                ctofHit.set_TrkPosition(new Point3D((matchedTrk.getLine().origin().x+matchedTrk.getLine().end().x)/2,
+                                                    (matchedTrk.getLine().origin().y+matchedTrk.getLine().end().y)/2,
+                                                    (matchedTrk.getLine().origin().z+matchedTrk.getLine().end().z)/2));
                 // compute the local y at the middle of the bar :
                 // ----------------------------------------------
                 Point3D origPaddleLine = ctofHit.get_paddleLine().origin();

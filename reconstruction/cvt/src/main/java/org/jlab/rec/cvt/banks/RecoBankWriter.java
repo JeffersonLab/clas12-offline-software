@@ -478,7 +478,7 @@ public class RecoBankWriter {
             for (StateVec stVec : trks.get(i).get_Trajectory()) {
 
                 bank.setShort("id",       k, (short) trks.get(i).get_Id());
-                bank.setShort("detector", k, (byte) stVec.get_SurfaceDetector());
+                bank.setByte("detector", k, (byte) stVec.get_SurfaceDetector());
                 bank.setByte("sector",    k, (byte) stVec.get_SurfaceSector());
                 bank.setByte("layer",     k, (byte) stVec.get_SurfaceLayer());
                 bank.setFloat("x",        k, (float) (stVec.x()/10.));
@@ -530,7 +530,7 @@ public class RecoBankWriter {
             for (StateVec stVec : trks.get(i).get_Trajectory()) {
 
                 bank.setShort("id",       k, (short) trks.get(i).get_Id());
-                bank.setShort("detector", k, (byte) stVec.get_SurfaceDetector());
+                bank.setByte("detector",  k, (byte) stVec.get_SurfaceDetector());
                 bank.setByte("sector",    k, (byte) stVec.get_SurfaceSector());
                 bank.setByte("layer",     k, (byte) stVec.get_SurfaceLayer());
                 bank.setFloat("x",        k, (float) (stVec.x()/10.));

@@ -406,7 +406,7 @@
     "info": "Trajectory bank",
     "entries": [
         {"name":"id",       "type":"S", "info":"id of the track"},
-        {"name":"detector", "type":"S", "info":"id of the detector"},
+        {"name":"detector", "type":"B", "info":"id of the detector"},
         {"name":"layer",    "type":"B", "info":"id of the layer"},
         {"name":"x",        "type":"F", "info":"track x position at detector surface (cm)"},
         {"name":"y",        "type":"F", "info":"track y position at detector surface (cm)"},
