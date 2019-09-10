@@ -25,7 +25,7 @@ public class HelixFitTest {
                 szpos[hit][2] = recotrackmap.get(TID).get(hit).z();
             }
             HelixFitJava h = new HelixFitJava();
-            HelixFitObject ho = h.HelixFit(hit,szpos,0,0,0,0,0,0,1);
+            HelixFitObject ho = h.HelixFit(hit,szpos,1);
             double momfit =  ho.get_Mom();
             double px = ho.get_px();
             double py = ho.get_py();

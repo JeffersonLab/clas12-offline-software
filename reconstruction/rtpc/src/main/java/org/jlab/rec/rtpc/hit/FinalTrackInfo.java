@@ -24,6 +24,7 @@ public class FinalTrackInfo {
         _px = px;
         _py = py;
         _pz = pz;
+        _vz = vz;
         _tl = tl;
         _dEdx = dEdx;
     }

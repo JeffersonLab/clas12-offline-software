@@ -709,10 +709,20 @@ public class HelixFitJava {
 	  //  DCA:       distance of closest approach to beamline
 	  //  Chi2:      ch2ph+ch2z/(npt-5) 
 	  \------------------------------------------------------------------------*/
-	  HelixFitObject helix_fit(int PointNum,double szPos[][], double Rho, double A, double B,
-	    double Phi, double Theta, double X0, double Y0,double Z0,  
-	    double DCA, double Chi2,int fit_track_to_beamline)
+	  HelixFitObject helix_fit(int PointNum,double szPos[][],int fit_track_to_beamline)// double Rho, double A, double B,
+	    //double Phi, double Theta, double X0, double Y0,double Z0,  
+	    //double DCA, double Chi2,int fit_track_to_beamline)
 	  {
+             double Rho;
+             double A;
+             double B;
+             double Phi;
+             double Theta;
+             double X0;
+             double Y0;
+             double Z0;
+             double DCA;
+             double Chi2;
 	     int kMaxHit = 200;  //set it to 200 to match that one in rwfthc.cc
 	     double PI = Math.acos(0.0)*2.0;
 
@@ -808,13 +818,16 @@ public class HelixFitJava {
 	  }
 
 	  /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-	  HelixFitObject HelixFit(int PointNum, double szPos[][], double R, double A, double B,
-	    double Phi_deg, double Theta_deg, double Z0, int fit_track_to_beamline )
+	  HelixFitObject HelixFit(int PointNum, double szPos[][], int fit_track_to_beamline )// double R, double A, double B,
+	    //double Phi_deg, double Theta_deg, double Z0, int fit_track_to_beamline )
 	  {
 	    double PI=Math.acos(0.0)*2;
-	    double Rho=0,Phi=0,Theta=0,X0=0,Y0=0,DCA=0,Chi2=0;
-	    HelixFitObject h = helix_fit(PointNum, szPos, Rho, A, B, Phi, Theta, 
-	      X0, Y0, Z0, DCA, Chi2, fit_track_to_beamline);
+	    //double Rho=0,Phi=0,Theta=0,X0=0,Y0=0,DCA=0,Chi2=0;
+            double R;
+            double Phi_deg;
+            double Theta_deg;
+            
+	    HelixFitObject h = helix_fit(PointNum, szPos, fit_track_to_beamline);
 	    
 	    R=Math.abs(h.get_Rho());
 	    Phi_deg=h.get_Phi()*180./PI;

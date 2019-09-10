@@ -102,6 +102,7 @@ public class RTPCEngine extends ReconstructionEngine{
             DataEvent event = reader.getNextEvent();			
             en.processDataEvent(event);
             writer.writeEvent(event);
+      
         }
         
         writer.close();
