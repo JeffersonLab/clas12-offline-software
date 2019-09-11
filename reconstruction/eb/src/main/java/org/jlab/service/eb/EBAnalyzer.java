@@ -545,7 +545,7 @@ public class EBAnalyzer {
                     }
                     if (found) break;
                 }
-                q = delta_t / sigma;
+                if (sigma>0) q = delta_t / sigma;
             }
 
             // neutrals:
