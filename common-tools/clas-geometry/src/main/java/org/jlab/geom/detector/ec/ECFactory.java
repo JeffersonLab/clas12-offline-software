@@ -147,16 +147,17 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         if (!(0<=superlayerId && superlayerId<3))
             throw new IllegalArgumentException("Error: invalid superlayer="+superlayerId);
         ECSuperlayer superlayer = new ECSuperlayer(sectorId, superlayerId);
-        /*
+        
         int numLayers = (superlayerId == 0)? 15 : // PCAL
                         (superlayerId == 1)? 15 : // Inner EC
                         (superlayerId == 2)? 24 : // Outer EC
                         -1; // ??
-        */
+        /*
         int numLayers = (superlayerId == 0)? 3 : // PCAL
                         (superlayerId == 1)? 3 : // Inner EC
                         (superlayerId == 2)? 3 : // Outer EC
                         -1; // ??
+        */
         for (int layerId=0; layerId<numLayers; layerId++)
             superlayer.addLayer(createLayer(cp, sectorId, superlayerId, layerId));
         return superlayer;
