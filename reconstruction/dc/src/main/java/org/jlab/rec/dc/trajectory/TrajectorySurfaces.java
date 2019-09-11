@@ -89,7 +89,7 @@ public class TrajectorySurfaces {
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.LTCC,1, 653.09, -n.x(), -n.y(), -n.z())); 
             //PCAL
             int superLayer = (int) ((DetectorLayer.PCAL_V-1)/3);
-            int localLayer = (DetectorLayer.PCAL_V-1)%3;
+            int localLayer = 9;//(DetectorLayer.PCAL_V-1)%3;
             P = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().point().toVector3D();
             n = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().normal();
             d = P.dot(n);            

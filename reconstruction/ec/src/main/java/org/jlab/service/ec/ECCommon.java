@@ -44,6 +44,7 @@ public class ECCommon {
     static int ind[]  = {0,0,0,1,1,1,2,2,2}; 
     static float               tps = 0.02345f;
     public static float       veff = 18.1f;
+    private static int pcTrackingPlane = 9;
     
     public  static void initHistos() {
        
@@ -127,7 +128,9 @@ public class ECCommon {
                     + "  LOCAL LAYER = " + localLayer
                     + "  LAYER = " + layer);
             */
-            Layer detLayer = detector.getSector(sector-1).getSuperlayer(superlayer).getLayer(localLayer);
+            int off = (superlayer==0)?pcTrackingPlane:0;
+            
+            Layer detLayer = detector.getSector(sector-1).getSuperlayer(superlayer).getLayer(localLayer+off);
             ScintillatorPaddle      paddle = (ScintillatorPaddle) detLayer.getComponent(component-1);
             ScintillatorPaddle firstPaddle = (ScintillatorPaddle) detLayer.getComponent(0);
             ScintillatorPaddle  lastPaddle = (ScintillatorPaddle) detLayer.getComponent(detLayer.getNumComponents()-1);
