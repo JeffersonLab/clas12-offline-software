@@ -430,6 +430,7 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
     private static void makePcalPlaneAndBoundary(ConstantProvider cp, ECLayer layer, double depth) {
         final double u_length = cp.getDouble("/geometry/pcal/Uview/max_length", 0)*0.1;
         final double yhigh = cp.getDouble("/geometry/pcal/pcal/yhigh", 0)*0.1;
+        final double strip_thick = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0)*0.1;
         final double view_angle = Math.toRadians(cp.getDouble("/geometry/pcal/pcal/view_angle", 0));
         
         double bz = depth;
@@ -441,7 +442,7 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         Point3D b2 = new Point3D(yhigh, -by, bz);
         layer.getBoundary().addFace(new Triangle3D(b0, b1, b2));
         
-        layer.getPlane().set(0, 0, bz, 0, 0, 1);
+        layer.getPlane().set(0, 0, bz+strip_thick/2, 0, 0, 1);
     }
     
     private static ECLayer createECU(ConstantProvider cp, int sectorId, int layerId, int realLayer) {
@@ -498,7 +499,7 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         }
       
         layer.getPlane().set(0, 0, 0, 0, 0, 1);
-        layer.getPlane().translateXYZ(0, 0, dz);
+        layer.getPlane().translateXYZ(0, 0, dz+strip_thick/2);
         layer.getPlane().rotateZ(Math.toRadians(-90));
         
         layer.getBoundary().addFace(new Triangle3D(pA, pC, pB));
@@ -588,7 +589,7 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         }
       
         layer.getPlane().set(0, 0, 0, 0, 0, 1);
-        layer.getPlane().translateXYZ(0, 0, dz);
+        layer.getPlane().translateXYZ(0, 0, dz+strip_thick/2);
         layer.getPlane().rotateZ(Math.toRadians(-90));
         
         layer.getBoundary().addFace(new Triangle3D(pA, pC, pB));
@@ -678,7 +679,7 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         }
       
         layer.getPlane().set(0, 0, 0, 0, 0, 1);
-        layer.getPlane().translateXYZ(0, 0, dz);
+        layer.getPlane().translateXYZ(0, 0, dz+strip_thick/2);
         layer.getPlane().rotateZ(Math.toRadians(-90));
         
         layer.getBoundary().addFace(new Triangle3D(pA, pC, pB));
