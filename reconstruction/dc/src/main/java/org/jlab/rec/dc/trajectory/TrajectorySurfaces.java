@@ -89,24 +89,30 @@ public class TrajectorySurfaces {
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.LTCC,1, 653.09, -n.x(), -n.y(), -n.z())); 
             //PCAL
             int superLayer = (int) ((DetectorLayer.PCAL_V-1)/3);
-            int localLayer = 9;//(DetectorLayer.PCAL_V-1)%3;
+            int localLayer = DetectorLayer.PCAL_Z+1;
             P = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().point().toVector3D();
+            Vector3D P1 = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getComponent(1).getMidpoint().toVector3D();
             n = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().normal();
-            d = P.dot(n);            
+            d = P.dot(n); 
+//            System.out.println("PCAL " + d + " " + P1.dot(n));
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.PCAL_V, d, n.x(), n.y(), n.z())); 
             //ECin
             superLayer = (int) ((DetectorLayer.EC_INNER_V-1)/3);
-            localLayer = (DetectorLayer.EC_INNER_V-1)%3;
+            localLayer = DetectorLayer.EC_INNER_Z+1;
             P = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().point().toVector3D();
+            P1 = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getComponent(1).getMidpoint().toVector3D();
             n = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().normal();
             d = P.dot(n);
+//            System.out.println("ECin " + d + " " + P1.dot(n));
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.EC_INNER_V, d, n.x(), n.y(), n.z())); 
             //ECout
             superLayer = (int) ((DetectorLayer.EC_OUTER_V-1)/3);
-            localLayer = (DetectorLayer.EC_OUTER_V-1)%3;
+            localLayer = DetectorLayer.EC_OUTER_Z+1;
             P = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().point().toVector3D();
+            P1 = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getComponent(1).getMidpoint().toVector3D();
             n = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().normal();
             d = P.dot(n);
+//            System.out.println("ECout " + d + " " + P1.dot(n));
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.EC_OUTER_V, d, n.x(), n.y(), n.z())); 
         }
     }

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jlab.detector.base.DetectorCollection;
+import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.base.Layer;
@@ -44,7 +45,6 @@ public class ECCommon {
     static int ind[]  = {0,0,0,1,1,1,2,2,2}; 
     static float               tps = 0.02345f;
     public static float       veff = 18.1f;
-    private static int pcTrackingPlane = 9;
     
     public  static void initHistos() {
        
@@ -128,7 +128,7 @@ public class ECCommon {
                     + "  LOCAL LAYER = " + localLayer
                     + "  LAYER = " + layer);
             */
-            int off = (superlayer==0)?pcTrackingPlane:0;
+            int off = (superlayer==0)?DetectorLayer.PCAL_Z:0;
             
             Layer detLayer = detector.getSector(sector-1).getSuperlayer(superlayer).getLayer(localLayer+off);
             ScintillatorPaddle      paddle = (ScintillatorPaddle) detLayer.getComponent(component-1);
