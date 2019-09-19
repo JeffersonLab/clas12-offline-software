@@ -203,11 +203,11 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         final int numPaddlesPCalU = 68;
         final int numDoublePaddlesPCalU = 16;
         final double strip_thick = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0)*0.1;
-        final double steel_thick = cp.getDouble("/geometry/pcal/pcal/steel_thick", 0)*0.1;
+        final double lead_thick = cp.getDouble("/geometry/pcal/pcal/lead_thick", 0)*0.1;
         final double strip_width = cp.getDouble("/geometry/pcal/pcal/strip_width", 0)*0.1;
         final double max_length = cp.getDouble("/geometry/pcal/Uview/max_length", 0)*0.1;
         final double yhigh = cp.getDouble("/geometry/pcal/pcal/yhigh", 0)*0.1;
-        final double dz = (strip_thick+steel_thick)*layerId;
+        final double dz = (strip_thick+lead_thick)*layerId;
         
         ECLayer layer = new ECLayer(sectorId, 0, layerId);
         
@@ -262,7 +262,7 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         final int numPaddlesPCalVW = 62;
         final int numSinglePaddlesPCalVW = 47;
         final double strip_thick = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0)*0.1;
-        final double steel_thick = cp.getDouble("/geometry/pcal/pcal/steel_thick", 0)*0.1;
+        final double lead_thick = cp.getDouble("/geometry/pcal/pcal/lead_thick", 0)*0.1;
         final double strip_width = cp.getDouble("/geometry/pcal/pcal/strip_width", 0)*0.1;
         final double max_length = cp.getDouble("/geometry/pcal/Vview/max_length", 0)*0.1;
         final double yhigh = cp.getDouble("/geometry/pcal/pcal/yhigh", 0)*0.1;
@@ -271,7 +271,7 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         final double l0u = cp.getDouble("/geometry/pcal/Uview/max_length", 0)*0.1;
         final double height = l0u*0.5*Math.tan(view_angle);
         final double ylo = height - yhigh;
-        final double dz = (strip_thick+steel_thick)*layerId;
+        final double dz = (strip_thick+lead_thick)*layerId;
         
         ECLayer layer = new ECLayer(sectorId, 0, layerId);
         
@@ -341,7 +341,7 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         final int numPaddlesPCalVW = 62;
         final int numSinglePaddlesPCalVW = 47;
         final double strip_thick = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0)*0.1;
-        final double steel_thick = cp.getDouble("/geometry/pcal/pcal/steel_thick", 0)*0.1;
+        final double lead_thick = cp.getDouble("/geometry/pcal/pcal/lead_thick", 0)*0.1;
         final double strip_width = cp.getDouble("/geometry/pcal/pcal/strip_width", 0)*0.1;
         final double max_length = cp.getDouble("/geometry/pcal/Wview/max_length", 0)*0.1;
         final double yhigh = cp.getDouble("/geometry/pcal/pcal/yhigh", 0)*0.1;
@@ -351,7 +351,7 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         final double height = l0u*0.5*Math.tan(view_angle);
         final double ylo = height - yhigh;
         
-        final double dz = (strip_thick+steel_thick)*layerId;
+        final double dz = (strip_thick+lead_thick)*layerId;
         
         ECLayer layer = new ECLayer(sectorId, 0, layerId);
         
@@ -431,8 +431,9 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         final double u_length = cp.getDouble("/geometry/pcal/Uview/max_length", 0)*0.1;
         final double yhigh = cp.getDouble("/geometry/pcal/pcal/yhigh", 0)*0.1;
         final double strip_thick = cp.getDouble("/geometry/pcal/pcal/strip_thick", 0)*0.1;
+        final double lead_thick = cp.getDouble("/geometry/pcal/pcal/lead_thick", 0)*0.1;
         final double view_angle = Math.toRadians(cp.getDouble("/geometry/pcal/pcal/view_angle", 0));
-        
+
         double bz = depth;
         double by = u_length/2;
         double bx = yhigh - by*Math.tan(view_angle);
@@ -442,7 +443,8 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
         Point3D b2 = new Point3D(yhigh, -by, bz);
         layer.getBoundary().addFace(new Triangle3D(b0, b1, b2));
         
-        layer.getPlane().set(0, 0, bz+strip_thick/2, 0, 0, 1);
+        double plane_offset = strip_thick/2 + (strip_thick + lead_thick)/4;
+        layer.getPlane().set(0, 0, bz+plane_offset, 0, 0, 1);
     }
     
     private static ECLayer createECU(ConstantProvider cp, int sectorId, int layerId, int realLayer) {
@@ -498,8 +500,9 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
             layer.addComponent(paddle);
         }
       
+        double plane_offset = strip_thick/2 + (strip_thick + lead_thick)/4;
         layer.getPlane().set(0, 0, 0, 0, 0, 1);
-        layer.getPlane().translateXYZ(0, 0, dz+strip_thick/2);
+        layer.getPlane().translateXYZ(0, 0, dz+plane_offset);
         layer.getPlane().rotateZ(Math.toRadians(-90));
         
         layer.getBoundary().addFace(new Triangle3D(pA, pC, pB));
@@ -588,8 +591,9 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
             layer.addComponent(paddle);
         }
       
+        double plane_offset = strip_thick/2 + (strip_thick + lead_thick)/4;
         layer.getPlane().set(0, 0, 0, 0, 0, 1);
-        layer.getPlane().translateXYZ(0, 0, dz+strip_thick/2);
+        layer.getPlane().translateXYZ(0, 0, dz+plane_offset);
         layer.getPlane().rotateZ(Math.toRadians(-90));
         
         layer.getBoundary().addFace(new Triangle3D(pA, pC, pB));
@@ -678,8 +682,9 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
             layer.addComponent(paddle);
         }
       
+        double plane_offset = strip_thick/2 + (strip_thick + lead_thick)/4;
         layer.getPlane().set(0, 0, 0, 0, 0, 1);
-        layer.getPlane().translateXYZ(0, 0, dz+strip_thick/2);
+        layer.getPlane().translateXYZ(0, 0, dz+strip_thick);
         layer.getPlane().rotateZ(Math.toRadians(-90));
         
         layer.getBoundary().addFace(new Triangle3D(pA, pC, pB));
