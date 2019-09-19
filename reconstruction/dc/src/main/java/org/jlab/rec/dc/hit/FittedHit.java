@@ -634,9 +634,11 @@ public class FittedHit extends Hit implements Comparable<Hit> {
         
         double delta_x = MaxSag*(1.-Math.abs(y)/(0.5*wireLen))*(1.-Math.abs(y)/(0.5*wireLen));
         
-        x+=delta_x;
-        Line3D wireLine = new Line3D(new Point3D(xL, yL, z), new Point3D(xR, yR, z));
-        wireLine.setOrigin(x, y, z);
+        //x+=delta_x;
+        //Line3D wireLine = new Line3D(new Point3D(xL, yL, z), new Point3D(xR, yR, z));
+        //wireLine.setOrigin(x, y, z);
+        Line3D wireLine = new Line3D(new Point3D(x, 0, z), new Point3D(xR, yR, z));
+        
         this.set_WireLength(wireLen);
         this.set_WireMaxSag(MaxSag);
         this.set_WireLine(wireLine);

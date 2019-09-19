@@ -187,7 +187,7 @@ public class KFitterDoca {
             
             
             double[] K = new double[5];
-            double V = mv.measurements.get(k).unc[0]*4;
+            double V = mv.measurements.get(k).unc[0];
             double[] H = mv.H(new double[]{sv.trackTraj.get(k).x, sv.trackTraj.get(k).y},
                     mv.measurements.get(k).z,
                     mv.measurements.get(k).wireLine[0]);
@@ -208,21 +208,31 @@ public class KFitterDoca {
                     mv.measurements.get(k).z,
                     mv.measurements.get(k).wireLine[0]);
             
-            double sign = Math.signum(mv.measurements.get(k).doca[0]);
+            double signMeas = 1;
+            double sign = 1;
+            if(mv.measurements.get(k).doca[1]!=-99 || 
+                    !(Math.abs(mv.measurements.get(k).doca[0])<0.1 && mv.measurements.get(k).doca[1]==-99 ) ) { //use LR only for double hits && large enough docas
+                signMeas = Math.signum(mv.measurements.get(k).doca[0]);
+                sign = Math.signum(h);
+            } else {
+                signMeas = Math.signum(h);
+                sign = Math.signum(h);
+            }
             //if(this.interNum>1)
-            //    sign = Math.signum(h);
-            double c2 = ((sign*Math.abs(mv.measurements.get(k).doca[0]) - h) * (sign*Math.abs(mv.measurements.get(k).doca[0]) - h) / V);
-            //if(sign!=Math.signum(h) && this.interNum>1) System.out.println(sv.trackTraj.get(k).printInfo()+" h "+(float)h);
-            double x_filt = sv.trackTraj.get(k).x + K[0] * (sign*Math.abs(mv.measurements.get(k).doca[0]) - h);
-            double y_filt = sv.trackTraj.get(k).y + K[1] * (sign*Math.abs(mv.measurements.get(k).doca[0]) - h);
-            double tx_filt = sv.trackTraj.get(k).tx + K[2] * (sign*Math.abs(mv.measurements.get(k).doca[0]) - h);
-            double ty_filt = sv.trackTraj.get(k).ty + K[3] * (sign*Math.abs(mv.measurements.get(k).doca[0]) - h);
-            double Q_filt = sv.trackTraj.get(k).Q + K[4] * (sign*Math.abs(mv.measurements.get(k).doca[0]) - h);
+            //    signMeas = Math.signum(h);
+            double c2 = ((signMeas*Math.abs(mv.measurements.get(k).doca[0]) - sign*Math.abs(h)) 
+                    * (signMeas*Math.abs(mv.measurements.get(k).doca[0]) - sign*Math.abs(h)) / V);
+            //if(signMeas!=Math.signum(h) && this.interNum>1) System.out.println(sv.trackTraj.get(k).printInfo()+" h "+(float)h);
+            double x_filt = sv.trackTraj.get(k).x + K[0] * (signMeas*Math.abs(mv.measurements.get(k).doca[0]) - sign*Math.abs(h));
+            double y_filt = sv.trackTraj.get(k).y + K[1] * (signMeas*Math.abs(mv.measurements.get(k).doca[0]) - sign*Math.abs(h));
+            double tx_filt = sv.trackTraj.get(k).tx + K[2] * (signMeas*Math.abs(mv.measurements.get(k).doca[0]) - sign*Math.abs(h));
+            double ty_filt = sv.trackTraj.get(k).ty + K[3] * (signMeas*Math.abs(mv.measurements.get(k).doca[0]) - sign*Math.abs(h));
+            double Q_filt = sv.trackTraj.get(k).Q + K[4] * (signMeas*Math.abs(mv.measurements.get(k).doca[0]) - sign*Math.abs(h));
                
             //USE THE DOUBLE HIT
             if(mv.measurements.get(k).doca[1]!=-99) { 
                 //now filter using the other Hit
-                V = mv.measurements.get(k).unc[1]*4;
+                V = mv.measurements.get(k).unc[1];
                 H = mv.H(new double[]{x_filt, y_filt},
                     mv.measurements.get(k).z,
                     mv.measurements.get(k).wireLine[1]);
@@ -241,17 +251,19 @@ public class KFitterDoca {
                     mv.measurements.get(k).z,
                     mv.measurements.get(k).wireLine[1]);   
             
-                sign = Math.signum(mv.measurements.get(k).doca[1]);
+                signMeas = Math.signum(mv.measurements.get(k).doca[1]);
+                sign = Math.signum(h);
                 //if(this.interNum>1)
-                //    sign = Math.signum(h);
+                //    signMeas = Math.signum(h);
                 
-                x_filt += K[0] * (sign*Math.abs(mv.measurements.get(k).doca[1]) - h);
-                y_filt += K[1] * (sign*Math.abs(mv.measurements.get(k).doca[1]) - h);
-                tx_filt += K[2] * (sign*Math.abs(mv.measurements.get(k).doca[1]) - h);
-                ty_filt += K[3] * (sign*Math.abs(mv.measurements.get(k).doca[1]) - h);
-                Q_filt += K[4] * (sign*Math.abs(mv.measurements.get(k).doca[1]) - h);
+                x_filt += K[0] * (signMeas*Math.abs(mv.measurements.get(k).doca[1]) - sign*Math.abs(h));
+                y_filt += K[1] * (signMeas*Math.abs(mv.measurements.get(k).doca[1]) - sign*Math.abs(h));
+                tx_filt += K[2] * (signMeas*Math.abs(mv.measurements.get(k).doca[1]) - sign*Math.abs(h));
+                ty_filt += K[3] * (signMeas*Math.abs(mv.measurements.get(k).doca[1]) - sign*Math.abs(h));
+                Q_filt += K[4] * (signMeas*Math.abs(mv.measurements.get(k).doca[1]) - sign*Math.abs(h));
               
-                c2 += ((sign*Math.abs(mv.measurements.get(k).doca[1]) - h) * (sign*Math.abs(mv.measurements.get(k).doca[1]) - h) / V);
+                c2 += ((signMeas*Math.abs(mv.measurements.get(k).doca[1]) - sign*Math.abs(h)) 
+                        * (signMeas*Math.abs(mv.measurements.get(k).doca[1]) - sign*Math.abs(h)) / V);
             } 
             
             chi2kf += c2;
@@ -296,19 +308,33 @@ public class KFitterDoca {
             svc.setB(sv.trackTraj.get(0).B);
             path += sv.trackTraj.get(0).deltaPath;
             svc.setPathLength(path);
+            double V0 = mv.measurements.get(0).unc[0];
             double h0 = mv.h(new double[]{sv.trackTraj.get(0).x, sv.trackTraj.get(0).y},
                     mv.measurements.get(0).z,
                     mv.measurements.get(0).wireLine[0]);
-            svc.setProjector(mv.measurements.get(k).wireLine[0].origin().x()+h0/Math.cos(Math.toRadians(6.)));
+            svc.setProjector(mv.measurements.get(0).wireLine[0].origin().x());
+            svc.setProjectorDoca(Math.abs(h0));
             kfStateVecsAlongTrajectory.add(svc); 
             double res = (mv.measurements.get(0).doca[0] - h0);
-            chi2 += (mv.measurements.get(0).doca[0] - h0) * (mv.measurements.get(0).doca[0] - h0) / mv.measurements.get(0).error;
+            chi2 += (mv.measurements.get(0).doca[0] - h0) * (mv.measurements.get(0).doca[0] - h0) / V0;
             nRj[mv.measurements.get(0).region-1]+=res*res/mv.measurements.get(0).error;
-            
+            //USE THE DOUBLE HIT
+            if(mv.measurements.get(0).doca[1]!=-99) { 
+                V0 = mv.measurements.get(0).unc[1];
+                h0 = mv.h(new double[]{sv.trackTraj.get(0).x, sv.trackTraj.get(0).y},
+                    mv.measurements.get(0).z,
+                    mv.measurements.get(0).wireLine[1]);
+                res = (mv.measurements.get(0).doca[1] - h0);
+                chi2 += (mv.measurements.get(0).doca[1] - h0) * (mv.measurements.get(0).doca[1] - h0) / V0;
+                nRj[mv.measurements.get(0).region-1]+=res*res/mv.measurements.get(0).error;
+                svc.setProjector(mv.measurements.get(0).wireLine[1].origin().x());
+                svc.setProjectorDoca(Math.abs(h0));
+                kfStateVecsAlongTrajectory.add(svc); 
+            }
             for (int k1 = 0; k1 < k; k1++) {
                 sv.transport(sector, k1, k1 + 1, sv.trackTraj.get(k1), sv.trackCov.get(k1));
 
-                double V = mv.measurements.get(k1 + 1).error;
+                double V = mv.measurements.get(k1 + 1).unc[0];
                 double h = mv.h(new double[]{sv.trackTraj.get(k1 + 1).x, sv.trackTraj.get(k1 + 1).y},
                     mv.measurements.get(k1 + 1).z,
                     mv.measurements.get(k1 + 1).wireLine[0]);
@@ -320,13 +346,25 @@ public class KFitterDoca {
                 svc.setB(sv.trackTraj.get(k1 + 1).B);
                 path += sv.trackTraj.get(k1 + 1).deltaPath;
                 svc.setPathLength(path);
-                svc.setProjector(mv.measurements.get(k1 + 1).wireLine[0].origin().x()+h/Math.cos(Math.toRadians(6.)));
+                svc.setProjector(mv.measurements.get(k1 + 1).wireLine[0].origin().x());
+                svc.setProjectorDoca(Math.abs(h));
                 kfStateVecsAlongTrajectory.add(svc); 
-                res = (mv.measurements.get(k1 + 1).doca[0]  - h);
+                res = (mv.measurements.get(k1 + 1).doca[0]  - h); 
                 chi2 += (mv.measurements.get(k1 + 1).doca[0]  - h) * (mv.measurements.get(k1 + 1).doca[0]  - h) / V;
-                
                 nRj[mv.measurements.get(k1 + 1).region-1]+=res*res/V;
-            
+                //USE THE DOUBLE HIT
+                if(mv.measurements.get(k1 + 1).doca[1]!=-99) { 
+                    V = mv.measurements.get(k1 + 1).unc[1];
+                    h = mv.h(new double[]{sv.trackTraj.get(k1 + 1).x, sv.trackTraj.get(k1 + 1).y},
+                    mv.measurements.get(k1 + 1).z,
+                    mv.measurements.get(k1 + 1).wireLine[1]);
+                    res = (mv.measurements.get(k1 + 1).doca[1]  - h);
+                    chi2 += (mv.measurements.get(k1 + 1).doca[1]  - h) * (mv.measurements.get(k1 + 1).doca[1]  - h) / V;
+                    nRj[mv.measurements.get(k1 + 1).region-1]+=res*res/V;
+                    svc.setProjector(mv.measurements.get(k1 + 1).wireLine[1].origin().x());
+                    svc.setProjectorDoca(Math.abs(h));
+                    kfStateVecsAlongTrajectory.add(svc); 
+                }
             } 
         } 
         

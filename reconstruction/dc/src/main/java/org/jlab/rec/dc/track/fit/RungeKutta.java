@@ -7,6 +7,7 @@ package org.jlab.rec.dc.track.fit;
 
 import Jama.Matrix;
 import java.util.ArrayList;
+import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.rec.dc.Constants;
 
@@ -307,7 +308,7 @@ public class RungeKutta {
         double cosEntranceAngle = Math.abs((x * px + y * py + z * pz) / (Math.sqrt(x * x + y * y + z * z) * p));
         double pathLength = t_ov_X0 / cosEntranceAngle;
 
-        double sctRMS = (0.0136 / (beta * p)) * Math.sqrt(pathLength) * (1 + 0.038 * Math.log(pathLength)); // Highland-Lynch-Dahl formula
+        double sctRMS = (0.0136 / (beta*PhysicsConstants.speedOfLight() * p)) * Math.sqrt(pathLength) * (1 + 0.038 * Math.log(pathLength)); // Highland-Lynch-Dahl formula
 
         double cov_txtx = (1 + tx * tx) * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
         double cov_tyty = (1 + ty * ty) * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;

@@ -160,7 +160,7 @@ public class MeasVecsDoca {
                 hot._doca[0]*=LR;
                 hot._hitError = trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr()*trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr();
                 //System.out.println(" Z "+Z+" ferr "+(float)(hot._Unc /(hot._hitError/4.)));
-                hot._Unc[0] = hot._hitError;
+                hot._Unc[0] = hot._hitError*4;
                 hot.region = trk.get_ListOfHBSegments().get(s).get(h).get_Region();
                 hOTS.add(hot);
                 
@@ -188,7 +188,8 @@ public class MeasVecsDoca {
             meas.z = hOTS.get(i)._Z;
             meas.region = hOTS.get(i).region;
             meas.error = hOTS.get(i)._hitError;
-            meas.unc = hOTS.get(i)._Unc; //uncertainty used in KF fit
+            meas.unc[0] = hOTS.get(i)._Unc[0]; //uncertainty used in KF fit
+            meas.unc[1] = hOTS.get(i)._Unc[1]; //uncertainty used in KF fit
             meas.tilt = hOTS.get(i)._tilt;
             meas.doca = hOTS.get(i)._doca;
             meas.wireMaxSag = hOTS.get(i)._wireMaxSag;

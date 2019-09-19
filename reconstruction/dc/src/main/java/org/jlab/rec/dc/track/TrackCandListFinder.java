@@ -662,17 +662,15 @@ public class TrackCandListFinder {
             
             for (Cross c : trk) {
                 for (FittedHit h1 : c.get_Segment1()) {
-                    if (Math.abs(st.getZ() - h1.get_Z()) < 0.1 && c.get_Segment1().get_Id()>-1) {
+                    if (Math.abs(st.getZ() - h1.get_Z()) < 0.1 && c.get_Segment1().get_Id()>-1 && 
+                            (h1.get_XWire() - st.getProjector())<0.1) {
                          
-                            if((h1.get_X() - st.getProjector())>h1.get_CellSize()*2) 
-                                continue;
-                           
                             h1.set_Id(h1.get_Id());
                             h1.set_TDC(h1.get_TDC());
                             h1.set_AssociatedHBTrackID(trk.get_Id());
                             h1.set_AssociatedClusterID(h1.get_AssociatedClusterID());
                             h1.setAssociatedStateVec(st);
-                            h1.set_TrkResid(h1.get_X() - st.getProjector()); 
+                            h1.set_TrkResid(h1.get_Doca() - st.getProjectorDoca()); 
                             h1.setB(st.getB());
                             h1.calc_SignalPropagAlongWire(st.x(), st.y(), DcDetector);
                             h1.setSignalPropagTimeAlongWire(DcDetector);
@@ -696,17 +694,15 @@ public class TrackCandListFinder {
                     }
                 }
                 for (FittedHit h1 : c.get_Segment2()) {
-                    if (Math.abs(st.getZ() - h1.get_Z()) < 0.1 && c.get_Segment2().get_Id()>-1) {
+                    if (Math.abs(st.getZ() - h1.get_Z()) < 0.1 && c.get_Segment2().get_Id()>-1 && 
+                            (h1.get_XWire() - st.getProjector())<0.1) {
                          
-                            if((h1.get_X() - st.getProjector())>h1.get_CellSize()*2) 
-                                continue;
-                            
                             h1.set_Id(h1.get_Id());
                             h1.set_TDC(h1.get_TDC());
                             h1.set_AssociatedHBTrackID(trk.get_Id());
                             h1.set_AssociatedClusterID(h1.get_AssociatedClusterID());
                             h1.setAssociatedStateVec(st);
-                            h1.set_TrkResid(h1.get_X() - st.getProjector()); 
+                            h1.set_TrkResid(h1.get_Doca() - st.getProjectorDoca()); 
                             h1.setB(st.getB());
                             h1.calc_SignalPropagAlongWire(st.x(), st.y(), DcDetector);
                             h1.setSignalPropagTimeAlongWire(DcDetector);

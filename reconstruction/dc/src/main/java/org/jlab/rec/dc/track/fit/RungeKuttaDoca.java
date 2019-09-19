@@ -8,8 +8,6 @@ package org.jlab.rec.dc.track.fit;
 import Jama.Matrix;
 import java.util.ArrayList;
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.rec.dc.Constants;
-
 /**
  *
  * @author ziegler
@@ -221,9 +219,9 @@ public class RungeKuttaDoca {
         double delx_delq0_3 = deltx_delq0_0+0.5*h*deltx_delq0_2;
         double dely_delq0_3 = delty_delq0_0+0.5*h*delty_delq0_2;
         
-        double deltx_delq0_3 = this.deltx_delq0_next(q,v,tx0+0.5*h*tx2,ty0+0.5*ty2,_b[0],_b[1],_b[2],
+        double deltx_delq0_3 = this.deltx_delq0_next(q,v,tx0+0.5*h*tx2,ty0+0.5*h*ty2,_b[0],_b[1],_b[2],
                 deltx_delq0_0+0.5*h*deltx_delq0_2,delty_delq0_0+0.5*h*delty_delq0_2);
-        double delty_delq0_3 = this.delty_delq0_next(q,v,tx0+0.5*h*tx2,ty0+0.5*ty2,_b[0],_b[1],_b[2],
+        double delty_delq0_3 = this.delty_delq0_next(q,v,tx0+0.5*h*tx2,ty0+0.5*h*ty2,_b[0],_b[1],_b[2],
                 deltx_delq0_0+0.5*h*deltx_delq0_2,delty_delq0_0+0.5*h*delty_delq0_2);
         
         swimmer.Bfield(sector, x0+h*x3, y0+h*y3, z0+h, _b);
@@ -297,10 +295,10 @@ public class RungeKuttaDoca {
 //        // Q  process noise matrix estimate
 //        double p = Math.abs(1. / q);
 //        
-//        double X0 = this.getX0(z0+h/2);
+//        double X0 = fVec.getX0(z0+h/2);
 //        double t_ov_X0 = Math.sqrt((x0-x)*(x0-x)+(y0-y)*(y0-y)+h*h) / X0;//path length in radiation length units = t/X0 [true path length/ X0] ; Ar radiation length = 14 cm
 //
-//        double beta = p / Math.sqrt(p * p + mass * mass); // use particle momentum
+//        double beta = p / Math.sqrt(p * p + mass * mass);  //use particle momentum
 //        beta = 1;
 //        
 //        double sctRMS = ((0.0136)/(beta*p))*Math.sqrt(t_ov_X0*Math.sqrt(1 + tx0 * tx0 + ty0 * ty0))*
@@ -316,7 +314,7 @@ public class RungeKuttaDoca {
 //            C[3][2] += cov_txty;
 //            C[3][3] += cov_tyty;
 //        } 
-//        
+        
         fVec.x = x;
         fVec.y  = y ;
         fVec.z = z0+h;

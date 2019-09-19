@@ -4,6 +4,7 @@ import Jama.Matrix;
 import java.util.HashMap;
 import java.util.Map;
 import org.jlab.clas.clas.math.FastMath;
+import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.track.Track;
@@ -90,14 +91,14 @@ public class StateVecsDoca {
             // Q  process noise matrix estimate
             double p = Math.abs(1. / iVec.Q);
 
-            double X0 = this.getX0(iVec.z);
+            double X0 = this.getX0(z);
             double t_ov_X0 = stepSize / X0;//path length in radiation length units = t/X0 [true path length/ X0] ; Ar radiation length = 14 cm
 
             double beta = p / Math.sqrt(p * p + mass * mass); // use particle momentum
             if(beta>0)
                 beta =1;
 
-            double sctRMS = ((0.0136)/(beta*p))*Math.sqrt(t_ov_X0)*
+            double sctRMS = ((0.0136)/(beta*PhysicsConstants.speedOfLight()*p))*Math.sqrt(t_ov_X0)*
                     (1 + 0.038 * Math.log(t_ov_X0));
 
             double cov_txtx = (1 + tx * tx) * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
@@ -125,14 +126,14 @@ public class StateVecsDoca {
         this.trackTraj.put(f, fVec);
         this.trackCov.put(f, fCov);
     }
-    private double getX0(double z) {
+    public double getX0(double z) {
         double X0 = Constants.AIRRADLEN;
         double tolerance = 0.01;
         for(int i = 1; i <Constants.Z.length; i++) {
             if(i%2==0)
                 continue;
             if(z>=Constants.Z[i]-tolerance && z<=Constants.Z[i+1]+tolerance) { 
-                return Constants.AIRRADLEN; 
+                return Constants.ARGONRADLEN; 
             }
         }
          

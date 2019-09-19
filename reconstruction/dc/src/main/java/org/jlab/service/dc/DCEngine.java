@@ -62,7 +62,7 @@ public class DCEngine extends ReconstructionEngine {
             }
         }
         else {
-            wireDistortionsFlag = System.getenv("COAT_DC_WIREDISTORTION");
+            wireDistortionsFlag = System.getenv("COAT_DC_WIREDISTORTION"); 
             if (wireDistortionsFlag!=null) {
                 System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on env = "+wireDistortionsFlag);
                 if(Boolean.valueOf(wireDistortionsFlag)==true) {
