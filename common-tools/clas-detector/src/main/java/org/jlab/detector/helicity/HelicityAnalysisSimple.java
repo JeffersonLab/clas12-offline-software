@@ -1,106 +1,124 @@
 package org.jlab.detector.helicity;
 
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import org.jlab.jnp.hipo4.data.Bank;
-import org.jlab.jnp.hipo4.data.Event;
-import org.jlab.jnp.hipo4.data.SchemaFactory;
+
 import org.jlab.jnp.hipo4.io.HipoReader;
+import org.jlab.jnp.hipo4.data.Event;
+import org.jlab.jnp.hipo4.data.Bank;
+import org.jlab.jnp.hipo4.data.SchemaFactory;
 
 /**
+ * An example of reading the helicity flips, analyzing the sequence, and getting
+ * the state for any event.
  *
+ * The 2 lines marked with "!!!" are the essential delayed-helicity correction
+ * and requires input from RUN::config.run and RUN::config.timestamp.
+ * 
  * @author baltzell
  */
 public class HelicityAnalysisSimple {
 
-    /**
-     * Example of accessing delay-corrected helicity.
-     *
-     * The 2 lines marked with "!!!" are specific to delay-corrected helicity.
-     * 
-     * @param args a list of input HIPO4 filenames 
-     */
     public static void main(String[] args) {
+       
+        //final String dir="/Users/baltzell/data/CLAS12/rg-a/decoded/6b.2.0/";
+        //final String file="clas_005038.evio.00000-00004.hipo";
+        final String dir="/Users/baltzell/data/CLAS12/rg-b/decoded/";
+        final String file="clas_006432.evio.00041-00042.hipo";
 
-        final String dir="/Users/baltzell/data/CLAS12/rg-a/decoded/6b.2.0/";
-        final String file="clas_005038.evio.00000-00004.hipo";
-        //final String dir="/Users/baltzell/data/CLAS12/rg-b/decoded/";
-        //final String file="clas_006432.evio.00041-00042.hipo";
         List<String> filenames=new ArrayList<>();
-
-        // override with user-inputs if available:
         if (args.length>0) filenames.addAll(Arrays.asList(args));
         else               filenames.add(dir+file);
 
-        // 1!!!1 initialize the helicity sequence:
-        HelicitySequenceDelayed seq = HelicityAnalysis.readSequence(filenames);
-       
-        seq.setVerbosity(2);
+        // !!! 111
+        // initialize a sequence, with delay=8, from tag=1 events:
+        HelicitySequenceManager seq = new HelicitySequenceManager(8,filenames);
 
-        seq.analyze();
+        // or initialize with a reader object:
+        //HelicitySequenceManager seq = new HelicitySequenceManager(8,HipoReader);
+
+        // increase info printouts:
+        //seq.setVerbosity(2);
         
-        seq.show();
-        
+        // print the sequence if any problems:
+        //if (!seq.analyze()) seq.show();
+
         // now read the full events, e.g. during a normal physics analysis: 
-      
-        int nGoodEvents=0;
-        int nBadEvents=0;
-        int nMismatches=0;
-        int nMismatches2=0;
+        int nevents=0;
+        int nflips=0;
+        int nbad=0;
         
-        // loop over files:
         for (String filename : filenames) {
 
-            // open the file, initialize reader/tags/schema:
             HipoReader reader = new HipoReader();
             reader.setTags(0);
             reader.open(filename);
+            
             SchemaFactory schema = reader.getSchemaFactory();
-       
-            // loop over events:
+        
             while (reader.hasNext()) {
-              
-                // read the event:
+
+                nevents++;
+               
+                Bank flipBank=new Bank(schema.getSchema("HEL::flip"));
+                Bank rcfgBank=new Bank(schema.getSchema("RUN::config"));
+                Bank onliBank=new Bank(schema.getSchema("HEL::online"));
+               
                 Event event=new Event();
                 reader.nextEvent(event);
-               
-                // get the event's timestamp:
-                Bank rcfgBank=new Bank(schema.getSchema("RUN::config"));
+                event.read(flipBank);
                 event.read(rcfgBank);
-                if (rcfgBank.getRows()<=0) continue;
-                final int  evno = rcfgBank.getInt("event",0);
+                event.read(onliBank);
+           
+                // Get RUN::config.runno/timestamp for this event:
+                if (rcfgBank.getRows()<=0) continue; 
                 final long timestamp = rcfgBank.getLong("timestamp",0);
-              
-                // 2!!!2 use the timestamp to get the delay-corrected helicity:
-                HelicityBit predicted = seq.findPrediction(timestamp);
+                final int runno = rcfgBank.getInt("run",0);
 
-                HelicityBit lookup = seq.lookupPrediction(timestamp);
-                if (lookup!=HelicityBit.UDF && predicted!=lookup) {
-                    nMismatches++;
-                }
-                HelicityBit measured = seq.find(timestamp);
-                if (measured!=HelicityBit.UDF && predicted!=measured) {
-                    nMismatches2++;
-                }
+                // Get HEL::online.rawHelicity, the online, delay-corrected
+                // helicity for this event (if available):
+                //HelicityBit level3 = HelicityBit.UDF;
+                //if (onliBank.getRows()>0)
+                //    level3 = HelicityBit.create(onliBank.getByte("helicity",0));
+
+                // !!! 222
+                // Get the offline, delay-corrected helicity for this event
+                // based on the measured sequence.  If the timestamp is outside
+                // the measured range, or the measured sequence is corrupted between
+                // the timestamp and the delayed timestamp, this will return null.
+                final HelicityBit measured = seq.search(runno,timestamp);
+
+                // Same as previous, except assumes the pseudo-random generator's
+                // prediction, which allows to access states later than the measured
+                // range and cross intermediate sequence corruption.  However, it
+                // requires a 4x longer consecutive valid sequence for initialization
+                // than the non-generator methods.
+                //final HelicityBit lookedup = seq.searchGenerated(runno,timestamp);
                 
-                if ( (predicted==null || predicted==HelicityBit.UDF) &&
-                        timestamp>=seq.generator.getTimestamp()) {
-                    nBadEvents++;
-                    System.out.println(String.format("Bad Helicity: event=%d time=%d helicity=%s",evno,timestamp,predicted));
+                // Same as previous, except relies on TI clock synced with helicity clock
+                // instead of counting states:
+                //final HelicityBit predicted = seq.predictGenerated(runno,timestamp);
+               
+                if (measured==HelicityBit.UDF) {
+                    nbad++;
                 }
                 else {
-                    // proceed with physics analysis:
-                    nGoodEvents++;
+                    // proceed with physics analysis
                 }
+              
+                //if (flipBank.getRows()>0) nflips++;
+                //if (nflips>240 && nevents%100!=0) {
+                //    System.out.println(String.format("%d %5d L3/Measured/LookedG/PredictG = %6s%6s%6s%6s",
+                //            timestamp,nflips,level3,measured,lookedup,predicted));
+                //}
             }
+
+            System.out.println(String.format("HelicityAnalysisSimple:  EVENTS BAD/TOTAL/FRACTION = %d/%d/%.2f%%",
+                    nbad,nevents,100*((float)nbad)/nevents));
+
             reader.close();
+
         }
-        System.out.println(String.format("HelicityAnalysisSimple:  BAD/GOOD/FRACTION=%d/%d/%.5f%%",
-                nBadEvents,nGoodEvents,100*((float)nBadEvents)/(nBadEvents+nGoodEvents)));
-        //System.out.println(String.format("HelicityAnalysisSimple:  MISMATCHES/FRACTION=%d/%.5f%%",
-        //        nMismatches,100*((float)nMismatches)/(nBadEvents+nGoodEvents)));
-        System.out.println(String.format("HelicityAnalysisSimple:  MISMATCHES2/FRACTION=%d/%.5f%%",
-                nMismatches2,100*((float)nMismatches2)/(nBadEvents+nGoodEvents)));
     }
 }
