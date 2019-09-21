@@ -8,6 +8,7 @@ import java.util.List;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.base.DetectorDescriptor;
 
 import org.jlab.geom.prim.Line3D;
@@ -332,13 +333,28 @@ public class DetectorParticle implements Comparable {
     
     public double   getPathLength(){ return detectorTrack.getPath();}
     public int      getCharge(){ return detectorTrack.getCharge();}
+ 
+    /*
+    // New, trajectory-based path length:
+    public double getPathLength(DetectorType type,int layId) {
+        DetectorTrack.Trajectory t=this.detectorTrack.getTrajectory();
+        if (!t.hasLayer(type.getDetectorId(),layId)) return -1.0;
+        return t.get(type.getDetectorId(),layId).getPathLength();
+    }
+    */
     
+    // Old, DOCA-based path length:
     public double   getPathLength(DetectorType type){
         DetectorResponse response = this.getHit(type);
         if(response==null) return -1.0;
         return this.getPathLength(response.getPosition());
     }
-    
+    public double  getPathLength(DetectorType type, int layer){
+        DetectorResponse response = this.getHit(type,layer);
+        if(response==null) return -1.0;
+        return this.getPathLength(response.getPosition());
+    } 
+   
     public double   getPathLength(Vector3D vec){
         return this.getPathLength(vec.x(), vec.y(), vec.z());
     }
@@ -346,11 +362,11 @@ public class DetectorParticle implements Comparable {
     public double   getPathLength(double x, double y, double z){
         double crosspath = Math.sqrt(
                 (this.detectorTrack.getLastCross().origin().x()-x)*
-                        (this.detectorTrack.getLastCross().origin().x()-x)
-                        + (this.detectorTrack.getLastCross().origin().y()-y)*
-                                (this.detectorTrack.getLastCross().origin().y()-y)
-                        + (this.detectorTrack.getLastCross().origin().z()-z)*
-                                (this.detectorTrack.getLastCross().origin().z()-z)
+                (this.detectorTrack.getLastCross().origin().x()-x)
+              + (this.detectorTrack.getLastCross().origin().y()-y)*
+                (this.detectorTrack.getLastCross().origin().y()-y)
+              + (this.detectorTrack.getLastCross().origin().z()-z)*
+                (this.detectorTrack.getLastCross().origin().z()-z)
         );
         return this.detectorTrack.getPath() + crosspath;
     }
@@ -387,22 +403,37 @@ public class DetectorParticle implements Comparable {
         }
         return energy;
     }
+   
+    /*
+    // New, trajectory-based path length:
+    public double getBeta(DetectorType type, int layer, double startTime){
+        DetectorResponse response = this.getHit(type,layer);
+        if(response==null) return -1.0;
+        double cpath = this.getPathLength(type,layer);
+        double ctime = response.getTime() - startTime;
+        double beta  = cpath/ctime/PhysicsConstants.speedOfLight();
+        return beta;
+    }
+    public double getBeta(DetectorType type, double startTime){
+        return this.getBeta(type,0,startTime);
+    }
+    */
     
+    // Old, DOCA-based path length:
     public double getBeta(DetectorType type, int layer, double startTime){
         DetectorResponse response = this.getHit(type,layer);
         if(response==null) return -1.0;
         double cpath = this.getPathLength(response.getPosition());
         double ctime = response.getTime() - startTime;
-        double beta  = cpath/ctime/PhysicsConstants.speedOfLight();//30.0;
+        double beta  = cpath/ctime/PhysicsConstants.speedOfLight();
         return beta;
     }
-    
     public double getBeta(DetectorType type, double startTime){
         DetectorResponse response = this.getHit(type);
         if(response==null) return -1.0;
         double cpath = this.getPathLength(response.getPosition());
         double ctime = response.getTime() - startTime;
-        double beta  = cpath/ctime/PhysicsConstants.speedOfLight();//30.0;
+        double beta  = cpath/ctime/PhysicsConstants.speedOfLight();
         if(type==DetectorType.CTOF){
             cpath = response.getPath();
             ctime = response.getTime()- startTime;
@@ -410,8 +441,7 @@ public class DetectorParticle implements Comparable {
         }
         return beta;
     }
-    
-    
+
     public double getBeta(DetectorType type){
         DetectorResponse response = this.getHit(type);
         if(response==null) return -1.0;
@@ -634,12 +664,6 @@ public class DetectorParticle implements Comparable {
         return response.getTime();
     }
 
-    public double  getPathLength(DetectorType type, int layer){
-        DetectorResponse response = this.getHit(type,layer);
-        if(response==null) return -1.0;
-        return this.getPathLength(response.getPosition());
-    }  
-   
     @Override
     public int compareTo(Object o) {
 

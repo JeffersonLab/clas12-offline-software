@@ -81,6 +81,15 @@ public class DetectorTrack implements Comparable {
             return null;
         }
 
+        public boolean hasDetector(int detId) {
+            return this.traj.containsKey(detId);
+        }
+
+        public boolean hasLayer(int detId,int layId) {
+            if (!this.hasDetector(detId)) return false;
+            return this.traj.get(detId).containsKey(layId);
+        }
+
         public int size() {
             return this.size;
         }
