@@ -90,10 +90,7 @@ public class DetectorTrack implements Comparable {
     private int     trackAssociation = -1;
     private int     trackIndex = -1;
     private int     trackCharge = 0;
-    private double  trackMom    = 0.0;
     private double  trackPath   = 0.0;
-    private double  taggerTime  = 0.0;
-    private int     taggerID    = 0;
     private double  trackchi2   = 0.0;
     private int     ndf         = 0;
     private int     trackStatus = -1;
@@ -132,12 +129,10 @@ public class DetectorTrack implements Comparable {
     }
     
     public DetectorTrack(int charge, double mom){
-        this.trackMom = mom;
         this.trackCharge = charge;
     }
 
     public DetectorTrack(int charge, double mom, int index){
-        this.trackMom = mom;
         this.trackCharge = charge;
         this.trackIndex = index;
     }
@@ -147,14 +142,6 @@ public class DetectorTrack implements Comparable {
         this.trackP.setXYZ(px, py, pz);
     }
     
-    public DetectorTrack(int id, int charge, double px, double py, double pz){
-        // FIXME
-        // Woah, DetectorTrack should not have a taggerID, or a taggerAnything!!!
-        this.taggerID = id;
-        this.trackCharge = charge;
-        this.trackP.setXYZ(px, py, pz);
-    }
-
     public DetectorTrack(int charge, double px, double py, double pz,
             double vx, double vy, double vz){
         this.trackCharge = charge;
@@ -182,11 +169,6 @@ public class DetectorTrack implements Comparable {
         return this;
     }
     
-    public DetectorTrack setP(double p){
-        this.trackMom = p;
-        return this;
-    }
-    
     public DetectorTrack setVector(double px, double py, double pz){
         this.trackP.setXYZ(px, py, pz);
         return this;
@@ -202,18 +184,8 @@ public class DetectorTrack implements Comparable {
         return this;
     }
     
-    public DetectorTrack setTime(double time){
-        this.taggerTime = time;
-        return this;
-    }
-
     public DetectorTrack setSector(int sector){
         this.trackSector = sector;
-        return this;
-    }
-    
-    public DetectorTrack setID(int id){
-        this.taggerID = id;
         return this;
     }
     
@@ -233,7 +205,6 @@ public class DetectorTrack implements Comparable {
     public int      getStatus()     {return this.trackStatus;}
     public double   getchi2()       {return this.trackchi2;}
     public double   getP()          {return this.trackP.mag();} 
-    public int      getID()         {return this.taggerID;}
     public double   getPath()       {return this.trackPath;}
     public int      getSector()     {return this.trackSector;}
     public Vector3  getVector()     {return this.trackP;}
@@ -270,7 +241,8 @@ public class DetectorTrack implements Comparable {
     public Line3D getLastCross(){
         return this.trackCrosses.get(this.trackCrosses.size()-1);
     }
-    
+   
+    @Override
     public int compareTo(Object o) {
         DetectorTrack other = (DetectorTrack) o;
         if (this.getVector().mag() == other.getVector().mag()) return 0;

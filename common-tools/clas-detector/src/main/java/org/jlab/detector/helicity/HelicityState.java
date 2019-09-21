@@ -1,5 +1,6 @@
 package org.jlab.detector.helicity;
 
+import java.util.Comparator;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.jnp.hipo4.data.Bank;
 
@@ -12,7 +13,15 @@ import org.jlab.io.base.DataBank;
  *
  * @author baltzell
  */
-public class HelicityState {
+public class HelicityState implements Comparable<HelicityState>, Comparator<HelicityState> {
+
+    public static class Mask {
+        public static final int HELICITY =0x1;
+        public static final int SYNC     =0x2;
+        public static final int PATTERN  =0x4;
+        public static final int BIGGAP   =0x8;
+        public static final int SMALLGAP =0x10;
+    }
 
     // FIXME:  these should go in CCDB
     private static final short HALFADC=2000;
@@ -29,10 +38,47 @@ public class HelicityState {
     private long timestamp   = 0;
     private int  event       = 0;
     private int  run         = 0;
-    private byte status      = -1;
+    private byte hwStatus    = 0;
+    private byte swStatus    = 0;
 
     public HelicityState(){}
 
+    /**
+     * Compare based on timestamp for sorting and List insertion.
+     * @param o1
+     * @param o2
+     * @return negative/positive if o1 is before/after o2, else zero.
+     */
+    @Override
+    public int compare(HelicityState o1, HelicityState o2) {
+        return o1.compareTo(o2);
+    }
+    
+    /**
+     * Compare based on timestamp for sorting and List insertion.
+     * @param other
+     * @return negative/positive if this is before/after other, else zero.
+     */
+    @Override
+    public int compareTo(HelicityState other) {
+        if (this.getTimestamp() < other.getTimestamp()) return -1;
+        if (this.getTimestamp() > other.getTimestamp()) return +1;
+        return 0;
+    }
+    
+
+    public void addSwStatusMask(int mask) {
+        this.swStatus |= mask;
+    }
+
+    public int getSwStatus() {
+        return this.swStatus;
+    }
+   
+    public int getHwStatus() {
+        return this.hwStatus;
+    }
+    
     private HelicityBit getFadcState(short ped) {
         if      (ped == HALFADC) return HelicityBit.UDF;
         else if (ped > HALFADC)  return HelicityBit.PLUS;
@@ -64,10 +110,10 @@ public class HelicityState {
                     break;
             }
         }
-        state.status=0;
-        if (state.helicityRaw==HelicityBit.UDF) state.status |= 0x1;
-        if (state.pairSync==HelicityBit.UDF)    state.status |= 0x2;
-        if (state.patternSync==HelicityBit.UDF) state.status |= 0x4;
+        state.hwStatus=0;
+        if (state.helicityRaw==HelicityBit.UDF) state.hwStatus |= Mask.HELICITY;
+        if (state.pairSync==HelicityBit.UDF)    state.hwStatus |= Mask.SYNC;
+        if (state.patternSync==HelicityBit.UDF) state.hwStatus |= Mask.PATTERN;
         state.fixMissingReadouts();
         return state;
     }
@@ -83,7 +129,7 @@ public class HelicityState {
         state.run         = flipBank.getInt("run",0);
         state.event       = flipBank.getInt("event",0);
         state.timestamp   = flipBank.getLong("timestamp",0);
-        state.status      = flipBank.getByte("status",0);
+        state.hwStatus    = flipBank.getByte("status",0);
         state.helicity    = HelicityBit.create(flipBank.getByte("helicity",0));
         state.helicityRaw = HelicityBit.create(flipBank.getByte("helicityRaw",0));
         state.pairSync    = HelicityBit.create(flipBank.getByte("pair",0));
@@ -104,7 +150,7 @@ public class HelicityState {
         state.run         = flipBank.getInt("run",0);
         state.event       = flipBank.getInt("event",0);
         state.timestamp   = flipBank.getLong("timestamp",0);
-        state.status      = flipBank.getByte("status",0);
+        state.hwStatus    = flipBank.getByte("status",0);
         state.helicity    = HelicityBit.create(flipBank.getByte("helicity",0));
         state.helicityRaw = HelicityBit.create(flipBank.getByte("helicityRaw",0));
         state.pairSync    = HelicityBit.create(flipBank.getByte("pair",0));
@@ -148,7 +194,7 @@ public class HelicityState {
     }
 
     public String getInfo(HelicityState other,int counter) {
-        return String.format("%s %6.2f %5d %7d",
+        return String.format("%s %8.2f %5d %7d",
                 this.toString(),
                 1000*this.getSecondsDelta(other),
                 this.getEventDelta(other),
@@ -160,7 +206,7 @@ public class HelicityState {
         bank.putInt("run", 0, this.run);
         bank.putInt("event", 0, this.event);
         bank.putLong("timestamp", 0, this.timestamp);
-        bank.putByte("status", 0, this.status);
+        bank.putByte("status", 0, this.hwStatus);
         bank.putByte("helicity", 0, this.helicity.value());
         bank.putByte("helicityRaw", 0, this.helicityRaw.value());
         bank.putByte("pair", 0, this.pairSync.value());

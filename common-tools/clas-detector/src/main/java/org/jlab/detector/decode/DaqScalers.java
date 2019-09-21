@@ -41,15 +41,32 @@ public class DaqScalers {
     private float beamCharge=0;
     private float beamChargeGated=0;
     private float livetime=0;
+    private long timestamp   = 0;
     public Dsc2RawReading dsc2=null;
     public StruckRawReading struck=null;
+    public void setTimestamp(long timestamp) { this.timestamp=timestamp; }
     private void setBeamCharge(float q) { this.beamCharge=q; }
     private void setBeamChargeGated(float q) { this.beamChargeGated=q; }
     private void setLivetime(float l) { this.livetime=l; }
     public float getBeamCharge() { return beamCharge; }
     public float getBeamChargeGated() { return beamChargeGated; }
     public float getLivetime()   { return livetime; }
+    public long getTimestamp() { return timestamp; }
     public void show() { System.out.println("BCG=%.3f   LT=%.3f"); }
+
+    /**
+    * @param runScalerBank HIPO RUN::scaler bank
+    */
+    public static DaqScalers create(Bank runScalerBank) {
+        DaqScalers ds=new DaqScalers();
+        for (int ii=0; ii<runScalerBank.getRows(); ii++) {
+            ds.livetime=runScalerBank.getFloat("livetime", ii);
+            ds.beamCharge=runScalerBank.getFloat("fcup",ii);
+            ds.beamChargeGated=runScalerBank.getFloat("fcupgated",ii);
+            break; 
+        }
+        return ds;
+    }
 
     /**
     * @param rawScalerBank HIPO RAW::scaler bank
