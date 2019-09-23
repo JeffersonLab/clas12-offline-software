@@ -32,8 +32,6 @@ services:
     name: HTCC
   - class: org.jlab.service.ltcc.LTCCEngine
     name: LTCC
-  - class: org.jlab.rec.rich.RICHEBEngine
-    name: RICH
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
   - class: org.jlab.service.dc.DCTBEngine
@@ -42,6 +40,8 @@ services:
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
     name: EBTB
+  - class: org.jlab.rec.rich.RICHEBEngine
+    name: RICH
 configuration:
   io-services:
     writer:

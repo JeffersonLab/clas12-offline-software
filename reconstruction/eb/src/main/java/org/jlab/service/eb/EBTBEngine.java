@@ -16,6 +16,7 @@ public class EBTBEngine extends EBEngine {
         super("EBTB");
     }
 
+    @Override
     public boolean processDataEvent(DataEvent de) {
         return super.processDataEvent(de,ebScalers);
     }

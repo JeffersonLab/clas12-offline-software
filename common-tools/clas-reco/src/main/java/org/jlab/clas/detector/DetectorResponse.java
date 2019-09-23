@@ -99,28 +99,6 @@ public class DetectorResponse {
         }
     }
     
-    public Line3D  getDistance(DetectorParticle particle){
-        Path3D  trajectory = particle.getTrajectory();
-        return trajectory.distance(hitPosition.x(),hitPosition.y(),hitPosition.z());
-    }
-    
-    public int  getParticleMatch(DetectorEvent event){
-        
-        double  distance = 1000.0;
-        int     index    = -1;
-        
-        int nparticles = event.getParticles().size();
-        for(int p = 0; p < nparticles; p++){
-            DetectorParticle  particle = event.getParticles().get(p);
-            Line3D distanceLine = this.getDistance(particle);
-            if(distanceLine.length()<distance){
-                distance = distanceLine.length();
-                index    = p;
-            }
-        }
-        return index;
-    }
-    
     /**
      * reads DetectorResponse List from DataEvent class. it has to contain
      * branches:
@@ -134,7 +112,7 @@ public class DetectorResponse {
      */
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
         String bankName, DetectorType type){        
-        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> responseList = new ArrayList<>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
@@ -167,7 +145,7 @@ public class DetectorResponse {
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type, double minEnergy){ 
         DetectorResponse response = new DetectorResponse();
-        List<DetectorResponse> responses = response.readHipoEvent(event, bankName, type);
+        List<DetectorResponse> responses = DetectorResponse.readHipoEvent(event, bankName, type);
         return DetectorResponse.getListByEnergy(responses, minEnergy);
     }
     
@@ -178,7 +156,7 @@ public class DetectorResponse {
      * @return 
      */
     public static List<DetectorResponse>  getListByEnergy(List<DetectorResponse> responses, double minEnergy){
-        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> responseList = new ArrayList<>();
         for(DetectorResponse r : responses){
             if(r.getEnergy()>minEnergy){
                 responseList.add(r);
@@ -188,7 +166,7 @@ public class DetectorResponse {
     }
     
     public static List<DetectorResponse>  getListBySector(List<DetectorResponse> list, DetectorType type, int sector){
-        List<DetectorResponse> result = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> result = new ArrayList<>();
         for(DetectorResponse res : list){
             if(res.getDescriptor().getType()==type&&res.getDescriptor().getSector()==sector){
                 result.add(res);
@@ -198,7 +176,7 @@ public class DetectorResponse {
     }
     
     public static List<DetectorResponse>  getListByLayer(List<DetectorResponse> list, DetectorType type, int layer){
-        List<DetectorResponse> result = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> result = new ArrayList<>();
         for(DetectorResponse res : list){
             if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer){
                 result.add(res);
@@ -209,7 +187,7 @@ public class DetectorResponse {
         
     public static List<DetectorResponse>  getListBySectorLayer(List<DetectorResponse> list, 
             DetectorType type, int sector, int layer){
-        List<DetectorResponse> result = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> result = new ArrayList<>();
         for(DetectorResponse res : list){
             if(res.getDescriptor().getType()==type
                     &&res.getDescriptor().getSector()==sector
