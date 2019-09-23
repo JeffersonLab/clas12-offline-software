@@ -1,0 +1,16 @@
+[   
+ {
+    "bank": "RTPC::rec",
+    "group": 1720,
+    "info": "reconstructed RTPC hits",
+    "items": [
+       {"name":"TID",        "id":1, "type":"int16", "info":"Track ID of the hit"},
+       {"name":"cellID",     "id":2, "type":"int16", "info":"cell id"},
+       {"name":"time",       "id":3, "type":"float", "info":"Time (ns)"},
+       {"name":"posX",       "id":4, "type":"float", "info":"x pos (cm)"},
+       {"name":"posY",       "id":5, "type":"float", "info":"y pos (cm)"},
+       {"name":"posZ",       "id":6, "type":"float", "info":"z pos (cm)"},
+       {"name":"tdiff",      "id":7, "type":"float", "info":"Time shift (ns)"}
+    ]
+  }
+ ]

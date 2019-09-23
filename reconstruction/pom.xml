@@ -26,5 +26,6 @@
     <module>fvt</module>
     <module>eb</module>
     <module>band</module>
+    <module>rtpc</module>
   </modules>
 </project>
