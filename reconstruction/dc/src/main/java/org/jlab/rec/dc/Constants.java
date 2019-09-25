@@ -172,6 +172,7 @@ public class Constants {
     //max number of hits allowed in the event to do tracking
     public static double MAXHITS = 2000;
     ;
+    public static double TRANSVTXCUT = 20;
 
     public static boolean isUSETSTART() {
         return USETSTART;

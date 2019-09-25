@@ -206,7 +206,7 @@ public class ClusterFinder {
                 continue;
             selectedClusList.add(fClus); 
         }
-
+        
         //System.out.println(" Clusters Step 2");
         // for(FittedCluster c : selectedClusList)
         //	for(FittedHit h : c)
@@ -219,33 +219,48 @@ public class ClusterFinder {
 
             cf.SetFitArray(clus, "LC"); 
             cf.Fit(clus, true);
-
-            if (clus.get_fitProb() > Constants.HITBASEDTRKGMINFITHI2PROB || clus.size() < Constants.HITBASEDTRKGNONSPLITTABLECLSSIZE) {            
+            if(clus.get_fitProb()<Constants.HITBASEDTRKGMINFITHI2PROB) { 
+                ct.IsolatedHitsPruner(clus);
+                //Refit
+                cf.SetFitArray(clus, "LC"); 
+                cf.Fit(clus, true);
+            }
+            if (clus.get_fitProb() > Constants.HITBASEDTRKGMINFITHI2PROB  ){
+                //    || 
+                //    (clus.size() < Constants.HITBASEDTRKGNONSPLITTABLECLSSIZE && clus.get_fitProb()!=0) ){            
                 fittedClusList.add(clus); //if the chi2 prob is good enough, then just add the cluster, or if the cluster is not split-able because it has too few hits                
-            } else {          
+            } else {  
+                
                 List<FittedCluster> splitClus = ct.ClusterSplitter(clus, selectedClusList.size(), cf);
                 fittedClusList.addAll(splitClus);              
             }
         }
-
+        
+        ArrayList rmHits = new ArrayList<FittedHit>();
         for (FittedCluster clus : fittedClusList) {
-            if (clus != null && clus.size() > 3 ) {
-
+            if (clus != null && clus.size() > 3 && clus.get_fitProb()>Constants.HITBASEDTRKGMINFITHI2PROB) {
+                
                 // update the hits
                 for (FittedHit fhit : clus) {
                     fhit.set_TrkgStatus(0);
                     fhit.updateHitPosition(DcDetector); 
-                    fhit.set_AssociatedClusterID(clus.get_Id());
+                    //fhit.set_AssociatedClusterID(clus.get_Id());
                 }
+                
                 cf.SetFitArray(clus, "TSC"); 
                 cf.Fit(clus, true); 
                 cf.SetResidualDerivedParams(clus, false, false, DcDetector); //calcTimeResidual=false, resetLRAmbig=false, local= false
-
+                
+                clus = ct.ClusterCleaner(clus, cf, DcDetector);
+                // update the hits
+                for (FittedHit fhit : clus) {
+                    fhit.set_AssociatedClusterID(clus.get_Id());
+                }
                 cf.SetFitArray(clus, "TSC");
                 cf.Fit(clus, false);
                 cf.SetSegmentLineParameters(clus.get(0).get_Z(), clus);
-
-                if (clus != null) {
+               
+                if (clus != null ) {
                     refittedClusList.add(clus);
                 }
 
