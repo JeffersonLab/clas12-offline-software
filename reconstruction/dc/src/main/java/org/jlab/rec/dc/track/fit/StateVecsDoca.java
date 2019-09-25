@@ -8,6 +8,7 @@ import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.track.Track;
+import org.jlab.geom.prim.Point3D;
 /**
  * 
  * @author ziegler
@@ -84,28 +85,32 @@ public class StateVecsDoca {
             if(Math.signum(Z[f] - Z[i]) *(z+s)>Math.signum(Z[f] - Z[i]) *Z[f])
                 s=Math.signum(Z[f] - Z[i]) *Math.abs(Z[f]-z);
             
-            rk.RK4transport( sector, Q, x, y, z, tx, ty, s, dcSwim,
-                        covMat, fVec, fCov, mass, dPath);
-            
+            rk.RK4transport(sector, Q, x, y, z, tx, ty, s, dcSwim,
+                        covMat, fVec, fCov, dPath);
             
             // Q  process noise matrix estimate
+            
             double p = Math.abs(1. / iVec.Q);
 
             double X0 = this.getX0(z);
-            double t_ov_X0 = stepSize / X0;//path length in radiation length units = t/X0 [true path length/ X0] ; Ar radiation length = 14 cm
+            double t_ov_X0 = Math.abs(s) / X0;//path length in radiation length units = t/X0 [true path length/ X0] ; Ar radiation length = 14 cm
 
-            double beta = p / Math.sqrt(p * p + mass * mass); // use particle momentum
-            if(beta>0)
-                beta =1;
+            double beta = this.beta;
+            if(beta>1.0 || beta<=0)
+                beta =1.0;
 
-            double sctRMS = ((0.0136)/(beta*PhysicsConstants.speedOfLight()*p))*Math.sqrt(t_ov_X0)*
+            double sctRMS = 0;
+            
+            if(Math.abs(s)>0) 
+                sctRMS = ((0.0136)/(beta*PhysicsConstants.speedOfLight()*p))*Math.sqrt(t_ov_X0)*
                     (1 + 0.038 * Math.log(t_ov_X0));
+            
 
             double cov_txtx = (1 + tx * tx) * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
             double cov_tyty = (1 + ty * ty) * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
             double cov_txty = tx * ty * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
 
-            if (Math.signum(Z[f] - Z[i]) > 0) { 
+            //if (Math.signum(Z[f] - Z[i]) > 0) { 
                 Matrix fMS = new Matrix(new double[][]{
                 {0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0},
@@ -115,7 +120,7 @@ public class StateVecsDoca {
                 });
                 Matrix fCovMS = fCov.covMat.copy().plus(fMS);
                 fCov.covMat = fCovMS;
-            } 
+            //} 
             // end add process noise
             
             if( Math.abs(fVec.B - BatMeas)<0.0001)
@@ -180,8 +185,8 @@ public class StateVecsDoca {
             double dPath = fVec.deltaPath;
             covMat.covMat = fCov.covMat; 
             
-            rk.RK4transport( sector, Q, x, y, z, tx, ty, s, dcSwim,
-                        covMat, fVec, fCov, mass, dPath);
+            rk.RK4transport(sector, Q, x, y, z, tx, ty, s, dcSwim,
+                        covMat, fVec, fCov, dPath);
             
         }
         
@@ -211,7 +216,7 @@ public class StateVecsDoca {
     }
 
     
-    private double mass = 0.13957018;
+    private double beta = 1.0;
     public void setMass(int hypo, double mass) {
           
         switch (hypo) {
@@ -240,19 +245,21 @@ public class StateVecsDoca {
      * @param z0 the value in z to which the track is swam back to
      * @param kf the final state measurement index
      */
-    public void init(Track trkcand, double z0, KFitterDoca kf) {
+    public void init(Track trkcand, double z0, KFitterDoca kf, int c) {
         
-        if (trkcand.get_StateVecAtReg1MiddlePlane() != null) {
+        Point3D trkCrs = trkcand.get(c).get_Point();
+        Point3D trkCrsD = trkcand.get(c).get_Dir();
+        StateVec initSV = new StateVec(0);
+        initSV.x = trkCrs.x();
+        initSV.y = trkCrs.y();
+        initSV.z = trkCrs.z();
+        initSV.tx = trkCrsD.x()/trkCrsD.z();
+        initSV.ty = trkCrsD.y()/trkCrsD.z();
+        initSV.Q = trkcand.get_Q() / trkcand.get_P();
+
+        rk.SwimToZ(trkcand.get(0).get_Sector(), initSV, dcSwim, z0, bf);
             
-            StateVec initSV = new StateVec(0);
-            initSV.x = trkcand.get_StateVecAtReg1MiddlePlane().x();
-            initSV.y = trkcand.get_StateVecAtReg1MiddlePlane().y();
-            initSV.z = trkcand.get(0).get_Point().z();
-            initSV.tx = trkcand.get_StateVecAtReg1MiddlePlane().tanThetaX();
-            initSV.ty = trkcand.get_StateVecAtReg1MiddlePlane().tanThetaY();
-            initSV.Q = trkcand.get_Q() / trkcand.get_P();
-            
-            rk.SwimToZ(trkcand.get(0).get_Sector(), initSV, dcSwim, z0, bf);
+        if (initSV != null) {
             
             this.trackTraj.put(0, initSV);
         } else {
@@ -366,11 +373,7 @@ public class StateVecsDoca {
     void initFromHB(Track trkcand, double z0, KFitterDoca kf) { 
         if (trkcand != null && trkcand.getFinalStateVec()!=null 
                 && trkcand.get_CovMat()!=null) {
-            if(trkcand.get(0).get(0).get(0).get_Beta()>0.99) {
-                this.setMass(0, mass);
-            } else {
-                this.setMass(1, mass);
-            }
+            beta = trkcand.get(0).get(0).get(0).get_Beta();
             StateVec initSV = new StateVec(0);
             initSV.x = trkcand.getFinalStateVec().x();
             initSV.y = trkcand.getFinalStateVec().y();
@@ -383,7 +386,7 @@ public class StateVecsDoca {
             this.trackTraj.put(0, initSV); 
             
             CovMat initCM = new CovMat(0);
-            initCM.covMat = trkcand.get_CovMat(); 
+            //initCM.covMat = trkcand.get_CovMat(); 
             //test
             StateVec rinitSV = new StateVec(0);
             rinitSV.x = trkcand.getFinalStateVec().x();
@@ -400,7 +403,7 @@ public class StateVecsDoca {
             }
             
             Matrix initCMatrix = new Matrix(FTF); 
-            initCM.covMat = initCMatrix;
+            initCM.covMat = initCMatrix; 
             //end test
             this.trackCov.put(0, initCM); //this.printMatrix(initCM.covMat);
         } else {
