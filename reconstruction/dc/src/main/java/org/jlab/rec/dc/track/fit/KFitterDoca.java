@@ -27,7 +27,7 @@ public class KFitterDoca {
     public List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory;
     public int totNumIter = 30;
     private double newChisq = Double.POSITIVE_INFINITY;
-
+    public boolean filterOn = true;
     public double chi2 = 0;
     private double chi2kf = 0;
     public int NDF = 0;
@@ -35,12 +35,12 @@ public class KFitterDoca {
 
     public KFitterDoca(Track trk, DCGeant4Factory DcDetector,
                    boolean TimeBasedUsingHBtrack,
-                   Swim swimmer) {
+                   Swim swimmer, int c) {
         sv = new StateVecsDoca(swimmer);
         if (TimeBasedUsingHBtrack) {
             this.initFromHB(trk, DcDetector);
         } else {
-            this.init(trk, DcDetector);
+            this.init(trk, DcDetector, c);
         }
     }
 
@@ -55,7 +55,7 @@ public class KFitterDoca {
         sv.initFromHB(trk, sv.Z[0], this);
     }
 
-    public void init(Track trk, DCGeant4Factory DcDetector) {
+    public void init(Track trk, DCGeant4Factory DcDetector, int c) {
         mv.setMeasVecs(trk, DcDetector);
         int mSize = mv.measurements.size();
 
@@ -64,7 +64,7 @@ public class KFitterDoca {
         for (int i = 0; i < mSize; i++) {
             sv.Z[i] = mv.measurements.get(i).z;
         }
-        sv.init(trk, sv.Z[0], this);
+        sv.init(trk, sv.Z[0], this, c);
     }
     public int interNum = 0;
     public void runFitter(int sector) {
@@ -211,7 +211,7 @@ public class KFitterDoca {
             double signMeas = 1;
             double sign = 1;
             if(mv.measurements.get(k).doca[1]!=-99 || 
-                    !(Math.abs(mv.measurements.get(k).doca[0])<0.1 && mv.measurements.get(k).doca[1]==-99 ) ) { //use LR only for double hits && large enough docas
+                    !(Math.abs(mv.measurements.get(k).doca[0])<0.5 && mv.measurements.get(k).doca[1]==-99 ) ) { //use LR only for double hits && large enough docas
                 signMeas = Math.signum(mv.measurements.get(k).doca[0]);
                 sign = Math.signum(h);
             } else {
@@ -267,12 +267,13 @@ public class KFitterDoca {
             } 
             
             chi2kf += c2;
-            sv.trackTraj.get(k).x = x_filt;
-            sv.trackTraj.get(k).y = y_filt;
-            sv.trackTraj.get(k).tx = tx_filt;
-            sv.trackTraj.get(k).ty = ty_filt;
-            sv.trackTraj.get(k).Q = Q_filt;
-
+            if(filterOn) {
+                sv.trackTraj.get(k).x = x_filt;
+                sv.trackTraj.get(k).y = y_filt;
+                sv.trackTraj.get(k).tx = tx_filt;
+                sv.trackTraj.get(k).ty = ty_filt;
+                sv.trackTraj.get(k).Q = Q_filt;
+            }
         }
     }
 
