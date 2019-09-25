@@ -24,7 +24,6 @@ import org.jlab.rec.dc.segment.SegmentFinder;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
-import org.jlab.rec.dc.track.fit.KFitter;
 import org.jlab.rec.dc.track.fit.KFitterDoca;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
@@ -220,7 +219,7 @@ public class DCTBEngine extends DCEngine {
             //if(TrackArray[i].get_FitChi2()>200) {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());
             //}
-            KFitterDoca kFit = new KFitterDoca(TrackArray[i], dcDetector, true, dcSwim);
+            KFitterDoca kFit = new KFitterDoca(TrackArray[i], dcDetector, true, dcSwim, 0);
            
             StateVec fn = new StateVec();
             kFit.runFitter(TrackArray[i].get(0).get_Sector());
