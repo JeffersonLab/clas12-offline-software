@@ -122,7 +122,7 @@ public class RungeKuttaDoca {
     }
     //
     void RK4transport(int sector, double q, double x0, double y0, double z0, double tx0, double ty0, double h, Swim swimmer, 
-            StateVecsDoca.CovMat covMat, StateVecsDoca.StateVec fVec, StateVecsDoca.CovMat fCov, double mass, double dPath) {
+            StateVecsDoca.CovMat covMat, StateVecsDoca.StateVec fVec, StateVecsDoca.CovMat fCov, double dPath) {
         // Jacobian:
         double[][] u = new double[5][5];       
         double[][] C = new double[5][5];
