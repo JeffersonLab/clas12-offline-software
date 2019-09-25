@@ -12,8 +12,9 @@ import org.jlab.rec.dc.cross.Cross;
 import org.jlab.rec.dc.cross.CrossList;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
-import org.jlab.rec.dc.track.fit.KFitter;
-//import org.jlab.rec.dc.track.fit.KFitterDoca;
+//import org.jlab.rec.dc.track.fit.KFitter;
+import org.jlab.rec.dc.track.fit.KFitterDoca;
+import org.jlab.rec.dc.track.fit.StateVecsDoca;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
@@ -318,7 +319,7 @@ public class TrackCandListFinder {
                              Swim dcSwim) {
         double pz = cand.get_P() / Math.sqrt(stateVec.tanThetaX() * stateVec.tanThetaX() +
                 stateVec.tanThetaY() * stateVec.tanThetaY() + 1);
-
+        
         //System.out.println("Setting track params for ");stateVec.printInfo();
         dcSwim.SetSwimParameters(stateVec.x(), stateVec.y(), z,
                 pz * stateVec.tanThetaX(), pz * stateVec.tanThetaY(), pz,
@@ -794,7 +795,7 @@ public class TrackCandListFinder {
                             cand.get(0).get_Dir().y() / cand.get(0).get_Dir().z());
                     cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane);
                     // initialize the fitter with the candidate track
-                    KFitter kFit = new KFitter(cand, DcDetector, false, dcSwim);
+                    KFitterDoca kFit = new KFitterDoca(cand, DcDetector, false, dcSwim,0);
                     kFit.totNumIter = 1;
 
                     if (debug) startTime = System.currentTimeMillis();
@@ -1000,71 +1001,53 @@ public class TrackCandListFinder {
                                 cand.get(0).get_Dir().y() / cand.get(0).get_Dir().z());
                         cand.set_StateVecAtReg1MiddlePlane(VecAtReg1MiddlePlane);
                         // initialize the fitter with the candidate track
+                        KFitterDoca kFit = null;
+                        StateVec fitStateVec = null;
 
-                        KFitter kFit = new KFitter(cand, DcDetector, false, dcSwim);
-    //                            if(this.trking.equalsIgnoreCase("TimeBased"))
-    //                                kFit.totNumIter=30;
-    
-                        // initialize the state vector corresponding to the last measurement site
-                        StateVec fn = new StateVec();
-
-                        if (debug) startTime = System.currentTimeMillis();
-                        kFit.runFitter(cand.get(0).get_Sector());
+                        
                         if (debug)
                             System.out.println("Kalman fitter - 2 = " + (System.currentTimeMillis() - startTime));
-                        
+                        // prefer to initialize the seed with region 2 cross due to higher background in region 1
+                        int crossIdxinList = 1;
+                        if(cand.get(1).isPseudoCross) {
+                            crossIdxinList = 0;
+                        }
+                        kFit = new KFitterDoca(cand, DcDetector, false, dcSwim, crossIdxinList);
+                        kFit.totNumIter = 10;
+                        kFit.runFitter(cand.get(0).get_Sector());
                         if (kFit.finalStateVec == null) {
-                            //System.out.println(" FIT FAILED no SV");
                             continue;
-                        }
+                        } else {
+                            if(kFit.chi2<Constants.MAXCHI2) {
 
-                        if (this.trking.equalsIgnoreCase("HitBased")) {
+                                fitStateVec= new StateVec(kFit.finalStateVec.x,
+                                kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty);
+                                q = (int) Math.signum(kFit.finalStateVec.Q);
+                                p = 1. / Math.abs(kFit.finalStateVec.Q);
+                                fitStateVec.setZ(kFit.finalStateVec.z);
+                                
+                                //set the track parameters 
+                                cand.set_P(p);
+                                cand.set_Q(q);
 
-                            if (debug) startTime = System.currentTimeMillis();
-                            double HBc2 = getHitBasedFitChi2ToCrosses(cand.get(0).get_Sector(),
-                                    x1, y1, z1, x2, y2, z2, x3, y3, z3,
-                                    1. / Math.abs(kFit.finalStateVec.Q),
-                                    (int) Math.signum(kFit.finalStateVec.Q),
-                                    kFit.finalStateVec.x,
-                                    kFit.finalStateVec.y,
-                                    kFit.finalStateVec.z,
-                                    kFit.finalStateVec.tx,
-                                    kFit.finalStateVec.ty,
-                                    dcSwim);
-                            if (debug)
-                                System.out.println("getHitBasedFitChi2ToCrosses = " +
-                                        (System.currentTimeMillis() - startTime));
+                                // candidate parameters 
+                                cand.set_FitChi2(kFit.chi2);
+                                cand.set_FitNDF(kFit.NDF);
+                                cand.set_FitConvergenceStatus(kFit.ConvStatus);
 
-                            if (HBc2 > Constants.MAXCHI2) {
-                                kFit.setFitFailed = true;
-                            }
-                        }
+                                cand.set_CovMat(kFit.finalCovMat.covMat);
+                                cand.set_Trajectory(kFit.kfStateVecsAlongTrajectory);
 
-                        if (!kFit.setFitFailed && kFit.finalStateVec != null) {
-                            // set the state vector at the last measurement site
-                            fn.set(kFit.finalStateVec.x,
-                                    kFit.finalStateVec.y,
-                                    kFit.finalStateVec.tx,
-                                    kFit.finalStateVec.ty);
-                            fn.setZ(kFit.finalStateVec.z);
-                            cand.setFinalStateVec(fn);
-                        
-                            //set the track parameters if the filter does not fail
-                            cand.set_P(1. / Math.abs(kFit.finalStateVec.Q));
-                            cand.set_Q((int) Math.signum(kFit.finalStateVec.Q));
-                            this.setTrackPars(cand, traj,
-                                    trjFind, fn,
-                                    kFit.finalStateVec.z,
+                                cand.setFinalStateVec(fitStateVec);
+                                cand.set_Id(cands.size() + 1);
+                                this.setTrackPars(cand, traj,
+                                    trjFind, fitStateVec,
+                                    fitStateVec.getZ(),
                                     DcDetector, dcSwim);
-                            // candidate parameters are set from the state vector
-                            cand.set_FitChi2(kFit.chi2);
-                            cand.set_FitNDF(kFit.NDF);
-                            cand.set_FitConvergenceStatus(kFit.ConvStatus);
-                            cand.set_Id(cands.size() + 1);
-                            cand.set_CovMat(kFit.finalCovMat.covMat);
-                            cand.set_Trajectory(kFit.kfStateVecsAlongTrajectory);
-                            // add candidate to list of tracks
-                            cands.add(cand);
+                                // add candidate to list of tracks
+                                if(cand.fit_Successful = true)
+                                    cands.add(cand);
+                            }
                         }
                     }
                 }
