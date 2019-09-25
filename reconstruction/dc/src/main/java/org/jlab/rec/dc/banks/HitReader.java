@@ -311,7 +311,7 @@ public class HitReader {
                 if (event.hasBank("RECHB::Event"))
                     T_Start = event.getBank("RECHB::Event").getFloat("startTime", 0);
             }
-
+            
             FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], tdc[i], id[i]);
             hit.set_Id(id[i]);
             hit.setB(B[i]);
@@ -349,7 +349,7 @@ public class HitReader {
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
             
-            if(hit.betaFlag != -1)
+            //if(hit.betaFlag != -1)
                 hits.add(hit);            
         }
 
