@@ -3,6 +3,7 @@ package org.jlab.detector.helicity;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Helicity Pseudo-Random Sequence.
@@ -24,7 +25,7 @@ import java.util.Collections;
  *
  * @author baltzell
  */
-public final class HelicityGenerator {
+public final class HelicityGenerator implements Comparable<HelicityGenerator>, Comparator<HelicityGenerator> {
 
     public static final int REGISTER_SIZE=30;
     private final List<Integer> states=new ArrayList<>();
@@ -48,6 +49,18 @@ public final class HelicityGenerator {
         return nextBit;
     }
 
+    @Override
+    public int compareTo(HelicityGenerator other) {
+        if (this.getTimestamp() < other.getTimestamp()) return -1;
+        if (this.getTimestamp() > other.getTimestamp()) return +1;
+        return 0;
+    }
+    
+    @Override
+    public int compare(HelicityGenerator o1, HelicityGenerator o2) {
+        return o1.compareTo(o2);
+    }
+    
     /**
      * Get the timestamp of the first state in the generator sequence.
      * @return timestamp (4ns)
@@ -85,7 +98,7 @@ public final class HelicityGenerator {
 
     /**
      * Test whether the generator is sufficiently initialized such that
-     * {@link getState(int)} method can be called, based on whether the
+     * {@link #get(int)} method can be called, based on whether the
      * number of added states is at least {@link REGISTER_SIZE}.
      *
      * @return whether the sequence is initialized
@@ -146,7 +159,7 @@ public final class HelicityGenerator {
      * @param n number of states after the first one.
      * @return the nth HelicityBit in the sequence.
      */
-    public HelicityBit getState(final int n) {
+    public HelicityBit get(final int n) {
         if (!this.initialized())
             throw new RuntimeException("Not initialized.");
         if (n < 0)
@@ -309,8 +322,11 @@ public final class HelicityGenerator {
         }
 
         if (!this.initialized()) {
-            System.out.println("HelicityGenerator:  Initialization Error.");
+            System.err.println("HelicityGenerator:  Initialization Error.");
             this.reset();
+        }
+        else if (this.verbosity>0) {
+            System.out.println("HelicityGenerator:  Initialized.");
         }
 
         return this.initialized();
