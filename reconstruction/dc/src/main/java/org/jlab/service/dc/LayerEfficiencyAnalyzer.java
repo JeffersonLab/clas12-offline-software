@@ -123,6 +123,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         // create histograms
         for(int si =0; si<6; si++) {
             LayerEffs.add(new HashMap<Coordinate, H1F>());
+            LayerEffsTrkD.add(new HashMap<Coordinate, H1F>());
             for(int i =0; i<6; i++) {
                 LayerEffs.get(si).put(new Coordinate(i),
                                 new H1F("Sector-"+si+" layer efficiencies" + (i + 1), "superlayer" + (i + 1), 6, 0.5, 6.5));
@@ -230,7 +231,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
-       if (newRun == 0)
+        if (newRun == 0)
            return true;
 
        if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
@@ -458,11 +459,10 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         screensize = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setSize((int) (screensize.getHeight() * .75 * 1.618), (int) (screensize.getHeight() * .75));
              
-        LayerEfficiencyAnalyzer tm = new LayerEfficiencyAnalyzer();
+        
         MagFieldsEngine enf = new MagFieldsEngine();
         enf.init();
-        DCHBEngine en = new DCHBEngine();
-        en.init();
+        LayerEfficiencyAnalyzer tm = new LayerEfficiencyAnalyzer();
         tm.init();
         
         frame.add(tm.mainPanel);
@@ -480,12 +480,10 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
             while (reader.hasEvent()) {
                 counter++;
                 DataEvent event = reader.getNextEvent();
-                //enf.processDataEvent(event);
-                //en.processDataEvent(event);
                 tm.processDataEvent(event);
                 tm.ProcessLayerEffs(event);
                 //event.show();
-                if(counter%10==0) {
+                if(counter%1000==0) {
                     System.out.println(counter);
                     tm.drawPlots();
                 }
