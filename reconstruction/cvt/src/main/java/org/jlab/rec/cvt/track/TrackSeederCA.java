@@ -8,6 +8,7 @@ import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.geom.prim.Point3D;
+import org.jlab.rec.cvt.CentralTracker;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.CircleFitter;
@@ -157,7 +158,8 @@ public class TrackSeederCA {
     // create and run the cellular automaton
     public List<Cell> runCAMaker( String plane, int nepochs, ArrayList<Cross> crs, 
             org.jlab.rec.cvt.bmt.Geometry bgeom, 
-            Swim swimmer){
+            Swim swimmer, 
+        CentralTracker CVT){
         MakerCA camaker = new MakerCA(false);
         camaker.set_plane( plane );
         if( plane.equalsIgnoreCase("XY") ){
@@ -171,7 +173,7 @@ public class TrackSeederCA {
           camaker.set_aCvsR(90.);
         }
         
-        camaker.createCells(crs, bgeom);
+        camaker.createCells(crs, bgeom, CVT);
         camaker.findNeighbors();
 //        camaker.evolve( nepochs );
         return camaker.getNodes();  
@@ -180,7 +182,8 @@ public class TrackSeederCA {
     public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses, 
     						   org.jlab.rec.cvt.svt.Geometry svt_geo, 
     						   org.jlab.rec.cvt.bmt.Geometry bmt_geo, 
-                                                   Swim swimmer) {
+                                                   Swim swimmer, 
+                    CentralTracker CVT) {
        
         List<Seed> seedlist = new ArrayList<Seed>();
 
@@ -204,7 +207,7 @@ public class TrackSeederCA {
         // look for candidates in the XY plane
         // run the cellular automaton over SVT and BMT_Z crosses
 
-        List<Cell> xynodes = runCAMaker( "XY", 10, crosses, bmt_geo, swimmer); 
+        List<Cell> xynodes = runCAMaker( "XY", 10, crosses, bmt_geo, swimmer, CVT); 
         List<ArrayList<Cross>> xytracks =  getCAcandidates( xynodes, swimmer);
 
 //        System.out.println( " XY tracks " + xytracks );
@@ -212,7 +215,7 @@ public class TrackSeederCA {
 
         // find ZR candidates and match with XY
         // ------------------------------------
-        List<ArrayList<Cross>> seedCrosses = CAonRZ( xytracks, bmtC_crosses, svt_geo, bmt_geo, swimmer);
+        List<ArrayList<Cross>> seedCrosses = CAonRZ( xytracks, bmtC_crosses, svt_geo, bmt_geo, swimmer, CVT);
         
         List<Track> cands = new ArrayList<Track>();
         for (int s = 0; s < seedCrosses.size(); s++) {
@@ -307,7 +310,7 @@ public class TrackSeederCA {
                                         List<ArrayList<Cross>> bmtC_crosses,
                                         org.jlab.rec.cvt.svt.Geometry svt_geo, 
                                         org.jlab.rec.cvt.bmt.Geometry bmt_geo, 
-                                        Swim swimmer) {
+                                        Swim swimmer, CentralTracker CVT) {
       
       List<ArrayList<Cross>> seedCrosses = new ArrayList<ArrayList<Cross>>();
 
@@ -318,7 +321,7 @@ public class TrackSeederCA {
       List< List< ArrayList< Cross > > > zrTrksPerSector = new ArrayList<List<ArrayList<Cross>>>();
       for( int i = 0 ; i < 3 ; i++ ){
 
-        List<Cell> zrnodes = runCAMaker( "ZR", 5, bmtC_crosses.get( i ) , bmt_geo, swimmer);
+        List<Cell> zrnodes = runCAMaker( "ZR", 5, bmtC_crosses.get( i ) , bmt_geo, swimmer, CVT);
         List<ArrayList<Cross>> zrtracks =  getCAcandidates( zrnodes, swimmer);
         zrTrksPerSector.add( zrtracks );
       }

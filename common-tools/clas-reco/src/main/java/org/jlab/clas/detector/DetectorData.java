@@ -580,8 +580,8 @@ public class DetectorData {
                double py = pt*Math.sin(phi0);
                double px = pt*Math.cos(phi0);
 
-               double vx = d0*Math.cos(phi0);
-               double vy = d0*Math.sin(phi0);
+               double vx = d0*Math.sin(phi0);
+               double vy = -d0*Math.cos(phi0);
 
                DetectorTrack  track = new DetectorTrack(charge,p,row);
                track.setVector(px, py, pz);

@@ -4,6 +4,7 @@ import java.util.*;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
+import org.jlab.rec.cvt.CentralTracker;
 import org.jlab.rec.cvt.bmt.Geometry;
 import org.jlab.rec.cvt.cross.Cross;
 
@@ -114,7 +115,7 @@ public class MakerCA {
 		return true;
 	}
 	
-	public void createCells( List<Cross> crs, Geometry bgeom ){
+	public void createCells( List<Cross> crs, Geometry bgeom, CentralTracker CVT ){
 		// this function loops over the crosses and looks for pairs that pass the cuts
 		//
 		Collections.sort(crs);
@@ -122,9 +123,17 @@ public class MakerCA {
         for( int ic=0;ic<crs.size();ic++){
       	  Cross a = crs.get(ic);
       	  int aReg = a.get_Region();
+      	  int aSector = a.get_Sector();
+      	  int aLayer = a.get_Cluster1().get_Layer();
       	  if( a.get_Detector().equalsIgnoreCase("BMT")) {
 //      		  aReg = 6 + bgeom.getLayer( aReg , a.get_DetectorType() );
       		  aReg = 6 + aReg;
+
+          	  if( CVT.getClusters(aLayer+6, aSector).size() > 5 ) continue;
+      	  }
+      	  else {
+
+          	  if( CVT.getClusters(aLayer, aSector).size() > 3 ) continue;
       	  }
       	  
       	  if( this._debug ) {

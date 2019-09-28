@@ -1015,6 +1015,25 @@ public static void applyInverseShift( Vector3d aPoint, double[] aShift, Vector3d
 		return x_strip;
 	}
 	
+	public double[] ComputeAngles(int lay, int sec, Vector3D direction) {
+    	double[] angle=new double[3];
+    	Vector3D er=this.findBSTPlaneNormal(sec, lay);
+    	Vector3D ez=new Vector3D(0,0,1);
+    	Vector3D etheta=er.cross(ez);
+    	    	
+    	
+    	double dot_theta=direction.dot(etheta);
+    	etheta.setXYZ(dot_theta*etheta.x(), dot_theta*etheta.y(), 0);
+    	
+    	Vector3D dir_rTheta=new Vector3D(direction.x(),direction.y(),0);
+    	    	
+    	angle[0]=er.angle(direction);//angle with er
+    	angle[1]=er.angle(dir_rTheta);//Angle in er ethteta plane
+    	angle[2]=er.angle(direction.sub(etheta));//Angle in er/ez plane
+    	
+    	return angle;
+    }
+	
     public static void main(String arg[]) throws FileNotFoundException {
 
         

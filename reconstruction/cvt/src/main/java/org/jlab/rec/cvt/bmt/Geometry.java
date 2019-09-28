@@ -707,6 +707,25 @@ public class Geometry {
          }
     	return rm;
     }
+    
+    public double[] ComputeAngles(Vector3D position, Vector3D direction) {
+    	double[] angle=new double[3];
+    	double norm_xy=Math.sqrt(position.x()*position.x()+position.y()*position.y());
+    	Vector3D er=new Vector3D(position.x()/norm_xy,position.y()/norm_xy,0);
+    	Vector3D etheta=new Vector3D(-position.y()/norm_xy,position.x()/norm_xy,0);
+    	Vector3D ez=new Vector3D(0,0,1);
+    	
+    	double dot_theta=direction.dot(etheta);
+    	etheta.setXYZ(dot_theta*etheta.x(), dot_theta*etheta.y(), 0);
+    	
+    	Vector3D dir_rTheta=new Vector3D(direction.x(),direction.y(),0);
+    	    	
+    	angle[0]=er.angle(direction);//angle with er
+    	angle[1]=er.angle(dir_rTheta);//Angle in er ethteta plane
+    	angle[2]=er.angle(direction.sub(etheta));//Angle in er/ez plane
+    	
+    	return angle;
+    }
 
     public static final int getZorC(int layer) {
         int axis = 0;
