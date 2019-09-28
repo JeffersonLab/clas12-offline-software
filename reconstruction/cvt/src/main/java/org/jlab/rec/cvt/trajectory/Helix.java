@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.trajectory;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.Constants;
 
 import Jama.Matrix;
 
@@ -44,6 +45,20 @@ public class Helix {
         set_tandip(tandip);
         set_covmatrix(covmatrix);
         set_pivot(pivot);
+    }
+    
+    public void initialize_with_particle(double vx, double vy, double vz, double px, double py, double pz, double charge, double Bz) {
+    	Vector3D piv=new Vector3D(vx,vy,vz);
+    	this.set_pivot(piv);
+    	this.set_Z0(0);
+    	this.set_dca(0);
+    	this.set_curvature((Constants.LIGHTVEL * Bz * charge)/Math.sqrt(px*px+py*py));
+    	double theta=Math.acos(pz/Math.sqrt(px*px+py*py+pz*pz));
+    	this.set_tandip(Math.tan(Math.PI/2.-theta));
+    	if (this.get_curvature()< 0) {
+            this.set_phi_at_dca(Math.atan2(-this.ycen() + vy, -this.xcen() + vx));
+        }
+    	else this.set_phi_at_dca(Math.atan2(this.ycen() - vy, this.xcen() - vx));
     }
 
     public void set_pivot(Vector3D pivot) {
