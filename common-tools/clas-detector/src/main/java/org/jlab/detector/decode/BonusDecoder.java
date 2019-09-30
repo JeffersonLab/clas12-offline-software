@@ -78,6 +78,24 @@ public class BonusDecoder {
         while(decoder.hasEvent()==true&&counter<100){
             counter++;
             decoder.nextEvent(63);
+            
+            List<DetectorDataDgtz> data = decoder.nextEvent(63);
+            System.out.println("printout event # " + counter);
+            for(int i = 0; i < data.size(); i++){
+                DetectorDataDgtz bonusData = data.get(i);
+                long timestamp = bonusData.getADCData(0).getTimeStamp();
+                short[]  pulse = bonusData.getADCData(0).getPulseArray();
+                System.out.println("TIME STAMP = " + timestamp);
+                int crate = bonusData.getDescriptor().getCrate();
+                int  slot = bonusData.getDescriptor().getSlot();
+                int channel = bonusData.getDescriptor().getChannel();
+                System.out.printf("CRATE : %5d , SLOT : %5d , CHANNEL = %5d \n",crate,slot,channel);
+                System.out.printf("%6d : ",pulse.length);
+                for(int p = 0; p < pulse.length; p++){
+                    System.out.printf("%6d ", pulse[p]);
+                }
+                System.out.println();
+            }
         }
     }
 }
