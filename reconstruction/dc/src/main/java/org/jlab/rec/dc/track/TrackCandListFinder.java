@@ -1,7 +1,9 @@
 package org.jlab.rec.dc.track;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.jlab.clas.clas.math.FastMath;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
@@ -14,7 +16,6 @@ import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 //import org.jlab.rec.dc.track.fit.KFitter;
 import org.jlab.rec.dc.track.fit.KFitterDoca;
-import org.jlab.rec.dc.track.fit.StateVecsDoca;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
@@ -571,24 +572,48 @@ public class TrackCandListFinder {
         cand.set_PreRegion1CrossDir(new Point3D(uxInner, uyInner, uzInner));
     }
 
-    public void removeOverlappingTracks(List<Track> trkcands) {
-        List<Track> selectedTracks = new ArrayList<Track>();
+    private Integer getKey(Track trk) {
+        return  trk.get(0).get_Id()*1000000+
+                trk.get(1).get_Id()*1000+
+                trk.get(2).get_Id();
+    }
+    public void removeOverlappingTracks(List<Track> trkcands) { 
+        Map<Integer, Track> selectedTracksMap = new HashMap<Integer, Track>();
         List<Track> list = new ArrayList<Track>();
         int size = trkcands.size();
         for (int i = 0; i < size; i++) {
             list.clear();
             this.getOverlapLists(trkcands.get(i), trkcands, list);
-            trkcands.removeAll(list);
-            size -= list.size();
             Track selectedTrk = this.FindBestTrack(list);
+            
             if (selectedTrk == null)
                 continue;
-            //if(this.ListContainsTrack(selectedTracks, selectedTrk)==false)
-            selectedTracks.add(selectedTrk);
+            selectedTracksMap.put(this.getKey(selectedTrk), selectedTrk);
         }
-        //trkcands.removeAll(trkcands);
-        trkcands.addAll(selectedTracks);
+        
+        trkcands.removeAll(trkcands);
+        for(Map.Entry<Integer, Track> entry : selectedTracksMap.entrySet())  
+            trkcands.add(entry.getValue()); 
     }
+    
+//    public void removeOverlappingTracks(List<Track> trkcands) { 
+//        List<Track> selectedTracks = new ArrayList<Track>();
+//        List<Track> list = new ArrayList<Track>();
+//        int size = trkcands.size();
+//        for (int i = 0; i < size; i++) {
+//            list.clear();
+//            this.getOverlapLists(trkcands.get(i), trkcands, list);
+//            trkcands.removeAll(list);
+//            size -= list.size();
+//            Track selectedTrk = this.FindBestTrack(list);
+//            if (selectedTrk == null)
+//                continue;
+//            //if(this.ListContainsTrack(selectedTracks, selectedTrk)==false)
+//            selectedTracks.add(selectedTrk);
+//        }
+//        //trkcands.removeAll(trkcands);
+//        trkcands.addAll(selectedTracks);
+//    }
 
     /**
      * @param selectedTracks the list of selected tracks
@@ -605,7 +630,7 @@ public class TrackCandListFinder {
         }
         return isInList;
     }
-
+    
     /**
      * @param track    the track
      * @param trkcands the list of candidates
