@@ -894,6 +894,98 @@ public class CodaEventDecoder {
         }
         return entries;
     }
+    
+        /**
+     * Decoding MicroMegas Packed Data
+     * @param crate
+     * @param node
+     * @param event
+     * @return
+     */
+    public List<DetectorDataDgtz>  getDataEntries_57641(Integer crate, EvioNode node, EvioDataEvent event){
+        // Micromegas packed data
+        // ----------------------
+        
+        ArrayList<DetectorDataDgtz>  entries = new ArrayList<DetectorDataDgtz>();
+        if(node.getTag()==57641){
+            try {
+                ByteBuffer     compBuffer = node.getByteData(true);
+                CompositeData  compData = new CompositeData(compBuffer.array(),event.getByteOrder());
+
+                List<DataType> cdatatypes = compData.getTypes();
+                List<Object>   cdataitems = compData.getItems();
+
+                //System.out.println("composite data size = " + cdatatypes.size());
+                int jdata = 0;  // item counter 
+                for( int i = 0 ; i < cdatatypes.size();  ) { // loop over data types
+                	Byte SLOT     =  (Byte)cdataitems.get( jdata++ ); i++;
+                	
+                	Integer EV_ID  = (Integer)cdataitems.get( jdata++ ); i++;
+                	
+                	Long TIMESTAMP =  (Long)cdataitems.get( jdata++ ); i++;
+                	
+                	Short nChannels =  (Short)cdataitems.get( jdata++ ); i++; 
+
+                	for( int ch=0; ch<nChannels; ch++ ) {
+                    	Short CHANNEL = (Short)cdataitems.get( jdata++ ); i++;
+                    	
+                        
+                        int nPulses = (Byte)cdataitems.get( jdata++ ); i++;
+                        //System.out.println(" CHANNEL = " + CHANNEL 
+                        //        + " n pulses = " + nPulses);
+                        for(int np = 0; np < nPulses; np++){
+                        
+                            int firstChannel = (Byte) cdataitems.get( jdata++ ); i++;
+                            
+                            int nBytes = (Byte)cdataitems.get( jdata++ ); i++;
+                            
+                            //System.out.println("CREATING CRATE : " + crate +
+                            //        "  SLOT : " + SLOT + " CHANNEL : " + CHANNEL);
+                            DetectorDataDgtz bank = new DetectorDataDgtz(crate,SLOT.intValue(),CHANNEL.intValue());
+                            
+                            int nSamples = nBytes*8/12;
+                            //System.out.println("CHANNEL = " + CHANNEL + " NSAMPLES = " + nSamples + "  CHANNEL = " + firstChannel);
+                            short[] samples = new short[ nSamples ];
+                            for( short t : samples ) { t = 0x00; }
+                            
+                            int s = 0;
+                            for( int b=0;b<nBytes;b++ ) {
+                                short data = (short)((byte)cdataitems.get( jdata++ )&0xFF);
+                                
+                                s = (int)Math.floor( b * 8./12. );
+                                if( b%3 != 1) {
+                                    samples[s] += (short)data;
+                                }
+                    		else {
+                    			samples[s] += (data&0x000F)<<8;
+                    			if( s+1 < nSamples ) samples[s+1] += ((data&0x00F0)>>4)<<8;
+                    		}
+                    	/*ADCData adcData = new ADCData();
+                        adcData.setTimeStamp(TIMESTAMP);
+                        adcData.setPulse(samples);  
+                        bank.addADC(adcData);
+                        entries.add(bank);*/
+                            }
+                    	i++;
+                    	
+                        ADCData adcData = new ADCData();
+                        adcData.setTimeStamp(TIMESTAMP);
+                        adcData.setPulse(samples);  
+                        bank.addADC(adcData);
+                        
+                        entries.add(bank);
+                        }
+                        } // end loop on channels
+                } // end loop on data types
+                return entries;
+
+            } catch (EvioException ex) {
+                Logger.getLogger(CodaEventDecoder.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return entries;
+    }
+    
     /**
      * Decoding MODE 7 data. for given crate.
      * @param crate
