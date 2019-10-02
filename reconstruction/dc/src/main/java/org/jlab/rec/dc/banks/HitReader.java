@@ -355,6 +355,68 @@ public class HitReader {
 
         this.set_HBHits(hits);
     }
+    
+    public void read_NNHits(DataEvent event, DCGeant4Factory DcDetector,
+                             double triggerPhase) {
+        
+        if (!(event.hasBank("DC::tdc") && event.hasBank("nn::dchits")  )) {
+            _DCHits = new ArrayList<>();
+
+            return;
+        }
+        DataBank bank = event.getBank("nn::dchits");
+        DataBank bankDGTZ = event.getBank("DC::tdc");
+
+        int rows = bankDGTZ.rows();
+        int[] sector = new int[rows];
+        int[] layer = new int[rows];
+        int[] wire = new int[rows];
+        int[] tdc = new int[rows];
+
+        for (int i = 0; i < rows; i++) {
+            sector[i] = bankDGTZ.getByte("sector", i);
+            layer[i] = bankDGTZ.getByte("layer", i);
+            wire[i] = bankDGTZ.getShort("component", i);
+            tdc[i] = bankDGTZ.getInt("TDC", i);
+
+        }
+
+        
+        
+        int[] layerNum = new int[rows];
+        int[] superlayerNum = new int[rows];
+        double[] smearedTime = new double[rows];
+
+        List<Hit> hits = new ArrayList<>();
+
+        for (int i = 0; i < rows; i++) {
+            
+            smearedTime[i] = (double) tdc[i] - triggerPhase;
+            if (smearedTime[i] < 0) {
+                smearedTime[i] = 1;
+            }
+            
+
+            superlayerNum[i] = (layer[i] - 1) / 6 + 1;
+            layerNum[i] = layer[i] - (superlayerNum[i] - 1) * 6;
+
+        }
+        
+
+        for (int j = 0; j < bank.rows(); j++) {
+            int i = bank.getInt("index", j-1);
+            Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], tdc[i], (i + 1));
+            hit.set_Id(i + 1);
+            hit.calc_CellSize(DcDetector);
+            double posError = hit.get_CellSize() / Math.sqrt(12.);
+            hit.set_DocaErr(posError);
+            hits.add(hit);
+                
+        }
+
+        this.set_DCHits(hits);
+    }
+
     //betaFlag:0 = OK; -1 = negative; 1 = less than lower cut (0.15); 2 = greater than 1.15 (from HBEB beta vs p plots for data)
     private void set_BetaFlag(DataEvent event, int trkId, FittedHit hit, double beta) {
         if(beta<0.15) {
