@@ -124,7 +124,7 @@ public class RoadFinder  {
                 return null;
             // make the missing segment
             Cluster pseudoCluster = new Cluster(segList.get(0).get_Sector(),slyr,-1);
-                FittedCluster fpseudoCluster = new FittedCluster(pseudoCluster);
+            FittedCluster fpseudoCluster = new FittedCluster(pseudoCluster);
             for(int l = 0; l<6; l++) {
                 int layer = l+1;
                 double z = DcDetector.getWireMidpoint(segList.get(0).get_Sector() - 1, slyr-1,layer-1,0).z;

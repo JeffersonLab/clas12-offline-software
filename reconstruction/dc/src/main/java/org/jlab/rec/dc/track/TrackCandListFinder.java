@@ -870,6 +870,9 @@ public class TrackCandListFinder {
             return cands;
         }
         for (List<Cross> aCrossList : crossList) {
+            if(aCrossList.size()<3) {
+                return cands;
+            }
             //initialize
             Track cand = new Track();
             TrajectoryFinder trjFind = new TrajectoryFinder();

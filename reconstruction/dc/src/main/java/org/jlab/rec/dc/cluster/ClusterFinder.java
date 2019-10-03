@@ -75,7 +75,7 @@ public class ClusterFinder {
      *
      * @param hits the unfitted hit
      */
-    private void fillHitArray(List<Hit> hits, int rejectLayer) {
+    public void fillHitArray(List<Hit> hits, int rejectLayer) {
 
         // a Hit Array is used to identify clusters
         Hit[][][] hitArray = new Hit[nsect * nslay][nwire][nlayr];

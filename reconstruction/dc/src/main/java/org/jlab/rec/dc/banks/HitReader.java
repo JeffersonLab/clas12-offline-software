@@ -368,10 +368,10 @@ public class HitReader {
         DataBank bankDGTZ = event.getBank("DC::tdc");
 
         int rows = bankDGTZ.rows();
-        int[] sector = new int[rows];
-        int[] layer = new int[rows];
-        int[] wire = new int[rows];
-        int[] tdc = new int[rows];
+        int[] sector    = new int[rows];
+        int[] layer     = new int[rows];
+        int[] wire      = new int[rows];
+        int[] tdc       = new int[rows];
 
         for (int i = 0; i < rows; i++) {
             sector[i] = bankDGTZ.getByte("sector", i);
@@ -381,8 +381,6 @@ public class HitReader {
 
         }
 
-        
-        
         int[] layerNum = new int[rows];
         int[] superlayerNum = new int[rows];
         double[] smearedTime = new double[rows];
@@ -402,16 +400,16 @@ public class HitReader {
 
         }
         
-
         for (int j = 0; j < bank.rows(); j++) {
-            int i = bank.getInt("index", j-1);
+            int i = bank.getInt("index", j)-1;
+            int tid = (int)bank.getByte("id", j);
             Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], tdc[i], (i + 1));
-            hit.set_Id(i + 1);
+            hit.set_Id(i+1);
             hit.calc_CellSize(DcDetector);
             double posError = hit.get_CellSize() / Math.sqrt(12.);
             hit.set_DocaErr(posError);
+            hit.NNTrkId = tid;
             hits.add(hit);
-                
         }
 
         this.set_DCHits(hits);

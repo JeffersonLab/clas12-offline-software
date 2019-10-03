@@ -21,6 +21,7 @@ public class Hit implements Comparable<Hit> {
     private double _cellSize;
     private double _DocaErr;
     // class implements Comparable interface to allow for sorting a collection of hits by wire number values
+    public int NNTrkId;
     
     // constructors
     /**
