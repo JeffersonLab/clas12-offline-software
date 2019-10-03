@@ -51,24 +51,15 @@ public class TrackListFinder {
                 //System.out.println("*******  after EL "+trk.get_P());
 
                 int charge = trk.get_Q();
-//                double maxPathLength = 5.0;//very loose cut 
-//                bstSwim.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
-//                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
-//                        trk.get_P(), charge, 
-//                        maxPathLength) ;
-//                double[] pointAtCylRad = bstSwim.SwimToCylinder(Constants.CTOFINNERRADIUS/10);
-                double maxPathLength = 3.0;//very loose cut 
-                double accuracy = 0.1; // accuracy of stopper in cm
-                double stepsize = 0.1; // initial step size
+                double maxPathLength = 5.0;//very loose cut 
                 bstSwim.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
                         Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                         trk.get_P(), charge, 
-                        maxPathLength, accuracy, stepsize) ;
-                double[] pointAtCylRad = bstSwim.SwimRho(Constants.CTOFINNERRADIUS/10);
-//                System.out.println(pointAtCylRad[0] + " " + pointAtCylRad[1] + " " + pointAtCylRad[2] + " " +
-//                        Math.sqrt(pointAtCylRad[0]*pointAtCylRad[0]+pointAtCylRad[1]*pointAtCylRad[1])+ " " + pointAtCylRad[6]);
+                        maxPathLength) ;
+
+                double[] pointAtCylRad = bstSwim.SwimToCylinder(Constants.CTOFINNERRADIUS/10);
                 trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
-                trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3], pointAtCylRad[4], pointAtCylRad[5]).asUnit());
+                trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
 
                 trk.set_pathLength(pointAtCylRad[6]*10);
 
@@ -139,7 +130,7 @@ public class TrackListFinder {
         }
     }
      
-    public void removeOverlappingTracks(List<Track> trkcands, String plane) {
+    public void removeOverlappingTracks(List<Track> trkcands) {
             if(trkcands==null) {
             	System.out.println("Pas de trace dans le overlap study");
             	return;
@@ -159,7 +150,7 @@ public class TrackListFinder {
                 
                 if( rejected.contains( trkcands.get(i) ) ) continue; //If we have already found a track that is better than this candidate, there is no need to re-analyze it.
                 
-                this.getOverlapLists(trkcands.get(i), trkcands, list, plane); //Compare trkcands.get(i) with all tracks to find overlaps... list must contains at least trkcands.get(i)
+                this.getOverlapLists(trkcands.get(i), trkcands, list); //Compare trkcands.get(i) with all tracks to find overlaps... list must contains at least trkcands.get(i)
                 
                 Track selectedTrk = this.FindBestTrack(list); //Return the best track among the candidates. If only trkcands.get(i) in list, it will return trkcands.get(i)
                
@@ -188,7 +179,7 @@ public class TrackListFinder {
             }
     }
 
-    private void getOverlapLists(Track track, List<Track> trkcands, List<Track> list, String plane) {
+    private void getOverlapLists(Track track, List<Track> trkcands, List<Track> list) {
     // --------------------------------------------------------------------
     //  two tracks are considered the same if they share at least 2 crosses
     // --------------------------------------------------------------------
@@ -196,28 +187,17 @@ public class TrackListFinder {
     	
     	for( Track t : trkcands ) {
     		int N = 0;
-    		int Nc = 0;
     		for( Cross c : t ) {
-//    			if( track.contains(c)&& c.get_DetectorType().equals("Z") ) { N++;  } //For Micromegas... one cross is uniquely assigned to one cluster
-//    			if (c.get_Detector().equals("SVT")) { //For SVT... a cluster can be assigned to several crosses
-//    				for( Cross cr : track ) {
-//    					if (cr.get_Detector().equals("SVT")) {
-//    						if (cr.get_Cluster1().get_Id()==c.get_Cluster1().get_Id()) { N++;  } 
-//    					}
-//    				}
-//    			}
-    			if( track.contains(c)) {
-    				if( c.get_Detector().equals("SVT") || c.get_DetectorType().equals("Z") ) N++;
-    				if( c.get_DetectorType() == "C") Nc++;
+    			if( track.contains(c)&& c.get_Detector().equals("BMT") ) { N++;  } //For Micromegas... one cross is uniquely assigned to one cluster
+    			if (c.get_Detector().equals("SVT")) { //For SVT... a cluster can be assigned to several crosses
+    				for( Cross cr : track ) {
+    					if (cr.get_Detector().equals("SVT")) {
+    						if (cr.get_Cluster1().get_Id()==c.get_Cluster1().get_Id()) { N++;  } 
+    					}
+    				}
     			}
     		}
-    		if( plane.equalsIgnoreCase("XY") ) {
-    			if( N >= 2 && Nc > 0) { list.add( t );}
-    		}
-    		else {
-    			if( Nc > 0 ) { list.add( t );}
-    		}
-
+    		if( N >= 2 ) list.add( t );
     	}
     	
     }
@@ -232,8 +212,7 @@ public class TrackListFinder {
             Track bestTrk = trkList.get(0);
             //The best and tallest track
             for (int i =0; i<trkList.size(); i++) {
-//            	if (trkList.get(i).getNDF()>ndf||(trkList.get(i).getNDF()==ndf&&trkList.get(i).getChi2()<bestChi2)) {
-            	if ((trkList.get(i).getChi2()/trkList.get(i).getNDF()<bestChi2/ndf)) {
+            	if (trkList.get(i).getNDF()>ndf||(trkList.get(i).getNDF()==ndf&&trkList.get(i).getChi2()<bestChi2)) {
             		ndf=trkList.get(i).getNDF();
             		bestTrk=trkList.get(i);
             		bestChi2=trkList.get(i).getChi2();
@@ -310,45 +289,27 @@ public class TrackListFinder {
         double maxPathLength = 3.0;//very loose cut 
         double accuracy = 0.1; // accuracy of stopper in cm
         double stepsize = 0.1; // initial step size
+        
         for (int t = 0; t < trks.size(); t++) {
-            
-            // keep original ctof cross definition that goes in Tracks bank
-                Track trk = trks.get(t);
-                int charge = trk.get_Q();
-                swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
-                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
-                        trk.get_P(), charge, 
-                        maxPathLength, accuracy, stepsize) ;
-                double[] pointAtCylRadOrg = swimmer.SwimRho(Constants.CTOFINNERRADIUS/10);
-                trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRadOrg[0]*10, pointAtCylRadOrg[1]*10, pointAtCylRadOrg[2]*10));
-                trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRadOrg[3], pointAtCylRadOrg[4], pointAtCylRadOrg[5]).asUnit());
-
-                trk.set_pathLength(pointAtCylRadOrg[6]*10);
-
-            
-            
-            
-            boolean keep_swimming=true;// boolean to kill the search of intersection if swimmer cannot catch the previous layer
+        	boolean keep_swimming=true;// boolean to kill the search of intersection if swimmer cannot catch the previous layer
             int trksize = trks.get(t).getTrajectory().size();
             StateVec ctof_inter=sv.new StateVec(trksize +1);
             StateVec[] cnd_inter=new StateVec[cnd_geo.getSector(0).getSuperlayer(0).getNumLayers()];
             px = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).dirx;
             py = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).diry;
             pz = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).dirz;
-            swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
-                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
-                        trk.get_P(), charge, 
-                        maxPathLength, accuracy, stepsize) ;
+            swimmer.SetSwimParameters(trks.get(t).getTrajectory().get(trksize - 1).x / 10., trks.get(t).getTrajectory().get(trksize - 1).y / 10., trks.get(t).getTrajectory().get(trksize - 1).z / 10., 
+            		px, py, pz, trks.get(t).get_Q(), maxPathLength, accuracy, stepsize);
             double[] pointAtCylRad = swimmer.SwimRho(CTOF_radius);
             
-//            if (pointAtCylRad[6]>150||pointAtCylRad[6]==0) {
-//            	keep_swimming=false;
-//            	break;
-//            }
+            if (pointAtCylRad[6]>15||pointAtCylRad[6]==0) {
+            	keep_swimming=false;
+            	break;
+            }
             ctof_inter.sector=1; ctof_inter.layer=1;ctof_inter.DetectorType=DetectorType.CTOF.getDetectorId();
-            ctof_inter.xdet=pointAtCylRad[0]*10;ctof_inter.ydet=pointAtCylRad[1]*10;ctof_inter.zdet=pointAtCylRad[2]*10;
+            ctof_inter.xdet=pointAtCylRad[0];ctof_inter.ydet=pointAtCylRad[1];ctof_inter.zdet=pointAtCylRad[2];
             ctof_inter.dirx=pointAtCylRad[3];ctof_inter.diry=pointAtCylRad[4];ctof_inter.dirz=pointAtCylRad[5];
-            ctof_inter.pathlength=pointAtCylRad[6]*10;
+            ctof_inter.pathlength=pointAtCylRad[6] + trks.get(t).getTrajectory().get(trksize - 1).pathlength / 10.;
                         
             trks.get(t).getTrajectory().add(ctof_inter);
             
@@ -358,19 +319,17 @@ public class TrackListFinder {
             	cnd_inter[ilayer]= sv.new StateVec(trksize +1);
             	Point3D center = cnd_geo.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
             	double radius  = Math.sqrt(center.x()*center.x()+center.y()*center.y());
-            	swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
-                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
-                        trk.get_P(), charge, 
-                        maxPathLength, accuracy, stepsize) ;
-                pointAtCylRad= swimmer.SwimRho(radius);
-//            	if (pointAtCylRad[6]==0||pointAtCylRad[6]>15) {
-//            		keep_swimming=false;
-//            		break;
-//            	}
+            	 swimmer.SetSwimParameters(pointAtCylRad[0],pointAtCylRad[1] , pointAtCylRad[2], pointAtCylRad[3], pointAtCylRad[4] , pointAtCylRad[5], 
+            			 trks.get(t).get_Q(),maxPathLength, accuracy, stepsize);
+            	 pointAtCylRad= swimmer.SwimRho(radius);
+            	if (pointAtCylRad[6]==0||pointAtCylRad[6]>15) {
+            		keep_swimming=false;
+            		break;
+            	}
             	cnd_inter[ilayer].layer=ilayer; cnd_inter[ilayer].sector=1;cnd_inter[ilayer].DetectorType=DetectorType.CND.getDetectorId();
-            	cnd_inter[ilayer].xdet=pointAtCylRad[0]*10;cnd_inter[ilayer].ydet=pointAtCylRad[1]*10;cnd_inter[ilayer].zdet=pointAtCylRad[2]*10;
+            	cnd_inter[ilayer].xdet=pointAtCylRad[0];cnd_inter[ilayer].ydet=pointAtCylRad[1];cnd_inter[ilayer].zdet=pointAtCylRad[2];
             	cnd_inter[ilayer].dirx=pointAtCylRad[3];cnd_inter[ilayer].diry=pointAtCylRad[4];cnd_inter[ilayer].dirz=pointAtCylRad[5];
-            	cnd_inter[ilayer].pathlength=pointAtCylRad[6]*10;
+            	cnd_inter[ilayer].pathlength=pointAtCylRad[6] + trks.get(t).getTrajectory().get(trksize - 1).pathlength;
             	trks.get(t).getTrajectory().add(cnd_inter[ilayer]);
             	
             }
