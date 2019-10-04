@@ -259,7 +259,7 @@ public class CNDClusterFinder {
                         clusters_hitenergy.set(subA[0], clusters_hitenergy.get(subB[0]) );
                     }
                     if(clusters_status.get(subB[0]) !=0) clusters_status.set(subA[0], clusters_status.get(subB[0]));
-                    clusters_nhits.set(subA[0], clusters_nhits.get(subA[0]) + 1);
+                    clusters_nhits.set(subA[0], clusters_nhits.get(subA[0]) + clusters_nhits.get(subB[0]));
                     clusters_nhits.remove(subB[0]);
                     clusters_energysum.set(subA[0], clusters_energysum.get(subA[0])+clusters_energysum.get(subB[0]));
                     
