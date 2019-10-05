@@ -298,10 +298,12 @@ public class TrackListFinder {
         double pz = 0;
         org.jlab.rec.cvt.track.fit.StateVecs sv=new org.jlab.rec.cvt.track.fit.StateVecs();//Stupid class... need to change it when I am bored.
         
-        double maxPathLength = 3.0;//very loose cut 
-        double accuracy = 0.1; // accuracy of stopper in cm
+        double maxPathLength = 10;//very loose cut 
+        double accuracy = 0.001; // accuracy of stopper in cm
         double stepsize = 0.1; // initial step size
-        
+        /*swimmer.SetSwimParameters(0, 0, 0, 10000, 0, 0, 1, maxPathLength, accuracy, stepsize);
+        double[] test=swimmer.SwimRho(1);
+        System.out.println(test[0]+" "+test[1]+" "+test[2]);*/
         for (int t = 0; t < trks.size(); t++) {
         	boolean keep_swimming=true;// boolean to kill the search of intersection if swimmer cannot catch the previous layer
             int trksize = trks.get(t).getTrajectory().size();
@@ -313,7 +315,7 @@ public class TrackListFinder {
             swimmer.SetSwimParameters(trks.get(t).getTrajectory().get(trksize - 1).x / 10., trks.get(t).getTrajectory().get(trksize - 1).y / 10., trks.get(t).getTrajectory().get(trksize - 1).z / 10., 
             		px, py, pz, trks.get(t).get_Q(), maxPathLength, accuracy, stepsize);
             double[] pointAtCylRad = swimmer.SwimRho(CTOF_radius);
-            
+           
             if (pointAtCylRad[6]>15||pointAtCylRad[6]==0) {
             	keep_swimming=false;
             	break;
@@ -324,6 +326,9 @@ public class TrackListFinder {
             ctof_inter.pathlength=pointAtCylRad[6] + trks.get(t).getTrajectory().get(trksize - 1).pathlength / 10.;
                         
             trks.get(t).getTrajectory().add(ctof_inter);
+            trks.get(t).set_TrackDirAtCTOFRadius(new Vector3D(ctof_inter.dirx,ctof_inter.diry,ctof_inter.dirz));
+            trks.get(t).set_TrackPointAtCTOFRadius(new Point3D(new Vector3D(ctof_inter.xdet,ctof_inter.ydet,ctof_inter.zdet)));
+            trks.get(t).set_pathLength(ctof_inter.pathlength);
             
             for(int ilayer=0; ilayer<cnd_geo.getSector(0).getSuperlayer(0).getNumLayers(); ilayer++) {
             	trksize = trks.get(t).getTrajectory().size();
