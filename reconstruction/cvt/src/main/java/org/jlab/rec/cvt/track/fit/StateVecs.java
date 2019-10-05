@@ -457,6 +457,10 @@ public class StateVecs {
         public double residual;
         public double excl_residual;
         public double pathlength;
+        //Track angles at module or tile
+        public double angle; // Angle of the direction wrt to norm
+        public double RTheta; // Angle of the projected direction in er/etheta with normal vector er
+        public double RZ; // Angle of the projected direction in er/ez with norm
                         
         public StateVec(int k) {
             this.k = k;
@@ -503,6 +507,9 @@ public class StateVecs {
         	this.residual=ToCopy.residual;
         	this.excl_residual=ToCopy.excl_residual;
         	this.pathlength=ToCopy.pathlength;
+        	this.angle=ToCopy.angle;
+        	this.RZ=ToCopy.RZ;
+        	this.RTheta=ToCopy.RTheta;
         	return ;
         }
         

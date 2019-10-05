@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
@@ -163,17 +164,29 @@ public class KFitter {
             sv.new_transport(1, 0, sv.trackTrajSmooth.get(1), sv.trackCovSmooth.get(1), sgeo, bgeo, mv.measurements.get(0).type, swimmer);
             this.chi2=this.getResiduals_Chi2(sgeo, bgeo, swimmer);
         	KFHelix = sv.setSvPars(sv.trackTrajSmooth.get(0),sv.trackCovSmooth.get(0).covMat);
-        	this.setTrajectory();
+        	this.setTrajectory(sgeo,bgeo);
         }
         
     }
     
-    public void setTrajectory() {
+    public void setTrajectory(org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo) {
     	TrjPoints.clear();
-    	
+    	double[] angle=new double[3];
         for (int k = 1; k < sv.trackTrajSmooth.size(); k++) {
-        	if (sv.trackTrajSmooth.get(k).layer<7) sv.trackTrajSmooth.get(k).DetectorType=DetectorType.BST.getDetectorId();
-        	if (sv.trackTrajSmooth.get(k).layer>6) sv.trackTrajSmooth.get(k).DetectorType=DetectorType.BMT.getDetectorId();
+        	if (sv.trackTrajSmooth.get(k).layer<7) {
+        		sv.trackTrajSmooth.get(k).DetectorType=DetectorType.BST.getDetectorId();
+        		angle=sgeo.ComputeAngles(sv.trackTrajSmooth.get(k).layer, sv.trackTrajSmooth.get(k).sector,
+        				new Vector3D(sv.trackTrajSmooth.get(k).dirx, sv.trackTrajSmooth.get(k).diry,sv.trackTrajSmooth.get(k).dirz));
+        	}
+        	if (sv.trackTrajSmooth.get(k).layer>6) {
+        		sv.trackTrajSmooth.get(k).DetectorType=DetectorType.BMT.getDetectorId();
+        		angle=bgeo.ComputeAngles(new Vector3D(sv.trackTrajSmooth.get(k).xdet, sv.trackTrajSmooth.get(k).ydet,sv.trackTrajSmooth.get(k).zdet),
+        				new Vector3D(sv.trackTrajSmooth.get(k).dirx, sv.trackTrajSmooth.get(k).diry,sv.trackTrajSmooth.get(k).dirz));
+        		
+        	}
+        	sv.trackTrajSmooth.get(k).angle=angle[0];
+        	sv.trackTrajSmooth.get(k).RTheta=angle[1];
+        	sv.trackTrajSmooth.get(k).RZ=angle[2];
         	TrjPoints.add(sv.trackTrajSmooth.get(k));
         }
     }

@@ -555,11 +555,11 @@ public class RecoBankWriter {
                     bank.setFloat("y",        k, (float) (stVec.ydet/10.));
                     bank.setFloat("z",        k, (float) (stVec.zdet/10. + zShift));
                     bank.setFloat("path",     k, (float) (stVec.pathlength/10.));
-                    
-                    /*bank.setFloat("phi",      k, (float) stVec.get_TrkPhiAtSurface());
-                    bank.setFloat("theta",    k, (float) stVec.get_TrkThetaAtSurface());
-                    bank.setFloat("langle",   k, (float) stVec.get_TrkToModuleAngle());
-                    bank.setFloat("centroid", k, (float) stVec.get_CalcCentroidStrip());*/
+                   
+                    bank.setFloat("phi",      k, (float) stVec.angle);
+                    bank.setFloat("theta",    k, (float) stVec.RTheta);
+                    bank.setFloat("langle",   k, (float) stVec.RZ);
+                    /*bank.setFloat("centroid", k, (float) stVec.get_CalcCentroidStrip());*/
                    
                     k++;
 
