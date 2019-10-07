@@ -56,6 +56,20 @@ public class TObject {
     }
 
     /**
+     * @return the _layer
+     */
+    public int getLayer() {
+        return _layer;
+    }
+
+    /**
+     * @param _layer the _layer to set
+     */
+    public void setLayer(int _layer) {
+        this._layer = _layer;
+    }
+
+    /**
      * @return the _x
      */
     public double getX() {
@@ -96,9 +110,25 @@ public class TObject {
     public void setZ(double _z) {
         this._z = _z;
     }
+
+    /**
+     * @return the _r
+     */
+    public double getR() {
+        return _r;
+    }
+
+    /**
+     * @param _r the _r to set
+     */
+    public void setR(double _r) {
+        this._r = _r;
+    }
     
     private int _id;
+    private int _layer;
     private double _x;
     private double _y;
     private double _z;
+    private double _r;
 }

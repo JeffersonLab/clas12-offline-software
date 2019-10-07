@@ -23,7 +23,7 @@
         <dependency>
             <groupId>org.jlab.coat</groupId>
             <artifactId>coat-libs</artifactId>
-            <version>6.3.0-SNAPSHOT</version>
+            <version>6.2.0-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
     </dependencies>

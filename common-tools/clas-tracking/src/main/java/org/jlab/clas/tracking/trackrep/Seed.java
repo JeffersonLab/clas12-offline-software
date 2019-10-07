@@ -7,14 +7,13 @@ package org.jlab.clas.tracking.trackrep;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.clas.tracking.objects.Cross;
 import org.jlab.clas.tracking.objects.TObject;
 
 /**
  *
  * @author ziegler
  */
-public class Seed {
+public class Seed extends ArrayList<TObject> {
 
     public Seed(){
     }
@@ -23,7 +22,7 @@ public class Seed {
     }
     public Seed(int id, List<TObject> tobjects) {
         _id      = id;
-        _tobjects = tobjects;
+        this.addAll(tobjects);
     }
      /**
      * @return the _id
@@ -71,24 +70,34 @@ public class Seed {
      * @return the _tobjects
      */
     public List<TObject> getTObjects() {
-        return _tobjects;
+        return this;
     }
-
+    
     /**
      * @param to the _tobjects to set
      */
     public void setTObjects(List<TObject> to) {
-        this._tobjects = to;
+        this.addAll(to);
+    }
+
+    /**
+     * @return the _overlaps
+     */
+    public List<Seed> getOverlaps() {
+        return _overlaps;
+    }
+
+    /**
+     * @param _overlaps the _overlaps to set
+     */
+    public void setOverlaps(List<Seed> _overlaps) {
+        this._overlaps = _overlaps;
     }
     
     private int _id;
     private double _qualFac;
     private int _overlapFlag = 0; //0: not an overlap; 1: an overlap with another seed
-    private List<TObject> _tobjects;
+    private List<Seed> _overlaps;
+
     
-    public static void main (String [] args) {  
-        List<TObject> cl = new ArrayList<TObject>();
-        
-        Seed a = new Seed(1, cl);
-    }
 }

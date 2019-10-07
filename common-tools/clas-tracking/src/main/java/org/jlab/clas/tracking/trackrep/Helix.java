@@ -4,10 +4,7 @@
  * and open the template in the editor.
  */
 package org.jlab.clas.tracking.trackrep;
-import java.util.ArrayList;
-import java.util.List;
 import org.jlab.clas.tracking.Constants;
-import org.jlab.clas.tracking.patternrec.CircleHoughTrans;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
@@ -87,10 +84,10 @@ public class Helix {
         return Constants.LIGHTVEL * _R * B;
     }
     public double getX(double l){
-        return _xc + _turningSign*_R*Math.sin(getPhi(l));
+        return getXc() + _turningSign*_R*Math.sin(getPhi(l));
     }
     public double getY(double l){
-        return _yc - _turningSign*_R*Math.cos(getPhi(l));
+        return getYc() - _turningSign*_R*Math.cos(getPhi(l));
     }
     public double getZ(double l){
         return _z0 + _turningSign*l*_tanL;
@@ -119,8 +116,8 @@ public class Helix {
         _R  = 1./Math.abs(_omega);
         _xd = -_d0*Math.sin(_phi0);
         _yd =  _d0*Math.cos(_phi0);
-        _xc = -(_turningSign*_R + _d0)*Math.sin(_phi0);
-        _yc =  (_turningSign*_R + _d0)*Math.cos(_phi0);
+        setXc(-(_turningSign*_R + _d0)*Math.sin(_phi0));
+        setYc((_turningSign*_R + _d0)*Math.cos(_phi0));
         setX(getX(tFlightLen));
         setY(getY(tFlightLen));
         setZ(getZ(tFlightLen));
@@ -137,8 +134,8 @@ public class Helix {
         double Y = 0;
         if (X2 - X1 == 0) {
             X = X1;
-            double y1 = _yc + Math.sqrt(_R * _R - (X - _xc) * (X - _xc));
-            double y2 = _yc - Math.sqrt(_R * _R - (X - _xc) * (X - _xc));
+            double y1 = getYc() + Math.sqrt(_R * _R - (X - getXc()) * (X - getXc()));
+            double y2 = getYc() - Math.sqrt(_R * _R - (X - getXc()) * (X - getXc()));
 
             if (Math.abs(y1 - Y1) < Math.abs(Y2 - Y1)+tolerance) {
                 Y = y1;
@@ -150,8 +147,8 @@ public class Helix {
         }
         if (Y2 - Y1 == 0) {
             Y = Y1;
-            double x1 = _xc + Math.sqrt(_R * _R - (Y - _yc) * (Y - _yc));
-            double x2 = _xc - Math.sqrt(_R * _R - (Y - _yc) * (Y - _yc));
+            double x1 = getXc() + Math.sqrt(_R * _R - (Y - getYc()) * (Y - getYc()));
+            double x2 = getXc() - Math.sqrt(_R * _R - (Y - getYc()) * (Y - getYc()));
 
             if (Math.abs(x1 - X1) < Math.abs(X2 - X1)+tolerance) {
                 X = x1;
@@ -167,14 +164,14 @@ public class Helix {
             double d = Y1 - X1 * m;
 
             //double del = r*r*(1+m*m) - (yc-m*xc-d)*(yc-m*xc-d);
-            double del = (_xc + (-d + _yc) * m) * (_xc + (-d + _yc) * m) - 
-                    (1 + m * m) * (_xc * _xc + (d - _yc) * (d - _yc) - _R*_R);
+            double del = (getXc() + (-d + getYc()) * m) * (getXc() + (-d + getYc()) * m) - 
+                    (1 + m * m) * (getXc() * getXc() + (d - getYc()) * (d - getYc()) - _R*_R);
             if (del < 0) {
                 System.err.println("Helix Plane Intersection error - Returning 0 ");
                 return 0;
             }
-            double x1 = (_xc + (-d + _yc) * m + Math.sqrt(del)) / (1 + m * m);
-            double x2 = (_xc + (-d + _yc) * m - Math.sqrt(del)) / (1 + m * m);
+            double x1 = (getXc() + (-d + getYc()) * m + Math.sqrt(del)) / (1 + m * m);
+            double x2 = (getXc() + (-d + getYc()) * m - Math.sqrt(del)) / (1 + m * m);
 
             if (Math.abs(x1 - X1) < Math.abs(X2 - X1)+tolerance) {
                 X = x1;
@@ -183,8 +180,8 @@ public class Helix {
                     X = x2;
                 }
             }
-            double y1 = _yc + Math.sqrt(_R * _R - (X - _xc) * (X - _xc));
-            double y2 = _yc - Math.sqrt(_R * _R - (X - _xc) * (X - _xc));
+            double y1 = getYc() + Math.sqrt(_R * _R - (X - getXc()) * (X - getXc()));
+            double y2 = getYc() - Math.sqrt(_R * _R - (X - getXc()) * (X - getXc()));
 
             if (Math.abs(y1 - Y1) < Math.abs(Y2 - Y1)+tolerance) {
                 Y = y1;
@@ -195,8 +192,8 @@ public class Helix {
             }
         }
         
-        double phi1 = Math.atan2(_yd -_yc, _xd -_xc);
-        double phi2 = Math.atan2(Y -_yc, X -_xc);
+        double phi1 = Math.atan2(_yd -getYc(), _xd -getXc());
+        double phi2 = Math.atan2(Y -getYc(), X -getXc());
         double dphi = phi2 - phi1;
         //  put dphi in (-pi, pi)
         if (dphi > Math.PI) {
@@ -232,8 +229,8 @@ public class Helix {
         double x;
         double y;
         
-        double a = 0.5 * (r * r - _R * _R + _xc * _xc + _yc * _yc) / _yc;
-        double b = -_xc / _yc;
+        double a = 0.5 * (r * r - _R * _R + getXc() * getXc() + getYc() * getYc()) / getYc();
+        double b = -getXc() / getYc();
 
         double delta = a * a * b * b - (1 + b * b) * (a * a - r * r);
 
@@ -254,8 +251,8 @@ public class Helix {
             y = ym;
         }
        
-        double phi1 = Math.atan2(_yd -_yc, _xd -_xc);
-        double phi2 = Math.atan2(y -_yc, x -_xc);
+        double phi1 = Math.atan2(_yd -getYc(), _xd -getXc());
+        double phi2 = Math.atan2(y -getYc(), x -getXc());
         double dphi = phi2 - phi1;
         //  put dphi in (-pi, pi)
         if (dphi > Math.PI) {
@@ -369,39 +366,33 @@ public class Helix {
     public void setPz(double _pz) {
         this._pz = _pz;
     }
-    public static void main(String arg[]) {
-        double p = 1.0;
-        double phi = Math.toRadians(18);
-        double theta = Math.toRadians(85.);
-        
-        Helix H = new Helix(0, 0, 0, p*Math.sin(theta)*Math.cos(phi), 
-                p*Math.sin(theta)*Math.sin(phi), p*Math.cos(theta),
-            -1, 5);
-        //System.out.println(H._yc);
-        //System.out.println(H.getHelixPointAtR(66.55));
-        //System.out.println(H.getHelixPointAtPlane(68.5, 1.5, 56.2, 39.3, 
-        //    10.));
-        
-        List<Double> X = new ArrayList<Double>();
-        List<Double> Y = new ArrayList<Double>();
-        
-        CircleHoughTrans cht = new CircleHoughTrans();
-        Point3D h = new Point3D(0,0,0);
-        for(int i = 0; i < 6; i++) {
-            h = H.getHelixPointAtR(65+(double)i * 5);
-            X.add(h.x());
-            Y.add(h.y());
-        }
-        
-        cht.findCircles(X, Y);
-        
-        for(int i = 0; i < cht.set.size(); i++) {
-            System.out.println("seed "+(i+1));
-            for(int j = 0; j < cht.set.get(i).size(); j++) {
-                float x = (float) cht.set.get(i).get(j).getX();
-                float y = (float) cht.set.get(i).get(j).getY();
-                System.out.println(" x = "+x+" y = "+y); 
-            }
-        }
+
+    /**
+     * @return the _xc
+     */
+    public double getXc() {
+        return _xc;
     }
+
+    /**
+     * @param _xc the _xc to set
+     */
+    public void setXc(double _xc) {
+        this._xc = _xc;
+    }
+
+    /**
+     * @return the _yc
+     */
+    public double getYc() {
+        return _yc;
+    }
+
+    /**
+     * @param _yc the _yc to set
+     */
+    public void setYc(double _yc) {
+        this._yc = _yc;
+    }
+    
 }

@@ -19,13 +19,12 @@ public class OverlapRemover {
     
     private boolean contains(Seed s0, List<Seed> set) {        
         boolean isc = false;
-        List<TObject> c0 = s0.getTObjects();
-        
-        c0.sort(Comparator.comparing(TObject::getX).thenComparing(TObject::getY).thenComparing(TObject::getZ));
+        List<TObject> c0 = s0.getTObjects();        
+        c0.sort(Comparator.comparing(TObject::getLayer).thenComparing(TObject::getR).thenComparing(TObject::getZ));
         
         for(int i = 0; i < set.size(); i++) {
             List<TObject> c1 = set.get(i).getTObjects();
-            c1.sort(Comparator.comparing(TObject::getX).thenComparing(TObject::getY).thenComparing(TObject::getZ));
+            c1.sort(Comparator.comparing(TObject::getLayer).thenComparing(TObject::getR).thenComparing(TObject::getZ));
             
             if(c1.size() == c0.size()) {
                 int n = 0;
@@ -44,8 +43,8 @@ public class OverlapRemover {
     private boolean equals(List<TObject> c0, List<TObject> c1) {
         boolean isc = false;
         
-        c0.sort(Comparator.comparing(TObject::getX).thenComparing(TObject::getY).thenComparing(TObject::getZ));
-        c1.sort(Comparator.comparing(TObject::getX).thenComparing(TObject::getY).thenComparing(TObject::getZ));
+        c0.sort(Comparator.comparing(TObject::getLayer).thenComparing(TObject::getR).thenComparing(TObject::getZ));
+        c1.sort(Comparator.comparing(TObject::getLayer).thenComparing(TObject::getR).thenComparing(TObject::getZ));
         if(c1.size() == c0.size()) {
             int n = 0;
             for(int k =0; k < c1.size(); k++) {
@@ -61,45 +60,51 @@ public class OverlapRemover {
     
     private List<TObject> findOverlapObjects(List<TObject> c0, List<TObject> c1) {
         List<TObject> covrl = new ArrayList<TObject>();
-        c0.sort(Comparator.comparing(TObject::getX).thenComparing(TObject::getY).thenComparing(TObject::getZ));
-        c1.sort(Comparator.comparing(TObject::getX).thenComparing(TObject::getY).thenComparing(TObject::getZ));
+        c0.sort(Comparator.comparing(TObject::getLayer).thenComparing(TObject::getR).thenComparing(TObject::getZ));
+        c1.sort(Comparator.comparing(TObject::getLayer).thenComparing(TObject::getR).thenComparing(TObject::getZ));
         
         //List<Cross> largerCList = ((c0.size()>c1.size()) ? c0 : c1);
         for(TObject ci : c0) {
             for(TObject cj : c1) {
-                if(c0.equals(c1)) {
+                if(ci.equals(cj)) {
                     covrl.add(cj);
                 }
             }
         }
+        System.out.println("Comparing lists ");
+        for(TObject c : c0) {
+            System.out.println("c0: "+c.getX());
+        }
+        for(TObject c : c1) {
+            System.out.println("c1: "+c.getX());
+        }
+        for(TObject c : covrl) {
+            System.out.println("covrl: "+c.getX());
+        }
         return covrl;
     }
-    
-    private List<TObject> getOverlap(List<TObject> c0, List<TObject> c1) {
-        List<TObject> covrl = this.findOverlapObjects(c0, c1);
-        if(covrl.equals(c1)) {//flag c1 as overlap
-            return c1;
-        } else {
-            return c0;
+    private boolean equalLists(List<TObject> c0, List<TObject> c1) {      
+        if(c0.size()!=c1.size()) {
+            return false;
         }
+        boolean eq = true;
+        for(int i = 0; i < c0.size(); i++) {
+            if(c0.get(i).equals(c1.get(i))) { //un-matched objects
+                eq = false;
+            }
+        }
+        return eq;
     }
     
-    private void flagOverlap(Seed s0, Seed s1) {        
-        if(this.getOverlap(s0.getTObjects(), s1.getTObjects())
-                .equals(s0.getTObjects())) {
-            if(s0.getQualFac()>s1.getQualFac()) {
-                s1.setOverlapFlag(1);
-            } else {
-                s0.setOverlapFlag(1);
-            }
+    public void flagOverlap(Seed s0, Seed s1) {      
+        List<TObject> ovrl = this.findOverlapObjects(s0.getTObjects(), s1.getTObjects());
+        if(ovrl == null) {
+            return;
         }
-        if(this.getOverlap(s0.getTObjects(), s1.getTObjects())
-                .equals(s1.getTObjects())) {
-            if(s0.getQualFac()>s1.getQualFac()) {
-                s1.setOverlapFlag(1);
-            } else {
-                s0.setOverlapFlag(1);
-            }
+        if(ovrl.size()==s0.size()) {
+            s0.setOverlapFlag(1);
+        } else {
+            s1.setOverlapFlag(1);
         }
     }
     
