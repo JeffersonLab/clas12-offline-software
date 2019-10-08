@@ -1,5 +1,6 @@
 package org.jlab.service.alert;
 import org.jlab.clas.reco.ReconstructionEngine;
+import org.jlab.io.base.DataEvent;
 
 public class ALERTEngine extends ReconstructionEngine{
 
