@@ -91,7 +91,7 @@ public class CNDClusterFinder {
         
         size = hits.size();
         for (int i = 0; i < size; i++) {
-            if( hits.get(i).Edep()<2.50 )continue; //energy threshold??
+            if( hits.get(i).Edep()<1.0 )continue; //energy threshold??
             clusters_nhits.add(1);
             //energysum and energy hit are the same?
             clusters_energysum.add(hits.get(i).Edep());
