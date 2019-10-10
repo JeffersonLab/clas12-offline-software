@@ -27,5 +27,6 @@
     <module>eb</module>
     <module>band</module>
     <module>rtpc</module>
+    <module>alert</module>
   </modules>
 </project>
