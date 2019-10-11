@@ -1,5 +1,7 @@
 package org.jlab.rec.cvt.trajectory;
 
+import java.util.ArrayList;
+
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
@@ -410,8 +412,41 @@ public class Helix {
     	
     	return cs;
     }
+    
+    public double getCurvAbsAtRadius(double radius, Vector3D center) {
+    	//Return the CurvAbs for closest intersection with 
+    	double cs=Double.NaN;
+    	Vector3D[] inter=this.FindIntersectionTwoCircles(center.x(),center.y(),radius,this.xcen(),this.ycen(),Math.abs(this.radius()));
+    	if (Double.isNaN(inter[0].x())) return cs;
+    	Vector3D start=this.getHelixPoint(0);
+    	double d0=Math.sqrt((inter[0].x()-start.x())*(inter[0].x()-start.x())+(inter[0].y()-start.y())*(inter[0].y()-start.y()));
+    	double d1=Math.sqrt((inter[1].x()-start.x())*(inter[1].x()-start.x())+(inter[1].y()-start.y())*(inter[1].y()-start.y()));
+    	Vector3D v1=new Vector3D(start.x()-this.xcen(),start.y()-this.ycen(),0);
+    	if (d0<=d1) {
+    		Vector3D v2=new Vector3D(inter[0].x()-this.xcen(),inter[0].y()-this.ycen(),0);
+    		cs=Math.abs(this.radius()*v1.angle(v2))/Math.cos(_dip);
+    	}
+    	if (d1<d0) {
+    		Vector3D v2=new Vector3D(inter[1].x()-this.xcen(),inter[1].y()-this.ycen(),0);
+    		cs=Math.abs(this.radius()*v1.angle(v2))/Math.cos(_dip);
+    	}
+    	return cs;
+    }
 
-    public static void main(String arg[]) {
+
+    public Vector3D[] FindIntersectionTwoCircles(double xa, double ya, double Ra, double xb, double yb, double Rb) {
+    	double R2=(xa-xb)*(xa-xb)+(ya-yb)*(ya-yb);
+    	  double xi=(xa+xb)/2.+(Ra*Ra-Rb*Rb)/2./R2*(xb-xa)+0.5*Math.sqrt(2*(Ra*Ra+Rb*Rb)/R2-(Ra*Ra-Rb*Rb)*(Ra*Ra-Rb*Rb)/R2/R2-1)*(yb-ya);
+    	  double yi=(ya+yb)/2.+(Ra*Ra-Rb*Rb)/2./R2*(yb-ya)+0.5*Math.sqrt(2*(Ra*Ra+Rb*Rb)/R2-(Ra*Ra-Rb*Rb)*(Ra*Ra-Rb*Rb)/R2/R2-1)*(xa-xb);
+    	  double xii=(xa+xb)/2.+(Ra*Ra-Rb*Rb)/2./R2*(xb-xa)-0.5*Math.sqrt(2*(Ra*Ra+Rb*Rb)/R2-(Ra*Ra-Rb*Rb)*(Ra*Ra-Rb*Rb)/R2/R2-1)*(yb-ya);
+    	  double yii=(ya+yb)/2.+(Ra*Ra-Rb*Rb)/2./R2*(yb-ya)-0.5*Math.sqrt(2*(Ra*Ra+Rb*Rb)/R2-(Ra*Ra-Rb*Rb)*(Ra*Ra-Rb*Rb)/R2/R2-1)*(xa-xb);
+    	  Vector3D[] inter=new Vector3D[2];
+    	  inter[0]=new Vector3D(xi,yi,0);
+    	  inter[1]=new Vector3D(xii,yii,0);
+    	  return inter;
+	}
+
+	public static void main(String arg[]) {
         //  	Helix h = new Helix(0, 0, 1/5., 0, -999, null);
 
     }

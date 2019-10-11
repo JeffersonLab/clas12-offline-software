@@ -561,9 +561,9 @@ public class RecoBankWriter {
                     bank.setFloat("langle",   k, (float) stVec.angle);
                    }
                    else {
-                   	bank.setFloat("x",        k, (float) stVec.xdet);
-                   	bank.setFloat("y",        k, (float) stVec.ydet);
-                   	bank.setFloat("z",        k, (float) (stVec.zdet + zShift));
+                   	bank.setFloat("x",        k, (float) (stVec.xdet/10.));
+                   	bank.setFloat("y",        k, (float) (stVec.ydet/10.));
+                   	bank.setFloat("z",        k, (float) (stVec.zdet/10. + zShift));
                    	bank.setFloat("path",     k, (float) stVec.pathlength);
                    }
                    
