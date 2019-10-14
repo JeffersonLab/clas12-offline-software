@@ -370,7 +370,11 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             double deltatime_beta = 0;
             
             if (x != -1) {
-                deltatime_beta = calcDeltaTimeBeta(x, tab, beta);
+                if(Constants.useUSETIMETBETA()==true) {
+                    deltatime_beta = calcDeltaTimeBetaTFCN(this.get_Time(), tab, beta);
+                } else {
+                    deltatime_beta = calcDeltaTimeBeta(x, tab, beta);
+                }
             }
             if(event.hasBank("MC::Particle")==false) {
                 distance = tde.interpolateOnGrid(B, Math.toDegrees(ralpha), this.getCorrectedTime(this.get_Time(), deltatime_beta), secIdx, slIdx) ;
@@ -393,6 +397,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
             correctedTime=0.01; // fixes edge effects ... to be improved
         return correctedTime;
     }
+    
     public double calcDeltaTimeBeta(double x, IndexedTable tab, double beta){
         return (Math.sqrt(x * x + (tab.getDoubleValue("distbeta", this.get_Sector(), 
                 this.get_Superlayer(),0) * beta * beta) * 
@@ -400,10 +405,15 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                         this.get_Superlayer(),0) * beta * beta)) - x) / Constants.V0AVERAGED;
     }
     
-    //public double calcDeltaTimeBeta(double x, int superlayer, double beta) {
-    //    double distbeta = TableLoader.distbetaValues[superlayer-1];
-    //    return (Math.sqrt(x * x + (distbeta * beta * beta) * (distbeta* beta * beta)) - x) / Constants.V0AVERAGED;
-    //}
+    public double calcDeltaTimeBetaTFCN(double t,IndexedTable tab, double beta){
+        double db = tab.getDoubleValue("distbeta", this.get_Sector(), 
+                        this.get_Superlayer(),0);
+        double delt = db/Constants.AVEDRIFTVEL; 
+        //see [CLAS-Note 96-008]
+        double tBeta = (0.5 *delt*delt*delt*t)/(delt*delt*delt*t*t*t);
+        return tBeta*beta*beta;
+    }
+    
     
     /**
      * 

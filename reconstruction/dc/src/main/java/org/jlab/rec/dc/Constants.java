@@ -165,6 +165,8 @@ public class Constants {
     public static int[][] STBLOC;
 
     private static boolean USETSTART = true;
+    private static boolean USETIMETBETA = false;
+    
     public static double SEEDCUT = 5000;
     public static double MINPATH = 200;
     public static double BETAHIGH = 1.5;
@@ -173,6 +175,8 @@ public class Constants {
     public static double MAXHITS = 2000;
     ;
     public static double TRANSVTXCUT = 20;
+    
+    public static double AVEDRIFTVEL = 0.0027; //velocity in cm / ns. [CLAS-Note 96-008]
 
     public static boolean isUSETSTART() {
         return USETSTART;
@@ -181,6 +185,15 @@ public class Constants {
     public static void setUSETSTART(boolean USETSTART) {
         Constants.USETSTART = USETSTART;
     }
+    
+    public static boolean useUSETIMETBETA() {
+        return USETIMETBETA;
+    }
+
+    public static void setUSETIMETBETA(boolean USETIMETBETA) {
+        Constants.USETIMETBETA = USETIMETBETA;
+    }
+    
     
     private static double WIREDIST = 0.0;
 
@@ -300,6 +313,7 @@ public class Constants {
     public static double getT2D() {
         return Constants.T2D;
     }
+
 
    
 }

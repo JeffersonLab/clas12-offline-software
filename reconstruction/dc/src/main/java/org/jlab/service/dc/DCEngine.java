@@ -77,7 +77,23 @@ public class DCEngine extends ReconstructionEngine {
         if (wireDistortionsFlag==null) {
              System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (MC-off/Data-on)");
         }
+        //Use time in tBeta function (true: use time; false: use track doca)
+        String useTIMETBETA = this.getEngineConfigString("dcTimeTBeta");
         
+        if (useTIMETBETA!=null) {
+            System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on yaml = "+useTIMETBETA);
+            Constants.setUSETIMETBETA(Boolean.valueOf(useTIMETBETA));
+        }
+        else {
+            useTIMETBETA = System.getenv("COAT_DC_USETIMETBETA");
+            if (useTIMETBETA!=null) {
+                System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on env = "+useTIMETBETA);
+                Constants.setUSETIMETBETA(Boolean.valueOf(useTIMETBETA));
+            }
+        }
+        if (useTIMETBETA==null) {
+             System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on default = "+Constants.useUSETIMETBETA());
+        }
         //T2D Function
         String T2Dfcn = this.getEngineConfigString("dcT2DFunc");
         
