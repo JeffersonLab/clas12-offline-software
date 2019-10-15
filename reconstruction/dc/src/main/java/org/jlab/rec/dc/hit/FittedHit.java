@@ -410,7 +410,7 @@ public class FittedHit extends Hit implements Comparable<Hit> {
                         this.get_Superlayer(),0);
         double delt = db/Constants.AVEDRIFTVEL; 
         //see [CLAS-Note 96-008]
-        double tBeta = (0.5 *delt*delt*delt*t)/(delt*delt*delt*t*t*t);
+        double tBeta = (0.5 *delt*delt*delt*t)/(delt*delt*delt+t*t*t);
         return tBeta*beta*beta;
     }
     

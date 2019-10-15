@@ -81,18 +81,18 @@ public class DCEngine extends ReconstructionEngine {
         String useTIMETBETA = this.getEngineConfigString("dcTimeTBeta");
         
         if (useTIMETBETA!=null) {
-            System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on yaml = "+useTIMETBETA);
+            System.out.println("["+this.getName()+"] run with new tBeta chosen based on yaml = "+useTIMETBETA);
             Constants.setUSETIMETBETA(Boolean.valueOf(useTIMETBETA));
         }
         else {
             useTIMETBETA = System.getenv("COAT_DC_USETIMETBETA");
             if (useTIMETBETA!=null) {
-                System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on env = "+useTIMETBETA);
+                System.out.println("["+this.getName()+"] run with with new tBeta config chosen based on env = "+useTIMETBETA);
                 Constants.setUSETIMETBETA(Boolean.valueOf(useTIMETBETA));
             }
         }
         if (useTIMETBETA==null) {
-             System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on default = "+Constants.useUSETIMETBETA());
+             System.out.println("["+this.getName()+"] run with with new tBeta config chosen based on default = "+Constants.useUSETIMETBETA());
         }
         //T2D Function
         String T2Dfcn = this.getEngineConfigString("dcT2DFunc");
