@@ -10,7 +10,6 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
-import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
 import org.jlab.geom.base.ConstantProvider;
@@ -25,10 +24,6 @@ import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
 import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.Track;
-import org.jlab.rec.cvt.track.Track;
-import org.jlab.utils.groups.IndexedTable;
-//import org.jlab.service.eb.EBHBEngine;
-//import org.jlab.service.eb.EBTBEngine;
 
 /**
  * Service to return reconstructed BST track candidates- the output is in Evio
@@ -86,16 +81,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             
             System.out.println("  CHECK CONFIGS..............................." + FieldsConfig + " = ? " + newConfig);
             Constants.Load(isCosmics, isSVTonly, (double) bank.getFloat("solenoid", 0));
-            // Load the Fields
-            //System.out.println("************************************************************SETTING FIELD SCALE *****************************************************");
-            //TrkSwimmer.setMagneticFieldScale(bank.getFloat("solenoid", 0)); // something changed in the configuration
-            //double shift =0;
-            //if(bank.getInt("run", 0)>1840)
-            //    shift = -1.9;
-            //MagneticFields.getInstance().setSolenoidShift(shift);
-//            this.setFieldsConfig(newConfig);
             
-//CCDBConstantsLoader.Load(new DatabaseConstantProvider(bank.getInt("run", 0), "default"));
         }
         this.setFieldsConfig(newConfig);
 
@@ -184,16 +170,23 @@ public class CVTReconstruction extends ReconstructionEngine {
     }
 
     public boolean init() {
-        //System.out.println(" ........................................ trying to connect to db ");
-////        CCDBConstantsLoader.Load(new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default"));
-        //CCDBConstantsLoader.Load(new DatabaseConstantProvider(10, "default"));
-               
-        //DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
-////        DatabaseConstantProvider cp = new DatabaseConstantProvider( "sqlite:///clas12.sqlite", "default");
-        //cp = SVTConstants.connect( cp );
-        //SVTConstants.loadAlignmentShifts( cp );
-        //cp.disconnect();    
-        //this.setSVTDB(cp);
+        // Load config
+        String rmReg = this.getEngineConfigString("removeRegion");
+        
+        if (rmReg!=null) {
+            System.out.println("["+this.getName()+"] run with region "+rmReg+"removed config chosen based on yaml");
+            Constants.setRmReg(Integer.valueOf(rmReg));
+        }
+        else {
+            rmReg = System.getenv("COAT_CVT_REMOVEREGION");
+            if (rmReg!=null) {
+                System.out.println("["+this.getName()+"] run with region "+rmReg+"removed config chosen based on env");
+                Constants.setRmReg(Integer.valueOf(rmReg));
+            }
+        }
+        if (rmReg==null) {
+             System.out.println("["+this.getName()+"] run with all region (default) ");
+        }
         
         // Load other geometries
         String variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");

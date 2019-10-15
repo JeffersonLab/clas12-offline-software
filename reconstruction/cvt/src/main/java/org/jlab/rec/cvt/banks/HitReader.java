@@ -114,7 +114,8 @@ public class HitReader {
                 //	hit.set_Status(-1);
                 hit.set_Id(i+1);
                 // add this hit
-                hits.add(hit);
+                if(hit.get_Layer()+3!=org.jlab.rec.cvt.Constants.getRmReg())
+                    hits.add(hit);
 
             }
             // fills the list of BMT hits
@@ -157,10 +158,11 @@ public class HitReader {
                 if (bankDGTZ.getInt("ADC", i) < 0) {
                     continue; // ignore hits TDC hits with ADC==-1 
                 }
-
+                
                 id[i] = i + 1;
                 sector[i] = bankDGTZ.getByte("sector", i);
                 layer[i] = bankDGTZ.getByte("layer", i);
+                
                 strip[i] = bankDGTZ.getShort("component", i);
                 ADC[i] = bankDGTZ.getInt("ADC", i);
                 
@@ -230,7 +232,7 @@ public class HitReader {
                 
                 hit.set_Id(id[i]);
                 // add this hit
-                if(SvtStrip.get_Edep()>0)      
+                if(SvtStrip.get_Edep()>0 && hit.get_Region()!=org.jlab.rec.cvt.Constants.getRmReg())      
                     hits.add(hit);
             }
         }

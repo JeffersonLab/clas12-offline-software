@@ -34,6 +34,8 @@ public class Constants {
     private static double _RbErr = 1./Math.sqrt(12.);
     
     private static double _Zoffset = 0;
+    
+    private static int _rmReg = 0;
 
     public static double getXb() {
         return _Xb;
@@ -67,6 +69,14 @@ public class Constants {
         Constants._Zoffset = _Zoffset;
     }
 
+    public static int getRmReg() {
+        return _rmReg;
+    }
+
+    public static void setRmReg(int _reg) {
+        Constants._rmReg = _reg;
+    }
+    
     //public static final boolean DEBUGMODE =false;
     // for landau inverse calculation
     public static final double f[] = {
