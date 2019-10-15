@@ -1,6 +1,7 @@
 package org.jlab.rec.dc.track.fit;
 
-import Jama.Matrix;
+//import Jama.Matrix;
+import org.jlab.jnp.matrix.*;
 import java.util.HashMap;
 import java.util.Map;
 import org.jlab.clas.clas.math.FastMath;
@@ -25,7 +26,9 @@ public class StateVecsDoca {
    
     public StateVec StateVec;
     public CovMat CovMat;
-    public Matrix F;
+    public Matrix F = new Matrix();
+    private Matrix fMS = new Matrix();
+    private Matrix copyMatrix = new Matrix();
     private final double[] A = new double[2];
     private final double[] dA = new double[4];
     private final float[] bf = new float[3];
@@ -63,8 +66,8 @@ public class StateVecsDoca {
         fVec.ty = iVec.ty;
         fVec.Q = iVec.Q;
         fVec.B = iVec.B;
-        fCov.covMat = covMat.covMat;
-        
+        //fCov.covMat = covMat.covMat;
+        Matrix5x5.copy(covMat.covMat, fCov.covMat);
         double s  = 0;
         double z = Z[i];
         double BatMeas = iVec.B;
@@ -78,8 +81,8 @@ public class StateVecsDoca {
             double ty = fVec.ty;
             double Q =  fVec.Q;
             double dPath = fVec.deltaPath;
-            covMat.covMat = fCov.covMat; 
-            
+            //covMat.covMat = fCov.covMat; 
+            Matrix5x5.copy(fCov.covMat, covMat.covMat);
             s= Math.signum(Z[f] - Z[i]) * stepSize;
            // System.out.println(" from "+(float)Z[i]+" to "+(float)Z[f]+" at "+(float)z+" By is "+bf[1]+" B is "+Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2])/Bmax+" stepSize is "+s);
             if(Math.signum(Z[f] - Z[i]) *(z+s)>Math.signum(Z[f] - Z[i]) *Z[f])
@@ -110,16 +113,19 @@ public class StateVecsDoca {
             double cov_tyty = (1 + ty * ty) * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
             double cov_txty = tx * ty * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
 
+            
             //if (Math.signum(Z[f] - Z[i]) > 0) { 
-                Matrix fMS = new Matrix(new double[][]{
-                {0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0},
-                {0, 0, cov_txtx, cov_txty, 0},
-                {0, 0, cov_txty, cov_tyty, 0},
-                {0, 0, 0, 0, 0}
-                });
-                Matrix fCovMS = fCov.covMat.copy().plus(fMS);
-                fCov.covMat = fCovMS;
+                fMS.set(
+                0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                0, 0, cov_txtx, cov_txty, 0,
+                0, 0, cov_txty, cov_tyty, 0,
+                0, 0, 0, 0, 0
+                );
+                
+                Matrix5x5.copy(fCov.covMat, copyMatrix);
+                Matrix5x5.add(copyMatrix, fMS, fCov.covMat);
+               
             //} 
             // end add process noise
             
@@ -281,14 +287,14 @@ public class StateVecsDoca {
         double ey = 0.5 * wy_over_wx * Math.sqrt(err_it1 * err_it1 + err_it2 * err_it2 + z * z * (err_sl1 * err_sl1 + err_sl2 * err_sl2));
         double epSq = 0.001 * trkcand.get_P() * trkcand.get_P();
 
-        Matrix initCMatrix = new Matrix(new double[][]{
-            {ex * ex, 0, 0, 0, 0},
-            {0, ey * ey, 0, 0, 0},
-            {0, 0, eux * eux, 0, 0},
-            {0, 0, 0, euy * euy, 0},
-            {0, 0, 0, 0, epSq}
-        });
-
+        Matrix initCMatrix = new Matrix();
+        initCMatrix.set(ex * ex, 0, 0, 0, 0,
+            0, ey * ey, 0, 0, 0,
+            0, 0, eux * eux, 0, 0,
+            0, 0, 0, euy * euy, 0,
+            0, 0, 0, 0, epSq
+        );
+        
         CovMat initCM = new CovMat(0);
         initCM.covMat = initCMatrix;
         this.trackCov.put(0, initCM);
@@ -395,14 +401,16 @@ public class StateVecsDoca {
             rinitSV.tx = trkcand.getFinalStateVec().tanThetaX();
             rinitSV.ty = trkcand.getFinalStateVec().tanThetaY();
             rinitSV.Q = ((double) trkcand.get_Q())/trkcand.get_P();
-            double[][] FTF = new double[5][5];
+            double[] FTF = new double[25];
             double[] F = this.F(trkcand.get(0).get_Sector(), z0, rinitSV);
             for(int i = 0; i<5; i++) {
-                FTF[i][i]=F[i]*F[i];
+                FTF[i*5+i]=F[i]*F[i];
                 
             }
             
-            Matrix initCMatrix = new Matrix(FTF); 
+            //Matrix initCMatrix = new Matrix(FTF); 
+            Matrix initCMatrix = new Matrix(); 
+            initCMatrix.set(FTF);
             initCM.covMat = initCMatrix; 
             //end test
             this.trackCov.put(0, initCM); //this.printMatrix(initCM.covMat);
@@ -451,7 +459,7 @@ public class StateVecsDoca {
     public class CovMat {
         
         final int k;
-        public Matrix covMat;
+        public Matrix covMat = new Matrix();
         
         CovMat(int k) {
             this.k = k;

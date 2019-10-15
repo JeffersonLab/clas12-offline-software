@@ -1,6 +1,6 @@
 package org.jlab.rec.dc.track.fit;
 
-import Jama.Matrix;
+//import Jama.Matrix;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.fit.StateVecsDoca.CovMat;
 import org.jlab.rec.dc.track.fit.StateVecsDoca.StateVec;
-
+import org.jlab.jnp.matrix.*;
 
 /**
  * @author ziegler
@@ -33,6 +33,12 @@ public class KFitterDoca {
     public int NDF = 0;
     public int ConvStatus = 1;
 
+    Matrix first_inverse = new Matrix();
+    Matrix addition      = new Matrix();
+    Matrix result        = new Matrix();
+    Matrix result_inv    = new Matrix();
+    Matrix adj           = new Matrix();
+    
     public KFitterDoca(Track trk, DCGeant4Factory DcDetector,
                    boolean TimeBasedUsingHBtrack,
                    Swim swimmer, int c) {
@@ -109,7 +115,9 @@ public class KFitterDoca {
                 sv.transport(sector, k, k + 1,
                         sv.trackTraj.get(k),
                         sv.trackCov.get(k));
-                    this.filter(k + 1);
+                //if(i==1 && k==0)
+                //    Matrix5x5.show(sv.trackCov.get(k).covMat);
+                this.filter(k + 1);
             }
             if (i > 1) {
                 if(this.setFitFailed==true)
@@ -141,43 +149,35 @@ public class KFitterDoca {
 
     }
 
-    public Matrix filterCovMat(double[] H, Matrix C, double V) {
-        Matrix Ci;
-
-        if (!this.isNonsingular(C)) {
+    public Matrix filterCovMat(double[] H, Matrix Ci, double V) {
+        
+        double det = Matrix5x5.inverse(Ci, first_inverse, adj);
+        if(Math.abs(det)<1.e-30)
             return null;
-        }
-        try {
-            Ci = C.inverse();
-        } catch (Exception e) {
+        
+        addition.set(
+                    H[0] * H[0] / V, H[0] * H[1] / V, 0, 0, 0,
+                    H[0] * H[1] / V, H[1] * H[1] / V, 0, 0, 0,
+                    0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0);
+        //System.out.println("Ci ");
+        //Matrix5x5.show(Ci);
+        //System.out.println("Cinv ");
+        //Matrix5x5.show(first_inverse);
+        //System.out.println("addition ");
+        //Matrix5x5.show(addition);
+        
+        Matrix5x5.add(first_inverse, addition, result);
+        double det2 = Matrix5x5.inverse(result, result_inv, adj);
+        //System.out.println("addition result");
+        //Matrix5x5.show(result);
+        //System.out.println("inv result");
+        //Matrix5x5.show(result_inv);
+        if(Math.abs(det2)<1.e-30)
             return null;
-        }
-        double[][] HTGH = new double[][]{
-                    {H[0] * H[0] / V, H[0] * H[1] / V, 0, 0, 0},
-                    {H[0] * H[1] / V, H[1] * H[1] / V, 0, 0, 0},
-                    {0, 0, 0, 0, 0},
-                    {0, 0, 0, 0, 0},
-                    {0, 0, 0, 0, 0}
-        };
-        Matrix Ca;
-        try {
-            Ca = Ci.plus(new Matrix(HTGH));
-        } catch (Exception e) {
-            return null;
-        }
-        if (Ca != null && !this.isNonsingular(Ca)) {
-            return null;
-        }
-        if (Ca != null) {
-            Matrix CaInv = Ca.inverse();
-            if (CaInv != null) {
-                return CaInv;
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
+        
+        return result_inv;
     }
     private void filter(int k) {
         if (sv.trackTraj.get(k) != null &&
@@ -371,9 +371,9 @@ public class KFitterDoca {
         
     }
 
-    private boolean isNonsingular(Matrix mat) {
+    /*private boolean isNonsingular(Matrix mat) {
         double matDet = mat.det();
         return Math.abs(matDet) >= 1.e-30;
-    }
+    }*/
 
 }

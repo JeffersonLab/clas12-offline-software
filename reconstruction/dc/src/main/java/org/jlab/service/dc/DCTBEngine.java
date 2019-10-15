@@ -1,6 +1,7 @@
 package org.jlab.service.dc;
 
-import Jama.Matrix;
+//import Jama.Matrix;
+import org.jlab.jnp.matrix.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -181,7 +182,8 @@ public class DCTBEngine extends DCEngine {
                     trkbank.getFloat("tx", i), trkbank.getFloat("ty", i));
             HBFinalSV.setZ(trkbank.getFloat("z", i));
             HBtrk.setFinalStateVec(HBFinalSV);
-            Matrix initCMatrix = new Matrix(new double[][]{
+            Matrix initCMatrix = new Matrix();
+            initCMatrix.set(new double[][]{
             {trkcovbank.getFloat("C11", i), trkcovbank.getFloat("C12", i), trkcovbank.getFloat("C13", i), trkcovbank.getFloat("C14", i), trkcovbank.getFloat("C15", i)},
             {trkcovbank.getFloat("C21", i), trkcovbank.getFloat("C22", i), trkcovbank.getFloat("C23", i), trkcovbank.getFloat("C24", i), trkcovbank.getFloat("C25", i)},
             {trkcovbank.getFloat("C31", i), trkcovbank.getFloat("C32", i), trkcovbank.getFloat("C33", i), trkcovbank.getFloat("C34", i), trkcovbank.getFloat("C35", i)},

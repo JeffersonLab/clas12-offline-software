@@ -5,7 +5,8 @@
  */
 package org.jlab.rec.dc.track.fit;
 
-import Jama.Matrix;
+//import Jama.Matrix;
+import org.jlab.jnp.matrix.*;
 import java.util.ArrayList;
 import org.jlab.clas.swimtools.Swim;
 /**
@@ -323,9 +324,9 @@ public class RungeKuttaDoca {
         fVec.Q = q;
         fVec.B = Math.sqrt(_b[0]*_b[0]+_b[1]*_b[1]+_b[2]*_b[2]);
         fVec.deltaPath = Math.sqrt((x0-x)*(x0-x)+(y0-y)*(y0-y)+h*h)+dPath;
-        fCov.covMat=new Matrix(C);
-        
-        
+        fCov.covMat.set(C);
+        //System.out.println("Transported matrix");
+        //Matrix5x5.show(fCov.covMat);
     }
     
     
