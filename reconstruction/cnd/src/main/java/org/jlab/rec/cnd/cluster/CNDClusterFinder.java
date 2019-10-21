@@ -168,9 +168,17 @@ public class CNDClusterFinder {
                     clusters_sector.set(0, clusters_sector.get(1) );
                     clusters_layer.set(0, clusters_layer.get(1) );
                     clusters_component.set(0, clusters_component.get(1) );
+                    
+                    clusters_x.set(0, clusters_x.get(1) );
+                    clusters_y.set(0, clusters_y.get(1) );
+                    clusters_z.set(0, clusters_z.get(1) );
+                    clusters_time.set(0, clusters_time.get(1) );
+                    
+                    
+                    
                 }
                 
-                /// the cluster information takes the Edep-weighted average
+                /*/// the cluster information takes the Edep-weighted average
                 clusters_x.set(0, (clusters_x.get(0)*clusters_energysum.get(0) + clusters_x.get(1)*clusters_energysum.get(1))
                                / (clusters_energysum.get(0) + clusters_energysum.get(1)) );
                 clusters_y.set(0, (clusters_y.get(0)*clusters_energysum.get(0) + clusters_y.get(1)*clusters_energysum.get(1))
@@ -178,14 +186,14 @@ public class CNDClusterFinder {
                 clusters_z.set(0, (clusters_z.get(0)*clusters_energysum.get(0) + clusters_z.get(1)*clusters_energysum.get(1))
                                / (clusters_energysum.get(0) + clusters_energysum.get(1)) );
                 clusters_time.set(0, (clusters_time.get(0)*clusters_energysum.get(0) + clusters_time.get(1)*clusters_energysum.get(1))
-                                  / (clusters_energysum.get(0) + clusters_energysum.get(1)) );
+                                  / (clusters_energysum.get(0) + clusters_energysum.get(1)) );*/
+                
+                
                 clusters_nhits.set(0, clusters_nhits.get(0) + 1);
                 clusters_energysum.set(0, clusters_energysum.get(0) + clusters_energysum.get(1));
                 if(clusters_status.get(1) !=0)clusters_status.set(0, clusters_status.get(1));
                 
-                
-                //clusters_veto.set(0,cluster_veto(clusters_energysum.get(0),clusters_nhits.get(0),clusters_layermultip.get(0)));
-                
+  
                 
                 clusters_nhits.remove(1);
                 clusters_energysum.remove(1);
@@ -220,18 +228,7 @@ public class CNDClusterFinder {
                     
                     int clusters_number_now = clusters_x.size();
                     
-                    clusters_x.set(subA[0],
-                                   (clusters_x.get(subA[0])*(1+clusters_number-clusters_number_now)+clusters_x.get(subB[0]))/(2.0+clusters_number-clusters_number_now) );
-                    clusters_y.set(subA[0],
-                                   (clusters_y.get(subA[0])*(1+clusters_number-clusters_number_now)+clusters_y.get(subB[0]))/(2.0+clusters_number-clusters_number_now) );
-                    clusters_z.set(subA[0],
-                                   (clusters_z.get(subA[0])*(1+clusters_number-clusters_number_now)+clusters_z.get(subB[0]))/(2.0+clusters_number-clusters_number_now) );
-                    clusters_time.set(subA[0],
-                                      (clusters_time.get(subA[0])*(1+clusters_number-clusters_number_now)+clusters_time.get(subB[0]))/(2.0+clusters_number-clusters_number_now) );
-                    clusters_xTimesEdep.set(subA[0], clusters_xTimesEdep.get(subA[0]) + clusters_xTimesEdep.get(subB[0]) );
-                    clusters_yTimesEdep.set(subA[0], clusters_yTimesEdep.get(subA[0]) + clusters_yTimesEdep.get(subB[0]) );
-                    clusters_zTimesEdep.set(subA[0], clusters_zTimesEdep.get(subA[0]) + clusters_zTimesEdep.get(subB[0]) );
-                    clusters_timeTimesEdep.set(subA[0], clusters_timeTimesEdep.get(subA[0]) + clusters_timeTimesEdep.get(subB[0]) );
+
 
                     
                     if(clusters_layer1.get(subA[0]) ==1 || clusters_layer1.get(subB[0])==1){
@@ -257,7 +254,24 @@ public class CNDClusterFinder {
                         clusters_layer.set(subA[0], clusters_layer.get(subB[0]) );
                         clusters_component.set(subA[0], clusters_component.get(subB[0]) );
                         clusters_hitenergy.set(subA[0], clusters_hitenergy.get(subB[0]) );
+                        
+                        
+                        clusters_x.set(subA[0], clusters_x.get(subB[0]));
+                        clusters_y.set(subA[0], clusters_y.get(subB[0]));
+                        clusters_z.set(subA[0], clusters_z.get(subB[0]));
+                        clusters_time.set(subA[0], clusters_time.get(subB[0]));
+        
                     }
+      
+                    /*
+                    
+                    clusters_xTimesEdep.set(subA[0], clusters_xTimesEdep.get(subA[0]) + clusters_xTimesEdep.get(subB[0]) );
+                    clusters_yTimesEdep.set(subA[0], clusters_yTimesEdep.get(subA[0]) + clusters_yTimesEdep.get(subB[0]) );
+                    clusters_zTimesEdep.set(subA[0], clusters_zTimesEdep.get(subA[0]) + clusters_zTimesEdep.get(subB[0]) );
+                    clusters_timeTimesEdep.set(subA[0], clusters_timeTimesEdep.get(subA[0]) + clusters_timeTimesEdep.get(subB[0]) );
+                    */
+
+                    
                     if(clusters_status.get(subB[0]) !=0) clusters_status.set(subA[0], clusters_status.get(subB[0]));
                     clusters_nhits.set(subA[0], clusters_nhits.get(subA[0]) + clusters_nhits.get(subB[0]));
                     clusters_nhits.remove(subB[0]);
@@ -290,13 +304,13 @@ public class CNDClusterFinder {
                 }
             }
             
-            /// calculate the Edep-weighted average
+            /*/// calculate the Edep-weighted average
             for(int i = 0; i < clusters_x.size(); i++){
                 clusters_x.set(i, clusters_xTimesEdep.get(i)/clusters_energysum.get(i));
                 clusters_y.set(i, clusters_yTimesEdep.get(i)/clusters_energysum.get(i));
                 clusters_z.set(i, clusters_zTimesEdep.get(i)/clusters_energysum.get(i));
                 clusters_time.set(i, clusters_timeTimesEdep.get(i)/clusters_energysum.get(i));
-            }
+            }*/
             
         }//end of hirerchical clustering!
         
