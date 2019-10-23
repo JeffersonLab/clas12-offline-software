@@ -25,7 +25,7 @@ fi
 
 hipo-utils \
  -filter \
- -b 'RUN::*,RAW::epics,RAW::scaler,HEL::flip,HEL::online,REC::*' \
+ -b 'RUN::*,RAW::epics,RAW::scaler,HEL::flip,HEL::online,REC::*,RECFT::*,MC::*' \
  -merge \
  -o $2 \
  ${@:3}
