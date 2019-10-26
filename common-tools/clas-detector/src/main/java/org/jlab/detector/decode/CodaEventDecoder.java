@@ -47,7 +47,7 @@ public class CodaEventDecoder {
     private List<Integer> triggerWords = new ArrayList<>(); 
     JsonObject  epicsData = new JsonObject();
 
-    private final long timeStampTolerance = 2L;
+    private final long timeStampTolerance = 0L;
 
     public CodaEventDecoder(){
 
@@ -127,11 +127,12 @@ public class CodaEventDecoder {
             long ts = tiEntries.get(0).getTimeStamp();
             for(int i=1; i<tiEntries.size(); i++) {
                 if(Math.abs(tiEntries.get(i).getTimeStamp()-ts)>this.timeStampTolerance) {
-                    tiSync=false;
+                    //tiSync=false;
                     if(this.timeStampErrors<100) {
                         System.out.println("WARNING: mismatch in TI time stamps: crate " 
                                         + tiEntries.get(i).getDescriptor().getCrate() + " reports " 
-                                        + tiEntries.get(i).getTimeStamp() + " instead of " + ts);
+                                        + tiEntries.get(i).getTimeStamp() + " instead of the " + ts
+                                        + " from crate " + tiEntries.get(0).getDescriptor().getCrate());
                         this.timeStampErrors++;
                     }
                 }
