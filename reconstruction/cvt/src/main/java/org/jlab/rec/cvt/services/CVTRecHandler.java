@@ -287,7 +287,7 @@ public class CVTRecHandler {
         List<Track> trks = new ArrayList<Track>();
         
         //List<Seed> seeds = trseed.findSeed(SVTclusters, SVTGeom, crosses.get(1), BMTGeom);
-        List<Seed> seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
+        List<Seed> seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer, CVT);
 //      System.out.println("  BEAM TRACKING    seeds " + seeds.size());
         for (Seed seed : seeds) { 
         	kf = new KFitter(seed, SVTGeom, swimmer );
