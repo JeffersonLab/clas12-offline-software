@@ -129,7 +129,7 @@ public class MakerCA {
 //      		  aReg = 6 + bgeom.getLayer( aReg , a.get_DetectorType() );
       		  aReg = 6 + aReg;
 
-          	  if( CVT.getClusters(aLayer+6, aSector).size() > 5 ) continue;
+          	  if( a.get_DetectorType().equalsIgnoreCase("Z") && CVT.getClusters(aLayer+6, aSector).size() > 5 ) continue;
       	  }
       	  else {
 
