@@ -28,6 +28,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>11</version>
+    </dependency>
+    <dependency>
       <groupId>org.jlab.ccdb</groupId>
       <artifactId>ccdb</artifactId>
       <version>1.2</version>
