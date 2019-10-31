@@ -457,6 +457,10 @@ public class StateVecs {
         public double residual;
         public double excl_residual;
         public double pathlength;
+        //Track angles at module or tile
+        public double angle; // Angle of the direction wrt to norm
+        public double RTheta; // Angle of the projected direction in er/etheta with normal vector er
+        public double RZ; // Angle of the projected direction in er/ez with norm
                         
         public StateVec(int k) {
             this.k = k;
@@ -503,6 +507,9 @@ public class StateVecs {
         	this.residual=ToCopy.residual;
         	this.excl_residual=ToCopy.excl_residual;
         	this.pathlength=ToCopy.pathlength;
+        	this.angle=ToCopy.angle;
+        	this.RZ=ToCopy.RZ;
+        	this.RTheta=ToCopy.RTheta;
         	return ;
         }
         
@@ -684,34 +691,12 @@ public class StateVecs {
         //Try to have a guess of position at last layer
     	
     	this.new_transport(0, mv.measurements.get(mv.measurements.size()-1).k, this.trackTrajFilt.get(0) , this.trackCovFilt.get(0) , sgeo, bgeo, mv.measurements.get(mv.measurements.size()-1).type, swimmer);
-    	if (mv.measurements.get(mv.measurements.size()-1).type==2) {
-    		this.trackTrajFilt.get(mv.measurements.get(mv.measurements.size()-1).k).refz=mv.measurements.get(mv.measurements.size()-1).z;
-    		this.trackTraj.get(mv.measurements.get(mv.measurements.size()-1).k).refz=mv.measurements.get(mv.measurements.size()-1).z;
-    	}
-    	if (mv.measurements.get(mv.measurements.size()-1).type==1) {
-    		this.trackTrajFilt.get(mv.measurements.get(mv.measurements.size()-1).k).refx=mv.measurements.get(mv.measurements.size()-1).x;
-    		this.trackTraj.get(mv.measurements.get(mv.measurements.size()-1).k).refx=mv.measurements.get(mv.measurements.size()-1).x;
-    		
-    		this.trackTrajFilt.get(mv.measurements.get(mv.measurements.size()-1).k).refy=mv.measurements.get(mv.measurements.size()-1).y;
-    		this.trackTraj.get(mv.measurements.get(mv.measurements.size()-1).k).refy=mv.measurements.get(mv.measurements.size()-1).y;
-    	}
-    	
-    	
-    	this.trackCovFilt.remove(mv.measurements.get(mv.measurements.size()-1).k);
-    	this.trackCov.remove(mv.measurements.get(mv.measurements.size()-1).k);
-    	this.trackTransport.remove(mv.measurements.get(mv.measurements.size()-1).k);
-    	
-    	CovMat initCM = new CovMat(mv.measurements.get(mv.measurements.size()-1).k);
-        initCM.covMat= this.trackCov.get(0).covMat;
-    	this.trackCovFilt.put(mv.measurements.get(mv.measurements.size()-1).k, initCM);
-    	this.trackCov.put(mv.measurements.get(mv.measurements.size()-1).k, initCM);
+    
     	//Remove the 0-object
         this.trackTraj.remove(0);
         this.trackTrajFilt.remove(0);
         this.trackCov.remove(0);
-        this.trackCovFilt.remove(0);
-        
-        
+        this.trackCovFilt.remove(0);     
         
     }
 

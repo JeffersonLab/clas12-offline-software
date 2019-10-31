@@ -11,8 +11,12 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.FittedHit;
+import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
+
+import Jama.Matrix;
+
 import org.jlab.rec.cvt.track.fit.StateVecs.StateVec;
 import org.jlab.detector.base.DetectorType;
 
@@ -51,24 +55,15 @@ public class TrackListFinder {
                 //System.out.println("*******  after EL "+trk.get_P());
 
                 int charge = trk.get_Q();
-//                double maxPathLength = 5.0;//very loose cut 
-//                bstSwim.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
-//                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
-//                        trk.get_P(), charge, 
-//                        maxPathLength) ;
-//                double[] pointAtCylRad = bstSwim.SwimToCylinder(Constants.CTOFINNERRADIUS/10);
-                double maxPathLength = 3.0;//very loose cut 
-                double accuracy = 0.1; // accuracy of stopper in cm
-                double stepsize = 0.1; // initial step size
+                double maxPathLength = 5.0;//very loose cut 
                 bstSwim.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
                         Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                         trk.get_P(), charge, 
-                        maxPathLength, accuracy, stepsize) ;
-                double[] pointAtCylRad = bstSwim.SwimRho(Constants.CTOFINNERRADIUS/10);
-//                System.out.println(pointAtCylRad[0] + " " + pointAtCylRad[1] + " " + pointAtCylRad[2] + " " +
-//                        Math.sqrt(pointAtCylRad[0]*pointAtCylRad[0]+pointAtCylRad[1]*pointAtCylRad[1])+ " " + pointAtCylRad[6]);
+                        maxPathLength) ;
+
+                double[] pointAtCylRad = bstSwim.SwimToCylinder(Constants.CTOFINNERRADIUS/10);
                 trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
-                trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3], pointAtCylRad[4], pointAtCylRad[5]).asUnit());
+                trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
 
                 trk.set_pathLength(pointAtCylRad[6]*10);
 
@@ -299,7 +294,7 @@ public class TrackListFinder {
 		
 	}
 
-    public void FinalizeTrackToCTOF_CND(List<Track> trks,  CTOFGeant4Factory ctof_geo, Detector cnd_geo, Swim swimmer) {
+     public void FinalizeTrackToCTOF_CND(List<Track> trks,  CTOFGeant4Factory ctof_geo, Detector cnd_geo, Swim swimmer) {
        
         double CTOF_radius=ctof_geo.getRadius(1);
         double px = 0;
@@ -307,70 +302,43 @@ public class TrackListFinder {
         double pz = 0;
         org.jlab.rec.cvt.track.fit.StateVecs sv=new org.jlab.rec.cvt.track.fit.StateVecs();//Stupid class... need to change it when I am bored.
         
-        double maxPathLength = 3.0;//very loose cut 
-        double accuracy = 0.1; // accuracy of stopper in cm
+        double maxPathLength = 10;//very loose cut 
+        double accuracy = 0.001; // accuracy of stopper in cm
         double stepsize = 0.1; // initial step size
+       
         for (int t = 0; t < trks.size(); t++) {
-            
-            // keep original ctof cross definition that goes in Tracks bank
-                Track trk = trks.get(t);
-                int charge = trk.get_Q();
-                swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
-                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
-                        trk.get_P(), charge, 
-                        maxPathLength, accuracy, stepsize) ;
-                double[] pointAtCylRadOrg = swimmer.SwimRho(Constants.CTOFINNERRADIUS/10);
-                trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRadOrg[0]*10, pointAtCylRadOrg[1]*10, pointAtCylRadOrg[2]*10));
-                trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRadOrg[3], pointAtCylRadOrg[4], pointAtCylRadOrg[5]).asUnit());
-
-                trk.set_pathLength(pointAtCylRadOrg[6]*10);
-
-            
-            
-            
-            boolean keep_swimming=true;// boolean to kill the search of intersection if swimmer cannot catch the previous layer
+        	boolean keep_swimming=true;// boolean to kill the search of intersection if swimmer cannot catch the previous layer
             int trksize = trks.get(t).getTrajectory().size();
             StateVec ctof_inter=sv.new StateVec(trksize +1);
             StateVec[] cnd_inter=new StateVec[cnd_geo.getSector(0).getSuperlayer(0).getNumLayers()];
-            px = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).dirx;
-            py = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).diry;
-            pz = trks.get(t).get_P() * trks.get(t).getTrajectory().get(trksize - 1).dirz;
-            swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
-                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
-                        trk.get_P(), charge, 
-                        maxPathLength, accuracy, stepsize) ;
-            double[] pointAtCylRad = swimmer.SwimRho(CTOF_radius);
+            Helix particle=sv.setSvPars(trks.get(t).getTrajectory().get(trksize - 1), new Matrix(3,3));
+            double csAtRadius=particle.getCurvAbsAtRadius(CTOF_radius*10, new Vector3D(0,0,0));
+            Vector3D intersection=particle.getHelixPoint(csAtRadius);
+            Vector3D dir_intersection=particle.getHelixDir(csAtRadius);
             
-//            if (pointAtCylRad[6]>150||pointAtCylRad[6]==0) {
-//            	keep_swimming=false;
-//            	break;
-//            }
             ctof_inter.sector=1; ctof_inter.layer=1;ctof_inter.DetectorType=DetectorType.CTOF.getDetectorId();
-            ctof_inter.xdet=pointAtCylRad[0]*10;ctof_inter.ydet=pointAtCylRad[1]*10;ctof_inter.zdet=pointAtCylRad[2]*10;
-            ctof_inter.dirx=pointAtCylRad[3];ctof_inter.diry=pointAtCylRad[4];ctof_inter.dirz=pointAtCylRad[5];
-            ctof_inter.pathlength=pointAtCylRad[6]*10;
+            ctof_inter.xdet=intersection.x();ctof_inter.ydet=intersection.y();ctof_inter.zdet=intersection.z();
+            ctof_inter.dirx=dir_intersection.x();ctof_inter.diry=dir_intersection.y();ctof_inter.dirz=dir_intersection.z();
+            ctof_inter.pathlength=csAtRadius/10. + trks.get(t).getTrajectory().get(trksize - 1).pathlength / 10.;
                         
             trks.get(t).getTrajectory().add(ctof_inter);
+            trks.get(t).set_TrackDirAtCTOFRadius(new Vector3D(ctof_inter.dirx,ctof_inter.diry,ctof_inter.dirz));
+            trks.get(t).set_TrackPointAtCTOFRadius(new Point3D(new Vector3D(ctof_inter.xdet,ctof_inter.ydet,ctof_inter.zdet)));
+            trks.get(t).set_pathLength(ctof_inter.pathlength);
             
-            for(int ilayer=0; ilayer<cnd_geo.getSector(0).getSuperlayer(0).getNumLayers(); ilayer++) {
+           for(int ilayer=0; ilayer<cnd_geo.getSector(0).getSuperlayer(0).getNumLayers(); ilayer++) {
             	trksize = trks.get(t).getTrajectory().size();
             	if (!keep_swimming) break;
             	cnd_inter[ilayer]= sv.new StateVec(trksize +1);
             	Point3D center = cnd_geo.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
             	double radius  = Math.sqrt(center.x()*center.x()+center.y()*center.y());
-            	swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
-                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
-                        trk.get_P(), charge, 
-                        maxPathLength, accuracy, stepsize) ;
-                pointAtCylRad= swimmer.SwimRho(radius);
-//            	if (pointAtCylRad[6]==0||pointAtCylRad[6]>15) {
-//            		keep_swimming=false;
-//            		break;
-//            	}
+            	csAtRadius=particle.getCurvAbsAtRadius(radius*10, new Vector3D(0,0,0));
+            	intersection=particle.getHelixPoint(csAtRadius);
+                dir_intersection=particle.getHelixDir(csAtRadius);
             	cnd_inter[ilayer].layer=ilayer; cnd_inter[ilayer].sector=1;cnd_inter[ilayer].DetectorType=DetectorType.CND.getDetectorId();
-            	cnd_inter[ilayer].xdet=pointAtCylRad[0]*10;cnd_inter[ilayer].ydet=pointAtCylRad[1]*10;cnd_inter[ilayer].zdet=pointAtCylRad[2]*10;
-            	cnd_inter[ilayer].dirx=pointAtCylRad[3];cnd_inter[ilayer].diry=pointAtCylRad[4];cnd_inter[ilayer].dirz=pointAtCylRad[5];
-            	cnd_inter[ilayer].pathlength=pointAtCylRad[6]*10;
+            	cnd_inter[ilayer].xdet=intersection.x();cnd_inter[ilayer].ydet=intersection.y();cnd_inter[ilayer].zdet=intersection.z();
+                cnd_inter[ilayer].dirx=dir_intersection.x();cnd_inter[ilayer].diry=dir_intersection.y();cnd_inter[ilayer].dirz=dir_intersection.z();
+            	cnd_inter[ilayer].pathlength=csAtRadius/10. + trks.get(t).getTrajectory().get(trksize - 1).pathlength;
             	trks.get(t).getTrajectory().add(cnd_inter[ilayer]);
             	
             }
