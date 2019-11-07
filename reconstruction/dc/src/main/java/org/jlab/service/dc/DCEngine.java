@@ -1,7 +1,10 @@
 package org.jlab.service.dc;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
@@ -172,6 +175,13 @@ public class DCEngine extends ReconstructionEngine {
 
         // create the surfaces
         tSurf = new TrajectorySurfaces();
+        // for debugging the end plates bowing:
+        //====================================
+        //try {
+        //    tSurf.checkDCGeometry(dcDetector);
+        //} catch (FileNotFoundException ex) {
+        //    Logger.getLogger(DCEngine.class.getName()).log(Level.SEVERE, null, ex);
+        //}
         tSurf.LoadSurfaces(targetPosition, targetLength,dcDetector, ftofDetector, ecalDetector);
         
         // Get the constants for the correct variation
