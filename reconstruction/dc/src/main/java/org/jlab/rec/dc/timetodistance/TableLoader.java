@@ -43,19 +43,17 @@ public class TableLoader {
                                     System.out.println(" NEW TIME BIN ");
                                     for(int icosalpha =0; icosalpha<maxBinIdxAlpha+1; icosalpha++) {
                                             //for (int tb = 0; tb< maxBinIdxT[s][r][ibfield][icosalpha]; tb++) {
-                                                
-                                                    
-                                                double Xalpha = -(Math.toDegrees(Math.acos(Math.cos(Math.toRadians(30.)) + (icosalpha)*(1. - Math.cos(Math.toRadians(30.)))/5.)) - 30.);
-                                                double Xtime=(2*tb+1);
-                                                
-                                                //for (int k=0; k<10; k++){
-                                                double Bf = (ibfield)*0.5;
-                                                int bbin = tde.getBIdx(Bf);
-                                                double Xdoca=tde.interpolateOnGrid((double) Bf, Xalpha, Xtime, s, r);
-                                                    System.out.println("Bbin "+ibfield+" B "+ (float)Bf+" sl "+(r+1)+" time "+Xtime+" tb "+tb+" timeBin "+tde.getTimeIdx(Xtime, s, r, ibfield, icosalpha)
-                                                            +" icosalpha "+icosalpha+" Xalpha "+(float) Xalpha + " dis "+ (float)DISTFROMTIME[s][r][bbin][icosalpha][tde.getTimeIdx(Xtime, s, r, ibfield, icosalpha)] +" dis' "+
-                                                          (float) Xdoca );
-                                                //}
+                                            double Xalpha = -(Math.toDegrees(Math.acos(Math.cos(Math.toRadians(30.)) + (icosalpha)*(1. - Math.cos(Math.toRadians(30.)))/5.)) - 30.);
+                                            double Xtime=(2*tb+1);
+
+                                            //for (int k=0; k<10; k++){
+                                            double Bf = (ibfield)*0.5;
+                                            int bbin = tde.getBIdx(Bf);
+                                            double Xdoca=tde.interpolateOnGrid((double) Bf, Xalpha, Xtime, s, r);
+                                                System.out.println("Bbin "+ibfield+" B "+ (float)Bf+" sl "+(r+1)+" time "+Xtime+" tb "+tb+" timeBin "+tde.getTimeIdx(Xtime, s, r, ibfield, icosalpha)
+                                                        +" icosalpha "+icosalpha+" Xalpha "+(float) Xalpha + " dis "+ (float)DISTFROMTIME[s][r][bbin][icosalpha][tde.getTimeIdx(Xtime, s, r, ibfield, icosalpha)] +" time' "+
+                                                      (float)  calc_Time( Xdoca,  Xalpha, Bf, s+1, r+1) +" tdix "+tde.getTimeIdx(calc_Time( Xdoca,  Xalpha, Bf, s+1, r+1), s, r, ibfield, icosalpha));
+                                            //}
                                             }
 
                                     }
@@ -163,7 +161,7 @@ public class TableLoader {
                                 double cos30minusalpha = Math.cos(Math.toRadians(30.)) + (double) (icosalpha)*(1. - Math.cos(Math.toRadians(30.)))/5.;
                                 double alpha = -(Math.toDegrees(Math.acos(cos30minusalpha)) - 30);
                                 int nxmax = (int) (dmax*cos30minusalpha/stepSize); 
-
+                                
                                 for(int idist =0; idist<nxmax; idist++) {
 
                                     double x = (double)(idist+1)*stepSize;
@@ -185,10 +183,16 @@ public class TableLoader {
                                         // bincount = 0;				    	 
                                         DISTFROMTIME[s][r][ibfield][icosalpha][tbin]=x;
                                     } else {
+                                        // test for getting center of the bin (to be validated):
+                                        //double prevTime = calc_Time(x-stepSize,  alpha, bfield, s+1, r+1);
+                                        //if(x>DISTFROMTIME[s][r][ibfield][icosalpha][tbin]
+                                        //        && Math.abs((double)(2.*tbin+1)-timebfield)<=Math.abs((double)(2.*tbin+1)-prevTime)) {
+                                        //    DISTFROMTIME[s][r][ibfield][icosalpha][tbin]=x;
+                                        //}
                                         // bincount++;
                                         DISTFROMTIME[s][r][ibfield][icosalpha][tbin]+=stepSize;
                                     }
-
+                                    
                                     /* if(timebfield>timebfield_max) {
                                         DISTFROMTIME[s][r][ibfield][icosalpha][tbin]=x-stepSize*0.5;
                                         if(DISTFROMTIME[s][r][ibfield][icosalpha][tbin]>dmax)
@@ -200,7 +204,7 @@ public class TableLoader {
                 }
         }	
         TableLoader.fillMissingTableBins();
-        TableLoader.test();
+        //TableLoader.test();
         System.out.println(" T2D TABLE FILLED.....");
         T2DLOADED = true;
      }
