@@ -5,6 +5,8 @@
  */
 package org.jlab.rec.dc.trajectory;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.detector.base.DetectorLayer;
@@ -15,6 +17,8 @@ import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
+
+import java.io.PrintWriter;
 /**
  * A class to load the geometry constants used in the DC reconstruction. The
  * coordinate system used in the Tilted Sector coordinate system.
@@ -135,6 +139,28 @@ public class TrajectorySurfaces {
 //
 //        return new Point3D(rx,ry,rzs);
 //    }
+
+    public void checkDCGeometry(DCGeant4Factory dcDetector) throws FileNotFoundException {
+        int is = 0; 
+        PrintWriter pw = new PrintWriter(new File("/Users/ziegler/WireEndPoints.txt"));
+        
+        pw.printf("superlayer"+"   "+"layer"+"   "+"wire"+"   "+"xL"+"   "+"yL"+"   "+
+                            "xR"+"   "+"yR"+"   "+"z"
+                            );
+        for(int isup =0; isup<6; isup++) {
+            for(int il =5; il<6; il++) {
+                for(int ic =0; ic<112; ic++) { // include only layer 6
+                    double z = dcDetector.getWireMidpoint(is, isup, il, ic).z; 
+                    double xL = dcDetector.getWireLeftend(is, isup, il, ic).x;
+                    double xR = dcDetector.getWireRightend(is, isup, il, ic).x;
+                    double yL = dcDetector.getWireLeftend(is, isup, il, ic).y;
+                    double yR = dcDetector.getWireRightend(is, isup, il, ic).y;
+                    pw.printf("%d\t %d\t %d\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", (isup+1),(il+1),(ic+1),xL,yL,xR,yR,z
+                            );
+                }
+            }
+        }
+    }
     
     
 }
