@@ -1,0 +1,32 @@
+#!/bin/sh
+
+usage="\nUsage: dst-maker -o outputfile inputfile [inputfile [...]]\n"
+
+if [ "$#" -lt 3 ]; then
+  echo -e $usage
+  exit
+elif [ "$1" != "-o" ]; then
+  echo -e $usage
+  exit
+elif [ -e $2 ]; then
+  echo -e $usage
+  echo File already exists: $2
+  exit
+else
+  for x in ${@:3}
+  do
+    if ! [ -e $x ]; then
+      echo -e $usage
+      echo File does not exist: $x
+      exit
+    fi
+  done
+fi
+
+hipo-utils \
+ -filter \
+ -b 'RUN::*,RAW::epics,RAW::scaler,HEL::flip,HEL::online,REC::*,RECFT::*,MC::*' \
+ -merge \
+ -o $2 \
+ ${@:3}
+

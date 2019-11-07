@@ -312,10 +312,19 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         
         @Override
         public String toString(){
+            int nsamples = 0;
+            if(this.adcPulse.isEmpty()==false) nsamples = adcPulse.get(0).length;
             StringBuilder str = new StringBuilder();
-            str.append(String.format("ADC (%d) : %5d %5d %5d  time = %5d  %9.4f  max = %5d",
-                    getOrder(),
+            if(nsamples>0){
+                str.append("PULSE : ");
+                for(int i = 0; i < nsamples; i++){
+                    str.append(String.format("%5d ", adcPulse.get(0)[i]));
+                }
+            } else {
+            str.append(String.format("ADC (%d) (L=%6d) : %5d %5d %5d  time = %5d  %9.4f  max = %5d",
+                    getOrder(), nsamples,
                     getIntegral(),getADC(), getPedestal(), getTimeCourse(), getTime(), getHeight()));
+            }
             return str.toString();
         }
                 
