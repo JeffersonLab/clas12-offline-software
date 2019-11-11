@@ -302,9 +302,18 @@ public class HitReader {
             if (trkID[i] == -1) {
                 continue;
             }
-
+            
             double T_0 = 0;
             double T_Start = 0;
+            
+            if (!event.hasBank("RECHB::Event")) {
+                continue;
+            }
+            if (event.hasBank("RECHB::Event") && 
+                    event.getBank("RECHB::Event").getFloat("startTime", 0)==-1000) {
+                continue;
+            }
+        
             if (!event.hasBank("MC::Particle") &&
                     event.getBank("RUN::config").getInt("run", 0) > 100) {
                 T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
@@ -349,7 +358,7 @@ public class HitReader {
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
             
-            //if(hit.betaFlag != -1)
+            //if(hit.betaFlag == 0)
                 hits.add(hit);            
         }
 
