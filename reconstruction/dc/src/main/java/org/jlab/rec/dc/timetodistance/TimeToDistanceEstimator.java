@@ -230,5 +230,24 @@ public class TimeToDistanceEstimator {
         }
         return binhighT;
     }
-	
+    
+    /**
+     * 
+     * @param time
+     * @return test doca corr
+     */
+    public double addDOCACorr(double time, int sly) {
+        double dDoca = 0;
+        if(sly == 5 || sly ==6) {
+            if(time>600) {
+                dDoca = 0.15;
+            } else {
+                dDoca = 7.6e-3 - 2.4e-4*time +9.8e-3*time*time - 3.8e-6*time*time*time;
+            }
+            
+        }
+        return dDoca;
+    }
 }
+        
+
