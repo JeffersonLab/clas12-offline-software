@@ -696,7 +696,7 @@ public class TrackCandListFinder {
                             h1.set_AssociatedHBTrackID(trk.get_Id());
                             h1.set_AssociatedClusterID(h1.get_AssociatedClusterID());
                             h1.setAssociatedStateVec(st);
-                            h1.set_TrkResid(h1.get_Doca() - st.getProjectorDoca()); 
+                            h1.set_TrkResid(h1.get_Doca()*Math.signum(st.getProjectorDoca()) - st.getProjectorDoca()); 
                             h1.setB(st.getB());
                             h1.calc_SignalPropagAlongWire(st.x(), st.y(), DcDetector);
                             h1.setSignalPropagTimeAlongWire(DcDetector);
@@ -728,7 +728,7 @@ public class TrackCandListFinder {
                             h1.set_AssociatedHBTrackID(trk.get_Id());
                             h1.set_AssociatedClusterID(h1.get_AssociatedClusterID());
                             h1.setAssociatedStateVec(st);
-                            h1.set_TrkResid(h1.get_Doca() - st.getProjectorDoca()); 
+                            h1.set_TrkResid(h1.get_Doca()*Math.signum(st.getProjectorDoca()) - st.getProjectorDoca()); 
                             h1.setB(st.getB());
                             h1.calc_SignalPropagAlongWire(st.x(), st.y(), DcDetector);
                             h1.setSignalPropagTimeAlongWire(DcDetector);
