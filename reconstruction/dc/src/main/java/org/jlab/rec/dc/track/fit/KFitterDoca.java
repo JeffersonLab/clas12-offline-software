@@ -314,7 +314,7 @@ public class KFitterDoca {
                     mv.measurements.get(0).z,
                     mv.measurements.get(0).wireLine[0]);
             svc.setProjector(mv.measurements.get(0).wireLine[0].origin().x());
-            svc.setProjectorDoca(Math.abs(h0));
+            svc.setProjectorDoca(h0);
             kfStateVecsAlongTrajectory.add(svc); 
             double res = (mv.measurements.get(0).doca[0] - h0);
             chi2 += (mv.measurements.get(0).doca[0] - h0) * (mv.measurements.get(0).doca[0] - h0) / V0;
@@ -329,7 +329,7 @@ public class KFitterDoca {
                 chi2 += (mv.measurements.get(0).doca[1] - h0) * (mv.measurements.get(0).doca[1] - h0) / V0;
                 nRj[mv.measurements.get(0).region-1]+=res*res/mv.measurements.get(0).error;
                 svc.setProjector(mv.measurements.get(0).wireLine[1].origin().x());
-                svc.setProjectorDoca(Math.abs(h0));
+                svc.setProjectorDoca(h0);
                 kfStateVecsAlongTrajectory.add(svc); 
             }
             for (int k1 = 0; k1 < k; k1++) {
@@ -348,7 +348,7 @@ public class KFitterDoca {
                 path += sv.trackTraj.get(k1 + 1).deltaPath;
                 svc.setPathLength(path);
                 svc.setProjector(mv.measurements.get(k1 + 1).wireLine[0].origin().x());
-                svc.setProjectorDoca(Math.abs(h));
+                svc.setProjectorDoca(h);
                 kfStateVecsAlongTrajectory.add(svc); 
                 res = (mv.measurements.get(k1 + 1).doca[0]  - h); 
                 chi2 += (mv.measurements.get(k1 + 1).doca[0]  - h) * (mv.measurements.get(k1 + 1).doca[0]  - h) / V;
@@ -363,7 +363,7 @@ public class KFitterDoca {
                     chi2 += (mv.measurements.get(k1 + 1).doca[1]  - h) * (mv.measurements.get(k1 + 1).doca[1]  - h) / V;
                     nRj[mv.measurements.get(k1 + 1).region-1]+=res*res/V;
                     svc.setProjector(mv.measurements.get(k1 + 1).wireLine[1].origin().x());
-                    svc.setProjectorDoca(Math.abs(h));
+                    svc.setProjectorDoca(h);
                     kfStateVecsAlongTrajectory.add(svc); 
                 }
             } 
