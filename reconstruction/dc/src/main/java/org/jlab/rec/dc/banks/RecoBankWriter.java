@@ -2,7 +2,6 @@ package org.jlab.rec.dc.banks;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.jnp.hipo.data.HipoEvent;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
