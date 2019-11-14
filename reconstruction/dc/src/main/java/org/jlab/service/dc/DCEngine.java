@@ -109,7 +109,7 @@ public class DCEngine extends ReconstructionEngine {
             useBETACUT = System.getenv("COAT_DC_USEBETACUT");
             if (useBETACUT!=null) {
                 System.out.println("["+this.getName()+"] run with with with Beta cut config chosen based on env = "+useBETACUT);
-                Constants.CHECKBETA=Boolean.valueOf(useTIMETBETA);
+                Constants.CHECKBETA=Boolean.valueOf(useBETACUT);
             }
         }
         if (useBETACUT==null) {
