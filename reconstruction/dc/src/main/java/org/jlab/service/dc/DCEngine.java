@@ -97,6 +97,25 @@ public class DCEngine extends ReconstructionEngine {
         if (useTIMETBETA==null) {
              System.out.println("["+this.getName()+"] run with with new tBeta config chosen based on default = "+Constants.useUSETIMETBETA());
         }
+        //CHECKBETA
+        //Use beta cut(true: use time; false: use track doca)
+        String useBETACUT = this.getEngineConfigString("dcBetaCut");
+        
+        if (useBETACUT!=null) {
+            System.out.println("["+this.getName()+"] run with Beta cut chosen based on yaml = "+useBETACUT);
+            Constants.CHECKBETA=Boolean.valueOf(useBETACUT);
+        }
+        else {
+            useBETACUT = System.getenv("COAT_DC_USEBETACUT");
+            if (useBETACUT!=null) {
+                System.out.println("["+this.getName()+"] run with with with Beta cut config chosen based on env = "+useBETACUT);
+                Constants.CHECKBETA=Boolean.valueOf(useTIMETBETA);
+            }
+        }
+        if (useBETACUT==null) {
+             System.out.println("["+this.getName()+"] run with with Beta cut config chosen based on default = "+Constants.CHECKBETA);
+        }
+        
         //T2D Function
         String T2Dfcn = this.getEngineConfigString("dcT2DFunc");
         
