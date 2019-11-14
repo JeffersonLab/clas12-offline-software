@@ -359,10 +359,21 @@ public class HitReader {
             hit.set_AssociatedHBTrackID(trkID[i]); 
             
             //if(hit.betaFlag == 0)
+            if(passHit(hit.betaFlag))
                 hits.add(hit);            
         }
 
         this.set_HBHits(hits);
+    }
+    
+    private boolean passHit(int betaFlag) {
+        boolean pass = true;
+        if(Constants.CHECKBETA) {
+            if(betaFlag != 0) {
+                pass = false;
+            }
+        }
+        return pass;
     }
     
     public void read_NNHits(DataEvent event, DCGeant4Factory DcDetector,
