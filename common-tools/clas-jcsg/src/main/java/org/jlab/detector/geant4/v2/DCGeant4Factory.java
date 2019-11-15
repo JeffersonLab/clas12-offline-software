@@ -52,6 +52,7 @@ final class DCdatabase {
     private int nguardwires;
 
     private boolean ministaggerStatus = false;
+    private double ministagger ;
 
     private final String dcdbpath = "/geometry/dc/";
     private static DCdatabase instance = null;
@@ -70,6 +71,7 @@ final class DCdatabase {
 
         nguardwires = cp.getInteger(dcdbpath + "layer/nguardwires", 0);
         nsensewires = cp.getInteger(dcdbpath + "layer/nsensewires", 0);
+        ministagger = cp.getDouble(dcdbpath + "ministagger/ministagger", 0);
 
         for (int ireg = 0; ireg < nRegions; ireg++) {
             dist2tgt[ireg] = cp.getDouble(dcdbpath + "region/dist2tgt", ireg)*Length.cm;
@@ -106,7 +108,7 @@ final class DCdatabase {
   		  align_dthetaz[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_z",irow);
 	   }
     }
-
+    
     public double dist2tgt(int ireg) {
         return dist2tgt[ireg];
     }
@@ -186,7 +188,11 @@ final class DCdatabase {
     public int nsectors() {
         return nSectors;
     }
-
+    
+    public double ministagger() {
+        return ministagger;
+    }
+    
     public void setMinistaggerStatus(boolean ministaggerStatus) {
         this.ministaggerStatus = ministaggerStatus;
     }
@@ -311,7 +317,7 @@ final class Wire {
         // hh: wire distance in the wire plane
         double hh = (iwire-1 + ((double)(ilayer % 2)) / 2.0) * dw2;
         if(ireg==2 && isSensitiveWire(isuper, ilayer, iwire) && dbref.getMinistaggerStatus())
-                hh += ((ilayer%2)*2-1)*0.03;
+                hh += ((ilayer%2)*2-1)*dbref.ministagger();
 
         // ll: layer distance
         double tt = dbref.cellthickness(isuper) * dbref.wpdist(isuper);

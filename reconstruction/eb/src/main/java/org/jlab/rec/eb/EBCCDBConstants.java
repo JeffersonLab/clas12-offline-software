@@ -2,6 +2,7 @@ package org.jlab.rec.eb;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -18,9 +19,9 @@ public class EBCCDBConstants {
     private int currentRun = -1;
     private boolean isLoaded = false;
     
-    private static final String ebTablePrefix="/calibration/eb/";
+    private static final String EB_TABLE_PREFIX="/calibration/eb/";
 
-    private static final String[] ebTableNames={
+    private static final String[] EB_TABLE_NAMES={
             "electron_sf",
             "photon_sf",
             "neutron_beta",
@@ -37,7 +38,7 @@ public class EBCCDBConstants {
             "rf/jitter"
     };
     
-    private static final String[] otherTableNames={
+    private static final String[] OTHER_TABLE_NAMES={
         "/runcontrol/fcup",
         "/runcontrol/hwp",
         "/runcontrol/helicity",
@@ -47,18 +48,18 @@ public class EBCCDBConstants {
     };
 
     public static List <String> getAllTableNames() {
-        List <String> ret=new ArrayList <String>();
-        for (String ss : ebTableNames) ret.add(ebTablePrefix+ss);
-        for (String ss : otherTableNames) ret.add(ss);
+        List <String> ret=new ArrayList <>();
+        for (String ss : EB_TABLE_NAMES) ret.add(EB_TABLE_PREFIX+ss);
+        ret.addAll(Arrays.asList(OTHER_TABLE_NAMES));
         return ret;
     }
 
-    private Map <String,IndexedTable> tables = new HashMap<String,IndexedTable>();
-    private Map <EBCCDBEnum,Double> dbDoubles = new HashMap<EBCCDBEnum,Double>();
-    private Map <EBCCDBEnum,Integer> dbIntegers = new HashMap<EBCCDBEnum,Integer>();
-    private Map <EBCCDBEnum,Vector3D> dbVector3Ds = new HashMap<EBCCDBEnum,Vector3D>();
-    private Map <EBCCDBEnum,Double[]> dbArrays = new HashMap<EBCCDBEnum,Double[]>();
-    private Map <EBCCDBEnum, Map <Integer,Double[]>> dbSectorArrays = new HashMap<EBCCDBEnum,Map<Integer,Double[]>>();
+    private final Map <String,IndexedTable> tables = new HashMap<>();
+    private final Map <EBCCDBEnum,Double> dbDoubles = new HashMap<>();
+    private final Map <EBCCDBEnum,Integer> dbIntegers = new HashMap<>();
+    private final Map <EBCCDBEnum,Vector3D> dbVector3Ds = new HashMap<>();
+    private final Map <EBCCDBEnum,Double[]> dbArrays = new HashMap<>();
+    private final Map <EBCCDBEnum, Map <Integer,Double[]>> dbSectorArrays = new HashMap<>();
 
     // fill maps:
     private void setDouble(EBCCDBEnum key,Double value) {
@@ -74,7 +75,7 @@ public class EBCCDBConstants {
         dbArrays.put(key,value);
     }
     private void setSectorArray(EBCCDBEnum key, Integer sector, Double[] value) {
-        if (!dbSectorArrays.containsKey(key)) dbSectorArrays.put(key,new HashMap<Integer,Double[]>());
+        if (!dbSectorArrays.containsKey(key)) dbSectorArrays.put(key,new HashMap<>());
         dbSectorArrays.get(key).put(sector,value);
     }
     
@@ -126,7 +127,7 @@ public class EBCCDBConstants {
             int run,
             ConstantsManager manager, 
             String shortTableName) {
-        tables.put(shortTableName,manager.getConstants(run,ebTablePrefix+shortTableName));
+        tables.put(shortTableName,manager.getConstants(run,EB_TABLE_PREFIX+shortTableName));
     }
 
     // read ccdb values, fill maps:
@@ -218,10 +219,10 @@ public class EBCCDBConstants {
     public final void load(int run,ConstantsManager manager) {
 
         // load /calibration/eb tables:
-        for (String ss : ebTableNames) loadEbTable(run,manager,ss);
+        for (String ss : EB_TABLE_NAMES) loadEbTable(run,manager,ss);
 
         //load non-/calibration/eb tables:
-        for (String ss : otherTableNames) loadTable(run,manager,ss);
+        for (String ss : OTHER_TABLE_NAMES) loadTable(run,manager,ss);
 
         String[] sf ={"sf1", "sf2", "sf3", "sf4"};
         String[] sfs={"sfs1","sfs2","sfs3","sfs4"};

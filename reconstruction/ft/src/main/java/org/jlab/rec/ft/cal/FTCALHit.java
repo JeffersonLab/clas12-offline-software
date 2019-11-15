@@ -20,7 +20,7 @@ public class FTCALHit implements Comparable<FTCALHit>{
 				          /charge2Energy.getDoubleValue("mips_charge", 1,1,ICOMPONENT)/1000.);
                 double twCorr=0;
                 if(this._Charge>0) {
-                    twCorr = timeWalk.getDoubleValue("amplitude", 1,1,ICOMPONENT)/Math.pow(this._Charge,timeWalk.getDoubleValue("lambda", 1,1,ICOMPONENT));
+                    twCorr = timeWalk.getDoubleValue("amplitude", 1,1,ICOMPONENT)*Math.exp(-this._Charge*timeWalk.getDoubleValue("lambda", 1,1,ICOMPONENT));
                 }
 		this.set_Time(((double) this._TDC)/FTCALConstantsLoader.TIMECONVFAC
                                                  -(FTCALConstantsLoader.CRYS_LENGTH-cluster.getDoubleValue("depth_z", 1,1,0))/FTCALConstantsLoader.VEFF
@@ -47,7 +47,7 @@ public class FTCALHit implements Comparable<FTCALHit>{
                 
                 double twCorr=0;
                 if(this._Charge>0) {
-                    twCorr = timeWalk.getDoubleValue("amplitude", 1,1,ICOMPONENT)/Math.pow(this._Charge,timeWalk.getDoubleValue("lambda", 1,1,ICOMPONENT));
+                    twCorr = timeWalk.getDoubleValue("amplitude", 1,1,ICOMPONENT)*Math.exp(-this._Charge*timeWalk.getDoubleValue("lambda", 1,1,ICOMPONENT));
                 }
 		
                 this.set_Time(time -(FTCALConstantsLoader.CRYS_LENGTH-cluster.getDoubleValue("depth_z", 1,1,0))/FTCALConstantsLoader.VEFF

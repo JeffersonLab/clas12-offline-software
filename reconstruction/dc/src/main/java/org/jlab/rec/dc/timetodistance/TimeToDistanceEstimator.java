@@ -12,6 +12,7 @@ public class TimeToDistanceEstimator {
     public TimeToDistanceEstimator() {
             // TODO Auto-generated constructor stub
     }
+    
     /**
      * 
      * @param x value on grid

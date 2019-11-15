@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.io.base.DataEvent;
 
 import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioDataEvent;
@@ -257,7 +258,7 @@ public class ClusterFinder {
 
     }
 
-    private List<FittedCluster> RecomposeClusters(List<FittedHit> fhits, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
+    private List<FittedCluster> RecomposeClusters(DataEvent event, List<FittedHit> fhits, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
 
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
         int NbClus = -1;
@@ -305,7 +306,7 @@ public class ClusterFinder {
                 // update the hits
                 for (FittedHit fhit : clus) {
                     fhit.set_TrkgStatus(0);
-                    fhit.updateHitPositionWithTime(1, fhit.getB(), tab, DcDetector, tde);
+                    fhit.updateHitPositionWithTime(event, 1, fhit.getB(), tab, DcDetector, tde);
                     fhit.set_AssociatedClusterID(clus.get_Id());
                     fhit.set_AssociatedHBTrackID(clus.get(0).get_AssociatedHBTrackID());
                 }
@@ -315,20 +316,22 @@ public class ClusterFinder {
         return clusters;
     }
 
-    public List<FittedCluster> FindTimeBasedClusters(List<FittedHit> fhits, ClusterFitter cf, ClusterCleanerUtilities ct, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
+    public List<FittedCluster> FindTimeBasedClusters(DataEvent event, 
+            List<FittedHit> fhits, ClusterFitter cf, ClusterCleanerUtilities ct, 
+            IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
 
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
 
-        List<FittedCluster> rclusters = RecomposeClusters(fhits, tab, DcDetector, tde);
+        List<FittedCluster> rclusters = RecomposeClusters(event, fhits, tab, DcDetector, tde);
         //System.out.println(" Clusters TimeBased Step 1");
-         //    for(FittedCluster c : rclusters)
-         //   	for(FittedHit h : c)
-         //   		System.out.println(h.printInfo());
+        //     for(FittedCluster c : rclusters)
+        //    	for(FittedHit h : c)
+        //    		System.out.println(h.printInfo());
 
         for (FittedCluster clus : rclusters) {
             // clean them up
             //if(Constants.isSimulation) {  // at this stage only remove secondaries in MC
-            FittedCluster cleanClus = ct.SecondariesRemover(clus, cf, tab, DcDetector, tde);
+            FittedCluster cleanClus = ct.SecondariesRemover(event, clus, cf, tab, DcDetector, tde);
             clus = cleanClus;
             //}
 
@@ -339,7 +342,7 @@ public class ClusterFinder {
            // 	System.out.println(" Clusters TimeBased Step 2ndaries rem");
            // 	for(FittedHit h : clus)
            // 		System.out.println(h.printInfo());
-            FittedCluster LRresolvClus = ct.LRAmbiguityResolver(clus, cf, tab, DcDetector, tde);
+            FittedCluster LRresolvClus = ct.LRAmbiguityResolver(event, clus, cf, tab, DcDetector, tde);
             clus = LRresolvClus;
             if (clus == null) {
                 continue;
@@ -382,7 +385,7 @@ public class ClusterFinder {
                         newhit.set_TrkgStatus(hit.get_TrkgStatus());
                         newhit.set_LeftRightAmb(-hit.get_LeftRightAmb());
                         newhit.calc_CellSize(DcDetector);
-                        newhit.updateHitPositionWithTime(1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer						
+                        newhit.updateHitPositionWithTime(event, 1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer						
                         newhit.set_AssociatedClusterID(hit.get_AssociatedClusterID());
                         newhit.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());
                         Clus2.add(newhit);
@@ -408,7 +411,7 @@ public class ClusterFinder {
 
             // update the hits
             for (FittedHit fhit : clus) {
-                fhit.updateHitPositionWithTime(cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
+                fhit.updateHitPositionWithTime(event, cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
             }
             // iterate till convergence of trkAngle
             double Chi2Diff = 1;
@@ -422,7 +425,7 @@ public class ClusterFinder {
                     cosTrkAngle = 1. / Math.sqrt(1. + clus.get_clusterLineFitSlope() * clus.get_clusterLineFitSlope());
                     // update the hits
                     for (FittedHit fhit : clus) {
-                        fhit.updateHitPositionWithTime(cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
+                        fhit.updateHitPositionWithTime(event, cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
                     }
                     cosTrkAngleFinal = cosTrkAngle;
                 }
@@ -433,7 +436,7 @@ public class ClusterFinder {
             cf.SetResidualDerivedParams(clus, false, false, DcDetector); //calcTimeResidual=false, resetLRAmbig=false 
 
             for (FittedHit fhit : clus) {
-                fhit.updateHitPositionWithTime(cosTrkAngleFinal, fhit.getB(), tab, DcDetector, tde);
+                fhit.updateHitPositionWithTime(event, cosTrkAngleFinal, fhit.getB(), tab, DcDetector, tde);
             }
             cf.SetFitArray(clus, "TSC");
             cf.Fit(clus, true);
