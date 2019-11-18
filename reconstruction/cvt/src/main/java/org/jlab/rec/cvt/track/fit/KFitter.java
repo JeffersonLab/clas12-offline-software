@@ -467,10 +467,10 @@ public class KFitter {
         	 sv.trackCovSmooth.get(f).covMat=sv.trackCovFilt.get(f).covMat.plus(Ak.times(sv.trackCovSmooth.get(i).covMat.minus(sv.trackCov.get(i).covMat)).times(Ak.transpose()));
         	   	 
         	 double deltaPhi=sv.trackTrajSmooth.get(i).phi-sv.trackTrajSmooth.get(f).phi;
-        	 if (deltaPhi>2*Math.PI) deltaPhi=deltaPhi-2*Math.PI;
-        	 if (deltaPhi<-2*Math.PI) deltaPhi=deltaPhi+2*Math.PI;
+        	 if (deltaPhi>Math.PI) deltaPhi=deltaPhi-2*Math.PI;
+        	 if (deltaPhi<-Math.PI) deltaPhi=deltaPhi+2*Math.PI;
         	 	sv.trackTrajSmooth.get(f).pathlength=sv.trackTrajSmooth.get(i).pathlength
-        	 			+Math.abs(sv.trackTrajSmooth.get(f).get_Radius()*(1+Math.abs(sv.trackTrajSmooth.get(f).tanL))*deltaPhi);
+        	 			+Math.abs(sv.trackTrajSmooth.get(f).get_Radius()*Math.sqrt(1+sv.trackTrajSmooth.get(f).tanL*sv.trackTrajSmooth.get(f).tanL)*deltaPhi);
     	       	 	
          } catch (Exception e) {
              return false;
