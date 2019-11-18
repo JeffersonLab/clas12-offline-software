@@ -32,6 +32,7 @@ public enum HelicityBit {
     public static HelicityBit getFlipped(HelicityBit bit) {
         if (bit==PLUS) return MINUS;
         if (bit==MINUS) return PLUS;
+        if (bit==DNE) return DNE;
         return UDF;
     }
 

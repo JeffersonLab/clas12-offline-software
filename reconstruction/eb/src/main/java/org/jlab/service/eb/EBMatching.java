@@ -137,7 +137,7 @@ public class EBMatching {
                 throw new RuntimeException("Invalid ECAL Layer:  "+ecalLayer);
         }
 
-        List<DetectorParticle> parts=new ArrayList<DetectorParticle>();
+        List<DetectorParticle> parts=new ArrayList<>();
 
         List<DetectorResponse> responsesECAL =
             eventBuilder.getUnmatchedResponses(null, DetectorType.ECAL, ecalLayer);

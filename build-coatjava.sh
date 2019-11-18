@@ -66,7 +66,7 @@ cp external-dependencies/vecmath-1.3.1-2.jar coatjava/lib/clas/
 mkdir -p coatjava/lib/utils
 cp external-dependencies/jclara-4.3-SNAPSHOT.jar coatjava/lib/utils
 cp external-dependencies/clas12mon-3.1.jar coatjava/lib/utils
-cp external-dependencies/KPP-Plots-3.0.jar coatjava/lib/utils
+cp external-dependencies/KPP-Plots-3.1.jar coatjava/lib/utils
 #cp external-dependencies/jaw-1.0.jar coatjava/lib/utils
 mkdir -p coatjava/lib/services
 
@@ -109,6 +109,7 @@ cp reconstruction/rich/target/clas12detector-rich-*-SNAPSHOT.jar coatjava/lib/se
 cp reconstruction/fvt/target/clas12detector-fmt-*-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/eb/target/clas12detector-eb-*-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/band/target/clas12detector-band-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/rtpc/target/clas12detector-rtpc-*-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/mc/target/clas12detector-mc-*-SNAPSHOT.jar coatjava/lib/services/
 
 echo "COATJAVA SUCCESSFULLY BUILT !"

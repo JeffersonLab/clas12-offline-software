@@ -55,7 +55,7 @@ public class DCHBEngine extends DCEngine {
     public boolean init() {
         // Load cuts
         Constants.Load();
-        super.setStartTimeOption();
+        super.setOptions();
         super.LoadTables();
 //        newRun = 809;
 //        long timeStamp = 371468548086L;
@@ -216,7 +216,7 @@ public class DCHBEngine extends DCEngine {
         /* 17 */
         CrossListFinder crossLister = new CrossListFinder();
 
-        CrossList crosslist = crossLister.candCrossLists(crosses,
+        CrossList crosslist = crossLister.candCrossLists(event, crosses,
                 false,
                 super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST),
                 dcDetector,
@@ -302,7 +302,7 @@ public class DCHBEngine extends DCEngine {
         }
         segments.addAll(psegments);
         List<Cross> pcrosses = crossMake.find_Crosses(segments, dcDetector);
-        CrossList pcrosslist = crossLister.candCrossLists(pcrosses,
+        CrossList pcrosslist = crossLister.candCrossLists(event, pcrosses,
                 false,
                 super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST),
                 dcDetector,
