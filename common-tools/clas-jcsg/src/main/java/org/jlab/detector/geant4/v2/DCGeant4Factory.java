@@ -118,6 +118,7 @@ final class DCdatabase {
                int ireg  = cp.getInteger(dcdbpath + "endplatesbow/region",irow)-1;
                int order = cp.getInteger(dcdbpath + "endplatesbow/order",irow);
                endplatesbow[isec][ireg][order] = cp.getDouble(dcdbpath+"endplatesbow/coefficient", irow)*Length.cm;
+               //System.out.println("READ ENDPLATES COEFF [isec"+isec+"]["+ireg+"]="+endplatesbow[isec][ireg][order] );
         }
     }
     
@@ -345,6 +346,14 @@ final class Wire {
         //get left and right ends assuming the wire length is not changing
         leftend = direction.times(-wlenl).add(midpoint);
         rightend = direction.times(wlenr).add(midpoint);
+        
+//        if(sector == 4)
+//            System.out.println((this.isuper+1)+" "+layer+" "+wire+" "+(float)(xL-deflL)+" "+(float)yL+" "+(float)leftend.z+" "+ 
+//                    (float)(xL)+" "+(float)yL+" "+(float)leftend.z+" "+
+//                    (float)leftend.x+" "+(float)leftend.y+" "+(float)leftend.z
+//            +" "+(float)(xR-deflR)+" "+(float)yR+" "+(float)rightend.z+" "+ 
+//                    (float)(xR)+" "+(float)yR+" "+(float)rightend.z+" "+
+//                    (float)rightend.x+" "+(float)rightend.y+" "+(float)rightend.z);
     }
     /**
      * 
@@ -548,7 +557,8 @@ public final class DCGeant4Factory extends Geant4Factory {
 						.rotateY(-dbref.thtilt(isuper/2));
                         
                         //implement end-plates bow in the tilted sector coordinate system (ziegler)
-                        wires[isec][isuper][ilayer][iwire].correctEnds();
+                        if(dbref.getEndPlatesStatus())
+                            wires[isec][isuper][ilayer][iwire].correctEnds();
                         //dc alignment implementation
                         wires[isec][isuper][ilayer][iwire].translate(regionMids[isec][isuper/2].times(-1.0));
                         wires[isec][isuper][ilayer][iwire].rotateZ(Math.toRadians(dbref.getAlignmentThetaZ(isec, isuper/2)));
