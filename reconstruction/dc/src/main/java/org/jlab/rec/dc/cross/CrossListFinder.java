@@ -110,12 +110,12 @@ public class CrossListFinder  {
 
                             // require a line containing crosses in R1 and R2 to intersect the lab z coordinate line in the lab
                             // downstream of the position of the first cross
-                            Point3D labR1 = c1.getCoordsInLab(X[0], Y[0], Z[0]);
-                            Point3D labR2 = c1.getCoordsInLab(X[1], Y[1], Z[1]);
-                            double s = (labR2.x()-labR1.x())/(labR2.z()-labR1.z());
-                            if(labR2.x()/s<0) {
-                                continue;
-                            }
+                            //Point3D labR1 = c1.getCoordsInLab(X[0], Y[0], Z[0]);
+                            //Point3D labR2 = c1.getCoordsInLab(X[1], Y[1], Z[1]);
+                            //double s = (labR2.x()-labR1.x())/(labR2.z()-labR1.z());
+                            //if(labR2.x()/s<0) {
+                            //    continue;
+                            //}
                             // require that the cross direction estimate be in the direction of the trajectory
                             if(cosTh1<Constants.TRACKDIRTOCROSSDIRCOSANGLE || cosTh2<Constants.TRACKDIRTOCROSSDIRCOSANGLE || cosTh3<Constants.TRACKDIRTOCROSSDIRCOSANGLE) {
                                 continue;
