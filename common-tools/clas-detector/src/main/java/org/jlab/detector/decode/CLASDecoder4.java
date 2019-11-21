@@ -451,7 +451,19 @@ public class CLASDecoder4 {
         } catch(Exception e) {
             e.printStackTrace();
         }
-
+        //-----------------------------------------------------
+        // CREATING BONUS BANK --------------------------------
+        //-----------------------------------------------------
+        try {
+            Bank bonusBank = this.createBonusBank();
+            if(bonusBank!=null){
+                if(bonusBank.getRows()>0){
+                    event.write(bonusBank);
+                }
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
         return event;
     }
 
@@ -602,7 +614,48 @@ public class CLASDecoder4 {
 
         return scalerBank;
     }
-
+    
+    public Bank createBonusBank(){
+        
+        if(schemaFactory.hasSchema("RTPC::adc")==false) return null;
+        List<DetectorDataDgtz> bonusData = this.getEntriesADC(DetectorType.RTPC);
+        int totalSize = 0;
+        for(int i = 0; i < bonusData.size(); i++){
+            short[]  pulse = bonusData.get(i).getADCData(0).getPulseArray();
+            totalSize += pulse.length;
+        }
+        
+        Bank bonusBank = new Bank(schemaFactory.getSchema("RTPC::adc"), totalSize);
+        int currentRow = 0;
+        for(int i = 0; i < bonusData.size(); i++){
+            
+            DetectorDataDgtz bonus = bonusData.get(i);
+            
+            short[] pulses = bonus.getADCData(0).getPulseArray();
+            long timestamp = bonus.getADCData(0).getTimeStamp();
+            double    time = bonus.getADCData(0).getTime();
+            double   coeff = time*120.0;
+            
+            double   offset1 = 0.0;
+            double   offset2 =  (double) (8*(timestamp%8));
+            
+            for(int k = 0; k < pulses.length; k++){
+                
+                double pulseTime = coeff + offset1 + offset2 + k*120.0;
+                
+                bonusBank.putByte("sector", currentRow, (byte) bonus.getDescriptor().getSector());
+                bonusBank.putByte("layer" , currentRow, (byte) bonus.getDescriptor().getLayer());
+                bonusBank.putShort("component", currentRow, (short) bonus.getDescriptor().getComponent());
+                bonusBank.putByte("order",      currentRow, (byte) bonus.getDescriptor().getOrder());
+                bonusBank.putInt("ADC",    currentRow, pulses[k]);
+                bonusBank.putFloat("time", currentRow, (float) pulseTime);
+                bonusBank.putShort("ped",  currentRow, (short) 0);
+                currentRow++;
+            }
+        }
+        
+        return bonusBank;
+    }
     public Bank createHelicityFlipBank(Event event,HelicityState state) {
         IndexedTable hwpTable=this.detectorDecoder.scalerManager.getConstants(
                 this.detectorDecoder.getRunNumber(),"/runcontrol/hwp");
