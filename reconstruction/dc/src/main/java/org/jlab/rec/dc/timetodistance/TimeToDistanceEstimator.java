@@ -232,19 +232,19 @@ public class TimeToDistanceEstimator {
     }
     
     /**
-     * 
+     * @param slyIdx superlayer index
      * @param time
      * @return test doca corr
      */
-    public double addDOCACorr(double time, int sly) {
+    public double addDOCACorr(double time, int slyIdx) {
         double dDoca = 0;
-        if(sly == 5 || sly ==6) {
+        if(slyIdx+1 == 5 || slyIdx+1 ==6) {
             if(time>600) {
                 dDoca = 0.15;
             } else {
-                dDoca = 7.6e-3 - 2.4e-4*time +9.8e-3*time*time - 3.8e-6*time*time*time;
+                dDoca = (7.6e-3 - 2.4e-4*time +9.8e-3*time*time - 3.8e-6*time*time*time)*5.5410595e-05;
             }
-            
+            //System.out.println("time "+time +" added doca "+(float)dDoca);
         }
         return dDoca;
     }
