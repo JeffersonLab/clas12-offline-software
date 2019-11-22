@@ -53,6 +53,97 @@ public class StateVecsDoca {
      * @param iVec state vector at the initial index
      * @param covMat state covariance matrix at the initial index
      */
+    public Matrix transport(int sector, int i, double Zf, StateVec iVec, CovMat covMat) { // s = signed step-size
+
+        double stepSize = 1.0;
+        StateVecsDoca.StateVec fVec = new StateVec(0);
+        CovMat fCov = new CovMat(0);
+        fVec.x = iVec.x;
+        fVec.y = iVec.y;
+        fVec.z = iVec.z;
+        fVec.tx = iVec.tx;
+        fVec.ty = iVec.ty;
+        fVec.Q = iVec.Q;
+        fVec.B = iVec.B;
+        //fCov.covMat = covMat.covMat;
+        Matrix5x5.copy(covMat.covMat, fCov.covMat);
+        double s  = 0;
+        double z = Z[i];
+        double BatMeas = iVec.B;
+        
+        while(Math.signum(Zf - Z[i]) *z<Math.signum(Zf - Z[i]) *Zf) {
+            //System.out.println(" RK step num "+(j+1)+" = "+(float)s+" nSteps = "+nSteps);
+            double x =  fVec.x;
+            double y =  fVec.y;
+            z = fVec.z;
+            double tx = fVec.tx;
+            double ty = fVec.ty;
+            double Q =  fVec.Q;
+            double dPath = fVec.deltaPath;
+            //covMat.covMat = fCov.covMat; 
+            Matrix5x5.copy(fCov.covMat, covMat.covMat);
+            s= Math.signum(Zf - Z[i]) * stepSize;
+           // System.out.println(" from "+(float)Z[i]+" to "+(float)Z[f]+" at "+(float)z+" By is "+bf[1]+" B is "+Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2])/Bmax+" stepSize is "+s);
+            if(Math.signum(Zf - Z[i]) *(z+s)>Math.signum(Zf - Z[i]) *Zf)
+                s=Math.signum(Zf - Z[i]) *Math.abs(Zf-z);
+            
+            rk.RK4transport(sector, Q, x, y, z, tx, ty, s, dcSwim,
+                        covMat, fVec, fCov, dPath);
+            
+            // Q  process noise matrix estimate
+            
+            double p = Math.abs(1. / iVec.Q);
+
+            double X0 = this.getX0(z);
+            double t_ov_X0 = Math.abs(s) / X0;//path length in radiation length units = t/X0 [true path length/ X0] ; Ar radiation length = 14 cm
+
+            double beta = this.beta;
+            if(beta>1.0 || beta<=0)
+                beta =1.0;
+
+            double sctRMS = 0;
+            
+            if(Math.abs(s)>0) 
+                sctRMS = ((0.0136)/(beta*PhysicsConstants.speedOfLight()*p))*Math.sqrt(t_ov_X0)*
+                    (1 + 0.038 * Math.log(t_ov_X0));
+            
+
+            double cov_txtx = (1 + tx * tx) * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
+            double cov_tyty = (1 + ty * ty) * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
+            double cov_txty = tx * ty * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
+
+            
+            //if (Math.signum(Z[f] - Z[i]) > 0) { 
+                fMS.set(
+                0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                0, 0, cov_txtx, cov_txty, 0,
+                0, 0, cov_txty, cov_tyty, 0,
+                0, 0, 0, 0, 0
+                );
+                
+                Matrix5x5.copy(fCov.covMat, copyMatrix);
+                Matrix5x5.add(copyMatrix, fMS, fCov.covMat);
+               
+            //} 
+            // end add process noise
+            
+            if( Math.abs(fVec.B - BatMeas)<0.0001)
+                stepSize*=2;
+                    
+            BatMeas = fVec.B;
+        }
+        
+        return fCov.covMat;
+    }
+    
+    /**
+     * 
+     * @param i initial state vector index
+     * @param f final state vector index
+     * @param iVec state vector at the initial index
+     * @param covMat state covariance matrix at the initial index
+     */
     public void transport(int sector, int i, int f, StateVec iVec, CovMat covMat) { // s = signed step-size
         if(iVec==null)
             return;

@@ -240,9 +240,14 @@ public class DCTBEngine extends DCEngine {
                 TrackArray[i].set_Trajectory(kFit.kfStateVecsAlongTrajectory);
                 TrackArray[i].set_FitConvergenceStatus(kFit.ConvStatus);
                 TrackArray[i].set_Id(TrackArray[i].size()+1);
-                TrackArray[i].set_CovMat(kFit.finalCovMat.covMat); 
+                //TrackArray[i].set_CovMat(kFit.finalCovMat.covMat); 
                 if(TrackArray[i].get_Vtx0().toVector3D().mag()>500)
                     continue;
+                // get CovMat at vertex
+                Point3D VTCS = crosses.get(0).getCoordsInSector(
+                        TrackArray[i].get_Vtx0().x(), TrackArray[i].get_Vtx0().y(), TrackArray[i].get_Vtx0().z());
+                TrackArray[i].set_CovMat(kFit.propagateToVtx(crosses.get(0).get_Sector(), VTCS.z()));
+                
                 trkcands.add(TrackArray[i]);
             }
         }

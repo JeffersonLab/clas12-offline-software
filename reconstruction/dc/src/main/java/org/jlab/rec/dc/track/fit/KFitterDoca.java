@@ -289,6 +289,10 @@ public class KFitterDoca {
         }
     }
 
+    public Matrix propagateToVtx(int sector, double Zf) {
+        return sv.transport(sector, 0, Zf, sv.trackTraj.get(0), sv.trackCov.get(0));
+        
+    }
     private void calcFinalChisq(int sector) {
         int k = sv.Z.length - 1;
         this.chi2 = 0;
