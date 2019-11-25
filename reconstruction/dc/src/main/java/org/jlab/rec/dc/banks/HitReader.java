@@ -372,7 +372,7 @@ public class HitReader {
             //if(betaFlag != 0) { //all beta cuts
             //    pass = false;
             //}
-            if(Math.abs(betaFlag) != 1) { // beta cut: beta >0.15
+            if(Math.abs(betaFlag) == 1) { // beta cut: beta >0.15
                 pass = false;
             }
         }
