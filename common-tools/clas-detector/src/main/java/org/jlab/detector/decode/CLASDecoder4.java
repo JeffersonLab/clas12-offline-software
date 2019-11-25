@@ -455,6 +455,7 @@ public class CLASDecoder4 {
         // CREATING BONUS BANK --------------------------------
         //-----------------------------------------------------
         try {
+            //System.out.println("creating bonus bank....");
             Bank bonusBank = this.createBonusBank();
             if(bonusBank!=null){
                 if(bonusBank.getRows()>0){
@@ -616,9 +617,12 @@ public class CLASDecoder4 {
     }
     
     public Bank createBonusBank(){
-        
+        //System.out.println("create bonus bank function...");
         if(schemaFactory.hasSchema("RTPC::adc")==false) return null;
+        //System.out.println("bank descriptor does exist");
         List<DetectorDataDgtz> bonusData = this.getEntriesADC(DetectorType.RTPC);
+        //System.out.println("number of entries in the list = " + bonusData.size()
+        //+ "  data list size = " + dataList.size());
         int totalSize = 0;
         for(int i = 0; i < bonusData.size(); i++){
             short[]  pulse = bonusData.get(i).getADCData(0).getPulseArray();
