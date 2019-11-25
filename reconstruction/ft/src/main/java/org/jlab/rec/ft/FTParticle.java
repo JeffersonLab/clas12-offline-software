@@ -96,7 +96,7 @@ public class FTParticle {
                 double energy    = this._Energy;
                 double thetaCorr = Math.exp(thetaTable.getDoubleValue("thetacorr0", 1,1,0)+thetaTable.getDoubleValue("thetacorr1", 1,1,0)*energy)+
 			     	   Math.exp(thetaTable.getDoubleValue("thetacorr1", 1,1,0)+thetaTable.getDoubleValue("thetacorr3", 1,1,0)*energy);
-                thetaCorr        = Math.toRadians(thetaCorr * this._field);
+                thetaCorr        = Math.toRadians(thetaCorr * Math.abs(this._field));
 		double phiCorr   = Math.exp(phiTable.getDoubleValue("phicorr0", 1,1,0)+phiTable.getDoubleValue("phicorr1", 1,1,0)*energy)+
 			     	   Math.exp(phiTable.getDoubleValue("phicorr2", 1,1,0)+phiTable.getDoubleValue("phicorr3", 1,1,0)*energy)+
 			     	   Math.exp(phiTable.getDoubleValue("phicorr4", 1,1,0)+phiTable.getDoubleValue("phicorr5", 1,1,0)*energy);
