@@ -287,6 +287,10 @@ public class CodaEventDecoder {
                 //  RICH TDC data
                 return this.getDataEntries_57636(crate, node, event);
                 //return this.getDataEntriesMode_7(crate,node, event);
+            } else if(node.getTag()==57641){
+                //  RTPC  data decoding
+                return this.getDataEntries_57641(crate, node, event);
+                //return this.getDataEntriesMode_7(crate,node, event);
             }
         }
         return bankEntries;
