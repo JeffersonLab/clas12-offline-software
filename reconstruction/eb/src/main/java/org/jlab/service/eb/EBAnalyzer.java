@@ -48,7 +48,7 @@ public class EBAnalyzer {
         // setup prioritization on timing detectors:
         chargedBetaDetectors=new LinkedHashMap<>();
         chargedBetaDetectors.put(DetectorType.FTOF,Arrays.asList(2,1,3));
-        chargedBetaDetectors.put(DetectorType.CTOF,Arrays.asList(0));
+        chargedBetaDetectors.put(DetectorType.CTOF,Arrays.asList(1));
         chargedBetaDetectors.put(DetectorType.ECAL,Arrays.asList(1,4,7));
         chargedBetaDetectors.put(DetectorType.HTCC,Arrays.asList(0));
         chargedBetaDetectors.put(DetectorType.CND,Arrays.asList(0));
