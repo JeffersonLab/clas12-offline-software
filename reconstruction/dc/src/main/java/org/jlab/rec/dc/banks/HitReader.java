@@ -369,12 +369,12 @@ public class HitReader {
     private boolean passHit(int betaFlag) {
         boolean pass = true;
         if(Constants.CHECKBETA) {
-            //if(betaFlag != 0) { //all beta cuts
-            //    pass = false;
-            //}
-            if(Math.abs(betaFlag) == 1) { // beta cut: beta >0.15
+            if(betaFlag != 0) { //all beta cuts
                 pass = false;
             }
+//            if(Math.abs(betaFlag) == 1) { // beta cut: beta >0.15
+//                pass = false;
+//            }
         }
         return pass;
     }
