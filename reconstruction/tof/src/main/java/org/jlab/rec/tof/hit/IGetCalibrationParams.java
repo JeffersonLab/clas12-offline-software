@@ -18,6 +18,16 @@ public interface IGetCalibrationParams {
 
     public double TW2P(IndexedTable tab);
 
+    public double TW0E(IndexedTable tab);
+
+    public double TW1E(IndexedTable tab);
+
+    public double TW2E(IndexedTable tab);
+
+    public double TW3E(IndexedTable tab);
+
+    public double TW4E(IndexedTable tab);
+
     public double HPOSa(IndexedTable tab);
 
     public double HPOSb(IndexedTable tab);

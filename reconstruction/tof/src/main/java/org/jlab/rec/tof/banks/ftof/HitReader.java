@@ -73,7 +73,8 @@ public class HitReader implements IMatchedHit {
             IndexedTable constants6, 
             IndexedTable constants7, 
             IndexedTable constants8, 
-            IndexedTable constants9) {/*
+            IndexedTable constants9, 
+            IndexedTable constants10) {/*
         0: "/calibration/ftof/attenuation"),
         1: "/calibration/ftof/effective_velocity"),
         2: "/calibration/ftof/time_offsets"),
@@ -83,7 +84,8 @@ public class HitReader implements IMatchedHit {
         6: "/calibration/ftof/tdc_conv"),
         7: "/calibration/ftof/time_jitter"),
         8: "/calibration/ftof/time_walk_pos"),
-        9: "/calibration/ftof/fadc_offset") );
+        9: "/calibration/ftof/time_walk_exp"),
+        10:"/calibration/ftof/fadc_offset") );
         */
         _numTrks = tracks.size();
 
@@ -91,7 +93,7 @@ public class HitReader implements IMatchedHit {
         
         BaseHitReader hitReader = new BaseHitReader();
         IMatchedHit MH = this;
-        List<BaseHit> hitList = hitReader.get_MatchedHits(event, MH, triggerPhase, constants6, constants9);
+        List<BaseHit> hitList = hitReader.get_MatchedHits(event, MH, triggerPhase, constants6, constants10);
 
         if (hitList.size() == 0) {
             // System.err.println("there is no FTOF bank ");
@@ -184,7 +186,8 @@ public class HitReader implements IMatchedHit {
                 constants3, 
                 constants5, 
                 constants6, 
-                constants8);
+                constants8, 
+                constants9);
             // DetHits.get(hit.get_Panel()-1).add(hit);
         }
         // List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);
