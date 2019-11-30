@@ -562,7 +562,7 @@ public abstract class AHit implements Comparable<AHit> {
                         this.get_lambda2(), this.get_lambda2Unc());
                 this.set_EnergyUnc(eErr);
                 // 7. add new TW exponential correction
-                this.set_t(this.get_t()+this.calc_TWexp(this.get_Energy(), TW0E, TW1E, TW2E, TW3E, TW4E));
+                this.set_t(this.get_t()-this.calc_TWexp(this.get_Energy(), TW0E, TW1E, TW2E, TW3E, TW4E));
 
                 break;
 
@@ -644,7 +644,7 @@ public abstract class AHit implements Comparable<AHit> {
                 this.set_yUnc(this.calc_yUnc(status, v1, v2, v1Unc, v2Unc, ADC1Err,
                         ADC2Err));
                 // 8. add new TW exponential correction
-                this.set_t(this.get_t()+this.calc_TWexp(this.get_Energy(), TW0E, TW1E, TW2E, TW3E, TW4E));
+                this.set_t(this.get_t()-this.calc_TWexp(this.get_Energy(), TW0E, TW1E, TW2E, TW3E, TW4E));
 
                 break;
 
@@ -738,7 +738,7 @@ public abstract class AHit implements Comparable<AHit> {
                         this.get_lambda2(), this.get_lambda2Unc());
                 this.set_EnergyUnc(eErr);
                 // 6. add new TW exponential correction
-                this.set_t(this.get_t()+this.calc_TWexp(this.get_Energy(), TW0E, TW1E, TW2E, TW3E, TW4E));
+                this.set_t(this.get_t()-this.calc_TWexp(this.get_Energy(), TW0E, TW1E, TW2E, TW3E, TW4E));
 
                 break;
 
@@ -838,7 +838,7 @@ public abstract class AHit implements Comparable<AHit> {
                     this.set_EnergyUnc(eErr);
                 }
                 // 7. add new TW exponential correction
-                this.set_t(this.get_t()+this.calc_TWexp(this.get_Energy(), TW0E, TW1E, TW2E, TW3E, TW4E));
+                this.set_t(this.get_t()-this.calc_TWexp(this.get_Energy(), TW0E, TW1E, TW2E, TW3E, TW4E));
 
                 break;
         }
@@ -1291,6 +1291,7 @@ public abstract class AHit implements Comparable<AHit> {
     private double calc_TWexp(double energy, double tw0e, double tw1e, double tw2e, double tw3e, double tw4e) {
         double twexp = 0;
         if(energy>0) {
+            System.out.println(tw0e + " " + tw1e + " " + tw2e + " " + tw3e);
             twexp = tw0e*tw1e*Math.exp(tw2e*energy)+tw3e/energy;
         }
         return twexp;
