@@ -1291,7 +1291,6 @@ public abstract class AHit implements Comparable<AHit> {
     private double calc_TWexp(double energy, double tw0e, double tw1e, double tw2e, double tw3e, double tw4e) {
         double twexp = 0;
         if(energy>0) {
-            System.out.println(tw0e + " " + tw1e + " " + tw2e + " " + tw3e);
             twexp = tw0e*tw1e*Math.exp(tw2e*energy)+tw3e/energy;
         }
         return twexp;
