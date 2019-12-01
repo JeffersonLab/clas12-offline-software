@@ -83,7 +83,18 @@ public final class HelicitySequenceManager {
         if (rcfgBank.getRows()<1) return HelicityBit.UDF;
         return this.searchGenerated(rcfgBank.getInt("run",0),rcfgBank.getLong("timestamp",0));
     }
-  
+
+    public boolean getHalfWavePlate(Event event) {
+        event.read(this.rcfgBank);
+        if (rcfgBank.getRows()>0) {
+            int runno=rcfgBank.getInt("run",0);
+            if (seqMap.containsKey(runno)) {
+              return seqMap.get(runno).getHalfWavePlate();
+            }
+        }
+        return false;
+    }
+
     /**
      * Initialize from a HipoReader object.
      * This requires an unread HipoReader, since HipoReader doesn't provide a
