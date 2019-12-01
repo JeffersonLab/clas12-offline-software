@@ -8,12 +8,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import org.jlab.clas.swimtools.MagFieldsEngine;
-import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.rec.dc.Constants;
@@ -36,8 +36,10 @@ import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.segment.SegmentFinder;
+import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.trajectory.SegmentTrajectory;
+import org.jlab.utils.groups.IndexedTable;
 
 public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListener{
     
@@ -80,9 +82,17 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
     private EmbeddedCanvas can12 = null;
     
     public double[] maxDoca = new double[6];
+    
+    private AtomicInteger Run = new AtomicInteger(0);
+    
+    private int newRun = 0;
     @Override
     public boolean init() {
+        
+        Constants.Load();
+        super.setOptions();
         super.LoadTables();
+        Constants.setT2D(1);
         
         maxDoca[0]=0.8;maxDoca[1]=0.9;maxDoca[2]=1.3;maxDoca[3]=1.4;maxDoca[4]=1.9;maxDoca[5]=2.0;
         //plots
@@ -111,83 +121,25 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         can12 = new EmbeddedCanvas(); 
         can12.divide(2, 3);
         // create histograms
-        for(int i =0; i<6; i++) {
-           
-            LayerEffs1.put(new Coordinate(i),
-                            new H1F("Sector-1 layer efficiencies" + (i + 1), "superlayer" + (i + 1), 6, 0.5, 6.5));
-            LayerEffs1.get(new Coordinate(i)).setTitleX("Layer" );
-            LayerEffs1.get(new Coordinate(i)).setTitleY("Efficiency for superlayer "+(i+1) );
+        for(int si =0; si<6; si++) {
+            LayerEffs.add(new HashMap<Coordinate, H1F>());
+            LayerEffsTrkD.add(new HashMap<Coordinate, H1F>());
+            for(int i =0; i<6; i++) {
+                LayerEffs.get(si).put(new Coordinate(i),
+                                new H1F("Sector-"+si+" layer efficiencies" + (i + 1), "superlayer" + (i + 1), 6, 0.5, 6.5));
+                LayerEffs.get(si).get(new Coordinate(i)).setTitleX("Layer" );
+                LayerEffs.get(si).get(new Coordinate(i)).setTitleY("Efficiency for superlayer "+(i+1) );
 
-            LayerEffs2.put(new Coordinate(i),
-                            new H1F("Sector-2 layer efficiencies" + (i + 1), "superlayer" + (i + 1), 6, 0.5, 6.5));
-            LayerEffs2.get(new Coordinate(i)).setTitleX("Layer" );
-            LayerEffs2.get(new Coordinate(i)).setTitleY("Efficiency for superlayer "+(i+1) );
 
-            LayerEffs3.put(new Coordinate(i),
-                            new H1F("Sector-3 layer efficiencies" + (i + 1), "superlayer" + (i + 1), 6, 0.5, 6.5));
-            LayerEffs3.get(new Coordinate(i)).setTitleX("Layer" );
-            LayerEffs3.get(new Coordinate(i)).setTitleY("Efficiency for superlayer "+(i+1) );
+                LayerEffsTrkD.get(si).put(new Coordinate(i),
+                                new H1F("Sector-"+si+" layer inefficiencies vs trkDoca" + (i + 1), "superlayer" + (i + 1), 40, 0.0, 4.0));
+                LayerEffsTrkD.get(si).get(new Coordinate(i)).setTitleX("Track Doca (cm)" );
+                LayerEffsTrkD.get(si).get(new Coordinate(i)).setTitleY("Inefficiency for superlayer "+(i+1) );
 
-            LayerEffs4.put(new Coordinate(i),
-                            new H1F("Sector-4 layer efficiencies" + (i + 1), "superlayer" + (i + 1), 6, 0.5, 6.5));
-            LayerEffs4.get(new Coordinate(i)).setTitleX("Layer" );
-            LayerEffs4.get(new Coordinate(i)).setTitleY("Efficiency for superlayer "+(i+1) );
-
-            LayerEffs5.put(new Coordinate(i),
-                            new H1F("Sector-5 layer efficiencies" + (i + 1), "superlayer" + (i + 1), 6, 0.5, 6.5));
-            LayerEffs5.get(new Coordinate(i)).setTitleX("Layer" );
-            LayerEffs5.get(new Coordinate(i)).setTitleY("Efficiency for superlayer "+(i+1) );
-
-            LayerEffs6.put(new Coordinate(i),
-                            new H1F("Sector-6 layer efficiencies" + (i + 1), "superlayer" + (i + 1), 6, 0.5, 6.5));
-            LayerEffs6.get(new Coordinate(i)).setTitleX("Layer" );
-            LayerEffs6.get(new Coordinate(i)).setTitleY("Efficiency for superlayer "+(i+1) );
-
-            LayerEffsTrkD1.put(new Coordinate(i),
-                            new H1F("Sector-1 layer inefficiencies vs trkDoca" + (i + 1), "superlayer" + (i + 1), 40, 0.0, 4.0));
-            LayerEffsTrkD1.get(new Coordinate(i)).setTitleX("Track Doca (cm)" );
-            LayerEffsTrkD1.get(new Coordinate(i)).setTitleY("Inefficiency for superlayer "+(i+1) );
-
-            LayerEffsTrkD2.put(new Coordinate(i),
-                            new H1F("Sector-2 layer inefficiencies vs trkDoca" + (i + 1), "superlayer" + (i + 1), 40, 0.0, 4.0));
-            LayerEffsTrkD2.get(new Coordinate(i)).setTitleX("Track Doca (cm)" );
-            LayerEffsTrkD2.get(new Coordinate(i)).setTitleY("Inefficiency for superlayer "+(i+1) );
-            
-            LayerEffsTrkD3.put(new Coordinate(i),
-                            new H1F("Sector-3 layer inefficiencies vs trkDoca" + (i + 1), "superlayer" + (i + 1), 40, 0.0, 4.0));
-            LayerEffsTrkD3.get(new Coordinate(i)).setTitleX("Track Doca (cm)" );
-            LayerEffsTrkD3.get(new Coordinate(i)).setTitleY("Inefficiency for superlayer "+(i+1) );
-
-            LayerEffsTrkD4.put(new Coordinate(i),
-                            new H1F("Sector-4 layer inefficiencies vs trkDoca" + (i + 1), "superlayer" + (i + 1), 40, 0.0, 4.0));
-            LayerEffsTrkD4.get(new Coordinate(i)).setTitleX("Track Doca (cm)" );
-            LayerEffsTrkD4.get(new Coordinate(i)).setTitleY("Inefficiency for superlayer "+(i+1) );
-
-            LayerEffsTrkD5.put(new Coordinate(i),
-                            new H1F("Sector-5 layer inefficiencies vs trkDoca" + (i + 1), "superlayer" + (i + 1), 40, 0.0, 4.0));
-            LayerEffsTrkD5.get(new Coordinate(i)).setTitleX("Track Doca (cm)" );
-            LayerEffsTrkD5.get(new Coordinate(i)).setTitleY("Inefficiency for superlayer "+(i+1) );
-
-            LayerEffsTrkD6.put(new Coordinate(i),
-                            new H1F("Sector-6 layer inefficiencies vs trkDoca" + (i + 1), "superlayer" + (i + 1), 40, 0.0, 4.0));
-            LayerEffsTrkD6.get(new Coordinate(i)).setTitleX("Track Doca (cm)" );
-            LayerEffsTrkD6.get(new Coordinate(i)).setTitleY("Inefficiency for superlayer "+(i+1) );
-            
-            
-            this.setHistosAtt(LayerEffs1.get(new Coordinate(i)), 4);
-            this.setHistosAtt(LayerEffs2.get(new Coordinate(i)), 4);
-            this.setHistosAtt(LayerEffs3.get(new Coordinate(i)), 4);
-            this.setHistosAtt(LayerEffs4.get(new Coordinate(i)), 4);
-            this.setHistosAtt(LayerEffs5.get(new Coordinate(i)), 4);
-            this.setHistosAtt(LayerEffs6.get(new Coordinate(i)), 4);
-            this.setHistosAtt(LayerEffsTrkD1.get(new Coordinate(i)), 2);
-            this.setHistosAtt(LayerEffsTrkD2.get(new Coordinate(i)), 2);
-            this.setHistosAtt(LayerEffsTrkD3.get(new Coordinate(i)), 2);
-            this.setHistosAtt(LayerEffsTrkD4.get(new Coordinate(i)), 2);
-            this.setHistosAtt(LayerEffsTrkD5.get(new Coordinate(i)), 2);
-            this.setHistosAtt(LayerEffsTrkD6.get(new Coordinate(i)), 2);
+                this.setHistosAtt(LayerEffs.get(si).get(new Coordinate(i)), 4);
+                this.setHistosAtt(LayerEffsTrkD.get(si).get(new Coordinate(i)), 2);
+            }
         }
-        
         tabbedPane.add("Sector-1 Layer Efficiencies", can1);
         tabbedPane.add("Sector-2 Layer Efficiencies", can2);
         tabbedPane.add("Sector-3 Layer Efficiencies", can3);
@@ -195,7 +147,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         tabbedPane.add("Sector-5 Layer Efficiencies", can5);
         tabbedPane.add("Sector-6 Layer Efficiencies", can6);
 
-        tabbedPane.add("Sector-1 Infficiencies vs Track Doca", can7);
+        tabbedPane.add("Sector-1 Inefficiencies vs Track Doca", can7);
         tabbedPane.add("Sector-2 Inefficiencies vs Track Doca", can8);
         tabbedPane.add("Sector-3 Inefficiencies vs Track Doca", can9);
         tabbedPane.add("Sector-4 Inefficiencies vs Track Doca", can10);
@@ -259,75 +211,70 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
 	}
     }
 
-    private Map<Coordinate, H1F> LayerEffs1 = new HashMap<Coordinate, H1F>();
-    private Map<Coordinate, H1F> LayerEffs2 = new HashMap<Coordinate, H1F>();
-    private Map<Coordinate, H1F> LayerEffs3 = new HashMap<Coordinate, H1F>();
-    private Map<Coordinate, H1F> LayerEffs4 = new HashMap<Coordinate, H1F>();
-    private Map<Coordinate, H1F> LayerEffs5 = new HashMap<Coordinate, H1F>();
-    private Map<Coordinate, H1F> LayerEffs6 = new HashMap<Coordinate, H1F>();
-    private Map<Coordinate, H1F> LayerEffsTrkD1 = new HashMap<Coordinate, H1F>();
-    private Map<Coordinate, H1F> LayerEffsTrkD2 = new HashMap<Coordinate, H1F>();
-    private Map<Coordinate, H1F> LayerEffsTrkD3 = new HashMap<Coordinate, H1F>();
-    private Map<Coordinate, H1F> LayerEffsTrkD4 = new HashMap<Coordinate, H1F>();
-    private Map<Coordinate, H1F> LayerEffsTrkD5 = new HashMap<Coordinate, H1F>();
-    private Map<Coordinate, H1F> LayerEffsTrkD6 = new HashMap<Coordinate, H1F>();
+    private ArrayList<HashMap<Coordinate, H1F>> LayerEffs = new ArrayList<HashMap<Coordinate, H1F>>();
+    private ArrayList<HashMap<Coordinate, H1F>> LayerEffsTrkD = new ArrayList<HashMap<Coordinate, H1F>>();
     
-    
-        @Override
+    //instantiate bank writer
+    RecoBankWriter rbc = new RecoBankWriter();
+    HitReader hitRead = new HitReader();
+
+    @Override
     public boolean processDataEvent(DataEvent event) {
-        //setRunConditionsParameters( event) ;
-        if(event.hasBank("RUN::config")==false) {
-            System.err.println("RUN CONDITIONS NOT READ AT TIMEBASED LEVEL!");
+        if (!event.hasBank("RUN::config")) {
             return true;
         }
-        //if(event.getBank("RECHB::Event").getFloat("startTime", 0)<0)
-        //    return true; // require the start time to reconstruct the tracks in the event
-        
-        DataBank bank = event.getBank("RUN::config");
+
+       DataBank bank = event.getBank("RUN::config");
+       long timeStamp = bank.getLong("timestamp", 0);
+       double triggerPhase = 0;
+
         // Load the constants
         //-------------------
         int newRun = bank.getInt("run", 0);
-        if(newRun==0)
-            return true;
+        if (newRun == 0)
+           return true;
 
-        double T_Start = 0;
-        if(Constants.isUSETSTART() == true) {
-            if(event.hasBank("RECHB::Event")==true) {
-                T_Start = event.getBank("RECHB::Event").getFloat("startTime", 0);
-                if(T_Start<0) {
-                    return true; // quit if start time not found in data
-                }
-            } else {
-                return true; // no REC HB bank
-            }
-        }
-        // get Field
-        Swim dcSwim = new Swim();        
+       if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) {
+           if (timeStamp == -1)
+               return true;
+ //          if (debug.get()) startTime = System.currentTimeMillis();
+           IndexedTable tabJ = super.getConstantsManager().getConstants(newRun, Constants.TIMEJITTER);
+           double period = tabJ.getDoubleValue("period", 0, 0, 0);
+           int phase = tabJ.getIntValue("phase", 0, 0, 0);
+           int cycles = tabJ.getIntValue("cycles", 0, 0, 0);
+
+           if (cycles > 0) triggerPhase = period * ((timeStamp + phase) % cycles);
+
+           TableLoader.FillT0Tables(newRun, super.variationName);
+           TableLoader.Fill(super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST));
+
+           Run.set(newRun);
+           if (event.hasBank("MC::Particle") && this.getEngineConfigString("wireDistort")==null) {
+               Constants.setWIREDIST(0);
+           }
+       }
         //System.out.println(" RUNNING TIME BASED....................................");
         ClusterFitter cf = new ClusterFitter();
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
 
-        List<FittedHit> fhits = new ArrayList<FittedHit>();	
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
         List<Segment> segments = new ArrayList<Segment>();
-        //instantiate bank writer
-        RecoBankWriter rbc = new RecoBankWriter();
-
-        HitReader hitRead = new HitReader();
+        
         hitRead.read_HBHits(event, 
             super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
             super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
             Constants.getT0(), Constants.getT0Err(), dcDetector, tde);
-        hitRead.read_TBHits(event, 
-            super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-            super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde, Constants.getT0(), Constants.getT0Err());
+        //hitRead.read_TBHits(event, 
+        //    super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
+        //    super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde, Constants.getT0(), Constants.getT0Err());
         List<FittedHit> hits = new ArrayList<FittedHit>();
         //I) get the hits
-        if(hitRead.get_TBHits().isEmpty()) {
+        if(hitRead.get_HBHits()==null)
+            return true;
+        if(!hitRead.get_HBHits().isEmpty()) {
             hits = hitRead.get_HBHits();
-
         } else {
-            hits = hitRead.get_TBHits();
+            return true;
         }
 
         //II) process the hits
@@ -371,6 +318,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
                     index++;
                 }
             }
+            
             event.appendBank(bankE);
         }
         return true;
@@ -406,178 +354,58 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
 			}
 			
 			if(totLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1]>0) {
-				if(Bank.getByte("sector", i)==1) {
-					float d = effLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1];
-					float n = totLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1];
-					float err = (float) (Math.sqrt(d*(d/n+1))/n);
-					LayerEffs1
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
+                            float d = effLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1];
+                            float n = totLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1];
+                            float err = (float) (Math.sqrt(d*(d/n+1))/n);
+                            
+                            LayerEffs.get(Bank.getByte("sector", i)-1).get(new Coordinate(Bank.getByte("superlayer", i) - 1))
 						.setBinContent(Bank.getByte("layer", i)-1,(float)100*d/ (float)n);
-					LayerEffs1
-					.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
+			    LayerEffs.get(Bank.getByte("sector", i)-1).get(new Coordinate(Bank.getByte("superlayer", i) - 1))
 					.setBinError(Bank.getByte("layer", i)-1,(float)100*err);
-					
-					if(Math.abs(Bank.getFloat("trkDoca", i))<4.0) {
+                            if(Math.abs(Bank.getFloat("trkDoca", i))<4.0) {
 						float ddc = effLayA[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][(int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning)))];
 						float ndc = totLayA[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][(int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning)))];
 						float errdc = (float) (Math.sqrt(ddc*(ddc/ndc+1))/ndc);
-						LayerEffsTrkD1
+						LayerEffsTrkD.get(Bank.getByte("sector", i)-1)
 						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
 						.setBinContent((int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning))),(float)100*ddc/ (float)ndc);
-						LayerEffsTrkD1
+						LayerEffsTrkD.get(Bank.getByte("sector", i)-1)
 						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
 						.setBinError((int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning))),(float)100*errdc);
-					}
-				}
-				if(Bank.getByte("sector", i)==2) {
-					float d = effLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1];
-					float n = totLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1];
-					float err = (float) (Math.sqrt(d*(d/n+1))/n);
-					LayerEffs2
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-						.setBinContent(Bank.getByte("layer", i)-1,(float)100*d/ (float)n);
-					LayerEffs2
-					.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-					.setBinError(Bank.getByte("layer", i)-1,(float)100*err);
-					
-					if(Math.abs(Bank.getFloat("trkDoca", i))<4.0) {
-						float ddc = effLayA[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][(int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning)))];
-						float ndc = totLayA[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][(int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning)))];
-						float errdc = (float) (Math.sqrt(ddc*(ddc/ndc+1))/ndc);
-						LayerEffsTrkD2
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-						.setBinContent((int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning))),(float)100*ddc/ (float)ndc);
-						LayerEffsTrkD2
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-						.setBinError((int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning))),(float)100*errdc);
-					}
-				}
-				if(Bank.getByte("sector", i)==3) {
-					float d = effLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1];
-					float n = totLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1];
-					float err = (float) (Math.sqrt(d*(d/n+1))/n);
-					LayerEffs3
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-						.setBinContent(Bank.getByte("layer", i)-1,(float)100*d/ (float)n);
-					LayerEffs3
-					.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-					.setBinError(Bank.getByte("layer", i)-1,(float)100*err);
-					
-					if(Math.abs(Bank.getFloat("trkDoca", i))<4.0) {
-						float ddc = effLayA[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][(int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning)))];
-						float ndc = totLayA[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][(int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning)))];
-						float errdc = (float) (Math.sqrt(ddc*(ddc/ndc+1))/ndc);
-						LayerEffsTrkD3
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-						.setBinContent((int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning))),(float)100*ddc/ (float)ndc);
-						LayerEffsTrkD3
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-						.setBinError((int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning))),(float)100*errdc);
-					}
-				}
-				if(Bank.getByte("sector", i)==4) {
-					float d = effLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1];
-					float n = totLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1];
-					float err = (float) (Math.sqrt(d*(d/n+1))/n);
-					LayerEffs4
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-						.setBinContent(Bank.getByte("layer", i)-1,(float)100*d/ (float)n);
-					LayerEffs4
-					.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-					.setBinError(Bank.getByte("layer", i)-1,(float)100*err);
-					
-					if(Math.abs(Bank.getFloat("trkDoca", i))<4.0) {
-						float ddc = effLayA[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][(int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning)))];
-						float ndc = totLayA[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][(int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning)))];
-						float errdc = (float) (Math.sqrt(ddc*(ddc/ndc+1))/ndc);
-						LayerEffsTrkD4
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-						.setBinContent((int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning))),(float)100*ddc/ (float)ndc);
-						LayerEffsTrkD4
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-						.setBinError((int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning))),(float)100*errdc);
-					}
-				}
-				if(Bank.getByte("sector", i)==5) {
-					float d = effLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1];
-					float n = totLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1];
-					float err = (float) (Math.sqrt(d*(d/n+1))/n);
-					LayerEffs5
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-						.setBinContent(Bank.getByte("layer", i)-1,(float)100*d/ (float)n);
-					LayerEffs5
-					.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-					.setBinError(Bank.getByte("layer", i)-1,(float)100*err);
-					
-					if(Math.abs(Bank.getFloat("trkDoca", i))<4.0) {
-						float ddc = effLayA[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][(int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning)))];
-						float ndc = totLayA[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][(int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning)))];
-						float errdc = (float) (Math.sqrt(ddc*(ddc/ndc+1))/ndc);
-						LayerEffsTrkD5
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-						.setBinContent((int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning))),(float)100*ddc/ (float)ndc);
-						LayerEffsTrkD5
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-						.setBinError((int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning))),(float)100*errdc);
-					}
-				}
-				if(Bank.getByte("sector", i)==6) {
-					float d = effLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1];
-					float n = totLay[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][Bank.getByte("layer", i)-1];
-					float err = (float) (Math.sqrt(d*(d/n+1))/n);
-					LayerEffs6
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-						.setBinContent(Bank.getByte("layer", i)-1,(float)100*d/ (float)n);
-					LayerEffs6
-					.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-					.setBinError(Bank.getByte("layer", i)-1,(float)100*err);
-					
-					if(Math.abs(Bank.getFloat("trkDoca", i))<4.0) {
-						float ddc = effLayA[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][(int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning)))];
-						float ndc = totLayA[Bank.getByte("sector", i)-1][Bank.getByte("superlayer", i)-1][(int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning)))];
-						float errdc = (float) (Math.sqrt(ddc*(ddc/ndc+1))/ndc);
-						LayerEffsTrkD6
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-						.setBinContent((int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning))),(float)100*ddc/ (float)ndc);
-						LayerEffsTrkD6
-						.get(new Coordinate(Bank.getByte("superlayer", i) - 1))
-						.setBinError((int)((Math.floor(Math.abs(Bank.getFloat("trkDoca", i))/trkDBinning))),(float)100*errdc);
-					}
-				}
-			}
-		}
-		
-	}
+                            }
+                        }
+                }
+        }
 
     
     private void drawPlots() {
         for (int i = 0; i < 6; i++) {
 
             can1.cd(i);
-            can1.draw(LayerEffs1.get(new Coordinate(i)), "E");
+            can1.draw(LayerEffs.get(0).get(new Coordinate(i)), "E");
             can2.cd(i);
-            can2.draw(LayerEffs2.get(new Coordinate(i)), "E");
+            can2.draw(LayerEffs.get(1).get(new Coordinate(i)), "E");
             can3.cd(i);
-            can3.draw(LayerEffs3.get(new Coordinate(i)), "E");
+            can3.draw(LayerEffs.get(2).get(new Coordinate(i)), "E");
             can4.cd(i);
-            can4.draw(LayerEffs4.get(new Coordinate(i)), "E");
+            can4.draw(LayerEffs.get(3).get(new Coordinate(i)), "E");
             can5.cd(i);
-            can5.draw(LayerEffs5.get(new Coordinate(i)), "E");
+            can5.draw(LayerEffs.get(4).get(new Coordinate(i)), "E");
             can6.cd(i);
-            can6.draw(LayerEffs6.get(new Coordinate(i)), "E");
+            can6.draw(LayerEffs.get(5).get(new Coordinate(i)), "E");
             
             can7.cd(i);
-            can7.draw(LayerEffsTrkD1.get(new Coordinate(i)), "E");
+            can7.draw(LayerEffsTrkD.get(0).get(new Coordinate(i)), "E");
             can8.cd(i);
-            can8.draw(LayerEffsTrkD2.get(new Coordinate(i)), "E");
+            can8.draw(LayerEffsTrkD.get(1).get(new Coordinate(i)), "E");
             can9.cd(i);
-            can9.draw(LayerEffsTrkD3.get(new Coordinate(i)), "E");
+            can9.draw(LayerEffsTrkD.get(2).get(new Coordinate(i)), "E");
             can10.cd(i);
-            can10.draw(LayerEffsTrkD4.get(new Coordinate(i)), "E");
+            can10.draw(LayerEffsTrkD.get(3).get(new Coordinate(i)), "E");
             can11.cd(i);
-            can11.draw(LayerEffsTrkD5.get(new Coordinate(i)), "E");
+            can11.draw(LayerEffsTrkD.get(4).get(new Coordinate(i)), "E");
             can12.cd(i);
-            can12.draw(LayerEffsTrkD6.get(new Coordinate(i)), "E");
+            can12.draw(LayerEffsTrkD.get(5).get(new Coordinate(i)), "E");
             
             can7.getPad(i).getAxisX().setRange(0, this.maxDoca[i]);
             can8.getPad(i).getAxisX().setRange(0, this.maxDoca[i]);
@@ -614,18 +442,10 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         dir.cd(folder);
                 
         for (int i = 0; i < 6; i++) {
-            dir.addDataSet(LayerEffs1.get(new Coordinate(i)));
-            dir.addDataSet(LayerEffs2.get(new Coordinate(i)));
-            dir.addDataSet(LayerEffs3.get(new Coordinate(i)));
-            dir.addDataSet(LayerEffs4.get(new Coordinate(i)));
-            dir.addDataSet(LayerEffs5.get(new Coordinate(i)));
-            dir.addDataSet(LayerEffs6.get(new Coordinate(i)));
-            dir.addDataSet(LayerEffsTrkD1.get(new Coordinate(i)));
-            dir.addDataSet(LayerEffsTrkD2.get(new Coordinate(i)));
-            dir.addDataSet(LayerEffsTrkD3.get(new Coordinate(i)));
-            dir.addDataSet(LayerEffsTrkD4.get(new Coordinate(i)));
-            dir.addDataSet(LayerEffsTrkD5.get(new Coordinate(i)));
-            dir.addDataSet(LayerEffsTrkD6.get(new Coordinate(i)));
+            for (int si = 0; si < 6; si++) {
+                dir.addDataSet(LayerEffs.get(si).get(new Coordinate(i)));
+                dir.addDataSet(LayerEffsTrkD.get(si).get(new Coordinate(i)));
+            }
         }
         System.out.println("Saving histograms to file " + fileName);
         dir.writeFile(fileName);
@@ -639,11 +459,10 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         screensize = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setSize((int) (screensize.getHeight() * .75 * 1.618), (int) (screensize.getHeight() * .75));
              
-        LayerEfficiencyAnalyzer tm = new LayerEfficiencyAnalyzer();
+        
         MagFieldsEngine enf = new MagFieldsEngine();
         enf.init();
-        DCHBEngine en = new DCHBEngine();
-        en.init();
+        LayerEfficiencyAnalyzer tm = new LayerEfficiencyAnalyzer();
         tm.init();
         
         frame.add(tm.mainPanel);
@@ -661,13 +480,13 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
             while (reader.hasEvent()) {
                 counter++;
                 DataEvent event = reader.getNextEvent();
-                enf.processDataEvent(event);
-                en.processDataEvent(event);
                 tm.processDataEvent(event);
                 tm.ProcessLayerEffs(event);
                 //event.show();
-                if(counter%1000==0)
+                if(counter%1000==0) {
+                    System.out.println(counter);
                     tm.drawPlots();
+                }
             }
             tm.drawPlots();
             tm.saveHistosToFile("dclayereffs.hipo");

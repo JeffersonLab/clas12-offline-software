@@ -1,7 +1,10 @@
 package org.jlab.service.dc;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
@@ -24,6 +27,7 @@ public class DCEngine extends ReconstructionEngine {
     TrajectorySurfaces tSurf;
     String clasDictionaryPath ;
     String variationName;
+    boolean endplatesBowing;
     public DCEngine(String name) {
         super(name,"ziegler","5.0");
     }
@@ -53,24 +57,63 @@ public class DCEngine extends ReconstructionEngine {
         if (wireDistortionsFlag!=null) {
             System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on yaml = "+wireDistortionsFlag);
             if(Boolean.valueOf(wireDistortionsFlag)==true) {
-                Constants.setWIREDIST(1.0);
+                //Constants.setWIREDIST(1.0);
+                endplatesBowing = DCGeant4Factory.ENDPLATESBOWON;
             } else {
-                Constants.setWIREDIST(0);
+                //Constants.setWIREDIST(0);
+                endplatesBowing = DCGeant4Factory.ENDPLATESBOWOFF;
             }
         }
         else {
-            wireDistortionsFlag = System.getenv("COAT_DC_WIREDISTORTION");
+            wireDistortionsFlag = System.getenv("COAT_DC_WIREDISTORTION"); 
             if (wireDistortionsFlag!=null) {
                 System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on env = "+wireDistortionsFlag);
                 if(Boolean.valueOf(wireDistortionsFlag)==true) {
-                    Constants.setWIREDIST(1.0);
+                    //Constants.setWIREDIST(1.0);
+                    endplatesBowing = DCGeant4Factory.ENDPLATESBOWON;
                 } else {
-                    Constants.setWIREDIST(0);
+                    //Constants.setWIREDIST(0);
+                    endplatesBowing = DCGeant4Factory.ENDPLATESBOWOFF;
                 }
             }
         }
         if (wireDistortionsFlag==null) {
              System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (MC-off/Data-on)");
+        }
+        //Use time in tBeta function (true: use time; false: use track doca)
+        String useTIMETBETA = this.getEngineConfigString("dcTimeTBeta");
+        
+        if (useTIMETBETA!=null) {
+            System.out.println("["+this.getName()+"] run with new tBeta chosen based on yaml = "+useTIMETBETA);
+            Constants.setUSETIMETBETA(Boolean.valueOf(useTIMETBETA));
+        }
+        else {
+            useTIMETBETA = System.getenv("COAT_DC_USETIMETBETA");
+            if (useTIMETBETA!=null) {
+                System.out.println("["+this.getName()+"] run with with new tBeta config chosen based on env = "+useTIMETBETA);
+                Constants.setUSETIMETBETA(Boolean.valueOf(useTIMETBETA));
+            }
+        }
+        if (useTIMETBETA==null) {
+             System.out.println("["+this.getName()+"] run with with new tBeta config chosen based on default = "+Constants.useUSETIMETBETA());
+        }
+        //CHECKBETA
+        //Use beta cut(true: use time; false: use track doca)
+        String useBETACUT = this.getEngineConfigString("dcBetaCut");
+        
+        if (useBETACUT!=null) {
+            System.out.println("["+this.getName()+"] run with Beta cut chosen based on yaml = "+useBETACUT);
+            Constants.CHECKBETA=Boolean.valueOf(useBETACUT);
+        }
+        else {
+            useBETACUT = System.getenv("COAT_DC_USEBETACUT");
+            if (useBETACUT!=null) {
+                System.out.println("["+this.getName()+"] run with with with Beta cut config chosen based on env = "+useBETACUT);
+                Constants.CHECKBETA=Boolean.valueOf(useBETACUT);
+            }
+        }
+        if (useBETACUT==null) {
+             System.out.println("["+this.getName()+"] run with with Beta cut config chosen based on default = "+Constants.CHECKBETA);
         }
         
         //T2D Function
@@ -133,7 +176,7 @@ public class DCEngine extends ReconstructionEngine {
         // Load the geometry
         String geoVariation = Optional.ofNullable(geomDBVar).orElse("default");
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, geoVariation);
-        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
+        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, endplatesBowing);
         for(int l=0; l<6; l++) {
             Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
             System.out.println("****************** WPDIST READ *********FROM "+geoVariation+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
@@ -151,6 +194,13 @@ public class DCEngine extends ReconstructionEngine {
 
         // create the surfaces
         tSurf = new TrajectorySurfaces();
+        // for debugging the end plates bowing:
+        //====================================
+        //try {
+        //    tSurf.checkDCGeometry(dcDetector);
+        //} catch (FileNotFoundException ex) {
+        //    Logger.getLogger(DCEngine.class.getName()).log(Level.SEVERE, null, ex);
+        //}
         tSurf.LoadSurfaces(targetPosition, targetLength,dcDetector, ftofDetector, ecalDetector);
         
         // Get the constants for the correct variation
