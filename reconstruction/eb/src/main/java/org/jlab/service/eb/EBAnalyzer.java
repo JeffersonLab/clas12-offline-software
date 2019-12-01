@@ -50,15 +50,15 @@ public class EBAnalyzer {
         chargedBetaDetectors.put(DetectorType.FTOF,Arrays.asList(2,1,3));
         chargedBetaDetectors.put(DetectorType.CTOF,Arrays.asList(1));
         chargedBetaDetectors.put(DetectorType.ECAL,Arrays.asList(1,4,7));
-        chargedBetaDetectors.put(DetectorType.HTCC,Arrays.asList(0));
-        chargedBetaDetectors.put(DetectorType.CND,Arrays.asList(0));
-        chargedBetaDetectors.put(DetectorType.FTCAL,Arrays.asList(0));
+        //chargedBetaDetectors.put(DetectorType.HTCC,Arrays.asList(0));
+        //chargedBetaDetectors.put(DetectorType.CND,Arrays.asList(0));
+        //chargedBetaDetectors.put(DetectorType.FTCAL,Arrays.asList(0));
         neutralBetaDetectors=new LinkedHashMap<>();
         neutralBetaDetectors.put(DetectorType.ECAL,Arrays.asList(1,4,7));
         neutralBetaDetectors.put(DetectorType.CND,Arrays.asList(0));
         neutralBetaDetectors.put(DetectorType.FTCAL,Arrays.asList(0));
-        neutralBetaDetectors.put(DetectorType.FTOF,Arrays.asList(2,1,3));
-        neutralBetaDetectors.put(DetectorType.CTOF,Arrays.asList(0));
+        //neutralBetaDetectors.put(DetectorType.FTOF,Arrays.asList(2,1,3));
+        //neutralBetaDetectors.put(DetectorType.CTOF,Arrays.asList(0));
     }
 
     
