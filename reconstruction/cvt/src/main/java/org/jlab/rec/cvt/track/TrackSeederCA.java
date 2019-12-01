@@ -15,6 +15,8 @@ import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter;
 import org.jlab.rec.cvt.fit.LineFitPars;
 import org.jlab.rec.cvt.fit.LineFitter;
+import org.jlab.rec.cvt.Constants;
+
 
 public class TrackSeederCA {
 
@@ -366,7 +368,7 @@ public class TrackSeederCA {
         	for( Cross c : zr) minTimeZ += c.get_Cluster1().get_Tmin();
         	minTimeZ /= zr.size();
         	
-        	if( Math.abs( minTimeZ - minTime ) > 60.   ) {
+        	if( Math.abs( minTimeZ - minTime ) > Constants.Max_Delta_Tmin   ) {
 //        		System.out.println( " ########### removing ZR for mismatch in time: " + minTimeZ + "  " + minTime);
         		lrz.add(irz);
         	}
@@ -538,10 +540,10 @@ public class TrackSeederCA {
                     ErrZ.add(j, explFact *  BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
                 }
             }
-//            X.add((double) 0);
-//            Y.add((double) 0);
+            X.add((double) 0);
+            Y.add((double) 0);
 
-            //ErrRt.add((double) 0.1);
+            ErrRt.add((double) 0.5);
 //            ErrRt.add((double) 1.5);
                                    
             fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);

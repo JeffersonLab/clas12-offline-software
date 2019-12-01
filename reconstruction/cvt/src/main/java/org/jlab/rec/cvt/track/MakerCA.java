@@ -7,6 +7,7 @@ import javax.vecmath.Vector2d;
 import org.jlab.rec.cvt.CentralTracker;
 import org.jlab.rec.cvt.bmt.Geometry;
 import org.jlab.rec.cvt.cross.Cross;
+import org.jlab.rec.cvt.Constants;
 
 /**
  * Cellular automaton maker. 
@@ -129,11 +130,11 @@ public class MakerCA {
 //      		  aReg = 6 + bgeom.getLayer( aReg , a.get_DetectorType() );
       		  aReg = 6 + aReg;
 
-          	  if( a.get_DetectorType().equalsIgnoreCase("Z") && CVT.getClusters(aLayer+6, aSector).size() > 5 ) continue;
+          	  if( a.get_DetectorType().equalsIgnoreCase("Z") && CVT.getClusters(aLayer+6, aSector).size() > 7 ) continue;
       	  }
       	  else {
 
-          	  if( CVT.getClusters(aLayer, aSector).size() > 3 ) continue;
+          	  if( CVT.getClusters(aLayer, aSector).size() > 5 ) continue;
       	  }
       	  
       	  if( this._debug ) {
@@ -178,7 +179,7 @@ public class MakerCA {
           			  if(b.get_Sector() != a.get_Sector() ) continue;
           			  
           			  // check if they have similar times
-          			  if( Math.abs( b.get_Cluster1().get_Tmin() - a.get_Cluster1().get_Tmin() ) > 60. ) continue;
+          			  if( Math.abs( b.get_Cluster1().get_Tmin() - a.get_Cluster1().get_Tmin() ) > Constants.Max_Delta_Tmin ) continue;
           		  }
           		  else{
           			  double aphi = a.get_Point().toVector3D().phi() ;

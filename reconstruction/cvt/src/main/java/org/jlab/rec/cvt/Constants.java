@@ -290,7 +290,7 @@ public class Constants {
         51.005773, 53.437996, 56.123356, 59.103894};
 
     //Constants for track quality
-	public static final int Nsigma_per_point = 25; //To clean cvt tracks... if chi2 is too large, just delete the track
+	public static final int Nsigma_per_point = 2500; //To clean cvt tracks... if chi2 is too large, just delete the track
 
 	public static final int NDF_Min = 2;
 
@@ -298,9 +298,10 @@ public class Constants {
 	
 	//Constants for seeding
 	public static final int MinZSize=2;
-	public static final int MaxBSTSize=4;
-	public static final int Min_Tmin=50;
-	public static final int Max_Tmin=350;
+	public static final int MaxBSTSize=6;
+	public static final int Min_Tmin=40;
+	public static final int Max_Tmin=360;
+	public static final double Max_Delta_Tmin=100.;
 	
 	//Covariance matrix initialization for KF
 	public static final double unc_d0 = 10;
