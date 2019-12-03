@@ -169,16 +169,13 @@ public class FTOFEngine extends ReconstructionEngine {
         List<Cluster> FTOF1BClusters = null;
         List<Cluster> FTOF2Clusters = null;
         if (FTOF1AHits != null && FTOF1AHits.size() > 0) {
-            FTOF1AClusters = clusFinder.findClusters(FTOF1AHits, nsectors,
-                    npanels, npaddles);
+            FTOF1AClusters = clusFinder.findClusters(FTOF1AHits);//, nsectors, npanels, npaddles);
         }
         if (FTOF1BHits != null && FTOF1BHits.size() > 0) {
-            FTOF1BClusters = clusFinder.findClusters(FTOF1BHits, nsectors,
-                    npanels, npaddles);
+            FTOF1BClusters = clusFinder.findClusters(FTOF1BHits);//, nsectors, npanels, npaddles);
         }
         if (FTOF2Hits != null && FTOF2Hits.size() > 0) {
-            FTOF2Clusters = clusFinder.findClusters(FTOF2Hits, nsectors,
-                    npanels, npaddles);
+            FTOF2Clusters = clusFinder.findClusters(FTOF2Hits);//, nsectors, npanels, npaddles);
         }
 
         // next write results to banks

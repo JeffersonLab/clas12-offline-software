@@ -139,7 +139,13 @@ public class RecoBankWriter {
             bank.setFloat("z", i, (float) cluslist.get(i).get_z());
             bank.setFloat("x_unc", i, 5); 											// At this stage the uncertainty is not calculated
             bank.setFloat("y_unc", i, (float) cluslist.get(i).get_y_locUnc());
-            bank.setFloat("z_unc", i, 10); 											// At this stage the uncertainty is not calculated
+            bank.setFloat("z_unc", i, 10); 
+            
+            //fill cluster size
+            bank.setShort("size", i, (short) cluslist.get(i).size());
+            
+            //fill veto
+            bank.setByte("veto", i, (byte) this.cluster_veto_flag(cluslist.get(i).get_Energy()));
         }
 
         return bank;
@@ -175,5 +181,22 @@ public class RecoBankWriter {
             event.appendBanks(cTOFBanks.get(0));
         }
 
+    }
+    
+    private  int cluster_veto_flag(double energy){
+        int alpha=0;
+        
+        //CTOF related condition for CTOF only veto
+        if(energy<18){
+            alpha++;
+        }
+        //CTOF related condition for CND and CTOF veto
+        if(energy<10){
+            alpha++;
+            alpha++;
+        }
+        
+        return alpha;
+        
     }
 }

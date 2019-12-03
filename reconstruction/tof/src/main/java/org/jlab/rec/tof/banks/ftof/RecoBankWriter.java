@@ -6,8 +6,6 @@ import java.util.List;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
-import org.jlab.jnp.hipo.data.HipoEvent;
-import org.jlab.jnp.hipo.data.HipoGroup;
 import org.jlab.rec.tof.cluster.Cluster;
 import org.jlab.rec.tof.hit.ftof.Hit;
 
@@ -192,7 +190,8 @@ public class RecoBankWriter {
                 // not calculated
                 bank.setFloat("y_unc", i, (float) cluslist.get(i).get_y_locUnc());
                 bank.setFloat("z_unc", i, 10); // At this stage the uncertainty is
-                // not calculated
+                //fill cluster size
+                bank.setShort("size", i, (short) cluslist.get(i).size());
             }
 
             return bank;

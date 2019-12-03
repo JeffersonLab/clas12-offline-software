@@ -148,8 +148,7 @@ public class CTOFEngine extends ReconstructionEngine {
         int nsectors = 1;
         List<Cluster> CTOFClusters = null;
         if (CTOFHits != null && CTOFHits.size() > 0) {
-            CTOFClusters = clusFinder.findClusters(hits, nsectors, npanels,
-                    npaddles);
+            CTOFClusters = clusFinder.findClusters(hits);//, nsectors, npanels,   npaddles);
         }
 
         if (CTOFClusters != null) {
@@ -182,7 +181,7 @@ public class CTOFEngine extends ReconstructionEngine {
             }
         }
         //rbc.appendCTOFBanks( event, hits, clusters);
-        rbc.appendCTOFBanks(event, hits, null); // json file needs clusters...
+        rbc.appendCTOFBanks(event, hits, clusters); // json file needs clusters...
 //        if(event.hasBank("CTOF::adc")) {
 //            if(event.hasBank("CTOF::adc")) event.getBank("CTOF::adc").show();
 //            if(event.hasBank("CTOF::tdc")) event.getBank("CTOF::tdc").show();

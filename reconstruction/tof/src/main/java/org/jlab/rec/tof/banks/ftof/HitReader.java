@@ -8,9 +8,11 @@ import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.io.base.DataEvent;
+import org.jlab.rec.ftof.Constants;
 import org.jlab.rec.tof.banks.BaseHit;
 import org.jlab.rec.tof.banks.BaseHitReader;
 import org.jlab.rec.tof.banks.IMatchedHit;
+import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.ftof.Hit;
 import org.jlab.rec.tof.track.Track;
 import org.jlab.utils.groups.IndexedList;
@@ -186,6 +188,7 @@ public class HitReader implements IMatchedHit {
                 constants6, 
                 constants8);
             // DetHits.get(hit.get_Panel()-1).add(hit);
+            this.checkTrackMatching(hit);
         }
         // List<Hit> unique_hits = this.removeDuplicatedHits(updated_hits);
 
@@ -626,4 +629,20 @@ public class HitReader implements IMatchedHit {
 //       List<BaseHit> result = hr.MatchHits(ADCandTDCLists);
     }
 
+    private void checkTrackMatching(Hit h) {
+       if (h.get_TrkPosition() != null
+                && !Double.isNaN(h.get_TrkPosition().y()) && h._AssociatedTrkId!=-1) {
+            //check that the track association is sound
+            double yTrk = h.get_TrkPosition().y();
+            
+            if (Math.abs(yTrk - h.get_y()) < Constants.TRKMATCHYPAR[h
+                .get_Panel() - 1]) {}
+    
+            
+        }
+        
+
+    }
+
+   
 }
