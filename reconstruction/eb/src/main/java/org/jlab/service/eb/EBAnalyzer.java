@@ -26,25 +26,25 @@ import org.jlab.rec.eb.EBRadioFrequency;
  * @author baltzell
  */
 public class EBAnalyzer {
-
+    
     private final EBCCDBConstants ccdb;
     private final EBRadioFrequency ebrf;
-
+    
     static final int[]  PID_POSITIVE = new int[]{-11,  211, 321, 2212, 45};
     static final int[]  PID_NEGATIVE = new int[]{ 11, -211,-321,-2212};
     static final int[]  PID_NEUTRAL = new int[]{22,2112};
-
+    
     public EBAnalyzer(EBCCDBConstants ccdb,EBRadioFrequency ebrf) {
         this.ccdb=ccdb;
         this.ebrf=ebrf;
     }
-
+    
     
     /**
      *
      * Determine event start time from FT electron and reassign timing-based
      * particle identification accordingly.
-     * 
+     *
      * Choice of which FT electron to use is that with the smallest vertex
      * time difference between FT and any combination of FD charged particle
      * and pid (mass) hypothesis.
@@ -57,24 +57,24 @@ public class EBAnalyzer {
      * @param event
      */
     public void processEventFT(DetectorEvent event) {
-
+        
         if (event.getParticles().size() <= 0) return;
-
+        
         // An FD electron was already used to get start time, abort:
         //if (event.getTriggerParticle()!=null &&
         //    event.getTriggerParticle().getPid()==11 &&
         //    event.getTriggerParticle().getStatus().isForward()) return;
-
+        
         // Match FT against these hypotheses in FD:
         final int[] hypotheses = new int[]{-11,11,-211,211,-321,321,2212};
-    
+        
         // particle candidates for FT-FD time-matching:
         List<DetectorParticle> electronFT = new ArrayList<>();
         List<DetectorParticle> chargedFD = new ArrayList<>();
-
+        
         // corresponding response candidates, to avoid excessive searches during combinatorics:
         List<DetectorResponse> chargedFTOF = new ArrayList<>();
-
+        
         // load the candidates:
         for (DetectorParticle p : event.getParticles()) {
             if (p.getStatus().isTagger() && p.getPid()==11) {
@@ -87,44 +87,44 @@ public class EBAnalyzer {
                 chargedFTOF.add(ftof1a);
             }
         }
-
+        
         // no good candidates, abort:
         if (electronFT.size()<1 || chargedFD.size()<1) return;
         
         // the index of the FT particle with the best FT-FD timing-match:
         int iMinTimeDiffFT = -1;
-
+        
         // anything relevant must be better than half-bucket:
         double minTimeDiff = this.ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH)/2;
-
+        
         // loop over FT electron candidates:
         for (int itag=0; itag<electronFT.size(); itag++) {
-
+            
             // calculate RF-corrected FT start time:
             final double startTimeFT = ebrf.getStartTime(electronFT.get(itag),DetectorType.FTCAL,-1);
             
             // loop over FD charged particles:
             for (int ifd=0; ifd<chargedFD.size(); ifd++) {
-
+                
                 final DetectorResponse ftof1a = chargedFTOF.get(ifd);
                 final double pFD = chargedFD.get(ifd).vector().mag();
                 final double pathFD = chargedFD.get(ifd).getPathLength(ftof1a.getPosition());
-                    
+                
                 for (int pid : hypotheses) {
-
+                    
                     // ignore if measured charge doesn't match hypothesis charge:
                     if (PDGDatabase.getParticleById(pid).charge() !=
-                            chargedFD.get(ifd).getCharge()) {
+                        chargedFD.get(ifd).getCharge()) {
                         continue;
                     }
                     
                     // calculate beta and vertex time based on measured
                     // momentum and this pid hypothesis:
                     final double beta = pFD /
-                            Math.sqrt(pFD*pFD + Math.pow(PDGDatabase.getParticleMass(pid),2));
+                    Math.sqrt(pFD*pFD + Math.pow(PDGDatabase.getParticleMass(pid),2));
                     final double vtxTimeFD = ftof1a.getTime() -
-                        pathFD/PhysicsConstants.speedOfLight()/beta;
-
+                    pathFD/PhysicsConstants.speedOfLight()/beta;
+                    
                     // check for a new best FT-FD timing match:
                     if (Math.abs(vtxTimeFD-startTimeFT) < Math.abs(minTimeDiff)) {
                         minTimeDiff = vtxTimeFD-startTimeFT;
@@ -133,16 +133,16 @@ public class EBAnalyzer {
                 }
             }
         }
-       
+        
         // no good FT, abort:
         if (iMinTimeDiffFT<0) return;
-
+        
         // reassign trigger particle:
         for (DetectorParticle p : event.getParticles()) {
             p.setTriggerParticle(false);
         }
         electronFT.get(iMinTimeDiffFT).setTriggerParticle(true);
-
+        
         // set start time:
         final double startTime = ebrf.getStartTime(electronFT.get(iMinTimeDiffFT),DetectorType.FTCAL,-1);
         event.getEventHeader().setStartTimeFT(startTime);
@@ -158,35 +158,35 @@ public class EBAnalyzer {
      *
      * Determine event start time from trigger particle, assign particles'
      * betas and pids and neutrals' momenta
-     * 
+     *
      * @param event
      */
     public void processEvent(DetectorEvent event) {
-
+        
         // abort, rely on default init of DetectorEvent:
         if (event.getParticles().size() <= 0) return;
-
+        
         DetectorParticle trigger = event.getTriggerParticle();
         if (trigger==null) return;
-
+        
         // priority is to identify a trigger time:
         boolean foundTriggerTime=false;
         double startTime=-1000;
-
+        
         // electron/positron/pion is trigger particle:
         if (trigger.getPid()==11 || trigger.getPid()==-11 ||
             trigger.getPid()==211 || trigger.getPid()==-211) {
-
+            
             trigger.setBeta(trigger.getTheoryBeta(trigger.getPid()));
             trigger.setMass(PDGDatabase.getParticleById(trigger.getPid()).mass());
-
+            
             // prefer FTOF Panel 1B:
             if (trigger.hasHit(DetectorType.FTOF, 2)==true){
                 startTime = ebrf.getStartTime(trigger,DetectorType.FTOF,2);
                 assignParticleStartTimes(event,DetectorType.FTOF,2);
                 foundTriggerTime = true;
             }
-
+            
             // else use FTOF Panel 1A:
             else if (trigger.hasHit(DetectorType.FTOF, 1)==true){
                 startTime = ebrf.getStartTime(trigger,DetectorType.FTOF,1);
@@ -194,7 +194,7 @@ public class EBAnalyzer {
                 foundTriggerTime = true;
             }
         }
-
+        
         // neutral is trigger particle:
         else if (trigger.getPid()==0 || trigger.getPid()==22) {
             trigger.setBeta(1.0);
@@ -202,7 +202,7 @@ public class EBAnalyzer {
             // TODO:  implement full neutral trigger start time?
             //foundTriggerTime=true;
         }
-
+        
         // we found event start time, so set it and do pid:
         if (foundTriggerTime) {
             event.getEventHeader().setStartTime(startTime);
@@ -210,30 +210,30 @@ public class EBAnalyzer {
             this.assignPids(event,false);
             this.assignNeutralMomenta(event);
         }
-
+        
     }
-
+    
     /**
      * Assign per-particle start times, based on the trigger particle's timing
      * and momentum, but with vz-correction per-particle.
-     * 
+     *
      * @param event
      * @param type
-     * @param layer 
+     * @param layer
      */
     public void assignParticleStartTimes(DetectorEvent event,DetectorType type,int layer) {
         DetectorParticle trig = event.getTriggerParticle();
         for (int ii=0; ii<event.getParticles().size(); ii++) {
             if (event.getParticles().get(ii).getCharge()!=0) {
                 event.getParticles().get(ii).setStartTime(
-                        ebrf.getStartTime(trig, type, layer, 
-                        event.getParticles().get(ii).vertex().z()));
+                                                          ebrf.getStartTime(trig, type, layer,
+                                                                            event.getParticles().get(ii).vertex().z()));
             }
             
         }
         
     }
-
+    
     public void assignNeutralMomenta(DetectorEvent de) {
         final int np = de.getParticles().size();
         for (int ii=0; ii<np; ii++) {
@@ -256,7 +256,7 @@ public class EBAnalyzer {
                     if (p.hasHit(DetectorType.ECAL)) {
                         // ECAL photon momentum defined by measured energy:
                         p.vector().setMag(p.getEnergy(DetectorType.ECAL) /
-                            SamplingFractions.getMean(22,p,ccdb));
+                                          SamplingFractions.getMean(22,p,ccdb));
                     }
                     else if (p.hasHit(DetectorType.CND)) {
                         // CND has no handle on photon energy, so we set momentum to zero,
@@ -273,13 +273,13 @@ public class EBAnalyzer {
             }
         }
     }
-
+    
     public void assignBetas(DetectorEvent event,final boolean useStartTimeFromFT){
-
+        
         final double startTime = useStartTimeFromFT ?
-            event.getEventHeader().getStartTimeFT() :
-            event.getEventHeader().getStartTime();
-
+        event.getEventHeader().getStartTimeFT() :
+        event.getEventHeader().getStartTime();
+        
         for (DetectorParticle p : event.getParticles()) {
             double beta = -99;
             if (p.isTriggerParticle()) {
@@ -318,13 +318,13 @@ public class EBAnalyzer {
             p.setBeta(beta);
         }
     }
-
+    
     public void assignPids(DetectorEvent event,final boolean useStartTimeFromFT) {
-
+        
         PIDHypothesis pidHyp = new PIDHypothesis();
         pidHyp.setEvent(event);
         pidHyp.setUseStartTimeFromFT(useStartTimeFromFT);
-
+        
         for (DetectorParticle p : event.getParticles()) {
             if (p.isTriggerParticle()) {
                 pidHyp.finalizePID(p,p.getPid());
@@ -332,9 +332,9 @@ public class EBAnalyzer {
             else {
                 if (p.getCharge()>0){
                     for(int b = 0; b < EBAnalyzer.PID_POSITIVE.length; b++) {
-                        pidHyp.PIDMatch(p, EBAnalyzer.PID_POSITIVE[b]); 
+                        pidHyp.PIDMatch(p, EBAnalyzer.PID_POSITIVE[b]);
                     }
-                } 
+                }
                 else if (p.getCharge()<0) {
                     for(int b = 0; b < EBAnalyzer.PID_NEGATIVE.length; b++) {
                         pidHyp.PIDMatch(p, EBAnalyzer.PID_NEGATIVE[b]);
@@ -343,39 +343,40 @@ public class EBAnalyzer {
                 else {
                     for(int b = 0; b < EBAnalyzer.PID_NEUTRAL.length; b++) {
                         pidHyp.PIDMatch(p, EBAnalyzer.PID_NEUTRAL[b]);
+                        //pidHyp.reviewNeutralPID(p);
                     }
                 }
             }
         }
     }
-
-
-
+    
+    
+    
     public class PIDHypothesis {
-
+        
         private int theoryPID = -1;
         private double PIDquality = 0.0;
         private DetectorEvent event;
         private boolean useStartTimeFromFT = false;
-
+        
         public PIDHypothesis() {}
-
+        
         public void setEvent(DetectorEvent e) {event = e;}
-
+        
         public void setUseStartTimeFromFT(boolean b) {useStartTimeFromFT = b;}
-
+        
         public double getStartTime() {
             return useStartTimeFromFT ?
-                event.getEventHeader().getStartTimeFT() :
-                event.getEventHeader().getStartTime();
+            event.getEventHeader().getStartTimeFT() :
+            event.getEventHeader().getStartTime();
         }
-
+        
         public void PIDMatch(DetectorParticle p, int pid) {
-
+            
             final int pidFromTiming = bestPidFromTiming(p);
             
             final boolean pidFromTimingCheck = pid==pidFromTiming && p.getTheoryBeta(pid)>0;
-           
+            
             final boolean isElectron = EBUtil.isSimpleElectron(p,ccdb);
             
             final boolean htccSignalCheck = p.getNphe(DetectorType.HTCC)>ccdb.getDouble(EBCCDBEnum.HTCC_NPHE_CUT);
@@ -384,15 +385,15 @@ public class EBAnalyzer {
             final boolean htccPionThreshold = p.vector().mag()>EBConstants.HTCC_PION_THRESHOLD;
             final boolean ltccPionThreshold = p.vector().mag()>EBConstants.LTCC_PION_THRESHOLD;
             final boolean ltccKaonThreshold = p.vector().mag()>EBConstants.LTCC_KAON_THRESHOLD;
-
+            
             switch(abs(pid)) {
                 case 11:
-                    // require htcc nphe and ecal sampling fraction for electrons: 
+                    // require htcc nphe and ecal sampling fraction for electrons:
                     if(isElectron) {
                         this.finalizePID(p, pid);
                     }
                     break;
-
+                    
                 case 211:
                     if (pidFromTimingCheck && !isElectron) {
                         // pion is best timing
@@ -432,7 +433,7 @@ public class EBAnalyzer {
                         this.finalizePID(p,pid);
                     }
                     break;
-
+                    
                 case 2112:
                     if (pidFromTimingCheck) {
                         this.finalizePID(p,pid);
@@ -444,9 +445,9 @@ public class EBAnalyzer {
                     }
                     break;
             }
-
+            
         }
-
+        
         /**
          * Get the hadron hypotheses with the closest vertex time.
          * @param p the particle for which to find best pid
@@ -486,8 +487,8 @@ public class EBAnalyzer {
             }
             return bestPid;
         }
-
-
+        
+        
         /**
          * Get a basic pid quality factor.
          * @param p the particle for which to calculate a pid quality factor
@@ -496,17 +497,17 @@ public class EBAnalyzer {
          */
         public double PIDQuality(DetectorParticle p, int pid) {
             double q=DetectorParticle.DEFAULTQUALITY;
-
+            
             // FT can't really to a pid quality:
             if (p.getStatus().isTagger()) {
                 q = 0;
             }
-
+            
             // electron/positron:
             else if (abs(pid)==11) {
                 q = SamplingFractions.getNSigma(pid,p,ccdb);
             }
-
+            
             // based on timing:
             else if (p.getCharge()!=0) {
                 double sigma = -1;
@@ -529,15 +530,15 @@ public class EBAnalyzer {
                 }
                 q = delta_t / sigma;
             }
-
+            
             // neutrals:
             else {
             }
-
+            
             return q;
         }
-
-
+        
+        
         /**
          * Set particle's pid and quality factor.
          * @param p the particle for which to calculate a pid quality factor
@@ -548,9 +549,63 @@ public class EBAnalyzer {
             theoryPID = pid;
             PIDquality = this.PIDQuality(p, pid);
             p.setPidQuality(PIDquality);
-
+            
         }
         
+        public void reviewNeutralPID(DetectorParticle p) {
+            
+            int vetoflagfromCNDClustersBank;
+            int vetoflagfromCTOFClustersBank;
+            double energyCNDcluster ;
+            double energyCTOFcluster ;
+            
+            // this if condition should be outside of the routine
+            //if(p.getPid()==PID_NEUTRAL[0] || p.getPid()==PID_NEUTRAL[1])
+            //{
+                
+                if (p.hasHit(DetectorType.CND) || p.hasHit(DetectorType.CTOF))
+                {
+                    //CTOF only veto
+                    if (!p.hasHit(DetectorType.CND)) {
+                        
+                        //vetoflagfromCTOFClustersBank = p.getHit(DetectorType.CTOF).get_veto();
+                        vetoflagfromCTOFClustersBank = 1;
+                        
+                        if(vetoflagfromCTOFClustersBank!=1){ this.finalizePID(p,2212); }
+                        
+                    }
+                    //CND only veto
+                    else if (!p.hasHit(DetectorType.CTOF)) {
+                        
+                        //vetoflagfromCNDClustersBank = p.getHit(DetectorType.CND).get_veto();
+                        vetoflagfromCNDClustersBank = 1;
+                        
+                        if(vetoflagfromCNDClustersBank!=1){ this.finalizePID(p,2212); }
+                        
+                    }
+                    else {
+                        
+                        //vetoflagfromCTOFClustersBank = p.getHit(DetectorType.CTOF).get_veto();
+                        //vetoflagfromCNDClustersBank  = p.getHit(DetectorType.CND) .get_veto();
+                        
+                        //energyCNDcluster  = p.getHit(DetectorType.CND) .get_energysum();
+                        //energyCTOFcluster = p.getHit(DetectorType.CTOF).get_Energy()   ;
+                        
+                        vetoflagfromCTOFClustersBank = 1;
+                        vetoflagfromCNDClustersBank  = 1;
+                        
+                        energyCNDcluster  = 1;
+                        energyCTOFcluster = 1;
+                        
+                        
+                        
+                        if(((vetoflagfromCNDClustersBank==2) && (vetoflagfromCTOFClustersBank==2))||((vetoflagfromCNDClustersBank==4) && (vetoflagfromCTOFClustersBank==2) && (energyCNDcluster+energyCTOFcluster<10))) {this.finalizePID(p,p.getPid()); }
+                        else{this.finalizePID(p,2212);}
+                        
+                    }
+                }
+            //}
+        }
     }
 }
 
