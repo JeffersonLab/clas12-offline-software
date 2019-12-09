@@ -232,7 +232,7 @@ public abstract class ReconstructionEngine implements Engine {
         if(constantsManager.getRequestStatus()<0){
             String msg = String.format("HALT : DATABASE CONNECTION ERROR");           
             //output.setStatus(EngineStatus.ERROR);
-            output.setStatus(EngineStatus.ERROR, 12);            
+            output.setStatus(EngineStatus.ERROR, 13);            
             output.setDescription(msg);
             return output;
         }
