@@ -228,6 +228,14 @@ public abstract class ReconstructionEngine implements Engine {
         String mt = input.getMimeType();
         //System.out.println(" DATA TYPE = [" + mt + "]");
         HipoDataEvent dataEventHipo = null;
+        
+        if(constantsManager.getRequestStatus()<0){
+            String msg = String.format("HALT : DATABASE CONNECTION ERROR");
+            output.setStatus(EngineStatus.ERROR);
+            output.setDescription(msg);
+            return output;
+        }
+        
         if(mt.compareTo("binary/data-hipo")==0){
             try {
                 //ByteBuffer bb = (ByteBuffer) input.getData();
