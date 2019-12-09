@@ -230,8 +230,9 @@ public abstract class ReconstructionEngine implements Engine {
         HipoDataEvent dataEventHipo = null;
         
         if(constantsManager.getRequestStatus()<0){
-            String msg = String.format("HALT : DATABASE CONNECTION ERROR");
-            output.setStatus(EngineStatus.ERROR);
+            String msg = String.format("HALT : DATABASE CONNECTION ERROR");           
+            //output.setStatus(EngineStatus.ERROR);
+            output.setStatus(EngineStatus.ERROR, 12);            
             output.setDescription(msg);
             return output;
         }
