@@ -64,16 +64,20 @@ public class StateVecs {
             double yp = a + b * xp;
             double ym = a + b * xm;
 
-            if (bmt_geo.isInSector(Layer.get(k) - 6, Math.atan2(ym, xm), Math.toRadians(10)) == Sector.get(k)) {
+            if (bmt_geo.isInSector(Layer.get(k) - 6, Math.atan2(ym, xm), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter)) == Sector.get(k)) {
                 X = xm;
                 Y = ym;
             }
-            if (bmt_geo.isInSector(Layer.get(k) - 6, Math.atan2(yp, xp), Math.toRadians(10)) == Sector.get(k)) {
+            if (bmt_geo.isInSector(Layer.get(k) - 6, Math.atan2(yp, xp), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter)) == Sector.get(k)) {
                 X = xp;
                 Y = yp;
             }
-            //System.out.println("R="+rm+" sector "+Sector.get(k)+" [xm, ym]= ["+xm+","+ym+"]; [xp,yp]= ["+xp+","+yp+"]; [x,y]= ["+X+","+Y+"]"+
-            //"+sec "+bmt_geo.isInSector(Layer.get(k)-6, Math.atan2(yp, xp), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter))+"-sec "+bmt_geo.isInSector(Layer.get(k)-6, Math.atan2(ym, xm), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter)));
+            //System.out.println("R="+rm+" sector "+Sector.get(k)+" [xm, ym]= ["+xm+","+ym+"]; "
+            //        + "[xp,yp]= ["+xp+","+yp+"]; [x,y]= ["+X+","+Y+"]"+
+            //"+sec "+bmt_geo.isInSector(Layer.get(k)-6, Math.atan2(yp, xp), 
+            //        Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter))
+            //        +"-sec "+bmt_geo.isInSector(Layer.get(k)-6, Math.atan2(ym, xm), 
+            //                Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter)));
         } else {
 
             // Find the intersection of the helix circle with the module plane projection in XY which is a line
@@ -138,6 +142,8 @@ public class StateVecs {
                     }
                 }
             }
+            //System.out.println(" sector "+Sector.get(k)+" layer "+Layer.get(k)+" [x,y]= ["+X+","+Y+"]");
+            
         }
 
         ToPoint = new Vector3D(X - xc, Y - yc, 0);

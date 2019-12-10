@@ -326,15 +326,15 @@ public class CVTRecHandler {
         
         KFitter kf;
         List<Track> trkcands = new ArrayList<Track>();
-        
+        //System.out.println(" LOOKING FOR SEED......................");
         //List<Seed> seeds = trseed.findSeed(SVTclusters, SVTGeom, crosses.get(1), BMTGeom);
         List<Seed> seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
         
         for (Seed seed : seeds) { 
-            
+            //System.out.println(" OUTPUT SEED......................");
             kf = new KFitter(seed, SVTGeom, swimmer );
             kf.runFitter(SVTGeom, BMTGeom, swimmer);
-            //System.out.println(" OUTPUT SEED......................");
+            //System.out.println(" OUTPUT FITTED SEED......................");
             trkcands.add(kf.OutputTrack(seed, SVTGeom, swimmer));
             if (kf.setFitFailed == false) {
                 trkcands.get(trkcands.size() - 1).set_TrackingStatus(2);
@@ -354,7 +354,7 @@ public class CVTRecHandler {
         trks = trkFinder.getTracks(trkcands, SVTGeom, BMTGeom, CTOFGeom, CNDGeom, swimmer);
         for( int i=0;i<trks.size();i++) { trks.get(i).set_Id(i+1);}
         
-//        System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + trks.size());
+        //System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + trks.size());
         trkFinder.removeOverlappingTracks(trks); //turn off until debugged
 
         
