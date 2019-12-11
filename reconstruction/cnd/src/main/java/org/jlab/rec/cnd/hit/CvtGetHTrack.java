@@ -112,7 +112,9 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
                     trk._TrkInters.get(lay - 1).add(trk.get_Helix().getPointAtRadius(escaperadius));
                     double r = Math.sqrt(Xm.x() * Xm.x() + Xm.y() * Xm.y());
                     double par = 1. - ((r * r - dca * dca) * rho * rho) / (2. * (1. + dca * Math.abs(rho)));
-                    double pathLength = Math.abs(Math.acos(par) / rho);
+                    double pathLengthXY = Math.abs(Math.acos(par) / rho);
+                    
+                    double pathLength = Math.sqrt((Xm.z() - z0 )*(Xm.z() - z0 )+pathLengthXY*pathLengthXY);
                     trk._TrkLengths.add(pathLength);
                 }
                 helices.add(trk);
