@@ -84,15 +84,17 @@ public class Hit extends AHit implements IGetCalibrationParams {
             IndexedTable constants3, 
             IndexedTable constants5, 
             IndexedTable constants6, 
-            IndexedTable constants8) {/*
+            IndexedTable constants8, 
+            IndexedTable constants9) {/*
         0: "/calibration/ftof/attenuation"),
         1: "/calibration/ftof/effective_velocity"),
         2: "/calibration/ftof/time_offsets"),
         3: "/calibration/ftof/time_walk"),
         4: "/calibration/ftof/status"),
         5: "/calibration/ftof/gain_balance"),
-        6: "/calibration/ftof/tdc_conv"));
-        8: "/calibration/ftof/time_walk_pos"));
+        6: "/calibration/ftof/tdc_conv"),
+        8: "/calibration/ftof/time_walk_pos"),
+        9: "/calibration/ftof/time_walk_exp"));
         */
         double pl = this.get_paddleLine().length();
 
@@ -103,6 +105,11 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double TW1R = this.TW12(constants3); 
         double TW1P = this.TW1P(constants8); 
         double TW2P = this.TW2P(constants8); 
+        double TW0E = this.TW0E(constants9); 
+        double TW1E = this.TW1E(constants9); 
+        double TW2E = this.TW2E(constants9); 
+        double TW3E = this.TW3E(constants9); 
+        double TW4E = this.TW4E(constants9); 
         double HPOSa = this.HPOSa(null);
         double HPOSb = this.HPOSb(null);
         double HPOSc = this.HPOSc(null);
@@ -138,6 +145,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double ScinBarThickn = this.get_barthickness();
 
         this.set_HitParams(superlayer, TW0L, TW0R, TW1L, TW1R, TW1P, TW2P, 
+                TW0E, TW1E, TW2E, TW3E, TW4E,
                 HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, lambdaL,lambdaR, 
                 yOffset, vL, vR, vLUnc, vRUnc, PEDL, PEDR, PEDLUnc,
                 PEDRUnc, paddle2paddle, RFPad, timeOffset, triggerPhase, LSBConv, LSBConvErr,
@@ -265,6 +273,31 @@ public class Hit extends AHit implements IGetCalibrationParams {
     @Override
     public double TW2P(IndexedTable tab) {
         return tab.getDoubleValue("tw2pos", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+    }
+
+    @Override
+    public double TW0E(IndexedTable tab) {
+        return tab.getDoubleValue("tw0", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+    }
+
+    @Override
+    public double TW1E(IndexedTable tab) {
+        return tab.getDoubleValue("tw1", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+    }
+
+    @Override
+    public double TW2E(IndexedTable tab) {
+        return tab.getDoubleValue("tw2", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+    }
+
+    @Override
+    public double TW3E(IndexedTable tab) {
+        return tab.getDoubleValue("tw3", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+    }
+
+    @Override
+    public double TW4E(IndexedTable tab) {
+        return tab.getDoubleValue("tw4", this.get_Sector(),this.get_Panel(),this.get_Paddle());
     }
 
     @Override

@@ -63,6 +63,7 @@ public class FTOFEngine extends ReconstructionEngine {
                     "/calibration/ftof/tdc_conv",
                     "/calibration/ftof/time_jitter",
                     "/calibration/ftof/time_walk_pos",
+                    "/calibration/ftof/time_walk_exp",
                     "/calibration/ftof/fadc_offset",
                  };
         
@@ -127,6 +128,7 @@ public class FTOFEngine extends ReconstructionEngine {
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/tdc_conv"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_jitter"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_walk_pos"),
+                this.getConstantsManager().getConstants(newRun, "/calibration/ftof/time_walk_exp"),
                 this.getConstantsManager().getConstants(newRun, "/calibration/ftof/fadc_offset"));
 
         // 1) get the hits

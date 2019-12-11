@@ -435,7 +435,7 @@
         "item": 41,
         "info": "Event Header Bank, shadowing REC::Event with FT-based start time",
         "entries": [
-            {"name":"EvCAT",     "type":"S", "info":"Event Category, if >0:  e-, e-p, e-pi+....."},
+            {"name":"category",   "type":"L", "info":"Undefined"},
             {"name":"startTime", "type":"F", "info":"Event Start Time (ns)"}
         ]
     },

@@ -70,6 +70,8 @@ public class RecoBankWriter {
         }
         for (int i = 0; i < hitlist.size(); i++) {
             bank.setShort("id", i, (short) hitlist.get(i).get_Id());
+            bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
+            bank.setByte("layer", i, (byte) hitlist.get(i).get_Panel());
             bank.setShort("component", i, (short) hitlist.get(i).get_Paddle());
             int status = 0;
 //            if (Integer.parseInt(hitlist.get(i).get_StatusWord()) == 1111) {
@@ -124,6 +126,8 @@ public class RecoBankWriter {
         }
         for (int i = 0; i < cluslist.size(); i++) {
             bank.setShort("id", i, (short) cluslist.get(i).get_Id());
+            bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
+            bank.setByte("layer", i, (byte) cluslist.get(i).get_Panel());
             bank.setShort("component", i, (short) cluslist.get(i).get(0).get_Paddle());		// paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]
             int status = 0;
             if (Integer.parseInt(cluslist.get(i).get_StatusWord()) == 1111) {
