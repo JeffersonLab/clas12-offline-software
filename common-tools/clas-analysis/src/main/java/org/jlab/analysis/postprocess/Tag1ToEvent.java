@@ -17,6 +17,8 @@ import org.jlab.detector.decode.DaqScalersSequence;
 import org.jlab.detector.helicity.HelicityBit;
 import org.jlab.detector.helicity.HelicitySequenceManager;
 
+import org.jlab.utils.options.OptionParser;
+
 /**
  * Calls routines to do analysis and per-event lookup of delayed helicity
  * and beam charge from tag-1 events, and outputs a file with modified
@@ -27,8 +29,6 @@ import org.jlab.detector.helicity.HelicitySequenceManager;
  * FIXME:  DaqScalersSequence doesn't manage run numbers.  Until then, we
  * cannot mix run numbers here.
  *
- * FIXME:  Use standard command-line interpreter, with decent usage help.
- * 
  * @author wphelps
  * @author baltzell
  */
@@ -37,16 +37,34 @@ public class Tag1ToEvent {
 
     public static void main(String[] args) {
 
-        // first argument is output filename:
-	String fileout = args[0];
+        OptionParser parser = new OptionParser("postprocess");
+        parser.addOption("-q","0","do beam charge and livetime (0/1=false/true)");
+        parser.addOption("-d","0","do delayed helicity (0/1=false/true)");
+        parser.addRequired("-o","output.hipo");
+        parser.parse(args);
 
-        // all other arguments are input filenames:
-	List<String> filenames = new ArrayList<>();
-	for (int i = 1; i < args.length; i++)
-                filenames.add(args[i]);
+        // input files:
+        List<String> inputList = parser.getInputList();
+        if(inputList.isEmpty()==true){
+            parser.printUsage();
+            System.err.println("\n >>>> error : no input file is specified....\n");
+            System.exit(1);
+        }
+        
+        // output file:
+        String fileout = parser.getOption("-o").stringValue();
 
-        HelicitySequenceManager helSeq = new HelicitySequenceManager(8,filenames);
-	DaqScalersSequence chargeSeq = DaqScalersSequence.readSequence(filenames);
+        // helicity / beamcharge options:
+        final boolean doHelicity = parser.getOption("-d").intValue() != 0;
+        final boolean doBeamCharge = parser.getOption("-q").intValue() != 0;
+        if (!doHelicity && !doBeamCharge) {
+            parser.printUsage();
+            System.err.println("\n >>>>> error : at least one of -q/-d must be specified\n");
+            System.exit(1);
+        }
+
+        HelicitySequenceManager helSeq = new HelicitySequenceManager(8,inputList);
+        DaqScalersSequence chargeSeq = DaqScalersSequence.readSequence(inputList);
 
         HipoWriterSorted writer = new HipoWriterSorted();
         writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("COATJAVA", "etc/bankdefs/hipo4"));
@@ -66,7 +84,7 @@ public class Tag1ToEvent {
         long badHelicity = 0;
         long goodHelicity = 0;
 
-        for (String filename : filenames) {
+        for (String filename : inputList) {
 
             HipoReader reader = new HipoReader();
             reader.open(filename);
@@ -88,14 +106,18 @@ public class Tag1ToEvent {
                 // write heliicty to REC::Event:
                 if (Math.abs(hb.value())==1) goodHelicity++;
                 else badHelicity++;
-                recEventBank.putByte("helicity",0,hb.value());
+                if (doHelicity) {
+                    recEventBank.putByte("helicity",0,hb.value());
+                }
 
                 // write beam charge to REC::Event:
                 if (ds==null) badCharge++;
                 else {
                     goodCharge++;
-                    recEventBank.putFloat("beamCharge",0,ds.getBeamCharge());
-                    recEventBank.putDouble("liveTime",0,ds.getLivetime());
+                    if (doBeamCharge) {
+                        recEventBank.putFloat("beamCharge",0,ds.getBeamCharge());
+                        recEventBank.putDouble("liveTime",0,ds.getLivetime());
+                    }
                 }
 
                 // update the output file:
