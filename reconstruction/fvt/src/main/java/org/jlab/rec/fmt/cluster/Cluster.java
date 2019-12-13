@@ -2,6 +2,7 @@ package org.jlab.rec.fmt.cluster;
 
 import java.util.ArrayList;
 import org.jlab.geom.prim.Line3D;
+import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.fmt.Constants;
 import org.jlab.rec.fmt.hit.FittedHit;
 import org.jlab.rec.fmt.hit.Hit;
@@ -20,6 +21,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 	private int _Layer;    	 							
 	private int _Id;									
 	private Line3D _StripSegment ;
+        public double doca;
 	
 	/**
 	 * 
@@ -288,22 +290,33 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     private int _AssociatedCrossID;
     private int _AssociatedTrackID;
 	
-	public int get_AssociatedCrossID() {
-		return _AssociatedCrossID;
-	}
+    public int get_AssociatedCrossID() {
+            return _AssociatedCrossID;
+    }
 
-	public void set_AssociatedCrossID(int _AssociatedCrossID) {
-		this._AssociatedCrossID = _AssociatedCrossID;
-	}
+    public void set_AssociatedCrossID(int _AssociatedCrossID) {
+            this._AssociatedCrossID = _AssociatedCrossID;
+    }
 
-	public int get_AssociatedTrackID() {
-		return _AssociatedTrackID;
-	}
+    public int get_AssociatedTrackID() {
+            return _AssociatedTrackID;
+    }
 
-	public void set_AssociatedTrackID(int _AssociatedTrackID) {
-		this._AssociatedTrackID = _AssociatedTrackID;
-	}
+    public void set_AssociatedTrackID(int _AssociatedTrackID) {
+            this._AssociatedTrackID = _AssociatedTrackID;
+    }
 
+    public double calcDoca(double x, double y, double z) {
+        Point3D trkPoint = new Point3D(x, y, z);
+        return _StripSegment.distance(trkPoint).length();
+        
+    }    
+    public Point3D calcCross(double x, double y, double z) {
+        Point3D trkPoint = new Point3D(x, y, z);
+        return _StripSegment.distance(trkPoint).origin();
+        
+    }    
+        
     @Override
     public int compareTo(Cluster arg) {
         

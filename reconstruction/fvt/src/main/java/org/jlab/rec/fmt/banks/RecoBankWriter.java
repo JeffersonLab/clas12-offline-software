@@ -104,26 +104,12 @@ public class RecoBankWriter {
             bank.setFloat("x", index, (float) crosses.get(j).get_Point().x());
             bank.setFloat("y", index, (float) crosses.get(j).get_Point().y());
             bank.setFloat("z", index, (float) crosses.get(j).get_Point().z());
-            bank.setFloat("err_x", index, (float) crosses.get(j).get_PointErr().x());
-            bank.setFloat("err_y", index, (float) crosses.get(j).get_PointErr().y());
-            bank.setFloat("err_z", index, (float) crosses.get(j).get_PointErr().z());
+            //bank.setFloat("err_x", index, (float) crosses.get(j).get_PointErr().x());
+            //bank.setFloat("err_y", index, (float) crosses.get(j).get_PointErr().y());
+            //bank.setFloat("err_z", index, (float) crosses.get(j).get_PointErr().z());
             bank.setShort("trkID", index, (short) crosses.get(j).get_AssociatedTrackID());
-
-            if (crosses.get(j).get_Dir() != null) {
-                bank.setFloat("ux", index, (float) crosses.get(j).get_Dir().x());
-                bank.setFloat("uy", index, (float) crosses.get(j).get_Dir().y());
-                bank.setFloat("uz", index, (float) crosses.get(j).get_Dir().z());
-            } else {
-                bank.setFloat("ux", index, 0);
-                bank.setFloat("uy", index, 0);
-                bank.setFloat("uz", index, 0);
-            }
-            if (crosses.get(j).get_Cluster1() != null) {
-                bank.setShort("Cluster1_ID", index, (short) crosses.get(j).get_Cluster1().get_Id());
-            }
-            if (crosses.get(j).get_Cluster2() != null) {
-                bank.setShort("Cluster2_ID", index, (short) crosses.get(j).get_Cluster2().get_Id());
-            }
+            bank.setShort("Cluster1_ID", index, (short) crosses.get(j).get_Cluster1().get_Id());
+            
             index++;
         }
 

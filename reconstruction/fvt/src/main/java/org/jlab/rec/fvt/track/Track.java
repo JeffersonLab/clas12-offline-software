@@ -5,19 +5,28 @@
  */
 package org.jlab.rec.fvt.track;
 
-import java.util.ArrayList;
 import java.util.List;
-import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Vector3D;
-import org.jlab.io.base.DataBank;
-import org.jlab.io.base.DataEvent;
-import org.jlab.jnp.matrix.Matrix;
+import org.jlab.geom.prim.Point3D; 
 
 /**
  *
  * @author ziegler
  */
 public class Track {
+
+    /**
+     * @return the _traj
+     */
+    public List<Point3D> getTraj() {
+        return _traj;
+    }
+
+    /**
+     * @param _traj the _traj to set
+     */
+    public void setTraj(List<Point3D> _traj) {
+        this._traj = _traj;
+    }
 
     /**
      * @return the _id
@@ -153,27 +162,7 @@ public class Track {
     private double _py;
     private double _pz;
     
-    public List<Track> getDCTracks(DataEvent event) {
-        
-        List<Track> trkList = new ArrayList<Track>();
-        
-        DataBank trkbank = event.getBank("TimeBasedTrkg::TBTracks");
-        int trkrows = trkbank.rows();
-        
-        for (int i = 0; i < trkrows; i++) {
-            Track trk = new Track();
-            trk.setId(trkbank.getShort("id", i));
-            trk.setSector(trkbank.getByte("sector", i));
-            trk.setQ(trkbank.getByte("q", i));
-            trk.setX(trkbank.getFloat("Vtx0_x", i));
-            trk.setY(trkbank.getFloat("Vtx0_y", i));
-            trk.setZ(trkbank.getFloat("Vtx0_z", i));
-            trk.setPx(trkbank.getFloat("p0_x", i));
-            trk.setPy(trkbank.getFloat("p0_y", i));
-            trk.setPz(trkbank.getFloat("p0_z", i));
-            
-            trkList.add(trk);
-        }
-        return trkList;
-    }
+    private List<Point3D> _traj;
+    
+   
 }
