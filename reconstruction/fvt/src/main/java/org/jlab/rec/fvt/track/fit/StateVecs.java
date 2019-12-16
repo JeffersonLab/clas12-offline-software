@@ -343,7 +343,7 @@ public class StateVecs {
         initSV.ty = pyVtx/pzVtx;
         double p = Math.sqrt(pxVtx*pxVtx+pyVtx*pyVtx+pzVtx*pzVtx);
         initSV.Q = (double)q / p;
-
+        
         rk.SwimToZ(sector, initSV, dcSwim, z0, bf);
             
         if (initSV != null) {

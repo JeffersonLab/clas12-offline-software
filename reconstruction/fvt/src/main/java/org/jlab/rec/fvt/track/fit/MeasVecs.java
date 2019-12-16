@@ -37,7 +37,7 @@ public class MeasVecs {
         measurements = new ArrayList<MeasVec>();
         
         for (int i = 0; i < clusters.size(); i++) {
-            int l = clusters.get(i).get_Layer();
+            int l = clusters.get(i).get_Layer()-1;
             double cent = clusters.get(i).get_Centroid();
             int seed = clusters.get(i).get_SeedStrip();
             int size = clusters.get(i).size();

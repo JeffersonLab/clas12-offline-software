@@ -41,7 +41,7 @@ public class RungeKutta {
     public void SwimToZ(int sector, StateVecs.StateVec fVec, Swim dcSwim, double z0, float[] bf){
        
         double stepSize = 0.5;
-        dcSwim.Bfield(sector, fVec.x, fVec.y, fVec.z, bf);
+        dcSwim.BfieldLab(fVec.x, fVec.y, fVec.z, bf);
         
         fVec.B = Math.sqrt(bf[0]*bf[0]+bf[1]*bf[1]+bf[2]*bf[2]);
         double s  = fVec.B;
@@ -74,25 +74,25 @@ public class RungeKutta {
     void RK4transport(int sector, double q, double x0, double y0, double z0, double tx0, double ty0, double h, Swim swimmer, 
             double dPath, StateVecs.StateVec fVec) { // lab system = 1, TSC =0
 
-        swimmer.Bfield(sector, x0, y0, z0, _b);
+        swimmer.BfieldLab(x0, y0, z0, _b);
         double x1 = tx0;
         double y1 = ty0;
         double tx1=q*v*Ax(tx0, ty0, _b[0], _b[1], _b[2]);
         double ty1=q*v*Ay(tx0, ty0, _b[0], _b[1], _b[2]);
  
-        swimmer.Bfield(sector, x0+0.5*h*x1, y0+0.5*h*y1, z0+0.5*h, _b);
+        swimmer.BfieldLab(x0+0.5*h*x1, y0+0.5*h*y1, z0+0.5*h, _b);
         double x2 = tx0+0.5*h*tx1;
         double y2 = ty0+0.5*h*ty1;
         double tx2=q*v*Ax((tx0+0.5*h*tx1), (ty0+0.5*h*ty1), _b[0], _b[1], _b[2]);
         double ty2=q*v*Ay((tx0+0.5*h*tx1), (ty0+0.5*h*ty1), _b[0], _b[1], _b[2]);
         
-        swimmer.Bfield(sector, x0+0.5*h*x2, y0+0.5*h*y2, z0+0.5*h, _b);
+        swimmer.BfieldLab(x0+0.5*h*x2, y0+0.5*h*y2, z0+0.5*h, _b);
         double x3 = tx0+0.5*h*tx2;
         double y3 = ty0+0.5*h*ty2;
         double tx3=q*v*Ax((tx0+0.5*h*tx2), (ty0+0.5*h*ty2), _b[0], _b[1], _b[2]);
         double ty3=q*v*Ay((tx0+0.5*h*tx2), (ty0+0.5*h*ty2), _b[0], _b[1], _b[2]);
         
-        swimmer.Bfield(sector, x0+h*x3, y0+h*y3, z0+h, _b);
+        swimmer.BfieldLab(x0+h*x3, y0+h*y3, z0+h, _b);
         double x4 = tx0+h*tx3;
         double y4 = ty0+h*ty3;
         double tx4=q*v*Ax((tx0+h*tx3), (ty0+h*ty3), _b[0], _b[1], _b[2]);
@@ -132,7 +132,7 @@ public class RungeKutta {
         double delty_delq0_0 =0;
         //System.out.println("RK0 "+x0+","+y0+","+z0+";"+tx0+","+ty0+","+" z0 "+z0+" h "+h);
         //State
-        swimmer.Bfield(sector, x0, y0, z0, _b);
+        swimmer.BfieldLab(x0, y0, z0, _b);
         double x1 = tx0;
         double y1 = ty0;
         double tx1=q*v*Ax(tx0, ty0, _b[0], _b[1], _b[2]);
@@ -164,7 +164,7 @@ public class RungeKutta {
                     + delAy_delty(tx0,ty0,_b[0],_b[1],_b[2])*delty_delq0_0);
         
  
-        swimmer.Bfield(sector, x0+0.5*h*x1, y0+0.5*h*y1, z0+0.5*h, _b);
+        swimmer.BfieldLab(x0+0.5*h*x1, y0+0.5*h*y1, z0+0.5*h, _b);
         double x2 = tx0+0.5*h*tx1;
         double y2 = ty0+0.5*h*ty1;
         double tx2=q*v*Ax((tx0+0.5*h*tx1), (ty0+0.5*h*ty1), _b[0], _b[1], _b[2]);
@@ -193,7 +193,7 @@ public class RungeKutta {
         double delty_delq0_2 = this.delty_delq0_next(q,v,tx0+0.5*h*tx1,ty0+0.5*h*ty1,_b[0],_b[1],_b[2],
                 deltx_delq0_0+0.5*h*deltx_delq0_1,delty_delq0_0+0.5*h*delty_delq0_1);
         
-        swimmer.Bfield(sector, x0+0.5*h*x2, y0+0.5*h*y2, z0+0.5*h, _b);
+        swimmer.BfieldLab(x0+0.5*h*x2, y0+0.5*h*y2, z0+0.5*h, _b);
         double x3 = tx0+0.5*h*tx2;
         double y3 = ty0+0.5*h*ty2;
         double tx3=q*v*Ax((tx0+0.5*h*tx2), (ty0+0.5*h*ty2), _b[0], _b[1], _b[2]);
@@ -222,7 +222,7 @@ public class RungeKutta {
         double delty_delq0_3 = this.delty_delq0_next(q,v,tx0+0.5*h*tx2,ty0+0.5*h*ty2,_b[0],_b[1],_b[2],
                 deltx_delq0_0+0.5*h*deltx_delq0_2,delty_delq0_0+0.5*h*delty_delq0_2);
         
-        swimmer.Bfield(sector, x0+h*x3, y0+h*y3, z0+h, _b);
+        swimmer.BfieldLab(x0+h*x3, y0+h*y3, z0+h, _b);
         double x4 = tx0+h*tx3;
         double y4 = ty0+h*ty3;
         double tx4=q*v*Ax((tx0+h*tx3), (ty0+h*ty3), _b[0], _b[1], _b[2]);

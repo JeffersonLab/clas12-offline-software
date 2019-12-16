@@ -19,7 +19,7 @@ public class KFitter {
 
     public StateVec finalStateVec;
     public CovMat finalCovMat;
-    public int totNumIter = 30;
+    public int totNumIter = 10;
     private double newChisq = Double.POSITIVE_INFINITY;
     public boolean filterOn = true;
     public double chi2 = 0;
@@ -98,15 +98,15 @@ public class KFitter {
                 if(this.setFitFailed==true)
                     i = totNumIter;
                 if (this.setFitFailed==false) {
-                    if(this.finalStateVec!=null) {
-                        if(Math.abs(sv.trackTraj.get(svzLength - 1).Q-this.finalStateVec.Q)<5.e-4 &&
-                                Math.abs(sv.trackTraj.get(svzLength - 1).x-this.finalStateVec.x)<1.e-4 &&
-                                Math.abs(sv.trackTraj.get(svzLength - 1).y-this.finalStateVec.y)<1.e-4 &&
-                                Math.abs(sv.trackTraj.get(svzLength - 1).tx-this.finalStateVec.tx)<1.e-6 &&
-                                Math.abs(sv.trackTraj.get(svzLength - 1).ty-this.finalStateVec.ty)<1.e-6) {
-                            i = totNumIter;
-                        }
-                    }
+//                    if(this.finalStateVec!=null) {
+//                        if(Math.abs(sv.trackTraj.get(svzLength - 1).Q-this.finalStateVec.Q)<5.e-4 &&
+//                                Math.abs(sv.trackTraj.get(svzLength - 1).x-this.finalStateVec.x)<1.e-4 &&
+//                                Math.abs(sv.trackTraj.get(svzLength - 1).y-this.finalStateVec.y)<1.e-4 &&
+//                                Math.abs(sv.trackTraj.get(svzLength - 1).tx-this.finalStateVec.tx)<1.e-6 &&
+//                                Math.abs(sv.trackTraj.get(svzLength - 1).ty-this.finalStateVec.ty)<1.e-6) {
+//                            i = totNumIter;
+//                        }
+//                    }
                     this.finalStateVec = sv.trackTraj.get(svzLength - 1);
                     this.finalCovMat = sv.trackCov.get(svzLength - 1);
                     
@@ -119,8 +119,9 @@ public class KFitter {
             this.finalStateVec = sv.trackTraj.get(svzLength - 1);
             this.finalCovMat = sv.trackCov.get(svzLength - 1);
         }
+        
     }
-
+    
     public Matrix filterCovMat(double[] H, Matrix Ci, double V) {
         
         double det = Matrix5x5.inverse(Ci, first_inverse, adj);

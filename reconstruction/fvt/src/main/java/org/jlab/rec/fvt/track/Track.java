@@ -7,12 +7,15 @@ package org.jlab.rec.fvt.track;
 
 import java.util.List;
 import org.jlab.geom.prim.Point3D; 
+import org.jlab.rec.fvt.track.fit.StateVecs;
 
 /**
  *
  * @author ziegler
  */
 public class Track {
+
+    public int status = 0;
 
     /**
      * @return the _traj
@@ -163,6 +166,20 @@ public class Track {
     private double _pz;
     
     private List<Point3D> _traj;
+
+    public double[] getLabPars(StateVecs.StateVec sv) {
+        double x = sv.x;
+        double y = sv.y;
+        double z = sv.z;
+        double p = 1./Math.abs(sv.Q);
+        double tx = sv.tx;
+        double ty = sv.ty;
+        double pz = p/Math.sqrt(tx*tx+ty*ty+1);
+        double px = pz*tx;
+        double py = pz*ty;
+        return new double[] {x,y,z,px,py,pz};
+        
+    }
     
    
 }
