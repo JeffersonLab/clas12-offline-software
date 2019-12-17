@@ -75,7 +75,7 @@ public class KFitter {
                 
                 for (int k = svzLength - 1; k >0; k--) {
                     
-                    //System.out.println("sector " +sector+"stateVec "+sv.trackTraj.get(k).printInfo());
+                    //System.out.println("k " +k+"stateVec "+sv.trackTraj.get(k).printInfo());
                     if(k>=1) {
                         sv.transport(sector, k, k - 1,
                             sv.trackTraj.get(k),
@@ -86,7 +86,7 @@ public class KFitter {
                 }
             }
             for (int k = 0; k < svzLength - 1; k++) {
-                //System.out.println("stateVec "+sv.trackTraj.get(k).printInfo());
+                //System.out.println(k+") stateVec "+sv.trackTraj.get(k).printInfo());
                 sv.transport(sector, k, k + 1,
                         sv.trackTraj.get(k),
                         sv.trackCov.get(k));
@@ -129,11 +129,12 @@ public class KFitter {
             return null;
         
         addition.set(
-                    H[0] * H[0] / V, H[0] * H[1] / V, 0, 0, 0,
-                    H[0] * H[1] / V, H[1] * H[1] / V, 0, 0, 0,
-                    0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0,
-                    0, 0, 0, 0, 0);
+                    H[0] * H[0] / V, H[0] * H[1] / V, H[0] * H[2] / V, H[0] * H[3] / V, H[0] * H[4] / V,
+                    H[1] * H[0] / V, H[1] * H[1] / V, H[1] * H[2] / V, H[1] * H[3] / V, H[1] * H[4] / V,
+                    H[2] * H[0] / V, H[2] * H[1] / V, H[2] * H[2] / V, H[2] * H[3] / V, H[2] * H[4] / V,
+                    H[3] * H[0] / V, H[3] * H[1] / V, H[3] * H[2] / V, H[3] * H[3] / V, H[3] * H[4] / V,
+                    H[4] * H[0] / V, H[4] * H[1] / V, H[4] * H[2] / V, H[4] * H[3] / V, H[4] * H[4] / V
+                    );
         //System.out.println("Ci ");
         //Matrix5x5.show(Ci);
         //System.out.println("Cinv ");
@@ -183,9 +184,9 @@ public class KFitter {
             //if(signMeas!=Math.signum(h) && this.interNum>1) System.out.println(sv.trackTraj.get(k).printInfo()+" h "+(float)h);
             double x_filt = sv.trackTraj.get(k).x + K[0] * (m-h);
             double y_filt = sv.trackTraj.get(k).y + K[1] * (m-h);
-            double tx_filt = sv.trackTraj.get(k).tx + K[2] * (m-h);
-            double ty_filt = sv.trackTraj.get(k).ty + K[3] * (m-h);
-            double Q_filt = sv.trackTraj.get(k).Q + K[4] * (m-h);
+            double tx_filt = sv.trackTraj.get(k).tx + 0*K[2] * (m-h);
+            double ty_filt = sv.trackTraj.get(k).ty + 0*K[3] * (m-h);
+            double Q_filt = sv.trackTraj.get(k).Q + 0*K[4] * (m-h);
                
         
             
