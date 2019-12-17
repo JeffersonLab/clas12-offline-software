@@ -8,12 +8,15 @@ import org.jlab.geom.prim.Triangle3D;
 
 public class Constants {
 
-
+    
     /**
      * Constants used in the reconstruction
      */
     Constants() {
     }
+    //CUTS
+    public static int MAXSVTHITS = 700;
+    public static int MAXSVTCROSSES = 1000;
 
     // THRESHOLDS
     public static int initThresholds = 30;
