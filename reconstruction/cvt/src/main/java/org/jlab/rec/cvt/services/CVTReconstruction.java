@@ -102,17 +102,6 @@ public class CVTReconstruction extends ReconstructionEngine {
             boolean align=false;
             //System.out.println(" LOADING CVT GEOMETRY...............................");
             CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, "default"));
-        
-  //        if(newRun>99)
-  //              align = true;
-   //             DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, "default");
-   //             cp = SVTConstants.connect( cp );
-   //             SVTConstants.loadAlignmentShifts( cp );
-   //             cp.disconnect();    
-    //            this.setSVTDB(cp);
-   //             SVTStripFactory svtStripFactory = new SVTStripFactory( this.getSVTDB(), align );
-    //            SVTGeom.setSvtStripFactory(svtStripFactory);
-
             this.setRun(newRun);
 
         }
@@ -412,7 +401,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         CTOFGeom = new CTOFGeant4Factory(providerCTOF);        
         CNDGeom =  GeometryFactory.getDetector(DetectorType.CND, 11, variationName);
         //
-        DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
+        DatabaseConstantProvider cp = new DatabaseConstantProvider(11, variationName);
         cp = SVTConstants.connect( cp );
         SVTConstants.loadAlignmentShifts( cp );
         cp.disconnect();    

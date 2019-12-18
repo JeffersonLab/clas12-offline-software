@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.svt;
 
 import java.util.ArrayList;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Shape3D;
@@ -177,95 +178,37 @@ public class Constants {
         NSECT[3] = 14;
         NSECT[4] = 18;
         NSECT[5] = 18;
-       // NSECT[6] = 24;
-       // NSECT[7] = 24;
-
-        // the values of the z0 position of the BST module local coordinate system
-        // in the lab frame coordinate system (from gemc geometry file), for each of the regions:
-        /*
-		Z0[0] = -219.856 + 0.5*DEADZNLEN;
-		Z0[1] = -219.856 + 0.5*DEADZNLEN;
-		Z0[2] = -180.490 + 0.5*DEADZNLEN;
-		Z0[3] = -180.490 + 0.5*DEADZNLEN;
-		Z0[4] = -141.530 + 0.5*DEADZNLEN;
-		Z0[5] = -141.530 + 0.5*DEADZNLEN;
-		Z0[6] =  -83.406 + 0.5*DEADZNLEN;
-		Z0[7] =  -83.406 + 0.5*DEADZNLEN;
-         */
-        Z0[0] = -219.826 + 0. * DEADZNLEN;
-        Z0[1] = -219.826 + 0. * DEADZNLEN;
-        Z0[2] = -180.380 + 0. * DEADZNLEN;
-        Z0[3] = -180.380 + 0. * DEADZNLEN;
-        Z0[4] = -141.206 + 0. * DEADZNLEN;
-        Z0[5] = -141.206 + 0. * DEADZNLEN;
-        //Z0[6] = -83.405 + 0. * DEADZNLEN;
-        //Z0[7] = -83.405 + 0. * DEADZNLEN;
-
-        //Z0[0]=-219.826; Z0[1]=Z0[0];
-        //Z0[2]=-180.38;  Z0[3]=Z0[2];
-        //Z0[4]=-141.206; Z0[5]=Z0[4];
-        //Z0[6]=-83.405;  Z0[7]=Z0[6];
-        double rotationFlag = 1;// in hardware the tracker is rotated by an  180 degrees in azimuth
-        PHI0[0] = Math.toRadians(90. + 180. * rotationFlag);
-        PHI0[1] = Math.toRadians(90. + 180. * rotationFlag);
-        PHI0[2] = Math.toRadians(90. + 180. * rotationFlag);
-        PHI0[3] = Math.toRadians(90. + 180. * rotationFlag);
-        PHI0[4] = Math.toRadians(90. + 180. * rotationFlag);
-        PHI0[5] = Math.toRadians(90. + 180. * rotationFlag);
-       // PHI0[6] = Math.toRadians(90. + 180. * rotationFlag);
-        //PHI0[7] = Math.toRadians(90. + 180. * rotationFlag);
-
-        /*
-		for(int s = 0; s <NSECT[0]; s++) {
-			MODULERADIUS[0][s] = 65.285 - MODULEPOSFAC*SILICONTHICK;
-		}
-		for(int s = 0; s <NSECT[2]; s++) {
-			MODULERADIUS[2][s] = 92.945 - MODULEPOSFAC*SILICONTHICK;
-		}
-		for(int s = 0; s <NSECT[4]; s++) {
-			MODULERADIUS[4][s] = 120.365 - MODULEPOSFAC*SILICONTHICK;
-		}
-		for(int s = 0; s <NSECT[6]; s++) {
-			MODULERADIUS[6][s] = 161.275 - MODULEPOSFAC*SILICONTHICK;
-		}
-		for(int s = 0; s <NSECT[1]; s++) {
-			MODULERADIUS[1][s] = 68.832 + MODULEPOSFAC*SILICONTHICK ;
-		}
-		for(int s = 0; s <NSECT[3]; s++) {
-			MODULERADIUS[3][s] = 96.492 + MODULEPOSFAC*SILICONTHICK;
-		}
-		for(int s = 0; s <NSECT[5]; s++) {
-			MODULERADIUS[5][s] = 123.912 + MODULEPOSFAC*SILICONTHICK;
-		}
-		for(int s = 0; s <NSECT[7]; s++) {
-			MODULERADIUS[7][s] = 164.822 + MODULEPOSFAC*SILICONTHICK;	
-		}
-         */
+       
+        Z0[0] = SVTConstants.Z0ACTIVE[0];
+        Z0[1] = SVTConstants.Z0ACTIVE[0];
+        Z0[2] = SVTConstants.Z0ACTIVE[1];
+        Z0[3] = SVTConstants.Z0ACTIVE[1];
+        Z0[4] = SVTConstants.Z0ACTIVE[2];
+        Z0[5] = SVTConstants.Z0ACTIVE[2];
+     
+        for(int k =0; k<6; k++)
+            PHI0[k] = SVTConstants.PHI0;
+        
         for (int s = 0; s < NSECT[0]; s++) {
-            MODULERADIUS[0][s] = 65.447 - MODULEPOSFAC * SILICONTHICK;
+            MODULERADIUS[0][s] = SVTConstants.LAYERRADIUS[0][0];
         }
         for (int s = 0; s < NSECT[2]; s++) {
-            MODULERADIUS[2][s] = 93.047 - MODULEPOSFAC * SILICONTHICK;
+            MODULERADIUS[2][s] = SVTConstants.LAYERRADIUS[1][0];
         }
         for (int s = 0; s < NSECT[4]; s++) {
-            MODULERADIUS[4][s] = 120.482 - MODULEPOSFAC * SILICONTHICK;
+            MODULERADIUS[4][s] = SVTConstants.LAYERRADIUS[2][0];
         }
-        //for (int s = 0; s < NSECT[6]; s++) {
-        //    MODULERADIUS[6][s] = 161.362 - MODULEPOSFAC * SILICONTHICK;
-        //}
-
+        
         for (int s = 0; s < NSECT[1]; s++) {
-            MODULERADIUS[1][s] = 65.447 + LAYRGAP + MODULEPOSFAC * SILICONTHICK;
+            MODULERADIUS[1][s] = SVTConstants.LAYERRADIUS[0][1];
         }
         for (int s = 0; s < NSECT[3]; s++) {
-            MODULERADIUS[3][s] = 93.047 + LAYRGAP + MODULEPOSFAC * SILICONTHICK;
+            MODULERADIUS[3][s] = SVTConstants.LAYERRADIUS[1][1];
         }
         for (int s = 0; s < NSECT[5]; s++) {
-            MODULERADIUS[5][s] = 120.482 + LAYRGAP + MODULEPOSFAC * SILICONTHICK;
+            MODULERADIUS[5][s] = SVTConstants.LAYERRADIUS[2][1];
         }
-        //for (int s = 0; s < NSECT[7]; s++) {
-        //    MODULERADIUS[7][s] = 161.362 + LAYRGAP + MODULEPOSFAC * SILICONTHICK;
-        //}
+        
         LAYRGAP = MODULERADIUS[1][0] - MODULERADIUS[0][0];
 
         // SHIFTS
