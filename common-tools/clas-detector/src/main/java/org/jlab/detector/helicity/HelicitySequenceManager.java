@@ -47,7 +47,7 @@ public final class HelicitySequenceManager {
             seqMap.put(runno, new HelicitySequenceDelayed(delay));
             seqMap.get(runno).setVerbosity(verbosity);
             if (!seqMap.get(runno).setRunNumber(runno)) {
-              System.err.println("HelicitySequenceManager:  error retrieving clock from ccdb, ABORT.");
+              System.err.println("HelicitySequenceManager:  error retrieving from CCDB, ABORT.");
               System.exit(1);
             }
         }

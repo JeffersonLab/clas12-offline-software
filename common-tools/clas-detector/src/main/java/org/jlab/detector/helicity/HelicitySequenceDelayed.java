@@ -1,19 +1,75 @@
 package org.jlab.detector.helicity;
 
+import org.jlab.utils.groups.IndexedTable;
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+
 /**
- *
- * Just adding a delay to HelicitySequence, where delay is the number
+ * Just adds a delay to HelicitySequence, where delay is the number
  * of "windows".  For example, a quartet pattern contains 4 windows, and
  * if the helicity clock is the usual 29.56 Hz, a window lasts 33.829 ms.
+ *
+ * Stores a sequence of helicity states and provides timestamp- or state-count-
+ * based search of helicity state based on the measured sequence or pseudo-random
+ * generator sequence, and provides some integrity checking of the sequence, 
+ * including comparing the measured and generator sequences.
+ *
+ * ____________________________________________________________________
+ * Getter methods naming convention:
+ * 
+ * Prefixes:
+ * "get"     - based on state count
+ * "search"  - based on finding timestamp in the measured sequence
+ * "predict" - based on generator seed time and expected periodicity
+ *
+ * Suffixes:
+ * "Generated" - use the psuedo-random generator's sequence
+ * ____________________________________________________________________
+ * 
+ * The generator methods are able to look past the measured range, while the
+ * non-generator methods cannot.
+ * 
+ * The inputs to initialize the sequence are {@link HelicityState} objects, one
+ * per window at the helicity board clock frequency, which contain important
+ * information for constructing and validating the sequence (e.g. helicity and
+ * sync bits and timestamps).
+ * 
+ * The return values from getters are just {@link HelicityBit} objects and
+ * represent the HWP-corrected helicity.
+ *
+ * See {@link HelicityAnalysisSimple} for an example on using this class.
  * 
  * @author baltzell
  */
 public class HelicitySequenceDelayed extends HelicitySequence {
   
-    private final int delay;
+    private int delay;
 
     public HelicitySequenceDelayed(int delay) {
         this.delay=delay;
+    }
+
+    public boolean setRunNumber(int runNumber) {
+        try {
+            DatabaseConstantProvider dcp=new DatabaseConstantProvider(runNumber,"default");
+            IndexedTable it=dcp.readTable("/runcontrol/helicity");
+            this.helicityClock=it.getDoubleValue("frequency",0,0,0);
+            this.delay=it.getIntValue("delay",0,0,0);
+            this.pattern=HelicityPattern.create((byte)it.getIntValue("pattern",0,0,0));
+            this.generator.setClock(this.helicityClock);
+            System.out.println(String.format("HelicitySequenceDelayed:  got parameters from CCDB for run %d:",runNumber));
+            System.out.println(String.format("HelicitySequenceDelayed:  CCDB clock: %.4f seconds",this.helicityClock));
+            System.out.println(String.format("HelicitySequenceDelayed:  CCDB delay: %d windows",this.delay));
+            System.out.println(String.format("HelicitySequenceDelayed:  CCDB pattern: %s",this.pattern));
+            if (this.pattern != HelicityPattern.QUARTET) {
+                System.err.println("HelicitySequenceDelayed:  not ready for non-QUARTET pattern");
+                return false;
+            }
+            return true;
+        }
+        catch (Exception e) {
+            System.err.println(String.format("HelicitySequence:  error retrieving clock from ccdb for run %d",runNumber));
+            return false;
+        }
     }
 
     /**
