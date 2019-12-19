@@ -45,6 +45,9 @@ public class Constants {
     public static double[][] RZ = new double[NREG][MAXNUMSECT]; // shift par
     public static double[][] RA = new double[NREG][MAXNUMSECT]; // shift par
     
+    public static Point3D[][][] LEP = new Point3D[MAXNUMSECT][NLAYR][NSTRIP]; //left strip end point
+    public static Point3D[][][] REP = new Point3D[MAXNUMSECT][NLAYR][NSTRIP]; //right strip end point
+    
     public static double  FIDCUX = 17.35;
     public static double  FIDCUZ = 3.75;
     public static double  FIDPKX = 3.5;
@@ -179,7 +182,8 @@ public class Constants {
         NSECT[5] = 18;
        // NSECT[6] = 24;
        // NSECT[7] = 24;
-
+       
+       
         // the values of the z0 position of the BST module local coordinate system
         // in the lab frame coordinate system (from gemc geometry file), for each of the regions:
         /*
@@ -268,10 +272,23 @@ public class Constants {
         //}
         LAYRGAP = MODULERADIUS[1][0] - MODULERADIUS[0][0];
 
+        
+        Geometry geo = new Geometry();
+       for(int l =0; l < NLAYR; l++) {
+           for(int j = 0; j< NSECT[l]; j++) {
+               for(int k = 0; k<NSTRIP; k++) {
+                   double[][] X = geo.getStripEndPoints(k+1, (l+1)%2);//1 top, 0 bottom
+                   LEP[j][l][k] = geo.transformToFrame(j+1, l+1, X[0][0], 0, X[0][1], "lab", ""); //left
+                   REP[j][l][k] = geo.transformToFrame(j+1, l+1, X[1][0], 0, X[1][1], "lab", ""); //right
+                   
+               }
+           }
+       }
+        
         // SHIFTS
         
         TX[0][0] = 0.177;	TY[0][0] = 0.184;	TZ[0][0] = 0.183;	RX[0][0] = 0.312;	RY[0][0] = 0;	RZ[0][0] = 0.95;	RA[0][0] = 0.164;
-        TX[0][1] = 0.134;	TY[0][1] = 0.1;	TZ[0][1] = 0.19;	RX[0][1] = 0.243;	RY[0][1] = -0.177;	RZ[0][1] = 0.954;	RA[0][1] = 0.102;
+        TX[0][1] = 0.134;	TY[0][1] = 0.1;         TZ[0][1] = 0.19;	RX[0][1] = 0.243;	RY[0][1] = -0.177;	RZ[0][1] = 0.954;	RA[0][1] = 0.102;
         TX[0][2] = 0.14;	TY[0][2] = -0.083;	TZ[0][2] = 0.163;	RX[0][2] = 0.017;	RY[0][2] = -0.052;	RZ[0][2] = 0.999;	RA[0][2] = 0.106;
         TX[0][3] = 0.023;	TY[0][3] = -0.079;	TZ[0][3] = 0.148;	RX[0][3] = 0.103;	RY[0][3] = 0.317;	RZ[0][3] = 0.943;	RA[0][3] = 0.099;
         TX[0][4] = -0.073;	TY[0][4] = -0.04;	TZ[0][4] = 0.143;	RX[0][4] = 0.395;	RY[0][4] = 0.287;	RZ[0][4] = 0.872;	RA[0][4] = 0.13;
@@ -341,7 +358,7 @@ public class Constants {
                         
         {
             ArrayList<ArrayList<Shape3D>> modules = new ArrayList<ArrayList<Shape3D>>();
-            Geometry geo = new Geometry();
+           //Geometry geo = new Geometry();
 
             for (int layer = 1; layer <= 8; layer++) {
                 ArrayList<Shape3D> layerModules = new ArrayList<Shape3D>();
