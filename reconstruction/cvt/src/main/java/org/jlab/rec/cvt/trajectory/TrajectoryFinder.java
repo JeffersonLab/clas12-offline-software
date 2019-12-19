@@ -224,7 +224,7 @@ public class TrajectoryFinder {
         // CTOF
         //  initialize swimmer starting from the track vertex
         int charge = trk.get_Q();
-        double maxPathLength = 1.5;//very loose cut 
+        double maxPathLength = 1.5;  
         swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
                 Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                 trk.get_P(), charge, 
@@ -233,7 +233,8 @@ public class TrajectoryFinder {
         if(ctof_geo!=null) {
             double radius = ctof_geo.getRadius(1);
             inters = swimmer.SwimToCylinder(radius);
-            if(inters!=null) {
+            double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
+            if(r>=radius) {
                 StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
                 stVec.set_SurfaceDetector(DetectorType.CTOF.getDetectorId());
                 stVec.set_SurfaceSector(1);
@@ -245,6 +246,7 @@ public class TrajectoryFinder {
                 stVec.set_Path(inters[6]*10);
                 stateVecs.add(stVec);
             }
+            else inters=null;
         }
         // CND
         if(cnd_geo!=null && inters!=null) {     //  don't swim to CND if swimming to CTOF failed
@@ -252,7 +254,8 @@ public class TrajectoryFinder {
                 Point3D center = cnd_geo.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
                 double radius  = Math.sqrt(center.x()*center.x()+center.y()*center.y());
                 inters = swimmer.SwimToCylinder(radius);
-                if(inters==null) break;          
+                double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
+                if(r<radius) break;
                 StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
                 stVec.set_SurfaceDetector(DetectorType.CND.getDetectorId());
                 stVec.set_SurfaceSector(1);
