@@ -34,6 +34,9 @@ import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.TrackListFinder;
 import org.jlab.rec.cvt.track.TrackSeederCA;
 import org.jlab.rec.cvt.track.fit.KFitter;
+import org.jlab.rec.cvt.trajectory.Helix;
+import org.jlab.rec.cvt.trajectory.Trajectory;
+import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 
 /**
  * Service to return reconstructed TRACKS
@@ -52,7 +55,7 @@ public class CVTReconstruction extends ReconstructionEngine {
     
     public CVTReconstruction() {
         super("CVTTracks", "ziegler", "4.0");
-        org.jlab.rec.cvt.svt.Constants.Load();
+        
         SVTGeom = new org.jlab.rec.cvt.svt.Geometry();
         BMTGeom = new org.jlab.rec.cvt.bmt.Geometry();
         
@@ -88,10 +91,9 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         if (FieldsConfig.equals(newConfig) == false) {
             // Load the Constants
-            System.out.println("  CHECK CONFIGS..............................." + FieldsConfig + " = ? " + newConfig);
-            Constants.Load(isCosmics, isSVTonly, (double) bank.getFloat("solenoid", 0));
+            
             this.setFieldsConfig(newConfig);
-            }
+        }
         FieldsConfig = newConfig;
 
         // Load the constants
@@ -100,19 +102,16 @@ public class CVTReconstruction extends ReconstructionEngine {
         
         if (Run != newRun) {
             boolean align=false;
-            //System.out.println(" LOADING CVT GEOMETRY...............................");
+            System.out.println(" LOADING CVT GEOMETRY...............................");
             CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, "default"));
-        
-  //        if(newRun>99)
-  //              align = true;
-   //             DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, "default");
-   //             cp = SVTConstants.connect( cp );
-   //             SVTConstants.loadAlignmentShifts( cp );
-   //             cp.disconnect();    
-    //            this.setSVTDB(cp);
-   //             SVTStripFactory svtStripFactory = new SVTStripFactory( this.getSVTDB(), align );
-    //            SVTGeom.setSvtStripFactory(svtStripFactory);
-
+            System.out.println("SVT LOADING WITH VARIATION "+variationName);
+            DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, variationName);
+            cp = SVTConstants.connect( cp );
+            SVTConstants.loadAlignmentShifts( cp );
+            cp.disconnect();  
+            SVTStripFactory svtFac = new SVTStripFactory(cp, false);
+            SVTGeom.setSvtStripFactory(svtFac);
+            Constants.Load(isCosmics, isSVTonly, (double) bank.getFloat("solenoid", 0));
             this.setRun(newRun);
 
         }
@@ -230,7 +229,7 @@ public class CVTReconstruction extends ReconstructionEngine {
                 trkcands.get(trkcands.size() - 1).set_TrackingStatus(1);
            }
         }
-
+        
         if (trkcands.size() == 0) {
             this.CleanupSpuriousCrosses(crosses, null) ;
             rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, shift);
@@ -407,24 +406,16 @@ public class CVTReconstruction extends ReconstructionEngine {
         }
         
         // Load other geometries
-        String variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
         ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, 11, variationName);
         CTOFGeom = new CTOFGeant4Factory(providerCTOF);        
         CNDGeom =  GeometryFactory.getDetector(DetectorType.CND, 11, variationName);
         //
-        DatabaseConstantProvider cp = new DatabaseConstantProvider(11, "default");
-        cp = SVTConstants.connect( cp );
-        SVTConstants.loadAlignmentShifts( cp );
-        cp.disconnect();    
+          
         return true;
     }
   
-    private DatabaseConstantProvider _SVTDB;
-    private synchronized void setSVTDB(DatabaseConstantProvider SVTDB) {
-        _SVTDB = SVTDB;
-    }
-    private synchronized DatabaseConstantProvider getSVTDB() {
-        return _SVTDB;
-    }
+    private String variationName;
+    
 
 }

@@ -133,11 +133,11 @@ public class Helix {
 
     //  (x,y) coordinates of the dca
     public double xdca() {
-        return this.get_dca() * Math.cos(this.get_phi_at_dca());
+        return -this.get_dca() * Math.sin(this.get_phi_at_dca());
     }
 
     public double ydca() {
-        return this.get_dca() * Math.sin(this.get_phi_at_dca());
+        return this.get_dca() * Math.cos(this.get_phi_at_dca());
     }
 
     public double getArcLength_dca(Point3D refpoint) {

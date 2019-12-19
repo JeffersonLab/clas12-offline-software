@@ -542,6 +542,12 @@ public class StateVecs {
 
         double h_dca = Math.sqrt(x * x + y * y);
         double h_phi0 = Math.atan2(py, px);
+        if(Math.abs(Math.sin(h_phi0))>1.e-07) {
+            h_dca = -x/Math.sin(h_phi0);
+        } else {
+            h_dca = y/Math.cos(h_phi0);
+        }
+            
         double kappa = Math.signum(this.trackTraj.get(kf).kappa) / Math.sqrt(px * px + py * py);
         double h_omega = kappa / this.trackTraj.get(kf).alpha; h_omega = kappa/this.trackTraj.get(0).alpha;
         double h_dz = z;
@@ -555,7 +561,6 @@ public class StateVecs {
 
     public void init(Seed trk, KFitter kf, Swim swimmer) {
         //init stateVec
-
         StateVec initSV = new StateVec(0);
         initSV.x = -trk.get_Helix().get_dca() * Math.sin(trk.get_Helix().get_phi_at_dca());
         initSV.y = trk.get_Helix().get_dca() * Math.cos(trk.get_Helix().get_phi_at_dca());
