@@ -11,9 +11,6 @@ import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.jnp.hipo4.io.HipoReader;
 
-import org.jlab.utils.groups.IndexedTable;
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
-
 /**
  * Stores a sequence of helicity states and provides timestamp- or state-count-
  * based search of helicity state based on the measured sequence or pseudo-random
@@ -43,16 +40,15 @@ import org.jlab.detector.calib.utils.DatabaseConstantProvider;
  * The return values from getters are just {@link HelicityBit} objects and
  * represent the HWP-corrected helicity.
  *
- * See {@link HelicityAnalysis} for an example on using this class.
+ * See {@link HelicityAnalysisSimple} for an example on using this class.
  * 
  * @author baltzell
  */
-public class HelicitySequence {
+class HelicitySequence {
 
-    // FIXME:  these should go to CCDB:
     public static final double TIMESTAMP_CLOCK=250.0e6; // Hz
-    private double helicityClock=29.56; // Hz
-
+    protected double helicityClock=29.56; // Hz
+    protected HelicityPattern pattern=HelicityPattern.QUARTET;
     protected boolean halfWavePlate=false;
     protected boolean analyzed=false;
     protected final Map<Long,HelicityGenerator> generators=new HashMap<>();
@@ -62,21 +58,6 @@ public class HelicitySequence {
 
     public HelicitySequence(){}
 
-    public boolean setRunNumber(int runNumber) {
-        try {
-            DatabaseConstantProvider dcp=new DatabaseConstantProvider(runNumber,"default");
-            IndexedTable it=dcp.readTable("/runcontrol/helicity");
-            this.helicityClock=it.getDoubleValue("frequency",0,0,0);
-            this.generator.setClock(this.helicityClock);
-            System.out.println(String.format("HelicitySequence:  got new clock from ccdb for run %d: %.4f",runNumber,this.helicityClock));
-            return true;
-        }
-        catch (Exception e) {
-            System.err.println(String.format("HelicitySequence:  error retrieving clock from ccdb for run %d",runNumber));
-            return false;
-        }
-    }
-    
     public void setVerbosity(int verbosity) {
         this.verbosity=verbosity;
         this.generator.setVerbosity(verbosity);
