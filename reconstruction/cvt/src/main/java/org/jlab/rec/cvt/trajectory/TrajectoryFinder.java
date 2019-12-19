@@ -180,11 +180,6 @@ public class TrajectoryFinder {
                 R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
             }
             
-            //Point3D InterPoint = helix.getPointAtRadius(R);
-            //Vector3D trkDir = helix.getTrackDirectionAtRadius(R);
-            
-            //StateVec stVec = new StateVec(InterPoint.x(), InterPoint.y(), InterPoint.z(),
-            //        trkDir.x(), trkDir.y(), trkDir.z());
             swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
                     Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                     trk.get_P(), trk.get_Q(), 
@@ -576,7 +571,7 @@ public class TrajectoryFinder {
                 double doca1 = svt_geo.getDOCAToStrip(sector, layer, (double) hit.get_Strip().get_Strip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
                 double sigma1 = svt_geo.getSingleStripResolution(layer, hit.get_Strip().get_Strip(), stVec.z());
                 hit.set_stripResolutionAtDoca(sigma1);
-                hit.set_docaToTrk(doca1);
+                hit.set_docaToTrk(doca1);  
                 if (trajFinal) {
                     hit.set_TrkgStatus(2);
                 }
