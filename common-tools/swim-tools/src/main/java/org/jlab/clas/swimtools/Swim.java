@@ -373,8 +373,9 @@ public class Swim {
             double r = Math.sqrt(y[0] * y[0] + y[1] * y[1]) * 100.;
             if(r>max ) 
                 max = r;
+//            else System.out.println(r + " " + max + " " + t);
             //if(cutOff) {
-                return (r < max || r > _Rad); // stop intergration at closest distance to the cylinder
+                return (r < max || t> _maxPathLength || r > _Rad); // stop intergration at closest distance to the cylinder
             //}
             //else {
             //    return (r > _Rad);
