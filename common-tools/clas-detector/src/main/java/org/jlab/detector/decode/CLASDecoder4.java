@@ -826,6 +826,9 @@ public class CLASDecoder4 {
 
                     counter++;
                     progress.updateStatus();
+                    if(counter%25000==0){
+                        System.gc();
+                    }
                     if(nevents>0){
                         if(counter>=nevents) break;
                     }
