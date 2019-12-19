@@ -224,7 +224,7 @@ public class TrajectoryFinder {
         // CTOF
         //  initialize swimmer starting from the track vertex
         int charge = trk.get_Q();
-        double maxPathLength = 5.0;//very loose cut 
+        double maxPathLength = 1.5;//very loose cut 
         swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
                 Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                 trk.get_P(), charge, 
