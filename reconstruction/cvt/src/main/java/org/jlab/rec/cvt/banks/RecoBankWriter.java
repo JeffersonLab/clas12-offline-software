@@ -334,7 +334,8 @@ public class RecoBankWriter {
             bank.setFloat("tandip", i, (float) helix.get_tandip());
             bank.setFloat("z0", i, (float) (helix.get_Z0()/10.+zShift));
             bank.setFloat("d0", i, (float) (helix.get_dca()/10.));
-
+            bank.setFloat("xb", i, (float) (org.jlab.rec.cvt.Constants.getXb()/10.0));
+            bank.setFloat("yb", i, (float) (org.jlab.rec.cvt.Constants.getYb()/10.0));
             // this is the format of the covariance matrix for helical tracks
             // cov matrix = 
             // | d_dca*d_dca                   d_dca*d_phi_at_dca            d_dca*d_curvature        0            0             |
