@@ -41,7 +41,9 @@
         {"name":"Cross6_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"Cross7_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"Cross8_ID",      "type":"S", "info":"ID of cross in the track"},
-        {"name":"Cross9_ID",      "type":"S", "info":"ID of cross in the track"}
+        {"name":"Cross9_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"xb",             "type":"F", "info":"x offset  "},
+        {"name":"yb",             "type":"F", "info":"y offset  "}
     ]
   },
   {
