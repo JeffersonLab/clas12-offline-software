@@ -123,7 +123,7 @@ public class TrajectoryFinder {
             //Point3D p = svt_geo.intersectionOfHelixWithPlane(layer, sector, helix);
             Point3D p = svt_geo.getPlaneModuleOrigin(sector, layer);
             double d = n.dot(p.toVector3D());
-            swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
+            swimmer.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
                     Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                     trk.get_P(), trk.get_Q(), 
                     5.0) ;
@@ -181,7 +181,7 @@ public class TrajectoryFinder {
                 R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
             }
             
-            swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
+            swimmer.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
                     Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                     trk.get_P(), trk.get_Q(), 
                     5.0) ;
@@ -259,7 +259,7 @@ public class TrajectoryFinder {
             double radius = ctof_geo.getRadius(1);
             int charge = trk.get_Q();
             double maxPathLength = 5.0;//very loose cut 
-            swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
+            swimmer.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
                     Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                     trk.get_P(), charge, 
                     maxPathLength) ;
@@ -283,7 +283,7 @@ public class TrajectoryFinder {
             double radius         = Math.sqrt(center.x()*center.x()+center.y()*center.y());
             int charge = trk.get_Q();
             double maxPathLength = 5.0;//very loose cut 
-            swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
+            swimmer.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
                     Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                     trk.get_P(), charge, 
                     maxPathLength) ;

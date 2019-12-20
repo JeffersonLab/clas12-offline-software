@@ -542,7 +542,7 @@ public class StateVecs {
 
         double h_dca = Math.sqrt(x * x + y * y);
         double h_phi0 = Math.atan2(py, px);
-        if(Math.abs(Math.sin(h_phi0))>1.e-07) {
+        if(Math.abs(Math.sin(h_phi0))>0.1) {
             h_dca = -x/Math.sin(h_phi0);
         } else {
             h_dca = y/Math.cos(h_phi0);
@@ -554,7 +554,7 @@ public class StateVecs {
         double h_tandip = pz / Math.sqrt(px * px + py * py);
         
         Helix trkHelix = new Helix(h_dca, h_phi0, h_omega, h_dz, h_tandip, this.trackCov.get(kf).covMat);
-       // System.out.println("x "+x+" y "+y+" z "+z+" p "+p_unc+" pt "+Math.sqrt(px*px+py*py) +" theta "+Math.toDegrees(Math.acos(pz/Math.sqrt(px*px+py*py+pz*pz)))+" phi "+Math.toDegrees(Math.atan2(py, px))+" q "+q);
+        //System.out.println("x "+x+" y "+y+" x' "+(-h_dca*Math.sin(h_phi0))+" y' "+y*Math.cos(h_phi0) +" theta "+Math.toDegrees(Math.acos(pz/Math.sqrt(px*px+py*py+pz*pz)))+" phi "+Math.toDegrees(Math.atan2(py, px))+" q "+q);
 
         return trkHelix;
     }
@@ -567,7 +567,7 @@ public class StateVecs {
         initSV.z = trk.get_Helix().get_Z0();
         double xcen = (1. / trk.get_Helix().get_curvature() - trk.get_Helix().get_dca()) * Math.sin(trk.get_Helix().get_phi_at_dca());
         double ycen = (-1. / trk.get_Helix().get_curvature() + trk.get_Helix().get_dca()) * Math.cos(trk.get_Helix().get_phi_at_dca());
-        B Bf = new B(0, 0, 0, 0, swimmer);
+        B Bf = new B(0, (float)org.jlab.rec.cvt.Constants.getXb(), (float)org.jlab.rec.cvt.Constants.getYb(), initSV.z, swimmer);
         initSV.alpha = Bf.alpha;
         initSV.kappa = Bf.alpha * trk.get_Helix().get_curvature();
         initSV.phi0 = Math.atan2(ycen, xcen);
@@ -579,7 +579,7 @@ public class StateVecs {
         initSV.d_rho = trk.get_Helix().get_dca();
         initSV.phi = 0;
         //
-
+        
         this.trackTraj.put(0, initSV);
         //init covMat
         Matrix fitCovMat = trk.get_Helix().get_covmatrix();
