@@ -224,26 +224,32 @@ public class TrajectoryFinder {
         // CTOF
         //  initialize swimmer starting from the track vertex
         int charge = trk.get_Q();
-        double maxPathLength = 1.5;  
+        double maxPathLength = 5.0;  
         swimmer.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
                 Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                 trk.get_P(), charge, 
                 maxPathLength) ;
         double[] inters = null;
+        double phi=0;
+        double theta=0;
+        double path=0;
         if(ctof_geo!=null) {
             double radius = ctof_geo.getRadius(1);
             inters = swimmer.SwimToCylinder(radius);
             double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
+            phi   = Math.atan2(inters[4], inters[3]);
+            theta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
+            path  = inters[6];
             if(r>=radius) {
                 StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
                 stVec.set_SurfaceDetector(DetectorType.CTOF.getDetectorId());
                 stVec.set_SurfaceSector(1);
                 stVec.set_SurfaceLayer(1); 
                 stVec.set_ID(id);
-                stVec.set_TrkPhiAtSurface(Math.atan2(inters[4], inters[3]));
-                stVec.set_TrkThetaAtSurface(Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5])));
+                stVec.set_TrkPhiAtSurface(phi);
+                stVec.set_TrkThetaAtSurface(theta);
                 stVec.set_TrkToModuleAngle(0);
-                stVec.set_Path(inters[6]*10);
+                stVec.set_Path(path*10);
                 stateVecs.add(stVec);
             }
             else inters=null;
@@ -251,21 +257,28 @@ public class TrajectoryFinder {
         // CND
         if(cnd_geo!=null && inters!=null) {     //  don't swim to CND if swimming to CTOF failed
             for(int ilayer=0; ilayer<cnd_geo.getSector(0).getSuperlayer(0).getNumLayers(); ilayer++) {
+                swimmer.SetSwimParameters(inters[0], inters[1], inters[2], 
+                        Math.toDegrees(phi), Math.toDegrees(theta),
+                        trk.get_P(), charge, 
+                        maxPathLength) ;
                 Point3D center = cnd_geo.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
                 double radius  = Math.sqrt(center.x()*center.x()+center.y()*center.y());
                 inters = swimmer.SwimToCylinder(radius);
                 double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
+                phi   = Math.atan2(inters[4], inters[3]);
+                theta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
+                path  = path + inters[6];
                 if(r<radius) break;
                 StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
                 stVec.set_SurfaceDetector(DetectorType.CND.getDetectorId());
                 stVec.set_SurfaceSector(1);
                 stVec.set_SurfaceLayer(ilayer+1); 
                 stVec.set_ID(id);
-                stVec.set_TrkPhiAtSurface(Math.atan2(inters[4], inters[3]));
-                stVec.set_TrkThetaAtSurface(Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5])));
+                stVec.set_TrkPhiAtSurface(phi);
+                stVec.set_TrkThetaAtSurface(theta);
                 stVec.set_TrkToModuleAngle(0);
-                stVec.set_Path(inters[6]*10);
-                stateVecs.add(stVec);
+                stVec.set_Path(path*10);
+               stateVecs.add(stVec);
             }
         }
                

@@ -375,7 +375,7 @@ public class Swim {
                 max = r;
 //            else System.out.println(r + " " + max + " " + t);
             //if(cutOff) {
-                return (r < max || t> _maxPathLength || r > _Rad); // stop intergration at closest distance to the cylinder
+                return (r < max || r > _Rad); // stop intergration at closest distance to the cylinder
             //}
             //else {
             //    return (r > _Rad);
