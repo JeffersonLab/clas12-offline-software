@@ -19,6 +19,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
+import static org.jlab.rec.cvt.Constants.setSolenoidscale;
 import org.jlab.rec.cvt.banks.HitReader;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
@@ -102,6 +103,12 @@ public class CVTReconstruction extends ReconstructionEngine {
         
         if (Run != newRun) {
             boolean align=false;
+            //Load field scale
+            double SolenoidScale =(double) bank.getFloat("solenoid", 0);
+            Constants.setSolenoidscale(SolenoidScale);
+            if(Math.abs(SolenoidScale)<0.001)
+            Constants.setCosmicsData(true);
+            
             System.out.println(" LOADING CVT GEOMETRY...............................");
             CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, "default"));
             System.out.println("SVT LOADING WITH VARIATION "+variationName);
@@ -111,7 +118,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             cp.disconnect();  
             SVTStripFactory svtFac = new SVTStripFactory(cp, false);
             SVTGeom.setSvtStripFactory(svtFac);
-            Constants.Load(isCosmics, isSVTonly, (double) bank.getFloat("solenoid", 0));
+            Constants.Load(isCosmics, isSVTonly);
             this.setRun(newRun);
 
         }
