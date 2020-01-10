@@ -108,6 +108,14 @@ public class CrossListFinder  {
                             double cosTh2 = traj2.dot(c2.get_Dir().toVector3D());
                             double cosTh3 = traj3.dot(c3.get_Dir().toVector3D());
 
+                            // require a line containing crosses in R1 and R2 to intersect the lab z coordinate line in the lab
+                            // downstream of the position of the first cross
+                            //Point3D labR1 = c1.getCoordsInLab(X[0], Y[0], Z[0]);
+                            //Point3D labR2 = c1.getCoordsInLab(X[1], Y[1], Z[1]);
+                            //double s = (labR2.x()-labR1.x())/(labR2.z()-labR1.z());
+                            //if(labR2.x()/s<0) {
+                            //    continue;
+                            //}
                             // require that the cross direction estimate be in the direction of the trajectory
                             if(cosTh1<Constants.TRACKDIRTOCROSSDIRCOSANGLE || cosTh2<Constants.TRACKDIRTOCROSSDIRCOSANGLE || cosTh3<Constants.TRACKDIRTOCROSSDIRCOSANGLE) {
                                 continue;
@@ -197,18 +205,18 @@ public class CrossListFinder  {
 
     private void recalcParsSegment(DataEvent event, Segment _Segment1, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         //refit
-        double cosTrkAngle = 1. / Math.sqrt(1. + _Segment1.get_fittedCluster().get_clusterLineFitSlope() * _Segment1.get_fittedCluster().get_clusterLineFitSlope());
+        double trkAngle = _Segment1.get_fittedCluster().get_clusterLineFitSlope();
         // update the hits
         for (FittedHit fhit : _Segment1.get_fittedCluster()) { 
-            fhit.updateHitPositionWithTime(event, cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
+            fhit.updateHitPositionWithTime(event, trkAngle, fhit.getB(), tab, DcDetector, tde);
         }
 
          cf.SetFitArray(_Segment1.get_fittedCluster(), "TSC");
          cf.Fit(_Segment1.get_fittedCluster(), true);
-         cosTrkAngle = 1. / Math.sqrt(1. + _Segment1.get_fittedCluster().get_clusterLineFitSlope() * _Segment1.get_fittedCluster().get_clusterLineFitSlope());
+         trkAngle = _Segment1.get_fittedCluster().get_clusterLineFitSlope();
 
          for (FittedHit fhit : _Segment1.get_fittedCluster()) {
-            fhit.updateHitPositionWithTime(event, cosTrkAngle, fhit.getB(), tab, DcDetector, tde);
+            fhit.updateHitPositionWithTime(event, trkAngle, fhit.getB(), tab, DcDetector, tde);
         }
         cf.SetFitArray(_Segment1.get_fittedCluster(), "TSC");
         cf.Fit(_Segment1.get_fittedCluster(), true);

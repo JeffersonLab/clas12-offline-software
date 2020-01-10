@@ -5,16 +5,15 @@
  */
 package org.jlab.rec.dc.track.fit;
 
-import Jama.Matrix;
+//import Jama.Matrix;
+import org.jlab.jnp.matrix.*;
 import java.util.ArrayList;
 import org.jlab.clas.swimtools.Swim;
-import org.jlab.rec.dc.Constants;
-
 /**
  *
  * @author ziegler
  */
-public class RungeKutta {
+public class RungeKuttaDoca {
     
     private final float[] _b = new float[3];
     final double v = 0.0029979245;
@@ -27,7 +26,7 @@ public class RungeKutta {
     private final ArrayList<Double> jk3;
     private final ArrayList<Double> jk4;
     
-    public RungeKutta() {
+    public RungeKuttaDoca() {
         this.k1 = new ArrayList<Double>(4);
         this.k2 = new ArrayList<Double>(4);
         this.k3 = new ArrayList<Double>(4);
@@ -39,7 +38,7 @@ public class RungeKutta {
         
     }
     
-    public void SwimToZ(int sector, StateVecs.StateVec fVec, Swim dcSwim, double z0, float[] bf){
+    public void SwimToZ(int sector, StateVecsDoca.StateVec fVec, Swim dcSwim, double z0, float[] bf){
        
         double stepSize = 1.0;
         dcSwim.Bfield(sector, fVec.x, fVec.y, fVec.z, bf);
@@ -76,7 +75,7 @@ public class RungeKutta {
     }
     
     void RK4transport(int sector, double q, double x0, double y0, double z0, double tx0, double ty0, double h, Swim swimmer, 
-            double dPath, StateVecs.StateVec fVec) { // lab system = 1, TSC =0
+            double dPath, StateVecsDoca.StateVec fVec) { // lab system = 1, TSC =0
 
         swimmer.Bfield(sector, x0, y0, z0, _b);
         double x1 = tx0;
@@ -124,7 +123,7 @@ public class RungeKutta {
     }
     //
     void RK4transport(int sector, double q, double x0, double y0, double z0, double tx0, double ty0, double h, Swim swimmer, 
-            StateVecs.CovMat covMat, StateVecs.StateVec fVec, StateVecs.CovMat fCov, double mass, double dPath) {
+            StateVecsDoca.CovMat covMat, StateVecsDoca.StateVec fVec, StateVecsDoca.CovMat fCov, double dPath) {
         // Jacobian:
         double[][] u = new double[5][5];       
         double[][] C = new double[5][5];
@@ -221,9 +220,9 @@ public class RungeKutta {
         double delx_delq0_3 = deltx_delq0_0+0.5*h*deltx_delq0_2;
         double dely_delq0_3 = delty_delq0_0+0.5*h*delty_delq0_2;
         
-        double deltx_delq0_3 = this.deltx_delq0_next(q,v,tx0+0.5*h*tx2,ty0+0.5*ty2,_b[0],_b[1],_b[2],
+        double deltx_delq0_3 = this.deltx_delq0_next(q,v,tx0+0.5*h*tx2,ty0+0.5*h*ty2,_b[0],_b[1],_b[2],
                 deltx_delq0_0+0.5*h*deltx_delq0_2,delty_delq0_0+0.5*h*delty_delq0_2);
-        double delty_delq0_3 = this.delty_delq0_next(q,v,tx0+0.5*h*tx2,ty0+0.5*ty2,_b[0],_b[1],_b[2],
+        double delty_delq0_3 = this.delty_delq0_next(q,v,tx0+0.5*h*tx2,ty0+0.5*h*ty2,_b[0],_b[1],_b[2],
                 deltx_delq0_0+0.5*h*deltx_delq0_2,delty_delq0_0+0.5*h*delty_delq0_2);
         
         swimmer.Bfield(sector, x0+h*x3, y0+h*y3, z0+h, _b);
@@ -294,31 +293,28 @@ public class RungeKutta {
             C[i1][4] = u[i1][4];
         }
 
-        // Q  process noise matrix estimate
-        double p = Math.abs(1. / q);
-        double pz = p / Math.sqrt(1 + tx * tx + ty * ty);
-        double px = tx * pz;
-        double py = ty * pz;
-
-        double t_ov_X0 = Math.signum(h) * h / Constants.ARGONRADLEN; //path length in radiation length units = t/X0 [true path length/ X0] ; Ar radiation length = 14 cm
-
-
-        double beta = p / Math.sqrt(p * p + mass * mass); // use particle momentum
-        double cosEntranceAngle = Math.abs((x * px + y * py + z * pz) / (Math.sqrt(x * x + y * y + z * z) * p));
-        double pathLength = t_ov_X0 / cosEntranceAngle;
-
-        double sctRMS = (0.0136 / (beta * p)) * Math.sqrt(pathLength) * (1 + 0.038 * Math.log(pathLength)); // Highland-Lynch-Dahl formula
-
-        double cov_txtx = (1 + tx * tx) * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
-        double cov_tyty = (1 + ty * ty) * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
-        double cov_txty = tx * ty * (1 + tx * tx + ty * ty) * sctRMS * sctRMS;
-
-        if (h > 0) {
-            C[2][2] += cov_txtx;
-            C[2][3] += cov_txty;
-            C[3][2] += cov_txty;
-            C[3][3] += cov_tyty;
-        }
+//        // Q  process noise matrix estimate
+//        double p = Math.abs(1. / q);
+//        
+//        double X0 = fVec.getX0(z0+h/2);
+//        double t_ov_X0 = Math.sqrt((x0-x)*(x0-x)+(y0-y)*(y0-y)+h*h) / X0;//path length in radiation length units = t/X0 [true path length/ X0] ; Ar radiation length = 14 cm
+//
+//        double beta = p / Math.sqrt(p * p + mass * mass);  //use particle momentum
+//        beta = 1;
+//        
+//        double sctRMS = ((0.0136)/(beta*p))*Math.sqrt(t_ov_X0*Math.sqrt(1 + tx0 * tx0 + ty0 * ty0))*
+//                (1 + 0.038 * Math.log(t_ov_X0*Math.sqrt(1 + tx0 * tx0 + ty0 * ty0)));
+//        
+//        double cov_txtx = (1 + tx0 * tx0) * (1 + tx0 * tx0 + ty0 * ty0) * sctRMS * sctRMS;
+//        double cov_tyty = (1 + ty0 * ty0) * (1 + tx0 * tx0 + ty0 * ty0) * sctRMS * sctRMS;
+//        double cov_txty = tx0 * ty0 * (1 + tx0 * tx0 + ty0 * ty0) * sctRMS * sctRMS;
+//
+//        if (h > 0) { 
+//            C[2][2] += cov_txtx;
+//            C[2][3] += cov_txty;
+//            C[3][2] += cov_txty;
+//            C[3][3] += cov_tyty;
+//        } 
         
         fVec.x = x;
         fVec.y  = y ;
@@ -328,9 +324,9 @@ public class RungeKutta {
         fVec.Q = q;
         fVec.B = Math.sqrt(_b[0]*_b[0]+_b[1]*_b[1]+_b[2]*_b[2]);
         fVec.deltaPath = Math.sqrt((x0-x)*(x0-x)+(y0-y)*(y0-y)+h*h)+dPath;
-        fCov.covMat=new Matrix(C);
-        
-        
+        fCov.covMat.set(C);
+        //System.out.println("Transported matrix");
+        //Matrix5x5.show(fCov.covMat);
     }
     
     
@@ -508,7 +504,7 @@ public class RungeKutta {
         jk2.add(10, deltx_delq0_2 );  
         jk2.add(11, delty_delq0_2 );  
     }
-    
+
     
     
 }

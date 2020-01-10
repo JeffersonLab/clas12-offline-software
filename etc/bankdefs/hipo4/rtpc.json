@@ -1,0 +1,32 @@
+[   
+ {
+    "name": "RTPC::rec",
+    "group": 1720,
+    "item" : 1,
+    "info": "reconstructed RTPC hits",
+    "entries": [
+       {"name":"TID",        "type":"I", "info":"Track ID of the hit"},
+       {"name":"cellID",     "type":"I",  "info":"cell id"},
+       {"name":"time",       "type":"F", "info":"Time (ns)"},
+       {"name":"posX",       "type":"F", "info":"x pos (cm)"},
+       {"name":"posY",       "type":"F", "info":"y pos (cm)"},
+       {"name":"posZ",       "type":"F", "info":"z pos (cm)"},
+       {"name":"tdiff",      "type":"F", "info":"Time shift (ns)"}
+    ]
+  },
+  {
+	"name": "RTPC::trackinfo",
+	"group": 1720,
+	"item" : 2,
+	"info" : "reconstructed track info",
+	"entries": [
+		{"name":"TID",		"type":"I", "info":"Track ID of the hit"},
+		{"name":"px",		"type":"F", "info":"X component of the momentum"},
+		{"name":"py",		"type":"F", "info":"Y component of the momentum"},
+		{"name":"pz",		"type":"F", "info":"Z component of the momentum"},
+		{"name":"vz",		"type":"F", "info":"Z component of the reconstructed vertex"},
+		{"name":"trackl",   "type":"F", "info":"Length of the Track"},
+		{"name":"dEdx",		"type":"F", "info":"dEdx for the Track"}		
+	]
+   }	
+ ]

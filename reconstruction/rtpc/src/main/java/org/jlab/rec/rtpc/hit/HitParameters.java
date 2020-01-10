@@ -1,0 +1,101 @@
+package org.jlab.rec.rtpc.hit;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+public class HitParameters {
+
+    final private int _SignalStepSize = 10;
+    final private int _BinSize = 40; 
+    final private int _NBinKept = 3; 
+    final private int _TrigWindSize = 10000;
+    private int _eventnum = 0; 
+    private ADCMap _ADCMap = new ADCMap();
+    private HashMap<Integer, List<Double>> _TimeMap = new HashMap<>();
+    private HashMap<Integer, List<HitVector>> _FinalTIDMap = new HashMap<>();
+    private List<Integer> _PadN = new ArrayList<>();  // used to read only cell with signal, one entry for each hit         
+    private List<Integer> _PadList = new ArrayList<>();// used to read only cell with signal, one entry for each cell
+    private List<Integer> _Pad = new ArrayList<>();
+    private List<Double> _ADC = new ArrayList<>();
+    private List<Double> _Time_o = new ArrayList<>();
+    private List<Double> _weightave = new ArrayList<>();
+    private List<Double> _maxinte = new ArrayList<>();
+    private List<Double> _time = new ArrayList<>();
+    private List<Double> _XVec = new ArrayList<>();
+    private List<Double> _YVec = new ArrayList<>();
+    private List<Double> _ZVec = new ArrayList<>();
+    private HashMap<Integer, HashMap<Integer,List<Integer>>> _TIDMap = new HashMap<>();
+    private HashMap<Integer, HashMap<Integer,List<Integer>>> _strkTIDMap = new HashMap<>();
+    private HashMap<Integer, List<HitVector>> _alltracks = new HashMap<>();
+    private HashMap<Integer, Double> _largetmap = new HashMap<>();
+    private HashMap<Integer, List<RecoHitVector>> _recotrackmap = new HashMap<>();
+    private HashMap<Integer, PadVector> _padmap = new HashMap<>();
+    private TrackMap _trackmap = new TrackMap();
+    private ReducedTrackMap _rtrackmap = new ReducedTrackMap();
+    private HashMap<Integer, FinalTrackInfo> _finaltrackinfomap;
+
+    public int get_SignalStepSize(){return _SignalStepSize;} // step size of the signal before integration (arbitrary value)
+    public int get_BinSize(){return _BinSize;} // electronics integrates the signal over 40 ns
+    public int get_NBinKept(){return _NBinKept;} // only 1 bin over 3 is kept by the daq
+    public int get_TrigWindSize(){return _TrigWindSize;} // Trigger window should be 10 micro
+    public ADCMap get_ADCMap(){return _ADCMap;}
+    public HashMap<Integer, List<Double>> get_TimeMap(){return _TimeMap;}
+    public List<Integer> get_PadN(){return _PadN;}
+    public List<Integer> get_PadList(){return _PadList;}
+    public List<Integer> get_Pad(){return _Pad;}
+    public List<Double> get_ADC(){return _ADC;}
+    public List<Double> get_Time_o(){return _Time_o;}
+    public int get_eventnum(){return _eventnum;}
+    public List<Double> get_weightave() {return _weightave;}
+    public List<Double> get_maxinte() {return _maxinte;}
+    public List<Double> get_time() {return _time;}
+    public List<Double> get_XVec() {return _XVec;}
+    public List<Double> get_YVec() {return _YVec;}
+    public List<Double> get_ZVec() {return _ZVec;}
+    public HashMap<Integer, HashMap<Integer,List<Integer>>> get_TIDMap() {return _TIDMap;}
+    public HashMap<Integer, HashMap<Integer,List<Integer>>> get_strkTIDMap() {return _strkTIDMap;}
+    public HashMap<Integer, List<HitVector>> get_FinalTIDMap() {return _FinalTIDMap;}
+    public HashMap<Integer, List<HitVector>> get_alltracks() {return _alltracks;}
+    public HashMap<Integer, Double> get_largetmap() {return _largetmap;}
+    public HashMap<Integer, List<RecoHitVector>> get_recotrackmap() {return _recotrackmap;}
+    public TrackMap get_trackmap() {return _trackmap;}
+    public ReducedTrackMap get_rtrackmap() {return _rtrackmap;}
+    public HashMap<Integer, FinalTrackInfo> get_finaltrackinfomap() {return _finaltrackinfomap;}
+    public PadVector get_padvector(int pad) {
+        if(!_padmap.containsKey(pad)) {
+            _padmap.put(pad, new PadVector(pad));
+        }
+        return _padmap.get(pad);
+    }
+
+
+    public void set_ADCMap(ADCMap _ADCMap){this._ADCMap = _ADCMap;}
+    public void set_TimeMap(HashMap<Integer, List<Double>> _TimeMap){this._TimeMap = _TimeMap;}
+    public void set_PadN(List<Integer> _PadN){this._PadN = _PadN;}
+    public void set_PadList(List<Integer> _PadList){this._PadList = _PadList;}
+    public void set_Pad(List<Integer> _Pad){this._Pad = _Pad;}
+    public void set_ADC(List<Double> _ADC){this._ADC = _ADC;}
+    public void set_Time_o(List<Double> _Time_o){this._Time_o = _Time_o;}
+    public void set_eventnum(int _eventnum){this._eventnum = _eventnum;}
+    public void set_weightave(List<Double> _weightave) {this._weightave = _weightave;}
+    public void set_maxinte(List<Double> _maxinte) {this._maxinte = _maxinte;}
+    public void set_time(List<Double> _time) {this._time = _time;}
+    public void set_XVec(List<Double> _XVec) {this._XVec = _XVec;}
+    public void set_YVec(List<Double> _YVec) {this._YVec = _YVec;}
+    public void set_ZVec(List<Double> _ZVec) {this._ZVec = _ZVec;}
+    public void set_TIDMap(HashMap<Integer, HashMap<Integer,List<Integer>>> _TIDMap) {this._TIDMap = _TIDMap;}
+    public void set_strkTIDMap(HashMap<Integer, HashMap<Integer,List<Integer>>> _strkTIDMap) {this._strkTIDMap = _strkTIDMap;}
+    public void set_FinalTimeMap(HashMap<Integer, List<HitVector>> _finalTIDMap){this._FinalTIDMap = _finalTIDMap;}
+    public void set_alltracks(HashMap<Integer, List<HitVector>> _alltracks) {this._alltracks = _alltracks;}
+    public void set_largetmap(HashMap<Integer, Double> _largetmap) {this._largetmap = _largetmap;}
+    public void set_recotrackmap(HashMap<Integer,List<RecoHitVector>> _recotrackmap) {this._recotrackmap = _recotrackmap;}
+    public void set_trackmap(TrackMap _trackmap) {this._trackmap = _trackmap;}
+    public void set_rtrackmap(ReducedTrackMap _rtrackmap) {this._rtrackmap = _rtrackmap;}
+    public void set_finaltrackinfomap(HashMap<Integer, FinalTrackInfo> _finaltrackinfomap) {this._finaltrackinfomap = _finaltrackinfomap;}
+
+    
+    public HitParameters() {}
+
+
+}

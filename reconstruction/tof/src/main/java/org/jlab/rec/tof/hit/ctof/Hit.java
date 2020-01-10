@@ -77,7 +77,12 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double TW1U = this.TW11(null);
         double TW1D = this.TW12(null);
         double TW1P = this.TW1P(null); 
-        double TW2P = this.TW2P(null); 
+        double TW2P = this.TW2P(null);  
+        double TW0E = this.TW0E(null); 
+        double TW1E = this.TW1E(null); 
+        double TW2E = this.TW2E(null); 
+        double TW3E = this.TW3E(null); 
+        double TW4E = this.TW4E(null);
         double HPOSa = this.HPOSa(constants8);
         double HPOSb = this.HPOSb(constants8);
         double HPOSc = this.HPOSc(constants8);
@@ -113,6 +118,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double ScinBarThickn = this.get_barthickness();
 
         this.set_HitParams(superlayer, TW0U, TW0D, TW1U, TW1D, TW1P, TW2P, 
+                TW0E, TW1E, TW2E, TW3E, TW4E, 
                 HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, lambdaU,lambdaD, 
                 yOffset, vU, vD, vUUnc, vDUnc, PEDU, PEDD, PEDUUnc,
                 PEDDUnc, paddle2paddle, RFPad, timeOffset, triggerPhase, LSBConv, LSBConvErr,
@@ -241,6 +247,31 @@ public class Hit extends AHit implements IGetCalibrationParams {
     public double TW12(IndexedTable tab) {
         //double TW1D = CCDBConstants.getTW1D()[this.get_Sector() - 1][this
          //       .get_Panel() - 1][this.get_Paddle() - 1];
+         return 0;
+    }
+
+    @Override
+    public double TW0E(IndexedTable tab) {
+         return 0;
+    }
+
+    @Override
+    public double TW1E(IndexedTable tab) {
+         return 0;
+    }
+
+    @Override
+    public double TW2E(IndexedTable tab) {
+         return 0;
+    }
+
+    @Override
+    public double TW3E(IndexedTable tab) {
+         return 0;
+    }
+
+    @Override
+    public double TW4E(IndexedTable tab) {
          return 0;
     }
 

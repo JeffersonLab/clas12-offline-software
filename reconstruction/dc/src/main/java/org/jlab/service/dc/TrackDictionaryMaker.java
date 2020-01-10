@@ -618,7 +618,7 @@ public class TrackDictionaryMaker extends DCEngine{
 
     private void resetGeom(String geomDBVar) {
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, Optional.ofNullable(geomDBVar).orElse("default"));
-        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
+        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, DCGeant4Factory.ENDPLATESBOWON);
         
         for(int l=0; l<6; l++) {
             Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);

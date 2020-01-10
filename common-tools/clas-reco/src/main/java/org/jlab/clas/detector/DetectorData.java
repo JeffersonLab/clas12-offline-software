@@ -353,7 +353,7 @@ public class DetectorData {
    public static DataBank getEventShadowBank(DetectorEvent detectorEvent, DataEvent event, String bank_name){
        DataBank bank = event.createBank(bank_name, 1);
        bank.setFloat("startTime", 0, (float) detectorEvent.getEventHeader().getStartTimeFT());
-       bank.setShort("EvCAT", 0, detectorEvent.getEventHeader().getEventCategoryFT());
+       bank.setLong("category", 0, detectorEvent.getEventHeader().getEventCategoryFT());
        return bank;
    }
       
