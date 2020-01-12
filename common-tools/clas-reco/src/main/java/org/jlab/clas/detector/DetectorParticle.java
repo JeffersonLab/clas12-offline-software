@@ -382,60 +382,17 @@ public class DetectorParticle implements Comparable {
         return energy;
     }
    
-    /*
-    // New, trajectory-based path length:
     public double getPathLength(DetectorType type,int layId) {
-        DetectorTrack.Trajectory t=this.detectorTrack.getTrajectory();
-        if (!t.hasLayer(type.getDetectorId(),layId)) return -1.0;
-        return t.get(type.getDetectorId(),layId).getPathLength();
+        return this.detectorTrack.getPathLength(type,layId);
     }
-    // New, trajectory-based path length:
     public double getBeta(DetectorType type, int layer, double startTime){
         DetectorResponse response = this.getHit(type,layer);
         if(response==null) return -1.0;
-        double cpath = this.getPathLength(type,layer);
-        double ctime = response.getTime() - startTime;
-        double beta  = cpath/ctime/PhysicsConstants.speedOfLight();
-        return beta;
+        final double cpath = this.detectorTrack.getPathLength(type,layer);
+        final double ctime = response.getTime() - startTime;
+        return cpath/ctime/PhysicsConstants.speedOfLight();
     }
-    public double getBeta(DetectorType type, double startTime){
-        return this.getBeta(type,0,startTime);
-    }
-    */
-    
-    // Old, DOCA-based path length:
-    public double   getPathLength(DetectorType type){
-        DetectorResponse response = this.getHit(type);
-        if(response==null) return -1.0;
-        return this.getPathLength(response.getPosition());
-    }
-    public double  getPathLength(DetectorType type, int layer){
-        DetectorResponse response = this.getHit(type,layer);
-        if(response==null) return -1.0;
-        return this.getPathLength(response.getPosition());
-    } 
-    public double getBeta(DetectorType type, int layer, double startTime){
-        DetectorResponse response = this.getHit(type,layer);
-        if(response==null) return -1.0;
-        double cpath = this.getPathLength(response.getPosition());
-        double ctime = response.getTime() - startTime;
-        double beta  = cpath/ctime/PhysicsConstants.speedOfLight();
-        return beta;
-    }
-    public double getBeta(DetectorType type, double startTime){
-        DetectorResponse response = this.getHit(type);
-        if(response==null) return -1.0;
-        double cpath = this.getPathLength(response.getPosition());
-        double ctime = response.getTime() - startTime;
-        double beta  = cpath/ctime/PhysicsConstants.speedOfLight();
-        if(type==DetectorType.CTOF){
-            cpath = response.getPath();
-            ctime = response.getTime()- startTime;
-            beta = cpath/ctime/PhysicsConstants.speedOfLight(); 
-        }
-        return beta;
-    }
-    
+
     public void setStatus(double minNpheHtcc,double minNpheLtcc) {
         this.particleStatus = DetectorParticleStatus.create(this,minNpheHtcc,minNpheLtcc);
     }
@@ -539,29 +496,13 @@ public class DetectorParticle implements Comparable {
     }
 
     public double getVertexTime(DetectorType type, int layer){
-        double vertex_time = this.getTime(type,layer) -
-            this.getPathLength(type, layer) /
-            (this.getTheoryBeta(this.getPid())*PhysicsConstants.speedOfLight());
-        return vertex_time;
+        return this.getVertexTime(type,layer,this.getPid());
     }
 
     public double getVertexTime(DetectorType type, int layer, int pid){
-        
-        double vertex_time = -9999;
-        
-        if(type==DetectorType.CTOF) {
-            DetectorResponse res = this.getHit(type);
-            vertex_time = this.getTime(type) - res.getPath()/
-             (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
-        }
-       
-        else {
-            vertex_time = this.getTime(type,layer) -
-                this.getPathLength(type, layer) /
-                (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
-        }
-        
-        return vertex_time;
+        return this.getTime(type,layer) -
+               this.getPathLength(type, layer) /
+               (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
     }
 
     public int getCherenkovSignal(List<DetectorResponse> responses, DetectorType type){

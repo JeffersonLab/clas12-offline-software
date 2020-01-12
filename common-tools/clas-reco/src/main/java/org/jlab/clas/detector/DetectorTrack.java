@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.jlab.clas.physics.Vector3;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
 
@@ -163,6 +164,11 @@ public class DetectorTrack implements Comparable {
     }
     public void addTrajectoryPoint(int detId,int layId,Line3D traj) {
         this.addTrajectoryPoint(detId,layId,traj,0.0f,-1.0f);
+    }
+
+    public double getPathLength(DetectorType type,int layId) {
+        if (!trajectory.hasLayer(type.getDetectorId(),layId)) return -1.0;
+        return trajectory.get(type.getDetectorId(),layId).getPathLength();
     }
 
     public Line3D getTrajectoryPoint(int detId,int layId) {
