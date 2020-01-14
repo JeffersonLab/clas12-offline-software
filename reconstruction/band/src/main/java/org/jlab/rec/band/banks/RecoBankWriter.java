@@ -2,6 +2,7 @@ package org.jlab.rec.band.banks;
 
 import java.util.ArrayList;
 
+import org.apache.commons.math3.analysis.function.Sqrt;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.band.hit.BandHit;
@@ -32,6 +33,8 @@ public class RecoBankWriter {
 			bank.setByte("sector",i, (byte) hitlist.get(i).GetSector());
 			bank.setByte("layer",i, (byte) hitlist.get(i).GetLayer());
 			bank.setShort("component",i, (short) hitlist.get(i).GetComponent());
+			
+			bank.setFloat("energy", i, (float) Math.sqrt(hitlist.get(i).GetAdcLeft() * hitlist.get(i).GetAdcRight()));
 
 			bank.setFloat("meantimeTdc",i, (float) hitlist.get(i).GetMeanTime_TDC());
 			bank.setFloat("meantimeFadc",i, (float) hitlist.get(i).GetMeanTime_FADC());
