@@ -76,7 +76,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         boolean isMC = false;
         boolean isCosmics = false;
         DataBank bank = event.getBank("RUN::config");
-        //System.out.println(bank.getInt("Event")[0]);
+        //System.out.println("EVENTNUM "+bank.getInt("event",0));
         if (bank.getByte("type", 0) == 0) {
             isMC = true;
         }
@@ -109,14 +109,14 @@ public class CVTReconstruction extends ReconstructionEngine {
             if(Math.abs(SolenoidScale)<0.001)
             Constants.setCosmicsData(true);
             
-            System.out.println(" LOADING CVT GEOMETRY...............................");
-            CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, "default"));
+            System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variationName);
+            CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, variationName));
             System.out.println("SVT LOADING WITH VARIATION "+variationName);
             DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, variationName);
             cp = SVTConstants.connect( cp );
             SVTConstants.loadAlignmentShifts( cp );
             cp.disconnect();  
-            SVTStripFactory svtFac = new SVTStripFactory(cp, false);
+            SVTStripFactory svtFac = new SVTStripFactory(cp, true);
             SVTGeom.setSvtStripFactory(svtFac);
             Constants.Load(isCosmics, isSVTonly);
             this.setRun(newRun);
@@ -146,7 +146,7 @@ public class CVTReconstruction extends ReconstructionEngine {
     public boolean processDataEvent(DataEvent event) {
         
         this.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
-        double shift = org.jlab.rec.cvt.Constants.getZoffset();
+        double shift = 0;
         this.FieldsConfig = this.getFieldsConfig();
         
         Swim swimmer = new Swim();
@@ -225,7 +225,6 @@ public class CVTReconstruction extends ReconstructionEngine {
             List<Seed> seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
             
             for (Seed seed : seeds) { 
-            
             kf = new KFitter(seed, SVTGeom, swimmer );
             kf.runFitter(SVTGeom, BMTGeom, swimmer);
             //System.out.println(" OUTPUT SEED......................");

@@ -13,7 +13,7 @@ import org.jlab.detector.geant4.v2.SVT.*;
 import org.jlab.geometry.prim.Line3d;
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.detector.geant4.v2.SVT.SVTStripFactory;
-//import org.jlab.detector.geant4.v2.SVT.AlignmentFactory;
+import org.jlab.detector.geant4.v2.SVT.AlignmentFactory;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.geometry.prim.*;
 import org.jlab.geometry.prim.Line3d;
@@ -31,6 +31,7 @@ public class Geometry {
     }
     
     public Geometry() {
+        //AlignmentFactory.VERBOSE=true;
     }
 
     // Comments on the Geometry of the BST 
@@ -76,9 +77,12 @@ public class Geometry {
                                                                               SVTConstants.LAYERRADIUS[ rm[0] ][ rm[1]],
                                                                               SVTConstants.Z0ACTIVE[    rm[0] ] ));
         // apply the shifts to both ends of labFrameLine
- 	double scaleT = 1.0, scaleR = 1.0;// scale factors used for visualization. Not relevant here.
- 	//AlignmentFactory.applyShift(labFrameLine.origin(),SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1)], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
-        //AlignmentFactory.applyShift(labFrameLine.end(),   SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1)], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
+ 	double scaleT = 1.0, scaleR = -1.0;// scale factors used for visualization. Not relevant here.
+        //System.out.println(" GET MODULE O "+labFrameLine.origin().toString());
+        //System.out.println(" GET MODULE 1 "+SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1)].toString());
+        //System.out.println(" GET MODULE 2 "+new Point3D(SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1).x, SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1).y, SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1).z).toString());
+ 	AlignmentFactory.applyShift(labFrameLine.origin(),SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1)], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
+        AlignmentFactory.applyShift(labFrameLine.end(),   SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1)], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
  
  	// return only the origin of the line.
  
@@ -102,9 +106,9 @@ public class Geometry {
                                                                               SVTConstants.LAYERRADIUS[ rm[0] ][ rm[1]],
                                                                               SVTConstants.Z0ACTIVE[    rm[0] ] ));
         // apply the shifts to both ends of labFrameLine
- 	double scaleT = 1.0, scaleR = 1.0;// scale factors used for visualization. Not relevant here.
- 	//AlignmentFactory.applyShift(labFrameLine.origin(),SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1)], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
-        //AlignmentFactory.applyShift(labFrameLine.end(),   SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1)], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
+ 	double scaleT = 1.0, scaleR = -1.0;// scale factors used for visualization. Not relevant here.
+ 	AlignmentFactory.applyShift(labFrameLine.origin(),SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1)], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
+        AlignmentFactory.applyShift(labFrameLine.end(),   SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1)], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
  
  	// return only the origin of this line.
         return new Point3D(labFrameLine.origin().x, labFrameLine.origin().y, labFrameLine.origin().z);
@@ -229,9 +233,9 @@ public class Geometry {
                                                                                   SVTConstants.LAYERRADIUS[rm[0]][rm[1]]+gap/2,
                                                                                   SVTConstants.Z0ACTIVE[rm[0]] ));
             //gpg apply the shifts to both ends of labFrameLine.
- 	    double scaleT = 1.0, scaleR = 1.0;// scale factors used for visualization. Not relevant here.
- 	    //AlignmentFactory.applyShift(labFrameLine.origin(),SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1)], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
- 	    //AlignmentFactory.applyShift(labFrameLine.end(),   SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1)], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
+ 	    double scaleT = 1.0, scaleR = -1.0;// scale factors used for visualization. Not relevant here.
+ 	    AlignmentFactory.applyShift(labFrameLine.origin(),SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1)], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
+ 	    AlignmentFactory.applyShift(labFrameLine.end(),   SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1)], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1),scaleT,scaleR );
   
             transf= new Point3D(labFrameLine.origin().x,
                                 labFrameLine.origin().y,
@@ -243,9 +247,9 @@ public class Geometry {
             boolean flip = true;
             
             //gpg need to apply the reverse survey shifts here.
- 	    double scaleT = 1.0, scaleR = 1.0;// scale factors used for visualization. Not relevant here.
- 	    //AlignmentFactory.applyInverseShift( glLine.origin(), SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1 )], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1 ), scaleT, scaleR );
- 	    //AlignmentFactory.applyInverseShift( glLine.end(), SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1 )], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1 ), scaleT, scaleR );
+ 	    double scaleT = 1.0, scaleR = -1.0;// scale factors used for visualization. Not relevant here.
+ 	    AlignmentFactory.applyInverseShift( glLine.origin(), SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1 )], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1 ), scaleT, scaleR );
+ 	    AlignmentFactory.applyInverseShift( glLine.end(), SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( rm[0],sector-1 )], SVTAlignmentFactory.getIdealFiducialCenter( rm[0], sector-1 ), scaleT, scaleR );
   
             Line3d localLine = glLine.transformed(SVTConstants.getLabFrame( (int)((layer+1)/2) -1,
                                                                             sector-1,
@@ -311,15 +315,15 @@ public class Geometry {
         vals[4] = yerr;
         vals[5] = LCErr_z;
 
-        if (LC_z > SVTConstants.MODULELEN + org.jlab.rec.cvt.svt.Constants.interTol * 2) {
+        if (LC_z > SVTConstants.MODULELEN + org.jlab.rec.cvt.svt.Constants.TOLTOMODULELEN * 2) {
             return new double[]{Double.NaN, 0, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
         }
 
         // once there is a trk, the cross should be well calculated
         //if the local cross is not in the fiducial volume it is not physical
         if ((trkDir != null && (LC_x < 0 || LC_x > SVTConstants.ACTIVESENWID + org.jlab.rec.cvt.svt.Constants.TOLTOMODULEEDGE))
-         || (trkDir != null && (LC_z < -org.jlab.rec.cvt.svt.Constants.interTol
-                                         || LC_z > SVTConstants.MODULELEN   + org.jlab.rec.cvt.svt.Constants.interTol))) {
+         || (trkDir != null && (LC_z < -org.jlab.rec.cvt.svt.Constants.TOLTOMODULELEN
+                                         || LC_z > SVTConstants.MODULELEN   + org.jlab.rec.cvt.svt.Constants.TOLTOMODULELEN))) {
             return new double[]{Double.NaN, 0, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
         }
 

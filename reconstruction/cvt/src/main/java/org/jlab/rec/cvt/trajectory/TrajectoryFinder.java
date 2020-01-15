@@ -534,7 +534,7 @@ public class TrajectoryFinder {
                     value = false;
                 }
             	
-                if (Math.abs(stVec.z() - c.get_Point0().z()) > Constants.interTol) {
+                if (Math.abs(stVec.z() - c.get_Point0().z()) > Constants.TOLTOMODULELEN) {
                     value = false;
                 }
             }
@@ -543,7 +543,7 @@ public class TrajectoryFinder {
                     value = false;
                 }
                 double deltaXt = Math.sqrt((stVec.x() - c.get_Point().x()) * (stVec.x() - c.get_Point().x()) + (stVec.y() - c.get_Point().y()) * (stVec.y() - c.get_Point().y()));
-                if (deltaXt > 2*Constants.interTol) {
+                if (deltaXt > 2*Constants.TOLTOMODULELEN) {
                     value = false;
                 }
             }

@@ -117,6 +117,9 @@ public class SVTConstants
 		cp.loadTable( ccdbPath +"material/box");
 		cp.loadTable( ccdbPath +"material/tube");
 		cp.loadTable( ccdbPath +"alignment");
+                //shift by target
+                cp.loadTable("/geometry/target");
+                
 		//if( loadAlignmentTables ) cp.loadTable( ccdbPath +"alignment/sector"); // possible future tables
 		//if( loadAlignmentTables ) cp.loadTable( ccdbPath +"alignment/layer");
 		
@@ -320,13 +323,14 @@ public class SVTConstants
 			// |			  | radius					  | radius
 			// |			  | 						  |
 			// o==============v===========================v===================================-> z (beamline)
-			
+			System.out.println("SVT READ Z SHIFT VALUE "+cp.getDouble("/geometry/target/position", 0));
 			// LAYERRADIUS and ZSTARTACTIVE are used primarily by the Reconstruction and getStrip()
 			for( int region = 0; region < NREGIONS; region++ )
 			{
 				NSECTORS[region] = cp.getInteger(ccdbPath+"region/nSectors", region );
 				STATUS[region] = cp.getInteger(ccdbPath+"region/status", region );
-				Z0ACTIVE[region] = cp.getDouble(ccdbPath+"region/zStart", region ); // Cu edge of hybrid sensor's active volume
+				Z0ACTIVE[region] = cp.getDouble(ccdbPath+"region/zStart", region )
+                                        + cp.getDouble("/geometry/target/position", 0)*10; // Cu edge of hybrid sensor's active volume
 				REFRADIUS[region] = cp.getDouble(ccdbPath+"region/UlayerOuterRadius", region); // radius to outer side of U (inner) module
 				SUPPORTRADIUS[region] = cp.getDouble(ccdbPath+"region/CuSupportInnerRadius", region); // radius to inner side of heatSinkRidge
 				

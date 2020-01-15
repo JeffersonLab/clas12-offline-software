@@ -94,7 +94,8 @@ public class Constants {
     // cut on Edep min;
     public static double edep_min = 0.020; //20keV=0.020
     // cut on strip intersection tolerance
-    public static double interTol = 10.0; //10.0 = /1 cm
+    public static double TOLTOMODULELEN = 10.0; //10.0 = /1 cm
+    public static final double TOLTOMODULEEDGE = 1.0; // Tolerance for track trajectory point at layer to module fiducial edge (mm)
     // sum of strip numbers for valid intersection:
     //public static int sumStpNumMin = 174;
     //public static int sumStpNumMax = 259;
@@ -159,8 +160,6 @@ public class Constants {
     public static final double MODULEPOSFAC = 0.5; // % wrt top of  module
 
     public static final double PIDCUTOFF = 2.6;
-
-    public static final double TOLTOMODULEEDGE = 1.0; // Tolerance for track trajectory point at layer to module fiducial edge (mm)
 
     public static double MAXDISTTOTRAJXY = 5; //max xy dist to cross in cm
 

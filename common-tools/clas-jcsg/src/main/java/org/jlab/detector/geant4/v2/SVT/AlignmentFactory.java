@@ -385,10 +385,10 @@ public class AlignmentFactory
 		
 		if( VERBOSE )
 		{
-			System.out.printf("PN: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
-			System.out.printf("ST: % 8.3f % 8.3f % 8.3f\n", tx, ty, tz );
-			System.out.printf("SR: % 8.3f % 8.3f % 8.3f % 8.3f\n", rx, ry, rz, Math.toDegrees(ra) );
-			System.out.printf("SC: % 8.3f % 8.3f % 8.3f\n", aCenter.x, aCenter.y, aCenter.z );
+			System.out.printf("iPN: % 8.3f % 8.3f % 8.3f\n", aPoint.x, aPoint.y, aPoint.z );
+			System.out.printf("iST: % 8.3f % 8.3f % 8.3f\n", tx, ty, tz );
+			System.out.printf("iSR: % 8.3f % 8.3f % 8.3f % 8.3f\n", rx, ry, rz, Math.toDegrees(ra) );
+			System.out.printf("iSC: % 8.3f % 8.3f % 8.3f\n", aCenter.x, aCenter.y, aCenter.z );
 		}
 			
 		// undo the translation.
