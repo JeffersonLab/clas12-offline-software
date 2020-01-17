@@ -297,7 +297,10 @@ public class AlignmentFactory
 	 */
 	public static void applyShift( Vector3d aPoint, double[] aShift, Vector3d aCenter, double aScaleT, double aScaleR ) throws IllegalArgumentException
 	{
-		if( aShift.length != NSHIFTDATARECLEN ){ throw new IllegalArgumentException("shift array must have "+NSHIFTDATARECLEN+" elements"); }
+                if(aShift==null){ throw new IllegalArgumentException("shift array is null "+
+                        Math.sqrt(aPoint.x*aPoint.x+aPoint.y*aPoint.y)); }
+			
+		if( aShift.length != NSHIFTDATARECLEN ){ throw new IllegalArgumentException("shift array must have "+NSHIFTDATARECLEN+" elements");}
 			
 		// double[] tarray = SVTConstants.getDataAlignmentSectorShift()[0];
 		// System.out.printf("Called applyShift. Shift[0][0]  = %8.4f ******************************************\n",tarray[0]);

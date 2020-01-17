@@ -114,7 +114,6 @@ public class CVTReconstruction extends ReconstructionEngine {
             System.out.println("SVT LOADING WITH VARIATION "+variationName);
             DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, variationName);
             cp = SVTConstants.connect( cp );
-            SVTConstants.loadAlignmentShifts( cp );
             cp.disconnect();  
             SVTStripFactory svtFac = new SVTStripFactory(cp, true);
             SVTGeom.setSvtStripFactory(svtFac);
