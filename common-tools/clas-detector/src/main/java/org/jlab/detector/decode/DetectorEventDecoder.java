@@ -87,12 +87,12 @@ public class DetectorEventDecoder {
     }
 
     public final void initDecoderDev(){
-        keysTrans = Arrays.asList(new String[]{ "HTCC","BST","RTPC"} );
+        keysTrans = Arrays.asList(new String[]{ "HTCC","BST","RTPC","HDICE"} );
         tablesTrans = Arrays.asList(new String[]{ "/daq/tt/clasdev/htcc","/daq/tt/clasdev/svt"
-                ,"/daq/tt/clasdev/rtpc" });
+                ,"/daq/tt/clasdev/rtpc","/daq/tt/clasdev/hdice" });
 
-        keysFitter   = Arrays.asList(new String[]{"HTCC"});
-        tablesFitter = Arrays.asList(new String[]{"/daq/fadc/clasdev/htcc"});
+        keysFitter   = Arrays.asList(new String[]{"HTCC","HDICE"});
+        tablesFitter = Arrays.asList(new String[]{"/daq/fadc/clasdev/htcc","/daq/fadc/clasdev/hdice"});
         translationManager.init(keysTrans,tablesTrans);
         fitterManager.init(keysFitter, tablesFitter);
         
