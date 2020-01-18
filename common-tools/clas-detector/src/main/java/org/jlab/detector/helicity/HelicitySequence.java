@@ -40,16 +40,15 @@ import org.jlab.jnp.hipo4.io.HipoReader;
  * The return values from getters are just {@link HelicityBit} objects and
  * represent the HWP-corrected helicity.
  *
- * See {@link HelicityAnalysis} for an example on using this class.
+ * See {@link HelicityAnalysisSimple} for an example on using this class.
  * 
  * @author baltzell
  */
-public class HelicitySequence {
+class HelicitySequence {
 
-    // FIXME:  these should go to CCDB:
     public static final double TIMESTAMP_CLOCK=250.0e6; // Hz
-    public static final double HELICITY_CLOCK=29.56; // Hz
-
+    protected double helicityClock=29.56; // Hz
+    protected HelicityPattern pattern=HelicityPattern.QUARTET;
     protected boolean halfWavePlate=false;
     protected boolean analyzed=false;
     protected final Map<Long,HelicityGenerator> generators=new HashMap<>();
@@ -171,7 +170,7 @@ public class HelicitySequence {
         if (!this.generator.initialized()) return -1;
         if (timestamp < this.generator.getTimestamp()) return -1;
         final int n = (int) ( (timestamp-this.generator.getTimestamp()) /
-                TIMESTAMP_CLOCK * HELICITY_CLOCK );
+                TIMESTAMP_CLOCK * this.helicityClock );
         return n+this.generator.getOffset();
     }
    
@@ -277,7 +276,7 @@ public class HelicitySequence {
             // FIXME:  use the latest available measured timestamp,
             //         or an average
             final int n = (int) ( (timestamp-this.getTimestamp(0)) /
-                    TIMESTAMP_CLOCK * HELICITY_CLOCK );
+                    TIMESTAMP_CLOCK * this.helicityClock );
             return this.getGenerated(n);
         }
         */
@@ -335,7 +334,7 @@ public class HelicitySequence {
             for (int ii=0; ii<this.states.size()-3; ii++) {
                 final double dt01 = (this.getTimestamp(ii+1)-this.getTimestamp(ii+0))/TIMESTAMP_CLOCK;
                 final double dt12 = (this.getTimestamp(ii+2)-this.getTimestamp(ii+1))/TIMESTAMP_CLOCK;
-                if (Math.abs(dt01+dt12-1./HELICITY_CLOCK) < 0.3/HELICITY_CLOCK) {
+                if (Math.abs(dt01+dt12-1./this.helicityClock) < 0.3/this.helicityClock) {
                     this.states.remove(ii+1);
                     rejection=true;
                     nRejects++;
@@ -426,13 +425,13 @@ public class HelicitySequence {
 
             // check timestamp deltas:
             final double seconds = (this.getTimestamp(ii)-this.getTimestamp(ii-1))/TIMESTAMP_CLOCK;
-            if (seconds < (1.0-0.5)/HELICITY_CLOCK) {
+            if (seconds < (1.0-0.5)/this.helicityClock) {
                 smallGapErrors++;
                 this.states.get(ii).addSwStatusMask(HelicityState.Mask.SMALLGAP);
                 if (verbosity>1) System.err.println("ERROR:  HelicitySequence TIMESTAMP: "+ii+" "+
                         this.getTimestamp(ii)+" "+this.getTimestamp(ii-1)+" "+seconds+"s");
             }
-            else if (seconds > (1.0+0.5)/HELICITY_CLOCK) {
+            else if (seconds > (1.0+0.5)/this.helicityClock) {
                 bigGapErrors++;
                 this.states.get(ii).addSwStatusMask(HelicityState.Mask.BIGGAP);
                 if (verbosity>1) System.err.println("ERROR:  HelicitySequence TIMESTAMP: "+ii+" "+

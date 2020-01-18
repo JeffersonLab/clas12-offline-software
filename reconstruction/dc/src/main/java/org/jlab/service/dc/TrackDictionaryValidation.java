@@ -131,12 +131,12 @@ public class TrackDictionaryValidation {
                         // save particle information
                         Particle part = new Particle(
                                         -11*charge,
-                                        recParticle.getFloat("px", i),
-                                        recParticle.getFloat("py", i),
-                                        recParticle.getFloat("pz", i),
-                                        recParticle.getFloat("vx", i),
-                                        recParticle.getFloat("vy", i),
-                                        recParticle.getFloat("vz", i)); 
+                                        recParticle.getFloat("px", pindex),
+                                        recParticle.getFloat("py", pindex),
+                                        recParticle.getFloat("pz", pindex),
+                                        recParticle.getFloat("vx", pindex),
+                                        recParticle.getFloat("vy", pindex),
+                                        recParticle.getFloat("vz", pindex)); 
                         if(part.p()<thrs) continue; //use only roads with momentum above the selected value
                         // get the DC wires' IDs
                         int[] wireArray = new int[36];
@@ -206,8 +206,11 @@ public class TrackDictionaryValidation {
                                         int detectorCheren = recCherenkov.getByte("detector", j);
                                         if (detectorCheren == DetectorType.HTCC.getDetectorId()) {
                                             int nhits = htccRec.getShort("nhits",recCherenkov.getShort("index", j));
-                                            double thetaCheren = recCherenkov.getFloat("theta", j);
-                                            double phiCheren   = recCherenkov.getFloat("phi", j);
+                                            double x = recCherenkov.getFloat("x", j);
+                                            double y = recCherenkov.getFloat("y", j);
+                                            double z = recCherenkov.getFloat("z", j);                                            
+                                            double thetaCheren = Math.acos(z/Math.sqrt(x*x+y*y+z*z));
+                                            double phiCheren   = Math.atan2(y, x);
                                             thetaCheren = Math.toDegrees(thetaCheren);
                                             phiCheren   = Math.toDegrees(phiCheren );
                                             double phiCC   = Math.round(phiCheren); 
@@ -814,12 +817,12 @@ public class TrackDictionaryValidation {
                         // save particle information
                         Particle part = new Particle(
                                         -11*charge,
-                                        recParticle.getFloat("px", i),
-                                        recParticle.getFloat("py", i),
-                                        recParticle.getFloat("pz", i),
-                                        recParticle.getFloat("vx", i),
-                                        recParticle.getFloat("vy", i),
-                                        recParticle.getFloat("vz", i));                   
+                                        recParticle.getFloat("px", pindex),
+                                        recParticle.getFloat("py", pindex),
+                                        recParticle.getFloat("pz", pindex),
+                                        recParticle.getFloat("vx", pindex),
+                                        recParticle.getFloat("vy", pindex),
+                                        recParticle.getFloat("vz", pindex));                   
                         boolean goodTrack=true;
                         // meglect tracks below 1 GeV
                         if(part.p()<thrs) goodTrack=false;
@@ -919,8 +922,11 @@ public class TrackDictionaryValidation {
                                         int detectorCheren = recCherenkov.getByte("detector", j);
                                         if (detectorCheren == DetectorType.HTCC.getDetectorId()) {
                                             int nhits = htccRec.getShort("nhits",recCherenkov.getShort("index", j));
-                                            double thetaCheren = recCherenkov.getFloat("theta", j);
-                                            double phiCheren   = recCherenkov.getFloat("phi", j);
+                                            double x = recCherenkov.getFloat("x", j);
+                                            double y = recCherenkov.getFloat("y", j);
+                                            double z = recCherenkov.getFloat("z", j);                                            
+                                            double thetaCheren = Math.acos(z/Math.sqrt(x*x+y*y+z*z));
+                                            double phiCheren   = Math.atan2(y, x);
                                             thetaCheren = Math.toDegrees(thetaCheren);
                                             phiCheren   = Math.toDegrees(phiCheren );
                                             double phiCC   = Math.round(phiCheren); 
@@ -972,7 +978,7 @@ public class TrackDictionaryValidation {
                             if(mode>0 && (paddle1b==0 || pcalU==0)) continue;
                             if(mode>1 && (paddle1b==0 || pcalU==0 || pcalV==0 || pcalW==0)) continue;
                             if(mode>2 && (paddle1b==0 || pcalU==0 || pcalV==0 || pcalW==0 || htcc==0)) continue;
-                            double phi     = (Math.toDegrees(part.phi())+180+30)%60-30;                        
+                            double phi     = (Math.toDegrees(part.phi())+180+30)%60-30;    
                             Particle road = this.findRoad(wires,wireSmear,pcalUSmear,pcalVWSmear);
                             if(road != null) {
                                 double phiRoad = (Math.toDegrees(road.phi())+180+30)%60-30;

@@ -33,8 +33,11 @@ public final class HelicityGenerator implements Comparable<HelicityGenerator>, C
     private int register=0;
     private long timestamp=0;
     private int verbosity=0;
+    private double clock=29.56; // Hz
 
     public HelicityGenerator(){}
+
+    public void setClock(double clock){this.clock=clock;}
 
     /**
      * Get the next bit in the sequence.
@@ -245,8 +248,8 @@ public final class HelicityGenerator implements Comparable<HelicityGenerator>, C
                             prevState.getTimestamp()) / HelicitySequence.TIMESTAMP_CLOCK;
                 
                     // bad timestamp delta, reset the sequence:
-                    if (seconds < (1.0-0.5)/HelicitySequence.HELICITY_CLOCK ||
-                            seconds > (1.0+0.5)/HelicitySequence.HELICITY_CLOCK) {
+                    if (seconds < (1.0-0.5)/this.clock ||
+                        seconds > (1.0+0.5)/this.clock) {
                         if (this.verbosity>1){
                             System.out.println("HelicityGenerator:  got bad timestamp, resetting... ");
                         }
@@ -309,7 +312,7 @@ public final class HelicityGenerator implements Comparable<HelicityGenerator>, C
                 // subtract off the nominal flip period:
                 if (this.size() > 0) {
                     long timeStamp=state.getTimestamp();
-                    double corr=(jj-this.offset)/HelicitySequence.HELICITY_CLOCK*HelicitySequence.TIMESTAMP_CLOCK;
+                    double corr=(jj-this.offset)/this.clock*HelicitySequence.TIMESTAMP_CLOCK;
                     timestamps.add(timeStamp-corr);
                     timestampsRaw.add((double)timeStamp);
                     if (this.verbosity>2) {
