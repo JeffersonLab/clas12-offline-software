@@ -4,8 +4,10 @@ public class TrackUtils {
 	private double adjthresh = 16; 				
 	private double PhiDelta = 16; 
 	private double ZDelta = 36; 
-	private double phithresh = 0.16;
-	private double zthresh = 16;
+	//private double phithresh = 0.16;
+	//private double zthresh = 16;
+        private double zthresh = 200;
+        private double phithresh = 7;
 	
 	public TrackUtils() {}
 	

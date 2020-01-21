@@ -8,6 +8,9 @@
 // The map is refreshed for each event. 
 
 package org.jlab.rec.rtpc.hit;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 
@@ -24,8 +27,9 @@ public class SignalSimulation {
     private double Time;
     private double Edep;   
     private ADCMap ADCMap = new ADCMap();
+    
 
-    public SignalSimulation(List<Hit> rawHits, HitParameters params){
+    public SignalSimulation(List<Hit> rawHits, HitParameters params, boolean cosmic){
 
         SignalStepSize = params.get_SignalStepSize(); // step size of the signal before integration (arbitrary value)
         BinSize = params.get_BinSize(); // electronics integrates the signal over 40 ns
@@ -33,18 +37,47 @@ public class SignalSimulation {
         TrigWindSize = params.get_TrigWindSize(); // Trigger window should be 10 micro
         NTrigSampl = TrigWindSize/BinSize; // number of time samples
 
+        /*try {
+
+            File out = new File("/Users/davidpayette/Desktop/SignalStudies/");
+            if(!out.exists())
+            {out.mkdirs();}
+            FileWriter write = new FileWriter("/Users/davidpayette/Desktop/SignalStudies/sigafter.txt",true);   
+        */
+        boolean pass_thresh = false;
+        List<Integer> sig_study_list = new ArrayList<>();
         for(Hit hit : rawHits){
 
             CellID = hit.get_cellID(); //Pad ID number of the hit
             Time = hit.get_Time(); //Time of the hit
             Edep = hit.get_EdepTrue(); //Simulated Energy of the hit
-            ADCMap.simulateSignal(CellID,Time,Edep); //Creates a signal based on the Time and the Energy
-            ADCMap.integrateSignal(CellID); //Integrates the signal into 120 ns bins based on DREAM elec specifications
-            
-            if(!PadList.contains(CellID)) PadList.add(CellID); //Maintains a list of all unique Pad IDs
+            //System.out.println("Edep " + Edep);
+            /*if(Edep > 1e-4){
+                //System.out.println("CellID " + CellID);
+                if(!sig_study_list.contains(CellID)){
+                    sig_study_list.add(CellID);
+                    write.write(CellID + "\r\n");
+                }
+            }*/
+            if(!cosmic){
+                ADCMap.simulateSignal(CellID,Time,Edep);//Creates a signal based on the Time and the Energy
+             
+                ADCMap.integrateSignal(CellID); //Integrates the signal into 120 ns bins based on DREAM elec specifications
+            }else{
+                ADCMap.addSignal(CellID, (int)Time, Edep);
+                
+            }
+            if(!PadList.contains(CellID)){
+                PadList.add(CellID);                
+            } //Maintains a list of all unique Pad IDs
             
         }
-        
+            /*write.write("End\r\n");
+            write.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }*/
         params.set_PadList(PadList);
         params.set_ADCMap(ADCMap);
     }

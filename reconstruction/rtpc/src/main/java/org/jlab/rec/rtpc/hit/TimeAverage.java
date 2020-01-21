@@ -44,7 +44,7 @@ public class TimeAverage {
             track = TIDMap.getTrack(tid);
             boolean trackflag = track.isTrackFlagged();
             rtrack = new ReducedTrack();
-            if(trackflag) {rtrack.flagTrack();}
+            if(trackflag) rtrack.flagTrack();
             Set<Integer> l = track.uniquePadList();
             Set<Integer> timesbypad = new HashSet<>();
             for(int pad : l) {

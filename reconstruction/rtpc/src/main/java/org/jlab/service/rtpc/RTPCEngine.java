@@ -43,7 +43,7 @@ public class RTPCEngine extends ReconstructionEngine{
     public boolean processDataEvent(DataEvent event) {
         HitParameters params = new HitParameters();
         HitReader hitRead = new HitReader();
-        hitRead.fetch_RTPCHits(event);
+        hitRead.fetch_RTPCHits(event,false);
 
         List<Hit> hits = new ArrayList<>();
         //I) get the hits
@@ -55,23 +55,24 @@ public class RTPCEngine extends ReconstructionEngine{
             return true;
         }
 
-        if(event.hasBank("RTPC::pos")){
+        if(event.hasBank("RTPC::adc")){
             //to be removed, signals should be simulated in GEMC
-            SignalSimulation SS = new SignalSimulation(hits,params); 
+            SignalSimulation SS = new SignalSimulation(hits,params,false); 
             //
             
             //Sort Hits into Tracks at the Readout Pads
-            TrackFinder TF = new TrackFinder(params);	
+            TrackFinder TF = new TrackFinder(params,false);	
             //Calculate Average Time of Hit Signals
             TimeAverage TA = new TimeAverage(params);
             //Reconstruct Hits in Drift Region
-            TrackHitReco TR = new TrackHitReco(params);
+            TrackHitReco TR = new TrackHitReco(params,hits,false);
             //Helix Fit Tracks to calculate Track Parameters
             HelixFitTest HF = new HelixFitTest(params);
             
             RecoBankWriter writer = new RecoBankWriter();	                               
             DataBank recoBank = writer.fillRTPCHitsBank(event,params);
             DataBank trackBank = writer.fillRTPCTrackBank(event,params);
+            //if(recoBank == null || trackBank == null) return true;
             event.appendBanks(recoBank);
             event.appendBanks(trackBank);
         }
@@ -84,8 +85,12 @@ public class RTPCEngine extends ReconstructionEngine{
     public static void main(String[] args){
         double starttime = System.nanoTime();
         
-        String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/plugins/clas12/5000_40_12Jul.hipo";
-        String outputFile = "/Users/davidpayette/Desktop/5b.7.4/myClara/tout_working.hipo";
+        //String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/good.hipo";
+        String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/cosmics.hipo";
+        //String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/new40p.hipo";
+        //String inputFile = "/Users/davidpayette/Desktop/rtpcbranch/1ep.hipo";
+        //String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/plugins/clas12/340_40p.hipo";
+        String outputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/out_cosmic.hipo";
 
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
@@ -96,13 +101,16 @@ public class RTPCEngine extends ReconstructionEngine{
         HipoDataSync writer = new HipoDataSync();
         reader.open(inputFile);
         writer.open(outputFile);
-        System.out.println("starting " + starttime);
-
-        while(reader.hasEvent()){	
-            DataEvent event = reader.getNextEvent();			
+        //System.out.println("starting " + starttime);
+        //int eventcount = 0;
+        //int eventselect = 5; //5,8*,
+        while(reader.hasEvent()){	           
+            DataEvent event = reader.getNextEvent();
+            //if(eventcount == eventselect){
             en.processDataEvent(event);
             writer.writeEvent(event);
-      
+            //}else if(eventcount > eventselect) break;
+            //eventcount ++;
         }
         
         writer.close();
