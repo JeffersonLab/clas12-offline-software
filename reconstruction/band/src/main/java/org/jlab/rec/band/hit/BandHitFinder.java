@@ -65,7 +65,7 @@ public class BandHitFinder {
 					Hit.SetSector(sector);
 					Hit.SetLayer(layer);
 					Hit.SetComponent(component);
-
+				
 					Hit.SetMeanTime_TDC(0.);
 					Hit.SetMeanTime_FADC(0.);
 					Hit.SetDiffTime_TDC(0.);
@@ -119,6 +119,8 @@ public class BandHitFinder {
 					double adcright = -1;
 					float ftdcleft = -1;
 					float ftdcright = -1;
+					int indexleft  = -1;
+					int indexright = -1;
 					if (hit1.GetSide() == 1) { //Hit1 is from left side PMT
 						tdcleft 	= hit1.GetTimeCorr();
 						tdcright 	= hit2.GetTimeCorr();
@@ -126,6 +128,8 @@ public class BandHitFinder {
 						ftdcright 	= hit2.GetFtdc();
 						adcleft 	= hit1.GetAdc();
 						adcright 	= hit2.GetAdc();
+						indexleft 	= i;
+						indexright	= j;
 					}
 					else if (hit1.GetSide() == 2) { //Hit1 is from right side PMT
 						tdcleft 	= hit2.GetTimeCorr();
@@ -134,6 +138,8 @@ public class BandHitFinder {
 						ftdcright 	= hit1.GetFtdc();
 						adcleft 	= hit2.GetAdc();
 						adcright 	= hit1.GetAdc();
+						indexright	= j;
+						indexleft	= i;
 					}
 					else { 
 						System.err.println("BAND HIT FINDER. Found two hits with left and right side but can not assign which hide belongs to which side");
@@ -226,7 +232,8 @@ public class BandHitFinder {
 					Hit.SetUx(xposHitUnc);
 					Hit.SetUy(yposHitUnc);
 					Hit.SetUz(zposHitUnc);
-
+					Hit.SetIndexLpmt(indexleft);
+					Hit.SetIndexRpmt(indexright);
 					// Print for debugging:
 					//Hit.Print();
 
@@ -262,9 +269,15 @@ public class BandHitFinder {
 
 
 		ArrayList<BandHit> betterHits = new ArrayList<BandHit>();
-
+		//Set status bits for each hit, good hit status is 0 for each hit when #hits is < 5.
+		//If #hits > 100, status will be set to 1 (laser hits), other possibilities it will be 2
+		int status_temp = -1;
+		if (coincidences.size() > 100) { status_temp = 1; }
+		else if (coincidences.size() < 5) { status_temp = 0; } //coincidences.size > 0 is already checked before advanceHitFinder is called
+		else { status_temp = 2; }
 		for( int hit = 0 ; hit < coincidences.size() ; hit++){
 			BandHit thisHit = coincidences.get(hit);
+			thisHit.SetStatus(status_temp);
 			//if( thisHit.GetLayer() == 6 ){
 			//	return new ArrayList<BandHit>();
 			//}

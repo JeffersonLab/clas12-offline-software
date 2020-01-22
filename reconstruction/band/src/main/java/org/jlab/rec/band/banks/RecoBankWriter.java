@@ -36,27 +36,23 @@ public class RecoBankWriter {
 			
 			bank.setFloat("energy", i, (float) Math.sqrt(hitlist.get(i).GetAdcLeft() * hitlist.get(i).GetAdcRight()));
 
-			bank.setFloat("meantimeTdc",i, (float) hitlist.get(i).GetMeanTime_TDC());
-			bank.setFloat("meantimeFadc",i, (float) hitlist.get(i).GetMeanTime_FADC());
+			bank.setFloat("time",i, (float) hitlist.get(i).GetMeanTime_TDC());
+			bank.setFloat("timeFadc",i, (float) hitlist.get(i).GetMeanTime_FADC());
 
-			bank.setFloat("difftimeTdc",i, (float) hitlist.get(i).GetDiffTime_TDC());
+			bank.setFloat("difftime",i, (float) hitlist.get(i).GetDiffTime_TDC());
 			bank.setFloat("difftimeFadc",i, (float) hitlist.get(i).GetDiffTime_FADC());
 
-			bank.setFloat("adcLcorr",i, (float) hitlist.get(i).GetAdcLeft());
-			bank.setFloat("adcRcorr",i, (float) hitlist.get(i).GetAdcRight());
-			bank.setFloat("tFadcLcorr",i, (float) hitlist.get(i).GetTLeft_FADC());
-			bank.setFloat("tFadcRcorr",i, (float) hitlist.get(i).GetTRight_FADC());
-			bank.setFloat("tTdcLcorr",i, (float) hitlist.get(i).GetTLeft_TDC());
-			bank.setFloat("tTdcRcorr",i, (float) hitlist.get(i).GetTRight_TDC());
+			bank.setShort("indexLpmt",i, (short) hitlist.get(i).GetIndexLpmt());
+			bank.setShort("indexRpmt",i, (short) hitlist.get(i).GetIndexRpmt()); 
 
 			bank.setFloat("x",i, (float) (hitlist.get(i).GetX()));
 			bank.setFloat("y",i, (float) (hitlist.get(i).GetY()));
 			bank.setFloat("z",i, (float) (hitlist.get(i).GetZ()));
-			bank.setFloat("ux",i, (float) (hitlist.get(i).GetUx()));
-			bank.setFloat("uy",i, (float) (hitlist.get(i).GetUy()));
-			bank.setFloat("uz",i, (float) (hitlist.get(i).GetUz()));
+			bank.setFloat("ex",i, (float) (hitlist.get(i).GetUx()));
+			bank.setFloat("ey",i, (float) (hitlist.get(i).GetUy()));
+			bank.setFloat("ez",i, (float) (hitlist.get(i).GetUz()));
 
-
+			bank.setShort("status",i, (short) hitlist.get(i).GetStatus());
 		}
 		return bank;
 
