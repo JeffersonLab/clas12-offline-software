@@ -6,19 +6,11 @@
 
 package org.jlab.rec.rtpc.hit;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import javax.swing.JFrame;
 
-import org.jlab.groot.*;
-import org.jlab.groot.data.GraphErrors;
-import org.jlab.groot.data.H2F;
-import org.jlab.groot.graphics.EmbeddedCanvas;
 
 public class TrackFinder {
     
@@ -42,16 +34,11 @@ public class TrackFinder {
     private String method = "phiz";
     private int minhitcount = 5; 
 
-    public TrackFinder(HitParameters params, boolean draw) {
+    public TrackFinder(HitParameters params) {
         /*	
          *Initializations 
          */
-                /*try {
 
-            File out = new File("/Users/davidpayette/Desktop/SignalStudies/");
-            if(!out.exists())
-            {out.mkdirs();}
-            FileWriter write = new FileWriter("/Users/davidpayette/Desktop/SignalStudies/sigTF.txt",true); */
         ADCMap = params.get_ADCMap();
         PadList = params.get_PadList();
         TrigWindSize = params.get_TrigWindSize();
@@ -72,11 +59,9 @@ public class TrackFinder {
                 
 
                 if(adc > adcthresh) { //pad adc threshold check
-                    //System.out.println("Track Finder " + pad + " " + adc);
+
                     PadVector PadVec = params.get_padvector(pad); //initializes the x,y,z,phi for pad
                     TIDList = TIDMap.getAllTrackIDs(); //Retrieve list of all available TIDs
-                    
-                    //write.write(pad + "\r\n");
 
                     TIDLOOP: //Loop over all Track IDs 
                     for(int tid : TIDList) {
@@ -126,7 +111,7 @@ public class TrackFinder {
                 } //END ADC THRESH CHECK
 
             } //END PADLOOP
-            //write.write("End\r\n");
+
         } //END TIMELOOP
         
         //END MAIN ALGORITHM
@@ -135,30 +120,19 @@ public class TrackFinder {
          * Clean up and flag tracks
          */
 
-        /*for(int tid : TIDMap.getAllTrackIDs()) { //We need to remove tracks with not enough pads to save time later
+        for(int tid : TIDMap.getAllTrackIDs()) { //We need to remove tracks with not enough pads to save time later
             Track tempt = TIDMap.getTrack(tid);
             if(tempt.uniquePadCountTotal() < minhitcount) {
                     TIDMap.removeTrack(tid);
             }
-        }*/
-
-        //System.out.println("This event has " + TIDMap.getAllTrackIDs().size() + " tracks");
-        
-       
-        
-        /*List<GraphErrors> g1 = new ArrayList<>();
-        List<H2F> hphi = new ArrayList<>();
-        List<H2F> hz = new ArrayList<>();
-        EmbeddedCanvas c = new EmbeddedCanvas();
-        JFrame j = new JFrame();
-        j.setSize(2560,1600);
+        }
+              
+        /*
 
         //Flag crossing tracks
-        int gindex = 0;
         int tmax = 0;
         int tmin = 0;
-        for(int tid : TIDMap.getAllTrackIDs()) {
-            if(draw) g1.add(new GraphErrors());              
+        for(int tid : TIDMap.getAllTrackIDs()) {          
             Track t = TIDMap.getTrack(tid); 
             for(int pad : t.uniquePadList()){
                 tmax = 0;
@@ -168,43 +142,19 @@ public class TrackFinder {
                     if(time < tmin) tmin = time;
                 }
                 if(tmax - tmin > 1000){
-                    //g1.get(gindex).setMarkerColor(2);
                     t.flagTrack();
                     break;
                 }
             }
-            
-            List<Integer> slices = t.getAllTimeSlices();
-            for(int time : slices){                
-                List<Integer> slice = t.getTimeSlice(time);
-                for(int pad : slice){
-                    PadVector p = new PadVector(pad);
-                    if(draw) g1.get(gindex).addPoint(p.phi(), p.z(), 0, 0);
-                }              
-            }
-            gindex++;
+
         }
-        if(draw){
-            int numrows = (g1.size()-g1.size()%5)/5 + 1;
-        c.divide(5, Math.max(5, numrows));
-        int padloc = 0;
-        for(GraphErrors g : g1){
-            c.cd(padloc);
-            c.draw(g);
-            padloc++;
-        }
-        j.add(c);
-        j.setVisible(true);}*/
+        */
+        
+        
         /*
          * Output
          */
-        
-            
-          /* write.close();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }*/
+       
 
         params.set_trackmap(TIDMap);
 

@@ -39,11 +39,11 @@ public class RTPCEngine extends ReconstructionEngine{
         return true;
     }
 
-    int eventnum = -1;
+
     
     @Override
     public boolean processDataEvent(DataEvent event) {
-        eventnum++;
+
         HitParameters params = new HitParameters();
         HitReader hitRead = new HitReader();
         hitRead.fetch_RTPCHits(event,true);
@@ -61,15 +61,15 @@ public class RTPCEngine extends ReconstructionEngine{
 
         if(event.hasBank("RTPC::adc")){
             //to be removed, signals should be simulated in GEMC
-            SignalSimulation SS = new SignalSimulation(hits,params,true); 
+            SignalSimulation SS = new SignalSimulation(hits,params,false); 
             //
             
             //Sort Hits into Tracks at the Readout Pads
-            TrackFinder TF = new TrackFinder(params,false);	
+            TrackFinder TF = new TrackFinder(params);	
             //Calculate Average Time of Hit Signals
             TimeAverage TA = new TimeAverage(params);
             //Reconstruct Hits in Drift Region
-            TrackHitReco TR = new TrackHitReco(params,hits,true,eventnum);
+            TrackHitReco TR = new TrackHitReco(params,hits);
             
             //Helix Fit Tracks to calculate Track Parameters
             HelixFitTest HF = new HelixFitTest(params);

@@ -1,8 +1,5 @@
 package org.jlab.rec.rtpc.banks;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +39,7 @@ public class HitReader {
 	 * This methods fills the RTPChit and MChit list of hits.  If the data is not MC, the MChit list remains empty
 	 * @param event DataEvent
 	 */
-	public void fetch_RTPCHits(DataEvent event, boolean cosmic) {
+	public void fetch_RTPCHits(DataEvent event, boolean simulation) {
 
  
             
@@ -52,7 +49,7 @@ public class HitReader {
             if(event.hasBank("RTPC::adc")==true)
                 bankDGTZ=event.getBank("RTPC::adc");
             DataBank bankTrue = null;
-            if(!cosmic){
+            if(simulation){
                 if(event.hasBank("RTPC::pos")==true)
                     bankTrue=event.getBank("RTPC::pos");
                 if(bankDGTZ==null || bankTrue==null)
@@ -61,30 +58,19 @@ public class HitReader {
                 if(bankDGTZ==null) return;
             }
             int rows = bankDGTZ.rows();
-            if(!cosmic && bankTrue.rows()!=rows)
+            if(!simulation && bankTrue.rows()!=rows)
                 return;
 
             int[] hitnb 	= new int[rows];
             int[] cellID 	= new int[rows];
             double[] Time	= new double[rows];
-            int[] step      = new int[rows];
             double[] posX 	= new double[rows];
             double[] posY 	= new double[rows];
             double[] posZ 	= new double[rows];
             double[] Edep = new double[rows];
-            double[] TShift = new double[rows];
             int layer = 0;
             int component = 0;
-            int[] tid = new int[rows];
-            int prevlayer = -1;
-            int prevcomponent = -1;
-            
-            try {
-
-                File out = new File("/Users/davidpayette/Desktop/SignalStudies/");
-                if(!out.exists())
-                {out.mkdirs();}
-                FileWriter write = new FileWriter("/Users/davidpayette/Desktop/SignalStudies/sig.txt",true);     
+            int[] tid = new int[rows];  
 
             
             for(int i = 0; i<rows; i++){				
@@ -92,11 +78,10 @@ public class HitReader {
                 layer = bankDGTZ.getByte("layer", i);
                 component = bankDGTZ.getShort("component", i);
                 cellID[i] = get_cellid(component,layer);                    
-                Time[i]	= (cosmic == false)?(double) bankTrue.getFloat("time", i):(double) bankDGTZ.getFloat("time",i);
-                if(!cosmic) step[i]	= bankTrue.getInt("step", i);
-                Edep[i] = (cosmic == false)?(double) bankTrue.getFloat("energy", i):(double) bankDGTZ.getInt("ADC", i);
-                if(!cosmic){
-                    TShift[i] = (double) bankDGTZ.getFloat("timeshift", i);               						    
+                Time[i]	= (double) bankDGTZ.getFloat("time",i);
+                
+                Edep[i] = (double) bankDGTZ.getInt("ADC", i);
+                if(simulation){               						    
                     posX[i] = (double) bankTrue.getFloat("posx", i);
                     posY[i] = (double) bankTrue.getFloat("posy", i);
                     posZ[i] = (double) bankTrue.getFloat("posz", i);	
@@ -116,26 +101,19 @@ public class HitReader {
                     posZ[i] = 0;
                 }		
                 
-                if(component != prevcomponent && layer != prevlayer) write.write(component + "\t" + layer + "\t" + Edep[i] + "\r\n");
-                prevcomponent = component; 
-                prevlayer = layer;
+
                 Hit hit = new Hit(1, cellID[i], 1, Time[i]);
                 hit.set_EdepTrue(Edep[i]);
-                if(!cosmic){
+                if(simulation){
                     hit.set_PosXTrue(posX[i]);                
                     hit.set_PosYTrue(posY[i]);
                     hit.set_PosZTrue(posZ[i]);
                 }
                 hit.set_Time(Time[i]);
-                if(!cosmic) hit.set_TShift(TShift[i]);
 
                 hits.add(hit); 
             }
-            write.close();
-            } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-            }
+
             this.set_RTPCHits(hits);
 
 	}

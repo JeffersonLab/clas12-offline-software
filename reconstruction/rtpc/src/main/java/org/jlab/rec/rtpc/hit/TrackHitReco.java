@@ -105,43 +105,23 @@ public class TrackHitReco {
    
     private boolean cosmic = true;
     
-    public TrackHitReco(HitParameters params, List<Hit> rawHits, boolean draw, int eventnum) {
+    public TrackHitReco(HitParameters params, List<Hit> rawHits) {
 
         HashMap<Integer, Double> tdiffmap = new HashMap<>();
         HashMap<Integer, List<RecoHitVector>> recotrackmap = new HashMap<>();
         ReducedTrackMap RTIDMap = params.get_rtrackmap();
         List<Integer> tids = RTIDMap.getAllTrackIDs();
-        GraphErrors gxy = new GraphErrors();
-        gxy.setTitle(eventnum + "");
-        GraphErrors grz = new GraphErrors();
-        grz.setTitle(eventnum + "");
-        GraphErrors grz2 = new GraphErrors();
-        EmbeddedCanvas c = new EmbeddedCanvas();
-        
-        c.divide(1,2);
-        JFrame j = new JFrame();
-        j.setSize(800,800);
-        boolean kill = false;
-        try{Thread.sleep(500);}catch(InterruptedException e){}
-        
-        
-        try {
 
-            File out = new File("/Users/davidpayette/Desktop/SignalStudies/");
-            if(!out.exists())
-            {out.mkdirs();}
-            //FileWriter write = new FileWriter("/Users/davidpayette/Desktop/SignalStudies/trackenergy.txt",true); 
-            FileWriter write = new FileWriter("/Users/davidpayette/Desktop/SignalStudies/timespectra.txt",true); 
-            FileWriter write2 = new FileWriter("/Users/davidpayette/Desktop/SignalStudies/timeenergy.txt",true); 
+
+        
+
         for(int TID : tids) {
             double adc = 0;
-            kill = false;
             ReducedTrack track = RTIDMap.getTrack(TID);
             //System.out.println(track.getAllHits().size() + " number of hits");
             track.sortHits();
             smallt = track.getSmallT();
             larget = track.getLargeT();
-            //write.write(smallt + "\t" + larget + "\r\n");
             
             
             //tdiff = 6000 - larget;
@@ -149,17 +129,16 @@ public class TrackHitReco {
             if(cosmic) tcathode = 2000;         
             else tcathode = 6000;
             tdiff = tcathode - larget;
-            //tdiff = 1800-larget;
-            //tdiff = 0;
+
             tdiffmap.put(TID, tdiff);
             recotrackmap.put(TID, new ArrayList<>());
             List<HitVector> allhits = track.getAllHits();
-            write.write(allhits.size() + "\r\n");
+
             for(HitVector hit : allhits) {
                 adc += hit.adc();
                 cellID = hit.pad();              
                 Time = hit.time();
-                write2.write(Time + "\t" + hit.adc() + "\r\n");
+
                 //System.out.println("Track Reco " + Time);
                 Time += tdiff;
 		           
@@ -180,61 +159,12 @@ public class TrackHitReco {
                 // x,y,z pos of reconstructed track
                 x_rec=r_rec*(Math.cos(phi_rec));
                 y_rec=r_rec*(Math.sin(phi_rec));
-                if(true){//allhits.size() > 10){
-                    gxy.addPoint(x_rec, y_rec, 0, 0);
-                } //PLOTTING
-                //if(r_rec > 80) kill = true;
-                //System.out.println("reco" + x_rec + " " + y_rec);
-                grz.addPoint(r_rec, hit.z(),0,0); //PLOTTING
+
                 recotrackmap.get(TID).add(new RecoHitVector(cellID,x_rec,y_rec,hit.z(),tdiff,Time));
             }
             //write.write(adc + "\r\n");
         }
-        
-        grz2.addPoint(0,-200,0,0);
-        grz2.addPoint(80,200,0,0);
-        grz2.setMarkerSize(0);
-        GraphErrors gsimxy = new GraphErrors();
-        gsimxy.setMarkerColor(2);
-        gsimxy.setMarkerSize(1);
-        gxy.setMarkerSize(2);
-        
-        if(draw){for(Hit hit : rawHits){
-            gsimxy.addPoint(hit.get_PosXTrue(), hit.get_PosYTrue(), 0, 0);
-        }
-        GraphErrors gcircles = new GraphErrors();
-        gcircles.setMarkerSize(0);
-        double theta = 0;
-        double test_x = 0;
-        double test_y = 0;
-        double test_x2 = 0;
-        double test_y2 = 0;
-        while(theta <= 2*Math.PI)
-        {
-                test_x = 30 * Math.cos(theta);
-                test_y = 30 * Math.sin(theta);
-                test_x2 = 70 * Math.cos(theta);
-                test_y2 = 70 * Math.sin(theta);
-                gcircles.addPoint(test_x, test_y, 0, 0);
-                gcircles.addPoint(test_x2, test_y2, 0, 0);
-                theta+=0.01;
-        }
-        c.cd(0);
-        if(!kill) c.draw(gxy);
-        c.draw(gcircles,"same");
-        c.draw(gsimxy,"same");
-        c.cd(1);
-        c.draw(grz);
-        c.draw(grz2,"same");
-        j.add(c);
-        j.setVisible(true);}
-        
-                    write.close();
-                    write2.close();
-            } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-            }
+ 
         params.set_recotrackmap(recotrackmap);
     }	
 	
