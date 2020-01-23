@@ -47,24 +47,20 @@ public class RTPCEngine extends ReconstructionEngine{
 
         HitParameters params = new HitParameters();
         HitReader hitRead = new HitReader();
-        hitRead.fetch_RTPCHits(event,false);
+        hitRead.fetch_RTPCHits(event,false);//boolean is for simulation
 
         List<Hit> hits = new ArrayList<>();
-        //I) get the hits
+
         hits = hitRead.get_RTPCHits();
-//System.out.println("----*****");
-        //II) process the hits
-        //1) exit if hit list is empty
+
         if(hits==null || hits.size()==0) {
             return true;
         }
         
-        //System.out.println("----");
+
         if(event.hasBank("RTPC::adc")){
-            //System.out.println("adc ----");
-            //to be removed, signals should be simulated in GEMC
-            SignalSimulation SS = new SignalSimulation(hits,params,false); 
-            //
+
+            SignalSimulation SS = new SignalSimulation(hits,params,false); //boolean is for simulation
             
             //Sort Hits into Tracks at the Readout Pads
             TrackFinder TF = new TrackFinder(params);	
@@ -79,8 +75,7 @@ public class RTPCEngine extends ReconstructionEngine{
             RecoBankWriter writer = new RecoBankWriter();	                               
             DataBank recoBank = writer.fillRTPCHitsBank(event,params);
             DataBank trackBank = writer.fillRTPCTrackBank(event,params);
-            //if(recoBank == null || trackBank == null) return true;
-            recoBank.show();
+
             event.appendBank(recoBank);
             event.appendBank(trackBank);
             
@@ -130,6 +125,7 @@ public class RTPCEngine extends ReconstructionEngine{
         EngineProcessor processor = new EngineProcessor();
         processor.addEngine("RTPC", en);
         processor.processFile(inputFile, outputFile);
+        
         /*
         HipoDataSource reader = new HipoDataSource();	
         HipoDataSync writer = reader.createWriter();
