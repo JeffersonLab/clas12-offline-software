@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.reco.EngineProcessor;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataBank;
@@ -46,20 +47,21 @@ public class RTPCEngine extends ReconstructionEngine{
 
         HitParameters params = new HitParameters();
         HitReader hitRead = new HitReader();
-        hitRead.fetch_RTPCHits(event,true);
+        hitRead.fetch_RTPCHits(event,false);
 
         List<Hit> hits = new ArrayList<>();
         //I) get the hits
         hits = hitRead.get_RTPCHits();
-
+//System.out.println("----*****");
         //II) process the hits
         //1) exit if hit list is empty
         if(hits==null || hits.size()==0) {
             return true;
         }
         
-
+        //System.out.println("----");
         if(event.hasBank("RTPC::adc")){
+            //System.out.println("adc ----");
             //to be removed, signals should be simulated in GEMC
             SignalSimulation SS = new SignalSimulation(hits,params,false); 
             //
@@ -78,6 +80,7 @@ public class RTPCEngine extends ReconstructionEngine{
             DataBank recoBank = writer.fillRTPCHitsBank(event,params);
             DataBank trackBank = writer.fillRTPCTrackBank(event,params);
             //if(recoBank == null || trackBank == null) return true;
+            recoBank.show();
             event.appendBank(recoBank);
             event.appendBank(trackBank);
             
@@ -90,6 +93,8 @@ public class RTPCEngine extends ReconstructionEngine{
     }
 
     public static void main(String[] args){
+        
+        System.setProperty("CLAS12DIR", "/Users/davidpayette/Desktop/rtpcbranch/clas12-offline-software");
         double starttime = System.nanoTime();
         
         File f = new File("/Users/davidpayette/Desktop/SignalStudies/sig.txt");
@@ -119,10 +124,16 @@ public class RTPCEngine extends ReconstructionEngine{
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
         RTPCEngine en = new RTPCEngine();
-        en.init();
+        //en.init();
 
+        
+        EngineProcessor processor = new EngineProcessor();
+        processor.addEngine("RTPC", en);
+        processor.processFile(inputFile, outputFile);
+        /*
         HipoDataSource reader = new HipoDataSource();	
-        HipoDataSync writer = new HipoDataSync();
+        HipoDataSync writer = reader.createWriter();
+
         reader.open(inputFile);
         writer.open(outputFile);
         //System.out.println("starting " + starttime);
@@ -138,7 +149,7 @@ public class RTPCEngine extends ReconstructionEngine{
         }
         
         writer.close();
-        
+        */
         System.out.println("finished " + (System.nanoTime() - starttime)*Math.pow(10,-9));
     }
 }

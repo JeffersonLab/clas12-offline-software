@@ -58,7 +58,7 @@ public class HitReader {
                 if(bankDGTZ==null) return;
             }
             int rows = bankDGTZ.rows();
-            if(!simulation && bankTrue.rows()!=rows)
+            if(simulation && bankTrue.rows()!=rows)
                 return;
 
             int[] hitnb 	= new int[rows];
