@@ -76,13 +76,15 @@ public class HitReader {
             int layer = 0;
             int component = 0;
             int[] tid = new int[rows];
+            int prevlayer = -1;
+            int prevcomponent = -1;
             
-            /*try {
+            try {
 
                 File out = new File("/Users/davidpayette/Desktop/SignalStudies/");
                 if(!out.exists())
                 {out.mkdirs();}
-                FileWriter write = new FileWriter("/Users/davidpayette/Desktop/SignalStudies/sig.txt",true);     */ 
+                FileWriter write = new FileWriter("/Users/davidpayette/Desktop/SignalStudies/sig.txt",true);     
 
             
             for(int i = 0; i<rows; i++){				
@@ -114,7 +116,9 @@ public class HitReader {
                     posZ[i] = 0;
                 }		
                 
-                //write.write(component + "\t" + layer + "\t" + Edep[i] + "\r\n");
+                if(component != prevcomponent && layer != prevlayer) write.write(component + "\t" + layer + "\t" + Edep[i] + "\r\n");
+                prevcomponent = component; 
+                prevlayer = layer;
                 Hit hit = new Hit(1, cellID[i], 1, Time[i]);
                 hit.set_EdepTrue(Edep[i]);
                 if(!cosmic){
@@ -127,11 +131,11 @@ public class HitReader {
 
                 hits.add(hit); 
             }
-            /*write.close();
+            write.close();
             } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
-            }*/
+            }
             this.set_RTPCHits(hits);
 
 	}

@@ -39,11 +39,14 @@ public class RTPCEngine extends ReconstructionEngine{
         return true;
     }
 
+    int eventnum = -1;
+    
     @Override
     public boolean processDataEvent(DataEvent event) {
+        eventnum++;
         HitParameters params = new HitParameters();
         HitReader hitRead = new HitReader();
-        hitRead.fetch_RTPCHits(event,false);
+        hitRead.fetch_RTPCHits(event,true);
 
         List<Hit> hits = new ArrayList<>();
         //I) get the hits
@@ -54,10 +57,11 @@ public class RTPCEngine extends ReconstructionEngine{
         if(hits==null || hits.size()==0) {
             return true;
         }
+        
 
         if(event.hasBank("RTPC::adc")){
             //to be removed, signals should be simulated in GEMC
-            SignalSimulation SS = new SignalSimulation(hits,params,false); 
+            SignalSimulation SS = new SignalSimulation(hits,params,true); 
             //
             
             //Sort Hits into Tracks at the Readout Pads
@@ -65,7 +69,8 @@ public class RTPCEngine extends ReconstructionEngine{
             //Calculate Average Time of Hit Signals
             TimeAverage TA = new TimeAverage(params);
             //Reconstruct Hits in Drift Region
-            TrackHitReco TR = new TrackHitReco(params,hits,false);
+            TrackHitReco TR = new TrackHitReco(params,hits,true,eventnum);
+            
             //Helix Fit Tracks to calculate Track Parameters
             HelixFitTest HF = new HelixFitTest(params);
             
@@ -73,8 +78,10 @@ public class RTPCEngine extends ReconstructionEngine{
             DataBank recoBank = writer.fillRTPCHitsBank(event,params);
             DataBank trackBank = writer.fillRTPCTrackBank(event,params);
             //if(recoBank == null || trackBank == null) return true;
-            event.appendBanks(recoBank);
-            event.appendBanks(trackBank);
+            event.appendBank(recoBank);
+            event.appendBank(trackBank);
+            
+            
         }
         else{
             return true;
@@ -85,8 +92,25 @@ public class RTPCEngine extends ReconstructionEngine{
     public static void main(String[] args){
         double starttime = System.nanoTime();
         
+        File f = new File("/Users/davidpayette/Desktop/SignalStudies/sig.txt");
+        f.delete();
+        f = new File("/Users/davidpayette/Desktop/SignalStudies/trackenergy.txt");
+        f.delete();
+        f = new File("/Users/davidpayette/Desktop/SignalStudies/timespectra.txt");
+        f.delete();
+        f = new File("/Users/davidpayette/Desktop/SignalStudies/sigafter.txt");
+        f.delete();
+        f = new File("/Users/davidpayette/Desktop/SignalStudies/sigTF.txt");
+        f.delete();
+        f = new File("/Users/davidpayette/Desktop/SignalStudies/timeenergy.txt");
+        f.delete();
+        f = new File("/Users/davidpayette/Desktop/SignalStudies/signalbins.txt");
+        f.delete();
+        
+        
         //String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/good.hipo";
-        String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/cosmics.hipo";
+        //String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/cosmics.hipo";
+        String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/ctest.hipo";
         //String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/new40p.hipo";
         //String inputFile = "/Users/davidpayette/Desktop/rtpcbranch/1ep.hipo";
         //String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/plugins/clas12/340_40p.hipo";
@@ -102,15 +126,15 @@ public class RTPCEngine extends ReconstructionEngine{
         reader.open(inputFile);
         writer.open(outputFile);
         //System.out.println("starting " + starttime);
-        //int eventcount = 0;
-        //int eventselect = 5; //5,8*,
+        int eventcount = 0;
+        int eventselect = 144; //144
         while(reader.hasEvent()){	           
             DataEvent event = reader.getNextEvent();
             //if(eventcount == eventselect){
             en.processDataEvent(event);
             writer.writeEvent(event);
             //}else if(eventcount > eventselect) break;
-            //eventcount ++;
+            eventcount ++;
         }
         
         writer.close();

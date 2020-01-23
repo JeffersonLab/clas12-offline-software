@@ -8,10 +8,18 @@
 
 package org.jlab.rec.rtpc.hit;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.swing.JFrame;
+import org.jlab.groot.data.GraphErrors;
+import org.jlab.groot.data.TDirectory;
+import org.jlab.groot.graphics.EmbeddedCanvas;
 
 public class TimeAverage {
 	
@@ -35,11 +43,28 @@ public class TimeAverage {
         TIDMap = params.get_trackmap();
         ADCMap = params.get_ADCMap();
         tids = TIDMap.getAllTrackIDs();
-
+        /*List<GraphErrors> g = new ArrayList<>();
+        GraphErrors bounds = new GraphErrors();
+        bounds.addPoint(0, 0, 0, 0);
+        bounds.addPoint(6000,0,0,0);
+        bounds.setMarkerSize(0);
+        EmbeddedCanvas c = new EmbeddedCanvas();
+        c.divide(5,3);
+        EmbeddedCanvas call = new EmbeddedCanvas();
+        JFrame j = new JFrame();
+        j.setSize(800,800);
+        JFrame j2 = new JFrame();
+        j2.setSize(800,800);*/
+        
         /*
          * Main Algorithm
          */
 		
+        try{File out = new File("/Users/davidpayette/Desktop/SignalStudies/");
+            if(!out.exists())
+            {out.mkdirs();}
+           FileWriter write = new FileWriter("/Users/davidpayette/Desktop/SignalStudies/signalbins.txt",true);
+        
         for(int tid : tids) { //Loop over all tracks
             track = TIDMap.getTrack(tid);
             boolean trackflag = track.isTrackFlagged();
@@ -48,16 +73,27 @@ public class TimeAverage {
             Set<Integer> l = track.uniquePadList();
             Set<Integer> timesbypad = new HashSet<>();
             for(int pad : l) {
+                //g.add(new GraphErrors());
                 adcmax = 0; 
                 sumnum = 0; 
                 sumden = 0; 
                 timesbypad = track.PadTimeList(pad);
                 for(int time : timesbypad) { //Loop to calculate maximum adc value
                     adc = ADCMap.getADC(pad,time);
+                    write.write(pad + "\t" + time + "\t" + adc + "\r\n");
+                    //g.get(g.size()-1).addPoint(time, adc, 0, 0);
+                    
                     if(adc > adcmax) {
                         adcmax = adc; 
                     }
                 }
+                
+                /*g.get(g.size()-1).setMarkerSize(2);
+                call.draw(g.get(g.size()-1),"same");
+                
+                c.cd(g.size()-1);
+                c.draw(g.get(g.size()-1));
+                c.draw(bounds,"same");*/
                 adcthresh = adcmax/2;
                 for(int time : timesbypad) { //Loop to calculate weighted average time using ADC values which are above half of the maximum
                     adc = ADCMap.getADC(pad,time);
@@ -73,7 +109,13 @@ public class TimeAverage {
             }
             RTIDMap.addTrack(rtrack);			
         }
-		
+        write.close();
+        /*call.draw(bounds,"same");
+        j.add(c);
+        j.setVisible(true);
+        j2.add(call);
+        j2.setVisible(true);*/
+        }catch(IOException e){}
         /*
          * Output
          */

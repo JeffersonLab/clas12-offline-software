@@ -42,8 +42,6 @@
       <artifactId>clas-analysis</artifactId>
       <version>6b.4.1-SNAPSHOT</version>
     </dependency>
-
-      
     
     <dependency>
       <groupId>org.jlab</groupId>

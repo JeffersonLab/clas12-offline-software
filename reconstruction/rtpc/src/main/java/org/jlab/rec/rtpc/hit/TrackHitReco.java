@@ -91,6 +91,7 @@ public class TrackHitReco {
     
     private double larget;
     private double smallt;
+    private double tcathode;
     private double tdiff;
     private double Time;
     private int cellID;
@@ -102,21 +103,26 @@ public class TrackHitReco {
     private double x_rec;
     private double y_rec;
    
-    private boolean cosmic = false;
+    private boolean cosmic = true;
     
-    public TrackHitReco(HitParameters params, List<Hit> rawHits, boolean draw) {
+    public TrackHitReco(HitParameters params, List<Hit> rawHits, boolean draw, int eventnum) {
 
         HashMap<Integer, Double> tdiffmap = new HashMap<>();
         HashMap<Integer, List<RecoHitVector>> recotrackmap = new HashMap<>();
         ReducedTrackMap RTIDMap = params.get_rtrackmap();
         List<Integer> tids = RTIDMap.getAllTrackIDs();
-        /*GraphErrors gxy = new GraphErrors();
+        GraphErrors gxy = new GraphErrors();
+        gxy.setTitle(eventnum + "");
         GraphErrors grz = new GraphErrors();
+        grz.setTitle(eventnum + "");
+        GraphErrors grz2 = new GraphErrors();
         EmbeddedCanvas c = new EmbeddedCanvas();
+        
         c.divide(1,2);
         JFrame j = new JFrame();
         j.setSize(800,800);
-        
+        boolean kill = false;
+        try{Thread.sleep(500);}catch(InterruptedException e){}
         
         
         try {
@@ -125,9 +131,11 @@ public class TrackHitReco {
             if(!out.exists())
             {out.mkdirs();}
             //FileWriter write = new FileWriter("/Users/davidpayette/Desktop/SignalStudies/trackenergy.txt",true); 
-            FileWriter write = new FileWriter("/Users/davidpayette/Desktop/SignalStudies/timespectra.txt",true); */
+            FileWriter write = new FileWriter("/Users/davidpayette/Desktop/SignalStudies/timespectra.txt",true); 
+            FileWriter write2 = new FileWriter("/Users/davidpayette/Desktop/SignalStudies/timeenergy.txt",true); 
         for(int TID : tids) {
             double adc = 0;
+            kill = false;
             ReducedTrack track = RTIDMap.getTrack(TID);
             //System.out.println(track.getAllHits().size() + " number of hits");
             track.sortHits();
@@ -135,25 +143,29 @@ public class TrackHitReco {
             larget = track.getLargeT();
             //write.write(smallt + "\t" + larget + "\r\n");
             
+            
             //tdiff = 6000 - larget;
-            if(cosmic) tdiff = 2025 - larget;
-            else tdiff = 6000 - larget;
+            
+            if(cosmic) tcathode = 2000;         
+            else tcathode = 6000;
+            tdiff = tcathode - larget;
             //tdiff = 1800-larget;
             //tdiff = 0;
             tdiffmap.put(TID, tdiff);
             recotrackmap.put(TID, new ArrayList<>());
             List<HitVector> allhits = track.getAllHits();
-            
+            write.write(allhits.size() + "\r\n");
             for(HitVector hit : allhits) {
                 adc += hit.adc();
                 cellID = hit.pad();              
                 Time = hit.time();
+                write2.write(Time + "\t" + hit.adc() + "\r\n");
                 //System.out.println("Track Reco " + Time);
                 Time += tdiff;
 		           
                 // find reconstructed position of ionization from Time info		                
                 drifttime = Time-t_gap;
-                r_rec = get_r_rec(hit.z(),drifttime); //in mm
+                r_rec = get_r_rec(hit.z(),drifttime,tcathode,1500); //in mm
                 dphi = get_dphi(hit.z(),r_rec); // in rad
                 
                 phi_rec=hit.phi()-dphi-phi_gap;
@@ -168,14 +180,21 @@ public class TrackHitReco {
                 // x,y,z pos of reconstructed track
                 x_rec=r_rec*(Math.cos(phi_rec));
                 y_rec=r_rec*(Math.sin(phi_rec));
-                //gxy.addPoint(x_rec, y_rec, 0, 0);
+                if(true){//allhits.size() > 10){
+                    gxy.addPoint(x_rec, y_rec, 0, 0);
+                } //PLOTTING
+                //if(r_rec > 80) kill = true;
                 //System.out.println("reco" + x_rec + " " + y_rec);
-                //grz.addPoint(r_rec, hit.z(),0,0);
+                grz.addPoint(r_rec, hit.z(),0,0); //PLOTTING
                 recotrackmap.get(TID).add(new RecoHitVector(cellID,x_rec,y_rec,hit.z(),tdiff,Time));
             }
             //write.write(adc + "\r\n");
         }
-        /*GraphErrors gsimxy = new GraphErrors();
+        
+        grz2.addPoint(0,-200,0,0);
+        grz2.addPoint(80,200,0,0);
+        grz2.setMarkerSize(0);
+        GraphErrors gsimxy = new GraphErrors();
         gsimxy.setMarkerColor(2);
         gsimxy.setMarkerSize(1);
         gxy.setMarkerSize(2);
@@ -201,19 +220,21 @@ public class TrackHitReco {
                 theta+=0.01;
         }
         c.cd(0);
-        c.draw(gxy);
+        if(!kill) c.draw(gxy);
         c.draw(gcircles,"same");
         c.draw(gsimxy,"same");
-        //c.cd(1);
-        //c.draw(grz);
+        c.cd(1);
+        c.draw(grz);
+        c.draw(grz2,"same");
         j.add(c);
         j.setVisible(true);}
         
                     write.close();
+                    write2.close();
             } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
-            }*/
+            }
         params.set_recotrackmap(recotrackmap);
     }	
 	
@@ -222,10 +243,10 @@ public class TrackHitReco {
         return t1*z*z*z*z + t2*z*z*z + t3*z*z + t4*z + t5;
     }
 
-    private double get_r_rec(double z,double t){
+    private double get_r_rec(double z,double t, double t_cathode, double t_max){
         a_t = get_rec_coef(a_t1,a_t2,a_t3,a_t4,a_t5,z);
         b_t = get_rec_coef(b_t1,b_t2,b_t3,b_t4,b_t5,z);
-	return ((-(Math.sqrt(a_t*a_t+(4*b_t*t)))+a_t+(14*b_t))/(2*b_t))*10.0;
+	return ((-(Math.sqrt(a_t*a_t+(4*b_t*t*t_cathode/t_max)))+a_t+(14*b_t))/(2*b_t))*10.0;
     }
     
     private double get_dphi(double z, double r){

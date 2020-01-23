@@ -59,7 +59,7 @@ public class RecoBankWriter {
                 row++;
             }
         }
-
+        //bank.show();
         return bank;
     }	
     
