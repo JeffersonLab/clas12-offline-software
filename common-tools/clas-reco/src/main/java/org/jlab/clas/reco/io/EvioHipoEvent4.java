@@ -252,7 +252,7 @@ public class EvioHipoEvent4 {
                 hipoADC.putInt("ADC", i, (int) evioBankdgtz.getDouble("ADC", i));
                 hipoADC.putFloat("time", i, (float) evioBankdgtz.getDouble("Time", i));
                 hipoADC.putShort("ped", i, (short) 0);
-                hipoADC.putFloat("timeshift", i, (float) evioBankdgtz.getDouble("TimeShift", i));
+                //hipoADC.putFloat("timeshift", i, (float) evioBankdgtz.getDouble("TimeShift", i));
                 hipoPOS.putInt("step", i, (byte) 1);
                 hipoPOS.putFloat("time", i, (float) evioBankdgtz.getDouble("Time", i));
                 hipoPOS.putFloat("energy", i, (float) evioBanktrue.getDouble("totEdep", i));

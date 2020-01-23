@@ -36,7 +36,6 @@
             <column name="Time"   type="float64"  num="5" info="Time [ns]"/>
             <column name="ADC"   type="float64"  num="6" info="Energy deposition"/>
             <column name="Ped"   type="float64"  num="7" info="Pedestal"/>
-            <column name="TimeShift" type="float64" num="8" info="time shift"/>
             <column name="hitn" type="int32" num="99" info="nstep"/>
         </section>
     </bank>

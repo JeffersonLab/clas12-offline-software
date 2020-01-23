@@ -34,6 +34,7 @@ hs_err_pid*
 # no log files:
 *.log
 *.evio 
-
+*.hipo
+*.evio.*
 bin/evio2hipotest
 export.sh

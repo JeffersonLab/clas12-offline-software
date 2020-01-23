@@ -47,6 +47,8 @@ final class DCdatabase {
     private final double align_dthetax[][] = new double[nSectors][nRegions];
     private final double align_dthetay[][] = new double[nSectors][nRegions];
     private final double align_dthetaz[][] = new double[nSectors][nRegions];
+    
+    private final double endplatesbow[][][] = new double[nSectors][nRegions][2];
 
     private int nsensewires;
     private int nguardwires;
@@ -54,6 +56,8 @@ final class DCdatabase {
     private boolean ministaggerStatus = false;
     private double ministagger ;
 
+    private boolean endplatesStatus = false;
+    
     private final String dcdbpath = "/geometry/dc/";
     private static DCdatabase instance = null;
 
@@ -94,19 +98,28 @@ final class DCdatabase {
             superwidth[isuper] = wpdist[isuper] * (nsenselayers[isuper] + nguardlayers[isuper] - 1) * cellthickness[isuper];
         }
 
-	   int alignrows = cp.length(dcdbpath+"alignment/dx");
-	   for(int irow = 0; irow< alignrows; irow++) {
-		  int isec = cp.getInteger(dcdbpath + "alignment/sector",irow)-1;
-		  int ireg = cp.getInteger(dcdbpath + "alignment/region",irow)-1;
+        int alignrows = cp.length(dcdbpath+"alignment/dx");
+        for(int irow = 0; irow< alignrows; irow++) {
+               int isec = cp.getInteger(dcdbpath + "alignment/sector",irow)-1;
+               int ireg = cp.getInteger(dcdbpath + "alignment/region",irow)-1;
 
-		  align_dx[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dx",irow);
-		  align_dy[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dy",irow);
-		  align_dz[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dz",irow);
+               align_dx[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dx",irow);
+               align_dy[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dy",irow);
+               align_dz[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dz",irow);
 
-		  align_dthetax[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_x",irow);
-  		  align_dthetay[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_y",irow);
-  		  align_dthetaz[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_z",irow);
-	   }
+               align_dthetax[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_x",irow);
+               align_dthetay[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_y",irow);
+               align_dthetaz[isec][ireg]=cp.getDouble(dcdbpath + "alignment/dtheta_z",irow);
+        }
+        
+        int endplatesrows = cp.length(dcdbpath+"endplatesbow/coefficient");
+        for(int irow = 0; irow< endplatesrows; irow++) {
+               int isec  = cp.getInteger(dcdbpath + "endplatesbow/sector",irow)-1;
+               int ireg  = cp.getInteger(dcdbpath + "endplatesbow/region",irow)-1;
+               int order = cp.getInteger(dcdbpath + "endplatesbow/order",irow);
+               endplatesbow[isec][ireg][order] = cp.getDouble(dcdbpath+"endplatesbow/coefficient", irow)*Length.cm;
+               //System.out.println("READ ENDPLATES COEFF [isec"+isec+"]["+ireg+"]="+endplatesbow[isec][ireg][order] );
+        }
     }
     
     public double dist2tgt(int ireg) {
@@ -200,7 +213,19 @@ final class DCdatabase {
     public boolean getMinistaggerStatus(){
         return ministaggerStatus;
     }
+    
+    public double endplatesbow(int isec, int ireg, int order) {
+        return endplatesbow[isec][ireg][order];
+    }
+    
+    public void setEndPlatesStatus(boolean endplatesStatus) {
+        this.endplatesStatus = endplatesStatus;
+    }
 
+    public boolean getEndPlatesStatus(){
+        return endplatesStatus;
+    }
+    
     public double getAlignmentThetaX(int isec, int ireg) {
         return align_dthetax[isec][ireg];
     }
@@ -220,10 +245,11 @@ final class DCdatabase {
 
 final class Wire {
 
+    private final int sector;
     private final int ireg;
     private final int isuper;
-    private final int ilayer;
-    private final int iwire;
+    private final int layer;
+    private final int wire;
     private final DCdatabase dbref = DCdatabase.getInstance();
 
     private final Vector3d midpoint;
@@ -290,11 +316,58 @@ final class Wire {
         rightend = direction.times(wlenr).add(midpoint);
     }
 
-    public Wire(int isuper, int ilayer, int iwire) {
-        this.isuper = isuper;
-        this.ilayer = ilayer;
-        this.iwire = iwire;
-        this.ireg = isuper / 2;
+    /**
+     * Correct for endplates bowing in tilted coordinate system. (ziegler)
+     */
+    public void correctEnds() {
+        double iwirn = (double) wire/112.0;
+        //deflection function has to be 1 at extremum (3.8465409 scales it so it is 1 at first derivative)
+        double defFunc = 3.8465409*(iwirn - 3 * iwirn*iwirn*iwirn +2 * iwirn*iwirn*iwirn*iwirn);
+        //max deflection for L and R sides of wire
+        double deflMaxL = dbref.endplatesbow(sector-1, ireg, 0);
+        double deflMaxR = dbref.endplatesbow(sector-1, ireg, 1); 
+        //deflection of the L and R sides
+        double deflL = 0.5 * deflMaxL * defFunc;
+        double deflR = 0.5 * deflMaxR * defFunc;
+        
+        double xL = leftend.x + deflL;
+        double xR = rightend.x + deflR;
+        double yL = leftend.y;
+        double yR = rightend.y;
+        
+        // the uncorrected wirelength.  We assume the wire length is not changing
+        double wlenl = leftend.sub(midpoint).magnitude();
+        double wlenr = rightend.sub(midpoint).magnitude();
+        //get the modified wire direction
+        double n = Math.sqrt((xR - xL)*(xR - xL)+(yR - yL)*(yR - yL));
+        direction.set((xR - xL)/n, (yR - yL)/n, 0);
+        // midpoint corresponds to y = 0
+        midpoint.set(xR -yR*((xR-xL)/(yR-yL)), 0, midpoint.z);
+        //get left and right ends assuming the wire length is not changing
+        leftend = direction.times(-wlenl).add(midpoint);
+        rightend = direction.times(wlenr).add(midpoint);
+        
+//        if(sector == 4)
+//            System.out.println((this.isuper+1)+" "+layer+" "+wire+" "+(float)(xL-deflL)+" "+(float)yL+" "+(float)leftend.z+" "+ 
+//                    (float)(xL)+" "+(float)yL+" "+(float)leftend.z+" "+
+//                    (float)leftend.x+" "+(float)leftend.y+" "+(float)leftend.z
+//            +" "+(float)(xR-deflR)+" "+(float)yR+" "+(float)rightend.z+" "+ 
+//                    (float)(xR)+" "+(float)yR+" "+(float)rightend.z+" "+
+//                    (float)rightend.x+" "+(float)rightend.y+" "+(float)rightend.z);
+    }
+    /**
+     * 
+     * @param sector sector 1...6
+     * @param super  superlayer index 0...5
+     * @param layer  layer 1...6
+     * @param wire   wire 1...112
+     */
+    public Wire(int sector, int isuperl, int layer, int wire) {
+        this.sector  = sector;
+        this.isuper  = isuperl;
+        this.layer   = layer;
+        this.wire    = wire;
+        this.ireg    = isuper / 2;
 
         // calculate first-wire distance from target
         double w2tgt = dbref.dist2tgt(ireg);
@@ -315,13 +388,13 @@ final class Wire {
         double dw2 = dw / cster;
 
         // hh: wire distance in the wire plane
-        double hh = (iwire-1 + ((double)(ilayer % 2)) / 2.0) * dw2;
-        if(ireg==2 && isSensitiveWire(isuper, ilayer, iwire) && dbref.getMinistaggerStatus())
-                hh += ((ilayer%2)*2-1)*dbref.ministagger();
+        double hh = (wire-1 + ((double)(layer % 2)) / 2.0) * dw2;
+        if(ireg==2 && isSensitiveWire(isuper, layer, wire) && dbref.getMinistaggerStatus())
+                hh += ((layer%2)*2-1)*dbref.ministagger();
 
         // ll: layer distance
         double tt = dbref.cellthickness(isuper) * dbref.wpdist(isuper);
-        double ll = ilayer * tt;
+        double ll = layer * tt;
 
         // wire x=0 coordinates in the lab
         double ym = y0mid + ll * stilt + hh * ctilt;
@@ -398,16 +471,21 @@ public final class DCGeant4Factory extends Geant4Factory {
 
     public static boolean MINISTAGGERON=true;
     public static boolean MINISTAGGEROFF=false;
+    
+    public static boolean ENDPLATESBOWON=true;
+    public static boolean ENDPLATESBOWOFF=false;
 
     ///////////////////////////////////////////////////
     public DCGeant4Factory(ConstantProvider provider) {
-        this(provider, MINISTAGGEROFF);
+        this(provider, MINISTAGGEROFF, ENDPLATESBOWOFF);
     }
 
     ///////////////////////////////////////////////////
-    public DCGeant4Factory(ConstantProvider provider, boolean ministaggerStatus) {
+    public DCGeant4Factory(ConstantProvider provider, boolean ministaggerStatus,
+            boolean endplatesStatus) {
         dbref.setMinistaggerStatus(ministaggerStatus);
-
+        dbref.setEndPlatesStatus(endplatesStatus);
+        
         motherVolume = new G4World("fc");
 
         dbref.connect(provider);
@@ -448,11 +526,11 @@ public final class DCGeant4Factory extends Geant4Factory {
                 for(int ilayer=0; ilayer<dbref.nsenselayers(isuper); ilayer++) {
 /*
                     //define layerMid using wires (produce slight shift compared to GEMC volumes)
-                    Wire firstWire = new Wire(isuper, ilayer+1, 1);
-                    Wire lastWire = new Wire(isuper, ilayer+1, dbref.nsensewires());
+                    Wire firstWire = new Wire(isuper, layer+1, 1);
+                    Wire lastWire = new Wire(isuper, layer+1, dbref.nsensewires());
                     Vector3d firstMid = firstWire.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
                     Vector3d lastMid = lastWire.mid().rotateZ(Math.toRadians(-90.0)).rotateY(-dbref.thtilt(isuper/2));
-                    layerMids[isec][isuper][ilayer] = firstMid.plus(lastMid).dividedBy(2.0);
+                    layerMids[isec][isuper][layer] = firstMid.plus(lastMid).dividedBy(2.0);
 */
                     layerMids[isec][isuper][ilayer] = getLayer(isec, isuper, ilayer).getGlobalPosition()
 					.add(dbref.getAlignmentShift(isec, isuper/2))
@@ -471,20 +549,22 @@ public final class DCGeant4Factory extends Geant4Factory {
                     layerMids[isec][isuper][ilayer].add(regionMids[isec][isuper/2]);
 
                     for(int iwire=0; iwire<dbref.nsensewires(); iwire++) {
-                        wires[isec][isuper][ilayer][iwire] = new Wire(isuper, ilayer+1, iwire+1);
-
+                        wires[isec][isuper][ilayer][iwire] = new Wire(isec+1, isuper, ilayer+1, iwire+1);
+                        //rotate in tilted sector coordinate system
                         wires[isec][isuper][ilayer][iwire].rotateZ(Math.toRadians(-90.0 + isec * 60))
 						.translate(dbref.getAlignmentShift(isec, isuper/2))
 						.rotateZ(Math.toRadians(-isec * 60))
 						.rotateY(-dbref.thtilt(isuper/2));
-
+                        
+                        //implement end-plates bow in the tilted sector coordinate system (ziegler)
+                        if(dbref.getEndPlatesStatus())
+                            wires[isec][isuper][ilayer][iwire].correctEnds();
                         //dc alignment implementation
                         wires[isec][isuper][ilayer][iwire].translate(regionMids[isec][isuper/2].times(-1.0));
                         wires[isec][isuper][ilayer][iwire].rotateZ(Math.toRadians(dbref.getAlignmentThetaZ(isec, isuper/2)));
                         wires[isec][isuper][ilayer][iwire].rotateX(Math.toRadians(dbref.getAlignmentThetaX(isec, isuper/2)));
                         wires[isec][isuper][ilayer][iwire].rotateY(Math.toRadians(dbref.getAlignmentThetaY(isec, isuper/2)));
                         wires[isec][isuper][ilayer][iwire].translate(regionMids[isec][isuper/2]);
-    //                    System.out.println((isuper+1) + " " + (ilayer+1) + " " + (iwire+1) + " " + wireLefts[isuper][ilayer][iwire] + " " + wireMids[isuper][ilayer][iwire] + " " + wireRights[isuper][ilayer][iwire]);
                    }
                 }
 
@@ -545,8 +625,8 @@ public final class DCGeant4Factory extends Geant4Factory {
     }
     ///////////////////////////////////////////////////
     public Geant4Basic createRegion(int isector, int iregion) {
-        Wire regw0 = new Wire(iregion * 2, 0, 0);
-        Wire regw1 = new Wire(iregion * 2 + 1, 7, nsgwires - 1);
+        Wire regw0 = new Wire(isector+1, iregion * 2, 0, 0);
+        Wire regw1 = new Wire(isector+1, iregion * 2 + 1, 7, nsgwires - 1);
 
         double dx_shift = y_enlargement * Math.tan(Math.toRadians(29.5));
 
@@ -594,8 +674,8 @@ public final class DCGeant4Factory extends Geant4Factory {
 
     ///////////////////////////////////////////////////
     public Geant4Basic createLayer(int isuper, int ilayer) {
-        Wire lw0 = new Wire(isuper, ilayer, 0);
-        Wire lw1 = new Wire(isuper, ilayer, nsgwires - 1);
+        Wire lw0 = new Wire(1, isuper, ilayer, 0);
+        Wire lw1 = new Wire(1, isuper, ilayer, nsgwires - 1);
 
         Vector3d midline = lw1.mid().minus(lw0.mid());
         double lay_dy = Math.sqrt(Math.pow(midline.magnitude(), 2.0) - Math.pow(midline.dot(lw0.dir()), 2.0)) / 2.0;
@@ -620,8 +700,8 @@ public final class DCGeant4Factory extends Geant4Factory {
         System.out.println("hello");
         for(int isup=0;isup<2;isup++)
         for(int il=0;il<8;il+=7)
-            for(int iwire=0;iwire<nsgwires+1;iwire+=nsgwires/30){
-        Wire regw = new Wire(isup,il,iwire);
+            for(int wire=0;wire<nsgwires+1;wire+=nsgwires/30){
+        Wire regw = new Wire(isup,il,wire);
         System.out.println("line("+regw.left()+", "+regw.right()+");");
             }
     }

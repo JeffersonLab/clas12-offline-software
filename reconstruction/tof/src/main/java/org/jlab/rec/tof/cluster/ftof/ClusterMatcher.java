@@ -295,7 +295,7 @@ public class ClusterMatcher {
             // defined
             double delta_t1a = this.calc_deltaT(clus1A.get_Panel(),
                     CntrInPan1aWithEmax);
-            double delta_t1b = this.calc_deltaT(clus1A.get_Panel(),
+            double delta_t1b = this.calc_deltaT(clus1B.get_Panel(),
                     CntrInPan1bWithEmax);
 
             double term1 = clus1B.get_t() / delta_t1b;
