@@ -273,6 +273,7 @@ public class CLASDecoder4 {
             	adcBANK.putInt("integral", i, adcDGTZ.get(i).getADCData(0).getIntegral());
             	adcBANK.putLong("timestamp", i, adcDGTZ.get(i).getADCData(0).getTimeStamp());
             }
+            if(name == "BAND::adc") adcBANK.putInt("amplitude", i, adcDGTZ.get(i).getADCData(0).getHeight());
          }
         return adcBANK;
     }
