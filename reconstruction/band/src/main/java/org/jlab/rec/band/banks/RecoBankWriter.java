@@ -6,6 +6,7 @@ import org.apache.commons.math3.analysis.function.Sqrt;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.band.hit.BandHit;
+import org.jlab.rec.band.hit.BandHitCandidate;
 
 
 
@@ -57,6 +58,45 @@ public class RecoBankWriter {
 		return bank;
 
 	}
+	
+	public static DataBank fillBandCandidateBanks(DataEvent event, ArrayList<BandHitCandidate> candidatelist) {
+
+		if (candidatelist == null) {
+			return null;
+		}
+		DataBank bank =  event.createBank("BAND::rawhits", candidatelist.size());
+
+		if (bank == null) {
+			//System.err.println("COULD NOT CREATE A BAND::Hits BANK!!!!!!");
+			return null;
+		}
+
+
+		//i should only go to 1 but keep for loop for future extensions if more hits are required
+		for(int i =0;  i<candidatelist.size(); i++) {
+			bank.setShort("id",i, (short)(i+1));
+
+			bank.setByte("sector",i, (byte) candidatelist.get(i).GetSector());
+			bank.setByte("layer",i, (byte) candidatelist.get(i).GetLayer());
+			bank.setShort("component",i, (short) candidatelist.get(i).GetComponent());
+			bank.setShort("side",i, (short) candidatelist.get(i).GetSide());
+		
+			bank.setFloat("time",i, (float) candidatelist.get(i).GetTdc());
+			bank.setFloat("timeFadc",i, (float) candidatelist.get(i).GetFtdc());
+			bank.setFloat("timeCorr",i, (float) candidatelist.get(i).GetTimeCorr());
+			bank.setFloat("adc",i, (float) candidatelist.get(i).GetAdc());
+		
+			bank.setShort("indexTdc",i, (short) candidatelist.get(i).GetIndexTdc());
+			bank.setShort("indexAdc",i, (short) candidatelist.get(i).GetIndexAdc()); 
+
+			
+
+		}
+		return bank;
+
+	}
+	
+	
 
 	public static void appendBANDBanks(DataEvent event,ArrayList<BandHit> hitlist) {
 

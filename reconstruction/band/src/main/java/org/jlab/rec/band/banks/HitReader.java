@@ -28,6 +28,8 @@ public class HitReader {
 		Map<Integer,Integer>	fadcInt 	= new HashMap<Integer,Integer>();
 		Map<Integer,Float>	fadcTimes	= new HashMap<Integer,Float>();
 		Map<Integer,Double>	tdcTimes	= new HashMap<Integer,Double>();
+		Map<Integer,Integer> fadcIndex  = new HashMap<Integer,Integer>();
+		Map<Integer,Integer> tdcIndex  = new HashMap<Integer,Integer>();
 
 
 
@@ -73,11 +75,13 @@ public class HitReader {
 				if( fadcInt.get( Integer.valueOf(key) ) < adc ) {
 					fadcInt.put( Integer.valueOf(key) , Integer.valueOf(adc) );
 					fadcTimes.put( Integer.valueOf(key),  Float.valueOf(ftdc) );
+					fadcIndex.put( Integer.valueOf(key), Integer.valueOf(i));
 				}
 			}
 			else {
 				fadcInt.put( Integer.valueOf(key) , Integer.valueOf(adc) );
 				fadcTimes.put( Integer.valueOf(key),  Float.valueOf(ftdc) );
+				fadcIndex.put( Integer.valueOf(key), Integer.valueOf(i));
 			}	
 		} // end fadc loop
 
@@ -109,10 +113,12 @@ public class HitReader {
 
 				if( Math.abs(thisDiff) < Math.abs(prevDiff) ) {
 					tdcTimes.put( Integer.valueOf(key),  Double.valueOf(tdc) );
+					tdcIndex.put( Integer.valueOf(key), Integer.valueOf(j));
 				}
 			}
 			else {
 				tdcTimes.put( Integer.valueOf(key),  Double.valueOf(tdc) );
+				tdcIndex.put( Integer.valueOf(key), Integer.valueOf(j));
 			}
 		} // end tdc loop
 
@@ -131,10 +137,12 @@ public class HitReader {
 			int adc = fadcInt.get(keys);
 			float ftdc = fadcTimes.get(keys);
 			double tdc = tdcTimes.get(keys);
+			int indexadc = fadcIndex.get(keys);
+			int indextdc = tdcIndex.get(keys);
 			//System.out.println("Found a candidate PMT hit! slco: "+sector+" "+layer+" "+component+" "+order+" "+adc+" "+ftdc+" "+tdc);
 
 			BandHitCandidate newHit = new BandHitCandidate( sector,layer,component,order,
-					adc, tdc, ftdc ,triggerPhase);
+					adc, tdc, ftdc ,triggerPhase, indexadc, indextdc);
 			candidates.add(newHit);
 
 		}
