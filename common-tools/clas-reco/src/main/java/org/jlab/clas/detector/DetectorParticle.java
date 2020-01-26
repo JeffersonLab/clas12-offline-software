@@ -4,6 +4,7 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.detector.DetectorTrack.TrajectoryPoint;
 
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.Vector3;
@@ -128,11 +129,19 @@ public class DetectorParticle implements Comparable {
     public void addResponse(DetectorResponse res, boolean match){
         this.responseStore.add(res);
         if(match==true){
-            Line3D distance = this.getDistance(res);
-            res.getMatchedPosition().setXYZ(
-                    distance.midpoint().x(),
-                    distance.midpoint().y(),distance.midpoint().z());
-            res.setPath(this.getPathLength(res.getPosition()));
+            TrajectoryPoint tp=this.detectorTrack.getTrajectoryPoint(res.getDescriptor());
+            if (tp!=null) {
+                res.getMatchedPosition().setXYZ(tp.getCross().origin().x(),
+                                                tp.getCross().origin().y(),
+                                                tp.getCross().origin().z());
+                res.setPath(tp.getPathLength());
+            }
+            // OLD POCA WAY:
+            //Line3D distance = this.getDistance(res);
+            //res.getMatchedPosition().setXYZ(
+            //        distance.midpoint().x(),
+            //        distance.midpoint().y(),distance.midpoint().z());
+            //res.setPath(this.getPathLength(res.getPosition()));
         }
     }
 
@@ -468,12 +477,15 @@ public class DetectorParticle implements Comparable {
     }
     
     public Line3D  getDistance(DetectorResponse  response){
-        Line3D cross = this.detectorTrack.getLastCross();
-        Line3D  dist = cross.distanceRay(response.getPosition().toPoint3D());
-        //Path3D trajectory = this.getTrajectory();
-        //Point3D hitPoint = new Point3D(
-        //response.getPosition().x(),response.getPosition().y(),response.getPosition().z());
-        return dist;
+        TrajectoryPoint tp=detectorTrack.getTrajectoryPoint(response.getDescriptor());
+        if (tp!=null) {
+            return new Line3D(tp.getCross().origin(), response.getPosition().toPoint3D());
+        }
+        return null;
+        // OLD POCA WAY:
+        //Line3D cross = this.detectorTrack.getLastCross();
+        //Line3D  dist = cross.distanceRay(response.getPosition().toPoint3D());
+        //return dist;
     }
 
     public double getTheoryBeta(int id){
@@ -507,18 +519,22 @@ public class DetectorParticle implements Comparable {
 
     public int getCherenkovSignal(List<DetectorResponse> responses, DetectorType type){
 
-        // choose cross based on detector type:
-        Line3D cross;
-        if (type==DetectorType.HTCC) {
-            cross=this.detectorTrack.getFirstCross();
-            // 0 is detId for HTCC in TimeBasedTrkg::Trajectory bank!
-            //cross=this.detectorTrack.getTrajectoryPoint(0);
-            //if (cross==null) return -1;
-        }
-        else if (type==DetectorType.LTCC)
-            cross=this.detectorTrack.getLastCross();
-        else throw new RuntimeException(
-                "DetectorParticle:getCheckr5noSignal:  invalid type:  "+type);
+        TrajectoryPoint tp=detectorTrack.getTrajectoryPoint(type.getDetectorId(), 1);
+        if (tp==null) return -1;
+        Line3D cross=tp.getCross();
+       
+        // OLD POCA WAY:
+        //Line3D cross;
+        //if (type==DetectorType.HTCC) {
+        //    cross=this.detectorTrack.getFirstCross();
+        //    // 0 is detId for HTCC in TimeBasedTrkg::Trajectory bank!
+        //    //cross=this.detectorTrack.getTrajectoryPoint(0);
+        //    //if (cross==null) return -1;
+        //}
+        //else if (type==DetectorType.LTCC)
+        //    cross=this.detectorTrack.getLastCross();
+        //else throw new RuntimeException(
+        //        "DetectorParticle:getCheckr5noSignal:  invalid type:  "+type);
 
         // find the best match:
         int bestIndex = -1;

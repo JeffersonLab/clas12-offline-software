@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
@@ -80,6 +81,10 @@ public class DetectorTrack implements Comparable {
                 }
             }
             return null;
+        }
+
+        public TrajectoryPoint get(DetectorDescriptor dd) {
+            return this.get(dd.getType().getDetectorId(),dd.getLayer());
         }
 
         public boolean hasDetector(int detId) {
@@ -171,8 +176,12 @@ public class DetectorTrack implements Comparable {
         return trajectory.get(type.getDetectorId(),layId).getPathLength();
     }
 
-    public Line3D getTrajectoryPoint(int detId,int layId) {
-        return this.trajectory.get(detId,layId).getCross();
+    public TrajectoryPoint getTrajectoryPoint(int detId,int layId) {
+        return this.trajectory.get(detId,layId);
+    }
+
+    public TrajectoryPoint getTrajectoryPoint(DetectorDescriptor dd) {
+        return this.trajectory.get(dd);
     }
     
     public Trajectory getTrajectory() {
