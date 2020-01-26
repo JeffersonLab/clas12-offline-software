@@ -62,8 +62,8 @@ public class FTCALConstantsLoader {
 //        public static double[][][] c3      = new double[1][1][484];
 //        public static double[][][] c4      = new double[1][1][484];
         
-	public static int    MAX_CLUS_RAD =3 ;                                                   // maximum radius of the cluster in # of crystals
-	public static double EN_THRES = 0.01;                                                   // energy threshold in GeV	
+//	public static int    MAX_CLUS_RAD =3 ;                                                   // maximum radius of the cluster in # of crystals
+//	public static double EN_THRES = 0.01;                                                   // energy threshold in GeV	
     // GEOMETRY PARAMETERS
 	public static double CRYS_DELTA  = 11.5;
 	public static double CRYS_WIDTH  = 15.3;					    // crystal width in mm
