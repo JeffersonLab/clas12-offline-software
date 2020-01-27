@@ -25,6 +25,9 @@
 		{"name":"py",		"type":"F", "info":"Y component of the momentum"},
 		{"name":"pz",		"type":"F", "info":"Z component of the momentum"},
 		{"name":"vz",		"type":"F", "info":"Z component of the reconstructed vertex"},
+		{"name":"theta",    "type":"F", "info":"Theta from the Helix fit of the track"},
+		{"name":"phi",      "type":"F", "info":"Phi from the Helix fit of the track"},
+		{"name":"numhits",  "type":"I", "info":"Number of hits in the track"},
 		{"name":"trackl",   "type":"F", "info":"Length of the Track"},
 		{"name":"dEdx",		"type":"F", "info":"dEdx for the Track"}		
 	]

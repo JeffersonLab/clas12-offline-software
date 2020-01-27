@@ -343,8 +343,7 @@
       { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
       { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
       { "name":"time"      , "type":"F", "info":"time from pulse fit"},
-      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"},
-      { "name":"timeshift" , "type":"F", "info":"timeshift from gemc"}
+      { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
     ]
   },
   {
@@ -373,8 +372,7 @@
       { "name":"layer"     , "type":"B", "info":"layer (1-6)"},
       { "name":"component" , "type":"S", "info":"strips"},
       { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
-      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
-      { "name":"amplitude" , "type":"I", "info":"ADC maximum"},
+      { "name":"ADC"       , "type":"I", "info":"ADC maximum"},
       { "name":"time"      , "type":"F", "info":"time from pulse fit"},
       { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
     ]

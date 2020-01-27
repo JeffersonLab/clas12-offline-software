@@ -9,6 +9,8 @@ package org.jlab.rec.rtpc.hit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+
 
 public class TrackFinder {
     
@@ -20,7 +22,7 @@ public class TrackFinder {
     private List<Integer> PadList;
     private int TrigWindSize;
     private int StepSize = 120;//Bin Size of Dream Electronics Output
-    private double adcthresh = 5e-4; 
+    private double adcthresh = 1e-6; 
     private int padloopsize;// = PadList.size();
     private boolean padSorted = false; 
     private List<Integer> padTIDlist = new ArrayList<>();
@@ -36,7 +38,7 @@ public class TrackFinder {
         /*	
          *Initializations 
          */
-        
+
         ADCMap = params.get_ADCMap();
         PadList = params.get_PadList();
         TrigWindSize = params.get_TrigWindSize();
@@ -53,8 +55,11 @@ public class TrackFinder {
                 padTIDlist.clear(); //List of all TIDs assigned to the pad starts empty
                 pad = PadList.get(padindex);	
                 adc = ADCMap.getADC(pad,time);
+                
+                
 
                 if(adc > adcthresh) { //pad adc threshold check
+
                     PadVector PadVec = params.get_padvector(pad); //initializes the x,y,z,phi for pad
                     TIDList = TIDMap.getAllTrackIDs(); //Retrieve list of all available TIDs
 
@@ -108,7 +113,7 @@ public class TrackFinder {
             } //END PADLOOP
 
         } //END TIMELOOP
-
+        
         //END MAIN ALGORITHM
 
         /*
@@ -121,18 +126,35 @@ public class TrackFinder {
                     TIDMap.removeTrack(tid);
             }
         }
+              
+        /*
 
-        //System.out.println("This event has " + TIDMap.getAllTrackIDs().size() + " tracks");
+        //Flag crossing tracks
+        int tmax = 0;
+        int tmin = 0;
+        for(int tid : TIDMap.getAllTrackIDs()) {          
+            Track t = TIDMap.getTrack(tid); 
+            for(int pad : t.uniquePadList()){
+                tmax = 0;
+                tmin = 1000000;
+                for(int time : t.PadTimeList(pad)){
+                    if(time > tmax) tmax = time;
+                    if(time < tmin) tmin = time;
+                }
+                if(tmax - tmin > 1000){
+                    t.flagTrack();
+                    break;
+                }
+            }
 
-        //TODO Flag crossing tracks; for now flag all tracks
-        for(int tid : TIDMap.getAllTrackIDs()) {
-            Track t = TIDMap.getTrack(tid);
-            t.flagTrack();
         }
-
+        */
+        
+        
         /*
          * Output
          */
+       
 
         params.set_trackmap(TIDMap);
 

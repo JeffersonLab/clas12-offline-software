@@ -1,5 +1,9 @@
 package org.jlab.rec.rtpc.hit;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 
 public class HelixFitJava {
 
@@ -198,14 +202,14 @@ public class HelixFitJava {
 
 
 	  {
-		  int ITMAX = 15;    
-		  int IOWRIT = 6;
-		  double EPS    = (double)1.0e-16;   
-	double ONEPI = (double)3.1415927;  
-	double PI =   (double)3.1415927; 
-	double TWOPI = (double)6.2831854;
-	double PIBY2 = (double)1.57074635;
-	int MAX_HITS_ON_CHAIN = 200;
+            int ITMAX = 15;    
+            int IOWRIT = 6;
+            double EPS    = (double)1.0e-16;   
+            double ONEPI = (double)3.1415927;  
+            double PI =   (double)3.1415927; 
+            double TWOPI = (double)6.2831854;
+            double PIBY2 = (double)1.57074635;
+            int MAX_HITS_ON_CHAIN = 200;
 
 	    double[]   sp2 = new double[MAX_HITS_ON_CHAIN],  vv1 = new double[5];
 	    double[]   sxy = new double[MAX_HITS_ON_CHAIN],   ss0 = new double[MAX_HITS_ON_CHAIN]; 
@@ -835,6 +839,19 @@ public class HelixFitJava {
             h.set_Rho(R);
             h.set_Phi(Phi_deg);
             h.set_Theta(Theta_deg);
+                    try {
+
+            File out = new File("/Users/davidpayette/Desktop/SignalStudies/");
+            if(!out.exists())
+            {out.mkdirs();}
+            FileWriter write = new FileWriter("/Users/davidpayette/Desktop/SignalStudies/DOCA.txt",true); 
+            write.write(h.get_DCA() + "\r\n");
+            write.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            //System.out.println("DOCA " + h.get_DCA());
 	    return h;
 	  }
 
