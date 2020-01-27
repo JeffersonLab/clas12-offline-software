@@ -8,15 +8,11 @@
 
 package org.jlab.rec.rtpc.hit;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import javax.swing.JFrame;
-import org.jlab.groot.data.GraphErrors;
-import org.jlab.groot.graphics.EmbeddedCanvas;
+
 
 public class TrackHitReco {
     

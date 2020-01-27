@@ -7,9 +7,7 @@ package org.jlab.rec.rtpc.hit;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JFrame;
-import org.jlab.groot.data.GraphErrors;
-import org.jlab.groot.graphics.EmbeddedCanvas;
+
 /**
  *
  * @author davidpayette
@@ -25,7 +23,7 @@ public class TrackDisentangler {
     public TrackDisentangler(ReducedTrackMap rtmap){//HitParameters params){
         //RTIDMap = params.get_rtrackmap();
         RTIDMap = rtmap;
-        System.out.println("Before " + NewTrackMap.getAllTrackIDs().size());
+        
         List<Integer> origtidlist = RTIDMap.getAllTrackIDs();
         for(int tid : origtidlist){
             rtrack = RTIDMap.getTrack(tid);           
@@ -62,45 +60,8 @@ public class TrackDisentangler {
             }
         }
 
-        System.out.println("After " + NewTrackMap.getAllTrackIDs().size());
         
-        List<GraphErrors> gzphi = new ArrayList<>();
-        List<GraphErrors> gzt = new ArrayList<>();
-        List<GraphErrors> gphit = new ArrayList<>();
-        EmbeddedCanvas c = new EmbeddedCanvas();
-        c.divide(1,3);
-        JFrame j = new JFrame();
-        int color = 1;
-        int index = 0;
-        for(int tid : RTIDMap.getAllTrackIDs()){
-
-            ReducedTrack t = RTIDMap.getTrack(tid);
-            gzphi.add(new GraphErrors());
-            gzt.add(new GraphErrors());
-            gphit.add(new GraphErrors());
-            for(HitVector hit : t.getAllHits()){
-                gzphi.get(index).addPoint(hit.phi(), hit.z(), 0, 0);
-                gzt.get(index).addPoint(hit.time(), hit.z(),0,0);
-                gphit.get(index).addPoint(hit.time(),hit.phi(),0,0);
-            }
-            gzphi.get(index).setMarkerColor(color);
-            gzphi.get(index).setMarkerSize(2);
-            gzt.get(index).setMarkerColor(color);
-            gzt.get(index).setMarkerSize(2);
-            gphit.get(index).setMarkerColor(color);
-            gphit.get(index).setMarkerSize(2);
-            c.cd(0);
-            c.draw(gzphi.get(index),"same");
-            c.cd(1);
-            c.draw(gzt.get(index),"same");
-            c.cd(2);
-            c.draw(gphit.get(index),"same");
-            index++;
-            color++;
-        }
-        j.add(c);
-        j.setSize(800,800);
-        j.setVisible(true);
+        
     }
     
     private void sortHit(HitVector hit){
