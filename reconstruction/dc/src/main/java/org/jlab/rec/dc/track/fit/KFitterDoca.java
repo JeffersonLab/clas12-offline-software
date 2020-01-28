@@ -179,6 +179,7 @@ public class KFitterDoca {
         
         return result_inv;
     }
+    private double KFScale = 4;
     private void filter(int k) {
         if (sv.trackTraj.get(k) != null &&
                 sv.trackCov.get(k).covMat != null &&
@@ -187,7 +188,7 @@ public class KFitterDoca {
             
             
             double[] K = new double[5];
-            double V = mv.measurements.get(k).unc[0];
+            double V = mv.measurements.get(k).unc[0]*KFScale;
             double[] H = mv.H(new double[]{sv.trackTraj.get(k).x, sv.trackTraj.get(k).y},
                     mv.measurements.get(k).z,
                     mv.measurements.get(k).wireLine[0]);
@@ -232,7 +233,7 @@ public class KFitterDoca {
             //USE THE DOUBLE HIT
             if(mv.measurements.get(k).doca[1]!=-99) { 
                 //now filter using the other Hit
-                V = mv.measurements.get(k).unc[1];
+                V = mv.measurements.get(k).unc[1]*KFScale;
                 H = mv.H(new double[]{x_filt, y_filt},
                     mv.measurements.get(k).z,
                     mv.measurements.get(k).wireLine[1]);
