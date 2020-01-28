@@ -12,6 +12,11 @@ import org.jlab.io.base.DataEvent;
  * @author jnewton
  */
 public class ScintillatorResponse extends DetectorResponse {
+   
+    private float dedx=0;
+    
+    public float getDedx() { return dedx; }
+    public void setDedx(float dedx) { this.dedx=dedx; }
     
     public ScintillatorResponse(){
         super();
@@ -31,7 +36,7 @@ public class ScintillatorResponse extends DetectorResponse {
                 int sector = bank.getByte("sector", row);
                 int layer  = bank.getByte("layer", row);
                 int paddle = bank.getShort("component", row);
-                DetectorResponse  response = new DetectorResponse(sector,layer,paddle);
+                ScintillatorResponse  response = new ScintillatorResponse(sector,layer,paddle);
                 response.setHitIndex(row);
                 response.getDescriptor().setType(type);
                 float x = bank.getFloat("x", row);
@@ -41,7 +46,9 @@ public class ScintillatorResponse extends DetectorResponse {
                 response.setEnergy(bank.getFloat("energy", row));
                 response.setTime(bank.getFloat("time", row));
                 response.setStatus(bank.getInt("status",row));
-
+                float dx = bank.getFloat("pathLengthThruBar",row);
+                if (dx>0) response.setDedx(bank.getFloat("energy", row)/dx);
+                
                 responseList.add(response);
             }
         }

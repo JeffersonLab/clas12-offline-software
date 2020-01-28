@@ -280,6 +280,7 @@ public class DetectorData {
                bank.setFloat("energy", row, (float) r.getEnergy());
                bank.setFloat("chi2", row, (float) 0.0);
                bank.setShort("status",row,(short) r.getStatus());
+               bank.setFloat("dedx",row,(float) ((ScintillatorResponse)r).getDedx());
                row++;
            }
        }
