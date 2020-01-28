@@ -25,7 +25,7 @@ import org.jlab.clas.pdg.PhysicsConstants;
  */
 public class DetectorParticle implements Comparable {
   
-    public static final Double DEFAULTQUALITY=99.0;
+    public static final Double DEFAULTQUALITY=9999.0;
 
     private boolean isTriggerParticle = false;
     private Integer particlePID       = 0;
