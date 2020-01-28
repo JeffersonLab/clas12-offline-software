@@ -244,7 +244,7 @@ public class EvioHipoEvent4 {
 				//EvioDataBank evioBanktrue = (EvioDataBank) evioEvent.getBank("RTPC::true");
             Bank hipoADC = new Bank(schemaFactory.getSchema("RTPC::adc"), evioBankdgtz.rows());
             //Bank hipoPOS = new Bank(schemaFactory.getSchema("RTPC::pos"), evioBanktrue.rows());      
-            for(int i = 0; i < evioBanktrue.rows(); i++){
+            for(int i = 0; i < evioBankdgtz.rows(); i++){
                 hipoADC.putByte("sector", i, (byte) 1);
                 hipoADC.putByte("layer",  i, (byte) evioBankdgtz.getInt("Layer",i));
                 hipoADC.putShort("component",  i, (short) evioBankdgtz.getInt("Component",i));
