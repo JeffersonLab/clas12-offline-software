@@ -46,8 +46,12 @@ public class ScintillatorResponse extends DetectorResponse {
                 response.setEnergy(bank.getFloat("energy", row));
                 response.setTime(bank.getFloat("time", row));
                 response.setStatus(bank.getInt("status",row));
-                float dx = bank.getFloat("pathLengthThruBar",row);
-                if (dx>0) response.setDedx(bank.getFloat("energy", row)/dx);
+
+                // CND clusters do not have path length in bar (but its hits do!):
+                if (type != DetectorType.CND) {
+                    float dx = bank.getFloat("pathLengthThruBar",row);
+                    if (dx>0) response.setDedx(bank.getFloat("energy", row)/dx);
+                }
                 
                 responseList.add(response);
             }
