@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.svt;
 
 import java.util.ArrayList;
+import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Shape3D;
@@ -8,12 +9,15 @@ import org.jlab.geom.prim.Triangle3D;
 
 public class Constants {
 
-
+    
     /**
      * Constants used in the reconstruction
      */
     Constants() {
     }
+    //CUTS
+    public static int MAXSVTHITS = 700;
+    public static int MAXSVTCROSSES = 1000;
 
     // THRESHOLDS
     public static int initThresholds = 30;
@@ -41,6 +45,9 @@ public class Constants {
     public static double[][] RY = new double[NREG][MAXNUMSECT]; // shift par
     public static double[][] RZ = new double[NREG][MAXNUMSECT]; // shift par
     public static double[][] RA = new double[NREG][MAXNUMSECT]; // shift par
+    
+    public static Point3D[][][] LEP = new Point3D[MAXNUMSECT][NLAYR][NSTRIP]; //left strip end point
+    public static Point3D[][][] REP = new Point3D[MAXNUMSECT][NLAYR][NSTRIP]; //right strip end point
     
     public static double  FIDCUX = 17.35;
     public static double  FIDCUZ = 3.75;
@@ -87,7 +94,8 @@ public class Constants {
     // cut on Edep min;
     public static double edep_min = 0.020; //20keV=0.020
     // cut on strip intersection tolerance
-    public static double interTol = 10.0; //10.0 = /1 cm
+    public static double TOLTOMODULELEN = 10.0; //10.0 = /1 cm
+    public static final double TOLTOMODULEEDGE = 1.0; // Tolerance for track trajectory point at layer to module fiducial edge (mm)
     // sum of strip numbers for valid intersection:
     //public static int sumStpNumMin = 174;
     //public static int sumStpNumMax = 259;
@@ -153,8 +161,6 @@ public class Constants {
 
     public static final double PIDCUTOFF = 2.6;
 
-    public static final double TOLTOMODULEEDGE = 1.0; // Tolerance for track trajectory point at layer to module fiducial edge (mm)
-
     public static double MAXDISTTOTRAJXY = 5; //max xy dist to cross in cm
 
     public static int BSTEXCLUDEDFITREGION = 0;
@@ -174,101 +180,56 @@ public class Constants {
         NSECT[3] = 14;
         NSECT[4] = 18;
         NSECT[5] = 18;
-       // NSECT[6] = 24;
-       // NSECT[7] = 24;
-
-        // the values of the z0 position of the BST module local coordinate system
-        // in the lab frame coordinate system (from gemc geometry file), for each of the regions:
-        /*
-		Z0[0] = -219.856 + 0.5*DEADZNLEN;
-		Z0[1] = -219.856 + 0.5*DEADZNLEN;
-		Z0[2] = -180.490 + 0.5*DEADZNLEN;
-		Z0[3] = -180.490 + 0.5*DEADZNLEN;
-		Z0[4] = -141.530 + 0.5*DEADZNLEN;
-		Z0[5] = -141.530 + 0.5*DEADZNLEN;
-		Z0[6] =  -83.406 + 0.5*DEADZNLEN;
-		Z0[7] =  -83.406 + 0.5*DEADZNLEN;
-         */
-        Z0[0] = -219.826 + 0. * DEADZNLEN;
-        Z0[1] = -219.826 + 0. * DEADZNLEN;
-        Z0[2] = -180.380 + 0. * DEADZNLEN;
-        Z0[3] = -180.380 + 0. * DEADZNLEN;
-        Z0[4] = -141.206 + 0. * DEADZNLEN;
-        Z0[5] = -141.206 + 0. * DEADZNLEN;
-        //Z0[6] = -83.405 + 0. * DEADZNLEN;
-        //Z0[7] = -83.405 + 0. * DEADZNLEN;
-
-        //Z0[0]=-219.826; Z0[1]=Z0[0];
-        //Z0[2]=-180.38;  Z0[3]=Z0[2];
-        //Z0[4]=-141.206; Z0[5]=Z0[4];
-        //Z0[6]=-83.405;  Z0[7]=Z0[6];
-        double rotationFlag = 1;// in hardware the tracker is rotated by an  180 degrees in azimuth
-        PHI0[0] = Math.toRadians(90. + 180. * rotationFlag);
-        PHI0[1] = Math.toRadians(90. + 180. * rotationFlag);
-        PHI0[2] = Math.toRadians(90. + 180. * rotationFlag);
-        PHI0[3] = Math.toRadians(90. + 180. * rotationFlag);
-        PHI0[4] = Math.toRadians(90. + 180. * rotationFlag);
-        PHI0[5] = Math.toRadians(90. + 180. * rotationFlag);
-       // PHI0[6] = Math.toRadians(90. + 180. * rotationFlag);
-        //PHI0[7] = Math.toRadians(90. + 180. * rotationFlag);
-
-        /*
-		for(int s = 0; s <NSECT[0]; s++) {
-			MODULERADIUS[0][s] = 65.285 - MODULEPOSFAC*SILICONTHICK;
-		}
-		for(int s = 0; s <NSECT[2]; s++) {
-			MODULERADIUS[2][s] = 92.945 - MODULEPOSFAC*SILICONTHICK;
-		}
-		for(int s = 0; s <NSECT[4]; s++) {
-			MODULERADIUS[4][s] = 120.365 - MODULEPOSFAC*SILICONTHICK;
-		}
-		for(int s = 0; s <NSECT[6]; s++) {
-			MODULERADIUS[6][s] = 161.275 - MODULEPOSFAC*SILICONTHICK;
-		}
-		for(int s = 0; s <NSECT[1]; s++) {
-			MODULERADIUS[1][s] = 68.832 + MODULEPOSFAC*SILICONTHICK ;
-		}
-		for(int s = 0; s <NSECT[3]; s++) {
-			MODULERADIUS[3][s] = 96.492 + MODULEPOSFAC*SILICONTHICK;
-		}
-		for(int s = 0; s <NSECT[5]; s++) {
-			MODULERADIUS[5][s] = 123.912 + MODULEPOSFAC*SILICONTHICK;
-		}
-		for(int s = 0; s <NSECT[7]; s++) {
-			MODULERADIUS[7][s] = 164.822 + MODULEPOSFAC*SILICONTHICK;	
-		}
-         */
+       
+        Z0[0] = SVTConstants.Z0ACTIVE[0];
+        Z0[1] = SVTConstants.Z0ACTIVE[0];
+        Z0[2] = SVTConstants.Z0ACTIVE[1];
+        Z0[3] = SVTConstants.Z0ACTIVE[1];
+        Z0[4] = SVTConstants.Z0ACTIVE[2];
+        Z0[5] = SVTConstants.Z0ACTIVE[2];
+     
+        for(int k =0; k<6; k++)
+            PHI0[k] = SVTConstants.PHI0;
+        
         for (int s = 0; s < NSECT[0]; s++) {
-            MODULERADIUS[0][s] = 65.447 - MODULEPOSFAC * SILICONTHICK;
+            MODULERADIUS[0][s] = SVTConstants.LAYERRADIUS[0][0];
         }
         for (int s = 0; s < NSECT[2]; s++) {
-            MODULERADIUS[2][s] = 93.047 - MODULEPOSFAC * SILICONTHICK;
+            MODULERADIUS[2][s] = SVTConstants.LAYERRADIUS[1][0];
         }
         for (int s = 0; s < NSECT[4]; s++) {
-            MODULERADIUS[4][s] = 120.482 - MODULEPOSFAC * SILICONTHICK;
+            MODULERADIUS[4][s] = SVTConstants.LAYERRADIUS[2][0];
         }
-        //for (int s = 0; s < NSECT[6]; s++) {
-        //    MODULERADIUS[6][s] = 161.362 - MODULEPOSFAC * SILICONTHICK;
-        //}
-
+        
         for (int s = 0; s < NSECT[1]; s++) {
-            MODULERADIUS[1][s] = 65.447 + LAYRGAP + MODULEPOSFAC * SILICONTHICK;
+            MODULERADIUS[1][s] = SVTConstants.LAYERRADIUS[0][1];
         }
         for (int s = 0; s < NSECT[3]; s++) {
-            MODULERADIUS[3][s] = 93.047 + LAYRGAP + MODULEPOSFAC * SILICONTHICK;
+            MODULERADIUS[3][s] = SVTConstants.LAYERRADIUS[1][1];
         }
         for (int s = 0; s < NSECT[5]; s++) {
-            MODULERADIUS[5][s] = 120.482 + LAYRGAP + MODULEPOSFAC * SILICONTHICK;
+            MODULERADIUS[5][s] = SVTConstants.LAYERRADIUS[2][1];
         }
-        //for (int s = 0; s < NSECT[7]; s++) {
-        //    MODULERADIUS[7][s] = 161.362 + LAYRGAP + MODULEPOSFAC * SILICONTHICK;
-        //}
+        
         LAYRGAP = MODULERADIUS[1][0] - MODULERADIUS[0][0];
 
+        
+        Geometry geo = new Geometry();
+       for(int l =0; l < NLAYR; l++) {
+           for(int j = 0; j< NSECT[l]; j++) {
+               for(int k = 0; k<NSTRIP; k++) {
+                   double[][] X = geo.getStripEndPoints(k+1, (l+1)%2);//1 top, 0 bottom
+                   LEP[j][l][k] = geo.transformToFrame(j+1, l+1, X[0][0], 0, X[0][1], "lab", ""); //left
+                   REP[j][l][k] = geo.transformToFrame(j+1, l+1, X[1][0], 0, X[1][1], "lab", ""); //right
+                   
+               }
+           }
+       }
+        
         // SHIFTS
         
         TX[0][0] = 0.177;	TY[0][0] = 0.184;	TZ[0][0] = 0.183;	RX[0][0] = 0.312;	RY[0][0] = 0;	RZ[0][0] = 0.95;	RA[0][0] = 0.164;
-        TX[0][1] = 0.134;	TY[0][1] = 0.1;	TZ[0][1] = 0.19;	RX[0][1] = 0.243;	RY[0][1] = -0.177;	RZ[0][1] = 0.954;	RA[0][1] = 0.102;
+        TX[0][1] = 0.134;	TY[0][1] = 0.1;         TZ[0][1] = 0.19;	RX[0][1] = 0.243;	RY[0][1] = -0.177;	RZ[0][1] = 0.954;	RA[0][1] = 0.102;
         TX[0][2] = 0.14;	TY[0][2] = -0.083;	TZ[0][2] = 0.163;	RX[0][2] = 0.017;	RY[0][2] = -0.052;	RZ[0][2] = 0.999;	RA[0][2] = 0.106;
         TX[0][3] = 0.023;	TY[0][3] = -0.079;	TZ[0][3] = 0.148;	RX[0][3] = 0.103;	RY[0][3] = 0.317;	RZ[0][3] = 0.943;	RA[0][3] = 0.099;
         TX[0][4] = -0.073;	TY[0][4] = -0.04;	TZ[0][4] = 0.143;	RX[0][4] = 0.395;	RY[0][4] = 0.287;	RZ[0][4] = 0.872;	RA[0][4] = 0.13;
@@ -338,7 +299,7 @@ public class Constants {
                         
         {
             ArrayList<ArrayList<Shape3D>> modules = new ArrayList<ArrayList<Shape3D>>();
-            Geometry geo = new Geometry();
+           //Geometry geo = new Geometry();
 
             for (int layer = 1; layer <= 8; layer++) {
                 ArrayList<Shape3D> layerModules = new ArrayList<Shape3D>();

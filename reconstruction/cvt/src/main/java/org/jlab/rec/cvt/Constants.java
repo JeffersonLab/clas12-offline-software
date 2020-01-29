@@ -33,7 +33,7 @@ public class Constants {
     private static double _Yb =0;
     private static double _RbErr = 1./Math.sqrt(12.);
     
-    private static double _Zoffset = 0;
+    //private static double _Zoffset = 0;
     
     private static int _rmReg = 0;
 
@@ -61,13 +61,13 @@ public class Constants {
         _RbErr = RbErr;
     }
 
-    public static double getZoffset() {
-        return _Zoffset;
-    }
+    //public static double getZoffset() {
+    //    return _Zoffset;
+    //}
 
-    public static void setZoffset(double _Zoffset) {
-        Constants._Zoffset = _Zoffset;
-    }
+    //public static void setZoffset(double _Zoffset) {
+    //    Constants._Zoffset = _Zoffset;
+    //}
 
     public static int getRmReg() {
         return _rmReg;
@@ -250,12 +250,12 @@ public class Constants {
 
     //public static final int CVTCONFIGSTARTREG = 2; // for 3SVT+3BMT
 
-    public static synchronized void Load(boolean isCosmics, boolean isSVTonly, double SolenoidScale) {
+    public static synchronized void Load(boolean isCosmics, boolean isSVTonly) {
         if (areConstantsLoaded) {
             return;
         }
 
-        setSolenoidscale(SolenoidScale);
+        
         Constants.setCosmicsData(false);
         setSVTOnly(isSVTonly);
 
@@ -264,9 +264,7 @@ public class Constants {
 
         areConstantsLoaded = true;
         System.out.println("CVT constants loaded ? " + areConstantsLoaded);
-
-        if(Math.abs(SolenoidScale)<0.001)
-            Constants.setCosmicsData(true);
+        
     }
 
     public static final boolean isCosmicsData() {
