@@ -24,6 +24,8 @@ public class KFitterDoca {
 
     public StateVec finalStateVec;
     public CovMat finalCovMat;
+    private StateVec initialStateVec;
+    private CovMat initialCovMat;
     public List<org.jlab.rec.dc.trajectory.StateVec> kfStateVecsAlongTrajectory;
     public int totNumIter = 30;
     private double newChisq = Double.POSITIVE_INFINITY;
@@ -49,7 +51,7 @@ public class KFitterDoca {
             this.init(trk, DcDetector, c);
         }
     }
-
+    boolean TBT =false;
     private void initFromHB(Track trk, DCGeant4Factory DcDetector) {
         mv.setMeasVecsFromHB(trk, DcDetector);
         int mSize = mv.measurements.size();
@@ -59,6 +61,7 @@ public class KFitterDoca {
             sv.Z[i] = mv.measurements.get(i).z;
         }
         sv.initFromHB(trk, sv.Z[0], this);
+        TBT = true;
     }
 
     public void init(Track trk, DCGeant4Factory DcDetector, int c) {
@@ -73,15 +76,37 @@ public class KFitterDoca {
         sv.init(trk, sv.Z[0], this, c);
     }
     public int interNum = 0;
+    double initChi2 = Double.POSITIVE_INFINITY;
     public void runFitter(int sector) {
-        this.chi2 = 0;
+        this.chi2 = Double.POSITIVE_INFINITY;
+        double initChi2 = Double.POSITIVE_INFINITY;
         this.NDF = mv.ndf;
         int svzLength = sv.Z.length;
-        
-//        IntStream.range(1,totNumIter ).parallel().forEach(i -> {
+
+        if(TBT==true) {
+            this.chi2kf = 0;
+            // Get the input parameters
+            for (int k = 0; k < svzLength - 1; k++) {
+                    sv.transport(sector, k, k + 1,
+                            sv.trackTraj.get(k),
+                            sv.trackCov.get(k));
+            }
+            this.calcFinalChisq(sector);
+            this.initialStateVec = sv.trackTraj.get(svzLength - 1);
+            this.initialCovMat = sv.trackCov.get(svzLength - 1);
+            this.finalStateVec = sv.trackTraj.get(svzLength - 1);
+            this.finalCovMat = sv.trackCov.get(svzLength - 1);
+            initChi2 = this.chi2; 
+            if(Double.isNaN(chi2)) {
+                this.setFitFailed = true;
+                return;
+            }
+        }
+    //        IntStream.range(1,totNumIter ).parallel().forEach(i -> {
         for (int i = 1; i <= totNumIter; i++) {
             interNum = i;
             this.chi2kf = 0;
+
             if (i > 1) {
                 //get new state vec at 1st measurement after propagating back from the last filtered state
                 /*sv.transport(sector,
@@ -132,21 +157,30 @@ public class KFitterDoca {
                             i = totNumIter;
                         }
                     }
+
                     this.finalStateVec = sv.trackTraj.get(svzLength - 1);
                     this.finalCovMat = sv.trackCov.get(svzLength - 1);
-                    
+
                 } else {
                     this.ConvStatus = 1;
                 }
             }
         }
-//        });
+    //        });
         if(totNumIter==1) {
             this.finalStateVec = sv.trackTraj.get(svzLength - 1);
             this.finalCovMat = sv.trackCov.get(svzLength - 1);
         }
         this.calcFinalChisq(sector);
-
+        if(TBT==true) {
+            if(chi2>initChi2) { // fit failed
+                this.finalStateVec = this.initialStateVec;
+                this.finalCovMat = this.initialCovMat;
+                sv.trackTraj.put(svzLength - 1,this.initialStateVec);
+                sv.trackCov.put(svzLength - 1, this.initialCovMat);
+                this.calcFinalChisq(sector);
+            }
+        }
     }
 
     public Matrix filterCovMat(double[] H, Matrix Ci, double V) {
