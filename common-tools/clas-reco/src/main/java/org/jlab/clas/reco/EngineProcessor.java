@@ -107,6 +107,7 @@ public class EngineProcessor {
             "org.jlab.service.ltcc.LTCCEngine",
             "org.jlab.service.eb.EBHBEngine",
             "org.jlab.service.dc.DCTBEngine",
+            "org.jlab.service.fvt.FVTEngine",
             "org.jlab.service.ftof.FTOFTBEngine",
             "org.jlab.service.eb.EBTBEngine",
             "org.jlab.rec.rich.RICHEBEngine"
