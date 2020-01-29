@@ -260,8 +260,7 @@ public class TrajectoryFinder {
         double maxPathLength = 5.0;  
         swimmer.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
                      Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
-                     trk.get_P(), charge, 
-                maxPathLength) ;
+                     trk.get_P(), charge, maxPathLength) ;
         double[] inters = null;
         double phi=0;
         double theta=0;
