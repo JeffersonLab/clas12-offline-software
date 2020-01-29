@@ -59,7 +59,7 @@ public class RecoBankWriter {
                 row++;
             }
         }
-
+        //bank.show();
         return bank;
     }	
     
@@ -70,6 +70,8 @@ public class RecoBankWriter {
                 return null;*/
         HashMap<Integer, FinalTrackInfo> finaltrackinfomap = params.get_finaltrackinfomap();
         int listsize = finaltrackinfomap.size();
+        if(listsize == 0) return null;
+        if(finaltrackinfomap.size() == 0) return null;
         int row = 0;
 
         
@@ -88,10 +90,14 @@ public class RecoBankWriter {
                 bank.setFloat("py", row, (float) finaltrackinfomap.get(TID).get_py());
                 bank.setFloat("pz", row, (float) finaltrackinfomap.get(TID).get_pz());
                 bank.setFloat("vz", row, (float) finaltrackinfomap.get(TID).get_vz());
+                bank.setFloat("theta", row, (float) finaltrackinfomap.get(TID).get_theta());
+                bank.setFloat("phi", row, (float) finaltrackinfomap.get(TID).get_phi());
+                bank.setInt("numhits", row, finaltrackinfomap.get(TID).get_numhits());
                 bank.setFloat("trackl", row, (float) finaltrackinfomap.get(TID).get_tl());
                 bank.setFloat("dEdx", row, (float) finaltrackinfomap.get(TID).get_dEdx());
+                
                 row++;
-            
+            //bank.show();
         }
 
         return bank;

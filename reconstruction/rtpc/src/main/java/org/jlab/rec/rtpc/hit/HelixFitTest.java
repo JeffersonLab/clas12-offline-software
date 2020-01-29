@@ -16,7 +16,7 @@ public class HelixFitTest {
     public HelixFitTest(HitParameters params){
         HashMap<Integer, List<RecoHitVector>> recotrackmap = params.get_recotrackmap();
         HashMap<Integer, FinalTrackInfo> finaltrackinfomap = new HashMap<>();
-        double szpos[][] = new double[1000][3];
+        double szpos[][] = new double[10000][3];
         int hit = 0;
         for(int TID : recotrackmap.keySet()){
             for(hit = 0; hit < recotrackmap.get(TID).size(); hit++){
@@ -31,9 +31,12 @@ public class HelixFitTest {
             double py = ho.get_py();
             double pz = ho.get_pz();
             double vz = ho.get_Z0();
+            double theta = ho.get_Theta();
+            double phi = ho.get_Phi();
+            int numhits = recotrackmap.get(TID).size();
             double tl = ho.get_trackl();
             double dEdx = ho.get_dEdx();
-            finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,tl,dEdx));
+            finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,theta,phi,numhits,tl,dEdx));
         }
         params.set_finaltrackinfomap(finaltrackinfomap);
     }

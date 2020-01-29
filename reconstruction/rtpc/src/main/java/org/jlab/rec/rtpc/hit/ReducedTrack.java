@@ -57,5 +57,9 @@ public class ReducedTrack {
 	public boolean isTrackFlagged() {
 		return _flagTrack;
 	}
+        
+        public HitVector getLastHit(){
+                return _hits.get(_hits.size()-1);
+        }
 	
 }
