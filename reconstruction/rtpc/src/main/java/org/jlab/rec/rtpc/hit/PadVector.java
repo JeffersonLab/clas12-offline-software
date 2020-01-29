@@ -1,20 +1,23 @@
 package org.jlab.rec.rtpc.hit;
 
+import org.jlab.clas.physics.Vector3;
+
 public class PadVector {
 	
-    private double _x;
+    private Vector3 _vec; 
+    /*private double _x;
     private double _y; 
     private double _z; 
-    private double _phi;
-    private double PAD_W = 2.79; // in mm
-    private double PAD_S = 80.0; //in mm
-    private double PAD_L = 4.0; // in mm
-    private double RTPC_L= 384.0; // in mm	    
+    private double _phi;*/
+    private final double PAD_W = 2.79; // in mm
+    private final double PAD_S = 80.0; //in mm
+    private final double PAD_L = 4.0; // in mm
+    private final double RTPC_L= 384.0; // in mm	    
     private double phi_pad;		    
-    private double Num_of_Cols = RTPC_L/PAD_L;
-    private double PI=Math.PI;
-    private double z0 = -(RTPC_L/2.0);
-    private double phi_per_pad = PAD_W/PAD_S; // in rad	
+    private final double Num_of_Cols = RTPC_L/PAD_L;
+    private final double PI=Math.PI;
+    private final double z0 = -(RTPC_L/2.0);
+    private final double phi_per_pad = PAD_W/PAD_S; // in rad	
     private double chan; 
     private double col;
     private double row;
@@ -23,7 +26,7 @@ public class PadVector {
 	
     public PadVector(int padnum){			
         chan = (double)padnum;       
-        col = chan%Num_of_Cols;
+        col = (chan-1)%Num_of_Cols+1;
         row=(chan-col)/Num_of_Cols;
         z_shift = row%4;
 
@@ -36,43 +39,33 @@ public class PadVector {
             phi_pad += 2.0*PI;
         }
 
-        z_pad=z0+(col*PAD_L)+(PAD_L/2.0)+z_shift;
+        z_pad=z0+((col-1)*PAD_L)+(PAD_L/2.0)+z_shift;
         
+        _vec = new Vector3(
+            PAD_S*Math.cos(phi_pad),
+            PAD_S*Math.sin(phi_pad),
+            z_pad);
+        
+        /*
         set_x(PAD_S*Math.cos(phi_pad));
         set_y(PAD_S*Math.sin(phi_pad));
         set_z(z_pad);
-        set_phi(phi_pad);       
-    }
-
-    private void set_x(double x){
-        _x = x; 
-    }
-
-    private void set_y(double y){
-        _y = y; 
-    }
-
-    private void set_z(double z){
-        _z = z; 
-    }
-
-    private void set_phi(double phi){
-        _phi = phi; 
+        set_phi(phi_pad);   */    
     }
 
     public double x(){
-            return _x; 
+            return _vec.x(); 
     }
 
     public double y(){
-            return _y;
+            return _vec.y();
     }
 
     public double z(){
-            return _z;
+            return _vec.z();
     }
 
     public double phi(){
-            return _phi;
+            return _vec.phi();
     }
 }
