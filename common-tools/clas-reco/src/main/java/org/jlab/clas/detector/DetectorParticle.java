@@ -35,7 +35,7 @@ public class DetectorParticle implements Comparable {
     private int     particleScore     = 0; // scores are assigned detector hits
     private double  particleScoreChi2 = 0.0; // chi2 for particle score 
     private double  startTime         = -1.0; // per-particle start-time
-   
+  
     public double getStartTime() { return this.startTime; }
     public void setStartTime(double time) {this.startTime=time; }
     
@@ -44,9 +44,9 @@ public class DetectorParticle implements Comparable {
     // let multiple particles share the same hit for these detectors:
     private final DetectorType[] sharedDetectors = {DetectorType.FTOF,DetectorType.CTOF};
     
-    private final List<DetectorResponse> responseStore = new ArrayList<>();
+    protected final List<DetectorResponse> responseStore = new ArrayList<>();
 
-    private DetectorTrack detectorTrack = null;
+    protected DetectorTrack detectorTrack = null;
     
     public DetectorParticle(){
         detectorTrack = new DetectorTrack(-1);
@@ -136,12 +136,6 @@ public class DetectorParticle implements Comparable {
                                                 tp.getCross().origin().z());
                 res.setPath(tp.getPathLength());
             }
-            // OLD POCA WAY:
-            //Line3D distance = this.getDistance(res);
-            //res.getMatchedPosition().setXYZ(
-            //        distance.midpoint().x(),
-            //        distance.midpoint().y(),distance.midpoint().z());
-            //res.setPath(this.getPathLength(res.getPosition()));
         }
     }
 
@@ -482,10 +476,6 @@ public class DetectorParticle implements Comparable {
             return new Line3D(tp.getCross().origin(), response.getPosition().toPoint3D());
         }
         return null;
-        // OLD POCA WAY:
-        //Line3D cross = this.detectorTrack.getLastCross();
-        //Line3D  dist = cross.distanceRay(response.getPosition().toPoint3D());
-        //return dist;
     }
 
     public double getTheoryBeta(int id){
@@ -523,19 +513,6 @@ public class DetectorParticle implements Comparable {
         if (tp==null) return -1;
         Line3D cross=tp.getCross();
        
-        // OLD POCA WAY:
-        //Line3D cross;
-        //if (type==DetectorType.HTCC) {
-        //    cross=this.detectorTrack.getFirstCross();
-        //    // 0 is detId for HTCC in TimeBasedTrkg::Trajectory bank!
-        //    //cross=this.detectorTrack.getTrajectoryPoint(0);
-        //    //if (cross==null) return -1;
-        //}
-        //else if (type==DetectorType.LTCC)
-        //    cross=this.detectorTrack.getLastCross();
-        //else throw new RuntimeException(
-        //        "DetectorParticle:getCheckr5noSignal:  invalid type:  "+type);
-
         // find the best match:
         int bestIndex = -1;
         double bestConeAngle = Double.POSITIVE_INFINITY;

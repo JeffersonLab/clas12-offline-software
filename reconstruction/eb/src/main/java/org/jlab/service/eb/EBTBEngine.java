@@ -14,6 +14,7 @@ public class EBTBEngine extends EBEngine {
 
     public EBTBEngine(){
         super("EBTB");
+        setUsePOCA(false);
     }
 
     @Override
