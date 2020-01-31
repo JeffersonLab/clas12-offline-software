@@ -84,26 +84,5 @@ public class TrackDisentangler {
             NewTrackMap.addTrack(newt);
         }
     }
-    
-    /*public static void main(String[] args){
-       ReducedTrackMap rtmap = new ReducedTrackMap();
-       ReducedTrack t1 = new ReducedTrack();
-       double zstep = 0; 
-       for(int time = 0; time <= 3600; time+=120){
-           zstep = 4*time/120;
-           System.out.println("zstep " + zstep);
-           t1.addHit(new HitVector(1,zstep,(0.04/120)*time,time,0));
-           
-           t1.addHit(new HitVector(1,-zstep + 40,-(0.04/120)*time + 1.1,time,0));
-           System.out.println("hits " + t1.getLastHit().z() + " " + t1.getLastHit().phi());
-           t1.addHit(new HitVector(1,-zstep + 60,-(0.04/120)*time + 0.8,time,0));
-           
-       }
-       t1.flagTrack();
-       rtmap.addTrack(t1);
-       TrackDisentangler td = new TrackDisentangler(rtmap);
-       
-
-    }*/
 }
 
