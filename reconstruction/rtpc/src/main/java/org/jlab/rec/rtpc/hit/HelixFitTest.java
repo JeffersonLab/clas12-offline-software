@@ -13,7 +13,7 @@ import java.util.List;
  * @author davidpayette
  */
 public class HelixFitTest {
-    public HelixFitTest(HitParameters params){
+    public HelixFitTest(HitParameters params, int fitToBeamline){
         HashMap<Integer, List<RecoHitVector>> recotrackmap = params.get_recotrackmap();
         HashMap<Integer, FinalTrackInfo> finaltrackinfomap = new HashMap<>();
         double szpos[][] = new double[10000][3];

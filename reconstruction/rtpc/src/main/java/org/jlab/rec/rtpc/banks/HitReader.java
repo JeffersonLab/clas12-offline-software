@@ -39,7 +39,7 @@ public class HitReader {
 	 * This methods fills the RTPChit and MChit list of hits.  If the data is not MC, the MChit list remains empty
 	 * @param event DataEvent
 	 */
-	public void fetch_RTPCHits(DataEvent event, boolean simulation) {
+	public void fetch_RTPCHits(DataEvent event, boolean simulation, boolean cosmic) {
 
  
             
@@ -50,16 +50,17 @@ public class HitReader {
                 bankDGTZ=event.getBank("RTPC::adc");
             DataBank bankTrue = null;
             if(simulation){
-                if(event.hasBank("RTPC::pos")==true)
-                    bankTrue=event.getBank("RTPC::pos");
+                if(event.hasBank("MC::True")==true)
+                    bankTrue=event.getBank("MC::True");
                 if(bankDGTZ==null || bankTrue==null)
                     return ;
             }else{
                 if(bankDGTZ==null) return;
             }
             int rows = bankDGTZ.rows();
-            if(simulation && bankTrue.rows()!=rows)
-                return;
+            //if(simulation && bankTrue.rows()!=rows)
+            //    return;
+
 
             int[] hitnb 	= new int[rows];
             int[] cellID 	= new int[rows];
@@ -78,17 +79,16 @@ public class HitReader {
                 layer = bankDGTZ.getByte("layer", i);
                 component = bankDGTZ.getShort("component", i);
                 cellID[i] = get_cellid(component,layer);                    
-                Time[i]	= (double) bankDGTZ.getFloat("time",i);
-                
+                Time[i]	= (double) bankDGTZ.getFloat("time",i);                
                 Edep[i] = (double) bankDGTZ.getInt("ADC", i);
-                if(simulation){               						    
+                /*if(simulation){               						    
                     posX[i] = (double) bankTrue.getFloat("posx", i);
                     posY[i] = (double) bankTrue.getFloat("posy", i);
                     posZ[i] = (double) bankTrue.getFloat("posz", i);	
                     tid[i] = (int) bankTrue.getInt("tid", i);
-                }else{
+                }else{*/
                     Time[i] = Time[i] - Time[i]%120; 
-                }
+                //}
                 
                 //System.out.println("Bank info " + cellID[i] + " " + Time[i] + " " + Edep[i]);
                 
@@ -103,12 +103,16 @@ public class HitReader {
                 
 
                 Hit hit = new Hit(1, cellID[i], 1, Time[i]);
+                if(cosmic){
+                    Edep[i] -= 256;
+                    if(Edep[i] < 0) Edep[i] = 0;
+                }
                 hit.set_EdepTrue(Edep[i]);
-                if(simulation){
+                /*if(simulation){
                     hit.set_PosXTrue(posX[i]);                
                     hit.set_PosYTrue(posY[i]);
                     hit.set_PosZTrue(posZ[i]);
-                }
+                }*/
                 hit.set_Time(Time[i]);
 
                 hits.add(hit); 
