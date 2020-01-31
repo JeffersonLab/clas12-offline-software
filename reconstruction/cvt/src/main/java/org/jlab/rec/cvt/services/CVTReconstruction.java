@@ -145,7 +145,8 @@ public class CVTReconstruction extends ReconstructionEngine {
     public boolean processDataEvent(DataEvent event) {
         
         this.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
-        double shift = 0;
+        double shift = org.jlab.rec.cvt.Constants.getZoffset();
+
         this.FieldsConfig = this.getFieldsConfig();
         
         Swim swimmer = new Swim();

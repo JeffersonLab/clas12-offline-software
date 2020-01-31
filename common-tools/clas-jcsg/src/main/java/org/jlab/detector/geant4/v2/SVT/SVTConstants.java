@@ -330,8 +330,7 @@ public class SVTConstants
 				NSECTORS[region] = cp.getInteger(ccdbPath+"region/nSectors", region );
                                 
 				STATUS[region] = cp.getInteger(ccdbPath+"region/status", region );
-				Z0ACTIVE[region] = cp.getDouble(ccdbPath+"region/zStart", region )
-                                        + cp.getDouble("/geometry/target/position", 0)*10; // Cu edge of hybrid sensor's active volume
+				Z0ACTIVE[region] = cp.getDouble(ccdbPath+"region/zStart", region ); // Cu edge of hybrid sensor's active volume
 				REFRADIUS[region] = cp.getDouble(ccdbPath+"region/UlayerOuterRadius", region); // radius to outer side of U (inner) module
 				SUPPORTRADIUS[region] = cp.getDouble(ccdbPath+"region/CuSupportInnerRadius", region); // radius to inner side of heatSinkRidge
 				
