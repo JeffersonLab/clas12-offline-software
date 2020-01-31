@@ -97,7 +97,7 @@ public class MeasVecsDoca {
                     //hot._hitError = err_sl1 * err_sl1 * Z * Z + err_it1 * err_it1 + 2 * Z * err_cov1 + trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr()*trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr();
                     hot._hitError = trkcand.get(c).get(s).get(h).get_DocaErr()*trkcand.get(c).get(s).get(h).get_DocaErr();
                     //System.out.println(" Z "+Z+" ferr "+(float)(hot._Unc /(hot._hitError/4.)));
-                    hot._Unc[0] = hot._hitError *4;
+                    hot._Unc[0] = hot._hitError;
                     hOTS.add(hot);
 
                 }
@@ -159,7 +159,7 @@ public class MeasVecsDoca {
                 hot._doca[0]*=LR;
                 hot._hitError = trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr()*trk.get_ListOfHBSegments().get(s).get(h).get_DocaErr();
                 //System.out.println(" Z "+Z+" ferr "+(float)(hot._Unc /(hot._hitError/4.)));
-                hot._Unc[0] = hot._hitError*4;
+                hot._Unc[0] = hot._hitError;
                 hot.region = trk.get_ListOfHBSegments().get(s).get(h).get_Region();
                 hOTS.add(hot);
                 
