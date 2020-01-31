@@ -44,28 +44,7 @@ public class TrackHitReco {
     final private double b_phi4 = 2.57684E-5;
     final private double b_phi5 = 2.10680E-2;
     private double b_phi;
-    /*private double a_t;
-    private double b_t;
-    private double a_phi;
-    private double b_phi;*/
-    
-    //COSMIC MAGBOLTZ PARAMETERS
-    //final private double a_t5_cosm = 6.96387e+02;//6.96145e+02;
 
-    //final private double b_t5_cosm = -4.73759e+01;//-4.74214e+01;
-    
-    /*final private double a_phi1 = 0;//1.12871e-08;
-    final private double a_phi2 = 0;//1.50882e-08;
-    final private double a_phi3 = 0;//-3.83492e-06;
-    final private double a_phi4 = 0;//-3.43608e-06;
-    final private double a_phi5 = 0;//2.16630e-05;
-    
-    final private double b_phi1 = 0;//-5.03125e-09;
-    final private double b_phi2 = 0;//-4.94344e-09;
-    final private double b_phi3 = 0;//1.77409e-06;
-    final private double b_phi4 = 0;//2.73528e-06;
-    final private double b_phi5 = 0;//-3.45254e-05;
-    */
     final private double t_2GEM2 = 296.082;
     final private double t_2GEM3 = 296.131;
     final private double t_2PAD = 399.09;
@@ -104,7 +83,6 @@ public class TrackHitReco {
         for(int TID : tids) {
             double adc = 0;
             ReducedTrack track = RTIDMap.getTrack(TID);
-            //System.out.println(track.getAllHits().size() + " number of hits");
             track.sortHits();
             smallt = track.getSmallT();
             larget = track.getLargeT();
@@ -125,7 +103,6 @@ public class TrackHitReco {
                 cellID = hit.pad();              
                 Time = hit.time();
 
-                //System.out.println("Track Reco " + Time);
                 //Time += tdiff;
 		           
                 // find reconstructed position of ionization from Time info		                
@@ -150,7 +127,6 @@ public class TrackHitReco {
 
                 recotrackmap.get(TID).add(new RecoHitVector(cellID,x_rec,y_rec,hit.z(),tdiff,Time));
             }
-            //write.write(adc + "\r\n");
         }
  
         params.set_recotrackmap(recotrackmap);
@@ -165,7 +141,7 @@ public class TrackHitReco {
         a_t = get_rec_coef(a_t1,a_t2,a_t3,a_t4,a_t5,z);
         b_t = get_rec_coef(b_t1,b_t2,b_t3,b_t4,b_t5,z);
 	//return ((-(Math.sqrt(a_t*a_t+(4*b_t*t*t_cathode/t_max)))+a_t+(14*b_t))/(2*b_t))*10.0;
-        return Math.sqrt((70*70*(1-((t-t_cathode)/t_max)))+(30*30*((t-t_cathode)/t_max)));// - 40;
+        return Math.sqrt((70*70*(1-((t-t_cathode)/t_max)))+(30*30*((t-t_cathode)/t_max)));
     }
     
     private double get_dphi(double z, double r){

@@ -33,10 +33,29 @@ public class RTPCEngine extends ReconstructionEngine{
     public RTPCEngine() {
         super("RTPC","davidp","3.0");
     }
-
+    
+    private boolean simulation = false;
+    private boolean cosmic = false;
+    private int fitToBeamline = 1;
+    
     @Override
     public boolean init() {
-        // TODO Auto-generated method stub
+        String sim = this.getEngineConfigString("rtpcSimulation");
+        String cosm = this.getEngineConfigString("rtpcCosmic");
+        String beamfit = this.getEngineConfigString("rtpcBeamlineFit");
+        //System.out.println(sim + " " + cosm + " " + beamfit);
+        
+        if(sim != null){
+            simulation = Boolean.valueOf(sim);
+        }
+        
+        if(cosm != null){
+            cosmic = Boolean.valueOf(cosm);
+        }
+        
+        if(beamfit != null){
+           fitToBeamline = Boolean.valueOf(beamfit)?1:0;
+        }
         return true;
     }
 
@@ -44,22 +63,7 @@ public class RTPCEngine extends ReconstructionEngine{
     
     @Override
     public boolean processDataEvent(DataEvent event) {
-        String sim = this.getEngineConfigString("rtpcSimulation");
-        String cosm = this.getEngineConfigString("rtpcCosmic");
-        String beamfit = this.getEngineConfigString("rtpcBeamlineFit");
-        //System.out.println(sim + " " + cosm + " " + beamfit);
-        boolean simulation = false;
-        if(sim != null){
-            simulation = Boolean.valueOf(sim);
-        }
-        boolean cosmic = false;
-        if(cosm != null){
-            cosmic = Boolean.valueOf(cosm);
-        }
-        int fitToBeamline = 1;
-        if(beamfit != null){
-           fitToBeamline = Boolean.valueOf(beamfit)?1:0;
-        }
+
         HitParameters params = new HitParameters();
         HitReader hitRead = new HitReader();
         hitRead.fetch_RTPCHits(event,false,cosmic);//boolean is for simulation
@@ -135,7 +139,7 @@ public class RTPCEngine extends ReconstructionEngine{
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
         RTPCEngine en = new RTPCEngine();
-        //en.init();
+        en.init();
 
         
         EngineProcessor processor = new EngineProcessor();
