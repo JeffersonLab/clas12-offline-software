@@ -23,7 +23,7 @@
         <dependency>
             <groupId>org.jlab.clas</groupId>
             <artifactId>clas-math</artifactId>
-            <version>6b.4.1-SNAPSHOT</version>
+            <version>6b.5.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
