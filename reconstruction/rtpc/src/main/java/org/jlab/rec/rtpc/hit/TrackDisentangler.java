@@ -20,9 +20,9 @@ public class TrackDisentangler {
     private double maxdeltaz = 8;
     private double maxdeltaphi = 0.10;
     
-    public TrackDisentangler(ReducedTrackMap rtmap){//HitParameters params){
-        //RTIDMap = params.get_rtrackmap();
-        RTIDMap = rtmap;
+    public TrackDisentangler(HitParameters params){
+        RTIDMap = params.get_rtrackmap();
+        //RTIDMap = rtmap;
         
         List<Integer> origtidlist = RTIDMap.getAllTrackIDs();
         for(int tid : origtidlist){
@@ -85,7 +85,7 @@ public class TrackDisentangler {
         }
     }
     
-    public static void main(String[] args){
+    /*public static void main(String[] args){
        ReducedTrackMap rtmap = new ReducedTrackMap();
        ReducedTrack t1 = new ReducedTrack();
        double zstep = 0; 
@@ -104,6 +104,6 @@ public class TrackDisentangler {
        TrackDisentangler td = new TrackDisentangler(rtmap);
        
 
-    }
+    }*/
 }
 

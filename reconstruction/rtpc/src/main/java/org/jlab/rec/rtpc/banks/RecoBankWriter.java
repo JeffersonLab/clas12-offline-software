@@ -31,7 +31,7 @@ public class RecoBankWriter {
             }
         }
 
-        DataBank bank = event.createBank("RTPC::rec", listsize);
+        DataBank bank = event.createBank("RTPC::hits", listsize);
         
         
         if (bank == null) {
@@ -48,12 +48,12 @@ public class RecoBankWriter {
                 double time  = recotrackmap.get(TID).get(i).time();
                 double tdiff = recotrackmap.get(TID).get(i).dt();
 
-                bank.setInt("TID", row, TID);
-                bank.setInt("cellID", row, cellID);
+                bank.setInt("trkID", row, TID);
+                bank.setInt("id", row, cellID);
                 bank.setFloat("time", row, (float) time);
-                bank.setFloat("posX", row, (float) x_rec);
-                bank.setFloat("posY", row, (float) y_rec);
-                bank.setFloat("posZ", row, (float) z_rec);				
+                bank.setFloat("x", row, (float) x_rec);
+                bank.setFloat("y", row, (float) y_rec);
+                bank.setFloat("z", row, (float) z_rec);				
                 bank.setFloat("tdiff", row, (float) tdiff);
 
                 row++;
@@ -75,7 +75,7 @@ public class RecoBankWriter {
         int row = 0;
 
         
-        DataBank bank = event.createBank("RTPC::trackinfo", listsize);
+        DataBank bank = event.createBank("RTPC::tracks", listsize);
         
         
         if (bank == null) {
@@ -85,16 +85,16 @@ public class RecoBankWriter {
 		
         for(int TID : finaltrackinfomap.keySet()) {
 
-                bank.setInt("TID", row, TID);
+                bank.setInt("trkID", row, TID);
                 bank.setFloat("px", row, (float) finaltrackinfomap.get(TID).get_px());
                 bank.setFloat("py", row, (float) finaltrackinfomap.get(TID).get_py());
                 bank.setFloat("pz", row, (float) finaltrackinfomap.get(TID).get_pz());
                 bank.setFloat("vz", row, (float) finaltrackinfomap.get(TID).get_vz());
                 bank.setFloat("theta", row, (float) finaltrackinfomap.get(TID).get_theta());
                 bank.setFloat("phi", row, (float) finaltrackinfomap.get(TID).get_phi());
-                bank.setInt("numhits", row, finaltrackinfomap.get(TID).get_numhits());
-                bank.setFloat("trackl", row, (float) finaltrackinfomap.get(TID).get_tl());
-                bank.setFloat("dEdx", row, (float) finaltrackinfomap.get(TID).get_dEdx());
+                bank.setInt("nhits", row, finaltrackinfomap.get(TID).get_numhits());
+                bank.setFloat("path", row, (float) finaltrackinfomap.get(TID).get_tl());
+                bank.setFloat("dedx", row, (float) finaltrackinfomap.get(TID).get_dEdx());
                 
                 row++;
             //bank.show();

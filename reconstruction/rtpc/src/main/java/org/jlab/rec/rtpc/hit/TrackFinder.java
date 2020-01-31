@@ -34,11 +34,11 @@ public class TrackFinder {
     private String method = "phiz";
     private int minhitcount = 5; 
 
-    public TrackFinder(HitParameters params) {
+    public TrackFinder(HitParameters params, boolean cosmic) {
         /*	
          *Initializations 
          */
-
+        
         ADCMap = params.get_ADCMap();
         PadList = params.get_PadList();
         TrigWindSize = params.get_TrigWindSize();
@@ -74,7 +74,7 @@ public class TrackFinder {
                                 PADCHECKLOOP: //Loop over pads 
                                 for(int checkpad : padlist) {		
                                     PadVector checkpadvec = params.get_padvector(checkpad);	
-                                    if(tutil.comparePads(PadVec, checkpadvec, method)) { //compares the position of two pads
+                                    if(tutil.comparePads(PadVec, checkpadvec, method, cosmic)) { //compares the position of two pads
                                         track.addPad(time, pad);			//assign pad to track
                                         padSorted = true;				//flag set
                                         padTIDlist.add(tid);				//track the TID assigned
@@ -127,28 +127,27 @@ public class TrackFinder {
             }
         }
               
-        /*
-
-        //Flag crossing tracks
-        int tmax = 0;
-        int tmin = 0;
-        for(int tid : TIDMap.getAllTrackIDs()) {          
-            Track t = TIDMap.getTrack(tid); 
-            for(int pad : t.uniquePadList()){
-                tmax = 0;
-                tmin = 1000000;
-                for(int time : t.PadTimeList(pad)){
-                    if(time > tmax) tmax = time;
-                    if(time < tmin) tmin = time;
-                }
-                if(tmax - tmin > 1000){
-                    t.flagTrack();
-                    break;
+        
+        if(!cosmic){
+            //Flag crossing tracks
+            int tmax = 0;
+            int tmin = 0;
+            for(int tid : TIDMap.getAllTrackIDs()) {          
+                Track t = TIDMap.getTrack(tid); 
+                for(int pad : t.uniquePadList()){
+                    tmax = 0;
+                    tmin = 1000000;
+                    for(int time : t.PadTimeList(pad)){
+                        if(time > tmax) tmax = time;
+                        if(time < tmin) tmin = time;
+                    }
+                    if(tmax - tmin > 1000){
+                        t.flagTrack();
+                        break;
+                    }
                 }
             }
-
         }
-        */
         
         
         /*
