@@ -12,6 +12,7 @@ import Jama.*;
  */
 public class StateVec extends Matrix implements Comparable<StateVec> {
 
+    
     /**
      * serialVersionUID
      */
@@ -21,6 +22,7 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
     private int _SurfaceDetector;
     private int _SurfaceLayer;
     private int _SurfaceSector;
+    private int _SurfaceComponent;
     private double _TrkPhiAtSurface;
     private double _TrkThetaAtSurface;
     private double _TrkToModuleAngle;
@@ -70,7 +72,20 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
     public double get_TrkPhiAtSurface() {
         return _TrkPhiAtSurface;
     }
+    /**
+     * @return the _SurfaceComponent
+     */
+    public int get_SurfaceComponent() {
+        return _SurfaceComponent;
+    }
 
+    /**
+     * @param _SurfaceComponent the _SurfaceComponent to set
+     */
+    public void set_SurfaceComponent(int _SurfaceComponent) {
+        this._SurfaceComponent = _SurfaceComponent;
+    }
+    
     public void set_TrkPhiAtSurface(double _TrkPhiAtSurface) {
         this._TrkPhiAtSurface = _TrkPhiAtSurface;
     }

@@ -615,28 +615,36 @@ public class ClusterCleanerUtilities {
                 for (int j = 0; j < hitsInLayer.size(); j++) {
                     docaSum += hitsInLayer.get(j).get_Doca();
                 }
-                //double passingCut = 1.75 * hitsInLayer.get(0).get_CellSize() * Math.cos(Math.toRadians(6.));
-                double passingCut = 1.5 * hitsInLayer.get(0).get_CellSize() ;
-                //if (docaSum < passingCut) { // reset LR to 0
-                //use doca ratio instead of sum
-                double hit1doca = 0;
-                double hit2doca = 0;
-                if(hitsInLayer.get(0).get_Doca()>hitsInLayer.get(1).get_Doca()) {
-                    hit1doca = hitsInLayer.get(0).get_Doca();
-                    hit2doca = hitsInLayer.get(1).get_Doca();
-                } else {
-                    hit1doca = hitsInLayer.get(1).get_Doca();
-                    hit2doca = hitsInLayer.get(0).get_Doca();
-                }
-                double passingCut2 = 0.75;
-                if (hit2doca/hit1doca < passingCut2 || (hit2doca/hit1doca > passingCut2 && docaSum < passingCut)) { // reset LR to 0
-                    for (int j = 0; j < hitsInLayer.size(); j++) {
-                        hitsInLayer.get(j).set_LeftRightAmb(0);
-                        hitsInLayer.get(j).updateHitPositionWithTime(event, 1, hitsInLayer.get(j).getB(), tab, DcDetector, tde);
-                    }
-                    hitsInSameLayerLists.add(hitsInLayer);
-                } else {
+                if(hitsInLayer.get(0).get_Doca()>0.5*hitsInLayer.get(0).get_CellSize() && 
+                        hitsInLayer.get(1).get_Doca()>0.5*hitsInLayer.get(1).get_CellSize()
+                        && docaSum>Constants.DOCASUMMAXFAC * hitsInLayer.get(0).get_CellSize()) {// both greater than 50% cell size
                     baseClusterHits.addAll(hitsInLayer); // safe all good hits to base cluster
+                    hitsInLayer.get(0).updateHitPositionWithTime(event, 1, hitsInLayer.get(0).getB(), tab, DcDetector, tde);
+                    hitsInLayer.get(1).updateHitPositionWithTime(event, 1, hitsInLayer.get(1).getB(), tab, DcDetector, tde);
+                } else {
+                    //double passingCut = 1.75 * hitsInLayer.get(0).get_CellSize() * Math.cos(Math.toRadians(6.));
+                    double passingCut = 1.5 * hitsInLayer.get(0).get_CellSize() ;
+                    //if (docaSum < passingCut) { // reset LR to 0
+                    //use doca ratio instead of sum
+                    double hit1doca = 0;
+                    double hit2doca = 0;
+                    if(hitsInLayer.get(0).get_Doca()>hitsInLayer.get(1).get_Doca()) {
+                        hit1doca = hitsInLayer.get(0).get_Doca();
+                        hit2doca = hitsInLayer.get(1).get_Doca();
+                    } else {
+                        hit1doca = hitsInLayer.get(1).get_Doca();
+                        hit2doca = hitsInLayer.get(0).get_Doca();
+                    }
+                    double passingCut2 = 0.75;
+                    if (hit2doca/hit1doca < passingCut2 || (hit2doca/hit1doca > passingCut2 && docaSum < passingCut)) { // reset LR to 0
+                        for (int j = 0; j < hitsInLayer.size(); j++) {
+                            hitsInLayer.get(j).set_LeftRightAmb(0);
+                            hitsInLayer.get(j).updateHitPositionWithTime(event, 1, hitsInLayer.get(j).getB(), tab, DcDetector, tde);
+                        }
+                        hitsInSameLayerLists.add(hitsInLayer);
+                    } else {
+                        baseClusterHits.addAll(hitsInLayer); // safe all good hits to base cluster
+                    }
                 }
             }
         }

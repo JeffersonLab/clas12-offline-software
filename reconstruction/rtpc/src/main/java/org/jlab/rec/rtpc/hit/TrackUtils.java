@@ -11,8 +11,15 @@ public class TrackUtils {
 	
 	public TrackUtils() {}
 	
-	public boolean comparePads(PadVector p1, PadVector p2, String Method) {
-		if(Method == "ellipse") {return ellipseMethod(p1, p2);}
+	public boolean comparePads(PadVector p1, PadVector p2, String Method, boolean cosmic) {
+		if(cosmic){
+                    zthresh = 200;
+                    phithresh = 7;              
+                }else{
+                    zthresh = 16;
+                    phithresh = 0.16;
+                }
+                if(Method == "ellipse") {return ellipseMethod(p1, p2);}
 		if(Method == "phiz")    {return phizMethod(p1,p2);}
 		else return false;
 	}	
