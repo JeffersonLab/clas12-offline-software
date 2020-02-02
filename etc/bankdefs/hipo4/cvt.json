@@ -94,9 +94,9 @@
         {"name":"x",        "type":"F", "info":"track x position at detector surface (cm)"},
         {"name":"y",        "type":"F", "info":"track y position at detector surface (cm)"},
         {"name":"z",        "type":"F", "info":"track z position at detector surface (cm)"},
-        {"name":"phi",      "type":"F", "info":"local phi at detector surface (deg)"},
-        {"name":"theta",    "type":"F", "info":"local theta at detector surface"},
-        {"name":"langle",   "type":"F", "info":"local angle with module surface"},
+        {"name":"phi",      "type":"F", "info":"local phi at detector surface (rad)"},
+        {"name":"theta",    "type":"F", "info":"local theta at detector surface (rad)"},
+        {"name":"langle",   "type":"F", "info":"local angle with module surface (rad)"},
         {"name":"centroid", "type":"F", "info":"estimated strip centroid"},
         {"name":"path",     "type":"F", "info":"pathlength of the track from the track vertex to the detector surface (cm)"}
     ]
