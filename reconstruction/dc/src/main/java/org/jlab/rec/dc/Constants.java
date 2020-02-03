@@ -178,6 +178,7 @@ public class Constants {
     
     public static double AVEDRIFTVEL = 0.0027; //velocity in cm / ns. [CLAS-Note 96-008]
     public static boolean CHECKBETA = false;
+    public static double DOCASUMMAXFAC = 1.6;
 
     public static boolean isUSETSTART() {
         return USETSTART;

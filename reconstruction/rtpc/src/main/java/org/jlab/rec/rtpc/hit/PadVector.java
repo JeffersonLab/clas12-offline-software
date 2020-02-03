@@ -45,12 +45,7 @@ public class PadVector {
             PAD_S*Math.cos(phi_pad),
             PAD_S*Math.sin(phi_pad),
             z_pad);
-        
-        /*
-        set_x(PAD_S*Math.cos(phi_pad));
-        set_y(PAD_S*Math.sin(phi_pad));
-        set_z(z_pad);
-        set_phi(phi_pad);   */    
+         
     }
 
     public double x(){

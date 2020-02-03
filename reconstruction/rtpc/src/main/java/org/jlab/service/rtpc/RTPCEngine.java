@@ -19,7 +19,7 @@ import org.jlab.rec.rtpc.hit.Hit;
 import org.jlab.rec.rtpc.hit.HitParameters;
 import org.jlab.rec.rtpc.hit.SignalSimulation;
 import org.jlab.rec.rtpc.hit.TimeAverage;
-//import org.jlab.rec.rtpc.hit.TrackDisentangler;
+import org.jlab.rec.rtpc.hit.TrackDisentangler;
 import org.jlab.rec.rtpc.hit.TrackFinder;
 import org.jlab.rec.rtpc.hit.TrackHitReco;
 import org.jlab.rec.rtpc.hit.HelixFitTest;
@@ -33,10 +33,29 @@ public class RTPCEngine extends ReconstructionEngine{
     public RTPCEngine() {
         super("RTPC","davidp","3.0");
     }
-
+    
+    private boolean simulation = false;
+    private boolean cosmic = false;
+    private int fitToBeamline = 1;
+    
     @Override
     public boolean init() {
-        // TODO Auto-generated method stub
+        String sim = this.getEngineConfigString("rtpcSimulation");
+        String cosm = this.getEngineConfigString("rtpcCosmic");
+        String beamfit = this.getEngineConfigString("rtpcBeamlineFit");
+        //System.out.println(sim + " " + cosm + " " + beamfit);
+        
+        if(sim != null){
+            simulation = Boolean.valueOf(sim);
+        }
+        
+        if(cosm != null){
+            cosmic = Boolean.valueOf(cosm);
+        }
+        
+        if(beamfit != null){
+           fitToBeamline = Boolean.valueOf(beamfit)?1:0;
+        }
         return true;
     }
 
@@ -47,7 +66,7 @@ public class RTPCEngine extends ReconstructionEngine{
 
         HitParameters params = new HitParameters();
         HitReader hitRead = new HitReader();
-        hitRead.fetch_RTPCHits(event,false);//boolean is for simulation
+        hitRead.fetch_RTPCHits(event,false,cosmic);//boolean is for simulation
 
         List<Hit> hits = new ArrayList<>();
 
@@ -60,17 +79,18 @@ public class RTPCEngine extends ReconstructionEngine{
 
         if(event.hasBank("RTPC::adc")){
 
-            SignalSimulation SS = new SignalSimulation(hits,params,false); //boolean is for simulation
+            SignalSimulation SS = new SignalSimulation(hits,params,simulation); //boolean is for simulation
             
             //Sort Hits into Tracks at the Readout Pads
-            TrackFinder TF = new TrackFinder(params);	
+            TrackFinder TF = new TrackFinder(params,cosmic);	
             //Calculate Average Time of Hit Signals
             TimeAverage TA = new TimeAverage(params);
+            //Disentangle Crossed Tracks
+            TrackDisentangler TD = new TrackDisentangler(params);
             //Reconstruct Hits in Drift Region
-            TrackHitReco TR = new TrackHitReco(params,hits);
-            
+            TrackHitReco TR = new TrackHitReco(params,hits,cosmic);            
             //Helix Fit Tracks to calculate Track Parameters
-            HelixFitTest HF = new HelixFitTest(params);
+            HelixFitTest HF = new HelixFitTest(params,fitToBeamline);
             
             RecoBankWriter writer = new RecoBankWriter();	                               
             DataBank recoBank = writer.fillRTPCHitsBank(event,params);
@@ -119,7 +139,7 @@ public class RTPCEngine extends ReconstructionEngine{
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
         RTPCEngine en = new RTPCEngine();
-        //en.init();
+        en.init();
 
         
         EngineProcessor processor = new EngineProcessor();

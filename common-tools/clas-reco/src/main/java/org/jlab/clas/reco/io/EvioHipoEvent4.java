@@ -237,13 +237,9 @@ public class EvioHipoEvent4 {
     }
     
 	public void fillHipoEventRTPC(Event hipoEvent, EvioDataEvent evioEvent){
-	    if(evioEvent.hasBank("RTPC::dgtz")==true){// && evioEvent.hasBank("RTPC::true")==true){
-	        //System.out.println("found RTPC dgtz bank");
-		//try{
-				EvioDataBank evioBankdgtz = (EvioDataBank) evioEvent.getBank("RTPC::dgtz");
-				//EvioDataBank evioBanktrue = (EvioDataBank) evioEvent.getBank("RTPC::true");
-            Bank hipoADC = new Bank(schemaFactory.getSchema("RTPC::adc"), evioBankdgtz.rows());
-            //Bank hipoPOS = new Bank(schemaFactory.getSchema("RTPC::pos"), evioBanktrue.rows());      
+	    if(evioEvent.hasBank("RTPC::dgtz")==true){
+			EvioDataBank evioBankdgtz = (EvioDataBank) evioEvent.getBank("RTPC::dgtz");
+            Bank hipoADC = new Bank(schemaFactory.getSchema("RTPC::adc"), evioBankdgtz.rows());     
             for(int i = 0; i < evioBankdgtz.rows(); i++){
                 hipoADC.putByte("sector", i, (byte) 1);
                 hipoADC.putByte("layer",  i, (byte) evioBankdgtz.getInt("Layer",i));
@@ -252,22 +248,8 @@ public class EvioHipoEvent4 {
                 hipoADC.putInt("ADC", i, (int) evioBankdgtz.getDouble("ADC", i));
                 hipoADC.putFloat("time", i, (float) evioBankdgtz.getDouble("Time", i));
                 hipoADC.putShort("ped", i, (short) 0);
-                //hipoADC.putFloat("timeshift", i, (float) evioBankdgtz.getDouble("TimeShift", i));
-                //hipoPOS.putInt("step", i, (byte) 1);
-                //hipoPOS.putFloat("time", i, (float) evioBankdgtz.getDouble("Time", i));
-                //hipoPOS.putFloat("energy", i, (float) evioBanktrue.getDouble("totEdep", i));
-                //hipoPOS.putFloat("posx", i, (float) evioBanktrue.getDouble("avgX", i));
-                //hipoPOS.putFloat("posy", i, (float) evioBanktrue.getDouble("avgY", i));
-                //hipoPOS.putFloat("posz", i, (float) evioBanktrue.getDouble("avgZ", i));
-                //hipoPOS.putInt("tid", i, evioBanktrue.getInt("tid", i));
-                //hipoPOS.putFloat("phi", i, (float) 0.0);
-                //hipoPOS.setFloat("phi", i, (float) evioBank.getDouble("phiRad", i));
             }
             hipoEvent.write(hipoADC);
-            //hipoEvent.write(hipoPOS);
-	    //}catch(NullPointerException e){
-	    //		return;
-	    //		}
         }
     }
     
