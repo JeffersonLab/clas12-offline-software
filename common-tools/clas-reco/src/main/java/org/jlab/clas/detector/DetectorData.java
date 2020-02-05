@@ -639,7 +639,9 @@ public class DetectorData {
 
                 DetectorTrack track = new DetectorTrack(charge, cx*energy ,cy*energy, cz*energy);
                 track.setDetectorID(DetectorType.FTCAL.getDetectorId());
-                DetectorParticle particle = new DetectorParticle(track);
+
+                // FIXME:  FT not in trajectory bank
+                DetectorParticlePOCA particle = new DetectorParticlePOCA(track);
                 
                 int pid = 0;
                 if (charge==0) pid = 22;
