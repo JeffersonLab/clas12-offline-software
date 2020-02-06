@@ -77,17 +77,13 @@ public class TrackHitReco {
         ReducedTrackMap RTIDMap = params.get_rtrackmap();
         List<Integer> tids = RTIDMap.getAllTrackIDs();
 
-
-        
-
         for(int TID : tids) {
             double adc = 0;
             ReducedTrack track = RTIDMap.getTrack(TID);
             track.sortHits();
             smallt = track.getSmallT();
             larget = track.getLargeT();
-            
-            
+                       
             //tdiff = 6000 - larget;
             
             if(cosmic) tcathode = 2000;         
@@ -103,7 +99,7 @@ public class TrackHitReco {
                 cellID = hit.pad();              
                 Time = hit.time();
 
-                //Time += tdiff;
+                if(!cosmic) Time += tdiff;
 		           
                 // find reconstructed position of ionization from Time info		                
                 drifttime = Time-t_gap;
@@ -125,7 +121,7 @@ public class TrackHitReco {
                 x_rec=r_rec*(Math.cos(phi_rec));
                 y_rec=r_rec*(Math.sin(phi_rec));
 
-                recotrackmap.get(TID).add(new RecoHitVector(cellID,x_rec,y_rec,hit.z(),tdiff,Time));
+                recotrackmap.get(TID).add(new RecoHitVector(cellID,x_rec,y_rec,hit.z(),tdiff,Time,hit.adc()));
             }
         }
  

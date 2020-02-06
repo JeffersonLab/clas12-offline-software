@@ -59,7 +59,7 @@ public class TrackDisentangler {
                 }
             }
         }
-
+        params.set_rtrackmap(RTIDMap);
         
         
     }

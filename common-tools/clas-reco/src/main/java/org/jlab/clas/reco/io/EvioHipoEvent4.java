@@ -245,7 +245,7 @@ public class EvioHipoEvent4 {
                 hipoADC.putByte("layer",  i, (byte) evioBankdgtz.getInt("Layer",i));
                 hipoADC.putShort("component",  i, (short) evioBankdgtz.getInt("Component",i));
                 hipoADC.putByte("order", i, (byte) 0);
-                hipoADC.putInt("ADC", i, (int) evioBankdgtz.getDouble("ADC", i));
+                hipoADC.putInt("ADC", i, (int) evioBankdgtz.getInt("ADC", i));
                 hipoADC.putFloat("time", i, (float) evioBankdgtz.getDouble("Time", i));
                 hipoADC.putShort("ped", i, (short) 0);
             }
