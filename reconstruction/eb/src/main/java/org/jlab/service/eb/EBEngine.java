@@ -271,6 +271,8 @@ public class EBEngine extends ReconstructionEngine {
         }
         de.removeBank(eventBank);
         de.removeBank(particleBank);
+        de.removeBank(eventBankFT);
+        de.removeBank(particleBankFT);
         de.removeBank(calorimeterBank);
         de.removeBank(scintillatorBank);
         de.removeBank(cherenkovBank);
