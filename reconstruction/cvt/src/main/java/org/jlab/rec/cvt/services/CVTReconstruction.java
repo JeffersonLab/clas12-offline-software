@@ -168,6 +168,8 @@ public class CVTReconstruction extends ReconstructionEngine {
         }
 
         List<Hit> bmt_hits = hitRead.get_BMTHits();
+        if(bmt_hits.size()>org.jlab.rec.cvt.bmt.Constants.MAXBMTHITS)
+             return true;
         if (bmt_hits != null && bmt_hits.size() > 0) {
             hits.addAll(bmt_hits);
         }

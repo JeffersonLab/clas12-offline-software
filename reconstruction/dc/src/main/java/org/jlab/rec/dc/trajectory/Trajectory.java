@@ -298,6 +298,8 @@ public class Trajectory extends ArrayList<Cross> {
                 trkPars[3]=tv.px();
                 trkPars[4]=tv.py();
                 trkPars[5]=tv.pz();
+                trkPars[6]=DCtrkPars[6];
+                trkPars[7]=DCtrkPars[7];
             } 
             // set swimming starting point depending on surface
             else {
@@ -347,6 +349,7 @@ public class Trajectory extends ArrayList<Cross> {
                 this.FillTrajectory(id, trajectory, trkPars, trkPars[6], trkPars[7], surface.getDetectorType(), surface.getDetectorLayer());
             }
             else {
+//                System.out.println(surface.getDetectorType() + " " + surface.getDetectorLayer() + " " + trkPars[2] + " " + pathLen + " " + trkPars[6]);
                 this.FillTrajectory(id, trajectory, trkPars, pathLen+trkPars[6], iBdl+trkPars[7], surface.getDetectorType(), surface.getDetectorLayer());               
             }
             
