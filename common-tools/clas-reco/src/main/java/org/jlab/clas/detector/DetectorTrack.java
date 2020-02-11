@@ -1,7 +1,7 @@
 package org.jlab.clas.detector;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,11 +46,11 @@ public class DetectorTrack implements Comparable {
     public class Trajectory {
 
         private int size=0;
-        private Map < Integer, Map <Integer,TrajectoryPoint> > traj = new HashMap<>();
+        private Map < Integer, Map <Integer,TrajectoryPoint> > traj = new LinkedHashMap<>();
         
         public void add(int detId,int layId,Line3D traj,float bField,float pathLength) {
             if (!this.traj.containsKey(detId)) {
-                this.traj.put(detId,new HashMap<>());
+                this.traj.put(detId,new LinkedHashMap<>());
             }
             if (this.traj.get(detId).containsKey(layId)) {
                 throw new RuntimeException("Duplicate detector type/layer: "+detId+"/"+layId);
