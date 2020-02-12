@@ -34,7 +34,7 @@
             <column name="Component"   type="int32"  num="3" info="Pad Row"/>
             <column name="Order"   type="int32"  num="4" info="Order = 0"/>
             <column name="Time"   type="float64"  num="5" info="Time [ns]"/>
-            <column name="ADC"   type="float64"  num="6" info="Energy deposition"/>
+            <column name="ADC"   type="int32"  num="6" info="Energy deposition"/>
             <column name="Ped"   type="float64"  num="7" info="Pedestal"/>
             <column name="hitn" type="int32" num="99" info="nstep"/>
         </section>

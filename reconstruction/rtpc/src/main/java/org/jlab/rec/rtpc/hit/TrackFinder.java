@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import org.jlab.detector.calib.utils.ConstantsManager;
 
 
 public class TrackFinder {
@@ -33,16 +34,24 @@ public class TrackFinder {
     private int parenttid = -1;
     private String method = "phiz";
     private int minhitcount = 5; 
+    private double zthresh = 16;
+    private double phithresh = 0.16;
 
     public TrackFinder(HitParameters params, boolean cosmic) {
         /*	
          *Initializations 
          */
-        
+        timeadjlimit = params.get_timeadjlimit();
+        adcthresh = params.get_adcthresh();
+        minhitcount = params.get_minhitspertrack();
+        zthresh = params.get_zthreshTF();
+        phithresh = params.get_phithreshTF();
         ADCMap = params.get_ADCMap();
         PadList = params.get_PadList();
+        
         TrigWindSize = params.get_TrigWindSize();
         padloopsize = PadList.size();
+        
         /*
          * Main Algorithm
          */
@@ -74,7 +83,7 @@ public class TrackFinder {
                                 PADCHECKLOOP: //Loop over pads 
                                 for(int checkpad : padlist) {		
                                     PadVector checkpadvec = params.get_padvector(checkpad);	
-                                    if(tutil.comparePads(PadVec, checkpadvec, method, cosmic)) { //compares the position of two pads
+                                    if(tutil.comparePads(PadVec, checkpadvec, method, cosmic, zthresh, phithresh)) { //compares the position of two pads
                                         track.addPad(time, pad);			//assign pad to track
                                         padSorted = true;				//flag set
                                         padTIDlist.add(tid);				//track the TID assigned

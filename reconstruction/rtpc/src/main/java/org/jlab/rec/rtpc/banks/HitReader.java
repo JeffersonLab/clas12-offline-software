@@ -76,8 +76,10 @@ public class HitReader {
             component = bankDGTZ.getShort("component", i);
             cellID[i] = get_cellid(component,layer);                    
             Time[i]	= (double) bankDGTZ.getFloat("time",i);  
-            Time[i] = Time[i] - Time[i]%120;
+            if(!simulation) Time[i] = Time[i] - Time[i]%120;
             Edep[i] = (double) bankDGTZ.getInt("ADC", i);
+            if(simulation) Edep[i]/=1000000;
+            
 
             if(Time[i] <= 0 || Time[i] > 12000 || component < 0 || layer < 0)// || tid[i] != 2) 
             {

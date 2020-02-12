@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.jlab.clas.reco.EngineProcessor;
 
@@ -34,7 +35,7 @@ public class RTPCEngine extends ReconstructionEngine{
         super("RTPC","davidp","3.0");
     }
     
-    private boolean simulation = false;
+    private boolean simulation = true;
     private boolean cosmic = false;
     private int fitToBeamline = 1;
     
@@ -56,6 +57,16 @@ public class RTPCEngine extends ReconstructionEngine{
         if(beamfit != null){
            fitToBeamline = Boolean.valueOf(beamfit)?1:0;
         }
+        
+        String[] rtpcTables = new String[]{
+            "/calibration/rtpc/time_offsets",
+            "/calibration/rtpc/gain_balance",
+            "/calibration/rtpc/time_parms",
+            "/calibration/rtpc/recon_parms"
+        };
+        
+        requireConstants(Arrays.asList(rtpcTables));
+        
         return true;
     }
 
@@ -65,8 +76,9 @@ public class RTPCEngine extends ReconstructionEngine{
     public boolean processDataEvent(DataEvent event) {
 
         HitParameters params = new HitParameters();
+        
         HitReader hitRead = new HitReader();
-        hitRead.fetch_RTPCHits(event,false,cosmic);//boolean is for simulation
+        hitRead.fetch_RTPCHits(event,simulation,cosmic);//boolean is for simulation
 
         List<Hit> hits = new ArrayList<>();
 
@@ -76,9 +88,21 @@ public class RTPCEngine extends ReconstructionEngine{
             return true;
         }
         
+        int runNo = 10;
+        
+        if(event.hasBank("RUN::config")==true){
+            DataBank bank = event.getBank("RUN::config");
+            runNo = bank.getInt("run", 0);
+            if (runNo<=0) {
+                System.err.println("RTPCEngine:  got run <= 0 in RUN::config, skipping event.");
+                return false;
+            }
+        }
+
 
         if(event.hasBank("RTPC::adc")){
-
+            params.init(this.getConstantsManager(), runNo);
+            
             SignalSimulation SS = new SignalSimulation(hits,params,simulation); //boolean is for simulation
             
             //Sort Hits into Tracks at the Readout Pads
@@ -109,7 +133,7 @@ public class RTPCEngine extends ReconstructionEngine{
 
     public static void main(String[] args){
         
-        System.setProperty("CLAS12DIR", "/Users/davidpayette/Desktop/rtpcbranch/clas12-offline-software");
+        System.setProperty("CLAS12DIR", "/Users/davidpayette/Desktop/newrtpcbranch/clas12-offline-software");
         double starttime = System.nanoTime();
         
         File f = new File("/Users/davidpayette/Desktop/SignalStudies/sig.txt");
@@ -130,16 +154,17 @@ public class RTPCEngine extends ReconstructionEngine{
         
         //String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/good.hipo";
         //String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/cosmics.hipo";
-        String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/ctest.hipo";
+        //String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/ctest.hipo";
         //String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/new40p.hipo";
         //String inputFile = "/Users/davidpayette/Desktop/rtpcbranch/1ep.hipo";
         //String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/plugins/clas12/340_40p.hipo";
+        String inputFile = "/Users/davidpayette/Desktop/newrtpcbranch/10p13120.hipo";
         String outputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/out_cosmic.hipo";
 
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
         RTPCEngine en = new RTPCEngine();
-        en.init();
+        //en.init();
 
         
         EngineProcessor processor = new EngineProcessor();

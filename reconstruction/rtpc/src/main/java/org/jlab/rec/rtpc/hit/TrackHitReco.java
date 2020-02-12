@@ -17,7 +17,7 @@ import java.util.List;
 public class TrackHitReco {
     
     //MAGBOLTZ PARAMETERS DO NOT TOUCH
-    final private double a_t1 = -2.48491E-4;
+    /*final private double a_t1 = -2.48491E-4;
     final private double a_t2 = 2.21413E-4;
     final private double a_t3 = -3.11195E-3;
     final private double a_t4 = -2.75206E-1;
@@ -54,7 +54,7 @@ public class TrackHitReco {
     final private double phi_2GEM3 = 0.0470817;
     final private double phi_2PAD = 0.0612122;
     final private double phi_gap = phi_2GEM2 + phi_2GEM3 + phi_2PAD;
-    
+    */
     
     private double larget;
     private double smallt;
@@ -70,15 +70,38 @@ public class TrackHitReco {
     private double x_rec;
     private double y_rec;
     
+    private double[] t_offset = new double[5];
+    private double toffset = 0;
+    private double[] t_max = new double[5];
+    private double tmax = 0;
+    private double[] a_phi = new double[5];
+    private double aphi = 0;
+    private double bphi = 0;
+    private double[] b_phi = new double[5];
+    private double[] phi_gap = new double[5];
+    private double phigap = 0;
+    private double tl = 0;
+    private double tp = 0;
+    private double tr = 0;
+   
+    
+    private boolean _cosmic = false;
+    
     public TrackHitReco(HitParameters params, List<Hit> rawHits, boolean cosmic) {
 
-        HashMap<Integer, Double> tdiffmap = new HashMap<>();
+        _cosmic = cosmic;
+        t_offset = params.get_toffparms();
+        t_max = params.get_tmaxparms();
+        a_phi = params.get_aphiparms();
+        b_phi = params.get_bphiparms();
+        phi_gap = params.get_phigapparms();
+        tl = params.get_tl();
+        tp = params.get_tp();
+        tr = params.get_tr();
+        tcathode = params.get_tcathode();
         HashMap<Integer, List<RecoHitVector>> recotrackmap = new HashMap<>();
         ReducedTrackMap RTIDMap = params.get_rtrackmap();
         List<Integer> tids = RTIDMap.getAllTrackIDs();
-
-
-        
 
         for(int TID : tids) {
             double adc = 0;
@@ -87,14 +110,7 @@ public class TrackHitReco {
             smallt = track.getSmallT();
             larget = track.getLargeT();
             
-            
-            //tdiff = 6000 - larget;
-            
-            if(cosmic) tcathode = 2000;         
-            else tcathode = 6000;
             tdiff = tcathode - larget;
-            if(cosmic) tdiff = 1800;
-            tdiffmap.put(TID, tdiff);
             recotrackmap.put(TID, new ArrayList<>());
             List<HitVector> allhits = track.getAllHits();
 
@@ -103,15 +119,13 @@ public class TrackHitReco {
                 cellID = hit.pad();              
                 Time = hit.time();
 
-                //Time += tdiff;
+                if(!cosmic) Time += tdiff;
 		           
                 // find reconstructed position of ionization from Time info		                
-                drifttime = Time-t_gap;
-                if(cosmic) drifttime = Time;
-                r_rec = get_r_rec(hit.z(),drifttime,tcathode,tdiff); //in mm
+                drifttime = Time;
+                r_rec = get_r_rec(hit.z(),drifttime); //in mm
                 dphi = get_dphi(hit.z(),r_rec); // in rad
-                
-                phi_rec=hit.phi()-dphi-phi_gap;
+                phi_rec=hit.phi()-dphi;
                 if(cosmic) phi_rec = hit.phi();
                 
                 if(phi_rec<0.0) {
@@ -125,31 +139,32 @@ public class TrackHitReco {
                 x_rec=r_rec*(Math.cos(phi_rec));
                 y_rec=r_rec*(Math.sin(phi_rec));
 
-                recotrackmap.get(TID).add(new RecoHitVector(cellID,x_rec,y_rec,hit.z(),tdiff,Time));
+                recotrackmap.get(TID).add(new RecoHitVector(cellID,x_rec,y_rec,hit.z(),tdiff,Time,hit.adc()));
             }
         }
  
         params.set_recotrackmap(recotrackmap);
     }	
 	
-    private double get_rec_coef(double t1, double t2, double t3, double t4, double t5, double z2) {
-        double z = 0;//z2/1000;
-        return t1*z*z*z*z + t2*z*z*z + t3*z*z + t4*z + t5;
+    private double get_rec_coef(double[] parms, double z2) {
+        double z = z2/1000;
+        return parms[4]*z*z*z*z + parms[3]*z*z*z + parms[2]*z*z + parms[1]*z + parms[0];
     }
 
-    private double get_r_rec(double z,double t, double t_cathode, double t_max){
-        a_t = get_rec_coef(a_t1,a_t2,a_t3,a_t4,a_t5,z);
-        b_t = get_rec_coef(b_t1,b_t2,b_t3,b_t4,b_t5,z);
-	//return ((-(Math.sqrt(a_t*a_t+(4*b_t*t*t_cathode/t_max)))+a_t+(14*b_t))/(2*b_t))*10.0;
-        return Math.sqrt((70*70*(1-((t-t_cathode)/t_max)))+(30*30*((t-t_cathode)/t_max)));
+    private double get_r_rec(double z,double t){
+        toffset = get_rec_coef(t_offset,z) + tl + tp + tr;
+        tmax = get_rec_coef(t_max,z);
+        return Math.sqrt((70*70*(1-((t-toffset)/tmax)))+(30*30*((t-toffset)/tmax)));
     }
     
     private double get_dphi(double z, double r){
-        a_phi = get_rec_coef(a_phi1,a_phi2,a_phi3,a_phi4,a_phi5,z);
-        b_phi = get_rec_coef(b_phi1,b_phi2,b_phi3,b_phi4,b_phi5,z);
-        return a_phi*(7-r/10)+b_phi*(7-r/10)*(7-r/10); // in rad
+        aphi = get_rec_coef(a_phi,z);
+        bphi = get_rec_coef(b_phi,z);
+        phigap = get_rec_coef(phi_gap,z);
+        return aphi*(7-r/10)+bphi*(7-r/10)*(7-r/10) + phigap; // in rad
     }
     
+
     
 }
 

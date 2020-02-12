@@ -3,6 +3,8 @@ package org.jlab.rec.rtpc.hit;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.jlab.detector.calib.utils.ConstantsManager;
+import org.jlab.utils.groups.IndexedTable;
 
 public class HitParameters {
 
@@ -34,7 +36,53 @@ public class HitParameters {
     private TrackMap _trackmap = new TrackMap();
     private ReducedTrackMap _rtrackmap = new ReducedTrackMap();
     private HashMap<Integer, FinalTrackInfo> _finaltrackinfomap;
+    private int _timeadjlimit = 4;
+    private double _zthreshTF = 16;
+    private double _phithreshTF = 0.16;
+    private double _zthreshTD = 8;
+    private double _phithreshTD = 0.1;
+    private int _tthreshTD = 300;
+    private double _adcthresh = 320;
+    private int _minhitspertrack = 5;
+    private double[] _tmaxparms = new double[5];
+    private double[] _toffparms = new double[5];
+    private double[] _aphiparms = new double[5];
+    private double[] _bphiparms = new double[5];
+    private double[] _tgapparms = new double[5];
+    private double[] _phigapparms = new double[5];
+    private double _tl = 0;
+    private double _tp = 0;
+    private double _tr = 0;
+    private double _tcathode = 0;
 
+    public void init(ConstantsManager manager, int runNo){
+        IndexedTable gain_balance = manager.getConstants(runNo, "/calibration/rtpc/gain_balance");
+        IndexedTable time_offsets = manager.getConstants(runNo, "/calibration/rtpc/time_offsets");
+        IndexedTable time_parms = manager.getConstants(runNo, "/calibration/rtpc/time_parms");
+        IndexedTable recon_parms = manager.getConstants(runNo, "/calibration/rtpc/recon_parms");
+        
+        _timeadjlimit = (int) recon_parms.getDoubleValue("Dtm", 1,1,1);
+        _zthreshTF = recon_parms.getDoubleValue("Dzm", 1,1,1);
+        _phithreshTF = recon_parms.getDoubleValue("Dphim", 1,1,1);
+        _adcthresh = recon_parms.getDoubleValue("ADCmin", 1,1,1);
+        _minhitspertrack = (int) recon_parms.getDoubleValue("Hitmin",1,1,1);
+        _zthreshTD = recon_parms.getDoubleValue("Dzm", 1,1,2);
+        _phithreshTD = recon_parms.getDoubleValue("Dphim", 1,1,2);
+        _tthreshTD = (int) recon_parms.getDoubleValue("Dtm",1,1,2);
+        for(int i = 0; i < 5; i++){
+            _tmaxparms[i] = time_parms.getDoubleValue("z"+i, 1,1,1);
+            _toffparms[i] = time_parms.getDoubleValue("z"+i, 1,1,2);
+            _aphiparms[i] = time_parms.getDoubleValue("z"+i, 1,1,3);
+            _bphiparms[i] = time_parms.getDoubleValue("z"+i, 1,1,4);
+            _tgapparms[i] = time_parms.getDoubleValue("z"+i, 1,1,5);
+            _phigapparms[i] = time_parms.getDoubleValue("z"+i, 1,1,6);
+        }
+        _tl = time_offsets.getDoubleValue("tl", 1,1,3);
+        _tp = time_offsets.getDoubleValue("tp", 1,1,3);
+        _tr = time_offsets.getDoubleValue("tr", 1,1,3);
+        _tcathode = time_parms.getDoubleValue("z0", 1,1,7);
+    }
+    
     public int get_SignalStepSize(){return _SignalStepSize;} // step size of the signal before integration (arbitrary value)
     public int get_BinSize(){return _BinSize;} // electronics integrates the signal over 40 ns
     public int get_NBinKept(){return _NBinKept;} // only 1 bin over 3 is kept by the daq
@@ -68,7 +116,24 @@ public class HitParameters {
         }
         return _padmap.get(pad);
     }
-
+    public int get_timeadjlimit(){return _timeadjlimit;}
+    public double get_zthreshTF(){return _zthreshTF;}
+    public double get_phithreshTF(){return _phithreshTF;}
+    public double get_zthreshTD(){return _zthreshTD;}
+    public double get_phithreshTD(){return _phithreshTD;}
+    public int get_tthreshTD(){return _tthreshTD;}
+    public double get_adcthresh(){return _adcthresh;}
+    public int get_minhitspertrack(){return _minhitspertrack;}
+    public double[] get_tmaxparms(){return _tmaxparms;}
+    public double[] get_toffparms(){return _toffparms;}
+    public double[] get_aphiparms(){return _aphiparms;}
+    public double[] get_bphiparms(){return _bphiparms;}
+    public double[] get_tgapparms(){return _tgapparms;}
+    public double[] get_phigapparms(){return _phigapparms;}
+    public double get_tl(){return _tl;}
+    public double get_tp(){return _tp;}
+    public double get_tr(){return _tr;}
+    public double get_tcathode(){return _tcathode;}
 
     public void set_ADCMap(ADCMap _ADCMap){this._ADCMap = _ADCMap;}
     public void set_TimeMap(HashMap<Integer, List<Double>> _TimeMap){this._TimeMap = _TimeMap;}
