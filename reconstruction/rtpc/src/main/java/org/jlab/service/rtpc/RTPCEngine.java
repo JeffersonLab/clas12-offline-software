@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.jlab.clas.reco.EngineProcessor;
 
@@ -56,6 +57,16 @@ public class RTPCEngine extends ReconstructionEngine{
         if(beamfit != null){
            fitToBeamline = Boolean.valueOf(beamfit)?1:0;
         }
+        
+        String[] rtpcTables = new String[]{
+            "/calibration/rtpc/time_offsets",
+            "/calibration/rtpc/gain_balance",
+            "/calibration/rtpc/time_parms",
+            "/calibration/rtpc/recon_parms"
+        };
+        
+        requireConstants(Arrays.asList(rtpcTables));
+        
         return true;
     }
 
@@ -65,6 +76,7 @@ public class RTPCEngine extends ReconstructionEngine{
     public boolean processDataEvent(DataEvent event) {
 
         HitParameters params = new HitParameters();
+        
         HitReader hitRead = new HitReader();
         hitRead.fetch_RTPCHits(event,simulation,cosmic);//boolean is for simulation
 
@@ -76,9 +88,21 @@ public class RTPCEngine extends ReconstructionEngine{
             return true;
         }
         
+        int runNo = 10;
+        
+        if(event.hasBank("RUN::config")==true){
+            DataBank bank = event.getBank("RUN::config");
+            runNo = bank.getInt("run", 0);
+            if (runNo<=0) {
+                System.err.println("RTPCEngine:  got run <= 0 in RUN::config, skipping event.");
+                return false;
+            }
+        }
+
 
         if(event.hasBank("RTPC::adc")){
-
+            params.init(this.getConstantsManager(), runNo);
+            
             SignalSimulation SS = new SignalSimulation(hits,params,simulation); //boolean is for simulation
             
             //Sort Hits into Tracks at the Readout Pads

@@ -21,8 +21,11 @@ public class TrackDisentangler {
     private double maxdeltaphi = 0.10;
     
     public TrackDisentangler(HitParameters params){
+        
         RTIDMap = params.get_rtrackmap();
-        //RTIDMap = rtmap;
+        maxdeltat = params.get_tthreshTD();
+        maxdeltaz = params.get_zthreshTD();
+        maxdeltaphi = params.get_phithreshTD();
         
         List<Integer> origtidlist = RTIDMap.getAllTrackIDs();
         for(int tid : origtidlist){
