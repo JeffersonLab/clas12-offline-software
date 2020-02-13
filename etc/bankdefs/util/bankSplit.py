@@ -6,7 +6,7 @@ import os
 
 # print usage
 if len(sys.argv)<2:
-   print "usage: bankSplit.py coatjavahipobankfolder (e.g. coatjava/etc/bankdefs/hipo4/)"
+   print("usage: bankSplit.py coatjavahipobankfolder (e.g. coatjava/etc/bankdefs/hipo4/)")
    sys.exit()
 
 # hipo schema directory
@@ -16,8 +16,8 @@ os.chdir(hipodirectory)
 # single jsons directory
 workdirectory   = "singles/"
 singledirectory = "full/"
-os.mkdir(workdirectory)	    
-os.mkdir(workdirectory + singledirectory)	    
+os.mkdir(workdirectory)
+os.mkdir(workdirectory + singledirectory)
 
 # create schema directory
 def createdirandlinks(dirname, banklist):
@@ -28,24 +28,24 @@ def createdirandlinks(dirname, banklist):
     os.chdir("../../")
     print("Json file links created in " + workdirectory + dirname)
 
-    
+
 # for each json file in hipo schema folder
 for filename in os.listdir("./"):
     if filename.endswith(".json"):
-		
+
         #Read JSON data into the datastore variable
         f = open(filename)
         try:
             datastore = json.load(f)
         except:
-            print 'Invalid JSON:  '+filename
+            print('Invalid JSON:  '+filename)
             sys.exit(1)
         # loop over banks in the json file
-	for bank in datastore:
-	    bankname = bank['name']
-	    file = open(workdirectory + singledirectory + bankname + ".json", 'w')
-	    file.write(json.dumps([bank], sort_keys=True, indent=4))
-	    file.close
+        for bank in datastore:
+            bankname = bank['name']
+            file = open(workdirectory + singledirectory + bankname + ".json", 'w')
+            file.write(json.dumps([bank], sort_keys=True, indent=4))
+            file.close
 print("Single json files saved in " + workdirectory + singledirectory)
 
 # create dst, calibration and monitoring directories
@@ -55,5 +55,5 @@ monitoring = ["BAND::adc","BAND::tdc","BAND::hits","BMT::adc","BMTRec::Clusters"
 createdirandlinks("dst/", dst)
 createdirandlinks("calibration/", calibration)
 createdirandlinks("monitoring/",  monitoring)
-    
+
 
