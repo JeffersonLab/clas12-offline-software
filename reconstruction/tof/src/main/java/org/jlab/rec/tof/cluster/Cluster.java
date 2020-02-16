@@ -317,19 +317,19 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
         int id =0;
         int[] iClusHitsMatchedToTrk = new int[this.size()];
         int totNbMatches = 0;
-        if(this.size()<1 || this.get(0)._AssociatedTrkId<1)
+        if(this.size()<1 || this.get(0).get_TrkId()<1)
             return;
-        id = this.get(0)._AssociatedTrkId;
+        id = this.get(0).get_TrkId();
         for (int i = 0; i < this.size(); i++) {
             iClusHitsMatchedToTrk[i] = -1;
 
             AHit h = this.get(i);
             
             if (h.get_TrkPosition() == null
-                    || Double.isNaN(h.get_TrkPosition().x()) || this.get(i)._AssociatedTrkId!=id) {
+                    || Double.isNaN(h.get_TrkPosition().x()) || this.get(i).get_TrkId()!=id) {
                 continue;
             }
-            id = h._AssociatedTrkId;
+            id = h.get_TrkId();
             xTrk = h.get_TrkPosition().x();
             yTrk = h.get_TrkPosition().y();
             zTrk = h.get_TrkPosition().z();
