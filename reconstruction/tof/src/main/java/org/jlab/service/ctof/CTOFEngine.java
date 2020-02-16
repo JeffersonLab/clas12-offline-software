@@ -62,7 +62,8 @@ public class CTOFEngine extends ReconstructionEngine {
                     "/calibration/ctof/gain_balance",
                     "/calibration/ctof/time_jitter",
                     "/calibration/ctof/fadc_offset",
-                    "/calibration/ctof/hpos"
+                    "/calibration/ctof/hpos",
+                    "/calibration/ctof/cluster"
                 };
         
         requireConstants(Arrays.asList(ctofTables));
@@ -142,7 +143,8 @@ public class CTOFEngine extends ReconstructionEngine {
         Collections.sort(hits);
 
         // 2) find the clusters from these hits
-        ClusterFinder clusFinder = new ClusterFinder();
+        ClusterFinder clusFinder = new ClusterFinder(this.getConstantsManager().getConstants(newRun, "/calibration/ctof/cluster"));
+//        clusFinder.setDebug(true);
         int[] npaddles = Constants.NPAD;
         int npanels = 1;
         int nsectors = 1;
@@ -154,6 +156,8 @@ public class CTOFEngine extends ReconstructionEngine {
 
         if (CTOFClusters != null) {
             clusters.addAll(CTOFClusters);
+            // assign cluster IDs to hits
+            hitRead.setHitPointersToClusters(hits, clusters);       
         }
 
         // 2.1) exit if cluster list is empty but save the hits
@@ -161,6 +165,7 @@ public class CTOFEngine extends ReconstructionEngine {
             rbc.appendCTOFBanks(event, hits, null);
             return true;
         }
+        
         // continuing ... there are clusters
         if (Constants.DEBUGMODE) { // if running in DEBUG MODE print out the
             // reconstructed info about the hits and the
@@ -181,15 +186,8 @@ public class CTOFEngine extends ReconstructionEngine {
                         .println("---------------------------------------------");
             }
         }
-        //rbc.appendCTOFBanks( event, hits, clusters);
-        rbc.appendCTOFBanks(event, hits, null); // json file needs clusters...
-//        if(event.hasBank("CTOF::adc")) {
-//            if(event.hasBank("CTOF::adc")) event.getBank("CTOF::adc").show();
-//            if(event.hasBank("CTOF::tdc")) event.getBank("CTOF::tdc").show();
-//            if(event.hasBank("CTOF::rawhits")) event.getBank("CTOF::rawhits").show();
-//            if(event.hasBank("CTOF::hits")) event.getBank("CTOF::hits").show();
-//            if(event.hasBank("CVTRec::Tracks")) event.getBank("CVTRec::Tracks").show();
-//        }
+        rbc.appendCTOFBanks(event, hits, clusters); // json file needs clusters...
+
         return true;
 
     }
