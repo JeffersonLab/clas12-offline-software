@@ -88,6 +88,7 @@ public class RecoBankWriter {
 			bank.setShort("component",i, (short) candidatelist.get(i).GetComponent());
 			bank.setShort("side",i, (short) candidatelist.get(i).GetSide());
 			bank.setFloat("adc",i, (float) candidatelist.get(i).GetAdc());	
+			bank.setFloat("ampl", i, (float) candidatelist.get(i).GetAmpl());
 		
 			bank.setFloat("time",i, (float) candidatelist.get(i).GetTdc());
 			bank.setFloat("timeFadc",i, (float) candidatelist.get(i).GetFtdc());

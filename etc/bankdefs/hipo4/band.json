@@ -37,6 +37,7 @@
        {"name":"component",        "type":"S", "info":"paddle or row id of BAND"},
        {"name":"side",             "type":"S", "info":"side of bar (L = 0 and R = 1)"},
        {"name":"adc",              "type":"F", "info":"Raw ADC from FADC"},
+       {"name":"ampl",             "type":"F", "info":"ADC ampl from FADC"},
        {"name":"time",             "type":"F", "info":"Raw Time (ns) from TDC"},
        {"name":"timeFadc",         "type":"F", "info":"Raw Time (ns) from FADC"},
        {"name":"timeCorr",         "type":"F", "info":"Raw Time (ns) from TDC corrected for trigger phase"},

@@ -81,6 +81,20 @@ public class BandHitFinder {
 					Hit.SetUx(0.);
 					Hit.SetUy(0.);
 					Hit.SetUz(0.);
+					
+					if (hit1.GetSide() == 1) { //Veto has a left side PMT
+						Hit.SetIndexLpmt(i);
+						Hit.SetIndexRpmt(0);
+					}
+					else if (hit1.GetSide() == 1) { //Veto has a right side PMT
+						Hit.SetIndexLpmt(0);
+						Hit.SetIndexRpmt(i);
+					}
+					else { 
+						System.err.println("BAND HIT FINDER. Side of Veto PMT could not be assigned");
+						continue;
+					}
+					
 
 					// Print for debugging:
 					//Hit.Print();
@@ -116,6 +130,8 @@ public class BandHitFinder {
 					double tdcright = -1;
 					double adcleft = -1;
 					double adcright = -1;
+					double amplleft = -1;
+					double amplright= -1;
 					float ftdcleft = -1;
 					float ftdcright = -1;
 					int indexleft  = -1;
@@ -127,6 +143,8 @@ public class BandHitFinder {
 						ftdcright 	= hit2.GetFtdc();
 						adcleft 	= hit1.GetAdc();
 						adcright 	= hit2.GetAdc();
+						amplleft	= hit1.GetAmpl();
+						amplright	= hit2.GetAmpl();
 						indexleft 	= i;
 						indexright	= j;
 					}
@@ -137,6 +155,8 @@ public class BandHitFinder {
 						ftdcright 	= hit1.GetFtdc();
 						adcleft 	= hit2.GetAdc();
 						adcright 	= hit1.GetAdc();
+						amplleft	= hit2.GetAmpl();
+						amplright	= hit1.GetAmpl();
 						indexright	= j;
 						indexleft	= i;
 					}
@@ -144,7 +164,8 @@ public class BandHitFinder {
 						System.err.println("BAND HIT FINDER. Found two hits with left and right side but can not assign which hide belongs to which side");
 						continue;
 					}
-					
+					//TODO: Update Time Walk Correction with Amplitude instead of ADC
+					//TODO: Update Algorithm
 					// -----------------------------------------------------------------------------------------------
 					// Time-walk correction
 					double time_walk_paramsL[] = CalibrationConstantsLoader.TIMEWALK_L.get( Integer.valueOf(barKey) );

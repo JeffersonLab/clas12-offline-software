@@ -26,11 +26,11 @@ public class HitReader {
 	public static  ArrayList<BandHitCandidate> getBandCandidates(DataEvent event) {
 
 		Map<Integer,Integer>	fadcInt 	= new HashMap<Integer,Integer>();
+		Map<Integer,Integer>	fadcAmpl    = new HashMap<Integer,Integer>();
 		Map<Integer,Float>	fadcTimes	= new HashMap<Integer,Float>();
 		Map<Integer,Double>	tdcTimes	= new HashMap<Integer,Double>();
 		Map<Integer,Integer> fadcIndex  = new HashMap<Integer,Integer>();
 		Map<Integer,Integer> tdcIndex  = new HashMap<Integer,Integer>();
-
 
 
 		if(event==null) return new ArrayList<BandHitCandidate>();
@@ -60,6 +60,7 @@ public class HitReader {
 			int o	= bankADC.getByte("order",i);
 
 			int adc = bankADC.getInt("ADC",i); 
+			int ampl= bankADC.getInt("amplitude", i);
 			float ftdc = bankADC.getFloat("time",i);
 
 			if( adc <= 0 || ftdc <= 0 ) continue;
@@ -71,15 +72,18 @@ public class HitReader {
 
 			// Check if this PMT has been stored before, and if it has, then
 			// replace it only if it has a larger ADC value. Otherwise, add to map
+			//NOTE F.H. Feb 17 2020: Should we do some update to also check Amplitude here?
 			if (fadcInt.containsKey( Integer.valueOf(key) ) ) { 
 				if( fadcInt.get( Integer.valueOf(key) ) < adc ) {
 					fadcInt.put( Integer.valueOf(key) , Integer.valueOf(adc) );
+					fadcAmpl.put(Integer.valueOf(key),  Integer.valueOf(ampl));
 					fadcTimes.put( Integer.valueOf(key),  Float.valueOf(ftdc) );
 					fadcIndex.put( Integer.valueOf(key), Integer.valueOf(i));
 				}
 			}
 			else {
 				fadcInt.put( Integer.valueOf(key) , Integer.valueOf(adc) );
+				fadcAmpl.put(Integer.valueOf(key),  Integer.valueOf(ampl));
 				fadcTimes.put( Integer.valueOf(key),  Float.valueOf(ftdc) );
 				fadcIndex.put( Integer.valueOf(key), Integer.valueOf(i));
 			}	
@@ -135,6 +139,7 @@ public class HitReader {
 			int order		= Integer.parseInt( id.substring(3,4) );
 
 			int adc = fadcInt.get(keys);
+			int ampl= fadcAmpl.get(keys);
 			float ftdc = fadcTimes.get(keys);
 			double tdc = tdcTimes.get(keys);
 			int indexadc = fadcIndex.get(keys);
@@ -142,7 +147,7 @@ public class HitReader {
 			//System.out.println("Found a candidate PMT hit! slco: "+sector+" "+layer+" "+component+" "+order+" "+adc+" "+ftdc+" "+tdc);
 
 			BandHitCandidate newHit = new BandHitCandidate( sector,layer,component,order,
-					adc, tdc, ftdc ,triggerPhase, indexadc, indextdc);
+					adc, ampl,tdc, ftdc ,triggerPhase, indexadc, indextdc);
 			candidates.add(newHit);
 
 		}
