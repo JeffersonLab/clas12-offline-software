@@ -2,7 +2,8 @@ package org.jlab.rec.band.banks;
 
 import java.util.ArrayList;
 
-import org.apache.commons.math3.analysis.function.Sqrt;
+import javax.net.ssl.ExtendedSSLSession;
+
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.band.hit.BandHit;
@@ -19,16 +20,24 @@ public class RecoBankWriter {
 		if (hitlist == null) {
 			return null;
 		}
-		DataBank bank =  event.createBank("BAND::hits", hitlist.size());
-
+		//Get status for first hit. If it is 1 assume that the BandHit array contains laser hits
+		short test_status = (short) hitlist.get(0).GetStatus();
+		
+		DataBank bank;
+		if (test_status == 1) { //Initialize BAND::laser if status is  1 of the first hit
+			bank =  event.createBank("BAND::laser", hitlist.size());
+		}
+		else { //in all other cases the data is something else (cosmics or real data)->Store in BAND::hits
+			bank =  event.createBank("BAND::hits", hitlist.size());
+		}
+		
 		if (bank == null) {
-			//System.err.println("COULD NOT CREATE A BAND::Hits BANK!!!!!!");
+			System.err.println("COULD NOT CREATE A BAND::Hits/laser BANK in RecoBankWriter.fillBandHitBanks!!!!!!");
 			return null;
 		}
 
-
-		//i should only go to 1 but keep for loop for future extensions if more hits are required
-		for(int i =0;  i<hitlist.size(); i++) {
+		//i just numbers the hits 
+		for(int i = 0; i < hitlist.size(); i++) {
 			bank.setShort("id",i, (short)(i+1));
 
 			bank.setByte("sector",i, (byte) hitlist.get(i).GetSector());
@@ -36,16 +45,8 @@ public class RecoBankWriter {
 			bank.setShort("component",i, (short) hitlist.get(i).GetComponent());
 			
 			bank.setFloat("energy", i, (float) Math.sqrt(hitlist.get(i).GetAdcLeft() * hitlist.get(i).GetAdcRight()));
-
 			bank.setFloat("time",i, (float) hitlist.get(i).GetMeanTime_TDC());
-			bank.setFloat("timeFadc",i, (float) hitlist.get(i).GetMeanTime_FADC());
-
-			bank.setFloat("difftime",i, (float) hitlist.get(i).GetDiffTime_TDC());
-			bank.setFloat("difftimeFadc",i, (float) hitlist.get(i).GetDiffTime_FADC());
-
-			bank.setShort("indexLpmt",i, (short) hitlist.get(i).GetIndexLpmt());
-			bank.setShort("indexRpmt",i, (short) hitlist.get(i).GetIndexRpmt()); 
-
+		
 			bank.setFloat("x",i, (float) (hitlist.get(i).GetX()));
 			bank.setFloat("y",i, (float) (hitlist.get(i).GetY()));
 			bank.setFloat("z",i, (float) (hitlist.get(i).GetZ()));
@@ -53,13 +54,20 @@ public class RecoBankWriter {
 			bank.setFloat("ey",i, (float) (hitlist.get(i).GetUy()));
 			bank.setFloat("ez",i, (float) (hitlist.get(i).GetUz()));
 
+			bank.setFloat("timeFadc",i, (float) hitlist.get(i).GetMeanTime_FADC());
+			bank.setFloat("difftime",i, (float) hitlist.get(i).GetDiffTime_TDC());
+			bank.setFloat("difftimeFadc",i, (float) hitlist.get(i).GetDiffTime_FADC());
+
+			bank.setShort("indexLpmt",i, (short) hitlist.get(i).GetIndexLpmt());
+			bank.setShort("indexRpmt",i, (short) hitlist.get(i).GetIndexRpmt()); 
+
 			bank.setShort("status",i, (short) hitlist.get(i).GetStatus());
 		}
 		return bank;
 
 	}
 	
-	public static DataBank fillBandCandidateBanks(DataEvent event, ArrayList<BandHitCandidate> candidatelist) {
+	public static DataBank fillBandCandidateBank(DataEvent event, ArrayList<BandHitCandidate> candidatelist) {
 
 		if (candidatelist == null) {
 			return null;
@@ -67,12 +75,11 @@ public class RecoBankWriter {
 		DataBank bank =  event.createBank("BAND::rawhits", candidatelist.size());
 
 		if (bank == null) {
-			//System.err.println("COULD NOT CREATE A BAND::Hits BANK!!!!!!");
+			System.err.println("COULD NOT CREATE A BAND::rawhits BANK in RecoBankWriter.fillBandRawhitsBank!!!!!!");
 			return null;
 		}
 
-
-		//i should only go to 1 but keep for loop for future extensions if more hits are required
+		//i just numbers the hits
 		for(int i =0;  i<candidatelist.size(); i++) {
 			bank.setShort("id",i, (short)(i+1));
 
@@ -80,16 +87,14 @@ public class RecoBankWriter {
 			bank.setByte("layer",i, (byte) candidatelist.get(i).GetLayer());
 			bank.setShort("component",i, (short) candidatelist.get(i).GetComponent());
 			bank.setShort("side",i, (short) candidatelist.get(i).GetSide());
+			bank.setFloat("adc",i, (float) candidatelist.get(i).GetAdc());	
 		
 			bank.setFloat("time",i, (float) candidatelist.get(i).GetTdc());
 			bank.setFloat("timeFadc",i, (float) candidatelist.get(i).GetFtdc());
 			bank.setFloat("timeCorr",i, (float) candidatelist.get(i).GetTimeCorr());
-			bank.setFloat("adc",i, (float) candidatelist.get(i).GetAdc());
-		
-			bank.setShort("indexTdc",i, (short) candidatelist.get(i).GetIndexTdc());
-			bank.setShort("indexAdc",i, (short) candidatelist.get(i).GetIndexAdc()); 
-
 			
+			bank.setShort("indexTdc",i, (short) candidatelist.get(i).GetIndexTdc());
+			bank.setShort("indexAdc",i, (short) candidatelist.get(i).GetIndexAdc()); 			
 
 		}
 		return bank;
@@ -98,12 +103,27 @@ public class RecoBankWriter {
 	
 	
 
-	public static void appendBANDBanks(DataEvent event,ArrayList<BandHit> hitlist) {
+	public static void appendBANDBanks(DataEvent event,ArrayList<BandHitCandidate> candidatelist, ArrayList<BandHit> hitlist) {
 
-		DataBank bank = fillBandHitBanks((DataEvent) event, hitlist);
-		if (bank != null) {
-			//bank.show();
-			event.appendBank(bank);
+		//check if candidatelist is not empty (just to be sure, this is also checked in BANDEngine.
+		if(candidatelist.size()>0){
+			DataBank rawhits = fillBandCandidateBank((DataEvent) event, candidatelist);
+			if (rawhits != null) {
+				event.appendBank(rawhits);
+			}
+			else {
+				System.err.println("COULD NOT APPEND BAND::rawhits to the event in RecoBankWriter.appendBANDBanks!");
+			}
+		}
+		//check if hitlist is not empty
+		if(hitlist.size()>0){
+			DataBank hits = fillBandHitBanks((DataEvent) event, hitlist); 
+			if (hits != null) {
+				event.appendBank(hits);
+			}
+			else {
+				System.err.println("COULD NOT APPEND BAND::hits/laser to the event in RecoBankWriter.appendBANDBanks!");
+			}
 		}
 	}
 

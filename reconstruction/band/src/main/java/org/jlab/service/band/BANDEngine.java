@@ -44,7 +44,7 @@ public class BANDEngine extends ReconstructionEngine {
 
 			//1) Search for valid PMT hits based on FADC/TDC for each PMT
 			candidates = HitReader.getBandCandidates(event)	;	
-			// exit if candidates list is empty
+			// exit if candidates list is empty, neither BAND::rawhits nor BAND::hits is filled in this case
 			if(candidates.size()==0 )
 				return true;
 
@@ -52,13 +52,8 @@ public class BANDEngine extends ReconstructionEngine {
 			BandHitFinder hitFinder = new BandHitFinder();
 			hits = hitFinder.findGoodHits(candidates);
 
-
-			if(hits.size()>0){
-				//event.show();
-				//System.out.println("in process event ");
-				RecoBankWriter.appendBANDBanks(event,hits);
-
-			}
+			//3) Write candidates and hits to the banks. 
+			RecoBankWriter.appendBANDBanks(event,candidates,hits);
 
 
 			return true;
