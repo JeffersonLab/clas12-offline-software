@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.jlab.rec.band.constants.CalibrationConstantsLoader;
 import org.jlab.rec.band.constants.Parameters;
-import org.netlib.util.doubleW;
 
 
 public class BandHitFinder {
@@ -31,7 +30,7 @@ public class BandHitFinder {
 		ArrayList<BandHit> coincidences = new ArrayList<BandHit>();  
 		Map<Integer,Integer> hasMatch 	= new HashMap<Integer,Integer>();
 
-
+		boolean hasvetohit = false;
 		// Loop through the candidates array to find possible combinations of left and right.
 		if(candidates.size() > 0) {
 
@@ -85,7 +84,7 @@ public class BandHitFinder {
 
 					// Print for debugging:
 					//Hit.Print();
-
+					hasvetohit = true;
 					coincidences.add(Hit);
 					continue;
 					//return new ArrayList<BandHit>();
@@ -246,7 +245,7 @@ public class BandHitFinder {
 
 			// At this stage an array of coincidence hits from type BandHit exists. Now we can skim those coincidence
 			// hits for some neutral candidate particles
-			if( coincidences.size() > 0 ) return advancedHitFinder(coincidences);
+			if( coincidences.size() > 0 ) return advancedHitFinder(coincidences, hasvetohit);
 
 			else{ return new ArrayList<BandHit>(); }
 
@@ -257,34 +256,33 @@ public class BandHitFinder {
 
 	} // findHits function		
 
-	public ArrayList<BandHit> advancedHitFinder(ArrayList<BandHit> coincidences) 
+	public ArrayList<BandHit> advancedHitFinder(ArrayList<BandHit> coincidences, boolean hasvetohit) 
 	{
 
-		/** author:  Efrain Segarra.
- 		 	Currently this function just searches if veto layer hit in the coincidence list. 
-			Otherwise, returns 'betterHits'. In the future we'd like to do some more sophisticated
-			neutral candidate searching.
-			Cut on Layer 6 is removed for now to have cosmics and laser data in the output as well.
-		 */
+		/** author:  Efrain Segarra, Florian Hauenstein
+		 * Currently this function sets status flags for EACH hit in an event. This depends on the length of the BandHit array and
+		 * 	if a veto hit was found in the data from the findGoodHits function. Laserhits will get status 1. The rest either 0, 2 or 3
+		 **/
 
 
 		ArrayList<BandHit> betterHits = new ArrayList<BandHit>();
-		//Set status bits for each hit, good hit status is 0 for each hit when #hits is < 5.
-		//If #hits > 100, status will be set to 1 (laser hits), other possibilities it will be 2
-		int status_temp = -1;
-		if (coincidences.size() > 100) { status_temp = 1; }
-		else if (coincidences.size() < 5) { status_temp = 0; } //coincidences.size > 0 is already checked before advanceHitFinder is called
-		else { status_temp = 2; }
+		int status_temp = -1; 
+		//Set status bits for each hit, good hit status is 0 for each hit when #hits is < bandhits (standard 5).
+		//If #hits > laserhitcutvalue (standard 100), status will be set to 1 (laser hits), other possibilities it will be 2
+		//If there will be a veto hit the status values are changed to 3 from 0 or 2 (exlude if laser hit
+		
+		if (coincidences.size() > CalibrationConstantsLoader.CUT_LASERHITS_BAND) { status_temp = 1; } //laser hits
+		else if (coincidences.size() < CalibrationConstantsLoader.CUT_NHITS_BAND) { status_temp = 0; } //coincidences.size > 0 is already checked before advanceHitFinder is called
+		else { status_temp = 2; } //cosmics or other data, no veto hit
+		
+		//if hasvetohit flag is true and it is not a laser hit set status to 3 for all hits
+		if (hasvetohit && status_temp != 1) { status_temp = 3; }
+		
+		
 		for( int hit = 0 ; hit < coincidences.size() ; hit++){
 			BandHit thisHit = coincidences.get(hit);
-			thisHit.SetStatus(status_temp);
-			//if( thisHit.GetLayer() == 6 ){
-			//	return new ArrayList<BandHit>();
-			//}
-			//else{
-				betterHits.add( thisHit );
-			//}
-
+			thisHit.SetStatus(status_temp);	
+			betterHits.add( thisHit );
 		}
 		return betterHits;
 	}
