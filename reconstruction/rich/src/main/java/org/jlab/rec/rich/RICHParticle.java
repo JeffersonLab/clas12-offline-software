@@ -33,20 +33,25 @@ public class RICHParticle {
     private int parent_index = -999;
     private int hit_index = -999;
     private int type = 0;
+    private int recofound = -1;
     private int status = -1;
     private int CLASpid = -999;
     private int RICHpid = -999;
     private double momentum = 0; 
-    private double[] ChAngle = new double[4];
+    private double[][] ChAngle = new double[4][3];
+    private double[] sChAngle = new double[3];
 
     public Vector3d meas_hit = null;
     private double  meas_time = 0.0;
 
     public Point3D lab_origin = null;
     public Vector3d lab_emission = null;
-    public int ilay_emission = 0;
-    public int ico_emission = 0;
+    public int ilay_emission = -1;
+    public int ico_emission = -1;
+    public int qua_emission = -1;
     public float refi_emission = 0;
+    public double chele_emission[] = {0.0, 0.0, 0.0};
+    public double schele_emission[] = {0.0, 0.0, 0.0};
     public double lab_phi = 0.0;
     public double lab_theta = 0.0;
 
@@ -96,8 +101,6 @@ public class RICHParticle {
 
         recopar = tool.get_Constants();
 
-        //if(CLASpid!=22)set_changle();
-
     }
 
 
@@ -134,15 +137,35 @@ public class RICHParticle {
     // define only one Cherenkov angle depending on the pid hypothesis
     
         int debugMode = 0;
-        for(int k=0 ; k<4; k++) ChAngle[k] = 0.0;
-        ChAngle[0] = expectedChAngle(11);      // expected angle for electron
-        ChAngle[1] = expectedChAngle(211);     // pion
-        ChAngle[2] = expectedChAngle(321);     // kaon
-        ChAngle[3] = expectedChAngle(2212);    // proton
+        for(int j=0; j<3; j++) {
+            for(int k=0 ; k<4; k++) ChAngle[k][j] = 0.0;
+            sChAngle[j] = 0.0;
+        }
+
+        for (int iref=0; iref<3; iref++){
+            if(recopar.CHANGLES_FROM_ELECTRON==1){
+                ChAngle[0][iref] = calibrated_ChAngle(11, iref);      // expected angle for electron
+                ChAngle[1][iref] = calibrated_ChAngle(211, iref);     // pion
+                ChAngle[2][iref] = calibrated_ChAngle(321, iref);     // kaon
+                ChAngle[3][iref] = calibrated_ChAngle(2212, iref);    // proton
+
+                sChAngle[iref]   = calibrated_sChAngle(iref);      // expected angle for electron
+
+            }else{
+
+                ChAngle[0][iref] = nominal_ChAngle(11);      // expected angle for electron
+                ChAngle[1][iref] = nominal_ChAngle(211);     // pion
+                ChAngle[2][iref] = nominal_ChAngle(321);     // kaon
+                ChAngle[3][iref] = nominal_ChAngle(2212);    // proton
+
+                sChAngle[iref]   = nominal_sChAngle();      // expected angle for electron
+            }
+        }
 
         if(debugMode>=1)  {
-            System.out.format(" Create RICH particle mom %8.2f     Ch %8.2f %8.2f %8.2f %8.2f \n",momentum,ChAngle[0]*MRAD,ChAngle[1]*MRAD,ChAngle[2]*MRAD,ChAngle[3]*MRAD);
-            System.out.format("      --> Ch angle limits %8.2f %8.2f \n",minChAngle()*MRAD,maxChAngle()*MRAD);
+            System.out.format(" Create RICH particle mom %8.2f \n",momentum);
+            for(int ir=0; ir<3; ir++) System.out.format("      --> Dir  pr %7.2f k  %7.2f  pi %7.2f  e %7.2f -->  limi  %7.2f %7.2f  res %7.2f\n",
+                         ChAngle[3][ir]*MRAD,ChAngle[2][ir]*MRAD,ChAngle[1][ir]*MRAD,ChAngle[0][ir]*MRAD,minChAngle(0)*MRAD,maxChAngle(0)*MRAD,sChAngle[0]*MRAD);
         }
     }
 
@@ -161,6 +184,10 @@ public class RICHParticle {
 
     // -------------
     public int get_type() {return type;}
+    // -------------
+
+    // -------------
+    public int get_recofound() {return recofound;}
     // -------------
 
     // -------------
@@ -184,9 +211,12 @@ public class RICHParticle {
     // -------------
 
     // -------------
-    public double get_changle(int i) { return ChAngle[i]; }
+    public double get_changle(int ipar, int irefle) { return ChAngle[ipar][irefle]; }
     // -------------
 
+    // -------------
+    public double get_schangle(int irefle) { return sChAngle[irefle]; }
+    // ------------
 
     // -------------
     public double get_beta(int pid) {
@@ -207,26 +237,33 @@ public class RICHParticle {
     }
 
     // ----------------
-    public double maxChAngle() {
+    public double maxChAngle(int irefle) {
     // ----------------
 
-        for(int k=0 ; k<4; k++) if(ChAngle[k]>0)return ChAngle[k] + 3*recopar.RICH_DIRECT_RMS;
+        for(int k=0 ; k<4; k++) if(ChAngle[k][irefle]>0)return ChAngle[k][irefle] + 3*sChAngle[irefle];
         return 0.0;
     }
 
 
     // ----------------
-    public double minChAngle() {
+    public double minChAngle(int irefle) {
     // ----------------
     // calculate the minimum Cherenlov angle compatible with the momentum 
   
-        for(int k=3 ; k>=0; k--) if(ChAngle[k]>0)return Math.max(recopar.RICH_MIN_CHANGLE, ChAngle[k] - 3*recopar.RICH_DIRECT_RMS);
+        for(int k=3 ; k>=0; k--) if(ChAngle[k][irefle]>0) return Math.max(recopar.RICH_MIN_CHANGLE, ChAngle[k][irefle] - 3*sChAngle[irefle]);
         return 0.0;
     }
 
 
     // ----------------
-    public double expectedChAngle(int pid){
+    public double nominal_sChAngle(){
+    // ----------------
+
+        return recopar.RICH_DIRECT_RMS;
+    }
+
+    // ----------------
+    public double nominal_ChAngle(int pid){
     // ----------------
 
         int debugMode = 0;
@@ -237,6 +274,29 @@ public class RICHParticle {
         if(arg>0.0 && arg<1.0) return Math.acos(arg);
         return 0.0;
     }
+
+    // ----------------
+    public double calibrated_sChAngle(int irefle){
+    // ----------------
+
+        return schele_emission[irefle];
+    }
+
+    // ----------------
+    public double calibrated_ChAngle(int pid, int irefle){
+    // ----------------
+
+        int debugMode = 0;
+        double arg = 0.0;
+        double beta = get_beta(pid);
+        double cose = chele_emission[irefle];
+
+        if(beta>0) arg = 1.0/beta*cose;
+        if(debugMode>=1)  System.out.format(" Expected Ch Angle %8.4f  beta %8.4f  n %7.3f  arg %8.4f\n",get_mass(pid),beta,refi_emission, Math.acos(arg)*MRAD);
+        if(arg>0.0 && arg<1.0) return Math.acos(arg);
+        return 0.0;
+    }
+
 
     // ----------------
     public void set_id(int id) { this.id=id;}
@@ -252,6 +312,10 @@ public class RICHParticle {
 
     // ----------------
     public void set_type(int type) { this.type=type; }
+    // ----------------
+
+    // ----------------
+    public void set_recofound(int recof) { this.recofound=recof; }
     // ----------------
 
     // ----------------
@@ -419,17 +483,22 @@ public class RICHParticle {
         aero_entrance  = tool.toVector3d(entrance.get_pos());
         aero_exit      = tool.toVector3d(exit.get_pos());
         aero_normal    = tool.toVector3d(exit.get_normal());
+
         /*
         *   Take point at 3/4 of path inside aerrogel  
         */
         Vector3d amiddle = aero_exit.midpoint(aero_entrance);
         aero_middle    = aero_exit.midpoint(amiddle);
         lab_emission   = aero_middle;
-        // take the downstream aerogel tile as the one with largest number of phtoons and average emisison point
+        // take the downstream aerogel tile as the one with largest number of phtoons and average emission point
         ilay_emission  = exit.get_layer();
         ico_emission   = exit.get_component();
         if(debugMode>=1)System.out.format(" AERO lay %3d ico %3d \n",ilay_emission,ico_emission);
         refi_emission  = tool.get_Component(ilay_emission,ico_emission).get_index();
+
+        qua_emission = tool.get_Layer(ilay_emission).get_Quadrant(3, ico_emission, entrance.get_pos());
+        for(int iref=0; iref<3; iref++)chele_emission[iref] = tool.get_ChElectron(ilay_emission, ico_emission, qua_emission, iref);
+        for(int iref=0; iref<3; iref++)schele_emission[iref] = tool.get_sChElectron(ilay_emission, ico_emission, qua_emission, iref);
 
         set_changle();
 
@@ -623,7 +692,7 @@ public class RICHParticle {
         double EtaCmin = 0.0;
         if(Math.abs(Cos_EtaC)<1.)EtaCmin = Math.acos(Cos_EtaC);
         int ntrials = 0;
-        while (dist > recopar.RICH_DIRECT_RMS*100/2. && ntrials<10){
+        while (dist > nominal_sChAngle()*100/2. && ntrials<20){
 
             if(debugMode>=1){ 
                 System.out.format(" Attempt %d  with the %7.1f (%7.2f)  phi %7.2f  EtaC  %7.2f\n",ntrials, the_min*MRAD, the_min*RAD, phi_min*RAD, EtaCmin*MRAD); 
@@ -634,16 +703,19 @@ public class RICHParticle {
  
             int nthe = 0;
             for (nthe=1; nthe<=4; nthe++){
-                double theta_dthe = the_min + recopar.RICH_DIRECT_RMS/nthe;
+                double theta_dthe = the_min + nominal_sChAngle()/nthe;
                 Vector3d vpho_dthe = new Vector3d( Math.sin(theta_dthe)*Math.cos(phi_min), Math.sin(theta_dthe)*Math.sin(phi_min), Math.cos(theta_dthe));
-                ArrayList<RICHRay> rays_dthe = tool.RayTrace(lab_emission, ilay_emission, ico_emission, vpho_dthe);
+                double naero = 1/(hadron.get_beta(get_CLASpid())*(Math.sin(Theta_P)* Math.sin(theta_dthe)*Math.cos(phi_min-Phi_P)+Math.cos(Theta_P)*Math.cos(theta_dthe)));
+
+                ArrayList<RICHRay> rays_dthe = tool.RayTrace(lab_emission, ilay_emission, ico_emission, vpho_dthe, naero);
+                //ArrayList<RICHRay> rays_dthe = tool.RayTrace(lab_emission, ilay_emission, ico_emission, vpho_dthe);
                 if(rays_dthe!=null){
                     int nrefle_dthe = get_rayrefle(rays_dthe);
                     if(debugMode>=1) System.out.format("     test %2d  the %7.1f  nrfl %2d vs %2d ",nthe, theta_dthe*MRAD, nrefle_dthe, nrefle_min); 
                     if(nrefle_dthe==nrefle_min){
                         Vector3d pmt_dthe = tool.toVector3d(rays_dthe.get(rays_dthe.size()-1).end());
                         Vector3d vers_dthe = pmt_dthe.minus(pmt_min);
-                        dthe = (vec_dist.x*vers_dthe.x + vec_dist.y*vers_dthe.y) / (vers_dthe.x*vers_dthe.x + vers_dthe.y*vers_dthe.y) * recopar.RICH_DIRECT_RMS;
+                        dthe = (vec_dist.x*vers_dthe.x + vec_dist.y*vers_dthe.y) / (vers_dthe.x*vers_dthe.x + vers_dthe.y*vers_dthe.y) * nominal_sChAngle();
                         if(debugMode>=1) System.out.format("   --> dthe pos %7.2f %7.2f %7.2f  delta %7.1f (%8.2f %8.2f) \n", 
                                      pmt_dthe.x, pmt_dthe.y, pmt_dthe.z, dthe*MRAD, vers_dthe.x, vers_dthe.y);
                         break;
@@ -654,16 +726,19 @@ public class RICHParticle {
             }
 
             for (int nphi=1; nphi<=4; nphi++){
-                double phi_dphi = phi_min + recopar.RICH_DIRECT_RMS/nphi;
+                double phi_dphi = phi_min + nominal_sChAngle()/nphi;
                 Vector3d vpho_dphi = new Vector3d( Math.sin(the_min)*Math.cos(phi_dphi), Math.sin(the_min)*Math.sin(phi_dphi), Math.cos(the_min));
-                ArrayList<RICHRay> rays_dphi = tool.RayTrace(lab_emission, ilay_emission, ico_emission, vpho_dphi);
+                double naero = 1/(hadron.get_beta(get_CLASpid())*(Math.sin(Theta_P)* Math.sin(the_min)*Math.cos(phi_dphi-Phi_P)+Math.cos(Theta_P)*Math.cos(the_min)));
+
+                ArrayList<RICHRay> rays_dphi = tool.RayTrace(lab_emission, ilay_emission, ico_emission, vpho_dphi, naero);
+                //ArrayList<RICHRay> rays_dphi = tool.RayTrace(lab_emission, ilay_emission, ico_emission, vpho_dphi);
                 if(rays_dphi!=null){
                     int nrefle_dphi = get_rayrefle(rays_dphi);
                     if(debugMode>=1) System.out.format("     test %2d  phi %7.2f  nrfl %2d vs %2d ",nphi, phi_dphi*RAD, nrefle_dphi, nrefle_min); 
                     if(nrefle_dphi==nrefle_min){
                         Vector3d pmt_dphi = tool.toVector3d(rays_dphi.get(rays_dphi.size()-1).end());
                         Vector3d vers_dphi = (pmt_dphi.minus(pmt_min));
-                        dphi = (vec_dist.x*vers_dphi.x + vec_dist.y*vers_dphi.y) / (vers_dphi.x*vers_dphi.x + vers_dphi.y*vers_dphi.y) * recopar.RICH_DIRECT_RMS;
+                        dphi = (vec_dist.x*vers_dphi.x + vec_dist.y*vers_dphi.y) / (vers_dphi.x*vers_dphi.x + vers_dphi.y*vers_dphi.y) * nominal_sChAngle();
                         if(debugMode>=1) System.out.format("   --> dphi pos %7.2f %7.2f %7.2f  delta %7.2f (%8.2f %8.2f) \n", 
                                      pmt_dphi.x, pmt_dphi.y, pmt_dphi.z, dphi*RAD, vers_dphi.x, vers_dphi.y);
                         break;
@@ -681,7 +756,10 @@ public class RICHParticle {
                     if(debugMode>=1) System.out.format("        do step nn %3d  the %7.1f  phi %7.2f  (from %7.1f  %7.2f) \n",nn,the_new*MRAD,phi_new*RAD,the_min*MRAD,phi_min*RAD);
 
                     Vector3d vpho_min = new Vector3d( Math.sin(the_new)*Math.cos(phi_new), Math.sin(the_new)*Math.sin(phi_new), Math.cos(the_new));
-                    rays_min = tool.RayTrace(lab_emission, ilay_emission, ico_emission, vpho_min);
+                    double naero = 1/(hadron.get_beta(get_CLASpid())*(Math.sin(Theta_P)* Math.sin(the_new)*Math.cos(phi_new-Phi_P)+Math.cos(Theta_P)*Math.cos(the_new)));
+
+                    rays_min = tool.RayTrace(lab_emission, ilay_emission, ico_emission, vpho_min, naero);
+                    //rays_min = tool.RayTrace(lab_emission, ilay_emission, ico_emission, vpho_min);
                     if(rays_min!=null){
                         int nrefle_new = get_rayrefle(rays_min);
                         if(debugMode>=1) System.out.format("        test %2d  the %7.1f  phi %7.2f  nrfl %2d vs %2d ",nn, the_new*MRAD, phi_new*RAD, nrefle_new, nrefle_min); 
@@ -716,7 +794,7 @@ public class RICHParticle {
             ntrials++;
         }
 
-        if(dist < recopar.RICH_DIRECT_RMS*100.){
+        if(dist < nominal_sChAngle()*100.){
 
             if(debugMode>=1){
                 System.out.format(" -->  Matched value found using %d calls: result is %8.2f %8.2f  matched hit %7.2f %7.2f %7.2f  dist %7.3f \n", 
@@ -872,14 +950,18 @@ public class RICHParticle {
 
         // angle probability
         double mean = 0.0;
-        if(Math.abs(pid)==11)mean=hadron.get_changle(0);
-        if(Math.abs(pid)==211)mean=hadron.get_changle(1);
-        if(Math.abs(pid)==321)mean=hadron.get_changle(2);
-        if(Math.abs(pid)==2212)mean=hadron.get_changle(3);
+        int irefle = reco.get_RefleType();
+        if(irefle>=0 && irefle<=2){
+            if(Math.abs(pid)==11)mean=hadron.get_changle(0, irefle);
+            if(Math.abs(pid)==211)mean=hadron.get_changle(1, irefle);
+            if(Math.abs(pid)==321)mean=hadron.get_changle(2, irefle);
+            if(Math.abs(pid)==2212)mean=hadron.get_changle(3, irefle);
+        }
+
+        double sigma = hadron.get_schangle(irefle);
 
         double func = 0.0;
         double dfunc = 1e-3;
-        double sigma = recopar.RICH_DIRECT_RMS;
 
         if(mean>0){
             func = Math.exp((-0.5)*Math.pow((reco.get_EtaC() - mean)/sigma, 2) )/ (sigma*Math.sqrt(2* Math.PI));
@@ -933,8 +1015,13 @@ public class RICHParticle {
         Vector3d ori_impact    = meas_hit.minus(reference);
 
         System.out.format(" PART  info  pid  %d   mass %8.5f   mom %g \n", CLASpid, get_mass(CLASpid), momentum);
-        System.out.format("       ChAngle (mrad)    %8.2f %8.2f %8.2f %8.2f  limits %8.2f %8.2f \n", ChAngle[3]*MRAD, ChAngle[2]*MRAD, ChAngle[1]*MRAD, ChAngle[0]*MRAD,
-                                             minChAngle()*MRAD, maxChAngle()*MRAD);
+
+        System.out.format("       ChAngle dir (mrad) %8.2f %8.2f %8.2f %8.2f  limits %8.2f %8.2f \n", ChAngle[3][0]*MRAD, ChAngle[2][0]*MRAD, ChAngle[1][0]*MRAD, ChAngle[0][0]*MRAD,
+                                             minChAngle(0)*MRAD, maxChAngle(0)*MRAD);
+        System.out.format("       ChAngle lat (mrad) %8.2f %8.2f %8.2f %8.2f  limits %8.2f %8.2f \n", ChAngle[3][1]*MRAD, ChAngle[2][1]*MRAD, ChAngle[1][1]*MRAD, ChAngle[0][1]*MRAD,
+                                             minChAngle(1)*MRAD, maxChAngle(1)*MRAD);
+        System.out.format("       ChAngle spe (mrad) %8.2f %8.2f %8.2f %8.2f  limits %8.2f %8.2f \n", ChAngle[3][2]*MRAD, ChAngle[2][2]*MRAD, ChAngle[1][2]*MRAD, ChAngle[0][2]*MRAD,
+                                             minChAngle(2)*MRAD, maxChAngle(2)*MRAD);
         System.out.println("  ");
         System.out.format(" TRACK origin     %8.1f %8.1f %8.1f \n", lab_origin.x(), lab_origin.y(), lab_origin.z());
         System.out.format("       direction  %8.3f %8.3f %8.3f   theta %8.2f   phi %8.2f \n", lab_direction.x, lab_direction.y, lab_direction.z, lab_theta*RAD, lab_phi*RAD);

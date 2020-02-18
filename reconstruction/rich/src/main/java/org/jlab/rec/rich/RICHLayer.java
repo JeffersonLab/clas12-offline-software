@@ -9,6 +9,7 @@ import org.jlab.geom.prim.Triangle3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.geom.prim.Plane3D;
 
 import eu.mihosoft.vrl.v3d.Vertex;
 import eu.mihosoft.vrl.v3d.Vector3d;
@@ -229,6 +230,43 @@ public class RICHLayer extends ArrayList<RICHComponent> {
     //------------------------------
 
     //------------------------------
+    public Plane3D get_TrajPlane(){ 
+    //------------------------------
+
+        int debugMode = 0;
+
+        double toIP = -1.;
+        if(get_Name().equals("mapmts")) toIP=1.;
+
+        Point3D pos = toPoint3D( get_SurfBary(-1, vinside.multiply(toIP)) );
+        Vector3D ver = get_LayerNormal(vinside.multiply(toIP) );
+        Plane3D plane = new Plane3D(pos, ver);
+
+        if(debugMode>=1) { 
+            System.out.format("get_TrajPlane %d %s to IP %7.2f %s\n",id,name,toIP,vinside.multiply(toIP).toStringBrief(2));
+            System.out.format("get_TrajPlane %s %s \n",pos.toStringBrief(2), ver.toStringBrief(2));
+            plane.show();
+        }
+        return plane;
+
+    }
+
+    //------------------------------
+    public Vector3D get_CompoBary(int icompo){ 
+    //------------------------------
+
+        int debugMode = 0;
+
+        Vector3D bary  = get_SurfBary(icompo, vinside); 
+        Vector3D sbary = get_SurfBary(icompo, vinside.multiply(-1.));
+
+        if(debugMode>0)System.out.format("%s %s \n",bary.toStringBrief(2), sbary.toStringBrief(2));
+        return (bary.add(sbary)).multiply(0.5);
+
+    }
+
+
+    //------------------------------
     public Vector3D get_CompoCSGBary(int icompo){
     //------------------------------
 
@@ -388,6 +426,47 @@ public class RICHLayer extends ArrayList<RICHComponent> {
          return null;
     }
 
+
+    //------------------------------
+    public int get_Quadrant(int Nqua, int icompo, Point3D point){
+    //------------------------------
+
+        /*
+        *  Look for the quadrant of aerogel tile
+        */
+        int debugMode = 0;
+
+        int Nqua2 = (int) Math.pow(Nqua,2);
+
+        if(debugMode>=1)System.out.format(" Get %d quadrant for compo %d point %s\n", Nqua2,icompo,point.toStringBrief(2));
+
+        Shape3D surf = get_TrackingSurf(icompo);
+        Vector3D vers = new Vector3D(vinside.multiply(-1.));
+        Point3D bary = toPoint3D(get_SurfBary(icompo, vers));
+
+        Point3D vtx = null;
+        for(Point3D v: select_Vertexes(surf, vers)){
+            if( (v.y()-bary.y()>0) && (v.x()-bary.x()>0) ) vtx = v;
+            if(debugMode>=1)System.out.format("   --> tets %s \n",v.toStringBrief(2));
+        }
+
+        int iqua = -1;
+        if(vtx!=null){
+            if(debugMode>=1)System.out.format("  vtx choice %s \n", vtx.toStringBrief(2));
+            double dx = (vtx.x()-point.x())/20*Nqua;
+            double dy = (vtx.y()-point.y())/20*Nqua;
+            int idx = (int) dx;
+            int idy = (int) dy;
+            iqua = idy*Nqua+idx;
+            if(debugMode>=1)System.out.format("Calc idx %7.2f %d  idy %7.2f %d  --> %d \n", dx,idx, dy,idy, iqua);
+        }
+
+        return iqua;
+
+    }
+
+
+
     //------------------------------
     public boolean into_Layer(Line3D ray, int icompo, int ifa) {
     //------------------------------
@@ -452,7 +531,7 @@ public class RICHLayer extends ArrayList<RICHComponent> {
         //ATT:aggiungere min path
 
         int debugMode = 0;
-        if(ico<-1 || ico>=this.size()) return null;
+        if(ico<-2 || ico>=this.size()) return null;
 
         boolean global = true;
         int ilay = this.get_id();
@@ -823,6 +902,10 @@ public class RICHLayer extends ArrayList<RICHComponent> {
 
     //------------------------------
     public Point3D toPoint3D(Vertex ver) {return  new Point3D(ver.pos.x, ver.pos.y, ver.pos.z); }
+    //------------------------------
+
+    //------------------------------
+    public Point3D toPoint3D(Vector3D ver) {return  new Point3D(ver.x(), ver.y(), ver.z()); }
     //------------------------------
 
     //------------------------------

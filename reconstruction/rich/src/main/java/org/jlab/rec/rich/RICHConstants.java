@@ -67,7 +67,7 @@ public class RICHConstants {
     public double  GOODHIT_FRAC                           =   80.;      // Maximum duration (in % of local max) to flag xtalk  
     public double  RICH_DCMATCH_CUT                       =   15.;      // RICH cluster matching cut with tracks 
     public double  RICH_HITMATCH_RMS                      =   0.6;      // RICH - particle matching chi2 reference (cm)
-    public double  RICH_DIRECT_RMS                        =   4.2e-3;   // Expected single photon angular resolution (rad)
+    public double  RICH_DIRECT_RMS                        =   6.0e-3;   // Expected single photon angular resolution (rad)
 
     public double  SHOW_PROGRESS_INTERVAL                 =   10.;      // Time interval between progress dumping (sec)
     public double  THROW_ASSOCIATION_CUT                  =   10.;      // Max distance to set initial values for tracing photons (cm)
@@ -76,6 +76,8 @@ public class RICHConstants {
 
     public double  MISA_SHIFT_SCALE                       =   1.0;      // Scale factor for misalignment shifts
     public double  MISA_ANGLE_SCALE                       =   1.0;      // Scale factor for misalignment angles
+
+    public int     CHANGLES_FROM_ELECTRON                 =   0;        // Get Cherenkov angle and rms from electrons control sample
 
     // -----------------
     // Run Type
