@@ -335,7 +335,8 @@ public class DetectorData {
            bank.setFloat("dy", row, (float) t.getPositionWidth().y());                                                                        
            bank.setFloat("radius", row, (float) t.getRadius());                                                                               
            bank.setShort("size", row, (short) t.getSize());                                                                                   
-           bank.setFloat("chi2", row, (float) 0.0);                                                                                           
+           bank.setFloat("chi2", row, (float) 0.0);
+           bank.setByte("layer", row, (byte) t.getDescriptor().getLayer());
            row = row + 1;
        }
        return bank;
