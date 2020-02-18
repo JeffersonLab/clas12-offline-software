@@ -25,7 +25,7 @@ public class PadVector {
     private double z_pad;
 	
     public PadVector(int padnum){			
-        chan = (double)padnum;       
+        chan = padnum;       
         col = (chan-1)%Num_of_Cols+1;
         row=(chan-col)/Num_of_Cols;
         z_shift = row%4;
@@ -47,7 +47,12 @@ public class PadVector {
             z_pad);
          
     }
-
+    public double row(){
+        return (chan-col())/96+1;
+    }
+    public double col(){
+        return chan%96;
+    }
     public double x(){
             return _vec.x(); 
     }
