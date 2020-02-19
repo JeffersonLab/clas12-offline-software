@@ -108,7 +108,7 @@ public class RTPCEngine extends ReconstructionEngine{
             //Sort Hits into Tracks at the Readout Pads
             TrackFinder TF = new TrackFinder(params,cosmic);	
             //Calculate Average Time of Hit Signals
-            TimeAverage TA = new TimeAverage(params);
+            TimeAverage TA = new TimeAverage(this.getConstantsManager(),params,runNo);
             //Disentangle Crossed Tracks
             TrackDisentangler TD = new TrackDisentangler(params);
             //Reconstruct Hits in Drift Region
