@@ -15,19 +15,20 @@ public class CCDBConstantsLoader {
     
     static boolean CSTLOADED = false;
 
-    // static FTOFGeant4Factory geometry ;
-    private static DatabaseConstantProvider DB;
-    static DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(
-            10, "default");
-
-    public static final synchronized void Load(int runNb) {
+    
+    public static final synchronized void Load(int runNb, String variation) {
+        
+        if(CSTLOADED)
+            return;
+        
         double[] EFF_Z_OVER_A;
         double[] EFFX0  ;
         double[] REL_POS;
 
 	
         // Load the tables
-        
+        DatabaseConstantProvider dbprovider = new DatabaseConstantProvider(
+            10, variation);
         
         //load material budget:
         dbprovider.loadTable("/test/mvt/fmt_mat");
@@ -87,14 +88,7 @@ public class CCDBConstantsLoader {
         CSTLOADED = true;
         System.out
                 .println("SUCCESSFULLY LOADED FMT material budget CONSTANTS....");
-        setDB(dbprovider);
     }
 
-    public static final synchronized DatabaseConstantProvider getDB() {
-        return DB;
-    }
-
-    public static final synchronized void setDB(DatabaseConstantProvider dB) {
-        DB = dB;
-    }
+    
 }
