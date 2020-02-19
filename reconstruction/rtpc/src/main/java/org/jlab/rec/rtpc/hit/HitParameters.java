@@ -11,7 +11,7 @@ public class HitParameters {
     final private int _SignalStepSize = 10;
     final private int _BinSize = 40; 
     final private int _NBinKept = 3; 
-    final private int _TrigWindSize = 10000;
+    final private int _TrigWindSize = 9600;
     private int _eventnum = 0; 
     private ADCMap _ADCMap = new ADCMap();
     private HashMap<Integer, List<Double>> _TimeMap = new HashMap<>();
@@ -56,7 +56,6 @@ public class HitParameters {
     private double _tcathode = 0;
 
     public void init(ConstantsManager manager, int runNo){
-        IndexedTable gain_balance = manager.getConstants(runNo, "/calibration/rtpc/gain_balance");
         IndexedTable time_offsets = manager.getConstants(runNo, "/calibration/rtpc/time_offsets");
         IndexedTable time_parms = manager.getConstants(runNo, "/calibration/rtpc/time_parms");
         IndexedTable recon_parms = manager.getConstants(runNo, "/calibration/rtpc/recon_parms");

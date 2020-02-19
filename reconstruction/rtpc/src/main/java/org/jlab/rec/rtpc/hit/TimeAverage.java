@@ -69,7 +69,7 @@ public class TimeAverage {
                     }
                 }
                 
-                adcthresh = adcmax/2;
+                adcthresh = adcmax/4;
                 for(int time : timesbypad) { //Loop to calculate weighted average time using ADC values which are above half of the maximum
                     adc = ADCMap.getADC(pad,time);
                     if(adc > adcthresh) { 

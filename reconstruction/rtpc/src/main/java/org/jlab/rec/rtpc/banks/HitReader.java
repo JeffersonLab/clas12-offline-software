@@ -2,6 +2,7 @@ package org.jlab.rec.rtpc.banks;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.Math;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -76,20 +77,20 @@ public class HitReader {
             component = bankDGTZ.getShort("component", i);
             cellID[i] = get_cellid(component,layer);                    
             Time[i]	= (double) bankDGTZ.getFloat("time",i);  
-            if(!simulation) Time[i] = Time[i] - Time[i]%120;
+            if(!simulation) Time[i] = Time[i] - Math.floorMod((int)Time[i],120);
             Edep[i] = (double) bankDGTZ.getInt("ADC", i);
             if(simulation) Edep[i]/=1000000;
             
 
-            if(Time[i] <= 0 || Time[i] > 12000 || component < 0 || layer < 0)// || tid[i] != 2) 
+            if(Time[i] < -1200 || Time[i] > 8400 || component < 0 || layer < 0)// || tid[i] != 2) 
             {
-                Time[i] = 0;
+                Time[i] = -1200;
                 Edep[i] = 0;
                 posX[i] = 0;
                 posY[i] = 0;
                 posZ[i] = 0;
             }		
-
+            Time[i] += 1200;
             Hit hit = new Hit(1, cellID[i], 1, Time[i]);
             if(cosmic){
                 Edep[i] -= 256;

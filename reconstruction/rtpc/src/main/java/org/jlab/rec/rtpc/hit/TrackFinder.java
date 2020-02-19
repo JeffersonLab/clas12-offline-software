@@ -23,7 +23,7 @@ public class TrackFinder {
     private List<Integer> PadList;
     private int TrigWindSize;
     private int StepSize = 120;//Bin Size of Dream Electronics Output
-    private double adcthresh = 1e-6; 
+    private double adcthresh = 0; 
     private int padloopsize;// = PadList.size();
     private boolean padSorted = false; 
     private List<Integer> padTIDlist = new ArrayList<>();

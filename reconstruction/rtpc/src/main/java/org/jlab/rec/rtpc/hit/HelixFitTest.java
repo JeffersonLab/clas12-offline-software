@@ -46,9 +46,9 @@ public class HelixFitTest {
             double theta = ho.get_Theta();
             double phi = ho.get_Phi();
             double tl = 0;
-            if(ho.get_Rho() > 0) Math.sqrt(ho.get_Rho()*ho.get_Rho()*psi*psi + dz*dz);
+            if(ho.get_Rho() > 0) tl = Math.sqrt(ho.get_Rho()*ho.get_Rho()*psi*psi + dz*dz);
             double dEdx = 0;
-            if(tl != 0) dEdx = ADCsum/(gain*tl);
+            if(tl != 0 && !Double.isNaN(tl)) dEdx = ADCsum/(gain*tl);
             finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,theta,phi,numhits,tl,dEdx));
         }
         params.set_finaltrackinfomap(finaltrackinfomap);
