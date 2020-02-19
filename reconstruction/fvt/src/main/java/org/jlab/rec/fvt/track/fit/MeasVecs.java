@@ -86,8 +86,8 @@ public class MeasVecs {
             double y_loc =  y*Math.cos(org.jlab.rec.fmt.Constants.FVT_Alpha[layer-1])- x*Math.sin(org.jlab.rec.fmt.Constants.FVT_Alpha[layer-1]);
 
              if(y_loc>-(org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.) && y_loc < (org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.)){ 
-              if (x_loc<=0) closestStrip = (int) (Math.floor(((org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.)-y_loc)/org.jlab.rec.fmt.Constants.FVT_Pitch) + 1 );
-              if (x_loc>0) closestStrip =  (int) ((Math.floor((y_loc+(org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.))/org.jlab.rec.fmt.Constants.FVT_Pitch) + 1 ) + org.jlab.rec.fmt.Constants.FVT_Halfstrips +0.5*( org.jlab.rec.fmt.Constants.FVT_Nstrips-2.*org.jlab.rec.fmt.Constants.FVT_Halfstrips));
+              if (x_loc>=0) closestStrip = (int) (Math.floor(((org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.)-y_loc)/org.jlab.rec.fmt.Constants.FVT_Pitch) + 1 );
+              if (x_loc<0) closestStrip =  (int) ((Math.floor((y_loc+(org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.))/org.jlab.rec.fmt.Constants.FVT_Pitch) + 1 ) + org.jlab.rec.fmt.Constants.FVT_Halfstrips +0.5*( org.jlab.rec.fmt.Constants.FVT_Nstrips-2.*org.jlab.rec.fmt.Constants.FVT_Halfstrips));
             }
             else if(y_loc <= -(org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.) && y_loc > -org.jlab.rec.fmt.Constants.FVT_Rmax){ 
               closestStrip =  (int) (Math.floor(((org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.)-y_loc)/org.jlab.rec.fmt.Constants.FVT_Pitch) +1 ); 
