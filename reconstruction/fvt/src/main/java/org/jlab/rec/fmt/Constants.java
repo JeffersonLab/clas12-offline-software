@@ -97,7 +97,8 @@ public class Constants {
                         FVT_stripsXloc[i][0] = -FVT_stripslength[i];
                         FVT_stripsXlocref[i] = -FVT_stripslength[i]/2;
                         if(Math.abs(FVT_stripsYloc[i][0])/FVT_Beamhole<1) {
-                                FVT_stripslength[i]= FVT_Rmax*Math.sin(Math.acos(Math.abs(FVT_stripsYloc[i][0])/FVT_Rmax))-FVT_Beamhole*Math.sin(Math.acos(Math.abs(FVT_stripsYloc[i][0])/FVT_Beamhole));
+                                FVT_stripslength[i]= FVT_Rmax*Math.sin(Math.acos(Math.abs(FVT_stripsYloc[i][0])/FVT_Rmax))
+                                        -FVT_Beamhole*Math.sin(Math.acos(Math.abs(FVT_stripsYloc[i][0])/FVT_Beamhole));
                                 FVT_stripsXloc[i][1] = -FVT_Beamhole*Math.sin(Math.acos(Math.abs(FVT_stripsYloc[i][0])/FVT_Beamhole));
                                 FVT_stripsXloc[i][0] = -FVT_stripslength[i];
                                 FVT_stripsXlocref[i] = -FVT_stripslength[i]/2-FVT_Beamhole*Math.sin(Math.acos(Math.abs(FVT_stripsYloc[i][0])/FVT_Beamhole));
@@ -109,14 +110,15 @@ public class Constants {
                         FVT_stripsXloc[i][1] = FVT_stripslength[i];
                         FVT_stripsXlocref[i] = FVT_stripslength[i]/2;
                         if(Math.abs(FVT_stripsYloc[i][0])/FVT_Beamhole<1) {
-                                FVT_stripslength[i]= FVT_Rmax*Math.sin(Math.acos(Math.abs(FVT_stripsYloc[i][0])/FVT_Rmax))-FVT_Beamhole*Math.sin(Math.acos(Math.abs(FVT_stripsYloc[i][0])/FVT_Beamhole));
+                                FVT_stripslength[i]= FVT_Rmax*Math.sin(Math.acos(Math.abs(FVT_stripsYloc[i][0])/FVT_Rmax))
+                                        -FVT_Beamhole*Math.sin(Math.acos(Math.abs(FVT_stripsYloc[i][0])/FVT_Beamhole));
                                 FVT_stripsXloc[i][0] = FVT_Beamhole*Math.sin(Math.acos(Math.abs(FVT_stripsYloc[i][0])/FVT_Beamhole));
                                 FVT_stripsXloc[i][1] = FVT_stripslength[i];
                                 FVT_stripsXlocref[i] = FVT_stripslength[i]/2+FVT_Beamhole*Math.sin(Math.acos(Math.abs(FVT_stripsYloc[i][0])/FVT_Beamhole));
                         }
                         break;
                 }
-                for(int j=0;j<FVT_Nlayers;j++) { //X sign flip
+                for(int j=0;j<FVT_Nlayers;j++) { //X sign flipgit s
                         FVT_stripsX[j][i][0] = -(FVT_stripsXloc[i][0]*Math.cos(FVT_Alpha[j]) + FVT_stripsYloc[i][0]*Math.sin(FVT_Alpha[j]));
                         FVT_stripsY[j][i][0] = -FVT_stripsXloc[i][0]*Math.sin(FVT_Alpha[j]) + FVT_stripsYloc[i][0]*Math.cos(FVT_Alpha[j]);
                         FVT_stripsX[j][i][1] = -(FVT_stripsXloc[i][1]*Math.cos(FVT_Alpha[j]) + FVT_stripsYloc[i][1]*Math.sin(FVT_Alpha[j]));
@@ -124,7 +126,11 @@ public class Constants {
                 }
 
 
-                    //System.out.println(Constants.getLocalRegion(i)+" strip-1 = "+i+" x' "+FVT_stripsXloc[i][1]+" y' "+FVT_stripsYloc[i][1]+" length "+FVT_stripslength[i]+" FVT_Beamhole "+FVT_Beamhole);
+//                    System.out.println(Constants.getLocalRegion(i)
+//                            +" strip-1 = "+i+" x' "+FVT_stripsXloc[i][0]+" y' "+FVT_stripsYloc[i][0]
+//                            +" x' "+FVT_stripsXloc[i][1]+" y' "+FVT_stripsYloc[i][1]
+//                            +" x "+FVT_stripsX[0][i][1]+" y "+FVT_stripsY[0][i][1]
+//                            +" length "+FVT_stripslength[i]+" FVT_Beamhole "+FVT_Beamhole);
             }
             areConstantsLoaded = true;
             System.out.println("*****   FMT constants loaded!");
