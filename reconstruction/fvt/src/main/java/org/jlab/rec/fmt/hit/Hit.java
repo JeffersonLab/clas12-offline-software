@@ -33,7 +33,7 @@ public class Hit implements Comparable<Hit>{
 		double x1 = Constants.FVT_stripsX[layer-1][strip-1][1];		
 		double y0 = Constants.FVT_stripsY[layer-1][strip-1][0];
 		double y1 = Constants.FVT_stripsY[layer-1][strip-1][1];
-		double Z  = Constants.FVT_Zlayer[layer-1]; // z
+		double Z  = Constants.FVT_Zlayer[layer-1]+Constants.hDrift/2; // z
 		Line3D seg = new Line3D();
 		seg.setOrigin(new Point3D(x0,y0,Z));
 		seg.setEnd(new Point3D(x1,y1,Z));
