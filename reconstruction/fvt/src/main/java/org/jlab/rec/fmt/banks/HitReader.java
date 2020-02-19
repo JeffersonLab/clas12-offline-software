@@ -75,8 +75,8 @@ public class HitReader {
                 if(strip[i]==-1 || ADC[i]==0)
                     continue;
                 //test using only 3 layers
-                if(layer[i]==4 || layer[i]==5 || layer[i]==6)
-                    continue;
+                //if(layer[i]==4 || layer[i]==5 || layer[i]==6)
+                //    continue;
                 // create the hit object
                 Hit hit = new Hit(sector[i], layer[i], strip[i], (double) ADC[i]);
                 // if the hit is useable in the analysis its status is 1
