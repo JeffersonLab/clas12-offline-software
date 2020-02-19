@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.clas.swimtools.Swim;
@@ -36,14 +37,8 @@ public class FVTEngine extends ReconstructionEngine {
     org.jlab.rec.fmt.Geometry FVTGeom;
 
     public FVTEngine() {
-        super("FMTTracks", "ziegler", "4.0");
+        super("FVT", "ziegler", "4.0");
         
-        FVTGeom = new org.jlab.rec.fmt.Geometry();
-        
-        //GeometryLoader.Load(10, "default");
-        //GeometryLoader gl = new GeometryLoader();
-        //gl.LoadSurfaces();
-        CCDBConstantsLoader.Load(10);
     }
 
     String FieldsConfig = "";
@@ -106,6 +101,7 @@ public class FVTEngine extends ReconstructionEngine {
                     rbc.appendFMTBanks(event, FMThits, clusters, null, null);
                     return true;
                 }
+                
                 //map of crosses associated with trk
                 Map<Integer, List<Cross> >trj = new HashMap<Integer, List<Cross> >();
                 for (int j = 0; j < clusters.size(); j++) {
@@ -194,12 +190,30 @@ public class FVTEngine extends ReconstructionEngine {
 
     @Override
     public boolean init() {
-       
-       Constants.Load();
-       clusFinder = new ClusterFinder();
-       crossMake = new CrossMaker();
-       trkLister = new TrackList();
-       return true;
+        FVTGeom = new org.jlab.rec.fmt.Geometry();
+        // Get the constants for the correct variation
+        String geomDBVar = this.getEngineConfigString("variation");
+        if (geomDBVar!=null) {
+            System.out.println("["+this.getName()+"] run with FMT geometry variation based on yaml = "+geomDBVar);
+        }
+        else {
+            geomDBVar = System.getenv("COAT_FMT_GEOMETRYVARIATION");
+            if (geomDBVar!=null) {
+                System.out.println("["+this.getName()+"] run with FMT geometry variation chosen based on env = "+geomDBVar);
+            }
+        } 
+        if (geomDBVar==null) {
+            System.out.println("["+this.getName()+"] run with FMT default geometry");
+        }
+        
+        // Load the geometry
+        String geoVariation = Optional.ofNullable(geomDBVar).orElse("default");
+        CCDBConstantsLoader.Load(10, geoVariation);
+        Constants.Load();
+        clusFinder = new ClusterFinder();
+        crossMake = new CrossMaker();
+        trkLister = new TrackList();
+        return true;
     }
 
      
