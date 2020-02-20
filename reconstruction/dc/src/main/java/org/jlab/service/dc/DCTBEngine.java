@@ -258,7 +258,6 @@ public class DCTBEngine extends DCEngine {
         // track found	
         int trkId = 1;
 
-        System.out.println("Creating Trajectories for new event with " + trkcands.size() + " tracks");
         if(trkcands.size()>0) {
             //trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
 
