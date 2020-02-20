@@ -55,6 +55,12 @@ public class RICHParticle {
     public double lab_phi = 0.0;
     public double lab_theta = 0.0;
 
+    private double pixel_gain  = 0.0;
+    private double pixel_eff   = 0.0;
+    private int    pixel_flag  = 0;
+    private double pixel_mtime = 0;
+    private double pixel_stime = 0;
+
     // rotated frame into RICH local coordinates (used for the analytic solution)
     public double RotAngle = 0.0;
     public Vector3d RotAxis = null;
@@ -143,7 +149,7 @@ public class RICHParticle {
         }
 
         for (int iref=0; iref<3; iref++){
-            if(recopar.CHANGLES_FROM_ELECTRON==1){
+            if(recopar.USE_ELECTRON_ANGLES==1){
                 ChAngle[0][iref] = calibrated_ChAngle(11, iref);      // expected angle for electron
                 ChAngle[1][iref] = calibrated_ChAngle(211, iref);     // pion
                 ChAngle[2][iref] = calibrated_ChAngle(321, iref);     // kaon
@@ -289,10 +295,11 @@ public class RICHParticle {
         int debugMode = 0;
         double arg = 0.0;
         double beta = get_beta(pid);
-        double cose = chele_emission[irefle];
+        double cose = Math.cos(chele_emission[irefle]);
 
         if(beta>0) arg = 1.0/beta*cose;
-        if(debugMode>=1)  System.out.format(" Expected Ch Angle %8.4f  beta %8.4f  n %7.3f  arg %8.4f\n",get_mass(pid),beta,refi_emission, Math.acos(arg)*MRAD);
+        if(debugMode>=1)  System.out.format(" Expected Ch Angle %7.2f %8.4f  beta %8.4f  n %7.3f  arg %8.4f\n",chele_emission[irefle]*1000,
+              get_mass(pid),beta,refi_emission, Math.acos(arg)*MRAD);
         if(arg>0.0 && arg<1.0) return Math.acos(arg);
         return 0.0;
     }
@@ -361,6 +368,34 @@ public class RICHParticle {
         if(hpid==4)this.RICHpid=321;
         if(hpid==5)this.RICHpid=2212;
         if(this.CLASpid<0)RICHpid*=-1;
+    }
+
+    // ----------------
+    public void set_PixelProp(RICHHit hit, RICHTool tool){
+    // ----------------
+
+        int debugMode = 0;
+   
+        int ipmt = hit.get_pmt()-1;
+        int ich  = hit.get_anode()-1;
+
+        if (tool.get_Constants().USE_PIXEL_PROPERTIES==1){
+            pixel_gain  = tool.get_PixelGain(ipmt, ich);
+            pixel_eff   = tool.get_PixelEff(ipmt, ich);
+            pixel_flag  = tool.get_PixelFlag(ipmt, ich);
+            pixel_mtime = tool.get_PixelMtime(ipmt, ich);
+            pixel_stime = tool.get_PixelStime(ipmt, ich);
+        }else{
+            pixel_gain  = 1.0;
+            pixel_eff   = 1.0;
+            pixel_flag  = 1;
+            pixel_mtime = 0.0;
+            pixel_stime = recopar.RICH_TIME_RMS;
+        }
+
+        if(debugMode>=1) System.out.format("Photon pixel %4d %4d %4d --> %2d %7.2f %7.2f %7.2f %7.2f \n",hit.get_id(), ipmt, ich, pixel_flag, pixel_gain, 
+            pixel_eff, pixel_mtime, pixel_stime);
+
     }
 
     // ----------------
@@ -933,7 +968,7 @@ public class RICHParticle {
 
     
     // ----------------
-    public double pid_probability(RICHParticle hadron, int pid, int recotype) {
+    public double pid_probability(RICHParticle hadron, RICHHit hit, int pid, int recotype) {
     // ----------------
     /*
     * calculate probability for a given pid hypothesis
@@ -948,41 +983,55 @@ public class RICHParticle {
         if(recotype==0) reco = analytic;
         if(recotype==1) reco = traced;
 
-        // angle probability
-        double mean = 0.0;
-        int irefle = reco.get_RefleType();
-        if(irefle>=0 && irefle<=2){
-            if(Math.abs(pid)==11)mean=hadron.get_changle(0, irefle);
-            if(Math.abs(pid)==211)mean=hadron.get_changle(1, irefle);
-            if(Math.abs(pid)==321)mean=hadron.get_changle(2, irefle);
-            if(Math.abs(pid)==2212)mean=hadron.get_changle(3, irefle);
-        }
-
-        double sigma = hadron.get_schangle(irefle);
-
         double func = 0.0;
         double dfunc = 1e-3;
-
-        if(mean>0){
-            func = Math.exp((-0.5)*Math.pow((reco.get_EtaC() - mean)/sigma, 2) )/ (sigma*Math.sqrt(2* Math.PI));
-        }
-        
-        // timing probability
-        double meant = start_time + reco.get_time();
-        double sigmat = recopar.RICH_TIME_RMS;
 
         double funt = 0.0;
         double dfunt = 1;
 
-        if(meant>0){
-            funt = Math.exp((-0.5)*Math.pow((meas_time - meant)/sigmat, 2) )/ (sigmat*Math.sqrt(2* Math.PI));
-        }
-        
-        double prob = 1 + func*dfunc*funt*dfunt + recopar.RICH_BKG_PROBABILITY;
+    
+        double mean = 0.0;
+        double sigma = 0.0;
+        double recot = 0.0;
+        double meant = 0.0;
+        double sigmat = 0.0;
 
-        if(debugMode>=1)if(prob-1>recopar.RICH_BKG_PROBABILITY)System.out.format(
-                     "PID prob %4d    mean %8.3f   etaC %8.3f   meant %8.3f  time %8.3f -->  %g  %g  %g \n",pid,
-                     mean*MRAD,reco.get_EtaC()*MRAD,meant,meas_time,func*dfunc,funt*dfunt,Math.log(prob)); 
+        if(pixel_flag==1){
+
+            // angle probability
+
+            int irefle = reco.get_RefleType();
+            if(irefle>=0 && irefle<=2){
+                if(Math.abs(pid)==11)mean=hadron.get_changle(0, irefle);
+                if(Math.abs(pid)==211)mean=hadron.get_changle(1, irefle);
+                if(Math.abs(pid)==321)mean=hadron.get_changle(2, irefle);
+                if(Math.abs(pid)==2212)mean=hadron.get_changle(3, irefle);
+
+                sigma = hadron.get_schangle(irefle);
+            }
+
+            if(mean>0 && sigma>0){
+                func = Math.exp((-0.5)*Math.pow((reco.get_EtaC() - mean)/sigma, 2) )/ (sigma*Math.sqrt(2* Math.PI));
+            }
+            
+            // timing probability
+            recot = start_time + reco.get_time();
+            meant = pixel_mtime;
+            sigmat = pixel_stime;
+
+
+            if(recot>0 && sigmat>0){
+                funt = Math.exp((-0.5)*Math.pow((meas_time - recot - meant)/sigmat, 2) )/ (sigmat*Math.sqrt(2* Math.PI));
+            }
+            
+        }
+
+        double prob = 1 + pixel_eff*func*dfunc*funt*dfunt + recopar.RICH_BKG_PROBABILITY;
+
+        //if(debugMode>=1)if(prob-1>recopar.RICH_BKG_PROBABILITY)System.out.format(
+        if(debugMode>=1)System.out.format(
+                     "PID prob %4d    mean %7.2f etaC %7.2f sigma %7.2f   meant %7.2f (%7.2f + %7.2f) time %7.2f sigmat %7.2f  eff %7.2f -->  %g  %g  %8.4f e-3\n",pid,
+                     mean*MRAD,reco.get_EtaC()*MRAD,sigma*MRAD,recot+meant,recot,meant,meas_time,sigmat,pixel_eff,func*dfunc,funt*dfunt,Math.log(prob)*1e3); 
         return prob;
 
     }

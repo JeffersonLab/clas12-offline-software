@@ -587,6 +587,8 @@ public class RICHEventBuilder{
                 photon.set_points(richhadron, tool.toVector3d(RichHits.get(k).getPosition()));
                 photon.set_meas_time(RichHits.get(k).getTime());
                 photon.set_start_time(richhadron.get_start_time());
+                RICHHit hit = richevent.get_Hit( RichHits.get(k).getHitIndex() );
+                photon.set_PixelProp(hit, tool);
                         
                 richevent.add_Photon(photon);
 

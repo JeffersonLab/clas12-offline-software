@@ -118,7 +118,9 @@ public class RICHEBEngine extends ReconstructionEngine {
                     "/calibration/rich/time_walk",
                     "/calibration/rich/time_offset",
                     "/calibration/rich/misalignments",
-                    "/calibration/rich/parameter"
+                    "/calibration/rich/parameterss",
+                    "/calibration/rich/pixels",
+                    "/calibration/rich/electro"
                  };
 
         requireConstants(Arrays.asList(richTables));
@@ -133,10 +135,10 @@ public class RICHEBEngine extends ReconstructionEngine {
         // Get the constant tables for reconstruction parameters, geometry and optical characterization
         int run = 11;
 
-        IndexedTable test = getConstantsManager().getConstants(run, "/calibration/rich/parameter");
+        //IndexedTable test = getConstantsManager().getConstants(run, "/calibration/rich/parameter");
 
         tool.init_GeoConstants(iflag,
-                  getConstantsManager().getConstants(run, "/calibration/rich/parameter"),
+                  getConstantsManager().getConstants(run, "/calibration/rich/parameterss"),
                   getConstantsManager().getConstants(run, "/calibration/rich/aerogel"),
                   getConstantsManager().getConstants(run, "/calibration/rich/misalignments") );
 
@@ -208,7 +210,9 @@ public class RICHEBEngine extends ReconstructionEngine {
     
             // Get the run-dependent tables for time calibration
             tool.init_TimeConstants( getConstantsManager().getConstants(run, "/calibration/rich/time_walk"),
-                      getConstantsManager().getConstants(run, "/calibration/rich/time_offset") );
+                      getConstantsManager().getConstants(run, "/calibration/rich/time_offset"),
+                      getConstantsManager().getConstants(run, "/calibration/rich/electro"),
+                      getConstantsManager().getConstants(run, "/calibration/rich/pixels") );
 
         }
 

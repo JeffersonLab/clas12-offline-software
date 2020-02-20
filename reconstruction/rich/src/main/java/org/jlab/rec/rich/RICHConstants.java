@@ -37,7 +37,7 @@ public class RICHConstants {
     public static final double RICH_MIN_CHANGLE           =  10.e-3;    // rad
 
     public static final double  RICH_MATCH_POLYDIST       =   1.e-3;    // Matching dist between poly and point
-    public static final double  RICH_BKG_PROBABILITY      =   1.e-3;   // Background probability for likelihood
+    public static final double  RICH_BKG_PROBABILITY      =   1.e-5;   // Background probability for likelihood
 
     public static final double READ_FROM_FILES            =   0.;      // read values from txt files
 
@@ -64,6 +64,9 @@ public class RICHConstants {
     public int     DO_MIRROR_HADS                         =   1;        // if 1 reconstruct hadrons pointing to mirror
     public int     DO_CURVED_AERO                         =   1;        // if 1 use spherical surface of aerogel
 
+    public int     USE_ELECTRON_ANGLES                    =   0;        // Get Cherenkov angle and rms from electrons control sample
+    public int     USE_PIXEL_PROPERTIES                   =   0;        // Use pixel status and efficiency in the likelihood
+
     public double  GOODHIT_FRAC                           =   80.;      // Maximum duration (in % of local max) to flag xtalk  
     public double  RICH_DCMATCH_CUT                       =   15.;      // RICH cluster matching cut with tracks 
     public double  RICH_HITMATCH_RMS                      =   0.6;      // RICH - particle matching chi2 reference (cm)
@@ -76,8 +79,6 @@ public class RICHConstants {
 
     public double  MISA_SHIFT_SCALE                       =   1.0;      // Scale factor for misalignment shifts
     public double  MISA_ANGLE_SCALE                       =   1.0;      // Scale factor for misalignment angles
-
-    public int     CHANGLES_FROM_ELECTRON                 =   0;        // Get Cherenkov angle and rms from electrons control sample
 
     // -----------------
     // Run Type

@@ -43,10 +43,6 @@ public class RICHio {
             event.removeBank("RICH::response");
             if(debugMode==1)System.out.format("Remove RICH::response from event \n");
         }
-        if(event.hasBank("RICH::ringCher")){
-            event.removeBank("RICH::ringCher");
-            if(debugMode==1)System.out.format("Remove RICH::ringCher from event \n");
-        }
         if(event.hasBank("RICH::hadrons")){
             event.removeBank("RICH::hadrons");
             if(debugMode==1)System.out.format("Remove RICH::hadrons from event \n");
@@ -54,6 +50,14 @@ public class RICHio {
         if(event.hasBank("RICH::photons")){
             event.removeBank("RICH::photons");
             if(debugMode==1)System.out.format("Remove RICH::photons from event \n");
+        }
+        if(event.hasBank("RICH::ringCher")){
+            event.removeBank("RICH::ringCher");
+            if(debugMode==1)System.out.format("Remove RICH::ringCher from event \n");
+        }
+        if(event.hasBank("RICH::hadCher")){
+            event.removeBank("RICH::hadCher");
+            if(debugMode==1)System.out.format("Remove RICH::hadCher from event \n");
         }
 
     }

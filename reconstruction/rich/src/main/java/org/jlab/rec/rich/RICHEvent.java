@@ -429,11 +429,13 @@ public class RICHEvent {
                 if(recotype==1) reco = pho.traced;
                 double etac = reco.get_EtaC();
                 if(reco.get_OK()!=SELE) continue;
+
+                RICHHit hit = hits.get( pho.get_hit_index() );
      
                 if(debugMode>=1)System.out.format("calc prob for photon %d \n",pho.get_id());
 
                 // prob for backgound
-                prob = pho.pid_probability(hadron, 0, recotype);
+                prob = pho.pid_probability(hadron, hit, 0, recotype);
                 if(prob-1>=RICHConstants.RICH_BKG_PROBABILITY){
                     lh_bg += Math.log(prob);
                     ch_bg += Math.log(prob)*etac;
@@ -445,7 +447,7 @@ public class RICHEvent {
                 }
 
                 // prob for electron
-                prob = pho.pid_probability(hadron, 11, recotype);
+                prob = pho.pid_probability(hadron, hit, 11, recotype);
                 if(prob-1>=RICHConstants.RICH_BKG_PROBABILITY){
                     lh_el += Math.log(prob);
                     ch_el += Math.log(prob)*etac;
@@ -457,7 +459,7 @@ public class RICHEvent {
                 }
 
                 // prob for pion
-                prob=pho.pid_probability(hadron, 211, recotype);
+                prob=pho.pid_probability(hadron, hit, 211, recotype);
                 if(prob-1>=RICHConstants.RICH_BKG_PROBABILITY){
                     lh_pi += Math.log(prob);
                     ch_pi += Math.log(prob)*etac;
@@ -469,7 +471,7 @@ public class RICHEvent {
                 }
 
                 // prob for kaon
-                prob=pho.pid_probability(hadron, 321, recotype);
+                prob=pho.pid_probability(hadron, hit, 321, recotype);
                 if(prob-1>=RICHConstants.RICH_BKG_PROBABILITY){
                     lh_k  += Math.log(prob);
                     ch_k  += Math.log(prob)*etac;
@@ -481,7 +483,7 @@ public class RICHEvent {
                 }
 
                 // prob for proton
-                prob=pho.pid_probability(hadron, 2212, recotype);
+                prob=pho.pid_probability(hadron, hit, 2212, recotype);
                 if(prob-1>=RICHConstants.RICH_BKG_PROBABILITY){
                     lh_pr += Math.log(prob);
                     ch_pr += Math.log(prob)*etac;

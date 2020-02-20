@@ -202,6 +202,13 @@ public class RICHTool{
 
     private double pmt_timeoff[][] = new double[NPMT][NPIX];
     private double pmt_timewalk[][] = new double[NPMT][4];
+    private double pixel_gain[][] = new double[NPMT][NPIX];
+    private double pixel_eff[][] = new double[NPMT][NPIX];
+    private int pixel_flag[][] = new int [NPMT][NPIX];            // 0 = dead, 1 = ok, 2= hot
+    private int pixel_ntime[][] = new int [NPMT][NPIX];            // 0 = dead, 1 = ok, 2= hot
+    private double pixel_mtime[][] = new double [NPMT][NPIX];            // 0 = dead, 1 = ok, 2= hot
+    private double pixel_stime[][] = new double [NPMT][NPIX];            // 0 = dead, 1 = ok, 2= hot
+
     private double aero_refi[][] = new double[4][31];
     private double aero_plan[][] = new double[4][31];
     private double aero_chele_dir[][][] = new double[4][31][225];
@@ -242,7 +249,6 @@ public class RICHTool{
     public void init_GeoConstants(int iflag, IndexedTable aeroConstants, IndexedTable misaConstants, IndexedTable paraConstants){
     //------------------------------
 
-        System.out.format(" &&& init_GeoConstants \n");
         // generate the tracking layers (0 = only Aerogel and MaPMT for trajectory, 1 = all)
         // start processing time
         init_ProcessTime();
@@ -277,14 +283,14 @@ public class RICHTool{
     } 
 
     //------------------------------
-    public void init_TimeConstants(IndexedTable timewalkConstants, IndexedTable timeoffConstants){
+    public void init_TimeConstants(IndexedTable timewalkConstants, IndexedTable timeoffConstants, IndexedTable cheleConstants, IndexedTable pixelConstants){
     //------------------------------
 
         // load constants
         if(RICHConstants.READ_FROM_FILES==1){
             init_ConstantsTxT(2);
         }else{
-            init_TimeConstantsCCDB(timewalkConstants, timeoffConstants);
+            init_TimeConstantsCCDB(timewalkConstants, timeoffConstants, cheleConstants, pixelConstants);
         }
 
     }
@@ -353,7 +359,7 @@ public class RICHTool{
 
 
     //------------------------------
-    public void init_TimeConstantsCCDB(IndexedTable timewalkConstants, IndexedTable timeoffConstants){
+    public void init_TimeConstantsCCDB(IndexedTable timewalkConstants, IndexedTable timeoffConstants, IndexedTable cheleConstants, IndexedTable pixelConstants){
     //------------------------------
 
         int debugMode = 1;
@@ -367,7 +373,7 @@ public class RICHTool{
                 pmt_timeoff[ipmt][ich] = (float) timeoffConstants.getDoubleValue("offset", 4, ipmt+1, ich+1);
             }
             if(debugMode>=1 && reco_constants.RICH_DEBUG>0){
-                if(ipmt<10 || ipmt>380)System.out.format("CCDB RICH TOFF    ipmt %4d  %8.2f (ch1)  %8.2f (ch2)  %8.2f (ch63)  %8.2f (ch64) \n", ipmt+1,
+                if(ipmt<10 || ipmt>380)System.out.format("CCDB RICH TOFF    ipmt %4d  %8.3f (ch1)  %8.3f (ch2)  %8.3f (ch63)  %8.3f (ch64) \n", ipmt+1,
                    pmt_timeoff[ipmt][0], pmt_timeoff[ipmt][1], pmt_timeoff[ipmt][62], pmt_timeoff[ipmt][63]);
                 if(ipmt==10)System.out.format("CCDB RICH TOFF     ....... \n");
                 if(ipmt==390)System.out.format("  \n");
@@ -385,9 +391,83 @@ public class RICHTool{
             pmt_timewalk[ipmt][2] = (float) Math.abs(timewalkConstants.getDoubleValue("m2", 4, ipmt+1, 0))*(-1.0);
             pmt_timewalk[ipmt][3] = (float) timewalkConstants.getDoubleValue("T0", 4, ipmt+1, 0);
             if(debugMode>=1 && reco_constants.RICH_DEBUG>0){
-                if(ipmt<10 || ipmt>380)System.out.format("CCDB RICH TWALK   ipmt %4d  D0 = %8.2f  T0 = %8.2f  m1 = %8.3f  m2 = %8.3f\n", ipmt+1,
+                if(ipmt<10 || ipmt>380)System.out.format("CCDB RICH TWALK   ipmt %4d  D0 = %8.3f  T0 = %8.3f  m1 = %8.4f  m2 = %8.4f\n", ipmt+1,
                          pmt_timewalk[ipmt][0], pmt_timewalk[ipmt][1] , pmt_timewalk[ipmt][2], pmt_timewalk[ipmt][3]);
                 if(ipmt==10)System.out.format("CCDB RICH TWALK    ....... \n");
+                if(ipmt==390)System.out.format("  \n");
+            }
+        }
+
+        /*
+        * AEROGEL CALIBRATED OPTCIS (USING ELECTRON CONTROL SAMPLE)
+        */
+
+        int ndo[] = {16,22,31,31};
+        double mrad = reco_constants.MRAD;
+        for (int ila=0; ila<4; ila++){
+            for (int ico=0; ico<ndo[ila]*225; ico++){
+                int itil = (int) ico/225;
+                int iqua  = (int) ico - itil*225;
+
+                aero_chele_dir[ila][itil][iqua] = (float) cheleConstants.getDoubleValue("ch_dir", 4,201+ila,ico+2) / 1000.;
+                aero_chele_lat[ila][itil][iqua] = (float) cheleConstants.getDoubleValue("ch_lat", 4,201+ila,ico+2) / 1000.;
+                aero_chele_spe[ila][itil][iqua] = (float) cheleConstants.getDoubleValue("ch_spe", 4,201+ila,ico+2) / 1000.;
+
+                aero_schele_dir[ila][itil][iqua] = (float) cheleConstants.getDoubleValue("s_dir", 4,201+ila,ico+2) / 1000.;
+                aero_schele_lat[ila][itil][iqua] = (float) cheleConstants.getDoubleValue("s_lat", 4,201+ila,ico+2) / 1000.;
+                aero_schele_spe[ila][itil][iqua] = (float) cheleConstants.getDoubleValue("s_spe", 4,201+ila,ico+2) / 1000.;
+
+                if(debugMode>=1 && reco_constants.RICH_DEBUG>0){
+                    if( (itil<2 || itil>ndo[ila]-3) && (iqua==0 || iqua==224)) {
+                        System.out.format("CCDB RICH CHELE   ila %4d  itile %3d  iq %4d dir = %7.2f  %7.2f  lat = %7.2f  %7.2f  spe = %7.2f  %7.2f \n", 201+ila, itil+1, iqua+1,
+                        aero_chele_dir[ila][itil][iqua]*mrad, aero_schele_dir[ila][itil][iqua]*mrad,
+                        aero_chele_lat[ila][itil][iqua]*mrad, aero_schele_lat[ila][itil][iqua]*mrad,
+                        aero_chele_spe[ila][itil][iqua]*mrad, aero_schele_spe[ila][itil][iqua]*mrad);
+                    }
+                    if(ila==3 && ico==ndo[ila]*225-1)System.out.format("  \n");
+                }
+            }
+        }
+
+        /*
+        * PIXELS
+        */
+
+        for(int ipmt=0; ipmt<NPMT; ipmt++){
+            for(int ich=0; ich<NPIX; ich++){
+                pixel_gain[ipmt][ich] = (float) pixelConstants.getDoubleValue("gain", 4, ipmt+1, ich+1);
+                pixel_eff[ipmt][ich] = (float) pixelConstants.getDoubleValue("efficiency", 4, ipmt+1, ich+1);
+                pixel_flag[ipmt][ich] = (int) pixelConstants.getIntValue("status", 4, ipmt+1, ich+1);
+                
+                pixel_ntime[ipmt][ich] = (int) pixelConstants.getIntValue("N_t", 4, ipmt+1, ich+1);
+                pixel_mtime[ipmt][ich] = (float) pixelConstants.getDoubleValue("mean_t", 4, ipmt+1, ich+1);
+                pixel_stime[ipmt][ich] = (float) pixelConstants.getDoubleValue("sigma_t", 4, ipmt+1, ich+1);
+            }
+            if(debugMode>=1 && reco_constants.RICH_DEBUG>0){
+                if(ipmt<2 || ipmt>388)System.out.format("CCDB PIXEL GAIN    ipmt %4d  %8.2f (ch1)  %8.2f (ch2)  %8.2f (ch63)  %8.2f (ch64) \n", ipmt+1,
+                   pixel_gain[ipmt][0], pixel_gain[ipmt][1], pixel_gain[ipmt][62], pixel_gain[ipmt][63]);
+                if(ipmt==10)System.out.format("CCDB PIXEL GAIN     ....... \n");
+
+                if(ipmt<2 || ipmt>388)System.out.format("CCDB PIXEL EFF     ipmt %4d  %8.2f (ch1)  %8.2f (ch2)  %8.2f (ch63)  %8.2f (ch64) \n", ipmt+1,
+                   pixel_eff[ipmt][0], pixel_eff[ipmt][1], pixel_eff[ipmt][62], pixel_eff[ipmt][63]);
+                if(ipmt==10)System.out.format("CCDB PIXEL EFF      ....... \n");
+
+                if(ipmt<2 || ipmt>388)System.out.format("CCDB PIXEL STATUS  ipmt %4d  %8d (ch1)  %8d (ch2)  %8d (ch63)  %8d (ch64) \n", ipmt+1,
+                   pixel_flag[ipmt][0], pixel_flag[ipmt][1], pixel_flag[ipmt][62], pixel_flag[ipmt][63]);
+                if(ipmt==10)System.out.format("CCDB PIXEL STATUS   ....... \n");
+
+                if(ipmt<2 || ipmt>388)System.out.format("CCDB PIXEL NTIME   ipmt %4d  %8d (ch1)  %8d (ch2)  %8d (ch63)  %8d (ch64) \n", ipmt+1,
+                   pixel_ntime[ipmt][0], pixel_ntime[ipmt][1], pixel_ntime[ipmt][62], pixel_ntime[ipmt][63]);
+                if(ipmt==10)System.out.format("CCDB PIXEL NTIME    ....... \n");
+
+                if(ipmt<2 || ipmt>388)System.out.format("CCDB PIXEL MTIME   ipmt %4d  %8.2f (ch1)  %8.2f (ch2)  %8.2f (ch63)  %8.2f (ch64) \n", ipmt+1,
+                   pixel_mtime[ipmt][0], pixel_mtime[ipmt][1], pixel_mtime[ipmt][62], pixel_mtime[ipmt][63]);
+                if(ipmt==10)System.out.format("CCDB PIXEL MTIME    ....... \n");
+
+                if(ipmt<2 || ipmt>388)System.out.format("CCDB PIXEL STIME   ipmt %4d  %8.2f (ch1)  %8.2f (ch2)  %8.2f (ch63)  %8.2f (ch64) \n", ipmt+1,
+                   pixel_stime[ipmt][0], pixel_stime[ipmt][1], pixel_stime[ipmt][62], pixel_stime[ipmt][63]);
+                if(ipmt==10)System.out.format("CCDB PIXEL STIME    ....... \n");
+
                 if(ipmt==390)System.out.format("  \n");
             }
         }
@@ -419,9 +499,12 @@ public class RICHTool{
         reco_constants.THROW_PHOTON_NUMBER         =  paraConstants.getIntValue("flag11", 4, 0, 0);
         reco_constants.TRACE_PHOTONS               =  paraConstants.getIntValue("flag12", 4, 0, 0);
 
-        reco_constants.REDO_RICH_RECO              =  paraConstants.getIntValue("falg13", 4, 0, 0);
+        reco_constants.REDO_RICH_RECO              =  paraConstants.getIntValue("flag13", 4, 0, 0);
         reco_constants.DO_MIRROR_HADS              =  paraConstants.getIntValue("flag14", 4, 0, 0);  
         reco_constants.DO_CURVED_AERO              =  paraConstants.getIntValue("flag15", 4, 0, 0);  
+
+        reco_constants.USE_ELECTRON_ANGLES         =  paraConstants.getIntValue("flag16", 4, 0, 0);
+        reco_constants.USE_PIXEL_PROPERTIES        =  paraConstants.getIntValue("flag17", 4, 0, 0);
 
         reco_constants.GOODHIT_FRAC                =  paraConstants.getDoubleValue("par1", 4, 0, 0);
         reco_constants.RICH_DCMATCH_CUT            =  paraConstants.getDoubleValue("par2", 4, 0, 0);
@@ -437,6 +520,8 @@ public class RICHTool{
         
         //TODO: check
         //reco_constants.RICH_DEBUG                  =  1.0;
+        //reco_constants.USE_ELECTRON_ANGLES         =  1;
+        //reco_constants.USE_PIXEL_PROPERTIES        =  1;
         //if(debugMode>=1 && reco_constants.RICH_DEBUG>0){   //MC
         if(debugMode>=1){ 
 
@@ -458,6 +543,9 @@ public class RICHTool{
             System.out.format("CCDB RICH PARA    REDO_RICH_RECO               %8d \n", reco_constants.REDO_RICH_RECO); 
             System.out.format("CCDB RICH PARA    DO_MIRROR_HADS               %8d \n", reco_constants.DO_MIRROR_HADS); 
             System.out.format("CCDB RICH PARA    DO_CURVED_AERO               %8d \n", reco_constants.DO_CURVED_AERO); 
+
+            System.out.format("CCDB RICH PARA    USE_ELECTRON_ANGLES          %8d \n", reco_constants.USE_ELECTRON_ANGLES); 
+            System.out.format("CCDB RICH PARA    USE_PIXEL_PROPERTIES         %8d \n \n", reco_constants.USE_PIXEL_PROPERTIES); 
 
             System.out.format("CCDB RICH PARA    GOODHIT_FRAC                 %8.4f \n", reco_constants.GOODHIT_FRAC); 
             System.out.format("CCDB RICH PARA    RICH_DCMATCH_CUT             %8.4f \n", reco_constants.RICH_DCMATCH_CUT); 
@@ -495,12 +583,12 @@ public class RICHTool{
 
             int lla = ccdb_ila[im];
             int cco = ccdb_ico[im];
-            double dx = (double) misaConstants.getIntValue("dx", 4, lla, cco);
-            double dy = (double) misaConstants.getIntValue("dy", 4, lla, cco);
-            double dz = (double) misaConstants.getIntValue("dz", 4, lla, cco);
-            double thx = (double) misaConstants.getIntValue("dthx", 4, lla, cco);
-            double thy = (double) misaConstants.getIntValue("dthy", 4, lla, cco);
-            double thz = (double) misaConstants.getIntValue("dthz", 4, lla, cco);
+            double dx = (double) misaConstants.getDoubleValue("dx", 4, lla, cco);
+            double dy = (double) misaConstants.getDoubleValue("dy", 4, lla, cco);
+            double dz = (double) misaConstants.getDoubleValue("dz", 4, lla, cco);
+            double thx = (double) misaConstants.getDoubleValue("dthx", 4, lla, cco);
+            double thy = (double) misaConstants.getDoubleValue("dthy", 4, lla, cco);
+            double thz = (double) misaConstants.getDoubleValue("dthz", 4, lla, cco);
 
             // the rotation is assumed to be in the component local ref system
             int ila = tool_ila[im];
@@ -509,6 +597,8 @@ public class RICHTool{
             layer_misa_angle[ila][ico].add( new Vector3D(thx*ascale, thy*ascale, thz*ascale));
 
             if(debugMode>=1 && reco_constants.RICH_DEBUG>0){
+                //System.out.format("QUA QUA %4d %4d  %d %d  %7.2f %7.2f %7.2f  %7.2f %7.2f \n",ila,ico,lla,cco,dx,dy,dz,
+                //    layer_misa_shift[ila][ico].mag(),layer_misa_angle[ila][ico].mag()*reco_constants.MRAD);
                 if(layer_misa_shift[ila][ico].mag()>0 || layer_misa_angle[ila][ico].mag()>0){
                     System.out.format("CCDB RICH MISA    ila  %4d ico %3d  (%4d %3d)  shift %s  angle %s \n", lla,cco, ila,ico,
                                layer_misa_shift[ila][ico].toStringBrief(3), layer_misa_angle[ila][ico].toStringBrief(3));
@@ -520,7 +610,7 @@ public class RICHTool{
 
 
         /*
-        * AEROGEL OPTCIS
+        * AEROGEL NOMINAL OPTCIS
         */
 
         int nco[] = {16,22,31,31};
@@ -528,7 +618,19 @@ public class RICHTool{
             for (int ico=0; ico<nco[ila]; ico++){
                 aero_refi[ila][ico] = (float) aeroConstants.getDoubleValue("n400", 4,201+ila,ico+1);
                 aero_plan[ila][ico] = (float) aeroConstants.getDoubleValue("planarity", 4,201+ila, ico+1);
-                if(debugMode>=1 && reco_constants.RICH_DEBUG>0)System.out.format("CCDB RICH AERO    ila %4d  ico %3d  n = %8.5f  pla = %8.2f\n", 201+ila, ico+1, aero_refi[ila][ico], aero_plan[ila][ico]);
+                if(debugMode>=2 && reco_constants.RICH_DEBUG>0)System.out.format("CCDB RICH AERO    ila %4d  ico %3d  n = %8.5f  pla = %8.2f\n", 201+ila, ico+1, aero_refi[ila][ico], aero_plan[ila][ico]);
+            }
+        }
+
+        if(debugMode>=2){
+            int ndo[] = {16,22,32,32};
+            for (int ila=0; ila<4; ila++){
+                for (int ico=0; ico<ndo[ila]; ico++){
+                    for (int iq=0; iq<225; iq++) {
+                        int icompo = ico*225+iq+1;
+                        System.out.format(" KK 4  %4d %6d  1 312.0 6.0  1 310.0 7.0  1 313.0 10.0 \n", 201+ila, icompo+1);
+                    }
+                }
             }
         }
 
@@ -2012,7 +2114,7 @@ public class RICHTool{
     public double get_sChElectron(int ila, int ico, int iqua, int irefle) {
     //------------------------------
 
-        if(get_Constants().CHANGLES_FROM_ELECTRON==1){
+        if(get_Constants().USE_ELECTRON_ANGLES==1){
             if(irefle==0){
                 if(aero_schele_dir[ila][ico][iqua]>0){ 
                     return aero_schele_dir[ila][ico][iqua];
@@ -2050,11 +2152,32 @@ public class RICHTool{
         return 0.0;
     }
  
+
+    //------------------------------
+    public double get_PixelGain(int ipmt, int ich) { return pixel_gain[ipmt][ich]; }
+    //------------------------------
+
+    //------------------------------
+    public double get_PixelEff(int ipmt, int ich) { return pixel_eff[ipmt][ich]; }
+    //------------------------------
+
+    //------------------------------
+    public int get_PixelFlag(int ipmt, int ich) { return pixel_flag[ipmt][ich]; }
+    //------------------------------
+
+    //------------------------------
+    public double get_PixelMtime(int ipmt, int ich) { return pixel_mtime[ipmt][ich]; }
+    //------------------------------
+
+    //------------------------------
+    public double get_PixelStime(int ipmt, int ich) { return pixel_stime[ipmt][ich]; }
+    //------------------------------
+
     //------------------------------
     public double get_ChElectron(int ila, int ico, int iqua, int irefle) {
     //------------------------------
  
-        if(get_Constants().CHANGLES_FROM_ELECTRON==1){
+        if(get_Constants().USE_ELECTRON_ANGLES==1){
             if(irefle==0){
                 if(aero_chele_dir[ila][ico][iqua]>0){ 
                     return aero_chele_dir[ila][ico][iqua];
