@@ -264,13 +264,20 @@ public class Trajectory extends ArrayList<Cross> {
         int dir  = 1;
         
         //HTCC: swim to sphere and save end point
-        double[] trkParsCheren = dcSwim.SwimToSphere(175.);
-        if(trkParsCheren==null) return;
-        this.FillTrajectory(id, trajectory, trkParsCheren, trkParsCheren[6], trkParsCheren[7], DetectorType.HTCC, 1); 
-        pathLen = trkParsCheren[6];
-        iBdl    = trkParsCheren[7]; 
+        double htccRadius = 175.0; // cm
+        double[] trkParsCheren = null;
+        // if track vertex is whitin the HTCC sphere than swim
+        if(Math.sqrt(x*x+y*y+z*z)<htccRadius) {
+           trkParsCheren = dcSwim.SwimToSphere(175.);
+           this.FillTrajectory(id, trajectory, trkParsCheren, trkParsCheren[6], trkParsCheren[7], DetectorType.HTCC, 1); 
+           pathLen = trkParsCheren[6];
+           iBdl    = trkParsCheren[7]; 
 //        System.out.println( "HTCC" + " " + trkParsCheren[0] + " " + trkParsCheren[1] + " " + trkParsCheren[2] + " " + trkParsCheren[6] + " " + trkParsCheren[7]);
-
+        }
+        else {
+            return;
+        }
+        
         int is = _Sector-1;
         // loop over surfaces: Target, FMT, DC, LTCC, FTOF, ECAL
         double[] trkPars = null;
