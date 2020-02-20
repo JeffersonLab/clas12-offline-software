@@ -189,11 +189,7 @@ public class RecoBankWriter {
                 bank.setFloat("x", i, (float) cluslist.get(i).get_x());
                 bank.setFloat("y", i, (float) cluslist.get(i).get_y());
                 bank.setFloat("z", i, (float) cluslist.get(i).get_z());
-                bank.setFloat("x_unc", i, 5); // At this stage the uncertainty is
-                // not calculated
-                bank.setFloat("y_unc", i, (float) cluslist.get(i).get_y_locUnc());
-                bank.setFloat("z_unc", i, 10); // At this stage the uncertainty is
-                // not calculated
+                bank.setFloat("pathLengthThruBar", i, (float) cluslist.get(i).get_PathLengthThruBar());										
             }
 
             return bank;

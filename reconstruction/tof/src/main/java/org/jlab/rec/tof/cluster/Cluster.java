@@ -47,6 +47,9 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
     private double _tUn; // uncertainty in cluster time
 
     private String _StatusWord; // a status word for each hit: 1111 - fully
+    
+    private double _pathLengthThruBar; // total pathlength of the track throught the bars of the cluster
+    
     // functioning, 0111-noADC[L,U],
     // 1011-noTDC[L,U], 1101-noADC[R,D],
     // 1110-noTDC[R,D]; the cluster word is the
@@ -186,6 +189,14 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
         this._tUn = _tUn;
     }
 
+    public double get_PathLengthThruBar() {
+        return _pathLengthThruBar;
+    }
+
+    public void set_PathLengthThruBar(double _pathLengthThruBar) {
+        this._pathLengthThruBar = _pathLengthThruBar;
+    }
+
     /**
      *
      * @return the energy-weighted strip number
@@ -207,6 +218,7 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
             double averageZ = 0; // average z
             double weightedYloc = 0; // weighted local y
             double weightedT = 0; // weighted time
+            double pathThroughCluster = 0.; // pathlength through the cluster bars
 
             double errESq = 0; // contribution factor to uncertainty in E
             double errYlocSq = 0; // contribution factor to uncertainty in local
@@ -259,6 +271,8 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
                 errTSq += E * thehit.get_tUnc() * E * thehit.get_tUnc()
                         + thehit.get_t() * thehit.get_EnergyUnc()
                         * thehit.get_t() * thehit.get_EnergyUnc();
+                
+                pathThroughCluster += thehit.get_TrkPathLenThruBar();
 
             }
 
@@ -283,6 +297,7 @@ public class Cluster extends ArrayList<AHit> implements Comparable<Cluster> {
             this.set_EnergyUnc(Math.sqrt(errESq));
             this.set_y_locUnc(Math.sqrt(errYlocSq) / totEn);
             this.set_tUnc(Math.sqrt(errTSq) / totEn);
+            this.set_PathLengthThruBar(pathThroughCluster);
             this.set_StatusWord(statusWord);
 
         }
