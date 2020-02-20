@@ -65,6 +65,7 @@ public class FTOFEngine extends ReconstructionEngine {
                     "/calibration/ftof/time_walk_pos",
                     "/calibration/ftof/time_walk_exp",
                     "/calibration/ftof/fadc_offset",
+                    "/calibration/ftof/cluster"
                  };
         
         requireConstants(Arrays.asList(ftofTables));
@@ -163,7 +164,7 @@ public class FTOFEngine extends ReconstructionEngine {
         }
 
         // 3) find the clusters from these hits
-        ClusterFinder clusFinder = new ClusterFinder();
+        ClusterFinder clusFinder = new ClusterFinder(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/cluster"));
         int[] npaddles = Constants.NPAD;
         int npanels = 3;
         int nsectors = 6;
