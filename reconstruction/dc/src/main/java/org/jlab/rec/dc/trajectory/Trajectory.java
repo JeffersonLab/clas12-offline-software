@@ -6,6 +6,7 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.cross.Cross;
 
 
@@ -264,12 +265,14 @@ public class Trajectory extends ArrayList<Cross> {
         int dir  = 1;
         
         //HTCC: swim to sphere and save end point
-        double[] trkParsCheren = dcSwim.SwimToSphere(175.);
+//        System.out.println("New track " + x + " " + y + " " + z);
+        double[] trkParsCheren = dcSwim.SwimToSphere(Constants.htccRadius);
         if(trkParsCheren==null) return;
         this.FillTrajectory(id, trajectory, trkParsCheren, trkParsCheren[6], trkParsCheren[7], DetectorType.HTCC, 1); 
         pathLen = trkParsCheren[6];
         iBdl    = trkParsCheren[7]; 
 //        System.out.println( "HTCC" + " " + trkParsCheren[0] + " " + trkParsCheren[1] + " " + trkParsCheren[2] + " " + trkParsCheren[6] + " " + trkParsCheren[7]);
+       
 
         int is = _Sector-1;
         // loop over surfaces: Target, FMT, DC, LTCC, FTOF, ECAL

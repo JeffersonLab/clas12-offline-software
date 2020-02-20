@@ -247,8 +247,7 @@ public class DCTBEngine extends DCEngine {
                 Point3D VTCS = crosses.get(0).getCoordsInSector(
                         TrackArray[i].get_Vtx0().x(), TrackArray[i].get_Vtx0().y(), TrackArray[i].get_Vtx0().z());
                 TrackArray[i].set_CovMat(kFit.propagateToVtx(crosses.get(0).get_Sector(), VTCS.z()));
-                
-                trkcands.add(TrackArray[i]);
+                if(TrackArray[i].isGood()) trkcands.add(TrackArray[i]);
             }
         }
         
@@ -259,6 +258,7 @@ public class DCTBEngine extends DCEngine {
         // track found	
         int trkId = 1;
 
+        System.out.println("Creating Trajectories for new event with " + trkcands.size() + " tracks");
         if(trkcands.size()>0) {
             //trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
 
