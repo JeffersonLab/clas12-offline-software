@@ -275,7 +275,7 @@ public class RICHio {
 
                 bankHads.setShort("emilay",        i, (short) had.ilay_emission);
                 bankHads.setShort("emico",         i, (short) had.ico_emission);
-                bankHads.setShort("emqua",         i, (short) had.qua_emission);
+                bankHads.setShort("emqua",         i, (short) had.iqua_emission);
                 bankHads.setFloat("mchi2",         i, (float) had.traced.get_machi2());
 
                 bankHads.setFloat("ch_min",        i, (float) had.minChAngle(0));

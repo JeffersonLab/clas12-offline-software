@@ -48,7 +48,7 @@ public class RICHParticle {
     public Vector3d lab_emission = null;
     public int ilay_emission = -1;
     public int ico_emission = -1;
-    public int qua_emission = -1;
+    public int iqua_emission = -1;
     public float refi_emission = 0;
     public double chele_emission[] = {0.0, 0.0, 0.0};
     public double schele_emission[] = {0.0, 0.0, 0.0};
@@ -528,21 +528,19 @@ public class RICHParticle {
         // take the downstream aerogel tile as the one with largest number of phtoons and average emission point
         ilay_emission  = exit.get_layer();
         ico_emission   = exit.get_component();
-        if(debugMode>=1)System.out.format(" AERO lay %3d ico %3d \n",ilay_emission,ico_emission);
         refi_emission  = tool.get_Component(ilay_emission,ico_emission).get_index();
 
-        qua_emission = tool.get_Layer(ilay_emission).get_Quadrant(3, ico_emission, entrance.get_pos());
-        for(int iref=0; iref<3; iref++)chele_emission[iref] = tool.get_ChElectron(ilay_emission, ico_emission, qua_emission, iref);
-        for(int iref=0; iref<3; iref++)schele_emission[iref] = tool.get_sChElectron(ilay_emission, ico_emission, qua_emission, iref);
+        iqua_emission = tool.get_Layer(ilay_emission).get_Quadrant(5, ico_emission, entrance.get_pos());
+        if(debugMode>=1)System.out.format(" AERO lay %3d ico %3d qua %3d \n",ilay_emission,ico_emission,iqua_emission);
+
+        for(int iref=0; iref<3; iref++)chele_emission[iref] = tool.get_ChElectron(ilay_emission, ico_emission, iqua_emission, iref);
+        for(int iref=0; iref<3; iref++)schele_emission[iref] = tool.get_sChElectron(ilay_emission, ico_emission, iqua_emission, iref);
 
         set_changle();
 
         RotAxis  = aero_normal.cross(Vector3d.Z_ONE).normalized();
         RotAngle = aero_normal.angle(Vector3d.Z_ONE);
 
-        if(debugMode>=1){
-            System.out.format(" Qua %d %f \n",CLASpid,meas_hit.x);
-        }
         if(start_time==0.0)start_time = traced.get_time() - meas_hit.distance(aero_middle)/get_beta(CLASpid)/(PhysicsConstants.speedOfLight());
 
         if(debugMode>=3){

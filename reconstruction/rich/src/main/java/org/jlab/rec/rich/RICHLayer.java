@@ -21,6 +21,9 @@ public class RICHLayer extends ArrayList<RICHComponent> {
      * A layer in the RICH consists of an array of components
      */
 
+    private static double MRAD = 1000.;
+    private static double RAD = 180./Math.PI;
+
     private int id;         // layer id
     private String name;    // layer name
 
@@ -428,6 +431,120 @@ public class RICHLayer extends ArrayList<RICHComponent> {
 
 
     //------------------------------
+    public int get_TileQuadrant(int Nqua, int icompo, Point3D point, ArrayList<Point3D> verts) {
+    //------------------------------
+
+        int debugMode = 0;
+
+        Shape3D surf = get_TrackingSurf(icompo);
+        Vector3D vers = new Vector3D(vinside.multiply(-1.));
+        Point3D surfb = toPoint3D(get_SurfBary(icompo, vers));
+
+        if(debugMode==1)System.out.format(" \n");
+        for(int i=0; i<verts.size(); i++){
+            if(debugMode==1)System.out.format(" vtx %s \n",verts.get(i).toStringBrief(2));
+        }
+        if(debugMode==1)System.out.format(" Layer id %d\n",id);
+
+        Vector3D vbary   = new Vector3D(0.,0.,0.);
+        Vector3D  stpx   = new Vector3D(0.,0.,0.);
+        Vector3D  stpy   = new Vector3D(0.,0.,0.);
+        Vector3D  vcross = new Vector3D(0.,0.,0.);
+        Point3D   v0     = new Point3D(0.,0.,0.);
+
+        double aero_dim = 20;
+        double aero_sca = 1.;
+        if(id==0 && (icompo==0 || icompo==1)) {aero_dim=16.5; aero_sca = 20/16.5;}
+ 
+        int found = 0;
+        for(int i=0; i<verts.size(); i++){
+            for(int j=i+1; j<verts.size(); j++){
+
+                double dist = verts.get(i).distance(verts.get(j));
+                double disty = Math.abs(verts.get(i).y()-verts.get(j).y());
+                if(debugMode==1)System.out.format(" vtx %3d %3d dist %7.2f aero_sca %7.2f\n",i,j, dist,aero_sca);
+                if(found==0 && Math.abs(dist - aero_dim)<0.2 && disty<10) {
+
+                    Point3D mid = verts.get(i).midpoint(verts.get(j));
+
+                    v0 = verts.get(i);
+                    Vector3D vb = v0.vectorTo(surfb);
+                    stpx = v0.vectorTo(mid);
+                    stpy = v0.vectorTo(mid);
+
+                    vcross = stpx.cross(vb);
+                    vcross.rotate(stpy, 90./RAD);
+                    stpy.scale(aero_sca);
+
+                    vbary = verts.get(i).toVector3D();
+                    vbary.add(stpx);
+                    vbary.add(stpy);
+
+                    if(debugMode==1)System.out.format(" v0     %3d %3d   --> %s \n",i,j,v0.toStringBrief(2));
+                    if(debugMode==1)System.out.format(" stpx   %3d %3d   --> %s \n",i,j,stpx.toStringBrief(2));
+                    if(debugMode==1)System.out.format(" vb     %3d %3d   --> %s \n",i,j,vb.toStringBrief(2));
+                    if(debugMode==1)System.out.format(" vcross %3d %3d   --> %s \n",i,j,vcross.toStringBrief(2));
+                    if(debugMode==1)System.out.format(" vspy   %3d %3d   --> %s \n",i,j,stpy.toStringBrief(2));
+                    if(debugMode==1)System.out.format(" vbary  %3d %3d   --> %s \n",i,j,vbary.toStringBrief(2));
+
+                    found=1;
+               
+                }
+            }
+        }
+
+        Vector3D step = new Vector3D(0.,0.,0.);
+        Vector3D vtx  = new Vector3D(0.,0.,0.);
+        step.add(stpx);
+        step.add(stpy); 
+        step.scale(-1.); 
+        double phi = step.phi()*RAD;
+        if(debugMode==1)System.out.format(" step  --> %s  %7.2f\n",step.toStringBrief(2),phi);
+
+        if(phi>0 && phi<=90) {
+            vtx = v0.toVector3D();
+        }
+        if(phi>-180  && phi<=-90) { 
+            vtx = (vbary.sub(step)).clone();
+            stpx.scale(-1);
+            stpy.scale(-1);
+        }
+        if(phi>90  && phi<=180) {
+            vcross.rotate(step,90/RAD);
+            vtx = (vbary.add(step)).clone();
+            stpx.scale(-1);
+        }
+        if(phi>-90  && phi<=0) { 
+            vcross.rotate(step,-90/RAD);
+            vtx = (vbary.add(step)).clone();
+            stpy.scale(-1);
+        }
+
+        Vector3D diff = vtx.toPoint3D().vectorTo(point);
+        Vector3D prox = diff.projection(stpx);
+        Vector3D proy = diff.projection(stpy);
+        double dx = prox.mag();
+        double dy = proy.mag();
+        double ddx = dx/20*Nqua;
+        double ddy = dy/20*Nqua;
+       
+        double th = diff.theta();
+        double ph = prox.theta();
+
+        int idx = (int) ddx;
+        int idy = (int) ddy;
+
+        if(debugMode==1)System.out.format(" angles %7.2f %7.2f \n",th,ph);
+        if(debugMode==1)System.out.format(" diff  --> %s\n",diff.toStringBrief(2));
+        if(debugMode==1)System.out.format(" prox  --> %s\n",prox.toStringBrief(2));
+        if(debugMode==1)System.out.format(" proy  --> %s\n",proy.toStringBrief(2));
+        if(debugMode==1)System.out.format(" vtx   --> %s\n",vtx.toStringBrief(2));
+        if(debugMode==1)System.out.format(" point --> %s   --> %7.2f %7.2f  %7.2f %7.2f  %4d %4d\n",point.toStringBrief(2), dx,dy,ddx,ddy,idx,idy);
+
+        return idy*Nqua+idx;
+    }
+
+    //------------------------------
     public int get_Quadrant(int Nqua, int icompo, Point3D point){
     //------------------------------
 
@@ -438,28 +555,14 @@ public class RICHLayer extends ArrayList<RICHComponent> {
 
         int Nqua2 = (int) Math.pow(Nqua,2);
 
-        if(debugMode>=1)System.out.format(" Get %d quadrant for compo %d point %s\n", Nqua2,icompo,point.toStringBrief(2));
+        if(debugMode>=1)System.out.format(" Get %d quadrant for compo %d ilay %d point %s\n", Nqua2,icompo,id, point.toStringBrief(2));
 
         Shape3D surf = get_TrackingSurf(icompo);
         Vector3D vers = new Vector3D(vinside.multiply(-1.));
-        Point3D bary = toPoint3D(get_SurfBary(icompo, vers));
+        int iqua = get_TileQuadrant(Nqua, icompo, point, select_Vertexes(surf, vers));
 
-        Point3D vtx = null;
-        for(Point3D v: select_Vertexes(surf, vers)){
-            if( (v.y()-bary.y()>0) && (v.x()-bary.x()>0) ) vtx = v;
-            if(debugMode>=1)System.out.format("   --> tets %s \n",v.toStringBrief(2));
-        }
-
-        int iqua = -1;
-        if(vtx!=null){
-            if(debugMode>=1)System.out.format("  vtx choice %s \n", vtx.toStringBrief(2));
-            double dx = (vtx.x()-point.x())/20*Nqua;
-            double dy = (vtx.y()-point.y())/20*Nqua;
-            int idx = (int) dx;
-            int idy = (int) dy;
-            iqua = idy*Nqua+idx;
-            if(debugMode>=1)System.out.format("Calc idx %7.2f %d  idy %7.2f %d  --> %d \n", dx,idx, dy,idy, iqua);
-        }
+        if(iqua<0)iqua=0;
+        if(iqua>Nqua2)iqua=Nqua2;
 
         return iqua;
 
