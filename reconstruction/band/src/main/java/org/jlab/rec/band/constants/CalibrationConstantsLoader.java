@@ -42,6 +42,8 @@ public class CalibrationConstantsLoader {
 	public static double JITTER_PERIOD = 0;
 	public static int JITTER_PHASE = 0;
 	public static int JITTER_CYCLES = 0;
+	public static int CUT_NHITS_BAND = 5;
+	public static int CUT_LASERHITS_BAND = 100;
 
 	public static synchronized void Load(int runno, String var, ConstantsManager manager) {
 
@@ -57,7 +59,17 @@ public class CalibrationConstantsLoader {
 	    IndexedTable  paddleoffs_fadc = manager.getConstants(runno, "/calibration/band/paddle_offsets");
 	    IndexedTable  layeroffs_fadc  = manager.getConstants(runno, "/calibration/band/layer_offsets");
 	    IndexedTable  paddleoffs_tdc  = manager.getConstants(runno, "/calibration/band/paddle_offsets_tdc");
-	    IndexedTable  layeroffs_tdc   = manager.getConstants(runno, "/calibration/band/layer_offsets_tdc");	    
+	    IndexedTable  layeroffs_tdc   = manager.getConstants(runno, "/calibration/band/layer_offsets_tdc");	 
+	    IndexedTable  cutvalues  	  = manager.getConstants(runno, "/calibration/band/cuts");
+
+	    
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// Cut Values
+	    for( int i = 0; i < cutvalues.getRowCount(); i++){
+			CUT_NHITS_BAND  	= cutvalues.getIntValue("nhitsband", 0,0,0);
+			CUT_LASERHITS_BAND  = cutvalues.getIntValue("nlaserhits", 0,0,0);	
+		}
+	    
 	    
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Time offsets
