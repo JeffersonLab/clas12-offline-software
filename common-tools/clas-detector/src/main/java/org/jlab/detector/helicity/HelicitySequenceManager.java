@@ -46,6 +46,10 @@ public final class HelicitySequenceManager {
         if (!seqMap.containsKey(runno)) {
             seqMap.put(runno, new HelicitySequenceDelayed(delay));
             seqMap.get(runno).setVerbosity(verbosity);
+            if (!seqMap.get(runno).setRunNumber(runno)) {
+              System.err.println("HelicitySequenceManager:  error retrieving from CCDB, ABORT.");
+              System.exit(1);
+            }
         }
         return seqMap.get(runno).addState(state);
     }

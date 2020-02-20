@@ -24,8 +24,9 @@ public class SignalSimulation {
     private double Time;
     private double Edep;   
     private ADCMap ADCMap = new ADCMap();
+    
 
-    public SignalSimulation(List<Hit> rawHits, HitParameters params){
+    public SignalSimulation(List<Hit> rawHits, HitParameters params, boolean simulation){
 
         SignalStepSize = params.get_SignalStepSize(); // step size of the signal before integration (arbitrary value)
         BinSize = params.get_BinSize(); // electronics integrates the signal over 40 ns
@@ -38,10 +39,17 @@ public class SignalSimulation {
             CellID = hit.get_cellID(); //Pad ID number of the hit
             Time = hit.get_Time(); //Time of the hit
             Edep = hit.get_EdepTrue(); //Simulated Energy of the hit
-            ADCMap.simulateSignal(CellID,Time,Edep); //Creates a signal based on the Time and the Energy
-            ADCMap.integrateSignal(CellID); //Integrates the signal into 120 ns bins based on DREAM elec specifications
-            
-            if(!PadList.contains(CellID)) PadList.add(CellID); //Maintains a list of all unique Pad IDs
+
+            if(simulation){
+                ADCMap.simulateSignal(CellID,Time,Edep);//Creates a signal based on the Time and the Energy             
+                ADCMap.integrateSignal(CellID); //Integrates the signal into 120 ns bins based on DREAM elec specifications
+            }else{
+                ADCMap.addSignal(CellID, (int)Time, Edep);
+                
+            }
+            if(!PadList.contains(CellID)){
+                PadList.add(CellID);                
+            } //Maintains a list of all unique Pad IDs
             
         }
         

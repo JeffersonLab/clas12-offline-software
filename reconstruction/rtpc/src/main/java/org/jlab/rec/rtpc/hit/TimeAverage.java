@@ -8,10 +8,13 @@
 
 package org.jlab.rec.rtpc.hit;
 
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 
 public class TimeAverage {
 	
@@ -36,28 +39,31 @@ public class TimeAverage {
         ADCMap = params.get_ADCMap();
         tids = TIDMap.getAllTrackIDs();
 
+        
         /*
          * Main Algorithm
          */
-		
+        
         for(int tid : tids) { //Loop over all tracks
             track = TIDMap.getTrack(tid);
             boolean trackflag = track.isTrackFlagged();
             rtrack = new ReducedTrack();
-            if(trackflag) {rtrack.flagTrack();}
+            if(trackflag) rtrack.flagTrack();
             Set<Integer> l = track.uniquePadList();
             Set<Integer> timesbypad = new HashSet<>();
             for(int pad : l) {
+                //g.add(new GraphErrors());
                 adcmax = 0; 
                 sumnum = 0; 
                 sumden = 0; 
                 timesbypad = track.PadTimeList(pad);
                 for(int time : timesbypad) { //Loop to calculate maximum adc value
-                    adc = ADCMap.getADC(pad,time);
+                    adc = ADCMap.getADC(pad,time);                 
                     if(adc > adcmax) {
                         adcmax = adc; 
                     }
                 }
+                
                 adcthresh = adcmax/2;
                 for(int time : timesbypad) { //Loop to calculate weighted average time using ADC values which are above half of the maximum
                     adc = ADCMap.getADC(pad,time);
@@ -73,7 +79,7 @@ public class TimeAverage {
             }
             RTIDMap.addTrack(rtrack);			
         }
-		
+
         /*
          * Output
          */

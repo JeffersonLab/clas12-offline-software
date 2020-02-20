@@ -206,13 +206,15 @@ public class FTCALCluster extends ArrayList<FTCALHit> {
             return Math.max(0., (3.45+Math.log(hit.get_Edep()/clusEnergy)));
         }
         
-        public boolean containsHit(FTCALHit hit, IndexedTable clusterTable) {
+        public boolean containsHit(FTCALHit hit, IndexedTable thresholds, IndexedTable clusterTable) {
             boolean addFlag = false;
-            for(int j = 0; j< this.size(); j++) {
-		double tDiff = Math.abs(hit.get_Time() - this.get(j).get_Time());
-		double xDiff = Math.abs(hit.get_IDX()  - this.get(j).get_IDX());
-		double yDiff = Math.abs(hit.get_IDY()  - this.get(j).get_IDY());
-                if(tDiff <= clusterTable.getDoubleValue("time_window", 1,1,0) && xDiff <= 1 && yDiff <= 1 && (xDiff + yDiff) >0) addFlag = true;
+            if(hit.get_Edep()>thresholds.getDoubleValue("thresholdCluster",1,1,hit.get_COMPONENT())) {
+                for(int j = 0; j< this.size(); j++) {
+                    double tDiff = Math.abs(hit.get_Time() - this.get(j).get_Time());
+                    double xDiff = Math.abs(hit.get_IDX()  - this.get(j).get_IDX());
+                    double yDiff = Math.abs(hit.get_IDY()  - this.get(j).get_IDY());
+                    if(tDiff <= clusterTable.getDoubleValue("time_window", 1,1,0) && xDiff <= 1 && yDiff <= 1 && (xDiff + yDiff) >0) addFlag = true;
+                }                
             }
             return addFlag;
         }

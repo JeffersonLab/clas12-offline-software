@@ -280,6 +280,7 @@ public class DetectorData {
                bank.setFloat("energy", row, (float) r.getEnergy());
                bank.setFloat("chi2", row, (float) 0.0);
                bank.setShort("status",row,(short) r.getStatus());
+               bank.setFloat("dedx",row,(float) ((ScintillatorResponse)r).getDedx());
                row++;
            }
        }
@@ -334,7 +335,8 @@ public class DetectorData {
            bank.setFloat("dy", row, (float) t.getPositionWidth().y());                                                                        
            bank.setFloat("radius", row, (float) t.getRadius());                                                                               
            bank.setShort("size", row, (short) t.getSize());                                                                                   
-           bank.setFloat("chi2", row, (float) 0.0);                                                                                           
+           bank.setFloat("chi2", row, (float) 0.0);
+           bank.setByte("layer", row, (byte) t.getDescriptor().getLayer());
            row = row + 1;
        }
        return bank;
@@ -382,33 +384,30 @@ public class DetectorData {
 
        DataBank bank=null;
        if (bank_name!=null) {
+           
            int nrows = 0;
            for(int i = 0 ; i < particles.size(); i++) {
-               if(particles.get(i).getTrackDetector()==DetectorType.DC.getDetectorId() ||
-                  particles.get(i).getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
-                   nrows += particles.get(i).getTrackTrajectory().size();
-               }
+               nrows += particles.get(i).getTrackTrajectory().size();
            }
-
            bank = event.createBank(bank_name, nrows);
+           
            int row = 0;
            for(int i = 0 ; i < particles.size(); i++) {
                DetectorParticle p = particles.get(i);
-               if(p.getTrackDetector()==DetectorType.DC.getDetectorId() ||
-                  p.getTrackDetector()==DetectorType.CVT.getDetectorId() ) {
-                   List <DetectorTrack.TrajectoryPoint> traj = p.getTrackTrajectory();
-                   for (int j=0; j<traj.size(); j++) {
+               DetectorTrack.Trajectory traj = p.getTrackTrajectory();
+               for (int detId : traj.getDetectors()) {
+                   for (int layId : traj.getLayers(detId)) {
                        bank.setShort("index", row, (short) p.getTrackIndex());
                        bank.setShort("pindex", row, (short) i);
-                       bank.setByte("detector", row, (byte) traj.get(j).getDetectorId());
-                       bank.setByte("layer", row, (byte) traj.get(j).getLayerId());
-                       bank.setFloat("path",row, traj.get(j).getPathLength());
-                       bank.setFloat("x",row, (float)traj.get(j).getCross().origin().x());
-                       bank.setFloat("y",row, (float)traj.get(j).getCross().origin().y());
-                       bank.setFloat("z",row, (float)traj.get(j).getCross().origin().z());
-                       bank.setFloat("cx",row, (float)traj.get(j).getCross().direction().asUnit().x());
-                       bank.setFloat("cy",row, (float)traj.get(j).getCross().direction().asUnit().y());
-                       bank.setFloat("cz",row, (float)traj.get(j).getCross().direction().asUnit().z());
+                       bank.setByte("detector", row, (byte) detId);
+                       bank.setByte("layer", row, (byte) layId);
+                       bank.setFloat("path",row, traj.get(detId,layId).getPathLength());
+                       bank.setFloat("x",row, (float)traj.get(detId,layId).getCross().origin().x());
+                       bank.setFloat("y",row, (float)traj.get(detId,layId).getCross().origin().y());
+                       bank.setFloat("z",row, (float)traj.get(detId,layId).getCross().origin().z());
+                       bank.setFloat("cx",row, (float)traj.get(detId,layId).getCross().direction().asUnit().x());
+                       bank.setFloat("cy",row, (float)traj.get(detId,layId).getCross().direction().asUnit().y());
+                       bank.setFloat("cz",row, (float)traj.get(detId,layId).getCross().direction().asUnit().z());
                        row = row + 1;
                    }
                }
@@ -566,8 +565,8 @@ public class DetectorData {
                double py = pt*Math.sin(phi0);
                double px = pt*Math.cos(phi0);
 
-               double vx = d0*Math.cos(phi0);
-               double vy = d0*Math.sin(phi0);
+               double vx = -d0*Math.sin(phi0);
+               double vy =  d0*Math.cos(phi0);
 
                DetectorTrack  track = new DetectorTrack(charge,p,row);
                track.setVector(px, py, pz);
@@ -641,7 +640,9 @@ public class DetectorData {
 
                 DetectorTrack track = new DetectorTrack(charge, cx*energy ,cy*energy, cz*energy);
                 track.setDetectorID(DetectorType.FTCAL.getDetectorId());
-                DetectorParticle particle = new DetectorParticle(track);
+
+                // FIXME:  FT not in trajectory bank
+                DetectorParticlePOCA particle = new DetectorParticlePOCA(track);
                 
                 int pid = 0;
                 if (charge==0) pid = 22;

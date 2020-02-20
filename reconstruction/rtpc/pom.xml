@@ -13,7 +13,7 @@
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>6b.4.1-SNAPSHOT</version>
+    <version>6b.5.1-SNAPSHOT</version>
   </parent>
 
   <repositories>
@@ -34,19 +34,13 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-reco</artifactId>
-      <version>6b.4.1-SNAPSHOT</version>
+      <version>6b.5.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-analysis</artifactId>
-      <version>6b.4.1-SNAPSHOT</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.jlab</groupId>
-      <artifactId>groot</artifactId>
-      <version>2.2.0-20190308.162151-9</version>
+      <version>6b.5.1-SNAPSHOT</version>
     </dependency>
     
   </dependencies>

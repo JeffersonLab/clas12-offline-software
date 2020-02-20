@@ -49,35 +49,35 @@ public class CalibrationConstantsLoader {
 
 		//System.out.println("*Loading calibration constants*");
 		manager.setVariation(var);
-		
-	    IndexedTable  lroffsets  = manager.getConstants(runno, "/calibration/band/lr_offsets");
-	    IndexedTable  timewalkL  = manager.getConstants(runno, "/calibration/band/time_walk_corr_left");
-	    IndexedTable  timewalkR  = manager.getConstants(runno, "/calibration/band/time_walk_corr_right");
-	    IndexedTable  effvel     = manager.getConstants(runno, "/calibration/band/effective_velocity");
-	    IndexedTable  timejitter = manager.getConstants(runno, "/calibration/band/time_jitter");
-	    IndexedTable  attenuation= manager.getConstants(runno, "/calibration/band/attenuation_lengths");
-	    IndexedTable  paddleoffs_fadc = manager.getConstants(runno, "/calibration/band/paddle_offsets");
-	    IndexedTable  layeroffs_fadc  = manager.getConstants(runno, "/calibration/band/layer_offsets");
-	    IndexedTable  paddleoffs_tdc  = manager.getConstants(runno, "/calibration/band/paddle_offsets_tdc");
-	    IndexedTable  layeroffs_tdc   = manager.getConstants(runno, "/calibration/band/layer_offsets_tdc");	 
-	    IndexedTable  cutvalues  	  = manager.getConstants(runno, "/calibration/band/cuts");
 
-	    
+		IndexedTable  lroffsets  = manager.getConstants(runno, "/calibration/band/lr_offsets");
+		IndexedTable  timewalkL  = manager.getConstants(runno, "/calibration/band/time_walk_corr_left");
+		IndexedTable  timewalkR  = manager.getConstants(runno, "/calibration/band/time_walk_corr_right");
+		IndexedTable  effvel     = manager.getConstants(runno, "/calibration/band/effective_velocity");
+		IndexedTable  timejitter = manager.getConstants(runno, "/calibration/band/time_jitter");
+		IndexedTable  attenuation= manager.getConstants(runno, "/calibration/band/attenuation_lengths");
+		IndexedTable  paddleoffs_fadc = manager.getConstants(runno, "/calibration/band/paddle_offsets");
+		IndexedTable  layeroffs_fadc  = manager.getConstants(runno, "/calibration/band/layer_offsets");
+		IndexedTable  paddleoffs_tdc  = manager.getConstants(runno, "/calibration/band/paddle_offsets_tdc");
+		IndexedTable  layeroffs_tdc   = manager.getConstants(runno, "/calibration/band/layer_offsets_tdc");	 
+		IndexedTable  cutvalues       = manager.getConstants(runno, "/calibration/band/cuts");
+
+
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Cut Values
-	    for( int i = 0; i < cutvalues.getRowCount(); i++){
+		for( int i = 0; i < cutvalues.getRowCount(); i++){
 			CUT_NHITS_BAND  	= cutvalues.getIntValue("nhitsband", 0,0,0);
 			CUT_LASERHITS_BAND  = cutvalues.getIntValue("nlaserhits", 0,0,0);	
 		}
-	    
-	    
+
+
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Time offsets
 		for(int i = 0; i < lroffsets.getRowCount(); i++) {
 			// Get sector, layer, component
 			int sector    = Integer.parseInt((String)lroffsets.getValueAt(i, 0));
-       	    int layer     = Integer.parseInt((String)lroffsets.getValueAt(i, 1));
-       	    int component = Integer.parseInt((String)lroffsets.getValueAt(i, 2));
+			int layer     = Integer.parseInt((String)lroffsets.getValueAt(i, 1));
+			int component = Integer.parseInt((String)lroffsets.getValueAt(i, 2));
 			// Get the actual offsets
 			double tdc_off 	= lroffsets.getDoubleValue("tdc_off",  sector, layer, component);
 			double fadc_off = lroffsets.getDoubleValue("fadc_off", sector, layer, component);
@@ -92,8 +92,8 @@ public class CalibrationConstantsLoader {
 		for(int i = 0; i < timewalkL.getRowCount(); i++) {
 			// Get sector, layer, component
 			int sector    = Integer.parseInt((String)timewalkL.getValueAt(i, 0));
-       	    int layer     = Integer.parseInt((String)timewalkL.getValueAt(i, 1));
-       	    int component = Integer.parseInt((String)timewalkL.getValueAt(i, 2));
+			int layer     = Integer.parseInt((String)timewalkL.getValueAt(i, 1));
+			int component = Integer.parseInt((String)timewalkL.getValueAt(i, 2));
 			// Get parameters
 			double parA = timewalkL.getDoubleValue("par_a", sector, layer, component); 
 			double parB = timewalkL.getDoubleValue("par_b", sector, layer, component); 
@@ -111,9 +111,9 @@ public class CalibrationConstantsLoader {
 		for(int i = 0; i < timewalkR.getRowCount(); i++) {
 			// Get sector, layer, component
 			int sector    = Integer.parseInt((String)timewalkR.getValueAt(i, 0));
-       	    int layer     = Integer.parseInt((String)timewalkR.getValueAt(i, 1));
-       	    int component = Integer.parseInt((String)timewalkR.getValueAt(i, 2));
-       	    // Get parameters
+			int layer     = Integer.parseInt((String)timewalkR.getValueAt(i, 1));
+			int component = Integer.parseInt((String)timewalkR.getValueAt(i, 2));
+			// Get parameters
 			double parA = timewalkR.getDoubleValue("par_a", sector, layer, component); 
 			double parB = timewalkR.getDoubleValue("par_b", sector, layer, component); 
 			// Get errors
@@ -139,7 +139,7 @@ public class CalibrationConstantsLoader {
 			int key = sector*100+layer*10+component;
 			TDC_VEFF.put(	Integer.valueOf(key),		Double.valueOf(veff_tdc) );
 			FADC_VEFF.put(	Integer.valueOf(key), 		Double.valueOf(veff_fadc) );
-			
+
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,7 +149,7 @@ public class CalibrationConstantsLoader {
 			JITTER_PHASE  = timejitter.getIntValue("phase", 0,0,0);
 			JITTER_CYCLES = timejitter.getIntValue("cycles", 0,0,0);	
 		}
-		
+
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Paddle-to-paddle offsets FADC
 		for(int i =0; i < paddleoffs_fadc.getRowCount(); i++) {
@@ -166,7 +166,7 @@ public class CalibrationConstantsLoader {
 			FADC_MT_P2P_RES.put(	Integer.valueOf(key),		Double.valueOf(p2p_res_fadc) );
 
 		}
-		
+
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Layer-to-layer offsets FADC
 		for(int i =0; i < layeroffs_fadc.getRowCount(); i++) {
@@ -182,7 +182,7 @@ public class CalibrationConstantsLoader {
 			FADC_MT_L2L_OFFSET.put(	Integer.valueOf(key),		Double.valueOf(l2l_off_fadc) );
 			FADC_MT_L2L_RES.put(	Integer.valueOf(key),		Double.valueOf(l2l_res_fadc) );
 		}
-		
+
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Paddle-to-paddle offsets
 		for(int i =0; i < paddleoffs_tdc.getRowCount(); i++) {
@@ -214,8 +214,8 @@ public class CalibrationConstantsLoader {
 			int key = sector*100+layer*10+component;
 			TDC_MT_L2L_OFFSET.put(	Integer.valueOf(key),		Double.valueOf(l2l_off_tdc) );
 			TDC_MT_L2L_RES.put(	Integer.valueOf(key),			Double.valueOf(l2l_res_tdc) );
-}
-		
+		}
+
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Attenuation constants
 		for( int i=0; i < attenuation.getRowCount(); i++){
@@ -234,7 +234,7 @@ public class CalibrationConstantsLoader {
 		CSTLOADED = true;
 		//System.out.println("SUCCESSFULLY LOADED band CALIBRATION CONSTANTS....");
 
-		
+
 
 	} 
 
@@ -251,6 +251,6 @@ public class CalibrationConstantsLoader {
 	}
 
 	public static void main (String arg[]) {
-	//	CalibrationConstantsLoader.Load(10,"default");
+		//	CalibrationConstantsLoader.Load(10,"default");
 	}
 }

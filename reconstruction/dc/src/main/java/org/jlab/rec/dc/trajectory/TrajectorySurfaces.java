@@ -115,7 +115,7 @@ public class TrajectorySurfaces {
             n = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().normal();
             d = P.dot(n); 
 //            System.out.println("PCAL " + d + " " + P1.dot(n));
-            this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.PCAL_V, d, n.x(), n.y(), n.z())); 
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.PCAL_U, d, n.x(), n.y(), n.z())); 
             //ECin
             superLayer = (int) ((DetectorLayer.EC_INNER_V-1)/3);
             localLayer = DetectorLayer.EC_INNER_Z+1;
@@ -124,7 +124,7 @@ public class TrajectorySurfaces {
             n = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().normal();
             d = P.dot(n);
 //            System.out.println("ECin " + d + " " + P1.dot(n));
-            this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.EC_INNER_V, d, n.x(), n.y(), n.z())); 
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.EC_INNER_U, d, n.x(), n.y(), n.z())); 
             //ECout
             superLayer = (int) ((DetectorLayer.EC_OUTER_V-1)/3);
             localLayer = DetectorLayer.EC_OUTER_Z+1;
@@ -133,7 +133,7 @@ public class TrajectorySurfaces {
             n = ecalDetector.getSector(is).getSuperlayer(superLayer).getLayer(localLayer).getPlane().normal();
             d = P.dot(n);
 //            System.out.println("ECout " + d + " " + P1.dot(n));
-            this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.EC_OUTER_V, d, n.x(), n.y(), n.z())); 
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.ECAL, DetectorLayer.EC_OUTER_U, d, n.x(), n.y(), n.z())); 
         }
     }
 //    private Point3D RotateFromTSCtoLabC(double X, double Y, double Z, int sector) {

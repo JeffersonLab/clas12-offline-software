@@ -140,7 +140,8 @@
             {"name":"hx",       "type":"F", "info":"X coordinate of the matched hit (cm)"},
             {"name":"hy",       "type":"F", "info":"Y coordinate of the mathced hit (cm)"},
             {"name":"hz",       "type":"F", "info":"Z coordinate of the matched hit (cm)"},
-            {"name":"status",   "type":"S", "info":"hit status"}
+            {"name":"status",   "type":"S", "info":"hit status"},
+            {"name":"dedx",     "type":"F", "info":"Energy deposition per distance travelled (MeV/cm)"}
         ]
     },
     {
@@ -320,7 +321,8 @@
             {"name":"hx",       "type":"F", "info":"X coordinate of the matched hit (cm)"},
             {"name":"hy",       "type":"F", "info":"Y coordinate of the mathced hit (cm)"},
             {"name":"hz",       "type":"F", "info":"Z coordinate of the matched hit (cm)"},
-            {"name":"status",   "type":"S", "info":"hit status"}
+            {"name":"status",   "type":"S", "info":"hit status"},
+            {"name":"dedx",     "type":"F", "info":"Energy deposition per distance travelled (MeV/cm)"}
         ]
     },
     {

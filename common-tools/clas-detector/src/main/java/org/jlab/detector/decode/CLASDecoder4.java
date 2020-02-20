@@ -273,6 +273,7 @@ public class CLASDecoder4 {
             	adcBANK.putInt("integral", i, adcDGTZ.get(i).getADCData(0).getIntegral());
             	adcBANK.putLong("timestamp", i, adcDGTZ.get(i).getADCData(0).getTimeStamp());
             }
+            if(name == "BAND::adc") adcBANK.putInt("amplitude", i, adcDGTZ.get(i).getADCData(0).getHeight());
          }
         return adcBANK;
     }
@@ -826,6 +827,9 @@ public class CLASDecoder4 {
 
                     counter++;
                     progress.updateStatus();
+                    if(counter%25000==0){
+                        System.gc();
+                    }
                     if(nevents>0){
                         if(counter>=nevents) break;
                     }
