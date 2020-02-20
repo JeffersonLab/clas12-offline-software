@@ -8,7 +8,6 @@
 
 package org.jlab.rec.rtpc.hit;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -138,8 +137,9 @@ public class TrackHitReco {
                 // x,y,z pos of reconstructed track
                 x_rec=r_rec*(Math.cos(phi_rec));
                 y_rec=r_rec*(Math.sin(phi_rec));
-
-                recotrackmap.get(TID).add(new RecoHitVector(cellID,x_rec,y_rec,hit.z(),tdiff,Time,hit.adc()));
+                if(!Double.isNaN(x_rec) && !Double.isNaN(y_rec) && !Double.isNaN(hit.z())){
+                    recotrackmap.get(TID).add(new RecoHitVector(cellID,x_rec,y_rec,hit.z(),tdiff,Time,hit.adc()));
+                }
             }
         }
  
