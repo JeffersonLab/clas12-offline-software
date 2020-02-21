@@ -574,6 +574,7 @@ public class DetectorData {
                track.setPath(bank.getFloat("pathlength", row));
                track.setNDF(bank.getInt("ndf",row));
                track.setchi2(bank.getFloat("chi2",row));
+               track.setStatus(bank.getShort("status",row));
 
                //track.addCTOFPoint(x,y,z);
                Vector3D hc_vec = DetectorData.readVector(bank, row, "c_x", "c_y", "c_z");
