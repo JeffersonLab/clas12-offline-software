@@ -43,7 +43,8 @@
         {"name":"Cross8_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"Cross9_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"xb",             "type":"F", "info":"x offset  "},
-        {"name":"yb",             "type":"F", "info":"y offset  "}
+        {"name":"yb",             "type":"F", "info":"y offset  "},
+        {"name":"status",         "type":"S", "info":"track status : 1abc (a = nb SVT crosses, b = nb BMT Z clusters, c = nb BMT C clusters, used in fit)"}
     ]
   },
   {
