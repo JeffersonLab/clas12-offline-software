@@ -86,8 +86,8 @@ public class TrackHitReco {
     
     private boolean _cosmic = false;
     
-    public TrackHitReco(HitParameters params, List<Hit> rawHits, boolean cosmic) {
-
+    public TrackHitReco(HitParameters params, List<Hit> rawHits, boolean cosmic){
+        
         _cosmic = cosmic;
         t_offset = params.get_toffparms();
         t_max = params.get_tmaxparms();
@@ -108,7 +108,6 @@ public class TrackHitReco {
             track.sortHits();
             smallt = track.getSmallT();
             larget = track.getLargeT();
-            
             tdiff = tcathode - larget;
             recotrackmap.put(TID, new ArrayList<>());
             List<HitVector> allhits = track.getAllHits();
