@@ -1,7 +1,7 @@
 package org.jlab.service.rtpc;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+
 
 
 import java.util.ArrayList;
@@ -12,8 +12,6 @@ import org.jlab.clas.reco.EngineProcessor;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.hipo.HipoDataSource;
-import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.rec.rtpc.banks.HitReader;
 import org.jlab.rec.rtpc.banks.RecoBankWriter;
 import org.jlab.rec.rtpc.hit.Hit;
@@ -35,7 +33,7 @@ public class RTPCEngine extends ReconstructionEngine{
         super("RTPC","davidp","3.0");
     }
     
-    private boolean simulation = true;
+    private boolean simulation = false;
     private boolean cosmic = false;
     private int fitToBeamline = 1;
     
@@ -112,7 +110,7 @@ public class RTPCEngine extends ReconstructionEngine{
             //Disentangle Crossed Tracks
             TrackDisentangler TD = new TrackDisentangler(params);
             //Reconstruct Hits in Drift Region
-            TrackHitReco TR = new TrackHitReco(params,hits,cosmic);            
+            TrackHitReco TR = new TrackHitReco(params,hits,cosmic);
             //Helix Fit Tracks to calculate Track Parameters
             HelixFitTest HF = new HelixFitTest(params,fitToBeamline);
             
@@ -158,13 +156,13 @@ public class RTPCEngine extends ReconstructionEngine{
         //String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/new40p.hipo";
         //String inputFile = "/Users/davidpayette/Desktop/rtpcbranch/1ep.hipo";
         //String inputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/plugins/clas12/340_40p.hipo";
-        String inputFile = "/Users/davidpayette/Desktop/newrtpcbranch/10p13120.hipo";
+        String inputFile = "/Users/davidpayette/Desktop/newrtpcbranch/input.hipo";
         String outputFile = "/Users/davidpayette/Desktop/6b.2.0/myClara/out_cosmic.hipo";
 
         System.err.println(" \n[PROCESSING FILE] : " + inputFile);
 
         RTPCEngine en = new RTPCEngine();
-        //en.init();
+        en.init();
 
         
         EngineProcessor processor = new EngineProcessor();

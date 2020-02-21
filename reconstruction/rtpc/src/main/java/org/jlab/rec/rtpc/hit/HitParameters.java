@@ -11,7 +11,7 @@ public class HitParameters {
     final private int _SignalStepSize = 10;
     final private int _BinSize = 40; 
     final private int _NBinKept = 3; 
-    final private int _TrigWindSize = 9600;
+    private int _TrigWindSize = 9600;
     private int _eventnum = 0; 
     private ADCMap _ADCMap = new ADCMap();
     private HashMap<Integer, List<Double>> _TimeMap = new HashMap<>();
@@ -60,6 +60,7 @@ public class HitParameters {
         IndexedTable time_parms = manager.getConstants(runNo, "/calibration/rtpc/time_parms");
         IndexedTable recon_parms = manager.getConstants(runNo, "/calibration/rtpc/recon_parms");
         
+        _TrigWindSize = (int) recon_parms.getDoubleValue("Dtm", 1,1,3);
         _timeadjlimit = (int) recon_parms.getDoubleValue("Dtm", 1,1,1);
         _zthreshTF = recon_parms.getDoubleValue("Dzm", 1,1,1);
         _phithreshTF = recon_parms.getDoubleValue("Dphim", 1,1,1);
