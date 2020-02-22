@@ -324,7 +324,7 @@ public class Trajectory extends ArrayList<Cross> {
                     dcSwim.SetSwimParameters(trkParsCheren[0], trkParsCheren[1], trkParsCheren[2], trkParsCheren[3], trkParsCheren[4], trkParsCheren[5], q);
                     dir=1;
                 }
-            
+                
                 // Swim in the lab for all detectors that are not DC
                 trkPars = dcSwim.SwimToPlaneBoundary(surface.get_d(), new Vector3D(surface.get_nx(),surface.get_ny(),surface.get_nz()),dir);
             
@@ -338,7 +338,7 @@ public class Trajectory extends ArrayList<Cross> {
                 //System.out.println(" Failed swim");
                 return;
             }
-            
+                
 //            System.out.println(surface.getDetectorType().getName() + " " + surface.getDetectorLayer() + " " + trkPars[0] + " " + trkPars[1] + " " + trkPars[2] + " " + trkPars[6] + " " + trkPars[7]);
 
             // if surface correspond to target, invert unit vector before is saved and calculate manually the pathlength
