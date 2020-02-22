@@ -38,7 +38,7 @@ public class TrajectorySurfaces {
         _DetectorPlanes = aDetectorPlanes;
     }
     
-    double FVT_Z1stlayer = 30.2967; // z-distance between target center and strips of the first layer.
+    double FVT_Z1stlayer = 29.3197; // z-distance between target center and strips of the first layer.
     double FVT_Interlayer = 1.190;  // Keep this for now until the Geometry service is ready... or remove FMT from traj.
     public void LoadSurfaces(double targetPosition, double targetLength,
             DCGeant4Factory dcDetector,
