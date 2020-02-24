@@ -14,7 +14,7 @@ import org.jlab.clas.physics.Vector3;
  * @author davidpayette
  */
 public class HelixFitTest {
-    public HelixFitTest(HitParameters params, int fitToBeamline){
+    public HelixFitTest(HitParameters params, int fitToBeamline, double magfield){
         HashMap<Integer, List<RecoHitVector>> recotrackmap = params.get_recotrackmap();
         HashMap<Integer, FinalTrackInfo> finaltrackinfomap = new HashMap<>();
         double szpos[][] = new double[10000][3];
@@ -30,6 +30,7 @@ public class HelixFitTest {
             }
             HelixFitJava h = new HelixFitJava();
             HelixFitObject ho = h.HelixFit(hit,szpos,fitToBeamline);
+            ho.set_magfield(magfield);
             Vector3 v1 = new Vector3();
             double dz = 0;
 
@@ -38,7 +39,6 @@ public class HelixFitTest {
             Vector3 v2 = new Vector3(recotrackmap.get(TID).get(numhits-1).x()-ho.get_A(),recotrackmap.get(TID).get(numhits-1).y()-ho.get_B(),0);
             double psi = Math.toRadians(v1.theta(v2)); //angle theta for helix
             double momfit =  ho.get_Mom();
-            double gain = 1;
             double px = ho.get_px();
             double py = ho.get_py();
             double pz = ho.get_pz();
@@ -46,10 +46,14 @@ public class HelixFitTest {
             double theta = ho.get_Theta();
             double phi = ho.get_Phi();
             double tl = 0;
-            if(ho.get_Rho() > 0) tl = Math.sqrt(ho.get_Rho()*ho.get_Rho()*psi*psi + dz*dz);
+            double R = Math.abs(ho.get_Rho());
+            double A = ho.get_A();
+            double B = ho.get_B();
+            double chi2 = ho.get_Chi2();
+            if(R > 0) tl = Math.sqrt(R*R*psi*psi + dz*dz);
             double dEdx = 0;
-            if(tl != 0 && !Double.isNaN(tl)) dEdx = ADCsum/(gain*tl);
-            finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,theta,phi,numhits,tl,dEdx));
+            if(tl != 0 && !Double.isNaN(tl)) dEdx = ADCsum/tl;
+            finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,theta,phi,numhits,tl,dEdx,R,A,B,chi2));
         }
         params.set_finaltrackinfomap(finaltrackinfomap);
     }
