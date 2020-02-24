@@ -27,7 +27,7 @@ public class RecoBankWriter {
                     listsize++;
             }
         }
-
+        if(listsize == 0) return null;
         DataBank bank = event.createBank("RTPC::hits", listsize);
         
         
@@ -65,7 +65,6 @@ public class RecoBankWriter {
         HashMap<Integer, FinalTrackInfo> finaltrackinfomap = params.get_finaltrackinfomap();
         int listsize = finaltrackinfomap.size();
         if(listsize == 0) return null;
-        if(finaltrackinfomap.size() == 0) return null;
         int row = 0;
 
         
@@ -78,17 +77,21 @@ public class RecoBankWriter {
         }
 		
         for(int TID : finaltrackinfomap.keySet()) {
-
+            FinalTrackInfo track = finaltrackinfomap.get(TID);
             bank.setInt("trkID", row, TID);
-            bank.setFloat("px", row, (float) finaltrackinfomap.get(TID).get_px()/1000);
-            bank.setFloat("py", row, (float) finaltrackinfomap.get(TID).get_py()/1000);
-            bank.setFloat("pz", row, (float) finaltrackinfomap.get(TID).get_pz()/1000);
-            bank.setFloat("vz", row, (float) finaltrackinfomap.get(TID).get_vz()/10);
-            bank.setFloat("theta", row, (float) finaltrackinfomap.get(TID).get_theta());
-            bank.setFloat("phi", row, (float) finaltrackinfomap.get(TID).get_phi());
-            bank.setInt("nhits", row, finaltrackinfomap.get(TID).get_numhits());
-            bank.setFloat("path", row, (float) finaltrackinfomap.get(TID).get_tl());
-            bank.setFloat("dedx", row, (float) finaltrackinfomap.get(TID).get_dEdx());
+            bank.setFloat("px", row, (float) track.get_px()/1000);
+            bank.setFloat("py", row, (float) track.get_py()/1000);
+            bank.setFloat("pz", row, (float) track.get_pz()/1000);
+            bank.setFloat("vz", row, (float) track.get_vz()/10);
+            bank.setFloat("theta", row, (float) track.get_theta());
+            bank.setFloat("phi", row, (float) track.get_phi());
+            bank.setInt("nhits", row, track.get_numhits());
+            bank.setFloat("path", row, (float) track.get_tl());
+            bank.setFloat("dedx", row, (float) track.get_dEdx());
+            bank.setFloat("r_helix", row, (float) track.get_R());
+            bank.setFloat("x_helix", row, (float) track.get_A());
+            bank.setFloat("y_helix", row, (float) track.get_B());
+            bank.setFloat("chi2_helix", row, (float) track.get_chi2());
 
             row++;
             //bank.show();
