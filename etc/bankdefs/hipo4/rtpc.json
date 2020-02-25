@@ -1,8 +1,8 @@
 [   
     {
 	"name": "RTPC::hits",
-	"group": 1720,
-	"item" : 1,
+	"group": 21900,
+	"item" : 21,
 	"info": "reconstructed RTPC hits",
 	"entries": [
 	    {"name":"trkID",        "type":"I", "info":"Track ID of the hit"},
@@ -16,8 +16,8 @@
     },
     {
 	"name": "RTPC::tracks",
-	"group": 1720,
-	"item" : 2,
+	"group": 21900,
+	"item" : 22,
 	"info" : "reconstructed track info",
 	"entries": [
 	    {"name":"trkID",		"type":"I", "info":"Track ID of the hit"},

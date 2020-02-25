@@ -54,6 +54,7 @@ public class HitParameters {
     private double _tp = 0;
     private double _tr = 0;
     private double _tcathode = 0;
+    private double _tshiftfactor = 0;
 
     public void init(ConstantsManager manager, int runNo){
         IndexedTable time_offsets = manager.getConstants(runNo, "/calibration/rtpc/time_offsets");
@@ -81,6 +82,7 @@ public class HitParameters {
         _tp = time_offsets.getDoubleValue("tp", 1,1,3);
         _tr = time_offsets.getDoubleValue("tr", 1,1,3);
         _tcathode = time_parms.getDoubleValue("z0", 1,1,7);
+        _tshiftfactor = time_parms.getDoubleValue("z1",1,1,7);
     }
     
     public int get_SignalStepSize(){return _SignalStepSize;} // step size of the signal before integration (arbitrary value)
@@ -134,6 +136,7 @@ public class HitParameters {
     public double get_tp(){return _tp;}
     public double get_tr(){return _tr;}
     public double get_tcathode(){return _tcathode;}
+    public double get_tshiftfactor(){return _tshiftfactor;}
 
     public void set_ADCMap(ADCMap _ADCMap){this._ADCMap = _ADCMap;}
     public void set_TimeMap(HashMap<Integer, List<Double>> _TimeMap){this._TimeMap = _TimeMap;}
