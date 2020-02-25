@@ -86,7 +86,7 @@ public class BandHitFinder {
 						Hit.SetIndexLpmt(i);
 						Hit.SetIndexRpmt(0);
 					}
-					else if (hit1.GetSide() == 1) { //Veto has a right side PMT
+					else if (hit1.GetSide() == 2) { //Veto has a right side PMT
 						Hit.SetIndexLpmt(0);
 						Hit.SetIndexRpmt(i);
 					}
@@ -172,10 +172,12 @@ public class BandHitFinder {
 					double parA_L = time_walk_paramsL[0];
 					double parB_L = time_walk_paramsL[1];
 					tdcleft  = tdcleft - (parA_L/Math.sqrt(adcleft ) + parB_L);
+					//tdcleft  = tdcleft - (parA_L/Math.pow( ampleft , parB_L) + parC_L);
 					double time_walk_paramsR[] = CalibrationConstantsLoader.TIMEWALK_R.get( Integer.valueOf(barKey) );
 					double parA_R = time_walk_paramsR[0];
 					double parB_R = time_walk_paramsR[1];
 					tdcright = tdcright - (parA_R/Math.sqrt(adcright) + parB_R);
+					//tdcright = tdcright - (parA_R/Math.sqrt( ampright , parB_R) + parC_R );
 					// -----------------------------------------------------------------------------------------------
 					
 					// Form the L-R time
@@ -210,6 +212,7 @@ public class BandHitFinder {
 					double xpos_tdc =  (-1./2.)* tdiff_tdc * CalibrationConstantsLoader.TDC_VEFF.get( Integer.valueOf(barKey) );
 					double xpos_fadc = (-1./2.)* tdiff_fadc * CalibrationConstantsLoader.FADC_VEFF.get( Integer.valueOf(barKey) );
 					xposHit = (xpos_tdc+xpos_fadc)/2.;
+					//xposHit = xpos_tdc;
 
 					// Grab global position from parameters class
 					Double[] globPos = Parameters.barGeo.get( Integer.valueOf(barKey) );
