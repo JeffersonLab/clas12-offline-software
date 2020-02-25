@@ -1,6 +1,7 @@
 package org.jlab.rec.ft;
 
 import java.util.List;
+import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.utils.groups.IndexedTable;
@@ -11,7 +12,7 @@ public class FTParticle {
 	
 	private int _ID;                                          // track ID
 	private int _Charge;		         	          // 0/1 for photon/electron
-	private double _Time;      			          // time of impact on the FT 
+	private double _Time;      			          // time of the particle at the vertex
 	private double _Energy;			                  // total energy of the cluster including correction
 	private Vector3D _Position  = new Vector3D();             // position 
 	private Vector3D _Direction = new Vector3D();             // direction 
@@ -154,7 +155,7 @@ public class FTParticle {
                 if(response.getAssociation()<0 && response.getType() == detectorType){
                     Line3D  dist = cross.distance(response.getPosition().toPoint3D());
                     double hitdistance = dist.length();
-                    double timedistance = Math.abs(this.getTime()-response.getTime());
+                    double timedistance = Math.abs(this.getTime()-(response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));
  //                   System.out.println(" LOOP = " + loop + "   distance = " + hitdistance);
                     if(timedistance<timeThresholds&&hitdistance<distanceThreshold&&hitdistance<minimumDistance){
                         minimumDistance = hitdistance;
