@@ -154,7 +154,7 @@ public class FTParticle {
                 FTResponse response = hitList.get(loop);
                 if(response.getAssociation()<0 && response.getType() == detectorType){
                     Line3D  dist = cross.distance(response.getPosition().toPoint3D());
-                    double hitdistance = dist.length();
+                    double hitdistance  = dist.length();
                     double timedistance = Math.abs(this.getTime()-(response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));
  //                   System.out.println(" LOOP = " + loop + "   distance = " + hitdistance);
                     if(timedistance<timeThresholds&&hitdistance<distanceThreshold&&hitdistance<minimumDistance){
@@ -162,6 +162,9 @@ public class FTParticle {
                         bestIndex       = loop;
                     }
                 }
+            }
+            if(bestIndex>-1) {
+                if(hitList.get(bestIndex).getSize()<FTConstants.HODO_MIN_CLUSTER_SIZE) bestIndex=-1;
             }
             return bestIndex;
         }
