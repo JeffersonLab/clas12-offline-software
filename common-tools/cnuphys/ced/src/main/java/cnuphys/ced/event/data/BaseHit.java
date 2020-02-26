@@ -11,10 +11,10 @@ public class BaseHit {
 	/** The 1-based sector */
 	public byte sector;
 	
-	/** The 1-based sector */
+	/** The 1-based layer */
 	public byte layer;
 	
-	/** The 1-based sector */
+	/** The 1-based component */
 	public short component;
 	
 	/**

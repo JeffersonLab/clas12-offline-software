@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 import org.jlab.rec.cvt.cross.Cross;
 
-import org.jlab.rec.cvt.trajectory.TrkSwimmer;
-
 /**
  * The trajectory is a set of state vectors at BST planes along the particle
  * path. * A StateVec describes a cross measurement in the BST. directions in
@@ -96,18 +94,8 @@ public class Trajectory extends ArrayList<Cross> {
      */
     private static final long serialVersionUID = 358913937206455870L;
 
-    public TrkSwimmer bstSwim = new TrkSwimmer();
     public boolean isFinal = false;
 
-    public double calc_Field(double x_cm, double y_cm, double z_cm) {
-
-        if (bstSwim.Bfield(x_cm, y_cm, z_cm) != null) {
-            double B = bstSwim.Bfield(0, 0, 0).z();
-            return Math.abs(B);
-        } else {
-            System.err.println("FATAL ERROR MAG FIELD NOT FOUND!!!");
-            return Double.NaN; // Default
-        }
-    }
+   
 
 }

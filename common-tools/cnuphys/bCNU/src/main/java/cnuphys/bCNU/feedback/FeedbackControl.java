@@ -4,9 +4,11 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Vector;
+
 import javax.swing.event.EventListenerList;
 
-import cnuphys.bCNU.application.GlobalOptions;
+import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.util.TextUtilities;
 
@@ -19,14 +21,10 @@ public class FeedbackControl {
 	private EventListenerList _listenerList;
 
 	// the newly acquired feedback strings
-	private ArrayList<String> _newFeedbackStrings = new ArrayList<String>(50);
+	private Vector<String> _newFeedbackStrings = new Vector<String>(50);
 
 	// the previous feedback strings
-	private ArrayList<String> _oldFeedbackStrings = new ArrayList<String>(50);
-
-	private static int skipUpdateLimit = 10;
-
-	private int skippedUpdates = 0;
+	private Vector<String> _oldFeedbackStrings = new Vector<String>(50);
 
 	/**
 	 * Create a feedback controller for a container.
@@ -119,41 +117,26 @@ public class FeedbackControl {
 
 		// get strings from all providers
 		requestFeedbackStrings(mouseEvent.getPoint(), wp);
+		
+		//don't update if same
+		if (TextUtilities.equalStringLists(_oldFeedbackStrings,
+				_newFeedbackStrings)) {
+					return;
+				}
 
-		// always update if we have a urhere
-		boolean haveURHere = (_container.getYouAreHereItem() != null);
-
-		// if the strings haven't changed, return
-		if (!haveURHere
-				&& (skippedUpdates < skipUpdateLimit)
-				&& (TextUtilities.equalStringLists(_oldFeedbackStrings,
-						_newFeedbackStrings))) {
-			skippedUpdates++;
-			return;
-		}
 
 		// update feedback pane if there is one
 		if (_container.getFeedbackPane() != null) {
 			_container.getFeedbackPane().updateFeedback(_newFeedbackStrings);
 		}
-		// update heads up if there is one and the global flag is set
-		if (GlobalOptions.isHeadsUpVisible()) {
-			if ((_container.getHeadsUp() != null) && !dragging) {
-
-				// it is ok if there is not a view (as in a standalone app) but
-				// if there is
-				// a view it should be on top
-				if ((_container.getView() == null)
-						|| _container.getView().isOnTop()) {
-					_container.getHeadsUp().updateHeadsUp(_newFeedbackStrings,
-							mouseEvent);
-					skippedUpdates = 0; // reset
-				}
-			}
+		
+		if (BaseMDIApplication.getHeadsUpDisplay() != null) {
+			System.err.println("HUD update");
+			BaseMDIApplication.getHeadsUpDisplay().update(_newFeedbackStrings);
 		}
-
+		
 		// swap old and new
-		ArrayList<String> temp = _oldFeedbackStrings;
+		Vector<String> temp = _oldFeedbackStrings;
 		_oldFeedbackStrings = _newFeedbackStrings;
 		_newFeedbackStrings = temp;
 		_newFeedbackStrings.clear();

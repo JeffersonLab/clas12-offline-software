@@ -28,6 +28,9 @@ public class DCSector extends AbstractSector<DCSuperlayer> {
         super(DetectorId.DC, sectorId);
     }
     
+    public DCSector(DetectorId id,int sectorId){
+        super(id, sectorId);
+    }
     /**
      * Constructs a new {@code Plane3D} half way between the two superlayers in the region
      * at the specified index with the normal of the plane facing away from

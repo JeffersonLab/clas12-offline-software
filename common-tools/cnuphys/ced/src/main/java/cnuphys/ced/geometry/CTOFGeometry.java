@@ -14,8 +14,8 @@ public class CTOFGeometry {
 	private static final double DTHETA = -7.5; //360/48
 //	private static final double RINNER = 250.; //mm
 //	private static final double ROUTER = 260.; //mm
-	public static final double RINNER = 237.; //mm
-	public static final double ROUTER = 273.; //mm
+	public static final double RINNER = 251.1; //mm
+	public static final double ROUTER = RINNER + 30.226; //mm
 	
 	public static final int COUNT = 48;
 	

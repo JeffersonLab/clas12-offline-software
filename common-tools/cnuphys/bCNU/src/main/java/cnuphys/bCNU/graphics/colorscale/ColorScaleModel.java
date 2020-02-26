@@ -32,7 +32,7 @@ public class ColorScaleModel {
 	private static final Color NULLCOLOR = new Color(0, 0, 0, 16);
 
 	// Color returned for a too-small value (default: null)
-	private Color _tooSmallColor = new Color(64, 64, 64, 64);
+	private Color _tooSmallColor = new Color(96, 96, 96, 16);
 
 	// Color returned for a too-big value (default: null)
 	private Color _tooBigColor = X11Colors.getX11Color("brown");
@@ -426,6 +426,10 @@ public class ColorScaleModel {
 
 		colors[(len - 1) * n] = new Color(r[len - 1], g[len - 1], b[len - 1]);
 		return colors;
+	}
+	
+	public boolean isTooSmall(Color color) {
+		return (_tooSmallColor.equals(color));
 	}
 
 }

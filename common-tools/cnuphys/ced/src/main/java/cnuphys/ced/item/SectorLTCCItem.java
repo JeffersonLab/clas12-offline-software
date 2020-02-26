@@ -17,7 +17,6 @@ import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.DataSupport;
 import cnuphys.ced.event.data.LTCC;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.geometry.LTCCGeometry;
 
@@ -80,7 +79,7 @@ public class SectorLTCCItem extends PolygonItem {
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
 
-		if (_eventManager.isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (_eventManager.isAccumulating()) {
 			return;
 		}
 		
@@ -124,21 +123,13 @@ public class SectorLTCCItem extends PolygonItem {
 		
 	// accumulated drawer
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
-		int maxHit = AccumulationManager.getInstance().getMaxLTCCCount();
-		if (maxHit < 1) {
-			return;
-		}
+		int medianHit = AccumulationManager.getInstance().getMedianLTCCCount();
 
 		int hits[][][] = AccumulationManager.getInstance().getAccumulatedLTCCData();
 
-		int hit = hits[_sector - 1][_half - 1][_ring - 1];
+		int hitCount = hits[_sector - 1][_half - 1][_ring - 1];
 
-		double fract;
-		if (_view.isSimpleAccumulatedMode()) {
-			fract = ((double) hit) / maxHit;
-		} else {
-			fract = Math.log(hit + 1.) / Math.log(maxHit + 1.);
-		}
+		double fract = _view.getMedianSetting() * (((double) hitCount) / (1+medianHit));
 
 		Color color = AccumulationManager.getInstance().getColor(fract);
 
@@ -149,7 +140,7 @@ public class SectorLTCCItem extends PolygonItem {
 	}
 
 	/**
-	 * Add any appropriate feedback strings for the headsup display or feedback
+	 * Add any appropriate feedback strings
 	 * panel.
 	 * 
 	 * @param container

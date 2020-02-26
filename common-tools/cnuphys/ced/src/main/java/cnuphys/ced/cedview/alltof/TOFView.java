@@ -31,7 +31,6 @@ import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.FTOFGeometry;
 
 public class TOFView extends CedView implements ISector {
@@ -102,15 +101,12 @@ public class TOFView extends CedView implements ISector {
 				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height,
 				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS,
 				CedView.NORANGETOOLBARBITS, PropertySupport.VISIBLE, true,
-				PropertySupport.HEADSUP, false,
-
 				PropertySupport.BACKGROUND,
 				X11Colors.getX11Color("Antique White"),
 				PropertySupport.TITLE, title,
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
-		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL
-				+ ControlPanel.DISPLAYARRAY 
+		view._controlPanel = new ControlPanel(view, ControlPanel.DISPLAYARRAY 
 				+ ControlPanel.DRAWLEGEND + ControlPanel.FEEDBACK
 				+ ControlPanel.ACCUMULATIONLEGEND, DisplayBits.ACCUMULATION
 				+ DisplayBits.MCTRUTH, 3, 5);
@@ -193,7 +189,7 @@ public class TOFView extends CedView implements ISector {
 			@Override
 			public void draw(Graphics g, IContainer container) {
 				
-				if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+				if (ClasIoEventManager.getInstance().isAccumulating()) {
 					return;
 				}
 
@@ -261,10 +257,7 @@ public class TOFView extends CedView implements ISector {
 		drawAccumulatedData(g, container, FTOF_2, rr);
 		
 		//CTOF
-		int maxHit = AccumulationManager.getInstance().getMaxCTOFCount();
-		if (maxHit < 1) {
-			return;
-		}
+		int medianHit = AccumulationManager.getInstance().getMedianCTOFCount();
 
 		int ctofData[] = AccumulationManager.getInstance()
 				.getAccumulatedCTOFData();
@@ -273,13 +266,7 @@ public class TOFView extends CedView implements ISector {
 			int hitCount = ctofData[index];
 			shells[ALL_CTOF].getStripRectangle(container, index, rr);
 		
-			double fract;
-			if (isSimpleAccumulatedMode()) {
-				fract = ((double) hitCount) / maxHit;
-			}
-			else {
-				fract = Math.log(hitCount + 1.) / Math.log(maxHit + 1.);
-			}
+			double fract = getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 
 			Color color = AccumulationManager.getInstance()
 					.getColor(fract);
@@ -293,36 +280,33 @@ public class TOFView extends CedView implements ISector {
 	
 	private void drawAccumulatedData(Graphics g, IContainer container, int panelType, Rectangle rr) {
 		
-		int maxHit = AccumulationManager.getInstance().getMaxFTOFCount();
-		if (maxHit < 1) {
-			return;
-		}
 
 		int hits[][] = null;
 	
+		int medianHit = 0;
+		
 		switch (panelType) {
-		case FTOF_1A:
+		case FTOF.PANEL_1A:
+			medianHit = AccumulationManager.getInstance().getMedianFTOF1ACount();
 			hits = AccumulationManager.getInstance().getAccumulatedFTOF1AData();
 			break;
-		case FTOF_1B:
+		case FTOF.PANEL_1B:
+			medianHit = AccumulationManager.getInstance().getMedianFTOF1BCount();
 			hits = AccumulationManager.getInstance().getAccumulatedFTOF1BData();
 			break;
-		case FTOF_2:
+		case FTOF.PANEL_2:
+			medianHit = AccumulationManager.getInstance().getMedianFTOF2Count();
 			hits = AccumulationManager.getInstance().getAccumulatedFTOF2Data();
 			break;
 		}
 
+		
 		if (hits != null) {
 			int sect0 = _sector - 1;
 			for (int paddle0 = 0; paddle0 < hits[sect0].length; paddle0++) {
 
 				int hit = hits[sect0][paddle0];
-				double fract;
-				if (isSimpleAccumulatedMode()) {
-					fract = ((double) hit) / maxHit;
-				} else {
-					fract = Math.log(hit + 1.) / Math.log(maxHit + 1.);
-				}
+				double fract = this.getMedianSetting() *(((double) hit) / (1 + medianHit));
 
 				Color color = AccumulationManager.getInstance().getColor(fract);
 				

@@ -10,7 +10,6 @@ import cnuphys.ced.event.data.CrossList;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.HBCrosses;
 import cnuphys.ced.event.data.TBCrosses;
-import cnuphys.ced.fastmc.FastMCManager;
 import item3D.Item3D;
 
 public class CrossDrawer3D extends Item3D {
@@ -31,7 +30,7 @@ public class CrossDrawer3D extends Item3D {
 	@Override
 	public void draw(GLAutoDrawable drawable) {
 
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 		

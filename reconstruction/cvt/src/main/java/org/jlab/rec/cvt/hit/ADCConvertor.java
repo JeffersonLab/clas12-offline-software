@@ -40,6 +40,7 @@ public class ADCConvertor {
         END[7] = 1000; //overflow
 
         Random random = new Random();
+        random.setSeed(42);
 
         int daq = returnRandomInteger(START[adc], END[adc], random);
 

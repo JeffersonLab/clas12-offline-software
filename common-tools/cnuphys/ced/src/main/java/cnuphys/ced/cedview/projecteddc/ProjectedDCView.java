@@ -132,8 +132,6 @@ public class ProjectedDCView extends CedView implements ISector {
 				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height,
 				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS,
 				CedView.NORANGETOOLBARBITS, PropertySupport.VISIBLE, true,
-				PropertySupport.HEADSUP, false,
-
 				PropertySupport.BACKGROUND,
 				X11Colors.getX11Color("gray"),
 				PropertySupport.TITLE, title,
@@ -355,33 +353,13 @@ public class ProjectedDCView extends CedView implements ISector {
 				+ UnicodeSupport.DEGREE + ")";
 		feedbackStrings.add(rzp);
 
-//		// sector coordinates
-//		worldToSector(wp, result);
-//		String sectxyz = "$yellow$Sector xyz " + vecStr(result) + " cm";
-//		feedbackStrings.add(sectxyz);
-
 		// tilted sector
 		sectorToTilted(result, result);
 		String tiltsectxyz = "$yellow$Tilted sect xyz " + vecStr(result)
 				+ " cm";
 		feedbackStrings.add(tiltsectxyz);
 
-//		IField activeField = MagneticFields.getActiveField();
-//		if (activeField != null) {
-//			float field[] = new float[3];
-//			activeField.fieldCylindrical(absphi, rho, z, field);
-//			// convert to Tesla from kG
-//			field[0] /= 10.0;
-//			field[1] /= 10.0;
-//			field[2] /= 10.0;
-//
-//			double bmag = VectorSupport.length(field);
-//			feedbackStrings.add("$Lawn Green$"
-//					+ MagneticFields.getActiveFieldDescription());
-//			feedbackStrings.add("$Lawn Green$Field " + valStr(bmag, 4) + " T "
-//					+ vecStr(field) + " T");
-//		}
-//		// near a swum trajectory?
+		// near a swum trajectory?
 		double mindist = _swimTrajectoryDrawer.closestApproach(wp);
 
 		double pixlen = WorldGraphicsUtilities.getMeanPixelDensity(container)

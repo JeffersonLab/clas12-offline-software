@@ -6,10 +6,6 @@ import java.awt.Point;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.List;
-import java.util.Vector;
-
-import org.jlab.geom.DetectorHit;
-
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.style.LineStyle;
 import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
@@ -21,8 +17,6 @@ import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
-import cnuphys.ced.fastmc.FastMCManager;
-import cnuphys.ced.fastmc.ParticleHits;
 import cnuphys.ced.geometry.FTOFGeometry;
 import cnuphys.ced.geometry.FTOFPanel;
 import cnuphys.ced.geometry.GeometryManager;
@@ -69,7 +63,7 @@ public class FTOFPanelItem extends PolygonItem {
 	public void drawItem(Graphics g, IContainer container) {
 		// TODO use dirty. If the item is not dirty, should be able to draw
 		// the _lastDrawnPolygon directly;
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 
@@ -113,32 +107,33 @@ public class FTOFPanelItem extends PolygonItem {
 
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
 		int hits[][] = null;
-		int maxHit = AccumulationManager.getInstance().getMaxFTOFCount();
 
+		int medianHit = 0;
+		
 		int panelType = _ftofPanel.getPanelType();
 		switch (panelType) {
 		case FTOF.PANEL_1A:
+			medianHit = AccumulationManager.getInstance().getMedianFTOF1ACount();
 			hits = AccumulationManager.getInstance().getAccumulatedFTOF1AData();
 			break;
 		case FTOF.PANEL_1B:
+			medianHit = AccumulationManager.getInstance().getMedianFTOF1BCount();
 			hits = AccumulationManager.getInstance().getAccumulatedFTOF1BData();
 			break;
 		case FTOF.PANEL_2:
+			medianHit = AccumulationManager.getInstance().getMedianFTOF2Count();
 			hits = AccumulationManager.getInstance().getAccumulatedFTOF2Data();
 			break;
 		}
 
+		
 		if (hits != null) {
 			int sect0 = _sector - 1;
 			for (int paddle0 = 0; paddle0 < hits[sect0].length; paddle0++) {
 
-				int hit = hits[sect0][paddle0];
-				double fract;
-				if (_view.isSimpleAccumulatedMode()) {
-					fract = ((double) hit) / maxHit;
-				} else {
-					fract = Math.log(hit + 1.) / Math.log(maxHit + 1.);
-				}
+				int hitCount = hits[sect0][paddle0];
+				double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
+
 
 				Color fc = AccumulationManager.getInstance().getColor(fract);
 				Point2D.Double wp[] = getPaddle(_view, paddle0, _ftofPanel, _sector);
@@ -153,46 +148,10 @@ public class FTOFPanelItem extends PolygonItem {
 
 	}
 
-	// for fast mc events
-	private void drawFastMCSingleModeHits(Graphics g, IContainer container) {
-		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
-		if ((phits == null) || phits.isEmpty()) {
-			return;
-		}
-
-		for (ParticleHits hits : phits) {
-			List<DetectorHit> ftofhits = hits.getTOFLayerHits(_sector - 1, _ftofPanel.getPanelType());
-			if (ftofhits != null) {
-				for (DetectorHit hit : ftofhits) {
-					int sect1 = hit.getSectorId() + 1;
-					int ptype = hit.getSuperlayerId(); // (0,1,2) = (1a,1b,2)
-
-					System.err.println(
-							"TOF HIT SECT: " + sect1 + "  PANEL: " + ptype + "  PADDLE: " + (hit.getComponentId() + 1));
-
-					int paddle0 = hit.getComponentId();
-					Color fc = hits.getFillColor();
-					Color lc = hits.getLineColor();
-					Point2D.Double wp[] = getPaddle(_view, paddle0, _ftofPanel, _sector);
-
-					if (wp != null) {
-						Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
-						WorldGraphicsUtilities.drawPath2D(g, container, path, fc, lc, 0, LineStyle.SOLID, true);
-					}
-				}
-			}
-		}
-
-	}
 
 	// works for both showMcTruth and not
 	private void drawSingleModeHits(Graphics g, IContainer container) {
 		
-		if (ClasIoEventManager.getInstance().isSourceFastMC()) {
-			drawFastMCSingleModeHits(g, container);
-			return;
-		}
-
 		// draw tdc adc hits
 		TdcAdcHitList hits = FTOF.getInstance().getTdcAdcHits();
 		if ((hits != null) && !hits.isEmpty()) {
@@ -213,47 +172,7 @@ public class FTOFPanelItem extends PolygonItem {
 			}
 		}
 
-//		int panelType = _ftofPanel.getPanelType();
-//
-//		int hitCount = FTOF.getInstance().hitCount(panelType);
-//
-//		if (hitCount < 1) {
-//			return;
-//		}
-//		int pid[] = FTOF.getInstance().pid(panelType);
-//		int sector[] = FTOF.getInstance().sector(panelType);
-//		int paddles[] = FTOF.getInstance().paddle(panelType);
-//
-//		if (!_view.showMcTruth()) {
-//			pid = null;
-//		}
-//
-//		if ((sector == null) || (paddles == null)) {
-//			return;
-//		}
-//
-//		Color default_fc = Color.red;
-//
-//		for (int i = 0; i < hitCount; i++) {
-//			if (sector[i] == _sector) {
-//				Color fc = default_fc;
-//				if (pid != null) {
-//					LundId lid = LundSupport.getInstance().get(pid[i]);
-//					if (lid != null) {
-//						fc = lid.getStyle().getFillColor();
-//					}
-//				}
-//
-//				Point2D.Double wp[] = getPaddle(_view, (paddles[i] - 1), _ftofPanel, _sector);
-//
-//				if (wp != null) {
-//					Path2D.Double path = WorldGraphicsUtilities.worldPolygonToPath(wp);
-//					WorldGraphicsUtilities.drawPath2D(g, container, path, fc, _style.getLineColor(), 0, LineStyle.SOLID,
-//							true);
-//				}
-//
-//			}
-//		}
+
 
 	}
 
@@ -338,7 +257,7 @@ public class FTOFPanelItem extends PolygonItem {
 	}
 
 	/**
-	 * Add any appropriate feedback strings for the headsup display or feedback
+	 * Add any appropriate feedback strings
 	 * panel. Default implementation returns the item's name.
 	 * 
 	 * @param container

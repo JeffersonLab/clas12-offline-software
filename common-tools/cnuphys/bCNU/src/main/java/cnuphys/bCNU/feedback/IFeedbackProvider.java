@@ -10,7 +10,7 @@ import cnuphys.bCNU.graphics.container.IContainer;
 public interface IFeedbackProvider extends EventListener {
 
 	/**
-	 * Add any appropriate feedback strings for the headsup display or feedback
+	 * Add any appropriate feedback strings
 	 * panel.
 	 * 
 	 * @param container

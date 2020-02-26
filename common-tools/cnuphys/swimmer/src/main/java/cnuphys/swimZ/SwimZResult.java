@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cnuphys.lund.GeneratedParticleRecord;
-import cnuphys.magfield.MagneticField;
+import org.jlab.clas.clas.math.FastMath;
+import cnuphys.magfield.FieldProbe;
 import cnuphys.swim.SwimTrajectory;
 
 /**
@@ -25,26 +26,21 @@ public class SwimZResult {
 	// the momentum in GeV/c
 	private double _p;
 
-	// the initial z value
+	// the initial z value in cm
 	private double _zo;
 
-	// the final z value
+	// the final z value in cm
 	private double _zf;
 
 	// the sign of pz
 	private int _pzSign;
 
-	// /**
-	// * Constructor
-	// * Create a SwimZResult with the trajectory initialized but empty.
-	// * @param Q the integer charge (-1 for electron)
-	// * @param p the momentum in Gev/c
-	// * @param zo the final z value;
-	// * @param zf the final z value;
-	// */
-	// public SwimZResult(int Q, double p, double zo, double zf) {
-	// this(Q, p, zo, zf, 100,100);
-	// }
+
+	//the |dl x B| integral in kG cm
+	private double _bdl = Double.NaN;
+	
+	//the pathlength in cm
+	private double _pathLength = Double.NaN;;
 
 	/**
 	 * Constructor Create a SwimZResult with the trajectory initialized but
@@ -55,13 +51,11 @@ public class SwimZResult {
 	 * @param p
 	 *            the momentum in Gev/c
 	 * @param zo
-	 *            the final z value;
+	 *            the initial z value in cm;
 	 * @param zf
-	 *            the final z value;
+	 *            the final z value in cm;
 	 * @param capacity
 	 *            the initial capacity of the trajectory
-	 * @param increment
-	 *            the increment when more space is needed
 	 */
 	public SwimZResult(int Q, double p, double zo, double zf, int capacity) {
 		_Q = Q;
@@ -93,6 +87,140 @@ public class SwimZResult {
 		double p3[] = new double[3];
 		getThreeMomentum(sv, p3);
 		return p3;
+	}
+	
+	/**
+	 * Get the approximate path length in cm
+ 	 * @return the approximate path length in cm
+	 */
+	public double getPathLength() {
+		
+		// only compute if necessary
+		if (Double.isNaN(_pathLength)) {
+			_pathLength = 0;
+			int size = size();
+			
+			SwimZStateVector prev = null;
+			if (size > 1) {
+				
+				double  dr[] = new double[3];
+				
+				for (SwimZStateVector next : _trajectory) {
+					if (prev != null) {
+						prev.dR(next, dr);
+						_pathLength += vecmag(dr);
+						
+				}
+					prev = next;
+				}
+			}
+		}
+		
+		return _pathLength;
+	}
+	
+	/**
+	 * Get the approximate integral |B x dL|
+     * @param probe the probe use to compute this result trajectory
+	 * @return the approximate integral |B x dL| in kG*cm
+	 */
+	public double getBDL(FieldProbe probe) {
+		
+		// only compute if necessary
+		if (Double.isNaN(_bdl)) {
+			_bdl = 0;
+			_pathLength = 0;
+			int size = size();
+			
+			SwimZStateVector prev = null;
+			if (size > 1) {
+				
+				double  dr[] = new double[3];
+				
+				float b[] = new float[3];
+				double bxdl[] = new double[3];
+
+				for (SwimZStateVector next : _trajectory) {
+					if (prev != null) {
+						prev.dR(next, dr);
+						_pathLength += vecmag(dr);
+					
+						//get the field at the midpoint
+						float xmid = (float) ((prev.x + next.x) / 2);
+						float ymid = (float) ((prev.y + next.y) / 2);
+						float zmid = (float) ((prev.z + next.z) / 2);
+						probe.field(xmid, ymid, zmid, b);
+						
+						cross(b, dr, bxdl);
+						_bdl += vecmag(bxdl);
+
+					}
+					prev = next;
+				}
+			}
+		}
+		
+		return _bdl;
+	}
+	
+	
+	/**
+	 * Get the approximate integral |B x dL|
+	 * @param sector sector 1..6
+     * @param probe the probe use to compute this result trajectory
+	 * @return the approximate integral |B x dL| in kG*cm
+	 */
+	public double sectorGetBDL(int sector, FieldProbe probe) {
+		
+		// only compute if necessary
+		if (Double.isNaN(_bdl)) {
+			_bdl = 0;
+			_pathLength = 0;
+
+			int size = size();
+			
+			SwimZStateVector prev = null;
+			if (size > 1) {
+				
+				double  dr[] = new double[3];
+	
+				float b[] = new float[3];
+				double bxdl[] = new double[3];
+
+				for (SwimZStateVector next : _trajectory) {
+					if (prev != null) {
+						prev.dR(next, dr);
+						_pathLength += vecmag(dr);
+						
+						//get the field at the midpoint
+						float xmid = (float) ((prev.x + next.x) / 2);
+						float ymid = (float) ((prev.y + next.y) / 2);
+						float zmid = (float) ((prev.z + next.z) / 2);
+						probe.field(sector, xmid, ymid, zmid, b);
+						
+						cross(b, dr, bxdl);
+						_bdl += vecmag(bxdl);
+
+					}
+					prev = next;
+				}
+			}
+		}
+		
+		return _bdl;
+	}
+	
+	// usual cross product c = a x b
+	private static void cross(float a[], double b[], double c[]) {
+		c[0] = a[1] * b[2] - a[2] * b[1];
+		c[1] = a[2] * b[0] - a[0] * b[2];
+		c[2] = a[0] * b[1] - a[1] * b[0];
+	}
+
+	// usual vec mag
+	private static double vecmag(double a[]) {
+		double asq = a[0] * a[0] + a[1] * a[1] + a[2] * a[2];
+		return Math.sqrt(asq);
 	}
 
 	/**
@@ -235,8 +363,8 @@ public class SwimZResult {
 		if (sv != null) {
 			double p3[] = getThreeMomentum(sv);
 			if (Math.abs(_p) > 1.0e-20) {
-				thetaPhi[0] = MagneticField.acos2Deg(p3[2] / _p); // theta
-				thetaPhi[1] = MagneticField.atan2Deg(p3[1], p3[0]);
+				thetaPhi[0] = FastMath.acos2Deg(p3[2] / _p); // theta
+				thetaPhi[1] = FastMath.atan2Deg(p3[1], p3[0]);
 			}
 		}
 		return thetaPhi;

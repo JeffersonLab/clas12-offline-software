@@ -11,9 +11,18 @@ import org.jlab.detector.geant4.v2.DCGeant4Factory;
  *
  */
 public class Hit implements Comparable<Hit> {
-    // class implements Comparable interface to allow for sorting a collection of hits by wire number values
 
-    // constructors 
+    private int _Sector;      							//	   sector[1...6]
+    private int _Superlayer;    	 					//	   superlayer [1,...6]
+    private int _Layer;    	 						//	   layer [1,...6]
+    private int _Wire;    	 						//	   wire [1...112]
+    private int _TDC;
+    private int _Id;
+    private double _cellSize;
+    private double _DocaErr;
+    // class implements Comparable interface to allow for sorting a collection of hits by wire number values
+    
+    // constructors
     /**
      *
      * @param sector (1...6)
@@ -31,12 +40,6 @@ public class Hit implements Comparable<Hit> {
         this._Id = Id;
 
     }
-
-    private int _Sector;      							//	   sector[1...6]
-    private int _Superlayer;    	 					//	   superlayer [1,...6]
-    private int _Layer;    	 						//	   layer [1,...6]
-    private int _Wire;    	 						//	   wire [1...112]
-    private int _TDC;
     
 
     /**
@@ -124,7 +127,6 @@ public class Hit implements Comparable<Hit> {
         this._TDC = TDC;
     }
     
-    private int _Id;
     /**
      *
      * @return the ID
@@ -147,7 +149,7 @@ public class Hit implements Comparable<Hit> {
      * @return region (1...3)
      */
     public int get_Region() {
-        return (int) (this._Superlayer + 1) / 2;
+        return (this._Superlayer + 1) / 2;
     }
 
     /**
@@ -168,11 +170,13 @@ public class Hit implements Comparable<Hit> {
     public int compareTo(Hit arg) {
         int return_val = 0;
         int CompSec = this.get_Sector() < arg.get_Sector() ? -1 : this.get_Sector() == arg.get_Sector() ? 0 : 1;
-        int CompPan = this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;
-        int CompPad = this.get_Wire() < arg.get_Wire() ? -1 : this.get_Wire() == arg.get_Wire() ? 0 : 1;
+        int CompSly = this.get_Superlayer() < arg.get_Superlayer() ? -1 : this.get_Superlayer() == arg.get_Superlayer() ? 0 : 1;
+        int CompLay = this.get_Layer() < arg.get_Layer() ? -1 : this.get_Layer() == arg.get_Layer() ? 0 : 1;
+        int CompWir = this.get_Wire() < arg.get_Wire() ? -1 : this.get_Wire() == arg.get_Wire() ? 0 : 1;
 
-        int return_val1 = ((CompPan == 0) ? CompPad : CompPan);
-        return_val = ((CompSec == 0) ? return_val1 : CompSec);
+        int return_val1 = ((CompLay == 0) ? CompWir : CompLay);
+        int return_val2 = ((CompSly == 0) ? return_val1 : CompSly);
+        return_val = ((CompSec == 0) ? return_val2 : CompSec);
 
         return return_val;
 
@@ -200,7 +204,7 @@ public class Hit implements Comparable<Hit> {
         double y = (double) wire * 2 * Math.tan(Math.PI / 6.);
         if (layer % 2 == 1) {
             //y = y-brickwallSign*Math.sin(Math.PI/3.)/(1.+Math.sin(Math.PI/6.));
-            y = y - brickwallSign * Math.tan(Math.PI / 6.);
+            y -= brickwallSign * Math.tan(Math.PI / 6.);
         }
         return y;
 
@@ -208,7 +212,6 @@ public class Hit implements Comparable<Hit> {
 
     
     
-    private double _cellSize;
     /**
      *
      * @return the cell size in a given superlayer
@@ -225,15 +228,14 @@ public class Hit implements Comparable<Hit> {
         // fix cell size = w_{i+1} -w_{i}
         //double layerDiffAtMPln  = GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(0).getMidpoint().x()
         //             - GeometryLoader.dcDetector.getSector(0).getSuperlayer(this.get_Superlayer()-1).getLayer(0).getComponent(1).getMidpoint().x();
-        double layerDiffAtMPln = DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 0, 0).x
-                - DcDetector.getWireMidpoint(this.get_Superlayer() - 1, 0, 1).x;
+        double layerDiffAtMPln = DcDetector.getWireMidpoint(this.get_Sector() - 1, this.get_Superlayer() - 1, 0, 0).x
+                - DcDetector.getWireMidpoint(this.get_Sector() - 1, this.get_Superlayer() - 1, 0, 1).x;
 
         //double cellSize = 0.5*Math.cos(Math.toRadians(6.)*Math.abs(layerDiffAtMPln*Math.cos(Math.toRadians(6.)));
         _cellSize = 0.5 * Math.abs(layerDiffAtMPln);
 
     }
-
-    private double _DocaErr;
+    
     /**
      *
      * @return error on the time in ns (4ns time window used by default in

@@ -17,6 +17,7 @@ import cnuphys.bCNU.util.Environment;
 public class ImageManager {
 	
 	public static ImageIcon cnuIcon = ImageManager.getInstance().loadImageIcon("images/cnuicon.png");
+	public static ImageIcon cnu2 = ImageManager.getInstance().loadImageIcon("images/cnu2.png");
 
 
 	/**

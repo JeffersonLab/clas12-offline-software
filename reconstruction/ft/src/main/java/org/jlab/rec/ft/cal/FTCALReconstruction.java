@@ -24,17 +24,18 @@ public class FTCALReconstruction {
 
         IndexedTable charge2Energy = manager.getConstants(run, "/calibration/ft/ftcal/charge_to_energy");
         IndexedTable timeOffsets   = manager.getConstants(run, "/calibration/ft/ftcal/time_offsets");
+        IndexedTable timeWalk      = manager.getConstants(run, "/calibration/ft/ftcal/time_walk");
         IndexedTable cluster       = manager.getConstants(run, "/calibration/ft/ftcal/cluster");
 
         if(this.debugMode>=1) System.out.println("\nAnalyzing new event");
         List<FTCALHit> allhits = null;
         
         if(event instanceof EvioDataEvent) {
-            allhits = this.readRawHits(event,charge2Energy,timeOffsets,cluster);
+            allhits = this.readRawHits(event,charge2Energy,timeOffsets,timeWalk,cluster);
         }
         
         if(event instanceof HipoDataEvent) {
-            allhits = this.readRawHitsHipo(event,charge2Energy,timeOffsets,cluster);
+            allhits = this.readRawHitsHipo(event,charge2Energy,timeOffsets,timeWalk,cluster);
         }
         if(debugMode>=1) {
             System.out.println("Found " + allhits.size() + " hits");
@@ -135,9 +136,9 @@ public class FTCALReconstruction {
             for(int i = 0; i < hits.size(); i++){
                 bankHits.setByte("idx",i,(byte) hits.get(i).get_IDX());
                 bankHits.setByte("idy",i,(byte) hits.get(i).get_IDY());
-                bankHits.setFloat("x",i,(float) hits.get(i).get_Dx());
-                bankHits.setFloat("y",i,(float) hits.get(i).get_Dy());
-                bankHits.setFloat("z",i,(float) hits.get(i).get_Dz());
+                bankHits.setFloat("x",i,(float) (hits.get(i).get_Dx()/10.0));
+                bankHits.setFloat("y",i,(float) (hits.get(i).get_Dy()/10.0));
+                bankHits.setFloat("z",i,(float) (hits.get(i).get_Dz()/10.0));
                 bankHits.setFloat("energy",i,(float) hits.get(i).get_Edep());
                 bankHits.setFloat("time",i,(float) hits.get(i).get_Time());
                 bankHits.setShort("hitID",i,(short) hits.get(i).get_DGTZIndex());
@@ -153,14 +154,14 @@ public class FTCALReconstruction {
                 return;
             }
             for(int i = 0; i < clusters.size(); i++){
-                            bankCluster.setInt("id", i,clusters.get(i).getID());
-                            bankCluster.setInt("size", i,clusters.get(i).getSize());
-                            bankCluster.setFloat("x",i,(float) clusters.get(i).getX());
-                            bankCluster.setFloat("y",i, (float) clusters.get(i).getY());
-                            bankCluster.setFloat("z",i, (float) clusters.get(i).getZ());
-                            bankCluster.setFloat("widthX",i, (float) clusters.get(i).getWidthX());
-                            bankCluster.setFloat("widthY",i, (float) clusters.get(i).getWidthY());
-                            bankCluster.setFloat("radius",i, (float) clusters.get(i).getRadius());
+                            bankCluster.setShort("id", i,(short) clusters.get(i).getID());
+                            bankCluster.setShort("size", i,(short) clusters.get(i).getSize());
+                            bankCluster.setFloat("x",i,(float) (clusters.get(i).getX()/10.0));
+                            bankCluster.setFloat("y",i, (float) (clusters.get(i).getY()/10.0));
+                            bankCluster.setFloat("z",i, (float) (clusters.get(i).getZ()/10.0));
+                            bankCluster.setFloat("widthX",i, (float) (clusters.get(i).getWidthX()/10.0));
+                            bankCluster.setFloat("widthY",i, (float) (clusters.get(i).getWidthY()/10.0));
+                            bankCluster.setFloat("radius",i, (float) (clusters.get(i).getRadius()/10.0));
                             bankCluster.setFloat("time",i, (float) clusters.get(i).getTime());
                             bankCluster.setFloat("energy",i, (float) clusters.get(i).getFullEnergy(energyTable));
                             bankCluster.setFloat("recEnergy",i, (float) clusters.get(i).getEnergy());
@@ -183,8 +184,8 @@ public class FTCALReconstruction {
                 for(int i=0; i<hits.size(); i++) {
                         bankhits.setInt("idx",i,hits.get(i).get_IDX());
                         bankhits.setInt("idy",i,hits.get(i).get_IDY());
-                        bankhits.setDouble("hitX",i,hits.get(i).get_Dx());
-                        bankhits.setDouble("hitY",i,hits.get(i).get_Dy());
+                        bankhits.setDouble("hitX",i,hits.get(i).get_Dx()/10.0);
+                        bankhits.setDouble("hitY",i,hits.get(i).get_Dy()/10.0);
                         bankhits.setDouble("hitEnergy",i,hits.get(i).get_Edep());
                         bankhits.setDouble("hitTime",i,hits.get(i).get_Time());
                         bankhits.setInt("hitDGTZIndex",i,hits.get(i).get_DGTZIndex());
@@ -198,13 +199,13 @@ public class FTCALReconstruction {
                         if(debugMode>=1) clusters.get(i).showCluster();
                         bankclust.setInt("clusID", i,clusters.get(i).getID());
                         bankclust.setInt("clusSize", i,clusters.get(i).getSize());
-                        bankclust.setDouble("clusX",i,clusters.get(i).getX());
-                        bankclust.setDouble("clusY",i,clusters.get(i).getY());
-                        bankclust.setDouble("clusXX",i,clusters.get(i).getX2());
-                        bankclust.setDouble("clusYY",i,clusters.get(i).getY2());
-                        bankclust.setDouble("clusSigmaX",i,clusters.get(i).getWidthX());
-                        bankclust.setDouble("clusSigmaY",i,clusters.get(i).getWidthY());
-                        bankclust.setDouble("clusRadius",i,clusters.get(i).getRadius());
+                        bankclust.setDouble("clusX",i,clusters.get(i).getX()/10.0);
+                        bankclust.setDouble("clusY",i,clusters.get(i).getY()/10.0);
+                        bankclust.setDouble("clusXX",i,clusters.get(i).getX2()/100.0);
+                        bankclust.setDouble("clusYY",i,clusters.get(i).getY2()/100.0);
+                        bankclust.setDouble("clusSigmaX",i,clusters.get(i).getWidthX()/10.0);
+                        bankclust.setDouble("clusSigmaY",i,clusters.get(i).getWidthY()/10.0);
+                        bankclust.setDouble("clusRadius",i,clusters.get(i).getRadius()/10.0);
                         bankclust.setDouble("clusTime",i,clusters.get(i).getTime());
                         bankclust.setDouble("clusEnergy",i,clusters.get(i).getFullEnergy(energyTable));
                         bankclust.setDouble("clusRecEnergy",i,clusters.get(i).getEnergy());
@@ -223,7 +224,7 @@ public class FTCALReconstruction {
         }
     }
 
-    public List<FTCALHit> readRawHits(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable cluster) {
+    public List<FTCALHit> readRawHits(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable timeWalk, IndexedTable cluster) {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTCAL:dgtz bank");
 
@@ -238,7 +239,7 @@ public class FTCALReconstruction {
                 int adc         = bankDGTZ.getInt("ADC",row);
                 int tdc         = bankDGTZ.getInt("TDC",row);
                 if(adc!=-1 && tdc!=-1){
-                    FTCALHit hit = new FTCALHit(row,icomponent, adc, tdc, charge2Energy, timeOffsets, cluster);
+                    FTCALHit hit = new FTCALHit(row,icomponent, adc, tdc, charge2Energy, timeOffsets, timeWalk, cluster);
 	             hits.add(hit); 
 	        }	          
             }
@@ -246,7 +247,7 @@ public class FTCALReconstruction {
         return hits;
     }
     
-    public List<FTCALHit> readRawHitsHipo(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable cluster) {
+    public List<FTCALHit> readRawHitsHipo(DataEvent event, IndexedTable charge2Energy, IndexedTable timeOffsets, IndexedTable timeWalk, IndexedTable cluster) {
         // getting raw data bank
 	if(debugMode>=1) System.out.println("Getting raw hits from FTCAL:adc bank");
 
@@ -255,14 +256,14 @@ public class FTCALReconstruction {
             DataBank bankDGTZ = event.getBank("FTCAL::adc");
             int nrows = bankDGTZ.rows();
             for(int row = 0; row < nrows; row++){
-                int isector     = bankDGTZ.getInt("sector",row);
-                int ilayer      = bankDGTZ.getInt("layer",row);
-                int icomponent  = bankDGTZ.getInt("component",row);
-                int iorder      = bankDGTZ.getInt("order",row);
+                int isector     = bankDGTZ.getByte("sector",row);
+                int ilayer      = bankDGTZ.getByte("layer",row);
+                int icomponent  = bankDGTZ.getShort("component",row);
+                int iorder      = bankDGTZ.getByte("order",row);
                 int adc         = bankDGTZ.getInt("ADC",row);
                 float time      = bankDGTZ.getFloat("time",row);
                 if(adc!=-1 && time!=-1){
-                    FTCALHit hit = new FTCALHit(row,icomponent, adc, time, charge2Energy, timeOffsets, cluster);
+                    FTCALHit hit = new FTCALHit(row,icomponent, adc, time, charge2Energy, timeOffsets, timeWalk, cluster);
 	             hits.add(hit); 
 	        }	          
             }

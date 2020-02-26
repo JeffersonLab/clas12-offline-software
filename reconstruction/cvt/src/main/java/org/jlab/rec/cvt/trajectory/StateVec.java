@@ -18,12 +18,14 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
     private static final long serialVersionUID = 1874984192960130771L;
 
     private int _ID;
+    private int _SurfaceDetector;
     private int _SurfaceLayer;
     private int _SurfaceSector;
     private double _TrkPhiAtSurface;
     private double _TrkThetaAtSurface;
     private double _TrkToModuleAngle;
     private double _CalcCentroidStrip;
+    private double _Path;
 
     public int get_ID() {
         return _ID;
@@ -31,6 +33,22 @@ public class StateVec extends Matrix implements Comparable<StateVec> {
 
     public void set_ID(int _ID) {
         this._ID = _ID;
+    }
+
+    public double get_Path() {
+        return _Path;
+    }
+
+    public void set_Path(double _Path) {
+        this._Path = _Path;
+    }
+
+    public int get_SurfaceDetector() {
+        return _SurfaceDetector;
+    }
+
+    public void set_SurfaceDetector(int _SurfaceDetector) {
+        this._SurfaceDetector = _SurfaceDetector;
     }
 
     public int get_SurfaceLayer() {

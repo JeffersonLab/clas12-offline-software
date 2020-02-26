@@ -5,7 +5,6 @@ import java.awt.Color;
 import item3D.Item3D;
 import bCNU3D.Support3D;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import com.jogamp.opengl.GLAutoDrawable;
@@ -41,7 +40,7 @@ public abstract class DetectorItem3D extends Item3D {
 			drawShape(drawable);
 		}
 
-		if (!_eventManager.isAccumulating() && !FastMCManager.getInstance().isStreaming()) {
+		if (!_eventManager.isAccumulating()) {
 			drawData(drawable);
 		}
 

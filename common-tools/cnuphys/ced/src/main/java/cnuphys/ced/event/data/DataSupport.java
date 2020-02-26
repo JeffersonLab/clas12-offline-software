@@ -45,6 +45,17 @@ public class DataSupport {
 
 
 
+	/**
+	 * Add positional feedback
+	 * @param hitIndex
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param lx
+	 * @param ly
+	 * @param lz
+	 * @param feedbackStrings
+	 */
 	public static void addXYZFeedback(int hitIndex, double x[], double y[],
 			double z[], double lx[], double ly[], double lz[],
 			List<String> feedbackStrings) {
@@ -71,6 +82,117 @@ public class DataSupport {
 					+ VectorSupport.toString(v, 2));
 		}
 	}
+	
+	/**
+	 * Safe method for extracting a byte from an array
+	 * @param array the array
+	 * @param index the index
+	 * @return the value at the index or errorVal  on any error
+	 */
+	public static byte safeValue(byte[] array, int index, byte errorVal) {
+		if (array == null) {
+			return errorVal;
+		}
+		else if ((index < 0) || (index >= array.length)) {
+			return errorVal;
+		}
+		else {
+			return array[index];
+		}
+	}
+	
+	/**
+	 * Safe method for extracting a short from an array
+	 * @param array the array
+	 * @param index the index
+	 * @return the value at the index or errorVal  on any error
+	 */
+	public static short safeValue(short[] array, int index, short errorVal) {
+		if (array == null) {
+			return errorVal;
+		}
+		else if ((index < 0) || (index >= array.length)) {
+			return errorVal;
+		}
+		else {
+			return array[index];
+		}
+	}
+
+
+	
+	/**
+	 * Safe method for extracting an int from an array
+	 * @param array the array
+	 * @param index the index
+	 * @return the value at the index or errorVal  on any error
+	 */
+	public static int safeValue(int[] array, int index, int errorVal) {
+		if (array == null) {
+			return errorVal;
+		}
+		else if ((index < 0) || (index >= array.length)) {
+			return errorVal;
+		}
+		else {
+			return array[index];
+		}
+	}
+	
+	/**
+	 * Safe method for extracting a long from an array
+	 * @param array the array
+	 * @param index the index
+	 * @return the value at the index or errorVal  on any error
+	 */
+	public static long safeValue(int[] array, int index, long errorVal) {
+		if (array == null) {
+			return errorVal;
+		}
+		else if ((index < 0) || (index >= array.length)) {
+			return errorVal;
+		}
+		else {
+			return array[index];
+		}
+	}
+	
+	/**
+	 * Safe method for extracting a float from an array
+	 * @param array the array
+	 * @param index the index
+	 * @return the value at the index or errorVal on any error
+	 */
+	public static float safeValue(float[] array, int index, float errorVal) {
+		if (array == null) {
+			return errorVal;
+		}
+		else if ((index < 0) || (index >= array.length)) {
+			return errorVal;
+		}
+		else {
+			return array[index];
+		}
+	}
+
+	/**
+	 * Safe method for extracting a double from an array
+	 * @param array the array
+	 * @param index the index
+	 * @return the value at the index or errorVal on any error
+	 */
+	public static double safeValue(double[] array, int index, double errorVal) {
+		if (array == null) {
+			return errorVal;
+		}
+		else if ((index < 0) || (index >= array.length)) {
+			return errorVal;
+		}
+		else {
+			return array[index];
+		}
+	}
+
 
 	/**
 	 * Safe way to get an integer element from an array for printing

@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.beans.PropertyChangeEvent;
@@ -98,6 +99,14 @@ public class PlotPanel extends JPanel implements PropertyChangeListener {
 		}
 
 	}
+	
+	@Override
+	public Insets getInsets() {
+		Insets def = super.getInsets();
+		return new Insets(def.top + 2, def.left + 2, def.bottom + 2,
+				def.right + 2);
+	}
+
 
 	private void addSouth() {
 		// south panel for x axis and status

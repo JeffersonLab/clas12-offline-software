@@ -36,12 +36,16 @@ import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.CedXYView;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
+import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
+import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.CTOF;
 import cnuphys.ced.event.data.Cosmic;
 import cnuphys.ced.event.data.CosmicList;
 import cnuphys.ced.event.data.Cosmics;
 import cnuphys.ced.event.data.BST;
+import cnuphys.ced.event.data.BaseHit2;
+import cnuphys.ced.event.data.BaseHit2List;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
 import cnuphys.ced.geometry.BSTGeometry;
@@ -164,7 +168,7 @@ public class CentralXYView extends CedXYView {
 				PropertySupport.BOTTOMMARGIN, BMARGIN, 
 				PropertySupport.TOOLBAR, true, 
 				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
-				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
+				PropertySupport.VISIBLE, true,
 				PropertySupport.TITLE, title,
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
@@ -173,8 +177,9 @@ public class CentralXYView extends CedXYView {
 						+ ControlPanel.ACCUMULATIONLEGEND
 						+ ControlPanel.DRAWLEGEND,
 				DisplayBits.ACCUMULATION + DisplayBits.CROSSES
-						+ DisplayBits.MCTRUTH
-						+ DisplayBits.COSMICS,
+						+ DisplayBits.MCTRUTH + DisplayBits.RECONHITS + DisplayBits.ADC_HITS
+						+ DisplayBits.CVTTRACKS + DisplayBits.COSMICS +
+						DisplayBits.GLOBAL_HB +  DisplayBits.GLOBAL_TB,
 				3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
@@ -229,13 +234,14 @@ public class CentralXYView extends CedXYView {
 			public void draw(Graphics g, IContainer container) {
 
 				if (!_eventManager.isAccumulating()) {
+					
+					_hitDrawer.draw(g, container);
+					
 					_swimTrajectoryDrawer.draw(g, container);
 					if (showCosmics()) {
 						drawCosmicTracks(g, container);
 					}
 					
-					_hitDrawer.draw(g, container);
-
 					if (showCrosses()) {
 						_crossDrawer.draw(g, container);
 					}
@@ -267,10 +273,15 @@ public class CentralXYView extends CedXYView {
 		Point p1 = new Point();
 		Point p2 = new Point();
 		for (Cosmic cosmic : cosmics) {
-			double y1 = 1000;
-			double y2 = -1000;
+			double y1 = 100;
+			double y2 = -100;
 			double x1 = cosmic.trkline_yx_slope * y1 + cosmic.trkline_yx_interc;
 			double x2 = cosmic.trkline_yx_slope * y2 + cosmic.trkline_yx_interc;
+			//convert to mm
+			x1 *= 10;
+			x2 *= 10;
+			y1 *= 10;
+			y2 *= 10;
 			container.worldToLocal(p1, x1, y1);
 			container.worldToLocal(p2, x2, y2);
 			
@@ -374,7 +385,7 @@ public class CentralXYView extends CedXYView {
 		Point pmid = new Point();
 		Point2D.Double wporig = new Point2D.Double();
 		container.worldToLocal(porig, wporig);
-		g2.setFont(Fonts.tinyFont);
+		g2.setFont(Fonts.smallFont);
 		FontMetrics fm = getFontMetrics(g2.getFont());
 
 		if ((panel.getLayer() % 2) == 0) {
@@ -440,9 +451,7 @@ public class CentralXYView extends CedXYView {
 
 
 	/**
-	 * This adds the detector items. The AllDC view is not faithful to geometry.
-	 * All we really uses in the number of superlayers, number of layers, and
-	 * number of wires.
+	 * This adds the detector items. 
 	 */
 	@Override
 	protected void addItems() {
@@ -575,11 +584,37 @@ public class CentralXYView extends CedXYView {
 				Vector<int[]> stripADCData = BST.getInstance().allStripsForSectorAndLayer(_closestPanel.getSector(),
 						_closestPanel.getLayer());
 				for (int sdtdat[] : stripADCData) {
-					fbString("orange", "strip  " + sdtdat[0] + " adc: " + +sdtdat[1], feedbackStrings);
+					fbString("orange", "strip  " + sdtdat[0] + " adc " + +sdtdat[1], feedbackStrings);
+				}
+			}
+		}
+		
+		//BMT?
+		
+		if (showADCHits()) {
+			AdcHitList adcHits = BMT.getInstance().getADCHits();
+			if ((adcHits != null) && !adcHits.isEmpty()) {
+				for (AdcHit adcHit : adcHits) {
+					if (adcHit.contains(screenPoint)) {
+						adcHit.tdcAdcFeedback("layer", "strip", feedbackStrings);
+						break;
+					}
 				}
 			}
 		}
 
+		if (showReconHits()) {
+			BaseHit2List reconHits = BMT.getInstance().getRecHits();
+			if ((reconHits != null) && !reconHits.isEmpty()) {
+				for (BaseHit2 bhit2 : reconHits) {
+					if (bhit2.contains(screenPoint)) {
+						fbString("orange", "BMT recon hit sector  " + bhit2.sector + " layer " + bhit2.layer + " strip "
+								+ bhit2.component, feedbackStrings);
+						break;
+					}
+				}
+			}
+		}
 		
 		// near a swum trajectory?
 		double mindist = _swimTrajectoryDrawer.closestApproach(worldPoint);

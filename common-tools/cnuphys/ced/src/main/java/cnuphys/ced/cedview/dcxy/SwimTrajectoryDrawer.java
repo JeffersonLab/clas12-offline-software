@@ -6,8 +6,6 @@ import java.awt.geom.Point2D;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.magneticfield.swim.ASwimTrajectoryDrawer;
 import cnuphys.ced.clasio.ClasIoEventManager;
-import cnuphys.ced.fastmc.FastMCManager;
-import cnuphys.lund.LundId;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.SwimTrajectory2D;
 
@@ -30,7 +28,7 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
-		if (!ClasIoEventManager.getInstance().isAccumulating() && !FastMCManager.getInstance().isStreaming() && _view.isSingleEventMode()) {
+		if (!ClasIoEventManager.getInstance().isAccumulating() && _view.isSingleEventMode()) {
 			super.draw(g, container);
 		}
 	}
@@ -88,20 +86,20 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 
 	@Override
 	public boolean acceptSimpleTrack(SwimTrajectory2D trajectory) {
-		//this is a fugly hack. Check to see if it is hit based ot time based 
-		//then check the display flags
-		LundId lid = trajectory.getTrajectory3D().getLundId();
-		int id = lid.getId();
-		
-		//FUGLY hack
-		if ((id == -99) || (id == -100) || (id == -101)) { //time based
-			return _view.showTB();
-		}
-		else if ((id == -199) || (id == -200) || (id == -201)) { //hitbased based
+
+		String source = trajectory.getSource().toLowerCase();
+
+		if (source.contains("hbtracks")) {
+			System.err.println("DCXY HB TRACK ACCEPT: " + _view.showHB());
 			return _view.showHB();
+		} else if (source.contains("tbtracks")) {
+			System.err.println("DCXY TB TRACK ACCEPT: " + _view.showTB());
+			return _view.showTB();
+		} else if (source.contains("cvtrec")) {
+			System.err.println("DCXY CVT TRACK ACCEPT: " +  _view.showCVTTracks());
+			return _view.showCVTTracks();
 		}
 
-		
 		return true;
 	}
 

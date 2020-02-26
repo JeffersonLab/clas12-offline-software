@@ -9,6 +9,9 @@ import org.jlab.io.evio.EvioDataBank;
 import org.jlab.io.evio.EvioFactory;
 import org.jlab.clas.detector.*;
 
+import org.jlab.rec.eb.EBScalers;
+import org.jlab.rec.eb.EBCCDBEnum;
+import org.jlab.rec.eb.EBCCDBConstants;
 
 /**
  *
@@ -20,42 +23,38 @@ public class EBio {
     public static int  TRACKS_TB = 2;
     
     // read header bank information 
-    public static DetectorHeader readHeader(DataEvent event) {
+    public static DetectorHeader readHeader(DataEvent event, EBScalers ebs, EBCCDBConstants ccdb) {
+        
         DetectorHeader dHeader = new DetectorHeader();
+       
         if(event.hasBank("RUN::config")==true){
             DataBank bank = event.getBank("RUN::config");
             dHeader.setRun(bank.getInt("run", 0));
             dHeader.setEvent(bank.getInt("event", 0));
             dHeader.setTrigger(bank.getLong("trigger", 0));
         }
+
         // helicity:
-        if(event.hasBank("HEL::adc")) {
+        if(ccdb.getInteger(EBCCDBEnum.HELICITY_delay)==0 && event.hasBank("HEL::adc")) {
             final int helComponent=1;
             final int helHalf=2000;
             DataBank bank = event.getBank("HEL::adc");
             for (int ii=0; ii<bank.rows(); ii++) {
                 if (bank.getInt("component",ii)==helComponent) {
-                    byte helicity=0;
+                    byte helicity=-1;
                     if (bank.getInt("ped",ii)>helHalf) helicity=1;
-                    dHeader.setHelicity(helicity);
+                    dHeader.setHelicityRaw(helicity);
+                    dHeader.setHelicity((byte)(helicity*ccdb.getInteger(EBCCDBEnum.HWP_position)));
                     break;
                 }
             }
         }
-        /*
-        // fcup:
-        if(event.hasBank("RAW::scaler")){
-            DataBank bank = event.getBank("RAW::scaler");
-            for(int k=0;k<bank.rows(); k++){
-                if(bank.getInt("channel",k)==0 && bank.getInt("slot",k)==0){
-                    int FCscaler = bank.getInt("value",k);
-                    // 30 Hz minus 0.5 ms dead for Helicity
-                    float trueFreq = FCscaler / (0.03333f - 0.0005f);
-                    //float beamCurrent = (trueFreq-100f)/906.2f;
-                }   
-            }   
-        }
-        */
+
+        // scaler data for beam charge and livetime:
+        //EBScalers.Reading ebsr = ebs.readScalers(event,ccdb);
+        //dHeader.setBeamChargeGated((float)ebsr.getBeamCharge());
+        //dHeader.setLiveTime((float)ebsr.getLiveTime());
+
         return dHeader;
     }
     
@@ -72,7 +71,7 @@ public class EBio {
             case 2 : bankName = "TimeBasedTrkg::TBTracks"; break;
             default: break;
         }
-        List<DetectorParticle> dpList = new ArrayList<DetectorParticle>();
+        List<DetectorParticle> dpList = new ArrayList<>();
     
         if(event.hasBank(bankName)==true){
             EvioDataBank bank = (EvioDataBank) event.getBank(bankName);
@@ -83,9 +82,6 @@ public class EBio {
                 
                 DetectorParticle p = new DetectorParticle();
                 
-                int trStatus = bank.getInt("status", i);
-                
-                p.setStatus(100+10*trStatus);
                 p.vector().setXYZ(
                         bank.getDouble("p0_x",i),
                         bank.getDouble("p0_y",i),
@@ -96,24 +92,6 @@ public class EBio {
                         bank.getDouble("Vtx0_y",i),
                         bank.getDouble("Vtx0_z",i));
                 
-                p.setCross( 
-                        bank.getDouble("c3_x", i),
-                        bank.getDouble("c3_y", i),
-                        bank.getDouble("c3_z", i),
-                        bank.getDouble("c3_ux", i),
-                        bank.getDouble("c3_uy", i),
-                        bank.getDouble("c3_uz", i)
-                );
-                p.setLowerCross(
-                        bank.getDouble("c1_x", i),
-                        bank.getDouble("c1_y", i),
-                        bank.getDouble("c1_z", i),
-                        bank.getDouble("c1_ux", i),
-                        bank.getDouble("c1_uy", i),
-                        bank.getDouble("c1_uz", i)
-                );         
-                //   System.out.println(p.getLowerCross());
-                p.setPath(bank.getDouble("pathlength", i));
                 p.setCharge(bank.getInt("q", i));
                 dpList.add(p);
             }
@@ -123,12 +101,11 @@ public class EBio {
     
     
     public static List<DetectorParticle>  readCentralTracks(DataEvent event){
-        List<DetectorParticle> dpList = new ArrayList<DetectorParticle>();
+        List<DetectorParticle> dpList = new ArrayList<>();
         if(event.hasBank("CVTRec::Tracks")==true){
             EvioDataBank bank = (EvioDataBank) event.getBank("CVTRec::Tracks");
             int nrows = bank.rows();
             for(int i = 0; i < nrows; i++){
-                double p = bank.getDouble("p", i);
                 double pt = bank.getDouble("pt", i);
                 double phi0 = bank.getDouble("phi0", i);
                 double tandip = bank.getDouble("tandip", i);
@@ -136,7 +113,6 @@ public class EBio {
                 double d0 = bank.getDouble("d0", i);
                 
                 DetectorParticle part = new DetectorParticle();
-                part.setStatus(200);
                 double pz = pt*tandip;
                 double py = pt*Math.sin(phi0);
                 double px = pt*Math.cos(phi0);
@@ -156,7 +132,6 @@ public class EBio {
     public static boolean isTimeBased(DataEvent de){
         boolean tb = false;
         if(de.hasBank("TimeBasedTrkg::TBHits")==true){
-            //de.show();
             return true;
         }
         return tb;
@@ -191,7 +166,6 @@ public class EBio {
             
             DetectorParticle p = particles.get(i);
             
-            bank.setInt("status", i, p.getStatus());
             bank.setInt("charge", i, p.getCharge());
             bank.setInt("pid", i, p.getPid());
             
@@ -277,7 +251,7 @@ public class EBio {
     }
     
     public static List<DetectorResponse> readECAL(DataEvent event){
-        List<DetectorResponse> ecal = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> ecal = new ArrayList<>();
         if(event.hasBank("ECDetector::clusters")==true){
             EvioDataBank bank = (EvioDataBank) event.getBank("ECDetector::clusters");
             int nrows = bank.rows();
@@ -300,7 +274,7 @@ public class EBio {
     }
     
     public static List<DetectorResponse>  readFTOF(DataEvent event){
-        List<DetectorResponse> ftof = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> ftof = new ArrayList<>();
         if(event.hasBank("FTOFRec::ftofhits")==true){
             EvioDataBank bank = (EvioDataBank) event.getBank("FTOFRec::ftofhits");
             int nrows = bank.rows();
@@ -326,26 +300,24 @@ public class EBio {
     }
     
     public static List<CherenkovResponse> readHTCC(DataEvent event) {
-        List<CherenkovResponse> htcc = new ArrayList<CherenkovResponse>();
+        List<CherenkovResponse> htcc = new ArrayList<>();
         if(event.hasBank("HTCCRec::clusters")==true){
             
             EvioDataBank bank = (EvioDataBank) event.getBank("HTCCRec::clusters");
             int nrows = bank.rows();
             for(int i = 0; i < nrows; i++){
                 int nphe  = bank.getInt("nphe", i);
-                double theta   = bank.getDouble("theta", i);
                 double dtheta = bank.getDouble("dtheta",i);
-                double phi = bank.getDouble("phi",i);
                 double dphi = bank.getDouble("dphi",i);
                 double x = bank.getDouble("x",i);
                 double y = bank.getDouble("y",i);
                 double z = bank.getDouble("z",i);
                 double time = bank.getFloat("time",i);
-                CherenkovResponse che = new CherenkovResponse(theta,phi,dtheta,dphi);
+                CherenkovResponse che = new CherenkovResponse(dtheta,dphi);
                 che.setHitPosition(x, y, z);
                 che.setEnergy(nphe);
                 che.setTime(time);
-                che.setCherenkovType(DetectorType.HTCC);
+                che.getDescriptor().setType(DetectorType.HTCC);
                 htcc.add(che);
 
             }

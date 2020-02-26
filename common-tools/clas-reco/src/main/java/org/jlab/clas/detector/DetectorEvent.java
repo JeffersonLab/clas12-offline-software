@@ -1,6 +1,7 @@
 package org.jlab.clas.detector;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.PhysicsEvent;
@@ -14,15 +15,21 @@ import org.jlab.io.base.DataEvent;
  */
 public class DetectorEvent {
     
-    private List<DetectorParticle>  particleList = new ArrayList<DetectorParticle>();
-    private PhysicsEvent          generatedEvent = new PhysicsEvent();
-    private PhysicsEvent      reconstructedEvent = new PhysicsEvent();
-    private DetectorHeader           eventHeader = new DetectorHeader();
+    private final List<DetectorParticle>  particleList = new ArrayList<>();
+    private final PhysicsEvent          generatedEvent = new PhysicsEvent();
+    private final PhysicsEvent      reconstructedEvent = new PhysicsEvent();
+    private DetectorHeader                 eventHeader = new DetectorHeader();
     
     public DetectorEvent(){
         
     }
-    
+   
+    public void sort() {
+        System.err.println("DetectorEvent:  Not ready for sorting!!!!!!!!!");
+        Collections.sort(particleList);
+        setAssociation();
+    }
+
     public static DetectorEvent readDetectorEvent(DataEvent event){
         return DetectorData.readDetectorEvent(event);
     }
@@ -82,7 +89,7 @@ public class DetectorEvent {
      */
     public List<DetectorResponse>  getDetectorResponseList(){
         this.setAssociation();
-        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> responses = new ArrayList<>();
         for(DetectorParticle p : this.particleList){
             for(DetectorResponse r : p.getDetectorResponses()){
                 responses.add(r);
@@ -90,57 +97,56 @@ public class DetectorEvent {
         }
         return responses;
     }
-    
-    public List<CherenkovResponse>  getCherenkovResponseList(){
-        this.setAssociation();
-        List<CherenkovResponse> responses = new ArrayList<CherenkovResponse>();
-        for(DetectorParticle p : this.particleList){
-            for(CherenkovResponse r : p.getCherenkovResponses()){
-                responses.add(r);
-            }
-        }
-        return responses;
+
+   public List<DetectorResponse>  getCherenkovResponseList(){
+       return getResponseList(new DetectorType[]{
+           DetectorType.HTCC,DetectorType.LTCC,DetectorType.RICH
+       });
     }
-    
+
     public List<DetectorResponse>  getCalorimeterResponseList(){
-        this.setAssociation();
-        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
-        for(DetectorParticle p : this.particleList){
-            for(DetectorResponse r : p.getDetectorResponses()){
-                if(r.getDescriptor().getType()==DetectorType.ECAL)
-                responses.add(r);
-            }
-        }
-        return responses;
+       return getResponseList(new DetectorType[]{
+           DetectorType.ECAL
+       });
     }
-    
+
     public List<DetectorResponse>  getScintillatorResponseList(){
+       return getResponseList(new DetectorType[]{
+           DetectorType.FTOF,DetectorType.CTOF,DetectorType.CND,DetectorType.BAND
+       });
+    }
+
+   public List<DetectorResponse>  getTaggerResponseList(){
+       return getResponseList(new DetectorType[]{
+           DetectorType.FTCAL,DetectorType.FTHODO
+       });
+    }
+
+   public List<DetectorResponse>  getResponseList(DetectorType type) {
+       return getResponseList(new DetectorType[]{type});
+   }
+
+   public List<DetectorResponse> getResponseList(DetectorType[] types) {
         this.setAssociation();
-        List<DetectorResponse> responses = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> responses = new ArrayList<>();
         for(DetectorParticle p : this.particleList){
-            for(DetectorResponse r : p.getDetectorResponses()){
-                if(r.getDescriptor().getType()==DetectorType.FTOF || r.getDescriptor().getType()==DetectorType.CTOF)
-                responses.add(r);
+            for(DetectorResponse r : p.getDetectorResponses()) {
+                if (responses.contains(r)) {
+                    continue;
+                }
+                for(DetectorType t : types) {
+                    if (r.getDescriptor().getType() == t) {
+                        responses.add(r);
+                        break;
+                    }
+                }
             }
         }
         return responses;
-    }
-    
-   public List<TaggerResponse>  getTaggerResponseList(){
-        this.setAssociation();
-        List<TaggerResponse> responses = new ArrayList<TaggerResponse>();
-        for(DetectorParticle p : this.particleList){
-            for(TaggerResponse r : p.getTaggerResponses()){
-                if(r.getDescriptor().getType()==DetectorType.FTCAL ||
-                        r.getDescriptor().getType()==DetectorType.FTHODO)
-                responses.add(r);
-            }
-        }
-        return responses;
-    }
-   
+   }
+
    public List<DetectorParticle> getCentralParticles() {
-       List<DetectorParticle> central = new ArrayList<DetectorParticle>();
+       List<DetectorParticle> central = new ArrayList<>();
        for(DetectorParticle p : this.particleList) {
            if(p.getTrackDetector()==DetectorType.CVT.getDetectorId()){
                central.add(p);
@@ -160,13 +166,19 @@ public class DetectorEvent {
     
     public void setAssociation(){
         for(int index = 0; index < this.particleList.size(); index++){
-            List<DetectorResponse> responses = particleList.get(index).getDetectorResponses();
-            for(DetectorResponse r : responses){
-                r.setAssociation(index);
+            for(DetectorResponse r : particleList.get(index).getDetectorResponses()) {
+                r.clearAssociations();
+            }
+        }
+        for(int index = 0; index < this.particleList.size(); index++){
+            for(DetectorResponse r : particleList.get(index).getDetectorResponses()) {
+                if (!r.hasAssociation(index)) {
+                    r.addAssociation(index);
+                }
             }
         }
     }
-    
+
     public void addParticle(double px, double py, double pz,
             double vx, double vy, double vz){
         DetectorParticle particle = new DetectorParticle();
@@ -175,8 +187,14 @@ public class DetectorEvent {
         this.addParticle(particle);
     }
     
-
-    
+    public DetectorParticle getTriggerParticle() {
+        for (int ii=0; ii<particleList.size(); ii++) {
+            if (particleList.get(ii).isTriggerParticle()) {
+                return particleList.get(ii);
+            }
+        }
+        return null;
+    }
     
     @Override
     public String toString(){

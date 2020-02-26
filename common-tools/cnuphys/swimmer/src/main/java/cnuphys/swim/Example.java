@@ -2,11 +2,10 @@ package cnuphys.swim;
 
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
-import cnuphys.magfield.FieldProbe;
-import cnuphys.magfield.IField;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
+import cnuphys.swim.util.TerminalPlot;
 
 /**
  * This class gives an example of swimming a Lund particle
@@ -47,11 +46,7 @@ public class Example {
 		
 		MagneticFields.getInstance().initializeMagneticFields();
 		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
-		swimmer = new Swimmer(
-					MagneticFields.getInstance().getIField(MagneticFields.getInstance().getActiveFieldType()));
-
-		
-		FieldProbe.cache(true);
+		swimmer = new Swimmer();
 
 //		 example1();
 //		 example2();
@@ -145,7 +140,7 @@ public class Example {
 		double stepSize = 5e-4; // m
 		try {
 			SwimTrajectory traj = swimmer.swim(electron.getCharge(), xo, yo,
-					zo, momentum, theta, phi, stopper, maxPathLength, stepSize,
+					zo, momentum, theta, phi, stopper, 0, maxPathLength, stepSize,
 					Swimmer.CLAS_Tolerance, hdata);
 			double[] lastY = traj.lastElement();
 			printSummary(
@@ -169,8 +164,6 @@ public class Example {
 		double eps = 1.0e-08;
 		double stepSize = 5e-4; // m
 		
-		IField field = MagneticFields.getInstance().getActiveField();
-
 		try {
 			int nstep = swimmer.swim(electron.getCharge(), xo, yo, zo,
 					momentum, theta, phi, stopper, listener, maxPathLength,
@@ -208,9 +201,7 @@ public class Example {
 
 			// lets try getting integral |b x dl|
 			
-			IField field = MagneticFields.getInstance().getActiveField();
-			
-			traj.computeBDL(field);
+			traj.computeBDL(swimmer.getProbe());
 //			terminalPlot(
 //					traj,
 //					"Pathlength (horizontal, m) vs. Int|Bxdl| (vertical, kg-m) [ADAPTIVE] ",
@@ -244,29 +235,6 @@ public class Example {
 
 	}
 	
-
-	// example 7 adaptive fixed z stop
-	private static void example7x() {
-		System.out.println("\n=== EXAMPLE 7X ===");
-		System.out.println("[Adaptive] Fixed X cutoff");
-		double xtarget = 1.58; // where integration should stop
-		double accuracy = 10e-6; // 10 microns
-		double stepSize = 5e-4; // m
-		try {
-			SwimTrajectory traj = swimmer.swimFixedX(electron.getCharge(), xo, yo,
-					zo, momentum, theta, phi, xtarget, accuracy, rmax,
-					maxPathLength, stepSize, Swimmer.CLAS_Tolerance, hdata);
-			double lastY[] = traj.lastElement();
-			printSummary(
-					"\nresult from adaptive stepsize method with storage and X cutoff at "
-							+ xtarget, traj.size(), momentum, lastY, hdata);
-			terminalPlot(traj,
-					"z (horizontal, cm) vs. x (vertical, cm) [ADAPTIVE] {STOP at Z=1.58}");
-		} catch (RungeKuttaException e) {
-			e.printStackTrace();
-		}
-
-	}
 
 	private static void example8() {
 

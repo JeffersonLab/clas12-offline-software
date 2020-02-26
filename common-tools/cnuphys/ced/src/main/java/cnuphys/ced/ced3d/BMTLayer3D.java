@@ -65,7 +65,7 @@ public class BMTLayer3D extends DetectorItem3D {
 //		boolean drawOutline = false;
 
 		
-		AdcHitList hits = BMT.getInstance().getHits();
+		AdcHitList hits = BMT.getInstance().getADCHits();
 		if ((hits != null) && !hits.isEmpty()) {
 			for (AdcHit hit : hits) {
 				if (hit != null) {
@@ -107,10 +107,10 @@ public class BMTLayer3D extends DetectorItem3D {
 			for (int i = 0; i < len; i++) {
 				Cross2 cross = crosses.elementAt(i);
 				if (cross != null) {
-					//convert to cm
-					float x1 = cross.x / 10;
-					float y1 = cross.y / 10;
-					float z1 = cross.z / 10;
+					//no longer convert (already in cm)
+					float x1 = cross.x;
+					float y1 = cross.y;
+					float z1 = cross.z;
 
 					Support3D.drawLine(drawable, x1, y1, z1, cross.ux,
 							cross.uy, cross.uz, CROSS_LEN,

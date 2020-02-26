@@ -3,6 +3,7 @@ package org.jlab.rec.dc.cluster;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.clas.clas.math.FastMath;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 
 import org.jlab.geom.prim.Line3D;
@@ -17,24 +18,23 @@ import org.jlab.rec.dc.track.fit.basefit.LineFitter;
 
 public class ClusterFitter {
 
-    public ClusterFitter() {
-        // TODO Auto-generated constructor stub
-    }
 
     /**
      * Fits a cluster to a line
      *
      */
     private LineFitPars FitPars;
-    //private double[][] FitArray;
-    
     private List<ArrayList<Double>> FitArray = new ArrayList<ArrayList<Double>>(); 
     private List<Double> x = new ArrayList<Double>();
     private List<Double> y = new ArrayList<Double>();
     private List<Double> ex = new ArrayList<Double>();
     private List<Double> ey = new ArrayList<Double>();
+    private double stereo = FastMath.cos(Math.toRadians(6.));
     
     private String CoordinateSystem; // LC= local, TSC = tilted Sector
+    public ClusterFitter() {
+        // TODO Auto-generated constructor stub
+    }
 
     public void SetFitArray(FittedCluster clus, String system) {
 
@@ -63,7 +63,7 @@ public class ClusterFitter {
                 ex.add(i, (double) 0);
                 y.add(i, clus.get(i).get_X());
                 //ey[i]= clus.get(i).get_DocaErr(); //CODEFIX1
-                ey.add(i, clus.get(i).get_DocaErr() / Math.cos(Math.toRadians(6.))); 
+                ey.add(i, clus.get(i).get_DocaErr() / stereo); 
             }
 
         }
@@ -73,7 +73,11 @@ public class ClusterFitter {
         FitArray.add((ArrayList<Double>) ey);
         
     }
-
+    /**
+     * 
+     * @param clus fitted cluster
+     * @param SaveFitPars boolean to save the fit parameters
+     */
     public void Fit(FittedCluster clus, boolean SaveFitPars) {
         if (FitArray != null) {
 
@@ -90,10 +94,13 @@ public class ClusterFitter {
                 this.SetClusterFitParameters(clus);
             }
         } else {
-            System.err.println("Cluster Fit array not set!!!");
         }
     }
 
+    /**
+     * 
+     * @param clus fitted cluster
+     */
     public void SetClusterFitParameters(FittedCluster clus) {
         if (FitPars != null) {
             
@@ -110,6 +117,11 @@ public class ClusterFitter {
         }
     }
 
+    /**
+     * 
+     * @param x0 local x in the tilted sector coordinate system (in cm)
+     * @param clus fitted cluster
+     */
     public void SetSegmentLineParameters(double x0, FittedCluster clus) {
 
         if (FitPars != null) {
@@ -134,6 +146,13 @@ public class ClusterFitter {
         }
     }
 
+    /**
+     * 
+     * @param clus fitted cluster
+     * @param calcTimeResidual boolean to compute the time residuals (in cm) 
+     * @param resetLRAmbig boolean to reset the LR ambiguity 
+     * @param DcDetector DC detector geometry
+     */
     public void SetResidualDerivedParams(FittedCluster clus, boolean calcTimeResidual, boolean resetLRAmbig, DCGeant4Factory DcDetector) {
 
         if (FitPars == null || FitArray == null) {
@@ -153,8 +172,8 @@ public class ClusterFitter {
             //clus.get(i).set_ClusFitDoca(FitPars.slope()*FitArray[0][i]+FitPars.intercept());
             //double xWire = GeometryLoader.dcDetector.getSector(0).getSuperlayer(clus.get(i).get_Superlayer()-1).getLayer(clus.get(i).get_Layer()-1).getComponent(clus.get(i).get_Wire()-1).getMidpoint().x();
             //double zWire = GeometryLoader.dcDetector.getSector(0).getSuperlayer(clus.get(i).get_Superlayer()-1).getLayer(clus.get(i).get_Layer()-1).getComponent(clus.get(i).get_Wire()-1).getMidpoint().z();
-            double xWire = DcDetector.getWireMidpoint(clus.get(i).get_Superlayer() - 1, clus.get(i).get_Layer() - 1, clus.get(i).get_Wire() - 1).x;
-            double zWire = DcDetector.getWireMidpoint(clus.get(i).get_Superlayer() - 1, clus.get(i).get_Layer() - 1, clus.get(i).get_Wire() - 1).z;
+            double xWire = DcDetector.getWireMidpoint(clus.get(i).get_Sector() - 1, clus.get(i).get_Superlayer() - 1, clus.get(i).get_Layer() - 1, clus.get(i).get_Wire() - 1).x;
+            double zWire = DcDetector.getWireMidpoint(clus.get(i).get_Sector() - 1, clus.get(i).get_Superlayer() - 1, clus.get(i).get_Layer() - 1, clus.get(i).get_Wire() - 1).z;
 
             Line3D FitLine = new Line3D();
             Point3D pointOnTrk = new Point3D(FitArray.get(0).get(0), FitPars.slope() * FitArray.get(0).get(0) + FitPars.intercept(), 0);
@@ -162,10 +181,10 @@ public class ClusterFitter {
             trkDir.unit();
             FitLine.set(pointOnTrk, trkDir);
             Point3D Wire = new Point3D(zWire, xWire, 0);
-
+            
             //double trkDocaMP = -xWire + (FitPars.slope()*FitArray[0][i]+FitPars.intercept());
             double trkDocaMP = FitLine.distance(Wire).length();
-            double trkDoca = trkDocaMP * Math.cos(Math.toRadians(6.));
+            double trkDoca = trkDocaMP * stereo;
 
             clus.get(i).set_ClusFitDoca(trkDoca);
 
@@ -194,7 +213,8 @@ public class ClusterFitter {
             }
 
             if (calcTimeResidual == true) {
-                double timeResidual = Math.abs(FitPars.slope() * FitArray.get(0).get(i) + FitPars.intercept()) - Math.abs(FitArray.get(2).get(i));
+                double timeResidual = trkDoca - clus.get(i).get_Doca();
+                //Math.abs(FitPars.slope() * FitArray.get(0).get(i) + FitPars.intercept()-xWire) - Math.abs(FitArray.get(2).get(i)-xWire);
                 clus.get(i).set_TimeResidual(timeResidual);
             }
         }
@@ -209,6 +229,12 @@ public class ClusterFitter {
         clus.set_Status(statusArray);
     }
 
+    /**
+     * 
+     * @param clusters fitted cluster
+     * @param system coordinate system in which the fit is performed
+     * @return the fitted cluster with the best fit chi2
+     */
     public FittedCluster BestClusterSelector(List<FittedCluster> clusters, String system) {
         //init
         FittedCluster BestCluster = null;
@@ -267,6 +293,11 @@ public class ClusterFitter {
         return new Point3D(the_slope * d + the_interc, 0, d);
     }
 
+    /**
+     * 
+     * @param clusCand fitted cluster
+     * @return wire pattern in the cluster 
+     */
     private boolean isBrickWall(FittedCluster clusCand) {
         boolean isBW = true;
         int sumWireNum = 0;

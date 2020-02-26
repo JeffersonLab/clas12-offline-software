@@ -7,9 +7,6 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
-import java.util.Vector;
-
-import org.jlab.geom.DetectorHit;
 import org.jlab.geom.prim.Point3D;
 
 import cnuphys.ced.cedview.CedView;
@@ -23,8 +20,6 @@ import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.DataSupport;
-import cnuphys.ced.fastmc.FastMCManager;
-import cnuphys.ced.fastmc.ParticleHits;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.noise.NoiseManager;
@@ -44,7 +39,7 @@ import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.X11Colors;
 
 public class AllDCSuperLayer extends RectangleItem {
-
+	
 	// convenient access to the event manager
 	ClasIoEventManager _eventManager = ClasIoEventManager.getInstance();
 
@@ -164,7 +159,7 @@ public class AllDCSuperLayer extends RectangleItem {
 	@Override
 	public void drawItem(Graphics g, IContainer container) {
 
-		if (_eventManager.isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (_eventManager.isAccumulating()) {
 			return;
 		}
 
@@ -204,54 +199,6 @@ public class AllDCSuperLayer extends RectangleItem {
 		g.drawPolygon(_lastDrawnPolygon);
 	}
 	
-	
-	//draw a fast MC even rather than an evio event
-	private void fastMCDraw(Graphics g, IContainer container) {
-		if (FastMCManager.getInstance().isStreaming()) {
-			return;
-		}
-		
-		//don't draw if streaming
-		if (FastMCManager.getInstance().isStreaming()) {
-			return;
-		}
-		
-		// draw results of noise reduction? If so will need the parameters
-		// (which have the results)
-		NoiseReductionParameters parameters = _noiseManager.getParameters(
-				_sector - 1, _superLayer - 1);
-		// NoiseReductionParameters parameters =
-		// NoiseEventListener.getInstance()
-		// .getNoiseParameters(_sector - 1, _superLayer - 1);
-
-		// show the noise segment masks?
-		if (_view.showMasks()) {
-			drawMasks(g, container, parameters);
-		}
-
-		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
-		if ((phits == null) || phits.isEmpty()) {
-			return;
-		}
-		
-		Rectangle2D.Double wr = new Rectangle2D.Double(); // used over and over
-
-		for (ParticleHits hits : phits) {
-			List<DetectorHit> dchits = hits.getDCHits();
-			if (dchits != null) {
-				for (DetectorHit hit : dchits) {
-					int sect1 = hit.getSectorId() + 1;
-					int supl1 = hit.getSuperlayerId() + 1;
-					if ((sect1 == _sector) && (supl1 == _superLayer)) {
-						int lay1 = hit.getLayerId() + 1;
-						int wire1 = hit.getComponentId() + 1;
-						drawDCHit(g, container, lay1, wire1, false, hits.getLundId().getId(), wr);
-
-					}
-				}
-			}
-		}
-	}
 
 	/**
 	 * Draw in single event mode
@@ -262,13 +209,7 @@ public class AllDCSuperLayer extends RectangleItem {
 	 *            the rendering container
 	 */
 	private void singleEventDrawItem(Graphics g, IContainer container) {
-		
-		//reroute for fast MC
-		if (_eventManager.isSourceFastMC()) {
-			fastMCDraw(g, container);
-			return;
-		}
-		
+				
 		Rectangle2D.Double wr = new Rectangle2D.Double(); // used over and over
 
 		// draw results of noise reduction? If so will need the parameters
@@ -511,25 +452,15 @@ public class AllDCSuperLayer extends RectangleItem {
 		Rectangle2D.Double wr = new Rectangle2D.Double(); // used over and over
 		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
 				.getAccumulatedDCData();
-		int maxHit = AccumulationManager.getInstance().getMaxDCCount();
-		if (maxHit < 1) {
-			return;
-		}
+		
+		int medianHit = AccumulationManager.getInstance().getMedianDCCount(_superLayer-1);
 
 		for (int layer = 0; layer < GeoConstants.NUM_LAYER; layer++) {
 			for (int wire = 0; wire < GeoConstants.NUM_WIRE; wire++) {
 				int hitCount = dcAccumulatedData[_sector - 1][_superLayer - 1][layer][wire];
 				getCell(layer + 1, wire + 1, wr);
 				
-				//test log drawing to remove hotspots
-				
-				double fract;
-				if (_view.isSimpleAccumulatedMode()) {
-					fract = ((double) hitCount) / maxHit;
-				}
-				else {
-					fract = Math.log(hitCount+1.)/Math.log(maxHit+1.);
-				}
+				double fract = _view.getMedianSetting()*(((double) hitCount) / (1 + medianHit));
 				
 				AccumulationManager.getInstance();
 				Color color = AccumulationManager.getInstance().getColor(fract);
@@ -541,7 +472,7 @@ public class AllDCSuperLayer extends RectangleItem {
 	}
 
 	/**
-	 * Add any appropriate feedback strings for the headsup display or feedback
+	 * Add any appropriate feedback strings
 	 * panel.
 	 * 
 	 * @param container
@@ -655,9 +586,14 @@ public class AllDCSuperLayer extends RectangleItem {
 	private void accumulatedFeedbackStrings(int wire, int layer,
 			List<String> feedbackStrings) {
 		
+		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
+				.getAccumulatedDCData();
+
 		double wireRate = AccumulationManager.getInstance().getAccumulatedWireHitPercentage(_sector-1, _superLayer-1, layer-1, wire-1);
 		double avgOccupancy = AccumulationManager.getInstance().getAverageDCOccupancy(_sector-1, _superLayer-1);
 
+		int hitCount = hitCount = dcAccumulatedData[_sector-1][_superLayer-1][layer-1][wire-1];
+		
 		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
 				"accumulated event count: " + AccumulationManager.getInstance().getAccumulationEventCount());
 		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
@@ -666,6 +602,9 @@ public class AllDCSuperLayer extends RectangleItem {
 		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
 				"hit rate layer: " + layer + ", wire: " + wire + " is "
 				+ DoubleFormat.doubleFormat(wireRate, 3) + "%");
+		feedbackStrings.add(AccumulationManager.accumulationFBColor + 
+				"hit count layer: " + layer + ", wire: " + wire + " is "
+				+ hitCount);
 
 	}
 

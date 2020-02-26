@@ -71,6 +71,7 @@ public class Constants {
     public static int Ne=0;                               //Number of step for the electric field
     public static int Nb=0;                               //Number of step for the magnetic field
   
+    
 // THE HV CONSTANT
     public static double[][] E_DRIFT = new double[2*NREGIONS][3]; 
     //private static double ThetaL = 0; 						// the Lorentz angle for 5-T B-field
@@ -116,7 +117,7 @@ public class Constants {
         if (org.jlab.rec.cvt.Constants.getSolenoidscale()<0) ThetaL=-ThetaL; 
     }
 
-    public static synchronized double[] getCRZRADIUS() {
+    public static double[] getCRZRADIUS() {
         return CRZRADIUS;
     }
 
@@ -124,7 +125,7 @@ public class Constants {
         CRZRADIUS = cRZRADIUS;
     }
 
-    public static synchronized int[] getCRZNSTRIPS() {
+    public static int[] getCRZNSTRIPS() {
         return CRZNSTRIPS;
     }
 
@@ -132,7 +133,7 @@ public class Constants {
         CRZNSTRIPS = cRZNSTRIPS;
     }
 
-    public static synchronized double[] getCRZSPACING() {
+    public static double[] getCRZSPACING() {
         return CRZSPACING;
     }
 
@@ -140,7 +141,7 @@ public class Constants {
         CRZSPACING = cRZSPACING;
     }
 
-    public static synchronized double[] getCRZWIDTH() {
+    public static double[] getCRZWIDTH() {
         return CRZWIDTH;
     }
 
@@ -148,7 +149,7 @@ public class Constants {
         CRZWIDTH = cRZWIDTH;
     }
 
-    public static synchronized double[] getCRZLENGTH() {
+    public static double[] getCRZLENGTH() {
         return CRZLENGTH;
     }
 
@@ -156,7 +157,7 @@ public class Constants {
         CRZLENGTH = cRZLENGTH;
     }
 
-    public static synchronized double[] getCRZZMIN() {
+    public static double[] getCRZZMIN() {
         return CRZZMIN;
     }
 
@@ -164,7 +165,7 @@ public class Constants {
         CRZZMIN = cRZZMIN;
     }
 
-    public static synchronized double[] getCRZZMAX() {
+    public static double[] getCRZZMAX() {
         return CRZZMAX;
     }
 
@@ -172,7 +173,7 @@ public class Constants {
         CRZZMAX = cRZZMAX;
     }
 
-    public static synchronized double[] getCRZOFFSET() {
+    public static double[] getCRZOFFSET() {
         return CRZOFFSET;
     }
 
@@ -180,7 +181,7 @@ public class Constants {
         CRZOFFSET = cRZOFFSET;
     }
 
-    public static synchronized double[][] getCRZEDGE1() {
+    public static double[][] getCRZEDGE1() {
         return CRZEDGE1;
     }
 
@@ -188,7 +189,7 @@ public class Constants {
         CRZEDGE1 = cRZEDGE1;
     }
 
-    public static synchronized double[][] getCRZEDGE2() {
+    public static double[][] getCRZEDGE2() {
         return CRZEDGE2;
     }
 
@@ -196,7 +197,7 @@ public class Constants {
         CRZEDGE2 = cRZEDGE2;
     }
 
-    public static synchronized double[] getCRZXPOS() {
+    public static double[] getCRZXPOS() {
         return CRZXPOS;
     }
 
@@ -204,7 +205,7 @@ public class Constants {
         CRZXPOS = cRZXPOS;
     }
 
-    public static synchronized double[] getCRCRADIUS() {
+    public static double[] getCRCRADIUS() {
         return CRCRADIUS;
     }
 
@@ -212,7 +213,7 @@ public class Constants {
         CRCRADIUS = cRCRADIUS;
     }
 
-    public static synchronized int[] getCRCNSTRIPS() {
+    public static int[] getCRCNSTRIPS() {
         return CRCNSTRIPS;
     }
 
@@ -220,7 +221,7 @@ public class Constants {
         CRCNSTRIPS = cRCNSTRIPS;
     }
 
-    public static synchronized double[] getCRCSPACING() {
+    public static double[] getCRCSPACING() {
         return CRCSPACING;
     }
 
@@ -228,7 +229,7 @@ public class Constants {
         CRCSPACING = cRCSPACING;
     }
 
-    public static synchronized double[] getCRCLENGTH() {
+    public static double[] getCRCLENGTH() {
         return CRCLENGTH;
     }
 
@@ -236,7 +237,7 @@ public class Constants {
         CRCLENGTH = cRCLENGTH;
     }
 
-    public static synchronized double[] getCRCZMIN() {
+    public static double[] getCRCZMIN() {
         return CRCZMIN;
     }
 
@@ -244,7 +245,7 @@ public class Constants {
         CRCZMIN = cRCZMIN;
     }
 
-    public static synchronized double[] getCRCZMAX() {
+    public static double[] getCRCZMAX() {
         return CRCZMAX;
     }
 
@@ -252,7 +253,7 @@ public class Constants {
         CRCZMAX = cRCZMAX;
     }
 
-    public static synchronized double[] getCRCOFFSET() {
+    public static double[] getCRCOFFSET() {
         return CRCOFFSET;
     }
 
@@ -260,7 +261,7 @@ public class Constants {
         CRCOFFSET = cRCOFFSET;
     }
 
-    public static synchronized int[][] getCRCGROUP() {
+    public static int[][] getCRCGROUP() {
         return CRCGROUP;
     }
 
@@ -268,7 +269,7 @@ public class Constants {
         CRCGROUP = cRCGROUP;
     }
 
-    public static synchronized double[][] getCRCWIDTH() {
+    public static double[][] getCRCWIDTH() {
         return CRCWIDTH;
     }
 
@@ -276,7 +277,7 @@ public class Constants {
         CRCWIDTH = cRCWIDTH;
     }
 
-    public static synchronized double[][] getCRCEDGE1() {
+    public static double[][] getCRCEDGE1() {
         return CRCEDGE1;
     }
 
@@ -284,7 +285,7 @@ public class Constants {
         CRCEDGE1 = cRCEDGE1;
     }
 
-    public static synchronized double[][] getCRCEDGE2() {
+    public static double[][] getCRCEDGE2() {
         return CRCEDGE2;
     }
 
@@ -292,7 +293,7 @@ public class Constants {
         CRCEDGE2 = cRCEDGE2;
     }
 
-    public static synchronized double[] getCRCXPOS() {
+    public static double[] getCRCXPOS() {
         return CRCXPOS;
     }
 
@@ -300,20 +301,19 @@ public class Constants {
         CRCXPOS = cRCXPOS;
     }
 
-    public static synchronized double[] getEFF_Z_OVER_A() {
+    public static double[] getEFF_Z_OVER_A() {
         return EFF_Z_OVER_A;
     }
     public static synchronized void setEFF_Z_OVER_A(double[] eFF_Z_OVER_A) {
         EFF_Z_OVER_A = eFF_Z_OVER_A;
     }
     
-    public static synchronized double[] get_T_OVER_X0() {
+    public static double[] get_T_OVER_X0() {
         return T_OVER_X0;
     }
     public static synchronized void set_T_OVER_X0(double[] t_OVER_X0) {
         T_OVER_X0 = t_OVER_X0;
     }
-    
     
     public static synchronized void setTHETAL_grid(double[] cThetaL_grid) {
   	ThetaL_grid  = cThetaL_grid;

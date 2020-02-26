@@ -25,6 +25,9 @@ public class DCSuperlayer extends AbstractSuperlayer<DCLayer> {
         super(DetectorId.DC, sectorId, superlayerId);
     }
     
+    public DCSuperlayer(DetectorId id, int sectorId, int superlayerId) {
+        super(id, sectorId, superlayerId);
+    }
     /**
      * Returns "DC Superlayer".
      * @return "DC Superlayer"

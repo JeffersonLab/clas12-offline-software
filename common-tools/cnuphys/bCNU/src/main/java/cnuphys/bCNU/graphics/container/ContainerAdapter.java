@@ -14,7 +14,6 @@ import cnuphys.bCNU.drawable.DrawableList;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.feedback.FeedbackControl;
 import cnuphys.bCNU.feedback.FeedbackPane;
-import cnuphys.bCNU.feedback.HeadsUpDisplay;
 import cnuphys.bCNU.graphics.toolbar.BaseToolBar;
 import cnuphys.bCNU.graphics.toolbar.ToolBarToggleButton;
 import cnuphys.bCNU.graphics.world.WorldPolygon;
@@ -179,11 +178,6 @@ public class ContainerAdapter implements IContainer {
 
     @Override
     public void setFeedbackPane(FeedbackPane feedbackPane) {
-    }
-
-    @Override
-    public HeadsUpDisplay getHeadsUp() {
-	return null;
     }
 
     @Override

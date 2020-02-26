@@ -90,8 +90,13 @@ public class ClusterList extends Vector<Cluster> {
 	
 	//check for length mismatch
 	private boolean lengthMismatch(byte[] sector, byte[] array, String name) {
+		if (array == null) {
+			_error = "null " + name + " array when creating ClusterList";
+			return true;
+		}
+
 		if (sector.length != array.length) {
-			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating CrossList";
+			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating ClusterList";
 			return true;
 		}
 		return false;
@@ -99,8 +104,13 @@ public class ClusterList extends Vector<Cluster> {
 	
 	//check for length mismatch
 	private boolean lengthMismatch(byte[] sector, short[] array, String name) {
+		if (array == null) {
+			_error = "null " + name + " array when creating ClusterList";
+			return true;
+		}
+
 		if (sector.length != array.length) {
-			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating CrossList";
+			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating ClusterList";
 			return true;
 		}
 		return false;
@@ -108,8 +118,13 @@ public class ClusterList extends Vector<Cluster> {
 	
 	//check for length mismatch
 	private boolean lengthMismatch(byte[] sector, float[] array, String name) {
+		if (array == null) {
+			_error = "null " + name + " array when creating ClusterList";
+			return true;
+		}
+
 		if (sector.length != array.length) {
-			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating CrossList";
+			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating ClusterList";
 			return true;
 		}
 		return false;

@@ -11,6 +11,7 @@ import cnuphys.magfield.Solenoid;
 import cnuphys.magfield.Torus;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -163,8 +164,8 @@ public class SwimEngine extends ReconstructionEngine {
         //this.initField();
         //this.initMagField();
         fastMC = new Clas12FastMC(-1.0,1.0);
-        MagneticField.setMathLib(MagneticField.MathLib.FAST);
-        System.out.println("[swimmer] -------> FAST MONTE CARLO TEST. USING FAST MATH = " + MagneticField.MathLib.SUPERFAST);
+        //MagneticField.setMathLib(MagneticField.MathLib.FAST);
+        //System.out.println("[swimmer] -------> FAST MONTE CARLO TEST. USING FAST MATH = " + MagneticField.MathLib.SUPERFAST);
         return true;
     }
     
@@ -176,6 +177,11 @@ public class SwimEngine extends ReconstructionEngine {
         MagneticField mf = new MagneticField(){
 
             @Override
+	    public boolean isActive() {
+                return true;            
+	    }
+    
+            @Override
             public String getName() {
                 return "TORUS";
             }
@@ -183,6 +189,11 @@ public class SwimEngine extends ReconstructionEngine {
             public void fieldCylindrical(double d, double d1, double d2, float[] floats) {
                 
             }            
+
+            @Override
+            public void printConfiguration(PrintStream ps) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
         };
         
         try {

@@ -22,9 +22,9 @@ import javax.swing.KeyStroke;
 import javax.swing.MenuSelectionManager;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileFilter;
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
+import cnuphys.bCNU.component.TransparentPanel;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.frame.Ced;
@@ -444,10 +444,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 
 	// create the goto event widget
 	private JPanel createGoToPanel() {
-		JPanel sp = new JPanel();
-		sp.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
-		
-	//	sp.setBackground(Color.white);
+		JPanel sp = new TransparentPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
 
 		JLabel label = new JLabel("Go To Event: ");
 
@@ -477,9 +474,7 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 
 	// create the event every so many seconds widget
 	private JPanel createEventPeriodPanel() {
-		JPanel sp = new JPanel();
-//		sp.setBackground(Color.white);
-		sp.setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
+		JPanel sp = new TransparentPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
 
 		_periodEvent = new JCheckBox("Auto Next-Event Every ");
 
@@ -571,15 +566,6 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	}
 
 	/**
-	 * New fast mc event
-	 * @param event the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
-		
-	}
-
-	/**
 	 * Part of the IClasIoEventListener interface
 	 * 
 	 * @param event
@@ -607,13 +593,21 @@ public class ClasIoEventMenu extends JMenu implements ActionListener,
 	
 	/**
 	 * Change the event source type
-	 * @param source the new source: File, ET, FastMC
+	 * @param source the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
 		fixState();
 	}
 	
+	/**
+	 * Tests whether this listener is interested in events while accumulating
+	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 */
+	@Override
+	public boolean ignoreIfAccumulating() {
+		return true;
+	}
 
 
 }

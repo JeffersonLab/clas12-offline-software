@@ -6,6 +6,7 @@
 package org.jlab.detector.examples;
 
 import java.awt.BorderLayout;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -13,8 +14,10 @@ import javax.swing.JSplitPane;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.decode.CodaEventDecoder;
 import org.jlab.detector.decode.DetectorDataDgtz;
+import org.jlab.detector.decode.DetectorDataFilter.DetectorDataFilterPane;
 import org.jlab.detector.decode.DetectorDecoderView;
 import org.jlab.detector.decode.DetectorEventDecoder;
+import org.jlab.detector.decode.FADCData;
 import org.jlab.detector.view.DetectorListener;
 import org.jlab.detector.view.DetectorPane2D;
 import org.jlab.detector.view.DetectorShape2D;
@@ -37,7 +40,8 @@ public class RawEventViewer implements IDataEventListener,DetectorListener {
     CodaEventDecoder               decoder = new CodaEventDecoder();
     DetectorEventDecoder   detectorDecoder = new DetectorEventDecoder();
     
-    DataSourceProcessorPane processorPane = null;
+    DataSourceProcessorPane  processorPane = null;
+    DetectorDataFilterPane   detectorFilterPane = null;
     
     JPanel          pane         = null;
     
@@ -54,6 +58,11 @@ public class RawEventViewer implements IDataEventListener,DetectorListener {
         
         detectorDecoderView = new DetectorDecoderView();
         splitPane.setRightComponent(detectorDecoderView);
+        
+        
+        detectorFilterPane = new DetectorDataFilterPane();
+        
+        pane.add(detectorFilterPane, BorderLayout.PAGE_START);
         
         pane.add(splitPane,BorderLayout.CENTER);
         processorPane = new DataSourceProcessorPane();
@@ -101,9 +110,19 @@ public class RawEventViewer implements IDataEventListener,DetectorListener {
 
     @Override
     public void dataEventAction(DataEvent event) {
-        List<DetectorDataDgtz>  dataSet = decoder.getDataEntries((EvioDataEvent) event);
-        detectorDecoder.translate(dataSet);
-        detectorDecoder.fitPulses(dataSet);
+        List<DetectorDataDgtz>  dataSetFull = decoder.getDataEntries((EvioDataEvent) event);
+        
+        List<FADCData>  fadcPacked = decoder.getADCEntries((EvioDataEvent) event);
+        if(fadcPacked!=null){
+            List<DetectorDataDgtz> dataSetADC = FADCData.convert(fadcPacked);
+            dataSetFull.addAll(dataSetADC);
+        }
+
+        
+        detectorDecoder.translate(dataSetFull);
+        detectorDecoder.fitPulses(dataSetFull);
+        
+        List<DetectorDataDgtz>  dataSet = this.detectorFilterPane.getFilter().filter(dataSetFull);
         //System.out.println(" EVENT TYPE = " + event.getType());
         //System.out.println(" processed the event data set Size = " + dataSet.size());
         //detectorData.clear();

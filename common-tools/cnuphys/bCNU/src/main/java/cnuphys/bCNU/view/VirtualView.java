@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
@@ -26,6 +27,7 @@ import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.item.AItem;
+import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.util.X11Colors;
 
@@ -59,6 +61,8 @@ public class VirtualView extends BaseView
 	public static final int TOPCENTER = 4;
 	public static final int BOTTOMCENTER = 5;
 	public static final int CENTER = 6;
+	public static final int CENTERLEFT = 7;
+	public static final int CENTERRIGHT = 8;
 
 	// for public access
 	private static VirtualView _instance;
@@ -86,7 +90,8 @@ public class VirtualView extends BaseView
 
 		setBackground(_bg);
 		getContainer().getComponent().setBackground(_bg);
-
+		
+		
 		getContainer().getComponent().addMouseMotionListener(this);
 		getContainer().getComponent().addMouseListener(this);
 
@@ -223,21 +228,38 @@ public class VirtualView extends BaseView
 		_numcol = numcol;
 		VirtualView view = null;
 		Rectangle2D.Double world = getWorld();
-		int width = numcol * 40;
-		int height = (int) ((width * world.height) / world.width);
+		
+		int cell_width = 40;
+		int cell_height = 1 + ((9*cell_width)/16);
+		int width = numcol * cell_width;
+//		int height = (int) ((width * world.height) / world.width);
+		int height = cell_height;
+		
+		if (Environment.getInstance().isLinux()) {
+			height += 23;
+		}
+		if (Environment.getInstance().isWindows()) {
+			height += 23;
+		}
+
 
 		// create the view
 		view = new VirtualView(PropertySupport.WORLDSYSTEM, world, PropertySupport.LEFT, 0, PropertySupport.TOP, 0,
 				PropertySupport.WIDTH, width, PropertySupport.HEIGHT, height, PropertySupport.TOOLBAR, false,
-				PropertySupport.VISIBLE, true, PropertySupport.BACKGROUND, Color.white, PropertySupport.HEADSUP, false,
+				PropertySupport.VISIBLE, true, PropertySupport.BACKGROUND, Color.white,
 				PropertySupport.TITLE, VVTITLE, PropertySupport.STANDARDVIEWDECORATIONS, false,
 				PropertySupport.ICONIFIABLE, false, PropertySupport.RESIZABLE, true, 
 				PropertySupport.MAXIMIZABLE, false, PropertySupport.CLOSABLE, false);
 
 		view._offsets = new Point[_numcol];
-		view.pack();
+		//view.pack();
+		
+		
+		Insets insets = view.getInsets();
+		view.setSize(width, height + insets.top);
 		return view;
 	}
+		
 
 	/**
 	 * Get the number of columns
@@ -447,6 +469,7 @@ public class VirtualView extends BaseView
 
 	@Override
 	public void mouseClicked(MouseEvent mouseEvent) {
+//		System.err.println("HEY MAN");
 		switch (mouseEvent.getButton()) {
 		case MouseEvent.BUTTON1:
 			if (mouseEvent.getClickCount() == 1) { // single click
@@ -463,7 +486,7 @@ public class VirtualView extends BaseView
 	// handle a double click
 	private void handleDoubleClick(MouseEvent mouseEvent) {
 		Point rc = getRowCol(mouseEvent.getPoint());
-		// System.err.println("Double clicked on: " + rc.y + ", " + rc.x);
+//		 System.err.println("Double clicked on: " + rc.y + ", " + rc.x);
 
 		int clickCol = rc.x;
 		if ((clickCol == _currentCol)) {
@@ -559,6 +582,24 @@ public class VirtualView extends BaseView
 
 		moveTo(view, col, 0, 0);
 	}
+	
+	/**
+	 * Move a view to a specific virtual cell
+	 * 
+	 * @param view
+	 *            the view to move
+	 * @param col
+	 *            the col
+	 * @param dh
+	 *            additional horizontal offset
+	 * @param dv
+	 *            additional vertical offset
+	 */
+	public void moveToStart(BaseView view, int col, int constraint) {
+		Point start = view.getStartingLocation();
+		moveTo(view, col, start.x, start.y, constraint);
+	}
+	
 
 	/**
 	 * Move a view to a specific virtual cell
@@ -672,6 +713,25 @@ public class VirtualView extends BaseView
 	 *            constraint constant
 	 */
 	public void moveTo(BaseView view, int col, int constraint) {
+		moveTo(view, col, 0, 0, constraint);
+
+	}
+	
+	/**
+	 * Move a view to a specific virtual cell
+	 * 
+	 * @param view
+	 *            the view to move
+	 * @param col
+	 *            the col
+	 * @param delh
+	 *            additional horizontal offset
+	 * @param delv
+	 *            additional vertical offset
+	 * @param constraint
+	 *            constraint constant
+	 */
+	public void moveTo(BaseView view, int col, int delh, int delv, int constraint) {
 
 		if (constraint == CENTER) {
 			moveTo(view, col);
@@ -741,9 +801,20 @@ public class VirtualView extends BaseView
 			dh = xf - x0;
 			dv = yf - y0;
 		}
+		else if (constraint == CENTERLEFT) {
+			int xf = (int) (left + slop);
+			dh = xf - x0;
+			System.err.println("CENTERLEFT DV, DELV = " + dv + "," + delv);
+		}
+		else if (constraint == CENTERRIGHT) {
+			int xf = (int) (right - bounds.width - 2 * slop);
+			dh = xf - x0;
+			System.err.println("CENTERRIGHT DV, DELV = " + dv + "," + delv);
+		}
 
-		view.offset(dh, dv);
+		view.offset(dh + delh, dv + delv);
 	}
+
 
 	/**
 	 * Activates the view's cell so that it is visible

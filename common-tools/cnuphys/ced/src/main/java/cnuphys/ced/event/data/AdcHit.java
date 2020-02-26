@@ -1,11 +1,15 @@
 package cnuphys.ced.event.data;
 
+import java.awt.Point;
 import java.util.List;
 
 import cnuphys.lund.DoubleFormat;
 
 public class AdcHit implements Comparable<AdcHit> {
 	
+	//used for mouse over feedback
+	private Point _screenLocation = new Point();
+
 	//for feedback strings
 	private static final String _fbColor = "$Light Blue$";
 	
@@ -182,5 +186,19 @@ public class AdcHit implements Comparable<AdcHit> {
 
 	}
 	
+	/**
+	 * For feedback
+	 * @param pp
+	 */
+	public void setLocation(Point pp) {
+		_screenLocation.x = pp.x;
+		_screenLocation.y = pp.y;
+	}
+	
+	public boolean contains(Point pp) {
+		return ((Math.abs(_screenLocation.x - pp.x) <= DataDrawSupport.HITHALF) &&
+				(Math.abs(_screenLocation.y - pp.y) <= DataDrawSupport.HITHALF));
+	}
+
 
 }

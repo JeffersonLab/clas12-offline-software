@@ -365,6 +365,32 @@
     ]
   },
   {
+    "bank": "BAND::adc",
+    "group": 22111,
+    "info": "digitized bank Central Neutron Detector",
+    "items": [
+       {"name":"sector",    "id":1, "type":"int8",  "info":"sector of BAND"},
+       {"name":"layer",     "id":2, "type":"int8",  "info":"layer id of BAND"},
+       {"name":"component", "id":3, "type":"int16", "info":"paddle id of BAND"},
+       {"name":"order",     "id":4, "type":"int8",  "info":"order of (0 - ADCD , 1 - ADCN)"},       
+       {"name":"ADC",       "id":5, "type":"int32", "info":"ADC integral from fit"},
+       {"name":"time",      "id":6, "type":"float", "info":"time from fitting the pulse"},
+       {"name":"ped",       "id":7, "type":"int16", "info":"pedestal from pulse"}
+    ]
+  },
+  {
+    "bank": "BAND::tdc",
+    "group": 22112,
+    "info": "digitized bank Central Neutron Detector",
+    "items": [
+       {"name":"sector",    "id":1, "type":"int8",  "info":"sector of BAND"},
+       {"name":"layer",     "id":2, "type":"int8",  "info":"layer id of BAND"},
+       {"name":"component", "id":3, "type":"int16", "info":"paddle id of BAND"},
+       {"name":"order",     "id":4, "type":"int8",  "info":"order of (0 - TDCD , 1 - TDCN)"},
+       {"name":"TDC",       "id":5, "type":"int32", "info":"TDC value"}
+    ]
+  },
+  {
     "bank": "RAW::adc",
     "group": 20011,
     "info": "digitized bank ADC for untranslated",
@@ -398,7 +424,7 @@
        {"name":"channel",  "id":3, "type":"int16", "info":"channel for Helicity Scalers (0/32 = FCUP, 1/33 = SLM"},
        {"name":"helicity", "id":4, "type":"int8",  "info":"helicity"},
        {"name":"quartet",  "id":5, "type":"int8",  "info":"quartet"},
-       {"name":"value",    "id":6, "type":"int32", "info":"scaler value"}
+       {"name":"value",    "id":6, "type":"int64", "info":"scaler value"}
     ]
   },
   {
@@ -407,9 +433,7 @@
     "info": "digitized VTP bank for untranslated entries",
     "items": [
        {"name":"crate",    "id":1, "type":"int8",  "info":"crate of VTP"},
-       {"name":"slot",     "id":2, "type":"int8",  "info":"slot for VTP"},
-       {"name":"channel",  "id":3, "type":"int16", "info":"channel for VTP"},
-       {"name":"word",     "id":4, "type":"int32", "info":"vtp value"}
+       {"name":"word",     "id":2, "type":"int32", "info":"vtp value"}
     ]
   }
 ]

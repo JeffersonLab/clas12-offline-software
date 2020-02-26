@@ -1,5 +1,6 @@
 package cnuphys.bCNU.menu;
 
+import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.util.Hashtable;
@@ -71,6 +72,9 @@ public class MenuManager {
 		}
 		// put into the menu hash
 		_menus.put(menu.getText(), menu);
+		
+		//seems to be necessary on some linus platforms
+		menu.setForeground(Color.black);
 	}
 
 	/**

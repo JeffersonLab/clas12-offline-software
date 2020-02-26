@@ -23,7 +23,7 @@ public class ScintillatorResponse extends DetectorResponse {
     
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type){        
-        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> responseList = new ArrayList<>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
@@ -40,6 +40,8 @@ public class ScintillatorResponse extends DetectorResponse {
                 response.setPosition(x, y, z);
                 response.setEnergy(bank.getFloat("energy", row));
                 response.setTime(bank.getFloat("time", row));
+                response.setStatus(bank.getInt("status",row));
+
                 responseList.add(response);
             }
         }

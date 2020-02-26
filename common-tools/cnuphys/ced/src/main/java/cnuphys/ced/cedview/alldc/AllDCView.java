@@ -112,7 +112,7 @@ public class AllDCView extends CedView {
 		AllDCView view = null;
 
 		// set to a fraction of screen
-		Dimension d = GraphicsUtilities.screenFraction(0.5);
+		Dimension d = GraphicsUtilities.screenFraction(0.65);
 
 		// create the view
 		view = new AllDCView(
@@ -124,7 +124,7 @@ public class AllDCView extends CedView {
 				d.height, // container height, not total view width
 				PropertySupport.TOOLBAR, true, 
 				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
-				PropertySupport.VISIBLE, true, PropertySupport.HEADSUP, false,
+				PropertySupport.VISIBLE, true,
 				PropertySupport.TITLE, _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")")),
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 

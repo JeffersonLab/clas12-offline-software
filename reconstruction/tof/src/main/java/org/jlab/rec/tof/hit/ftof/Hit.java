@@ -11,13 +11,9 @@ import java.util.Random;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
-//import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.detector.hits.DetHit;
 import org.jlab.detector.hits.FTOFDetHit;
 import org.jlab.detector.volume.G4Box;
-//import org.jlab.geom.component.ScintillatorMesh;
-//import org.jlab.geom.detector.ftof.FTOFDetectorMesh;
-//import org.jlab.geom.detector.ftof.FTOFFactory;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
 import org.jlab.geom.prim.Point3D;
@@ -27,9 +23,8 @@ import org.jlab.rec.ftof.Constants;
 import org.jlab.rec.tof.banks.ftof.HitReader;
 import org.jlab.rec.tof.hit.AHit;
 import org.jlab.rec.tof.hit.IGetCalibrationParams;
-import org.jlab.service.ftof.FTOFEngine;
-
 import eu.mihosoft.vrl.v3d.Vector3d;
+import org.jlab.service.ftof.FTOFHBEngine;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -56,7 +51,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
     // exit point of the track with the
     // FTOF hit counter
     private Line3d _matchedTrack;
-    public int _AssociatedTrkId = -1;
+    
     public int trkAssociated_Paddle;
 
     public Line3D get_paddleLine() {
@@ -83,19 +78,21 @@ public class Hit extends AHit implements IGetCalibrationParams {
         this._matchedTrack = _matchedTrack;
     }
 
-    public void set_HitParameters(int superlayer, IndexedTable constants0, 
+    public void set_HitParameters(int superlayer, double triggerPhase, IndexedTable constants0, 
             IndexedTable constants1, 
             IndexedTable constants2, 
             IndexedTable constants3, 
             IndexedTable constants5, 
-            IndexedTable constants6) {/*
+            IndexedTable constants6, 
+            IndexedTable constants8) {/*
         0: "/calibration/ftof/attenuation"),
         1: "/calibration/ftof/effective_velocity"),
         2: "/calibration/ftof/time_offsets"),
         3: "/calibration/ftof/time_walk"),
         4: "/calibration/ftof/status"),
         5: "/calibration/ftof/gain_balance"),
-        6: "/calibration/ftof/tdc_conv") );
+        6: "/calibration/ftof/tdc_conv"));
+        8: "/calibration/ftof/time_walk_pos"));
         */
         double pl = this.get_paddleLine().length();
 
@@ -103,7 +100,14 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double TW0L = this.TW01(constants3);
         double TW0R = this.TW02(constants3);
         double TW1L = this.TW11(constants3);
-        double TW1R = this.TW12(constants3);
+        double TW1R = this.TW12(constants3); 
+        double TW1P = this.TW1P(constants8); 
+        double TW2P = this.TW2P(constants8); 
+        double HPOSa = this.HPOSa(null);
+        double HPOSb = this.HPOSb(null);
+        double HPOSc = this.HPOSc(null);
+        double HPOSd = this.HPOSd(null);
+        double HPOSe = this.HPOSe(null);
         double lambdaL = this.lambda1(constants0);
         this.set_lambda1(lambdaL);
         this.set_lambda1Unc(this.lambda1Unc(constants0));
@@ -131,11 +135,12 @@ public class Hit extends AHit implements IGetCalibrationParams {
         double ADC_MIP = this.ADC_MIP(constants5);
         double ADC_MIPErr = this.ADC_MIPUnc(constants5);
         double DEDX_MIP = this.DEDX_MIP();
-        double ScinBarThickn = this.ScinBarThickn();
+        double ScinBarThickn = this.get_barthickness();
 
-        this.set_HitParams(superlayer, TW0L, TW0R, TW1L, TW1R, lambdaL,
-                lambdaR, yOffset, vL, vR, vLUnc, vRUnc, PEDL, PEDR, PEDLUnc,
-                PEDRUnc, paddle2paddle, RFPad, timeOffset, LSBConv, LSBConvErr,
+        this.set_HitParams(superlayer, TW0L, TW0R, TW1L, TW1R, TW1P, TW2P, 
+                HPOSa, HPOSb, HPOSc, HPOSd, HPOSe, lambdaL,lambdaR, 
+                yOffset, vL, vR, vLUnc, vRUnc, PEDL, PEDR, PEDLUnc,
+                PEDRUnc, paddle2paddle, RFPad, timeOffset, triggerPhase, LSBConv, LSBConvErr,
                 ADCLErr, ADCRErr, TDCLErr, TDCRErr, ADC_MIP, ADC_MIPErr,
                 DEDX_MIP, ScinBarThickn, pl);
         // Set the hit position in the local coordinate of the bar
@@ -156,6 +161,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
                 comp.getLineX().origin().z, comp.getLineX().end().x, comp
                 .getLineX().end().y, comp.getLineX().end().z);
         this.set_paddleLine(paddleLine);
+        this.set_barthickness(geometry.getThickness(this.get_Sector(),this.get_Panel(), this.get_Paddle()));
     }
 
     public Point3D calc_hitPosition() {
@@ -252,6 +258,41 @@ public class Hit extends AHit implements IGetCalibrationParams {
     }
 
     @Override
+    public double TW1P(IndexedTable tab) {
+        return tab.getDoubleValue("tw1pos", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+    }
+
+    @Override
+    public double TW2P(IndexedTable tab) {
+        return tab.getDoubleValue("tw2pos", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+    }
+
+    @Override
+    public double HPOSa(IndexedTable tab) {
+        return 0;
+    }
+
+    @Override
+    public double HPOSb(IndexedTable tab) {
+        return 0;
+    }
+
+    @Override
+    public double HPOSc(IndexedTable tab) {
+        return 0;
+    }
+
+    @Override
+    public double HPOSd(IndexedTable tab) {
+        return 0;
+    }
+
+    @Override
+    public double HPOSe(IndexedTable tab) {
+        return 0;
+    }
+
+    @Override
     public double lambda1(IndexedTable tab) {
         //return CCDBConstants.getLAMBDAL()[this.get_Sector() - 1][this
         //        .get_Panel() - 1][this.get_Paddle() - 1];
@@ -281,9 +322,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
 
     @Override
     public double yOffset(IndexedTable tab) {
-        //return CCDBConstants.getYOFF()[this.get_Sector() - 1][this.get_Panel() - 1][this
-        //        .get_Paddle() - 1];
-        return tab.getDoubleValue("y_offset", this.get_Sector(),this.get_Panel(),this.get_Paddle());
+        return 0.0;
     }
 
     @Override
@@ -411,11 +450,6 @@ public class Hit extends AHit implements IGetCalibrationParams {
     }
 
     @Override
-    public double ScinBarThickn() {
-        return Constants.SCBARTHICKN[this.get_Panel() - 1];
-    }
-
-    @Override
     public int Status1(IndexedTable tab) {
         //return CCDBConstants.getSTATUSL()[this.get_Sector() - 1][this
         //        .get_Panel() - 1][this.get_Paddle() - 1];
@@ -431,7 +465,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
     
     public static void main(String arg[]) throws IOException {
 
-        FTOFEngine rec = new FTOFEngine();
+        FTOFHBEngine rec = new FTOFHBEngine();
         rec.init();
         HitReader hrd = new HitReader();
 

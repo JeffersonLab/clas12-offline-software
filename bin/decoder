@@ -1,12 +1,8 @@
-#!/bin/sh -f
+#!/bin/bash
 
-SCRIPT_DIR=`dirname $0`
-DISTRO_DIR=$SCRIPT_DIR/../ ; export DISTRO_DIR
-CLAS12DIR=$SCRIPT_DIR/../ ; export CLAS12DIR
-CLARA_SERVICES=$DISTRO_DIR/lib/services; export CLARA_SERVICES
-DATAMINING=$DISTRO_DIR ; export DATAMINING
-TORUSMAP=$CLAS12DIR/etc/data/magfield/clas12-fieldmap-torus.dat ; export TORUSMAP
-SOLENOIDMAP=$CLAS12DIR/etc/data/magfield/clas12-fieldmap-solenoid.dat ; export SOLENOIDMAP
+# This doesn't work in dash (Travis's /bin/sh):
+source `dirname $0`/env.sh 
+
 MALLOC_ARENA_MAX=1; export MALLOC_ARENA_MAX
 
 #CLARA_HOME=`dirname $0`
@@ -14,7 +10,7 @@ MALLOC_ARENA_MAX=1; export MALLOC_ARENA_MAX
 #DATAMINING=`dirname $0`
 
 echo +-------------------------------------------------------------------------
-echo "| Starting CLARA-PLATFORM with CLARA_SERVICES = " $CLARA_SERVICES
+echo "| DECODER GENERATION 4 (using HIPO-4 Library)"
 echo +-------------------------------------------------------------------------
 echo "\n"
 
@@ -23,4 +19,4 @@ echo "LIBRARY DIRECTORY      = " $DATAMINING/lib/clas/
 
 #java -cp "$DATAMINING/lib/clas/core/*" org.jlab.coda.eventViewer.EventTreeFrame $*
 #java -Xms1024m -cp "$DATAMINING/lib/clas/*:$DATAMINING/lib/plugins/*" org.jlab.io.hipo.HipoDataSync $*
-java -Xmx1536m -Xms1024m -cp "$DATAMINING/lib/clas/*:$DATAMINING/lib/plugins/*" org.jlab.detector.decode.CLASDecoder $*
+java -Xmx1536m -Xms1024m -cp "$DATAMINING/lib/clas/*:$DATAMINING/lib/plugins/*" org.jlab.detector.decode.CLASDecoder4 $*

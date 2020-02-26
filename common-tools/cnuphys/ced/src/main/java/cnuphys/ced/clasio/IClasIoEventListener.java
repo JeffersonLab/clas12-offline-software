@@ -2,7 +2,6 @@ package cnuphys.ced.clasio;
 
 import java.util.EventListener;
 
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 public interface IClasIoEventListener extends EventListener {
@@ -13,7 +12,7 @@ public interface IClasIoEventListener extends EventListener {
 	 *            the new event.
 	 */
 	public void newClasIoEvent(final DataEvent event);
-
+	
 	/**
 	 * Opened a new event file
 	 * 
@@ -29,9 +28,9 @@ public interface IClasIoEventListener extends EventListener {
 	public void changedEventSource(ClasIoEventManager.EventSourceType source);
 	
 	/**
-	 * New fast mc event
-	 * @param event the generated physics event
+	 * Tests whether this listener is interested in events while accumulating
+	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
 	 */
-	public void newFastMCGenEvent(PhysicsEvent event);
-
+	public boolean ignoreIfAccumulating();
+	
 }

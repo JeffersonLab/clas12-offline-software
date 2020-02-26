@@ -15,13 +15,10 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
-
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import org.jlab.geom.DetectorHit;
 import org.jlab.geom.prim.Line3D;
 
 import cnuphys.bCNU.drawable.DrawableAdapter;
@@ -37,14 +34,13 @@ import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.HexView;
+import cnuphys.ced.common.FMTCrossDrawer;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
-import cnuphys.ced.fastmc.FastMCManager;
-import cnuphys.ced.fastmc.ParticleHits;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.ced.item.DCHexSectorItem;
@@ -72,6 +68,10 @@ public class DCXYView extends HexView {
 
 	// draws mc hits
 	private McHitDrawer _mcHitDrawer;
+	
+	//for fmt
+	private FMTCrossDrawer _fmtCrossDrawer;
+
 		
 	//exach superlayer in a different color
 	private static Color _wireColors[] = {Color.red, X11Colors.getX11Color("dark red"), 
@@ -118,6 +118,10 @@ public class DCXYView extends HexView {
 		_swimTrajectoryDrawer = new SwimTrajectoryDrawer(this);
 		_crossDrawer = new CrossDrawer(this);
 		_mcHitDrawer = new McHitDrawer(this);
+		
+		// fmt cross drawer
+		_fmtCrossDrawer = new FMTCrossDrawer(this);
+
 		setBeforeDraw();
 		setAfterDraw();
 		getContainer().getComponent().setBackground(Color.gray);
@@ -158,6 +162,11 @@ public class DCXYView extends HexView {
 		panel.add(wireLegend, BorderLayout.CENTER);
 		panel.setBorder(BorderFactory.createEtchedBorder());
 		add(panel, BorderLayout.SOUTH);
+		
+		//add a quick zoom
+		double qzlim = 25;
+		addQuickZoom("Central Region", -qzlim, -qzlim, qzlim, qzlim);
+
 	}
 
 	// add the control panel
@@ -168,8 +177,8 @@ public class DCXYView extends HexView {
 				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
 				+ ControlPanel.DRAWLEGEND, 
 				DisplayBits.ACCUMULATION
-				+ DisplayBits.CROSSES
-				+ DisplayBits.GLOBAL_HB + DisplayBits.GLOBAL_TB
+				+ DisplayBits.CROSSES + DisplayBits.FMTCROSSES
+				+ DisplayBits.GLOBAL_HB + DisplayBits.GLOBAL_TB + DisplayBits.CVTTRACKS
                 + DisplayBits.MCTRUTH, 3, 5);
 
 		add(_controlPanel, BorderLayout.EAST);
@@ -243,6 +252,12 @@ public class DCXYView extends HexView {
 						_crossDrawer.setMode(CrossDrawer.TB);
 						_crossDrawer.draw(g, container);
 					}
+					
+					//Other (not DC) Crosses
+					if (showCrosses()) {
+						_fmtCrossDrawer.draw(g, container);
+					}
+
 					drawCoordinateSystem(g, container);
 					drawSectorNumbers(g, container);
 				} // not acumulating
@@ -253,56 +268,9 @@ public class DCXYView extends HexView {
 		getContainer().setAfterDraw(beforeDraw);
 	}
 	
-	//draw a fast MC even rather than an evio event
-	private void fastMCDraw(Graphics g, IContainer container) {
-		if (FastMCManager.getInstance().isStreaming()) {
-			return;
-		}
-
-		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
-		if ((phits == null) || phits.isEmpty()) {
-			return;
-		}
-		
-		Graphics2D g2 = (Graphics2D)g;
-		Stroke oldStroke = g2.getStroke();
-		g2.setStroke(stroke);
-		
-		Point pp1 = new Point();
-		Point pp2 = new Point();
-		Point2D.Double wp1 = new Point2D.Double();
-		Point2D.Double wp2 = new Point2D.Double();
-
-		for (ParticleHits hits : phits) {
-			List<DetectorHit> dchits = hits.getDCHits();
-			if (dchits != null) {
-				for (DetectorHit hit : dchits) {
-					int sect1 = hit.getSectorId() + 1;
-					int supl1 = hit.getSuperlayerId() + 1;
-					int lay1 = hit.getLayerId() + 1;
-					int wire1 = hit.getComponentId() + 1;
-					
-					projectWire(g, container, sect1, supl1, lay1, wire1, wp1, wp2, pp1, pp2);
-					g.setColor(_wireColors[supl1-1]);
-					g.drawLine(pp1.x, pp1.y, pp2.x, pp2.y);
-
-				}
-			}
-		}
-		
-		g2.setStroke(oldStroke);
-
-	}
-
-	
 	private void drawHits(Graphics g, IContainer container) {
 		
 		if (isSingleEventMode()) {
-			
-			if (_eventManager.isSourceFastMC()) {
-				fastMCDraw(g, container);
-				return;
-			}
 			
 			DCTdcHitList hits = DC.getInstance().getTDCHits();
 			if ((hits != null) && !hits.isEmpty()) {
@@ -439,10 +407,6 @@ public class DCXYView extends HexView {
 		
 		int dcAccumulatedData[][][][] = AccumulationManager.getInstance()
 				.getAccumulatedDCData();
-		int maxHit = AccumulationManager.getInstance().getMaxDCCount();
-		if (maxHit < 1) {
-			return;
-		}
 
 		Point pp1 = new Point();
 		Point pp2 = new Point();
@@ -451,28 +415,24 @@ public class DCXYView extends HexView {
 
 		for (int sect0 = 0; sect0 < 6; sect0++) {
 			for (int supl0 = 0; supl0 < 6; supl0++) {
+
+				int medianHit = AccumulationManager.getInstance().getMedianDCCount(supl0);
+
 				for (int lay0 = 0; lay0 < 6; lay0++) {
 					for (int wire0 = 0; wire0 < 112; wire0++) {
 
-						double fract;
 						int hitCount = dcAccumulatedData[sect0][supl0][lay0][wire0];
 
 						if (hitCount > 0) {
-							if (isSimpleAccumulatedMode()) {
-								fract = ((double) hitCount) / maxHit;
-							}
-							else {
-								fract = Math.log(hitCount + 1.)
-										/ Math.log(maxHit + 1.);
-							}
+							double fract = getMedianSetting() * (((double) hitCount) / (1 + medianHit));
 
-							Color color = AccumulationManager.getInstance()
-									.getAlphaColor(fract, 128);
-							
-							projectWire(g, container, sect0 + 1,
-									supl0 + 1, lay0 + 1, wire0 + 1, wp1, wp2, pp1, pp2);
+							Color color = AccumulationManager.getInstance().getAlphaColor(fract, 128);
+
+							projectWire(g, container, sect0 + 1, supl0 + 1, lay0 + 1, wire0 + 1, wp1, wp2, pp1, pp2);
 
 							g.setColor(color);
+							g.drawLine(pp1.x, pp1.y, pp2.x, pp2.y);
+
 						} // hitcount > 0
 					}
 				}
@@ -498,7 +458,6 @@ public class DCXYView extends HexView {
 		props.put(PropertySupport.TOOLBAR, true);
 		props.put(PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS);
 		props.put(PropertySupport.VISIBLE, true);
-		props.put(PropertySupport.HEADSUP, false);
 
 		props.put(PropertySupport.BACKGROUND,
 				X11Colors.getX11Color("Alice Blue"));
@@ -523,6 +482,11 @@ public class DCXYView extends HexView {
 		if (showDCTBCrosses()) {
 			_crossDrawer.setMode(CrossDrawer.TB);
 			_crossDrawer.feedback(container, pp, wp, feedbackStrings);
+		}
+		
+		//Other (not DC) Crosses
+		if (showCrosses()) {
+			_fmtCrossDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
 
 		if (showMcTruth()) {

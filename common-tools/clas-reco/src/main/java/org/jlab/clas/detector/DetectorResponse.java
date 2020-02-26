@@ -2,12 +2,10 @@ package org.jlab.clas.detector;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.clas.physics.Vector3;
 import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Path3D;
-import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -15,18 +13,19 @@ import org.jlab.io.base.DataEvent;
 /**
  *
  * @author gavalian
+ * @author baltzell
  */
 public class DetectorResponse {
     
     private DetectorDescriptor  descriptor  = new DetectorDescriptor();
     private Vector3D            hitPosition = new Vector3D();
-    //private Point3D            hitPosition = new Vector3();
     private Vector3D     hitPositionMatched = new Vector3D();
     private Double             detectorTime = 0.0;
     private Double           detectorEnergy = 0.0;
     private Double           particlePath   = 0.0;
-    private int              association    = -1;
+    private List<Integer>    associations   = new ArrayList();
     private int              hitIndex       = -1;
+    private int                      status = -1;
 
     public DetectorResponse(){
         super();
@@ -41,11 +40,14 @@ public class DetectorResponse {
     public void   setMatchPosition(double x, double y, double z){this.hitPositionMatched.setXYZ(x, y, z);}
     public void   setPath(double path){ this.particlePath = path;}
     public void   setEnergy(double energy) { this.detectorEnergy = energy; }
+    public void   setStatus(int status) { this.status = status; }
     
     public double getTime(){ return this.detectorTime;}
     public double getEnergy(){ return this.detectorEnergy; }
     public double getPath(){ return this.particlePath;}
-    
+    public int    getSector(){return this.descriptor.getSector();}
+    public int    getStatus(){return this.status;}
+
     public Vector3D getPosition(){ return this.hitPosition;}
     public Vector3D getMatchedPosition(){ return this.hitPositionMatched;}
     
@@ -60,30 +62,41 @@ public class DetectorResponse {
     public DetectorDescriptor getDescriptor(){ return this.descriptor;}
     public int getHitIndex(){return hitIndex;}
     public void setHitIndex(int hitIndex) {this.hitIndex = hitIndex;}
-        
-    public int getAssociation(){ return this.association;}
-    public void setAssociation(int asc){ this.association = asc;}
-    
-    public Line3D  getDistance(DetectorParticle particle){
-        Path3D  trajectory = particle.getTrajectory();
-        return trajectory.distance(hitPosition.x(),hitPosition.y(),hitPosition.z());
-    }
-    
-    public int  getParticleMatch(DetectorEvent event){
-        
-        double  distance = 1000.0;
-        int     index    = -1;
-        
-        int nparticles = event.getParticles().size();
-        for(int p = 0; p < nparticles; p++){
-            DetectorParticle  particle = event.getParticles().get(p);
-            Line3D distanceLine = this.getDistance(particle);
-            if(distanceLine.length()<distance){
-                distance = distanceLine.length();
-                index    = p;
-            }
+       
+    // new, many-to-one relationship between tracks and hits:
+    public void addAssociation(int asc){ this.associations.add(asc); }
+    public int getNAssociations() { return this.associations.size(); }
+    public int getAssociation(int index) { return this.associations.get(index); }
+    public boolean hasAssociation(int asc) { return this.associations.contains(asc); }
+    public void clearAssociations() { this.associations.clear(); }
+
+    // if we wanted pindex to store pointers to multiple particles:
+    // (but with pindex being a short, this would be limited to 15 particles)
+    public int getPindexMask() {
+        int pindex=0;
+        for (int a : this.associations) {
+            pindex |= 1<<a;
         }
-        return index;
+        return pindex;
+    }
+   
+    // temporary, for backward compatibility during development:
+    public int getAssociation(){
+        if (this.associations.size()>0) {
+            return this.associations.get(0);
+        }
+        else {
+            return -1;
+        }
+    }
+    public void setAssociation(int asc) {
+        // block multiple associations for now:
+        if (this.associations.size()>0) {
+            this.associations.set(0,asc);
+        }
+        else {
+            this.associations.add(asc);
+        }
     }
     
     /**
@@ -99,7 +112,7 @@ public class DetectorResponse {
      */
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
         String bankName, DetectorType type){        
-        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> responseList = new ArrayList<>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
@@ -132,7 +145,7 @@ public class DetectorResponse {
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type, double minEnergy){ 
         DetectorResponse response = new DetectorResponse();
-        List<DetectorResponse> responses = response.readHipoEvent(event, bankName, type);
+        List<DetectorResponse> responses = DetectorResponse.readHipoEvent(event, bankName, type);
         return DetectorResponse.getListByEnergy(responses, minEnergy);
     }
     
@@ -143,7 +156,7 @@ public class DetectorResponse {
      * @return 
      */
     public static List<DetectorResponse>  getListByEnergy(List<DetectorResponse> responses, double minEnergy){
-        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> responseList = new ArrayList<>();
         for(DetectorResponse r : responses){
             if(r.getEnergy()>minEnergy){
                 responseList.add(r);
@@ -153,7 +166,7 @@ public class DetectorResponse {
     }
     
     public static List<DetectorResponse>  getListBySector(List<DetectorResponse> list, DetectorType type, int sector){
-        List<DetectorResponse> result = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> result = new ArrayList<>();
         for(DetectorResponse res : list){
             if(res.getDescriptor().getType()==type&&res.getDescriptor().getSector()==sector){
                 result.add(res);
@@ -163,7 +176,7 @@ public class DetectorResponse {
     }
     
     public static List<DetectorResponse>  getListByLayer(List<DetectorResponse> list, DetectorType type, int layer){
-        List<DetectorResponse> result = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> result = new ArrayList<>();
         for(DetectorResponse res : list){
             if(res.getDescriptor().getType()==type&&res.getDescriptor().getLayer()==layer){
                 result.add(res);
@@ -174,7 +187,7 @@ public class DetectorResponse {
         
     public static List<DetectorResponse>  getListBySectorLayer(List<DetectorResponse> list, 
             DetectorType type, int sector, int layer){
-        List<DetectorResponse> result = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> result = new ArrayList<>();
         for(DetectorResponse res : list){
             if(res.getDescriptor().getType()==type
                     &&res.getDescriptor().getSector()==sector
@@ -183,6 +196,15 @@ public class DetectorResponse {
             }
         }
         return result;
+    }
+
+    public static int getSector(final double phi) {
+        // shift in positive-phi direction by 3.5 sectors, result in [0,2*pi):
+        final double phiShifted = Math.IEEEremainder(phi+Math.PI/6,2.*Math.PI)+Math.PI;
+        // shifted sector number: 
+        final int sectorShifted = (int)(phiShifted / (Math.PI/3)) + 1;
+        // rotate back to proper sector:
+        return sectorShifted<=3 ? sectorShifted-3+6 : sectorShifted-3;
     }
     
     @Override

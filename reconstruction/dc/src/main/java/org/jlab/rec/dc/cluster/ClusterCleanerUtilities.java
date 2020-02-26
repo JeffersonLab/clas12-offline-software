@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.io.base.DataEvent;
 
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.hit.FittedHit;
@@ -14,9 +15,13 @@ import org.jlab.utils.groups.IndexedTable;
 public class ClusterCleanerUtilities {
 
     public ClusterCleanerUtilities() {
-        // TODO Auto-generated constructor stub
+        List<ArrayList<Hit>> sortdHits = new ArrayList<ArrayList<Hit>>();
+        for(int l = 0; l < 6; l++) {
+            sortdHits.add(new ArrayList<Hit>());
+        }
+        sortedHits = sortdHits;
     }
-
+    private List<ArrayList<Hit>> sortedHits;
     /**
      *
      * Pattern Recognition step for identifying clusters in a clump: Find the
@@ -311,7 +316,8 @@ public class ClusterCleanerUtilities {
         return nlayers_hit;
     }
 
-    public FittedCluster LRAmbiguityResolver(FittedCluster fClus, ClusterFitter cf, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
+    public FittedCluster LRAmbiguityResolver(DataEvent event, FittedCluster fClus, 
+            ClusterFitter cf, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         //	int[] notResolvedLR = {0,0,0,0,0,0};
         //	if(fClus.get_Status()[1]==notResolvedLR) {
         //		return fClus;
@@ -366,6 +372,8 @@ public class ClusterCleanerUtilities {
             newhitPos.set_DocaErr(hit.get_DocaErr());
             newhitPos.setT0(hit.getT0()); 
             newhitPos.set_Beta(hit.get_Beta()); 
+            newhitPos.setB(hit.getB()); 
+            newhitPos.set_DeltaTimeBeta(hit.get_DeltaTimeBeta());
             newhitPos.setTStart(hit.getTStart());
             newhitPos.setTProp(hit.getTProp());
             newhitPos.setTFlight(hit.getTFlight());
@@ -374,7 +382,7 @@ public class ClusterCleanerUtilities {
             newhitPos.set_TrkgStatus(0);
             newhitPos.calc_CellSize(DcDetector);
             newhitPos.set_LeftRightAmb(1);
-            newhitPos.updateHitPositionWithTime(1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer, so that cosTrkAng =1
+            newhitPos.updateHitPositionWithTime(event, 1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer, so that cosTrkAng =1
 
             newhitPos.set_AssociatedClusterID(hit.get_AssociatedClusterID());
             newhitPos.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());
@@ -384,7 +392,9 @@ public class ClusterCleanerUtilities {
             newhitNeg.set_Doca(hit.get_Doca());
             newhitNeg.set_DocaErr(hit.get_DocaErr());
             newhitNeg.setT0(hit.getT0()); 
-            newhitNeg.set_Beta(hit.get_Beta()); 
+            newhitNeg.set_Beta(hit.get_Beta());  
+            newhitNeg.setB(hit.getB());  
+            newhitNeg.set_DeltaTimeBeta(hit.get_DeltaTimeBeta());
             newhitNeg.setTStart(hit.getTStart());
             newhitNeg.setTProp(hit.getTProp());
             newhitNeg.setTFlight(hit.getTFlight());
@@ -393,7 +403,7 @@ public class ClusterCleanerUtilities {
             newhitNeg.set_TrkgStatus(0);
             newhitNeg.calc_CellSize(DcDetector);
             newhitNeg.set_LeftRightAmb(-1);
-            newhitNeg.updateHitPositionWithTime(1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer
+            newhitNeg.updateHitPositionWithTime(event, 1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer
 
             newhitNeg.set_AssociatedClusterID(hit.get_AssociatedClusterID());
             newhitNeg.set_AssociatedHBTrackID(hit.get_AssociatedHBTrackID());
@@ -552,7 +562,7 @@ public class ClusterCleanerUtilities {
 
     }
 
-    public FittedCluster SecondariesRemover(FittedCluster clus, ClusterFitter cf, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
+    public FittedCluster SecondariesRemover(DataEvent event, FittedCluster clus, ClusterFitter cf, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         //System.out.println(" secondaries Remover :"+clus.printInfo());
         Collections.sort(clus);
 
@@ -585,7 +595,7 @@ public class ClusterCleanerUtilities {
                 baseClusterHits.addAll(hitsInLayer); // safe all good hits to base cluster		
                 for (int j = 0; j < hitsInLayer.size(); j++) {
                     hitsInLayer.get(j).set_LeftRightAmb(0);
-                    hitsInLayer.get(j).updateHitPositionWithTime(1, hitsInLayer.get(j).getB(), tab, DcDetector, tde);
+                    hitsInLayer.get(j).updateHitPositionWithTime(event, 1, hitsInLayer.get(j).getB(), tab, DcDetector, tde);
                 }
             }
             if (hitsInLayer.size() == 2) {
@@ -610,7 +620,7 @@ public class ClusterCleanerUtilities {
                 if (hit2doca/hit1doca < passingCut2 || (hit2doca/hit1doca > passingCut2 && docaSum < passingCut)) { // reset LR to 0
                     for (int j = 0; j < hitsInLayer.size(); j++) {
                         hitsInLayer.get(j).set_LeftRightAmb(0);
-                        hitsInLayer.get(j).updateHitPositionWithTime(1, hitsInLayer.get(j).getB(), tab, DcDetector, tde);
+                        hitsInLayer.get(j).updateHitPositionWithTime(event, 1, hitsInLayer.get(j).getB(), tab, DcDetector, tde);
                     }
                     hitsInSameLayerLists.add(hitsInLayer);
                 } else {
@@ -711,8 +721,7 @@ public class ClusterCleanerUtilities {
         return overlapingClusters.get(0);
 
     }
-
-    /**
+/**
      * Prunes the input hit list to remove noise candidates; the algorithm finds
      * contiguous hits in a layer (column) and removes hits according to the
      * number (Nc) of such contiguous hits in a given layer. If Nc=3, keep only
@@ -722,72 +731,48 @@ public class ClusterCleanerUtilities {
      *
      * @param hits the unfitted hits
      */
-    public void HitListPruner(List<Hit> hits, Hit[][][] HitArray) {
-
-        int nsect = Constants.NSECT;
-        int nslay = Constants.NSLAY;
-        int nlayr = Constants.NLAYR;
-        int nwire = Constants.NWIRE;
-
-        for (int ssl = 0; ssl < nsect * nslay; ssl++) {
-            // for each ssl, a loop over the wires
-            // is done to define clusters
-            for (int la = 0; la < nlayr; la++) {
-                int wi = 0;  // wire index in the loop
-
-                // looping over all wires
-                while (wi < nwire) {
-                    // if there's a hit, it's a potential column of hits in a layer
-                    if (HitArray[ssl][wi][la] != null) {
-                        // vector of hits in the cluster candidate
-                        List<Hit> hitsInLayer = new ArrayList<Hit>();
-
-                        // adding all hits in this and all the subsequent
-                        // strip until there's a strip with no hit
-                        while (HitArray[ssl][wi][la] != null && wi < nwire) {
-                            hitsInLayer.add(HitArray[ssl][wi][la]);
-
-                            wi++;
-                        }
-
-                        Collections.sort(hitsInLayer);
-
-                        // for 3 hits in layer, keep only the middle one
-                        if (hitsInLayer.size() == 3) {
-                            hits.remove(hitsInLayer.get(0));
-                            HitArray[ssl][hitsInLayer.get(0).get_Wire() - 1][la] = null;
-                            hits.remove(hitsInLayer.get(2));
-                            HitArray[ssl][hitsInLayer.get(2).get_Wire() - 1][la] = null;
-                        }
-                        if (hitsInLayer.size() > 3) {
-                            //int NbEndCells2Keep = 1;
-                            int NbEndCells2Keep = Constants.DEFAULTNBENDCELLSTOKEEP;
-                            if (hitsInLayer.size() > 4) {
-                                NbEndCells2Keep = Constants.NBENDCELLSTOKEEPMORETHAN4HITSINCOLUMN; //possible tracks crossing
-                            }
-                            if (hitsInLayer.size() > 10) {
-                                NbEndCells2Keep = 0; //kill all hits
-                            }
-                            List<Hit> insublist = new ArrayList<Hit>();
-                            for (int si = NbEndCells2Keep; si < hitsInLayer.size() - NbEndCells2Keep; si++) {
-                                insublist.add(hitsInLayer.get(si));
-                            }
-
-                            //remove the bad hits from hit list
-                            for (int si = 0; si < insublist.size(); si++) {
-
-                                Hit hitToRmv = HitArray[ssl][insublist.get(si).get_Wire() - 1][la];
-                                hits.remove(hitToRmv);
-                                HitArray[ssl][insublist.get(si).get_Wire() - 1][la] = null;
-                            }
-                        }
-                    }
-                    wi++;
-                }
-            }
+    public List<Hit> HitListPruner(List<Hit> hits) {
+        //Collections.sort(hits);
+        
+        for(int l = 0; l < 6; l++) {
+            sortedHits.get(l).clear();
         }
+        
+        for(int i = 0; i < hits.size() ; i++) {
+            sortedHits.get(hits.get(i).get_Layer()-1).add(hits.get(i));
+        }
+        for(int l = 0; l < 6; l++) {
+            
+            if(sortedHits.get(l).size()>2 && sortedHits.get(l).size()<5) {
+                ArrayList<Hit> rmHits = (ArrayList<Hit>) sortedHits.get(l).clone();
+                ArrayList<Hit> kHits = new ArrayList<Hit>();
+                kHits.add(sortedHits.get(l).get(0));
+                kHits.add(sortedHits.get(l).get(sortedHits.get(l).size()-1));
+                rmHits.removeAll(kHits);
+                sortedHits.get(l).removeAll(rmHits);
+            }
+            if(sortedHits.get(l).size()>4 && sortedHits.get(l).size()<10) {
+                ArrayList<Hit> rmHits = (ArrayList<Hit>) sortedHits.get(l).clone();
+                ArrayList<Hit> kHits = new ArrayList<Hit>();
+                kHits.add(sortedHits.get(l).get(0));
+                kHits.add(sortedHits.get(l).get(1));
+                kHits.add(sortedHits.get(l).get(sortedHits.get(l).size()-1));
+                kHits.add(sortedHits.get(l).get(sortedHits.get(l).size()-2));
+                rmHits.removeAll(kHits);
+                sortedHits.get(l).removeAll(rmHits); 
+            }
+            if(sortedHits.get(l).size()==10) 
+                sortedHits.get(l).removeAll(sortedHits.get(l));
+             
+        }
+        hits.clear();
+        for(int l = 0; l < 6; l++) {
+            if(sortedHits.get(l).size()>0)
+                hits.addAll(sortedHits.get(l));
+        }
+        return hits;
     }
-
+    
     /**
      *
      * @param clus

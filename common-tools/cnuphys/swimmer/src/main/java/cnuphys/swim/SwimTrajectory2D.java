@@ -6,7 +6,7 @@ import java.util.List;
 
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.lund.LundId;
-import cnuphys.magfield.MagneticField;
+import org.jlab.clas.clas.math.FastMath;
 
 /**
  * A 2D version of the 3D SwimTrajectory where all points have been projected
@@ -36,6 +36,7 @@ public class SwimTrajectory2D {
 	
 	//sector with the most points
 	private byte _dominantSector = -1;
+	
 
 	/**
 	 * Create a 2D trajectory from the 3D trajectory
@@ -179,7 +180,7 @@ public class SwimTrajectory2D {
 	 */
 	private static byte getSector(double x, double y) {
 		
-		double phi = MagneticField.atan2Deg(y, x);
+		double phi = FastMath.atan2Deg(y, x);
 		// convert phi to [0..360]
 
 		while (phi < 0) {
@@ -348,5 +349,14 @@ public class SwimTrajectory2D {
 		// intersection on line
 		return pintersect.distance(wp);
 	}
+	
+	/**
+	 * Get the source of the trajectory, e.g., hbtracking
+	 * @return the source of the trajectory
+	 */
+	public String getSource() {
+		return ((_trajectory3D == null) ? "???" : _trajectory3D.getSource());
+	}
+
 
 }

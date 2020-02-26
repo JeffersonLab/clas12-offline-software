@@ -18,8 +18,9 @@ public class DataDrawSupport {
 	private static final Color TRANSYELLOW = new Color(255, 255, 0, 240);
 	private static final Color TRANSGREEN = X11Colors.getX11Color("lawn green", 250);
 	private static final Color TRANSBLUE = X11Colors.getX11Color("sky blue", 250);
+	private static final Color TRANSRED = X11Colors.getX11Color("red", 128);
 
-	public static Color transColors[] = { DC.HB_TRANS, DC.TB_TRANS, TRANSYELLOW, TRANSGREEN, TRANSBLUE };
+	public static Color transColors[] = { DC.HB_TRANS, DC.TB_TRANS, TRANSYELLOW, TRANSGREEN, TRANSRED };
 	public static String prefix[] = { "HB ", "TB ", "BST ", "BMT ", "FMT "};
 	
 
@@ -36,9 +37,10 @@ public class DataDrawSupport {
 
 	//reconstructed hits
 	private static final Color rec_hit_fillColor = Color.cyan;
-//	private static final Color rec_hit_lineColor = X11Colors
-//			.getX11Color("dark red");
 	private static final Color rec_hit_lineColor = Color.red;
+	
+	//adc hits
+	private static final Color adc_hit_lineColor = Color.black;
 	
 	//reconstructed cluster
 	private static final Color cluster_fillColor = X11Colors.getX11Color("dark red");
@@ -86,6 +88,26 @@ public class DataDrawSupport {
 		g.setColor(rec_hit_lineColor);
 		g.drawRect(pp.x - 3, pp.y - 3, 6, 6);
 	}
+	
+	/**
+	 * Draw a reconstructed hit at the given screen location
+	 * 
+	 * @param g
+	 *            the graphics context
+	 * @param pp
+	 *            the screen location
+	 */
+	public static void drawAdcHit(Graphics g, Point pp, Color fcolor) {
+		// now the cross
+		g.setColor(adc_hit_lineColor);
+		g.drawLine(pp.x - 4, pp.y - 4, pp.x + 4, pp.y + 4);
+		g.drawLine(pp.x - 4, pp.y + 4, pp.x + 4, pp.y - 4);
+		g.setColor(fcolor);
+		g.fillOval(pp.x - 3, pp.y - 3, 6, 6);
+		g.setColor(adc_hit_lineColor);
+		g.drawOval(pp.x - 3, pp.y - 3, 6, 6);
+	}
+
 	
 	/**
 	 * Draw a reconstructed hit at the given screen location

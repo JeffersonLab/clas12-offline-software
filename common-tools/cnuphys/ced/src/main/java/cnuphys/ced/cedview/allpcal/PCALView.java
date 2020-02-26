@@ -177,8 +177,6 @@ public class PCALView extends HexView {
 		props.put(PropertySupport.TOOLBAR, true);
 		props.put(PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS);
 		props.put(PropertySupport.VISIBLE, true);
-		props.put(PropertySupport.HEADSUP, false);
-
 		props.put(PropertySupport.BACKGROUND,
 				X11Colors.getX11Color("Alice Blue"));
 		props.put(PropertySupport.STANDARDVIEWDECORATIONS, true);

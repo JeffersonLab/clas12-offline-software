@@ -34,23 +34,6 @@ public class CutTableScrollPane extends JScrollPane {
 
 		setBorder(BorderFactory.createTitledBorder(null, label,
 				TitledBorder.LEADING, TitledBorder.TOP, null, Color.blue));
-//		addMouseListener(new MouseAdapter() {
-//			@Override
-//			public void mouseClicked(MouseEvent me) {
-//				System.err.println("DUDE");
-//
-//				if (me.getClickCount() == 1) {
-//					CutTableModel model = getCutTableModel();
-//					int row = cutTable.getSelectedRow();
-//					int column = cutTable.getSelectedColumn();
-//
-//					if ((row >= 0) && (column == CutTableModel.ACTIVE)) {
-//						model.fireTableDataChanged();
-//					}
-//
-//				}
-//			}
-//		});
 
 	}
 

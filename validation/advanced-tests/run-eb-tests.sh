@@ -1,7 +1,7 @@
-#!/bin/sh -f
+#!/bin/bash
 
 webDir=http://clasweb.jlab.org/clas12offline/distribution/coatjava/validation_files/eb
-webVersion=4a.2.2-fid-r10
+webVersion=4.3.0-fid-r11
 webDir=$webDir/$webVersion
 
 # coatjava must already be built at ../../coatjava/
@@ -9,13 +9,35 @@ webDir=$webDir/$webVersion
 # whether to use CLARA (0=no)
 useClara=0
 
-# if first argument is -t, only run the test, 
-# don't redownload dependencies, don't run reconstruction.
+# if non-zero, don't redownload dependencies, don't run reconstruction:
 runTestOnly=0
-if [ "$1" = "-t" ]
+
+# gemc default solenoid (changed in 4a.2.4):
+gemcSolenoidDefault=-1.0
+if [[ $webVersion = *"4a.2.2"* ]] || [[ $webVersion = *"4a.2.3"* ]]
 then
-    runTestOnly=1
+    gemcSolenoidDefault=1.0
 fi
+
+# geometry variation for DC
+geoDbVariation="default"
+if [[ $webVersion = *"4a.2.2"* ]] || [[ $webVersion = *"4a.2.3"* ]] || [[ $webVersion = *"4a.2.4"* ]]
+then
+    geoDbVariation="dc_geo_gemc424"
+fi
+
+nEvents=-1
+
+for arg in $@
+do
+    if [ "$arg" == "-t" ]
+    then
+        runTestOnly=1
+    elif [[ $arg == "-100" ]]
+    then
+        webDir=${webDir}-100
+    fi
+done
 
 # last argument is input file stub:
 webFileStub="${@: -1}"
@@ -63,6 +85,7 @@ esac
 if [ $useClara -eq 0 ]
 then
     COAT=../../coatjava
+    source $COAT/bin/env.sh
 else
     CLARA_HOME=$PWD/clara_installation/
     COAT=$CLARA_HOME/plugins/clas12/
@@ -100,25 +123,24 @@ then
         fi
     fi
 
-    # download test files
-    if ! [ -e ${webFileStub}.evio ]
-    then
-        rm -f ${webFileStub}.evio.gz
-        wget --no-check-certificate $webDir/${webFileStub}.evio.gz
-        if [ $? != 0 ] ; then echo "wget validation files failure" ; exit 1 ; fi
-        gunzip -f ${webFileStub}.evio.gz
-    fi
+    # download test files, if necessary:
+    rm -f ${webFileStub}.evio
+    wget -N --no-check-certificate $webDir/${webFileStub}.evio.gz
+    if [ $? != 0 ] ; then echo "wget validation files failure" ; exit 1 ; fi
+    gunzip -f ${webFileStub}.evio.gz
 
     rm -f ${webFileStub}.hipo
     rm -f out_${webFileStub}.hipo
 
     # convert to hipo:
-    $COAT/bin/evio2hipo -o ${webFileStub}.hipo ${webFileStub}.evio
+    $COAT/bin/evio2hipo -s $gemcSolenoidDefault -o ${webFileStub}.hipo ${webFileStub}.evio
 
     # run reconstruction:
     if [ $useClara -eq 0 ]
     then
-        ../../coatjava/bin/notsouseful-util -i ${webFileStub}.hipo -o out_${webFileStub}.hipo -c 2
+        GEOMDBVAR=$geoDbVariation
+        export GEOMDBVAR
+        ../../coatjava/bin/recon-util -i ${webFileStub}.hipo -o out_${webFileStub}.hipo -c 2
     else
         echo "set inputDir $PWD/" > cook.clara
         echo "set outputDir $PWD/" >> cook.clara

@@ -10,10 +10,12 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import cnuphys.bCNU.feedback.FeedbackPane;
 import cnuphys.bCNU.graphics.colorscale.ColorModelLegend;
+import cnuphys.bCNU.graphics.colorscale.ColorModelPanel;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.bCNU.util.Bits;
 import cnuphys.bCNU.util.Fonts;
@@ -29,7 +31,7 @@ import cnuphys.ced.item.MagFieldItem;
  * @author heddle
  *
  */
-public class ControlPanel extends JPanel {
+public class ControlPanel extends JPanel implements ChangeListener {
 
 	private static final int SLIDERWIDTH = 210;
 	private static final int FEEDBACKWIDTH = 220;
@@ -106,6 +108,9 @@ public class ControlPanel extends JPanel {
 	// colums and gaps for display array
 	private int _nc;
 	private int _hgap;
+	
+	//color model panel for accumulation
+	private ColorModelPanel _colorPanel;
 	
 	/**
 	 * Create a view control panel
@@ -266,9 +271,14 @@ public class ControlPanel extends JPanel {
 			sp.add(_displayArray, BorderLayout.NORTH);
 			// accumulation
 			if (Bits.checkBit(controlPanelBits, ACCUMULATIONLEGEND)) {
-				sp.add(new ColorModelLegend(
+				_colorPanel = new ColorModelPanel(
 						AccumulationManager.colorScaleModel, 160,
-						"Relative Accumulation or ADC Value", 20), BorderLayout.SOUTH);
+						"Relative Accumulation or ADC Value", 10, _view.getMedianSetting());
+				
+				_colorPanel.getSlider().setEnabled(false);
+				_colorPanel.getSlider().addChangeListener(this);
+					
+				sp.add(_colorPanel, BorderLayout.SOUTH);
 			}
 
 			tabbedPane.add(sp, "display");
@@ -288,7 +298,16 @@ public class ControlPanel extends JPanel {
 
 		return tabbedPane;
 	}
+	
 
+	/**
+	 * Get the slider for the acumulation legend
+	 * @return the slider
+	 */
+	public JSlider getAccumulationSlider() {
+		return (_colorPanel == null) ? null : _colorPanel.getSlider();
+	}
+	
 	/**
 	 * Create the slider used to control the target z
 	 * 
@@ -439,6 +458,21 @@ public class ControlPanel extends JPanel {
 	 */
 	public boolean hideNoise() {
 		return _noisePanel.hideNoise();
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		Object source = e.getSource();
+		if (_colorPanel != null) {
+			JSlider slider = _colorPanel.getSlider();
+			
+			if (source == slider) {
+				double val = _colorPanel.getValue();
+				_view.setMedianSetting(val);
+				_view.refresh();
+			}
+		}
+		
 	}
 
 }

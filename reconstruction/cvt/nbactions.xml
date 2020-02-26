@@ -1,46 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <actions>
-    <action>
-        <actionName>run</actionName>
-        <packagings>
-            <packaging>jar</packaging>
-        </packagings>
-        <goals>
-            <goal>process-classes</goal>
-            <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
-        </goals>
-        <properties>
-            <exec.args>-DCLAS12DIR=/Users/ziegler/NetBeansProjects/clas12-offline-software/coatjava -Xfuture -DTORUSMAP=/Users/ziegler/Workdir/Distribution/coatjava-4a.4.1/etc/data/magfield/clas12-fieldmap-torus.dat -DSOLENOIDMAP=/Users/ziegler/Workdir/Distribution/coatjava-4a.4.1/etc/data/magfield/clas12-fieldmap-solenoid.dat -classpath %classpath org.jlab.rec.cvt.services.CVTReconstruction</exec.args>
-            <exec.executable>java</exec.executable>
-        </properties>
-    </action>
-    <action>
-        <actionName>debug</actionName>
-        <packagings>
-            <packaging>jar</packaging>
-        </packagings>
-        <goals>
-            <goal>process-classes</goal>
-            <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
-        </goals>
-        <properties>
-            <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -DCLAS12DIR=/Users/ziegler/NetBeansProjects/clas12-offline-software/coatjava -Xfuture -DTORUSMAP=/Users/ziegler/Workdir/Distribution/coatjava-4a.4.1/etc/data/magfield/clas12-fieldmap-torus.dat -DSOLENOIDMAP=/Users/ziegler/Workdir/Distribution/coatjava-4a.4.1/etc/data/magfield/clas12-fieldmap-solenoid.dat -classpath %classpath org.jlab.rec.cvt.services.CVTReconstruction</exec.args>
-            <exec.executable>java</exec.executable>
-            <jpda.listen>true</jpda.listen>
-        </properties>
-    </action>
-    <action>
-        <actionName>profile</actionName>
-        <packagings>
-            <packaging>jar</packaging>
-        </packagings>
-        <goals>
-            <goal>process-classes</goal>
-            <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
-        </goals>
-        <properties>
-            <exec.args>-DCLAS12DIR=/Users/ziegler/NetBeansProjects/clas12-offline-software/coatjava -Xfuture -DTORUSMAP=/Users/ziegler/Workdir/Distribution/coatjava-4a.4.1/etc/data/magfield/clas12-fieldmap-torus.dat -DSOLENOIDMAP=/Users/ziegler/Workdir/Distribution/coatjava-4a.4.1/etc/data/magfield/clas12-fieldmap-solenoid.dat -classpath %classpath org.jlab.rec.cvt.services.CVTReconstruction</exec.args>
-            <exec.executable>java</exec.executable>
-        </properties>
-    </action>
-</actions>
+        <action>
+            <actionName>run</actionName>
+            <packagings>
+                <packaging>jar</packaging>
+            </packagings>
+            <goals>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
+            </goals>
+            <properties>
+                <exec.args>-DCLAS12DIR=/Users/ziegler/Desktop/Work/Release/branches/optim2/clas12-offline-software/coatjava -classpath %classpath org.jlab.rec.cvt.services.CVTReconstruction</exec.args>
+                <exec.executable>java</exec.executable>
+                <Env.TORUSMAP>Symm_torus_r2501_phi16_z251_24Apr2018.dat</Env.TORUSMAP>
+                <Env.SOLENOIDMAP>Symm_solenoid_r601_phi1_z1201_13June2018.dat</Env.SOLENOIDMAP>
+            </properties>
+        </action>
+        <action>
+            <actionName>debug</actionName>
+            <packagings>
+                <packaging>jar</packaging>
+            </packagings>
+            <goals>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
+            </goals>
+            <properties>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -DCLAS12DIR=/Users/ziegler/Desktop/Work/Release/branches/optim2/clas12-offline-software/coatjava -classpath %classpath org.jlab.rec.cvt.services.CVTReconstruction</exec.args>
+                <exec.executable>java</exec.executable>
+                <jpda.listen>true</jpda.listen>
+            </properties>
+        </action>
+        <action>
+            <actionName>profile</actionName>
+            <packagings>
+                <packaging>jar</packaging>
+            </packagings>
+            <goals>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
+            </goals>
+            <properties>
+                <exec.args>-DCLAS12DIR=/Users/ziegler/Desktop/Work/Release/branches/optim2/clas12-offline-software/coatjava -classpath %classpath org.jlab.rec.cvt.services.CVTReconstruction</exec.args>
+                <exec.executable>java</exec.executable>
+            </properties>
+        </action>
+    </actions>

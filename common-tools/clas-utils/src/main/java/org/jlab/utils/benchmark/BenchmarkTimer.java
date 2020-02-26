@@ -48,6 +48,14 @@ public class BenchmarkTimer {
         }
     }
     
+    public void reset(){
+        lastStartTime = 0;
+        totalTime = 0;
+        timeAtResume = 0;
+        numberOfCalls = 0;
+        isPaused = true;
+    }
+    
     public double getMiliseconds(){
         return totalTime/(1.0e6);
     }

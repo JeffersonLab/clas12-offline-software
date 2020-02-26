@@ -67,7 +67,7 @@ public class CCDBConstantsLoader {
         // new
         // run
         // load the geometry tables
-        dbprovider.loadTable("/geometry/cvt/mvt/bmt_layer");
+        dbprovider.loadTable("/geometry/cvt/mvt/bmt_layer_noshim");
         dbprovider.loadTable("/geometry/cvt/mvt/bmt_strip_L1");
         dbprovider.loadTable("/geometry/cvt/mvt/bmt_strip_L2");
         dbprovider.loadTable("/geometry/cvt/mvt/bmt_strip_L3");
@@ -87,9 +87,16 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/calibration/mvt/lorentz");
         dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_fullfield");
         dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_midfield");
-        dbprovider.disconnect();
 
-       //  dbprovider.show();
+        //beam offset table
+        dbprovider.loadTable("/geometry/beam/position");
+        
+        //target position table
+        dbprovider.loadTable("/geometry/target");
+        
+        dbprovider.disconnect();
+        
+      //  dbprovider.show();
         // Getting the Constants
         // 1) pitch info 
         for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_strip_L1/Group_size"); i++) {
@@ -111,20 +118,20 @@ public class CCDBConstantsLoader {
 
         // Getting the Constants
         // 2) Layer info 
-        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_layer/Layer"); i++) {
+        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_layer_noshim/Layer"); i++) {
 
-            int layer = dbprovider.getInteger("/geometry/cvt/mvt/bmt_layer/Layer", i);
+            int layer = dbprovider.getInteger("/geometry/cvt/mvt/bmt_layer_noshim/Layer", i);
             int region = (int) ((layer + 1) / 2);
 
-            double radius = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer/Radius", i);
-            double Zmin = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer/Zmin", i);
-            double Zmax = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer/Zmax", i);
-            double spacing = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer/Interstrip", i);
-            int axis = dbprovider.getInteger("/geometry/cvt/mvt/bmt_layer/Axis", i);
-            int Nstrips = dbprovider.getInteger("/geometry/cvt/mvt/bmt_layer/Nstrip", i);
+            double radius = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer_noshim/Radius", i);
+            double Zmin = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer_noshim/Zmin", i);
+            double Zmax = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer_noshim/Zmax", i);
+            double spacing = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer_noshim/Interstrip", i);
+            int axis = dbprovider.getInteger("/geometry/cvt/mvt/bmt_layer_noshim/Axis", i);
+            int Nstrips = dbprovider.getInteger("/geometry/cvt/mvt/bmt_layer_noshim/Nstrip", i);
 
-            double Phi_min = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer/Phi_min", i);
-            double Phi_max = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer/Phi_max", i);
+            double Phi_min = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer_noshim/Phi_min", i);
+            double Phi_max = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer_noshim/Phi_max", i);
 
             //sector clocking fix data
             double[] EDGE1 = new double[]{Math.toRadians(Phi_min + 120), Math.toRadians(Phi_min), Math.toRadians(Phi_min + 240)};
@@ -238,7 +245,21 @@ public class CCDBConstantsLoader {
         	 }
         	 
         }
-                
+         // beam offset
+        double xb = dbprovider.getDouble("/geometry/beam/position/x_offset", 0);     
+        double yb = dbprovider.getDouble("/geometry/beam/position/y_offset", 0); 
+        double exb = dbprovider.getDouble("/geometry/beam/position/x_error", 0);     
+        double eyb = dbprovider.getDouble("/geometry/beam/position/y_error", 0); 
+        double err = 0;
+        if(Math.sqrt(xb*xb+yb*yb)!=0) err = Math.sqrt((Math.pow(xb*exb,2)+Math.pow(yb*eyb,2))/(xb*xb+yb*yb));
+        org.jlab.rec.cvt.Constants.setXb(xb);
+        org.jlab.rec.cvt.Constants.setYb(yb);
+        org.jlab.rec.cvt.Constants.setRbErr(err);
+        
+        // target position
+        double ztarget = dbprovider.getDouble("/geometry/target/position", 0);
+        org.jlab.rec.cvt.Constants.setZoffset(ztarget);
+         
         Constants.setCRCRADIUS(CRCRADIUS);
         Constants.setCRZRADIUS(CRZRADIUS);
         Constants.setCRZNSTRIPS(CRZNSTRIPS);

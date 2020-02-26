@@ -122,8 +122,10 @@ public class NoiseReductionParameters {
 		int numLay = 6;
 		int numWire = 112;
 		int numMissing = 2;
-		int rightShifts[] = { 0, 1, 2, 2, 3, 3 };
-		int leftShifts[] = { 0, 1, 2, 2, 3, 3 };
+//		int rightShifts[] = { 0, 1, 2, 2, 3, 3 };
+//		int leftShifts[] = { 0, 1, 2, 2, 3, 3 };
+		int rightShifts[] = { 0, 3, 4, 4, 5, 5 };
+		int leftShifts[] = { 0, 3, 4, 4, 5, 5 };
 		return new NoiseReductionParameters(numLay, numWire, numMissing,
 				leftShifts, rightShifts);
 	}
@@ -241,6 +243,8 @@ public class NoiseReductionParameters {
 		for (int layer = 0; layer < _numLayer; layer++) {
 			_packedData[layer].clear();
 		}
+		leftSegments.clear();
+		rightSegments.clear();
 		_analyzed = false;
 	}
 

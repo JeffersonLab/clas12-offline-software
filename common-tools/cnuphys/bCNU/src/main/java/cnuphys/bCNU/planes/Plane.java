@@ -3,11 +3,14 @@ package cnuphys.bCNU.planes;
 import cnuphys.bCNU.util.VectorSupport;
 
 /**
- * A plane is defined by the equation ax + by + cd = d
+ * A plane is defined by the equation ax + by + cz = d
  * @author heddle
  *
  */
 public class Plane {
+	
+	//effectively zero
+	private static double TINY = 1.0e-10;
 
 	//the plane constants
 	private double _a;
@@ -79,9 +82,26 @@ public class Plane {
 		return numer/denom;
 	}
 	
-	public static void main(String arg[]) {
-	
+	/**
+	 * Get the sign of a point relative to a plane. If it is -1 it is on
+	 * one side of the plane (call it left). If it is +1 it is on the other.
+	 * Thus you can determine when you cross the plane: when the sign changes.
+	 * @param x the x coordinate of the point
+	 * @param y the y coordinate of the point
+	 * @param z the z coordinate of the point
+	 * @return 0 if the point is on (or almost on modulo TINY) the plane, -1 if
+	 * it is on one side, + 1 if it is on the other.
+	 */
+	public int directionSign(double x, double y, double z) {
+		double dot = _a*x + _b*y + _c*z - _d;
+		
+		if (Math.abs(dot) < TINY) {
+			return 0;
+		}
+		
+		return (dot < 0) ? -1 : 1;
 	}
+	
 	
 	/**
 	 * Create a plane of constant azimuthal angle phi
@@ -108,4 +128,9 @@ public class Plane {
 		
 		return createPlane(norm, p);
 	}
+	
+	public static void main(String arg[]) {
+		
+	}
+
 }

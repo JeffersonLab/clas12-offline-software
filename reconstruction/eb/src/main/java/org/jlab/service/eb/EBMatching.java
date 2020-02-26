@@ -1,16 +1,12 @@
 package org.jlab.service.eb;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.jlab.clas.physics.Vector3;
 import org.jlab.clas.detector.DetectorParticle;
 import org.jlab.clas.detector.DetectorResponse;
-import org.jlab.clas.detector.DetectorTrack;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.io.base.DataBank;
-import org.jlab.io.base.DataEvent;
-import org.jlab.rec.eb.EBCCDBConstants;
+import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.rec.eb.EBCCDBEnum;
 
 /*
@@ -32,6 +28,7 @@ public class EBMatching {
      * addResponsesFTOF
      *
      * Find and add all unmatched, matching FTOF responses to each particle.
+     * NOTE:  This will be simplified once FTOF reports clusters.
      *
      */
     public void addResponsesFTOF(List <DetectorParticle> parts) {
@@ -48,13 +45,13 @@ public class EBMatching {
                                 + this.eventBuilder.getPindexMap().get(1);
 
             int index1A = part.getDetectorHit(respFTOF1A, DetectorType.FTOF, 1, 
-                    EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1A));
+                    eventBuilder.ccdb.getDouble(EBCCDBEnum.FTOF_MATCHING_1A));
             if (index1A >= 0) {
                 part.addResponse(respFTOF1A.get(index1A), true);
                 respFTOF1A.get(index1A).setAssociation(ii + pindex_offset);
             }
             int index1B = part.getDetectorHit(respFTOF1B, DetectorType.FTOF, 2,
-                    EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_1B));
+                    eventBuilder.ccdb.getDouble(EBCCDBEnum.FTOF_MATCHING_1B));
             if (index1B >= 0) {
                 part.addResponse(respFTOF1B.get(index1B), true);
                 respFTOF1B.get(index1B).setAssociation(ii + pindex_offset);
@@ -62,7 +59,7 @@ public class EBMatching {
             // only try to match with FTOF2 if not matched with 1A/1B:
             if (index1A<0 && index1B<0) {
                 int index2 = part.getDetectorHit(respFTOF2, DetectorType.FTOF, 3,
-                        EBCCDBConstants.getDouble(EBCCDBEnum.FTOF_MATCHING_2));
+                        eventBuilder.ccdb.getDouble(EBCCDBEnum.FTOF_MATCHING_2));
                 if (index2>=0) {
                     part.addResponse(respFTOF2.get(index2), true);
                     respFTOF2.get(index2).setAssociation(ii + pindex_offset);
@@ -90,13 +87,13 @@ public class EBMatching {
                 double matching;
                 switch (layer) {
                     case (1):
-                        matching=EBCCDBConstants.getDouble(EBCCDBEnum.PCAL_MATCHING);
+                        matching=eventBuilder.ccdb.getDouble(EBCCDBEnum.PCAL_MATCHING);
                         break;
                     case (4):
-                        matching=EBCCDBConstants.getDouble(EBCCDBEnum.ECIN_MATCHING);
+                        matching=eventBuilder.ccdb.getDouble(EBCCDBEnum.ECIN_MATCHING);
                         break;
                     case (7):
-                        matching=EBCCDBConstants.getDouble(EBCCDBEnum.ECOUT_MATCHING);
+                        matching=eventBuilder.ccdb.getDouble(EBCCDBEnum.ECOUT_MATCHING);
                         break;
                     default:
                         throw new RuntimeException("Invalid ECAL Layer:  "+layer);
@@ -107,7 +104,7 @@ public class EBMatching {
                 int index = part.getDetectorHit(respECAL, DetectorType.ECAL, layer, matching);
                 if (index>=0) {
                     int pindex_offset = this.eventBuilder.getPindexMap().get(0)
-                                        + this.eventBuilder.getPindexMap().get(1); //After FD/CD Charged Particles
+                                      + this.eventBuilder.getPindexMap().get(1); //After FD/CD Charged Particles
                     part.addResponse(respECAL.get(index), true); 
                     respECAL.get(index).setAssociation(ii + pindex_offset);
                 }
@@ -140,13 +137,22 @@ public class EBMatching {
                 throw new RuntimeException("Invalid ECAL Layer:  "+ecalLayer);
         }
 
-        List<DetectorParticle> parts=new ArrayList<DetectorParticle>();
+        List<DetectorParticle> parts=new ArrayList<>();
 
         List<DetectorResponse> responsesECAL =
             eventBuilder.getUnmatchedResponses(null, DetectorType.ECAL, ecalLayer);
 
-        for (DetectorResponse r : responsesECAL)
-            parts.add(DetectorParticle.createNeutral(r));
+        Vector3 vertex = new Vector3(0,0,0);
+        if (eventBuilder.getEvent().getParticles().size()>0) {
+            vertex.copy(eventBuilder.getEvent().getParticle(0).vertex());
+        }
+
+        for (DetectorResponse r : responsesECAL) {
+            int pindex_offset = this.eventBuilder.getPindexMap().get(0)
+                              + this.eventBuilder.getPindexMap().get(1); //After FD/CD Charged Particles
+            r.setAssociation(parts.size()+pindex_offset);
+            parts.add(DetectorParticle.createNeutral(r,vertex));
+        }
         
         // add other responses:
         this.addResponsesECAL(parts,otherEcalLayers);
@@ -156,73 +162,50 @@ public class EBMatching {
     }
 
     /**
-     *
-     * Central Tracks and CTOF/CND were already matched before
-     * event builder.  Copy in.
-     *
+     * find CD neutrals and append to particle list
      */
-    
-    public void processCentralParticles(DataEvent de,
-                                     String ctrkBankName,
-                                     String ctofBankName,
-                                     String cndBankName,
-                                     List<DetectorParticle> cvtParticles,
-                                     List<DetectorResponse> ctofHits,
-                                     List<DetectorResponse> cndHits) {
+    public boolean addCentralNeutrals(DetectorEvent de) {
+        
+        List<DetectorResponse> respsCND =
+            eventBuilder.getUnmatchedResponses(null, DetectorType.CND, 0);
 
-        // Make a neutral particle for each CND hit without an
-        // associated track.
-        if (de.hasBank(cndBankName)==true) {
-            DataBank cndBank = de.getBank(cndBankName);
-            final int ncnd=cndBank.rows();
-            int cnd_count = 0;
-            for (int icnd=0; icnd<ncnd; icnd++) {
-                final int trkid=cndBank.getInt("trkID",icnd);
-                if (trkid==-1) {
-                    // make neutral particle
-                    DetectorParticle p = DetectorParticle.createNeutral(cndHits.get(icnd));
-                    this.eventBuilder.getEvent().addParticle(p);
-                    cnd_count = cnd_count + 1;
-                }
+        if (respsCND.size()>0) {
+
+            Vector3 vertex = new Vector3(0,0,0);
+            if (de.getParticles().size()>0) {
+                vertex.copy(eventBuilder.getEvent().getParticle(0).vertex());
             }
-            this.eventBuilder.getPindexMap().put(3,cnd_count);
-        }
 
-        // load map from trkID to ctof hits
-        Map<Integer,ArrayList<Integer>> ctofMap = null;
-        if (de.hasBank(ctofBankName)==true) {
-            ctofMap = new HashMap<Integer,ArrayList<Integer>>();
-            DataBank ctofBank = de.getBank(ctofBankName);
-            final int nctof=ctofBank.rows();
-            for (int ictof=0; ictof<nctof; ictof++) {
-                final int trkid=ctofBank.getInt("trkID",ictof);
-                if (trkid>=0) {
-                    if (!ctofMap.containsKey(trkid))
-                        ctofMap.put(trkid,new ArrayList<Integer>());
-                    ctofMap.get(trkid).add(ictof);
+            // make a new neutral particle for each unmatched CND cluster:
+            for (DetectorResponse respCND : respsCND) {
+
+                // haven't appended the particle yet, but this will be its index:
+                final int pindex = de.getParticles().size();
+
+                // make neutral particle from CND:
+                DetectorParticle neutral = DetectorParticle.createNeutral(respCND,vertex);
+                respCND.setAssociation(pindex);
+
+                // find and associate matching CTOF hits:
+                List<DetectorResponse> respCTOF =
+                    eventBuilder.getUnmatchedResponses(null, DetectorType.CTOF, 0);
+                final int indx=neutral.getDetectorHit(respCTOF,DetectorType.CTOF,0,
+                        eventBuilder.ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
+                if (indx >= 0) {
+                    neutral.addResponse(respCTOF.get(indx),true);
+                    respCTOF.get(indx).setAssociation(pindex);
+                    // FIXME:  stop mixing Vector3 and Vector3D
+                    final double dx = respCTOF.get(indx).getPosition().x()-vertex.x();
+                    final double dy = respCTOF.get(indx).getPosition().y()-vertex.y();
+                    final double dz = respCTOF.get(indx).getPosition().z()-vertex.z();
+                    respCTOF.get(indx).setPath(Math.sqrt(dx*dx+dy*dy+dz*dz));
                 }
+
+                de.addParticle(neutral);
             }
         }
 
-        // Make a charged particle for each Central Track,
-        // associate it with CTOF hit if found matching track ID.
-        if (de.hasBank(ctrkBankName)==true) {
-            DataBank ctrkBank = de.getBank(ctrkBankName);
-            final int nctrk=ctrkBank.rows();
-            for (int ictrk=0; ictrk<nctrk; ictrk++) {
-                // make track and charged particle
-                DetectorParticle cvtParticle = cvtParticles.get(ictrk);
-                final int trkid=ctrkBank.getInt("ID",ictrk);
-                if (ctofMap!=null && ctofMap.containsKey(trkid)) {
-                    for(int i = 0 ; i < ctofMap.get(trkid).size() ; i++) {
-                        final int pindex_offset = eventBuilder.getPindexMap().get(0); //After the FD charged particles
-                        final int ctofIndex = ctofMap.get(trkid).get(i);
-                        cvtParticle.addResponse(ctofHits.get(ctofIndex), true);
-                        ctofHits.get(ctofIndex).setAssociation(ictrk + pindex_offset);
-                    }
-                }
-            }
-        }
+        return respsCND.size()>0;
     }
 
 }

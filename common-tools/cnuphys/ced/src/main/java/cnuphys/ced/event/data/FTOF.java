@@ -69,7 +69,7 @@ public class FTOF extends DetectorData {
 	
 	/**
 	 * Update the list. This is probably needed only during accumulation
-	 * @return the update l;ist
+	 * @return the update list
 	 */
 	public TdcAdcHitList updateTdcAdcList() {
 		_tdcAdcHits =  new TdcAdcHitList("FTOF::tdc", "FTOF::adc");

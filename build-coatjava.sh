@@ -1,118 +1,113 @@
 #!/bin/bash
 
+usage='build-coatjava.sh [--quiet] [--spotbugs] [--nomaps] [--unittests]'
+
+quiet="no"
+runSpotBugs="no"
+downloadMaps="yes"
+runUnitTests="no"
+for xx in $@
+do
+    if [ "$xx" == "--spotbugs" ]
+    then
+        runSpotBugs="yes"
+    elif [ "$xx" == "-n" ]
+    then
+        runSpotBugs="no"
+    elif [ "$xx" == "--nomaps" ]
+    then
+        downloadMaps="no"
+    elif [ "$xx" == "--unittests" ]
+    then
+        runUnitTests="yes"
+    elif [ "$xx" == "--quiet" ]
+    then
+        quiet="yes"
+    else
+        echo $usage
+        exit
+    fi
+done
+
+wget='wget'
+mvn='mvn'
+if [ "$quiet" == "yes" ]
+then
+    wget='wget --progress=dot:mega'
+    mvn='mvn -q -B'
+fi
+
+# download the default field maps, as defined in bin/env.sh:
+# (and duplicated in etc/services/reconstruction.yaml):
+source `dirname $0`/bin/env.sh
+if [ $downloadMaps == "yes" ]; then
+  echo 'Retrieving field maps ...'
+  webDir=http://clasweb.jlab.org/clas12offline/magfield
+  locDir=etc/data/magfield
+  mkdir -p $locDir
+  cd $locDir
+  for map in $COAT_MAGFIELD_SOLENOIDMAP $COAT_MAGFIELD_TORUSMAP $COAT_MAGFIELD_TORUSSECONDARYMAP
+  do
+    # -N only redownloads if timestamp/filesize is newer/different
+    $wget -N --no-check-certificate $webDir/$map
+  done
+  cd -
+fi
+
+rm -rf coatjava
 mkdir -p coatjava
-rm -f coatjava/lib/clas/jcsg-0.3.2.jar
 cp -r bin coatjava/
 cp -r etc coatjava/
+# create schema directories for partial reconstruction outputs		
+python etc/bankdefs/util/bankSplit.py coatjava/etc/bankdefs/hipo4 || exit 1
 mkdir -p coatjava/lib/clas
 cp external-dependencies/JEventViewer-1.1.jar coatjava/lib/clas/
 cp external-dependencies/vecmath-1.3.1-2.jar coatjava/lib/clas/
 mkdir -p coatjava/lib/utils
 cp external-dependencies/jclara-4.3-SNAPSHOT.jar coatjava/lib/utils
-cp external-dependencies/KPP-Monitoring-1.0.jar coatjava/lib/utils
-cp external-dependencies/KPP-Plots-1.0.jar coatjava/lib/utils
-cp external-dependencies/jaw-1.0.jar coatjava/lib/utils
+cp external-dependencies/clas12mon-3.1.jar coatjava/lib/utils
+cp external-dependencies/KPP-Plots-3.1.jar coatjava/lib/utils
+#cp external-dependencies/jaw-1.0.jar coatjava/lib/utils
 mkdir -p coatjava/lib/services
 
 ### clean up any cache copies ###
 rm -rf ~/.m2/repository/org/hep/hipo
 rm -rf ~/.m2/repository/org/jlab
 
-### coat-libs ###
-cd common-tools
-mvn install
-if [ $? != 0 ] ; then echo "common tools failure 1" ; exit 1 ; fi
-cd -
+unset CLAS12DIR
+if [ $runUnitTests == "yes" ]; then
+	$mvn install # also runs unit tests
+	if [ $? != 0 ] ; then echo "mvn install failure" ; exit 1 ; fi
+else
+	$mvn -Dmaven.test.skip=true install
+	if [ $? != 0 ] ; then echo "mvn install failure" ; exit 1 ; fi
+fi
+
+if [ $runSpotBugs == "yes" ]; then
+	# mvn com.github.spotbugs:spotbugs-maven-plugin:spotbugs # spotbugs goal produces a report target/spotbugsXml.xml for each module
+	$mvn com.github.spotbugs:spotbugs-maven-plugin:check # check goal produces a report and produces build failed if bugs
+	# the spotbugsXml.xml file is easiest read in a web browser
+	# see http://spotbugs.readthedocs.io/en/latest/maven.html and https://spotbugs.github.io/spotbugs-maven-plugin/index.html for more info
+	if [ $? != 0 ] ; then echo "spotbugs failure" ; exit 1 ; fi
+fi
+
 cd common-tools/coat-lib
-mvn package
-if [ $? != 0 ] ; then echo "common tools failure 2" ; exit 1 ; fi
+$mvn package
+if [ $? != 0 ] ; then echo "mvn package failure" ; exit 1 ; fi
 cd -
-cp common-tools/coat-lib/target/coat-libs-5.1-SNAPSHOT.jar coatjava/lib/clas/
 
-### create local mvn repo containing coat-libs and jcsg ##
-mvn deploy:deploy-file -Dfile=./common-tools/coat-lib/target/coat-libs-5.1-SNAPSHOT.jar -DgroupId=org.jlab.clas -DartifactId=common-tools -Dversion=0.0 -Dpackaging=jar -Durl=file:./myLocalMvnRepo/ -DrepositoryId=myLocalMvnRepo -DupdateReleaseInfo=true
-if [ $? != 0 ] ; then echo "failed to create local mvn repo" ; exit 1 ; fi
- 
-### dc (depends on jcsg) ###
-cd reconstruction/dc
-mvn install
-if [ $? != 0 ] ; then echo "dc failure" ; exit 1 ; fi
-cd -
-cp reconstruction/dc/target/clas12detector-dc-1.0-SNAPSHOT.jar coatjava/lib/services/
+cp common-tools/coat-lib/target/coat-libs-*-SNAPSHOT.jar coatjava/lib/clas/
+cp reconstruction/dc/target/clas12detector-dc-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/tof/target/clas12detector-tof-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/cvt/target/clas12detector-cvt-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/ft/target/clas12detector-ft-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/ec/target/clas12detector-ec-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/ltcc/target/clas12detector-ltcc-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/htcc/target/clas12detector-htcc-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/cnd/target/clas12detector-cnd-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/rich/target/clas12detector-rich-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/fvt/target/clas12detector-fmt-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/eb/target/clas12detector-eb-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/band/target/clas12detector-band-*-SNAPSHOT.jar coatjava/lib/services/
 
-### add dc jar to local mvn repo ###
-mvn deploy:deploy-file -Dfile=./reconstruction/dc/target/clas12detector-dc-1.0-SNAPSHOT.jar -DgroupId=org.jlab.service.dc -DartifactId=clas12detector-dc -Dversion=0.0 -Dpackaging=jar -Durl=file:./myLocalMvnRepo/ -DrepositoryId=myLocalMvnRepo -DupdateReleaseInfo=true
-if [ $? != 0 ] ; then echo "dc failure" ; exit 1 ; fi
-
-### tof (depends on jcsg and dc) ###
-cd reconstruction/tof
-mvn install
-if [ $? != 0 ] ; then echo "tof failure" ; exit 1 ; fi
-cd -
-cp reconstruction/tof/target/tof-1.0-SNAPSHOT.jar coatjava/lib/services/
-
-### cvt ###
-cd reconstruction/cvt
-mvn install
-if [ $? != 0 ] ; then echo "cvt failure" ; exit 1 ; fi
-cd -
-cp reconstruction/cvt/target/cvt-1.0-SNAPSHOT.jar coatjava/lib/services/
-
-### ft ###
-cd reconstruction/ft
-mvn install
-if [ $? != 0 ] ; then echo "ft failure" ; exit 1 ; fi
-cd -
-cp reconstruction/ft/target/clas12detector-ft-1.0-SNAPSHOT.jar coatjava/lib/services/
-
-### ec ###
-cd reconstruction/ec
-mvn install
-if [ $? != 0 ] ; then echo "ec failure" ; exit 1 ; fi
-cd -
-cp reconstruction/ec/target/clas12detector-ec-1.0-SNAPSHOT.jar coatjava/lib/services/
-
-### ltcc ###
-cd reconstruction/ltcc
-mvn install
-if [ $? != 0 ] ; then echo "ltcc failure" ; exit 1 ; fi
-cd -
-cp reconstruction/ltcc/target/clasrec-ltcc-1.0-SNAPSHOT.jar coatjava/lib/services/
-
-### htcc ###
-cd reconstruction/htcc
-mvn install
-if [ $? != 0 ] ; then echo "htcc failure" ; exit 1 ; fi
-cd -
-cp reconstruction/htcc/target/clasrec-htcc-1.0-SNAPSHOT.jar coatjava/lib/services/
-
-### cnd ###
-cd reconstruction/cnd
-mvn install
-if [ $? != 0 ] ; then echo "cnd failure" ; exit 1 ; fi
-cd -
-cp reconstruction/cnd/target/clas12detector-cnd-1.0-SNAPSHOT.jar coatjava/lib/services/
-
-### rich ###
-cd reconstruction/rich
-mvn install
-if [ $? != 0 ] ; then echo "rich failure" ; exit 1 ; fi
-cd -
-cp reconstruction/rich/target/clas12detector-rich-1.0-SNAPSHOT.jar coatjava/lib/services/
-
-### fvt ###
-cd reconstruction/fvt
-mvn install
-if [ $? != 0 ] ; then echo "fvt failure" ; exit 1 ; fi
-cd -
-cp reconstruction/fvt/target/clas12detector-fvt-1.0-SNAPSHOT.jar coatjava/lib/services/
-
-### eb ###
-cd reconstruction/eb
-mvn install
-if [ $? != 0 ] ; then echo "eb failure" ; exit 1 ; fi
-cd -
-cp reconstruction/eb/target/clas12detector-eb-1.0-SNAPSHOT.jar coatjava/lib/services/
-
-### end ###
 echo "COATJAVA SUCCESSFULLY BUILT !"

@@ -81,24 +81,24 @@ public class FTEBEngine extends ReconstructionEngine {
 
             if (event instanceof EvioDataEvent) {
                 EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
-                if (bank.getByte("Type")[0] == 0) {
+                if (bank.getByte("Type",0) == 0) {
                     isMC = true;
                 }
-                if (bank.getByte("Mode")[0] == 1) {
+                if (bank.getByte("Mode",0)== 1) {
                     isCosmics = true;
                 }
-                run = bank.getInt("Run")[0];
+                run = bank.getInt("Run",0);
                 fieldScale = bank.getFloat("Solenoid")[0];
             } else {
                 DataBank bank = event.getBank("RUN::config");
-                if (bank.getByte("type")[0] == 0) {
+                if (bank.getByte("type",0) == 0) {
                     isMC = true;
                 }
-                if (bank.getByte("mode")[0] == 1) {
+                if (bank.getByte("mode",0)== 1) {
                     isCosmics = true;
                 }
-                run = bank.getInt("run")[0];
-                fieldScale = bank.getFloat("solenoid")[0];
+                run = bank.getInt("run",0);
+                fieldScale = bank.getFloat("solenoid",0);
             }
             this.setSolenoid(fieldScale);
         }
@@ -130,8 +130,7 @@ public class FTEBEngine extends ReconstructionEngine {
         en.init();
 //		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/elec_nofield_header.evio";
 //		EvioSource  reader = new EvioSource();
-        String input = "/Users/devita/NetBeansProjects/clas12-offline-software/validation/advanced-tests/electrongammaFT.hipo";
-        //"/Users/devita/Work/clas12/simulations/tests/clas12Tags/4a.2.2/electron.hipo";
+        String input = "/Users/devita/Work/clas12/simulations/clas12Tags/4.3.1/out.hipo";
 //		String input = "/Users/devita/out_gemc_10.hipo";
         HipoDataSource reader = new HipoDataSource();
         reader.open(input);
@@ -197,18 +196,18 @@ public class FTEBEngine extends ReconstructionEngine {
                     DataBank bank = event.getBank("FT::particles");
                     int nrows = bank.rows();
                     for (int i = 0; i < nrows; i++) {
-                        if(bank.getByte("charge", i)==0) {
+                        if(bank.getByte("charge", i)==-1) {
                             h1.fill(bank.getFloat("energy", i));
-                            h2.fill(bank.getFloat("energy", i) - gen.getGeneratedParticle(1).vector().p());
+                            h2.fill(bank.getFloat("energy", i) - gen.getGeneratedParticle(0).vector().p());
                             Vector3D part = new Vector3D(bank.getFloat("cx", i), bank.getFloat("cy", i), bank.getFloat("cz", i));
-                            h3.fill(Math.toDegrees(part.theta() - gen.getGeneratedParticle(1).theta()));
-                            h4.fill(Math.toDegrees(part.phi() - gen.getGeneratedParticle(1).phi()));
+                            h3.fill(Math.toDegrees(part.theta() - gen.getGeneratedParticle(0).theta()));
+                            h4.fill(Math.toDegrees(part.phi() - gen.getGeneratedParticle(0).phi()));
                             h5.fill(bank.getFloat("time", i) - 124.25);
-                            h6.fill(bank.getFloat("cx", i) * FTCALConstantsLoader.CRYS_ZPOS, bank.getFloat("cy", i) * FTCALConstantsLoader.CRYS_ZPOS, bank.getFloat("energy", i) - gen.getGeneratedParticle(1).vector().p());
+                            h6.fill(bank.getFloat("cx", i) * FTCALConstantsLoader.CRYS_ZPOS, bank.getFloat("cy", i) * FTCALConstantsLoader.CRYS_ZPOS, bank.getFloat("energy", i) - gen.getGeneratedParticle(0).vector().p());
                             h7.fill(bank.getFloat("cx", i) * FTCALConstantsLoader.CRYS_ZPOS, bank.getFloat("cy", i) * FTCALConstantsLoader.CRYS_ZPOS);
-                            h8.fill(gen.getGeneratedParticle(1).vector().p(), bank.getFloat("energy", i) - gen.getGeneratedParticle(1).vector().p());
-                            h9.fill(Math.toDegrees(gen.getGeneratedParticle(1).theta()), bank.getFloat("energy", i) - gen.getGeneratedParticle(1).vector().p());
-                            h10.fill(Math.toDegrees(gen.getGeneratedParticle(1).phi()), bank.getFloat("energy", i) - gen.getGeneratedParticle(1).vector().p());
+                            h8.fill(gen.getGeneratedParticle(0).vector().p(), bank.getFloat("energy", i) - gen.getGeneratedParticle(0).vector().p());
+                            h9.fill(Math.toDegrees(gen.getGeneratedParticle(0).theta()), bank.getFloat("energy", i) - gen.getGeneratedParticle(0).vector().p());
+                            h10.fill(Math.toDegrees(gen.getGeneratedParticle(0).phi()), bank.getFloat("energy", i) - gen.getGeneratedParticle(0).vector().p());
                         }
                     }
                 }

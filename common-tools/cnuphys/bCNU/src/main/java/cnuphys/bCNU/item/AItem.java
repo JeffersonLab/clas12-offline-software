@@ -22,7 +22,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JPopupMenu;
 
-import cnuphys.bCNU.application.GlobalOptions;
 import cnuphys.bCNU.drawable.DrawableChangeType;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.feedback.IFeedbackProvider;
@@ -243,21 +242,6 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 				((Graphics2D) g).setStroke(oldStroke);
 
 				g.setClip(oldClip);
-			}
-
-			// draw arrows to parent?
-			if (GlobalOptions.isParentChildArrowsVisible()) {
-				if (_parent != null) {
-					Point2D.Double parentFocus = _parent.getFocus();
-					if ((_focus != null) && (parentFocus != null)) {
-						Point p0 = new Point();
-						Point p1 = new Point();
-						container.worldToLocal(p0, _focus);
-						container.worldToLocal(p1, parentFocus);
-						g.setColor(Color.lightGray);
-						GraphicsUtilities.drawArrow(g, p0.x, p0.y, p1.x, p1.y);
-					}
-				}
 			}
 
 			drawSelections(g, container);
@@ -661,7 +645,7 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	}
 
 	/**
-	 * Add any appropriate feedback strings for the headsup display or feedback
+	 * Add any appropriate feedback strings
 	 * panel. Default implementation returns the item's name.
 	 * 
 	 * @param container
@@ -676,19 +660,6 @@ public abstract class AItem implements IDrawable, IFeedbackProvider {
 	@Override
 	public void getFeedbackStrings(IContainer container, Point pp,
 			Point2D.Double wp, List<String> feedbackStrings) {
-		if (getName() != null) {
-			if (contains(container, pp)) {
-				feedbackStrings.add(getName());
-				if (_focus != null) {
-					feedbackStrings.add("focus "
-							+ container.getLocationString(_focus));
-				}
-				feedbackStrings.add("azimuth "
-						+ DoubleFormat.doubleFormat(_azimuth, 2)
-						+ UnicodeSupport.DEGREE);
-			}
-		}
-
 	}
 
 	/**

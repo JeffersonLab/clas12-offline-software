@@ -1,17 +1,10 @@
 package cnuphys.ced.ced3d;
 
 import java.awt.Color;
-import java.util.List;
-import java.util.Vector;
-
-import org.jlab.geom.DetectorHit;
-
 import bCNU3D.Support3D;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
-import cnuphys.ced.fastmc.FastMCManager;
-import cnuphys.ced.fastmc.ParticleHits;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.lund.X11Colors;
 
@@ -65,47 +58,9 @@ public class DCSuperLayer3D extends DetectorItem3D {
 				frame);
 
 	}
-	
-	private void fastMCDraw(GLAutoDrawable drawable) {
-		if (FastMCManager.getInstance().isStreaming()) {
-			return;
-		}
-
-		Vector<ParticleHits> phits = FastMCManager.getInstance().getFastMCHits();
-		if ((phits == null) || phits.isEmpty()) {
-			return;
-		}
-		
-		float coords[] = new float[6];
-
-		for (ParticleHits hits : phits) {
-			List<DetectorHit> dchits = hits.getDCHits();
-			if (dchits != null) {
-				for (DetectorHit hit : dchits) {
-					int sect1 = hit.getSectorId() + 1;
-					int supl1 = hit.getSuperlayerId() + 1;
-					if ((sect1 == _sector) && (supl1 == _superLayer)) {
-						int lay1 = hit.getLayerId() + 1;
-						int wire1 = hit.getComponentId() + 1;
-						getWire(lay1, wire1, coords);
-						int pid = hits.lundId();
-						Color color = truthColor(pid);
-						Support3D.drawLine(drawable, coords, color, 2f);
-					}
-				}
-			}
-		}
-	}
 
 	@Override
 	public void drawData(GLAutoDrawable drawable) {
-
-		//reroute for fast MC
-		if (_eventManager.isSourceFastMC()) {
-			fastMCDraw(drawable);
-			return;
-		}
-
 		
 		float coords[] = new float[6];
 		

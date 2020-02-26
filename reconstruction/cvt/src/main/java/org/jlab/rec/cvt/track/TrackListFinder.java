@@ -2,18 +2,19 @@ package org.jlab.rec.cvt.track;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.geom.base.Detector;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
-import org.jlab.rec.cvt.trajectory.TrkSwimmer;
 
 public class TrackListFinder {
-
-    private TrkSwimmer bstSwim = new TrkSwimmer();
-
+    
     public TrackListFinder() {
         // TODO Auto-generated constructor stub
     }
@@ -24,15 +25,16 @@ public class TrackListFinder {
      * @param svt_geo the svt geometry
      * @return the list of selected tracks
      */
-    public List<Track> getTracks(List<Track> cands, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
+    public List<Track> getTracks(List<Track> cands, 
+            org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo,
+            CTOFGeant4Factory ctof_geo, Detector cnd_geo,
+            Swim bstSwim) {
         List<Track> tracks = new ArrayList<Track>();
         if (cands.size() == 0) {
             System.err.print("Error no tracks found");
             return cands;
         }
 
-        // remove clones
-        //ArrayList<Track> passedcands = this.rmHelicalTrkClones(org.jlab.rec.cvt.svt.Constants.removeClones, cands);
         // loop over candidates and set the trajectories
         
         for (Track trk : cands) {
@@ -47,17 +49,20 @@ public class TrackListFinder {
 
                 int charge = trk.get_Q();
                 double maxPathLength = 5.0;//very loose cut 
-                bstSwim.SetSwimParameters(trk.get_helix(), maxPathLength, charge, trk.get_P());
+                bstSwim.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
+                        Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
+                        trk.get_P(), charge, 
+                        maxPathLength) ;
 
-                double[] pointAtCylRad = bstSwim.SwimToCylinder(Constants.CTOFINNERRADIUS);
-                trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0], pointAtCylRad[1], pointAtCylRad[2]));
-                trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3], pointAtCylRad[4], pointAtCylRad[5]));
+                double[] pointAtCylRad = bstSwim.SwimToCylinder(Constants.CTOFINNERRADIUS/10);
+                trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
+                trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
 
-                trk.set_pathLength(bstSwim.swamPathLength);
+                trk.set_pathLength(pointAtCylRad[6]*10);
 
                 TrajectoryFinder trjFind = new TrajectoryFinder();
 
-                Trajectory traj = trjFind.findTrajectory(trk.get_Id(), trk.get_helix(), trk, svt_geo, bmt_geo, "final");
+                Trajectory traj = trjFind.findTrajectory(trk.get_Id(), trk, svt_geo, bmt_geo, ctof_geo, cnd_geo, bstSwim, "final");
 
                 trk.set_Trajectory(traj.get_Trajectory());
 
@@ -100,27 +105,43 @@ public class TrackListFinder {
     public void removeOverlappingTracks(List<Track> trkcands) {
             if(trkcands==null)
                 return;
+            
             List<Track> selectedTracks =new ArrayList<Track>();
             List<Track> list = new  ArrayList<Track>();
+            List<Track> rejected = new  ArrayList<Track>();
             for(int i =0; i<trkcands.size(); i++) { 
                 
                 list.clear();
-                if(trkcands.get(i)==null)
+                if(trkcands.get(i)==null) {
                     continue;
+                }
+                if( rejected.contains( trkcands.get(i) ) ) continue;
+                
                 this.getOverlapLists(trkcands.get(i), trkcands, list);
+                
                 Track selectedTrk = this.FindBestTrack(list);
                 if(selectedTrk==null)
                     continue;
-                if(this.ListContainsTrack(selectedTracks, selectedTrk)==false)
+                if(selectedTracks.contains(selectedTrk)==false)
                         selectedTracks.add(selectedTrk);
+                
+                list.remove(selectedTrk);
+
+                for( Track t : list ) {
+                	if( ! rejected.contains(t) ) rejected.add(t);
+                }
+
             }
+            if( rejected != null )
+            	selectedTracks.removeAll(rejected);
             if(trkcands!=null)
                 trkcands.removeAll(trkcands);
             if(selectedTracks!=null)
                 trkcands.addAll(selectedTracks);
     }
 
-    private boolean ListContainsTrack(List<Track> selectedTracks, Track selectedTrk) {
+    private boolean ListContainsTrack(List<Track> selectedTracks, Track selectedTrk) { 
+            // not used. Now Track extends Comparables
             boolean isInList = false;
             for(Track trk : selectedTracks) {
                     if(trk.get_Id()==selectedTrk.get_Id())
@@ -129,26 +150,53 @@ public class TrackListFinder {
             return isInList;
     }
 
+
     private void getOverlapLists(Track track, List<Track> trkcands, List<Track> list) {
-         
-        for(int i =0; i<trkcands.size(); i++) { 
-                if( (track.get(0).get_Id()!=-1 && track.get(0).get_Id()==trkcands.get(i).get(0).get_Id()) || 
-                                (track.get(1).get_Id()!=-1 && track.get(1).get_Id()==trkcands.get(i).get(1).get_Id()) || 
-                                (track.get(2).get_Id()!=-1 && track.get(2).get_Id()==trkcands.get(i).get(2).get_Id()) ) {
-                        list.add(trkcands.get(i));
-                }
-        }
+    // --------------------------------------------------------------------
+    //  two tracks are considered the same if they share at least 2 crosses
+    // --------------------------------------------------------------------
+			
+    	for( Track t : trkcands ) {
+    		int N = 0;
+    		for( Cross c : t ) {
+
+          // do not check on BMTC
+          if( c.get_DetectorType().equalsIgnoreCase("C") == true ) continue;
+
+    			if( track.contains(c) ) { N++;  }
+    		}
+    		if( N >= 2 ) list.add( t );
+    	}
+    	
     }
 
     private Track FindBestTrack(List<Track> trkList) {
+    // --------------------------------------------------------------------
+    //  Select the candidate with the highest number of NDF
+    //    if two have the same ndf, get the one with the better chi2/ndf
+    // --------------------------------------------------------------------
             double bestChi2 = 9999999;
+            int ndf = 0;
             Track bestTrk = null;
 
             for(int i =0; i<trkList.size(); i++) {
-                    if(trkList.get(i).getChi2()/(double)trkList.get(i).getNDF()<bestChi2) {
-                            bestChi2 = trkList.get(i).getChi2()/(double)trkList.get(i).getNDF();
-                            bestTrk = trkList.get(i);
-                    }
+
+                    if( Double.isNaN(trkList.get(i).getChi2()) == false && 
+                        trkList.get(i).getChi2() < 1e4 &&
+                        trkList.get(i).getNDF()>=ndf) {
+
+                        ndf = trkList.get(i).getNDF();
+                        if( trkList.get(i).getNDF()==ndf ) {
+                        	if(trkList.get(i).getChi2()/(double)trkList.get(i).getNDF()<bestChi2) {
+		                      bestChi2 = trkList.get(i).getChi2()/(double)trkList.get(i).getNDF();
+		                      bestTrk = trkList.get(i);
+                        	}
+                        }
+                        else {
+                        	bestChi2 = trkList.get(i).getChi2()/(double)trkList.get(i).getNDF();
+                        	bestTrk = trkList.get(i);
+                        }
+                }
             }
             return bestTrk;
     }

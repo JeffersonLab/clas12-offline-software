@@ -108,6 +108,24 @@ public class LundSupport {
 			return LundSupport.getInstance().get(-200);
 		}
 	}
+	
+	/**
+	 * Obtain the LundID object for a cvt based particle
+	 * 
+	 * @return the LundID object for a hit based particle
+	 */
+	public static LundId getCVTbased(int q) {
+		if (q < 0) {
+			return LundSupport.getInstance().get(-301);
+		}
+		if (q > 0) {
+			return LundSupport.getInstance().get(-299);
+		}
+		else {
+			return LundSupport.getInstance().get(-300);
+		}
+	}
+
 
 	/**
 	 * Is this a track based "particle"
@@ -136,6 +154,21 @@ public class LundSupport {
 		return((id == -201) || (id == -199) || (id == -200));
 				
 	}
+	
+	/**
+	 * Is this a cvt based "particle"
+	 * @param lid the id
+	 * @return <code>true</code> if cvt based
+	 */
+	public static boolean isCVT(LundId lid) {
+		if (lid == null) {
+			return false;
+		}
+		int id = lid.getId();
+		return((id == -301) || (id == -299) || (id == -300));
+				
+	}
+
 
 	/**
 	 * Obtain the LundID object for an electron
@@ -183,7 +216,13 @@ public class LundSupport {
 		//unknowns (yellow--hit based)
 		_lundIds.add(new LundId("Lepton", "?HB" + SUPERPLUS,   -199,  0,  3, 0));
 		_lundIds.add(new LundId("Lepton", "?HB" + SUPERMINUS, -201,  0, -3, 0));
-		_lundIds.add(new LundId("Lepton", "?HB" + SUPERZERO,   -300, 0, 0, 0));
+		_lundIds.add(new LundId("Lepton", "?HB" + SUPERZERO,   -200, 0, 0, 0));
+		
+		//unknowns (green--cvt based)
+		_lundIds.add(new LundId("Lepton", "?CVT" + SUPERPLUS,   -299,  0,  3, 0));
+		_lundIds.add(new LundId("Lepton", "?CVT" + SUPERMINUS, -301,  0, -3, 0));
+		_lundIds.add(new LundId("Lepton", "?CVT" + SUPERZERO,   -300, 0, 0, 0));
+
 
 		
 		_lundIds.add(new LundId("InterBoson", "g", 21, 0, 0, 2));
@@ -948,7 +987,10 @@ public class LundSupport {
 		setStyle(-199, Color.yellow);
 		setStyle(-200, Color.yellow);
 		setStyle(-201, Color.yellow);
-		
+		setStyle(-299, darkGreen);
+		setStyle(-500, darkGreen);
+		setStyle(-301, darkGreen);
+	
 		
 		setStyle(11, Color.red); // e-
 		setStyle(-11, Color.magenta); // e+

@@ -1,6 +1,5 @@
 package cnuphys.ced.event.data;
 
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.ced.clasio.ClasIoEventManager;
@@ -24,9 +23,15 @@ public class DetectorData implements IClasIoEventListener {
 	@Override
 	public void changedEventSource(EventSourceType source) {
 	}
-
+	
+	/**
+	 * Tests whether this listener is interested in events while accumulating
+	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 */
 	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
+	public boolean ignoreIfAccumulating() {
+		return true;
 	}
+
 
 }

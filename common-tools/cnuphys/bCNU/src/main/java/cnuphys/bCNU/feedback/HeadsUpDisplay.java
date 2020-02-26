@@ -5,39 +5,39 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import java.util.List;
 
-import cnuphys.bCNU.graphics.container.IContainer;
-import cnuphys.bCNU.item.YouAreHereItem;
+import cnuphys.bCNU.application.BaseMDIApplication;
+import cnuphys.bCNU.graphics.component.GlassPane;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.X11Colors;
 
-public class HeadsUpDisplay {
+public class HeadsUpDisplay extends GlassPane {
 
 	// Font used to display HUD text;
-	private static Font _hudFont = Fonts.commonFont(Font.BOLD, 9);
+	private static Font _hudFont = Fonts.commonFont(Font.BOLD, 12);
 
 	// color behind text
-	private Color _backgroundColor = new Color(0, 0, 64, 160);
+	private Color _backgroundColor = new Color(48, 48, 48, 196);
 
-	// the parent container
-	private IContainer _container;
+	// the parent application
+	private BaseMDIApplication _application;
 
-	// hack for flash
-	private static int _udcount = 0;
-
-	// which corner
+	// which corner to display
 	private static final int UPPERLEFT = 0;
 	private static final int UPPERRIGHT = 1;
 	private static final int LOWERRIGHT = 2;
 	private static final int LOWERLEFT = 3;
-	private int _corner = UPPERLEFT;
-
-	private Rectangle _cornerRects[] = new Rectangle[4];
+	
+	//corner choice
+	private int _desiredCorner = LOWERRIGHT;
+	
+	//the current strings
+	private List<String> _currentStrings;
+	
+	private Rectangle _cornerRect = new Rectangle();
+	
 
 	/**
 	 * Create a HeadsUp display.
@@ -45,11 +45,33 @@ public class HeadsUpDisplay {
 	 * @param container
 	 *            the parent container
 	 */
-	public HeadsUpDisplay(IContainer container) {
-		_container = container;
+	public HeadsUpDisplay(BaseMDIApplication application) {
+		_application = application;
+	}
+	
+	@Override
+	public void paintComponent(Graphics g) {
+				
+		if (_currentStrings != null) {
+			updateStrings(g, _currentStrings);
+		}
+	}
+	
+	public void update(List<String> feedbackStrings) {
+		_currentStrings = feedbackStrings;
+		
+		Graphics g = this.getGraphics();
+		repaint();
+	}
 
-		for (int i = 0; i < 4; i++) {
-			_cornerRects[i] = new Rectangle();
+	
+	/**
+	 * Set the desired corner
+	 * @param corner the desired corner
+	 */
+	public void setDesiredCorner(int corner) {
+		if ((corner >= 0) && (corner < 4)) {
+			_desiredCorner = corner;
 		}
 	}
 
@@ -59,101 +81,53 @@ public class HeadsUpDisplay {
 	 * @param feedbackStrings
 	 *            the new feedback strings.
 	 */
-	public void updateHeadsUp(List<String> feedbackStrings,
-			MouseEvent mouseEvent) {
+	private void updateStrings(Graphics g, List<String> feedbackStrings) {
 
-		if (mouseEvent == null) {
-			return;
-		}
-
-		Rectangle bounds = _container.getComponent().getBounds();
+		Rectangle bounds = _application.getBounds();
 		if ((bounds == null) || (bounds.height < 10)) {
 			return;
 		}
 
-		boolean drawStrings = true;
 		Dimension fbSize = getFeedbackSize(bounds, feedbackStrings);
 
 		int fbw = 0;
 		int fbh = 0;
 		if (fbSize == null) {
-			drawStrings = false;
+			return;
 		} else {
 			fbw = fbSize.width;
 			fbh = fbSize.height;
 		}
 
-		// get the container's image
-		BufferedImage offscreenBuffer = _container.getImage();
-		if (offscreenBuffer == null) {
-			return;
+
+		// set all four corner rects, later we'll decide which
+		// to use (that the mouse is not in)
+
+		int left = 10;
+		int top = 40;
+		int right = bounds.width - fbw - 10;
+		int bottom = bounds.height - fbh - 40;
+		
+		switch (_desiredCorner) {
+		case UPPERLEFT:
+			_cornerRect.setBounds(left, top, fbw, fbh + 4);
+			break;
+		case UPPERRIGHT:
+			_cornerRect.setBounds(right, top, fbw, fbh + 4);
+			break;
+		case LOWERRIGHT:
+			_cornerRect.setBounds(right, bottom, fbw, fbh + 4);
+			break;
+		case LOWERLEFT:
+			_cornerRect.setBounds(left, bottom, fbw, fbh + 4);
+			break;
 		}
 
-		// make a new buffer the same size
-		BufferedImage newBuffer = new BufferedImage(offscreenBuffer.getWidth(),
-				offscreenBuffer.getHeight(), BufferedImage.TYPE_INT_RGB);
+		g.setColor(_backgroundColor);
+		g.fillRect(_cornerRect.x, _cornerRect.y, _cornerRect.width, _cornerRect.height);
 
-		// draw the background image onto the new buffer
-		Graphics newg = newBuffer.getGraphics();
-		newg.drawImage(offscreenBuffer, 0, 0, _container.getComponent());
-
-		// set both upper left and upper right rects, later we'll decide which
-		// to use
-
-		int left = 4;
-		int top = 0;
-		int right = bounds.width - fbw - 4;
-		int bottom = bounds.height - fbh - 4;
-
-		_cornerRects[UPPERLEFT].setBounds(left, top, fbw, fbh + 4);
-		_cornerRects[UPPERRIGHT].setBounds(right, top, fbw, fbh + 4);
-		_cornerRects[LOWERRIGHT].setBounds(right, bottom, fbw, fbh + 4);
-		_cornerRects[LOWERLEFT].setBounds(left, bottom, fbw, fbh + 4);
-
-		// find a corner the mouse is not in
-		int count = 0;
-		while ((count < 4)
-				&& _cornerRects[_corner].contains(mouseEvent.getPoint())) {
-			_corner = (_corner + 1) % 4;
-			count++;
-		}
-
-		// now the strings
-		if (drawStrings) {
-
-			Rectangle rect = _cornerRects[_corner];
-
-			newg.setColor(_backgroundColor);
-			newg.fillRect(rect.x, rect.y, rect.width, rect.height);
-			drawStrings(newg, rect.x + 2, rect.y, feedbackStrings);
-
-		}
-
-		newg.dispose();
-
-		Graphics g = _container.getComponent().getGraphics();
-		// this causes that flash the first time i dinna ken why
-		// hack: skip the first few
-		if (_udcount < 3) {
-			_udcount++;
-		} else {
-			g.drawImage(newBuffer, 0, 0, _container.getComponent());
-
-			// anchor (urhere) feedback?
-			YouAreHereItem item = _container.getYouAreHereItem();
-
-			if (item != null) {
-				// draw line if shift down
-				if (mouseEvent.isShiftDown()) {
-					Point anchor = item.getFocusPoint(_container);
-					g.setColor(Color.black);
-					g.drawLine(mouseEvent.getX(), mouseEvent.getY(), anchor.x,
-							anchor.y);
-				}
-			}
-		}
-
-		g.dispose();
+		
+		drawStrings(g, _cornerRect.x + 2, _cornerRect.y, feedbackStrings);
 	}
 
 	/**
@@ -168,7 +142,7 @@ public class HeadsUpDisplay {
 	 */
 	private void drawStrings(Graphics g, int x, int yo,
 			List<String> feedbackStrings) {
-		FontMetrics fm = _container.getComponent().getFontMetrics(_hudFont);
+		FontMetrics fm = _application.getFontMetrics(_hudFont);
 		int y = yo + fm.getHeight();
 		g.setFont(_hudFont);
 
@@ -214,7 +188,7 @@ public class HeadsUpDisplay {
 		int h = 0;
 		int slop = 4;
 
-		FontMetrics fm = _container.getComponent().getFontMetrics(_hudFont);
+		FontMetrics fm = _application.getFontMetrics(_hudFont);
 
 		for (String s : feedbackStrings) {
 			if (s != null) {
@@ -245,6 +219,16 @@ public class HeadsUpDisplay {
 			}
 		}
 		return str;
+	}
+
+	/**
+	 * Clear the strings
+	 */
+	public void clear() {
+		if (_currentStrings != null) {
+			_currentStrings = null;
+			repaint();
+		}
 	}
 
 }

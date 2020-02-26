@@ -1,9 +1,9 @@
 package org.jlab.rec.cvt.track;
 
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.rec.cvt.svt.Constants;
 import org.jlab.rec.cvt.svt.Geometry;
 import org.jlab.rec.cvt.trajectory.Helix;
-import org.jlab.rec.cvt.trajectory.TrkSwimmer;
 
 /**
  * Stand alone energy loss correction for the SVT
@@ -19,8 +19,7 @@ public class EnergyLossCorr {
     /**
      * Field instantiated using the torus and the solenoid
      */
-    public TrkSwimmer bstSwim = new TrkSwimmer();
-
+    
     double cosEntAnglesPlanes[];
 
     private double[][] Points;
@@ -42,7 +41,7 @@ public class EnergyLossCorr {
      *
      * @param trkcand the track candidate
      */
-    public EnergyLossCorr(Track trkcand) {
+    public EnergyLossCorr(Track trkcand, Swim bstSwim) {
 
         if (trkcand == null) {
             return;
@@ -53,12 +52,12 @@ public class EnergyLossCorr {
         OrigTrack = new Helix(trkcand.get_helix().get_dca(), trkcand.get_helix().get_phi_at_dca(), trkcand.get_helix().get_curvature(),
                 trkcand.get_helix().get_Z0(), trkcand.get_helix().get_tandip(), null);
 
-        init(trkcand);
+        init(trkcand, bstSwim);
     }
-
-    public void doCorrection(Track trkcand, Geometry geo) {
-
-        double B = bstSwim.Bfield(Points[0][0] / 10, Points[0][0] / 10, Points[0][0] / 10).z();
+    
+    public void doCorrection(Track trkcand, Geometry geo, Swim bstSwim, float b[]) {
+        bstSwim.BfieldLab(Points[0][0] / 10, Points[0][0] / 10, Points[0][0] / 10, b);
+        double B = (double)b[2];
         double ELossMax = 600; //600Mev 
         double stepSize = 0.001; //1 MeV
         int nbins = (int) ELossMax;
@@ -72,14 +71,14 @@ public class EnergyLossCorr {
             if (Math.abs(this.OrigTrack.get_curvature()) < Math.abs(curv)) {
                 double correctedCurv = (Constants.LIGHTVEL * Math.abs(B)) * Math.signum(this.OrigTrack.get_curvature()) / (pt + stepSize);
                 trkcand.get_helix().set_curvature(correctedCurv);
-                trkcand.set_HelicalTrack(trkcand.get_helix());
+                trkcand.set_HelicalTrack(trkcand.get_helix(), bstSwim, b);
                 return;
             }
             pt = pt0 - j * stepSize;
 
             double aveCurv = 0;
             for (int k = 0; k < trkcand.size(); k++) {
-                aveCurv += doEnergyLossCorrection(k, pt);
+                aveCurv += doEnergyLossCorrection(k, pt, bstSwim, b);
             }
             aveCurv /= trkcand.size();
             curv = aveCurv;
@@ -88,14 +87,14 @@ public class EnergyLossCorr {
 
     }
 
-    private void init(Track trkcand) {
+    private void init(Track trkcand, Swim bstSwim) {
 
         Points = new double[trkcand.size()][3];
         //CorrPoints 	= new double[trkcand.size()][3] ;
 
         cosEntAnglesPlanes = new double[trkcand.size()];
 
-        Track trkcandcopy = new Track(trkcand.get_helix());
+        Track trkcandcopy = new Track(trkcand.get_helix(), bstSwim);
         trkcandcopy.addAll(trkcand);
 
         this.set_UpdatedTrack(trkcandcopy);
@@ -120,9 +119,9 @@ public class EnergyLossCorr {
     }
 
     //? Solve numerically stepping over pt until corr pt matches with fit omega... how much dedx corresponds to obs pt?
-    private double doEnergyLossCorrection(int m, double pt) {
-
-        double B = bstSwim.Bfield(Points[m][0] / 10, Points[m][0] / 10, Points[m][0] / 10).z(); // Bfield takes units of cm
+    private double doEnergyLossCorrection(int m, double pt, Swim bstSwim, float b[]) {
+        bstSwim.BfieldLab(Points[m][0] / 10, Points[m][0] / 10, Points[m][0] / 10, b);
+        double B = b[2]; // Bfield takes units of cm
 
         double tanL = this.OrigTrack.get_tandip();
 

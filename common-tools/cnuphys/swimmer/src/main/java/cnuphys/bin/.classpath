@@ -4,5 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/magfield"/>
 	<classpathentry kind="lib" path="lib/Jama-1.0.3.jar"/>
+	<classpathentry kind="lib" path="/apache/lib/commons-math3-3.6.1.jar"/>
 	<classpathentry kind="output" path="cnuphys/bin"/>
 </classpath>

@@ -23,10 +23,15 @@ services:
     name: CVT
   - class: org.jlab.service.ctof.CTOFEngine
     name: CTOF
+#  - class: org.jlab.service.cnd.CNDEngine
+  - class: org.jlab.service.cnd.CNDCalibrationEngine
+    name: CND
   - class: org.jlab.service.htcc.HTCCReconstructionService
     name: HTCC
   - class: org.jlab.service.ltcc.LTCCEngine
     name: LTCC
+  - class: org.jlab.rec.rich.RICHEBEngine
+    name: RICH
   - class: org.jlab.service.ec.ECEngine
     name: EC
   - class: org.jlab.service.eb.EBHBEngine

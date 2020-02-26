@@ -590,6 +590,7 @@ public class Support3D {
 	public static void drawTube(GLAutoDrawable drawable, float x1, float y1,
 			float z1, float x2, float y2, float z2, float radius, Color color) {
 
+		
 		if (_quad == null) {
 			_quad = Panel3D.glu.gluNewQuadric();
 		}
@@ -616,7 +617,7 @@ public class Support3D {
 		gl.glTranslatef(x1, y1, z1);
 		gl.glRotatef(ax, rx, ry, 0f);
 		// gluQuadricOrientation(quadric,GLU_OUTSIDE);
-		Panel3D.glu.gluCylinder(_quad, radius, radius, v, 10, 1);
+		Panel3D.glu.gluCylinder(_quad, radius, radius, v, 50, 1);
 
 		gl.glPopMatrix();
 	}

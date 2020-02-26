@@ -33,8 +33,11 @@ public class HTCCReconstructionService extends ReconstructionEngine{
        
         try {
             HTCCReconstruction reco = new HTCCReconstruction();
-              reco.gain  = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/gain");
-              reco.time  = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/time");
+              reco.gain       = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/gain");
+              reco.time       = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/time");
+              reco.ring_time  = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/ring_time");
+              reco.cluster_par    = this.getConstantsManager().getConstants(runNo, "/calibration/htcc/cluster");
+              reco.geometry   = this.getConstantsManager().getConstants(runNo, "/geometry/htcc/htcc");
               reco.processEvent(event);
         } catch (Exception e){
             System.out.println("----> error with HTCC reconstruction..");
@@ -52,6 +55,9 @@ public class HTCCReconstructionService extends ReconstructionEngine{
             String[]  htccTables = new String[]{
             "/calibration/htcc/gain", 
             "/calibration/htcc/time", 
+            "/calibration/htcc/ring_time", 
+            "/calibration/htcc/cluster", 
+            "/geometry/htcc/htcc", 
     
         };
         

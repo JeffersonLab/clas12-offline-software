@@ -1,8 +1,9 @@
 package org.jlab.rec.dc.cross;
 
 import java.util.ArrayList;
+import org.jlab.clas.clas.math.FastMath;
 
-import org.apache.commons.math3.util.FastMath;
+//import org.apache.commons.math3.util.FastMath;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.dc.hit.FittedHit;
@@ -21,7 +22,31 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
      * serial id
      */
     private static final long serialVersionUID = 5317526429163382618L;
+    /**
+     *
+     * @return serialVersionUID
+     */
+    public static long getSerialversionuid() {
+        return serialVersionUID;
+    }
 
+    private int _Sector;      							//	sector[1...6]
+    private int _Region;    		 					//	region[1,...3]
+    private int _Id;								//	cross Id
+
+    // point parameters:
+    private Point3D _Point;
+    private Point3D _PointErr;
+    private Point3D _Dir;
+    private Point3D _DirErr;
+    private Segment _seg1;
+    private Segment _seg2;
+    public boolean isPseudoCross = false;
+    
+    private double cos_tilt = FastMath.cos(Math.toRadians(25.));
+    private double sin_tilt = FastMath.sin(Math.toRadians(25.));
+    
+    public int recalc;
     /**
      *
      * @param sector the sector (1...6)
@@ -34,16 +59,6 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
         this._Region = region;
         this._Id = rid;
     }
-
-    private int _Sector;      							//	sector[1...6]
-    private int _Region;    		 					//	region[1,...3]
-    private int _Id;								//	cross Id
-
-    // point parameters:
-    private Point3D _Point;
-    private Point3D _PointErr;
-    private Point3D _Dir;
-    private Point3D _DirErr;
 
     /**
      *
@@ -168,13 +183,6 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
         this._DirErr = _DirErr;
     }
 
-    /**
-     *
-     * @return serialVersionUID
-     */
-    public static long getSerialversionuid() {
-        return serialVersionUID;
-    }
 
     /**
      * Sorts crosses by azimuth angle values
@@ -193,10 +201,6 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
         }
     }
 
-    private Segment _seg1;
-    private Segment _seg2;
-    public boolean isPseudoCross = false;
-    public int recalc;
 
     /**
      * Set the first segment (corresponding to the first superlayer in a region)
@@ -266,7 +270,6 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
         this.set_Dir(dirVec);
 
         if (this.get_Dir().z() == 0) {
-            System.err.print("Error in tangent to trajectory calculation");
             return;
         }
 
@@ -320,7 +323,7 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
                 + " Point " + this.get_Point().toString() + "  Dir " + this.get_Dir().toString();
         return s;
     }
-
+    
     /**
      *
      * @param X
@@ -330,8 +333,8 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
      * coordinate system
      */
     public Point3D getCoordsInSector(double X, double Y, double Z) {
-        double rz = -X * Math.sin(Math.toRadians(25.)) + Z * Math.cos(Math.toRadians(25.));
-        double rx = X * Math.cos(Math.toRadians(25.)) + Z * Math.sin(Math.toRadians(25.));
+        double rz = -X * sin_tilt + Z * cos_tilt;
+        double rx = X * cos_tilt + Z * sin_tilt;
 
         return new Point3D(rx, Y, rz);
     }
@@ -346,10 +349,20 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
      */
     public Point3D getCoordsInLab(double X, double Y, double Z) {
         Point3D PointInSec = this.getCoordsInSector(X, Y, Z);
-        double rx = PointInSec.x() * Math.cos((this.get_Sector() - 1) * Math.toRadians(60.)) - PointInSec.y() * Math.sin((this.get_Sector() - 1) * Math.toRadians(60.));
-        double ry = PointInSec.x() * Math.sin((this.get_Sector() - 1) * Math.toRadians(60.)) + PointInSec.y() * Math.cos((this.get_Sector() - 1) * Math.toRadians(60.));
+        double rx = PointInSec.x() * FastMath.cos((this.get_Sector() - 1) * Math.toRadians(60.)) - PointInSec.y() * FastMath.sin((this.get_Sector() - 1) * Math.toRadians(60.));
+        double ry = PointInSec.x() * FastMath.sin((this.get_Sector() - 1) * Math.toRadians(60.)) + PointInSec.y() * FastMath.cos((this.get_Sector() - 1) * Math.toRadians(60.));
 
         return new Point3D(rx, ry, PointInSec.z());
+    }
+    
+    public Point3D getCoordsInTiltedSector(double X, double Y, double Z) {
+        double rx = X * FastMath.cos((this.get_Sector() - 1) * Math.toRadians(-60.)) - Y * FastMath.sin((this.get_Sector() - 1) * Math.toRadians(-60.));
+        double ry = X * FastMath.sin((this.get_Sector() - 1) * Math.toRadians(-60.)) + Y * FastMath.cos((this.get_Sector() - 1) * Math.toRadians(-60.));
+       
+        double rtz = rx * sin_tilt + Z * cos_tilt;
+        double rtx = rx * cos_tilt - Z * sin_tilt;
+         
+        return new Point3D(rtx, ry, rtz);
     }
     /*
 	public double[] ReCalcPseudoCross(Cross c2, Cross c3) {
@@ -380,7 +393,7 @@ public class Cross extends ArrayList<Segment> implements Comparable<Cross> {
      */
 
     void set_CrossDirIntersSegWires() {
-        double wy_over_wx = (Math.cos(Math.toRadians(6.)) / Math.sin(Math.toRadians(6.)));
+        double wy_over_wx = (FastMath.cos(Math.toRadians(6.)) / FastMath.sin(Math.toRadians(6.)));
         double val_sl1 = this._seg1.get_fittedCluster().get_clusterLineFitSlope();
         double val_sl2 = this._seg2.get_fittedCluster().get_clusterLineFitSlope();
         double val_it1 = this._seg1.get_fittedCluster().get_clusterLineFitIntercept();

@@ -384,7 +384,7 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
         private int  scalerOrder = 0;
         private byte helicity    = -1;
         private byte quartet     = -1;
-        private int  value       = 0;
+        private long value       = 0;
 
         
         
@@ -398,7 +398,7 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
             return quartet;
         }
 
-        public int getValue() {
+        public long getValue() {
             return value;        
         }
         
@@ -416,7 +416,7 @@ public class DetectorDataDgtz implements Comparable<DetectorDataDgtz> {
             return this;
         }
 
-        public SCALERData setValue(int value) {
+        public SCALERData setValue(long value) {
             this.value = value;
             return this;
         }

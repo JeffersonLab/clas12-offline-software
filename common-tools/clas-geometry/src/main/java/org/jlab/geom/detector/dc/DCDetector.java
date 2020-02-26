@@ -24,6 +24,9 @@ public class DCDetector extends AbstractDetector<DCSector> {
         super(DetectorId.DC);
     }
     
+    public DCDetector(DetectorId id){
+        super(id);
+    }
     /**
      * Returns "DC Detector".
      * @return "DC Detector"

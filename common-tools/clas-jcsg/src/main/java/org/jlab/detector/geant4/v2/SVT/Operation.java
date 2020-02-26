@@ -18,12 +18,12 @@ public class Operation implements Primitive {
 
 	public Operation( String operation, String[] operands )
 	{
-		if( pOp.isEmpty() || pOps.length == 0 ) {
+		if( operation.isEmpty() || operands.length == 0 ) {
             throw new IllegalArgumentException("Illegal arguments for Operation Primitive!");
         }
 		
-		this.pOp = pOp;
-		this.pOps = pOps;
+		this.pOp = operation;
+		this.pOps = operands;
 	}
 
 	@Override

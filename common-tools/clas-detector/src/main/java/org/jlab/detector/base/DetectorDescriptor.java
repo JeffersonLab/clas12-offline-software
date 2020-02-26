@@ -51,7 +51,11 @@ public class DetectorDescriptor implements Comparable<DetectorDescriptor> {
     public int getSlot(){ return this.hw_SLOT;}
     public int getSector(){return this.dt_SECTOR;}
     public int getOrder(){ return this.dt_ORDER;}
- 
+
+    public void setSector(int sector){
+        this.dt_SECTOR=sector;
+    }
+    
     public void setOrder(int order){        
         this.dt_ORDER = order;
         if(this.dt_ORDER<0||this.dt_ORDER>3){
@@ -104,10 +108,10 @@ public class DetectorDescriptor implements Comparable<DetectorDescriptor> {
     }
     
     public boolean compare(DetectorDescriptor desc){
-        if(this.detectorType==desc.detectorType&&
-                this.dt_SECTOR==desc.dt_SECTOR&&
-                this.dt_LAYER==desc.dt_LAYER&&
-                this.dt_COMPONENT==desc.dt_COMPONENT) return true;
+        if(this.detectorType.equals(desc.detectorType)&&
+                this.dt_SECTOR.equals(desc.dt_SECTOR)&&
+                this.dt_LAYER.equals(desc.dt_LAYER)&&
+                this.dt_COMPONENT.equals(desc.dt_COMPONENT)) return true;
         return false;
     }
     

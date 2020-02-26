@@ -131,6 +131,11 @@ public class CrossList extends Vector<Cross> {
 	
 	//check for length mismatch
 	private boolean lengthMismatch(byte[] sector, byte[] array, String name) {
+		if (array == null) {
+			_error = "null " + name + " array when creating CrossList";
+			return true;
+		}
+
 		if (sector.length != array.length) {
 			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating CrossList";
 			return true;
@@ -140,6 +145,11 @@ public class CrossList extends Vector<Cross> {
 	
 	//check for length mismatch
 	private boolean lengthMismatch(byte[] sector, short[] array, String name) {
+		if (array == null) {
+			_error = "null " + name + " array when creating CrossList";
+			return true;
+		}
+
 		if (sector.length != array.length) {
 			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating CrossList";
 			return true;
@@ -149,6 +159,11 @@ public class CrossList extends Vector<Cross> {
 	
 	//check for length mismatch
 	private boolean lengthMismatch(byte[] sector, float[] array, String name) {
+		if (array == null) {
+			_error = "null " + name + " array when creating CrossList";
+			return true;
+		}
+
 		if (sector.length != array.length) {
 			_error = "Sector length: " + sector.length + " does not match " + name + " length: " + array.length + " when creating CrossList";
 			return true;

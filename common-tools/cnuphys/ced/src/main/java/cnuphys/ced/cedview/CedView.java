@@ -15,6 +15,7 @@ import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JSlider;
 import javax.swing.Timer;
 
 import cnuphys.bCNU.component.InfoWindow;
@@ -36,8 +37,6 @@ import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.MagFieldDisplayArray;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.IAccumulationListener;
-import cnuphys.ced.fastmc.AcceptanceManager;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.ECGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.lund.SwimTrajectoryListener;
@@ -46,7 +45,6 @@ import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.Swimming;
 
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
@@ -57,15 +55,16 @@ import org.jlab.io.base.DataEvent;
 public abstract class CedView extends BaseView implements IFeedbackProvider, SwimTrajectoryListener,
 		MagneticFieldChangeListener, IAccumulationListener, IClasIoEventListener {
 	
+	//for accumulation drawing
+	private double _medianRelSetting = 0.25;
 
 	// are we showing single events or are we showing accumulated data
 	public enum Mode {
-		SINGLE_EVENT, SIMPLEACCUMULATED, LOGACCUMULATED
+		SINGLE_EVENT, ACCUMULATED
 	};
 	
-	//field probe for fast retrieval of mag field
-	protected FieldProbe probe;
-	
+	static protected FieldProbe _activeProbe;
+		
 	//to add separator for first clone
 	private static boolean _firstClone = true;
 
@@ -164,8 +163,6 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		// listen for trajectory changes
 		Swimming.addSwimTrajectoryListener(this);
 
-		probe = FieldProbe.factory();
-
 		MagneticFields.getInstance().addMagneticFieldChangeListener(this);
 
 		_userComponentDrawer = new UserComponentLundDrawer(this);
@@ -201,6 +198,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		GraphicsUtilities.setSizeMini(nextEvent);
 		getToolBar().add(Box.createHorizontalStrut(5), 0);
 		getToolBar().add(nextEvent, 0);
+		
+		if (_activeProbe == null) {
+			_activeProbe = FieldProbe.factory();
+		}
 	}
 
 	// called when heartbeat goes off.
@@ -425,7 +426,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	}
 
 	/**
-	 * Convenience method to see it we show the the reconstructed clusters.
+	 * Convenience method to see it we show the reconstructed clusters.
 	 * 
 	 * @return <code>true</code> if we are to show the the reconstructed
 	 *         clusters.
@@ -436,6 +437,20 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showClusters();
 	}
+	
+	/**
+	 * Convenience method to see it we show the reconstructed FMT Crosses.
+	 * 
+	 * @return <code>true</code> if we are to show the the reconstructed
+	 *         FMT Crosses.
+	 */
+	public boolean showFMTCrosses() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showFMTCrosses();
+	}
+
 
 	
 	/**
@@ -451,6 +466,30 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		return _controlPanel.getDisplayArray().showReconHits();
 	}
 	
+	/**
+	 * Convenience method to see it we show the the adc hits.
+	 * 
+	 * @return <code>true</code> if we are to show the the adc
+	 *         hits.
+	 */
+	public boolean showADCHits() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showADCHits();
+	}
+
+	/**
+	 * Convenience method to see if we show CVT reconstructed tracks.
+	 * These are ADC hits except 
+	 * @return <code>true</code> if we are to show ADC hits.
+	 */
+	public boolean showCVTTracks() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showCVTTracks();
+	}
 
 	/**
 	 * Convenience method to see it we show the dc time-based reconstructed
@@ -619,7 +658,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 */
 	@Override
 	public void magneticFieldChanged() {
-		probe = FieldProbe.factory();
+		_activeProbe = FieldProbe.factory();
 		getContainer().refresh();
 	}
 
@@ -718,13 +757,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		EventSourceType estype = ClasIoEventManager.getInstance().getEventSourceType();
 		switch (estype) {
 		case HIPOFILE:
-		case HIPORING:
+//		case HIPORING:
 		case ET:
 		case EVIOFILE:
 			haveEvent = (_eventManager.getCurrentEvent() != null);
-			break;
-		case FASTMC:
-			haveEvent = (FastMCManager.getInstance().getCurrentGenEvent() != null);
 			break;
 		}
 
@@ -734,13 +770,6 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		} else {
 			feedbackStrings.add("$orange red$" + "event " + _eventManager.getEventNumber());
 			feedbackStrings.add("$orange red$" + _eventManager.getCurrentSourceDescription());
-		}
-
-		// acceptance for fast MC
-		if (_eventManager.isSourceFastMC()) {
-			if (!FastMCManager.getInstance().isStreaming()) {
-				feedbackStrings.add("$orange red$" + AcceptanceManager.getInstance().acceptanceResult());
-			}
 		}
 
 		// get the sector
@@ -794,18 +823,10 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 * 
 	 * @return <code>true</code> if we are in accumulation mode
 	 */
-	public boolean isSimpleAccumulatedMode() {
-		return (_mode == Mode.SIMPLEACCUMULATED);
+	public boolean isAccumulatedMode() {
+		return (_mode == Mode.ACCUMULATED);
 	}
 
-	/**
-	 * See if we are in log accumulation event mode
-	 * 
-	 * @return <code>true</code> if we are in accumulation mode
-	 */
-	public boolean isLogAccumulatedMode() {
-		return (_mode == Mode.LOGACCUMULATED);
-	}
 
 	/**
 	 * Set the mode for this view.
@@ -816,6 +837,11 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 */
 	public void setMode(Mode mode) {
 		_mode = mode;
+		
+		JSlider slider = _controlPanel.getAccumulationSlider();
+		if (slider != null) {
+			slider.setEnabled(_mode == Mode.ACCUMULATED);
+		}
 	}
 
 	/**
@@ -851,21 +877,9 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 */
 	@Override
 	public void trajectoriesChanged() {
-		if (!_eventManager.isAccumulating() && !FastMCManager.getInstance().isStreaming()) {
-			//System.err.println("TRAJ CHANGE view: " + getTitle());
+		if (!_eventManager.isAccumulating()) {
 			getContainer().refresh();
 		}
-	}
-
-	/**
-	 * New fast mc event
-	 * 
-	 * @param event
-	 *            the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
-		System.err.println("111");
 	}
 
 	/**
@@ -933,7 +947,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 * Change the event source type
 	 * 
 	 * @param source
-	 *            the new source: File, ET, FastMC
+	 *            the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
@@ -1089,6 +1103,33 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		wp.y = Math.hypot(pisect.x(), pisect.y());
 		return pisect;
 	}
+	
+	/**
+	 * Tests whether this listener is interested in events while accumulating
+	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 */
+	@Override
+	public boolean ignoreIfAccumulating() {
+		return true;
+	}
+
+	/**
+	 * Get the median setting used in accumulation drawing
+	 * @return the median setting used in accumulation drawing
+	 */
+	public double getMedianSetting() {
+		return _medianRelSetting;
+	}
+	
+	/**
+	 * Set the median setting used in accumulation drawing
+	 * @param medianSetting the median setting used in accumulation drawing
+	 */
+	public void setMedianSetting(double medianSetting) {
+		_medianRelSetting = Math.max(0, Math.min(1, medianSetting));
+	}
+	
+
 	
 	/**
 	 * Clone the view. 

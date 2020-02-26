@@ -88,10 +88,10 @@ public class DatabaseConstantProvider implements ConstantProvider {
         
         String envAddress = this.getEnvironment();        
         if(envAddress!=null) address = envAddress;
-        this.initialize(address);
         if(timestamp.length()>8){
             this.setTimeStamp(timestamp);
         }
+        this.initialize(address);
     }
     
     public DatabaseConstantProvider(String address){
@@ -181,7 +181,10 @@ public class DatabaseConstantProvider implements ConstantProvider {
     }
     
     public final void setTimeStamp(String timestamp){
-        String pattern = "MM/dd/yyyy";
+        String pattern = "MM/dd/yyyy-HH:mm:ss";
+	if(timestamp.contains("-")==false){
+	    pattern = "MM/dd/yyyy";
+	}
         SimpleDateFormat format = new SimpleDateFormat(pattern);
         
         try {

@@ -22,6 +22,7 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.plaf.metal.MetalIconFactory;
 
+import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.graphics.ImageManager;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.util.Environment;
@@ -62,6 +63,9 @@ public final class Desktop extends JDesktopPane {
 
 	// the singleton
 	private static Desktop instance;
+	
+	//optional after drawer
+	private IDrawable _afterDraw;
 
 	/**
 	 * Create a desktop pane.
@@ -126,7 +130,8 @@ public final class Desktop extends JDesktopPane {
 	}
 
 	/**
-	 * The paint method for the desktop.
+	 * The paint method for the desktop. This is where the background
+	 * image gets tiled
 	 * 
 	 * @param g
 	 *            the graphics context.
@@ -139,8 +144,20 @@ public final class Desktop extends JDesktopPane {
 		} else {
 			super.paintComponent(g);
 		}
+		
+		if (_afterDraw != null) {
+			_afterDraw.draw(g, null);
+		}
 	}
 
+	/**
+	 * Set an "after" draw
+	 * @param afterDraw the drawable
+	 */
+	public void setAfterDraw(IDrawable afterDraw) {
+		_afterDraw = afterDraw;
+	}
+	
 	/**
 	 * Tile the background.
 	 * 

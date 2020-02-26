@@ -28,6 +28,20 @@ public class Geometry {
         return DetIdx;
     }
 
+    // Return the layer number 1..6, given the region 1..3 and the detector type "C" or "Z" 
+    public int getLayer( int region, String detType ) {
+    	int layer = -1;
+    	int[] lZ = { 2, 3, 5};
+    	int[] lC = { 1, 4, 6}; 
+    	if( detType.equalsIgnoreCase("Z") ) {
+    		layer = lZ[ region - 1 ];
+    	}
+    	if( detType.equalsIgnoreCase("C")) {
+    		layer = lC[ region - 1 ];
+    	}
+    	return layer;
+    }
+    
     /**
      *
      * @param sector the sector in CLAS12 1...3
@@ -52,6 +66,7 @@ public class Geometry {
         return angle; //in rad 
     }
 
+    
     /**
      *
      * @param layer the layer 1...6
@@ -445,7 +460,6 @@ public class Geometry {
         if (angle < 0) {
             angle += 2 * Math.PI; // from 0 to 2Pi
         }
-     
         double angle_i = 0; // first angular boundary init
         double angle_f = 0; // second angular boundary for detector A, B, or C init
         int num_detector = 2;
@@ -479,6 +493,55 @@ public class Geometry {
         return value;
     }
 
+    /**
+    *
+    * @param angle
+    * @param sector
+    * @param layer
+    * @param x
+    * @return a boolean indicating if the given angle is the sector 
+    */
+    public boolean checkIsInSector( double angle, int sector, int layer, double jitter ) {
+    	if( layer < 1 || layer > 6 ) {
+    		System.err.println(" BMT layer has to be 1 <= layer <= 6");
+    		return false;
+    	}
+    	if( sector < 1 || sector > 3 ) {
+    		System.err.println(" BMT sector has to be 1 <= layer <= 3");
+    		return false;
+    	}
+    	
+    	int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+        double angle_i = 0; // first angular boundary init
+        double angle_f = 0; // second angular boundary for detector A, B, or C init
+        angle_i = Constants.getCRCEDGE1()[num_region][sector-1];
+        angle_f = Constants.getCRCEDGE2()[num_region][sector-1];
+        
+
+        if (angle < 0) {
+            angle += 2 * Math.PI; // from 0 to 2Pi
+        }
+        
+        if( sector == 3 ) {
+        	if( angle < Math.PI ) {
+        		if( angle < angle_f + jitter ) return true;
+        		else return false;
+        	}
+        	else {
+        		if( angle > angle_i - jitter ) return true;
+        		else return false;
+        	}
+        }
+        else {
+            if ( (angle >= angle_i - jitter && angle <= angle_f + jitter))
+            	return true;
+            else
+            	return false;
+            
+        }
+    }
+    
+    
     public double LorentzAngleCorr(double phi, int layer) {
 
         int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6

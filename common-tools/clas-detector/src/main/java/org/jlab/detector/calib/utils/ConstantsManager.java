@@ -24,6 +24,8 @@ public class ConstantsManager {
     private volatile Map<Integer,DatabaseConstantsDescriptor>  runConstants = new LinkedHashMap<Integer,DatabaseConstantsDescriptor>();
     private String   databaseVariation = "default";
     private String   timeStamp         = "";
+   
+    private volatile Map<Integer,RCDBConstants> rcdbConstants = new LinkedHashMap<Integer,RCDBConstants>();
     
     public ConstantsManager(){
         
@@ -67,6 +69,17 @@ public class ConstantsManager {
         }
         return descriptor.getMap().get(table);
     }
+  
+    public RCDBConstants getRcdbConstants(int run) {
+        if(this.rcdbConstants.containsKey(run)==false){
+            this.loadConstantsForRun(run);
+        }
+        return this.rcdbConstants.get(run);
+    }
+    
+    public RCDBConstants.RCDBConstant getRcdbConstant(int run,String name) {
+        return getRcdbConstants(run).get(name);
+    }
     
     private synchronized void loadConstantsForRun(int run){
 
@@ -99,6 +112,10 @@ public class ConstantsManager {
         provider.disconnect();
         this.runConstants.put(run, desc);
         //System.out.println(this.toString());
+
+        RCDBProvider rcdbpro = new RCDBProvider();
+        this.rcdbConstants.put(run,rcdbpro.getConstants(run));
+        rcdbpro.disconnect();
     }
     
     @Override

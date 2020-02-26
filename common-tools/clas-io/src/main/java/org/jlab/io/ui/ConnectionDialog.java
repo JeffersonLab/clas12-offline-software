@@ -49,6 +49,8 @@ public class ConnectionDialog extends BasicDialog {
     
     private JTextField _ipField;
     private JTextField _fileName;
+    private JTextField _portNumber;
+    
     private JComboBox  _comboHosts;
     private JComboBox  _comboEtFiles;
     private JComboBox  _files;
@@ -57,8 +59,6 @@ public class ConnectionDialog extends BasicDialog {
     
     /**
      * Create the panel for selected
-     * @param id
-     * @param level
      */
     public ConnectionDialog() {
         super("Connection.....", true, closeoutButtons);
@@ -115,12 +115,13 @@ public class ConnectionDialog extends BasicDialog {
         
         JLabel label = new JLabel(" File: ");
         _fileName = new JTextField(30);
-        _fileName.setText("/tmp/et_sys_clasprod");
+        _fileName.setText("/et/clasprod");
         subpanel2.add(label);
         subpanel2.add(_fileName);
         //List<String>  etFiles = FileUtils.filesInFolder(null, reason);
         try {
-            List<String> etFiles = FileUtils.dirListStartsWith("/tmp", "et_sys");
+            List<String> etFiles = FileUtils.dirListStartsWith("/et", "");
+            //List<String> etFiles = FileUtils.dirListStartsWith("/tmp", "et_sys");
             //List<String> etFiles = FileUtils.dirListStartsWith("/Users/gavalian/Work", "d");
             for(String f : etFiles){
                 System.out.println(" -----> " + f);
@@ -145,6 +146,15 @@ public class ConnectionDialog extends BasicDialog {
         
         panel.add(subpanel2);
         
+        
+        JPanel subpanel3 = new JPanel();
+        JLabel labelport = new JLabel(" Port : ");
+        _portNumber = new JTextField(8);
+        _portNumber.setText("11111");
+        subpanel3.add(labelport);
+        subpanel3.add(_portNumber);
+        
+        panel.add(subpanel3);
         Border emptyBorder = BorderFactory
                 .createEtchedBorder();//4, 4, 4, 4);
         
@@ -172,6 +182,16 @@ public class ConnectionDialog extends BasicDialog {
         return _fileName.getText();
     }
     
+    public Integer getPort(){
+        String port_number = _portNumber.getText();
+        Integer port = 11111;
+        try {
+            port = Integer.parseInt(port_number);
+        } catch (Exception e) {
+            System.out.println("ERROR : the string provided is not a number : " + port_number);
+        }
+        return port;
+    }
     
     public String getIpAddress() {
         return _ipField.getText();

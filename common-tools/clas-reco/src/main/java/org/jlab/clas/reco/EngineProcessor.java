@@ -41,17 +41,20 @@ public class EngineProcessor {
     public void initDefault(){
         
         String[] names = new String[]{
-            "DCHB","DCTB","FTOF","EC","HTCC",
-            "EBHB","EBTB"
+            "MAGFIELDS",
+            "DCHB","FTOFHB","EC","HTCC","EBHB",
+            "DCTB","FTOFTB","EBTB"
         };
         
         String[] services = new String[]{
+            "org.jlab.clas.swimtools.MagFieldsEngine",
             "org.jlab.service.dc.DCHBEngine",
-            "org.jlab.service.dc.DCTBEngine",
-            "org.jlab.service.ftof.FTOFEngine",
+            "org.jlab.service.ftof.FTOFHBEngine",
             "org.jlab.service.ec.ECEngine",
             "org.jlab.service.htcc.HTCCReconstructionService",
             "org.jlab.service.eb.EBHBEngine",
+            "org.jlab.service.dc.DCTBEngine",
+            "org.jlab.service.ftof.FTOFTBEngine",
             "org.jlab.service.eb.EBTBEngine"
         };
         
@@ -66,29 +69,34 @@ public class EngineProcessor {
     public void initAll(){
         
         String[] names = new String[]{
+            "MAGFIELDS",
             "FTCAL", "FTHODO", "FTEB",
-            "DCHB","DCTB","CVT",
-            "FTOF", "CTOF","CND",
-            "EC","HTCC","LTCC",
-            "EBHB","EBTB"
+            "DCHB","FTOFHB","EC",
+            "CVT","CTOF","CND","BAND",
+            "HTCC","LTCC","RICHEB","EBHB",
+            "DCTB","FTOFTB","EBTB"
         };
         
         String[] services = new String[]{
+            "org.jlab.clas.swimtools.MagFieldsEngine",
             "org.jlab.rec.ft.cal.FTCALEngine",
             "org.jlab.rec.ft.hodo.FTHODOEngine",
             "org.jlab.rec.ft.FTEBEngine",
             "org.jlab.service.dc.DCHBEngine",
-            "org.jlab.service.dc.DCTBEngine",
+            "org.jlab.service.ftof.FTOFHBEngine",
+            "org.jlab.service.ec.ECEngine",
             "org.jlab.rec.cvt.services.CVTReconstruction",
-            "org.jlab.service.ftof.FTOFEngine",
             "org.jlab.service.ctof.CTOFEngine",
             //"org.jlab.service.cnd.CNDEngine",
             "org.jlab.service.cnd.CNDCalibrationEngine",
-            "org.jlab.service.ec.ECEngine",
+            "org.jlab.service.band.BANDEngine",
             "org.jlab.service.htcc.HTCCReconstructionService",
             "org.jlab.service.ltcc.LTCCEngine",
             "org.jlab.service.eb.EBHBEngine",
-            "org.jlab.service.eb.EBTBEngine"
+            "org.jlab.service.dc.DCTBEngine",
+            "org.jlab.service.ftof.FTOFTBEngine",
+            "org.jlab.service.eb.EBTBEngine",
+            "org.jlab.rec.rich.RICHEBEngine"
         };
         
         for(int i = 0; i < names.length; i++){
@@ -240,12 +248,13 @@ public class EngineProcessor {
     
     public static void main(String[] args){
         
-        OptionParser parser = new OptionParser("notsouseful-util");
+        OptionParser parser = new OptionParser("recon-util");
         parser.addRequired("-o","output.hipo");
         parser.addRequired("-i","input.hipo");
         parser.setRequiresInputList(false);
         parser.addOption("-c","0","use default configuration [0 - no, 1 - yes/default, 2 - all services] ");
         parser.addOption("-n","-1","number of events to process");
+        parser.setDescription("previously known as notsouseful-util");
         
         parser.parse(args);
         

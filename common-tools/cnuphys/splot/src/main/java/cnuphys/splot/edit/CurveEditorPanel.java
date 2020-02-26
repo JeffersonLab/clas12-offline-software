@@ -180,6 +180,10 @@ public class CurveEditorPanel extends JPanel
 		if (_stylePanel.getSymbolSizeSelector() != null) {
 			_stylePanel.getSymbolSizeSelector().addPropertyChangeListener(this);
 		}
+		if (_stylePanel.getLineWidthSelector() != null) {
+			_stylePanel.getLineWidthSelector().addPropertyChangeListener(this);
+		}
+
 
 		IColorChangeListener iccl = new IColorChangeListener() {
 
@@ -341,6 +345,18 @@ public class CurveEditorPanel extends JPanel
 				_plotCanvas.repaint();
 			}
 		}
+		
+		if (StyleEditorPanel.LINEWIDTHPROP.equals(evt.getPropertyName())) {
+			int lwidth = (Integer) evt.getNewValue();
+			float fwidth = (lwidth/2.f);
+			IStyled style = curve.getStyle();
+			System.err.println("Setting line width to: " + fwidth);
+			if (style.getLineWidth() != fwidth) {
+				style.setLineWidth(fwidth);
+				_plotCanvas.repaint();
+			}
+		}
+
 
 		else if (FitEditorPanel.POLYNOMIALORDERPROP
 				.equals(evt.getPropertyName())) {

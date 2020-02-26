@@ -203,8 +203,10 @@ public class DataSet extends DefaultTableModel {
 	 * @param xname the name for the new xdata (ignored for some types)
 	 * @param yname the name for the new y data
 	 */
-	public void addCurve(String xname, String yname) {
+	public DataColumn addCurve(String xname, String yname) {
 
+		DataColumn newCurve = null; 
+		
 		switch (getType()) {
 		case XYY:
 			System.err.println(
@@ -216,10 +218,10 @@ public class DataSet extends DefaultTableModel {
 			addColumn(yname);
 			_columns.add(new DataColumn(DataColumnType.X, xname));
 
-			DataColumn ycol = new DataColumn(DataColumnType.Y, yname);
-			ycol.initFit();
-			ycol.initStyle();
-			_columns.add(ycol);
+			newCurve = new DataColumn(DataColumnType.Y, yname);
+			newCurve.initFit();
+			newCurve.initStyle();
+			_columns.add(newCurve);
 			break;
 
 		case XYEXYE:
@@ -253,6 +255,8 @@ public class DataSet extends DefaultTableModel {
 		// colNames.add(dc.getName());
 		// }
 		// setColumnIdentifiers(colNames);
+		
+		return newCurve;
 	}
 
 	/**

@@ -153,7 +153,7 @@ public abstract class PlotDialog extends JDialog
 	 * Change the event source type
 	 * 
 	 * @param source
-	 *            the new source: File, ET, FastMC
+	 *            the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {

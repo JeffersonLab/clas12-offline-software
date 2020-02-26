@@ -91,15 +91,15 @@ public class CNDFactory implements Factory <CNDDetector, CNDSector, CNDSuperlaye
         if(!(0<=layerId && layerId<3))
             throw new IllegalArgumentException("Error: invalid layer="+layerId);
         
-        double R0       = cp.getDouble("/geometry/cnd/cnd/InnerRadius", 0)*0.1; 
-        double dR       = cp.getDouble("/geometry/cnd/cnd/Thickness", 0)*0.1;
-        double gp       = cp.getDouble("/geometry/cnd/cnd/LateralGap", 0)*0.1;
-        double gl       = cp.getDouble("/geometry/cnd/cnd/AzimuthalGap", 0)*0.1;
-        double phi      = Math.toRadians(cp.getDouble("/geometry/cnd/cnd/OpenAngle", 0));
-        double len      = cp.getDouble("/geometry/cnd/layer/Length", layerId)*0.1;
-        double widthT   = cp.getDouble("/geometry/cnd/layer/HigherBase", layerId)*0.1;
-        double widthB   = cp.getDouble("/geometry/cnd/layer/LowerBase", layerId)*0.1;
-        double z        = cp.getDouble("/geometry/cnd/layer/UpstreamZOffset", layerId)*0.1;
+        double R0       = cp.getDouble("/geometry/cnd/cndgeom/InnerRadius",     layerId); 
+        double dR       = cp.getDouble("/geometry/cnd/cndgeom/Thickness",       layerId);
+        double gp       = cp.getDouble("/geometry/cnd/cndgeom/LateralGap",      layerId);
+        double gl       = cp.getDouble("/geometry/cnd/cndgeom/AzimuthalGap",    layerId);
+        double phi      = Math.toRadians(cp.getDouble("/geometry/cnd/cndgeom/OpenAngle", layerId));
+        double len      = cp.getDouble("/geometry/cnd/cndgeom/Length",          layerId);
+        double widthT   = cp.getDouble("/geometry/cnd/cndgeom/HigherBase",      layerId);
+        double widthB   = cp.getDouble("/geometry/cnd/cndgeom/LowerBase",       layerId);
+        double z        = cp.getDouble("/geometry/cnd/cndgeom/UpstreamZOffset", layerId);
 
         CNDLayer layer = new CNDLayer(sectorId, superlayerId, layerId);
         

@@ -9,6 +9,8 @@ import java.util.Properties;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
+
+import cnuphys.bCNU.feedback.HeadsUpDisplay;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
 import cnuphys.bCNU.menu.FileMenu;
 import cnuphys.bCNU.menu.MenuManager;
@@ -36,6 +38,12 @@ public class BaseMDIApplication extends JFrame {
 	 * Attributes created from the variable length arguments.
 	 */
 	protected Properties _properties;
+	
+	//used (optionally) for feedback
+	private static HeadsUpDisplay _headsUpDisplay;
+	
+	//singleton. Applications cannot create other applications.
+	private static  BaseMDIApplication instance;
 
 	/**
 	 * Constructor
@@ -45,7 +53,12 @@ public class BaseMDIApplication extends JFrame {
 	 *            pairs. For example, AttributeType.NAME, "my application",
 	 *            AttributeType.CENTER, true, etc.
 	 */
-	public BaseMDIApplication(Object... keyVals) {
+	protected BaseMDIApplication(Object... keyVals) {
+		
+		if (instance != null) {
+			System.err.println("Singleton violation in BaseMDI Application");
+			System.exit(1);
+		}
 
 		_properties = PropertySupport.fromKeyValues(keyVals);
 
@@ -113,6 +126,30 @@ public class BaseMDIApplication extends JFrame {
 		menuManager.addMenu(ViewManager.getInstance().getViewMenu());
 
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
+		instance = this;
+	}
+	
+	public static BaseMDIApplication getApplication() {
+		return instance;
+	}
+	
+	/**
+	 * Get the heads up display (might be null)
+	 * @return the heads up display
+	 */
+	public static HeadsUpDisplay getHeadsUpDisplay() {
+		return _headsUpDisplay;
+	}
+	
+	/**
+	 * Add a heads up display (as a glass pane) for this application
+	 */
+	protected static void addHeadsUp() {
+		_headsUpDisplay = new HeadsUpDisplay(instance);
+		instance.setGlassPane(_headsUpDisplay);
+		instance.getGlassPane().setVisible(true);
+
 	}
 
 }

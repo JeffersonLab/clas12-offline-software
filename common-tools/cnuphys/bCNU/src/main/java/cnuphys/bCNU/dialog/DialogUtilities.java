@@ -2,13 +2,20 @@ package cnuphys.bCNU.dialog;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FontMetrics;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
+
 import javax.swing.Box;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import cnuphys.bCNU.graphics.GraphicsUtilities;
+import cnuphys.bCNU.log.Log;
 
 public class DialogUtilities {
 
@@ -64,6 +71,47 @@ public class DialogUtilities {
 	public static void centerDialog(JDialog dialog) {
 		GraphicsUtilities.centerComponent(dialog);
 	}
+	
+	/**
+	 * Place a component in the upper right
+	 * 
+	 * @param component
+	 *            The Component to center.
+	 */
+	public static void upperRightComponent(Component component, int dh, int dv) {
+
+		if (component == null) {
+			return;
+		}
+		
+		try {
+
+			GraphicsEnvironment env = GraphicsEnvironment
+					.getLocalGraphicsEnvironment();
+			GraphicsDevice[] allScreens = env.getScreenDevices();
+			GraphicsConfiguration gc = allScreens[0].getDefaultConfiguration();
+
+			Rectangle bounds = gc.getBounds();
+			Dimension componentSize = component.getSize();
+			if (componentSize.height > bounds.height) {
+				componentSize.height = bounds.height;
+			}
+			if (componentSize.width > bounds.width) {
+				componentSize.width = bounds.width;
+			}
+
+			int x = bounds.x + bounds.width - componentSize.width -  dh;
+			int y = bounds.y  + dv;
+
+			component.setLocation(x, y);
+
+		} catch (Exception e) {
+			Log.getInstance().exception(e);
+			component.setLocation(200, 200);
+			e.printStackTrace();
+		}
+	}
+
 
 	/**
 	 * Convenience routine for padding a string using the default font.

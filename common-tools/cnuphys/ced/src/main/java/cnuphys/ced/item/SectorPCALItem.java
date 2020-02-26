@@ -18,7 +18,6 @@ import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.TdcAdcHit;
 import cnuphys.ced.event.data.TdcAdcHitList;
-import cnuphys.ced.fastmc.FastMCManager;
 import cnuphys.ced.geometry.PCALGeometry;
 import cnuphys.lund.X11Colors;
 
@@ -79,7 +78,7 @@ public class SectorPCALItem extends PolygonItem {
 		// TODO use dirty. If the item is not dirty, should be able to draw
 		// the _lastDrawnPolygon directly;
 		
-		if (ClasIoEventManager.getInstance().isAccumulating() || FastMCManager.getInstance().isStreaming()) {
+		if (ClasIoEventManager.getInstance().isAccumulating()) {
 			return;
 		}
 
@@ -187,22 +186,13 @@ public class SectorPCALItem extends PolygonItem {
 
 	//accumulated drawer
 	private void drawAccumulatedHits(Graphics g, IContainer container) {
-		int maxHit = AccumulationManager.getInstance().getMaxPCALCount();
-		if (maxHit < 1) {
-			return;
-		}
+		int medianHit = AccumulationManager.getInstance().getMedianPCALCount();
 
 		int hits[][][] = AccumulationManager.getInstance()
 				.getAccumulatedPCALData();
 		for (int strip0 = 0; strip0 < _stripCounts[_stripType]; strip0++) {
-			int hit = hits[_sector - 1][_stripType][strip0];
-			double fract;
-			if (_view.isSimpleAccumulatedMode()) {
-				fract = ((double) hit) / maxHit;
-			}
-			else {
-				fract = Math.log(hit+1.)/Math.log(maxHit+1.);
-			}
+			int hitCount = hits[_sector - 1][_stripType][strip0];
+			double fract = _view.getMedianSetting()*(((double) hitCount) /(1 +  medianHit));
 			
 			Point2D.Double wp[] = getStrip(strip0);
 
@@ -254,7 +244,7 @@ public class SectorPCALItem extends PolygonItem {
 	}
 
 	/**
-	 * Add any appropriate feedback strings for the headsup display or feedback
+	 * Add any appropriate feedback strings
 	 * panel. Default implementation returns the item's name.
 	 * 
 	 * @param container

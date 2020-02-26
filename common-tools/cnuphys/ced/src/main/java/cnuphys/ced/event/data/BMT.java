@@ -13,6 +13,9 @@ public class BMT extends DetectorData {
 
 	//list of adc hits
 	AdcHitList _adcHits = new AdcHitList("BMT::adc");
+	
+	//list of BMT reconstructed hits
+	BaseHit2List _bmtRecHits;
 
 	private static BMT _instance;
 
@@ -30,6 +33,7 @@ public class BMT extends DetectorData {
 	@Override
 	public void newClasIoEvent(DataEvent event) {
 		_adcHits = new AdcHitList("BMT::adc");
+		_bmtRecHits = new BaseHit2List("BMTRec::Hits", "strip");
 	}
 	
 	/**
@@ -45,8 +49,16 @@ public class BMT extends DetectorData {
 	 * Get the adc hit list
 	 * @return the adc hit list
 	 */
-	public AdcHitList getHits() {
+	public AdcHitList getADCHits() {
 		return _adcHits;
+	}
+	
+	/**
+	 * Get the BMT reconstructed hits
+	 * @return the BMT reconstructed hits
+	 */
+	public BaseHit2List getRecHits() {
+		return _bmtRecHits;
 	}
 	
 }

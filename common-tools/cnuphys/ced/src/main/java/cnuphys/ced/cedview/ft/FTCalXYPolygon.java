@@ -60,6 +60,14 @@ public class FTCalXYPolygon extends Polygon {
 
 	}
 
+	/**
+	 * Get the feedback strings
+	 * @param container
+	 * @param screenPoint
+	 * @param worldPoint
+	 * @param feedbackStrings
+	 * @return
+	 */
 	public boolean getFeedbackStrings(IContainer container, Point screenPoint,
 			Point2D.Double worldPoint, List<String> feedbackStrings) {
 
@@ -68,6 +76,10 @@ public class FTCalXYPolygon extends Polygon {
 		}
 
 		fbString("red", "Id " + paddleId, feedbackStrings);
+		
+		//get the xy indices
+		Point p = FTCALGeometry.getXYIndices(paddleId);
+		fbString("red", "XY Indices [" + p.x + ", " + p.y + "]", feedbackStrings);
 
 		return true;
 	}

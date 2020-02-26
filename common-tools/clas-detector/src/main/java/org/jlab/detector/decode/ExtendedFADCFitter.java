@@ -88,7 +88,7 @@ public class ExtendedFADCFitter implements IFADCFitter {
                 // calculate integral and find maximum
                 for (int bin=Math.max(0,tcross-nsb); bin<Math.min(pulse.length,tcross+nsa+1); bin++) { // sum should be up to tcross+nsa (without +1), this was added to match the old fit method
                     adc+=pulse[bin]-ped;
-                    if(bin>=tcross & pulse[bin]>pmax) {
+                    if(bin>=tcross && pulse[bin]>pmax) {
                         pmax=pulse[bin];
                         ppos=bin;
                     }

@@ -26,8 +26,8 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioFactory;
 import org.jlab.io.hipo.HipoDataEvent;
-import org.jlab.jnp.hipo.data.HipoEvent;
-import org.jlab.jnp.hipo.schema.SchemaFactory;
+import org.jlab.jnp.hipo4.data.Event;
+import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import static org.json.JSONObject.quote;
@@ -42,6 +42,7 @@ public abstract class ReconstructionEngine implements Engine {
     volatile ConcurrentMap<String,ConstantsManager> constManagerMap;
     volatile SchemaFactory                          engineDictionary;
 
+    volatile ConcurrentMap<String,String>           engineConfigMap;
     volatile String                                 engineConfiguration = null;
     
     String             engineName        = "UnknownEngine";
@@ -55,7 +56,9 @@ public abstract class ReconstructionEngine implements Engine {
         engineVersion = version;
         constManagerMap   = new ConcurrentHashMap<String,ConstantsManager>();
         engineDictionary  = new SchemaFactory();
-        engineDictionary.initFromDirectory("CLAS12DIR", "etc/bankdefs/hipo");
+        engineConfigMap   = new ConcurrentHashMap<String,String>();
+        String env = System.getenv("CLAS12DIR");
+        engineDictionary.initFromDirectory( env +  "/etc/bankdefs/hipo4");
         //System.out.println("[Engine] >>>>> constants manager : " + getConstantsManager().toString());
     }
 
@@ -79,6 +82,14 @@ public abstract class ReconstructionEngine implements Engine {
         return constManagerMap.get(this.getClass().getName());
     }
 
+    public String getEngineConfigString(String key) {
+        String val=null;
+        if (this.engineConfigMap.containsKey(key)) {
+            val=this.engineConfigMap.get(key);
+        }
+        return val;
+    }
+
     /**
      *
      * @param ed
@@ -94,6 +105,18 @@ public abstract class ReconstructionEngine implements Engine {
             this.engineConfiguration = "";
             System.out.println("[CONFIGURE][" + this.getName() + "] *** WARNING *** ---> NO JSON Data provided");
         }
+       
+        // store yaml contents for easy access by engines:
+        engineConfigMap = new ConcurrentHashMap<String,String>();
+        try {
+            JSONObject base = new JSONObject(this.engineConfiguration);
+            for (String key : base.keySet()) {
+                engineConfigMap.put(key,base.getString(key));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         
       if(constManagerMap == null)
       constManagerMap   = new ConcurrentHashMap<String,ConstantsManager>();
@@ -208,9 +231,9 @@ public abstract class ReconstructionEngine implements Engine {
         if(mt.compareTo("binary/data-hipo")==0){
             try {
                 //ByteBuffer bb = (ByteBuffer) input.getData();
-                HipoEvent hipoEvent = (HipoEvent) input.getData();
-                hipoEvent.setSchemaFactory(engineDictionary, false);
-                dataEventHipo = new HipoDataEvent(hipoEvent);
+                Event hipoEvent = (Event) input.getData();
+                //hipoEvent.setSchemaFactory(engineDictionary, false);
+                dataEventHipo = new HipoDataEvent(hipoEvent,engineDictionary);
                 
                 //dataEventHipo.initDictionary(engineDictionary);
                 //dataEventHipo = new HipoDataEvent(bb.array(),this.engineDictionary);

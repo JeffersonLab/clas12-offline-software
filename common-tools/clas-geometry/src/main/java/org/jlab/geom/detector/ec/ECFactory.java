@@ -78,16 +78,43 @@ public class ECFactory implements Factory<ECDetector, ECSector, ECSuperlayer, EC
                 Transformation3D trans = new Transformation3D();
                 if (superlayer.getSuperlayerId() == 0) {
                     double dist2tgt = cp.getDouble("/geometry/pcal/pcal/dist2tgt", 0)*0.1;
-                    trans.translateXYZ(0, 0, dist2tgt);
+                    double deltaX   = cp.getDouble("/geometry/pcal/alignment/deltaX", sector.getSectorId()); // displacements are already in cm
+                    double deltaY   = cp.getDouble("/geometry/pcal/alignment/deltaY", sector.getSectorId()); 
+                    double deltaZ   = cp.getDouble("/geometry/pcal/alignment/deltaZ", sector.getSectorId()); 
+                    double rotX     = cp.getDouble("/geometry/pcal/alignment/rotX", sector.getSectorId());   // rotations are in degrees
+                    double rotY     = cp.getDouble("/geometry/pcal/alignment/rotY", sector.getSectorId()); 
+                    double rotZ     = cp.getDouble("/geometry/pcal/alignment/rotZ", sector.getSectorId()); 
+                    trans.rotateX(Math.toRadians(rotX));
+                    trans.rotateY(Math.toRadians(rotY));
+                    trans.rotateZ(Math.toRadians(rotZ));
+                    trans.translateXYZ(deltaX, deltaY, deltaZ + dist2tgt);
                 } else if (superlayer.getSuperlayerId() == 1) {
                     double dist2tgt = cp.getDouble("/geometry/ec/ec/dist2tgt", 0)*0.1;
-                    trans.translateXYZ(0, 0, dist2tgt);
+                    double deltaX   = cp.getDouble("/geometry/ec/alignment/deltaX", sector.getSectorId()); // displacements are already in cm
+                    double deltaY   = cp.getDouble("/geometry/ec/alignment/deltaY", sector.getSectorId()); 
+                    double deltaZ   = cp.getDouble("/geometry/ec/alignment/deltaZ", sector.getSectorId()); 
+                    double rotX     = cp.getDouble("/geometry/ec/alignment/rotX", sector.getSectorId());   // rotations are in degrees
+                    double rotY     = cp.getDouble("/geometry/ec/alignment/rotY", sector.getSectorId()); 
+                    double rotZ     = cp.getDouble("/geometry/ec/alignment/rotZ", sector.getSectorId()); 
+                    trans.rotateX(Math.toRadians(rotX));
+                    trans.rotateY(Math.toRadians(rotY));
+                    trans.rotateZ(Math.toRadians(rotZ));
+                    trans.translateXYZ(deltaX, deltaY, deltaZ + dist2tgt);
                 } else {
                     double dist2tgt = cp.getDouble("/geometry/ec/ec/dist2tgt", 0)*0.1;
                     double strip_thick = cp.getDouble("/geometry/ec/ec/strip_thick", 0)*0.1;
                     double lead_thick = cp.getDouble("/geometry/ec/ec/lead_thick", 0)*0.1;
+                    double deltaX   = cp.getDouble("/geometry/ec/alignment/deltaX", sector.getSectorId()); // displacements are already in cm
+                    double deltaY   = cp.getDouble("/geometry/ec/alignment/deltaY", sector.getSectorId()); 
+                    double deltaZ   = cp.getDouble("/geometry/ec/alignment/deltaZ", sector.getSectorId()); 
+                    double rotX     = cp.getDouble("/geometry/ec/alignment/rotX", sector.getSectorId());   // rotations are in degrees
+                    double rotY     = cp.getDouble("/geometry/ec/alignment/rotY", sector.getSectorId()); 
+                    double rotZ     = cp.getDouble("/geometry/ec/alignment/rotZ", sector.getSectorId()); 
                     double dz = (strip_thick + lead_thick) * 15;
-                    trans.translateXYZ(0, 0, dist2tgt + dz);
+                    trans.rotateX(Math.toRadians(rotX));
+                    trans.rotateY(Math.toRadians(rotY));
+                    trans.rotateZ(Math.toRadians(rotZ));
+                    trans.translateXYZ(deltaX, deltaY, deltaZ + dist2tgt + dz);
                 }
                 superlayer.setTransformation(trans);
             }

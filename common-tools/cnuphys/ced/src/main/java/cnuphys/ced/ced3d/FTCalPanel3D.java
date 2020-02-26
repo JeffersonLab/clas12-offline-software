@@ -3,8 +3,6 @@ package cnuphys.ced.ced3d;
 import java.awt.Color;
 import java.awt.Font;
 
-import com.jogamp.opengl.GLAutoDrawable;
-
 import cnuphys.ced.ced3d.view.CedView3D;
 import cnuphys.ced.geometry.FTCALGeometry;
 import cnuphys.lund.X11Colors;
@@ -33,7 +31,7 @@ public class FTCalPanel3D extends CedPanel3D {
 	public void createInitialItems() {
 		// coordinate axes
 		Axes3D axes = new Axes3D(this, -xymax, xymax, -xymax, xymax, zmin,
-				zmax, FTCALGeometry.FTCAL_Z0, Color.darkGray, 1f, 6, 6, 6,
+				zmax, null, FTCALGeometry.FTCAL_Z0, Color.darkGray, 1f, 6, 6, 6,
 				Color.black, X11Colors.getX11Color("Dark Green"), new Font(
 						"SansSerif", Font.PLAIN, 12), 0);
 		addItem(axes);

@@ -3,21 +3,24 @@ package org.jlab.rec.cvt.track;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.CircleFitter;
+import org.jlab.rec.cvt.fit.CircleFitPars;
 import org.jlab.rec.cvt.fit.HelicalTrackFitter;
 import org.jlab.rec.cvt.svt.Constants;
 
 public class TrackSeeder {
+    public int NBINS = 36;
 
     public TrackSeeder() {
         
         sortedCrosses = new ArrayList<ArrayList<ArrayList<Cross>>>();
         
-        for(int b =0; b<36; b++) {
+        for(int b =0; b<NBINS; b++) {
             sortedCrosses.add(b, new ArrayList<ArrayList<Cross>>() );
             for(int l =0; l<6; l++) {
                 sortedCrosses.get(b).add(l,new ArrayList<Cross>() );
@@ -27,7 +30,7 @@ public class TrackSeeder {
 
     private List<ArrayList<Cross>> seedCrosses = new ArrayList<ArrayList<Cross>>();
 
-    double[] phiShift = new double[]{0, 90}; // move the bin edge to handle bin boundaries
+    double[] phiShift = new double[]{0, 65}; // move the bin edge to handle bin boundaries
 
     public void FindSeedCrossList(List<Cross> crosses) {
         
@@ -58,13 +61,13 @@ public class TrackSeeder {
     List<ArrayList<ArrayList<Cross>>> sortedCrosses;
     
     public List<ArrayList<Cross>> FindSeedCrossesFixedBin(List<Cross> crosses, double phiShift) {
-            for(int b =0; b<36; b++) {
-                for(int l =0; l<6; l++) {
+        for(int b =0; b<NBINS; b++) {
+            for(int l =0; l<6; l++) {
                 sortedCrosses.get(b).get(l).clear();
             }
         }
         List<ArrayList<Cross>> inseedCrosses = new ArrayList<ArrayList<Cross>>();
-        int[][] LPhi = new int[36][6];
+        int[][] LPhi = new int[NBINS][6];
         for (int i = 0; i < crosses.size(); i++) {
             double phi = Math.toDegrees(crosses.get(i).get_Point().toVector3D().phi());
 
@@ -73,7 +76,7 @@ public class TrackSeeder {
                 phi += 360;
             }
 
-            int binIdx = (int) (phi / 36);
+            int binIdx = (int) (phi / (360./NBINS) );
             if(crosses.get(i).get_Detector().equalsIgnoreCase("BMT") ) { 
                 sortedCrosses.get(binIdx).get(crosses.get(i).get_Region() - 1 + 3).add(crosses.get(i));
                 LPhi[binIdx][crosses.get(i).get_Region() - 1 + 3]++; 
@@ -85,14 +88,28 @@ public class TrackSeeder {
         }
         
         
-        for (int b = 0; b < 36; b++) {
+        for (int b = 0; b < NBINS; b++) {
             int max_layers =0;
+            int max_layersSVT =0;
+            int max_layersBMT =0;
             for (int la = 0; la < 6; la++) { 
                 if(LPhi[b][la]>0)
                     max_layers++;
             }
+            // count for svt
+            for (int la = 0; la < 3; la++) { 
+                if(LPhi[b][la]>0){
+                    max_layersSVT++;
+                }
+            }
+            // count for bmt
+            for (int la = 3; la < 6; la++) { 
+                if(LPhi[b][la]>0){
+                    max_layersBMT++;
+                }
+            }
             
-            if (sortedCrosses.get(b) != null && max_layers>=3) { 
+            if (sortedCrosses.get(b) != null && max_layers>=3 && max_layersBMT >= 1) { 
                 double SumLyr=0;
                 while(LPhi[b][0]+LPhi[b][1]+ LPhi[b][2]+LPhi[b][3]+ LPhi[b][4]+ LPhi[b][5]>=max_layers) {
                     if(SumLyr!=LPhi[b][0]+LPhi[b][1]+ LPhi[b][2]+LPhi[b][3]+ LPhi[b][4]+ LPhi[b][5]) {
@@ -134,7 +151,9 @@ public class TrackSeeder {
 
     private List<Seed> BMTmatches = new ArrayList<Seed>();
 
-    public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
+    public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses, 
+            org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo,
+            Swim swimmer) {
        
         List<Seed> seedlist = new ArrayList<Seed>();
 
@@ -152,21 +171,25 @@ public class TrackSeeder {
         
         this.FindSeedCrossList(crosses);
 
-        for (int s = 0; s < seedCrosses.size(); s++) {
-            //	if(seeds.get(s).size()<4)
-            //	continue;
 
+        for ( List<Cross> seedcrs : seedCrosses ) {
+
+          // loop until a good circular fit. removing far crosses each time
+          boolean circlefitstatusOK = false;
+          while( ! circlefitstatusOK && seedcrs.size()>=4 ){
+            //System.out.println( " While loop on circle fit " );
             Xs.clear();
             Ys.clear();
             Ws.clear();
-            ((ArrayList<Double>) Xs).ensureCapacity(seedCrosses.get(s).size()+1);
-            ((ArrayList<Double>) Ys).ensureCapacity(seedCrosses.get(s).size()+1);
-            ((ArrayList<Double>) Ws).ensureCapacity(seedCrosses.get(s).size()+1);
+            ((ArrayList<Double>) Xs).ensureCapacity(seedcrs.size()+1);
+            ((ArrayList<Double>) Ys).ensureCapacity(seedcrs.size()+1);
+            ((ArrayList<Double>) Ws).ensureCapacity(seedcrs.size()+1);
             Xs.add(0, 0.0); 
             Ys.add(0, 0.0);
             Ws.add(0,0.1);
             int loopIdx = 1;
-            for (Cross c : seedCrosses.get(s)) { 
+            for (Cross c : seedcrs ) { 
+                if(c.get_DetectorType().equalsIgnoreCase("C") ) continue;
                 Xs.add(loopIdx, c.get_Point().x()); 
                 Ys.add(loopIdx, c.get_Point().y());
                 Ws.add(loopIdx, 1. / (c.get_PointErr().x()*c.get_PointErr().x()+c.get_PointErr().y()*c.get_PointErr().y()));
@@ -174,13 +197,75 @@ public class TrackSeeder {
             }
 
             CircleFitter circlefit = new CircleFitter();
-            boolean circlefitstatusOK = circlefit.fitStatus(Xs, Ys, Ws, Xs.size());
+            circlefitstatusOK = circlefit.fitStatus(Xs, Ys, Ws, Xs.size());
+            CircleFitPars pars = circlefit.getFit();
 
-            if (!circlefitstatusOK ||  circlefit.getFit().chisq()/(double)(Xs.size()-3)>10) {
-                continue;
+            // if not a good fit, check for outliers 
+            if (!circlefitstatusOK ||  pars.chisq()/(double)(Xs.size()-3)>10) {
+              //System.out.println(" check circular fit" );
+              double d = pars.doca();
+              double r = pars.rho();
+              double f = pars.phi();
+              // find the maximum residual
+              double maxresiduals = 0.;
+              for (Cross c : seedcrs ) { 
+                if(c.get_DetectorType().equalsIgnoreCase("C") ) continue;
+                  double xi = c.get_Point().x(); 
+                  double yi = c.get_Point().y();
+                  double unci = Math.sqrt(c.get_PointErr().x()*c.get_PointErr().x()+c.get_PointErr().y()*c.get_PointErr().y());
+                  double ri = Math.sqrt(xi*xi+yi*yi);
+                  double fi = Math.atan2(yi,xi) ;
+                  double res = 0.5*r*ri*ri - (1+r*d)*ri*Math.sin(f-fi)+0.5*r*d*d+d;
+                  res = res*res;
+                  if( res > maxresiduals ) maxresiduals = res;
+              }
+              
+              // remove the outlier
+              for (Cross c : seedcrs ) { 
+                if(c.get_DetectorType().equalsIgnoreCase("C") ) continue;
+                  double xi = c.get_Point().x(); 
+                  double yi = c.get_Point().y();
+                  double unci = Math.sqrt(c.get_PointErr().x()*c.get_PointErr().x()+c.get_PointErr().y()*c.get_PointErr().y());
+                  double ri = Math.sqrt(xi*xi+yi*yi);
+                  double fi = Math.atan2(yi,xi) ;
+                  double res = 0.5*r*ri*ri - (1+r*d)*ri*Math.sin(f-fi)+0.5*r*d*d+d;
+                  res = res*res;
+                  if( Math.abs(res - maxresiduals) < 1.e-3 ) {
+                    //System.out.println(" remove detector " + c .get_Detector() + " region " + c.get_Region() + " sector " + c.get_Sector()  );
+                    seedcrs.remove(c);
+                    break;
+                  }
+              }
+      
             }
+
+          }
+        }
+
+        for (int s = 0; s < seedCrosses.size(); s++) {
+          if( seedCrosses.get(s).size()<4 ){
+      
+            if( seedCrosses.get(s).size()<3 ){
+              seedCrosses.remove(seedCrosses.get(s));
+              continue;
+            }
+            boolean hasBMT = false;
+            for( Cross c : seedCrosses.get(s) ){
+              if( c.get_Detector().equalsIgnoreCase("BMT") ) hasBMT = true;
+            }
+            if( hasBMT == false){
+              seedCrosses.remove(seedCrosses.get(s));
+              continue;
+            }
+        
+          }
+        }
+
+        for (int s = 0; s < seedCrosses.size(); s++) {
+            //	if(seeds.get(s).size()<4)
+            //	continue;
             
-            Track cand = fitSeed(seedCrosses.get(s), svt_geo, 5, false);
+            Track cand = fitSeed(seedCrosses.get(s), svt_geo, 5, false, swimmer);
             if (cand != null) {
                 Seed seed = new Seed();
                 seed.set_Crosses(seedCrosses.get(s));
@@ -205,7 +290,7 @@ public class TrackSeeder {
                     
                     for (Seed bseed : BMTmatches) {
                         //refit using the BMT
-                        Track bcand = fitSeed(bseed.get_Crosses(), svt_geo, 5, false);
+                        Track bcand = fitSeed(bseed.get_Crosses(), svt_geo, 5, false, swimmer);
                         if (bcand != null) {
                             seed = new Seed();
                             seed.set_Crosses(bseed.get_Crosses());
@@ -257,8 +342,10 @@ public class TrackSeeder {
     List<Cross> BMTCrossesC = new ArrayList<Cross>();
     List<Cross> BMTCrossesZ = new ArrayList<Cross>();
     List<Cross> SVTCrosses = new ArrayList<Cross>();
-
-    public Track fitSeed(List<Cross> VTCrosses, org.jlab.rec.cvt.svt.Geometry svt_geo, int fitIter, boolean originConstraint) {
+    float b[] = new float[3];
+    
+    public Track fitSeed(List<Cross> VTCrosses, org.jlab.rec.cvt.svt.Geometry svt_geo, int fitIter, 
+            boolean originConstraint, Swim swimmer) {
         double chisqMax = Double.POSITIVE_INFINITY;
         
         Track cand = null;
@@ -322,7 +409,7 @@ public class TrackSeeder {
             ((ArrayList<Double>) ErrRho).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz); // Try: don't use svt in dipdangle fit determination
             ((ArrayList<Double>) ErrRt).ensureCapacity(svtSz + bmtZSz);
 
-            cand = new Track(null);
+            cand = new Track(null, swimmer);
             cand.addAll(SVTCrosses);
             for (int j = 0; j < SVTCrosses.size(); j++) {
                 X.add(j, SVTCrosses.get(j).get_Point().x());
@@ -368,11 +455,11 @@ public class TrackSeeder {
                 return null;
             }
 
-            cand = new Track(fitTrk.get_helix());
+            cand = new Track(fitTrk.get_helix(), swimmer);
             //cand.addAll(SVTCrosses);
             cand.addAll(SVTCrosses);
             
-            cand.set_HelicalTrack(fitTrk.get_helix());
+            cand.set_HelicalTrack(fitTrk.get_helix(), swimmer, b);
             //if(shift==0)
             if (fitTrk.get_chisq()[0] < chisqMax) {
                 chisqMax = fitTrk.get_chisq()[0];

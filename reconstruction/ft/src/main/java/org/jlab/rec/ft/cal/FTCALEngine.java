@@ -36,6 +36,7 @@ public class FTCALEngine extends ReconstructionEngine {
                 String[]  tables = new String[]{ 
                     "/calibration/ft/ftcal/charge_to_energy",
                     "/calibration/ft/ftcal/time_offsets",
+                    "/calibration/ft/ftcal/time_walk",
                     "/calibration/ft/ftcal/status",
                     "/calibration/ft/ftcal/cluster",
                     "/calibration/ft/ftcal/energycorr"
@@ -79,11 +80,11 @@ public class FTCALEngine extends ReconstructionEngine {
 
         if(event instanceof EvioDataEvent) {
             EvioDataBank bank = (EvioDataBank) event.getBank("RUN::config");
-            run = bank.getInt("Run")[0];
+            run = bank.getInt("Run",0);
         }
         else {
             DataBank bank = event.getBank("RUN::config");
-            run = bank.getInt("run")[0];
+            run = bank.getInt("run",0);
         }
 	
         return run;
@@ -93,7 +94,7 @@ public class FTCALEngine extends ReconstructionEngine {
     public static void main (String arg[])  {
 		FTCALEngine cal = new FTCALEngine();
 		cal.init();
-		String input = "/Users/devita/Work/clas12/simulations/tests/clas12Tags/4a.2.2/out.hipo";
+		String input = "/Users/devita/Work/clas12/simulations/clas12Tags/4.3.1/out.hipo";
 		HipoDataSource  reader = new HipoDataSource();
 //		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/out_header.ev";
 //		EvioSource  reader = new EvioSource();
@@ -141,8 +142,8 @@ public class FTCALEngine extends ReconstructionEngine {
                         h2.fill(bank.getFloat("energy",i)-gen.getGeneratedParticle(0).vector().p());
                         Vector3D cluster = new Vector3D(bank.getFloat("x",i),bank.getFloat("y",i),bank.getFloat("z",i));  
                         h3.fill(Math.toDegrees(cluster.theta()-gen.getGeneratedParticle(0).theta()));
-                        System.out.println(cluster.theta() + " " + gen.getGeneratedParticle(0).theta());
-                        System.out.println(cluster.x() + " " + cluster.y() + " " + cluster.z() + " ");
+//                        System.out.println(cluster.theta() + " " + gen.getGeneratedParticle(0).theta());
+//                        System.out.println(cluster.x() + " " + cluster.y() + " " + cluster.z() + " ");
                         h4.fill(Math.toDegrees(cluster.phi()-gen.getGeneratedParticle(0).phi()));
                         h5.fill(bank.getFloat("time",i)-124.25);
                     }

@@ -8,7 +8,6 @@ import cnuphys.ced.clasio.ClasIoReconEventView;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.lund.TrajectoryRowData;
-import cnuphys.magfield.MagneticFields;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.DefaultSwimStopper;
 import cnuphys.swim.SwimTrajectory;
@@ -60,12 +59,13 @@ public class SwimAllRecon implements ISwimAll {
 		}
 		// System.err.println("SWIM " + data.size() + "  recon trax");
 
-		Swimmer swimmer = new Swimmer(MagneticFields.getInstance().getActiveField());
+		Swimmer swimmer = new Swimmer();
 		double stepSize = 5e-4; // m
 		DefaultSwimStopper stopper = new DefaultSwimStopper(RMAX);
 
 		for (TrajectoryRowData trd : data) {
 			LundId lid = LundSupport.getInstance().get(trd.getId());
+		
 
 			if (lid != null) {
 				SwimTrajectory traj;
@@ -73,9 +73,10 @@ public class SwimAllRecon implements ISwimAll {
 					traj = swimmer.swim(lid.getCharge(), trd.getXo() / 100,
 							trd.getYo() / 100, trd.getZo() / 100,
 							trd.getMomentum() / 1000, trd.getTheta(),
-							trd.getPhi(), stopper, PATHMAX, stepSize,
+							trd.getPhi(), stopper, 0, PATHMAX, stepSize,
 							Swimmer.CLAS_Tolerance, null);
 					traj.setLundId(lid);
+					traj.setSource(trd.getSource());
 					Swimming.addReconTrajectory(traj);
 				} catch (RungeKuttaException e) {
 					e.printStackTrace();

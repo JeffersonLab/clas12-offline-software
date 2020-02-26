@@ -22,7 +22,6 @@ import javax.swing.JTextField;
 import javax.swing.MenuSelectionManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import org.jlab.clas.physics.PhysicsEvent;
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.format.DoubleFormat;
@@ -509,15 +508,6 @@ public class NodePanel extends JPanel implements ActionListener,
 	}
 
 	/**
-	 * New fast mc event
-	 * @param event the generated physics event
-	 */
-	@Override
-	public void newFastMCGenEvent(PhysicsEvent event) {
-	}
-	
-
-	/**
 	 * Part of the IClasIoEventListener interface
 	 * 
 	 * @param event
@@ -553,7 +543,7 @@ public class NodePanel extends JPanel implements ActionListener,
 	
 	/**
 	 * Change the event source type
-	 * @param source the new source: File, ET, FastMC
+	 * @param source the new source: File, ET
 	 */
 	@Override
 	public void changedEventSource(ClasIoEventManager.EventSourceType source) {
@@ -578,5 +568,15 @@ public class NodePanel extends JPanel implements ActionListener,
 			break;
 		}
 	}
+	
+	/**
+	 * Tests whether this listener is interested in events while accumulating
+	 * @return <code>true</code> if this listener is NOT interested in  events while accumulating
+	 */
+	@Override
+	public boolean ignoreIfAccumulating() {
+		return true;
+	}
+
 
 }
