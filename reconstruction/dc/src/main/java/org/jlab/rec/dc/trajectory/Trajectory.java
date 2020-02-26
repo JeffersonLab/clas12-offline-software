@@ -6,6 +6,7 @@ import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.cross.Cross;
 
 
@@ -264,12 +265,14 @@ public class Trajectory extends ArrayList<Cross> {
         int dir  = 1;
         
         //HTCC: swim to sphere and save end point
-        double[] trkParsCheren = dcSwim.SwimToSphere(175.);
+//        System.out.println("New track " + x + " " + y + " " + z);
+        double[] trkParsCheren = dcSwim.SwimToSphere(Constants.htccRadius);
         if(trkParsCheren==null) return;
         this.FillTrajectory(id, trajectory, trkParsCheren, trkParsCheren[6], trkParsCheren[7], DetectorType.HTCC, 1); 
         pathLen = trkParsCheren[6];
         iBdl    = trkParsCheren[7]; 
 //        System.out.println( "HTCC" + " " + trkParsCheren[0] + " " + trkParsCheren[1] + " " + trkParsCheren[2] + " " + trkParsCheren[6] + " " + trkParsCheren[7]);
+       
 
         int is = _Sector-1;
         // loop over surfaces: Target, FMT, DC, LTCC, FTOF, ECAL
@@ -321,7 +324,7 @@ public class Trajectory extends ArrayList<Cross> {
                     dcSwim.SetSwimParameters(trkParsCheren[0], trkParsCheren[1], trkParsCheren[2], trkParsCheren[3], trkParsCheren[4], trkParsCheren[5], q);
                     dir=1;
                 }
-            
+                
                 // Swim in the lab for all detectors that are not DC
                 trkPars = dcSwim.SwimToPlaneBoundary(surface.get_d(), new Vector3D(surface.get_nx(),surface.get_ny(),surface.get_nz()),dir);
             
@@ -335,7 +338,7 @@ public class Trajectory extends ArrayList<Cross> {
                 //System.out.println(" Failed swim");
                 return;
             }
-            
+                
 //            System.out.println(surface.getDetectorType().getName() + " " + surface.getDetectorLayer() + " " + trkPars[0] + " " + trkPars[1] + " " + trkPars[2] + " " + trkPars[6] + " " + trkPars[7]);
 
             // if surface correspond to target, invert unit vector before is saved and calculate manually the pathlength

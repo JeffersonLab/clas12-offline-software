@@ -63,7 +63,6 @@ public class TrajectorySurfaces {
         double d = 0;
         Vector3D n;
         for(int is =0; is<6; is++) {
-            int index =0;
 
             System.out.println(" CREATING SURFACES FOR SECTOR "+(is+1));
             this._DetectorPlanes.add(new ArrayList<Surface>());
@@ -72,12 +71,12 @@ public class TrajectorySurfaces {
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.TARGET, DetectorLayer.TARGET_DOWNSTREAM, targetPosition+targetLength/2, 0., 0., 1.));
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.TARGET, DetectorLayer.TARGET_CENTER, targetPosition, 0., 0., 1.));
             
-            //add FMT
-            for(int i=0;i<6;i++) { 
-                d = FVT_Z1stlayer+i*FVT_Interlayer;               
-                this._DetectorPlanes.get(is).add(new Surface(DetectorType.FMT, i+1, d, 0., 0., 1.));
-            } 
-            index=7; // end of MM + HTCC(7)
+//            //add FMT
+//            for(int i=0;i<6;i++) { 
+//                d = FVT_Z1stlayer+i*FVT_Interlayer;               
+//                this._DetectorPlanes.get(is).add(new Surface(DetectorType.FMT, i+1, d, 0., 0., 1.));
+//            } 
+
             // Add DC
             //n = this.RotateFromTSCtoLabC(0,0,1, is+1).toVector3D();
             // don't rotate to the lab
@@ -106,7 +105,7 @@ public class TrajectorySurfaces {
             d = P.dot(n);
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.FTOF, DetectorLayer.FTOF1A, -d, -n.x(), -n.y(), -n.z())); 
             //LTCC
-            this._DetectorPlanes.get(is).add(new Surface(DetectorType.LTCC,1, 653.09, -n.x(), -n.y(), -n.z())); 
+            this._DetectorPlanes.get(is).add(new Surface(DetectorType.LTCC,1, Constants.ltccPlane, -n.x(), -n.y(), -n.z())); 
             //PCAL
             int superLayer = (int) ((DetectorLayer.PCAL_V-1)/3);
             int localLayer = DetectorLayer.PCAL_Z+1;
