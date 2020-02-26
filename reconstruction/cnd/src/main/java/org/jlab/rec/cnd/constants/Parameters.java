@@ -18,7 +18,7 @@ public class Parameters {
 
 	public static final double R0 = 28.92;   												  // radius of inner-most surface of CND paddle (cm)
 	public static final double Thickness = 3.08;   											  // thickness of each paddle (cm)
-	public static final double LayerGap = 0.01;   											  // radial gap between surfaces of paddles in neighbouring layers (cm)
+	public static final double LayerGap = 1.0;											  // radial gap between surfaces of paddles in neighbouring layers (cm)
 	public static final double BlockSlice = 360./SectNum;									  // azimuthal angle subtended by each sector
 
 	public static final double[] PLength = new double[LayNum] ;                               // Paddle length in each layer (cm)
