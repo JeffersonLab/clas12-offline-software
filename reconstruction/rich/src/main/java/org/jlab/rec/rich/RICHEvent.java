@@ -38,9 +38,6 @@ public class RICHEvent {
     private ArrayList<RICHParticle> hadrons = new ArrayList<RICHParticle>();
     private ArrayList<RICHParticle> photons = new ArrayList<RICHParticle>();
 
-    private double match_chi2 = 0.0;
-    private int match_nchi2 = 0;
-
     
     // constructor
     // ----------------
@@ -247,11 +244,161 @@ public class RICHEvent {
     // ----------------
 
     // ----------------
+    public void get_ChMean(RICHParticle hadron, int recotype) {
+    // ----------------
+
+        int debugMode = 0;
+        int SELE = 2;
+
+        if(debugMode>=1)System.out.format("Ch Mean calc for reco %d \n",recotype);
+
+        int update = 1;
+        while (update==1) { 
+
+            update     = 0;
+            int    nea = 0;
+            double mea = 0.0;
+            double sea = 0.0;
+            for( RICHParticle pho: photons) {
+                if(pho.get_type()==0 && pho.get_ParentIndex() == hadron.get_id()){
+
+
+                    if(debugMode>=1)System.out.format("calc mean for photon %d ",pho.get_id());
+                    RICHSolution reco = new RICHSolution(); 
+                    if(recotype==0) reco = pho.analytic;
+                    if(recotype==1) reco = pho.traced;
+                    double etac = reco.get_EtaC();
+
+                    if(reco.get_OK()==SELE){
+                        if(debugMode>=1)System.out.format(" etac %7.2f \n",etac*MRAD);
+                        nea++;
+                        mea += etac;
+                        sea += etac*etac;
+                    }else{
+                        if(debugMode>=1)System.out.format(" -> no\n");
+                    }
+                }
+
+            }
+
+            if(nea>0){
+                mea = mea /nea;
+                sea = Math.sqrt( sea/nea - mea*mea );
+            }
+            if(debugMode>=1)System.out.format(" mean etac %7.2f %7.2f \n",mea*MRAD,sea*MRAD);
+
+            for( RICHParticle pho: photons) {
+                if(pho.get_type()==0 && pho.get_ParentIndex() == hadron.get_id()){
+
+                    RICHSolution reco = new RICHSolution(); 
+                    if(recotype==0) reco = pho.analytic;
+                    if(recotype==1) reco = pho.traced;
+                    double etac = reco.get_EtaC();
+                    double chi = mea - 3 *sea;
+                    double cha = mea + 3 *sea;
+
+                    if(reco.get_OK()==SELE && ( etac < chi || etac > cha )) {
+                        reco.set_OK(1);
+                        update = 1;
+                        if(debugMode>=1)System.out.format(" reject photon %d  with etac %7.2f vs [%7.2f : %7.2f] \n",pho.get_id(),etac*MRAD,chi*MRAD,cha*MRAD);
+                    }
+                }
+            }
+
+        }
+        if(debugMode>=1)System.out.format(" Done with average \n");
+
+        int ndir = 0;
+        int nlat = 0;
+        int nspe = 0;
+        double chdir = 0.0;
+        double chlat = 0.0;
+        double chspe = 0.0;
+        double sdir = 0.0;
+        double slat = 0.0;
+        double sspe = 0.0;
+        for( RICHParticle pho: photons) {
+            if(pho.get_type()==0 && pho.get_ParentIndex() == hadron.get_id()){
+
+                RICHSolution reco = new RICHSolution();
+                if(recotype==0) reco = pho.analytic;
+                if(recotype==1) reco = pho.traced;
+                if(reco.get_OK()!=SELE) continue;
+
+                double etac = reco.get_EtaC();
+
+                int irefle = reco.get_RefleType();
+                if(irefle<0 || irefle>2) continue;
+
+                if(irefle==0){
+                    chdir+=etac;
+                    sdir+=etac*etac;
+                    ndir++;
+                }else{
+                    if(irefle==2){
+                        chspe+=etac;
+                        sspe+=etac*etac;
+                        nspe++;
+                    }else{
+                        chlat+=etac;
+                        slat+=etac*etac;
+                        nlat++;
+                    }
+                }
+            }
+        }
+
+        if(ndir>0){
+            chdir = chdir /ndir;
+            sdir = Math.sqrt( sdir/ndir - chdir*chdir );
+        }
+        if(nlat>0){
+            chlat = chlat /nlat;
+            slat = Math.sqrt( slat/nlat - chlat*chlat );
+        }
+        if(nspe>0){
+            chspe = chspe /nspe;
+            sspe = Math.sqrt( sspe/nspe - chspe*chspe );
+        }
+
+        RICHSolution hreco = null;
+        String sreco = null;
+        if(recotype==0) {hreco = hadron.analytic; sreco = "ALI";}
+        if(recotype==1) {hreco = hadron.traced; sreco = "TRA";}
+
+        int ntot = ndir+nlat+nspe;
+        double  chtot = 0.0;
+        double  stot = 0.0;
+        if(ntot>0){
+          chtot = (chdir*ndir + chlat*nlat + chspe*nspe)/ntot;
+          stot = Math.sqrt(sdir*sdir*ndir + slat*slat*nlat + sspe*sspe*nspe)/ntot;
+        }
+
+        if(debugMode>=1)System.out.format("Ave %s %7.2f %7.2f  %d  dir %d %7.2f %7.2f  lat %d %7.2f %7.2f  spe %d %7.2f %7.2f tot %d %7.2f %7.2f \n",sreco,hadron.get_momentum(),
+                  hadron.lab_theta*RAD,hadron.get_CLASpid(),ndir,chdir*MRAD, sdir*MRAD,nlat,chlat*MRAD,slat*MRAD,nspe,chspe*MRAD,sspe*MRAD,ntot,chtot*MRAD,stot*MRAD);
+
+        hreco.set_Ndir(ndir);
+        hreco.set_Chdir(chdir);
+        hreco.set_RMSdir(sdir);
+
+        hreco.set_Nlat(nlat);
+        hreco.set_Chlat(chlat);
+        hreco.set_RMSlat(slat);
+
+        hreco.set_Nspe(nspe);
+        hreco.set_Chspe(chspe);
+        hreco.set_RMSspe(sspe);
+
+    }
+     
+
+    // ----------------
     public void get_pid(RICHParticle hadron, int recotype) {
     // ----------------
 
         int debugMode = 0;
-        int npho = 0;
+        int SELE=2;
+
         double lh_el = 0.0;
         double lh_pi = 0.0;
         double lh_k  = 0.0;
@@ -277,76 +424,78 @@ public class RICHEvent {
         for( RICHParticle pho: photons) {
             if(pho.get_type()==0 && pho.get_ParentIndex() == hadron.get_id()){
 
-                if(debugMode>=1)System.out.format("calc prob for photon %d \n",npho);
-
                 RICHSolution reco = new RICHSolution(); 
                 if(recotype==0) reco = pho.analytic;
                 if(recotype==1) reco = pho.traced;
                 double etac = reco.get_EtaC();
+                if(reco.get_OK()!=SELE) continue;
+
+                RICHHit hit = hits.get( pho.get_hit_index() );
      
+                if(debugMode>=1)System.out.format("calc prob for photon %d \n",pho.get_id());
+
                 // prob for backgound
-                prob = pho.pid_probability(hadron, 0, recotype);
+                prob = pho.pid_probability(hadron, hit, 0, recotype);
                 if(prob-1>=RICHConstants.RICH_BKG_PROBABILITY){
                     lh_bg += Math.log(prob);
                     ch_bg += Math.log(prob)*etac;
                     n_bg++;
-                    reco.set_bgprob(Math.log(prob));
-                    if(debugMode>=2)System.out.format("prob  %d etac %8.4f for background %g %g \n",npho, etac*MRAD, prob, Math.log(prob));
+                    reco.set_BgProb(Math.log(prob));
+                    if(debugMode>=2)System.out.format(" --> etac %8.4f for background %g %g \n", etac*MRAD, prob, Math.log(prob));
                 }else{
                     //System.out.format("ATT: wrong prob  for background %g \n",prob-1);
                 }
 
                 // prob for electron
-                prob = pho.pid_probability(hadron, 11, recotype);
+                prob = pho.pid_probability(hadron, hit, 11, recotype);
                 if(prob-1>=RICHConstants.RICH_BKG_PROBABILITY){
                     lh_el += Math.log(prob);
                     ch_el += Math.log(prob)*etac;
                     n_el++;
-                    reco.set_elprob(Math.log(prob));
-                    if(debugMode>=2)System.out.format("prob  %d etac %8.4f for electron %g %g \n",npho, etac*MRAD, prob, Math.log(prob));
+                    reco.set_ElProb(Math.log(prob));
+                    if(debugMode>=2)System.out.format("- --> etac %8.4f for electron %g %g \n", etac*MRAD, prob, Math.log(prob));
                 }else{
                     //System.out.format("ATT: wrong prob  for electron %g \n",prob-1);
                 }
 
                 // prob for pion
-                prob=pho.pid_probability(hadron, 211, recotype);
+                prob=pho.pid_probability(hadron, hit, 211, recotype);
                 if(prob-1>=RICHConstants.RICH_BKG_PROBABILITY){
                     lh_pi += Math.log(prob);
                     ch_pi += Math.log(prob)*etac;
                     n_pi++;
-                    reco.set_piprob(Math.log(prob));
-                    if(debugMode>=1)System.out.format("prob  %d etac %8.4f for pion %g %g \n",npho, etac*MRAD, prob, Math.log(prob));
+                    reco.set_PiProb(Math.log(prob));
+                    if(debugMode>=1)System.out.format(" --> etac %8.4f for pion %g %g \n", etac*MRAD, prob, Math.log(prob));
                 }else{
                     //System.out.format("ATT: wrong prob  for pion %g \n",prob-1);
                 }
 
                 // prob for kaon
-                prob=pho.pid_probability(hadron, 321, recotype);
+                prob=pho.pid_probability(hadron, hit, 321, recotype);
                 if(prob-1>=RICHConstants.RICH_BKG_PROBABILITY){
                     lh_k  += Math.log(prob);
                     ch_k  += Math.log(prob)*etac;
                     n_k++;
-                    reco.set_kprob(Math.log(prob));
-                    if(debugMode>=1)System.out.format("prob  %d etac %8.4f for kaon %g %g \n",npho, etac*MRAD, prob, Math.log(prob));
+                    reco.set_KProb(Math.log(prob));
+                    if(debugMode>=1)System.out.format(" --> etac %8.4f for kaon %g %g \n", etac*MRAD, prob, Math.log(prob));
                 }else{
                     //System.out.format("ATT: wrong prob  for kaon %g \n",prob-1);
                 }
 
                 // prob for proton
-                prob=pho.pid_probability(hadron, 2212, recotype);
+                prob=pho.pid_probability(hadron, hit, 2212, recotype);
                 if(prob-1>=RICHConstants.RICH_BKG_PROBABILITY){
                     lh_pr += Math.log(prob);
                     ch_pr += Math.log(prob)*etac;
-                    reco.set_prprob(Math.log(prob));
+                    reco.set_PrProb(Math.log(prob));
                     n_pr++;
-                    if(debugMode>=1)System.out.format("prob  %d etac %8.4f for proton %g %g \n",npho, etac*MRAD, prob, Math.log(prob));
+                    if(debugMode>=1)System.out.format(" --> etac %8.4f for proton %g %g \n", etac*MRAD, prob, Math.log(prob));
                 }else{
                     //System.out.format("ATT: wrong prob  for proton %g \n",prob-1);
                 }
 
                 if(debugMode>=2) pho.shortshow();
             }
-            npho++;
         }
         
         if(lh_el>0)ch_el=ch_el/lh_el;
@@ -364,22 +513,18 @@ public class RICHEvent {
                       ch_el, ch_pi, ch_k, ch_pr, ch_had);
 
         double newRQ = 0.0;
-        if(recotype==0) {
-            newRQ = hadron.analytic.assign_PID(lh_el, lh_pi, lh_k, lh_pr, lh_bg);
-            hadron.set_RICHpid(hadron.analytic.get_bestH());
-            if(debugMode>=1)System.out.format("NEW ALY eve %8d  mom %6.2f xy %7.2f %7.2f %7.2f %7.2f %8.2f %8.4f  Npho %5d %8.4f %3d %g %3d %g --> %8.5f %7.2f %7.2f %3d %3d | %5d %8.4f \n",eventID, hadron.get_momentum(), 
-                hadron.lab_origin.x(), hadron.lab_origin.y(), hadron.meas_hit.x, hadron.meas_hit.y, hadron.get_changle(0)*MRAD, hadron.refi_emission,
-                n_el, lh_el, hadron.analytic.get_bestH(), hadron.analytic.get_bestprob(), hadron.analytic.get_secH(), hadron.analytic.get_secprob(), 
-                newRQ, ch_had*MRAD, ch_el*MRAD, hadron.get_CLASpid(), hadron.get_RICHpid(), match_nchi2, match_chi2);
-        }
-        if(recotype==1) {
-            newRQ = hadron.traced.assign_PID(lh_el, lh_pi, lh_k, lh_pr, lh_bg);
-            hadron.set_RICHpid(hadron.traced.get_bestH());
-            if(debugMode>=1)System.out.format("NEW TRA eve %8d  mom %6.2f xy %7.2f %7.2f %7.2f %7.2f %8.2f %8.4f  Npho %5d %8.4f %3d %g %3d %g --> %8.5f %7.2f %7.2f %3d %3d | %5d %8.4f \n",eventID, hadron.get_momentum(), 
-                hadron.lab_origin.x(), hadron.lab_origin.y(), hadron.meas_hit.x, hadron.meas_hit.y, hadron.get_changle(0)*MRAD, hadron.refi_emission,
-                n_el, lh_el, hadron.traced.get_bestH(), hadron.traced.get_bestprob(), hadron.traced.get_secH(), hadron.traced.get_secprob(),  
-                newRQ, ch_had*MRAD, ch_el*MRAD, hadron.get_CLASpid(), hadron.get_RICHpid(), match_nchi2, match_chi2);
-        }
+        RICHSolution hreco = new RICHSolution();
+        String hstri = null;
+        if(recotype==0) {hreco = hadron.analytic; hstri="ALI";}
+        if(recotype==1) {hreco = hadron.traced; hstri="TRA";}
+
+        newRQ = hreco.assign_PID(lh_el, lh_pi, lh_k, lh_pr, lh_bg);
+        hadron.set_RICHpid(hreco.get_BestH());
+        if(debugMode>=1)System.out.format("%s eve %8d  mom %6.2f xy %7.2f %7.2f %7.2f %7.2f %8.2f %8.4f  Npho %5d %8.4f %3d %g %3d %g --> %8.5f %7.2f %7.2f %3d %3d\n", 
+            hstri,eventID, hadron.get_momentum(), 
+            hadron.lab_origin.x(), hadron.lab_origin.y(), hadron.meas_hit.x, hadron.meas_hit.y, hadron.get_changle(0,0)*MRAD, hadron.refi_emission,
+            n_el, lh_el, hadron.analytic.get_BestH(), hadron.analytic.get_Bestprob(), hadron.analytic.get_secH(), hadron.analytic.get_secprob(), 
+            newRQ, ch_el*MRAD, ch_had*MRAD, hadron.get_CLASpid(), hadron.get_RICHpid());
 
     }
 
@@ -411,6 +556,53 @@ public class RICHEvent {
         }    
     }
 
+    // ----------------
+    public void select_Photons(RICHConstants recopar, int recotype){
+    // ----------------
+        int debugMode = 0;
+        int jj=0;
+        for( RICHParticle pho: photons){
+            if(pho.get_type()==0){
+
+                RICHHit hit = get_Hit( pho.get_hit_index() );
+                RICHParticle had = get_Hadron( pho.get_ParentIndex() );
+
+                RICHSolution reco = new RICHSolution();
+                String stype = null;
+                if(recotype==0) {
+                    if (had.get_Status()!=1)continue;
+                    reco = pho.analytic; stype="analytic";
+                }
+                if(recotype==1) {reco = pho.traced; stype="traced";}
+
+                double htime = hit.get_time();
+                double dtime = pho.get_start_time() + reco.get_time() - htime;
+
+                int irefle = reco.get_RefleType();
+                if(irefle<0 || irefle>2) continue;
+
+                double CHMI = had.minChAngle(irefle);
+                double CHMA = had.maxChAngle(irefle);
+                double DTMA = recopar.RICH_TIME_RMS*3;
+
+                double etaC = reco.get_EtaC();
+
+                // select acceptable Cherenkov solution
+                if((etaC>CHMI && etaC<CHMA) && Math.abs(dtime) < DTMA) {
+                    reco.set_OK(2);
+                }
+
+                if(debugMode>=1){
+                    System.out.format("Test pho %4d  %4d  %s  %7.2f (%7.2f-%7.2f)  %7.2f (%7.2f) -->  %4d  %d\n",
+                        jj,pho.get_id(), stype, etaC*MRAD, CHMI*MRAD, CHMA*MRAD, dtime, DTMA, reco.get_OK(),reco.get_FirstRefle());
+                }
+                jj++;
+
+            }
+
+        }
+
+    }
 
     // ----------------
     public void analyze_Photons(){
@@ -466,8 +658,8 @@ public class RICHEvent {
     // ----------------
 
         int debugMode = 0;
-        match_nchi2 = 0 ;
-        match_chi2 = 0.0 ;
+        int match_nchi2 = 0 ;
+        double match_chi2 = 0.0 ;
 
         RICHConstants recopar = tool.get_Constants();
 
@@ -576,6 +768,7 @@ public class RICHEvent {
 
                 // store in the event
                 if(rays.get(rays.size()-1).is_detected()){
+                    if(debugMode>=1)System.out.format(" --> detected \n");
                     photons.add(photon);
                     fac=1;
                     if (photon.traced.get_rayrefle()>2)fac=2.;
