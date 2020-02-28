@@ -31,6 +31,8 @@ public class BandHitFinder {
 		Map<Integer,Integer> hasMatch 	= new HashMap<Integer,Integer>();
 
 		boolean hasvetohit = false;
+		System.out.println("***** STARTING HIT CANDIDATE SKIMMER *****");
+		System.out.flush();
 		// Loop through the candidates array to find possible combinations of left and right.
 		if(candidates.size() > 0) {
 
@@ -47,7 +49,8 @@ public class BandHitFinder {
 
 				//check if hit is in the veto counter (layer 6). 
 				if (hit1.GetLayer() == 6) {
-
+					System.out.println("Candidate hit is veto hit");
+					System.out.flush();
 					//  Vetos only have one PMT, so call them 'left' and add them to our
 					//  coincidence list and move on
 					
@@ -108,9 +111,9 @@ public class BandHitFinder {
 				// is an associated hit on the other side of the bar
 				int sector 		= hit1.GetSector();    
 				int layer 		= hit1.GetLayer(); 
-				int component 	= hit1.GetComponent(); 
+				int component 		= hit1.GetComponent(); 
 				int side 		= hit1.GetSide();
-				int barKey =  sector*100+layer*10+component;
+				int barKey 		= sector*100+layer*10+component;
 
 				// Now loop through the candidates again and match any which has same sector,layer,component but
 				// different side. Off-set the start of the list to make sure no repeats:
@@ -125,6 +128,8 @@ public class BandHitFinder {
 
 					// Sanity check if side differs by one (there should be no multi hits stored)
 					if (Math.abs(hit2.GetSide() - side) != 1) continue;
+
+					System.err.println("\tWiill attempt to pair s l c o " + (barKey*10+side) + " with " + (hit2.GetSector()*1000+hit2.GetLayer()*100+hit2.GetComponent()*10+hit2.GetSide()));
 
 					double tdcleft = -1;
 					double tdcright = -1;
@@ -164,28 +169,161 @@ public class BandHitFinder {
 						System.err.println("BAND HIT FINDER. Found two hits with left and right side but can not assign which hide belongs to which side");
 						continue;
 					}
+					System.out.println("\tCandidate hit information ordered as:");
+					System.out.println("\t\ttdcleft = "	+ tdcleft);
+					System.out.println("\t\tftdcleft = "	+ftdcleft);
+					System.out.println("\t\tadcleft = "	+ adcleft );
+					System.out.println("\t\tamplleft = "	+amplleft );
+					System.out.println("\t\ttdcright = "	+ tdcright);
+					System.out.println("\t\tftdcright = "	+ftdcright);
+					System.out.println("\t\tadcright = "	+ adcright );
+					System.out.println("\t\tamplright = "	+amplright );
+					System.out.flush();
+
+
+
+					// -----------------------------------------------------------------------------------------------
+					// First correction to apply is time-walk on TDC (FADC is assumed to have no TW correction):
+					// 	for the left PMT:
+					double time_walk_paramsL[] = CalibrationConstantsLoader.TIMEWALK_L.get( Integer.valueOf(barKey) );
+					double parA1_L = time_walk_paramsL[0];
+					double parB1_L = time_walk_paramsL[1];
+					double parC1_L = time_walk_paramsL[2];
+					double parA2_L = time_walk_paramsL[3];
+					double parB2_L = time_walk_paramsL[4];
+					double parC2_L = time_walk_paramsL[5];
+					tdcleft = tdcleft - ( parA1_L + parB1_L / Math.pow( amplleft , parC1_L ) ) - ( parA2_L + parB2_L / Math.pow( amplleft , parC2_L ) );
+					//	for the right PMT:
+					double time_walk_paramsR[] = CalibrationConstantsLoader.TIMEWALK_R.get( Integer.valueOf(barKey) );
+					double parA1_R = time_walk_paramsR[0];
+					double parB1_R = time_walk_paramsR[1];
+					double parC1_R = time_walk_paramsR[2];
+					double parA2_R = time_walk_paramsR[3];
+					double parB2_R = time_walk_paramsR[4];
+					double parC2_R = time_walk_paramsR[5];
+					tdcright = tdcright - ( parA1_R + parB1_R / Math.pow( amplright , parC1_R ) ) - ( parA2_R + parB2_R / Math.pow( amplright , parC2_R ) );
+					
+					
+					// -----------------------------------------------------------------------------------------------
+					// Next we form (L-R) time and correct for the offset between the two for both TDC and FADC times:
+					double tdiff_tdc  = (tdcleft - tdcright) - CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) );
+					double tdiff_fadc = (ftdcleft - ftdcright) - CalibrationConstantsLoader.FADC_T_OFFSET.get( Integer.valueOf(barKey) );
+
+
+
+					// -----------------------------------------------------------------------------------------------
+					// Now we can load effective velocity in the bar and require that the time difference is 
+					// less than the max allowed for the bar length with 10% safety net on the edge of the bar:
+					double maxDiff_tdc = Parameters.barLengthSector[sector-1]/
+						CalibrationConstantsLoader.TDC_VEFF.get( Integer.valueOf(barKey) );
+					double maxDiff_fadc = Parameters.barLengthSector[sector-1]/
+						CalibrationConstantsLoader.FADC_VEFF.get( Integer.valueOf(barKey) );
+					if( Math.abs(tdiff_tdc)  > 1.1*maxDiff_tdc )continue;
+					if( Math.abs(tdiff_fadc) > 1.1*maxDiff_fadc )continue;
+
+
+					// -----------------------------------------------------------------------------------------------
+					// Form the mean time for TDC and FADC and fix any offsets that are different layer-by-layer and 
+					// paddle-by-paddle, which are given by the laser calibration runs. Then also subtract off a global
+					// offset per bar which is a final re-calibration to the photon peak for each bar for each run number
+					double mtime_tdc =
+							( tdcleft + tdcright )/2. 
+							  - Math.abs(CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) ))/2. 
+							  - CalibrationConstantsLoader.TDC_MT_P2P_OFFSET.get(Integer.valueOf(barKey) ) 
+							  - CalibrationConstantsLoader.TDC_MT_L2L_OFFSET.get(Integer.valueOf(barKey) ) 
+							  - CalibrationConstantsLoader.TDC_GLOB_OFFSET.get(Integer.valueOf(barKey) );
+					double mtime_fadc = 
+							( ftdcleft + ftdcright )/2.
+							 - Math.abs(CalibrationConstantsLoader.FADC_T_OFFSET.get( Integer.valueOf(barKey) ))/2.
+							 - CalibrationConstantsLoader.FADC_MT_P2P_OFFSET.get(Integer.valueOf(barKey) )
+							 - CalibrationConstantsLoader.FADC_MT_L2L_OFFSET.get(Integer.valueOf(barKey) ) 
+							 - CalibrationConstantsLoader.FADC_GLOB_OFFSET.get(Integer.valueOf(barKey) );
+
+					// -----------------------------------------------------------------------------------------------
+					// Using the effective velocity for each bar, get the position of the hit in x based on the TDC time
+					// and then form the global position in the lab system:
+					double xpos_tdc =  (-1./2.)* tdiff_tdc * CalibrationConstantsLoader.TDC_VEFF.get( Integer.valueOf(barKey) );
+					double xpos_fadc = (-1./2.)* tdiff_fadc * CalibrationConstantsLoader.FADC_VEFF.get( Integer.valueOf(barKey) );
+					xposHit = xpos_tdc;
+
+					Double[] globPos = Parameters.barGeo.get( Integer.valueOf(barKey) );
+					xposHit += globPos[0];
+					yposHit = globPos[1];
+					zposHit = globPos[2];
+					xposHitUnc = 0.5 * CalibrationConstantsLoader.TDC_VEFF.get( Integer.valueOf(barKey) ) * 0.3; // Estimation of error, not perfect
+					yposHitUnc = Parameters.thickness / Math.sqrt(12.);
+					zposHitUnc = Parameters.thickness / Math.sqrt(12.);
+
+
+
+					// -----------------------------------------------------------------------------------------------
+					// Correct FADC ADC for attenuation length
+					double sectorLen = Parameters.barLengthSector[sector-1];
+					double mu_cm = CalibrationConstantsLoader.FADC_ATTEN_LENGTH.get( Integer.valueOf(barKey) ); // in [cm]
+					double adcL_corr = adcleft * Math.exp( (sectorLen/2.-xpos_fadc) / mu_cm );
+					double adcR_corr = adcright* Math.exp( (sectorLen/2.+xpos_fadc) / mu_cm );
+
+				
+					// -----------------------------------------------------------------------------------------------
+					// Create a new BandHit and fill it with the relevant info:
+					BandHit Hit = new BandHit();  
+
+					Hit.SetSector(sector);
+					Hit.SetLayer(layer);
+					Hit.SetComponent(component);
+
+					Hit.SetMeanTime_TDC(mtime_tdc);
+					Hit.SetMeanTime_FADC(mtime_fadc);
+
+					Hit.SetDiffTime_TDC(tdiff_tdc);
+					Hit.SetDiffTime_FADC(tdiff_fadc);
+
+					Hit.SetAdcLeft(adcL_corr);
+					Hit.SetAdcRight(adcR_corr);
+
+					Hit.SetTLeft_FADC(ftdcleft);
+					Hit.SetTRight_FADC(ftdcright);
+
+					Hit.SetTLeft_TDC(tdcleft);
+					Hit.SetTRight_TDC(tdcright);
+
+					Hit.SetX(xposHit);
+					Hit.SetY(yposHit);
+					Hit.SetZ(zposHit);
+					Hit.SetUx(xposHitUnc);
+					Hit.SetUy(yposHitUnc);
+					Hit.SetUz(zposHitUnc);
+
+					Hit.SetIndexLpmt(indexleft);
+					Hit.SetIndexRpmt(indexright);
+
+					coincidences.add(Hit);
+					break; // Found a hit match for this bar, so let's move on to the next possible bar
+
 					//TODO: Update Time Walk Correction with Amplitude instead of ADC
 					//TODO: Update Algorithm
 					// -----------------------------------------------------------------------------------------------
 					// Time-walk correction
+					/*
 					double time_walk_paramsL[] = CalibrationConstantsLoader.TIMEWALK_L.get( Integer.valueOf(barKey) );
 					double parA_L = time_walk_paramsL[0];
 					double parB_L = time_walk_paramsL[1];
 					tdcleft  = tdcleft - (parA_L/Math.sqrt(adcleft ) + parB_L);
-					//tdcleft  = tdcleft - (parA_L/Math.pow( ampleft , parB_L) + parC_L);
 					double time_walk_paramsR[] = CalibrationConstantsLoader.TIMEWALK_R.get( Integer.valueOf(barKey) );
 					double parA_R = time_walk_paramsR[0];
 					double parB_R = time_walk_paramsR[1];
 					tdcright = tdcright - (parA_R/Math.sqrt(adcright) + parB_R);
-					//tdcright = tdcright - (parA_R/Math.sqrt( ampright , parB_R) + parC_R );
 					// -----------------------------------------------------------------------------------------------
-					
+					*/
+
+					/*
 					// Form the L-R time
 					double tdiff_tdc  = (tdcleft - tdcright) - CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) );
 					double tdiff_fadc = (ftdcleft - ftdcright) - CalibrationConstantsLoader.FADC_T_OFFSET.get( Integer.valueOf(barKey) );
+					*/
 
-					//System.out.println("*Found a candidate BAR with tdiff: "+tdiff_tdc+" "+tdiff_fadc);
 					// Check if the time difference is within the length of the bar:
+					/*
 					double maxDiff_tdc = Parameters.barLengthSector[sector-1]/
 						CalibrationConstantsLoader.TDC_VEFF.get( Integer.valueOf(barKey) );
 					double maxDiff_fadc = Parameters.barLengthSector[sector-1]/
@@ -194,7 +332,9 @@ public class BandHitFinder {
 					//System.out.println("\tmax time diff allowed: "+maxDiff_tdc+"  " +maxDiff_fadc);
 					if( Math.abs(tdiff_tdc)  > maxDiff_tdc )continue;
 					if( Math.abs(tdiff_fadc) > maxDiff_fadc )continue;
+					*/
 
+					/*
 					// Form mean time
 					double mtime_tdc =
 							( tdcleft + tdcright )/2. 
@@ -206,14 +346,17 @@ public class BandHitFinder {
 							 - Math.abs(CalibrationConstantsLoader.FADC_T_OFFSET.get( Integer.valueOf(barKey) ))/2.
 							 - CalibrationConstantsLoader.FADC_MT_P2P_OFFSET.get(Integer.valueOf(barKey) )
 							 - CalibrationConstantsLoader.FADC_MT_L2L_OFFSET.get(Integer.valueOf(barKey) ) ;
+					*/
 
+					/*
 					// Get position from mean time, but multiply by -1 because we define left to be position x, so if
 					// L-R < 0, that means position is closer to left side, which is positive x.
 					double xpos_tdc =  (-1./2.)* tdiff_tdc * CalibrationConstantsLoader.TDC_VEFF.get( Integer.valueOf(barKey) );
 					double xpos_fadc = (-1./2.)* tdiff_fadc * CalibrationConstantsLoader.FADC_VEFF.get( Integer.valueOf(barKey) );
 					xposHit = (xpos_tdc+xpos_fadc)/2.;
 					//xposHit = xpos_tdc;
-
+					*/
+					/*
 					// Grab global position from parameters class
 					Double[] globPos = Parameters.barGeo.get( Integer.valueOf(barKey) );
 					xposHit += globPos[0];
@@ -223,16 +366,18 @@ public class BandHitFinder {
 									* CalibrationConstantsLoader.FADC_VEFF.get( Integer.valueOf(barKey) );
 					yposHitUnc = Parameters.thickness / 2.;
 					zposHitUnc = Parameters.thickness / 2.;
+					*/
 
-
+					/*
 					// Correct FADC ADC for attenuation length
 					double sectorLen = Parameters.barLengthSector[sector-1];
 					double mu_cm = CalibrationConstantsLoader.FADC_ATTEN_LENGTH.get( Integer.valueOf(barKey) ); // in [cm]
 					double adcL_corr = adcleft * Math.exp( (sectorLen/2.-xpos_fadc) / mu_cm );
 					double adcR_corr = adcright* Math.exp( (sectorLen/2.+xpos_fadc) / mu_cm );
 					//System.out.println(barKey+"\t"+xpos_fadc+"\t"+(adcleft-adcright)+"\t"+(adcL_corr-adcR_corr));
+					*/
 
-
+					/*
 					// Create a new BandHit and fill it with the relevant info:
 					BandHit Hit = new BandHit();  
 
@@ -258,11 +403,15 @@ public class BandHitFinder {
 					Hit.SetIndexLpmt(indexleft);
 					Hit.SetIndexRpmt(indexright);
 					// Print for debugging:
+					//System.out.println("\tKept this candidate!");
 					//Hit.Print();
+					//System.out.println("");
+					//System.out.flush();
 
 					coincidences.add(Hit);
 
 					break;
+					*/
 
 				}  // close loop over j
 			} // close loop over i  		

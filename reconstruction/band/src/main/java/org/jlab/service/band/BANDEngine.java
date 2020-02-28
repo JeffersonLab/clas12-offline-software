@@ -36,6 +36,7 @@ public class BANDEngine extends ReconstructionEngine {
 
 	@Override
 		public boolean processDataEvent(DataEvent event) {
+			System.out.println("**** NEW EVENT ****");
 			// update calibration constants based on run number if changed
 			setRunConditionsParameters(event);
 
@@ -71,9 +72,12 @@ public class BANDEngine extends ReconstructionEngine {
 				"/calibration/band/paddle_offsets_tdc",
 				"/calibration/band/layer_offsets_tdc",
 				"/calibration/band/attenuation_lengths",
-				"/calibration/band/time_walk_corr_left",
-				"/calibration/band/time_walk_corr_right",
+				"/calibration/band/time_walk_amp_left",
+				"/calibration/band/time_walk_amp_right",
+				"/calibration/band/global_offsets",
 				"/calibration/band/cuts"
+				//"/calibration/band/time_walk_corr_left",
+				//"/calibration/band/time_walk_corr_right",
     		};
     
 			requireConstants(Arrays.asList(bandTables));

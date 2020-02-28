@@ -35,6 +35,7 @@ public class HitReader {
 
 		if(event==null) return new ArrayList<BandHitCandidate>();
 
+
 		// Grab trigger phase for TDC vs FADC matching
 		double triggerPhase = getTriggerPhase(event);
 
@@ -51,7 +52,8 @@ public class HitReader {
 		int nadc 	= bankADC.rows();   // number of adc values
 		int ntdc 	= bankTDC.rows();   // number of tdc values
 
-
+		System.out.println("PROCESSING ALL ADCs");
+		System.out.flush();
 		// Loop over the event and add all the FADC information to arrays for processing
 		for( int i = 0 ; i < nadc ; i++ ){ 
 			int s	= bankADC.getByte("sector",i);  // one of the 5 sectors
@@ -67,14 +69,19 @@ public class HitReader {
 
 			int key = s*1000 + l*100 + c*10 + o;
 
-			//System.out.println("s,l,c,o: "+key+" adc,ftdc: "+adc+" "+ftdc);
+			System.out.println("s,l,c,o: "+key+" adc,ftdc: "+adc+" "+ftdc+" amp,index: "+ampl+" " +i);
+			System.out.flush();
 
 
 			// Check if this PMT has been stored before, and if it has, then
 			// replace it only if it has a larger ADC value. Otherwise, add to map
 			//NOTE F.H. Feb 17 2020: Should we do some update to also check Amplitude here?
 			if (fadcInt.containsKey( Integer.valueOf(key) ) ) { 
+				System.out.println("\tPMT has prev save.");
+				System.out.flush();
 				if( fadcInt.get( Integer.valueOf(key) ) < adc ) {
+					System.out.println("\t\treplacing PMT information for: "+key+" adc,ftdc: "+adc+" "+ftdc);
+					System.out.flush();
 					fadcInt.put( Integer.valueOf(key) , Integer.valueOf(adc) );
 					fadcAmpl.put(Integer.valueOf(key),  Integer.valueOf(ampl));
 					fadcTimes.put( Integer.valueOf(key),  Float.valueOf(ftdc) );
@@ -82,6 +89,8 @@ public class HitReader {
 				}
 			}
 			else {
+				System.out.println("\tPMT doesnt have prev save. saving as s,l,c,o: "+key+" adc,ftdc: "+adc+" "+ftdc);
+				System.out.flush();
 				fadcInt.put( Integer.valueOf(key) , Integer.valueOf(adc) );
 				fadcAmpl.put(Integer.valueOf(key),  Integer.valueOf(ampl));
 				fadcTimes.put( Integer.valueOf(key),  Float.valueOf(ftdc) );
@@ -89,6 +98,8 @@ public class HitReader {
 			}	
 		} // end fadc loop
 
+		System.out.println("PROCESSING ALL TDCs");
+		System.out.flush();
 		// Now loop over the TDC information and try to find best match
 		for( int j = 0 ; j < ntdc ; j++ ){
 			int s = bankTDC.getByte("sector", j);
@@ -102,12 +113,14 @@ public class HitReader {
 
 			if( tdc <= 0 ) continue;
 
-			//System.out.println("s,l,c,o: "+key+" tdc: "+tdc);
+			System.out.println("s,l,c,o: "+key+" tdc, index: "+tdc+" "+j);
+			System.out.flush();
 
 
 			// Make sure that we have FADC information for this PMT -- if not, skip it
 			if( !fadcInt.containsKey(key) || !fadcTimes.containsKey(key) ) continue;
-			//System.out.println("\t*Found match for this PMT!*");
+			System.out.println("\t*Found match for this PMT! Saving TDC information*");
+			System.out.flush();
 
 			// If we have already stored a TDC for this PMT, need to compare with
 			// FADC time and take the smallest tdiff one.
@@ -115,12 +128,18 @@ public class HitReader {
 				double thisDiff = fadcTimes.get( Integer.valueOf(key) ) - tdc;
 				double prevDiff = fadcTimes.get( Integer.valueOf(key) ) - tdcTimes.get( Integer.valueOf(key) );
 
+				System.out.println("\tPMT TDC has prev save.");
+				System.out.flush();
 				if( Math.abs(thisDiff) < Math.abs(prevDiff) ) {
+					System.out.println("\t\treplacing PMT TDC information for: "+key+" tdc: "+tdc);
+					System.out.flush();
 					tdcTimes.put( Integer.valueOf(key),  Double.valueOf(tdc) );
 					tdcIndex.put( Integer.valueOf(key), Integer.valueOf(j));
 				}
 			}
 			else {
+				System.out.println("\tPMT TDC doesnt have prev save. saving as s,l,c,o: "+key+" tdc: "+tdc);
+				System.out.flush();
 				tdcTimes.put( Integer.valueOf(key),  Double.valueOf(tdc) );
 				tdcIndex.put( Integer.valueOf(key), Integer.valueOf(j));
 			}
@@ -135,7 +154,7 @@ public class HitReader {
 			String id = Integer.toString(keys);
 			int sector 		= Integer.parseInt( id.substring(0,1) );
 			int layer 		= Integer.parseInt( id.substring(1,2) );
-			int component 	= Integer.parseInt( id.substring(2,3) );
+			int component 		= Integer.parseInt( id.substring(2,3) );
 			int order		= Integer.parseInt( id.substring(3,4) );
 
 			int adc = fadcInt.get(keys);
@@ -144,7 +163,8 @@ public class HitReader {
 			double tdc = tdcTimes.get(keys);
 			int indexadc = fadcIndex.get(keys);
 			int indextdc = tdcIndex.get(keys);
-			//System.out.println("Found a candidate PMT hit! slco: "+sector+" "+layer+" "+component+" "+order+" "+adc+" "+ftdc+" "+tdc);
+			System.out.println("Found a candidate PMT hit! slco: "+sector+" "+layer+" "+component+" "+order+" adc,ftdc "+adc+" "+ftdc+" tdc: "+tdc+" adcInd,tdcInd: "+indexadc+" "+indextdc);
+			System.out.flush();
 
 			BandHitCandidate newHit = new BandHitCandidate( sector,layer,component,order,
 					adc, ampl,tdc, ftdc ,triggerPhase, indexadc, indextdc);
