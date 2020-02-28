@@ -316,6 +316,8 @@ public class Constants {
         return Constants.T2D;
     }
 
-
-   
+    // geometry constants not yet read from CCDB of from geometry services
+    public static double htccRadius=175;
+    public static double ltccPlane=653.09;
+        
 }

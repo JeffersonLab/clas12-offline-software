@@ -14,6 +14,9 @@ import org.jlab.utils.groups.IndexedTable;
 import java.util.Arrays;
 import java.util.Optional;
 
+import org.jlab.geom.prim.Plane3D;
+import org.jlab.geom.prim.Line3D;
+
 public class RICHEBEngine extends ReconstructionEngine {
 
     private int Run = -1;
@@ -39,18 +42,73 @@ public class RICHEBEngine extends ReconstructionEngine {
 
 
         int debugMode = 0;
+        if(debugMode>=1)System.out.format("I am in RICHEBEngine \n");
 
         tool = new RICHTool();
 
-        boolean ccdb = init_CCDB();
+        boolean ccdb = init_CCDB(1);
 
         return true;
 
     }
 
+    
+    /*
+    // ----------------
+    public boolean init_forTraj() {
+    // ----------------
+
+
+        int debugMode = 0;
+
+        tool = new RICHTool();
+
+        boolean ccdb = init_CCDB(0);
+
+        //testTraj();
+
+        return true;
+
+    }*/
+
+    // ----------------
+    public void testTraj() {
+    // ----------------
+
+        tool.testTraj();
+ 
+    }
+
+
+    // ----------------
+    public Plane3D get_MaPMTforTraj() {
+    // ----------------
+
+        return tool.get_MaPMTforTraj();
+
+    }
+
+
+    // ----------------
+    public Plane3D get_AeroforTraj(int iflag) {
+    // ----------------
+
+        return tool.get_AeroforTraj(iflag);
+
+    }
+
+
+    //------------------------------
+    public int select_AeroforTraj(Line3D first, Line3D second, Line3D third) {
+    //------------------------------
+
+        return tool.select_AeroforTraj(first, second, third);
+
+    }
+
  
     // ----------------
-    public boolean init_CCDB() {
+    public boolean init_CCDB(int iflag) {
     // ----------------
 
         int debugMode = 0;
@@ -60,13 +118,15 @@ public class RICHEBEngine extends ReconstructionEngine {
                     "/calibration/rich/time_walk",
                     "/calibration/rich/time_offset",
                     "/calibration/rich/misalignments",
-                    "/calibration/rich/parameter"
+                    "/calibration/rich/parameterss",
+                    "/calibration/rich/pixels",
+                    "/calibration/rich/electro"
                  };
 
         requireConstants(Arrays.asList(richTables));
 
         // initialize constants manager default variation, will be then modified based on yaml settings
-            // Get the constants for the correct variation
+        // Get the constants for the correct variation
         String engineVariation = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");         
         getConstantsManager().setVariation(engineVariation);
 
@@ -75,11 +135,10 @@ public class RICHEBEngine extends ReconstructionEngine {
         // Get the constant tables for reconstruction parameters, geometry and optical characterization
         int run = 11;
 
-        IndexedTable test = getConstantsManager().getConstants(run, "/calibration/rich/parameter");
+        //IndexedTable test = getConstantsManager().getConstants(run, "/calibration/rich/parameter");
 
-
-        tool.init_GeoConstants(
-                  getConstantsManager().getConstants(run, "/calibration/rich/parameter"),
+        tool.init_GeoConstants(iflag,
+                  getConstantsManager().getConstants(run, "/calibration/rich/parameterss"),
                   getConstantsManager().getConstants(run, "/calibration/rich/aerogel"),
                   getConstantsManager().getConstants(run, "/calibration/rich/misalignments") );
 
@@ -151,7 +210,9 @@ public class RICHEBEngine extends ReconstructionEngine {
     
             // Get the run-dependent tables for time calibration
             tool.init_TimeConstants( getConstantsManager().getConstants(run, "/calibration/rich/time_walk"),
-                      getConstantsManager().getConstants(run, "/calibration/rich/time_offset") );
+                      getConstantsManager().getConstants(run, "/calibration/rich/time_offset"),
+                      getConstantsManager().getConstants(run, "/calibration/rich/electro"),
+                      getConstantsManager().getConstants(run, "/calibration/rich/pixels") );
 
         }
 

@@ -8,11 +8,14 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.clas.detector.DetectorResponse;
 
+
 public class RICHio {
 
     /*
      *   RICH i/o 
      */
+    private static double RAD = 180./Math.PI;
+    private static double MRAD = 1000;
 
     // constructor
     // ----------------
@@ -40,10 +43,6 @@ public class RICHio {
             event.removeBank("RICH::response");
             if(debugMode==1)System.out.format("Remove RICH::response from event \n");
         }
-        if(event.hasBank("RICH::ringCher")){
-            event.removeBank("RICH::ringCher");
-            if(debugMode==1)System.out.format("Remove RICH::ringCher from event \n");
-        }
         if(event.hasBank("RICH::hadrons")){
             event.removeBank("RICH::hadrons");
             if(debugMode==1)System.out.format("Remove RICH::hadrons from event \n");
@@ -51,6 +50,14 @@ public class RICHio {
         if(event.hasBank("RICH::photons")){
             event.removeBank("RICH::photons");
             if(debugMode==1)System.out.format("Remove RICH::photons from event \n");
+        }
+        if(event.hasBank("RICH::ringCher")){
+            event.removeBank("RICH::ringCher");
+            if(debugMode==1)System.out.format("Remove RICH::ringCher from event \n");
+        }
+        if(event.hasBank("RICH::hadCher")){
+            event.removeBank("RICH::hadCher");
+            if(debugMode==1)System.out.format("Remove RICH::hadCher from event \n");
         }
 
     }
@@ -96,6 +103,8 @@ public class RICHio {
         if(richevent.get_nPho()>0)write_PhotonBank(event, richevent);
 
         if(richevent.get_nPho()>0)write_RingCherBank(event, richevent, recopar);
+
+        if(richevent.get_nHad()>0)write_HadCherBank(event, richevent, recopar);
 
     }
 
@@ -214,6 +223,7 @@ public class RICHio {
                 bankHads.setFloat("traced_hitz",   i, (float) had.meas_hit.z);
                 bankHads.setFloat("traced_time",   i, (float) had.traced.get_time());
                 bankHads.setFloat("traced_path",   i, (float) had.traced.get_path());
+                //bankHads.setFloat("traced_mchi2",  i, (float) had.traced.get_machi2());
 
                 bankHads.setShort("traced_ilay",   i, (short) had.ilay_emission);
                 bankHads.setShort("traced_ico",    i, (short) had.ico_emission);
@@ -221,13 +231,66 @@ public class RICHio {
                 bankHads.setFloat("traced_emiy",   i, (float) had.lab_emission.y);
                 bankHads.setFloat("traced_emiz",   i, (float) had.lab_emission.z);
 
-                bankHads.setFloat("EtaC_ele",      i, (float) had.get_changle(0));
-                bankHads.setFloat("EtaC_pi",       i, (float) had.get_changle(1));
-                bankHads.setFloat("EtaC_k",        i, (float) had.get_changle(2));
-                bankHads.setFloat("EtaC_pr",       i, (float) had.get_changle(3));
-                bankHads.setFloat("EtaC_min",      i, (float) had.minChAngle());
-                bankHads.setFloat("EtaC_max",      i, (float) had.maxChAngle());
+                bankHads.setFloat("EtaC_ele",      i, (float) had.get_changle(0,0));
+                bankHads.setFloat("EtaC_pi",       i, (float) had.get_changle(1,0));
+                bankHads.setFloat("EtaC_k",        i, (float) had.get_changle(2,0));
+                bankHads.setFloat("EtaC_pr",       i, (float) had.get_changle(3,0));
+                bankHads.setFloat("EtaC_min",      i, (float) had.minChAngle(0));
+                bankHads.setFloat("EtaC_max",      i, (float) had.maxChAngle(0));
 
+            }
+            event.appendBanks(bankHads);
+        }
+
+    }
+
+    // ----------------
+    public void write_HadCherBank(DataEvent event, RICHEvent richevent, RICHConstants recopar) {
+    // ----------------
+
+        int debugMode = 0;
+
+        int NHAD = richevent.get_nHad();
+        if(debugMode>=1)System.out.format("Creating Bank for %5d Hadrons \n", NHAD);
+        
+        if(NHAD>0) {
+            if(debugMode>=1)System.out.println(" --> Creating the HadCher Bank ");
+            DataBank bankHads = event.createBank("RICH::hadCher", NHAD);
+            if(bankHads==null){
+                System.out.println("ERROR CREATING BANK : RICH::hadCher");
+                return;
+            }
+
+            for(int i = 0; i < NHAD; i++){
+
+                RICHParticle had = richevent.get_Hadron(i);
+                double dT_max = recopar.RICH_TIME_RMS*3;
+
+                if(debugMode>0)System.out.format(" RICHio %7.2f %7.2f %5d %7.2f %9.4f %9.4f \n",had.minChAngle(0)*MRAD,had.maxChAngle(0)*MRAD,
+                          had.traced.get_BestH(),had.traced.get_RQP(),had.traced.get_ElProb(),had.traced.get_PiProb());
+
+                bankHads.setShort("id",            i ,(short) had.get_id());
+                bankHads.setShort("hindex",        i, (short) had.get_hit_index());
+                bankHads.setShort("pindex",        i, (short) had.get_ParentIndex());
+
+                bankHads.setShort("emilay",        i, (short) had.ilay_emission);
+                bankHads.setShort("emico",         i, (short) had.ico_emission);
+                bankHads.setShort("emqua",         i, (short) had.iqua_emission);
+                bankHads.setFloat("mchi2",         i, (float) had.traced.get_machi2());
+
+                bankHads.setFloat("ch_min",        i, (float) had.minChAngle(0));
+                bankHads.setFloat("ch_max",        i, (float) had.maxChAngle(0));
+                bankHads.setFloat("dt_max",        i, (float) dT_max);
+                bankHads.setFloat("ch_dir",        i, (float) had.traced.get_Chdir());
+                bankHads.setFloat("ch_lat",        i, (float) had.traced.get_Chlat());
+                bankHads.setFloat("ch_spe",        i, (float) had.traced.get_Chspe());
+
+                bankHads.setShort("best_PID",      i, (short) had.traced.get_BestH());
+                bankHads.setFloat("RQ_prob",       i, (float) had.traced.get_RQP());
+                bankHads.setFloat("el_prob",       i, (float) had.traced.get_ElProb());
+                bankHads.setFloat("pi_prob",       i, (float) had.traced.get_PiProb());
+                bankHads.setFloat("k_prob",        i, (float) had.traced.get_KProb());
+                bankHads.setFloat("pr_prob",       i, (float) had.traced.get_PrProb());
             }
             event.appendBanks(bankHads);
         }
@@ -251,6 +314,8 @@ public class RICHio {
                 return;
             }
 
+            int SELE = 2;
+
             for(int i = 0; i < NPHO; i++){
 
                 RICHParticle pho = richevent.get_Photon(i);
@@ -264,16 +329,12 @@ public class RICHio {
                 double htime = hit.get_time();
                 double a_time = pho.get_start_time() + pho.analytic.get_time();
                 double t_time = pho.get_start_time() + pho.traced.get_time();
-                double chmi = had.minChAngle();
-                double chma = had.maxChAngle();
-                double dtma = recopar.RICH_TIME_RMS*3;
 
                 double a_etaC = pho.analytic.get_EtaC();
                 double t_etaC = pho.traced.get_EtaC();
 
                 // skip no real Cherenkov solution
-                if((a_etaC<chmi || a_etaC>chma) && (t_etaC<chmi || t_etaC>chma)) continue;
-                if(Math.abs(a_time-htime)>dtma && Math.abs(t_time-htime)>dtma) continue;
+                if(pho.analytic.get_OK()!=SELE && pho.traced.get_OK()!=SELE) continue; 
 
                 bankRing.setShort("id",     i, (short) pho.get_id());
                 bankRing.setShort("hindex", i, (short) pho.get_hit_index());
@@ -317,6 +378,7 @@ public class RICHio {
             for(int i = 0; i < NPHO; i++){
 
                 RICHParticle pho = richevent.get_Photon(i);
+                if(debugMode>=1)System.out.format(" --> %3d %3d %3d \n",pho.get_id(),pho.get_type(),pho.get_ParentIndex());
 
                 bankPhos.setShort("id",i, (short) pho.get_id());
                 bankPhos.setShort("type",i, (short) pho.get_type());
@@ -333,11 +395,11 @@ public class RICHio {
 
                 bankPhos.setFloat("analytic_EtaC",i,(float) pho.analytic.get_EtaC());
                 bankPhos.setFloat("analytic_aeron",i,(float) pho.analytic.get_aeron());
-                bankPhos.setFloat("analytic_elpr",i,(float) pho.analytic.get_elprob());
-                bankPhos.setFloat("analytic_pipr",i,(float) pho.analytic.get_piprob());
-                bankPhos.setFloat("analytic_kpr",i,(float) pho.analytic.get_kprob());
-                bankPhos.setFloat("analytic_prpr",i,(float) pho.analytic.get_prprob());
-                bankPhos.setFloat("analytic_bgpr",i,(float) pho.analytic.get_bgprob());
+                bankPhos.setFloat("analytic_elpr",i,(float) pho.analytic.get_ElProb());
+                bankPhos.setFloat("analytic_pipr",i,(float) pho.analytic.get_PiProb());
+                bankPhos.setFloat("analytic_kpr",i,(float) pho.analytic.get_KProb());
+                bankPhos.setFloat("analytic_prpr",i,(float) pho.analytic.get_PrProb());
+                bankPhos.setFloat("analytic_bgpr",i,(float) pho.analytic.get_BgProb());
 
                 bankPhos.setFloat("traced_the",i,(float) pho.traced.get_theta());
                 bankPhos.setFloat("traced_phi",i,(float) pho.traced.get_phi());
@@ -348,15 +410,15 @@ public class RICHio {
                 bankPhos.setFloat("traced_time",i,(float) pho.traced.get_time());
                 bankPhos.setShort("traced_nrfl",i,(short) pho.traced.get_nrefle());
                 bankPhos.setShort("traced_nrfr",i,(short) pho.traced.get_nrefra());
-                bankPhos.setShort("traced_1rfl",i,(short) pho.traced.get_firstrefle());
+                bankPhos.setShort("traced_1rfl",i,(short) pho.traced.get_FirstRefle());
 
                 bankPhos.setFloat("traced_EtaC",i,(float) pho.traced.get_EtaC());
                 bankPhos.setFloat("traced_aeron",i,(float) pho.traced.get_aeron());
-                bankPhos.setFloat("traced_elpr",i,(float) pho.traced.get_elprob());
-                bankPhos.setFloat("traced_pipr",i,(float) pho.traced.get_piprob());
-                bankPhos.setFloat("traced_kpr",i,(float) pho.traced.get_kprob());
-                bankPhos.setFloat("traced_prpr",i,(float) pho.traced.get_prprob());
-                bankPhos.setFloat("traced_bgpr",i,(float) pho.traced.get_bgprob());
+                bankPhos.setFloat("traced_elpr",i,(float) pho.traced.get_ElProb());
+                bankPhos.setFloat("traced_pipr",i,(float) pho.traced.get_PiProb());
+                bankPhos.setFloat("traced_kpr",i,(float) pho.traced.get_KProb());
+                bankPhos.setFloat("traced_prpr",i,(float) pho.traced.get_PrProb());
+                bankPhos.setFloat("traced_bgpr",i,(float) pho.traced.get_BgProb());
 
             }
             event.appendBanks(bankPhos);
