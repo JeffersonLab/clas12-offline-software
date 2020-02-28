@@ -408,6 +408,20 @@ public class DetectorParticle implements Comparable {
     public int getDetectorHit(List<DetectorResponse>  hitList, DetectorType type,
             int detectorLayer,
             double distanceThreshold){
+    
+        // FIXME:  get HB trajectories and remove DetectorParticle POCA,
+        // or invert DetectorParticle inheritance
+        // Here we protect against odd tracks that don't have trajectory intersection:
+        if (!DetectorParticlePOCA.class.isInstance(this)) {
+            if (detectorLayer<1) {
+                if (!detectorTrack.getTrajectory().hasDetector(type.getDetectorId())) {
+                    return -1;
+                }
+            }
+            else if (detectorTrack.getTrajectoryPoint(type.getDetectorId(),detectorLayer)==null) {
+                return -1;
+            }
+        }
         
         Line3D   trajectory = this.detectorTrack.getLastCross();
         Point3D  hitPoint = new Point3D();
