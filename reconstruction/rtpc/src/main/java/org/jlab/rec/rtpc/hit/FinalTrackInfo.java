@@ -24,10 +24,11 @@ public class FinalTrackInfo {
     private double _A;
     private double _B;
     private double _chi2;
+    private double _ADCsum;
     
     public FinalTrackInfo(){}
     
-    public FinalTrackInfo(double px, double py, double pz, double vz, double theta, double phi, int numhits, double tl, double dEdx, double R, double A, double B, double chi2){
+    public FinalTrackInfo(double px, double py, double pz, double vz, double theta, double phi, int numhits, double tl, double ADCsum, double dEdx, double R, double A, double B, double chi2){
         _px = px;
         _py = py;
         _pz = pz;
@@ -41,6 +42,7 @@ public class FinalTrackInfo {
         _A = A;
         _B = B;
         _chi2 = chi2;
+        _ADCsum = ADCsum;
     }
     
     public void set_px(double px){
@@ -109,5 +111,8 @@ public class FinalTrackInfo {
     }
     public double get_chi2(){
         return _chi2;
+    }
+    public double get_ADCsum(){
+        return _ADCsum;
     }
 }

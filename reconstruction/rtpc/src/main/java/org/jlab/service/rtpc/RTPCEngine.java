@@ -115,7 +115,7 @@ public class RTPCEngine extends ReconstructionEngine{
             //Disentangle Crossed Tracks
             TrackDisentangler TD = new TrackDisentangler(params);
             //Reconstruct Hits in Drift Region
-            TrackHitReco TR = new TrackHitReco(params,hits,cosmic);
+            TrackHitReco TR = new TrackHitReco(params,hits,cosmic,magfield);
             //Helix Fit Tracks to calculate Track Parameters
             HelixFitTest HF = new HelixFitTest(params,fitToBeamline,magfield);
             

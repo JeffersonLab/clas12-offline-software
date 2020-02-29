@@ -57,6 +57,10 @@ public class TrackHitReco {
     
     private double larget;
     private double smallt;
+    private HitVector smallthit;
+    private HitVector largethit;
+    private PadVector smalltpadvec;
+    private PadVector largetpadvec;
     private double tcathode;
     private double tdiff;
     private double Time;
@@ -83,10 +87,12 @@ public class TrackHitReco {
     private double tp = 0;
     private double tr = 0;
     private double tshiftfactor = 1;
+    private int smalltpad;
+    private int largetpad;
     
     private boolean _cosmic = false;
     
-    public TrackHitReco(HitParameters params, List<Hit> rawHits, boolean cosmic){
+    public TrackHitReco(HitParameters params, List<Hit> rawHits, boolean cosmic, double magfield){
         
         _cosmic = cosmic;
         t_offset = params.get_toffparms();
@@ -110,8 +116,11 @@ public class TrackHitReco {
             List<HitVector> allhits = track.getAllHits();
             if(allhits.size() < 5) continue;
             track.sortHits();
-            smallt = track.getSmallT();
-            larget = track.getLargeT();
+            smallthit = track.getSmallTHit();
+            largethit = track.getLargeTHit();
+            smallt = smallthit.time();
+            larget = largethit.time();
+            largetpad = largethit.pad();
             tdiff = tcathode - larget;
             tdiff *= tshiftfactor;
             recotrackmap.put(TID, new ArrayList<>());
@@ -126,7 +135,7 @@ public class TrackHitReco {
                 // find reconstructed position of ionization from Time info		                
                 drifttime = Time;
                 r_rec = get_r_rec(hit.z(),drifttime); //in mm
-                dphi = get_dphi(hit.z(),r_rec); // in rad
+                dphi = get_dphi(hit.z(),r_rec,magfield); // in rad
                 phi_rec=hit.phi()-dphi;
                 if(cosmic) phi_rec = hit.phi();
                 
@@ -141,7 +150,7 @@ public class TrackHitReco {
                 x_rec=r_rec*(Math.cos(phi_rec));
                 y_rec=r_rec*(Math.sin(phi_rec));
                 if(!Double.isNaN(x_rec) && !Double.isNaN(y_rec) && !Double.isNaN(hit.z())){
-                    recotrackmap.get(TID).add(new RecoHitVector(cellID,x_rec,y_rec,hit.z(),tdiff,Time,hit.adc()));
+                    recotrackmap.get(TID).add(new RecoHitVector(cellID,x_rec,y_rec,hit.z(),r_rec,phi_rec,tdiff,Time,hit.adc(),smallthit,largethit));
                 }
             }
         }
@@ -160,11 +169,12 @@ public class TrackHitReco {
         return Math.sqrt((70*70*(1-((t-toffset)/tmax)))+(30*30*((t-toffset)/tmax)));
     }
     
-    private double get_dphi(double z, double r){
-        aphi = get_rec_coef(a_phi,z);
+    private double get_dphi(double z, double r, double magfield){
+        /*aphi = get_rec_coef(a_phi,z);
         bphi = get_rec_coef(b_phi,z);
         phigap = get_rec_coef(phi_gap,z);
-        return aphi*(7-r/10)+bphi*(7-r/10)*(7-r/10) + phigap; // in rad
+        return aphi*(7-r/10)+bphi*(7-r/10)*(7-r/10) + phigap; // in rad*/
+        return magfield/10 * phi_gap[0] * Math.log(70/r);
     }
     
 

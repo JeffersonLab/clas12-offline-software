@@ -7,6 +7,7 @@ import org.jlab.rec.rtpc.hit.RecoHitVector;
 import java.util.List;
 import java.util.HashMap;
 import org.jlab.rec.rtpc.hit.FinalTrackInfo;
+import org.jlab.rec.rtpc.hit.PadVector;
 
 public class RecoBankWriter {
 
@@ -63,6 +64,7 @@ public class RecoBankWriter {
     public  DataBank fillRTPCTrackBank(DataEvent event, HitParameters params) {
 
         HashMap<Integer, FinalTrackInfo> finaltrackinfomap = params.get_finaltrackinfomap();
+        HashMap<Integer, List<RecoHitVector>> recotrackmap = params.get_recotrackmap();
         int listsize = finaltrackinfomap.size();
         if(listsize == 0) return null;
         int row = 0;
@@ -78,6 +80,11 @@ public class RecoBankWriter {
 		
         for(int TID : finaltrackinfomap.keySet()) {
             FinalTrackInfo track = finaltrackinfomap.get(TID);
+            List<RecoHitVector> listhits = recotrackmap.get(TID);
+            RecoHitVector hitvec = recotrackmap.get(TID).get(0);
+            PadVector smallpad = params.get_padvector(hitvec.smallhit().pad());
+            PadVector largepad = params.get_padvector(hitvec.largehit().pad());
+            
             bank.setInt("trkID", row, TID);
             bank.setFloat("px", row, (float) track.get_px()/1000);
             bank.setFloat("py", row, (float) track.get_py()/1000);
@@ -87,16 +94,26 @@ public class RecoBankWriter {
             bank.setFloat("phi", row, (float) track.get_phi());
             bank.setInt("nhits", row, track.get_numhits());
             bank.setFloat("path", row, (float) track.get_tl());
+            bank.setFloat("adcsum", row, (float) track.get_ADCsum());
             bank.setFloat("dedx", row, (float) track.get_dEdx());
             bank.setFloat("r_helix", row, (float) track.get_R());
             bank.setFloat("x_helix", row, (float) track.get_A());
             bank.setFloat("y_helix", row, (float) track.get_B());
             bank.setFloat("chi2_helix", row, (float) track.get_chi2());
+            bank.setFloat("min_row", row, (float) smallpad.row());
+            bank.setFloat("min_col", row, (float) smallpad.col());
+            bank.setFloat("max_row", row, (float) largepad.row());
+            bank.setFloat("max_col", row, (float) largepad.col());
+            bank.setFloat("min_time", row, (float) hitvec.smallhit().time());
+            bank.setFloat("max_time", row, (float) hitvec.largehit().time());
+            bank.setFloat("min_radius", row, (float) listhits.get(listhits.size()-1).r());
+            bank.setFloat("max_radius", row, (float) listhits.get(0).r());
+            bank.setFloat("min_phi", row, (float) listhits.get(listhits.size()-1).phi());
+            bank.setFloat("max_phi", row, (float) listhits.get(0).phi());
 
             row++;
-            //bank.show();
         }
-
+        //bank.show();
         return bank;
     }	
 }

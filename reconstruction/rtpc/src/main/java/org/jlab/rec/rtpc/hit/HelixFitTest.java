@@ -53,7 +53,7 @@ public class HelixFitTest {
             if(R > 0) tl = Math.sqrt(R*R*psi*psi + dz*dz);
             double dEdx = 0;
             if(tl != 0 && !Double.isNaN(tl)) dEdx = ADCsum/tl;
-            finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,theta,phi,numhits,tl,dEdx,R,A,B,chi2));
+            if(TID != 0) finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,theta,phi,numhits,tl,ADCsum,dEdx,R,A,B,chi2));
         }
         params.set_finaltrackinfomap(finaltrackinfomap);
     }
