@@ -29,6 +29,7 @@
 	    {"name":"phi",      "type":"F", "info":"Phi from the Helix fit of the track (deg)"},
 	    {"name":"nhits",  "type":"I", "info":"Number of hits in the track"},
 	    {"name":"path",   "type":"F", "info":"Length of the Track (mm)"},
+	    {"name":"adcsum", "type":"F", "info":"Total ADC sum of the Track"},
 	    {"name":"dedx",		"type":"F", "info":"dEdx for the Track (MeV/mm)"},
 	    {"name":"r_helix", "type":"F", "info":"Radius of the helix fit (mm)"},
 	    {"name":"x_helix", "type":"F", "info":"X-coordinate of the center of helix fit (mm)"},
