@@ -92,7 +92,7 @@ public class TrackHitReco {
     
     private boolean _cosmic = false;
     
-    public TrackHitReco(HitParameters params, List<Hit> rawHits, boolean cosmic){
+    public TrackHitReco(HitParameters params, List<Hit> rawHits, boolean cosmic, double magfield){
         
         _cosmic = cosmic;
         t_offset = params.get_toffparms();
@@ -135,7 +135,7 @@ public class TrackHitReco {
                 // find reconstructed position of ionization from Time info		                
                 drifttime = Time;
                 r_rec = get_r_rec(hit.z(),drifttime); //in mm
-                dphi = get_dphi(hit.z(),r_rec); // in rad
+                dphi = get_dphi(hit.z(),r_rec,magfield); // in rad
                 phi_rec=hit.phi()-dphi;
                 if(cosmic) phi_rec = hit.phi();
                 
@@ -169,11 +169,12 @@ public class TrackHitReco {
         return Math.sqrt((70*70*(1-((t-toffset)/tmax)))+(30*30*((t-toffset)/tmax)));
     }
     
-    private double get_dphi(double z, double r){
-        aphi = get_rec_coef(a_phi,z);
+    private double get_dphi(double z, double r, double magfield){
+        /*aphi = get_rec_coef(a_phi,z);
         bphi = get_rec_coef(b_phi,z);
         phigap = get_rec_coef(phi_gap,z);
-        return aphi*(7-r/10)+bphi*(7-r/10)*(7-r/10) + phigap; // in rad
+        return aphi*(7-r/10)+bphi*(7-r/10)*(7-r/10) + phigap; // in rad*/
+        return magfield/10 * phi_gap[0] * Math.log(70/r);
     }
     
 
