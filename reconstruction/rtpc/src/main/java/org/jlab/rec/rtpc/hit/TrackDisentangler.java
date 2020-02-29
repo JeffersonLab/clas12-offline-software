@@ -44,13 +44,23 @@ public class TrackDisentangler {
                         if(tid1 != tid2 && !removedtracks.contains(tid1) && !removedtracks.contains(tid2)){
                             ReducedTrack t1 = NewTrackMap.getTrack(tid1);
                             ReducedTrack t2 = NewTrackMap.getTrack(tid2);
-                            HitVector h1 = t1.getLastHit();
-                            HitVector h2 = t2.getLastHit();
-                            if(Math.abs(h1.z() - h2.z()) < maxdeltaz && 
-                              (Math.abs(h1.phi() - h2.phi()) < maxdeltaphi || Math.abs(h1.phi() - h2.phi() - 2*Math.PI) < maxdeltaphi)){
-                                NewTrackMap.mergeTracks(tid1, tid2); 
-                                NewTrackMap.getTrack(tid1).sortHits();
-                                removedtracks.add(tid2);
+                            List<HitVector> h1list = new ArrayList<>();
+                            List<HitVector> h2list = new ArrayList<>();
+                            h1list.addAll(t1.getFirstNHits(2));
+                            h1list.addAll(t1.getLastNHits(2));
+                            h2list.addAll(t2.getFirstNHits(2));
+                            h2list.addAll(t2.getLastNHits(2));
+                            HITSLOOP:
+                            for(HitVector h1 : h1list){
+                                for(HitVector h2 : h2list){
+                                    if(Math.abs(h1.z() - h2.z()) < maxdeltaz && 
+                                    (Math.abs(h1.phi() - h2.phi()) < maxdeltaphi || Math.abs(h1.phi() - h2.phi() - 2*Math.PI) < maxdeltaphi)){
+                                        NewTrackMap.mergeTracks(tid1, tid2); 
+                                        NewTrackMap.getTrack(tid1).sortHits();
+                                        removedtracks.add(tid2);
+                                        break HITSLOOP;
+                                    }
+                                }
                             }
                         }
                     }

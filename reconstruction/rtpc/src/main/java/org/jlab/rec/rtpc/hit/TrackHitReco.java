@@ -57,6 +57,10 @@ public class TrackHitReco {
     
     private double larget;
     private double smallt;
+    private HitVector smallthit;
+    private HitVector largethit;
+    private PadVector smalltpadvec;
+    private PadVector largetpadvec;
     private double tcathode;
     private double tdiff;
     private double Time;
@@ -83,6 +87,8 @@ public class TrackHitReco {
     private double tp = 0;
     private double tr = 0;
     private double tshiftfactor = 1;
+    private int smalltpad;
+    private int largetpad;
     
     private boolean _cosmic = false;
     
@@ -110,8 +116,11 @@ public class TrackHitReco {
             List<HitVector> allhits = track.getAllHits();
             if(allhits.size() < 5) continue;
             track.sortHits();
-            smallt = track.getSmallT();
-            larget = track.getLargeT();
+            smallthit = track.getSmallTHit();
+            largethit = track.getLargeTHit();
+            smallt = smallthit.time();
+            larget = largethit.time();
+            largetpad = largethit.pad();
             tdiff = tcathode - larget;
             tdiff *= tshiftfactor;
             recotrackmap.put(TID, new ArrayList<>());
@@ -141,7 +150,7 @@ public class TrackHitReco {
                 x_rec=r_rec*(Math.cos(phi_rec));
                 y_rec=r_rec*(Math.sin(phi_rec));
                 if(!Double.isNaN(x_rec) && !Double.isNaN(y_rec) && !Double.isNaN(hit.z())){
-                    recotrackmap.get(TID).add(new RecoHitVector(cellID,x_rec,y_rec,hit.z(),tdiff,Time,hit.adc()));
+                    recotrackmap.get(TID).add(new RecoHitVector(cellID,x_rec,y_rec,hit.z(),r_rec,phi_rec,tdiff,Time,hit.adc(),smallthit,largethit));
                 }
             }
         }

@@ -64,6 +64,10 @@ public class PadVector {
     public double z(){
             return _vec.z();
     }
+    
+    public double r(){
+        return _vec.rho();
+    }
 
     public double phi(){
             return _vec.phi();
