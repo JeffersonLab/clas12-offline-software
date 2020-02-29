@@ -643,7 +643,7 @@ public class DetectorData {
                 track.setDetectorID(DetectorType.FTCAL.getDetectorId());
 
                 // FIXME:  FT not in trajectory bank
-                DetectorParticlePOCA particle = new DetectorParticlePOCA(track);
+                DetectorParticle particle = new DetectorParticle(track);
                 
                 int pid = 0;
                 if (charge==0) pid = 22;
