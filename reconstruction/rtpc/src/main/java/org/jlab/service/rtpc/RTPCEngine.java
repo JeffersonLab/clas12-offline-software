@@ -93,7 +93,7 @@ public class RTPCEngine extends ReconstructionEngine{
         if(event.hasBank("RUN::config")==true){
             DataBank bank = event.getBank("RUN::config");
             runNo = bank.getInt("run", 0);
-            magfieldfactor = Math.abs(bank.getFloat("solenoid",0));
+            magfieldfactor = bank.getFloat("solenoid",0);
             if (runNo<=0) {
                 System.err.println("RTPCEngine:  got run <= 0 in RUN::config, skipping event.");
                 return false;
@@ -117,7 +117,7 @@ public class RTPCEngine extends ReconstructionEngine{
             //Reconstruct Hits in Drift Region
             TrackHitReco TR = new TrackHitReco(params,hits,cosmic,magfield);
             //Helix Fit Tracks to calculate Track Parameters
-            HelixFitTest HF = new HelixFitTest(params,fitToBeamline,magfield);
+            HelixFitTest HF = new HelixFitTest(params,fitToBeamline,Math.abs(magfield));
             
             RecoBankWriter writer = new RecoBankWriter();	                               
             DataBank recoBank = writer.fillRTPCHitsBank(event,params);
