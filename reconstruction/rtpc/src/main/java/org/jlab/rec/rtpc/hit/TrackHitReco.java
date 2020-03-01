@@ -170,11 +170,11 @@ public class TrackHitReco {
     }
     
     private double get_dphi(double z, double r, double magfield){
-        /*aphi = get_rec_coef(a_phi,z);
+        aphi = get_rec_coef(a_phi,z);
         bphi = get_rec_coef(b_phi,z);
         phigap = get_rec_coef(phi_gap,z);
-        return aphi*(7-r/10)+bphi*(7-r/10)*(7-r/10) + phigap; // in rad*/
-        return magfield/10 * phi_gap[0] * Math.log(70/r);
+        //return aphi*(7-r/10)+bphi*(7-r/10)*(7-r/10) + phigap; // in rad
+        return phigap + magfield/10 * aphi * Math.log(70/r) + bphi*((1/(r*r))-(1/(70*70)));
     }
     
 
