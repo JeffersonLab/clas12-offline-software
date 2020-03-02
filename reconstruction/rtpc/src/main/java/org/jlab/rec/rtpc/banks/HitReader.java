@@ -91,7 +91,7 @@ public class HitReader {
                 posZ[i] = 0;
             }		
             Hit hit = new Hit(1, cellID[i], 1, Time[i]);
-            if(cosmic){
+            if(!simulation){
                 Edep[i] -= 256;
                 if(Edep[i] < 0) Edep[i] = 0;
             }
