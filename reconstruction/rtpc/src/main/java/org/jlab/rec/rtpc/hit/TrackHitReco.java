@@ -89,6 +89,7 @@ public class TrackHitReco {
     private double tshiftfactor = 1;
     private int smalltpad;
     private int largetpad;
+    private int minhitcount = 5;
     
     private boolean _cosmic = false;
     
@@ -105,6 +106,7 @@ public class TrackHitReco {
         tr = params.get_tr();
         tcathode = params.get_tcathode();
         tshiftfactor = params.get_tshiftfactor();
+        minhitcount = params.get_minhitspertrack();
         
         HashMap<Integer, List<RecoHitVector>> recotrackmap = new HashMap<>();
         ReducedTrackMap RTIDMap = params.get_rtrackmap();
@@ -114,7 +116,7 @@ public class TrackHitReco {
             double adc = 0;
             ReducedTrack track = RTIDMap.getTrack(TID);
             List<HitVector> allhits = track.getAllHits();
-            if(allhits.size() < 5) continue;
+            if(allhits.size() < minhitcount) continue;
             track.sortHits();
             smallthit = track.getSmallTHit();
             largethit = track.getLargeTHit();
