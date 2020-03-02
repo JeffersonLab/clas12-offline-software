@@ -11,8 +11,8 @@
                 {"name":"liveTime",   "type":"D", "info":"Lifetime"},
                 {"name":"startTime",  "type":"F", "info":"Event Start Time (ns)"},
                 {"name":"RFTime",     "type":"F", "info":"RF Time (ns)"},
-                {"name":"helicity",   "type":"B", "info":"Helicity of Event (0 or 1, else undefined), with HWP-correction"},
-                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (0 or 1, else undefined)"},
+                {"name":"helicity",   "type":"B", "info":"Helicity of Event (+/-1, else undefined), with HWP-correction"},
+                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (+/-1, else undefined)"},
                 {"name":"procTime",   "type":"F", "info":"Event Processing Time (UNIX Time = seconds)"}
             ]
     },
@@ -192,8 +192,8 @@
                 {"name":"liveTime",   "type":"D", "info":"Lifetime"},
                 {"name":"startTime",  "type":"F", "info":"Event Start Time (ns)"},
                 {"name":"RFTime",     "type":"F", "info":"RF Time (ns)"},
-                {"name":"helicity",   "type":"B", "info":"Helicity of Event (0 or 1, else undefined), with HWP-correction"},
-                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (0 or 1, else undefined)"},
+                {"name":"helicity",   "type":"B", "info":"Helicity of Event (+/-1, else undefined), with HWP-correction"},
+                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (+/-1, else undefined)"},
                 {"name":"procTime",   "type":"F", "info":"Event Processing Time (UNIX Time = seconds)"}
             ]
     },
