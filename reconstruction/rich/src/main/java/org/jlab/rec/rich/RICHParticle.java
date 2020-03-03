@@ -48,6 +48,7 @@ public class RICHParticle {
     public Vector3d lab_emission = null;
     public int ilay_emission = -1;
     public int ico_emission = -1;
+    public int ico_entrance = -1;
     public int iqua_emission = -1;
     public float refi_emission = 0;
     public double chele_emission[] = {0.0, 0.0, 0.0};
@@ -170,8 +171,8 @@ public class RICHParticle {
 
         if(debugMode>=1)  {
             System.out.format(" Create RICH particle mom %8.2f \n",momentum);
-            for(int ir=0; ir<3; ir++) System.out.format("      --> Dir  pr %7.2f k  %7.2f  pi %7.2f  e %7.2f -->  limi  %7.2f %7.2f  res %7.2f\n",
-                         ChAngle[3][ir]*MRAD,ChAngle[2][ir]*MRAD,ChAngle[1][ir]*MRAD,ChAngle[0][ir]*MRAD,minChAngle(0)*MRAD,maxChAngle(0)*MRAD,sChAngle[0]*MRAD);
+            for(int ir=0; ir<3; ir++) System.out.format("      --> Refle %3d  pr %7.2f k  %7.2f  pi %7.2f  e %7.2f -->  limi  %7.2f %7.2f  res %7.2f\n",ir,
+                         ChAngle[3][ir]*MRAD,ChAngle[2][ir]*MRAD,ChAngle[1][ir]*MRAD,ChAngle[0][ir]*MRAD,minChAngle(ir)*MRAD,maxChAngle(ir)*MRAD,sChAngle[ir]*MRAD);
         }
     }
 
@@ -297,6 +298,7 @@ public class RICHParticle {
         double beta = get_beta(pid);
         double cose = Math.cos(chele_emission[irefle]);
 
+        // ATT: beta=1 assumed for electron
         if(beta>0) arg = 1.0/beta*cose;
         if(debugMode>=1)  System.out.format(" Expected Ch Angle %7.2f %8.4f  beta %8.4f  n %7.3f  arg %8.4f\n",chele_emission[irefle]*1000,
               get_mass(pid),beta,refi_emission, Math.acos(arg)*MRAD);
@@ -528,10 +530,18 @@ public class RICHParticle {
         // take the downstream aerogel tile as the one with largest number of phtoons and average emission point
         ilay_emission  = exit.get_layer();
         ico_emission   = exit.get_component();
+        ico_entrance   = entrance.get_component();
         refi_emission  = tool.get_Component(ilay_emission,ico_emission).get_index();
 
-        iqua_emission = tool.get_Layer(ilay_emission).get_Quadrant(5, ico_emission, entrance.get_pos());
-        if(debugMode>=1)System.out.format(" AERO lay %3d ico %3d qua %3d \n",ilay_emission,ico_emission,iqua_emission);
+        int Nqua = tool.get_Constants().QUADRANT_NUMBER;
+        iqua_emission = tool.get_Layer(ilay_emission).get_Quadrant(Nqua, ico_emission, exit.get_pos());
+
+        if(debugMode>=1){
+            System.out.format(" AERO lay %3d ico %3d  qua  %3d \n",ilay_emission,ico_emission,iqua_emission);
+            if(entrance.get_layer()!=ilay_emission || entrance.get_component()!=ico_emission)
+                System.out.format(" AERO CROSS ilay %4d %4d  ico %4d %4d \n",entrance.get_layer(),ilay_emission,entrance.get_component(),ico_emission);
+        }
+       
 
         for(int iref=0; iref<3; iref++)chele_emission[iref] = tool.get_ChElectron(ilay_emission, ico_emission, iqua_emission, iref);
         for(int iref=0; iref<3; iref++)schele_emission[iref] = tool.get_sChElectron(ilay_emission, ico_emission, iqua_emission, iref);
