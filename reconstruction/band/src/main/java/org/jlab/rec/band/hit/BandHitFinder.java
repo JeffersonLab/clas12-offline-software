@@ -31,8 +31,8 @@ public class BandHitFinder {
 		Map<Integer,Integer> hasMatch 	= new HashMap<Integer,Integer>();
 
 		boolean hasvetohit = false;
-		System.out.println("***** STARTING HIT CANDIDATE SKIMMER *****");
-		System.out.flush();
+		//System.out.println("***** STARTING HIT CANDIDATE SKIMMER *****");
+		//System.out.flush();
 		// Loop through the candidates array to find possible combinations of left and right.
 		if(candidates.size() > 0) {
 
@@ -49,8 +49,8 @@ public class BandHitFinder {
 
 				//check if hit is in the veto counter (layer 6). 
 				if (hit1.GetLayer() == 6) {
-					System.out.println("Candidate hit is veto hit");
-					System.out.flush();
+					//System.out.println("Candidate hit is veto hit");
+					//System.out.flush();
 					//  Vetos only have one PMT, so call them 'left' and add them to our
 					//  coincidence list and move on
 					
@@ -129,7 +129,7 @@ public class BandHitFinder {
 					// Sanity check if side differs by one (there should be no multi hits stored)
 					if (Math.abs(hit2.GetSide() - side) != 1) continue;
 
-					System.err.println("\tWiill attempt to pair s l c o " + (barKey*10+side) + " with " + (hit2.GetSector()*1000+hit2.GetLayer()*100+hit2.GetComponent()*10+hit2.GetSide()));
+					//System.err.println("\tWiill attempt to pair s l c o " + (barKey*10+side) + " with " + (hit2.GetSector()*1000+hit2.GetLayer()*100+hit2.GetComponent()*10+hit2.GetSide()));
 
 					double tdcleft = -1;
 					double tdcright = -1;
@@ -169,16 +169,16 @@ public class BandHitFinder {
 						System.err.println("BAND HIT FINDER. Found two hits with left and right side but can not assign which hide belongs to which side");
 						continue;
 					}
-					System.out.println("\tCandidate hit information ordered as:");
-					System.out.println("\t\ttdcleft = "	+ tdcleft);
-					System.out.println("\t\tftdcleft = "	+ftdcleft);
-					System.out.println("\t\tadcleft = "	+ adcleft );
-					System.out.println("\t\tamplleft = "	+amplleft );
-					System.out.println("\t\ttdcright = "	+ tdcright);
-					System.out.println("\t\tftdcright = "	+ftdcright);
-					System.out.println("\t\tadcright = "	+ adcright );
-					System.out.println("\t\tamplright = "	+amplright );
-					System.out.flush();
+					//System.out.println("\tCandidate hit information ordered as:");
+					//System.out.println("\t\ttdcleft = "	+ tdcleft);
+					//System.out.println("\t\tftdcleft = "	+ftdcleft);
+					//System.out.println("\t\tadcleft = "	+ adcleft );
+					//System.out.println("\t\tamplleft = "	+amplleft );
+					//System.out.println("\t\ttdcright = "	+ tdcright);
+					//System.out.println("\t\tftdcright = "	+ftdcright);
+					//System.out.println("\t\tadcright = "	+ adcright );
+					//System.out.println("\t\tamplright = "	+amplright );
+					//System.out.flush();
 
 
 
@@ -192,7 +192,9 @@ public class BandHitFinder {
 					double parA2_L = time_walk_paramsL[3];
 					double parB2_L = time_walk_paramsL[4];
 					double parC2_L = time_walk_paramsL[5];
+					//System.out.println("Hit info before TW left: "+tdcleft+" "+parA1_L+" "+parB1_L+" "+parC1_L);
 					tdcleft = tdcleft - ( parA1_L + parB1_L / Math.pow( amplleft , parC1_L ) ) - ( parA2_L + parB2_L / Math.pow( amplleft , parC2_L ) );
+					//System.out.println("\t\tafter: "+tdcleft);
 					//	for the right PMT:
 					double time_walk_paramsR[] = CalibrationConstantsLoader.TIMEWALK_R.get( Integer.valueOf(barKey) );
 					double parA1_R = time_walk_paramsR[0];
@@ -201,13 +203,16 @@ public class BandHitFinder {
 					double parA2_R = time_walk_paramsR[3];
 					double parB2_R = time_walk_paramsR[4];
 					double parC2_R = time_walk_paramsR[5];
+					//System.out.println("Hit info before TW right: "+tdcright+" "+parA1_R+" "+parB1_R+" "+parC1_R);
 					tdcright = tdcright - ( parA1_R + parB1_R / Math.pow( amplright , parC1_R ) ) - ( parA2_R + parB2_R / Math.pow( amplright , parC2_R ) );
+					//System.out.println("\t\tafter: "+tdcright);
 					
 					
 					// -----------------------------------------------------------------------------------------------
 					// Next we form (L-R) time and correct for the offset between the two for both TDC and FADC times:
 					double tdiff_tdc  = (tdcleft - tdcright) - CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) );
 					double tdiff_fadc = (ftdcleft - ftdcright) - CalibrationConstantsLoader.FADC_T_OFFSET.get( Integer.valueOf(barKey) );
+					//System.out.println("Offset: "+CalibrationConstantsLoader.TDC_T_OFFSET.get( Integer.valueOf(barKey) ));
 
 
 
@@ -238,6 +243,7 @@ public class BandHitFinder {
 							 - CalibrationConstantsLoader.FADC_MT_P2P_OFFSET.get(Integer.valueOf(barKey) )
 							 - CalibrationConstantsLoader.FADC_MT_L2L_OFFSET.get(Integer.valueOf(barKey) ) 
 							 - CalibrationConstantsLoader.FADC_GLOB_OFFSET.get(Integer.valueOf(barKey) );
+					//System.out.println("Global offsets: " + CalibrationConstantsLoader.TDC_GLOB_OFFSET.get(Integer.valueOf(barKey) )+" "+CalibrationConstantsLoader.FADC_GLOB_OFFSET.get(Integer.valueOf(barKey) ));
 
 					// -----------------------------------------------------------------------------------------------
 					// Using the effective velocity for each bar, get the position of the hit in x based on the TDC time

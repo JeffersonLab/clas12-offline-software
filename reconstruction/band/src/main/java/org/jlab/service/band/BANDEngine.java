@@ -36,7 +36,7 @@ public class BANDEngine extends ReconstructionEngine {
 
 	@Override
 		public boolean processDataEvent(DataEvent event) {
-			System.out.println("**** NEW EVENT ****");
+			//System.out.println("**** NEW EVENT ****");
 			// update calibration constants based on run number if changed
 			setRunConditionsParameters(event);
 
