@@ -44,6 +44,7 @@ public class HitParameters {
     private int _tthreshTD = 300;
     private double _adcthresh = 320;
     private int _minhitspertrack = 5;
+    private int _minhitspertrackreco = 10;
     private double[] _tmaxparms = new double[5];
     private double[] _toffparms = new double[5];
     private double[] _aphiparms = new double[5];
@@ -67,6 +68,7 @@ public class HitParameters {
         _phithreshTF = recon_parms.getDoubleValue("Dphim", 1,1,1);
         _adcthresh = recon_parms.getDoubleValue("ADCmin", 1,1,1);
         _minhitspertrack = (int) recon_parms.getDoubleValue("Hitmin",1,1,1);
+        _minhitspertrackreco = (int) recon_parms.getDoubleValue("Hitmin",1,1,2);
         _zthreshTD = recon_parms.getDoubleValue("Dzm", 1,1,2);
         _phithreshTD = recon_parms.getDoubleValue("Dphim", 1,1,2);
         _tthreshTD = (int) recon_parms.getDoubleValue("Dtm",1,1,2);
@@ -126,6 +128,7 @@ public class HitParameters {
     public int get_tthreshTD(){return _tthreshTD;}
     public double get_adcthresh(){return _adcthresh;}
     public int get_minhitspertrack(){return _minhitspertrack;}
+    public int get_minhitspertrackreco(){return _minhitspertrackreco;}
     public double[] get_tmaxparms(){return _tmaxparms;}
     public double[] get_toffparms(){return _toffparms;}
     public double[] get_aphiparms(){return _aphiparms;}
