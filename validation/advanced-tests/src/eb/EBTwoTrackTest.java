@@ -385,7 +385,7 @@ public class EBTwoTrackTest {
     public void checkParticleStatus(DataEvent event) {
         if (recPartBank==null) return;
         for (int ipart=0; ipart<recPartBank.rows(); ipart++) {
-            final int status = recPartBank.getShort("status",ipart);
+            final int status = Math.abs(recPartBank.getShort("status",ipart));
             final boolean isFD = ((int)status/1000)==2;
             final int ncher = status%10;
             final int ncalo = (status%100  - ncher)/10;
@@ -487,9 +487,9 @@ public class EBTwoTrackTest {
         System.out.println(String.format("FT gEff = %.3f",gEff));
         System.out.println(String.format("FD hEff = %.3f",hEff));
         System.out.println("#############################################################");
-        if      (ftPDG==11) assertEquals(eEff>0.90,true);
+        if      (ftPDG==11) assertEquals(eEff>0.77,true);
         else if (ftPDG==22) assertEquals(gEff>0.88,true);
-        assertEquals(hEff>0.50,true);
+        assertEquals(hEff>0.62,true);
     }
 
     // This is for Forward Tagger;
@@ -499,7 +499,7 @@ public class EBTwoTrackTest {
 
         nEvents++;
 
-        if (recBank==null || recPartBank==null || recFtBank==null) return;
+        if (recBank==null || recPartBank==null || recFtBank==null || recFtPartBank==null) return;
 
         if (debug) {
             System.out.println("\n\n#############################################################\n");
@@ -510,9 +510,9 @@ public class EBTwoTrackTest {
 
         final float startTime=recBank.getFloat("startTime",0);
 
-        for (int ii=0; ii<recPartBank.rows(); ii++) {
-            if (recPartBank.getShort("status",ii)/1000 == 1) {
-                switch (recPartBank.getInt("pid",ii)) {
+        for (int ii=0; ii<recFtPartBank.rows(); ii++) {
+            if (Math.abs(recFtPartBank.getShort("status",ii))/1000 == 1) {
+                switch (recFtPartBank.getInt("pid",ii)) {
                     case 11:
                         nFtElectrons++;
                         break;
@@ -523,8 +523,8 @@ public class EBTwoTrackTest {
             }
         }
 
-        for (int ii=0; ii<recPartBank.rows() && (startTime>0 || fdCharge==0); ii++) {
-            final int pid = recPartBank.getInt("pid",ii);
+        for (int ii=0; ii<recFtPartBank.rows() && (startTime>0 || fdCharge==0); ii++) {
+            final int pid = recFtPartBank.getInt("pid",ii);
             if (pid==hadronPDG) {
                 final double px=recPartBank.getFloat("px",ii);
                 final double py=recPartBank.getFloat("py",ii);
@@ -603,7 +603,7 @@ public class EBTwoTrackTest {
 
             for (int ii = 0; ii < recPartBank.rows(); ii++) {
                
-                final short status = recPartBank.getShort("status", ii);
+                final short status = (short)Math.abs(recPartBank.getShort("status", ii));
                 final byte charge  = recPartBank.getByte("charge", ii);
                 final int pid      = recPartBank.getInt("pid", ii);
                 final boolean isFT = status/1000 == 1;

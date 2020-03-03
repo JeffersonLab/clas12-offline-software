@@ -371,6 +371,10 @@ public class RecoBankWriter {
             bank.setFloat("c_uz", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().z());
             bank.setFloat("pathlength", i, (float) (trkcands.get(i).get_pathLength() / 10.)); // conversion to cm
 
+            //for status word:
+            int a = 0;
+            int b = 0;
+            int c = 0;
             // fills the list of cross ids for crosses belonging to that reconstructed track
             for (int j = 0; j < trkcands.get(i).size(); j++) {
                 if(j<9) {
@@ -379,12 +383,21 @@ public class RecoBankWriter {
                 hitStrg += "_ID";  //System.out.println(" j "+j+" matched id "+trkcands.get(i).get(j).get_Id());
                 bank.setShort(hitStrg, i, (short) trkcands.get(i).get(j).get_Id());
                 }
+                // counter to get status word    
+                if(trkcands.get(i).get(j).get_Detector().equalsIgnoreCase("SVT"))
+                    a++;
+                if(trkcands.get(i).get(j).get_Detector().equalsIgnoreCase("BMT") 
+                    && trkcands.get(i).get(j).get_DetectorType().equalsIgnoreCase("Z"))
+                    b++;
+                if(trkcands.get(i).get(j).get_Detector().equalsIgnoreCase("BMT") 
+                    && trkcands.get(i).get(j).get_DetectorType().equalsIgnoreCase("C"))
+                    c++;
             }
+            bank.setShort("status", i, (short) ((short) 1000+a*100+b*10+c));
             bank.setFloat("circlefit_chi2_per_ndf", i, (float) trkcands.get(i).get_circleFitChi2PerNDF());
             bank.setFloat("linefit_chi2_per_ndf", i, (float) trkcands.get(i).get_lineFitChi2PerNDF());
             bank.setFloat("chi2", i, (float) trkcands.get(i).getChi2());
             bank.setShort("ndf", i, (short) trkcands.get(i).getNDF());
-
 
         }
         //bank.show();

@@ -82,6 +82,7 @@ public class TaggerResponse extends DetectorResponse {
                 ft.setPositionWidth(dx, dy, 0);
 
                 ft.getDescriptor().setType(type);
+                ft.getDescriptor().setSectorLayerComponent(0,1,0);
 
                 responseList.add((DetectorResponse)ft);
             }
