@@ -106,7 +106,7 @@ public class TrackHitReco {
         tr = params.get_tr();
         tcathode = params.get_tcathode();
         tshiftfactor = params.get_tshiftfactor();
-        minhitcount = params.get_minhitspertrack();
+        minhitcount = params.get_minhitspertrackreco();
         
         HashMap<Integer, List<RecoHitVector>> recotrackmap = new HashMap<>();
         ReducedTrackMap RTIDMap = params.get_rtrackmap();
@@ -123,7 +123,7 @@ public class TrackHitReco {
             smallt = smallthit.time();
             larget = largethit.time();
             largetpad = largethit.pad();
-            tdiff = tcathode - larget;
+            tdiff = tcathode - smallt;
             tdiff *= tshiftfactor;
             recotrackmap.put(TID, new ArrayList<>());
 

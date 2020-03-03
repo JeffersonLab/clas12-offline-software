@@ -7,6 +7,7 @@
 package org.jlab.rec.rtpc.hit;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -155,6 +156,9 @@ public class TrackFinder {
                         break;
                     }
                 }
+                List<Integer> times = t.getAllTimeSlices();
+                Collections.sort(times);
+                if(times.get(times.size()-1) - times.get(0) > 5000) t.flagTrack();
             }
         }
         
