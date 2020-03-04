@@ -8,23 +8,67 @@
        {"name":"id",               "type":"S", "info":"id of the coincidence hit"},
        {"name":"sector",           "type":"B", "info":"sector of BAND"},
        {"name":"layer",            "type":"B", "info":"layer or column id of BAND"},
-       {"name":"component",        "type":"S", "info":"paddle or bad id of BAND"},
-       {"name":"meantimeTdc",      "type":"F", "info":"Calibrated meantime of L and R on a bar (ns) from TDC"},
-       {"name":"meantimeFadc",     "type":"F", "info":"Calibrated meantime of L and R on a bar (ns) from FADC"},
-       {"name":"difftimeTdc",      "type":"F", "info":"Calibrated time difference of L and R on a bar(ns) from TDC"},
-       {"name":"difftimeFadc",     "type":"F", "info":"Calibrated time difference of L and R on a bar(ns) from FADC"},
-       {"name":"adcLcorr",         "type":"F", "info":"Calibrated ADC of left PMT of coincidence hit"},
-       {"name":"adcRcorr",         "type":"F", "info":"Calibrated ADC of right PMT of coincidence hit"},
-       {"name":"tFadcLcorr",       "type":"F", "info":"Calibrated time from FADC of left PMT in ns of coincidence hit"},
-       {"name":"tFadcRcorr",       "type":"F", "info":"Calibrated time from FADC of right PMT in ns of coincidence hit"},
-       {"name":"tTdcLcorr",        "type":"F", "info":"Calibrated time from TDC of left PMT in ns of coincidence hit"},
-       {"name":"tTdcRcorr",        "type":"F", "info":"Calibrated time from TDC of right PMT in ns of coincidence hit"},
+       {"name":"component",        "type":"S", "info":"paddle or row id of BAND"},
+       {"name":"energy",           "type":"F", "info":"Geometric mean of L and R ADC"},
+       {"name":"time",             "type":"F", "info":"Meantime from TDC from L and R hit (ns)"},
        {"name":"x",                "type":"F", "info":"X coor (cm) of coincidence hit"},
        {"name":"y",                "type":"F", "info":"Y coor (cm) of coincidence hit"},
        {"name":"z",                "type":"F", "info":"Z coor (cm) of coincidence hit"},
-       {"name":"ux",               "type":"F", "info":"X coor uncertainty (cm) of coincidence hit"},
-       {"name":"uy",               "type":"F", "info":"Y coor uncertainty (cm) of coincidence hit"},
-       {"name":"uz",               "type":"F", "info":"Z coor uncertainty (cm) of coincidence hit"}
-       ]
-    }
+       {"name":"ex",               "type":"F", "info":"X coor uncertainty (cm) of coincidence hit"},
+       {"name":"ey",               "type":"F", "info":"Y coor uncertainty (cm) of coincidence hit"},
+       {"name":"ez",               "type":"F", "info":"Z coor uncertainty (cm) of coincidence hit"},
+       {"name":"timeFadc",         "type":"F", "info":"Meantime from FADC from L and R hit (ns)"},
+       {"name":"difftime",         "type":"F", "info":"Calibrated time difference of L and R on a bar(ns) from TDC"},
+       {"name":"difftimeFadc",     "type":"F", "info":"Calibrated time difference of L and R on a bar(ns) from FADC"},
+       {"name":"indexLpmt",        "type":"S", "info":"index of rawhit from Left PMT, starts at zero"},
+       {"name":"indexRpmt",        "type":"S", "info":"index of rawhit from Right PMT, starts at zero"},
+       {"name":"status",           "type":"S", "info":"status of the hit"}
+    ]
+  },
+  {
+    "name": "BAND::rawhits",
+    "group": 22100,
+    "item" : 22,
+    "info": "single PMT hits from BAND",
+    "entries": [
+       {"name":"id",               "type":"S", "info":"id of the coincidence hit"},
+       {"name":"sector",           "type":"B", "info":"sector of BAND"},
+       {"name":"layer",            "type":"B", "info":"layer or column id of BAND"},
+       {"name":"component",        "type":"S", "info":"paddle or row id of BAND"},
+       {"name":"side",             "type":"S", "info":"side of bar (L = 0 and R = 1)"},
+       {"name":"adc",              "type":"F", "info":"Raw ADC from FADC"},
+       {"name":"ampl",             "type":"F", "info":"ADC ampl from FADC"},
+       {"name":"time",             "type":"F", "info":"Raw Time (ns) from TDC"},
+       {"name":"timeFadc",         "type":"F", "info":"Raw Time (ns) from FADC"},
+       {"name":"timeCorr",         "type":"F", "info":"Raw Time (ns) from TDC corrected for trigger phase"},
+       {"name":"indexTdc",         "type":"S", "info":"index to raw information in BAND::TDC bank"},
+       {"name":"indexAdc",         "type":"S", "info":"index to raw information in BAND::ADC bank"}
+    ]
+  },
+  {
+    "name": "BAND::laser",
+    "group": 22100,
+    "item" : 23,
+    "info": "laser hits from BAND",
+    "entries": [
+       {"name":"id",               "type":"S", "info":"id of the coincidence hit"},
+       {"name":"sector",           "type":"B", "info":"sector of BAND"},
+       {"name":"layer",            "type":"B", "info":"layer or column id of BAND"},
+       {"name":"component",        "type":"S", "info":"paddle or row id of BAND"},
+       {"name":"energy",           "type":"F", "info":"Geometric mean of L and R ADC"},
+       {"name":"time",             "type":"F", "info":"Meantime from TDC from L and R hit (ns)"},
+       {"name":"x",                "type":"F", "info":"X coor (cm) of coincidence hit"},
+       {"name":"y",                "type":"F", "info":"Y coor (cm) of coincidence hit"},
+       {"name":"z",                "type":"F", "info":"Z coor (cm) of coincidence hit"},
+       {"name":"ex",               "type":"F", "info":"X coor uncertainty (cm) of coincidence hit"},
+       {"name":"ey",               "type":"F", "info":"Y coor uncertainty (cm) of coincidence hit"},
+       {"name":"ez",               "type":"F", "info":"Z coor uncertainty (cm) of coincidence hit"},
+       {"name":"timeFadc",         "type":"F", "info":"Meantime from FADC from L and R hit (ns)"},
+       {"name":"difftime",         "type":"F", "info":"Calibrated time difference of L and R on a bar(ns) from TDC"},
+       {"name":"difftimeFadc",     "type":"F", "info":"Calibrated time difference of L and R on a bar(ns) from FADC"},
+       {"name":"indexLpmt",        "type":"S", "info":"index of rawhit from Left PMT, starts at zero"},
+       {"name":"indexRpmt",        "type":"S", "info":"index of rawhit from Right PMT, starts at zero"},
+       {"name":"status",           "type":"S", "info":"status of the hit"}
+    ]
+  }
 ]
