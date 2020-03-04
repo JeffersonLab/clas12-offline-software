@@ -525,8 +525,8 @@ public class RICHTool{
         //reco_constants.QUADRANT_NUMBER             =  5;
         //reco_constants.USE_ELECTRON_ANGLES         =  1;
         //reco_constants.USE_PIXEL_PROPERTIES        =  1;
-        //if(debugMode>=1 && reco_constants.RICH_DEBUG>0){   //MC
-        if(debugMode>=1){ 
+        if(debugMode>=1 && reco_constants.RICH_DEBUG>0){   //MC
+        //if(debugMode>=1){ 
 
             System.out.format(" \n");
             System.out.format("CCDB RICH PARA    DO_MISALIGNMENT              %9d \n", reco_constants.DO_MISALIGNMENT); 
