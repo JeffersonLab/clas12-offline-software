@@ -1,6 +1,7 @@
 package org.jlab.clas.detector;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -382,12 +383,24 @@ public class DetectorData {
      
    public static DataBank getTrajectoriesBank(List<DetectorParticle> particles, DataEvent event, String bank_name) {
 
+       Map <Integer,List<Integer>> ignore=new HashMap<>();
+       //ignore.put(DetectorType.TARGET.getDetectorId(),Arrays.asList(1,2));
+       //ignore.put(DetectorType.CVT.getDetectorId(),Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12));
+       //ignore.put(DetectorType.DC.getDetectorId(),Arrays.asList(6,12,18,24,30,36));
+       
        DataBank bank=null;
        if (bank_name!=null) {
            
            int nrows = 0;
            for(int i = 0 ; i < particles.size(); i++) {
-               nrows += particles.get(i).getTrackTrajectory().size();
+               DetectorTrack.Trajectory traj = particles.get(i).getTrackTrajectory();
+               for (int detId : traj.getDetectors()) {
+                   for (int layId : traj.getLayers(detId)) {
+                       if (!ignore.containsKey(detId) || !ignore.get(detId).contains(layId)) {
+                           nrows++;
+                       }
+                   }
+               }
            }
            bank = event.createBank(bank_name, nrows);
            
@@ -397,6 +410,9 @@ public class DetectorData {
                DetectorTrack.Trajectory traj = p.getTrackTrajectory();
                for (int detId : traj.getDetectors()) {
                    for (int layId : traj.getLayers(detId)) {
+                       if (ignore.containsKey(detId) && ignore.get(detId).contains(layId)) {
+                           continue;
+                       }
                        bank.setShort("index", row, (short) p.getTrackIndex());
                        bank.setShort("pindex", row, (short) i);
                        bank.setByte("detector", row, (byte) detId);
@@ -643,7 +659,7 @@ public class DetectorData {
                 track.setDetectorID(DetectorType.FTCAL.getDetectorId());
 
                 // FIXME:  FT not in trajectory bank
-                DetectorParticlePOCA particle = new DetectorParticlePOCA(track);
+                DetectorParticle particle = new DetectorParticle(track);
                 
                 int pid = 0;
                 if (charge==0) pid = 22;
