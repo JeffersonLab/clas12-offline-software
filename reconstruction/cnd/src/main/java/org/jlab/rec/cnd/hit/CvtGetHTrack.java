@@ -44,7 +44,6 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
 			//System.out.println(" no cvt tracks");
 		}
 		
-		System.out.println();
 		
 		if (event.hasBank("CVTRec::Trajectory") == true) {
 
