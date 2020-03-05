@@ -160,7 +160,7 @@ public class KFitterDoca {
 
                     this.finalStateVec = sv.trackTraj.get(svzLength - 1);
                     this.finalCovMat = sv.trackCov.get(svzLength - 1);
-
+                    
                 } else {
                     this.ConvStatus = 1;
                 }
@@ -172,6 +172,8 @@ public class KFitterDoca {
             this.finalCovMat = sv.trackCov.get(svzLength - 1);
         }
         this.calcFinalChisq(sector);
+        if(Double.isNaN(chi2))
+            this.setFitFailed = true;
         if(TBT==true) {
             if(chi2>initChi2) { // fit failed
                 this.finalStateVec = this.initialStateVec;
@@ -215,6 +217,12 @@ public class KFitterDoca {
     }
     private double KFScale = 4;
     private void filter(int k) {
+        if(Double.isNaN(sv.trackTraj.get(k).x) || Double.isNaN(sv.trackTraj.get(k).y) 
+                || Double.isNaN(sv.trackTraj.get(k).tx) ||Double.isNaN(sv.trackTraj.get(k).ty )
+                || Double.isNaN(sv.trackTraj.get(k).Q)) {
+                this.setFitFailed = true;
+                return;
+        }
         if (sv.trackTraj.get(k) != null &&
                 sv.trackCov.get(k).covMat != null &&
                 k < sv.Z.length 
