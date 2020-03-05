@@ -735,7 +735,7 @@ public class RICHParticle {
         double EtaCmin = 0.0;
         if(Math.abs(Cos_EtaC)<1.)EtaCmin = Math.acos(Cos_EtaC);
         int ntrials = 0;
-        while (dist > nominal_sChAngle()*100/2. && ntrials<20){
+        while (dist > nominal_sChAngle()*100/10. && ntrials<20){
 
             if(debugMode>=1){ 
                 System.out.format(" Attempt %d  with the %7.1f (%7.2f)  phi %7.2f  EtaC  %7.2f\n",ntrials, the_min*MRAD, the_min*RAD, phi_min*RAD, EtaCmin*MRAD); 
