@@ -91,8 +91,9 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
 
 					double uo1 = (-b+Math.sqrt(b*b-4*a*co))/(2*a); 
 					double ui1 = (-b+Math.sqrt(b*b-4*a*ci))/(2*a); 
-
-
+					
+					if((Double.isNaN(uo1)) ||  (Double.isNaN(ui1)) )continue; //check if the track crosses the paddle. If not then go to the next swimmer intersection
+						
 					Point3D entryPoint = new Point3D((x+ui1*ux)*10,(y+ui1*uy)*10,(z+ui1*uz)*10);
 					Point3D midPoint = new Point3D(x*10,y*10,z*10);
 					Point3D exitPoint = new Point3D((x+uo1*ux)*10,(y+uo1*uy)*10,(z+uo1*uz)*10);
@@ -104,16 +105,20 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
 					trk._TrkLengths.add(path*10);
 
 					helices.add(trk);
-					//System.out.println(layer + " "+id +"path in paddle new "+entryPoint.distance(exitPoint)+ " pathlength "+ trk._TrkInters.get(layer-1)+ " id "+id);
+					//System.out.println("layer from swimmer "+layer+ " x "+trk._TrkInters.get(layer-1).get(0).x()+ " "+y+" "+z);
+
+					//System.out.println(layer + " "+id +" path in paddle new "+entryPoint.distance(exitPoint)+ " pathlength "+ trk._TrkInters.get(layer-1)+ " id "+id);
 
 				} 
+				
+				//add 
 			}	
 
 		}
 
-/*
-		//old code (kept only for quick reference)
 
+		//old code (kept only for quick reference)
+/*
 		   if (event.hasBank("CVTRec::Tracks") == false) {
 			// check if there are some cvt tracks in the event
             //System.out.println(" no cvt tracks");
@@ -205,8 +210,8 @@ public class CvtGetHTrack { // this class is used to extract helical tracks from
             }
 
         }//end
-
-		*/ 
+*/
+		
 
 	}
 
