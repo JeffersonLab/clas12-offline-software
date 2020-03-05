@@ -342,6 +342,11 @@ public class RICHLayer extends ArrayList<RICHComponent> {
         for(int ifa=0; ifa<surf.size(); ifa++){
 
             Face3D f = surf.face(ifa);
+            for (int ipo=0; ipo<3; ipo++){
+                Point3D p = f.point(ipo);
+                if(debugMode>=1)System.out.format("Vertex %s \n", p.toStringBrief(2));
+            }
+
             if(toTriangle3D(f).normal().dot(vers)<0)continue;
             for (int ipo=0; ipo<3; ipo++){
 
@@ -440,7 +445,7 @@ public class RICHLayer extends ArrayList<RICHComponent> {
         Vector3D vers = new Vector3D(vinside.multiply(-1.));
         Point3D surfb = toPoint3D(get_SurfBary(icompo, vers));
 
-        if(debugMode==1)System.out.format(" \n");
+        if(debugMode==1)System.out.format(" --- N quadrant --- %d \n",Nqua);
         for(int i=0; i<verts.size(); i++){
             if(debugMode==1)System.out.format(" vtx %s \n",verts.get(i).toStringBrief(2));
         }
@@ -480,12 +485,14 @@ public class RICHLayer extends ArrayList<RICHComponent> {
                     vbary.add(stpx);
                     vbary.add(stpy);
 
-                    if(debugMode==1)System.out.format(" v0     %3d %3d   --> %s \n",i,j,v0.toStringBrief(2));
-                    if(debugMode==1)System.out.format(" stpx   %3d %3d   --> %s \n",i,j,stpx.toStringBrief(2));
-                    if(debugMode==1)System.out.format(" vb     %3d %3d   --> %s \n",i,j,vb.toStringBrief(2));
-                    if(debugMode==1)System.out.format(" vcross %3d %3d   --> %s \n",i,j,vcross.toStringBrief(2));
-                    if(debugMode==1)System.out.format(" vspy   %3d %3d   --> %s \n",i,j,stpy.toStringBrief(2));
-                    if(debugMode==1)System.out.format(" vbary  %3d %3d   --> %s \n",i,j,vbary.toStringBrief(2));
+                    if(debugMode==1){
+                        System.out.format(" v0     %3d %3d   --> %s \n",i,j,v0.toStringBrief(2));
+                        System.out.format(" stpx   %3d %3d   --> %s \n",i,j,stpx.toStringBrief(2));
+                        System.out.format(" vb     %3d %3d   --> %s \n",i,j,vb.toStringBrief(2));
+                        System.out.format(" vcross %3d %3d   --> %s \n",i,j,vcross.toStringBrief(2));
+                        System.out.format(" vspy   %3d %3d   --> %s \n",i,j,stpy.toStringBrief(2));
+                        System.out.format(" vbary  %3d %3d   --> %s \n",i,j,vbary.toStringBrief(2));
+                    }
 
                     found=1;
                
@@ -523,6 +530,17 @@ public class RICHLayer extends ArrayList<RICHComponent> {
         Vector3D diff = vtx.toPoint3D().vectorTo(point);
         Vector3D prox = diff.projection(stpx);
         Vector3D proy = diff.projection(stpy);
+
+        if(debugMode==1){
+            System.out.format(" \n");
+            System.out.format(" diff  %s \n",diff.toStringBrief(2));
+            System.out.format(" stpx  %s \n",stpx.toStringBrief(2));
+            System.out.format(" prox  %s \n",prox.toStringBrief(2));
+            System.out.format(" stpy  %s \n",stpy.toStringBrief(2));
+            System.out.format(" proy  %s \n",proy.toStringBrief(2));
+            System.out.format(" \n");
+        }
+
         double dx = prox.mag();
         double dy = proy.mag();
         double ddx = dx/20*Nqua;
@@ -534,12 +552,21 @@ public class RICHLayer extends ArrayList<RICHComponent> {
         int idx = (int) ddx;
         int idy = (int) ddy;
 
-        if(debugMode==1)System.out.format(" angles %7.2f %7.2f \n",th,ph);
-        if(debugMode==1)System.out.format(" diff  --> %s\n",diff.toStringBrief(2));
-        if(debugMode==1)System.out.format(" prox  --> %s\n",prox.toStringBrief(2));
-        if(debugMode==1)System.out.format(" proy  --> %s\n",proy.toStringBrief(2));
-        if(debugMode==1)System.out.format(" vtx   --> %s\n",vtx.toStringBrief(2));
-        if(debugMode==1)System.out.format(" point --> %s   --> %7.2f %7.2f  %7.2f %7.2f  %4d %4d\n",point.toStringBrief(2), dx,dy,ddx,ddy,idx,idy);
+        if(debugMode==1){
+            System.out.format(" angles %7.2f %7.2f \n",th,ph);
+            System.out.format(" diff  --> %s\n",diff.toStringBrief(2));
+            System.out.format(" prox  --> %s\n",prox.toStringBrief(2));
+            System.out.format(" proy  --> %s\n",proy.toStringBrief(2));
+            System.out.format(" vtx   --> %s\n",vtx.toStringBrief(2));
+            System.out.format(" point --> %s   --> %7.2f %7.2f  %7.2f %7.2f  %4d %4d\n",point.toStringBrief(2), dx,dy,ddx,ddy,idx,idy);
+            if(idx>=Nqua || idy>=Nqua)System.out.format(" ECCOLO x %7.2f %4d y %7.2f %4d \n",ddx,idx,ddy,idy);  
+        }
+
+        // to stay within limits
+        if(idx<0)idx=0; 
+        if(idx>Nqua-1)idx=Nqua-1; 
+        if(idy<0)idy=0; 
+        if(idy>Nqua-1)idy=Nqua-1; 
 
         return idy*Nqua+idx;
     }
@@ -553,16 +580,14 @@ public class RICHLayer extends ArrayList<RICHComponent> {
         */
         int debugMode = 0;
 
+        if(Nqua<0 || Nqua>15)Nqua=1;
         int Nqua2 = (int) Math.pow(Nqua,2);
 
-        if(debugMode>=1)System.out.format(" Get %d quadrant for compo %d ilay %d point %s\n", Nqua2,icompo,id, point.toStringBrief(2));
+        if(debugMode>=1)System.out.format(" Get %d %d quadrant for compo %d ilay %d point %s\n", Nqua, Nqua2,icompo,id, point.toStringBrief(2));
 
         Shape3D surf = get_TrackingSurf(icompo);
-        Vector3D vers = new Vector3D(vinside.multiply(-1.));
+        Vector3D vers = new Vector3D(vinside);
         int iqua = get_TileQuadrant(Nqua, icompo, point, select_Vertexes(surf, vers));
-
-        if(iqua<0)iqua=0;
-        if(iqua>Nqua2)iqua=Nqua2;
 
         return iqua;
 

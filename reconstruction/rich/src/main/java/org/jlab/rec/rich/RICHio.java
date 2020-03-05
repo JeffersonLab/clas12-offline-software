@@ -100,7 +100,7 @@ public class RICHio {
 
         if(richevent.get_nHad()>0)write_HadronBank(event, richevent);
 
-        if(richevent.get_nPho()>0)write_PhotonBank(event, richevent);
+        if(richevent.get_nPho()>0)write_PhotonBank(event, richevent, recopar);
 
         if(richevent.get_nPho()>0)write_RingCherBank(event, richevent, recopar);
 
@@ -252,9 +252,9 @@ public class RICHio {
 
         int NHAD = richevent.get_nHad();
         if(debugMode>=1)System.out.format("Creating Bank for %5d Hadrons \n", NHAD);
-        
+
         if(NHAD>0) {
-            if(debugMode>=1)System.out.println(" --> Creating the HadCher Bank ");
+            if(debugMode>=1)System.out.println(" --> Creating the RICH::hadCher Bank ");
             DataBank bankHads = event.createBank("RICH::hadCher", NHAD);
             if(bankHads==null){
                 System.out.println("ERROR CREATING BANK : RICH::hadCher");
@@ -269,12 +269,22 @@ public class RICHio {
                 if(debugMode>0)System.out.format(" RICHio %7.2f %7.2f %5d %7.2f %9.4f %9.4f \n",had.minChAngle(0)*MRAD,had.maxChAngle(0)*MRAD,
                           had.traced.get_BestH(),had.traced.get_RQP(),had.traced.get_ElProb(),had.traced.get_PiProb());
 
-                bankHads.setShort("id",            i ,(short) had.get_id());
-                bankHads.setShort("hindex",        i, (short) had.get_hit_index());
-                bankHads.setShort("pindex",        i, (short) had.get_ParentIndex());
+                if(had.get_id()>255)continue;
+                if(had.get_hit_index()>255)continue;
+                if(had.get_ParentIndex()>255)continue;
+                if(had.ilay_emission>255)continue;
+                if(had.ico_emission>255)continue;
+                if(had.ico_entrance>255)continue;
+                if(had.iqua_emission>255)continue;
+                if(had.traced.get_BestH()>255)continue;
 
-                bankHads.setShort("emilay",        i, (short) had.ilay_emission);
-                bankHads.setShort("emico",         i, (short) had.ico_emission);
+                bankHads.setByte("id",             i ,(byte) had.get_id());
+                bankHads.setByte("hindex",         i, (byte) had.get_hit_index());
+                bankHads.setByte("pindex",         i, (byte) had.get_ParentIndex());
+
+                bankHads.setByte("emilay",         i, (byte) had.ilay_emission);
+                bankHads.setByte("emico",          i, (byte) had.ico_emission);
+                bankHads.setByte("enico",          i, (byte) had.ico_entrance);
                 bankHads.setShort("emqua",         i, (short) had.iqua_emission);
                 bankHads.setFloat("mchi2",         i, (float) had.traced.get_machi2());
 
@@ -285,7 +295,7 @@ public class RICHio {
                 bankHads.setFloat("ch_lat",        i, (float) had.traced.get_Chlat());
                 bankHads.setFloat("ch_spe",        i, (float) had.traced.get_Chspe());
 
-                bankHads.setShort("best_PID",      i, (short) had.traced.get_BestH());
+                bankHads.setByte("best_PID",       i, (byte) had.traced.get_BestH());
                 bankHads.setFloat("RQ_prob",       i, (float) had.traced.get_RQP());
                 bankHads.setFloat("el_prob",       i, (float) had.traced.get_ElProb());
                 bankHads.setFloat("pi_prob",       i, (float) had.traced.get_PiProb());
@@ -303,22 +313,36 @@ public class RICHio {
 
         int debugMode = 0;
 
+        int SELE = 2;
+
         int NPHO = richevent.get_nPho();
         if(debugMode>=1)System.out.format("Creating Bank for %5d Ring Cherenkovs \n", NPHO);
         
         if(NPHO!=0) {
-            if(debugMode>=1)System.out.println(" --> Creating the RICH::ringCher Bank ");
-            DataBank bankRing = event.createBank("RICH::ringCher", NPHO);
+
+            int Nring = 0;
+
+            for(int i = 0; i < NPHO; i++){
+                RICHParticle pho = richevent.get_Photon(i);
+                if(pho.get_type()!=0) continue;
+                if(pho.analytic.get_OK()==SELE || pho.traced.get_OK()==SELE) Nring++;
+            }
+
+            if(debugMode>=1)System.out.format(" --> Creating the RICH::ringCher Bank for Npho %5d Nring %5d \n",NPHO,Nring);
+            DataBank bankRing = event.createBank("RICH::ringCher", Nring);
             if(bankRing==null){
                 System.out.println("ERROR CREATING BANK : RICH::ringCher");
                 return;
             }
 
-            int SELE = 2;
 
+            int ientry = 0;
             for(int i = 0; i < NPHO; i++){
 
                 RICHParticle pho = richevent.get_Photon(i);
+
+                // consistency
+                if(ientry>Nring) continue;
 
                 // only reconstructed photons
                 if(pho.get_type()!=0) continue;
@@ -333,24 +357,40 @@ public class RICHio {
                 double a_etaC = pho.analytic.get_EtaC();
                 double t_etaC = pho.traced.get_EtaC();
 
+                if(debugMode>=1)System.out.format(" pho %3d %3d flag %3d %3d ",i,ientry,pho.analytic.get_OK(),pho.traced.get_OK());
                 // skip no real Cherenkov solution
-                if(pho.analytic.get_OK()!=SELE && pho.traced.get_OK()!=SELE) continue; 
+                if(pho.analytic.get_OK()==SELE || pho.traced.get_OK()==SELE){
 
-                bankRing.setShort("id",     i, (short) pho.get_id());
-                bankRing.setShort("hindex", i, (short) pho.get_hit_index());
-                bankRing.setShort("pindex", i, (short) had.get_ParentIndex());
+                    if(had.get_ParentIndex()>255)continue;
+                    if(hit.get_anode()>255)continue;
+                    if(pho.traced.get_nrefle()>255)continue;
 
-                bankRing.setFloat("time",   i, (float) htime);
-                bankRing.setShort("pmt",    i, (short) hit.get_pmt());
-                bankRing.setShort("anode",  i, (short) hit.get_anode());
+                    if(debugMode>=1)System.out.format("   --> store \n");
 
-                bankRing.setFloat("apath",  i, (float) pho.analytic.get_path());
-                bankRing.setFloat("atime",  i, (float) a_time );
-                bankRing.setFloat("aEtaC",  i, (float) a_etaC );
+                    bankRing.setShort("id",     ientry, (short) pho.get_id());
+                    bankRing.setShort("hindex", ientry, (short) pho.get_hit_index());
+                    bankRing.setByte("pindex",  ientry, (byte) had.get_ParentIndex());
 
-                bankRing.setFloat("tpath",  i, (float) pho.traced.get_path());
-                bankRing.setFloat("ttime",  i, (float) t_time );
-                bankRing.setFloat("tEtaC",  i, (float) t_etaC );
+                    bankRing.setShort("pmt",    ientry, (short) hit.get_pmt());
+                    bankRing.setByte("anode",   ientry, (byte) hit.get_anode());
+                    bankRing.setFloat("time",   ientry, (float) htime);
+
+                    bankRing.setFloat("apath",  ientry, (float) pho.analytic.get_path());
+                    bankRing.setFloat("atime",  ientry, (float) a_time );
+                    bankRing.setFloat("aEtaC",  ientry, (float) a_etaC );
+
+                    bankRing.setFloat("tpath",  ientry, (float) pho.traced.get_path());
+                    bankRing.setFloat("ttime",  ientry, (float) t_time );
+                    bankRing.setFloat("tEtaC",  ientry, (float) t_etaC );
+
+                    bankRing.setByte("nrfl",    ientry, (byte) pho.traced.get_nrefle());
+                    bankRing.setShort("1rfl",   ientry, (short) pho.traced.get_FirstRefle());
+
+                    ientry++;
+
+                }else{
+                    if(debugMode>=1)System.out.format(" \n");
+                }
 
             }
             event.appendBanks(bankRing);
@@ -359,7 +399,7 @@ public class RICHio {
 
 
     // ----------------
-    public void write_PhotonBank(DataEvent event, RICHEvent richevent) {
+    public void write_PhotonBank(DataEvent event, RICHEvent richevent, RICHConstants recopar) {
     // ----------------
 
         int debugMode = 0;
@@ -368,57 +408,80 @@ public class RICHio {
         if(debugMode>=1)System.out.format("Creating Bank for %5d Photons \n", NPHO);
         
         if(NPHO!=0) {
-            if(debugMode>=1)System.out.println(" --> Creating the Photons Bank ");
-            DataBank bankPhos = event.createBank("RICH::photons", NPHO);
+
+            int Nrow = 0;
+
+            for(int i = 0; i < NPHO; i++){
+                RICHParticle pho = richevent.get_Photon(i);
+                if(pho.get_type()==0 || recopar.SAVE_THROWS==1)Nrow++;
+            }
+
+            if(debugMode>=1)System.out.format(" --> Creating the Photons Bank for Npho %4d Nrow %4d \n",NPHO,Nrow);
+            DataBank bankPhos = event.createBank("RICH::photons", Nrow);
             if(bankPhos==null){
                 System.out.println("ERROR CREATING BANK : RICH::photons");
                 return;
             }
 
+            int ientry = 0;
+
             for(int i = 0; i < NPHO; i++){
 
                 RICHParticle pho = richevent.get_Photon(i);
-                if(debugMode>=1)System.out.format(" --> %3d %3d %3d \n",pho.get_id(),pho.get_type(),pho.get_ParentIndex());
+                if(debugMode>=1)System.out.format(" pho %3d %3d type %3d %3d ",i,ientry,pho.get_type(),pho.get_ParentIndex());
 
-                bankPhos.setShort("id",i, (short) pho.get_id());
-                bankPhos.setShort("type",i, (short) pho.get_type());
-                bankPhos.setShort("hit_index",i,(short) pho.get_hit_index());
-                bankPhos.setShort("hadron_index",i,(short) pho.get_ParentIndex());
-                bankPhos.setFloat("start_time",i,(float) pho.get_start_time());
+                // consistency
+                if(ientry>Nrow) continue;
 
-                bankPhos.setFloat("analytic_the",i,(float) pho.analytic.get_theta());
-                bankPhos.setFloat("analytic_phi",i,(float) pho.analytic.get_phi());
-                bankPhos.setFloat("analytic_path",i,(float) pho.analytic.get_path());
-                bankPhos.setFloat("analytic_time",i,(float) pho.analytic.get_time());
-                //bankPhos.setShort("analytic_nrfl",i,(short) pho.analytic.get_nrefle());
-                //bankPhos.setShort("analytic_nrfr",i,(short) pho.analytic.get_nrefra());
+                if(pho.get_type()==0 || recopar.SAVE_THROWS==1){
+    
+                    if(debugMode>=1)System.out.format("   --> store \n");
 
-                bankPhos.setFloat("analytic_EtaC",i,(float) pho.analytic.get_EtaC());
-                bankPhos.setFloat("analytic_aeron",i,(float) pho.analytic.get_aeron());
-                bankPhos.setFloat("analytic_elpr",i,(float) pho.analytic.get_ElProb());
-                bankPhos.setFloat("analytic_pipr",i,(float) pho.analytic.get_PiProb());
-                bankPhos.setFloat("analytic_kpr",i,(float) pho.analytic.get_KProb());
-                bankPhos.setFloat("analytic_prpr",i,(float) pho.analytic.get_PrProb());
-                bankPhos.setFloat("analytic_bgpr",i,(float) pho.analytic.get_BgProb());
+                    bankPhos.setShort("id",             ientry, (short) pho.get_id());
+                    bankPhos.setShort("type",           ientry, (short) pho.get_type());
+                    bankPhos.setShort("hit_index",      ientry,(short) pho.get_hit_index());
+                    bankPhos.setShort("hadron_index",   ientry,(short) pho.get_ParentIndex());
+                    bankPhos.setFloat("start_time",     ientry,(float) pho.get_start_time());
 
-                bankPhos.setFloat("traced_the",i,(float) pho.traced.get_theta());
-                bankPhos.setFloat("traced_phi",i,(float) pho.traced.get_phi());
-                bankPhos.setFloat("traced_hitx",i,(float) pho.traced.get_hit().x);
-                bankPhos.setFloat("traced_hity",i,(float) pho.traced.get_hit().y);
-                bankPhos.setFloat("traced_hitz",i,(float) pho.traced.get_hit().z);
-                bankPhos.setFloat("traced_path",i,(float) pho.traced.get_path());
-                bankPhos.setFloat("traced_time",i,(float) pho.traced.get_time());
-                bankPhos.setShort("traced_nrfl",i,(short) pho.traced.get_nrefle());
-                bankPhos.setShort("traced_nrfr",i,(short) pho.traced.get_nrefra());
-                bankPhos.setShort("traced_1rfl",i,(short) pho.traced.get_FirstRefle());
+                    bankPhos.setFloat("analytic_the",   ientry,(float) pho.analytic.get_theta());
+                    bankPhos.setFloat("analytic_phi",   ientry,(float) pho.analytic.get_phi());
+                    bankPhos.setFloat("analytic_path",  ientry,(float) pho.analytic.get_path());
+                    bankPhos.setFloat("analytic_time",  ientry,(float) pho.analytic.get_time());
+                    //bankPhos.setShort("analytic_nrfl",ientry,(short) pho.analytic.get_nrefle());
+                    //bankPhos.setShort("analytic_nrfr",ientry,(short) pho.analytic.get_nrefra());
 
-                bankPhos.setFloat("traced_EtaC",i,(float) pho.traced.get_EtaC());
-                bankPhos.setFloat("traced_aeron",i,(float) pho.traced.get_aeron());
-                bankPhos.setFloat("traced_elpr",i,(float) pho.traced.get_ElProb());
-                bankPhos.setFloat("traced_pipr",i,(float) pho.traced.get_PiProb());
-                bankPhos.setFloat("traced_kpr",i,(float) pho.traced.get_KProb());
-                bankPhos.setFloat("traced_prpr",i,(float) pho.traced.get_PrProb());
-                bankPhos.setFloat("traced_bgpr",i,(float) pho.traced.get_BgProb());
+                    bankPhos.setFloat("analytic_EtaC",  ientry,(float) pho.analytic.get_EtaC());
+                    bankPhos.setFloat("analytic_aeron", ientry,(float) pho.analytic.get_aeron());
+                    bankPhos.setFloat("analytic_elpr",  ientry,(float) pho.analytic.get_ElProb());
+                    bankPhos.setFloat("analytic_pipr",  ientry,(float) pho.analytic.get_PiProb());
+                    bankPhos.setFloat("analytic_kpr",   ientry,(float) pho.analytic.get_KProb());
+                    bankPhos.setFloat("analytic_prpr",  ientry,(float) pho.analytic.get_PrProb());
+                    bankPhos.setFloat("analytic_bgpr",  ientry,(float) pho.analytic.get_BgProb());
+
+                    bankPhos.setFloat("traced_the",     ientry,(float) pho.traced.get_theta());
+                    bankPhos.setFloat("traced_phi",     ientry,(float) pho.traced.get_phi());
+                    bankPhos.setFloat("traced_hitx",    ientry,(float) pho.traced.get_hit().x);
+                    bankPhos.setFloat("traced_hity",    ientry,(float) pho.traced.get_hit().y);
+                    bankPhos.setFloat("traced_hitz",    ientry,(float) pho.traced.get_hit().z);
+                    bankPhos.setFloat("traced_path",    ientry,(float) pho.traced.get_path());
+                    bankPhos.setFloat("traced_time",    ientry,(float) pho.traced.get_time());
+                    bankPhos.setShort("traced_nrfl",    ientry,(short) pho.traced.get_nrefle());
+                    bankPhos.setShort("traced_nrfr",    ientry,(short) pho.traced.get_nrefra());
+                    bankPhos.setShort("traced_1rfl",    ientry,(short) pho.traced.get_FirstRefle());
+
+                    bankPhos.setFloat("traced_EtaC",    ientry,(float) pho.traced.get_EtaC());
+                    bankPhos.setFloat("traced_aeron",   ientry,(float) pho.traced.get_aeron());
+                    bankPhos.setFloat("traced_elpr",    ientry,(float) pho.traced.get_ElProb());
+                    bankPhos.setFloat("traced_pipr",    ientry,(float) pho.traced.get_PiProb());
+                    bankPhos.setFloat("traced_kpr",     ientry,(float) pho.traced.get_KProb());
+                    bankPhos.setFloat("traced_prpr",    ientry,(float) pho.traced.get_PrProb());
+                    bankPhos.setFloat("traced_bgpr",    ientry,(float) pho.traced.get_BgProb());
+
+                    ientry++;
+
+                  }else{
+                    if(debugMode>=1)System.out.format(" \n");
+                  }
 
             }
             event.appendBanks(bankPhos);

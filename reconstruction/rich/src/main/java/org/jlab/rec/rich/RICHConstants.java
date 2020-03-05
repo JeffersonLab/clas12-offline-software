@@ -66,6 +66,8 @@ public class RICHConstants {
 
     public int     USE_ELECTRON_ANGLES                    =   0;        // Get Cherenkov angle and rms from electrons control sample
     public int     USE_PIXEL_PROPERTIES                   =   0;        // Use pixel status and efficiency in the likelihood
+    public int     SAVE_THROWS                            =   0;        // Store throwed photons in the photons bank
+    public int     QUADRANT_NUMBER                        =   15;       // Number of quadrants (square root of)
 
     public double  GOODHIT_FRAC                           =   80.;      // Maximum duration (in % of local max) to flag xtalk  
     public double  RICH_DCMATCH_CUT                       =   15.;      // RICH cluster matching cut with tracks 
