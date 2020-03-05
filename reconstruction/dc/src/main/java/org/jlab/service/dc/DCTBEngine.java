@@ -222,7 +222,7 @@ public class DCTBEngine extends DCEngine {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());
             //}
             KFitterDoca kFit = new KFitterDoca(TrackArray[i], dcDetector, true, dcSwim, 0);
-           
+             
             StateVec fn = new StateVec();
             kFit.runFitter(TrackArray[i].get(0).get_Sector());
             
