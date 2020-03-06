@@ -283,7 +283,6 @@ public class BandHitFinder {
 					double mu_cm = CalibrationConstantsLoader.FADC_ATTEN_LENGTH.get( Integer.valueOf(barKey) ); // in [cm]
 					double adcL_corr = adcleft * Math.exp( (sectorLen/2.-xpos_fadc) / mu_cm );
 					double adcR_corr = adcright* Math.exp( (sectorLen/2.+xpos_fadc) / mu_cm );
-
 				
 					// -----------------------------------------------------------------------------------------------
 					// Create a new BandHit and fill it with the relevant info:
@@ -301,6 +300,7 @@ public class BandHitFinder {
 
 					Hit.SetAdcLeft(adcL_corr);
 					Hit.SetAdcRight(adcR_corr);
+					
 
 					Hit.SetTLeft_FADC(ftdcleft);
 					Hit.SetTRight_FADC(ftdcright);
