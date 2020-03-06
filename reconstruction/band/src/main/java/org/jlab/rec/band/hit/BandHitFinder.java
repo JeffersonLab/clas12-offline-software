@@ -263,18 +263,11 @@ public class BandHitFinder {
 
 
 					// -----------------------------------------------------------------------------------------------
-					// Correct FADC ADC for attenuation length and convert to MeV
+					// Correct FADC ADC for attenuation length
 					double sectorLen = Parameters.barLengthSector[sector-1];
 					double mu_cm = CalibrationConstantsLoader.FADC_ATTEN_LENGTH.get( Integer.valueOf(barKey) ); // in [cm]
 					double adcL_corr = adcleft * Math.exp( (sectorLen/2.-xpos_fadc) / mu_cm );
 					double adcR_corr = adcright* Math.exp( (sectorLen/2.+xpos_fadc) / mu_cm );
-					//	convert from ADC to MeV
-					double energyconvert_params[] = CalibrationConstantsLoader.ENERGY_CONVERT.get( Integer.valueOf(barKey) );
-					double parA = energyconvert_params[0];
-					double parB = energyconvert_params[1];
-					double parC = energyconvert_params[2];
-					double combo_adc = Math.sqrt(adcL_corr*adcR_corr);
-					combo_adc = parA + parB*combo_adc + parC*combo_adc*combo_adc;
 				
 					// -----------------------------------------------------------------------------------------------
 					// Create a new BandHit and fill it with the relevant info:
@@ -290,10 +283,8 @@ public class BandHitFinder {
 					Hit.SetDiffTime_TDC(tdiff_tdc);
 					Hit.SetDiffTime_FADC(tdiff_fadc);
 
-					//Hit.SetAdcLeft(adcL_corr);
-					//Hit.SetAdcRight(adcR_corr);
-					Hit.SetAdcLeft(combo_adc);
-					Hit.SetAdcRight(combo_adc);
+					Hit.SetAdcLeft(adcL_corr);
+					Hit.SetAdcRight(adcR_corr);
 					
 
 					Hit.SetTLeft_FADC(ftdcleft);
