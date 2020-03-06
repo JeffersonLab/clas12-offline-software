@@ -8,6 +8,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.band.hit.BandHit;
 import org.jlab.rec.band.hit.BandHitCandidate;
+import org.jlab.rec.band.constants.CalibrationConstantsLoader;
 
 
 
@@ -43,8 +44,17 @@ public class RecoBankWriter {
 			bank.setByte("sector",i, (byte) hitlist.get(i).GetSector());
 			bank.setByte("layer",i, (byte) hitlist.get(i).GetLayer());
 			bank.setShort("component",i, (short) hitlist.get(i).GetComponent());
-			
-			bank.setFloat("energy", i, (float) Math.sqrt(hitlist.get(i).GetAdcLeft() * hitlist.get(i).GetAdcRight()));
+
+			int barKey = hitlist.get(i).GetSector()*100+hitlist.get(i).GetLayer()*10+hitlist.get(i).GetComponent();
+			double energyconvert_params[] = CalibrationConstantsLoader.ENERGY_CONVERT.get( Integer.valueOf(barKey) );
+			double parA = energyconvert_params[0];
+			double parB = energyconvert_params[1];
+			double parC = energyconvert_params[2];
+			double combo_adc = Math.sqrt(hitlist.get(i).GetAdcLeft() * hitlist.get(i).GetAdcRight());
+			combo_adc = parA + parB*combo_adc + parC*combo_adc*combo_adc;
+
+			//bank.setFloat("energy", i, (float) Math.sqrt(hitlist.get(i).GetAdcLeft() * hitlist.get(i).GetAdcRight()));
+			bank.setFloat("energy", i, (float) combo_adc);
 			bank.setFloat("time",i, (float) hitlist.get(i).GetMeanTime_TDC());
 		
 			bank.setFloat("x",i, (float) (hitlist.get(i).GetX()));
