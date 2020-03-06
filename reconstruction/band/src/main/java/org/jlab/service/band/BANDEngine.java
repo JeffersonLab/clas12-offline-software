@@ -75,7 +75,8 @@ public class BANDEngine extends ReconstructionEngine {
 				"/calibration/band/time_walk_amp_left",
 				"/calibration/band/time_walk_amp_right",
 				"/calibration/band/global_offsets",
-				"/calibration/band/cuts"
+				"/calibration/band/cuts",
+				"/calibration/band/energy_conversion"
 				//"/calibration/band/time_walk_corr_left",
 				//"/calibration/band/time_walk_corr_right",
     		};

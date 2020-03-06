@@ -40,6 +40,7 @@ public class CalibrationConstantsLoader {
 	public static Map<Integer, Double> FADC_ATTEN_LENGTH  = new HashMap<Integer,Double>  ();	// FADC attenuation length [cm]
 	public static Map<Integer, double[]> TIMEWALK_L       = new HashMap<Integer,double[]>(); 	// Parameters for time-walk correction for L PMTs
 	public static Map<Integer, double[]> TIMEWALK_R       = new HashMap<Integer,double[]>(); 	// Parameters for time-walk correction for R PMTs
+	public static Map<Integer, double[]> ENERGY_CONVERT   = new HashMap<Integer,double[]>();	// Energy conversion correction for ADC->MeV
 
 	public static double JITTER_PERIOD = 0;
 	public static int JITTER_PHASE = 0;
@@ -64,6 +65,7 @@ public class CalibrationConstantsLoader {
 		IndexedTable  layeroffs_tdc   = manager.getConstants(runno, "/calibration/band/layer_offsets_tdc");	 
 		IndexedTable  cutvalues       = manager.getConstants(runno, "/calibration/band/cuts");
 		IndexedTable  globaloffsets   = manager.getConstants(runno, "/calibration/band/global_offsets");
+		IndexedTable  energyconvert   = manager.getConstants(runno, "/calibration/band/energy_conversion");
 		//IndexedTable  timewalkL  = manager.getConstants(runno, "/calibration/band/time_walk_corr_left");
 		//IndexedTable  timewalkR  = manager.getConstants(runno, "/calibration/band/time_walk_corr_right");
 
@@ -73,6 +75,19 @@ public class CalibrationConstantsLoader {
 		for( int i = 0; i < cutvalues.getRowCount(); i++){
 			CUT_NHITS_BAND  	= cutvalues.getIntValue("nhitsband", 0,0,0);
 			CUT_LASERHITS_BAND 	= cutvalues.getIntValue("nlaserhits", 0,0,0);	
+		}
+
+		for( int i = 0; i < energyconvert.getRowCount(); i++){
+			int sector    = Integer.parseInt((String)energyconvert.getValueAt(i, 0));
+                        int layer     = Integer.parseInt((String)energyconvert.getValueAt(i, 1));
+                        int component = Integer.parseInt((String)energyconvert.getValueAt(i, 2));
+			double parA = energyconvert.getDoubleValue("par_a", sector, layer, component); 
+			double parB = energyconvert.getDoubleValue("par_b", sector, layer, component); 
+			double parC = energyconvert.getDoubleValue("par_c", sector, layer, component); 
+			// Put TW in map
+			int key 	= sector*100+layer*10+component;
+			double convert_params[] = {parA,parB,parC};
+			ENERGY_CONVERT.put(Integer.valueOf(key), convert_params);
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
