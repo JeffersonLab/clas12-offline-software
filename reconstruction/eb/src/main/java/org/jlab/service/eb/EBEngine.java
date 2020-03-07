@@ -23,6 +23,7 @@ public class EBEngine extends ReconstructionEngine {
 
     boolean dropBanks = false;
     boolean alreadyDroppedBanks = false;
+    boolean usePOCA = false;
 
     // output banks:
     String eventBank        = null;
@@ -53,6 +54,10 @@ public class EBEngine extends ReconstructionEngine {
         //Initialize bank names
     }
 
+    public void setUsePOCA(boolean val) {
+        this.usePOCA=val;
+    }
+
     @Override
     public boolean processDataEvent(DataEvent de) {
         throw new RuntimeException("EBEngine cannot be used directly.  Use EBTBEngine/EBHBEngine instead.");
@@ -77,6 +82,7 @@ public class EBEngine extends ReconstructionEngine {
         DetectorHeader head = EBio.readHeader(de,ebs,ccdb);
 
         EventBuilder eb = new EventBuilder(ccdb);
+        eb.setUsePOCA(this.usePOCA);
         eb.initEvent(head); // clear particles
 
         EBMatching ebm = new EBMatching(eb);
@@ -265,6 +271,8 @@ public class EBEngine extends ReconstructionEngine {
         }
         de.removeBank(eventBank);
         de.removeBank(particleBank);
+        de.removeBank(eventBankFT);
+        de.removeBank(particleBankFT);
         de.removeBank(calorimeterBank);
         de.removeBank(scintillatorBank);
         de.removeBank(cherenkovBank);

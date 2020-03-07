@@ -218,6 +218,13 @@ public abstract class ReconstructionEngine implements Engine {
        }
     }
     
+    protected boolean constantManagerStatus(){
+        for(Map.Entry<String,ConstantsManager> entry : this.constManagerMap.entrySet()){
+            if(entry.getValue().getRequestStatus()<0) return false;
+        }
+        return true;
+    }
+    
     @Override
     public EngineData execute(EngineData input) {
 
@@ -228,6 +235,15 @@ public abstract class ReconstructionEngine implements Engine {
         String mt = input.getMimeType();
         //System.out.println(" DATA TYPE = [" + mt + "]");
         HipoDataEvent dataEventHipo = null;
+        
+        if(constantManagerStatus()==false){
+            String msg = String.format("HALT : DATABASE CONNECTION ERROR");           
+            //output.setStatus(EngineStatus.ERROR);
+            output.setStatus(EngineStatus.ERROR, 13);
+            output.setDescription(msg);
+            return output;
+        }
+        
         if(mt.compareTo("binary/data-hipo")==0){
             try {
                 //ByteBuffer bb = (ByteBuffer) input.getData();

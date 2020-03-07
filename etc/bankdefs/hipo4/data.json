@@ -352,13 +352,14 @@
     "item" : 14,
     "info": "Digitized bank for the Radial TPC",
     "entries":[
-      { "name":"step"      , "type":"F", "info":"step"},
+      { "name":"step"      , "type":"I", "info":"step"},
       { "name":"time"      , "type":"F", "info":"time (ns)"},
       { "name":"energy"    , "type":"F", "info":"energy"},
       { "name":"posx"      , "type":"F", "info":"x position (mm)"},
       { "name":"posy"      , "type":"F", "info":"y position (mm)"},
       { "name":"posz"      , "type":"F", "info":"z position (mm)"},
-      { "name":"phi"       , "type":"F", "info":"phi (rad)"}
+      { "name":"phi"       , "type":"F", "info":"phi (rad)"},
+      { "name":"tid"       , "type":"I", "info":"track id"}
     ]
   },
   {
@@ -371,7 +372,8 @@
       { "name":"layer"     , "type":"B", "info":"layer (1-6)"},
       { "name":"component" , "type":"S", "info":"strips"},
       { "name":"order"     , "type":"B", "info":"order: 0 - ADCL , 1 - ADCR"},
-      { "name":"ADC"       , "type":"I", "info":"ADC maximum"},
+      { "name":"ADC"       , "type":"I", "info":"ADC integral from pulse fit"},
+      { "name":"amplitude" , "type":"I", "info":"ADC maximum"},
       { "name":"time"      , "type":"F", "info":"time from pulse fit"},
       { "name":"ped"       , "type":"S", "info":"pedestal from pulse analysis"}
     ]

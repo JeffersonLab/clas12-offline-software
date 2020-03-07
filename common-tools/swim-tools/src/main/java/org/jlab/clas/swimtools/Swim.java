@@ -328,6 +328,7 @@ public class Swim {
     }
 
     private void checkR(double _x0, double _y0, double _z0) {
+        this.SwimUnPhys=false;
         if(Math.sqrt(_x0*_x0 + _y0*_y0)>this._rMax || 
                 Math.sqrt(_x0*_x0 + _y0*_y0 + _z0*_z0)>this._maxPathLength)
             this.SwimUnPhys=true;
@@ -335,31 +336,51 @@ public class Swim {
     /**
      * Cylindrical stopper
      */
-    private class CylindricalcalBoundarySwimStopper implements IStopper {
+    private class CylindricalBoundarySwimStopper implements IStopper {
 
         private double _finalPathLength = Double.NaN;
 
         private double _Rad;
+        //boolean cutOff = false;
+        // check that the track can get to R.   Stops at the track radius    
+        //float[] b = new float[3];
+        //double x0 = _x0*100;
+        //double y0 = _y0*100;
+        //double z0 = _z0*100;
 
+        double max = -1.0;
         /**
          * A swim stopper that will stop if the boundary of a plane is crossed
          *
          * @param maxR
          *            the max radial coordinate in meters.
          */
-        private CylindricalcalBoundarySwimStopper(double Rad) {
-                // DC reconstruction units are cm. Swim units are m. Hence scale by
-                // 100
-                _Rad = Rad;
+        private CylindricalBoundarySwimStopper(double Rad) {
+            // DC reconstruction units are cm. Swim units are m. Hence scale by
+            // 100
+            _Rad = Rad;
+            // check if the track will reach the surface of the cylinder.  
+            //BfieldLab(x0, y0, z0, b);            
+            //double trkR = _pTot*Math.sin(Math.toRadians(_theta))/Math.abs(b[2]*LIGHTVEL);
+            //double trkXc = x0 + trkR * Math.sin(Math.toRadians(_phi));
+            //if(trkR<(Rad+trkXc) && Math.sqrt(x0*x0+y0*y0)<_Rad) { // check only for swimming inside out.
+            //    cutOff=true;
+            //}
         }
 
         @Override
         public boolean stopIntegration(double t, double[] y) {
-
-                double r = Math.sqrt(y[0] * y[0] + y[1] * y[1]) * 100.;
-
-                return (r > _Rad);
-
+            
+            double r = Math.sqrt(y[0] * y[0] + y[1] * y[1]) * 100.;
+//            if(r>max ) 
+//                max = r;
+//            else System.out.println(r + " " + max + " " + t);
+            //if(cutOff) {
+                return (r < max || r > _Rad); // stop intergration at closest distance to the cylinder
+            //}
+            //else {
+            //    return (r > _Rad);
+            //}
         }
 
         /**
@@ -383,24 +404,25 @@ public class Swim {
                 _finalPathLength = finalPathLength;
         }
     }
+    //private final double LIGHTVEL     = 0.000299792458 ;
+    
     /**
      * 
      * @param Rad
      * @return state  x,y,z,px,py,pz, pathlength, iBdl at the surface 
      */
     public double[] SwimToCylinder(double Rad) {
-
+        
         double[] value = new double[8];
-        // using adaptive stepsize
         if(this.SwimUnPhys)
             return null;
         
-        CylindricalcalBoundarySwimStopper stopper = new CylindricalcalBoundarySwimStopper(Rad);
+        CylindricalBoundarySwimStopper stopper = new CylindricalBoundarySwimStopper(Rad);
         
         SwimTrajectory st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize,
                         0.0005);
         if(st==null)
-                    return null;
+                return null;
         st.computeBDL(PC.CP);
         // st.computeBDL(compositeField);
 
@@ -479,7 +501,7 @@ public class Swim {
         if(this.SwimUnPhys==true)
             return null;
         SphericalBoundarySwimStopper stopper = new SphericalBoundarySwimStopper(Rad);
-
+            
         SwimTrajectory st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize,
                         0.0005);
         if(st==null)
@@ -632,50 +654,6 @@ public class Swim {
         } catch (RungeKuttaException e) {
                 e.printStackTrace();
         }
-
-//		PlaneBoundarySwimStopper stopper = new PlaneBoundarySwimStopper(d, n, dir);
-
-        // this is a uniform stepsize swimmer (dph)
-//		st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, 0.0005);
-//		st.computeBDL(PC.CP);
-//		// st.computeBDL(compositeField);
-//
-//		double[] lastY = st.lastElement();
-//
-//		value[0] = lastY[0] * 100; // convert back to cm
-//		value[1] = lastY[1] * 100; // convert back to cm
-//		value[2] = lastY[2] * 100; // convert back to cm
-//		value[3] = lastY[3] * _pTot; // normalized values
-//		value[4] = lastY[4] * _pTot;
-//		value[5] = lastY[5] * _pTot;
-//		value[6] = lastY[6] * 100;
-//		value[7] = lastY[7] * 10; // Conversion from kG.m to T.cm
-//
-//		double tv1 = Math.abs(tvalue[0]);
-//		double v1 = Math.abs(value[0]);
-//
-//		double fract = (Math.abs(tv1 - v1) / Math.max(tv1, v1));
-//		if (fract > 0.9) {
-//			System.out.println("\nBig Diff fract = " + fract + "   direction = " + dir + "   DIST = " + d);
-//
-//			double vtxR = Math.sqrt(_x0 * _x0 + _y0 * _y0 + _z0 * _z0);
-//			System.out.println("VTX: (" + _x0 + ", " + _y0 + ", " + _z0 + ") VtxR: " + vtxR + "   P: " + _pTot
-//					+ "  theta: " + _theta + "  phi: " + _phi);
-//
-//			printV("tV", tvalue);
-//			printV(" V", value);
-//			// System.out.println("tV: (" + tvalue[0]/100 + ", " + tvalue[1]/100
-//			// + ", " + tvalue[2]/100 + ")");
-//			// System.out.println(" V: (" + value[0]/100 + ", " + value[1]/100 +
-//			// ", " + value[2]/100 + ")");
-//		}
-//
-//		// System.out.println();
-//		// for (int i = 0; i < 8; i++) {
-//		// System.out.print(String.format("%-8.5f ", value[i]));
-//		// }
-//		// System.out.println();
-
         return value;
 
     }

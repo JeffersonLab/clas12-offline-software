@@ -7,6 +7,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.rec.tof.track.Track;
 
 /**
@@ -25,30 +26,34 @@ public class TrackReader {
 
          ArrayList<Track> Tracks = new ArrayList<Track>();
 
-        if (event.hasBank("CVTRec::Tracks") == false) {
+        if (event.hasBank("CVTRec::Trajectory") == false) {
             // System.err.println("there is no CVT bank ");
             return Tracks;
         }
         else {
 
-            DataBank bank = event.getBank("CVTRec::Tracks");
+            DataBank bank = event.getBank("CVTRec::Trajectory");
             int rows = bank.rows();
             for (int i = 0; i < rows; i++) {
-                int id      = bank.getShort("ID", i);
-                double x    = bank.getFloat("c_x", i);
-                double y    = bank.getFloat("c_y", i);
-                double z    = bank.getFloat("c_z", i);
-                double ux   = bank.getFloat("c_ux", i);
-                double uy   = bank.getFloat("c_uy", i);
-                double uz   = bank.getFloat("c_uz", i);
-                double path = bank.getFloat("pathlength", i);
-
-                Line3d line = new Line3d(new Vector3d(x,y,z), new Vector3d(x+5*ux,y+5*uy, z+5*uz));
-                Track track = new Track(id,line,path);
-                Tracks.add(track);
+                if(bank.getByte("detector", i)==DetectorType.CTOF.getDetectorId()) {
+                    int id       = bank.getShort("id", i);
+                    double x     = bank.getFloat("x", i);
+                    double y     = bank.getFloat("y", i);
+                    double z     = bank.getFloat("z", i);
+                    double theta = bank.getFloat("theta", i);
+                    double phi   = bank.getFloat("phi", i);                
+                    double ux    = Math.sin(theta)*Math.cos(phi);
+                    double uy    = Math.sin(theta)*Math.sin(phi);
+                    double uz    = Math.cos(theta);
+                    double path  = bank.getFloat("path", i);
+                    Line3d line = new Line3d(new Vector3d(x-10*ux,y-10*uy,z-10*uz), new Vector3d(x+10*ux,y+10*uy,z+10*uz));
+                    Track track = new Track(id,line,path);
+                    Tracks.add(track);
+                }
             }
         }
         return Tracks;
     }
+
 
 }

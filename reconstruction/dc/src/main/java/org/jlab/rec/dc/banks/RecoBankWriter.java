@@ -2,7 +2,6 @@ package org.jlab.rec.dc.banks;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.jnp.hipo.data.HipoEvent;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -708,17 +707,16 @@ public class RecoBankWriter {
      * @return segments bank
      */
     private DataBank fillTBTracksBank(DataEvent event, List<Track> candlist) {
-        if(event.hasBank("TimeBasedTrkg::TBTracks")) { // for second pass tracking
-                HipoDataEvent de = (HipoDataEvent) event;
+    //    if(event.hasBank("TimeBasedTrkg::TBTracks")) { // for second pass tracking
+    //            HipoDataEvent de = (HipoDataEvent) event;
                 //HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBTracks");
                 ////event.show();
                 //group.show();
                 //dde.removeGroup("TimeBasedTrkg::TBTracks");
-        }
+    //    }
         DataBank bank = event.createBank("TimeBasedTrkg::TBTracks", candlist.size());
-
-        for (int i = 0; i < candlist.size(); i++) {
+        for (int i = 0; i < candlist.size(); i++) { 
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
             bank.setShort("status", i, (short) (100+candlist.get(i).get_Status()*10+candlist.get(i).get_MissingSuperlayer()));
             bank.setByte("sector", i, (byte) candlist.get(i).get_Sector());
@@ -799,7 +797,7 @@ public class RecoBankWriter {
                     continue;  // save the last layer in a superlayer
 
                 bank.setShort("id",       i1, (short) track.get_Id());
-                bank.setShort("detector", i1, (short) track.trajectory.get(j).getDetId());
+                bank.setByte("detector",  i1, (byte) track.trajectory.get(j).getDetId());
                 bank.setByte("layer",     i1, (byte) track.trajectory.get(j).getLayerId());
                 bank.setFloat("x",        i1, (float) track.trajectory.get(j).getX());
                 bank.setFloat("y",        i1, (float) track.trajectory.get(j).getY());

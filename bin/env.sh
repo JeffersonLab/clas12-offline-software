@@ -1,10 +1,7 @@
 #!/bin/bash
 
 SCRIPT_DIR=`dirname $0`
-DISTRO_DIR=$SCRIPT_DIR/../ ; export DISTRO_DIR
 CLAS12DIR=$SCRIPT_DIR/../ ; export CLAS12DIR
-CLARA_SERVICES=$DISTRO_DIR/lib/services; export CLARA_SERVICES
-DATAMINING=$DISTRO_DIR ; export DATAMINING
 
 # Set default field maps (but do not override user's env):
 if [ -z "$COAT_MAGFIELD_TORUSMAP" ]; then
@@ -16,4 +13,8 @@ fi
 if [ -z "$COAT_MAGFIELD_SOLENOIDMAP" ]; then
     export COAT_MAGFIELD_SOLENOIDMAP=Symm_solenoid_r601_phi1_z1201_13June2018.dat
 fi
+
+echo +-------------------------------------------------------------------------
+echo "| COATJAVA LIBRARY DIRECTORY = " $CLAS12DIR/lib/clas/
+echo +-------------------------------------------------------------------------
 

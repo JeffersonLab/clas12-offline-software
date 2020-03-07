@@ -24,7 +24,7 @@ import org.jlab.clas.pdg.PhysicsConstants;
  */
 public class DetectorParticle implements Comparable {
   
-    public static final Double DEFAULTQUALITY=99.0;
+    public static final Double DEFAULTQUALITY=9999.0;
 
     private boolean isTriggerParticle = false;
     private Integer particlePID       = 0;
@@ -34,7 +34,7 @@ public class DetectorParticle implements Comparable {
     private int     particleScore     = 0; // scores are assigned detector hits
     private double  particleScoreChi2 = 0.0; // chi2 for particle score 
     private double  startTime         = -1.0; // per-particle start-time
-   
+  
     public double getStartTime() { return this.startTime; }
     public void setStartTime(double time) {this.startTime=time; }
     
@@ -43,9 +43,9 @@ public class DetectorParticle implements Comparable {
     // let multiple particles share the same hit for these detectors:
     private final DetectorType[] sharedDetectors = {DetectorType.FTOF,DetectorType.CTOF};
     
-    private final List<DetectorResponse> responseStore = new ArrayList<>();
+    protected final List<DetectorResponse> responseStore = new ArrayList<>();
 
-    private DetectorTrack detectorTrack = null;
+    protected DetectorTrack detectorTrack = null;
     
     public DetectorParticle(){
         detectorTrack = new DetectorTrack(-1);
@@ -117,7 +117,7 @@ public class DetectorParticle implements Comparable {
         return particle;
     }
    
-    public List<DetectorTrack.TrajectoryPoint> getTrackTrajectory() {
+    public DetectorTrack.Trajectory getTrackTrajectory() {
         return detectorTrack.getTrajectory();
     }
     
@@ -332,13 +332,7 @@ public class DetectorParticle implements Comparable {
     
     public double   getPathLength(){ return detectorTrack.getPath();}
     public int      getCharge(){ return detectorTrack.getCharge();}
-    
-    public double   getPathLength(DetectorType type){
-        DetectorResponse response = this.getHit(type);
-        if(response==null) return -1.0;
-        return this.getPathLength(response.getPosition());
-    }
-    
+ 
     public double   getPathLength(Vector3D vec){
         return this.getPathLength(vec.x(), vec.y(), vec.z());
     }
@@ -346,11 +340,11 @@ public class DetectorParticle implements Comparable {
     public double   getPathLength(double x, double y, double z){
         double crosspath = Math.sqrt(
                 (this.detectorTrack.getLastCross().origin().x()-x)*
-                        (this.detectorTrack.getLastCross().origin().x()-x)
-                        + (this.detectorTrack.getLastCross().origin().y()-y)*
-                                (this.detectorTrack.getLastCross().origin().y()-y)
-                        + (this.detectorTrack.getLastCross().origin().z()-z)*
-                                (this.detectorTrack.getLastCross().origin().z()-z)
+                (this.detectorTrack.getLastCross().origin().x()-x)
+              + (this.detectorTrack.getLastCross().origin().y()-y)*
+                (this.detectorTrack.getLastCross().origin().y()-y)
+              + (this.detectorTrack.getLastCross().origin().z()-z)*
+                (this.detectorTrack.getLastCross().origin().z()-z)
         );
         return this.detectorTrack.getPath() + crosspath;
     }
@@ -387,81 +381,21 @@ public class DetectorParticle implements Comparable {
         }
         return energy;
     }
-    
+   
+    public double getPathLength(DetectorType type, int layer){
+        DetectorResponse response = this.getHit(type,layer);
+        if(response==null) return -1.0;
+        return this.getPathLength(response.getPosition());
+    } 
     public double getBeta(DetectorType type, int layer, double startTime){
         DetectorResponse response = this.getHit(type,layer);
         if(response==null) return -1.0;
         double cpath = this.getPathLength(response.getPosition());
         double ctime = response.getTime() - startTime;
-        double beta  = cpath/ctime/PhysicsConstants.speedOfLight();//30.0;
+        double beta  = cpath/ctime/PhysicsConstants.speedOfLight();
         return beta;
     }
-    
-    public double getBeta(DetectorType type, double startTime){
-        DetectorResponse response = this.getHit(type);
-        if(response==null) return -1.0;
-        double cpath = this.getPathLength(response.getPosition());
-        double ctime = response.getTime() - startTime;
-        double beta  = cpath/ctime/PhysicsConstants.speedOfLight();//30.0;
-        if(type==DetectorType.CTOF){
-            cpath = response.getPath();
-            ctime = response.getTime()- startTime;
-            beta = cpath/ctime/PhysicsConstants.speedOfLight(); 
-        }
-        return beta;
-    }
-    
-    
-    public double getBeta(DetectorType type){
-        DetectorResponse response = this.getHit(type);
-        if(response==null) return -1.0;
-        double cpath = this.getPathLength(response.getPosition());
-        double ctime = response.getTime();
-        double beta  = cpath/ctime/PhysicsConstants.speedOfLight();//30.0;
-        return beta;
-    }
- 
 
-    
-    public double getMass(DetectorType type,double startTime){
-        double mass2 = this.getMass2(type,startTime);
-        if(mass2<0) return Math.sqrt(-mass2);
-        return Math.sqrt(mass2);
-    }
-    
-    public double getMass(DetectorType type,int layer, double startTime){
-        double mass2 = this.getMass2(type,layer,startTime);
-        if(mass2<0) return Math.sqrt(-mass2);
-        return Math.sqrt(mass2);
-    }
-    
-    public double getMass(DetectorType type){
-        double mass2 = this.getMass2(type);
-        if(mass2<0) return Math.sqrt(-mass2);
-        return Math.sqrt(mass2);
-    }
-    
-    public double getMass2(DetectorType type,int layer, double startTime){
-        double beta   = this.getBeta(type,layer,startTime);
-        double mass2  = this.detectorTrack.getVector().mag2()/(beta*beta) 
-                - this.detectorTrack.getVector().mag2();
-        return mass2;
-    }
-    
-    public double getMass2(DetectorType type,double startTime){
-        double beta   = this.getBeta(type,startTime);
-        double mass2  = this.detectorTrack.getVector().mag2()/(beta*beta) 
-                - this.detectorTrack.getVector().mag2();
-        return mass2;
-    }
-    
-    public double getMass2(DetectorType type){
-        double beta   = this.getBeta(type);
-        double mass2  = this.detectorTrack.getVector().mag2()/(beta*beta) 
-                - this.detectorTrack.getVector().mag2();
-        return mass2;
-    }
-    
     public void setStatus(double minNpheHtcc,double minNpheLtcc) {
         this.particleStatus = DetectorParticleStatus.create(this,minNpheHtcc,minNpheLtcc);
     }
@@ -474,7 +408,7 @@ public class DetectorParticle implements Comparable {
     public int getDetectorHit(List<DetectorResponse>  hitList, DetectorType type,
             int detectorLayer,
             double distanceThreshold){
-        
+         
         Line3D   trajectory = this.detectorTrack.getLastCross();
         Point3D  hitPoint = new Point3D();
         double   minimumDistance = 500.0;
@@ -539,9 +473,6 @@ public class DetectorParticle implements Comparable {
     public Line3D  getDistance(DetectorResponse  response){
         Line3D cross = this.detectorTrack.getLastCross();
         Line3D  dist = cross.distanceRay(response.getPosition().toPoint3D());
-        //Path3D trajectory = this.getTrajectory();
-        //Point3D hitPoint = new Point3D(
-        //response.getPosition().x(),response.getPosition().y(),response.getPosition().z());
         return dist;
     }
 
@@ -566,39 +497,31 @@ public class DetectorParticle implements Comparable {
 
     public double getVertexTime(DetectorType type, int layer){
         double vertex_time = this.getTime(type,layer) -
-            this.getPathLength(type, layer) /
-            (this.getTheoryBeta(this.getPid())*PhysicsConstants.speedOfLight());
+                this.getPathLength(type, layer) /
+                (this.getTheoryBeta(this.getPid())*PhysicsConstants.speedOfLight());
         return vertex_time;
     }
-
+    
     public double getVertexTime(DetectorType type, int layer, int pid){
-        
         double vertex_time = -9999;
-        
         if(type==DetectorType.CTOF) {
             DetectorResponse res = this.getHit(type);
             vertex_time = this.getTime(type) - res.getPath()/
-             (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
+                    (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
         }
-       
         else {
             vertex_time = this.getTime(type,layer) -
-                this.getPathLength(type, layer) /
-                (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
+                    this.getPathLength(type, layer) /
+                    (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
         }
-        
         return vertex_time;
     }
 
     public int getCherenkovSignal(List<DetectorResponse> responses, DetectorType type){
 
-        // choose cross based on detector type:
         Line3D cross;
         if (type==DetectorType.HTCC) {
             cross=this.detectorTrack.getFirstCross();
-            // 0 is detId for HTCC in TimeBasedTrkg::Trajectory bank!
-            //cross=this.detectorTrack.getTrajectoryPoint(0);
-            //if (cross==null) return -1;
         }
         else if (type==DetectorType.LTCC)
             cross=this.detectorTrack.getLastCross();
@@ -634,12 +557,6 @@ public class DetectorParticle implements Comparable {
         return response.getTime();
     }
 
-    public double  getPathLength(DetectorType type, int layer){
-        DetectorResponse response = this.getHit(type,layer);
-        if(response==null) return -1.0;
-        return this.getPathLength(response.getPosition());
-    }  
-   
     @Override
     public int compareTo(Object o) {
 
@@ -669,34 +586,9 @@ public class DetectorParticle implements Comparable {
     @Override
     public String toString(){
         StringBuilder str = new StringBuilder();
-        /*
-        str.append(String.format("status = %4d  charge = %3d [pid/beta/mass] %5d %8.4f %8.4f",                 
-                this.particleStatus,
-                this.particleCharge,
-                this.particlePID,
-                this.particleBeta,this.particleMass));
-        str.append(String.format("  P [ %8.4f %8.4f %8.4f ]  V [ %8.4f %8.4f %8.4f ] ",
-                this.particleMomenta.x(),this.particleMomenta.y(),
-                this.particleMomenta.z(),
-                this.particleVertex.x(),this.particleVertex.y(),
-                this.particleVertex.z()));
-        str.append("\n");
-        str.append(String.format("\t\t\t CROSS [%8.4f %8.4f %8.4f]  DIRECTION [%8.4f %8.4f %8.4f]\n",
-                this.particleCrossPosition.x(),this.particleCrossPosition.y(),
-                this.particleCrossPosition.z(),this.particleCrossDirection.x(),
-                this.particleCrossDirection.y(),this.particleCrossDirection.z()));
-        */
         str.append(String.format("[particle] id = %5d, c = %2d, p = %6.2f , sf = %6.3f, htcc = %5d, beta = %6.3f, mass2 = %8.3f\n",                
                 this.getPid(), this.getCharge(),this.vector().mag(),this.getEnergyFraction(DetectorType.ECAL),
                 this.getNphe(DetectorType.HTCC),this.getBeta(),this.getMass()));
-//        for(ScintillatorResponse res : this.scintillatorStore){
-//            str.append(res.toString());
-//            str.append("\n");
-//        }
-//        for(CalorimeterResponse res : this.calorimeterStore){
-//            str.append(res.toString());
-//            str.append("\n");
-//        }
         for(DetectorResponse res : this.responseStore){
             str.append(res.toString());
             str.append("\n");

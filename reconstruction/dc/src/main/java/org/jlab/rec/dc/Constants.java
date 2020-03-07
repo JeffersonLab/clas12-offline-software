@@ -85,6 +85,8 @@ public class Constants {
     public static final double SEGMENTPLANESANGLE = 1.5;  // the angle between the normals to the segment fit planes is 12 degrees (6+6 for +/- stereo relative angles) + 1.5 degrees tolerance.  This number (1.5) should be optimized 
 
     public static final double ARGONRADLEN = 14;  // radiation length in Argon is 14 cm
+    
+     public static final double AIRRADLEN = 30400; // radiation length in cm
 
     public static final  double SWIMSTEPSIZE = 5.00*1.e-4; //n00 microns
 
@@ -108,6 +110,8 @@ public class Constants {
     public static final  int[] SNR_RIGHTSHIFTS = {0,1,2,2,4,4};
     public static final  int[] SNR_LEFTSHIFTS  = {0,1,2,2,4,4};	
 
+    // Z Range for MS
+    public static double[] Z = new double[13];
 
     // Arrays for combinatorial cluster compositions
     private static final int[][] CombArray1Layer = new int[][]{
@@ -161,12 +165,20 @@ public class Constants {
     public static int[][] STBLOC;
 
     private static boolean USETSTART = true;
+    private static boolean USETIMETBETA = false;
+    
     public static double SEEDCUT = 5000;
     public static double MINPATH = 200;
     public static double BETAHIGH = 1.5;
     public static double BETALOW = 0.15;
     //max number of hits allowed in the event to do tracking
     public static double MAXHITS = 2000;
+    ;
+    public static double TRANSVTXCUT = 20;
+    
+    public static double AVEDRIFTVEL = 0.0027; //velocity in cm / ns. [CLAS-Note 96-008]
+    public static boolean CHECKBETA = false;
+    public static double DOCASUMMAXFAC = 1.6;
 
     public static boolean isUSETSTART() {
         return USETSTART;
@@ -175,6 +187,15 @@ public class Constants {
     public static void setUSETSTART(boolean USETSTART) {
         Constants.USETSTART = USETSTART;
     }
+    
+    public static boolean useUSETIMETBETA() {
+        return USETIMETBETA;
+    }
+
+    public static void setUSETIMETBETA(boolean USETIMETBETA) {
+        Constants.USETIMETBETA = USETIMETBETA;
+    }
+    
     
     private static double WIREDIST = 0.0;
 
@@ -295,5 +316,8 @@ public class Constants {
         return Constants.T2D;
     }
 
-   
+    // geometry constants not yet read from CCDB of from geometry services
+    public static double htccRadius=175;
+    public static double ltccPlane=653.09;
+        
 }

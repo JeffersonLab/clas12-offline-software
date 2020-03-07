@@ -15,49 +15,53 @@ public class TestEvent {
 	public static HipoDataEvent getDCSector1ElectronEvent(SchemaFactory schemaFactory) {
                 Event testEvent = new Event();
 		
-		// this event is based on a gemc event with
-		// one generated electron with p=2.5, th=25, ph=0
-		// (i.e. px=1.057, py=0, pz=2.266)
-		// torus = -1.0 , solenoid = 0.0
-		// updated to use non-linear t2d
-		// updated to include mini-stagger
-
-                Bank config = new Bank(schemaFactory.getSchema("RUN::config"), 1);
-		config.putInt("run", 0, (int) 11);
-		config.putInt("event", 0, (int) 1);
-		config.putInt("unixtime", 0, (int) 0);
-		config.putLong("trigger", 0, (long) 0);
-		config.putLong("timestamp", 0, (long) 0);
-		config.putByte("type", 0, (byte) 0);
-		config.putByte("mode", 0, (byte) 0);
-		config.putFloat("torus", 0, (float) -1.0);
-		config.putFloat("solenoid", 0, (float) 0.0);
 		
-                Bank event = new Bank(schemaFactory.getSchema("RECHB::Event"), 1);
-		event.putFloat("startTime", 0, (float) 124.25);
 
+		// this event is based on a gemc event with
+ 		// one generated electron with p=2.5, th=25, ph=0
+ 		// (i.e. px=1.057, py=0, pz=2.266)
+ 		// torus = -1.0 , solenoid = 0.0
 
-                int[] layer = {    1,   2,   3,   4,   5,   6,   7,   8,   9,  10
-                              ,   11,  12,  13,  14,  15,  16,  17,  18,  19,  20
-                              ,   21,  22,  23,  24,  25,  26,  26,  27,  28,  29
-                              ,   30,  31,  31,  32,  33,  34,  35,  36};
-                int[] component = {    63,  64,  63,  64,  63,  64,  64,  64,  64,  64
-                                  ,   64,  64,  59,  60,  59,  60,  59,  60,  59,  59
-                                  ,   59,  59,  59,  59,  52,  53,  52,  52,  52,  52
-                                  ,   52,  52,  51,  52,  51,  52,  51,  51};
-                int[]  TDC = {   73,  74,  79,  72,  77,  75,  21, 145,  27, 136
-                             ,   29, 136, 149, 124,  99, 192,  43, 260,  89, 142
-                             ,  159,  69, 243,   3,  88, 456, 547,  67, 256, 280
-                             ,   56, 537, 484,  96, 220, 312,  18, 423};
+		Bank config = new Bank(schemaFactory.getSchema("RUN::config"), 1);
+			config.putInt("run", 0, (int) 11);
+			config.putInt("event", 0, (int) 1);
+			config.putInt("unixtime", 0, (int) 0);
+			config.putLong("trigger", 0, (long) 0);
+			config.putLong("timestamp", 0, (long) 0);
+			config.putByte("type", 0, (byte) 0);
+			config.putByte("mode", 0, (byte) 0);
+			config.putFloat("torus", 0, (float) -1.0);
+			config.putFloat("solenoid", 0, (float) 0.0);
+ 
+		Bank event = new Bank(schemaFactory.getSchema("RECHB::Event"), 1);
+			event.putFloat("startTime", 0, (float) 124.25);
+
+			int[] layer = {    1,   2,   3,   4,   5,   6,   7,   8,   9,  10
+                        	      ,   11,  12,  13,  14,  15,  16,  16,  17,  18,  19
+                        	      ,   20,  21,  22,  23,  24,  25,  25,  26,  27,  28
+                        	      ,   29,  30,  30,  31,  32,  33,  33,  34,  35,  26};
+ 				
+
+			int[] component = {   66,  67,  66,  67,  66,  67,  67,  67,  67, 67
+                        	          ,   67,  67,  62,  63,  62,  63,  62,  62,  62, 61
+                                	  ,   62,  61,  62,  61,  62,  55,  54,  55,  54, 55 
+                        	          ,   54,  55,  54,  54,  54,  54,  53,  54,  53, 54};
+ 				  
+ 
+			int[]  TDC = {   86,  60,  95,  52, 103,  39,  80,   75,  74,   84
+        	                     ,   67,  93,  60, 228,  21, 285, 341,   16,  229, 253
+                	             ,   68, 175, 125, 104, 196, 470, 558,   48,  269, 237
+                        	     ,   85, 462, 518, 326,  51, 644, 450,  104,  210, 338};
+                
       
-                Bank DCtdc  = new Bank(schemaFactory.getSchema("DC::tdc"), layer.length);
-		for(int i = 0; i < layer.length; i++) {
-			DCtdc.putByte("sector",     i, (byte) 1);
-			DCtdc.putByte("order",      i, (byte) 2);
-			DCtdc.putByte("layer",      i, (byte) layer[i]);
-		        DCtdc.putShort("component", i, (short) component[i]);
-		        DCtdc.putInt("TDC",         i, TDC[i]);
-                }
+               	Bank DCtdc  = new Bank(schemaFactory.getSchema("DC::tdc"), layer.length);
+			for(int i = 0; i < layer.length; i++) {
+				DCtdc.putByte("sector",     i, (byte) 1);
+				DCtdc.putByte("order",      i, (byte) 2);
+				DCtdc.putByte("layer",      i, (byte) layer[i]);
+		        	DCtdc.putShort("component", i, (short) component[i]);
+		        	DCtdc.putInt("TDC",         i, TDC[i]);
+                	}
 
 
 		

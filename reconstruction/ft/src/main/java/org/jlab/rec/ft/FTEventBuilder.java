@@ -2,6 +2,7 @@ package org.jlab.rec.ft;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
@@ -140,7 +141,7 @@ public class FTEventBuilder {
                 track.setEnergy(responses.get(i).getEnergy());
                 track.setPosition(responses.get(i).getPosition());
                 track.setDirection();
-                track.setTime(responses.get(i).getTime() - responses.get(i).getPosition().mag() / 29.97);
+                track.setTime(responses.get(i).getTime() - responses.get(i).getPosition().mag() / PhysicsConstants.speedOfLight());
                 track.setCalorimeterIndex(responses.get(i).getId());
                 track.setHodoscopeIndex(-1);
                 track.setTrackerIndex(-1);

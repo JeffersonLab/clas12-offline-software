@@ -86,12 +86,14 @@ public class TrackDictionaryMerger {
                     int pcalv    = Integer.parseInt(lineValues[44]);
                     int pcalw    = Integer.parseInt(lineValues[45]);
                     int htcc     = Integer.parseInt(lineValues[46]);
+                    int sector   = Integer.parseInt(lineValues[47]);
                     wires.add((byte) paddle1b);
                     wires.add((byte) paddle2);
                     wires.add((byte) pcalu);
                     wires.add((byte) pcalv);
                     wires.add((byte) pcalw);
                     wires.add((byte) htcc);
+                    wires.add((byte) sector);
                     nFull++;
                     this.nfull++;
                     if(this.dictionary.containsKey(wires)) {
@@ -145,6 +147,7 @@ public class TrackDictionaryMerger {
                     int pcalV    = road.get(9);
                     int pcalW    = road.get(10);
                     int htcc     = road.get(11);
+                    int sector   = road.get(12);
                     pw.printf("%d\t%.2f\t%.2f\t%.2f\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
@@ -153,7 +156,7 @@ public class TrackDictionaryMerger {
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%.2f\t%d\t%d\t%d\t%d\t"
-                    + "%d\n",
+                    + "%d\t%d\n",
                     //+ "%.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", 
                     part.charge(), part.p(), Math.toDegrees(part.theta()), Math.toDegrees(part.phi()),
                     road.get(0), 0, 0, 0, 0, 0, 
@@ -162,7 +165,7 @@ public class TrackDictionaryMerger {
                     road.get(3), 0, 0, 0, 0, 0, 
                     road.get(4), 0, 0, 0, 0, 0, 
                     road.get(5), 0, 0, 0, 0, 0,  
-                    paddle1b, part.vz(), paddle2, pcalU, pcalV, pcalW, htcc);
+                    paddle1b, part.vz(), paddle2, pcalU, pcalV, pcalW, htcc, sector);
                 }
             }
             pw.close();

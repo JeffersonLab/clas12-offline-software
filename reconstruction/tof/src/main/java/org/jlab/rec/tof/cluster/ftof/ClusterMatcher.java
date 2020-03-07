@@ -3,6 +3,7 @@ package org.jlab.rec.tof.cluster.ftof;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
+import org.jlab.clas.pdg.PhysicsConstants;
 
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
@@ -294,14 +295,14 @@ public class ClusterMatcher {
             // defined
             double delta_t1a = this.calc_deltaT(clus1A.get_Panel(),
                     CntrInPan1aWithEmax);
-            double delta_t1b = this.calc_deltaT(clus1A.get_Panel(),
+            double delta_t1b = this.calc_deltaT(clus1B.get_Panel(),
                     CntrInPan1bWithEmax);
 
             double term1 = clus1B.get_t() / delta_t1b;
             double term3 = 1. / delta_t1a + 1. / delta_t1b;
             for (int i = 0; i < 3; i++) {
                 if (this._deltaPathLen[i] > 0) {
-                    term2[i] = (clus1A.get_t() - this._deltaPathLen[i] / Beta) / delta_t1a;
+                    term2[i] = (clus1A.get_t() - this._deltaPathLen[i] / Beta/ PhysicsConstants.speedOfLight()) / delta_t1a;
                     tCorr[i] = (term1 + term2[i]) / term3;
                 }
             }

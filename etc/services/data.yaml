@@ -42,6 +42,8 @@ services:
     name: EBTB
   - class: org.jlab.rec.rich.RICHEBEngine
     name: RICH
+  - class: org.jlab.service.rtpc.RTPCEngine
+    name: RTPC
 configuration:
   io-services:
     writer:
@@ -61,6 +63,7 @@ configuration:
       variation: rga_fall2018
       dcGeometryVariation: rga_fall2018
       dcT2DFunc: "Polynomial"
+      dcWireDistortion: "true"
     DCTB:
       variation: rga_fall2018
       dcGeometryVariation: rga_fall2018

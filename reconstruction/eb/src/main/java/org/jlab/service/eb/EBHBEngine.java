@@ -14,6 +14,7 @@ public class EBHBEngine extends EBEngine {
     
     public EBHBEngine(){
         super("EBHB");
+        setUsePOCA(true);
     }
    
     @Override
