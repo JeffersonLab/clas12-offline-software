@@ -1,10 +1,9 @@
 package org.jlab.rec.band.hit;
 
 
-
 public class BandHitCandidate {
 
-	public BandHitCandidate(int sector, int layer, int component, int order, int adc, double tdc, float ftdc, double triggerPhase) 
+	public BandHitCandidate(int sector, int layer, int component, int order, int adc, int ampl, double tdc, float ftdc, double triggerPhase, int idadc, int idtdc) 
 	{
 
 		this._sector 	= sector;
@@ -15,11 +14,15 @@ public class BandHitCandidate {
 		this._tCorr 	= tdc - triggerPhase;
 
 		this._adc 		= adc;
+		this._ampl		= ampl;
 		this._ftdc 		= ftdc;
 		this._tdc 		= tdc;
+		
+		this._indexAdc  = idadc;
+		this._indexTdc  = idtdc;
                 
 
-		//System.out.println("Created BandHitCandidate: adc "+ this._adc +" tdc "+this._tdc+" ftdc "+this._ftdc+ " AttCorr " + this._AttCorr + " tcorr "+ this._tCorr);
+		//System.out.println("Created BandHitCandidate: adc "+ this._adc +" tdc "+this._tdc+" ftdc "+this._ftdc);
 
                 
 
@@ -29,9 +32,11 @@ public class BandHitCandidate {
 	private int _layer;        		// layer in which the signal is registered
 	private int _component;    		// component in which the signal is registered
 	private int _side;    			// side of Hit. Side 0 for left PMT on a bar or side 1 for right PMT on a bar
-
+	private int _indexTdc, _indexAdc; //pointer to the hit in BANK::ADC and BANK::TDC
+	
 	private double _tCorr;			// Time (ns) corrected for offset 
 
+	private int _ampl;				// ADC amplitude
 	private int _adc;    			// Raw adc
 	private float _ftdc;     		// Raw tdc from FADC
 	private double _tdc;      		// Raw tdc
@@ -60,6 +65,10 @@ public class BandHitCandidate {
 	public int GetAdc() {
 		return _adc;
 	}
+	
+	public int GetAmpl() {
+		return _ampl;
+	}
 
 	public double GetTdc() {
 		return _tdc;
@@ -67,6 +76,14 @@ public class BandHitCandidate {
 
 	public float GetFtdc() {
 		return _ftdc;
+	}
+	
+	public int GetIndexTdc() {
+		return _indexTdc;
+	}
+	
+	public int GetIndexAdc() {
+		return _indexAdc;
 	}
 
 
