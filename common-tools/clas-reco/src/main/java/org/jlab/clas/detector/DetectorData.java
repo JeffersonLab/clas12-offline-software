@@ -383,11 +383,13 @@ public class DetectorData {
      
    public static DataBank getTrajectoriesBank(List<DetectorParticle> particles, DataEvent event, String bank_name) {
 
+       // these are going to be dropped from REC::Traj:
+       // FIXME:  should be HashSet instead of ArrayList
        Map <Integer,List<Integer>> ignore=new HashMap<>();
-       //ignore.put(DetectorType.TARGET.getDetectorId(),Arrays.asList(1,2));
-       //ignore.put(DetectorType.CVT.getDetectorId(),Arrays.asList(1,2,3,4,5,6,7,8,9,10,11,12));
-       //ignore.put(DetectorType.DC.getDetectorId(),Arrays.asList(6,12,18,24,30,36));
-       
+       ignore.put(DetectorType.TARGET.getDetectorId(),Arrays.asList(1,2));
+       ignore.put(DetectorType.CVT.getDetectorId(),Arrays.asList(2,4,6,8,9,10,11));
+       ignore.put(DetectorType.DC.getDetectorId(),Arrays.asList(12,24,30));
+
        DataBank bank=null;
        if (bank_name!=null) {
            
