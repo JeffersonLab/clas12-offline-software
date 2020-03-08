@@ -62,6 +62,8 @@ public class TrackHitReco {
     private PadVector smalltpadvec;
     private PadVector largetpadvec;
     private double tcathode;
+    private double tdiffshort;
+    private double tdifflong;
     private double tdiff;
     private double Time;
     private int cellID;
@@ -86,7 +88,8 @@ public class TrackHitReco {
     private double tl = 0;
     private double tp = 0;
     private double tr = 0;
-    private double tshiftfactor = 1;
+    private double tshiftfactorshort = 1;
+    private double tshiftfactorlong = 0;
     private int smalltpad;
     private int largetpad;
     private int minhitcount = 5;
@@ -105,7 +108,8 @@ public class TrackHitReco {
         tp = params.get_tp();
         tr = params.get_tr();
         tcathode = params.get_tcathode();
-        tshiftfactor = params.get_tshiftfactor();
+        tshiftfactorshort = params.get_tshiftfactorshort();
+        tshiftfactorlong = params.get_tshiftfactorlong();
         minhitcount = params.get_minhitspertrackreco();
         
         HashMap<Integer, List<RecoHitVector>> recotrackmap = new HashMap<>();
@@ -123,8 +127,11 @@ public class TrackHitReco {
             smallt = smallthit.time();
             larget = largethit.time();
             largetpad = largethit.pad();
-            tdiff = tcathode - smallt;
-            tdiff *= tshiftfactor;
+            tdiffshort = tcathode - smallt;
+            tdifflong = tcathode - larget;
+            tdiffshort *= tshiftfactorshort;
+            tdifflong *= tshiftfactorlong;
+            tdiff = tdiffshort + tdifflong;
             recotrackmap.put(TID, new ArrayList<>());
 
             for(HitVector hit : allhits) {
@@ -132,7 +139,9 @@ public class TrackHitReco {
                 cellID = hit.pad();              
                 Time = hit.time();
 
-                if(!cosmic) Time += tdiff;
+                if(!cosmic){
+                    Time += tdiff;
+                }
 		           
                 // find reconstructed position of ionization from Time info		                
                 drifttime = Time;
