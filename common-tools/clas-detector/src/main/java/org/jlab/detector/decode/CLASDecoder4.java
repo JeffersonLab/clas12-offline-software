@@ -100,49 +100,52 @@ public class CLASDecoder4 {
     public void initEvent(DataEvent event){
 
         if(event instanceof EvioDataEvent){
-            try {
+            EvioDataEvent evioEvent = (EvioDataEvent) event;
+            if(evioEvent.getHandler().getStructure()!=null){
+                try {
 
-                dataList = codaDecoder.getDataEntries( (EvioDataEvent) event);
-
-                //dataList = new ArrayList<DetectorDataDgtz>();
-                //-----------------------------------------------------------------------------
-                // This part reads the BITPACKED FADC data from tag=57638 Format (cmcms)
-                // Then unpacks into Detector Digigitized data, and appends to existing buffer
-                // Modified on 9/5/2018
-                //-----------------------------------------------------------------------------
-
-                List<FADCData>  fadcPacked = codaDecoder.getADCEntries((EvioDataEvent) event);
-
-                /*for(FADCData data : fadcPacked){
+                    dataList = codaDecoder.getDataEntries( (EvioDataEvent) event);
+                    
+                    //dataList = new ArrayList<DetectorDataDgtz>();
+                    //-----------------------------------------------------------------------------
+                    // This part reads the BITPACKED FADC data from tag=57638 Format (cmcms)
+                    // Then unpacks into Detector Digigitized data, and appends to existing buffer
+                    // Modified on 9/5/2018
+                    //-----------------------------------------------------------------------------
+                    
+                    List<FADCData>  fadcPacked = codaDecoder.getADCEntries((EvioDataEvent) event);
+                    
+                    /*for(FADCData data : fadcPacked){
                     data.show();
-                }*/
-
-                if(fadcPacked!=null){
-                    List<DetectorDataDgtz> fadcUnpacked = FADCData.convert(fadcPacked);
-                    dataList.addAll(fadcUnpacked);
-                }
-                //  END of Bitpacked section
-                //-----------------------------------------------------------------------------
-                //this.decoderDebugMode = 4;
-                if(this.decoderDebugMode>0){
-                    System.out.println("\n>>>>>>>>> RAW decoded data");
-                    for(DetectorDataDgtz data : dataList){
-                        System.out.println(data);
+                    }*/
+                    
+                    if(fadcPacked!=null){
+                        List<DetectorDataDgtz> fadcUnpacked = FADCData.convert(fadcPacked);
+                        dataList.addAll(fadcUnpacked);
                     }
-                }
-                int runNumberCoda = codaDecoder.getRunNumber();
-                this.setRunNumber(runNumberCoda);
-
-                detectorDecoder.translate(dataList);
-                detectorDecoder.fitPulses(dataList);
-                if(this.decoderDebugMode>0){
-                    System.out.println("\n>>>>>>>>> TRANSLATED data");
-                    for(DetectorDataDgtz data : dataList){
-                        System.out.println(data);
+                    //  END of Bitpacked section
+                    //-----------------------------------------------------------------------------
+                    //this.decoderDebugMode = 4;
+                    if(this.decoderDebugMode>0){
+                        System.out.println("\n>>>>>>>>> RAW decoded data");
+                        for(DetectorDataDgtz data : dataList){
+                            System.out.println(data);
+                        }
                     }
+                    int runNumberCoda = codaDecoder.getRunNumber();
+                    this.setRunNumber(runNumberCoda);
+                    
+                    detectorDecoder.translate(dataList);
+                    detectorDecoder.fitPulses(dataList);
+                    if(this.decoderDebugMode>0){
+                        System.out.println("\n>>>>>>>>> TRANSLATED data");
+                        for(DetectorDataDgtz data : dataList){
+                            System.out.println(data);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
 
