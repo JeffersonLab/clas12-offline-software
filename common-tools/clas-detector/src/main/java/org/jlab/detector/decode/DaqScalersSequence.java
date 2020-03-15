@@ -76,6 +76,16 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
         if (n>=0) return this.scalers.get(n);
         return null;
     }
+    
+    /**
+     * @param timestamp TI timestamp (i.e. RUN::config.timestamp)
+     * @return the previous DaqScalers for the given timestamp
+     */
+    public DaqScalers getPrevious(long timestamp) {
+        final int n=this.findIndex(timestamp);
+        if (n>=1) return this.scalers.get(n-1);
+        return null;
+    }
    
     /**
      * This reads tag=1 events for RUN::scaler banks, and initializes and returns
