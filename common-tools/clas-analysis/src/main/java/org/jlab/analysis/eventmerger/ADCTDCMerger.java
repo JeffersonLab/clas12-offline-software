@@ -216,6 +216,7 @@ public class ADCTDCMerger {
     
     
     public void updateEventWithMergedBanks(DataEvent event, DataEvent bg) {
+        if(event.hasBank("DC::doca")) event.removeBank("DC::doca");
         event.appendBanks(
         this.getTDCBank("DC", event, bg)
 //        ,this.getADCBank("BST", event, bg)
