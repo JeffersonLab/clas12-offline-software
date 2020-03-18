@@ -1,4 +1,4 @@
-package clas12vis;
+package org.jlab.geom.detector.alert.AHDC;
 
 import java.awt.Color;
 import java.util.List;

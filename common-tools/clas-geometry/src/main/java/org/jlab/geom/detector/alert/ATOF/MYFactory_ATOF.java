@@ -1,4 +1,4 @@
-package clas12vis;
+package org.jlab.geom.detector.alert.ATOF;
 
 import java.util.ArrayList;
 import java.util.List;

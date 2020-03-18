@@ -1,4 +1,4 @@
-package clas12vis;
+package org.jlab.geom.detector.alert.ATOF;
 
 import org.jlab.geom.DetectorId;
 import org.jlab.geom.abs.AbstractSuperlayer;
