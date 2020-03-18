@@ -318,6 +318,9 @@ public class TrackCandListFinder {
                              StateVec stateVec, double z,
                              DCGeant4Factory getDcDetector,
                              Swim dcSwim) {
+        if(cand == null || traj == null || stateVec == null)
+            return;
+        
         double pz = cand.get_P() / Math.sqrt(stateVec.tanThetaX() * stateVec.tanThetaX() +
                 stateVec.tanThetaY() * stateVec.tanThetaY() + 1);
         
