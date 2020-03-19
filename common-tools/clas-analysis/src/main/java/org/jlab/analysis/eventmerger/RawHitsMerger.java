@@ -22,7 +22,7 @@ public class RawHitsMerger extends ReconstructionEngine {
 
     public static void main(String[] args)  {
         
-        OptionParser parser = new OptionParser("background-merger");
+        OptionParser parser = new OptionParser("bgMerger");
         parser.addRequired("-o"    ,"merged file");
         parser.addRequired("-i"    ,"input data file");
         parser.addRequired("-b"    ,"background file");
