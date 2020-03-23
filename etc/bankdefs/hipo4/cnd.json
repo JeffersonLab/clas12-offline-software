@@ -48,7 +48,12 @@
             {"name":"y",                "type":"F", "info":"center of Y coor (cm) of the hits"},
             {"name":"z",                "type":"F", "info":"center of Z coor (cm) of the hits"},
             {"name":"time",             "type":"F", "info":"center of time (ns) of the hits"},
-            {"name":"status",           "type":"S", "info":"cluster status"}
+            {"name":"status",           "type":"S", "info":"cluster status"},
+            {"name":"veto",             "type":"B", "info":"charged particle veto"},
+            {"name":"layermultip",      "type":"B", "info":"layer multiplicity"},
+            {"name":"layer1",           "type":"B", "info":"firt layer hit"},
+            {"name":"layer2",           "type":"B", "info":"second layer hit"},
+            {"name":"layer3",           "type":"B", "info":"third layer hit"}
         ]
   }
 ]

@@ -185,6 +185,13 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	                        bank2.setFloat("z",i,   (float)(1.0* cndclusters.get(i).get_z()) );
 	                        bank2.setFloat("time",i,   (float)(1.0*  cndclusters.get(i).get_time()) );
 				bank2.setShort("status",i, (short)  cndclusters.get(i).get_status());
+                        //should add here the flag from kitty's veto as
+                        bank2.setByte("veto",i,  (byte) cndclusters.get(i).get_veto() );
+                        //should add here the layer multiplicity
+                        bank2.setByte("layermultip",i,  (byte) cndclusters.get(i).get_layermultip() );
+                        bank2.setByte("layer1",i,  (byte) cndclusters.get(i).get_layer1() );
+                        bank2.setByte("layer2",i,  (byte) cndclusters.get(i).get_layer2() );
+                        bank2.setByte("layer3",i,  (byte) cndclusters.get(i).get_layer3() );
 	                }
 	                event.appendBanks(bank2);
 	        }
