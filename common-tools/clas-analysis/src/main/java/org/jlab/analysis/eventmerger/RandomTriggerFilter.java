@@ -46,7 +46,7 @@ public class RandomTriggerFilter {
 
     public static void main(String[] args){
       
-        OptionParser parser = new OptionParser("triggerBitFiilter");
+        OptionParser parser = new OptionParser("triggerBitFilter");
         parser.addRequired("-o"    ,"output file");
         parser.addRequired("-b"    ,"trigger bit");
         parser.setRequiresInputList(false);
