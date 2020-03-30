@@ -35,7 +35,8 @@ public class StateVecsDoca {
     private final float[] lbf = new float[3];
     private Swim dcSwim;
     private RungeKuttaDoca rk;
-    
+    public StateVec stateVecAtVtx;
+    public Matrix covMatAtVtx;
     /**
      * State vector representing the track in the sector coordinate system at the measurement layer
      */
@@ -53,7 +54,7 @@ public class StateVecsDoca {
      * @param iVec state vector at the initial index
      * @param covMat state covariance matrix at the initial index
      */
-    public Matrix transport(int sector, int i, double Zf, StateVec iVec, CovMat covMat) { // s = signed step-size
+    public void transportFinal(int sector, int i, double Zf, StateVec iVec, CovMat covMat) { // s = signed step-size
 
         double stepSize = 1.0;
         StateVecsDoca.StateVec fVec = new StateVec(0);
@@ -134,7 +135,8 @@ public class StateVecsDoca {
             BatMeas = fVec.B;
         }
         
-        return fCov.covMat;
+        this.stateVecAtVtx= fVec;
+        this.covMatAtVtx =  fCov.covMat;
     }
     
     /**

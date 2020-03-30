@@ -9,6 +9,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
+import org.jlab.rec.dc.track.fit.StateVecsDoca;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 
@@ -319,6 +320,14 @@ public class Track extends Trajectory implements Comparable<Track>{
         this._CovMat = _CovMat;
     }
     
+    private double[][] _CovMatLab;
+    public double[][] get_CovMatLab() {
+        return _CovMatLab;
+    }
+    public void set_CovMatLab(double[][] _CovMatLab) {
+        this._CovMatLab = _CovMatLab;
+    }
+    
     /**
      * 
      * @param fitConvergenceStatus fit convergence status 0 if OK, 1 if the fit exits before converging
@@ -439,7 +448,142 @@ public class Track extends Trajectory implements Comparable<Track>{
 
             return ((returnSec ==0) ? return_val_a6 : returnSec);
     }
-
-   
+    private double[] q = new double[6]; // the variables in the lab
+    private double[] t = new double[6]; // the variables in the tilted coordinate system (TCS)
+    private double[][] C = new double[6][6]; // C' = F^T C F
+    private double[][] CF = new double[5][6];
+    private void reset() {
+        for (int i = 0; i < 6; i++) {
+            q[i] = 0;
+            t[i] = 0;
+            for (int j = 0; j < 6; j++) {
+                C[i][j] = 0;
+            }
+        }
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 6; j++) {
+                CF[i][j] = 0;
+            }
+        }
+    }
+    Matrix result = new Matrix();
+    Matrix jac = new Matrix();
+    Matrix jacT = new Matrix();
+   /**
+    * Jacobian calculations by Luca Marsicano and Mylene Caudron
+    * @param sector
+    * @param stateVecAtVtx
+    * @param covMatAtVtx
+    * @param z 
+    */
+    public void getCovMatToLab(int sector, StateVecsDoca.StateVec stateVecAtVtx, Matrix covMatAtVtx, double z) {
+        this.reset();
+        
+        //the parameters in the TCS
+        t[0] = stateVecAtVtx.x;
+        t[1] = stateVecAtVtx.y;
+        t[2] = z;
+        t[3] = stateVecAtVtx.tx;
+        t[4] = stateVecAtVtx.ty;
+        t[5] = stateVecAtVtx.Q;
+        double Q = Math.signum(stateVecAtVtx.Q);
+        //the parameters in the lab
+        q[0] = this.get_Vtx0().x();
+        q[1] = this.get_Vtx0().y();
+        q[2] = this.get_Vtx0().z();
+        q[3] = this.get_pAtOrig().x();
+        q[4] = this.get_pAtOrig().y();
+        q[5] = this.get_pAtOrig().z();
+        
+        double thetaS = Math.PI/3*(sector -1);
+        double thetaT = Math.toDegrees(-25.0);
+        
+        double cS = Math.cos(thetaS);
+        double sS = Math.sin(thetaS);
+        double cT = Math.cos(thetaT);
+        double sT = Math.sin(thetaT);
+        
+        double del_xH_del_xT = cS*cT;
+        double del_xH_del_yT = - sS;
+        double del_xH_del_zT = cS*sT;
+        
+        double del_yH_del_xT = sS*cT;
+        double del_yH_del_yT = cS;
+        double del_yH_del_zT = cS*sT;
+        
+        double del_zH_del_xT = -sT;
+        double del_zH_del_zT = cT;
+        
+        double del_pxH_del_txT = Q/t[5] *
+                (cS*cT*t[4]*t[4]+sS*t[3]*t[4]-cS*sT*t[3]+cS*cT)/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pxH_del_tyT = Q/t[5] *
+                (-sS*t[3]*t[3]-cS*cT*t[3]*t[4]-cS*sT*t[4]*t[4]-sS)/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pxH_del_QT = Q/(t[5]*t[5]) *
+                (-cS*cT*t[3]+sS*t[4]-cS*sT)/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pyH_del_txT = Q/t[5] *
+                (sS*cT*t[4]*t[4]-cS*t[3]*t[4]-sS*sT*t[3]+sS*cT)/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pyH_del_tyT = Q/t[5] *
+                (cS*t[3]*t[3]-sS*cT*t[3]*t[4]-sS*sT*t[4]*t[4]-cS)/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pyH_del_QT = Q/(t[5]*t[5]) *
+                (-sS*cT*t[3]-cS*t[4]-sS*sT)/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pzH_del_txT = Q/t[5] *
+                (-sT*t[4]*t[4]-cT*t[3]-sT)/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pzH_del_tyT = Q/t[5] *
+                (sT*t[3]*t[4]-cT*t[4])/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double del_pzH_del_QT = Q/(t[5]*t[5]) *
+                (sT*t[3]-cT*t[4])/
+                (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
+        
+        double[][] F = new double[][]{
+            {del_xH_del_xT, del_yH_del_xT, del_zH_del_xT, 0, 0, 0},
+            {del_xH_del_yT, del_yH_del_yT, 0, 0, 0, 0},
+            {0, 0, 0, del_pxH_del_txT, del_pyH_del_txT, del_pzH_del_txT},
+            {0, 0, 0, del_pxH_del_tyT, del_pyH_del_tyT, del_pzH_del_tyT},
+            {0, 0, 0, del_pxH_del_QT, del_pyH_del_QT, del_pzH_del_QT}};
+        
+        double[][] FT = new double[][]{
+            {del_xH_del_xT, del_xH_del_yT, 0, 0, 0},
+            {del_yH_del_xT, del_yH_del_yT, 0, 0, 0},
+            {del_zH_del_xT, 0, 0, 0, 0},
+            {0, 0, del_pxH_del_txT, del_pxH_del_tyT, del_pxH_del_QT},
+            {0, 0, del_pyH_del_txT, del_pyH_del_tyT, del_pyH_del_QT}, 
+            {0, 0, del_pzH_del_txT, del_pzH_del_tyT, del_pzH_del_QT}};
+        
+        for (int k = 0; k < 5; k++) {
+            for (int i = 0; i < 6; i++) {
+                 for (int j = 0; j < 5; j++) {
+                     CF[k][i] += F[j][i] * covMatAtVtx.get(k, j);
+                }
+            }
+        }
+        
+        for (int k = 0; k < 6; k++) {
+            for (int i = 0; i < 5; i++) {
+                 for (int j = 0; j < 6; j++) {
+                     C[k][j] += CF[i][k] * FT[j][i];
+                }
+            }
+        }
+        
+        
+        
+        this.set_CovMatLab(C);
+    }
 
 }

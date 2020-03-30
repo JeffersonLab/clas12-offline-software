@@ -243,11 +243,18 @@ public class DCTBEngine extends DCEngine {
                 //TrackArray[i].set_CovMat(kFit.finalCovMat.covMat); 
                 if(TrackArray[i].get_Vtx0().toVector3D().mag()>500)
                     continue;
-                // get CovMat at vertex
-                Point3D VTCS = crosses.get(0).getCoordsInSector(
+               
+                if(TrackArray[i].isGood()) {
+                    //Transform cov mat in lab frame
+                     // get CovMat at vertex
+                    Point3D VTCS = crosses.get(0).getCoordsInSector(
                         TrackArray[i].get_Vtx0().x(), TrackArray[i].get_Vtx0().y(), TrackArray[i].get_Vtx0().z());
-                TrackArray[i].set_CovMat(kFit.propagateToVtx(crosses.get(0).get_Sector(), VTCS.z()));
-                if(TrackArray[i].isGood()) trkcands.add(TrackArray[i]);
+                    //get stateVec and covMat at vertex (Vz lab).
+                    kFit.propagateToVtx(crosses.get(0).get_Sector(), VTCS.z());
+                    TrackArray[i].getCovMatToLab(TrackArray[i].get(0).get_Sector(), 
+                            kFit.stateVecAtVtx, kFit.covMatAtVtx, VTCS.z());
+                    trkcands.add(TrackArray[i]);
+                }
             }
         }
         
