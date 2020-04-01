@@ -509,7 +509,7 @@ public class Track extends Trajectory implements Comparable<Track>{
         
         double del_yH_del_xT = sS*cT;
         double del_yH_del_yT = cS;
-        double del_yH_del_zT = cS*sT;
+        double del_yH_del_zT = sS*sT;
         
         double del_zH_del_xT = -sT;
         double del_zH_del_zT = cT;
@@ -519,7 +519,7 @@ public class Track extends Trajectory implements Comparable<Track>{
                 (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
         
         double del_pxH_del_tyT = Q/t[5] *
-                (-sS*t[3]*t[3]-cS*cT*t[3]*t[4]-cS*sT*t[4]*t[4]-sS)/
+                (-sS*t[3]*t[3]-cS*cT*t[3]*t[4]-cS*sT*t[4]-sS)/
                 (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
         
         double del_pxH_del_QT = Q/(t[5]*t[5]) *
@@ -531,7 +531,7 @@ public class Track extends Trajectory implements Comparable<Track>{
                 (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
         
         double del_pyH_del_tyT = Q/t[5] *
-                (cS*t[3]*t[3]-sS*cT*t[3]*t[4]-sS*sT*t[4]*t[4]-cS)/
+                (cS*t[3]*t[3]-sS*cT*t[3]*t[4]-sS*sT*t[4]+cS)/
                 (Math.sqrt(t[3]*t[3]+t[4]*t[4]+t[5]*t[5])*(t[3]*t[3]+t[4]*t[4]+t[5]*t[5]));
         
         double del_pyH_del_QT = Q/(t[5]*t[5]) *
