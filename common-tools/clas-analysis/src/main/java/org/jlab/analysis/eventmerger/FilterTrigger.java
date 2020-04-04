@@ -4,8 +4,13 @@ import org.jlab.jnp.hipo4.data.*;
 import org.jlab.jnp.hipo4.io.HipoReader;
 import org.jlab.jnp.utils.data.*;
 
-
-
+/**
+ * Hipo Reduce Worker: filter event based on trigger bit
+ * 
+ * Inputs: selected trigger bit (0-63)
+ * 
+ * @author devita
+ */
 public class FilterTrigger implements Worker {
 
     Bank triggerBank = null;
@@ -14,14 +19,25 @@ public class FilterTrigger implements Worker {
     
     public FilterTrigger(int bit){
         this.bit=bit;
-        System.out.println("\nInitializing trigger reduction: bit set to " + this.bit);
+        System.out.println("\nInitializing trigger reduction: bit set to " + this.bit + "\n");
     }
 
+    /**
+     * Initialize bank schema
+     * 
+     * @param reader
+     */
     @Override
     public void init(HipoReader reader) {
         triggerBank = new Bank(reader.getSchemaFactory().getSchema("RUN::config"));
     }
 
+    /**
+     * Event filter: select events according to trigger bit
+     * 
+     * @param event
+     * @return
+     */
     @Override
     public boolean processEvent(Event event) {
         event.read(triggerBank);

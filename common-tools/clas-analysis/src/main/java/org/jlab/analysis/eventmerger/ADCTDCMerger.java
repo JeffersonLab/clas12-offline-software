@@ -12,18 +12,37 @@ import org.jlab.detector.base.DetectorType;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
-import org.jlab.io.hipo.HipoDataSync;
+
 /**
- *
+ * Class for merging of ADC and TDC banks from two events
+ * Operates on selectable list of detectors (default DC, FTOF)
+ * 
  * @author ziegler
+ * @author devita
  */
+
 public class ADCTDCMerger {
     
     private boolean debug = false;
+    private String[] detectors;
     
-    private HipoDataSync dataSync = new HipoDataSync();
+    public ADCTDCMerger() {
+        detectors = new String[]{"DC","FTOF"};
+        printDetectors();
+    }
+        
+    public ADCTDCMerger(String[] dets) {
+        detectors = dets;
+        printDetectors();
+    }
     
-    
+    /**
+     * Reads  ADC bank
+     * 
+     * @param detector
+     * @param bankDGTZ
+     * @return
+     */
     public List<ADC> ADCbank(String detector,DataBank bankDGTZ) {
         List<ADC> adcStore   = new ArrayList<ADC>();
         
@@ -59,6 +78,12 @@ public class ADCTDCMerger {
         return adcStore;
     }
      
+    /**
+     * Read TDC bank
+     * 
+     * @param bankDGTZ
+     * @return
+     */
     public List<TDC> TDCbank(DataBank bankDGTZ) {
         List<TDC> tdcStore   = new ArrayList<TDC>();
         for (int i = 0; i < bankDGTZ.rows(); i++) {
@@ -74,6 +99,15 @@ public class ADCTDCMerger {
         return tdcStore;
     }
     
+    /**
+     * Merge TDC banks for data (signal) and background events for selected detector
+     * In case of multiple hit on same detector element, only first hit in time is kept 
+     * 
+     * @param Det
+     * @param event
+     * @param bg
+     * @return
+     */
     public DataBank getTDCBank(String Det, DataEvent event, DataEvent bg){
         
         String TDCString = Det+"::tdc";
@@ -135,7 +169,15 @@ public class ADCTDCMerger {
         return bank;
     }
     
-    
+    /**
+     * Merge ADC banks for data (signal) and background events for selected detector
+     * In case of multiple hit on same detector element, only first hit in time is kept 
+     *
+     * @param detector
+     * @param event
+     * @param bg
+     * @return
+     */
     public DataBank getADCBank(String detector, DataEvent event, DataEvent bg){
         
         String ADCString = detector+"::adc";
@@ -214,24 +256,35 @@ public class ADCTDCMerger {
         return bank;
     }
     
+    private void printDetectors() {
+        System.out.print("\nMerging activated for detectors: ");
+        for(String det:detectors) System.out.print(det + " ");
+        System.out.println("\n");
+    }
     
+    /**
+     * Append merged banks to hipo event
+     * 
+     * @param event
+     * @param bg
+     */
     public void updateEventWithMergedBanks(DataEvent event, DataEvent bg) {
         if(event.hasBank("DC::doca")) event.removeBank("DC::doca");
-        event.appendBanks(
-        this.getTDCBank("DC", event, bg)
-//        ,this.getADCBank("BST", event, bg)
-//        ,this.getADCBank("BMT", event, bg)
-//        ,this.getADCBank("FMT", event, bg)
-//        ,this.getADCBank("FTCAL", event, bg)
-//        ,this.getADCBank("FTHODO", event, bg)
-//        ,this.getTDCBank("CND", event, bg),this.getADCBank("CND", event, bg)
-//        ,this.getTDCBank("HTCC", event, bg),this.getADCBank("HTCC", event, bg)
-//        ,this.getTDCBank("LTCC", event, bg),this.getADCBank("LTCC", event, bg)
-//        ,this.getTDCBank("RICH", event, bg),this.getADCBank("RICH", event, bg)
-//        ,this.getTDCBank("CTOF", event, bg),this.getADCBank("CTOF", event, bg)
-        ,this.getTDCBank("FTOF", event, bg),this.getADCBank("FTOF", event, bg)
-//        ,this.getTDCBank("ECAL", event, bg),this.getADCBank("ECAL", event, bg)
-        );
+        
+        for(String det:detectors) {
+            if("BMT".equals(det) || "BST".equals(det) || "FTCAL".equals(det) || "FTHODO".equals(det) || "FMT".equals(det) || "FTTRK".equals(det) || "HTCC".equals(det) || "LTCC".equals(det)) {
+                event.appendBanks(this.getADCBank(det, event, bg));
+            }
+            else if("DC".equals(det) || "RICH".equals(det)) {
+                event.appendBanks(this.getTDCBank(det, event, bg));
+            }
+            else if("BAND".equals(det) || "CND".equals(det) || "CTOF".equals(det) || "ECAL".equals(det) || "FTOF".equals(det)) {
+                event.appendBanks(this.getADCBank(det, event, bg),this.getTDCBank(det, event, bg));
+            }
+            else {
+                System.out.println("Unknown detector:" + det);
+            }
+        }
     }
     
     private class ADC implements Comparable<ADC> {

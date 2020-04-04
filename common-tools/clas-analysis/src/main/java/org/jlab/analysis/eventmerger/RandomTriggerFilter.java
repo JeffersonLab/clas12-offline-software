@@ -9,6 +9,17 @@ import org.jlab.utils.options.OptionParser;
 import org.jlab.utils.system.ClasUtilsFile;
 
 
+/**
+ * Random trigger filtering tool: filters hipo event according to trigger bit 
+ * and beam current to create random-trigger files for background merging
+ * 
+ * Usage: triggerBitFilter -b [trigger bit] -o [output file] 
+ * Options: 
+ *      -c : minimum beam current (default = -1)
+ *      -n : maximum number of events to process (default = -1)
+ * 
+ * @author devita
+ */
 
 public class RandomTriggerFilter {
 
@@ -48,7 +59,7 @@ public class RandomTriggerFilter {
       
         OptionParser parser = new OptionParser("triggerBitFilter");
         parser.addRequired("-o"    ,"output file");
-        parser.addRequired("-b"    ,"trigger bit");
+        parser.addRequired("-b"    ,"trigger bit (0-63)");
         parser.setRequiresInputList(false);
         parser.addOption("-c"    ,"-1", "minimum beam current");
         parser.addOption("-n"    ,"-1", "maximum number of events to process");
@@ -66,6 +77,12 @@ public class RandomTriggerFilter {
             if(inputList.isEmpty()==true){
                 parser.printUsage();
                 System.out.println("\n >>>> error : no input file is specified....\n");
+                System.exit(0);
+            }
+            
+            if(triggerBit<0 || triggerBit>63) {
+                parser.printUsage();
+                System.out.println("\n >>>> error : invalid trigger bit....\n");
                 System.exit(0);
             }
             
@@ -108,6 +125,8 @@ public class RandomTriggerFilter {
                 progress.showStatus();
             }
             writer.close();
+            
+            filter.getFcupFilter().showStats();
         }
     }
 }

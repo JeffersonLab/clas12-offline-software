@@ -11,6 +11,19 @@ import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.utils.benchmark.ProgressPrintout;
 import org.jlab.utils.options.OptionParser;
 
+/**
+ * Tool for merging of signal and background events
+ *      
+ * Usage : bgMerger -b [background file] -i [input data file] -o [merged file] 
+ * Options :
+ *      -d : list of detectors, for example "DC,FTOF,HTCC" (default = DC,FTOF)
+ *      -n : maximum number of events to process (default = -1)
+ * 
+ * @author ziegler
+ * @author devita
+ */
+
+
 public class RawHitsMerger extends ReconstructionEngine {
 
    
@@ -28,6 +41,7 @@ public class RawHitsMerger extends ReconstructionEngine {
         parser.addRequired("-b"    ,"background file");
         parser.setRequiresInputList(false);
         parser.addOption("-n"    ,"-1", "maximum number of events to process");
+        parser.addOption("-d"    ,"DC,FTOF", "list of detectors, for example \"DC,FTOF,HTCC\"");
         parser.parse(args);
         
         if(parser.hasOption("-i")==true&&parser.hasOption("-o")==true&&parser.hasOption("-b")==true){
@@ -36,12 +50,13 @@ public class RawHitsMerger extends ReconstructionEngine {
             String outputFile = parser.getOption("-o").stringValue();
             String bgFile     = parser.getOption("-b").stringValue();
             
-            int maxEvents  = parser.getOption("-n").intValue();
-
-
+            int    maxEvents = parser.getOption("-n").intValue();
+            String detectors = parser.getOption("-d").stringValue();
+            
+            
             RawHitsMerger en = new RawHitsMerger();
             en.init();
-            ADCTDCMerger aDCTDCMerge = new ADCTDCMerger();
+            ADCTDCMerger aDCTDCMerge = new ADCTDCMerger(detectors.split(","));
 
             int counter = 0;
 
