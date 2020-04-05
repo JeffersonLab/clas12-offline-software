@@ -6,11 +6,6 @@
 
 for xx in `awk '{print$1}' src/eb/scripts/list.txt`
 do
-    if [ "$xx" == "electrongammaC" ]
-    then
-        echo "This test is ignored (pid is not assigned for central photons): $xx"
-        continue
-    fi
     ./run-eb-tests.sh -100 $xx
     if [ $? != 0 ]
     then
