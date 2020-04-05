@@ -14,9 +14,11 @@ import org.jlab.io.base.DataEvent;
 public class ScintillatorResponse extends DetectorResponse {
    
     private float dedx=0;
+    private byte neutralVeto=0;
     
     public float getDedx() { return dedx; }
     public void setDedx(float dedx) { this.dedx=dedx; }
+    public byte getNeutralVeto() { return neutralVeto; }
     
     public ScintillatorResponse(){
         super();
@@ -48,7 +50,10 @@ public class ScintillatorResponse extends DetectorResponse {
                 response.setStatus(bank.getInt("status",row));
 
                 // CND clusters do not have path length in bar (but its hits do!):
-                if (type != DetectorType.CND) {
+                if (type == DetectorType.CND) {
+                    response.neutralVeto = bank.getByte("veto",row);
+                }
+                else {
                     float dx = bank.getFloat("pathLengthThruBar",row);
                     if (dx>0) response.setDedx(bank.getFloat("energy", row)/dx);
                 }

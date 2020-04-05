@@ -5,11 +5,52 @@ import static java.lang.Math.pow;
 import java.util.List;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorParticle;
+import org.jlab.clas.detector.ScintillatorResponse;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.clas.pdg.PhysicsConstants;
 
 public class EBUtil {
 
+     /**
+     * Central neutral veto logic from Adam Hobart.
+     *
+     * @param p
+     * @return whether to veto neutrality of p
+     *
+     * FIXME:  magic veto bits
+     * FIXME:  move float parameters to CCDB
+     */
+    public static boolean centralNeutralVeto(DetectorParticle p) {
+
+        ScintillatorResponse cnd=(ScintillatorResponse)p.getHit(DetectorType.CND);
+        ScintillatorResponse ctof=(ScintillatorResponse)p.getHit(DetectorType.CTOF);
+
+        if (cnd!=null || ctof!=null) {
+            if (cnd==null) {
+                if ( ctof.getEnergy() >= 18.0 ) {
+                    return true;
+                }
+            }
+            else if (ctof==null) {
+                if ( (cnd.getNeutralVeto() & 1) == 0 ) {
+                    return true;
+                }
+            }
+            else if ( ctof.getEnergy() >= 10.0 ) {
+                return true;
+            }
+            else if ( (cnd.getNeutralVeto() & (1<<1)) == 0 ) {
+                if ( ctof.getEnergy()+cnd.getEnergy() >= 10.0 ) {
+                    return true;
+                }
+                else if ( (cnd.getNeutralVeto() & (1<<2) ) == 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
      /**
      * Perform a basic true/false identification for electrons.
      */
