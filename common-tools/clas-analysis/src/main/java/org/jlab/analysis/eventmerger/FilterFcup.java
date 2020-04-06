@@ -69,26 +69,26 @@ public class FilterFcup implements Worker {
             DaqScalers dsPrevious = chargeSeq.getPrevious(timeStamp);
             
             // calculate beam current
-            double current=0;
+            double value=0;
             if(dsCurrent!=null && dsPrevious!=null) {
-                current = (dsCurrent.getBeamChargeGated()-dsPrevious.getBeamChargeGated())/
+                value = (dsCurrent.getBeamChargeGated()-dsPrevious.getBeamChargeGated())/
                         (dsCurrent.getTimestamp()-dsPrevious.getTimestamp())/tsResolution;                
 //                System.out.println(value);           
             }
             
             // fill statistics array
             int currentBins = currentBuffer.length-1;
-            if(current>currentMax){
+            if(value>currentMax){
                 currentBuffer[currentBins] = currentBuffer[currentBins] + 1;
-            } else if(current<0){
+            } else if(value<0){
                 currentBuffer[0] = currentBuffer[0];
             } else{
-                int bin =  (int) (currentBins*((double) current)/(currentMax));
+                int bin =  (int) (currentBins*value/(currentMax));
                 currentBuffer[bin] = currentBuffer[bin] + 1;
             }
             
             // set filter value
-            if(current>current) return true;
+            if(value>current) return true;
         }
         return false;
     }
