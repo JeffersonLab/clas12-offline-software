@@ -33,6 +33,7 @@ import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.TrackListFinder;
+import org.jlab.rec.cvt.track.TrackSeeder;
 import org.jlab.rec.cvt.track.TrackSeederCA;
 import org.jlab.rec.cvt.track.fit.KFitter;
 import org.jlab.rec.cvt.trajectory.Helix;
@@ -64,7 +65,7 @@ public class CVTReconstruction extends ReconstructionEngine {
 
     String FieldsConfig = "";
     int Run = -1;
-  
+   public boolean isSVTonly = false;
     public void setRunConditionsParameters(DataEvent event, String FieldsConfig, int iRun, boolean addMisAlignmts, String misAlgnFile) {
         if (event.hasBank("RUN::config") == false) {
             System.err.println("RUN CONDITIONS NOT READ!");
@@ -84,7 +85,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             isCosmics = true;
         }
 
-        boolean isSVTonly = false;
+        
 
         // Load the fields
         //-----------------
@@ -156,7 +157,8 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         HitReader hitRead = new HitReader();
         hitRead.fetch_SVTHits(event, adcConv, -1, -1, SVTGeom);
-        hitRead.fetch_BMTHits(event, adcConv, BMTGeom);
+        if(isSVTonly==false)
+          hitRead.fetch_BMTHits(event, adcConv, BMTGeom);
 
         List<Hit> hits = new ArrayList<Hit>();
         //I) get the hits
@@ -168,10 +170,11 @@ public class CVTReconstruction extends ReconstructionEngine {
         }
 
         List<Hit> bmt_hits = hitRead.get_BMTHits();
-        if(bmt_hits.size()>org.jlab.rec.cvt.bmt.Constants.MAXBMTHITS)
-             return true;
         if (bmt_hits != null && bmt_hits.size() > 0) {
             hits.addAll(bmt_hits);
+
+            if(bmt_hits.size()>org.jlab.rec.cvt.bmt.Constants.MAXBMTHITS)
+                 return true;
         }
 
         //II) process the hits		
@@ -189,7 +192,8 @@ public class CVTReconstruction extends ReconstructionEngine {
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
         clusters.addAll(clusFinder.findClusters(svt_hits, BMTGeom));     
-        clusters.addAll(clusFinder.findClusters(bmt_hits, BMTGeom)); 
+        if(bmt_hits != null && bmt_hits.size() > 0)
+            clusters.addAll(clusFinder.findClusters(bmt_hits, BMTGeom)); 
         
         if (clusters.size() == 0) {
             rbc.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, shift);
@@ -218,13 +222,25 @@ public class CVTReconstruction extends ReconstructionEngine {
             return true; 
          }
          {//System.out.println(" FITTING SEED......................");
-//            TrackSeeder trseed = new TrackSeeder();
-            TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
            
+            List<Seed> seeds = null;
+            
+            if(this.isSVTonly) {
+                TrackSeeder trseed = new TrackSeeder();
+                seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
+            
+            } else {
+                TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
+                seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
+                
+            }
+            if(seeds ==null) {
+                this.CleanupSpuriousCrosses(crosses, null) ;
+                rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, shift);
+                return true;
+            }   
             KFitter kf;
             List<Track> trkcands = new ArrayList<Track>();
-            
-            List<Seed> seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
             
             for (Seed seed : seeds) { 
             kf = new KFitter(seed, SVTGeom, swimmer );
@@ -412,7 +428,23 @@ public class CVTReconstruction extends ReconstructionEngine {
         if (rmReg==null) {
              System.out.println("["+this.getName()+"] run with all region (default) ");
         }
+        //svt stand-alone
+        String svtStAl = this.getEngineConfigString("svtOnly");
         
+        if (svtStAl!=null) {
+            System.out.println("["+this.getName()+"] run with SVT only "+svtStAl+"removed config chosen based on yaml");
+            this.isSVTonly= Boolean.valueOf(svtStAl);
+        }
+        else {
+            svtStAl = System.getenv("COAT_SVT_ONLY");
+            if (svtStAl!=null) {
+                System.out.println("["+this.getName()+"] run with SVT only "+svtStAl+" config chosen based on env");
+                this.isSVTonly= Boolean.valueOf(svtStAl);
+            }
+        }
+        if (svtStAl==null) {
+             System.out.println("["+this.getName()+"] run with both CVT systems (default) ");
+        }
         // Load other geometries
         variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
         ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, 11, variationName);
