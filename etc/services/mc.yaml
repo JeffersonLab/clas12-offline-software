@@ -51,6 +51,7 @@ configuration:
     MAGFIELDS:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
       magfieldTorusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
-
+    CVT:
+      svtOnly: "false"
 mime-types:
   - binary/data-hipo
