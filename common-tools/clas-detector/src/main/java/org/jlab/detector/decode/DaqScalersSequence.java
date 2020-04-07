@@ -21,6 +21,7 @@ import org.jlab.jnp.hipo4.data.SchemaFactory;
  */
 public class DaqScalersSequence implements Comparator<DaqScalers> {
    
+    private final static double TI_CLOCK_FREQ=250e6;    
     private final List<DaqScalers> scalers=new ArrayList<>();
    
     @Override
@@ -79,14 +80,52 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
     
     /**
      * @param timestamp TI timestamp (i.e. RUN::config.timestamp)
-     * @return the previous DaqScalers for the given timestamp
+     * @return the beam charge for the scaler interval for the 
+     * given timestamp
      */
-    public DaqScalers getPrevious(long timestamp) {
+    public double getBeamCharge(long timestamp) {
         final int n=this.findIndex(timestamp);
-        if (n>=1) return this.scalers.get(n-1);
-        return null;
+        if (n>=1) return (this.scalers.get(n).getBeamCharge()-this.scalers.get(n-1).getBeamCharge());
+        return 0;
     }
    
+    /**
+     * @param timestamp TI timestamp (i.e. RUN::config.timestamp)
+     * @return the gated beam charge for the scaler interval for the 
+     * given timestamp
+     */
+    public double getBeamChargeGated(long timestamp) {
+        final int n=this.findIndex(timestamp);
+        if (n>=1) return (this.scalers.get(n).getBeamChargeGated()-this.scalers.get(n-1).getBeamChargeGated());
+        return 0;
+    }
+ 
+    /**
+     * @param timestamp TI timestamp (i.e. RUN::config.timestamp)
+     * @return the gated beam current for the given timestamp
+     */
+    public double getBeamCurrent(long timestamp) {
+        final int n=this.findIndex(timestamp);
+        if (n>=1) {
+            double time = this.scalers.get(n).getTimestamp()-this.scalers.get(n-1).getTimestamp();
+            return this.getBeamCharge(timestamp)*TI_CLOCK_FREQ/time;
+        }
+        else return 0;
+    }
+
+    /**
+     * @param timestamp TI timestamp (i.e. RUN::config.timestamp)
+     * @return the gated beam current for the given timestamp
+     */
+    public double getBeamCurrentGated(long timestamp) {
+        final int n=this.findIndex(timestamp);
+        if (n>=1) {
+            double time = this.scalers.get(n).getTimestamp()-this.scalers.get(n-1).getTimestamp();
+            return this.getBeamChargeGated(timestamp)*TI_CLOCK_FREQ/time;
+        }
+        else return 0;
+    }
+    
     /**
      * This reads tag=1 events for RUN::scaler banks, and initializes and returns
      * a {@link DaqScalersSequence} that can be used to access the most recent scaler

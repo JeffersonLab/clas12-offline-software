@@ -22,7 +22,6 @@ public class FilterFcup implements Worker {
     DaqScalersSequence chargeSeq = null;
     private double charge  = -1;
     private double current = -1;
-    private double tsResolution = 4E-9;
     private int[]  currentBuffer = new int[21];
     private int    currentMax    = 80; 
     
@@ -64,17 +63,8 @@ public class FilterFcup implements Worker {
         if(runConfigBank.getRows()>0){
             long timeStamp  = runConfigBank.getLong("timestamp",0);
             
-            // get integrating scaler values for current and previous scaler intervals
-            DaqScalers dsCurrent  = chargeSeq.get(timeStamp);
-            DaqScalers dsPrevious = chargeSeq.getPrevious(timeStamp);
-            
-            // calculate beam current
-            double value=0;
-            if(dsCurrent!=null && dsPrevious!=null) {
-                value = (dsCurrent.getBeamChargeGated()-dsPrevious.getBeamChargeGated())/
-                        (dsCurrent.getTimestamp()-dsPrevious.getTimestamp())/tsResolution;                
-//                System.out.println(value);           
-            }
+            // get beam current
+            double value=chargeSeq.getBeamCurrentGated(timeStamp);
             
             // fill statistics array
             int currentBins = currentBuffer.length-1;
