@@ -1,7 +1,6 @@
 package org.jlab.analysis.eventmerger;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.jlab.detector.decode.DaqScalers;
 import org.jlab.detector.decode.DaqScalersSequence;
 import org.jlab.jnp.hipo4.data.*;
 import org.jlab.jnp.hipo4.io.HipoReader;
@@ -64,7 +63,7 @@ public class FilterFcup implements Worker {
             long timeStamp  = runConfigBank.getLong("timestamp",0);
             
             // get beam current
-            double value=chargeSeq.getBeamCurrentGated(timeStamp);
+            double value=chargeSeq.getInterval(timeStamp).getBeamCurrent();
             
             // fill statistics array
             int currentBins = currentBuffer.length-1;
