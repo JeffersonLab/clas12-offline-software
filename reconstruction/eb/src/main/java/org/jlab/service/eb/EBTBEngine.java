@@ -39,7 +39,7 @@ public class EBTBEngine extends EBEngine {
         this.setFTOFHitsType("FTOF::hits");
         this.setTrackType("TimeBasedTrkg::TBTracks");
         this.setTrajectoryType("TimeBasedTrkg::Trajectory");
-        this.setCovMatrixType("TimeBasedTrkg::TBCovMat");
+//        this.setCovMatrixType("TimeBasedTrkg::TBCovMat");
     }
     
 }
