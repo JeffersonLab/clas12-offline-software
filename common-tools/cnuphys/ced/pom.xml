@@ -69,25 +69,25 @@
  <dependency>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clasrec-main</artifactId>
-    <version>6.5.3-SNAPSHOT</version>
+    <version>6c.5.4-SNAPSHOT</version>
   </dependency>
 
 <dependency>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas-io</artifactId>
-    <version>6.5.3-SNAPSHOT</version>
+    <version>6c.5.4-SNAPSHOT</version>
   </dependency>
 
   <dependency>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas-geometry</artifactId>
-    <version>6.5.3-SNAPSHOT</version>
+    <version>6c.5.4-SNAPSHOT</version>
   </dependency>
 
   <dependency>
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas-detector</artifactId>
-    <version>6.5.3-SNAPSHOT</version>
+    <version>6c.5.4-SNAPSHOT</version>
   </dependency>
 
   <dependency>

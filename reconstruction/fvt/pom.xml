@@ -26,7 +26,7 @@
     <groupId>org.jlab.clas</groupId>
     <artifactId>clas12rec</artifactId>
     <relativePath>../../parent/pom.xml</relativePath>
-    <version>6.5.3-SNAPSHOT</version>
+    <version>6c.5.4-SNAPSHOT</version>
   </parent>
 
   <repositories>
@@ -40,7 +40,7 @@
      <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-jcsg</artifactId>
-      <version>6.5.3-SNAPSHOT</version>
+      <version>6c.5.4-SNAPSHOT</version>
       <type>jar</type>
     </dependency>  
 
@@ -53,7 +53,7 @@
 	<dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-reco</artifactId>
-      <version>6.5.3-SNAPSHOT</version>
+      <version>6c.5.4-SNAPSHOT</version>
     </dependency>
 
     <dependency>

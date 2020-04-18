@@ -19,6 +19,7 @@ import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorTrack;
 import org.jlab.clas.detector.TaggerResponse;
 import org.jlab.clas.detector.CherenkovResponse;
+import org.jlab.clas.physics.Vector3;
 
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
@@ -275,6 +276,21 @@ public class EventBuilder {
         addDetectorResponses(responseFTHODO);
         addFTIndices(indices);
         forwardTaggerIDMatching();
+    }
+
+    public void processBAND(List<DetectorResponse> bandHits) {
+        Vector3 vtx=new Vector3(0,0,0);
+        DetectorParticle trig=this.detectorEvent.getTriggerParticle();
+        if (trig!=null) vtx.copy(trig.vertex());
+        for (DetectorResponse r : bandHits) {
+            if (r.getDescriptor().getType()==DetectorType.BAND) {
+                // Non-zero BAND hits are ignored:
+                if (r.getStatus()!=0) continue;
+                DetectorParticle p=DetectorParticle.createNeutral(r, vtx);
+                r.setAssociation(this.detectorEvent.getParticles().size());
+                this.detectorEvent.addParticle(p);
+           }
+        }
     }
 
 
