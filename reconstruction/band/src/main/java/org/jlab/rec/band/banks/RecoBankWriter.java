@@ -2,8 +2,6 @@ package org.jlab.rec.band.banks;
 
 import java.util.ArrayList;
 
-import javax.net.ssl.ExtendedSSLSession;
-
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.band.hit.BandHit;
