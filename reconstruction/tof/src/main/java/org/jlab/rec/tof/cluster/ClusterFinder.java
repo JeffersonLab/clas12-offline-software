@@ -23,7 +23,7 @@ public class ClusterFinder {
     private int    maxSize     = 2 ; // default set to cluster size of 2
     private IndexedTable clusterPar = null;
     
-    private boolean debug = false;
+    private boolean debug = true;
     
     public ClusterFinder() {
         // TODO Auto-generated constructor stub
@@ -106,6 +106,7 @@ public class ClusterFinder {
                                 continue;
                             }
                             // loop over all clusters 
+                            addHitToCluster:
                             for(int j=0; j<clusters.size(); j++) {
                                 Cluster cluster = clusters.get(j);
                                 // if cluster siz is less than the max allowed
@@ -121,7 +122,8 @@ public class ClusterFinder {
                                                 if(debug) System.out.println("Adding hit " + hit.get_Sector() + " " + hit.get_Panel() + " " + hit.get_Paddle() 
                                                                  + " " + hit.get_Energy() + " " + hit.get_t() + " " + hit.get_y() 
                                                                  + " to cluster " + cluster.get_Id());
-                                                break;
+                                                // as soon as hit is associated to a cluster stop looping over clusters
+                                                break addHitToCluster;
                                             }
                                         }
                                     }
