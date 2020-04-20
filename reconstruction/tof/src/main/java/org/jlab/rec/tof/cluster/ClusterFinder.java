@@ -23,7 +23,7 @@ public class ClusterFinder {
     private int    maxSize     = 2 ; // default set to cluster size of 2
     private IndexedTable clusterPar = null;
     
-    private boolean debug = true;
+    private boolean debug = false;
     
     public ClusterFinder() {
         // TODO Auto-generated constructor stub
