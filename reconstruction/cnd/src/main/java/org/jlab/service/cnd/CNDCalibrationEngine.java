@@ -175,7 +175,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	                }
 	                for(int i =0; i< size; i++) {
 	                        bank2.setShort("id",i, (short) cndclusters.get(i).get_id() );
-	                        bank2.setShort("nhits",i, (short) cndclusters.get(i).get_nhits() );
+	                        bank2.setShort("size",i, (short) cndclusters.get(i).get_nhits() );
 				bank2.setByte("sector",i,  (byte)(1* cndclusters.get(i).get_sector()) );
 				bank2.setByte("layer",i,  (byte)(1*  cndclusters.get(i).get_layer()) );
 				bank2.setShort("component",i, (short) cndclusters.get(i).get_component() );
@@ -185,13 +185,11 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	                        bank2.setFloat("z",i,   (float)(1.0* cndclusters.get(i).get_z()) );
 	                        bank2.setFloat("time",i,   (float)(1.0*  cndclusters.get(i).get_time()) );
 				bank2.setShort("status",i, (short)  cndclusters.get(i).get_status());
-                        //should add here the flag from kitty's veto as
-                        bank2.setByte("veto",i,  (byte) cndclusters.get(i).get_veto() );
-                        //should add here the layer multiplicity
-                        bank2.setByte("layermultip",i,  (byte) cndclusters.get(i).get_layermultip() );
-                        bank2.setByte("layer1",i,  (byte) cndclusters.get(i).get_layer1() );
-                        bank2.setByte("layer2",i,  (byte) cndclusters.get(i).get_layer2() );
-                        bank2.setByte("layer3",i,  (byte) cndclusters.get(i).get_layer3() );
+                                //should add here the layer multiplicity
+                                bank2.setByte("layermultip",i,  (byte) cndclusters.get(i).get_layermultip() );
+                                bank2.setByte("layer1",i,  (byte) cndclusters.get(i).get_layer1() );
+                                bank2.setByte("layer2",i,  (byte) cndclusters.get(i).get_layer2() );
+                                bank2.setByte("layer3",i,  (byte) cndclusters.get(i).get_layer3() );
 	                }
 	                event.appendBanks(bank2);
 	        }

@@ -17,7 +17,6 @@ public class EBUtil {
      * @param p
      * @return whether to veto neutrality of p
      *
-     * FIXME:  magic veto bits
      * FIXME:  move float parameters to CCDB
      */
     public static boolean centralNeutralVeto(DetectorParticle p) {
@@ -32,20 +31,20 @@ public class EBUtil {
                 }
             }
             else if (ctof==null) {
-                if ( (cnd.getNeutralVeto() & 1) == 0 ) {
-                    return true;
+                if ((cnd.getEnergy()>10 && cnd.getClusterSize()<3) || (cnd.getEnergy()<=10 && cnd.getClusterSize()<4) ) {
+                    return false;
                 }
+                else return true;
             }
             else if ( ctof.getEnergy() >= 10.0 ) {
                 return true;
             }
-            else if ( (cnd.getNeutralVeto() & (1<<1)) == 0 ) {
-                if ( ctof.getEnergy()+cnd.getEnergy() >= 10.0 ) {
-                    return true;
+            else {
+                if ( (cnd.getEnergy()<30 && cnd.getLayerMultip()==1) || 
+                     (cnd.getClusterSize()<3 && cnd.getLayerMultip()==2 && (cnd.getEnergy()+ctof.getEnergy())<10) ) {
+                    return false;
                 }
-                else if ( (cnd.getNeutralVeto() & (1<<2) ) == 0) {
-                    return true;
-                }
+                else return true;
             }
         }
         return false;
