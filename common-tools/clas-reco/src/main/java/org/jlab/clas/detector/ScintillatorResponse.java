@@ -15,13 +15,13 @@ public class ScintillatorResponse extends DetectorResponse {
    
     private float dedx=0;
     private short clusterSize=0;
-    private byte layerMultip=0;
+    private byte layerMultiplicity=0;
     
     public float getDedx() { return dedx; }
     public void setDedx(float dedx) { this.dedx=dedx; }
     public short getClusterSize() { return clusterSize; }
     public void setClusterSize(short size) { this.clusterSize=size; }
-    public byte getLayerMultip() { return layerMultip; }
+    public byte getLayerMultiplicity() { return layerMultiplicity; }
     
     public ScintillatorResponse(){
         super();
@@ -55,7 +55,7 @@ public class ScintillatorResponse extends DetectorResponse {
                 // CND clusters do not have path length in bar (but its hits do!):
                 if (type == DetectorType.CND) {
                     response.clusterSize = bank.getShort("size",row);
-                    response.layerMultip = bank.getByte("layermultip",row);
+                    response.layerMultiplicity = bank.getByte("layermultip",row);
                 }
                 else {
                     float dx = bank.getFloat("pathLengthThruBar",row);

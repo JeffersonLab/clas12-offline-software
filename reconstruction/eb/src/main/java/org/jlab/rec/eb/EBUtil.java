@@ -25,26 +25,45 @@ public class EBUtil {
         ScintillatorResponse ctof=(ScintillatorResponse)p.getHit(DetectorType.CTOF);
 
         if (cnd!=null || ctof!=null) {
-            if (cnd==null) {
-                if ( ctof.getEnergy() >= 18.0 ) {
+
+            // CTOF-only veto:
+            if (cnd == null) {
+                if (ctof.getEnergy() >= 18.0) {
                     return true;
                 }
             }
-            else if (ctof==null) {
-                if ((cnd.getEnergy()>10 && cnd.getClusterSize()<3) || (cnd.getEnergy()<=10 && cnd.getClusterSize()<4) ) {
-                    return false;
+
+            // CND-only veto:
+            else if (ctof == null) {
+                if (cnd.getClusterSize() > 3) {
+                    return true;
                 }
-                else return true;
+                else if (cnd.getClusterSize() > 2) {
+                    if (cnd.getEnergy() > 10) {
+                        return true;
+                    }
+                }
             }
-            else if ( ctof.getEnergy() >= 10.0 ) {
+
+            // CTOF/CND-veto:
+            else if (ctof.getEnergy() >= 10.0) {
                 return true;
             }
-            else {
-                if ( (cnd.getEnergy()<30 && cnd.getLayerMultip()==1) || 
-                     (cnd.getClusterSize()<3 && cnd.getLayerMultip()==2 && (cnd.getEnergy()+ctof.getEnergy())<10) ) {
-                    return false;
+            else if (cnd.getLayerMultiplicity()==1) {
+                if (cnd.getEnergy() >= 30.0) {
+                    return true;
                 }
-                else return true;
+            }
+            else if (cnd.getLayerMultiplicity()==2) {
+                if (cnd.getClusterSize() > 2) {
+                    return true;
+                }
+                else if (cnd.getEnergy()+ctof.getEnergy() >= 10.0) {
+                    return true;
+                }
+            }
+            else {
+                return true;
             }
         }
         return false;
