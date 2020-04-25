@@ -446,7 +446,9 @@ public class CVTReconstruction extends ReconstructionEngine {
              System.out.println("["+this.getName()+"] run with both CVT systems (default) ");
         }
         // Load other geometries
+        
         variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        System.out.println(" CVT YAML VARIATION NAME + "+variationName);
         ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, 11, variationName);
         CTOFGeom = new CTOFGeant4Factory(providerCTOF);        
         CNDGeom =  GeometryFactory.getDetector(DetectorType.CND, 11, variationName);
