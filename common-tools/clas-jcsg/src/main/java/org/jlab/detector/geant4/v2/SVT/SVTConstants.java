@@ -9,6 +9,7 @@ import org.jlab.detector.calib.utils.DatabaseConstantProvider; // coatjava-3.0
 import org.jlab.geom.base.ConstantProvider;
 
 import eu.mihosoft.vrl.v3d.Transform;
+import org.jlab.geom.prim.Point3D;
 
 /**
  * <h1> Geometry for the SVT </h1>
@@ -374,7 +375,7 @@ public class SVTConstants
                                 double ry = cp.getDouble(ccdbPath+"alignment/ry", i );
                                 double rz = cp.getDouble(ccdbPath+"alignment/rz", i );
                                 double ra = cp.getDouble(ccdbPath+"alignment/ra", i );
-
+                                System.out.println("SVT alignment pars "+new Point3D(tx, ty, tz)+ " "+ new Point3D(rx, ry, rz)+" "+ Math.toRadians(ra));
                                 SECTORSHIFTDATA[i] = new double[]{ tx, ty, tz, rx, ry, rz, Math.toRadians(ra) };
 
                         }
