@@ -53,13 +53,13 @@ public class ScintillatorResponse extends DetectorResponse {
                 response.setStatus(bank.getInt("status",row));
 
                 // CND clusters do not have path length in bar (but its hits do!):
-                if (type == DetectorType.CND) {
-                    response.clusterSize = bank.getShort("size",row);
-                    response.layerMultiplicity = bank.getByte("layermultip",row);
-                }
-                else {
+                if (type != DetectorType.CND && type != DetectorType.BAND) {
                     float dx = bank.getFloat("pathLengthThruBar",row);
                     if (dx>0) response.setDedx(bank.getFloat("energy", row)/dx);
+                }
+		else if (type == DetectorType.CND) {
+                    response.clusterSize = bank.getShort("size",row);
+                    response.layerMultiplicity = bank.getByte("layermultip",row);
                 }
                 
                 responseList.add(response);

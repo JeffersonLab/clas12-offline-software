@@ -95,12 +95,14 @@ public class EBEngine extends ReconstructionEngine {
         List<DetectorResponse> responseFTOF = ScintillatorResponse.readHipoEvent(de, ftofHitsType, DetectorType.FTOF);
         List<DetectorResponse> responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::clusters", DetectorType.CTOF);
         List<DetectorResponse> responseCND  = ScintillatorResponse.readHipoEvent(de, "CND::clusters", DetectorType.CND);
+        List<DetectorResponse> responseBAND = ScintillatorResponse.readHipoEvent(de, "BAND::hits", DetectorType.BAND);
         List<DetectorResponse> responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
         List<DetectorResponse> responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
-        
+
         eb.addDetectorResponses(responseFTOF);
         eb.addDetectorResponses(responseCTOF);
         eb.addDetectorResponses(responseCND);
+        eb.addDetectorResponses(responseBAND);
         eb.addDetectorResponses(responseECAL);
         eb.addDetectorResponses(responseHTCC);
         eb.addDetectorResponses(responseLTCC);
@@ -130,6 +132,9 @@ public class EBEngine extends ReconstructionEngine {
         // Create central neutrals:
         ebm.addCentralNeutrals(eb.getEvent());
 
+        // Add BAND particles:
+        eb.processBAND(responseBAND);
+        
         // Do PID etc:
         EBAnalyzer analyzer = new EBAnalyzer(ccdb,rf);
         analyzer.processEvent(eb.getEvent());
