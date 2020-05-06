@@ -1,6 +1,5 @@
 package org.jlab.analysis.eventmerger;
 import java.util.List;
-import org.jlab.detector.decode.DaqScalersSequence;
 import org.jlab.jnp.hipo4.data.*;
 import org.jlab.jnp.hipo4.io.HipoReader;
 import org.jlab.jnp.hipo4.io.HipoWriterSorted;
@@ -8,8 +7,17 @@ import org.jlab.utils.benchmark.ProgressPrintout;
 import org.jlab.utils.options.OptionParser;
 import org.jlab.utils.system.ClasUtilsFile;
 
-
-
+/**
+ * Random trigger file splitting tool: splits a list of input files 
+ * into output files with a given number of tag-0 events
+ * 
+ * Usage : fileSplitter -o [output file prefix] 
+ * Options :
+ *      -n : maximum number of events to process (default = -1)
+ *      -s : number of events per output file (default = -1)
+ * 
+ * @author devita
+ */
 public class RandomTriggerSplit {
 
     
@@ -20,16 +28,16 @@ public class RandomTriggerSplit {
         HipoWriterSorted writer = null;
         writer = new HipoWriterSorted();
         writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("COATJAVA", "etc/bankdefs/hipo4"));
-        writer.setCompressionType(1);
+        writer.setCompressionType(2);
         writer.open(outputfile);
-        System.out.println("Open outoutput file " + outputfile);
+        System.out.println("Open output file " + outputfile);
         return writer;
     }
 
     public static void main(String[] args){
       
         OptionParser parser = new OptionParser("fileSplitter");
-        parser.addRequired("-o"    ,"output file prefix");
+        parser.addRequired("-o"  ,"output file prefix");
         parser.setRequiresInputList(false);
         parser.addOption("-n"    ,"-1", "maximum number of events to process");
         parser.addOption("-s"    ,"-1", "number of events per output file");
@@ -54,6 +62,7 @@ public class RandomTriggerSplit {
 
             //Writer
             HipoWriterSorted writer = null;
+            SortedWriterUtils utils = new SortedWriterUtils();
             
             RandomTriggerSplit splitter = new RandomTriggerSplit();
 
@@ -70,6 +79,8 @@ public class RandomTriggerSplit {
                         if(writer!=null) writer.close();
                         String filename = outputFile + "_" + String.format("%05d", fileCounter) + ".hipo";
                         writer = splitter.openOutputFile(filename);
+                        utils.writeTag(writer, utils.SCALERTAG, inputFile);
+                        utils.writeTag(writer, utils.CONFIGTAG, inputFile);
                         fileCounter++;
                     }
                     Event event = new Event();

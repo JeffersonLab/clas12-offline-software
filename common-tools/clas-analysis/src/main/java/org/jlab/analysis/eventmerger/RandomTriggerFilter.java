@@ -4,6 +4,7 @@ import org.jlab.detector.decode.DaqScalersSequence;
 import org.jlab.jnp.hipo4.data.*;
 import org.jlab.jnp.hipo4.io.HipoReader;
 import org.jlab.jnp.hipo4.io.HipoWriterSorted;
+import org.jlab.jnp.utils.json.JsonObject;
 import org.jlab.utils.benchmark.ProgressPrintout;
 import org.jlab.utils.options.OptionParser;
 import org.jlab.utils.system.ClasUtilsFile;
@@ -22,7 +23,7 @@ import org.jlab.utils.system.ClasUtilsFile;
  */
 
 public class RandomTriggerFilter {
-
+    
     FilterTrigger triggerFilter = null;
     FilterFcup fcupFilter = null;
     
@@ -54,6 +55,39 @@ public class RandomTriggerFilter {
         }
     }
     
+    /**
+     * Create Json object with filter settings
+     * @param triggerBit
+     * @param minCurrent
+     * @return
+     */
+    public JsonObject settingsToJson(int triggerBit, double minCurrent){
+        
+        JsonObject filterData = new JsonObject();
+        filterData.add("trigger-bit", triggerBit);
+        filterData.add("current-threshold", minCurrent); 
+        JsonObject json = new JsonObject();
+        json.add("filter", filterData);
+        return json;
+    }
+    
+    /**
+     * Create hipo bank with Json string saved as byte array
+     * @param writer
+     * @param json
+     * @return
+     */
+    public Bank createFilterBank(HipoWriterSorted writer, JsonObject json){
+        
+        if(writer.getSchemaFactory().hasSchema("RUN::filter")==false) return null;
+        String jsonString = json.toString();
+        //create bank
+        Bank bank = new Bank(writer.getSchemaFactory().getSchema("RUN::filter"), jsonString.length());
+        for (int ii=0; ii<jsonString.length(); ii++) {
+            bank.putByte("json",ii,(byte)jsonString.charAt(ii));
+        }
+        return bank;
+    }
 
     public static void main(String[] args){
       
@@ -93,7 +127,7 @@ public class RandomTriggerFilter {
             //Writer
             HipoWriterSorted writer = new HipoWriterSorted();
             writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("COATJAVA", "etc/bankdefs/hipo4"));
-            writer.setCompressionType(1);
+            writer.setCompressionType(2);
             writer.open(outputFile);
 
             RandomTriggerFilter filter = new RandomTriggerFilter(triggerBit, minCurrent);
@@ -101,11 +135,26 @@ public class RandomTriggerFilter {
 
             ProgressPrintout  progress = new ProgressPrintout();
             for(String inputFile : inputList){
+
+                // write tag-1 events 
+                SortedWriterUtils utils = new SortedWriterUtils();
+//                utils.writeTag(writer, utils.SCALERTAG, inputFile);
+                
                 // Reader
                 HipoReader reader = new HipoReader();
                 reader.setTags(0);
                 reader.open(inputFile);
                 filter.init(reader);
+
+                // create tag 1 event with trigger filter information
+                JsonObject json = filter.settingsToJson(triggerBit, minCurrent);
+                // write tag-1 event
+                Event  tagEvent = new Event();
+                tagEvent.write(filter.createFilterBank(writer, json));
+                tagEvent.setEventTag(utils.CONFIGTAG);
+                writer.addEvent(tagEvent,tagEvent.getEventTag());
+                System.out.println("\nAdding tag-1 bank with filter settings...");
+                System.out.println(json);
 
                 while (reader.hasNext()) {
                     

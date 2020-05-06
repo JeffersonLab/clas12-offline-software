@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package org.jlab.analysis.eventmerger;
-import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
@@ -21,14 +20,15 @@ import org.jlab.utils.options.OptionParser;
  * 
  * @author ziegler
  * @author devita
+ * 
+ * FIXME: event tags are not preserved
  */
 
 
-public class RawHitsMerger extends ReconstructionEngine {
+public class RawHitsMerger {
 
    
     public RawHitsMerger() {
-        super("RawHitMerger","ziegler","1.0");
     }
 
     
@@ -55,8 +55,7 @@ public class RawHitsMerger extends ReconstructionEngine {
             
             
             RawHitsMerger en = new RawHitsMerger();
-            en.init();
-            ADCTDCMerger aDCTDCMerge = new ADCTDCMerger(detectors.split(","));
+            ADCTDCMerger adctdcMerger = new ADCTDCMerger(detectors.split(","));
 
             int counter = 0;
 
@@ -70,18 +69,17 @@ public class RawHitsMerger extends ReconstructionEngine {
             HipoDataSync writer = new HipoDataSync();
             writer.setCompressionType(2);
             writer.open(outputFile);
-
-
+            
             ProgressPrintout  progress = new ProgressPrintout();
-            while (readerData.hasEvent() && readerBg.hasEvent()) {
+            while (readerData.hasEvent()&& readerBg.hasEvent()) {
 
                 counter++;
 
                 //System.out.println("************************************************************* ");
                 DataEvent eventData = readerData.getNextEvent();
                 DataEvent eventBg   = readerBg.getNextEvent();
-
-                aDCTDCMerge.updateEventWithMergedBanks(eventData, eventBg);
+                
+                adctdcMerger.updateEventWithMergedBanks(eventData, eventBg);
                 writer.writeEvent(eventData);
                 progress.updateStatus();
                 if(maxEvents>0){
@@ -92,16 +90,6 @@ public class RawHitsMerger extends ReconstructionEngine {
             writer.close();
         }
 
-    }
-
-    @Override
-    public boolean processDataEvent(DataEvent de) {
-        return true;
-    }
-
-    @Override
-    public boolean init() {
-        return true;
     }
 
 }
