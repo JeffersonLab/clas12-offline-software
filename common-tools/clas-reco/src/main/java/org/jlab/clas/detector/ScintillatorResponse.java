@@ -57,9 +57,12 @@ public class ScintillatorResponse extends DetectorResponse {
                     float dx = bank.getFloat("pathLengthThruBar",row);
                     if (dx>0) response.setDedx(bank.getFloat("energy", row)/dx);
                 }
-		else if (type == DetectorType.CND) {
+		if (type == DetectorType.CTOF) {
                     response.clusterSize = bank.getShort("size",row);
-                    response.layerMultiplicity = bank.getByte("layermultip",row);
+                }
+		if (type == DetectorType.CND) {
+                    response.clusterSize = bank.getShort("size",row);
+                    response.layerMultiplicity = bank.getByte("layermult",row);
                 }
                 
                 responseList.add(response);

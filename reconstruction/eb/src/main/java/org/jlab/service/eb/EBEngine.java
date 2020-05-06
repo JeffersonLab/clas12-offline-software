@@ -32,6 +32,7 @@ public class EBEngine extends ReconstructionEngine {
     String particleBankFT   = null;
     String calorimeterBank  = null;
     String scintillatorBank = null;
+    String scintextrasBank = null;
     String cherenkovBank    = null;
     String trackBank        = null;
     String crossBank        = null;
@@ -165,6 +166,8 @@ public class EBEngine extends ReconstructionEngine {
             if(scintillatorBank!=null && scintillators.size()>0) {
                 DataBank bankSci = DetectorData.getScintillatorResponseBank(scintillators, de, scintillatorBank);
                 de.appendBanks(bankSci);               
+                DataBank eaxtbankSci = DetectorData.getScintExtrasResponseBank(scintillators, de, scintextrasBank);
+                de.appendBanks(eaxtbankSci);               
             }
             List<DetectorResponse> cherenkovs = eb.getEvent().getCherenkovResponseList();
             if(cherenkovBank!=null && cherenkovs.size()>0) {
@@ -227,6 +230,10 @@ public class EBEngine extends ReconstructionEngine {
 
     public void setScintillatorBank(String scintillatorBank) {
         this.scintillatorBank = scintillatorBank;
+    }
+
+    public void setScintClusterBank(String scintclusterBank) {
+        this.scintextrasBank = scintclusterBank;
     }
 
     public void setCherenkovBank(String cherenkovBank) {
