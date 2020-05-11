@@ -18,8 +18,9 @@ public class CNDCluster extends ArrayList<CndHit> implements Comparable<CNDClust
 	private double _time;
 	private int _nhits;
 	private double _energysum;
-	private int _status; 
-        private double _pathLengthThruBar;
+	private int _status;
+    //add path length through bar for CND clusters
+    private double _pathLengthThruBar;
 	
 	private ArrayList<CndHit> _cndhits;
 
@@ -30,6 +31,7 @@ public class CNDCluster extends ArrayList<CndHit> implements Comparable<CNDClust
 		_cndhits = new ArrayList<CndHit>();
 	}
 	
+    //add path length through bar for CND clusters
 	public double get_pathLengthThruBar(){
         return _pathLengthThruBar;
     }
