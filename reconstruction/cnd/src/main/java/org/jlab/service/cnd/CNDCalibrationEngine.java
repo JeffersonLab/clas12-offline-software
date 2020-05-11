@@ -185,6 +185,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 	                        bank2.setFloat("z",i,   (float)(1.0* cndclusters.get(i).get_z()) );
 	                        bank2.setFloat("time",i,   (float)(1.0*  cndclusters.get(i).get_time()) );
 				bank2.setShort("status",i, (short)  cndclusters.get(i).get_status());
+				bank2.setFloat("pathLengthThruBar",i, (float)  cndclusters.get(i).get_pathLengthThruBar());
 	                }
 	                event.appendBanks(bank2);
 	        }
