@@ -52,7 +52,8 @@
             {"name":"layermult",        "type":"B", "info":"layer multiplicity"},
             {"name":"layer1",           "type":"B", "info":"firt layer hit"},
             {"name":"layer2",           "type":"B", "info":"second layer hit"},
-            {"name":"layer3",           "type":"B", "info":"third layer hit"}
+            {"name":"layer3",           "type":"B", "info":"third layer hit"},
+            {"name":"pathLengthThruBar","type":"F", "info":"pathlength of the track from the entrance point to the exit point through the cluster bars "}
         ]
   }
 ]
