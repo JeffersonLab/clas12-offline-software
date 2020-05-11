@@ -48,6 +48,7 @@ public class CNDClusterFinder {
 	        ArrayList<Integer> clusters_layer;
 	        ArrayList<Integer> clusters_component;
 	        ArrayList<Integer> clusters_status;
+		ArrayList<Double>  clusters_pathLengthThruBar = new ArrayList<Double>();
 	        double[] closest_distance = new double[1];
 	        int[] subA = new int[1];
 	        int[] subB = new int[1];
@@ -89,6 +90,7 @@ public class CNDClusterFinder {
 			clusters_layer.add(hits.get(i).Layer());
 			clusters_component.add(hits.get(i).Component());
 			clusters_status.add(0);
+			clusters_pathLengthThruBar.add(hits.get(i).tLength()/10.0);
 		}
 
 		//// clustering of the CND hits
@@ -122,6 +124,10 @@ public class CNDClusterFinder {
 				clusters_nhits.set(0, clusters_nhits.get(0) + 1);
 				clusters_energysum.set(0, clusters_energysum.get(0) + clusters_energysum.get(1));
 				if(clusters_status.get(1) !=0)clusters_status.set(0, clusters_status.get(1));
+				
+				clusters_pathLengthThruBar.set(0,clusters_pathLengthThruBar.get(0)+clusters_pathLengthThruBar.get(1));
+                                clusters_pathLengthThruBar.remove(1);
+				
 				clusters_nhits.remove(1);
 				clusters_energysum.remove(1);
 				clusters_x.remove(1);
@@ -166,7 +172,7 @@ public class CNDClusterFinder {
 						clusters_hitenergy.set(subA[0], clusters_hitenergy.get(subB[0]) );
 					}
 					if(clusters_status.get(subB[0]) !=0) clusters_status.set(subA[0], clusters_status.get(subB[0]));
-					clusters_nhits.set(subA[0], clusters_nhits.get(subA[0]) + 1);
+					clusters_nhits.set(subA[0], clusters_nhits.get(subA[0]) + clusters_nhits.get(subA[0]));
 					clusters_nhits.remove(subB[0]);
 					clusters_energysum.set(subA[0], clusters_energysum.get(subA[0])+clusters_energysum.get(subB[0]));
 					clusters_energysum.remove(subB[0]);
@@ -183,6 +189,10 @@ public class CNDClusterFinder {
 					clusters_layer.remove(subB[0]);
 					clusters_component.remove(subB[0]);
 					clusters_status.remove(subB[0]);
+					
+				        clusters_pathLengthThruBar.set(subA[0],clusters_pathLengthThruBar.get(subA[0])+clusters_pathLengthThruBar.get(subB[0]));
+                                        clusters_pathLengthThruBar.remove(subB[0]);
+					
 				}
 	         	}
 
@@ -206,6 +216,7 @@ public class CNDClusterFinder {
 			acluster.set_nhits(clusters_nhits.get(i));
 			acluster.set_energysum(clusters_energysum.get(i));
 			acluster.set_status(clusters_status.get(i));
+			acluster.set_pathLengthThruBar(clusters_pathLengthThruBar.get(i));
 			clusters.add(acluster);
 		}
 
