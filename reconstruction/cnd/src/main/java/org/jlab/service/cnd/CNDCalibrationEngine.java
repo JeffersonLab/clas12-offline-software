@@ -190,6 +190,7 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
                                 bank2.setByte("layer1",i,  (byte) cndclusters.get(i).get_layer1() );
                                 bank2.setByte("layer2",i,  (byte) cndclusters.get(i).get_layer2() );
                                 bank2.setByte("layer3",i,  (byte) cndclusters.get(i).get_layer3() );
+                        bank2.setFloat("pathLengthThruBar",i, (float)  cndclusters.get(i).get_pathLengthThruBar());
 	                }
 	                event.appendBanks(bank2);
 	        }

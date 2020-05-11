@@ -27,7 +27,8 @@ public class CNDCluster extends ArrayList<CndHit> implements Comparable<CNDClust
     private int _layer1;
     private int _layer2;
     private int _layer3;
-
+    private double _pathLengthThruBar;
+    
 	private ArrayList<CndHit> _cndhits;
 
 	public CNDCluster(int id, int sector, int layer){
@@ -38,6 +39,13 @@ public class CNDCluster extends ArrayList<CndHit> implements Comparable<CNDClust
 	}
 
     //get_veto and set_veto methods
+    
+    public double get_pathLengthThruBar(){
+        return _pathLengthThruBar;
+    }
+    public void set_pathLengthThruBar(double pathLengthThruBar){
+        _pathLengthThruBar = pathLengthThruBar;
+    }
     
     public int get_veto(){
         return _veto;
