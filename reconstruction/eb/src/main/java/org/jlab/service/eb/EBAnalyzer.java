@@ -316,7 +316,7 @@ public class EBAnalyzer {
                 if (p.getCharge()==0) {
                     for (Entry<DetectorType,List<Integer>> bd : neutralBetaDetectors.entrySet()) {
                         if (p.hasHit(bd.getKey())) {
-                            beta = EBUtil.getNeutralBeta(p,bd.getKey(),bd.getValue(),startTime);
+                            beta = p.getNeutralBeta(bd.getKey(),bd.getValue(),startTime);
                             break;
                         }
                     }
