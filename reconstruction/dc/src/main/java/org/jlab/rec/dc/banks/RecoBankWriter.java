@@ -160,7 +160,7 @@ public class RecoBankWriter {
      * @param event the EvioEvent
      * @return segments bank
      */
-    private DataBank fillHBSegmentsBank(DataEvent event, List<Segment> seglist) {
+    public DataBank fillHBSegmentsBank(DataEvent event, List<Segment> seglist) {
 
         DataBank bank = event.createBank("HitBasedTrkg::HBSegments", seglist.size());
 
@@ -256,7 +256,7 @@ public class RecoBankWriter {
      * @param event the EvioEvent
      * @return crosses bank
      */
-    private DataBank fillHBCrossesBank(DataEvent event, List<Cross> crosslist) {
+    public DataBank fillHBCrossesBank(DataEvent event, List<Cross> crosslist) {
 
         int banksize=0;
         for (Cross aCrosslist1 : crosslist) {
@@ -293,7 +293,7 @@ public class RecoBankWriter {
         return bank;
     }
 
-    private DataBank fillHBTracksBank(DataEvent event, List<Track> candlist) {
+    public DataBank fillHBTracksBank(DataEvent event, List<Track> candlist) {
 
         DataBank bank = event.createBank("HitBasedTrkg::HBTracks", candlist.size());
 

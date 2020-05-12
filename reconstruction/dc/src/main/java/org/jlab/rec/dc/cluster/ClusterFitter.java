@@ -35,13 +35,21 @@ public class ClusterFitter {
     public ClusterFitter() {
         // TODO Auto-generated constructor stub
     }
-
+    public void reset() {
+        for(int i =0; i<FitArray.size(); i++)
+            FitArray.get(i).clear();
+        FitArray.clear();
+        x.clear();
+        y.clear();
+        ex.clear();
+        ey.clear();
+    }
     public void SetFitArray(FittedCluster clus, String system) {
 
         Collections.sort(clus);
-        for(int i =0; i<FitArray.size(); i++)
-            FitArray.get(i).clear();
-        
+        //for(int i =0; i<FitArray.size(); i++)
+        //    FitArray.get(i).clear();
+        reset();
         //double[][] fitArray = new double[4][clus.size()];
         //double[] x = new double[clus.size()];
         //double[] y = new double[clus.size()];

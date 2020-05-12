@@ -33,6 +33,23 @@ public class DCEngine extends ReconstructionEngine {
     }
 
     public void setOptions() {
+        //AI settings
+        String aiAssist = this.getEngineConfigString("AI");
+        
+        if (aiAssist!=null) {
+            System.out.println("["+this.getName()+"] run with AI config chosen based on yaml = "+aiAssist);
+            DCHBClustering.aiAssist=Boolean.valueOf(aiAssist);
+        }
+        else {
+            aiAssist = System.getenv("COAT_DC_AIASSIST");
+            if (aiAssist!=null) {
+                System.out.println("["+this.getName()+"] run with AI config chosen based on env = "+aiAssist);
+                DCHBClustering.aiAssist=Boolean.valueOf(aiAssist);
+            }
+        }
+        if (aiAssist==null) {
+             System.out.println("["+this.getName()+"] run with AI config chosen based on default = "+Constants.isUSETSTART());
+        }
         // Load config
         String useSTTConf = this.getEngineConfigString("dcUseStartTime");
         

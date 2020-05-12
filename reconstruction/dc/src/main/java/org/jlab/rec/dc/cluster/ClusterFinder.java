@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 
 import org.jlab.io.evio.EvioDataBank;
@@ -276,8 +277,101 @@ public class ClusterFinder {
 
     }
 
+    public List<FittedCluster> RecomposeClusters(DataEvent event, 
+            DCGeant4Factory dcDetector, ClusterFitter cf) {
+        cf.reset();
+        Map<Integer, ArrayList<FittedHit>> grpHits = new HashMap<Integer, ArrayList<FittedHit>>();
+        List<FittedCluster> clusters = new ArrayList<FittedCluster>();
+        List<FittedHit>fhits = new ArrayList<FittedHit>();
+        //
+        if (!event.hasBank("HitBasedTrkg::HBHits")) {
+            return null;
+        }
+        
+        DataBank bank = event.getBank("HitBasedTrkg::HBHits");
+        int rows = bank.rows();
+
+        List<FittedHit> hits = new ArrayList<>();
+        for (int i = 0; i < rows; i++) {
+            int id          = bank.getShort("id", i);
+            int sector      = bank.getByte("sector", i);
+            int slayer      = bank.getByte("superlayer", i);
+            int layer       = bank.getByte("layer", i);
+            int wire        = bank.getShort("wire", i);
+            int tdc         = bank.getInt("TDC", i);
+            int LR          = bank.getByte("LR", i);
+            double trkDoca  = bank.getFloat("trkDoca", i);
+            int clusterID   = bank.getShort("clusterID", i);
+            
+        
+            //use only hits that have been fit to a track
+            if (clusterID == -1) {
+                continue;
+            }
+            
+            FittedHit hit = new FittedHit(sector, slayer, layer, wire, tdc, id);
+            hit.set_Id(id);
+            
+            hit.set_TrkgStatus(0);
+            hit.calc_CellSize(dcDetector);
+            hit.calc_GeomCorr(dcDetector, 0);
+            hits.add(hit);            
+        }
+        for (FittedHit hit : fhits) {
+            
+            if (hit.get_AssociatedClusterID() == -1) {
+                continue;
+            }
+            if (hit.get_AssociatedClusterID() != -1 ) {
+                int index = hit.get_AssociatedClusterID();
+                if(grpHits.get(index)==null) { // if the list not yet created make it
+                    grpHits.put(index, new ArrayList<FittedHit>()); 
+                    grpHits.get(index).add(hit); // append hit
+                } else {
+                    grpHits.get(index).add(hit); // append hit
+                }
+            }
+        }
+        
+        // using iterators 
+        Iterator<Map.Entry<Integer, ArrayList<FittedHit>>> itr = grpHits.entrySet().iterator(); 
+          
+        while(itr.hasNext()) {
+            Map.Entry<Integer, ArrayList<FittedHit>> entry = itr.next(); 
+             
+            if(entry.getValue().size()>3) {
+                Cluster cluster = new Cluster(entry.getValue().get(0).get_Sector(), 
+                        entry.getValue().get(0).get_Superlayer(), entry.getValue().get(0).get_AssociatedClusterID());
+                FittedCluster fcluster = new FittedCluster(cluster);
+                for (FittedHit hit : entry.getValue()) {
+                    hit.updateHitPosition(dcDetector); 
+                }
+                fcluster.addAll(entry.getValue());
+                clusters.add(fcluster);
+            }
+        }
     
-    private List<FittedCluster> RecomposeClusters(DataEvent event, List<FittedHit> fhits, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
+
+        for (FittedCluster clus : clusters) {
+            if (clus != null) {
+                cf.SetFitArray(clus, "TSC");
+                cf.Fit(clus, true);
+                cf.SetResidualDerivedParams(clus, true, false, dcDetector); //calcTimeResidual=false, resetLRAmbig=false 
+                cf.Fit(clus, false);
+                cf.SetSegmentLineParameters(clus.get(0).get_Z(), clus);
+                cf.reset();
+                // update the hits
+                for (FittedHit fhit : clus) {
+                    fhit.set_TrkgStatus(0);
+                    fhit.set_AssociatedClusterID(clus.get_Id());
+                }
+            }
+        }
+
+        return clusters;
+    }
+    
+    private List<FittedCluster> RecomposeTrackClusters(DataEvent event, List<FittedHit> fhits, IndexedTable tab, DCGeant4Factory DcDetector, TimeToDistanceEstimator tde) {
         Map<Integer, ArrayList<FittedHit>> grpHits = new HashMap<Integer, ArrayList<FittedHit>>();
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
         
@@ -338,7 +432,7 @@ public class ClusterFinder {
 
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
 
-        List<FittedCluster> rclusters = RecomposeClusters(event, fhits, tab, DcDetector, tde);
+        List<FittedCluster> rclusters = RecomposeTrackClusters(event, fhits, tab, DcDetector, tde);
         //System.out.println(" Clusters TimeBased Step 1");
         //     for(FittedCluster c : rclusters)
         //    	for(FittedHit h : c)
