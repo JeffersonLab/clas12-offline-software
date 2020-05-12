@@ -37,7 +37,7 @@ public class DCInit extends DCEngine {
     private int newRun = 0;
 
     public DCInit() {
-        super("DCHB");
+        super("DCI");
     }
 
     @Override
