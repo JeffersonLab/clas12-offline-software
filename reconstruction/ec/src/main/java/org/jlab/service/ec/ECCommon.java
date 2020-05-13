@@ -128,7 +128,7 @@ public class ECCommon {
                     + "  LOCAL LAYER = " + localLayer
                     + "  LAYER = " + layer);
             */
-            int off = (superlayer==0)?DetectorLayer.PCAL_Z:0;
+            int off = (superlayer==0)?DetectorLayer.PCAL_Z:DetectorLayer.EC_INNER_Z;
             
             Layer detLayer = detector.getSector(sector-1).getSuperlayer(superlayer).getLayer(localLayer+off);
             ScintillatorPaddle      paddle = (ScintillatorPaddle) detLayer.getComponent(component-1);
