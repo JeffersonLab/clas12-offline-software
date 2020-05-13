@@ -29,10 +29,21 @@ public class RecoBankWriter {
 //     * Writes output banks
 //     *
 //     */
-//    public RecoBankWriter() {
-//        // empty constructor
-//
-//    }
+    
+    private boolean _aiAssist;
+    private String[] _names;
+    public RecoBankWriter(boolean aiAssist) {
+        this._aiAssist = aiAssist;
+        _names = new String[2];
+        if(this._aiAssist==true) {
+            _names[0] = "AI";
+            _names[1] = "AI";
+        } else {
+            _names[0] = "HB";
+            _names[1] = "TB";
+        }
+            
+    }
 
     public void updateListsListWithClusterInfo(List<FittedHit> fhits,
             List<FittedCluster> clusters) {
@@ -55,8 +66,8 @@ public class RecoBankWriter {
     }
 
     private DataBank fillHBHitsBank(DataEvent event, List<FittedHit> hitlist) {
-
-        DataBank bank = event.createBank("HitBasedTrkg::HBHits", hitlist.size());
+        String name = "HitBasedTrkg::"+_names[0]+"Hits";
+        DataBank bank = event.createBank(name, hitlist.size());
 
         for (int i = 0; i < hitlist.size(); i++) {
             if (hitlist.get(i).get_Id() == -1) {
@@ -398,16 +409,9 @@ public class RecoBankWriter {
      *
      */
      private DataBank fillTBHitsBank(DataEvent event, List<FittedHit> hitlist) {
-        if(event.hasBank("TimeBasedTrkg::TBHits")) { // for second pass tracking
-                HipoDataEvent de = (HipoDataEvent) event;
-               // HipoEvent dde = de.getHipoEvent();
-//                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBHits");
-                ////event.show();
-                //group.show();
-                //dde.removeGroup("TimeBasedTrkg::TBHits");
-        }
-        DataBank bank = event.createBank("TimeBasedTrkg::TBHits", hitlist.size());
-
+        String name = "TimeBasedTrkg::"+_names[0]+"Hits";
+        DataBank bank = event.createBank(name, hitlist.size());
+        
         for (int i = 0; i < hitlist.size(); i++) {
             if (hitlist.get(i).get_Id() == -1) {
                 continue;
