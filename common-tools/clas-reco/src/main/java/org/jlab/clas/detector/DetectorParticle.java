@@ -565,7 +565,8 @@ public class DetectorParticle implements Comparable {
         for (int layer : layers) {
             DetectorResponse resp = getHit(type,layer);
             if (resp!=null) {
-                double path=resp.getPosition().sub(new Vector3D(vertex().x(),vertex().y(),vertex().z())).mag();
+                Vector3D hit=resp.getPosition().clone();
+                double path=hit.sub(new Vector3D(vertex().x(),vertex().y(),vertex().z())).mag();
                 beta = path / (resp.getTime()-startTime) /
                     PhysicsConstants.speedOfLight();
                 break;
