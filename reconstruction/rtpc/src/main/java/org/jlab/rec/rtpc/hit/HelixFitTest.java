@@ -49,12 +49,33 @@ public class HelixFitTest {
             double R = Math.abs(ho.get_Rho());
             double A = ho.get_A();
             double B = ho.get_B();
-            double chi2 = ho.get_Chi2();
+            double chi2 = 0;
+            double hitphi = 0;
+            double hitz = 0;
+            double hitr = 0;
+            double denphi = 0.0001;
+            double denz = 1.44;
+            for(hit = 0; hit < numhits; hit++){
+                hitr = recotrackmap.get(TID).get(hit).r();
+                hitphi = recotrackmap.get(TID).get(hit).phi();
+                hitz = recotrackmap.get(TID).get(hit).z();
+                chi2 += (hitphi - phichi2(phi,hitr,R))*(hitphi - phichi2(phi,hitr,R))/denphi;
+                chi2 += (hitz - zchi2(vz,theta,hitr,R))*(hitz - zchi2(vz,theta,hitr,R))/denz;
+            }
+            chi2 += (R-Math.sqrt(A*A + B*B))*(R-Math.sqrt(A*A + B*B));
+            chi2 /= numhits - 3;
+            System.out.println(chi2);
             if(R > 0) tl = Math.sqrt(R*R*psi*psi + dz*dz);
             double dEdx = 0;
             if(tl != 0 && !Double.isNaN(tl)) dEdx = ADCsum/tl;
             if(TID != 0) finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,theta,phi,numhits,tl,ADCsum,dEdx,ho.get_Rho(),A,B,chi2));
         }
         params.set_finaltrackinfomap(finaltrackinfomap);
+    }
+    private double phichi2(double phi0, double r, double R){
+        return Math.toRadians(phi0) + Math.asin(r/(2*R));
+    }
+    private double zchi2(double z0, double theta0, double r, double R){
+        return z0 + 2*R*Math.asin(r/(2*R))/Math.tan(Math.toRadians(theta0));
     }
 }
