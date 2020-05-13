@@ -95,7 +95,7 @@ public class DCTBEngine extends DCEngine {
         List<Track> trkcands = new ArrayList<Track>();
 
         //instantiate bank writer
-        RecoBankWriter rbc = new RecoBankWriter();
+        RecoBankWriter rbc = new RecoBankWriter(false);
 
         HitReader hitRead = new HitReader();
         hitRead.read_HBHits(event, 

@@ -42,13 +42,21 @@ public class DCHBClustering extends DCEngine {
         super.LoadTables();
         return true;
     }
-    public static boolean aiAssist;
+    boolean aiAssist = false;
     
     @Override
     public boolean processDataEvent(DataEvent event) {
         if (!event.hasBank("RUN::config")) {
             return true;
         }
+        DataBank bank = event.getBank("RUN::config");
+       
+        int newRun = bank.getInt("run", 0);
+        if (newRun == 0)
+           return true;
+
+        if (Run.get() == 0 || (Run.get() != 0 && Run.get() != newRun)) 
+            Run.set(newRun);
 
         /* 1 */
         // get Field
@@ -69,7 +77,7 @@ public class DCHBClustering extends DCEngine {
         /* 6 */
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
         /* 7 */
-        RecoBankWriter rbc = new RecoBankWriter();
+        RecoBankWriter rbc = new RecoBankWriter(this.aiAssist);
         /* 8 */
         HitReader hitRead = new HitReader();
         /* 9 */
@@ -77,9 +85,9 @@ public class DCHBClustering extends DCEngine {
                 noiseAnalysis,
                 parameters,
                 results,
-                super.getConstantsManager().getConstants(newRun, Constants.TIME2DIST),
-                super.getConstantsManager().getConstants(newRun, Constants.TDCTCUTS),
-                super.getConstantsManager().getConstants(newRun, Constants.WIRESTAT),
+                super.getConstantsManager().getConstants(Run.get(), Constants.TIME2DIST),
+                super.getConstantsManager().getConstants(Run.get(), Constants.TDCTCUTS),
+                super.getConstantsManager().getConstants(Run.get(), Constants.WIRESTAT),
                 dcDetector,
                 triggerPhase);
         /* 10 */

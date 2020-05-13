@@ -134,7 +134,7 @@ public class DCHBEngine extends DCEngine {
         /* 6 */
         ClusterCleanerUtilities ct = new ClusterCleanerUtilities();
         /* 7 */
-        RecoBankWriter rbc = new RecoBankWriter();
+        RecoBankWriter rbc = new RecoBankWriter(false);
         /* 8 */
         HitReader hitRead = new HitReader();
         /* 9 */

@@ -87,7 +87,7 @@ public class DCNNEngine extends DCEngine {
         // get Field
         Swim dcSwim = new Swim();
         
-        RecoBankWriter rbc = new RecoBankWriter();
+        RecoBankWriter rbc = new RecoBankWriter(true);
        
         HitReader hitRead = new HitReader();
        

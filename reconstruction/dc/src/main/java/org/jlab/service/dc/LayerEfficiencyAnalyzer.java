@@ -215,7 +215,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
     private ArrayList<HashMap<Coordinate, H1F>> LayerEffsTrkD = new ArrayList<HashMap<Coordinate, H1F>>();
     
     //instantiate bank writer
-    RecoBankWriter rbc = new RecoBankWriter();
+    RecoBankWriter rbc = new RecoBankWriter(false);
     HitReader hitRead = new HitReader();
 
     @Override
