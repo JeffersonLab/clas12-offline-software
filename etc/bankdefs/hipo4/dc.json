@@ -22,8 +22,7 @@
        {"name":"B",           "type":"F", "info":"B-field intensity at hit position in tilted-sector system"},
        {"name":"TProp",       "type":"F", "info":"t propagation along the wire"},
        {"name":"TFlight",     "type":"F", "info":"time of flight correction"},
-       {"name":"clusterID",   "type":"S", "info":"ID of associated cluster"},
-       {"name":"trkID",       "type":"B", "info":"ID of associated track"}
+       {"name":"clusterID",   "type":"S", "info":"ID of associated cluster"}
     ]
   },
  {
@@ -180,6 +179,16 @@
         {"name":"ndf",           "type":"S", "info":"fit ndf of the track"}
     ]
   }, 
+  {
+    "name": "HitBasedTrkg::HBHitTrkId",
+    "group": 20600,
+    "item" : 27,
+    "info": "pointers between track and hit banks",
+    "entries": [
+        {"name":"id",            "type":"S", "info":"id of the hit"},    
+        {"name":"tid",           "type":"S", "info":"id of the track"}
+    ]
+  },
   {
     "name": "TimeBasedTrkg::TBHits",
     "group": 20600,
