@@ -50,8 +50,10 @@ public class DCTBEngine extends DCEngine {
     @Override
     public boolean init() {
         super.LoadTables();
+        aiAssist = super.aiAssist;
         return true;
     }
+    private boolean aiAssist;
     @Override
     public boolean processDataEvent(DataEvent event) {
         //setRunConditionsParameters( event) ;
@@ -97,7 +99,7 @@ public class DCTBEngine extends DCEngine {
         //instantiate bank writer
         RecoBankWriter rbc = new RecoBankWriter(false);
 
-        HitReader hitRead = new HitReader();
+        HitReader hitRead = new HitReader(aiAssist); //vz; modified reader to read regular or ai hits
         hitRead.read_HBHits(event, 
             super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
             super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
@@ -163,11 +165,11 @@ public class DCTBEngine extends DCEngine {
         }
         
         DataBank trkbank = event.getBank("HitBasedTrkg::HBTracks");
-        DataBank trkcovbank = event.getBank("TimeBasedTrkg::TBCovMat");
+        //DataBank trkcovbank = event.getBank("TimeBasedTrkg::TBCovMat");
         int trkrows = trkbank.rows();
-        if(trkbank.rows()!=trkcovbank.rows()) {
-            return true; // HB tracks not saved correctly
-        }
+        //if(trkbank.rows()!=trkcovbank.rows()) {
+        //    return true; // HB tracks not saved correctly
+        //}
         Track[] TrackArray = new Track[trkrows];
         for (int i = 0; i < trkrows; i++) {
             Track HBtrk = new Track();
@@ -182,15 +184,15 @@ public class DCTBEngine extends DCEngine {
                     trkbank.getFloat("tx", i), trkbank.getFloat("ty", i));
             HBFinalSV.setZ(trkbank.getFloat("z", i));
             HBtrk.setFinalStateVec(HBFinalSV);
-            Matrix initCMatrix = new Matrix();
-            initCMatrix.set(new double[][]{
-            {trkcovbank.getFloat("C11", i), trkcovbank.getFloat("C12", i), trkcovbank.getFloat("C13", i), trkcovbank.getFloat("C14", i), trkcovbank.getFloat("C15", i)},
-            {trkcovbank.getFloat("C21", i), trkcovbank.getFloat("C22", i), trkcovbank.getFloat("C23", i), trkcovbank.getFloat("C24", i), trkcovbank.getFloat("C25", i)},
-            {trkcovbank.getFloat("C31", i), trkcovbank.getFloat("C32", i), trkcovbank.getFloat("C33", i), trkcovbank.getFloat("C34", i), trkcovbank.getFloat("C35", i)},
-            {trkcovbank.getFloat("C41", i), trkcovbank.getFloat("C42", i), trkcovbank.getFloat("C43", i), trkcovbank.getFloat("C44", i), trkcovbank.getFloat("C45", i)},
-            {trkcovbank.getFloat("C51", i), trkcovbank.getFloat("C52", i), trkcovbank.getFloat("C53", i), trkcovbank.getFloat("C54", i), trkcovbank.getFloat("C55", i)}
-            });
-            HBtrk.set_CovMat(initCMatrix);
+//            Matrix initCMatrix = new Matrix();
+//            initCMatrix.set(new double[][]{
+//            {trkcovbank.getFloat("C11", i), trkcovbank.getFloat("C12", i), trkcovbank.getFloat("C13", i), trkcovbank.getFloat("C14", i), trkcovbank.getFloat("C15", i)},
+//            {trkcovbank.getFloat("C21", i), trkcovbank.getFloat("C22", i), trkcovbank.getFloat("C23", i), trkcovbank.getFloat("C24", i), trkcovbank.getFloat("C25", i)},
+//            {trkcovbank.getFloat("C31", i), trkcovbank.getFloat("C32", i), trkcovbank.getFloat("C33", i), trkcovbank.getFloat("C34", i), trkcovbank.getFloat("C35", i)},
+//            {trkcovbank.getFloat("C41", i), trkcovbank.getFloat("C42", i), trkcovbank.getFloat("C43", i), trkcovbank.getFloat("C44", i), trkcovbank.getFloat("C45", i)},
+//            {trkcovbank.getFloat("C51", i), trkcovbank.getFloat("C52", i), trkcovbank.getFloat("C53", i), trkcovbank.getFloat("C54", i), trkcovbank.getFloat("C55", i)}
+//            });
+//            HBtrk.set_CovMat(initCMatrix);
             TrackArray[HBtrk.get_Id()-1] = HBtrk; 
             TrackArray[HBtrk.get_Id()-1].set_Status(0);
         }
