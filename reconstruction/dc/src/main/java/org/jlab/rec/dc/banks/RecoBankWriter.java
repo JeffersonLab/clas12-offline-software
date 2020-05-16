@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.rec.dc.cluster.FittedCluster;
 import org.jlab.rec.dc.cross.Cross;
 import org.jlab.rec.dc.hit.FittedHit;
@@ -74,95 +73,113 @@ public class RecoBankWriter {
                 continue;
         }
 
-            bank.setShort("id", i, (short) hitlist.get(i).get_Id());
-            bank.setShort("status", i, (short) 0);
-            bank.setByte("superlayer", i, (byte) hitlist.get(i).get_Superlayer());
-            bank.setByte("layer", i, (byte) hitlist.get(i).get_Layer());
-            bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
-            bank.setShort("wire", i, (short) hitlist.get(i).get_Wire());
-            bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
-            bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());
-            bank.setFloat("LocX", i, (float) hitlist.get(i).get_lX());
-            bank.setFloat("LocY", i, (float) hitlist.get(i).get_lY());
-            bank.setFloat("X", i, (float) hitlist.get(i).get_X());
-            bank.setFloat("Z", i, (float) hitlist.get(i).get_Z());
-            bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
-            bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
-            bank.setByte("trkID", i, (byte) hitlist.get(i).get_AssociatedHBTrackID());
+        bank.setShort("id", i, (short) hitlist.get(i).get_Id());
+        bank.setShort("status", i, (short) 0);
+        bank.setByte("superlayer", i, (byte) hitlist.get(i).get_Superlayer());
+        bank.setByte("layer", i, (byte) hitlist.get(i).get_Layer());
+        bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
+        bank.setShort("wire", i, (short) hitlist.get(i).get_Wire());
+        bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
+        bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());
+        bank.setFloat("LocX", i, (float) hitlist.get(i).get_lX());
+        bank.setFloat("LocY", i, (float) hitlist.get(i).get_lY());
+        bank.setFloat("X", i, (float) hitlist.get(i).get_X());
+        bank.setFloat("Z", i, (float) hitlist.get(i).get_Z());
+        bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
+        bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
+        //bank.setByte("trkID", i, (byte) hitlist.get(i).get_AssociatedHBTrackID());
 
-            bank.setInt("TDC",i,hitlist.get(i).get_TDC());
-            bank.setFloat("B", i, (float) hitlist.get(i).getB());
-            bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
-            bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
+        bank.setInt("TDC",i,hitlist.get(i).get_TDC());
+        bank.setFloat("B", i, (float) hitlist.get(i).getB());
+        bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
+        bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
 
-            if(hitlist.get(i).get_AssociatedHBTrackID()>-1 && !event.hasBank("MC::Particle")) {
-                bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
-                bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
-            }
+        if(hitlist.get(i).get_AssociatedHBTrackID()>-1 && !event.hasBank("MC::Particle")) {
+            bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
+            bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
         }
-
-        return bank;
-
     }
 
-    /**
-     *
-     * @param event the EvioEvent
-     * @return clusters bank
-     */
-    private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist) {
+    return bank;
 
-        DataBank bank = event.createBank("HitBasedTrkg::HBClusters", cluslist.size());
+    }   
+    
+    public DataBank fillHBHitsTrkIdBank(DataEvent event, List<FittedHit> hitlist) {
+        String name = "HitBasedTrkg::"+_names[0]+"HitTrkId";
+        DataBank bank = event.createBank(name, hitlist.size());
 
-        int[] hitIdxArray = new int[12];
-
-        for (int i = 0; i < cluslist.size(); i++) {
-            if (cluslist.get(i).get_Id() == -1) {
+        for (int i = 0; i < hitlist.size(); i++) {
+            //output only for HOTs
+            if (hitlist.get(i).get_AssociatedHBTrackID() == -1) {
                 continue;
             }
-            for (int j = 0; j < hitIdxArray.length; j++) {
-                hitIdxArray[j] = -1;
-            }
-            double chi2 = 0;
 
-            bank.setShort("id", i, (short) cluslist.get(i).get_Id());
-            int status = 0;
-            if(cluslist.get(i).size()<6)
-                status = 1;
-            bank.setShort("status", i, (short) status);
-            bank.setByte("superlayer", i, (byte) cluslist.get(i).get_Superlayer());
-            bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
+            bank.setShort("id", i, (short) hitlist.get(i).get_Id());
+            bank.setShort("tid", i, (short) hitlist.get(i).get_AssociatedHBTrackID());
 
-            bank.setFloat("avgWire", i, (float) cluslist.get(i).getAvgwire());
-            bank.setByte("size", i, (byte) cluslist.get(i).size());
-
-            double fitSlope = cluslist.get(i).get_clusterLineFitSlope();
-            double fitInterc = cluslist.get(i).get_clusterLineFitIntercept();
-
-            bank.setFloat("fitSlope", i, (float) fitSlope);
-            bank.setFloat("fitSlopeErr", i, (float) cluslist.get(i).get_clusterLineFitSlopeErr());
-            bank.setFloat("fitInterc", i, (float) fitInterc);
-            bank.setFloat("fitIntercErr", i, (float) cluslist.get(i).get_clusterLineFitInterceptErr());
-
-            for (int j = 0; j < cluslist.get(i).size(); j++) {
-                if (j < hitIdxArray.length) {
-                    hitIdxArray[j] = cluslist.get(i).get(j).get_Id();
-                }
-
-                double residual = cluslist.get(i).get(j).get_ClusFitDoca() / (cluslist.get(i).get(j).get_CellSize() / Math.sqrt(12.));
-                chi2 += residual * residual;
-            }
-            bank.setFloat("fitChisqProb", i, (float) ProbChi2perNDF.prob(chi2, cluslist.get(i).size() - 2));
-
-            for (int j = 0; j < hitIdxArray.length; j++) {
-                String hitStrg = "Hit";
-                hitStrg += (j + 1);
-                hitStrg += "_ID";
-                bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
-            }
         }
+   //bank.show();
+    return bank;
 
-        return bank;
+}
+/**
+ *
+ * @param event the EvioEvent
+ * @return clusters bank
+ */
+private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist) {
+    String name = "HitBasedTrkg::"+_names[0]+"Clusters";
+    DataBank bank = event.createBank(name, cluslist.size());
+
+    int[] hitIdxArray = new int[12];
+
+    for (int i = 0; i < cluslist.size(); i++) {
+        if (cluslist.get(i).get_Id() == -1) {
+            continue;
+        }
+        for (int j = 0; j < hitIdxArray.length; j++) {
+            hitIdxArray[j] = -1;
+        }
+        double chi2 = 0;
+
+        bank.setShort("id", i, (short) cluslist.get(i).get_Id());
+        int status = 0;
+        if(cluslist.get(i).size()<6)
+            status = 1;
+        bank.setShort("status", i, (short) status);
+        bank.setByte("superlayer", i, (byte) cluslist.get(i).get_Superlayer());
+        bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
+
+        bank.setFloat("avgWire", i, (float) cluslist.get(i).getAvgwire());
+        bank.setByte("size", i, (byte) cluslist.get(i).size());
+
+        double fitSlope = cluslist.get(i).get_clusterLineFitSlope();
+        double fitInterc = cluslist.get(i).get_clusterLineFitIntercept();
+
+        bank.setFloat("fitSlope", i, (float) fitSlope);
+        bank.setFloat("fitSlopeErr", i, (float) cluslist.get(i).get_clusterLineFitSlopeErr());
+        bank.setFloat("fitInterc", i, (float) fitInterc);
+        bank.setFloat("fitIntercErr", i, (float) cluslist.get(i).get_clusterLineFitInterceptErr());
+
+        for (int j = 0; j < cluslist.get(i).size(); j++) {
+            if (j < hitIdxArray.length) {
+                hitIdxArray[j] = cluslist.get(i).get(j).get_Id();
+            }
+
+            double residual = cluslist.get(i).get(j).get_ClusFitDoca() / (cluslist.get(i).get(j).get_CellSize() / Math.sqrt(12.));
+            chi2 += residual * residual;
+        }
+        bank.setFloat("fitChisqProb", i, (float) ProbChi2perNDF.prob(chi2, cluslist.get(i).size() - 2));
+
+        for (int j = 0; j < hitIdxArray.length; j++) {
+            String hitStrg = "Hit";
+            hitStrg += (j + 1);
+            hitStrg += "_ID";
+            bank.setShort(hitStrg, i, (short) hitIdxArray[j]);
+        }
+    }
+
+    return bank;
 
     }
 
@@ -172,9 +189,8 @@ public class RecoBankWriter {
      * @return segments bank
      */
     public DataBank fillHBSegmentsBank(DataEvent event, List<Segment> seglist) {
-
-        DataBank bank = event.createBank("HitBasedTrkg::HBSegments", seglist.size());
-
+        String name = "HitBasedTrkg::"+_names[0]+"Segments";
+        DataBank bank = event.createBank(name, seglist.size());
         int[] hitIdxArray = new int[12]; // only saving 12 hits for now
 
         for (int i = 0; i < seglist.size(); i++) {
@@ -274,8 +290,8 @@ public class RecoBankWriter {
             if (aCrosslist1.get_Id() != -1)
                 banksize++;
         }
-
-        DataBank bank = event.createBank("HitBasedTrkg::HBCrosses", banksize);
+        String name = "HitBasedTrkg::"+_names[0]+"Crosses";
+        DataBank bank = event.createBank(name, banksize); 
 
         int index=0;
         for (Cross aCrosslist : crosslist) {
@@ -305,8 +321,8 @@ public class RecoBankWriter {
     }
 
     public DataBank fillHBTracksBank(DataEvent event, List<Track> candlist) {
-
-        DataBank bank = event.createBank("HitBasedTrkg::HBTracks", candlist.size());
+        String name = "HitBasedTrkg::"+_names[0]+"Tracks";
+        DataBank bank = event.createBank(name, candlist.size()); 
 
         for (int i = 0; i < candlist.size(); i++) {
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
@@ -409,7 +425,7 @@ public class RecoBankWriter {
      *
      */
      private DataBank fillTBHitsBank(DataEvent event, List<FittedHit> hitlist) {
-        String name = "TimeBasedTrkg::"+_names[0]+"Hits";
+        String name = "TimeBasedTrkg::"+_names[1]+"Hits";
         DataBank bank = event.createBank(name, hitlist.size());
         
         for (int i = 0; i < hitlist.size(); i++) {
@@ -488,16 +504,9 @@ public class RecoBankWriter {
      * @return clusters bank
      */
     private DataBank fillTBClustersBank(DataEvent event, List<FittedCluster> cluslist) {
-        if(event.hasBank("TimeBasedTrkg::TBClusters")) { // for second pass tracking
-                HipoDataEvent de = (HipoDataEvent) event;
-                //HipoEvent dde = de.getHipoEvent();
-//                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBClusters");
-                ////event.show();
-                //group.show();
-                //dde.removeGroup("TimeBasedTrkg::TBClusters");
-        }
-        DataBank bank = event.createBank("TimeBasedTrkg::TBClusters", cluslist.size());
-
+        String name = "TimeBasedTrkg::"+_names[1]+"Clusters";
+        DataBank bank = event.createBank(name, cluslist.size());
+        
         int[] hitIdxArray = new int[12];
 
         for (int i = 0; i < cluslist.size(); i++) {
@@ -556,16 +565,9 @@ public class RecoBankWriter {
      * @return segments bank
      */
     private DataBank fillTBSegmentsBank(DataEvent event, List<Segment> seglist) {
-        if(event.hasBank("TimeBasedTrkg::TBSegments")) { // for second pass tracking
-                HipoDataEvent de = (HipoDataEvent) event;
-                //HipoEvent dde = de.getHipoEvent();
-//                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBSegments");
-                ////event.show();
-                //group.show();
-                //dde.removeGroup("TimeBasedTrkg::TBSegments");
-        }
-        DataBank bank = event.createBank("TimeBasedTrkg::TBSegments", seglist.size());
-
+        String name = "TimeBasedTrkg::"+_names[1]+"Segments";
+        DataBank bank = event.createBank(name, seglist.size());
+        
         int[] hitIdxArray = new int[12];
 
         for (int i = 0; i < seglist.size(); i++) {
@@ -663,21 +665,14 @@ public class RecoBankWriter {
      * @return crosses bank
      */
     private DataBank fillTBCrossesBank(DataEvent event, List<Cross> crosslist) {
-
-        if(event.hasBank("TimeBasedTrkg::TBCrosses")) { // for second pass tracking
-                HipoDataEvent de = (HipoDataEvent) event;
-                //HipoEvent dde = de.getHipoEvent();
-//                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBCrosses");
-                ////event.show();
-                //group.show();
-                //dde.removeGroup("TimeBasedTrkg::TBCrosses");
-        }
         int banksize=0;
         for (Cross aCrosslist1 : crosslist) {
             if (aCrosslist1.get_Id() != -1)
                 banksize++;
         }
-        DataBank bank = event.createBank("TimeBasedTrkg::TBCrosses", banksize);
+        String name = "TimeBasedTrkg::"+_names[1]+"Crosses";
+        DataBank bank = event.createBank(name, banksize);
+        
         int index=0;
         for (Cross aCrosslist : crosslist) {
             if (aCrosslist.get_Id() != -1) {
@@ -711,15 +706,9 @@ public class RecoBankWriter {
      * @return segments bank
      */
     private DataBank fillTBTracksBank(DataEvent event, List<Track> candlist) {
-    //    if(event.hasBank("TimeBasedTrkg::TBTracks")) { // for second pass tracking
-    //            HipoDataEvent de = (HipoDataEvent) event;
-                //HipoEvent dde = de.getHipoEvent();
-//                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBTracks");
-                ////event.show();
-                //group.show();
-                //dde.removeGroup("TimeBasedTrkg::TBTracks");
-    //    }
-        DataBank bank = event.createBank("TimeBasedTrkg::TBTracks", candlist.size());
+    
+        String name = "TimeBasedTrkg::"+_names[1]+"Tracks";
+        DataBank bank = event.createBank(name, candlist.size());
         for (int i = 0; i < candlist.size(); i++) { 
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
             bank.setShort("status", i, (short) (100+candlist.get(i).get_Status()*10+candlist.get(i).get_MissingSuperlayer()));
@@ -845,8 +834,8 @@ public class RecoBankWriter {
                     rbc.fillHBClustersBank(event, clusters),
                     rbc.fillHBSegmentsBank(event, segments),
                     rbc.fillHBCrossesBank(event, crosses),
-                    rbc.fillHBTracksBank(event, trkcands),
-                    rbc.fillTrackCovMatBank(event, trkcands)
+                    rbc.fillHBTracksBank(event, trkcands)
+                    //rbc.fillTrackCovMatBank(event, trkcands)
             );
 
         }
@@ -889,7 +878,8 @@ public class RecoBankWriter {
                     rbc.fillTBSegmentsBank(event, segments),
                     rbc.fillTBCrossesBank(event, crosses),
                     rbc.fillTBTracksBank(event, trkcands),
-                    rbc.fillTrajectoryBank(event, trkcands));
+                    rbc.fillTrajectoryBank(event, trkcands)
+            );
 
         }
         if (crosses != null && trkcands == null) {
