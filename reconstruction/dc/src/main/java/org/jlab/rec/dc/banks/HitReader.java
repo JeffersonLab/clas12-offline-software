@@ -12,6 +12,8 @@ import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import cnuphys.snr.NoiseReductionParameters;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
+import java.util.HashMap;
+import java.util.Map;
 import org.jlab.clas.swimtools.Swimmer;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.rec.dc.Constants;
@@ -27,6 +29,25 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class HitReader {
 
+    private boolean _aiAssist = false;
+    private String[] _names;
+    
+    public HitReader() {
+        _names = new String[2];
+    }
+             
+    public HitReader(boolean aiAssist) {
+        this._aiAssist = aiAssist;
+        _names = new String[2];
+        if(this._aiAssist==true) {
+            _names[0] = "AI";
+            _names[1] = "AI";
+        } else {
+            _names[0] = "HB";
+            _names[1] = "TB";
+        }
+            
+    }
     private List<Hit> _DCHits;
 
     private List<FittedHit> _HBHits; //hit-based tracking hit information
@@ -231,7 +252,7 @@ public class HitReader {
 
     }
 
-
+    private Map<Integer, Integer> id2tid = new HashMap<Integer, Integer>();
     /**
      * Reads HB DC hits written to the DC bank
      *
@@ -249,13 +270,21 @@ public class HitReader {
         0: this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
         1: this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d")
         */
-        if (!event.hasBank("HitBasedTrkg::HBHits")) {
-            //System.err.println("there is no HB dc bank ");
+        String bankName = "HitBasedTrkg::"+_names[0]+"Hits";
+        String pointName = "HitBasedTrkg::"+_names[0]+"HitTrkId";
+        
+        if (!event.hasBank(bankName) || !event.hasBank(pointName) || event.getBank(pointName).rows()==0) {
+            // System.err.println("there is no HB dc bank ");
             _HBHits = new ArrayList<>();
             return;
         }
+        id2tid.clear();
+        DataBank pbank = event.getBank(pointName);
+        for (int i = 0; i < pbank.rows(); i++) {
+            id2tid.put((int)pbank.getShort("id", i), (int)pbank.getShort("tid", i));
+        }
         
-        DataBank bank = event.getBank("HitBasedTrkg::HBHits");
+        DataBank bank = event.getBank(bankName);
         int rows = bank.rows();
 
         int[] id = new int[rows];
@@ -284,7 +313,10 @@ public class HitReader {
             B[i] = bank.getFloat("B", i);
             trkDoca[i] = bank.getFloat("trkDoca", i);
             clusterID[i] = bank.getShort("clusterID", i);
-            trkID[i] = bank.getByte("trkID", i);
+            trkID[i] = -1;
+            if(this.id2tid.containsKey(id[i]) ){
+                trkID[i] =this.id2tid.get(id[i]);
+            }
             tProp[i] = bank.getFloat("TProp", i);
             tFlight[i] = bank.getFloat("TFlight", i);
             if (event.hasBank("MC::Particle") ||
@@ -309,17 +341,19 @@ public class HitReader {
             if (!event.hasBank("RECHB::Event")) {
                 continue;
             }
+            
             if (event.hasBank("RECHB::Event") && 
                     event.getBank("RECHB::Event").getFloat("startTime", 0)==-1000) {
                 continue;
-            }
-        
+            } 
+            
             if (!event.hasBank("MC::Particle") &&
                     event.getBank("RUN::config").getInt("run", 0) > 100) {
                 //T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
                 if (event.hasBank("RECHB::Event"))
                     T_Start = event.getBank("RECHB::Event").getFloat("startTime", 0);
-            }
+            }  
+            
             T_0 = this.get_T0(sector[i], slayer[i], layer[i], wire[i], T0, T0ERR)[0];
             FittedHit hit = new FittedHit(sector[i], slayer[i], layer[i], wire[i], tdc[i], id[i]);
             hit.set_Id(id[i]);
@@ -353,7 +387,7 @@ public class HitReader {
             }
             if (hit.get_Time() < 0)
                 hit.set_QualityFac(1);
-
+            
             hit.set_DocaErr(hit.get_PosErr(event, B[i], constants0, constants1, tde));
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
@@ -381,7 +415,6 @@ public class HitReader {
     
     public void read_NNHits(DataEvent event, DCGeant4Factory DcDetector,
                              double triggerPhase) {
-        
         if (!(event.hasBank("DC::tdc") && event.hasBank("nn::dchits")  )) {
             _DCHits = new ArrayList<>();
 
