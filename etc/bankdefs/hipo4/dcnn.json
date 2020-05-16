@@ -167,6 +167,16 @@
     ]
   }, 
   {
+    "name": "HitBasedTrkg::AIHitTrkId",
+    "group": 20600,
+    "item" : 67,
+    "info": "pointers between track and hit banks",
+    "entries": [
+        {"name":"id",            "type":"S", "info":"id of the hit"},    
+        {"name":"tid",           "type":"S", "info":"id of the track"}
+    ]
+  },
+  {
     "name": "TimeBasedTrkg::AIHits",
     "group": 20600,
     "item" : 71,
