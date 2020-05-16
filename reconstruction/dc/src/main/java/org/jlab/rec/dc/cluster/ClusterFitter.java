@@ -38,11 +38,11 @@ public class ClusterFitter {
     public void reset() {
         for(int i =0; i<FitArray.size(); i++)
             FitArray.get(i).clear();
-        FitArray.clear();
-        x.clear();
-        y.clear();
-        ex.clear();
-        ey.clear();
+            FitArray.clear();
+            x.clear();
+            y.clear();
+            ex.clear();
+            ey.clear();
     }
     public void SetFitArray(FittedCluster clus, String system) {
 
@@ -149,7 +149,7 @@ public class ClusterFitter {
             clus.set_clusterLineFitInterceptErrMP(FitPars.interceptErr());
 
         } else {
-            //System.err.println("Cluster Fit Params not set!!!");
+            System.err.println("Cluster Fit Params not set!!!");
 
         }
     }

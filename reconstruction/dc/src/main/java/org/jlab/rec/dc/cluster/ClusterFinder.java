@@ -282,7 +282,7 @@ public class ClusterFinder {
         cf.reset();
         Map<Integer, ArrayList<FittedHit>> grpHits = new HashMap<Integer, ArrayList<FittedHit>>();
         List<FittedCluster> clusters = new ArrayList<FittedCluster>();
-        List<FittedHit>fhits = new ArrayList<FittedHit>();
+        //List<FittedHit>fhits = new ArrayList<FittedHit>();
         //
         if (!event.hasBank("HitBasedTrkg::HBHits")) {
             return null;
@@ -300,7 +300,6 @@ public class ClusterFinder {
             int wire        = bank.getShort("wire", i);
             int tdc         = bank.getInt("TDC", i);
             int LR          = bank.getByte("LR", i);
-            double trkDoca  = bank.getFloat("trkDoca", i);
             int clusterID   = bank.getShort("clusterID", i);
             
         
@@ -311,18 +310,21 @@ public class ClusterFinder {
             
             FittedHit hit = new FittedHit(sector, slayer, layer, wire, tdc, id);
             hit.set_Id(id);
-            
+            hit.set_AssociatedClusterID(clusterID);
             hit.set_TrkgStatus(0);
             hit.calc_CellSize(dcDetector);
             hit.calc_GeomCorr(dcDetector, 0);
-            hits.add(hit);            
+            double posError = hit.get_CellSize() / Math.sqrt(12.);
+            hit.set_DocaErr(posError);
+            hits.add(hit);   
         }
-        for (FittedHit hit : fhits) {
+        for (FittedHit hit : hits) {
             
             if (hit.get_AssociatedClusterID() == -1) {
                 continue;
             }
             if (hit.get_AssociatedClusterID() != -1 ) {
+                
                 int index = hit.get_AssociatedClusterID();
                 if(grpHits.get(index)==null) { // if the list not yet created make it
                     grpHits.put(index, new ArrayList<FittedHit>()); 
@@ -360,12 +362,14 @@ public class ClusterFinder {
                 cf.Fit(clus, false);
                 cf.SetSegmentLineParameters(clus.get(0).get_Z(), clus);
                 cf.reset();
+               
                 // update the hits
                 for (FittedHit fhit : clus) {
                     fhit.set_TrkgStatus(0);
                     fhit.set_AssociatedClusterID(clus.get_Id());
                 }
             }
+            
         }
 
         return clusters;

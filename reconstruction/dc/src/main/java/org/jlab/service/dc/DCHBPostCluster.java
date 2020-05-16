@@ -36,17 +36,16 @@ public class DCHBPostCluster extends DCEngine {
     private double triggerPhase;
     private int newRun = 0;
 
-    public DCHBPostCluster() {
-        super("DCHB");
+    public DCHBPostCluster(String trking) {
+        super(trking);
     }
 
     @Override
     public boolean init() {
         super.LoadTables();
-        aiAssist = super.aiAssist;
         return true;
     }
-    private boolean aiAssist;
+    public boolean aiAssist;
     
     @Override
     public boolean processDataEvent(DataEvent event) {
@@ -55,6 +54,7 @@ public class DCHBPostCluster extends DCEngine {
         }
         DataBank bank = event.getBank("RUN::config");
        
+        
         int newRun = bank.getInt("run", 0);
         if (newRun == 0)
            return true;
@@ -78,12 +78,13 @@ public class DCHBPostCluster extends DCEngine {
         List<Cross> crosses = null;
         List<FittedCluster> clusters = null;
         List<Segment> segments = null;
+        List<FittedHit> fhits = null;
         if(this.aiAssist==true) {
             hitRead.read_NNHits(event, dcDetector, triggerPhase);
 
             //I) get the lists
             List<Hit> hits = hitRead.get_DCHits();
-            List<FittedHit> fhits = new ArrayList<FittedHit>();
+            fhits = new ArrayList<FittedHit>();
             //II) process the hits
             //1) exit if hit list is empty
             if (hits.isEmpty()) {
@@ -142,10 +143,11 @@ public class DCHBPostCluster extends DCEngine {
         } else {
         //non-AI
           //2) find the clusters from these hits
+            fhits = new ArrayList<FittedHit>();
             ClusterFinder clusFinder = new ClusterFinder();
             ClusterFitter cf = new ClusterFitter();
             clusters = clusFinder.RecomposeClusters(event, dcDetector, cf);
-            if (clusters.isEmpty()) {
+            if (clusters ==null || clusters.isEmpty()) {
                 return true;
             }
 
@@ -154,6 +156,7 @@ public class DCHBPostCluster extends DCEngine {
             segments = segFinder.get_Segments(clusters,
                     event,
                     dcDetector, false);
+            
             /* 15 */
             // need 6 segments to make a trajectory
             if (segments.isEmpty()) {
@@ -172,14 +175,14 @@ public class DCHBPostCluster extends DCEngine {
                 }
             }
             segments.removeAll(rmSegs);
-
+            if(segments == null || segments.isEmpty())
+                return true;
             /* 16 */
             CrossMaker crossMake = new CrossMaker();
             crosses = crossMake.find_Crosses(segments, dcDetector);
             if (crosses.isEmpty()) {
                 event.appendBanks(
-                        rbc.fillHBSegmentsBank(event, segments),
-                        rbc.fillHBCrossesBank(event, crosses));
+                        rbc.fillHBSegmentsBank(event, segments));
                 return true;
             }
             /* 17 */
@@ -305,6 +308,17 @@ public class DCHBPostCluster extends DCEngine {
                 }
             }
             trkcands.addAll(mistrkcands);
+            //gather all the hits for pointer bank creation
+            for (Track trk : trkcands) {
+                for (Cross c : trk) {
+                    for (FittedHit h1 : c.get_Segment1()) {
+                        fhits.add(h1);
+                    }
+                    for (FittedHit h2 : c.get_Segment2()) {
+                        fhits.add(h2);
+                    }
+                }
+            }
         }
         // no candidate found, stop here and save the hits,
         // the clusters, the segments, the crosses
@@ -317,7 +331,8 @@ public class DCHBPostCluster extends DCEngine {
         event.appendBanks(
             rbc.fillHBSegmentsBank(event, segments),
             rbc.fillHBCrossesBank(event, crosses),
-            rbc.fillHBTracksBank(event, trkcands));
+            rbc.fillHBTracksBank(event, trkcands),
+            rbc.fillHBHitsTrkIdBank(event, fhits) );
         return true;
     }
 

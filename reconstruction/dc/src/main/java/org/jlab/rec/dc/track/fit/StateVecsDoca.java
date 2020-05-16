@@ -468,8 +468,7 @@ public class StateVecsDoca {
     }
     
     void initFromHB(Track trkcand, double z0, KFitterDoca kf) { 
-        if (trkcand != null && trkcand.getFinalStateVec()!=null 
-                && trkcand.get_CovMat()!=null) {
+        if (trkcand != null && trkcand.getFinalStateVec()!=null ) {
             beta = trkcand.get(0).get(0).get(0).get_Beta();
             StateVec initSV = new StateVec(0);
             initSV.x = trkcand.getFinalStateVec().x();

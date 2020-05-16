@@ -28,29 +28,29 @@ public class DCEngine extends ReconstructionEngine {
     String clasDictionaryPath ;
     String variationName;
     boolean endplatesBowing;
-    boolean aiAssist;
+    //boolean aiAssist;
     public DCEngine(String name) {
         super(name,"ziegler","5.0");
     }
 
     public void setOptions() {
-        //AI settings
-        String aiAssist = this.getEngineConfigString("AI");
-        
-        if (aiAssist!=null) {
-            System.out.println("["+this.getName()+"] run with AI config chosen based on yaml = "+aiAssist);
-            this.aiAssist=Boolean.valueOf(aiAssist);
-        }
-        else {
-            aiAssist = System.getenv("COAT_DC_AIASSIST");
-            if (aiAssist!=null) {
-                System.out.println("["+this.getName()+"] run with AI config chosen based on env = "+aiAssist);
-                this.aiAssist=Boolean.valueOf(aiAssist);
-            }
-        }
-        if (aiAssist==null) {
-             System.out.println("["+this.getName()+"] run with AI config chosen based on default = "+aiAssist);
-        }
+//        //AI settings
+//        String aiAssist = this.getEngineConfigString("AI");
+//        
+//        if (aiAssist!=null) {
+//            System.out.println("["+this.getName()+"] run with AI config chosen based on yaml = "+aiAssist);
+//            this.aiAssist=Boolean.valueOf(aiAssist);
+//        }
+//        else {
+//            aiAssist = System.getenv("COAT_DC_AIASSIST");
+//            if (aiAssist!=null) {
+//                System.out.println("["+this.getName()+"] run with AI config chosen based on env = "+aiAssist);
+//                this.aiAssist=Boolean.valueOf(aiAssist);
+//            }
+//        }
+//        if (aiAssist==null) {
+//             System.out.println("["+this.getName()+"] run with AI config chosen based on default = "+aiAssist);
+//        }
         // Load config
         String useSTTConf = this.getEngineConfigString("dcUseStartTime");
         

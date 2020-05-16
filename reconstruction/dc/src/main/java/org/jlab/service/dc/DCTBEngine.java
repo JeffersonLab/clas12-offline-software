@@ -43,17 +43,16 @@ public class DCTBEngine extends DCEngine {
     private int newRun = 0;
     private TimeToDistanceEstimator tde;
 
-    public DCTBEngine() {
-        super("DCTB");
+    public DCTBEngine(String trking) {
+        super(trking);
         tde = new TimeToDistanceEstimator();
     }
     @Override
     public boolean init() {
         super.LoadTables();
-        aiAssist = super.aiAssist;
         return true;
     }
-    private boolean aiAssist;
+    public boolean aiAssist;
     @Override
     public boolean processDataEvent(DataEvent event) {
         //setRunConditionsParameters( event) ;
@@ -111,7 +110,7 @@ public class DCTBEngine extends DCEngine {
         //II) process the hits
         //1) exit if hit list is empty
         if(hits.isEmpty() ) {
-                return true;
+            return true;
         }
 
         //2) find the clusters from these hits

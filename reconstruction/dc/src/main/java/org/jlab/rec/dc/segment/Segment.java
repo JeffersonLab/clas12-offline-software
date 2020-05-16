@@ -294,7 +294,8 @@ public class Segment extends ArrayList<FittedHit> implements Comparable<Segment>
      */
     public void set_fitPlane(DCGeant4Factory DcDetector) {
         if (this.get_fittedCluster().get_clusLine() == null) {
-           // System.err.println(" no clusterline for " + this.get_fittedCluster().printInfo());
+            System.err.println(" no clusterline for " + this.get_fittedCluster().printInfo());
+            
             return;
         }
         this.set_SegmentEndPointsSecCoordSys(DcDetector);

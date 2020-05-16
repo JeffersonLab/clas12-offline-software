@@ -359,52 +359,5 @@ public class DCHBEngine extends DCEngine {
         return true;
     }
 
-    public static void main(String[] args) {
-
-        String inputFile = "/Users/ziegler/Desktop/Work/validation/infiles/straight.hipo";
-        MagFieldsEngine enf = new MagFieldsEngine();
-        enf.init();
-
-        DCHBEngine en = new DCHBEngine();
-        en.init();
-
-        DCTBEngine en2 = new DCTBEngine();
-        en2.init();
-
-        int counter = 0;
-
-        HipoDataSource reader = new HipoDataSource();
-        reader.open(inputFile);
-
-        HipoDataSync writer = new HipoDataSync();
-        //Writer
-
-        String outputFile = "/Users/ziegler/Desktop/Work/Files/test.hipo";
-
-        writer.open(outputFile);
-        long t1 = 0;
-        while (reader.hasEvent()) {
-
-            counter++;
-            System.out.println("************************************************************* ");
-            DataEvent event = reader.getNextEvent();
-            if (counter > 0) {
-                t1 = System.currentTimeMillis();
-            }
-            enf.processDataEvent(event);
-            en.processDataEvent(event);
-
-            // Processing TB
-            en2.processDataEvent(event);
-            writer.writeEvent(event);
-            System.out.println("PROCESSED  EVENT " + event.getBank("RUN::config").getInt("event", 0));
-            
-            if(counter>40)
-                break;
-        }
-        writer.close();
-        double t = System.currentTimeMillis() - t1;
-        System.out.println(t1 + " TOTAL  PROCESSING TIME = " + (t / (float) counter));
-    }
-
+    
 }
