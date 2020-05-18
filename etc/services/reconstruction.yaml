@@ -14,8 +14,20 @@ services:
     name: FTHODO
   - class: org.jlab.rec.ft.FTEBEngine
     name: FTEB
-  - class: org.jlab.service.dc.DCHBEngine
-    name: DCHB
+# DC initializer: passes geometry and constants to all DC services
+  - class: org.jlab.service.dc.DCInit
+    name: DCI
+# DC clustering: nominal algoritm, filled the cluster bank for ai and conventional tracking
+  - class: org.jlab.service.dc.DCHBClustering
+    name: DCRC
+# This is where the AI plugin would go.  THe AI code reads the HB clusters.  
+#
+# DC using clustering: regular HB tracking
+  - class: org.jlab.service.dc.DCHBPostClusterConv
+    name: DCRPC
+# DC using clustering on AI hits: NN assisted HB tracking
+  - class: org.jlab.service.dc.DCHBPostClusterAI
+    name: DCAC
   - class: org.jlab.service.ftof.FTOFHBEngine
     name: FTOFHB
   - class: org.jlab.service.ec.ECEngine
@@ -34,8 +46,12 @@ services:
     name: LTCC
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
-  - class: org.jlab.service.dc.DCTBEngine
-    name: DCTB
+# DC regular TB tracking    
+  - class: org.jlab.service.dc.DCTBEngineConv
+    name: DCRTB
+  # DC Ai assisted TB tracking    
+  - class: org.jlab.service.dc.DCTBEngineAI
+    name: DCATB  
   - class: org.jlab.service.ftof.FTOFTBEngine
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
@@ -48,32 +64,47 @@ configuration:
   io-services:
     writer:
       compression: 2
-# settings below are for GEMC, compatible with 4.3.0
   services:
     MAGFIELDS:
       magfieldSolenoidMap: Symm_solenoid_r601_phi1_z1201_13June2018.dat
-      magfieldTorusMap: Symm_torus_r2501_phi16_z251_24Apr2018.dat
-# examples of yaml settings for magfields 
-#      magfieldSolenoidShift: "0.0"
-#      magfieldTorusXShift: "0.0"
-#      magfieldTorusYShift: "0.0"
-#      magfieldTorusZShift: "0.0"
-# examples of yaml settings for DC services 
-#    DCHB:
-#      variation: default
-#      dcGeometryVariation: rga_spring2018
-#      dcUseSTT: "true"
+      magfieldTorusMap: Full_torus_r251_phi181_z251_08May2018.dat
+#      variation: rga_fall2018
+    CND:
+#      variation: rga_fall2018
+    CTOF:
+#      variation: rga_fall2018
+    CVT:
+#      variation: rga_fall2018
+    DCI:
+#      variation: rga_fall2018
+#      dcGeometryVariation: rga_fall2018
+#      dcT2DFunc: "Polynomial"
 #      dcWireDistortion: "true"
-#    DCTB:
-#      variation: default
-#      dcGeometryVariation: rga_spring2018
-# example of how to set variation and timestamp for a service, uncomment to use
-#    EBTB:
-#      variation: default
-#      timestamp: 08/22/2018
-    RTPC:
-      rtpcSimulation: "false"
-      rtpcCosmic: "true"
-      rtpcBeamlineFit: "false"
+    DCRC:
+#      variation: rga_fall2018
+#      dcGeometryVariation: rga_fall2018
+    DCRPC:
+#      variation: rga_fall2018
+#      dcGeometryVariation: rga_fall2018
+    DCAC:
+#      variation: rga_fall2018
+#      dcGeometryVariation: rga_fall2018
+    DCRTB:
+#      variation: rga_fall2018
+#      dcGeometryVariation: rga_fall2018
+    DCATB:
+#      variation: rga_fall2018
+#      dcGeometryVariation: rga_fall2018 
+    EC:
+#      variation: rga_fall2018
+    FTOFHB:
+#      variation: rga_fall2018
+    FTOFTB:
+#      variation: rga_fall2018
+    EBHB:
+#      variation: rga_fall2018
+    EBTB:
+#      variation: rga_fall2018
+      
 mime-types:
   - binary/data-hipo
