@@ -27,7 +27,7 @@ public class RandomTriggerSplit {
     private HipoWriterSorted openOutputFile(String outputfile){
         HipoWriterSorted writer = null;
         writer = new HipoWriterSorted();
-        writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("COATJAVA", "etc/bankdefs/hipo4"));
+        writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4"));
         writer.setCompressionType(2);
         writer.open(outputfile);
         System.out.println("Open output file " + outputfile);
@@ -37,8 +37,7 @@ public class RandomTriggerSplit {
     public static void main(String[] args){
       
         OptionParser parser = new OptionParser("fileSplitter");
-        parser.addRequired("-o"  ,"output file prefix");
-        parser.setRequiresInputList(false);
+        parser.addOption("-o"    ,"",   "output file prefix");
         parser.addOption("-n"    ,"-1", "maximum number of events to process");
         parser.addOption("-s"    ,"-1", "number of events per output file");
         parser.parse(args);
@@ -77,7 +76,8 @@ public class RandomTriggerSplit {
                     // open/close ouputfiles
                     if(((eventCounter%maxOutEvents)==0 && maxOutEvents!=-1) || writer==null) {
                         if(writer!=null) writer.close();
-                        String filename = outputFile + "_" + String.format("%05d", fileCounter) + ".hipo";
+                        String filename = String.format("%05d", fileCounter) + ".hipo";
+                        if(!outputFile.equals("")) filename = outputFile + "_" + filename;
                         writer = splitter.openOutputFile(filename);
                         utils.writeTag(writer, utils.SCALERTAG, inputFile);
                         utils.writeTag(writer, utils.CONFIGTAG, inputFile);

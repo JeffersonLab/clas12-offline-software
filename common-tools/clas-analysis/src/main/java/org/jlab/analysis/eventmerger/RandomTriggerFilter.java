@@ -126,7 +126,7 @@ public class RandomTriggerFilter {
 
             //Writer
             HipoWriterSorted writer = new HipoWriterSorted();
-            writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("COATJAVA", "etc/bankdefs/hipo4"));
+            writer.getSchemaFactory().initFromDirectory(ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4"));
             writer.setCompressionType(2);
             writer.open(outputFile);
 
