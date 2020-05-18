@@ -324,11 +324,13 @@ public class DCHBPostCluster extends DCEngine {
         // the clusters, the segments, the crosses
         if (trkcands.isEmpty()) {
             event.appendBanks(
+                rbc.fillHBHitsBank(event, fhits),    
                 rbc.fillHBSegmentsBank(event, segments),
                 rbc.fillHBCrossesBank(event, crosses));
             return true;
         }
         event.appendBanks(
+            rbc.fillHBHitsBank(event, fhits),    
             rbc.fillHBSegmentsBank(event, segments),
             rbc.fillHBCrossesBank(event, crosses),
             rbc.fillHBTracksBank(event, trkcands),

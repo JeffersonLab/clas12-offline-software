@@ -13,5 +13,6 @@ public class DCTBEngineConv extends DCTBEngine {
     public DCTBEngineConv() {
         super("DCTBCONV");
         super.aiAssist = false;
+        super._name = "HB";
     }
 }

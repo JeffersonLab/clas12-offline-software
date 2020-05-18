@@ -13,5 +13,6 @@ public class DCTBEngineAI extends DCTBEngine {
     public DCTBEngineAI() {
         super("DCTBAI");
         super.aiAssist = true;
+        super._name = "AI";
     }
 }

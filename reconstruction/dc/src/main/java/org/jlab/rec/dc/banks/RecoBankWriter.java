@@ -64,7 +64,7 @@ public class RecoBankWriter {
 
     }
 
-    private DataBank fillHBHitsBank(DataEvent event, List<FittedHit> hitlist) {
+    public DataBank fillHBHitsBank(DataEvent event, List<FittedHit> hitlist) {
         String name = "HitBasedTrkg::"+_names[0]+"Hits";
         DataBank bank = event.createBank(name, hitlist.size());
 
@@ -706,10 +706,10 @@ private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslis
      * @return segments bank
      */
     private DataBank fillTBTracksBank(DataEvent event, List<Track> candlist) {
-    
-        String name = "TimeBasedTrkg::"+_names[1]+"Tracks";
+       
+        String name = "TimeBasedTrkg::"+_names[1]+"Tracks"; 
         DataBank bank = event.createBank(name, candlist.size());
-        for (int i = 0; i < candlist.size(); i++) { 
+        for (int i = 0; i < candlist.size(); i++) {
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
             bank.setShort("status", i, (short) (100+candlist.get(i).get_Status()*10+candlist.get(i).get_MissingSuperlayer()));
             bank.setByte("sector", i, (byte) candlist.get(i).get_Sector());
@@ -873,14 +873,22 @@ private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslis
         }
 
         if (trkcands != null) {
-            event.appendBanks(rbc.fillTBHitsBank(event, fhits),
+            if(this._aiAssist) { // fill only trajectory for conv bank for now
+                event.appendBanks(rbc.fillTBHitsBank(event, fhits),
+                        rbc.fillTBClustersBank(event, clusters),
+                        rbc.fillTBSegmentsBank(event, segments),
+                        rbc.fillTBCrossesBank(event, crosses),
+                        rbc.fillTBTracksBank(event, trkcands)
+                );
+            } else {
+                event.appendBanks(rbc.fillTBHitsBank(event, fhits),
                     rbc.fillTBClustersBank(event, clusters),
                     rbc.fillTBSegmentsBank(event, segments),
                     rbc.fillTBCrossesBank(event, crosses),
                     rbc.fillTBTracksBank(event, trkcands),
                     rbc.fillTrajectoryBank(event, trkcands)
             );
-
+            }
         }
         if (crosses != null && trkcands == null) {
             event.appendBanks(rbc.fillTBHitsBank(event, fhits),

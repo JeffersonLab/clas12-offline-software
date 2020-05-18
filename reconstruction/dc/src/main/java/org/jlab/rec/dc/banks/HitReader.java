@@ -274,7 +274,7 @@ public class HitReader {
         String pointName = "HitBasedTrkg::"+_names[0]+"HitTrkId";
         
         if (!event.hasBank(bankName) || !event.hasBank(pointName) || event.getBank(pointName).rows()==0) {
-            // System.err.println("there is no HB dc bank ");
+            //    System.err.println("there is no HB dc bank for "+_names[0]);
             _HBHits = new ArrayList<>();
             return;
         }
@@ -391,7 +391,6 @@ public class HitReader {
             hit.set_DocaErr(hit.get_PosErr(event, B[i], constants0, constants1, tde));
             hit.set_AssociatedClusterID(clusterID[i]);
             hit.set_AssociatedHBTrackID(trkID[i]); 
-            
             //if(hit.betaFlag == 0)
             if(passHit(hit.betaFlag))
                 hits.add(hit);            

@@ -53,6 +53,7 @@ public class DCTBEngine extends DCEngine {
         return true;
     }
     public boolean aiAssist;
+    public String _name;
     @Override
     public boolean processDataEvent(DataEvent event) {
         //setRunConditionsParameters( event) ;
@@ -96,7 +97,7 @@ public class DCTBEngine extends DCEngine {
         List<Track> trkcands = new ArrayList<Track>();
 
         //instantiate bank writer
-        RecoBankWriter rbc = new RecoBankWriter(false);
+        RecoBankWriter rbc = new RecoBankWriter(aiAssist);
 
         HitReader hitRead = new HitReader(aiAssist); //vz; modified reader to read regular or ai hits
         hitRead.read_HBHits(event, 
@@ -106,7 +107,6 @@ public class DCTBEngine extends DCEngine {
         List<FittedHit> hits = new ArrayList<FittedHit>();
         //I) get the hits
         hits = hitRead.get_HBHits();
-
         //II) process the hits
         //1) exit if hit list is empty
         if(hits.isEmpty() ) {
@@ -159,11 +159,11 @@ public class DCTBEngine extends DCEngine {
         
         //
         // also need Track bank
-        if (event.hasBank("HitBasedTrkg::HBTracks") == false) {
+        if (event.hasBank("HitBasedTrkg::"+_name+"Tracks") == false) {
             return true;
         }
         
-        DataBank trkbank = event.getBank("HitBasedTrkg::HBTracks");
+        DataBank trkbank = event.getBank("HitBasedTrkg::"+_name+"Tracks");
         //DataBank trkcovbank = event.getBank("TimeBasedTrkg::TBCovMat");
         int trkrows = trkbank.rows();
         //if(trkbank.rows()!=trkcovbank.rows()) {
@@ -261,7 +261,7 @@ public class DCTBEngine extends DCEngine {
 
         if(trkcands.size()>0) {
             //trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
-
+            
             for(Track trk: trkcands) {
                 // reset the id
                 trk.set_Id(trkId);
@@ -303,8 +303,10 @@ public class DCTBEngine extends DCEngine {
             rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
             return true;
         }
+       
         rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, crosses, trkcands);
-
+        //if(this.aiAssist) 
+        //    event.getBank("TimeBasedTrkg::"+_name+"Tracks").show();
         return true;
     }
 
