@@ -88,16 +88,16 @@ public class HelixFitObject {
         return _Chi2;
     }
     public double get_Mom(){
-        return 0.3*_magfield*Math.abs(_Rho)/10;
+        return 0.3*_magfield*Math.abs(_Rho)/(10*Math.sin(Math.toRadians(_Theta)));
     }
     public double get_px(){
-        return get_Mom()*Math.cos(Math.toRadians(get_Phi()))*Math.sin(Math.toRadians(get_Theta()));
+        return get_Mom()*Math.cos(Math.toRadians(_Phi))*Math.sin(Math.toRadians(_Theta));
     }
     public double get_py(){
-        return get_Mom()*Math.sin(Math.toRadians(get_Phi()))*Math.sin(Math.toRadians(get_Theta()));
+        return get_Mom()*Math.sin(Math.toRadians(_Phi))*Math.sin(Math.toRadians(_Theta));
     }
     public double get_pz(){
-        return get_Mom()*Math.cos(Math.toRadians(get_Theta()));
+        return get_Mom()*Math.cos(Math.toRadians(_Theta));
     }
     public double get_trackl(){
         return 0;
