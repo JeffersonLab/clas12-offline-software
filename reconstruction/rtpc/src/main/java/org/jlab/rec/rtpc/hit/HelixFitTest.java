@@ -64,7 +64,6 @@ public class HelixFitTest {
             }
             chi2 += (R-Math.sqrt(A*A + B*B))*(R-Math.sqrt(A*A + B*B));
             chi2 /= numhits - 3;
-            System.out.println(chi2);
             if(R > 0) tl = Math.sqrt(R*R*psi*psi + dz*dz);
             double dEdx = 0;
             if(tl != 0 && !Double.isNaN(tl)) dEdx = ADCsum/tl;
