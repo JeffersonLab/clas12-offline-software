@@ -1,24 +1,9 @@
 package org.jlab.service.dc;
-
-import cnuphys.snr.NoiseReductionParameters;
-import cnuphys.snr.clas12.Clas12NoiseAnalysis;
-import cnuphys.snr.clas12.Clas12NoiseResult;
-
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jlab.clas.swimtools.Swim;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.dc.Constants;
-import org.jlab.rec.dc.banks.HitReader;
-import org.jlab.rec.dc.banks.RecoBankWriter;
-import org.jlab.rec.dc.cluster.ClusterCleanerUtilities;
-import org.jlab.rec.dc.cluster.ClusterFinder;
-import org.jlab.rec.dc.cluster.ClusterFitter;
-import org.jlab.rec.dc.cluster.FittedCluster;
-import org.jlab.rec.dc.hit.FittedHit;
-import org.jlab.rec.dc.hit.Hit;
 import org.jlab.rec.dc.timetodistance.TableLoader;
 import org.jlab.utils.groups.IndexedTable;
 

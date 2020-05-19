@@ -43,7 +43,7 @@ public class DCHBClustering extends DCEngine {
         return true;
     }
     boolean aiAssist = false;
-    
+    public static int sectorSelect;
     @Override
     public boolean processDataEvent(DataEvent event) {
         if (!event.hasBank("RUN::config")) {
@@ -92,7 +92,7 @@ public class DCHBClustering extends DCEngine {
                 triggerPhase);
         /* 10 */
         //I) get the hits
-        List<Hit> hits = hitRead.get_DCHits();
+        List<Hit> hits = hitRead.get_DCHits(sectorSelect);
         //II) process the hits
         //1) exit if hit list is empty
         if (hits.isEmpty()) {

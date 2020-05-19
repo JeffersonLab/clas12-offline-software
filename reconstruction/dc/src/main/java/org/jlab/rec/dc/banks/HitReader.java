@@ -659,4 +659,18 @@ public class HitReader {
 }
     }
 */
+
+    public List<Hit> get_DCHits(int sectorSelect) {
+        if(sectorSelect==-1) {
+            return this._DCHits;
+        } else {
+            List<Hit> list = new ArrayList<Hit>();
+            for (int i = 0; i < this._DCHits.size(); i++) {
+                if(this._DCHits.get(i).get_Sector()==sectorSelect) {
+                   list.add(this._DCHits.get(i)); 
+                }
+            }
+            return list;
+        }
+    }
 }

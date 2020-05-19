@@ -28,29 +28,28 @@ public class DCEngine extends ReconstructionEngine {
     String clasDictionaryPath ;
     String variationName;
     boolean endplatesBowing;
-    //boolean aiAssist;
     public DCEngine(String name) {
         super(name,"ziegler","5.0");
     }
 
     public void setOptions() {
-//        //AI settings
-//        String aiAssist = this.getEngineConfigString("AI");
-//        
-//        if (aiAssist!=null) {
-//            System.out.println("["+this.getName()+"] run with AI config chosen based on yaml = "+aiAssist);
-//            this.aiAssist=Boolean.valueOf(aiAssist);
-//        }
-//        else {
-//            aiAssist = System.getenv("COAT_DC_AIASSIST");
-//            if (aiAssist!=null) {
-//                System.out.println("["+this.getName()+"] run with AI config chosen based on env = "+aiAssist);
-//                this.aiAssist=Boolean.valueOf(aiAssist);
-//            }
-//        }
-//        if (aiAssist==null) {
-//             System.out.println("["+this.getName()+"] run with AI config chosen based on default = "+aiAssist);
-//        }
+        //AI settings for selecting specific sector
+        String sectorSelect = this.getEngineConfigString("sectorSelect");
+        
+        if (sectorSelect!=null) {
+            System.out.println("["+this.getName()+"] run with sector config chosen based on yaml = "+sectorSelect);
+            DCHBClustering.sectorSelect=Integer.parseInt(sectorSelect); 
+        }
+        else {
+            sectorSelect = System.getenv("COAT_DC_SECTORSELECT");
+            if (sectorSelect!=null) {
+                System.out.println("["+this.getName()+"] run with sector config chosen based on env = "+sectorSelect);
+                DCHBClustering.sectorSelect=Integer.parseInt(sectorSelect);
+            }
+        }
+        if (sectorSelect==null) {
+             System.out.println("["+this.getName()+"] run with sector config chosen based on default = "+sectorSelect);
+        }
         // Load config
         String useSTTConf = this.getEngineConfigString("dcUseStartTime");
         
