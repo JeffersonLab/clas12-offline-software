@@ -90,14 +90,7 @@ public class RecoBankWriter {
         //bank.setByte("trkID", i, (byte) hitlist.get(i).get_AssociatedHBTrackID());
 
         bank.setInt("TDC",i,hitlist.get(i).get_TDC());
-        bank.setFloat("B", i, (float) hitlist.get(i).getB());
-        bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
-        bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
-
-        if(hitlist.get(i).get_AssociatedHBTrackID()>-1 && !event.hasBank("MC::Particle")) {
-            bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
-            bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
-        }
+        
     }
 
     return bank;
@@ -116,7 +109,14 @@ public class RecoBankWriter {
 
             bank.setShort("id", i, (short) hitlist.get(i).get_Id());
             bank.setShort("tid", i, (short) hitlist.get(i).get_AssociatedHBTrackID());
+            bank.setFloat("B", i, (float) hitlist.get(i).getB());
+            bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
+            bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
 
+            if(hitlist.get(i).get_AssociatedHBTrackID()>-1 && !event.hasBank("MC::Particle")) {
+                bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
+                bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
+            }
         }
    //bank.show();
     return bank;

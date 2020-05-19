@@ -253,6 +253,9 @@ public class HitReader {
     }
 
     private Map<Integer, Integer> id2tid = new HashMap<Integer, Integer>();
+    private Map<Integer, Double> id2tidB = new HashMap<Integer, Double>();
+    private Map<Integer, Double> id2tidtProp = new HashMap<Integer, Double>();
+    private Map<Integer, Double> id2tidtFlight = new HashMap<Integer, Double>();
     /**
      * Reads HB DC hits written to the DC bank
      *
@@ -279,9 +282,16 @@ public class HitReader {
             return;
         }
         id2tid.clear();
+        id2tidB.clear();
+        id2tidtFlight.clear();
+        id2tidtProp.clear();
+        
         DataBank pbank = event.getBank(pointName);
         for (int i = 0; i < pbank.rows(); i++) {
             id2tid.put((int)pbank.getShort("id", i), (int)pbank.getShort("tid", i));
+            id2tidB.put((int)pbank.getShort("id", i), (double)pbank.getFloat("B", i));
+            id2tidtFlight.put((int)pbank.getShort("id", i), (double)pbank.getFloat("TFlight", i));
+            id2tidtProp.put((int)pbank.getShort("id", i), (double)pbank.getFloat("TProp", i));
         }
         
         DataBank bank = event.getBank(bankName);
@@ -310,15 +320,17 @@ public class HitReader {
             tdc[i] = bank.getInt("TDC", i);
             id[i] = bank.getShort("id", i);
             LR[i] = bank.getByte("LR", i);
-            B[i] = bank.getFloat("B", i);
+           
             trkDoca[i] = bank.getFloat("trkDoca", i);
             clusterID[i] = bank.getShort("clusterID", i);
             trkID[i] = -1;
             if(this.id2tid.containsKey(id[i]) ){
-                trkID[i] =this.id2tid.get(id[i]);
+                trkID[i]    = this.id2tid.get(id[i]);
+                 B[i]       = this.id2tidB.get(id[i]);
+                 tProp[i]   = this.id2tidtProp.get(id[i]);
+                 tFlight[i] = this.id2tidtFlight.get(id[i]);
             }
-            tProp[i] = bank.getFloat("TProp", i);
-            tFlight[i] = bank.getFloat("TFlight", i);
+            
             if (event.hasBank("MC::Particle") ||
                     event.getBank("RUN::config").getInt("run", 0) < 100) {
                 tProp[i] = 0;
@@ -456,7 +468,7 @@ public class HitReader {
         }
         
         for (int j = 0; j < bank.rows(); j++) {
-            int i = bank.getInt("index", j)-1;
+            int i = bank.getInt("index", j);
             int tid = (int)bank.getByte("id", j);
             Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], tdc[i], (i + 1));
             hit.set_Id(i+1);
