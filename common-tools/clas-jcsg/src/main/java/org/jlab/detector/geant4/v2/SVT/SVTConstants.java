@@ -401,7 +401,7 @@ public class SVTConstants
 			//if( NREGIONS == 0 || NSECTORS[0] == 0 || FIDCUX == 0 || MATERIALS[0][0] == 0 || SUPPORTRADIUS[0] == 0 )
 				//throw new NullPointerException("please load the following tables from CCDB in "+ccdbPath+"\n svt\n region\n support\n fiducial\n material\n");
 			
-			bLoadedConstants = true;
+//			bLoadedConstants = true;
 			
 			if( VERBOSE )
 			{

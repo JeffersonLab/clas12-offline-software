@@ -110,14 +110,14 @@ public class CVTReconstruction extends ReconstructionEngine {
             if(Math.abs(SolenoidScale)<0.001)
             Constants.setCosmicsData(true);
             
-            System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variationName);
-            CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, variationName));
-            System.out.println("SVT LOADING WITH VARIATION "+variationName);
-            DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, variationName);
-            cp = SVTConstants.connect( cp );
-            cp.disconnect();  
-            SVTStripFactory svtFac = new SVTStripFactory(cp, true);
-            SVTGeom.setSvtStripFactory(svtFac);
+//            System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variationName);
+//            CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, variationName));
+//            System.out.println("SVT LOADING WITH VARIATION "+variationName);
+//            DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, variationName);
+//            cp = SVTConstants.connect( cp );
+//            cp.disconnect();  
+//            SVTStripFactory svtFac = new SVTStripFactory(cp, true);
+//            SVTGeom.setSvtStripFactory(svtFac);
             Constants.Load(isCosmics, isSVTonly);
             this.setRun(newRun);
 
@@ -410,7 +410,8 @@ public class CVTReconstruction extends ReconstructionEngine {
         }
     }
 
-        public boolean init() {
+    @Override
+    public boolean init() {
         // Load config
         String rmReg = this.getEngineConfigString("removeRegion");
         
@@ -432,7 +433,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         String svtStAl = this.getEngineConfigString("svtOnly");
         
         if (svtStAl!=null) {
-            System.out.println("["+this.getName()+"] run with SVT only "+svtStAl+"removed config chosen based on yaml");
+            System.out.println("["+this.getName()+"] run with SVT only "+svtStAl+" config chosen based on yaml");
             this.isSVTonly= Boolean.valueOf(svtStAl);
         }
         else {
@@ -454,6 +455,16 @@ public class CVTReconstruction extends ReconstructionEngine {
         CNDGeom =  GeometryFactory.getDetector(DetectorType.CND, 11, variationName);
         //
           
+        
+        System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variationName);
+        CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, variationName));
+        System.out.println("SVT LOADING WITH VARIATION "+variationName);
+        DatabaseConstantProvider cp = new DatabaseConstantProvider(11, variationName);
+        cp = SVTConstants.connect( cp );
+        cp.disconnect();  
+        SVTStripFactory svtFac = new SVTStripFactory(cp, true);
+        SVTGeom.setSvtStripFactory(svtFac);
+
         return true;
     }
   
