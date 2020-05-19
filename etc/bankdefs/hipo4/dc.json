@@ -19,9 +19,6 @@
        {"name":"LocY",        "type":"F", "info":"y in planar local coordinate system"},
        {"name":"X",           "type":"F", "info":"wire x-coordinate  in tilted-sector"},
        {"name":"Z",           "type":"F", "info":"wire z-coordinate  in tilted-sector"},
-       {"name":"B",           "type":"F", "info":"B-field intensity at hit position in tilted-sector system"},
-       {"name":"TProp",       "type":"F", "info":"t propagation along the wire"},
-       {"name":"TFlight",     "type":"F", "info":"time of flight correction"},
        {"name":"clusterID",   "type":"S", "info":"ID of associated cluster"}
     ]
   },
@@ -186,7 +183,10 @@
     "info": "pointers between track and hit banks",
     "entries": [
         {"name":"id",            "type":"S", "info":"id of the hit"},    
-        {"name":"tid",           "type":"S", "info":"id of the track"}
+        {"name":"tid",           "type":"S", "info":"id of the track"},
+        {"name":"B",             "type":"F", "info":"B-field intensity at hit position in tilted-sector system"},
+        {"name":"TProp",         "type":"F", "info":"t propagation along the wire"},
+        {"name":"TFlight",       "type":"F", "info":"time of flight correction"}
     ]
   },
   {
