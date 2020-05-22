@@ -1,7 +1,5 @@
 package org.jlab.service.dc;
 
-//import Jama.Matrix;
-import org.jlab.jnp.matrix.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,6 +43,10 @@ public class DCTBEngine extends DCEngine {
 
     public DCTBEngine(String trking) {
         super(trking);
+        tde = new TimeToDistanceEstimator();
+    }
+    public DCTBEngine() {
+        super("DCTB");
         tde = new TimeToDistanceEstimator();
     }
     @Override
