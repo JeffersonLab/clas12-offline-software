@@ -673,7 +673,7 @@ public class HitReader {
 */
 
     public List<Hit> get_DCHits(int sectorSelect) {
-        if(sectorSelect==-1) {
+        if(sectorSelect==0) {
             return this._DCHits;
         } else {
             List<Hit> list = new ArrayList<Hit>();
