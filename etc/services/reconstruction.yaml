@@ -80,7 +80,7 @@ configuration:
 #      dcGeometryVariation: rga_fall2018
 #      dcT2DFunc: "Polynomial"
 #      dcWireDistortion: "true"
-      sectorSelect: "1"
+#      sectorSelect: "1"
     DCRC:
 #      variation: rga_fall2018
 #      dcGeometryVariation: rga_fall2018
