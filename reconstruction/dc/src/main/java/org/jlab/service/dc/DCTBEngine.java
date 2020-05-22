@@ -45,8 +45,10 @@ public class DCTBEngine extends DCEngine {
         super(trking);
         tde = new TimeToDistanceEstimator();
     }
-    public DCTBEngine() {
+    public DCTBEngine() { // if not specified use conventional tracking
         super("DCTB");
+        this.aiAssist = false;
+        this._name = "HB";
         tde = new TimeToDistanceEstimator();
     }
     @Override
@@ -65,7 +67,6 @@ public class DCTBEngine extends DCEngine {
         }
         //if(event.getBank("RECHB::Event").getFloat("startTime", 0)<0)
         //    return true; // require the start time to reconstruct the tracks in the event
-        
         DataBank bank = event.getBank("RUN::config");
         // Load the constants
         //-------------------
@@ -161,7 +162,7 @@ public class DCTBEngine extends DCEngine {
         
         //
         // also need Track bank
-        if (event.hasBank("HitBasedTrkg::"+_name+"Tracks") == false) {
+        if (event.hasBank("HitBasedTrkg::"+_name+"Tracks") == false) { 
             return true;
         }
         

@@ -98,15 +98,13 @@ public class RecoBankWriter {
     }   
     
     public DataBank fillHBHitsTrkIdBank(DataEvent event, List<FittedHit> hitlist) {
-        String name = "HitBasedTrkg::"+_names[0]+"HitTrkId";
+        String name = "HitBasedTrkg::"+_names[0]+"HitTrkId"; 
         DataBank bank = event.createBank(name, hitlist.size());
-
         for (int i = 0; i < hitlist.size(); i++) {
             //output only for HOTs
             if (hitlist.get(i).get_AssociatedHBTrackID() == -1) {
                 continue;
-            }
-
+            } 
             bank.setShort("id", i, (short) hitlist.get(i).get_Id());
             bank.setShort("tid", i, (short) hitlist.get(i).get_AssociatedHBTrackID());
             bank.setFloat("B", i, (float) hitlist.get(i).getB());
@@ -834,7 +832,8 @@ private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslis
                     rbc.fillHBClustersBank(event, clusters),
                     rbc.fillHBSegmentsBank(event, segments),
                     rbc.fillHBCrossesBank(event, crosses),
-                    rbc.fillHBTracksBank(event, trkcands)
+                    rbc.fillHBTracksBank(event, trkcands),
+                    rbc.fillHBHitsTrkIdBank(event, fhits)
                     //rbc.fillTrackCovMatBank(event, trkcands)
             );
 
@@ -886,7 +885,8 @@ private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslis
                     rbc.fillTBSegmentsBank(event, segments),
                     rbc.fillTBCrossesBank(event, crosses),
                     rbc.fillTBTracksBank(event, trkcands),
-                    rbc.fillTrajectoryBank(event, trkcands)
+                    rbc.fillTrajectoryBank(event, trkcands),
+                    rbc.fillTrackCovMatBank(event, trkcands)
             );
             }
         }
