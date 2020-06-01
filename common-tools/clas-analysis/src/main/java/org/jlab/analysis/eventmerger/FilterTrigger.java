@@ -8,7 +8,7 @@ import org.jlab.jnp.utils.data.*;
  * Hipo Reduce Worker: filter event based on trigger bit
  * 
  * Inputs: selected trigger bit (0-63)
- * 
+ * Returns "true" is selected bit is set in the trigger bit word and no other bits are set
  * @author devita
  */
 public class FilterTrigger implements Worker {
@@ -44,11 +44,12 @@ public class FilterTrigger implements Worker {
         if(triggerBank.getRows()>0){
             long triggerBit = triggerBank.getLong("trigger",0);
             long timeStamp  = triggerBank.getLong("timestamp",0);
-            // Value will be >0 if bit 24 is 1 in triggerBit
-            // and 0 if the bit 24 is not set
-            int value = DataByteUtils.readLong(triggerBit, bit, bit);
+            // Value will be >0 if selected bit is 1 in triggerBit
+            int  value    = DataByteUtils.readLong(triggerBit, bit, bit);
+            // Check that no other bit is set
+            long thisBit  = value*((long) Math.pow(2, bit));
             // If returned true, the event will be write to the output
-            if(value>0) return true;
+            if(value>0 && thisBit==triggerBit) return true;
             }
         return false;
     }

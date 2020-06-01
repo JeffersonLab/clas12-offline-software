@@ -42,6 +42,7 @@ public class RawHitsMerger {
         parser.setRequiresInputList(false);
         parser.addOption("-n"    ,"-1", "maximum number of events to process");
         parser.addOption("-d"    ,"DC,FTOF", "list of detectors, for example \"DC,FTOF,HTCC\"");
+        parser.addOption("-s"    ,"1", "suppress double hits on the same component, 0-no suppression, 1-suppression");
         parser.parse(args);
         
         if(parser.hasOption("-i")==true&&parser.hasOption("-o")==true&&parser.hasOption("-b")==true){
@@ -50,12 +51,13 @@ public class RawHitsMerger {
             String outputFile = parser.getOption("-o").stringValue();
             String bgFile     = parser.getOption("-b").stringValue();
             
-            int    maxEvents = parser.getOption("-n").intValue();
-            String detectors = parser.getOption("-d").stringValue();
-            
+            int     maxEvents  = parser.getOption("-n").intValue();
+            String  detectors  = parser.getOption("-d").stringValue();
+            boolean doubleHits = true;
+            if(parser.getOption("-s").intValue()==0) doubleHits = false;
             
             RawHitsMerger en = new RawHitsMerger();
-            ADCTDCMerger adctdcMerger = new ADCTDCMerger(detectors.split(","));
+            ADCTDCMerger adctdcMerger = new ADCTDCMerger(detectors.split(","),doubleHits);
 
             int counter = 0;
 
@@ -83,7 +85,7 @@ public class RawHitsMerger {
                 writer.writeEvent(eventData);
                 progress.updateStatus();
                 if(maxEvents>0){
-                    if(counter>maxEvents) break;
+                    if(counter>=maxEvents) break;
                 }
             }
             progress.showStatus();

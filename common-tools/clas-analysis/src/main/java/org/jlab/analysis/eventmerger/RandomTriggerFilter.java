@@ -13,11 +13,13 @@ import org.jlab.utils.system.ClasUtilsFile;
 /**
  * Random trigger filtering tool: filters hipo event according to trigger bit 
  * and beam current to create random-trigger files for background merging
- * 
+ *  
  * Usage: triggerBitFilter -b [trigger bit] -o [output file] 
  * Options: 
  *      -c : minimum beam current (default = -1)
  *      -n : maximum number of events to process (default = -1)
+ * 
+ *  Event is filtered if selected trigger bit is set and no other bit is
  * 
  * @author devita
  */

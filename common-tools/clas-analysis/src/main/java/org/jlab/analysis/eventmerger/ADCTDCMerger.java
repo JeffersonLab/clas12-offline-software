@@ -24,6 +24,7 @@ import org.jlab.io.hipo.HipoDataEvent;
 public class ADCTDCMerger {
     
     private boolean debug = false;
+    private boolean suppressDoubleHits = true;
     private String[] detectors;
     
     public ADCTDCMerger() {
@@ -31,7 +32,9 @@ public class ADCTDCMerger {
         printDetectors();
     }
         
-    public ADCTDCMerger(String[] dets) {
+    public ADCTDCMerger(String[] dets, boolean dhits) {
+        suppressDoubleHits = dhits;
+        System.out.println("Double hits suppression flag set to " + suppressDoubleHits);
         detectors = dets;
         printDetectors();
     }
@@ -55,7 +58,7 @@ public class ADCTDCMerger {
             int adc         = bankDGTZ.getInt("ADC", i);
             float time      = bankDGTZ.getFloat("time", i);
             short ped       = bankDGTZ.getShort("ped", i);
-            if(adc<=0 || time<=0) continue;
+            if(adc<=0) continue;
             if(detector == DetectorType.BST.getName()) {
                 long timestamp = (int)bankDGTZ.getLong("timestamp", i);
                 adcData = new ADC(sector,layer,component,order,adc,time,ped,timestamp);
@@ -134,10 +137,16 @@ public class ADCTDCMerger {
             List<TDC> mergedTDCs = new ArrayList<TDC>();
             for(int i = 0; i < allTDCs.size(); i++) {
                 TDC tdc = allTDCs.get(i);
-                if(mergedTDCs.size()==0) mergedTDCs.add(tdc);
+                if(mergedTDCs.size()==0) {
+                    if(debug) {
+                        System.out.println("Keeping TDC " + i);
+                        tdc.show();
+                    }
+                    mergedTDCs.add(tdc);
+                }
                 else {
                     TDC tdcOld = mergedTDCs.get(mergedTDCs.size()-1);
-                    if(!tdc.equalTo(tdcOld)) {
+                    if(!tdc.equalTo(tdcOld) || !suppressDoubleHits) {
                         if(debug) {
                             System.out.println("Keeping TDC " + i);
                             tdc.show();
@@ -205,10 +214,16 @@ public class ADCTDCMerger {
 
             for(int i = 0; i < allADCs.size(); i++) {
                 ADC adc = allADCs.get(i);
-                if(mergedADCs.isEmpty()) mergedADCs.add(adc);
+                if(mergedADCs.isEmpty()) {
+                    if(debug) {
+                        System.out.println("\tSkipping ADC " + i +"\t");
+                        adc.show();
+                    }
+                    mergedADCs.add(adc);
+                }
                 else {
                     ADC adcOld = mergedADCs.get(mergedADCs.size()-1);
-                    if(!adc.equalTo(adcOld)) {
+                    if(!adc.equalTo(adcOld) || !suppressDoubleHits) {
                         if(debug) {
                             System.out.println("Keeping ADC " + i);
                             adc.show();
