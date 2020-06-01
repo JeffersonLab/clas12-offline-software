@@ -223,7 +223,7 @@ public class ADCTDCMerger {
                 }
                 else {
                     ADC adcOld = mergedADCs.get(mergedADCs.size()-1);
-                    if(!adc.equalTo(adcOld) || !suppressDoubleHits) {
+                    if(!adc.equalTo(adcOld)) {
                         if(debug) {
                             System.out.println("Keeping ADC " + i);
                             adc.show();

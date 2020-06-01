@@ -42,7 +42,7 @@ public class RawHitsMerger {
         parser.setRequiresInputList(false);
         parser.addOption("-n"    ,"-1", "maximum number of events to process");
         parser.addOption("-d"    ,"DC,FTOF", "list of detectors, for example \"DC,FTOF,HTCC\"");
-        parser.addOption("-s"    ,"1", "suppress double hits on the same component, 0-no suppression, 1-suppression");
+        parser.addOption("-s"    ,"1", "suppress double TDC hits on the same component, 0-no suppression, 1-suppression");
         parser.parse(args);
         
         if(parser.hasOption("-i")==true&&parser.hasOption("-o")==true&&parser.hasOption("-b")==true){
