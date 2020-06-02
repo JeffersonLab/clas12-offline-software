@@ -87,7 +87,7 @@ public class ADCTDCMerger {
      * @param bankDGTZ
      * @return
      */
-    public List<TDC> TDCbank(DataBank bankDGTZ) {
+    public List<TDC> TDCbank(DataBank bankDGTZ, int offset) {
         List<TDC> tdcStore   = new ArrayList<TDC>();
         for (int i = 0; i < bankDGTZ.rows(); i++) {
             byte sector     = bankDGTZ.getByte("sector", i);
@@ -96,7 +96,7 @@ public class ADCTDCMerger {
             byte order      = bankDGTZ.getByte("order", i);
             int tdc         = bankDGTZ.getInt("TDC", i);
             if(tdc<=0) continue;
-            TDC tdcData = new TDC(sector,layer,component,order,tdc);
+            TDC tdcData = new TDC(sector,layer,component,order,tdc+offset);
             tdcStore.add(tdcData);
         }
         return tdcStore;
@@ -113,6 +113,8 @@ public class ADCTDCMerger {
      */
     public DataBank getTDCBank(String Det, DataEvent event, DataEvent bg){
         
+        int offset = getTDCOffset(Det, event, bg);
+        
         String TDCString = Det+"::tdc";
         DataBank bank = null;
         if(event.hasBank(TDCString)==true && (bg==null || bg.hasBank(TDCString)==false)) {
@@ -126,8 +128,8 @@ public class ADCTDCMerger {
             bank = bg.getBank(TDCString);
         }  
         else if(event.hasBank(TDCString)==true && bg.hasBank(TDCString)==true) {
-            List<TDC> bgTDCs  = TDCbank(bg.getBank(TDCString));
-            List<TDC> TDCs    = TDCbank(event.getBank(TDCString));
+            List<TDC> bgTDCs  = TDCbank(bg.getBank(TDCString), offset);
+            List<TDC> TDCs    = TDCbank(event.getBank(TDCString), 0);
 
             List<TDC> allTDCs = new ArrayList<TDC>();
             for(TDC tdc : TDCs)   allTDCs.add(tdc);
@@ -271,6 +273,31 @@ public class ADCTDCMerger {
         return bank;
     }
     
+    private int getTDCOffset(String detector, DataEvent event, DataEvent bg) {
+        int offset = getJitterCorrection(event, detector)
+                   - getJitterCorrection(bg, detector);
+        return offset;
+    }
+    
+    private int getJitterCorrection(DataEvent event, String detector) {
+        // calculate the trigger time jitter correction
+        double tdcconv = 0.02345;
+        double period  = 4;
+        int    phase   = 3;
+        int    cycles  = 6;
+        if("DC".equals(detector)) {
+            tdcconv = 1;
+            phase   = 1;
+            cycles  = 2;
+        }       
+        double triggerphase=0;
+        long   timestamp = event.getBank("RUN::config").getLong("timestamp", 0);
+        if(cycles > 0) triggerphase=period*((timestamp+phase)%cycles);
+        int    tdcjitter = (int) (triggerphase/tdcconv);
+        return tdcjitter;
+    }
+
+
     private void printDetectors() {
         System.out.print("\nMerging activated for detectors: ");
         for(String det:detectors) System.out.print(det + " ");
@@ -284,13 +311,19 @@ public class ADCTDCMerger {
      * @param bg
      */
     public void updateEventWithMergedBanks(DataEvent event, DataEvent bg) {
+        
+        if(!event.hasBank("RUN::config") || !bg.hasBank("RUN::config")) {
+            System.out.println("Missing RUN::config bank");
+            return;
+        }
+        
         if(event.hasBank("DC::doca")) event.removeBank("DC::doca");
         
         for(String det:detectors) {
             if("BMT".equals(det) || "BST".equals(det) || "FTCAL".equals(det) || "FTHODO".equals(det) || "FMT".equals(det) || "FTTRK".equals(det) || "HTCC".equals(det) || "LTCC".equals(det)) {
                 event.appendBanks(this.getADCBank(det, event, bg));
             }
-            else if("DC".equals(det) || "RICH".equals(det)) {
+            else if("DC".equals(det)) {
                 event.appendBanks(this.getTDCBank(det, event, bg));
             }
             else if("BAND".equals(det) || "CND".equals(det) || "CTOF".equals(det) || "ECAL".equals(det) || "FTOF".equals(det)) {
