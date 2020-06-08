@@ -329,7 +329,7 @@ public class DCHBPostCluster extends DCEngine {
                 rbc.fillHBCrossesBank(event, crosses));
             return true;
         }
-        System.out.println(" *********** FILLING ALL HB BANKS ************");
+        
         event.appendBanks(
             rbc.fillHBHitsBank(event, fhits),    
             rbc.fillHBSegmentsBank(event, segments),
