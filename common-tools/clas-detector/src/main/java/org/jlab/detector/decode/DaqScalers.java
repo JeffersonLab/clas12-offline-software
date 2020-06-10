@@ -18,7 +18,7 @@ import org.jlab.utils.groups.IndexedTable;
  * DSC2.  Integrating since beginning of run, useful for beam charge normalization.
  *
  * @see <a href="https://logbooks.jlab.org/comment/14616">logbook entry</a>
- * @see "common-tools/clas-detector/doc"
+ * and common-tools/clas-detector/doc
  *
  * The EPICS equation for converting Faraday Cup raw scaler S to beam current I:
  *   I [nA] = (S [Hz] - offset ) / slope * attenuation;
@@ -41,15 +41,32 @@ public class DaqScalers {
     private float beamCharge=0;
     private float beamChargeGated=0;
     private float livetime=0;
+    private long timestamp   = 0;
     public Dsc2RawReading dsc2=null;
     public StruckRawReading struck=null;
+    public void setTimestamp(long timestamp) { this.timestamp=timestamp; }
     private void setBeamCharge(float q) { this.beamCharge=q; }
     private void setBeamChargeGated(float q) { this.beamChargeGated=q; }
     private void setLivetime(float l) { this.livetime=l; }
     public float getBeamCharge() { return beamCharge; }
     public float getBeamChargeGated() { return beamChargeGated; }
     public float getLivetime()   { return livetime; }
+    public long getTimestamp() { return timestamp; }
     public void show() { System.out.println("BCG=%.3f   LT=%.3f"); }
+
+    /**
+    * @param runScalerBank HIPO RUN::scaler bank
+    */
+    public static DaqScalers create(Bank runScalerBank) {
+        DaqScalers ds=new DaqScalers();
+        for (int ii=0; ii<runScalerBank.getRows(); ii++) {
+            ds.livetime=runScalerBank.getFloat("livetime", ii);
+            ds.beamCharge=runScalerBank.getFloat("fcup",ii);
+            ds.beamChargeGated=runScalerBank.getFloat("fcupgated",ii);
+            break; 
+        }
+        return ds;
+    }
 
     /**
     * @param rawScalerBank HIPO RAW::scaler bank
@@ -68,7 +85,7 @@ public class DaqScalers {
 
         if (dsc2.getClock() > 0) {
 
-            float live = dsc2.getGatedSlm() / dsc2.getSlm();
+            float live = (float)dsc2.getGatedSlm() / dsc2.getSlm();
             float q  = (float)(dsc2.getFcup()      - fcup_offset * seconds );
             float qg = (float)(dsc2.getGatedFcup() - fcup_offset * seconds * live);
             q  *= fcup_atten / fcup_slope;

@@ -158,6 +158,27 @@ public class Shape3D implements Transformable, Showable {
     }
 
     /**
+     * Finds intersections of the given infinite line with this shape. 
+     * Intersection points will be appended to the given list.
+     *
+     * @param line the infinite line
+     * @param intersections the list of intersections
+     * @return the number of intersections that were found
+     */
+    public int intersection_with_faces(final Line3D line, List<Point3D> intersections, List<Integer> ifaces) {
+        int count = 0;
+        int ifa = 0;
+        int nint = 0;
+        for (Face3D face : faces){
+            nint = face.intersection(line, intersections);
+            count += nint;
+            for(int ii=0; ii<nint; ii++)ifaces.add(ifa);
+            ifa++;
+        }
+        return count;
+    }
+
+    /**
      * Finds intersections of the given ray with this shape. 
      * Intersection points will be appended to the given list.
      *

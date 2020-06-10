@@ -15,38 +15,46 @@ import org.jlab.clas.pdg.PhysicsConstants;
  */
 public class EBRadioFrequency {
 
-    private EBCCDBConstants ccdb;
-    private int debugMode = 0;
+    private final EBCCDBConstants ccdb;
+    private final int debugMode = 0;
     
-    private ArrayList<rfSignal> rfSignals = new ArrayList<rfSignal>();
+    private final ArrayList<rfSignal> rfSignals = new ArrayList<>();
     private double rfTime = -100;
    
-    private final boolean doVzCorrection = false;
-    
     public EBRadioFrequency(EBCCDBConstants ccdb) {
         this.ccdb=ccdb;
     }
 
-    public double  getStartTime(DetectorParticle p,final DetectorType type,final int layer) {
+    /**
+     * new-style start time, based on one particle's vertex time (the trigger
+     * particle) and another's z-vertex (e.g. the hadron) 
+     * @param p the particle with which to determine the vertex time (e.g. the trigger particle)
+     * @param type type of detector to use for p's timing info
+     * @param layer layer of detector to use for p's timing info
+     * @param vz the z-vertex to use for the correction
+     * @return RF/vz-corrected start time 
+     */
+    public double  getStartTime(DetectorParticle p,final DetectorType type,final int layer,final double vz) {
         final double tgpos = this.ccdb.getDouble(EBCCDBEnum.TARGET_POSITION);
         final double rfBucketLength = this.ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH);
-
-        final double pathLength = p.getPathLength(type,layer);
-        final double time = p.getTime(type,layer);
-
-        final double tof = pathLength/PhysicsConstants.speedOfLight()/p.getBeta();
-        final double vertexTime = time - tof;
-
-        final double vzCorr = doVzCorrection ?
-                (tgpos - p.vertex().z()) / PhysicsConstants.speedOfLight() :
-                0.0;
-
+        final double vertexTime = p.getVertexTime(type,layer,p.getPid());
+        final double vzCorr = (tgpos - vz) / PhysicsConstants.speedOfLight();
         final double deltatr = - vertexTime - vzCorr
                 + this.rfTime + this.ccdb.getDouble(EBCCDBEnum.RF_OFFSET)
                 + (EBConstants.RF_LARGE_INTEGER+0.5)*rfBucketLength;
         final double rfCorr = deltatr % rfBucketLength - rfBucketLength/2;
-
         return vertexTime + rfCorr;
+    }
+  
+    /**
+     * "traditional" start time, based only on one particle
+     * @param p the particle with which to determine the start time
+     * @param type type of detector to use for timing info
+     * @param layer layer of detector to use for timing info
+     * @return RF/vz-corrected start time
+     */
+    public double  getStartTime(DetectorParticle p,final DetectorType type,final int layer) {
+        return this.getStartTime(p,type,layer,p.vertex().z());
     }
     
     public double getTime(DataEvent event) {
@@ -60,22 +68,18 @@ public class EBRadioFrequency {
         double triggerPhase = 0;
         if(event.hasBank("RUN::config")) {
             DataBank bank = event.getBank("RUN::config");
-            double period = ccdb.getDouble(EBCCDBEnum.RF_JITTER_PERIOD);;
+            double period = ccdb.getDouble(EBCCDBEnum.RF_JITTER_PERIOD);
             int    phase  = ccdb.getInteger(EBCCDBEnum.RF_JITTER_PHASE);
             int    cycles = ccdb.getInteger(EBCCDBEnum.RF_JITTER_CYCLES);
             long   timeStamp = bank.getLong("timestamp", 0);
             if(cycles>0 && timeStamp!=-1) triggerPhase=period*((timeStamp+phase)%cycles);
-//            System.out.println(period + " " + phase + " " + cycles + " " + timeStamp + " " + triggerPhase);
         
         }
         // if RUN::rf bank does not exist but tdc bnk exist, reconstruct RF signals from TDC hits and save to bank
         if(event.hasBank("RF::tdc") && !event.hasBank("RUN::rf")) {
-            int    hits = 0;
             DataBank bank = event.getBank("RF::tdc");
             int rows = bank.rows();
             for(int i = 0; i < rows; i++){
-                int    sector = bank.getByte("sector",i);
-                int     layer = bank.getByte("layer",i);
                 int      comp = bank.getShort("component",i);
                 int       TDC = bank.getInt("TDC",i);
                 int     order = bank.getByte("order",i); 
@@ -126,12 +130,12 @@ public class EBRadioFrequency {
     private class rfSignal {
         private int _id;
         private double _jitter;
-        private ArrayList<Integer> _tdc = new ArrayList<Integer>();
-        private ArrayList<Double> _time = new ArrayList<Double>();
+        private ArrayList<Integer> _tdc = new ArrayList<>();
+        private ArrayList<Double> _time = new ArrayList<>();
 
         public rfSignal(int id, double jitter) {
-            this.setId(id);
-            this.setJitter(jitter);
+            _id=id;
+            _jitter=jitter;
         }
 
         public boolean add(int tdc) {
@@ -141,13 +145,10 @@ public class EBRadioFrequency {
             final double rfBucketLength = ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH); 
             boolean skip = false;
             double time = (tdc*rfTdc2Time) % (rfCycles*rfBucketLength) - this.getJitter();
-//            time = (tdc % 6840) *EBConstants.RF_TDC2TIME;
             // check if new TDC value compared to previous one is consistent with 80*2.004 ns interval
             if(this._tdc.size()>0) {               
                 int deltaTDC = tdc - this._tdc.get(this._tdc.size()-1);
                 if(deltaTDC>((double) (rfCycles+1)*rfBucketLength)/rfTdc2Time) { // allow for an extra 2.004 ns
-//                    System.out.println("Found missing hits in RF sequence for signal ID " + this._id + ", TDC = " + tdc 
-//                            + ", DeltaTDC = " + deltaTDC  + "(" + deltaTDC*EBConstants.RF_TDC2TIME+ ")");
                     skip = true;
                 }
             }

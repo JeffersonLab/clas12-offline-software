@@ -32,7 +32,7 @@ public abstract class AHit implements Comparable<AHit> {
     private int _TDCbankHitIdx1 = -1;
     private int _TDCbankHitIdx2 = -1;
 
-    public int _AssociatedTrkId = -1;
+    private int _AssociatedTrkId = -1;
     
     public AHit(int id, int panel, int sector, int paddle, int aDC1, int tDC1,
             int aDC2, int tDC2) {
@@ -315,6 +315,14 @@ public abstract class AHit implements Comparable<AHit> {
         return this._barThickness;
     }
 
+    public int get_TrkId() {
+        return _AssociatedTrkId;
+    }
+
+    public void set_TrkId(int id) {
+        this._AssociatedTrkId=id;
+    }
+
     public Point3D get_TrkPosition() {
         return _TrkPosition;
     }
@@ -447,6 +455,18 @@ public abstract class AHit implements Comparable<AHit> {
      * @param TW02
      * @param TW11
      * @param TW12
+     * @param TW1P
+     * @param TW2P
+     * @param TW0E
+     * @param TW1E
+     * @param TW2E
+     * @param TW3E
+     * @param TW4E
+     * @param HPOSa
+     * @param HPOSb
+     * @param HPOSc
+     * @param HPOSd
+     * @param HPOSe
      * @param lambda1
      * @param lambda2
      * @param yOffset
@@ -474,7 +494,10 @@ public abstract class AHit implements Comparable<AHit> {
      * @param ScinBarThickn
      */
     public void set_HitParams(int superlayer, double TW01, double TW02,
-            double TW11, double TW12, double lambda1, double lambda2,
+            double TW11, double TW12, double TW1P, double TW2P, 
+            double TW0E, double TW1E, double TW2E, double TW3E, double TW4E, 
+            double HPOSa, double HPOSb, double HPOSc, double HPOSd, double HPOSe,
+            double lambda1, double lambda2,
             double yOffset, double v1, double v2, double v1Unc, double v2Unc,
             double PED1, double PED2, double PED1Unc, double PED2Unc,
             double paddle2paddle, double RFPad, double timeOffset, double triggerPhase, double[] LSBConv,
@@ -498,9 +521,9 @@ public abstract class AHit implements Comparable<AHit> {
 
             case "1111": // Good: TDC1, TDC2, ADC1, ADC2
                 // 1. Compute time-walk corrections:
-                this.set_timeWalk1(this.calc_timeWalk(TW01, TW11,
+                this.set_timeWalk1(this.calc_timeWalk(TW0E, TW01, TW11,
                         (int) (this.get_ADC1() - PED1)));
-                this.set_timeWalk2(this.calc_timeWalk(TW02, TW12,
+                this.set_timeWalk2(this.calc_timeWalk(TW0E, TW02, TW12,
                         (int) (this.get_ADC2() - PED2)));
                 // 2. Compute corrected hit times & errors:
                 t12 = this.calc_t12(paddle2paddle, timeOffset, triggerPhase, LSBConv, RFPad);
@@ -516,10 +539,10 @@ public abstract class AHit implements Comparable<AHit> {
                 this.set_yUnc(this.calc_yUnc(status, v1, v2, v1Unc, v2Unc, ADC1Err,
                         ADC2Err));
                 // 4. Compute average hit time:
-                // this.set_t( 0.5*(this.get_t1() - y/v1 + this.get_t2() + y/v2));
                 // // average of times
-                this.set_t(0.5 * (this.get_t1() - (pl / 2 + y) / v1 + this.get_t2() - (pl / 2 - y)
-                        / v2));
+                this.set_t(0.5 * (this.get_t1() - (pl / 2 + y) / v1 + this.get_t2() - (pl / 2 - y) / v2)
+                          + this.calc_TWpos(y, TW1P, TW2P) 
+                          + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
                 // 4.1 Both TDCs --> Getting the uncertainty contribution from each
                 tErr = this.calc_tErr(this.get_y(), this.get_yUnc(), this.get_t1(),
                         this.get_t1Unc(), v1, v1Unc, this.get_t2(),
@@ -546,6 +569,8 @@ public abstract class AHit implements Comparable<AHit> {
                         this.get_Energy2(), this.get_Energy2Unc(),
                         this.get_lambda2(), this.get_lambda2Unc());
                 this.set_EnergyUnc(eErr);
+                // 7. add new TW exponential correction
+                this.set_t(this.get_t()-this.calc_TWexp(this.get_Energy(), TW0E, TW1E, TW2E, TW3E, TW4E));
 
                 break;
 
@@ -567,18 +592,18 @@ public abstract class AHit implements Comparable<AHit> {
                 this.setMissingADC(y, PED1, PED2);
                 // 3. Compute time-walk corrections (with the estimated ADC1,2
                 // value):
-                this.set_timeWalk1(this.calc_timeWalk(TW01, TW11,
+                this.set_timeWalk1(this.calc_timeWalk(TW0E, TW01, TW11,
                         (int) (this.get_ADC1() - PED1)));
-                this.set_timeWalk2(this.calc_timeWalk(TW02, TW12,
+                this.set_timeWalk2(this.calc_timeWalk(TW0E, TW02, TW12,
                         (int) (this.get_ADC2() - PED2)));
                 // 4. Compute corrected hit times & uncertainties:
                 t12 = this.calc_t12(paddle2paddle, timeOffset, triggerPhase, LSBConv, RFPad);
                 this.set_t1(t12[0]);
                 this.set_t2(t12[1]);
-                // this.set_t( 0.5*(this.get_t1() - y/v1 + this.get_t2() + y/v2));
                 // // average of times
-                this.set_t(0.5 * (this.get_t1() - (pl / 2 + y) / v1 + this.get_t2() - (pl / 2 - y)
-                        / v2));
+                this.set_t(0.5 * (this.get_t1() - (pl / 2 + y) / v1 + this.get_t2() - (pl / 2 - y) / v2) 
+                          + this.calc_TWpos(y, TW1P, TW2P) 
+                          + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
                 tErr12 = this.calc_tErr12(TDC1Err, TDC2Err, LSBConv, LSBConvErr);
                 this.set_t1Unc(tErr12[0]);
                 this.set_t2Unc(tErr12[1]);
@@ -626,15 +651,17 @@ public abstract class AHit implements Comparable<AHit> {
                 // 7.1. Compute the uncertainty in y
                 this.set_yUnc(this.calc_yUnc(status, v1, v2, v1Unc, v2Unc, ADC1Err,
                         ADC2Err));
+                // 8. add new TW exponential correction
+                this.set_t(this.get_t()-this.calc_TWexp(this.get_Energy(), TW0E, TW1E, TW2E, TW3E, TW4E));
 
                 break;
 
             case "1011":
             case "1110": // Good: ADC1, ADC2 Missing: TDC1 or TDC2
                 // 1. Compute time-walk corrections:
-                this.set_timeWalk1(this.calc_timeWalk(TW01, TW11,
+                this.set_timeWalk1(this.calc_timeWalk(TW0E, TW01, TW11,
                         (int) (this.get_ADC1() - PED1)));
-                this.set_timeWalk2(this.calc_timeWalk(TW02, TW12,
+                this.set_timeWalk2(this.calc_timeWalk(TW0E, TW02, TW12,
                         (int) (this.get_ADC2() - PED2)));
 
                 // 2. Determine hit coordinate from tracking or from ADC log ratio
@@ -667,13 +694,17 @@ public abstract class AHit implements Comparable<AHit> {
                 // is
                 // valid
                 {
-                    this.set_t(this.get_t1() - (pl / 2 + y) / v1 - yOffset / 2.);
+                    this.set_t(this.get_t1() - (pl / 2 + y) / v1 - yOffset / 2.
+                              + this.calc_TWpos(y, TW1P, TW2P) 
+                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
                 }
                 if (Character.toString(this.get_StatusWord().charAt(3)).equals("1")) // TDC2
                 // is
                 // valid
                 {
-                    this.set_t(this.get_t2() + (y - pl / 2) / v2 + yOffset / 2.);
+                    this.set_t(this.get_t2() + (y - pl / 2) / v2 + yOffset / 2.
+                              + this.calc_TWpos(y, TW1P, TW2P) 
+                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
                 }
                 tErr12 = this.calc_tErr12(TDC1Err, TDC2Err, LSBConv, LSBConvErr);
                 this.set_t1Unc(tErr12[0]);
@@ -714,6 +745,8 @@ public abstract class AHit implements Comparable<AHit> {
                         this.get_Energy2(), this.get_Energy2Unc(),
                         this.get_lambda2(), this.get_lambda2Unc());
                 this.set_EnergyUnc(eErr);
+                // 6. add new TW exponential correction
+                this.set_t(this.get_t()-this.calc_TWexp(this.get_Energy(), TW0E, TW1E, TW2E, TW3E, TW4E));
 
                 break;
 
@@ -737,9 +770,9 @@ public abstract class AHit implements Comparable<AHit> {
                 // 2. Compute the missing ADC
                 this.setMissingADC(y, PED1, PED2);
                 // 3. Compute time-walk corrections (with the estimated ADC value):
-                this.set_timeWalk1(this.calc_timeWalk(TW01, TW11,
+                this.set_timeWalk1(this.calc_timeWalk(TW0E, TW01, TW11,
                         (int) (this.get_ADC1() - PED1)));
-                this.set_timeWalk2(this.calc_timeWalk(TW02, TW12,
+                this.set_timeWalk2(this.calc_timeWalk(TW0E, TW02, TW12,
                         (int) (this.get_ADC2() - PED2)));
                 // 4. Compute corrected hit times & uncertainties:
                 t12 = this.calc_t12(paddle2paddle, timeOffset, triggerPhase, LSBConv, RFPad);
@@ -749,13 +782,17 @@ public abstract class AHit implements Comparable<AHit> {
                 // is
                 // valid
                 {
-                    this.set_t(this.get_t1() - (pl / 2 + y) / v1 - yOffset / 2.);
+                    this.set_t(this.get_t1() - (pl / 2 + y) / v1 - yOffset / 2.
+                              + this.calc_TWpos(y, TW1P, TW2P) 
+                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
                 }
                 if (Character.toString(this.get_StatusWord().charAt(3)).equals("1")) // TDC2
                 // is
                 // valid
                 {
-                    this.set_t(this.get_t2() + (y - pl / 2) / v2 + yOffset / 2.);
+                    this.set_t(this.get_t2() + (y - pl / 2) / v2 + yOffset / 2.
+                              + this.calc_TWpos(y, TW1P, TW2P) 
+                              + this.calc_Hpos(y, HPOSa, HPOSb, HPOSc, HPOSd, HPOSe));
                 }
                 tErr12 = this.calc_tErr12(TDC1Err, TDC2Err, LSBConv, LSBConvErr);
                 this.set_t1Unc(tErr12[0]);
@@ -808,6 +845,8 @@ public abstract class AHit implements Comparable<AHit> {
                             this.get_lambda2Unc());
                     this.set_EnergyUnc(eErr);
                 }
+                // 7. add new TW exponential correction
+                this.set_t(this.get_t()-this.calc_TWexp(this.get_Energy(), TW0E, TW1E, TW2E, TW3E, TW4E));
 
                 break;
         }
@@ -986,8 +1025,9 @@ public abstract class AHit implements Comparable<AHit> {
         return err;
     }
 
-    private double calc_timeWalk(double A, double B, int ADC) {
-        double tw = A / Math.pow((double) ADC, B);
+    private double calc_timeWalk(double E, double A, double B, int ADC) {
+        // E: first constants from time_wal_exp table to enable/disable standard TW correction
+        double tw =(1-E)*(A / Math.pow((double) ADC, B));
         return tw;
     }
 
@@ -1240,6 +1280,68 @@ public abstract class AHit implements Comparable<AHit> {
             Sq = term1Sq + term2Sq + term3Sq;
         }
         return E * Math.sqrt(Sq);
+    }
+
+    private double calc_TWpos(double y, double tw1pos, double tw2pos) {
+        return tw1pos*Math.pow(y, 2)+tw2pos*y;
+    }
+    
+    /**  
+    * Calculate new TW correction for FTOF
+    * @param energy hit energy deposition
+    * @param tw0e activate new TW correction (0) or old (1)
+    * @param tw1e first correction parameter
+    * @param tw2e second correction parameter, currently not used
+    * @param tw3e third correction parameter, currently not used
+    * @param tw4e fourth correction parameter, currently not used
+    * @return time offset in ns
+    */     
+    private double calc_TWexp(double energy, double tw0e, double tw1e, double tw2e, double tw3e, double tw4e) {
+        double twexp = 0;
+        if(energy>0) {
+            twexp = tw0e*tw1e*Math.exp(tw2e*energy)+tw3e/energy;
+        }
+        return twexp;
+    }
+    
+    /**  
+    * Calculate position dependent correction to timing offsets  
+    * Currently used for CTOF
+    * @param y hit position along the paddle
+    * @param hposa first correction parameter
+    * @param hposb second correction parameter
+    * @param hposc third correction parameter, currently not used
+    * @param hposd fourth correction parameter, currently not used
+    * @param hpose fifth correction parameter, currently not used
+    * @return time offset in ns
+    */     
+    private double calc_Hpos(double y, double hposa, double hposb, double hposc, double hposd, double hpose) {
+       return hposa*Math.exp(hposb*y);
+    }
+    
+    @Override
+    public int compareTo(AHit arg) {
+        // Sort by sector, panel, paddle
+        int return_val = 0;
+        int CompSec = this.get_Sector() < arg.get_Sector() ? -1 : this
+                .get_Sector() == arg.get_Sector() ? 0 : 1;
+        int CompPan = this.get_Panel() < arg.get_Panel() ? -1 : this
+                .get_Panel() == arg.get_Panel() ? 0 : 1;
+        int CompPad = this.get_Paddle() < arg.get_Paddle() ? -1 : this
+                .get_Paddle() == arg.get_Paddle() ? 0 : 1;
+
+        int return_val1 = ((CompPan == 0) ? CompPad : CompPan);
+        return_val = ((CompSec == 0) ? return_val1 : CompSec);
+
+        return return_val;
+    }
+    
+    public boolean isAdjacent(AHit arg0) {
+        boolean isClose = false;
+        if(this.get_Sector()==arg0.get_Sector() && this.get_Panel()==arg0.get_Panel()) {
+            if(this.get_Paddle()==arg0.get_Paddle()-1 || this.get_Paddle()==arg0.get_Paddle()+1) isClose=true;
+        }
+        return isClose;
     }
 
     public void printInfo() {

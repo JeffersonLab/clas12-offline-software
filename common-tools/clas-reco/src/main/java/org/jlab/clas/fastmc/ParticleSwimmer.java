@@ -52,7 +52,7 @@ public class ParticleSwimmer {
          String clasDictionaryPath = CLASResources.getResourcePath("etc");
          String magfieldDir = clasDictionaryPath + "/data/magfield/";
 
-         String torusFileName = System.getenv("TORUSMAP");
+         String torusFileName = System.getenv("COAT_MAGFIELD_TORUSMAP");
          if (torusFileName==null) torusFileName = "clas12-fieldmap-torus.dat";
          File torusFile = new File(magfieldDir + torusFileName);
          try {
@@ -62,7 +62,7 @@ public class ParticleSwimmer {
          }
 		
          //OK, see if we can create a Solenoid
-         String solenoidFileName = System.getenv("SOLENOIDMAP");
+         String solenoidFileName = System.getenv("COAT_MAGFIELD_SOLENOIDMAP");
          if (solenoidFileName==null) solenoidFileName = "clas12-fieldmap-solenoid.dat";
          //OK, see if we can create a Torus
          if(clasDictionaryPath == "../clasJLib")

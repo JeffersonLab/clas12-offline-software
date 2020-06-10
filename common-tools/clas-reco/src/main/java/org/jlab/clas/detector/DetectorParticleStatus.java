@@ -17,6 +17,7 @@ public class DetectorParticleStatus {
     public static final int SCINTILLATOR=100;
     public static final int CALORIMETER=10;
     public static final int CHERENKOV=1;
+    public static final int BAND=8;
     public static final int CENTRAL=4;
     public static final int FORWARD=2;
     public static final int TAGGER=1;
@@ -25,6 +26,7 @@ public class DetectorParticleStatus {
     private boolean isForward=false;
     private boolean isCentral=false;
     private boolean isTagger=false;
+    private boolean isBand=false;
     private int nScintillator=0;
     private int nCalorimeter=0;
     private int nCherenkov=0;
@@ -36,6 +38,7 @@ public class DetectorParticleStatus {
         this.isForward = ( (int)(Math.abs(this.status)/REGION) & FORWARD ) > 0;
         this.isCentral = ( (int)(Math.abs(this.status)/REGION) & CENTRAL ) > 0;
         this.isTagger  = ( (int)(Math.abs(this.status)/REGION) & TAGGER  ) > 0;
+        this.isBand    = ( (int)(Math.abs(this.status)/REGION) & BAND    ) > 0;
         this.nCherenkov    = Math.abs(this.status)%(10*CHERENKOV)/CHERENKOV;
         this.nCalorimeter  = Math.abs(this.status)%(10*CALORIMETER)/CALORIMETER;
         this.nScintillator = Math.abs(this.status)%(10*SCINTILLATOR)/SCINTILLATOR;
@@ -45,6 +48,7 @@ public class DetectorParticleStatus {
     public boolean isForward()        { return this.isForward; }
     public boolean isCentral()        { return this.isCentral; }
     public boolean isTagger()         { return this.isTagger; }
+    public boolean isBAND()           { return this.isBand; }
     public int getScintillatorCount() { return this.nScintillator; }
     public int getCalorimeterCount()  { return this.nCalorimeter; }
     public int getCherenkovCount()    { return this.nCherenkov; }
@@ -93,6 +97,9 @@ public class DetectorParticleStatus {
         else if (DetectorType.getType(trackType)==DetectorType.DC) {
             status += FORWARD*REGION;
         }
+        else if (p.hasHit(DetectorType.BAND)) {
+            status += BAND*REGION;
+        }
 
         // tagger:
         // need to fix broken response classes inheritance
@@ -110,6 +117,7 @@ public class DetectorParticleStatus {
         status += SCINTILLATOR*p.countResponses(DetectorType.FTOF);
         status += SCINTILLATOR*p.countResponses(DetectorType.CTOF);
         status += SCINTILLATOR*p.countResponses(DetectorType.FTHODO);
+        status += SCINTILLATOR*p.countResponses(DetectorType.BAND);
 
         // calorimeters:
         status += CALORIMETER*p.countResponses(DetectorType.CND);

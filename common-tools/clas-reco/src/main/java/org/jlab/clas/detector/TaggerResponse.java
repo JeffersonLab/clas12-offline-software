@@ -48,7 +48,7 @@ public class TaggerResponse extends DetectorResponse {
 
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
         String bankName, DetectorType type){        
-        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> responseList = new ArrayList<>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
@@ -82,6 +82,7 @@ public class TaggerResponse extends DetectorResponse {
                 ft.setPositionWidth(dx, dy, 0);
 
                 ft.getDescriptor().setType(type);
+                ft.getDescriptor().setSectorLayerComponent(0,1,0);
 
                 responseList.add((DetectorResponse)ft);
             }

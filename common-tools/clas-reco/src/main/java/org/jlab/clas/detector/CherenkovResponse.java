@@ -18,9 +18,9 @@ import org.jlab.io.base.DataEvent;
 public class CherenkovResponse extends DetectorResponse {
 
     public static class TrackResidual implements Comparable {
-        private double coneAngle;
-        private double dTheta;
-        private double dPhi;
+        private final double coneAngle;
+        private final double dTheta;
+        private final double dPhi;
         public double getDeltaTheta() { return this.dTheta; }
         public double getDeltaPhi()   { return this.dPhi; }
         public double getConeAngle()  { return this.coneAngle; }
@@ -32,6 +32,7 @@ public class CherenkovResponse extends DetectorResponse {
             this.dPhi = cher.getDeltaPhi(vecHit.phi(),vecTrk.phi());
             this.coneAngle = vecHit.angle(vecTrk);
         }
+        @Override
         public int compareTo(Object o) {
             TrackResidual other = (TrackResidual)o;
             if (this.coneAngle < other.getConeAngle()) return -1;
@@ -45,7 +46,7 @@ public class CherenkovResponse extends DetectorResponse {
     private double  hitDeltaTheta = 0.0;
     
     // FIXME:  remove this, use DetectorResponse's hitPosition instead:
-    private Point3D hitPosition = new Point3D();
+    private final Point3D hitPosition = new Point3D();
 
     public CherenkovResponse(double dtheta, double dphi){
         hitDeltaTheta  = dtheta;
@@ -118,7 +119,7 @@ public class CherenkovResponse extends DetectorResponse {
 
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type){        
-        List<DetectorResponse> responseList = new ArrayList<DetectorResponse>();
+        List<DetectorResponse> responseList = new ArrayList<>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
@@ -159,6 +160,7 @@ public class CherenkovResponse extends DetectorResponse {
                 che.setTime(time);
                 che.getDescriptor().setSector(sector);
                 che.getDescriptor().setType(type);
+                che.getDescriptor().setLayer(1);
 
                 // only LTCC currently reports status:
                 if (type==DetectorType.LTCC) che.setStatus(bank.getInt("status",row));

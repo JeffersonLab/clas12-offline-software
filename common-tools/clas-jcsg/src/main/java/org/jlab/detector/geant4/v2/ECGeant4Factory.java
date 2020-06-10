@@ -6,8 +6,9 @@
 package org.jlab.detector.geant4.v2;
 
 import eu.mihosoft.vrl.v3d.Vector3d;
+import org.jlab.detector.base.DetectorType;
+import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.units.SystemOfUnits.Length;
-import org.jlab.detector.volume.G4Box;
 import org.jlab.detector.volume.G4Trap;
 import org.jlab.detector.volume.G4World;
 import org.jlab.detector.volume.Geant4Basic;
@@ -29,6 +30,14 @@ public final class ECGeant4Factory extends Geant4Factory {
     private final double wUstrip, dwUstrip, wVstrip, dwVstrip, wWstrip, dwWstrip;
     private final double thtilt, thview, walpha;
     private final double dist2tgt, dist2cnt, shiftcnt;
+
+    private final double[] align_deltaX = new double[6];
+    private final double[] align_deltaY = new double[6];
+    private final double[] align_deltaZ = new double[6];
+    private final double[] align_rotX = new double[6];
+    private final double[] align_rotY = new double[6];
+    private final double[] align_rotZ = new double[6];
+
 
     public ECGeant4Factory(ConstantProvider cp) {
         motherVolume = new G4World("fc");
@@ -61,6 +70,19 @@ public final class ECGeant4Factory extends Geant4Factory {
 
         thview = Math.toRadians(cp.getDouble("/geometry/ec/ec/view_angle", 0));
         thtilt = Math.toRadians(cp.getDouble("/geometry/ec/ec/thtilt", 0));
+        
+        int alignrows = cp.length("/geometry/ec/alignment/sector");
+        for(int irow = 0; irow< alignrows; irow++) {
+            int isector = cp.getInteger("/geometry/ec/alignment/sector",irow)-1;
+            
+            align_deltaX[isector] = cp.getDouble("/geometry/ec/alignment/deltaX",irow);
+            align_deltaY[isector] = cp.getDouble("/geometry/ec/alignment/deltaY",irow);
+            align_deltaZ[isector] = cp.getDouble("/geometry/ec/alignment/deltaZ",irow);
+            align_rotX[isector]   = cp.getDouble("/geometry/ec/alignment/rotX",irow);
+            align_rotY[isector]   = cp.getDouble("/geometry/ec/alignment/rotY",irow);
+            align_rotZ[isector]   = cp.getDouble("/geometry/ec/alignment/rotZ",irow);
+        }
+
         walpha = Math.atan((Math.pow(Math.tan(thview), 2.0) - 3) / 4 / Math.tan(thview));
 
         for (int sec = 1; sec <= nsectors; sec++) {
@@ -245,9 +267,12 @@ public final class ECGeant4Factory extends Geant4Factory {
             double secphi = Math.toRadians(90 - (sector - 1) * 60);
             sectorVolume.rotate("yxz", 0, thtilt, secphi);
 
-            Vector3d secPos = new Vector3d(0, 0, dist2midplane)
+            // apply shifts from alignment table (ROTATIONS TO BE ADDED!!)
+            // alignment table offsets are defined in standard tilted-sector-coordinate frame
+            // sector before placement is "sector-2.5", i.e sectorX=-tcsY and sectorY=tcsX
+            Vector3d secPos = new Vector3d(0, 0, dist2midplane + align_deltaZ[sector-1])
                     .rotateX(-thtilt)
-                    .add(0, -dist2cnt * Math.cos(thtilt), dist2cnt * Math.sin(thtilt))
+                    .add(-align_deltaY[sector-1], -(dist2cnt-align_deltaX[sector-1]) * Math.cos(thtilt), (dist2cnt-align_deltaX[sector-1]) * Math.sin(thtilt))
                     .rotateZ(-secphi);
             sectorVolume.translate(secPos);
 
@@ -357,4 +382,15 @@ public final class ECGeant4Factory extends Geant4Factory {
         //System.out.println("line3d(" + point + ", "+point.plus(normal.times(20))+");");
         return new Plane3D(point.x, point.y, point.z, normal.x, normal.y, normal.z);
     }
+    
+        
+        public static void main(String[] args) {
+        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.ECAL, 11, "default");
+        ECGeant4Factory factory = new ECGeant4Factory(cp);
+            
+        for (int sector = 1; sector <= 6; sector++) {
+            System.out.println(factory.getFrontalFace(sector).point().toString() + " " + factory.getPaddle(sector, 1, 1).getGlobalPosition().toString());
+        }
+    }
+
 }

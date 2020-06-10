@@ -56,6 +56,14 @@ public class HipoDataSync implements DataSync {
         this.writer.open(file);
     }
 
+    public void addSchema(Schema schema){
+        writer.getSchemaFactory().addSchema(schema);
+    }
+    
+    public void addSchemaList(List<Schema> schemaList){
+        for(Schema schema : schemaList) addSchema(schema);
+    }
+    
     @Override
     public void writeEvent(DataEvent event) {
         //EvioDataEvent  evioEvent = (EvioDataEvent) event;

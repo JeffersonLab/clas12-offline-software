@@ -59,6 +59,11 @@ public enum EBCCDBEnum {
     FCUP_slope,
     FCUP_offset,
     FCUP_atten,
+    HELICITY_frequency,
+    HELICITY_delay,
+    HELICITY_pattern,
+    HELICITY_tsettle,
+    HELICITY_tstable,
     HWP_position;
 }
 

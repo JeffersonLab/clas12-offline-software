@@ -18,8 +18,6 @@ import static org.jlab.detector.units.SystemOfUnits.Length;
 import org.jlab.detector.volume.G4World;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.prim.Plane3D;
-import org.jlab.geom.prim.Vector3D;
-import org.jlab.geometry.prim.Line3d;
 
 /**
  *
@@ -30,6 +28,12 @@ public final class FTOFGeant4Factory extends Geant4Factory {
     private final double motherGap = 4.0 * Length.cm;
     private final double pbthickness = 0.005 * Length.in;
     private final double microgap = 0.001;
+    private final double[][] align_deltaX = new double[6][3];
+    private final double[][] align_deltaY = new double[6][3];
+    private final double[][] align_deltaZ = new double[6][3];
+    private final double[][] align_rotX = new double[6][3];
+    private final double[][] align_rotY = new double[6][3];
+    private final double[][] align_rotZ = new double[6][3];
 
     private final String[] stringLayers = new String[]{
         "/geometry/ftof/panel1a",
@@ -42,6 +46,19 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
     public FTOFGeant4Factory(ConstantProvider provider) {
         motherVolume = new G4World("fc");
+
+        int alignrows = provider.length("/geometry/ftof/alignment/sector");
+        for(int irow = 0; irow< alignrows; irow++) {
+            int isector = provider.getInteger("/geometry/ftof/alignment/sector",irow)-1;
+            int ilayer = provider.getInteger("/geometry/ftof/alignment/layer",irow)-1;
+
+            align_deltaX[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/deltaX",irow);
+            align_deltaY[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/deltaY",irow);
+            align_deltaZ[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/deltaZ",irow);
+            align_rotX[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/rotX",irow);
+            align_rotY[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/rotY",irow);
+            align_rotZ[isector][ilayer] = provider.getDouble("/geometry/ftof/alignment/rotZ",irow);
+        }
 
         for (int sector = 1; sector <= 6; sector++) {
             for (int layer = 1; layer <= 3; layer++) {
@@ -61,6 +78,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
         List<G4Box> paddles = this.createLayer(cp, layer);
 
+        // x is along the paddle, y perpendicular to the panel and z in the panel plane pointing outward
         double panel_mother_dx1 = paddles.get(0).getXHalfLength();
         double panel_mother_dx2 = paddles.get(paddles.size() - 1).getXHalfLength()
                 + (paddles.get(paddles.size() - 1).getXHalfLength() - paddles.get(paddles.size() - 2).getXHalfLength());
@@ -71,18 +89,19 @@ public final class FTOFGeant4Factory extends Geant4Factory {
         double panel_mother_dz = panel_width / 2.0;
 
         G4Trd panelVolume = new G4Trd("ftof_p" + gemcLayerNames[layer - 1] + "_s" + sector,
-                panel_mother_dx1 + motherGap, panel_mother_dx2 + motherGap,
+                panel_mother_dx1 + motherGap, panel_mother_dx2 +motherGap,
                 panel_mother_dy + motherGap, panel_mother_dy + motherGap,
                 panel_mother_dz + motherGap);
         panelVolume.setId(FTOFID, sector, layer, 0);
 
-        double panel_pos_xy = dist2edge * Math.sin(thmin) + panel_width / 2 * Math.cos(thtilt) + panel_mother_dy * Math.sin(thtilt);
-        double panel_pos_x = panel_pos_xy * Math.cos(Math.toRadians(sector * 60 - 60));
-        double panel_pos_y = panel_pos_xy * Math.sin(Math.toRadians(sector * 60 - 60));
-        double panel_pos_z = dist2edge * Math.cos(thmin) - panel_width / 2 * Math.sin(thtilt) + panel_mother_dy * Math.cos(thtilt);
-
         panelVolume.rotate("xyz", Math.toRadians(-90) - thtilt, 0.0, Math.toRadians(-30.0 - sector * 60.0));
-        panelVolume.translate(panel_pos_x, panel_pos_y, panel_pos_z);
+
+        double panel_pos_x = dist2edge * Math.sin(thmin) + (panel_width/2 + align_deltaX[sector-1][layer-1]) * Math.cos(thtilt) + (panel_mother_dy+align_deltaZ[sector-1][layer-1]) * Math.sin(thtilt);
+        double panel_pos_y = align_deltaY[sector-1][layer-1];
+        double panel_pos_z = dist2edge * Math.cos(thmin) - (panel_width/2 + align_deltaX[sector-1][layer-1]) * Math.sin(thtilt) + (panel_mother_dy+align_deltaZ[sector-1][layer-1]) * Math.cos(thtilt);
+        Vector3d pos_vec = new Vector3d(panel_pos_x, panel_pos_y, panel_pos_z);
+        pos_vec.rotateZ(Math.toRadians((sector-1)*60));
+        panelVolume.translate(pos_vec);
 
         for (int ipaddle = 0; ipaddle < paddles.size(); ipaddle++) {
             paddles.get(ipaddle).setName("panel" + gemcLayerNames[layer - 1] + "_sector" + sector + "_paddle_" + (ipaddle + 1));
@@ -102,15 +121,15 @@ public final class FTOFGeant4Factory extends Geant4Factory {
 
     private List<G4Box> createLayer(ConstantProvider cp, int layer) {
 
-        int numPaddles = cp.length(stringLayers[layer - 1] + "/paddles/paddle");
-        double paddlewidth = cp.getDouble(stringLayers[layer - 1] + "/panel/paddlewidth", 0);
-        double paddlethickness = cp.getDouble(stringLayers[layer - 1] + "/panel/paddlethickness", 0);
-        double gap = cp.getDouble(stringLayers[layer - 1] + "/panel/gap", 0);
+        int numPaddles          = cp.length(stringLayers[layer - 1] + "/paddles/paddle");
+        double paddlewidth      = cp.getDouble(stringLayers[layer - 1] + "/panel/paddlewidth", 0);
+        double paddlethickness  = cp.getDouble(stringLayers[layer - 1] + "/panel/paddlethickness", 0);
+        double gap              = cp.getDouble(stringLayers[layer - 1] + "/panel/gap", 0);
         double wrapperthickness = cp.getDouble(stringLayers[layer - 1] + "/panel/wrapperthickness", 0);
-        double thtilt = Math.toRadians(cp.getDouble(stringLayers[layer - 1] + "/panel/thtilt", 0));
-        double thmin = Math.toRadians(cp.getDouble(stringLayers[layer - 1] + "/panel/thmin", 0));
-        double pairgap = 0;
-        if(layer==2) pairgap = cp.getDouble(stringLayers[layer - 1] + "/panel/pairgap", 0);
+        double thtilt           = Math.toRadians(cp.getDouble(stringLayers[layer - 1] + "/panel/thtilt", 0));
+        double thmin            = Math.toRadians(cp.getDouble(stringLayers[layer - 1] + "/panel/thmin", 0));
+        double pairgap          = 0;
+        if(layer==2) pairgap    = cp.getDouble(stringLayers[layer - 1] + "/panel/pairgap", 0);
             
         String paddleLengthStr = stringLayers[layer - 1] + "/paddles/Length";
 
@@ -204,7 +223,7 @@ public final class FTOFGeant4Factory extends Geant4Factory {
     
     
     public static void main(String[] args) {
-        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.FTOF);
+        ConstantProvider cp = GeometryFactory.getConstants(DetectorType.FTOF, 11, "rga_spring2018");
         FTOFGeant4Factory factory = new FTOFGeant4Factory(cp);
             
         for (int sector = 1; sector <= 1; sector++) {

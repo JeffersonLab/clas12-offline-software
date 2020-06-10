@@ -236,30 +236,19 @@ public class EvioHipoEvent4 {
         }
     }
     
-    public void fillHipoEventRTPC(Event hipoEvent, EvioDataEvent evioEvent){
-        if(evioEvent.hasBank("RTPC::dgtz")==true){
-            EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("RTPC::dgtz");
-            Bank hipoADC = new Bank(schemaFactory.getSchema("RTPC::adc"), evioBank.rows());
-//            Bank hipoPOS = new Bank(schemaFactory.getSchema(("RTPC::pos"), evioBank.rows());            
-            for(int i = 0; i < evioBank.rows(); i++){
+	public void fillHipoEventRTPC(Event hipoEvent, EvioDataEvent evioEvent){
+	    if(evioEvent.hasBank("RTPC::dgtz")==true){
+			EvioDataBank evioBankdgtz = (EvioDataBank) evioEvent.getBank("RTPC::dgtz");
+            Bank hipoADC = new Bank(schemaFactory.getSchema("RTPC::adc"), evioBankdgtz.rows());     
+            for(int i = 0; i < evioBankdgtz.rows(); i++){
                 hipoADC.putByte("sector", i, (byte) 1);
-                hipoADC.putByte("layer",  i, (byte) 1);
-                hipoADC.putShort("component",  i, (short) evioBank.getInt("CellID",i));
+                hipoADC.putByte("layer",  i, (byte) evioBankdgtz.getInt("Layer",i));
+                hipoADC.putShort("component",  i, (short) evioBankdgtz.getInt("Component",i));
                 hipoADC.putByte("order", i, (byte) 0);
-                hipoADC.putInt("ADC", i, (int) evioBank.getDouble("ADC", i));
-                hipoADC.putFloat("time", i, (float) evioBank.getDouble("Time", i));
-//                double tdc = evioBank.getDouble("TDC", i);
-//                hipoADC.putFloat("time", i, (float) tdc);
-//                hipoADC.putShort("ped", i, (short) 0);
-//                hipoPOS.putInt("step", i, (byte) evioBank.getInt("step", i));
-//                hipoPOS.putFloat("time", i, (float) tdc);
-//                hipoPOS.putFloat("energy", i, (float) evioBank.getDouble("EDep", i));
-//                hipoPOS.putFloat("posx", i, (float) evioBank.getDouble("PosX", i));
-//                hipoPOS.putFloat("posy", i, (float) evioBank.getDouble("PosY", i));
-//                hipoPOS.putFloat("posz", i, (float) evioBank.getDouble("PosZ", i));
-//                hipoPOS.putFloat("phi", i, (float) evioBank.getDouble("phiRad", i));
+                hipoADC.putInt("ADC", i, (int) evioBankdgtz.getInt("ADC", i));
+                hipoADC.putFloat("time", i, (float) evioBankdgtz.getDouble("Time", i));
+                hipoADC.putShort("ped", i, (short) 0);
             }
-//            hipoEvent.write(hipoADC,hipoPOS);
             hipoEvent.write(hipoADC);
         }
     }
@@ -305,12 +294,16 @@ public class EvioHipoEvent4 {
                 hipoADC.putShort("component",  index, (short) evioBank.getInt("component",i));
                 hipoADC.putByte("order", index,(byte) 0);
                 hipoADC.putInt("ADC", index, evioBank.getInt("ADCL", i));
+                double tdcl = (double) evioBank.getInt("TDCL", i);
+                hipoADC.putFloat("time", index, (float) (tdcl*24.0/1000));
                 
                 hipoADC.putByte("sector", index+1,      (byte)  evioBank.getInt("sector",i));
                 hipoADC.putByte("layer",  index+1,      (byte)  evioBank.getInt("layer",i));
                 hipoADC.putShort("component",  index+1, (short) evioBank.getInt("component",i));
                 hipoADC.putByte("order", index+1,(byte) 1);
                 hipoADC.putInt("ADC", index+1, evioBank.getInt("ADCR", i));
+                double tdcr = (double) evioBank.getInt("TDCR", i);
+                hipoADC.putFloat("time", index+1, (float) (tdcr*24.0/1000));
                 
                 hipoTDC.putByte("sector", index,      (byte)  evioBank.getInt("sector",i));
                 hipoTDC.putByte("layer",  index,      (byte)  evioBank.getInt("layer",i));
@@ -534,8 +527,8 @@ public class EvioHipoEvent4 {
                 hipoBank.putFloat("lifetime",i, (float) (evioBank.getDouble("ltime", i)) );
                 hipoBank.putByte("type",     i, (byte)  (evioBank.getDouble("type", i)) );
                 hipoBank.putInt("pid",       i, (int)   (evioBank.getDouble("pid", i)) );
-                hipoBank.putByte("parent",   i, (byte)  (evioBank.getDouble("parent", i)) );
-                hipoBank.putByte("daughter", i, (byte)  (evioBank.getDouble("daughter", i)) );
+                hipoBank.putByte("parent",   i, (byte)  (evioBank.getDouble("parentID", i)) );
+                hipoBank.putByte("daughter", i, (byte)  (evioBank.getDouble("daughterID", i)) );
                 hipoBank.putFloat("px",      i, (float) (evioBank.getDouble("px", i)) );
                 hipoBank.putFloat("py",      i, (float) (evioBank.getDouble("py", i)) );
                 hipoBank.putFloat("pz",      i, (float) (evioBank.getDouble("pz", i)) );

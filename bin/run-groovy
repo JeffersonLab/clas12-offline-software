@@ -3,17 +3,17 @@
 source `dirname $0`/env.sh 
 
 CLARA_HOME=`dirname $0`/..
-DATAMINING=`dirname $0`/..
+CLAS12DIR=`dirname $0`/..
 CLAS12DIR=`dirname $0`/.. ; export CLAS12DIR
  
 CLARA_SERVICES=$CLAS12DIR/lib/services ; export CLARA_SERVICES
 
-#JYTHONPATH=${DATAMINING}/lib/jython
+#JYTHONPATH=${CLAS12DIR}/lib/jython
 #echo ${JYTHONPATH}
 
 #--------------------------------------------------------------
 # Adding supporting COAT jar files
-for i in `ls -a $DATAMINING/lib/clas/*.jar`
+for i in `ls -a $CLAS12DIR/lib/clas/*.jar`
 do  
 #echo "$i"
 if [ -z "${JYPATH}" ] ; then
@@ -24,7 +24,7 @@ fi
 done 
 #--------------------------------------------------------------
 # Adding supporting plugins directory
-for i in `ls -a $DATAMINING/lib/services/*.jar`
+for i in `ls -a $CLAS12DIR/lib/services/*.jar`
 do
 if [ -z "${JYPATH}" ] ; then
 JYPATH="$i"
@@ -38,7 +38,7 @@ done
 # Done loading plugins
 #--------------------------------------------------------------
 # Adding supporting plugins directory 
-for i in `ls -a $DATAMINING/lib/utils/*.jar`
+for i in `ls -a $CLAS12DIR/lib/utils/*.jar`
 do
 if [ -z "${JYPATH}" ] ; then
 JYPATH="$i"
@@ -47,7 +47,7 @@ JYPATH=${JYPATH}:"$i"
 fi
 done
 #-------------------------------------------------------------
-JYPATH=${JYPATH}:${DATAMINING}/lib/packages
+JYPATH=${JYPATH}:${CLAS12DIR}/lib/packages
 echo " "
 echo " "
 echo "*****************************************"

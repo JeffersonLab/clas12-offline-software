@@ -1,15 +1,15 @@
 package org.jlab.service.dc;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.base.GeometryFactory;
-import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
-import org.jlab.detector.geant4.v2.ECGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
-import org.jlab.detector.geant4.v2.PCALGeant4Factory;
 import org.jlab.geom.base.ConstantProvider;
 import org.jlab.geom.base.Detector;
 import org.jlab.io.base.DataEvent;
@@ -27,53 +27,119 @@ public class DCEngine extends ReconstructionEngine {
     TrajectorySurfaces tSurf;
     String clasDictionaryPath ;
     String variationName;
+    boolean endplatesBowing;
     public DCEngine(String name) {
         super(name,"ziegler","5.0");
     }
 
-    public void setStartTimeOption() {
+    public void setOptions() {
         // Load config
-        String useSTTConf = this.getEngineConfigString("useStartTime");
+        String useSTTConf = this.getEngineConfigString("dcUseStartTime");
         
         if (useSTTConf!=null) {
-            System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on yaml ="+useSTTConf);
+            System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on yaml = "+useSTTConf);
             Constants.setUSETSTART(Boolean.valueOf(useSTTConf));
         }
         else {
-            useSTTConf = System.getenv("USESTT");
+            useSTTConf = System.getenv("COAT_DC_USESTARTTIME");
             if (useSTTConf!=null) {
-                System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on env ="+useSTTConf);
+                System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on env = "+useSTTConf);
                 Constants.setUSETSTART(Boolean.valueOf(useSTTConf));
             }
         }
         if (useSTTConf==null) {
-             System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on default ="+Constants.isUSETSTART());
+             System.out.println("["+this.getName()+"] run with start time in tracking config chosen based on default = "+Constants.isUSETSTART());
         }
         
         // Wire distortions
-        String wireDistortionsFlag = this.getEngineConfigString("wireDistort");
+        String wireDistortionsFlag = this.getEngineConfigString("dcWireDistortion");
         
         if (wireDistortionsFlag!=null) {
-            System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on yaml ="+wireDistortionsFlag);
+            System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on yaml = "+wireDistortionsFlag);
             if(Boolean.valueOf(wireDistortionsFlag)==true) {
-                Constants.setWIREDIST(1.0);
+                //Constants.setWIREDIST(1.0);
+                endplatesBowing = DCGeant4Factory.ENDPLATESBOWON;
             } else {
-                Constants.setWIREDIST(0);
+                //Constants.setWIREDIST(0);
+                endplatesBowing = DCGeant4Factory.ENDPLATESBOWOFF;
             }
         }
         else {
-            wireDistortionsFlag = System.getenv("USEWIREDIST");
+            wireDistortionsFlag = System.getenv("COAT_DC_WIREDISTORTION"); 
             if (wireDistortionsFlag!=null) {
-                System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on env ="+wireDistortionsFlag);
+                System.out.println("["+this.getName()+"] run with wire distortions in tracking config chosen based on env = "+wireDistortionsFlag);
                 if(Boolean.valueOf(wireDistortionsFlag)==true) {
-                    Constants.setWIREDIST(1.0);
+                    //Constants.setWIREDIST(1.0);
+                    endplatesBowing = DCGeant4Factory.ENDPLATESBOWON;
                 } else {
-                    Constants.setWIREDIST(0);
+                    //Constants.setWIREDIST(0);
+                    endplatesBowing = DCGeant4Factory.ENDPLATESBOWOFF;
                 }
             }
         }
         if (wireDistortionsFlag==null) {
-             System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (off)");
+             System.out.println("["+this.getName()+"] run with default setting for wire distortions in tracking (MC-off/Data-on)");
+        }
+        //Use time in tBeta function (true: use time; false: use track doca)
+        String useTIMETBETA = this.getEngineConfigString("dcTimeTBeta");
+        
+        if (useTIMETBETA!=null) {
+            System.out.println("["+this.getName()+"] run with new tBeta chosen based on yaml = "+useTIMETBETA);
+            Constants.setUSETIMETBETA(Boolean.valueOf(useTIMETBETA));
+        }
+        else {
+            useTIMETBETA = System.getenv("COAT_DC_USETIMETBETA");
+            if (useTIMETBETA!=null) {
+                System.out.println("["+this.getName()+"] run with with new tBeta config chosen based on env = "+useTIMETBETA);
+                Constants.setUSETIMETBETA(Boolean.valueOf(useTIMETBETA));
+            }
+        }
+        if (useTIMETBETA==null) {
+             System.out.println("["+this.getName()+"] run with with new tBeta config chosen based on default = "+Constants.useUSETIMETBETA());
+        }
+        //CHECKBETA
+        //Use beta cut(true: use time; false: use track doca)
+        String useBETACUT = this.getEngineConfigString("dcBetaCut");
+        
+        if (useBETACUT!=null) {
+            System.out.println("["+this.getName()+"] run with Beta cut chosen based on yaml = "+useBETACUT);
+            Constants.CHECKBETA=Boolean.valueOf(useBETACUT);
+        }
+        else {
+            useBETACUT = System.getenv("COAT_DC_USEBETACUT");
+            if (useBETACUT!=null) {
+                System.out.println("["+this.getName()+"] run with with with Beta cut config chosen based on env = "+useBETACUT);
+                Constants.CHECKBETA=Boolean.valueOf(useBETACUT);
+            }
+        }
+        if (useBETACUT==null) {
+             System.out.println("["+this.getName()+"] run with with Beta cut config chosen based on default = "+Constants.CHECKBETA);
+        }
+        
+        //T2D Function
+        String T2Dfcn = this.getEngineConfigString("dcT2DFunc");
+        
+        if (T2Dfcn!=null) {
+            System.out.println("["+this.getName()+"] run with time to distance function in tracking config chosen based on yaml = "+T2Dfcn);
+            if(T2Dfcn.equalsIgnoreCase("Polynomial")) {
+                Constants.setT2D(1);
+            } else {
+                Constants.setT2D(0);
+            }
+        }
+        else {
+            T2Dfcn = System.getenv("COAT_DC_T2DFUNC");
+            if (T2Dfcn!=null) {
+                System.out.println("["+this.getName()+"] run with time to distance function in config chosen based on env = "+T2Dfcn);
+                if(T2Dfcn.equalsIgnoreCase("Polynomial")) {
+                Constants.setT2D(1);
+            } else {
+                Constants.setT2D(0);
+            }
+            }
+        }
+        if (T2Dfcn==null) {
+             System.out.println("["+this.getName()+"] run with time to distance exponential function in tracking ");
         }
     }
     public void LoadTables() {
@@ -93,14 +159,14 @@ public class DCEngine extends ReconstructionEngine {
 
         requireConstants(Arrays.asList(dcTables));
         // Get the constants for the correct variation
-        String geomDBVar = this.getEngineConfigString("geomDBVariation");
+        String geomDBVar = this.getEngineConfigString("dcGeometryVariation");
         if (geomDBVar!=null) {
-            System.out.println("["+this.getName()+"] run with geometry variation based on yaml ="+geomDBVar);
+            System.out.println("["+this.getName()+"] run with geometry variation based on yaml = "+geomDBVar);
         }
         else {
-            geomDBVar = System.getenv("GEOMDBVAR");
+            geomDBVar = System.getenv("COAT_DC_GEOMETRYVARIATION");
             if (geomDBVar!=null) {
-                System.out.println("["+this.getName()+"] run with geometry variation chosen based on env ="+geomDBVar);
+                System.out.println("["+this.getName()+"] run with geometry variation chosen based on env = "+geomDBVar);
             }
         } 
         if (geomDBVar==null) {
@@ -110,7 +176,7 @@ public class DCEngine extends ReconstructionEngine {
         // Load the geometry
         String geoVariation = Optional.ofNullable(geomDBVar).orElse("default");
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, geoVariation);
-        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
+        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, endplatesBowing);
         for(int l=0; l<6; l++) {
             Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);
             System.out.println("****************** WPDIST READ *********FROM "+geoVariation+"**** VARIATION ****** "+provider.getDouble("/geometry/dc/superlayer/wpdist", l));
@@ -128,17 +194,24 @@ public class DCEngine extends ReconstructionEngine {
 
         // create the surfaces
         tSurf = new TrajectorySurfaces();
+        // for debugging the end plates bowing:
+        //====================================
+        //try {
+        //    tSurf.checkDCGeometry(dcDetector);
+        //} catch (FileNotFoundException ex) {
+        //    Logger.getLogger(DCEngine.class.getName()).log(Level.SEVERE, null, ex);
+        //}
         tSurf.LoadSurfaces(targetPosition, targetLength,dcDetector, ftofDetector, ecalDetector);
         
         // Get the constants for the correct variation
-        String ccDBVar = this.getEngineConfigString("constantsDBVariation");
+        String ccDBVar = this.getEngineConfigString("variation");
         if (ccDBVar!=null) {
-            System.out.println("["+this.getName()+"] run with constants variation based on yaml ="+ccDBVar);
+            System.out.println("["+this.getName()+"] run with constants variation based on yaml = "+ccDBVar);
         }
         else {
-            ccDBVar = System.getenv("CCDBVAR");
+            ccDBVar = System.getenv("COAT_DC_VARIATION");
             if (ccDBVar!=null) {
-                System.out.println("["+this.getName()+"] run with constants variation chosen based on env ="+ccDBVar);
+                System.out.println("["+this.getName()+"] run with constants variation chosen based on env = "+ccDBVar);
             }
         } 
         if (ccDBVar==null) {

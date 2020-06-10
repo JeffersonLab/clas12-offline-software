@@ -197,7 +197,7 @@ public class CndHitFinder {
 					else if (hit_d.Component() == 2) phi_hit = (block-1) * Parameters.BlockSlice + 0.75*Parameters.BlockSlice;
 
 					//in mm
-					z_hit = (((-1.*ccdb.ZOFFSET[lay-1]) + (ccdb.LENGTH[lay-1]/2.)) + Z_av)-(ccdb.ZTARGET[0]*10);    // z co-ordinate of hit in the paddle wrt Central Detector centre                                                                   
+					z_hit = (((-1.*ccdb.ZOFFSET[lay-1]) + (ccdb.LENGTH[lay-1]/2.)) + Z_av)+(ccdb.ZTARGET[0]*10);    // z co-ordinate of hit in the paddle wrt Central Detector centre                                                                   
 					r_hit = ccdb.INNERRADIUS[0] + (lay - 0.5)*ccdb.THICKNESS[0] + (lay-1)*Parameters.LayerGap;
 					path = Math.sqrt(r_hit*r_hit + z_hit*z_hit); 
 
@@ -314,7 +314,7 @@ public class CndHitFinder {
 		// Constants SHOULD NOT be in the code methods BUT in a parameters file or in CCDB!!!
 
 		double Rres= ccdb.THICKNESS[0]/2.; // Resolution in radius (half the thickness of the paddles)
-		double Phires= Parameters.BlockSlice/2.; // resolution in Phi (half the angle covered by a paddle)
+		double Phires= Parameters.BlockSlice/4.; // resolution in Phi (half the angle covered by a paddle)
 		double radius = ccdb.INNERRADIUS[0] + (lay - 0.5)*ccdb.THICKNESS[0] + (lay-1)*Parameters.LayerGap;
 
 		//		double incx = Math.sqrt(((xi*xi*15.*15.)/(radius*radius))+((yi*yi)*(3.75*3.75*(Math.PI/180.)*(Math.PI/180.)))); //15 is half the paddle thickness
@@ -334,6 +334,14 @@ public class CndHitFinder {
 
 			// the following line give the point at which the cnd hit would occur according to the cvt track
 			//Point3D hitCndfromCvt = helices.get(i).get_Helix().getPointAtRadius(radius); 
+			
+			//System.out.print("helices size "+helices.get(i).get_TrkInters().size());			
+			//System.out.println("layer "+lay+ " helice  "+i);
+			ArrayList<Point3D> hitCndfromCvtList = helices.get(i).get_TrkInters().get(lay-1); // middle of the counter
+			
+			if(hitCndfromCvtList.isEmpty())continue; //Check if a layer as a swimmer intersection. If not go to the next track
+			
+
 			Point3D hitCndfromCvt = helices.get(i).get_TrkInters().get(lay-1).get(1); // middle of the counter
 
 			double xj=hitCndfromCvt.x(); // retrieve CndFromCvt hit coordinates
@@ -345,7 +353,7 @@ public class CndHitFinder {
 			double thetaj = Math.acos(zj/rj)*(180./Math.PI);
 
 			//	if(Math.abs(xi-xj)<(3.*incx)  && Math.abs(yi-yj)<(3.*incy)  && Math.abs(zi-zj)<(3.*incz)) { // CUT are set to x,y,z incertainty
-			double zjAv = zj - ((-1.*ccdb.ZOFFSET[lay-1]) + (ccdb.LENGTH[lay-1]/2.));
+			double zjAv = zj - ((-1.*ccdb.ZOFFSET[lay-1]) + (ccdb.LENGTH[lay-1]/2.))-(ccdb.ZTARGET[0]*10);
 			if((flag==0 && Math.abs(xi-xj)<(5.*incx)  && Math.abs(yi-yj)<(5.*incy)  && zjAv>(ccdb.LENGTH[lay-1]/-2.)-10*Parameters.Zres[0] && zjAv<(ccdb.LENGTH[lay-1]/2.)+10*Parameters.Zres[0]) || 
 					(flag==1 && Math.abs(xi-xj)<(5.*incx)  && Math.abs(yi-yj)<(5.*incy)  && Math.abs(zi-zj)<(5.*incz))){ // CUT are set to x,y incertainty and zj in the paddle length
 
@@ -381,6 +389,8 @@ public class CndHitFinder {
 
 				else {length = helices.get(i).get_TrkInters().get(lay-1).get(0).distance(helices.get(i).get_TrkInters().get(lay-1).get(2));
 				}
+				
+				//System.out.println(length);
 			}
 		}
 		return length; 

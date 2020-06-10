@@ -5,13 +5,12 @@ sudo: required
 language: java
 
 jdk:
-  - oraclejdk9
+  - openjdk11
 
-# this affects which java version is used:
 addons:
   apt:
     packages:
-      - oracle-java9-installer
+      - openjfx
 
 before_install:
     - ls -lthra
@@ -32,6 +31,7 @@ script:
   - ./run-eb-tests.sh -100 electrongamma    || travis_terminate 1;
   - ./run-eb-tests.sh -100 electronprotonC  || travis_terminate 1;
   - ./run-eb-tests.sh -100 electronneutronC || travis_terminate 1;
+  - ./run-eb-tests.sh -100 electronFTpion   || travis_terminate 1;
   - cd -
   - echo "finished advanced tests"
 #  - mvn cobertura:cobertura &> /dev/null # for codecov

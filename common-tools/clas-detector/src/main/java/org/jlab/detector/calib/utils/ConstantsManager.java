@@ -22,8 +22,12 @@ public class ConstantsManager {
     
     private DatabaseConstantsDescriptor  defaultDescriptor = new DatabaseConstantsDescriptor();
     private volatile Map<Integer,DatabaseConstantsDescriptor>  runConstants = new LinkedHashMap<Integer,DatabaseConstantsDescriptor>();
+    private volatile Map<Integer,Integer>    runConstantRequestHistory = new LinkedHashMap<Integer,Integer>();
+    
     private String   databaseVariation = "default";
     private String   timeStamp         = "";
+    private int      requestStatus     = 0;
+    private int      maxRequests       = 2;
    
     private volatile Map<Integer,RCDBConstants> rcdbConstants = new LinkedHashMap<Integer,RCDBConstants>();
     
@@ -49,6 +53,10 @@ public class ConstantsManager {
     
     public synchronized void init(List<String>  tables){
         this.defaultDescriptor.addTables(tables);
+    }
+    
+    public int getRequestStatus(){
+        return requestStatus;
     }
     
     public synchronized void init(List<String>  keys, List<String>  tables){
@@ -85,6 +93,18 @@ public class ConstantsManager {
 
         if(this.runConstants.containsKey(run)==true) return;
         
+         if(this.runConstantRequestHistory.containsKey(run)==false){
+                runConstantRequestHistory.put(run, 1);
+         } else {
+             int requests = runConstantRequestHistory.get(run);
+             runConstantRequestHistory.put(run, requests+1);
+             if(requests>maxRequests) {
+                 requestStatus = -1;
+                 System.out.println("[ConstantsManager] exceeded maximum requests " + requests + " for run " + run);
+             }
+         }
+        //String  historyString = 
+        //if()
         System.out.println("[ConstantsManager] --->  loading table for run = " + run);
         DatabaseConstantsDescriptor desc = defaultDescriptor.getCopy(run);
         DatabaseConstantProvider provider = new DatabaseConstantProvider(run,
@@ -116,6 +136,10 @@ public class ConstantsManager {
         RCDBProvider rcdbpro = new RCDBProvider();
         this.rcdbConstants.put(run,rcdbpro.getConstants(run));
         rcdbpro.disconnect();
+    }
+    
+    public void reset(){
+       this.runConstants.clear();
     }
     
     @Override
@@ -229,9 +253,12 @@ public class ConstantsManager {
         manager.init(Arrays.asList(new String[]{
             "/daq/fadc/ec",
             "/daq/fadc/ftof","/daq/fadc/htcc"}));
-        
-        IndexedTable  table1 = manager.getConstants(10, "/daq/fadc/htcc");
-        IndexedTable  table2 = manager.getConstants(10, "/daq/fadc/ec");
-        IndexedTable  table3 = manager.getConstants(12, "/daq/fadc/htcc");
+        for(int i = 0; i < 5 ; i++){
+            IndexedTable  table1 = manager.getConstants(10, "/daq/fadc/htcc");
+            IndexedTable  table2 = manager.getConstants(10, "/daq/fadc/ec");
+            IndexedTable  table3 = manager.getConstants(12, "/daq/fadc/htcc");
+            manager.reset();
+            System.out.println("\n\n STATUS = " + manager.getRequestStatus());
+        }
     }
 }

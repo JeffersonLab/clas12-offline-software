@@ -3,6 +3,8 @@ package org.jlab.rec.cvt.track;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
+import org.jlab.geom.base.Detector;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -25,6 +27,7 @@ public class TrackListFinder {
      */
     public List<Track> getTracks(List<Track> cands, 
             org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo,
+            CTOFGeant4Factory ctof_geo, Detector cnd_geo,
             Swim bstSwim) {
         List<Track> tracks = new ArrayList<Track>();
         if (cands.size() == 0) {
@@ -46,7 +49,7 @@ public class TrackListFinder {
 
                 int charge = trk.get_Q();
                 double maxPathLength = 5.0;//very loose cut 
-                bstSwim.SetSwimParameters(trk.get_helix().xdca() / 10, trk.get_helix().ydca() / 10, trk.get_helix().get_Z0() / 10, 
+                bstSwim.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10 , 
                         Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
                         trk.get_P(), charge, 
                         maxPathLength) ;
@@ -59,7 +62,7 @@ public class TrackListFinder {
 
                 TrajectoryFinder trjFind = new TrajectoryFinder();
 
-                Trajectory traj = trjFind.findTrajectory(trk.get_Id(), trk.get_helix(), trk, svt_geo, bmt_geo, "final");
+                Trajectory traj = trjFind.findTrajectory(trk.get_Id(), trk, svt_geo, bmt_geo, ctof_geo, cnd_geo, bstSwim, "final");
 
                 trk.set_Trajectory(traj.get_Trajectory());
 
