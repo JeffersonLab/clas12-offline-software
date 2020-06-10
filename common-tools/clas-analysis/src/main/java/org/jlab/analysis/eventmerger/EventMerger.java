@@ -25,10 +25,10 @@ import org.jlab.utils.options.OptionParser;
  */
 
 
-public class RawHitsMerger {
+public class EventMerger {
 
    
-    public RawHitsMerger() {
+    public EventMerger() {
     }
 
     
@@ -56,7 +56,7 @@ public class RawHitsMerger {
             boolean doubleHits = true;
             if(parser.getOption("-s").intValue()==0) doubleHits = false;
             
-            RawHitsMerger en = new RawHitsMerger();
+            EventMerger en = new EventMerger();
             ADCTDCMerger adctdcMerger = new ADCTDCMerger(detectors.split(","),doubleHits);
 
             int counter = 0;
@@ -79,9 +79,11 @@ public class RawHitsMerger {
 
                 //System.out.println("************************************************************* ");
                 DataEvent eventData = readerData.getNextEvent();
-                DataEvent eventBg   = readerBg.getNextEvent();
+                DataEvent eventBg1  = readerBg.getNextEvent();
+                if(!readerBg.hasEvent()) break;
+                DataEvent eventBg2  = readerBg.getNextEvent();
                 
-                adctdcMerger.updateEventWithMergedBanks(eventData, eventBg);
+                adctdcMerger.updateEventWithMergedBanks(eventData, eventBg1, eventBg2);
                 writer.writeEvent(eventData);
                 progress.updateStatus();
                 if(maxEvents>0){

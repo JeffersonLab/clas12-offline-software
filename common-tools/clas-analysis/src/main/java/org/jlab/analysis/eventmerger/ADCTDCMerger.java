@@ -26,6 +26,7 @@ public class ADCTDCMerger {
     private boolean debug = false;
     private boolean suppressDoubleHits = true;
     private String[] detectors;
+    private EventMergerConstants constants = new EventMergerConstants();
     
     public ADCTDCMerger() {
         detectors = new String[]{"DC","FTOF"};
@@ -181,6 +182,118 @@ public class ADCTDCMerger {
     }
     
     /**
+     * Merge TDC banks for data (signal) and background events for selected detector
+     * Use two background events shifted in time to extend the time range of the backgrounds
+     * 
+     * @param Det
+     * @param event
+     * @param bg1: primary background event
+     * @param bg2: secondary background event that will be shifted to negative times
+     * @return
+     */
+    public DataBank getTDCBank(String Det, DataEvent event, DataEvent bg1, DataEvent bg2){
+        
+        int offset1 = getTDCOffset(Det, event, bg1);
+        int offset2 = getTDCOffset(Det, event, bg2);
+        
+        String TDCString = Det+"::tdc";
+        DataBank bank = null;
+        // if no detector bank is found in the background events then keep the event bank
+        if(event.hasBank(TDCString)==true && bg1.hasBank(TDCString)==false && bg2.hasBank(TDCString)==false) {
+            bank = event.getBank(TDCString);
+            if(event.hasBank(TDCString)) { 
+                HipoDataEvent de = (HipoDataEvent) event;
+                de.removeBank(TDCString);
+            }
+        }
+        // if no detector bank is found in the phyics event, then keep the bank from the primary background event
+        else if(event.hasBank(TDCString)==false && bg1.hasBank(TDCString)==true) {
+            bank = bg1.getBank(TDCString);
+        }  
+        // if both physics and primary background events have the detector bank, then proceed with merging
+        else if(event.hasBank(TDCString)==true && bg1.hasBank(TDCString)==true) {
+            List<TDC> bgTDCs  = TDCbank(bg1.getBank(TDCString), offset1);
+            // if secondary background event has the relevant detector bank, add the hits shifted in time
+            if(bg2.hasBank(TDCString)) {
+                List<TDC> bg2TDCs  = TDCbank(bg2.getBank(TDCString), offset2);
+                for(TDC tdc : bg2TDCs) {
+                    int value  = tdc.getTdc();
+                    int layer  = tdc.getLayer();
+                    int offset = constants.getInt(Det, EventMergerEnum.READOUT_WINDOW_WIDTH, layer);
+                    tdc.setTdc(value-offset);
+                    bgTDCs.add(tdc);
+                }
+            }
+            List<TDC> TDCs    = TDCbank(event.getBank(TDCString), 0);
+
+            List<TDC> allTDCs = new ArrayList<TDC>();
+            for(TDC tdc : TDCs)   allTDCs.add(tdc);
+            for(TDC tdc : bgTDCs) allTDCs.add(tdc);
+            Collections.sort(allTDCs);
+            
+            List<TDC> mergedTDCs = new ArrayList<TDC>();
+            for(int i = 0; i < allTDCs.size(); i++) {
+                TDC tdc = allTDCs.get(i);
+                if(mergedTDCs.size()==0) {
+                    if(debug) {
+                        System.out.println("Keeping TDC " + i);
+                        tdc.show();
+                    }
+                    mergedTDCs.add(tdc);
+                }
+                else {
+                    TDC tdcOld = mergedTDCs.get(mergedTDCs.size()-1);
+                    if(!tdc.equalTo(tdcOld) || !suppressDoubleHits) {
+                        if(debug) {
+                            System.out.println("Keeping TDC " + i);
+                            tdc.show();
+                        }
+                        mergedTDCs.add(tdc);
+                    }
+                    else {
+                        if(tdc.getTdc()-tdcOld.getTdc()<constants.getInt(Det, EventMergerEnum.DEAD_TIME, tdc.getLayer())*constants.getDouble(Det, EventMergerEnum.TDC_CONV)) {
+                            if(debug) {
+                                System.out.println("\tSkipping TDC " + i +"\t");
+                                tdc.show();
+                            }                            
+                        }
+                        else {
+                            if(debug) {
+                                System.out.println("Keeping TDC " + i);
+                                tdc.show();
+                            }
+                            mergedTDCs.add(tdc);
+                        }
+                    }
+                }
+            } 
+                
+            List<TDC> filteredTDCs = new ArrayList<TDC>();
+            for(int i = 0; i < mergedTDCs.size(); i++) {
+                TDC tdc = mergedTDCs.get(i);
+                int value = tdc.getTdc();
+                int layer  = tdc.getLayer();
+                if((value>0 && value<constants.getInt(Det, EventMergerEnum.READOUT_WINDOW_WIDTH, layer))) {
+                    filteredTDCs.add(tdc);
+                }
+            }
+            if(event.hasBank(TDCString)) { 
+                HipoDataEvent de = (HipoDataEvent) event;
+                de.removeBank(TDCString);
+            }
+            bank = event.createBank(TDCString, filteredTDCs.size());
+            for (int i = 0; i < filteredTDCs.size(); i++) {
+                bank.setByte("sector",     i, filteredTDCs.get(i).getSector());
+                bank.setByte("layer",      i, filteredTDCs.get(i).getLayer());
+                bank.setShort("component", i, filteredTDCs.get(i).getComponent());
+                bank.setInt("TDC",         i, filteredTDCs.get(i).getTdc());
+                bank.setByte("order",      i, filteredTDCs.get(i).getOrder());
+            }
+        }
+        return bank;
+    }
+
+    /**
      * Merge ADC banks for data (signal) and background events for selected detector
      * In case of multiple hit on same detector element, only first hit in time is kept 
      *
@@ -308,11 +421,11 @@ public class ADCTDCMerger {
      * Append merged banks to hipo event
      * 
      * @param event
-     * @param bg
+     * @param bg1
      */
-    public void updateEventWithMergedBanks(DataEvent event, DataEvent bg) {
+    public void updateEventWithMergedBanks(DataEvent event, DataEvent bg1, DataEvent bg2) {
         
-        if(!event.hasBank("RUN::config") || !bg.hasBank("RUN::config")) {
+        if(!event.hasBank("RUN::config") || !bg1.hasBank("RUN::config")) {
             System.out.println("Missing RUN::config bank");
             return;
         }
@@ -321,13 +434,13 @@ public class ADCTDCMerger {
         
         for(String det:detectors) {
             if("BMT".equals(det) || "BST".equals(det) || "FTCAL".equals(det) || "FTHODO".equals(det) || "FMT".equals(det) || "FTTRK".equals(det) || "HTCC".equals(det) || "LTCC".equals(det)) {
-                event.appendBanks(this.getADCBank(det, event, bg));
+                event.appendBanks(this.getADCBank(det, event, bg1));
             }
             else if("DC".equals(det)) {
-                event.appendBanks(this.getTDCBank(det, event, bg));
+                event.appendBanks(this.getTDCBank(det, event, bg1, bg2));
             }
             else if("BAND".equals(det) || "CND".equals(det) || "CTOF".equals(det) || "ECAL".equals(det) || "FTOF".equals(det)) {
-                event.appendBanks(this.getADCBank(det, event, bg),this.getTDCBank(det, event, bg));
+                event.appendBanks(this.getADCBank(det, event, bg1),this.getTDCBank(det, event, bg1));
             }
             else {
                 System.out.println("Unknown detector:" + det);
@@ -495,6 +608,10 @@ public class ADCTDCMerger {
 
         public int getTdc() {
             return tdc;
+        }
+
+        public void setTdc(int tdc) {
+            this.tdc = tdc;
         }
         
         public boolean equalTo(TDC o){
