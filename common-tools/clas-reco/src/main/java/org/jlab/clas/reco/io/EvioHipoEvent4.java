@@ -294,12 +294,16 @@ public class EvioHipoEvent4 {
                 hipoADC.putShort("component",  index, (short) evioBank.getInt("component",i));
                 hipoADC.putByte("order", index,(byte) 0);
                 hipoADC.putInt("ADC", index, evioBank.getInt("ADCL", i));
+                double tdcl = (double) evioBank.getInt("TDCL", i);
+                hipoADC.putFloat("time", index, (float) (tdcl*24.0/1000));
                 
                 hipoADC.putByte("sector", index+1,      (byte)  evioBank.getInt("sector",i));
                 hipoADC.putByte("layer",  index+1,      (byte)  evioBank.getInt("layer",i));
                 hipoADC.putShort("component",  index+1, (short) evioBank.getInt("component",i));
                 hipoADC.putByte("order", index+1,(byte) 1);
                 hipoADC.putInt("ADC", index+1, evioBank.getInt("ADCR", i));
+                double tdcr = (double) evioBank.getInt("TDCR", i);
+                hipoADC.putFloat("time", index+1, (float) (tdcr*24.0/1000));
                 
                 hipoTDC.putByte("sector", index,      (byte)  evioBank.getInt("sector",i));
                 hipoTDC.putByte("layer",  index,      (byte)  evioBank.getInt("layer",i));

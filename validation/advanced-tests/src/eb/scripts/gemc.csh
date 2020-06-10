@@ -9,10 +9,14 @@ if ( -e "$1.evio" ) then
     exit
 endif
 
-source /group/clas12/gemc/environment.csh 4.3.0
+source /group/clas12/packages/setup.csh
+module load ccdb
+module load root
+module load gemc/4.3.2
+
 set run = 11
-set nEvents = 1000
-set gcard = ${GEMC}/../clas12.gcard
+set nEvents = 100
+set gcard = ${GEMC}/../../gcards/clas12-default.gcard
 
 gemc \
     $gcard \
