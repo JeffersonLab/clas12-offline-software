@@ -556,6 +556,25 @@ public class DetectorParticle implements Comparable {
         if(response==null) return -1.0;
         return response.getTime();
     }
+    
+    /**
+     * Calculate beta for given detector type/layer, prioritized by layer:
+     */
+    public double getNeutralBeta(DetectorType type, List<Integer> layers,double startTime) {
+        double beta=-9999;
+        for (int layer : layers) {
+            DetectorResponse resp = getHit(type,layer);
+            if (resp!=null) {
+                Vector3D hit=resp.getPosition().clone();
+                double path=hit.sub(new Vector3D(vertex().x(),vertex().y(),vertex().z())).mag();
+                beta = path / (resp.getTime()-startTime) /
+                    PhysicsConstants.speedOfLight();
+                break;
+            }
+        }
+        return beta;
+    }
+
 
     @Override
     public int compareTo(Object o) {

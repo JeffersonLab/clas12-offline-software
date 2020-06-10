@@ -65,6 +65,7 @@ public class FTOFEngine extends ReconstructionEngine {
                     "/calibration/ftof/time_walk_pos",
                     "/calibration/ftof/time_walk_exp",
                     "/calibration/ftof/fadc_offset",
+                    "/calibration/ftof/cluster"
                  };
         
         requireConstants(Arrays.asList(ftofTables));
@@ -134,9 +135,9 @@ public class FTOFEngine extends ReconstructionEngine {
         // 1) get the hits
         List<Hit> FTOF1AHits = hitRead.get_FTOF1AHits();
         List<Hit> FTOF1BHits = hitRead.get_FTOF1BHits();
-        List<Hit> FTOF2Hits = hitRead.get_FTOF2Hits();
+        List<Hit> FTOF2Hits  = hitRead.get_FTOF2Hits();
 
-        // 1.1) exit if hit list is empty
+        // 2) exit if hit list is empty
         if (FTOF1AHits != null) {
             hits.addAll(FTOF1AHits);
         }
@@ -150,9 +151,8 @@ public class FTOFEngine extends ReconstructionEngine {
         if (hits.size() == 0) {
             return true;
         }
-
-        // 1.2) Sort the hits for clustering
-        Collections.sort(hits);
+        // 2.1) Sort the hits according to sector/layer/component
+        Collections.sort(hits);       
         if (Constants.DEBUGMODE) { // if running in DEBUG MODE print out the
             // reconstructed info about the hits and the
             // clusters
@@ -162,42 +162,27 @@ public class FTOFEngine extends ReconstructionEngine {
                 hit.printInfo();
             }
         }
-        // 2) find the clusters from these hits
-        ClusterFinder clusFinder = new ClusterFinder();
+
+        // 3) find the clusters from these hits
+        ClusterFinder clusFinder = new ClusterFinder(this.getConstantsManager().getConstants(newRun, "/calibration/ftof/cluster"));
         int[] npaddles = Constants.NPAD;
         int npanels = 3;
         int nsectors = 6;
-        List<Cluster> FTOF1AClusters = null;
-        List<Cluster> FTOF1BClusters = null;
-        List<Cluster> FTOF2Clusters = null;
-        if (FTOF1AHits != null && FTOF1AHits.size() > 0) {
-            FTOF1AClusters = clusFinder.findClusters(FTOF1AHits, nsectors,
+        if (hits != null && hits.size() > 0) {
+            clusters = clusFinder.findClusters(hits, nsectors,
                     npanels, npaddles);
         }
-        if (FTOF1BHits != null && FTOF1BHits.size() > 0) {
-            FTOF1BClusters = clusFinder.findClusters(FTOF1BHits, nsectors,
-                    npanels, npaddles);
+        // 3.1) assign cluster IDs to hits
+        if (clusters != null && clusters.size()>0) {
+            hitRead.setHitPointersToClusters(hits, clusters);       
         }
-        if (FTOF2Hits != null && FTOF2Hits.size() > 0) {
-            FTOF2Clusters = clusFinder.findClusters(FTOF2Hits, nsectors,
-                    npanels, npaddles);
-        }
-
-        // next write results to banks
-        if (FTOF1AClusters != null) {
-            clusters.addAll(FTOF1AClusters);
-        }
-        if (FTOF1BClusters != null) {
-            clusters.addAll(FTOF1BClusters);
-        }
-        if (FTOF2Clusters != null) {
-            clusters.addAll(FTOF2Clusters);
-        } 
-        // 2.1) exit if cluster list is empty but save the hits
+        
+        // 3.2) exit if cluster list is empty but save the hits
         if (clusters.size() == 0) {
             rbc.appendFTOFBanks(event, hits, null, null, TrkType);
             return true;
         }
+        
         // continuing ... there are clusters
         if (Constants.DEBUGMODE) { // if running in DEBUG MODE print out the
             // reconstructed info about the hits and the
@@ -219,7 +204,7 @@ public class FTOFEngine extends ReconstructionEngine {
             }
         }
 
-        // matching ... not used at this stage...
+        // 4) matching clusters ... not used at this stage...
         ClusterMatcher clsMatch = new ClusterMatcher();
         ArrayList<ArrayList<Cluster>> matchedClusters = clsMatch
                 .MatchedClusters(clusters, event);
@@ -228,6 +213,8 @@ public class FTOFEngine extends ReconstructionEngine {
             return true;
         }
 
+        
+        // 3.4) exit if cluster list is empty but save the hits
         rbc.appendFTOFBanks(event, hits, clusters, matchedClusters, TrkType);
 //            if (event.hasBank("FTOF::adc")) {
 //                if (event.hasBank("FTOF::adc")) {

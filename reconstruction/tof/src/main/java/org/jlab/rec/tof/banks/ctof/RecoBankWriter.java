@@ -90,7 +90,7 @@ public class RecoBankWriter {
                 bank.setFloat("tx", i, (float) hitlist.get(i).get_TrkPosition().x());
                 bank.setFloat("ty", i, (float) hitlist.get(i).get_TrkPosition().y());
                 bank.setFloat("tz", i, (float) hitlist.get(i).get_TrkPosition().z());
-                bank.setShort("trkID", i, (short) hitlist.get(i)._AssociatedTrkId);
+                bank.setShort("trkID", i, (short) hitlist.get(i).get_TrkId());
             } else {
                 bank.setShort("trkID", i, (short) -1);
             }
@@ -101,6 +101,7 @@ public class RecoBankWriter {
             bank.setShort("adc_idx2",i, (short) hitlist.get(i).get_ADCbankHitIdx2()); 		
             bank.setShort("tdc_idx1",i, (short) hitlist.get(i).get_TDCbankHitIdx1()); 		
             bank.setShort("tdc_idx2",i, (short) hitlist.get(i).get_TDCbankHitIdx2()); 
+            bank.setShort("clusterid", i, (short) hitlist.get(i).get_AssociatedClusterID());
             bank.setFloat("pathLength", i, (float) hitlist.get(i)
                     .get_TrkPathLen());
             bank.setFloat("pathLengthThruBar", i, (float) hitlist.get(i)
@@ -126,9 +127,11 @@ public class RecoBankWriter {
         }
         for (int i = 0; i < cluslist.size(); i++) {
             bank.setShort("id", i, (short) cluslist.get(i).get_Id());
+            bank.setShort("trackid", i, (short) cluslist.get(i).get(0).get_TrkId());
+            bank.setShort("size", i, (short) cluslist.get(i).size());
             bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
             bank.setByte("layer", i, (byte) cluslist.get(i).get_Panel());
-            bank.setShort("component", i, (short) cluslist.get(i).get(0).get_Paddle());		// paddle id of hit with lowest paddle id in cluster [Check the sorting!!!]
+            bank.setShort("component", i, (short) cluslist.get(i).get(0).get_Paddle()); // paddle id of cluster seed
             int status = 0;
             if (Integer.parseInt(cluslist.get(i).get_StatusWord()) == 1111) {
                 status = 1;
@@ -136,14 +139,12 @@ public class RecoBankWriter {
             bank.setShort("status", i, (short) status);
             bank.setFloat("energy", i, (float) cluslist.get(i).get_Energy());
             bank.setFloat("energy_unc", i, (float) cluslist.get(i).get_EnergyUnc());
-            bank.setFloat("time", i, (float) cluslist.get(i).get_t());
-            bank.setFloat("time_unc", i, (float) cluslist.get(i).get_tUnc());
-            bank.setFloat("x", i, (float) cluslist.get(i).get_x());
-            bank.setFloat("y", i, (float) cluslist.get(i).get_y());
-            bank.setFloat("z", i, (float) cluslist.get(i).get_z());
-            bank.setFloat("x_unc", i, 5); 											// At this stage the uncertainty is not calculated
-            bank.setFloat("y_unc", i, (float) cluslist.get(i).get_y_locUnc());
-            bank.setFloat("z_unc", i, 10); 											// At this stage the uncertainty is not calculated
+            bank.setFloat("time", i, (float) cluslist.get(i).get(0).get_t());
+            bank.setFloat("time_unc", i, (float) cluslist.get(i).get(0).get_tUnc());
+            bank.setFloat("x", i, (float) cluslist.get(i).get(0).get_Position().x());
+            bank.setFloat("y", i, (float) cluslist.get(i).get(0).get_Position().y());
+            bank.setFloat("z", i, (float) cluslist.get(i).get(0).get_Position().z());										
+            bank.setFloat("pathLengthThruBar", i, (float) cluslist.get(i).get_PathLengthThruBar());										
         }
 
         return bank;
