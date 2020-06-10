@@ -111,6 +111,7 @@ public class EngineProcessor {
             "org.jlab.service.eb.EBTBEngine",
             "org.jlab.rec.rich.RICHEBEngine",
             "org.jlab.service.rtpc.RTPCEngine"
+#add here the truth matching class
         };
 
         for(int i = 0; i < names.length; i++){
