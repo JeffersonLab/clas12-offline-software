@@ -110,8 +110,8 @@ public class EngineProcessor {
             "org.jlab.service.ftof.FTOFTBEngine",
             "org.jlab.service.eb.EBTBEngine",
             "org.jlab.rec.rich.RICHEBEngine",
-            "org.jlab.service.rtpc.RTPCEngine"
-#add here the truth matching class
+            "org.jlab.service.rtpc.RTPCEngine",
+	    "org.jlab.service.mc"
         };
 
         for(int i = 0; i < names.length; i++){
