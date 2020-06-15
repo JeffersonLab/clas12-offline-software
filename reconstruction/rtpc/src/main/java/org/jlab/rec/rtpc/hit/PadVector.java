@@ -30,12 +30,20 @@ public class PadVector {
         row=(chan-col)/Num_of_Cols+1;
         z_shift = (row-1)%4;
 
-        phi_pad=((row-1)*phi_per_pad)+(phi_per_pad/2.0);
+        /*phi_pad=((row-1)*phi_per_pad)+(phi_per_pad/2.0);
 
         if(phi_pad>= 2.0*PI) {
             phi_pad -= 2.0*PI;
         }
         if(phi_pad<0){
+            phi_pad += 2.0*PI;
+        }*/
+        phi_pad = Math.toRadians((row-1)*2 + 1);
+       
+        if(phi_pad >= PI) {
+            phi_pad -= 2.0*PI;
+        }
+        if(phi_pad < -PI){
             phi_pad += 2.0*PI;
         }
 
