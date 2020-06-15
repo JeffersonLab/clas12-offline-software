@@ -84,6 +84,8 @@ public class TrackHitReco {
     private double bphi = 0;
     private double[] b_phi = new double[5];
     private double[] phi_gap = new double[5];
+    private double[] c_r = new double[5];
+    private double cr = 0;
     private double phigap = 0;
     private double tl = 0;
     private double tp = 0;
@@ -104,6 +106,7 @@ public class TrackHitReco {
         a_phi = params.get_aphiparms();
         b_phi = params.get_bphiparms();
         phi_gap = params.get_phigapparms();
+        c_r = params.get_tgapparms();
         tl = params.get_tl();
         tp = params.get_tp();
         tr = params.get_tr();
@@ -177,7 +180,11 @@ public class TrackHitReco {
     private double get_r_rec(double z,double t){
         toffset = get_rec_coef(t_offset,z) + tl + tp + tr;
         tmax = get_rec_coef(t_max,z);
-        return Math.sqrt((70*70*(1-((t-toffset)/tmax)))+(30*30*((t-toffset)/tmax)));
+        cr = get_rec_coef(c_r,z);
+        double x = (t-toffset)/tmax;
+        double rmax = 70;
+        double rmin = 30;
+        return Math.sqrt(rmax*rmax*(1-x) + rmin*rmin*x + cr*(1-x)*x);
     }
     
     private double get_dphi(double z, double r, double magfield){
