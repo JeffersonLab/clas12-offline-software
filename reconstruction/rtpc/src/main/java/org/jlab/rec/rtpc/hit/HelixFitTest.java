@@ -69,7 +69,8 @@ public class HelixFitTest {
             chi2 /= numhits - 3;
             if(R > 0) tl = Math.sqrt(R*R*psi*psi + dz*dz);
             double dEdx = 0;
-            if(tl != 0 && !Double.isNaN(tl)) dEdx = ADCsum/tl;
+            if(Double.isNaN(tl)) tl = 0;
+            if(tl != 0 && !Double.isNaN(tl)) dEdx = ADCsum/tl;          
             if(TID != 0) finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,theta,phi,numhits,tl,ADCsum,dEdx,ho.get_Rho(),A,B,chi2));
         }
         params.set_finaltrackinfomap(finaltrackinfomap);

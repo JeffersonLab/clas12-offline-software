@@ -153,10 +153,10 @@ public class TrackHitReco {
                 phi_rec=hit.phi()-dphi;
                 if(cosmic) phi_rec = hit.phi();
                 
-                if(phi_rec<0.0) {
+                if(phi_rec<-Math.PI) {
                     phi_rec+=2.0*Math.PI;
                 }
-                if(phi_rec>2.0*Math.PI){
+                if(phi_rec>Math.PI){
                     phi_rec-=2.0*Math.PI;
                 }
 
