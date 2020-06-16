@@ -281,7 +281,25 @@ public class DetectorData {
                bank.setFloat("energy", row, (float) r.getEnergy());
                bank.setFloat("chi2", row, (float) 0.0);
                bank.setShort("status",row,(short) r.getStatus());
+               row++;
+           }
+       }
+       return bank;
+   }
+   
+   public static DataBank getScintExtrasResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
+       int nrows=0;
+       for(int iresp=0; iresp<responses.size(); iresp++) {
+           nrows += responses.get(iresp).getNAssociations();
+       }
+       int row=0;
+       DataBank     bank = event.createBank(bank_name, nrows);
+       for(int iresp = 0; iresp < responses.size(); iresp++){
+           DetectorResponse r = responses.get(iresp);
+           for(int iass = 0; iass < r.getNAssociations(); iass++) {
                bank.setFloat("dedx",row,(float) ((ScintillatorResponse)r).getDedx());
+               bank.setShort("size",row, ((ScintillatorResponse)r).getClusterSize());
+               bank.setByte("layermult",row, ((ScintillatorResponse)r).getLayerMultiplicity());
                row++;
            }
        }

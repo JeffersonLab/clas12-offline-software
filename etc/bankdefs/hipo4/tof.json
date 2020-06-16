@@ -49,6 +49,7 @@
        {"name":"adc_idx2",     "type":"S", "info":"index of hit with ADCR in adc bank, starts at zero"},
        {"name":"tdc_idx1",    "type":"S", "info":"index of hit with TDCL in tdc bank, starts at zero"},
        {"name":"tdc_idx2",     "type":"S", "info":"index of hit with TDCR in tdc bank, starts at zero"},
+       {"name":"clusterid",    "type":"S", "info":"pointer to the cluster"},
        {"name":"pathLength",         "type":"F", "info":"pathlength of the track from the vertex (doca point to the beamline to the midpoint between the entrance and exit of the hit bar"},
        {"name":"pathLengthThruBar",  "type":"F", "info":"pathlength of the track from the entrance point to the exit point through the hit bar "}
     ]
@@ -81,7 +82,8 @@
        {"name":"adc_idx1",    "type":"S", "info":"index of hit with ADCL in adc bank, starts at zero"},
        {"name":"adc_idx2",    "type":"S", "info":"index of hit with ADCR in adc bank, starts at zero"},
        {"name":"tdc_idx1",    "type":"S", "info":"index of hit with TDCL in tdc bank, starts at zero"},
-       {"name":"tdc_idx2",     "type":"S", "info":"index of hit with TDCR in tdc bank, starts at zero"},
+       {"name":"tdc_idx2",    "type":"S", "info":"index of hit with TDCR in tdc bank, starts at zero"},
+       {"name":"clusterid",   "type":"S", "info":"pointer to the cluster"},
        {"name":"pathLength",         "type":"F", "info":"pathlength of the track from the vertex (doca point to the beamline to the midpoint between the entrance and exit of the hit bar"},
        {"name":"pathLengthThruBar",  "type":"F", "info":"pathlength of the track from the entrance point to the exit point through the hit bar "}
     ]
@@ -92,12 +94,13 @@
     "item": 32,
     "info": "reconstructed clusters from FTOF",
     "entries": [
-        {"name":"id",           "type":"S",  "info":"id of the hit"},
+        {"name":"id",          "type":"S",  "info":"id of the hit"},
         {"name":"status",      "type":"S",  "info":"status of the cluster"},
         {"name":"trackid",     "type":"S",  "info":"matched DC track id"},
-        {"name":"sector",      "type":"B",   "info":"sector of FTOF"},
+        {"name":"size",        "type":"S",  "info":"cluster size"},
+        {"name":"sector",      "type":"B",  "info":"sector of FTOF"},
         {"name":"layer",       "type":"B",  "info":"panel id of FTOF (1-1A, 2-1B, 3-2"},
-        {"name":"component",   "type":"S", "info":"paddle id of FTOF hit with lowest paddle id in cluster "},
+        {"name":"component",   "type":"S", "info":"paddle id of FTOF cluster seed"},
         {"name":"energy",      "type":"F", "info":"E dep (MeV) of the cluster"},
         {"name":"time",        "type":"F", "info":"Cluster hit time (ns)"},
         {"name":"energy_unc",  "type":"F", "info":"E dep unc (MeV) of the cluster"},
@@ -105,9 +108,7 @@
         {"name":"x",            "type":"F", "info":"Global X coor (cm) of cluster hit"},
         {"name":"y",           "type":"F", "info":"Global Y coor (cm) of cluster hit"},
         {"name":"z",           "type":"F", "info":"Global Z coor (cm) of cluster hit"},
-        {"name":"x_unc",       "type":"F", "info":"Global X coor unc (cm)  of cluster hit"},
-        {"name":"y_unc",       "type":"F", "info":"Global Y coor unc (cm) of cluster hit"},
-        {"name":"z_unc",       "type":"F", "info":"Global Z coor unc (cm) of cluster hit"}
+        {"name":"pathLengthThruBar",  "type":"F", "info":"pathlength of the track from the entrance point to the exit point through the cluster bars "}
     ]
  },
  {
@@ -176,10 +177,34 @@
        {"name":"adc_idx2",    "type":"S", "info":"index of hit with ADCD in adc bank, starts at zero"},
        {"name":"tdc_idx1",    "type":"S", "info":"index of hit with TDCU in tdc bank, starts at zero"},
        {"name":"tdc_idx2",     "type":"S", "info":"index of hit with TDCD in tdc bank, starts at zero"},
+       {"name":"clusterid",    "type":"S", "info":"pointer to the cluster"},
        {"name":"pathLength",     "type":"F", "info":"pathlength of the track from the vertex (doca point to the beamline to the midpoint between the entrance and exit of the hit bar"},
        {"name":"pathLengthThruBar",  "type":"F", "info":"pathlength of the track from the entrance point to the exit point through the hit bar"}
 
     ]
-  }
+  },
+ {
+    "name": "CTOF::clusters",
+    "group": 20400,
+    "item": 22,
+    "info": "reconstructed clusters from CTOF",
+    "entries": [
+        {"name":"id",          "type":"S",  "info":"id of the hit"},
+        {"name":"status",      "type":"S",  "info":"status of the cluster"},
+        {"name":"trackid",     "type":"S",  "info":"matched DC track id"},
+        {"name":"size",        "type":"S",  "info":"cluster size"},
+        {"name":"sector",      "type":"B",  "info":"sector of CTOF"},
+        {"name":"layer",       "type":"B",  "info":"panel id of CTOF"},
+        {"name":"component",   "type":"S", "info":"paddle id of CTOF cluster seed"},
+        {"name":"energy",      "type":"F", "info":"E dep (MeV) of the cluster"},
+        {"name":"time",        "type":"F", "info":"Cluster seed time (ns)"},
+        {"name":"energy_unc",  "type":"F", "info":"E dep unc (MeV) of the cluster"},
+        {"name":"time_unc",    "type":"F", "info":"Cluster seed time unc (ns)"},
+        {"name":"x",           "type":"F", "info":"Global X coor (cm) of cluster seed"},
+        {"name":"y",           "type":"F", "info":"Global Y coor (cm) of cluster seed"},
+        {"name":"z",           "type":"F", "info":"Global Z coor (cm) of cluster seed"},
+        {"name":"pathLengthThruBar",  "type":"F", "info":"pathlength of the track from the entrance point to the exit point through the cluster bars "}
+    ]
+ }
 
 ]
