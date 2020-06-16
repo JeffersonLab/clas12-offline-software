@@ -81,6 +81,7 @@ public class TimeAverage {
                 PadVector p = params.get_padvector(pad);
                 
                 gain = gains.getDoubleValue("gain", 1,(int)p.col(),(int)p.row());
+                if(gain == 0) gain = 1;
                 HitVector v = new HitVector(pad,p.z(),p.phi(),averagetime,sumden/gain);
                 rtrack.addHit(v);
             }
