@@ -830,8 +830,14 @@ public class HelixFitJava {
             
 	    HelixFitObject h = helix_fit(PointNum, szPos, fit_track_to_beamline);
 	    
-	    Phi_deg=h.get_Phi()*180./PI;
-	    Theta_deg=h.get_Theta()*180./PI; 
+	    Phi_deg=Math.toDegrees(h.get_Phi());
+            if(Phi_deg >= 180){
+                Phi_deg -= 360;
+            }
+            if(Phi_deg < -180){
+                Phi_deg += 360;
+            }
+	    Theta_deg=Math.toDegrees(h.get_Theta()); 
             h.set_Phi(Phi_deg);
             h.set_Theta(Theta_deg);
             

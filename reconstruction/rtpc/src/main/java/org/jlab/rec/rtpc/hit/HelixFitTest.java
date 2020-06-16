@@ -55,18 +55,22 @@ public class HelixFitTest {
             double hitr = 0;
             double denphi = 0.0001;
             double denz = 1.44;
+            double chi2phiterm = 0;
             for(hit = 0; hit < numhits; hit++){
                 hitr = recotrackmap.get(TID).get(hit).r();
                 hitphi = recotrackmap.get(TID).get(hit).phi();
                 hitz = recotrackmap.get(TID).get(hit).z();
-                chi2 += (hitphi - phichi2(phi,hitr,R))*(hitphi - phichi2(phi,hitr,R))/denphi;
+                chi2phiterm = (hitphi - phichi2(phi,hitr,R))*(hitphi - phichi2(phi,hitr,R));
+                chi2phiterm = Math.min(chi2phiterm, Math.min(chi2phiterm - 2*Math.PI,chi2phiterm + 2*Math.PI));
+                chi2 += chi2phiterm/denphi;
                 chi2 += (hitz - zchi2(vz,theta,hitr,R))*(hitz - zchi2(vz,theta,hitr,R))/denz;
             }
             chi2 += (R-Math.sqrt(A*A + B*B))*(R-Math.sqrt(A*A + B*B));
             chi2 /= numhits - 3;
             if(R > 0) tl = Math.sqrt(R*R*psi*psi + dz*dz);
             double dEdx = 0;
-            if(tl != 0 && !Double.isNaN(tl)) dEdx = ADCsum/tl;
+            if(Double.isNaN(tl)) tl = 0;
+            if(tl != 0 && !Double.isNaN(tl)) dEdx = ADCsum/tl;          
             if(TID != 0) finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,theta,phi,numhits,tl,ADCsum,dEdx,ho.get_Rho(),A,B,chi2));
         }
         params.set_finaltrackinfomap(finaltrackinfomap);
