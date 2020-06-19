@@ -10,10 +10,7 @@ package org.jlab.analysis.eventmerger;
  * @author devita
  */
 public enum EventMergerEnum {
-    JITTER_PHASE,
-    JITTER_CYCLES,
-    JITTER_PERIOD,
+    TIME_JITTER,
     TDC_CONV,
-    READOUT_WINDOW_WIDTH,
-    DEAD_TIME
+    READOUT_PAR
 }

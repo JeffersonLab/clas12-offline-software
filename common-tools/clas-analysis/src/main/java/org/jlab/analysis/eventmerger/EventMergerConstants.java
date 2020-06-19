@@ -5,8 +5,12 @@
  */
 package org.jlab.analysis.eventmerger;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import org.jlab.detector.calib.utils.ConstantsManager;
+import org.jlab.utils.groups.IndexedTable;
 
 /**
  *
@@ -15,15 +19,27 @@ import java.util.Map;
 public class EventMergerConstants {
     
     private final Map <String,EventMergerEnum> constants = new HashMap<>();
-    private final Map <String, Map <EventMergerEnum,Double>>   globalConstants = new HashMap<>();
-    private final Map <String, Map <EventMergerEnum,double[]>> doubleArrayConstants = new HashMap<>();
-    private final Map <String, Map <EventMergerEnum,int[]>>    intArrayConstants = new HashMap<>();
+    private final Map <String, Map <EventMergerEnum,Double>>       globalConstants = new HashMap<>();
+    private final Map <String, Map <EventMergerEnum,double[]>>     doubleArrayConstants = new HashMap<>();
+    private final Map <String, Map <EventMergerEnum,int[]>>        intArrayConstants = new HashMap<>();
+    private final Map <String, Map <EventMergerEnum,IndexedTable>> indexedTableConstants = new HashMap<>();
+
+    private static final String[] tableNames={
+            "/daq/config/dc",
+            "/calibration/dc/time_jitter",
+            "/calibration/ftof/time_jitter",
+            "/calibration/ec/time_jitter",
+            "/calibration/cnd/time_jitter",
+            "/calibration/ctof/time_jitter",            
+    };
 
     public EventMergerConstants() {
-        load();
+
     }
 
-    
+    public static List<String> getTableNames() {
+        return Arrays.asList(tableNames);
+    }    
     
     private void setDouble(String detector, EventMergerEnum key, Double value) {
         if(!globalConstants.containsKey(detector)) globalConstants.put(detector, new HashMap<>());
@@ -38,6 +54,11 @@ public class EventMergerConstants {
     private void setIntArray(String detector, EventMergerEnum key, int[] value) {
         if (!intArrayConstants.containsKey(detector)) intArrayConstants.put(detector,new HashMap<>());
         intArrayConstants.get(detector).put(key,value);
+    }
+   
+    private void setTable(String detector, EventMergerEnum key, IndexedTable table) {
+        if (!indexedTableConstants.containsKey(detector)) indexedTableConstants.put(detector,new HashMap<>());
+        indexedTableConstants.get(detector).put(key,table);
     }
    
     public double getDouble(String detector, EventMergerEnum key) {
@@ -59,6 +80,28 @@ public class EventMergerConstants {
         return array[layer-1];
     }
     
+    public int getInt(String detector, EventMergerEnum key, String item, int sector, int layer, int component) {
+        if (!indexedTableConstants.containsKey(detector))
+            throw new RuntimeException("Missing Integer Key:  "+detector);
+        if (!indexedTableConstants.get(detector).containsKey(key))
+            throw new RuntimeException("Missing Integer Key:  "+key);
+        IndexedTable table = indexedTableConstants.get(detector).get(key);
+        if (!table.hasEntry(sector,layer,component))
+            throw new RuntimeException("Missing entry Sector/Layer/Component:  "+sector+"/"+layer+"/"+component);
+        return table.getIntValue(item, sector, layer, component);
+    }
+    
+    public double getDouble(String detector, EventMergerEnum key, String item, int sector, int layer, int component) {
+        if (!indexedTableConstants.containsKey(detector))
+            throw new RuntimeException("Missing Integer Key:  "+detector);
+        if (!indexedTableConstants.get(detector).containsKey(key))
+            throw new RuntimeException("Missing Integer Key:  "+key);
+        IndexedTable table = indexedTableConstants.get(detector).get(key);
+        if (!table.hasEntry(sector,layer,component))
+            throw new RuntimeException("Missing entry Sector/Layer/Component:  "+sector+"/"+layer+"/"+component);
+        return table.getDoubleValue(item, sector, layer, component);
+    }
+
     public int getInt(String detector, EventMergerEnum key, int layer) {
         if (!intArrayConstants.containsKey(detector))
             throw new RuntimeException("Missing Integer Key:  "+detector);
@@ -86,27 +129,30 @@ public class EventMergerConstants {
         return intArrayConstants.get(detector).get(key);
     }
     
-
-    public void load() {
+    public IndexedTable getTable(String detector, EventMergerEnum key) {
+        if (!indexedTableConstants.containsKey(detector))
+            throw new RuntimeException("Missing Integer Key:  "+detector);
+        if (!indexedTableConstants.get(detector).containsKey(key))
+            throw new RuntimeException("Missing Integer Key:  "+key);
+        return indexedTableConstants.get(detector).get(key);
+    }
+    
+    public void load(int run, ConstantsManager manager) {
         // DC constants
-        setDouble("DC",EventMergerEnum.JITTER_CYCLES, 2.0);
-        setDouble("DC",EventMergerEnum.JITTER_PERIOD, 4.0);
-        setDouble("DC",EventMergerEnum.JITTER_PHASE,  1.0);
-        setDouble("DC",EventMergerEnum.TDC_CONV,      1.0);
-        int[] deadTimes =    { 350,  350,  350,  350,  350,  350,
-                               350,  350,  350,  350,  350,  350,
-                              1100, 1100, 1100, 1100, 1100, 1100,
-                              1000, 1000, 1000, 1000, 1000, 1000,
-                              1000, 1000, 1000, 1000, 1000, 1000,
-                              1000, 1000, 1000, 1000, 1000, 1000};
-        setIntArray("DC",EventMergerEnum.DEAD_TIME, deadTimes);
-        int[] readoutWidth =    { 500,  500,  500,  500,  500,  500,
-                                  500,  500,  500,  500,  500,  500,
-                                 1400, 1400, 1400, 1400, 1400, 1400,
-                                 1400, 1400, 1400, 1400, 1400, 1400,
-                                 1200, 1200, 1200, 1200, 1200, 1200,
-                                 1200, 1200, 1200, 1200, 1200, 1200};
-        setIntArray("DC",EventMergerEnum.READOUT_WINDOW_WIDTH, readoutWidth);
-                
+        setDouble("DC",EventMergerEnum.TDC_CONV,  1.0);
+        setTable("DC",EventMergerEnum.READOUT_PAR,manager.getConstants(run, "/daq/config/dc"));
+        setTable("DC",EventMergerEnum.TIME_JITTER,manager.getConstants(run, "/calibration/dc/time_jitter"));
+        // FTOF constants
+        setDouble("FTOF",EventMergerEnum.TDC_CONV,  0.02345);
+        setTable("FTOF",EventMergerEnum.TIME_JITTER,manager.getConstants(run, "/calibration/ftof/time_jitter"));
+        // EC constants
+        setDouble("ECAL",EventMergerEnum.TDC_CONV,  0.02345);
+        setTable("ECAL",EventMergerEnum.TIME_JITTER,manager.getConstants(run, "/calibration/ec/time_jitter"));
+        // CTOF constants
+        setDouble("CTOF",EventMergerEnum.TDC_CONV,  0.02345);
+        setTable("CTOF",EventMergerEnum.TIME_JITTER,manager.getConstants(run, "/calibration/ctof/time_jitter"));
+        // CND constants
+        setDouble("CND",EventMergerEnum.TDC_CONV,  0.02345);
+        setTable("CND",EventMergerEnum.TIME_JITTER,manager.getConstants(run, "/calibration/cnd/time_jitter"));
     }
 }
