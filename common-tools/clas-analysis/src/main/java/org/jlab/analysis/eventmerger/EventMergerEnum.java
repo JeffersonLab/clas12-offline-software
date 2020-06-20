@@ -11,6 +11,11 @@ package org.jlab.analysis.eventmerger;
  */
 public enum EventMergerEnum {
     TIME_JITTER,
+    READOUT_PAR,
     TDC_CONV,
-    READOUT_PAR
+    JITTER_PHASE,
+    JITTER_CYCLES,
+    JITTER_PERIOD,
+    READOUT_WINDOW,
+    READOUT_HOLDOFF
 }

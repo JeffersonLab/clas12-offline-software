@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.jlab.detector.base.DetectorType;
-import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.hipo.HipoDataEvent;
@@ -28,12 +27,10 @@ public class ADCTDCMerger {
     private boolean suppressDoubleHits = true;
     private String[] detectors;
     private EventMergerConstants constants = new EventMergerConstants();
-    private ConstantsManager       manager = new ConstantsManager();
             
     public ADCTDCMerger() {
         detectors = new String[]{"DC","FTOF"};
         printDetectors();
-        initManager();
     }
         
     public ADCTDCMerger(String[] dets, boolean dhits) {
@@ -41,7 +38,6 @@ public class ADCTDCMerger {
         System.out.println("Double hits suppression flag set to " + suppressDoubleHits);
         detectors = dets;
         printDetectors();
-        initManager();
     }
     
     /**
@@ -200,6 +196,8 @@ public class ADCTDCMerger {
         int offset1 = getTDCOffset(Det, event, bg1);
         int offset2 = getTDCOffset(Det, event, bg2);
         
+        int run = bg2.getBank("RUN::config").getInt("run", 0);
+
         String TDCString = Det+"::tdc";
         DataBank bank = null;
         // if no detector bank is found in the background events then keep the event bank
@@ -224,7 +222,7 @@ public class ADCTDCMerger {
                     int value  = tdc.getTdc();
                     int layer  = tdc.getLayer();
                     int comp   = tdc.getComponent();
-                    int offset = constants.getInt(Det, EventMergerEnum.READOUT_PAR, "window", 0, layer, comp);
+                    int offset = constants.getInt(run, Det, EventMergerEnum.READOUT_WINDOW, 0, layer, comp);
                     tdc.setTdc(value-offset);
                     bgTDCs.add(tdc);
                 }
@@ -256,9 +254,9 @@ public class ADCTDCMerger {
                         mergedTDCs.add(tdc);
                     }
                     else {
-                        double delta = constants.getInt(Det, EventMergerEnum.READOUT_PAR, "holdoff", 0, tdc.getLayer(), tdc.getComponent())
+                        double delta = constants.getInt(run, Det, EventMergerEnum.READOUT_HOLDOFF, 0, tdc.getLayer(), tdc.getComponent())
                                      / constants.getDouble(Det, EventMergerEnum.TDC_CONV);
-                        if(tdc.getTdc()-tdcOld.getTdc()<delta) {
+                         if(tdc.getTdc()-tdcOld.getTdc()<delta) {
                             if(debug) {
                                 System.out.println("\tSkipping TDC " + i +"\t");
                                 tdc.show();
@@ -281,7 +279,7 @@ public class ADCTDCMerger {
                 int value = tdc.getTdc();
                 int layer  = tdc.getLayer();
                 int comp   = tdc.getComponent();
-                if(value>0 && value<constants.getInt(Det, EventMergerEnum.READOUT_PAR, "window", 0, layer, comp)) {
+                if(value>0 && value<constants.getInt(run, Det, EventMergerEnum.READOUT_WINDOW, 0, layer, comp)) {
                     filteredTDCs.add(tdc);
                 }
             }
@@ -402,10 +400,11 @@ public class ADCTDCMerger {
     
     private int getJitterCorrection(DataEvent event, String detector) {
         // calculate the trigger time jitter correction
-        double tdcconv = constants.getDouble(detector, EventMergerEnum.TDC_CONV);
-        double period  = constants.getDouble(detector, EventMergerEnum.TIME_JITTER, "period", 0, 0, 0);
-        int    phase   = constants.getInt(detector, EventMergerEnum.TIME_JITTER, "phase", 0, 0, 0);
-        int    cycles  = constants.getInt(detector, EventMergerEnum.TIME_JITTER, "cycles", 0, 0, 0);
+        int run = event.getBank("RUN::config").getInt("run", 0);        
+        double tdcconv     = constants.getDouble(detector, EventMergerEnum.TDC_CONV);
+        double period      = constants.getDouble(run, detector, EventMergerEnum.JITTER_PERIOD);
+        int    phase       = constants.getInt(run, detector, EventMergerEnum.JITTER_PHASE);
+        int    cycles      = constants.getInt(run, detector, EventMergerEnum.JITTER_CYCLES);
         
         double triggerphase=0;
         long   timestamp = event.getBank("RUN::config").getLong("timestamp", 0);
@@ -414,11 +413,6 @@ public class ADCTDCMerger {
         return tdcjitter;
     }
 
-    private void initManager() {
-        manager.setVariation("default");
-        manager.init(EventMergerConstants.getTableNames());
-    }
-    
     private void printDetectors() {
         System.out.print("\nMerging activated for detectors: ");
         for(String det:detectors) System.out.print(det + " ");
@@ -433,13 +427,9 @@ public class ADCTDCMerger {
      */
     public void updateEventWithMergedBanks(DataEvent event, DataEvent bg1, DataEvent bg2) {
         
-        if(!event.hasBank("RUN::config") || !bg1.hasBank("RUN::config")) {
+        if(!event.hasBank("RUN::config") || !bg1.hasBank("RUN::config") || !bg2.hasBank("RUN::config")) {
             System.out.println("Missing RUN::config bank");
             return;
-        }
-        else {
-            int run = event.getBank("RUN::config").getInt("run", 0);
-            constants.load(run,manager);
         }
         
         if(event.hasBank("DC::doca")) event.removeBank("DC::doca");
