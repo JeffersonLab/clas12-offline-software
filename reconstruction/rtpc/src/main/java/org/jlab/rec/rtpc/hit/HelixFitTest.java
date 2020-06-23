@@ -60,10 +60,11 @@ public class HelixFitTest {
                 hitr = recotrackmap.get(TID).get(hit).r();
                 hitphi = recotrackmap.get(TID).get(hit).phi();
                 hitz = recotrackmap.get(TID).get(hit).z();
-                chi2phiterm = (hitphi - phichi2(phi,hitr,R))*(hitphi - phichi2(phi,hitr,R));
-                chi2phiterm = Math.min(chi2phiterm, Math.min(chi2phiterm - 2*Math.PI,chi2phiterm + 2*Math.PI));
+                chi2phiterm = (hitphi - phichi2(phi,hitr,R));
                 if(chi2phiterm < -Math.PI) chi2phiterm += 2*Math.PI;
                 else if(chi2phiterm > Math.PI) chi2phiterm -= 2*Math.PI;
+                chi2phiterm = chi2phiterm*chi2phiterm; 
+                
                 chi2 += chi2phiterm/denphi;
                 chi2 += (hitz - zchi2(vz,theta,hitr,R))*(hitz - zchi2(vz,theta,hitr,R))/denz;
             }
