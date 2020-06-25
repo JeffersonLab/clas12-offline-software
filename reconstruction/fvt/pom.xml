@@ -50,7 +50,7 @@
       <version>4.3-SNAPSHOT</version>
     </dependency>
 
-	<dependency>
+    <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-reco</artifactId>
       <version>6.5.8-SNAPSHOT</version>
