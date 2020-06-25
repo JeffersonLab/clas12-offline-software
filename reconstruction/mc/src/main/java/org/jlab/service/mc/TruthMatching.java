@@ -338,7 +338,7 @@ public class TruthMatching extends ReconstructionEngine {
 
     Map<Byte,Map<Integer, MChit >> dmchits = new HashMap<Byte,Map<Integer, MChit>>();
     
-
+    System.out.println(" ======= getMCHits ======== ");
     for( int i = 0; i < mctrue.rows(); i++ ){
       MChit hit = new MChit();
       hit.pid      = mctrue.getInt( "pid", i );
@@ -346,6 +346,8 @@ public class TruthMatching extends ReconstructionEngine {
       hit.hitn     = mctrue.getInt( "hitn", i );
       hit.detector = mctrue.getByte( "detector", i );
 
+      System.out.println("pid = " + hit.pid + "   tid = " + hit.tid + "   hitn = " + hit.hitn + "    detector = " + hit.detector);
+      
       if( mcp.get( (short) hit.tid ) == null ) continue;
 
       if( dmchits.get( hit.detector ) == null ){
@@ -390,15 +392,33 @@ public class TruthMatching extends ReconstructionEngine {
   // this method returns a map of < mc particle ids, list of clusters >
   // -------------------------------------------------------------------
   Map<Short,List<RecCluster>> mapClustersToMCParticles( Set<Short> mcpKeys, List<RecCluster> cls ){
+      
+      //System.out.println("  ====== ======= mapClustersToMCParticles  ======= ======  ");
     Map<Short,List<RecCluster>> map = new HashMap<Short,List<RecCluster>>();
     for( short i : mcpKeys ){
       map.put( i, new ArrayList<RecCluster>() );
+      
+      //System.out.println("The key is " + i);
     }
 
+   // System.out.println(" ======= RecClusters ======= ");
+    
     for( RecCluster c : cls ){
+        
+      //System.out.println(" c.mctid = " + c.mctid + "   c.detector = " + c.detector + "  id = " + c.id + "  c.nHitMatched " + c.nHitMatched );
+        
       if( map.get( c.mctid ) == null ) map.put( c.mctid,new ArrayList<RecCluster>() );
       map.get( c.mctid ).add( c );
     }
+    
+    //System.out.println(" ======= Map ======= ");
+    
+//    for( Map.Entry< Short,List<RecCluster> > entry: map.entrySet() ){
+//    
+//        System.out.println( "Key is " + entry.getKey() + "    List Size is " + entry.getValue().size() );
+//    }
+    
+    
     return map;
   }
 
@@ -438,7 +458,7 @@ public class TruthMatching extends ReconstructionEngine {
 
       }
       else { // it is a DC hit
-          if( mchits != null &&  mchits.get((int)cluster.id) != null ){
+          if( mchits != null && mchits.get((int)cluster.id) != null ){
             cluster.nHitMatched = 1;
             cluster.mctid = (short) mchits.get((int)cluster.id).tid;
           }
@@ -520,11 +540,15 @@ public class TruthMatching extends ReconstructionEngine {
    
     DataBank bank = event.getBank( bankName );
 
+    System.out.println(" ======= RecHits ======= ");
+    
     for( int i = 0; i < bank.rows(); i++ ){
       RecHit h = new RecHit();
       h.id   = bank.getShort( "ID" , i );
       h.tid  = bank.getShort( "trkID", i );
       h.cid  = bank.getShort( "clusterID", i );
+      
+      System.out.println("h.id = " + h.id + "   h.tid = " + h.tid + "    h.cid = " + h.cid);
       
       if( hits.get( h.cid ) == null ){
         hits.put( h.cid, new ArrayList<RecHit>() );
