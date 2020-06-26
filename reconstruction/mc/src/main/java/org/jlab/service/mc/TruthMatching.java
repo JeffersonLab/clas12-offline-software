@@ -7,9 +7,9 @@ import org.jlab.detector.base.DetectorType;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.hipo.HipoDataEvent;
-import org.jlab.io.hipo.HipoDataSource;
-import org.jlab.io.hipo.HipoDataSync;
+//import org.jlab.io.hipo.HipoDataEvent;
+//import org.jlab.io.hipo.HipoDataSource;
+//import org.jlab.io.hipo.HipoDataSync;
 
 import java.util.*;
 
