@@ -358,9 +358,24 @@ private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslis
             bank.setFloat("p0_x", i, (float) candlist.get(i).get_pAtOrig().x());
             bank.setFloat("p0_y", i, (float) candlist.get(i).get_pAtOrig().y());
             bank.setFloat("p0_z", i, (float) candlist.get(i).get_pAtOrig().z());
-            bank.setShort("Cross1_ID", i, (short) candlist.get(i).get(0).get_Id());
-            bank.setShort("Cross2_ID", i, (short) candlist.get(i).get(1).get_Id());
-            bank.setShort("Cross3_ID", i, (short) candlist.get(i).get(2).get_Id());
+            //fill associated IDs
+            for(int r = 0; r < 3; r++) {
+                bank.setShort("Cross"+String.valueOf(r)+"_ID", 
+                    i, (short) -1);
+            }
+            for(int r = 0; r < 6; r++) {
+                bank.setShort("Cluster"+String.valueOf(r)+"_ID", 
+                    i, (short) -1);
+            }
+            for(int k = 0; k < candlist.get(i).size(); k++) {
+                bank.setShort("Cross"+String.valueOf(candlist.get(i).get(k).get_Region())+"_ID", 
+                    i, (short) candlist.get(i).get(k).get_Id());
+                bank.setShort("Cluster"+String.valueOf(candlist.get(i).get(k).get_Region()*2-1)+"_ID", 
+                        i, (short) candlist.get(i).get(k).get_Segment1().get_Id());
+                bank.setShort("Cluster"+String.valueOf(candlist.get(i).get(k).get_Region()*2)+"_ID", 
+                        i, (short) candlist.get(i).get(k).get_Segment2().get_Id());
+            }
+            
             bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
             bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
             bank.setFloat("x", i, (float) candlist.get(i).getFinalStateVec().x());
@@ -744,21 +759,24 @@ private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslis
             bank.setFloat("p0_x", i, (float) candlist.get(i).get_pAtOrig().x());
             bank.setFloat("p0_y", i, (float) candlist.get(i).get_pAtOrig().y());
             bank.setFloat("p0_z", i, (float) candlist.get(i).get_pAtOrig().z());
-            if(candlist.get(i).size()==3) {
-                bank.setShort("Cross1_ID", i, (short) candlist.get(i).get(0).get_Id());
-                bank.setShort("Cross2_ID", i, (short) candlist.get(i).get(1).get_Id());
-                bank.setShort("Cross3_ID", i, (short) candlist.get(i).get(2).get_Id());
+            //fill associated IDs
+            for(int r = 0; r < 3; r++) {
+                bank.setShort("Cross"+String.valueOf(r)+"_ID", 
+                    i, (short) -1);
             }
-            if(candlist.get(i).size()==2) {
-                bank.setShort("Cross1_ID", i, (short) candlist.get(i).get(0).get_Id());
-                bank.setShort("Cross2_ID", i, (short) candlist.get(i).get(1).get_Id());
-                bank.setShort("Cross3_ID", i, (short) -1);
+            for(int r = 0; r < 6; r++) {
+                bank.setShort("Cluster"+String.valueOf(r)+"_ID", 
+                    i, (short) -1);
             }
-            if(candlist.get(i).size()==1) {
-                bank.setShort("Cross1_ID", i, (short) candlist.get(i).get(0).get_Id());
-                bank.setShort("Cross2_ID", i, (short) -1);
-                bank.setShort("Cross3_ID", i, (short) -1);
+            for(int k = 0; k < candlist.get(i).size(); k++) {
+                bank.setShort("Cross"+String.valueOf(candlist.get(i).get(k).get_Region())+"_ID", 
+                    i, (short) candlist.get(i).get(k).get_Id());
+                bank.setShort("Cluster"+String.valueOf(candlist.get(i).get(k).get_Region()*2-1)+"_ID", 
+                        i, (short) candlist.get(i).get(k).get_Segment1().get_Id());
+                bank.setShort("Cluster"+String.valueOf(candlist.get(i).get(k).get_Region()*2)+"_ID", 
+                        i, (short) candlist.get(i).get(k).get_Segment2().get_Id());
             }
+            
             bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
             bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
         }

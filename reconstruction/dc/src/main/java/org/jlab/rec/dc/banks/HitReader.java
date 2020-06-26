@@ -256,8 +256,10 @@ public class HitReader {
     private Map<Integer, Double> id2tidB = new HashMap<Integer, Double>();
     private Map<Integer, Double> id2tidtProp = new HashMap<Integer, Double>();
     private Map<Integer, Double> id2tidtFlight = new HashMap<Integer, Double>();
+    
+    private Map<Integer, double[]> aimatch = new HashMap<Integer, double[]>();
     /**
-     * Reads HB DC hits written to the DC bank
+     * Reads HB DC hits written to the DC bankAI
      *
      * @param event      .
      * @param constants0 .
@@ -277,7 +279,7 @@ public class HitReader {
         String pointName = "HitBasedTrkg::"+_names[0]+"HitTrkId";
         
         if (!event.hasBank(bankName) || !event.hasBank(pointName) || event.getBank(pointName).rows()==0) {
-            //    System.err.println("there is no HB dc bank for "+_names[0]);
+            //    System.err.println("there is no HB dc bankAI for "+_names[0]);
             _HBHits = new ArrayList<>();
             return;
         }
@@ -423,64 +425,124 @@ public class HitReader {
         }
         return pass;
     }
-    
+    //new way of fetching ai id'ed hits
     public void read_NNHits(DataEvent event, DCGeant4Factory DcDetector,
                              double triggerPhase) {
-        if (!(event.hasBank("DC::tdc") && event.hasBank("nn::dchits")  )) {
+        
+        if (!(event.hasBank("HitBasedTrkg::HBHits") && event.hasBank("HitBasedTrkg::HBClusters")
+                && event.hasBank("ai::tracks")  )) {
             _DCHits = new ArrayList<>();
-
             return;
         }
-        DataBank bank = event.getBank("nn::dchits");
-        DataBank bankDGTZ = event.getBank("DC::tdc");
-
-        int rows = bankDGTZ.rows();
-        int[] sector    = new int[rows];
-        int[] layer     = new int[rows];
-        int[] wire      = new int[rows];
-        int[] tdc       = new int[rows];
-
-        for (int i = 0; i < rows; i++) {
-            sector[i] = bankDGTZ.getByte("sector", i);
-            layer[i] = bankDGTZ.getByte("layer", i);
-            wire[i] = bankDGTZ.getShort("component", i);
-            tdc[i] = bankDGTZ.getInt("TDC", i);
-
-        }
-
-        int[] layerNum = new int[rows];
-        int[] superlayerNum = new int[rows];
-        double[] smearedTime = new double[rows];
-
         List<Hit> hits = new ArrayList<>();
+        
+        DataBank bankAI = event.getBank("ai::tracks");
+        DataBank bank = event.getBank("HitBasedTrkg::HBHits");
 
-        for (int i = 0; i < rows; i++) {
+        int[] Ids  = new int[6]; //  1-6 = cluster ids for slyrs 1 - 6
+        double[] tPars = new double[3]; // NN trk pars p, theta, phi ; last idx = track id;
+        for (int j = 0; j < bankAI.rows(); j++) {
             
-            smearedTime[i] = (double) tdc[i] - triggerPhase;
-            if (smearedTime[i] < 0) {
-                smearedTime[i] = 1;
+            Ids[0] = (int)bankAI.getShort("c1", j); // clusId in superlayer 1
+            Ids[1] = (int)bankAI.getShort("c2", j);
+            Ids[2] = (int)bankAI.getShort("c3", j);
+            Ids[3] = (int)bankAI.getShort("c4", j);
+            Ids[4] = (int)bankAI.getShort("c5", j);
+            Ids[5] = (int)bankAI.getShort("c6", j); // clusId in superlayer 6
+            
+            tPars[0] = (double)bankAI.getFloat("p", j);
+            tPars[1] = (double)bankAI.getFloat("theta", j);
+            tPars[2] = (double)bankAI.getFloat("phi", j);
+            tPars[3] = (double)bankAI.getByte("id", j);
+            
+            for (int k = 0; k < 6; k++) {
+                aimatch.put(Ids[k], tPars);
             }
-            
-
-            superlayerNum[i] = (layer[i] - 1) / 6 + 1;
-            layerNum[i] = layer[i] - (superlayerNum[i] - 1) * 6;
-
         }
         
-        for (int j = 0; j < bank.rows(); j++) {
-            int i = bank.getInt("index", j);
-            int tid = (int)bank.getByte("id", j);
-            Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], tdc[i], (i + 1));
+        for (int i = 0; i < bank.rows(); i++) {
+            
+            Hit hit = new Hit(bank.getByte("sector", i), bank.getByte("superlayer", i), 
+                    bank.getByte("layer", i), bank.getShort("wire", i), bank.getInt("TDC", i), (i + 1));
             hit.set_Id(i+1);
             hit.calc_CellSize(DcDetector);
             double posError = hit.get_CellSize() / Math.sqrt(12.);
             hit.set_DocaErr(posError);
-            hit.NNTrkId = tid;
+            
+            int clusterID = bank.getShort("clusterID", i);
+            
+            if(this.aimatch.containsKey(clusterID)) {
+                hit.NNTrkId  = (int) this.aimatch.get(clusterID)[3];
+                hit.NNClusId = clusterID;
+                hit.NNTrkP      = this.aimatch.get(clusterID)[0];
+                hit.NNTrkTheta  = this.aimatch.get(clusterID)[1];
+                hit.NNTrkPhi    = this.aimatch.get(clusterID)[2];
+                
+            }
+            
             hits.add(hit);
         }
 
         this.set_DCHits(hits);
     }
+
+//    public void read_NNHits(DataEvent event, DCGeant4Factory DcDetector,
+//                             double triggerPhase) {
+//        if (!(event.hasBank("DC::tdc") && event.hasBank("nn::dchits")  )) {
+//            _DCHits = new ArrayList<>();
+//
+//            return;
+//        }
+//        DataBank bankAI = event.getBank("nn::dchits");
+//        DataBank bankHits = event.getBank("DC::tdc");
+//
+//        int rows = bankHits.rows();
+//        int[] sector    = new int[rows];
+//        int[] layer     = new int[rows];
+//        int[] wire      = new int[rows];
+//        int[] tdc       = new int[rows];
+//
+//        for (int i = 0; i < rows; i++) {
+//            sector[i] = bankHits.getByte("sector", i);
+//            layer[i] = bankHits.getByte("layer", i);
+//            wire[i] = bankHits.getShort("component", i);
+//            tdc[i] = bankHits.getInt("TDC", i);
+//
+//        }
+//
+//        int[] layerNum = new int[rows];
+//        int[] superlayerNum = new int[rows];
+//        double[] smearedTime = new double[rows];
+//
+//        List<Hit> hits = new ArrayList<>();
+//
+//        for (int i = 0; i < rows; i++) {
+//            
+//            smearedTime[i] = (double) tdc[i] - triggerPhase;
+//            if (smearedTime[i] < 0) {
+//                smearedTime[i] = 1;
+//            }
+//            
+//
+//            superlayerNum[i] = (layer[i] - 1) / 6 + 1;
+//            layerNum[i] = layer[i] - (superlayerNum[i] - 1) * 6;
+//
+//        }
+//        
+//        for (int j = 0; j < bankAI.rows(); j++) {
+//            int i = bankAI.getInt("index", j);
+//            int tid = (int)bankAI.getByte("id", j);
+//            Hit hit = new Hit(sector[i], superlayerNum[i], layerNum[i], wire[i], tdc[i], (i + 1));
+//            hit.set_Id(i+1);
+//            hit.calc_CellSize(DcDetector);
+//            double posError = hit.get_CellSize() / Math.sqrt(12.);
+//            hit.set_DocaErr(posError);
+//            hit.NNTrkId = tid;
+//            hits.add(hit);
+//        }
+//
+//        this.set_DCHits(hits);
+//    }
 
     //betaFlag:0 = OK; -1 = negative; 1 = less than lower cut (0.15); 2 = greater than 1.15 (from HBEB beta vs p plots for data)
     private void set_BetaFlag(DataEvent event, int trkId, FittedHit hit, double beta) {
@@ -655,8 +717,8 @@ public class HitReader {
      /*   boolean[] trigger_bits = new boolean[32];
 
         if (event.hasBank("RUN::config")) {
-            DataBank bank = event.getBank("RUN::config");
-            TriggerWord = bank.getLong("trigger",0);
+            DataBank bankAI = event.getBank("RUN::config");
+            TriggerWord = bankAI.getLong("trigger",0);
             for (int i=31; i>=0; i--) {
                 trigger_bits[i] = (TriggerWord & (1 << i)) != 0;
             }
