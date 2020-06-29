@@ -360,11 +360,11 @@ private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslis
             bank.setFloat("p0_z", i, (float) candlist.get(i).get_pAtOrig().z());
             //fill associated IDs
             for(int r = 0; r < 3; r++) {
-                bank.setShort("Cross"+String.valueOf(r)+"_ID", 
+                bank.setShort("Cross"+String.valueOf(r+1)+"_ID", 
                     i, (short) -1);
             }
             for(int r = 0; r < 6; r++) {
-                bank.setShort("Cluster"+String.valueOf(r)+"_ID", 
+                bank.setShort("Cluster"+String.valueOf(r+1)+"_ID", 
                     i, (short) -1);
             }
             for(int k = 0; k < candlist.get(i).size(); k++) {
@@ -761,11 +761,11 @@ private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslis
             bank.setFloat("p0_z", i, (float) candlist.get(i).get_pAtOrig().z());
             //fill associated IDs
             for(int r = 0; r < 3; r++) {
-                bank.setShort("Cross"+String.valueOf(r)+"_ID", 
+                bank.setShort("Cross"+String.valueOf(r+1)+"_ID", 
                     i, (short) -1);
             }
             for(int r = 0; r < 6; r++) {
-                bank.setShort("Cluster"+String.valueOf(r)+"_ID", 
+                bank.setShort("Cluster"+String.valueOf(r+1)+"_ID", 
                     i, (short) -1);
             }
             for(int k = 0; k < candlist.get(i).size(); k++) {
