@@ -291,6 +291,7 @@ public class TruthMatching extends ReconstructionEngine {
           for( byte l = 1; l <= 6; l++ ){ 
             if( countSL.get( l ) >= 4 ) testSL++;  // per SuperLayer at least 5 out of 6 layers need to be fired
           }
+          
           if( testSL >= 5 ){  // at least 5 out of 6 SuperLayers need to be fired
             m.reconstructable = 1; 
             //System.out.println( " Yeah! DC track found! " );
@@ -338,7 +339,7 @@ public class TruthMatching extends ReconstructionEngine {
 
     Map<Byte,Map<Integer, MChit >> dmchits = new HashMap<Byte,Map<Integer, MChit>>();
     
-    System.out.println(" ======= getMCHits ======== ");
+    //System.out.println(" ======= getMCHits ======== ");
     for( int i = 0; i < mctrue.rows(); i++ ){
       MChit hit = new MChit();
       hit.pid      = mctrue.getInt( "pid", i );
@@ -346,7 +347,7 @@ public class TruthMatching extends ReconstructionEngine {
       hit.hitn     = mctrue.getInt( "hitn", i );
       hit.detector = mctrue.getByte( "detector", i );
 
-      System.out.println("pid = " + hit.pid + "   tid = " + hit.tid + "   hitn = " + hit.hitn + "    detector = " + hit.detector);
+      //System.out.println("pid = " + hit.pid + "   tid = " + hit.tid + "   hitn = " + hit.hitn + "    detector = " + hit.detector);
       
       if( mcp.get( (short) hit.tid ) == null ) continue;
 
@@ -540,7 +541,7 @@ public class TruthMatching extends ReconstructionEngine {
    
     DataBank bank = event.getBank( bankName );
 
-    System.out.println(" ======= RecHits ======= ");
+    //System.out.println(" ======= RecHits ======= ");
     
     for( int i = 0; i < bank.rows(); i++ ){
       RecHit h = new RecHit();
@@ -548,7 +549,7 @@ public class TruthMatching extends ReconstructionEngine {
       h.tid  = bank.getShort( "trkID", i );
       h.cid  = bank.getShort( "clusterID", i );
       
-      System.out.println("h.id = " + h.id + "   h.tid = " + h.tid + "    h.cid = " + h.cid);
+      //System.out.println("h.id = " + h.id + "   h.tid = " + h.tid + "    h.cid = " + h.cid);
       
       if( hits.get( h.cid ) == null ){
         hits.put( h.cid, new ArrayList<RecHit>() );
