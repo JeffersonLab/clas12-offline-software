@@ -30,7 +30,7 @@ public class EvioDataEventHandler {
     public EvioDataEventHandler(byte[] buffer, ByteOrder b_order){
         evioBuffer = ByteBuffer.wrap(buffer);
         evioBuffer.order(b_order);
-        if(buffer.length>500*1024){
+        if(buffer.length>2500*1024){
             System.out.println("error >>> evio event hadler : buffer size ecceeds 500 kB");
             structure = null;
             eventNodes = null;
