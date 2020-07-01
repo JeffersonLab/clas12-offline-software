@@ -492,5 +492,18 @@
     "entries":[
         { "name":"json"    , "type":"B", "info":"json character" }
     ]
+  },
+  {
+    "name" : "AHDC::tdc",
+    "group" : 22200,
+    "item" : 12,
+    "info": "TDC bank for ALERT",
+    "entries":[
+      { "name":"sector"    , "type":"B", "info":"sector (=1)"},
+      { "name":"layer"     , "type":"B", "info":"layer (=1)"},
+      { "name":"component" , "type":"S", "info":"signal (1-2)"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
+      { "name":"TDC"       , "type":"I", "info":"TDC value"}
+    ]
   }
 ]
