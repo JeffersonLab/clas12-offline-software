@@ -63,9 +63,31 @@ public class EvioHipoEvent4 {
         this.fillHipoEventGenPart(hipoEvent, event);
         this.fillHipoEventTrueInfo(hipoEvent, event);
         this.fillHipoEventTrigger(hipoEvent, event);
+        this.fillHipoEventAHDC(hipoEvent, event);
         return hipoEvent;
     }
     
+    
+    
+    public void fillHipoEventAHDC(Event hipoEvent, EvioDataEvent evioEvent){
+        if(evioEvent.hasBank("AHDC::dgtz")==true){
+            try {
+                EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("AHDC::dgtz");
+                Bank  hipoBankTDC = new Bank(schemaFactory.getSchema("AHDC::tdc"), evioBank.rows());
+                for(int i = 0; i < evioBank.rows(); i++){
+                    hipoBankTDC.putByte("sector",   i,    (byte) evioBank.getInt("sector", i));
+                    hipoBankTDC.putShort("pmt",     i,   (short)  evioBank.getInt("pmt",i));
+                    hipoBankTDC.putShort("pixel",   i,    (short) evioBank.getInt("pixel",i));
+                    hipoBankTDC.putInt("TDC1",      i,    (int) evioBank.getInt("TDC1",i));
+                    hipoBankTDC.putInt("TDC2",      i,    (int) evioBank.getInt("TDC2", i));
+                }
+                hipoEvent.write(hipoBankTDC);
+                }
+            catch (Exception e) {
+                System.out.println("[hipo-decoder]  >>>> error writing RICH bank");
+            }
+        }
+    }
     
     public void fillHipoEventRF(Event hipoEvent, EvioDataEvent evioEvent){
         if(evioEvent.hasBank("RF::info")==true){

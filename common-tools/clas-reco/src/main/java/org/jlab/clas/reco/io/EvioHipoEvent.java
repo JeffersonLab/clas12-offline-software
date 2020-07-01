@@ -52,27 +52,7 @@ public class EvioHipoEvent {
         this.fillHipoEventGenPart(hipoEvent, event);
         this.fillHipoEventTrueInfo(hipoEvent, event);
         this.fillHipoEventTrigger(hipoEvent, event);
-        this.fillHipoEventAHDC(hipoEvent, event);
         return hipoEvent;
-    }
-    
-    
-    public void fillHipoEventAHDC(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
-        if(evioEvent.hasBank("AHDC::dgtz")==true){
-            System.out.println("AHDC bank is present");
-            EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("AHDC::dgtz");
-            evioBank.show();
-            HipoDataBank hipoTDC = (HipoDataBank) hipoEvent.createBank("AHDC::tdc", evioBank.rows());
-            for(int i = 0; i < evioBank.rows(); i++) {
-                int index = i;
-                hipoTDC.setByte("sector", i,      (byte)  1);
-                hipoTDC.setByte("layer",  i,      (byte)  1);
-                hipoTDC.setShort("component",  i, (short) evioBank.getInt("paddle",i));
-                hipoTDC.setByte("order", i,(byte) (byte) (evioBank.getInt("side", i)+2));
-                hipoTDC.setInt("TDC", i, evioBank.getInt("TDC", i));
-            }
-            hipoEvent.appendBanks(hipoTDC);
-        }
     }
     
     public void fillHipoEventRF(HipoDataEvent hipoEvent, EvioDataEvent evioEvent){
