@@ -1,5 +1,5 @@
 <evio_dictionary>
-    <bank name="ALERT" tag="2300" info="Simulated Hit Information">
+    <bank name="AHDC" tag="2300" info="Simulated Hit Information">
         <section name="true" tag="2301" num="0" info="True Values">
             <column name="pid"     num="1"  type="int32"   info="ID of the first particle entering the sensitive volume"/>
             <column name="mpid"    num="2"  type="int32"   info="ID of the mother of the first particle entering the sensitive volume"/>

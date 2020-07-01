@@ -73,15 +73,17 @@ public class EvioHipoEvent4 {
         if(evioEvent.hasBank("AHDC::dgtz")==true){
             try {
                 EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("AHDC::dgtz");
-                Bank  hipoBankTDC = new Bank(schemaFactory.getSchema("AHDC::tdc"), evioBank.rows());
+                System.out.println("AHDC bank is present");
+                Bank  hipoTDC = new Bank(schemaFactory.getSchema("AHDC::tdc"), evioBank.rows());
                 for(int i = 0; i < evioBank.rows(); i++){
-                    hipoBankTDC.putByte("sector",   i,    (byte) evioBank.getInt("sector", i));
-                    hipoBankTDC.putShort("pmt",     i,   (short)  evioBank.getInt("pmt",i));
-                    hipoBankTDC.putShort("pixel",   i,    (short) evioBank.getInt("pixel",i));
-                    hipoBankTDC.putInt("TDC1",      i,    (int) evioBank.getInt("TDC1",i));
-                    hipoBankTDC.putInt("TDC2",      i,    (int) evioBank.getInt("TDC2", i));
+                    int index = i;
+                    hipoTDC.putByte("sector", index,      (byte)  evioBank.getInt("sector",i));
+                    hipoTDC.putByte("layer",  index,      (byte)  evioBank.getInt("layer",i));
+                    hipoTDC.putShort("component",  index, (short) evioBank.getInt("component",i));
+                    hipoTDC.putByte("order", index,(byte) 2);
+                    hipoTDC.putInt("TDC", index, evioBank.getInt("TDC", i));
                 }
-                hipoEvent.write(hipoBankTDC);
+                hipoEvent.write(hipoTDC);
                 }
             catch (Exception e) {
                 System.out.println("[hipo-decoder]  >>>> error writing RICH bank");
