@@ -31,7 +31,7 @@
         <section name="dgtz" tag="2302" num="0" info="Digitized information">
             <column name="superlayer" type="int32"    num="1" info="Superlayer number" />
             <column name="layer"    type="int32"  num="2" info="layer number" />
-            <column name="wireNum"   type="int32"  num="3" info="Wire Number"/>
+            <column name="wire"   type="int32"  num="3" info="Wire Number"/>
             <column name="adc" type="float64" num="4" info="adc"/>
             <column name="time" type="float64" num="5" info="time"/>
             <column name="hitn" type="int32" num="99" info="Hit Number"/>
