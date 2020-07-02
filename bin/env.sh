@@ -1,7 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
-SCRIPT_DIR=`dirname $0`
-CLAS12DIR=$SCRIPT_DIR/../ ; export CLAS12DIR
+export CLAS12DIR=`dirname $0`/..
 
 # Set default field maps (but do not override user's env):
 if [ -z "$COAT_MAGFIELD_TORUSMAP" ]; then
