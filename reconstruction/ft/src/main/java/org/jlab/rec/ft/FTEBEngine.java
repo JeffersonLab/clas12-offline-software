@@ -130,8 +130,7 @@ public class FTEBEngine extends ReconstructionEngine {
         en.init();
 //		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/elec_nofield_header.evio";
 //		EvioSource  reader = new EvioSource();
-        String input = "/Users/devita/Work/clas12/simulations/clas12Tags/4.3.1/out.hipo";
-//		String input = "/Users/devita/out_gemc_10.hipo";
+        String input = "/Users/devita/Work/clas12/simulations/clas12Tags/4.4.0/out.hipo";
         HipoDataSource reader = new HipoDataSource();
         reader.open(input);
 
@@ -142,12 +141,12 @@ public class FTEBEngine extends ReconstructionEngine {
         H1F h2 = new H1F("Energy Resolution", 100, -1, 1);
         h2.setOptStat(Integer.parseInt("1111"));
         h2.setTitleX("Energy Resolution(GeV)");
-        H1F h3 = new H1F("Theta Resolution", 100, -2, 2);
-        h3.setOptStat(Integer.parseInt("1111"));
-        h3.setTitleX("Theta Resolution(deg)");
-        H1F h4 = new H1F("Phi Resolution", 100, -10, 10);
-        h4.setOptStat(Integer.parseInt("1111"));
-        h4.setTitleX("Phi Resolution(deg)");
+        H2F h3 = new H2F("Theta Resolution", 100, 0, 5, 100, -2, 2);
+        h3.setTitleX("Energy (GeV)");
+        h3.setTitleY("Theta Resolution(deg)");
+        H2F h4 = new H2F("Phi Resolution", 100, 0, 5, 100, -10, 10);
+        h4.setTitleX("Energy (GeV)");
+        h4.setTitleY("Phi Resolution(deg)");
         H1F h5 = new H1F("Time Resolution", 100, -2, 2);
         h5.setOptStat(Integer.parseInt("1111"));
         h5.setTitleX("Time Resolution(ns)");
@@ -183,8 +182,8 @@ public class FTEBEngine extends ReconstructionEngine {
                         h1.fill(bank.getDouble("Energy", i));
                         h2.fill(bank.getDouble("Energy", i) - gen.getParticle("[11]").vector().p());
                         Vector3D part = new Vector3D(bank.getDouble("Cx", i), bank.getDouble("Cy", i), bank.getDouble("Cz", i));
-                        h3.fill(Math.toDegrees(part.theta() - gen.getParticle("[11]").theta()));
-                        h4.fill(Math.toDegrees(part.phi() - gen.getParticle("[11]").phi()));
+                        h3.fill(gen.getParticle("[11]").vector().p(),Math.toDegrees(part.theta() - gen.getParticle("[11]").theta()));
+                        h4.fill(gen.getParticle("[11]").vector().p(),Math.toDegrees(part.phi() - gen.getParticle("[11]").phi()));
                         h5.fill(bank.getDouble("Time", i));
                         h6.fill(bank.getDouble("Energy", i), bank.getDouble("Energy", i) - gen.getParticle("[11]").vector().p());
                     }
@@ -200,8 +199,8 @@ public class FTEBEngine extends ReconstructionEngine {
                             h1.fill(bank.getFloat("energy", i));
                             h2.fill(bank.getFloat("energy", i) - gen.getGeneratedParticle(0).vector().p());
                             Vector3D part = new Vector3D(bank.getFloat("cx", i), bank.getFloat("cy", i), bank.getFloat("cz", i));
-                            h3.fill(Math.toDegrees(part.theta() - gen.getGeneratedParticle(0).theta()));
-                            h4.fill(Math.toDegrees(part.phi() - gen.getGeneratedParticle(0).phi()));
+                            h3.fill(gen.getGeneratedParticle(0).vector().p(),Math.toDegrees(part.theta() - gen.getGeneratedParticle(0).theta()));
+                            h4.fill(gen.getGeneratedParticle(0).vector().p(),Math.toDegrees(part.phi() - gen.getGeneratedParticle(0).phi()));
                             h5.fill(bank.getFloat("time", i) - 124.25);
                             h6.fill(bank.getFloat("cx", i) * FTCALConstantsLoader.CRYS_ZPOS, bank.getFloat("cy", i) * FTCALConstantsLoader.CRYS_ZPOS, bank.getFloat("energy", i) - gen.getGeneratedParticle(0).vector().p());
                             h7.fill(bank.getFloat("cx", i) * FTCALConstantsLoader.CRYS_ZPOS, bank.getFloat("cy", i) * FTCALConstantsLoader.CRYS_ZPOS);

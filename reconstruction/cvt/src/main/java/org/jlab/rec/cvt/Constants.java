@@ -34,6 +34,8 @@ public class Constants {
     private static double _RbErr = 1./Math.sqrt(12.);
     
     private static double _Zoffset = 0;
+    
+    private static int _rmReg = 0;
 
     public static double getXb() {
         return _Xb;
@@ -67,6 +69,14 @@ public class Constants {
         Constants._Zoffset = _Zoffset;
     }
 
+    public static int getRmReg() {
+        return _rmReg;
+    }
+
+    public static void setRmReg(int _reg) {
+        Constants._rmReg = _reg;
+    }
+    
     //public static final boolean DEBUGMODE =false;
     // for landau inverse calculation
     public static final double f[] = {
@@ -240,12 +250,12 @@ public class Constants {
 
     //public static final int CVTCONFIGSTARTREG = 2; // for 3SVT+3BMT
 
-    public static synchronized void Load(boolean isCosmics, boolean isSVTonly, double SolenoidScale) {
+    public static synchronized void Load(boolean isCosmics, boolean isSVTonly) {
         if (areConstantsLoaded) {
             return;
         }
 
-        setSolenoidscale(SolenoidScale);
+        
         Constants.setCosmicsData(false);
         setSVTOnly(isSVTonly);
 
@@ -254,9 +264,7 @@ public class Constants {
 
         areConstantsLoaded = true;
         System.out.println("CVT constants loaded ? " + areConstantsLoaded);
-
-        if(Math.abs(SolenoidScale)<0.001)
-            Constants.setCosmicsData(true);
+        
     }
 
     public static final boolean isCosmicsData() {

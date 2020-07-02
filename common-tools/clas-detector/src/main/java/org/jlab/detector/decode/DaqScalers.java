@@ -85,7 +85,7 @@ public class DaqScalers {
 
         if (dsc2.getClock() > 0) {
 
-            float live = dsc2.getGatedSlm() / dsc2.getSlm();
+            float live = (float)dsc2.getGatedSlm() / dsc2.getSlm();
             float q  = (float)(dsc2.getFcup()      - fcup_offset * seconds );
             float qg = (float)(dsc2.getGatedFcup() - fcup_offset * seconds * live);
             q  *= fcup_atten / fcup_slope;

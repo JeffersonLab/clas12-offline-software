@@ -1,6 +1,7 @@
 package org.jlab.service.dc;
 
-import Jama.Matrix;
+//import Jama.Matrix;
+import org.jlab.jnp.matrix.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,7 +25,7 @@ import org.jlab.rec.dc.segment.SegmentFinder;
 import org.jlab.rec.dc.timetodistance.TimeToDistanceEstimator;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.TrackCandListFinder;
-import org.jlab.rec.dc.track.fit.KFitter;
+import org.jlab.rec.dc.track.fit.KFitterDoca;
 import org.jlab.rec.dc.trajectory.StateVec;
 import org.jlab.rec.dc.trajectory.Trajectory;
 import org.jlab.rec.dc.trajectory.TrajectoryFinder;
@@ -101,17 +102,9 @@ public class DCTBEngine extends DCEngine {
             super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
             super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"),
             Constants.getT0(), Constants.getT0Err(), dcDetector, tde);
-        hitRead.read_TBHits(event, 
-            super.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
-            super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), tde, Constants.getT0(), Constants.getT0Err());
         List<FittedHit> hits = new ArrayList<FittedHit>();
         //I) get the hits
-        if(hitRead.get_TBHits().isEmpty()) {
-            hits = hitRead.get_HBHits();
-
-        } else {
-            hits = hitRead.get_TBHits();
-        }
+        hits = hitRead.get_HBHits();
 
         //II) process the hits
         //1) exit if hit list is empty
@@ -189,7 +182,8 @@ public class DCTBEngine extends DCEngine {
                     trkbank.getFloat("tx", i), trkbank.getFloat("ty", i));
             HBFinalSV.setZ(trkbank.getFloat("z", i));
             HBtrk.setFinalStateVec(HBFinalSV);
-            Matrix initCMatrix = new Matrix(new double[][]{
+            Matrix initCMatrix = new Matrix();
+            initCMatrix.set(new double[][]{
             {trkcovbank.getFloat("C11", i), trkcovbank.getFloat("C12", i), trkcovbank.getFloat("C13", i), trkcovbank.getFloat("C14", i), trkcovbank.getFloat("C15", i)},
             {trkcovbank.getFloat("C21", i), trkcovbank.getFloat("C22", i), trkcovbank.getFloat("C23", i), trkcovbank.getFloat("C24", i), trkcovbank.getFloat("C25", i)},
             {trkcovbank.getFloat("C31", i), trkcovbank.getFloat("C32", i), trkcovbank.getFloat("C33", i), trkcovbank.getFloat("C34", i), trkcovbank.getFloat("C35", i)},
@@ -227,8 +221,8 @@ public class DCTBEngine extends DCEngine {
             //if(TrackArray[i].get_FitChi2()>200) {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());
             //}
-            KFitter kFit = new KFitter(TrackArray[i], dcDetector, true, dcSwim);
-           
+            KFitterDoca kFit = new KFitterDoca(TrackArray[i], dcDetector, true, dcSwim, 0);
+             
             StateVec fn = new StateVec();
             kFit.runFitter(TrackArray[i].get(0).get_Sector());
             
@@ -246,10 +240,14 @@ public class DCTBEngine extends DCEngine {
                 TrackArray[i].set_Trajectory(kFit.kfStateVecsAlongTrajectory);
                 TrackArray[i].set_FitConvergenceStatus(kFit.ConvStatus);
                 TrackArray[i].set_Id(TrackArray[i].size()+1);
-                TrackArray[i].set_CovMat(kFit.finalCovMat.covMat); 
+                //TrackArray[i].set_CovMat(kFit.finalCovMat.covMat); 
                 if(TrackArray[i].get_Vtx0().toVector3D().mag()>500)
                     continue;
-                trkcands.add(TrackArray[i]);
+                // get CovMat at vertex
+                Point3D VTCS = crosses.get(0).getCoordsInSector(
+                        TrackArray[i].get_Vtx0().x(), TrackArray[i].get_Vtx0().y(), TrackArray[i].get_Vtx0().z());
+                TrackArray[i].set_CovMat(kFit.propagateToVtx(crosses.get(0).get_Sector(), VTCS.z()));
+                if(TrackArray[i].isGood()) trkcands.add(TrackArray[i]);
             }
         }
         

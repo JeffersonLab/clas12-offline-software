@@ -41,7 +41,10 @@
         {"name":"Cross6_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"Cross7_ID",      "type":"S", "info":"ID of cross in the track"},
         {"name":"Cross8_ID",      "type":"S", "info":"ID of cross in the track"},
-        {"name":"Cross9_ID",      "type":"S", "info":"ID of cross in the track"}
+        {"name":"Cross9_ID",      "type":"S", "info":"ID of cross in the track"},
+        {"name":"xb",             "type":"F", "info":"x offset  "},
+        {"name":"yb",             "type":"F", "info":"y offset  "},
+        {"name":"status",         "type":"S", "info":"track status : 1abc (a = nb SVT crosses, b = nb BMT Z clusters, c = nb BMT C clusters, used in fit)"}
     ]
   },
   {
@@ -86,15 +89,15 @@
     "info": "Trajectory bank",
     "entries": [
         {"name":"id",       "type":"S", "info":"id of the track"},
-        {"name":"detector", "type":"S", "info":"id of the detector"},
+        {"name":"detector", "type":"B", "info":"id of the detector"},
         {"name":"sector",   "type":"B", "info":"id of the sector"},
         {"name":"layer",    "type":"B", "info":"id of the layer"},
         {"name":"x",        "type":"F", "info":"track x position at detector surface (cm)"},
         {"name":"y",        "type":"F", "info":"track y position at detector surface (cm)"},
         {"name":"z",        "type":"F", "info":"track z position at detector surface (cm)"},
-        {"name":"phi",      "type":"F", "info":"local phi at detector surface (deg)"},
-        {"name":"theta",    "type":"F", "info":"local theta at detector surface"},
-        {"name":"langle",   "type":"F", "info":"local angle with module surface"},
+        {"name":"phi",      "type":"F", "info":"local phi at detector surface (rad)"},
+        {"name":"theta",    "type":"F", "info":"local theta at detector surface (rad)"},
+        {"name":"langle",   "type":"F", "info":"local angle with module surface (rad)"},
         {"name":"centroid", "type":"F", "info":"estimated strip centroid"},
         {"name":"path",     "type":"F", "info":"pathlength of the track from the track vertex to the detector surface (cm)"}
     ]

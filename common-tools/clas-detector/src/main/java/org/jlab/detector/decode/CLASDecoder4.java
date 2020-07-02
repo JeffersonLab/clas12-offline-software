@@ -100,49 +100,52 @@ public class CLASDecoder4 {
     public void initEvent(DataEvent event){
 
         if(event instanceof EvioDataEvent){
-            try {
+            EvioDataEvent evioEvent = (EvioDataEvent) event;
+            if(evioEvent.getHandler().getStructure()!=null){
+                try {
 
-                dataList = codaDecoder.getDataEntries( (EvioDataEvent) event);
-
-                //dataList = new ArrayList<DetectorDataDgtz>();
-                //-----------------------------------------------------------------------------
-                // This part reads the BITPACKED FADC data from tag=57638 Format (cmcms)
-                // Then unpacks into Detector Digigitized data, and appends to existing buffer
-                // Modified on 9/5/2018
-                //-----------------------------------------------------------------------------
-
-                List<FADCData>  fadcPacked = codaDecoder.getADCEntries((EvioDataEvent) event);
-
-                /*for(FADCData data : fadcPacked){
+                    dataList = codaDecoder.getDataEntries( (EvioDataEvent) event);
+                    
+                    //dataList = new ArrayList<DetectorDataDgtz>();
+                    //-----------------------------------------------------------------------------
+                    // This part reads the BITPACKED FADC data from tag=57638 Format (cmcms)
+                    // Then unpacks into Detector Digigitized data, and appends to existing buffer
+                    // Modified on 9/5/2018
+                    //-----------------------------------------------------------------------------
+                    
+                    List<FADCData>  fadcPacked = codaDecoder.getADCEntries((EvioDataEvent) event);
+                    
+                    /*for(FADCData data : fadcPacked){
                     data.show();
-                }*/
-
-                if(fadcPacked!=null){
-                    List<DetectorDataDgtz> fadcUnpacked = FADCData.convert(fadcPacked);
-                    dataList.addAll(fadcUnpacked);
-                }
-                //  END of Bitpacked section
-                //-----------------------------------------------------------------------------
-                //this.decoderDebugMode = 4;
-                if(this.decoderDebugMode>0){
-                    System.out.println("\n>>>>>>>>> RAW decoded data");
-                    for(DetectorDataDgtz data : dataList){
-                        System.out.println(data);
+                    }*/
+                    
+                    if(fadcPacked!=null){
+                        List<DetectorDataDgtz> fadcUnpacked = FADCData.convert(fadcPacked);
+                        dataList.addAll(fadcUnpacked);
                     }
-                }
-                int runNumberCoda = codaDecoder.getRunNumber();
-                this.setRunNumber(runNumberCoda);
-
-                detectorDecoder.translate(dataList);
-                detectorDecoder.fitPulses(dataList);
-                if(this.decoderDebugMode>0){
-                    System.out.println("\n>>>>>>>>> TRANSLATED data");
-                    for(DetectorDataDgtz data : dataList){
-                        System.out.println(data);
+                    //  END of Bitpacked section
+                    //-----------------------------------------------------------------------------
+                    //this.decoderDebugMode = 4;
+                    if(this.decoderDebugMode>0){
+                        System.out.println("\n>>>>>>>>> RAW decoded data");
+                        for(DetectorDataDgtz data : dataList){
+                            System.out.println(data);
+                        }
                     }
+                    int runNumberCoda = codaDecoder.getRunNumber();
+                    this.setRunNumber(runNumberCoda);
+                    
+                    detectorDecoder.translate(dataList);
+                    detectorDecoder.fitPulses(dataList);
+                    if(this.decoderDebugMode>0){
+                        System.out.println("\n>>>>>>>>> TRANSLATED data");
+                        for(DetectorDataDgtz data : dataList){
+                            System.out.println(data);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
 
@@ -273,6 +276,7 @@ public class CLASDecoder4 {
             	adcBANK.putInt("integral", i, adcDGTZ.get(i).getADCData(0).getIntegral());
             	adcBANK.putLong("timestamp", i, adcDGTZ.get(i).getADCData(0).getTimeStamp());
             }
+            if(name == "BAND::adc") adcBANK.putInt("amplitude", i, adcDGTZ.get(i).getADCData(0).getHeight());
          }
         return adcBANK;
     }
@@ -451,7 +455,20 @@ public class CLASDecoder4 {
         } catch(Exception e) {
             e.printStackTrace();
         }
-
+        //-----------------------------------------------------
+        // CREATING BONUS BANK --------------------------------
+        //-----------------------------------------------------
+        try {
+            //System.out.println("creating bonus bank....");
+            Bank bonusBank = this.createBonusBank();
+            if(bonusBank!=null){
+                if(bonusBank.getRows()>0){
+                    event.write(bonusBank);
+                }
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
         return event;
     }
 
@@ -602,7 +619,51 @@ public class CLASDecoder4 {
 
         return scalerBank;
     }
-
+    
+    public Bank createBonusBank(){
+        //System.out.println("create bonus bank function...");
+        if(schemaFactory.hasSchema("RTPC::adc")==false) return null;
+        //System.out.println("bank descriptor does exist");
+        List<DetectorDataDgtz> bonusData = this.getEntriesADC(DetectorType.RTPC);
+        //System.out.println("number of entries in the list = " + bonusData.size()
+        //+ "  data list size = " + dataList.size());
+        int totalSize = 0;
+        for(int i = 0; i < bonusData.size(); i++){
+            short[]  pulse = bonusData.get(i).getADCData(0).getPulseArray();
+            totalSize += pulse.length;
+        }
+        
+        Bank bonusBank = new Bank(schemaFactory.getSchema("RTPC::adc"), totalSize);
+        int currentRow = 0;
+        for(int i = 0; i < bonusData.size(); i++){
+            
+            DetectorDataDgtz bonus = bonusData.get(i);
+            
+            short[] pulses = bonus.getADCData(0).getPulseArray();
+            long timestamp = bonus.getADCData(0).getTimeStamp();
+            double    time = bonus.getADCData(0).getTime();
+            double   coeff = time*120.0;
+            
+            double   offset1 = 0.0;
+            double   offset2 =  (double) (8*(timestamp%8));
+            
+            for(int k = 0; k < pulses.length; k++){
+                
+                double pulseTime = coeff + offset1 + offset2 + k*120.0;
+                
+                bonusBank.putByte("sector", currentRow, (byte) bonus.getDescriptor().getSector());
+                bonusBank.putByte("layer" , currentRow, (byte) bonus.getDescriptor().getLayer());
+                bonusBank.putShort("component", currentRow, (short) bonus.getDescriptor().getComponent());
+                bonusBank.putByte("order",      currentRow, (byte) bonus.getDescriptor().getOrder());
+                bonusBank.putInt("ADC",    currentRow, pulses[k]);
+                bonusBank.putFloat("time", currentRow, (float) pulseTime);
+                bonusBank.putShort("ped",  currentRow, (short) 0);
+                currentRow++;
+            }
+        }
+        
+        return bonusBank;
+    }
     public Bank createHelicityFlipBank(Event event,HelicityState state) {
         IndexedTable hwpTable=this.detectorDecoder.scalerManager.getConstants(
                 this.detectorDecoder.getRunNumber(),"/runcontrol/hwp");
@@ -769,6 +830,9 @@ public class CLASDecoder4 {
 
                     counter++;
                     progress.updateStatus();
+                    if(counter%25000==0){
+                        System.gc();
+                    }
                     if(nevents>0){
                         if(counter>=nevents) break;
                     }

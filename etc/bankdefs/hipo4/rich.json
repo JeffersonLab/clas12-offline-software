@@ -149,10 +149,10 @@
     "entries": [
             {"name":"id",             "type":"S", "info":"id" },
             {"name":"hindex",         "type":"S", "info":"related row in the RICH::hits bank"},
-            {"name":"pindex",         "type":"S", "info":"related row in the REC::Particle bank"},
+            {"name":"pindex",         "type":"B", "info":"related row in the REC::Particle bank"},
 
             {"name":"pmt",            "type":"S", "info":"photon hit pmt" },
-            {"name":"anode",          "type":"S", "info":"photon hit anode" },
+            {"name":"anode",          "type":"B", "info":"photon hit anode" },
             {"name":"time",           "type":"F", "info":"photon hit time" },
 
             {"name":"apath",          "type":"F", "info":"photon path for analytic solution" },
@@ -161,7 +161,41 @@
 
             {"name":"tpath",          "type":"F", "info":"photon path for traced solution" },
             {"name":"ttime",          "type":"F", "info":"photon arrival time for traced solution" },
-            {"name":"tEtaC",          "type":"F", "info":"Cherenkov angle as traced solution" }
+            {"name":"tEtaC",          "type":"F", "info":"Cherenkov angle as traced solution" },
+
+            {"name":"nrfl",           "type":"B", "info":"n reflections for traced solution" },
+            {"name":"1rfl",           "type":"S", "info":"layer and component of the first reflection for traced solution" }
+    ]
+  },
+  {
+    "name": "RICH::hadCher",
+    "group": 21800,
+    "item" : 35,
+    "info": "Reconstructed Cherenov information per track",
+    "entries": [
+            {"name":"id",             "type":"B", "info":"id"},
+            {"name":"hindex",         "type":"B", "info":"related row in the RICH::clusters bank (if any)"},
+            {"name":"pindex",         "type":"B", "info":"related row in the REC::Particle bank"},
+
+            {"name":"emilay",         "type":"B", "info":"aerogel layer of photon emission"},
+            {"name":"emico",          "type":"B", "info":"aerogel component of photon emission"},
+            {"name":"enico",          "type":"B", "info":"aerogel component of photon entrance point"},
+            {"name":"emqua",          "type":"S", "info":"aerogel quadrant of photon emission"},
+            {"name":"mchi2",          "type":"F", "info":"track-cluster matching chi2 (if any)"},
+
+            {"name":"ch_min",         "type":"F", "info":"minimum EtaC selection"},
+            {"name":"ch_max",         "type":"F", "info":"maximum EtaC selection"},
+            {"name":"dt_max",         "type":"F", "info":"maximum delta-time selection"},
+            {"name":"ch_dir",         "type":"F", "info":"average Cherenkov angle for direct photons"},
+            {"name":"ch_lat",         "type":"F", "info":"average Cherenkov angle for photons reflected by flat mirrors"},
+            {"name":"ch_spe",         "type":"F", "info":"average Cherenkov angle for photons reflected by spherical mirrors"},
+
+            {"name":"best_PID",       "type":"B", "info":"most probable PID choice"},
+            {"name":"RQ_prob",        "type":"F", "info":"goodness of choice parameter (1=anambiguos, 0=random)"},
+            {"name":"el_prob",        "type":"F", "info":"probability to be an electron"},
+            {"name":"pi_prob",        "type":"F", "info":"probability to be an pion"},
+            {"name":"k_prob",         "type":"F", "info":"probability to be an kaon"},
+            {"name":"pr_prob",        "type":"F", "info":"probability to be an proton"}
     ]
   }
-      ]
+]

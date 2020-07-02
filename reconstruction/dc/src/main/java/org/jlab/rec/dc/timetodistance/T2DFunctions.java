@@ -5,8 +5,6 @@
  */
 package org.jlab.rec.dc.timetodistance;
 
-import org.jlab.rec.dc.Constants;
-
 /**
  *
  * @author ziegler
@@ -334,7 +332,8 @@ public class T2DFunctions {
         c = c /(4.-(1.-6.*R*R)/(1.-2.*R));
         double b = delv/(rcapital*rcapital) - 4.*c/(3.*rcapital);
         double d = 1/v_0;
-        double a = (tmax -  b*dmaxalpha*dmaxalpha*dmaxalpha - c*dmaxalpha*dmaxalpha - d*dmaxalpha)/(dmaxalpha*dmaxalpha*dmaxalpha*dmaxalpha) ;       
+        double a = (tmax -  b*dmaxalpha*dmaxalpha*dmaxalpha - 
+                c*dmaxalpha*dmaxalpha - d*dmaxalpha)/(dmaxalpha*dmaxalpha*dmaxalpha*dmaxalpha) ;       
         time = a*x*x*x*x + b*x*x*x + c*x*x + d*x ;
         
         //B correction

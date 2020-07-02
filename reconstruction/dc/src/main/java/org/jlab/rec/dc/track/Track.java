@@ -1,10 +1,12 @@
 package org.jlab.rec.dc.track;
 
-import Jama.Matrix;
+//import Jama.Matrix;
+import org.jlab.jnp.matrix.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.dc.Constants;
 import org.jlab.rec.dc.hit.FittedHit;
 import org.jlab.rec.dc.segment.Segment;
 import org.jlab.rec.dc.trajectory.StateVec;
@@ -380,6 +382,12 @@ public class Track extends Trajectory implements Comparable<Track>{
         return _hitsOnTrack;
     }
     
+    
+    public boolean isGood() {
+        boolean isGood=true;
+        if(this._trakOrig.distance(0, 0, 0)>Constants.htccRadius) isGood=false;
+        return isGood;
+    }
     /**
      * Basic track info
      */

@@ -380,6 +380,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                 wires.add(pcalV);
                 wires.add(pcalW);
                 wires.add(htcc);
+                wires.add(sector);
                 if(newDictionary.containsKey(wires) && duplicates!=0)  {
                         int nRoad = newDictionary.get(wires) + 1;
                         newDictionary.replace(wires, nRoad);
@@ -410,7 +411,8 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
-                    + "%d\t%.2f\t%d\t%d\t%d\t%d\t%d\n",
+                    + "%d\t%.2f\t%d\t%d\t%d\t%d\t"
+                    + "%d\t%d\t0.0\t0.0\t0.0\n",
                     q, p, thetaDeg, phiDeg,
                     Wl1.get(0), Wl2.get(0), Wl3.get(0), Wl4.get(0), Wl5.get(0), Wl6.get(0), 
                     Wl1.get(1), Wl2.get(1), Wl3.get(1), Wl4.get(1), Wl5.get(1), Wl6.get(1), 
@@ -418,7 +420,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
                     Wl1.get(3), Wl2.get(3), Wl3.get(3), Wl4.get(3), Wl5.get(3), Wl6.get(3), 
                     Wl1.get(4), Wl2.get(4), Wl3.get(4), Wl4.get(4), Wl5.get(4), Wl6.get(4), 
                     Wl1.get(5), Wl2.get(5), Wl3.get(5), Wl4.get(5), Wl5.get(5), Wl6.get(5), 
-                    paddle1b, vzCm, paddle2, pcalU, pcalV, pcalW, htcc);
+                    paddle1b, vzCm, paddle2, pcalU, pcalV, pcalW, htcc, sector);
                 }   
             }
         }
@@ -669,7 +671,7 @@ public class TrackDictionaryMakerRNG extends DCEngine{
 
     private void resetGeom(String geomDBVar) {
         ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11, Optional.ofNullable(geomDBVar).orElse("default"));
-        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
+        dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, DCGeant4Factory.ENDPLATESBOWON);
         
         for(int l=0; l<6; l++) {
             Constants.wpdist[l] = provider.getDouble("/geometry/dc/superlayer/wpdist", l);

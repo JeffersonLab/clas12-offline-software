@@ -131,18 +131,19 @@ public class TrackDictionaryValidation {
                         // save particle information
                         Particle part = new Particle(
                                         -11*charge,
-                                        recParticle.getFloat("px", i),
-                                        recParticle.getFloat("py", i),
-                                        recParticle.getFloat("pz", i),
-                                        recParticle.getFloat("vx", i),
-                                        recParticle.getFloat("vy", i),
-                                        recParticle.getFloat("vz", i)); 
+                                        recParticle.getFloat("px", pindex),
+                                        recParticle.getFloat("py", pindex),
+                                        recParticle.getFloat("pz", pindex),
+                                        recParticle.getFloat("vx", pindex),
+                                        recParticle.getFloat("vy", pindex),
+                                        recParticle.getFloat("vz", pindex)); 
                         if(part.p()<thrs) continue; //use only roads with momentum above the selected value
                         // get the DC wires' IDs
+                        int trackSector = 0;
                         int[] wireArray = new int[36];
                         for (int j = 0; j < tbtHits.rows(); j++) {
                             if (tbtHits.getByte("trkID", j) == tbtTrack.getShort("id", index)) {
-                                int sector = tbtHits.getByte("sector", j);
+                                trackSector = tbtHits.getByte("sector", j);
                                 int superlayer = tbtHits.getByte("superlayer", j);
                                 int layer = tbtHits.getByte("layer", j);
                                 int wire = tbtHits.getShort("wire", j);
@@ -168,7 +169,9 @@ public class TrackDictionaryValidation {
                             int pcalV    = 0;
                             int pcalW    = 0;
                             int htcc     = 0;
-                            // check FTOF
+                            double pcalE = 0;
+                            double ecinE = 0;
+                            double ecoutE= 0;                             // check FTOF
                             if(recScintillator!=null) {
                                 for(int j=0; j<recScintillator.rows(); j++) {
                                     if(recScintillator.getShort("pindex",j) == pindex) {
@@ -187,18 +190,26 @@ public class TrackDictionaryValidation {
                                         int detectorClus = recCalorimeter.getByte("detector", j);
                                         int indexClus    = recCalorimeter.getShort("index",j);
                                         int layerClus    = recCalorimeter.getByte("layer",j);
+                                        double energy    = recCalorimeter.getFloat("energy",j);
                                         // use pcal only
                                         if(detectorClus==DetectorType.ECAL.getDetectorId() && layerClus==1) {
                                             pcalU = (ecalCluster.getInt("coordU",indexClus)-4)/8+1;
                                             pcalV = (ecalCluster.getInt("coordV",indexClus)-4)/8+1;
                                             pcalW = (ecalCluster.getInt("coordW",indexClus)-4)/8+1;
+                                            pcalE =  energy;
 //                                            System.out.println(pcalU + " " + pcalV + " " + pcalW);
+                                        }
+                                        else if(detectorClus==DetectorType.ECAL.getDetectorId() && layerClus==4) {
+                                            ecinE = energy;
+                                        }
+                                        else if(detectorClus==DetectorType.ECAL.getDetectorId() && layerClus==7) {
+                                            ecoutE = energy;
                                         }
                                     }
                                 }
                             }
                            // check HTCC
-                            if (recCherenkov != null && htccRec != null && htccADC != null) {
+                            if (recCherenkov != null && htccRec != null && htccADC != null && false) {
                                 int htcc_event;
 //                                recCherenkov.show(); htccADC.show();
                                 for (int j = 0; j < recCherenkov.rows(); j++) {
@@ -206,8 +217,11 @@ public class TrackDictionaryValidation {
                                         int detectorCheren = recCherenkov.getByte("detector", j);
                                         if (detectorCheren == DetectorType.HTCC.getDetectorId()) {
                                             int nhits = htccRec.getShort("nhits",recCherenkov.getShort("index", j));
-                                            double thetaCheren = recCherenkov.getFloat("theta", j);
-                                            double phiCheren   = recCherenkov.getFloat("phi", j);
+                                            double x = recCherenkov.getFloat("x", j);
+                                            double y = recCherenkov.getFloat("y", j);
+                                            double z = recCherenkov.getFloat("z", j);                                            
+                                            double thetaCheren = Math.acos(z/Math.sqrt(x*x+y*y+z*z));
+                                            double phiCheren   = Math.atan2(y, x);
                                             thetaCheren = Math.toDegrees(thetaCheren);
                                             phiCheren   = Math.toDegrees(phiCheren );
                                             double phiCC   = Math.round(phiCheren); 
@@ -269,6 +283,10 @@ public class TrackDictionaryValidation {
                             wires.add(pcalV);
                             wires.add(pcalW);
                             wires.add(htcc);
+                            wires.add(trackSector);
+                            part.setProperty("pcalE",  pcalE);
+                            part.setProperty("ecinE",  ecinE);
+                            part.setProperty("ecoutE", ecoutE);
                             if(duplicates==0) wires.add(nevent);
                             // save roads to map
                             if(!newDictionary.containsKey(wires))  {
@@ -445,9 +463,12 @@ public class TrackDictionaryValidation {
                 wiresCopy.set(4, (byte) (wires.get(4) + k5));
                 wiresCopy.set(5, (byte) (wires.get(5) + k6));
                 wiresCopy.set(6, (byte) (wires.get(6) + k7));
+                wiresCopy.set(7, (byte) 0); //panel 2
                 wiresCopy.set(8, (byte) (wires.get(8) + k8));
                 wiresCopy.set(9, (byte) (wires.get(9) + k9));
                 wiresCopy.set(10,(byte) (wires.get(10)+ k10));
+                wiresCopy.set(11, (byte) 0); //htcc
+                wiresCopy.set(12,(byte) (wires.get(12)));
                 if(this.dictionary.containsKey(wiresCopy)) {
                     foundRoad=this.dictionary.get(wiresCopy);
                     break;
@@ -814,12 +835,12 @@ public class TrackDictionaryValidation {
                         // save particle information
                         Particle part = new Particle(
                                         -11*charge,
-                                        recParticle.getFloat("px", i),
-                                        recParticle.getFloat("py", i),
-                                        recParticle.getFloat("pz", i),
-                                        recParticle.getFloat("vx", i),
-                                        recParticle.getFloat("vy", i),
-                                        recParticle.getFloat("vz", i));                   
+                                        recParticle.getFloat("px", pindex),
+                                        recParticle.getFloat("py", pindex),
+                                        recParticle.getFloat("pz", pindex),
+                                        recParticle.getFloat("vx", pindex),
+                                        recParticle.getFloat("vy", pindex),
+                                        recParticle.getFloat("vz", pindex));                   
                         boolean goodTrack=true;
                         // meglect tracks below 1 GeV
                         if(part.p()<thrs) goodTrack=false;
@@ -847,10 +868,11 @@ public class TrackDictionaryValidation {
                         
                         // get the DC wires' IDs
                         int[] wireArray = new int[36];
+                        int trackSector = 0;
                         int nSL3=0;
                         for (int j = 0; j < tbtHits.rows(); j++) {
                             if (tbtHits.getByte("trkID", j) == tbtTrack.getShort("id", index)) {
-                                int sector     = tbtHits.getByte("sector", j);
+                                trackSector    = tbtHits.getByte("sector", j);
                                 int superlayer = tbtHits.getByte("superlayer", j);
                                 int layer      = tbtHits.getByte("layer", j);
                                 int wire       = tbtHits.getShort("wire", j);
@@ -911,7 +933,7 @@ public class TrackDictionaryValidation {
                                 }
                             }
                            // check HTCC
-                            if (recCherenkov != null && htccRec != null && htccADC != null && mode > 2) {
+                            if (recCherenkov != null && htccRec != null && htccADC != null && mode > 2 && false) {
                                 int htcc_event;
 //                                recCherenkov.show(); htccADC.show();
                                 for (int j = 0; j < recCherenkov.rows(); j++) {
@@ -919,8 +941,11 @@ public class TrackDictionaryValidation {
                                         int detectorCheren = recCherenkov.getByte("detector", j);
                                         if (detectorCheren == DetectorType.HTCC.getDetectorId()) {
                                             int nhits = htccRec.getShort("nhits",recCherenkov.getShort("index", j));
-                                            double thetaCheren = recCherenkov.getFloat("theta", j);
-                                            double phiCheren   = recCherenkov.getFloat("phi", j);
+                                            double x = recCherenkov.getFloat("x", j);
+                                            double y = recCherenkov.getFloat("y", j);
+                                            double z = recCherenkov.getFloat("z", j);                                            
+                                            double thetaCheren = Math.acos(z/Math.sqrt(x*x+y*y+z*z));
+                                            double phiCheren   = Math.atan2(y, x);
                                             thetaCheren = Math.toDegrees(thetaCheren);
                                             phiCheren   = Math.toDegrees(phiCheren );
                                             double phiCC   = Math.round(phiCheren); 
@@ -969,10 +994,11 @@ public class TrackDictionaryValidation {
                             wires.add((byte) pcalV);
                             wires.add((byte) pcalW);
                             wires.add((byte) htcc);
+                            wires.add((byte) trackSector);
                             if(mode>0 && (paddle1b==0 || pcalU==0)) continue;
                             if(mode>1 && (paddle1b==0 || pcalU==0 || pcalV==0 || pcalW==0)) continue;
-                            if(mode>2 && (paddle1b==0 || pcalU==0 || pcalV==0 || pcalW==0 || htcc==0)) continue;
-                            double phi     = (Math.toDegrees(part.phi())+180+30)%60-30;                        
+                            if(mode>2 && (paddle1b==0 || pcalU==0 || pcalV==0 || pcalW==0 || htcc==-1)) continue;
+                            double phi    = (Math.toDegrees(part.phi())+180+30)%60-30;    
                             Particle road = this.findRoad(wires,wireSmear,pcalUSmear,pcalVWSmear);
                             if(road != null) {
                                 double phiRoad = (Math.toDegrees(road.phi())+180+30)%60-30;
@@ -1035,7 +1061,7 @@ public class TrackDictionaryValidation {
                 String[] lineValues;
                 lineValues  = line.split("\t");
                 ArrayList<Byte> wires = new ArrayList<Byte>();
-                if(lineValues.length < 47) {
+                if(lineValues.length < 51) {
                     System.out.println("WARNING: dictionary line " + nLines + " incomplete: skipping");
                 }
                 else {
@@ -1049,12 +1075,19 @@ public class TrackDictionaryValidation {
                     double py    = p*Math.sin(Math.toRadians(theta))*Math.sin(Math.toRadians(phi));
                     double pz    = p*Math.cos(Math.toRadians(theta));
                     double phiSec = (phi+360+30)%60-30;
+                    double pcalE  = Double.parseDouble(lineValues[48]);
+                    double ecinE  = Double.parseDouble(lineValues[49]);
+                    double ecoutE = Double.parseDouble(lineValues[50]);
                     Particle road = new Particle(211*charge, px, py, pz, 0, 0, vz);
+                    road.setProperty("pcalE",  pcalE);
+                    road.setProperty("ecinE",  ecinE);
+                    road.setProperty("ecoutE", ecoutE);
                     // take wire id of first layer in each superlayer, id>0
                     for(int i=0; i<6; i++) {
                         int wire = Integer.parseInt(lineValues[4+i*6]);
                         if(wire>0) wires.add((byte) wire);
                     }
+                    int sector   = 0;
                     int paddle1b = 0;
                     int paddle2  = 0;
                     int pcalu    = 0; 
@@ -1070,9 +1103,12 @@ public class TrackDictionaryValidation {
                         pcalv    = Integer.parseInt(lineValues[44]);                    
                         pcalw    = Integer.parseInt(lineValues[45]);
                     }                    
-                     if(lineValues.length >=47 & mode>2) {
+                    if(lineValues.length >=47 & mode>2) {
                         htcc     = Integer.parseInt(lineValues[46]);
-                    }                    
+                    }
+                    if(lineValues.length >=48) {
+                        sector   = Integer.parseInt(lineValues[47]);
+                    }
                     // keep only roads with 6 superlayers
                     if(wires.size()!=6 || road.p()< thrs) continue;
                     // add other detectors
@@ -1082,6 +1118,7 @@ public class TrackDictionaryValidation {
                     wires.add((byte) pcalv);
                     wires.add((byte) pcalw);
                     wires.add((byte) htcc);
+                    wires.add((byte) sector);
                     nFull++;
                     if(this.dictionary.containsKey(wires)) {
                         nDupli++;
@@ -1128,7 +1165,7 @@ public class TrackDictionaryValidation {
             for(Map.Entry<ArrayList<Integer>, Particle> entry : dictionary.entrySet()) {
                 ArrayList<Integer> road = entry.getKey();
                 Particle           part = entry.getValue();
-                if(road.size()<12) {
+                if(road.size()<13) {
                     continue;
                 }
                 else {
@@ -1144,6 +1181,7 @@ public class TrackDictionaryValidation {
                     int pcalV    = road.get(9);
                     int pcalW    = road.get(10);
                     int htcc     = road.get(11);
+                    int sector   = road.get(12);
                     pw.printf("%d\t%.2f\t%.2f\t%.2f\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
@@ -1152,7 +1190,7 @@ public class TrackDictionaryValidation {
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%d\t%d\t%d\t%d\t%d\t"
                     + "%d\t%.2f\t%d\t%d\t%d\t%d\t"
-                    + "%d\n",
+                    + "%d\t%d\t%.1f\t%.1f\t%.1f\n",
                     //+ "%.1f\t %.1f\t %.1f\t %.1f\t %.1f\t %.1f\t\n", 
                     part.charge(), part.p(), Math.toDegrees(part.theta()), Math.toDegrees(part.phi()),
                     road.get(0), 0, 0, 0, 0, 0, 
@@ -1161,7 +1199,8 @@ public class TrackDictionaryValidation {
                     road.get(3), 0, 0, 0, 0, 0, 
                     road.get(4), 0, 0, 0, 0, 0, 
                     road.get(5), 0, 0, 0, 0, 0,  
-                    paddle1b, part.vz(), paddle2, pcalU, pcalV, pcalW, htcc);
+                    paddle1b, part.vz(), paddle2, pcalU, pcalV, pcalW, htcc, sector, 
+                    part.getProperty("pcalE"), part.getProperty("ecinE"), part.getProperty("ecoutE"));
                 }
             }
             pw.close();

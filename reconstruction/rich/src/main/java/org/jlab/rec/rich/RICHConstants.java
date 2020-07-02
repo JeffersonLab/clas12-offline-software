@@ -37,7 +37,7 @@ public class RICHConstants {
     public static final double RICH_MIN_CHANGLE           =  10.e-3;    // rad
 
     public static final double  RICH_MATCH_POLYDIST       =   1.e-3;    // Matching dist between poly and point
-    public static final double  RICH_BKG_PROBABILITY      =   1.e-3;   // Background probability for likelihood
+    public static final double  RICH_BKG_PROBABILITY      =   1.e-5;   // Background probability for likelihood
 
     public static final double READ_FROM_FILES            =   0.;      // read values from txt files
 
@@ -64,10 +64,15 @@ public class RICHConstants {
     public int     DO_MIRROR_HADS                         =   1;        // if 1 reconstruct hadrons pointing to mirror
     public int     DO_CURVED_AERO                         =   1;        // if 1 use spherical surface of aerogel
 
+    public int     USE_ELECTRON_ANGLES                    =   0;        // Get Cherenkov angle and rms from electrons control sample
+    public int     USE_PIXEL_PROPERTIES                   =   0;        // Use pixel status and efficiency in the likelihood
+    public int     SAVE_THROWS                            =   0;        // Store throwed photons in the photons bank
+    public int     QUADRANT_NUMBER                        =   15;       // Number of quadrants (square root of)
+
     public double  GOODHIT_FRAC                           =   80.;      // Maximum duration (in % of local max) to flag xtalk  
     public double  RICH_DCMATCH_CUT                       =   15.;      // RICH cluster matching cut with tracks 
     public double  RICH_HITMATCH_RMS                      =   0.6;      // RICH - particle matching chi2 reference (cm)
-    public double  RICH_DIRECT_RMS                        =   4.2e-3;   // Expected single photon angular resolution (rad)
+    public double  RICH_DIRECT_RMS                        =   6.0e-3;   // Expected single photon angular resolution (rad)
 
     public double  SHOW_PROGRESS_INTERVAL                 =   10.;      // Time interval between progress dumping (sec)
     public double  THROW_ASSOCIATION_CUT                  =   10.;      // Max distance to set initial values for tracing photons (cm)

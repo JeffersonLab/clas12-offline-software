@@ -95,7 +95,7 @@ public class ClusterMatcher {
         if (C1b.get_xTrk() == null || C1a.get_xTrk() == null) {
             return null; // no tracking info
         }
-        if (C1a.get(0)._AssociatedTrkId != C1b.get(0)._AssociatedTrkId) {
+        if (C1a.get(0).get_TrkId() != C1b.get(0).get_TrkId()) {
             return null; // not from the stame track
         }
         ArrayList<Cluster> ClsDoublet = new ArrayList<Cluster>(2);
@@ -112,7 +112,7 @@ public class ClusterMatcher {
         int rows = bank.rows();
         for (int i = 0; i < rows; i++) {
             if (bank.getByte("detector", i) == 6 &&
-                    bank.getShort("index", i) == C1a.get(0)._AssociatedTrkId - 1) {
+                    bank.getShort("index", i) == C1a.get(0).get_TrkId() - 1) {
                 this.Beta = event.getBank("RECHB::Particle").getFloat("beta",
                         bank.getShort("pindex", i));
             }
@@ -295,7 +295,7 @@ public class ClusterMatcher {
             // defined
             double delta_t1a = this.calc_deltaT(clus1A.get_Panel(),
                     CntrInPan1aWithEmax);
-            double delta_t1b = this.calc_deltaT(clus1A.get_Panel(),
+            double delta_t1b = this.calc_deltaT(clus1B.get_Panel(),
                     CntrInPan1bWithEmax);
 
             double term1 = clus1B.get_t() / delta_t1b;

@@ -536,7 +536,7 @@ public class TrackSeederCA {
             if (bmtCSz >= 2) {
                 useSVTdipAngEst = 0;
             }
-
+            
             ((ArrayList<Double>) X).ensureCapacity(svtSz + bmtZSz);
             ((ArrayList<Double>) Y).ensureCapacity(svtSz + bmtZSz);
             ((ArrayList<Double>) Z).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz);
@@ -544,7 +544,7 @@ public class TrackSeederCA {
             ((ArrayList<Double>) ErrZ).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz);
             ((ArrayList<Double>) ErrRho).ensureCapacity(svtSz * useSVTdipAngEst + bmtCSz); // Try: don't use svt in dipdangle fit determination
             ((ArrayList<Double>) ErrRt).ensureCapacity(svtSz + bmtZSz);
-
+            
             cand = new Track(null, swimmer);
             cand.addAll(SVTCrosses);
             for (int j = 0; j < SVTCrosses.size(); j++) {
@@ -580,8 +580,8 @@ public class TrackSeederCA {
                     ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
                 }
             }
-            X.add((double) 0);
-            Y.add((double) 0);
+            X.add((double) org.jlab.rec.cvt.Constants.getXb());
+            Y.add((double) org.jlab.rec.cvt.Constants.getYb());
 
             ErrRt.add((double) 0.1);
             
@@ -598,15 +598,19 @@ public class TrackSeederCA {
             cand.addAll(BMTCrossesZ);
             
             cand.set_HelicalTrack(fitTrk.get_helix(), swimmer, b);
-            if( X.size()>3 )
+            if( X.size()>3 ) {
             	cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]/(X.size()-3));
-            else 
+            }
+            else { 
             	cand.set_circleFitChi2PerNDF(fitTrk.get_chisq()[0]*2); // penalize tracks with only 3 crosses 
+            }
             
-            if( Z.size() > 2 )
+            if( Z.size() > 2 ) {
             	cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1]/Z.size());
-            else
+            }
+            else {
             	cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1]*2);// penalize tracks with only 2 crosses
+            }
             	
             //if(shift==0)
 //            if (fitTrk.get_chisq()[0] < chisqMax) {

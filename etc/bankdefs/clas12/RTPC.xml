@@ -1,4 +1,3 @@
-
 <evio_dictionary>
     <bank name="RTPC" tag="1700" info="Simulated FMT Hit Information">
         <section name="true" tag="1701" num="0" info="True Values">
@@ -30,10 +29,13 @@
             <column name="hitn"    num="99" type="int32"   info="Hit1 Number"/>
         </section>
         <section name="dgtz" tag="1702" num="0" info="Digitized information">
-            <column name="CellID" type="int32"    num="1" info="Pad CellId" />
-            <column name="ADC"    type="float64"  num="2" info="adc" />
-            <column name="Time"   type="float64"  num="3" info="tdc"/>
-            <column name="TimeShift" type="float64" num="4" info="time shift"/>
+            <column name="Sector"    type="int32"    num="1" info="Sector = 1" />
+            <column name="Layer"     type="int32"  num="2" info="Pad Column" />
+            <column name="Component"   type="int32"  num="3" info="Pad Row"/>
+            <column name="Order"   type="int32"  num="4" info="Order = 0"/>
+            <column name="Time"   type="float64"  num="5" info="Time [ns]"/>
+            <column name="ADC"   type="int32"  num="6" info="Energy deposition"/>
+            <column name="Ped"   type="float64"  num="7" info="Pedestal"/>
             <column name="hitn" type="int32" num="99" info="nstep"/>
         </section>
     </bank>

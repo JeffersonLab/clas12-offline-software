@@ -376,11 +376,17 @@ public class ClusterCleanerUtilities {
             newhitPos.set_DeltaTimeBeta(hit.get_DeltaTimeBeta());
             newhitPos.setTStart(hit.getTStart());
             newhitPos.setTProp(hit.getTProp());
+            newhitPos.betaFlag= hit.betaFlag;
             newhitPos.setTFlight(hit.getTFlight());
             newhitPos.set_Time(hit.get_Time());
             newhitPos.set_Id(hit.get_Id());
             newhitPos.set_TrkgStatus(0);
             newhitPos.calc_CellSize(DcDetector);
+            newhitPos.set_XWire(hit.get_XWire());
+            newhitPos.set_Z(hit.get_Z());
+            newhitPos.set_WireLength(hit.get_WireLength());
+            newhitPos.set_WireMaxSag(hit.get_WireMaxSag());
+            newhitPos.set_WireLine(hit.get_WireLine());
             newhitPos.set_LeftRightAmb(1);
             newhitPos.updateHitPositionWithTime(event, 1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer, so that cosTrkAng =1
 
@@ -397,11 +403,17 @@ public class ClusterCleanerUtilities {
             newhitNeg.set_DeltaTimeBeta(hit.get_DeltaTimeBeta());
             newhitNeg.setTStart(hit.getTStart());
             newhitNeg.setTProp(hit.getTProp());
+            newhitNeg.betaFlag= hit.betaFlag;
             newhitNeg.setTFlight(hit.getTFlight());
             newhitNeg.set_Time(hit.get_Time());
             newhitNeg.set_Id(hit.get_Id());
             newhitNeg.set_TrkgStatus(0);
             newhitNeg.calc_CellSize(DcDetector);
+            newhitNeg.set_XWire(hit.get_XWire());
+            newhitNeg.set_Z(hit.get_Z());
+            newhitNeg.set_WireLength(hit.get_WireLength());
+            newhitNeg.set_WireMaxSag(hit.get_WireMaxSag());
+            newhitNeg.set_WireLine(hit.get_WireLine());
             newhitNeg.set_LeftRightAmb(-1);
             newhitNeg.updateHitPositionWithTime(event, 1, hit.getB(), tab, DcDetector, tde); // assume the track angle is // to the layer
 
@@ -603,28 +615,36 @@ public class ClusterCleanerUtilities {
                 for (int j = 0; j < hitsInLayer.size(); j++) {
                     docaSum += hitsInLayer.get(j).get_Doca();
                 }
-                //double passingCut = 1.75 * hitsInLayer.get(0).get_CellSize() * Math.cos(Math.toRadians(6.));
-                double passingCut = 1.5 * hitsInLayer.get(0).get_CellSize() ;
-                //if (docaSum < passingCut) { // reset LR to 0
-                //use doca ratio instead of sum
-                double hit1doca = 0;
-                double hit2doca = 0;
-                if(hitsInLayer.get(0).get_Doca()>hitsInLayer.get(1).get_Doca()) {
-                    hit1doca = hitsInLayer.get(0).get_Doca();
-                    hit2doca = hitsInLayer.get(1).get_Doca();
-                } else {
-                    hit1doca = hitsInLayer.get(1).get_Doca();
-                    hit2doca = hitsInLayer.get(0).get_Doca();
-                }
-                double passingCut2 = 0.75;
-                if (hit2doca/hit1doca < passingCut2 || (hit2doca/hit1doca > passingCut2 && docaSum < passingCut)) { // reset LR to 0
-                    for (int j = 0; j < hitsInLayer.size(); j++) {
-                        hitsInLayer.get(j).set_LeftRightAmb(0);
-                        hitsInLayer.get(j).updateHitPositionWithTime(event, 1, hitsInLayer.get(j).getB(), tab, DcDetector, tde);
-                    }
-                    hitsInSameLayerLists.add(hitsInLayer);
-                } else {
+                if(hitsInLayer.get(0).get_Doca()>0.5*hitsInLayer.get(0).get_CellSize() && 
+                        hitsInLayer.get(1).get_Doca()>0.5*hitsInLayer.get(1).get_CellSize()
+                        && docaSum>Constants.DOCASUMMAXFAC * hitsInLayer.get(0).get_CellSize()) {// both greater than 50% cell size
                     baseClusterHits.addAll(hitsInLayer); // safe all good hits to base cluster
+                    hitsInLayer.get(0).updateHitPositionWithTime(event, 1, hitsInLayer.get(0).getB(), tab, DcDetector, tde);
+                    hitsInLayer.get(1).updateHitPositionWithTime(event, 1, hitsInLayer.get(1).getB(), tab, DcDetector, tde);
+                } else {
+                    //double passingCut = 1.75 * hitsInLayer.get(0).get_CellSize() * Math.cos(Math.toRadians(6.));
+                    double passingCut = 1.5 * hitsInLayer.get(0).get_CellSize() ;
+                    //if (docaSum < passingCut) { // reset LR to 0
+                    //use doca ratio instead of sum
+                    double hit1doca = 0;
+                    double hit2doca = 0;
+                    if(hitsInLayer.get(0).get_Doca()>hitsInLayer.get(1).get_Doca()) {
+                        hit1doca = hitsInLayer.get(0).get_Doca();
+                        hit2doca = hitsInLayer.get(1).get_Doca();
+                    } else {
+                        hit1doca = hitsInLayer.get(1).get_Doca();
+                        hit2doca = hitsInLayer.get(0).get_Doca();
+                    }
+                    double passingCut2 = 0.75;
+                    if (hit2doca/hit1doca < passingCut2 || (hit2doca/hit1doca > passingCut2 && docaSum < passingCut)) { // reset LR to 0
+                        for (int j = 0; j < hitsInLayer.size(); j++) {
+                            hitsInLayer.get(j).set_LeftRightAmb(0);
+                            hitsInLayer.get(j).updateHitPositionWithTime(event, 1, hitsInLayer.get(j).getB(), tab, DcDetector, tde);
+                        }
+                        hitsInSameLayerLists.add(hitsInLayer);
+                    } else {
+                        baseClusterHits.addAll(hitsInLayer); // safe all good hits to base cluster
+                    }
                 }
             }
         }
@@ -732,7 +752,7 @@ public class ClusterCleanerUtilities {
      * @param hits the unfitted hits
      */
     public List<Hit> HitListPruner(List<Hit> hits) {
-        //Collections.sort(hits);
+        Collections.sort(hits);
         
         for(int l = 0; l < 6; l++) {
             sortedHits.get(l).clear();
@@ -760,8 +780,8 @@ public class ClusterCleanerUtilities {
                 kHits.add(sortedHits.get(l).get(sortedHits.get(l).size()-2));
                 rmHits.removeAll(kHits);
                 sortedHits.get(l).removeAll(rmHits); 
-            }
-            if(sortedHits.get(l).size()==10) 
+            } 
+            if(sortedHits.get(l).size()>=10) 
                 sortedHits.get(l).removeAll(sortedHits.get(l));
              
         }
@@ -851,6 +871,107 @@ public class ClusterCleanerUtilities {
                 }
             }
         }
+    }
+
+    public FittedCluster ClusterCleaner(FittedCluster clus, ClusterFitter cf, DCGeant4Factory DcDetector) {
+        //System.out.println(" cleaner :"+clus.printInfo());
+        Collections.sort(clus);
+
+        ArrayList<ArrayList<FittedHit>> sortedHits = new ArrayList<ArrayList<FittedHit>>(6);
+        //initialize
+        for (int i = 0; i < 6; i++) {
+            sortedHits.add(new ArrayList<FittedHit>());
+        }
+
+        for (int i = 0; i < clus.size(); i++) {
+            FittedHit hit = clus.get(i);
+            sortedHits.get(hit.get_Layer() - 1).add(hit);
+        }
+
+        ArrayList<FittedCluster> clusters = new ArrayList<FittedCluster>();
+
+        ArrayList<ArrayList<FittedHit>> hitsInSameLayerLists = new ArrayList<ArrayList<FittedHit>>();
+        ArrayList<ArrayList<FittedHit>> hitsInClusCandLists = new ArrayList<ArrayList<FittedHit>>();
+        ArrayList<FittedHit> baseClusterHits = new ArrayList<FittedHit>();
+
+        for (int i = 0; i < 6; i++) {
+            ArrayList<FittedHit> hitsInLayer = sortedHits.get(i);
+            //for(int j =0; j<hitsInLayer.size(); j++) {
+            //	System.out.println("*  Hits in layer  :: "+(i+1)+" "+hitsInLayer.get(j).printInfo());
+            //}
+            if (hitsInLayer.size() == 0) {
+                continue;
+            }
+            if (hitsInLayer.size() == 1) {
+                baseClusterHits.addAll(hitsInLayer); // safe all good hits to base cluster		
+                
+            }
+            if (hitsInLayer.size() == 2) {
+                double docaSum = 0;
+                for (int j = 0; j < hitsInLayer.size(); j++) {
+                    docaSum += hitsInLayer.get(j).get_Residual();
+                }
+                
+                double passingCut = 2.2 * hitsInLayer.get(0).get_CellSize() ;
+                //if (docaSum < passingCut) { // reset LR to 0
+                //use doca ratio instead of sum
+                double hit1doca = 0;
+                double hit2doca = 0;
+                if(hitsInLayer.get(0).get_Residual()>hitsInLayer.get(1).get_Residual()) {
+                    hit1doca = hitsInLayer.get(0).get_Residual();
+                    hit2doca = hitsInLayer.get(1).get_Residual();
+                } else {
+                    hit1doca = hitsInLayer.get(1).get_Residual();
+                    hit2doca = hitsInLayer.get(0).get_Residual();
+                }
+                
+                if (hit1doca+hit2doca>passingCut) { 
+                    
+                    hitsInSameLayerLists.add(hitsInLayer);
+                } else {
+                    baseClusterHits.addAll(hitsInLayer); // save all good hits to base cluster
+                }
+            }
+        }
+
+        int nbLyr = hitsInSameLayerLists.size();
+        if (nbLyr == 0) {
+            return clus;
+        }
+
+        if (nbLyr > 0) {
+
+            for (int clusIdx = 0; clusIdx < Constants.CombArray.get(nbLyr - 1).length; clusIdx++) {
+                ArrayList<FittedHit> hitsInClusterCand = new ArrayList<FittedHit>();
+                hitsInClusterCand.addAll(baseClusterHits);
+
+                for (int k = 0; k < Constants.CombArray.get(nbLyr - 1)[clusIdx].length; k++) {
+                    hitsInClusterCand.add(hitsInSameLayerLists.get(k).get(Constants.CombArray.get(nbLyr - 1)[clusIdx][k]));
+                }
+                hitsInClusCandLists.add(hitsInClusterCand);
+            }
+        }
+        for (int i = 0; i < hitsInClusCandLists.size(); i++) {
+            FittedCluster newClus = new FittedCluster(clus.getBaseCluster());
+            for (int i1 = 0; i1 < newClus.size(); i1++) {
+                newClus.remove(i1);
+            }
+            newClus.addAll(hitsInClusCandLists.get(i));
+            clusters.add(newClus);
+        }
+
+        // get the best cluster
+        //System.out.println(" clusters for selection ");
+        //for(FittedCluster c : clusters) {
+        //	System.out.println(c.printInfo());
+        //	for(FittedHit h : c)
+        //		System.out.println(h.printInfo());
+        //}
+        FittedCluster BestCluster = cf.BestClusterSelector(clusters, "LC");
+        //System.out.println("  ---> selected cluster  : ");
+        //for(FittedHit h : BestCluster)
+        //	System.out.println(h.printInfo());
+        return BestCluster;
     }
 
 }
