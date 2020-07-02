@@ -63,8 +63,29 @@ public class EvioHipoEvent4 {
         this.fillHipoEventGenPart(hipoEvent, event);
         this.fillHipoEventTrueInfo(hipoEvent, event);
         this.fillHipoEventTrigger(hipoEvent, event);
+        this.fillHipoEventAHDC(hipoEvent, event);
         return hipoEvent;
     }
+    
+    
+    public void fillHipoEventAHDC(Event hipoEvent, EvioDataEvent evioEvent){
+        if(evioEvent.hasBank("AHDC::dgtz")==true){
+            EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("AHDC::dgtz");
+            evioBank.show();
+            Bank  hipoTDC = new Bank(schemaFactory.getSchema("AHDC::tdc"), evioBank.rows());
+            for(int i = 0; i < evioBank.rows(); i++){
+                int index = i;
+                hipoTDC.putByte("superlayer", index,  (byte)  evioBank.getInt("superlayer",i));
+                hipoTDC.putByte("layer",      index,  (byte)  evioBank.getInt("layer",i));
+                hipoTDC.putShort("wire", index,  (short) evioBank.getInt("wire",i));
+                hipoTDC.putByte("order",      index,  (byte)  1);
+                hipoTDC.putFloat("adc",       index,  (float) evioBank.getDouble("adc", i));
+                hipoTDC.putFloat("time",      index,  (float) evioBank.getDouble("time",i));
+            }
+            hipoEvent.write(hipoTDC);
+        }
+    }
+    
     
     
     public void fillHipoEventRF(Event hipoEvent, EvioDataEvent evioEvent){
