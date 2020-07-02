@@ -492,5 +492,20 @@
     "entries":[
         { "name":"json"    , "type":"B", "info":"json character" }
     ]
+  },
+  {
+    "name" : "AHDC::tdc",
+    "group" : 22200,
+    "item" : 12,
+    "info": "ADC bank for ALERT",
+    "entries":[
+      { "name":"superlayer", "type":"B", "info":"superlayer (0..4)"},
+      { "name":"layer"     , "type":"B", "info":"layer (0..1)"},
+      { "name":"wire"      , "type":"S", "info":"wire number (1..)"},
+      { "name":"order"     , "type":"B", "info":"order: 2 - TDCL , 3 - TDCR"},
+      { "name":"adc"       , "type":"F", "info":"adc value"},
+      { "name":"time"      , "type":"F", "info":"time for the hit"}
+
+    ]
   }
 ]
