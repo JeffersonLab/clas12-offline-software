@@ -184,7 +184,7 @@ public class TrackHitReco {
         double x = (t-toffset)/tmax;
         double rmax = 70;
         double rmin = 30;
-        return Math.sqrt(rmax*rmax*(1-x) + rmin*rmin*x + (0.1-cr*cr)*(1-x)*x);
+        return Math.sqrt(rmax*rmax*(1-x) + rmin*rmin*x + (0.1+cr*cr)*(1-x)*x);
     }
     
     private double get_dphi(double z, double r, double magfield){
