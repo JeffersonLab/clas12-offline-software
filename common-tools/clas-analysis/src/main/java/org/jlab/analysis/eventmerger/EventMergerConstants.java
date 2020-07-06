@@ -7,13 +7,15 @@ package org.jlab.analysis.eventmerger;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
- *
+ * Class organizing CCDB constants for background-merging purposes
+ * Includes TDC conversion factor, time jitter constants and DC 
+ * readout parameters
+ * 
  * @author devita
  */
 public class EventMergerConstants {
@@ -87,6 +89,13 @@ public class EventMergerConstants {
         constants.get(detector).put(key,value);
     }
     
+    /**
+     * Get double value for selected detector and constant (used for run-independent constants)
+     * 
+     * @param detector: detector identifier string
+     * @param key:      constant
+     * @return
+     */
     public double getDouble(String detector, EventMergerEnum key) {
         if (!constants.containsKey(detector))
             throw new RuntimeException("Missing Integer Key:  "+detector);
@@ -95,22 +104,49 @@ public class EventMergerConstants {
         return constants.get(detector).get(key);
     }
     
+    /**
+     * Get double value for selected run number, detector and constant
+     * 
+     * @param run:      run number
+     * @param detector: detector identifier string
+     * @param item:     constant
+     * @return
+     */
     public double getDouble(int run, String detector, EventMergerEnum item) {
         IndexedTable table = getTable(run, detector, links.get(item));
         return table.getDoubleValue(items.get(item), 0, 0, 0);
     }
     
+    /**
+     * Get integer value for selected run number, detector and constant
+     * 
+     * @param run:      run number
+     * @param detector: detector identifier string
+     * @param item:     constant
+     * @return
+     */
     public int getInt(int run, String detector, EventMergerEnum item) {
         IndexedTable table = getTable(run, detector, links.get(item));
         return table.getIntValue(items.get(item), 0, 0, 0);
     }
     
+    /**
+     * Get integer value for selected run number, detector  component and constant
+     *
+     * @param run:      run number
+     * @param detector: detector identifier string
+     * @param item:     constant
+     * @param sector
+     * @param layer
+     * @param component
+     * @return
+     */
     public int getInt(int run, String detector, EventMergerEnum item, int sector, int layer, int component) {
         IndexedTable table = getTable(run, detector, links.get(item));
         return table.getIntValue(items.get(item), sector, layer, component);
     }
     
-    public String getTable(String detector, EventMergerEnum key) {
+    private String getTable(String detector, EventMergerEnum key) {
         if (!tables.containsKey(detector))
             throw new RuntimeException("Missing  Key:  "+detector);
         if (!tables.get(detector).containsKey(key))
@@ -118,7 +154,7 @@ public class EventMergerConstants {
         return tables.get(detector).get(key);
     }
     
-    public IndexedTable getTable(int run, String detector, EventMergerEnum key) {
+    private IndexedTable getTable(int run, String detector, EventMergerEnum key) {
         String path = getTable(detector, key);
         return manager.getConstants(run, path);
     }

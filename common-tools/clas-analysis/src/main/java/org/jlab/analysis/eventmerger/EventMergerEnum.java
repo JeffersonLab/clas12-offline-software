@@ -6,7 +6,8 @@
 package org.jlab.analysis.eventmerger;
 
 /**
- *
+ * Event merger constants enum
+ * 
  * @author devita
  */
 public enum EventMergerEnum {

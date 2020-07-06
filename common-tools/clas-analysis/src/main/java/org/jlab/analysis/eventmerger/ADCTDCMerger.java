@@ -41,11 +41,11 @@ public class ADCTDCMerger {
     }
     
     /**
-     * Reads  ADC bank
+     * Reads  ADC bank and returns corresponding information
      * 
-     * @param detector
-     * @param bankDGTZ
-     * @return
+     * @param detector: detector identifier string
+     * @param bankDGTZ: selected DataBank
+     * @return 
      */
     public List<ADC> ADCbank(String detector,DataBank bankDGTZ) {
         List<ADC> adcStore   = new ArrayList<ADC>();
@@ -83,9 +83,10 @@ public class ADCTDCMerger {
     }
      
     /**
-     * Read TDC bank
+     * Read TDC bank and return corresponding information
      * 
-     * @param bankDGTZ
+     * @param bankDGTZ: selected DataBank
+     * @param offset:   offset to be applied to TDC values to compensate for jitter  
      * @return
      */
     public List<TDC> TDCbank(DataBank bankDGTZ, int offset) {
@@ -106,6 +107,7 @@ public class ADCTDCMerger {
     /**
      * Merge TDC banks for data (signal) and background events for selected detector
      * In case of multiple hit on same detector element, only first hit in time is kept 
+     * unless the double-hit suppression flag, suppressDoubleHits, is set to false
      * 
      * @param Det
      * @param event
@@ -184,6 +186,7 @@ public class ADCTDCMerger {
     /**
      * Merge TDC banks for data (signal) and background events for selected detector
      * Use two background events shifted in time to extend the time range of the backgrounds
+     * Multiple hits on the same components are kept if time distance exceed the holdoff time
      * 
      * @param Det
      * @param event
@@ -302,6 +305,7 @@ public class ADCTDCMerger {
     /**
      * Merge ADC banks for data (signal) and background events for selected detector
      * In case of multiple hit on same detector element, only first hit in time is kept 
+     * unless the double-hit suppression flag, suppressDoubleHits, is set to false
      *
      * @param detector
      * @param event
@@ -424,6 +428,7 @@ public class ADCTDCMerger {
      * 
      * @param event
      * @param bg1
+     * @param bg2
      */
     public void updateEventWithMergedBanks(DataEvent event, DataEvent bg1, DataEvent bg2) {
         
