@@ -69,7 +69,9 @@ public class HelixFitTest {
                 chi2 += (hitz - zchi2(vz,theta,hitr,R))*(hitz - zchi2(vz,theta,hitr,R))/denz;
             }
             chi2 += (R-Math.sqrt(A*A + B*B))*(R-Math.sqrt(A*A + B*B));
-            chi2 /= numhits - 3;
+            numhits++;
+            chi2 /= 2*numhits - 4;
+            numhits--;
             if(R > 0) tl = Math.sqrt(R*R*psi*psi + dz*dz);
             double dEdx = 0;
             if(Double.isNaN(tl)) tl = 0;
