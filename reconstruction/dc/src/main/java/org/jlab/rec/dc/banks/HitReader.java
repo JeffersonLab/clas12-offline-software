@@ -440,7 +440,7 @@ public class HitReader {
         DataBank bank = event.getBank("HitBasedTrkg::HBHits");
 
         int[] Ids  = new int[6]; //  1-6 = cluster ids for slyrs 1 - 6
-        double[] tPars = new double[3]; // NN trk pars p, theta, phi ; last idx = track id;
+        double[] tPars = new double[4]; // NN trk pars p, theta, phi ; last idx = track id;
         for (int j = 0; j < bankAI.rows(); j++) {
             
             Ids[0] = (int)bankAI.getShort("c1", j); // clusId in superlayer 1
