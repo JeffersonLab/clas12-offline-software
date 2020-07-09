@@ -36,6 +36,7 @@ public class ECStrip implements Comparable {
 	private int        triggerPhase = 0;
 	private double             veff = 18.1; // Effective velocity of scintillator light (cm/ns)
 	private int              peakID = -1;
+        private int              id = -1;       // ID of the hit. this shows the row number of the corresponding hit in the ADC bank
 	
 	private double              tdist=0;
 	private double              edist=0;
@@ -166,6 +167,15 @@ public class ECStrip implements Comparable {
     public int getPeakId(){
       	return this.peakID;
     	}
+    
+    public void setID(int id){
+            this.id = id;
+    }
+    
+    public int getID(){
+            return this.id;
+    }
+    
     
     public void setAttenuation(double a, double b, double c){
         this.iAttenLengthA = a;

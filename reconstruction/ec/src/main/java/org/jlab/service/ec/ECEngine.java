@@ -102,8 +102,9 @@ public class ECEngine extends ReconstructionEngine {
             bankS.setByte("layer",   h,  (byte) strips.get(h).getDescriptor().getLayer());
             bankS.setByte("strip",   h,  (byte) strips.get(h).getDescriptor().getComponent());
             bankS.setByte("peakid",  h,  (byte) strips.get(h).getPeakId());
+            bankS.setShort("id",     h, (short) strips.get(h).getID());
             bankS.setFloat("energy", h, (float) strips.get(h).getEnergy());
-            bankS.setFloat("time",   h, (float) strips.get(h).getTime());                
+            bankS.setFloat("time",   h, (float) strips.get(h).getTime());
         }
        
         DataBank  bankP =  de.createBank("ECAL::peaks", peaks.size());
