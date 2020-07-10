@@ -49,8 +49,8 @@ public class ECEngine extends ReconstructionEngine {
             }
         }
                 
-        List<ECStrip>     ecStrips = ECCommon.initEC(de,  ecDetector, this.getConstantsManager(), runNo); // thresholds, ADC/TDC match        
-        List<ECPeak>      ecPeaks  = ECCommon.processPeaks(ECCommon.createPeaks(ecStrips)); // thresholds, split peaks -> update peak-lines          
+        List<ECStrip>     ecStrips = ECCommon.initEC(de,  ecDetector, this.getConstantsManager(), runNo); // thresholds, ADC/TDC match
+        List<ECPeak>      ecPeaks  = ECCommon.processPeaks(ECCommon.createPeaks(ecStrips)); // thresholds, split peaks -> update peak-lines
         List<ECCluster> ecClusters = new ArrayList<ECCluster>();
         ecClusters.addAll(ECCommon.createClusters(ecPeaks,1)); //PCAL
         ecClusters.addAll(ECCommon.createClusters(ecPeaks,4)); //ECinner 
@@ -98,13 +98,22 @@ public class ECEngine extends ReconstructionEngine {
 	    
         DataBank bankS = de.createBank("ECAL::hits", strips.size());
         for(int h = 0; h < strips.size(); h++){
-            bankS.setByte("sector",  h,  (byte) strips.get(h).getDescriptor().getSector());
-            bankS.setByte("layer",   h,  (byte) strips.get(h).getDescriptor().getLayer());
-            bankS.setByte("strip",   h,  (byte) strips.get(h).getDescriptor().getComponent());
-            bankS.setByte("peakid",  h,  (byte) strips.get(h).getPeakId());
-            bankS.setShort("id",     h, (short) strips.get(h).getID());
-            bankS.setFloat("energy", h, (float) strips.get(h).getEnergy());
-            bankS.setFloat("time",   h, (float) strips.get(h).getTime());
+            bankS.setByte("sector",     h,  (byte) strips.get(h).getDescriptor().getSector());
+            bankS.setByte("layer",      h,  (byte) strips.get(h).getDescriptor().getLayer());
+            bankS.setByte("strip",      h,  (byte) strips.get(h).getDescriptor().getComponent());
+            bankS.setByte("peakid",     h,  (byte) strips.get(h).getPeakId());
+            bankS.setShort("id",        h, (short) strips.get(h).getID());
+            //System.out.println("clusterID = " + strips.get(h).getClusterId());
+            //bankS.setShort("clusterid", h, (short) strips.get(h).getClusterId() );
+            bankS.setShort("clusterId", h, (short) 5 );
+            bankS.setFloat("energy",    h, (float) strips.get(h).getEnergy());
+            bankS.setFloat("time",      h, (float) strips.get(h).getTime());
+            
+            System.out.println("ColumnList is: " );
+            
+            for( String cur_col: bankS.getColumnList()  ){
+                System.out.println(cur_col);
+            }
         }
        
         DataBank  bankP =  de.createBank("ECAL::peaks", peaks.size());
@@ -139,7 +148,6 @@ public class ECEngine extends ReconstructionEngine {
             bankC.setInt("coordU",   c,         clusters.get(c).getPeak(0).getCoord());
             bankC.setInt("coordV",   c,         clusters.get(c).getPeak(1).getCoord());
             bankC.setInt("coordW",   c,         clusters.get(c).getPeak(2).getCoord());
-  
         }
      
         DataBank bankM = de.createBank("ECAL::moments", clusters.size());
