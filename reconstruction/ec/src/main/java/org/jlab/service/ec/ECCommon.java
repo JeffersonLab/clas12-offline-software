@@ -381,20 +381,6 @@ public class ECCommon {
             clusters.get(i).getEnergy(0) + 
             clusters.get(i).getEnergy(1) +
             clusters.get(i).getEnergy(2));
-            
-            // As clusters are already defined at this point, we can fill the clusterID of ECStrips belonging to the given cluster
-            // === U strips ===
-            for( ECStrip curStrip : clusters.get(i).getPeak(0).getStrips() ){
-                curStrip.setClusterId(i+1);
-            }
-            // === V strips ===
-            for( ECStrip curStrip : clusters.get(i).getPeak(1).getStrips() ){
-                curStrip.setClusterId(i+1);
-            }
-            // === W strips ===
-            for( ECStrip curStrip : clusters.get(i).getPeak(2).getStrips() ){
-                curStrip.setClusterId(i+1);
-            }
         }  
         
         return clusters;
