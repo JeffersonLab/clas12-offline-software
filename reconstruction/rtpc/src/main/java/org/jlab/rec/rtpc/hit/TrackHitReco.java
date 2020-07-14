@@ -173,7 +173,7 @@ public class TrackHitReco {
     }	
 	
     private double get_rec_coef(double[] parms, double z2) {
-        double z = z2/1000;
+        double z = z2/10;
         return parms[4]*z*z*z*z + parms[3]*z*z*z + parms[2]*z*z + parms[1]*z + parms[0];
     }
 
@@ -184,7 +184,7 @@ public class TrackHitReco {
         double x = (t-toffset)/tmax;
         double rmax = 70;
         double rmin = 30;
-        return Math.sqrt(rmax*rmax*(1-x) + rmin*rmin*x + (0.1+cr*cr)*(1-x)*x);
+        return Math.sqrt(rmax*rmax*(1-x) + rmin*rmin*x + (10+100*cr*cr)*(1-x)*x);
     }
     
     private double get_dphi(double z, double r, double magfield){
