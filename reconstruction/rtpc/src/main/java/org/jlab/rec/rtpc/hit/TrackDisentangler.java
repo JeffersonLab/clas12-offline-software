@@ -20,59 +20,61 @@ public class TrackDisentangler {
     private double maxdeltaz = 8;
     private double maxdeltaphi = 0.10;
     
-    public TrackDisentangler(HitParameters params){
+    public TrackDisentangler(HitParameters params, boolean disentangle){       
         
-        RTIDMap = params.get_rtrackmap();
-        maxdeltat = params.get_tthreshTD();
-        maxdeltaz = params.get_zthreshTD();
-        maxdeltaphi = params.get_phithreshTD();
-        
-        List<Integer> origtidlist = RTIDMap.getAllTrackIDs();
-        for(int tid : origtidlist){
-            rtrack = RTIDMap.getTrack(tid);           
-            if(rtrack.isTrackFlagged()){
-                NewTrackMap = new ReducedTrackMap();
-                rtrack.sortHits();
-                List<HitVector> hits = rtrack.getAllHits();
-                for(HitVector hit : hits){
-                    sortHit(hit);
-                }
-                List<Integer> newtidlist = NewTrackMap.getAllTrackIDs();  
-                List<Integer> removedtracks = new ArrayList<>();
-                for(int tid1 : newtidlist){
-                    for(int tid2 : newtidlist){
-                        if(tid1 != tid2 && !removedtracks.contains(tid1) && !removedtracks.contains(tid2)){
-                            ReducedTrack t1 = NewTrackMap.getTrack(tid1);
-                            ReducedTrack t2 = NewTrackMap.getTrack(tid2);
-                            List<HitVector> h1list = new ArrayList<>();
-                            List<HitVector> h2list = new ArrayList<>();
-                            h1list.addAll(t1.getFirstNHits(2));
-                            h1list.addAll(t1.getLastNHits(2));
-                            h2list.addAll(t2.getFirstNHits(2));
-                            h2list.addAll(t2.getLastNHits(2));
-                            HITSLOOP:
-                            for(HitVector h1 : h1list){
-                                for(HitVector h2 : h2list){
-                                    if(Math.abs(h1.z() - h2.z()) < maxdeltaz && 
-                                    (Math.abs(h1.phi() - h2.phi()) < maxdeltaphi || Math.abs(h1.phi() - h2.phi() - 2*Math.PI) < maxdeltaphi)){
-                                        NewTrackMap.mergeTracks(tid1, tid2); 
-                                        NewTrackMap.getTrack(tid1).sortHits();
-                                        removedtracks.add(tid2);
-                                        break HITSLOOP;
+        if(disentangle){
+            RTIDMap = params.get_rtrackmap();
+            maxdeltat = params.get_tthreshTD();
+            maxdeltaz = params.get_zthreshTD();
+            maxdeltaphi = params.get_phithreshTD();
+
+            List<Integer> origtidlist = RTIDMap.getAllTrackIDs();
+            for(int tid : origtidlist){
+                rtrack = RTIDMap.getTrack(tid);           
+                if(rtrack.isTrackFlagged()){
+                    NewTrackMap = new ReducedTrackMap();
+                    rtrack.sortHits();
+                    List<HitVector> hits = rtrack.getAllHits();
+                    for(HitVector hit : hits){
+                        sortHit(hit);
+                    }
+                    List<Integer> newtidlist = NewTrackMap.getAllTrackIDs();  
+                    List<Integer> removedtracks = new ArrayList<>();
+                    for(int tid1 : newtidlist){
+                        for(int tid2 : newtidlist){
+                            if(tid1 != tid2 && !removedtracks.contains(tid1) && !removedtracks.contains(tid2)){
+                                ReducedTrack t1 = NewTrackMap.getTrack(tid1);
+                                ReducedTrack t2 = NewTrackMap.getTrack(tid2);
+                                List<HitVector> h1list = new ArrayList<>();
+                                List<HitVector> h2list = new ArrayList<>();
+                                h1list.addAll(t1.getFirstNHits(2));
+                                h1list.addAll(t1.getLastNHits(2));
+                                h2list.addAll(t2.getFirstNHits(2));
+                                h2list.addAll(t2.getLastNHits(2));
+                                HITSLOOP:
+                                for(HitVector h1 : h1list){
+                                    for(HitVector h2 : h2list){
+                                        if(Math.abs(h1.z() - h2.z()) < maxdeltaz && 
+                                        (Math.abs(h1.phi() - h2.phi()) < maxdeltaphi || Math.abs(h1.phi() - h2.phi() - 2*Math.PI) < maxdeltaphi)){
+                                            NewTrackMap.mergeTracks(tid1, tid2); 
+                                            NewTrackMap.getTrack(tid1).sortHits();
+                                            removedtracks.add(tid2);
+                                            break HITSLOOP;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
-                RTIDMap.removeTrack(tid);
-                newtidlist = NewTrackMap.getAllTrackIDs();
-                for(int tidfinal : newtidlist){
-                    RTIDMap.addTrack(NewTrackMap.getTrack(tidfinal));
+                    RTIDMap.removeTrack(tid);
+                    newtidlist = NewTrackMap.getAllTrackIDs();
+                    for(int tidfinal : newtidlist){
+                        RTIDMap.addTrack(NewTrackMap.getTrack(tidfinal));
+                    }
                 }
             }
+            params.set_rtrackmap(RTIDMap);
         }
-        params.set_rtrackmap(RTIDMap);
         
         
     }

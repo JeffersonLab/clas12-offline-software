@@ -36,12 +36,14 @@ public class RTPCEngine extends ReconstructionEngine{
     private boolean simulation = false;
     private boolean cosmic = false;
     private int fitToBeamline = 1;
+    private boolean disentangle = true; 
     
     @Override
     public boolean init() {
         String sim = this.getEngineConfigString("rtpcSimulation");
         String cosm = this.getEngineConfigString("rtpcCosmic");
         String beamfit = this.getEngineConfigString("rtpcBeamlineFit");
+        String disentangler = this.getEngineConfigString("rtpcDisentangler");
         //System.out.println(sim + " " + cosm + " " + beamfit);
         
         if(sim != null){
@@ -54,6 +56,10 @@ public class RTPCEngine extends ReconstructionEngine{
         
         if(beamfit != null){
            fitToBeamline = Boolean.valueOf(beamfit)?1:0;
+        }
+        
+        if(disentangler != null){
+            disentangle = Boolean.valueOf(disentangler);
         }
         
         String[] rtpcTables = new String[]{
@@ -113,7 +119,7 @@ public class RTPCEngine extends ReconstructionEngine{
             //Calculate Average Time of Hit Signals
             TimeAverage TA = new TimeAverage(this.getConstantsManager(),params,runNo);
             //Disentangle Crossed Tracks
-            TrackDisentangler TD = new TrackDisentangler(params);
+            TrackDisentangler TD = new TrackDisentangler(params,disentangle);
             //Reconstruct Hits in Drift Region
             TrackHitReco TR = new TrackHitReco(params,hits,cosmic,magfield);
             //Helix Fit Tracks to calculate Track Parameters
