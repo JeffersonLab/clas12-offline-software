@@ -45,12 +45,12 @@ public class HitParameters {
     private double _adcthresh = 320;
     private int _minhitspertrack = 5;
     private int _minhitspertrackreco = 10;
-    private double[] _tmaxparms = new double[5];
-    private double[] _toffparms = new double[5];
+    private double[] _atparms = new double[5];
+    private double[] _btparms = new double[5];
+    private double[] _ctparms = new double[5];
     private double[] _aphiparms = new double[5];
     private double[] _bphiparms = new double[5];
-    private double[] _tgapparms = new double[5];
-    private double[] _phigapparms = new double[5];
+    private double[] _cphiparms = new double[5];
     private double _tl = 0;
     private double _tp = 0;
     private double _tr = 0;
@@ -74,12 +74,12 @@ public class HitParameters {
         _phithreshTD = recon_parms.getDoubleValue("Dphim", 1,1,2);
         _tthreshTD = (int) recon_parms.getDoubleValue("Dtm",1,1,2);
         for(int i = 0; i < 5; i++){
-            _tmaxparms[i] = time_parms.getDoubleValue("z"+i, 1,1,1);
-            _toffparms[i] = time_parms.getDoubleValue("z"+i, 1,1,2);
-            _aphiparms[i] = time_parms.getDoubleValue("z"+i, 1,1,3);
-            _bphiparms[i] = time_parms.getDoubleValue("z"+i, 1,1,4);
-            _tgapparms[i] = time_parms.getDoubleValue("z"+i, 1,1,5);
-            _phigapparms[i] = time_parms.getDoubleValue("z"+i, 1,1,6);
+            _atparms[i] = time_parms.getDoubleValue("z"+i, 1,1,1);
+            _btparms[i] = time_parms.getDoubleValue("z"+i, 1,1,2);
+            _ctparms[i] = time_parms.getDoubleValue("z"+i, 1,1,3);
+            _aphiparms[i] = time_parms.getDoubleValue("z"+i, 1,1,4);
+            _bphiparms[i] = time_parms.getDoubleValue("z"+i, 1,1,5);
+            _cphiparms[i] = time_parms.getDoubleValue("z"+i, 1,1,6);
         }
         _tl = time_offsets.getDoubleValue("tl", 1,1,3);
         _tp = time_offsets.getDoubleValue("tp", 1,1,3);
@@ -131,12 +131,12 @@ public class HitParameters {
     public double get_adcthresh(){return _adcthresh;}
     public int get_minhitspertrack(){return _minhitspertrack;}
     public int get_minhitspertrackreco(){return _minhitspertrackreco;}
-    public double[] get_tmaxparms(){return _tmaxparms;}
-    public double[] get_toffparms(){return _toffparms;}
+    public double[] get_atparms(){return _atparms;}
+    public double[] get_btparms(){return _btparms;}
     public double[] get_aphiparms(){return _aphiparms;}
     public double[] get_bphiparms(){return _bphiparms;}
-    public double[] get_tgapparms(){return _tgapparms;}
-    public double[] get_phigapparms(){return _phigapparms;}
+    public double[] get_ctparms(){return _ctparms;}
+    public double[] get_cphiparms(){return _cphiparms;}
     public double get_tl(){return _tl;}
     public double get_tp(){return _tp;}
     public double get_tr(){return _tr;}
