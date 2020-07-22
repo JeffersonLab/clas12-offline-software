@@ -75,18 +75,18 @@ public class TrackHitReco {
     private double x_rec;
     private double y_rec;
     
-    private double[] t_offset = new double[5];
-    private double toffset = 0;
-    private double[] t_max = new double[5];
-    private double tmax = 0;
+    private double[] a_t = new double[5];
+    private double at = 0;
+    private double[] b_t = new double[5];
+    private double bt = 0;
     private double[] a_phi = new double[5];
     private double aphi = 0;
     private double bphi = 0;
     private double[] b_phi = new double[5];
-    private double[] phi_gap = new double[5];
-    private double[] c_r = new double[5];
-    private double cr = 0;
-    private double phigap = 0;
+    private double[] c_phi = new double[5];
+    private double[] c_t = new double[5];
+    private double ct = 0;
+    private double cphi = 0;
     private double tl = 0;
     private double tp = 0;
     private double tr = 0;
@@ -101,12 +101,12 @@ public class TrackHitReco {
     public TrackHitReco(HitParameters params, List<Hit> rawHits, boolean cosmic, double magfield){
         
         _cosmic = cosmic;
-        t_offset = params.get_toffparms();
-        t_max = params.get_tmaxparms();
+        a_t = params.get_atparms();
+        b_t = params.get_btparms();
         a_phi = params.get_aphiparms();
         b_phi = params.get_bphiparms();
-        phi_gap = params.get_phigapparms();
-        c_r = params.get_tgapparms();
+        c_phi = params.get_cphiparms();
+        c_t = params.get_ctparms();
         tl = params.get_tl();
         tp = params.get_tp();
         tr = params.get_tr();
@@ -178,21 +178,21 @@ public class TrackHitReco {
     }
 
     private double get_r_rec(double z,double t){
-        toffset = get_rec_coef(t_offset,z) + tl + tp + tr;
-        tmax = get_rec_coef(t_max,z);
-        cr = get_rec_coef(c_r,z);
-        double x = (t-toffset)/tmax;
+        at = get_rec_coef(a_t,z) + tl + tp + tr;
+        bt = get_rec_coef(b_t,z);
+        ct = 100*get_rec_coef(c_t,z);
+        double x = (t-at)/bt;
         double rmax = 70;
         double rmin = 30;
-        return Math.sqrt(rmax*rmax*(1-x) + rmin*rmin*x + (10+100*cr*cr)*(1-x)*x);
+        return Math.sqrt(rmax*rmax*(1-x) + rmin*rmin*x + ct*(1-x)*x);
     }
     
     private double get_dphi(double z, double r, double magfield){
         aphi = get_rec_coef(a_phi,z);
         bphi = get_rec_coef(b_phi,z);
-        phigap = get_rec_coef(phi_gap,z);
+        cphi = get_rec_coef(c_phi,z);
         //return aphi*(7-r/10)+bphi*(7-r/10)*(7-r/10) + phigap; // in rad
-        return phigap + magfield/10 * aphi * Math.log(70/r) + bphi*((1/(r*r))-(1/(70*70)));
+        return cphi + aphi * Math.log(70/r) + bphi*((1/(r*r))-(1/(70*70)));
     }
     
 
