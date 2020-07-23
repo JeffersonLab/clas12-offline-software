@@ -192,7 +192,7 @@ public class TrackHitReco {
         bphi = get_rec_coef(b_phi,z);
         cphi = get_rec_coef(c_phi,z);
         //return aphi*(7-r/10)+bphi*(7-r/10)*(7-r/10) + phigap; // in rad
-        return cphi + aphi * Math.log(70/r) + bphi*((1/(r*r))-(1/(70*70)));
+        return aphi + bphi * Math.log(70/r) + 100*cphi*((1/(r*r))-(1/(70*70)));
     }
     
 
