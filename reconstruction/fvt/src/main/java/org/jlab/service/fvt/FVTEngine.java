@@ -44,6 +44,9 @@ public class FVTEngine extends ReconstructionEngine {
     double xB = 0;
     double yB = 0;
 
+    // Shift array: [deltaX, deltaY, deltaZ, rotX, rotY, rotZ]
+    double[][] shArr = new double[6][6];
+
     public FVTEngine() {
         super("FVT", "ziegler", "4.0");
     }
@@ -72,13 +75,28 @@ public class FVTEngine extends ReconstructionEngine {
         requireConstants(Arrays.asList(tables));
         this.getConstantsManager().setVariation("default");
 
+        // Load alignment tables
+        // Load FMT shifts
+        IndexedTable fmtShifts = this.getConstantsManager().getConstants(this.getRun(), "/geometry/fmt/alignment");
+        shArr = new double[6][6];
+        for (int li = 0; li < 6; ++li) {
+            shArr[li][0] = fmtShifts.getDoubleValue("deltaX", 0,li+1,0)/10.;
+            shArr[li][1] = fmtShifts.getDoubleValue("deltaY", 0,li+1,0)/10.;
+            shArr[li][2] = fmtShifts.getDoubleValue("deltaZ", 0,li+1,0)/10.;
+            shArr[li][3] = fmtShifts.getDoubleValue("rotX",   0,li+1,0);
+            shArr[li][4] = fmtShifts.getDoubleValue("rotY",   0,li+1,0);
+            shArr[li][5] = fmtShifts.getDoubleValue("rotZ",   0,li+1,0);
+        }
+
         // Load the geometry
         String geoVariation = Optional.ofNullable(geomDBVar).orElse("default");
-        CCDBConstantsLoader.Load(this.getRun(), geoVariation);
+        // TODO: This is probably not the best way to apply the shifts, but I'm adding this here
+        //       hoping that I'll remember to change it later.
+        CCDBConstantsLoader.Load(this.getRun(), geoVariation, shArr);
         Constants.Load();
         clusFinder = new ClusterFinder();
-        crossMake = new CrossMaker();
-        trkLister = new TrackList();
+        crossMake  = new CrossMaker();
+        trkLister  = new TrackList();
 
         return true;
     }
@@ -101,18 +119,27 @@ public class FVTEngine extends ReconstructionEngine {
 
     @Override
     public boolean processDataEvent(DataEvent event) {
-        // Load FMT shifts
-        IndexedTable fmtShifts = this.getConstantsManager().getConstants(this.getRun(), "/geometry/fmt/alignment");
-        // shArr: [deltaX, deltaY, deltaZ, rotX, rotY, rotZ]
-        double[][] shArr = new double[6][6];
-        for (int li = 0; li < 6; ++li) {
-            shArr[li][0] = fmtShifts.getDoubleValue("deltaX", 0,li+1,0);
-            shArr[li][1] = fmtShifts.getDoubleValue("deltaY", 0,li+1,0);
-            shArr[li][2] = fmtShifts.getDoubleValue("deltaZ", 0,li+1,0);
-            shArr[li][3] = fmtShifts.getDoubleValue("rotX",   0,li+1,0);
-            shArr[li][4] = fmtShifts.getDoubleValue("rotY",   0,li+1,0);
-            shArr[li][5] = fmtShifts.getDoubleValue("rotZ",   0,li+1,0);
-        }
+        // // Load FMT shifts
+        // IndexedTable fmtShifts = this.getConstantsManager().getConstants(this.getRun(), "/geometry/fmt/alignment");
+        // // shArr: [deltaX, deltaY, deltaZ, rotX, rotY, rotZ]
+        // double[][] shArr = new double[6][6];
+        // for (int li = 0; li < 6; ++li) {
+        //     shArr[li][0] = fmtShifts.getDoubleValue("deltaX", 0,li+1,0);
+        //     shArr[li][1] = fmtShifts.getDoubleValue("deltaY", 0,li+1,0);
+        //     shArr[li][2] = fmtShifts.getDoubleValue("deltaZ", 0,li+1,0);
+        //     shArr[li][3] = fmtShifts.getDoubleValue("rotX",   0,li+1,0);
+        //     shArr[li][4] = fmtShifts.getDoubleValue("rotY",   0,li+1,0);
+        //     shArr[li][5] = fmtShifts.getDoubleValue("rotZ",   0,li+1,0);
+        // }
+        //
+        // System.out.printf("FMT Alignment table:");
+        // for (int li = 0; li < 6; ++li) {
+        //     System.out.printf("\n  Layer %1d: ", li+1);
+        //     for (int si = 0; si < 6; ++si) {
+        //         System.out.printf("%6.2f ", shArr[li][si]);
+        //     }
+        // }
+        // System.out.printf("\n\n");
 
         // Initial setup
         List<Cluster> clusters = new ArrayList<Cluster>();
