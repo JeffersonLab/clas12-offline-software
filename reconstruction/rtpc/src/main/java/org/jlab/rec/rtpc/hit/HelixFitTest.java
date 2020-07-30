@@ -46,7 +46,7 @@ public class HelixFitTest {
             double theta = ho.get_Theta();
             double phi = ho.get_Phi();
             double tl = 0;
-            double R = Math.abs(ho.get_Rho());
+            double R = ho.get_Rho();
             double A = ho.get_A();
             double B = ho.get_B();
             double chi2 = 0;
@@ -68,10 +68,10 @@ public class HelixFitTest {
                 chi2 += chi2phiterm/denphi;
                 chi2 += (hitz - zchi2(vz,theta,hitr,R))*(hitz - zchi2(vz,theta,hitr,R))/denz;
             }
+            R = Math.abs(R);
             chi2 += (R-Math.sqrt(A*A + B*B))*(R-Math.sqrt(A*A + B*B));
-            numhits++;
             chi2 /= 2*numhits - 4;
-            numhits--;
+            
             if(R > 0) tl = Math.sqrt(R*R*psi*psi + dz*dz);
             double dEdx = 0;
             if(Double.isNaN(tl)) tl = 0;
@@ -81,9 +81,10 @@ public class HelixFitTest {
         params.set_finaltrackinfomap(finaltrackinfomap);
     }
     private double phichi2(double phi0, double r, double R){
-        return Math.toRadians(phi0) + Math.asin(r/(2*R));
+        return Math.toRadians(phi0) - Math.asin(r/(2*R));
     }
     private double zchi2(double z0, double theta0, double r, double R){
+        R = Math.abs(R);
         return z0 + 2*R*Math.asin(r/(2*R))/Math.tan(Math.toRadians(theta0));
     }
 }
