@@ -1,9 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.rec.fmt.banks;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.jlab.rec.fmt.hit.Hit;
@@ -16,9 +12,7 @@ import org.jlab.io.base.DataEvent;
  */
 public class HitReader {
 
-    public HitReader() {
-
-    }
+    public HitReader() {}
 
     // the list of FMT hits
     private List<Hit> _FMTHits;
@@ -38,14 +32,11 @@ public class HitReader {
      */
     public void set_FMTHits(List<Hit> _FMTHits) {
         this._FMTHits = _FMTHits;
-    }    
-    
-    public void fetch_FMTHits(DataEvent event) {
-        
-        if (event.hasBank("FMT::adc") == false) {
-            //System.err.println("there is no BST bank ");
-            _FMTHits = new ArrayList<Hit>();
+    }
 
+    public void fetch_FMTHits(DataEvent event) {
+        if (!event.hasBank("FMT::adc")) {
+            _FMTHits = new ArrayList<Hit>();
             return;
         }
 
@@ -55,41 +46,28 @@ public class HitReader {
 
         int rows = bankDGTZ.rows();;
 
-        int[] id = new int[rows];
+        int[] id     = new int[rows];
         int[] sector = new int[rows];
-        int[] layer = new int[rows];
-        int[] strip = new int[rows];
-        int[] ADC = new int[rows];
+        int[] layer  = new int[rows];
+        int[] strip  = new int[rows];
+        int[] ADC    = new int[rows];
 
-        if (event.hasBank("FMT::adc") == true) { 
-            
-            //bankDGTZ.show();
+        if (event.hasBank("FMT::adc")) {
             for (int i = 0; i < rows; i++) {
-
                 id[i] = i + 1;
                 sector[i] = bankDGTZ.getByte("sector", i);
                 layer[i] = bankDGTZ.getByte("layer", i);
                 strip[i] = bankDGTZ.getShort("component", i);
                 ADC[i] = bankDGTZ.getInt("ADC", i);
 
-                if(strip[i]==-1 || ADC[i]==0)
-                    continue;
-                //test using only 3 layers
-                //if(layer[i]==4 || layer[i]==5 || layer[i]==6)
-                //    continue;
-                // create the hit object
-                Hit hit = new Hit(sector[i], layer[i], strip[i], (double) ADC[i]);
-                // if the hit is useable in the analysis its status is 1
-               
-                hit.set_Id(i+1);
+                if (strip[i] == -1 || ADC[i] == 0) continue;
 
-                // add this hit
+                Hit hit = new Hit(sector[i], layer[i], strip[i], (double) ADC[i]);
+                hit.set_Id(i+1);
                 hits.add(hit);
             }
         }
-        // fill the list of SVT hits
+
         this.set_FMTHits(hits);
-
     }
-
 }

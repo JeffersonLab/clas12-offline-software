@@ -66,10 +66,10 @@ public class CCDBConstantsLoader {
 
         // TODO: Apply z shifts and rotations from lines 68 to 73! =================================
         Constants.FVT_Zlayer = new double[dbprovider.length("/geometry/fmt/fmt_layer_noshim/Z")];
-        Constants.FVT_Alpha = new double[dbprovider.length("/geometry/fmt/fmt_layer_noshim/Z")];
+        Constants.FVT_Alpha  = new double[dbprovider.length("/geometry/fmt/fmt_layer_noshim/Z")];
         for (int i = 0; i < dbprovider.length("/geometry/fmt/fmt_layer_noshim/Z"); i++) {
-            Constants.FVT_Zlayer[i]=dbprovider.getDouble("/geometry/fmt/fmt_layer_noshim/Z", i)/10.;
-            Constants.FVT_Alpha[i]=Math.toRadians(dbprovider.getDouble("/geometry/fmt/fmt_layer_noshim/Angle", i));
+            Constants.FVT_Zlayer[i] = dbprovider.getDouble("/geometry/fmt/fmt_layer_noshim/Z", i)/10.;
+            Constants.FVT_Alpha[i]  = Math.toRadians(dbprovider.getDouble("/geometry/fmt/fmt_layer_noshim/Angle", i));
         }
         // =========================================================================================
 

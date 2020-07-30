@@ -38,7 +38,7 @@ public class Constants {
 
     public static double[] FVT_stripslength; // Give the strip length
 
-    public static double hDrift;
+    public static double hDrift; // TODO: What is this?
 
     private static double[] EFF_Z_OVER_A; // for ELOSS
     private static double[] _X0;          // for M.Scat.
@@ -132,9 +132,9 @@ public class Constants {
 		// Region 2 is the region in the negative y part of outer region: the strips range is from 321 to 512  ( 320 <= i < 512)
 		// Region 3 is the region in the positive x part of inner region: the strips range is from 513 to 832  ( 512 <= i < 832)
 		// Region 4 is the region in the positive y part of outer region: the strips range is from 833 to 1024 ( 832 <= i < 1024)
-		if (i>=  0 &&  i<320) return 1;
-		if (i>=320 &&  i<512) return 2;
-		if (i>=512 &&  i<832) return 3;
+		if (i>=  0 && i< 320) return 1;
+		if (i>=320 && i< 512) return 2;
+		if (i>=512 && i< 832) return 3;
 		if (i>=832 && i<1024) return 4;
 		return 0;
 	}
