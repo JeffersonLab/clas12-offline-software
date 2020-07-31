@@ -36,9 +36,9 @@ public class Hit implements Comparable<Hit>{
 		set_StripSegment(seg);
 	}
 
-	private int _Sector;      	  // sector[1...24]
+	private int _Sector;      	  // unused
 	private int _Layer;    	 	  // layer [1,...6]
-	private int _Strip;    	 	  // strip [1...256]
+	private int _Strip;    	 	  // strip [1...1024]
 
 	private double _Edep;      	  // Reconstructed time, for now it is the gemc time
 	private Line3D _StripSegment; // The geometry segment representing the strip position
