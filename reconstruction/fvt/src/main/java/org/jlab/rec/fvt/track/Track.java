@@ -1,12 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.rec.fvt.track;
 
 import java.util.List;
-import org.jlab.geom.prim.Point3D; 
+import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.fvt.track.fit.StateVecs;
 
 /**
@@ -16,6 +11,18 @@ import org.jlab.rec.fvt.track.fit.StateVecs;
 public class Track {
 
     public int status = 0;
+
+    private int _id;
+    private int _sector;
+    private int _q;
+    private double _x;
+    private double _y;
+    private double _z;
+    private double _px;
+    private double _py;
+    private double _pz;
+
+    private List<Point3D> _traj;
 
     /**
      * @return the _traj
@@ -58,6 +65,7 @@ public class Track {
     public void setSector(int _sector) {
         this._sector = _sector;
     }
+
     /**
      * @return the _q
      */
@@ -155,17 +163,6 @@ public class Track {
     public void setPz(double _pz) {
         this._pz = _pz;
     }
-    private int _id;
-    private int _sector;
-    private int _q;
-    private double _x;
-    private double _y;
-    private double _z;
-    private double _px;
-    private double _py;
-    private double _pz;
-    
-    private List<Point3D> _traj;
 
     public double[] getLabPars(StateVecs.StateVec sv) {
         double x = sv.x;
@@ -178,8 +175,5 @@ public class Track {
         double px = pz*tx;
         double py = pz*ty;
         return new double[] {x,y,z,px,py,pz};
-        
     }
-    
-   
 }

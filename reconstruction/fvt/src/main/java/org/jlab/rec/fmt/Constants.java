@@ -125,6 +125,36 @@ public class Constants {
         System.out.println("*****   FMT constants loaded!");
 	}
 
+    /**
+     * Apply z shifts and rotations to FMT Constants.
+     * @param shArr : Two-dimensional array storing alignment information. Rows define the 6 FMT
+     *                layers, and columns are [deltaX, deltaY, deltaZ, rotX, rotY, rotZ].
+     */
+    public static synchronized void applyZShifts(double[][] shArr) {
+        for (int li = 0; li < FVT_Nlayers; ++li) {
+            FVT_Zlayer[li] += shArr[li][2];
+            FVT_Alpha[li]  += shArr[li][5];
+        }
+    }
+
+    /**
+     * Apply z shifts and rotations to FMT Constants.
+     * @param shArr : Two-dimensional array storing alignment information. Rows define the 6 FMT
+     *                layers, and columns are [deltaX, deltaY, deltaZ, rotX, rotY, rotZ].
+     */
+    public static synchronized void applyXYShifts(double[][] shArr) {
+        // TODO: Only deltaX and deltaY are implemented. rotX and rotY pending!
+
+        for (int li = 0; li < FVT_Nlayers; ++li) { // layers
+            for (int si = 0; si < FVT_Nstrips; ++si) { // strips
+                for (int ei = 0; ei < 2; ++ei) { // endpoints
+                    FVT_stripsX[li][si][ei] += shArr[li][0];
+                    FVT_stripsY[li][si][ei] += shArr[li][1];
+                }
+            }
+        }
+    }
+
 	private static int getLocalRegion(int i) {
 		// To represent the geometry we divide the barrel micromega disk into 4 regions according to the strip numbering system.
 		// Here i = strip_number -1;

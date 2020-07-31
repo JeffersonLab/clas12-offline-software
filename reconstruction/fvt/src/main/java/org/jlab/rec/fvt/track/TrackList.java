@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.rec.fvt.track;
 
 import java.util.ArrayList;
@@ -18,35 +13,31 @@ import org.jlab.io.base.DataEvent;
  * @author ziegler
  */
 public class TrackList {
-    
-    
+
     public List<Track> getDCTracks(DataEvent event) {
-        
         List<Track> trkList = new ArrayList<Track>();
         Map<Integer, List<Point3D> >trj = new HashMap<Integer, List<Point3D> >();
-        
+
         DataBank trkbank = event.getBank("TimeBasedTrkg::TBTracks");
-        if(trkbank==null || trkbank.rows()==0)
-            return null;
-        
+        if (trkbank == null || trkbank.rows() == 0) return null;
+
         DataBank trkbank2 = event.getBank("TimeBasedTrkg::Trajectory");
-        if(trkbank2==null || trkbank2.rows()==0)
-            return null;
+        if (trkbank2 == null || trkbank2.rows() == 0) return null;
         int trkrows2 = trkbank2.rows();
         for (int i = 0; i < trkrows2; i++) {
-            if(trkbank2.getShort("detector", i)==8) { // FMT detector
+            if (trkbank2.getShort("detector", i) == 8) { // FMT detector
                 int id = trkbank2.getShort("id", i);
                 Point3D p = new Point3D(trkbank2.getFloat("x", i),
                                         trkbank2.getFloat("y", i),
                                         trkbank2.getFloat("z", i));
-                if(trj.get(id)==null) {
+
+                if (trj.get(id) == null) {
                     trj.put(id, new ArrayList<Point3D>());
                     trj.get(id).add(p);
                 } else {
                     trj.get(id).add(p);
                 }
             }
-            
         }
         int trkrows = trkbank.rows();
         for (int i = 0; i < trkrows; i++) {
@@ -61,12 +52,11 @@ public class TrackList {
             trk.setPx(trkbank.getFloat("p0_x", i));
             trk.setPy(trkbank.getFloat("p0_y", i));
             trk.setPz(trkbank.getFloat("p0_z", i));
-            if(trj.get(id)!=null) {
-                trk.setTraj(trj.get(id));
-            }
+            if (trj.get(id) != null) trk.setTraj(trj.get(id));
+
             trkList.add(trk);
         }
-        
+
         return trkList;
     }
 }

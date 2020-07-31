@@ -25,11 +25,9 @@ import org.jlab.rec.fmt.CCDBConstantsLoader;
 import org.jlab.rec.fvt.track.Track;
 import org.jlab.rec.fvt.track.TrackList;
 import org.jlab.rec.fvt.track.fit.KFitter;
-import org.jlab.utils.groups.IndexedTable;
 
 /**
- * Service to return reconstructed  track candidates- the output is in hipo
- * format
+ * Service to return reconstructed track candidates - the output is in hipo format
  *
  * @author ziegler
  */
@@ -43,9 +41,6 @@ public class FVTEngine extends ReconstructionEngine {
     TrackList trkLister;
     double xB = 0;
     double yB = 0;
-
-    // Shift array: [deltaX, deltaY, deltaZ, rotX, rotY, rotZ]
-    double[][] shArr = new double[6][6];
 
     public FVTEngine() {
         super("FVT", "ziegler", "4.0");
@@ -65,7 +60,7 @@ public class FVTEngine extends ReconstructionEngine {
                 System.out.println("["+this.getName()+"] run with FMT geometry variation chosen based on env = "+geomDBVar);
             }
         }
-        if (geomDBVar==null) {
+        if (geomDBVar == null) {
             System.out.println("["+this.getName()+"] run with FMT default geometry");
         }
         this.setRun(10);
@@ -75,25 +70,16 @@ public class FVTEngine extends ReconstructionEngine {
         requireConstants(Arrays.asList(tables));
         this.getConstantsManager().setVariation("default");
 
-        // Load alignment tables
-        // Load FMT shifts
-        IndexedTable fmtShifts = this.getConstantsManager().getConstants(this.getRun(), "/geometry/fmt/alignment");
-        shArr = new double[6][6];
-        for (int li = 0; li < 6; ++li) {
-            shArr[li][0] = fmtShifts.getDoubleValue("deltaX", 0,li+1,0)/10.;
-            shArr[li][1] = fmtShifts.getDoubleValue("deltaY", 0,li+1,0)/10.;
-            shArr[li][2] = fmtShifts.getDoubleValue("deltaZ", 0,li+1,0)/10.;
-            shArr[li][3] = fmtShifts.getDoubleValue("rotX",   0,li+1,0);
-            shArr[li][4] = fmtShifts.getDoubleValue("rotY",   0,li+1,0);
-            shArr[li][5] = fmtShifts.getDoubleValue("rotZ",   0,li+1,0);
-        }
-
         // Load the geometry
         String geoVariation = Optional.ofNullable(geomDBVar).orElse("default");
-        // TODO: This is probably not the best way to apply the shifts, but I'm adding this here
-        //       hoping that I'll remember to change it later.
-        CCDBConstantsLoader.Load(this.getRun(), geoVariation, shArr);
+        CCDBConstantsLoader.Load(this.getRun(), geoVariation);
+        double[][] shiftsArray =
+                CCDBConstantsLoader.loadAlignmentTable(this.getRun(), this.getConstantsManager());
+
+        Constants.applyZShifts(shiftsArray);
         Constants.Load();
+        Constants.applyXYShifts(shiftsArray);
+
         clusFinder = new ClusterFinder();
         crossMake  = new CrossMaker();
         trkLister  = new TrackList();
