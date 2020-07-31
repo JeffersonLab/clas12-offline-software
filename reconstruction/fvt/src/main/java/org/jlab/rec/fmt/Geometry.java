@@ -59,8 +59,8 @@ public class Geometry {
 
     public double getCentroidEstimate(int layer, double x, double y, int clust_size) {
 
-        double x_loc =  x*Math.cos(Constants.FVT_Alpha[layer-1])+ y*Math.sin(Constants.FVT_Alpha[layer-1]);
-        double y_loc =  y*Math.cos(Constants.FVT_Alpha[layer-1])- x*Math.sin(Constants.FVT_Alpha[layer-1]);
+        double x_loc = x*Math.cos(Constants.FVT_Alpha[layer-1])+ y*Math.sin(Constants.FVT_Alpha[layer-1]);
+        double y_loc = y*Math.cos(Constants.FVT_Alpha[layer-1])- x*Math.sin(Constants.FVT_Alpha[layer-1]);
 
         double cent = 0;
         double norm = 0;
