@@ -110,7 +110,7 @@ public class EngineProcessor {
             "org.jlab.service.ftof.FTOFTBEngine",
             "org.jlab.service.eb.EBTBEngine",
             "org.jlab.rec.rich.RICHEBEngine",
-            "org.jlab.service.rtpc.RTPCEngine"
+            "org.jlab.service.rtpc.RTPCEngine",
 	    //"org.jlab.service.mc.TruthMatching"
 	    "org.jlab.service.mc.TruthMatch"
         };
