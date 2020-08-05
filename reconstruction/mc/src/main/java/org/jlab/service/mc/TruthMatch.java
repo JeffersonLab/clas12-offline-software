@@ -87,6 +87,25 @@ public class TruthMatch extends ReconstructionEngine {
         MatchClasters(ecalClusters, ecalHits, mchits.get((byte) DetectorType.ECAL.getDetectorId()));
 
         /**
+         * Adding all clusters together
+         */
+        List<RecCluster> allCls = new ArrayList<>();
+
+        /**
+         * Adding ECal clusters
+         */
+        if (ecalClusters != null) {
+            allCls.addAll(ecalClusters);
+        }
+
+        Map<Short, List<RecCluster>> clsPerMCp = mapClustersToMCParticles(mcp.keySet(), allCls);
+
+        PrintClsPerMc(clsPerMCp);
+        
+        List<MCRecMatch> MCRecMatches = MakeMCRecMatch(mcp, clsPerMCp);
+
+        //PrintRecMatches(MCRecMatches);
+        /**
          *
          *
          */
@@ -141,7 +160,57 @@ public class TruthMatch extends ReconstructionEngine {
         public byte layer;
         public byte superlayer;
         public byte sector;
+
+        @Override
+        public String toString() {
+
+            String str = "***** RecCluster Object *****\n";
+            
+            str += "id = " + String.valueOf(id) + "\n";
+            str += "mcotid = " + String.valueOf(mcotid) + "\n";
+            str += "rectid = " + String.valueOf(rectid) + "\n";
+            str += "pindex = " + String.valueOf(pindex) + "\n";
+            str += "nHitMatched = " + String.valueOf(nHitMatched) + "\n";
+            str += "size = " + String.valueOf(size) + "\n";
+            str += "detector = " + String.valueOf(detector) + "\n";
+            str += "layer = " + String.valueOf(layer) + "\n";
+            str += "superlayer = " + String.valueOf(superlayer) + "\n";
+            str += "sector = " + String.valueOf(sector) + "\n";
+            str += " ***** All info about the RecCluster Object is printed \n \n";
+            
+            return str;
+        }
     }
+
+    class MCRecMatch {
+
+        public MCRecMatch() {
+            id = -1;
+            nclusters = -1;
+            nClsInRec = -1;
+            frac = (float) -1.0;
+            tid = -1;
+            pindex = -1;
+        }
+        public short id;        // MC particle id
+        public short pindex;    // pindex index of the rec particle in the REC::Particle bank
+        public short nclusters; // number of matched clusters
+        public short nClsInRec; // number of clusters used in reconstruction
+        public float frac;      // fraction of clusters used
+        public short tid;       // reconstructed track id
+        public boolean reconstructable;       // reconstructed track id
+
+    }
+
+    /**
+     * Some constatnts
+     */
+    private final int BMTID = 1;
+    private final int BSTID = 2;
+    private final int DCID = 6;
+    private final int ECALID = 7;
+
+    private final int PHOTON_ID = 22;
 
     /**
      * ************************************************************************
@@ -346,11 +415,10 @@ public class TruthMatch extends ReconstructionEngine {
             return;
         }
 
-        System.out.println("Size of Clusters is " + cls.size());
-        if (cls.size() >= 1) {
-            PrintRecHits(Rechits_a);
-        }
-
+//        System.out.println("Size of Clusters is " + cls.size());
+//        if (cls.size() >= 1) {
+//            PrintRecHits(Rechits_a);
+//        }
         int ind = 0;
         for (RecCluster cl : cls) {
 
@@ -363,11 +431,19 @@ public class TruthMatch extends ReconstructionEngine {
 
             List<RecHit> recHits = Rechits_a.get(cl.id);
 
-            System.out.println(" ====== Printing the " + ind + "-th cluster ==========");
-            ind = ind + 1;
-            PrintRecCluster(cl);
-
+//            System.out.println(" ====== Printing the " + ind + "-th cluster ==========");
+//            ind = ind + 1;
+//            PrintRecCluster(cl);
             if (recHits == null) {
+                /**
+                 * ************* AA TT EE NN TT II OO NN *******************
+                 * This needs to be resolved!! There should not be cases where
+                 * there is a cluster, but non of hits has clusterId pointing to
+                 * that cluster. A possibility is that because of shared hits
+                 * all hits of a given cluster is shared wit other cluster(s).
+                 *
+                 * Needs to be investigated
+                 */
                 System.out.println("Oo, recHits is Null");
                 continue;
                 //System.out.println(" ====== # of hit in a cluster " + cl.id + " is " + recHits.size() + " =========");
@@ -403,11 +479,136 @@ public class TruthMatch extends ReconstructionEngine {
 
             if (maxEntry != null) {
                 cl.nHitMatched = maxEntry.getValue();
-                System.out.println("Final otid is  " + maxEntry.getKey() + "and # of matched hits is " + maxEntry.getValue());
+                //System.out.println("Final otid is  " + maxEntry.getKey() + "and # of matched hits is " + maxEntry.getValue());
             }
 
         }
 
+    }
+
+    /**
+     *
+     * @param mcpKeys: Set of MCparticle iDs,
+     * @param cls : List of clusters
+     * @return : Map<MCPId, List<Clusters>>, returns list of RecClusters for
+     * each MC particle
+     */
+    Map<Short, List<RecCluster>> mapClustersToMCParticles(Set<Short> mcpKeys, List<RecCluster> cls) {
+        Map<Short, List<RecCluster>> map = new HashMap<>();
+
+        for (short theKey : mcpKeys) {
+
+            map.put(theKey, new ArrayList<>());
+        }
+
+        System.out.println(" ** ** ** Size of the cls is " + cls.size());
+        for (RecCluster curCl : cls) {
+
+            if (map.get(curCl.mcotid) == null) {
+                // Should not happen, but just in case
+                map.put(curCl.mcotid, new ArrayList<>());
+            }
+
+            map.get(curCl.mcotid).add(curCl);
+        }
+
+        System.out.println(" ** ** ** Size of the Map is " + map.size());
+
+        return map;
+    }
+
+    List<MCRecMatch> MakeMCRecMatch(Map<Short, MCPart> mcp, Map<Short, List<RecCluster>> clsPerMCp) {
+
+        List<MCRecMatch> recMatch = new ArrayList<>();
+
+        for (short imc : mcp.keySet()) {
+
+            MCRecMatch match = new MCRecMatch();
+
+            match.id = imc;
+
+            /**
+             * Generally speaking it is possible that all clusters of a given MC
+             * particles will not have the same Rec::Particle. So we will make a
+             * map here Map<pindex, count>, and the matched Rec::Particle will
+             * be the one with highest count.
+             */
+            Map<Short, Integer> matched_counts = new HashMap<>();
+
+            Map<Short, Integer> matched_PCalcounts = new HashMap<>();
+            Map<Short, Integer> matched_ECcounts = new HashMap<>();
+            Map<Short, Integer> matched_FTCalcounts = new HashMap<>();
+            Map<Short, Integer> matched_BSTcounts = new HashMap<>();
+            Map<Short, Integer> matched_BMTcounts = new HashMap<>();
+
+            int nPCal = 0;
+            int nEC = 0;
+            int nFTCal = 0;
+            int nBST = 0;
+            int nBMT = 0;
+
+            /**
+             * Making sure there are clusters created from the given MCParticle
+             */
+            if (!clsPerMCp.get(imc).isEmpty()) {
+
+                match.nclusters = (short) clsPerMCp.get(imc).size();
+
+                System.out.println("# of clusters is " + match.nclusters);
+
+                for (RecCluster curCl : clsPerMCp.get(imc)) {
+
+                    incrementMap(matched_counts, curCl.pindex);
+                    System.out.println("******* Counts after Increment Operation is " + matched_counts.get(curCl.pindex));
+
+                    final int det = (int) curCl.detector;
+
+                    /**
+                     * Can not use swith with with det.getdetectorID() so will
+                     * make
+                     */
+                    switch (det) {
+
+                        case ECALID:
+
+                            if (curCl.layer == 1) {
+                                // PCal
+                                incrementMap(matched_PCalcounts, curCl.pindex);
+                            } else if (curCl.layer == 4 || curCl.layer == 7) {
+                                // EC
+                                incrementMap(matched_ECcounts, curCl.pindex);
+                            }
+                            break;
+                        case BMTID:
+                            incrementMap(matched_BMTcounts, curCl.pindex);
+                            break;
+                        case BSTID:
+                            incrementMap(matched_BSTcounts, curCl.pindex);
+                            break;
+                    }
+
+                }
+
+                if (mcp.get(match.id).pid == PHOTON_ID) {
+                    match.pindex = getMaxEntryKey(matched_counts);
+                    match.tid = -1;
+                    match.nClsInRec = matched_counts.get(match.pindex).shortValue();
+                    match.frac = (float) (match.nClsInRec / match.nclusters);
+                    match.reconstructable = (0 < matched_PCalcounts.get(match.pindex) || 0 < matched_ECcounts.get(match.pindex));
+                }
+
+            } else {
+                match.pindex = -1;
+                match.tid = -1;
+                match.nClsInRec = 0;
+                match.frac = 0;
+                match.reconstructable = false;
+            }
+
+            recMatch.add(match);
+        }
+
+        return recMatch;
     }
 
     /**
@@ -448,5 +649,103 @@ public class TruthMatch extends ReconstructionEngine {
         System.out.println("** superlayer is        " + cl.superlayer);
         System.out.println("** sector is            " + cl.sector);
         System.out.println("******************* RecCluster ******************************");
+    }
+
+    void PrintRecMatches(List<MCRecMatch> matches) {
+
+        System.out.println("** ************  MATCHED Objects *********************");
+        for (int i = 0; i < matches.size(); i++) {
+
+            String strIndex;
+            if (i == 0) {
+                strIndex = "1st";
+            } else if (i == 1) {
+                strIndex = "2nd";
+            } else if (i == 2) {
+                strIndex = "3rd";
+            } else {
+                strIndex = String.valueOf(i + 1) + "th";
+            }
+
+            System.out.println("** ********" + strIndex + "Particle *********");
+            System.out.println("** id = " + matches.get(i).id);
+            System.out.println("** pindex = " + matches.get(i).pindex);
+            System.out.println("** nclusters = " + matches.get(i).nclusters);
+            System.out.println("** nclustersInRec = " + matches.get(i).nClsInRec);
+            System.out.println("** frac = " + matches.get(i).frac);
+            System.out.println("** reconstructable = " + matches.get(i).reconstructable);
+            System.out.println("");
+
+        }
+        System.out.println("** *********  End of MATCHED Objects *****************");
+
+    }
+
+    void PrintClsPerMc(Map<Short, List<RecCluster>> map) {
+
+        System.out.println("** ******** Map of Clusters per MC particle **************");
+
+        if (!map.isEmpty()) {
+
+            for (Short curKey : map.keySet()) {
+
+                int nCl = map.get(curKey).size();
+                System.out.println("mcotid  = " + curKey + "     @ of clusters is " + nCl);
+
+                for (int ii = 0; ii < nCl; ii++) {
+
+                    System.out.println("                ***** printing the cluster #" + ii + " *****");
+                    System.out.print(map.get(curKey).get(ii).toString());
+                }
+            }
+
+        } else {
+            System.out.println("The Map is empty");
+        }
+
+        System.out.println("** ***** End of Map of Clusters per MC particle **********");
+
+    }
+
+    /**
+     * This function as an argument expects counter maps, i.e. maps, which have
+     * the value as a counter of Keys. I will increment the value of the map
+     * each time it is called, and if the key doesn't exist, it will make an
+     * entry with that key and will assign value = 1
+     *
+     * @param <T> : the type of the make Key
+     * @param map : the map
+     * @param var : is the key of the map
+     */
+    private <T> void incrementMap(Map<T, Integer> map, T var) {
+        if (map.get(var) == null) {
+            map.put(var, 1);
+        } else {
+            map.put(var, map.get(var) + 1);
+        }
+    }
+
+    /**
+     * Returns the Key of the map that has the highest counts
+     *
+     * @param <T> Type of the Map keys
+     * @param map The actuall map
+     * @return The Key, which has highest counts
+     */
+    private <T> T getMaxEntryKey(Map<T, Integer> map) {
+
+        if (map.isEmpty()) {
+            System.out.println("Oho Map is empty. Returning null");
+            return null;
+        }
+
+        Map.Entry<T, Integer> maxEntry = null;
+        for (Map.Entry<T, Integer> entry : map.entrySet()) {
+            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0) {
+                maxEntry = entry;
+            }
+        }
+
+        return maxEntry.getKey();
     }
 }
