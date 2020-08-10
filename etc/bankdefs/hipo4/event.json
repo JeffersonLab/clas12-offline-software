@@ -11,8 +11,8 @@
                 {"name":"liveTime",   "type":"D", "info":"Lifetime"},
                 {"name":"startTime",  "type":"F", "info":"Event Start Time (ns)"},
                 {"name":"RFTime",     "type":"F", "info":"RF Time (ns)"},
-                {"name":"helicity",   "type":"B", "info":"Helicity of Event (0 or 1, else undefined), with HWP-correction"},
-                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (0 or 1, else undefined)"},
+                {"name":"helicity",   "type":"B", "info":"Helicity of Event (+/-1, else undefined), with HWP-correction"},
+                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (+/-1, else undefined)"},
                 {"name":"procTime",   "type":"F", "info":"Event Processing Time (UNIX Time = seconds)"}
             ]
     },
@@ -144,6 +144,17 @@
         ]
     },
     {
+        "name": "RECHB::ScintExtras",
+        "group": 300,
+        "item" : 23,
+        "info": "Scintillator Cluster Parameters",
+        "entries": [
+            {"name":"dedx",     "type":"F", "info":"Energy deposition per distance travelled (MeV/cm)"},
+            {"name":"size",     "type":"S", "info":"cluster size"},
+            {"name":"layermult","type":"B", "info":"cluster layer multiplicity"}
+        ]
+    },
+    {
         "name": "RECHB::Track",
         "group": 300,
         "item" : 16,
@@ -191,8 +202,8 @@
                 {"name":"liveTime",   "type":"D", "info":"Lifetime"},
                 {"name":"startTime",  "type":"F", "info":"Event Start Time (ns)"},
                 {"name":"RFTime",     "type":"F", "info":"RF Time (ns)"},
-                {"name":"helicity",   "type":"B", "info":"Helicity of Event (0 or 1, else undefined), with HWP-correction"},
-                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (0 or 1, else undefined)"},
+                {"name":"helicity",   "type":"B", "info":"Helicity of Event (+/-1, else undefined), with HWP-correction"},
+                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (+/-1, else undefined)"},
                 {"name":"procTime",   "type":"F", "info":"Event Processing Time (UNIX Time = seconds)"}
             ]
     },
@@ -321,6 +332,17 @@
             {"name":"hy",       "type":"F", "info":"Y coordinate of the mathced hit (cm)"},
             {"name":"hz",       "type":"F", "info":"Z coordinate of the matched hit (cm)"},
             {"name":"status",   "type":"S", "info":"hit status"}
+        ]
+    },
+    {
+        "name": "REC::ScintExtras",
+        "group": 300,
+        "item" : 43,
+        "info": "Scintillator Cluster Parameters",
+        "entries": [
+            {"name":"dedx",     "type":"F", "info":"Energy deposition per distance travelled (MeV/cm)"},
+            {"name":"size",     "type":"S", "info":"cluster size"},
+            {"name":"layermult","type":"B", "info":"cluster layer multiplicity"}
         ]
     },
     {

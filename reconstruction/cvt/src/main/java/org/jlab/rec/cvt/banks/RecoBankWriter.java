@@ -334,7 +334,8 @@ public class RecoBankWriter {
             bank.setFloat("tandip", i, (float) helix.get_tandip());
             bank.setFloat("z0", i, (float) (helix.get_Z0()/10.+zShift));
             bank.setFloat("d0", i, (float) (helix.get_dca()/10.));
-
+            bank.setFloat("xb", i, (float) (org.jlab.rec.cvt.Constants.getXb()/10.0));
+            bank.setFloat("yb", i, (float) (org.jlab.rec.cvt.Constants.getYb()/10.0));
             // this is the format of the covariance matrix for helical tracks
             // cov matrix = 
             // | d_dca*d_dca                   d_dca*d_phi_at_dca            d_dca*d_curvature        0            0             |
@@ -370,6 +371,10 @@ public class RecoBankWriter {
             bank.setFloat("c_uz", i, (float) trkcands.get(i).get_TrackDirAtCTOFRadius().z());
             bank.setFloat("pathlength", i, (float) (trkcands.get(i).get_pathLength() / 10.)); // conversion to cm
 
+            //for status word:
+            int a = 0;
+            int b = 0;
+            int c = 0;
             // fills the list of cross ids for crosses belonging to that reconstructed track
             for (int j = 0; j < trkcands.get(i).size(); j++) {
                 if(j<9) {
@@ -378,12 +383,21 @@ public class RecoBankWriter {
                 hitStrg += "_ID";  //System.out.println(" j "+j+" matched id "+trkcands.get(i).get(j).get_Id());
                 bank.setShort(hitStrg, i, (short) trkcands.get(i).get(j).get_Id());
                 }
+                // counter to get status word    
+                if(trkcands.get(i).get(j).get_Detector().equalsIgnoreCase("SVT"))
+                    a++;
+                if(trkcands.get(i).get(j).get_Detector().equalsIgnoreCase("BMT") 
+                    && trkcands.get(i).get(j).get_DetectorType().equalsIgnoreCase("Z"))
+                    b++;
+                if(trkcands.get(i).get(j).get_Detector().equalsIgnoreCase("BMT") 
+                    && trkcands.get(i).get(j).get_DetectorType().equalsIgnoreCase("C"))
+                    c++;
             }
+            bank.setShort("status", i, (short) ((short) 1000+a*100+b*10+c));
             bank.setFloat("circlefit_chi2_per_ndf", i, (float) trkcands.get(i).get_circleFitChi2PerNDF());
             bank.setFloat("linefit_chi2_per_ndf", i, (float) trkcands.get(i).get_lineFitChi2PerNDF());
             bank.setFloat("chi2", i, (float) trkcands.get(i).getChi2());
             bank.setShort("ndf", i, (short) trkcands.get(i).getNDF());
-
 
         }
         //bank.show();
@@ -478,7 +492,7 @@ public class RecoBankWriter {
             for (StateVec stVec : trks.get(i).get_Trajectory()) {
 
                 bank.setShort("id",       k, (short) trks.get(i).get_Id());
-                bank.setShort("detector", k, (byte) stVec.get_SurfaceDetector());
+                bank.setByte("detector",  k, (byte) stVec.get_SurfaceDetector());
                 bank.setByte("sector",    k, (byte) stVec.get_SurfaceSector());
                 bank.setByte("layer",     k, (byte) stVec.get_SurfaceLayer());
                 bank.setFloat("x",        k, (float) (stVec.x()/10.));
@@ -530,7 +544,7 @@ public class RecoBankWriter {
             for (StateVec stVec : trks.get(i).get_Trajectory()) {
 
                 bank.setShort("id",       k, (short) trks.get(i).get_Id());
-                bank.setShort("detector", k, (byte) stVec.get_SurfaceDetector());
+                bank.setByte("detector",  k, (byte) stVec.get_SurfaceDetector());
                 bank.setByte("sector",    k, (byte) stVec.get_SurfaceSector());
                 bank.setByte("layer",     k, (byte) stVec.get_SurfaceLayer());
                 bank.setFloat("x",        k, (float) (stVec.x()/10.));

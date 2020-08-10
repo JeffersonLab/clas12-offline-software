@@ -222,7 +222,7 @@ public class DCTBEngine extends DCEngine {
             //    resetTrackParams(TrackArray[i], new DCSwimmer());
             //}
             KFitterDoca kFit = new KFitterDoca(TrackArray[i], dcDetector, true, dcSwim, 0);
-           
+             
             StateVec fn = new StateVec();
             kFit.runFitter(TrackArray[i].get(0).get_Sector());
             
@@ -247,8 +247,7 @@ public class DCTBEngine extends DCEngine {
                 Point3D VTCS = crosses.get(0).getCoordsInSector(
                         TrackArray[i].get_Vtx0().x(), TrackArray[i].get_Vtx0().y(), TrackArray[i].get_Vtx0().z());
                 TrackArray[i].set_CovMat(kFit.propagateToVtx(crosses.get(0).get_Sector(), VTCS.z()));
-                
-                trkcands.add(TrackArray[i]);
+                if(TrackArray[i].isGood()) trkcands.add(TrackArray[i]);
             }
         }
         

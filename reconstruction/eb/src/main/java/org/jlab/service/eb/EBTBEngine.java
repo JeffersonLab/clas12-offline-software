@@ -14,6 +14,7 @@ public class EBTBEngine extends EBEngine {
 
     public EBTBEngine(){
         super("EBTB");
+        setUsePOCA(false);
     }
 
     @Override
@@ -30,6 +31,7 @@ public class EBTBEngine extends EBEngine {
         this.setCalorimeterBank("REC::Calorimeter");
         this.setCherenkovBank("REC::Cherenkov");
         this.setScintillatorBank("REC::Scintillator");
+        this.setScintClusterBank("REC::ScintExtras");
         this.setTrackBank("REC::Track");
         this.setCrossBank("REC::TrackCross");
         this.setCovMatrixBank("REC::CovMat");

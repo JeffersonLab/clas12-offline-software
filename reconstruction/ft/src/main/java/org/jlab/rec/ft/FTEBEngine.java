@@ -130,8 +130,7 @@ public class FTEBEngine extends ReconstructionEngine {
         en.init();
 //		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/elec_nofield_header.evio";
 //		EvioSource  reader = new EvioSource();
-        String input = "/Users/devita/out.hipo";
-//		String input = "/Users/devita/out_gemc_10.hipo";
+        String input = "/Users/devita/Work/clas12/simulations/clas12Tags/4.4.0/out.hipo";
         HipoDataSource reader = new HipoDataSource();
         reader.open(input);
 

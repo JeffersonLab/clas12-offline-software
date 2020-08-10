@@ -64,16 +64,20 @@ public class StateVecs {
             double yp = a + b * xp;
             double ym = a + b * xm;
 
-            if (bmt_geo.isInSector(Layer.get(k) - 6, Math.atan2(ym, xm), Math.toRadians(10)) == Sector.get(k)) {
+            if (bmt_geo.isInSector(Layer.get(k) - 6, Math.atan2(ym, xm), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter)) == Sector.get(k)) {
                 X = xm;
                 Y = ym;
             }
-            if (bmt_geo.isInSector(Layer.get(k) - 6, Math.atan2(yp, xp), Math.toRadians(10)) == Sector.get(k)) {
+            if (bmt_geo.isInSector(Layer.get(k) - 6, Math.atan2(yp, xp), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter)) == Sector.get(k)) {
                 X = xp;
                 Y = yp;
             }
-            //System.out.println("R="+rm+" sector "+Sector.get(k)+" [xm, ym]= ["+xm+","+ym+"]; [xp,yp]= ["+xp+","+yp+"]; [x,y]= ["+X+","+Y+"]"+
-            //"+sec "+bmt_geo.isInSector(Layer.get(k)-6, Math.atan2(yp, xp), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter))+"-sec "+bmt_geo.isInSector(Layer.get(k)-6, Math.atan2(ym, xm), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter)));
+            //System.out.println("R="+rm+" sector "+Sector.get(k)+" [xm, ym]= ["+xm+","+ym+"]; "
+            //        + "[xp,yp]= ["+xp+","+yp+"]; [x,y]= ["+X+","+Y+"]"+
+            //"+sec "+bmt_geo.isInSector(Layer.get(k)-6, Math.atan2(yp, xp), 
+            //        Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter))
+            //        +"-sec "+bmt_geo.isInSector(Layer.get(k)-6, Math.atan2(ym, xm), 
+            //                Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter)));
         } else {
 
             // Find the intersection of the helix circle with the module plane projection in XY which is a line
@@ -138,6 +142,8 @@ public class StateVecs {
                     }
                 }
             }
+            //System.out.println(" sector "+Sector.get(k)+" layer "+Layer.get(k)+" [x,y]= ["+X+","+Y+"]");
+            
         }
 
         ToPoint = new Vector3D(X - xc, Y - yc, 0);
@@ -536,27 +542,32 @@ public class StateVecs {
 
         double h_dca = Math.sqrt(x * x + y * y);
         double h_phi0 = Math.atan2(py, px);
+        if(Math.abs(Math.sin(h_phi0))>0.1) {
+            h_dca = -x/Math.sin(h_phi0);
+        } else {
+            h_dca = y/Math.cos(h_phi0);
+        }
+            
         double kappa = Math.signum(this.trackTraj.get(kf).kappa) / Math.sqrt(px * px + py * py);
         double h_omega = kappa / this.trackTraj.get(kf).alpha; h_omega = kappa/this.trackTraj.get(0).alpha;
         double h_dz = z;
         double h_tandip = pz / Math.sqrt(px * px + py * py);
         
         Helix trkHelix = new Helix(h_dca, h_phi0, h_omega, h_dz, h_tandip, this.trackCov.get(kf).covMat);
-       // System.out.println("x "+x+" y "+y+" z "+z+" p "+p_unc+" pt "+Math.sqrt(px*px+py*py) +" theta "+Math.toDegrees(Math.acos(pz/Math.sqrt(px*px+py*py+pz*pz)))+" phi "+Math.toDegrees(Math.atan2(py, px))+" q "+q);
+        //System.out.println("x "+x+" y "+y+" x' "+(-h_dca*Math.sin(h_phi0))+" y' "+y*Math.cos(h_phi0) +" theta "+Math.toDegrees(Math.acos(pz/Math.sqrt(px*px+py*py+pz*pz)))+" phi "+Math.toDegrees(Math.atan2(py, px))+" q "+q);
 
         return trkHelix;
     }
 
     public void init(Seed trk, KFitter kf, Swim swimmer) {
         //init stateVec
-
         StateVec initSV = new StateVec(0);
         initSV.x = -trk.get_Helix().get_dca() * Math.sin(trk.get_Helix().get_phi_at_dca());
         initSV.y = trk.get_Helix().get_dca() * Math.cos(trk.get_Helix().get_phi_at_dca());
         initSV.z = trk.get_Helix().get_Z0();
         double xcen = (1. / trk.get_Helix().get_curvature() - trk.get_Helix().get_dca()) * Math.sin(trk.get_Helix().get_phi_at_dca());
         double ycen = (-1. / trk.get_Helix().get_curvature() + trk.get_Helix().get_dca()) * Math.cos(trk.get_Helix().get_phi_at_dca());
-        B Bf = new B(0, 0, 0, 0, swimmer);
+        B Bf = new B(0, (float)org.jlab.rec.cvt.Constants.getXb(), (float)org.jlab.rec.cvt.Constants.getYb(), initSV.z, swimmer);
         initSV.alpha = Bf.alpha;
         initSV.kappa = Bf.alpha * trk.get_Helix().get_curvature();
         initSV.phi0 = Math.atan2(ycen, xcen);
@@ -568,7 +579,7 @@ public class StateVecs {
         initSV.d_rho = trk.get_Helix().get_dca();
         initSV.phi = 0;
         //
-
+        
         this.trackTraj.put(0, initSV);
         //init covMat
         Matrix fitCovMat = trk.get_Helix().get_covmatrix();

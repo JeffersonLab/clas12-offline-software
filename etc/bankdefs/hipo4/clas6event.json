@@ -62,20 +62,34 @@
     ]
  },
  {
+  "name": "EVENT::beam",
+  "group": 31000,
+  "item": 23,
+  "info": "Beam information",
+  "entries": [
+      {"name": "energy",  "type": "F",    "info": "Electron Beam Energy"},
+      {"name": "itorus",  "type": "F",    "info": "Torus Magnet current in Amps"},
+      {"name": "imini",   "type": "F",    "info": "Mini-Torus Magnet current in Amps"},
+      {"name": "itag",    "type": "F",    "info": "Tagger Magnet current in Amps"}
+    ]
+ },
+ {
   "name": "DETECTOR::ecpb",
   "group": 31000,
   "item" : 31,
   "info": "EC detector bank",
   "entries": [
-      {"name": "sector",   "type": "B",     "info": "hit sector"},
-      {"name": "etot",     "type": "F",     "info": "total  energy of the hit"},
-      {"name": "ein",      "type": "F",     "info": "inner  energy of the hit"},
-      {"name": "eout",     "type": "F",     "info": "outter energy of the hit"},
-      {"name": "time",     "type": "F",     "info": "time of the hit"},
-      {"name": "path",     "type": "F",     "info": "path of the hit"},
-      {"name": "x",        "type": "F",     "info": "x coordinate of the hit"},
-      {"name": "y",        "type": "F",     "info": "y coordinate of the hit"},
-      {"name": "z",        "type": "F",     "info": "z coordinate of the hit"}
+      {"name": "sector",      "type": "B",     "info": "hit sector"},
+      {"name": "clusterid","type": "B",     "info": "whole_hit_ID"},
+      {"name": "etot",        "type": "F",     "info": "total  energy of the hit"},
+      {"name": "ein",         "type": "F",     "info": "inner  energy of the hit"},
+      {"name": "eout",        "type": "F",     "info": "outter energy of the hit"},
+      {"name": "time",        "type": "F",     "info": "time of the hit"},
+      {"name": "path",        "type": "F",     "info": "path of the hit"},
+      {"name": "x",           "type": "F",     "info": "x coordinate of the hit"},
+      {"name": "y",           "type": "F",     "info": "y coordinate of the hit"},
+      {"name": "z",           "type": "F",     "info": "z coordinate of the hit"},
+      {"name": "chi2",      "type": "F",     "info": "quality measure of geometrical tracking"}
   ]
  },
  {
@@ -88,7 +102,8 @@
       {"name": "paddle",   "type": "B",     "info": "hit sector"},
       {"name": "edep",     "type": "F",     "info": "deposited energy"},
       {"name": "time",     "type": "F",     "info": "time of the hit"},
-      {"name": "path",     "type": "F",     "info": "path of the hit"}
+      {"name": "path",     "type": "F",     "info": "path of the hit"},
+      {"name": "chi2",   "type": "F",     "info": "quality measure of geometrical tracking"}
   ]
  },
  {
@@ -100,7 +115,8 @@
       {"name": "sector",   "type": "B",     "info": "hit sector"},
       {"name": "nphe",     "type": "F",     "info": "number of photo-electrons"},
       {"name": "time",     "type": "F",     "info": "time of the hit"},
-      {"name": "path",     "type": "F",     "info": "path of the hit"}
+      {"name": "path",     "type": "F",     "info": "path of the hit"},
+      {"name": "chi2",   "type": "F",     "info": "Geometrical tracking: angle between cc hit and nearest sc hit"}
   ]
  },
  {
@@ -116,11 +132,33 @@
       {"name": "path",     "type": "F",     "info": "path of the hit"},
       {"name": "x",        "type": "F",     "info": "x coordinate of the hit"},
       {"name": "y",        "type": "F",     "info": "y coordinate of the hit"},
-      {"name": "z",        "type": "F",     "info": "z coordinate of the hit"}
+      {"name": "z",        "type": "F",     "info": "z coordinate of the hit"},
+      {"name": "chi2",   "type": "F",     "info": "quality measure of geometrical tracking"}
   ]
  },
  {
-  "name": "TAGGER::tgpb",
+  "name": "DETECTOR::dcpb",
+  "group": 31000,
+  "item" : 35,
+  "info": "DC detector bank",
+  "entries": [
+      {"name": "sector",   "type": "B",	   "info": "sector"},
+      {"name": "track_id", "type": "B",	   "info": "track_ID"},
+      {"name": "x_sc",	   "type": "F",	   "info": "x coordinate of track intersection with SC plane"},
+      {"name": "y_sc",	   "type": "F",	   "info": "y coordinate of track intersection with SC plane"},
+      {"name": "z_sc",	   "type": "F",	   "info": "z coordinate of track intersection with SC plane"},
+      {"name": "cx_sc",    "type": "F",	   "info": "X dir cosine at (x_SC,y_SC,z_SC)"},
+      {"name": "cy_sc",	   "type": "F",	   "info": "Y dir cosine at (x_SC,y_SC,z_SC)"},
+      {"name": "cz_sc",	   "type": "F",	   "info": "Z dir cosine at (x_SC,y_SC,z_SC)"},
+      {"name": "x_v",	   "type": "F",	   "info": "vertex X after fiting to the beam position"},
+      {"name": "y_v",	   "type": "F",	   "info": "vertex Y after fiting to the beam position"},
+      {"name": "z_v",	   "type": "F",	   "info": "vertex Z after fiting to the beam position"},
+      {"name": "r_v",	   "type": "F",	   "info": "distance from production vertex to the beam"},
+      {"name": "chi2",     "type": "F",    "info": "Chisquare of track fitting"}
+  ]
+ }, 
+ {
+  "name": "TAGGER::tagr",
   "group": 31000,
   "item" : 41,
   "info": "Tagger bank",
@@ -129,7 +167,20 @@
       {"name": "tid",      "type": "S",     "info": "T-counter id"},
       {"name": "eid",      "type": "S",     "info": "E-counter id"},
       {"name": "time",     "type": "F",     "info": "time of the tagger hit"},
-      {"name": "energy",   "type": "F",     "info": "energy of the tagger hit"}
+      {"name": "energy",   "type": "F",     "info": "energy of the tagger hit"},
+      {"name": "ttag",     "type": "F",     "info": "Time of the photon has reconstructed in the Tagger"}
+    ]
+ },
+ {
+  "name": "TAGGER::tgpb",
+  "group": 31000,
+  "item" : 42,
+  "info": "TGPB Bank",
+  "entries": [
+      {"name": "pointer",  "type": "B",     "info": "1000*i+tagstat where i is the pointer to the TAGR bank. Negative for trigger photon"},
+      {"name": "time",     "type": "F",     "info": "starttime_TAG at interaction point(s)"},
+      {"name": "energy",   "type": "F",     "info": "photon Energy"},
+      {"name": "dt",       "type": "F",     "info": "starttime_ST - starttimeTAG (ns)"}
     ]
  },
  {

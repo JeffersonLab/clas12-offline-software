@@ -206,9 +206,9 @@ public class FTCALHit implements Comparable<FTCALHit>{
 		this._ClusIndex = _ClusIndex;
 	}
 	
-	public static boolean passHitSelection(FTCALHit hit) {
+	public static boolean passHitSelection(FTCALHit hit, IndexedTable thresholds) {
 		// a selection cut to pass the hit. 
-		if(hit.get_Edep() > FTCALConstantsLoader.EN_THRES) {
+		if(hit.get_Edep() > thresholds.getDoubleValue("thresholdHit", 1,1,hit.get_COMPONENT())) {
 			return true;
 		} else {
 			return false;

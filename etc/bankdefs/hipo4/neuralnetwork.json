@@ -21,5 +21,25 @@
             {"name":"id"    ,  "type":"B", "info":"track id"},
             {"name":"index",   "type":"S", "info":"index of the row for DC::tdc bank"}
         ]
+    },
+
+    {
+	"name": "ai::tracks",
+	"group": 4200,
+	"item" : 3,
+	"info" : "tracks identified with AI",
+	"entries": [
+	    {"name":"id",     "type":"B", "info":"id of the track"},
+	    {"name":"sector", "type":"B", "info":"sector of the track"},
+	    {"name":"c1",     "type":"S", "info":"cluster ID in superlayer 1"},
+	    {"name":"c2",     "type":"S", "info":"cluster ID in superlayer 2"},
+	    {"name":"c3",     "type":"S", "info":"cluster ID in superlayer 3"},
+	    {"name":"c4",     "type":"S", "info":"cluster ID in superlayer 4"},
+	    {"name":"c5",     "type":"S", "info":"cluster ID in superlayer 5"},
+	    {"name":"c6",     "type":"S", "info":"cluster ID in superlayer 6"},
+	    {"name":"p",      "type":"F", "info":"momentum of the track"},
+	    {"name":"theta",  "type":"F", "info":"theta angle of the track"},
+	    {"name":"phi",    "type":"F", "info":"phi angle of the track"}
+	    ]
     }
 ]

@@ -38,6 +38,7 @@ public class FTCALEngine extends ReconstructionEngine {
                     "/calibration/ft/ftcal/time_offsets",
                     "/calibration/ft/ftcal/time_walk",
                     "/calibration/ft/ftcal/status",
+                    "/calibration/ft/ftcal/thresholds",
                     "/calibration/ft/ftcal/cluster",
                     "/calibration/ft/ftcal/energycorr"
                 };
@@ -61,7 +62,7 @@ public class FTCALEngine extends ReconstructionEngine {
                 // get hits fron banks
                 allHits = reco.initFTCAL(event,this.getConstantsManager(), run);
                 // select good hits and order them by energy
-                selectedHits = reco.selectHits(allHits);
+                selectedHits = reco.selectHits(allHits,this.getConstantsManager(), run);
                 // create clusters
                 allClusters = reco.findClusters(selectedHits, this.getConstantsManager(), run);
                 // select good clusters
@@ -94,7 +95,7 @@ public class FTCALEngine extends ReconstructionEngine {
     public static void main (String arg[])  {
 		FTCALEngine cal = new FTCALEngine();
 		cal.init();
-		String input = "/Users/devita/Work/clas12/simulations/clas12Tags/4.3.1/out.hipo";
+		String input = "/Users/devita/Work/clas12/simulations/clas12Tags/4.4.0/out.hipo";
 		HipoDataSource  reader = new HipoDataSource();
 //		String input = "/Users/devita/Work/clas12/simulations/tests/detectors/clas12/ft/out_header.ev";
 //		EvioSource  reader = new EvioSource();
