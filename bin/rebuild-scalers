@@ -1,0 +1,7 @@
+#!/bin/sh
+
+. `dirname $0`/env.sh 
+
+export MALLOC_ARENA_MAX=1
+
+java -Xmx768m -Xms768m -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/services/*:$CLAS12DIR/lib/utils/*" org.jlab.analysis.postprocess.RebuildScalers $*

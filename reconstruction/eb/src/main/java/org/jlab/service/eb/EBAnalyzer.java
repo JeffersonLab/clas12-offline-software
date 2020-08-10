@@ -56,9 +56,10 @@ public class EBAnalyzer {
         neutralBetaDetectors=new LinkedHashMap<>();
         neutralBetaDetectors.put(DetectorType.ECAL,Arrays.asList(1,4,7));
         neutralBetaDetectors.put(DetectorType.CND,Arrays.asList(0));
+        neutralBetaDetectors.put(DetectorType.CTOF,Arrays.asList(0));
         neutralBetaDetectors.put(DetectorType.FTCAL,Arrays.asList(0));
+        neutralBetaDetectors.put(DetectorType.BAND,Arrays.asList(0));
         //neutralBetaDetectors.put(DetectorType.FTOF,Arrays.asList(2,1,3));
-        //neutralBetaDetectors.put(DetectorType.CTOF,Arrays.asList(0));
     }
 
     
@@ -280,8 +281,8 @@ public class EBAnalyzer {
                         p.vector().setMag(p.getEnergy(DetectorType.ECAL) /
                             SamplingFractions.getMean(22,p,ccdb));
                     }
-                    else if (p.hasHit(DetectorType.CND)) {
-                        // CND has no handle on photon energy, so we set momentum to zero,
+                    else if (p.hasHit(DetectorType.CND) || p.hasHit(DetectorType.CTOF) || p.hasHit(DetectorType.BAND)) {
+                        // Central and BAND have no handle on photon energy, so we set momentum to zero,
                         // and let user get direction from REC::Scintillator.x/y/z.
                         p.vector().setMag(0.0);
                     }
@@ -315,7 +316,7 @@ public class EBAnalyzer {
                 if (p.getCharge()==0) {
                     for (Entry<DetectorType,List<Integer>> bd : neutralBetaDetectors.entrySet()) {
                         if (p.hasHit(bd.getKey())) {
-                            beta = EBUtil.getNeutralBeta(p,bd.getKey(),bd.getValue(),startTime);
+                            beta = p.getNeutralBeta(bd.getKey(),bd.getValue(),startTime);
                             break;
                         }
                     }
@@ -476,8 +477,13 @@ public class EBAnalyzer {
                 if (p.hasHit(DetectorType.ECAL)) {
                     bestPid = p.getBeta()<ccdb.getDouble(EBCCDBEnum.NEUTRON_maxBeta) ? 2112 : 22;
                 }
-                else if (p.hasHit(DetectorType.CND)) {
-                    bestPid = p.getBeta()<ccdb.getDouble(EBCCDBEnum.CND_NEUTRON_maxBeta) ? 2112 : 0;
+                else if (p.hasHit(DetectorType.CND) || p.hasHit(DetectorType.CTOF)) {
+                    if (!EBUtil.centralNeutralVeto(p)) {
+                        bestPid = p.getBeta()<ccdb.getDouble(EBCCDBEnum.CND_NEUTRON_maxBeta) ? 2112 : 22;
+                    }
+                }
+                else if (p.hasHit(DetectorType.BAND)) {
+                    bestPid = p.getBeta() < 0.9 ? 2112 : 0;
                 }
             }
             else {

@@ -5,11 +5,70 @@ import static java.lang.Math.pow;
 import java.util.List;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorParticle;
+import org.jlab.clas.detector.ScintillatorResponse;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.clas.pdg.PhysicsConstants;
 
 public class EBUtil {
 
+     /**
+     * Central neutral veto logic from Adam Hobart.
+     *
+     * @param p
+     * @return whether to veto neutrality of p
+     *
+     * FIXME:  move float parameters to CCDB
+     */
+    public static boolean centralNeutralVeto(DetectorParticle p) {
+
+        ScintillatorResponse cnd=(ScintillatorResponse)p.getHit(DetectorType.CND);
+        ScintillatorResponse ctof=(ScintillatorResponse)p.getHit(DetectorType.CTOF);
+
+        if (cnd!=null || ctof!=null) {
+
+            // CTOF-only veto:
+            if (cnd == null) {
+                if (ctof.getEnergy() >= 18.0) {
+                    return true;
+                }
+            }
+
+            // CND-only veto:
+            else if (ctof == null) {
+                if (cnd.getClusterSize() > 3) {
+                    return true;
+                }
+                else if (cnd.getClusterSize() > 2) {
+                    if (cnd.getEnergy() > 10) {
+                        return true;
+                    }
+                }
+            }
+
+            // CTOF/CND-veto:
+            else if (ctof.getEnergy() >= 10.0) {
+                return true;
+            }
+            else if (cnd.getLayerMultiplicity()==1) {
+                if (cnd.getEnergy() >= 30.0) {
+                    return true;
+                }
+            }
+            else if (cnd.getLayerMultiplicity()==2) {
+                if (cnd.getClusterSize() > 2) {
+                    return true;
+                }
+                else if (cnd.getEnergy()+ctof.getEnergy() >= 10.0) {
+                    return true;
+                }
+            }
+            else {
+                return true;
+            }
+        }
+        return false;
+    }
+    
      /**
      * Perform a basic true/false identification for electrons.
      */
@@ -77,47 +136,6 @@ public class EBUtil {
         }
         return ccdb.getTable(tableName).
             getDoubleValue("tres",sector,layer,component);
-    }
-
-    /**
-     * Calculate beta for given detector type/layer, prioritized by layer:
-     */
-    public static double getNeutralBeta(DetectorParticle p, DetectorType type, List<Integer> layers,double startTime) {
-        double beta=-9999;
-        for (int layer : layers) {
-            DetectorResponse resp = p.getHit(type,layer);
-            if (resp!=null) {
-                beta = resp.getPosition().mag() /
-                    (resp.getTime()-startTime) /
-                    PhysicsConstants.speedOfLight();
-                break;
-            }
-        }
-        return beta;
-    }
-
-    /**
-     * Calculate beta for given detector type/layer, prioritized by layer:
-     */
-    public static double getNeutralBeta(DetectorParticle p, DetectorType type, int[] layers,double startTime) {
-        double beta=-9999;
-        for (int layer : layers) {
-            DetectorResponse resp = p.getHit(type,layer);
-            if (resp!=null) {
-                beta = resp.getPosition().mag() /
-                    (resp.getTime()-startTime) /
-                    PhysicsConstants.speedOfLight();
-                break;
-            }
-        }
-        return beta;
-    }
-
-    /**
-     * Calculate beta for given detector type:
-     */
-    public static double getNeutralBeta(DetectorParticle p, DetectorType type, int layer,double startTime) {
-        return getNeutralBeta(p,type,new int[]{layer},startTime);
     }
 
 }

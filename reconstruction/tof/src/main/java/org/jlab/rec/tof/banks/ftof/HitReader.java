@@ -11,6 +11,7 @@ import org.jlab.io.base.DataEvent;
 import org.jlab.rec.tof.banks.BaseHit;
 import org.jlab.rec.tof.banks.BaseHitReader;
 import org.jlab.rec.tof.banks.IMatchedHit;
+import org.jlab.rec.tof.cluster.Cluster;
 import org.jlab.rec.tof.hit.ftof.Hit;
 import org.jlab.rec.tof.track.Track;
 import org.jlab.utils.groups.IndexedList;
@@ -222,11 +223,11 @@ public class HitReader implements IMatchedHit {
         }
 
         for (Hit h : updated_hits) {
-            if (h._AssociatedTrkId == -1) {
+            if (h.get_TrkId() == -1) {
                 unique_hits.add(h);
             }
-            if (h._AssociatedTrkId != -1) {
-                lists.get(h._AssociatedTrkId - 1).add(h);
+            if (h.get_TrkId() != -1) {
+                lists.get(h.get_TrkId() - 1).add(h);
             }
         }
         for (int j = 0; j < this._numTrks; j++) {
@@ -385,7 +386,7 @@ public class HitReader implements IMatchedHit {
             }            
             if(matchedTrk!=null) {
                 FTOFDetHit trkHit = new FTOFDetHit(matchedTrk.getHit());
-                ftofHit._AssociatedTrkId = matchedTrk.getId();
+                ftofHit.set_TrkId(matchedTrk.getId());
                 ftofHit.set_matchedTrackHit(trkHit);
                 ftofHit.set_matchedTrack(matchedTrk.getLine());
                 ftofHit.set_TrkPathLenThruBar(trkHit.origin().distance(trkHit.end()));
@@ -605,6 +606,20 @@ public class HitReader implements IMatchedHit {
 //        System.out.println(period + " " + phase + " " + cycles + " " + timestamp + " " + triggerphase);
         return triggerphase;
     }
+    
+    public void setHitPointersToClusters(List<Hit> hits, List<Cluster> clusters) {
+        for(int j=0; j<clusters.size(); j++) {
+            Cluster cluster=clusters.get(j);
+            for(int k=0; k<cluster.size(); k++) {
+                for(int i=0; i<hits.size(); i++) {
+                    if(hits.get(i).get_Id()==cluster.get(k).get_Id()) {
+                        hits.get(i).set_AssociatedClusterID(cluster.get_Id());
+                    }
+                }
+            }
+        }
+    }
+    
     
     public static void main(String arg[]) {
         System.out.println(" TRYING TO MATCH HITS");

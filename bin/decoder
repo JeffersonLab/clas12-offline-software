@@ -1,9 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
-# This doesn't work in dash (Travis's /bin/sh):
-source `dirname $0`/env.sh 
+. `dirname $0`/env.sh 
 
-MALLOC_ARENA_MAX=1; export MALLOC_ARENA_MAX
+export MALLOC_ARENA_MAX=1
 
 echo +-------------------------------------------------------------------------
 echo "| DECODER GENERATION 4 (using HIPO-4 Library)"
