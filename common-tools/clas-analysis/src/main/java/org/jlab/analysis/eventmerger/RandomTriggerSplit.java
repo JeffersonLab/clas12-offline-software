@@ -36,7 +36,7 @@ public class RandomTriggerSplit {
 
     public static void main(String[] args){
       
-        OptionParser parser = new OptionParser("fileSplitter");
+        OptionParser parser = new OptionParser("trigger-splitter");
         parser.addOption("-o"    ,"",   "output file prefix");
         parser.addOption("-n"    ,"-1", "maximum number of events to process");
         parser.addOption("-s"    ,"-1", "number of events per output file");
