@@ -100,10 +100,12 @@ public class TruthMatch extends ReconstructionEngine {
 
         Map<Short, List<RecCluster>> clsPerMCp = mapClustersToMCParticles(mcp.keySet(), allCls);
 
-        PrintClsPerMc(clsPerMCp);
-        
+        //PrintClsPerMc(clsPerMCp);
+
         List<MCRecMatch> MCRecMatches = MakeMCRecMatch(mcp, clsPerMCp);
 
+        bankWriter( event, MCRecMatches, allCls );
+        
         //PrintRecMatches(MCRecMatches);
         /**
          *
@@ -142,6 +144,19 @@ public class TruthMatch extends ReconstructionEngine {
         public short pindex;      // pindex
         public short cid;         // clusterID
         public byte detector;     // Detector specifier
+
+        @Override
+        public String toString() {
+            String str = "***** RecHit object ******\n";
+
+            str += "* id = " + String.valueOf(id) + "\n";
+            str += "* pindex = " + String.valueOf(pindex) + "\n";
+            str += "* cid = " + String.valueOf(cid) + "\n";
+            str += "* detector = " + String.valueOf(cid) + "\n";
+            str += "***** End of RecHit object ******\n";
+            return str;
+        }
+
     }
 
     class RecCluster {
@@ -165,7 +180,7 @@ public class TruthMatch extends ReconstructionEngine {
         public String toString() {
 
             String str = "***** RecCluster Object *****\n";
-            
+
             str += "id = " + String.valueOf(id) + "\n";
             str += "mcotid = " + String.valueOf(mcotid) + "\n";
             str += "rectid = " + String.valueOf(rectid) + "\n";
@@ -177,7 +192,7 @@ public class TruthMatch extends ReconstructionEngine {
             str += "superlayer = " + String.valueOf(superlayer) + "\n";
             str += "sector = " + String.valueOf(sector) + "\n";
             str += " ***** All info about the RecCluster Object is printed \n \n";
-            
+
             return str;
         }
     }
@@ -198,7 +213,7 @@ public class TruthMatch extends ReconstructionEngine {
         public short nClsInRec; // number of clusters used in reconstruction
         public float frac;      // fraction of clusters used
         public short tid;       // reconstructed track id
-        public boolean reconstructable;       // reconstructed track id
+        public byte reconstructable;       // reconstructed track id
 
     }
 
@@ -461,6 +476,9 @@ public class TruthMatch extends ReconstructionEngine {
                     } else {
                         matchMCParts.put(mchit.otid, matchMCParts.get(mchit.otid) + 1);
                     }
+                } else {
+                    System.out.println("******* No MC hit is matched to this RecHit");
+                    System.out.println(curRecHit.toString());
                 }
 
             }
@@ -479,6 +497,7 @@ public class TruthMatch extends ReconstructionEngine {
 
             if (maxEntry != null) {
                 cl.nHitMatched = maxEntry.getValue();
+                cl.mcotid = maxEntry.getKey().shortValue();
                 //System.out.println("Final otid is  " + maxEntry.getKey() + "and # of matched hits is " + maxEntry.getValue());
             }
 
@@ -559,7 +578,7 @@ public class TruthMatch extends ReconstructionEngine {
                 for (RecCluster curCl : clsPerMCp.get(imc)) {
 
                     incrementMap(matched_counts, curCl.pindex);
-                    System.out.println("******* Counts after Increment Operation is " + matched_counts.get(curCl.pindex));
+                    //System.out.println("******* Counts after Increment Operation is " + matched_counts.get(curCl.pindex));
 
                     final int det = (int) curCl.detector;
 
@@ -594,7 +613,11 @@ public class TruthMatch extends ReconstructionEngine {
                     match.tid = -1;
                     match.nClsInRec = matched_counts.get(match.pindex).shortValue();
                     match.frac = (float) (match.nClsInRec / match.nclusters);
-                    match.reconstructable = (0 < matched_PCalcounts.get(match.pindex) || 0 < matched_ECcounts.get(match.pindex));
+                    if( 0 < matched_PCalcounts.get(match.pindex) || 0 < matched_ECcounts.get(match.pindex) ){
+                        match.reconstructable = 1;
+                    }else{
+                        match.reconstructable = 0;
+                    }
                 }
 
             } else {
@@ -602,13 +625,30 @@ public class TruthMatch extends ReconstructionEngine {
                 match.tid = -1;
                 match.nClsInRec = 0;
                 match.frac = 0;
-                match.reconstructable = false;
+                match.reconstructable = 0;
             }
 
             recMatch.add(match);
         }
 
         return recMatch;
+    }
+
+    void bankWriter(DataEvent event, List<MCRecMatch> mcp, List<RecCluster> cls) {
+
+        DataBank bank = event.createBank("MC::IsParticleMatched", mcp.size());
+
+        for (int j = 0; j < mcp.size(); j++) {
+            MCRecMatch p = mcp.get(j);
+            bank.setShort("mcTindex", j, p.id);
+            bank.setShort("recTindex", j, p.tid);
+            bank.setShort("pindex", j, p.pindex);
+            bank.setShort("nMCclusters", j, (short) p.nclusters);
+            bank.setByte("isInAcc", j, p.reconstructable );
+            bank.setFloat("fraction", j, p.frac);
+        }
+
+        event.appendBanks(bank);
     }
 
     /**
@@ -690,7 +730,7 @@ public class TruthMatch extends ReconstructionEngine {
             for (Short curKey : map.keySet()) {
 
                 int nCl = map.get(curKey).size();
-                System.out.println("mcotid  = " + curKey + "     @ of clusters is " + nCl);
+                System.out.println("mcotid  = " + curKey + "     # of clusters is " + nCl);
 
                 for (int ii = 0; ii < nCl; ii++) {
 
