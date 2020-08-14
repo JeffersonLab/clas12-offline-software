@@ -109,7 +109,8 @@
         "entries": [
             {"name":"mcTindex",    "type":"S",  "info":"MC Particle index, as in `tid`"},
             {"name":"recTindex",   "type":"S",  "info":"REC Track ID"},
-            {"name":"isInAcc",     "type":"B",   "info":"Is reconstructable"},
+	    {"name":"pindex",	   "type":"S",  "info":"REC particle index"},
+            {"name":"isInAcc",     "type":"B",  "info":"Is reconstructable"},
             {"name":"nMCclusters", "type":"S",  "info":"Number of rec clusters/hits created by the MC particle"},
             {"name":"fraction",    "type":"F",  "info":"Fraction of clusters used"}
         ]
