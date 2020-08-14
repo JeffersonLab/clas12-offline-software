@@ -35,7 +35,7 @@ public class EventMerger {
 
     public static void main(String[] args)  {
         
-        OptionParser parser = new OptionParser("bgMerger");
+        OptionParser parser = new OptionParser("bg-merger");
         parser.addRequired("-o"    ,"merged file");
         parser.addRequired("-i"    ,"input data file");
         parser.addRequired("-b"    ,"background file");
