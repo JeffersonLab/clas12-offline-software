@@ -1,3 +1,4 @@
+
 [
     {
         "name": "RUN::config",
@@ -45,6 +46,15 @@
             {"name":"fcupgated",  "type":"F", "info":"Beam charge, integrated from beginning of run, gated (nano-Coulomb)"},
             {"name":"fcup",       "type":"F", "info":"Beam charge, integrated from beginning of run, ungated (nano-Coulomb)"},
             {"name":"livetime",   "type":"F", "info":"Livetime during one scaler period"}
+        ]
+    },
+    { 
+        "name" : "RUN::filter",
+        "group": 10000,
+        "item" : 15,
+        "info" : "Random trigger filter information",
+        "entries":[
+            { "name":"json"    , "type":"B", "info":"json character" }
         ]
     }
 ]
