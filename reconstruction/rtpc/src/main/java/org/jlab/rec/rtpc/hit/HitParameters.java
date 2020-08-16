@@ -39,8 +39,14 @@ public class HitParameters {
     private int _timeadjlimit = 4;
     private double _zthreshTF = 16;
     private double _phithreshTF = 0.16;
+    private double _zthreshTFgap = 20;
+    private double _phithreshTFgap = 0.20;
     private double _zthreshTD = 8;
     private double _phithreshTD = 0.1;
+    private double _zthreshTDgap = 10;
+    private double _phithreshTDgap = 0.12;
+    private double _TFtotaltracktimeflag = 5000;
+    private double _TFtotalpadtimeflag = 1000;
     private int _tthreshTD = 300;
     private double _adcthresh = 320;
     private int _minhitspertrack = 5;
@@ -67,11 +73,17 @@ public class HitParameters {
         _timeadjlimit = (int) recon_parms.getDoubleValue("Dtm", 1,1,1);
         _zthreshTF = recon_parms.getDoubleValue("Dzm", 1,1,1);
         _phithreshTF = recon_parms.getDoubleValue("Dphim", 1,1,1);
+        _zthreshTFgap = recon_parms.getDoubleValue("Dzm", 1,1,4);
+        _phithreshTFgap = recon_parms.getDoubleValue("Dphim", 1,1,4);
         _adcthresh = recon_parms.getDoubleValue("ADCmin", 1,1,1);
         _minhitspertrack = (int) recon_parms.getDoubleValue("Hitmin",1,1,1);
         _minhitspertrackreco = (int) recon_parms.getDoubleValue("Hitmin",1,1,2);
         _zthreshTD = recon_parms.getDoubleValue("Dzm", 1,1,2);
         _phithreshTD = recon_parms.getDoubleValue("Dphim", 1,1,2);
+        _zthreshTDgap = recon_parms.getDoubleValue("Dzm", 1,1,5);
+        _phithreshTDgap = recon_parms.getDoubleValue("Dphim", 1,1,5);
+        _TFtotaltracktimeflag = recon_parms.getDoubleValue("Dtm", 1,1,6);
+        _TFtotalpadtimeflag = recon_parms.getDoubleValue("Dtm", 1,1,7);
         _tthreshTD = (int) recon_parms.getDoubleValue("Dtm",1,1,2);
         for(int i = 0; i < 5; i++){
             _atparms[i] = time_parms.getDoubleValue("z"+i, 1,1,1);
@@ -127,6 +139,10 @@ public class HitParameters {
     public double get_phithreshTF(){return _phithreshTF;}
     public double get_zthreshTD(){return _zthreshTD;}
     public double get_phithreshTD(){return _phithreshTD;}
+    public double get_zthreshTFgap(){return _zthreshTFgap;}
+    public double get_phithreshTFgap(){return _phithreshTFgap;}
+    public double get_zthreshTDgap(){return _zthreshTDgap;}
+    public double get_phithreshTDgap(){return _phithreshTDgap;}
     public int get_tthreshTD(){return _tthreshTD;}
     public double get_adcthresh(){return _adcthresh;}
     public int get_minhitspertrack(){return _minhitspertrack;}
@@ -143,6 +159,8 @@ public class HitParameters {
     public double get_tcathode(){return _tcathode;}
     public double get_tshiftfactorshort(){return _tshiftfactorshort;}
     public double get_tshiftfactorlong(){return _tshiftfactorlong;}
+    public double get_TFtotaltracktimeflag(){return _TFtotaltracktimeflag;}
+    public double get_TFtotalpadtimeflag(){return _TFtotalpadtimeflag;}
 
     public void set_ADCMap(ADCMap _ADCMap){this._ADCMap = _ADCMap;}
     public void set_TimeMap(HashMap<Integer, List<Double>> _TimeMap){this._TimeMap = _TimeMap;}

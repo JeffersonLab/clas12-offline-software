@@ -19,6 +19,8 @@ public class TrackDisentangler {
     private int maxdeltat = 300;
     private double maxdeltaz = 8;
     private double maxdeltaphi = 0.10;
+    private double maxdeltazgap = 10;
+    private double maxdeltaphigap = 0.12;
     
     public TrackDisentangler(HitParameters params, boolean disentangle){       
         
@@ -27,6 +29,8 @@ public class TrackDisentangler {
             maxdeltat = params.get_tthreshTD();
             maxdeltaz = params.get_zthreshTD();
             maxdeltaphi = params.get_phithreshTD();
+            maxdeltazgap = params.get_zthreshTDgap();
+            maxdeltaphigap = params.get_phithreshTDgap();
 
             List<Integer> origtidlist = RTIDMap.getAllTrackIDs();
             for(int tid : origtidlist){
@@ -54,8 +58,7 @@ public class TrackDisentangler {
                                 HITSLOOP:
                                 for(HitVector h1 : h1list){
                                     for(HitVector h2 : h2list){
-                                        if(Math.abs(h1.z() - h2.z()) < maxdeltaz && 
-                                        (Math.abs(h1.phi() - h2.phi()) < maxdeltaphi || Math.abs(h1.phi() - h2.phi() - 2*Math.PI) < maxdeltaphi)){
+                                        if(compareHits(h1,h2)){
                                             NewTrackMap.mergeTracks(tid1, tid2); 
                                             NewTrackMap.getTrack(tid1).sortHits();
                                             removedtracks.add(tid2);
@@ -86,17 +89,27 @@ public class TrackDisentangler {
             ReducedTrack t = NewTrackMap.getTrack(tid);
             HitVector comphit = t.getLastHit();
             if(comphit.time() - hit.time() < maxdeltat &&
-               hit.time() < comphit.time() &&
-               Math.abs(hit.z() - comphit.z()) < maxdeltaz &&
-               (Math.abs(hit.phi() - comphit.phi()) < maxdeltaphi || Math.abs(hit.phi() - comphit.phi() - Math.PI * 2) < maxdeltaphi)){
-                t.addHit(hit);
-                hitsorted = true;
+               hit.time() < comphit.time()){
+                if(compareHits(hit,comphit)){
+                    t.addHit(hit);
+                    hitsorted = true;
+                }
             }
         }
         if(!hitsorted){
             ReducedTrack newt = new ReducedTrack();
             newt.addHit(hit);
             NewTrackMap.addTrack(newt);
+        }
+    }
+    
+    private boolean compareHits(HitVector a, HitVector b){
+        double zdiff = a.z() - b.z();
+        double phidiff = Math.abs(a.phi() - b.phi());
+        if(phidiff > Math.PI){
+            return Math.abs(phidiff - 2*Math.PI) < maxdeltaphigap && zdiff < maxdeltazgap;
+        }else{
+            return phidiff < maxdeltaphi && zdiff < maxdeltaz;
         }
     }
 }
