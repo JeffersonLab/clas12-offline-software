@@ -42,6 +42,9 @@ public class TruthMatch extends ReconstructionEngine {
     @Override
     public boolean processDataEvent(DataEvent event) {
 
+        System.out.println("========================================= Event "
+                + event.getBank("RUN::config").getInt("event", 0) + " =========================================");
+
         // check if the event contains the MC banks
         if (event.hasBank("MC::True") == false) {
             System.err.print(" [ WARNING, TruthMatching ]: no MC::True bank found");
@@ -101,11 +104,10 @@ public class TruthMatch extends ReconstructionEngine {
         Map<Short, List<RecCluster>> clsPerMCp = mapClustersToMCParticles(mcp.keySet(), allCls);
 
         //PrintClsPerMc(clsPerMCp);
-
         List<MCRecMatch> MCRecMatches = MakeMCRecMatch(mcp, clsPerMCp);
 
-        bankWriter( event, MCRecMatches, allCls );
-        
+        bankWriter(event, MCRecMatches, allCls);
+
         //PrintRecMatches(MCRecMatches);
         /**
          *
@@ -363,11 +365,13 @@ public class TruthMatch extends ReconstructionEngine {
         for (int ihit = 0; ihit < hitsBank.rows(); ihit++) {
             RecHit curHit = new RecHit();
 
-            curHit.id = hitsBank.getShort("id", ihit);
+            curHit.id = hitsBank.getShort("id", ihit) - 1;   // -1 for starting from 0
             curHit.cid = (short) (hitsBank.getShort("clusterId", ihit) - 1);  // -1 for starting from 0
             if (curHit.cid == -2) {
-                continue; // The hit is not part of any cluster, 
                 // and hence is not related to any rec particle
+//                System.out.println("The hit is not associated to any cluster");
+//                System.out.print(curHit.toString());
+                continue; // The hit is not part of any cluster, 
             }
             //System.out.println("Inside the hit loop:  the cid of the hit is " + curHit.cid);
             curHit.pindex = clId2Pindex.get(curHit.cid);
@@ -397,6 +401,7 @@ public class TruthMatch extends ReconstructionEngine {
 
         DataBank recCal = event.getBank("REC::Calorimeter");
 
+        //System.out.println("# of Cluster in the event is " + recCal.rows());
         for (int iCl = 0; iCl < recCal.rows(); iCl++) {
             RecCluster curCl = new RecCluster();
 
@@ -405,6 +410,12 @@ public class TruthMatch extends ReconstructionEngine {
             curCl.detector = recCal.getByte("detector", iCl);
             curCl.layer = recCal.getByte("layer", iCl);
             curCl.sector = recCal.getByte("sector", iCl);
+            float energy = recCal.getFloat("energy", iCl);
+
+//            PrintRecCluster(curCl);
+//            System.out.println("Energy of the cluster is " + energy);
+//            System.out.println();
+//            System.out.println();
 
             curCl.size = -1;    // For ECal clusters this is not particularly important, // We don't have this in the bank
             curCl.rectid = -1;  // We will not use ECal clusters for tracks.
@@ -468,6 +479,8 @@ public class TruthMatch extends ReconstructionEngine {
 
                 MCHit mchit = mchits.get(curRecHit.id);
 
+                
+                
                 if (mchit != null) {
                     //cl.nHitMatched = (short) (cl.nHitMatched + (short) 1);
 
@@ -477,8 +490,8 @@ public class TruthMatch extends ReconstructionEngine {
                         matchMCParts.put(mchit.otid, matchMCParts.get(mchit.otid) + 1);
                     }
                 } else {
-                    System.out.println("******* No MC hit is matched to this RecHit");
-                    System.out.println(curRecHit.toString());
+                    System.err.println("******* No MC hit is matched to this RecHit");                                        
+                    System.err.println(curRecHit.toString());
                 }
 
             }
@@ -520,7 +533,7 @@ public class TruthMatch extends ReconstructionEngine {
             map.put(theKey, new ArrayList<>());
         }
 
-        System.out.println(" ** ** ** Size of the cls is " + cls.size());
+        //System.out.println(" ** ** ** Size of the cls is " + cls.size());
         for (RecCluster curCl : cls) {
 
             if (map.get(curCl.mcotid) == null) {
@@ -531,8 +544,7 @@ public class TruthMatch extends ReconstructionEngine {
             map.get(curCl.mcotid).add(curCl);
         }
 
-        System.out.println(" ** ** ** Size of the Map is " + map.size());
-
+        //System.out.println(" ** ** ** Size of the Map is " + map.size());
         return map;
     }
 
@@ -573,8 +585,7 @@ public class TruthMatch extends ReconstructionEngine {
 
                 match.nclusters = (short) clsPerMCp.get(imc).size();
 
-                System.out.println("# of clusters is " + match.nclusters);
-
+                //System.out.println("# of clusters is " + match.nclusters);
                 for (RecCluster curCl : clsPerMCp.get(imc)) {
 
                     incrementMap(matched_counts, curCl.pindex);
@@ -613,9 +624,11 @@ public class TruthMatch extends ReconstructionEngine {
                     match.tid = -1;
                     match.nClsInRec = matched_counts.get(match.pindex).shortValue();
                     match.frac = (float) (match.nClsInRec / match.nclusters);
-                    if( 0 < matched_PCalcounts.get(match.pindex) || 0 < matched_ECcounts.get(match.pindex) ){
+                    //if (0 < matched_PCalcounts.get(match.pindex) || 0 < matched_ECcounts.get(match.pindex)) {
+                    if ( (matched_PCalcounts.containsKey(match.pindex) &&  matched_PCalcounts.get(match.pindex) > 0) 
+                            || ( matched_ECcounts.containsKey(match.pindex) && 0 < matched_ECcounts.get(match.pindex) ) ) {
                         match.reconstructable = 1;
-                    }else{
+                    } else {
                         match.reconstructable = 0;
                     }
                 }
@@ -644,7 +657,7 @@ public class TruthMatch extends ReconstructionEngine {
             bank.setShort("recTindex", j, p.tid);
             bank.setShort("pindex", j, p.pindex);
             bank.setShort("nMCclusters", j, (short) p.nclusters);
-            bank.setByte("isInAcc", j, p.reconstructable );
+            bank.setByte("isInAcc", j, p.reconstructable);
             bank.setFloat("fraction", j, p.frac);
         }
 
