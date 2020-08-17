@@ -48,6 +48,7 @@ public class HitParameters {
     private double _TFtotaltracktimeflag = 5000;
     private double _TFtotalpadtimeflag = 1000;
     private int _tthreshTD = 300;
+    private int _tthreshTDgap = 300;
     private double _adcthresh = 320;
     private int _minhitspertrack = 5;
     private int _minhitspertrackreco = 10;
@@ -85,6 +86,7 @@ public class HitParameters {
         _TFtotaltracktimeflag = recon_parms.getDoubleValue("Dtm", 1,1,6);
         _TFtotalpadtimeflag = recon_parms.getDoubleValue("Dtm", 1,1,7);
         _tthreshTD = (int) recon_parms.getDoubleValue("Dtm",1,1,2);
+        _tthreshTDgap = (int) recon_parms.getDoubleValue("Dtm",1,1,5);
         for(int i = 0; i < 5; i++){
             _atparms[i] = time_parms.getDoubleValue("z"+i, 1,1,1);
             _btparms[i] = time_parms.getDoubleValue("z"+i, 1,1,2);
@@ -144,6 +146,7 @@ public class HitParameters {
     public double get_zthreshTDgap(){return _zthreshTDgap;}
     public double get_phithreshTDgap(){return _phithreshTDgap;}
     public int get_tthreshTD(){return _tthreshTD;}
+    public int get_tthreshTDgap(){return _tthreshTDgap;}
     public double get_adcthresh(){return _adcthresh;}
     public int get_minhitspertrack(){return _minhitspertrack;}
     public int get_minhitspertrackreco(){return _minhitspertrackreco;}

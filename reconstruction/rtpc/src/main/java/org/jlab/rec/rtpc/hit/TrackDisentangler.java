@@ -17,6 +17,7 @@ public class TrackDisentangler {
     private ReducedTrackMap NewTrackMap = new ReducedTrackMap();
     private ReducedTrack rtrack; 
     private int maxdeltat = 300;
+    private int maxdeltatgap = 300;
     private double maxdeltaz = 8;
     private double maxdeltaphi = 0.10;
     private double maxdeltazgap = 10;
@@ -27,6 +28,7 @@ public class TrackDisentangler {
         if(disentangle){
             RTIDMap = params.get_rtrackmap();
             maxdeltat = params.get_tthreshTD();
+            maxdeltatgap = params.get_tthreshTDgap();
             maxdeltaz = params.get_zthreshTD();
             maxdeltaphi = params.get_phithreshTD();
             maxdeltazgap = params.get_zthreshTDgap();
@@ -88,13 +90,10 @@ public class TrackDisentangler {
         for(int tid : TIDList){
             ReducedTrack t = NewTrackMap.getTrack(tid);
             HitVector comphit = t.getLastHit();
-            if(comphit.time() - hit.time() < maxdeltat &&
-               hit.time() < comphit.time()){
-                if(compareHits(hit,comphit)){
-                    t.addHit(hit);
-                    hitsorted = true;
-                }
-            }
+            if(compareHitsTime(hit,comphit)){
+                t.addHit(hit);
+                hitsorted = true;
+            }            
         }
         if(!hitsorted){
             ReducedTrack newt = new ReducedTrack();
@@ -110,6 +109,18 @@ public class TrackDisentangler {
             return Math.abs(phidiff - 2*Math.PI) < maxdeltaphigap && zdiff < maxdeltazgap;
         }else{
             return phidiff < maxdeltaphi && zdiff < maxdeltaz;
+        }
+    }
+    
+    private boolean compareHitsTime(HitVector a, HitVector b){
+        double zdiff = a.z() - b.z();
+        double phidiff = Math.abs(a.phi() - b.phi());
+        boolean torder = false;
+        if(a.time() < b.time()) torder = true;
+        if(phidiff > Math.PI){
+            return b.time() - a.time() < maxdeltatgap && torder && Math.abs(phidiff - 2*Math.PI) < maxdeltaphigap && zdiff < maxdeltazgap;
+        }else{
+            return b.time() - a.time() < maxdeltat && torder && phidiff < maxdeltaphi && zdiff < maxdeltaz;
         }
     }
 }
