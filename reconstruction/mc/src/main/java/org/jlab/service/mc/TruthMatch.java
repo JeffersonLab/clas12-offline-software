@@ -80,7 +80,7 @@ public class TruthMatch extends ReconstructionEngine {
          * cluster to which the hit belogs to - pindex : pindex of the particle
          * that the current cluster belongs to.
          */
-        Map< Short, List<RecHit>> ecalHits = getECalHits(event);
+        Map< Short, List<RecHit>> ecalHits = getECalHits(event, mchits.get((byte)DetectorType.ECAL.getDetectorId()));
 
         List<RecCluster> ecalClusters = getECalClusters(event);
 
@@ -177,6 +177,7 @@ public class TruthMatch extends ReconstructionEngine {
         public byte layer;
         public byte superlayer;
         public byte sector;
+        public float energy;
 
         @Override
         public String toString() {
@@ -324,7 +325,7 @@ public class TruthMatch extends ReconstructionEngine {
         return dmchits;
     }
 
-    Map< Short, List<RecHit>> getECalHits(DataEvent event) {
+    Map< Short, List<RecHit>> getECalHits(DataEvent event, Map<Integer, MCHit> mchitsInECal) {
 
         /**
          * We need two banks to be present in the event: ECAL::hits and
@@ -334,6 +335,13 @@ public class TruthMatch extends ReconstructionEngine {
          * <cId, pindex>.
          */
         Map< Short, List<RecHit>> recHits = new HashMap<>();
+        if( mchitsInECal == null ){
+            /**
+             * In case if no MC hit present in the ECal, then don't proceed,
+             * as we need only hits that are associated to an MC hit
+             */
+            return recHits;
+        }
 
         /**
          * Check if two necessary banks existm otherwise will return null
@@ -367,11 +375,8 @@ public class TruthMatch extends ReconstructionEngine {
 
             curHit.id = hitsBank.getShort("id", ihit) - 1;   // -1 for starting from 0
             curHit.cid = (short) (hitsBank.getShort("clusterId", ihit) - 1);  // -1 for starting from 0
-            if (curHit.cid == -2) {
-                // and hence is not related to any rec particle
-//                System.out.println("The hit is not associated to any cluster");
-//                System.out.print(curHit.toString());
-                continue; // The hit is not part of any cluster, 
+            if (curHit.cid == -2 || !mchitsInECal.containsKey(curHit.id) ) {
+                continue; // The hit is not part of any cluster, or the hit it's corresponding MC hit is ignored
             }
             //System.out.println("Inside the hit loop:  the cid of the hit is " + curHit.cid);
             curHit.pindex = clId2Pindex.get(curHit.cid);
@@ -410,12 +415,7 @@ public class TruthMatch extends ReconstructionEngine {
             curCl.detector = recCal.getByte("detector", iCl);
             curCl.layer = recCal.getByte("layer", iCl);
             curCl.sector = recCal.getByte("sector", iCl);
-            float energy = recCal.getFloat("energy", iCl);
-
-//            PrintRecCluster(curCl);
-//            System.out.println("Energy of the cluster is " + energy);
-//            System.out.println();
-//            System.out.println();
+            curCl.energy = recCal.getFloat("energy", iCl);
 
             curCl.size = -1;    // For ECal clusters this is not particularly important, // We don't have this in the bank
             curCl.rectid = -1;  // We will not use ECal clusters for tracks.
@@ -441,10 +441,6 @@ public class TruthMatch extends ReconstructionEngine {
             return;
         }
 
-//        System.out.println("Size of Clusters is " + cls.size());
-//        if (cls.size() >= 1) {
-//            PrintRecHits(Rechits_a);
-//        }
         int ind = 0;
         for (RecCluster cl : cls) {
 
@@ -457,9 +453,6 @@ public class TruthMatch extends ReconstructionEngine {
 
             List<RecHit> recHits = Rechits_a.get(cl.id);
 
-//            System.out.println(" ====== Printing the " + ind + "-th cluster ==========");
-//            ind = ind + 1;
-//            PrintRecCluster(cl);
             if (recHits == null) {
                 /**
                  * ************* AA TT EE NN TT II OO NN *******************
@@ -470,7 +463,8 @@ public class TruthMatch extends ReconstructionEngine {
                  *
                  * Needs to be investigated
                  */
-                System.out.println("Oo, recHits is Null");
+//                System.out.println("Oo, recHits is Null. Tot # of cluster is " + cls.size() + "    The energy of the cluster is " + cl.energy);
+//                System.out.println("Cluster is " + cl.toString());
                 continue;
                 //System.out.println(" ====== # of hit in a cluster " + cl.id + " is " + recHits.size() + " =========");
             }
@@ -479,8 +473,6 @@ public class TruthMatch extends ReconstructionEngine {
 
                 MCHit mchit = mchits.get(curRecHit.id);
 
-                
-                
                 if (mchit != null) {
                     //cl.nHitMatched = (short) (cl.nHitMatched + (short) 1);
 
@@ -490,8 +482,12 @@ public class TruthMatch extends ReconstructionEngine {
                         matchMCParts.put(mchit.otid, matchMCParts.get(mchit.otid) + 1);
                     }
                 } else {
-                    System.err.println("******* No MC hit is matched to this RecHit");                                        
-                    System.err.println(curRecHit.toString());
+                    //System.err.println("******* No MC hit is matched to this RecHit");
+
+//                    for (int hitn : mchits.keySet()) {
+//                        System.err.println("hitn is " + hitn + " otid is " + mchits.get(hitn).otid);
+//                    }
+//                    System.err.println(curRecHit.toString());
                 }
 
             }
@@ -625,8 +621,8 @@ public class TruthMatch extends ReconstructionEngine {
                     match.nClsInRec = matched_counts.get(match.pindex).shortValue();
                     match.frac = (float) (match.nClsInRec / match.nclusters);
                     //if (0 < matched_PCalcounts.get(match.pindex) || 0 < matched_ECcounts.get(match.pindex)) {
-                    if ( (matched_PCalcounts.containsKey(match.pindex) &&  matched_PCalcounts.get(match.pindex) > 0) 
-                            || ( matched_ECcounts.containsKey(match.pindex) && 0 < matched_ECcounts.get(match.pindex) ) ) {
+                    if ((matched_PCalcounts.containsKey(match.pindex) && matched_PCalcounts.get(match.pindex) > 0)
+                            || (matched_ECcounts.containsKey(match.pindex) && 0 < matched_ECcounts.get(match.pindex))) {
                         match.reconstructable = 1;
                     } else {
                         match.reconstructable = 0;
