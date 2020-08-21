@@ -1,6 +1,6 @@
 <evio_dictionary>
-    <bank name="FTOF" tag="2100" info="Simulated BAND Hit Information">
-        <section name = "true" tag = "1001" num = "0" info = "Digitized information">
+    <bank name="BAND" tag="2100" info="Simulated BAND Hit Information">
+        <section name = "true" tag = "2101" num = "0" info = "Digitized information">
             <column name="pid"     num="1"  type="int32"   info="ID of the first particle entering the sensitive volume"/>
             <column name="mpid"    num="2"  type="int32"   info="ID of the mother of the first particle entering the sensitive volume"/>
             <column name="tid"     num="3"  type="int32"   info="Track ID of the first particle entering the sensitive volume"/>
