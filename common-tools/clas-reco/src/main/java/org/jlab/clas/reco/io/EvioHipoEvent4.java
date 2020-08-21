@@ -57,6 +57,7 @@ public class EvioHipoEvent4 {
         this.fillHipoEventLTCC(hipoEvent, event);
         this.fillHipoEventHTCC(hipoEvent, event);
         this.fillHipoEventRICH(hipoEvent, event);
+        this.fillHipoEventBAND(hipoEvent, event);
         this.fillHipoEventGenPart(hipoEvent, event);
         this.fillHipoEventTrueInfo(hipoEvent, event);
         this.fillHipoEventTrigger(hipoEvent, event);
@@ -483,6 +484,39 @@ public class EvioHipoEvent4 {
         }
     }
     
+    
+    public void fillHipoEventBAND(Event hipoEvent, EvioDataEvent evioEvent){
+        if(evioEvent.hasBank("BAND::dgtz")==true){
+            EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("BAND::dgtz");
+            int rows = evioBank.rows();
+            Bank hipoADC = new Bank(schemaFactory.getSchema("BAND::adc"), rows);
+            Bank hipoTDC = new Bank(schemaFactory.getSchema("BAND::tdc"), rows);            
+
+            for(int i = 0; i < evioBank.rows(); i++){
+            	
+                hipoADC.putByte("sector", i,      (byte)  evioBank.getInt("sector",i));
+                hipoADC.putByte("layer",  i,      (byte)  evioBank.getInt("layer",i));
+                hipoADC.putShort("component",  i, (short) evioBank.getInt("component",i));
+                hipoADC.putByte("order", i,(byte) evioBank.getInt("order", i));
+                hipoADC.putInt("ADC", i, evioBank.getInt("ADC", i));
+                hipoADC.putInt("amplitude", i, evioBank.getInt("amplitude", i));
+                //Time channel from FADC 
+                hipoADC.putFloat("time", i, evioBank.getFloat("ADCtime", i));
+                hipoADC.putShort("ped",  i, (short) 0);
+                
+                hipoTDC.putByte("sector", i,      (byte)  evioBank.getInt("sector",i));
+                hipoTDC.putByte("layer",  i,      (byte)  evioBank.getInt("layer",i));
+                hipoTDC.putShort("component",  i, (short) evioBank.getInt("component",i));
+                hipoTDC.putByte("order", i,(byte) (evioBank.getInt("order", i)+2));
+                //TDC channel here. Conversion from ns in GEMC and to ns in BAND reconstruction
+                hipoTDC.putInt("TDC", i, evioBank.getInt("TDC", i));
+                
+            }
+            hipoEvent.write(hipoADC);
+            hipoEvent.write(hipoTDC);
+        }
+    }
+    
     public void fillHipoEventGenPart(Event hipoEvent, EvioDataEvent evioEvent){
         if(evioEvent.hasBank("GenPart::header")==true){
             EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("GenPart::header");
@@ -552,7 +586,7 @@ public class EvioHipoEvent4 {
     
    public void fillHipoEventTrueInfo(Event hipoEvent, EvioDataEvent evioEvent){
         
-        String[]        bankNames = new String[]{"BMT","BST","CND","CTOF","DC","EC","FMT","FTCAL","FTHODO","FTOF","FTTRK","HTCC","LTCC","PCAL","RICH","RTPC"};
+        String[]        bankNames = new String[]{"BMT","BST","CND","CTOF","DC","EC","FMT","FTCAL","FTHODO","FTOF","FTTRK","HTCC","LTCC","PCAL","RICH","RTPC","BAND"};
         DetectorType[]  bankTypes = new DetectorType[]{DetectorType.BMT,
                                                        DetectorType.BST,
                                                        DetectorType.CND,
@@ -568,7 +602,8 @@ public class EvioHipoEvent4 {
                                                        DetectorType.LTCC,
                                                        DetectorType.ECAL,
                                                        DetectorType.RICH,
-                                                       DetectorType.RTPC};
+                                                       DetectorType.RTPC,
+                                                       DetectorType.BAND};
         int rows = 0;
         for(int k = 0; k < bankNames.length; k++){
             if(evioEvent.hasBank(bankNames[k]+"::true")==true){
