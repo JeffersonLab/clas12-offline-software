@@ -178,6 +178,15 @@ public class Hit extends AHit implements IGetCalibrationParams {
         return hitPosition;
     }
 
+    @Override
+    public boolean isAdjacent(AHit arg0) {
+        boolean isClose = false;
+        if(this.get_Paddle()==arg0.get_Paddle()-1 || this.get_Paddle()==arg0.get_Paddle()+1) isClose=true;
+        if((this.get_Paddle()==1 && arg0.get_Paddle()==Constants.NPAD[0]) ||
+           (arg0.get_Paddle()==1 && this.get_Paddle()==Constants.NPAD[0])) isClose=true;    
+        return isClose;
+    }
+
     public void printInfo() {
         DecimalFormat form = new DecimalFormat("#.##");
         String s = " CTOF Hit in  Paddle " + this.get_Paddle()
@@ -204,24 +213,7 @@ public class Hit extends AHit implements IGetCalibrationParams {
         }
         System.out.println(s);
     }
-
-    @Override
-    public int compareTo(AHit arg) {
-        // Sort by sector, panel, paddle
-        int return_val = 0;
-        int CompSec = this.get_Sector() < arg.get_Sector() ? -1 : this
-                .get_Sector() == arg.get_Sector() ? 0 : 1;
-        int CompPan = this.get_Panel() < arg.get_Panel() ? -1 : this
-                .get_Panel() == arg.get_Panel() ? 0 : 1;
-        int CompPad = this.get_Paddle() < arg.get_Paddle() ? -1 : this
-                .get_Paddle() == arg.get_Paddle() ? 0 : 1;
-
-        int return_val1 = ((CompPan == 0) ? CompPad : CompPan);
-        return_val = ((CompSec == 0) ? return_val1 : CompSec);
-
-        return return_val;
-    }
-
+    
     @Override
     public double TW01(IndexedTable tab) {
         //double TW0U = CCDBConstants.getTW0U()[this.get_Sector() - 1][this

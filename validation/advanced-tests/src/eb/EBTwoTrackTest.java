@@ -457,7 +457,7 @@ public class EBTwoTrackTest {
                 else           assertEquals(kEff>0.60,true);
                 break;
             case 211:
-                if (isCentral) assertEquals(piEff>0.75,true);
+                if (isCentral) assertEquals(piEff>0.72,true);
                 else           assertEquals(piEff>0.75,true);
                 break;
             case 22:
@@ -487,7 +487,7 @@ public class EBTwoTrackTest {
         System.out.println(String.format("FT gEff = %.3f",gEff));
         System.out.println(String.format("FD hEff = %.3f",hEff));
         System.out.println("#############################################################");
-        if      (ftPDG==11) assertEquals(eEff>0.78,true);
+        if      (ftPDG==11) assertEquals(eEff>0.77,true);
         else if (ftPDG==22) assertEquals(gEff>0.88,true);
         assertEquals(hEff>0.62,true);
     }

@@ -29,6 +29,7 @@ public class EBHBEngine extends EBEngine {
         this.setCalorimeterBank("RECHB::Calorimeter");
         this.setCherenkovBank("RECHB::Cherenkov");
         this.setScintillatorBank("RECHB::Scintillator");
+        this.setScintClusterBank("RECHB::ScintExtras");
         this.setTrackBank("RECHB::Track");
         this.setCrossBank("RECHB::TrackCross");
         this.setTrackType("HitBasedTrkg::HBTracks");

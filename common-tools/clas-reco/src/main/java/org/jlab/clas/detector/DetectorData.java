@@ -1,6 +1,7 @@
 package org.jlab.clas.detector;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -280,7 +281,25 @@ public class DetectorData {
                bank.setFloat("energy", row, (float) r.getEnergy());
                bank.setFloat("chi2", row, (float) 0.0);
                bank.setShort("status",row,(short) r.getStatus());
+               row++;
+           }
+       }
+       return bank;
+   }
+   
+   public static DataBank getScintExtrasResponseBank(List<DetectorResponse> responses, DataEvent event, String bank_name){
+       int nrows=0;
+       for(int iresp=0; iresp<responses.size(); iresp++) {
+           nrows += responses.get(iresp).getNAssociations();
+       }
+       int row=0;
+       DataBank     bank = event.createBank(bank_name, nrows);
+       for(int iresp = 0; iresp < responses.size(); iresp++){
+           DetectorResponse r = responses.get(iresp);
+           for(int iass = 0; iass < r.getNAssociations(); iass++) {
                bank.setFloat("dedx",row,(float) ((ScintillatorResponse)r).getDedx());
+               bank.setShort("size",row, ((ScintillatorResponse)r).getClusterSize());
+               bank.setByte("layermult",row, ((ScintillatorResponse)r).getLayerMultiplicity());
                row++;
            }
        }
@@ -382,12 +401,26 @@ public class DetectorData {
      
    public static DataBank getTrajectoriesBank(List<DetectorParticle> particles, DataEvent event, String bank_name) {
 
+       // these are going to be dropped from REC::Traj:
+       // FIXME:  should be HashSet instead of ArrayList
+       Map <Integer,List<Integer>> ignore=new HashMap<>();
+       ignore.put(DetectorType.TARGET.getDetectorId(),Arrays.asList(1,2));
+       ignore.put(DetectorType.CVT.getDetectorId(),Arrays.asList(2,4,6,8,9,10,11));
+       ignore.put(DetectorType.DC.getDetectorId(),Arrays.asList(12,24,30));
+
        DataBank bank=null;
        if (bank_name!=null) {
            
            int nrows = 0;
            for(int i = 0 ; i < particles.size(); i++) {
-               nrows += particles.get(i).getTrackTrajectory().size();
+               DetectorTrack.Trajectory traj = particles.get(i).getTrackTrajectory();
+               for (int detId : traj.getDetectors()) {
+                   for (int layId : traj.getLayers(detId)) {
+                       if (!ignore.containsKey(detId) || !ignore.get(detId).contains(layId)) {
+                           nrows++;
+                       }
+                   }
+               }
            }
            bank = event.createBank(bank_name, nrows);
            
@@ -397,6 +430,9 @@ public class DetectorData {
                DetectorTrack.Trajectory traj = p.getTrackTrajectory();
                for (int detId : traj.getDetectors()) {
                    for (int layId : traj.getLayers(detId)) {
+                       if (ignore.containsKey(detId) && ignore.get(detId).contains(layId)) {
+                           continue;
+                       }
                        bank.setShort("index", row, (short) p.getTrackIndex());
                        bank.setShort("pindex", row, (short) i);
                        bank.setByte("detector", row, (byte) detId);
@@ -574,6 +610,7 @@ public class DetectorData {
                track.setPath(bank.getFloat("pathlength", row));
                track.setNDF(bank.getInt("ndf",row));
                track.setchi2(bank.getFloat("chi2",row));
+               track.setStatus(bank.getShort("status",row));
 
                //track.addCTOFPoint(x,y,z);
                Vector3D hc_vec = DetectorData.readVector(bank, row, "c_x", "c_y", "c_z");
@@ -642,7 +679,7 @@ public class DetectorData {
                 track.setDetectorID(DetectorType.FTCAL.getDetectorId());
 
                 // FIXME:  FT not in trajectory bank
-                DetectorParticlePOCA particle = new DetectorParticlePOCA(track);
+                DetectorParticle particle = new DetectorParticle(track);
                 
                 int pid = 0;
                 if (charge==0) pid = 22;

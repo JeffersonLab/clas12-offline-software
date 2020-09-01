@@ -14,11 +14,12 @@ import org.jlab.clas.detector.DetectorData;
 import org.jlab.clas.detector.DetectorHeader;
 import org.jlab.clas.detector.DetectorEvent;
 import org.jlab.clas.detector.DetectorParticle;
-import org.jlab.clas.detector.DetectorParticlePOCA;
+import org.jlab.clas.detector.DetectorParticleTraj;
 import org.jlab.clas.detector.DetectorResponse;
 import org.jlab.clas.detector.DetectorTrack;
 import org.jlab.clas.detector.TaggerResponse;
 import org.jlab.clas.detector.CherenkovResponse;
+import org.jlab.clas.physics.Vector3;
 
 import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
@@ -72,9 +73,9 @@ public class EventBuilder {
     public void addTracks(List<DetectorTrack> tracks) {
         for(int i = 0 ; i < tracks.size(); i++){
             if (this.usePOCA)
-                detectorEvent.addParticle(new DetectorParticlePOCA(tracks.get(i)));
-            else
                 detectorEvent.addParticle(new DetectorParticle(tracks.get(i)));
+            else
+                detectorEvent.addParticle(new DetectorParticleTraj(tracks.get(i)));
         }
     }
     
@@ -144,8 +145,8 @@ public class EventBuilder {
             // only match with CTOF/CND if it's a central track:
             else if (p.getTrackDetectorID()==DetectorType.CVT.getDetectorId()) {
                 // NOTE:  Should we do 2-d matching in cylindrical coordinates for CD?
-                findMatchingHit(n,p,detectorResponses,DetectorType.CTOF,0, ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
-                findMatchingHit(n,p,detectorResponses,DetectorType.CND, 0, ccdb.getDouble(EBCCDBEnum.CND_DZ));
+                findMatchingHit(n,p,detectorResponses,DetectorType.CTOF,1, ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
+                findMatchingHit(n,p,detectorResponses,DetectorType.CND,-1, ccdb.getDouble(EBCCDBEnum.CND_DZ));
             }
 
         }
@@ -275,6 +276,21 @@ public class EventBuilder {
         addDetectorResponses(responseFTHODO);
         addFTIndices(indices);
         forwardTaggerIDMatching();
+    }
+
+    public void processBAND(List<DetectorResponse> bandHits) {
+        Vector3 vtx=new Vector3(0,0,0);
+        DetectorParticle trig=this.detectorEvent.getTriggerParticle();
+        if (trig!=null) vtx.copy(trig.vertex());
+        for (DetectorResponse r : bandHits) {
+            if (r.getDescriptor().getType()==DetectorType.BAND) {
+                // Non-zero BAND hits are ignored:
+                if (r.getStatus()!=0) continue;
+                DetectorParticle p=DetectorParticle.createNeutral(r, vtx);
+                r.setAssociation(this.detectorEvent.getParticles().size());
+                this.detectorEvent.addParticle(p);
+           }
+        }
     }
 
 

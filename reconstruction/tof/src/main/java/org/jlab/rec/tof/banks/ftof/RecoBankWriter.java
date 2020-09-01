@@ -124,7 +124,7 @@ public class RecoBankWriter {
                 bank.setFloat("tz", i, (float) hitlist.get(i).get_TrkPosition()
                         .z());
                 bank.setShort("trackid", i,
-                        (short) hitlist.get(i)._AssociatedTrkId);
+                        (short) hitlist.get(i).get_TrkId());
             } else {
                 bank.setShort("trackid", i, (short) -1);
             }
@@ -139,6 +139,7 @@ public class RecoBankWriter {
                     .get_TDCbankHitIdx1());
             bank.setShort("tdc_idx2", i, (short) hitlist.get(i)
                     .get_TDCbankHitIdx2());
+            bank.setShort("clusterid", i, (short) hitlist.get(i).get_AssociatedClusterID());
             bank.setFloat("pathLength", i, (float) hitlist.get(i)
                     .get_TrkPathLen());
             bank.setFloat("pathLengthThruBar", i, (float) hitlist.get(i)
@@ -169,12 +170,12 @@ public class RecoBankWriter {
             }
             for (int i = 0; i < cluslist.size(); i++) {
                 bank.setShort("id", i, (short) cluslist.get(i).get_Id());
-                bank.setShort("trackid", i, (short) cluslist.get(i).get(0)._AssociatedTrkId);
+                bank.setShort("trackid", i, (short) cluslist.get(i).get(0).get_TrkId());
+                bank.setShort("size", i, (short) cluslist.get(i).size());
                 bank.setByte("sector", i, (byte) cluslist.get(i).get_Sector());
                 bank.setByte("layer", i, (byte) cluslist.get(i).get_Panel());
                 bank.setShort("component", i, (short) cluslist.get(i).get(0)
-                        .get_Paddle()); // paddle id of hit with lowest paddle id in
-                // cluster [Check the sorting!!!]
+                        .get_Paddle()); // paddle id of the cluster seed
                 int status = 0;
                 if (Integer.parseInt(cluslist.get(i).get_StatusWord()) == 1111) {
                     status = 1;
@@ -188,11 +189,7 @@ public class RecoBankWriter {
                 bank.setFloat("x", i, (float) cluslist.get(i).get_x());
                 bank.setFloat("y", i, (float) cluslist.get(i).get_y());
                 bank.setFloat("z", i, (float) cluslist.get(i).get_z());
-                bank.setFloat("x_unc", i, 5); // At this stage the uncertainty is
-                // not calculated
-                bank.setFloat("y_unc", i, (float) cluslist.get(i).get_y_locUnc());
-                bank.setFloat("z_unc", i, 10); // At this stage the uncertainty is
-                // not calculated
+                bank.setFloat("pathLengthThruBar", i, (float) cluslist.get(i).get_PathLengthThruBar());										
             }
 
             return bank;

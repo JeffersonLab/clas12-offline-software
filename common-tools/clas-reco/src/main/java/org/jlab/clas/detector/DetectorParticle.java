@@ -4,7 +4,6 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 import java.util.ArrayList;
 import java.util.List;
-import org.jlab.clas.detector.DetectorTrack.TrajectoryPoint;
 
 import org.jlab.clas.physics.Particle;
 import org.jlab.clas.physics.Vector3;
@@ -129,13 +128,11 @@ public class DetectorParticle implements Comparable {
     public void addResponse(DetectorResponse res, boolean match){
         this.responseStore.add(res);
         if(match==true){
-            TrajectoryPoint tp=this.detectorTrack.getTrajectoryPoint(res.getDescriptor());
-            if (tp!=null) {
-                res.getMatchedPosition().setXYZ(tp.getCross().origin().x(),
-                                                tp.getCross().origin().y(),
-                                                tp.getCross().origin().z());
-                res.setPath(tp.getPathLength());
-            }
+            Line3D distance = this.getDistance(res);
+            res.getMatchedPosition().setXYZ(
+                    distance.midpoint().x(),
+                    distance.midpoint().y(),distance.midpoint().z());
+            res.setPath(this.getPathLength(res.getPosition()));
         }
     }
 
@@ -385,15 +382,18 @@ public class DetectorParticle implements Comparable {
         return energy;
     }
    
-    public double getPathLength(DetectorType type,int layId) {
-        return this.detectorTrack.getPathLength(type,layId);
-    }
+    public double getPathLength(DetectorType type, int layer){
+        DetectorResponse response = this.getHit(type,layer);
+        if(response==null) return -1.0;
+        return this.getPathLength(response.getPosition());
+    } 
     public double getBeta(DetectorType type, int layer, double startTime){
         DetectorResponse response = this.getHit(type,layer);
         if(response==null) return -1.0;
-        final double cpath = this.detectorTrack.getPathLength(type,layer);
-        final double ctime = response.getTime() - startTime;
-        return cpath/ctime/PhysicsConstants.speedOfLight();
+        double cpath = this.getPathLength(response.getPosition());
+        double ctime = response.getTime() - startTime;
+        double beta  = cpath/ctime/PhysicsConstants.speedOfLight();
+        return beta;
     }
 
     public void setStatus(double minNpheHtcc,double minNpheLtcc) {
@@ -408,7 +408,7 @@ public class DetectorParticle implements Comparable {
     public int getDetectorHit(List<DetectorResponse>  hitList, DetectorType type,
             int detectorLayer,
             double distanceThreshold){
-        
+         
         Line3D   trajectory = this.detectorTrack.getLastCross();
         Point3D  hitPoint = new Point3D();
         double   minimumDistance = 500.0;
@@ -471,11 +471,9 @@ public class DetectorParticle implements Comparable {
     }
     
     public Line3D  getDistance(DetectorResponse  response){
-        TrajectoryPoint tp=detectorTrack.getTrajectoryPoint(response.getDescriptor());
-        if (tp!=null) {
-            return new Line3D(tp.getCross().origin(), response.getPosition().toPoint3D());
-        }
-        return null;
+        Line3D cross = this.detectorTrack.getLastCross();
+        Line3D  dist = cross.distanceRay(response.getPosition().toPoint3D());
+        return dist;
     }
 
     public double getTheoryBeta(int id){
@@ -498,21 +496,38 @@ public class DetectorParticle implements Comparable {
     }
 
     public double getVertexTime(DetectorType type, int layer){
-        return this.getVertexTime(type,layer,this.getPid());
+        double vertex_time = this.getTime(type,layer) -
+                this.getPathLength(type, layer) /
+                (this.getTheoryBeta(this.getPid())*PhysicsConstants.speedOfLight());
+        return vertex_time;
     }
-
+    
     public double getVertexTime(DetectorType type, int layer, int pid){
-        return this.getTime(type,layer) -
-               this.getPathLength(type, layer) /
-               (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
+        double vertex_time = -9999;
+        if(type==DetectorType.CTOF) {
+            DetectorResponse res = this.getHit(type);
+            vertex_time = this.getTime(type) - res.getPath()/
+                    (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
+        }
+        else {
+            vertex_time = this.getTime(type,layer) -
+                    this.getPathLength(type, layer) /
+                    (this.getTheoryBeta(pid)*PhysicsConstants.speedOfLight());
+        }
+        return vertex_time;
     }
 
     public int getCherenkovSignal(List<DetectorResponse> responses, DetectorType type){
 
-        TrajectoryPoint tp=detectorTrack.getTrajectoryPoint(type.getDetectorId(), 1);
-        if (tp==null) return -1;
-        Line3D cross=tp.getCross();
-       
+        Line3D cross;
+        if (type==DetectorType.HTCC) {
+            cross=this.detectorTrack.getFirstCross();
+        }
+        else if (type==DetectorType.LTCC)
+            cross=this.detectorTrack.getLastCross();
+        else throw new RuntimeException(
+                "DetectorParticle:getCheckr5noSignal:  invalid type:  "+type);
+
         // find the best match:
         int bestIndex = -1;
         double bestConeAngle = Double.POSITIVE_INFINITY;
@@ -541,6 +556,25 @@ public class DetectorParticle implements Comparable {
         if(response==null) return -1.0;
         return response.getTime();
     }
+    
+    /**
+     * Calculate beta for given detector type/layer, prioritized by layer:
+     */
+    public double getNeutralBeta(DetectorType type, List<Integer> layers,double startTime) {
+        double beta=-9999;
+        for (int layer : layers) {
+            DetectorResponse resp = getHit(type,layer);
+            if (resp!=null) {
+                Vector3D hit=resp.getPosition().clone();
+                double path=hit.sub(new Vector3D(vertex().x(),vertex().y(),vertex().z())).mag();
+                beta = path / (resp.getTime()-startTime) /
+                    PhysicsConstants.speedOfLight();
+                break;
+            }
+        }
+        return beta;
+    }
+
 
     @Override
     public int compareTo(Object o) {
