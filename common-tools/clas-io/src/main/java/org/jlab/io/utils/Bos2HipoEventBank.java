@@ -97,8 +97,10 @@ public class Bos2HipoEventBank {
                 hipoEVNTp.setByte("lcstat", loop, (byte) bEVNT.getInt("LCstat")[loop]);
                 hipoEVNTp.setByte("scstat", loop, (byte) bEVNT.getInt("SCstat")[loop]);
                 hipoEVNTp.setByte("ccstat", loop, (byte) bEVNT.getInt("CCstat")[loop]);
+                //hipoEVNTp.setByte("ststat", loop, (byte) bEVNT.getInt("STstat")[loop]);
 
                 hipoEVNTp.setInt("pid",loop, bEVNT.getInt("ID")[loop]);
+                hipoEVNTp.setFloat("betta", loop, bEVNT.getFloat("Betta")[loop]);
                 hipoEVNTp.setFloat("mass", loop,bEVNT.getFloat("Mass")[loop]);
                 hipoEVNTp.setFloat("px", loop,bEVNT.getFloat("Pmom")[loop]*bEVNT.getFloat("Cx")[loop]);
                 hipoEVNTp.setFloat("py", loop,bEVNT.getFloat("Pmom")[loop]*bEVNT.getFloat("cy")[loop]);
@@ -123,7 +125,7 @@ public class Bos2HipoEventBank {
         }
         if(this.bosDataBanks.containsKey("TGBI")==true){
             BosDataBank tgbi = (BosDataBank) this.bosDataBanks.get("TGBI");
-            DataBank hipoTGBIp = hipoEvent.createBank("TAGGER::tgbi",tgbi.rows());
+            DataBank hipoTGBIp = hipoEvent.createBank("HEADER::tgbi",tgbi.rows());
             hipoTGBIp.setInt("latch1", 0, tgbi.getInt("latch1")[0]);
             hipoTGBIp.setInt("helicity_scaler", 0, tgbi.getInt("helicity_scaler")[0]);
             hipoTGBIp.setInt("interrupt_time", 0, tgbi.getInt("interrupt_time")[0]);

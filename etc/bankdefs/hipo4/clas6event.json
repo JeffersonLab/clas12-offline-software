@@ -27,6 +27,19 @@
   ]
  },
  {
+   "name": "HEADER::tgbi",
+   "group": 31000,
+   "item" : 43,
+   "info" : "TGBI Bank",
+   "entries": [
+       {"name": "latch1",          "type": "I",     "info": "level1 trigger latch word (16 bits)"},
+       {"name": "helicity_scaler", "type": "I",     "info": "helicity interval count"},
+       {"name": "interrupt_time",  "type": "I",     "info": "interrupt time from microsec clock"},
+       {"name": "latch2",          "type": "I",     "info": "level2 trigger latch word (16 bits)"},
+       {"name": "level3",          "type": "I",     "info": "level3 trigger word (32 bits)"}
+     ]
+ },
+ {
   "name": "EVENT::particle",
   "group": 31000,
   "item" : 21,
@@ -35,6 +48,7 @@
       {"name": "status",  "type": "B",   "info": "status of the particle"},
       {"name": "charge",  "type": "B",   "info": "charge of the particle"},
       {"name": "pid",     "type": "I",   "info": "particle ID"},
+      {"name": "betta",   "type": "F",   "info": "Particle velocity in the units of c (=R_trk/TOF/c)"},
       {"name": "mass",    "type": "F",   "info": "particle mass calculated from beta"},
       {"name": "px",      "type": "F",   "info": "x component of momentum"},
       {"name": "py",      "type": "F",   "info": "y component of momentum"},
@@ -46,6 +60,7 @@
       {"name": "ecstat",  "type": "B",   "info": "pointer to ec bank"},
       {"name": "scstat",  "type": "B",   "info": "pointer to sc bank"},
       {"name": "ccstat",  "type": "B",   "info": "pointer to cc bank"},
+
       {"name": "lcstat",  "type": "B",   "info": "pointer to cc bank"}
   ]
  },
@@ -195,7 +210,7 @@
     ]
  },
  {
-  "name": "TAGGER::tgpb",
+  "name": "HEADER::tgpb",
   "group": 31000,
   "item" : 42,
   "info": "TGPB Bank",
@@ -206,19 +221,6 @@
       {"name": "dt",       "type": "F",     "info": "starttime_ST - starttimeTAG (ns)"}
     ]
  },
-{
-  "name": "TAGGER::tgbi",
-  "group": 31000,
-  "item" : 43,
-  "info" : "TGBI Bank",
-  "entries": [
-      {"name": "latch1",          "type": "I",     "info": "level1 trigger latch word (16 bits)"},
-      {"name": "helicity_scaler", "type": "I",     "info": "helicity interval count"},
-      {"name": "interrupt_time",  "type": "I",     "info": "interrupt time from microsec clock"},
-      {"name": "latch2",          "type": "I",     "info": "level2 trigger latch word (16 bits)"},
-      {"name": "level3",          "type": "I",     "info": "level3 trigger word (32 bits)"}
-    ]
-},
  {
   "name": "DETECTOR::icpb",
   "group": 31000,
