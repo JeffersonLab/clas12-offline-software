@@ -35,6 +35,8 @@ public class TimeAverage {
     private double gain = 1;
     private int row = 0;
     private int col = 0;
+    private double TFtotaltracktimeflag = 5000;
+            
     
     public TimeAverage(ConstantsManager manager, HitParameters params, int runNo) {
         /*	
@@ -44,6 +46,7 @@ public class TimeAverage {
         ADCMap = params.get_ADCMap();
         tids = TIDMap.getAllTrackIDs();
         IndexedTable gains = manager.getConstants(runNo, "/calibration/rtpc/gain_balance");
+        TFtotaltracktimeflag = params.get_TFtotaltracktimeflag();
         
         /*
          * Main Algorithm
@@ -86,6 +89,8 @@ public class TimeAverage {
                 HitVector v = new HitVector(pad,p.z(),p.phi(),averagetime,sumden/gain);
                 rtrack.addHit(v);
             }
+            rtrack.sortHits();
+            if(Math.abs(rtrack.getLargeT()-rtrack.getSmallT()) < TFtotaltracktimeflag) rtrack.flagTrack();
             RTIDMap.addTrack(rtrack);			
         }
 
