@@ -60,7 +60,7 @@
       {"name": "ecstat",  "type": "B",   "info": "pointer to ec bank"},
       {"name": "scstat",  "type": "B",   "info": "pointer to sc bank"},
       {"name": "ccstat",  "type": "B",   "info": "pointer to cc bank"},
-
+      {"name": "ststat",  "type": "B",   "info": "pointer to st bank"},
       {"name": "lcstat",  "type": "B",   "info": "pointer to cc bank"}
   ]
  },

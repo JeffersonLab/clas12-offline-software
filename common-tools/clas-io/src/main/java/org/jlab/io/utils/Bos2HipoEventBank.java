@@ -97,7 +97,7 @@ public class Bos2HipoEventBank {
                 hipoEVNTp.setByte("lcstat", loop, (byte) bEVNT.getInt("LCstat")[loop]);
                 hipoEVNTp.setByte("scstat", loop, (byte) bEVNT.getInt("SCstat")[loop]);
                 hipoEVNTp.setByte("ccstat", loop, (byte) bEVNT.getInt("CCstat")[loop]);
-                //hipoEVNTp.setByte("ststat", loop, (byte) bEVNT.getInt("STstat")[loop]);
+                hipoEVNTp.setByte("ststat", loop, (byte) bEVNT.getInt("STstat")[loop]);
 
                 hipoEVNTp.setInt("pid",loop, bEVNT.getInt("ID")[loop]);
                 hipoEVNTp.setFloat("betta", loop, bEVNT.getFloat("Betta")[loop]);
