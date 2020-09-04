@@ -29,6 +29,7 @@ public class HelixFitTest {
         fittobeamline = fitToBeamline;
         recotrackmap = params.get_recotrackmap();
         minhitcount = params.get_minhitspertrackreco();
+        List<Integer> trackstoremove = new ArrayList<>();
 
         chi2termthreshold = params.get_chi2termthreshold();
         for(int TID : recotrackmap.keySet()){
@@ -105,7 +106,7 @@ public class HelixFitTest {
             for(int i = 0; i < numhits; i++){
                 if(!hitstoremove.contains(i)) newtrack.add(track.get(i));
             }
-            findtrackparams(TID,newtrack,1);
+            if(!newtrack.isEmpty()) findtrackparams(TID,newtrack,1);
             return; 
         }
         
