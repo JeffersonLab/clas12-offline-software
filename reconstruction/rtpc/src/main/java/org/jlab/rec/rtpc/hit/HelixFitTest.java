@@ -19,16 +19,22 @@ public class HelixFitTest {
     private double szpos[][];
     private int fittobeamline = 0;
     private double magfield = 0;
+    private int minhitcount = 5;
+    private HashMap<Integer, List<RecoHitVector>> recotrackmap = new HashMap<>();
+    private HashMap<Integer, List<RecoHitVector>> newrecotrackmap = new HashMap<>();
     private HashMap<Integer, FinalTrackInfo> finaltrackinfomap = new HashMap<>();
+    
     public HelixFitTest(HitParameters params, int fitToBeamline, double _magfield){
         magfield = _magfield;
         fittobeamline = fitToBeamline;
-        HashMap<Integer, List<RecoHitVector>> recotrackmap = params.get_recotrackmap();
+        recotrackmap = params.get_recotrackmap();
+        minhitcount = params.get_minhitspertrackreco();
 
         chi2termthreshold = params.get_chi2termthreshold();
         for(int TID : recotrackmap.keySet()){
             findtrackparams(TID,recotrackmap.get(TID),0);
         }
+        params.set_recotrackmap(newrecotrackmap);
         params.set_finaltrackinfomap(finaltrackinfomap);
     }
     private double phichi2(double phi0, double r, double R){
@@ -102,6 +108,7 @@ public class HelixFitTest {
             findtrackparams(TID,newtrack,1);
             return; 
         }
+        
         R = Math.abs(R);
         chi2 += (R-Math.sqrt(A*A + B*B))*(R-Math.sqrt(A*A + B*B));
         chi2 /= 2*numhits - 4;
@@ -110,7 +117,10 @@ public class HelixFitTest {
         double dEdx = 0;
         if(Double.isNaN(tl)) tl = 0;
         if(tl != 0 && !Double.isNaN(tl)) dEdx = ADCsum/tl;          
-        if(TID != 0) finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,theta,phi,numhits,tl,ADCsum,dEdx,ho.get_Rho(),A,B,chi2));
+        if(TID != 0 && numhits > minhitcount){
+            newrecotrackmap.put(TID, track);
+            finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,theta,phi,numhits,tl,ADCsum,dEdx,ho.get_Rho(),A,B,chi2));
+        }
 
     }
 }
