@@ -16,6 +16,7 @@ import org.jlab.clas.physics.Vector3;
  */
 public class HelixFitTest {
     private double chi2termthreshold = 20;
+    private double chi2percthreshold = 50;
     private double szpos[][];
     private int fittobeamline = 0;
     private double magfield = 0;
@@ -32,6 +33,7 @@ public class HelixFitTest {
         List<Integer> trackstoremove = new ArrayList<>();
 
         chi2termthreshold = params.get_chi2termthreshold();
+        chi2percthreshold = params.get_chi2percthreshold();
         for(int TID : recotrackmap.keySet()){
             findtrackparams(TID,recotrackmap.get(TID),0);
         }
@@ -87,6 +89,7 @@ public class HelixFitTest {
         double chi2zterm = 0;
         double chi2term = 0;
         List<Integer> hitstoremove = new ArrayList<>();
+        //calculate chi2
         for(hit = 0; hit < numhits; hit++){
             hitr = track.get(hit).r();
             hitphi = track.get(hit).phi();
@@ -99,9 +102,10 @@ public class HelixFitTest {
             chi2zterm = (hitz - zchi2(vz,theta,hitr,R))*(hitz - zchi2(vz,theta,hitr,R))/denz;
             chi2term = chi2phiterm + chi2zterm;
             chi2 += chi2term;
-            if(chi2term > chi2termthreshold) hitstoremove.add(hit);
+            if(chi2term > chi2termthreshold) hitstoremove.add(hit); //if the hit messes up chi2 too much we are going to remove it
         }
-        if(hitstoremove.size() > 0 && iter == 0){
+        if(hitstoremove.size()/numhits > chi2percthreshold) return; //if too many hits are removed we delete the track
+        if(hitstoremove.size() > 0 && iter == 0){ //make a new track containing the hits leftover and fit it again
             List<RecoHitVector> newtrack = new ArrayList<>();
             for(int i = 0; i < numhits; i++){
                 if(!hitstoremove.contains(i)) newtrack.add(track.get(i));

@@ -65,6 +65,7 @@ public class HitParameters {
     private double _tshiftfactorshort = 0;
     private double _tshiftfactorlong = 0;
     private double _chi2termthreshold = 20;
+    private double _chi2percthreshold = 50;
 
     public void init(ConstantsManager manager, int runNo){
         IndexedTable time_offsets = manager.getConstants(runNo, "/calibration/rtpc/time_offsets");
@@ -73,6 +74,7 @@ public class HitParameters {
         
         _TrigWindSize = (int) recon_parms.getDoubleValue("Dtm", 1,1,3);
         _chi2termthreshold = recon_parms.getDoubleValue("Dzm", 1,1,3);
+        _chi2percthreshold = recon_parms.getDoubleValue("Dphim",1,1,3);
         _timeadjlimit = (int) recon_parms.getDoubleValue("Dtm", 1,1,1);
         _zthreshTF = recon_parms.getDoubleValue("Dzm", 1,1,1);
         _phithreshTF = recon_parms.getDoubleValue("Dphim", 1,1,1);
@@ -167,6 +169,7 @@ public class HitParameters {
     public double get_TFtotaltracktimeflag(){return _TFtotaltracktimeflag;}
     public double get_TFtotalpadtimeflag(){return _TFtotalpadtimeflag;}
     public double get_chi2termthreshold(){return _chi2termthreshold;}
+    public double get_chi2percthreshold(){return _chi2percthreshold;}
 
     public void set_ADCMap(ADCMap _ADCMap){this._ADCMap = _ADCMap;}
     public void set_TimeMap(HashMap<Integer, List<Double>> _TimeMap){this._TimeMap = _TimeMap;}
