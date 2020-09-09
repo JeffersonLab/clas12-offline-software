@@ -80,9 +80,9 @@ public class CNDClusterFinder {
             for(int k =0; k<j/*clustered_hits.size()*/; k++)
             {
                 
-                for(int l=0; l<clustered_hits.getItem(k).size(); l++)
+                for(int l=0; l<1/*clustered_hits.getItem(k).size()*/; l++)
                 {
-                    
+                    //l is always 0, check with seed hit!!
                     CndHit otherHit = (CndHit) clustered_hits.getItem(k).get(l);
                     
                     double x1 = thisHit.X()    /10.0;
