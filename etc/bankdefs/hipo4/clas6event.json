@@ -48,7 +48,7 @@
       {"name": "status",  "type": "B",   "info": "status of the particle"},
       {"name": "charge",  "type": "B",   "info": "charge of the particle"},
       {"name": "pid",     "type": "I",   "info": "particle ID"},
-      {"name": "betta",   "type": "F",   "info": "Particle velocity in the units of c (=R_trk/TOF/c)"},
+      {"name": "beta",   "type": "F",   "info": "Particle velocity in the units of c (=R_trk/TOF/c)"},
       {"name": "mass",    "type": "F",   "info": "particle mass calculated from beta"},
       {"name": "px",      "type": "F",   "info": "x component of momentum"},
       {"name": "py",      "type": "F",   "info": "y component of momentum"},
