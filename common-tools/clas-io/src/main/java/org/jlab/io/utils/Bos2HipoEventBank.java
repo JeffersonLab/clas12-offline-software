@@ -49,12 +49,21 @@ public class Bos2HipoEventBank {
 
         if(this.bosDataBanks.containsKey("HEVT")==true){
             DataBank  bankHEVT = hipoEvent.createBank("HEADER::info", 1);
+            bankHEVT.setInt("estatus", 0, this.bosDataBanks.get("HEVT").getInt("ESTATUS")[0]);
             bankHEVT.setInt("nrun", 0, this.bosDataBanks.get("HEVT").getInt("NRUN")[0]);
             bankHEVT.setInt("nevt", 0, this.bosDataBanks.get("HEVT").getInt("NEVENT")[0]);
+            bankHEVT.setInt("type", 0, this.bosDataBanks.get("HEVT").getInt("TYPE")[0]);
+            bankHEVT.setInt("npgp", 0, this.bosDataBanks.get("HEVT").getInt("NPGP")[0]);
+            bankHEVT.setInt("trgprs", 0, this.bosDataBanks.get("HEVT").getInt("TRGPRS")[0]);
+            bankHEVT.setFloat("tg", 0, this.bosDataBanks.get("HEVT").getFloat("TG")[0]);
             bankHEVT.setFloat("stt" , 0, this.bosDataBanks.get("HEVT").getFloat("STT")[0]);
             bankHEVT.setFloat("fc"  , 0, this.bosDataBanks.get("HEVT").getFloat("FC")[0]);
             bankHEVT.setFloat("fcg" , 0, this.bosDataBanks.get("HEVT").getFloat("FCG")[0]);
-
+            bankHEVT.setFloat("rf1", 0, this.bosDataBanks.get("HEVT").getFloat("RF1")[0]);
+            bankHEVT.setFloat("rf2", 0, this.bosDataBanks.get("HEVT").getFloat("RF2")[0]);
+            bankHEVT.setFloat("con1", 0, this.bosDataBanks.get("HEVT").getFloat("CON1")[0]);
+            bankHEVT.setFloat("con2", 0, this.bosDataBanks.get("HEVT").getFloat("CON2")[0]);
+            bankHEVT.setFloat("con3", 0, this.bosDataBanks.get("HEVT").getFloat("CON3")[0]);
             int evtclass = this.bosDataBanks.get("HEVT").getInt("TRGPRS")[0];
             byte ihelicity = 0;
             if(evtclass<0) ihelicity = 1;
@@ -88,8 +97,10 @@ public class Bos2HipoEventBank {
                 hipoEVNTp.setByte("lcstat", loop, (byte) bEVNT.getInt("LCstat")[loop]);
                 hipoEVNTp.setByte("scstat", loop, (byte) bEVNT.getInt("SCstat")[loop]);
                 hipoEVNTp.setByte("ccstat", loop, (byte) bEVNT.getInt("CCstat")[loop]);
+                hipoEVNTp.setByte("ststat", loop, (byte) bEVNT.getInt("STstat")[loop]);
 
                 hipoEVNTp.setInt("pid",loop, bEVNT.getInt("ID")[loop]);
+                hipoEVNTp.setFloat("beta", loop, bEVNT.getFloat("Betta")[loop]);
                 hipoEVNTp.setFloat("mass", loop,bEVNT.getFloat("Mass")[loop]);
                 hipoEVNTp.setFloat("px", loop,bEVNT.getFloat("Pmom")[loop]*bEVNT.getFloat("Cx")[loop]);
                 hipoEVNTp.setFloat("py", loop,bEVNT.getFloat("Pmom")[loop]*bEVNT.getFloat("cy")[loop]);
@@ -112,7 +123,17 @@ public class Bos2HipoEventBank {
             }
         this.hipoDataBanks.put("TGPB", hipoTGPBp);
         }
+        if(this.bosDataBanks.containsKey("TGBI")==true){
+            BosDataBank tgbi = (BosDataBank) this.bosDataBanks.get("TGBI");
+            DataBank hipoTGBIp = hipoEvent.createBank("HEADER::tgbi",tgbi.rows());
+            hipoTGBIp.setInt("latch1", 0, tgbi.getInt("latch1")[0]);
+            hipoTGBIp.setInt("helicity_scaler", 0, tgbi.getInt("helicity_scaler")[0]);
+            hipoTGBIp.setInt("interrupt_time", 0, tgbi.getInt("interrupt_time")[0]);
+            hipoTGBIp.setInt("latch2", 0, tgbi.getInt("latch2")[0]);
+            hipoTGBIp.setInt("level3", 0, tgbi.getInt("level3")[0]);
 
+        this.hipoDataBanks.put("TGBI", hipoTGBIp);
+        }
         if(this.bosDataBanks.containsKey("TAGR")==true){
             BosDataBank tagr = (BosDataBank) this.bosDataBanks.get("TAGR");
             DataBank hipoTAGRp = hipoEvent.createBank("TAGGER::tagr",tagr.rows());
@@ -151,6 +172,7 @@ public class Bos2HipoEventBank {
                 hipoDCPB.setFloat("z_v", loop, bDCPB.getFloat("Z_v")[loop]);
                 hipoDCPB.setFloat("r_v", loop, bDCPB.getFloat("R_v")[loop]);
                 hipoDCPB.setFloat("chi2", loop, bDCPB.getFloat("Chi2")[loop]);
+                hipoDCPB.setInt("status", loop, bDCPB.getInt("Status")[loop]);
             }
             this.hipoDataBanks.put("DCPB", hipoDCPB);
         }
@@ -176,6 +198,10 @@ public class Bos2HipoEventBank {
                 hipoICPB.setFloat("tc", loop, bICPB.getFloat("Time")[loop]);
                 hipoICPB.setFloat("xc", loop, bICPB.getFloat("X")[loop]);
                 hipoICPB.setFloat("yc", loop, bICPB.getFloat("Y")[loop]);
+                hipoICPB.setFloat("m2_hit", loop, bICPB.getFloat("M2_hit")[loop]);
+                hipoICPB.setFloat("m3_hit", loop, bICPB.getFloat("M3_hit")[loop]);
+                hipoICPB.setInt("status", loop, bICPB.getInt("Status")[loop]);
+                hipoICPB.setFloat("zc", loop, bICPB.getFloat("Z")[loop]);
             }
             this.hipoDataBanks.put("ICPB", hipoICPB);
         }
@@ -199,7 +225,13 @@ public class Bos2HipoEventBank {
                 hipoECPB.setFloat("x", loop, bECPB.getFloat("X") [loop]);
                 hipoECPB.setFloat("y", loop, bECPB.getFloat("Y") [loop]);
                 hipoECPB.setFloat("z", loop, bECPB.getFloat("Z") [loop]);
+                hipoECPB.setFloat("m2_hit", loop, bECPB.getFloat("M2_hit")[loop]);
+                hipoECPB.setFloat("m3_hit", loop, bECPB.getFloat("M3_hit")[loop]);
+                hipoECPB.setFloat("m4_hit", loop, bECPB.getFloat("M4_hit")[loop]);
                 hipoECPB.setFloat("chi2", loop, bECPB.getFloat("Chi2EC") [loop]);
+                hipoECPB.setInt("innstr", loop, bECPB.getInt("InnStr")[loop]);
+                hipoECPB.setInt("outstr", loop, bECPB.getInt("OutStr")[loop]);
+                hipoECPB.setInt("status", loop, bECPB.getInt("Status")[loop]);
             }
             this.hipoDataBanks.put("ECPB", hipoECPB);
             //banklist.add(hipoECPB);
@@ -212,7 +244,9 @@ public class Bos2HipoEventBank {
             for(int loop = 0; loop < rows; loop++){
                 int scht = bLCPB.getInt("ScHt")[loop];
                 int sector = (int) scht/100;
+                int lchit_id = scht - sector;
                 hipoLCPB.setByte("sector", loop, (byte) sector);
+                hipoLCPB.setByte("hit_id", loop, (byte) lchit_id);
                 hipoLCPB.setFloat("etot", loop, bLCPB.getFloat("Etot")[loop]);
                 hipoLCPB.setFloat("ein" , loop, bLCPB.getFloat("Ein")[loop]);
                 hipoLCPB.setFloat("time", loop, bLCPB.getFloat("Time") [loop]);
@@ -221,6 +255,7 @@ public class Bos2HipoEventBank {
                 hipoLCPB.setFloat("y", loop, bLCPB.getFloat("Y") [loop]);
                 hipoLCPB.setFloat("z", loop, bLCPB.getFloat("Z") [loop]);
                 hipoLCPB.setFloat("chi2", loop, bLCPB.getFloat("Chi2LC") [loop]);
+                hipoLCPB.setInt("status", loop, bLCPB.getInt("Status") [loop]);
             }
             this.hipoDataBanks.put("LCPB", hipoLCPB);
             //banklist.add(hipoECPB);
@@ -232,15 +267,18 @@ public class Bos2HipoEventBank {
             for(int loop = 0; loop < rows; loop++){
                 int sector = bSCPB.getInt("ScPdHt")[loop]/10000;
                 int paddle = bSCPB.getInt("ScPdHt")[loop]/100 - sector*100;
+                int hit_id = bSCPB.getInt("ScPdHt")[loop] - sector - paddle;
                 //System.err.println(" " + bSCPB.getInt("ScPdHt")[loop] +
                 //        "  sector = " + sector + " " + paddle);
                 //int paddle = bSCPB.getInt("ScPdHt")[loop]/10000;
                 hipoSCPB.setByte("sector", loop, (byte) sector);
                 hipoSCPB.setByte("paddle", loop, (byte) paddle);
+                hipoSCPB.setByte("hit_id", loop, (byte) hit_id);
                 hipoSCPB.setFloat("edep", loop, bSCPB.getFloat("Edep") [loop]);
                 hipoSCPB.setFloat("time", loop, bSCPB.getFloat("Time") [loop]);
                 hipoSCPB.setFloat("path", loop, bSCPB.getFloat("Path") [loop]);
                 hipoSCPB.setFloat("chi2", loop, bSCPB.getFloat("Chi2SC") [loop]);
+                hipoSCPB.setInt("status", loop, bSCPB.getInt("Status") [loop]);
             }
             this.hipoDataBanks.put("SCPB", hipoSCPB);
         }
@@ -251,9 +289,12 @@ public class Bos2HipoEventBank {
             DataBank hipoCCPB = hipoEvent.createBank("DETECTOR::ccpb", rows);
             for(int loop = 0; loop < rows; loop++){
                 int sector = bCCPB.getInt("ScSgHt")[loop]/100;
+                int cluster = bCCPB.getInt("ScSgHt")[loop] - sector*100;
                 //int paddle = bSCPB.getInt("ScPdHt")[loop]/10000;
                 hipoCCPB.setByte("sector", loop, (byte) sector);
+                hipoCCPB.setInt("clusterid", loop, cluster);
                 hipoCCPB.setFloat("nphe", loop, bCCPB.getFloat("Nphe") [loop]);
+                hipoCCPB.setInt("status", loop, bCCPB.getInt("Status") [loop]);
                 hipoCCPB.setFloat("time", loop, bCCPB.getFloat("Time") [loop]);
                 hipoCCPB.setFloat("path", loop, bCCPB.getFloat("Path") [loop]);
                 hipoCCPB.setFloat("chi2", loop, bCCPB.getFloat("Chi2CC") [loop]);
