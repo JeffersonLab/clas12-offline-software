@@ -104,7 +104,7 @@ public class HelixFitTest {
             chi2 += chi2term;
             if(chi2term > chi2termthreshold) hitstoremove.add(hit); //if the hit messes up chi2 too much we are going to remove it
         }
-        if((hitstoremove.size()/numhits) * 100 > chi2percthreshold) return; //if too many hits are removed we delete the track
+        if(((double)hitstoremove.size()/(double)numhits) * 100 > chi2percthreshold) return; //if too many hits are removed we delete the track
         if(hitstoremove.size() > 0 && iter == 0){ //make a new track containing the hits leftover and fit it again
             List<RecoHitVector> newtrack = new ArrayList<>();
             for(int i = 0; i < numhits; i++){
