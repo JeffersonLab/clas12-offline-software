@@ -80,15 +80,26 @@ public class TruthMatch extends ReconstructionEngine {
          * cluster to which the hit belogs to - pindex : pindex of the particle
          * that the current cluster belongs to.
          */
-        Map< Short, List<RecHit>> ecalHits = getECalHits(event, mchits.get((byte)DetectorType.ECAL.getDetectorId()));
+        Map< Short, List<RecHit>> ecalHits = getECalHits(event, mchits.get((byte) DetectorType.ECAL.getDetectorId()));
 
         List<RecCluster> ecalClusters = getECalClusters(event);
 
+        
+        /**
+         * Getting FT Hits and clusters
+         */
+        
+        Map< Short, List<RecHit>> ftCalHits = getFTCalHits(event, mchits.get((byte) DetectorType.FTCAL.getDetectorId()));
+        List<RecCluster> ftCalClusters = getFTCalClusters(event);
+        
         /**
          * Matchingg clusters to MCParticles
          */
         MatchClasters(ecalClusters, ecalHits, mchits.get((byte) DetectorType.ECAL.getDetectorId()));
+        MatchClasters(ftCalClusters, ftCalHits, mchits.get((byte) DetectorType.FTCAL.getDetectorId()));
 
+        
+        
         /**
          * Adding all clusters together
          */
@@ -99,6 +110,12 @@ public class TruthMatch extends ReconstructionEngine {
          */
         if (ecalClusters != null) {
             allCls.addAll(ecalClusters);
+        }
+        /**
+         * Adding FTCal clusters
+         */
+        if (ftCalClusters != null) {
+            allCls.addAll(ftCalClusters);
         }
 
         Map<Short, List<RecCluster>> clsPerMCp = mapClustersToMCParticles(mcp.keySet(), allCls);
@@ -168,10 +185,10 @@ public class TruthMatch extends ReconstructionEngine {
             mcotid = -1;
         }
         public short id;            // cluster id
-        public short mcotid;         // mc track id
+        public short mcotid;        // mc track id
         public short rectid;        // rec track id
         public short pindex;        // index of the rec particle
-        public int nHitMatched;   // number of hits MC matched
+        public int nHitMatched;     // number of hits MC matched
         public short size;          // number of hits
         public byte detector;
         public byte layer;
@@ -227,6 +244,7 @@ public class TruthMatch extends ReconstructionEngine {
     private final int BSTID = 2;
     private final int DCID = 6;
     private final int ECALID = 7;
+    private final int FTCALID = 10;
 
     private final int PHOTON_ID = 22;
 
@@ -325,6 +343,13 @@ public class TruthMatch extends ReconstructionEngine {
         return dmchits;
     }
 
+    /**
+     *
+     * @param event DataEvent
+     * @param mchitsInECal MCHits in ECal
+     * @return Map<clusterID, List<RecHit>>, Map, where the Key is the
+     * clusterID, and the value is a list of hits having the same clusterID
+     */
     Map< Short, List<RecHit>> getECalHits(DataEvent event, Map<Integer, MCHit> mchitsInECal) {
 
         /**
@@ -335,16 +360,16 @@ public class TruthMatch extends ReconstructionEngine {
          * <cId, pindex>.
          */
         Map< Short, List<RecHit>> recHits = new HashMap<>();
-        if( mchitsInECal == null ){
+        if (mchitsInECal == null) {
             /**
-             * In case if no MC hit present in the ECal, then don't proceed,
-             * as we need only hits that are associated to an MC hit
+             * In case if no MC hit present in the ECal, then don't proceed, as
+             * we need only hits that are associated to an MC hit
              */
             return recHits;
         }
 
         /**
-         * Check if two necessary banks existm otherwise will return null
+         * Check if two necessary banks exist otherwise will return null
          */
         if (event.hasBank("ECAL::hits") == false) {
             return null;
@@ -375,7 +400,64 @@ public class TruthMatch extends ReconstructionEngine {
 
             curHit.id = hitsBank.getShort("id", ihit) - 1;   // -1 for starting from 0
             curHit.cid = (short) (hitsBank.getShort("clusterId", ihit) - 1);  // -1 for starting from 0
-            if (curHit.cid == -2 || !mchitsInECal.containsKey(curHit.id) ) {
+            if (curHit.cid == -2 || !mchitsInECal.containsKey(curHit.id)) {
+                continue; // The hit is not part of any cluster, or the hit it's corresponding MC hit is ignored
+            }
+            //System.out.println("Inside the hit loop:  the cid of the hit is " + curHit.cid);
+            curHit.pindex = clId2Pindex.get(curHit.cid);
+            curHit.detector = (byte) DetectorType.ECAL.getDetectorId();
+
+            if (recHits.get(curHit.cid) == null) {
+                recHits.put(curHit.cid, new ArrayList<>());
+            }
+
+            recHits.get(curHit.cid).add(curHit);
+        }
+
+        return recHits;
+    }
+
+    Map< Short, List<RecHit>> getFTCalHits(DataEvent event, Map<Integer, MCHit> mchitsInFTCal) {
+        Map< Short, List<RecHit>> recHits = new HashMap<>();
+
+        if (mchitsInFTCal == null) {
+            /**
+             * In case if no MC hit present in the FTCal, then don't proceed, as
+             * we need only hits that are associated to an MC hit
+             */
+            return recHits;
+        }
+
+        /**
+         * Check if two necessary banks exist otherwise will return null
+         */
+        if (event.hasBank("FTCAL::hits") == false) {
+            return null;
+        }
+
+        if (event.hasBank("FTCAL::clusters") == false) {
+            return null;
+        }
+
+        Map<Short, Short> clId2Pindex = new HashMap<>();
+        DataBank RecFTBank = event.getBank("REC::ForwardTagger");
+
+        for (int iFT = 0; iFT < RecFTBank.rows(); iFT++) {
+
+            Short pindex = RecFTBank.getShort("pindex", iFT);
+            Short index = RecFTBank.getShort("index", iFT);
+
+            clId2Pindex.put(index, pindex);
+        }
+
+        DataBank hitsBank = event.getBank("FTCAL::hits");
+
+        for (int ihit = 0; ihit < hitsBank.rows(); ihit++) {
+            RecHit curHit = new RecHit();
+
+            curHit.id = hitsBank.getShort("hitID", ihit);   // Not removing 1, as hitID start from 0
+            curHit.cid = (short) (hitsBank.getShort("clusterID", ihit) - 1);  // -1 for starting from 0
+            if (curHit.cid == -2 || !mchitsInFTCal.containsKey(curHit.id)) {
                 continue; // The hit is not part of any cluster, or the hit it's corresponding MC hit is ignored
             }
             //System.out.println("Inside the hit loop:  the cid of the hit is " + curHit.cid);
@@ -427,6 +509,48 @@ public class TruthMatch extends ReconstructionEngine {
         return cls;
     }
 
+    List<RecCluster> getFTCalClusters(DataEvent event) {
+        List<RecCluster> cls = new ArrayList<>();
+
+        /**
+         * We need the bank REC::ForwardTagger, so as a first thing we will check
+         * if the bank exist
+         */
+        if (event.hasBank("REC::ForwardTagger") == false) {
+            return cls;
+        }
+
+        DataBank recFTCal = event.getBank("REC::ForwardTagger");
+        
+        for (int iCl = 0; iCl < recFTCal.rows(); iCl++) {
+            
+            /**
+             * Both FT clusters and FT hodo hits are in the same REC::ForwardTagger bank
+             */
+         
+            if( recFTCal.getByte("detector", iCl) != DetectorType.FTCAL.getDetectorId() ){
+                continue;
+            }
+            
+            RecCluster curCl = new RecCluster();
+            
+            curCl.id = recFTCal.getShort("index", iCl);
+            curCl.pindex = recFTCal.getShort("pindex", iCl);
+            curCl.detector = recFTCal.getByte("detector", iCl);
+            curCl.layer = recFTCal.getByte("layer", iCl);
+            curCl.sector = -1; // No concept of sector for FT
+            curCl.energy = recFTCal.getFloat("energy", iCl);
+            curCl.size = recFTCal.getShort("size", iCl);
+
+            curCl.rectid = -1;  // We will not use ECal clusters for tracks.
+            curCl.superlayer = -1; // Not applicable for ECal clusters
+
+            cls.add(curCl);
+        }
+        
+        return cls;
+    }
+
     /**
      *
      * @param cls: List of clusters for a given detector
@@ -441,7 +565,6 @@ public class TruthMatch extends ReconstructionEngine {
             return;
         }
 
-        int ind = 0;
         for (RecCluster cl : cls) {
 
             /**
