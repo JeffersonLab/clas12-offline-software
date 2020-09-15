@@ -84,22 +84,23 @@ public class TruthMatch extends ReconstructionEngine {
 
         List<RecCluster> ecalClusters = getECalClusters(event);
 
-        
         /**
          * Getting FT Hits and clusters
          */
-        
         Map< Short, List<RecHit>> ftCalHits = getFTCalHits(event, mchits.get((byte) DetectorType.FTCAL.getDetectorId()));
         List<RecCluster> ftCalClusters = getFTCalClusters(event);
-        
+
+//        if (ftCalHits != null) {
+//            System.out.println("=====>>> Size of FTCal Hits is " + ftCalHits.size());
+//        }
+//        System.out.println("=====>>> Size of FTClusters is " + ftCalClusters.size());
+
         /**
          * Matchingg clusters to MCParticles
          */
         MatchClasters(ecalClusters, ecalHits, mchits.get((byte) DetectorType.ECAL.getDetectorId()));
         MatchClasters(ftCalClusters, ftCalHits, mchits.get((byte) DetectorType.FTCAL.getDetectorId()));
 
-        
-        
         /**
          * Adding all clusters together
          */
@@ -448,6 +449,8 @@ public class TruthMatch extends ReconstructionEngine {
             Short index = RecFTBank.getShort("index", iFT);
 
             clId2Pindex.put(index, pindex);
+
+            //System.out.println("Map clId2Pindex:   index = " + index + "pindex = " + pindex);
         }
 
         DataBank hitsBank = event.getBank("FTCAL::hits");
@@ -461,6 +464,16 @@ public class TruthMatch extends ReconstructionEngine {
                 continue; // The hit is not part of any cluster, or the hit it's corresponding MC hit is ignored
             }
             //System.out.println("Inside the hit loop:  the cid of the hit is " + curHit.cid);
+
+            /**
+             * For FTCal not necessarily all clusters are associated to a rec
+             * particle, that is why we will check, if the clId2Pindex contains
+             * the given cluster
+             */
+            if (!clId2Pindex.containsKey(curHit.cid)) {
+                continue;
+            }
+
             curHit.pindex = clId2Pindex.get(curHit.cid);
             curHit.detector = (byte) DetectorType.ECAL.getDetectorId();
 
@@ -513,27 +526,27 @@ public class TruthMatch extends ReconstructionEngine {
         List<RecCluster> cls = new ArrayList<>();
 
         /**
-         * We need the bank REC::ForwardTagger, so as a first thing we will check
-         * if the bank exist
+         * We need the bank REC::ForwardTagger, so as a first thing we will
+         * check if the bank exist
          */
         if (event.hasBank("REC::ForwardTagger") == false) {
             return cls;
         }
 
         DataBank recFTCal = event.getBank("REC::ForwardTagger");
-        
+
         for (int iCl = 0; iCl < recFTCal.rows(); iCl++) {
-            
+
             /**
-             * Both FT clusters and FT hodo hits are in the same REC::ForwardTagger bank
+             * Both FT clusters and FT hodo hits are in the same
+             * REC::ForwardTagger bank
              */
-         
-            if( recFTCal.getByte("detector", iCl) != DetectorType.FTCAL.getDetectorId() ){
+            if (recFTCal.getByte("detector", iCl) != DetectorType.FTCAL.getDetectorId()) {
                 continue;
             }
-            
+
             RecCluster curCl = new RecCluster();
-            
+
             curCl.id = recFTCal.getShort("index", iCl);
             curCl.pindex = recFTCal.getShort("pindex", iCl);
             curCl.detector = recFTCal.getByte("detector", iCl);
@@ -547,7 +560,7 @@ public class TruthMatch extends ReconstructionEngine {
 
             cls.add(curCl);
         }
-        
+
         return cls;
     }
 
@@ -728,6 +741,9 @@ public class TruthMatch extends ReconstructionEngine {
                                 incrementMap(matched_ECcounts, curCl.pindex);
                             }
                             break;
+                        case FTCALID:
+                            incrementMap(matched_FTCalcounts, curCl.pindex);
+
                         case BMTID:
                             incrementMap(matched_BMTcounts, curCl.pindex);
                             break;
@@ -745,7 +761,8 @@ public class TruthMatch extends ReconstructionEngine {
                     match.frac = (float) (match.nClsInRec / match.nclusters);
                     //if (0 < matched_PCalcounts.get(match.pindex) || 0 < matched_ECcounts.get(match.pindex)) {
                     if ((matched_PCalcounts.containsKey(match.pindex) && matched_PCalcounts.get(match.pindex) > 0)
-                            || (matched_ECcounts.containsKey(match.pindex) && 0 < matched_ECcounts.get(match.pindex))) {
+                            || (matched_ECcounts.containsKey(match.pindex) && 0 < matched_ECcounts.get(match.pindex))
+                            || (matched_FTCalcounts.containsKey(match.pindex) && matched_FTCalcounts.get(match.pindex) > 0)) {
                         match.reconstructable = 1;
                     } else {
                         match.reconstructable = 0;
