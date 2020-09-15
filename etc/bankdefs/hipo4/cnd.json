@@ -8,6 +8,7 @@
             {"name":"id",               "type":"S", "info":"id of the hit"},
             {"name":"status",           "type":"S", "info":"status of the hit"},
             {"name":"trkID",            "type":"S", "info":"match CVT track index"},
+            {"name":"clusterid",        "type":"S", "info":"pointer to the cluster"},
             {"name":"sector",           "type":"B", "info":"sector of CND"},
             {"name":"layer",            "type":"B", "info":"panel id of CND"},
             {"name":"component",        "type":"S", "info":"paddle id of CND"},
