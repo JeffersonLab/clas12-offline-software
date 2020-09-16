@@ -31,12 +31,16 @@
         <section name = "dgtz" tag = "2102" num = "0" info = "True Values">
             <column name = "sector"    num = "1"  type = "int32"  info = "sector number"/>
             <column name = "layer"     num = "2"  type = "int32"  info = "layer number (1-6)"/>
-            <column name = "component" num = "3"  type = "int32"  info = "component number"/>
-            <column name = "side"      num = "4"  type = "int32"  info = "PMT side (0 Left, 1 Right)"/>
-            <column name = "ADC"       num = "5"  type = "int32"  info = "ADC"/>
-            <column name = "amplitude" num = "6"  type = "int32"  info = "ADC amplitude"/>
-            <column name = "ADCtime"   num = "7"  type = "float64"  info = "time from ADC"/>
-            <column name = "TDC"       num = "8"  type = "int32"  info = "TDC"/>
+	    <column name = "component" num = "3"  type = "int32"  info = "component number"/>
+
+            <column name = "ADCL"       num = "4"  type = "int32"  info = "ADC"/>
+            <column name = "amplitudeL" num = "5"  type = "int32"  info = "ADC amplitude"/>
+            <column name = "ADCtimeL"   num = "6"  type = "float64"  info = "time from ADC"/>
+            <column name = "TDCL"       num = "7"  type = "int32"  info = "TDC"/>
+            <column name = "ADCR"       num = "8"  type = "int32"  info = "ADC"/>
+            <column name = "amplitudeR" num = "9"  type = "int32"  info = "ADC amplitude"/>
+            <column name = "ADCtimeR"   num = "10"  type = "float64"  info = "time from ADC"/>
+            <column name = "TDCR"       num = "11"  type = "int32"  info = "TDC"/>
             <column name = "hitn"      num = "99" type = "int32"  info = "hit number"/>
         </section>
     </bank>
