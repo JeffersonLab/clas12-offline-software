@@ -489,31 +489,55 @@ public class EvioHipoEvent4 {
         if(evioEvent.hasBank("BAND::dgtz")==true){
             EvioDataBank evioBank = (EvioDataBank) evioEvent.getBank("BAND::dgtz");
             int rows = evioBank.rows();
-            Bank hipoADC = new Bank(schemaFactory.getSchema("BAND::adc"), rows);
-            Bank hipoTDC = new Bank(schemaFactory.getSchema("BAND::tdc"), rows);            
+            Bank hipoADC = new Bank(schemaFactory.getSchema("BAND::adc"), rows*2);
+            Bank hipoTDC = new Bank(schemaFactory.getSchema("BAND::tdc"), rows*2);            
+	    //System.out.println("In band DGTZ\n");
+	    //evioBank.show();
+            for(int index = 0; index < evioBank.rows(); index++){
+		int i = index*2;
 
-            for(int i = 0; i < evioBank.rows(); i++){
-            	
-                hipoADC.putByte("sector", i,      (byte)  evioBank.getInt("sector",i));
-                hipoADC.putByte("layer",  i,      (byte)  evioBank.getInt("layer",i));
-                hipoADC.putShort("component",  i, (short) evioBank.getInt("component",i));
-                hipoADC.putByte("order", i,(byte) evioBank.getInt("order", i));
-                hipoADC.putInt("ADC", i, evioBank.getInt("ADC", i));
-                hipoADC.putInt("amplitude", i, evioBank.getInt("amplitude", i));
-                //Time channel from FADC 
-                hipoADC.putFloat("time", i, evioBank.getFloat("ADCtime", i));
-                hipoADC.putShort("ped",  i, (short) 0);
-                
-                hipoTDC.putByte("sector", i,      (byte)  evioBank.getInt("sector",i));
-                hipoTDC.putByte("layer",  i,      (byte)  evioBank.getInt("layer",i));
-                hipoTDC.putShort("component",  i, (short) evioBank.getInt("component",i));
-                hipoTDC.putByte("order", i,(byte) (evioBank.getInt("order", i)+2));
-                //TDC channel here. Conversion from ns in GEMC and to ns in BAND reconstruction
-                hipoTDC.putInt("TDC", i, evioBank.getInt("TDC", i));
-                
+		// For L PMT:
+                hipoADC .putByte("sector", 	i,      (byte)  evioBank.getInt("sector",index));
+                hipoADC .putByte("layer",  	i,      (byte)  evioBank.getInt("layer",index));
+                hipoADC .putShort("component",  i, 	(short) evioBank.getInt("component",index));
+                hipoADC .putByte("order", 	i,	(byte) 	0);
+                hipoADC .putInt("ADC", 		i, 	evioBank.getInt("ADCL", index));
+                hipoADC .putInt("amplitude", 	i, 	evioBank.getInt("amplitudeL", index));
+                hipoADC .putFloat("time", 	i, 	(float) evioBank.getDouble("ADCtimeL", index));
+                hipoADC .putShort("ped",  	i, 	(short) 0);
+
+                hipoTDC .putByte("sector", 	i,      (byte)  evioBank.getInt("sector",index));
+                hipoTDC .putByte("layer",  	i,      (byte)  evioBank.getInt("layer",index));
+                hipoTDC .putShort("component",  i, 	(short) evioBank.getInt("component",index));
+                hipoTDC .putByte("order", 	i,	(byte)  2);
+                hipoTDC .putInt("TDC", 		i, 	evioBank.getInt("TDCL", index));
+
+		// For R PMT:
+                hipoADC .putByte("sector", 	i+1,      (byte)  evioBank.getInt("sector",index));
+                hipoADC .putByte("layer",  	i+1,      (byte)  evioBank.getInt("layer",index));
+                hipoADC .putShort("component",  i+1, 	(short) evioBank.getInt("component",index));
+                hipoADC .putByte("order", 	i+1,	(byte) 	1);
+                hipoADC .putInt("ADC", 		i+1, 	evioBank.getInt("ADCR", index));
+                hipoADC .putInt("amplitude", 	i+1, 	evioBank.getInt("amplitudeR", index));
+                hipoADC .putFloat("time", 	i+1, 	(float) evioBank.getDouble("ADCtimeR", index));
+                hipoADC .putShort("ped",  	i+1, 	(short) 0);
+
+                hipoTDC .putByte("sector", 	i+1,      (byte)  evioBank.getInt("sector",index));
+                hipoTDC .putByte("layer",  	i+1,      (byte)  evioBank.getInt("layer",index));
+                hipoTDC .putShort("component",  i+1, 	(short) evioBank.getInt("component",index));
+                hipoTDC .putByte("order", 	i+1,	(byte)  3);
+                hipoTDC .putInt("TDC", 		i+1, 	evioBank.getInt("TDCR", index));
             }
             hipoEvent.write(hipoADC);
             hipoEvent.write(hipoTDC);
+
+
+
+	    //System.out.println("ADC");
+	    //hipoADC.show();
+	    //System.out.println("TDC");
+	    //hipoTDC.show();
+	    
         }
     }
     
