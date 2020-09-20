@@ -115,8 +115,8 @@ public class Tag1ToEvent {
                 else {
                     goodCharge++;
                     if (doBeamCharge) {
-                        recEventBank.putFloat("beamCharge",0,ds.getBeamChargeGated());
-                        recEventBank.putDouble("liveTime",0,ds.getLivetime());
+                        recEventBank.putFloat("beamCharge",0, (float) ds.dsc2.getBeamChargeGated());
+                        recEventBank.putDouble("liveTime",0,ds.dsc2.getLivetime());
                     }
                 }
 

@@ -38,31 +38,27 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class DaqScalers {
 
-    private float beamCharge=0;
-    private float beamChargeGated=0;
-    private float livetime=0;
-    private long timestamp   = 0;
     public Dsc2RawReading dsc2=null;
     public StruckRawReading struck=null;
-    public void setTimestamp(long timestamp) { this.timestamp=timestamp; }
-    private void setBeamCharge(float q) { this.beamCharge=q; }
-    private void setBeamChargeGated(float q) { this.beamChargeGated=q; }
-    private void setLivetime(float l) { this.livetime=l; }
-    public float getBeamCharge() { return beamCharge; }
-    public float getBeamChargeGated() { return beamChargeGated; }
-    public float getLivetime()   { return livetime; }
-    public long getTimestamp() { return timestamp; }
-    public void show() { System.out.println("BCG=%.3f   LT=%.3f"); }
 
+    private long timestamp=0;
+    public void setTimestamp(long timestamp) { this.timestamp=timestamp; }
+    public long getTimestamp(){ return this.timestamp; }
+
+    @Deprecated public double getBeamChargeGated() { return this.dsc2.getBeamChargeGated(); }
+    @Deprecated public double getBeamCharge() { return this.dsc2.getBeamCharge(); }
+    @Deprecated public double getLivetime() { return this.struck.getLivetime(); }
+    
     /**
     * @param runScalerBank HIPO RUN::scaler bank
     */
     public static DaqScalers create(Bank runScalerBank) {
         DaqScalers ds=new DaqScalers();
+        ds.dsc2=new Dsc2RawReading();
         for (int ii=0; ii<runScalerBank.getRows(); ii++) {
-            ds.livetime=runScalerBank.getFloat("livetime", ii);
-            ds.beamCharge=runScalerBank.getFloat("fcup",ii);
-            ds.beamChargeGated=runScalerBank.getFloat("fcupgated",ii);
+            ds.dsc2.setLivetime(runScalerBank.getFloat("livetime", ii));
+            ds.dsc2.setBeamCharge(runScalerBank.getFloat("fcup",ii));
+            ds.dsc2.setBeamChargeGated(runScalerBank.getFloat("fcupgated",ii));
             break; 
         }
         return ds;
@@ -73,35 +69,43 @@ public class DaqScalers {
     * @param fcupTable /runcontrol/fcup IndexedTable from CCDB
     * @param seconds duration between run start and current event
     */
-    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,double seconds) {
+    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable,double seconds) {
 
         StruckRawReading struck = new StruckRawReading(rawScalerBank);
         Dsc2RawReading dsc2 = new Dsc2RawReading(rawScalerBank);
 
-        // retrieve fcup calibrations:
-        final double fcup_slope  = fcupTable.getDoubleValue("slope",0,0,0);
-        final double fcup_offset = fcupTable.getDoubleValue("offset",0,0,0);
-        final double fcup_atten  = fcupTable.getDoubleValue("atten",0,0,0);
+        // retrieve fcup/slm calibrations:
+        final double fcup_slope  = fcupTable.getDoubleValue("slope",0,0,0);  // Hz/nA
+        final double fcup_offset = fcupTable.getDoubleValue("offset",0,0,0); // Hz
+        final double fcup_atten  = fcupTable.getDoubleValue("atten",0,0,0);  // attenuation
+        final double slm_slope   = slmTable.getDoubleValue("slope",0,0,0);   // Hz/nA
+        final double slm_offset  = slmTable.getDoubleValue("offset",0,0,0);  // Hz
+        final double slm_atten   = slmTable.getDoubleValue("atten",0,0,0);   // attenuation
+
+        if (struck.getClock() > 0 && struck.getGatedClock()>0) {
+            double q  = (double)(struck.getSlm()      - slm_offset * struck.getClockSeconds() );
+            double qg = (double)(struck.getGatedSlm() - slm_offset * struck.getGatedClockSeconds() );
+            struck.setBeamChargeSLM(q * slm_atten / slm_slope);
+            struck.setBeamChargeGatedSLM(qg * slm_atten / slm_slope);
+            struck.setLivetime((double)struck.getGatedClock() / struck.getClock());
+        }
 
         if (dsc2.getClock() > 0) {
+            double live = (double)dsc2.getGatedSlm() / dsc2.getSlm();
+            double q  = (double)(dsc2.getFcup()      - fcup_offset * seconds );
+            double qg = (double)(dsc2.getGatedFcup() - fcup_offset * seconds * live);
+            dsc2.setBeamCharge(q * fcup_atten / fcup_slope);
+            dsc2.setBeamChargeGated(qg * fcup_atten / fcup_slope);
+            dsc2.setLivetime(struck.getClock()>0?(double)struck.getGatedClock()/struck.getClock():-1);
+        }
 
-            float live = (float)dsc2.getGatedSlm() / dsc2.getSlm();
-            float q  = (float)(dsc2.getFcup()      - fcup_offset * seconds );
-            float qg = (float)(dsc2.getGatedFcup() - fcup_offset * seconds * live);
-            q  *= fcup_atten / fcup_slope;
-            qg *= fcup_atten / fcup_slope;
-            float l = -1;
-            if (struck.getClock()>0) {
-                l = (float)struck.getGatedClock() / struck.getClock();
-            }
+        if (dsc2.getClock()>0 || struck.getClock()>0) {
             DaqScalers ds=new DaqScalers();
-            ds.setBeamCharge(q);
-            ds.setBeamChargeGated(qg);
-            ds.setLivetime(l);
             ds.dsc2=dsc2;
             ds.struck=struck;
             return ds;
         }
+
         return null;
     }
 
@@ -111,9 +115,9 @@ public class DaqScalers {
     * @param rawScalerBank HIPO RAW::scaler bank
     * @param fcupTable /runcontrol/fcup IndexedTable from CCDB
     */
-    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable) {
+    public static DaqScalers create(Bank rawScalerBank,IndexedTable fcupTable,IndexedTable slmTable) {
         Dsc2RawReading dsc2 = new Dsc2RawReading(rawScalerBank);
-        return create(rawScalerBank,fcupTable,dsc2.getGatedClockTime());
+        return create(rawScalerBank,fcupTable,slmTable,dsc2.getGatedClockSeconds());
     }
 
     private static class RawReading {
@@ -135,8 +139,25 @@ public class DaqScalers {
         public long   getGatedClock()  { return this.gatedClock; }
         public long   getGatedFcup()   { return this.gatedFcup; }
         public long   getGatedSlm()    { return this.gatedSlm; }
-        public double getClockTime()   { return this.clock / this.clockFreq; }
-        public double getGatedClockTime() { return this.gatedClock / this.clockFreq; }
+        public double getClockSeconds()   { return (double)this.clock / this.clockFreq; }
+        public double getGatedClockSeconds() { return (double)this.gatedClock / this.clockFreq; }
+       
+        // not really "raw" anymore:
+        private double beamCharge=0;
+        private double beamChargeGated=0;
+        private double beamChargeSLM=0;
+        private double beamChargeGatedSLM=0;
+        private double livetime=0;
+        protected void setBeamCharge(double q) { this.beamCharge=q; }
+        protected void setBeamChargeGated(double q) { this.beamChargeGated=q; }
+        protected void setBeamChargeSLM(double q) { this.beamChargeSLM=q; }
+        protected void setBeamChargeGatedSLM(double q) { this.beamChargeGatedSLM=q; }
+        protected void setLivetime(double l) { this.livetime=l; }
+        public double getBeamCharge() { return beamCharge; }
+        public double getBeamChargeGated() { return beamChargeGated; }
+        public double getLivetime()   { return livetime; }
+        public double getBeamChargeSLM() { return beamChargeSLM; }
+        public double getBeamChargeGatedSLM() { return beamChargeGatedSLM; }
     }
 
     public static class StruckRawReading extends RawReading {
@@ -163,6 +184,8 @@ public class DaqScalers {
         private static final int CHAN_FCUP_SETTLE=32;
         private static final int CHAN_SLM_SETTLE=33;
         private static final int CHAN_CLOCK_SETTLE=34;
+
+        public StruckRawReading() {}
 
         public StruckRawReading(Bank bank) {
 
@@ -227,6 +250,8 @@ public class DaqScalers {
         private static final int CHAN_FCUP=48;
         private static final int CHAN_SLM=49;
         private static final int CHAN_CLOCK=50;
+
+        public Dsc2RawReading() {}
 
         public Dsc2RawReading(Bank bank) {
 

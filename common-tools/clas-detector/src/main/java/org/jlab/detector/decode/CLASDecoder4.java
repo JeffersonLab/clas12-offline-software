@@ -564,7 +564,7 @@ public class CLASDecoder4 {
      *
      * FIXME:  refactor this out more cleanly
      */
-    public Bank createReconScalerBank(Event event){
+    public Bank[] createReconScalerBanks(Event event){
 
         // abort if run number corresponds to simulation:
         if (this.detectorDecoder.getRunNumber() < 1000) return null;
@@ -581,9 +581,11 @@ public class CLASDecoder4 {
         event.read(rawScalerBank);
         if (configBank.getRows()<1 || rawScalerBank.getRows()<1) return null;
 
-        // retrieve fcup calibrations from CCDB:
+        // retrieve fcup/slm calibrations from slm:
         IndexedTable fcupTable = this.detectorDecoder.scalerManager.
                 getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/fcup");
+        IndexedTable slmTable = this.detectorDecoder.scalerManager.
+                getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/slm");
 
         // get unix event time (in seconds), and convert to Java's date (via milliseconds):
         Date uet=new Date(configBank.getInt("unixtime",0)*1000L);
@@ -609,15 +611,25 @@ public class CLASDecoder4 {
         final double seconds = s2<s1 ? s2+60*60*24-s1 : s2-s1;
 
         // interpret/calibrate RAW::scaler into RUN::scaler:
-        DaqScalers r = DaqScalers.create(rawScalerBank,fcupTable,seconds);
+        DaqScalers r = DaqScalers.create(rawScalerBank,fcupTable,slmTable,seconds);
         if (r==null) return null;
 
         Bank scalerBank = new Bank(schemaFactory.getSchema("RUN::scaler"),1);
-        scalerBank.putFloat("fcup",0,r.getBeamCharge());
-        scalerBank.putFloat("fcupgated",0,r.getBeamChargeGated());
-        scalerBank.putFloat("livetime",0,r.getLivetime());
+        scalerBank.putFloat("fcup",0,(float)r.dsc2.getBeamCharge());
+        scalerBank.putFloat("fcupgated",0,(float)r.dsc2.getBeamChargeGated());
+        scalerBank.putFloat("livetime",0,(float)r.dsc2.getLivetime());
+        
+        Bank helicityBank = new Bank(schemaFactory.getSchema("HEL::scaler"),1);
+        helicityBank.putFloat("fcup",0,(float)r.struck.getBeamCharge());
+        helicityBank.putFloat("fcupgated",0,(float)r.struck.getBeamChargeGated());
+        helicityBank.putFloat("slm",0,(float)r.struck.getBeamChargeSLM());
+        helicityBank.putFloat("slmgated",0,(float)r.struck.getBeamChargeGatedSLM());
+        helicityBank.putFloat("clock",0,(float)r.struck.getClock());
+        helicityBank.putFloat("clockgated",0,(float)r.struck.getGatedClock());
+        helicityBank.putFloat("livetime",0,(float)r.struck.getLivetime());
 
-        return scalerBank;
+        Bank ret[] = {scalerBank,helicityBank};
+        return ret;
     }
     
     public Bank createBonusBank(){
@@ -807,10 +819,12 @@ public class CLASDecoder4 {
                         if(rawScaler.getRows()>0) scalerEvent.write(rawScaler);
                         if(rawRunConf.getRows()>0) scalerEvent.write(rawRunConf);
 
-                        Bank recScaler = decoder.createReconScalerBank(decodedEvent);
-                        if (recScaler != null) {
-                            decodedEvent.write(recScaler);
-                            scalerEvent.write(recScaler);
+                        Bank[] scalers = decoder.createReconScalerBanks(decodedEvent);
+                        if (scalers != null) {
+                            for (Bank b : scalers) {
+                                decodedEvent.write(b);
+                                scalerEvent.write(b);
+                            }
                         }
 
                         if (epics!=null) {
