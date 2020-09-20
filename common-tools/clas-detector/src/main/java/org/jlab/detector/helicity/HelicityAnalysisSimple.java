@@ -62,20 +62,13 @@ public class HelicityAnalysisSimple {
                 nevents++;
                
                 Bank flipBank=new Bank(schema.getSchema("HEL::flip"));
-                Bank rcfgBank=new Bank(schema.getSchema("RUN::config"));
                 Bank onliBank=new Bank(schema.getSchema("HEL::online"));
                
                 Event event=new Event();
                 reader.nextEvent(event);
                 event.read(flipBank);
-                event.read(rcfgBank);
                 event.read(onliBank);
            
-                // Get RUN::config.runno/timestamp for this event:
-                if (rcfgBank.getRows()<=0) continue; 
-                final long timestamp = rcfgBank.getLong("timestamp",0);
-                final int runno = rcfgBank.getInt("run",0);
-
                 // Get HEL::online.rawHelicity, the online, delay-corrected
                 // helicity for this event (if available):
                 //HelicityBit level3 = HelicityBit.UDF;
@@ -87,18 +80,18 @@ public class HelicityAnalysisSimple {
                 // based on the measured sequence.  If the timestamp is outside
                 // the measured range, or the measured sequence is corrupted between
                 // the timestamp and the delayed timestamp, this will return null.
-                final HelicityBit measured = seq.search(runno,timestamp);
+                final HelicityBit measured = seq.search(event);
 
                 // Same as previous, except assumes the pseudo-random generator's
                 // prediction, which allows to access states later than the measured
                 // range and cross intermediate sequence corruption.  However, it
                 // requires a 4x longer consecutive valid sequence for initialization
                 // than the non-generator methods.
-                //final HelicityBit lookedup = seq.searchGenerated(runno,timestamp);
+                //final HelicityBit lookedup = seq.searchGenerated(event);
                 
                 // Same as previous, except relies on TI clock synced with helicity clock
                 // instead of counting states:
-                //final HelicityBit predicted = seq.predictGenerated(runno,timestamp);
+                //final HelicityBit predicted = seq.predictGenerated(event);
                
                 if (measured==HelicityBit.UDF) {
                     nbad++;
