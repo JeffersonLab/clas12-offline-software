@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.detector.calib.utils.RCDBConstants;
-import org.jlab.detector.decode.DaqScalers;
+import org.jlab.detector.scalers.DaqScalers;
 import org.jlab.detector.helicity.HelicitySequenceManager;
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.Event;
