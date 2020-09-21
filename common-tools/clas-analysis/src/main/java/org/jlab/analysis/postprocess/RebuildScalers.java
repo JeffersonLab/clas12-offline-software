@@ -99,15 +99,15 @@ public class RebuildScalers {
                     // modify RUN::scaler:
                     runScalerBank.putFloat("fcupgated",0, (float) ds.dsc2.getBeamChargeGated());
                     runScalerBank.putFloat("fcup",0, (float) ds.dsc2.getBeamCharge());
-                    runScalerBank.putFloat("livetime",0, (float) ds.dsc2.getLivetime());
+                    runScalerBank.putFloat("livetime",0, (float) ds.struck.getLivetimeClock());
                     
                     // modify HEL::scaler:
                     helScalerBank.putFloat("fcup",0, (float) ds.struck.getBeamCharge());
                     helScalerBank.putFloat("fcupgated",0, (float) ds.struck.getBeamChargeGated());
                     helScalerBank.putFloat("slm",0, (float) ds.struck.getBeamChargeSLM());
                     helScalerBank.putFloat("slmgated",0, (float) ds.struck.getBeamChargeGatedSLM());
-                    helScalerBank.putFloat("clock",0,ds.struck.getClock());
-                    helScalerBank.putFloat("clockgated",0,ds.struck.getGatedClock());
+                    helScalerBank.putFloat("clock",0,(float)ds.struck.getClock());
+                    helScalerBank.putFloat("clockgated",0,(float)ds.struck.getGatedClock());
                     // the scaler banks always are delayed relative to helicity changes,
                     // so assign the previous helicity state to this scaler reading:
                     helScalerBank.putByte("helicity",0,helSeq.search(event,-1).value());
@@ -117,7 +117,6 @@ public class RebuildScalers {
                     else {
                         helScalerBank.putByte("helicityRaw",0,helSeq.search(event,-1).value());
                     }
-
 
                     // put modified HEL/RUN::scaler back in the event:
                     event.write(runScalerBank);

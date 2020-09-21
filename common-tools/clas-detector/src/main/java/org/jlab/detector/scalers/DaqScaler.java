@@ -51,6 +51,7 @@ public class DaqScaler {
      * @param liveSeconds 
      */
     protected void calibrate(IndexedTable fcupTable,IndexedTable slmTable,double seconds,double liveSeconds) {
+
         if (this.clock > 0) {
             final double fcup_slope  = fcupTable.getDoubleValue("slope",0,0,0);  // Hz/nA
             final double fcup_offset = fcupTable.getDoubleValue("offset",0,0,0); // Hz
@@ -59,18 +60,22 @@ public class DaqScaler {
             final double slm_offset  = slmTable.getDoubleValue("offset",0,0,0);  // Hz
             final double slm_atten   = slmTable.getDoubleValue("atten",0,0,0);   // attenuation
 
-            double q,qg;
-
-            q  = (double)this.slm      - slm_offset * seconds;
-            qg = (double)this.gatedSlm - slm_offset * liveSeconds;
+            double q  = (double)this.slm      - slm_offset * seconds;
+            double qg = (double)this.gatedSlm - slm_offset * liveSeconds;
             this.beamChargeSLM = q * slm_atten / slm_slope;
             this.beamChargeGatedSLM = qg * slm_atten / slm_slope;
             this.livetime = (double)this.gatedClock / this.clock;
 
-            q  = (double)this.fcup      - fcup_offset * seconds;
-            qg = (double)this.gatedFcup - fcup_offset * liveSeconds;
-            this.beamCharge = q * fcup_atten / fcup_slope;
-            this.beamChargeGated = qg * fcup_atten / fcup_slope;
+            if (fcup_atten<0 || fcup_slope<0) {
+                this.beamCharge = this.beamChargeSLM;
+                this.beamChargeGated = this.beamChargeGatedSLM;
+            }
+            else {
+                q  = (double)this.fcup      - fcup_offset * seconds;
+                qg = (double)this.gatedFcup - fcup_offset * liveSeconds;
+                this.beamCharge = q * fcup_atten / fcup_slope;
+                this.beamChargeGated = qg * fcup_atten / fcup_slope;
+            }
         }
     }
    

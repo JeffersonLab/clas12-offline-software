@@ -70,8 +70,7 @@
             {"name":"clockgated", "type":"F", "info":"Clock, DAQ-gated"},
             {"name":"clock",      "type":"F", "info":"Clock"},
             {"name":"helicity",   "type":"B", "info":"Helicity state, HWP-corrected"},
-            {"name":"helicityRaw","type":"B", "info":"Helicity state"},
-            {"name":"livetime",   "type":"F", "info":"DAQ livetime"}
+            {"name":"helicityRaw","type":"B", "info":"Helicity state"}
         ]
     }
 ]
