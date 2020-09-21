@@ -1,4 +1,4 @@
-package org.jlab.detector.decode;
+package org.jlab.detector.scalers;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -10,6 +10,7 @@ import org.jlab.jnp.hipo4.io.HipoReader;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
+import org.jlab.detector.scalers.DaqScalers;
 
 /**
  * For easy access to most recent scaler readout for any given event.

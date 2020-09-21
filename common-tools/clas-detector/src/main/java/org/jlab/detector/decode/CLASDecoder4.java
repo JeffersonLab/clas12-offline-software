@@ -5,6 +5,7 @@
  */
 package org.jlab.detector.decode;
 
+import org.jlab.detector.scalers.DaqScalers;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -617,7 +618,7 @@ public class CLASDecoder4 {
         Bank scalerBank = new Bank(schemaFactory.getSchema("RUN::scaler"),1);
         scalerBank.putFloat("fcup",0,(float)r.dsc2.getBeamCharge());
         scalerBank.putFloat("fcupgated",0,(float)r.dsc2.getBeamChargeGated());
-        scalerBank.putFloat("livetime",0,(float)r.dsc2.getLivetime());
+        scalerBank.putFloat("livetime",0,(float)r.struck.getLivetime());
         
         Bank helicityBank = new Bank(schemaFactory.getSchema("HEL::scaler"),1);
         helicityBank.putFloat("fcup",0,(float)r.struck.getBeamCharge());

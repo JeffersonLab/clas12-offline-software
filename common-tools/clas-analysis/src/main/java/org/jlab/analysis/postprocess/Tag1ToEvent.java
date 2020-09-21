@@ -11,8 +11,8 @@ import org.jlab.jnp.hipo4.io.HipoWriterSorted;
 
 import org.jlab.utils.system.ClasUtilsFile;
 
-import org.jlab.detector.decode.DaqScalers;
-import org.jlab.detector.decode.DaqScalersSequence;
+import org.jlab.detector.scalers.DaqScalers;
+import org.jlab.detector.scalers.DaqScalersSequence;
 
 import org.jlab.detector.helicity.HelicityBit;
 import org.jlab.detector.helicity.HelicitySequenceManager;
