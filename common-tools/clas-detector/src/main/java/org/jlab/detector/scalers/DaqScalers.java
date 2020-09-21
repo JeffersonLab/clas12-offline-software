@@ -45,10 +45,6 @@ public class DaqScalers {
     public void setTimestamp(long timestamp) { this.timestamp=timestamp; }
     public long getTimestamp(){ return this.timestamp; }
 
-    @Deprecated public double getBeamChargeGated() { return this.dsc2.getBeamChargeGated(); }
-    @Deprecated public double getBeamCharge() { return this.dsc2.getBeamCharge(); }
-    @Deprecated public double getLivetime() { return this.struck.getLivetime(); }
-    
     /**
     * @param runScalerBank HIPO RUN::scaler bank
     */

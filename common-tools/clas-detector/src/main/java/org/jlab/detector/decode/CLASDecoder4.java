@@ -615,7 +615,7 @@ public class CLASDecoder4 {
         Bank scalerBank = new Bank(schemaFactory.getSchema("RUN::scaler"),1);
         scalerBank.putFloat("fcup",0,(float)r.dsc2.getBeamCharge());
         scalerBank.putFloat("fcupgated",0,(float)r.dsc2.getBeamChargeGated());
-        scalerBank.putFloat("livetime",0,(float)r.struck.getLivetime());
+        scalerBank.putFloat("livetime",0,(float)r.struck.getLivetimeClock());
         
         Bank helicityBank = new Bank(schemaFactory.getSchema("HEL::scaler"),1);
         helicityBank.putFloat("fcup",0,(float)r.struck.getBeamCharge());
@@ -624,7 +624,6 @@ public class CLASDecoder4 {
         helicityBank.putFloat("slmgated",0,(float)r.struck.getBeamChargeGatedSLM());
         helicityBank.putFloat("clock",0,(float)r.struck.getClock());
         helicityBank.putFloat("clockgated",0,(float)r.struck.getGatedClock());
-        helicityBank.putFloat("livetime",0,(float)r.struck.getLivetime());
 
         Bank ret[] = {scalerBank,helicityBank};
         return ret;
