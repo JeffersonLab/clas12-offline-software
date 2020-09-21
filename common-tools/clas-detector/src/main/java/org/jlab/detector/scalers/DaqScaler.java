@@ -15,16 +15,18 @@ public class DaqScaler {
     protected long gatedClock=-1;   // counts
     protected long gatedSlm=-1;     // counts
 
-    public long   getClock()       { return this.clock; }
-    public long   getFcup()        { return this.fcup; }
-    public long   getSlm()         { return this.slm; }
-    public long   getGatedClock()  { return this.gatedClock; }
-    public long   getGatedFcup()   { return this.gatedFcup; }
-    public long   getGatedSlm()    { return this.gatedSlm; }
-    public double getClockSeconds()   { return (double)this.clock / this.clockFreq; }
-    public double getGatedClockSeconds() { return (double)this.gatedClock / this.clockFreq; }
+    public final long   getClock()       { return this.clock; }
+    public final long   getFcup()        { return this.fcup; }
+    public final long   getSlm()         { return this.slm; }
+    public final long   getGatedClock()  { return this.gatedClock; }
+    public final long   getGatedFcup()   { return this.gatedFcup; }
+    public final long   getGatedSlm()    { return this.gatedSlm; }
+    public final double getClockSeconds()   { return (double)this.clock / this.clockFreq; }
+    public final double getGatedClockSeconds() { return (double)this.gatedClock / this.clockFreq; }
+    public final double getLivetimeClock() { return (double)this.gatedClock / this.clock; }
+    public final double getLivetimeFcup() {return (double)this.gatedFcup / this.fcup; } 
+    public final double getLivetimeSLM() {return (double)this.gatedSlm / this.slm; } 
        
-    // not really "raw" anymore:
     protected double beamCharge=0;
     protected double beamChargeGated=0;
     protected double beamChargeSLM=0;
@@ -41,9 +43,15 @@ public class DaqScaler {
     public double getBeamChargeSLM() { return beamChargeSLM; }
     public double getBeamChargeGatedSLM() { return beamChargeGatedSLM; }
 
-    protected final void calibrate(IndexedTable fcupTable,IndexedTable slmTable,double seconds) {
-        if (this.clock > 0 && this.gatedClock>0) {
-                
+    /**
+     * Manually choose dwell and live-dwell times, e.g. if clock rolls over. 
+     * @param fcupTable
+     * @param slmTable
+     * @param seconds
+     * @param liveSeconds 
+     */
+    protected void calibrate(IndexedTable fcupTable,IndexedTable slmTable,double seconds,double liveSeconds) {
+        if (this.clock > 0) {
             final double fcup_slope  = fcupTable.getDoubleValue("slope",0,0,0);  // Hz/nA
             final double fcup_offset = fcupTable.getDoubleValue("offset",0,0,0); // Hz
             final double fcup_atten  = fcupTable.getDoubleValue("atten",0,0,0);  // attenuation
@@ -53,20 +61,25 @@ public class DaqScaler {
 
             double q,qg;
 
-            q  = this.slm      - slm_offset * seconds;
-            qg = this.gatedSlm - slm_offset * seconds;
+            q  = (double)this.slm      - slm_offset * seconds;
+            qg = (double)this.gatedSlm - slm_offset * liveSeconds;
             this.beamChargeSLM = q * slm_atten / slm_slope;
             this.beamChargeGatedSLM = qg * slm_atten / slm_slope;
             this.livetime = (double)this.gatedClock / this.clock;
 
-            q  = this.fcup      - fcup_offset * seconds;
-            qg = this.gatedFcup - fcup_offset * seconds;
+            q  = (double)this.fcup      - fcup_offset * seconds;
+            qg = (double)this.gatedFcup - fcup_offset * liveSeconds;
             this.beamCharge = q * fcup_atten / fcup_slope;
             this.beamChargeGated = qg * fcup_atten / fcup_slope;
         }
     }
-        
+   
+    /**
+     * Use the scaler's own clock to get dwell and live-dwell times
+     * @param fcupTable
+     * @param slmTable 
+     */
     protected final void calibrate(IndexedTable fcupTable,IndexedTable slmTable) {
-        this.calibrate(fcupTable,slmTable,((double)this.gatedClock)/this.clockFreq);
+        this.calibrate(fcupTable,slmTable,this.getClockSeconds(),this.getGatedClockSeconds());
     }
 }
