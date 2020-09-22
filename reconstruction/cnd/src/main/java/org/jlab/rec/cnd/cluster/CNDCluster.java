@@ -18,8 +18,15 @@ public class CNDCluster extends ArrayList<CndHit> implements Comparable<CNDClust
 	private double _time;
 	private int _nhits;
 	private double _energysum;
-	private int _status; 
-
+	private int _status;
+    //define layer multiplicity
+    private int _layermultip;
+    
+    private int _layer1=0;
+    private int _layer2=0;
+    private int _layer3=0;
+    private double _pathLengthThruBar;
+    
 	private ArrayList<CndHit> _cndhits;
 
 	public CNDCluster(int id, int sector, int layer){
@@ -29,6 +36,46 @@ public class CNDCluster extends ArrayList<CndHit> implements Comparable<CNDClust
 		_cndhits = new ArrayList<CndHit>();
 	}
 
+    //get_veto and set_veto methods
+    
+    public double get_pathLengthThruBar(){
+        return _pathLengthThruBar;
+    }
+    public void set_pathLengthThruBar(double pathLengthThruBar){
+        _pathLengthThruBar = pathLengthThruBar;
+    }
+    
+
+    //get_layermultip and set_layermultip methods
+    
+    public int get_layermultip(){
+        return _layermultip;
+    }
+    public void set_layermultip(int layermultip){
+        _layermultip = layermultip;
+    }
+    
+    public int get_layer1(){
+        return _layer1;
+    }
+    public void set_layer1(int layer1){
+        _layer1 = layer1;
+    }
+    
+    public int get_layer2(){
+        return _layer2;
+    }
+    public void set_layer2(int layer2){
+        _layer2 = layer2;
+    }
+    public int get_layer3(){
+        return _layer3;
+    }
+    public void set_layer3(int layer3){
+        _layer3 = layer3;
+    }
+    
+    
 	public int get_id(){
 		return _id;
 	}

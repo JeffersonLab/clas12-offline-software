@@ -8,6 +8,7 @@
             {"name":"id",               "type":"S", "info":"id of the hit"},
             {"name":"status",           "type":"S", "info":"status of the hit"},
             {"name":"trkID",            "type":"S", "info":"match CVT track index"},
+            {"name":"clusterid",        "type":"S", "info":"pointer to the cluster"},
             {"name":"sector",           "type":"B", "info":"sector of CND"},
             {"name":"layer",            "type":"B", "info":"panel id of CND"},
             {"name":"component",        "type":"S", "info":"paddle id of CND"},
@@ -42,13 +43,18 @@
             {"name":"sector",           "type":"B", "info":"sector of the cluster's seed hit"},
             {"name":"layer",            "type":"B", "info":"layer of the cluster's seed hit"},
             {"name":"component",        "type":"S", "info":"component of the cluster's seed hit"},
-            {"name":"nhits",            "type":"S", "info":"number of hits of the cluster"},
+            {"name":"size",             "type":"S", "info":"number of hits of the cluster"},
             {"name":"energy",           "type":"F", "info":"Sum of E dep (MeV) of the hits"},
             {"name":"x",                "type":"F", "info":"center of X coor (cm) of the hits"},
             {"name":"y",                "type":"F", "info":"center of Y coor (cm) of the hits"},
             {"name":"z",                "type":"F", "info":"center of Z coor (cm) of the hits"},
             {"name":"time",             "type":"F", "info":"center of time (ns) of the hits"},
-            {"name":"status",           "type":"S", "info":"cluster status"}
+            {"name":"status",           "type":"S", "info":"cluster status"},
+            {"name":"layermult",        "type":"B", "info":"layer multiplicity"},
+            {"name":"layer1",           "type":"B", "info":"firt layer hit"},
+            {"name":"layer2",           "type":"B", "info":"second layer hit"},
+            {"name":"layer3",           "type":"B", "info":"third layer hit"},
+            {"name":"pathLengthThruBar","type":"F", "info":"pathlength of the track from the entrance point to the exit point through the cluster bars "}
         ]
   }
 ]

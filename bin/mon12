@@ -1,5 +1,5 @@
-#!/bin/sh -f
+#!/bin/sh
 
-source `dirname $0`/env.sh 
+. `dirname $0`/env.sh 
 
 java -Dsun.java2d.pmoffscreen=false -Xmx2048m -Xms1024m -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/utils/*:$CLAS12DIR/lib/services/*" org.clas.viewer.EventViewer $*

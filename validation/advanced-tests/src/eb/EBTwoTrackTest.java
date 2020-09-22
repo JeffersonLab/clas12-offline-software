@@ -457,7 +457,7 @@ public class EBTwoTrackTest {
                 else           assertEquals(kEff>0.60,true);
                 break;
             case 211:
-                if (isCentral) assertEquals(piEff>0.75,true);
+                if (isCentral) assertEquals(piEff>0.72,true);
                 else           assertEquals(piEff>0.75,true);
                 break;
             case 22:

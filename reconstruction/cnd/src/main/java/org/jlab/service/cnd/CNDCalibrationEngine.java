@@ -141,13 +141,24 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 		////		event.show();
 		//		return true;
 		//	}
+        
+        
+        
+
+        //// clustering of the CND hits
+        CNDClusterFinder cndclusterFinder = new CNDClusterFinder();
+        ArrayList<CNDCluster> cndclusters = cndclusterFinder.findClusters(hits);
+            
+        
+        
+        
 		if(hits.size()!=0){
 
 			//          DataBank outbank = RecoBankWriter.fillCndHitBanks(event, hits);
 			//          event.appendBanks(outbank);
 			// event.show();
 		//	System.out.println("in process event ");
-			rbc.appendCNDBanks(event,hits);
+			rbc.appendCNDBanks(event,hits,cndclusters);
 			//      ecnd++;
 			//      if(event.hasBank("CVTRec::Tracks")){
 			//              posmatch++;
@@ -160,34 +171,6 @@ public class CNDCalibrationEngine extends ReconstructionEngine {
 
 
 
-		//// clustering of the CND hits
-		CNDClusterFinder cndclusterFinder = new CNDClusterFinder();
-		ArrayList<CNDCluster> cndclusters = cndclusterFinder.findClusters(hits);
-	        
-
-	        /// Filling the banks of CND clusters
-	        int size = cndclusters.size();
-	        if(size>0){
-	                DataBank bank2 =  event.createBank("CND::clusters", size);
-	                if (bank2 == null) {
-	                        System.err.println("COULD NOT CREATE A CND::clusters BANK!!!!!!");
-	                        return false;
-	                }
-	                for(int i =0; i< size; i++) {
-	                        bank2.setShort("id",i, (short) cndclusters.get(i).get_id() );
-	                        bank2.setShort("nhits",i, (short) cndclusters.get(i).get_nhits() );
-				bank2.setByte("sector",i,  (byte)(1* cndclusters.get(i).get_sector()) );
-				bank2.setByte("layer",i,  (byte)(1*  cndclusters.get(i).get_layer()) );
-				bank2.setShort("component",i, (short) cndclusters.get(i).get_component() );
-	                        bank2.setFloat("energy",i,   (float)(1.0* cndclusters.get(i).get_energysum()) );
-	                        bank2.setFloat("x",i,   (float)(1.0* cndclusters.get(i).get_x()) );
-	                        bank2.setFloat("y",i,   (float)(1.0* cndclusters.get(i).get_y()) );
-	                        bank2.setFloat("z",i,   (float)(1.0* cndclusters.get(i).get_z()) );
-	                        bank2.setFloat("time",i,   (float)(1.0*  cndclusters.get(i).get_time()) );
-				bank2.setShort("status",i, (short)  cndclusters.get(i).get_status());
-	                }
-	                event.appendBanks(bank2);
-	        }
 
 
 		return true;

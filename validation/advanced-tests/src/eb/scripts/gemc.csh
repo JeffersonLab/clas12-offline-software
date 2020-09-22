@@ -9,10 +9,10 @@ if ( -e "$1.evio" ) then
     exit
 endif
 
-source /group/clas12/packages/setup.csh
-module load ccdb
-module load root
-module load gemc/4.3.2
+#source /group/clas12/packages/setup.csh
+#module load ccdb
+#module load root
+#module load gemc/4.3.2
 
 set run = 11
 set nEvents = 100
