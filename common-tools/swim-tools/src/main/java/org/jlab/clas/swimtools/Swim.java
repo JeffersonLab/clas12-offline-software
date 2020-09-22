@@ -601,56 +601,29 @@ public class Swim {
         SwimTrajectory st;
         try {
 
-            // swim backwards?
-            double vertexR = Math.sqrt(_x0 * _x0 + _y0 * _y0 + _z0 * _z0);
-            if ((vertexR > d) && (dir > 0)) {
+            st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, plane, accuracy, _maxPathLength, stepSize,
+                            cnuphys.swim.Swimmer.CLAS_Tolerance, hdata);
 
-                //trying to swim forward, but already beyond the plane. Just return the starting values
-                double thetaRad = Math.toRadians(_theta);
-                double phiRad = Math.toRadians(_phi);
-                double pz = _pTot * Math.cos(thetaRad);
-                double pperp = _pTot * Math.sin(thetaRad);
-                double px = pperp * Math.cos(phiRad);
-                double py = pperp * Math.sin(phiRad);
+            st.computeBDL(PC.CP);
 
-                value[0] = _x0 * 100; // convert back to cm
-                value[1] = _y0 * 100; // convert back to cm
-                value[2] = _z0 * 100; // convert back to cm
+            double[] lastY = st.lastElement();
 
-                value[3] = px;
-                value[4] = py;
-                value[5] = pz;
-                value[6] = 0;
-                value[7] = 0;
+            value[0] = lastY[0] * 100; // convert back to cm
+            value[1] = lastY[1] * 100; // convert back to cm
+            value[2] = lastY[2] * 100; // convert back to cm
+            value[3] = lastY[3] * _pTot; // normalized values
+            value[4] = lastY[4] * _pTot;
+            value[5] = lastY[5] * _pTot;
+            value[6] = lastY[6] * 100;
+            value[7] = lastY[7] * 10; // Conversion from kG.m to T.cm
 
-                return value;
+            // System.out.println("\nCOMPARE plane swims DIRECTION = " +
+            // dir);
+            // for (int i = 0; i < 8; i++) {
+            // System.out.print(String.format("%-8.5f ", value[i]));
+            // }
 
-            }
-
-            else {
-                st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, plane, accuracy, _maxPathLength, stepSize,
-                                cnuphys.swim.Swimmer.CLAS_Tolerance, hdata);
-
-                st.computeBDL(PC.CP);
-
-                double[] lastY = st.lastElement();
-
-                value[0] = lastY[0] * 100; // convert back to cm
-                value[1] = lastY[1] * 100; // convert back to cm
-                value[2] = lastY[2] * 100; // convert back to cm
-                value[3] = lastY[3] * _pTot; // normalized values
-                value[4] = lastY[4] * _pTot;
-                value[5] = lastY[5] * _pTot;
-                value[6] = lastY[6] * 100;
-                value[7] = lastY[7] * 10; // Conversion from kG.m to T.cm
-
-                // System.out.println("\nCOMPARE plane swims DIRECTION = " +
-                // dir);
-                // for (int i = 0; i < 8; i++) {
-                // System.out.print(String.format("%-8.5f ", value[i]));
-                // }
-
-            }
+         
         } catch (RungeKuttaException e) {
                 e.printStackTrace();
         }

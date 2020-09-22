@@ -5,16 +5,39 @@
   "item" : 1,
   "info": "Event Header Information",
   "entries": [
+      {"name": "estatus",   "type": "I",    "info": "event status after reconstruction"},
       {"name": "nrun",      "type": "I",    "info": "run number"},
       {"name": "nevt",      "type": "I",    "info": "event number"},
+      {"name": "type",      "type": "I",    "info": "event type (data or mc)"},
+      {"name": "npgp",      "type": "I",    "info": "number of final reconstructed particles*100 + number of geometrically reconstructed particles"},
+      {"name": "trgprs",    "type": "I",    "info": "trigger type*10000 + prescale factor for that trigger (event class)"},
       {"name": "trigger",   "type": "I",    "info": "trigger type"},
       {"name": "helicity",  "type": "B",    "info": "faraday cup gated"},
       {"name": "fc",        "type": "F",    "info": "faraday cup"},
       {"name": "fcg",       "type": "F",    "info": "faraday cup gated"},
+      {"name": "tg",        "type": "F",    "info": "clock gated"},
       {"name": "stt",       "type": "F",    "info": "start time"},
+      {"name": "rf1",       "type": "F",    "info": "rf time1"},
+      {"name": "rf2",       "type": "F",    "info": "rf time2"},
+      {"name": "con1",      "type": "F",    "info": "control rates1"},
+      {"name": "con2",      "type": "F",    "info": "control rates2"},
+      {"name": "con3",      "type": "F",    "info": "control rates3"},
       {"name": "rastr1",    "type": "S",    "info": "rastr 1"},
       {"name": "rastr2",    "type": "S",    "info": "rastr 2"}
   ]
+ },
+ {
+   "name": "HEADER::tgbi",
+   "group": 31000,
+   "item" : 43,
+   "info" : "TGBI Bank",
+   "entries": [
+       {"name": "latch1",          "type": "I",     "info": "level1 trigger latch word (16 bits)"},
+       {"name": "helicity_scaler", "type": "I",     "info": "helicity interval count"},
+       {"name": "interrupt_time",  "type": "I",     "info": "interrupt time from microsec clock"},
+       {"name": "latch2",          "type": "I",     "info": "level2 trigger latch word (16 bits)"},
+       {"name": "level3",          "type": "I",     "info": "level3 trigger word (32 bits)"}
+     ]
  },
  {
   "name": "EVENT::particle",
@@ -25,6 +48,7 @@
       {"name": "status",  "type": "B",   "info": "status of the particle"},
       {"name": "charge",  "type": "B",   "info": "charge of the particle"},
       {"name": "pid",     "type": "I",   "info": "particle ID"},
+      {"name": "beta",   "type": "F",   "info": "Particle velocity in the units of c (=R_trk/TOF/c)"},
       {"name": "mass",    "type": "F",   "info": "particle mass calculated from beta"},
       {"name": "px",      "type": "F",   "info": "x component of momentum"},
       {"name": "py",      "type": "F",   "info": "y component of momentum"},
@@ -36,6 +60,7 @@
       {"name": "ecstat",  "type": "B",   "info": "pointer to ec bank"},
       {"name": "scstat",  "type": "B",   "info": "pointer to sc bank"},
       {"name": "ccstat",  "type": "B",   "info": "pointer to cc bank"},
+      {"name": "ststat",  "type": "B",   "info": "pointer to st bank"},
       {"name": "lcstat",  "type": "B",   "info": "pointer to cc bank"}
   ]
  },
@@ -62,20 +87,40 @@
     ]
  },
  {
+  "name": "EVENT::beam",
+  "group": 31000,
+  "item": 23,
+  "info": "Beam information",
+  "entries": [
+      {"name": "energy",  "type": "F",    "info": "Electron Beam Energy"},
+      {"name": "itorus",  "type": "F",    "info": "Torus Magnet current in Amps"},
+      {"name": "imini",   "type": "F",    "info": "Mini-Torus Magnet current in Amps"},
+      {"name": "itag",    "type": "F",    "info": "Tagger Magnet current in Amps"}
+    ]
+ },
+ {
   "name": "DETECTOR::ecpb",
   "group": 31000,
   "item" : 31,
   "info": "EC detector bank",
   "entries": [
-      {"name": "sector",   "type": "B",     "info": "hit sector"},
-      {"name": "etot",     "type": "F",     "info": "total  energy of the hit"},
-      {"name": "ein",      "type": "F",     "info": "inner  energy of the hit"},
-      {"name": "eout",     "type": "F",     "info": "outter energy of the hit"},
-      {"name": "time",     "type": "F",     "info": "time of the hit"},
-      {"name": "path",     "type": "F",     "info": "path of the hit"},
-      {"name": "x",        "type": "F",     "info": "x coordinate of the hit"},
-      {"name": "y",        "type": "F",     "info": "y coordinate of the hit"},
-      {"name": "z",        "type": "F",     "info": "z coordinate of the hit"}
+      {"name": "sector",      "type": "B",     "info": "hit sector"},
+      {"name": "clusterid","type": "B",     "info": "whole_hit_ID"},
+      {"name": "etot",        "type": "F",     "info": "total  energy of the hit"},
+      {"name": "ein",         "type": "F",     "info": "inner  energy of the hit"},
+      {"name": "eout",        "type": "F",     "info": "outter energy of the hit"},
+      {"name": "time",        "type": "F",     "info": "time of the hit"},
+      {"name": "path",        "type": "F",     "info": "path of the hit"},
+      {"name": "x",           "type": "F",     "info": "x coordinate of the hit"},
+      {"name": "y",           "type": "F",     "info": "y coordinate of the hit"},
+      {"name": "z",           "type": "F",     "info": "z coordinate of the hit"},
+      {"name": "m2_hit",      "type": "F",     "info": "second moment of hit pattern"},
+      {"name": "m3_hit",      "type": "F",     "info": "third moment of hit pattern"},
+      {"name": "m4_hit",      "type": "F",     "info": "fourth moment of hit pattern"},
+      {"name": "innstr",      "type": "I",     "info": "10000*UI+100*VI+WI"},
+      {"name": "outstr",      "type": "I",     "info": "10000*UO+100*VO+WO"},
+      {"name": "chi2",        "type": "F",     "info": "quality measure of geometrical tracking"},
+      {"name": "status",      "type": "I",     "info": "Status word"}
   ]
  },
  {
@@ -86,9 +131,12 @@
   "entries": [
       {"name": "sector",   "type": "B",     "info": "hit sector"},
       {"name": "paddle",   "type": "B",     "info": "hit sector"},
+      {"name": "hit_id",   "type": "B",     "info": "hit ID"},
       {"name": "edep",     "type": "F",     "info": "deposited energy"},
       {"name": "time",     "type": "F",     "info": "time of the hit"},
-      {"name": "path",     "type": "F",     "info": "path of the hit"}
+      {"name": "path",     "type": "F",     "info": "path of the hit"},
+      {"name": "chi2",     "type": "F",     "info": "quality measure of geometrical tracking"},
+      {"name": "status",   "type": "I",     "info": "Status word"}
   ]
  },
  {
@@ -98,9 +146,12 @@
   "info": "CC detector bank",
   "entries": [
       {"name": "sector",   "type": "B",     "info": "hit sector"},
+      {"name": "clusterid","type": "I",     "info": "cluster id"},
       {"name": "nphe",     "type": "F",     "info": "number of photo-electrons"},
       {"name": "time",     "type": "F",     "info": "time of the hit"},
-      {"name": "path",     "type": "F",     "info": "path of the hit"}
+      {"name": "path",     "type": "F",     "info": "path of the hit"},
+      {"name": "chi2",   "type": "F",     "info": "Geometrical tracking: angle between cc hit and nearest sc hit"},
+      {"name": "status",   "type": "I",     "info": "Status word - now 10*(CC segment number)"}
   ]
  },
  {
@@ -110,17 +161,42 @@
   "info": "LC detector bank",
   "entries": [
       {"name": "sector",   "type": "B",     "info": "hit sector"},
+      {"name": "hit_id",   "type": "B",     "info": "hit ID"},
       {"name": "etot",     "type": "F",     "info": "total  energy of the hit"},
       {"name": "ein",      "type": "F",     "info": "inner  energy of the hit"},
       {"name": "time",     "type": "F",     "info": "time of the hit"},
       {"name": "path",     "type": "F",     "info": "path of the hit"},
       {"name": "x",        "type": "F",     "info": "x coordinate of the hit"},
       {"name": "y",        "type": "F",     "info": "y coordinate of the hit"},
-      {"name": "z",        "type": "F",     "info": "z coordinate of the hit"}
+      {"name": "z",        "type": "F",     "info": "z coordinate of the hit"},
+      {"name": "chi2",     "type": "F",     "info": "quality measure of geometrical tracking"},
+      {"name": "status",   "type": "I",     "info": "Status word"}
   ]
  },
  {
-  "name": "TAGGER::tgpb",
+  "name": "DETECTOR::dcpb",
+  "group": 31000,
+  "item" : 35,
+  "info": "DC detector bank",
+  "entries": [
+      {"name": "sector",   "type": "B",	   "info": "sector"},
+      {"name": "track_id", "type": "B",	   "info": "track_ID"},
+      {"name": "x_sc",	   "type": "F",	   "info": "x coordinate of track intersection with SC plane"},
+      {"name": "y_sc",	   "type": "F",	   "info": "y coordinate of track intersection with SC plane"},
+      {"name": "z_sc",	   "type": "F",	   "info": "z coordinate of track intersection with SC plane"},
+      {"name": "cx_sc",    "type": "F",	   "info": "X dir cosine at (x_SC,y_SC,z_SC)"},
+      {"name": "cy_sc",	   "type": "F",	   "info": "Y dir cosine at (x_SC,y_SC,z_SC)"},
+      {"name": "cz_sc",	   "type": "F",	   "info": "Z dir cosine at (x_SC,y_SC,z_SC)"},
+      {"name": "x_v",	   "type": "F",	   "info": "vertex X after fiting to the beam position"},
+      {"name": "y_v",	   "type": "F",	   "info": "vertex Y after fiting to the beam position"},
+      {"name": "z_v",	   "type": "F",	   "info": "vertex Z after fiting to the beam position"},
+      {"name": "r_v",	   "type": "F",	   "info": "distance from production vertex to the beam"},
+      {"name": "chi2",     "type": "F",    "info": "Chisquare of track fitting"},
+      {"name": "status",   "type": "I",    "info": "Status word"}
+  ]
+ },
+ {
+  "name": "TAGGER::tagr",
   "group": 31000,
   "item" : 41,
   "info": "Tagger bank",
@@ -129,7 +205,20 @@
       {"name": "tid",      "type": "S",     "info": "T-counter id"},
       {"name": "eid",      "type": "S",     "info": "E-counter id"},
       {"name": "time",     "type": "F",     "info": "time of the tagger hit"},
-      {"name": "energy",   "type": "F",     "info": "energy of the tagger hit"}
+      {"name": "energy",   "type": "F",     "info": "energy of the tagger hit"},
+      {"name": "ttag",     "type": "F",     "info": "Time of the photon has reconstructed in the Tagger"}
+    ]
+ },
+ {
+  "name": "TAGGER::tgpb",
+  "group": 31000,
+  "item" : 42,
+  "info": "TGPB Bank",
+  "entries": [
+      {"name": "pointer",  "type": "B",     "info": "1000*i+tagstat where i is the pointer to the TAGR bank. Negative for trigger photon"},
+      {"name": "time",     "type": "F",     "info": "starttime_TAG at interaction point(s)"},
+      {"name": "energy",   "type": "F",     "info": "photon Energy"},
+      {"name": "dt",       "type": "F",     "info": "starttime_ST - starttimeTAG (ns)"}
     ]
  },
  {
@@ -142,7 +231,11 @@
       {"name": "ecc",      "type": "F",       "info": "Energy of central hit crystal in cluster"},
       {"name": "tc",       "type": "F",       "info": "Time relative to event start time"},
       {"name": "xc",       "type": "F",       "info": "x coord of hit (diff from ich_x)"},
-      {"name": "yc",       "type": "F",       "info": "y coord of hit (diff from ich_y)"}
+      {"name": "yc",       "type": "F",       "info": "y coord of hit (diff from ich_y)"},
+      {"name": "zc",       "type": "F",       "info": "z coordinate of hit (front face of IC)"},
+      {"name": "m2_hit",   "type": "F",       "info": "second moment of _hit pattern"},
+      {"name": "m3_hit",   "type": "F",       "info": "third moment of _hit pattern"},
+      {"name": "status",   "type": "I",       "info": "Ncrystals+10000*Hit_ID in ICHB"}
   ]
  }
 ]

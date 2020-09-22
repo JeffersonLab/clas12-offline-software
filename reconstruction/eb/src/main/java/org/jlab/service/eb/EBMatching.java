@@ -165,47 +165,58 @@ public class EBMatching {
      * find CD neutrals and append to particle list
      */
     public boolean addCentralNeutrals(DetectorEvent de) {
+
+        int newneuts=0;
         
+        Vector3 vertex = new Vector3(0,0,0);
+        if (de.getParticles().size()>0) {
+            vertex.copy(eventBuilder.getEvent().getParticle(0).vertex());
+        }
+
         List<DetectorResponse> respsCND =
             eventBuilder.getUnmatchedResponses(null, DetectorType.CND, 0);
 
-        if (respsCND.size()>0) {
+        // make a new neutral particle for each unmatched CND cluster:
+        for (DetectorResponse respCND : respsCND) {
 
-            Vector3 vertex = new Vector3(0,0,0);
-            if (de.getParticles().size()>0) {
-                vertex.copy(eventBuilder.getEvent().getParticle(0).vertex());
-            }
+            // haven't appended the particle yet, but this will be its index:
+            final int pindex = de.getParticles().size();
 
-            // make a new neutral particle for each unmatched CND cluster:
-            for (DetectorResponse respCND : respsCND) {
+            // make neutral particle from CND:
+            DetectorParticle neutral = DetectorParticle.createNeutral(respCND,vertex);
+            respCND.setAssociation(pindex);
 
-                // haven't appended the particle yet, but this will be its index:
-                final int pindex = de.getParticles().size();
-
-                // make neutral particle from CND:
-                DetectorParticle neutral = DetectorParticle.createNeutral(respCND,vertex);
-                respCND.setAssociation(pindex);
-
-                // find and associate matching CTOF hits:
-                List<DetectorResponse> respCTOF =
+            // find and associate matching CTOF hits:
+            List<DetectorResponse> respCTOF =
                     eventBuilder.getUnmatchedResponses(null, DetectorType.CTOF, 0);
-                final int indx=neutral.getDetectorHit(respCTOF,DetectorType.CTOF,0,
-                        eventBuilder.ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
-                if (indx >= 0) {
-                    neutral.addResponse(respCTOF.get(indx),true);
-                    respCTOF.get(indx).setAssociation(pindex);
-                    // FIXME:  stop mixing Vector3 and Vector3D
-                    final double dx = respCTOF.get(indx).getPosition().x()-vertex.x();
-                    final double dy = respCTOF.get(indx).getPosition().y()-vertex.y();
-                    final double dz = respCTOF.get(indx).getPosition().z()-vertex.z();
-                    respCTOF.get(indx).setPath(Math.sqrt(dx*dx+dy*dy+dz*dz));
-                }
-
-                de.addParticle(neutral);
+            final int indx=neutral.getDetectorHit(respCTOF,DetectorType.CTOF,0,
+                    eventBuilder.ccdb.getDouble(EBCCDBEnum.CTOF_DZ));
+            if (indx >= 0) {
+                neutral.addResponse(respCTOF.get(indx),true);
+                respCTOF.get(indx).setAssociation(pindex);
+                // FIXME:  stop mixing Vector3 and Vector3D
+                final double dx = respCTOF.get(indx).getPosition().x()-vertex.x();
+                final double dy = respCTOF.get(indx).getPosition().y()-vertex.y();
+                final double dz = respCTOF.get(indx).getPosition().z()-vertex.z();
+                respCTOF.get(indx).setPath(Math.sqrt(dx*dx+dy*dy+dz*dz));
             }
+
+            de.addParticle(neutral);
+            newneuts++;
         }
 
-        return respsCND.size()>0;
+        // make a new neutral particle for each unmatched CTOF cluster:
+        List<DetectorResponse> respsCTOF =
+            eventBuilder.getUnmatchedResponses(null, DetectorType.CTOF, 0);
+        for (DetectorResponse respCTOF : respsCTOF) {
+            // make neutral particle from CTOF:
+            DetectorParticle neutral = DetectorParticle.createNeutral(respCTOF,vertex);
+            respCTOF.setAssociation(de.getParticles().size());
+            de.addParticle(neutral);
+            newneuts++;
+        }
+
+        return newneuts>0;
     }
 
 }

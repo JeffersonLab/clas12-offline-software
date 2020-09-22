@@ -32,7 +32,7 @@ public abstract class AHit implements Comparable<AHit> {
     private int _TDCbankHitIdx1 = -1;
     private int _TDCbankHitIdx2 = -1;
 
-    public int _AssociatedTrkId = -1;
+    private int _AssociatedTrkId = -1;
     
     public AHit(int id, int panel, int sector, int paddle, int aDC1, int tDC1,
             int aDC2, int tDC2) {
@@ -313,6 +313,14 @@ public abstract class AHit implements Comparable<AHit> {
     }
     public double get_barthickness() {
         return this._barThickness;
+    }
+
+    public int get_TrkId() {
+        return _AssociatedTrkId;
+    }
+
+    public void set_TrkId(int id) {
+        this._AssociatedTrkId=id;
     }
 
     public Point3D get_TrkPosition() {
@@ -1311,6 +1319,31 @@ public abstract class AHit implements Comparable<AHit> {
        return hposa*Math.exp(hposb*y);
     }
     
+    @Override
+    public int compareTo(AHit arg) {
+        // Sort by sector, panel, paddle
+        int return_val = 0;
+        int CompSec = this.get_Sector() < arg.get_Sector() ? -1 : this
+                .get_Sector() == arg.get_Sector() ? 0 : 1;
+        int CompPan = this.get_Panel() < arg.get_Panel() ? -1 : this
+                .get_Panel() == arg.get_Panel() ? 0 : 1;
+        int CompPad = this.get_Paddle() < arg.get_Paddle() ? -1 : this
+                .get_Paddle() == arg.get_Paddle() ? 0 : 1;
+
+        int return_val1 = ((CompPan == 0) ? CompPad : CompPan);
+        return_val = ((CompSec == 0) ? return_val1 : CompSec);
+
+        return return_val;
+    }
+    
+    public boolean isAdjacent(AHit arg0) {
+        boolean isClose = false;
+        if(this.get_Sector()==arg0.get_Sector() && this.get_Panel()==arg0.get_Panel()) {
+            if(this.get_Paddle()==arg0.get_Paddle()-1 || this.get_Paddle()==arg0.get_Paddle()+1) isClose=true;
+        }
+        return isClose;
+    }
+
     public void printInfo() {
         DecimalFormat form = new DecimalFormat("#.##");
         String s = " FTOF Hit in " + " Sector " + this.get_Sector() + " Panel "
