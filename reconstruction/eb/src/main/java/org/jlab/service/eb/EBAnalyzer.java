@@ -157,23 +157,24 @@ public class EBAnalyzer {
             }
         }
        
-        // no good FT, abort:
-        if (iMinTimeDiffFT<0) return;
+        if (iMinTimeDiffFT>=0) {
 
-        // reassign trigger particle:
-        for (DetectorParticle p : event.getParticles()) {
-            p.setTriggerParticle(false);
+            // reassign trigger particle:
+            for (DetectorParticle p : event.getParticles()) {
+                p.setTriggerParticle(false);
+            }
+            electronFT.get(iMinTimeDiffFT).setTriggerParticle(true);
+
+            // set start time:
+            final double startTime = ebrf.getStartTime(electronFT.get(iMinTimeDiffFT),DetectorType.FTCAL,-1);
+            event.getEventHeader().setStartTimeFT(startTime);
+            assignParticleStartTimes(event,DetectorType.FTCAL,-1);
+
+            // recalculate betas, pids, etc:
+            this.assignBetas(event,true);
+            this.assignPids(event,true);
         }
-        electronFT.get(iMinTimeDiffFT).setTriggerParticle(true);
 
-        // set start time:
-        final double startTime = ebrf.getStartTime(electronFT.get(iMinTimeDiffFT),DetectorType.FTCAL,-1);
-        event.getEventHeader().setStartTimeFT(startTime);
-        assignParticleStartTimes(event,DetectorType.FTCAL,-1);
-        
-        // recalculate betas, pids, etc:
-        this.assignBetas(event,true);
-        this.assignPids(event,true);
         this.assignNeutralMomenta(event);
     }
     
@@ -231,8 +232,8 @@ public class EBAnalyzer {
             event.getEventHeader().setStartTime(startTime);
             this.assignBetas(event,false);
             this.assignPids(event,false);
-            this.assignNeutralMomenta(event);
         }
+        this.assignNeutralMomenta(event);
 
     }
 
