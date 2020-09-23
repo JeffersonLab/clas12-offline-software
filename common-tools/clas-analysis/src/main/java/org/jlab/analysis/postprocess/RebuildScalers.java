@@ -74,6 +74,7 @@ public class RebuildScalers {
 
                 // this is the bank we're here to rebuild:
                 event.remove(runScalerBank.getSchema());
+                event.remove(helScalerBank.getSchema());
 
                 // get CCDB/RCDB constants:
                 if (runConfigBank.getInt("run",0) >= 100) {
@@ -85,39 +86,23 @@ public class RebuildScalers {
                 // now rebuild the RUN::scaler bank: 
                 if (rcdb!=null && ccdb_fcup !=null && rawScalerBank.getRows()>0) {
                     
-                    // Run duration in seconds.  Nasty but works, until RCDB (uses java.sql.Time)
-                    // is changed to support full date and not just HH:MM:SS.  Meanwhile just
-                    // requires that runs last less than 24 hours.
-                    Date uet = new Date(runConfigBank.getInt("unixtime",0)*1000L);
+                    // Inputs for calculation run duration in seconds, since for
+                    // some run periods the DSC2 clock rolls over during a run.
                     Time rst = rcdb.getTime("run_start_time");
-                    final double s1 = rst.getSeconds()+60*rst.getMinutes()+60*60*rst.getHours();
-                    final double s2 = uet.getSeconds()+60*uet.getMinutes()+60*60*uet.getHours();
-                    final double seconds = s2<s1 ? s2+60*60*24-s1 : s2-s1;
-
-                    DaqScalers ds = DaqScalers.create(rawScalerBank, ccdb_fcup, ccdb_slm, seconds);
-
-                    // modify RUN::scaler:
-                    runScalerBank.putFloat("fcupgated",0, (float) ds.dsc2.getBeamChargeGated());
-                    runScalerBank.putFloat("fcup",0, (float) ds.dsc2.getBeamCharge());
-                    runScalerBank.putFloat("livetime",0, (float) ds.struck.getLivetimeClock());
+                    Date uet = new Date(runConfigBank.getInt("unixtime",0)*1000L);
+       
+                    DaqScalers ds = DaqScalers.create(rawScalerBank, ccdb_fcup, ccdb_slm, rst, uet);
+                    runScalerBank = ds.createRunBank(writer.getSchemaFactory());
+                    helScalerBank = ds.createHelicityBank(writer.getSchemaFactory());
                     
-                    // modify HEL::scaler:
-                    helScalerBank.putFloat("fcup",0, (float) ds.struck.getBeamCharge());
-                    helScalerBank.putFloat("fcupgated",0, (float) ds.struck.getBeamChargeGated());
-                    helScalerBank.putFloat("slm",0, (float) ds.struck.getBeamChargeSLM());
-                    helScalerBank.putFloat("slmgated",0, (float) ds.struck.getBeamChargeGatedSLM());
-                    helScalerBank.putFloat("clock",0,(float)ds.struck.getClock());
-                    helScalerBank.putFloat("clockgated",0,(float)ds.struck.getGatedClock());
-                    // the scaler banks always are delayed relative to helicity changes,
-                    // so assign the previous helicity state to this scaler reading:
+                    // the scaler banks always are slightly after the helicity changes, so
+                    // assign the previous (delay-corrected) helicity state to this scaler reading:
                     helScalerBank.putByte("helicity",0,helSeq.search(event,-1).value());
-                    if (helSeq.getHalfWavePlate(event)) {
+                    if (helSeq.getHalfWavePlate(event))
                         helScalerBank.putByte("helicityRaw",0,(byte)(-1*helSeq.search(event,-1).value()));
-                    }
-                    else {
+                    else
                         helScalerBank.putByte("helicityRaw",0,helSeq.search(event,-1).value());
-                    }
-
+                   
                     // put modified HEL/RUN::scaler back in the event:
                     event.write(runScalerBank);
                     event.write(helScalerBank);

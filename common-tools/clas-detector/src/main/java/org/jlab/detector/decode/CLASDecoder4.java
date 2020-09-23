@@ -601,35 +601,7 @@ public class CLASDecoder4 {
             // abort if no RCDB access (e.g. offsite)
             return null;
         }
-
-        // seconds since 00:00:00, on their given day:
-        final double s1 = rst.getSeconds()+60*rst.getMinutes()+60*60*rst.getHours();
-        final double s2 = uet.getSeconds()+60*uet.getMinutes()+60*60*uet.getHours();
-
-        // Run duration in seconds.  Nasty but works, until RCDB (uses java.sql.Time)
-        // is changed to support full date and not just HH:MM:SS.  Meanwhile just
-        // requires that runs last less than 24 hours.
-        final double seconds = s2<s1 ? s2+60*60*24-s1 : s2-s1;
-
-        // interpret/calibrate RAW::scaler into RUN::scaler:
-        DaqScalers r = DaqScalers.create(rawScalerBank,fcupTable,slmTable,seconds);
-        if (r==null) return null;
-
-        Bank scalerBank = new Bank(schemaFactory.getSchema("RUN::scaler"),1);
-        scalerBank.putFloat("fcup",0,(float)r.dsc2.getBeamCharge());
-        scalerBank.putFloat("fcupgated",0,(float)r.dsc2.getBeamChargeGated());
-        scalerBank.putFloat("livetime",0,(float)r.struck.getLivetimeClock());
-        
-        Bank helicityBank = new Bank(schemaFactory.getSchema("HEL::scaler"),1);
-        helicityBank.putFloat("fcup",0,(float)r.struck.getBeamCharge());
-        helicityBank.putFloat("fcupgated",0,(float)r.struck.getBeamChargeGated());
-        helicityBank.putFloat("slm",0,(float)r.struck.getBeamChargeSLM());
-        helicityBank.putFloat("slmgated",0,(float)r.struck.getBeamChargeGatedSLM());
-        helicityBank.putFloat("clock",0,(float)r.struck.getClock());
-        helicityBank.putFloat("clockgated",0,(float)r.struck.getGatedClock());
-
-        Bank ret[] = {scalerBank,helicityBank};
-        return ret;
+        return DaqScalers.createBanks(schemaFactory,rawScalerBank,fcupTable,slmTable,rst,uet);
     }
     
     public Bank createBonusBank(){
