@@ -110,9 +110,11 @@ public class Tag1ToEvent {
                 HelicityBit hb = helSeq.search(event);
                 DaqScalers ds = chargeSeq.get(event);
 
-                // write helicity to REC::Event:
+                // count helicity good/bad;
                 if (Math.abs(hb.value())==1) goodHelicity++;
                 else badHelicity++;
+
+                // write heliicty to REC::Event:
                 if (doHelicity) {
                     recEventBank.putByte("helicity",0,hb.value());
                 }

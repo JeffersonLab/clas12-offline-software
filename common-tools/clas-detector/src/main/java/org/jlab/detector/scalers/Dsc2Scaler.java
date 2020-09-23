@@ -62,6 +62,11 @@ public class Dsc2Scaler extends DaqScaler{
         this.calibrate(fcupTable,slmTable,seconds);
     }
 
+    /**
+     * @param bank RAW::scaler bank
+     * @param fcupTable /runcontrol/fcup CCDB table
+     * @param slmTable  /runcontrol/slm CCDB table
+     */
     public Dsc2Scaler(Bank bank,IndexedTable fcupTable,IndexedTable slmTable) {
         this(bank,fcupTable,slmTable,1);
         this.calibrate(fcupTable,slmTable);
@@ -71,8 +76,8 @@ public class Dsc2Scaler extends DaqScaler{
      * During some run periods, the run-integrating DSC2 scaler's clock frequency
      * was too large and rolls over during the run.  So here we can pass in seconds
      * (e.g. based on RCDB run start time) instead.
-     * @param fcupTable
-     * @param slmTable
+     * @param fcupTable /runcontrol/fcup CCDB table
+     * @param slmTable /runcontrol/slm CCDB table
      * @param seconds 
      */
     protected final void calibrate(IndexedTable fcupTable,IndexedTable slmTable,double seconds) {
@@ -80,5 +85,4 @@ public class Dsc2Scaler extends DaqScaler{
             super.calibrate(fcupTable,slmTable,seconds,seconds*((double)this.gatedSlm)/this.slm);
         }
     }
-        
 }
