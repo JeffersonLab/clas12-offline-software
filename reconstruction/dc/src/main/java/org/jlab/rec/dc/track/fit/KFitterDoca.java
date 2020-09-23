@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
+import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.dc.track.Track;
 import org.jlab.rec.dc.track.fit.StateVecsDoca.CovMat;
 import org.jlab.rec.dc.track.fit.StateVecsDoca.StateVec;
@@ -61,7 +62,7 @@ public class KFitterDoca {
             sv.Z[i] = mv.measurements.get(i).z;
         }
         sv.initFromHB(trk, sv.Z[0], this);
-        TBT = true;
+        TBT = true; 
     }
 
     public void init(Track trk, DCGeant4Factory DcDetector, int c) {
@@ -142,7 +143,7 @@ public class KFitterDoca {
                         sv.trackCov.get(k));
                 //if(i==1 && k==0)
                 //    Matrix5x5.show(sv.trackCov.get(k).covMat);
-                this.filter(k + 1);
+                this.filter(k + 1); 
             }
             if (i > 1) {
                 if(this.setFitFailed==true)
@@ -170,6 +171,7 @@ public class KFitterDoca {
         if(totNumIter==1) {
             this.finalStateVec = sv.trackTraj.get(svzLength - 1);
             this.finalCovMat = sv.trackCov.get(svzLength - 1);
+            
         }
         this.calcFinalChisq(sector);
         if(Double.isNaN(chi2))
@@ -217,6 +219,10 @@ public class KFitterDoca {
     }
     private double KFScale = 4;
     private void filter(int k) {
+        if(this.filterOn == false) 
+            return;
+        if(sv.trackTraj.get(k)==null)
+            return;
         if(Double.isNaN(sv.trackTraj.get(k).x) || Double.isNaN(sv.trackTraj.get(k).y) 
                 || Double.isNaN(sv.trackTraj.get(k).tx) ||Double.isNaN(sv.trackTraj.get(k).ty )
                 || Double.isNaN(sv.trackTraj.get(k).Q)) {
@@ -227,7 +233,6 @@ public class KFitterDoca {
                 sv.trackCov.get(k).covMat != null &&
                 k < sv.Z.length 
                 && mv.measurements.get(k).reject==false) {
-            
             
             double[] K = new double[5];
             double V = mv.measurements.get(k).unc[0]*KFScale;
@@ -310,13 +315,13 @@ public class KFitterDoca {
             } 
             
             chi2kf += c2;
-            if(filterOn) {
-                sv.trackTraj.get(k).x = x_filt;
-                sv.trackTraj.get(k).y = y_filt;
-                sv.trackTraj.get(k).tx = tx_filt;
-                sv.trackTraj.get(k).ty = ty_filt;
-                sv.trackTraj.get(k).Q = Q_filt;
-            }
+            
+            sv.trackTraj.get(k).x = x_filt;
+            sv.trackTraj.get(k).y = y_filt;
+            sv.trackTraj.get(k).tx = tx_filt;
+            sv.trackTraj.get(k).ty = ty_filt;
+            sv.trackTraj.get(k).Q = Q_filt;
+            
         }
     }
 

@@ -36,6 +36,20 @@ public class Track extends Trajectory implements Comparable<Track>{
     }
 
     /**
+     * @return the finalStateVecMC
+     */
+    public StateVec getFinalStateVecMC() {
+        return finalStateVecMC;
+    }
+
+    /**
+     * @param finalStateVecMC the finalStateVecMC to set
+     */
+    public void setFinalStateVecMC(StateVec finalStateVecMC) {
+        this.finalStateVecMC = finalStateVecMC;
+    }
+
+    /**
      * serialVersionUID
      */	
     private static final long serialVersionUID = 1763744434903318419L;
@@ -65,7 +79,7 @@ public class Track extends Trajectory implements Comparable<Track>{
     private int _missingSuperlayer;
     private int _fitConvergenceStatus;
     private StateVec finalStateVec ;
-    
+    private StateVec finalStateVecMC ;
     
     public Track() {
     }

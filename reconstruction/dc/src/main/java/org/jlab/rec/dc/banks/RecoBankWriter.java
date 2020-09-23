@@ -355,6 +355,13 @@ public class RecoBankWriter {
         {"delpy_delx", "delpy_dely", "delpy_delz", "delpy_delpx", "delpy_delpy", "delpy_delpz"},
         {"delpz_delx", "delpz_dely", "delpz_delz", "delpz_delpx", "delpz_delpy", "delpz_delpz"}
     };
+    String[][] covMatEltsSVRep = new String[][] {{"delx_delx", "delx_dely", "delx_deltx", "delx_delty", "delx_delQ"},
+        {"dely_delx", "dely_dely", "dely_deltx", "dely_delty", "dely_delQ"},
+        {"deltx_delx", "deltx_dely", "deltx_deltx", "deltx_delty", "deltx_delQ"},
+        {"delty_delx", "delty_dely", "delty_deltx", "delty_delty", "delty_delQ"},
+        {"delQ_delx", "delQ_dely", "delQ_deltx", "delQ_delty", "delQ_delQ"}
+    };
+    
     /**
      *
      * @param event hipo event
@@ -372,6 +379,25 @@ public class RecoBankWriter {
                 for(int mi = 0; mi <6; mi++) {
                     for(int mj = 0; mj <6; mj++) {
                         bank.setFloat(covMatElts[mi][mj], i, (float) candlist.get(i).get_CovMatLab()[mi][mj]);
+                    }
+                }
+            }
+        }
+        //bank.show();
+        return bank;
+    }
+    
+    private DataBank fillTrackCovMatBankSVRep(DataEvent event, List<Track> candlist) {
+        
+        DataBank bank = event.createBank("TimeBasedTrkg::TBCovMatSVRep", candlist.size());
+
+        for (int i = 0; i < candlist.size(); i++) {
+            bank.setShort("id", i, (short) candlist.get(i).get_Id());
+            
+            if(candlist.get(i).get_CovMat()!=null) {
+                for(int mi = 0; mi <5; mi++) {
+                    for(int mj = 0; mj <5; mj++) {
+                        bank.setFloat(covMatEltsSVRep[mi][mj], i, (float) candlist.get(i).get_CovMat().get(mi, mj));
                     }
                 }
             }
@@ -758,7 +784,26 @@ public class RecoBankWriter {
             }
             bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
             bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
+            
+            bank.setFloat("x", i, (float) candlist.get(i).getFinalStateVec().x());
+            bank.setFloat("y", i, (float) candlist.get(i).getFinalStateVec().y());
+            bank.setFloat("tx", i, (float) candlist.get(i).getFinalStateVec().tanThetaX());
+            bank.setFloat("ty", i, (float) candlist.get(i).getFinalStateVec().tanThetaY());
+            
+            if(candlist.get(i).getFinalStateVecMC()!=null) {
+                bank.setFloat("x_mc", i, (float) candlist.get(i).getFinalStateVecMC().x());
+                bank.setFloat("y_mc", i, (float) candlist.get(i).getFinalStateVecMC().y());
+                bank.setFloat("tx_mc", i, (float) candlist.get(i).getFinalStateVecMC().tanThetaX());
+                bank.setFloat("ty_mc", i, (float) candlist.get(i).getFinalStateVecMC().tanThetaY());
+            } else {
+                bank.setFloat("x_mc", i, (float) -999);
+                bank.setFloat("y_mc", i, (float) -999);
+                bank.setFloat("tx_mc", i, (float) -999);
+                bank.setFloat("ty_mc", i, (float) -999);
+            }
+            
         }
+        //bank.show();
         return bank;
 
     }
@@ -874,6 +919,7 @@ public class RecoBankWriter {
                     rbc.fillTBCrossesBank(event, crosses),
                     rbc.fillTBTracksBank(event, trkcands),
                     rbc.fillTrackCovMatBank(event, trkcands),
+                    rbc.fillTrackCovMatBankSVRep(event, trkcands),
                     rbc.fillTrajectoryBank(event, trkcands));
 
         }

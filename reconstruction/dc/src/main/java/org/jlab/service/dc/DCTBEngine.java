@@ -3,8 +3,10 @@ package org.jlab.service.dc;
 //import Jama.Matrix;
 import org.jlab.jnp.matrix.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
@@ -237,6 +239,7 @@ public class DCTBEngine extends DCEngine {
                 // candidate parameters are set from the state vector
                 TrackArray[i].set_FitChi2(kFit.chi2); 
                 TrackArray[i].set_FitNDF(kFit.NDF);
+                TrackArray[i].set_CovMat(kFit.finalCovMat.covMat);
                 TrackArray[i].set_Trajectory(kFit.kfStateVecsAlongTrajectory);
                 TrackArray[i].set_FitConvergenceStatus(kFit.ConvStatus);
                 TrackArray[i].set_Id(TrackArray[i].size()+1);
@@ -245,6 +248,19 @@ public class DCTBEngine extends DCEngine {
                     continue;
                
                 if(TrackArray[i].isGood()) {
+                    //compare to MC truth
+                    Track mcTrack = this.matchedToMCTruth(event, TrackArray[i], dcSwim);
+                    if(mcTrack!=null) {
+                        
+                        mcTrack.set_CovMat(new Matrix());
+                        KFitterDoca kFit2 = new KFitterDoca(mcTrack, dcDetector, true, dcSwim, 0);
+                        kFit2.filterOn=false;
+                        kFit2.totNumIter=1;
+                        kFit2.runFitter(TrackArray[i].get(0).get_Sector());
+                        StateVec fn2 = new StateVec();
+                        fn2.set(kFit2.finalStateVec.x, kFit2.finalStateVec.y, kFit2.finalStateVec.tx, kFit2.finalStateVec.ty); 
+                        TrackArray[i].setFinalStateVecMC(fn2);
+                    }
                     //Transform cov mat in lab frame
                      // get CovMat at vertex
                     Point3D VTCS = crosses.get(0).getCoordsInSector(
@@ -329,5 +345,98 @@ public class DCTBEngine extends DCEngine {
         }
         return miss;
     }
+
+    private Track matchedToMCTruth(DataEvent event, Track track, Swim dcSwim) {
+        
+        if (event.hasBank("MC::Particle") == false) {
+            return null;
+        }
+        Track mcTrack = null;
+        DataBank bank = event.getBank("MC::Particle");
        
+        List<MC> matchedTrks = new ArrayList<MC>();
+        for (int i = 0; i < bank.rows(); i++) { 
+            if(this.getMCCharge(bank.getInt("pid", i))!=track.get_Q())
+                continue;
+            double px = (double)bank.getFloat("px", i);
+            double py = (double)bank.getFloat("py", i);
+            double pz = (double)bank.getFloat("pz", i);
+            double p = Math.sqrt(px*px+py*py+pz*pz);
+            double d_theta = Math.abs(Math.toDegrees(Math.acos(pz/p)-Math.acos(track.get_pAtOrig().z()/track.get_pAtOrig().mag())));
+            double d_phi = Math.abs(Math.toDegrees(Math.atan2(py, px)-Math.atan2(track.get_pAtOrig().y(), track.get_pAtOrig().x())));
+            matchedTrks.add(new MC(i, d_theta, d_phi));
+        }
+        Collections.sort(matchedTrks);
+        
+        if(matchedTrks.get(0).dtheta<0.5 && matchedTrks.get(0).dphi<0.3) {
+            int index = matchedTrks.get(0).i;
+            mcTrack = new Track();
+            mcTrack.addAll(track);
+            mcTrack.set_ListOfHBSegments(track.get_ListOfHBSegments());
+            double vx = (double)bank.getFloat("vx", index);
+            double vy = (double)bank.getFloat("vy", index);
+            double vz = (double)bank.getFloat("vz", index);
+            double px = (double)bank.getFloat("px", index);
+            double py = (double)bank.getFloat("py", index);
+            double pz = (double)bank.getFloat("pz", index);
+            mcTrack.set_Vtx0(new Point3D(vx,vy,vz));
+            mcTrack.set_pAtOrig(new Vector3D(px,py,pz));
+            mcTrack.set_Id(track.get_Id());
+            mcTrack.set_Q(track.get_Q());
+            mcTrack.set_P(mcTrack.get_pAtOrig().mag());
+            StateVec sv = new StateVec();
+            dcSwim.SetSwimParameters(vx,vy,vz, px,py,pz,track.get_Q());
+            double[] R = dcSwim.SwimToPlaneLab(250);
+            if(R==null)
+                return mcTrack;
+            Cross C = new Cross(track.get(track.size() - 1).get_Sector(), track.get(track.size() - 1).get_Region(), -1);
+
+            Point3D trX = C.getCoordsInTiltedSector(R[0], R[1], R[2]);
+            Point3D trP = C.getCoordsInTiltedSector(R[3], R[4], R[5]);
+            sv.set(trX.x(), trX.y(), 
+                    trP.x()/ trP.z(), 
+                    trP.y()/ trP.z());
+            sv.setZ(trX.z());
+            mcTrack.setFinalStateVec(sv);
+        }
+        
+        return mcTrack;
+    }
+
+    private int getMCCharge(int pid) {
+        int q = 0;
+        if(Math.abs(pid)==11 || Math.abs(pid)==12 || Math.abs(pid)==13) {
+               q= (int)-Math.signum(pid);
+        }
+        if((int)(Math.abs(pid)/100)>0) {
+            q= (int)Math.signum(pid);
+        }
+        return q;
+    }
+    
+    public class MC implements Comparable<MC>{
+
+        public int i;
+        
+        public double dtheta;
+        public double dphi;
+        
+        MC(int i, double dth, double dphi) {
+            this.i = i;
+            this.dtheta = dth;
+            this.dphi = dphi;
+        }
+        
+        @Override
+        public int compareTo(MC arg) {
+        
+            int CompTh = this.dtheta < arg.dtheta ? -1 : this.dtheta == arg.dtheta ? 0 : 1;
+            int CompPh = this.dphi < arg.dphi ? -1 : this.dphi == arg.dphi ? 0 : 1;
+
+            return ((CompTh == 0) ? CompPh : CompTh);
+        }
+        
+    }
+
+    
 }
