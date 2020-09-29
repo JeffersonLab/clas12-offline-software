@@ -79,6 +79,6 @@ configuration:
       rtpcCosmic: "false"
       rtpcBeamlineFit: "true"
       rtpcDisentangler: "false"
-
+      
 mime-types:
   - binary/data-hipo
