@@ -24,14 +24,14 @@ public class HelixFitTest {
     private HashMap<Integer, List<RecoHitVector>> recotrackmap = new HashMap<>();
     private HashMap<Integer, List<RecoHitVector>> newrecotrackmap = new HashMap<>();
     private HashMap<Integer, FinalTrackInfo> finaltrackinfomap = new HashMap<>();
-    
-    public HelixFitTest(HitParameters params, int fitToBeamline, double _magfield){
+    private boolean cosmic = false;
+    public HelixFitTest(HitParameters params, int fitToBeamline, double _magfield, boolean cosm){
         magfield = _magfield;
         fittobeamline = fitToBeamline;
         recotrackmap = params.get_recotrackmap();
         minhitcount = params.get_minhitspertrackreco();
         List<Integer> trackstoremove = new ArrayList<>();
-
+        cosmic = cosm;
         chi2termthreshold = params.get_chi2termthreshold();
         chi2percthreshold = params.get_chi2percthreshold();
         for(int TID : recotrackmap.keySet()){
@@ -47,7 +47,7 @@ public class HelixFitTest {
         R = Math.abs(R);
         return z0 + 2*R*Math.asin(r/(2*R))/Math.tan(Math.toRadians(theta0));
     }
-    
+
     private void findtrackparams(int TID, List<RecoHitVector> track, int iter){
         szpos = new double[10000][3];
         int numhits = track.size();
@@ -65,7 +65,7 @@ public class HelixFitTest {
         double dz = 0;
 
         dz = track.get(numhits-1).z() - track.get(0).z();
-        Vector3 v1 = new Vector3(track.get(0).x()-ho.get_A(),track.get(0).y()-ho.get_B(),0);          
+        Vector3 v1 = new Vector3(track.get(0).x()-ho.get_A(),track.get(0).y()-ho.get_B(),0);
         Vector3 v2 = new Vector3(track.get(numhits-1).x()-ho.get_A(),track.get(numhits-1).y()-ho.get_B(),0);
         double psi = Math.toRadians(v1.theta(v2)); //angle theta for helix
         double momfit =  ho.get_Mom();
@@ -88,6 +88,7 @@ public class HelixFitTest {
         double chi2phiterm = 0;
         double chi2zterm = 0;
         double chi2term = 0;
+        boolean removehits = false;
         List<Integer> hitstoremove = new ArrayList<>();
         //calculate chi2
         for(hit = 0; hit < numhits; hit++){
@@ -97,23 +98,24 @@ public class HelixFitTest {
             chi2phiterm = (hitphi - phichi2(phi,hitr,R));
             if(chi2phiterm < -Math.PI) chi2phiterm += 2*Math.PI;
             else if(chi2phiterm > Math.PI) chi2phiterm -= 2*Math.PI;
-            chi2phiterm = chi2phiterm*chi2phiterm; 
+            chi2phiterm = chi2phiterm*chi2phiterm;
             chi2phiterm /= denphi;
             chi2zterm = (hitz - zchi2(vz,theta,hitr,R))*(hitz - zchi2(vz,theta,hitr,R))/denz;
             chi2term = chi2phiterm + chi2zterm;
             chi2 += chi2term;
-            if(chi2term > chi2termthreshold) hitstoremove.add(hit); //if the hit messes up chi2 too much we are going to remove it
+            if(chi2term > chi2termthreshold && iter == 0 && !cosmic) hitstoremove.add(hit); //if the hit messes up chi2 too much we are going to remove it
         }
-        if(((double)hitstoremove.size()/(double)numhits) * 100 > chi2percthreshold) return; //if too many hits are removed we delete the track
-        if(hitstoremove.size() > 0 && iter == 0){ //make a new track containing the hits leftover and fit it again
+
+        if(hitstoremove.size() > 0 && iter == 0 && !cosmic){ //make a new track containing the hits leftover and fit it again
+            if(((double)hitstoremove.size()/(double)numhits) >= chi2percthreshold/100) removehits = true;
             List<RecoHitVector> newtrack = new ArrayList<>();
             for(int i = 0; i < numhits; i++){
                 if(!hitstoremove.contains(i)) newtrack.add(track.get(i));
             }
-            if(!newtrack.isEmpty()) findtrackparams(TID,newtrack,1);
-            return; 
+            if(!newtrack.isEmpty() && !removehits) findtrackparams(TID,newtrack,1);
+            return;
         }
-        
+
         R = Math.abs(R);
         chi2 += (R-Math.sqrt(A*A + B*B))*(R-Math.sqrt(A*A + B*B));
         chi2 /= 2*numhits - 4;
@@ -121,7 +123,7 @@ public class HelixFitTest {
         if(R > 0) tl = Math.sqrt(R*R*psi*psi + dz*dz);
         double dEdx = 0;
         if(Double.isNaN(tl)) tl = 0;
-        if(tl != 0 && !Double.isNaN(tl)) dEdx = ADCsum/tl;          
+        if(tl != 0 && !Double.isNaN(tl)) dEdx = ADCsum/tl;
         if(TID != 0 && numhits > minhitcount){
             newrecotrackmap.put(TID, track);
             finaltrackinfomap.put(TID, new FinalTrackInfo(px,py,pz,vz,theta,phi,numhits,tl,ADCsum,dEdx,ho.get_Rho(),A,B,chi2));
