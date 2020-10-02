@@ -66,7 +66,7 @@ public class DaqScaler {
             this.beamChargeGatedSLM = qg * slm_atten / slm_slope;
             this.livetime = (double)this.gatedClock / this.clock;
 
-            if (fcup_atten<0 || fcup_slope<0) {
+            if (fcup_atten<1e-8 || fcup_slope<1e-8) {
                 this.beamCharge = this.beamChargeSLM;
                 this.beamChargeGated = this.beamChargeGatedSLM;
             }
