@@ -21,15 +21,28 @@ public final class HelicitySequenceManager {
     SchemaFactory schema=null;
     private final int delay;
     private int verbosity=1;
+    private boolean flip=false;
     private volatile Map<Integer,HelicitySequenceDelayed> seqMap=new HashMap<>();
     Bank rcfgBank=null;
     
+    public HelicitySequenceManager(int delay,List<String> filenames,boolean flip) {
+        this.flip=flip;
+        this.delay=delay;
+        initialize(filenames);
+    }
+
     public HelicitySequenceManager(int delay,List<String> filenames) {
         this.delay=delay;
         initialize(filenames);
     }
     
     private HelicitySequenceManager(int delay,HipoReader reader) {
+        this.delay=delay;
+        initialize(reader);
+    }
+    
+    private HelicitySequenceManager(int delay,HipoReader reader,boolean flip) {
+        this.flip=flip;
         this.delay=delay;
         initialize(reader);
     }
@@ -51,7 +64,7 @@ public final class HelicitySequenceManager {
               System.exit(1);
             }
         }
-        return seqMap.get(runno).addState(state);
+        return seqMap.get(runno).addState(this.flip?state.invert():state);
     }
 
     public HelicitySequence getSequence(int runno) {
