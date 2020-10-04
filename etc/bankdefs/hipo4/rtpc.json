@@ -1,35 +1,50 @@
 [   
- {
-    "name": "RTPC::hits",
-    "group": 1720,
-    "item" : 1,
-    "info": "reconstructed RTPC hits",
-    "entries": [
-       {"name":"trkID",        "type":"I", "info":"Track ID of the hit"},
-       {"name":"id",     "type":"I",  "info":"cell id"},
-       {"name":"time",       "type":"F", "info":"Time (ns)"},
-       {"name":"x",          "type":"F", "info":"x pos (mm)"},
-       {"name":"y",          "type":"F", "info":"y pos (mm)"},
-       {"name":"z",          "type":"F", "info":"z pos (mm)"},
-       {"name":"tdiff",      "type":"F", "info":"Time shift (ns)"}
-    ]
-  },
-  {
+    {
+	"name": "RTPC::hits",
+	"group": 21900,
+	"item" : 21,
+	"info": "reconstructed RTPC hits",
+	"entries": [
+	    {"name":"trkID",        "type":"I", "info":"Track ID of the hit"},
+	    {"name":"id",     "type":"I",  "info":"cell id"},
+	    {"name":"time",       "type":"F", "info":"Time (ns)"},
+	    {"name":"x",          "type":"F", "info":"x pos (mm)"},
+	    {"name":"y",          "type":"F", "info":"y pos (mm)"},
+	    {"name":"z",          "type":"F", "info":"z pos (mm)"},
+	    {"name":"tdiff",      "type":"F", "info":"Time shift (ns)"}
+	]
+    },
+    {
 	"name": "RTPC::tracks",
-	"group": 1720,
-	"item" : 2,
+	"group": 21900,
+	"item" : 22,
 	"info" : "reconstructed track info",
 	"entries": [
-		{"name":"trkID",		"type":"I", "info":"Track ID of the hit"},
-		{"name":"px",		"type":"F", "info":"X component of the momentum (GeV)"},
-		{"name":"py",		"type":"F", "info":"Y component of the momentum (GeV)"},
-		{"name":"pz",		"type":"F", "info":"Z component of the momentum (GeV)"},
-		{"name":"vz",		"type":"F", "info":"Z component of the reconstructed vertex (cm)"},
-		{"name":"theta",    "type":"F", "info":"Theta from the Helix fit of the track (rad)"},
-		{"name":"phi",      "type":"F", "info":"Phi from the Helix fit of the track (rad)"},
-		{"name":"nhits",  "type":"I", "info":"Number of hits in the track"},
-		{"name":"path",   "type":"F", "info":"Length of the Track (mm)"},
-		{"name":"dedx",		"type":"F", "info":"dEdx for the Track (MeV/mm)"}		
+	    {"name":"trkID",		"type":"I", "info":"Track ID of the hit"},
+	    {"name":"px",		"type":"F", "info":"X component of the momentum (GeV)"},
+	    {"name":"py",		"type":"F", "info":"Y component of the momentum (GeV)"},
+	    {"name":"pz",		"type":"F", "info":"Z component of the momentum (GeV)"},
+	    {"name":"vz",		"type":"F", "info":"Z component of the reconstructed vertex (cm)"},
+	    {"name":"theta",    "type":"F", "info":"Theta from the Helix fit of the track (deg)"},
+	    {"name":"phi",      "type":"F", "info":"Phi from the Helix fit of the track (deg)"},
+	    {"name":"nhits",  "type":"I", "info":"Number of hits in the track"},
+	    {"name":"path",   "type":"F", "info":"Length of the Track (mm)"},
+	    {"name":"adcsum", "type":"F", "info":"Total ADC sum of the Track"},
+	    {"name":"dedx",		"type":"F", "info":"dEdx for the Track (MeV/mm)"},
+	    {"name":"r_helix", "type":"F", "info":"Radius of the helix fit (mm)"},
+	    {"name":"x_helix", "type":"F", "info":"X-coordinate of the center of helix fit (mm)"},
+	    {"name":"y_helix", "type":"F", "info":"Y-coordinate of the center of helix fit (mm)"},
+	    {"name":"chi2_helix", "type":"F", "info":"Chi squared of the helix fit"},
+	    {"name":"min_row", "type":"F", "info":"Pad row of hit with smallest time"},
+	    {"name":"min_col", "type":"F", "info":"Pad col of hit with smallest time"},
+	    {"name":"max_row", "type":"F", "info":"Pad row of hit with largest time"},
+	    {"name":"max_col", "type":"F", "info":"Pad col of hit with largest time"},
+    	    {"name":"min_time", "type":"F", "info":"Smallest time in track not shifted (ns)"},
+	    {"name":"max_time", "type":"F", "info":"Largest time in track not shifted (ns)"},
+	    {"name":"min_radius", "type":"F", "info":"Smallest reconstructed radius (mm)"},
+	    {"name":"max_radius", "type":"F", "info":"Largest reconstructed radius (mm)"},
+	    {"name":"min_phi", "type":"F", "info":"Smallest reconstructed phi (rad)"},
+	    {"name":"max_phi", "type":"F", "info":"Largest reconstructed phi (rad)"}
 	]
-   }	
- ]
+    }	
+]
