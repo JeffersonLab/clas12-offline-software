@@ -11,7 +11,7 @@ public class HitParameters {
     final private int _SignalStepSize = 10;
     final private int _BinSize = 40; 
     final private int _NBinKept = 3; 
-    final private int _TrigWindSize = 10000;
+    private int _TrigWindSize = 9600;
     private int _eventnum = 0; 
     private ADCMap _ADCMap = new ADCMap();
     private HashMap<Integer, List<Double>> _TimeMap = new HashMap<>();
@@ -39,48 +39,72 @@ public class HitParameters {
     private int _timeadjlimit = 4;
     private double _zthreshTF = 16;
     private double _phithreshTF = 0.16;
+    private double _zthreshTFgap = 20;
+    private double _phithreshTFgap = 0.20;
     private double _zthreshTD = 8;
     private double _phithreshTD = 0.1;
+    private double _zthreshTDgap = 10;
+    private double _phithreshTDgap = 0.12;
+    private double _TFtotaltracktimeflag = 5000;
+    private double _TFtotalpadtimeflag = 1000;
     private int _tthreshTD = 300;
+    private int _tthreshTDgap = 300;
     private double _adcthresh = 320;
     private int _minhitspertrack = 5;
-    private double[] _tmaxparms = new double[5];
-    private double[] _toffparms = new double[5];
+    private int _minhitspertrackreco = 10;
+    private double[] _atparms = new double[5];
+    private double[] _btparms = new double[5];
+    private double[] _ctparms = new double[5];
     private double[] _aphiparms = new double[5];
     private double[] _bphiparms = new double[5];
-    private double[] _tgapparms = new double[5];
-    private double[] _phigapparms = new double[5];
+    private double[] _cphiparms = new double[5];
     private double _tl = 0;
     private double _tp = 0;
     private double _tr = 0;
     private double _tcathode = 0;
+    private double _tshiftfactorshort = 0;
+    private double _tshiftfactorlong = 0;
+    private double _chi2termthreshold = 20;
+    private double _chi2percthreshold = 50;
 
     public void init(ConstantsManager manager, int runNo){
-        IndexedTable gain_balance = manager.getConstants(runNo, "/calibration/rtpc/gain_balance");
         IndexedTable time_offsets = manager.getConstants(runNo, "/calibration/rtpc/time_offsets");
         IndexedTable time_parms = manager.getConstants(runNo, "/calibration/rtpc/time_parms");
         IndexedTable recon_parms = manager.getConstants(runNo, "/calibration/rtpc/recon_parms");
         
+        _TrigWindSize = (int) recon_parms.getDoubleValue("Dtm", 1,1,3);
+        _chi2termthreshold = recon_parms.getDoubleValue("Dzm", 1,1,3);
+        _chi2percthreshold = recon_parms.getDoubleValue("Dphim",1,1,3);
         _timeadjlimit = (int) recon_parms.getDoubleValue("Dtm", 1,1,1);
         _zthreshTF = recon_parms.getDoubleValue("Dzm", 1,1,1);
         _phithreshTF = recon_parms.getDoubleValue("Dphim", 1,1,1);
+        _zthreshTFgap = recon_parms.getDoubleValue("Dzm", 1,1,4);
+        _phithreshTFgap = recon_parms.getDoubleValue("Dphim", 1,1,4);
         _adcthresh = recon_parms.getDoubleValue("ADCmin", 1,1,1);
         _minhitspertrack = (int) recon_parms.getDoubleValue("Hitmin",1,1,1);
+        _minhitspertrackreco = (int) recon_parms.getDoubleValue("Hitmin",1,1,2);
         _zthreshTD = recon_parms.getDoubleValue("Dzm", 1,1,2);
         _phithreshTD = recon_parms.getDoubleValue("Dphim", 1,1,2);
+        _zthreshTDgap = recon_parms.getDoubleValue("Dzm", 1,1,5);
+        _phithreshTDgap = recon_parms.getDoubleValue("Dphim", 1,1,5);
+        _TFtotaltracktimeflag = recon_parms.getDoubleValue("Dtm", 1,1,6);
+        _TFtotalpadtimeflag = recon_parms.getDoubleValue("Dtm", 1,1,7);
         _tthreshTD = (int) recon_parms.getDoubleValue("Dtm",1,1,2);
+        _tthreshTDgap = (int) recon_parms.getDoubleValue("Dtm",1,1,5);
         for(int i = 0; i < 5; i++){
-            _tmaxparms[i] = time_parms.getDoubleValue("z"+i, 1,1,1);
-            _toffparms[i] = time_parms.getDoubleValue("z"+i, 1,1,2);
-            _aphiparms[i] = time_parms.getDoubleValue("z"+i, 1,1,3);
-            _bphiparms[i] = time_parms.getDoubleValue("z"+i, 1,1,4);
-            _tgapparms[i] = time_parms.getDoubleValue("z"+i, 1,1,5);
-            _phigapparms[i] = time_parms.getDoubleValue("z"+i, 1,1,6);
+            _atparms[i] = time_parms.getDoubleValue("z"+i, 1,1,1);
+            _btparms[i] = time_parms.getDoubleValue("z"+i, 1,1,2);
+            _ctparms[i] = time_parms.getDoubleValue("z"+i, 1,1,3);
+            _aphiparms[i] = time_parms.getDoubleValue("z"+i, 1,1,4);
+            _bphiparms[i] = time_parms.getDoubleValue("z"+i, 1,1,5);
+            _cphiparms[i] = time_parms.getDoubleValue("z"+i, 1,1,6);
         }
         _tl = time_offsets.getDoubleValue("tl", 1,1,3);
         _tp = time_offsets.getDoubleValue("tp", 1,1,3);
         _tr = time_offsets.getDoubleValue("tr", 1,1,3);
         _tcathode = time_parms.getDoubleValue("z0", 1,1,7);
+        _tshiftfactorshort = time_parms.getDoubleValue("z1",1,1,7);
+        _tshiftfactorlong = time_parms.getDoubleValue("z2",1,1,7);
     }
     
     public int get_SignalStepSize(){return _SignalStepSize;} // step size of the signal before integration (arbitrary value)
@@ -121,19 +145,31 @@ public class HitParameters {
     public double get_phithreshTF(){return _phithreshTF;}
     public double get_zthreshTD(){return _zthreshTD;}
     public double get_phithreshTD(){return _phithreshTD;}
+    public double get_zthreshTFgap(){return _zthreshTFgap;}
+    public double get_phithreshTFgap(){return _phithreshTFgap;}
+    public double get_zthreshTDgap(){return _zthreshTDgap;}
+    public double get_phithreshTDgap(){return _phithreshTDgap;}
     public int get_tthreshTD(){return _tthreshTD;}
+    public int get_tthreshTDgap(){return _tthreshTDgap;}
     public double get_adcthresh(){return _adcthresh;}
     public int get_minhitspertrack(){return _minhitspertrack;}
-    public double[] get_tmaxparms(){return _tmaxparms;}
-    public double[] get_toffparms(){return _toffparms;}
+    public int get_minhitspertrackreco(){return _minhitspertrackreco;}
+    public double[] get_atparms(){return _atparms;}
+    public double[] get_btparms(){return _btparms;}
     public double[] get_aphiparms(){return _aphiparms;}
     public double[] get_bphiparms(){return _bphiparms;}
-    public double[] get_tgapparms(){return _tgapparms;}
-    public double[] get_phigapparms(){return _phigapparms;}
+    public double[] get_ctparms(){return _ctparms;}
+    public double[] get_cphiparms(){return _cphiparms;}
     public double get_tl(){return _tl;}
     public double get_tp(){return _tp;}
     public double get_tr(){return _tr;}
     public double get_tcathode(){return _tcathode;}
+    public double get_tshiftfactorshort(){return _tshiftfactorshort;}
+    public double get_tshiftfactorlong(){return _tshiftfactorlong;}
+    public double get_TFtotaltracktimeflag(){return _TFtotaltracktimeflag;}
+    public double get_TFtotalpadtimeflag(){return _TFtotalpadtimeflag;}
+    public double get_chi2termthreshold(){return _chi2termthreshold;}
+    public double get_chi2percthreshold(){return _chi2percthreshold;}
 
     public void set_ADCMap(ADCMap _ADCMap){this._ADCMap = _ADCMap;}
     public void set_TimeMap(HashMap<Integer, List<Double>> _TimeMap){this._TimeMap = _TimeMap;}

@@ -25,6 +25,8 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
     public static final double TI_CLOCK_FREQ = 250e6; // Hz
     
     protected final List<DaqScalers> scalers=new ArrayList<>();
+    
+    private Bank rcfgBank=null;
   
     public class Interval {
         private DaqScalers previous = null;
@@ -117,19 +119,51 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
     }
 
     /**
+     * @param event 
+     * @return the most recent DaqScalers for the given event
+     */
+    public DaqScalers get(Event event) {
+        event.read(this.rcfgBank);
+        return this.get(this.rcfgBank.getLong("timestamp", 0));
+    }
+
+    /**
      * @param timestamp TI timestamp (i.e. RUN::config.timestamp)
      * @return smallest interval of scaler readings around that timestamp
      */
     public Interval getInterval(long timestamp) {
         return this.getInterval(timestamp,timestamp);
     }
+    
+    /**
+     * @param event
+     * @return smallest interval of scaler readings around that event
+     */
+    public Interval getInterval(Event event) {
+        event.read(this.rcfgBank);
+        return this.getInterval(this.rcfgBank.getLong("timestamp", 0));
+    }
+
     /**
      * @param t1 first TI timestamp (i.e. RUN::config.timestamp)
      * @param t2 second TI timestamp
-     * @return an interval of scaler readings around those timestamps
+     * @return smallest interval of scaler readings around those timestamps
      */
     public Interval getInterval(long t1,long t2) {
         return new Interval(this,t1,t2);
+    }
+    
+    /**
+     * @param event1 first event
+     * @param event2 second event
+     * @return smallest interval of scaler readings around those events
+     */
+    public Interval getInterval(Event event1, Event event2) {
+        event1.read(this.rcfgBank);
+        final long t1 = this.rcfgBank.getLong("timestamp",0);
+        event2.read(this.rcfgBank);
+        final long t2 = this.rcfgBank.getLong("timestamp",0);
+        return this.getInterval(t1,t2);
     }
 
     /**
@@ -149,6 +183,10 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
             HipoReader reader = new HipoReader();
             reader.setTags(1);
             reader.open(filename);
+
+            if (seq.rcfgBank==null) {
+                seq.rcfgBank = new Bank(reader.getSchemaFactory().getSchema("RUN::config"));
+            }
         
             SchemaFactory schema = reader.getSchemaFactory();
         
