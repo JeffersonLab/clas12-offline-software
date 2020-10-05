@@ -258,6 +258,7 @@ public class TruthMatch extends ReconstructionEngine {
     private final int FTCALID = 10;
 
     private final int PHOTON_ID = 22;
+    private final int NEUTRON_ID = 2112;
 
     /**
      * ************************************************************************
@@ -867,7 +868,7 @@ public class TruthMatch extends ReconstructionEngine {
 
                 }
 
-                if (mcp.get(match.id).pid == PHOTON_ID) {
+                if (mcp.get(match.id).pid == PHOTON_ID || mcp.get(match.id).pid == NEUTRON_ID) {
                     match.pindex = getMaxEntryKey(matched_counts);
                     match.tid = -1;
                     match.nClsInRec = matched_counts.get(match.pindex).shortValue();
