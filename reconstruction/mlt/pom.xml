@@ -9,18 +9,6 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <build>
-      <plugins>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <configuration>
-                  <source>1.8</source>
-                  <target>1.8</target>
-              </configuration>
-          </plugin>
-      </plugins>
-  </build>
 
   <parent>
     <groupId>org.jlab.clas</groupId>
@@ -40,7 +28,7 @@
       <url>https://clasweb.jlab.org/jhep/maven</url>
     </repository>
   </repositories>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.jlab.coda</groupId>
@@ -59,7 +47,7 @@
       <artifactId>jnp-ai</artifactId>
       <version>2.0-SNAPSHOT</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-io</artifactId>
@@ -102,8 +90,47 @@
       <version>2.0-SNAPSHOT</version>
     </dependency>
 
-    
+
   </dependencies>
+
+
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ssh-external</artifactId>
+        <version>2.8</version>
+      </extension>
+    </extensions>
+    <plugins>
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+              <source>1.8</source>
+              <target>1.8</target>
+          </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.6</version>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id> <!-- this is used for inheritance merges -->
+            <phase>package</phase> <!-- bind to the packaging phase -->
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
