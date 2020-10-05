@@ -88,20 +88,25 @@ public class TruthMatch extends ReconstructionEngine {
         Map< Short, List<RecHit>> ftCalHits = getFTCalHits(event, mchits.get((byte) DetectorType.FTCAL.getDetectorId()));
         List<RecCluster> ftCalClusters = getFTCalClusters(event);
 
-
         /**
          * Getting CND Hits and Clusters
          */
-        
         Map<Short, List<RecHit>> cndHits = getCNDHits(event, mchits.get((byte) DetectorType.CND.getDetectorId()));
         List<RecCluster> cndClusters = getCNDClusters(event);
-        
+
+        /**
+         * Getting CTOF Hits and Clusters
+         */
+        Map<Short, List<RecHit>> ctofHits = getCTOFHits(event, mchits.get((byte) DetectorType.CND.getDetectorId()));
+        List<RecCluster> ctofClusters = getCTOFClusters(event);
+
         /**
          * Matchingg clusters to MCParticles
          */
         MatchClasters(ecalClusters, ecalHits, mchits.get((byte) DetectorType.ECAL.getDetectorId()));
         MatchClasters(ftCalClusters, ftCalHits, mchits.get((byte) DetectorType.FTCAL.getDetectorId()));
         MatchClasters(cndClusters, cndHits, mchits.get((byte) DetectorType.CND.getDetectorId()));
+        MatchClasters(ctofClusters, ctofHits, mchits.get((byte) DetectorType.CTOF.getDetectorId()));
 
         /**
          * Adding all clusters together
@@ -120,12 +125,19 @@ public class TruthMatch extends ReconstructionEngine {
         if (ftCalClusters != null) {
             allCls.addAll(ftCalClusters);
         }
-        
+
         /**
          * Adding CND clusters
          */
-        if( cndClusters != null ){
+        if (cndClusters != null) {
             allCls.addAll(cndClusters);
+        }
+
+        /**
+         * Adding CTOF clusters
+         */
+        if (cndClusters != null) {
+            allCls.addAll(ctofClusters);
         }
 
         Map<Short, List<RecCluster>> clsPerMCp = mapClustersToMCParticles(mcp.keySet(), allCls);
@@ -255,6 +267,7 @@ public class TruthMatch extends ReconstructionEngine {
     private final int DCID = 6;
     private final int ECALID = 7;
     private final int CNDID = 3;
+    private final int CTOFID = 4;
     private final int FTCALID = 10;
 
     private final int PHOTON_ID = 22;
@@ -540,8 +553,8 @@ public class TruthMatch extends ReconstructionEngine {
         for (int ihit = 0; ihit < hitsBank.rows(); ihit++) {
             RecHit curHit = new RecHit();
 
-            curHit.id = hitsBank.getShort("hitID", ihit);   // Not removing 1, as hitID start from 0
-            curHit.cid = (short) (hitsBank.getShort("clusterID", ihit) - 1);  // -1 for starting from 0
+            curHit.id = hitsBank.getShort("id", ihit) - 1;   // -1, as id start from 1
+            curHit.cid = (short) (hitsBank.getShort("clusterid", ihit) - 1);  // -1 for starting from 0
             if (curHit.cid == -2 || !mchitsInCND.containsKey(curHit.id)) {
                 continue; // The hit is not part of any cluster, or the hit it's corresponding MC hit is ignored
             }
@@ -549,6 +562,66 @@ public class TruthMatch extends ReconstructionEngine {
 
             curHit.pindex = clId2Pindex.get(curHit.cid);
             curHit.detector = (byte) DetectorType.CND.getDetectorId();
+
+            if (recHits.get(curHit.cid) == null) {
+                recHits.put(curHit.cid, new ArrayList<>());
+            }
+
+            recHits.get(curHit.cid).add(curHit);
+        }
+
+        return recHits;
+    }
+
+    Map< Short, List<RecHit>> getCTOFHits(DataEvent event, Map<Integer, MCHit> mchitsInCTOF) {
+        Map< Short, List<RecHit>> recHits = new HashMap<>();
+
+        if (mchitsInCTOF == null) {
+            /**
+             * If no MC hits present in the CTOF, then we stop here! no need to
+             * collect hits, as wee need only hits that are matched to an MChit
+             */
+            return recHits;
+        }
+
+        /**
+         * Check if three necessary banks exist otherwise will return null
+         */
+        if ((event.hasBank("CTOF::hits") == false) || (event.hasBank("CTOF::clusters") == false)
+                || (event.hasBank("REC::Scintillator") == false)) {
+            return null;
+        }
+
+        Map<Short, Short> clId2Pindex = new HashMap<>();
+        DataBank RecScintil = event.getBank("REC::Scintillator");
+
+        for (int iSC = 0; iSC < RecScintil.rows(); iSC++) {
+
+            // Rec scintillator has different detectors in it, so we want only CTOF responces in this case
+            if (RecScintil.getByte("detector", iSC) != (byte) DetectorType.CTOF.getDetectorId()) {
+                continue;
+            }
+
+            Short pindex = RecScintil.getShort("pindex", iSC);
+            Short index = RecScintil.getShort("index", iSC);
+
+            clId2Pindex.put(index, pindex);
+        }
+
+        DataBank hitsBank = event.getBank("CTOF::hits");
+
+        for (int ihit = 0; ihit < hitsBank.rows(); ihit++) {
+            RecHit curHit = new RecHit();
+
+            curHit.id = hitsBank.getShort("id", ihit) - 1;   // -1, as id starts from 1
+            curHit.cid = (short) (hitsBank.getShort("clusterid", ihit) - 1);  // -1 for starting from 0
+            if (curHit.cid == -1 || !mchitsInCTOF.containsKey(curHit.id)) {
+                continue; // The hit is not part of any cluster, or the hit it's corresponding MC hit is ignored
+            }
+            //System.out.println("Inside the hit loop:  the cid of the hit is " + curHit.cid);
+
+            curHit.pindex = clId2Pindex.get(curHit.cid);
+            curHit.detector = (byte) DetectorType.CTOF.getDetectorId();
 
             if (recHits.get(curHit.cid) == null) {
                 recHits.put(curHit.cid, new ArrayList<>());
@@ -641,21 +714,22 @@ public class TruthMatch extends ReconstructionEngine {
         List<RecCluster> cls = new ArrayList<>();
 
         /**
-         * Of course we need the REC::Scintillator bank. Though we don't need directly the CND::cluster bank,
-         * however without it REC::scintillator will not have entry with CND detector
+         * Of course we need the REC::Scintillator bank. Though we don't need
+         * directly the CND::cluster bank, however without it REC::scintillator
+         * will not have entry with CND detector
          */
-        if ( (event.hasBank("REC::Scintillator") == false) || (event.hasBank("CND::cluster") == false) ) {
+        if ((event.hasBank("REC::Scintillator") == false) || (event.hasBank("CND::cluster") == false)) {
             return cls;
         }
-        
+
         DataBank recSC = event.getBank("REC::Scintillator");
-        
-        for( int iSC = 0; iSC < recSC.rows(); iSC++ ){
-            
-            if( recSC.getByte("detector", iSC) != DetectorType.CND.getDetectorId() ){
+
+        for (int iSC = 0; iSC < recSC.rows(); iSC++) {
+
+            if (recSC.getByte("detector", iSC) != DetectorType.CND.getDetectorId()) {
                 continue;
             }
-            
+
             RecCluster curCl = new RecCluster();
             curCl.id = recSC.getShort("index", iSC);
             curCl.pindex = recSC.getShort("pindex", iSC);
@@ -666,7 +740,44 @@ public class TruthMatch extends ReconstructionEngine {
             curCl.size = -1; // For CND clusters this is not a relevant variable
             curCl.rectid = -1; // CND is not used for tracks
             curCl.superlayer = -1; // not applicable
-            
+
+            cls.add(curCl);
+        }
+
+        return cls;
+    }
+
+    List<RecCluster> getCTOFClusters(DataEvent event) {
+        List<RecCluster> cls = new ArrayList<>();
+
+        /**
+         * Of course we need the REC::Scintillator bank. Though we don't need
+         * directly the CTOF::cluster bank, however without it REC::scintillator
+         * will not have entry with CTOF detector
+         */
+        if ((event.hasBank("REC::Scintillator") == false) || (event.hasBank("CTOF::cluster") == false)) {
+            return cls;
+        }
+
+        DataBank recSC = event.getBank("REC::Scintillator");
+
+        for (int iSC = 0; iSC < recSC.rows(); iSC++) {
+
+            if (recSC.getByte("detector", iSC) != DetectorType.CTOF.getDetectorId()) {
+                continue;
+            }
+
+            RecCluster curCl = new RecCluster();
+            curCl.id = recSC.getShort("index", iSC);
+            curCl.pindex = recSC.getShort("pindex", iSC);
+            curCl.detector = recSC.getByte("detector", iSC);
+            curCl.layer = recSC.getByte("layer", iSC);
+            curCl.sector = recSC.getByte("sector", iSC);
+            curCl.energy = recSC.getFloat("energy", iSC);
+            curCl.size = -1; // For CTOF clusters this is not a relevant variable
+            curCl.rectid = -1; // CTOF is not used for tracks
+            curCl.superlayer = -1; // not applicable
+
             cls.add(curCl);
         }
 
@@ -811,6 +922,7 @@ public class TruthMatch extends ReconstructionEngine {
             Map<Short, Integer> matched_ECcounts = new HashMap<>();
             Map<Short, Integer> matched_FTCalcounts = new HashMap<>();
             Map<Short, Integer> matched_CNDcounts = new HashMap<>();
+            Map<Short, Integer> matched_CTOFcounts = new HashMap<>();
             Map<Short, Integer> matched_BSTcounts = new HashMap<>();
             Map<Short, Integer> matched_BMTcounts = new HashMap<>();
 
@@ -818,6 +930,7 @@ public class TruthMatch extends ReconstructionEngine {
             int nEC = 0;
             int nFTCal = 0;
             int nCND = 0;
+            int nCTOF = 0;
             int nBST = 0;
             int nBMT = 0;
 
@@ -863,6 +976,8 @@ public class TruthMatch extends ReconstructionEngine {
                             break;
                         case CNDID:
                             incrementMap(matched_CNDcounts, curCl.pindex);
+                        case CTOFID:
+                            incrementMap(matched_CTOFcounts, curCl.pindex);
                             break;
                     }
 
@@ -877,8 +992,8 @@ public class TruthMatch extends ReconstructionEngine {
                     if ((matched_PCalcounts.containsKey(match.pindex) && matched_PCalcounts.get(match.pindex) > 0)
                             || (matched_ECcounts.containsKey(match.pindex) && 0 < matched_ECcounts.get(match.pindex))
                             || (matched_FTCalcounts.containsKey(match.pindex) && matched_FTCalcounts.get(match.pindex) > 0)
-                            || (matched_CNDcounts.containsKey(match.pindex) && matched_CNDcounts.get(match.pindex) > 0)
-                            ) {
+                            || ((matched_CNDcounts.containsKey(match.pindex) && matched_CNDcounts.get(match.pindex) > 0)
+                            ||  (matched_CTOFcounts.containsKey(match.pindex) && matched_CTOFcounts.get(match.pindex) > 0))) {
                         match.reconstructable = 1;
                     } else {
                         match.reconstructable = 0;
