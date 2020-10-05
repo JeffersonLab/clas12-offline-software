@@ -130,13 +130,15 @@ public class TruthMatch extends ReconstructionEngine {
          * Adding CND clusters
          */
         if (cndClusters != null) {
+            System.out.println("Size of CND cluster is " + cndClusters.size() );
             allCls.addAll(cndClusters);
         }
 
         /**
          * Adding CTOF clusters
          */
-        if (cndClusters != null) {
+        if (ctofClusters != null) {
+            System.out.println("Size of CTOF cluster is " + ctofClusters.size() );
             allCls.addAll(ctofClusters);
         }
 
@@ -718,7 +720,7 @@ public class TruthMatch extends ReconstructionEngine {
          * directly the CND::cluster bank, however without it REC::scintillator
          * will not have entry with CND detector
          */
-        if ((event.hasBank("REC::Scintillator") == false) || (event.hasBank("CND::cluster") == false)) {
+        if ((event.hasBank("REC::Scintillator") == false) || (event.hasBank("CND::clusters") == false)) {
             return cls;
         }
 
@@ -755,7 +757,7 @@ public class TruthMatch extends ReconstructionEngine {
          * directly the CTOF::cluster bank, however without it REC::scintillator
          * will not have entry with CTOF detector
          */
-        if ((event.hasBank("REC::Scintillator") == false) || (event.hasBank("CTOF::cluster") == false)) {
+        if ((event.hasBank("REC::Scintillator") == false) || (event.hasBank("CTOF::clusters") == false)) {
             return cls;
         }
 
@@ -975,8 +977,10 @@ public class TruthMatch extends ReconstructionEngine {
                             incrementMap(matched_BSTcounts, curCl.pindex);
                             break;
                         case CNDID:
+                            System.out.println("******* Kuku The cluster is a CND Cluster");
                             incrementMap(matched_CNDcounts, curCl.pindex);
                         case CTOFID:
+                            System.out.println("******* Kuku The cluster is a CTOF Cluster");
                             incrementMap(matched_CTOFcounts, curCl.pindex);
                             break;
                     }
