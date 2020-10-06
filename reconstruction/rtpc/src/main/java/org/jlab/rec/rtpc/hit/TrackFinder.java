@@ -7,6 +7,7 @@
 package org.jlab.rec.rtpc.hit;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -23,7 +24,7 @@ public class TrackFinder {
     private List<Integer> PadList;
     private int TrigWindSize;
     private int StepSize = 120;//Bin Size of Dream Electronics Output
-    private double adcthresh = 1e-6; 
+    private double adcthresh = 0; 
     private int padloopsize;// = PadList.size();
     private boolean padSorted = false; 
     private List<Integer> padTIDlist = new ArrayList<>();
@@ -36,6 +37,11 @@ public class TrackFinder {
     private int minhitcount = 5; 
     private double zthresh = 16;
     private double phithresh = 0.16;
+    private double zthreshgap = 20;
+    private double phithreshgap = 0.20;
+    private double TFtotaltracktimeflag = 5000;
+    private double TFtotalpadtimeflag = 1000;
+    
 
     public TrackFinder(HitParameters params, boolean cosmic) {
         /*	
@@ -46,8 +52,12 @@ public class TrackFinder {
         minhitcount = params.get_minhitspertrack();
         zthresh = params.get_zthreshTF();
         phithresh = params.get_phithreshTF();
+        zthreshgap = params.get_zthreshTFgap();
+        phithreshgap = params.get_phithreshTFgap();
         ADCMap = params.get_ADCMap();
         PadList = params.get_PadList();
+        TFtotaltracktimeflag = params.get_TFtotaltracktimeflag();
+        TFtotalpadtimeflag = params.get_TFtotalpadtimeflag();
         
         TrigWindSize = params.get_TrigWindSize();
         padloopsize = PadList.size();
@@ -83,7 +93,7 @@ public class TrackFinder {
                                 PADCHECKLOOP: //Loop over pads 
                                 for(int checkpad : padlist) {		
                                     PadVector checkpadvec = params.get_padvector(checkpad);	
-                                    if(tutil.comparePads(PadVec, checkpadvec, method, cosmic, zthresh, phithresh)) { //compares the position of two pads
+                                    if(tutil.comparePads(PadVec, checkpadvec, method, cosmic, zthresh, zthreshgap, phithresh, phithreshgap)) { //compares the position of two pads
                                         track.addPad(time, pad);			//assign pad to track
                                         padSorted = true;				//flag set
                                         padTIDlist.add(tid);				//track the TID assigned
@@ -150,11 +160,14 @@ public class TrackFinder {
                         if(time > tmax) tmax = time;
                         if(time < tmin) tmin = time;
                     }
-                    if(tmax - tmin > 1000){
+                    if(tmax - tmin > TFtotalpadtimeflag){
                         t.flagTrack();
                         break;
                     }
                 }
+                List<Integer> times = t.getAllTimeSlices();
+                Collections.sort(times);
+                if(times.get(times.size()-1) - times.get(0) > TFtotaltracktimeflag) t.flagTrack();
             }
         }
         

@@ -112,68 +112,69 @@ public class EBAnalyzer {
         }
 
         // no good candidates, abort:
-        if (electronFT.size()<1 || chargedFD.size()<1) return;
+        if (electronFT.size()>0 && chargedFD.size()>0) {
         
-        // the index of the FT particle with the best FT-FD timing-match:
-        int iMinTimeDiffFT = -1;
+            // the index of the FT particle with the best FT-FD timing-match:
+            int iMinTimeDiffFT = -1;
 
-        // anything relevant must be better than half-bucket:
-        double minTimeDiff = this.ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH)/2;
+            // anything relevant must be better than half-bucket:
+            double minTimeDiff = this.ccdb.getDouble(EBCCDBEnum.RF_BUCKET_LENGTH)/2;
 
-        // loop over FT electron candidates:
-        for (int itag=0; itag<electronFT.size(); itag++) {
+            // loop over FT electron candidates:
+            for (int itag=0; itag<electronFT.size(); itag++) {
 
-            // calculate RF-corrected FT start time:
-            final double startTimeFT = ebrf.getStartTime(electronFT.get(itag),DetectorType.FTCAL,-1);
+                // calculate RF-corrected FT start time:
+                final double startTimeFT = ebrf.getStartTime(electronFT.get(itag),DetectorType.FTCAL,-1);
             
-            // loop over FD charged particles:
-            for (int ifd=0; ifd<chargedFD.size(); ifd++) {
+                // loop over FD charged particles:
+                for (int ifd=0; ifd<chargedFD.size(); ifd++) {
 
-                final DetectorResponse ftof1a = chargedFTOF.get(ifd);
-                final double pFD = chargedFD.get(ifd).vector().mag();
-                final double pathFD = chargedFD.get(ifd).getPathLength(ftof1a.getPosition());
+                    final DetectorResponse ftof1a = chargedFTOF.get(ifd);
+                    final double pFD = chargedFD.get(ifd).vector().mag();
+                    final double pathFD = chargedFD.get(ifd).getPathLength(ftof1a.getPosition());
                     
-                for (int pid : hypotheses) {
+                    for (int pid : hypotheses) {
 
-                    // ignore if measured charge doesn't match hypothesis charge:
-                    if (PDGDatabase.getParticleById(pid).charge() !=
-                            chargedFD.get(ifd).getCharge()) {
-                        continue;
-                    }
+                        // ignore if measured charge doesn't match hypothesis charge:
+                        if (PDGDatabase.getParticleById(pid).charge() !=
+                                chargedFD.get(ifd).getCharge()) {
+                            continue;
+                        }
                     
-                    // calculate beta and vertex time based on measured
-                    // momentum and this pid hypothesis:
-                    final double beta = pFD /
-                            Math.sqrt(pFD*pFD + Math.pow(PDGDatabase.getParticleMass(pid),2));
-                    final double vtxTimeFD = ftof1a.getTime() -
-                        pathFD/PhysicsConstants.speedOfLight()/beta;
-
-                    // check for a new best FT-FD timing match:
-                    if (Math.abs(vtxTimeFD-startTimeFT) < Math.abs(minTimeDiff)) {
-                        minTimeDiff = vtxTimeFD-startTimeFT;
-                        iMinTimeDiffFT = itag;
+                        // calculate beta and vertex time based on measured
+                        // momentum and this pid hypothesis:
+                        final double beta = pFD /
+                                Math.sqrt(pFD*pFD + Math.pow(PDGDatabase.getParticleMass(pid),2));
+                        final double vtxTimeFD = ftof1a.getTime() -
+                                pathFD/PhysicsConstants.speedOfLight()/beta;
+                        
+                        // check for a new best FT-FD timing match:
+                        if (Math.abs(vtxTimeFD-startTimeFT) < Math.abs(minTimeDiff)) {
+                            minTimeDiff = vtxTimeFD-startTimeFT;
+                            iMinTimeDiffFT = itag;
+                        }
                     }
                 }
             }
-        }
        
-        // no good FT, abort:
-        if (iMinTimeDiffFT<0) return;
+            if (iMinTimeDiffFT>=0) {
 
-        // reassign trigger particle:
-        for (DetectorParticle p : event.getParticles()) {
-            p.setTriggerParticle(false);
+                // reassign trigger particle:
+                for (DetectorParticle p : event.getParticles()) {
+                    p.setTriggerParticle(false);
+                }
+                electronFT.get(iMinTimeDiffFT).setTriggerParticle(true);
+
+                // set start time:
+                final double startTime = ebrf.getStartTime(electronFT.get(iMinTimeDiffFT),DetectorType.FTCAL,-1);
+                event.getEventHeader().setStartTimeFT(startTime);
+                assignParticleStartTimes(event,DetectorType.FTCAL,-1);
+
+                // recalculate betas, pids, etc:
+                this.assignBetas(event,true);
+                this.assignPids(event,true);
+            }
         }
-        electronFT.get(iMinTimeDiffFT).setTriggerParticle(true);
-
-        // set start time:
-        final double startTime = ebrf.getStartTime(electronFT.get(iMinTimeDiffFT),DetectorType.FTCAL,-1);
-        event.getEventHeader().setStartTimeFT(startTime);
-        assignParticleStartTimes(event,DetectorType.FTCAL,-1);
-        
-        // recalculate betas, pids, etc:
-        this.assignBetas(event,true);
-        this.assignPids(event,true);
         this.assignNeutralMomenta(event);
     }
     
@@ -190,50 +191,50 @@ public class EBAnalyzer {
         if (event.getParticles().size() <= 0) return;
 
         DetectorParticle trigger = event.getTriggerParticle();
-        if (trigger==null) return;
+        if (trigger!=null) {
 
-        // priority is to identify a trigger time:
-        boolean foundTriggerTime=false;
-        double startTime=-1000;
+            // priority is to identify a trigger time:
+            boolean foundTriggerTime=false;
+            double startTime=-1000;
 
-        // electron/positron/pion is trigger particle:
-        if (trigger.getPid()==11 || trigger.getPid()==-11 ||
-            trigger.getPid()==211 || trigger.getPid()==-211) {
+            // electron/positron/pion is trigger particle:
+            if (trigger.getPid()==11 || trigger.getPid()==-11 ||
+                    trigger.getPid()==211 || trigger.getPid()==-211) {
 
-            trigger.setBeta(trigger.getTheoryBeta(trigger.getPid()));
-            trigger.setMass(PDGDatabase.getParticleById(trigger.getPid()).mass());
+                trigger.setBeta(trigger.getTheoryBeta(trigger.getPid()));
+                trigger.setMass(PDGDatabase.getParticleById(trigger.getPid()).mass());
 
-            // prefer FTOF Panel 1B:
-            if (trigger.hasHit(DetectorType.FTOF, 2)==true){
-                startTime = ebrf.getStartTime(trigger,DetectorType.FTOF,2);
-                assignParticleStartTimes(event,DetectorType.FTOF,2);
-                foundTriggerTime = true;
+                // prefer FTOF Panel 1B:
+                if (trigger.hasHit(DetectorType.FTOF, 2)==true){
+                    startTime = ebrf.getStartTime(trigger,DetectorType.FTOF,2);
+                    assignParticleStartTimes(event,DetectorType.FTOF,2);
+                    foundTriggerTime = true;
+                }
+
+                // else use FTOF Panel 1A:
+                else if (trigger.hasHit(DetectorType.FTOF, 1)==true){
+                    startTime = ebrf.getStartTime(trigger,DetectorType.FTOF,1);
+                    assignParticleStartTimes(event,DetectorType.FTOF,1);
+                    foundTriggerTime = true;
+                }
             }
 
-            // else use FTOF Panel 1A:
-            else if (trigger.hasHit(DetectorType.FTOF, 1)==true){
-                startTime = ebrf.getStartTime(trigger,DetectorType.FTOF,1);
-                assignParticleStartTimes(event,DetectorType.FTOF,1);
-                foundTriggerTime = true;
+            // neutral is trigger particle:
+            else if (trigger.getPid()==0 || trigger.getPid()==22) {
+                trigger.setBeta(1.0);
+                trigger.setMass(0.0);
+                // TODO:  implement full neutral trigger start time?
+                //foundTriggerTime=true;
+            }
+
+            // we found event start time, so set it and do pid:
+            if (foundTriggerTime) {
+                event.getEventHeader().setStartTime(startTime);
+                this.assignBetas(event,false);
+                this.assignPids(event,false);
             }
         }
-
-        // neutral is trigger particle:
-        else if (trigger.getPid()==0 || trigger.getPid()==22) {
-            trigger.setBeta(1.0);
-            trigger.setMass(0.0);
-            // TODO:  implement full neutral trigger start time?
-            //foundTriggerTime=true;
-        }
-
-        // we found event start time, so set it and do pid:
-        if (foundTriggerTime) {
-            event.getEventHeader().setStartTime(startTime);
-            this.assignBetas(event,false);
-            this.assignPids(event,false);
-            this.assignNeutralMomenta(event);
-        }
-
+        this.assignNeutralMomenta(event);
     }
 
     /**

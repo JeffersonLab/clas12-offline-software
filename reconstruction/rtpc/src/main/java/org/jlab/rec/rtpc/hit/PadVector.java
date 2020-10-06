@@ -25,17 +25,25 @@ public class PadVector {
     private double z_pad;
 	
     public PadVector(int padnum){			
-        chan = (double)padnum;       
+        chan = padnum;       
         col = (chan-1)%Num_of_Cols+1;
-        row=(chan-col)/Num_of_Cols;
-        z_shift = row%4;
+        row=(chan-col)/Num_of_Cols+1;
+        z_shift = (row-1)%4;
 
-        phi_pad=(row*phi_per_pad)+(phi_per_pad/2.0);
+        /*phi_pad=((row-1)*phi_per_pad)+(phi_per_pad/2.0);
 
         if(phi_pad>= 2.0*PI) {
             phi_pad -= 2.0*PI;
         }
         if(phi_pad<0){
+            phi_pad += 2.0*PI;
+        }*/
+        phi_pad = Math.toRadians((row-1)*2 + 1);
+       
+        if(phi_pad >= PI) {
+            phi_pad -= 2.0*PI;
+        }
+        if(phi_pad < -PI){
             phi_pad += 2.0*PI;
         }
 
@@ -47,7 +55,12 @@ public class PadVector {
             z_pad);
          
     }
-
+    public double row(){
+        return row;
+    }
+    public double col(){
+        return col;
+    }
     public double x(){
             return _vec.x(); 
     }
@@ -58,6 +71,10 @@ public class PadVector {
 
     public double z(){
             return _vec.z();
+    }
+    
+    public double r(){
+        return _vec.rho();
     }
 
     public double phi(){
