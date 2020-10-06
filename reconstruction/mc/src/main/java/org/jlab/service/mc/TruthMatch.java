@@ -130,7 +130,6 @@ public class TruthMatch extends ReconstructionEngine {
          * Adding CND clusters
          */
         if (cndClusters != null) {
-            System.out.println("Size of CND cluster is " + cndClusters.size() );
             allCls.addAll(cndClusters);
         }
 
@@ -138,7 +137,6 @@ public class TruthMatch extends ReconstructionEngine {
          * Adding CTOF clusters
          */
         if (ctofClusters != null) {
-            System.out.println("Size of CTOF cluster is " + ctofClusters.size() );
             allCls.addAll(ctofClusters);
         }
 
@@ -291,6 +289,7 @@ public class TruthMatch extends ReconstructionEngine {
 
         Map<Short, MCPart> mcp = new HashMap<>();
 
+
         for (int i = 0; i < mcpart.rows(); i++) {
 
             MCPart curPart = new MCPart();
@@ -348,8 +347,9 @@ public class TruthMatch extends ReconstructionEngine {
              * particle
              *
              */
-            if (hit.detector != (byte) DetectorType.ECAL.getDetectorId() && hit.detector != (byte) DetectorType.FTCAL.getDetectorId()
-                    && mcp.get((short) tid) == null) {
+            if (hit.detector != (byte) DetectorType.ECAL.getDetectorId() && hit.detector != (byte) DetectorType.FTCAL.getDetectorId() &&
+                    hit.detector != (byte) DetectorType.CND.getDetectorId() && hit.detector != (byte) DetectorType.CTOF.getDetectorId() &&
+                    mcp.get((short) tid) == null) {
                 continue;
             } else if (mcp.get((short) (hit.otid)).pid != 22 && mcp.get((short) (hit.otid)).pid != 2112) {
                 continue;
@@ -419,9 +419,6 @@ public class TruthMatch extends ReconstructionEngine {
 
         DataBank hitsBank = event.getBank("ECAL::hits");
 
-//        for (Short theKey : clId2Pindex.keySet()) {
-//            System.out.println("The Key of clId2Pindex is " + theKey + "The value is " + clId2Pindex.get(theKey));
-//        }
         for (int ihit = 0; ihit < hitsBank.rows(); ihit++) {
             RecHit curHit = new RecHit();
 
@@ -430,7 +427,6 @@ public class TruthMatch extends ReconstructionEngine {
             if (curHit.cid == -2 || !mchitsInECal.containsKey(curHit.id)) {
                 continue; // The hit is not part of any cluster, or the hit it's corresponding MC hit is ignored
             }
-            //System.out.println("Inside the hit loop:  the cid of the hit is " + curHit.cid);
             curHit.pindex = clId2Pindex.get(curHit.cid);
             curHit.detector = (byte) DetectorType.ECAL.getDetectorId();
 
@@ -476,7 +472,6 @@ public class TruthMatch extends ReconstructionEngine {
 
             clId2Pindex.put(index, pindex);
 
-            //System.out.println("Map clId2Pindex:   index = " + index + "pindex = " + pindex);
         }
 
         DataBank hitsBank = event.getBank("FTCAL::hits");
@@ -489,7 +484,6 @@ public class TruthMatch extends ReconstructionEngine {
             if (curHit.cid == -2 || !mchitsInFTCal.containsKey(curHit.id)) {
                 continue; // The hit is not part of any cluster, or the hit it's corresponding MC hit is ignored
             }
-            //System.out.println("Inside the hit loop:  the cid of the hit is " + curHit.cid);
 
             /**
              * For FTCal not necessarily all clusters are associated to a rec
@@ -547,7 +541,6 @@ public class TruthMatch extends ReconstructionEngine {
 
             clId2Pindex.put(index, pindex);
 
-            //System.out.println("Map clId2Pindex:   index = " + index + "pindex = " + pindex);
         }
 
         DataBank hitsBank = event.getBank("CND::hits");
@@ -560,7 +553,6 @@ public class TruthMatch extends ReconstructionEngine {
             if (curHit.cid == -2 || !mchitsInCND.containsKey(curHit.id)) {
                 continue; // The hit is not part of any cluster, or the hit it's corresponding MC hit is ignored
             }
-            //System.out.println("Inside the hit loop:  the cid of the hit is " + curHit.cid);
 
             curHit.pindex = clId2Pindex.get(curHit.cid);
             curHit.detector = (byte) DetectorType.CND.getDetectorId();
@@ -620,7 +612,6 @@ public class TruthMatch extends ReconstructionEngine {
             if (curHit.cid == -1 || !mchitsInCTOF.containsKey(curHit.id)) {
                 continue; // The hit is not part of any cluster, or the hit it's corresponding MC hit is ignored
             }
-            //System.out.println("Inside the hit loop:  the cid of the hit is " + curHit.cid);
 
             curHit.pindex = clId2Pindex.get(curHit.cid);
             curHit.detector = (byte) DetectorType.CTOF.getDetectorId();
@@ -649,7 +640,6 @@ public class TruthMatch extends ReconstructionEngine {
 
         DataBank recCal = event.getBank("REC::Calorimeter");
 
-        //System.out.println("# of Cluster in the event is " + recCal.rows());
         for (int iCl = 0; iCl < recCal.rows(); iCl++) {
             RecCluster curCl = new RecCluster();
 
@@ -840,12 +830,6 @@ public class TruthMatch extends ReconstructionEngine {
                         matchMCParts.put(mchit.otid, matchMCParts.get(mchit.otid) + 1);
                     }
                 } else {
-                    //System.err.println("******* No MC hit is matched to this RecHit");
-
-//                    for (int hitn : mchits.keySet()) {
-//                        System.err.println("hitn is " + hitn + " otid is " + mchits.get(hitn).otid);
-//                    }
-//                    System.err.println(curRecHit.toString());
                 }
 
             }
@@ -865,7 +849,6 @@ public class TruthMatch extends ReconstructionEngine {
             if (maxEntry != null) {
                 cl.nHitMatched = maxEntry.getValue();
                 cl.mcotid = maxEntry.getKey().shortValue();
-                //System.out.println("Final otid is  " + maxEntry.getKey() + "and # of matched hits is " + maxEntry.getValue());
             }
 
         }
@@ -887,7 +870,6 @@ public class TruthMatch extends ReconstructionEngine {
             map.put(theKey, new ArrayList<>());
         }
 
-        //System.out.println(" ** ** ** Size of the cls is " + cls.size());
         for (RecCluster curCl : cls) {
 
             if (map.get(curCl.mcotid) == null) {
@@ -898,12 +880,6 @@ public class TruthMatch extends ReconstructionEngine {
             map.get(curCl.mcotid).add(curCl);
         }
 
-        System.out.println(" ** ** ** Size of the Map is " + map.size());
-        
-        for( Short mapKey : map.keySet() ){
-            System.out.println("Size of the list with Key = " + mapKey + " is " + map.get(mapKey).size() );
-        }
-        
         return map;
     }
 
@@ -956,8 +932,6 @@ public class TruthMatch extends ReconstructionEngine {
 
                     final int det = (int) curCl.detector;
 
-                    System.out.println("The detector of the cluster is " + det);
-                    
                     /**
                      * Can not use swith with with det.getdetectorID() so will
                      * make
@@ -984,10 +958,8 @@ public class TruthMatch extends ReconstructionEngine {
                             incrementMap(matched_BSTcounts, curCl.pindex);
                             break;
                         case CNDID:
-                            System.out.println("******* Kuku The cluster is a CND Cluster");
                             incrementMap(matched_CNDcounts, curCl.pindex);
                         case CTOFID:
-                            System.out.println("******* Kuku The cluster is a CTOF Cluster");
                             incrementMap(matched_CTOFcounts, curCl.pindex);
                             break;
                     }
@@ -1004,7 +976,7 @@ public class TruthMatch extends ReconstructionEngine {
                             || (matched_ECcounts.containsKey(match.pindex) && 0 < matched_ECcounts.get(match.pindex))
                             || (matched_FTCalcounts.containsKey(match.pindex) && matched_FTCalcounts.get(match.pindex) > 0)
                             || ((matched_CNDcounts.containsKey(match.pindex) && matched_CNDcounts.get(match.pindex) > 0)
-                            ||  (matched_CTOFcounts.containsKey(match.pindex) && matched_CTOFcounts.get(match.pindex) > 0))) {
+                            || (matched_CTOFcounts.containsKey(match.pindex) && matched_CTOFcounts.get(match.pindex) > 0))) {
                         match.reconstructable = 1;
                     } else {
                         match.reconstructable = 0;
