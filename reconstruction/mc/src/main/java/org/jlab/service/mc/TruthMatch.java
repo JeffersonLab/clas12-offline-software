@@ -898,7 +898,12 @@ public class TruthMatch extends ReconstructionEngine {
             map.get(curCl.mcotid).add(curCl);
         }
 
-        //System.out.println(" ** ** ** Size of the Map is " + map.size());
+        System.out.println(" ** ** ** Size of the Map is " + map.size());
+        
+        for( Short mapKey : map.keySet() ){
+            System.out.println("Size of the list with Key = " + mapKey + " is " + map.get(mapKey).size() );
+        }
+        
         return map;
     }
 
@@ -951,6 +956,8 @@ public class TruthMatch extends ReconstructionEngine {
 
                     final int det = (int) curCl.detector;
 
+                    System.out.println("The detector of the cluster is " + det);
+                    
                     /**
                      * Can not use swith with with det.getdetectorID() so will
                      * make
