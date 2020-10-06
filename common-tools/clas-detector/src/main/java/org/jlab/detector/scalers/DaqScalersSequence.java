@@ -1,4 +1,4 @@
-package org.jlab.detector.decode;
+package org.jlab.detector.scalers;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -10,6 +10,7 @@ import org.jlab.jnp.hipo4.io.HipoReader;
 import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
+import org.jlab.detector.scalers.DaqScalers;
 
 /**
  * For easy access to most recent scaler readout for any given event.
@@ -40,15 +41,15 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
         }
         public double getBeamChargeGated() {
             if (previous!=null && next!=null) {
-                return this.next.getBeamChargeGated()
-                      -this.previous.getBeamChargeGated();
+                return this.next.dsc2.getBeamChargeGated()
+                      -this.previous.dsc2.getBeamChargeGated();
             }
             return 0;
         }
         public double getBeamCharge() {
             if (previous!=null && next!=null) {
-                return this.next.getBeamCharge()
-                      -this.previous.getBeamCharge();
+                return this.next.dsc2.getBeamCharge()
+                      -this.previous.dsc2.getBeamCharge();
             }
             return 0;
         }
@@ -264,7 +265,7 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
                 else {
                     good++;
                     // do something useful with beam charge here:
-                    System.out.println(timestamp+" "+ds.getBeamCharge()+" "+ds.getBeamChargeGated());
+                    System.out.println(timestamp+" "+ds.dsc2.getBeamCharge()+" "+ds.dsc2.getBeamChargeGated());
                 }
             }
 

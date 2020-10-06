@@ -11,8 +11,8 @@ import org.jlab.jnp.hipo4.io.HipoWriterSorted;
 
 import org.jlab.utils.system.ClasUtilsFile;
 
-import org.jlab.detector.decode.DaqScalers;
-import org.jlab.detector.decode.DaqScalersSequence;
+import org.jlab.detector.scalers.DaqScalers;
+import org.jlab.detector.scalers.DaqScalersSequence;
 
 import org.jlab.detector.helicity.HelicityBit;
 import org.jlab.detector.helicity.HelicitySequenceManager;
@@ -110,9 +110,11 @@ public class Tag1ToEvent {
                 HelicityBit hb = helSeq.search(event);
                 DaqScalers ds = chargeSeq.get(event);
 
-                // write helicity to REC::Event:
+                // count helicity good/bad;
                 if (Math.abs(hb.value())==1) goodHelicity++;
                 else badHelicity++;
+
+                // write heliicty to REC::Event:
                 if (doHelicity) {
                     recEventBank.putByte("helicity",0,hb.value());
                 }
@@ -122,8 +124,8 @@ public class Tag1ToEvent {
                 else {
                     goodCharge++;
                     if (doBeamCharge) {
-                        recEventBank.putFloat("beamCharge",0,ds.getBeamChargeGated());
-                        recEventBank.putDouble("liveTime",0,ds.getLivetime());
+                        recEventBank.putFloat("beamCharge",0, (float) ds.dsc2.getBeamChargeGated());
+                        recEventBank.putDouble("liveTime",0,ds.dsc2.getLivetime());
                     }
                 }
 
