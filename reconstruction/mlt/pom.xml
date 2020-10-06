@@ -118,6 +118,9 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
+          <excludes>
+              <exclude>**/jlab/clara/* </exclude>
+          </excludes>
         </configuration>
         <executions>
           <execution>

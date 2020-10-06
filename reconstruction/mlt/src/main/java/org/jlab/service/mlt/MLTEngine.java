@@ -95,9 +95,9 @@ public class MLTEngine extends ReconstructionEngine {
     }
     
     public String getEnvironment(){
-        String result = System.getenv("CLAS12_DIR");
+        String result = System.getenv("CLAS12DIR");
         if(result==null){
-            result = System.getProperty("CLAS12_DIR");
+            result = System.getProperty("CLAS12DIR");
         }
         return result;
     }
@@ -111,7 +111,9 @@ public class MLTEngine extends ReconstructionEngine {
 
             try {
                 networkNegative = MultiLayerNetwork.load(new File(fileNegative), false);
+                System.out.println("LOADING AI : " + fileNegative);
                 networkPositive = MultiLayerNetwork.load(new File(filePositive), false);
+                System.out.println("LOADING AI : " + filePositive);
             } catch (IOException ex) {
                 Logger.getLogger(MLTEngine.class.getName()).log(Level.SEVERE, null, ex);
             }
