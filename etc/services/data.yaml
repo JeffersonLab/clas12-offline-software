@@ -21,8 +21,8 @@ services:
   - class: org.jlab.service.dc.DCHBClustering
     name: DCRC
 # This is where the AI plugin would go.  THe AI code reads the HB clusters.  
-#  - class: org.jlab.service.mlt.MLTEngine
-#    name: MLT
+  - class: org.jlab.service.mlt.MLTEngine
+    name: MLT
 # DC using clustering: regular HB tracking
   - class: org.jlab.service.dc.DCHBPostClusterConv
     name: DCRPC
