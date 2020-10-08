@@ -367,37 +367,38 @@ public class DCTBEngine extends DCEngine {
             matchedTrks.add(new MC(i, d_theta, d_phi));
         }
         Collections.sort(matchedTrks);
-        
-        if(matchedTrks.get(0).dtheta<0.5 && matchedTrks.get(0).dphi<0.3) {
-            int index = matchedTrks.get(0).i;
-            mcTrack = new Track();
-            mcTrack.addAll(track);
-            mcTrack.set_ListOfHBSegments(track.get_ListOfHBSegments());
-            double vx = (double)bank.getFloat("vx", index);
-            double vy = (double)bank.getFloat("vy", index);
-            double vz = (double)bank.getFloat("vz", index);
-            double px = (double)bank.getFloat("px", index);
-            double py = (double)bank.getFloat("py", index);
-            double pz = (double)bank.getFloat("pz", index);
-            mcTrack.set_Vtx0(new Point3D(vx,vy,vz));
-            mcTrack.set_pAtOrig(new Vector3D(px,py,pz));
-            mcTrack.set_Id(track.get_Id());
-            mcTrack.set_Q(track.get_Q());
-            mcTrack.set_P(mcTrack.get_pAtOrig().mag());
-            StateVec sv = new StateVec();
-            dcSwim.SetSwimParameters(vx,vy,vz, px,py,pz,track.get_Q());
-            double[] R = dcSwim.SwimToPlaneLab(250);
-            if(R==null)
-                return mcTrack;
-            Cross C = new Cross(track.get(track.size() - 1).get_Sector(), track.get(track.size() - 1).get_Region(), -1);
+        if(matchedTrks.size()>0) {
+            if(matchedTrks.get(0).dtheta<0.6 && matchedTrks.get(0).dphi<1.2) {
+                int index = matchedTrks.get(0).i;
+                mcTrack = new Track();
+                mcTrack.addAll(track);
+                mcTrack.set_ListOfHBSegments(track.get_ListOfHBSegments());
+                double vx = (double)bank.getFloat("vx", index);
+                double vy = (double)bank.getFloat("vy", index);
+                double vz = (double)bank.getFloat("vz", index);
+                double px = (double)bank.getFloat("px", index);
+                double py = (double)bank.getFloat("py", index);
+                double pz = (double)bank.getFloat("pz", index);
+                mcTrack.set_Vtx0(new Point3D(vx,vy,vz));
+                mcTrack.set_pAtOrig(new Vector3D(px,py,pz));
+                mcTrack.set_Id(track.get_Id());
+                mcTrack.set_Q(track.get_Q());
+                mcTrack.set_P(mcTrack.get_pAtOrig().mag());
+                StateVec sv = new StateVec();
+                dcSwim.SetSwimParameters(vx,vy,vz, px,py,pz,track.get_Q());
+                double[] R = dcSwim.SwimToPlaneLab(250);
+                if(R==null)
+                    return mcTrack;
+                Cross C = new Cross(track.get(track.size() - 1).get_Sector(), track.get(track.size() - 1).get_Region(), -1);
 
-            Point3D trX = C.getCoordsInTiltedSector(R[0], R[1], R[2]);
-            Point3D trP = C.getCoordsInTiltedSector(R[3], R[4], R[5]);
-            sv.set(trX.x(), trX.y(), 
-                    trP.x()/ trP.z(), 
-                    trP.y()/ trP.z());
-            sv.setZ(trX.z());
-            mcTrack.setFinalStateVec(sv);
+                Point3D trX = C.getCoordsInTiltedSector(R[0], R[1], R[2]);
+                Point3D trP = C.getCoordsInTiltedSector(R[3], R[4], R[5]);
+                sv.set(trX.x(), trX.y(), 
+                        trP.x()/ trP.z(), 
+                        trP.y()/ trP.z());
+                sv.setZ(trX.z());
+                mcTrack.setFinalStateVec(sv);
+            }
         }
         
         return mcTrack;
