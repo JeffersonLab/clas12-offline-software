@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 import cnuphys.magfield.FloatVect;
+import cnuphys.magfield.GridCoordinate;
+import cnuphys.magfield.MagneticFields;
+import cnuphys.magfield.Solenoid;
+import cnuphys.magfield.Torus;
 
 /**
  * Convert the new ascii maps to the old ascii format so that they can then be
@@ -292,9 +296,9 @@ public class Converter {
 									System.err.println(
 											"PHIINDX: " + phiIndex + "  RHOINDX: " + rhoIndex + "  ZINDX:  " + iVal);
 
-									double x = Double.parseDouble(tokens[0]) /10;
-									double y = Double.parseDouble(tokens[1]) /10;
-									double z = Double.parseDouble(tokens[2]) /10;
+									double x = Double.parseDouble(tokens[0]) / 10;
+									double y = Double.parseDouble(tokens[1]) / 10;
+									double z = Double.parseDouble(tokens[2]) / 10;
 									double phi = Math.toDegrees(Math.atan2(y, x));
 									double rho = Math.hypot(x, y);
 									System.err.println("PHI: " + phi + "   rho: " + rho + "   z: " + z);
@@ -554,6 +558,218 @@ public class Converter {
 
 		public double del() {
 			return (max - min) / (n - 1);
+		}
+
+	}
+	
+	/**
+	 * Convert the in memory solenoid to GEMC format
+	 */
+	public static void memoryToGEMCSolenoidConverter() {
+		Solenoid solenoid = MagneticFields.getInstance().getSolenoid();
+		if (solenoid == null) {
+			System.err.println("No in-map solenoid.");
+			System.exit(-1);
+		}
+		
+		String mapCreationDate = solenoid.getCreationDate();
+		mapCreationDate=  mapCreationDate.replace("/", "_");
+		mapCreationDate=  mapCreationDate.replace(":", "_");
+		mapCreationDate=  mapCreationDate.replace(" ", "_");
+		
+
+		File afile = new File(getDataDir(), "gemc_solenoid_" + mapCreationDate + ".dat");
+		System.out.println("GEMC file at [" + afile.getPath() + "]");
+
+		if (afile.exists()) {
+			afile.delete();
+		}
+		
+		GridCoordinate gcR = solenoid.getQ2Coordinate();
+		GridCoordinate gcZ = solenoid.getQ3Coordinate();
+		
+		int nR = gcR.getNumPoints();
+		int nZ = gcZ.getNumPoints();
+		
+		double rMin = gcR.getMin()/100.;  //meters
+		double rMax = gcR.getMax()/100.;  //meters
+		double zMin = gcZ.getMin()/100.;  //meters
+		double zMax = gcZ.getMax()/100.;  //meters
+
+		try {
+			PrintWriter writer = new PrintWriter(new FileOutputStream(afile));
+			
+			// write the header
+
+			int indentLevel = 0;
+			writeln(writer, indentLevel, false, "<mfield>");
+			indentLevel++;
+
+			writeln(writer, indentLevel, true, "description name=\"" + "clas12-newSolenoid"
+					+ "\" factory=\"ASCII\" comment=\"clas12 superconducting solenoid\"");
+
+			writeln(writer, indentLevel, true,
+					"symmetry type=\"" + "cylindrical-z\""
+							+ " format=\"map\" integration=\"ClassicalRK4\" minStep=\"0.01*mm\"");
+
+			writeln(writer, indentLevel, false, "<map>");
+			indentLevel++;
+
+			writeln(writer, indentLevel, false, "<coordinate>");
+			indentLevel++;
+			
+			
+			String s1 = String.format("<%s name=\"%s\" npoints=\"%d\" min=\"%d\" max=\"%d\" units=\"%s\"/>", "first", "transverse", nR, (int)rMin, (int)rMax, "m");
+			String s2 = String.format("<%s name=\"%s\" npoints=\"%d\" min=\"%d\" max=\"%d\" units=\"%s\"/>", "second", "longitudinal", nZ, (int)zMin, (int)zMax, "m");
+
+			writeln(writer, indentLevel, false, s1);
+			writeln(writer, indentLevel, false, s2);
+
+			indentLevel--;
+			writeln(writer, indentLevel, false, "</coordinate>");
+
+			writeln(writer, indentLevel, true, "field unit=\"T\"");
+
+			indentLevel--;
+			writeln(writer, indentLevel, false, "</map>");
+
+			indentLevel--;
+			writeln(writer, indentLevel, false, "</mfield>");
+			
+			
+			double valuesR[] = gcR.getValues();
+			double valuesZ[] = gcZ.getValues();
+			
+			for (int iR = 0; iR < valuesR.length; iR++) {
+				double r = valuesR[iR];
+				for (int iZ = 0; iZ < valuesZ.length; iZ++) {
+					double z = valuesZ[iZ];
+					
+					int compIndex = solenoid.getCompositeIndex(0, iR, iZ);
+					
+					double bR = solenoid.getB2(compIndex);
+					double bZ = solenoid.getB3(compIndex);
+					
+					String s = String.format("%-6.3f %-6.3f %-11.5e %-11.5e", r/100, z/100, bR/10, bZ/10);
+					writeln(writer, 0, false, s);
+				}				
+			}
+						
+			
+			writer.flush();
+			writer.close();
+
+
+		}
+		catch (Exception e) {
+			
+		}
+
+	}
+	
+	
+	/**
+	 * Convert the in memory torus to GEMC format
+	 */
+	public static void memoryToGEMCTorusConverter() {
+		Torus torus = MagneticFields.getInstance().getTorus();
+		if (torus == null) {
+			System.err.println("No in-map torus.");
+			System.exit(-1);
+		}
+		
+		String mapCreationDate = torus.getCreationDate();
+		mapCreationDate=  mapCreationDate.replace("/", "_");
+		mapCreationDate=  mapCreationDate.replace(":", "_");
+		mapCreationDate=  mapCreationDate.replace(" ", "_");
+		
+
+		File afile = new File(getDataDir(), "gemc_torus_" + mapCreationDate + ".dat");
+		System.out.println("GEMC file at [" + afile.getPath() + "]");
+
+		if (afile.exists()) {
+			afile.delete();
+		}
+		
+		GridCoordinate gcP = torus.getQ1Coordinate();
+		GridCoordinate gcR = torus.getQ2Coordinate();
+		GridCoordinate gcZ = torus.getQ3Coordinate();
+		
+		int nR = gcR.getNumPoints();
+		int nZ = gcZ.getNumPoints();
+		
+		double rMin = gcR.getMin()/100.;  //meters
+		double rMax = gcR.getMax()/100.;  //meters
+		double zMin = gcZ.getMin()/100.;  //meters
+		double zMax = gcZ.getMax()/100.;  //meters
+
+		try {
+			PrintWriter writer = new PrintWriter(new FileOutputStream(afile));
+			
+			// write the header
+
+			int indentLevel = 0;
+			writeln(writer, indentLevel, false, "<mfield>");
+			indentLevel++;
+
+			writeln(writer, indentLevel, true, "description name=\"" + "clas12-newSolenoid"
+					+ "\" factory=\"ASCII\" comment=\"clas12 superconducting solenoid\"");
+
+			writeln(writer, indentLevel, true,
+					"symmetry type=\"" + "cylindrical-z\""
+							+ " format=\"map\" integration=\"ClassicalRK4\" minStep=\"0.01*mm\"");
+
+			writeln(writer, indentLevel, false, "<map>");
+			indentLevel++;
+
+			writeln(writer, indentLevel, false, "<coordinate>");
+			indentLevel++;
+			
+			
+			String s1 = String.format("<%s name=\"%s\" npoints=\"%d\" min=\"%d\" max=\"%d\" units=\"%s\"/>", "first", "transverse", nR, (int)rMin, (int)rMax, "m");
+			String s2 = String.format("<%s name=\"%s\" npoints=\"%d\" min=\"%d\" max=\"%d\" units=\"%s\"/>", "second", "longitudinal", nZ, (int)zMin, (int)zMax, "m");
+
+			writeln(writer, indentLevel, false, s1);
+			writeln(writer, indentLevel, false, s2);
+
+			indentLevel--;
+			writeln(writer, indentLevel, false, "</coordinate>");
+
+			writeln(writer, indentLevel, true, "field unit=\"T\"");
+
+			indentLevel--;
+			writeln(writer, indentLevel, false, "</map>");
+
+			indentLevel--;
+			writeln(writer, indentLevel, false, "</mfield>");
+			
+//			
+//			double valuesR[] = gcR.getValues();
+//			double valuesZ[] = gcZ.getValues();
+//			
+//			for (int iR = 0; iR < valuesR.length; iR++) {
+//				double r = valuesR[iR];
+//				for (int iZ = 0; iZ < valuesZ.length; iZ++) {
+//					double z = valuesZ[iZ];
+//					
+//					int compIndex = solenoid.getCompositeIndex(0, iR, iZ);
+//					
+//					double bR = solenoid.getB2(compIndex);
+//					double bZ = solenoid.getB3(compIndex);
+//					
+//					String s = String.format("%-6.3f %-6.3f %-11.8f %-11.8f", r/100, z/100, bR/10, bZ/10);
+//					writeln(writer, 0, false, s);
+//				}				
+//			}
+//						
+			
+			writer.flush();
+			writer.close();
+
+
+		}
+		catch (Exception e) {
+			
 		}
 
 	}
