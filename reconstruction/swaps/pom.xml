@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <project xmlns="http://maven.apache.org/POM/4.0.0"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.jlab.clas12.detector</groupId>
+  <artifactId>clas12detector-swaps</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <build>
+      <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <configuration>
+                  <source>1.8</source>
+                  <target>1.8</target>
+              </configuration>
+          </plugin>
+      </plugins>
+  </build>
+
+  <parent>
+    <groupId>org.jlab.clas</groupId>
+    <artifactId>clas12rec</artifactId>
+    <relativePath>../../parent/pom.xml</relativePath>
+    <version>6.5.11-SNAPSHOT</version>
+  </parent>
+
+  <repositories>
+    <repository>
+      <id>clas12maven</id>
+      <url>https://clasweb.jlab.org/clas12maven</url>
+    </repository>
+  </repositories>
+  
+  <dependencies>
+
+    <dependency>
+      <groupId>org.jlab.clas</groupId>
+      <artifactId>clas-utils</artifactId>
+      <version>6.5.11-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jlab.clas</groupId>
+      <artifactId>clas-detector</artifactId>
+      <version>6.5.11-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jlab.clas</groupId>
+      <artifactId>clas-io</artifactId>
+      <version>6.5.11-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jlab.clas</groupId>
+      <artifactId>clas-reco</artifactId>
+      <version>6.5.11-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jlab.clas</groupId>
+      <artifactId>clas-analysis</artifactId>
+      <version>6.5.11-SNAPSHOT</version>
+    </dependency>
+
+  </dependencies>
+ </project>
