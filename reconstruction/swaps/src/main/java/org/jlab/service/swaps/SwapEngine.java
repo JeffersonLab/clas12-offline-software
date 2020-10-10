@@ -14,16 +14,16 @@ import org.jlab.jnp.hipo4.data.SchemaFactory;
  * Modifies ADC/TDC banks based on two CCDB timestamps, the standard one for
  * ReconstructionEngine and this one's previousTimestamp.  The result is HIPO
  * files decoded with previousTimestamp get modified as if they were decoded
- * timestamp.
+ * with the new timestamp.
  * 
- *@author baltzell
+ * @author baltzell
  */
 public class SwapEngine extends ReconstructionEngine {
 
     public static final String CURRENT_CCDB_VARIATION = "swaps";
     public static final String PREVIOUS_CCDB_VARIATION = "default";
 
-	public static final String[] DET_NAMES = {"FTCAL","FTHODO","FTTRK","LTCC","ECAL","FTOF","HTCC","DC","CTOF","CND","BST","RF","BMT","FMT","RICH","HEL","BAND","RTPC"};
+    public static final String[] DET_NAMES = {"FTCAL","FTHODO","FTTRK","LTCC","ECAL","FTOF","HTCC","DC","CTOF","CND","BST","RF","BMT","FMT","RICH","HEL","BAND","RTPC"};
 
     SwapManager swapman = null;
     ConstantsManager previousConman = new ConstantsManager();
@@ -34,20 +34,20 @@ public class SwapEngine extends ReconstructionEngine {
     private class Detector {
         String name;
         String table;
-        public List<String> banks;
+        public List<String> banks = new ArrayList<>();
         public Detector(String name,String table) {
             this.name = name;
             this.table = table;
         }
     }
-    
+
     public SwapEngine(String name){
         super(name,"baltzell","1.0");
     }
 
     private void updateBank(int run,String tableName,DataBank bank) {
         final int nvars = bank.getDescriptor().hasEntry("order") ? 4 : 3;
-        final int type = bank.getDescriptor().getName().contains("adc") ? SwapManager.ADC : SwapManager.TDC;
+        final int type = bank.getDescriptor().getName().contains("adc") ? Swap.ADC : Swap.TDC;
         for (int irow=0; irow<bank.rows(); irow++) {
             int[] slco = new int[nvars];
             slco[0] = (int)bank.getByte("sector",irow);
@@ -60,7 +60,7 @@ public class SwapEngine extends ReconstructionEngine {
             if (nvars==4) bank.setByte("order",irow,(byte)swapman.get(type,run,tableName,"order",slco));
         }
     }
-    
+
     @Override
     public boolean processDataEvent(DataEvent event) {
         DataBank bank = event.getBank("RUN::config");
@@ -76,10 +76,14 @@ public class SwapEngine extends ReconstructionEngine {
         return true;
     }
 
-    private void initNames() {
+    /**
+     * Initialize the appropriate bank names and corresponding translation
+     * table names, based on the given detector names.
+     */
+    private void initNames(List<String> detectorNames) {
         SchemaFactory schema = new SchemaFactory();
         schema.initFromDirectory(System.getenv("CLAS12DIR")+"/etc/bankdefs/hipo4");
-        for (String detName : this.detectorNames) {
+        for (String detName : detectorNames) {
             // some detectors broke the bank/table naming convention:
             String tableName = detName.equals("BST") ? "/daq/tt/svt" : "/daq/tt/"+detName.toLowerCase();
             Detector det = new Detector(detName,tableName);
@@ -94,6 +98,11 @@ public class SwapEngine extends ReconstructionEngine {
         }
     }
 
+    /**
+     * Interpret the user's request list of detectors to unswap.
+     * @param userDets a CSV string of detector names, or null for everything
+     * @return whether userDets was valid
+     */
     private boolean initDetectors(String userDets) {
         List<String> allDets = Arrays.asList(DET_NAMES);
         if (userDets == null) {
@@ -106,6 +115,7 @@ public class SwapEngine extends ReconstructionEngine {
                     this.detectorNames.add(userDet);
                 }
                 else {
+                    this.detectorNames.clear();
                     System.err.println("["+this.getName()+"] --> Invalid detector name from YAML:  "+userDet);
                     System.err.println("["+this.getName()+"] --> Valid detector names:  "+String.join(",",allDets));
                     return false;
@@ -114,7 +124,7 @@ public class SwapEngine extends ReconstructionEngine {
         }
         return true;
     }
-   
+
     @Override
     public boolean init() {
 
@@ -137,9 +147,9 @@ public class SwapEngine extends ReconstructionEngine {
         if (!this.initDetectors(this.getEngineConfigString("detectors"))) {
             return false;
         }
-       
+ 
         // initialize the bank and translation table names that will be used:
-        this.initNames();
+        this.initNames(this.detectorNames);
 
         // initialize old translation tables:
         this.previousConman.setTimeStamp(previousTimestamp);
@@ -152,9 +162,9 @@ public class SwapEngine extends ReconstructionEngine {
 
         // initialize the swapper:
         this.swapman = new SwapManager(tableNames,previousConman,this.getConstantsManager());
-        
+
         System.out.println("["+this.getName()+"] --> swaps are ready....");
         return true;
     }
-    
+
 }
