@@ -5,9 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
-import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.io.base.DataBank;
-import org.jlab.jnp.hipo4.data.SchemaFactory;
 
 /**
  *
@@ -20,29 +18,11 @@ import org.jlab.jnp.hipo4.data.SchemaFactory;
  */
 public class SwapEngine extends ReconstructionEngine {
 
-    public static final String CURRENT_CCDB_VARIATION = "swaps";
-    public static final String PREVIOUS_CCDB_VARIATION = "default";
-
-    public static final String[] DET_NAMES = {"FTCAL","FTHODO","FTTRK","LTCC","ECAL","FTOF","HTCC","DC","CTOF","CND","BST","RF","BMT","FMT","RICH","HEL","BAND","RTPC"};
-
     SwapManager swapman = null;
-    ConstantsManager previousConman = new ConstantsManager();
-    List<String> detectorNames = new ArrayList<>();
-    List<Detector> detectors = new ArrayList<>();
-    List<String> tableNames = new ArrayList<>();
+    SwapManager.Detector[] detectors = null;
 
-    private class Detector {
-        String name;
-        String table;
-        public List<String> banks = new ArrayList<>();
-        public Detector(String name,String table) {
-            this.name = name;
-            this.table = table;
-        }
-    }
-
-    public SwapEngine(String name){
-        super(name,"baltzell","1.0");
+    public SwapEngine() {
+        super("SwapEngine","baltzell","1.0");
     }
 
     private void updateBank(int run,String tableName,DataBank bank) {
@@ -65,61 +45,12 @@ public class SwapEngine extends ReconstructionEngine {
     public boolean processDataEvent(DataEvent event) {
         DataBank bank = event.getBank("RUN::config");
         int run = bank.getInt("run",0);
-        for (int idet=0; idet<detectors.size(); idet++) {
-            for (int ibank=0; ibank<detectors.get(idet).banks.size(); ibank++) {
-                bank = event.getBank(detectors.get(idet).banks.get(ibank));
-                event.removeBank(detectors.get(idet).banks.get(ibank));
-                this.updateBank(run,detectors.get(idet).table,bank);
+        for (SwapManager.Detector det : this.detectors) {
+            for (int ibank=0; ibank<det.banks.size(); ibank++) {
+                bank = event.getBank(det.banks.get(ibank));
+                event.removeBank(det.banks.get(ibank));
+                this.updateBank(run,det.table,bank);
                 event.appendBank(bank);
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Initialize the appropriate bank names and corresponding translation
-     * table names, based on the given detector names.
-     */
-    private void initNames(List<String> detectorNames) {
-        SchemaFactory schema = new SchemaFactory();
-        schema.initFromDirectory(System.getenv("CLAS12DIR")+"/etc/bankdefs/hipo4");
-        for (String detName : detectorNames) {
-            // some detectors broke the bank/table naming convention:
-            String tableName = detName.equals("BST") ? "/daq/tt/svt" : "/daq/tt/"+detName.toLowerCase();
-            Detector det = new Detector(detName,tableName);
-            this.tableNames.add(tableName);
-            if (schema.hasSchema(detName+":adc")) {
-                det.banks.add(detName+":adc");
-            }
-            if (schema.hasSchema(detName+":tdc")) {
-                det.banks.add(detName+":tdc");
-            }
-            this.detectors.add(det);
-        }
-    }
-
-    /**
-     * Interpret the user's request list of detectors to unswap.
-     * @param userDets a CSV string of detector names, or null for everything
-     * @return whether userDets was valid
-     */
-    private boolean initDetectors(String userDets) {
-        List<String> allDets = Arrays.asList(DET_NAMES);
-        if (userDets == null) {
-            System.out.println("["+this.getName()+"] --> No detectors specified in YAML, assuming all.");
-            this.detectorNames.addAll(allDets);
-        }
-        else {
-            for (String userDet : userDets.split(",")) {
-                if (allDets.contains(userDet)) {
-                    this.detectorNames.add(userDet);
-                }
-                else {
-                    this.detectorNames.clear();
-                    System.err.println("["+this.getName()+"] --> Invalid detector name from YAML:  "+userDet);
-                    System.err.println("["+this.getName()+"] --> Valid detector names:  "+String.join(",",allDets));
-                    return false;
-                }
             }
         }
         return true;
@@ -142,27 +73,28 @@ public class SwapEngine extends ReconstructionEngine {
             System.err.println("["+this.getName()+"] --> Missing previousTimestamp in YAML.");
             return false;
         }
+        
+        // get timestamp for new translation tables:
+        String currentTimestamp = this.getEngineConfigString("timestamp");
 
-        // select detector list:
-        if (!this.initDetectors(this.getEngineConfigString("detectors"))) {
-            return false;
+        // select detector list, initialize bank and translation table names:
+        List<String> dets = new ArrayList<>();
+        if (this.getEngineConfigString("detectors") == null) {
+            System.out.println("["+this.getName()+"] --> No detectors specified in YAML, assuming all.");
         }
- 
-        // initialize the bank and translation table names that will be used:
-        this.initNames(this.detectorNames);
+        else {
+            dets.addAll(Arrays.asList(this.getEngineConfigString("detectors").split(",")));
+        }
 
-        // initialize old translation tables:
-        this.previousConman.setTimeStamp(previousTimestamp);
-        this.previousConman.setVariation(PREVIOUS_CCDB_VARIATION);
-        this.previousConman.init(tableNames);
+        System.out.println("["+this.getName()+"] --> Setting current variation : "+SwapManager.DEF_CURRENT_CCDB_VARIATION);
+        System.out.println("["+this.getName()+"] --> Setting previous variation : "+SwapManager.DEF_PREVIOUS_CCDB_VARIATION);
+        System.out.println("["+this.getName()+"] --> Setting current timestamp : "+currentTimestamp);
+        System.out.println("["+this.getName()+"] --> Setting previous timestamp : "+previousTimestamp);
+        System.out.println("["+this.getName()+"] --> Setting detectors : "+this.getEngineConfigString("detectors"));
 
-        // initialize new translation tables:
-        requireConstants(tableNames);
-        this.getConstantsManager().setVariation(CURRENT_CCDB_VARIATION);
-
-        // initialize the swapper:
-        this.swapman = new SwapManager(tableNames,previousConman,this.getConstantsManager());
-
+        this.swapman = new SwapManager(dets,previousTimestamp,currentTimestamp);
+        this.detectors = this.swapman.getDetectors();
+       
         System.out.println("["+this.getName()+"] --> swaps are ready....");
         return true;
     }

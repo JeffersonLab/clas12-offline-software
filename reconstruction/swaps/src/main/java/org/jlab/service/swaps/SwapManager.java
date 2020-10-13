@@ -1,9 +1,11 @@
 package org.jlab.service.swaps;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import org.jlab.detector.calib.utils.ConstantsManager;
+import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -17,18 +19,78 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class SwapManager {
 
-    HashMap<Integer,HashMap<String,Swap>> swaps = new HashMap<>();
-    List<String> tableNames = new ArrayList<>();
-    ConstantsManager prevConman;
-    ConstantsManager currConman;
+    public static final String DEF_CURRENT_CCDB_VARIATION = "swaps";
+    public static final String DEF_PREVIOUS_CCDB_VARIATION = "default";
+    public static final String[] DEF_DETECTOR_NAMES = {
+        "FTCAL",
+        "FTHODO",
+        "FTTRK",
+        "LTCC",
+        "ECAL",
+        "FTOF",
+        "HTCC",
+        "DC",
+        "CTOF",
+        "CND",
+        "BST",
+        "RF",
+        "BMT",
+        "FMT",
+        "RICH",
+        "HEL",
+        "BAND",
+        "RTPC"
+    };
+
+    private final HashMap<Integer,HashMap<String,Swap>> swaps = new HashMap<>();
+    private final List<String> tableNames = new ArrayList<>();
+    private final List<String> detectorNames = new ArrayList<>();
+    private final List<Detector> detectors = new ArrayList<>();
+    private final ConstantsManager prevConman;
+    private final ConstantsManager currConman;
+
+    public Detector[] getDetectors() {
+        return (Detector[]) this.detectors.toArray();
+    }
+    
+    public class Detector {
+        String name;
+        String table;
+        public List<String> banks = new ArrayList<>();
+        public Detector(String name,String table) {
+            this.name = name;
+            this.table = table;
+        }
+    }
 
     /**
-     * @param tableNames list of CCDB translation table names to be available for swapping
+     * @param detectorNames
+     * @param prevTimestamp in CCDB format:  MM/DD/YYYY
+     * @param currTimestamp in CCDB format:  MM/DD/YYYY
+     */
+    public SwapManager(List<String> detectorNames, String prevTimestamp,String currTimestamp) {
+        this.initDetectors(detectorNames);
+        this.prevConman = new ConstantsManager();
+        this.currConman = new ConstantsManager();
+        this.prevConman.setTimeStamp(prevTimestamp);
+        this.prevConman.setVariation(DEF_PREVIOUS_CCDB_VARIATION);
+        this.prevConman.init(this.tableNames);
+        if (currTimestamp != null) this.currConman.setTimeStamp(currTimestamp);
+        this.currConman.setVariation(DEF_CURRENT_CCDB_VARIATION);
+        this.currConman.init(this.tableNames);
+        //System.err.println("Previous Timestamp: "+prevTimestamp);
+        //System.err.println("Current Timestamp: "+currTimestamp);
+        //System.err.println("Previous Variation: "+DEF_PREVIOUS_CCDB_VARIATION);
+        //System.err.println("Current Variation: "+DEF_CURRENT_CCDB_VARIATION);
+    }
+
+    /**
+     * @param detectorNames
      * @param previous timestamp/variation used for translation tables during decoding
      * @param current timestamp/variation with correct translation tables
      */
-    public SwapManager(List<String> tableNames,ConstantsManager previous,ConstantsManager current) {
-        this.tableNames.addAll(tableNames);
+    public SwapManager(List<String> detectorNames,ConstantsManager previous,ConstantsManager current) {
+        this.initDetectors(detectorNames);
         this.prevConman = previous;
         this.currConman = current;
     }
@@ -61,4 +123,63 @@ public class SwapManager {
             this.swaps.get(run).put(tableName,new Swap(prev,curr));
         }
     }
+
+    @Override
+    public String toString() {
+        String ret = "";
+        for (int run : this.swaps.keySet()) {
+            for (String table : this.swaps.get(run).keySet()) {
+                ret += this.swaps.get(run).get(table);
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * Initialize the appropriate bank names and corresponding translation
+     * table names, based on the given detector names.
+     */
+    private void initNames(List<String> detectorNames) {
+        SchemaFactory schema = new SchemaFactory();
+        schema.initFromDirectory(System.getenv("CLAS12DIR")+"/etc/bankdefs/hipo4");
+        for (String detName : detectorNames) {
+            // some detectors broke the bank/table naming convention:
+            String tableName = detName.equals("BST") ? "/daq/tt/svt" : "/daq/tt/"+detName.toLowerCase();
+            Detector det = new Detector(detName,tableName);
+            this.tableNames.add(tableName);
+            if (schema.hasSchema(detName+":adc")) {
+                det.banks.add(detName+":adc");
+            }
+            if (schema.hasSchema(detName+":tdc")) {
+                det.banks.add(detName+":tdc");
+            }
+            this.detectors.add(det);
+        }
+    }
+
+    public final void initDetectors(List<String> detectorNames) {
+        List<String> allDets = Arrays.asList(DEF_DETECTOR_NAMES);
+        if (detectorNames == null || detectorNames.isEmpty()) {
+            this.detectorNames.addAll(allDets);
+        }
+        else {
+            for (String detectorName : detectorNames) {
+                if (allDets.contains(detectorName)) {
+                    this.detectorNames.add(detectorName);
+                }
+                else {
+                    this.detectorNames.clear();
+                    throw new RuntimeException("[SwapManager] --> Invalid detector name:  "+detectorName);
+                }
+            }
+        }
+        this.initNames(this.detectorNames);
+    }
+
+    public static void main(String[] args) {
+        SwapManager man = new SwapManager(Arrays.asList("BST","BMT"),"08/10/2020","10/13/2020");
+        man.get(Swap.ADC, 11014, man.tableNames.get(0),"sector",1,1,1,1);
+        //System.out.println("SwapManager:  "+man); 
+    }
+
 }
