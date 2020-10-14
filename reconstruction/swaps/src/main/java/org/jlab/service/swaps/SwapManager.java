@@ -42,7 +42,7 @@ public class SwapManager {
         "RTPC"
     };
 
-    private final HashMap<Integer,HashMap<String,Swap>> swaps = new HashMap<>();
+    private final HashMap<Integer,HashMap<String,SwapTable>> swaps = new HashMap<>();
     private final List<String> tableNames = new ArrayList<>();
     private final List<String> detectorNames = new ArrayList<>();
     private final List<Detector> detectors = new ArrayList<>();
@@ -78,10 +78,6 @@ public class SwapManager {
         if (currTimestamp != null) this.currConman.setTimeStamp(currTimestamp);
         this.currConman.setVariation(DEF_CURRENT_CCDB_VARIATION);
         this.currConman.init(this.tableNames);
-        //System.err.println("Previous Timestamp: "+prevTimestamp);
-        //System.err.println("Current Timestamp: "+currTimestamp);
-        //System.err.println("Previous Variation: "+DEF_PREVIOUS_CCDB_VARIATION);
-        //System.err.println("Current Variation: "+DEF_CURRENT_CCDB_VARIATION);
     }
 
     /**
@@ -97,18 +93,17 @@ public class SwapManager {
 
     /**
      * Get an unswapped value. 
-     * @param adctdc 0/1 = ADC/TDC
      * @param run run number
      * @param tableName CCDB translation table name, e.g. "/daq/tt/ecal"
      * @param varName name of new variable to retrieve (sector/layer/component/order)
      * @param slco array of old variables (sector/layer/component/order)
      * @return new value of the requested variable
      */
-    public int get(int adctdc,int run,String tableName,String varName,int... slco) {
+    public int get(int run,String tableName,String varName,int... slco) {
         if (!this.swaps.containsKey(run)) {
             this.add(run);
         }
-        return this.swaps.get(run).get(tableName).get(adctdc,varName,slco);
+        return this.swaps.get(run).get(tableName).get(varName,slco);
     }
 
     /**
@@ -120,7 +115,7 @@ public class SwapManager {
         for (String tableName : tableNames) {
             IndexedTable prev = prevConman.getConstants(run, tableName);
             IndexedTable curr = currConman.getConstants(run, tableName);
-            this.swaps.get(run).put(tableName,new Swap(prev,curr));
+            this.swaps.get(run).put(tableName,new SwapTable(prev,curr));
         }
     }
 
@@ -177,9 +172,9 @@ public class SwapManager {
     }
 
     public static void main(String[] args) {
-        SwapManager man = new SwapManager(Arrays.asList("BST","BMT"),"08/10/2020","10/13/2020");
-        man.get(Swap.ADC, 11014, man.tableNames.get(0),"sector",1,1,1,1);
-        //System.out.println("SwapManager:  "+man); 
+        SwapManager man = new SwapManager(Arrays.asList("BMT"),"08/10/2020","10/13/2020");
+        man.get(11014, man.tableNames.get(0),"sector",3,6,8,0);
+        //System.out.println("SwapManager:\n"+man);
     }
 
 }
