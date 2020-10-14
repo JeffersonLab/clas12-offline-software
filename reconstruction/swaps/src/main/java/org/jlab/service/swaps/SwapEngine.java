@@ -19,7 +19,6 @@ import org.jlab.io.base.DataBank;
 public class SwapEngine extends ReconstructionEngine {
 
     SwapManager swapman = null;
-    SwapManager.Detector[] detectors = null;
 
     public SwapEngine() {
         super("SwapEngine","baltzell","1.0");
@@ -43,11 +42,11 @@ public class SwapEngine extends ReconstructionEngine {
     public boolean processDataEvent(DataEvent event) {
         DataBank bank = event.getBank("RUN::config");
         final int run = bank.getInt("run",0);
-        for (SwapManager.Detector det : this.detectors) {
-            for (int ibank=0; ibank<det.banks.size(); ibank++) {
-                bank = event.getBank(det.banks.get(ibank));
-                event.removeBank(det.banks.get(ibank));
-                this.updateBank(run,det.table,bank);
+        for (String detectorName : this.swapman.getDetectors()) {
+            for (String bankName : this.swapman.getBanks(detectorName)) {
+                bank = event.getBank(bankName);
+                event.removeBank(bankName);
+                this.updateBank(run,this.swapman.getTable(detectorName),bank);
                 event.appendBank(bank);
             }
         }
@@ -91,7 +90,6 @@ public class SwapEngine extends ReconstructionEngine {
         System.out.println("["+this.getName()+"] --> Setting detectors : "+this.getEngineConfigString("detectors"));
 
         this.swapman = new SwapManager(dets,previousTimestamp,currentTimestamp);
-        this.detectors = this.swapman.getDetectors();
        
         System.out.println("["+this.getName()+"] --> swaps are ready....");
         return true;

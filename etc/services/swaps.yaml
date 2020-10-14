@@ -18,6 +18,6 @@ configuration:
     SWAPS:
       timestamp: 10/13/2020
       previousTimestamp: 08/10/2020
-      detectors: "BMT,BST"
+      detectors: "BMT"
 mime-types:
   - binary/data-hipo

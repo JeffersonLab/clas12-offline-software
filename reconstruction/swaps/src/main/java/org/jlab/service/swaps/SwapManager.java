@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.jlab.detector.calib.utils.ConstantsManager;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.utils.groups.IndexedTable;
@@ -45,21 +47,37 @@ public class SwapManager {
     private final HashMap<Integer,HashMap<String,SwapTable>> swaps = new HashMap<>();
     private final List<String> tableNames = new ArrayList<>();
     private final List<String> detectorNames = new ArrayList<>();
-    private final List<Detector> detectors = new ArrayList<>();
+    private final Map<String,Detector> detectors = new HashMap<>();
     private final ConstantsManager prevConman;
     private final ConstantsManager currConman;
 
-    public Detector[] getDetectors() {
-        return (Detector[]) this.detectors.toArray();
+    public Set<String> getDetectors() {
+        return this.detectors.keySet();
+    }
+    public String getTable(String detectorName) {
+        return this.detectors.get(detectorName).table;
+    }
+    public List<String> getBanks(String detectorName) {
+        return this.detectors.get(detectorName).getBanks();
     }
     
     public class Detector {
-        String name;
-        String table;
-        public List<String> banks = new ArrayList<>();
+        private final String name;
+        private final String table;
+        private final List<String> banks;
         public Detector(String name,String table) {
+            this.banks = new ArrayList<>();
             this.name = name;
             this.table = table;
+        }
+        public List<String> getBanks() {
+            //List<String> ret=new ArrayList<>();
+            return this.banks;
+        }
+        public void addBank(String b){this.banks.add(b);}
+        @Override
+        public String toString() {
+            return this.name+":"+this.table+":"+String.join(":",this.banks);
         }
     }
 
@@ -137,18 +155,20 @@ public class SwapManager {
     private void initNames(List<String> detectorNames) {
         SchemaFactory schema = new SchemaFactory();
         schema.initFromDirectory(System.getenv("CLAS12DIR")+"/etc/bankdefs/hipo4");
+        //schema.initFromDirectory("/Users/baltzell/cos-iss611-swaps/coatjava/etc/bankdefs/hipo4/");
+        //schema.show();
         for (String detName : detectorNames) {
             // some detectors broke the bank/table naming convention:
             String tableName = detName.equals("BST") ? "/daq/tt/svt" : "/daq/tt/"+detName.toLowerCase();
             Detector det = new Detector(detName,tableName);
             this.tableNames.add(tableName);
-            if (schema.hasSchema(detName+":adc")) {
-                det.banks.add(detName+":adc");
+            if (schema.hasSchema(detName+"::adc")) {
+                det.banks.add(detName+"::adc");
             }
-            if (schema.hasSchema(detName+":tdc")) {
-                det.banks.add(detName+":tdc");
+            if (schema.hasSchema(detName+"::tdc")) {
+                det.banks.add(detName+"::tdc");
             }
-            this.detectors.add(det);
+            this.detectors.put(detName,det);
         }
     }
 
