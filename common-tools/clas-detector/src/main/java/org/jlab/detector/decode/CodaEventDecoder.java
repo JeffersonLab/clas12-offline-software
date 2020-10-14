@@ -154,15 +154,14 @@ public class CodaEventDecoder {
                 if(Math.abs(tiEntries.get(i).getTimeStamp()-tiEntries.get(i0).getTimeStamp())>deltaTS) {
                     tiSync=false;
                     if(this.timeStampErrors<100) {
-                        System.out.println("WARNING: mismatch in TI time stamps: crate " 
+                        System.err.println("WARNING: mismatch in TI time stamps: crate " 
                                         + tiEntries.get(i).getDescriptor().getCrate() + " reports " 
                                         + tiEntries.get(i).getTimeStamp() + " instead of the " + ts
                                         + " from crate " + tiEntries.get(i0).getDescriptor().getCrate());
-                        this.timeStampErrors++;
                     }
-                }
-                if(this.timeStampErrors==100) {
-                    System.out.println("Reached the maximum number of timeStamp errors (100)");
+                    else if(this.timeStampErrors==100) {
+                        System.err.println("WARNING: reached the maximum number of timeStamp errors (100), supressing future warnings.");
+                    }
                     this.timeStampErrors++;
                 }
             }
