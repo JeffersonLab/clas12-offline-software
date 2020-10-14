@@ -174,7 +174,7 @@ public class SwapManager {
     public static void main(String[] args) {
         SwapManager man = new SwapManager(Arrays.asList("BMT"),"08/10/2020","10/13/2020");
         man.get(11014, man.tableNames.get(0),"sector",3,6,8,0);
-        //System.out.println("SwapManager:\n"+man);
+        System.out.println("SwapManager:\n"+man);
     }
 
 }

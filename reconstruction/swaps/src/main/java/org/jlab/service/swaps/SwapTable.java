@@ -32,8 +32,6 @@ public class SwapTable {
     public SwapTable(IndexedTable fromTrans,IndexedTable toTrans) {
 
         this.table = new IndexedTable(VARNAMES.length,String.join(":",VARNAMES));
-       
-        int ndiff=0;
 
         for (int row=0; row<fromTrans.getRowCount(); row++) {
 
@@ -42,35 +40,24 @@ public class SwapTable {
             final int slot = Integer.valueOf((String)fromTrans.getValueAt(row,1));
             final int channel = Integer.valueOf((String)fromTrans.getValueAt(row,2));
 
-            // load the previous values of sector/layer/component/order:
+            // load the previous and current values of sector/layer/component/order:
             int[] previous = new int[VARNAMES.length];
+            int[] current = new int[VARNAMES.length];
             for (int ivar=0; ivar<VARNAMES.length; ivar++) {
                 previous[ivar] = fromTrans.getIntValue(VARNAMES[ivar],crate,slot,channel);
+                current[ivar] = toTrans.getIntValue(VARNAMES[ivar], crate, slot, channel);
             }
             
-            // get the new values and fill the table:
-            int[] current = new int[VARNAMES.length];
-            boolean diff = false;
-            for (int ivar=0; ivar<VARNAMES.length; ivar++) {
-                current[ivar] = toTrans.getIntValue(VARNAMES[ivar], crate, slot, channel);
-                this.table.addEntry(previous);
-                this.table.setIntValue(current[ivar], VARNAMES[ivar], previous);
-                if (current[ivar] != previous[ivar]) {
-                    diff = true;
-                    ndiff++;
-                }
+            // load the new table:
+            String[] cvals = new String[VARNAMES.length*2];
+            for (int ii=0; ii<VARNAMES.length; ii++) {
+                cvals[ii] = String.format("%d",previous[ii]);
             }
-
-            if (diff) {
-                for (int ivar=0; ivar<VARNAMES.length; ivar++) {
-                    current[ivar] = this.table.getIntValue(VARNAMES[ivar],previous);
-                }
-                System.out.println(String.format("%d/%d/%d/%d --> %d/%d/%d/%d",
-                            previous[0],previous[1],previous[2],previous[3],
-                            current[0],current[1],current[2],current[3]));
+            for (int ii=0; ii<VARNAMES.length; ii++) {
+                cvals[ii+VARNAMES.length] = String.format("%d",current[ii]);
             }
+            this.table.addEntryFromString(cvals);
         }
-        System.out.println("ndiff:  "+ndiff);
     }
 
     public String toString() {
