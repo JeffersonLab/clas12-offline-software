@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.jlab.detector.swaps.SwapManager;
-import org.jlab.detector.swaps.SwapTable;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataBank;
@@ -25,17 +24,13 @@ public class SwapEngine extends ReconstructionEngine {
         super("SwapEngine","baltzell","1.0");
     }
 
-    private void updateBank(int run,String tableName,DataBank bank) {
+    private void updateBank(int run,DataBank bank) {
         for (int irow=0; irow<bank.rows(); irow++) {
-            int[] slco = new int[SwapTable.VAR_NAMES.length];
-            slco[0] = (int)bank.getByte("sector",irow);
-            slco[1] = (int)bank.getByte("layer",irow);
-            slco[2] = (int)bank.getShort("component",irow);
-            slco[3] = (int)bank.getByte("order",irow);
-            bank.setByte("sector",irow,(byte)swapman.get(run,tableName,"sector",slco));
-            bank.setByte("layer",irow,(byte)swapman.get(run,tableName,"layer",slco));
-            bank.setShort("component",irow,(short)swapman.get(run,tableName,"component",slco));
-            bank.setByte("order",irow,(byte)swapman.get(run,tableName,"order",slco));
+            final int[] slco = swapman.get(run,bank,irow);
+            bank.setByte("sector",irow,(byte)slco[0]);
+            bank.setByte("layer",irow,(byte)slco[1]);
+            bank.setShort("component",irow,(short)slco[2]);
+            bank.setByte("order",irow,(byte)slco[3]);
         }
     }
 
@@ -48,7 +43,7 @@ public class SwapEngine extends ReconstructionEngine {
                 for (String bankName : this.swapman.getBanks(detectorName)) {
                     bank = event.getBank(bankName);
                     event.removeBank(bankName);
-                    this.updateBank(run,this.swapman.getTable(detectorName),bank);
+                    this.updateBank(run,bank);
                     event.appendBank(bank);
                 }
             }

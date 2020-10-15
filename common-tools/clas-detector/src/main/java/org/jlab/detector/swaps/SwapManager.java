@@ -48,47 +48,25 @@ public class SwapManager {
     };
 
     private final HashMap<Integer,HashMap<String,SwapTable>> swaps = new HashMap<>();
-    private final List<String> tableNames = new ArrayList<>();
-    private final List<String> detectorNames = new ArrayList<>();
     private final Map<String,String> banksToTables = new HashMap<>();
-    private final Map<String,Detector> detectors = new HashMap<>();
+    private final Map<String,List<String>> detsToBanks = new HashMap<>();
+    private final Map<String,String> detsToTables = new HashMap<>();
     private ConstantsManager prevConman = null;
     private ConstantsManager currConman = null;
 
     private static SwapManager instance = null;
 
     public Set<String> getDetectors() {
-        return this.detectors.keySet();
+        return this.detsToBanks.keySet();
     }
     public String getTable(String detectorName) {
-        return this.detectors.get(detectorName).table;
+        return this.detsToTables.get(detectorName);
     }
     public List<String> getBanks(String detectorName) {
-        return this.detectors.get(detectorName).getBanks();
+        return this.detsToBanks.get(detectorName);
     }
     
-    public class Detector {
-        private final String name;
-        private final String table;
-        private final List<String> banks;
-        public Detector(String name,String table) {
-            this.banks = new ArrayList<>();
-            this.name = name;
-            this.table = table;
-        }
-        public List<String> getBanks() {
-            //List<String> ret=new ArrayList<>();
-            return this.banks;
-        }
-        public void addBank(String b){this.banks.add(b);}
-        @Override
-        public String toString() {
-            return this.name+":"+this.table+":"+String.join(":",this.banks);
-        }
-    }
-
-    private SwapManager() {
-    }
+    private SwapManager() {}
     
     public static SwapManager getInstance() {
         if (instance == null) {
@@ -126,10 +104,10 @@ public class SwapManager {
         this.currConman = new ConstantsManager();
         this.prevConman.setTimeStamp(prevTimestamp);
         this.prevConman.setVariation(DEF_PREVIOUS_CCDB_VARIATION);
-        this.prevConman.init(this.tableNames);
+        this.prevConman.init(new ArrayList<>(this.banksToTables.values()));
         if (currTimestamp != null) this.currConman.setTimeStamp(currTimestamp);
         this.currConman.setVariation(DEF_CURRENT_CCDB_VARIATION);
-        this.currConman.init(this.tableNames);
+        this.currConman.init(new ArrayList<>(this.banksToTables.values()));
     }
 
     /**
@@ -211,7 +189,7 @@ public class SwapManager {
      */
     private void add(int run) {
         this.swaps.put(run,new HashMap<>());
-        for (String tableName : tableNames) {
+        for (String tableName : this.banksToTables.values()) {
             IndexedTable prev = prevConman.getConstants(run, tableName);
             IndexedTable curr = currConman.getConstants(run, tableName);
             this.swaps.get(run).put(tableName,new SwapTable(prev,curr));
@@ -233,54 +211,57 @@ public class SwapManager {
      * Initialize the appropriate bank names and corresponding translation
      * table names, based on the given detector names.
      */
-    private void initNames(List<String> detectorNames) {
-        SchemaFactory schema = new SchemaFactory();
-        schema.initFromDirectory(System.getenv("CLAS12DIR")+"/etc/bankdefs/hipo4");
-        //schema.initFromDirectory("/Users/baltzell/cos-iss611-swaps/coatjava/etc/bankdefs/hipo4/");
-        //schema.show();
-        for (String detName : detectorNames) {
-            // some detectors broke the bank/table naming convention:
-            String tableName = detName.equals("BST") ? "/daq/tt/svt" : "/daq/tt/"+detName.toLowerCase();
-            Detector det = new Detector(detName,tableName);
-            this.tableNames.add(tableName);
-            if (schema.hasSchema(detName+"::adc")) {
-                det.banks.add(detName+"::adc");
-                this.banksToTables.put(detName+"::adc",tableName);
-            }
-            if (schema.hasSchema(detName+"::tdc")) {
-                det.banks.add(detName+"::tdc");
-                this.banksToTables.put(detName+":tadc",tableName);
-            }
-            this.detectors.put(detName,det);
-        }
-    }
-
     private final void initDetectors(List<String> detectorNames) {
+        
+        // register the detector names:
+        List<String> thisDets = new ArrayList<>();
         List<String> allDets = Arrays.asList(DEF_DETECTOR_NAMES);
         if (detectorNames == null || detectorNames.isEmpty()) {
-            this.detectorNames.addAll(allDets);
+            thisDets.addAll(allDets);
         }
         else {
             for (String detectorName : detectorNames) {
                 if (allDets.contains(detectorName)) {
-                    this.detectorNames.add(detectorName);
+                    thisDets.add(detectorName);
                 }
                 else {
-                    this.detectorNames.clear();
+                    thisDets.clear();
                     throw new RuntimeException("[SwapManager] --> Invalid detector name:  "+detectorName);
                 }
             }
         }
-        this.initNames(this.detectorNames);
+       
+        // set their bank/table names:
+        SchemaFactory schema = new SchemaFactory();
+        schema.initFromDirectory(System.getenv("CLAS12DIR")+"/etc/bankdefs/hipo4");
+        for (String detName : thisDets) {
+            // some detectors broke the bank/table naming convention:
+            String tableName = detName.equals("BST") ? "/daq/tt/svt" : "/daq/tt/"+detName.toLowerCase();
+            for (String suffix : new String[]{"::adc","::tdc"}) {
+                if (schema.hasSchema(detName+suffix)) {
+                    this.banksToTables.put(detName+suffix,tableName);
+                    this.detsToTables.put(detName,tableName);
+                    if (!this.detsToBanks.containsKey(detName)) {
+                        this.detsToBanks.put(detName,new ArrayList<String>());
+                    }
+                    this.detsToBanks.get(detName).add(detName+suffix);
+                }
+            }
+        }
     }
 
     public static void main(String[] args) {
+
+        SwapManager noman = getInstance();
+        System.out.println(Arrays.toString(noman.get(11014, "/daq/tt/bmt",3,5,320,0)));
+        
         SwapManager man = new SwapManager(Arrays.asList("BMT"),"08/10/2020","10/13/2020");
-        man.get(11014, man.tableNames.get(0),"sector",3,6,8,0);
+        man.get(11014,man.getTable("BMT"),"sector",3,6,8,0);
         System.out.println("SwapManager:\n"+man);
-        System.out.println(man.get(11014, man.tableNames.get(0),"sector",99,22,33,44));
-        System.out.println(Arrays.toString(man.get(11014, man.tableNames.get(0),99,22,33,44)));
-        System.out.println(Arrays.toString(man.get(11014, man.tableNames.get(0),3,5,320,0)));
+        System.out.println(man.get(11014,man.getTable("BMT"),"sector",99,22,33,44));
+        System.out.println(Arrays.toString(man.get(11014,man.getTable("BMT"),99,22,33,44)));
+        System.out.println(Arrays.toString(man.get(11014,man.getTable("BMT"),3,5,320,0)));
+
     }
 
 }
