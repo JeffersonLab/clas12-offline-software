@@ -48,8 +48,10 @@ public class SwapManager {
     private final List<String> tableNames = new ArrayList<>();
     private final List<String> detectorNames = new ArrayList<>();
     private final Map<String,Detector> detectors = new HashMap<>();
-    private final ConstantsManager prevConman;
-    private final ConstantsManager currConman;
+    private ConstantsManager prevConman = null;
+    private ConstantsManager currConman = null;
+
+    private static SwapManager instance = null;
 
     public Set<String> getDetectors() {
         return this.detectors.keySet();
@@ -81,12 +83,39 @@ public class SwapManager {
         }
     }
 
+    private SwapManager() {}
+    
+    public static SwapManager getInstance() {
+        if (instance == null) {
+            instance = new SwapManager();
+        }
+        return instance;
+    }
+
     /**
      * @param detectorNames
      * @param prevTimestamp in CCDB format:  MM/DD/YYYY
      * @param currTimestamp in CCDB format:  MM/DD/YYYY
      */
     public SwapManager(List<String> detectorNames, String prevTimestamp,String currTimestamp) {
+        this.initialize(detectorNames, prevTimestamp, currTimestamp);    
+    }
+
+    /**
+     * @param detectorNames
+     * @param previous timestamp/variation used for translation tables during decoding
+     * @param current timestamp/variation with correct translation tables
+     */
+    public SwapManager(List<String> detectorNames,ConstantsManager previous,ConstantsManager current) {
+        this.initialize(detectorNames, previous, current);
+    }
+
+    /**
+     * @param detectorNames
+     * @param prevTimestamp in CCDB format:  MM/DD/YYYY
+     * @param currTimestamp in CCDB format:  MM/DD/YYYY
+     */
+    public void initialize(List<String> detectorNames, String prevTimestamp,String currTimestamp) {
         this.initDetectors(detectorNames);
         this.prevConman = new ConstantsManager();
         this.currConman = new ConstantsManager();
@@ -103,7 +132,7 @@ public class SwapManager {
      * @param previous timestamp/variation used for translation tables during decoding
      * @param current timestamp/variation with correct translation tables
      */
-    public SwapManager(List<String> detectorNames,ConstantsManager previous,ConstantsManager current) {
+    public void initialize(List<String> detectorNames,ConstantsManager previous,ConstantsManager current) {
         this.initDetectors(detectorNames);
         this.prevConman = previous;
         this.currConman = current;
@@ -121,7 +150,12 @@ public class SwapManager {
         if (!this.swaps.containsKey(run)) {
             this.add(run);
         }
-        return this.swaps.get(run).get(tableName).get(varName,slco);
+        if (this.swaps.get(run).containsKey(tableName)) {
+            return this.swaps.get(run).get(tableName).get(varName,slco);
+        }
+        else {
+            return slco[SwapTable.getVariableIndex(varName)];
+        }
     }
 
     /**
@@ -172,7 +206,7 @@ public class SwapManager {
         }
     }
 
-    public final void initDetectors(List<String> detectorNames) {
+    private final void initDetectors(List<String> detectorNames) {
         List<String> allDets = Arrays.asList(DEF_DETECTOR_NAMES);
         if (detectorNames == null || detectorNames.isEmpty()) {
             this.detectorNames.addAll(allDets);
@@ -195,6 +229,7 @@ public class SwapManager {
         SwapManager man = new SwapManager(Arrays.asList("BMT"),"08/10/2020","10/13/2020");
         man.get(11014, man.tableNames.get(0),"sector",3,6,8,0);
         System.out.println("SwapManager:\n"+man);
+        System.out.println(man.get(11014, man.tableNames.get(0),"sector",99,22,33,44));
     }
 
 }

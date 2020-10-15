@@ -1,5 +1,7 @@
 package org.jlab.service.swaps;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -12,7 +14,13 @@ import org.jlab.utils.groups.IndexedTable;
  */
 public class SwapTable {
 
-    public static final String[] VARNAMES = {"sector", "layer", "component", "order"};
+    public static final String[] VAR_NAMES = {"sector", "layer", "component", "order"};
+    private static final Map<String,Integer> VAR_INDEX_MAP = new HashMap<String,Integer>() {{
+        put(VAR_NAMES[0],0);
+        put(VAR_NAMES[1],1);
+        put(VAR_NAMES[2],2);
+        put(VAR_NAMES[3],3);
+    }};
 
     private IndexedTable table = null;
 
@@ -22,7 +30,20 @@ public class SwapTable {
      * @return new value of the requested variable
      */
     public int get(String varName,int... slco) {
-        return this.table.getIntValue(varName,slco);
+        if (this.table.hasEntry(slco)) {
+            return this.table.getIntValue(varName,slco);
+        }
+        else {
+            return slco[getVariableIndex(varName)];
+        }
+    }
+
+    /**
+     * @param varName name of variable's index in s/l/c/o to retrieve
+     * @return index
+     */
+    public static int getVariableIndex(String varName) {
+        return VAR_INDEX_MAP.get(varName);
     }
 
     /**
@@ -31,7 +52,11 @@ public class SwapTable {
      */
     public SwapTable(IndexedTable fromTrans,IndexedTable toTrans) {
 
-        this.table = new IndexedTable(VARNAMES.length,String.join(":",VARNAMES));
+        for (int ivar=0; ivar<VAR_NAMES.length; ivar++) {
+            VAR_INDEX_MAP.put(VAR_NAMES[ivar],ivar);
+        }
+        
+        this.table = new IndexedTable(VAR_NAMES.length,String.join(":",VAR_NAMES));
 
         for (int row=0; row<fromTrans.getRowCount(); row++) {
 
@@ -41,44 +66,45 @@ public class SwapTable {
             final int channel = Integer.valueOf((String)fromTrans.getValueAt(row,2));
 
             // load the previous and current values of sector/layer/component/order:
-            int[] previous = new int[VARNAMES.length];
-            int[] current = new int[VARNAMES.length];
-            for (int ivar=0; ivar<VARNAMES.length; ivar++) {
-                previous[ivar] = fromTrans.getIntValue(VARNAMES[ivar],crate,slot,channel);
-                current[ivar] = toTrans.getIntValue(VARNAMES[ivar], crate, slot, channel);
+            boolean diff = false;
+            int[] previous = new int[VAR_NAMES.length];
+            int[] current = new int[VAR_NAMES.length];
+            for (int ivar=0; ivar<VAR_NAMES.length; ivar++) {
+                previous[ivar] = fromTrans.getIntValue(VAR_NAMES[ivar],crate,slot,channel);
+                current[ivar] = toTrans.getIntValue(VAR_NAMES[ivar], crate, slot, channel);
+                if (previous[ivar] != current[ivar]) {
+                    diff = true;
+                }
             }
             
-            // load the new table:
-            String[] cvals = new String[VARNAMES.length*2];
-            for (int ii=0; ii<VARNAMES.length; ii++) {
-                cvals[ii] = String.format("%d",previous[ii]);
+            // fill the new table if different:
+            if (diff) {
+                String[] cvals = new String[VAR_NAMES.length*2];
+                for (int ii=0; ii<VAR_NAMES.length; ii++) {
+                    cvals[ii] = String.format("%d",previous[ii]);
+                }
+                for (int ii=0; ii<VAR_NAMES.length; ii++) {
+                    cvals[ii+VAR_NAMES.length] = String.format("%d",current[ii]);
+                }
+                this.table.addEntryFromString(cvals);
             }
-            for (int ii=0; ii<VARNAMES.length; ii++) {
-                cvals[ii+VARNAMES.length] = String.format("%d",current[ii]);
-            }
-            this.table.addEntryFromString(cvals);
         }
     }
 
     public String toString() {
         String ret = "";
-        int[] prev = new int[VARNAMES.length];
-        int[] curr = new int[VARNAMES.length];
+        int[] prev = new int[VAR_NAMES.length];
+        int[] curr = new int[VAR_NAMES.length];
         for (int row=0; row<this.table.getRowCount(); row++) {
-            for (int ivar=0; ivar<VARNAMES.length; ivar++) {
+            for (int ivar=0; ivar<VAR_NAMES.length; ivar++) {
                 prev[ivar] = Integer.valueOf((String)this.table.getValueAt(row,ivar));
             }
-            for (int ivar=0; ivar<VARNAMES.length; ivar++) {
-                curr[ivar] = this.table.getIntValue(VARNAMES[ivar],prev);
+            for (int ivar=0; ivar<VAR_NAMES.length; ivar++) {
+                curr[ivar] = this.table.getIntValue(VAR_NAMES[ivar],prev);
             }
-            for (int ivar=0; ivar<VARNAMES.length; ivar++) {
-                if (curr[ivar] != prev[ivar]) {
-                    ret += String.format("%d/%d/%d/%d --> %d/%d/%d/%d\n",
-                            prev[0],prev[1],prev[2],prev[3],
-                            curr[0],curr[1],curr[2],curr[3]);
-                    break;
-                }
-            }
+            ret += String.format("%d/%d/%d/%d --> %d/%d/%d/%d\n",
+                    prev[0],prev[1],prev[2],prev[3],
+                    curr[0],curr[1],curr[2],curr[3]);
         }
         return ret;
     }
