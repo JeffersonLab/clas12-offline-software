@@ -1,5 +1,6 @@
-package org.jlab.service.swaps;
+package org.jlab.detector.swaps;
 
+import org.jlab.detector.swaps.SwapTable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

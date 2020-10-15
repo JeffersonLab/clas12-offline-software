@@ -3,16 +3,16 @@ package org.jlab.service.swaps;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.jlab.detector.swaps.SwapManager;
+import org.jlab.detector.swaps.SwapTable;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataBank;
 
 /**
  *
- * Modifies ADC/TDC banks based on two CCDB timestamps, the standard one for
- * ReconstructionEngine and this one's previousTimestamp.  The result is HIPO
- * files decoded with previousTimestamp get modified as if they were decoded
- * with the new timestamp.
+ * Initializes SwapManager singleton based on two CCDB timestamps to allow
+ * fixing cable swaps in decoded HIPO files.  Optionally modifies ADC/TDC banks.
  * 
  * @author baltzell
  */
