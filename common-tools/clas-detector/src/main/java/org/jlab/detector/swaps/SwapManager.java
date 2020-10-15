@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.jlab.detector.calib.utils.ConstantsManager;
+import org.jlab.io.base.DataBank;
+import org.jlab.io.base.DataEvent;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.utils.groups.IndexedTable;
 
@@ -48,6 +50,7 @@ public class SwapManager {
     private final HashMap<Integer,HashMap<String,SwapTable>> swaps = new HashMap<>();
     private final List<String> tableNames = new ArrayList<>();
     private final List<String> detectorNames = new ArrayList<>();
+    private final Map<String,String> banksToTables = new HashMap<>();
     private final Map<String,Detector> detectors = new HashMap<>();
     private ConstantsManager prevConman = null;
     private ConstantsManager currConman = null;
@@ -84,7 +87,8 @@ public class SwapManager {
         }
     }
 
-    private SwapManager() {}
+    private SwapManager() {
+    }
     
     public static SwapManager getInstance() {
         if (instance == null) {
@@ -140,23 +144,65 @@ public class SwapManager {
     }
 
     /**
-     * Get an unswapped value. 
      * @param run run number
-     * @param tableName CCDB translation table name, e.g. "/daq/tt/ecal"
-     * @param varName name of new variable to retrieve (sector/layer/component/order)
-     * @param slco array of old variables (sector/layer/component/order)
-     * @return new value of the requested variable
+     * @param tableName CCDB translation table name, e.g. "/dat/tt/ecal"
+     * @param slco array of old indices (sector,layer,component,order)
+     * @return array of new table indices (sector/layer/component/order)
      */
-    public int get(int run,String tableName,String varName,int... slco) {
+    public int[] get(int run, String tableName, int... slco) {
+        if (this.currConman == null || this.prevConman == null) {
+            return slco;
+        }
         if (!this.swaps.containsKey(run)) {
             this.add(run);
         }
         if (this.swaps.get(run).containsKey(tableName)) {
-            return this.swaps.get(run).get(tableName).get(varName,slco);
+            return this.swaps.get(run).get(tableName).get(slco);
         }
         else {
-            return slco[SwapTable.getVariableIndex(varName)];
+            return slco;
         }
+    }
+
+    /**
+     * @param run run number
+     * @param tableName CCDB translation table name, e.g. "/daq/tt/ecal"
+     * @param varName name of new index to retrieve (sector/layer/component/order)
+     * @param slco array of old indices (sector/layer/component/order)
+     * @return new value of the requested index (sector/layer/component/order)
+     */
+    public int get(int run,String tableName,String varName,int... slco) {
+        return this.get(run,tableName,slco)[SwapTable.getVariableIndex(varName)];
+    }
+
+    /**
+     * @param run run number
+     * @param bank ADC/TDC bank
+     * @param row row index in bank
+     * @return array of new table indices (sector/layer/component/order)
+     */
+    public int[] get(int run, DataBank bank, int row) {
+        final int sector = bank.getByte("sector", row);
+        final int layer = bank.getByte("layer", row);
+        final int comp = bank.getShort("component", row);
+        final int order = bank.getByte("order", row);
+        return this.get(run,banksToTables.get(bank.getDescriptor().getName()),sector,layer,comp,order);
+    }
+
+    /**
+     * @param event the HIPO event
+     * @param bankName name of ADC/TDC bank
+     * @param row row index in bank
+     * @return array of new table indices (sector/layer/component/order)
+     */
+    public int[] get(DataEvent event, String bankName, int row) {
+        if (event.hasBank("RUN::config")) {
+            if (event.hasBank(bankName)) {
+                final int run = event.getBank("RUN::config").getInt("run",0);
+                return this.get(run,event.getBank(bankName),row);
+            }
+        }
+        return null;
     }
 
     /**
@@ -199,9 +245,11 @@ public class SwapManager {
             this.tableNames.add(tableName);
             if (schema.hasSchema(detName+"::adc")) {
                 det.banks.add(detName+"::adc");
+                this.banksToTables.put(detName+"::adc",tableName);
             }
             if (schema.hasSchema(detName+"::tdc")) {
                 det.banks.add(detName+"::tdc");
+                this.banksToTables.put(detName+":tadc",tableName);
             }
             this.detectors.put(detName,det);
         }
@@ -231,6 +279,8 @@ public class SwapManager {
         man.get(11014, man.tableNames.get(0),"sector",3,6,8,0);
         System.out.println("SwapManager:\n"+man);
         System.out.println(man.get(11014, man.tableNames.get(0),"sector",99,22,33,44));
+        System.out.println(Arrays.toString(man.get(11014, man.tableNames.get(0),99,22,33,44)));
+        System.out.println(Arrays.toString(man.get(11014, man.tableNames.get(0),3,5,320,0)));
     }
 
 }

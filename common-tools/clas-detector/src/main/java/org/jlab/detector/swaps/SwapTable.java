@@ -39,6 +39,18 @@ public class SwapTable {
     }
 
     /**
+     * @param slco array of old variables (sector/layer/component/order)
+     * @return new value of the requested variable
+     */
+    public int[] get(int... slco) {
+        int[] ret = new int[4];
+        for (int ivar=0; ivar<VAR_NAMES.length; ivar++) {
+            ret[ivar] = this.get(VAR_NAMES[ivar],slco);
+        }
+        return ret;
+    }
+
+    /**
      * @param varName name of variable's index in s/l/c/o to retrieve
      * @return index
      */
