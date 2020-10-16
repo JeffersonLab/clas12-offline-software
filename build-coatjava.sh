@@ -112,5 +112,6 @@ cp reconstruction/eb/target/clas12detector-eb-*-SNAPSHOT.jar coatjava/lib/servic
 cp reconstruction/band/target/clas12detector-band-*-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/mc/target/clas12detector-mc-*-SNAPSHOT.jar coatjava/lib/services/
 cp reconstruction/rtpc/target/clas12detector-rtpc-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/swaps/target/clas12detector-swaps-*-SNAPSHOT.jar coatjava/lib/services/
 
 echo "COATJAVA SUCCESSFULLY BUILT !"

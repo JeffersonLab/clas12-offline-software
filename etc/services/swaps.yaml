@@ -1,0 +1,23 @@
+# Just an example of configuring SwapEngine.
+# Note, it must come before all other services.
+io-services:
+  reader:
+    class: org.jlab.clas.std.services.convertors.HipoToHipoReader
+    name: HipoToHipoReader
+  writer:
+    class: org.jlab.clas.std.services.convertors.HipoToHipoWriter
+    name: HipoToHipoWriter
+services:
+  - class: org.jlab.service.swaps.SwapEngine
+    name: SWAPS
+configuration:
+  io-services:
+    writer:
+      compression: 2
+  services:
+    SWAPS:
+      timestamp: 10/13/2020
+      previousTimestamp: 08/10/2020
+      detectors: "BMT"
+mime-types:
+  - binary/data-hipo
