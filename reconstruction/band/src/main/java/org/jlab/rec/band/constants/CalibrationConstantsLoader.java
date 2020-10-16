@@ -48,6 +48,11 @@ public class CalibrationConstantsLoader {
 	public static int CUT_NHITS_BAND = 5;
 	public static int CUT_LASERHITS_BAND = 100;
 
+        public static int LASER_SECTOR    = 6;
+        public static int LASER_LAYER     = 6;
+        public static int LASER_COMPONENT = 6;
+        public static double[] LASER_CONV = {0,1,0};
+
 	public static synchronized void Load(int runno, String var, ConstantsManager manager) {
 
 		//System.out.println("*Loading calibration constants*");
@@ -89,6 +94,8 @@ public class CalibrationConstantsLoader {
 			double convert_params[] = {parA,parB,parC};
 			ENERGY_CONVERT.put(Integer.valueOf(key), convert_params);
 		}
+                // Add laser channel
+                ENERGY_CONVERT.put(LASER_SECTOR*100+LASER_LAYER*10+LASER_SECTOR, LASER_CONV);
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Global offsets for each bar for FADC and TDC
