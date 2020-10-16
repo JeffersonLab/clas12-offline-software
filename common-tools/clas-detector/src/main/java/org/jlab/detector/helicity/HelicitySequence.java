@@ -213,9 +213,19 @@ class HelicitySequence {
      * @return the helicity state, null if timestamp is outside of measured range
      */
     public HelicityBit search(long timestamp) {
-        HelicityState state = this.searchState(timestamp);
-        if (state==null) return HelicityBit.UDF;
-        else return state.getHelicity();
+        return this.search(timestamp,0);
+    }
+
+    /**
+     * Find the state corresponding to a given timestamp in the measured sequence.
+     * @param timestamp TI timestamp (i.e. RUN::config.timestamp)
+     * @param offset number of states offset
+     * @return the helicity state, null if timestamp is outside of measured range
+     */
+    public HelicityBit search(long timestamp,int offset) {
+        final int index = this.searchIndex(timestamp)+offset;
+        if (index < 0) return HelicityBit.UDF;
+        else return this.getState(index).getHelicity();
     }
 
     /**

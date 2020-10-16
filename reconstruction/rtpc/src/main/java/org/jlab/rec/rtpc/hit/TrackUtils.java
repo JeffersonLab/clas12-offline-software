@@ -8,16 +8,22 @@ public class TrackUtils {
     //private double zthresh = 16;
     private double zthresh = 200;
     private double phithresh = 7;
+    private double zthreshgap = 20;
+    private double phithreshgap = 0.20;
 
     public TrackUtils() {}
 
-    public boolean comparePads(PadVector p1, PadVector p2, String Method, boolean cosmic, double dz, double dphi) {
+    public boolean comparePads(PadVector p1, PadVector p2, String Method, boolean cosmic, double dz, double dzgap, double dphi, double dphigap) {
         if(cosmic){
             zthresh = 200;
-            phithresh = 7;              
+            phithresh = 7;  
+            zthreshgap = zthresh;
+            phithreshgap = phithresh;
         }else{
             zthresh = dz;
             phithresh = dphi;
+            zthreshgap = dzgap;
+            phithreshgap = dphigap;
         }
         if(Method == "ellipse") {return ellipseMethod(p1, p2);}
         if(Method == "phiz")    {return phizMethod(p1,p2);}
@@ -44,10 +50,15 @@ public class TrackUtils {
         double p2phi = p2.phi();
         double p1z = p1.z();
         double p2z = p2.z();
-        double phidiff = p2phi-p1phi;
+        double phidiff = Math.abs(p2phi-p1phi);
         double zdiff = Math.abs(p1z-p2z);
         //System.out.println(p1phi + " " + p2phi + " " + (p1phi - p2phi));
-        return ((Math.abs(phidiff)<phithresh) || (Math.abs(phidiff-2*Math.PI) < phithresh )) && zdiff<zthresh;
+        if(phidiff < Math.PI){
+            return phidiff < phithresh && zdiff < zthresh;
+        }else{
+            return Math.abs(phidiff-2*Math.PI) < phithreshgap && zdiff < zthreshgap;
+        }
+        
     }
 
 }
