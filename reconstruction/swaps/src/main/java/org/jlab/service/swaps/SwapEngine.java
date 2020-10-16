@@ -82,7 +82,7 @@ public class SwapEngine extends ReconstructionEngine {
         }
 
         if (this.getEngineConfigString("modifyBanks") != null) {
-            if (this.getEngineConfigString("dropBanks").equals("true")) {
+            if (this.getEngineConfigString("modifyBanks").equals("true")) {
                 this.modifyBanks = true;
             }
         }
