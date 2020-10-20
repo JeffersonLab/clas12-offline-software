@@ -94,11 +94,21 @@ public class TruthMatch extends ReconstructionEngine {
         Map<Short, List<RecHit>> cndHits = getCNDHits(event, mchits.get((byte) DetectorType.CND.getDetectorId()));
         List<RecCluster> cndClusters = getCNDClusters(event);
 
+//        if (cndClusters != null && cndClusters.size() > 0 && cndHits.isEmpty()) {
+//            System.out.println("**** CND clusters have non 0 size, while the number of hits is 0 ****");
+//            System.out.println("Size of clusters is " + cndClusters.size());
+//        }
+
         /**
          * Getting CTOF Hits and Clusters
          */
-        Map<Short, List<RecHit>> ctofHits = getCTOFHits(event, mchits.get((byte) DetectorType.CND.getDetectorId()));
+        Map<Short, List<RecHit>> ctofHits = getCTOFHits(event, mchits.get((byte) DetectorType.CTOF.getDetectorId()));
         List<RecCluster> ctofClusters = getCTOFClusters(event);
+
+//        if (ctofClusters != null && ctofClusters.size() > 0 && ctofHits.isEmpty()) {
+//            System.out.println("************************************** CTOF clusters have non 0 size, while the number of hits is 0 ****");
+//            System.out.println("Size of clusters is " + ctofClusters.size());
+//        }
 
         /**
          * Matchingg clusters to MCParticles
@@ -145,6 +155,22 @@ public class TruthMatch extends ReconstructionEngine {
         //PrintClsPerMc(clsPerMCp);
         List<MCRecMatch> MCRecMatches = MakeMCRecMatch(mcp, clsPerMCp);
 
+        /**
+         * Very Ad-hoc test should be removed from the code after it is resolved
+         */
+//        for( MCRecMatch curRecMatch : MCRecMatches ){
+//            
+//            if( curRecMatch.pindex < 0 && cndClusters != null && ctofClusters != null && (cndClusters.size() + ctofClusters.size()) > 0 && curRecMatch.id == 0 ){
+//                System.out.println("*************************Oho this should not happen!!!!*********************************");
+//                System.out.println("The number of CTOF hits is " + ctofHits.size());
+//                System.out.print(ctofClusters.toString());
+//                System.out.println("The number of CND hits is " + cndHits.size());
+//                System.out.print(cndClusters.toString());
+//            }
+//        }
+//        MCRecMatches.stream().filter(curRecMatch -> ( curRecMatch.pindex < 0 && cndClusters != null && ctofClusters != null && (cndClusters.size() + ctofClusters.size()) > 0 )).forEachOrdered(_item -> {
+//            System.out.println("Oho this should not happen!!!!");
+//        });
         bankWriter(event, MCRecMatches, allCls);
 
         //PrintRecMatches(MCRecMatches);
@@ -289,7 +315,6 @@ public class TruthMatch extends ReconstructionEngine {
 
         Map<Short, MCPart> mcp = new HashMap<>();
 
-
         for (int i = 0; i < mcpart.rows(); i++) {
 
             MCPart curPart = new MCPart();
@@ -347,9 +372,9 @@ public class TruthMatch extends ReconstructionEngine {
              * particle
              *
              */
-            if (hit.detector != (byte) DetectorType.ECAL.getDetectorId() && hit.detector != (byte) DetectorType.FTCAL.getDetectorId() &&
-                    hit.detector != (byte) DetectorType.CND.getDetectorId() && hit.detector != (byte) DetectorType.CTOF.getDetectorId() &&
-                    mcp.get((short) tid) == null) {
+            if (hit.detector != (byte) DetectorType.ECAL.getDetectorId() && hit.detector != (byte) DetectorType.FTCAL.getDetectorId()
+                    && hit.detector != (byte) DetectorType.CND.getDetectorId() && hit.detector != (byte) DetectorType.CTOF.getDetectorId()
+                    && mcp.get((short) tid) == null) {
                 continue;
             } else if (mcp.get((short) (hit.otid)).pid != 22 && mcp.get((short) (hit.otid)).pid != 2112) {
                 continue;
@@ -515,6 +540,7 @@ public class TruthMatch extends ReconstructionEngine {
              * If no MC hits present in the CND, then we stop here! no need to
              * collect hits, as wee need only hits that are matched to an MChit
              */
+            //System.out.println("No MC hits in CND");
             return recHits;
         }
 
@@ -523,6 +549,7 @@ public class TruthMatch extends ReconstructionEngine {
          */
         if ((event.hasBank("CND::hits") == false) || (event.hasBank("CND::clusters") == false)
                 || (event.hasBank("REC::Scintillator") == false)) {
+           // System.out.println("There is No CND cluster or there is No CND::hit or there is no REC::Scintillator bank present");
             return null;
         }
 
@@ -540,7 +567,6 @@ public class TruthMatch extends ReconstructionEngine {
             Short index = RecScintil.getShort("index", iSC);
 
             clId2Pindex.put(index, pindex);
-
         }
 
         DataBank hitsBank = event.getBank("CND::hits");
@@ -564,6 +590,7 @@ public class TruthMatch extends ReconstructionEngine {
             recHits.get(curHit.cid).add(curHit);
         }
 
+        //System.out.println("The size of CNDHits is " + recHits.keySet().size());
         return recHits;
     }
 
@@ -575,6 +602,7 @@ public class TruthMatch extends ReconstructionEngine {
              * If no MC hits present in the CTOF, then we stop here! no need to
              * collect hits, as wee need only hits that are matched to an MChit
              */
+            //System.out.println("No MC hits in CTOF");
             return recHits;
         }
 
@@ -583,6 +611,7 @@ public class TruthMatch extends ReconstructionEngine {
          */
         if ((event.hasBank("CTOF::hits") == false) || (event.hasBank("CTOF::clusters") == false)
                 || (event.hasBank("REC::Scintillator") == false)) {
+            //System.out.println("There is No CTOF::cluster or there is No CTOF::hit or there is no REC::Scintillator bank present");
             return null;
         }
 
@@ -610,6 +639,8 @@ public class TruthMatch extends ReconstructionEngine {
             curHit.id = hitsBank.getShort("id", ihit) - 1;   // -1, as id starts from 1
             curHit.cid = (short) (hitsBank.getShort("clusterid", ihit) - 1);  // -1 for starting from 0
             if (curHit.cid == -1 || !mchitsInCTOF.containsKey(curHit.id)) {
+                
+                //System.out.println("Continuing!!!! The hit id is " + curHit.id);
                 continue; // The hit is not part of any cluster, or the hit it's corresponding MC hit is ignored
             }
 
@@ -623,6 +654,7 @@ public class TruthMatch extends ReconstructionEngine {
             recHits.get(curHit.cid).add(curHit);
         }
 
+        //System.out.println("The size of CTOFHits is " + recHits.keySet().size());
         return recHits;
     }
 
