@@ -133,6 +133,13 @@
       <artifactId>swim-tools</artifactId>
       <version>6.5.11-SNAPSHOT</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.jlab.clas</groupId>
+      <artifactId>clas-tracking</artifactId>
+      <version>6.5.11-SNAPSHOT</version>
+    </dependency>
+
     <!--
     <dependency>
       <groupId>org.jlab.clas</groupId>
