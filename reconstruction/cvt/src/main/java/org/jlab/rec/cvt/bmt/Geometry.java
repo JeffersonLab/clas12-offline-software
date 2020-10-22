@@ -36,7 +36,7 @@ public class Geometry {
     	if( detType.equalsIgnoreCase("Z") ) {
     		layer = lZ[ region - 1 ];
     	}
-    	if( detType.equalsIgnoreCase("C")) {
+    	if( detType.equalsIgnoreCase("C") ) {
     		layer = lC[ region - 1 ];
     	}
     	return layer;

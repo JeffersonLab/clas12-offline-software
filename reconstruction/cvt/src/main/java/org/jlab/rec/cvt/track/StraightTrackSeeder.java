@@ -5,17 +5,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.CircleFitter;
 import org.jlab.rec.cvt.fit.CircleFitPars;
-import org.jlab.rec.cvt.fit.HelicalTrackFitter;
+import org.jlab.rec.cvt.fit.StraightTrackFitter;
 import org.jlab.rec.cvt.svt.Constants;
 
-public class TrackSeeder {
+public class StraightTrackSeeder {
     int NBINS = 36;
     double[] phiShift = new double[]{0, 65, 90}; // move the bin edge to handle bin boundaries
     List<ArrayList<Cross>> scan ;
@@ -26,7 +25,7 @@ public class TrackSeeder {
     List<Double> Ys ;
     List<Double> Ws ;
     
-    public TrackSeeder() {
+    public StraightTrackSeeder() {
         //init lists for scan
         sortedCrosses = new ArrayList<ArrayList<ArrayList<Cross>>>();
         for(int b =0; b<NBINS; b++) {
@@ -44,14 +43,13 @@ public class TrackSeeder {
         Ws = new ArrayList<Double>();
     }
     private void MatchSeed(List<Cross> othercrs) {
-        if(othercrs==null || othercrs.size()==0)
-            return;
         
         for (Seed seed : seedScan) {
             double d = seed.doca;
             double r = seed.rho;
             double f = seed.phi;
 
+            Map<Integer, Cross> matchBMT = new HashMap<Integer, Cross>();
             for (Cross c : othercrs ) { 
                 c.set_AssociatedTrackID(22220);
                 if(this.InSamePhiRange(seed, c)== true) {
@@ -62,13 +60,27 @@ public class TrackSeeder {
                     double fi = Math.atan2(yi,xi) ;
 
                     double res = this.calcResi(r, ri, d, f, fi);
-                    if(Math.abs(res)<Constants.RESIMAX) { 
+                    if(Math.abs(res)<20) { 
                         c.set_AssociatedTrackID(22222);
-                        // add to seed    
-                        seed.get_Crosses().add((Cross) c.clone());
+                        // add to seed   
+                        if(matchBMT.containsKey(c.getOrderedRegion())) {
+                            Cross cs = (Cross) matchBMT.get(c.getOrderedRegion());
+                            double xis = cs.get_Point().x(); 
+                            double yis = cs.get_Point().y();
+                            double ris = Math.sqrt(xis*xis+yis*yis);
+                            double fis = Math.atan2(yis,xis) ;
+                            if(Math.abs(this.calcResi(r, ris, d, f, fis))>Math.abs(res)) {
+                               matchBMT.put(c.getOrderedRegion(), (Cross) c.clone()); // add only if res better
+                            } 
+                        } else {
+                            matchBMT.put(c.getOrderedRegion(), (Cross) c.clone());
+                        }
                     }
                 }
             }
+            // add hashmap items to list 
+            for (Cross crs : matchBMT.values())  
+                seed.get_Crosses().add((Cross) crs);
         }
     }
     private void FitSeed(List<Cross> seedcrs) {
@@ -94,7 +106,7 @@ public class TrackSeeder {
         if(circlefitstatusOK==false )
             return;
         double d = pars.doca();
-        double r = pars.rho();
+        double r = pars.rho(); r= 1.e-09;
         double f = pars.phi();
         
         boolean failed = false;
@@ -105,8 +117,8 @@ public class TrackSeeder {
             double fi = Math.atan2(yi,xi) ;
             
             double res = this.calcResi(r, ri, d, f, fi);
-            if(Math.abs(res)>Constants.RESIMAX) { 
-                failed = true;
+            if(Math.abs(res)>10) { 
+                failed = true; 
                 return;
             }
         }
@@ -208,15 +220,14 @@ public class TrackSeeder {
 
     List<Seed> BMTmatches = new ArrayList<Seed>();
     public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses, 
-            org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo,
-            Swim swimmer) {
-       
+            org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, boolean isSVTOnly) {
+        
         List<Seed> seedlist = new ArrayList<Seed>();
 
         List<Cross> crosses = new ArrayList<Cross>();
         List<Cross> bmtC_crosses = new ArrayList<Cross>();
         
-        if(bmt_crosses!=null) {
+        if(isSVTOnly == false ) {
             for(Cross c : bmt_crosses) { 
                 if(c.get_DetectorType().equalsIgnoreCase("Z"))
                     crosses.add(c);
@@ -224,11 +235,14 @@ public class TrackSeeder {
                     bmtC_crosses.add(c);
             }
         }
+        //this.FindSeedCrossList(crosses);
+        //this.MatchSeed(svt_crosses);
         this.FindSeedCrossList(svt_crosses);
         this.MatchSeed(crosses);
         
         for(Seed mseed : seedScan) { 
             List<Cross> seedcrs = mseed.get_Crosses();
+            
             for (Cross c : seedcrs ) { 
                 if(c.get_DetectorType().equalsIgnoreCase("C") ) continue;
                 c.set_AssociatedTrackID(122220);
@@ -288,7 +302,7 @@ public class TrackSeeder {
             List<Cross> seedcrs = mseed.get_Crosses();
             Track cand = null;
             if(seedcrs.size()>=3)
-                cand = fitSeed(seedcrs, svt_geo, 5, false, swimmer);
+                cand = fitSeed(seedcrs, svt_geo, 5, false);
             if (cand != null) {
                 Seed seed = new Seed();
                 seed.set_Crosses(seedcrs);
@@ -304,6 +318,7 @@ public class TrackSeeder {
                     }
                 }
                 seed.set_Clusters(clusters);
+                
                 //match to BMT
                 if (seed != null ) {
                     List<Cross> sameSectorCrosses = this.FindCrossesInSameSectorAsSVTTrk(seed, bmtC_crosses, bmt_geo);
@@ -313,19 +328,21 @@ public class TrackSeeder {
                     } 
                     
                     for (Seed bseed : BMTmatches) {
+                        Collections.sort(bseed.get_Crosses());
                         //refit using the BMT
-                        Track bcand = fitSeed(bseed.get_Crosses(), svt_geo, 5, false, swimmer);
+                        Track bcand = fitSeed(bseed.get_Crosses(), svt_geo, 5, false);
                         if (bcand != null) {
                             seed = new Seed();
                             seed.set_Crosses(bseed.get_Crosses());
                             seed.set_Clusters(bseed.get_Clusters());
                             seed.set_Helix(bcand.get_helix());
+                            List<Cross> seedcrs2 = seed.get_Crosses();
                         }
                     }
 
-                    seedlist.add(seed);
+                    seedlist.add(seed); 
                 } else { // no bmt
-                    seedlist.add(seed);
+                    seedlist.add(seed); 
                 }
             }
         }
@@ -341,9 +358,9 @@ public class TrackSeeder {
         
         double jitter = Math.toRadians(10); // 10 degrees jitter
         for (int i = 0; i < bmt_crosses.size(); i++) { 
-            Point3D pAtBMTSurf =seed.get_Helix().getPointAtRadius(org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[bmt_crosses.get(i).get_Region()-1]);
+            Point3D ref =seed.get_Crosses().get(0).get_Point();
             // the hit parameters
-            double angle = Math.atan2(pAtBMTSurf.y(), pAtBMTSurf.x());
+            double angle = Math.atan2(ref.y(), ref.x());
             if (angle < 0) {
                 angle += 2 * Math.PI;
             }
@@ -366,24 +383,14 @@ public class TrackSeeder {
     List<Cross> BMTCrossesC = new ArrayList<Cross>();
     List<Cross> BMTCrossesZ = new ArrayList<Cross>();
     List<Cross> SVTCrosses = new ArrayList<Cross>();
-    float b[] = new float[3];
     
     public Track fitSeed(List<Cross> VTCrosses, org.jlab.rec.cvt.svt.Geometry svt_geo, int fitIter, 
-            boolean originConstraint, Swim swimmer) {
+            boolean originConstraint) {
         double chisqMax = Double.POSITIVE_INFINITY;
         
         Track cand = null;
-        HelicalTrackFitter fitTrk = new HelicalTrackFitter();
+        StraightTrackFitter fitTrk = new StraightTrackFitter();
         for (int i = 0; i < fitIter; i++) {
-            //	if(originConstraint==true) {
-            //		X.add(0, (double) 0);
-            //		Y.add(0, (double) 0);
-            //		Z.add(0, (double) 0);
-            //		Rho.add(0, (double) 0);
-            //		ErrRt.add(0, (double) org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);
-            //		ErrZ.add(0, (double) org.jlab.rec.cvt.svt.Constants.ZVTXCONSTRAINT);		
-            //		ErrRho.add(0, (double) org.jlab.rec.cvt.svt.Constants.RHOVTXCONSTRAINT);										
-            //	}
             X.clear();
             Y.clear();
             Z.clear();
@@ -468,9 +475,9 @@ public class TrackSeeder {
                     ErrZ.add(j, BMTCrossesC.get(j - svtSz * useSVTdipAngEst).get_PointErr().z());
                 }
             }
-            X.add((double) org.jlab.rec.cvt.Constants.getXb());
-            Y.add((double) org.jlab.rec.cvt.Constants.getYb());
-            ErrRt.add((double) 0.1);
+            //X.add((double) org.jlab.rec.cvt.Constants.getXb());
+            //Y.add((double) org.jlab.rec.cvt.Constants.getYb());
+            //ErrRt.add((double) 0.1);
             
             fitTrk.fit(X, Y, Z, Rho, ErrRt, ErrRho, ErrZ);
             
@@ -482,9 +489,7 @@ public class TrackSeeder {
             //cand.addAll(SVTCrosses);
             cand.addAll(SVTCrosses);
             
-            swimmer.BfieldLab(0, 0, 0, b);
-            double Bz = Math.abs(b[2]);
-            fitTrk.get_helix().B = Bz;
+            fitTrk.get_helix().B = 0;
             cand.set_HelicalTrack(fitTrk.get_helix());
             //if(shift==0)
             if (fitTrk.get_chisq()[0] < chisqMax) {
@@ -519,8 +524,9 @@ public class TrackSeeder {
         //}
 
         for (Cross bmt_cross : bmt_crosses) { 
-            if (bmt_cross.get_DetectorType().equalsIgnoreCase("C")) // C-detector
+            if (bmt_cross.get_DetectorType().equalsIgnoreCase("C")) {// C-detector
                 BMTCcrosses.get(bmt_cross.get_Region() - 1).add(bmt_cross); 
+            }
         }
 
         AllSeeds.clear();
@@ -541,17 +547,17 @@ public class TrackSeeder {
 
                     if (BMTCcrosses.get(0).size() > 0 && i1 < BMTCcrosses.get(0).size()) {
                         if (this.passCcross(trkCand, BMTCcrosses.get(0).get(i1), bmt_geo)) {
-                            matches.add(BMTCcrosses.get(0).get(i1));
+                            matches.add((Cross) BMTCcrosses.get(0).get(i1).clone());
                         }
                     }
                     if (BMTCcrosses.get(1).size() > 0 && i2 < BMTCcrosses.get(1).size()) {
                         if (this.passCcross(trkCand, BMTCcrosses.get(1).get(i2), bmt_geo)) {
-                            matches.add(BMTCcrosses.get(1).get(i2));
+                            matches.add((Cross) BMTCcrosses.get(1).get(i2).clone());
                         }
                     }
                     if (BMTCcrosses.get(2).size() > 0 && i3 < BMTCcrosses.get(2).size()) {
                         if (this.passCcross(trkCand, BMTCcrosses.get(2).get(i3), bmt_geo)) {
-                            matches.add(BMTCcrosses.get(2).get(i3));
+                            matches.add((Cross) BMTCcrosses.get(2).get(i3).clone());
                         }
                     }
                     
@@ -582,52 +588,22 @@ public class TrackSeeder {
 
     private boolean passCcross(Seed trkCand, Cross bmt_Ccross, org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
         boolean pass = false;
-
         double dzdrsum = trkCand.get_Helix().get_tandip();
 
         double z_bmt = bmt_Ccross.get_Point().z();
         double r_bmt = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[bmt_Ccross.get_Region() - 1];
-        Point3D phiHelixAtSurf = trkCand.get_Helix().getPointAtRadius(r_bmt); 
-        if (bmt_geo.isInSector(bmt_Ccross.get_Cluster1().get_Layer(), Math.atan2(phiHelixAtSurf.y(), phiHelixAtSurf.x()), Math.toRadians(10)) != bmt_Ccross.get_Sector()) {
+        
+        Point3D refPoint = trkCand.get_Crosses().get(0).get_Point(); 
+        if (bmt_geo.isInSector(bmt_Ccross.get_Cluster1().get_Layer(), Math.atan2(refPoint.y(), refPoint.x()), Math.toRadians(10)) != bmt_Ccross.get_Sector()) {
             return false;
         }
         double dzdr_bmt = z_bmt / r_bmt;
         if (Math.abs(1 - (dzdrsum / (double) (trkCand.get_Crosses().size())) / ((dzdrsum + dzdr_bmt) / (double) (trkCand.get_Crosses().size() + 1))) <= Constants.dzdrcut) // add this to the track
-        {
+        { 
             pass = true;
         } 
         
         return pass;
-    }
-
-    
-    /**
-     *
-     * @param x1 cross1 x-coordinate
-     * @param x2 cross2 x-coordinate
-     * @param x3 cross3 x-coordinate
-     * @param y1 cross1 y-coordinate
-     * @param y2 cross2 y-coordinate
-     * @param y3 cross3 y-coordinate
-     * @return radius of circle containing 3 crosses in the (x,y) plane
-     */
-    private double calc_radOfCurv(double x1, double x2, double x3, double y1, double y2, double y3) {
-        double radiusOfCurv = 0;
-
-        if (Math.abs(x2 - x1) > 1.0e-9 && Math.abs(x3 - x2) > 1.0e-9) {
-            // Find the intersection of the lines joining the innermost to middle and middle to outermost point
-            double ma = (y2 - y1) / (x2 - x1);
-            double mb = (y3 - y2) / (x3 - x2);
-
-            if (Math.abs(mb - ma) > 1.0e-9) {
-                double xcen = 0.5 * (ma * mb * (y1 - y3) + mb * (x1 + x2) - ma * (x2 + x3)) / (mb - ma);
-                double ycen = (-1. / mb) * (xcen - 0.5 * (x2 + x3)) + 0.5 * (y2 + y3);
-
-                radiusOfCurv = Math.sqrt((x1 - xcen) * (x1 - xcen) + (y1 - ycen) * (y1 - ycen));
-            }
-        }
-        return radiusOfCurv;
-
     }
 
     private void removeDuplicates(List<Seed> AllSeeds) {
@@ -649,7 +625,13 @@ public class TrackSeeder {
     }
 
     private boolean InSamePhiRange(Seed seed, Cross c) {
-        return true;
+        boolean pass = false;
+        Cross s = seed.get_Crosses().get(0);
+        double seedPhi = Math.atan2(s.get_Point().y(), s.get_Point().x());
+        double crossPhi = Math.atan2(c.get_Point().y(), c.get_Point().x());
+        if(Math.abs(Math.toDegrees(seedPhi-crossPhi))<8)
+            pass = true;
+        return pass;
     }
 
 }

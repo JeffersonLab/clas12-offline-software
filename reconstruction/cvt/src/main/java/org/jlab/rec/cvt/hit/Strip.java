@@ -2,6 +2,7 @@ package org.jlab.rec.cvt.hit;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.bmt.Constants;
 
 public class Strip {
 
@@ -23,6 +24,7 @@ public class Strip {
 
     private Point3D _ImplantPoint;						// 	   the end-point of the strip at implant (lab frame)
     private Point3D _MidPoint;							//	   the mid-point of the strip (lab frame)
+    private Point3D _EndPoint;							//	   the end-point of the strip (lab frame)
     private Vector3D _StripDir;							// 	   unit direction vector along the strip (lab frame)
 
     public int get_Strip() {
@@ -49,6 +51,14 @@ public class Strip {
         this._MidPoint = _MidPoint;
     }
 
+    public Point3D get_EndPoint() {
+        return _EndPoint;
+    }
+
+    public void set_EndPoint(Point3D _EndPoint) {
+        this._EndPoint = _EndPoint;
+    }
+    
     public Vector3D get_StripDir() {
         return _StripDir;
     }

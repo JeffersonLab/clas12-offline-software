@@ -40,11 +40,12 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
         this._usedInXYcand = false;
         this._usedInZRcand = false;
     }
-
+    
     private String _Detector;							//      the detector SVT or BMT
     private String _DetectorType;						//      the detector type for BMT, C or Z detector	
     private int _Sector;      							//	    sector [1...]
     private int _Region;    		 					//	    region [1,...]
+    private int _OrderedRegion;                                                 // 1...3:SVT; 4...9: BMT
     private int _Id;									//		cross Id
 
     private boolean _usedInXYcand;   // used in patter recognition
@@ -136,6 +137,20 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      */
     public void set_Region(int _Region) {
         this._Region = _Region;
+    }
+
+    /**
+     * @return the _OrderedRegion
+     */
+    public int getOrderedRegion() {
+        return _OrderedRegion;
+    }
+
+    /**
+     * @param _OrderedRegion the _OrderedRegion to set
+     */
+    public void setOrderedRegion(int _OrderedRegion) {
+        this._OrderedRegion = _OrderedRegion;
     }
 
     /**
@@ -341,7 +356,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
 
         Cluster inlayerclus = this.get_Cluster1();
         Cluster outlayerclus = this.get_Cluster2();
-        if (inlayerclus == null || outlayerclus == null) {
+        if (inlayerclus == null || outlayerclus == null) { 
             return;
         }
 
@@ -371,12 +386,12 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     }
 
     @Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + _Id;
-		return result;
-	}
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + _Id;
+        return result;
+    }
     
     @Override
     public String toString() {
@@ -385,10 +400,10 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
     
     public String printInfo() {
         String s = " cross:  " + this.get_Detector() + " ID " + this.get_Id() + " Sector " + this.get_Sector() + " Region " + this.get_Region()
-                + " Point " + this.get_Point().toString();
-        if (this.get_Detector() == "SVT") {
-            s += " Point " + this.get_Point().toString();
-        }
+                + " Point " + this.get_Point().toString()
+                + " sort "+this.getOrderedRegion();
+        
+        
         return s;
     }
 
@@ -471,11 +486,12 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
             int IDComp = this.get_Id() < arg.get_Id() ? -1 : this.get_Id() == arg.get_Id() ? 0 : 1;
 
             return_val = ((RegComp == 0) ? IDComp : RegComp);
-        }
-        if (org.jlab.rec.cvt.Constants.isCosmicsData() == false) {
-        	org.jlab.rec.cvt.bmt.Geometry bgeom = new org.jlab.rec.cvt.bmt.Geometry();
-        	int thisreg = (this.get_Detector().equalsIgnoreCase("BMT")) ? 3 + bgeom.getLayer( this.get_Region(), this.get_DetectorType()) : this.get_Region();
-        	int argreg  = (arg.get_Detector().equalsIgnoreCase("BMT"))  ? 3 + bgeom.getLayer( arg.get_Region(), arg.get_DetectorType()) : arg.get_Region();
+        } else {
+            
+            //int thisreg = (this.get_Detector().equalsIgnoreCase("BMT")) ? 3 + bgeom.getLayer( this.get_Region(), this.get_DetectorType()) : this.get_Region();
+            //int argreg  = (arg.get_Detector().equalsIgnoreCase("BMT"))  ? 3 + bgeom.getLayer( arg.get_Region(), arg.get_DetectorType()) : arg.get_Region();
+            int thisreg = this.getOrderedRegion();
+            int argreg  = arg.getOrderedRegion();
             int RegComp = thisreg < argreg ? -1 : thisreg == argreg ? 0 : 1;
 //            int RegComp = this.get_Region() < arg.get_Region() ? -1 : this.get_Region() == arg.get_Region() ? 0 : 1;
             

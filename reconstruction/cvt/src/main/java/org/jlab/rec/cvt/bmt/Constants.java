@@ -75,7 +75,8 @@ public class Constants {
   
     
 // THE HV CONSTANT
-    public static double[][] E_DRIFT = new double[2*NREGIONS][3]; 
+    public static double[][] E_DRIFT_FF = new double[2*NREGIONS][3]; 
+    public static double[][] E_DRIFT_MF = new double[2*NREGIONS][3]; 
     //private static double ThetaL = 0; 						// the Lorentz angle for 5-T B-field
 
     //private static double w_i =25.0; 
@@ -110,11 +111,15 @@ public class Constants {
     }
 
     public static synchronized void setThetaL(int layer, int sector) {
-        if (org.jlab.rec.cvt.Constants.isCosmicsData() == true) {
+        if(Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.001) {
             ThetaL = 0;
         }
         else {
-            ThetaL = Math.toRadians(org.jlab.rec.cvt.bmt.Lorentz.GetLorentzAngle(E_DRIFT[layer-1][sector-1],Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()*50)));
+            if(Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.8) {
+                ThetaL = Math.toRadians(org.jlab.rec.cvt.bmt.Lorentz.GetLorentzAngle(E_DRIFT_MF[layer-1][sector-1],Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()*50)));
+            } else {
+                ThetaL = Math.toRadians(org.jlab.rec.cvt.bmt.Lorentz.GetLorentzAngle(E_DRIFT_FF[layer-1][sector-1],Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()*50)));
+            }
         }
         if (org.jlab.rec.cvt.Constants.getSolenoidscale()<0) ThetaL=-ThetaL; 
     }
@@ -357,11 +362,18 @@ public class Constants {
            pb = B_grid[j] ;
         }
    }
-   public static synchronized void setE_drift(double[][] cHV_drift) {
+   public static synchronized void setE_drift_FF(double[][] cHV_drift) {
    	for (int i=0; i<2*NREGIONS;i++) {
-   		for (int j=0; j<3;j++) {	
-   			E_DRIFT[i][j]  = 10*cHV_drift[i][j]/hDrift;
-   		}	
+            for (int j=0; j<3;j++) {	
+                    E_DRIFT_FF[i][j]  = 10*cHV_drift[i][j]/hDrift;
+            }	
+   	}
+  }
+   public static synchronized void setE_drift_MF(double[][] cHV_drift) {
+   	for (int i=0; i<2*NREGIONS;i++) {
+            for (int j=0; j<3;j++) {	
+                    E_DRIFT_MF[i][j]  = 10*cHV_drift[i][j]/hDrift;
+            }	
    	}
   }
   public static synchronized void setRx(int layer, int sector, double cRx) {

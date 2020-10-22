@@ -93,10 +93,11 @@ public class HitReader {
 
             for (int i = 0; i < rows; i++) {
 
-                if (bankDGTZ.getInt("ADC", i) < 1) {
-                    continue; // gemc assigns strip value -1 for inefficiencies, we only consider strips with values between 1 to the maximum strip number for a given detector
-                }
+                //if (bankDGTZ.getInt("ADC", i) < 1) {
+                    //continue; // gemc assigns strip value -1 for inefficiencies, we only consider strips with values between 1 to the maximum strip number for a given detector
+                //}
                 double ADCtoEdep = bankDGTZ.getInt("ADC", i);
+               
                 //fix for now... no adc in GEMC
                 if (ADCtoEdep < 1) {
                     continue;
@@ -116,7 +117,6 @@ public class HitReader {
                 // add this hit
                 if(hit.get_Layer()+3!=org.jlab.rec.cvt.Constants.getRmReg())
                     hits.add(hit);
-
             }
             // fills the list of BMT hits
             this.set_BMTHits(hits);
@@ -203,6 +203,7 @@ public class HitReader {
                 Point3D MP = new Point3D((EP1.x() + EP2.x()) / 2., (EP1.y() + EP2.y()) / 2., (EP1.z() + EP2.z()) / 2.);
                 Vector3D Dir = new Vector3D((-EP1.x() + EP2.x()), (-EP1.y() + EP2.y()), (-EP1.z() + EP2.z()));
                 SvtStrip.set_ImplantPoint(EP1); 
+                SvtStrip.set_EndPoint(EP2); 
                 // Geometry implementation using the geometry package:  Charles Platt
 //                Line3d shiftedStrip   = geo.getStrip(layer[i]-1, sector[i]-1, strip[i]-1);
 //

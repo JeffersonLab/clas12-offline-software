@@ -1,6 +1,5 @@
 package org.jlab.rec.cvt.track;
 
-import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.cross.Cross;
@@ -21,6 +20,7 @@ public class Track extends Trajectory implements Comparable<Track> {
 
     private int _TrackingStatus;
 
+    
     public void set_TrackingStatus(int ts) {
         _TrackingStatus = ts;
     }
@@ -28,19 +28,16 @@ public class Track extends Trajectory implements Comparable<Track> {
     public int get_TrackingStatus() {
         return _TrackingStatus;
     }
-    float b[] = new float[3];
-
     /**
      *
      * @param helix helix track parameterization
      */
-    public Track(Helix helix, Swim swimmer) {
+    public Track(Helix helix) {
         super(helix);
         if (helix != null) {
-            set_HelicalTrack(helix, swimmer, b);
+            set_HelicalTrack(helix);
         }
     }
-
     /**
      * serialVersionUID
      */
@@ -112,16 +109,19 @@ public class Track extends Trajectory implements Comparable<Track> {
      *
      * @param Helix the track helix
      */
-    public void set_HelicalTrack(Helix Helix, Swim swimmer, float b[]) {
+    public void set_HelicalTrack(Helix Helix) {
         if (Helix != null) {
             set_Q(((int) Math.signum(Constants.getSolenoidscale()) * Helix.get_charge()));
-            swimmer.BfieldLab(0, 0, 0, b);
-            double Bz = Math.abs(b[2]);
-            double calcPt = Constants.LIGHTVEL * Helix.radius() * Bz;
+            double calcPt = 10;
+            if(Math.abs(Helix.B)>0.0001) {
+                calcPt = Constants.LIGHTVEL * Helix.radius() * Helix.B;
+            } else {
+                calcPt = 100;
+                set_Q(1);
+            }
             double calcPz = 0;
             calcPz = calcPt * Helix.get_tandip();
             double calcP = Math.sqrt(calcPt * calcPt + calcPz * calcPz);
-
             set_Pt(calcPt);
             set_Pz(calcPz);
             set_P(calcP);

@@ -157,7 +157,6 @@ public class HelicalTrackFitter {
         double fit_phi_at_dca = _circlefitpars.phi();
         double fit_curvature = _circlefitpars.rho();
         double fit_tandip = _linefitpars.slope();
-
         //double fit_Z0 = _linefitpars.intercept();
         double fit_Z0 = _linefitpars.intercept();
         //fit_Z0 = (Math.abs(fit_dca)-_linefitpars.intercept())/ _linefitpars.slope() ; //reset for displaced vertex

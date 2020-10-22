@@ -13,8 +13,15 @@ import org.jlab.rec.cvt.track.fit.StateVecs.StateVec;
 import org.jlab.rec.cvt.trajectory.Helix;
 
 import Jama.Matrix;
+import java.util.HashMap;
+import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.cluster.Cluster;
+import org.jlab.rec.cvt.hit.FittedHit;
+import org.jlab.rec.cvt.services.RecUtilities;
+import org.jlab.rec.cvt.svt.Geometry;
 
 public class KFitter {
 
@@ -88,7 +95,7 @@ public class KFitter {
         this.NDF = sv.X0.size()-5; 
         for (int it = 0; it < totNumIter; it++) {
             this.chi2 = 0;
-            TrjPoints.clear();
+           //TrjPoints.clear();
             for (int k = 0; k < sv.X0.size() - 1; k++) {
                 if (sv.trackCov.get(k) == null || mv.measurements.get(k + 1) == null) {
                     return;
@@ -118,15 +125,17 @@ public class KFitter {
                 break;
             }
         }
-       
+        if(KFHelix==null)
+            KFHelix = sv.setTrackPars(1);
         //KFHelix = sv.setTrackPars(sv.X0.size() - 1);
         //this.setTrajectory();
         
     }
-    public List<HitOnTrack> TrjPoints = new ArrayList<HitOnTrack>();
+    public Map<Integer, HitOnTrack> TrjPoints = new HashMap<Integer, HitOnTrack>();
 
     public void setTrajectory() {
         TrjPoints.clear();
+        
         for (int k = 1; k < sv.trackTraj.size(); k++) {
             int layer = mv.measurements.get(k).layer;
             double x = sv.trackTraj.get(k).x;
@@ -138,9 +147,9 @@ public class KFitter {
             double px = -invKappa * Math.sin(azi);
             double py = invKappa * Math.cos(azi);
             double pz = invKappa * sv.trackTraj.get(k).tanL;
-            TrjPoints.add(new HitOnTrack(layer, x, y, z, px, py, pz));
+            TrjPoints.put(layer, new HitOnTrack(layer, x, y, z, px, py, pz));
 
-//            System.out.println(" Traj layer "+layer+" x "+x+" y "+y+" z "+z);
+            //System.out.println(" Traj layer "+layer+" x "+x+" y "+y+" z "+z);
         }
     }
 
@@ -169,43 +178,22 @@ public class KFitter {
     public Helix KFHelix;
     
     public Track OutputTrack(Seed trk, org.jlab.rec.cvt.svt.Geometry geo, Swim swimmer) {
-   
-        Track cand = new Track(KFHelix, swimmer);
-        
+        if(trk==null || this.TrjPoints.isEmpty())
+            return null;
+        KFHelix.B = Math.abs(sv.new B(0, 0, 0, 0, swimmer).Bz);
+        Track cand = new Track(KFHelix); 
         if(cand.get_P()<0.05)
             this.setFitFailed = true;
         cand.setNDF(NDF);
         cand.setChi2(chi2);
         
-        for (Cross c : trk.get_Crosses()) {
-            if (c.get_Detector().equalsIgnoreCase("SVT")) {
-                continue;
-            }
-           // System.out.println("output  track trajectory   "+this.TrjPoints.size());
-            for (HitOnTrack h : this.TrjPoints) {
-                //System.out.println(" hot : layer "+h.layer+" x "+h.x+" y "+h.y+" z "+h.z);
-                if (c.get_Cluster1().get_Layer() == h.layer - 6) {
-                    if (Math.sqrt(h.x * h.x + h.y * h.y) < 100) {
-                        this.setFitFailed = true;
-                    }
-                    //System.err.println(c.get_Cluster1().get_Layer()+") error in traj "+this.TrjPoints.size());
-//                    if (Double.isNaN(c.get_Point().x())) {
-//                        c.set_Point(new Point3D(h.x, h.y, c.get_Point().z()));
-//                    }
-//                    if (Double.isNaN(c.get_Point().z())) {
-//                        c.set_Point(new Point3D(c.get_Point().x(), c.get_Point().y(), h.z));
-//                    }
-
-                }
-            }
-        }
-        cand.addAll(trk.get_Crosses());
-
+        cand.addAll(trk.get_Crosses()); 
+        this.MatchTrack2Traj(trk, this.TrjPoints, geo);
 //        cand.finalUpdate_Crosses(geo);
 
         return cand;
     }
-
+    
     public double chi2 = 0;
     public int NDF = 0;
 
@@ -415,6 +403,79 @@ public class KFitter {
 
     }
 
+    private void MatchTrack2Traj(Seed trkcand, Map<Integer,HitOnTrack> traj, Geometry sgeo) {
+    for (int i = 0; i < trkcand.get_Clusters().size(); i++) { //SVT
+            if(trkcand.get_Clusters().get(i).get_Detector()==0) {
+                Cluster cluster = trkcand.get_Clusters().get(i);
+                int layer = trkcand.get_Clusters().get(i).get_Layer();
+                int sector = trkcand.get_Clusters().get(i).get_Sector();
+                Point3D p = new Point3D(traj.get(layer).x, traj.get(layer).y, traj.get(layer).z);
+                Line3D l = new Line3D(cluster.getEndPoint1(), cluster.getEndPoint2());
+                double doca2Cls = sgeo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), p);
+                
+                //double doca2Seed = sgeo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip(), p);
+                //cluster.set_SeedResidual(doca2Seed); 
+                cluster.set_CentroidResidual(doca2Cls);
+            
+                for (FittedHit hit : cluster) {
+                    double doca1 = sgeo.getDOCAToStrip(sector, layer, (double) hit.get_Strip().get_Strip(), p);
+                    double sigma1 = sgeo.getSingleStripResolution(layer, hit.get_Strip().get_Strip(), traj.get(layer).z);
+                    hit.set_stripResolutionAtDoca(sigma1);
+                    hit.set_docaToTrk(doca2Cls);  
+
+                }
+            }
+        }
+
+        // adding the BMT
+        for (int c = 0; c < trkcand.get_Crosses().size(); c++) {
+            if (trkcand.get_Crosses().get(c).get_Detector().equalsIgnoreCase("BMT")) {
+                double ce = trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();
+                if (trkcand.get_Crosses().get(c).get_DetectorType().equalsIgnoreCase("Z")) {
+                    //double x = trkcand.get_Crosses().get(c).get_Point().x();
+                    //double y = trkcand.get_Crosses().get(c).get_Point().y();
+                    //double phi = Math.atan2(y,x);
+                    //double err = trkcand.get_Crosses().get(c).get_Cluster1().get_PhiErr();
+                    //int sector = trkcand.get_Crosses().get(c).get_Sector();
+                    int layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6;
+                    Cluster cluster = trkcand.get_Crosses().get(c).get_Cluster1();
+                    Point3D p = new Point3D(traj.get(layer).x, traj.get(layer).y, traj.get(layer).z);
+                    
+                    double doca2Cls = (Math.atan2(p.y(), p.x())-cluster.get_Phi())*
+                            (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
+                            + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                    
+                    cluster.set_CentroidResidual(doca2Cls);
+
+                    for (FittedHit hit : cluster) {
+                        double doca1 = (Math.atan2(p.y(), p.x())-hit.get_Strip().get_Phi())*
+                            (org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[cluster.get_Region() - 1] 
+                            + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
+                       
+                        hit.set_docaToTrk(doca2Cls);  
+
+                    }
+                }
+                if (trkcand.get_Crosses().get(c).get_DetectorType().equalsIgnoreCase("C")) {
+                    double z = trkcand.get_Crosses().get(c).get_Point().z();
+                    double err = trkcand.get_Crosses().get(c).get_Cluster1().get_ZErr();
+                    int layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer()+6;
+                    Cluster cluster = trkcand.get_Crosses().get(c).get_Cluster1(); 
+                    Point3D p = new Point3D(traj.get(layer).x, traj.get(layer).y, traj.get(layer).z); 
+                    double doca2Cls = p.z()-cluster.get_Z();
+                    
+                    cluster.set_CentroidResidual(doca2Cls);
+
+                    for (FittedHit hit : cluster) {
+                        double doca1 = p.z()-hit.get_Strip().get_Z();
+                        hit.set_docaToTrk(doca2Cls);  
+
+                    }
+                }
+            }
+        }    
+    }
+
     public class HitOnTrack {
 
         int layer;
@@ -424,7 +485,7 @@ public class KFitter {
         double px;
         double py;
         double pz;
-
+        
         HitOnTrack(int layer, double x, double y, double z, double px, double py, double pz) {
             this.layer = layer;
             this.x = x;

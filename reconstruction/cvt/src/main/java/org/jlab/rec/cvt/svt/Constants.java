@@ -18,6 +18,7 @@ public class Constants {
     //CUTS
     public static int MAXSVTHITS = 700;
     public static int MAXSVTCROSSES = 1000;
+    public static double RESIMAX = 5;
 
     // THRESHOLDS
     public static int initThresholds = 30;

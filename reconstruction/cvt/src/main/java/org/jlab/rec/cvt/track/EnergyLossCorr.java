@@ -55,9 +55,8 @@ public class EnergyLossCorr {
         init(trkcand, bstSwim);
     }
     
-    public void doCorrection(Track trkcand, Geometry geo, Swim bstSwim, float b[]) {
-        bstSwim.BfieldLab(Points[0][0] / 10, Points[0][0] / 10, Points[0][0] / 10, b);
-        double B = (double)b[2];
+    public void doCorrection(Track trkcand) {
+        double B = trkcand.get_helix().B;
         double ELossMax = 600; //600Mev 
         double stepSize = 0.001; //1 MeV
         int nbins = (int) ELossMax;
@@ -71,14 +70,14 @@ public class EnergyLossCorr {
             if (Math.abs(this.OrigTrack.get_curvature()) < Math.abs(curv)) {
                 double correctedCurv = (Constants.LIGHTVEL * Math.abs(B)) * Math.signum(this.OrigTrack.get_curvature()) / (pt + stepSize);
                 trkcand.get_helix().set_curvature(correctedCurv);
-                trkcand.set_HelicalTrack(trkcand.get_helix(), bstSwim, b);
+                trkcand.set_HelicalTrack(trkcand.get_helix());
                 return;
             }
             pt = pt0 - j * stepSize;
 
             double aveCurv = 0;
             for (int k = 0; k < trkcand.size(); k++) {
-                aveCurv += doEnergyLossCorrection(k, pt, bstSwim, b);
+                aveCurv += doEnergyLossCorrection(k, pt, B);
             }
             aveCurv /= trkcand.size();
             curv = aveCurv;
@@ -94,7 +93,7 @@ public class EnergyLossCorr {
 
         cosEntAnglesPlanes = new double[trkcand.size()];
 
-        Track trkcandcopy = new Track(trkcand.get_helix(), bstSwim);
+        Track trkcandcopy = new Track(trkcand.get_helix());
         trkcandcopy.addAll(trkcand);
 
         this.set_UpdatedTrack(trkcandcopy);
@@ -119,10 +118,8 @@ public class EnergyLossCorr {
     }
 
     //? Solve numerically stepping over pt until corr pt matches with fit omega... how much dedx corresponds to obs pt?
-    private double doEnergyLossCorrection(int m, double pt, Swim bstSwim, float b[]) {
-        bstSwim.BfieldLab(Points[m][0] / 10, Points[m][0] / 10, Points[m][0] / 10, b);
-        double B = b[2]; // Bfield takes units of cm
-
+    private double doEnergyLossCorrection(int m, double pt, double B) {
+        
         double tanL = this.OrigTrack.get_tandip();
 
         // pz = pt*tanL

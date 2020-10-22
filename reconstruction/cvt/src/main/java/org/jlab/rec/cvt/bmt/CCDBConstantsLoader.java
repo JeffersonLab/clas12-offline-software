@@ -58,7 +58,8 @@ public class CCDBConstantsLoader {
          double[] MAG_grid = new double [GRID_SIZE];
          
          // HV settings for Lorentz Angle
-         double [][] HV_DRIFT= new double [NREGIONS*2][3];
+         double [][] HV_DRIFT_FF= new double [NREGIONS*2][3];
+         double [][] HV_DRIFT_MF= new double [NREGIONS*2][3];
          
         // Load the tables
         
@@ -239,14 +240,12 @@ public class CCDBConstantsLoader {
         }
          
          for (int i = 0; i<2*NREGIONS; i++) {
-        	 HV_DRIFT[i][0]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_1", i);
-    		 HV_DRIFT[i][1]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_2", i);
-    		 HV_DRIFT[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_3", i);
-        	 if (Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.8) {
-        		 HV_DRIFT[i][0]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_1", i);
-        		 HV_DRIFT[i][1]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_2", i);
-        		 HV_DRIFT[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_3", i);
-        	 }
+        	HV_DRIFT_FF[i][0]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_1", i);
+    		HV_DRIFT_FF[i][1]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_2", i);
+    		HV_DRIFT_FF[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_3", i);
+        	HV_DRIFT_MF[i][0]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_1", i);
+                HV_DRIFT_MF[i][1]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_2", i);
+                HV_DRIFT_MF[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_3", i);
         	 
         }
          // beam offset
@@ -291,7 +290,8 @@ public class CCDBConstantsLoader {
         Constants.setE_grid(ELEC_grid);
         Constants.setB_grid(MAG_grid);
         Constants.setPar_grid();
-        Constants.setE_drift(HV_DRIFT);
+        Constants.setE_drift_FF(HV_DRIFT_FF);
+        Constants.setE_drift_MF(HV_DRIFT_MF);
         dbprovider.disconnect();
         CSTLOADED = true;
         System.out

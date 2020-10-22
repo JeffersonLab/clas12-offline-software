@@ -26,7 +26,8 @@ public class CrossMaker {
      * @param svt_geo svt geometry
      * @return list of crosses for the SVT and BMT
      */
-    public ArrayList<ArrayList<Cross>> findCrosses(List<Cluster> clusters, org.jlab.rec.cvt.svt.Geometry svt_geo) {
+    public ArrayList<ArrayList<Cross>> findCrosses(List<Cluster> clusters, org.jlab.rec.cvt.svt.Geometry svt_geo,
+            org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
         // instantiate array of clusters that are sorted by detector (SVT, BMT [C, Z]) and inner/outer layers
         ArrayList<ArrayList<Cluster>> sortedClusters = new ArrayList<ArrayList<Cluster>>();
         // fill the sorted list
@@ -37,9 +38,9 @@ public class CrossMaker {
         ArrayList<Cluster> bmt_Clayrclus = sortedClusters.get(2);
         ArrayList<Cluster> bmt_Zlayrclus = sortedClusters.get(3);
         // arrays of BMT and SVT crosses
-        ArrayList<Cross> BMTCrosses = this.findBMTCrosses(bmt_Clayrclus, bmt_Zlayrclus);
+        ArrayList<Cross> BMTCrosses = this.findBMTCrosses(bmt_Clayrclus, bmt_Zlayrclus, bmt_geo);
         ArrayList<Cross> SVTCrosses = this.findSVTCrosses(svt_innerlayrclus, svt_outerlayrclus, svt_geo);
-
+        
         // instantiate the arraylists of sorted Crosses by detector type
         ArrayList<ArrayList<Cross>> sortedCrosses = new ArrayList<ArrayList<Cross>>();
         // array index 0 = SVT crosses, 1 = BMT crosses
@@ -109,6 +110,10 @@ public class CrossMaker {
                 }
             }
         }
+        for (Cross c : crosses) {
+            int rg  = c.get_Region();
+            c.setOrderedRegion(rg);
+        }
         return crosses;
     }
 
@@ -119,6 +124,7 @@ public class CrossMaker {
         if(Z>Constants.ACTIVESENLEN)
             Z=Constants.ACTIVESENLEN;
         Cluster1.set_CentroidError(Cluster1.get_ResolutionAlongZ(Z, svt_geo) / (Constants.PITCH / Math.sqrt(12.)));
+        Cluster1.set_Error(Cluster1.get_ResolutionAlongZ(Z, svt_geo) );
     }
     /**
      *
@@ -129,7 +135,8 @@ public class CrossMaker {
      */
     private ArrayList<Cross> findBMTCrosses(
             ArrayList<Cluster> Clayrclus,
-            ArrayList<Cluster> Zlayrclus) {
+            ArrayList<Cluster> Zlayrclus, 
+            org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
         //instanciates the list of crosses
         ArrayList<Cross> crosses = new ArrayList<Cross>();
 
@@ -192,15 +199,22 @@ public class CrossMaker {
             if (this_cross.get_Point0() != null) {
                 //make arraylist
                 crosses.add(this_cross);
-
             }
-
         }
-
+        //for (Cross c : crosses) {
+        //    int rg  = (c.get_Detector().equalsIgnoreCase("BMT"))  ? 3 + 
+        //            bmt_geo.getLayer( c.get_Region(), c.get_DetectorType()) : c.get_Region();
+        //    c.setOrderedRegion(rg);
+        //}
+        for (Cross c : crosses) {
+            int rg  =  3 + 
+                    bmt_geo.getLayer( c.get_Region(), c.get_DetectorType()) ;
+            c.setOrderedRegion(rg);
+        }
         return crosses;
-
+        
     }
-
+    
     /**
      *
      * @param clusters the clusters

@@ -37,7 +37,7 @@ public class TrackListFinder {
 
         // loop over candidates and set the trajectories
         
-        for (Track trk : cands) {
+        for (Track trk : cands) { 
             if(trk.get_helix()!=null) {
                 this.assignTrkPID(trk);
                 //KalFit kf = new KalFit(trk, svt_geo);
@@ -54,7 +54,7 @@ public class TrackListFinder {
                         trk.get_P(), charge, 
                         maxPathLength) ;
 
-                double[] pointAtCylRad = bstSwim.SwimToCylinder(Constants.CTOFINNERRADIUS/10);
+                double[] pointAtCylRad = bstSwim.SwimRho(Constants.CTOFINNERRADIUS/10);
                 trk.set_TrackPointAtCTOFRadius(new Point3D(pointAtCylRad[0]*10, pointAtCylRad[1]*10, pointAtCylRad[2]*10));
                 trk.set_TrackDirAtCTOFRadius(new Vector3D(pointAtCylRad[3]*10, pointAtCylRad[4]*10, pointAtCylRad[5]*10));
 

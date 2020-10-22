@@ -19,7 +19,6 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
-import static org.jlab.rec.cvt.Constants.setSolenoidscale;
 import org.jlab.rec.cvt.banks.HitReader;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
 import org.jlab.rec.cvt.bmt.CCDBConstantsLoader;
@@ -33,11 +32,9 @@ import org.jlab.rec.cvt.hit.Hit;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.rec.cvt.track.TrackListFinder;
+import org.jlab.rec.cvt.track.TrackSeeder;
 import org.jlab.rec.cvt.track.TrackSeederCA;
 import org.jlab.rec.cvt.track.fit.KFitter;
-import org.jlab.rec.cvt.trajectory.Helix;
-import org.jlab.rec.cvt.trajectory.Trajectory;
-import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
 
 /**
  * Service to return reconstructed TRACKS
@@ -64,7 +61,7 @@ public class CVTReconstruction extends ReconstructionEngine {
 
     String FieldsConfig = "";
     int Run = -1;
-  
+   public boolean isSVTonly = false;
     public void setRunConditionsParameters(DataEvent event, String FieldsConfig, int iRun, boolean addMisAlignmts, String misAlgnFile) {
         if (event.hasBank("RUN::config") == false) {
             System.err.println("RUN CONDITIONS NOT READ!");
@@ -84,7 +81,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             isCosmics = true;
         }
 
-        boolean isSVTonly = false;
+        
 
         // Load the fields
         //-----------------
@@ -105,18 +102,19 @@ public class CVTReconstruction extends ReconstructionEngine {
             boolean align=false;
             //Load field scale
             double SolenoidScale =(double) bank.getFloat("solenoid", 0);
-            Constants.setSolenoidscale(SolenoidScale);
             if(Math.abs(SolenoidScale)<0.001)
-            Constants.setCosmicsData(true);
-            
-            System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variationName);
-            CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, variationName));
-            System.out.println("SVT LOADING WITH VARIATION "+variationName);
-            DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, variationName);
-            cp = SVTConstants.connect( cp );
-            cp.disconnect();  
-            SVTStripFactory svtFac = new SVTStripFactory(cp, true);
-            SVTGeom.setSvtStripFactory(svtFac);
+                Constants.setCosmicsData(true);
+            if(SolenoidScale==0)
+                SolenoidScale=0.000001;
+            Constants.setSolenoidscale(SolenoidScale);
+//            System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variationName);
+//            CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, variationName));
+//            System.out.println("SVT LOADING WITH VARIATION "+variationName);
+//            DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, variationName);
+//            cp = SVTConstants.connect( cp );
+//            cp.disconnect();  
+//            SVTStripFactory svtFac = new SVTStripFactory(cp, true);
+//            SVTGeom.setSvtStripFactory(svtFac);
             Constants.Load(isCosmics, isSVTonly);
             this.setRun(newRun);
 
@@ -156,7 +154,8 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         HitReader hitRead = new HitReader();
         hitRead.fetch_SVTHits(event, adcConv, -1, -1, SVTGeom);
-        hitRead.fetch_BMTHits(event, adcConv, BMTGeom);
+        if(isSVTonly==false)
+          hitRead.fetch_BMTHits(event, adcConv, BMTGeom);
 
         List<Hit> hits = new ArrayList<Hit>();
         //I) get the hits
@@ -168,10 +167,11 @@ public class CVTReconstruction extends ReconstructionEngine {
         }
 
         List<Hit> bmt_hits = hitRead.get_BMTHits();
-        if(bmt_hits.size()>org.jlab.rec.cvt.bmt.Constants.MAXBMTHITS)
-             return true;
         if (bmt_hits != null && bmt_hits.size() > 0) {
             hits.addAll(bmt_hits);
+
+            if(bmt_hits.size()>org.jlab.rec.cvt.bmt.Constants.MAXBMTHITS)
+                 return true;
         }
 
         //II) process the hits		
@@ -189,7 +189,8 @@ public class CVTReconstruction extends ReconstructionEngine {
         //2) find the clusters from these hits
         ClusterFinder clusFinder = new ClusterFinder();
         clusters.addAll(clusFinder.findClusters(svt_hits, BMTGeom));     
-        clusters.addAll(clusFinder.findClusters(bmt_hits, BMTGeom)); 
+        if(bmt_hits != null && bmt_hits.size() > 0)
+            clusters.addAll(clusFinder.findClusters(bmt_hits, BMTGeom)); 
         
         if (clusters.size() == 0) {
             rbc.appendCVTBanks(event, SVThits, BMThits, null, null, null, null, shift);
@@ -212,31 +213,47 @@ public class CVTReconstruction extends ReconstructionEngine {
 
         List<ArrayList<Cross>> crosses = new ArrayList<ArrayList<Cross>>();
         CrossMaker crossMake = new CrossMaker();
-        crosses = crossMake.findCrosses(clusters, SVTGeom);
+        crosses = crossMake.findCrosses(clusters, SVTGeom, BMTGeom);
          if(crosses.get(0).size() > org.jlab.rec.cvt.svt.Constants.MAXSVTCROSSES ) {
             rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, shift);
             return true; 
          }
          {//System.out.println(" FITTING SEED......................");
-//            TrackSeeder trseed = new TrackSeeder();
-            TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
            
+            List<Seed> seeds = null;
+            
+            if(this.isSVTonly) {
+                TrackSeeder trseed = new TrackSeeder();
+                seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
+            
+            } else {
+                TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
+                seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
+                
+            }
+            if(seeds ==null) {
+                this.CleanupSpuriousCrosses(crosses, null) ;
+                rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, null, shift);
+                return true;
+            }   
             KFitter kf;
             List<Track> trkcands = new ArrayList<Track>();
             
-            List<Seed> seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
-            
             for (Seed seed : seeds) { 
-            kf = new KFitter(seed, SVTGeom, swimmer );
-            kf.runFitter(SVTGeom, BMTGeom, swimmer);
-            //System.out.println(" OUTPUT SEED......................");
-            trkcands.add(kf.OutputTrack(seed, SVTGeom, swimmer));
-            if (kf.setFitFailed == false) {
-                trkcands.get(trkcands.size() - 1).set_TrackingStatus(2);
-           } else {
-                trkcands.get(trkcands.size() - 1).set_TrackingStatus(1);
-           }
-        }
+                kf = new KFitter(seed, SVTGeom, swimmer );
+                kf.runFitter(SVTGeom, BMTGeom, swimmer);
+                
+                //System.out.println(" OUTPUT SEED......................");
+                Track track = kf.OutputTrack(seed, SVTGeom, swimmer);
+                if(track != null) {
+                    trkcands.add(track);
+                    if (kf.setFitFailed == false) {
+                        trkcands.get(trkcands.size() - 1).set_TrackingStatus(2);
+                    } else {
+                    trkcands.get(trkcands.size() - 1).set_TrackingStatus(1);
+                    }
+                }
+            }
         
         if (trkcands.size() == 0) {
             this.CleanupSpuriousCrosses(crosses, null) ;
@@ -394,7 +411,8 @@ public class CVTReconstruction extends ReconstructionEngine {
         }
     }
 
-        public boolean init() {
+    @Override
+    public boolean init() {
         // Load config
         String rmReg = this.getEngineConfigString("removeRegion");
         
@@ -412,14 +430,42 @@ public class CVTReconstruction extends ReconstructionEngine {
         if (rmReg==null) {
              System.out.println("["+this.getName()+"] run with all region (default) ");
         }
+        //svt stand-alone
+        String svtStAl = this.getEngineConfigString("svtOnly");
         
+        if (svtStAl!=null) {
+            System.out.println("["+this.getName()+"] run with SVT only "+svtStAl+" config chosen based on yaml");
+            this.isSVTonly= Boolean.valueOf(svtStAl);
+        }
+        else {
+            svtStAl = System.getenv("COAT_SVT_ONLY");
+            if (svtStAl!=null) {
+                System.out.println("["+this.getName()+"] run with SVT only "+svtStAl+" config chosen based on env");
+                this.isSVTonly= Boolean.valueOf(svtStAl);
+            }
+        }
+        if (svtStAl==null) {
+             System.out.println("["+this.getName()+"] run with both CVT systems (default) ");
+        }
         // Load other geometries
+        
         variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        System.out.println(" CVT YAML VARIATION NAME + "+variationName);
         ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, 11, variationName);
         CTOFGeom = new CTOFGeant4Factory(providerCTOF);        
         CNDGeom =  GeometryFactory.getDetector(DetectorType.CND, 11, variationName);
         //
           
+        
+        System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variationName);
+        CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, variationName));
+        System.out.println("SVT LOADING WITH VARIATION "+variationName);
+        DatabaseConstantProvider cp = new DatabaseConstantProvider(11, variationName);
+        cp = SVTConstants.connect( cp );
+        cp.disconnect();  
+        SVTStripFactory svtFac = new SVTStripFactory(cp, true);
+        SVTGeom.setSvtStripFactory(svtFac);
+
         return true;
     }
   

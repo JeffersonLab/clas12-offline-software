@@ -67,5 +67,9 @@ public class Seed implements Comparable<Seed>{
 //        return Double.parseDouble(this.get_IntIdentifier()) < Double.parseDouble(arg.get_IntIdentifier()) ? -1 : Double.parseDouble(this.get_IntIdentifier()) == Double.parseDouble(arg.get_IntIdentifier()) ? 0 : 1;
         
     }
+    
+    public double doca;
+    public double rho;
+    public double phi;
 
 }

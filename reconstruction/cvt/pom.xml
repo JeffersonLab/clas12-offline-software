@@ -108,6 +108,10 @@
       <artifactId>groot</artifactId>
       <version>2.2.0-SNAPSHOT</version>
     </dependency>
-    
-  </dependencies>
+        <dependency>
+            <groupId>org.jlab.clas</groupId>
+            <artifactId>clas-tracking</artifactId>
+            <version>6.5.11-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
  </project>

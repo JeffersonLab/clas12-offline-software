@@ -554,7 +554,7 @@ public class StateVecs {
         double h_tandip = pz / Math.sqrt(px * px + py * py);
         
         Helix trkHelix = new Helix(h_dca, h_phi0, h_omega, h_dz, h_tandip, this.trackCov.get(kf).covMat);
-        //System.out.println("x "+x+" y "+y+" x' "+(-h_dca*Math.sin(h_phi0))+" y' "+y*Math.cos(h_phi0) +" theta "+Math.toDegrees(Math.acos(pz/Math.sqrt(px*px+py*py+pz*pz)))+" phi "+Math.toDegrees(Math.atan2(py, px))+" q "+q);
+       // System.out.println("x "+x+" y "+y+" x' "+(-h_dca*Math.sin(h_phi0))+" y' "+y*Math.cos(h_phi0) +" theta "+Math.toDegrees(Math.acos(pz/Math.sqrt(px*px+py*py+pz*pz)))+" phi "+Math.toDegrees(Math.atan2(py, px))+" q "+q);
 
         return trkHelix;
     }

@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.cluster;
 
 import java.util.ArrayList;
+import org.jlab.geom.prim.Point3D;
 
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.hit.Hit;
@@ -23,6 +24,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
     private int _Id;								//		cluster Id
     private double _Centroid; 							// 		after LC (Lorentz Correction)
     private double _CentroidError;
+    private double _Error;                                              //              strip resolution    
     private double _Centroid0; 							// 		before LC
     private double _TotalEnergy;
     private double _Phi;  							// 		for Z-detectors
@@ -156,7 +158,13 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         double weightedPhiErrSq0 = 0;           // Err^2 on uncorrected energy-weighted phi of the strip 
         double weightedZ = 0;			// Energy-weighted z of the strip
         double weightedZErrSq = 0;		// Err^2 on  energy-weighted z of the strip
-
+        double weightedX1 = 0;                  // SVT strip centroid positions of endpoints
+        double weightedX2 = 0;                  // SVT strip centroid positions of endpoints
+        double weightedY1 = 0;                  // SVT strip centroid positions of endpoints
+        double weightedY2 = 0;                  // SVT strip centroid positions of endpoints
+        double weightedZ1 = 0;                  // SVT strip centroid positions of endpoints
+        double weightedZ2 = 0;                  // SVT strip centroid positions of endpoints
+        
         int nbhits = this.size();
 
         if (nbhits != 0) {
@@ -175,6 +183,14 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 if (this.get_Detector()==0) {
                     // for the SVT the analysis only uses the centroid
                     strpNb = thehit.get_Strip().get_Strip();
+                    Point3D stEP1 = thehit.get_Strip().get_ImplantPoint();
+                    Point3D stEP2 = thehit.get_Strip().get_EndPoint();
+                    weightedX1 += strpEn * stEP1.x();
+                    weightedY1 += strpEn * stEP1.y();
+                    weightedZ1 += strpEn * stEP1.z();
+                    weightedX2 += strpEn * stEP2.x();
+                    weightedY2 += strpEn * stEP2.y();
+                    weightedZ2 += strpEn * stEP2.z();
                 }
                 if (this.get_Detector()==1) { 
                     // for the BMT the analysis distinguishes between C and Z type detectors
@@ -199,7 +215,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                 totEn += strpEn;
                 weightedStrp += strpEn * (double) strpNb;
                 weightedStrp0 += strpEn * (double) strpNb0;
-
+                
                 // getting the max and min strip number in the cluster
                 if (strpNb <= min) {
                     min = strpNb;
@@ -237,7 +253,8 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
             phiErrCent = Math.sqrt(weightedPhiErrSq);
             phiErrCent0 = Math.sqrt(weightedPhiErrSq0);
             zErrCent = Math.sqrt(weightedZErrSq);
-
+            this.setEndPoint1(new Point3D(weightedX1/totEn, weightedY1/totEn, weightedZ1/totEn));
+            this.setEndPoint2(new Point3D(weightedX2/totEn, weightedY2/totEn, weightedZ2/totEn));
             //phiErrCent = Math.sqrt(weightedPhiErrSq);
             //phiErrCent0 = Math.sqrt(weightedPhiErrSq0);
             //zErrCent = Math.sqrt(weightedZErrSq);
@@ -274,6 +291,13 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
     public void set_CentroidError(double _CentroidE) {
         this._CentroidError = _CentroidE;
+    }
+    public double get_Error() {
+        return _Error;
+    }
+
+    public void set_Error(double E) {
+        this._Error = E;
     }
     public double get_Centroid0() {
         return _Centroid0;
@@ -468,5 +492,36 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
         return phi;
     }
 
+    /**
+     * @return the _EndPoint1
+     */
+    public Point3D getEndPoint1() {
+        return _EndPoint1;
+    }
+
+    /**
+     * @param _EndPoint1 the _EndPoint1 to set
+     */
+    public void setEndPoint1(Point3D _EndPoint1) {
+        this._EndPoint1 = _EndPoint1;
+    }
+
+    /**
+     * @return the _EndPoint2
+     */
+    public Point3D getEndPoint2() {
+        return _EndPoint2;
+    }
+
+    /**
+     * @param _EndPoint2 the _EndPoint2 to set
+     */
+    public void setEndPoint2(Point3D _EndPoint2) {
+        this._EndPoint2 = _EndPoint2;
+    }
+
+    private Point3D _EndPoint1;
+    private Point3D _EndPoint2;
+    
     
 }

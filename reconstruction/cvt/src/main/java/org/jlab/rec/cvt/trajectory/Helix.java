@@ -19,7 +19,7 @@ import Jama.Matrix;
  *
  */
 public class Helix {
-
+    public double B = 5.0;
     private double _dca;          // distance of closest approach to the z-axis in the lab frame
     private double _phi_at_dca;   // azimuth at the DOCA
     private double _curvature;    // track curvature = 1/R, where R is the radius of the circle 
@@ -41,6 +41,15 @@ public class Helix {
         set_Z0(Z0);
         set_tandip(tandip);
         set_covmatrix(covmatrix);
+
+    }
+    
+    public Helix(double dca, double phi_at_doca, double curvature, double Z0, double tandip ) {
+        set_dca(dca);
+        set_phi_at_dca(phi_at_doca);
+        set_curvature(curvature);
+        set_Z0(Z0);
+        set_tandip(tandip);
 
     }
 

@@ -89,9 +89,9 @@ public class FittedHit extends Hit implements Comparable<Hit> {
      * @return the hit residual = doca to track
      */
     public double get_Residual() {
-        if (get_docaToTrk() == 0) {
-            return Double.NaN;
-        }
+        //if (get_docaToTrk() == 0) {
+        //    return Double.NaN;
+        //}
         return get_docaToTrk();
     }
 
