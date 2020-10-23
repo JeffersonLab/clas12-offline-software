@@ -491,6 +491,7 @@ public class EvioHipoEvent4 {
             int rows = evioBank.rows();
             Bank hipoADC = new Bank(schemaFactory.getSchema("BAND::adc"), rows*2);
             Bank hipoTDC = new Bank(schemaFactory.getSchema("BAND::tdc"), rows*2);            
+	    //System.out.println("**************************");
 	    //System.out.println("In band DGTZ\n");
 	    //evioBank.show();
             for(int index = 0; index < evioBank.rows(); index++){
@@ -527,6 +528,8 @@ public class EvioHipoEvent4 {
                 hipoTDC .putShort("component",  i+1, 	(short) evioBank.getInt("component",index));
                 hipoTDC .putByte("order", 	i+1,	(byte)  3);
                 hipoTDC .putInt("TDC", 		i+1, 	evioBank.getInt("TDCR", index));
+
+
             }
             hipoEvent.write(hipoADC);
             hipoEvent.write(hipoTDC);
@@ -537,6 +540,7 @@ public class EvioHipoEvent4 {
 	    //hipoADC.show();
 	    //System.out.println("TDC");
 	    //hipoTDC.show();
+	    //System.out.println("**************************");
 	    
         }
     }
