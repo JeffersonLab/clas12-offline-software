@@ -39,6 +39,9 @@ public class HitReader {
 		// Grab trigger phase for TDC vs FADC matching
 		double triggerPhase = getTriggerPhase(event);
 
+		// Check if this is a MC file
+		double TDCscale = getTDCScale(event);
+
 		// Check that the file has the dgtz bank for BAND.	 
 		if(event.hasBank("BAND::adc")==false || event.hasBank("BAND::tdc")==false) {
 			return new ArrayList<BandHitCandidate>();
@@ -112,7 +115,7 @@ public class HitReader {
 
 			int key = s*1000 + l*100 + c*10 + (o-2);
 
-			double tdc = ((double)bankTDC.getInt("TDC",j) * 0.02345);
+			double tdc = ((double)bankTDC.getInt("TDC",j) * 0.02345 / TDCscale );
 
 			if( tdc <= 0 ) continue;
 
@@ -192,6 +195,11 @@ public class HitReader {
 			}
 		}
 		return tPh;
+	}
 
+	private static double getTDCScale( DataEvent ev ){
+		double tdcScale = 1;
+		if(ev.hasBank("MC::Event")) tdcScale = 1E4;
+		return tdcScale;
 	}
 }
