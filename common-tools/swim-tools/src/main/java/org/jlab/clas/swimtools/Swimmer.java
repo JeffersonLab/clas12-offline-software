@@ -65,6 +65,8 @@ public class Swimmer {
         }
         if(TorusScale==0)
             TorusScale=0.000001;
+        if(SolenoidScale==0)
+            SolenoidScale=0.000001;
         MagneticFields.getInstance().getTorus().setScaleFactor(TorusScale);
         MagneticFields.getInstance().getSolenoid().setScaleFactor(SolenoidScale);
         MagneticFields.getInstance().setSolenoidShift(shift);
