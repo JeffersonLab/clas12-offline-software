@@ -1085,8 +1085,8 @@ public class TrackCandListFinder {
                     continue;
                 }
                 if (Math.abs(st.get_CalcCentroidStrip() - cls.get_Centroid()) < 4) {
-                    tf.setHitResolParams("SVT", cls.get_Sector(), cls.get_Layer(), cls,
-                            st, svt_geo, bmt_geo, trajFinal);
+                    //tf.setHitResolParams("SVT", cls.get_Sector(), cls.get_Layer(), cls,
+                    //        st, svt_geo, bmt_geo, trajFinal);
                     //System.out.println("trying to associate a cluster ");cls.printInfo(); System.out.println(" to "+st.get_CalcCentroidStrip()+" dStp = "+(st.get_CalcCentroidStrip()-cls.get_Centroid()));
                     cls.set_AssociatedTrackID(k);
                     for (FittedHit h : cls) {
