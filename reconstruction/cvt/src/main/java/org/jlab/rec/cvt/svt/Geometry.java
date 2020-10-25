@@ -288,7 +288,7 @@ public class Geometry {
         double LC_z = LC[1];
 
         Point3D crPoint = transformToFrame(sector, upperlayer - 1, LC_x, 0, LC_z, "lab", "middle");
-        
+
         vals[0] = crPoint.x();
         vals[1] = crPoint.y();
         vals[2] = crPoint.z();

@@ -35,7 +35,6 @@ import org.jlab.rec.cvt.track.TrackSeederCA;
 public class TracksFromTargetRec {
     private StraightTrackCrossListFinder crossLister = new StraightTrackCrossListFinder();
     private RecUtilities recUtil = new RecUtilities();
-    boolean KFOn;
     
     public boolean processEvent(DataEvent event,  
             List<FittedHit> SVThits, List<FittedHit> BMThits, 
@@ -58,13 +57,11 @@ public class TracksFromTargetRec {
         } else {
             if(isSVTonly) {
                 TrackSeeder trseed = new TrackSeeder();
-                seeds = trseed.findSeed(crosses.get(0), null, SVTGeom, BMTGeom, swimmer);
+                seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
             
             } else {
                 TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
                 seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
-                //TrackSeeder trseed = new TrackSeeder();
-                //seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
             }
         }
         if(seeds ==null || seeds.size() == 0) {
@@ -105,7 +102,7 @@ public class TracksFromTargetRec {
                     org.jlab.rec.cvt.Constants.getYb(),
                     org.jlab.rec.cvt.Constants.getZoffset(), 
                     recUtil.setMeasVecs(seed, SVTGeom)) ;
-                kf.filterOn = this.KFOn;
+
                 kf.runFitter(swimmer);
                
                 if (kf.setFitFailed == false && kf.NDF>0) {

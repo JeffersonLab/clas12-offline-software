@@ -58,7 +58,6 @@ public class CVTRecNewKF extends ReconstructionEngine {
     int Run = -1;
     public boolean isSVTonly = false;
     public boolean isCosmic = false;
-    public boolean KFOn = false;
     
     public void setRunConditionsParameters(DataEvent event, String FieldsConfig, int iRun, boolean addMisAlignmts, String misAlgnFile) {
         if (event.hasBank("RUN::config") == false) {
@@ -107,7 +106,6 @@ public class CVTRecNewKF extends ReconstructionEngine {
             Constants.setSolenoidVal(Math.abs(b[2]));
             Constants.Load(isCosmics, isSVTonly);
             this.setRun(newRun); 
-            trksFromTargetRec.KFOn = this.KFOn;
         }
       
         Run = newRun;
@@ -141,11 +139,12 @@ public class CVTRecNewKF extends ReconstructionEngine {
         ADCConvertor adcConv = new ADCConvertor();
 
         RecoBankWriter rbc = new RecoBankWriter();
+
         HitReader hitRead = new HitReader();
         hitRead.fetch_SVTHits(event, adcConv, -1, -1, SVTGeom);
-        if(isSVTonly==false) 
+        if(isSVTonly==false)
           hitRead.fetch_BMTHits(event, adcConv, BMTGeom);
-        
+
         List<Hit> hits = new ArrayList<Hit>();
         //I) get the hits
         List<Hit> svt_hits = hitRead.get_SVTHits();
@@ -259,42 +258,23 @@ public class CVTRecNewKF extends ReconstructionEngine {
         if (svtStAl==null) {
              System.out.println("["+this.getName()+"] run with both CVT systems (default) ");
         }
-        //svt cosmics
+        //svt stand-alone
         String svtCosmics = this.getEngineConfigString("cosmics");
         
         if (svtCosmics!=null) {
             System.out.println("["+this.getName()+"] run with cosmics settings "+svtCosmics+" config chosen based on yaml");
-            this.isCosmic= Boolean.valueOf(svtCosmics);
+            this.isSVTonly= Boolean.valueOf(svtCosmics);
         }
         else {
-            svtCosmics = System.getenv("COAT_CVT_COSMICS");
+            svtCosmics = System.getenv("COAT_SVT_ONLY");
             if (svtCosmics!=null) {
                 System.out.println("["+this.getName()+"] run with cosmics settings "+svtCosmics+" config chosen based on env");
-                this.isCosmic= Boolean.valueOf(svtCosmics);
+                this.isSVTonly= Boolean.valueOf(svtCosmics);
             }
         }
         if (svtCosmics==null) {
              System.out.println("["+this.getName()+"] run with cosmics settings default = false");
         }
-        
-        //KF fit
-        String KFFItOn = this.getEngineConfigString("KFon");
-        
-        if (KFFItOn!=null) {
-            System.out.println("["+this.getName()+"] run with KF on settings "+KFFItOn+" config chosen based on yaml");
-            this.KFOn= Boolean.valueOf(KFFItOn);
-        }
-        else {
-            KFFItOn = System.getenv("COAT_KF_ON");
-            if (KFFItOn!=null) {
-                System.out.println("["+this.getName()+"] run with KF on settings "+KFFItOn+" config chosen based on env");
-                this.KFOn= Boolean.valueOf(KFFItOn);
-            }
-        }
-        if (KFFItOn==null) {
-             System.out.println("["+this.getName()+"] run with KF settings default = on");
-        }
-        
         // Load other geometries
         
         variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
