@@ -30,7 +30,6 @@ public class KFitter {
     private double _Xb;
     private double _Yb;
     private double resiCut = 100;//residual cut for the measurements
-    public boolean filterOn;
     
     public void setMeasurements(List<Surface> measSurfaces) {
         mv.setMeasVecs(measSurfaces);
@@ -110,8 +109,6 @@ public class KFitter {
     double newChisq = Double.POSITIVE_INFINITY;
                             
     public void runFitter(Swim swimmer) {
-        if(this.filterOn==false)
-            totNumIter=2;
         double newchisq = Double.POSITIVE_INFINITY;
         this.NDF = sv.X0.size()-5; 
         
@@ -210,7 +207,7 @@ public class KFitter {
     private void filter(int k, Swim swimmer, int dir) {
 
         if (sv.trackTraj.get(k) != null && sv.trackCov.get(k).covMat != null 
-                && mv.measurements.get(k).skip == false && this.filterOn==true) {
+                && mv.measurements.get(k).skip == false) {
 
             double[] K = new double[5];
             double V = mv.measurements.get(k).error;
