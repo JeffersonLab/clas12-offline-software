@@ -115,7 +115,7 @@ public class TrajectoryFinder {
             int sector = Sectors[l];
             if(sector == -1)
                 continue;
-
+            
             Vector3D n = svt_geo.findBSTPlaneNormal(sector, layer);
             Point3D p = svt_geo.getPlaneModuleOrigin(sector, layer);
             double d = n.dot(p.toVector3D());
@@ -132,16 +132,17 @@ public class TrajectoryFinder {
             stateVecs.add(stVec);
 
             // loops over the crosses to get the strip resolutions
-            for (Cross c : SVTCrossList) {
-                if (matchCrossToStateVec(c, stVec, layer, sector) == false) {
-                    continue;
-                }
-                Vector3D dir = new Vector3D(inters[3], inters[4], inters[5]).asUnit();
-                this.fill_HelicalTrkAngleWRTSVTPlane(sector, layer, dir, svt_geo, stVec);
-                // set the cross dir
-                c.set_Dir(dir);
-
-            }
+        //    for (Cross c : SVTCrossList) {
+        //        if (matchCrossToStateVec(c, stVec, layer, sector) == false) {
+        //            continue;
+        //        }
+        //        Vector3D dir = new Vector3D(inters[3], inters[4], inters[5]).asUnit();
+        //        this.fill_HelicalTrkAngleWRTSVTPlane(sector, layer, dir, svt_geo, stVec);
+        //        // set the cross dir
+        //        c.set_Dir(dir);
+        //        //set z
+        //        c.set_Point(new Point3D(c.get_Point().x(), c.get_Point().y(), stVec.z()));
+        //    }
 
         }
         // reinitialize from vertex
@@ -174,7 +175,11 @@ public class TrajectoryFinder {
                     R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
                 }
 
-                inters = swimmer.SwimRho(R/10);
+    //            swimmer.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
+    //                    Math.toDegrees(trk.get_helix().get_phi_at_dca()), Math.toDegrees(Math.acos(trk.get_helix().costheta())),
+    //                    trk.get_P(), trk.get_Q(), 
+    //                    5.0) ;
+                inters = swimmer.SwimToCylinder(R/10);
                 double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
                 path  = path + inters[6];
                 
@@ -189,44 +194,8 @@ public class TrajectoryFinder {
                     stVec.set_ID(id);
                     stVec.set_Path(path*10);
                     Vector3D dir = new Vector3D(inters[3], inters[4], inters[5]).asUnit();
-                    //stateVecs.add(stVec);
-                    // calculate crosses on BMT layers using track information.  These are used in the event display
-                    for (Cross c : BMTCrossList) {
-                        if (matchCrossToStateVec(c, stVec, l + 1, 0) == false) {
-                            continue;
-                        }
-
-                        if (c.get_DetectorType().equalsIgnoreCase("C")) { //C-detector measuring Z
-                            double x = stVec.x();
-                            double y = stVec.y();
-                            if (traj.isFinal) {
-
-                                c.set_Point(new Point3D(x, y, c.get_Point().z()));
-                                c.set_Dir(dir);
-                            }
-
-                            // calculate the hit residuals
-//                            this.setHitResolParams("BMT", c.get_Cluster1().get_Sector(), c.get_Cluster1().get_Layer(), c.get_Cluster1(),
-//                                    stVec, svt_geo, bmt_geo, traj.isFinal);          
-                            stVec.set_CalcCentroidStrip(bmt_geo.getCStrip(BMTRegIdx+1, stVec.z()));
-        //                    this.fill_HelicalTrkAngleWRTBMTTangentPlane(trkDir, stVec);
-                        }
-        //                if (c.get_DetectorType().equalsIgnoreCase("Z")) { //Z-detector measuring phi
-                        else { //Z-detector measuring phi
-                            double z = stVec.z();
-                            if (traj.isFinal) {
-                                c.set_Point(new Point3D(c.get_Point().x(), c.get_Point().y(), z));
-                                c.set_Dir(dir); 
-                            }
-
-                            // calculate the hit residuals
-//                            this.setHitResolParams("BMT", c.get_Cluster1().get_Sector(), c.get_Cluster1().get_Layer(), c.get_Cluster1(),
-//                                    stVec, svt_geo, bmt_geo, traj.isFinal);
-                            stVec.set_CalcCentroidStrip(bmt_geo.getZStrip(BMTRegIdx+1,  phiPos));
-                        }
-                    }
-
-                    this.fill_HelicalTrkAngleWRTBMTTangentPlane(dir, stVec); 
+                    this.fill_HelicalTrkAngleWRTBMTTangentPlane(dir, stVec);
+                    stVec.set_CalcCentroidStrip(bmt_geo.getCStrip(BMTRegIdx+1, stVec.z()));
                     stateVecs.add(stVec);
                 //}
                 //else {
@@ -242,7 +211,7 @@ public class TrajectoryFinder {
             swimmer.SetSwimParameters(inters[0], inters[1], inters[2], Math.toDegrees(intersPhi), Math.toDegrees(intersTheta), trk.get_P(), trk.get_Q(), maxPathLength) ;
             // swim to CTOF
             double radius = ctof_geo.getRadius(1);
-            inters = swimmer.SwimRho(radius);
+            inters = swimmer.SwimToCylinder(radius);
             // update parameters
             double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
             intersPhi   = Math.atan2(inters[4], inters[3]);
@@ -262,7 +231,7 @@ public class TrajectoryFinder {
                     
             //}
             //else inters=null;
-        }
+            }
         // CND
         if(cnd_geo!=null && inters!=null) {     //  don't swim to CND if swimming to CTOF failed
             for(int ilayer=0; ilayer<cnd_geo.getSector(0).getSuperlayer(0).getNumLayers(); ilayer++) {
@@ -276,7 +245,7 @@ public class TrajectoryFinder {
                 // swim to CTOF
                 Point3D center = cnd_geo.getSector(0).getSuperlayer(0).getLayer(ilayer).getComponent(0).getMidpoint();
                 double radius  = Math.sqrt(center.x()*center.x()+center.y()*center.y());
-                inters = swimmer.SwimRho(radius);
+                inters = swimmer.SwimToCylinder(radius);
                 // update parameters
                 double r = Math.sqrt(inters[0]*inters[0]+inters[1]*inters[1]);
                 intersPhi   = Math.atan2(inters[4], inters[3]);
@@ -293,7 +262,6 @@ public class TrajectoryFinder {
                 stVec.set_TrkToModuleAngle(0);
                 stVec.set_Path(path*10);
                stateVecs.add(stVec);
-                    
             }
         }
                
@@ -410,12 +378,12 @@ public class TrajectoryFinder {
                             clsOnTrk = c.get_Cluster2(); 
                         }
 
-//                        if (clsOnTrk != null && clsOnTrk.get_Layer() == l + 1) {
-//
-//                            setHitResolParams("SVT", clsOnTrk.get_Sector(), clsOnTrk.get_Layer(), clsOnTrk,
-//                                    stVec, svt_geo, bmt_geo, traj.isFinal);
-//
-//                        }
+                        if (clsOnTrk != null && clsOnTrk.get_Layer() == l + 1) {
+
+                            setHitResolParams("SVT", clsOnTrk.get_Sector(), clsOnTrk.get_Layer(), clsOnTrk,
+                                    stVec, svt_geo, bmt_geo, traj.isFinal);
+
+                        }
                     }
                 }
             }
@@ -470,8 +438,8 @@ public class TrajectoryFinder {
                             //}
 
                             // calculate the hit residuals // CHECK THIS ........
-//                            this.setHitResolParams("BMT", c.get_Sector(), c.get_Cluster2().get_Layer(), c.get_Cluster2(),
-//                                    stVec, svt_geo, bmt_geo, traj.isFinal);
+                            this.setHitResolParams("BMT", c.get_Sector(), c.get_Cluster2().get_Layer(), c.get_Cluster2(),
+                                    stVec, svt_geo, bmt_geo, traj.isFinal);
 
                         }
                         if (c.get_DetectorType().equalsIgnoreCase("Z")) { //Z-detector measuring phi
@@ -482,8 +450,8 @@ public class TrajectoryFinder {
                             //}
 
                             // calculate the hit residuals
-//                            this.setHitResolParams("BMT", c.get_Cluster1().get_Sector(), c.get_Cluster1().get_Layer(), c.get_Cluster1(),
-//                                    stVec, svt_geo, bmt_geo, traj.isFinal);
+                            this.setHitResolParams("BMT", c.get_Cluster1().get_Sector(), c.get_Cluster1().get_Layer(), c.get_Cluster1(),
+                                    stVec, svt_geo, bmt_geo, traj.isFinal);
 
                         }
                     }
@@ -556,61 +524,61 @@ public class TrajectoryFinder {
      * @param Cluster
      * @param stVec stateVec
      */
-//    public void setHitResolParams(String detector, int sector, int layer, Cluster cluster,
-//            StateVec stVec, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, boolean trajFinal) {
-//
-//        if (detector.equalsIgnoreCase("SVT") ) {
-//            double doca2Cls = svt_geo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
-//            double doca2Seed = svt_geo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
-//            cluster.set_SeedResidual(doca2Seed); 
-//            cluster.set_CentroidResidual(doca2Cls);
-//            
-//            for (FittedHit hit : cluster) {
-//                double doca1 = svt_geo.getDOCAToStrip(sector, layer, (double) hit.get_Strip().get_Strip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
-//                double sigma1 = svt_geo.getSingleStripResolution(layer, hit.get_Strip().get_Strip(), stVec.z());
-//                hit.set_stripResolutionAtDoca(sigma1);
-//                hit.set_docaToTrk(doca1);  
-//                hit.set_TrkgStatus(1);
-//                if (trajFinal) {
-//                    hit.set_TrkgStatus(2);
-//                }
-//            }
-//        }
-//        if (detector.equalsIgnoreCase("BMT")) {
-//            if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 0) { //C-detector measuring z
-//                for (FittedHit h1 : cluster) {
-//                    // calculate the hit residuals
-//                    double docaToTrk = stVec.z() - h1.get_Strip().get_Z();
-//                    double doca2Cls = stVec.z() -cluster.get_Z();
-//                    double stripResol = h1.get_Strip().get_ZErr();
-//                    h1.set_docaToTrk(docaToTrk);
-//                    h1.set_stripResolutionAtDoca(stripResol);
-//                    h1.set_TrkgStatus(1);
-//                    if (trajFinal) {
-//                        h1.set_TrkgStatus(2);
-//                    }
-//                }
-//            }
-//            if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 1) { //Z-detector measuring phi
-//                // calculate the hit residuals
-//                for (FittedHit h1 : cluster) {
-//                    double StripX = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] * Math.cos(h1.get_Strip().get_Phi());
-//                    double StripY = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] * Math.sin(h1.get_Strip().get_Phi());
-//
-//                    double Sign = Math.signum(Math.atan2(StripY - stVec.y(), StripX - stVec.x()));
-//                    double docaToTrk = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] *Math.atan2(stVec.y(), stVec.x())- h1.get_Strip().get_Phi();
-//                    double doca2Cls =  org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] *Math.atan2(stVec.y(), stVec.x())- cluster.get_Phi();
-//                    double stripResol = h1.get_Strip().get_PhiErr();
-//                    h1.set_docaToTrk(docaToTrk);
-//                    h1.set_stripResolutionAtDoca(stripResol);
-//                    h1.set_TrkgStatus(1);
-//                    if (trajFinal) {
-//                        h1.set_TrkgStatus(2);
-//                    }
-//                }
-//            }
-//        }
-//    }
+    public void setHitResolParams(String detector, int sector, int layer, Cluster cluster,
+            StateVec stVec, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, boolean trajFinal) {
+
+        if (detector.equalsIgnoreCase("SVT") ) {
+            double doca2Cls = svt_geo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
+            double doca2Seed = svt_geo.getDOCAToStrip(sector, layer, (double) cluster.get_SeedStrip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
+            cluster.set_SeedResidual(doca2Seed); 
+            cluster.set_CentroidResidual(doca2Cls);
+            
+            for (FittedHit hit : cluster) {
+                double doca1 = svt_geo.getDOCAToStrip(sector, layer, (double) hit.get_Strip().get_Strip(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
+                double sigma1 = svt_geo.getSingleStripResolution(layer, hit.get_Strip().get_Strip(), stVec.z());
+                hit.set_stripResolutionAtDoca(sigma1);
+                hit.set_docaToTrk(doca1);  
+                hit.set_TrkgStatus(1);
+                if (trajFinal) {
+                    hit.set_TrkgStatus(2);
+                }
+            }
+        }
+        if (detector.equalsIgnoreCase("BMT")) {
+            if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 0) { //C-detector measuring z
+                for (FittedHit h1 : cluster) {
+                    // calculate the hit residuals
+                    double docaToTrk = stVec.z() - h1.get_Strip().get_Z();
+                    double doca2Cls = stVec.z() -cluster.get_Z();
+                    double stripResol = h1.get_Strip().get_ZErr();
+                    h1.set_docaToTrk(docaToTrk);
+                    h1.set_stripResolutionAtDoca(stripResol);
+                    h1.set_TrkgStatus(1);
+                    if (trajFinal) {
+                        h1.set_TrkgStatus(2);
+                    }
+                }
+            }
+            if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 1) { //Z-detector measuring phi
+                // calculate the hit residuals
+                for (FittedHit h1 : cluster) {
+                    double StripX = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] * Math.cos(h1.get_Strip().get_Phi());
+                    double StripY = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] * Math.sin(h1.get_Strip().get_Phi());
+
+                    double Sign = Math.signum(Math.atan2(StripY - stVec.y(), StripX - stVec.x()));
+                    double docaToTrk = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] *Math.atan2(stVec.y(), stVec.x())- h1.get_Strip().get_Phi();
+                    double doca2Cls =  org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] *Math.atan2(stVec.y(), stVec.x())- cluster.get_Phi();
+                    double stripResol = h1.get_Strip().get_PhiErr();
+                    h1.set_docaToTrk(docaToTrk);
+                    h1.set_stripResolutionAtDoca(stripResol);
+                    h1.set_TrkgStatus(1);
+                    if (trajFinal) {
+                        h1.set_TrkgStatus(2);
+                    }
+                }
+            }
+        }
+    }
 
     private double[][][] calc_trackIntersBMT(Ray ray, org.jlab.rec.cvt.bmt.Geometry bmt_geo, int start_layer) {
         //[l][hemisphere], [0,1,2,3,4]=x,y,z,phi,theta,estimated centroid strip; hemisphere = [1]top or [0]bottom
