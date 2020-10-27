@@ -178,8 +178,17 @@ public class RecUtilities {
             }
         }
 
-        // adding the BMT
+        // adding the cross infos
         for (int c = 0; c < trkcand.get_Crosses().size(); c++) {
+            if (trkcand.get_Crosses().get(c).get_Detector().equalsIgnoreCase("SVT")) {
+                int layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer();
+                Point3D p = new Point3D(trkcand.get_Crosses().get(c).get_Point().x(), 
+                        trkcand.get_Crosses().get(c).get_Point().y(), 
+                        traj.get(layer).z);
+                Vector3D d = new Vector3D(traj.get(layer).px, traj.get(layer).py, traj.get(layer).pz).asUnit();
+                trkcand.get_Crosses().get(c).set_Point(p);
+                trkcand.get_Crosses().get(c).set_Dir(d);
+            }
             if (trkcand.get_Crosses().get(c).get_Detector().equalsIgnoreCase("BMT")) {
                 double ce = trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();
                 int layer = trkcand.get_Crosses().get(c).getOrderedRegion()+3;
