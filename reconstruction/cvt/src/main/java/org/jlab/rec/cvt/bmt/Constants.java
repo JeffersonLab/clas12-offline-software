@@ -1,5 +1,8 @@
 package org.jlab.rec.cvt.bmt;
 
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
+
 public class Constants {
 
     private Constants() {
@@ -17,6 +20,8 @@ public class Constants {
     public static int MAXBMTHITS = 700;
     // THE GEOMETRY CONSTANTS
     public static final int NREGIONS = 3;						// 3 regions of MM 
+    public static final int NLAYERS   = NREGIONS*2;					// 6 layer
+    public static final int NSECTOR  = 3;						// 3 sectors or tiles per layer
     //public static final int STARTINGLAYR = 5;						// current configuration is 3 SVT + 3BMT (outermost BST ring)
     public static double ETOTCUT = 0.0;
     //Z detector characteristics
@@ -56,6 +61,8 @@ public class Constants {
     public static final double hDrift = 3.0; 					// Size of the drift gap
     public static final double hStrip2Det = hDrift / 2;                         // distance between strips and the middle of the conversion gap (~half the drift gap)
 
+    public static Point3D[][]  shifts    = new Point3D[NLAYERS][NSECTOR];  // detector alignment shifts
+    public static Vector3D[][] rotations = new Vector3D[NLAYERS][NSECTOR]; // detector alignment rotations
     public static double[][] Rx= new double[NREGIONS*2][3];   //Angle to rotate the det around x-axis
     public static double[][] Ry= new double[NREGIONS*2][3];   //Angle to rotate the det around y-axis
     public static double[][] Rz= new double[NREGIONS*2][3];   //Angle to rotate the det around z-axis
@@ -376,6 +383,7 @@ public class Constants {
             }	
    	}
   }
+   
   public static synchronized void setRx(int layer, int sector, double cRx) {
    	Rx[layer-1][sector-1]  = cRx;
   }

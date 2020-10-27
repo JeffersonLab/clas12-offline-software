@@ -89,6 +89,9 @@ public class CCDBConstantsLoader {
         dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_fullfield");
         dbprovider.loadTable("/calibration/mvt/bmt_hv/drift_midfield");
 
+        //load alignment parameters
+        dbprovider.loadTable("/geometry/cvt/mvt/alignment");
+        
         //beam offset table
         dbprovider.loadTable("/geometry/beam/position");
         
@@ -162,7 +165,7 @@ public class CCDBConstantsLoader {
                         EDGE2[j] = middle + ((double) Nstrips) * (CRZWIDTH[region - 1] / radius) / 2. - 0 * CRZWIDTH[region - 1] / radius;
                         EDGE2[j] -= 2 * Math.PI;
                     }
-
+                    
                 }
                 CRZEDGE1[region - 1] = EDGE1;
                 CRZEDGE2[region - 1] = EDGE2;
@@ -248,7 +251,20 @@ public class CCDBConstantsLoader {
                 HV_DRIFT_MF[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_midfield/Sector_3", i);
         	 
         }
-         // beam offset
+        
+        // alignment 
+        for (int i = 0; i<Constants.NLAYERS; i++) {
+            for (int j = 0; j<Constants.NSECTOR; j++) {
+                Constants.shifts[i][j].setX(dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaX", i));
+                Constants.shifts[i][j].setY(dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaY", i));
+                Constants.shifts[i][j].setZ(dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaZ", i));
+                Constants.rotations[i][j].setX(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotX", i));
+                Constants.rotations[i][j].setY(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotY", i));
+                Constants.rotations[i][j].setZ(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotZ", i));
+            }
+        }
+         
+        // beam offset
         double xb = dbprovider.getDouble("/geometry/beam/position/x_offset", 0);     
         double yb = dbprovider.getDouble("/geometry/beam/position/y_offset", 0); 
         double exb = dbprovider.getDouble("/geometry/beam/position/x_error", 0);     
