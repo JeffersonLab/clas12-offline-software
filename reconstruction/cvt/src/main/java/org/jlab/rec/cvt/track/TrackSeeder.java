@@ -25,6 +25,7 @@ public class TrackSeeder {
     List<Double> Xs ;
     List<Double> Ys ;
     List<Double> Ws ;
+    public boolean unUsedHitsOnly = false;
     
     public TrackSeeder() {
         //init lists for scan
@@ -207,21 +208,28 @@ public class TrackSeeder {
     
 
     List<Seed> BMTmatches = new ArrayList<Seed>();
-    public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses, 
+    public List<Seed> findSeed(List<Cross> bst_crosses, List<Cross> bmt_crosses, 
             org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo,
             Swim swimmer) {
        
         List<Seed> seedlist = new ArrayList<Seed>();
 
         List<Cross> crosses = new ArrayList<Cross>();
+        List<Cross> svt_crosses = new ArrayList<Cross>();
         List<Cross> bmtC_crosses = new ArrayList<Cross>();
         
         if(bmt_crosses!=null) {
             for(Cross c : bmt_crosses) { 
-                if(c.get_DetectorType().equalsIgnoreCase("Z"))
+                if(c.get_DetectorType().equalsIgnoreCase("Z") && this.unUsedHitsOnly == true)
                     crosses.add(c);
-                if(c.get_DetectorType().equalsIgnoreCase("C"))
+                if(c.get_DetectorType().equalsIgnoreCase("C") && this.unUsedHitsOnly == true)
                     bmtC_crosses.add(c);
+            }
+        }
+        if(bst_crosses!=null) {
+            for(Cross c : bst_crosses) { 
+                if(this.unUsedHitsOnly == true)
+                    svt_crosses.add(c);
             }
         }
         this.FindSeedCrossList(svt_crosses);
@@ -329,7 +337,11 @@ public class TrackSeeder {
                 }
             }
         }
-        
+        for (Seed bseed : seedlist) {
+            for(Cross c : bseed.get_Crosses()) {
+                c.isInSeed = true;
+            }
+        }
         return seedlist;
     }
     

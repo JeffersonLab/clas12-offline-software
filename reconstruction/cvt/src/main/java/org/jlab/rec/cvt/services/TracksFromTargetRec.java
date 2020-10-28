@@ -61,7 +61,11 @@ public class TracksFromTargetRec {
             
             } else {
                 TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
-                seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
+                seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer); 
+                //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
+                TrackSeeder trseed2 = new TrackSeeder();
+                trseed2.unUsedHitsOnly = true;
+                seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer)); 
             }
         }
         if(seeds ==null || seeds.size() == 0) {
