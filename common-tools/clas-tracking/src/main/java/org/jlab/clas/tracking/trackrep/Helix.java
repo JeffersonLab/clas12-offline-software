@@ -282,9 +282,9 @@ public class Helix {
             double del = (getXc() + (-d + getYc()) * m) * (getXc() + (-d + getYc()) * m) - 
                     (1 + m * m) * (getXc() * getXc() + (d - getYc()) * (d - getYc()) - getR()*getR());
             if (del < 0) {
-                System.err.println("Helix Plane Intersection error - Returning 0 ");
+                //System.err.println("Helix Plane Intersection error - Returning 0 ");
                 return 0;
-            }
+            } 
             double x1 = (getXc() + (-d + getYc()) * m + Math.sqrt(del)) / (1 + m * m);
             double x2 = (getXc() + (-d + getYc()) * m - Math.sqrt(del)) / (1 + m * m);
 
