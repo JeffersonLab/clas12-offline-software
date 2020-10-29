@@ -574,7 +574,12 @@ public class TruthMatch extends ReconstructionEngine {
         for (int ihit = 0; ihit < hitsBank.rows(); ihit++) {
             RecHit curHit = new RecHit();
 
-            curHit.id = hitsBank.getShort("id", ihit) - 1;   // -1, as id start from 1
+            /**
+             * The following line is *WRONG*, variable *id* is not correct, instead we should use indexLadc(tdc)
+             * *** curHit.id = hitsBank.getShort("id", ihit) - 1;   // -1, as id start from 1***
+             */
+                        
+            curHit.id = (int)hitsBank.getShort("indexLtdc", ihit)/2;   // We should devide to 2, as each MC::True hit is digitized into two ADC/TDC hits.
             curHit.cid = (short) (hitsBank.getShort("clusterid", ihit) - 1);  // -1 for starting from 0
             if (curHit.cid == -2 || !mchitsInCND.containsKey(curHit.id)) {
                 continue; // The hit is not part of any cluster, or the hit it's corresponding MC hit is ignored
@@ -636,7 +641,14 @@ public class TruthMatch extends ReconstructionEngine {
         for (int ihit = 0; ihit < hitsBank.rows(); ihit++) {
             RecHit curHit = new RecHit();
 
-            curHit.id = hitsBank.getShort("id", ihit) - 1;   // -1, as id starts from 1
+            
+            /**
+             * The following line is *WRONG*, variable *id* is not correct, instead we should use indexLadc(tdc)
+             * curHit.id = hitsBank.getShort("id", ihit) - 1;   // -1, as id starts from 1
+             */
+                        
+            curHit.id = (int)hitsBank.getShort("tdc_idx1", ihit)/2;   // We should devide to 2, as each MC::True hit is digitized into two ADC/TDC hits.
+                        
             curHit.cid = (short) (hitsBank.getShort("clusterid", ihit) - 1);  // -1 for starting from 0
             if (curHit.cid == -1 || !mchitsInCTOF.containsKey(curHit.id)) {
                 
