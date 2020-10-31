@@ -129,11 +129,11 @@ public class MeasVecs {
     public double[] H(StateVecs.StateVec stateVec, StateVecs sv, MeasVec mv, Swim swimmer, int dir) {
         StateVecs.StateVec SVplus = null;// = new StateVec(stateVec.k);
         StateVecs.StateVec SVminus = null;// = new StateVec(stateVec.k);
-        delta_d_a[0]=2*sqrt_epsilon*stateVec.d_rho;
-        delta_d_a[1]=2*sqrt_epsilon*stateVec.phi0;
-        delta_d_a[2]=2*sqrt_epsilon*stateVec.kappa;
-        delta_d_a[3]=2*sqrt_epsilon*stateVec.dz;
-        delta_d_a[4]=2*sqrt_epsilon*stateVec.tanL;
+        delta_d_a[0]=2*sqrt_epsilon*(stateVec.d_rho+1);
+        delta_d_a[1]=2*sqrt_epsilon*(stateVec.phi0+1);
+        delta_d_a[2]=2*sqrt_epsilon*(stateVec.kappa+1);
+        delta_d_a[3]=2*sqrt_epsilon*(stateVec.dz+1);
+        delta_d_a[4]=2*sqrt_epsilon*(stateVec.tanL+1);
         
         for(int i = 0; i < getHval().length; i++)
             getHval()[i] = 0;
