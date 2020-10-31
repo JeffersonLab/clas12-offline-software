@@ -31,6 +31,8 @@ public class Helix {
     private double _yd;
     private double _xc;
     private double _yc;
+    private double _xb;
+    private double _yb;
     private double _x;
     private double _y;
     private double _z;
@@ -41,7 +43,7 @@ public class Helix {
     public Units units = Units.CM; //default
     
     public Helix(double d0, double phi0, double omega, double z0, double tanL,
-            int turningSign, double B, Units unit) {
+            int turningSign, double B, double xb, double yb, Units unit) {
         _d0             = d0;
         _phi0           = phi0;
         _omega          = omega;
@@ -49,6 +51,8 @@ public class Helix {
         _tanL           = tanL;
         _turningSign    = turningSign;
         _B              = B;
+        _xb = xb;
+        _yb = yb;
         this.units = unit;
         this.setUnitScale(unit.unit);
         setLIGHTVEL(LIGHTVEL*unit.unit);
@@ -56,7 +60,7 @@ public class Helix {
     }
     
     public Helix(double x0, double y0, double z0, double px0, double py0, double pz0,
-            int q, double B, Units unit) {
+            int q, double B, double xb, double yb, Units unit) {
         _turningSign = q;
         _B = B;
         double pt = Math.sqrt(px0*px0 + py0*py0);
@@ -71,10 +75,12 @@ public class Helix {
         double S = Math.sin(_phi0);
         double C = Math.cos(_phi0);
         if(Math.abs(S)>=Math.abs(C)) {
-            _d0 = -x0/S;
+            _d0 = -(x0-xb)/S;
         } else {
-            _d0 = y0/C;
+            _d0 = (y0-yb)/C;
         }
+        _xb = xb;
+        _yb = yb;
         this.Update();
     }
     
@@ -229,10 +235,10 @@ public class Helix {
     }
     public void Update() {
         setR(1./Math.abs(getOmega()));
-        _xd = -getD0()*Math.sin(getPhi0());
-        _yd =  getD0()*Math.cos(getPhi0());
-        setXc(-(_turningSign*_R + _d0)*Math.sin(getPhi0()));
-        setYc((_turningSign*_R + _d0)*Math.cos(getPhi0()));
+        _xd = -getD0()*Math.sin(getPhi0())+_xb;
+        _yd =  getD0()*Math.cos(getPhi0())+_yb;
+        setXc(-(_turningSign*_R + _d0)*Math.sin(getPhi0())+_xb);
+        setYc((_turningSign*_R + _d0)*Math.cos(getPhi0())+_yb);
         setX(getX(tFlightLen));
         setY(getY(tFlightLen));
         setZ(getZ(tFlightLen));
@@ -508,6 +514,34 @@ public class Helix {
      */
     public void setYc(double _yc) {
         this._yc = _yc;
+    }
+
+    /**
+     * @return the _xb
+     */
+    public double getXb() {
+        return _xb;
+    }
+
+    /**
+     * @param _xb the _xb to set
+     */
+    public void setXb(double _xb) {
+        this._xb = _xb;
+    }
+
+    /**
+     * @return the _yb
+     */
+    public double getYb() {
+        return _yb;
+    }
+
+    /**
+     * @param _yb the _yb to set
+     */
+    public void setYb(double _yb) {
+        this._yb = _yb;
     }
     
     
