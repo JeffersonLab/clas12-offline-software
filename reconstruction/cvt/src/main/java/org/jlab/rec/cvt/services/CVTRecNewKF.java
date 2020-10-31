@@ -91,7 +91,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
 
         // Load the constants
         //-------------------
-        int newRun = bank.getInt("run", 0);
+        int newRun = bank.getInt("run", 0); 
         
         if (Run != newRun) {
             boolean align=false;

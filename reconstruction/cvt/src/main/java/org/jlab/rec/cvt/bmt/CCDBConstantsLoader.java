@@ -261,8 +261,8 @@ public class CCDBConstantsLoader {
         org.jlab.rec.cvt.Constants.setRbErr(err*10);
         System.out.println(" ................READ BEAM OFFSET PARAMETERS "+xb+" & "+yb+" cm.......");
         
-        // target position
-        org.jlab.rec.cvt.Constants.setZoffset(ztarget);
+        // target position mm
+        org.jlab.rec.cvt.Constants.setZoffset(ztarget*10);
         
         Constants.setCRCRADIUS(CRCRADIUS);
         Constants.setCRZRADIUS(CRZRADIUS);

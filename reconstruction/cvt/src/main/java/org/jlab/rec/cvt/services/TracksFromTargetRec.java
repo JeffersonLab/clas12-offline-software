@@ -57,8 +57,9 @@ public class TracksFromTargetRec {
         } else {
             if(isSVTonly) {
                 TrackSeeder trseed = new TrackSeeder();
+                trseed.unUsedHitsOnly = true;
                 seeds = trseed.findSeed(crosses.get(0), null, SVTGeom, BMTGeom, swimmer);
-            
+                
             } else {
                 TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
                 seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer); 
@@ -89,14 +90,14 @@ public class TracksFromTargetRec {
             double pz = pt*seed.get_Helix().get_tandip();
             double px = pt*Math.cos(seed.get_Helix().get_phi_at_dca());
             double py = pt*Math.sin(seed.get_Helix().get_phi_at_dca());
-            
             int charge = (int) (Math.signum(Constants.getSolenoidscale())*seed.get_Helix().get_charge());
             if(Math.abs(Constants.getSolenoidVal())<0.001)
                 charge = 1;
-            
+            xr += org.jlab.rec.cvt.Constants.getXb();
+            yr += org.jlab.rec.cvt.Constants.getYb();
             hlx = new org.jlab.clas.tracking.trackrep.Helix(xr,yr,zr,px,py,pz, 
-                    charge, Constants.getSolenoidVal(), org.jlab.clas.tracking.trackrep.Helix.Units.MM);
-
+                    charge, Constants.getSolenoidVal(), org.jlab.rec.cvt.Constants.getXb(), 
+                    org.jlab.rec.cvt.Constants.getYb(), org.jlab.clas.tracking.trackrep.Helix.Units.MM);
             Matrix cov = seed.get_Helix().get_covmatrix();
             if(Math.abs(Constants.getSolenoidVal())>0.001 &&
                     Constants.LIGHTVEL * seed.get_Helix().radius() *Constants.getSolenoidVal()<Constants.PTCUT)
@@ -104,9 +105,8 @@ public class TracksFromTargetRec {
                 kf = new org.jlab.clas.tracking.kalmanfilter.helical.KFitter( hlx, cov, event,  swimmer, 
                     org.jlab.rec.cvt.Constants.getXb(), 
                     org.jlab.rec.cvt.Constants.getYb(),
-                    org.jlab.rec.cvt.Constants.getZoffset(), 
+                    shift, 
                     recUtil.setMeasVecs(seed, SVTGeom)) ;
-
                 kf.runFitter(swimmer);
                
                 if (kf.setFitFailed == false && kf.NDF>0) {
