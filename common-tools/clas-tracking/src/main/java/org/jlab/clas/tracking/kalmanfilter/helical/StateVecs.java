@@ -33,7 +33,7 @@ public class StateVecs {
     public List<Double> X0;
     public List<Double> Y0;
     public List<Double> Z0; // reference points
-
+    public double shift; // target shift
     public List<Integer> Layer;
     public List<Integer> Sector;
 
@@ -466,11 +466,10 @@ public class StateVecs {
 
         double S = Math.sin(util.getPhi0());
         double C = Math.cos(util.getPhi0());
-
         if(Math.abs(S)>=Math.abs(C)) {
-            util.setD0(-x0/S) ;
+            util.setD0(-(x0-X0.get(0))/S) ;
         } else {
-            util.setD0(y0/C) ;
+            util.setD0((y0-Y0.get(0))/C) ;
         }
 
         util.Update();
@@ -608,7 +607,7 @@ public class StateVecs {
             this.y = y;
             this.z = z;
 
-            swimmer.BfieldLab(x/units, y/units, z/units, b);
+            swimmer.BfieldLab(x/units, y/units, z/units + shift/units, b);
             this.Bx = b[0];
             this.By = b[1];
             this.Bz = b[2];
@@ -617,7 +616,7 @@ public class StateVecs {
         }
 
         public void set() {
-            swimmer.BfieldLab(x/units, y/units, z/units, b);
+            swimmer.BfieldLab(x/units, y/units, z/units + shift/units, b);
             this.Bx = b[0];
             this.By = b[1];
             this.Bz = b[2];
@@ -713,38 +712,6 @@ public class StateVecs {
 
     }
 
-    public Helix getHelixAtBeamLine(int k, Swim swim) {
-        this.resetArrays(swimPars);
-        StateVec kVec = this.trackTraj.get(k);
-        double x0 = kVec.x ;
-        double y0 = kVec.y ;
-        double z0 = kVec.z ;
-
-        Vector3D p = this.P(k);
-        double px0 = p.x();
-        double py0 = p.y();
-        double pz0 = p.z();
-        int ch = (int) KFitter.polarity*(int) Math.signum(kVec.kappa);
-
-        swim.SetSwimParameters(
-            x0/units,
-            y0/units,
-            z0/units,
-            -px0, -py0, -pz0, -ch);
-
-        swimPars = swim.SwimToBeamLine(X0.get(0), Y0.get(0));
-
-        for(int j =0; j < 3; j++) {
-            swimPars[j]*=units;
-        }
-
-        int q = KFitter.polarity*(int) Math.signum(this.trackTraj.get(k).kappa);
-        double B = 1./Math.abs(this.trackTraj.get(0).alpha)/lightVel;
-
-        this.setHelix(util, swimPars[0], swimPars[1], swimPars[2], -swimPars[3], -swimPars[4], -swimPars[5], q, B);
-
-        return util;
-    }
     public Helix setTrackPars() {
         Vector3D X = this.X0(0);
         Vector3D P = this.P0(0);
@@ -752,7 +719,7 @@ public class StateVecs {
         int q = KFitter.polarity*(int) Math.signum(this.trackTraj.get(0).kappa);
         double B = 1./Math.abs(this.trackTraj.get(0).alpha)/lightVel ;
 
-        return new Helix(X.x(), X.y(), X.z(), P.x(), P.y(), P.z(), q, B, util.units);
+        return new Helix(X.x(), X.y(), X.z(), P.x(), P.y(), P.z(), q, B, X0.get(0), Y0.get(0), util.units);
     }
     public StateVec initSV = new StateVec(0);
     public void init(Helix trk, Matrix cov, KFitter kf,
