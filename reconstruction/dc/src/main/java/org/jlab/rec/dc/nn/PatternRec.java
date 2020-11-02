@@ -140,7 +140,9 @@ public class PatternRec {
                 List<Cluster> clusters = clf.findClumps(entry.getValue(), ct);
                 for (Cluster clus : clusters) {
                     FittedCluster fclus = new FittedCluster(clus);
+                    
                     if (clus != null && clus.size() >= 4 ) { //4 layers per superlayer
+                        fclus.set_Id(clus.get(0).NNClusId);
                         // update the hits
                         for (FittedHit fhit : fclus) {
                             fhit.set_TrkgStatus(0);

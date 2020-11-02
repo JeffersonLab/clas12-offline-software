@@ -1,6 +1,7 @@
 package org.jlab.rec.dc.track;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -870,6 +871,7 @@ public class TrackCandListFinder {
             return cands;
         }
         for (List<Cross> aCrossList : crossList) {
+            aCrossList.sort(Comparator.comparing(Cross::get_Sector).thenComparing(Cross::get_Region));  
             if(aCrossList.size()<3) {
                 return cands;
             }
@@ -895,11 +897,11 @@ public class TrackCandListFinder {
 
                 //require 3 crosses to make a track (allows for 1 pseudo-cross)
                 if (cand.size() == 3) {
-                    //System.out.println("---- cand in sector "+aCrossList.get(0).get_Sector());
-                    //System.out.println(aCrossList.get(0).printInfo());
-                    //System.out.println(aCrossList.get(1).printInfo());
-                    //System.out.println(aCrossList.get(2).printInfo());
-                    //System.out.println("---------------");
+//                    System.out.println("---- cand in sector "+aCrossList.get(0).get_Sector());
+//                    System.out.println(aCrossList.get(0).printInfo());
+//                    System.out.println(aCrossList.get(1).printInfo());
+//                    System.out.println(aCrossList.get(2).printInfo());
+//                    System.out.println("---------------");
                     double x1 = aCrossList.get(0).get_Point().x();
                     double y1 = aCrossList.get(0).get_Point().y();
                     double z1 = aCrossList.get(0).get_Point().z();

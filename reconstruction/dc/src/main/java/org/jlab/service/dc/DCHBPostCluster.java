@@ -101,7 +101,7 @@ public class DCHBPostCluster extends DCEngine {
             crosses = new ArrayList<Cross>();
 
             for (List<Cross> clist : crosslist) {
-                crosses.addAll(clist);
+                crosses.addAll(clist); 
             }
             //find the list of  track candidates
             TrackCandListFinder trkcandFinder = new TrackCandListFinder(Constants.HITBASE);

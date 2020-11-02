@@ -439,10 +439,11 @@ public class HitReader {
         DataBank bankAI = event.getBank("ai::tracks");
         DataBank bank = event.getBank("HitBasedTrkg::HBHits");
 
-        int[] Ids  = new int[6]; //  1-6 = cluster ids for slyrs 1 - 6
-        double[] tPars = new double[4]; // NN trk pars p, theta, phi ; last idx = track id;
+        int[] Ids  ;     //  1-6 = cluster ids for slyrs 1 - 6
+        double[] tPars ; // NN trk pars p, theta, phi ; last idx = track id;
         for (int j = 0; j < bankAI.rows(); j++) {
-            
+            Ids  = new int[6];
+            tPars = new double[4];
             Ids[0] = (int)bankAI.getShort("c1", j); // clusId in superlayer 1
             Ids[1] = (int)bankAI.getShort("c2", j);
             Ids[2] = (int)bankAI.getShort("c3", j);
@@ -456,7 +457,7 @@ public class HitReader {
             tPars[3] = (double)bankAI.getByte("id", j);
             
             for (int k = 0; k < 6; k++) {
-                aimatch.put(Ids[k], tPars);
+                aimatch.put(Ids[k], tPars); 
             }
         }
         
@@ -471,7 +472,7 @@ public class HitReader {
             
             int clusterID = bank.getShort("clusterID", i);
             
-            if(this.aimatch.containsKey(clusterID)) {
+            if(this.aimatch.containsKey(clusterID)) { 
                 hit.NNTrkId  = (int) this.aimatch.get(clusterID)[3];
                 hit.NNClusId = clusterID;
                 hit.NNTrkP      = this.aimatch.get(clusterID)[0];
