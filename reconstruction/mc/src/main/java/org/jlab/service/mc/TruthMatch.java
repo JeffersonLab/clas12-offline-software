@@ -376,7 +376,7 @@ public class TruthMatch extends ReconstructionEngine {
                     && hit.detector != (byte) DetectorType.CND.getDetectorId() && hit.detector != (byte) DetectorType.CTOF.getDetectorId()
                     && mcp.get((short) tid) == null) {
                 continue;
-            } else if (mcp.get((short) (hit.otid)).pid != 22 && mcp.get((short) (hit.otid)).pid != 2112) {
+            } else if ( mcp.containsKey((short) (hit.otid)) && mcp.get((short) (hit.otid)).pid != 22 && mcp.get((short) (hit.otid)).pid != 2112) {
                 continue;
             }
 
