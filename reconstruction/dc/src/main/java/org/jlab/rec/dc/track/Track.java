@@ -50,6 +50,34 @@ public class Track extends Trajectory implements Comparable<Track>{
     }
 
     /**
+     * @return the originStateVec
+     */
+    public StateVec getOriginStateVec() {
+        return originStateVec;
+    }
+
+    /**
+     * @param originStateVec the originStateVec to set
+     */
+    public void setOriginStateVec(StateVec originStateVec) {
+        this.originStateVec = originStateVec;
+    }
+
+    /**
+     * @return the originStateVecMC
+     */
+    public StateVec getOriginStateVecMC() {
+        return originStateVecMC;
+    }
+
+    /**
+     * @param originStateVecMC the originStateVecMC to set
+     */
+    public void setOriginStateVecMC(StateVec originStateVecMC) {
+        this.originStateVecMC = originStateVecMC;
+    }
+
+    /**
      * serialVersionUID
      */	
     private static final long serialVersionUID = 1763744434903318419L;
@@ -80,6 +108,8 @@ public class Track extends Trajectory implements Comparable<Track>{
     private int _fitConvergenceStatus;
     private StateVec finalStateVec ;
     private StateVec finalStateVecMC ;
+    private StateVec originStateVec ;
+    private StateVec originStateVecMC ;
     
     public Track() {
     }

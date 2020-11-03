@@ -258,8 +258,16 @@ public class DCTBEngine extends DCEngine {
                         kFit2.totNumIter=1;
                         kFit2.runFitter(TrackArray[i].get(0).get_Sector());
                         StateVec fn2 = new StateVec();
-                        fn2.set(kFit2.finalStateVec.x, kFit2.finalStateVec.y, kFit2.finalStateVec.tx, kFit2.finalStateVec.ty); 
+                        fn2.set(kFit2.finalStateVec.x, kFit2.finalStateVec.y, kFit2.finalStateVec.tx, kFit2.finalStateVec.ty);
                         TrackArray[i].setFinalStateVecMC(fn2);
+                        //state vec at 0
+                        Point3D VTCSMC = crosses.get(0).getCoordsInSector(
+                        mcTrack.get_Vtx0().x(), mcTrack.get_Vtx0().y(), mcTrack.get_Vtx0().z());
+                        //get stateVec and covMat at vertex (Vz lab).
+                        kFit2.propagateToVtx(crosses.get(0).get_Sector(), VTCSMC.z());
+                        StateVec fn3 = new StateVec();
+                        fn3.set(kFit2.stateVecAtVtx.x, kFit2.stateVecAtVtx.y, kFit2.stateVecAtVtx.tx, kFit2.stateVecAtVtx.ty);
+                        TrackArray[i].setOriginStateVecMC(fn3);
                     }
                     //Transform cov mat in lab frame
                      // get CovMat at vertex
@@ -269,6 +277,11 @@ public class DCTBEngine extends DCEngine {
                     kFit.propagateToVtx(crosses.get(0).get_Sector(), VTCS.z());
                     TrackArray[i].getCovMatToLab(TrackArray[i].get(0).get_Sector(), 
                             kFit.stateVecAtVtx, kFit.covMatAtVtx, VTCS.z());
+                    //state vec at 0
+                    StateVec fn3 = new StateVec();
+                    fn3.set(kFit.stateVecAtVtx.x, kFit.stateVecAtVtx.y, kFit.stateVecAtVtx.tx, kFit.stateVecAtVtx.ty);
+                    TrackArray[i].setOriginStateVec(fn3);
+                                
                     trkcands.add(TrackArray[i]);
                 }
             }

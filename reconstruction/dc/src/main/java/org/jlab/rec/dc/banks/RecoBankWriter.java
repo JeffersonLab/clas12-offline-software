@@ -790,16 +790,32 @@ public class RecoBankWriter {
             bank.setFloat("tx", i, (float) candlist.get(i).getFinalStateVec().tanThetaX());
             bank.setFloat("ty", i, (float) candlist.get(i).getFinalStateVec().tanThetaY());
             
+            
+            bank.setFloat("x0", i, (float) candlist.get(i).getOriginStateVec().x());
+            bank.setFloat("y0", i, (float) candlist.get(i).getOriginStateVec().y());
+            bank.setFloat("tx0", i, (float) candlist.get(i).getOriginStateVec().tanThetaX());
+            bank.setFloat("ty0", i, (float) candlist.get(i).getOriginStateVec().tanThetaY());
+            
             if(candlist.get(i).getFinalStateVecMC()!=null) {
                 bank.setFloat("x_mc", i, (float) candlist.get(i).getFinalStateVecMC().x());
                 bank.setFloat("y_mc", i, (float) candlist.get(i).getFinalStateVecMC().y());
                 bank.setFloat("tx_mc", i, (float) candlist.get(i).getFinalStateVecMC().tanThetaX());
                 bank.setFloat("ty_mc", i, (float) candlist.get(i).getFinalStateVecMC().tanThetaY());
+                
+                bank.setFloat("x0_mc", i, (float) candlist.get(i).getOriginStateVecMC().x());
+                bank.setFloat("y0_mc", i, (float) candlist.get(i).getOriginStateVecMC().y());
+                bank.setFloat("tx0_mc", i, (float) candlist.get(i).getOriginStateVecMC().tanThetaX());
+                bank.setFloat("ty0_mc", i, (float) candlist.get(i).getOriginStateVecMC().tanThetaY());
             } else {
                 bank.setFloat("x_mc", i, (float) -999);
                 bank.setFloat("y_mc", i, (float) -999);
                 bank.setFloat("tx_mc", i, (float) -999);
                 bank.setFloat("ty_mc", i, (float) -999);
+                
+                bank.setFloat("x0_mc", i, (float) -999);
+                bank.setFloat("y0_mc", i, (float) -999);
+                bank.setFloat("tx0_mc", i, (float) -999);
+                bank.setFloat("ty0_mc", i, (float) -999);
             }
             
         }

@@ -1067,6 +1067,7 @@ public class TrackCandListFinder {
                                 cand.set_Trajectory(kFit.kfStateVecsAlongTrajectory);
 
                                 cand.setFinalStateVec(fitStateVec);
+                                
                                 cand.set_Id(cands.size() + 1);
                                 this.setTrackPars(cand, traj,
                                     trjFind, fitStateVec,
