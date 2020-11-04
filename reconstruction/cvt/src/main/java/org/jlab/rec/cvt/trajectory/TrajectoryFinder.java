@@ -126,6 +126,8 @@ public class TrajectoryFinder {
             stVec.set_SurfaceDetector(DetectorType.CVT.getDetectorId());
             stVec.set_SurfaceLayer(layer);
             stVec.set_SurfaceSector(sector);
+            Vector3D dir = new Vector3D(inters[3], inters[4], inters[5]).asUnit();
+            this.fill_HelicalTrkAngleWRTSVTPlane(sector, layer, dir, svt_geo, stVec);
             stVec.set_CalcCentroidStrip(svt_geo.calcNearestStrip(inters[0]*10, inters[1]*10, inters[2]*10, layer, sector));
             stVec.set_Path(path*10);
             stVec.set_ID(id);
