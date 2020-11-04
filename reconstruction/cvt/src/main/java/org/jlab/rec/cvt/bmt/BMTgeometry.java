@@ -606,7 +606,7 @@ public class BMTgeometry {
                 int nstrip = newGeo.getStrip(traj);
                 int ostrip = -1;
                 if     (newGeo.getDetectorType(i)==BMTType.C)            ostrip = oldGeo.getCStrip(i, z);
-                else if(newGeo.getDetectorType(i)==BMTType.Z && nsect>0) ostrip = oldGeo.getZStrip(nsect, phi);
+                else if(newGeo.getDetectorType(i)==BMTType.Z && nsect>0) ostrip = oldGeo.getZStrip(i, phi);
                 int diff = -1;
                 if(nstrip>0 && ostrip>0) diff = nstrip - ostrip;
                 System.out.println("\t" + i + "\t" + String.format("%8.4f",z) + "\t" + String.format("%8.4f", Math.toDegrees(phi)) + "\t" + nsect + "\t" + nstrip + "/" + ostrip + "/" + diff);
@@ -641,7 +641,7 @@ public class BMTgeometry {
                     
                     int ostrip = -1;
                     if     (newGeo.getDetectorType(i)==BMTType.C) ostrip = oldGeo.getCStrip(i, z);
-                    else if(newGeo.getDetectorType(i)==BMTType.Z) ostrip = oldGeo.getZStrip(k, phi);
+                    else if(newGeo.getDetectorType(i)==BMTType.Z) ostrip = oldGeo.getZStrip(i, phi);
                     int diff = -1;
                     if(nstrip>0 && ostrip>0) diff=nstrip-ostrip;
                     if(nstrip!=j) check=false;
