@@ -95,7 +95,7 @@ public class BMTgeometry {
     /**
      * Return number of strips of the selected layer
      * @param layer (1-6)
-     * @return radius (=0 if layer is out of range)
+     * @return nstrips (=0 if layer is out of range)
      */
     public int getNStrips(int layer) {
         
@@ -109,6 +109,65 @@ public class BMTgeometry {
         }
         else System.out.println("ERROR: out of range layer number in getNStrips(int layer)");
         return nstrips;
+    }
+    
+    /**
+     * Return pitch for the selected layer and strip
+     * @param layer (1-6)
+     * @param strip
+     * @return pitch (=0 if layer is out of range)
+     */
+    public double getPitch(int layer, int strip) {
+        
+        int region = this.getRegion(layer);
+        BMTType det = this.getDetectorType(layer);
+        
+        double pitch = 0;
+        if(region>0 && det!=null) {
+            if     (det == BMTType.C) pitch = this.getCPitch(region, strip);
+            else if(det == BMTType.Z) pitch = this.getZPitch(region, strip);
+        }
+        else System.out.println("ERROR: out of range layer number in getNStrips(int layer)");
+        return pitch;
+    }
+    
+    /**
+     * Return pitch for C strips
+     * @param region (1-3)
+     * @param strip
+     * @return pitch (0 if region or strip are out of range
+     */
+    public double getCPitch(int region, int strip) {
+        double pitch=0;
+        
+        if(region>=1 && region<=3) {
+            if(strip>0 && strip<=Constants.getCRCNSTRIPS()[region-1]) {
+                int group = this.getCGroup(region, strip);
+                pitch = Constants.getCRCWIDTH()[region-1][group-1];
+            }
+            else System.out.println("ERROR: out of range strip number in getZPitch(int region, int strip)");
+        }
+        else System.out.println("ERROR: out of range region number in getZPitch(int region, int strip)");
+        return pitch;        
+    }
+    
+    /**
+     * Return pitch for Z strips
+     * @param region (1-3)
+     * @param strip
+     * @return pitch (0 if region or strip are out of range
+     */
+    public double getZPitch(int region, int strip) {
+        double pitch=0;
+        
+        if(region>=1 && region<=3) {
+            if(strip>0 && strip<=Constants.getCRZNSTRIPS()[region-1]) {
+                pitch = Constants.getCRZWIDTH()[region-1];
+            }
+            else System.out.println("ERROR: out of range strip number in getZPitch(int region, int strip)");
+        }
+        else System.out.println("ERROR: out of range region number in getZPitch(int region, int strip)");
+        return pitch;        
     }
     
     /**
@@ -490,8 +549,10 @@ public class BMTgeometry {
 
     }
    
-    
-    
+    /**
+     * Executable method: implements checks
+     * @param arg
+     */
     public static void main (String arg[]) {
         
         CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, "default"));
@@ -646,7 +707,7 @@ public class BMTgeometry {
                     if(nstrip>0 && ostrip>0) diff=nstrip-ostrip;
                     if(nstrip!=j) check=false;
                     if(diff!=0 || !check) System.out.println("\t" + i + "\t" + String.format("%8.4f",z) + "\t" + String.format("%8.4f", Math.toDegrees(phi)) + "\t" + k + "\t" 
-                                            + j + "/" + nstrip + "/" + ostrip + "/" + diff);
+                                           + j + "/" + nstrip + "/" + ostrip + "/" + diff + "\t" + newGeo.getPitch(i, j));
                 }
             }
         }
