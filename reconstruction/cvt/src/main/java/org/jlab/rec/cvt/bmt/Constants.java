@@ -21,7 +21,7 @@ public class Constants {
     // THE GEOMETRY CONSTANTS
     public static final int NREGIONS = 3;						// 3 regions of MM 
     public static final int NLAYERS   = NREGIONS*2;					// 6 layer
-    public static final int NSECTOR  = 3;						// 3 sectors or tiles per layer
+    public static final int NSECTORS  = 3;						// 3 sectors or tiles per layer
     //public static final int STARTINGLAYR = 5;						// current configuration is 3 SVT + 3BMT (outermost BST ring)
     public static double ETOTCUT = 0.0;
     //Z detector characteristics
@@ -33,6 +33,8 @@ public class Constants {
     private static double[] CRZZMIN = new double[NREGIONS]; 		// PCB upstream extremity mm
     private static double[] CRZZMAX = new double[NREGIONS]; 		// PCB downstream extremity mm
     private static double[] CRZOFFSET = new double[NREGIONS]; 		// Beginning of strips in mm
+    private static double[][] CRZPHI = new double[NREGIONS][3]; 	// the central phi of each PCB detector A, B, C
+    private static double[][] CRZDPHI = new double[NREGIONS][3]; 	// the half phi width of each PCB detector A, B, C
     private static double[][] CRZEDGE1 = new double[NREGIONS][3]; 	// the angle of the first edge of each PCB detector A, B, C
     private static double[][] CRZEDGE2 = new double[NREGIONS][3]; 	// the angle of the second edge of each PCB detector A, B, C
     private static double[] CRZXPOS = new double[NREGIONS]; 		// Distance on the PCB between the PCB first edge and the edge of the first strip in mm
@@ -47,6 +49,12 @@ public class Constants {
     private static double[] CRCOFFSET = new double[NREGIONS]; 		// Beginning of strips in mm
     private static int[][] CRCGROUP = new int[NREGIONS][];		// Number of strips with same width
     private static double[][] CRCWIDTH = new double[NREGIONS][];	// the width of the corresponding group of strips 
+    private static int[][] CRCGRPNMIN = new int[NREGIONS][];		// the group min strip number
+    private static int[][] CRCGRPNMAX = new int[NREGIONS][];		// the group max strip number
+    private static double[][] CRCGRPZMIN = new double[NREGIONS][];      // the group minimum z
+    private static double[][] CRCGRPZMAX = new double[NREGIONS][];      // the group maximum z
+    private static double[][] CRCPHI = new double[NREGIONS][3]; 	// the central phi of each PCB detector A, B, C
+    private static double[][] CRCDPHI = new double[NREGIONS][3]; 	// the half phi width of each PCB detector A, B, C
     private static double[][] CRCEDGE1 = new double[NREGIONS][3]; 	// the angle of the first edge of each PCB detector A, B, C
     private static double[][] CRCEDGE2 = new double[NREGIONS][3]; 	// the angle of the second edge of each PCB detector A, B, C
     private static double[] CRCXPOS = new double[NREGIONS]; 		// Distance on the PCB between the PCB first edge and the edge of the first strip in mm
@@ -61,8 +69,8 @@ public class Constants {
     public static final double hDrift = 3.0; 					// Size of the drift gap
     public static final double hStrip2Det = hDrift / 2;                         // distance between strips and the middle of the conversion gap (~half the drift gap)
 
-    public static Point3D[][]  shifts    = new Point3D[NLAYERS][NSECTOR];  // detector alignment shifts
-    public static Vector3D[][] rotations = new Vector3D[NLAYERS][NSECTOR]; // detector alignment rotations
+    public static Point3D[][]  shifts    = new Point3D[NLAYERS][NSECTORS];  // detector alignment shifts
+    public static Vector3D[][] rotations = new Vector3D[NLAYERS][NSECTORS]; // detector alignment rotations
     public static double[][] Rx= new double[NREGIONS*2][3];   //Angle to rotate the det around x-axis
     public static double[][] Ry= new double[NREGIONS*2][3];   //Angle to rotate the det around y-axis
     public static double[][] Rz= new double[NREGIONS*2][3];   //Angle to rotate the det around z-axis
@@ -195,6 +203,22 @@ public class Constants {
         CRZOFFSET = cRZOFFSET;
     }
 
+    public static double[][] getCRZPHI() {
+        return CRZPHI;
+    }
+
+    public static void setCRZPHI(double[][] cRZPHI) {
+        Constants.CRZPHI = cRZPHI;
+    }
+
+    public static double[][] getCRZDPHI() {
+        return CRZDPHI;
+    }
+
+    public static void setCRZDPHI(double[][] cRZDPHI) {
+        Constants.CRZDPHI = cRZDPHI;
+    }
+
     public static double[][] getCRZEDGE1() {
         return CRZEDGE1;
     }
@@ -287,8 +311,56 @@ public class Constants {
         return CRCWIDTH;
     }
 
+    public static void setCRCGRPZMIN(double[][] cRCGRPZ) {
+        CRCGRPZMIN = cRCGRPZ;
+    }
+
+    public static double[][] getCRCGRPZMIN() {
+        return CRCGRPZMIN;
+    }
+
+    public static void setCRCGRPZMAX(double[][] cRCGRPZ) {
+        CRCGRPZMAX = cRCGRPZ;
+    }
+
+    public static double[][] getCRCGRPZMAX() {
+        return CRCGRPZMAX;
+    }
+
+    public static void setCRCGRPNMAX(int[][] cRCGRPN) {
+        CRCGRPNMAX = cRCGRPN;
+    }
+
+    public static int[][] getCRCGRPNMAX() {
+        return CRCGRPNMAX;
+    }
+
+    public static void setCRCGRPNMIN(int[][] cRCGRPN) {
+        CRCGRPNMIN = cRCGRPN;
+    }
+
+    public static int[][] getCRCGRPNMIN() {
+        return CRCGRPNMIN;
+    }
+
     public static synchronized void setCRCWIDTH(double[][] cRCWIDTH) {
         CRCWIDTH = cRCWIDTH;
+    }
+
+    public static double[][] getCRCPHI() {
+        return CRCPHI;
+    }
+
+    public static void setCRCPHI(double[][] cRCPHI) {
+        Constants.CRCPHI = cRCPHI;
+    }
+
+    public static double[][] getCRCDPHI() {
+        return CRCDPHI;
+    }
+
+    public static void setCRCDPHI(double[][] cRCDPHI) {
+        Constants.CRCDPHI = cRCDPHI;
     }
 
     public static double[][] getCRCEDGE1() {

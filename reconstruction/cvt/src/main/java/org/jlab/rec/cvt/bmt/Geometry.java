@@ -124,7 +124,7 @@ public class Geometry {
      * @param layer the layer 1...6
      * @return the angle to localize the beginning of the strips
      */
-    private double CRC_GetBeginStrip(int sector, int layer) {
+    public double CRC_GetBeginStrip(int sector, int layer) {
         // Sector = num_detector + 1;	
         // num_detector = 0 (region A), 1 (region B), 2, (region C)
 
@@ -145,7 +145,7 @@ public class Geometry {
      * @param layer the layer 1...6
      * @return the angle to localize the end of the strips
      */
-    private double CRC_GetEndStrip(int sector, int layer) {
+    public double CRC_GetEndStrip(int sector, int layer) {
         // Sector = num_detector + 1;	
         // num_detector = 0 (region A), 1 (region B), 2, (region C)
 

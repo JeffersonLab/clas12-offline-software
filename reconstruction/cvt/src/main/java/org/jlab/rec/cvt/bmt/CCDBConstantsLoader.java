@@ -1,6 +1,8 @@
 package org.jlab.rec.cvt.bmt;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 
 /**
  *
@@ -22,7 +24,9 @@ public class CCDBConstantsLoader {
     public static final synchronized void Load(DatabaseConstantProvider dbprovider) {
         // initialize the constants
         //Z detector characteristics
-        int NREGIONS = 3;
+        int NREGIONS = Constants.NREGIONS;
+        int NSECTORS = Constants.NSECTORS;
+        int NLAYERS  = Constants.NLAYERS;
         double[] CRZRADIUS = new double[NREGIONS]; 		// the radius of the Z detector in mm
         int[] CRZNSTRIPS = new int[NREGIONS]; 			// the number of strips
         double[] CRZSPACING = new double[NREGIONS]; 	// the strip spacing in mm
@@ -31,8 +35,10 @@ public class CCDBConstantsLoader {
         double[] CRZZMIN = new double[NREGIONS]; 		// PCB upstream extremity mm
         double[] CRZZMAX = new double[NREGIONS]; 		// PCB downstream extremity mm
         double[] CRZOFFSET = new double[NREGIONS]; 		// Beginning of strips in mm
-        double[][] CRZEDGE1 = new double[NREGIONS][3]; 	// the angle of the first edge of each PCB detector A, B, C
-        double[][] CRZEDGE2 = new double[NREGIONS][3]; 	// the angle of the second edge of each PCB detector A, B, C
+        double[][] CRZPHI = new double[NREGIONS][NSECTORS]; 	// the the central phi of the PCB
+        double[][] CRZDPHI = new double[NREGIONS][NSECTORS]; 	// the the half phi width of the PCB
+        double[][] CRZEDGE1 = new double[NREGIONS][NSECTORS]; 	// the angle of the first edge of each PCB detector A, B, C
+        double[][] CRZEDGE2 = new double[NREGIONS][NSECTORS]; 	// the angle of the second edge of each PCB detector A, B, C
         double[] CRZXPOS = new double[NREGIONS]; 		// Distance on the PCB between the PCB first edge and the edge of the first strip in mm
 
         //C detector characteristics
@@ -45,12 +51,18 @@ public class CCDBConstantsLoader {
         double[] CRCOFFSET = new double[NREGIONS]; 		// Beginning of strips in mm
         int[][] CRCGROUP = new int[NREGIONS][100]; 		// Number of strips with same width
         double[][] CRCWIDTH = new double[NREGIONS][100];	// the width of the corresponding group of strips 
-        double[][] CRCEDGE1 = new double[NREGIONS][3];          // the angle of the first edge of each PCB detector A, B, C
-        double[][] CRCEDGE2 = new double[NREGIONS][3];          // the angle of the second edge of each PCB detector A, B, C
+        int[][] CRCGRPNMIN     = new int[NREGIONS][100];        // the group min strip number
+        int[][] CRCGRPNMAX     = new int[NREGIONS][100];        // the group max strip number
+        double[][] CRCGRPZMIN  = new double[NREGIONS][100];	// the group minimum z
+        double[][] CRCGRPZMAX  = new double[NREGIONS][100];	// the group maximum z
+        double[][] CRCPHI = new double[NREGIONS][NSECTORS]; 	// the the central phi of the PCB
+        double[][] CRCDPHI = new double[NREGIONS][NSECTORS]; 	// the the half phi width of the PCB
+        double[][] CRCEDGE1 = new double[NREGIONS][NSECTORS];   // the angle of the first edge of each PCB detector A, B, C
+        double[][] CRCEDGE2 = new double[NREGIONS][NSECTORS];   // the angle of the second edge of each PCB detector A, B, C
         double[] CRCXPOS = new double[NREGIONS]; 		// Distance on the PCB between the PCB first edge and the edge of the first strip in mm
 
-        double[] EFF_Z_OVER_A = new double[NREGIONS*2];
-        double[] T_OVER_X0    = new double[NREGIONS*2];
+        double[] EFF_Z_OVER_A = new double[NLAYERS];
+        double[] T_OVER_X0    = new double[NLAYERS];
         
          int GRID_SIZE=405;
          double[] THETA_L_grid = new double [GRID_SIZE];
@@ -58,8 +70,8 @@ public class CCDBConstantsLoader {
          double[] MAG_grid = new double [GRID_SIZE];
          
          // HV settings for Lorentz Angle
-         double [][] HV_DRIFT_FF= new double [NREGIONS*2][3];
-         double [][] HV_DRIFT_MF= new double [NREGIONS*2][3];
+         double [][] HV_DRIFT_FF= new double [NLAYERS][NSECTORS];
+         double [][] HV_DRIFT_MF= new double [NLAYERS][NSECTORS];
          
         // Load the tables
         
@@ -107,18 +119,33 @@ public class CCDBConstantsLoader {
       //  dbprovider.show();
         // Getting the Constants
         // 1) pitch info 
-        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_strip_L1/Group_size"); i++) {
-            CRCGROUP[0][i] = dbprovider.getInteger("/geometry/cvt/mvt/bmt_strip_L1/Group_size", i);
-            CRCWIDTH[0][i] = dbprovider.getDouble("/geometry/cvt/mvt/bmt_strip_L1/Pitch", i);
+        int[] C_Layers = {1, 4, 6};
+        for (int j = 0; j < NREGIONS; j++) {
+            for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_strip_L" + C_Layers[j] + "/Group_size"); i++) {
+                CRCGROUP[j][i] = dbprovider.getInteger("/geometry/cvt/mvt/bmt_strip_L" + C_Layers[j] + "/Group_size", i);
+                CRCWIDTH[j][i] = dbprovider.getDouble("/geometry/cvt/mvt/bmt_strip_L" + C_Layers[j] + "/Pitch", i);
+                if(i==0) {
+                    CRCGRPNMIN[j][i] = 1;
+                    CRCGRPNMAX[j][i] = CRCGROUP[j][i];
+                    CRCGRPZMIN[j][i] = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer_noshim/Zmin", C_Layers[j]-1);
+                    CRCGRPZMAX[j][i] = CRCGRPZMIN[j][i] + CRCGROUP[j][i]*CRCWIDTH[j][i]; 
+                }
+                else     {
+                    CRCGRPNMIN[j][i] = CRCGRPNMAX[j][i-1] + 1;
+                    CRCGRPNMAX[j][i] = CRCGRPNMAX[j][i-1] + CRCGROUP[j][i];
+                    CRCGRPZMIN[j][i] = CRCGRPZMAX[j][i-1];
+                    CRCGRPZMAX[j][i] = CRCGRPZMIN[j][i]   + CRCGROUP[j][i]*CRCWIDTH[j][i]; 
+                }
+            }
         }
-        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_strip_L4/Group_size"); i++) {
-            CRCGROUP[1][i] = dbprovider.getInteger("/geometry/cvt/mvt/bmt_strip_L4/Group_size", i);
-            CRCWIDTH[1][i] = dbprovider.getDouble("/geometry/cvt/mvt/bmt_strip_L4/Pitch", i);
-        }
-        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_strip_L6/Group_size"); i++) {
-            CRCGROUP[2][i] = dbprovider.getInteger("/geometry/cvt/mvt/bmt_strip_L6/Group_size", i);
-            CRCWIDTH[2][i] = dbprovider.getDouble("/geometry/cvt/mvt/bmt_strip_L6/Pitch", i);
-        }
+//        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_strip_L4/Group_size"); i++) {
+//            CRCGROUP[1][i] = dbprovider.getInteger("/geometry/cvt/mvt/bmt_strip_L4/Group_size", i);
+//            CRCWIDTH[1][i] = dbprovider.getDouble("/geometry/cvt/mvt/bmt_strip_L4/Pitch", i);
+//        }
+//        for (int i = 0; i < dbprovider.length("/geometry/cvt/mvt/bmt_strip_L6/Group_size"); i++) {
+//            CRCGROUP[2][i] = dbprovider.getInteger("/geometry/cvt/mvt/bmt_strip_L6/Group_size", i);
+//            CRCWIDTH[2][i] = dbprovider.getDouble("/geometry/cvt/mvt/bmt_strip_L6/Pitch", i);
+//        }
 
         CRZWIDTH[0] = dbprovider.getDouble("/geometry/cvt/mvt/bmt_strip_L2/Pitch", 0);
         CRZWIDTH[1] = dbprovider.getDouble("/geometry/cvt/mvt/bmt_strip_L3/Pitch", 0);
@@ -152,6 +179,7 @@ public class CCDBConstantsLoader {
                 CRZZMAX[region - 1] = Zmax;
                 CRZLENGTH[region - 1] = Zmax - Zmin;
                 CRZSPACING[region - 1] = spacing;
+                
 
                 for (int j = 0; j < 3; j++) {
                     if (EDGE2[j] > EDGE1[j]) {
@@ -165,7 +193,10 @@ public class CCDBConstantsLoader {
                         EDGE2[j] = middle + ((double) Nstrips) * (CRZWIDTH[region - 1] / radius) / 2. - 0 * CRZWIDTH[region - 1] / radius;
                         EDGE2[j] -= 2 * Math.PI;
                     }
-                    
+                    if     (j==0) CRZPHI[region-1][j] = Math.toRadians((Phi_min+Phi_max)/2 + 120);
+                    else if(j==1) CRZPHI[region-1][j] = Math.toRadians((Phi_min+Phi_max)/2);
+                    else if(j==2) CRZPHI[region-1][j] = Math.toRadians((Phi_min+Phi_max)/2 + 240);
+                    CRZDPHI[region-1][j] = Nstrips * CRZWIDTH[region - 1]/radius/2;
                 }
                 CRZEDGE1[region - 1] = EDGE1;
                 CRZEDGE2[region - 1] = EDGE2;
@@ -179,6 +210,12 @@ public class CCDBConstantsLoader {
                 CRCSPACING[region - 1] = spacing;
                 CRCEDGE1[region - 1] = EDGE1;
                 CRCEDGE2[region - 1] = EDGE2;
+                for (int j = 0; j < 3; j++) {
+                    if     (j==0) CRCPHI[region-1][j] = Math.toRadians((Phi_min+Phi_max)/2 + 120);
+                    else if(j==1) CRCPHI[region-1][j] = Math.toRadians((Phi_min+Phi_max)/2);
+                    else if(j==2) CRCPHI[region-1][j] = Math.toRadians((Phi_min+Phi_max)/2 + 240);
+                    CRCDPHI[region-1][j] = Math.toRadians((Phi_max-Phi_min)/2 );
+                }
             }
 
         }
@@ -242,7 +279,7 @@ public class CCDBConstantsLoader {
          	MAG_grid[i]=dbprovider.getDouble("/calibration/mvt/lorentz/Bfield",i);
         }
          
-         for (int i = 0; i<2*NREGIONS; i++) {
+         for (int i = 0; i<NLAYERS; i++) {
         	HV_DRIFT_FF[i][0]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_1", i);
     		HV_DRIFT_FF[i][1]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_2", i);
     		HV_DRIFT_FF[i][2]=dbprovider.getDouble("/calibration/mvt/bmt_hv/drift_fullfield/Sector_3", i);
@@ -253,14 +290,17 @@ public class CCDBConstantsLoader {
         }
         
         // alignment 
-        for (int i = 0; i<Constants.NLAYERS; i++) {
-            for (int j = 0; j<Constants.NSECTOR; j++) {
-                Constants.shifts[i][j].setX(dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaX", i));
-                Constants.shifts[i][j].setY(dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaY", i));
-                Constants.shifts[i][j].setZ(dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaZ", i));
-                Constants.rotations[i][j].setX(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotX", i));
-                Constants.rotations[i][j].setY(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotY", i));
-                Constants.rotations[i][j].setZ(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotZ", i));
+        for (int j = 0; j<NSECTORS; j++) {
+            for (int i = 0; i<NLAYERS; i++) {
+                int row = j*NSECTORS + i;
+                Point3D shift = new Point3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaX", row),
+                                            dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaY", row),
+                                            dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaZ", row));                
+                Vector3D rot = new Vector3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotX", row),
+                                            dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotY", row),
+                                            dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotZ", row));                
+                Constants.shifts[i][j] = shift;
+                Constants.rotations[i][j] = rot;
             }
         }
          
@@ -287,6 +327,8 @@ public class CCDBConstantsLoader {
         Constants.setCRZZMAX(CRZZMAX);
         Constants.setCRZLENGTH(CRZLENGTH);
         Constants.setCRZSPACING(CRZSPACING);
+        Constants.setCRZPHI(CRZPHI);
+        Constants.setCRZDPHI(CRZDPHI);
         Constants.setCRZEDGE1(CRZEDGE1);
         Constants.setCRZEDGE2(CRZEDGE2);
         Constants.setCRCRADIUS(CRCRADIUS);
@@ -295,10 +337,16 @@ public class CCDBConstantsLoader {
         Constants.setCRCZMAX(CRCZMAX);
         Constants.setCRCLENGTH(CRCLENGTH);
         Constants.setCRCSPACING(CRCSPACING);
+        Constants.setCRCPHI(CRCPHI);
+        Constants.setCRCDPHI(CRCDPHI);
         Constants.setCRCEDGE1(CRCEDGE1);
         Constants.setCRCEDGE2(CRCEDGE2);
         Constants.setCRCGROUP(CRCGROUP);
         Constants.setCRCWIDTH(CRCWIDTH);
+        Constants.setCRCGRPZMIN(CRCGRPZMIN);
+        Constants.setCRCGRPZMAX(CRCGRPZMAX);
+        Constants.setCRCGRPNMIN(CRCGRPNMIN);
+        Constants.setCRCGRPNMAX(CRCGRPNMAX);
         Constants.setCRZWIDTH(CRZWIDTH);
         Constants.setEFF_Z_OVER_A(EFF_Z_OVER_A);
         Constants.set_T_OVER_X0(T_OVER_X0);
