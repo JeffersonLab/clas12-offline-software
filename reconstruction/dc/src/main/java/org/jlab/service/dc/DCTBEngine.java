@@ -323,8 +323,14 @@ public class DCTBEngine extends DCEngine {
             L[track.get_ListOfHBSegments().get(l).get_Superlayer()-1]++;
         }
         for(int l = 0; l<6; l++) {
-            if(L[l]==0)
+            if(L[l]==0){
                 miss=l+1;
+                if(miss%2==0) {//missing sl in 2,4,6
+                    track.setSingleSuperlayer(track.get_ListOfHBSegments().get(l));//isolated sl in 1,3,5
+                } else {
+                    track.setSingleSuperlayer(track.get_ListOfHBSegments().get(l+1));//isolated sl in 2,4,6
+                }
+            }
         }
         return miss;
     }

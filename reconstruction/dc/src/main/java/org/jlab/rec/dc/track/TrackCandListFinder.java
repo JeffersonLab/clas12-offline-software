@@ -61,9 +61,11 @@ public class TrackCandListFinder {
                 }
                 if (c.get_Segment1().get_Id() == -1) {
                     cand.set_MissingSuperlayer(c.get_Segment1().get_Superlayer());
+                    cand.setSingleSuperlayer(c.get_Segment2());
                 }
                 if (c.get_Segment2().get_Id() == -1) {
                     cand.set_MissingSuperlayer(c.get_Segment2().get_Superlayer());
+                    cand.setSingleSuperlayer(c.get_Segment1());
                 }
             } else {
                 if ((c.get_Segment1().get_Status() == 1) || (c.get_Segment2().get_Status() == 1))

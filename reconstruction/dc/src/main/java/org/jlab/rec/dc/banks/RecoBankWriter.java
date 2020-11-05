@@ -375,7 +375,11 @@ private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslis
                 bank.setShort("Cluster"+String.valueOf(candlist.get(i).get(k).get_Region()*2)+"_ID", 
                         i, (short) candlist.get(i).get(k).get_Segment2().get_Id());
             }
-            
+            if(candlist.get(i).getSingleSuperlayer()!=null) {
+                bank.setShort("Cluster"+String.valueOf(candlist.get(i).getSingleSuperlayer().get_Superlayer())+"_ID", 
+                        i, (short) candlist.get(i).getSingleSuperlayer().get_fittedCluster().get_Id());
+            }
+                
             bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
             bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
             bank.setFloat("x", i, (float) candlist.get(i).getFinalStateVec().x());
@@ -776,7 +780,10 @@ private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslis
                 bank.setShort("Cluster"+String.valueOf(candlist.get(i).get(k).get_Region()*2)+"_ID", 
                         i, (short) candlist.get(i).get(k).get_Segment2().get_Id());
             }
-            
+            if(candlist.get(i).getSingleSuperlayer()!=null) {
+                bank.setShort("Cluster"+String.valueOf(candlist.get(i).getSingleSuperlayer().get_Superlayer())+"_ID", 
+                        i, (short) candlist.get(i).getSingleSuperlayer().get_fittedCluster().get_Id());
+            }
             bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
             bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
         }

@@ -62,6 +62,7 @@ public class Track extends Trajectory implements Comparable<Track>{
     private double _fitChisq;
     public boolean fit_Successful;
     private int _missingSuperlayer;
+    private Segment _singleSuperlayer ;
     private int _fitConvergenceStatus;
     private StateVec finalStateVec ;
     
@@ -81,6 +82,20 @@ public class Track extends Trajectory implements Comparable<Track>{
      */
     public void set_MissingSuperlayer(int missingSuperlayer) {
         this._missingSuperlayer = missingSuperlayer;
+    }
+
+    /**
+     * @return the _singleSuperlayer
+     */
+    public Segment getSingleSuperlayer() {
+        return _singleSuperlayer;
+    }
+
+    /**
+     * @param _singleSuperlayer the _singleSuperlayer to set
+     */
+    public void setSingleSuperlayer(Segment _singleSuperlayer) {
+        this._singleSuperlayer = _singleSuperlayer;
     }
     
     private int _Status=0;
