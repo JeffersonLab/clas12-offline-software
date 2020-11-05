@@ -15,7 +15,7 @@ public class Constants {
     public static final double SPEEDLIGHT = 29.97924580;
     // DATABASE VARIATION
     //public static final String DBVAR = "default";
-    public static double NSUPERLAYERTRACKING = 5;
+    public static double NSUPERLAYERTRACKING = 6;
     public static double TSTARTEST = 560.;
     // GEOMETRY PARAMETERS
 
