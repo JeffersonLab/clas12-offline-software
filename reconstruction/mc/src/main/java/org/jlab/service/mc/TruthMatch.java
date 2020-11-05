@@ -647,7 +647,7 @@ public class TruthMatch extends ReconstructionEngine {
              * curHit.id = hitsBank.getShort("id", ihit) - 1;   // -1, as id starts from 1
              */
                         
-            curHit.id = (int)hitsBank.getShort("tdc_idx1", ihit)/2;   // We should devide to 2, as each MC::True hit is digitized into two ADC/TDC hits.
+            curHit.id = (int)hitsBank.getShort("tdc_idx1", ihit);
                         
             curHit.cid = (short) (hitsBank.getShort("clusterid", ihit) - 1);  // -1 for starting from 0
             if (curHit.cid == -1 || !mchitsInCTOF.containsKey(curHit.id)) {
