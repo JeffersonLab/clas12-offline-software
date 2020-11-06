@@ -261,7 +261,11 @@ public class TrackSeederCA {
         	}
         	seed.set_Clusters(clusters);
 	    }
-
+        for (Seed bseed : seedlist) {
+            for(Cross c : bseed.get_Crosses()) {
+                c.isInSeed = true;
+            }
+        }    
         return seedlist;
     }
     

@@ -1,14 +1,13 @@
 package org.jlab.rec.cvt.services;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import java.util.Map;
-
+import java.util.HashMap;
+import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.clas.tracking.kalmanfilter.Surface;
 import org.jlab.clas.tracking.objects.Strip;
-
 import org.jlab.detector.geant4.v2.SVT.SVTConstants;
 import org.jlab.geom.prim.Cylindrical3D;
 import org.jlab.geom.prim.Plane3D;
@@ -19,7 +18,8 @@ import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.track.Seed;
-import org.jlab.rec.cvt.track.Track; 
+import org.jlab.rec.cvt.track.Track;
+import org.jlab.clas.swimtools.Swim;
 
 /**
  * Service to return reconstructed TRACKS
@@ -150,7 +150,69 @@ public class RecUtilities {
         }
         return KFSites;
     }
-
+    public Map<Integer, Cluster> FindClustersOnTrk (List<Cluster> allClusters, Helix helix, double P, int Q,
+            org.jlab.rec.cvt.svt.Geometry sgeo, 
+            Swim swimmer) {
+        Map<Integer, Cluster> clusMap = new HashMap<Integer, Cluster>();
+        //Map<Integer, Double> stripMap = new HashMap<Integer, Double>();
+        Map<Integer, Double> docaMap = new HashMap<Integer, Double>();
+        Map<Integer, Point3D> trajMap = new HashMap<Integer, Point3D>();
+        int[] Sectors = new int[org.jlab.rec.cvt.svt.Constants.NLAYR];
+        for (int a = 0; a < Sectors.length; a++) {
+            Point3D I = helix.getPointAtRadius(org.jlab.rec.cvt.svt.Constants.MODULERADIUS[a][0]);
+            int sec = sgeo.findSectorFromAngle(a + 1, I);                
+            Sectors[a] = sec;
+        }
+        // initialize swimmer starting from the track vertex
+        double maxPathLength = 1; 
+        swimmer.SetSwimParameters((helix.xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (helix.ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, helix.get_Z0() / 10, 
+                     Math.toDegrees(helix.get_phi_at_dca()), Math.toDegrees(Math.acos(helix.costheta())),
+                     P, Q, maxPathLength) ;
+        double[] inters = null;
+        double     path = 0;
+        // SVT
+        for (int l = 0; l < org.jlab.rec.cvt.svt.Constants.NLAYR; l++) {
+            // reinitilize swimmer from last surface
+            if(inters!=null) {
+                double intersPhi   = Math.atan2(inters[4], inters[3]);
+                double intersTheta = Math.acos(inters[5]/Math.sqrt(inters[3]*inters[3]+inters[4]*inters[4]+inters[5]*inters[5]));
+                swimmer.SetSwimParameters(inters[0], inters[1], inters[2], Math.toDegrees(intersPhi), Math.toDegrees(intersTheta), 
+                        P, Q, maxPathLength) ;
+            }
+            int layer = l + 1;
+            int sector = Sectors[l];
+            if(sector == -1)
+                continue;
+            
+            Vector3D n = sgeo.findBSTPlaneNormal(sector, layer);
+            Point3D p = sgeo.getPlaneModuleOrigin(sector, layer);
+            double d = n.dot(p.toVector3D());
+            inters = swimmer.SwimToPlaneBoundary(d/10.0, n, 1);
+            Point3D trp = new Point3D(inters[0]*10, inters[1]*10, inters[2]*10);
+            double nearstp = sgeo.calcNearestStrip(inters[0]*10, inters[1]*10, inters[2]*10, layer, sector);
+            //stripMap.put((sector*1000+layer), nearstp);
+            docaMap.put((sector*1000+layer), sgeo.getDOCAToStrip(sector, layer, nearstp, trp)); 
+            trajMap.put((sector*1000+layer), trp); 
+        }
+        for(Cluster cls : allClusters) {
+            int clsKey = cls.get_Sector()*1000+cls.get_Layer();
+            //double trjCent = stripMap.get(clsKey);
+            double clsDoca = sgeo.getDOCAToStrip(cls.get_Sector(), cls.get_Layer(), 
+                    cls.get_Centroid(), trajMap.get(clsKey));
+            if(clusMap.containsKey(clsKey)) {
+                //double filldCent = clusMap.get(clsKey).get_Centroid();
+                double filldDoca = docaMap.get(clsKey);
+                if(Math.abs(clsDoca)<Math.abs(filldDoca)) {//closer doca
+                    clusMap.put(clsKey, cls); //fill it
+                }
+            }
+            if(Math.abs(clsDoca)<cls.get_CentroidError()*5){ //5sigma cut
+                clusMap.put(clsKey, cls);
+                System.out.println("Added to seed ");cls.printInfo();
+            }
+        }
+        return clusMap;
+    }
     
     public void MatchTrack2Traj(Seed trkcand, Map<Integer, 
             org.jlab.clas.tracking.kalmanfilter.helical.KFitter.HitOnTrack> traj, 
@@ -178,8 +240,17 @@ public class RecUtilities {
             }
         }
 
-        // adding the BMT
+        // adding the cross infos
         for (int c = 0; c < trkcand.get_Crosses().size(); c++) {
+            if (trkcand.get_Crosses().get(c).get_Detector().equalsIgnoreCase("SVT")) {
+                int layer = trkcand.get_Crosses().get(c).get_Cluster1().get_Layer();
+                Point3D p = new Point3D(trkcand.get_Crosses().get(c).get_Point().x(), 
+                        trkcand.get_Crosses().get(c).get_Point().y(), 
+                        traj.get(layer).z);
+                Vector3D d = new Vector3D(traj.get(layer).px, traj.get(layer).py, traj.get(layer).pz).asUnit();
+                trkcand.get_Crosses().get(c).set_Point(p);
+                trkcand.get_Crosses().get(c).set_Dir(d);
+            }
             if (trkcand.get_Crosses().get(c).get_Detector().equalsIgnoreCase("BMT")) {
                 double ce = trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();
                 int layer = trkcand.get_Crosses().get(c).getOrderedRegion()+3;

@@ -22,6 +22,7 @@ public class Cross extends ArrayList<Cluster> implements Comparable<Cross> {
      * serial id
      */
     private static final long serialVersionUID = 5317526429163382618L;
+    public boolean isInSeed = false;
 
     /**
      * @param detector SVT or BMT

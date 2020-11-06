@@ -26,8 +26,8 @@ public class KFitter {
     MeasVecs mv = new MeasVecs();
     
     public StateVec finalStateVec;
-    
-    private double _Xb;
+    private double _tarShift; //targetshift
+    private double _Xb; //beam axis pars
     private double _Yb;
     private double resiCut = 100;//residual cut for the measurements
     
@@ -39,13 +39,14 @@ public class KFitter {
             double Zref, List<Surface> measSurfaces) {
         _Xb = Xb;
         _Yb = Yb;
+        _tarShift = Zref;
         this.init(helix, cov, event, swimmer, Xb, Yb, 
              Zref, mv, measSurfaces);
     }
     //private Matrix iCov;
     public void init(Helix helix, Matrix cov, DataEvent event, Swim swimmer, double Xb, double Yb, 
             double Zref, MeasVecs mv, List<Surface> measSurfaces) {
-        
+        sv.shift = Zref;
         //iCov = cov;
         mv.setMeasVecs(measSurfaces);
         if (sv.Layer != null) {
@@ -78,11 +79,11 @@ public class KFitter {
         sv.Sector.add(0);
         sv.X0.add(Xb);
         sv.Y0.add(Yb);
-        sv.Z0.add(Zref); 
+        sv.Z0.add(0.0); 
         for (int i = 1; i < mv.measurements.size(); i++) {
             sv.Layer.add(mv.measurements.get(i).layer);
             sv.Sector.add(mv.measurements.get(i).sector);
-            Point3D ref = new Point3D(Xb, Yb, Zref);
+            Point3D ref = new Point3D(Xb, Yb, 0.0);
             sv.X0.add(ref.x());
             sv.Y0.add(ref.y());
             sv.Z0.add(ref.z());
@@ -129,8 +130,8 @@ public class KFitter {
                 }
                 sv.transport(k, k - 1, sv.trackTraj.get(k), sv.trackCov.get(k), mv.measurements.get(k-1), 
                         swimmer);
-                 if(k>1)
-                    this.filter(k - 1, swimmer, -1);
+                if(k>1)
+                   this.filter(k - 1, swimmer, -1);
             }
 
             // chi2
@@ -139,7 +140,6 @@ public class KFitter {
                 newchisq=this.chi2;
                 KFHelix = sv.setTrackPars();
                 finalStateVec = sv.trackTraj.get(0);
-                //KFHelix = sv.getHelixAtBeamLine(1, swimmer); 
                 this.setTrajectory();
                 setFitFailed = false;
             } else {
@@ -189,7 +189,7 @@ public class KFitter {
         int ndf = -5;
         StateVec stv = sv.transported(0, 1, sv.trackTraj.get(0), mv.measurements.get(1), swimmer);
         double dh = mv.dh(1, stv);
-        if(mv.measurements.get(1).skip==false) {
+        if(mv.measurements.get(1).skip==false) { 
             chi2 = dh*dh / mv.measurements.get(1).error;
             ndf++;
         }
@@ -237,7 +237,7 @@ public class KFitter {
             }
             Matrix Ca = null;
             try {
-                Ca = Ci.plus(new Matrix(HTGH));
+                Ca = Ci.plus(new Matrix(HTGH)); 
             } catch (Exception e) {
                 return;
             }
@@ -304,12 +304,54 @@ public class KFitter {
                 sv.trackTraj.get(k).phi = fVec.phi;
                 sv.trackTraj.get(k).x = fVec.x;
                 sv.trackTraj.get(k).y = fVec.y;
-                sv.trackTraj.get(k).z = fVec.z;
+                sv.trackTraj.get(k).z = fVec.z;  
             } else {
                 this.NDF--;
                 mv.measurements.get(k).skip = true;
             }
         }
+    }
+
+    /**
+     * @return the _Xb
+     */
+    public double getXb() {
+        return _Xb;
+    }
+
+    /**
+     * @param _Xb the _Xb to set
+     */
+    public void setXb(double _Xb) {
+        this._Xb = _Xb;
+    }
+
+    /**
+     * @return the _Yb
+     */
+    public double getYb() {
+        return _Yb;
+    }
+
+    /**
+     * @param _Yb the _Yb to set
+     */
+    public void setYb(double _Yb) {
+        this._Yb = _Yb;
+    }
+
+    /**
+     * @return the _tarShift
+     */
+    public double getTarShift() {
+        return _tarShift;
+    }
+
+    /**
+     * @param _TarShift the _tarShift to set
+     */
+    public void setTarShift(double _TarShift) {
+        this._tarShift = _TarShift;
     }
 
     /**

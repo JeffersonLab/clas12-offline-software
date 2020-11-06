@@ -2,7 +2,9 @@ package org.jlab.rec.cvt.track;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
@@ -334,14 +336,16 @@ public class TrackCandListFinder {
     public ArrayList<StraightTrack> getStraightTracks(CrossList SVTCrosses, List<Cross> BMTCrosses, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
 
         ArrayList<StraightTrack> cands = new ArrayList<StraightTrack>();
-
+        Map<int[], StraightTrack> candMap= new HashMap<int[], StraightTrack>();
+        
         if (SVTCrosses.size() == 0) {
             System.err.print("Error in estimating track candidate trajectory: less than 3 crosses found");
             return cands;
         }
 
         CosmicFitter fitTrk = new CosmicFitter();
-
+        int[] crossNbs;
+        
         for (int i = 0; i < SVTCrosses.size(); i++) {
             ArrayList<Cross> crossesToFit = new ArrayList<Cross>();
             // remove SVT regions
@@ -448,44 +452,14 @@ public class TrackCandListFinder {
                     double chi2 = cand.calc_straightTrkChi2();
                     cand.set_chi2(chi2);
                     cand.set_Id(cands.size() + 1);
-                    cands.add(cand); // dump the cand		
+                    crossNbs = new int[cand.size()];
+                    for(int ic = 0; ic < cand.size(); ic++)
+                        crossNbs[ic] = cand.get(ic).get_Id();
+                    candMap.put(crossNbs, cand);
+                    
                 }
             }
-            /*
-			// reset the arrays
-			NewMeasArrays = this.get_RayMeasurementsArrays(crossesToFitWithBMT, false, false);
-			fitTrk.fit(MeasArrays._X, MeasArrays._Y, MeasArrays._Z, MeasArrays._Y_prime, MeasArrays._ErrRt, MeasArrays._ErrY_prime, MeasArrays._ErrZ);
-			//System.out.println(" *** NEW Refit cand with mm "+cand.get_ray().get_dirVec().toString()+
-			//		" slope xy "+fitTrk.get_ray().get_yxslope()+" slope yz "+fitTrk.get_ray().get_yzslope()+
-			//		" intec xy "+fitTrk.get_ray().get_yxinterc()+" inter yz "+fitTrk.get_ray().get_yzinterc());
-			// if fit OK
-			if(fitTrk.get_ray()!=null) {	
-				cand = new StraightTrack(fitTrk.get_ray());
-				
-				cand.addAll(crossesToFit);
-				
-				cand.update_Crosses(fitTrk.get_ray().get_yxslope(),fitTrk.get_ray().get_yzslope(),svt_geo);
-			
-				//System.out.println(" *** Refit cand with mm after reset SVT crosses "+cand.get_ray().get_dirVec().toString()+
-				//		" slope xy "+cand.get_ray().get_yxslope()+" slope yz "+cand.get_ray().get_yzslope()+
-				//		" intec xy "+cand.get_ray().get_yxinterc()+" inter yz "+cand.get_ray().get_yzinterc());
-				//KalFitCosmics kf = new KalFitCosmics(cand, svt_geo);
-				//kf.runKalFit(cand, svt_geo); // for now the KF runs on just SVT
-				//cand.update_Crosses(fitTrk.get_ray().get_yxslope(),fitTrk.get_ray().get_yzslope(),svt_geo);
-				
-				// add BMT
-				//cand.addAll(BMTCrosses);
-				//for(Cross c : cand)
-				//	c.set_Dir(cand.get_ray().get_dirVec());
-				//cand.set_chi2(fitTrk.get_rayfitoutput().get_chisq()[0]+fitTrk.get_rayfitoutput().get_chisq()[1]);
-				cand.set_ndf(NewMeasArrays._Y.size() + NewMeasArrays._Y_prime.size() -4);
-				double chi2 = cand.calc_straightTrkChi2();
-				cand.set_chi2(chi2);
-				//if(cand.get_ndf()>0) {							
-					cands.add(cand); // dump the cand							
-				//}
-			
-			} */
+            candMap.forEach((key,value) -> cands.add(value));
         }
 
         ArrayList<StraightTrack> passedcands = this.rmStraightTrkClones(org.jlab.rec.cvt.svt.Constants.removeClones, cands);
@@ -896,6 +870,7 @@ public class TrackCandListFinder {
 
             if (closestCross != null) {
                 if (doca < matchCutOff * 100) {
+                    //System.out.println(doca+" -->match C "+closestCross.toString());
                     matchedMMCrosses.add(closestCross);
                 }
             }
@@ -957,14 +932,14 @@ public class TrackCandListFinder {
 
                 if (Math.acos(cosAngMeasToTrk) < Math.acos(minCosAngMeasToTrk)) {
                     minCosAngMeasToTrk = cosAngMeasToTrk;
-                    closestCross = MMCrosses.get(i);
+                    closestCross = (Cross) MMCrosses.get(i).clone();
                     closestCross.set_Point(new Point3D(m_x, m_y, z));
                     closestCross.set_PointErr(new Point3D(MMCrosses.get(i).get_PointErr().x(), MMCrosses.get(i).get_PointErr().y(), 10.)); // to do : put in the correct error
                 }
             }
             if (closestCross != null) {
                 //if(minCosAngMeasToTrk<matchCutOff) 
-                //	System.out.println("matched "+closestCross.printInfo());
+                //	System.out.println("matched Z-det"+closestCross.printInfo());
                 matchedMMCrosses.add(closestCross);
 
             }
@@ -1085,8 +1060,8 @@ public class TrackCandListFinder {
                     continue;
                 }
                 if (Math.abs(st.get_CalcCentroidStrip() - cls.get_Centroid()) < 4) {
-                    //tf.setHitResolParams("SVT", cls.get_Sector(), cls.get_Layer(), cls,
-                    //        st, svt_geo, bmt_geo, trajFinal);
+                    tf.setHitResolParams("SVT", cls.get_Sector(), cls.get_Layer(), cls,
+                            st, svt_geo, bmt_geo, trajFinal);
                     //System.out.println("trying to associate a cluster ");cls.printInfo(); System.out.println(" to "+st.get_CalcCentroidStrip()+" dStp = "+(st.get_CalcCentroidStrip()-cls.get_Centroid()));
                     cls.set_AssociatedTrackID(k);
                     for (FittedHit h : cls) {

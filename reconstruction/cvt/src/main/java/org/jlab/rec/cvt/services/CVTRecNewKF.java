@@ -91,7 +91,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
 
         // Load the constants
         //-------------------
-        int newRun = bank.getInt("run", 0);
+        int newRun = bank.getInt("run", 0); 
         
         if (Run != newRun) {
             boolean align=false;
@@ -263,13 +263,13 @@ public class CVTRecNewKF extends ReconstructionEngine {
         
         if (svtCosmics!=null) {
             System.out.println("["+this.getName()+"] run with cosmics settings "+svtCosmics+" config chosen based on yaml");
-            this.isSVTonly= Boolean.valueOf(svtCosmics);
+            this.isCosmic= Boolean.valueOf(svtCosmics);
         }
         else {
-            svtCosmics = System.getenv("COAT_SVT_ONLY");
+            svtCosmics = System.getenv("COAT_CVT_COSMICS");
             if (svtCosmics!=null) {
                 System.out.println("["+this.getName()+"] run with cosmics settings "+svtCosmics+" config chosen based on env");
-                this.isSVTonly= Boolean.valueOf(svtCosmics);
+                this.isCosmic= Boolean.valueOf(svtCosmics);
             }
         }
         if (svtCosmics==null) {
