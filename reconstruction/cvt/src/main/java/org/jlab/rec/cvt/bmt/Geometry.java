@@ -153,7 +153,7 @@ public class Geometry {
         int num_region = (int) (layer + 1) / 2 - 1; 					// region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
 
         //For CRC, this function returns the angle to localize the end of the strips
-        double angle = Constants.getCRCEDGE1()[num_region][num_detector] + (Constants.getCRCXPOS()[num_region] + Constants.getCRCLENGTH()[num_region]) / Constants.getCRCRADIUS()[num_region];
+        double angle = Constants.getCRCEDGE2()[num_region][num_detector] + Constants.getCRCXPOS()[num_region] / Constants.getCRCRADIUS()[num_region];
         if (angle > 2 * Math.PI) {
             angle -= 2 * Math.PI;
         }
@@ -231,19 +231,21 @@ public class Geometry {
         double zi = Constants.getCRCZMIN()[num_region] + Constants.getCRCOFFSET()[num_region];
         double z = trk_z - zi;
 
-        Z_lowBound[0] = Constants.getCRCWIDTH()[num_region][0] / 2.; // the lower bound is the zMin+theOffset with half the width
-        Z_uppBound[0] = Z_lowBound[0]
-                + (Constants.getCRCGROUP()[num_region][0] - 1) * (Constants.getCRCWIDTH()[num_region][0] + Constants.getCRCSPACING()[num_region]);
-        NStrips[0] = Constants.getCRCGROUP()[num_region][0];
-        for (int i = 1; i < len; i++) {
-            Z_lowBound[i] = Z_uppBound[i - 1] + Constants.getCRCWIDTH()[num_region][i - 1] / 2. + Constants.getCRCSPACING()[num_region] + Constants.getCRCWIDTH()[num_region][i] / 2.;
-            Z_uppBound[i] = Z_lowBound[i] + (Constants.getCRCGROUP()[num_region][i] - 1) * (Constants.getCRCWIDTH()[num_region][i] + Constants.getCRCSPACING()[num_region]);
-
-            NStrips[i] = NStrips[i - 1] + Constants.getCRCGROUP()[num_region][i];
-
+        for (int i = 0; i < len; i++) {
+            if(i==0) {
+                Z_lowBound[i] = 0; 
+                NStrips[i] = Constants.getCRCGROUP()[num_region][i];
+            }
+            else {
+                Z_lowBound[i] = Z_uppBound[i - 1];
+                NStrips[i] = NStrips[i - 1] + Constants.getCRCGROUP()[num_region][i];
+            }
+            Z_uppBound[i] = Z_lowBound[i] + Constants.getCRCGROUP()[num_region][i] * Constants.getCRCWIDTH()[num_region][i];
+            
             if (z >= Z_lowBound[i] && z <= Z_uppBound[i]) {
                 strip_group = i;
-                ClosestStrip = 1 + (int) (Math.round(((z - Z_lowBound[strip_group]) / (Constants.getCRCWIDTH()[num_region][strip_group] + Constants.getCRCSPACING()[num_region])))) + NStrips[i - 1];
+                ClosestStrip = 1 + (int) Math.floor((z - Z_lowBound[strip_group]) / Constants.getCRCWIDTH()[num_region][strip_group]);
+                if(i>0)  ClosestStrip += NStrips[i - 1];
                 //ClosestStrip = (int) (Math.round(((z-Z_lowBound[strip_group])/(Constants.getCRCWIDTH()[num_region][strip_group] + Constants.getCRCSPACING()[num_region]))))+NStrips[i-1];
 
                 len = i;
