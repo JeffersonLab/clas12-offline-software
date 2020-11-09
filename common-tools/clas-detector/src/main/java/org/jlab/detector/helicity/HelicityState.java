@@ -110,15 +110,17 @@ public class HelicityState implements Comparable<HelicityState>, Comparator<Heli
                     break;
             }
         }
+
         state.hwStatus=0;
         if (state.helicityRaw==HelicityBit.UDF) state.hwStatus |= Mask.HELICITY;
         if (state.pairSync==HelicityBit.UDF)    state.hwStatus |= Mask.SYNC;
         if (state.patternSync==HelicityBit.UDF) state.hwStatus |= Mask.PATTERN;
 
+        state.fixMissingReadouts();
+
         // Fix the overall sign-convention error in the offline helicity:
         state.invert();
-        
-        state.fixMissingReadouts();
+
         return state;
     }
 
