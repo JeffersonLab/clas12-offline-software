@@ -1,6 +1,7 @@
 package org.jlab.rec.cvt.bmt;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider;
+import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 
@@ -298,9 +299,15 @@ public class CCDBConstantsLoader {
                                             dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaZ", row));                
                 Vector3D rot = new Vector3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotX", row),
                                             dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotY", row),
-                                            dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotZ", row));                
+                                            dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotZ", row));  
+                Line3D axis = new Line3D(new Point3D(0,0,0), new Vector3D(0,0,1));
+                axis.rotateX(rot.x());
+                axis.rotateY(rot.y());
+                axis.rotateZ(rot.z());
+                axis.translateXYZ(shift.x(), shift.y(), shift.z()+ztarget*10);
                 Constants.shifts[i][j] = shift;
                 Constants.rotations[i][j] = rot;
+                Constants.axes[i][j] = axis;
             }
         }
          
