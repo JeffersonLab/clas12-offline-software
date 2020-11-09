@@ -30,6 +30,10 @@ public class Surface implements Comparable<Surface> {
     private double error;
     private int layer;
     private int sector;
+    // this is for multiple scattering estimates in track 
+    private double _l_over_X0;
+    //this is for energy loss
+    private double _Z_over_A_times_l;
     
     public Surface(Plane3D plane3d, Point3D refrPoint, Point3D c1, Point3D c2) {
         type = Type.PLANEWITHPOINT;
@@ -118,6 +122,34 @@ public class Surface implements Comparable<Surface> {
      */
     public void setSector(int sector) {
         this.sector = sector;
+    }
+
+    /**
+     * @return  _l_over_X0
+     */
+    public double getl_over_X0() {
+        return _l_over_X0;
+    }
+
+    /**
+     * @param l_over_X0 the l_over_X0 to set
+     */
+    public void setl_over_X0(double l_over_X0) {
+        this._l_over_X0 = l_over_X0;
+    }
+
+    /**
+     * @return the _Z_over_A_times_l
+     */
+    public double getZ_over_A_times_l() {
+        return _Z_over_A_times_l;
+    }
+
+    /**
+     * @param _Z_over_A_times_l the _Z_over_A_times_l to set
+     */
+    public void setZ_over_A_times_l(double _Z_over_A_times_l) {
+        this._Z_over_A_times_l = _Z_over_A_times_l;
     }
     public Surface(Cylindrical3D cylinder3d, Arc3D refArc, 
             Point3D endPoint1, Point3D endPoint2) {

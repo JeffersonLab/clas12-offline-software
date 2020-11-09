@@ -9,6 +9,7 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Line3D;
 import Jama.Matrix;
+import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.clas.tracking.kalmanfilter.helical.MeasVecs.MeasVec;
 import org.jlab.clas.tracking.trackrep.Helix;
@@ -369,23 +370,13 @@ public class StateVecs {
         Matrix Cpropagated = FT.times(icovMat.covMat).times(F);
         if (Cpropagated != null) {
             CovMat fCov = new CovMat(f);
-            fCov.covMat = Cpropagated.plus(this.Q(iVec, f - i));
+            fCov.covMat = Cpropagated.plus(this.Q(iVec, mv, f - i));
             //CovMat = fCov;
             this.trackCov.put(f, fCov);
         }
     }
-    private double get_t_ov_X0(double radius) {
-        double value = 0;
-        return value;
-    }
-
-    private double detMat_Z_ov_A_timesThickn(double radius) {
-        double value = 0;
-        return value;
-    }
-
-
-    private Matrix Q(StateVec iVec, int dir) {
+    
+    private Matrix Q(StateVec iVec, MeasVec mVec, int dir) {
 
         Matrix Q = new Matrix(new double[][]{
             {0, 0, 0, 0, 0},
@@ -396,7 +387,7 @@ public class StateVecs {
         });
 
         // if (iVec.k % 2 == 1 && dir > 0) {
-        if (dir >99999990 ) {
+        if (dir >0 ) {
             Vector3D trkDir = this.P(iVec.k).asUnit();
             Vector3D trkPos = this.X(iVec.k);
             double x = trkPos.x();
@@ -411,14 +402,18 @@ public class StateVecs {
             double pt = Math.abs(1. / iVec.kappa);
             double pz = pt * iVec.tanL;
             double p = Math.sqrt(pt * pt + pz * pz);
-
-            //double t_ov_X0 = 2. * 0.32 / Constants.SILICONRADLEN; //path length in radiation length units = t/X0 [true path length/ X0] ; Si radiation length = 9.36 cm
-            double t_ov_X0 = this.get_t_ov_X0(Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)); //System.out.println(Math.log(t_ov_X0)/9.+" rad "+Math.sqrt(iVec.x*iVec.x+iVec.y*iVec.y)+" t/x0 "+t_ov_X0);
-            double mass = MassHypothesis(2);   // assume given mass hypothesis (2=pion)
+             double sctRMS = 0;
+            double t_ov_X0 = mVec.l_over_X0;
+            double mass = piMass;   // assume given mass hypothesis 
             double beta = p / Math.sqrt(p * p + mass * mass); // use particle momentum
-            double pathLength = t_ov_X0 / cosEntranceAngle;
-            double sctRMS = (0.00141 / (beta * p)) * Math.sqrt(pathLength) * (1 + Math.log10(pathLength)/9.); // Highland-Lynch-Dahl formula
-
+            t_ov_X0 = t_ov_X0 / cosEntranceAngle;
+            if(t_ov_X0>0) {
+            // Highland-Lynch-Dahl formula
+                sctRMS = (0.136/(beta*PhysicsConstants.speedOfLight()*p))*Math.sqrt(t_ov_X0)*
+                    (1 + 0.038 * Math.log(t_ov_X0));
+             //sctRMS = ((0.141)/(beta*PhysicsConstants.speedOfLight()*p))*Math.sqrt(t_ov_X0)*
+             //       (1 + Math.log(t_ov_X0)/9.);
+            }
             Q = new Matrix(new double[][]{
                 {0, 0, 0, 0, 0},
                 {0, sctRMS*sctRMS * (1 + iVec.tanL * iVec.tanL), 0, 0, 0},
@@ -624,32 +619,12 @@ public class StateVecs {
             this.alpha = 1. / (lightVel * Math.abs(b[2]));
         }
     }
-
-    //public String massHypo = "pion";
-    public double MassHypothesis(int H) {
-        double piMass = 0.13957018;
-        double KMass = 0.493677;
-        double muMass = 0.105658369;
-        double eMass = 0.000510998;
-        double pMass = 0.938272029;
-        double value = piMass; //default
-        if (H == 4) {
-            value = pMass;
-        }
-        if (H == 1) {
-            value = eMass;
-        }
-        if (H == 2) {
-            value = piMass;
-        }
-        if (H == 3) {
-            value = KMass;
-        }
-        if (H == 0) {
-            value = muMass;
-        }
-        return value;
-    }
+    double piMass = 0.13957018;
+    double KMass = 0.493677;
+    double muMass = 0.105658369;
+    double eMass = 0.000510998;
+    double pMass = 0.938272029;
+    
 
     public Vector3D P(int kf) {
         if (this.trackTraj.get(kf) != null) {
