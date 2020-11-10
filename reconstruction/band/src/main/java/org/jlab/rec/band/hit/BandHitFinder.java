@@ -268,7 +268,7 @@ public class BandHitFinder {
 					xposHit = xpos_tdc;
 
 					Double[] globPos = Parameters.barGeo.get( Integer.valueOf(barKey) );
-					//xposHit += globPos[0]; -- TURN OFF FOR MC??
+					xposHit += globPos[0];
 					yposHit = globPos[1];
 					zposHit = globPos[2];
 					xposHitUnc = 0.5 * CalibrationConstantsLoader.TDC_VEFF.get( Integer.valueOf(barKey) ) * 0.3; // Estimation of error, not perfect
