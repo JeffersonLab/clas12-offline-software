@@ -98,7 +98,6 @@ public class TruthMatch extends ReconstructionEngine {
 //            System.out.println("**** CND clusters have non 0 size, while the number of hits is 0 ****");
 //            System.out.println("Size of clusters is " + cndClusters.size());
 //        }
-
         /**
          * Getting CTOF Hits and Clusters
          */
@@ -109,7 +108,6 @@ public class TruthMatch extends ReconstructionEngine {
 //            System.out.println("************************************** CTOF clusters have non 0 size, while the number of hits is 0 ****");
 //            System.out.println("Size of clusters is " + ctofClusters.size());
 //        }
-
         /**
          * Matchingg clusters to MCParticles
          */
@@ -376,7 +374,7 @@ public class TruthMatch extends ReconstructionEngine {
                     && hit.detector != (byte) DetectorType.CND.getDetectorId() && hit.detector != (byte) DetectorType.CTOF.getDetectorId()
                     && mcp.get((short) tid) == null) {
                 continue;
-            } else if ( mcp.containsKey((short) (hit.otid)) && mcp.get((short) (hit.otid)).pid != 22 && mcp.get((short) (hit.otid)).pid != 2112) {
+            } else if (mcp.containsKey((short) (hit.otid)) && mcp.get((short) (hit.otid)).pid != 22 && mcp.get((short) (hit.otid)).pid != 2112) {
                 continue;
             }
 
@@ -549,7 +547,7 @@ public class TruthMatch extends ReconstructionEngine {
          */
         if ((event.hasBank("CND::hits") == false) || (event.hasBank("CND::clusters") == false)
                 || (event.hasBank("REC::Scintillator") == false)) {
-           // System.out.println("There is No CND cluster or there is No CND::hit or there is no REC::Scintillator bank present");
+            // System.out.println("There is No CND cluster or there is No CND::hit or there is no REC::Scintillator bank present");
             return null;
         }
 
@@ -575,11 +573,11 @@ public class TruthMatch extends ReconstructionEngine {
             RecHit curHit = new RecHit();
 
             /**
-             * The following line is *WRONG*, variable *id* is not correct, instead we should use indexLadc(tdc)
-             * *** curHit.id = hitsBank.getShort("id", ihit) - 1;   // -1, as id start from 1***
+             * The following line is *WRONG*, variable *id* is not correct,
+             * instead we should use indexLadc(tdc) *** curHit.id =
+             * hitsBank.getShort("id", ihit) - 1; // -1, as id start from 1***
              */
-                        
-            curHit.id = (int)hitsBank.getShort("indexLtdc", ihit)/2;   // We should devide to 2, as each MC::True hit is digitized into two ADC/TDC hits.
+            curHit.id = (int) hitsBank.getShort("indexLtdc", ihit) / 2;   // We should devide to 2, as each MC::True hit is digitized into two ADC/TDC hits.
             curHit.cid = (short) (hitsBank.getShort("clusterid", ihit) - 1);  // -1 for starting from 0
             if (curHit.cid == -2 || !mchitsInCND.containsKey(curHit.id)) {
                 continue; // The hit is not part of any cluster, or the hit it's corresponding MC hit is ignored
@@ -641,17 +639,16 @@ public class TruthMatch extends ReconstructionEngine {
         for (int ihit = 0; ihit < hitsBank.rows(); ihit++) {
             RecHit curHit = new RecHit();
 
-            
             /**
-             * The following line is *WRONG*, variable *id* is not correct, instead we should use indexLadc(tdc)
-             * curHit.id = hitsBank.getShort("id", ihit) - 1;   // -1, as id starts from 1
+             * The following line is *WRONG*, variable *id* is not correct,
+             * instead we should use indexLadc(tdc) curHit.id =
+             * hitsBank.getShort("id", ihit) - 1; // -1, as id starts from 1
              */
-                        
-            curHit.id = (int)hitsBank.getShort("tdc_idx1", ihit);
-                        
+            curHit.id = (int) hitsBank.getShort("tdc_idx1", ihit) / 2;   // We should devide to 2, as each MC::True hit is digitized into two ADC/TDC hits.
+
             curHit.cid = (short) (hitsBank.getShort("clusterid", ihit) - 1);  // -1 for starting from 0
             if (curHit.cid == -1 || !mchitsInCTOF.containsKey(curHit.id)) {
-                
+
                 //System.out.println("Continuing!!!! The hit id is " + curHit.id);
                 continue; // The hit is not part of any cluster, or the hit it's corresponding MC hit is ignored
             }
@@ -667,6 +664,52 @@ public class TruthMatch extends ReconstructionEngine {
         }
 
         //System.out.println("The size of CTOFHits is " + recHits.keySet().size());
+        return recHits;
+    }
+
+    Map< Short, List<RecHit>> getBSTHits(DataEvent event, Map<Integer, MCHit> mchitsInBST) {
+
+        Map< Short, List<RecHit>> recHits = new HashMap<>();
+
+        if (mchitsInBST == null) {
+            /**
+             * If no MC hits present in the CTOF, then we stop here! no need to
+             * collect hits, as wee need only hits that are matched to an MChit
+             */
+            //System.out.println("No MC hits in CTOF");
+            return recHits;
+        }
+
+        /**
+         * Check if three necessary banks exist otherwise will return null
+         */
+        if ((event.hasBank("BSTRec::Hits") == false) || (event.hasBank("BSTRec::Clusters") == false) || (event.hasBank("REC::Track") == false)) {
+            //System.out.println("There is No BSTRec::clusters bank, or there is No BSTRec::Hits bank, or there is no REC::Track bank present");
+            return null;
+        }
+
+        Map<Short, Short> clId2Pindex = new HashMap<>();
+        DataBank RecTrk = event.getBank("REC::Track");
+
+        for (int iTrk = 0; iTrk < RecTrk.rows(); iTrk++) {
+
+            // Rec scintillator has different detectors in it, so we want only CTOF responces in this case
+            if (RecTrk.getByte("detector", iTrk) != (byte) DetectorType.BST.getDetectorId()) {
+                continue;
+            }
+
+            Short pindex = RecTrk.getShort("pindex", iTrk);
+            Short index = RecTrk.getShort("index", iTrk);
+
+            clId2Pindex.put(index, pindex);
+        }
+
+        DataBank hitsBank = event.getBank("BSTRec::hits");
+        
+        for( int ihit = 0; ihit < hitsBank.rows(); ihit++ ){
+            
+        }
+        
         return recHits;
     }
 
