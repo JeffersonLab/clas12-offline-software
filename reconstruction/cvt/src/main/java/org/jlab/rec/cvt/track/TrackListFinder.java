@@ -9,6 +9,7 @@ import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.Constants;
+import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.trajectory.Trajectory;
 import org.jlab.rec.cvt.trajectory.TrajectoryFinder;
@@ -26,7 +27,7 @@ public class TrackListFinder {
      * @return the list of selected tracks
      */
     public List<Track> getTracks(List<Track> cands, 
-            org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo,
+            org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo,
             CTOFGeant4Factory ctof_geo, Detector cnd_geo,
             Swim bstSwim) {
         List<Track> tracks = new ArrayList<Track>();
@@ -161,7 +162,7 @@ public class TrackListFinder {
     		for( Cross c : t ) {
 
           // do not check on BMTC
-          if( c.get_DetectorType().equalsIgnoreCase("C") == true ) continue;
+          if( c.get_DetectorType()==BMTType.C == true ) continue;
 
     			if( track.contains(c) ) { N++;  }
     		}

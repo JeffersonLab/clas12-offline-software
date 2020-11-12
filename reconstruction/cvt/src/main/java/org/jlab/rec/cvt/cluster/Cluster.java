@@ -139,7 +139,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
      * (energy-weighted) value, the energy-weighted phi for Z detectors and the
      * energy-weighted z for C detectors
      */
-    public void calc_CentroidParams(org.jlab.rec.cvt.bmt.Geometry geo) {
+    public void calc_CentroidParams(org.jlab.rec.cvt.bmt.BMTGeometry geo) {
         // instantiation of variables
         double stripNumCent = 0;		// cluster Lorentz-angle-corrected energy-weighted strip = centroid
         double stripNumCent0 = 0;		// cluster uncorrected energy-weighted strip = centroid

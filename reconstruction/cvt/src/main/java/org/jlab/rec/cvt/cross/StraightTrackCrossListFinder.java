@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.bmt.Constants;
 import org.jlab.rec.cvt.fit.LineFitPars;
 import org.jlab.rec.cvt.fit.LineFitter;
@@ -262,7 +263,7 @@ public class StraightTrackCrossListFinder {
      */
     public CrossList findCosmicsCandidateCrossLists(List<ArrayList<Cross>> crosses,
             org.jlab.rec.cvt.svt.Geometry svt_geo,
-            org.jlab.rec.cvt.bmt.Geometry bmt_geo, int NbSVTRegions) {
+            org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, int NbSVTRegions) {
         // start finding svt crosses
         ArrayList<Cross> svt_crosses = crosses.get(0);
         // if there are no svt crosses then return - there is no track
@@ -349,7 +350,7 @@ public class StraightTrackCrossListFinder {
     private List<Double> errY = new ArrayList<Double>();
 
     private ArrayList<Cross> get_XYTrajectory(List<Cross> crosses, org.jlab.rec.cvt.svt.Geometry svt_geo,
-            org.jlab.rec.cvt.bmt.Geometry bmt_geo, int NbSVTRegions) {
+            org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, int NbSVTRegions) {
 
         ArrayList<Cross> projectedCrosses = new ArrayList<Cross>();
 
@@ -406,7 +407,7 @@ public class StraightTrackCrossListFinder {
      */
     private ArrayList<Cross> get_CalcHitsOnTrackXY(double yxslope,
             double yxinterc, org.jlab.rec.cvt.svt.Geometry svt_geo,
-            org.jlab.rec.cvt.bmt.Geometry bmt_geo, int NbSVTRegions) {
+            org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, int NbSVTRegions) {
 
         ArrayList<Cross> projectedCrosses = new ArrayList<Cross>();
         //Layer 1-8:
@@ -436,7 +437,7 @@ public class StraightTrackCrossListFinder {
                 if (Delt.mag() < org.jlab.rec.cvt.svt.Constants.ACTIVESENWIDTH / 2) {
                     double tX = fac * yxslope + yxinterc;
                     double tY = fac;
-                    Cross cross2D = new Cross("SVT", "", s + 1, (int) (l + 2) / 2, -1); // 2-dimentional cross object corresponding to a point on the trajectory line in the xy plane
+                    Cross cross2D = new Cross("SVT", BMTType.UNDEFINED, s + 1, (int) (l + 2) / 2, -1); // 2-dimentional cross object corresponding to a point on the trajectory line in the xy plane
                     cross2D.set_Point0(new Point3D(tX, tY, 0));
                     projectedCrosses.add(cross2D);
                 }
@@ -450,24 +451,24 @@ public class StraightTrackCrossListFinder {
             this.calcBMT2DPoint(yxslope,
                     yxinterc, org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[r] + org.jlab.rec.cvt.bmt.Constants.hDrift, t);
 
-            Cross cross2D1 = new Cross("BMT", "C", bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[1], t[0]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
+            Cross cross2D1 = new Cross("BMT", BMTType.C, bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[1], t[0]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
             cross2D1.set_Point0(new Point3D(t[0], t[1], 0));
             projectedCrosses.add(cross2D1);
             if (t[3] != t[1] && t[2] != t[0]) {
 
-                Cross cross2D2 = new Cross("BMT", "C", bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[3], t[2]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
+                Cross cross2D2 = new Cross("BMT", BMTType.C, bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[3], t[2]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
                 cross2D2.set_Point0(new Point3D(t[2], t[3], 0));
                 projectedCrosses.add(cross2D2);
             }
             this.calcBMT2DPoint(yxslope,
                     yxinterc, org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[r] + org.jlab.rec.cvt.bmt.Constants.hDrift, t);
 
-            Cross cross2D3 = new Cross("BMT", "Z", bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[1], t[0]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
+            Cross cross2D3 = new Cross("BMT", BMTType.Z, bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[1], t[0]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
             cross2D3.set_Point0(new Point3D(t[0], t[1], 0));
             projectedCrosses.add(cross2D3);
             if (t[3] != t[1] && t[2] != t[0]) {
 
-                Cross cross2D4 = new Cross("BMT", "Z", bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[3], t[2]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
+                Cross cross2D4 = new Cross("BMT", BMTType.Z, bmt_geo.isInSector((r + 1) * 2, Math.atan2(t[3], t[2]), Math.toRadians(Constants.isInSectorJitter)), r + 1, -1);
                 cross2D4.set_Point0(new Point3D(t[2], t[3], 0));
                 projectedCrosses.add(cross2D4);
             }

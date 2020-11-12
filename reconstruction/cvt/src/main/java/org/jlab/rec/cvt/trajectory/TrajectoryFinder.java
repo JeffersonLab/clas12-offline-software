@@ -14,6 +14,7 @@ import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
+import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.hit.FittedHit;
@@ -42,7 +43,7 @@ public class TrajectoryFinder {
      * @return a trajectory object
      */
     public Trajectory findTrajectory(int id, Track trk, 
-                                    org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, 
+                                    org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, 
                                     CTOFGeant4Factory ctof_geo, Detector cnd_geo,
                                     Swim swimmer, String isFinal) {
         Helix helix = trk.get_helix(); 
@@ -170,10 +171,10 @@ public class TrajectoryFinder {
                 }
                 double R = 0;
 
-                if (org.jlab.rec.cvt.bmt.Geometry.getZorC(l + 1-6) == 1) {
+                if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(l + 1-6) == 1) {
                     R = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
                 }
-                if (org.jlab.rec.cvt.bmt.Geometry.getZorC(l + 1-6) == 0) {
+                if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(l + 1-6) == 0) {
                     R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
                 }
 
@@ -314,7 +315,7 @@ public class TrajectoryFinder {
 
     }
 
-    public Trajectory findTrajectory(int id, Ray ray, ArrayList<Cross> candCrossList, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
+    public Trajectory findTrajectory(int id, Ray ray, ArrayList<Cross> candCrossList, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo) {
         Trajectory traj = new Trajectory(ray);
         traj.set_Id(id);
 
@@ -432,7 +433,7 @@ public class TrajectoryFinder {
                         if (this.matchCrossToStateVec(c, stVec, l + 1, c.get_Sector()) == false) {
                             continue;
                         }
-                        if (c.get_DetectorType().equalsIgnoreCase("C")) { //C-detector measuring Z
+                        if (c.get_DetectorType()==BMTType.C) { //C-detector measuring Z
                             //if(traj.isFinal) { // reset the cross only for final trajectory
 
                             c.set_Point(new Point3D(XtrackIntersSurf, YtrackIntersSurf, c.get_Point().z()));
@@ -444,7 +445,7 @@ public class TrajectoryFinder {
                                     stVec, svt_geo, bmt_geo, traj.isFinal);
 
                         }
-                        if (c.get_DetectorType().equalsIgnoreCase("Z")) { //Z-detector measuring phi
+                        if (c.get_DetectorType()==BMTType.Z) { //Z-detector measuring phi
                             //if(traj.isFinal) {
 
                             c.set_Point(new Point3D(c.get_Point().x(), c.get_Point().y(), ZtrackIntersSurf));
@@ -496,8 +497,8 @@ public class TrajectoryFinder {
             if (c.get_Region() != (int) (l / 2) + 1) {
                 value = false;	// reauire same region
             }
-            if (c.get_DetectorType().equalsIgnoreCase("C")) { //C-detector measuring Z
-                if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 1) { //Z-detector measuring phi
+            if (c.get_DetectorType()==BMTType.C) { //C-detector measuring Z
+                if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(layer) == 1) { //Z-detector measuring phi
                     value = false;
                 }
             	
@@ -505,8 +506,8 @@ public class TrajectoryFinder {
                     value = false;
                 }
             }
-            if (c.get_DetectorType().equalsIgnoreCase("Z")) { //Z-detector measuring phi
-                if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 0) { //C-detector 
+            if (c.get_DetectorType()==BMTType.Z) { //Z-detector measuring phi
+                if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(layer) == 0) { //C-detector 
                     value = false;
                 }
                 double deltaXt = Math.sqrt((stVec.x() - c.get_Point().x()) * (stVec.x() - c.get_Point().x()) + (stVec.y() - c.get_Point().y()) * (stVec.y() - c.get_Point().y()));
@@ -527,7 +528,7 @@ public class TrajectoryFinder {
      * @param stVec stateVec
      */
     public void setHitResolParams(String detector, int sector, int layer, Cluster cluster,
-            StateVec stVec, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.Geometry bmt_geo, boolean trajFinal) {
+            StateVec stVec, org.jlab.rec.cvt.svt.Geometry svt_geo, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, boolean trajFinal) {
 
         if (detector.equalsIgnoreCase("SVT") ) {
             double doca2Cls = svt_geo.getDOCAToStrip(sector, layer, cluster.get_Centroid(), new Point3D(stVec.x(), stVec.y(), stVec.z()));
@@ -547,7 +548,7 @@ public class TrajectoryFinder {
             }
         }
         if (detector.equalsIgnoreCase("BMT")) {
-            if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 0) { //C-detector measuring z
+            if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(layer) == 0) { //C-detector measuring z
                 for (FittedHit h1 : cluster) {
                     // calculate the hit residuals
                     double docaToTrk = stVec.z() - h1.get_Strip().get_Z();
@@ -561,7 +562,7 @@ public class TrajectoryFinder {
                     }
                 }
             }
-            if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 1) { //Z-detector measuring phi
+            if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(layer) == 1) { //Z-detector measuring phi
                 // calculate the hit residuals
                 for (FittedHit h1 : cluster) {
                     double StripX = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] * Math.cos(h1.get_Strip().get_Phi());
@@ -582,7 +583,7 @@ public class TrajectoryFinder {
         }
     }
 
-    private double[][][] calc_trackIntersBMT(Ray ray, org.jlab.rec.cvt.bmt.Geometry bmt_geo, int start_layer) {
+    private double[][][] calc_trackIntersBMT(Ray ray, org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, int start_layer) {
         //[l][hemisphere], [0,1,2,3,4]=x,y,z,phi,theta,estimated centroid strip; hemisphere = [1]top or [0]bottom
         double[][][] result = new double[6][2][7];
         for (int l = start_layer - 1; l < 6; l++) {
@@ -740,7 +741,7 @@ public class TrajectoryFinder {
 
     private double[][] getIntersectionTrackWithBMTModules(int l,
             double _yxinterc2, double _yxslope2, double _yzinterc2,
-            double _yzslope2, org.jlab.rec.cvt.bmt.Geometry geo) {
+            double _yzslope2, org.jlab.rec.cvt.bmt.BMTGeometry geo) {
         // array [][][][] =[x][y][z][stripCentroid]
         double[][] inters = new double[2][4];
         double[] inters_top = new double[4];
@@ -756,10 +757,10 @@ public class TrajectoryFinder {
         inters_bottom[3] = Double.NaN;
 
         double R = 0;
-        if (org.jlab.rec.cvt.bmt.Geometry.getZorC(l + 1) == 0) {
+        if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(l + 1) == 0) {
             R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[l / 2] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
         }
-        if (org.jlab.rec.cvt.bmt.Geometry.getZorC(l + 1) == 1) {
+        if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(l + 1) == 1) {
             R = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[l / 2] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
         }
         // solve for intersection of line with cylinder of radius R

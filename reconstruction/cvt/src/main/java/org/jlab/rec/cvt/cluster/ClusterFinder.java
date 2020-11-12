@@ -23,7 +23,7 @@ public class ClusterFinder {
     int nstrip = 1200; // max number of strips
     int nlayr = 6;
     int nsec = 18;
-    public ArrayList<Cluster> findClusters(List<Hit> hits2,org.jlab.rec.cvt.bmt.Geometry geo_bmt) // the number of strips depends on the layer 
+    public ArrayList<Cluster> findClusters(List<Hit> hits2,org.jlab.rec.cvt.bmt.BMTGeometry geo_bmt) // the number of strips depends on the layer 
     {
         ArrayList<Cluster> clusters = new ArrayList<Cluster>();
 

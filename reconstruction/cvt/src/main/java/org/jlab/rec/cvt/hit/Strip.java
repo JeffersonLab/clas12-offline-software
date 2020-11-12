@@ -3,6 +3,7 @@ package org.jlab.rec.cvt.hit;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.cvt.bmt.Constants;
+import org.jlab.rec.cvt.bmt.Geometry;
 
 public class Strip {
 
@@ -136,9 +137,9 @@ public class Strip {
      * @param geo the BMT geometry class Sets the Lorentz corrected phi and
      * strip number for Z detectors, the z position for C detectors
      */
-    public void calc_BMTStripParams(org.jlab.rec.cvt.bmt.Geometry geo, int sector, int layer) {
+    public void calc_BMTStripParams(org.jlab.rec.cvt.bmt.BMTGeometry geo, int sector, int layer) {
 
-        if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 0) { // C-dtectors
+        if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(layer) == 0) { // C-dtectors
             // set z
             double z = geo.CRCStrip_GetZ(layer, this.get_Strip());
             this.set_Z(z);
@@ -146,8 +147,8 @@ public class Strip {
             this.set_ZErr(geo.CRCStrip_GetPitch(layer, this.get_Strip()) / Math.sqrt(12.));
         }
 
-        if (org.jlab.rec.cvt.bmt.Geometry.getZorC(layer) == 1) { // Z-detectors
-            geo.SetLorentzAngle(layer, sector);
+        if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(layer) == 1) { // Z-detectors
+            geo.setLorentzAngle(layer, sector);
             double theMeasuredPhi = geo.CRZStrip_GetPhi(sector, layer, this.get_Strip());
             double theLorentzCorrectedAngle = geo.LorentzAngleCorr(theMeasuredPhi, layer);
             // set the phi 

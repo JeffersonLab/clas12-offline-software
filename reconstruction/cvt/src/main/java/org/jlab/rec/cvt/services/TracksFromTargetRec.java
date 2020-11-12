@@ -17,6 +17,7 @@ import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
+import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
@@ -40,7 +41,7 @@ public class TracksFromTargetRec {
             List<FittedHit> SVThits, List<FittedHit> BMThits, 
             List<Cluster> SVTclusters, List<Cluster> BMTclusters, 
             List<ArrayList<Cross>> crosses,
-            org.jlab.rec.cvt.svt.Geometry SVTGeom, org.jlab.rec.cvt.bmt.Geometry BMTGeom,
+            org.jlab.rec.cvt.svt.Geometry SVTGeom, org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom,
             CTOFGeant4Factory CTOFGeom, Detector CNDGeom,
             RecoBankWriter rbc,
             double shift, 
@@ -64,9 +65,9 @@ public class TracksFromTargetRec {
                 TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
                 seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer); 
                 //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
-                TrackSeeder trseed2 = new TrackSeeder();
-                trseed2.unUsedHitsOnly = true;
-                seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer)); 
+       //         TrackSeeder trseed2 = new TrackSeeder();
+        //        trseed2.unUsedHitsOnly = true;
+        //        seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer)); 
             }
         }
         if(seeds ==null || seeds.size() == 0) {
@@ -190,7 +191,7 @@ public class TracksFromTargetRec {
                 if( c.get_AssociatedTrackID() < 0 ) {
                         c.set_Dir( new Vector3D(0,0,0));
                         c.set_DirErr( new Vector3D(0,0,0));
-                        if( c.get_DetectorType().equalsIgnoreCase("C")) {
+                        if( c.get_DetectorType()==BMTType.C) {
     //        			System.out.println(c + " " + c.get_AssociatedTrackID());
                                 c.set_Point(new Point3D(Double.NaN,Double.NaN,c.get_Point().z()));
     //        			System.out.println(c.get_Point());

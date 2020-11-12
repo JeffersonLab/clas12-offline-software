@@ -38,7 +38,7 @@ import org.jlab.rec.cvt.hit.Hit;
 public class CVTRecNewKF extends ReconstructionEngine {
 
     org.jlab.rec.cvt.svt.Geometry SVTGeom;
-    org.jlab.rec.cvt.bmt.Geometry BMTGeom;
+    org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom;
     CTOFGeant4Factory CTOFGeom;
     Detector          CNDGeom ;
     SVTStripFactory svtIdealStripFactory;
@@ -49,7 +49,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
         super("CVTTracks", "ziegler", "4.0");
         
         SVTGeom = new org.jlab.rec.cvt.svt.Geometry();
-        BMTGeom = new org.jlab.rec.cvt.bmt.Geometry();
+        BMTGeom = new org.jlab.rec.cvt.bmt.BMTGeometry();
         strgtTrksRec = new CosmicTracksRec();
         trksFromTargetRec = new TracksFromTargetRec();
     }

@@ -20,6 +20,7 @@ import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.rec.cvt.bmt.BMTType;
 
 /**
  * Service to return reconstructed TRACKS
@@ -116,7 +117,7 @@ public class RecUtilities {
                 
                 int id = trkcand.get_Crosses().get(c).get_Cluster1().get_Id();
                 double ce = trkcand.get_Crosses().get(c).get_Cluster1().get_Centroid();
-                if (trkcand.get_Crosses().get(c).get_DetectorType().equalsIgnoreCase("Z")) {
+                if (trkcand.get_Crosses().get(c).get_DetectorType()==BMTType.Z) {
                     double x = trkcand.get_Crosses().get(c).get_Point().x();
                     double y = trkcand.get_Crosses().get(c).get_Point().y();
                     double phi = Math.atan2(y,x);
@@ -139,7 +140,7 @@ public class RecUtilities {
                         continue;
                     KFSites.add(meas);
                 }
-                if (trkcand.get_Crosses().get(c).get_DetectorType().equalsIgnoreCase("C")) {
+                if (trkcand.get_Crosses().get(c).get_DetectorType()==BMTType.C) {
                     double z = trkcand.get_Crosses().get(c).get_Point().z();
                     double err = trkcand.get_Crosses().get(c).get_Cluster1().get_ZErr();
                     
@@ -227,7 +228,7 @@ public class RecUtilities {
     
     public void MatchTrack2Traj(Seed trkcand, Map<Integer, 
             org.jlab.clas.tracking.kalmanfilter.helical.KFitter.HitOnTrack> traj, 
-            org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.Geometry bgeo) {
+            org.jlab.rec.cvt.svt.Geometry sgeo, org.jlab.rec.cvt.bmt.BMTGeometry bgeo) {
         
         for (int i = 0; i < trkcand.get_Clusters().size(); i++) { //SVT
             if(trkcand.get_Clusters().get(i).get_Detector()==0) {
@@ -269,7 +270,7 @@ public class RecUtilities {
                 Point3D p = new Point3D(traj.get(layer).x, traj.get(layer).y, traj.get(layer).z);
                 Vector3D v = new Vector3D(traj.get(layer).px, traj.get(layer).py, traj.get(layer).pz).asUnit();
                 trkcand.get_Crosses().get(c).set_Dir(v); 
-                if (trkcand.get_Crosses().get(c).get_DetectorType().equalsIgnoreCase("Z")) {
+                if (trkcand.get_Crosses().get(c).get_DetectorType()==BMTType.Z) {
                     trkcand.get_Crosses().get(c).set_Point(new Point3D(trkcand.get_Crosses().get(c).get_Point().x(),trkcand.get_Crosses().get(c).get_Point().y(),p.z()));
                     double xc = trkcand.get_Crosses().get(c).get_Point().x();
                     double yc = trkcand.get_Crosses().get(c).get_Point().y();
@@ -293,7 +294,7 @@ public class RecUtilities {
 
                     }
                 }
-                if (trkcand.get_Crosses().get(c).get_DetectorType().equalsIgnoreCase("C")) {
+                if (trkcand.get_Crosses().get(c).get_DetectorType()==BMTType.C) {
                     double z = trkcand.get_Crosses().get(c).get_Point().z();
                     double err = trkcand.get_Crosses().get(c).get_Cluster1().get_ZErr();
                     trkcand.get_Crosses().get(c).set_Point(new Point3D(p.x(),p.y(),trkcand.get_Crosses().get(c).get_Point().z()));
@@ -316,7 +317,7 @@ public class RecUtilities {
     }
     
     public Track OutputTrack(Seed seed, org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf,
-            org.jlab.rec.cvt.svt.Geometry SVTGeom, org.jlab.rec.cvt.bmt.Geometry BMTGeom) {
+            org.jlab.rec.cvt.svt.Geometry SVTGeom, org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom) {
         org.jlab.rec.cvt.trajectory.Helix helix = new org.jlab.rec.cvt.trajectory.Helix(kf.KFHelix.getD0(), 
                 kf.KFHelix.getPhi0(), kf.KFHelix.getOmega(), 
                 kf.KFHelix.getZ0(), kf.KFHelix.getTanL());

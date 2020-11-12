@@ -4,7 +4,8 @@ import java.util.*;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import org.jlab.rec.cvt.bmt.Geometry;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
+import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cross.Cross;
 
 /**
@@ -43,7 +44,7 @@ public class MakerCA {
 		if( c.get_Detector().equalsIgnoreCase("SVT") ) 
 			return Math.sqrt(c.get_Point().x()*c.get_Point().x()+c.get_Point().y()*c.get_Point().y());
 		
-		if( c.get_DetectorType().equalsIgnoreCase("Z") )
+		if( c.get_DetectorType()==BMTType.Z )
 			return org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[c.get_Region()-1 ];
 		
 		return org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[c.get_Region()-1 ];
@@ -92,7 +93,7 @@ public class MakerCA {
 		return true;
 	}
 	
-	public void createCells( List<Cross> crs, Geometry bgeom ){
+	public void createCells( List<Cross> crs, BMTGeometry bgeom ){
 		// this function loops over the crosses and looks for pairs that pass the cuts
 		//
 		Collections.sort(crs);

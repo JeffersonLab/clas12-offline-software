@@ -72,7 +72,7 @@ public class HitReader {
      * Edep for gemc, adc for cosmics)
      * @param geo the BMT geometry
      */
-    public void fetch_BMTHits(DataEvent event, ADCConvertor adcConv, org.jlab.rec.cvt.bmt.Geometry geo) {
+    public void fetch_BMTHits(DataEvent event, ADCConvertor adcConv, org.jlab.rec.cvt.bmt.BMTGeometry geo) {
 
         // return if there is no BMT bank
         if (event.hasBank("BMT::adc") == false) {
@@ -204,7 +204,7 @@ public class HitReader {
                 Vector3D Dir = new Vector3D((-EP1.x() + EP2.x()), (-EP1.y() + EP2.y()), (-EP1.z() + EP2.z()));
                 SvtStrip.set_ImplantPoint(EP1); 
                 SvtStrip.set_EndPoint(EP2); 
-                // Geometry implementation using the geometry package:  Charles Platt
+                // BMTGeometry implementation using the geometry package:  Charles Platt
 //                Line3d shiftedStrip   = geo.getStrip(layer[i]-1, sector[i]-1, strip[i]-1);
 //
  //               Vector3d o1            = shiftedStrip.origin();

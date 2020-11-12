@@ -15,6 +15,7 @@ import org.jlab.rec.cvt.trajectory.Helix;
 import org.jlab.rec.cvt.trajectory.StateVec;
 
 import Jama.Matrix;
+import org.jlab.rec.cvt.bmt.BMTType;
 
 public class RecoBankWriter {
 
@@ -387,10 +388,10 @@ public class RecoBankWriter {
                 if(trkcands.get(i).get(j).get_Detector().equalsIgnoreCase("SVT"))
                     a++;
                 if(trkcands.get(i).get(j).get_Detector().equalsIgnoreCase("BMT") 
-                    && trkcands.get(i).get(j).get_DetectorType().equalsIgnoreCase("Z"))
+                    && trkcands.get(i).get(j).get_DetectorType()==BMTType.Z)
                     b++;
                 if(trkcands.get(i).get(j).get_Detector().equalsIgnoreCase("BMT") 
-                    && trkcands.get(i).get(j).get_DetectorType().equalsIgnoreCase("C"))
+                    && trkcands.get(i).get(j).get_DetectorType()==BMTType.C)
                     c++;
             }
             bank.setShort("status", i, (short) ((short) 1000+a*100+b*10+c));

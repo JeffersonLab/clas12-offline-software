@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.geom.prim.Point3D;
-import org.jlab.rec.cvt.bmt.Geometry;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
+import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.svt.Constants;
 
@@ -27,7 +28,7 @@ public class CrossMaker {
      * @return list of crosses for the SVT and BMT
      */
     public ArrayList<ArrayList<Cross>> findCrosses(List<Cluster> clusters, org.jlab.rec.cvt.svt.Geometry svt_geo,
-            org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
+            org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo) {
         // instantiate array of clusters that are sorted by detector (SVT, BMT [C, Z]) and inner/outer layers
         ArrayList<ArrayList<Cluster>> sortedClusters = new ArrayList<ArrayList<Cluster>>();
         // fill the sorted list
@@ -89,7 +90,7 @@ public class CrossMaker {
                         && (inlayerclus.get_MaxStrip() + outlayerclus.get_MaxStrip() < Constants.sumStpNumMax)) { // the intersection is valid
 
                     // define new cross 
-                    Cross this_cross = new Cross("SVT", "", inlayerclus.get_Sector(), inlayerclus.get_Region(), rid++);
+                    Cross this_cross = new Cross("SVT", BMTType.UNDEFINED, inlayerclus.get_Sector(), inlayerclus.get_Region(), rid++);
                     // cluster1 is the inner layer cluster
                     this_cross.set_Cluster1(inlayerclus);
                     // cluster2 is the outer layer cluster
@@ -136,7 +137,7 @@ public class CrossMaker {
     private ArrayList<Cross> findBMTCrosses(
             ArrayList<Cluster> Clayrclus,
             ArrayList<Cluster> Zlayrclus, 
-            org.jlab.rec.cvt.bmt.Geometry bmt_geo) {
+            org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo) {
         //instanciates the list of crosses
         ArrayList<Cross> crosses = new ArrayList<Cross>();
 
@@ -148,7 +149,7 @@ public class CrossMaker {
             }
             // Z detector --> meas phi
             // define new cross 
-            Cross this_cross = new Cross("BMT", "Z", Zlayerclus.get_Sector(), Zlayerclus.get_Region(), pid++);
+            Cross this_cross = new Cross("BMT", BMTType.Z, Zlayerclus.get_Sector(), Zlayerclus.get_Region(), pid++);
             this_cross.set_Id(pid);
             this_cross.set_Cluster1(Zlayerclus); // this is the inner shell
             //the uncorrected x,y position of the Z detector cluster centroid.  This is calculated from the measured strips 
@@ -183,7 +184,7 @@ public class CrossMaker {
             }
             // C detector --> meas z
             // define new cross 
-            Cross this_cross = new Cross("BMT", "C", Clayerclus.get_Sector(), Clayerclus.get_Region(), pid++);
+            Cross this_cross = new Cross("BMT", BMTType.C, Clayerclus.get_Sector(), Clayerclus.get_Region(), pid++);
             this_cross.set_Id(pid);
 
             // measurement of z
@@ -236,11 +237,11 @@ public class CrossMaker {
         // Sorting by layer first:
         for (Cluster theclus : clusters) {
             if (theclus.get_Detector() == 1) {
-                if (Geometry.getZorC(theclus.get_Layer()) == 1) {
+                if (BMTGeometry.getZorC(theclus.get_Layer()) == 1) {
                     bmt_Zlayrclus.add(theclus);
                 }
 
-                if (Geometry.getZorC(theclus.get_Layer()) == 0) {
+                if (BMTGeometry.getZorC(theclus.get_Layer()) == 0) {
                     bmt_Clayrclus.add(theclus);
                 }
 

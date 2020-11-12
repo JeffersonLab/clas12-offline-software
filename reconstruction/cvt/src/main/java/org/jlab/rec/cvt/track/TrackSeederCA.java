@@ -8,6 +8,7 @@ import java.util.List;
 import org.jlab.clas.swimtools.Swim;
 
 import org.jlab.geom.prim.Point3D;
+import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.fit.CircleFitter;
@@ -169,7 +170,7 @@ public class TrackSeederCA {
 
     // create and run the cellular automaton
     public List<Cell> runCAMaker( String plane, int nepochs, ArrayList<Cross> crs, 
-            org.jlab.rec.cvt.bmt.Geometry bgeom, 
+            org.jlab.rec.cvt.bmt.BMTGeometry bgeom, 
             Swim swimmer){
         MakerCA camaker = new MakerCA(false);
         camaker.set_plane( plane );
@@ -192,7 +193,7 @@ public class TrackSeederCA {
     
     public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses, 
     						   org.jlab.rec.cvt.svt.Geometry svt_geo, 
-    						   org.jlab.rec.cvt.bmt.Geometry bmt_geo, 
+    						   org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, 
                                                    Swim swimmer) {
        
         List<Seed> seedlist = new ArrayList<Seed>();
@@ -206,9 +207,9 @@ public class TrackSeederCA {
 //        Collections.sort(crosses);
         
         for(Cross c : bmt_crosses) { 
-            if(c.get_DetectorType().equalsIgnoreCase("Z"))
+            if(c.get_DetectorType()==BMTType.Z)
                 crosses.add(c);
-            if(c.get_DetectorType().equalsIgnoreCase("C")) {
+            if(c.get_DetectorType()==BMTType.C) {
                 bmtC_crosses.get(c.get_Sector()-1).add(c);	
             }
         }
@@ -330,7 +331,7 @@ public class TrackSeederCA {
                                         List<ArrayList<Cross>>xytracks , 
                                         List<ArrayList<Cross>> bmtC_crosses,
                                         org.jlab.rec.cvt.svt.Geometry svt_geo, 
-                                        org.jlab.rec.cvt.bmt.Geometry bmt_geo, 
+                                        org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, 
                                         Swim swimmer) {
       
       List<ArrayList<Cross>> seedCrosses = new ArrayList<ArrayList<Cross>>();

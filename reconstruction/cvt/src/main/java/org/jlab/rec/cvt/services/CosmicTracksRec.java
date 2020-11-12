@@ -31,7 +31,7 @@ public class CosmicTracksRec {
             List<FittedHit> SVThits, List<FittedHit> BMThits, 
             List<Cluster> SVTclusters, List<Cluster> BMTclusters, 
             List<ArrayList<Cross>> crosses,
-            org.jlab.rec.cvt.svt.Geometry SVTGeom, org.jlab.rec.cvt.bmt.Geometry BMTGeom,
+            org.jlab.rec.cvt.svt.Geometry SVTGeom, org.jlab.rec.cvt.bmt.BMTGeometry BMTGeom,
             RecoBankWriter rbc,
             double zShift) {
         // make list of crosses consistent with a track candidate
