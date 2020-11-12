@@ -221,16 +221,35 @@ public class TrackSeeder {
         
         if(bmt_crosses!=null) {
             for(Cross c : bmt_crosses) { 
-                if(c.get_DetectorType()==BMTType.Z && this.unUsedHitsOnly == true)
-                    crosses.add(c);
-                if(c.get_DetectorType()==BMTType.C && this.unUsedHitsOnly == true)
-                    bmtC_crosses.add(c);
+                if(c.get_DetectorType()==BMTType.Z) { 
+                    if(this.unUsedHitsOnly == false) {
+                        crosses.add(c);
+                    } else {
+                        if(this.unUsedHitsOnly == true && c.isInSeed == false) {
+                            crosses.add(c);
+                        }
+                    }
+                }
+                if(c.get_DetectorType()==BMTType.C) {
+                    if(this.unUsedHitsOnly == false) {
+                        bmtC_crosses.add(c);
+                    } else {
+                        if(this.unUsedHitsOnly == true && c.isInSeed == false) {
+                            bmtC_crosses.add(c);
+                        }
+                    }
+                }
             }
         }
         if(bst_crosses!=null) {
             for(Cross c : bst_crosses) { 
-                if(this.unUsedHitsOnly == true)
-                    svt_crosses.add(c);
+                if(this.unUsedHitsOnly == false) {
+                        svt_crosses.add(c);
+                } else {
+                    if(this.unUsedHitsOnly == true && c.isInSeed == false) {
+                        svt_crosses.add(c);
+                    }
+                }
             }
         }
         this.FindSeedCrossList(svt_crosses);
