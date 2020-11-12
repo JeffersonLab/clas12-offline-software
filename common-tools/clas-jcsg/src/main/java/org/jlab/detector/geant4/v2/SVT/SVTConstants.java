@@ -38,6 +38,7 @@ public class SVTConstants
 	// data for alignment shifts
 	private static double[][] SECTORSHIFTDATA = null;
 	private static String filenameSectorShiftData = null;
+        private static double[][][] LAYERSHIFTDATA = null;
 	
 	//private static double[][] LAYERSHIFTDATA = null;
 	//private static String filenameLayerShiftData = null;
@@ -118,6 +119,7 @@ public class SVTConstants
 		cp.loadTable( ccdbPath +"material/box");
 		cp.loadTable( ccdbPath +"material/tube");
 		cp.loadTable( ccdbPath +"alignment");
+		cp.loadTable( ccdbPath +"layeralignment");
                 //shift by target
                 cp.loadTable("/geometry/target");
                 
@@ -378,6 +380,22 @@ public class SVTConstants
                                 SECTORSHIFTDATA[i] = new double[]{ tx, ty, tz, rx, ry, rz, Math.toRadians(ra) };
 
                         }
+                        
+                        LAYERSHIFTDATA = new double[NSECTORS[3]][NLAYERS][];
+                        for( int i = 0; i < (NTOTALSECTORS-NSECTORS[3])*2; i++ )    // layeralignment tables doesn't cover region 4
+                        {
+                                int sector = cp.getInteger(ccdbPath+"layeralignment/sector", i );
+                                int layer  = cp.getInteger(ccdbPath+"layeralignment/layer", i );
+                                double tx  = cp.getDouble(ccdbPath+"layeralignment/deltaX", i );
+                                double ty  = cp.getDouble(ccdbPath+"layeralignment/deltaY", i );
+                                double tz  = cp.getDouble(ccdbPath+"layeralignment/deltaZ", i );
+                                double rx  = cp.getDouble(ccdbPath+"layeralignment/rotX", i );
+                                double ry  = cp.getDouble(ccdbPath+"layeralignment/rotY", i );
+                                double rz  = cp.getDouble(ccdbPath+"layeralignment/rotZ", i );
+                                double ra  = cp.getDouble(ccdbPath+"layeralignment/rotA", i );
+                                LAYERSHIFTDATA[sector-1][layer-1] = new double[]{ tx, ty, tz, rx, ry, rz, ra };
+                        }
+                        
                         
 			if( VERBOSE )
 			{
@@ -832,4 +850,15 @@ public class SVTConstants
 		if( SECTORSHIFTDATA == null ){ System.err.println("error: SVTConstants.getDataAlignmentSectorShift: SECTORSHIFTDATA requested is null"); } // System.exit(-1);
 		return SECTORSHIFTDATA;
 	}
+
+        /**
+         * Returns the layer/sector alignment data
+         * @return
+         */
+        public static double[][][] getLayerSectorAlignmentData() {
+                if(LAYERSHIFTDATA == null ) { System.err.println("error: SVTConstants.getLayerSectorAlignmentData: LAYERSHIFTDATA requested is null"); }
+                return LAYERSHIFTDATA;
+        }
+        
+        
 }
