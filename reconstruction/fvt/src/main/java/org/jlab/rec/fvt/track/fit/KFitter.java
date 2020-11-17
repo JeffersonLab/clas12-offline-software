@@ -1,6 +1,8 @@
 package org.jlab.rec.fvt.track.fit;
 
+import java.util.HashMap;
 import java.util.List;
+
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.rec.fvt.track.fit.StateVecs.CovMat;
 import org.jlab.rec.fvt.track.fit.StateVecs.StateVec;
@@ -34,9 +36,12 @@ public class KFitter {
     Matrix result_inv    = new Matrix();
     Matrix adj           = new Matrix();
 
+    List<Cluster> clusters;
+
     public KFitter(List<Cluster> clusters, int sector, double xVtx, double yVtx, double zVtx,
             double pxVtx, double pyVtx, double pzVtx, int q, Swim swimmer, int c) {
         sv = new StateVecs(swimmer);
+        this.clusters = clusters;
         this.init(clusters, sector, xVtx, yVtx, zVtx, pxVtx, pyVtx, pzVtx, q, c);
     }
 
@@ -62,7 +67,7 @@ public class KFitter {
             interNum = i;
             this.chi2kf = 0;
             if (i > 1) {
-                for (int k = svzLength - 1; k >0; k--) {
+                for (int k = svzLength - 1; k > 0; k--) {
                     if (k >= 1) {
                         sv.transport(sector, k, k - 1, sv.trackTraj.get(k), sv.trackCov.get(k));
                         this.filter(k - 1);
@@ -86,6 +91,47 @@ public class KFitter {
         if (totNumIter == 1) {
             this.finalStateVec = sv.trackTraj.get(svzLength - 1);
             this.finalCovMat = sv.trackCov.get(svzLength - 1);
+        }
+
+        // Do one final pass to get the final chi^2 and the corresponding centroid residuals.
+        // TODO: A default value needs to be set for clusters without a matching track.
+        this.chi2kf = 0;
+        for (int k = svzLength - 1; k > 0; --k) {
+            if (k >= 1) {
+                sv.transport(sector, k, k-1, sv.trackTraj.get(k), sv.trackCov.get(k));
+                this.filter(k - 1);
+            }
+        }
+        for (int k = 0; k < svzLength - 1; ++k) {
+            sv.transport(sector, k, k+1, sv.trackTraj.get(k), sv.trackCov.get(k));
+        }
+
+        for (int li = 1; li <= 6; ++li) {
+            // Get the state vector closest in z to the FMT layer.
+            // NOTE: A simple optimization would be to do this on another for loop with only the
+            //       state vectors, saving the ones closest to the FMT layers to use them later
+            //       instead of looping through them 6 times.
+            int closestSVID = -1;
+            double closestSVDistance = Double.POSITIVE_INFINITY;
+            for (int si = 0; si < sv.trackTraj.size(); ++si) {
+                double svDistance = Math.abs(sv.trackTraj.get(si).z - org.jlab.rec.fmt.Constants.FVT_Zlayer[li-1]);
+                if (svDistance < closestSVDistance) {
+                    closestSVID = si;
+                    closestSVDistance = svDistance;
+                }
+            }
+
+            // Get the state vector's y position in the layer's local coordinates.
+            // TODO: ASSERT THAT THE STATE VECTOR'S X AND Y COORDINATE ARE IN GLOBAL COORDINATES.
+            double sv_yloc = -sv.trackTraj.get(closestSVID).x * Math.sin(org.jlab.rec.fmt.Constants.FVT_Alpha[li-1])
+                    + sv.trackTraj.get(closestSVID).y * Math.cos(org.jlab.rec.fmt.Constants.FVT_Alpha[li-1]);
+
+            // Store the cluster's residual.
+            for (Cluster cl : this.clusters) {
+                if (cl.get_Layer() == li) {
+                    cl.set_CentroidResidual(Math.abs(cl.get_Centroid() - sv_yloc));
+                }
+            }
         }
     }
 
