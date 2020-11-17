@@ -36,8 +36,7 @@ public class SVTConstants
 	private static boolean bLoadedConstants = false; // only load constants once
 	
 	// data for alignment shifts
-	private static double[][] SECTORSHIFTDATA = null;
-	private static String filenameSectorShiftData = null;
+//	private static String filenameSectorShiftData = null;
         private static double[][][] LAYERSHIFTDATA = null;
 	
 	//private static double[][] LAYERSHIFTDATA = null;
@@ -118,7 +117,6 @@ public class SVTConstants
 		cp.loadTable( ccdbPath +"fiducial");
 		cp.loadTable( ccdbPath +"material/box");
 		cp.loadTable( ccdbPath +"material/tube");
-		cp.loadTable( ccdbPath +"alignment");
 		cp.loadTable( ccdbPath +"layeralignment");
                 //shift by target
                 cp.loadTable("/geometry/target");
@@ -360,28 +358,13 @@ public class SVTConstants
                             for( int aSector = 0; aSector < NSECTORS[aRegion]; aSector++ )
                             {
                                 RSI[aRegion][aSector] = convertRegionSector2Index( aRegion, aSector );
-                                System.out.println(" a Region "+aRegion +" aSector "+aSector+" RSI "+RSI[aRegion][aSector] );
+//                                System.out.println(" a Region "+aRegion +" aSector "+aSector+" RSI "+RSI[aRegion][aSector] );
                             }
                         }
 			System.out.println("Reading alignment shifts from database");
 		
-                        SECTORSHIFTDATA = new double[NTOTALSECTORS][];
                         
-                        for( int i = 0; i < NTOTALSECTORS; i++ )
-                        {
-                                double tx = cp.getDouble(ccdbPath+"alignment/tx", i );
-                                double ty = cp.getDouble(ccdbPath+"alignment/ty", i );
-                                double tz = cp.getDouble(ccdbPath+"alignment/tz", i );
-                                double rx = cp.getDouble(ccdbPath+"alignment/rx", i );
-                                double ry = cp.getDouble(ccdbPath+"alignment/ry", i );
-                                double rz = cp.getDouble(ccdbPath+"alignment/rz", i );
-                                double ra = cp.getDouble(ccdbPath+"alignment/ra", i );
-
-                                SECTORSHIFTDATA[i] = new double[]{ tx, ty, tz, rx, ry, rz, Math.toRadians(ra) };
-
-                        }
-                        
-                        LAYERSHIFTDATA = new double[NSECTORS[3]][NLAYERS][];
+                        LAYERSHIFTDATA = new double[NSECTORS[3]][NLAYERS-2][];
                         for( int i = 0; i < (NTOTALSECTORS-NSECTORS[3])*2; i++ )    // layeralignment tables doesn't cover region 4
                         {
                                 int sector = cp.getInteger(ccdbPath+"layeralignment/sector", i );
@@ -395,7 +378,7 @@ public class SVTConstants
                                 double ra  = cp.getDouble(ccdbPath+"layeralignment/rotA", i );
                                 LAYERSHIFTDATA[sector-1][layer-1] = new double[]{ tx, ty, tz, rx, ry, rz, ra };
                         }
-                        
+                        if( VERBOSE ) showLayerShiftData();
                         
 			if( VERBOSE )
 			{
@@ -481,93 +464,41 @@ public class SVTConstants
                        
 		}
 	}
+		
 	
-	
-	/**
-	 * Reads alignment data from CCDB.
-	 * 
-	 * @param cp a DatabaseConstantProvider that has loaded the "alignment" table
-	 */
-	public static synchronized void loadAlignmentShifts( ConstantProvider cp )
-	{
-		System.out.println("reading alignment shifts from database");
-		
-		SECTORSHIFTDATA = new double[NTOTALSECTORS][];
-		//LAYERSHIFTDATA = new double[NTOTALSECTORS*NMODULES][];
-		
-		for( int i = 0; i < NTOTALSECTORS; i++ )
-		{
-			double tx = cp.getDouble(ccdbPath+"alignment/tx", i );
-			double ty = cp.getDouble(ccdbPath+"alignment/ty", i );
-			double tz = cp.getDouble(ccdbPath+"alignment/tz", i );
-			double rx = cp.getDouble(ccdbPath+"alignment/rx", i );
-			double ry = cp.getDouble(ccdbPath+"alignment/ry", i );
-			double rz = cp.getDouble(ccdbPath+"alignment/rz", i );
-			double ra = cp.getDouble(ccdbPath+"alignment/ra", i );
-			
-			SECTORSHIFTDATA[i] = new double[]{ tx, ty, tz, rx, ry, rz, Math.toRadians(ra) };
-			
-			/*double stx = cp.getDouble(ccdbPath+"alignment/sector/tx", i );
-			double sty = cp.getDouble(ccdbPath+"alignment/sector/ty", i );
-			double stz = cp.getDouble(ccdbPath+"alignment/sector/tz", i );
-			double srx = cp.getDouble(ccdbPath+"alignment/sector/rx", i );
-			double sry = cp.getDouble(ccdbPath+"alignment/sector/ry", i );
-			double srz = cp.getDouble(ccdbPath+"alignment/sector/rz", i );
-			double sra = cp.getDouble(ccdbPath+"alignment/sector/ra", i );
-			
-			SECTORSHIFTDATA[i] = new double[]{ tx, ty, tz, rx, ry, rz, Math.toRadians(ra) };
-			
-			for( int j = 0; j < NMODULES; j++ )
-			{
-				double ltx = cp.getDouble(ccdbPath+"alignment/layer/tx", i );
-				double lty = cp.getDouble(ccdbPath+"alignment/layer/ty", i );
-				double ltz = cp.getDouble(ccdbPath+"alignment/layer/tz", i );
-				double lrx = cp.getDouble(ccdbPath+"alignment/layer/rx", i );
-				double lry = cp.getDouble(ccdbPath+"alignment/layer/ry", i );
-				double lrz = cp.getDouble(ccdbPath+"alignment/layer/rz", i );
-				double lra = cp.getDouble(ccdbPath+"alignment/layer/ra", i );
-				
-				SECTORSHIFTDATA[i] = new double[]{ ltx, lty, ltz, lrx, lry, lrz, Math.toRadians(lra) };
-			}*/
-		}
-		//if( VERBOSE ) 
-                    showSectorShiftData();
-	}
-	
-	
-	/**
-	 * Reads alignment data for sectors from the given file.
-	 * The translation and axis-angle rotation data should be of the form { tx, ty, tz, rx, ry, rz, ra }.
-	 * 
-	 * @param aFilename a filename
-	 */
-	public static void loadAlignmentSectorShifts( String aFilename )
-	{
-		filenameSectorShiftData = aFilename;
-		
-		try
-		{
-			SECTORSHIFTDATA = Util.inputTaggedData( filenameSectorShiftData, AlignmentFactory.NSHIFTDATARECLEN ); // 3 translation(x,y,z), 4 rotation(x,y,z,a)
-		}
-		catch( Exception e )
-		{ 
-			e.printStackTrace();
-			System.exit(-1); // trigger fatal error
-		}
-		
-		if( SECTORSHIFTDATA == null )
-		{
-			System.err.println("stop: SHIFTDATA is null after reading file \""+filenameSectorShiftData+"\"");
-			System.exit(-1); 
-		}
-		
-		for( int k = 0; k < NTOTALSECTORS; k++ )
-		{
-			SECTORSHIFTDATA[k][6] = Math.toRadians(SECTORSHIFTDATA[k][6]); // convert shift angle to radians 
-		}
-		
-		if( VERBOSE ) showSectorShiftData();
-	}
+//	/**
+//	 * Reads alignment data for sectors from the given file.
+//	 * The translation and axis-angle rotation data should be of the form { tx, ty, tz, rx, ry, rz, ra }.
+//	 * 
+//	 * @param aFilename a filename
+//	 */
+//	public static void loadAlignmentSectorShifts( String aFilename )
+//	{
+//		filenameSectorShiftData = aFilename;
+//		
+//		try
+//		{
+//			SECTORSHIFTDATA = Util.inputTaggedData( filenameSectorShiftData, AlignmentFactory.NSHIFTDATARECLEN ); // 3 translation(x,y,z), 4 rotation(x,y,z,a)
+//		}
+//		catch( Exception e )
+//		{ 
+//			e.printStackTrace();
+//			System.exit(-1); // trigger fatal error
+//		}
+//		
+//		if( SECTORSHIFTDATA == null )
+//		{
+//			System.err.println("stop: SHIFTDATA is null after reading file \""+filenameSectorShiftData+"\"");
+//			System.exit(-1); 
+//		}
+//		
+//		for( int k = 0; k < NTOTALSECTORS; k++ )
+//		{
+//			SECTORSHIFTDATA[k][6] = Math.toRadians(SECTORSHIFTDATA[k][6]); // convert shift angle to radians 
+//		}
+//		
+//		if( VERBOSE ) showSectorShiftData();
+//	}
 	
 	
 	/*
@@ -608,45 +539,25 @@ public class SVTConstants
 	/**
 	 * Prints alignment shift data for sectors to screen.
 	 */
-	public static void showSectorShiftData()
+	public static void showLayerShiftData()
 	{
-		//System.out.printf("i%8stx%7sty%7stz%7srx%7sry%7srz%7sra\n","","","","","","","");
-		System.out.printf(" i%9stranslation(x,y,z)%19srotation(x,y,z,a)\n","","");
-		for( int i = 0; i < NTOTALSECTORS; i++ )
-		{
-			System.out.printf("%2d", i+1 );
+		System.out.printf(" l%3ss%4stranslation(x,y,z)%9srotation(x,y,z,a)\n","","","");
+		for( int k = 0; k < NLAYERS-2; k++ )
+                {
+                    for( int i = 0; i < NSECTORS[k/2]; i++ )
+                    {
+                        System.out.printf("%2d  %2d", k+1, i+1);
 			for( int d = 0; d < AlignmentFactory.NSHIFTDATARECLEN-1; d++ )
-				System.out.printf(" %8.3f", SECTORSHIFTDATA[i][d] );
-			System.out.printf(" %8.3f", Math.toDegrees(SECTORSHIFTDATA[i][AlignmentFactory.NSHIFTDATARECLEN-1]) );
+				System.out.printf(" %8.3f", LAYERSHIFTDATA[i][k][d] );
+			System.out.printf(" %8.3f", Math.toDegrees(LAYERSHIFTDATA[i][k][AlignmentFactory.NSHIFTDATARECLEN-1]) );
 			System.out.println();
+                    }
 		}
 	}
-	
-	
-	/*
-	 * Prints alignment shift data for layers to screen.
-	 */
-	/*public static void showLayersShiftData()
-	{
-		//System.out.printf("i%8stx%7sty%7stz%7srx%7sry%7srz%7sra\n","","","","","","","");
-		System.out.printf(" i%9stranslation(x,y,z)%19srotation(x,y,z,a)\n","","");
-		for( int i = 0; i < NTOTALSECTORS; i++ )
-		{
-			for( int j = 0; j < NMODULES; j++ )
-			{
-				System.out.printf("%2d", i+1 );
-				for( int d = 0; d < AlignmentFactory.NSHIFTDATARECLEN-1; d++ )
-					System.out.printf(" %8.3f", LAYERSHIFTDATA[i][d] );
-				System.out.printf(" %8.3f", Math.toDegrees(LAYERSHIFTDATA[i][AlignmentFactory.NSHIFTDATARECLEN-1]) );
-				System.out.println();
-			}
-		}
-	}*/
-	
+		
 	
 	/**
-	 * Converts RSF indices to linear index.
-	 * Useful for writing data files.
+	 * Converts RSF indices to linear index.Useful for writing data files.
 	 * 
 	 * @param aRegion an index starting from 0
 	 * @param aSector an index starting from 0
@@ -704,7 +615,7 @@ public class SVTConstants
                 
 	}
 	
-	
+                
 	/**
 	 * Converts linear index to Region and Sector indices.
 	 * For use with data files.
@@ -840,17 +751,6 @@ public class SVTConstants
 	}
 	
 	
-	/**
-	 * Returns the sector alignment data.
-	 * 
-	 * @return double[][] an array of translations and axis-angle rotations of the form { tx, ty, tz, rx, ry, rz, ra }
-	 */
-	public static double[][] getDataAlignmentSectorShift()
-	{
-		if( SECTORSHIFTDATA == null ){ System.err.println("error: SVTConstants.getDataAlignmentSectorShift: SECTORSHIFTDATA requested is null"); } // System.exit(-1);
-		return SECTORSHIFTDATA;
-	}
-
         /**
          * Returns the layer/sector alignment data
          * @return

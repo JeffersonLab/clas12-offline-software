@@ -53,23 +53,6 @@ public class SVTStripFactory
 	}
 	
 	/**
-	 * Constructs a new geometry factory for sensor strips, with alignment shifts applied from the given file.
-	 * Please run {@code SVTConstants.connect() } first.
-	 * 
-	 * @param cp a DatabaseConstantProvider that has loaded the necessary tables
-	 * @param filenameAlignmentShifts a file containing the alignment shifts to be applied
-	 * 
-	 * @see SVTConstants#connect
-	 */
-	public SVTStripFactory( DatabaseConstantProvider cp, String filenameAlignmentShifts )
-	{
-		SVTConstants.load( cp );
-		bShift = true;
-		SVTConstants.loadAlignmentSectorShifts( filenameAlignmentShifts );
-	}
-	
-	
-	/**
 	 * Returns either an ideal or shifted strip, depending on this factory's setup.
 	 * 
 	 * @param aLayer an index starting from 0
