@@ -33,9 +33,9 @@ public class TrajectorySurfaces {
         _DetectorPlanes = aDetectorPlanes;
     }
 
+    // TODO: This should be read from the Geometry service. For now, it's hardcoded.
     // z distances between target center and strips of the different FMT layers.
-    // TODO: This should be read from the Geometry service, currently is hardcoded.
-    double[] FVT_Z = new double[] {26.050, 26.990, 28.280, 29.870, 31.060, 32.250};
+    double[] FVT_Z = new double[] {25.8697, 26.9597, 28.0997, 29.4897, 30.6797, 31.8697};
 
     public void LoadSurfaces(double targetPosition, double targetLength,
             DCGeant4Factory dcDetector,
