@@ -69,20 +69,23 @@ public class DetectorDescriptor implements Comparable<DetectorDescriptor> {
     public final void setType(DetectorType type){
         this.detectorType = type;
     }
-    
+
+    public final void setLayer(int layer) {
+        this.dt_LAYER = layer;
+    }
+
     public final void setCrateSlotChannel(int crate, int slot, int channel){
         this.hw_CRATE   = crate;
         this.hw_SLOT    = slot;
         this.hw_CHANNEL = channel;
     }
-    
+
     public final void setSectorLayerComponent(int sector, int layer, int comp){
         this.dt_SECTOR = sector;
         this.dt_LAYER  = layer;
         this.dt_COMPONENT = comp;
     }
-    
-    
+
     public static int generateHashCode(int s, int l, int c){
         return  ((s<<24)&0xFF000000)|
                 ((l<<16)&0x00FF0000)|(c&0x0000FFFF);
@@ -94,8 +97,7 @@ public class DetectorDescriptor implements Comparable<DetectorDescriptor> {
                 (this.dt_COMPONENT&0x00000FFF);
         return hash;
     }
-    
-    
+   
     
     public void copy(DetectorDescriptor desc){
         this.hw_SLOT    = desc.hw_SLOT;

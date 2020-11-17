@@ -96,6 +96,10 @@ public class CCDBConstantsLoader {
         
         dbprovider.disconnect();
         
+        // target position
+        double ztarget = dbprovider.getDouble("/geometry/target/position", 0);
+        
+        System.out.println(" ................READ TARGET SHIFT "+ztarget+" cm......."); 
       //  dbprovider.show();
         // Getting the Constants
         // 1) pitch info 
@@ -252,14 +256,15 @@ public class CCDBConstantsLoader {
         double eyb = dbprovider.getDouble("/geometry/beam/position/y_error", 0); 
         double err = 0;
         if(Math.sqrt(xb*xb+yb*yb)!=0) err = Math.sqrt((Math.pow(xb*exb,2)+Math.pow(yb*eyb,2))/(xb*xb+yb*yb));
-        org.jlab.rec.cvt.Constants.setXb(xb);
-        org.jlab.rec.cvt.Constants.setYb(yb);
-        org.jlab.rec.cvt.Constants.setRbErr(err);
+        
+        org.jlab.rec.cvt.Constants.setXb(xb*10);
+        org.jlab.rec.cvt.Constants.setYb(yb*10);
+        org.jlab.rec.cvt.Constants.setRbErr(err*10);
+        System.out.println(" ................READ BEAM OFFSET PARAMETERS "+xb+" & "+yb+" cm.......");
         
         // target position
-        double ztarget = dbprovider.getDouble("/geometry/target/position", 0);
         org.jlab.rec.cvt.Constants.setZoffset(ztarget);
-         
+        
         Constants.setCRCRADIUS(CRCRADIUS);
         Constants.setCRZRADIUS(CRZRADIUS);
         Constants.setCRZNSTRIPS(CRZNSTRIPS);

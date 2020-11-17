@@ -102,7 +102,20 @@ public class HelicitySequenceDelayed extends HelicitySequence {
      */
     @Override
     public HelicityBit search(long timestamp) {
-        return this.get(super.searchIndex(timestamp));
+        return this.search(timestamp,0);
+    }
+    
+    /**
+     * Get the delay-corrected state of a TI timestamp by searching the measured
+     * sequence and walking forward, returning HelicityBit.UDF if any errors
+     * along the way.
+     * 
+     * @param timestamp TI-timestamp (i.e. RUN::config.timestamp)
+     * @param offset number of states offset
+     * @return the helicity bit
+     */
+    public HelicityBit search(long timestamp,int offset) {
+        return this.get(super.searchIndex(timestamp)+offset);
     }
 
     /**

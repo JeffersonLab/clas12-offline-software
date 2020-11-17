@@ -11,8 +11,8 @@ import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.jnp.hipo4.io.HipoReader;
 
 /**
- *
  * Manage helicity sequences for multiple run numbers simultaneously.
+ * A wrapper around {@link HelicitySequenceDelayed}
  * 
  * @author baltzell
  */
@@ -21,15 +21,32 @@ public final class HelicitySequenceManager {
     SchemaFactory schema=null;
     private final int delay;
     private int verbosity=1;
+    private boolean flip=false;
     private volatile Map<Integer,HelicitySequenceDelayed> seqMap=new HashMap<>();
     Bank rcfgBank=null;
     
+    public HelicitySequenceManager(int delay,List<String> filenames,boolean flip) {
+        this.flip=flip;
+        this.delay=delay;
+        initialize(filenames);
+    }
+
     public HelicitySequenceManager(int delay,List<String> filenames) {
         this.delay=delay;
         initialize(filenames);
     }
     
+    /**
+     * @param delay number of states delayed 
+     * @param reader HipoReader to initialize from 
+     */
     private HelicitySequenceManager(int delay,HipoReader reader) {
+        this.delay=delay;
+        initialize(reader);
+    }
+    
+    private HelicitySequenceManager(int delay,HipoReader reader,boolean flip) {
+        this.flip=flip;
         this.delay=delay;
         initialize(reader);
     }
@@ -51,37 +68,73 @@ public final class HelicitySequenceManager {
               System.exit(1);
             }
         }
-        return seqMap.get(runno).addState(state);
+        return seqMap.get(runno).addState(this.flip?state.invert():state);
     }
 
+    /**
+     * @param runno run number 
+     * @return sequence for given run number
+     */
     public HelicitySequence getSequence(int runno) {
         if (seqMap.containsKey(runno)) return seqMap.get(runno);
         return null;
     }
 
+    /**
+     * @param runno run number
+     * @param timestamp TI timestamp
+     * @return helicity for given run number and timestamp
+     */
     public HelicityBit search(int runno, long timestamp) {
-        if (seqMap.containsKey(runno)) return seqMap.get(runno).search(timestamp);
+        return this.search(runno,timestamp,0);
+    }
+    
+    /**
+     * @param runno run number
+     * @param timestamp TI timestamp
+     * @param offset number of states offset
+     * @return helicity for given run number and timestamp plus offset
+     */
+    public HelicityBit search(int runno, long timestamp,int offset) {
+        if (seqMap.containsKey(runno)) return seqMap.get(runno).search(timestamp,offset);
         return HelicityBit.UDF;
     }
+   
+    /**
+     * @param event HIPO event
+     * @return helicity for given event
+     */
+    public HelicityBit search(Event event) {
+        return this.search(event,0);
+    }
+
+    /**
+     * @param event HIPO event
+     * @param offset number of states offset
+     * @return helicity for given event plus offset
+     */
+    public HelicityBit search(Event event,int offset) {
+        event.read(this.rcfgBank);
+        if (rcfgBank.getRows()<1) return HelicityBit.UDF;
+        return this.search(rcfgBank.getInt("run",0),rcfgBank.getLong("timestamp",0),offset);
+    }
+
     public HelicityBit predictGenerated(int runno, long timestamp) {
         if (seqMap.containsKey(runno)) return seqMap.get(runno).predictGenerated(timestamp);
         return HelicityBit.UDF;
     }
+
     public HelicityBit searchGenerated(int runno, long timestamp) {
         if (seqMap.containsKey(runno)) return seqMap.get(runno).searchGenerated(timestamp);
         return HelicityBit.UDF;
     }
-    
-    public HelicityBit search(Event event) {
-        event.read(this.rcfgBank);
-        if (rcfgBank.getRows()<1) return HelicityBit.UDF;
-        return this.search(rcfgBank.getInt("run",0),rcfgBank.getLong("timestamp",0));
-    }
+
     public HelicityBit predictGenerated(Event event) {
         event.read(this.rcfgBank);
         if (rcfgBank.getRows()<1) return HelicityBit.UDF;
         return this.predictGenerated(rcfgBank.getInt("run",0),rcfgBank.getLong("timestamp",0));
     }
+
     public HelicityBit searchGenerated(Event event) {
         event.read(this.rcfgBank);
         if (rcfgBank.getRows()<1) return HelicityBit.UDF;
@@ -122,10 +175,6 @@ public final class HelicitySequenceManager {
         }
     }
 
-    /**
-     * Initialize from a list of file names:
-     * @param filenames
-     */ 
     private void initialize(List<String> filenames) {
         for (String filename : filenames) {
             HipoReader reader = new HipoReader();

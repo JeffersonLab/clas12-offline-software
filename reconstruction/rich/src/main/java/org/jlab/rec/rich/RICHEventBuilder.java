@@ -265,6 +265,7 @@ public class RICHEventBuilder{
                 *  disregard central detector tracks
                 */
                 if(idet!=6)continue;
+                if(tr.getSector()!=4)continue;
 
                 for (int j=0; j<rbank.rows(); j++){
                     int jpr = (int) rbank.getShort("pindex",j);
@@ -286,8 +287,8 @@ public class RICHEventBuilder{
                         Vector3d vdir = (new Vector3d(jcx, jcy, jcz)).normalized();
                         tr.addCross(jx, jy, jz, vdir.x, vdir.y, vdir.z);
                         tr.setPath(rbank.getFloat("path", j));
-                        if(debugMode>=1) System.out.format(" --> %7.2f %7.2f %7.2f | %7.2f %7.2f %7.2f -> %7.2f %7.2f %7.2f \n",
-                              jx,jy,jz,jcx,jcy,jcz,vdir.x,vdir.y,vdir.z);
+                        if(debugMode>=1) System.out.format(" --> %7.2f %7.2f %7.2f | %7.2f %7.2f %7.2f -> %7.2f %7.2f %7.2f | path %7.2f \n",
+                              jx,jy,jz,jcx,jcy,jcz,vdir.x,vdir.y,vdir.z,rbank.getFloat("path", j));
                     }else{
                         if(debugMode>=1) System.out.format("\n");
                     }
@@ -380,8 +381,13 @@ public class RICHEventBuilder{
             int index = p.getDetectorHit(richevent.get_ResClus(), DetectorType.RICH, 1, rich_match_cut);
             if(index>=0){
 		// while storing the match, calculates the matched position as middle point between track and hit and path (track last cross plus distance to hit)
-                p.addResponse(richevent.get_ResClu(index), true);
-                richevent.get_ResClu(index).setAssociation(n);
+
+                DetectorResponse res = richevent.get_ResClu(index);
+                double dist = tool.toVector3d(res.getPosition()).distance( tool.toVector3d(p.getLastCross().origin()) );
+                //res.setPath(p.getPathLength()+dist);
+
+                p.addResponse(res, true);
+                res.setAssociation(p.getTrackStatus());
                 if(debugMode>=1)  System.out.println(" --> match found "+index+" for particle "+n); 
             }
 
@@ -462,41 +468,53 @@ public class RICHEventBuilder{
             double CLASbeta = p.getTheoryBeta(CLASpid);
 
             if(debugMode>=1) { 
-                System.out.format(" -->  track    %4d  %4d  ori %s    P  %8.2f    the  %8.2f    time @IP %8.2f \n",p.getTrackIndex(),CLASpid,
-                    tool.toString(p.getLastCross().origin()),p.vector().mag(),theta*RAD,richevent.get_EventTime());
+                System.out.format(" -->  track    %4d  %4d  ori %s    P  %8.2f    the  %8.2f    time @IP %8.2f  path %7.2f\n",p.getTrackIndex(),CLASpid,
+                    tool.toString(p.getLastCross().origin()),p.vector().mag(),theta*RAD,richevent.get_EventTime(),p.getPathLength());
             }
 
             DetectorResponse r = null; 
-            int nresp = 0;
+            DetectorResponse exr = null; 
+            int nr = 0;
+            int nexr = 0;
+            double RICHtime = 0.0;
+            double Match_chi2 = 0.0;
+            int RICHiclu = -1;
             for(DetectorResponse rtest : p.getDetectorResponses()){
                 if(rtest.getDescriptor().getType()==DetectorType.RICH){
                     r = rtest;
-                    nresp++;
+                    RICHtime = richevent.get_EventTime() + r.getPath()/CLASbeta/(PhysicsConstants.speedOfLight());
+                    RICHiclu = r.getHitIndex();
+                    double CLAStime = richevent.get_EventTime() + r.getPath()/CLASbeta/(PhysicsConstants.speedOfLight());
+
+                    if(debugMode>=1)System.out.format(" -->  cluster  %4d   hit %s   path %7.2f  -->  clas  %8.2f  vs rich %8.2f  time\n \n",RICHiclu,
+                         tool.toString(r.getPosition()), r.getPath(), CLAStime, RICHtime);
+
+                    nr++;
                 }
             }
-            if(tool.get_Constants().DO_MIRROR_HADS==1 && nresp==0){ 
-                if(debugMode>=1)System.out.format("EXTRAPOLATED \n");
-                r = extrapolate_RICHResponse(p);
-                if(r!=null) nresp++;
+            
+            if( (nr==1) || (nr==0 && tool.get_Constants().DO_MIRROR_HADS==1) ){ 
+                if(debugMode>=1)System.out.format("EXTRAPOLATED with nresp %d \n",nr);
+                exr = extrapolate_RICHResponse(p, r);
+                if(exr!=null) nexr++;
             }
 
             // ATT: define the response tratment in special cases
-            if(nresp==0){if(debugMode>=1)System.out.format("No RICH intersection for particle %8.2f \n",theta*RAD); continue;}
-            if(nresp>1){if(debugMode>=1)System.out.format("Too many RICH responses for particle \n"); continue;}
+            if(nexr==0){if(debugMode>=1)System.out.format("No RICH intersection for particle with nresp %d and theta %8.2f \n",nr,theta*RAD); continue;}
+            if(nr==1)Match_chi2 = 2*exr.getMatchedDistance()/tool.get_Constants().RICH_HITMATCH_RMS;
 
-            // ATT: time taken at the RICH matching point
-            double CLAStime = richevent.get_EventTime() + r.getPath()/CLASbeta/(PhysicsConstants.speedOfLight());
+            // ATT: time taken at the RICH extrapolated point
+            double CLAStime = richevent.get_EventTime() + exr.getPath()/CLASbeta/(PhysicsConstants.speedOfLight());
             //double CLAStime = richevent.get_EventTime() + p.getPathLength()/CLASbeta/(PhysicsConstants.speedOfLight());
 
-            if(debugMode>=1) { 
-                System.out.format(" -->  response  %4d   hit %s   path %7.2f  -->  clas  %8.2f  vs rich %8.2f  time\n \n",r.getHitIndex(),
-                    tool.toString(r.getPosition()), r.getPath(), CLAStime, r.getTime());
-            }
+            if(debugMode>=1)System.out.format(" -->  intersec  %4d   hit %s   path %7.2f  -->  time clas %7.2f vs rich %8.2f  chi2 %7.2f \n \n",RICHiclu,
+                    tool.toString(exr.getPosition()), exr.getPath(), CLAStime, RICHtime, Match_chi2);
 
-            RICHParticle richhadron = new RICHParticle(hindex, p.getTrackStatus(), r.getHitIndex(), p.vector().mag(), CLASpid, tool);
+            RICHParticle richhadron = new RICHParticle(hindex, p.getTrackStatus(), RICHiclu, p.vector().mag(), CLASpid, tool);
             richhadron.traced.set_time((float) CLAStime);
-            richhadron.set_meas_time(r.getTime());
-            if(!richhadron.set_points(p.getLastCross().origin(), p.getLastCross().end(), r.getPosition(), r.getStatus(), tool) ){
+            richhadron.traced.set_machi2(Match_chi2);
+            richhadron.set_meas_time(exr.getTime());
+            if(!richhadron.set_points(p.getLastCross().origin(), p.getLastCross().end(), exr.getPosition(), exr.getStatus(), tool) ){
                  if(debugMode>=1)System.out.println(" ERROR: no MAPMT interesection found for hadron \n"); 
                  continue;
             }
@@ -518,7 +536,7 @@ public class RICHEventBuilder{
 	    if(debugMode>=1){
                 System.out.format("  ------------------- \n");  
                 System.out.format("  Hadron  %4d  id %4d  from part %4d  and clu  %4d  CLAS eve %7d  pid %5d \n ", hindex, richhadron.get_id(), 
-                                     p.getTrackStatus(), r.getHitIndex(), richevent.get_EventID(), CLASpid);
+                                     p.getTrackStatus(), RICHiclu, richevent.get_EventID(), CLASpid);
                 System.out.format("  ------------------- \n");  
 
                 richhadron.show();
@@ -569,6 +587,8 @@ public class RICHEventBuilder{
                 photon.set_points(richhadron, tool.toVector3d(RichHits.get(k).getPosition()));
                 photon.set_meas_time(RichHits.get(k).getTime());
                 photon.set_start_time(richhadron.get_start_time());
+                RICHHit hit = richevent.get_Hit( RichHits.get(k).getHitIndex() );
+                photon.set_PixelProp(hit, tool);
                         
                 richevent.add_Photon(photon);
 
@@ -590,9 +610,15 @@ public class RICHEventBuilder{
         if(tool.get_Constants().DO_ANALYTIC==1){
 
             richevent.analyze_Photons();
+            richevent.select_Photons(tool.get_Constants(), 0);
 
             for(RICHParticle richhadron : richevent.get_Hadrons()){
-                richevent.get_pid(richhadron,0); 
+                if (richhadron.get_Status()==1){
+                    richevent.get_ChMean(richhadron,0); 
+                    richevent.get_pid(richhadron,0); 
+                }else{
+                    if(debugMode>=1)System.out.format(" Hadron pointing to mirror, skip analytic analysis \n");
+                }
             }
 
         }
@@ -612,23 +638,23 @@ public class RICHEventBuilder{
             int trials = tool.get_Constants().THROW_PHOTON_NUMBER;
 
             if(tool.get_Constants().THROW_ELECTRONS==1){
-                double chel = richhadron.get_changle(0);
+                double chel = richhadron.get_changle(0,0);
                 if(chel>0)richevent.throw_Photons(richhadron, trials, chel, 5, tool);
             }
 
             if(tool.get_Constants().THROW_PIONS==1){
-                double chpi = richhadron.get_changle(1);
+                double chpi = richhadron.get_changle(1,0);
                 if(chpi>0)richevent.throw_Photons(richhadron, trials, chpi, 1, tool);
             }
 
 
             if(tool.get_Constants().THROW_KAONS==1){
-                double chk = richhadron.get_changle(2);
+                double chk = richhadron.get_changle(2,0);
                 if(chk>0)richevent.throw_Photons(richhadron, trials, chk, 2, tool);
             }
 
             if(tool.get_Constants().THROW_PROTONS==1){
-                double chpr = richhadron.get_changle(3);
+                double chpr = richhadron.get_changle(3,0);
                 if(chpr>0)richevent.throw_Photons(richhadron, trials, chpr, 3, tool);
             }
 
@@ -640,8 +666,10 @@ public class RICHEventBuilder{
             richevent.associate_Throws(tool);
 
             richevent.trace_Photons(tool);
+            richevent.select_Photons(tool.get_Constants(), 1);
             
             for(RICHParticle richhadron : richevent.get_Hadrons()){
+                richevent.get_ChMean(richhadron,1); 
                 richevent.get_pid(richhadron,1); 
             }
 
@@ -652,32 +680,53 @@ public class RICHEventBuilder{
 
 
     // ----------------
-    public DetectorResponse extrapolate_RICHResponse(DetectorParticle p){
+    public DetectorResponse extrapolate_RICHResponse(DetectorParticle p, DetectorResponse r){
     // ----------------
 
         int debugMode = 0;
+        int imir=0;
 
-        DetectorResponse r = new DetectorResponse(4, 18, 1);
+        DetectorResponse exr = new DetectorResponse(4, 18, 1);
 
-        Vector3d extra = tool.find_intersection_UpperHalf_RICH( p.getLastCross());
+        Point3D extra = tool.toPoint3D( tool.find_intersection_MAPMT( p.getLastCross()) );
         if(extra==null){
-            extra = tool.find_intersection_MAPMT( p.getLastCross());
+            imir=1;
+            extra = tool.toPoint3D( tool.find_intersection_UpperHalf_RICH( p.getLastCross()) );
         }
 
         if(extra==null) return null;
 
-        double dist = extra.distance( tool.toVector3d(p.getLastCross().origin()) );
+        double extrapath = extra.distance( p.getLastCross().origin() );
+        
+        Point3D rpos = new Point3D(0.0, 0.0, 0.0);
+        Point3D rmatch = new Point3D(0.0, 0.0, 0.0);
+        if(r!=null){
+            
+            rpos = r.getPosition().toPoint3D(); 
+            Line3D  lmatch = new Line3D(rpos, extra);
+            rmatch = lmatch.midpoint();
+            exr.setPosition( rpos.x(), rpos.y(), rpos.z() );
+            exr.setMatchPosition( rmatch.x(), rmatch.y(), rmatch.z()); 
+            exr.setStatus(1);
 
-        r.setPosition(extra.x, extra.y, extra.z);
-        r.setPath(p.getPathLength()+dist);
-        r.setStatus(0);
+        }else{
+
+            exr.setPosition( extra.x(), extra.y(), extra.z() );
+            exr.setMatchPosition( extra.x(), extra.y(), extra.z()); 
+            exr.setStatus(0);
+
+        }
+        exr.setPath(p.getPathLength()+extrapath);
 
         int CLASpid = p.getPid();
         if(CLASpid==0)CLASpid = 211;
         double CLASbeta = p.getTheoryBeta(CLASpid);
-        r.setTime( richevent.get_EventTime() + r.getPath()/CLASbeta/(PhysicsConstants.speedOfLight()) );
+        exr.setTime( richevent.get_EventTime() + exr.getPath()/CLASbeta/(PhysicsConstants.speedOfLight()) );
 
-        return r;
+        if(debugMode>0)System.out.format("extrapolate_RICHResponse: %d %d ex %s r %s mach %s  L %7.2f (%7.2f + %7.2f) T %7.2f \n",exr.getStatus(),imir,extra.toStringBrief(2),
+                  rpos.toStringBrief(2),rmatch.toStringBrief(2),exr.getPath(),p.getPathLength(),extrapath,exr.getTime());
+
+        return exr;
     }
 
     // ----------------

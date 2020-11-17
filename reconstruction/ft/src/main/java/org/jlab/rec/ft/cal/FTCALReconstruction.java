@@ -47,14 +47,16 @@ public class FTCALReconstruction {
         return allhits;
     }
     
-    public List<FTCALHit> selectHits(List<FTCALHit> allhits) {
+    public List<FTCALHit> selectHits(List<FTCALHit> allhits, ConstantsManager manager, int run) {
 
         if(debugMode>=1) System.out.println("\nSelecting hits");
         ArrayList<FTCALHit> hits = new ArrayList<FTCALHit>();
         
+        IndexedTable thresholds = manager.getConstants(run, "/calibration/ft/ftcal/thresholds");
+
         for(int i = 0; i < allhits.size(); i++) 
         {
-                if(FTCALHit.passHitSelection(allhits.get(i))) {
+                if(FTCALHit.passHitSelection(allhits.get(i), thresholds)) {
                         hits.add(allhits.get(i));	
                 }
         }	
@@ -74,6 +76,7 @@ public class FTCALReconstruction {
 
         List<FTCALCluster> clusters = new ArrayList();
         
+        IndexedTable   thresholds   = manager.getConstants(run, "/calibration/ft/ftcal/thresholds");
         IndexedTable   clusterTable = manager.getConstants(run, "/calibration/ft/ftcal/cluster");
         
         if(debugMode>=1) System.out.println("\nBuilding clusters");
@@ -82,10 +85,11 @@ public class FTCALReconstruction {
             if(hit.get_ClusIndex()==0)  {                       // this hit is not yet associated with a cluster
                 for(int jclus=0; jclus<clusters.size(); jclus++) {
                     FTCALCluster cluster = clusters.get(jclus);
-                    if(cluster.containsHit(hit, clusterTable)) {
+                    if(cluster.containsHit(hit, thresholds, clusterTable)) {
                         hit.set_ClusIndex(cluster.getID());     // attaching hit to previous cluster 
                         cluster.add(hit);
                         if(debugMode>=1) System.out.println("Attaching hit " + ihit + " to cluster " + cluster.getID());
+                        break;
                     }
                 }
             }

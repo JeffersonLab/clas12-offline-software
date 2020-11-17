@@ -1,3 +1,4 @@
+
 [
     {
         "name": "RUN::config",
@@ -40,11 +41,36 @@
         "name": "RUN::scaler",
         "group": 10000,
         "item": 14,
-        "info": "Scaler information",
+        "info": "Run-integrated, analyzed scalers.",
         "entries": [
-            {"name":"fcupgated",  "type":"F", "info":"Beam charge, integrated from beginning of run, gated (nano-Coulomb)"},
+            {"name":"fcupgated",  "type":"F", "info":"Beam charge, integrated from beginning of run, DAQ-gated (nano-Coulomb)"},
             {"name":"fcup",       "type":"F", "info":"Beam charge, integrated from beginning of run, ungated (nano-Coulomb)"},
-            {"name":"livetime",   "type":"F", "info":"Livetime during one scaler period"}
+            {"name":"livetime",   "type":"F", "info":"DAQ livetime during one scaler period"}
+        ]
+    },
+    { 
+        "name" : "RUN::filter",
+        "group": 10000,
+        "item" : 15,
+        "info" : "Random trigger filter information",
+        "entries":[
+            { "name":"json"    , "type":"B", "info":"json character" }
+        ]
+    },
+    {
+        "name": "HEL::scaler",
+        "group": 10000,
+        "item": 16,
+        "info": "Helicity-gated, analyzed scalers.",
+        "entries": [
+            {"name":"fcupgated",  "type":"F", "info":"Beam charge from Faraday cup, DAQ-gated (nano-Coulomb)"},
+            {"name":"fcup",       "type":"F", "info":"Beam charge from Faraday cup, (nano-Coulomb)"},
+            {"name":"slmgated",   "type":"F", "info":"Beam charge from SLM, DAQ-gated (nano-Coulomb)"},
+            {"name":"slm",        "type":"F", "info":"Beam charge from SLM (nano-Coulomb)"},
+            {"name":"clockgated", "type":"F", "info":"Clock, DAQ-gated"},
+            {"name":"clock",      "type":"F", "info":"Clock"},
+            {"name":"helicity",   "type":"B", "info":"Helicity state, HWP-corrected"},
+            {"name":"helicityRaw","type":"B", "info":"Helicity state"}
         ]
     }
 ]

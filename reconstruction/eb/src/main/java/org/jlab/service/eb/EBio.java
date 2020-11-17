@@ -111,14 +111,16 @@ public class EBio {
                 double tandip = bank.getDouble("tandip", i);
                 double z0 = bank.getDouble("z0", i);
                 double d0 = bank.getDouble("d0", i);
+                double xb = bank.getDouble("xb", i);
+                double yb = bank.getDouble("yb", i);
                 
                 DetectorParticle part = new DetectorParticle();
                 double pz = pt*tandip;
                 double py = pt*Math.sin(phi0);
                 double px = pt*Math.cos(phi0);
                 
-                double vx = d0*Math.cos(phi0);
-                double vy = d0*Math.sin(phi0);
+                double vx = -d0*Math.sin(phi0)+xb;
+                double vy = d0*Math.cos(phi0)+yb;
                 
                 part.vector().setXYZ(px, py, pz);
                 part.vertex().setXYZ(vx, vy, z0);

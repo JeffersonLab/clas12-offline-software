@@ -30,12 +30,18 @@ public class EvioDataEventHandler {
     public EvioDataEventHandler(byte[] buffer, ByteOrder b_order){
         evioBuffer = ByteBuffer.wrap(buffer);
         evioBuffer.order(b_order);
-         try {
-            structure = new EvioCompactStructureHandler(evioBuffer,DataType.BANK);
-            //eventNodes = structure.getChildNodes();
-            eventNodes = structure.getNodes();
-        } catch (EvioException ex) {
-            Logger.getLogger(EvioDataEvent.class.getName()).log(Level.SEVERE, null, ex);
+        if(buffer.length>500*1024){
+            System.out.println("error >>> evio event hadler : buffer size ecceeds 500 kB");
+            structure = null;
+            eventNodes = null;
+        } else {
+            try {
+                structure = new EvioCompactStructureHandler(evioBuffer,DataType.BANK);
+                //eventNodes = structure.getChildNodes();
+                eventNodes = structure.getNodes();
+            } catch (EvioException ex) {
+                Logger.getLogger(EvioDataEvent.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
          //this.list();
     }

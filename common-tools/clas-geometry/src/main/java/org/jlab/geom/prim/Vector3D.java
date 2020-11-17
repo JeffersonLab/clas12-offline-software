@@ -436,10 +436,10 @@ public final class Vector3D implements Transformable, Showable {
         vector.add(A);
         vector.add(B);
         vector.setMag(m);
-        System.out.println(Math.toDegrees(angle));
-        System.out.println(A);
-        System.out.println(B);
-        System.out.println(vector);
+        //System.out.println(Math.toDegrees(angle));
+        //System.out.println(A);
+        //System.out.println(B);
+        //System.out.println(vector);
     }
 
     /**

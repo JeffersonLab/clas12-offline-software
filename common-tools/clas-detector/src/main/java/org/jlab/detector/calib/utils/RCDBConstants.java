@@ -70,7 +70,7 @@ public class RCDBConstants {
     }
     public Time getTime(String key) {
         if (data.containsKey(key)) {
-            if (data.get(key).getValue() instanceof Double) {
+            if (data.get(key).getValue() instanceof Time) {
                 return (Time) data.get(key).getValue();
             }
         }
