@@ -89,7 +89,7 @@ public class CCDBConstantsLoader {
         String[] sn = new String[] {"deltaX", "deltaY", "deltaZ", "rotX", "rotY", "rotZ"};
         double[][] shArr = new double[Constants.FVT_Nlayers][6];
         for (int li = 0; li < Constants.FVT_Nlayers; ++li) {
-            // Get shifts and convert to milimeters.
+            // Get shifts and convert them to centimeters.
             for (int si = 0; si < 3; ++si)
                 shArr[li][si] = fmtShifts.getDoubleValue(sn[si], 0,li+1,0) / 10.;
             // Get rotations and convert to radians.

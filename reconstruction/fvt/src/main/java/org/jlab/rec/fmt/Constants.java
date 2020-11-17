@@ -53,7 +53,7 @@ public class Constants {
     // ----- end cut based cand select
     public static double CIRCLECONFUSION = 1; // cm
 
-    public static synchronized void Load() {
+    public static void Load() {
         if (areConstantsLoaded) return;
 
         FVT_Sidestrips    = (FVT_Nstrips - 2*FVT_Halfstrips)/2;
@@ -130,7 +130,7 @@ public class Constants {
      * @param shArr : Two-dimensional array storing alignment information. Rows define the 6 FMT
      *                layers, and columns are [deltaX, deltaY, deltaZ, rotX, rotY, rotZ].
      */
-    public static synchronized void applyZShifts(double[][] shArr) {
+    public static void applyZShifts(double[][] shArr) {
         for (int li = 0; li < FVT_Nlayers; ++li) {
             FVT_Zlayer[li] += shArr[li][2];
             FVT_Alpha[li]  += shArr[li][5];
@@ -142,9 +142,8 @@ public class Constants {
      * @param shArr : Two-dimensional array storing alignment information. Rows define the 6 FMT
      *                layers, and columns are [deltaX, deltaY, deltaZ, rotX, rotY, rotZ].
      */
-    public static synchronized void applyXYShifts(double[][] shArr) {
+    public static void applyXYShifts(double[][] shArr) {
         // TODO: Only deltaX and deltaY are implemented. rotX and rotY pending!
-
         for (int li = 0; li < FVT_Nlayers; ++li) { // layers
             for (int si = 0; si < FVT_Nstrips; ++si) { // strips
                 for (int ei = 0; ei < 2; ++ei) { // endpoints
