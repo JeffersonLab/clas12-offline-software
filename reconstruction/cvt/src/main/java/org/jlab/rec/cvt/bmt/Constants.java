@@ -13,6 +13,8 @@ public class Constants {
    CRC and CRZ characteristics localize strips in the cylindrical coordinate system. The target center is at the origin. The Z-axis is along the beam axis. 
    The angles are defined with theZ-axis oriented from the accelerator to the beam dump.
      */
+    //CUTS
+    public static int MAXBMTHITS = 700;
     // THE GEOMETRY CONSTANTS
     public static final int NREGIONS = 3;						// 3 regions of MM 
     //public static final int STARTINGLAYR = 5;						// current configuration is 3 SVT + 3BMT (outermost BST ring)

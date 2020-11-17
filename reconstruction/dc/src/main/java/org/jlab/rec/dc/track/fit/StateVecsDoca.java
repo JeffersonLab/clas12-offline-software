@@ -541,7 +541,7 @@ public class StateVecsDoca {
 
         String printInfo() {
             return this.k+"] = "+(float)this.x+", "+(float)this.y+", "+(float)this.z+", "
-                    +(float)this.tx+", "+(float)this.ty+", "+(float)this.Q+" B = "+(float)this.B;
+                    +(float)this.tx+", "+(float)this.ty+", "+(float)1./this.Q+" B = "+(float)this.B;
         }
     }
     /**

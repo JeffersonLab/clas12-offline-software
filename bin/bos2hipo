@@ -1,5 +1,5 @@
-#!/bin/sh -f
+#!/bin/sh
 
-source `dirname $0`/env.sh 
+. `dirname $0`/env.sh 
 
 java -Xms1024m -cp "$CLAS12DIR/lib/clas/*:$CLAS12DIR/lib/plugins/*" org.jlab.io.utils.Bos2HipoEventBank $*

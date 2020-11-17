@@ -36,6 +36,7 @@ public class BANDEngine extends ReconstructionEngine {
 
 	@Override
 		public boolean processDataEvent(DataEvent event) {
+			//System.out.println("**** NEW EVENT ****");
 			// update calibration constants based on run number if changed
 			setRunConditionsParameters(event);
 
@@ -44,7 +45,7 @@ public class BANDEngine extends ReconstructionEngine {
 
 			//1) Search for valid PMT hits based on FADC/TDC for each PMT
 			candidates = HitReader.getBandCandidates(event)	;	
-			// exit if candidates list is empty
+			// exit if candidates list is empty, neither BAND::rawhits nor BAND::hits is filled in this case
 			if(candidates.size()==0 )
 				return true;
 
@@ -52,13 +53,8 @@ public class BANDEngine extends ReconstructionEngine {
 			BandHitFinder hitFinder = new BandHitFinder();
 			hits = hitFinder.findGoodHits(candidates);
 
-
-			if(hits.size()>0){
-				//event.show();
-				//System.out.println("in process event ");
-				RecoBankWriter.appendBANDBanks(event,hits);
-
-			}
+			//3) Write candidates and hits to the banks. 
+			RecoBankWriter.appendBANDBanks(event,candidates,hits);
 
 
 			return true;
@@ -76,8 +72,13 @@ public class BANDEngine extends ReconstructionEngine {
 				"/calibration/band/paddle_offsets_tdc",
 				"/calibration/band/layer_offsets_tdc",
 				"/calibration/band/attenuation_lengths",
-				"/calibration/band/time_walk_corr_left",
-				"/calibration/band/time_walk_corr_right"
+				"/calibration/band/time_walk_amp_left",
+				"/calibration/band/time_walk_amp_right",
+				"/calibration/band/global_offsets",
+				"/calibration/band/cuts",
+				"/calibration/band/energy_conversion"
+				//"/calibration/band/time_walk_corr_left",
+				//"/calibration/band/time_walk_corr_right",
     		};
     
 			requireConstants(Arrays.asList(bandTables));

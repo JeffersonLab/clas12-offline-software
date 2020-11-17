@@ -133,11 +133,11 @@ public class Helix {
 
     //  (x,y) coordinates of the dca
     public double xdca() {
-        return this.get_dca() * Math.cos(this.get_phi_at_dca());
+        return -this.get_dca() * Math.sin(this.get_phi_at_dca());
     }
 
     public double ydca() {
-        return this.get_dca() * Math.sin(this.get_phi_at_dca());
+        return this.get_dca() * Math.cos(this.get_phi_at_dca());
     }
 
     public double getArcLength_dca(Point3D refpoint) {
@@ -199,8 +199,10 @@ public class Helix {
 
         double alpha = -newPathLength * omega;
 
-        double x = d0 * charge * Math.sin(phi0) + (charge / Math.abs(omega)) * (Math.sin(phi0) - Math.cos(alpha) * Math.sin(phi0) - Math.sin(alpha) * Math.cos(phi0));
-        double y = -d0 * charge * Math.cos(phi0) - (charge / Math.abs(omega)) * (Math.cos(phi0) + Math.sin(alpha) * Math.sin(phi0) - Math.cos(alpha) * Math.cos(phi0));
+        double x = d0 * charge * Math.sin(phi0) + (charge / Math.abs(omega)) 
+                * (Math.sin(phi0) - Math.cos(alpha) * Math.sin(phi0) - Math.sin(alpha) * Math.cos(phi0));
+        double y = -d0 * charge * Math.cos(phi0) - (charge / Math.abs(omega)) 
+                * (Math.cos(phi0) + Math.sin(alpha) * Math.sin(phi0) - Math.cos(alpha) * Math.cos(phi0));
         double z = z0 + newPathLength * tandip;
 
         return new Point3D(x, y, z);

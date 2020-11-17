@@ -334,6 +334,14 @@ public class CndHitFinder {
 
 			// the following line give the point at which the cnd hit would occur according to the cvt track
 			//Point3D hitCndfromCvt = helices.get(i).get_Helix().getPointAtRadius(radius); 
+			
+			//System.out.print("helices size "+helices.get(i).get_TrkInters().size());			
+			//System.out.println("layer "+lay+ " helice  "+i);
+			ArrayList<Point3D> hitCndfromCvtList = helices.get(i).get_TrkInters().get(lay-1); // middle of the counter
+			
+			if(hitCndfromCvtList.isEmpty())continue; //Check if a layer as a swimmer intersection. If not go to the next track
+			
+
 			Point3D hitCndfromCvt = helices.get(i).get_TrkInters().get(lay-1).get(1); // middle of the counter
 
 			double xj=hitCndfromCvt.x(); // retrieve CndFromCvt hit coordinates
@@ -381,6 +389,8 @@ public class CndHitFinder {
 
 				else {length = helices.get(i).get_TrkInters().get(lay-1).get(0).distance(helices.get(i).get_TrkInters().get(lay-1).get(2));
 				}
+				
+				//System.out.println(length);
 			}
 		}
 		return length; 

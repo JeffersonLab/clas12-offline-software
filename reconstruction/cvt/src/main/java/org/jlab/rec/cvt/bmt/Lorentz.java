@@ -55,17 +55,20 @@ public class Lorentz {
 	}
 
 	
-	public static double linInterp(double x, double x1, double x2, double y1, double y2) {
-		// linear interpolation
-		  // return y = f(x), given x1, y1=f(x1) and x2, y2=f(x2) 
-		  // y = m * ( x - x1 ) + y1
-		  // m = ( y2 - y1)/(x2 - x1)
+	public static double linInterp(double x0, double xa, double xb, double ya, double yb) {
+            double x = x0;
+            if(x>xb)
+                x=xb;
+            if(x<xa)
+                x=xa;
+            double y = (ya + yb)*0.5;
+            if(xb - xa == 0) 
+                return y;
+
+            y = ya*(xb - x)/(xb - xa) + yb*(x - xa)/(xb - xa);
+
+            return y;
 		  
-		  // compute m
-		  double m = (y2 - y1)/(x2 - x1);
-		  
-		  // return
-		  return m * ( x - x1 ) + y1;
 	}
 	
 	public static int getBin( double e, double b){

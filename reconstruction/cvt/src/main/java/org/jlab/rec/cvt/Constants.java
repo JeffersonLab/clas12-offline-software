@@ -250,12 +250,12 @@ public class Constants {
 
     //public static final int CVTCONFIGSTARTREG = 2; // for 3SVT+3BMT
 
-    public static synchronized void Load(boolean isCosmics, boolean isSVTonly, double SolenoidScale) {
+    public static synchronized void Load(boolean isCosmics, boolean isSVTonly) {
         if (areConstantsLoaded) {
             return;
         }
 
-        setSolenoidscale(SolenoidScale);
+        
         Constants.setCosmicsData(false);
         setSVTOnly(isSVTonly);
 
@@ -264,9 +264,7 @@ public class Constants {
 
         areConstantsLoaded = true;
         System.out.println("CVT constants loaded ? " + areConstantsLoaded);
-
-        if(Math.abs(SolenoidScale)<0.001)
-            Constants.setCosmicsData(true);
+        
     }
 
     public static final boolean isCosmicsData() {

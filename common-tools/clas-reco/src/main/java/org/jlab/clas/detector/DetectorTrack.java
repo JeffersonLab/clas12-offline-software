@@ -1,8 +1,13 @@
 package org.jlab.clas.detector;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.jlab.detector.base.DetectorDescriptor;
 import org.jlab.clas.physics.Vector3;
+import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
 
@@ -37,6 +42,64 @@ public class DetectorTrack implements Comparable {
         public float getBField() { return bField; }
         public float getPathLength() { return pathLength; }
     }
+
+    public class Trajectory {
+
+        private int size=0;
+        private Map < Integer, Map <Integer,TrajectoryPoint> > traj = new LinkedHashMap<>();
+        
+        public void add(int detId,int layId,Line3D traj,float bField,float pathLength) {
+            if (!this.traj.containsKey(detId)) {
+                this.traj.put(detId,new LinkedHashMap<>());
+            }
+            if (this.traj.get(detId).containsKey(layId)) {
+                throw new RuntimeException("Duplicate detector type/layer: "+detId+"/"+layId);
+            }
+            this.traj.get(detId).put(layId,new TrajectoryPoint(detId,layId,traj,bField,pathLength));
+            this.size++;
+        }
+
+        public void add(int detId,int layId,Line3D traj) {
+            this.add(detId,layId,traj,0.0f,-1.0f);
+        }
+
+        public Set<Integer> getDetectors() {
+            return this.traj.keySet();
+        }
+
+        public Set<Integer> getLayers(int detId) {
+            if (traj.containsKey(detId)) {
+                return traj.get(detId).keySet();
+            }
+            return null;
+        }
+        
+        public TrajectoryPoint get(int detId,int layId) {
+            if (this.traj.containsKey(detId)) {
+                if (this.traj.get(detId).containsKey(layId)) {
+                    return this.traj.get(detId).get(layId);
+                }
+            }
+            return null;
+        }
+
+        public TrajectoryPoint get(DetectorDescriptor dd) {
+            return this.get(dd.getType().getDetectorId(),dd.getLayer());
+        }
+
+        public boolean hasDetector(int detId) {
+            return this.traj.containsKey(detId);
+        }
+
+        public boolean hasLayer(int detId,int layId) {
+            if (!this.hasDetector(detId)) return false;
+            return this.traj.get(detId).containsKey(layId);
+        }
+
+        public int size() {
+            return this.size;
+        }
+    }
    
     private int     trackSector = 0;
     private int     trackAssociation = -1;
@@ -54,8 +117,8 @@ public class DetectorTrack implements Comparable {
 
     private float[][] covMatrix = new float[5][5];
     private List<Line3D> trackCrosses = new ArrayList<>();
-  
-    private List<TrajectoryPoint> trajectory = new ArrayList<>();
+ 
+    private Trajectory trajectory=new Trajectory();
     
     private double MAX_LINE_LENGTH = 1500.0;
 
@@ -102,23 +165,26 @@ public class DetectorTrack implements Comparable {
     }
 
     public void addTrajectoryPoint(int detId,int layId,Line3D traj,float bField,float pathLength) {
-        this.trajectory.add(new TrajectoryPoint(detId,layId,traj,bField,pathLength));
+        this.trajectory.add(detId,layId,traj,bField,pathLength);
     }
     public void addTrajectoryPoint(int detId,int layId,Line3D traj) {
-        this.trajectory.add(new TrajectoryPoint(detId,layId,traj));
+        this.addTrajectoryPoint(detId,layId,traj,0.0f,-1.0f);
     }
 
-    public Line3D getTrajectoryPoint(int detId,int layId) {
-        for (int ii=0; ii<this.trajectory.size(); ii++) {
-            if (this.trajectory.get(ii).getDetectorId()==detId &&
-                this.trajectory.get(ii).getLayerId()==layId) {
-                return this.trajectory.get(ii).getCross();
-            }
-        }
-        return null;
+    public double getPathLength(DetectorType type,int layId) {
+        if (!trajectory.hasLayer(type.getDetectorId(),layId)) return -1.0;
+        return trajectory.get(type.getDetectorId(),layId).getPathLength();
+    }
+
+    public TrajectoryPoint getTrajectoryPoint(int detId,int layId) {
+        return this.trajectory.get(detId,layId);
+    }
+
+    public TrajectoryPoint getTrajectoryPoint(DetectorDescriptor dd) {
+        return this.trajectory.get(dd);
     }
     
-    public List<TrajectoryPoint> getTrajectory() {
+    public Trajectory getTrajectory() {
         return this.trajectory;
     }
     

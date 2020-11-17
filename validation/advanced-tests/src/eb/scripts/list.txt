@@ -8,7 +8,6 @@ electrongammaFT -pid 22 -ft
 electronprotonC -pid 2212 -cd
 electronkaonC -pid 321 -cd
 electronpionC -pid 211 -cd
-electrongammaC -pid 22 -cd
 electronneutronC -pid 2112 -cd
 electronFTpion -pid -211 -ft
 electronFTproton -pid -2212 -ft

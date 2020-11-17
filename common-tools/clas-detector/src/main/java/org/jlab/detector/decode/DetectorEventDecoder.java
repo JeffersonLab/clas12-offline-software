@@ -96,18 +96,18 @@ public class DetectorEventDecoder {
         translationManager.init(keysTrans,tablesTrans);
         fitterManager.init(keysFitter, tablesFitter);
         
-        scalerManager.init(Arrays.asList(new String[]{"/runcontrol/fcup","/runcontrol/hwp"}));
+        scalerManager.init(Arrays.asList(new String[]{"/runcontrol/fcup","/runcontrol/slm","/runcontrol/hwp"}));
     }
 
     public final void initDecoder(){
         keysTrans = Arrays.asList(new String[]{
-		"FTCAL","FTHODO","FTTRK","LTCC","ECAL","FTOF","HTCC","DC","CTOF","CND","BST","RF","BMT","FMT","RICH","HEL","BAND"
+		"FTCAL","FTHODO","FTTRK","LTCC","ECAL","FTOF","HTCC","DC","CTOF","CND","BST","RF","BMT","FMT","RICH","HEL","BAND","RTPC"
         });
 
         tablesTrans = Arrays.asList(new String[]{
             "/daq/tt/ftcal","/daq/tt/fthodo","/daq/tt/fttrk","/daq/tt/ltcc",
             "/daq/tt/ec","/daq/tt/ftof","/daq/tt/htcc","/daq/tt/dc","/daq/tt/ctof","/daq/tt/cnd","/daq/tt/svt",
-            "/daq/tt/rf","/daq/tt/bmt","/daq/tt/fmt","/daq/tt/rich","/daq/tt/hel","/daq/tt/band"
+            "/daq/tt/rf","/daq/tt/bmt","/daq/tt/fmt","/daq/tt/rich","/daq/tt/hel","/daq/tt/band","/daq/tt/rtpc"
         });
 
         translationManager.init(keysTrans,tablesTrans);
@@ -119,7 +119,7 @@ public class DetectorEventDecoder {
         });
         fitterManager.init(keysFitter, tablesFitter);
 
-        scalerManager.init(Arrays.asList(new String[]{"/runcontrol/fcup","/runcontrol/hwp"}));
+        scalerManager.init(Arrays.asList(new String[]{"/runcontrol/fcup","/runcontrol/slm","/runcontrol/hwp"}));
     }
     /**
      * Set the flag to use extended fitter instead of basic fitter
