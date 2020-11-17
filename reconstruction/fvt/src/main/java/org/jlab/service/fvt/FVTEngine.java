@@ -10,8 +10,9 @@ import java.util.Optional;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Point3D;
-
+import org.jlab.utils.groups.IndexedTable;
 import org.jlab.io.base.*;
+
 import org.jlab.rec.fmt.Constants;
 import org.jlab.rec.fmt.banks.HitReader;
 import org.jlab.rec.fmt.banks.RecoBankWriter;
@@ -72,10 +73,10 @@ public class FVTEngine extends ReconstructionEngine {
 
         // Load the geometry
         String geoVariation = Optional.ofNullable(geomDBVar).orElse("default");
-        CCDBConstantsLoader.Load(this.getRun(), geoVariation);
         double[][] shiftsArray =
                 CCDBConstantsLoader.loadAlignmentTable(this.getRun(), this.getConstantsManager());
 
+        CCDBConstantsLoader.Load(this.getRun(), geoVariation);
         Constants.applyZShifts(shiftsArray);
         Constants.Load();
         Constants.applyXYShifts(shiftsArray);
@@ -105,28 +106,6 @@ public class FVTEngine extends ReconstructionEngine {
 
     @Override
     public boolean processDataEvent(DataEvent event) {
-        // // Load FMT shifts
-        // IndexedTable fmtShifts = this.getConstantsManager().getConstants(this.getRun(), "/geometry/fmt/alignment");
-        // // shArr: [deltaX, deltaY, deltaZ, rotX, rotY, rotZ]
-        // double[][] shArr = new double[6][6];
-        // for (int li = 0; li < 6; ++li) {
-        //     shArr[li][0] = fmtShifts.getDoubleValue("deltaX", 0,li+1,0);
-        //     shArr[li][1] = fmtShifts.getDoubleValue("deltaY", 0,li+1,0);
-        //     shArr[li][2] = fmtShifts.getDoubleValue("deltaZ", 0,li+1,0);
-        //     shArr[li][3] = fmtShifts.getDoubleValue("rotX",   0,li+1,0);
-        //     shArr[li][4] = fmtShifts.getDoubleValue("rotY",   0,li+1,0);
-        //     shArr[li][5] = fmtShifts.getDoubleValue("rotZ",   0,li+1,0);
-        // }
-        //
-        // System.out.printf("FMT Alignment table:");
-        // for (int li = 0; li < 6; ++li) {
-        //     System.out.printf("\n  Layer %1d: ", li+1);
-        //     for (int si = 0; si < 6; ++si) {
-        //         System.out.printf("%6.2f ", shArr[li][si]);
-        //     }
-        // }
-        // System.out.printf("\n\n");
-
         // Initial setup
         List<Cluster> clusters = new ArrayList<Cluster>();
         List<Cross> crosses = new ArrayList<Cross>();
@@ -181,6 +160,7 @@ public class FVTEngine extends ReconstructionEngine {
                         this_cross.set_Point(clusters.get(j).calcCross(x, y, z));
                         this_cross.set_AssociatedTrackID(dcTracks.get(i).getId());
                         this_cross.set_Cluster1(clusters.get(j));
+                        this_cross.get_Cluster1().set_AssociatedTrackID(dcTracks.get(i).getId());
                         crosses.add(this_cross);
                         // add to seed
                         if (trj.get(dcTracks.get(i).getId()) == null) {
@@ -207,6 +187,7 @@ public class FVTEngine extends ReconstructionEngine {
                 for(Cross c : crs) {
                     cls.add(c.get_Cluster1());
                 }
+                tr.setNMeas(cls.size());
                 kf = new KFitter(
                         cls, tr.getSector(), tr.getX(), tr.getY(), tr.getZ(),
                         tr.getPx(), tr.getPy(), tr.getPz(), tr.getQ(), swimmer, 0

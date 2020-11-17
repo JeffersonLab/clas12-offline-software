@@ -15,6 +15,7 @@ public class Track {
     private int _id;
     private int _sector;
     private int _q;
+    private int _nmeas;
     private double _x;
     private double _y;
     private double _z;
@@ -78,6 +79,20 @@ public class Track {
      */
     public void setQ(int _q) {
         this._q = _q;
+    }
+
+    /**
+     * @return the number of measurements used in the track.
+     */
+    public int getNMeas() {
+        return _nmeas;
+    }
+
+    /**
+     * @param _nmeas the number of measurements to set.
+     */
+    public void setNMeas(int _nmeas) {
+        this._nmeas = _nmeas;
     }
 
     /**
