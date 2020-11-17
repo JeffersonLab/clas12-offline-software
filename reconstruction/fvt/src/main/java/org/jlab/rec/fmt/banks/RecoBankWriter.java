@@ -105,6 +105,7 @@ public class RecoBankWriter {
             bank.setShort("status", i, (short)candlist.get(i).status);
             bank.setByte("sector", i, (byte) candlist.get(i).getSector());
             bank.setByte("q", i, (byte) candlist.get(i).getQ());
+            bank.setShort("nmeas", i, (short) candlist.get(i).getNMeas());
             bank.setFloat("Vtx0_x", i, (float) candlist.get(i).getX());
             bank.setFloat("Vtx0_y", i, (float) candlist.get(i).getY());
             bank.setFloat("Vtx0_z", i, (float) candlist.get(i).getZ());
