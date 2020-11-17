@@ -19,11 +19,12 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 	private int _Sector;
 	private int _Layer;
 	private int _Id;
-	private Line3D _StripSegment ;
+	private Line3D _StripSegment;
 
     private double _TotalEnergy;
     private double _Centroid;
     private double _CentroidError;
+    private double _CentroidResidual;
 
     private int _MinStrip;
 	private int _MaxStrip;
@@ -143,6 +144,14 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
 
 	public void set_CentroidError(double _CentroidError) {
 		this._CentroidError = _CentroidError;
+	}
+
+    public double get_CentroidResidual() {
+		return _CentroidResidual;
+	}
+
+	public void set_CentroidResidual(double _CentroidResidual) {
+		this._CentroidResidual = _CentroidResidual;
 	}
 
 	public double get_TotalEnergy() {
