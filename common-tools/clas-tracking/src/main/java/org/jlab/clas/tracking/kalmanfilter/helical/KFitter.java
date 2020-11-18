@@ -137,11 +137,14 @@ public class KFitter {
             // chi2
             this.chi2=this.calc_chi2(swimmer); 
             if(this.chi2<newchisq) { 
-                newchisq=this.chi2;
                 KFHelix = sv.setTrackPars();
                 finalStateVec = sv.trackTraj.get(0);
                 this.setTrajectory();
                 setFitFailed = false;
+                if(newchisq-this.chi2<0.1)
+                    break;
+                    
+                newchisq=this.chi2;
             } else {
                 this.chi2 =newchisq ;
                 break;

@@ -19,6 +19,8 @@ public class Helix {
     private double _B;
     private double _d0;
     private double _phi0;
+    private double _cosphi0;
+    private double _sinphi0;
     private double _omega;
     private double _z0;
     private double _tanL;
@@ -46,6 +48,8 @@ public class Helix {
             int turningSign, double B, double xb, double yb, Units unit) {
         _d0             = d0;
         _phi0           = phi0;
+        _cosphi0 = Math.cos(phi0);
+        _sinphi0 = Math.sin(phi0);
         _omega          = omega;
         _z0             = z0;
         _tanL           = tanL;
@@ -68,6 +72,8 @@ public class Helix {
         setUnitScale(unit.unit);
         setLIGHTVEL(LIGHTVEL*unit.unit);
         _R = pt/(B*LIGHTVEL*unit.unit);
+        _cosphi0 = px0/pt;
+        _sinphi0 = py0/pt;
         _phi0 = Math.atan2(py0, px0);
         _tanL = pz0/pt;
         _z0 = z0;
@@ -153,6 +159,34 @@ public class Helix {
     }
 
     /**
+     * @return the _cosphi0
+     */
+    public double getCosphi0() {
+        return _cosphi0;
+    }
+
+    /**
+     * @param _cosphi0 the _cosphi0 to set
+     */
+    public void setCosphi0(double _cosphi0) {
+        this._cosphi0 = _cosphi0;
+    }
+
+    /**
+     * @return the _sinphi0
+     */
+    public double getSinphi0() {
+        return _sinphi0;
+    }
+
+    /**
+     * @param _sinphi0 the _sinphi0 to set
+     */
+    public void setSinphi0(double _sinphi0) {
+        this._sinphi0 = _sinphi0;
+    }
+
+    /**
      * @return the _omega
      */
     public double getOmega() {
@@ -226,6 +260,8 @@ public class Helix {
             double B){
         setD0(d0);
         setPhi0(phi0);
+        setCosphi0(Math.cos(phi0));
+        setSinphi0(Math.sin(phi0));
         setOmega(omega);
         setZ0(z0);
         setTanL(tanL);
@@ -235,10 +271,10 @@ public class Helix {
     }
     public void Update() {
         setR(1./Math.abs(getOmega()));
-        _xd = -getD0()*Math.sin(getPhi0())+_xb;
-        _yd =  getD0()*Math.cos(getPhi0())+_yb;
-        setXc(-(_turningSign*_R + _d0)*Math.sin(getPhi0())+_xb);
-        setYc((_turningSign*_R + _d0)*Math.cos(getPhi0())+_yb);
+        _xd = -getD0()*getSinphi0()+_xb;
+        _yd =  getD0()*getCosphi0()+_yb;
+        setXc(-(_turningSign*_R + _d0)*getSinphi0()+_xb);
+        setYc((_turningSign*_R + _d0)*getCosphi0()+_yb);
         setX(getX(tFlightLen));
         setY(getY(tFlightLen));
         setZ(getZ(tFlightLen));
@@ -361,9 +397,12 @@ public class Helix {
         double yp = a + b * xp;
         double ym = a + b * xm;
         
-        double Cp = new Vector3D(xp,yp,0).asUnit().dot(new Vector3D(Math.cos(getPhi0()), Math.sin(getPhi0()),0));
-        double Cm = new Vector3D(xm,ym,0).asUnit().dot(new Vector3D(Math.cos(getPhi0()), Math.sin(getPhi0()),0));
-        
+        //double Cp = new Vector3D(xp,yp,0).asUnit().dot(new Vector3D(Math.cos(getPhi0()), Math.sin(getPhi0()),0));
+        //double Cm = new Vector3D(xm,ym,0).asUnit().dot(new Vector3D(Math.cos(getPhi0()), Math.sin(getPhi0()),0));
+        double Np = Math.sqrt(xp*xp+yp*yp);
+        double Nm = Math.sqrt(xm*xm+ym*ym);
+        double Cp = (xp*getCosphi0()+yp*getSinphi0())/Np;
+        double Cm = (xm*getCosphi0()+ym*getSinphi0())/Nm;
         if(Cp > Cm) {
             x = xp;
             y = yp;
