@@ -18,8 +18,7 @@ public class ScaleFieldPanel extends JPanel {
 	private final MagneticFields.FieldType _fieldType;
 	protected JTextField _textField;
 
-	public ScaleFieldPanel(final MagneticFields.FieldType type,
-			final String name, double defaultVal) {
+	public ScaleFieldPanel(final MagneticFields.FieldType type, final String name, double defaultVal) {
 		setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
 		setOpaque(false);
 		setBackground(null);
@@ -41,32 +40,31 @@ public class ScaleFieldPanel extends JPanel {
 			}
 		};
 		_textField.addKeyListener(ka);
-		
+
 		FocusAdapter fl = new FocusAdapter() {
 
 			@Override
 			public void focusLost(FocusEvent e) {
 				maybeChangeScaleFactor();
 			}
-			
+
 		};
 		_textField.addFocusListener(fl);
-
 
 		add(_label);
 		add(_textField);
 	}
-	
-	//maybe change the scale factor
+
+	// maybe change the scale factor
 	private void maybeChangeScaleFactor() {
 		try {
 			double newSF = Double.parseDouble(_textField.getText());
-			
+
 			if (getField() == null) {
 				_textField.setText("1.0");
 				return;
 			}
-			
+
 			double currentSF = getField()._scaleFactor;
 			if (Math.abs(newSF - currentSF) > 1.0e-6) {
 				getField()._scaleFactor = newSF;
@@ -81,7 +79,7 @@ public class ScaleFieldPanel extends JPanel {
 	private MagneticField getField() {
 		return (MagneticField) MagneticFields.getInstance().getIField(_fieldType);
 	}
-	
+
 	public void fixText() {
 		_textField.setText(String.format("%7.3f", getField().getScaleFactor()));
 	}
