@@ -488,7 +488,7 @@ public class Swim {
         
             SwimResult result = new SwimResult(6);
             
-            PC.CF.swimRho(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, radius/100, accuracy, _rMax, stepSize, cnuphys.swim.Swimmer.CLAS_Tolerance, result);
+            PC.CF.swimRho(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, radius/100, accuracy*2, _rMax, stepSize*10, cnuphys.swim.Swimmer.CLAS_Tolerance, result);
 
             value[0] = result.getUf()[0] * 100; // convert back to cm
             value[1] = result.getUf()[1] * 100; // convert back to cm
