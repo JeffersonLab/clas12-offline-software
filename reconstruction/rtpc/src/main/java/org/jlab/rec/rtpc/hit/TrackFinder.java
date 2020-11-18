@@ -168,6 +168,22 @@ public class TrackFinder {
                 List<Integer> times = t.getAllTimeSlices();
                 Collections.sort(times);
                 if(times.get(times.size()-1) - times.get(0) > TFtotaltracktimeflag) t.flagTrack();
+                TRACKTIMELOOP:
+                for(int tx : times){
+                    double minphi = 10;
+                    double maxphi = -10;
+                    double minz = 1000;
+                    double maxz = -1000;
+                    List<Integer> pads = t.getTimeSlice(tx);
+                    PadVector pparent = params.get_padvector(pads.get(0));
+                    for(int index = 1; index < pads.size(); index ++){
+                        PadVector p = params.get_padvector(pads.get(index));
+                        if(!tutil.comparePads(pparent, p, method, cosmic, zthresh, zthreshgap, phithresh, phithreshgap)){
+                            t.flagTrack();
+                            break TRACKTIMELOOP;
+                        }
+                    }
+                }
             }
         }
         
