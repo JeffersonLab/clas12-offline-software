@@ -190,7 +190,7 @@ public class TrackSeederCA {
         camaker.evolve( nepochs );
         return camaker.getNodes();  
     }
-    
+    TrackListFinder trkFinder = new TrackListFinder();
     public List<Seed> findSeed(List<Cross> svt_crosses, List<Cross> bmt_crosses, 
     						   org.jlab.rec.cvt.svt.Geometry svt_geo, 
     						   org.jlab.rec.cvt.bmt.BMTGeometry bmt_geo, 
@@ -244,8 +244,8 @@ public class TrackSeederCA {
 	    }
 //	    for( int i=0;i<cands.size();i++)cands.get(i).set_Id(i+1);
 //	    cands = rmDuplicate( cands ); // TODO
-	    
-	    for( Track cand : cands ) {
+	    trkFinder.removeOverlappingTracks(cands);
+	    for( Track cand : cands ) { 
 	    	//cand.finalUpdate_Crosses(svt_geo); // this should update the Z position, only for display purposes 
 	        Seed seed = new Seed();
 	        seed.set_Crosses(cand);
@@ -616,7 +616,8 @@ public class TrackSeederCA {
             else {
             	cand.set_lineFitChi2PerNDF(fitTrk.get_chisq()[1]*2);// penalize tracks with only 2 crosses
             }
-            
+            cand.setChi2(fitTrk.get_chisq()[0]+fitTrk.get_chisq()[1]);
+            cand.setNDF(X.size()+Z.size());
             //if(shift==0)
             if (fitTrk.get_chisq()[0] < chisqMax) {
                 chisqMax = fitTrk.get_chisq()[0];

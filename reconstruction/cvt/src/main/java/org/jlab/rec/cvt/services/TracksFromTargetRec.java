@@ -13,7 +13,6 @@ import org.jlab.detector.geant4.v2.CTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
-import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.rec.cvt.Constants;
 import org.jlab.rec.cvt.banks.RecoBankWriter;
@@ -63,7 +62,7 @@ public class TracksFromTargetRec {
                 
             } else {
                 TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
-                seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer); 
+                seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
                 //second seeding algorithm to search for SVT only tracks, and/or tracks missed by the CA
                 TrackSeeder trseed2 = new TrackSeeder();
                 trseed2.unUsedHitsOnly = true;
@@ -134,7 +133,7 @@ public class TracksFromTargetRec {
             tracks.get(i).set_Id(i+1);         }
 
         //System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + trks.size());
-        trkFinder.removeOverlappingTracks(tracks); //turn off until debugged
+        //trkFinder.removeOverlappingTracks(tracks); //turn off until debugged
 
         for (int c = 0; c < tracks.size(); c++) {
             tracks.get(c).set_Id(c + 1);
