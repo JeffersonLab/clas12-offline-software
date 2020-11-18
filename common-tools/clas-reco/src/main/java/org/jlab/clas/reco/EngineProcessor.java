@@ -98,7 +98,7 @@ public class EngineProcessor {
             "org.jlab.service.dc.DCHBEngine",
             "org.jlab.service.ftof.FTOFHBEngine",
             "org.jlab.service.ec.ECEngine",
-            "org.jlab.rec.cvt.services.CVTReconstruction",
+            "org.jlab.rec.cvt.services.CVTRecNewKF",
             "org.jlab.service.ctof.CTOFEngine",
             //"org.jlab.service.cnd.CNDEngine",
             "org.jlab.service.cnd.CNDCalibrationEngine",
