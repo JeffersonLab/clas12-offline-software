@@ -114,7 +114,8 @@ public class KFitter {
             int closestSVID = -1;
             double closestSVDistance = Double.POSITIVE_INFINITY;
             for (int si = 0; si < sv.trackTraj.size(); ++si) {
-                double svDistance = Math.abs(sv.trackTraj.get(si).z - org.jlab.rec.fmt.Constants.FVT_Zlayer[li-1]);
+                double svDistance = Math.abs(sv.trackTraj.get(si).z
+                        - org.jlab.rec.fmt.Constants.FVT_Zlayer[li-1] - org.jlab.rec.fmt.Constants.hDrift/2);
                 if (svDistance < closestSVDistance) {
                     closestSVID = si;
                     closestSVDistance = svDistance;
@@ -123,13 +124,14 @@ public class KFitter {
 
             // Get the state vector's y position in the layer's local coordinates.
             // TODO: ASSERT THAT THE STATE VECTOR'S X AND Y COORDINATE ARE IN GLOBAL COORDINATES.
-            double sv_yloc = -sv.trackTraj.get(closestSVID).x * Math.sin(org.jlab.rec.fmt.Constants.FVT_Alpha[li-1])
+            double sv_yloc =
+                    - sv.trackTraj.get(closestSVID).x * Math.sin(org.jlab.rec.fmt.Constants.FVT_Alpha[li-1])
                     + sv.trackTraj.get(closestSVID).y * Math.cos(org.jlab.rec.fmt.Constants.FVT_Alpha[li-1]);
 
             // Store the cluster's residual.
             for (Cluster cl : this.clusters) {
                 if (cl.get_Layer() == li) {
-                    cl.set_CentroidResidual(Math.abs(cl.get_Centroid() - sv_yloc));
+                    cl.set_CentroidResidual(cl.get_Centroid() - sv_yloc);
                 }
             }
         }
