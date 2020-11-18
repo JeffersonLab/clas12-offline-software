@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Line3D;
 import Jama.Matrix;
 import org.jlab.clas.pdg.PhysicsConstants;
 import org.jlab.clas.swimtools.Swim;
@@ -44,9 +43,17 @@ public class StateVecs {
 
     public double[] getStateVecPosAtMeasSite(int k, StateVec iVec, MeasVec mv, Swim swim, 
             boolean useSwimmer) {
-        this.resetArrays(swimPars);
-        this.resetArrays(value);
-
+        if(swimPars!=null) {
+            this.resetArrays(swimPars);
+        } else {
+            swimPars = new double[7];
+        }
+        if(value!=null) {
+            this.resetArrays(value);
+        } else {
+            value = new double[4];
+        }
+        
         Point3D ps = new Point3D(0,0,0) ;
 
         StateVec kVec = new StateVec(k);
@@ -170,12 +177,6 @@ public class StateVecs {
                     int nSteps = (int) (r/stepSize);
 
                     double dist = 0;
-
-//                    for(int i = 1; i<nSteps; i++) {
-//                        dist = (double) (i*stepSize);
-//                        this.iterateHelixAtR(2, k, kVec, swim, dist, Bf, ps);
-//                    }
-//                    this.iterateHelixAtR(2, k, kVec, swim, r, Bf, ps);
                     for(int i = 1; i<nSteps; i++) {
                         dist = (double) (i*stepSize);
                         this.setHelixPars(kVec, swim);
@@ -301,15 +302,10 @@ public class StateVecs {
         B Bf = new B(i, x, y, z, swimmer);
 
         fVec.phi0 = iVec.phi0;
-
         fVec.d_rho = iVec.d_rho;
-
         fVec.kappa = iVec.kappa;
-
         fVec.dz = iVec.dz;
-
         fVec.tanL = iVec.tanL;
-
         fVec.alpha = Bf.alpha;
 
         this.newStateVecAtMeasSite(f, fVec, mv, swimmer, true);
@@ -461,6 +457,10 @@ public class StateVecs {
 
         double S = Math.sin(util.getPhi0());
         double C = Math.cos(util.getPhi0());
+        
+        util.setCosphi0(C);
+        util.setSinphi0(S);
+        
         if(Math.abs(S)>=Math.abs(C)) {
             util.setD0(-(x0-X0.get(0))/S) ;
         } else {
