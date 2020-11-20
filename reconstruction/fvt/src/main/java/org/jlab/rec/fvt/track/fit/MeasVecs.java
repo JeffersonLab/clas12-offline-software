@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.math3.special.Erf;
+import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.fmt.cluster.Cluster;
 import org.jlab.rec.fmt.hit.Hit;
+import org.jlab.rec.fmt.GeometryMethods;
 import org.jlab.rec.fvt.track.fit.StateVecs.StateVec;
 
 public class MeasVecs {
@@ -57,31 +59,21 @@ public class MeasVecs {
         return meas;
     }
 
-    public double h(StateVec stateVec) {
-        if (stateVec == null) return 0;
-        if (this.measurements.get(stateVec.k) == null) return 0;
-
-        int layer = this.measurements.get(stateVec.k).layer;
-
-        return stateVec.y*Math.cos(org.jlab.rec.fmt.Constants.FVT_Alpha[layer-1])-stateVec.x*Math.sin(org.jlab.rec.fmt.Constants.FVT_Alpha[layer-1]);
-    }
-
     public int getClosestStrip(double x, double y, int layer) {
         int closestStrip = 0;
         if(Math.sqrt(x*x+y*y)<org.jlab.rec.fmt.Constants.FVT_Rmax && Math.sqrt(x*x+y*y)>org.jlab.rec.fmt.Constants.FVT_Beamhole) {
 
-            double x_loc =  x*Math.cos(org.jlab.rec.fmt.Constants.FVT_Alpha[layer-1])+ y*Math.sin(org.jlab.rec.fmt.Constants.FVT_Alpha[layer-1]);
-            double y_loc =  y*Math.cos(org.jlab.rec.fmt.Constants.FVT_Alpha[layer-1])- x*Math.sin(org.jlab.rec.fmt.Constants.FVT_Alpha[layer-1]);
+            Point3D locPos = GeometryMethods.globalToLocal(new Point3D(x,y,0), layer-1);
 
-            if (y_loc>-(org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.) && y_loc < (org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.)){
-                if (x_loc>=0) closestStrip = (int) (Math.floor(((org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.)-y_loc)/org.jlab.rec.fmt.Constants.FVT_Pitch) + 1 );
-                if (x_loc<0) closestStrip =  (int) ((Math.floor((y_loc+(org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.))/org.jlab.rec.fmt.Constants.FVT_Pitch) + 1 ) + org.jlab.rec.fmt.Constants.FVT_Halfstrips +0.5*( org.jlab.rec.fmt.Constants.FVT_Nstrips-2.*org.jlab.rec.fmt.Constants.FVT_Halfstrips));
+            if (locPos.y()>-(org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.) && locPos.y() < (org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.)){
+                if (locPos.x()>=0) closestStrip = (int) (Math.floor(((org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.)-locPos.y())/org.jlab.rec.fmt.Constants.FVT_Pitch) + 1 );
+                if (locPos.x()<0) closestStrip =  (int) ((Math.floor((locPos.y()+(org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.))/org.jlab.rec.fmt.Constants.FVT_Pitch) + 1 ) + org.jlab.rec.fmt.Constants.FVT_Halfstrips +0.5*( org.jlab.rec.fmt.Constants.FVT_Nstrips-2.*org.jlab.rec.fmt.Constants.FVT_Halfstrips));
             }
-            else if (y_loc <= -(org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.) && y_loc > -org.jlab.rec.fmt.Constants.FVT_Rmax){
-                closestStrip =  (int) (Math.floor(((org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.)-y_loc)/org.jlab.rec.fmt.Constants.FVT_Pitch) +1 );
+            else if (locPos.y() <= -(org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.) && locPos.y() > -org.jlab.rec.fmt.Constants.FVT_Rmax){
+                closestStrip =  (int) (Math.floor(((org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.)-locPos.y())/org.jlab.rec.fmt.Constants.FVT_Pitch) +1 );
             }
-            else if (y_loc >= (org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.) && y_loc < org.jlab.rec.fmt.Constants.FVT_Rmax){
-                closestStrip = (int) (Math.floor((y_loc+(org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.))/org.jlab.rec.fmt.Constants.FVT_Pitch) + 1 + org.jlab.rec.fmt.Constants.FVT_Halfstrips+0.5*( org.jlab.rec.fmt.Constants.FVT_Nstrips-2.*org.jlab.rec.fmt.Constants.FVT_Halfstrips));
+            else if (locPos.y() >= (org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.) && locPos.y() < org.jlab.rec.fmt.Constants.FVT_Rmax){
+                closestStrip = (int) (Math.floor((locPos.y()+(org.jlab.rec.fmt.Constants.FVT_Halfstrips*org.jlab.rec.fmt.Constants.FVT_Pitch/2.))/org.jlab.rec.fmt.Constants.FVT_Pitch) + 1 + org.jlab.rec.fmt.Constants.FVT_Halfstrips+0.5*( org.jlab.rec.fmt.Constants.FVT_Nstrips-2.*org.jlab.rec.fmt.Constants.FVT_Halfstrips));
             }
         }
         return closestStrip;
@@ -104,15 +96,25 @@ public class MeasVecs {
         if (this.getClosestStrip(x, y, layer)>1) {
             return org.jlab.rec.fmt.Constants.FVT_stripsYlocref[this.getClosestStrip(x, y, layer)-1];
         } else {
-            return y*Math.cos(org.jlab.rec.fmt.Constants.FVT_Alpha[layer-1])- x*Math.sin(org.jlab.rec.fmt.Constants.FVT_Alpha[layer-1]);
+            return GeometryMethods.globalToLocal(new Point3D(x,y,0), layer-1).y();
         }
+    }
+
+    public double h(StateVec stateVec) {
+        if (stateVec == null) return 0;
+        if (this.measurements.get(stateVec.k) == null) return 0;
+
+        int layer = this.measurements.get(stateVec.k).layer;
+
+        return stateVec.y*Math.cos(org.jlab.rec.fmt.Constants.FVT_Alpha[layer-1])
+                - stateVec.x*Math.sin(org.jlab.rec.fmt.Constants.FVT_Alpha[layer-1]);
     }
 
     public double[] H(StateVec stateVec, StateVecs sv) {
         int layer = this.measurements.get(stateVec.k).layer;
         double[] H = new double[]{-Math.sin(org.jlab.rec.fmt.Constants.FVT_Alpha[layer-1]), Math.cos(org.jlab.rec.fmt.Constants.FVT_Alpha[layer-1]), 0, 0, 0};
         return H;
-     }
+    }
 
     private StateVec reset(StateVec SVplus, StateVec stateVec, StateVecs sv) {
         SVplus = sv.new StateVec(stateVec.k);

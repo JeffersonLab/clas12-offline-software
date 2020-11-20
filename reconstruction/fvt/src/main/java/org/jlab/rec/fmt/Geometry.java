@@ -22,21 +22,20 @@ public class Geometry {
     public int getClosestStrip(double x, double y, int layer) {
         int closestStrip = 0;
         if (Math.sqrt(x*x+y*y) < Constants.FVT_Rmax && Math.sqrt(x*x+y*y) > Constants.FVT_Beamhole) {
-            double x_loc = x*Math.cos(Constants.FVT_Alpha[layer-1]) + y*Math.sin(Constants.FVT_Alpha[layer-1]);
-            double y_loc = y*Math.cos(Constants.FVT_Alpha[layer-1]) - x*Math.sin(Constants.FVT_Alpha[layer-1]);
+            Point3D locPos = GeometryMethods.globalToLocal(new Point3D(x, y, 0), layer-1);
 
-            if (y_loc > -(Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.) && y_loc < (Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.)) {
-            	if (x_loc >= 0)
-					closestStrip = (int) (Math.floor(((Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.)-y_loc)/Constants.FVT_Pitch) + 1);
-            	if (x_loc < 0)
-					closestStrip = (int) ((Math.floor((y_loc+(Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.))/Constants.FVT_Pitch) + 1)
+            if (locPos.y() > -(Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.) && locPos.y() < (Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.)) {
+            	if (locPos.x() >= 0)
+					closestStrip = (int) (Math.floor(((Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.)-locPos.y())/Constants.FVT_Pitch) + 1);
+            	if (locPos.x() < 0)
+					closestStrip = (int) ((Math.floor((locPos.y()+(Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.))/Constants.FVT_Pitch) + 1)
 							+ Constants.FVT_Halfstrips +0.5*( Constants.FVT_Nstrips-2.*Constants.FVT_Halfstrips));
             }
-            else if (y_loc <= -(Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.) && y_loc > -Constants.FVT_Rmax) {
-            	closestStrip = (int) (Math.floor(((Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.) - y_loc)/Constants.FVT_Pitch) + 1);
+            else if (locPos.y() <= -(Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.) && locPos.y() > -Constants.FVT_Rmax) {
+            	closestStrip = (int) (Math.floor(((Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.) - locPos.y())/Constants.FVT_Pitch) + 1);
             }
-            else if (y_loc >= (Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.) && y_loc < Constants.FVT_Rmax) {
-            	closestStrip = (int) (Math.floor((y_loc + (Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.))/Constants.FVT_Pitch)
+            else if (locPos.y() >= (Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.) && locPos.y() < Constants.FVT_Rmax) {
+            	closestStrip = (int) (Math.floor((locPos.y() + (Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.))/Constants.FVT_Pitch)
 						+ 1 + Constants.FVT_Halfstrips+0.5*( Constants.FVT_Nstrips-2.*Constants.FVT_Halfstrips));
             }
         }
@@ -58,9 +57,7 @@ public class Geometry {
     }
 
     public double getCentroidEstimate(int layer, double x, double y, int clust_size) {
-
-        double x_loc = x*Math.cos(Constants.FVT_Alpha[layer-1])+ y*Math.sin(Constants.FVT_Alpha[layer-1]);
-        double y_loc = y*Math.cos(Constants.FVT_Alpha[layer-1])- x*Math.sin(Constants.FVT_Alpha[layer-1]);
+        Point3D locPos = GeometryMethods.globalToLocal(new Point3D(x, y, 0), layer-1);
 
         double cent = 0;
         double norm = 0;
@@ -76,14 +73,14 @@ public class Geometry {
 						&& strip_num >= (Constants.FVT_Halfstrips+Constants.FVT_Sidestrips+1)
 						&& strip_num<Constants.FVT_Nstrips+1)) {
 
-					double normCoeff = getWeightEstimate(strip_num, layer, x_loc, y_loc);
+					double normCoeff = getWeightEstimate(strip_num, layer, locPos.x(), locPos.y());
                     cent += normCoeff * (double) strip_num;
                     norm += normCoeff;
 
 					// If in central part, then check the top/bottom strip systematically
                     if (Math.abs(Constants.FVT_stripsYlocref[strip_num-1]) < Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.) {
                         strip_num = 2*Constants.FVT_Halfstrips + Constants.FVT_Sidestrips + 1 - strip_num;
-                        normCoeff = getWeightEstimate(strip_num, layer, x_loc, y_loc);
+                        normCoeff = getWeightEstimate(strip_num, layer, locPos.x(), locPos.y());
                         cent += normCoeff * (double) strip_num;
                         norm += normCoeff;
                     }
@@ -95,14 +92,14 @@ public class Geometry {
 				if (strip_num < 1 || (strip_num <= Constants.FVT_Halfstrips + Constants.FVT_Sidestrips
 						&& closestStrip > Constants.FVT_Halfstrips + Constants.FVT_Sidestrips))
 					strip_num = 2*Constants.FVT_Halfstrips + Constants.FVT_Sidestrips + 1 - strip_num;
-				double normCoeff = getWeightEstimate(strip_num, layer, x_loc, y_loc);
+				double normCoeff = getWeightEstimate(strip_num, layer, locPos.x(), locPos.y());
                 cent += normCoeff * (double) strip_num;
                 norm += normCoeff;
 
 				// If in central part, then check the top/bottom strip systematically
                 if (Math.abs(Constants.FVT_stripsYlocref[strip_num-1]) < Constants.FVT_Halfstrips*Constants.FVT_Pitch/2.) {
                     strip_num = 2*Constants.FVT_Halfstrips + Constants.FVT_Sidestrips + 1 - strip_num;
-                    normCoeff = getWeightEstimate(strip_num, layer, x_loc, y_loc);
+                    normCoeff = getWeightEstimate(strip_num, layer, locPos.x(), locPos.y());
                     cent += normCoeff*(double)strip_num;
                     norm += normCoeff;
                 }

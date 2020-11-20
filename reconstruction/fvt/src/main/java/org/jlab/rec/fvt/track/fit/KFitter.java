@@ -4,9 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.jlab.clas.swimtools.Swim;
+import org.jlab.geom.prim.Point3D;
 import org.jlab.rec.fvt.track.fit.StateVecs.CovMat;
 import org.jlab.rec.fvt.track.fit.StateVecs.StateVec;
 import org.jlab.jnp.matrix.*;
+import org.jlab.rec.fmt.GeometryMethods;
 import org.jlab.rec.fmt.cluster.Cluster;
 
 /**
@@ -124,14 +126,14 @@ public class KFitter {
 
             // Get the state vector's y position in the layer's local coordinates.
             // TODO: ASSERT THAT THE STATE VECTOR'S X AND Y COORDINATE ARE IN GLOBAL COORDINATES.
-            double sv_yloc =
-                    - sv.trackTraj.get(closestSVID).x * Math.sin(org.jlab.rec.fmt.Constants.FVT_Alpha[li-1])
-                    + sv.trackTraj.get(closestSVID).y * Math.cos(org.jlab.rec.fmt.Constants.FVT_Alpha[li-1]);
+            Point3D locPos = GeometryMethods.globalToLocal(
+                    new Point3D(sv.trackTraj.get(closestSVID).x, sv.trackTraj.get(closestSVID).y, 0),
+                    li-1);
 
             // Store the cluster's residual.
             for (Cluster cl : this.clusters) {
                 if (cl.get_Layer() == li) {
-                    cl.set_CentroidResidual(cl.get_Centroid() - sv_yloc);
+                    cl.set_CentroidResidual(cl.get_Centroid() - locPos.y());
                 }
             }
         }
