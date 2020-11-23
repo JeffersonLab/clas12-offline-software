@@ -38,7 +38,6 @@ public class FVTEngine extends ReconstructionEngine {
     String FieldsConfig = "";
     private int Run = -1;
     CrossMaker crossMake;
-    ClusterFinder clusFinder;
     TrackList trkLister;
     double xB = 0;
     double yB = 0;
@@ -81,7 +80,6 @@ public class FVTEngine extends ReconstructionEngine {
         Constants.Load();
         Constants.applyXYShifts(shiftsArray);
 
-        clusFinder = new ClusterFinder();
         crossMake  = new CrossMaker();
         trkLister  = new TrackList();
 
@@ -107,6 +105,7 @@ public class FVTEngine extends ReconstructionEngine {
     @Override
     public boolean processDataEvent(DataEvent event) {
         // Initial setup
+        ClusterFinder clusFinder = new ClusterFinder();
         List<Cluster> clusters = new ArrayList<Cluster>();
         List<Cross> crosses = new ArrayList<Cross>();
         List<Track> dcTracks = null;
