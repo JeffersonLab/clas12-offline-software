@@ -7,6 +7,7 @@ import java.util.List;
 import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.base.DetectorType;
 
+import org.jlab.detector.calib.utils.DatabaseConstantProvider;
 import org.jlab.detector.geant4.v2.DCGeant4Factory;
 import org.jlab.detector.geant4.v2.FTOFGeant4Factory;
 import org.jlab.geom.base.Detector;
@@ -33,14 +34,8 @@ public class TrajectorySurfaces {
         _DetectorPlanes = aDetectorPlanes;
     }
 
-    // TODO: This should be read from the Geometry service. For now, it's hardcoded.
-    // z distances between target center and strips of the different FMT layers.
-    double[] FVT_Z = new double[] {25.8697, 26.9597, 28.0997, 29.4897, 30.6797, 31.8697};
-
-    public void LoadSurfaces(double targetPosition, double targetLength,
-            DCGeant4Factory dcDetector,
-            FTOFGeant4Factory ftofDetector,
-            Detector ecalDetector) {
+    public void LoadSurfaces(double targetPosition, double targetLength, DCGeant4Factory dcDetector,
+            FTOFGeant4Factory ftofDetector, Detector ecalDetector, double[] FVT_Z) {
         // creating Boundaries for MS
         Constants.Z[0]= targetPosition;
         Constants.Z[1]= dcDetector.getWireMidpoint(0, 0, 0, 0).z;
@@ -59,17 +54,17 @@ public class TrajectorySurfaces {
 
         double d = 0;
         Vector3D n;
-        for(int is =0; is<6; is++) {
-            int index =0;
+        for(int is=0; is<6; is++) {
+            int index = 0;
 
             System.out.println(" CREATING SURFACES FOR SECTOR "+(is+1));
             this._DetectorPlanes.add(new ArrayList<Surface>());
 
-            // add target center and downstream wall
+            // Add target center and downstream wall
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.TARGET, DetectorLayer.TARGET_DOWNSTREAM, targetPosition+targetLength/2, 0., 0., 1.));
             this._DetectorPlanes.get(is).add(new Surface(DetectorType.TARGET, DetectorLayer.TARGET_CENTER, targetPosition, 0., 0., 1.));
 
-            //add FMT
+            // Add FMT layers
             for (int li=0; li<6; ++li)
                 this._DetectorPlanes.get(is).add(new Surface(DetectorType.FMT, li+1, FVT_Z[li], 0., 0., 1.));
             index=7; // end of MM + HTCC(7)
