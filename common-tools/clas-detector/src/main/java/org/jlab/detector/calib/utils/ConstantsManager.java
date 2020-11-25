@@ -23,14 +23,13 @@ public class ConstantsManager {
     private DatabaseConstantsDescriptor  defaultDescriptor = new DatabaseConstantsDescriptor();
     private volatile Map<Integer,DatabaseConstantsDescriptor>  runConstants = new LinkedHashMap<Integer,DatabaseConstantsDescriptor>();
     private volatile Map<Integer,Integer>    runConstantRequestHistory = new LinkedHashMap<Integer,Integer>();
+    private static volatile Map<Integer,RCDBConstants> rcdbConstants = new LinkedHashMap<Integer,RCDBConstants>();
     
     private String   databaseVariation = "default";
     private String   timeStamp         = "";
     private int      requestStatus     = 0;
     private int      maxRequests       = 2;
    
-    private volatile Map<Integer,RCDBConstants> rcdbConstants = new LinkedHashMap<Integer,RCDBConstants>();
-    
     public ConstantsManager(){
         
     }
@@ -133,9 +132,11 @@ public class ConstantsManager {
         this.runConstants.put(run, desc);
         //System.out.println(this.toString());
 
-        RCDBProvider rcdbpro = new RCDBProvider();
-        this.rcdbConstants.put(run,rcdbpro.getConstants(run));
-        rcdbpro.disconnect();
+        if (this.rcdbConstants.containsKey(run) == false) {
+            RCDBProvider rcdbpro = new RCDBProvider();
+            this.rcdbConstants.put(run,rcdbpro.getConstants(run));
+            rcdbpro.disconnect();
+        }
     }
     
     public void reset(){
