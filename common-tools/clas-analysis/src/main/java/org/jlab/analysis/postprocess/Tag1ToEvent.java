@@ -2,6 +2,7 @@ package org.jlab.analysis.postprocess;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.jlab.clas.reco.ReconstructionEngine;
 
 import org.jlab.jnp.hipo4.data.Bank;
 import org.jlab.jnp.hipo4.data.Event;
@@ -38,7 +39,7 @@ import org.jlab.utils.options.OptionParser;
 public class Tag1ToEvent {
 
     public static final String[] CREATE_TAG1_EVENTS = {
-        "SOFT::config"
+        ReconstructionEngine.CONFIG_BANK_NAME
     };
     
     public static void main(String[] args) {
