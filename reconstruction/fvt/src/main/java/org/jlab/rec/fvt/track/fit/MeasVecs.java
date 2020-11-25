@@ -52,7 +52,7 @@ public class MeasVecs {
         double err       = (double) org.jlab.rec.fmt.Constants.FVT_Pitch/Math.sqrt(12.);
         meas.error       = err*err*size;
         meas.layer       = l+1;
-        if (l>-1) meas.z = org.jlab.rec.fmt.Constants.FVT_Zlayer[l]+org.jlab.rec.fmt.Constants.hDrift/2;
+        if (l>-1) meas.z = GeometryMethods.getLayerZ(l);
         meas.centroid    = cent;
         meas.seed        = seed;
 

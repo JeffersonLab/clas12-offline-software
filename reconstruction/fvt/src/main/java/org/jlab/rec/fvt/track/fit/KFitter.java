@@ -96,7 +96,6 @@ public class KFitter {
         }
 
         // Do one final pass to get the final chi^2 and the corresponding centroid residuals.
-        // TODO: A default value needs to be set for clusters without a matching track.
         this.chi2kf = 0;
         for (int k = svzLength - 1; k > 0; --k) {
             if (k >= 1) {
@@ -116,8 +115,7 @@ public class KFitter {
             int closestSVID = -1;
             double closestSVDistance = Double.POSITIVE_INFINITY;
             for (int si = 0; si < sv.trackTraj.size(); ++si) {
-                double svDistance = Math.abs(sv.trackTraj.get(si).z
-                        - org.jlab.rec.fmt.Constants.FVT_Zlayer[li-1] - org.jlab.rec.fmt.Constants.hDrift/2);
+                double svDistance = Math.abs(sv.trackTraj.get(si).z - GeometryMethods.getLayerZ(li-1));
                 if (svDistance < closestSVDistance) {
                     closestSVID = si;
                     closestSVDistance = svDistance;
@@ -125,7 +123,6 @@ public class KFitter {
             }
 
             // Get the state vector's y position in the layer's local coordinates.
-            // TODO: ASSERT THAT THE STATE VECTOR'S X AND Y COORDINATE ARE IN GLOBAL COORDINATES.
             Point3D locPos = GeometryMethods.globalToLocal(
                     new Point3D(sv.trackTraj.get(closestSVID).x, sv.trackTraj.get(closestSVID).y, 0),
                     li-1);
