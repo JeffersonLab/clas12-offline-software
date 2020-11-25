@@ -241,6 +241,7 @@ public abstract class ReconstructionEngine implements Engine {
     public Map<String,Object> generateConfig() {
         Map<String,String> cfg = new HashMap<>(this.engineConfigMap);
         cfg.put("version",this.getClass().getPackage().getImplementationVersion());
+        cfg.put("class",this.getClass().getCanonicalName());
         Map<String,Object> service = new HashMap<>();
         service.put(this.engineName,cfg);
         Map<String,Object> coatjava = new HashMap<>();
