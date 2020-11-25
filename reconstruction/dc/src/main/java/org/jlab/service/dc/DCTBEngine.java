@@ -231,6 +231,8 @@ public class DCTBEngine extends DCEngine {
             if(kFit.setFitFailed==false && kFit.finalStateVec!=null) { 
                 // set the state vector at the last measurement site
                 fn.set(kFit.finalStateVec.x, kFit.finalStateVec.y, kFit.finalStateVec.tx, kFit.finalStateVec.ty); 
+                fn.setZ(kFit.finalStateVec.z);
+                
                 //set the track parameters if the filter does not fail
                 TrackArray[i].set_P(1./Math.abs(kFit.finalStateVec.Q));
                 TrackArray[i].set_Q((int)Math.signum(kFit.finalStateVec.Q));
@@ -259,6 +261,7 @@ public class DCTBEngine extends DCEngine {
                         kFit2.runFitter(TrackArray[i].get(0).get_Sector());
                         StateVec fn2 = new StateVec();
                         fn2.set(kFit2.finalStateVec.x, kFit2.finalStateVec.y, kFit2.finalStateVec.tx, kFit2.finalStateVec.ty);
+                        fn2.setZ(kFit2.finalStateVec.z);
                         TrackArray[i].setFinalStateVecMC(fn2);
                         //state vec at 0
                         Point3D VTCSMC = crosses.get(0).getCoordsInSector(
@@ -267,6 +270,7 @@ public class DCTBEngine extends DCEngine {
                         kFit2.propagateToVtx(crosses.get(0).get_Sector(), VTCSMC.z());
                         StateVec fn3 = new StateVec();
                         fn3.set(kFit2.stateVecAtVtx.x, kFit2.stateVecAtVtx.y, kFit2.stateVecAtVtx.tx, kFit2.stateVecAtVtx.ty);
+                        fn3.setZ(kFit2.stateVecAtVtx.z);
                         TrackArray[i].setOriginStateVecMC(fn3);
                     }
                     //Transform cov mat in lab frame
@@ -280,6 +284,7 @@ public class DCTBEngine extends DCEngine {
                     //state vec at 0
                     StateVec fn3 = new StateVec();
                     fn3.set(kFit.stateVecAtVtx.x, kFit.stateVecAtVtx.y, kFit.stateVecAtVtx.tx, kFit.stateVecAtVtx.ty);
+                    fn3.setZ(kFit.stateVecAtVtx.z);
                     TrackArray[i].setOriginStateVec(fn3);
                                 
                     trkcands.add(TrackArray[i]);
@@ -398,18 +403,33 @@ public class DCTBEngine extends DCEngine {
                 mcTrack.set_Q(track.get_Q());
                 mcTrack.set_P(mcTrack.get_pAtOrig().mag());
                 StateVec sv = new StateVec();
-                dcSwim.SetSwimParameters(vx,vy,vz, px,py,pz,track.get_Q());
-                double[] R = dcSwim.SwimToPlaneLab(250);
+//                dcSwim.SetSwimParameters(vx,vy,vz, px,py,pz,track.get_Q());
+//                double[] R = dcSwim.SwimToPlaneLab(250);
+//                if(R==null)
+//                    return mcTrack;
+//                Cross C = new Cross(track.get(track.size() - 1).get_Sector(), track.get(track.size() - 1).get_Region(), -1);
+//
+//                Point3D trX = C.getCoordsInTiltedSector(R[0], R[1], R[2]);
+//                Point3D trP = C.getCoordsInTiltedSector(R[3], R[4], R[5]);
+//                sv.set(trX.x(), trX.y(), 
+//                        trP.x()/ trP.z(), 
+//                        trP.y()/ trP.z());
+//                sv.setZ(trX.z());
+                sv.setZ(track.getFinalStateVec().getZ());  
+                Cross C = new Cross(track.get(track.size() - 1).get_Sector(), track.get(track.size() - 1).get_Region(), -1);
+                
+                Point3D rotatedX = this.rotateToTiltedCoordSys(track.get(track.size() - 1).get_Sector(), 
+                        mcTrack.get_Vtx0());
+                Point3D rotatedP = this.rotateToTiltedCoordSys(track.get(track.size() - 1).get_Sector(), 
+                        mcTrack.get_pAtOrig().toPoint3D());
+                dcSwim.SetSwimParameters(rotatedX.x(), rotatedX.y(), rotatedX.z(), rotatedP.x(), rotatedP.y(), rotatedP.z(), track.get_Q());
+                double[] R = dcSwim.SwimToPlaneTiltSecSys(track.get(track.size() - 1).get_Sector(), sv.getZ());
+                
                 if(R==null)
                     return mcTrack;
-                Cross C = new Cross(track.get(track.size() - 1).get_Sector(), track.get(track.size() - 1).get_Region(), -1);
-
-                Point3D trX = C.getCoordsInTiltedSector(R[0], R[1], R[2]);
-                Point3D trP = C.getCoordsInTiltedSector(R[3], R[4], R[5]);
-                sv.set(trX.x(), trX.y(), 
-                        trP.x()/ trP.z(), 
-                        trP.y()/ trP.z());
-                sv.setZ(trX.z());
+                sv.set(R[0], R[1], 
+                        R[3]/ R[5], 
+                        R[4]/ R[5]);
                 mcTrack.setFinalStateVec(sv);
             }
         }
@@ -451,6 +471,36 @@ public class DCTBEngine extends DCEngine {
         }
         
     }
+    public Point3D rotateToTiltedCoordSys(int sector, Point3D labFramePars){
+        double[] XinSec = new double[3];
+        double[] XinTiltSec = new double[3];
 
+//        int sector = this.getSector(labFramePars.x(), labFramePars.y(), labFramePars.z());
+
+        if ((sector < 1) || (sector > 6)) {
+            return new Point3D(0,0,0);
+        }
+        if (sector == 1) {
+            XinSec[0] = labFramePars.x();
+            XinSec[1] = labFramePars.y();
+        } else {
+
+            double midPlanePhi = Math.toRadians(60 * (sector - 1));
+            double cosPhi = Math.cos(midPlanePhi);
+            double sinPhi = Math.sin(midPlanePhi);
+            XinSec[0] = cosPhi * labFramePars.x() + sinPhi * labFramePars.y();
+            XinSec[1] = -sinPhi * labFramePars.x() + cosPhi * labFramePars.y();
+        }
+
+        //z coordinates are the same
+        XinSec[2] = labFramePars.z();
+
+        // rotate in tilted sector
+        XinTiltSec[2] = XinSec[0] * Math.sin(Math.toRadians(25.)) + XinSec[2] * Math.cos(Math.toRadians(25.));
+        XinTiltSec[0] = XinSec[0] * Math.cos(Math.toRadians(25.)) - XinSec[2] * Math.sin(Math.toRadians(25.));
+        XinTiltSec[1] = XinSec[1];
+
+        return new Point3D(XinTiltSec[0],XinTiltSec[1],XinTiltSec[2]);
+    }
     
 }
