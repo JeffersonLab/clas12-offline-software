@@ -76,9 +76,10 @@ public class FVTEngine extends ReconstructionEngine {
                 CCDBConstantsLoader.loadAlignmentTable(this.getRun(), this.getConstantsManager());
 
         CCDBConstantsLoader.Load(this.getRun(), geoVariation);
-        Constants.applyZShifts(shiftsArray);
+        Constants.saveAlignmentTable(shiftsArray);
+        Constants.applyZShifts();
         Constants.Load();
-        Constants.applyXYShifts(shiftsArray);
+        Constants.applyXYShifts();
 
         crossMake  = new CrossMaker();
         trkLister  = new TrackList();

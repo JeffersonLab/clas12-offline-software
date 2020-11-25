@@ -1,5 +1,7 @@
 package org.jlab.rec.fmt;
 
+import java.util.Arrays;
+
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Point3D;
 
@@ -37,8 +39,14 @@ public class Constants {
     public static double[][][] FVT_stripsY; // Give the  end-points y-coordinates of the strip segment
 
     public static double[] FVT_stripslength; // Give the strip length
+    public static double hDrift; // Thickness of the drift region in the micromegas
 
-    public static double hDrift; // TODO: What is this?
+    public static double[] FVT_zShift; // z shift from alignment
+    public static double[] FVT_zRot;   // alpha shift from alignment
+    public static double[] FVT_xShift; // x shift from alignment
+    public static double[] FVT_xRot;   // x rotation from alignment
+    public static double[] FVT_yShift; // y shift from alignment
+    public static double[] FVT_yRot;   // y rotation from alignment
 
     private static double[] EFF_Z_OVER_A; // for ELOSS
     private static double[] _X0;          // for M.Scat.
@@ -126,29 +134,48 @@ public class Constants {
 	}
 
     /**
-     * Apply z shifts and rotations to FMT Constants.
+     * Save loaded alignment table to constants.
      * @param shArr : Two-dimensional array storing alignment information. Rows define the 6 FMT
      *                layers, and columns are [deltaX, deltaY, deltaZ, rotX, rotY, rotZ].
      */
-    public static void applyZShifts(double[][] shArr) {
-        for (int li = 0; li < FVT_Nlayers; ++li) {
-            FVT_Zlayer[li] += shArr[li][2];
-            FVT_Alpha[li]  += shArr[li][5];
+    public static void saveAlignmentTable(double[][] shArr) {
+        FVT_zShift = new double[FVT_Nlayers];
+        FVT_zRot   = new double[FVT_Nlayers];
+        FVT_xShift = new double[FVT_Nlayers];
+        FVT_xRot   = new double[FVT_Nlayers];
+        FVT_yShift = new double[FVT_Nlayers];
+        FVT_yRot   = new double[FVT_Nlayers];
+
+        for (int li=0; li<FVT_Nlayers; ++li) {
+            FVT_xShift[li] = shArr[li][0];
+            FVT_yShift[li] = shArr[li][1];
+            FVT_zShift[li] = shArr[li][2];
+            FVT_xRot[li]   = shArr[li][3];
+            FVT_yRot[li]   = shArr[li][4];
+            FVT_zRot[li]   = shArr[li][5];
         }
     }
 
     /**
      * Apply z shifts and rotations to FMT Constants.
-     * @param shArr : Two-dimensional array storing alignment information. Rows define the 6 FMT
-     *                layers, and columns are [deltaX, deltaY, deltaZ, rotX, rotY, rotZ].
      */
-    public static void applyXYShifts(double[][] shArr) {
+    public static void applyZShifts() {
+        for (int li = 0; li < FVT_Nlayers; ++li) {
+            FVT_Zlayer[li] += FVT_zShift[li];
+            FVT_Alpha[li]  += FVT_zRot[li];
+        }
+    }
+
+    /**
+     * Apply z shifts and rotations to FMT Constants.
+     */
+    public static void applyXYShifts() {
         // TODO: Only deltaX and deltaY are implemented. rotX and rotY pending!
         for (int li = 0; li < FVT_Nlayers; ++li) { // layers
             for (int si = 0; si < FVT_Nstrips; ++si) { // strips
                 for (int ei = 0; ei < 2; ++ei) { // endpoints
-                    FVT_stripsX[li][si][ei] += shArr[li][0];
-                    FVT_stripsY[li][si][ei] += shArr[li][1];
+                    FVT_stripsX[li][si][ei] += FVT_xShift[li];
+                    FVT_stripsY[li][si][ei] += FVT_yShift[li];
                 }
             }
         }
