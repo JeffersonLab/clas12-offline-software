@@ -108,7 +108,7 @@ public class MakerCA {
       	  if( this._debug ) {
       		  System.out.println( "\n cross a " + a.get_Id() + " " + a.get_Detector() +a.get_DetectorType() + " sect:" + a.get_Sector() + " reg:" 
       				  + aReg + " phi:" + a.get_Point().toVector3D().phi() + " in BMT sector:" + 
-      				  bgeom.isInSector(1, a.get_Point().toVector3D().phi(), 0 ));
+      				  bgeom.getSector(1, a.get_Point().toVector3D().phi()));
       	  }
       	  
       	  
@@ -125,7 +125,7 @@ public class MakerCA {
           	  if( this._debug ) {
           		  System.out.println( " cross b " + b.get_Id() + " " + b.get_Detector() +b.get_DetectorType() + " sect:" + b.get_Sector() + " reg:" 
           				  + bReg + " phi:" + b.get_Point().toVector3D().phi() + " in BMT sector:" + 
-          				  bgeom.isInSector(1, b.get_Point().toVector3D().phi(), 0 ));
+          				  bgeom.getSector(1, b.get_Point().toVector3D().phi() ));
           	  }
           	  
           	  if( bReg <= aReg  ) continue; // crosses should be ordered. skip in case they are not
@@ -151,7 +151,8 @@ public class MakerCA {
           		  }
           		  else{
           			  double aphi = a.get_Point().toVector3D().phi() ;
-          			  if( ! bgeom.checkIsInSector( aphi, b.get_Sector(), 1, Math.toRadians(10) )  ) {
+          			  //if( ! bgeom.checkIsInSector( aphi, b.get_Sector(), 1, Math.toRadians(10) )  ) {
+                                  if(bgeom.getSector(b.get_Region()*2, aphi)>0) {
           				  if( this._debug) System.out.println("cross b and a are not in the same sector"); 
           				  continue;
       				  }

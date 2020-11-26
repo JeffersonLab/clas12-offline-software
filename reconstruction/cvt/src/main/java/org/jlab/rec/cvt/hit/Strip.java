@@ -141,10 +141,14 @@ public class Strip {
 
         if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(layer) == 0) { // C-dtectors
             // set z
-            double z = geo.CRCStrip_GetZ(layer, this.get_Strip());
+            //double z = geo.CRCStrip_GetZ(layer, this.get_Strip());
+            int region = (int) ((layer + 1) / 2 ); // region index (1...3) 1=layers 1&2, 2=layers 3&4, 3=layers 5&6
+            double z = geo.getCstripZ(region, this.get_Strip());
             this.set_Z(z);
             // max z err
-            this.set_ZErr(geo.CRCStrip_GetPitch(layer, this.get_Strip()) / Math.sqrt(12.));
+            //this.set_ZErr(geo.CRCStrip_GetPitch(layer, this.get_Strip()) / Math.sqrt(12.));
+            this.set_ZErr(geo.getCPitch(region, this.get_Strip()) / Math.sqrt(12.));
+            
         }
 
         if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(layer) == 1) { // Z-detectors
@@ -155,13 +159,19 @@ public class Strip {
             this.set_Phi(theLorentzCorrectedAngle);
             this.set_Phi0(theMeasuredPhi); // uncorrected
             //System.out.println(" sec "+sector+" strip "+this.get_Strip()+" LC strip "+geo.getZStrip(layer, theLorentzCorrectedAngle));
-            int theLorentzCorrectedStrip = geo.getZStrip(layer, theLorentzCorrectedAngle);
+            //int theLorentzCorrectedStrip = geo.getZStrip(layer, theLorentzCorrectedAngle);
+            int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6double Z0=0;           
+            double xl = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]*
+                    Math.cos(theLorentzCorrectedAngle);
+            double yl = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region]*
+                    Math.sin(theLorentzCorrectedAngle);
+            int theLorentzCorrectedStrip = geo.getStrip( layer,  sector, 
+                    new Point3D(xl,yl,0));
             // get the strip number after correcting for Lorentz angle
             this.set_LCStrip(theLorentzCorrectedStrip);
 
             double sigma = org.jlab.rec.cvt.bmt.Constants.SigmaDrift / Math.cos(org.jlab.rec.cvt.bmt.Constants.getThetaL()); // max sigma for drift distance  (hDrift) = total gap from top to mesh
 
-            int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6double Z0=0;
             //max phi err
             double phiErrL = sigma / org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[num_region];
 

@@ -854,8 +854,8 @@ public class TrackCandListFinder {
                     continue;
                 }
                 double m_z = MMCrosses.get(i).get_Point().z();
-                int sector = geo.isInSector(MMCrosses.get(i).get_Region() * 2, phi, Math.toRadians(Constants.isInSectorJitter));
-
+                //int sector = geo.isInSector(MMCrosses.get(i).get_Region() * 2, phi, Math.toRadians(Constants.isInSectorJitter));
+                int sector = geo.getSector(MMCrosses.get(i).get_Region() * 2, phi);
                 if (sector != MMCrosses.get(i).get_Sector()) {
                     continue;
                 }

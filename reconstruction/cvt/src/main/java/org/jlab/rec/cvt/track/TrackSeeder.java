@@ -379,7 +379,10 @@ public class TrackSeeder {
             if (angle < 0) {
                 angle += 2 * Math.PI;
             }
-            if (bmt_geo.isInDetector(bmt_crosses.get(i).get_Region()*2-1, angle, jitter) == bmt_crosses.get(i).get_Sector() - 1) {
+            //if (bmt_geo.isInDetector(bmt_crosses.get(i).get_Region()*2-1, angle, jitter) 
+            //        == bmt_crosses.get(i).get_Sector() - 1) 
+            //inDetector(int layer, int sector, Point3D traj) 
+            if (bmt_geo.inDetector(bmt_crosses.get(i).get_Region()*2-1, bmt_crosses.get(i).get_Sector(), pAtBMTSurf)==true){
                 bmt_crossesInSec.add(bmt_crosses.get(i)); 
             }
             
@@ -620,7 +623,10 @@ public class TrackSeeder {
         double z_bmt = bmt_Ccross.get_Point().z();
         double r_bmt = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[bmt_Ccross.get_Region() - 1];
         Point3D phiHelixAtSurf = trkCand.get_Helix().getPointAtRadius(r_bmt); 
-        if (bmt_geo.isInSector(bmt_Ccross.get_Cluster1().get_Layer(), Math.atan2(phiHelixAtSurf.y(), phiHelixAtSurf.x()), Math.toRadians(10)) != bmt_Ccross.get_Sector()) {
+        //if (bmt_geo.isInSector(bmt_Ccross.get_Cluster1().get_Layer(), Math.atan2(phiHelixAtSurf.y(), phiHelixAtSurf.x()), Math.toRadians(10)) 
+        //        != bmt_Ccross.get_Sector()) 
+        int sector = bmt_geo.getSector(bmt_Ccross.get_Cluster1().get_Layer(), Math.atan2(phiHelixAtSurf.y(), phiHelixAtSurf.x()));
+        if(sector!= bmt_Ccross.get_Sector()){
             return false;
         }
         double dzdr_bmt = z_bmt / r_bmt;

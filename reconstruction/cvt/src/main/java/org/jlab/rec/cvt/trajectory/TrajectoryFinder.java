@@ -190,7 +190,8 @@ public class TrajectoryFinder {
                     StateVec stVec = new StateVec(inters[0]*10, inters[1]*10, inters[2]*10, inters[3], inters[4], inters[5]);
                     stVec.set_planeIdx(l);  
                     double phiPos = Math.atan2(stVec.y(),stVec.x());
-                    int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
+                    //int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
+                    int sector = bmt_geo.getSector(BMTRegIdx+1,phiPos);
                     stVec.set_SurfaceDetector(DetectorType.CVT.getDetectorId());
                     stVec.set_SurfaceSector(sector);
                     stVec.set_SurfaceLayer(l+1); 
@@ -198,7 +199,9 @@ public class TrajectoryFinder {
                     stVec.set_Path(path*10);
                     Vector3D dir = new Vector3D(inters[3], inters[4], inters[5]).asUnit();
                     this.fill_HelicalTrkAngleWRTBMTTangentPlane(dir, stVec);
-                    stVec.set_CalcCentroidStrip(bmt_geo.getCStrip(BMTRegIdx+1, stVec.z()));
+                    //stVec.set_CalcCentroidStrip(bmt_geo.getCStrip(BMTRegIdx+1, stVec.z()));
+                    stVec.set_CalcCentroidStrip(bmt_geo.getCstrip(BMTRegIdx+1, 
+                            new Point3D(stVec.x(),stVec.y(),stVec.z())));
                     stateVecs.add(stVec);
                 //}
                 //else {
@@ -404,7 +407,8 @@ public class TrajectoryFinder {
                     double XtrackIntersSurf = BMTIntersections[l][h][0];
                     double YtrackIntersSurf = BMTIntersections[l][h][1];
                     double ZtrackIntersSurf = BMTIntersections[l][h][2];
-                    int SectorTrackIntersSurf = bmt_geo.isInSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter));
+                    //int SectorTrackIntersSurf = bmt_geo.isInSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf), Math.toRadians(org.jlab.rec.cvt.bmt.Constants.isInSectorJitter));
+                    int SectorTrackIntersSurf = bmt_geo.getSector(LayerTrackIntersSurf, Math.atan2(YtrackIntersSurf, XtrackIntersSurf));
                     double PhiTrackIntersSurf = BMTIntersections[l][h][3];
                     double ThetaTrackIntersSurf = BMTIntersections[l][h][4];
                     double trkToMPlnAngl = BMTIntersections[l][h][5];
@@ -775,26 +779,36 @@ public class TrajectoryFinder {
         double z_plus = _yzslope2 * y_plus + _yzinterc2;
         double z_minus = _yzslope2 * y_minus + _yzinterc2;
 
-        if (geo.isInFiducial(x_plus, y_plus, z_plus, l + 1)) {
-            inters_top[0] = x_plus;
+        //if (geo.isInFiducial(x_plus, y_plus, z_plus, l + 1)) {
+        if(geo.inDetector(new Point3D(x_plus, y_plus, z_plus))) {
+        inters_top[0] = x_plus;
             inters_top[1] = y_plus;
             inters_top[2] = z_plus;
             if (l % 2 == 1) {
-                inters_top[3] = geo.getCStrip(l + 1, z_plus);
+                //inters_top[3] = geo.getCStrip(l + 1, z_plus);
+                inters_top[3] = geo.getCstrip(l + 1, new Point3D(x_plus,y_plus,z_plus));
             }
             if (l % 2 == 0) {
-                inters_top[3] = geo.getZStrip(l + 1, Math.atan2(y_plus, x_plus));
+                //inters_top[3] = geo.getZStrip(l + 1, Math.atan2(y_plus, x_plus));
+                int sector = geo.getSector(l, Math.atan2(y_plus, x_plus));
+                inters_top[3]= geo.getStrip( l + 1,  sector, 
+                    new Point3D(x_plus, y_plus,0));
             }
         }
-        if (geo.isInFiducial(x_minus, y_minus, z_minus, l + 1)) {
+        //if (geo.isInFiducial(x_minus, y_minus, z_minus, l + 1)) {
+        if(geo.inDetector(new Point3D(x_minus, y_minus, z_minus))) {
             inters_bottom[0] = x_minus;
             inters_bottom[1] = y_minus;
             inters_bottom[2] = z_minus;
             if (l % 2 == 1) {
-                inters_bottom[3] = geo.getCStrip(l + 1, z_minus);
+                //inters_bottom[3] = geo.getCStrip(l + 1, z_minus);
+                inters_bottom[3] = geo.getCstrip(l + 1, new Point3D(x_minus,y_minus,z_minus));
             }
             if (l % 2 == 0) {
-                inters_bottom[3] = geo.getZStrip(l + 1, Math.atan2(y_minus, x_minus));
+                //inters_bottom[3] = geo.getZStrip(l + 1, Math.atan2(y_minus, x_minus));
+                int sector = geo.getSector(l, Math.atan2(y_minus, x_minus));
+                inters_bottom[3]= geo.getStrip( l + 1,  sector, 
+                    new Point3D(x_minus, y_minus,0));
             }
         }
 
