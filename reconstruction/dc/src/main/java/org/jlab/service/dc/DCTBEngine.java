@@ -239,6 +239,7 @@ public class DCTBEngine extends DCEngine {
                 trkcandFinder.setTrackPars(TrackArray[i], new Trajectory(), trjFind, fn, 
                         kFit.finalStateVec.z, dcDetector, dcSwim, beamXoffset, beamYoffset);
                 // candidate parameters are set from the state vector
+                TrackArray[i].setFinalStateVec(fn);
                 TrackArray[i].set_FitChi2(kFit.chi2); 
                 TrackArray[i].set_FitNDF(kFit.NDF);
                 TrackArray[i].set_CovMat(kFit.finalCovMat.covMat);
