@@ -191,7 +191,7 @@ public class TrajectoryFinder {
                     stVec.set_planeIdx(l);  
                     double phiPos = Math.atan2(stVec.y(),stVec.x());
                     //int sector = bmt_geo.isInSector(BMTRegIdx+1,phiPos, 0);
-                    int sector = bmt_geo.getSector(BMTRegIdx+1,phiPos);
+                    int sector = bmt_geo.getSector(2*(BMTRegIdx+1),phiPos);
                     stVec.set_SurfaceDetector(DetectorType.CVT.getDetectorId());
                     stVec.set_SurfaceSector(sector);
                     stVec.set_SurfaceLayer(l+1); 
@@ -786,11 +786,11 @@ public class TrajectoryFinder {
             inters_top[2] = z_plus;
             if (l % 2 == 1) {
                 //inters_top[3] = geo.getCStrip(l + 1, z_plus);
-                inters_top[3] = geo.getCstrip(l + 1, new Point3D(x_plus,y_plus,z_plus));
+                inters_top[3] = geo.getCstrip((int)(l/2 + 1), new Point3D(x_plus,y_plus,z_plus));
             }
             if (l % 2 == 0) {
                 //inters_top[3] = geo.getZStrip(l + 1, Math.atan2(y_plus, x_plus));
-                int sector = geo.getSector(l, Math.atan2(y_plus, x_plus));
+                int sector = geo.getSector(l + 1, Math.atan2(y_plus, x_plus));
                 inters_top[3]= geo.getStrip( l + 1,  sector, 
                     new Point3D(x_plus, y_plus,0));
             }
@@ -802,11 +802,11 @@ public class TrajectoryFinder {
             inters_bottom[2] = z_minus;
             if (l % 2 == 1) {
                 //inters_bottom[3] = geo.getCStrip(l + 1, z_minus);
-                inters_bottom[3] = geo.getCstrip(l + 1, new Point3D(x_minus,y_minus,z_minus));
+                inters_bottom[3] = geo.getCstrip((int)(l/2 + 1), new Point3D(x_minus,y_minus,z_minus));
             }
             if (l % 2 == 0) {
                 //inters_bottom[3] = geo.getZStrip(l + 1, Math.atan2(y_minus, x_minus));
-                int sector = geo.getSector(l, Math.atan2(y_minus, x_minus));
+                int sector = geo.getSector(l + 1, Math.atan2(y_minus, x_minus));
                 inters_bottom[3]= geo.getStrip( l + 1,  sector, 
                     new Point3D(x_minus, y_minus,0));
             }
