@@ -35,6 +35,10 @@ public class DefaultLogger {
      * Initialize default logging if java system properties are not set.
      */
     public static void initialize() {
+        String clas12_logger = System.getenv("CLAS12_LOGGER");
+        if(clas12_logger != null)
+            System.setProperty("java.util.logging.config.file", clas12_logger);
+
         if (System.getProperty("java.util.logging.config.file") == null) {
             // Config is only read in if there is not an externally set class or file already.
             new DefaultLogger();
@@ -47,6 +51,12 @@ public class DefaultLogger {
             // Config is only read in if there is not an externally set class or file already.
             new DefaultLogger();
         }
+    }
 
+    public static void main(String[] args) {
+        DefaultLogger.initialize();
+        Logger.getLogger(DefaultLogger.class.getName()).log(Level.INFO,"Info");
+        Logger.getLogger(DefaultLogger.class.getName()).log(Level.WARNING,"Warning");
+        Logger.getLogger(DefaultLogger.class.getName()).log(Level.SEVERE,"Severe");
     }
 }
