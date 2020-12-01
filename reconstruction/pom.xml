@@ -28,5 +28,6 @@
     <module>band</module>
     <module>rtpc</module>
     <module>swaps</module>
+    <module>vtx</module>
   </modules>
 </project>
