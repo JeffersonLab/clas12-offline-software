@@ -12,6 +12,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The Class Solenoid.
@@ -20,6 +22,7 @@ import java.util.StringTokenizer;
  * @version 1.0
  */
 public final class Solenoid extends MagneticField {
+	public static Logger LOGGER = Logger.getLogger(Solenoid.class.getName());
 	
 	
 	// private constructor
@@ -66,7 +69,7 @@ public final class Solenoid extends MagneticField {
 		Solenoid solenoid = new Solenoid();
 		solenoid.readBinaryMagneticField(file);
 		// is the field ready to use?
-		System.out.println(solenoid.toString());
+		LOGGER.log(Level.FINEST, solenoid.toString());
 		return solenoid;
 	}
     

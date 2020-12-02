@@ -2,6 +2,9 @@ package org.jlab.service.eb;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
 import org.jlab.clas.detector.*;
@@ -12,6 +15,7 @@ import org.jlab.rec.eb.EBCCDBConstants;
 import org.jlab.rec.eb.EBCCDBEnum;
 import org.jlab.rec.eb.EBScalers;
 import org.jlab.rec.eb.EBRadioFrequency;
+import org.jlab.service.ec.ECEngine;
 
 /**
  *
@@ -20,6 +24,7 @@ import org.jlab.rec.eb.EBRadioFrequency;
  *@author baltzell
  */
 public class EBEngine extends ReconstructionEngine {
+    public static Logger LOGGER = Logger.getLogger(EBEngine.class.getName());
 
     boolean dropBanks = false;
     boolean alreadyDroppedBanks = false;
@@ -74,7 +79,7 @@ public class EBEngine extends ReconstructionEngine {
             run=de.getBank("RUN::config").getInt("run",0);
         }
         if (run<=0) {
-            System.out.println("EBEngine:  found no run number, CCDB constants not loaded, skipping event.");
+            LOGGER.log(Level.WARNING,"EBEngine:  found no run number, CCDB constants not loaded, skipping event.");
             return false;
         }
 
@@ -278,7 +283,7 @@ public class EBEngine extends ReconstructionEngine {
 
     public void dropBanks(DataEvent de) {
         if (this.alreadyDroppedBanks==false) {
-            System.out.println("["+this.getName()+"]  dropping REC banks!\n");
+            LOGGER.log(Level.INFO,"["+this.getName()+"]  dropping REC banks!\n");
             this.alreadyDroppedBanks=true;
         }
         de.removeBank(eventBank);
@@ -305,7 +310,7 @@ public class EBEngine extends ReconstructionEngine {
 
         requireConstants(EBCCDBConstants.getAllTableNames());
         this.getConstantsManager().setVariation("default");
-        System.out.println("["+this.getName()+"] --> event builder is ready....");
+        LOGGER.log(Level.INFO,"["+this.getName()+"] --> event builder is ready....");
         return true;
     }
     

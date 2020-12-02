@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jlab.detector.calib.utils.DatabaseConstantProvider; // coatjava-3.0
 import org.jlab.geom.base.ConstantProvider;
@@ -30,8 +32,9 @@ import eu.mihosoft.vrl.v3d.Transform;
  * @author pdavies
  * @version 1.1.1
  */
-public class SVTConstants
-{
+public class SVTConstants {
+	public static Logger LOGGER = Logger.getLogger(SVTConstants.class.getName());
+
 	private static String ccdbPath = "/geometry/cvt/svt/";
 	private static boolean bLoadedConstants = false; // only load constants once
 	
@@ -323,7 +326,7 @@ public class SVTConstants
 			// |			  | radius					  | radius
 			// |			  | 						  |
 			// o==============v===========================v===================================-> z (beamline)
-			System.out.println("SVT READ Z SHIFT VALUE "+cp.getDouble("/geometry/target/position", 0));
+			LOGGER.log(Level.INFO,"SVT READ Z SHIFT VALUE "+cp.getDouble("/geometry/target/position", 0));
 			// LAYERRADIUS and ZSTARTACTIVE are used primarily by the Reconstruction and getStrip()
 			for( int region = 0; region < NREGIONS; region++ )
 			{
@@ -358,10 +361,10 @@ public class SVTConstants
                             for( int aSector = 0; aSector < NSECTORS[aRegion]; aSector++ )
                             {
                                 RSI[aRegion][aSector] = convertRegionSector2Index( aRegion, aSector );
-                                System.out.println(" a Region "+aRegion +" aSector "+aSector+" RSI "+RSI[aRegion][aSector] );
+                                LOGGER.log(Level.FINEST," a Region "+aRegion +" aSector "+aSector+" RSI "+RSI[aRegion][aSector] );
                             }
                         }
-			System.out.println("Reading alignment shifts from database");
+			LOGGER.log(Level.INFO,"Reading alignment shifts from database");
 		
                         SECTORSHIFTDATA = new double[NTOTALSECTORS][];
                         

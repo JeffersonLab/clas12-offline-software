@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.detector.base.DetectorCollection;
@@ -19,6 +21,7 @@ import org.jlab.io.base.DataEvent;
  * @author gavalian
  */
 public class ECEngine extends ReconstructionEngine {
+    public static Logger LOGGER = Logger.getLogger(ECEngine.class.getName());
     
     Detector              ecDetector = null;
     public Boolean             debug = false;
@@ -44,7 +47,7 @@ public class ECEngine extends ReconstructionEngine {
             DataBank bank = de.getBank("RUN::config");
             runNo = bank.getInt("run", 0);
             if (runNo<=0) {
-                System.err.println("ECEngine:  got run <= 0 in RUN::config, skipping event.");
+                LOGGER.log(Level.WARNING,"ECEngine:  got run <= 0 in RUN::config, skipping event.");
                 return false;
             }
         }
@@ -176,41 +179,41 @@ public class ECEngine extends ReconstructionEngine {
     }
    
     public void setCalRun(int runno) {
-        System.out.println("ECEngine: Calibration Run Number = "+runno);
+        LOGGER.log(Level.INFO,"ECEngine: Calibration Run Number = "+runno);
         this.calrun = runno;
     }
     
     public void setVariation(String variation) {
-        System.out.println("ECEngine: Variation = "+variation);
+        LOGGER.log(Level.INFO,"ECEngine: Variation = "+variation);
         ECCommon.variation = variation;
     } 
     
     public void setVeff(float veff) {
-        System.out.println("ECEngine: Veff = "+veff);
+        LOGGER.log(Level.INFO,"ECEngine: Veff = "+veff);
     	    ECCommon.veff = veff;
     }
     
     public void setNewTimeCal(boolean val) {
-        System.out.println("ECEngine: useNewTimeCal = "+val);
+        LOGGER.log(Level.INFO,"ECEngine: useNewTimeCal = "+val);
     	ECCommon.useNewTimeCal = val;
     }
     
     public void setStripThresholds(int thr0, int thr1, int thr2) {
-        System.out.println("ECEngine: Strip ADC thresholds = "+thr0+" "+thr1+" "+thr2);
+        LOGGER.log(Level.INFO,"ECEngine: Strip ADC thresholds = "+thr0+" "+thr1+" "+thr2);
         ECCommon.stripThreshold[0] = thr0;
         ECCommon.stripThreshold[1] = thr1;
         ECCommon.stripThreshold[2] = thr2;
     }
     
     public void setPeakThresholds(int thr0, int thr1, int thr2) {
-        System.out.println("ECEngine: Peak ADC thresholds = "+thr0+" "+thr1+" "+thr2);
+        LOGGER.log(Level.INFO,"ECEngine: Peak ADC thresholds = "+thr0+" "+thr1+" "+thr2);
         ECCommon.peakThreshold[0] = thr0;
         ECCommon.peakThreshold[1] = thr1;
         ECCommon.peakThreshold[2] = thr2;
     }   
     
     public void setClusterCuts(float err0, float err1, float err2) {
-        System.out.println("ECEngine: Cluster Dalitz Cuts = "+err0+" "+err1+" "+err2);
+        LOGGER.log(Level.INFO,"ECEngine: Cluster Dalitz Cuts = "+err0+" "+err1+" "+err2);
         ECCommon.clusterError[0] = err0;
         ECCommon.clusterError[1] = err1;
         ECCommon.clusterError[2] = err2;

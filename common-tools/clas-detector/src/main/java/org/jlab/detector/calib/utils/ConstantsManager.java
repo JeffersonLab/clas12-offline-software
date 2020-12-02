@@ -12,6 +12,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.jlab.geom.base.ConstantProvider;
 import org.jlab.utils.groups.IndexedTable;
 
 /**
@@ -19,7 +23,7 @@ import org.jlab.utils.groups.IndexedTable;
  * @author gavalian
  */
 public class ConstantsManager {
-    
+    Logger LOGGER = Logger.getLogger(ConstantsManager.class.getName());
     private DatabaseConstantsDescriptor  defaultDescriptor = new DatabaseConstantsDescriptor();
     private volatile Map<Integer,DatabaseConstantsDescriptor>  runConstants = new LinkedHashMap<Integer,DatabaseConstantsDescriptor>();
     private volatile Map<Integer,Integer>    runConstantRequestHistory = new LinkedHashMap<Integer,Integer>();
@@ -72,7 +76,7 @@ public class ConstantsManager {
         }
         DatabaseConstantsDescriptor  descriptor = this.runConstants.get(run);
         if(descriptor.getMap().containsKey(table)==false){
-            System.out.println("[getConstants] error ( run = " + run + " ) "
+            LOGGER.log(Level.WARNING,"[getConstants] error ( run = " + run + " ) "
                     + " table not found with name : " + table);
         }
         return descriptor.getMap().get(table);
@@ -100,12 +104,12 @@ public class ConstantsManager {
              runConstantRequestHistory.put(run, requests+1);
              if(requests>maxRequests) {
                  requestStatus = -1;
-                 System.out.println("[ConstantsManager] exceeded maximum requests " + requests + " for run " + run);
+                 LOGGER.log(Level.WARNING,"[ConstantsManager] exceeded maximum requests " + requests + " for run " + run);
              }
          }
         //String  historyString = 
         //if()
-        System.out.println("[ConstantsManager] --->  loading table for run = " + run);
+        LOGGER.log(Level.INFO,"[ConstantsManager] --->  loading table for run = " + run);
         DatabaseConstantsDescriptor desc = defaultDescriptor.getCopy(run);
         DatabaseConstantProvider provider = new DatabaseConstantProvider(run,
                 this.databaseVariation, this.timeStamp);
@@ -121,11 +125,11 @@ public class ConstantsManager {
             try {
                 IndexedTable  table = provider.readTable(tableName);
                 desc.getMap().put(tk.get(i), table);
-                System.out.println(String.format("***** >>> adding : %14s / table = %s", tk.get(i),tableName));
+                LOGGER.log(Level.INFO,String.format("***** >>> adding : %14s / table = %s", tk.get(i),tableName));
                 //System.out.println("***** >>> adding : table " + tableName 
                 //        + "  key = " + tk.get(i));
             } catch (Exception e) {
-                System.out.println("[ConstantsManager] ---> error reading table : "
+                LOGGER.log(Level.WARNING,"[ConstantsManager] ---> error reading table : "
                         + tableName);
             }
         }
@@ -160,6 +164,7 @@ public class ConstantsManager {
      * Helper class to hold all constants for particular run.
      */
     public static class DatabaseConstantsDescriptor {
+        Logger LOGGER = Logger.getLogger(DatabaseConstantsDescriptor.class.getName());
         
         private String  descName   = "descriptor";
         private int     runNumber  = 10;
@@ -189,7 +194,7 @@ public class ConstantsManager {
         
         public void addTables(Set<String> keys, Set<String> tables){
             if(keys.size()!=tables.size()){
-                System.out.println("[DatabaseConstantsDescriptor] error --> "
+                LOGGER.log(Level.WARNING,"[DatabaseConstantsDescriptor] error --> "
                 + " size of keys ("+keys.size()+") does not match size of"
                         + " tables ("+tables.size()+")");
             } else {

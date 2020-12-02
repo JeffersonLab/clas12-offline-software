@@ -8,6 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * For magnetic fields stored in a specific format.
@@ -17,6 +19,7 @@ import java.nio.FloatBuffer;
  * @version 1.0
  */
 public abstract class MagneticField implements IMagField {
+	public static Logger LOGGER = Logger.getLogger(MagneticField.class.getName());
 
 	/** Magic number used to check if byteswapping is necessary. */
 	public static final int MAGICNUMBER = 0xced;
@@ -134,13 +137,13 @@ public abstract class MagneticField implements IMagField {
 	 *            the scale factor
 	 */
 	public final void setScaleFactor(double scale) {
-		System.out.println("CHANGING SCALE from " + _scaleFactor + " to " + scale + "  for " + getBaseFileName());
+		LOGGER.log(Level.FINE,"CHANGING SCALE from " + _scaleFactor + " to " + scale + "  for " + getBaseFileName());
 		if (Math.abs(scale - _scaleFactor) > TINY) {
 			_scaleFactor = scale;
 			MagneticFields.getInstance().changedScale(this);
 		}
 		else {
-			System.out.println("Ignored inconsequential scale change for " + getBaseFileName());
+			LOGGER.log(Level.WARNING,"Ignored inconsequential scale change for " + getBaseFileName());
 		}
 	}
 	
@@ -433,7 +436,7 @@ public abstract class MagneticField implements IMagField {
 			// TODO handle swapping if necessary
 			swap = (magicnum != MAGICNUMBER);
 			if (swap) {
-				System.err.println("byte swapping required but not yet implemented.");
+				LOGGER.log(Level.WARNING,"byte swapping required but not yet implemented.");
 				dos.close();
 				return;
 			}
@@ -543,7 +546,7 @@ public abstract class MagneticField implements IMagField {
 			return val;
 		}
 		catch (IndexOutOfBoundsException e) {
-			System.err.println("error in mag field index1 = " + index);
+			LOGGER.log(Level.WARNING,"error in mag field index1 = " + index);
 			e.printStackTrace();
 			return 0;
 		}
@@ -652,7 +655,7 @@ public abstract class MagneticField implements IMagField {
 	 */
 	public static final void setInterpolate(boolean interpolate) {
 		_interpolate = interpolate;
-		System.out.println("Interpolating fields: " + _interpolate);
+		LOGGER.log(Level.FINE,"Interpolating fields: " + _interpolate);
 	}
 
 

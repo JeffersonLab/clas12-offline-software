@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+
+import cnuphys.magfield.MagneticField;
 import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.base.DetectorType;
 
@@ -19,6 +21,9 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.rec.dc.Constants;
 
 import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * A class to load the geometry constants used in the DC reconstruction. The
  * coordinate system used in the Tilted Sector coordinate system.
@@ -27,6 +32,7 @@ import java.io.PrintWriter;
  *
  */
 public class TrajectorySurfaces {
+    public static Logger LOGGER = Logger.getLogger(TrajectorySurfaces.class.getName());
 
     private List<ArrayList<Surface>> _DetectorPlanes = new ArrayList<ArrayList<Surface>>();
     
@@ -64,7 +70,7 @@ public class TrajectorySurfaces {
         Vector3D n;
         for(int is =0; is<6; is++) {
 
-            System.out.println(" CREATING SURFACES FOR SECTOR "+(is+1));
+            LOGGER.log(Level.FINE," CREATING SURFACES FOR SECTOR "+(is+1));
             this._DetectorPlanes.add(new ArrayList<Surface>());
             
             // add target center and downstream wall

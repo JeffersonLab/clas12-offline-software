@@ -9,6 +9,8 @@ import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
@@ -25,6 +27,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * 
  */
 public class MagneticFields {
+	public static Logger LOGGER = Logger.getLogger(MagneticField.class.getName());
 	
 	//0.866...
 	private static final double ROOT3OVER2 = Math.sqrt(3)/2;
@@ -209,7 +212,7 @@ public class MagneticFields {
 			}
 		}
 
-		// System.out.println(_torus);
+		// LOGGER.log(Level.FINE,_torus);
 		notifyListeners();
 
 	}
@@ -709,7 +712,7 @@ public class MagneticFields {
 
 		_solenoidPath = fullPath;
 
-		// System.out.println("\nAttempted to read solenoid from [" + cp + "]
+		// LOGGER.log(Level.FINE,"\nAttempted to read solenoid from [" + cp + "]
 		// success: " + (solenoid != null));
 		return solenoid;
 	}
@@ -734,7 +737,7 @@ public class MagneticFields {
 		}
 
 		_torusPath = fullPath;
-		// System.out.println("\nAttempted to read torus from [" + cp + "]
+		// LOGGER.log(Level.FINE,"\nAttempted to read torus from [" + cp + "]
 		// success: " + (torus != null));
 		return torus;
 	}
@@ -883,26 +886,26 @@ public class MagneticFields {
 			}
 		}
 
-		System.out.println("===========================================");
-		System.out.println("  Initializing Magnetic Fields");
-		System.out.println("  Version " + VERSION);
-		System.out.println("  Contact: david.heddle@cnu.edu");
-		System.out.println();
+		LOGGER.log(Level.FINE,"===========================================");
+		LOGGER.log(Level.FINE,"  Initializing Magnetic Fields");
+		LOGGER.log(Level.FINE,"  Version " + VERSION);
+		LOGGER.log(Level.FINE,"  Contact: david.heddle@cnu.edu");
+		LOGGER.log(Level.FINE,"");
 
 		if (torusFile != null) {
-			System.out.println("  TORUS: [" + torusPath + "]");
+			LOGGER.log(Level.FINE,"  TORUS: [" + torusPath + "]");
 			_torus = readTorus(torusPath);
 		}
 
 		if (solenoidFile != null) {
-			System.out.println("  SOLENOID: [" + solenoidPath + "]");
+			LOGGER.log(Level.FINE,"  SOLENOID: [" + solenoidPath + "]");
 			// load the solenoid
 			_solenoid = readSolenoid(solenoidPath);
 		}
 
-		System.out.println("  Torus loaded: " + (_torus != null));
-		System.out.println("  Solenoid loaded: " + (_solenoid != null));
-		System.out.println("===========================================");
+		LOGGER.log(Level.FINE,"  Torus loaded: " + (_torus != null));
+		LOGGER.log(Level.FINE,"  Solenoid loaded: " + (_solenoid != null));
+		LOGGER.log(Level.FINE,"===========================================");
 
 		// _uniform = new Uniform(0, 0, 2);
 		//
@@ -929,7 +932,7 @@ public class MagneticFields {
 			goodDir[i] = (magdir.exists() && magdir.isDirectory());
 
 			try {
-				System.out.println("MagDir [" + magdir.getCanonicalPath() + "]  Good: " + goodDir[i]);
+				LOGGER.log(Level.FINE,"MagDir [" + magdir.getCanonicalPath() + "]  Good: " + goodDir[i]);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -939,15 +942,15 @@ public class MagneticFields {
 			if (goodDir[i]) {
 				File magdir = new File(dirs[i], "magfield");
 				if (initializeMagneticFields(magdir)) {
-					System.out.println("Used fields found in [" + magdir.getPath() + "]");
+					LOGGER.log(Level.FINE,"Used fields found in [" + magdir.getPath() + "]");
 					return;
 				} else {
-					System.out.println("WARNING Unable to use fields found in [" + magdir.getPath() + "]");
+					LOGGER.log(Level.FINE,"WARNING Unable to use fields found in [" + magdir.getPath() + "]");
 				}
 			}
 		}
 
-		System.out.println("WARNING Magnetic Field Package did not initialize.");
+		LOGGER.log(Level.FINE,"WARNING Magnetic Field Package did not initialize.");
 	}
 
 	private boolean initializeMagneticFields(File magdir) {
@@ -1008,22 +1011,22 @@ public class MagneticFields {
 		}
 
 		_dataDirs = tokens(dataPath, ":");
-		System.out.println("Number of possible data directories = " + _dataDirs.length);
+		LOGGER.log(Level.FINE,"Number of possible data directories = " + _dataDirs.length);
 
 		_initialized = true;
 
-		System.out.println("===========================================");
-		System.out.println("=  Initializing Magnetic Fields");
-		System.out.println("=  Version " + VERSION);
-		System.out.println("===========================================");
+		LOGGER.log(Level.FINE,"===========================================");
+		LOGGER.log(Level.FINE,"=  Initializing Magnetic Fields");
+		LOGGER.log(Level.FINE,"=  Version " + VERSION);
+		LOGGER.log(Level.FINE,"===========================================");
 
 		initializeTorus(torusMap);
 
 		// will actually try env variable first
 		_solenoid = getSolenoid("clas12-fieldmap-solenoid.dat");
 
-		System.out.println("Torus found: " + (_torus != null));
-		System.out.println("Solenoid found: " + (_solenoid != null));
+		LOGGER.log(Level.FINE,"Torus found: " + (_torus != null));
+		LOGGER.log(Level.FINE,"Solenoid found: " + (_solenoid != null));
 
 		// _uniform = new Uniform(0, 0, 2);
 		//
@@ -1068,7 +1071,7 @@ public class MagneticFields {
 					tmap.setFound(true);
 					tmap.setDirName(dataDir);
 
-					// System.out.println("** FOUND Torus map [" + fName + "] in
+					// LOGGER.log(Level.FINE,"** FOUND Torus map [" + fName + "] in
 					// directory: [" + dataDir + "]");
 				}
 
@@ -1090,12 +1093,12 @@ public class MagneticFields {
 
 		// print some features
 		if (_torus != null) {
-			// System.out.println("************ Torus: \n" + torus);
+			// LOGGER.log(Level.FINE,"************ Torus: \n" + torus);
 			_compositeField.add(_torus);
 			_rotatedCompositeField.add(_torus);
 		}
 		if (_solenoid != null) {
-			// System.out.println("************ Solenoid: \n" + solenoid);
+			// LOGGER.log(Level.FINE,"************ Solenoid: \n" + solenoid);
 			_compositeField.add(_solenoid);
 			_rotatedCompositeField.add(_solenoid);
 		}
@@ -1622,7 +1625,7 @@ public class MagneticFields {
 
 		if ((sector < 1) || (sector > 6)) {
 			String wstr = "Bad sector: " + sector + " in MagneticFields labToSector";
-			System.err.println(wstr);
+			LOGGER.log(Level.WARNING,wstr);
 			return;
 		}
 

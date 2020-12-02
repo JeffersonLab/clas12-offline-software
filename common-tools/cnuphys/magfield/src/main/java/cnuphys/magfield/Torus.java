@@ -3,6 +3,8 @@ package cnuphys.magfield;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The Class Torus.
@@ -12,6 +14,7 @@ import java.io.PrintStream;
  */
 
 public class Torus extends MagneticField {
+	public static Logger LOGGER = Logger.getLogger(Torus.class.getName());
 		
 	//has part of the solenoid been added in to remove the overlap?
 	protected boolean _addedSolenoid;
@@ -75,7 +78,7 @@ public class Torus extends MagneticField {
 		
 		torus._fullMap = (phiMax > 100.);
 		
-		System.out.println(torus.toString());
+		LOGGER.log(Level.FINEST,torus.toString());
 
 		return torus;
 	}
