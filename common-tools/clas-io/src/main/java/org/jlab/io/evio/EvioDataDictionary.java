@@ -10,6 +10,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataDescriptor;
@@ -23,7 +25,7 @@ import org.jlab.utils.TablePrintout;
  * @author gavalian
  */
 public class EvioDataDictionary implements DataDictionary {
-
+	Logger LOGGER = Logger.getLogger(EvioDataDictionary.class.getName());
 	private HashMap<String, EvioDataDescriptor> descriptors = new HashMap<String, EvioDataDescriptor>();
 
 	public EvioDataDictionary() {
@@ -68,7 +70,7 @@ public class EvioDataDictionary implements DataDictionary {
 	public final void initWithEnv(String envname, String relative_path) {
 		String ENVDIR = System.getenv(envname);
 		if (ENVDIR == null) {
-			System.out.println("---> Warning the CLAS12DIR environment is not defined.");
+			LOGGER.log(Level.INFO,"---> Warning the CLAS12DIR environment is not defined.");
 			return;
 		}
 		String dict_path = ENVDIR + "/" + relative_path;
@@ -87,16 +89,16 @@ public class EvioDataDictionary implements DataDictionary {
 		ArrayList<String> ignorePrefixes = new ArrayList<String>();
 		ignorePrefixes.add(".");
 		ignorePrefixes.add("_");
-		System.out.println("[EvioDataDictionary]---> loading bankdefs from directory : " + dirname);
+		LOGGER.log(Level.INFO,"[EvioDataDictionary]---> loading bankdefs from directory : " + dirname);
 		File dict_dir = new File(dirname);
 
 		if (dict_dir.exists() == false) {
-			System.err.println("[EvioDataDictionary]---> Directory does not exist.....");
+			LOGGER.log(Level.WARNING,"[EvioDataDictionary]---> Directory does not exist.....");
 			return;
 		}
 
 		ArrayList<String> xmlFileList = FileUtils.filesInFolder(dict_dir, "xml", ignorePrefixes);
-		System.out.println("[EvioDataDictionary]------> number of XML files located  : " + xmlFileList.size());
+		LOGGER.log(Level.INFO,"[EvioDataDictionary]------> number of XML files located  : " + xmlFileList.size());
 		Integer counter = 0;
 		for (String file : xmlFileList) {
 			ArrayList<EvioDataDescriptor> descList = DictionaryLoader.getDescriptorsFromFile(file);
@@ -111,7 +113,7 @@ public class EvioDataDictionary implements DataDictionary {
 				counter++;
 			}
 		}
-		System.out.println("[EvioDataDictionary]--> total number of descriptors found  : " + counter.toString());
+		LOGGER.log(Level.INFO,"[EvioDataDictionary]--> total number of descriptors found  : " + counter.toString());
 	}
 
 	public void show() {
@@ -167,7 +169,7 @@ public class EvioDataDictionary implements DataDictionary {
 
 	public DataBank createBank(String name, int rows) {
 		if (descriptors.containsKey(name) == false) {
-			System.err.println("[EvioDataDictionary]:: ERROR ---> no descriptor with name = " + name + " is found");
+			LOGGER.log(Level.WARNING,"[EvioDataDictionary]:: ERROR ---> no descriptor with name = " + name + " is found");
 		}
 		EvioDataDescriptor desc = descriptors.get(name);
 		EvioDataBank bank = new EvioDataBank(desc);
