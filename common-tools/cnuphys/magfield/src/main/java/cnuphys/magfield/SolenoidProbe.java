@@ -1,7 +1,5 @@
 package cnuphys.magfield;
 
-import org.jlab.clas.clas.math.FastMath;
-
 public class SolenoidProbe extends FieldProbe {
 
 	private Cell2D _cell;
@@ -35,22 +33,23 @@ public class SolenoidProbe extends FieldProbe {
 
 	/**
 	 * Get the field in kG
-	 * @param x the x coordinate in cm
-	 * @param y the y coordinate in cm
-	 * @param z the z coordinate in cm
+	 * 
+	 * @param x      the x coordinate in cm
+	 * @param y      the y coordinate in cm
+	 * @param z      the z coordinate in cm
 	 * @param result holds the resuts, the Cartesian coordinates of B in kG
 	 */
 	@Override
 	public void field(float x, float y, float z, float result[]) {
-		
+
 		if (isZeroField()) {
 			result[X] = 0f;
 			result[Y] = 0f;
 			result[Z] = 0f;
 			return;
 		}
-				
-		//note that the contains functions handles the shifts
+
+		// note that the contains functions handles the shifts
 		if (!contains(x, y, z)) {
 			result[0] = 0f;
 			result[1] = 0f;
@@ -58,7 +57,7 @@ public class SolenoidProbe extends FieldProbe {
 			return;
 		}
 
-		//apply the shifts
+		// apply the shifts
 		x -= _solenoid.getShiftX();
 		y -= _solenoid.getShiftY();
 		z -= _solenoid.getShiftZ();
@@ -69,22 +68,16 @@ public class SolenoidProbe extends FieldProbe {
 	}
 
 	/**
-	 * Get the field by trilinear interpolation.
+	 * Get the field by bilinear interpolation.
 	 * 
-	 * @param probe
-	 *            for faster results
-	 * @param phi
-	 *            azimuthal angle in degrees.
-	 * @param rho
-	 *            the cylindrical rho coordinate in cm.
-	 * @param z
-	 *            coordinate in cm
-	 * @param result
-	 *            the result
+	 * @param cell   holds cached nearest neighbors
+	 * @param phi    azimuthal angle in degrees.
+	 * @param rho    the cylindrical rho coordinate in cm.
+	 * @param z      coordinate in cm
+	 * @param result the result
 	 * @result a Cartesian vector holding the calculated field in kiloGauss.
 	 */
 	private void fieldCylindrical(Cell2D cell, double phi, double rho, double z, float result[]) {
-
 
 		// this will return
 		// result[0] = bphi = 0;
@@ -98,17 +91,18 @@ public class SolenoidProbe extends FieldProbe {
 		double rphi = Math.toRadians(phi);
 		double cos = Math.cos(rphi);
 		double sin = Math.sin(rphi);
-		double bphi = result[0];
+		
+		//The solenoid map has cylindrical field components
+		double bphi = result[0]; //0 if symmetric
 		double brho = result[1];
-		result[X] = (float) (brho * cos - bphi * sin);
-		result[Y] = (float) (brho * sin + bphi * cos);
-		// }
+		result[X] = (float) (brho * cos);
+		result[Y] = (float) (brho * sin);
+	
 
 		double sf = _solenoid.getScaleFactor();
 		result[X] *= sf;
 		result[Y] *= sf;
 		result[Z] *= sf;
 	}
-
 
 }

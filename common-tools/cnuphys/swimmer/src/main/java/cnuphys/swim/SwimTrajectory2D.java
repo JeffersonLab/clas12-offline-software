@@ -6,7 +6,7 @@ import java.util.List;
 
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.lund.LundId;
-import org.jlab.clas.clas.math.FastMath;
+import cnuphys.magfield.FastMath;
 
 /**
  * A 2D version of the 3D SwimTrajectory where all points have been projected
