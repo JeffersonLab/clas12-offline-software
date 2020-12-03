@@ -133,7 +133,7 @@ public class TracksFromTargetRec {
             tracks.get(i).set_Id(i+1);         }
 
         //System.out.println( " *** *** trkcands " + trkcands.size() + " * trks " + trks.size());
-        //trkFinder.removeOverlappingTracks(tracks); //turn off until debugged
+        trkFinder.removeOverlappingTracks(tracks); //turn off until debugged
 
         for (int c = 0; c < tracks.size(); c++) {
             tracks.get(c).set_Id(c + 1);
