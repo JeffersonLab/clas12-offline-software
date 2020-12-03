@@ -30,6 +30,7 @@ public class TruthMatch extends ReconstructionEngine {
 
     public TruthMatch() {
         super("TruthMatch", "Rafo", "0.0");
+        this.chargedPIDs = new ArrayList<>(Arrays.asList(ELECTRON_ID, PROTON_ID, POSITRON_ID, PIPLUS_ID, PIMINUS_ID, KPLUS_ID, KMINUS_ID, MUMINUS_ID, MUPLUS_ID));
         hasNeutral = false;
     }
 
@@ -64,6 +65,7 @@ public class TruthMatch extends ReconstructionEngine {
          * The 1st thing, let's load MC particles
          * ********************************************************
          */
+        // <index, MCPart>
         Map<Short, MCPart> mcp = getMCparticles(event.getBank("MC::Particle"));
 
         /**
@@ -71,6 +73,7 @@ public class TruthMatch extends ReconstructionEngine {
          * Now let's get True hits from the MC::True bank
          * ********************************************************
          */
+        // <Detector, <hitn, MCHit>>
         Map<Byte, Map<Integer, MCHit>> mchits = getMCHits(event.getBank("MC::True"), mcp);
 
         /**
@@ -103,6 +106,12 @@ public class TruthMatch extends ReconstructionEngine {
          */
         Map<Short, List<RecHit>> ctofHits = getCTOFHits(event, mchits.get((byte) DetectorType.CTOF.getDetectorId()));
         List<RecCluster> ctofClusters = getCTOFClusters(event);
+
+        /**
+         * Getting CTOF Hits and Clusters
+         */
+        Map<Short, List<RecHit>> bstfHits = getBSTHits(event, mchits.get((byte) DetectorType.BST.getDetectorId()));
+        List<RecCluster> bstClusters = getBSTClusters(event);
 
 //        if (ctofClusters != null && ctofClusters.size() > 0 && ctofHits.isEmpty()) {
 //            System.out.println("************************************** CTOF clusters have non 0 size, while the number of hits is 0 ****");
@@ -177,6 +186,7 @@ public class TruthMatch extends ReconstructionEngine {
          *
          */
         return true;
+
     }
 
     /**
@@ -193,7 +203,7 @@ public class TruthMatch extends ReconstructionEngine {
         public int pid;     // PDG ID code
     }
 
-    // True hit information from the MC::True banl
+// True hit information from the MC::True banl
     class MCHit {
 
         public int pid;      // MC particle id (pdg code)
@@ -202,7 +212,7 @@ public class TruthMatch extends ReconstructionEngine {
         public byte detector; // Detector code descriptor
     }
 
-    // RecHit object
+// RecHit object
     class RecHit {
 
         public int id;          // ID: This is corresponding ADC row number in the ADC bank.
@@ -296,6 +306,18 @@ public class TruthMatch extends ReconstructionEngine {
 
     private final int PHOTON_ID = 22;
     private final int NEUTRON_ID = 2112;
+
+    private final int ELECTRON_ID = 11;
+    private final int PROTON_ID = 2212;
+    private final int POSITRON_ID = -11;
+    private final int PIPLUS_ID = 211;
+    private final int PIMINUS_ID = -211;
+    private final int KPLUS_ID = 321;
+    private final int KMINUS_ID = -321;
+    private final int MUMINUS_ID = 13;
+    private final int MUPLUS_ID = -13;
+
+    private final List<Integer> chargedPIDs;
 
     /**
      * ************************************************************************
@@ -688,28 +710,52 @@ public class TruthMatch extends ReconstructionEngine {
             return null;
         }
 
-        Map<Short, Short> clId2Pindex = new HashMap<>();
-        DataBank RecTrk = event.getBank("REC::Track");
+        DataBank clBank = event.getBank("BSTRec::Clusters");
+        DataBank trkBank = event.getBank("REC::Track");
 
-        for (int iTrk = 0; iTrk < RecTrk.rows(); iTrk++) {
+        for (int iCL = 0; iCL < clBank.rows(); iCL++) {
 
-            // Rec scintillator has different detectors in it, so we want only CTOF responces in this case
-            if (RecTrk.getByte("detector", iTrk) != (byte) DetectorType.BST.getDetectorId()) {
+            short clID = (short) iCL;
+            short trkID = (short) (clBank.getShort("trkID", iCL) - 1);
+
+            if (trkID < 0) {
+                // We need only hits that contribute to a track
                 continue;
             }
 
-            Short pindex = RecTrk.getShort("pindex", iTrk);
-            Short index = RecTrk.getShort("index", iTrk);
+            short pindex = trkBank.getShort("pindex", trkID);
 
-            clId2Pindex.put(index, pindex);
+            // The hardcoded 5 is the Max number of hits per Cl
+            for (int iHit = 0; iHit < 5; iHit++) {
+
+                int hitID = clBank.getInt(String.format("Hit%d_ID", iHit + 1), iCL) - 1;
+
+                if (hitID < 0) {
+                    break;
+                }
+
+                if (!mchitsInBST.containsKey(hitID)) {
+                    // We need only hits that correspond to an MCHit
+                    continue;
+                }
+
+                RecHit curHit = new RecHit();
+
+                curHit.id = hitID;
+                curHit.cid = (short) iCL;
+                curHit.pindex = pindex;
+                curHit.detector = (byte) DetectorType.BST.getDetectorId();
+
+                if (iHit == 0) {
+                    recHits.put(curHit.cid, new ArrayList<>());
+                }
+
+                recHits.get(curHit.cid).add(curHit);
+
+            }
+
         }
 
-        DataBank hitsBank = event.getBank("BSTRec::hits");
-        
-        for( int ihit = 0; ihit < hitsBank.rows(); ihit++ ){
-            
-        }
-        
         return recHits;
     }
 
@@ -863,6 +909,48 @@ public class TruthMatch extends ReconstructionEngine {
         return cls;
     }
 
+    List<RecCluster> getBSTClusters(DataEvent event) {
+        List<RecCluster> cls = new ArrayList<>();
+
+        /**
+         * Check if three necessary banks exist otherwise will return null
+         */
+        if ((event.hasBank("BSTRec::Clusters") == false) || (event.hasBank("REC::Track") == false)) {
+            //System.out.println("There is No BSTRec::clusters bank, or there is No BSTRec::Hits bank, or there is no REC::Track bank present");
+            return null;
+        }
+
+        DataBank clBank = event.getBank("BSTRec::Clusters");
+        DataBank trkBank = event.getBank("REC::Track");
+
+        for (int iCL = 0; iCL < clBank.rows(); iCL++) {
+
+            short clID = (short) iCL;
+            short trkID = (short) (clBank.getShort("trkID", iCL) - 1);
+
+            if (trkID < 0) {
+                // We need only hits that contribute to a track
+                continue;
+            }
+
+            short pindex = trkBank.getShort("pindex", trkID);
+
+            RecCluster curCl = new RecCluster();
+            curCl.id = (short) iCL;
+            curCl.detector = (byte) DetectorType.BST.getDetectorId();
+            curCl.energy = clBank.getFloat("ETot", iCL);
+            curCl.rectid = trkID;
+            curCl.layer = clBank.getByte("layer", iCL);
+            curCl.sector = clBank.getByte("sector", iCL);
+            curCl.pindex = pindex;
+            curCl.size = clBank.getShort("size", iCL);
+            curCl.superlayer = -1; // NA for this detector
+            cls.add(curCl);
+        }
+
+        return cls;
+    }
+
     /**
      *
      * @param cls: List of clusters for a given detector
@@ -953,7 +1041,6 @@ public class TruthMatch extends ReconstructionEngine {
         Map<Short, List<RecCluster>> map = new HashMap<>();
 
         for (short theKey : mcpKeys) {
-
             map.put(theKey, new ArrayList<>());
         }
 
@@ -970,6 +1057,13 @@ public class TruthMatch extends ReconstructionEngine {
         return map;
     }
 
+    /**
+     * @param mcp: the Key is the index of the MCparticle in the MC::Particle
+     * bank, and the value is MCPart object
+     * @param clsPerMCp: The key is MCParticle index in the MC::Particle bank
+     * and the value is the list of clusters for that MC::Particle
+     * @return
+     */
     List<MCRecMatch> MakeMCRecMatch(Map<Short, MCPart> mcp, Map<Short, List<RecCluster>> clsPerMCp) {
 
         List<MCRecMatch> recMatch = new ArrayList<>();
@@ -1053,11 +1147,12 @@ public class TruthMatch extends ReconstructionEngine {
 
                 }
 
+                match.pindex = getMaxEntryKey(matched_counts);
+                match.nClsInRec = matched_counts.get(match.pindex).shortValue();
+                match.frac = (float) (match.nClsInRec / match.nclusters);
+
                 if (mcp.get(match.id).pid == PHOTON_ID || mcp.get(match.id).pid == NEUTRON_ID) {
-                    match.pindex = getMaxEntryKey(matched_counts);
                     match.tid = -1;
-                    match.nClsInRec = matched_counts.get(match.pindex).shortValue();
-                    match.frac = (float) (match.nClsInRec / match.nclusters);
                     //if (0 < matched_PCalcounts.get(match.pindex) || 0 < matched_ECcounts.get(match.pindex)) {
                     if ((matched_PCalcounts.containsKey(match.pindex) && matched_PCalcounts.get(match.pindex) > 0)
                             || (matched_ECcounts.containsKey(match.pindex) && 0 < matched_ECcounts.get(match.pindex))
@@ -1068,6 +1163,9 @@ public class TruthMatch extends ReconstructionEngine {
                     } else {
                         match.reconstructable = 0;
                     }
+                } else if (chargedPIDs.contains(mcp.get(match.id).pid)) {
+
+                    //match.tid = 
                 }
 
             } else {
