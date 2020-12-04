@@ -46,28 +46,11 @@ public class SVTStripFactory
 	{
 		SVTConstants.load( cp );
 		setApplyAlignmentShifts( applyAlignmentShifts );
-		if( bShift == true && SVTConstants.getDataAlignmentSectorShift() == null ){
+		if( bShift == true && SVTConstants.getLayerSectorAlignmentData()== null ){
 			System.err.println("error: SVTStripFactory: no shifts loaded");
 			System.exit(-1);
 		}
 	}
-	
-	/**
-	 * Constructs a new geometry factory for sensor strips, with alignment shifts applied from the given file.
-	 * Please run {@code SVTConstants.connect() } first.
-	 * 
-	 * @param cp a DatabaseConstantProvider that has loaded the necessary tables
-	 * @param filenameAlignmentShifts a file containing the alignment shifts to be applied
-	 * 
-	 * @see SVTConstants#connect
-	 */
-	public SVTStripFactory( DatabaseConstantProvider cp, String filenameAlignmentShifts )
-	{
-		SVTConstants.load( cp );
-		bShift = true;
-		SVTConstants.loadAlignmentSectorShifts( filenameAlignmentShifts );
-	}
-	
 	
 	/**
 	 * Returns either an ideal or shifted strip, depending on this factory's setup.
@@ -290,10 +273,13 @@ public class SVTStripFactory
 	 */
 	public Line3d getShiftedStrip( int aRegion, int aSector, int aModule, int aStrip )
 	{
+                int aLayer = SVTConstants.convertRegionModule2Layer(aRegion, aModule);
 		Line3d stripLine = getIdealStrip( aRegion, aSector, aModule, aStrip );
-		AlignmentFactory.applyShift( stripLine.origin(), SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( aRegion, aSector )], SVTAlignmentFactory.getIdealFiducialCenter( aRegion, aSector ), scaleT, scaleR );
-		AlignmentFactory.applyShift( stripLine.end(),    SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( aRegion, aSector )], SVTAlignmentFactory.getIdealFiducialCenter( aRegion, aSector ), scaleT, scaleR );
-		return stripLine;
+                if(aRegion<SVTConstants.NREGIONS-1) {
+                    AlignmentFactory.applyShift( stripLine.origin(), SVTConstants.getLayerSectorAlignmentData()[aSector][aLayer], SVTAlignmentFactory.getIdealFiducialCenter( aRegion, aSector ), scaleT, scaleR );
+                    AlignmentFactory.applyShift( stripLine.end(),    SVTConstants.getLayerSectorAlignmentData()[aSector][aLayer], SVTAlignmentFactory.getIdealFiducialCenter( aRegion, aSector ), scaleT, scaleR );
+                }
+                return stripLine;
 	}
 	
 	
@@ -445,10 +431,13 @@ public class SVTStripFactory
 	 */
 	public Vector3d[] getShiftedLayerCorners( int aRegion, int aSector, int aModule )
 	{
+                int aLayer = SVTConstants.convertRegionModule2Layer(aRegion, aModule);
 		Vector3d[] cornerPos3Ds = getIdealLayerCorners( aRegion, aSector, aModule );
-		for( int i = 0; i < cornerPos3Ds.length; i++ )
-			AlignmentFactory.applyShift( cornerPos3Ds[i], SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( aRegion, aSector )], SVTAlignmentFactory.getIdealFiducialCenter( aRegion, aSector ), scaleT, scaleR );
-		return cornerPos3Ds;
+                if(aRegion<SVTConstants.NREGIONS-1) {
+                    for( int i = 0; i < cornerPos3Ds.length; i++ )
+                        AlignmentFactory.applyShift( cornerPos3Ds[i], SVTConstants.getLayerSectorAlignmentData()[aSector][aLayer], SVTAlignmentFactory.getIdealFiducialCenter( aRegion, aSector ), scaleT, scaleR );
+                }
+                return cornerPos3Ds;
 	}
 	
 	

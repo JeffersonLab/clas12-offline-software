@@ -107,7 +107,7 @@ public class SVTVolumeFactory
 	{
 		SVTConstants.load( cp );
 		setApplyAlignmentShifts( applyAlignmentShifts );
-		if( bShift == true && SVTConstants.getDataAlignmentSectorShift() == null ){
+		if( bShift == true && SVTConstants.getLayerSectorAlignmentData() == null ){
 			System.err.println("error: SVTVolumeFactory: no shifts loaded");
 			System.exit(-1);
 		}
@@ -269,7 +269,8 @@ public class SVTVolumeFactory
 							//System.out.println( stepVol.getChildren().get(j).gemcString() );
 					}*/
 					
-					AlignmentFactory.applyShift( sectorVol, SVTConstants.getDataAlignmentSectorShift()[SVTConstants.convertRegionSector2Index( region, sector )], fidTri3D.center(), scaleT, scaleR );
+                                        // FIXME currently using shifts from bottom module of each region
+					AlignmentFactory.applyShift( sectorVol, SVTConstants.getLayerSectorAlignmentData()[sector][region*2], fidTri3D.center(), scaleT, scaleR );
 					//System.out.println("S "+sectorVol.gemcString() );
 				}
 			}
