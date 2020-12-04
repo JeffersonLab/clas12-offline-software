@@ -157,34 +157,16 @@ public class TruthMatch extends ReconstructionEngine {
             allCls.addAll(ctofClusters);
         }
 
+        /**
+         * Mapping Clusters to MCParticle
+         */
         Map<Short, List<RecCluster>> clsPerMCp = mapClustersToMCParticles(mcp.keySet(), allCls);
 
         //PrintClsPerMc(clsPerMCp);
         List<MCRecMatch> MCRecMatches = MakeMCRecMatch(mcp, clsPerMCp);
 
-        /**
-         * Very Ad-hoc test should be removed from the code after it is resolved
-         */
-//        for( MCRecMatch curRecMatch : MCRecMatches ){
-//            
-//            if( curRecMatch.pindex < 0 && cndClusters != null && ctofClusters != null && (cndClusters.size() + ctofClusters.size()) > 0 && curRecMatch.id == 0 ){
-//                System.out.println("*************************Oho this should not happen!!!!*********************************");
-//                System.out.println("The number of CTOF hits is " + ctofHits.size());
-//                System.out.print(ctofClusters.toString());
-//                System.out.println("The number of CND hits is " + cndHits.size());
-//                System.out.print(cndClusters.toString());
-//            }
-//        }
-//        MCRecMatches.stream().filter(curRecMatch -> ( curRecMatch.pindex < 0 && cndClusters != null && ctofClusters != null && (cndClusters.size() + ctofClusters.size()) > 0 )).forEachOrdered(_item -> {
-//            System.out.println("Oho this should not happen!!!!");
-//        });
         bankWriter(event, MCRecMatches, allCls);
 
-        //PrintRecMatches(MCRecMatches);
-        /**
-         *
-         *
-         */
         return true;
 
     }
@@ -396,9 +378,9 @@ public class TruthMatch extends ReconstructionEngine {
                     && hit.detector != (byte) DetectorType.CND.getDetectorId() && hit.detector != (byte) DetectorType.CTOF.getDetectorId()
                     && mcp.get((short) tid) == null) {
                 continue;
-            } else if (mcp.containsKey((short) (hit.otid)) && mcp.get((short) (hit.otid)).pid != 22 && mcp.get((short) (hit.otid)).pid != 2112) {
+            } /*else if (mcp.containsKey((short) (hit.otid)) && mcp.get((short) (hit.otid)).pid != 22 && mcp.get((short) (hit.otid)).pid != 2112) {
                 continue;
-            }
+            }*/
 
             /**
              * We can check whether the particle or it's mother is original
@@ -409,6 +391,7 @@ public class TruthMatch extends ReconstructionEngine {
             if (dmchits.get(hit.detector) == null) {
                 dmchits.put(hit.detector, new HashMap<>());
             }
+            System.out.println("PID of otid is " + mcp.get((short) (hit.otid)).pid);
             dmchits.get(hit.detector).put(hit.hitn, hit);
 
         }
@@ -695,10 +678,10 @@ public class TruthMatch extends ReconstructionEngine {
 
         if (mchitsInBST == null) {
             /**
-             * If no MC hits present in the CTOF, then we stop here! no need to
+             * If no MC hits present in the BST, then we stop here! no need to
              * collect hits, as wee need only hits that are matched to an MChit
              */
-            //System.out.println("No MC hits in CTOF");
+            //System.out.println("No MC hits in BST");
             return recHits;
         }
 
