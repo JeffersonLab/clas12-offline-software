@@ -98,20 +98,7 @@ if [ $? != 0 ] ; then echo "mvn package failure" ; exit 1 ; fi
 cd -
 
 cp common-tools/coat-lib/target/coat-libs-*-SNAPSHOT.jar coatjava/lib/clas/
-cp reconstruction/dc/target/clas12detector-dc-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/tof/target/clas12detector-tof-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/cvt/target/clas12detector-cvt-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/ft/target/clas12detector-ft-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/ec/target/clas12detector-ec-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/ltcc/target/clas12detector-ltcc-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/htcc/target/clas12detector-htcc-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/cnd/target/clas12detector-cnd-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/rich/target/clas12detector-rich-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/fvt/target/clas12detector-fmt-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/eb/target/clas12detector-eb-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/band/target/clas12detector-band-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/mc/target/clas12detector-mc-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/rtpc/target/clas12detector-rtpc-*-SNAPSHOT.jar coatjava/lib/services/
-cp reconstruction/swaps/target/clas12detector-swaps-*-SNAPSHOT.jar coatjava/lib/services/
+cp reconstruction/*/target/clas12detector-*-SNAPSHOT.jar coatjava/lib/services/
+
 
 echo "COATJAVA SUCCESSFULLY BUILT !"

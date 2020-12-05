@@ -10,7 +10,7 @@ import java.util.ArrayList;
  */
 @SuppressWarnings("serial")
 public class CompositeField extends ArrayList<IMagField> implements IMagField {
-	
+
 	/**
 	 * Checks whether the field has been set to always return zero.
 	 * 
@@ -63,19 +63,19 @@ public class CompositeField extends ArrayList<IMagField> implements IMagField {
 		return s;
 	}
 
- 	/**
- 	 * Check whether we have a torus field
- 	 * 
- 	 * @return <code>true</code> if we have a torus
- 	 */
- 	public boolean hasTorus() {
- 		for (IMagField field : this) {
- 			if (field instanceof Torus) {
- 				return true;
- 			}
- 		}
+	/**
+	 * Check whether we have a torus field
+	 * 
+	 * @return <code>true</code> if we have a torus
+	 */
+	public boolean hasTorus() {
+		for (IMagField field : this) {
+			if (field instanceof Torus) {
+				return true;
+			}
+		}
 
- 		return false;
+		return false;
 	}
 
 	/**
@@ -84,11 +84,11 @@ public class CompositeField extends ArrayList<IMagField> implements IMagField {
 	 * @return <code>true</code> if we have a solenoid
 	 */
 	public boolean hasSolenoid() {
- 		for (IMagField field : this) {
- 			if (field instanceof Solenoid) {
- 				return true;
- 			}
- 		}
+		for (IMagField field : this) {
+			if (field instanceof Solenoid) {
+				return true;
+			}
+		}
 
 		return false;
 	}
@@ -124,7 +124,7 @@ public class CompositeField extends ArrayList<IMagField> implements IMagField {
 	public float getMaxFieldMagnitude() {
 		float max = 0;
 		for (IMagField field : this) {
-			max = Math.max(max,  field.getMaxFieldMagnitude());
+			max = Math.max(max, field.getMaxFieldMagnitude());
 		}
 		return max;
 	}
@@ -133,9 +133,10 @@ public class CompositeField extends ArrayList<IMagField> implements IMagField {
 	public double getScaleFactor() {
 		return 1;
 	}
-	
+
 	/**
 	 * Print the current configuration
+	 * 
 	 * @param ps the print stream
 	 */
 	@Override
@@ -143,10 +144,10 @@ public class CompositeField extends ArrayList<IMagField> implements IMagField {
 		ps.println("COMPOSITE FIELD");
 		for (IMagField field : this) {
 			field.printConfiguration(ps);
-			
+
 		}
 	}
-	
+
 	@Override
 	public boolean contains(double x, double y, double z) {
 		for (IMagField field : this) {
@@ -156,6 +157,5 @@ public class CompositeField extends ArrayList<IMagField> implements IMagField {
 		}
 		return false;
 	}
-
 
 }

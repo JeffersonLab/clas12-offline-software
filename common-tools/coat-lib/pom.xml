@@ -232,8 +232,8 @@
 
   <!-- BUILD section for creating one JAR -->
   <build>
-    <finalName>coatjava</finalName>
-    <plugins>
+      <finalName>coatjava</finalName>
+      <plugins>
           <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-compiler-plugin</artifactId>
@@ -242,54 +242,55 @@
                   <target>1.8</target>
               </configuration>
           </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>2.3</version>
-        <configuration>
-          <outputFile>target/coat-libs-${project.version}.jar</outputFile>
-          <artifactSet>
-            <excludes>
-              <exclude>cnuphys:cnuphys</exclude>
-              <!-- <exclude>cnuphys:magfield</exclude> -->
-              <!-- <exclude>cnuphys:swimmer</exclude> -->
-              <exclude>cnuphys:bCNU</exclude>
-              <exclude>cnuphys:bCNU3D</exclude>
-              <exclude>cnuphys:jogl-all</exclude>
-              <exclude>cnuphys:jogl</exclude>
-              <exclude>cnuphys:gluegen</exclude>
-              <exclude>org.jlab.coda:jclara</exclude>
-              <!-- <exclude>org.jlab.coda:jevio</exclude> -->
-            </excludes>
-          </artifactSet>
-          <filters>
-            <filter>
-              <artifact>*:*</artifact>
-              <excludes>
-                <exclude>META-INF/*.SF</exclude>
-                <exclude>META-INF/*.DSA</exclude>
-                <exclude>META-INF/*.RSA</exclude>
-              </excludes>
-            </filter>
-          </filters>
-          <!--
-          <artifactSet>
-            <excludes>
-              <exclude>org.jlab.coda:jclara</exclude>
-            </excludes>
-          </artifactSet>
-          -->
-        </configuration>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-shade-plugin</artifactId>
+              <version>2.3</version>
+              <configuration>
+                  <outputFile>target/coat-libs-${project.version}.jar</outputFile>
+                  <artifactSet>
+                      <excludes>
+                          <exclude>cnuphys:cnuphys</exclude>
+                          <exclude>cnuphys:bCNU</exclude>
+                          <exclude>cnuphys:bCNU3D</exclude>
+                          <exclude>cnuphys:jogl-all</exclude>
+                          <exclude>cnuphys:jogl</exclude>
+                          <exclude>cnuphys:gluegen</exclude>
+                          <exclude>org.jlab.coda:jclara</exclude>
+                      </excludes>
+                  </artifactSet>
+                  <filters>
+                      <filter>
+                          <artifact>*:*</artifact>
+                          <excludes>
+                              <exclude>META-INF/*.SF</exclude>
+                              <exclude>META-INF/*.DSA</exclude>
+                              <exclude>META-INF/*.RSA</exclude>
+                          </excludes>
+                      </filter>
+                  </filters>
+                  <transformers>
+                      <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                          <manifestEntries>
+                              <Specification-Title>${project.artifactId}</Specification-Title>
+                              <Specification-Version>${project.version}</Specification-Version>
+                              <Implementation-Title>${project.artifactId}</Implementation-Title>
+                              <Implementation-Version>${project.version}</Implementation-Version>
+                              <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                          </manifestEntries>
+                      </transformer>
+                  </transformers>
+              </configuration>
+              <executions>
+                  <execution>
+                      <phase>package</phase>
+                      <goals>
+                          <goal>shade</goal>
+                      </goals>
+                  </execution>
+              </executions>
+          </plugin>
+      </plugins>
   </build>
-
 </project>
+

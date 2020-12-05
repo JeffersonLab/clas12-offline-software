@@ -1,13 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.jlab.clas.reco;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.ClassCastException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,19 +12,19 @@ import org.jlab.io.hipo.HipoDataSource;
 import org.jlab.io.hipo.HipoDataSync;
 import org.jlab.utils.benchmark.ProgressPrintout;
 import org.jlab.utils.options.OptionParser;
-import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.clara.engine.EngineData;
 import org.jlab.clara.engine.EngineDataType;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 import java.io.InputStream;
 import java.io.FileInputStream;
+import org.jlab.utils.JsonUtils;
 import org.json.JSONObject;
 
 
 /**
  *
- * @author gavalian, kenjo
+ * @author gavalian, kenjo, baltzell
  */
 public class EngineProcessor {
 
@@ -74,10 +68,6 @@ public class EngineProcessor {
         for(int i = 0; i < names.length; i++){
             this.addEngine(names[i], services[i]);
         }
-        /*
-        for(String service : services){
-            this.addEngine(service);
-        }*/
     }
     public void initAll(){
 
@@ -118,11 +108,8 @@ public class EngineProcessor {
         for(int i = 0; i < names.length; i++){
             this.addEngine(names[i], services[i]);
         }
-        /*
-        for(String service : services){
-            this.addEngine(service);
-        }*/
     }
+
      public void initCaloDebug(){
 
         String[] names = new String[]{
@@ -137,26 +124,23 @@ public class EngineProcessor {
         for(int i = 0; i < names.length; i++){
             this.addEngine(names[i], services[i]);
         }
-        /*
-        for(String service : services){
-            this.addEngine(service);
-        }*/
     }
+
     /**
      * Adding engine to the map the order of the services matters, since they will
      * be executed in order added.
      * @param name name for the service
      * @param clazz class name including the package name
-     * @param jsonConfig string in json format with engine configuration
+     * @param jsonConf string in json format with engine configuration
      */
     public void addEngine(String name, String clazz, String jsonConf) {
-        Class c = null;
+        Class c;
         try {
             c = Class.forName(clazz);
             if( ReconstructionEngine.class.isAssignableFrom(c)==true){
                 ReconstructionEngine engine = (ReconstructionEngine) c.newInstance();
                 engine.init();
-                if(jsonConf!="null") {
+                if(!jsonConf.equals("null")) {
                     EngineData input = new EngineData();
                     input.setData(EngineDataType.JSON.mimeType(), jsonConf);
                     engine.configure(input);
@@ -165,14 +149,11 @@ public class EngineProcessor {
             } else {
                 System.out.println(">>>> ERROR: class is not a reconstruction engine : " + clazz);
             }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
     /**
      * Adding engine to the map the order of the services matters, since they will
      * be executed in order added.
@@ -180,7 +161,7 @@ public class EngineProcessor {
      * @param clazz class name including the package name
      */
     public void addEngine(String name, String clazz) {
-        Class c = null;
+        Class c;
         try {
             c = Class.forName(clazz);
             if( ReconstructionEngine.class.isAssignableFrom(c)==true){
@@ -190,20 +171,17 @@ public class EngineProcessor {
             } else {
                 System.out.println(">>>> ERROR: class is not a reconstruction engine : " + clazz);
             }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
     /**
      * Add reconstruction engine to the chain
      * @param clazz Engine class.
      */
     public void addEngine( String clazz) {
-        Class c = null;
+        Class c;
         try {
             c = Class.forName(clazz);
             if( ReconstructionEngine.class.isAssignableFrom(c)==true){
@@ -213,14 +191,11 @@ public class EngineProcessor {
             } else {
                 System.out.println(">>>> ERROR: class is not a reconstruction engine : " + clazz);
             }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
     /**
      * Initialize all the engines in the chain.
      */
@@ -233,6 +208,7 @@ public class EngineProcessor {
         }
         System.out.println("\n\n");
     }
+
     /**
      * process a single event through the chain.
      * @param event
@@ -240,8 +216,11 @@ public class EngineProcessor {
     public void processEvent(DataEvent event){
         for(Map.Entry<String,ReconstructionEngine>  engine : this.processorEngines.entrySet()){
             try {
-                //System.out.println("processing engine : " + engine.getKey());
-                //System.out.println("processing event");
+                if (!engine.getValue().wroteConfig) {
+                    engine.getValue().wroteConfig = true;
+                    JsonUtils.extend(event, ReconstructionEngine.CONFIG_BANK_NAME, "json",
+                            engine.getValue().generateConfig());
+                }
                 engine.getValue().processDataEvent(event);
             } catch (Exception e){
 
@@ -255,10 +234,12 @@ public class EngineProcessor {
     public void processFile(String file, String output){
         this.processFile(file, output, -1);
     }
+
     /**
      * process entire file through engine chain.
      * @param file file name to process.
      * @param output
+     * @param nevents
      */
     public void processFile(String file, String output, int nevents){
         if(file.endsWith(".hipo")==true){
@@ -285,6 +266,7 @@ public class EngineProcessor {
             writer.close();
         }
     }
+
     /**
      * display services registered with the processor.
      */
@@ -315,37 +297,29 @@ public class EngineProcessor {
             String  inputFile = parser.getOption("-i").stringValue();
             String outputFile = parser.getOption("-o").stringValue();
 
-            /*for(int i =1; i < args.length; i++){
-                services.add(args[i]);
-            }*/
-
             EngineProcessor proc = new EngineProcessor();
             int config  = parser.getOption("-c").intValue();
             int nevents = parser.getOption("-n").intValue();
             String yamlFileName = parser.getOption("-y").stringValue();
-            if(yamlFileName!="0") {
+
+            if(!yamlFileName.equals("0")) {
                 try {
                     InputStream input = new FileInputStream(yamlFileName);
                     Yaml yaml = new Yaml();
                     Map<String, Object> yamlConf = (Map<String, Object>) yaml.load(input);
                     JSONObject jsonObject=new JSONObject(yamlConf);
-                    System.out.println(jsonObject.getJSONObject("configuration").getJSONObject("services"));
                     for(Object obj: jsonObject.getJSONArray("services")) {
                         if(obj instanceof JSONObject) {
                             JSONObject service = (JSONObject) obj;
                             String name = service.getString("name");
                             String engineClass = service.getString("class");
-                            System.out.println(name);
-                            System.out.println(engineClass);
-                            JSONObject configs = jsonObject.getJSONObject("configuration").getJSONObject("services");
-                            if(configs.has(name)) {
-                              proc.addEngine(name, engineClass, configs.getJSONObject(name).toString());
+                            JSONObject configs = JsonUtils.filterClaraYaml(jsonObject,name);
+                            if(configs.length()>0) {
+                              proc.addEngine(name, engineClass, configs.toString());
                             } else {
                               proc.addEngine(name, engineClass);
                             }
                         }
-//                      System.out.println(yamlConf.get("configuration").get("services"));
-//                      String jsonConf = gson.toJson(yamlConf["configuration"]["services"][service["name"]]);
                     }
                 } catch (FileNotFoundException ex) {
                     Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
@@ -354,7 +328,8 @@ public class EngineProcessor {
                 } catch (ClassCastException | YAMLException ex) {
                     Logger.getLogger(EngineProcessor.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            } else if (config>0){
+            }
+            else if (config>0){
                 if(config>2){
                     proc.initCaloDebug();
                 } else if(config==2){
@@ -362,7 +337,8 @@ public class EngineProcessor {
                 } else {
                     proc.initDefault();
                 }
-            } else {
+            }
+            else {
                 for(String engine : services){
                     System.out.println("Adding reconstruction engine " + engine);
                     proc.addEngine(engine);

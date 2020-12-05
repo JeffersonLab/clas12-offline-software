@@ -18,8 +18,7 @@ public enum AngularUnit {
     /**
      * Get the angular unit from an integer
      * 
-     * @param val
-     *            the integer value
+	 * @param val the integer value
      * @return the angular unit
      */
     public static AngularUnit fromInt(int val) {
