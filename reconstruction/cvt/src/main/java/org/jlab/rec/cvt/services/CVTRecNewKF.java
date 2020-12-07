@@ -131,7 +131,7 @@ public class CVTRecNewKF extends ReconstructionEngine {
     public boolean processDataEvent(DataEvent event) {
         
         this.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
-        double shift = org.jlab.rec.cvt.Constants.getZoffset();
+        double shift = 0;//org.jlab.rec.cvt.Constants.getZoffset();
 
         this.FieldsConfig = this.getFieldsConfig();
         

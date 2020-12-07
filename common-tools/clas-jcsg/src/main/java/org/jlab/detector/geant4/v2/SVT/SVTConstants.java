@@ -118,6 +118,7 @@ public class SVTConstants
 		cp.loadTable( ccdbPath +"material/box");
 		cp.loadTable( ccdbPath +"material/tube");
 		cp.loadTable( ccdbPath +"layeralignment");
+                cp.loadTable( ccdbPath +"position");
                 //shift by target
                 cp.loadTable("/geometry/target");
                 
@@ -163,306 +164,312 @@ public class SVTConstants
 	 */
 	public static synchronized void load( ConstantProvider cp )
 	{
-		if( !bLoadedConstants )
-		{			
-			// read constants from svt table
-			NREGIONS = cp.getInteger( ccdbPath+"svt/nRegions", 0 );
-			NMODULES = cp.getInteger( ccdbPath+"svt/nModules", 0 );
-			NSENSORS = cp.getInteger( ccdbPath+"svt/nSensors", 0 );
-			NSTRIPS = cp.getInteger( ccdbPath+"svt/nStrips", 0 );
-			NFIDUCIALS = cp.getInteger( ccdbPath+"svt/nFiducials", 0 );
-			NPADS = cp.getInteger( ccdbPath+"svt/nPads", 0 );
-			
-			READOUTPITCH = cp.getDouble( ccdbPath+"svt/readoutPitch", 0 );
-			STEREOANGLE = Math.toRadians(cp.getDouble( ccdbPath+"svt/stereoAngle", 0 ));
-			PHI0 = Math.toRadians(cp.getDouble( ccdbPath+"svt/phiStart", 0 ));
-			SECTOR0 = Math.toRadians(cp.getDouble( ccdbPath+"svt/zRotationStart", 0 ));
-			LAYERPOSFAC = cp.getDouble( ccdbPath+"svt/modulePosFac", 0 );
-			
-			SILICONTHK = cp.getDouble( ccdbPath+"svt/siliconThk", 0 );
-			PHYSSENLEN = cp.getDouble( ccdbPath+"svt/physSenLen", 0 );
-			PHYSSENWID = cp.getDouble( ccdbPath+"svt/physSenWid", 0 );
-			ACTIVESENLEN = cp.getDouble( ccdbPath+"svt/activeSenLen", 0 );
-			ACTIVESENWID = cp.getDouble( ccdbPath+"svt/activeSenWid", 0 );
-			DEADZNLEN = cp.getDouble( ccdbPath+"svt/deadZnLen", 0 );
-			DEADZNWID = cp.getDouble( ccdbPath+"svt/deadZnWid", 0 );
-			MICROGAPLEN = cp.getDouble( ccdbPath+"svt/microGapLen", 0 );
-			
-			FIDCUX = cp.getDouble( ccdbPath+"fiducial/CuX", 0 );
-			FIDPKX = cp.getDouble( ccdbPath+"fiducial/PkX", 0 );
-			FIDORIGINZ = cp.getDouble( ccdbPath+"fiducial/OriginZ", 0 );
-			FIDCUZ = cp.getDouble( ccdbPath+"fiducial/CuZ", 0 );
-			FIDPKZ0 = cp.getDouble( ccdbPath+"fiducial/PkZ0", 0 );
-			FIDPKZ1 = cp.getDouble( ccdbPath+"fiducial/PkZ1", 0 );
-			
-			// read constants from materials table
-			NMATERIALS = 14; // number of unique materials, not length of materialNames
-					
-			// cannot read String variables from CCDB, so put them here in the correct order
-			MATERIALTYPES.put("heatSink", 			"box");
-			MATERIALTYPES.put("heatSinkCu", 		"box");
-			MATERIALTYPES.put("heatSinkRidge", 		"box");
-			MATERIALTYPES.put("rohacell", 			"box");
-			MATERIALTYPES.put("rohacellCu",			"box");
-			MATERIALTYPES.put("plastic", 			"box");
-			MATERIALTYPES.put("plasticPk", 			"box");
-			MATERIALTYPES.put("carbonFiber", 		"box");
-			MATERIALTYPES.put("carbonFiberCu", 		"box");
-			MATERIALTYPES.put("carbonFiberPk", 		"box");
-			MATERIALTYPES.put("busCable", 			"box");
-			MATERIALTYPES.put("busCableCu", 		"box");
-			MATERIALTYPES.put("busCablePk", 		"box");
-			MATERIALTYPES.put("pitchAdaptor", 		"box");
-			MATERIALTYPES.put("pcBoardAndChips", 	"box");
-			MATERIALTYPES.put("pcBoard", 			"box");
-			MATERIALTYPES.put("chip", 				"box");
-			MATERIALTYPES.put("epoxyAndRailAndPads","box");
-			MATERIALTYPES.put("epoxyMajorCu",       "box");
-			MATERIALTYPES.put("epoxyMinorCu",		"box");
-			MATERIALTYPES.put("epoxyMajorPk",		"box");
-			MATERIALTYPES.put("epoxyMinorPk",		"box");
-			MATERIALTYPES.put("rail",				"box");
-			MATERIALTYPES.put("wirebond",			"box");
-			MATERIALTYPES.put("kaptonWrapTapeSide", "box");
-			MATERIALTYPES.put("kaptonWrapTapeCap", 	"box");
-			MATERIALTYPES.put("kaptonWrapGlueSide",	"box");
-			MATERIALTYPES.put("kaptonWrapGlueCap", 	"box");
-			
-			MATERIALTYPES.put("pad", "tube");
-			
-			int boxNum = 0; // number of box types
-			int mat = 0;
-			for( Entry<String, String> entry : MATERIALTYPES.entrySet() )
-			{
-				String key = entry.getKey();
-				String value = entry.getValue();
-				double[] dimensions = null;
-				
-				if( value == "box" )
-				{
-					boxNum++;
-					dimensions = new double[]{
-							cp.getDouble( ccdbPath+"material/box/wid", mat ),
-							cp.getDouble( ccdbPath+"material/box/thk", mat ),
-							cp.getDouble( ccdbPath+"material/box/len", mat )
-							};
-				}
-				else if( value == "tube" ) // offset by boxNum to reset row for CCDB table
-				{
-					dimensions = new double[]{
-							cp.getDouble( ccdbPath+"material/tube/rmin", mat - boxNum ),
-							cp.getDouble( ccdbPath+"material/tube/rmax", mat - boxNum ),
-							cp.getDouble( ccdbPath+"material/tube/zlen", mat - boxNum ),
-							cp.getDouble( ccdbPath+"material/tube/phi0", mat - boxNum ),
-							cp.getDouble( ccdbPath+"material/tube/dphi", mat - boxNum )
-							};
-				}
-				MATERIALDIMENSIONS.put( key, dimensions );
-				mat++;
-			}
-			
-			
-			// calculate derived constants
-			NLAYERS = NMODULES*NREGIONS;
-			MODULELEN = NSENSORS*(ACTIVESENLEN + 2*DEADZNLEN) + (NSENSORS - 1)*MICROGAPLEN;
-			STRIPLENMAX = MODULELEN - 2*DEADZNLEN;
-			MODULEWID = ACTIVESENWID + 2*DEADZNWID;
-			STRIPOFFSETWID = cp.getDouble(ccdbPath+"svt/stripStart", 0 );
-			LAYERGAPTHK = cp.getDouble(ccdbPath+"svt/layerGapThk", 0 );
-			PASSIVETHK = MATERIALDIMENSIONS.get("carbonFiber")[1] + MATERIALDIMENSIONS.get("busCable")[1] + MATERIALDIMENSIONS.get("epoxyAndRailAndPads")[1];
-			SECTORLEN = MATERIALDIMENSIONS.get("heatSink")[2] + MATERIALDIMENSIONS.get("rohacell")[2];
-			double layerGapThk = MATERIALDIMENSIONS.get("rohacell")[1] + 2*PASSIVETHK; // construct from material thicknesses instead
-			
-			
-			if( VERBOSE ) System.out.printf("LAYERGAPTHK (CCDB)      = % 8.3f\n", LAYERGAPTHK );
-			if( VERBOSE ) System.out.printf("layerGapThk (MATERIALS) = % 8.3f\n", layerGapThk );
-			LAYERGAPTHK = layerGapThk; if( VERBOSE ) System.out.println("set LAYERGAPTHK to layerGapThk");
-			
-			if( VERBOSE )
-			{
-				System.out.printf("NREGIONS        %4d\n", NREGIONS );
-				System.out.printf("NMODULES        %4d\n", NMODULES );
-				System.out.printf("NLAYERS         %4d\n", NLAYERS );
-				System.out.printf("NSENSORS        %4d\n", NSENSORS );
-				System.out.printf("NSTRIPS         %4d\n", NSTRIPS );
-				System.out.printf("NFIDUCIALS      %4d\n", NFIDUCIALS );
-				System.out.printf("NPADS           %4d\n", NPADS );
-				System.out.println();
-			}
-			
-			// read constants from region and support table
-			NSECTORS = new int[NREGIONS];
-			STATUS = new int[NREGIONS];
-			Z0ACTIVE = new double[NREGIONS];
-			REFRADIUS = new double[NREGIONS]; // used to derive LAYERRADIUS
-			SUPPORTRADIUS = new double[NREGIONS]; // used to build volumes
-			LAYERRADIUS = new double[NREGIONS][NMODULES]; // used to build strips
-			
-			// Consider Region 1 Sector 6 (not to scale)
-			//
-			// y (vertical)                                    .------------------^-------------
-			// ^         			   						   | V (outer)		  |
-			// |                                               | sensor layer	  | 0.32 silicon thickness
-			// |                                               |				  |
-			// |                                      .--------+--------------^---v------------- module radius 1
-			// |                                      | passiveThk 			  |
-			// |------^-----------------^-------------+-----------------------|----------------- fiducial layer
-			// |      |   				|		|							  |
-			// |	  |		heatSink	|		|							  |
-			// |      |   				| 2.50	|		rohacell			  | 3.236 layer gap
-			// |	  |	2.88			|		|							  |
-			// |      |         	    |		|							  |
-			// |      |              +--v-------------+-----------------------|------------------ module radius 0
-			// |  	  |				 |                | passiveThk			  |
-			// |      |				 |				  '---^----+--------------v-----^------------ radius CCDB
-			// |------v-------^------'					  |	   | 				    |						radius MechEng
-			// |              |                           |    | U (inner)			| 0.32 silicon thickness
-			// |              |                           |    | sensor layer		|
-			// |              |                           |    '--------------------v-----------
-			// |			  | support					  | reference 
-			// |			  | radius					  | radius
-			// |			  | 						  |
-			// o==============v===========================v===================================-> z (beamline)
-			System.out.println("SVT READ Z SHIFT VALUE "+cp.getDouble("/geometry/target/position", 0));
-			// LAYERRADIUS and ZSTARTACTIVE are used primarily by the Reconstruction and getStrip()
-			for( int region = 0; region < NREGIONS; region++ )
-			{
-				NSECTORS[region] = cp.getInteger(ccdbPath+"region/nSectors", region );
-                                
-				STATUS[region] = cp.getInteger(ccdbPath+"region/status", region );
-				Z0ACTIVE[region] = cp.getDouble(ccdbPath+"region/zStart", region ); // Cu edge of hybrid sensor's active volume
-				REFRADIUS[region] = cp.getDouble(ccdbPath+"region/UlayerOuterRadius", region); // radius to outer side of U (inner) module
-				SUPPORTRADIUS[region] = cp.getDouble(ccdbPath+"region/CuSupportInnerRadius", region); // radius to inner side of heatSinkRidge
-				
-				for( int m = 0; m < NMODULES; m++ )
-				{
-					switch( m ) 
-					{
-					case 0: // U = lower / inner
-						LAYERRADIUS[region][m] = REFRADIUS[region] - LAYERPOSFAC*SILICONTHK;
-						break;
-					case 1: // V = upper / outer
-						LAYERRADIUS[region][m] = REFRADIUS[region] + LAYERGAPTHK + LAYERPOSFAC*SILICONTHK;
-						break;
-					}
-					//System.out.println("LAYERRADIUS "+ LAYERRADIUS[region][m]);
-				}
-			}
-                        
-                        NTOTALSECTORS = convertRegionSector2Index( NREGIONS-1, NSECTORS[NREGIONS-1]-1 )+1;
-			NTOTALFIDUCIALS = convertRegionSectorFiducial2Index(NREGIONS-1, NSECTORS[NREGIONS-1]-1, NFIDUCIALS-1  )+1;
-			
-                        RSI = new int[NREGIONS][NTOTALSECTORS];
-                        for( int aRegion = 0; aRegion < NREGIONS; aRegion++ )
-			{
-                            for( int aSector = 0; aSector < NSECTORS[aRegion]; aSector++ )
-                            {
-                                RSI[aRegion][aSector] = convertRegionSector2Index( aRegion, aSector );
-//                                System.out.println(" a Region "+aRegion +" aSector "+aSector+" RSI "+RSI[aRegion][aSector] );
-                            }
-                        }
-			System.out.println("Reading alignment shifts from database");
-		
-                        
-                        LAYERSHIFTDATA = new double[NSECTORS[3]][NLAYERS-2][];
-                        for( int i = 0; i < (NTOTALSECTORS-NSECTORS[3])*2; i++ )    // layeralignment tables doesn't cover region 4
+                // read constants from svt table
+                NREGIONS = cp.getInteger( ccdbPath+"svt/nRegions", 0 );
+                NMODULES = cp.getInteger( ccdbPath+"svt/nModules", 0 );
+                NSENSORS = cp.getInteger( ccdbPath+"svt/nSensors", 0 );
+                NSTRIPS = cp.getInteger( ccdbPath+"svt/nStrips", 0 );
+                NFIDUCIALS = cp.getInteger( ccdbPath+"svt/nFiducials", 0 );
+                NPADS = cp.getInteger( ccdbPath+"svt/nPads", 0 );
+
+                READOUTPITCH = cp.getDouble( ccdbPath+"svt/readoutPitch", 0 );
+                STEREOANGLE = Math.toRadians(cp.getDouble( ccdbPath+"svt/stereoAngle", 0 ));
+                PHI0 = Math.toRadians(cp.getDouble( ccdbPath+"svt/phiStart", 0 ));
+                SECTOR0 = Math.toRadians(cp.getDouble( ccdbPath+"svt/zRotationStart", 0 ));
+                LAYERPOSFAC = cp.getDouble( ccdbPath+"svt/modulePosFac", 0 );
+
+                SILICONTHK = cp.getDouble( ccdbPath+"svt/siliconThk", 0 );
+                PHYSSENLEN = cp.getDouble( ccdbPath+"svt/physSenLen", 0 );
+                PHYSSENWID = cp.getDouble( ccdbPath+"svt/physSenWid", 0 );
+                ACTIVESENLEN = cp.getDouble( ccdbPath+"svt/activeSenLen", 0 );
+                ACTIVESENWID = cp.getDouble( ccdbPath+"svt/activeSenWid", 0 );
+                DEADZNLEN = cp.getDouble( ccdbPath+"svt/deadZnLen", 0 );
+                DEADZNWID = cp.getDouble( ccdbPath+"svt/deadZnWid", 0 );
+                MICROGAPLEN = cp.getDouble( ccdbPath+"svt/microGapLen", 0 );
+
+                FIDCUX = cp.getDouble( ccdbPath+"fiducial/CuX", 0 );
+                FIDPKX = cp.getDouble( ccdbPath+"fiducial/PkX", 0 );
+                FIDORIGINZ = cp.getDouble( ccdbPath+"fiducial/OriginZ", 0 );
+                FIDCUZ = cp.getDouble( ccdbPath+"fiducial/CuZ", 0 );
+                FIDPKZ0 = cp.getDouble( ccdbPath+"fiducial/PkZ0", 0 );
+                FIDPKZ1 = cp.getDouble( ccdbPath+"fiducial/PkZ1", 0 );
+
+                // read constants from materials table
+                NMATERIALS = 14; // number of unique materials, not length of materialNames
+
+                // cannot read String variables from CCDB, so put them here in the correct order
+                MATERIALTYPES.put("heatSink", 			"box");
+                MATERIALTYPES.put("heatSinkCu", 		"box");
+                MATERIALTYPES.put("heatSinkRidge", 		"box");
+                MATERIALTYPES.put("rohacell", 			"box");
+                MATERIALTYPES.put("rohacellCu",			"box");
+                MATERIALTYPES.put("plastic", 			"box");
+                MATERIALTYPES.put("plasticPk", 			"box");
+                MATERIALTYPES.put("carbonFiber", 		"box");
+                MATERIALTYPES.put("carbonFiberCu", 		"box");
+                MATERIALTYPES.put("carbonFiberPk", 		"box");
+                MATERIALTYPES.put("busCable", 			"box");
+                MATERIALTYPES.put("busCableCu", 		"box");
+                MATERIALTYPES.put("busCablePk", 		"box");
+                MATERIALTYPES.put("pitchAdaptor", 		"box");
+                MATERIALTYPES.put("pcBoardAndChips", 	"box");
+                MATERIALTYPES.put("pcBoard", 			"box");
+                MATERIALTYPES.put("chip", 				"box");
+                MATERIALTYPES.put("epoxyAndRailAndPads","box");
+                MATERIALTYPES.put("epoxyMajorCu",       "box");
+                MATERIALTYPES.put("epoxyMinorCu",		"box");
+                MATERIALTYPES.put("epoxyMajorPk",		"box");
+                MATERIALTYPES.put("epoxyMinorPk",		"box");
+                MATERIALTYPES.put("rail",				"box");
+                MATERIALTYPES.put("wirebond",			"box");
+                MATERIALTYPES.put("kaptonWrapTapeSide", "box");
+                MATERIALTYPES.put("kaptonWrapTapeCap", 	"box");
+                MATERIALTYPES.put("kaptonWrapGlueSide",	"box");
+                MATERIALTYPES.put("kaptonWrapGlueCap", 	"box");
+
+                MATERIALTYPES.put("pad", "tube");
+
+                int boxNum = 0; // number of box types
+                int mat = 0;
+                for( Entry<String, String> entry : MATERIALTYPES.entrySet() )
+                {
+                        String key = entry.getKey();
+                        String value = entry.getValue();
+                        double[] dimensions = null;
+
+                        if( value == "box" )
                         {
-                                int sector = cp.getInteger(ccdbPath+"layeralignment/sector", i );
-                                int layer  = cp.getInteger(ccdbPath+"layeralignment/layer", i );
-                                double tx  = cp.getDouble(ccdbPath+"layeralignment/deltaX", i );
-                                double ty  = cp.getDouble(ccdbPath+"layeralignment/deltaY", i );
-                                double tz  = cp.getDouble(ccdbPath+"layeralignment/deltaZ", i );
-                                double rx  = cp.getDouble(ccdbPath+"layeralignment/rotX", i );
-                                double ry  = cp.getDouble(ccdbPath+"layeralignment/rotY", i );
-                                double rz  = cp.getDouble(ccdbPath+"layeralignment/rotZ", i );
-                                double ra  = cp.getDouble(ccdbPath+"layeralignment/rotA", i );
-                                LAYERSHIFTDATA[sector-1][layer-1] = new double[]{ tx, ty, tz, rx, ry, rz, ra };
+                                boxNum++;
+                                dimensions = new double[]{
+                                                cp.getDouble( ccdbPath+"material/box/wid", mat ),
+                                                cp.getDouble( ccdbPath+"material/box/thk", mat ),
+                                                cp.getDouble( ccdbPath+"material/box/len", mat )
+                                                };
                         }
-                        if( VERBOSE ) showLayerShiftData();
-                        
-			if( VERBOSE )
-			{
-				System.out.println("NSECTORS STATUS Z0ACTIVE REFRADIUS SUPPORTRADIUS LAYERRADIUS (U,V)");
-				for(int r = 0; r < NREGIONS; r++ )
-				{
-					System.out.printf("%6s%2d","", NSECTORS[r] );
-					System.out.printf("%6s%1d","", STATUS[r] );
-					System.out.printf("%1s%8.3f","", Z0ACTIVE[r] );
-					System.out.printf("%2s%8.3f","", REFRADIUS[r] );
-					System.out.printf("%6s%8.3f","", SUPPORTRADIUS[r] );
-					System.out.printf("%1s%8.3f %8.3f","", LAYERRADIUS[r][0], LAYERRADIUS[r][1] );
-					System.out.println();
-				}
-			}
-			
-			
-                         
-			// check one constant from each table
-			//if( NREGIONS == 0 || NSECTORS[0] == 0 || FIDCUX == 0 || MATERIALS[0][0] == 0 || SUPPORTRADIUS[0] == 0 )
-				//throw new NullPointerException("please load the following tables from CCDB in "+ccdbPath+"\n svt\n region\n support\n fiducial\n material\n");
-			
-			bLoadedConstants = true;
-			
-			if( VERBOSE )
-			{
-				System.out.println();
-				System.out.printf("NTOTALSECTORS   %4d\n", NTOTALSECTORS );
-				System.out.printf("NTOTALFIDUCIALS %4d\n", NTOTALFIDUCIALS );
-				System.out.printf("PHI0            %8.3f\n", Math.toDegrees(PHI0) );
-				System.out.printf("SECTOR0         %8.3f\n", Math.toDegrees(SECTOR0) );
-				System.out.printf("STEREOANGLE     %8.3f\n", Math.toDegrees(STEREOANGLE) );
-				System.out.printf("READOUTPITCH    %8.3f\n", READOUTPITCH );
-				System.out.printf("STRIPOFFSETWID  %8.3f\n", STRIPOFFSETWID );
-				System.out.printf("STRIPLENMAX     %8.3f\n", STRIPLENMAX );
-				System.out.printf("LAYERPOSFAC     %8.3f\n", LAYERPOSFAC );
-				System.out.printf("PHYSSENLEN      %8.3f\n", PHYSSENLEN );
-				System.out.printf("SILICONTHK      %8.3f\n", SILICONTHK );
-				System.out.printf("PHYSSENWID      %8.3f\n", PHYSSENWID );
-				System.out.printf("ACTIVESENLEN    %8.3f\n", ACTIVESENLEN );
-				System.out.printf("ACTIVESENWID    %8.3f\n", ACTIVESENWID );
-				System.out.printf("DEADZNLEN       %8.3f\n", DEADZNLEN );
-				System.out.printf("DEADZNWID       %8.3f\n", DEADZNWID );
-				System.out.printf("MICROGAPLEN     %8.3f\n", MICROGAPLEN );
-				System.out.printf("MODULEWID       %8.3f\n", MODULEWID );
-				System.out.printf("MODULELEN       %8.3f\n", MODULELEN );
-				System.out.printf("LAYERGAPTHK     %8.3f\n", LAYERGAPTHK );
-				System.out.printf("PASSIVETHK      %8.3f\n", PASSIVETHK );
-				System.out.printf("SECTORLEN       %8.3f\n", SECTORLEN );
-				System.out.printf("FIDCUX          %8.3f\n", FIDCUX );
-				System.out.printf("FIDPKX          %8.3f\n", FIDPKX );
-				System.out.printf("FIDORIGINZ      %8.3f\n", FIDORIGINZ );
-				System.out.printf("FIDCUZ          %8.3f\n", FIDCUZ );
-				System.out.printf("FIDPKZ0         %8.3f\n", FIDPKZ0 );
-				System.out.printf("FIDPKZ1         %8.3f\n", FIDPKZ1 );
-				
-				double fidXDist = 2*SVTConstants.FIDCUX;
-				double fidZDist = SVTConstants.FIDCUZ + SVTConstants.FIDPKZ0 + SVTConstants.FIDPKZ1;
-				double fidZDist0 = Math.sqrt( Math.pow(fidZDist,2) + Math.pow(SVTConstants.FIDCUX + SVTConstants.FIDPKX, 2) );
-				double fidZDist1 = Math.sqrt( Math.pow(fidZDist,2) + Math.pow(SVTConstants.FIDCUX - SVTConstants.FIDPKX, 2) );
-				
-				System.out.printf("fidXDist  %8.3f\n", fidXDist );
-				System.out.printf("fidZDist  %8.3f\n", fidZDist );
-				System.out.printf("fidZDist0 %8.3f\n", fidZDist0 );
-				System.out.printf("fidZDist1 %8.3f\n", fidZDist1 );
-				
-				int maxStrLenName = 32;
-				int maxStrLenType = 5;
-				for( Map.Entry<String, String> entryType : MATERIALTYPES.entrySet() )
-				{
-					String name = entryType.getKey();
-					String type = entryType.getValue();
-					double[] dimensions = MATERIALDIMENSIONS.get( name );
-					String fmt = "%s %"+(maxStrLenName - name.length())+"s";
-					System.out.printf(fmt, name, "" );
-					fmt = "%s %"+(maxStrLenType - type.length())+"s";
-					System.out.printf(fmt, type, "" );
-					for( int i = 0; i < dimensions.length; i++ )
-						System.out.printf("%8.3f ", dimensions[i] );
-					System.out.println();
-				}
-			}
-                       
-		}
+                        else if( value == "tube" ) // offset by boxNum to reset row for CCDB table
+                        {
+                                dimensions = new double[]{
+                                                cp.getDouble( ccdbPath+"material/tube/rmin", mat - boxNum ),
+                                                cp.getDouble( ccdbPath+"material/tube/rmax", mat - boxNum ),
+                                                cp.getDouble( ccdbPath+"material/tube/zlen", mat - boxNum ),
+                                                cp.getDouble( ccdbPath+"material/tube/phi0", mat - boxNum ),
+                                                cp.getDouble( ccdbPath+"material/tube/dphi", mat - boxNum )
+                                                };
+                        }
+                        MATERIALDIMENSIONS.put( key, dimensions );
+                        mat++;
+                }
+
+
+                // calculate derived constants
+                NLAYERS = NMODULES*NREGIONS;
+                MODULELEN = NSENSORS*(ACTIVESENLEN + 2*DEADZNLEN) + (NSENSORS - 1)*MICROGAPLEN;
+                STRIPLENMAX = MODULELEN - 2*DEADZNLEN;
+                MODULEWID = ACTIVESENWID + 2*DEADZNWID;
+                STRIPOFFSETWID = cp.getDouble(ccdbPath+"svt/stripStart", 0 );
+                LAYERGAPTHK = cp.getDouble(ccdbPath+"svt/layerGapThk", 0 );
+                PASSIVETHK = MATERIALDIMENSIONS.get("carbonFiber")[1] + MATERIALDIMENSIONS.get("busCable")[1] + MATERIALDIMENSIONS.get("epoxyAndRailAndPads")[1];
+                SECTORLEN = MATERIALDIMENSIONS.get("heatSink")[2] + MATERIALDIMENSIONS.get("rohacell")[2];
+                double layerGapThk = MATERIALDIMENSIONS.get("rohacell")[1] + 2*PASSIVETHK; // construct from material thicknesses instead
+
+
+                if( VERBOSE ) System.out.printf("LAYERGAPTHK (CCDB)      = % 8.3f\n", LAYERGAPTHK );
+                if( VERBOSE ) System.out.printf("layerGapThk (MATERIALS) = % 8.3f\n", layerGapThk );
+                LAYERGAPTHK = layerGapThk; if( VERBOSE ) System.out.println("set LAYERGAPTHK to layerGapThk");
+
+                if( VERBOSE )
+                {
+                        System.out.printf("NREGIONS        %4d\n", NREGIONS );
+                        System.out.printf("NMODULES        %4d\n", NMODULES );
+                        System.out.printf("NLAYERS         %4d\n", NLAYERS );
+                        System.out.printf("NSENSORS        %4d\n", NSENSORS );
+                        System.out.printf("NSTRIPS         %4d\n", NSTRIPS );
+                        System.out.printf("NFIDUCIALS      %4d\n", NFIDUCIALS );
+                        System.out.printf("NPADS           %4d\n", NPADS );
+                        System.out.println();
+                }
+
+                // read constants from region and support table
+                NSECTORS = new int[NREGIONS];
+                STATUS = new int[NREGIONS];
+                Z0ACTIVE = new double[NREGIONS];
+                REFRADIUS = new double[NREGIONS]; // used to derive LAYERRADIUS
+                SUPPORTRADIUS = new double[NREGIONS]; // used to build volumes
+                LAYERRADIUS = new double[NREGIONS][NMODULES]; // used to build strips
+
+                // Consider Region 1 Sector 6 (not to scale)
+                //
+                // y (vertical)                                    .------------------^-------------
+                // ^         			   						   | V (outer)		  |
+                // |                                               | sensor layer	  | 0.32 silicon thickness
+                // |                                               |				  |
+                // |                                      .--------+--------------^---v------------- module radius 1
+                // |                                      | passiveThk 			  |
+                // |------^-----------------^-------------+-----------------------|----------------- fiducial layer
+                // |      |   				|		|							  |
+                // |	  |		heatSink	|		|							  |
+                // |      |   				| 2.50	|		rohacell			  | 3.236 layer gap
+                // |	  |	2.88			|		|							  |
+                // |      |         	    |		|							  |
+                // |      |              +--v-------------+-----------------------|------------------ module radius 0
+                // |  	  |				 |                | passiveThk			  |
+                // |      |				 |				  '---^----+--------------v-----^------------ radius CCDB
+                // |------v-------^------'					  |	   | 				    |						radius MechEng
+                // |              |                           |    | U (inner)			| 0.32 silicon thickness
+                // |              |                           |    | sensor layer		|
+                // |              |                           |    '--------------------v-----------
+                // |			  | support					  | reference 
+                // |			  | radius					  | radius
+                // |			  | 						  |
+                // o==============v===========================v===================================-> z (beamline)
+                System.out.println("SVT READ Z SHIFT VALUE "+cp.getDouble("/geometry/target/position", 0));
+                // LAYERRADIUS and ZSTARTACTIVE are used primarily by the Reconstruction and getStrip()
+                for( int region = 0; region < NREGIONS; region++ )
+                {
+                        NSECTORS[region] = cp.getInteger(ccdbPath+"region/nSectors", region );
+
+                        STATUS[region] = cp.getInteger(ccdbPath+"region/status", region );
+                        Z0ACTIVE[region] = cp.getDouble(ccdbPath+"region/zStart", region ); // Cu edge of hybrid sensor's active volume
+                        REFRADIUS[region] = cp.getDouble(ccdbPath+"region/UlayerOuterRadius", region); // radius to outer side of U (inner) module
+                        SUPPORTRADIUS[region] = cp.getDouble(ccdbPath+"region/CuSupportInnerRadius", region); // radius to inner side of heatSinkRidge
+
+                        for( int m = 0; m < NMODULES; m++ )
+                        {
+                                switch( m ) 
+                                {
+                                case 0: // U = lower / inner
+                                        LAYERRADIUS[region][m] = REFRADIUS[region] - LAYERPOSFAC*SILICONTHK;
+                                        break;
+                                case 1: // V = upper / outer
+                                        LAYERRADIUS[region][m] = REFRADIUS[region] + LAYERGAPTHK + LAYERPOSFAC*SILICONTHK;
+                                        break;
+                                }
+                                //System.out.println("LAYERRADIUS "+ LAYERRADIUS[region][m]);
+                        }
+                }
+
+                NTOTALSECTORS = convertRegionSector2Index( NREGIONS-1, NSECTORS[NREGIONS-1]-1 )+1;
+                NTOTALFIDUCIALS = convertRegionSectorFiducial2Index(NREGIONS-1, NSECTORS[NREGIONS-1]-1, NFIDUCIALS-1  )+1;
+
+                RSI = new int[NREGIONS][NTOTALSECTORS];
+                for( int aRegion = 0; aRegion < NREGIONS; aRegion++ )
+                {
+                    for( int aSector = 0; aSector < NSECTORS[aRegion]; aSector++ )
+                    {
+                        RSI[aRegion][aSector] = convertRegionSector2Index( aRegion, aSector );
+//                                System.out.println(" a Region "+aRegion +" aSector "+aSector+" RSI "+RSI[aRegion][aSector] );
+                    }
+                }
+
+                System.out.println("Reading detector global position from database");
+                double xpos = cp.getDouble(ccdbPath+"position/x", 0 );
+                double ypos = cp.getDouble(ccdbPath+"position/y", 0 );
+                double zpos = cp.getDouble(ccdbPath+"position/z", 0 );
+                System.out.println("SVT position set to (" + xpos + "," + ypos + "," + zpos + ") mm");
+
+                System.out.println("Reading alignment shifts from database");
+
+
+                LAYERSHIFTDATA = new double[NSECTORS[3]][NLAYERS-2][];
+                for( int i = 0; i < (NTOTALSECTORS-NSECTORS[3])*2; i++ )    // layeralignment tables doesn't cover region 4
+                {
+                        int sector = cp.getInteger(ccdbPath+"layeralignment/sector", i );
+                        int layer  = cp.getInteger(ccdbPath+"layeralignment/layer", i );
+                        double tx  = cp.getDouble(ccdbPath+"layeralignment/deltaX", i );
+                        double ty  = cp.getDouble(ccdbPath+"layeralignment/deltaY", i );
+                        double tz  = cp.getDouble(ccdbPath+"layeralignment/deltaZ", i );
+                        double rx  = cp.getDouble(ccdbPath+"layeralignment/rotX", i );
+                        double ry  = cp.getDouble(ccdbPath+"layeralignment/rotY", i );
+                        double rz  = cp.getDouble(ccdbPath+"layeralignment/rotZ", i );
+                        double ra  = cp.getDouble(ccdbPath+"layeralignment/rotA", i );
+                        // adding global shift to internal alignment shifts
+                        tx += xpos;
+                        ty += ypos;
+                        tz += zpos;
+                        LAYERSHIFTDATA[sector-1][layer-1] = new double[]{ tx, ty, tz, rx, ry, rz, ra };
+                }
+                if( VERBOSE ) showLayerShiftData();
+
+                if( VERBOSE )
+                {
+                        System.out.println("NSECTORS STATUS Z0ACTIVE REFRADIUS SUPPORTRADIUS LAYERRADIUS (U,V)");
+                        for(int r = 0; r < NREGIONS; r++ )
+                        {
+                                System.out.printf("%6s%2d","", NSECTORS[r] );
+                                System.out.printf("%6s%1d","", STATUS[r] );
+                                System.out.printf("%1s%8.3f","", Z0ACTIVE[r] );
+                                System.out.printf("%2s%8.3f","", REFRADIUS[r] );
+                                System.out.printf("%6s%8.3f","", SUPPORTRADIUS[r] );
+                                System.out.printf("%1s%8.3f %8.3f","", LAYERRADIUS[r][0], LAYERRADIUS[r][1] );
+                                System.out.println();
+                        }
+                }
+
+
+
+                // check one constant from each table
+                //if( NREGIONS == 0 || NSECTORS[0] == 0 || FIDCUX == 0 || MATERIALS[0][0] == 0 || SUPPORTRADIUS[0] == 0 )
+                        //throw new NullPointerException("please load the following tables from CCDB in "+ccdbPath+"\n svt\n region\n support\n fiducial\n material\n");
+
+                if( VERBOSE )
+                {
+                        System.out.println();
+                        System.out.printf("NTOTALSECTORS   %4d\n", NTOTALSECTORS );
+                        System.out.printf("NTOTALFIDUCIALS %4d\n", NTOTALFIDUCIALS );
+                        System.out.printf("PHI0            %8.3f\n", Math.toDegrees(PHI0) );
+                        System.out.printf("SECTOR0         %8.3f\n", Math.toDegrees(SECTOR0) );
+                        System.out.printf("STEREOANGLE     %8.3f\n", Math.toDegrees(STEREOANGLE) );
+                        System.out.printf("READOUTPITCH    %8.3f\n", READOUTPITCH );
+                        System.out.printf("STRIPOFFSETWID  %8.3f\n", STRIPOFFSETWID );
+                        System.out.printf("STRIPLENMAX     %8.3f\n", STRIPLENMAX );
+                        System.out.printf("LAYERPOSFAC     %8.3f\n", LAYERPOSFAC );
+                        System.out.printf("PHYSSENLEN      %8.3f\n", PHYSSENLEN );
+                        System.out.printf("SILICONTHK      %8.3f\n", SILICONTHK );
+                        System.out.printf("PHYSSENWID      %8.3f\n", PHYSSENWID );
+                        System.out.printf("ACTIVESENLEN    %8.3f\n", ACTIVESENLEN );
+                        System.out.printf("ACTIVESENWID    %8.3f\n", ACTIVESENWID );
+                        System.out.printf("DEADZNLEN       %8.3f\n", DEADZNLEN );
+                        System.out.printf("DEADZNWID       %8.3f\n", DEADZNWID );
+                        System.out.printf("MICROGAPLEN     %8.3f\n", MICROGAPLEN );
+                        System.out.printf("MODULEWID       %8.3f\n", MODULEWID );
+                        System.out.printf("MODULELEN       %8.3f\n", MODULELEN );
+                        System.out.printf("LAYERGAPTHK     %8.3f\n", LAYERGAPTHK );
+                        System.out.printf("PASSIVETHK      %8.3f\n", PASSIVETHK );
+                        System.out.printf("SECTORLEN       %8.3f\n", SECTORLEN );
+                        System.out.printf("FIDCUX          %8.3f\n", FIDCUX );
+                        System.out.printf("FIDPKX          %8.3f\n", FIDPKX );
+                        System.out.printf("FIDORIGINZ      %8.3f\n", FIDORIGINZ );
+                        System.out.printf("FIDCUZ          %8.3f\n", FIDCUZ );
+                        System.out.printf("FIDPKZ0         %8.3f\n", FIDPKZ0 );
+                        System.out.printf("FIDPKZ1         %8.3f\n", FIDPKZ1 );
+
+                        double fidXDist = 2*SVTConstants.FIDCUX;
+                        double fidZDist = SVTConstants.FIDCUZ + SVTConstants.FIDPKZ0 + SVTConstants.FIDPKZ1;
+                        double fidZDist0 = Math.sqrt( Math.pow(fidZDist,2) + Math.pow(SVTConstants.FIDCUX + SVTConstants.FIDPKX, 2) );
+                        double fidZDist1 = Math.sqrt( Math.pow(fidZDist,2) + Math.pow(SVTConstants.FIDCUX - SVTConstants.FIDPKX, 2) );
+
+                        System.out.printf("fidXDist  %8.3f\n", fidXDist );
+                        System.out.printf("fidZDist  %8.3f\n", fidZDist );
+                        System.out.printf("fidZDist0 %8.3f\n", fidZDist0 );
+                        System.out.printf("fidZDist1 %8.3f\n", fidZDist1 );
+
+                        int maxStrLenName = 32;
+                        int maxStrLenType = 5;
+                        for( Map.Entry<String, String> entryType : MATERIALTYPES.entrySet() )
+                        {
+                                String name = entryType.getKey();
+                                String type = entryType.getValue();
+                                double[] dimensions = MATERIALDIMENSIONS.get( name );
+                                String fmt = "%s %"+(maxStrLenName - name.length())+"s";
+                                System.out.printf(fmt, name, "" );
+                                fmt = "%s %"+(maxStrLenType - type.length())+"s";
+                                System.out.printf(fmt, type, "" );
+                                for( int i = 0; i < dimensions.length; i++ )
+                                        System.out.printf("%8.3f ", dimensions[i] );
+                                System.out.println();
+                        }
+                }
+
 	}
 		
 	
