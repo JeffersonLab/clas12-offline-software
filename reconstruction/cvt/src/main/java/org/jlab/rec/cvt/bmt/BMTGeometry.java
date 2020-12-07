@@ -278,7 +278,7 @@ public class BMTGeometry {
         
         Point3D offset = new Point3D();
         offset.copy(Constants.shifts[layer-1][sector-1]);
-        offset.translateXYZ(0, 0, org.jlab.rec.cvt.Constants.getZoffset());
+//        offset.translateXYZ(0, 0, org.jlab.rec.cvt.Constants.getZoffset());
         
         return offset;
     }

@@ -104,6 +104,7 @@ public class CCDBConstantsLoader {
 
         //load alignment parameters
         dbprovider.loadTable("/geometry/cvt/mvt/alignment");
+        dbprovider.loadTable("/geometry/cvt/mvt/position");
         
         //beam offset table
         dbprovider.loadTable("/geometry/beam/position");
@@ -116,7 +117,7 @@ public class CCDBConstantsLoader {
         // target position
         double ztarget = dbprovider.getDouble("/geometry/target/position", 0);
         
-        System.out.println(" ................READ TARGET SHIFT "+ztarget+" cm......."); 
+//        System.out.println(" ................READ TARGET SHIFT "+ztarget+" cm......."); 
       //  dbprovider.show();
         // Getting the Constants
         // 1) pitch info 
@@ -290,13 +291,17 @@ public class CCDBConstantsLoader {
         	 
         }
         
-        // alignment 
+        // alignment and offsets
+        double xpos = dbprovider.getDouble("/geometry/cvt/mvt/position/x", 0 );
+        double ypos = dbprovider.getDouble("/geometry/cvt/mvt/position/y", 0 );
+        double zpos = dbprovider.getDouble("/geometry/cvt/mvt/position/z", 0 );
         for (int j = 0; j<NSECTORS; j++) {
             for (int i = 0; i<NLAYERS; i++) {
                 int row = j*NSECTORS + i;
                 Point3D shift = new Point3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaX", row),
                                             dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaY", row),
-                                            dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaZ", row));                
+                                            dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaZ", row)); 
+                shift.translateXYZ(xpos, ypos, zpos);
                 Vector3D rot = new Vector3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotX", row),
                                             dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotY", row),
                                             dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotZ", row));  
@@ -304,7 +309,7 @@ public class CCDBConstantsLoader {
                 axis.rotateX(rot.x());
                 axis.rotateY(rot.y());
                 axis.rotateZ(rot.z());
-                axis.translateXYZ(shift.x(), shift.y(), shift.z()+ztarget*10);
+                axis.translateXYZ(shift.x(), shift.y(), shift.z());//+ztarget*10);
                 Constants.shifts[i][j] = shift;
                 Constants.rotations[i][j] = rot;
                 Constants.axes[i][j] = axis;
