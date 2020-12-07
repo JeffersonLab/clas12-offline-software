@@ -237,11 +237,11 @@ public class CrossMaker {
         // Sorting by layer first:
         for (Cluster theclus : clusters) {
             if (theclus.get_Detector() == 1) {
-                if (BMTGeometry.getZorC(theclus.get_Layer()) == 1) {
+                if (BMTGeometry.getDetectorType(theclus.get_Layer()) == BMTType.Z) {
                     bmt_Zlayrclus.add(theclus);
                 }
 
-                if (BMTGeometry.getZorC(theclus.get_Layer()) == 0) {
+                if (BMTGeometry.getDetectorType(theclus.get_Layer()) == BMTType.C) {
                     bmt_Clayrclus.add(theclus);
                 }
 

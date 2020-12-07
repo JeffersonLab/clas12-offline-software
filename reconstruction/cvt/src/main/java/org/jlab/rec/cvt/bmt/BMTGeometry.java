@@ -9,6 +9,9 @@ import org.jlab.geom.prim.Vector3D;
 import org.jlab.groot.data.H2F;
 import org.jlab.groot.graphics.EmbeddedCanvas;
 import org.jlab.groot.group.DataGroup;
+import static org.jlab.rec.cvt.bmt.Constants.E_DRIFT_FF;
+import static org.jlab.rec.cvt.bmt.Constants.E_DRIFT_MF;
+import static org.jlab.rec.cvt.bmt.Lorentz.getLorentzAngle;
 
 /**
  *
@@ -67,7 +70,7 @@ public class BMTGeometry {
      * @param layer (1-6)
      * @return type ("C" or "Z");
      */
-    public BMTType getDetectorType(int layer) {
+    public static BMTType getDetectorType(int layer) {
     	if(layer == lC[0] || layer == lC[1] || layer == lC[2]) return BMTType.C;
         else if(layer == lZ[0] || layer == lZ[1] || layer == lZ[2]) return BMTType.Z;
         else {
@@ -395,7 +398,7 @@ public class BMTGeometry {
      * @param strip 
      * @return zc
      */
-    public double getCstripZ(int region, int strip) {
+    private double getCstripZ(int region, int strip) {
         
         double z = udf;
         
@@ -662,13 +665,44 @@ public class BMTGeometry {
         return strip;
 
     }
-    public static int getZorC(int layer) {
-        int axis = 0;
-        if (layer == 2 || layer == 3 || layer == 5) {
-            axis = 1;
+    
+    /**
+     * Calculate Theta Lorentz based on solenoid scale and drift settings
+     * @param layer
+     * @param sector
+     * @return thetaL in radians
+     */
+    public double getThetaLorentz(int layer, int sector) {
+         
+        double thetaL = 0;
+        
+        double solenoidScale = org.jlab.rec.cvt.Constants.getSolenoidscale();
+        
+        if(Math.abs(solenoidScale)<0.001) {
+            thetaL = 0;
         }
-        return axis;
+        else {
+            if(Math.abs(solenoidScale)<0.8) {
+                thetaL = Math.toRadians(getLorentzAngle(Constants.E_DRIFT_MF[layer-1][sector-1],Math.abs(solenoidScale*50)));
+            } else {
+                thetaL = Math.toRadians(getLorentzAngle(E_DRIFT_FF[layer-1][sector-1],Math.abs(solenoidScale*50)));
+            }
+        }
+        if (solenoidScale<0) thetaL=-thetaL; 
+        return thetaL;
     }
+
+    /**
+     * Calculate Lorentz angle correction
+     * @param layer
+     * @param sector
+     * @return 
+     */
+    public double LorentzAngleCorr(int layer, int sector) {
+        return (this.getThickness()/2 * Math.tan(this.getThetaLorentz(layer, sector))) / this.getRadius(layer);
+    }
+
+
     /**
      * Executable method: implements checks
      * @param arg
@@ -1008,25 +1042,25 @@ public class BMTGeometry {
 //        return value;
 //    }
 
-    public void setLorentzAngle(int layer, int sector) {
-     	org.jlab.rec.cvt.bmt.Constants.setThetaL(layer, sector); 
-    }
-//    // Correct strip position before clustering
-//    public int getLorentzCorrectedZStrip(int sector, int layer, int theMeasuredZStrip) {
+//    public void setLorentzAngle(int layer, int sector) {
+//     	org.jlab.rec.cvt.bmt.Constants.setThetaL(layer, sector); 
+//    }
+////    // Correct strip position before clustering
+////    public int getLorentzCorrectedZStrip(int sector, int layer, int theMeasuredZStrip) {
+////
+////        double theMeasuredPhi = this.CRZStrip_GetPhi(sector, layer, theMeasuredZStrip);
+////        double theLorentzCorrectedAngle = this.LorentzAngleCorr(theMeasuredPhi, layer);
+////        
+////        return this.getZStrip(layer, theLorentzCorrectedAngle);
+////    }   
+//    public double LorentzAngleCorr(double phi, int layer) {
 //
-//        double theMeasuredPhi = this.CRZStrip_GetPhi(sector, layer, theMeasuredZStrip);
-//        double theLorentzCorrectedAngle = this.LorentzAngleCorr(theMeasuredPhi, layer);
-//        
-//        return this.getZStrip(layer, theLorentzCorrectedAngle);
-//    }   
-    public double LorentzAngleCorr(double phi, int layer) {
-
-        int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
-        //return phi +( Constants.hDrift/2*Math.tan(Constants.getThetaL()) )/Constants.getCRZRADIUS()[num_region];
-        //return phi + (Constants.hDrift * Math.tan(Constants.getThetaL())) / (Constants.getCRZRADIUS()[num_region]);
-        return phi + (Constants.hStrip2Det * Math.tan(Constants.getThetaL())) / (Constants.getCRZRADIUS()[num_region]);
-    }
-    
+//        int num_region = (int) (layer + 1) / 2 - 1; // region index (0...2) 0=layers 1&2, 1=layers 3&4, 2=layers 5&6
+//        //return phi +( Constants.hDrift/2*Math.tan(Constants.getThetaL()) )/Constants.getCRZRADIUS()[num_region];
+//        //return phi + (Constants.hDrift * Math.tan(Constants.getThetaL())) / (Constants.getCRZRADIUS()[num_region]);
+//        return phi + (Constants.hStrip2Det * Math.tan(Constants.getThetaL())) / (Constants.getCRZRADIUS()[num_region]);
+//    }
+//    
 //    /**
 //     *
 //     * @param sector

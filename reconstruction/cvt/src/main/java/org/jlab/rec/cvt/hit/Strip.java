@@ -2,6 +2,8 @@ package org.jlab.rec.cvt.hit;
 
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
+import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.bmt.Constants;
 import org.jlab.rec.cvt.bmt.Geometry;
 
@@ -139,11 +141,11 @@ public class Strip {
      */
     public void calc_BMTStripParams(org.jlab.rec.cvt.bmt.BMTGeometry geo, int sector, int layer) {
 
-        if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(layer) == 0) { // C-dtectors
+        if (BMTGeometry.getDetectorType(layer) == BMTType.C) { // C-detectors
             // set z
             //double z = geo.CRCStrip_GetZ(layer, this.get_Strip());
             int region = (int) ((layer + 1) / 2 ); // region index (1...3) 1=layers 1&2, 2=layers 3&4, 3=layers 5&6
-            double z = geo.getCstripZ(region, this.get_Strip());
+            double z = geo.getCstrip(region, sector, this.get_Strip()).center().z();
             this.set_Z(z);
             // max z err
             //this.set_ZErr(geo.CRCStrip_GetPitch(layer, this.get_Strip()) / Math.sqrt(12.));
@@ -151,10 +153,9 @@ public class Strip {
             
         }
 
-        if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(layer) == 1) { // Z-detectors
-            geo.setLorentzAngle(layer, sector);
+        if (BMTGeometry.getDetectorType(layer) == BMTType.Z) { // Z-detectors
             double theMeasuredPhi = geo.CRZStrip_GetPhi(sector, layer, this.get_Strip());
-            double theLorentzCorrectedAngle = geo.LorentzAngleCorr(theMeasuredPhi, layer);
+            double theLorentzCorrectedAngle = theMeasuredPhi + geo.LorentzAngleCorr(layer,sector);
             // set the phi 
             this.set_Phi(theLorentzCorrectedAngle);
             this.set_Phi0(theMeasuredPhi); // uncorrected

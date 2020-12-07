@@ -11,7 +11,7 @@ public class Lorentz {
 		
 	}
 	
-	public static double GetLorentzAngle(double xe, double xb) {
+	public static double getLorentzAngle(double xe, double xb) {
 		if (xe==0||xb==0) return 0;
 		double de = (org.jlab.rec.cvt.bmt.Constants.emax-org.jlab.rec.cvt.bmt.Constants.emin)/(org.jlab.rec.cvt.bmt.Constants.Ne-1);
 		double db = (org.jlab.rec.cvt.bmt.Constants.bmax-org.jlab.rec.cvt.bmt.Constants.bmin)/(org.jlab.rec.cvt.bmt.Constants.Nb-1);	

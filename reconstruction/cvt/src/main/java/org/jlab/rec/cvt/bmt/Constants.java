@@ -133,9 +133,9 @@ public class Constants {
         }
         else {
             if(Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale())<0.8) {
-                ThetaL = Math.toRadians(org.jlab.rec.cvt.bmt.Lorentz.GetLorentzAngle(E_DRIFT_MF[layer-1][sector-1],Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()*50)));
+                ThetaL = Math.toRadians(org.jlab.rec.cvt.bmt.Lorentz.getLorentzAngle(E_DRIFT_MF[layer-1][sector-1],Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()*50)));
             } else {
-                ThetaL = Math.toRadians(org.jlab.rec.cvt.bmt.Lorentz.GetLorentzAngle(E_DRIFT_FF[layer-1][sector-1],Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()*50)));
+                ThetaL = Math.toRadians(org.jlab.rec.cvt.bmt.Lorentz.getLorentzAngle(E_DRIFT_FF[layer-1][sector-1],Math.abs(org.jlab.rec.cvt.Constants.getSolenoidscale()*50)));
             }
         }
         if (org.jlab.rec.cvt.Constants.getSolenoidscale()<0) ThetaL=-ThetaL; 

@@ -14,6 +14,7 @@ import org.jlab.geom.base.Detector;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Vector3D;
 import org.jlab.geometry.prim.Line3d;
+import org.jlab.rec.cvt.bmt.BMTGeometry;
 import org.jlab.rec.cvt.bmt.BMTType;
 import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
@@ -171,10 +172,10 @@ public class TrajectoryFinder {
                 }
                 double R = 0;
 
-                if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(l + 1-6) == 1) {
+                if (BMTGeometry.getDetectorType(l + 1-6) == BMTType.Z) {
                     R = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
                 }
-                if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(l + 1-6) == 0) {
+                if (BMTGeometry.getDetectorType(l + 1-6) == BMTType.C) {
                     R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
                 }
 
@@ -502,7 +503,7 @@ public class TrajectoryFinder {
                 value = false;	// reauire same region
             }
             if (c.get_DetectorType()==BMTType.C) { //C-detector measuring Z
-                if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(layer) == 1) { //Z-detector measuring phi
+                if (BMTGeometry.getDetectorType(layer) == BMTType.Z) { //Z-detector measuring phi
                     value = false;
                 }
             	
@@ -511,7 +512,7 @@ public class TrajectoryFinder {
                 }
             }
             if (c.get_DetectorType()==BMTType.Z) { //Z-detector measuring phi
-                if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(layer) == 0) { //C-detector 
+                if (BMTGeometry.getDetectorType(layer) == BMTType.C) { //C-detector 
                     value = false;
                 }
                 double deltaXt = Math.sqrt((stVec.x() - c.get_Point().x()) * (stVec.x() - c.get_Point().x()) + (stVec.y() - c.get_Point().y()) * (stVec.y() - c.get_Point().y()));
@@ -552,7 +553,7 @@ public class TrajectoryFinder {
             }
         }
         if (detector.equalsIgnoreCase("BMT")) {
-            if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(layer) == 0) { //C-detector measuring z
+            if (BMTGeometry.getDetectorType(layer) == BMTType.C) { //C-detector measuring z
                 for (FittedHit h1 : cluster) {
                     // calculate the hit residuals
                     double docaToTrk = stVec.z() - h1.get_Strip().get_Z();
@@ -566,7 +567,7 @@ public class TrajectoryFinder {
                     }
                 }
             }
-            if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(layer) == 1) { //Z-detector measuring phi
+            if (BMTGeometry.getDetectorType(layer) == BMTType.Z) { //Z-detector measuring phi
                 // calculate the hit residuals
                 for (FittedHit h1 : cluster) {
                     double StripX = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[(cluster.get_Layer() + 1) / 2 - 1] * Math.cos(h1.get_Strip().get_Phi());
@@ -761,10 +762,10 @@ public class TrajectoryFinder {
         inters_bottom[3] = Double.NaN;
 
         double R = 0;
-        if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(l + 1) == 0) {
+        if (BMTGeometry.getDetectorType(l + 1) == BMTType.C) {
             R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[l / 2] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
         }
-        if (org.jlab.rec.cvt.bmt.BMTGeometry.getZorC(l + 1) == 1) {
+        if (BMTGeometry.getDetectorType(l + 1) == BMTType.Z) {
             R = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[l / 2] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
         }
         // solve for intersection of line with cylinder of radius R
