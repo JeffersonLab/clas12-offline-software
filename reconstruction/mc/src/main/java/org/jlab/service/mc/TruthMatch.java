@@ -179,14 +179,14 @@ public class TruthMatch extends ReconstructionEngine {
     class MCPart {
 
         public MCPart() {
-            LayersTrk = 0;
+            MCLayersTrk = 0;
         }
 
         public int id;      // index of the MC particle (it should correspond of tid/otid
         // (still needs to be defined which one) in MC::True)
 
         public int pid;     // PDG ID code
-        public long LayersTrk;    // This is not really MCParticle property, bu we know that each MCParticle should have this so, attaching this to MCPart object
+        public long MCLayersTrk;    // This is not really MCParticle property, bu we know that each MCParticle should have this so, attaching this to MCPart object
         // *********************************************** Description of "LayersTrk" ************************************************************
         //**** BMT Layer ****|*** BST Layer **** | ******************************************* DC layers *******************************************
         // 47 46 45 44 43 42 | 41 40 39 38 37 36 | 35 34 33 32 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 3 2 0
@@ -733,7 +733,7 @@ public class TruthMatch extends ReconstructionEngine {
                 int layerBit = BSTStartBit + adcBank.getInt("layer", hitID) - 1;
 //                System.out.println(" iCL = " + iCL + "   iHit = " + iHit + "   hitID = " + hitID + "  Layer is " +  adcBank.getInt("layer", hitID) + "     layerBit is " + layerBit);
 //                System.out.println("otid is " + mchitsInBST.get(hitID).otid);
-                mcp.get((short) mchitsInBST.get(hitID).otid).LayersTrk |= 1L << layerBit;
+                mcp.get((short) mchitsInBST.get(hitID).otid).MCLayersTrk |= 1L << layerBit;
 
 //                System.out.println("Bitwise representation of LayersTrk is " + Long.toBinaryString(mcp.get((short) mchitsInBST.get(hitID).otid).LayersTrk));
 
@@ -1076,6 +1076,7 @@ public class TruthMatch extends ReconstructionEngine {
             MCRecMatch match = new MCRecMatch();
 
             match.id = imc;
+            match.MCLayersTrk = mcp.get(imc).MCLayersTrk;
 
             /**
              * Generally speaking it is possible that all clusters of a given MC
@@ -1168,6 +1169,7 @@ public class TruthMatch extends ReconstructionEngine {
             MCRecMatch p = mcp.get(j);
             bank.setShort("mcTindex", j, p.id);
             bank.setShort("pindex", j, p.pindex);
+            bank.setLong("MCLayersTrk", j, p.MCLayersTrk);
         }
 
         event.appendBanks(bank);
