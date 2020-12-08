@@ -108,11 +108,8 @@
         "info": "MC Particle - Rec Track matching.",
         "entries": [
             {"name":"mcTindex",    "type":"S",  "info":"MC Particle index, as in `tid`"},
-            {"name":"recTindex",   "type":"S",  "info":"REC Track ID"},
 	    {"name":"pindex",	   "type":"S",  "info":"REC particle index"},
-            {"name":"isInAcc",     "type":"B",  "info":"Is reconstructable"},
-            {"name":"nMCclusters", "type":"S",  "info":"Number of rec clusters/hits created by the MC particle"},
-            {"name":"fraction",    "type":"F",  "info":"Fraction of clusters used"}
+	    {"name":"LayersTrkMC", "type":"L",  "info":"layers of tracker detectors that a givem MCParticle hit. Each layer corresponds to a specific bit in this variable"}
         ]
     },
     {
