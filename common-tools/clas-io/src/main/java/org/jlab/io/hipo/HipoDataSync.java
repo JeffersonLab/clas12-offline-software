@@ -15,6 +15,7 @@ import org.jlab.jnp.hipo4.data.Event;
 import org.jlab.jnp.hipo4.data.Schema;
 import org.jlab.jnp.hipo4.data.SchemaFactory;
 import org.jlab.jnp.hipo4.io.HipoWriter;
+import org.jlab.jnp.hipo4.io.HipoWriterSorted;
 
 
 /**
@@ -23,10 +24,10 @@ import org.jlab.jnp.hipo4.io.HipoWriter;
  */
 public class HipoDataSync implements DataSync {
     
-    HipoWriter writer = null;
+    HipoWriterSorted writer = null;
     
     public HipoDataSync(){
-        this.writer = new HipoWriter();
+        this.writer = new HipoWriterSorted();
         this.writer.setCompressionType(2);
         String env = System.getenv("CLAS12DIR");
         writer.getSchemaFactory().initFromDirectory(env + "/etc/bankdefs/hipo4");
@@ -36,7 +37,7 @@ public class HipoDataSync implements DataSync {
     }
     
     public HipoDataSync(SchemaFactory factory){
-        this.writer = new HipoWriter();
+        this.writer = new HipoWriterSorted();
         this.writer.setCompressionType(2);
         List<Schema>  schemas = factory.getSchemaList();
         for(Schema schema : schemas){
@@ -69,7 +70,8 @@ public class HipoDataSync implements DataSync {
         //EvioDataEvent  evioEvent = (EvioDataEvent) event;
         if(event instanceof HipoDataEvent) {
             HipoDataEvent hipoEvent = (HipoDataEvent) event;
-            this.writer.addEvent(hipoEvent.getHipoEvent());
+            
+            this.writer.addEvent(hipoEvent.getHipoEvent(),hipoEvent.getHipoEvent().getEventTag());
         }
     }
 
