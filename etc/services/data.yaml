@@ -82,6 +82,7 @@ configuration:
       dcT2DFunc: "Polynomial"
       dcWireDistortion: "true"
 #      sectorSelect: "1"
+      dcFOOST: "true"
     DCRC:
       variation: rga_fall2018
       dcGeometryVariation: rga_fall2018
