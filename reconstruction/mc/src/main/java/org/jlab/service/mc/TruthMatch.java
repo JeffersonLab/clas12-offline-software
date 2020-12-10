@@ -44,7 +44,6 @@ public class TruthMatch extends ReconstructionEngine {
 
         //System.out.println("========================================= Event "
         //        + event.getBank("RUN::config").getInt("event", 0) + " =========================================");
-
         // check if the event contains the MC banks
         if (event.hasBank("MC::True") == false) {
             System.err.print(" [ WARNING, TruthMatching ]: no MC::True bank found");
@@ -331,6 +330,7 @@ public class TruthMatch extends ReconstructionEngine {
 
     private final int BSTStartBit = 36;
     private final int BMTStartBit = 42;
+    private final int DCStartBit = 0;
 
     private final List<Integer> chargedPIDs;
 
@@ -872,6 +872,61 @@ public class TruthMatch extends ReconstructionEngine {
 
             }
 
+        }
+
+        return recHits;
+    }
+
+    Map< Short, List<RecHit>> getDCHits(DataEvent event, Map<Integer, MCHit> mchitsInDC, Map<Short, MCPart> mcp, Map<Short, RecPart> recp) {
+        Map< Short, List<RecHit>> recHits = new HashMap<>();
+
+        /**
+         * Check if three necessary banks exist otherwise will return null
+         */
+        if ((event.hasBank("DC::tdc") == false) || (event.hasBank("BMTRec::Clusters") == false)) {
+            //System.out.println("There is No BMTRec::clusters bank, or there is No BMTRec::Hits bank, or there is no REC::Track bank present");
+            return null;
+        }
+
+        DataBank trkBank = event.getBank("REC::Track");
+        DataBank tdcBank = event.getBank("DC::tdc");
+        DataBank tbHitsBank = event.getBank("TimeBasedTrkg::TBHits");
+
+        /**
+         * We need to link the hit to a pindex, if the the hit is part of a
+         * track, so will read TBHits banks and collect all hit IDs that were
+         * part of any track
+         */
+        //List<Integer> tbHitIDs = new ArrayList<>();
+        Map<Integer, Short> tbHitIDs = new HashMap<>();
+        for (int itbHit = 0; itbHit < tbHitsBank.rows(); itbHit++) {
+            //tbHitIDs.put(tbHitsBank.getInt("id", itbHit) - 1, (short)tbHitsBank.getShort("trkID", itbHit) - 1);
+            tbHitIDs.put(tbHitsBank.getInt("id", itbHit) - 1, (short) (tbHitsBank.getByte("trkID", itbHit) - 1));
+        }
+
+        for (int iHit = 0; iHit < tdcBank.rows(); iHit++) {
+            RecHit curHit = new RecHit();
+
+            int layer = tdcBank.getInt("layer", iHit);
+            int layerBit = DCStartBit + layer - 1;
+
+            curHit.id = iHit;
+            curHit.detector = (byte) DetectorType.DC.getDetectorId();
+            curHit.cid = (short) iHit;
+
+            if (tbHitIDs.containsKey(curHit.id)) {
+                curHit.pindex = trkBank.getShort("pindex", tbHitIDs.get(curHit.id));
+            } else {
+                curHit.pindex = -1;
+            }
+
+            mcp.get((short) mchitsInDC.get(curHit.id).otid).MCLayersTrk |= 1L << layerBit;
+            if (curHit.pindex >= 0) {
+                recp.get(curHit.pindex).RecLayersTrk |= 1L << layerBit;
+            }
+
+            recHits.put(curHit.cid, new ArrayList<>());
+            recHits.get(curHit.cid).add(curHit);
         }
 
         return recHits;
