@@ -140,11 +140,12 @@ public class PatternRec {
                 List<Cluster> clusters = clf.findClumps(entry.getValue(), ct);
                 for (Cluster clus : clusters) {
                     FittedCluster fclus = new FittedCluster(clus);
-                    
+                    clus.set_Id(clus.get(0).NNClusId);
                     if (clus != null && clus.size() >= 4 ) { //4 layers per superlayer
-                        fclus.set_Id(clus.get(0).NNClusId);
+                        fclus.set_Id(clus.get(0).NNClusId); 
                         // update the hits
                         for (FittedHit fhit : fclus) {
+                            fhit.set_AssociatedClusterID(fclus.get_Id());
                             fhit.set_TrkgStatus(0);
                             fhit.updateHitPosition(DcDetector); 
                         }
@@ -155,8 +156,9 @@ public class PatternRec {
 
                         fclus = ct.ClusterCleaner(fclus, cf, DcDetector);
                         // update the hits
+                        fclus.set_Id(fclus.get(0).get_AssociatedClusterID()); 
                         for (FittedHit fhit : fclus) {
-                            fhit.set_AssociatedClusterID(clus.get_Id());
+                            fhit.set_AssociatedClusterID(fclus.get_Id());
                             fhit.set_AssociatedHBTrackID(entry.getKey());
                         }
                         cf.SetFitArray(fclus, "TSC");

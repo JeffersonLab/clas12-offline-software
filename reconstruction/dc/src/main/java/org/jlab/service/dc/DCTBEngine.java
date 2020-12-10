@@ -1,7 +1,10 @@
 package org.jlab.service.dc;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.geom.prim.Point3D;
@@ -121,7 +124,9 @@ public class DCTBEngine extends DCEngine {
 
         clusters = clusFinder.FindTimeBasedClusters(event, hits, cf, ct, 
                 super.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/time2dist"), dcDetector, tde);
-
+        for(FittedCluster c : clusters) {
+            c.set_Id(c.get(0).get_AssociatedClusterID());
+        }
         if(clusters.isEmpty()) {
             rbc.fillAllTBBanks(event, rbc, hits, null, null, null, null);
             return true;
@@ -236,14 +241,12 @@ public class DCTBEngine extends DCEngine {
                 //set the track parameters if the filter does not fail
                 TrackArray[i].set_P(1./Math.abs(kFit.finalStateVec.Q));
                 TrackArray[i].set_Q((int)Math.signum(kFit.finalStateVec.Q));
-                trkcandFinder.setTrackPars(TrackArray[i], new Trajectory(), trjFind, fn, 
-                        kFit.finalStateVec.z, dcDetector, dcSwim, beamXoffset, beamYoffset);
                 // candidate parameters are set from the state vector
                 TrackArray[i].set_FitChi2(kFit.chi2); 
                 TrackArray[i].set_FitNDF(kFit.NDF);
                 TrackArray[i].set_Trajectory(kFit.kfStateVecsAlongTrajectory);
                 TrackArray[i].set_FitConvergenceStatus(kFit.ConvStatus);
-                TrackArray[i].set_Id(TrackArray[i].size()+1);
+                //TrackArray[i].set_Id(TrackArray[i].size()+1);
                 //TrackArray[i].set_CovMat(kFit.finalCovMat.covMat); 
                 if(TrackArray[i].get_Vtx0().toVector3D().mag()>500)
                     continue;
@@ -256,18 +259,18 @@ public class DCTBEngine extends DCEngine {
         }
         
         
-        for(int i = 0; i < crosses.size(); i++) {
-            crosses.get(i).set_Id(i+1);
-        }
+        //for(int i = 0; i < crosses.size(); i++) {
+        //    crosses.get(i).set_Id(i+1);
+        //}
         // track found	
-        int trkId = 1;
+        //int trkId = 1;
 
         if(trkcands.size()>0) {
             //trkcandFinder.removeOverlappingTracks(trkcands);		// remove overlaps
-            
             for(Track trk: trkcands) {
+                int trkId = trk.get_Id();
                 // reset the id
-                trk.set_Id(trkId);
+                //trk.set_Id(trkId);
                 trkcandFinder.matchHits(trk.get_Trajectory(), trk, dcDetector, dcSwim);
                 trk.calcTrajectory(trkId, dcSwim, trk.get_Vtx0().x(), trk.get_Vtx0().y(), trk.get_Vtx0().z(), 
                         trk.get_pAtOrig().x(), trk.get_pAtOrig().y(), trk.get_pAtOrig().z(), trk.get_Q(), 
@@ -297,7 +300,7 @@ public class DCTBEngine extends DCEngine {
                         h2.set_AssociatedTBTrackID(trk.get_Id());                              
                     }
                 }
-                trkId++;
+                //trkId++;
             }
         }    
        
@@ -306,7 +309,7 @@ public class DCTBEngine extends DCEngine {
             rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, crosses, null); // no cand found, stop here and save the hits, the clusters, the segments, the crosses
             return true;
         }
-       
+        this.ensureTrackUnique(trkcands);
         rbc.fillAllTBBanks(event, rbc, fhits, clusters, segments, crosses, trkcands);
         //if(this.aiAssist) 
         //    event.getBank("TimeBasedTrkg::"+_name+"Tracks").show();
@@ -319,20 +322,44 @@ public class DCTBEngine extends DCEngine {
         int miss = 0;    
         
         int L[] = new int[6];
+        Map<Integer, Segment> SegMap = new HashMap<Integer, Segment>();
         for(int l = 0; l<track.get_ListOfHBSegments().size(); l++) {
             L[track.get_ListOfHBSegments().get(l).get_Superlayer()-1]++;
+            SegMap.put(track.get_ListOfHBSegments().get(l).get_Superlayer(), track.get_ListOfHBSegments().get(l));
         }
         for(int l = 0; l<6; l++) {
             if(L[l]==0){
                 miss=l+1;
                 if(miss%2==0) {//missing sl in 2,4,6
-                    track.setSingleSuperlayer(track.get_ListOfHBSegments().get(l));//isolated sl in 1,3,5
-                } else {
-                    track.setSingleSuperlayer(track.get_ListOfHBSegments().get(l+1));//isolated sl in 2,4,6
+                    track.setSingleSuperlayer(SegMap.get(l)); //isolated sl in 1,3,5
+                } else {//missing sl in 1,3,4
+                    track.setSingleSuperlayer(SegMap.get(l)); //isolated sl in 2,4,6
                 }
+                
+//                if(miss%2==0) {//missing sl in 2,4,6
+//                    track.setSingleSuperlayer(track.get_ListOfHBSegments().get(l));//isolated sl in 1,3,5
+//                } else {
+//                    track.setSingleSuperlayer(track.get_ListOfHBSegments().get(l+1));//isolated sl in 2,4,6
+//                }
             }
         }
         return miss;
     }
-       
+
+    private void ensureTrackUnique(List<Track> trkcands) {
+        List<Track> rmFrmList = new ArrayList<Track>();
+        trkcands.sort(Comparator.comparing(Track::get_Id).thenComparing(Track::get_FitChi2));
+        for(int i = 0; i < trkcands.size()-1; i++) {
+            if(trkcands.get(i).get_Id()==trkcands.get(i+1).get_Id()) {
+                double chi2_ov_ndf_i=trkcands.get(i).get_FitChi2()/(double)trkcands.get(i).get_FitNDF();
+                double chi2_ov_ndf_ip1=trkcands.get(i+1).get_FitChi2()/(double)trkcands.get(i+1).get_FitNDF();
+                if(chi2_ov_ndf_i<chi2_ov_ndf_ip1) {
+                    rmFrmList.add(trkcands.get(i+1));
+                } else {
+                    rmFrmList.add(trkcands.get(i));
+                }
+            }
+        }
+        trkcands.removeAll(rmFrmList);
+    }
 }

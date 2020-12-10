@@ -158,6 +158,33 @@ public class DCEngine extends ReconstructionEngine {
         if (T2Dfcn==null) {
              System.out.println("["+this.getName()+"] run with time to distance exponential function in tracking ");
         }
+        //NSUPERLAYERTRACKING
+        String useFOOST = this.getEngineConfigString("dcFOOST");
+        
+        if (useFOOST!=null) {
+            if(Boolean.valueOf(useFOOST)==true) {
+                Constants.NSUPERLAYERTRACKING =5;
+            } else {
+                Constants.NSUPERLAYERTRACKING =6;
+            }
+            System.out.println("["+this.getName()+"] run with Five-out-of-six-superlayer-trkg chosen based on yaml = "+Constants.NSUPERLAYERTRACKING);
+                
+        }
+        else {
+            useFOOST = System.getenv("COAT_DC_USEFOOST");
+            if (useFOOST!=null) {
+                if(Boolean.valueOf(useFOOST)==true) {
+                    Constants.NSUPERLAYERTRACKING =5;
+                } else {
+                    Constants.NSUPERLAYERTRACKING =6;
+                }
+                System.out.println("["+this.getName()+"] run with with with Five-out-of-six-superlayer-trkg config chosen based on env = "+Constants.NSUPERLAYERTRACKING);               
+            }
+        }
+        if (useFOOST==null) {
+             System.out.println("["+this.getName()+"] run with with Five-out-of-six-superlayer-trkg config chosen based on default = "+Constants.NSUPERLAYERTRACKING);
+             Constants.NSUPERLAYERTRACKING =5;
+        }
     }
     public void LoadTables() {
         

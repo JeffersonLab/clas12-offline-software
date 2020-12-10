@@ -110,7 +110,7 @@ public class DCHBClustering extends DCEngine {
         } else {
             List<FittedHit> fhits = rbc.createRawHitList(hits);
             /* 13 */
-            rbc.updateListsListWithClusterInfo(fhits, clusters);
+            rbc.updateListsWithClusterInfo(fhits, clusters);
             rbc.fillAllHBBanks(event,
                     rbc,
                     fhits,

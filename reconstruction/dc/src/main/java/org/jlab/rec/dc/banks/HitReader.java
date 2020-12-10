@@ -464,8 +464,8 @@ public class HitReader {
         for (int i = 0; i < bank.rows(); i++) {
             
             Hit hit = new Hit(bank.getByte("sector", i), bank.getByte("superlayer", i), 
-                    bank.getByte("layer", i), bank.getShort("wire", i), bank.getInt("TDC", i), (i + 1));
-            hit.set_Id(i+1);
+                    bank.getByte("layer", i), bank.getShort("wire", i), bank.getInt("TDC", i), bank.getShort("id", i));
+            hit.set_Id(bank.getShort("id", i));
             hit.calc_CellSize(DcDetector);
             double posError = hit.get_CellSize() / Math.sqrt(12.);
             hit.set_DocaErr(posError);

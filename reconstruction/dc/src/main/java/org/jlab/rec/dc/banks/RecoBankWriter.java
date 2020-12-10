@@ -44,7 +44,7 @@ public class RecoBankWriter {
             
     }
 
-    public void updateListsListWithClusterInfo(List<FittedHit> fhits,
+    public void updateListsWithClusterInfo(List<FittedHit> fhits,
             List<FittedCluster> clusters) {
 
         for (int i = 0; i < clusters.size(); i++) {
