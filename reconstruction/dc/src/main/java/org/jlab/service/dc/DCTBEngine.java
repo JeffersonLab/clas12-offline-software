@@ -241,6 +241,8 @@ public class DCTBEngine extends DCEngine {
                 //set the track parameters if the filter does not fail
                 TrackArray[i].set_P(1./Math.abs(kFit.finalStateVec.Q));
                 TrackArray[i].set_Q((int)Math.signum(kFit.finalStateVec.Q));
+                trkcandFinder.setTrackPars(TrackArray[i], new Trajectory(), trjFind, fn, 
+                        kFit.finalStateVec.z, dcDetector, dcSwim, beamXoffset, beamYoffset);
                 // candidate parameters are set from the state vector
                 TrackArray[i].set_FitChi2(kFit.chi2); 
                 TrackArray[i].set_FitNDF(kFit.NDF);
