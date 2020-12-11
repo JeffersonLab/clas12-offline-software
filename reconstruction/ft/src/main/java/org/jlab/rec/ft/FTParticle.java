@@ -18,7 +18,7 @@ public class FTParticle {
 	private Vector3D _Direction = new Vector3D();             // direction 
         private int _Cluster;					  // track pointer to cluster information in FTCALRec::cluster bank
 	private int _Signal;					  // track pointer to signal information in FTHODORec::cluster bank
-	private int _Cross;					  // track pointer to cross information in FTTRKRec::cluster bank
+	private int _Cross;					  // track pointer to cross information in FTTRKRec::cross bank
         private double _field;
         	
 	// constructor
@@ -157,20 +157,37 @@ public class FTParticle {
                     double hitdistance  = dist.length();
                     double timedistance = Math.abs(this.getTime()-(response.getTime()-response.getPosition().mag()/PhysicsConstants.speedOfLight()));
  //                   System.out.println(" LOOP = " + loop + "   distance = " + hitdistance);
-                    if(timedistance<timeThresholds&&hitdistance<distanceThreshold&&hitdistance<minimumDistance){
+ //                   if(timedistance<timeThresholds&&hitdistance<distanceThreshold&&hitdistance<minimumDistance){
+ // provisional: no requirement on time distance (no info available yet fot time fof the hit
+ //                 if the track passes through an FTCAL hit, check if the distance is within a tolerance
+                    boolean inTolerance = true;
+                    if(this.getCalorimeterIndex()>0){
+                        if(hitdistance>distanceThreshold) inTolerance=false;
+                    }
+                    if(this.getTrackerIndex()>0){
+                        if(hitdistance>FTConstants.TRK0_TRK1_DISTANCE_MATCHING) inTolerance = false;
+                    }
+                    if(inTolerance && hitdistance<minimumDistance){
                         minimumDistance = hitdistance;
                         bestIndex       = loop;
                     }
                 }
             }
             if(bestIndex>-1) {
-                if(hitList.get(bestIndex).getSize()<FTConstants.HODO_MIN_CLUSTER_SIZE) bestIndex=-1;
+                // if bestHit is on hodo require at least two hits overall on HODO
+                if(detectorType=="HODO"){if(hitList.get(bestIndex).getSize()<FTConstants.HODO_MIN_CLUSTER_SIZE) bestIndex=-1;}
+                // if bestHit is on trk require at least two crosses overall in FTTRK
+                if(detectorType=="FTTRK"){if(hitList.get(bestIndex).getSize()<FTConstants.TRK_MIN_CROSS_NUMBER) bestIndex=-1;}
             }
             return bestIndex;
         }
         
         public void show() {
+            String dtype = "xxx";
+            if(this.getCalorimeterIndex()>0 && this.getTrackerIndex()<0){dtype = "FTCAL ";}else{dtype = "FTTRK ";}
+            
             System.out.println( "FT Particle info " +
+                                " hit in "  + dtype +
                                 " Charge = "+ this.getCharge() +
                                 " E = "     + this.getEnergy() +                    
                                 " X = "     + this.getPosition().x() +

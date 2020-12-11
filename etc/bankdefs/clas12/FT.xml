@@ -34,6 +34,7 @@
          <column name = "component" num = "3"  type = "int32"  info = "component number"/>
          <column name = "ADC"       num = "4"  type = "int32"  info = "ADC value"/>
          <column name = "hitn"      num = "99"  type = "int32"  info = "hit number"/>
+         <column name = "time"      num = "23"  type = "float64"  info = "time"/>
       </section>
     </bank>
     
@@ -142,7 +143,7 @@
     </bank>
 
     <bank name="FTHODORec" tag="810" info="Reconstructed FTHODO Cluster Information">
-      <section name="hits" tag="811" num = "0" info="Reconstructed Hits in FT hodoscope">
+        <section name="hits" tag="811" num = "0" info="Reconstructed Hits in FT hodoscope">
         <column name = "id"             type = "int32"   num = "1"  info = "id number"/>
         <column name = "sector"         type = "int32"   num = "2"  info = "sector number"/>
         <column name = "layer"			type = "int32"   num = "3"  info = "layer number"/>
