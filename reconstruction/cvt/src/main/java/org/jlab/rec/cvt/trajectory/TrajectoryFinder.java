@@ -173,10 +173,10 @@ public class TrajectoryFinder {
                 double R = 0;
 
                 if (BMTGeometry.getDetectorType(l + 1-6) == BMTType.Z) {
-                    R = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
+                    R = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
                 }
                 if (BMTGeometry.getDetectorType(l + 1-6) == BMTType.C) {
-                    R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
+                    R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTRegIdx] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
                 }
 
     //            swimmer.SetSwimParameters((trk.get_helix().xdca()+org.jlab.rec.cvt.Constants.getXb()) / 10, (trk.get_helix().ydca()+org.jlab.rec.cvt.Constants.getYb()) / 10, trk.get_helix().get_Z0() / 10, 
@@ -763,10 +763,10 @@ public class TrajectoryFinder {
 
         double R = 0;
         if (BMTGeometry.getDetectorType(l + 1) == BMTType.C) {
-            R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[l / 2] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
+            R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[l / 2] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
         }
         if (BMTGeometry.getDetectorType(l + 1) == BMTType.Z) {
-            R = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[l / 2] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN;
+            R = org.jlab.rec.cvt.bmt.Constants.getCRZRADIUS()[l / 2] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det;
         }
         // solve for intersection of line with cylinder of radius R
         // x = _yxslope2*y +_yxinterc2; x^2+y^2 = R^2

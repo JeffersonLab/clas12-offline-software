@@ -629,7 +629,7 @@ public class TrackCandListFinder {
 
         for (int j = shift + j0; j < shift + j0 + BMTCdetcrossesInTrk.size(); j++) {
             Z.add(j, BMTCdetcrossesInTrk.get(j - shift - j0).get_Point().z());
-            Rho.add(j, org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTCdetcrossesInTrk.get(j - shift - j0).get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.LYRTHICKN);
+            Rho.add(j, org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[BMTCdetcrossesInTrk.get(j - shift - j0).get_Region() - 1] + org.jlab.rec.cvt.bmt.Constants.hStrip2Det);
             ErrRho.add(j, 0.01); // check this error on thickness measurement					
             ErrZ.add(j, BMTCdetcrossesInTrk.get(j - shift - j0).get_PointErr().z());
 

@@ -105,7 +105,7 @@ public class Constants {
     public static final double phi14cut = 35.;
     public static final double radcut = 100.;
     public static final double drdzcut = 150.;
-    public static final double LYRTHICKN = 0.0; // old LYRTHICKN = 4.;
+//    public static final double LYRTHICKN = 0.0; // old LYRTHICKN = 4.;
     public static final double isInSectorJitter = 2.0; // 2 deg
 
     public static final int STARTINGLAYR = 1;
