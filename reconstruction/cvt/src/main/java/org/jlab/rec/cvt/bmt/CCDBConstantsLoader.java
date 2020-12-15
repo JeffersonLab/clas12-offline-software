@@ -295,25 +295,24 @@ public class CCDBConstantsLoader {
         double xpos = dbprovider.getDouble("/geometry/cvt/mvt/position/x", 0 );
         double ypos = dbprovider.getDouble("/geometry/cvt/mvt/position/y", 0 );
         double zpos = dbprovider.getDouble("/geometry/cvt/mvt/position/z", 0 );
-        for (int j = 0; j<NSECTORS; j++) {
-            for (int i = 0; i<NLAYERS; i++) {
-                int row = j*NSECTORS + i;
-                Point3D shift = new Point3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaX", row),
-                                            dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaY", row),
-                                            dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaZ", row)); 
-                shift.translateXYZ(xpos, ypos, zpos);
-                Vector3D rot = new Vector3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotX", row),
-                                            dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotY", row),
-                                            dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotZ", row));  
-                Line3D axis = new Line3D(new Point3D(0,0,0), new Vector3D(0,0,1));
-                axis.rotateX(rot.x());
-                axis.rotateY(rot.y());
-                axis.rotateZ(rot.z());
-                axis.translateXYZ(shift.x(), shift.y(), shift.z());//+ztarget*10);
-                Constants.shifts[i][j] = shift;
-                Constants.rotations[i][j] = rot;
-                Constants.axes[i][j] = axis;
-            }
+        for (int row = 0; row<NLAYERS*NSECTORS; row++) {
+            int sector = dbprovider.getInteger("/geometry/cvt/mvt/alignment/sector", row);
+            int layer  = dbprovider.getInteger("/geometry/cvt/mvt/alignment/layer", row);
+            Point3D shift = new Point3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaX", row),
+                                        dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaY", row),
+                                        dbprovider.getDouble("/geometry/cvt/mvt/alignment/deltaZ", row)); 
+            shift.translateXYZ(xpos, ypos, zpos);
+            Vector3D rot = new Vector3D(dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotX", row),
+                                        dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotY", row),
+                                        dbprovider.getDouble("/geometry/cvt/mvt/alignment/rotZ", row));  
+            Line3D axis = new Line3D(new Point3D(0,0,0), new Vector3D(0,0,1));
+            axis.rotateX(rot.x());
+            axis.rotateY(rot.y());
+            axis.rotateZ(rot.z());
+            axis.translateXYZ(shift.x(), shift.y(), shift.z());//+ztarget*10);
+            Constants.shifts[layer-1][sector-1] = shift;
+            Constants.rotations[layer-1][sector-1] = rot;
+            Constants.axes[layer-1][sector-1] = axis;
         }
          
         // beam offset
