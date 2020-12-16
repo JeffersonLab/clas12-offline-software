@@ -138,8 +138,10 @@ public class RecUtilities {
                     //for multiple scattering
                     double thickn_ov_X0 = org.jlab.rec.cvt.bmt.Constants.get_T_OVER_X0()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1];
                     meas.setl_over_X0(thickn_ov_X0);
-                    if(Constants.getLayersUsed().get(meas.getLayer())==(Integer)0)
+                    if(Constants.getLayersUsed().get(meas.getLayer())==(Integer)0) {
+                        //System.out.println("Exluding layer "+meas.getLayer());
                         meas.notUsedInFit=true;
+                    }
                     if(c>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer())
                         continue;
                     KFSites.add(meas);
@@ -158,8 +160,10 @@ public class RecUtilities {
                     //for multiple scattering
                     double thickn_ov_X0 = org.jlab.rec.cvt.bmt.Constants.get_T_OVER_X0()[(trkcand.get_Crosses().get(c).get_Cluster1().get_Layer() + 1) / 2 - 1];
                     meas.setl_over_X0(thickn_ov_X0);
-                    if(Constants.getLayersUsed().get(meas.getLayer())==(Integer)0)
+                    if(Constants.getLayersUsed().get(meas.getLayer())==(Integer)0) {
+                        //System.out.println("Exluding layer "+meas.getLayer());
                         meas.notUsedInFit=true;
+                    }
                     if(c>0 && KFSites.get(KFSites.size()-1).getLayer()==meas.getLayer())
                         continue;
                     KFSites.add(meas);
