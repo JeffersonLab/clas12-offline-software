@@ -36,6 +36,7 @@ public class MeasVecs {
             if(mvec.surface.getError()!=0)
                 mvec.error = mvec.surface.getError();
             mvec.l_over_X0 = mvec.surface.getl_over_X0(); 
+            mvec.skip = mvec.surface.notUsedInFit;
             measurements.add(mvec);
         }
     }

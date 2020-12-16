@@ -34,6 +34,7 @@ public class Surface implements Comparable<Surface> {
     private double _l_over_X0;
     //this is for energy loss
     private double _Z_over_A_times_l;
+    public boolean notUsedInFit = false;
     
     public Surface(Plane3D plane3d, Point3D refrPoint, Point3D c1, Point3D c2) {
         type = Type.PLANEWITHPOINT;
