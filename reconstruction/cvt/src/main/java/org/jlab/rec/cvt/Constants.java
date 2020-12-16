@@ -1,5 +1,8 @@
 package org.jlab.rec.cvt;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Constants {
 
     public static double PTCUT = 0.075;
@@ -39,6 +42,8 @@ public class Constants {
     
     private static int _rmReg = 0;
 
+    private static Map<Integer,Integer> layersUsed = new HashMap<Integer,Integer>();
+    
     public static double getXb() {
         return _Xb;
     }
@@ -77,6 +82,20 @@ public class Constants {
 
     public static void setRmReg(int _reg) {
         Constants._rmReg = _reg;
+    }
+
+    /**
+     * @return the layersUsed
+     */
+    public static Map getLayersUsed() {
+        return layersUsed;
+    }
+
+    /**
+     * @param aLayersUsed the layersUsed to set
+     */
+    public static void setLayersUsed(Map aLayersUsed) {
+        layersUsed = aLayersUsed;
     }
     
     //public static final boolean DEBUGMODE =false;

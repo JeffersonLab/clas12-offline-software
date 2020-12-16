@@ -275,6 +275,33 @@ public class CVTRecNewKF extends ReconstructionEngine {
         if (svtCosmics==null) {
              System.out.println("["+this.getName()+"] run with cosmics settings default = false");
         }
+        
+        for(int i = 0; i < 12; i++)
+            Constants.getLayersUsed().put(i+1, 1);
+        
+        //Skip layers
+         String exLys = this.getEngineConfigString("excludeLayers");
+        
+        if (exLys!=null) {
+            System.out.println("["+this.getName()+"] run with layers "+exLys+"excluded in fit config chosen based on yaml");
+            String exlys = String.valueOf(exLys);
+            String[] values = exlys.split(",");
+            for(int k = 0; k < values.length; k++)
+                Constants.getLayersUsed().put(Integer.valueOf(values[k]), 0);
+        }
+        else {
+            exLys = System.getenv("COAT_CVT_EXCLUDELAYERS");
+            if (exLys!=null) {
+                System.out.println("["+this.getName()+"] run with region "+rmReg+"excluded in fit  config chosen based on env");
+                String exlys = String.valueOf(exLys);
+                String[] values = exlys.split(",");
+                for(int k = 0; k < values.length; k++)
+                    Constants.getLayersUsed().put(Integer.valueOf(values[k]), 0);
+            }
+        }
+        if (exLys==null) {
+             System.out.println("["+this.getName()+"] run with all layer in fit (default) ");
+        }
         // Load other geometries
         
         variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
