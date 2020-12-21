@@ -3,12 +3,9 @@ package org.jlab.rec.vtx.banks;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jlab.clas.physics.GenericKinematicFitter;
-import org.jlab.clas.physics.PhysicsEvent;
-import org.jlab.clas.physics.RecEvent;
+import org.jlab.clas.swimtools.Swim;
 import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
-import org.jlab.io.evio.EvioDataBank;
 import org.jlab.rec.vtx.TrackParsHelix;
 
 public class Reader {
@@ -18,68 +15,69 @@ public class Reader {
 		// TODO Auto-generated constructor stub
 	}
 
-
-	public List<TrackParsHelix> get_DCTrks(DataEvent event) {
+        float[] b = new float[3];
+	public List<TrackParsHelix> get_Trks(DataEvent event, Swim swimmer) {
+            if(event.hasBank("REC::Particle")==false ) {
+                //System.err.println(" NO Tracks bank! ");						
+                return new ArrayList<TrackParsHelix>();
+            }
+            List<TrackParsHelix> helices = new ArrayList<TrackParsHelix>();	
+            DataBank bank = event.getBank("REC::Particle");
+            int rows = bank.rows();
+            for (int i = 0; i < rows; i++) {
+                if (bank.getFloat("chi2pid", i) !=(float)9999 && bank.getByte("charge", i)!=0) {
+                    swimmer.BfieldLab(
+                        (double)event.getBank("REC::Particle").getFloat("vx",i),
+                        (double)event.getBank("REC::Particle").getFloat("vy",i),
+                        (double)event.getBank("REC::Particle").getFloat("vz",i), b);
+                    
+                    TrackParsHelix dcpars = new TrackParsHelix((int)i);
+                    dcpars.setHelixParams(
+                            (double)event.getBank("REC::Particle").getFloat("vx",i),
+                            (double)event.getBank("REC::Particle").getFloat("vy",i),
+                            (double)event.getBank("REC::Particle").getFloat("vz",i),
+                            (double)event.getBank("REC::Particle").getFloat("px",i),
+                            (double)event.getBank("REC::Particle").getFloat("py",i),
+                            (double)event.getBank("REC::Particle").getFloat("pz",i),
+                            (double) bank.getByte("charge", i), b[2]); 
+                    helices.add(dcpars);
+                }
+            }
+		
+            return helices;
+	}
+        public List<TrackParsHelix> get_MCTrks(DataEvent event, Swim swimmer) {
     	
 		
-		if(event.hasBank("TimeBasedTrkg::TBTracks")==false ) {
-			System.err.println(" NO TBTracks bank! ");						
+		if(event.hasBank("MC::Particle")==false ) {
+			System.err.println(" NO MC bank! ");						
 			return new ArrayList<TrackParsHelix>();
 		}
  
 		List<TrackParsHelix> helices = new ArrayList<TrackParsHelix>();		
-		DataBank bankDC = event.getBank("TimeBasedTrkg::TBTracks");
+		DataBank bankMC = event.getBank("MC::Particle");
 		
-		float[] x		= bankDC.getFloat("Vtx0_x");	// doca to beam line x-position in the lab (in cm = default unit)
-		float[] y		= bankDC.getFloat("Vtx0_y");  	// doca to beam line y-position in the lab
-		float[] z		= bankDC.getFloat("Vtx0_z");  	// doca to beam line z-position in the lab
-		float[] px		= bankDC.getFloat("p0_x"); 		// px at doca to beam line in the lab (in GeV/c)
-		float[] py		= bankDC.getFloat("p0_y"); 		// py at doca to beam line in the lab
-		float[] pz		= bankDC.getFloat("p0_z"); 		// pz at doca to beam line in the lab
-		byte[] q        = bankDC.getByte("q");
-		// cut on fitc2	
-		
-		for(int i = 0; i<x.length; i++){
-			TrackParsHelix dcpars = new TrackParsHelix();
-			dcpars.setHelixParams(x[i], y[i], z[i], px[i], py[i], pz[i], 
-					             (double)q[i], dcpars.Bfield);
+                for(int i = 0; i<bankMC.rows(); i++){
+			TrackParsHelix dcpars = new TrackParsHelix(i);
+                        swimmer.BfieldLab(bankMC.getFloat("vx",i), bankMC.getFloat("vy",i), bankMC.getFloat("vz",i), b);
+			dcpars.setHelixParams(bankMC.getFloat("vx",i), bankMC.getFloat("vy",i), bankMC.getFloat("vz",i),
+                                bankMC.getFloat("px",i), bankMC.getFloat("py",i), bankMC.getFloat("pz",i), 
+					             this.getQ(bankMC.getInt("pid",i)), b[2]);
 			helices.add(dcpars);
 		}
 		
 		return helices;
 	}
 	
-	
-	public List<TrackParsHelix> get_CVTTrks(DataEvent event) {
-		
-		if(event.hasBank("CVTRec::Tracks")==false ) {
-			System.err.println("there is no CVTRec bank ");						
-			return new ArrayList<TrackParsHelix>();
-		}
-
-		List<TrackParsHelix> helices = new ArrayList<TrackParsHelix>();		
-		
-		EvioDataBank bankCV = (EvioDataBank) event.getBank("CVTRec::Tracks");
-		
-		double[] q		= bankCV.getDouble("q"); 			// charge
-		double[] pt		= bankCV.getDouble("pt");			// pt in lab (GeV/c)
-		double[] phi0	= bankCV.getDouble("phi0");  		// phi at doca to beam line in the lab
-		double[] d0		= bankCV.getDouble("d0");  			// doca to beam line  in the lab (mm)
-		double[] z0		= bankCV.getDouble("z0");	 		// z at doca to beam line in the lab (mm)
-		double[] tandip	= bankCV.getDouble("tandip"); 		// tan of dip angle of helix
-		double[] fitc2  = bankCV.getDouble("circlefit_chi2_per_ndf");
-		// cut on fit c2
-		
-		if(event.hasBank("CVTRec::Tracks")==true) {
-			for(int i = 0; i<pt.length; i++){
-				TrackParsHelix cvtpars = new TrackParsHelix();
-				cvtpars.setHelixParams(pt[i], phi0[i], d0[i], z0[i], tandip[i], (double)q[i], cvtpars.Bfield);
-				helices.add(cvtpars);
-			}
-		
-		}
-		return helices;
-	}
+    private double getQ(int pid) {
+        double q = 1;
+        if(Math.abs(pid/100)>0) {
+            q = (double)-Math.abs(pid); // leptons 11,12,13
+        } else {
+            q = (double)Math.abs(pid);
+        }
+        return q;
+    }
 	
 	
 } // end class

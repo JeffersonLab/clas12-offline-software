@@ -1,14 +1,31 @@
 package org.jlab.rec.vtx;
 
 import org.jlab.geom.prim.Point3D;
+import org.jlab.geom.prim.Vector3D;
 
 public class TrackParsHelix {
 
-	public TrackParsHelix() {
-		// TODO Auto-generated constructor stub
+    /**
+     * @return the _id1
+     */
+    public int getId() {
+        return _id;
+    }
+
+    /**
+     * @param _id1 the _id1 to set
+     */
+    public void setId(int _id1) {
+        this._id = _id1;
+    }
+
+
+	public TrackParsHelix(int i1) {
+            _id = i1;
+            
 	}
 	
-	
+	private int _id;               // id of the track
 	private double _dca ;	 	// distance of closest approach to the z-axis in the lab frame
 	private double _phi_dca;	// azimuth at the DOCA
 	private double _rho ;         	// track curvature = 1/R, where R is the radius of the circle 
@@ -16,6 +33,7 @@ public class TrackParsHelix {
 	private double _tan_lambda ;	// tangent of the dip angle 
 	private double _q;
 	private double _p;
+        private double _pt;
 
 	private double _r;  //  radius of the circle 
 	private double _cosphidca ;
@@ -29,9 +47,6 @@ public class TrackParsHelix {
 	private double _y0;  // 
 	private double _z0;  // 
 
-	
-	public double Bfield = 5.0;
-	
 	public double get_x() {
 		return _x;
 	}
@@ -69,7 +84,9 @@ public class TrackParsHelix {
 	public double get_p() {
 		return _p;
 	}
-
+        public double get_pt() {
+		return _pt;
+	}
 	public void set_rho(double _rho) {
 		this._rho = _rho;
 	}
@@ -95,52 +112,62 @@ public class TrackParsHelix {
 	public void set_p(double _p) {
 		this._p = _p;
 	}
+        public void set_pt(double _pt) {
+		this._pt = _pt;
+	}
 
-	final double LIGHTVEL = 0.000299792458 ; 
-	public void setHelixParams(double x, double y, double z,
-			                   double px, double py, double pz, 
-			                   double Q, double Bfield) {
-		   
-            double pt = Math.sqrt(px*px + py*py);			
+	final double LIGHTVEL =  0.0000299792458 ; 
+	public void setHelixParams(double x0, double y0, double z0,
+			                   double px0, double py0, double pz0, 
+			                   double q, double Bf) { 
+            
+            double xb=0; double yb=0;  // no beam offset
+            double pt = Math.sqrt(px0*px0 + py0*py0);
+            
+            this._tan_lambda = pz0/pt;
+            this._z_0 = z0;
+            double omega = -q*(Bf*LIGHTVEL)/pt;
+            double phi0=Math.atan2(py0, px0);
+            double S = Math.sin(Math.atan2(py0, px0));
+            double C = Math.cos(Math.atan2(py0, px0));
+            double signedDCA = 0;
+            if(Math.abs(S)>=Math.abs(C)) {
+                signedDCA = -(x0-xb)/S;
+            } else {
+                signedDCA = (y0-yb)/C;
+            }
+            
+            this._dca = signedDCA;
+            double xcen = (1. / omega- signedDCA) *S;
+            double ycen = (-1. / omega + signedDCA) * C;
+            double kappa = (double ) -q/pt;
+            
+            this._phi_dca = Math.atan2(ycen, xcen);
+            if (kappa < 0) {
+                this._phi_dca = Math.atan2(-ycen, -xcen);
+            }
+            //this._dca = signedDCA*(Math.cos(phi0)*Math.sin( this._phi_dca) -Math.sin(phi0)*Math.cos( this._phi_dca));
 
-            // 5-parameter helix representation
-            this._dca = Math.atan2(-x, y);	 			// set distance of closest approach to the z-axis in the lab frame
-            this._phi_dca = -Math.atan2(px, py);		// set azimuth at the DOCA
-            this._rho = (LIGHTVEL * Bfield) / (Q*pt); 	// set track curvature = 1/R, where R is the radius of the circle 
-            this._z_0 = z;	              				// set intersection of the helix axis with the z-axis
-            this._tan_lambda = pz/pt;	       			// set tangent of the dip angle  
-            this._q = Q;
+            this._q = q;
 
-            this._r = 1./this._rho;
+            this._rho = omega;
+            this._r = 1./omega;
             this._sinphidca = Math.sin(_phi_dca);
             this._cosphidca = Math.cos(_phi_dca);        
 
-            this._x = x;  // x of the reference point 
-            this._y = y;  // y of the reference point
-            this._z = z;  // z of the reference point
+            this._x = x0;  // x of the reference point 
+            this._y = y0;  // y of the reference point
+            this._z = z0;  // z of the reference point
 
-            this._x0 = x - this._dca*Math.cos(this._phi_dca);
-            this._y0 = y - this._dca*Math.sin(this._phi_dca);
-            this._z0 = z - this._z_0;
-
-            this._p = Math.sqrt(px*px+py*py+pz*pz);
+            this._x0 = xb;
+            this._y0 = yb;
+            this._z0 = 0;
+           
+            this._pt = Math.sqrt(px0*px0+py0*py0);
+            this._p = Math.sqrt(px0*px0+py0*py0+pz0*pz0);
         
 	} // end setHelixParams()
 
-	
-	public void setHelixParams(double pt, double phi0, double d0, double z0, 
-			                   double tandip, double Q, double Bfield) {
-            this._rho = (LIGHTVEL * Bfield) / (Q* pt);
-            this._z_0 = z0;	              				
-            this._tan_lambda = tandip;
-            this._dca = d0;
-            this._phi_dca = phi0;
-            this._q = Q;
-            this._r = 1./this._rho;
-            this._sinphidca = Math.sin(_phi_dca);
-            this._cosphidca = Math.cos(_phi_dca);    
-	}
-	
 	
 	// calculate coordinates of the point of the helix curve from the parameter phi.
 	// phi=0 corresponds to the ref. point given by the DC track
@@ -153,6 +180,13 @@ public class TrackParsHelix {
             return new Point3D(x,y,z);
 		
 	}
+        public Vector3D calcDir(double phi) {
+            double px = -this._pt * Math.sin(this._phi_dca + phi);
+            double py = this._pt * Math.cos(this._phi_dca + phi);
+            double pz = this._pt * this._tan_lambda;
+            
+            return new Vector3D(px,py,pz).asUnit();
+        }
 
 
 }
