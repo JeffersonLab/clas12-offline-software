@@ -800,7 +800,12 @@ private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslis
                 continue;
             size+=track.trajectory.size();
         }       
-        DataBank bank = event.createBank("TimeBasedTrkg::Trajectory", size);
+        DataBank bank ;
+        if(this._aiAssist==true) {
+            bank = event.createBank("TimeBasedTrkg::AITrajectory", size);
+        } else {
+            bank = event.createBank("TimeBasedTrkg::Trajectory", size);
+        }
         int i1=0;
         for (Track track : tracks) {
             if (track == null)
@@ -902,7 +907,8 @@ private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslis
                         rbc.fillTBClustersBank(event, clusters),
                         rbc.fillTBSegmentsBank(event, segments),
                         rbc.fillTBCrossesBank(event, crosses),
-                        rbc.fillTBTracksBank(event, trkcands)
+                        rbc.fillTBTracksBank(event, trkcands),
+                        rbc.fillTrajectoryBank(event, trkcands)
                 );
             } else {
                 event.appendBanks(rbc.fillTBHitsBank(event, fhits),
@@ -912,7 +918,7 @@ private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslis
                     rbc.fillTBTracksBank(event, trkcands),
                     rbc.fillTrajectoryBank(event, trkcands),
                     rbc.fillTrackCovMatBank(event, trkcands)
-            );
+                );
             }
         }
         if (crosses != null && trkcands == null) {
