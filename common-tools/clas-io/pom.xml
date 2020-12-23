@@ -44,6 +44,7 @@
       <groupId>org.jlab.coda</groupId>
       <artifactId>jevio</artifactId>
       <version>6.2-SNAPSHOT</version>
+<<<<<<< HEAD
       <classifier>jar-with-dependencies</classifier>
        <exclusions>
          <exclusion>
@@ -63,6 +64,8 @@
 	   <artifactId>proguard</artifactId>
 	 </exclusion>
        </exclusions>
+=======
+>>>>>>> a4b7b29e7d933680d73aba9e2573721d769abead
     </dependency>
 
     <dependency>
