@@ -47,6 +47,8 @@ services:
     name: LTCC
   - class: org.jlab.service.eb.EBHBEngine
     name: EBHB
+  - class: org.jlab.service.eb.EBHBAIEngine
+    name: EBHBAI
 # DC regular TB tracking    
   - class: org.jlab.service.dc.DCTBEngineConv
     name: DCRTB
@@ -57,6 +59,8 @@ services:
     name: FTOFTB
   - class: org.jlab.service.eb.EBTBEngine
     name: EBTB
+  - class: org.jlab.service.eb.EBTBAIEngine
+    name: EBTBAI
   - class: org.jlab.rec.rich.RICHEBEngine
     name: RICH
   - class: org.jlab.service.rtpc.RTPCEngine
