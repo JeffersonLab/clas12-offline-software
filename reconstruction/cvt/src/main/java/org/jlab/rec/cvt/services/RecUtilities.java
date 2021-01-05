@@ -21,6 +21,10 @@ import org.jlab.rec.cvt.track.Seed;
 import org.jlab.rec.cvt.track.Track;
 import org.jlab.clas.swimtools.Swim;
 import org.jlab.rec.cvt.bmt.BMTType;
+import org.jlab.rec.cvt.fit.CosmicFitter;
+import org.jlab.rec.cvt.track.StraightTrack;
+import org.jlab.rec.cvt.track.TrackCandListFinder;
+import org.jlab.rec.cvt.track.TrackSeeder;
 
 /**
  * Service to return reconstructed TRACKS
@@ -359,6 +363,104 @@ public class RecUtilities {
         cand.addAll(seed.get_Crosses());
         return cand;
         
+    }
+    
+    public List<Seed> reFit(List<Seed> seedlist,org.jlab.rec.cvt.svt.Geometry svt_geo,
+            Swim swimmer,  TrackSeeder trkseedr) {
+        List<Seed> filtlist = new ArrayList<Seed>();
+        if(seedlist==null)
+            return filtlist;
+        for (Seed bseed : seedlist) {
+            if(bseed == null)
+                continue;
+            if(this.reFit(bseed, svt_geo, swimmer, trkseedr) == true) {
+                filtlist.add(bseed);
+            }
+        }
+        return filtlist;
+    }
+    public boolean reFit(Seed bseed, 
+            org.jlab.rec.cvt.svt.Geometry svt_geo,
+            Swim swimmer, TrackSeeder trkseedr) {
+        boolean pass = true;
+        
+        List<Cross> refi = new ArrayList<Cross>();
+        for(Cross c : bseed.get_Crosses()) {
+            int layr = 0;
+            int layr2 = 0;
+            if(c.get_Detector().equalsIgnoreCase("BMT")) {
+                layr = c.get_Cluster1().get_Layer()+6;
+                if(org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)!=(Integer)0)
+                    refi.add(c);
+            } else {
+                layr = c.get_Cluster1().get_Layer();
+                layr2 = c.get_Cluster2().get_Layer();
+                if(org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)!=(Integer)0 
+                        && org.jlab.rec.cvt.Constants.getLayersUsed().get(layr2)!=(Integer)0)
+                    refi.add(c);
+            }
+        }
+        Track cand = null;
+        if(refi.size()>=3) {
+            cand = trkseedr.fitSeed(refi, svt_geo, 5, false, swimmer);
+            if(cand!=null && cand.get_helix()!=null) {
+                bseed.set_Helix(cand.get_helix());
+            } else {
+                pass = false;
+            }
+        } else {
+            pass = false;
+        }
+        return pass;    
+    }
+    
+    public List<StraightTrack> reFit(List<StraightTrack> seedlist, CosmicFitter fitTrk,  TrackCandListFinder trkfindr) {
+        List<StraightTrack> filtlist = new ArrayList<StraightTrack>();
+        if(seedlist==null)
+            return filtlist;
+        for (StraightTrack bseed : seedlist) {
+            if(this.reFit(bseed, fitTrk, trkfindr) == true) {
+                filtlist.add(bseed);
+            }
+        }
+        return filtlist;
+    }
+    
+    public boolean reFit(StraightTrack cand, CosmicFitter fitTrk,  TrackCandListFinder trkfindr) {
+        boolean pass = true;
+        List<Cross> refi = new ArrayList<Cross>();
+        List<Cross> crosses = cand;
+        for(Cross c : crosses) {
+            int layr = 0;
+            int layr2 = 0;
+            if(c.get_Detector().equalsIgnoreCase("BMT")) {
+                layr = c.get_Cluster1().get_Layer()+6;
+                if(org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)!=(Integer)0)
+                    refi.add(c);
+            } else {
+                layr = c.get_Cluster1().get_Layer();
+                layr2 = c.get_Cluster2().get_Layer();
+                if(org.jlab.rec.cvt.Constants.getLayersUsed().get(layr)!=(Integer)0 
+                        && org.jlab.rec.cvt.Constants.getLayersUsed().get(layr2)!=(Integer)0)
+                    refi.add(c);
+            }
+        }
+        
+        if(refi.size()>=3) {
+            TrackCandListFinder.RayMeasurements NewMeasArrays = trkfindr.
+                get_RayMeasurementsArrays((ArrayList<Cross>) refi, false, false);
+            fitTrk.fit(NewMeasArrays._X, NewMeasArrays._Y, NewMeasArrays._Z,
+                    NewMeasArrays._Y_prime, NewMeasArrays._ErrRt, 
+                    NewMeasArrays._ErrY_prime, NewMeasArrays._ErrZ);
+            if(fitTrk.get_ray()!=null) {
+                cand = new StraightTrack(fitTrk.get_ray());
+            } else {
+                pass = false;
+            }
+        } else {
+            pass = false;
+        }
+        return pass;               
     }
     
 }

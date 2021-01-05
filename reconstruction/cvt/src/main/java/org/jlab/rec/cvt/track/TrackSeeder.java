@@ -73,7 +73,7 @@ public class TrackSeeder {
             }
         }
     }
-    private void FitSeed(List<Cross> seedcrs) {
+    public void FitSeed(List<Cross> seedcrs) {
         Xs.clear();
         Ys.clear();
         Ws.clear();
@@ -357,6 +357,7 @@ public class TrackSeeder {
                 }
             }
         }
+       
         for (Seed bseed : seedlist) {
             for(Cross c : bseed.get_Crosses()) {
                 c.isInSeed = true;

@@ -100,15 +100,15 @@ public class TrackCandListFinder {
      * @author ziegler
      *
      */
-    private class RayMeasurements {
+    public class RayMeasurements {
 
-        List<Double> _X;			// x coordinate array
-        List<Double> _Y;			// y coordinate array (same size as X array)
-        List<Double> _Z;			// z coordinate array
-        List<Double> _Y_prime;		// y coordinate array (same size as Z array)
-        List<Double> _ErrZ;		// z uncertainty (same size as Z array)
-        List<Double> _ErrY_prime;	// y uncertainty (same size as Z array)
-        List<Double> _ErrRt;		// sqrt(x^2 + y^2)  uncertainty array (same size as X & Y arrays)
+        public List<Double> _X;			// x coordinate array
+        public List<Double> _Y;			// y coordinate array (same size as X array)
+        public List<Double> _Z;			// z coordinate array
+        public List<Double> _Y_prime;		// y coordinate array (same size as Z array)
+        public List<Double> _ErrZ;		// z uncertainty (same size as Z array)
+        public List<Double> _ErrY_prime;	// y uncertainty (same size as Z array)
+        public List<Double> _ErrRt;		// sqrt(x^2 + y^2)  uncertainty array (same size as X & Y arrays)
 
         RayMeasurements(List<Double> X,
                 List<Double> Y,
@@ -661,7 +661,7 @@ public class TrackCandListFinder {
     List<Cross> BMTCdetcrossesInTrk = new ArrayList<Cross>();
     List<Cross> BMTZdetcrossesInTrk = new ArrayList<Cross>();
 
-    private RayMeasurements get_RayMeasurementsArrays(ArrayList<Cross> arrayList, boolean ignoreErr, boolean resetSVTMeas) {
+    public RayMeasurements get_RayMeasurementsArrays(ArrayList<Cross> arrayList, boolean ignoreErr, boolean resetSVTMeas) {
 
         X.clear();
         Y.clear();

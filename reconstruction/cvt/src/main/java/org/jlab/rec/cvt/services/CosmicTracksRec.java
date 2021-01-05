@@ -12,6 +12,7 @@ import org.jlab.rec.cvt.cluster.Cluster;
 import org.jlab.rec.cvt.cross.Cross;
 import org.jlab.rec.cvt.cross.CrossList;
 import org.jlab.rec.cvt.cross.StraightTrackCrossListFinder;
+import org.jlab.rec.cvt.fit.CosmicFitter;
 import org.jlab.rec.cvt.hit.FittedHit;
 import org.jlab.rec.cvt.track.StraightTrack;
 import org.jlab.rec.cvt.track.TrackCandListFinder;
@@ -56,6 +57,8 @@ public class CosmicTracksRec {
 
             return true;
         }
+        CosmicFitter fitTrk = new CosmicFitter();
+        cosmics = recUtil.reFit(cosmics, fitTrk,  trkcandFinder);
         
         if (cosmics.size() > 0) {
             for (int k1 = 0; k1 < cosmics.size(); k1++) {

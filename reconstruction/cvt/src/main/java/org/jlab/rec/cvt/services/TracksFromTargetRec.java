@@ -60,6 +60,7 @@ public class TracksFromTargetRec {
                 trseed.unUsedHitsOnly = true;
                 seeds = trseed.findSeed(crosses.get(0), null, SVTGeom, BMTGeom, swimmer);
                 
+                seeds = recUtil.reFit(seeds, SVTGeom, swimmer, trseed);
             } else {
                 TrackSeederCA trseed = new TrackSeederCA();  // cellular automaton seeder
                 seeds = trseed.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer);
@@ -67,6 +68,8 @@ public class TracksFromTargetRec {
                 TrackSeeder trseed2 = new TrackSeeder();
                 trseed2.unUsedHitsOnly = true;
                 seeds.addAll( trseed2.findSeed(crosses.get(0), crosses.get(1), SVTGeom, BMTGeom, swimmer)); 
+                
+                seeds = recUtil.reFit(seeds, SVTGeom, swimmer, trseed2);
             }
         }
         if(seeds ==null || seeds.size() == 0) {
@@ -77,7 +80,7 @@ public class TracksFromTargetRec {
         
         org.jlab.clas.tracking.kalmanfilter.helical.KFitter kf = null;
         List<Track> trkcands = new ArrayList<Track>();
-
+        
         for (Seed seed : seeds) { 
             org.jlab.clas.tracking.trackrep.Helix hlx = null ;
 
